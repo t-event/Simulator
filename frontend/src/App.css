@@ -323,3 +323,237 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* --- Slaggpanel --- */
+.slag-panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.basicity {
+  margin-bottom: 10px;
+}
+.basicity-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.basicity-head strong {
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.basicity-target {
+  margin-left: auto;
+  font-size: 11px;
+}
+.basicity-track {
+  position: relative;
+  height: 8px;
+  background: #232d3d;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+.basicity-window {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: rgba(76, 175, 80, 0.25);
+  border-radius: 4px;
+}
+.basicity-tick {
+  position: absolute;
+  top: -2px;
+  width: 1px;
+  height: 12px;
+  background: var(--text-dim);
+}
+.basicity-marker {
+  position: absolute;
+  top: -3px;
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  transform: translateX(-1px);
+}
+.marker-ok {
+  background: var(--ok);
+}
+.marker-off {
+  background: var(--warning);
+}
+.value-ok {
+  color: var(--ok);
+}
+.value-off {
+  color: var(--warning);
+}
+
+.slag-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-dim);
+  margin: 8px 0 6px;
+}
+
+.slag-table,
+.chem-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.slag-ox {
+  width: 52px;
+  color: var(--text-dim);
+}
+.slag-bar-cell {
+  padding: 2px 6px;
+}
+.slag-bar {
+  height: 8px;
+  background: linear-gradient(90deg, #4fc3f7, #b388ff);
+  border-radius: 3px;
+  min-width: 2px;
+}
+.slag-val {
+  width: 52px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.chem-table td {
+  padding: 3px 0;
+  font-variant-numeric: tabular-nums;
+}
+.chem-limit {
+  text-align: right;
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+.consumption {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* --- Betjening --- */
+.status-row {
+  font-size: 13px;
+  gap: 16px;
+}
+.slider-label {
+  width: 118px;
+  flex-shrink: 0;
+}
+.slider-value {
+  width: 88px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.control-note {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* --- Mimic --- */
+.mimic-big {
+  fill: var(--text);
+  font-size: 20px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.mimic-alarm {
+  fill: var(--warning);
+  font-size: 11px;
+}
+.conveyor-scrap {
+  animation: belt-move 2s linear infinite;
+}
+@keyframes belt-move {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(32px);
+  }
+}
+
+/* --- Tapperesultat --- */
+.tap-result {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-left: 4px solid var(--ok);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+.tap-dev {
+  border-left-color: var(--warning);
+}
+.tap-figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.tap-verdict {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--ok);
+}
+.tap-deviations {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 12px;
+  color: var(--warning);
+}
+
+/* --- Trend --- */
+.trend-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.trend-head .panel-title {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.trend-tabs {
+  display: flex;
+  gap: 4px;
+}
+.trend-tabs button {
+  padding: 3px 8px;
+  font-size: 11px;
+}
+
+/* --- Instruktør --- */
+.briefing {
+  background: #232d3d;
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+}
+.briefing p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.instructor-status {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
