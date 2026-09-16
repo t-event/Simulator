@@ -6,13 +6,12 @@ from typing import Optional
 
 
 class Phase(str, Enum):
-    IDLE = "idle"
-    CHARGING = "charging"
-    BORE_IN = "bore_in"
-    MELTING = "melting"
-    REFINING = "refining"
+    KLAR = "klar"
+    INNSMELTING = "innsmelting"
+    RAFFINERING = "raffinering"
+    AVSLAGGING = "avslagging"
     TAPPING = "tapping"
-    TURNAROUND = "turnaround"
+    KLARGJORING = "klargjoring"
 
 
 class RegulationMode(str, Enum):
@@ -29,13 +28,13 @@ class Severity(str, Enum):
 @dataclass
 class ElectrodeState:
     index: int
-    position_pct: float = 0.0  # 0 = fully raised, 100 = fully lowered
+    position_pct: float = 0.0  # 0 = helt hevet, 100 = helt senket
     target_position_pct: float = 0.0
     current_ka: float = 0.0
     voltage_v: float = 0.0
     mode: RegulationMode = RegulationMode.AUTO
-    consumed_m: float = 0.0
     length_m: float = 6.0
+    consumed_m: float = 0.0
     broken: bool = False
 
 
@@ -46,7 +45,7 @@ class CoolingCircuitState:
     nominal_flow_lpm: float
     delta_t_c: float = 0.0
     leaking: bool = False
-    blocked_pct_loss: float = 0.0  # fraction of flow lost, 0..1
+    flow_loss_fraction: float = 0.0
 
 
 @dataclass
@@ -61,43 +60,89 @@ class Alarm:
 
 
 @dataclass
+class SteelGrade:
+    """TP-kvalitet med de kravene stålovnen skal levere på.
+
+    Karbonvinduet er det stålovnen skal tappe på, ikke ferdig analyse: karbon
+    legeres opp igjen ved tapping og på øseovnen. Lavkarbonkvaliteter krever
+    mer oksygen på stålovnen og gir høyere FeO i slaggen.
+    """
+
+    code: str
+    name: str
+    tap_carbon_min_pct: float
+    tap_carbon_max_pct: float
+    phosphorus_max_pct: float
+    final_carbon_pct: float
+
+
+@dataclass
 class FurnaceState:
     time_s: float = 0.0
-    phase: Phase = Phase.IDLE
+    phase: Phase = Phase.KLAR
     power_on: bool = False
     time_scale: float = 1.0
 
+    # Elektrisk
     transformer_tap: int = 3
-    total_power_mw: float = 0.0
     electrical_power_mw: float = 0.0
     chemical_power_mw: float = 0.0
-
+    total_power_mw: float = 0.0
     electrodes: list[ElectrodeState] = field(default_factory=list)
+    electrode_cooling_pct: float = 50.0
+    hvelv_dust_level: float = 0.0  # 0-1, bygges opp og fjernes ved støvsuging
 
-    baskets_charged: int = 0
-    bath_mass_kg: float = 0.0
-    bath_enthalpy_kj_per_kg: float = 0.0
+    # Metall
+    liquid_mass_kg: float = 0.0
+    solid_scrap_kg: float = 0.0  # umeltet skrap som ligger i badet
     bath_temp_c: float = 25.0
-    solid_fraction: float = 1.0
+    scrap_charged_kg: float = 0.0
     carbon_pct: float = 0.0
+    phosphorus_pct: float = 0.0
+    silicon_pct: float = 0.0
+    manganese_pct: float = 0.0
+    scrap_phosphorus_pct: float = 0.035  # fosfor i skrapet som mates inn
 
-    oxygen_flow_nm3h: float = 0.0
-    carbon_injection_kg_min: float = 0.0
-    burner_on: bool = False
+    # Conveyor og forvarming
+    conveyor_rate_t_min: float = 0.0
+    conveyor_running: bool = False
+    preheat_temp_c: float = 25.0
+    static_seal_ok: bool = True
+    charge_remaining_kg: float = 0.0
+
+    # Slagg (masser i kg per oksid)
+    slag: dict[str, float] = field(default_factory=dict)
     slag_foam_index: float = 0.0
 
-    door_open: bool = False
+    # Tilsatser og injeksjon
+    lime_rate_kg_min: float = 0.0
+    dolomite_rate_kg_min: float = 0.0
+    magnesite_rate_kg_min: float = 0.0
+    carbon_injection_kg_min: float = 0.0
+    oxygen_flow_nm3h: float = 0.0
+    lime_total_kg: float = 0.0
+    dolomite_total_kg: float = 0.0
+    carbon_total_kg: float = 0.0
+    oxygen_total_nm3: float = 0.0
+
+    # Mekanisk
+    slag_door_open: bool = False
     tilt_deg: float = 0.0
 
+    # Avgass
     offgas_temp_c: float = 25.0
     offgas_co_pct: float = 0.0
 
     cooling: dict[str, CoolingCircuitState] = field(default_factory=dict)
 
+    # Produksjon
+    grade: Optional[SteelGrade] = None
     energy_total_mwh: float = 0.0
-    tap_to_tap_target_min: float = 45.0
+    refractory_wear: float = 0.0  # 0-1, akkumulert slitasje på ovnsstein
+    heat_number: int = 0
+    tap_started_s: Optional[float] = None
+    last_tap_result: Optional[dict] = None
 
     alarms: list[Alarm] = field(default_factory=list)
     next_alarm_id: int = 1
-
     scenario: Optional[str] = None

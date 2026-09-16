@@ -47,15 +47,24 @@ export function useSimSocket() {
     };
   }, []);
 
-  const sendCommand = useCallback((action: string, payload: Record<string, unknown> = {}) => {
-    wsRef.current?.readyState === WebSocket.OPEN &&
-      wsRef.current.send(JSON.stringify({ type: "command", action, payload }));
-  }, []);
+  const send = useCallback(
+    (type: "command" | "instructor", action: string, payload: Record<string, unknown>) => {
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        wsRef.current.send(JSON.stringify({ type, action, payload }));
+      }
+    },
+    [],
+  );
 
-  const sendInstructor = useCallback((action: string, payload: Record<string, unknown> = {}) => {
-    wsRef.current?.readyState === WebSocket.OPEN &&
-      wsRef.current.send(JSON.stringify({ type: "instructor", action, payload }));
-  }, []);
+  const sendCommand = useCallback(
+    (action: string, payload: Record<string, unknown> = {}) => send("command", action, payload),
+    [send],
+  );
+
+  const sendInstructor = useCallback(
+    (action: string, payload: Record<string, unknown> = {}) => send("instructor", action, payload),
+    [send],
+  );
 
   return { state, status, sendCommand, sendInstructor };
 }
