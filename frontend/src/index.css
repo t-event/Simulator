@@ -1,0 +1,50 @@
+:root {
+  --bg: #10161f;
+  --panel-bg: #1b2330;
+  --panel-border: #384357;
+  --text: #e6ebf2;
+  --text-dim: #8a94a6;
+  --accent: #4fc3f7;
+  --warning: #ffb020;
+  --critical: #ff4d4d;
+  --ok: #4caf50;
+  color-scheme: dark;
+  font-family: "Segoe UI", Roboto, system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  background: #2a3546;
+  color: var(--text);
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+button:hover:not(:disabled) {
+  background: #344056;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+input[type="range"] {
+  accent-color: var(--accent);
+}
