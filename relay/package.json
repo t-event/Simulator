@@ -1,0 +1,13 @@
+{
+  "name": "stalovn-relay",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Meldingsformidler for flermaskin-øvelser i stålovnssimulatoren",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
