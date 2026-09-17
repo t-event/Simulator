@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
-import { useSimSocket } from "./hooks/useSimSocket";
+import { useSimulation } from "./hooks/useSimulation";
 import { Readout } from "./components/Readout";
 import { FurnaceMimic } from "./components/FurnaceMimic";
 import { TrendChart, type TrendPoint } from "./components/TrendChart";
@@ -9,11 +9,19 @@ import { ControlPanel } from "./components/ControlPanel";
 import { SlagPanel } from "./components/SlagPanel";
 import { InstructorPanel } from "./components/InstructorPanel";
 import { COOLING_LABEL, PHASE_LABEL } from "./types";
+import type { ConnectionStatus } from "./hooks/useSimulation";
+
+const STATUS_LABEL: Record<ConnectionStatus, string> = {
+  lokal: "Lokal",
+  connecting: "kobler til…",
+  open: "Tilkoblet",
+  closed: "frakoblet",
+};
 
 const MAX_TREND_POINTS = 600;
 
 function App() {
-  const { state, status, sendCommand, sendInstructor } = useSimSocket();
+  const { state, status, session, sendCommand, sendInstructor } = useSimulation();
   const [tab, setTab] = useState<"control" | "instructor">("control");
   const trendRef = useRef<TrendPoint[]>([]);
   const [trend, setTrend] = useState<TrendPoint[]>([]);
@@ -36,7 +44,7 @@ function App() {
   }, [state]);
 
   if (!state) {
-    return <div className="app-loading">Kobler til simulator ({status})…</div>;
+    return <div className="app-loading">Kobler til øvelsen ({STATUS_LABEL[status]})…</div>;
   }
 
   const activeAlarms = state.alarms.filter((a) => a.active).length;
@@ -56,7 +64,8 @@ function App() {
       <header className="app-header">
         <h1>Stålovn Simulator</h1>
         <div className="header-status">
-          <span className={`ws-status ws-${status}`}>{status === "open" ? "Tilkoblet" : status}</span>
+          <span className={`ws-status ws-${status}`}>{STATUS_LABEL[status]}</span>
+          {session.mode !== "lokal" && <span>rom: {session.room}</span>}
           <span>
             Fase: <strong>{PHASE_LABEL[state.phase]}</strong>
           </span>

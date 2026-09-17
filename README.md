@@ -11,6 +11,9 @@ karbon og oksygen gjennom KT-lansene, avfosforerer, slagger av og tapper
 innenfor temperaturvinduet. Et eget instruktørpanel styrer øvelser og
 injiserer feil.
 
+Hele simuleringen kjører i nettleseren. Det er ingen server å drifte for
+vanlig bruk – appen publiseres på GitHub Pages og deles som en URL.
+
 ## Hva som er modellert
 
 | Område | Modell |
@@ -29,9 +32,52 @@ injiserer feil.
 
 Modellen er lumped-parameter. Den gjengir riktig retning, rekkefølge og
 størrelsesorden på koblingene en operatør må håndtere, men er ikke en
-termodynamisk nøyaktig gjengivelse av anlegget. En normalt kjørt charge lander
-på rundt 380 kWh/t, ca. 55 min tapp-til-tapp og en slaggsammensetning nær
-slaggprøven i kompendiet (FeO ≈ 29 %, B2 ≈ 1,7).
+termodynamisk nøyaktig gjengivelse av anlegget.
+
+`frontend/src/sim/validate.ts` kjører referansescenarioene og skriver ut
+nøkkeltallene. Den kjøres også i CI ved hver publisering. En normalt kjørt
+charge skal lande på:
+
+| Nøkkeltall | Simulator | Kompendiet |
+|---|---|---|
+| Tapp-til-tapp | ca. 59 min | – |
+| Energiforbruk | ca. 390 kWh/t | conveyor sparer ca. 10 % mot korg [K 3.1] |
+| FeO i slagg | 29,3 % | 28,8 % i slaggprøve TP26 [K 4.3.1] |
+| B2 | 1,74 | 1,74 i samme prøve, mål 1,8 [K 4.3.2] |
+| Ildfast per charge | 0,99 % | ca. 100 charger per potte |
+
+## Kjøremodus
+
+Simulatoren kan kjøres på tre måter, styrt av parametre i URL-en.
+
+**Lokal** (standard, og det GitHub Pages bruker): simuleringen kjører i denne
+nettleseren. Instruktøren bytter til Instruktør-fanen på samme skjerm.
+
+```
+https://<bruker>.github.io/Simulator/
+```
+
+**Flermaskin**: instruktør og operatør sitter på hver sin maskin. Én maskin er
+vert og kjører simuleringen; de andre kobler seg til som deltakere. En liten
+relay formidler meldinger mellom dem – den inneholder ingen prosessmodell.
+
+```bash
+cd relay
+npm install
+npm start          # lytter på ws://0.0.0.0:8080
+```
+
+```
+Vert (operatør):     ...?modus=vert&rom=kurs1&relay=ws://192.168.1.10:8080
+Deltaker (instruktør): ...?modus=deltaker&rom=kurs1&relay=ws://192.168.1.10:8080
+```
+
+Verten kjører ovnen og sender tilstanden videre; deltakerne ser det samme
+bildet og kan gripe inn. `rom` skiller flere samtidige øvelser på samme relay.
+
+Merk at GitHub Pages bare serverer statiske filer. Flermaskin-modus krever
+derfor at relayen kjører et sted begge maskinene når – typisk på
+instruktørens laptop på treningssenterets nett.
 
 ## Scenarioer
 
@@ -45,49 +91,46 @@ slaggprøven i kompendiet (FeO ≈ 29 %, B2 ≈ 1,7).
 ## Arkitektur
 
 ```
-backend/   Python (FastAPI) – prosessmodell og sanntidssimulering
-  app/main.py                WebSocket-server og REST-endepunkter
-  app/simulation/
-    constants.py              Prosessparametre, merket [K] der de kommer fra kompendiet
-    model.py                  Datamodeller for ovnstilstand
-    grades.py                 TP-kvaliteter med tappevindu
-    eaf.py                    Simuleringsmotor
-    scenarios.py              Treningsscenarioer
-    serialize.py              Tilstand -> JSON
+frontend/
+  src/sim/                  Prosessmodellen – eneste implementasjon
+    constants.ts             Prosessparametre, merket [K] der de kommer fra kompendiet
+    state.ts                 Intern ovnstilstand
+    grades.ts                TP-kvaliteter med tappevindu
+    eaf.ts                   Simuleringsmotor
+    scenarios.ts             Treningsscenarioer
+    commands.ts              Kommandodispatch, delt av lokal og fjernstyrt modus
+    serialize.ts             Intern tilstand -> flat tilstand for HMI
+    validate.ts              Referansekjøring med nøkkeltall
+  src/hooks/useSimulation.ts Tick-løkke og eventuell relay-tilkobling
+  src/session.ts             Leser modus/rom/relay fra URL
+  src/components/            Kontrollrom-HMI
 
-frontend/  React + TypeScript (Vite) – kontrollrom-HMI
-  src/hooks/useSimSocket.ts   WebSocket-klient
-  src/components/
-    FurnaceMimic.tsx           Prosessdiagram med conveyor, forvarming og ovn
-    ControlPanel.tsx           Operatørbetjening
-    SlagPanel.tsx              Slaggkjemi, B2/B3 og badanalyse
-    InstructorPanel.tsx        Scenarioer og feilinjeksjon
-    AlarmPanel.tsx / TrendChart.tsx / Readout.tsx
+relay/                      Meldingsformidler for flermaskin-øvelser (ingen fysikk)
+.github/workflows/pages.yml Bygger, validerer og publiserer til GitHub Pages
 ```
-
-Backend kjører en sanntidsløkke på 4 Hz som stepper prosessmodellen og
-kringkaster tilstanden til alle tilkoblede klienter over WebSocket (`/ws`).
-Kommandoer fra operatør og instruktør går samme vei.
 
 ## Kjøre lokalt
 
-**Backend:**
-```bash
-cd backend
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-.venv/bin/uvicorn app.main:app --reload --port 8000
-```
-
-**Frontend** (i en annen terminal):
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Åpne `http://localhost:5173`. Frontend kobler som standard til
-`ws://<host>:8000/ws`, som kan overstyres med `VITE_WS_URL` og `VITE_API_URL`.
+Åpne `http://localhost:5173`.
+
+Verifisere prosessmodellen:
+
+```bash
+cd frontend
+npx tsx src/sim/validate.ts
+```
+
+## Publisere
+
+Arbeidsflyten i `.github/workflows/pages.yml` bygger og publiserer ved hver
+push til `main`. Første gang må Pages slås på i repoet under
+**Settings → Pages → Source: GitHub Actions**.
 
 ## Kjøre en charge
 
@@ -100,14 +143,14 @@ npm run dev
 5. Når alt skrapet er smeltet, gå til raffinering: juster karbon og fosfor.
 6. **Slagg av før du kjører opp temperaturen** – åpne slaggdøra og tipp til
    slaggstilling. Gjør du det motsatt, kommer fosforet tilbake i stålet.
-7. Tilbake til vannrett, kjør opp mot tappemålet, og trykk **Start tapping**.
-   Tapperapporten viser avvik mot kravene til kvaliteten.
+7. Tilbake til vannrett, kjør opp mot tappemålet med litt margin (badet kjøles
+   mens det tappes), og trykk **Start tapping**. Tapperapporten viser avvik mot
+   kravene til kvaliteten.
 
 ## Videre arbeid
 
 - Øseovnen som eget område (kompendiets kapittel 6), slik at temperatur og
   legering kan følges videre etter tapping.
-- Flerbruker-/sesjonsstøtte – i dag er det én global ovn per backend.
 - Elektrodeskjøting som prosedyre i stedet for at brudd krever pottebytte.
 - Logging av øvelser for evaluering i etterkant.
 - Validering av tidskonstanter og tilsatsrater mot faktiske driftsdata.
