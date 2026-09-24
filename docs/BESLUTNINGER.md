@@ -263,3 +263,24 @@ Beslutning (gjelder når verket har elektrisk ovn; gassdigelen har fast pris):
 - **Utkobling:** nytt hendelseskort der nettselskapet betaler for å koble ut ovnene kl. 07–11 neste
   dag. Betalingen er 15–45 % av verdien av stålet man ikke får laget, så det lønner seg bare noen ganger.
 - Testspilleren beholder spotpris og dagskift, og sier nei til utkobling. Balanse: 12 / 44 / 104 / 185.
+
+## B-025 Fagboka i sentrum: lesing, quiz, oppdrag og rådgiver (2026-09-24)
+Status: gjelder
+Beslutning:
+- **Lesing før forskning:** Hver forskning (unntatt fartsforskningen) har et kapittel som må være
+  lest (`reads` i `research.ts`). Kapitlet kommer i fagboka så snart forskningen er synlig på nivået,
+  og forskningskortet har knappen «Les kapitlet» som åpner boka der. Et kapittel regnes som lest når
+  det er åpnet (`readChapters`). Merket på bokknappen viser uleste kapitler.
+- **Quiz:** to spørsmål med tre svar per kapittel (`game/quiz.ts`). Alt riktig første gang gir
+  2 × (1 + nivå) fagpoeng. Feil svar: forklaringene vises, og man kan prøve igjen neste døgn.
+- **Oppdrag:** elleve kapitler har et oppdrag (`game/missions.ts`) som starter når kapitlet er lest,
+  og gir fagpoeng og penger når målet er nådd (f.eks. tre planlagte omforinger, to døgn der alt stål
+  holder kvaliteten, tre døgn med billig strøm). Oppdrag i gang vises i Fagboka-kortet på Verket.
+- **Rådgiver:** tre omdømmetap av samme grunn (reklamasjon, sen levering eller havari) på ti døgn gir
+  et kort som forklarer årsaken med vanlige ord, peker til kapitlet og tilbyr en spesialist i ti døgn
+  for 15 000 × (1 + nivå)² kr: kvalitetsingeniør (måler alt som med spektrometer), planlegger
+  (sorterer køen og kjøper inn) eller vedlikeholdsspesialist (bytter foring i tide). Samme rådgiver
+  kommer ikke igjen før etter 20 døgn.
+- Gamle lagringer regner kapitlene de har som lest.
+- Testspilleren leser alle kapitler, tar ikke quiz, og leier spesialist når den har god råd.
+  Balanse: 10 / 40 / 104 / 180.

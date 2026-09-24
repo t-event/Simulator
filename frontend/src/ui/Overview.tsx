@@ -8,7 +8,8 @@ import { castingType, rollingActive, shiftStart, type PlantStats } from "../game
 import type { GameState, GradeId, RoleId } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { AnalysisLine, Bar, Card, GradeChips, Stat } from "./common";
-import { fmtClock, fmtKr, fmtPct, fmtT } from "./format";
+import { fmtClock, fmtKr, fmtNum, fmtPct, fmtT } from "./format";
+import { activeMissions, missionProgress } from "../game/missions";
 import { PlantScene } from "./PlantScene";
 import { SceneBubbles } from "./SceneBubbles";
 import { StageCard, StationButton, UpgradeSheet } from "./Upgrades";
@@ -20,6 +21,7 @@ interface Props {
   stats: PlantStats;
   act: GameApi["act"];
   go: (view: View) => void;
+  openBook: (chapter?: string) => void;
 }
 
 interface Hint {
@@ -116,7 +118,40 @@ function Quality({ g, stats, go, right }: { g: GameState; stats: PlantStats; go:
   );
 }
 
-export function Overview({ g, stats, act, go }: Props) {
+/** Fagboka på Verket: nye kapitler og oppdrag i gang (B-025) */
+function BookCard({ g, openBook }: { g: GameState; openBook: (chapter?: string) => void }) {
+  const active = activeMissions(g);
+  const unread = g.knowledge.filter((k) => !g.readChapters.includes(k)).length;
+  if (!active.length && !unread) return null;
+  return (
+    <Card
+      title="Fagboka"
+      right={
+        <button className="g-small" onClick={() => openBook()}>
+          📖 Åpne
+        </button>
+      }
+    >
+      {unread > 0 && (
+        <p className="g-note">
+          {unread === 1 ? "Ett nytt kapittel" : `${unread} nye kapitler`}. Les for å kunne forske – og ta quizen for fagpoeng.
+        </p>
+      )}
+      {active.slice(0, 3).map((m) => (
+        <button key={m.id} className="g-mission g-mission-btn" onClick={() => openBook(m.chapter)}>
+          <strong>Oppdrag: {m.title}</strong>
+          <Bar value={missionProgress(g, m) / m.goal} tone="ok" label="Fremdrift" />
+          <span className="g-muted">
+            {fmtNum(missionProgress(g, m), m.unit === "stjerner" ? 1 : 0)} av {m.goal} {m.unit ?? ""} · {m.fp} fagpoeng
+            {m.cash > 0 ? ` og ${fmtKr(m.cash)}` : ""}
+          </span>
+        </button>
+      ))}
+    </Card>
+  );
+}
+
+export function Overview({ g, stats, act, go, openBook }: Props) {
   const [sheet, setSheet] = useState<Station | null>(null);
   const est = recipeEstimate(g, g.targetGrade, stats);
   const order = currentOrder(g);
@@ -319,6 +354,8 @@ export function Overview({ g, stats, act, go }: Props) {
             g.stage >= 2 && <p className="g-muted">Med en lysbueovn kan du ta styringen og kjøre chargene selv.</p>
           )}
         </Card>
+
+        <BookCard g={g} openBook={openBook} />
 
         <Quality g={g} stats={stats} go={go} right={<StationButton g={g} station="kvalitet" onOpen={setSheet} />} />
 

@@ -25,14 +25,16 @@ import {
   WIN_CASH,
 } from "./data";
 import { knowledgeCard } from "./knowledge";
-import { hasResearch, scrapUnlocked } from "./research";
-import { maybeCreateDecision } from "./decisions";
+import { hasResearch, RESEARCH, scrapUnlocked } from "./research";
+import { checkMissions } from "./missions";
+import { maybeAdvisor, maybeCreateDecision } from "./decisions";
 import {
   castingType,
   computePlantStats,
   day,
   energyPrice,
   fixedPowerOffer,
+  furnaceType,
   gradeFailures,
   has,
   hasPlanner,
@@ -55,6 +57,7 @@ import type {
   DayFinance,
   FurnaceUnit,
   GameState,
+  RepCause,
   GradeId,
   IncomeCategory,
   LiquidBatch,
@@ -185,6 +188,14 @@ export function newGame(seed = Date.now()): GameState {
     celebrate: null,
     seenViews: ["verket", "marked", "salg"],
     gridCut: null,
+    readChapters: [],
+    quizDone: [],
+    quizFailedDay: {},
+    missions: {},
+    counters: {},
+    repLog: [],
+    advisorSeen: {},
+    specialists: {},
     knowledge: [],
     unreadKnowledge: 0,
   };
@@ -225,6 +236,24 @@ export function addIncome(g: GameState, category: IncomeCategory, amount: number
 }
 
 /** Fagpoeng til forskning. */
+/** Teller hendelser som oppdragene i fagboka følger med på */
+export function countEvent(g: GameState, key: string, n = 1): void {
+  g.counters[key] = (g.counters[key] ?? 0) + n;
+}
+
+/** Omdømmetap med årsak, så rådgiveren kan se mønstre (B-025) */
+function repLoss(g: GameState, amount: number, cause: RepCause): void {
+  adjustReputation(g, -amount);
+  g.repLog.push({ day: day(g), cause });
+  if (g.repLog.length > 30) g.repLog.splice(0, g.repLog.length - 30);
+}
+
+/** Strøm brukt, for snittprisen per døgn */
+function chargeEnergy(g: GameState, kwh: number): void {
+  addCost(g, "energi", kwh * energyPrice(g));
+  if (furnaceType(g).fuel === "strøm") g.today.kwh = (g.today.kwh ?? 0) + kwh;
+}
+
 export function awardPoints(g: GameState, points: number): void {
   if (points > 0) g.researchPoints += points;
 }
@@ -516,7 +545,7 @@ function startHeat(g: GameState, index: number, stats: PlantStats): boolean {
   };
   const tempOff = chance(g, tempOffRisk(g, stats));
   const kwh = stats.kwhPerT * mix.energy * size * (tempOff ? 1.04 : 1);
-  addCost(g, "energi", kwh * energyPrice(g));
+  chargeEnergy(g, kwh);
   // Karburisering koster litt ekstra når karbonet må opp
   const carburize = !furnace.decarb && expected.c > mix.expected.c * 0.95 ? (expected.c - mix.expected.c) * 10 * 25 : 0;
   addCost(g, "forbruk", (furnace.consumablesPerT + carburize + (has(g, "oseovn") ? 60 : 0)) * size);
@@ -597,7 +626,7 @@ function finishHeat(g: GameState, index: number, stats: PlantStats): void {
   if (heat.radioactive) {
     const cleanup = 50_000 * (1 + g.stage) ** 2;
     addCost(g, "annet", cleanup);
-    adjustReputation(g, -12);
+    repLoss(g, 12, "havari");
     f.downUntilMin = g.minute + 2 * MIN_PER_DAY;
     f.downReason = "Havari: opprydding etter radioaktiv kilde";
     g.castDownUntilMin = Math.max(g.castDownUntilMin, g.minute + MIN_PER_DAY);
@@ -616,7 +645,7 @@ function finishHeat(g: GameState, index: number, stats: PlantStats): void {
     const cost = stats.furnace.relineCost * 3;
     const hours = stats.furnace.relineHours * 3 * stats.repairFactor;
     addCost(g, "vedlikehold", cost);
-    adjustReputation(g, -5);
+    repLoss(g, 5, "havari");
     f.wear = 0;
     f.heatsOnLining = 0;
     f.lastRelineDay = day(g);
@@ -671,6 +700,7 @@ export function startReline(
   f.lastRelineDay = day(g);
   f.downUntilMin = g.minute + hours * 60;
   f.downReason = "Planlagt stans: ny foring";
+  countEvent(g, "omforinger");
   const who = why === "plan" ? " etter vedlikeholdsplanen" : why === "reparatør" ? " av reparatøren" : "";
   log(g, `Planlagt stans: ovn ${index + 1} fores om${who} (${fmtKr(cost)}, ${hours.toFixed(0)} timer).`, "info");
   unlock(g, "ildfast");
@@ -711,7 +741,8 @@ function updateFurnaces(g: GameState, stats: PlantStats): void {
       day(g) - f.lastRelineDay >= g.settings.relinePlanDays &&
       f.wear > 0.15;
     const repairerDue =
-      g.settings.autoReline && g.workers.some((w) => w.role === "vedlikehold") && f.wear >= g.settings.relineAt;
+      (g.settings.autoReline && g.workers.some((w) => w.role === "vedlikehold") && f.wear >= g.settings.relineAt) ||
+      ((g.specialists.havari ?? 0) > g.minute && f.wear >= 0.8);
     if (f.relineRequested || planDue || repairerDue) {
       if (startReline(g, i, stats, f.relineRequested ? "manuell" : planDue ? "plan" : "reparatør").ok) {
         f.relineRequested = false;
@@ -1035,6 +1066,7 @@ function deliverContracts(g: GameState): void {
       const gain = c.repGain * Math.max(0.25, 1 - g.reputation / 150);
       adjustReputation(g, gain);
       g.totals.contractsDone += 1;
+      countEvent(g, "leveranser");
       awardPoints(g, 1 + g.stage);
       log(g, `Kontrakten med ${c.customer} er levert. Omdømme +${gain.toFixed(1)}.`, "good");
       if (g.totals.contractsDone === 1) unlock(g, "omdomme");
@@ -1049,7 +1081,7 @@ function processComplaints(g: GameState): void {
   g.complaints = g.complaints.filter((c) => c.dueMin > g.minute);
   for (const c of due) {
     addCost(g, "bot", c.refund);
-    adjustReputation(g, -c.repLoss);
+    repLoss(g, c.repLoss, "reklamasjon");
     g.totals.complaints += 1;
     awardPoints(g, 2);
     log(
@@ -1222,6 +1254,9 @@ function refreshCandidates(g: GameState): void {
 // Døgn og time
 // ------------------------------------------------------------------ //
 function onHour(g: GameState, stats: PlantStats): void {
+  // Kapitlene forskningen krever, kommer i fagboka når forskningen blir synlig (B-025)
+  for (const r of RESEARCH) if (r.reads && r.stage <= g.stage) unlock(g, r.reads);
+  checkMissions(g);
   expireOffers(g);
   trickleOffers(g, stats);
   deliverContracts(g);
@@ -1273,6 +1308,13 @@ function onDay(g: GameState, stats: PlantStats): void {
   const today = day(g);
   // Effekttariff for døgnet som er slutt: betales for den høyeste effekten verket trakk
   if (g.today.peakMW) addCost(g, "nett", g.today.peakMW * PEAK_RATE_PER_MW);
+  {
+    const t = g.today;
+    const cast = (t.onGradeT ?? 0) + (t.offGradeT ?? 0) + (t.secondT ?? 0);
+    if ((t.onGradeT ?? 0) > 0 && !t.offGradeT) countEvent(g, "rene_dogn");
+    if (cast > 0 && (t.secondT ?? 0) / cast < 0.03) countEvent(g, "fine_stopedogn");
+    if ((t.kwh ?? 0) > 0 && (t.costs.energi ?? 0) / t.kwh! < 0.7) countEvent(g, "billig_strom");
+  }
   g.today.cashEnd = g.cash;
   g.history.push(g.today);
   if (g.history.length > HISTORY_MAX) g.history.splice(0, g.history.length - HISTORY_MAX);
@@ -1341,7 +1383,7 @@ function onDay(g: GameState, stats: PlantStats): void {
       const remaining = c.tonnes - c.delivered;
       const penalty = remaining * c.penaltyPerT;
       addCost(g, "bot", penalty);
-      adjustReputation(g, -c.repLoss);
+      repLoss(g, c.repLoss, "sen");
       c.status = "misligholdt";
       c.closedDay = today;
       log(
@@ -1364,6 +1406,7 @@ function onDay(g: GameState, stats: PlantStats): void {
     if (stats.ownerWorks) g.ownerSkill = Math.min(4.5, g.ownerSkill + 0.04);
   }
   refreshCandidates(g);
+  if (!g.pendingDecision) maybeAdvisor(g);
   maybeCreateDecision(g);
 
   // Banken
@@ -1458,7 +1501,7 @@ export function completeManual(g: GameState, result: ManualResult | null): void 
   const tempOff = Math.abs(result.tempDeviationC) > 20 && !(lf && Math.abs(result.tempDeviationC) < 40);
   const analysis: Analysis = { c: Math.max(0.02, c), p: result.phosphorusPct, tramp: req.mix.tramp };
   const kwh = result.kwhPerT * req.sizeT;
-  addCost(g, "energi", kwh * energyPrice(g));
+  chargeEnergy(g, kwh);
   addCost(g, "forbruk", (stats.furnace.consumablesPerT + (lf ? 60 : 0)) * req.sizeT);
   f.wear += result.wear * (stats.furnace.wearPerHeat / 0.01) * wearFactor(g);
   f.heat = {
@@ -1476,6 +1519,7 @@ export function completeManual(g: GameState, result: ManualResult | null): void 
   };
   f.waitReason = null;
   awardPoints(g, result.stars !== undefined ? 1 + result.stars : 3);
+  if ((result.stars ?? 0) >= 4) countEvent(g, "gode_charger");
   if (result.ok) {
     adjustReputation(g, 0.5);
     log(
@@ -1496,7 +1540,7 @@ function autoHeatFromRequest(g: GameState, req: ManualRequest, stats: PlantStats
     tramp: req.mix.tramp,
   };
   const kwh = stats.kwhPerT * req.energyFactor * req.sizeT;
-  addCost(g, "energi", kwh * energyPrice(g));
+  chargeEnergy(g, kwh);
   addCost(g, "forbruk", stats.furnace.consumablesPerT * req.sizeT);
   g.furnaces[req.furnace].wear += stats.furnace.wearPerHeat * wearFactor(g);
   return {

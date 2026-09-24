@@ -80,12 +80,14 @@ frontend/src/
     plant.ts     Utledede tall (kapasitet, skift)   engine.ts   Tid, produksjon, marked, hendelser
     actions.ts   Spillerhandlinger          research.ts  Forskning, fagpoeng, låste skraptyper og fart
     recipe.ts    Reseptsjekk og forslag til billigste resept
+    quiz.ts      Quiz per kapittel         missions.ts  Oppdrag fra fagboka
     decisions.ts Hendelseskort med valg     knowledge.ts Fagboka
     save.ts      Lagring + migrering        useGame.ts   Spilløkka for React
     balance.ts   Automatisk testspiller
   ui/          Spillets skjermer (mobil først) og kontrollrommet
     views.ts     Fanene og når de låses opp   Upgrades.tsx, stations.ts  Utstyr per sted i anlegget
     ResearchPage.tsx  Forskning-fanen (forskning, bank, nytt spill)   Power.tsx  Strøm og skiftplan
+    Handbook.tsx Fagboka med quiz og oppdrag
     control/     Kontrollrommet: enkel styring (standard) og full HMI (ekspert)
   sim/         Prosessmodell for lysbueovnen (brukes av kontrollrommet)
   components/  HMI-komponenter for full kontrollromsvisning

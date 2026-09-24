@@ -57,6 +57,17 @@ export function migrate(g: GameState): GameState {
     g.settings.shiftStart = 6;
   }
   if (loose.gridCut === undefined) loose.gridCut = null;
+  if (loose.readChapters === undefined) {
+    // Fagboka (B-025): kapitler man allerede har, regnes som lest, så forskning ikke stopper opp
+    loose.readChapters = [...g.knowledge];
+    loose.quizDone = [];
+    loose.quizFailedDay = {};
+    loose.missions = {};
+    loose.counters = {};
+    loose.repLog = [];
+    loose.advisorSeen = {};
+    loose.specialists = {};
+  }
   if (loose.seenViews === undefined) {
     // Lagret før gradvis opplåsing (B-023): gi det spilleren allerede hadde tilgang til
     loose.seenViews = ["verket", "marked", "salg", "folk", "forskning"];

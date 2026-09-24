@@ -1439,3 +1439,92 @@ button {
   flex: 1 1 30%;
   min-height: 44px;
 }
+
+/* Fagboka: quiz og oppdrag (B-025) */
+.g-handbook-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+}
+
+.g-handbook-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--warning);
+  border: 1px solid var(--warning);
+  border-radius: 9px;
+  padding: 0 6px;
+}
+
+.g-quiz {
+  margin: 10px 0 14px;
+  padding: 10px;
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+}
+
+.g-quiz h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.g-quiz fieldset {
+  border: 0;
+  margin: 0 0 10px;
+  padding: 0;
+  min-width: 0;
+}
+
+.g-quiz legend {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+  padding: 0;
+}
+
+.g-quiz-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.g-quiz-option.is-picked {
+  border-color: var(--accent);
+}
+
+.g-quiz-option.is-right {
+  border-color: var(--ok);
+  background: rgba(76, 175, 80, 0.12);
+}
+
+.g-quiz-option.is-wrong {
+  border-color: var(--critical, #e53935);
+  background: rgba(229, 57, 53, 0.12);
+}
+
+.g-quiz-done {
+  display: inline-block;
+  margin: 6px 0 12px;
+}
+
+.g-mission {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 8px 0;
+  font-size: 13px;
+}
+
+.g-mission-btn {
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  align-items: stretch;
+}

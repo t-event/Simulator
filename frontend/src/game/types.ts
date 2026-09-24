@@ -169,9 +169,14 @@ export interface DayFinance {
   offGradeT?: number;
   /** Tonn med støpefeil (sekunda) */
   secondT?: number;
+  /** Strøm brukt i døgnet (kWh), for snittprisen */
+  kwh?: number;
   /** Døgnets høyeste effektuttak (MW), grunnlaget for effekttariffen */
   peakMW?: number;
 }
+
+/** Hvorfor omdømmet falt: reklamasjon, sen levering eller havari */
+export type RepCause = "reklamasjon" | "sen" | "havari";
 
 export type PowerDeal = "spot" | "fast" | "natt";
 
@@ -224,7 +229,8 @@ export interface Decision {
   id: string;
   title: string;
   text: string;
-  options: { label: string; hint?: string }[];
+  /** chapter: valget åpner fagboka på dette kapitlet */
+  options: { label: string; hint?: string; chapter?: string }[];
   /** Tall kortet trenger når valget skal gjennomføres (mengde, pris …) */
   data: Record<string, number | string>;
   resumeSpeed: number;
@@ -294,6 +300,20 @@ export interface GameState {
   bonusOffer: boolean;
   /** Avtalt utkobling fra nettselskapet: ingen nye charger i dette tidsrommet */
   gridCut: { fromMin: number; untilMin: number } | null;
+  /** Fagboka (B-025): kapitler spilleren har åpnet, beståtte quizer og dagen en quiz sist ble feil */
+  readChapters: string[];
+  quizDone: string[];
+  quizFailedDay: Record<string, number>;
+  /** Oppdrag fra fagboka: telleren da oppdraget startet, og om det er fullført */
+  missions: Record<string, { base: number; done: boolean }>;
+  /** Tellere for oppdrag (planlagte omforinger, rene døgn …) */
+  counters: Record<string, number>;
+  /** Omdømmetap siste tid, med årsak, så rådgiveren kan se mønstre */
+  repLog: { day: number; cause: RepCause }[];
+  /** Dagen rådgiveren sist kom for hver årsak */
+  advisorSeen: Record<string, number>;
+  /** Innleide spesialister: årsak → spillminuttet de er ferdige */
+  specialists: Record<string, number>;
   /** Faner spilleren har sett (nye faner får et «Ny»-merke, B-023) */
   seenViews: string[];
   /** Nivået spilleren nettopp flyttet til, for feiring; null når det er sett */

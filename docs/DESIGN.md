@@ -128,10 +128,10 @@ Oppdater listen når noe blir gjort, så arbeidet kan fortsette i en ny samtale.
 - [x] Utkobling fra nettselskapet mot betaling (hendelse med valg)
 
 **F. Fagboka sentral** (brukerens valg: alle fire)
-- [ ] Quiz per kapittel som gir belønning
-- [ ] Forskning krever at kapitlet er lest
-- [ ] Oppdrag fra fagboka med mål og belønning
-- [ ] Rådgiver ved gjentatte omdømmetap: forklarer feilen, viser til kapittel, spesialist mot betaling
+- [x] Quiz per kapittel som gir belønning
+- [x] Forskning krever at kapitlet er lest
+- [x] Oppdrag fra fagboka med mål og belønning
+- [x] Rådgiver ved gjentatte omdømmetap: forklarer feilen, viser til kapittel, spesialist mot betaling
 
 **G. Ansatte og balanse**
 - [ ] Ansatte med mer å si (trivsel, kurs, spesialister)
