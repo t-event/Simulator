@@ -168,3 +168,13 @@ Resultat: pengene sperrer nå fra støperiet og oppover, omdømmet i garasjen; f
 Median nivådager 13 / 36 / 89 / 169 (var 13 / 27 / 77 / 152). Nye mål: Verksted 7–20,
 Støperi 20–50, Stålverk 55–120, Storverk 120–220; testspilleren kjører 240 døgn.
 Kassa på dag 240 er 15–55 mill. (var 400–800 mill.).
+
+## B-019 Svar på tilbakemeldingsrunde 2 (2026-09-24)
+Status: gjelder
+Bakgrunn: Stor tilbakemelding fra brukeren og en testperson (se arbeidslisten i `docs/DESIGN.md`).
+Brukerens valg:
+- **Fagboka:** alle fire – quiz med belønning, forskning krever lest kapittel, oppdrag, rådgiver
+  med kapittelhenvisning og betalt spesialist.
+- **Strøm:** alle fire – strømavtale, effekttariff, skiftplan etter strømpris, utkobling.
+- **Planlegging:** ordrekø som spilleren sorterer, og en planlegger som kan ansettes senere.
+Beslutning: Gjennomføres tema for tema (A–G), én PR per tema, som merges fortløpende (B-017).
