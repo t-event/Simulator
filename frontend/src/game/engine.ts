@@ -42,6 +42,7 @@ import {
   isOpen,
   nightExtra,
   PEAK_RATE_PER_MW,
+  presentWorkers,
   potRebuildPerDay,
   potSwapHours,
   POWER_BINDING_DAYS,
@@ -191,6 +192,7 @@ export function newGame(seed = Date.now()): GameState {
     pendingDecision: null,
     decisionSeen: {},
     sickUntilMin: 0,
+    tempsUntilMin: 0,
     bonusOffer: false,
     celebrate: null,
     seenViews: ["verket", "marked", "salg"],
@@ -796,7 +798,7 @@ function updateFurnaces(g: GameState, stats: PlantStats): void {
       hasResearch(g, "vedlikeholdsplan") &&
       ((day(g) - f.lastRelineDay >= g.settings.relinePlanDays && f.wear > 0.15) || f.wear >= PLAN_SAFETY_WEAR);
     const repairerDue =
-      (g.settings.autoReline && g.workers.some((w) => w.role === "vedlikehold") && f.wear >= g.settings.relineAt) ||
+      (g.settings.autoReline && presentWorkers(g).some((w) => w.role === "vedlikehold") && f.wear >= g.settings.relineAt) ||
       ((g.specialists.havari ?? 0) > g.minute && f.wear >= 0.8);
     if (f.relineRequested || planDue || repairerDue) {
       if (startReline(g, i, stats, f.relineRequested ? "manuell" : planDue ? "plan" : "reparatør").ok) {
@@ -1328,6 +1330,50 @@ function updatePots(g: GameState, stats: PlantStats, dt: number): void {
   });
 }
 
+/**
+ * Fravær (B-031): ferie kommer automatisk med tre døgns varsel, og enkeltpersoner kan bli syke –
+ * oftere når trivselen er lav eller verket går nattskift. Ledige allroundere dekker plassene.
+ */
+function updateAbsence(g: GameState, stats: PlantStats): void {
+  if (!g.workers.length) return;
+  const today = day(g);
+  const vacationCap = Math.max(1, Math.floor(g.workers.length * 0.1));
+  const onVacation = (from: number, until: number) =>
+    g.workers.filter((w) => w.absentReason === "ferie" && w.absentFrom! < until && w.absentUntil! > from).length;
+  for (const w of g.workers) {
+    if (w.absentUntil !== undefined && g.minute >= w.absentUntil) {
+      w.absentFrom = w.absentUntil = w.absentReason = undefined;
+    }
+    if (w.nextVacationDay === undefined) w.nextVacationDay = today + randInt(g, 10, 110);
+    const busy = w.absentUntil !== undefined;
+    // Ferie: varsles tre døgn før, maks en tidel av de ansatte samtidig
+    if (!busy && today >= w.nextVacationDay - 3) {
+      const len = randInt(g, 3, 5);
+      const from = (Math.max(w.nextVacationDay, today + 1) - 1) * MIN_PER_DAY;
+      const until = from + len * MIN_PER_DAY;
+      if (onVacation(from, until) >= vacationCap) {
+        w.nextVacationDay += 3;
+        continue;
+      }
+      w.absentFrom = from;
+      w.absentUntil = until;
+      w.absentReason = "ferie";
+      w.nextVacationDay = day(g, until) + randInt(g, 100, 140);
+      log(g, `${w.name} (${ROLES[w.role].name.toLowerCase()}) har ferie dag ${day(g, from)}–${day(g, until - 1)}.`, "info");
+      continue;
+    }
+    // Sykdom
+    const risk = 0.005 * (1 + Math.max(0, 60 - g.morale) / 60) * (nightExtra(g, stats.hours) > 0 ? 1.3 : 1);
+    if (!busy && chance(g, risk)) {
+      const len = randInt(g, 1, 3);
+      w.absentFrom = g.minute;
+      w.absentUntil = g.minute + len * MIN_PER_DAY;
+      w.absentReason = "syk";
+      log(g, `${w.name} (${ROLES[w.role].name.toLowerCase()}) er syk ${len === 1 ? "i dag" : `i ${len} døgn`}.`, "event");
+    }
+  }
+}
+
 /** Trivselen driver mot det normale, nattarbeid tærer, og misfornøyde folk slutter (B-026) */
 function updateMorale(g: GameState, stats: PlantStats): void {
   if (!g.workers.length) return;
@@ -1513,6 +1559,7 @@ function onDay(g: GameState, stats: PlantStats): void {
     if (stats.ownerWorks) g.ownerSkill = Math.min(4.5, g.ownerSkill + 0.04);
   }
   updateMorale(g, stats);
+  updateAbsence(g, stats);
   refreshCandidates(g);
   if (!g.pendingDecision) maybeAdvisor(g);
   maybeCreateDecision(g);

@@ -386,3 +386,23 @@ Beslutning:
 - Gamle lagringer får en ferdig reservepott. Testspilleren ansetter to murere per lysbueovn.
 - Test i Node (to lysbueovner, 40 døgn): uten murere 74 ovnstimer planlagt stans og 3 omforinger i ovnen;
   med to murere 18 ovnstimer og bare pottebytter. Balanse: 12 / 36 / 74 / 144.
+
+## B-031 Fravær: automatisk ferie, sykdom, influensa og vikarer (2026-09-24)
+Status: gjelder (erstatter influensakortet som bare fjernet ett skift)
+Brukeren godtok forslaget: automatisk ferie, influensa der flere er borte, og valget mellom å gå ned på
+skiftgangen eller leie inn vikarer. Allrounderne blir reserven som dekker fravær.
+Beslutning:
+- **Ferie:** hver ansatt får 3–5 døgns ferie omtrent hvert 100.–140. døgn, varslet i loggen tre døgn før.
+  Høyst en tidel av de ansatte har ferie samtidig; ellers flyttes ferien tre døgn.
+- **Sykdom:** 0,5 % sjanse per ansatt per døgn for 1–3 døgn, opptil dobbelt så ofte med lav trivsel og
+  30 % oftere med nattskift.
+- **Influensa** (hendelseskort, fra 6 ansatte): 20–35 % av de ansatte er syke i 2–4 døgn. Valg: leie
+  vikarer (1,5 × lønna til de syke) eller gå ned på skiftgangen til de er tilbake.
+- Den som er borte, teller ikke i bemanningen. Ledige allroundere dekker plassene automatisk; ellers går
+  verket færre skift. Også planlegger, skrapklasser, murere, reparatører og selgere mangler når de er borte.
+- **Vikarer** kan leies manuelt under Folk i 1 eller 3 døgn når noen er borte (1,5 × lønna). Mens vikarene
+  er der, dekker de alt fravær.
+- Folk-fanen har kortet **Fravær** (hvem som er borte, ferie som kommer, hva det koster i skift) og merker
+  ansatte som er borte. Verket varsler når fravær koster skift.
+- Test i Node over 60 døgn: støperi med 11 ansatte fikk 5 fravær og mistet et skift ca. 20 % av tida;
+  storverk med 50 ansatte og allroundere i reserve fikk 20 fravær uten tapte skift. Balanse 12 / 31 / 73 / 150.
