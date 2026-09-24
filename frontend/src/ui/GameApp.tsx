@@ -176,13 +176,18 @@ function Coach({ g, act }: { g: GameState; act: GameApi["act"] }) {
         </span>
         {!last && (
           <button className="g-link" onClick={() => act((gg) => skipTutorial(gg))}>
-            Hopp over
+            Avslutt veiledningen
           </button>
         )}
       </div>
       <strong>{step.title}</strong>
       <p>{step.text}</p>
-      {!step.done && (
+      {step.done ? (
+        // Steg med et mål går videre av seg selv, men kan hoppes over ett og ett
+        <button className="g-coach-skip" onClick={() => act((gg) => nextTutorialStep(gg))}>
+          Hopp over steget
+        </button>
+      ) : (
         <button className="g-primary" onClick={() => act((gg) => nextTutorialStep(gg))}>
           {last ? "Ferdig" : "Neste"}
         </button>

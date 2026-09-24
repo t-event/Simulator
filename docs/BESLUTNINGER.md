@@ -406,3 +406,9 @@ Beslutning:
   ansatte som er borte. Verket varsler når fravær koster skift.
 - Test i Node over 60 døgn: støperi med 11 ansatte fikk 5 fravær og mistet et skift ca. 20 % av tida;
   storverk med 50 ansatte og allroundere i reserve fikk 20 fravær uten tapte skift. Balanse 12 / 31 / 73 / 150.
+
+## B-032 «Hopp over steget» og «Avslutt veiledningen» (2026-09-24)
+Status: gjelder (endrer «Hopp over» i B-027)
+Brukeren trykket «Hopp over» og ventet å komme til neste steg, men hele veiledningen forsvant.
+Beslutning: Veiledningskortet har «Hopp over steget» (neste steg) på steg som ellers venter på at
+spilleren gjør noe, og lenken «Avslutt veiledningen» øverst for å fjerne hele veiledningen.
