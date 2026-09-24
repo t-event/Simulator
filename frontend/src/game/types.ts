@@ -208,6 +208,8 @@ export interface Settings {
   powerFixedPrice: number;
   /** Bare én ovn smelter om gangen, for å holde effekttoppen nede */
   onePeak: boolean;
+  /** Spol fram når verket står utenfor arbeidstida og ingenting skjer (B-033) */
+  skipIdleNights: boolean;
   /** Klokketimen skiftene starter (6, 14 eller 22) */
   shiftStart: number;
   /** Start ikke ny charge når strømprisen er over dette (kr/kWh). null = ingen grense */
@@ -341,6 +343,14 @@ export interface GameState {
   morale: number;
   /** Dagen det sist ble gitt bonus */
   lastBonusDay: number;
+  /** Engangstips som er vist (B-033) */
+  tipsSeen: string[];
+  /** Hvorfor spillet er over, vist på sluttskjermen */
+  gameOverReason?: string;
+  /** Kassa er under null, og spilleren har fått varsel om det */
+  inCredit?: boolean;
+  /** Døgn på rad der verket står fordi det ikke er råd til omforing og lånet er fullt */
+  stuckDays?: number;
   /** Faner spilleren har sett (nye faner får et «Ny»-merke, B-023) */
   seenViews: string[];
   /** Nivået spilleren nettopp flyttet til, for feiring; null når det er sett */

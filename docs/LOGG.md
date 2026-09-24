@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 17 – 2026-09-24: ny tilbakemeldingsrunde (pakke 1 av 5: start og varsler)
+
+**Brukeren ba om:** Lang liste (se oppgavene i denne økta): murere på dagtid, raskere start, varsler og
+tips, 1× etter popup, konkurs uten råd til omforing, omdømme i starten, reklamasjoner, kvalitetsingeniør,
+Verket for lang, Marked uintuitiv, støpefeil, fagbok-kapitler, potte/porten, nattillegg, vedlikehold,
+nestenulykke, søkere ved flytting, bryter for forespørsler, lang lagerliste, øseovnsoperatør, digel.
+Delt i fem pakker.
+
+**Pakke 1 (B-033):** Små første ordre, spoling om natta, engangstips, varsel ved tomt skraplager og
+kreditt, 1× og klikksperre på kort, murere dagtid, nattillegg bare for skiftfolk, konkurs uten råd til
+foring. Testet i Playwright: første tilbud 0,4–0,6 døgn, tips kl. 16:00, knappene sperret et øyeblikk,
+1× etter kortet, natta på 11 s. Balanse 11 / 33 / 77 / 153.
+
+---
+
 ## Økt 16 – 2026-09-24: «Hopp over» i veiledningen
 
 **Brukeren meldte:** «Hopp over» hoppet over hele veiledningen, ikke bare til neste steg.

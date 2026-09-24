@@ -28,6 +28,7 @@ import { knowledgeCard } from "./knowledge";
 import { hasResearch, RESEARCH, scrapUnlocked } from "./research";
 import { checkMissions } from "./missions";
 import { maybeAdvisor, maybeCreateDecision } from "./decisions";
+import { maybeTip, setCreditHint } from "./tips";
 import {
   castingType,
   computePlantStats,
@@ -43,6 +44,8 @@ import {
   nightExtra,
   PEAK_RATE_PER_MW,
   presentWorkers,
+  MASON_HOURS,
+  masonsAtWork,
   potRebuildPerDay,
   potSwapHours,
   POWER_BINDING_DAYS,
@@ -167,6 +170,7 @@ export function newGame(seed = Date.now()): GameState {
       powerFixedPrice: 0,
       onePeak: false,
       shiftStart: SHIFT_START_HOUR,
+      skipIdleNights: true,
       maxPowerPrice: null,
       autoBuy: false,
       followQueue: true,
@@ -196,6 +200,7 @@ export function newGame(seed = Date.now()): GameState {
     bonusOffer: false,
     celebrate: null,
     seenViews: ["verket", "marked", "salg"],
+    tipsSeen: [],
     gridCut: null,
     readChapters: [],
     quizDone: [],
@@ -311,6 +316,8 @@ export function addScrapParti(
 export function scrapPrice(g: GameState, id: ScrapId): number {
   return SCRAP_TYPES[id].price * g.market.scrapFactor[id];
 }
+
+setCreditHint((g) => creditLimit(g));
 
 /** Kassekreditten følger nivået og omsetningen verket kan ha (to døgns produksjon). */
 export function creditLimit(g: GameState, stats = computePlantStats(g)): number {
@@ -836,9 +843,14 @@ function updateFurnaces(g: GameState, stats: PlantStats): void {
       f.waitReason = "Venter mens du er i kontrollrommet";
       continue;
     }
-    if (!startHeat(g, i, stats))
+    if (!startHeat(g, i, stats)) {
+      const was = f.waitReason;
       f.waitReason =
         hasGrader(g) && stats.yardUsed >= stats.sizeT ? "Mangler skrap til resepten" : "Tomt for skrap";
+      // Tydelig varsel når ovnen blir stående uten skrap (B-033)
+      if (was !== f.waitReason && i === 0)
+        log(g, `Ovnen står: ${f.waitReason === "Tomt for skrap" ? "skraplageret er tomt. Kjøp skrap under Marked" : "mangler skrap til resepten"}.`, "bad");
+    }
   }
 }
 
@@ -1179,7 +1191,9 @@ function makeOffer(g: GameState, stats: PlantStats): Contract | null {
   const grade = pick(g, grades.length ? grades : customer.grades);
   const capacity = Math.max(0.1, stats.dailyProductT);
   // En kontrakt skal være et lite prosjekt: 1,5–4 døgns produksjon, ikke noe som er ferdig på sekunder
-  const workDays = uniform(g, CONTRACT_DAYS[0], CONTRACT_DAYS[1]);
+  // De første kontraktene i garasjen er små, så starten går fort og man ser at det virker (B-033)
+  const firstOrders = g.stage === 0 && g.totals.contractsDone + g.contracts.filter((c) => c.status === "aktiv").length < 2;
+  const workDays = firstOrders ? uniform(g, 0.4, 0.8) : uniform(g, CONTRACT_DAYS[0], CONTRACT_DAYS[1]);
   const tonnes = roundTonnes(Math.max(customer.minT, Math.min(customer.maxT, capacity * workDays)));
   const pricePerT = Math.round(productPrice(g, product, grade) * (1 + stats.priceBonus) * uniform(g, 0.95, 1.1));
   const days = Math.min(30, Math.ceil(tonnes / (capacity * 0.6)) + randInt(g, 2, 4));
@@ -1322,10 +1336,11 @@ function refreshCandidates(g: GameState): void {
 function updatePots(g: GameState, stats: PlantStats, dt: number): void {
   if (!stats.furnace.arc) return;
   const perDay = potRebuildPerDay(g);
-  if (perDay <= 0) return;
+  if (perDay <= 0 || !masonsAtWork(g)) return;
   g.furnaces.forEach((f, i) => {
     if (f.spareProgress >= 1) return;
-    f.spareProgress = Math.min(1, f.spareProgress + (perDay * dt) / MIN_PER_DAY);
+    // Hele døgnets oppmuring gjøres i arbeidstida
+    f.spareProgress = Math.min(1, f.spareProgress + (perDay * dt) / (MASON_HOURS * 60));
     if (f.spareProgress >= 1) log(g, `Murerne er ferdige: reservepotta til ovn ${i + 1} er klar.`, "good");
   });
 }
@@ -1393,6 +1408,12 @@ function updateMorale(g: GameState, stats: PlantStats): void {
 }
 
 function onHour(g: GameState, stats: PlantStats): void {
+  // Varsel når kassa går tom og kassekreditten tas i bruk (B-033)
+  if (g.cash < 0 && !g.inCredit) {
+    g.inCredit = true;
+    log(g, `Kassa er tom – du bruker nå kassekreditten (grense ${fmtKr(creditLimit(g, stats))}).`, "bad");
+  } else if (g.cash >= 0) g.inCredit = false;
+  maybeTip(g, stats);
   // Kapitlene forskningen krever, kommer i fagboka når forskningen blir synlig (B-025)
   for (const r of RESEARCH) if (r.reads && r.stage <= g.stage) unlock(g, r.reads);
   checkMissions(g);
@@ -1564,6 +1585,20 @@ function onDay(g: GameState, stats: PlantStats): void {
   if (!g.pendingDecision) maybeAdvisor(g);
   maybeCreateDecision(g);
 
+  // Står verket fordi det ikke er råd til omforing, og lånet er fullt, er det slutt (B-033)
+  const cantReline = g.furnaces.every((f) => (f.waitReason ?? "").includes("mangler penger til omforing"));
+  if (cantReline && g.loan >= maxLoan(g) - 1) {
+    g.stuckDays = (g.stuckDays ?? 0) + 1;
+    if (g.stuckDays === 1)
+      log(g, "Verket står: det er ikke råd til ny foring, og banken låner ikke ut mer. Skaff penger innen tre døgn.", "bad");
+    if (g.stuckDays >= 3) {
+      g.gameOver = true;
+      g.speed = 0;
+      g.gameOverReason = "Ovnen trengte ny foring, men det var ikke penger til det, og banken ville ikke låne ut mer.";
+      log(g, "Banken har begjært verket konkurs.", "bad");
+    }
+  } else g.stuckDays = 0;
+
   // Banken
   if (g.cash < -creditLimit(g)) {
     g.negativeDays += 1;
@@ -1573,6 +1608,7 @@ function onDay(g: GameState, stats: PlantStats): void {
     if (g.negativeDays >= BANKRUPTCY_DAYS) {
       g.gameOver = true;
       g.speed = 0;
+      g.gameOverReason = "Du var over kredittgrensen i en uke.";
       log(g, "Banken har begjært verket konkurs.", "bad");
     }
   } else {

@@ -54,7 +54,7 @@ export function Maintenance({
       {f0.arc && (
         <p className="g-muted">
           Lysbueovnen har to potter. Mens den ene er i bruk, murer murerne opp den andre med ny foring (ca.{" "}
-          {POT_REBUILD_DAYS} døgn med {MASONS_PER_POT} murere per pott). Står reservepotta klar, tar et bytte bare{" "}
+          {POT_REBUILD_DAYS} døgn med {MASONS_PER_POT} murere per pott; murerne jobber dagtid 07–15). Står reservepotta klar, tar et bytte bare{" "}
           {swapHours} timer i stedet for {relineHours}.
         </p>
       )}

@@ -69,6 +69,9 @@ export function migrate(g: GameState): GameState {
   }
   if (loose.gridCut === undefined) loose.gridCut = null;
   if (loose.tutorial === undefined) loose.tutorial = null;
+  // Gamle spillere har sett det meste; tipsene om natt og fart er likevel nyttige
+  if (loose.tipsSeen === undefined) loose.tipsSeen = g.stage >= 1 ? ["tips-foring", "tips-skrap"] : [];
+  if (g.settings.skipIdleNights === undefined) g.settings.skipIdleNights = true;
   if (loose.quizScores === undefined) {
     // Før B-029 kunne en quiz tas om igjen, og bare fullt hus ble lagret
     loose.quizScores = Object.fromEntries((g.quizDone ?? []).map((c) => [c, 2]));

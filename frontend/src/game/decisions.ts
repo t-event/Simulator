@@ -310,7 +310,8 @@ export function resolveDecision(g: GameState, option: number): void {
   const d = g.pendingDecision;
   if (!d) return;
   g.pendingDecision = null;
-  g.speed = d.resumeSpeed;
+  // Etter et kort går spillet videre på 1×, så man ikke raser videre på 10× (B-033)
+  g.speed = d.resumeSpeed > 0 ? 1 : 0;
   const yes = option === 0;
   const n = (k: string) => Number(d.data[k] ?? 0);
   switch (d.id) {
