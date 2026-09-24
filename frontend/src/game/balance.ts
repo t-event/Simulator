@@ -110,6 +110,9 @@ const RESEARCH_PRIORITY = [
 /** Spill der testspilleren venter med å bytte støping til kontraktene på det gamle produktet er levert */
 const switching = new WeakSet<GameState>();
 
+/** Testspilleren holder to murere per lysbueovn */
+const MASONS_BOT = 2;
+
 function botHour(g: GameState): void {
   // Hendelseskort: forsiktige valg, som en fornuftig spiller
   if (g.pendingDecision) {
@@ -197,7 +200,12 @@ function botHour(g: GameState): void {
   const count = (r: RoleId) => g.workers.filter((w) => w.role === r).length;
   const crewTotal = Object.values(stats.crew).reduce((a, b) => a + (b ?? 0), 0) * 3;
   const crewWorkers = g.workers.filter(
-    (w) => w.role !== "salg" && w.role !== "vedlikehold" && w.role !== "planlegger" && w.role !== "klasser",
+    (w) =>
+      w.role !== "salg" &&
+      w.role !== "vedlikehold" &&
+      w.role !== "planlegger" &&
+      w.role !== "klasser" &&
+      w.role !== "murer",
   ).length;
   const spare = cap - g.workers.length - Math.max(0, crewTotal - crewWorkers);
   if (
@@ -208,6 +216,11 @@ function botHour(g: GameState): void {
     g.workers.length < cap
   ) {
     const c = g.candidates.find((x) => x.role === "salg");
+    if (c) hire(g, c.id);
+  }
+  // Murere til reservepottene i lysbueovnen (B-030)
+  if (spare > 0 && stats.furnace.arc && count("murer") < MASONS_BOT * g.furnaceCount && g.workers.length < cap) {
+    const c = g.candidates.find((x) => x.role === "murer");
     if (c) hire(g, c.id);
   }
   // Skrapklasser når verket går flere skift, så chargene følger resepten (B-029)

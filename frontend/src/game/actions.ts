@@ -174,6 +174,7 @@ export function buyUpgrade(g: GameState, id: string): PurchaseResult {
       for (const f of g.furnaces) {
         f.wear = 0;
         f.heatsOnLining = 0;
+        f.spareProgress = 1;
       }
       const type = furnaceType(g);
       if (type.arc) {

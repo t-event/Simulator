@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 14 – 2026-09-24: to potter per lysbueovn og murere
+
+**Brukeren ba om:** To potter per lysbueovn, og murere som bygger opp den ene mens den andre er i bruk
+(ca. fire døgn).
+
+**Gjort (B-030):** Reservepott per lysbueovn, pottebytte på noen timer når den er klar, ny rolle Murer
+(fire døgn med to murere per pott), visning i vedlikeholdskortet, varsel på Verket og nytt avsnitt i
+fagboka.
+
+**Testet:** Node-test med 0, 2 og 4 murere (se B-030). Playwright på iPhone 13: vedlikeholdskortet viser
+reservepott, fremdrift og «Bytt pott nå». Balanse 12 / 36 / 74 / 144. Ingen konsollfeil.
+
+**Gjenstår:** Brukeren vurderer forslaget om fravær (sykdom/ferie) der allroundere dekker opp.
+
+---
+
 ## Økt 13 – 2026-09-24: bemanningstabellen var forvirrende
 
 **Brukeren meldte (skjermbilde fra støperiet):** «Antall per skift stemmer vel ikke.» Tabellen viste

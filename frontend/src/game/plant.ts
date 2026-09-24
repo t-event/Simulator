@@ -126,6 +126,7 @@ function countRoles(g: GameState): Record<RoleId, number> {
     valse: 0,
     planlegger: 0,
     klasser: 0,
+    murer: 0,
   };
   for (const w of g.workers) counts[w.role] += 1;
   return counts;
@@ -313,7 +314,12 @@ export function computePlantStats(g: GameState): PlantStats {
 
   // Ferdigheten til de som faktisk står i produksjonen
   const floor = g.workers.filter(
-    (w) => w.role !== "salg" && w.role !== "vedlikehold" && w.role !== "planlegger" && w.role !== "klasser",
+    (w) =>
+      w.role !== "salg" &&
+      w.role !== "vedlikehold" &&
+      w.role !== "planlegger" &&
+      w.role !== "klasser" &&
+      w.role !== "murer",
   );
   const skills = floor.map((w) => w.skill);
   if (staff.ownerWorks) skills.push(g.ownerSkill, g.ownerSkill);
@@ -476,6 +482,23 @@ export function liningDays(g: GameState, stats: PlantStats): number {
   const hours = stats.hours > 0 ? stats.hours : 24;
   const heatsPerDay = (hours * 60) / stats.cycleMin;
   return 0.85 / (liningWearPerHeat(g) * heatsPerDay);
+}
+
+/** Oppmuring av en pott tar fire døgn med to murere; én murer bruker dobbelt så lang tid (B-030) */
+export const POT_REBUILD_DAYS = 4;
+export const MASONS_PER_POT = 2;
+
+/** Hvor mye av en reservepott som mures opp per døgn, når murerne deles på pottene som trenger det */
+export function potRebuildPerDay(g: GameState): number {
+  const masons = g.workers.filter((w) => w.role === "murer").length;
+  const pots = g.furnaces.filter((f) => f.spareProgress < 1).length;
+  if (!masons || !pots) return 0;
+  return Math.min(MASONS_PER_POT, masons / pots) / MASONS_PER_POT / POT_REBUILD_DAYS;
+}
+
+/** Timer et pottebytte tar, uten reparatørfaktor */
+export function potSwapHours(g: GameState): number {
+  return Math.max(4, Math.round(furnaceType(g).relineHours * 0.2));
 }
 
 /** En skrapklasser sørger for at chargene følger resepten (B-029) */

@@ -109,6 +109,8 @@ export function migrate(g: GameState): GameState {
     g.settings.autoReline = g.workers.some((w) => w.role === "vedlikehold");
   }
   for (const f of g.furnaces) if (f.relineRequested === undefined) f.relineRequested = false;
+  // Reservepott (B-030): gamle lagringer har en ferdig pott på lager
+  for (const f of g.furnaces) if (f.spareProgress === undefined) f.spareProgress = 1;
   for (const f of g.furnaces) if (f.lastRelineDay === undefined) f.lastRelineDay = Math.max(1, Math.floor(g.minute / 1440) + 1);
   if (g.settings.followQueue === undefined) g.settings.followQueue = true;
   if (g.settings.plannerSorts === undefined) g.settings.plannerSorts = true;

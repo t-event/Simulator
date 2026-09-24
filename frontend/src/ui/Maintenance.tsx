@@ -1,7 +1,15 @@
 import type { ReactNode } from "react";
 import { requestReline } from "../game/actions";
 import { PLAN_SAFETY_WEAR } from "../game/engine";
-import { day, liningDays, type PlantStats } from "../game/plant";
+import {
+  day,
+  liningDays,
+  MASONS_PER_POT,
+  POT_REBUILD_DAYS,
+  potRebuildPerDay,
+  potSwapHours,
+  type PlantStats,
+} from "../game/plant";
 import { hasResearch } from "../game/research";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
@@ -31,15 +39,25 @@ export function Maintenance({
   const hasRepairer = g.workers.some((w) => w.role === "vedlikehold");
   const canPlan = hasResearch(g, "vedlikeholdsplan");
   const life = liningDays(g, stats);
+  const potRate = potRebuildPerDay(g);
+  const swapHours = Math.round(potSwapHours(g) * stats.repairFactor);
+  const relineHours = Math.round(f0.relineHours * stats.repairFactor);
   const plan = g.settings.relinePlanDays;
   // Slitasjen etter et gitt antall døgn, med dagens drift
   const wearAfter = (d: number) => Math.min(1, (d / life) * 0.85);
   return (
     <Card title="Vedlikehold" right={right}>
       <p className="g-muted">
-        Foringen slites for hver charge. Planlagt stans koster {fmtKr(f0.relineCost)} og {f0.relineHours} timer. Brenner
-        den gjennom, blir det havari: {fmtKr(f0.relineCost * 3)}, {f0.relineHours * 3} timer og tapt omdømme.
+        Foringen slites for hver charge. Planlagt stans koster {fmtKr(f0.relineCost)} og {relineHours} timer. Brenner
+        den gjennom, blir det havari: {fmtKr(f0.relineCost * 3)}, {relineHours * 3} timer og tapt omdømme.
       </p>
+      {f0.arc && (
+        <p className="g-muted">
+          Lysbueovnen har to potter. Mens den ene er i bruk, murer murerne opp den andre med ny foring (ca.{" "}
+          {POT_REBUILD_DAYS} døgn med {MASONS_PER_POT} murere per pott). Står reservepotta klar, tar et bytte bare{" "}
+          {swapHours} timer i stedet for {relineHours}.
+        </p>
+      )}
       {g.furnaces.map((f, i) => {
         const tone = f.wear > 0.85 ? "critical" : f.wear > 0.6 ? "warning" : "ok";
         const busy = !!f.heat || !!f.holding;
@@ -58,6 +76,15 @@ export function Maintenance({
               {fmtPct(f.wear)} slitt · {day(g) - f.lastRelineDay} døgn siden omforing
               {down && f.downReason ? ` · ${f.downReason}` : ""}
             </p>
+            {f0.arc && (
+              <p className={f.spareProgress >= 1 ? "g-muted" : "g-note"}>
+                {f.spareProgress >= 1
+                  ? "Reservepott: klar ✓ – neste bytte tar bare noen timer."
+                  : potRate > 0
+                    ? `Reservepott: murerne har kommet ${fmtPct(f.spareProgress)} – ca. ${fmtNum((1 - f.spareProgress) / potRate, 1)} døgn igjen.`
+                    : `Reservepott: venter på murere (${fmtPct(f.spareProgress)} ferdig). Ansett murere under Folk.`}
+              </p>
+            )}
             <button
               className={f.relineRequested ? "g-primary is-on" : ""}
               disabled={down || (f.wear < 0.1 && !f.relineRequested)}
@@ -68,8 +95,12 @@ export function Maintenance({
                 : f.wear < 0.1
                   ? "Foringen er ny"
                   : busy
-                    ? "Bytt foring etter denne chargen"
-                    : `Bytt foring nå (${fmtKr(f0.relineCost)})`}
+                    ? f0.arc && f.spareProgress >= 1
+                      ? "Bytt pott etter denne chargen"
+                      : "Bytt foring etter denne chargen"
+                    : f0.arc && f.spareProgress >= 1
+                      ? `Bytt pott nå (${swapHours} timer)`
+                      : `${f0.arc ? "Mur om i ovnen" : "Bytt foring nå"} (${fmtKr(f0.relineCost)})`}
             </button>
           </div>
         );
@@ -95,8 +126,8 @@ export function Maintenance({
             </select>
           </label>
           <p className="g-muted">
-            Med dagens drift ({stats.hours > 0 && stats.hours < 24 ? `${stats.hours} timer i døgnet` : "døgnet rundt"}) er foringen 85 %
-            slitt etter ca. {fmtNum(life, 0)} døgn.
+            Med dagens drift ({stats.hours > 0 && stats.hours < 24 ? `${stats.hours} timer i døgnet` : "døgnet rundt"})
+            er foringen 85 % slitt etter ca. {fmtNum(life, 0)} døgn.
             {plan !== null && wearAfter(plan) > 0.85 && " Planen er lengre enn foringen holder – velg færre døgn."}
             {canPlan && ` Planen bytter uansett hvis foringen blir ${fmtPct(PLAN_SAFETY_WEAR)} slitt før dagen.`}
           </p>

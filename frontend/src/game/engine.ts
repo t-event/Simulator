@@ -42,6 +42,8 @@ import {
   isOpen,
   nightExtra,
   PEAK_RATE_PER_MW,
+  potRebuildPerDay,
+  potSwapHours,
   POWER_BINDING_DAYS,
   productPrice,
   rollingActive,
@@ -104,6 +106,7 @@ export function newFurnaceUnit(): FurnaceUnit {
     heatsOnLining: 0,
     lastRelineDay: 1,
     relineRequested: false,
+    spareProgress: 1,
     waitReason: null,
   };
 }
@@ -728,6 +731,25 @@ export function startReline(
   // Omforing kan tas på kassekreditten: en ovn som står, tjener ingen penger
   if (g.cash - cost < -creditLimit(g)) return { ok: false, message: "Du har ikke råd til ny foring." };
   addCost(g, "vedlikehold", cost);
+  const who = why === "plan" ? " etter vedlikeholdsplanen" : why === "reparatør" ? " av reparatøren" : "";
+  // Lysbueovn med ferdig reservepott: bytt pott på noen timer, og la murerne mure opp den slitte (B-030)
+  if (stats.furnace.arc && f.spareProgress >= 1) {
+    const swap = potSwapHours(g) * stats.repairFactor;
+    f.wear = 0;
+    f.heatsOnLining = 0;
+    f.lastRelineDay = day(g);
+    f.spareProgress = 0;
+    f.downUntilMin = g.minute + swap * 60;
+    f.downReason = "Planlagt stans: bytter pott";
+    countEvent(g, "omforinger");
+    log(
+      g,
+      `Planlagt stans: ovn ${index + 1} får ny pott${who} (${swap.toFixed(0)} timer). Den slitte potta går til murerne (${fmtKr(cost)} i ildfast stein).`,
+      "info",
+    );
+    unlock(g, "ildfast");
+    return { ok: true, message: "Pottebytte startet." };
+  }
   const hours = stats.furnace.relineHours * stats.repairFactor;
   f.wear = 0;
   f.heatsOnLining = 0;
@@ -735,8 +757,8 @@ export function startReline(
   f.downUntilMin = g.minute + hours * 60;
   f.downReason = "Planlagt stans: ny foring";
   countEvent(g, "omforinger");
-  const who = why === "plan" ? " etter vedlikeholdsplanen" : why === "reparatør" ? " av reparatøren" : "";
-  log(g, `Planlagt stans: ovn ${index + 1} fores om${who} (${fmtKr(cost)}, ${hours.toFixed(0)} timer).`, "info");
+  const inPlace = stats.furnace.arc ? " Reservepotta var ikke klar, så foringen mures om inne i ovnen." : "";
+  log(g, `Planlagt stans: ovn ${index + 1} fores om${who} (${fmtKr(cost)}, ${hours.toFixed(0)} timer).${inPlace}`, "info");
   unlock(g, "ildfast");
   return { ok: true, message: "Omforing startet." };
 }
@@ -1256,6 +1278,7 @@ export function makeCandidate(g: GameState, role?: RoleId): Worker {
     "valse",
     "planlegger",
     "klasser",
+    "murer",
   ];
   const r =
     role ??
@@ -1265,7 +1288,8 @@ export function makeCandidate(g: GameState, role?: RoleId): Worker {
         .filter((x) => x !== "valse" || g.stage >= 3)
         .filter((x) => x !== "lab" || g.stage >= 2)
         .filter((x) => x !== "planlegger" || g.stage >= 2)
-        .filter((x) => x !== "klasser" || g.stage >= 1),
+        .filter((x) => x !== "klasser" || g.stage >= 1)
+        .filter((x) => x !== "murer" || g.stage >= 3),
     );
   const skill = Math.min(5, Math.max(1, Math.round((uniform(g, 0.6, 3.6) + (g.stage >= 3 ? 0.5 : 0)) * 10) / 10));
   return {
@@ -1292,6 +1316,18 @@ function refreshCandidates(g: GameState): void {
 // ------------------------------------------------------------------ //
 // Døgn og time
 // ------------------------------------------------------------------ //
+/** Murerne murer opp reservepottene til lysbueovnene (B-030) */
+function updatePots(g: GameState, stats: PlantStats, dt: number): void {
+  if (!stats.furnace.arc) return;
+  const perDay = potRebuildPerDay(g);
+  if (perDay <= 0) return;
+  g.furnaces.forEach((f, i) => {
+    if (f.spareProgress >= 1) return;
+    f.spareProgress = Math.min(1, f.spareProgress + (perDay * dt) / MIN_PER_DAY);
+    if (f.spareProgress >= 1) log(g, `Murerne er ferdige: reservepotta til ovn ${i + 1} er klar.`, "good");
+  });
+}
+
 /** Trivselen driver mot det normale, nattarbeid tærer, og misfornøyde folk slutter (B-026) */
 function updateMorale(g: GameState, stats: PlantStats): void {
   if (!g.workers.length) return;
@@ -1509,6 +1545,7 @@ function step(g: GameState, dt: number): void {
   g.minute += dt;
   let stats = computePlantStats(g);
   updateFurnaces(g, stats);
+  updatePots(g, stats, dt);
   // Effekttoppen: hvor mange ovner som smelter samtidig
   const mw = g.furnaces.filter((f) => f.heat).length * stats.furnaceMW;
   if (mw > (g.today.peakMW ?? 0)) g.today.peakMW = mw;
