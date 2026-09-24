@@ -39,7 +39,12 @@ en uten kunnskap klarer å kjøre manuelt.
 - `validate.ts`, typesjekk, lint og bygg rene.
 
 **Gjenstår / ideer:** se veikartet i `docs/DESIGN.md` (kundevurdering 1–10, markedstrender,
-opplæring av ansatte, prestasjoner, lyd). PR til `main` er ikke laget – brukeren må be om det.
+opplæring av ansatte, prestasjoner, lyd).
+
+**Avslutning:** PR #3 til `main` opprettet etter brukerens ønske (PR #2 var allerede merget, så
+de nye commitene ble flyttet over på nyeste `main` først). Lokale kopier av kildematerialet fra
+tidligere økter er slettet etter brukerens ønske – det finnes ingen kopier igjen i miljøet, og alt
+spillet trenger ligger som generiske tall i koden.
 
 ---
 
