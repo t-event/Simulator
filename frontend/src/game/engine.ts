@@ -427,9 +427,28 @@ interface Mix {
 
 /** Hva spilleren kan gjøre når ovnen står uten skrap: hvorfor planleggeren ikke har kjøpt, eller at noen må kjøpe (B-048) */
 export function scrapStopHelp(g: GameState): string {
-  if (!g.settings.autoBuy || !plannerOrders(g)) return "Kjøp skrap under Marked, eller ansett en planlegger som kjøper inn.";
+  const short = scrapShort(g);
+  const what = short.length
+    ? `Resepten trenger ${short.map((id) => SCRAP_TYPES[id].name.toLowerCase()).join(" og ")}.`
+    : "";
+  if (!g.settings.autoBuy || !plannerOrders(g))
+    return `${what} Kjøp det under Marked, eller ansett en planlegger som kjøper inn.`.trim();
   if (g.autoBuyNote) return `Planleggeren får ikke kjøpt ${g.autoBuyNote}.`;
-  return "Planleggeren bestiller mer skrap.";
+  return `${what} Planleggeren bestiller mer.`.trim();
+}
+
+/**
+ * Skraptypene ovnene mangler for neste charge: det resepten (for hver ovns kvalitet) skal ha, mer enn det som
+ * ligger på lageret (B-049).
+ */
+export function scrapShort(g: GameState, stats = computePlantStats(g)): ScrapId[] {
+  const need = Object.fromEntries(SCRAP_IDS.map((id) => [id, 0])) as Record<ScrapId, number>;
+  for (let i = 0; i < g.furnaces.length; i++) {
+    const r = gradeRecipe(g, furnaceGrade(g, i));
+    const sum = SCRAP_IDS.reduce((a, id) => a + r[id], 0) || 1;
+    for (const id of SCRAP_IDS) need[id] += (stats.sizeT * r[id]) / sum;
+  }
+  return SCRAP_IDS.filter((id) => need[id] > 1e-6 && g.scrap[id].t < need[id]);
 }
 
 /** Tar skrap fra lageret etter resepten. Mangler en type, fylles det opp med resten. */

@@ -5,6 +5,17 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 26 – 2026-09-24: hvilket skrap ovnen venter på
+
+**Brukeren sendte:** Skjermbilder av ovn 1 som venter på skrap til lavkarbon (fra før B-048 var publisert).
+
+**Gjort (B-049):** Varsel og tips sier hvilke skraptyper som mangler; Marked merker dem.
+
+**Testet:** tsc, lint, balanse (8 / 24 / 63 / 135). I Node: med planlegger ingen stopp på 48 t; uten planlegger
+sier varselet «Resepten trenger rent nyskrap». Playwright (iPhone 13): rent nyskrap merket under Marked, 390 px.
+
+---
+
 ## Økt 25 – 2026-09-24: Lager-knappen og skrap til lavkarbon
 
 **Brukeren meldte:** Lager-knappen på Verket går til Forespørsler; ovnen stopper fordi lavkarbon-skrapet ikke
