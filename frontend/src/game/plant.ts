@@ -266,7 +266,9 @@ export function computePlantStats(g: GameState): PlantStats {
   const floor = g.workers.filter((w) => w.role !== "salg" && w.role !== "vedlikehold" && w.role !== "planlegger");
   const skills = floor.map((w) => w.skill);
   if (staff.ownerWorks) skills.push(g.ownerSkill, g.ownerSkill);
-  const crewSkill = skills.length ? skills.reduce((a, b) => a + b, 0) / skills.length : g.ownerSkill;
+  // Trivselen gjør de ansatte bedre eller dårligere enn ferdigheten tilsier (B-026)
+  const raw = skills.length ? skills.reduce((a, b) => a + b, 0) / skills.length : g.ownerSkill;
+  const crewSkill = Math.min(5, raw * (g.workers.length ? moraleFactor(g) : 1));
   const skillFactor = 1.12 - 0.04 * crewSkill;
 
   let cycleMin = furnace.cycleMin * skillFactor;
@@ -406,6 +408,11 @@ export function productPrice(g: GameState, product: ProductId, grade: GradeId | 
 
 export function unlockedAddons(g: GameState): Addon[] {
   return ADDONS.filter((a) => a.stage <= g.stage);
+}
+
+/** Hvor mye trivselen løfter (over 1) eller trekker ned (under 1) de ansattes innsats */
+export function moraleFactor(g: GameState): number {
+  return 0.85 + 0.3 * ((g.morale ?? 60) / 100);
 }
 
 export function hasPlanner(g: GameState): boolean {

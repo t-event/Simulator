@@ -14,7 +14,7 @@ import { Handbook } from "./Handbook";
 import { Market } from "./Market";
 import { Overview } from "./Overview";
 import { People } from "./People";
-import { ResearchPage } from "./ResearchPage";
+import { BackupInput, ResearchPage } from "./ResearchPage";
 import { Sales } from "./Sales";
 import { VIEWS, viewUnlocked, type View } from "./views";
 
@@ -28,7 +28,17 @@ const SPEED_OPTIONS = [
   { speed: 10, label: "10×", title: "Veldig rask" },
 ];
 
-function Intro({ hasSave, onNew, onContinue }: { hasSave: boolean; onNew: () => void; onContinue: () => void }) {
+function Intro({
+  hasSave,
+  onNew,
+  onContinue,
+  onLoadBackup,
+}: {
+  hasSave: boolean;
+  onNew: () => void;
+  onContinue: () => void;
+  onLoadBackup: (text: string) => boolean;
+}) {
   return (
     <div className="g-intro">
       <div className="g-intro-card">
@@ -56,6 +66,9 @@ function Intro({ hasSave, onNew, onContinue }: { hasSave: boolean; onNew: () => 
           <button className={hasSave ? "" : "g-primary"} onClick={onNew}>
             {hasSave ? "Nytt spill" : "Start"}
           </button>
+        </div>
+        <div className="g-intro-backup">
+          <BackupInput onLoad={onLoadBackup} />
         </div>
       </div>
     </div>
@@ -221,7 +234,10 @@ export function GameApp() {
     window.scrollTo({ top: 0 });
   }, [view]);
 
-  if (!g) return <Intro hasSave={api.hasSave} onNew={api.startNew} onContinue={api.continueSaved} />;
+  if (!g)
+    return (
+      <Intro hasSave={api.hasSave} onNew={api.startNew} onContinue={api.continueSaved} onLoadBackup={api.loadBackup} />
+    );
 
   const stats = computePlantStats(g);
   const shown: View = viewUnlocked(g, view) ? view : "verket";
@@ -282,7 +298,7 @@ export function GameApp() {
           {shown === "marked" && <Market g={g} stats={stats} act={act} />}
           {shown === "salg" && <Sales g={g} stats={stats} act={act} />}
           {shown === "folk" && <People g={g} stats={stats} act={act} />}
-          {shown === "forskning" && <ResearchPage g={g} stats={stats} act={act} onQuit={api.quit} openBook={openBook} />}
+          {shown === "forskning" && <ResearchPage g={g} stats={stats} act={act} onQuit={api.quit} openBook={openBook} onLoadBackup={api.loadBackup} />}
         </main>
       </div>
 

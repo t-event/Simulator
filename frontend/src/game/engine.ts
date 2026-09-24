@@ -39,6 +39,7 @@ import {
   has,
   hasPlanner,
   isOpen,
+  nightExtra,
   PEAK_RATE_PER_MW,
   POWER_BINDING_DAYS,
   productPrice,
@@ -196,6 +197,8 @@ export function newGame(seed = Date.now()): GameState {
     repLog: [],
     advisorSeen: {},
     specialists: {},
+    morale: 70,
+    lastBonusDay: -99,
     knowledge: [],
     unreadKnowledge: 0,
   };
@@ -252,6 +255,12 @@ function repLoss(g: GameState, amount: number, cause: RepCause): void {
 function chargeEnergy(g: GameState, kwh: number): void {
   addCost(g, "energi", kwh * energyPrice(g));
   if (furnaceType(g).fuel === "strøm") g.today.kwh = (g.today.kwh ?? 0) + kwh;
+}
+
+/** Endrer trivselen blant de ansatte (0–100) */
+export function adjustMorale(g: GameState, delta: number): void {
+  if (!g.workers.length) return;
+  g.morale = Math.max(0, Math.min(100, g.morale + delta));
 }
 
 export function awardPoints(g: GameState, points: number): void {
@@ -646,6 +655,7 @@ function finishHeat(g: GameState, index: number, stats: PlantStats): void {
     const hours = stats.furnace.relineHours * 3 * stats.repairFactor;
     addCost(g, "vedlikehold", cost);
     repLoss(g, 5, "havari");
+    adjustMorale(g, -4);
     f.wear = 0;
     f.heatsOnLining = 0;
     f.lastRelineDay = day(g);
@@ -669,7 +679,8 @@ function finishHeat(g: GameState, index: number, stats: PlantStats): void {
   }
 
   // Mange charger i et stort verk lærer deg mindre hver for seg
-  awardPoints(g, g.stage <= 1 ? 0.5 : g.stage === 2 ? 0.3 : 0.2);
+  // Fagpoeng per charge: færre jo flere charger verket kjører (B-026)
+  awardPoints(g, [0.5, 0.2, 0.25, 0.2, 0.15][g.stage] ?? 0.15);
   f.holding = {
     t: heat.liquidT,
     grade: heat.grade,
@@ -1067,6 +1078,7 @@ function deliverContracts(g: GameState): void {
       adjustReputation(g, gain);
       g.totals.contractsDone += 1;
       countEvent(g, "leveranser");
+      adjustMorale(g, 0.5);
       awardPoints(g, 1 + g.stage);
       log(g, `Kontrakten med ${c.customer} er levert. Omdømme +${gain.toFixed(1)}.`, "good");
       if (g.totals.contractsDone === 1) unlock(g, "omdomme");
@@ -1082,6 +1094,7 @@ function processComplaints(g: GameState): void {
   for (const c of due) {
     addCost(g, "bot", c.refund);
     repLoss(g, c.repLoss, "reklamasjon");
+    adjustMorale(g, -1);
     g.totals.complaints += 1;
     awardPoints(g, 2);
     log(
@@ -1253,6 +1266,24 @@ function refreshCandidates(g: GameState): void {
 // ------------------------------------------------------------------ //
 // Døgn og time
 // ------------------------------------------------------------------ //
+/** Trivselen driver mot det normale, nattarbeid tærer, og misfornøyde folk slutter (B-026) */
+function updateMorale(g: GameState, stats: PlantStats): void {
+  if (!g.workers.length) return;
+  g.morale += (60 - g.morale) * 0.05;
+  if (nightExtra(g, stats.hours) > 0) adjustMorale(g, -1.5);
+  if (g.morale < 35) {
+    const quitters = g.workers.filter(() => chance(g, ((35 - g.morale) / 35) * 0.04));
+    if (quitters.length) {
+      g.workers = g.workers.filter((w) => !quitters.includes(w));
+      log(
+        g,
+        `${quitters.map((w) => w.name).join(", ")} sa opp. Trivselen er lav – gi bonus, send folk på kurs eller unngå nattskift.`,
+        "bad",
+      );
+    }
+  }
+}
+
 function onHour(g: GameState, stats: PlantStats): void {
   // Kapitlene forskningen krever, kommer i fagboka når forskningen blir synlig (B-025)
   for (const r of RESEARCH) if (r.reads && r.stage <= g.stage) unlock(g, r.reads);
@@ -1401,10 +1432,11 @@ function onDay(g: GameState, stats: PlantStats): void {
 
   // Folk blir flinkere av å jobbe
   if (stats.hours > 0) {
-    const growth = hasResearch(g, "opplaering") ? 0.04 : 0.025;
+    const growth = (hasResearch(g, "opplaering") ? 0.04 : 0.025) * (0.5 + g.morale / 100);
     for (const w of g.workers) w.skill = Math.min(5, w.skill + growth);
     if (stats.ownerWorks) g.ownerSkill = Math.min(4.5, g.ownerSkill + 0.04);
   }
+  updateMorale(g, stats);
   refreshCandidates(g);
   if (!g.pendingDecision) maybeAdvisor(g);
   maybeCreateDecision(g);

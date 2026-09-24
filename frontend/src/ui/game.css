@@ -1528,3 +1528,34 @@ button {
   padding: 8px 10px;
   align-items: stretch;
 }
+
+/* Sikkerhetskopi (B-026) */
+.g-file-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: #2a3546;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.g-file-btn input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.g-file-btn:focus-within {
+  outline: 2px solid var(--accent);
+}
+
+.g-intro-backup {
+  margin-top: 12px;
+}

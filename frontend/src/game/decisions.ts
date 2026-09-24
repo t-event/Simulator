@@ -6,7 +6,7 @@
  * stålverk drives.
  */
 import { SCRAP_TYPES, STAGES } from "./data";
-import { acceptContract, addCost, addIncome, addScrapParti, adjustReputation, fmtKr, fmtT, log, makeCandidate, scrapPrice, unlock } from "./engine";
+import { acceptContract, addCost, addIncome, addScrapParti, adjustMorale, adjustReputation, fmtKr, fmtT, log, makeCandidate, scrapPrice, unlock } from "./engine";
 import { computePlantStats, day, productPrice } from "./plant";
 import { chance, pick, uniform } from "./random";
 import { knowledgeCard } from "./knowledge";
@@ -345,16 +345,20 @@ export function resolveDecision(g: GameState, option: number): void {
       if (yes) {
         for (const w of g.workers) w.salary = Math.round(w.salary * 1.04);
         for (const w of g.workers) w.skill = Math.min(5, w.skill + 0.1);
+        adjustMorale(g, 10);
         log(g, "De ansatte fikk lønnstillegg og er fornøyde.", "good");
       } else if (option === 1 && chance(g, 0.6)) {
         for (const w of g.workers) w.salary = Math.round(w.salary * 1.02);
+        adjustMorale(g, 3);
         log(g, "De ansatte godtok mottilbudet på 2 %. Enighet uten bråk.", "good");
       } else if (option === 1) {
         for (const w of g.workers) w.salary = Math.round(w.salary * 1.03);
         const quitter = pick(g, g.workers);
         g.workers = g.workers.filter((w) => w !== quitter);
+        adjustMorale(g, -5);
         log(g, `Mottilbudet ble for lavt. Dere møttes på 3 %, men ${quitter.name} sa opp i protest.`, "bad");
       } else {
+        adjustMorale(g, -15);
         const quitters = g.workers.filter(() => chance(g, 0.12)).slice(0, 3);
         g.workers = g.workers.filter((w) => !quitters.includes(w));
         log(
@@ -399,6 +403,7 @@ export function resolveDecision(g: GameState, option: number): void {
       addCost(g, "annet", n("cost"));
       for (const w of g.workers)
         if (w.role === "ovn" || w.role === "stoper" || w.role === "allround") w.skill = Math.min(5, w.skill + 0.4);
+      adjustMorale(g, 5);
       log(g, "Operatørene er tilbake fra kurs og har lært mye.", "good");
       return;
     case "sykdom":
@@ -431,10 +436,12 @@ export function resolveDecision(g: GameState, option: number): void {
     case "nestenulykke":
       if (yes) {
         addCost(g, "annet", n("cost"));
+        adjustMorale(g, 5);
         log(g, "Nytt verneutstyr og sprutskjermer er på plass.", "good");
       } else if (chance(g, 0.35) && g.workers.length) {
         const hurt = pick(g, g.workers);
         g.workers = g.workers.filter((w) => w !== hurt);
+        adjustMorale(g, -15);
         addCost(g, "bot", 50_000 * (1 + g.stage));
         adjustReputation(g, -4);
         log(g, `${hurt.name} ble skadet ved tappingen og er sykmeldt på ubestemt tid. Bot fra tilsynet og omdømme −4.`, "bad");
