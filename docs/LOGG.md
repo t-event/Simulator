@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 24 – 2026-09-24: Avløser og ryddigere Folk-side
+
+**Brukeren ba om:** Allroundere skal ikke kunne være reparatør, skrapklasser eller murer; nytt navn «Avløser»;
+Folk-siden mer intuitiv.
+
+**Gjort (B-047):** Stedfortreder-logikken fjernet, rollen heter Avløser, Folk har fire underfaner.
+
+**Testet:** tsc, lint, balanse (8 / 24 / 63 / 135). Playwright (iPhone 13): alle fire faner, 390 px bredt og
+høyst ca. 860 px høyt, ingen feil.
+
+---
+
 ## Økt 23 – 2026-09-24: sekvenser og overgangsemner i strengstøpingen
 
 **Brukeren påpekte:** Med to kvaliteter må støpingen vente med den ene kvaliteten, ellers blir det

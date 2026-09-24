@@ -156,7 +156,7 @@ const MORE_MAKERS: Record<string, Maker> = {
     return {
       id: "sykdom",
       title: "Influensa",
-      text: `Influensaen har kommet til verket: ${n} av ${g.workers.length} ansatte er syke de neste ${days} døgnene. Allroundere kan dekke noen plasser, men neppe alle.`,
+      text: `Influensaen har kommet til verket: ${n} av ${g.workers.length} ansatte er syke de neste ${days} døgnene. Avløsere kan dekke noen plasser, men neppe alle.`,
       options: [
         { label: `Lei inn vikarer (${fmtKr(cost)})`, hint: "Verket går som normalt." },
         {

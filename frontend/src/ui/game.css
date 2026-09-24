@@ -1904,3 +1904,13 @@ button {
 .g-details[open] summary {
   margin-bottom: 4px;
 }
+
+/* Folk: hovedlinja om skiftene, og fanen som trenger oppmerksomhet (B-047) */
+.g-big-status {
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+
+.g-subtabs button.is-alert:not(.is-active) {
+  color: var(--warning, #f5a623);
+}

@@ -70,7 +70,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
     title: "Folk og skift",
     paragraphs: [
       "Hvert anlegg trenger et fast mannskap per skift. Med ett skift går verket 8 timer i døgnet; med tre skift går det døgnet rundt.",
-      "Erfarne folk jobber raskere og gjør færre feil, og alle blir flinkere av å jobbe. Allroundere kan fylle hvilken plass som helst.",
+      "Erfarne folk jobber raskere og gjør færre feil, og alle blir flinkere av å jobbe. Avløsere kan ta hvilken plass som helst på skiftet.",
       "Lønn betales hver dag, også når verket står. Et ekstra skift lønner seg bare hvis du får solgt det du lager.",
     ],
   },

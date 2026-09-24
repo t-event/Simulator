@@ -694,10 +694,11 @@ export interface Role {
 export const ROLES: Record<RoleId, Role> = {
   allround: {
     id: "allround",
-    name: "Allrounder",
-    plural: "Allroundere",
+    name: "Avløser",
+    plural: "Avløsere",
     salary: 1500,
-    description: "Kan fylle en plass hvor som helst, men blir ikke like god som en spesialist.",
+    description:
+      "Tar plassen til den som mangler på skiftet – ved ovnen, støpingen eller kranen – også når noen er syke eller har ferie. Blir ikke like god som en spesialist.",
   },
   ovn: {
     id: "ovn",
