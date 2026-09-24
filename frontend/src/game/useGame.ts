@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { GAME_MIN_PER_REAL_S } from "./data";
 import { advance, newGame, type PurchaseResult } from "./engine";
+import { IDLE_NIGHT_SPEED, idleOutsideHours } from "./plant";
 import { maxSpeed } from "./research";
 import { advanceTutorial } from "./tutorial";
 import { clearSave, loadGame, parseSave, saveGame } from "./save";
@@ -144,7 +145,9 @@ export function useGame(): GameApi {
       last = now;
       const wasRunning = g.speed > 0;
       if (g.speed > 0 && !g.pendingManual && !g.gameOver) {
-        advance(g, elapsed * g.speed * GAME_MIN_PER_REAL_S);
+        // Om natta, når verket står og ingenting skjer, går tida fortere (B-033)
+        const boost = idleOutsideHours(g) ? IDLE_NIGHT_SPEED : 1;
+        advance(g, elapsed * g.speed * boost * GAME_MIN_PER_REAL_S);
         advanceTutorial(g);
         flushLog();
       }

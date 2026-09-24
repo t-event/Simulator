@@ -1676,3 +1676,9 @@ button {
   min-height: 40px;
   padding: 6px 14px;
 }
+
+.g-ff {
+  color: var(--accent);
+  font-style: normal;
+  font-weight: 600;
+}

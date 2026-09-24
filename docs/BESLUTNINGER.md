@@ -412,3 +412,25 @@ Status: gjelder (endrer «Hopp over» i B-027)
 Brukeren trykket «Hopp over» og ventet å komme til neste steg, men hele veiledningen forsvant.
 Beslutning: Veiledningskortet har «Hopp over steget» (neste steg) på steg som ellers venter på at
 spilleren gjør noe, og lenken «Avslutt veiledningen» øverst for å fjerne hele veiledningen.
+
+## B-033 Raskere start, engangstips, murere på dagtid, 1× etter kort, konkurs uten råd til foring (2026-09-24)
+Status: gjelder
+Brukeren: starten tar for lang tid; murerne skal gå dagtid; varsel første gang verket stopper om kvelden,
+tips om fart etter «Faste rutiner», varsel om foring i starten, bedre varsel om tomt skraplager og
+kreditt, 1× etter popup (trykket feil på 10×), konkurs hvis man ikke har råd til omforing med fullt lån.
+Beslutning:
+- **Små første ordre:** de to første kontraktene i garasjen er 0,4–0,8 døgns produksjon (ellers 1,5–4).
+- **Spoling om natta:** når verket står utenfor arbeidstida og ingenting er i gang (ingen charge, ingen
+  støping, ikke mangel på folk), går tida 6 ganger så fort. Toppfeltet viser «⏩ natt». Kan slås av under
+  Forskning → Spillet (`skipIdleNights`). En natt i garasjen tar ca. 11 sekunder i stedet for ca. ett minutt.
+- **Engangstips** (`game/tips.ts`), vist som et kort med «Skjønner»: arbeidsdagen er over (og hvordan man
+  utvider med folk og skift), farten kan skrus opp (etter «Faste rutiner»), foringen slites (ved 55 %),
+  skraplageret er tomt, kassa er tom (kassekreditt). Gamle lagringer fra verkstedet og oppover har sett
+  tipsene om foring og skrap.
+- **Varsler** (rød melding) når ovnen blir stående uten skrap, og når kassa går under null.
+- **Etter et kort går spillet på 1×**, og knappene på kortet virker først etter 0,8 sekunder.
+- **Murere** jobber dagtid 07–15; oppmuringen er fortsatt ca. fire døgn med to murere per potte.
+  Nattillegg gjelder bare dem som går skift (ikke murere, selgere, planleggere osv.).
+- **Konkurs** når alle ovner står fordi det ikke er råd til omforing, og lånet er fullt, i tre døgn.
+  Sluttskjermen sier hvorfor spillet er over.
+- Balanse: 11 / 33 / 77 / 153.

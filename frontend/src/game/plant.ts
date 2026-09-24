@@ -387,7 +387,10 @@ export function computePlantStats(g: GameState): PlantStats {
   const yardUsed = Object.values(g.scrap).reduce((a, s) => a + s.t, 0);
   const storeUsed = g.lots.reduce((a, l) => a + l.t, 0);
 
-  const salaryPerDay = g.workers.reduce((a, w) => a + w.salary, 0) * (1 + nightExtra(g, staff.hours));
+  // Nattillegg bare for dem som går skift; dagarbeidere (murer, selger, planlegger …) jobber ikke natt
+  const shiftRoles = new Set<RoleId>([...CREW_ROLES, "allround"]);
+  const extra = nightExtra(g, staff.hours);
+  const salaryPerDay = g.workers.reduce((a, w) => a + w.salary * (shiftRoles.has(w.role) ? 1 + extra : 1), 0);
 
   const products: ProductId[] = [casting.product];
   if (rollingActive(g)) products.push("armering");
@@ -504,6 +507,29 @@ export function liningDays(g: GameState, stats: PlantStats): number {
 /** Oppmuring av en pott tar fire døgn med to murere; én murer bruker dobbelt så lang tid (B-030) */
 export const POT_REBUILD_DAYS = 4;
 export const MASONS_PER_POT = 2;
+
+/** Hvor mye fortere tida går når verket står om natta og ingenting skjer (B-033) */
+export const IDLE_NIGHT_SPEED = 6;
+
+/**
+ * Verket står utenfor arbeidstida og har ingenting i gang – da kan spillet spole fram.
+ * Ikke når verket står fordi det mangler folk: da må spilleren gjøre noe.
+ */
+export function idleOutsideHours(g: GameState, stats = computePlantStats(g)): boolean {
+  if (!g.settings.skipIdleNights || stats.hours <= 0 || stats.hours >= 24) return false;
+  if (isOpen(g, stats.hours) || g.pendingManual || g.pendingDecision) return false;
+  if (g.furnaces.some((f) => f.heat || f.holding) || g.castQueue.length) return false;
+  return true;
+}
+
+/** Murerne jobber dagtid, ikke skift (B-033) */
+export const MASON_START_HOUR = 7;
+export const MASON_HOURS = 8;
+
+export function masonsAtWork(g: GameState, minute = g.minute): boolean {
+  const h = hourOfDay(g, minute);
+  return h >= MASON_START_HOUR && h < MASON_START_HOUR + MASON_HOURS;
+}
 
 /** Hvor mye av en reservepott som mures opp per døgn, når murerne deles på pottene som trenger det */
 export function potRebuildPerDay(g: GameState): number {

@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import "./game.css";
 import { STAGES, WIN_CASH } from "../game/data";
 import { completeManual } from "../game/engine";
-import { computePlantStats, day, energyPrice } from "../game/plant";
+import { computePlantStats, day, energyPrice, idleOutsideHours } from "../game/plant";
 import { useGame, type GameApi } from "../game/useGame";
 import { resolveDecision } from "../game/decisions";
 import { maxSpeed, researchForSpeed, researchOptions } from "../game/research";
@@ -86,7 +86,7 @@ function EndScreen({ g, onRestart, onContinue }: { g: GameState; onRestart: () =
         <p>
           {won
             ? `Du startet i en garasje og har bygget et stålverk med ${g.workers.length} ansatte og over ${fmtKr(WIN_CASH)} i egenkapital.`
-            : "Banken har tatt over verket. Neste gang: hold av penger til skrap og lønn når du investerer."}
+            : `Banken har tatt over verket. ${g.gameOverReason ?? ""} Neste gang: hold av penger til skrap, lønn og vedlikehold når du investerer.`}
         </p>
         <ul>
           <li>Dager: {day(g)}</li>
@@ -112,15 +112,24 @@ function EndScreen({ g, onRestart, onContinue }: { g: GameState; onRestart: () =
 
 function DecisionCard({ g, onChoose }: { g: GameState; onChoose: (i: number) => void }) {
   const d = g.pendingDecision!;
+  // Knappene virker først etter et øyeblikk, så et trykk ment for noe annet ikke velger for deg (B-033)
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setReady(true), 800);
+    return () => clearTimeout(t);
+  }, []);
+  const tip = d.id.startsWith("tips-");
   return (
     <div className="g-modal" role="dialog" aria-modal="true" aria-labelledby="decision-title">
       <div className="g-modal-card g-decision">
-        <span className="g-decision-kicker">Dag {day(g)} · Et valg</span>
+        <span className="g-decision-kicker">
+          Dag {day(g)} · {tip ? "Tips" : "Et valg"}
+        </span>
         <h2 id="decision-title">{d.title}</h2>
         <p>{d.text}</p>
         <div className="g-decision-options">
           {d.options.map((o, i) => (
-            <button key={o.label} className={i === 0 ? "g-primary" : ""} onClick={() => onChoose(i)}>
+            <button key={o.label} className={i === 0 ? "g-primary" : ""} disabled={!ready} onClick={() => onChoose(i)}>
               <strong>{o.label}</strong>
               {o.hint && <span>{o.hint}</span>}
             </button>
@@ -206,6 +215,12 @@ function TopBar({ g, api, onBook }: { g: GameState; api: GameApi; onBook: () => 
           <strong>{STAGES[g.stage].name}</strong>
           <span>
             Dag {day(g)} · {fmtClock(g.minute)}
+            {g.speed > 0 && idleOutsideHours(g, stats) && (
+              <em className="g-ff" title="Verket står om natta – tida går fortere til arbeidsdagen starter">
+                {" "}
+                ⏩ natt
+              </em>
+            )}
           </span>
         </div>
         <div className="g-speed" role="group" aria-label="Fart">
@@ -354,6 +369,7 @@ export function GameApp() {
 
       {g.pendingDecision && !g.pendingManual && (
         <DecisionCard
+          key={`${g.pendingDecision.id}-${g.minute}`}
           g={g}
           onChoose={(i) => {
             const chapter = g.pendingDecision?.options[i]?.chapter;
