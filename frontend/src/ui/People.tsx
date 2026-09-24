@@ -11,7 +11,7 @@ import {
   sendOnCourse,
 } from "../game/actions";
 import { CREW_ROLES, ROLE_IDS, ROLES, STAGES } from "../game/data";
-import { day, moraleFactor, nightExtra, type PlantStats } from "../game/plant";
+import { crewCoverage, day, moraleFactor, nightExtra, type PlantStats } from "../game/plant";
 import type { GameState, RoleId, Worker } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Bar, Card, Stat } from "./common";
@@ -88,7 +88,13 @@ export function People({ g, stats, act }: Props) {
     RoleId,
     number
   >;
-  const neededRoles = CREW_ROLES.filter((r) => (stats.crew[r] ?? 0) > 0);
+  // Tabellen viser neste skift hvis verket ikke går alle tre, ellers de tre som går
+  const planShifts = Math.min(3, stats.shifts + (stats.shifts < 3 ? 1 : 0));
+  const coverage = crewCoverage(g, stats.crew, planShifts);
+  const extra = ROLE_IDS.filter((r) => !CREW_ROLES.includes(r) && r !== "allround" && counts[r] > 0);
+  const surplus = coverage.rows
+    .map((row) => ({ role: row.role, extra: counts[row.role] - row.own }))
+    .filter((r) => r.extra > 0);
 
   return (
     <div className="g-grid">
@@ -106,32 +112,45 @@ export function People({ g, stats, act }: Props) {
               timer). Fra støperiet og oppover er du daglig leder, og da må alle plassene fylles av ansatte.
             </p>
           )}
-          <table className="g-table">
+          <table className="g-table g-crew-table">
             <thead>
               <tr>
                 <th>Plass</th>
-                <th className="num">Per skift</th>
-                <th className="num">Ansatt</th>
-                <th className="num">Mangler for neste skift</th>
+                <th className="num">
+                  Trengs
+                  <br />
+                  <span className="g-muted">{planShifts} skift</span>
+                </th>
+                <th className="num">Fylt av</th>
+                <th className="num">Mangler</th>
               </tr>
             </thead>
             <tbody>
-              {neededRoles.map((r) => (
-                <tr key={r}>
-                  <td>{ROLES[r].plural}</td>
-                  <td className="num">{stats.crew[r]}</td>
-                  <td className="num">{counts[r]}</td>
-                  <td className={`num${stats.missing[r] ? " bad" : ""}`}>{stats.missing[r] ?? "–"}</td>
+              {coverage.rows.map((row) => (
+                <tr key={row.role}>
+                  <td>{ROLES[row.role].plural}</td>
+                  <td className="num">
+                    {row.need}
+                    <span className="g-muted g-sub">{row.perShift} per skift</span>
+                  </td>
+                  <td className="num">
+                    {row.own} {row.own === 1 ? "egen" : "egne"}
+                    {row.filled > 0 && <span className="g-muted g-sub">+ {row.filled} {row.filled === 1 ? "allrounder" : "allroundere"}</span>}
+                  </td>
+                  <td className={`num${row.missing ? " bad" : ""}`}>{row.missing || "–"}</td>
                 </tr>
               ))}
-              <tr>
-                <td>{ROLES.allround.plural}</td>
-                <td className="num">–</td>
-                <td className="num">{counts.allround}</td>
-                <td className="num g-muted">fyller hull</td>
-              </tr>
             </tbody>
           </table>
+          <p className="g-muted">
+            {coverage.wildcards > 0
+              ? `Allroundere${coverage.ownerSlots ? " (og deg selv på dagskiftet)" : ""} fyller plassene det mangler folk på: ${coverage.wildUsed} av ${coverage.wildcards} er i bruk.`
+              : "Allroundere kan fylle plasser det mangler folk på."}
+            {extra.length > 0 &&
+              ` Ikke på skift: ${extra.map((r) => `${counts[r]} ${(counts[r] === 1 ? ROLES[r].name : ROLES[r].plural).toLowerCase()}`).join(", ")}.`}
+            {surplus.length > 0 &&
+              ` Flere enn skiftene trenger: ${surplus.map((r) => `${r.extra} ${ROLES[r.role].plural.toLowerCase()}`).join(", ")}.`}
+          </p>
           <p className="g-muted">
             Mannskapets ferdighet (med trivsel): {fmtNum(stats.crewSkill, 1)} av 5. Flinke folk gir kortere charger og
             færre feil. Alle blir flinkere av å jobbe, og raskere på kurs.

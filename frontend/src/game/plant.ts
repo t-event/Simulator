@@ -147,6 +147,44 @@ function deficit(crew: Crew, counts: Record<RoleId, number>, k: number, wildcard
 
 const isEmpty = (crew: Crew) => Object.values(crew).every((n) => !n);
 
+export interface CrewRow {
+  role: RoleId;
+  perShift: number;
+  /** Plasser som må fylles for dette antallet skift */
+  need: number;
+  /** Egne folk i rollen som brukes (resten er ekstra) */
+  own: number;
+  /** Plasser fylt av allroundere (og deg selv i garasjen og verkstedet) */
+  filled: number;
+  missing: number;
+}
+
+/**
+ * Hvordan plassene fylles for et gitt antall skift, med samme fordeling som bemanningen
+ * regnes med: egne folk først, så fyller allroundere (og eieren) hullene i rollerekkefølge.
+ */
+export function crewCoverage(
+  g: GameState,
+  crew: Crew,
+  shifts: number,
+): { rows: CrewRow[]; wildcards: number; wildUsed: number; ownerSlots: number } {
+  const counts = countRoles(g);
+  const ownerSlots = g.stage <= 1 ? OWNER_SLOTS : 0;
+  const wildcards = counts.allround + ownerSlots;
+  let spare = wildcards;
+  const rows: CrewRow[] = [];
+  for (const role of CREW_ROLES) {
+    const perShift = crew[role] ?? 0;
+    if (perShift <= 0) continue;
+    const need = perShift * shifts;
+    const own = Math.min(need, counts[role]);
+    const filled = Math.min(need - own, spare);
+    spare -= filled;
+    rows.push({ role, perShift, need, own, filled, missing: need - own - filled });
+  }
+  return { rows, wildcards, wildUsed: wildcards - spare, ownerSlots };
+}
+
 export function staffing(g: GameState): {
   shifts: number;
   hours: number;
