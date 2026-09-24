@@ -9,9 +9,11 @@ import {
   hire,
   hireForMissing,
   hireTemps,
+  hireTempCrew,
+  hiredCrewCost,
   sendOnCourse,
 } from "../game/actions";
-import { ROLE_IDS, ROLES, STAGES } from "../game/data";
+import { CREW_ROLES, ROLE_IDS, ROLES, STAGES } from "../game/data";
 import {
   crewCoverage,
   day,
@@ -188,6 +190,14 @@ type PeopleTab = "skift" | "ansett" | "ansatte" | "fravaer";
 /** Bemanningstabellen: hvem som står hvor på skiftene, med avløsere og vikarer */
 function CrewTable({ g, stats, shifts }: { g: GameState; stats: PlantStats; shifts: number }) {
   const coverage = crewCoverage(g, stats.crew, shifts);
+  const count = (r: RoleId) => g.workers.filter((w) => w.role === r).length;
+  const label = (r: RoleId, n: number) => `${n} ${(n === 1 ? ROLES[r].name : ROLES[r].plural).toLowerCase()}`;
+  const inTable = new Set(coverage.rows.map((row) => row.role));
+  // Roller som ikke står på skiftene, og skiftroller verket ikke bruker nå (f.eks. øseovnsoperatør uten øseovn)
+  const others = ROLE_IDS.filter((r) => !CREW_ROLES.includes(r) && r !== "allround" && count(r) > 0).map((r) =>
+    label(r, count(r)),
+  );
+  const idle = CREW_ROLES.filter((r) => !inTable.has(r) && count(r) > 0).map((r) => label(r, count(r)));
   return (
     <>
       <table className="g-table g-crew-table">
@@ -212,7 +222,8 @@ function CrewTable({ g, stats, shifts }: { g: GameState; stats: PlantStats; shif
                 <span className="g-muted g-sub">{row.perShift} per skift</span>
               </td>
               <td className="num">
-                {row.own} {row.own === 1 ? "egen" : "egne"}
+                {row.own - row.hired} {row.own - row.hired === 1 ? "egen" : "egne"}
+                {row.hired > 0 && <span className="g-muted g-sub">+ {row.hired} innleid</span>}
                 {row.temps > 0 && (
                   <span className="g-muted g-sub">
                     herav {row.temps} vikar{row.temps === 1 ? "" : "er"}
@@ -234,6 +245,8 @@ function CrewTable({ g, stats, shifts }: { g: GameState; stats: PlantStats; shif
         {coverage.wildcards > 0
           ? `Avløsere${coverage.ownerSlots ? " (og du selv på dagskiftet)" : ""} går dit det mangler folk: ${coverage.wildUsed} av ${coverage.wildcards} er i bruk.`
           : "Avløsere kan ta plassen til den som mangler på skiftet."}
+        {others.length > 0 && ` Andre jobber (ikke på skift): ${others.join(", ")}.`}
+        {idle.length > 0 && ` Trengs ikke nå, men tar plass blant de ansatte: ${idle.join(", ")}.`}
       </p>
     </>
   );
@@ -251,8 +264,10 @@ export function People({ g, stats, act }: Props) {
   const planShifts = Math.min(3, stats.shifts + (stats.shifts < 3 ? 1 : 0));
   const missing = Object.entries(stats.missing).filter(([, n]) => (n ?? 0) > 0) as [RoleId, number][];
   const away = g.workers.filter((w) => isAbsent(g, w));
-  const full = staffing(g, true).shifts;
-  const absenceCosts = away.length > 0 && !tempsActive(g) && stats.shifts < full;
+  const fullShifts = staffing(g, true).shifts;
+  const absenceCosts = away.length > 0 && !tempsActive(g) && stats.shifts < fullShifts;
+  const full = cap > 0 && g.workers.length >= cap;
+  const hiredActive = !!g.tempCrew && g.tempCrew.untilMin > g.minute;
   const tabs: { id: PeopleTab; label: string }[] = [
     { id: "skift", label: "Skift" },
     { id: "ansett", label: `Ansett${g.candidates.length && cap > 0 ? ` (${g.candidates.length})` : ""}` },
@@ -311,13 +326,41 @@ export function People({ g, stats, act }: Props) {
                     .map(([r, n]) => `${n} ${(n === 1 ? ROLES[r].name : ROLES[r].plural).toLowerCase()}`)
                     .join(", ")}
                   .
+                  {full ? (
+                    <p className="g-small-text">
+                      Verket er fullt: {cap} av {cap} ansatte. Lei inn vikarer til plassene, si opp noen som ikke trengs
+                      på skiftene, eller flytt til et større verk.
+                    </p>
+                  ) : (
+                    <p className="g-small-text">
+                      Vikarer for fravær dekker bare folk som er borte. Plasser ingen har, må du ansette til – eller
+                      leie inn.
+                    </p>
+                  )}
                   <div className="g-row">
-                    <button className="g-primary" onClick={() => act((gg) => hireForMissing(gg))}>
-                      Ansett til manglende plasser
+                    {!full && (
+                      <button className="g-primary" onClick={() => act((gg) => hireForMissing(gg))}>
+                        Ansett til manglende plasser
+                      </button>
+                    )}
+                    <button className={full ? "g-primary" : ""} onClick={() => act((gg) => hireTempCrew(gg, 3))}>
+                      Lei inn vikarer i 3 døgn ({fmtKr(hiredCrewCost(g, 3))})
                     </button>
-                    <button onClick={() => setTab("ansett")}>Velg selv</button>
                   </div>
                 </div>
+              )}
+              {hiredActive && (
+                <p className="g-note">
+                  Innleide vikarer:{" "}
+                  {Object.entries(g.tempCrew!.crew)
+                    .filter(([, n]) => (n ?? 0) > 0)
+                    .map(
+                      ([r, n]) =>
+                        `${n} ${(n === 1 ? ROLES[r as RoleId].name : ROLES[r as RoleId].plural).toLowerCase()}`,
+                    )
+                    .join(", ")}{" "}
+                  til dag {day(g, g.tempCrew!.untilMin - 1)}. De koster halvannen gang lønna og teller ikke som ansatte.
+                </p>
               )}
               <div className="g-stats">
                 <Stat label="Ansatte" value={`${g.workers.length} / ${cap}`} />

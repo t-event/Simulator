@@ -385,6 +385,8 @@ export interface GameState {
   sickUntilMin: number;
   /** Innleide vikarer dekker alle som er borte til dette spillminuttet (B-031) */
   tempsUntilMin: number;
+  /** Innleide vikarer til plasser verket mangler folk på, og hvor lenge (B-050) */
+  tempCrew: { crew: Crew; untilMin: number } | null;
   /** Et kundebesøk har gitt en god forespørsel som kommer snart */
   bonusOffer: boolean;
   /** Avtalt utkobling fra nettselskapet: ingen nye charger i dette tidsrommet */

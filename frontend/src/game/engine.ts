@@ -221,6 +221,7 @@ export function newGame(seed = Date.now()): GameState {
     decisionSeen: {},
     sickUntilMin: 0,
     tempsUntilMin: 0,
+    tempCrew: null,
     bonusOffer: false,
     celebrate: null,
     seenViews: ["verket", "marked", "salg"],
@@ -1817,6 +1818,16 @@ export function bookTemps(g: GameState, days: number, auto = false): void {
  * når vikarene går hjem mens folk fortsatt er borte (B-039).
  */
 function checkTemps(g: GameState): void {
+  // Innleide vikarer til ledige plasser går hjem når tida er ute (B-050)
+  if (g.tempCrew && g.tempCrew.untilMin <= g.minute) {
+    g.tempCrew = null;
+    const s = staffing(g);
+    log(
+      g,
+      `De innleide vikarene har gått hjem. Verket går nå ${s.shifts} skift. Lei inn nye eller ansett under Folk.`,
+      "event",
+    );
+  }
   if (tempsActive(g)) return;
   const absent = g.workers.filter((w) => isAbsent(g, w));
   if (!absent.length) return;
