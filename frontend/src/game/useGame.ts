@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { GAME_MIN_PER_REAL_S } from "./data";
 import { advance, newGame, type PurchaseResult } from "./engine";
+import { maxSpeed } from "./research";
 import { clearSave, loadGame, saveGame } from "./save";
 import type { GameState, LogEntry } from "./types";
 
@@ -95,7 +96,7 @@ export function useGame(): GameApi {
   const setSpeed = useCallback(
     (speed: number) => {
       const g = gameRef.current;
-      if (!g || g.gameOver) return;
+      if (!g || g.gameOver || speed > maxSpeed(g)) return;
       g.speed = speed;
       bump();
     },

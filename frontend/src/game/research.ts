@@ -6,7 +6,7 @@
  * låser opp utstyr, forbedringer og kapitler i fagboka.
  */
 import { STAGES } from "./data";
-import type { GameState } from "./types";
+import type { GameState, ScrapId } from "./types";
 
 export interface Research {
   id: string;
@@ -16,6 +16,10 @@ export interface Research {
   requires?: string[];
   /** Utstyr (ovner, støping, tillegg) som ikke kan kjøpes før dette er forsket fram */
   unlocks?: string[];
+  /** Skraptyper som kan kjøpes etter dette (resten er låst fra start, se START_SCRAP) */
+  scrap?: ScrapId[];
+  /** Raskeste spillfart dette låser opp (3× eller 10×) */
+  speed?: number;
   /** Fagbokkapittel som låses opp */
   knowledge?: string;
   description: string;
@@ -25,6 +29,34 @@ export interface Research {
 
 export const RESEARCH: Research[] = [
   // Garasjen
+  {
+    id: "rutiner",
+    name: "Faste rutiner",
+    stage: 0,
+    cost: 3,
+    description: "Når du kan jobben, går den av seg selv mens du følger med.",
+    effect: "Låser opp 3× fart",
+    speed: 3,
+  },
+  {
+    id: "skrapkjop",
+    name: "Flere skrapleverandører",
+    stage: 0,
+    cost: 6,
+    scrap: ["shredder", "spon"],
+    description: "Skraphandleren har mer enn blandet og tungt skrap – hvis du vet hva du ber om.",
+    effect: "Du kan kjøpe shredderskrap og spon",
+  },
+  {
+    id: "stodig",
+    name: "Stødig drift",
+    stage: 0,
+    cost: 10,
+    requires: ["rutiner"],
+    description: "Verket går jevnt nok til at du kan spole fram til noe skjer.",
+    effect: "Låser opp 10× fart",
+    speed: 10,
+  },
   {
     id: "energistyring",
     name: "Energistyring",
@@ -83,6 +115,15 @@ export const RESEARCH: Research[] = [
     effect: "Åpner for strålingsportal",
   },
   {
+    id: "nyskrap",
+    name: "Rent nyskrap",
+    stage: 1,
+    cost: 10,
+    scrap: ["rent"],
+    description: "Avkapp fra fabrikker er rent og kjent, men koster mer. Det trengs til kvaliteter med strenge krav.",
+    effect: "Du kan kjøpe rent nyskrap",
+  },
+  {
     id: "vedlikeholdsplan",
     name: "Vedlikeholdsplan",
     stage: 1,
@@ -129,6 +170,15 @@ export const RESEARCH: Research[] = [
     knowledge: "skrap",
     description: "Plukke ut kobberledninger, motorer og skitt før skrapet går til ovnen.",
     effect: "Åpner for skrapsortering",
+  },
+  {
+    id: "rajern",
+    name: "Råjern",
+    stage: 2,
+    cost: 60,
+    scrap: ["rajern"],
+    description: "Råjern fra masovn er nesten fritt for kobber og tinn, og tynner ut sporelementene i resten av skrapet.",
+    effect: "Du kan kjøpe råjern",
   },
   {
     id: "sikkerhet",
@@ -231,6 +281,28 @@ export const RESEARCH: Research[] = [
     effect: "Flere store forespørsler og 3 % bedre priser",
   },
 ];
+
+/** Skraptypene man kan kjøpe fra start */
+export const START_SCRAP: ScrapId[] = ["blandet", "tungt", "retur"];
+
+export function scrapUnlocked(g: GameState, id: ScrapId): boolean {
+  return START_SCRAP.includes(id) || RESEARCH.some((r) => r.scrap?.includes(id) && hasResearch(g, r.id));
+}
+
+/** Forskningen som låser opp en skraptype */
+export function researchForScrap(id: ScrapId): Research | undefined {
+  return RESEARCH.find((r) => r.scrap?.includes(id));
+}
+
+/** Raskeste fart spilleren har låst opp */
+export function maxSpeed(g: GameState): number {
+  return Math.max(1, ...RESEARCH.filter((r) => r.speed && hasResearch(g, r.id)).map((r) => r.speed!));
+}
+
+/** Forskningen som låser opp en fart */
+export function researchForSpeed(speed: number): Research | undefined {
+  return RESEARCH.find((r) => r.speed === speed);
+}
 
 export function hasResearch(g: GameState, id: string): boolean {
   return g.researched.includes(id);

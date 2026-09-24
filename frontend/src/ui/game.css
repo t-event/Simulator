@@ -1338,3 +1338,46 @@ button {
   width: 100%;
   margin-top: 4px;
 }
+
+/* Gradvis opplåsing (B-023) */
+.g-speed button.is-locked {
+  color: var(--text-dim);
+  opacity: 0.5;
+}
+
+.g-speed button.is-locked::after {
+  content: "🔒";
+  font-size: 9px;
+  margin-left: 1px;
+}
+
+.g-badge.g-badge-new {
+  background: var(--ok);
+  color: #06200a;
+  font-size: 10px;
+  padding: 0 4px;
+  width: auto;
+}
+
+.g-station-btn {
+  position: relative;
+}
+
+.g-station-btn .g-badge {
+  margin-left: 4px;
+}
+
+.g-locked-scrap {
+  color: var(--text-dim);
+}
+
+.g-recipe-checks li {
+  padding-bottom: 4px;
+}
+
+.g-fix {
+  display: block;
+  color: var(--text-dim);
+  font-size: 12px;
+  line-height: 1.35;
+}

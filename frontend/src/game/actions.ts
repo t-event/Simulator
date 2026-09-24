@@ -4,7 +4,7 @@
 import { ADDONS, CASTINGS, FURNACES, GRADES, PRODUCTS, SCRAP_IDS, STAGES, type Addon } from "./data";
 import { addCost, fmtKr, fmtT, log, orderQueue, startReline, maxLoan, newFurnaceUnit, unlock, type PurchaseResult } from "./engine";
 import { castingType, computePlantStats, day, furnaceType, has } from "./plant";
-import { hasResearch, missingResearchFor, RESEARCH, researchOptions } from "./research";
+import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
 import type { GameState, GradeId, ScrapId } from "./types";
 
 export type UpgradeKind = "stage" | "furnace" | "casting" | "addon";
@@ -289,9 +289,15 @@ export function fire(g: GameState, workerId: number): PurchaseResult {
 // Produksjon
 // ------------------------------------------------------------------ //
 export function setRecipe(g: GameState, id: ScrapId, weight: number): void {
+  if (weight > 0 && !scrapUnlocked(g, id)) return;
   g.recipe[id] = Math.max(0, Math.min(100, Math.round(weight)));
   // Resepten huskes for kvaliteten som kjøres nå
   g.gradeRecipes[g.targetGrade] = { ...g.recipe };
+}
+
+/** Setter hele resepten på én gang (f.eks. et forslag) */
+export function applyRecipe(g: GameState, recipe: Record<ScrapId, number>): void {
+  for (const id of SCRAP_IDS) setRecipe(g, id, recipe[id] ?? 0);
 }
 
 export function setTargetGrade(g: GameState, grade: GradeId): void {

@@ -1,8 +1,10 @@
-import { setRecipe } from "../game/actions";
+import { applyRecipe, setRecipe } from "../game/actions";
 import { GRADES, PRODUCTS, SCRAP_IDS, SCRAP_TYPES } from "../game/data";
 import { buyScrap, recipeEstimate, scrapPrice } from "../game/engine";
 import { hasPlanner, powerPrice, productPrice, type PlantStats } from "../game/plant";
-import type { GameState, ProductId } from "../game/types";
+import { gradeChecks, suggestRecipe } from "../game/recipe";
+import { researchForScrap, scrapUnlocked } from "../game/research";
+import type { GameState, ProductId, ScrapId } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { AnalysisLine, Bar, Card, GradeChips } from "./common";
 import { fmtKr, fmtNum, fmtPct, fmtT } from "./format";
@@ -31,6 +33,26 @@ export function Market({ g, stats, act }: Props) {
   const maxHour = Math.max(...hourPrices);
   const nowHour = Math.floor((g.minute % 1440) / 60);
   const electric = stats.furnace.fuel === "strøm";
+  const open = SCRAP_IDS.filter((id) => scrapUnlocked(g, id));
+  // Låste skraptyper gruppert etter forskningen som låser dem opp
+  const locked = new Map<string, ScrapId[]>();
+  for (const id of SCRAP_IDS.filter((x) => !scrapUnlocked(g, x))) {
+    const r = researchForScrap(id);
+    // Bare det som kan forskes fram på dette nivået; resten er for langt fram
+    if (r && r.stage <= g.stage) locked.set(r.name, [...(locked.get(r.name) ?? []), id]);
+  }
+  const checks = gradeChecks(g, g.targetGrade, est.analysis, stats);
+  const suggest = () =>
+    act((gg) => {
+      const s = suggestRecipe(gg, gg.targetGrade, stats);
+      if (!s)
+        return {
+          ok: false,
+          message: `Ingen blanding av skrapet du har tilgang til, holder kravet til ${GRADES[gg.targetGrade].name.toLowerCase()}.`,
+        };
+      applyRecipe(gg, s.recipe);
+      return { ok: true, message: "Resepten er satt." };
+    });
 
   return (
     <div className="g-grid">
@@ -45,7 +67,7 @@ export function Market({ g, stats, act }: Props) {
         >
           <Bar value={stats.yardUsed / stats.yardT} label="Skraplager" />
           <div className="g-scrap-list">
-            {SCRAP_IDS.map((id) => {
+            {open.map((id) => {
               const type = SCRAP_TYPES[id];
               const price = scrapPrice(g, id);
               const trend = price / type.price;
@@ -94,6 +116,11 @@ export function Market({ g, stats, act }: Props) {
               );
             })}
           </div>
+          {[...locked].map(([name, ids]) => (
+            <p key={name} className="g-note g-locked-scrap">
+              🔒 {ids.map((id) => SCRAP_TYPES[id].name).join(" · ")} – forsk fram «{name}».
+            </p>
+          ))}
           {hasPlanner(g) ? (
             <label className="g-toggle">
               <input
@@ -123,8 +150,20 @@ export function Market({ g, stats, act }: Props) {
           <div className="g-estimate">
             <AnalysisLine a={est.analysis} />
             <span>Holder kravet til:</span>
-            <GradeChips grades={est.grades} highlight={g.targetGrade} />
+            <GradeChips grades={est.grades.filter((id) => GRADES[id].minStage <= g.stage)} highlight={g.targetGrade} />
           </div>
+          <ul className="g-checks g-recipe-checks">
+            {checks.map((c) => (
+              <li key={c.key} className={c.ok ? (c.close ? "warn" : "ok") : "bad"}>
+                {c.label}: {fmtNum(c.value, c.key === "p" ? 3 : 2)} (krav {c.limit})
+                {c.fix && <span className="g-fix">{c.fix}</span>}
+                {c.close && <span className="g-fix">Nær grensen – skrapet varierer, så legg inn litt margin.</span>}
+              </li>
+            ))}
+          </ul>
+          <button className="g-primary" onClick={suggest}>
+            Foreslå billigste resept for {GRADES[g.targetGrade].name.toLowerCase()}
+          </button>
           <div className="g-stats">
             <div className="g-stat">
               <span>Skrap per tonn</span>

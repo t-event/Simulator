@@ -218,3 +218,30 @@ Beslutning:
   (gjennombrenning, vannlekkasje, strålekilde) heter «Havari: …». Gjennombrenning koster tre ganger
   prisen og tiden, omdømme −5 (var −3), og meldingen sier hva en planlagt omforing ville kostet.
 - Testspilleren bestiller ny foring ved 88 % slitasje. Balanse: 11 / 43 / 98 / 182.
+
+## B-023 Gradvis opplåsing, utstyr på Verket, reseptforslag og kvalitetskort (2026-09-24)
+Status: gjelder (Bygg-fanen er erstattet av Forskning-fanen)
+Beslutning:
+- **Faner:** Verket, Marked og Salg fra start. Folk kommer når det er plass til ansatte (verkstedet),
+  Forskning når de første fagpoengene er tjent. Nye faner får et grønt «Ny»-merke til de er åpnet
+  (`seenViews`). Fagpoeng vises i toppfeltet først når man har noen.
+- **Fart:** 3× låses opp med forskningen «Faste rutiner» (3 FP), 10× med «Stødig drift» (10 FP).
+  Låste knapper vises med hengelås og forklarer hva som trengs når de trykkes.
+- **Skrap:** Blandet, tungt og returskrap fra start. «Flere skrapleverandører» (garasjen, 6 FP) gir
+  shredder og spon, «Rent nyskrap» (verkstedet, 10 FP) gir rent skrap, «Råjern» (støperiet, 60 FP)
+  gir råjern. Marked viser bare låste typer som kan forskes fram på nivået man er på.
+- **Utstyr der det brukes:** Hvert sted i anlegget på Verket (skraplager, ovn, støping,
+  ferdigvarelager, kvalitet, vedlikehold) har en «Utstyr»-knapp som åpner utstyret for det stedet.
+  Målkortet på Verket har «Flytt inn»-knappen. Forskning, bank og spillinnstillinger ligger i
+  Forskning-fanen (`ui/ResearchPage.tsx`).
+- **Resept:** Marked viser karbon, fosfor og kobber/tinn mot kravet med ✓/!/✗ og sier med vanlige
+  ord hva som må endres. «Foreslå billigste resept» (`game/recipe.ts`) prøver alle blandinger i steg
+  på 10 % av skrapet man har låst opp, og velger den billigste som holder kravet med margin (15 %,
+  eller 5 % med spektrometer).
+- **Kvalitet:** Nytt kort viser andelen stål de siste sju døgnene som holdt kvaliteten, bommet på
+  analysen eller fikk støpefeil (`onGradeT`, `offGradeT`, `secondT` per døgn), og hva man måler med.
+- Kvalitetsvalget på Verket viser bare kvaliteter som finnes på nivået.
+- Gamle lagringer får forskningen for fart og for skrap på nivåene de allerede har nådd, så ingen
+  mister noe de hadde.
+- Balanse etter endringen: 11 / 49 / 100 / 187 (innenfor målene; støperiet er nær øvre grense og
+  vurderes igjen i tema G).
