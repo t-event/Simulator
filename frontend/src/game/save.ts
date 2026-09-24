@@ -115,9 +115,22 @@ export function migrate(g: GameState): GameState {
     g.settings.autoReline = g.workers.some((w) => w.role === "vedlikehold");
   }
   for (const f of g.furnaces) if (f.relineRequested === undefined) f.relineRequested = false;
+  // Ovner kjøpt før B-038 fikk «byttet dag 1»: anslå dagen ut fra antall charger på foringen
+  const today = Math.floor(g.minute / 1440) + 1;
+  for (const f of g.furnaces)
+    if (f.lastRelineDay === 1 && today > 3 && f.heatsOnLining !== undefined) {
+      const perDay = Math.max(
+        1,
+        g.history.slice(-3).reduce((a, d) => a + d.heats, 0) /
+          Math.max(1, g.history.slice(-3).length) /
+          g.furnaces.length,
+      );
+      f.lastRelineDay = Math.max(1, today - Math.round(f.heatsOnLining / perDay));
+    }
   // Reservepotte (B-030): gamle lagringer har en ferdig potte på lager
   for (const f of g.furnaces) if (f.spareProgress === undefined) f.spareProgress = 1;
-  for (const f of g.furnaces) if (f.lastRelineDay === undefined) f.lastRelineDay = Math.max(1, Math.floor(g.minute / 1440) + 1);
+  for (const f of g.furnaces)
+    if (f.lastRelineDay === undefined) f.lastRelineDay = Math.max(1, Math.floor(g.minute / 1440) + 1);
   if (g.settings.followQueue === undefined) g.settings.followQueue = true;
   if (g.settings.plannerSorts === undefined) g.settings.plannerSorts = true;
   const active = g.contracts.filter((c) => c.status === "aktiv").sort((a, b) => a.deadlineDay - b.deadlineDay);

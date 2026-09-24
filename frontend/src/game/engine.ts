@@ -101,7 +101,8 @@ function emptyStock(): ScrapStock {
   return { t: 0, p: 0, tramp: 0, c: 0, dirt: 0, radioactive: false };
 }
 
-export function newFurnaceUnit(): FurnaceUnit {
+/** En ny ovn (eller ny foring) er «byttet» dagen den settes i drift */
+export function newFurnaceUnit(today = 1): FurnaceUnit {
   return {
     wear: 0,
     heat: null,
@@ -109,7 +110,7 @@ export function newFurnaceUnit(): FurnaceUnit {
     downUntilMin: 0,
     downReason: null,
     heatsOnLining: 0,
-    lastRelineDay: 1,
+    lastRelineDay: today,
     relineRequested: false,
     spareProgress: 1,
     waitReason: null,
