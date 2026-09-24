@@ -523,3 +523,32 @@ Status: gjelder
 Brukeren meldte at «døgn siden omforing» var feil for ovn nummer to rett etter kjøpet (62 døgn).
 Beslutning: En ny ovn og en ny ovnstype får `lastRelineDay` = dagen de settes i drift. Gamle lagringer med
 «byttet dag 1» får dagen anslått ut fra antall charger på foringen og hvor mange charger verket kjører per døgn.
+
+## B-039 To kvaliteter samtidig, og vikarer som ikke går hjem for tidlig (2026-09-24)
+Status: gjelder
+Brukeren ville kunne lage to kvaliteter samtidig med to ovner, få varsel om ferie og sykdom, og meldte at
+skiftgangen gikk ned selv om vikarer var leid inn.
+Beslutning:
+- Hver ovn kan ha sin egen kvalitet (`FurnaceUnit.grade`, null = samme som ovn 1). Med «Følg ordrekøen» og
+  «To kvaliteter samtidig» (`settings.splitGrades`, på som standard) tar ovn 2 neste kvalitet i køen når den er
+  en annen enn ovn 1 sin. Uten å følge køen velges kvaliteten for ovn 2 på Verket. Hver ovn bruker resepten for
+  sin kvalitet (`gradeRecipes`); Resept-kortet får én fane per kvalitet som er i bruk. Støpingen er som før: én
+  kø, én øse av gangen. Automatisk innkjøp kjøper etter alle ovnenes resepter.
+- Vikarer: i test dekket de fraværet så lenge de var leid inn. Men de gikk hjem etter antall døgn som var
+  valgt, selv om folk fortsatt var borte eller nye ble syke. Nå: knapp «Vikarer til alle er tilbake», varsel
+  når vikarene går hjem mens fraværet fortsatt koster skift, og et valg om å leie inn vikarer automatisk
+  (`settings.autoTemps`, av som standard). Vikarer koster bare for døgnene hver enkelt er borte.
+- Ferie varsles som hendelse (toast) når den avtales, og igjen dagen den starter. Sykdom varsles som før.
+
+## B-040 Rammeavtaler fra stålverket (2026-09-24)
+Status: gjelder
+Brukeren ville ha faste kontrakter som varer lenger, senere i spillet.
+Beslutning: Fra Stålverk (nivå 3) tilbyr store kunder av og til rammeavtaler (ca. 20 % sjanse per døgn når
+ingen tilbud står åpent). Maks 2 aktive avtaler i stålverket og 3 i storverket. En avtale er 20–40 % av en ukes
+realistiske produksjon, i 4–10 uker, til fast pris (markedspris ±3–4 % ved signering). Hver uke legges en
+vanlig kontrakt med sju døgns frist i ordrekøen, så levering, bot og omdømme går som før. Alle uker i tide gir
+bonus (5 % av avtalens verdi, omdømme 2 + 0,4 per uke og fagpoeng). To uker uten full leveranse gjør at kunden
+sier opp, og omdømmet trekkes like mye som bonusen ville gitt. Lager verket ikke lenger varen (ny støping eller
+valseverk), avsluttes avtalen uten straff. «Ta imot nye forespørsler» gjelder også rammeavtaler.
+Balanse: testspilleren tar avtaler som er under 35 % av en ukes produksjon og i kvaliteten den kjører.
+Nivådager: 10 / 24 / 62 / 142.

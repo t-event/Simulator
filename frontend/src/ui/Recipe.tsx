@@ -1,10 +1,11 @@
+import { useState } from "react";
 import { applyRecipe, nudgeRecipe } from "../game/actions";
 import { GRADES, SCRAP_IDS, SCRAP_TYPES } from "../game/data";
 import { recipeEstimate } from "../game/engine";
-import { hasGrader, satisfies, type PlantStats } from "../game/plant";
+import { furnaceGrade, gradeRecipe, gradesInUse, hasGrader, satisfies, type PlantStats } from "../game/plant";
 import { gradeChecks, suggestRecipe, worstCase } from "../game/recipe";
 import { scrapUnlocked } from "../game/research";
-import type { GameState } from "../game/types";
+import type { GameState, GradeId } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Card, GradeChips } from "./common";
 import { fmtKr, fmtNum, fmtPct } from "./format";
@@ -14,34 +15,55 @@ import { fmtKr, fmtNum, fmtPct } from "./format";
  * sjekk mot kravet, forslag (billigst og sikrest) og hva som skjer uten skrapklasser.
  */
 export function RecipeCard({ g, stats, act }: { g: GameState; stats: PlantStats; act: GameApi["act"] }) {
-  const grade = g.targetGrade;
-  const est = recipeEstimate(g, grade, stats);
-  const total = SCRAP_IDS.reduce((a, id) => a + g.recipe[id], 0) || 1;
-  const rows = SCRAP_IDS.filter((id) => scrapUnlocked(g, id) || g.recipe[id] > 0);
+  // Med to kvaliteter samtidig har hver ovn sin resept (B-039)
+  const [picked, setPicked] = useState<GradeId | null>(null);
+  const inUse = gradesInUse(g);
+  const grade = picked && inUse.includes(picked) ? picked : g.targetGrade;
+  const recipe = gradeRecipe(g, grade);
+  const est = recipeEstimate(g, grade, stats, recipe);
+  const total = SCRAP_IDS.reduce((a, id) => a + recipe[id], 0) || 1;
+  const rows = SCRAP_IDS.filter((id) => scrapUnlocked(g, id) || recipe[id] > 0);
+  const ovens = g.furnaces.map((_, i) => i).filter((i) => furnaceGrade(g, i) === grade);
   const checks = gradeChecks(g, grade, est.analysis, stats);
   const cheap = suggestRecipe(g, grade, stats, "billig");
   const safe = suggestRecipe(g, grade, stats, "sikker");
   const grader = hasGrader(g);
-  const worst = worstCase(g, grade, stats);
+  const worst = worstCase(g, grade, stats, recipe);
   const worstOk = satisfies(worst, grade);
   const spec = GRADES[grade];
 
   return (
     <Card title={`Resepten for ${spec.name.toLowerCase()}`}>
+      {inUse.length > 1 && (
+        <div className="g-subtabs" role="tablist" aria-label="Resept for kvalitet">
+          {inUse.map((id) => (
+            <button
+              key={id}
+              role="tab"
+              aria-selected={id === grade}
+              className={id === grade ? "is-active" : ""}
+              onClick={() => setPicked(id)}
+            >
+              {GRADES[id].name}
+            </button>
+          ))}
+        </div>
+      )}
       <p className="g-muted">
         Resepten sier hvor mye av hver skraptype som går i ovnen. Den bestemmer hva som blir i stålet. Kvaliteten velger
         du på Verket.
+        {inUse.length > 1 && ` Denne resepten brukes i ovn ${ovens.map((i) => i + 1).join(" og ")}.`}
       </p>
 
       <div className="g-recipe-suggest">
         <button
           className="g-primary"
           disabled={!cheap}
-          onClick={() => act((gg) => cheap && applyRecipe(gg, cheap.recipe))}
+          onClick={() => act((gg) => cheap && applyRecipe(gg, cheap.recipe, grade))}
         >
           Billigst{cheap ? ` · ${fmtKr(cheap.costPerT)}/t` : ""}
         </button>
-        <button disabled={!safe} onClick={() => act((gg) => safe && applyRecipe(gg, safe.recipe))}>
+        <button disabled={!safe} onClick={() => act((gg) => safe && applyRecipe(gg, safe.recipe, grade))}>
           Sikrest{safe ? ` · ${fmtKr(safe.costPerT)}/t` : ""}
         </button>
       </div>
@@ -53,7 +75,7 @@ export function RecipeCard({ g, stats, act }: { g: GameState; stats: PlantStats;
 
       <ul className="g-recipe-rows">
         {rows.map((id) => {
-          const share = g.recipe[id] / total;
+          const share = recipe[id] / total;
           const type = SCRAP_TYPES[id];
           return (
             <li key={id}>
@@ -67,7 +89,7 @@ export function RecipeCard({ g, stats, act }: { g: GameState; stats: PlantStats;
                 <button
                   aria-label={`Mindre ${type.name.toLowerCase()}`}
                   disabled={share <= 0}
-                  onClick={() => act((gg) => nudgeRecipe(gg, id, -10))}
+                  onClick={() => act((gg) => nudgeRecipe(gg, id, -10, grade))}
                 >
                   −
                 </button>
@@ -75,7 +97,7 @@ export function RecipeCard({ g, stats, act }: { g: GameState; stats: PlantStats;
                 <button
                   aria-label={`Mer ${type.name.toLowerCase()}`}
                   disabled={share >= 1 || !scrapUnlocked(g, id)}
-                  onClick={() => act((gg) => nudgeRecipe(gg, id, 10))}
+                  onClick={() => act((gg) => nudgeRecipe(gg, id, 10, grade))}
                 >
                   +
                 </button>

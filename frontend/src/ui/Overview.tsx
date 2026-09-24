@@ -1,11 +1,14 @@
 import { useState, type ReactNode } from "react";
-import { requestManual, requestReline, setTargetGrade, upgradeOptions } from "../game/actions";
+import { requestManual, requestReline, setFurnaceGrade, setTargetGrade, upgradeOptions } from "../game/actions";
 import { Maintenance } from "./Maintenance";
 import { researchOptions } from "../game/research";
 import { GRADE_IDS, GRADES, PRODUCTS, ROLES, STAGES } from "../game/data";
-import { currentOrder, recipeEstimate } from "../game/engine";
+import { currentOrder, furnaceOrder, recipeEstimate } from "../game/engine";
 import {
   castingType,
+  furnaceGrade,
+  gradeRecipe,
+  gradesInUse,
   isAbsent,
   rollingActive,
   shiftStart,
@@ -68,12 +71,14 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
     });
   if (g.furnaces.some((f) => f.wear > 0.8 && !f.relineRequested))
     out.push({ text: "Foringen er nesten slitt gjennom. Bytt den under Vedlikehold før den brenner gjennom." });
-  const est = recipeEstimate(g, g.targetGrade, stats);
-  if (!est.grades.includes(g.targetGrade))
-    out.push({
-      text: `Resepten din holder ikke kravet til ${GRADES[g.targetGrade].name}. Juster resepten under Marked.`,
-      view: "marked",
-    });
+  for (const grade of gradesInUse(g)) {
+    const est = recipeEstimate(g, grade, stats, gradeRecipe(g, grade));
+    if (!est.grades.includes(grade))
+      out.push({
+        text: `Resepten din holder ikke kravet til ${GRADES[grade].name.toLowerCase()}. Juster resepten under Marked.`,
+        view: "marked",
+      });
+  }
   const research = researchOptions(g).filter((r) => r.available);
   if (research.length)
     out.push({ text: `Du har fagpoeng nok til å forske på ${research[0].name.toLowerCase()}.`, view: "forskning" });
@@ -279,6 +284,7 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
   const [tab, setTab] = useState<SubTab>("oversikt");
   const est = recipeEstimate(g, g.targetGrade, stats);
   const order = currentOrder(g);
+  const split = gradesInUse(g).length > 1;
   const casting = castingType(g);
   const castHead = g.castQueue[0];
   const y = g.history[g.history.length - 1];
@@ -351,7 +357,19 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
           <div className="g-col-wide">
             <CompactChain g={g} stats={stats} act={act} onOpen={() => setTab("anlegg")} go={go} />
             <Card title="Produksjon nå">
-              {order ? (
+              {split ? (
+                <ul className="g-furnace-grades">
+                  {g.furnaces.map((_, i) => {
+                    const o = furnaceOrder(g, i);
+                    return (
+                      <li key={i}>
+                        Ovn {i + 1}: <strong>{GRADES[furnaceGrade(g, i)].name}</strong>
+                        {o ? ` til ${o.customer} (${fmtT(o.tonnes - o.delivered)} igjen)` : " for lager og spot"}
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : order ? (
                 <p>
                   Produserer <strong>{GRADES[order.grade].name}</strong> til {order.customer} (
                   {fmtT(order.tonnes - order.delivered)} igjen).
@@ -372,8 +390,20 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
                   <span>Følg ordrekøen (kvalitet og resept skifter etter kontrakten som står først)</span>
                 </label>
               )}
+              {g.furnaces.length > 1 && g.settings.followQueue && (
+                <label className="g-toggle">
+                  <input
+                    type="checkbox"
+                    checked={g.settings.splitGrades}
+                    onChange={(e) => act((gg) => void (gg.settings.splitGrades = e.target.checked))}
+                  />
+                  <span>
+                    To kvaliteter samtidig: ovn 2 lager neste kvalitet i køen når den er en annen enn ovn 1 sin
+                  </span>
+                </label>
+              )}
               <label className="g-field">
-                <span>Kjør mot kvalitet</span>
+                <span>{g.furnaces.length > 1 ? "Ovn 1 kjører mot" : "Kjør mot kvalitet"}</span>
                 <select
                   value={g.targetGrade}
                   disabled={g.settings.followQueue && !!order}
@@ -386,6 +416,32 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
                   ))}
                 </select>
               </label>
+              {g.furnaces.slice(1).map((f, j) => (
+                <label className="g-field" key={j}>
+                  <span>Ovn {j + 2} kjører mot</span>
+                  <select
+                    value={f.grade ?? ""}
+                    disabled={g.settings.followQueue && !!order}
+                    onChange={(e) =>
+                      act((gg) => setFurnaceGrade(gg, j + 1, e.target.value === "" ? null : (e.target.value as GradeId)))
+                    }
+                  >
+                    <option value="">Samme som ovn 1</option>
+                    {GRADE_IDS.filter(
+                      (id) => id !== g.targetGrade && (GRADES[id].minStage <= g.stage || id === f.grade),
+                    ).map((id) => (
+                      <option key={id} value={id}>
+                        {GRADES[id].name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ))}
+              {split && (
+                <p className="g-muted">
+                  Hver ovn bruker resepten for sin kvalitet. Stålet går til samme støpemaskin, én øse av gangen.
+                </p>
+              )}
               <p className="g-muted">{GRADES[g.targetGrade].description}</p>
               <div className="g-estimate">
                 <span>Anslag med resepten:</span>

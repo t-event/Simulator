@@ -20,7 +20,7 @@ import {
   type Stage,
 } from "./data";
 import { hasResearch } from "./research";
-import type { Analysis, Crew, GameState, GradeId, PowerDeal, ProductId, RoleId, Worker } from "./types";
+import type { Analysis, Crew, GameState, GradeId, PowerDeal, ProductId, RoleId, ScrapId, Worker } from "./types";
 
 export const OWNER_SLOTS = 2;
 export const OWNER_HOURS = 10;
@@ -114,6 +114,22 @@ export function crewPerShift(g: GameState): Crew {
   return crew;
 }
 
+/** Kvaliteten ovnen lager: ovn 1 lager verkets kvalitet, de andre kan lage en annen (B-039) */
+export function furnaceGrade(g: GameState, index: number): GradeId {
+  const f = g.furnaces[index];
+  return index > 0 && f?.grade ? f.grade : g.targetGrade;
+}
+
+/** Resepten for en kvalitet: den som står nå for verkets kvalitet, ellers den som er lagret for kvaliteten */
+export function gradeRecipe(g: GameState, grade: GradeId): Record<ScrapId, number> {
+  return grade === g.targetGrade ? g.recipe : (g.gradeRecipes[grade] ?? g.recipe);
+}
+
+/** Kvalitetene verket lager nå, uten dubletter, ovn 1 først */
+export function gradesInUse(g: GameState): GradeId[] {
+  return [...new Set(g.furnaces.map((_, i) => furnaceGrade(g, i)))];
+}
+
 /** Er den ansatte borte (syk eller på ferie) akkurat nå? */
 export function isAbsent(g: GameState, w: Worker, minute = g.minute): boolean {
   return w.absentFrom !== undefined && w.absentUntil !== undefined && minute >= w.absentFrom && minute < w.absentUntil;
@@ -122,6 +138,24 @@ export function isAbsent(g: GameState, w: Worker, minute = g.minute): boolean {
 /** Vikarer dekker fraværet? */
 export function tempsActive(g: GameState): boolean {
   return (g.tempsUntilMin ?? 0) > g.minute;
+}
+
+/** Døgn vikarer må leies inn (etter dem som alt er leid) til alle som er borte nå, er tilbake */
+export function daysUntilAllBack(g: GameState): number {
+  const end = Math.max(0, ...g.workers.filter((w) => isAbsent(g, w)).map((w) => w.absentUntil ?? 0));
+  const from = Math.max(g.tempsUntilMin ?? 0, g.minute);
+  return Math.max(1, Math.ceil((end - from) / MIN_PER_DAY));
+}
+
+/** Vikarer koster halvannen gang lønna til dem som er borte, for døgnene de er borte (B-039) */
+export function tempsCost(g: GameState, days: number): number {
+  let sum = 0;
+  for (const w of g.workers) {
+    if (!isAbsent(g, w)) continue;
+    const left = Math.ceil(((w.absentUntil ?? 0) - g.minute) / MIN_PER_DAY);
+    sum += w.salary * 1.5 * Math.min(days, Math.max(1, left));
+  }
+  return Math.round(sum);
 }
 
 /** De som er på jobb: alle som ikke er borte, eller alle hvis vikarer dekker fraværet (B-031) */

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { GRADES, PRODUCTS } from "../game/data";
 import {
   acceptContract,
-  currentOrder,
+  furnaceOrder,
   declineContract,
   orderQueue,
   realisticDailyT,
@@ -11,9 +11,10 @@ import {
   spotPrice,
 } from "../game/engine";
 import { moveInQueue } from "../game/actions";
-import { day, gradeFailures, hasPlanner, nearLimit, satisfiedGrades, type PlantStats } from "../game/plant";
+import { day, gradeFailures, gradeRecipe, hasPlanner, nearLimit, satisfiedGrades, type PlantStats } from "../game/plant";
 import type { Contract, GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
+import { Agreements } from "./Agreements";
 import { AnalysisLine, Bar, Card, GradeChips, GradeSpec } from "./common";
 import { fmtKr, fmtNum, fmtT } from "./format";
 
@@ -29,7 +30,7 @@ function daysLeft(g: GameState, c: Contract): number {
 
 function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; committed: number }) {
   const canMake = stats.products.includes(c.product);
-  const est = recipeEstimate(g, c.grade, stats);
+  const est = recipeEstimate(g, c.grade, stats, gradeRecipe(g, c.grade));
   const recipeOk = est.grades.includes(c.grade);
   const failures = recipeOk ? [] : gradeFailures(est.analysis, c.grade);
   // Anslaget bygger på det verket faktisk har laget de siste døgnene, med ordrekøen du alt har (B-034)
@@ -100,7 +101,12 @@ export function Sales({ g, stats, act }: Props) {
   const [showAll, setShowAll] = useState(false);
   const offers = g.contracts.filter((c) => c.status === "tilbud");
   const active = orderQueue(g);
-  const current = currentOrder(g);
+  // Hvilken ovn som lager hvilken kontrakt; med to kvaliteter kan to kontrakter produseres samtidig (B-039)
+  const producing = new Map<number, number[]>();
+  g.furnaces.forEach((_, i) => {
+    const c = furnaceOrder(g, i);
+    if (c) producing.set(c.id, [...(producing.get(c.id) ?? []), i + 1]);
+  });
   const closed = g.contracts
     .filter((c) => c.status === "fullfort" || c.status === "misligholdt")
     .slice(-6)
@@ -131,6 +137,8 @@ export function Sales({ g, stats, act }: Props) {
           ))}
         </Card>
 
+        <Agreements g={g} stats={stats} act={act} />
+
         <Card title={`Ordrekø (${active.length})`}>
           {active.length === 0 && <p className="g-muted">Ingen aktive kontrakter.</p>}
           {active.length > 1 && (
@@ -141,9 +149,9 @@ export function Sales({ g, stats, act }: Props) {
           )}
           {active.map((c, i) => {
             const left = daysLeft(g, c);
-            const producing = current?.id === c.id;
+            const ovens = producing.get(c.id);
             return (
-              <div className={`g-contract${producing ? " is-producing" : ""}`} key={c.id}>
+              <div className={`g-contract${ovens ? " is-producing" : ""}`} key={c.id}>
                 <div className="g-contract-head">
                   <strong>
                     {i + 1}. {c.customer}
@@ -152,9 +160,15 @@ export function Sales({ g, stats, act }: Props) {
                     {left <= 0 ? "Frist i dag" : `${left} døgn igjen`}
                   </span>
                 </div>
-                {producing && <span className="g-badge-ok">Produseres nå</span>}
+                {ovens && (
+                  <span className="g-badge-ok">
+                    Produseres nå
+                    {g.furnaces.length > 1 && ovens.length < g.furnaces.length ? ` i ovn ${ovens.join(" og ")}` : ""}
+                  </span>
+                )}
                 <p>
                   {PRODUCTS[c.product].name}, {GRADES[c.grade].name} · {fmtKr(c.pricePerT)}/t
+                  {c.agreementId ? " · rammeavtale" : ""}
                 </p>
                 <Bar value={c.delivered / c.tonnes} tone="ok" label="Levert" />
                 <div className="g-contract-head">

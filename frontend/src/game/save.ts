@@ -73,6 +73,7 @@ export function migrate(g: GameState): GameState {
   if (loose.tipsSeen === undefined) loose.tipsSeen = g.stage >= 1 ? ["tips-foring", "tips-skrap"] : [];
   if (g.settings.skipIdleNights === undefined) g.settings.skipIdleNights = true;
   if (g.settings.pauseOffers === undefined) g.settings.pauseOffers = false;
+  if (g.settings.autoTemps === undefined) g.settings.autoTemps = false;
   if (g.settings.secondsAction === undefined) g.settings.secondsAction = "spot";
   if (g.settings.graderStrict === undefined) g.settings.graderStrict = true;
   if (loose.quizScores === undefined) {
@@ -129,6 +130,10 @@ export function migrate(g: GameState): GameState {
     }
   // Reservepotte (B-030): gamle lagringer har en ferdig potte på lager
   for (const f of g.furnaces) if (f.spareProgress === undefined) f.spareProgress = 1;
+  for (const f of g.furnaces) if (f.grade === undefined) f.grade = null;
+  if (g.settings.splitGrades === undefined) g.settings.splitGrades = true;
+  if (loose.agreements === undefined) loose.agreements = [];
+  if (loose.nextAgreementId === undefined) loose.nextAgreementId = 1;
   for (const f of g.furnaces)
     if (f.lastRelineDay === undefined) f.lastRelineDay = Math.max(1, Math.floor(g.minute / 1440) + 1);
   if (g.settings.followQueue === undefined) g.settings.followQueue = true;

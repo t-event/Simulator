@@ -1850,3 +1850,14 @@ button {
 .g-locked-box strong {
   color: var(--text);
 }
+
+/* Rammeavtaler som er avsluttet (B-040) */
+.g-contract.is-closed {
+  opacity: 0.7;
+}
+
+/* Hva hver ovn lager når verket kjører to kvaliteter (B-039) */
+.g-furnace-grades {
+  margin: 0 0 8px;
+  padding-left: 18px;
+}
