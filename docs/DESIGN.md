@@ -23,7 +23,7 @@ i presentasjonen, lett å spille i korte økter og vanskelig å legge fra seg.
 | Forskningspoeng og forskning | Fremgang som ikke bare er penger | Fagpoeng fra charger, leveranser og feil; forskning låser opp utstyr og forbedringer |
 | Spillrapporten viser hva som var bra og dårlig | Lær gjennom oppdagelse | Tapperapport med stjerner og forklaring; reklamasjoner forklarer hva som var galt; fagboka låses opp |
 | Kontraktarbeid for trygg inntekt | Sikkerhetsnett tidlig | Små kontrakter fra smia og gårdbrukeren |
-| Flytting til større kontor med høyere kostnader | Tydelige milepæler med risiko | Fem nivåer; lønn og kostnader hopper ved hver flytting; feiring ved flytting |
+| Flytting til større kontor med høyere kostnader | Tydelige milepæler med risiko | Fem nivåer; faste kostnader per døgn (200 kr i garasjen → 150 000 kr i storverket) og lønn hopper ved hver flytting; feiring ved flytting |
 | Hendelser som krever et valg | Variasjon og personlighet | Hendelseskort med to valg (billig skrapparti, hasteordre, lønnskrav, avisintervju …) |
 | Ansatte med ferdigheter som vokser | Folk du blir glad i | Ansatte med stjerner som blir flinkere av å jobbe |
 | Pause og fart | Spilleren styrer tempoet | Pause, 1×, 3×, 10× |
@@ -67,8 +67,9 @@ Ekspertmodus med full HMI kan åpnes fra den enkle styringen (bare én vei).
 
 ## Forskning
 
-Fagpoeng (FP) tjenes slik: 1 per charge, 2 per levert kontrakt, 2–5 per charge
-du kjører selv (etter stjerner), 3 per reklamasjon eller havari. Forskning
+Fagpoeng (FP) tjenes slik: 0,5 / 0,3 / 0,2 per charge (avtar med størrelsen på
+verket), 1 + nivå per levert kontrakt, 2–6 per charge du kjører selv (etter
+stjerner), 2–3 per reklamasjon eller havari. Se B-018. Forskning
 koster FP, er umiddelbar og låser opp utstyr, forbedringer og kapitler i
 fagboka. Se `src/game/research.ts` for tabellen.
 

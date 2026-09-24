@@ -79,8 +79,11 @@ function applyRecipe(g: GameState, r: Recipe): void {
 function botHour(g: GameState): void {
   // Hendelseskort: forsiktige valg, som en fornuftig spiller
   if (g.pendingDecision) {
-    const safe: Record<string, number> = { billigparti: 1, hasteordre: 1, lonnskrav: 0, avis: 0, messe: 0, laerling: 0, tilsyn: 0 };
-    resolveDecision(g, safe[g.pendingDecision.id] ?? 1);
+    const d = g.pendingDecision;
+    const safe: Record<string, number> = { billigparti: 1, hasteordre: 1, lonnskrav: 0, avis: 0, laerling: 0, tilsyn: 0 };
+    // Messa bare når det er god råd
+    safe.messe = g.cash > Number(d.data.cost ?? 0) * 4 ? 0 : 1;
+    resolveDecision(g, safe[d.id] ?? 1);
   }
   // Forskning: alt som er tilgjengelig, i tabellens rekkefølge
   for (const r of researchOptions(g)) if (r.available) doResearch(g, r.id);
@@ -266,6 +269,30 @@ if (process.argv.includes("--kontrakter")) {
   });
   process.exit?.(0);
 }
+if (process.argv.includes("--sperrer")) {
+  // Hva som holder igjen neste nivå: dagen penger holder, dagen omdømmet holder, og ubrukte fagpoeng
+  for (const seed of [1, 2, 3, 4]) {
+    const g = newGame(seed);
+    const cashDay: (number | null)[] = [null, null, null, null, null];
+    const repDay: (number | null)[] = [null, null, null, null, null];
+    const fpAt: (number | null)[] = [null, null, null, null, null];
+    while (day(g) <= 200 && g.stage < 4) {
+      botHour(g);
+      advance(g, 60);
+      const next = STAGES[g.stage + 1];
+      if (!next) break;
+      if (cashDay[next.id] === null && g.cash >= next.price) cashDay[next.id] = day(g);
+      if (repDay[next.id] === null && g.reputation >= next.reputation) repDay[next.id] = day(g);
+      fpAt[g.stage] = Math.round(g.researchPoints);
+    }
+    console.log(
+      `frø ${seed}: ` +
+        [1, 2, 3, 4].map((i) => `${STAGES[i].name}: penger dag ${cashDay[i] ?? "-"}, omdømme dag ${repDay[i] ?? "-"}`).join(" | ") +
+        ` | ubrukte FP ved slutten av hvert nivå: ${fpAt.join("/")}`,
+    );
+  }
+  process.exit?.(0);
+}
 if (process.argv.includes("--replog")) {
   // Skriver ut alt som har påvirket omdømmet, for feilsøking av balansen
   const g = newGame(Number(process.argv[process.argv.indexOf("--replog") + 1]));
@@ -284,12 +311,12 @@ if (process.argv.includes("--replog")) {
 const seeds = process.argv.includes("--seed")
   ? [Number(process.argv[process.argv.indexOf("--seed") + 1])]
   : [1, 2, 3, 4, 5, 6];
-const DAYS = 200;
+const DAYS = 240;
 const targets = [
-  { stage: 1, min: 5, max: 18 },
+  { stage: 1, min: 7, max: 20 },
   { stage: 2, min: 20, max: 50 },
-  { stage: 3, min: 50, max: 115 },
-  { stage: 4, min: 100, max: 185 },
+  { stage: 3, min: 55, max: 120 },
+  { stage: 4, min: 120, max: 220 },
 ];
 
 let failed = false;

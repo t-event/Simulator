@@ -245,7 +245,7 @@ export interface Product {
 }
 
 export const PRODUCTS: Record<ProductId, Product> = {
-  stopegods: { id: "stopegods", name: "Støpegods", price: 16_000, spotPerDay: 2 },
+  stopegods: { id: "stopegods", name: "Støpegods", price: 13_500, spotPerDay: 2 },
   blokk: { id: "blokk", name: "Blokker", price: 7_400, spotPerDay: 60 },
   emne: { id: "emne", name: "Emner", price: 7_000, spotPerDay: 500 },
   armering: { id: "armering", name: "Armeringsstål", price: 8_300, spotPerDay: 600 },
@@ -266,6 +266,8 @@ export interface Stage {
   storeT: number;
   /** Skraphåndtering som trengs per skift */
   scrapCrew: number;
+  /** Faste kostnader per døgn: husleie, forsikring, strøm til bygg (se B-018) */
+  fixedPerDay: number;
   description: string;
 }
 
@@ -279,50 +281,55 @@ export const STAGES: Stage[] = [
     yardT: 6,
     storeT: 4,
     scrapCrew: 0,
+    fixedPerDay: 200,
     description: "En kald garasje, en gassfyrt digel og deg selv.",
   },
   {
     id: 1,
     name: "Verksted",
-    price: 55_000,
+    price: 80_000,
     reputation: 5,
     staffCap: 4,
     yardT: 40,
     storeT: 30,
     scrapCrew: 0,
+    fixedPerDay: 1500,
     description: "Leid verkstedhall med plass til en liten induksjonsovn og et par ansatte.",
   },
   {
     id: 2,
     name: "Støperi",
-    price: 400_000,
+    price: 550_000,
     reputation: 18,
     staffCap: 24,
     yardT: 600,
     storeT: 400,
     scrapCrew: 1,
+    fixedPerDay: 8000,
     description: "Egen industritomt med skraplager, kran og plass til skiftarbeid.",
   },
   {
     id: 3,
     name: "Stålverk",
-    price: 5_000_000,
+    price: 6_500_000,
     reputation: 40,
     staffCap: 70,
     yardT: 6000,
     storeT: 5000,
     scrapCrew: 2,
+    fixedPerDay: 40000,
     description: "Smelteverk med tung strømforsyning og jernbanespor. Her kan lysbueovnen stå.",
   },
   {
     id: 4,
     name: "Storverk",
-    price: 25_000_000,
+    price: 32_000_000,
     reputation: 65,
     staffCap: 220,
     yardT: 25000,
     storeT: 20000,
     scrapCrew: 4,
+    fixedPerDay: 150000,
     description: "Et fullskala stålverk med skraphavn, egen kai og hundrevis av ansatte.",
   },
 ];
@@ -381,7 +388,7 @@ export const FURNACES: FurnaceType[] = [
     id: "induksjon1",
     name: "Induksjonsovn 1 t",
     stage: 1,
-    price: 60_000,
+    price: 50_000,
     sizeT: 1,
     cycleMin: 70,
     kwhPerT: 650,

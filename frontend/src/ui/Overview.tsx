@@ -286,6 +286,7 @@ export function Overview({ g, stats, act, go }: Props) {
             )}
             {y && <Stat label="I går produsert" value={fmtT(y.producedT)} />}
             <Stat label="Lønn per dag" value={fmtKr(stats.salaryPerDay)} />
+            <Stat label="Faste kostnader per dag" value={fmtKr(STAGES[g.stage].fixedPerDay)} />
             {g.loan > 0 && <Stat label="Lån" value={fmtKr(g.loan)} tone="warning" />}
           </div>
         </Card>

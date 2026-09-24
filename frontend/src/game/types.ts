@@ -135,6 +135,7 @@ export type CostCategory =
   | "renter"
   | "investering"
   | "bot"
+  | "faste"
   | "annet";
 export type IncomeCategory = "kontrakt" | "spot" | "annet";
 

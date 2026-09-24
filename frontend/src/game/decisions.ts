@@ -75,7 +75,7 @@ const MAKERS: Record<string, Maker> = {
   }),
   messe: (g) => {
     if (g.stage < 1) return null;
-    const cost = 15_000 * (1 + g.stage) ** 2;
+    const cost = 8_000 * (1 + g.stage) ** 2;
     return {
       id: "messe",
       title: "Bransjemesse",
