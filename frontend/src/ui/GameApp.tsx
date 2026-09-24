@@ -6,17 +6,17 @@ import { KNOWLEDGE, knowledgeCard } from "../game/knowledge";
 import { computePlantStats, day, energyPrice } from "../game/plant";
 import { useGame, type GameApi } from "../game/useGame";
 import { resolveDecision } from "../game/decisions";
-import { researchOptions } from "../game/research";
+import { maxSpeed, researchForSpeed, researchOptions } from "../game/research";
 import { upgradeOptions } from "../game/actions";
 import { buzz } from "./haptics";
 import type { GameState } from "../game/types";
-import { Build } from "./Build";
 import { fmtClock, fmtKr, fmtNum, fmtRep, fmtT } from "./format";
 import { Market } from "./Market";
 import { Overview } from "./Overview";
 import { People } from "./People";
+import { ResearchPage } from "./ResearchPage";
 import { Sales } from "./Sales";
-import { VIEWS, type View } from "./views";
+import { VIEWS, viewUnlocked, type View } from "./views";
 
 // Kontrollrommet drar med seg prosessmodellen og grafene; det lastes først når det trengs
 const ControlRoom = lazy(() => import("./control/ControlRoom").then((m) => ({ default: m.ControlRoom })));
@@ -194,18 +194,29 @@ function TopBar({ g, api, onBook }: { g: GameState; api: GameApi; onBook: () => 
           </span>
         </div>
         <div className="g-speed" role="group" aria-label="Fart">
-          {SPEED_OPTIONS.map((o) => (
-            <button
-              key={o.speed}
-              className={g.speed === o.speed ? "is-active" : ""}
-              title={o.title}
-              aria-label={o.title}
-              aria-pressed={g.speed === o.speed}
-              onClick={() => api.setSpeed(o.speed)}
-            >
-              {o.label}
-            </button>
-          ))}
+          {SPEED_OPTIONS.map((o) => {
+            const locked = o.speed > maxSpeed(g);
+            const research = researchForSpeed(o.speed);
+            return (
+              <button
+                key={o.speed}
+                className={`${g.speed === o.speed ? "is-active" : ""}${locked ? " is-locked" : ""}`}
+                title={locked ? `Låses opp med forskning` : o.title}
+                aria-label={locked ? `${o.title} (låst)` : o.title}
+                aria-pressed={g.speed === o.speed}
+                onClick={() =>
+                  locked
+                    ? api.act(() => ({
+                        ok: false,
+                        message: `${o.label} fart låses opp med forskningen «${research?.name}» når du har fagpoeng nok.`,
+                      }))
+                    : api.setSpeed(o.speed)
+                }
+              >
+                {o.label}
+              </button>
+            );
+          })}
         </div>
         <button className="g-book" onClick={onBook} aria-label="Fagboka">
           <span aria-hidden="true">📖</span>
@@ -223,9 +234,11 @@ function TopBar({ g, api, onBook }: { g: GameState; api: GameApi; onBook: () => 
         <span>
           <em>{stats.furnace.fuel === "gass" ? "Gass" : "Strøm"}</em> {fmtNum(energyPrice(g), 2)} kr/kWh
         </span>
-        <span>
-          <em>Fagpoeng</em> {Math.floor(g.researchPoints)}
-        </span>
+        {(g.researchPoints > 0 || g.researched.length > 0) && (
+          <span>
+            <em>Fagpoeng</em> {Math.floor(g.researchPoints)}
+          </span>
+        )}
       </div>
     </header>
   );
@@ -245,7 +258,11 @@ export function GameApp() {
   if (!g) return <Intro hasSave={api.hasSave} onNew={api.startNew} onContinue={api.continueSaved} />;
 
   const stats = computePlantStats(g);
-  const go = (v: View) => setView(v);
+  const shown: View = viewUnlocked(g, view) ? view : "verket";
+  const go = (v: View) => {
+    setView(v);
+    if (!g.seenViews.includes(v)) act((gg) => void gg.seenViews.push(v));
+  };
   const openBook = () => {
     act((gg) => void (gg.unreadKnowledge = 0));
     setBookOpen(true);
@@ -261,22 +278,27 @@ export function GameApp() {
           <TopBar g={g} api={api} onBook={openBook} />
 
           <nav className="g-nav" aria-label="Hovedmeny">
-            {VIEWS.map((v) => {
+            {VIEWS.filter((v) => viewUnlocked(g, v.id)).map((v) => {
+              const isNew = !g.seenViews.includes(v.id);
               const badge =
                 v.id === "salg"
                   ? g.contracts.filter((c) => c.status === "tilbud").length
-                  : v.id === "bygg"
+                  : v.id === "forskning"
                     ? researchOptions(g).filter((r) => r.available).length
                     : 0;
               return (
                 <button
                   key={v.id}
-                  className={view === v.id ? "is-active" : ""}
-                  aria-current={view === v.id ? "page" : undefined}
+                  className={shown === v.id ? "is-active" : ""}
+                  aria-current={shown === v.id ? "page" : undefined}
                   onClick={() => go(v.id)}
                 >
                   {v.label}
-                  {badge > 0 && <span className="g-badge">{badge}</span>}
+                  {isNew ? (
+                    <span className="g-badge g-badge-new">Ny</span>
+                  ) : (
+                    badge > 0 && <span className="g-badge">{badge}</span>
+                  )}
                 </button>
               );
             })}
@@ -284,11 +306,11 @@ export function GameApp() {
         </div>
 
         <main className="g-main">
-          {view === "verket" && <Overview g={g} stats={stats} act={act} go={go} />}
-          {view === "marked" && <Market g={g} stats={stats} act={act} />}
-          {view === "salg" && <Sales g={g} stats={stats} act={act} />}
-          {view === "folk" && <People g={g} stats={stats} act={act} />}
-          {view === "bygg" && <Build g={g} stats={stats} act={act} onQuit={api.quit} />}
+          {shown === "verket" && <Overview g={g} stats={stats} act={act} go={go} />}
+          {shown === "marked" && <Market g={g} stats={stats} act={act} />}
+          {shown === "salg" && <Sales g={g} stats={stats} act={act} />}
+          {shown === "folk" && <People g={g} stats={stats} act={act} />}
+          {shown === "forskning" && <ResearchPage g={g} stats={stats} act={act} onQuit={api.quit} />}
         </main>
       </div>
 

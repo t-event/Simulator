@@ -162,6 +162,12 @@ export interface DayFinance {
   producedT: number;
   heats: number;
   cashEnd: number;
+  /** Tonn som holdt kvaliteten det ble laget for */
+  onGradeT?: number;
+  /** Tonn som bommet på analysen */
+  offGradeT?: number;
+  /** Tonn med støpefeil (sekunda) */
+  secondT?: number;
 }
 
 export interface Settings {
@@ -271,6 +277,8 @@ export interface GameState {
   sickUntilMin: number;
   /** Et kundebesøk har gitt en god forespørsel som kommer snart */
   bonusOffer: boolean;
+  /** Faner spilleren har sett (nye faner får et «Ny»-merke, B-023) */
+  seenViews: string[];
   /** Nivået spilleren nettopp flyttet til, for feiring; null når det er sett */
   celebrate: number | null;
   /** Kunnskapskort spilleren har låst opp, i rekkefølge */

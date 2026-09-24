@@ -24,7 +24,7 @@ import {
   WIN_CASH,
 } from "./data";
 import { knowledgeCard } from "./knowledge";
-import { hasResearch } from "./research";
+import { hasResearch, scrapUnlocked } from "./research";
 import { maybeCreateDecision } from "./decisions";
 import {
   castingType,
@@ -174,6 +174,7 @@ export function newGame(seed = Date.now()): GameState {
     sickUntilMin: 0,
     bonusOffer: false,
     celebrate: null,
+    seenViews: ["verket", "marked", "salg"],
     knowledge: [],
     unreadKnowledge: 0,
   };
@@ -277,6 +278,7 @@ export interface PurchaseResult {
 export function buyScrap(g: GameState, id: ScrapId, t: number, stats = computePlantStats(g)): PurchaseResult {
   const type = SCRAP_TYPES[id];
   if (!type.buyable) return { ok: false, message: `${type.name} kan ikke kjøpes.` };
+  if (!scrapUnlocked(g, id)) return { ok: false, message: `${type.name} låses opp med forskning.` };
   const free = stats.yardT - stats.yardUsed;
   const amount = Math.min(t, free);
   if (amount <= 0.001) return { ok: false, message: "Skraplageret er fullt." };
@@ -419,15 +421,16 @@ export function recipeEstimate(
   g: GameState,
   grade: GradeId = g.targetGrade,
   stats = computePlantStats(g),
+  recipe: Record<ScrapId, number> = g.recipe,
 ): RecipeEstimate {
-  const total = SCRAP_IDS.reduce((a, id) => a + g.recipe[id], 0);
+  const total = SCRAP_IDS.reduce((a, id) => a + recipe[id], 0);
   const sorting = has(g, "sortering");
   const mix = { c: 0, p: 0, tramp: 0 };
   let dirt = 0;
   let energy = 0;
   let cost = 0;
   for (const id of SCRAP_IDS) {
-    const w = total > 0 ? g.recipe[id] / total : 0;
+    const w = total > 0 ? recipe[id] / total : 0;
     if (w <= 0) continue;
     const type = SCRAP_TYPES[id];
     const sorted = sorting && (id === "blandet" || id === "shredder" || id === "spon");
@@ -794,6 +797,10 @@ function castBatch(g: GameState, batch: LiquidBatch, stats: PlantStats): void {
   addReturnScrap(g, t - productT, batch.analysis, stats);
   const defectRisk = casting.defectRisk * (batch.tempOff ? 3 : 1) * (1.3 - 0.1 * stats.crewSkill);
   const second = chance(g, Math.min(0.9, defectRisk));
+  // Kvalitet: traff stålet kvaliteten det ble laget for, og ble det støpt uten feil?
+  if (second) g.today.secondT = (g.today.secondT ?? 0) + productT;
+  else if (satisfies(batch.analysis, batch.grade)) g.today.onGradeT = (g.today.onGradeT ?? 0) + productT;
+  else g.today.offGradeT = (g.today.offGradeT ?? 0) + productT;
   if (second && batch.tempOff) unlock(g, "stoping");
   addLot(g, {
     product: casting.product,
@@ -1222,7 +1229,7 @@ function onHour(g: GameState, stats: PlantStats): void {
 
 /** Kjøper skrap etter resepten for et par døgns forbruk (planleggerens jobb, eller spillerens). */
 export function autoBuy(g: GameState, stats: PlantStats): void {
-  const recipeIds = SCRAP_IDS.filter((id) => g.recipe[id] > 0 && SCRAP_TYPES[id].buyable);
+  const recipeIds = SCRAP_IDS.filter((id) => g.recipe[id] > 0 && SCRAP_TYPES[id].buyable && scrapUnlocked(g, id));
   const total = SCRAP_IDS.reduce((a, id) => a + g.recipe[id], 0);
   if (!recipeIds.length || total <= 0) return;
   const need = Math.max(

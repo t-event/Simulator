@@ -3,6 +3,7 @@
  * blokkerte data), så alle kall er pakket inn og spillet fungerer uten.
  */
 import { grantResearchForOwned } from "./actions";
+import { RESEARCH } from "./research";
 import { SAVE_VERSION } from "./engine";
 import type { GameState } from "./types";
 
@@ -48,6 +49,15 @@ export function migrate(g: GameState): GameState {
   if (loose.celebrate === undefined) loose.celebrate = null;
   if (loose.decisionSeen === undefined) loose.decisionSeen = {};
   if (loose.gradeRecipes === undefined) loose.gradeRecipes = {};
+  if (loose.seenViews === undefined) {
+    // Lagret før gradvis opplåsing (B-023): gi det spilleren allerede hadde tilgang til
+    loose.seenViews = ["verket", "marked", "salg", "folk", "forskning"];
+    for (const r of RESEARCH) {
+      if (g.researched.includes(r.id)) continue;
+      const used = r.scrap?.some((id) => g.recipe[id] > 0 || g.scrap[id].t > 0);
+      if (r.speed || (r.scrap && (r.stage <= g.stage || used))) g.researched.push(r.id);
+    }
+  }
   if (g.settings.relinePlanDays === undefined) {
     // Automatisk omforing krever nå en reparatør eller en plan (B-022)
     g.settings.relinePlanDays = null;

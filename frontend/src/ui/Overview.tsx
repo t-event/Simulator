@@ -1,3 +1,4 @@
+import { useState, type ReactNode } from "react";
 import { requestManual, setTargetGrade, upgradeOptions } from "../game/actions";
 import { Maintenance } from "./Maintenance";
 import { researchOptions } from "../game/research";
@@ -7,9 +8,11 @@ import { castingType, rollingActive, type PlantStats } from "../game/plant";
 import type { GameState, GradeId, RoleId } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { AnalysisLine, Bar, Card, GradeChips, Stat } from "./common";
-import { fmtClock, fmtKr, fmtPct, fmtRep, fmtT } from "./format";
+import { fmtClock, fmtKr, fmtPct, fmtT } from "./format";
 import { PlantScene } from "./PlantScene";
 import { SceneBubbles } from "./SceneBubbles";
+import { StageCard, StationButton, UpgradeSheet } from "./Upgrades";
+import type { Station } from "./stations";
 import type { View } from "./views";
 
 interface Props {
@@ -53,9 +56,10 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
     });
   const research = researchOptions(g).filter((r) => r.available);
   if (research.length)
-    out.push({ text: `Du har fagpoeng nok til å forske på ${research[0].name.toLowerCase()}.`, view: "bygg" });
+    out.push({ text: `Du har fagpoeng nok til å forske på ${research[0].name.toLowerCase()}.`, view: "forskning" });
   const next = upgradeOptions(g).find((o) => o.kind === "stage");
-  if (next?.available) out.push({ text: `Du har råd til å flytte inn i ${next.name.toLowerCase()}!`, view: "bygg" });
+  if (next?.available)
+    out.push({ text: `Du kan flytte inn i ${next.name.toLowerCase()}! Trykk «Flytt inn» under Mål lenger ned.` });
   if (g.stage >= 1 && stats.staffCount === 0)
     out.push({ text: "Nå har du plass til ansatte. Med flere folk kan verket gå flere skift.", view: "folk" });
   return out.slice(0, 3);
@@ -72,8 +76,48 @@ function furnaceState(g: GameState, index: number): { text: string; progress: nu
   return { text: f.waitReason ?? "Klar", progress: null };
 }
 
+/** Kvalitet de siste sju døgnene: holdt stålet kvaliteten det ble laget for? */
+function Quality({ g, stats, go, right }: { g: GameState; stats: PlantStats; go: (v: View) => void; right: ReactNode }) {
+  const days = [...g.history.slice(-6), g.today];
+  const on = days.reduce((a, d) => a + (d.onGradeT ?? 0), 0);
+  const off = days.reduce((a, d) => a + (d.offGradeT ?? 0), 0);
+  const second = days.reduce((a, d) => a + (d.secondT ?? 0), 0);
+  const total = on + off + second;
+  const lab = ["Ingen måling – du vet ikke sikkert hva som er i stålet", "Håndholdt analysator", "Spektrometer (hele analysen)"][
+    stats.lab
+  ];
+  return (
+    <Card title="Kvalitet" right={right}>
+      {total <= 0 ? (
+        <p className="g-muted">Ikke noe stål støpt ennå denne uka.</p>
+      ) : (
+        <>
+          <div className="g-goal">
+            <span>Riktig</span>
+            <Bar value={on / total} tone={on / total >= 0.9 ? "ok" : on / total >= 0.75 ? "warning" : "critical"} label="Riktig kvalitet" />
+            <span>{fmtPct(on / total)}</span>
+          </div>
+          <p className="g-muted">
+            Siste sju døgn: {fmtPct(on / total)} holdt kvaliteten, {fmtPct(off / total)} bommet på analysen og{" "}
+            {fmtPct(second / total)} fikk støpefeil. Stål som bommer, kan ikke leveres på kontrakten og selges billig.
+          </p>
+          {off / total > 0.05 && (
+            <button className="g-small" onClick={() => go("marked")}>
+              Se på resepten
+            </button>
+          )}
+          {second / total > 0.08 && (
+            <p className="g-muted">Støpefeil kommer oftest av feil temperatur. Erfarne folk gir færre feil.</p>
+          )}
+        </>
+      )}
+      <p className="g-muted">Måling: {lab}.</p>
+    </Card>
+  );
+}
+
 export function Overview({ g, stats, act, go }: Props) {
-  const next = STAGES[g.stage + 1];
+  const [sheet, setSheet] = useState<Station | null>(null);
   const est = recipeEstimate(g, g.targetGrade, stats);
   const order = currentOrder(g);
   const casting = castingType(g);
@@ -140,9 +184,12 @@ export function Overview({ g, stats, act, go }: Props) {
               <p>
                 {fmtT(stats.yardUsed)} av {fmtT(stats.yardT)}
               </p>
-              <button className="g-small" onClick={() => go("marked")}>
-                Kjøp skrap
-              </button>
+              <div className="g-row">
+                <button className="g-small" onClick={() => go("marked")}>
+                  Kjøp skrap
+                </button>
+                <StationButton g={g} station="skrap" onOpen={setSheet} />
+              </div>
             </div>
 
             {g.furnaces.map((f, i) => {
@@ -160,6 +207,7 @@ export function Overview({ g, stats, act, go }: Props) {
                   )}
                   <p>{st.text}</p>
                   <p className="g-muted">Foring {fmtPct(f.wear)} slitt</p>
+                  {i === 0 && <StationButton g={g} station="ovn" onOpen={setSheet} />}
                 </div>
               );
             })}
@@ -176,6 +224,7 @@ export function Overview({ g, stats, act, go }: Props) {
               <p className="g-muted">
                 {PRODUCTS[casting.product].name} · utbytte {fmtPct(casting.yield)}
               </p>
+              <StationButton g={g} station="stoping" onOpen={setSheet} />
             </div>
 
             {rollingActive(g) && (
@@ -195,13 +244,22 @@ export function Overview({ g, stats, act, go }: Props) {
               <p>
                 {fmtT(stats.storeUsed)} av {fmtT(stats.storeT)}
               </p>
-              <button className="g-small" onClick={() => go("salg")}>
-                Til salg
-              </button>
+              <div className="g-row">
+                <button className="g-small" onClick={() => go("salg")}>
+                  Til salg
+                </button>
+                <StationButton g={g} station="lager" onOpen={setSheet} />
+              </div>
             </div>
           </div>
         </Card>
-              <Maintenance g={g} stats={stats} act={act} />
+        <Maintenance
+          g={g}
+          stats={stats}
+          act={act}
+          right={<StationButton g={g} station="vedlikehold" onOpen={setSheet} />}
+        />
+        {sheet && <UpgradeSheet g={g} station={sheet} act={act} onClose={() => setSheet(null)} />}
       </div>
 
       <div className="g-col">
@@ -214,6 +272,7 @@ export function Overview({ g, stats, act, go }: Props) {
           ) : (
             <p className="g-muted">Ingen kontrakt venter på produksjon. Verket lager {GRADES[g.targetGrade].name.toLowerCase()} for lager og spot.</p>
           )}
+          {(g.stage >= 1 || g.contracts.filter((c) => c.status === "aktiv").length > 1) && (
           <label className="g-toggle">
             <input
               type="checkbox"
@@ -222,6 +281,7 @@ export function Overview({ g, stats, act, go }: Props) {
             />
             <span>Følg ordrekøen (kvalitet og resept skifter etter kontrakten som står først)</span>
           </label>
+          )}
           <label className="g-field">
             <span>Kjør mot kvalitet</span>
             <select
@@ -229,7 +289,7 @@ export function Overview({ g, stats, act, go }: Props) {
               disabled={g.settings.followQueue && !!order}
               onChange={(e) => act((gg) => setTargetGrade(gg, e.target.value as GradeId))}
             >
-              {GRADE_IDS.map((id) => (
+              {GRADE_IDS.filter((id) => GRADES[id].minStage <= g.stage || id === g.targetGrade).map((id) => (
                 <option key={id} value={id}>
                   {GRADES[id].name}
                 </option>
@@ -241,7 +301,7 @@ export function Overview({ g, stats, act, go }: Props) {
             <span>Anslag med resepten:</span>
             <AnalysisLine a={est.analysis} />
             <span>Holder:</span>
-            <GradeChips grades={est.grades} highlight={g.targetGrade} />
+            <GradeChips grades={est.grades.filter((id) => GRADES[id].minStage <= g.stage)} highlight={g.targetGrade} />
           </div>
           {stats.furnace.arc ? (
             <div className="g-manual">
@@ -256,34 +316,13 @@ export function Overview({ g, stats, act, go }: Props) {
               </p>
             </div>
           ) : (
-            <p className="g-muted">Med en lysbueovn kan du ta styringen og kjøre chargene selv.</p>
+            g.stage >= 2 && <p className="g-muted">Med en lysbueovn kan du ta styringen og kjøre chargene selv.</p>
           )}
         </Card>
 
-        {next && (
-          <Card
-            title={`Mål: ${next.name}`}
-            right={
-              <button className="g-small" onClick={() => go("bygg")}>
-                Bygg
-              </button>
-            }
-          >
-            <p className="g-muted">{next.description}</p>
-            <div className="g-goal">
-              <span>Penger</span>
-              <Bar value={Math.max(0, g.cash) / next.price} tone="ok" label="Penger" />
-              <span>
-                {fmtKr(Math.max(0, g.cash))} / {fmtKr(next.price)}
-              </span>
-              <span>Omdømme</span>
-              <Bar value={g.reputation / next.reputation} tone="ok" label="Omdømme" />
-              <span>
-                {fmtRep(g.reputation)} / {next.reputation}
-              </span>
-            </div>
-          </Card>
-        )}
+        <Quality g={g} stats={stats} go={go} right={<StationButton g={g} station="kvalitet" onOpen={setSheet} />} />
+
+        <StageCard g={g} act={act} />
 
         <Card title="Økonomi">
           <div className="g-stats">
@@ -297,7 +336,7 @@ export function Overview({ g, stats, act, go }: Props) {
               />
             )}
             {y && <Stat label="Produsert i går" value={fmtT(y.producedT)} />}
-            <Stat label="Lønn per døgn" value={fmtKr(stats.salaryPerDay)} />
+            {stats.salaryPerDay > 0 && <Stat label="Lønn per døgn" value={fmtKr(stats.salaryPerDay)} />}
             <Stat label="Faste kostnader per døgn" value={fmtKr(STAGES[g.stage].fixedPerDay)} />
             {g.loan > 0 && <Stat label="Lån" value={fmtKr(g.loan)} tone="warning" />}
           </div>

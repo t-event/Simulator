@@ -8,7 +8,7 @@
  */
 import { buyUpgrade, doResearch, hire, requestReline, setRecipe, setTargetGrade, upgradeOptions } from "./actions";
 import { resolveDecision } from "./decisions";
-import { researchOptions } from "./research";
+import { researchOptions, scrapUnlocked } from "./research";
 import { SCRAP_IDS, STAGES } from "./data";
 import { acceptContract, advance, autoBuy, completeManual, newGame, TARGET_C } from "./engine";
 import { EAFSimulation } from "../sim/eaf";
@@ -63,6 +63,7 @@ function cheapestRecipe(g: GameState, grade: GradeId): Recipe | null {
   let best: Recipe | null = null;
   let bestPrice = Infinity;
   for (const r of PRESETS) {
+    if (!SCRAP_IDS.every((id) => !r[id] || scrapUnlocked(g, id))) continue;
     const e = expectedFor(g, r, grade);
     if (e.ok && e.price < bestPrice) {
       best = r;

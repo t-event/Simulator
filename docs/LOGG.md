@@ -25,7 +25,13 @@ planlagt omforing via forskning, eller reparatør. Planlagt stans og havari skil
 meldinger og straff. Testet på iPhone 13 (knappen bytter tekst, ingen horisontal scroll, ingen
 konsollfeil) og balansetest (11 / 43 / 98 / 182).
 
-**Gjenstår:** Tema D–G i arbeidslisten.
+**Tema D (B-023):** Gradvis opplåsing av faner, fart og skraptyper; utstyr kjøpes fra stedet i
+anlegget på Verket; Bygg-fanen erstattet av Forskning; reseptsjekk med forklaring og «Foreslå billigste
+resept»; nytt Kvalitet-kort. Testet på iPhone 13 (garasje og nivå 3): riktige faner, låst fart gir
+forklaring, forslag setter resepten, utstyrsark åpner, ingen horisontal scroll, ingen konsollfeil.
+Balanse 11 / 49 / 100 / 187.
+
+**Gjenstår:** Tema E–G i arbeidslisten.
 
 ---
 

@@ -113,12 +113,13 @@ Oppdater listen når noe blir gjort, så arbeidet kan fortsette i en ny samtale.
 - [x] Tydelig forskjell på planlagt stans (billig, kort) og havari (dyrt, langt, omdømme)
 
 **D. Gradvis opplåsing og ryddigere grensesnitt**
-- [ ] Mindre info i starten; faner og kort låses opp etter hvert
-- [ ] Ovn, støping, utstyr og bygg mer sentralt – ikke gjemt i Bygg-menyen
-- [ ] Skraptyper låses opp med fagpoeng; ikke alt fra start
-- [ ] 3× og 10× fart låses opp med fagpoeng
-- [ ] Resepten mer intuitiv: vis hva som mangler for kvaliteten og hvordan det rettes, med forslag
-- [ ] Fokus på flere ting enn å godta kontrakter; kvaliteten man produserer mer sentral
+- [x] Mindre info i starten; faner og kort låses opp etter hvert (Folk, Forskning, fart, skrap)
+- [x] Ovn, støping, utstyr og bygg mer sentralt – «Utstyr»-knapp på hvert sted i anlegget på Verket
+- [x] Skraptyper låses opp med fagpoeng; ikke alt fra start
+- [x] 3× og 10× fart låses opp med fagpoeng
+- [x] Resepten mer intuitiv: vis hva som mangler for kvaliteten og hvordan det rettes, med forslag
+- [x] Fokus på flere ting enn å godta kontrakter; kvaliteten man produserer mer sentral (Kvalitet-kort;
+      mer kommer med strøm i tema E og ansatte i tema G)
 
 **E. Strøm** (brukerens valg: alle fire)
 - [ ] Strømavtale: spot, fastpris eller nattariff, med bindingstid
