@@ -5,6 +5,15 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 20 – 2026-09-24: utstyr på ovn 2
+
+**Brukeren meldte (skjermbilde):** Ovn 2 skal ha egen «utstyrsbutikk» som ovn 1.
+
+**Gjort (B-041):** Knappen «Utstyr» vises på hver ovn. Butikken sier at ovnstype og utstyr gjelder alle ovnene.
+Testet med Playwright (iPhone 13): knappen på ovn 2 åpner ovnsutstyret, 390 px, ingen feil.
+
+---
+
 ## Økt 19 – 2026-09-24: to kvaliteter, fraværsvarsler, rammeavtaler og vikarer
 
 **Brukeren ba om:** To kvaliteter samtidig med to linjer, varsel når noen tar ferie eller blir syk, faste

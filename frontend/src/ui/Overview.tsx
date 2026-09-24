@@ -515,7 +515,7 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
                       )}
                       <p>{st.text}</p>
                       <p className="g-muted">Foring {fmtPct(f.wear)} slitt</p>
-                      {i === 0 && <StationButton g={g} station="ovn" onOpen={setSheet} />}
+                      <StationButton g={g} station="ovn" onOpen={setSheet} />
                     </div>
                   );
                 })}

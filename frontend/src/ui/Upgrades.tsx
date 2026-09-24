@@ -80,6 +80,11 @@ export function UpgradeSheet({
             ✕
           </button>
         </header>
+        {station === "ovn" && g.furnaces.length > 1 && (
+          <p className="g-muted">
+            Du har {g.furnaces.length} ovner. Ny ovnstype og utstyret her gjelder alle ovnene, så de bygges om samtidig.
+          </p>
+        )}
         <div className="g-upgrades">
           {options.map((o) => (
             <UpgradeCard key={o.id} o={o} act={act} />

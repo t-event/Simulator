@@ -552,3 +552,10 @@ sier opp, og omdømmet trekkes like mye som bonusen ville gitt. Lager verket ikk
 valseverk), avsluttes avtalen uten straff. «Ta imot nye forespørsler» gjelder også rammeavtaler.
 Balanse: testspilleren tar avtaler som er under 35 % av en ukes produksjon og i kvaliteten den kjører.
 Nivådager: 10 / 24 / 62 / 142.
+
+## B-041 Utstyrsknapp på hver ovn (2026-09-24)
+Status: gjelder
+Brukeren ville at ovn 2 skulle ha egen «utstyrsbutikk» som ovn 1.
+Beslutning: «Utstyr» vises på hver ovn i Anlegg og åpner ovnsutstyret. Alle ovnene er av samme type, og ny
+ovnstype eller nytt ovnsutstyr gjelder alle ovnene samtidig. Det står nå i butikken når verket har flere
+ovner. Egen ovnstype per ovn er ikke laget; det ville krevd at kapasitet, mannskap og strøm regnes per ovn.
