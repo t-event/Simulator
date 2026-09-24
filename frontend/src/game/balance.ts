@@ -6,7 +6,7 @@
  * rekker, ansetter folk og bygger ut når det er råd. Skriptet sjekker at
  * progresjonen havner innenfor målene, og feiler ellers (brukes i CI).
  */
-import { buyUpgrade, doResearch, hire, requestReline, setRecipe, setTargetGrade, upgradeOptions } from "./actions";
+import { bonusCost, buyUpgrade, courseCost, doResearch, giveBonus, hire, requestReline, sendOnCourse, setRecipe, setTargetGrade, upgradeOptions } from "./actions";
 import { resolveDecision } from "./decisions";
 import { researchOptions, scrapUnlocked } from "./research";
 import { SCRAP_IDS, STAGES } from "./data";
@@ -77,6 +77,36 @@ function applyRecipe(g: GameState, r: Recipe): void {
   for (const id of SCRAP_IDS) setRecipe(g, id, r[id] ?? 0);
 }
 
+const RESEARCH_PRIORITY = [
+  // Det som låser opp neste ovn og støping først – resten når det er råd
+  "rutiner",
+  "stodig",
+  "skrapkjop",
+  "induksjon",
+  "nyskrap",
+  "maskinforming",
+  "blokkstoping",
+  "lysbue",
+  "strengstoping",
+  "valsing",
+  "kundepleie",
+  "energistyring",
+  "vedlikeholdsplan",
+  "stralevern",
+  "rontgen",
+  "opplaering",
+  "spektrometri",
+  "rajern",
+  "hoyeffekt",
+  "osemetallurgi",
+  "sikkerhet",
+  "sortering",
+  "ildfast",
+  "skumslagg",
+  "forvarming",
+  "eksport",
+];
+
 function botHour(g: GameState): void {
   // Hendelseskort: forsiktige valg, som en fornuftig spiller
   if (g.pendingDecision) {
@@ -89,10 +119,22 @@ function botHour(g: GameState): void {
     safe.radgiver = affordable ? 0 : 2;
     resolveDecision(g, safe[d.id] ?? 1);
   }
+  // Folk: bonus når trivselen er lav, kurs til de minst erfarne når det er god råd (B-026)
+  if (g.workers.length && g.morale < 50 && g.cash > bonusCost(g) * 5) giveBonus(g);
+  if (g.stage >= 2 && g.cash > courseCost(g) * 40) {
+    const w = g.workers.find((x) => x.skill < 2.5 && (x.courseDay === undefined || day(g) - x.courseDay >= 10));
+    if (w) sendOnCourse(g, w.id);
+  }
   // Fagboka: testspilleren leser alle kapitler den får
   for (const k of g.knowledge) if (!g.readChapters.includes(k)) g.readChapters.push(k);
   // Forskning: alt som er tilgjengelig, i tabellens rekkefølge
-  for (const r of researchOptions(g)) if (r.available) doResearch(g, r.id);
+  // Forskning i prioritert rekkefølge, som en spiller som vet hva som gir mest: spar opp til det viktigste
+  for (const id of RESEARCH_PRIORITY) {
+    const r = researchOptions(g).find((x) => x.id === id);
+    if (!r || r.done || r.locked) continue;
+    if (r.available) doResearch(g, r.id);
+    else if (!r.reason?.startsWith("Krever")) break;
+  }
   const stats = computePlantStats(g);
   const today = day(g);
 

@@ -30,6 +30,17 @@ export function loadGame(): GameState | null {
   }
 }
 
+/** Leser en sikkerhetskopi (JSON-fil fra «Last ned sikkerhetskopi»). Null hvis fila ikke er et lagret spill. */
+export function parseSave(text: string): GameState | null {
+  try {
+    const g = JSON.parse(text) as GameState;
+    if (!g || g.version !== SAVE_VERSION || typeof g.minute !== "number") return null;
+    return migrate(g);
+  } catch {
+    return null;
+  }
+}
+
 export function clearSave(): void {
   try {
     localStorage.removeItem(KEY);
@@ -57,6 +68,10 @@ export function migrate(g: GameState): GameState {
     g.settings.shiftStart = 6;
   }
   if (loose.gridCut === undefined) loose.gridCut = null;
+  if (loose.morale === undefined) {
+    loose.morale = 70;
+    loose.lastBonusDay = -99;
+  }
   if (loose.readChapters === undefined) {
     // Fagboka (B-025): kapitler man allerede har, regnes som lest, så forskning ikke stopper opp
     loose.readChapters = [...g.knowledge];

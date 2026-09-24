@@ -284,3 +284,27 @@ Beslutning:
 - Gamle lagringer regner kapitlene de har som lest.
 - Testspilleren leser alle kapitler, tar ikke quiz, og leier spesialist når den har god råd.
   Balanse: 10 / 40 / 104 / 180.
+
+## B-026 Trivsel, kurs, tregere fagpoeng, sikkerhetskopi og batteri (2026-09-24)
+Status: gjelder (fagpoeng per charge erstatter tallene i B-018)
+Beslutning:
+- **Trivsel** (`morale`, 0–100, start 70) for de ansatte. Innsatsen ganges med 0,85 + 0,3 × trivsel/100
+  (70 gir +6 %), og folk lærer raskere når de trives. Trivselen drar mot 60, synker med nattskift
+  (−1,5 per døgn), havari (−4), reklamasjon (−1), avslått lønnskrav (−15) og skade (−15), og stiger med
+  leveranser (+0,5), lønnstillegg (+10), kurs og bonus. Under 35 kan folk si opp.
+- **Bonus til alle:** to dagers lønn, trivsel +15, én gang i uka. **Kurs per ansatt:**
+  3 000 × (1 + nivå) kr, ferdighet +0,6, ett kurs per ti døgn per person.
+- **Fagpoeng per charge:** garasje 0,5, verksted 0,2, støperi 0,25, stålverk 0,2, storverk 0,15.
+  Før flyttingen fra verkstedet lå testspilleren på 45–150 ubrukte fagpoeng; nå 2–13.
+  Lysbueteknikk og strengstøping koster 200 (var 260), så stålverket ikke står fast.
+- **Testspilleren** forsker etter en prioritert liste (det som låser opp neste ovn og støping først)
+  og sparer opp til det viktigste, som en spiller som vet hva som gir mest. Den gir bonus når
+  trivselen er under 50, og sender de minst erfarne på kurs når det er god råd.
+- **Penger og omdømme i verkstedet:** testspilleren når kravene til penger og omdømme omtrent samtidig
+  (dag 22–29 og 27–32). At brukeren hadde 1,8 mill. kr med omdømme 18, tyder på at pengene manglet
+  noe fornuftig å gå til. Nå kan de brukes på utstyr fra Verket, bonus og kurs, og målkortet viser
+  tydelig når man kan flytte. Følg med på om det fortsatt føles skjevt.
+- **Sikkerhetskopi:** «Last ned sikkerhetskopi» og «Hent sikkerhetskopi» i Forskning-fanen, og henting
+  også på startskjermen (Safari kan slette data for nettsider som ikke er brukt på en uke).
+- **Batteri:** skjermen tegnes ikke på nytt når spillet står på pause eller ikke vises.
+- Balanse: 10 / 32 / 101 / 185, ingen konkurs.

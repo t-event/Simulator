@@ -62,6 +62,8 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
   const next = upgradeOptions(g).find((o) => o.kind === "stage");
   if (next?.available)
     out.push({ text: `Du kan flytte inn i ${next.name.toLowerCase()}! Trykk «Flytt inn» under Mål lenger ned.` });
+  if (g.workers.length && g.morale < 40)
+    out.push({ text: "Trivselen blant de ansatte er lav, og noen kan si opp. Se Folk.", view: "folk" });
   if (g.stage >= 1 && stats.staffCount === 0)
     out.push({ text: "Nå har du plass til ansatte. Med flere folk kan verket gå flere skift.", view: "folk" });
   return out.slice(0, 3);

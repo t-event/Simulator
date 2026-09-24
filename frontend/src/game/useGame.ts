@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { GAME_MIN_PER_REAL_S } from "./data";
 import { advance, newGame, type PurchaseResult } from "./engine";
 import { maxSpeed } from "./research";
-import { clearSave, loadGame, saveGame } from "./save";
+import { clearSave, loadGame, parseSave, saveGame } from "./save";
 import type { GameState, LogEntry } from "./types";
 
 const TICK_MS = 200;
@@ -28,6 +28,8 @@ export interface GameApi {
   setSpeed: (speed: number) => void;
   dismissToast: (id: number) => void;
   quit: () => void;
+  /** Starter fra en sikkerhetskopi. Gir false hvis fila ikke var et lagret spill. */
+  loadBackup: (text: string) => boolean;
 }
 
 export function useGame(): GameApi {
@@ -60,6 +62,17 @@ export function useGame(): GameApi {
     const g = loadGame();
     begin(g ?? newGame());
   }, [begin]);
+
+  const loadBackup = useCallback(
+    (text: string) => {
+      const g = parseSave(text);
+      if (!g) return false;
+      g.speed = 0;
+      begin(g);
+      return true;
+    },
+    [begin],
+  );
 
   const quit = useCallback(() => {
     gameRef.current = null;
@@ -116,6 +129,7 @@ export function useGame(): GameApi {
       const now = performance.now();
       const elapsed = Math.min((now - last) / 1000, MAX_ELAPSED_S);
       last = now;
+      const wasRunning = g.speed > 0;
       if (g.speed > 0 && !g.pendingManual && !g.gameOver) {
         advance(g, elapsed * g.speed * GAME_MIN_PER_REAL_S);
         flushLog();
@@ -124,7 +138,9 @@ export function useGame(): GameApi {
         saveGame(g);
         lastSave = now;
       }
-      bump();
+      // Spar batteri: ikke tegn på nytt når spillet står på pause eller ikke vises
+      // (men tegn når spillet nettopp stoppet, f.eks. for et hendelseskort)
+      if (wasRunning && document.visibilityState !== "hidden") bump();
     }, TICK_MS);
 
     const saveNow = () => {
@@ -143,5 +159,5 @@ export function useGame(): GameApi {
     };
   }, [game, bump, flushLog]);
 
-  return { game, hasSave, toasts, startNew, continueSaved, act, setSpeed, dismissToast, quit };
+  return { game, hasSave, toasts, startNew, continueSaved, act, setSpeed, dismissToast, quit, loadBackup };
 }

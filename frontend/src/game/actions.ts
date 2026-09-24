@@ -2,7 +2,7 @@
  * Det spilleren kan gjøre: bygge ut, kjøpe utstyr, ansette, låne og styre produksjonen.
  */
 import { ADDONS, CASTINGS, FURNACES, GRADES, PRODUCTS, SCRAP_IDS, STAGES, type Addon } from "./data";
-import { addCost, fmtKr, fmtT, log, orderQueue, startReline, maxLoan, newFurnaceUnit, unlock, type PurchaseResult } from "./engine";
+import { addCost, adjustMorale, fmtKr, fmtT, log, orderQueue, startReline, maxLoan, newFurnaceUnit, unlock, type PurchaseResult } from "./engine";
 import { castingType, computePlantStats, day, fixedPowerOffer, furnaceType, has, POWER_BINDING_DAYS } from "./plant";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
 import type { GameState, GradeId, PowerDeal, ScrapId } from "./types";
@@ -395,4 +395,46 @@ export const SHIFT_STARTS = [6, 14, 22];
 
 export function setShiftStart(g: GameState, hour: number): void {
   if (SHIFT_STARTS.includes(hour)) g.settings.shiftStart = hour;
+}
+
+// ------------------------------------------------------------------ //
+// Trivsel og kurs (B-026)
+// ------------------------------------------------------------------ //
+export const BONUS_COOLDOWN_DAYS = 7;
+export const COURSE_COOLDOWN_DAYS = 10;
+
+/** Bonus til alle: to dagers lønn, trivselen +15. Én gang i uka. */
+export function bonusCost(g: GameState): number {
+  return Math.round(g.workers.reduce((a, w) => a + w.salary, 0) * 2);
+}
+
+export function giveBonus(g: GameState): PurchaseResult {
+  if (!g.workers.length) return fail("Du har ingen ansatte.");
+  if (day(g) - g.lastBonusDay < BONUS_COOLDOWN_DAYS)
+    return fail(`Bonus kan gis igjen dag ${g.lastBonusDay + BONUS_COOLDOWN_DAYS}.`);
+  const cost = bonusCost(g);
+  addCost(g, "lonn", cost);
+  g.lastBonusDay = day(g);
+  adjustMorale(g, 15);
+  log(g, `Alle ansatte fikk bonus (${fmtKr(cost)}). Trivselen stiger.`, "good");
+  return { ok: true, message: "Bonus utbetalt." };
+}
+
+export function courseCost(g: GameState): number {
+  return 3_000 * (1 + g.stage);
+}
+
+/** Kurs for én ansatt: ferdighet +0,6 og litt bedre trivsel. */
+export function sendOnCourse(g: GameState, workerId: number): PurchaseResult {
+  const w = g.workers.find((x) => x.id === workerId);
+  if (!w) return fail("Fant ikke den ansatte.");
+  if (w.skill >= 5) return fail(`${w.name} kan alt kurset lærer bort.`);
+  if (w.courseDay !== undefined && day(g) - w.courseDay < COURSE_COOLDOWN_DAYS)
+    return fail(`${w.name} var nylig på kurs. Neste mulighet dag ${w.courseDay + COURSE_COOLDOWN_DAYS}.`);
+  addCost(g, "annet", courseCost(g));
+  w.skill = Math.min(5, w.skill + 0.6);
+  w.courseDay = day(g);
+  adjustMorale(g, 1);
+  log(g, `${w.name} har vært på kurs og er blitt flinkere.`, "good");
+  return { ok: true, message: "Kurs gjennomført." };
 }

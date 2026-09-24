@@ -5,7 +5,7 @@ ble testet, og hva som gjenstår.
 
 ---
 
-## Økt 8 – 2026-09-24: tilbakemeldingsrunde 2, tema A
+## Økt 8 – 2026-09-24: tilbakemeldingsrunde 2, tema A–G
 
 **Brukeren ba om:** En lang liste forbedringer (se arbeidslisten i `docs/DESIGN.md`), med valg for
 fagbok, strøm og planlegging (B-019).
@@ -42,7 +42,14 @@ quiz riktig gir +2 FP og åpner Forskning-fanen, feil svar viser forklaring og s
 «Les kapitlet» åpner riktig kapittel og låser opp forskningen. Rådgiveren testet i Node (spesialistene
 virker). Ingen konsollfeil. Balanse 10 / 40 / 104 / 180.
 
-**Gjenstår:** Tema G i arbeidslisten.
+**Tema G (B-026):** Trivsel med bonus og kurs per ansatt, tregere fagpoeng, testspiller med
+prioritert forskning, sikkerhetskopi (last ned/hent) og mindre tegning på pause. Testet på iPhone 13:
+bonus løfter trivselen 70 → 85 og låses i en uke, kurs låses etter bruk, sikkerhetskopi lastet ned og
+hentet inn igjen fra startskjermen. Ingen konsollfeil. Balanse 10 / 32 / 101 / 185.
+
+**Gjenstår:** Veiledet start de første minuttene (Claudes eget forslag). Følg med på om penger og
+omdømme fortsatt føles skjevt i verkstedet, og om storverket blir for lønnsomt (flere testspillere
+passerer 100 mill. kr før dag 240).
 
 ---
 

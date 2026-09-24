@@ -1,10 +1,20 @@
 import { useState } from "react";
-import { fire, hire, hireForMissing } from "../game/actions";
+import {
+  BONUS_COOLDOWN_DAYS,
+  bonusCost,
+  COURSE_COOLDOWN_DAYS,
+  courseCost,
+  fire,
+  giveBonus,
+  hire,
+  hireForMissing,
+  sendOnCourse,
+} from "../game/actions";
 import { CREW_ROLES, ROLE_IDS, ROLES, STAGES } from "../game/data";
-import type { PlantStats } from "../game/plant";
+import { day, moraleFactor, nightExtra, type PlantStats } from "../game/plant";
 import type { GameState, RoleId, Worker } from "../game/types";
 import type { GameApi } from "../game/useGame";
-import { Card, Stat } from "./common";
+import { Bar, Card, Stat } from "./common";
 import { fmtKr, fmtNum } from "./format";
 import { ShiftPlan } from "./Power";
 
@@ -39,6 +49,35 @@ function WorkerRow({ w, action }: { w: Worker; action: React.ReactNode }) {
       <span className="g-muted">{fmtKr(w.salary)}/dag</span>
       {action}
     </li>
+  );
+}
+
+/** Trivsel: gjør folk bedre eller dårligere, og lav trivsel får dem til å slutte (B-026) */
+function Morale({ g, stats, act }: Props) {
+  if (!g.workers.length) return null;
+  const m = g.morale;
+  const tone = m >= 60 ? "ok" : m >= 35 ? "warning" : "critical";
+  const nextBonus = g.lastBonusDay + BONUS_COOLDOWN_DAYS;
+  const effect = Math.round((moraleFactor(g) - 1) * 100);
+  return (
+    <Card title="Trivsel">
+      <div className="g-goal">
+        <span>Trivsel</span>
+        <Bar value={m / 100} tone={tone} label="Trivsel" />
+        <span>{Math.round(m)} av 100</span>
+      </div>
+      <p className="g-muted">
+        {m >= 60 ? "Folk trives og lærer raskt." : m >= 35 ? "Stemningen er så som så." : "Folk mistrives, og noen kan si opp."}{" "}
+        Innsatsen er {effect >= 0 ? `${effect} % bedre` : `${-effect} % dårligere`} enn ferdigheten tilsier.
+      </p>
+      <p className="g-muted">
+        Trivselen stiger med bonus, kurs, lønnstillegg og leveranser i tide. Den synker med havarier, reklamasjoner,
+        avslåtte lønnskrav{nightExtra(g, stats.hours) > 0 ? " og nattskift (som du har nå)" : " og nattskift"}.
+      </p>
+      <button className="g-primary" disabled={day(g) < nextBonus} onClick={() => act((gg) => giveBonus(gg))}>
+        {day(g) < nextBonus ? `Bonus igjen dag ${nextBonus}` : `Gi alle bonus (${fmtKr(bonusCost(g))})`}
+      </button>
+    </Card>
   );
 }
 
@@ -94,10 +133,12 @@ export function People({ g, stats, act }: Props) {
             </tbody>
           </table>
           <p className="g-muted">
-            Mannskapets ferdighet: {fmtNum(stats.crewSkill, 1)} av 5. Flinke folk gir kortere charger og færre feil, og
-            alle blir flinkere av å jobbe.
+            Mannskapets ferdighet (med trivsel): {fmtNum(stats.crewSkill, 1)} av 5. Flinke folk gir kortere charger og
+            færre feil. Alle blir flinkere av å jobbe, og raskere på kurs.
           </p>
         </Card>
+
+        <Morale g={g} stats={stats} act={act} />
 
         <Card title={`Ansatte (${g.workers.length})`}>
           {g.workers.length === 0 && (
@@ -132,9 +173,21 @@ export function People({ g, stats, act }: Props) {
                             </button>
                           </span>
                         ) : (
-                          <button className="g-small" onClick={() => setConfirmFire(w.id)}>
-                            Si opp
-                          </button>
+                          <span className="g-row">
+                            <button
+                              className="g-small"
+                              disabled={
+                                w.skill >= 5 || (w.courseDay !== undefined && day(g) - w.courseDay < COURSE_COOLDOWN_DAYS)
+                              }
+                              title="Ferdighet +0,6"
+                              onClick={() => act((gg) => sendOnCourse(gg, w.id))}
+                            >
+                              Kurs ({fmtKr(courseCost(g))})
+                            </button>
+                            <button className="g-small" onClick={() => setConfirmFire(w.id)}>
+                              Si opp
+                            </button>
+                          </span>
                         )
                       }
                     />

@@ -133,6 +133,8 @@ export interface Worker {
   skill: number;
   salary: number;
   hiredDay: number;
+  /** Siste dag den ansatte var på kurs (B-026) */
+  courseDay?: number;
 }
 
 export interface LogEntry {
@@ -314,6 +316,10 @@ export interface GameState {
   advisorSeen: Record<string, number>;
   /** Innleide spesialister: årsak → spillminuttet de er ferdige */
   specialists: Record<string, number>;
+  /** Trivselen blant de ansatte, 0–100 (B-026) */
+  morale: number;
+  /** Dagen det sist ble gitt bonus */
+  lastBonusDay: number;
   /** Faner spilleren har sett (nye faner får et «Ny»-merke, B-023) */
   seenViews: string[];
   /** Nivået spilleren nettopp flyttet til, for feiring; null når det er sett */

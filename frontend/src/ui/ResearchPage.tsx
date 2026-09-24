@@ -15,9 +15,42 @@ interface Props {
   act: GameApi["act"];
   onQuit: () => void;
   openBook: (chapter?: string) => void;
+  onLoadBackup: (text: string) => boolean;
 }
 
-export function ResearchPage({ g, stats, act, onQuit, openBook }: Props) {
+/** Laster ned hele spillet som en JSON-fil */
+function downloadBackup(g: GameState): void {
+  const blob = new Blob([JSON.stringify(g)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `stalverket-dag-${Math.floor(g.minute / 1440) + 1}.json`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/** Knapp som henter en sikkerhetskopi fra en fil */
+export function BackupInput({ onLoad }: { onLoad: (text: string) => boolean }) {
+  const [error, setError] = useState(false);
+  return (
+    <label className="g-file-btn">
+      Hent sikkerhetskopi
+      <input
+        type="file"
+        accept="application/json,.json"
+        onChange={async (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          setError(!onLoad(await file.text()));
+          e.target.value = "";
+        }}
+      />
+      {error && <span className="g-muted"> Fila er ikke et lagret spill.</span>}
+    </label>
+  );
+}
+
+export function ResearchPage({ g, stats, act, onQuit, openBook, onLoadBackup }: Props) {
   const [confirmQuit, setConfirmQuit] = useState(false);
   const loanRoom = Math.max(0, maxLoan(g) - g.loan);
   const loanStep = Math.max(10_000, Math.round(maxLoan(g) / 4 / 10_000) * 10_000);
@@ -72,7 +105,14 @@ export function ResearchPage({ g, stats, act, onQuit, openBook }: Props) {
           ) : (
             <button onClick={() => setConfirmQuit(true)}>Start nytt spill</button>
           )}
-          <p className="g-muted">Spillet lagres automatisk i denne nettleseren.</p>
+          <p className="g-muted">
+            Spillet lagres automatisk i denne nettleseren. Safari kan slette lagrede data for nettsider som ikke er
+            brukt på en uke – legg spillet på hjemskjermen, eller ta en sikkerhetskopi.
+          </p>
+          <div className="g-row">
+            <button onClick={() => downloadBackup(g)}>Last ned sikkerhetskopi</button>
+            <BackupInput onLoad={onLoadBackup} />
+          </div>
         </Card>
       </div>
     </div>

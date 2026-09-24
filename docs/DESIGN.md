@@ -134,13 +134,14 @@ Oppdater listen når noe blir gjort, så arbeidet kan fortsette i en ny samtale.
 - [x] Rådgiver ved gjentatte omdømmetap: forklarer feilen, viser til kapittel, spesialist mot betaling
 
 **G. Ansatte og balanse**
-- [ ] Ansatte med mer å si (trivsel, kurs, spesialister)
-- [ ] Verkstedet: omdømme 18 og 1,8 mill. kr – kostnader og omdømme skjevt fordelt
-- [ ] Fagpoeng kommer fortsatt for fort
+- [x] Ansatte med mer å si (trivsel, bonus, kurs per ansatt; spesialister via rådgiveren i tema F)
+- [x] Verkstedet: omdømme 18 og 1,8 mill. kr – pengene har nå flere nyttige formål (utstyr på Verket,
+      bonus, kurs), og penger og omdømme holder følge for testspilleren (se B-026)
+- [x] Fagpoeng kommer fortsatt for fort
 - [x] Ting bør ta mer tid
 
 **Claudes egne forslag**
-- [ ] Sikkerhetskopi av lagret spill (Safari kan slette data for nettsider som ikke er brukt på 7 dager,
+- [x] Sikkerhetskopi av lagret spill (Safari kan slette data for nettsider som ikke er brukt på 7 dager,
       med mindre spillet er lagt på hjemskjermen)
-- [ ] Spare batteri: tegne skjermen sjeldnere
+- [x] Spare batteri: tegne skjermen sjeldnere (ikke på pause eller i bakgrunnen)
 - [ ] Veiledet start de første minuttene
