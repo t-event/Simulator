@@ -135,12 +135,6 @@ export interface FurnaceState {
   scenario: string | null;
 }
 
-export interface ScenarioInfo {
-  id: string;
-  name: string;
-  briefing: string;
-  grade: string;
-}
 
 export const PHASE_LABEL: Record<Phase, string> = {
   klar: "Klar",

@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import type { FurnaceState, ScenarioInfo } from "../types";
+import type { FurnaceState } from "../types";
 import { COOLING_LABEL } from "../types";
+import { SCENARIOS } from "../sim/scenarios";
 
 interface Props {
   state: FurnaceState;
@@ -9,19 +9,7 @@ interface Props {
 }
 
 export function InstructorPanel({ state, sendCommand, sendInstructor }: Props) {
-  const [scenarios, setScenarios] = useState<ScenarioInfo[]>([]);
-  const apiBase =
-    (import.meta.env.VITE_API_URL as string | undefined) ??
-    `http://${window.location.hostname}:8000`;
-
-  useEffect(() => {
-    fetch(`${apiBase}/api/scenarios`)
-      .then((r) => r.json())
-      .then(setScenarios)
-      .catch(() => setScenarios([]));
-  }, [apiBase]);
-
-  const active = scenarios.find((s) => s.id === state.scenario);
+  const active = SCENARIOS.find((s) => s.id === state.scenario);
 
   return (
     <div className="instructor-panel">
@@ -36,7 +24,7 @@ export function InstructorPanel({ state, sendCommand, sendInstructor }: Props) {
 
       <div className="panel-subtitle">Scenarioer</div>
       <ul className="scenario-list">
-        {scenarios.map((s) => (
+        {SCENARIOS.map((s) => (
           <li key={s.id} className={state.scenario === s.id ? "scenario-active" : ""}>
             <div>
               <strong>{s.name}</strong>

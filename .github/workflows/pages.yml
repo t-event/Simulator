@@ -10,9 +10,10 @@ permissions:
   pages: write
   id-token: write
 
+# En påbegynt publisering får alltid fullføre; nyere kjøringer venter i kø
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:

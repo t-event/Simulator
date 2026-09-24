@@ -10,7 +10,10 @@ innenfor temperaturvinduet. Et eget instruktørpanel styrer øvelser og
 injiserer feil.
 
 Hele simuleringen kjører i nettleseren. Det er ingen server å drifte for
-vanlig bruk – appen publiseres på GitHub Pages og deles som en URL.
+vanlig bruk – appen publiseres på GitHub Pages og deles som en URL. Den
+fungerer på PC, nettbrett og mobil; på mobil vises én seksjon om gangen
+(Ovn, Styring, Kjemi, Alarmer, Instruktør) med nøkkeltallene alltid synlige
+øverst.
 
 ## Hva som er modellert
 
@@ -72,25 +75,31 @@ https://<bruker>.github.io/Simulator/
 
 **Flermaskin**: instruktør og operatør sitter på hver sin maskin. Én maskin er
 vert og kjører simuleringen; de andre kobler seg til som deltakere. En liten
-relay formidler meldinger mellom dem – den inneholder ingen prosessmodell.
+relay på lokalnettet serverer appen og formidler meldinger mellom dem – den
+inneholder ingen prosessmodell.
 
 ```bash
 cd relay
 npm install
-npm start          # lytter på ws://0.0.0.0:8080
+npm run bygg       # bygger appen som relayen skal servere
+npm start          # skriver ut adressene som skal åpnes
 ```
 
+Relayen skriver ut adresser av typen:
+
 ```
-Vert (operatør):       ...?modus=vert&rom=kurs1&relay=ws://192.168.1.10:8080
-Deltaker (instruktør): ...?modus=deltaker&rom=kurs1&relay=ws://192.168.1.10:8080
+Vert (operatør):       http://192.168.1.10:8080/?modus=vert&rom=kurs1
+Deltaker (instruktør): http://192.168.1.10:8080/?modus=deltaker&rom=kurs1
 ```
 
 Verten kjører ovnen og sender tilstanden videre; deltakerne ser det samme
-bildet og kan gripe inn. `rom` skiller flere samtidige øvelser på samme relay.
+bildet og kan gripe inn – også fra mobil. `rom` skiller flere samtidige
+øvelser på samme relay. Starter en ny vert i et rom som allerede har en,
+overtar den nye, og den gamle får beskjed om det.
 
-Merk at GitHub Pages bare serverer statiske filer. Flermaskin-modus krever
-derfor at relayen kjører et sted begge maskinene når – typisk på
-instruktørens laptop på treningssenterets nett.
+Flermaskin må åpnes fra relayens adresse, ikke fra GitHub Pages. En side
+lastet over https får ikke lov av nettleseren til å koble seg til en
+ukryptert relay på lokalnettet, og Pages kan ikke selv kjøre en relay.
 
 ## Scenarioer
 
@@ -114,11 +123,11 @@ frontend/
     commands.ts              Kommandodispatch, delt av lokal og fjernstyrt modus
     serialize.ts             Intern tilstand -> flat tilstand for HMI
     validate.ts              Referansekjøring med nøkkeltall
-  src/hooks/useSimulation.ts Tick-løkke og eventuell relay-tilkobling
+  src/hooks/useSimulation.ts Tick-løkke (delsteg på maks 1 s) og eventuell relay-tilkobling
   src/session.ts             Leser modus/rom/relay fra URL
   src/components/            Kontrollrom-HMI
 
-relay/                      Meldingsformidler for flermaskin-øvelser (ingen fysikk)
+relay/                      Serverer appen på lokalnettet og formidler meldinger (ingen fysikk)
 .github/workflows/pages.yml Bygger, validerer og publiserer til GitHub Pages
 ```
 
@@ -155,9 +164,9 @@ push til `main`. Pages må stå på **Settings → Pages → Source: GitHub Acti
 5. Når alt skrapet er smeltet, gå til raffinering: juster karbon og fosfor.
 6. **Slagg av før du kjører opp temperaturen** – åpne slaggdøra og tipp til
    slaggstilling. Gjør du det motsatt, kommer fosforet tilbake i stålet.
-7. Tilbake til vannrett, kjør opp mot tappemålet med litt margin (badet kjøles
-   mens det tappes), og trykk **Start tapping**. Tapperapporten viser avvik mot
-   kravene til kvaliteten.
+7. Tilbake til vannrett, kjør opp mot tappemålet, og trykk **Start tapping**.
+   Tappetemperaturen er temperaturen når tappingen starter. Tapperapporten
+   viser avvik mot kravene til kvaliteten; energi og forbruk er per charge.
 
 ## Videre arbeid
 

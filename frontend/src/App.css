@@ -1,18 +1,46 @@
 .app-loading {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  min-height: 100vh;
+  padding: 24px;
+  text-align: center;
   font-size: 18px;
   color: var(--text-dim);
 }
+.app-loading p {
+  margin: 0 0 12px;
+}
+.app-loading-detail {
+  max-width: 460px;
+  font-size: 14px;
+  color: var(--warning);
+}
 
+/* Siden flyter fritt og kan scrolles. Bare på store skjermer låses HMI-et
+   til skjermhøyden, med egen scroll i hver kolonne (se media query under). */
 .app-shell {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
   padding: 12px 16px;
   gap: 10px;
+}
+
+.app-top {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.status-banner {
+  background: rgba(255, 176, 32, 0.12);
+  border: 1px solid var(--warning);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--warning);
 }
 
 .app-header {
@@ -30,9 +58,14 @@
 
 .header-status {
   display: flex;
-  gap: 14px;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  align-items: center;
   font-size: 13px;
   color: var(--text-dim);
+}
+.header-status > span {
+  white-space: nowrap;
 }
 
 .ws-status {
@@ -46,6 +79,10 @@
 .ws-closed,
 .ws-connecting {
   color: var(--warning);
+}
+.ws-feil,
+.ws-erstattet {
+  color: var(--critical);
 }
 
 .header-alarm-badge {
@@ -111,20 +148,34 @@
 
 .main-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 12px;
-  flex: 1;
-  min-height: 0;
 }
 
 .main-col {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  overflow-y: auto;
+  min-width: 0;
+}
+
+@media (min-width: 1100px) {
+  .app-shell {
+    height: 100vh;
+    height: 100dvh;
+  }
+  .main-grid {
+    grid-template-columns: 2fr 1fr 1fr;
+    flex: 1;
+    min-height: 0;
+  }
+  .main-col {
+    overflow-y: auto;
+  }
 }
 
 .furnace-mimic {
+  display: block;
   width: 100%;
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
@@ -318,11 +369,6 @@
   border: 1px solid var(--accent);
 }
 
-@media (max-width: 1100px) {
-  .main-grid {
-    grid-template-columns: 1fr;
-  }
-}
 
 /* --- Slaggpanel --- */
 .slag-panel {
@@ -556,4 +602,280 @@
   font-size: 11px;
   color: var(--text-dim);
   margin-bottom: 8px;
+}
+
+/* --- Smalt betjeningspanel ---------------------------------------------
+   Etikett, glider og verdi får ikke plass på én linje i en smal kolonne
+   (mobil, men også laptop der panelet deler bredden med to andre). */
+.control-panel {
+  container-type: inline-size;
+}
+
+@container (max-width: 340px) {
+  /* Glidere: etikett og verdi på én linje, glideren i full bredde under */
+  .control-row label {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "lbl val"
+      "rng rng";
+    gap: 0 8px;
+  }
+  .slider-label {
+    grid-area: lbl;
+    width: auto;
+  }
+  .slider-value {
+    grid-area: val;
+    width: auto;
+  }
+  .control-row label input[type="range"] {
+    grid-area: rng;
+    width: 100%;
+    min-width: 0;
+  }
+  .electrode-row {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    grid-template-areas:
+      "lbl btn val"
+      "rng rng rng";
+    gap: 2px 8px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .electrode-label {
+    grid-area: lbl;
+  }
+  .electrode-row > button {
+    grid-area: btn;
+  }
+  .electrode-row > input[type="range"] {
+    grid-area: rng;
+    width: 100%;
+  }
+  .electrode-readout {
+    grid-area: val;
+    width: auto;
+  }
+}
+
+/* --- Kun på mobil ------------------------------------------------------ */
+.mobile-keybar,
+.mobile-nav {
+  display: none;
+}
+
+.mimic-wrap {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.mimic-wrap .furnace-mimic {
+  border: none;
+  border-radius: 0;
+}
+.mimic-stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0;
+  padding: 6px 10px 8px;
+  border-top: 1px solid var(--panel-border);
+}
+.mimic-stats div {
+  min-width: 0;
+}
+.mimic-stats dt {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.mimic-stats dd {
+  margin: 0;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+@media (max-width: 759px) {
+  .app-shell {
+    padding: 0 12px calc(72px + env(safe-area-inset-bottom));
+  }
+
+  .hide-on-mobile {
+    display: none !important;
+  }
+  /* Én seksjon om gangen, valgt i navigasjonen nederst */
+  .mobile-section:not(.is-active) {
+    display: none !important;
+  }
+
+  /* Toppen følger med når man scroller, så nøkkeltallene alltid er synlige */
+  .app-top {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    gap: 6px;
+    margin: 0 -12px;
+    padding: calc(8px + env(safe-area-inset-top)) 12px 8px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--panel-border);
+  }
+  .app-header {
+    gap: 4px 10px;
+  }
+  .app-header h1 {
+    font-size: 15px;
+  }
+  .header-status {
+    gap: 4px 10px;
+    font-size: 12px;
+  }
+
+  .mobile-keybar {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .keybar-cell {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 4px 6px;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 6px;
+  }
+  .keybar-cell span {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .keybar-cell strong {
+    font-size: 16px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .keybar-warning {
+    border-color: var(--warning);
+  }
+  .keybar-warning strong {
+    color: var(--warning);
+  }
+  .keybar-critical {
+    border-color: var(--critical);
+  }
+  .keybar-critical strong {
+    color: var(--critical);
+  }
+
+  .gauge-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .readout {
+    min-width: 0;
+    padding: 6px 8px;
+  }
+  .readout-label {
+    font-size: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .readout-value {
+    font-size: 18px;
+    white-space: nowrap;
+  }
+  .readout-unit {
+    font-size: 11px;
+  }
+
+  .mobile-nav {
+    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    padding-bottom: env(safe-area-inset-bottom);
+    background: var(--panel-bg);
+    border-top: 1px solid var(--panel-border);
+  }
+  .mobile-nav button {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    min-height: 56px;
+    padding: 4px 2px;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+  .mobile-nav button.is-active {
+    color: var(--accent);
+    font-weight: 600;
+    box-shadow: inset 0 3px 0 var(--accent);
+  }
+  .mobile-nav-badge {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    min-width: 18px;
+    padding: 1px 5px;
+    border-radius: 9px;
+    background: var(--critical);
+    color: #1a0000;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  /* Trykkflater på minst 44 px */
+  button {
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  .alarm-ack-btn,
+  .trend-tabs button {
+    min-height: 36px;
+  }
+  input[type="range"] {
+    height: 32px;
+  }
+  .control-row > button {
+    flex: 1 1 auto;
+  }
+  .control-row label,
+  .electrode-row {
+    font-size: 13px;
+  }
+
+
+  .scenario-list li {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .alarm-item {
+    flex-wrap: wrap;
+  }
+  .alarm-message {
+    flex-basis: 100%;
+  }
+
+  /* Ovnsbildet skaleres ned på smal skjerm, så teksten må være større i SVG-enheter */
+  .furnace-mimic.compact .mimic-label,
+  .furnace-mimic.compact .mimic-alarm {
+    font-size: 16px;
+  }
+  .furnace-mimic.compact .mimic-value {
+    font-size: 17px;
+  }
 }

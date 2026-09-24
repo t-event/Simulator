@@ -106,6 +106,8 @@ export interface SimState {
   energyTotalMwh: number;
   refractoryWear: number;
   heatNumber: number;
+  // Temperaturen målt når tappingen startet; det er den operatøren styrer mot
+  tapStartTempC: number | null;
   lastTapResult: TapResult | null;
 
   alarms: Alarm[];

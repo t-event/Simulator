@@ -69,9 +69,7 @@ function runCharge(options: { deslagFirst: boolean; scrapP?: number; seed?: numb
   sim.setPower(true);
   sim.setTransformerTap(5);
   let heat = 0;
-  // Badet kjøles mens det tappes, så en kompetent operatør legger på litt margin
-  const heatTarget = sim.tapTargetTempC + 15;
-  while (sim.state.bathTempC < heatTarget && heat < 3000) {
+  while (sim.state.bathTempC < sim.tapTargetTempC && heat < 3000) {
     sim.step(1);
     t += 1;
     heat += 1;
