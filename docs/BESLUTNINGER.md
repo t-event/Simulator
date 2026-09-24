@@ -52,7 +52,7 @@ Beslutning: `GameState` er ren JSON. Motoren endrer tilstanden på stedet. Lagre
 Begrunnelse: Enkel lagring, deterministisk testspiller, ingen server.
 
 ## B-006 Balansen styres av en automatisk testspiller i CI (tidligere økt)
-Status: gjelder (målet for Verksted endret i B-016)
+Status: gjelder (målene endret i B-016 og B-018)
 Beslutning: `src/game/balance.ts` spiller seks spill. Medianen for når hvert nivå nås skal
 ligge i målvinduet, ingen får gå konkurs, og en charge fra kontrollrommet skal komme riktig
 tilbake. Mål: Verksted 4–14, Støperi 20–50, Stålverk 50–115, Storverk 100–185 dager.
@@ -110,7 +110,7 @@ lagringer. `SAVE_VERSION` økes bare når en lagring ikke kan migreres.
 Begrunnelse: Spillere skal ikke miste spillet sitt når vi legger til funksjoner.
 
 ## B-014 Fagpoeng per charge avtar med størrelsen på verket (2026-09-24)
-Status: gjelder
+Status: erstattet av B-018 (lavere satser)
 Bakgrunn: Med 1 fagpoeng per charge hopet poengene seg opp fra støperiet og oppover
 (2 900 ubrukte på dag 150), fordi antall charger per døgn øker mye.
 Beslutning: 1 FP per charge i garasje og verksted, 0,6 i støperiet, 0,4 fra stålverket.
@@ -147,3 +147,24 @@ Beslutning: Når en endring er ferdig, sjekket lokalt (typesjekk, lint, `validat
 oppretter Claude PR til `main` og merger den med vanlig merge-commit, uten å spørre først.
 Etterpå sjekkes Actions-kjøringen for publisering; feiler den, rettes det straks.
 Begrunnelse: Brukeren tester spillet på mobilen via GitHub Pages og vil se endringene uten ekstra runder.
+
+## B-018 Vanskeligere spill: faste kostnader, lavere marginer, færre fagpoeng (2026-09-24)
+Status: gjelder
+Bakgrunn: Brukeren (skjermbilde fra garasjen dag 9: 71 000 kr, omdømme 2,4 av 5, 50 fagpoeng):
+«Man har for mye penger i forhold til omdømme. Også får man for fort fagpoeng. Spillet må være
+litt vanskeligere.» Målt med `balance.ts --sperrer`: pengene til Verksted var på plass dag 3–4,
+omdømmet dag 8–17; 50–250 fagpoeng lå ubrukt ved slutten av hvert nivå.
+Beslutning:
+- Faste kostnader per døgn (`fixedPerDay` i `STAGES`): 200 / 1 500 / 8 000 / 40 000 / 150 000 kr,
+  som overhead i Game Dev Tycoon. Vises før flytting, ved flytting og på Verket.
+- Støpegods 16 000 → 13 500 kr/t. Nivåpriser: Verksted 80 000, Støperi 550 000, Stålverk 6,5 mill.,
+  Storverk 32 mill. Induksjonsovn 1 t 60 000 → 50 000 (så verkstedet ikke blir en felle).
+- Fagpoeng: 0,5 / 0,3 / 0,2 per charge (garasje+verksted / støperi / stålverk+), 1 + nivå per
+  levert kontrakt, 2 per reklamasjon, 1 + stjerner for egne charger. Forskning ca. 1,5× dyrere.
+- Bransjemessa koster 8 000 × (1 + nivå)² (var 15 000 ×), så den ikke tømmer kassa i verkstedet.
+Første forsøk (husleie 2 500 i verkstedet og støpegods 12 000) ga konkurs: verkstedet ble en
+felle der man aldri fikk råd til induksjonsovnen. Derfor de mildere tallene over.
+Resultat: pengene sperrer nå fra støperiet og oppover, omdømmet i garasjen; få ubrukte fagpoeng.
+Median nivådager 13 / 36 / 89 / 169 (var 13 / 27 / 77 / 152). Nye mål: Verksted 7–20,
+Støperi 20–50, Stålverk 55–120, Storverk 120–220; testspilleren kjører 240 døgn.
+Kassa på dag 240 er 15–55 mill. (var 400–800 mill.).

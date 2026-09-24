@@ -75,6 +75,9 @@ export function Build({ g, stats, act, onQuit }: Props) {
                 Plass til {next.staffCap} ansatte, {Math.round(next.yardT)} t skrap og {Math.round(next.storeT)} t
                 ferdigvare
               </li>
+              <li className="g-muted">
+                Faste kostnader øker fra {fmtKr(STAGES[g.stage].fixedPerDay)} til {fmtKr(next.fixedPerDay)} per døgn
+              </li>
               {next.id === 2 && (
                 <li className="g-muted">
                   Du går over til å være daglig leder og står ikke lenger i produksjonen selv.

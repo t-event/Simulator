@@ -166,6 +166,7 @@ function Celebration({ g, onClose }: { g: GameState; onClose: () => void }) {
         <p>{stage.description}</p>
         <ul>
           <li>Plass til {stage.staffCap} ansatte</li>
+          <li>Faste kostnader: {fmtKr(stage.fixedPerDay)} per døgn</li>
           <li>
             {Math.round(stage.yardT)} t skraplager og {Math.round(stage.storeT)} t ferdigvarelager
           </li>

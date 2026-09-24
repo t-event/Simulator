@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 7 – 2026-09-24: vanskeligere spill
+
+**Brukeren ba om:** For mye penger i forhold til omdømme, for raske fagpoeng, spillet må være
+litt vanskeligere (skjermbilde fra garasjen, dag 9).
+
+**Gjort:** Faste kostnader per nivå, lavere pris på støpegods, dyrere nivåer, færre fagpoeng,
+dyrere forskning, billigere messe (B-018). Nytt analyseflagg `--sperrer` i `balance.ts` viser når
+penger og omdømme hver for seg holder til neste nivå, og hvor mye fagpoeng som ligger ubrukt.
+Faste kostnader vises i «Neste nivå», i flyttefeiringen og i økonomikortet.
+
+**Testet:** Balansetest grønn (13 / 36 / 89 / 169), 14 frø uten konkurs, typesjekk og lint rene.
+Første forsøk var for hardt (konkurs i verkstedet) og ble justert.
+
+**Gjenstår:** Følg med på om garasjen fortsatt føles for rik – der sperrer omdømmet fortsatt
+litt før pengene (penger dag 6–9, omdømme dag 7–13).
+
+---
+
 ## Økt 6 – 2026-09-24: kontrakter tar lengre tid
 
 **Brukeren ba om:** «Det bør ta lengre tid å gjøre kontrakter. Det går altfor fort nå.»

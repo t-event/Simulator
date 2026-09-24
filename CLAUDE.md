@@ -67,6 +67,7 @@ npx tsx src/game/balance.ts --verbose --finance --seed 3   # feilsøking av bala
 npx tsx src/game/balance.ts --dump 3 > lagret.json         # lagret spill på nivå 3, for testing
 npx tsx src/game/balance.ts --kontrakter 1                 # hvor lang tid kontraktene tar per nivå
 npx tsx src/game/balance.ts --research 1                   # når testspilleren forsker
+npx tsx src/game/balance.ts --sperrer                      # hva som sperrer neste nivå: penger, omdømme, fagpoeng
 npm run build
 ```
 

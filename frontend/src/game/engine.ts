@@ -612,7 +612,7 @@ function finishHeat(g: GameState, index: number, stats: PlantStats): void {
   }
 
   // Mange charger i et stort verk lærer deg mindre hver for seg
-  awardPoints(g, g.stage <= 1 ? 1 : g.stage === 2 ? 0.6 : 0.4);
+  awardPoints(g, g.stage <= 1 ? 0.5 : g.stage === 2 ? 0.3 : 0.2);
   f.holding = {
     t: heat.liquidT,
     grade: heat.grade,
@@ -937,7 +937,7 @@ function deliverContracts(g: GameState): void {
       const gain = c.repGain * Math.max(0.25, 1 - g.reputation / 150);
       adjustReputation(g, gain);
       g.totals.contractsDone += 1;
-      awardPoints(g, 2 + g.stage);
+      awardPoints(g, 1 + g.stage);
       log(g, `Kontrakten med ${c.customer} er levert. Omdømme +${gain.toFixed(1)}.`, "good");
       if (g.totals.contractsDone === 1) unlock(g, "omdomme");
     }
@@ -953,10 +953,10 @@ function processComplaints(g: GameState): void {
     addCost(g, "bot", c.refund);
     adjustReputation(g, -c.repLoss);
     g.totals.complaints += 1;
-    awardPoints(g, 3);
+    awardPoints(g, 2);
     log(
       g,
-      `${c.text} Kunden får pengene tilbake (${fmtKr(c.refund)}), omdømme −${c.repLoss.toFixed(1)}. Du lærte noe: +3 fagpoeng.`,
+      `${c.text} Kunden får pengene tilbake (${fmtKr(c.refund)}), omdømme −${c.repLoss.toFixed(1)}. Du lærte noe: +2 fagpoeng.`,
       "bad",
     );
     unlock(g, "analyse");
@@ -1136,6 +1136,7 @@ function onDay(g: GameState, stats: PlantStats): void {
 
   // Faste kostnader
   addCost(g, "lonn", stats.salaryPerDay);
+  addCost(g, "faste", STAGES[g.stage].fixedPerDay);
   if (g.loan > 0) addCost(g, "renter", g.loan * LOAN_INTEREST_PER_DAY);
 
   // Markedet
@@ -1320,7 +1321,7 @@ export function completeManual(g: GameState, result: ManualResult | null): void 
     energyKwh: kwh,
   };
   f.waitReason = null;
-  awardPoints(g, result.stars !== undefined ? 2 + result.stars : 4);
+  awardPoints(g, result.stars !== undefined ? 1 + result.stars : 3);
   if (result.ok) {
     adjustReputation(g, 0.5);
     log(
