@@ -1,13 +1,12 @@
-import { applyRecipe, setRecipe } from "../game/actions";
-import { GRADES, PRODUCTS, SCRAP_IDS, SCRAP_TYPES } from "../game/data";
-import { buyScrap, recipeEstimate, scrapPrice } from "../game/engine";
+import { PRODUCTS, SCRAP_IDS, SCRAP_TYPES } from "../game/data";
+import { buyScrap, scrapPrice } from "../game/engine";
 import { hasPlanner, productPrice, type PlantStats } from "../game/plant";
 import { PowerCard } from "./Power";
-import { gradeChecks, suggestRecipe } from "../game/recipe";
 import { researchForScrap, scrapUnlocked } from "../game/research";
 import type { GameState, ProductId, ScrapId } from "../game/types";
 import type { GameApi } from "../game/useGame";
-import { AnalysisLine, Bar, Card, GradeChips } from "./common";
+import { Bar, Card } from "./common";
+import { RecipeCard } from "./Recipe";
 import { fmtKr, fmtNum, fmtPct, fmtT } from "./format";
 
 interface Props {
@@ -24,10 +23,7 @@ const BUY_AMOUNTS = [
   [1000, 2500, 5000],
 ];
 
-
 export function Market({ g, stats, act }: Props) {
-  const est = recipeEstimate(g, g.targetGrade, stats);
-  const total = SCRAP_IDS.reduce((a, id) => a + g.recipe[id], 0);
   const amounts = BUY_AMOUNTS[g.stage];
   const electric = stats.furnace.fuel === "strøm";
   const open = SCRAP_IDS.filter((id) => scrapUnlocked(g, id));
@@ -43,24 +39,13 @@ export function Market({ g, stats, act }: Props) {
   const capOptions = [...new Set([1, 2, 5, 10].map((m) => m * capBase).concat(g.settings.autoBuyMaxPerDay ?? []))].sort(
     (a, b) => a - b,
   );
-  const checks = gradeChecks(g, g.targetGrade, est.analysis, stats);
-  const suggest = () =>
-    act((gg) => {
-      const s = suggestRecipe(gg, gg.targetGrade, stats);
-      if (!s)
-        return {
-          ok: false,
-          message: `Ingen blanding av skrapet du har tilgang til, holder kravet til ${GRADES[gg.targetGrade].name.toLowerCase()}.`,
-        };
-      applyRecipe(gg, s.recipe);
-      return { ok: true, message: "Resepten er satt." };
-    });
-
   return (
     <div className="g-grid">
       <div className="g-col-wide">
+        <RecipeCard g={g} stats={stats} act={act} />
+
         <Card
-          title="Skrap"
+          title="Kjøp skrap"
           right={
             <span className="g-muted">
               Lager {fmtT(stats.yardUsed)} / {fmtT(stats.yardT)}
@@ -97,23 +82,12 @@ export function Market({ g, stats, act }: Props) {
                   <div className="g-scrap-actions">
                     {type.buyable &&
                       amounts.map((t) => (
-                        <button key={t} onClick={() => act((gg) => buyScrap(gg, id, t))}>
+                        <button key={t} className="g-buy" onClick={() => act((gg) => buyScrap(gg, id, t))}>
                           +{fmtT(t)}
+                          <small>{fmtKr(price * t)}</small>
                         </button>
                       ))}
                   </div>
-                  <label className="g-recipe">
-                    <span>I resepten</span>
-                    <input
-                      type="range"
-                      min={0}
-                      max={100}
-                      step={5}
-                      value={g.recipe[id]}
-                      onChange={(e) => act((gg) => setRecipe(gg, id, Number(e.target.value)))}
-                    />
-                    <span className="g-recipe-share">{total > 0 ? fmtPct(g.recipe[id] / total) : "0 %"}</span>
-                  </label>
                 </div>
               );
             })}
@@ -176,7 +150,8 @@ export function Market({ g, stats, act }: Props) {
             </div>
           ) : (
             <p className="g-note">
-              Du kjøper skrap selv. {g.stage >= 2 ? "Ansett en planlegger under Folk" : "Fra støperiet kan du ansette en planlegger"} som
+              Du kjøper skrap selv.{" "}
+              {g.stage >= 2 ? "Ansett en planlegger under Folk" : "Fra støperiet kan du ansette en planlegger"} som
               kjøper inn automatisk.
             </p>
           )}
@@ -184,50 +159,6 @@ export function Market({ g, stats, act }: Props) {
       </div>
 
       <div className="g-col">
-        <Card title="Resepten gir">
-          <p className="g-muted">
-            Anslag ut fra hva skraptypene normalt inneholder, i {stats.furnace.name.toLowerCase()} kjørt mot{" "}
-            {GRADES[g.targetGrade].name.toLowerCase()}. Faktisk analyse varierer med partiet.
-          </p>
-          <div className="g-estimate">
-            <AnalysisLine a={est.analysis} />
-            <span>Holder kravet til:</span>
-            <GradeChips grades={est.grades.filter((id) => GRADES[id].minStage <= g.stage)} highlight={g.targetGrade} />
-          </div>
-          <ul className="g-checks g-recipe-checks">
-            {checks.map((c) => (
-              <li key={c.key} className={c.ok ? (c.close ? "warn" : "ok") : "bad"}>
-                {c.label}: {fmtNum(c.value, c.key === "p" ? 3 : 2)} (krav {c.limit})
-                {c.fix && <span className="g-fix">{c.fix}</span>}
-                {c.close && <span className="g-fix">Nær grensen – skrapet varierer, så legg inn litt margin.</span>}
-              </li>
-            ))}
-          </ul>
-          <button className="g-primary" onClick={suggest}>
-            Foreslå billigste resept for {GRADES[g.targetGrade].name.toLowerCase()}
-          </button>
-          <div className="g-stats">
-            <div className="g-stat">
-              <span>Skrap per tonn</span>
-              <strong>{fmtKr(est.scrapCostPerT)}</strong>
-            </div>
-            <div className="g-stat">
-              <span>Stål per tonn skrap</span>
-              <strong>{fmtPct(est.metallicYield)}</strong>
-            </div>
-            <div className="g-stat">
-              <span>Energibehov</span>
-              <strong>{fmtPct(est.energyFactor)}</strong>
-            </div>
-          </div>
-          {stats.dephos === 0 && (
-            <p className="g-note">
-              Denne ovnen fjerner verken fosfor eller sporelementer, og karbon kan bare legges til. Det du legger i, får
-              du ut.
-            </p>
-          )}
-        </Card>
-
         {electric ? (
           <PowerCard g={g} stats={stats} act={act} />
         ) : (

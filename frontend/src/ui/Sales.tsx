@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { GRADES, PRODUCTS } from "../game/data";
 import {
   acceptContract,
@@ -92,7 +93,11 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
   );
 }
 
+/** Så mange partier vises før «Vis alle» (lista kan bli svært lang i et stort verk) */
+const LOTS_SHOWN = 6;
+
 export function Sales({ g, stats, act }: Props) {
+  const [showAll, setShowAll] = useState(false);
   const offers = g.contracts.filter((c) => c.status === "tilbud");
   const active = orderQueue(g);
   const current = currentOrder(g);
@@ -220,7 +225,7 @@ export function Sales({ g, stats, act }: Props) {
           </p>
           {g.lots.length === 0 && <p className="g-muted">Lageret er tomt.</p>}
           <ul className="g-lots">
-            {g.lots.map((l) => (
+            {(showAll ? g.lots : [...g.lots].sort((a, b) => b.t - a.t).slice(0, LOTS_SHOWN)).map((l) => (
               <li key={l.id} className={l.second ? "is-second" : ""}>
                 <div className="g-contract-head">
                   <strong>
@@ -242,13 +247,35 @@ export function Sales({ g, stats, act }: Props) {
               </li>
             ))}
           </ul>
+          {g.lots.length > LOTS_SHOWN && (
+            <button className="g-link" onClick={() => setShowAll(!showAll)}>
+              {showAll ? "Vis bare de største partiene" : `Vis alle ${g.lots.length} partiene`}
+            </button>
+          )}
+          <label className="g-field">
+            <span>Støpefeil (2. sortering)</span>
+            <select
+              value={g.settings.secondsAction}
+              onChange={(e) =>
+                act((gg) => void (gg.settings.secondsAction = e.target.value as GameState["settings"]["secondsAction"]))
+              }
+            >
+              <option value="spot">Selg automatisk på spot</option>
+              <option value="retur">Smelt om som returskrap</option>
+              <option value="behold">Behold på lager</option>
+            </select>
+          </label>
+          <p className="g-muted g-small-text">
+            Støpefeil kan ikke leveres på kontrakt. Omsmelting gir returskrap med kjent analyse – gratis skrap til neste
+            charge, men det koster strøm og tar plass på skraplageret.
+          </p>
           <label className="g-toggle">
             <input
               type="checkbox"
               checked={g.settings.autoSpot}
               onChange={(e) => act((gg) => void (gg.settings.autoSpot = e.target.checked))}
             />
-            <span>Selg automatisk på spot: 2. sortering straks, og partier ingen kontrakt venter på etter ett døgn</span>
+            <span>Selg automatisk på spot partier ingen kontrakt venter på, etter ett døgn</span>
           </label>
         </Card>
       </div>

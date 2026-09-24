@@ -216,6 +216,10 @@ export interface Settings {
   onePeak: boolean;
   /** Spol fram når verket står utenfor arbeidstida og ingenting skjer (B-033) */
   skipIdleNights: boolean;
+  /** Hva som skjer med støpefeil (2. sortering): selges på spot, smeltes om som returskrap, eller beholdes (B-035) */
+  secondsAction: "spot" | "retur" | "behold";
+  /** Skrapklasseren venter på riktig skrap i stedet for å fylle med annet (B-035) */
+  graderStrict: boolean;
   /** Ikke ta imot nye forespørsler (B-034) */
   pauseOffers: boolean;
   /** Klokketimen skiftene starter (6, 14 eller 22) */

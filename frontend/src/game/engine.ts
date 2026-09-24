@@ -171,6 +171,8 @@ export function newGame(seed = Date.now()): GameState {
       onePeak: false,
       shiftStart: SHIFT_START_HOUR,
       pauseOffers: false,
+      secondsAction: "spot",
+      graderStrict: true,
       skipIdleNights: true,
       maxPowerPrice: null,
       autoBuy: false,
@@ -418,7 +420,7 @@ export function takeScrap(g: GameState, sizeT: number, dryRun = false): Mix | nu
   let short = sizeT - Object.values(amounts).reduce((a, b) => a + b, 0);
   // Fyll opp med andre typer i resepten. Uten skrapklasser tas deretter hva som helst som ligger på
   // lageret; skrapklasseren venter heller på riktig skrap enn å ødelegge analysen.
-  for (const pool of grader ? [recipeIds] : [recipeIds, SCRAP_IDS]) {
+  for (const pool of grader && g.settings.graderStrict !== false ? [recipeIds] : [recipeIds, SCRAP_IDS]) {
     for (let pass = 0; pass < 4 && short > 1e-9; pass++) {
       const spare = pool.map((id) => ({ id, spare: g.scrap[id].t - amounts[id] })).filter((x) => x.spare > 1e-9);
       const spareTotal = spare.reduce((a, x) => a + x.spare, 0);
@@ -960,6 +962,26 @@ function updateCasting(g: GameState, stats: PlantStats, dt: number): void {
   if (!g.castQueue.length) g.castProgressT = 0;
 }
 
+/** Støpefeil kan ikke leveres på kontrakt: selg dem, eller smelt dem om som returskrap med kjent analyse */
+function handleSeconds(g: GameState): void {
+  const action = g.settings.secondsAction ?? "spot";
+  if (action === "behold") return;
+  for (const lot of [...g.lots]) {
+    if (!lot.second) continue;
+    if (action === "spot") {
+      sellLot(g, lot.id);
+      continue;
+    }
+    const s = computePlantStats(g);
+    const free = Math.max(0, s.yardT - s.yardUsed);
+    const t = Math.min(free, lot.t);
+    if (t <= 1e-6) continue;
+    addScrap(g, "retur", t, { ...lot.analysis, dirt: 0.01 });
+    lot.t -= t;
+  }
+  g.lots = g.lots.filter((l) => l.t > 1e-6);
+}
+
 function lotsTonnage(g: GameState): number {
   return g.lots.reduce((a, l) => a + l.t, 0);
 }
@@ -1483,8 +1505,9 @@ function onHour(g: GameState, stats: PlantStats): void {
   expireOffers(g);
   trickleOffers(g, stats);
   deliverContracts(g);
+  // Støpefeil håndteres automatisk etter valget (B-035)
+  handleSeconds(g);
   if (g.settings.autoSpot) {
-    for (const lot of [...g.lots]) if (lot.second) sellLot(g, lot.id);
     // Det ingen kontrakt venter på, selges etter ett døgn – eller straks lageret fylles
     const reserved = lotReservations(g);
     const today = day(g);
