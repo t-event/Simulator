@@ -4,7 +4,7 @@
  */
 import { GRADES, SCRAP_IDS, SCRAP_TYPES } from "./data";
 import { recipeEstimate } from "./engine";
-import { energyPrice, satisfies, type PlantStats } from "./plant";
+import { energyPrice, has, satisfies, type PlantStats } from "./plant";
 import { researchForScrap, scrapUnlocked } from "./research";
 import type { Analysis, GameState, GradeId, ScrapId } from "./types";
 
@@ -37,6 +37,8 @@ export function gradeChecks(g: GameState, grade: GradeId, a: Analysis, stats: Pl
   const out: GradeCheck[] = [];
 
   const cOk = a.c >= spec.cMin && a.c <= spec.cMax;
+  // Lysbueovnen treffer karbonet omtrent; uten øseovn er et smalt karbonvindu vanskelig
+  const cShaky = cOk && stats.furnace.decarb && !has(g, "oseovn") && spec.cMax - spec.cMin < 0.15;
   out.push({
     key: "c",
     label: "Karbon",
@@ -44,13 +46,15 @@ export function gradeChecks(g: GameState, grade: GradeId, a: Analysis, stats: Pl
     limit: spec.cMin > 0 ? `${fmt(spec.cMin, 2)}–${fmt(spec.cMax, 2)}` : `maks ${fmt(spec.cMax, 2)}`,
     ok: cOk,
     close: false,
-    fix: cOk
-      ? null
-      : a.c > spec.cMax
-        ? stats.furnace.decarb
-          ? "For mye karbon."
-          : "For mye karbon, og denne ovnen kan ikke brenne det bort. Bruk mindre råjern og spon."
-        : "For lite karbon. Ovnen legger til karbon, så dette retter seg vanligvis selv.",
+    fix: cShaky
+      ? "Karbonet varierer fra charge til charge i lysbueovnen. Kravet er smalt, så en del charger vil bomme – en øseovn finjusterer karbonet."
+      : cOk
+        ? null
+        : a.c > spec.cMax
+          ? stats.furnace.decarb
+            ? "For mye karbon."
+            : "For mye karbon, og denne ovnen kan ikke brenne det bort. Bruk mindre råjern og spon."
+          : "For lite karbon. Ovnen legger til karbon, så dette retter seg vanligvis selv.",
   });
 
   const pOk = a.p <= spec.pMax;

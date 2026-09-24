@@ -68,6 +68,12 @@ export function migrate(g: GameState): GameState {
     g.settings.shiftStart = 6;
   }
   if (loose.gridCut === undefined) loose.gridCut = null;
+  if (loose.tutorial === undefined) loose.tutorial = null;
+  if (g.settings.autoBuyCredit === undefined) {
+    // Før B-027 handlet planleggeren alltid på kreditt; nå må spilleren tillate det
+    g.settings.autoBuyCredit = false;
+    g.settings.autoBuyMaxPerDay = null;
+  }
   if (loose.morale === undefined) {
     loose.morale = 70;
     loose.lastBonusDay = -99;

@@ -1,6 +1,6 @@
 import { buyUpgrade, upgradeOptions, type UpgradeOption } from "../game/actions";
 import { STATION_NAMES, stationOptions, type Station } from "./stations";
-import { STAGES } from "../game/data";
+import { STAGES, WIN_CASH } from "../game/data";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Card } from "./common";
@@ -97,7 +97,7 @@ export function StageCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
   if (!next || !stage) {
     return (
       <Card title="Storverket">
-        <p>Du har bygget et fullskala stålverk. Klarer du å samle {fmtKr(100_000_000)} i egenkapital?</p>
+        <p>Du har bygget et fullskala stålverk. Klarer du å samle {fmtKr(WIN_CASH)} i egenkapital?</p>
       </Card>
     );
   }

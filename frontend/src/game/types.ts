@@ -171,6 +171,8 @@ export interface DayFinance {
   offGradeT?: number;
   /** Tonn med støpefeil (sekunda) */
   secondT?: number;
+  /** Kroner planleggeren har kjøpt skrap for i døgnet */
+  autoBuyKr?: number;
   /** Strøm brukt i døgnet (kWh), for snittprisen */
   kwh?: number;
   /** Døgnets høyeste effektuttak (MW), grunnlaget for effekttariffen */
@@ -203,6 +205,10 @@ export interface Settings {
   autoBuy: boolean;
   /** Hvor mange dagers forbruk automatisk innkjøp skal holde på lager */
   autoBuyDays: number;
+  /** Planleggeren kan handle på kassekreditten (B-027) */
+  autoBuyCredit: boolean;
+  /** Største beløp planleggeren kan bruke på skrap per døgn; null = ingen grense */
+  autoBuyMaxPerDay: number | null;
   autoSpot: boolean;
   rolling: boolean;
   /** Ta styringen på neste charge i lysbueovnen */
@@ -316,6 +322,8 @@ export interface GameState {
   advisorSeen: Record<string, number>;
   /** Innleide spesialister: årsak → spillminuttet de er ferdige */
   specialists: Record<string, number>;
+  /** Steget i den veiledede starten; null = av eller ferdig (B-027) */
+  tutorial: number | null;
   /** Trivselen blant de ansatte, 0–100 (B-026) */
   morale: number;
   /** Dagen det sist ble gitt bonus */

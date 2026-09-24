@@ -8,6 +8,7 @@ import { resolveDecision } from "../game/decisions";
 import { maxSpeed, researchForSpeed, researchOptions } from "../game/research";
 import { upgradeOptions } from "../game/actions";
 import { buzz } from "./haptics";
+import { nextTutorialStep, skipTutorial, TUTORIAL } from "../game/tutorial";
 import type { GameState } from "../game/types";
 import { fmtClock, fmtKr, fmtNum, fmtRep, fmtT } from "./format";
 import { Handbook } from "./Handbook";
@@ -35,7 +36,7 @@ function Intro({
   onLoadBackup,
 }: {
   hasSave: boolean;
-  onNew: () => void;
+  onNew: (guided: boolean) => void;
   onContinue: () => void;
   onLoadBackup: (text: string) => boolean;
 }) {
@@ -63,9 +64,10 @@ function Intro({
               Fortsett
             </button>
           )}
-          <button className={hasSave ? "" : "g-primary"} onClick={onNew}>
-            {hasSave ? "Nytt spill" : "Start"}
+          <button className={hasSave ? "" : "g-primary"} onClick={() => onNew(true)}>
+            {hasSave ? "Nytt spill med veiledning" : "Start med veiledning"}
           </button>
+          <button onClick={() => onNew(false)}>{hasSave ? "Nytt spill uten veiledning" : "Start uten veiledning"}</button>
         </div>
         <div className="g-intro-backup">
           <BackupInput onLoad={onLoadBackup} />
@@ -156,6 +158,36 @@ function Celebration({ g, onClose }: { g: GameState; onClose: () => void }) {
         </button>
       </div>
     </div>
+  );
+}
+
+/** Veiledet start: ett steg om gangen nederst på skjermen, og kan hoppes over (B-027) */
+function Coach({ g, act }: { g: GameState; act: GameApi["act"] }) {
+  const i = g.tutorial;
+  if (i === null) return null;
+  const step = TUTORIAL[i];
+  if (!step) return null;
+  const last = i === TUTORIAL.length - 1;
+  return (
+    <aside className="g-coach" aria-live="polite" aria-label="Veiledning">
+      <div className="g-coach-head">
+        <span className="g-muted">
+          Veiledning {i + 1} av {TUTORIAL.length}
+        </span>
+        {!last && (
+          <button className="g-link" onClick={() => act((gg) => skipTutorial(gg))}>
+            Hopp over
+          </button>
+        )}
+      </div>
+      <strong>{step.title}</strong>
+      <p>{step.text}</p>
+      {!step.done && (
+        <button className="g-primary" onClick={() => act((gg) => nextTutorialStep(gg))}>
+          {last ? "Ferdig" : "Neste"}
+        </button>
+      )}
+    </aside>
   );
 }
 
@@ -260,7 +292,7 @@ export function GameApp() {
     bookOpen || !!g.pendingManual || !!g.pendingDecision || g.celebrate !== null || g.gameOver || (g.won && !winSeen);
 
   return (
-    <div className="g-app">
+    <div className={`g-app${g.tutorial !== null ? " has-coach" : ""}`}>
       <div className="g-behind" inert={modalOpen}>
         <div className="g-head">
           <TopBar g={g} api={api} onBook={() => openBook()} />
@@ -268,6 +300,7 @@ export function GameApp() {
           <nav className="g-nav" aria-label="Hovedmeny">
             {VIEWS.filter((v) => viewUnlocked(g, v.id)).map((v) => {
               const isNew = !g.seenViews.includes(v.id);
+              const hint = g.tutorial !== null && TUTORIAL[g.tutorial]?.view === v.id && shown !== v.id;
               const badge =
                 v.id === "salg"
                   ? g.contracts.filter((c) => c.status === "tilbud").length
@@ -277,7 +310,7 @@ export function GameApp() {
               return (
                 <button
                   key={v.id}
-                  className={shown === v.id ? "is-active" : ""}
+                  className={`${shown === v.id ? "is-active" : ""}${hint ? " is-hint" : ""}`}
                   aria-current={shown === v.id ? "page" : undefined}
                   onClick={() => go(v.id)}
                 >
@@ -301,6 +334,8 @@ export function GameApp() {
           {shown === "forskning" && <ResearchPage g={g} stats={stats} act={act} onQuit={api.quit} openBook={openBook} onLoadBackup={api.loadBackup} />}
         </main>
       </div>
+
+      {!modalOpen && <Coach g={g} act={act} />}
 
       <div className="g-toasts" aria-live="polite">
         {api.toasts.map((t) => (
