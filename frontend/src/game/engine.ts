@@ -149,6 +149,7 @@ export function newGame(seed = Date.now()): GameState {
     castingType: "sandformer",
     furnaces: [newFurnaceUnit()],
     castQueue: [],
+    lastCast: null,
     castProgressT: 0,
     castDownUntilMin: 0,
     castWait: null,
@@ -816,7 +817,7 @@ function updateFurnaces(g: GameState, stats: PlantStats): void {
     const f = g.furnaces[i];
     if (f.heat && g.minute >= f.heat.endMin) finishHeat(g, i, stats);
     if (f.holding && g.castQueue.length < maxLadlesWaiting(g)) {
-      g.castQueue.push(f.holding);
+      g.castQueue.push({ ...f.holding, queuedMin: g.minute });
       f.holding = null;
     }
     if (f.heat) continue;
@@ -938,6 +939,26 @@ function addReturnScrap(g: GameState, t: number, analysis: Analysis, stats: Plan
 function castBatch(g: GameState, batch: LiquidBatch, stats: PlantStats): void {
   const casting = castingType(g);
   let t = batch.t;
+  // Kvalitetsbytte i en sekvens: stålet fra to øser blandes i fordeleren, og emnene i overgangen holder
+  // ingen av kvalitetene. De kappes ut og smeltes om (B-046)
+  if (casting.continuous) {
+    const last = g.lastCast;
+    if (last && batch.transition) {
+      const cut = Math.min(t * 0.5, casting.tph * 0.05);
+      addReturnScrap(g, cut, batch.analysis, stats);
+      t -= cut;
+      g.today.transitionT = (g.today.transitionT ?? 0) + cut;
+      if (!g.tipsSeen.includes("tips-overgang")) {
+        g.tipsSeen.push("tips-overgang");
+        log(
+          g,
+          `Strengstøpingen byttet fra ${GRADES[last.grade].name.toLowerCase()} til ${GRADES[batch.grade].name.toLowerCase()}. ${fmtT(cut)} overgangsemner holdt ingen av kvalitetene og ble skrapet. Færre kvalitetsbytter gir mindre tap.`,
+          "event",
+        );
+      }
+    }
+    g.lastCast = { grade: batch.grade, min: g.minute };
+  }
   if (casting.continuous && chance(g, 0.01 * stats.maintFactor * (batch.tempOff ? 2.5 : 1))) {
     const hours = 4 * stats.repairFactor;
     g.castDownUntilMin = g.minute + hours * 60;
@@ -1008,13 +1029,48 @@ function updateCasting(g: GameState, stats: PlantStats, dt: number): void {
       return;
     }
   }
+  if (g.castProgressT <= 1e-9 && !pickNextLadle(g)) {
+    g.castWait = `Venter med ${GRADES[g.castQueue[0].grade].name.toLowerCase()} til sekvensen er ferdig`;
+    return;
+  }
   g.castProgressT += stats.castTph * (dt / 60);
   while (g.castQueue.length && g.castProgressT >= g.castQueue[0].t) {
     const batch = g.castQueue.shift()!;
     g.castProgressT -= batch.t;
     castBatch(g, batch, stats);
+    if (g.castQueue.length && !pickNextLadle(g)) {
+      g.castProgressT = 0;
+      break;
+    }
   }
   if (!g.castQueue.length) g.castProgressT = 0;
+}
+
+/** Står strengstøpingen så lenge uten stål, er sekvensen slutt, og neste kvalitet starter uten overgang (B-046) */
+export const SEQUENCE_GAP_MIN = 30;
+/** Lenger enn dette venter ikke en øse med annen kvalitet; da byttes det midt i sekvensen (B-046) */
+export const SEQUENCE_WAIT_MIN = 90;
+
+/**
+ * Strengstøpingen støper én kvalitet om gangen (B-046). Står det en øse med samme kvalitet som sist i
+ * køen, tas den først. En øse med annen kvalitet venter til sekvensen er slutt (ingen stål på en stund),
+ * eller til den har ventet for lenge – da byttes kvaliteten midt i sekvensen, og overgangsemnene blir
+ * skrap. Blokk- og formstøping tar øsene i rekkefølge. Returnerer false når støpingen skal vente.
+ */
+function pickNextLadle(g: GameState): boolean {
+  const last = g.lastCast;
+  if (!castingType(g).continuous || !last || !g.castQueue.length) return true;
+  const head = g.castQueue[0];
+  if (head.grade === last.grade) return true;
+  const same = g.castQueue.findIndex((b) => b.grade === last.grade);
+  if (same > 0) {
+    g.castQueue.unshift(...g.castQueue.splice(same, 1));
+    return true;
+  }
+  if (g.minute - last.min >= SEQUENCE_GAP_MIN) return true;
+  if (g.minute - (head.queuedMin ?? g.minute) < SEQUENCE_WAIT_MIN) return false;
+  head.transition = true;
+  return true;
 }
 
 /** Støpefeil kan ikke leveres på kontrakt: selg dem, eller smelt dem om som returskrap med kjent analyse */

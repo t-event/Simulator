@@ -78,6 +78,7 @@ export function migrate(g: GameState): GameState {
   if (g.settings.offerGrades === undefined) g.settings.offerGrades = [];
   // Garasjen startet med gassfyrt digel før B-045; nå er det en liten induksjonsovn
   if (g.furnaceType === "digel") g.furnaceType = "induksjon025";
+  if (loose.lastCast === undefined) loose.lastCast = null;
   if (g.settings.offerSort === undefined) g.settings.offerSort = "frist";
   // Rent nyskrap har lavere karbon fra B-043
   if (g.scrap.rent && g.scrap.rent.c > 0.06) g.scrap.rent.c = 0.06;

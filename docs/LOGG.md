@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 23 – 2026-09-24: sekvenser og overgangsemner i strengstøpingen
+
+**Brukeren påpekte:** Med to kvaliteter må støpingen vente med den ene kvaliteten, ellers blir det
+overgangsemner som må skrapes.
+
+**Gjort (B-046):** Strengstøpingen støper én kvalitet om gangen, venter på slutt av sekvens (30 min stopp)
+eller bytter etter 90 min med skrapede overgangsemner. Tekst på Verket og tonn i Kvalitet-kortet.
+
+**Testet:** tsc, lint, balanse (uendret). I Node med to kvaliteter: lysbueovn 525 t mot 584 t på 48 t, 8 t
+overgangsemner; induksjonsovn uten tap. Playwright (iPhone 13): teksten på Verket, 390 px, ingen feil.
+
+---
+
 ## Økt 22 – 2026-09-24: Salg, folk, lavkarbon og ny startovn
 
 **Brukeren ba om:** Kortere og mer intuitiv Salg-side; vikarer som dekker støpere; skrapklasser og planlegger

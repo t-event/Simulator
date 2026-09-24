@@ -608,3 +608,18 @@ Beslutning: Garasjen starter med «Liten induksjonsovn 250 kg» (strøm, 750 kWh
 Forskningen «Induksjonssmelting» heter nå «Større induksjonsovn». I garasjen vises bare strømprisen;
 strømavtaler og effekttariff kommer fra verkstedet. Gamle lagringer med digel får den nye ovnen.
 Balanse: 8 / 24 / 63 / 136.
+
+## B-046 Strengstøping med to kvaliteter: sekvenser og overgangsemner (2026-09-24)
+Status: gjelder (utfyller B-039)
+Brukeren påpekte at støpingen må vente med å kjøre en ny kvalitet, fordi det blir overgangsemner som må skrapes.
+Beslutning: Gjelder bare strengstøping (blokk- og formstøping støper hver øse for seg).
+- Maskinen støper én kvalitet om gangen. Står en øse med samme kvalitet som sist i køen, tas den først.
+- En øse med annen kvalitet venter til støpingen har stått i 30 min (sekvensen er slutt og fordeleren tom) –
+  da starter den nye kvaliteten uten tap.
+- Har øsa ventet i 90 min, byttes kvaliteten midt i sekvensen. Da skrapes overgangsemnene (5 % av en times
+  støpekapasitet, høyst halve øsa) og går til returskrap. Første gang forklares det i et varsel; Kvalitet-kortet
+  viser tonn overgangsemner siste uke.
+- Mens øsa venter, står den i køen, og ovnen kan bli stående med ferdig stål («Venter på støping»).
+Test: 2 × 30 t lysbueovn på 1-strengs maskin: 525 t på 48 t med to kvaliteter mot 584 t med én, 8 t
+overgangsemner. Små induksjonsøser gir ingen tap, fordi støpingen uansett står mellom øsene.
+Balanse uendret: 8 / 24 / 63 / 136.
