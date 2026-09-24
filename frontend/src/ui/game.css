@@ -1670,3 +1670,9 @@ button {
 .g-worker-away {
   font-size: 12px;
 }
+
+.g-coach .g-coach-skip {
+  align-self: flex-end;
+  min-height: 40px;
+  padding: 6px 14px;
+}

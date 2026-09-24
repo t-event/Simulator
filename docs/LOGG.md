@@ -5,6 +5,17 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 16 – 2026-09-24: «Hopp over» i veiledningen
+
+**Brukeren meldte:** «Hopp over» hoppet over hele veiledningen, ikke bare til neste steg.
+
+**Gjort (B-032):** «Hopp over steget» går til neste steg; «Avslutt veiledningen» fjerner den helt.
+
+**Testet:** Playwright på iPhone 13: alle stegene kan hoppes over ett og ett til «Ferdig», og «Avslutt
+veiledningen» fjerner kortet. Ingen konsollfeil.
+
+---
+
 ## Økt 15 – 2026-09-24: fravær, influensa og vikarer
 
 **Brukeren ba om:** Forslaget om fravær, med automatisk ferie, influensa der flere er borte, og valget
