@@ -144,4 +144,4 @@ Oppdater listen når noe blir gjort, så arbeidet kan fortsette i en ny samtale.
 - [x] Sikkerhetskopi av lagret spill (Safari kan slette data for nettsider som ikke er brukt på 7 dager,
       med mindre spillet er lagt på hjemskjermen)
 - [x] Spare batteri: tegne skjermen sjeldnere (ikke på pause eller i bakgrunnen)
-- [ ] Veiledet start de første minuttene
+- [x] Veiledet start de første minuttene (kan hoppes over, B-027)

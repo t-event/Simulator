@@ -308,3 +308,25 @@ Beslutning:
   også på startskjermen (Safari kan slette data for nettsider som ikke er brukt på en uke).
 - **Batteri:** skjermen tegnes ikke på nytt når spillet står på pause eller ikke vises.
 - Balanse: 10 / 32 / 101 / 185, ingen konkurs.
+
+## B-027 Vinnergrense 1 mrd., planlegger med grense og kreditt-valg, veiledet start (2026-09-24)
+Status: gjelder (erstatter vinnergrensen på 100 mill. kr)
+Brukeren svarte på spørsmålene fra tilbakemeldingsrunde 2: vinnergrensen må opp, planleggeren må få en
+grense og et valg om kreditt, og spillet skal ha en veiledet start som gamle spillere kan hoppe over.
+Beslutning:
+- **Vinnergrense:** 1 mrd. kr i egenkapital (`WIN_CASH`). Testspilleren har 400–700 mill. kr på dag 240,
+  så 300 mill. ville fortsatt kommet for tidlig. Beløp over en milliard vises som «mrd. kr».
+- **Planleggeren:** handler ikke lenger på kassekreditten med mindre spilleren huker av for det
+  (`autoBuyCredit`, av som standard). Uten kreditt lar den lønn og faste kostnader for ett døgn ligge
+  igjen i kassa. Spilleren kan sette et tak for innkjøp per døgn (`autoBuyMaxPerDay`, valg tilpasset
+  nivået). Marked viser hva planleggeren har brukt i dag.
+- **Veiledet start** (`game/tutorial.ts`): sju steg (velkommen, ta en kontrakt, kjøp skrap, se ovnen
+  jobbe, lever, les i fagboka, ferdig) i et kort nederst på skjermen. Stegene går videre av seg selv når
+  spilleren har gjort dem, og fanen steget gjelder, blinker. Startskjermen har «Start med veiledning» og
+  «Start uten veiledning», og kortet har «Hopp over». Gamle lagringer får ikke veiledning.
+- **Lavkarbon i lysbueovn uten øseovn:** reseptsjekken advarer om at karbonet varierer og at en del
+  charger vil bomme. (Mekanikken er uendret.)
+- **Testspilleren:** bytter ikke støping til et nytt produkt før kontraktene på det gamle er levert, tar
+  ikke lavkarbon uten øseovn, og forsker på øsemetallurgi rett etter strengstøping. Uten dette gikk den
+  i stålverket inn i bøter og omdømmefall som en forsiktig spiller ville unngått.
+- Balanse: 10 / 32 / 83 / 161, alle frø når storverket, ingen konkurs.

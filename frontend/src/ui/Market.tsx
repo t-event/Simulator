@@ -38,6 +38,11 @@ export function Market({ g, stats, act }: Props) {
     // Bare det som kan forskes fram på dette nivået; resten er for langt fram
     if (r && r.stage <= g.stage) locked.set(r.name, [...(locked.get(r.name) ?? []), id]);
   }
+  // Valg for planleggerens døgngrense, tilpasset størrelsen på verket
+  const capBase = [5_000, 10_000, 100_000, 500_000, 2_500_000][g.stage];
+  const capOptions = [...new Set([1, 2, 5, 10].map((m) => m * capBase).concat(g.settings.autoBuyMaxPerDay ?? []))].sort(
+    (a, b) => a - b,
+  );
   const checks = gradeChecks(g, g.targetGrade, est.analysis, stats);
   const suggest = () =>
     act((gg) => {
@@ -119,16 +124,56 @@ export function Market({ g, stats, act }: Props) {
             </p>
           ))}
           {hasPlanner(g) ? (
-            <label className="g-toggle">
-              <input
-                type="checkbox"
-                checked={g.settings.autoBuy}
-                onChange={(e) => act((gg) => void (gg.settings.autoBuy = e.target.checked))}
-              />
-              <span>
-                La planleggeren kjøpe inn etter resepten (holder ca. {fmtNum(g.settings.autoBuyDays, 1)} døgns forbruk)
-              </span>
-            </label>
+            <div className="g-planner">
+              <label className="g-toggle">
+                <input
+                  type="checkbox"
+                  checked={g.settings.autoBuy}
+                  onChange={(e) => act((gg) => void (gg.settings.autoBuy = e.target.checked))}
+                />
+                <span>
+                  La planleggeren kjøpe inn etter resepten (holder ca. {fmtNum(g.settings.autoBuyDays, 1)} døgns
+                  forbruk)
+                </span>
+              </label>
+              {g.settings.autoBuy && (
+                <>
+                  <label className="g-field">
+                    <span>Planleggeren kan bruke per døgn</span>
+                    <select
+                      value={g.settings.autoBuyMaxPerDay ?? ""}
+                      onChange={(e) =>
+                        act(
+                          (gg) =>
+                            void (gg.settings.autoBuyMaxPerDay = e.target.value === "" ? null : Number(e.target.value)),
+                        )
+                      }
+                    >
+                      <option value="">Ingen grense</option>
+                      {capOptions.map((v) => (
+                        <option key={v} value={v}>
+                          Maks {fmtKr(v)}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="g-toggle">
+                    <input
+                      type="checkbox"
+                      checked={g.settings.autoBuyCredit}
+                      onChange={(e) => act((gg) => void (gg.settings.autoBuyCredit = e.target.checked))}
+                    />
+                    <span>Planleggeren kan handle på kassekreditten når kassa er tom</span>
+                  </label>
+                  <p className="g-muted">
+                    Brukt i dag: {fmtKr(g.today.autoBuyKr ?? 0)}.{" "}
+                    {g.settings.autoBuyCredit
+                      ? "Kassa kan gå i minus – husk at en uke under kredittgrensen er konkurs."
+                      : "Uten kreditt lar planleggeren lønn og faste kostnader for ett døgn ligge igjen i kassa."}
+                  </p>
+                </>
+              )}
+            </div>
           ) : (
             <p className="g-note">
               Du kjøper skrap selv. {g.stage >= 2 ? "Ansett en planlegger under Folk" : "Fra støperiet kan du ansette en planlegger"} som

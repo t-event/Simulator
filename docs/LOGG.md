@@ -5,6 +5,25 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 9 – 2026-09-24: vinnergrense, planleggerens grense og veiledet start
+
+**Brukeren ba om:** Høyere vinnergrense. En grense for planleggeren, og et valg om den får handle på
+kreditt. Veiledet start med mulighet for å hoppe over.
+
+**Gjort (B-027):** Vinnergrensen er 1 mrd. kr. Planleggeren handler bare på kreditt hvis spilleren
+tillater det, og kan få et tak per døgn. Veiledet start i sju steg med «Hopp over», og startskjermen har
+valg med eller uten veiledning. Testspilleren er rettet for produktbytte ved ny støping og lavkarbon uten
+øseovn (den gikk i bøter i stålverket), og reseptsjekken advarer om lavkarbon uten øseovn.
+
+**Testet:** Playwright på iPhone 13: veiledningen gjennom stegene (kontrakt, skrap, første charge) og
+«Hopp over», planleggervalgene i Marked. Planleggerens tak og kreditt testet i Node (taket 50 000 kr
+holdt; uten kreditt holdt kassa seg rundt null). Balanse 10 / 32 / 83 / 161. Ingen konsollfeil.
+
+**Gjenstår:** Følg med på om storverket blir for lønnsomt (testspilleren tjener ca. 10 mill. kr per
+døgn der). Vurder flere spørsmål i quizene.
+
+---
+
 ## Økt 8 – 2026-09-24: tilbakemeldingsrunde 2, tema A–G
 
 **Brukeren ba om:** En lang liste forbedringer (se arbeidslisten i `docs/DESIGN.md`), med valg for

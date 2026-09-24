@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { GAME_MIN_PER_REAL_S } from "./data";
 import { advance, newGame, type PurchaseResult } from "./engine";
 import { maxSpeed } from "./research";
+import { advanceTutorial } from "./tutorial";
 import { clearSave, loadGame, parseSave, saveGame } from "./save";
 import type { GameState, LogEntry } from "./types";
 
@@ -21,7 +22,8 @@ export interface GameApi {
   game: GameState | null;
   hasSave: boolean;
   toasts: Toast[];
-  startNew: () => void;
+  /** Nytt spill, med eller uten veiledet start */
+  startNew: (guided: boolean) => void;
   continueSaved: () => void;
   /** Kjører en handling på spillet og tegner på nytt. Resultatmeldinger vises som varsel. */
   act: <T>(fn: (g: GameState) => T) => T;
@@ -57,7 +59,17 @@ export function useGame(): GameApi {
     setHasSave(true);
   }, []);
 
-  const startNew = useCallback(() => begin(newGame()), [begin]);
+  const startNew = useCallback(
+    (guided: boolean) => {
+      const g = newGame();
+      if (guided) {
+        g.tutorial = 0;
+        g.speed = 0;
+      }
+      begin(g);
+    },
+    [begin],
+  );
   const continueSaved = useCallback(() => {
     const g = loadGame();
     begin(g ?? newGame());
@@ -97,6 +109,7 @@ export function useGame(): GameApi {
       const g = gameRef.current;
       if (!g) throw new Error("ingen spill");
       const result = fn(g);
+      advanceTutorial(g);
       const r = result as unknown as PurchaseResult | undefined;
       if (r && typeof r === "object" && "ok" in r && "message" in r && !r.ok) pushToast(r.message, "bad");
       flushLog();
@@ -132,6 +145,7 @@ export function useGame(): GameApi {
       const wasRunning = g.speed > 0;
       if (g.speed > 0 && !g.pendingManual && !g.gameOver) {
         advance(g, elapsed * g.speed * GAME_MIN_PER_REAL_S);
+        advanceTutorial(g);
         flushLog();
       }
       if (now - lastSave > AUTOSAVE_MS) {

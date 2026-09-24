@@ -167,6 +167,8 @@ export function newGame(seed = Date.now()): GameState {
       followQueue: true,
       plannerSorts: true,
       autoBuyDays: 1.5,
+      autoBuyCredit: false,
+      autoBuyMaxPerDay: null,
       autoSpot: false,
       rolling: true,
       manualNext: false,
@@ -197,6 +199,7 @@ export function newGame(seed = Date.now()): GameState {
     repLog: [],
     advisorSeen: {},
     specialists: {},
+    tutorial: null,
     morale: 70,
     lastBonusDay: -99,
     knowledge: [],
@@ -1311,8 +1314,16 @@ function onHour(g: GameState, stats: PlantStats): void {
   if (g.settings.autoBuy && hasPlanner(g)) autoBuy(g, stats);
 }
 
-/** Kjøper skrap etter resepten for et par døgns forbruk (planleggerens jobb, eller spillerens). */
-export function autoBuy(g: GameState, stats: PlantStats): void {
+/**
+ * Kjøper skrap etter resepten for et par døgns forbruk (planleggerens jobb, eller spillerens).
+ * Planleggeren holder seg innenfor døgngrensen, og bruker bare kassekreditten hvis spilleren
+ * har tillatt det; ellers lar den lønn og faste kostnader for ett døgn ligge igjen i kassa (B-027).
+ */
+export function autoBuy(
+  g: GameState,
+  stats: PlantStats,
+  opts: { credit: boolean; cap: number | null } = { credit: g.settings.autoBuyCredit, cap: g.settings.autoBuyMaxPerDay },
+): void {
   const recipeIds = SCRAP_IDS.filter((id) => g.recipe[id] > 0 && SCRAP_TYPES[id].buyable && scrapUnlocked(g, id));
   const total = SCRAP_IDS.reduce((a, id) => a + g.recipe[id], 0);
   if (!recipeIds.length || total <= 0) return;
@@ -1325,9 +1336,15 @@ export function autoBuy(g: GameState, stats: PlantStats): void {
     const stock = g.scrap[id].t;
     if (stock >= target * 0.6) continue;
     const s = computePlantStats(g);
-    const afford = Math.max(0, (g.cash + creditLimit(g) * 0.9) / scrapPrice(g, id));
+    const reserve = stats.salaryPerDay + STAGES[g.stage].fixedPerDay;
+    let money = opts.credit ? g.cash + creditLimit(g) * 0.9 : g.cash - reserve;
+    if (opts.cap !== null) money = Math.min(money, opts.cap - (g.today.autoBuyKr ?? 0));
+    const afford = Math.max(0, money / scrapPrice(g, id));
     const amount = Math.min(target - stock, afford, s.yardT - s.yardUsed);
-    if (amount > stats.sizeT * 0.1) buyScrap(g, id, amount, s);
+    if (amount <= stats.sizeT * 0.1) continue;
+    const before = g.cash;
+    buyScrap(g, id, amount, s);
+    g.today.autoBuyKr = (g.today.autoBuyKr ?? 0) + (before - g.cash);
   }
 }
 
@@ -1604,6 +1621,7 @@ const nf2 = new Intl.NumberFormat("nb-NO", { maximumFractionDigits: 2 });
 export function fmtKr(v: number): string {
   const abs = Math.abs(v);
   const sign = v < 0 ? "−" : "";
+  if (abs >= 1_000_000_000) return `${sign}${nf2.format(abs / 1_000_000_000)} mrd. kr`;
   if (abs >= 1_000_000) return `${sign}${nf2.format(abs / 1_000_000)} mill. kr`;
   return `${sign}${nf0.format(abs)} kr`;
 }

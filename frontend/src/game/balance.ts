@@ -9,7 +9,7 @@
 import { bonusCost, buyUpgrade, courseCost, doResearch, giveBonus, hire, requestReline, sendOnCourse, setRecipe, setTargetGrade, upgradeOptions } from "./actions";
 import { resolveDecision } from "./decisions";
 import { researchOptions, scrapUnlocked } from "./research";
-import { SCRAP_IDS, STAGES } from "./data";
+import { CASTINGS, SCRAP_IDS, STAGES } from "./data";
 import { acceptContract, advance, autoBuy, completeManual, newGame, TARGET_C } from "./engine";
 import { EAFSimulation } from "../sim/eaf";
 import { createSim } from "../ui/control/simSetup";
@@ -88,6 +88,7 @@ const RESEARCH_PRIORITY = [
   "blokkstoping",
   "lysbue",
   "strengstoping",
+  "osemetallurgi",
   "valsing",
   "kundepleie",
   "energistyring",
@@ -98,7 +99,6 @@ const RESEARCH_PRIORITY = [
   "spektrometri",
   "rajern",
   "hoyeffekt",
-  "osemetallurgi",
   "sikkerhet",
   "sortering",
   "ildfast",
@@ -106,6 +106,9 @@ const RESEARCH_PRIORITY = [
   "forvarming",
   "eksport",
 ];
+
+/** Spill der testspilleren venter med å bytte støping til kontraktene på det gamle produktet er levert */
+const switching = new WeakSet<GameState>();
 
 function botHour(g: GameState): void {
   // Hendelseskort: forsiktige valg, som en fornuftig spiller
@@ -149,9 +152,13 @@ function botHour(g: GameState): void {
   const activeGrades = new Set(active.map((c) => c.grade));
   for (const offer of g.contracts.filter((c) => c.status === "tilbud")) {
     if (!stats.products.includes(offer.product)) continue;
+    // Skal støpingen byttes til et nytt produkt, tas ikke flere kontrakter på det gamle
+    if (switching.has(g) && offer.product === stats.casting.product) continue;
     // Med valseverket i drift går alle emner til armering
     if (stats.products.includes("armering") && offer.product !== "armering") continue;
     if (!cheapestRecipe(g, offer.grade)) continue;
+    // Lavkarbon bommer for ofte i lysbueovnen uten øseovn til at en forsiktig spiller tar det
+    if (offer.grade === "lavkarbon" && stats.furnace.arc && !g.owned.includes("oseovn")) continue;
     // En kvalitet om gangen, som en enkel spiller ville kjørt
     if (activeGrades.size > 0 && !activeGrades.has(offer.grade)) continue;
     const days = offer.deadlineDay - today + 0.5;
@@ -170,7 +177,8 @@ function botHour(g: GameState): void {
 
   g.settings.autoBuy = true;
   // Uten planlegger kjøper testspilleren skrap selv, på samme måte som planleggeren ville gjort
-  if (!hasPlanner(g)) autoBuy(g, stats);
+  // Uten planlegger kjøper testspilleren selv, og strekker seg på kassekreditten når det trengs
+  if (!hasPlanner(g)) autoBuy(g, stats, { credit: true, cap: null });
   g.settings.autoSpot = true;
 
   // Ansettelser: fyll opp manglende plasser, deretter selgere og reparatører
@@ -226,6 +234,15 @@ function botHour(g: GameState): void {
     if (!o.available && o.reason !== "For lite penger") continue;
     // Store investeringer krever en buffer til skrap og lønn mens produksjonen tar seg opp
     if (g.cash - o.price * (o.price > 1_000_000 ? 1.3 : 1) < reserve) break;
+    // Ny støping som gir et annet produkt: lever ferdig kontraktene på det gamle først
+    const product = CASTINGS.find((c) => c.id === id)?.product;
+    if (product && product !== stats.casting.product) {
+      if (g.contracts.some((c) => c.status === "aktiv" && c.product !== product)) {
+        switching.add(g);
+        break;
+      }
+      switching.delete(g);
+    }
     buyUpgrade(g, id);
     break;
   }
@@ -267,7 +284,8 @@ function run(seed: number, days: number, verbose: boolean): RunSummary {
                 .map(([k, v]) => `${k} ${Math.round((v ?? 0) / 1000)}k`)
                 .join(", ")}] `
             : "") +
-          `vent: ${g.furnaces.map((f) => f.waitReason ?? "-").join("/")}${g.castWait ? " støp:" + g.castWait : ""}`,
+          (y ? `kval ${Math.round(y.onGradeT ?? 0)}/${Math.round(y.offGradeT ?? 0)}/${Math.round(y.secondT ?? 0)} t  ` : "") +
+          `mål ${g.targetGrade}  vent: ${g.furnaces.map((f) => f.waitReason ?? "-").join("/")}${g.castWait ? " støp:" + g.castWait : ""}`,
       );
     }
   }
