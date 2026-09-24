@@ -1,6 +1,6 @@
 import { PRODUCTS, SCRAP_IDS, SCRAP_TYPES } from "../game/data";
 import { buyScrap, scrapPrice } from "../game/engine";
-import { energyPrice, hasPlanner, productPrice, type PlantStats } from "../game/plant";
+import { energyPrice, hasPlanner, plannerOrders, productPrice, type PlantStats } from "../game/plant";
 import { PowerCard } from "./Power";
 import { researchForScrap, scrapUnlocked } from "../game/research";
 import type { GameState, ProductId, ScrapId } from "../game/types";
@@ -98,7 +98,7 @@ export function Market({ g, stats, act }: Props) {
               🔒 {ids.map((id) => SCRAP_TYPES[id].name).join(" · ")} – forsk fram «{name}».
             </p>
           ))}
-          {hasPlanner(g) ? (
+          {plannerOrders(g) ? (
             <div className="g-planner">
               <label className="g-toggle">
                 <input
@@ -140,6 +140,12 @@ export function Market({ g, stats, act }: Props) {
                     />
                     <span>Planleggeren kan handle på kassekreditten når kassa er tom</span>
                   </label>
+                  {g.autoBuyNote && (
+                    <p className="g-note g-warn">Planleggeren får ikke kjøpt {g.autoBuyNote}.</p>
+                  )}
+                  {!hasPlanner(g) && (
+                    <p className="g-muted">Planleggeren er borte, men de faste bestillingene går som vanlig.</p>
+                  )}
                   <p className="g-muted">
                     Brukt i dag: {fmtKr(g.today.autoBuyKr ?? 0)}.{" "}
                     {g.settings.autoBuyCredit

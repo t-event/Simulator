@@ -111,10 +111,14 @@ const LOTS_SHOWN = 6;
 
 type SalesTab = "tilbud" | "ko" | "lager" | "avtaler";
 
-export function Sales({ g, stats, act }: Props) {
+export function Sales({ g, stats, act, openTab }: Props & { openTab?: string }) {
   const [showAll, setShowAll] = useState(false);
   const [tab, setTab] = useState<SalesTab>(() =>
-    g.contracts.some((c) => c.status === "tilbud") || !g.contracts.some((c) => c.status === "aktiv") ? "tilbud" : "ko",
+    openTab && ["tilbud", "ko", "lager", "avtaler"].includes(openTab)
+      ? (openTab as SalesTab)
+      : g.contracts.some((c) => c.status === "tilbud") || !g.contracts.some((c) => c.status === "aktiv")
+        ? "tilbud"
+        : "ko",
   );
   const sort = g.settings.offerSort;
   const offers = g.contracts

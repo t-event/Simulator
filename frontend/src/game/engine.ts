@@ -38,6 +38,7 @@ import {
   fixedPowerOffer,
   furnaceType,
   furnaceGrade,
+  plannerOrders,
   gradeFailures,
   gradeRecipe,
   has,
@@ -244,7 +245,7 @@ export function newGame(seed = Date.now()): GameState {
   addScrap(g, "tungt", 0.65, SCRAP_TYPES.tungt);
   unlock(g, "start");
   unlock(g, "skrap");
-  log(g, "Du låser opp garasjen. Digelen er fyrt opp, og naboen har gitt deg ett tonn skrap.", "info");
+  log(g, "Du låser opp garasjen. Induksjonsovnen er klar, og naboen har gitt deg ett tonn skrap.", "info");
   generateOffers(g, computePlantStats(g), 2);
   return g;
 }
@@ -422,6 +423,13 @@ interface Mix {
   dirt: number;
   energy: number;
   radioactive: boolean;
+}
+
+/** Hva spilleren kan gjøre når ovnen står uten skrap: hvorfor planleggeren ikke har kjøpt, eller at noen må kjøpe (B-048) */
+export function scrapStopHelp(g: GameState): string {
+  if (!g.settings.autoBuy || !plannerOrders(g)) return "Kjøp skrap under Marked, eller ansett en planlegger som kjøper inn.";
+  if (g.autoBuyNote) return `Planleggeren får ikke kjøpt ${g.autoBuyNote}.`;
+  return "Planleggeren bestiller mer skrap.";
 }
 
 /** Tar skrap fra lageret etter resepten. Mangler en type, fylles det opp med resten. */
@@ -884,7 +892,7 @@ function updateFurnaces(g: GameState, stats: PlantStats): void {
         hasGrader(g) && stats.yardUsed >= stats.sizeT ? "Mangler skrap til resepten" : "Tomt for skrap";
       // Tydelig varsel når ovnen blir stående uten skrap (B-033)
       if (was !== f.waitReason && i === 0)
-        log(g, `Ovnen står: ${f.waitReason === "Tomt for skrap" ? "skraplageret er tomt. Kjøp skrap under Marked" : "mangler skrap til resepten"}.`, "bad");
+        log(g, `Ovnen står: ${f.waitReason === "Tomt for skrap" ? "skraplageret er tomt" : "mangler skrap til resepten"}. ${scrapStopHelp(g)}`, "bad");
     }
   }
 }
@@ -1931,8 +1939,10 @@ function onHour(g: GameState, stats: PlantStats): void {
   }
   plannerSort(g);
   followQueue(g, stats);
-  // Automatisk innkjøp krever en planlegger (se B-021)
-  if (g.settings.autoBuy && hasPlanner(g)) autoBuy(g, stats);
+  // Automatisk innkjøp krever en planlegger (se B-021). Er planleggeren borte, går de faste bestillingene
+  // videre (B-048)
+  g.autoBuyNote = null;
+  if (g.settings.autoBuy && plannerOrders(g)) autoBuy(g, stats);
 }
 
 /**
@@ -1955,6 +1965,9 @@ export function autoBuy(
   const recipeIds = SCRAP_IDS.filter((id) => recipe[id] > 0 && SCRAP_TYPES[id].buyable && scrapUnlocked(g, id));
   const total = SCRAP_IDS.reduce((a, id) => a + recipe[id], 0);
   if (!recipeIds.length || total <= 0) return;
+  // Hvorfor planleggeren ikke fikk kjøpt det resepten trenger, så spilleren kan se det (B-048)
+  const note = (text: string, id: ScrapId) =>
+    void (g.autoBuyNote = g.autoBuyNote ?? `${SCRAP_TYPES[id].name.toLowerCase()}: ${text}`);
   const need = Math.max(
     stats.sizeT * stats.furnaceCount * 2,
     (stats.dailyProductT / stats.castYield) * 1.1 * g.settings.autoBuyDays,
@@ -1968,8 +1981,22 @@ export function autoBuy(
     let money = opts.credit ? g.cash + creditLimit(g) * 0.9 : g.cash - reserve;
     if (opts.cap !== null) money = Math.min(money, opts.cap - (g.today.autoBuyKr ?? 0));
     const afford = Math.max(0, money / scrapPrice(g, id));
-    const amount = Math.min(target - stock, afford, s.yardT - s.yardUsed);
-    if (amount <= stats.sizeT * 0.1) continue;
+    const room = s.yardT - s.yardUsed;
+    const amount = Math.min(target - stock, afford, room);
+    if (amount <= stats.sizeT * 0.1) {
+      if (target - stock > stats.sizeT * 0.1)
+        note(
+          room <= stats.sizeT * 0.1
+            ? "skraplageret er fullt av annet skrap"
+            : opts.cap !== null && opts.cap - (g.today.autoBuyKr ?? 0) <= scrapPrice(g, id) * stats.sizeT * 0.1
+              ? "døgngrensen for innkjøp er brukt opp"
+              : opts.credit
+                ? "kassekreditten er brukt opp"
+                : "det er ikke nok penger i kassa (kreditt er ikke tillatt)",
+          id,
+        );
+      continue;
+    }
     const before = g.cash;
     buyScrap(g, id, amount, s);
     g.today.autoBuyKr = (g.today.autoBuyKr ?? 0) + (before - g.cash);

@@ -46,8 +46,8 @@ function Intro({
         <h1>Stålverket</h1>
         <p className="g-intro-lead">Fra garasje til storverk.</p>
         <p>
-          Du har leid en kald garasje, fått tak i en liten, brukt induksjonsovn og har 25 000 kroner på konto. Naboen har ryddet
-          låven og gitt deg et tonn skrap.
+          Du har leid en kald garasje, fått tak i en liten, brukt induksjonsovn og har 25 000 kroner på konto. Naboen
+          har ryddet låven og gitt deg et tonn skrap.
         </p>
         <p>
           Smelt skrap, støp gods og selg til kundene i bygda. Bygg ut til verksted, støperi og stålverk – og til slutt
@@ -67,7 +67,9 @@ function Intro({
           <button className={hasSave ? "" : "g-primary"} onClick={() => onNew(true)}>
             {hasSave ? "Nytt spill med veiledning" : "Start med veiledning"}
           </button>
-          <button onClick={() => onNew(false)}>{hasSave ? "Nytt spill uten veiledning" : "Start uten veiledning"}</button>
+          <button onClick={() => onNew(false)}>
+            {hasSave ? "Nytt spill uten veiledning" : "Start uten veiledning"}
+          </button>
         </div>
         <div className="g-intro-backup">
           <BackupInput onLoad={onLoadBackup} />
@@ -278,6 +280,7 @@ export function GameApp() {
   const api = useGame();
   const { game: g, act } = api;
   const [view, setView] = useState<View>("verket");
+  const [subTab, setSubTab] = useState<{ tab?: string; n: number }>({ n: 0 });
   const [bookOpen, setBookOpen] = useState(false);
   const [bookChapter, setBookChapter] = useState<string | null>(null);
   const [winSeen, setWinSeen] = useState(false);
@@ -293,8 +296,10 @@ export function GameApp() {
 
   const stats = computePlantStats(g);
   const shown: View = viewUnlocked(g, view) ? view : "verket";
-  const go = (v: View) => {
+  const go = (v: View, sub?: string) => {
     setView(v);
+    // Åpner en bestemt underfane, f.eks. lageret under Salg (B-048)
+    setSubTab((prev) => ({ tab: sub, n: prev.n + 1 }));
     if (!g.seenViews.includes(v)) act((gg) => void gg.seenViews.push(v));
   };
   /** Åpner fagboka på et kapittel (eller det første uleste) og merker det som lest */
@@ -351,9 +356,20 @@ export function GameApp() {
         <main className="g-main">
           {shown === "verket" && <Overview g={g} stats={stats} act={act} go={go} openBook={openBook} />}
           {shown === "marked" && <Market g={g} stats={stats} act={act} />}
-          {shown === "salg" && <Sales g={g} stats={stats} act={act} />}
+          {shown === "salg" && (
+            <Sales key={subTab.tab ? `salg-${subTab.n}` : "salg"} g={g} stats={stats} act={act} openTab={subTab.tab} />
+          )}
           {shown === "folk" && <People g={g} stats={stats} act={act} />}
-          {shown === "forskning" && <ResearchPage g={g} stats={stats} act={act} onQuit={api.quit} openBook={openBook} onLoadBackup={api.loadBackup} />}
+          {shown === "forskning" && (
+            <ResearchPage
+              g={g}
+              stats={stats}
+              act={act}
+              onQuit={api.quit}
+              openBook={openBook}
+              onLoadBackup={api.loadBackup}
+            />
+          )}
         </main>
       </div>
 
