@@ -13,6 +13,9 @@ Verket for lang, Marked uintuitiv, støpefeil, fagbok-kapitler, potte/porten, na
 nestenulykke, søkere ved flytting, bryter for forespørsler, lang lagerliste, øseovnsoperatør, digel.
 Delt i fem pakker.
 
+**Pakke 4 (B-036):** potte, porten, nattillegg, «Les «kapittel»» fra Forskning, låst/skjult planlagt
+omforing, varsel når reparatøren er borte, belønning og straff ved nestenulykke. Testet i Playwright.
+
 **Pakke 3 (B-035):** Verket i underfaner med kompakt produksjonslinje (siden er ca. 20 % kortere, og alt
 viktig står øverst), resept-editor med −/+ og forslagene Billigst og Sikrest, skrapklasser-info, pris på
 kjøpsknapper, kortere lagerliste, automatisk håndtering av støpefeil. Testet i Playwright på iPhone 13.

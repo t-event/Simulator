@@ -88,7 +88,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
     title: "Radioaktive kilder i skrap",
     paragraphs: [
       "Gamle måleinstrumenter og medisinsk utstyr kan inneholde radioaktive kilder. Havner en slik kilde i ovnen, forurenses stålet, støvet og anlegget.",
-      "Derfor måles alt skrap ved porten. En strålingsportal koster lite sammenlignet med en opprydding.",
+      "Derfor måles alt skrap når det kommer inn på verket. En strålingsportal koster lite sammenlignet med en opprydding.",
     ],
   },
   {

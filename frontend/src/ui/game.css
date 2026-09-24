@@ -1834,3 +1834,19 @@ button {
   margin-top: 8px;
   min-height: 32px;
 }
+
+.g-locked-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 8px 0;
+  padding: 8px 10px;
+  border: 1px dashed var(--panel-border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.g-locked-box strong {
+  color: var(--text);
+}

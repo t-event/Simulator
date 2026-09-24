@@ -150,7 +150,9 @@ export function ShiftPlan({ g, stats, act }: { g: GameState; stats: PlantStats; 
         })}
       </div>
       <p className="g-muted">
-        Nattillegg nå: {fmtPct(nightExtra(g, stats.hours))} ({fmtKr(baseSalary * nightExtra(g, stats.hours))} per døgn)
+        {nightExtra(g, stats.hours) > 0
+          ? `Nattillegg: ${fmtPct(nightExtra(g, stats.hours))} ekstra lønn (${fmtKr(baseSalary * nightExtra(g, stats.hours))} per døgn)`
+          : "Ingen nattillegg med dette skiftet"}
         {electric && ` · strøm i driftstida: ${kr(avgDealPrice(g, g.settings.powerDeal, stats.hours))}`}
       </p>
     </Card>

@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import "./game.css";
 import { STAGES, WIN_CASH } from "../game/data";
-import { completeManual } from "../game/engine";
+import { completeManual, unlock } from "../game/engine";
 import { computePlantStats, day, energyPrice, idleOutsideHours } from "../game/plant";
 import { useGame, type GameApi } from "../game/useGame";
 import { resolveDecision } from "../game/decisions";
@@ -302,6 +302,8 @@ export function GameApp() {
     const start = chapter ?? g.knowledge.find((k) => !g.readChapters.includes(k)) ?? null;
     act((gg) => {
       gg.unreadKnowledge = 0;
+      // Et kapittel som forskningen ber om, skal alltid kunne leses, også før det er låst opp (B-036)
+      if (start) unlock(gg, start);
       if (start && !gg.readChapters.includes(start)) gg.readChapters.push(start);
     });
     setBookChapter(start);

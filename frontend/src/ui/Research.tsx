@@ -1,5 +1,6 @@
 import { doResearch } from "../game/actions";
 import { STAGES } from "../game/data";
+import { knowledgeCard } from "../game/knowledge";
 import { researchOptions } from "../game/research";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
@@ -65,7 +66,7 @@ export function Research({
                 </button>
                 {r.reads && !g.readChapters.includes(r.reads) ? (
                   <button className="g-small" onClick={() => openBook(r.reads)}>
-                    📖 Les kapitlet
+                    📖 Les «{knowledgeCard(r.reads)?.title ?? "kapitlet"}»
                   </button>
                 ) : (
                   r.reason && <span className="g-muted">{r.reason}</span>

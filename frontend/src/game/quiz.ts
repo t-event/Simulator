@@ -145,7 +145,7 @@ export const QUIZ: Record<string, QuizQuestion[]> = {
     },
     {
       q: "Hva er det beste vernet?",
-      options: ["Å smelte fort", "Å måle alt skrap i porten", "Å bruke bare billig skrap"],
+      options: ["Å smelte fort", "Å måle alt skrap som kommer inn på verket", "Å bruke bare billig skrap"],
       correct: 1,
       why: "En strålingsportal koster lite sammenlignet med en opprydding.",
     },

@@ -202,8 +202,11 @@ const MORE_MAKERS: Record<string, Maker> = {
       title: "Nestenulykke",
       text: "Flytende stål sprutet ved tappingen og var nær ved å treffe en operatør.",
       options: [
-        { label: `Kjøp verneutstyr og skjermer (${fmtKr(cost)})`, hint: "Ingen skal skades på jobb." },
-        { label: "La det gå denne gangen", hint: "Neste gang kan det gå verre." },
+        {
+          label: `Kjøp verneutstyr og skjermer (${fmtKr(cost)})`,
+          hint: "Ingen skal skades på jobb. Folk og kunder merker det.",
+        },
+        { label: "La det gå denne gangen", hint: "Folk merker at sikkerheten ikke prioriteres – og neste gang kan det gå verre." },
       ],
       data: { cost },
     };
@@ -456,7 +459,8 @@ export function resolveDecision(g: GameState, option: number): void {
       if (yes) {
         addCost(g, "annet", n("cost"));
         adjustMorale(g, 5);
-        log(g, "Nytt verneutstyr og sprutskjermer er på plass.", "good");
+        adjustReputation(g, 1);
+        log(g, "Nytt verneutstyr og sprutskjermer er på plass. De ansatte er fornøyde (trivsel +5), omdømme +1.", "good");
       } else if (chance(g, 0.35) && g.workers.length) {
         const hurt = pick(g, g.workers);
         g.workers = g.workers.filter((w) => w !== hurt);
@@ -465,7 +469,9 @@ export function resolveDecision(g: GameState, option: number): void {
         adjustReputation(g, -4);
         log(g, `${hurt.name} ble skadet ved tappingen og er sykmeldt på ubestemt tid. Bot fra tilsynet og omdømme −4.`, "bad");
       } else {
-        log(g, "Det gikk bra denne gangen.", "info");
+        adjustMorale(g, -5);
+        adjustReputation(g, -1);
+        log(g, "Det gikk bra denne gangen, men det snakkes om sikkerheten på verket. Trivsel −5, omdømme −1.", "bad");
       }
       return;
     case "radgiver": {
