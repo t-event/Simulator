@@ -80,9 +80,11 @@ function botHour(g: GameState): void {
   // Hendelseskort: forsiktige valg, som en fornuftig spiller
   if (g.pendingDecision) {
     const d = g.pendingDecision;
-    const safe: Record<string, number> = { billigparti: 1, hasteordre: 1, lonnskrav: 0, avis: 0, laerling: 0, tilsyn: 0 };
+    const safe: Record<string, number> = { billigparti: 1, hasteordre: 1, lonnskrav: 1, avis: 0, laerling: 0, tilsyn: 0, kurs: 0, sykdom: 0, naboklage: 0, kundebesok: 0, nestenulykke: 0 };
     // Messa bare når det er god råd
-    safe.messe = g.cash > Number(d.data.cost ?? 0) * 4 ? 0 : 1;
+    const affordable = g.cash > Number(d.data.cost ?? 0) * 4;
+    safe.messe = affordable ? 0 : 1;
+    for (const id of ["kurs", "sykdom", "naboklage", "nestenulykke"]) if (!affordable) safe[id] = 1;
     resolveDecision(g, safe[d.id] ?? 1);
   }
   // Forskning: alt som er tilgjengelig, i tabellens rekkefølge

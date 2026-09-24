@@ -168,3 +168,27 @@ Resultat: pengene sperrer nå fra støperiet og oppover, omdømmet i garasjen; f
 Median nivådager 13 / 36 / 89 / 169 (var 13 / 27 / 77 / 152). Nye mål: Verksted 7–20,
 Støperi 20–50, Stålverk 55–120, Storverk 120–220; testspilleren kjører 240 døgn.
 Kassa på dag 240 er 15–55 mill. (var 400–800 mill.).
+
+## B-019 Svar på tilbakemeldingsrunde 2 (2026-09-24)
+Status: gjelder
+Bakgrunn: Stor tilbakemelding fra brukeren og en testperson (se arbeidslisten i `docs/DESIGN.md`).
+Brukerens valg:
+- **Fagboka:** alle fire – quiz med belønning, forskning krever lest kapittel, oppdrag, rådgiver
+  med kapittelhenvisning og betalt spesialist.
+- **Strøm:** alle fire – strømavtale, effekttariff, skiftplan etter strømpris, utkobling.
+- **Planlegging:** ordrekø som spilleren sorterer, og en planlegger som kan ansettes senere.
+Beslutning: Gjennomføres tema for tema (A–G), én PR per tema, som merges fortløpende (B-017).
+
+## B-020 Tregere klokke, forespørsler med svarfrist, hardere bot, hendelser uten gjentakelse (2026-09-24)
+Status: gjelder
+Beslutning:
+- Spillklokka: ett døgn tar to minutter på 1× (var ett). Brukeren har flere ganger sagt at ting går for fort.
+- Forespørsler kommer spredt gjennom døgnet (ikke alle om morgenen), maks 3 åpne om gangen, og
+  hver har en synlig svarfrist på 8–20 timer før kunden går videre.
+- Ulevert stål ved fristen koster halve kontraktsprisen i bot (var en fjerdedel), og omdømmetapet
+  er større (3 × gevinsten + 2).
+- 12 hendelseskort (5 nye: kurs, influensa, naboklage, kundebesøk, nestenulykke). Samme kort kommer
+  ikke igjen før etter 25 døgn, og det går minst 2 døgn mellom to kort.
+- Lønnskrav kan besvares med mottilbud på 2 % (60 % sjanse for enighet, ellers 3 % og én slutter).
+- Navn: «Sandformer» → «Sandstøping»; «Lekkasje i spolen» → «Vannlekkasje i induksjonsspolen», med
+  forklaring på at kobberspolen rundt digelen er vannkjølt.

@@ -275,18 +275,18 @@ export function Overview({ g, stats, act, go }: Props) {
 
         <Card title="Økonomi">
           <div className="g-stats">
-            <Stat label="I dag inn" value={fmtKr(sum(g.today.income))} />
-            <Stat label="I dag ut" value={fmtKr(sum(g.today.costs))} />
+            <Stat label="Inntekter i dag" value={fmtKr(sum(g.today.income))} />
+            <Stat label="Utgifter i dag" value={fmtKr(sum(g.today.costs))} />
             {y && (
               <Stat
-                label="I går resultat"
+                label="Resultat i går"
                 value={fmtKr(sum(y.income) - sum(y.costs))}
                 tone={sum(y.income) - sum(y.costs) >= 0 ? "ok" : "critical"}
               />
             )}
-            {y && <Stat label="I går produsert" value={fmtT(y.producedT)} />}
-            <Stat label="Lønn per dag" value={fmtKr(stats.salaryPerDay)} />
-            <Stat label="Faste kostnader per dag" value={fmtKr(STAGES[g.stage].fixedPerDay)} />
+            {y && <Stat label="Produsert i går" value={fmtT(y.producedT)} />}
+            <Stat label="Lønn per døgn" value={fmtKr(stats.salaryPerDay)} />
+            <Stat label="Faste kostnader per døgn" value={fmtKr(STAGES[g.stage].fixedPerDay)} />
             {g.loan > 0 && <Stat label="Lån" value={fmtKr(g.loan)} tone="warning" />}
           </div>
         </Card>

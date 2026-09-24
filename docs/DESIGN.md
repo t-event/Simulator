@@ -87,3 +87,59 @@ Omtrent ett kort hver fjerde dag. Spillet pauses til du har valgt. Se
 - Lyd og vibrasjon ved viktige hendelser.
 - Flere produkter (tråd, profiler, plater) og ulike markeder.
 - App Store / Google Play via Capacitor, hvis ønsket (se B-009).
+
+## Tilbakemeldingsrunde 2 (2026-09-24) – arbeidsliste
+
+Brukeren testet på mobil og fikk en annen person til å teste. Hvert punkt har en status.
+Oppdater listen når noe blir gjort, så arbeidet kan fortsette i en ny samtale.
+
+**A. Småfeil og språk**
+- [ ] Velge selv hvilken kontrakt som leveres først (løses i B)
+- [x] Færre forespørsler om gangen; forespørsler har synlig svarfrist og avslås automatisk
+- [x] Hardere bot når en kontrakt ikke leveres
+- [x] Mottilbud på lønnskrav
+- [x] Flere hendelseskort, og ikke det samme om og om igjen
+- [x] Bedre norsk: «I dag inn/ut», «I går resultat» osv.
+- [x] Riktige navn: «Sandformer» → sandstøping; «Lekkasje i spolen» → vannlekkasje i induksjonsspolen
+- [x] Se etter og rett konsollfeil (ingen funnet i Chromium, verken utvikling, publisert bygg eller kontrollrom)
+
+**B. Planlegging** (brukerens valg: ordrekø + planlegger)
+- [ ] Ordrekø: spilleren sorterer aktive kontrakter; levering, kvalitet og resept følger køen
+- [ ] Planlegger (ansatt) som ordner køen og innkjøp automatisk; automatisk innkjøp krever planlegger
+
+**C. Foring og vedlikehold**
+- [ ] Ingen automatisk omforing fra start: knapp «Bytt foring», plan hver N døgn (forskning), eller en
+      vedlikeholdsleder som gjør det automatisk
+- [ ] Tydelig forskjell på planlagt stans (billig, kort) og havari (dyrt, langt, omdømme)
+
+**D. Gradvis opplåsing og ryddigere grensesnitt**
+- [ ] Mindre info i starten; faner og kort låses opp etter hvert
+- [ ] Ovn, støping, utstyr og bygg mer sentralt – ikke gjemt i Bygg-menyen
+- [ ] Skraptyper låses opp med fagpoeng; ikke alt fra start
+- [ ] 3× og 10× fart låses opp med fagpoeng
+- [ ] Resepten mer intuitiv: vis hva som mangler for kvaliteten og hvordan det rettes, med forslag
+- [ ] Fokus på flere ting enn å godta kontrakter; kvaliteten man produserer mer sentral
+
+**E. Strøm** (brukerens valg: alle fire)
+- [ ] Strømavtale: spot, fastpris eller nattariff, med bindingstid
+- [ ] Effekttariff: døgnets høyeste effektuttak koster; mange ovner samtidig blir dyrt
+- [ ] Skiftplan: velg når verket smelter (natt er billig strøm, men nattillegg i lønn)
+- [ ] Utkobling fra nettselskapet mot betaling (hendelse med valg)
+
+**F. Fagboka sentral** (brukerens valg: alle fire)
+- [ ] Quiz per kapittel som gir belønning
+- [ ] Forskning krever at kapitlet er lest
+- [ ] Oppdrag fra fagboka med mål og belønning
+- [ ] Rådgiver ved gjentatte omdømmetap: forklarer feilen, viser til kapittel, spesialist mot betaling
+
+**G. Ansatte og balanse**
+- [ ] Ansatte med mer å si (trivsel, kurs, spesialister)
+- [ ] Verkstedet: omdømme 18 og 1,8 mill. kr – kostnader og omdømme skjevt fordelt
+- [ ] Fagpoeng kommer fortsatt for fort
+- [x] Ting bør ta mer tid
+
+**Claudes egne forslag**
+- [ ] Sikkerhetskopi av lagret spill (Safari kan slette data for nettsider som ikke er brukt på 7 dager,
+      med mindre spillet er lagt på hjemskjermen)
+- [ ] Spare batteri: tegne skjermen sjeldnere
+- [ ] Veiledet start de første minuttene

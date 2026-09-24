@@ -1307,3 +1307,13 @@ button {
   -webkit-user-select: text;
   user-select: text;
 }
+
+.g-answer-by {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.g-answer-by.is-urgent {
+  color: var(--warning);
+  font-weight: 600;
+}

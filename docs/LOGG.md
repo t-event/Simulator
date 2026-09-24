@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 8 – 2026-09-24: tilbakemeldingsrunde 2, tema A
+
+**Brukeren ba om:** En lang liste forbedringer (se arbeidslisten i `docs/DESIGN.md`), med valg for
+fagbok, strøm og planlegging (B-019).
+
+**Gjort (tema A, B-020):** Tregere klokke, forespørsler med svarfrist og maks tre åpne, hardere
+bot, nye hendelseskort uten gjentakelse, mottilbud på lønnskrav, bedre norsk i økonomikortet og
+riktigere navn. Konsollfeil: ingen funnet.
+
+**Testet:** Balansetest grønn (12 / 37 / 103 / 179), nettlesertest av forespørsler og lønnskort.
+
+**Gjenstår:** Tema B–G i arbeidslisten.
+
+---
+
 ## Økt 7 – 2026-09-24: vanskeligere spill
 
 **Brukeren ba om:** For mye penger i forhold til omdømme, for raske fagpoeng, spillet må være

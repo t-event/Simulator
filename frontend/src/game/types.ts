@@ -94,7 +94,8 @@ export interface Contract {
   pricePerT: number;
   /** Dagnummer leveransen må være fullført innen (ved dagens slutt) */
   deadlineDay: number;
-  offerExpiresDay: number;
+  /** Spillminuttet tilbudet avslås automatisk hvis det ikke er besvart */
+  offerExpiresMin: number;
   repGain: number;
   repLoss: number;
   penaltyPerT: number;
@@ -240,6 +241,12 @@ export interface GameState {
   researchPoints: number;
   researched: string[];
   pendingDecision: Decision | null;
+  /** Dagen hvert hendelseskort sist ble vist, så de ikke gjentas for ofte */
+  decisionSeen: Record<string, number>;
+  /** Syke ansatte: ett skift mindre til dette spillminuttet */
+  sickUntilMin: number;
+  /** Et kundebesøk har gitt en god forespørsel som kommer snart */
+  bonusOffer: boolean;
   /** Nivået spilleren nettopp flyttet til, for feiring; null når det er sett */
   celebrate: number | null;
   /** Kunnskapskort spilleren har låst opp, i rekkefølge */

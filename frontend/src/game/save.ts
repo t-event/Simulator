@@ -46,6 +46,13 @@ export function migrate(g: GameState): GameState {
   if (loose.researchPoints === undefined) loose.researchPoints = 0;
   if (loose.pendingDecision === undefined) loose.pendingDecision = null;
   if (loose.celebrate === undefined) loose.celebrate = null;
+  if (loose.decisionSeen === undefined) loose.decisionSeen = {};
+  if (loose.sickUntilMin === undefined) loose.sickUntilMin = 0;
+  if (loose.bonusOffer === undefined) loose.bonusOffer = false;
+  for (const c of g.contracts) {
+    const old = c as typeof c & { offerExpiresDay?: number };
+    if (c.offerExpiresMin === undefined) c.offerExpiresMin = ((old.offerExpiresDay ?? 0) + 0) * 1440;
+  }
   if (loose.researched === undefined) {
     loose.researched = [];
     // Utstyr spilleren alt har, skal ikke kreve forskning i ettertid

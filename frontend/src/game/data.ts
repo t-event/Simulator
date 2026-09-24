@@ -12,8 +12,8 @@ import type { Crew, GradeId, ProductId, RoleId, ScrapId } from "./types";
 // Tid
 // ------------------------------------------------------------------ //
 export const MIN_PER_DAY = 24 * 60;
-/** Spillminutter per sekund ved 1x: ett døgn tar ett minutt */
-export const GAME_MIN_PER_REAL_S = 24;
+/** Spillminutter per sekund ved 1x: ett døgn tar to minutter (se B-020) */
+export const GAME_MIN_PER_REAL_S = 12;
 export const SHIFT_START_HOUR = 6;
 export const SPEEDS = [0, 1, 3, 10] as const;
 
@@ -490,7 +490,7 @@ export interface CastingType {
 export const CASTINGS: CastingType[] = [
   {
     id: "sandformer",
-    name: "Sandformer",
+    name: "Sandstøping",
     stage: 0,
     price: 0,
     product: "stopegods",
@@ -500,7 +500,7 @@ export const CASTINGS: CastingType[] = [
     costPerT: 800,
     defectRisk: 0.1,
     continuous: false,
-    description: "Håndformede sandformer. Mye av stålet havner i innløp og matere.",
+    description: "Stålet støpes i former av sand som lages for hånd rundt en modell. Enkelt og billig, men mye av stålet havner i innløp og matere.",
   },
   {
     id: "formlinje",

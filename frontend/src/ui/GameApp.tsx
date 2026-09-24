@@ -23,7 +23,7 @@ const ControlRoom = lazy(() => import("./control/ControlRoom").then((m) => ({ de
 
 const SPEED_OPTIONS = [
   { speed: 0, label: "❚❚", title: "Pause" },
-  { speed: 1, label: "1×", title: "Normal fart: ett døgn per minutt" },
+  { speed: 1, label: "1×", title: "Normal fart: ett døgn på to minutter" },
   { speed: 3, label: "3×", title: "Rask" },
   { speed: 10, label: "10×", title: "Veldig rask" },
 ];
