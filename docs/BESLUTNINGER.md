@@ -434,3 +434,28 @@ Beslutning:
 - **Konkurs** når alle ovner står fordi det ikke er råd til omforing, og lånet er fullt, i tre døgn.
   Sluttskjermen sier hvorfor spillet er over.
 - Balanse: 11 / 33 / 77 / 153.
+
+## B-034 Omdømme og reklamasjoner i starten, realistiske frister, søkere ved flytting (2026-09-24)
+Status: gjelder
+Brukeren: for vanskelig å få omdømme i starten (200 000 kr før omdømme 5), mange reklamasjoner på samme
+ordre (flere −0,5 på rad), reklamasjoner når ingen ordre er aktiv, innleid kvalitetsingeniør virket ikke,
+rekker nesten ikke ordrene i verkstedet uten ansatte, bryter for nye forespørsler, ingen søkere til de nye
+plassene ved flytting.
+Beslutning:
+- **Én reklamasjon per kontrakt:** flere dårlige partier til samme kontrakt samles, og omdømmet trekkes
+  bare én gang per kontrakt. Meldingen sier hvilken dag stålet ble levert (reklamasjoner kommer 0,5–2,5
+  døgn etter leveransen).
+- **Små kunder er tålmodige:** i garasjen og verkstedet godtar kundene opptil 10 % over kravet, og
+  reklamerer i 60 % av tilfellene (ellers 80 %). Dårlige skrappartier er sjeldnere der (3 % mot 5 %).
+- **Mer omdømme i garasjen:** kontrakter der gir 1,5 ganger så mye omdømme.
+- **Kvalitetsingeniøren** måler også alt på lager med en gang, så dårlige partier ikke leveres, og sier at
+  reklamasjoner på stål som alt er levert, kan komme.
+- **Frister og anslag** bygger på det verket faktisk har laget de siste døgnene (`realisticDailyT`), ikke
+  bare kapasiteten. Salg viser «Blir ferdig ca. dag X (frist dag Y)» og advarer når det ikke rekkes.
+- **Bryter** «Ta imot nye forespørsler» i Salg (`pauseOffers`).
+- **Søkere:** det finnes alltid søkere til plassene som mangler for neste skift, og nye søkere kommer med
+  en gang man flytter.
+- **Radioaktive kilder** kom nesten ved hvert store innkjøp i storverket (sjansen var per tonn). Nå høyst
+  1 % per innkjøp og høyst én gang per 30 døgn; meldingen sier at det koster omdømme −12.
+- Støperiet koster 750 000 kr (var 550 000), fordi pengene kom raskere med færre bøter og tilbakebetalinger.
+- Balanse: 10 / 24 / 68 / 141.

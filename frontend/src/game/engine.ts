@@ -170,6 +170,7 @@ export function newGame(seed = Date.now()): GameState {
       powerFixedPrice: 0,
       onePeak: false,
       shiftStart: SHIFT_START_HOUR,
+      pauseOffers: false,
       skipIdleNights: true,
       maxPowerPrice: null,
       autoBuy: false,
@@ -354,7 +355,7 @@ export function buyScrap(g: GameState, id: ScrapId, t: number, stats = computePl
 
   // Et dårlig parti: mer fosfor og kobber enn normalt, uten at det synes på skrapet
   const quality = { p: type.p, tramp: type.tramp, c: type.c, dirt: type.dirt };
-  if ((id === "blandet" || id === "spon" || id === "shredder") && chance(g, 0.05)) {
+  if ((id === "blandet" || id === "spon" || id === "shredder") && chance(g, g.stage <= 1 ? 0.03 : 0.05)) {
     if (hasGrader(g)) {
       // Skrapklasseren ser at partiet er dårlig og sender det tilbake (B-029)
       addIncome(g, "annet", cost);
@@ -369,9 +370,11 @@ export function buyScrap(g: GameState, id: ScrapId, t: number, stats = computePl
     quality.tramp *= uniform(g, 1.2, 1.6);
   }
 
-  const radioChance = 1 - (1 - type.radioPerT) ** amount;
+  // Radioaktive kilder er sjeldne: høyst 1 % per innkjøp og høyst én gang per 30 døgn, også for store verk (B-034)
+  const radioChance = Math.min(0.01, 1 - (1 - type.radioPerT) ** amount);
   let radioactive = false;
-  if (radioChance > 0 && chance(g, radioChance)) {
+  if (radioChance > 0 && day(g) - (g.lastRadioDay ?? -99) >= 30 && chance(g, radioChance)) {
+    g.lastRadioDay = day(g);
     if (has(g, "portal")) {
       const fee = 15_000;
       addCost(g, "annet", fee);
@@ -677,7 +680,7 @@ function finishHeat(g: GameState, index: number, stats: PlantStats): void {
     awardPoints(g, 3);
     log(
       g,
-      `En radioaktiv kilde ble smeltet i ovn ${index + 1}! Stålet og støvet er forurenset og må destrueres. Opprydding ${fmtKr(cleanup)}, anlegget står i to døgn.`,
+      `En radioaktiv kilde ble smeltet i ovn ${index + 1}! Stålet og støvet er forurenset og må destrueres. Opprydding ${fmtKr(cleanup)}, anlegget står i to døgn, omdømme −12. En strålingsportal ville stoppet kilden.`,
       "bad",
     );
     unlock(g, "radioaktivitet");
@@ -1105,6 +1108,28 @@ function plannerSort(g: GameState): void {
     .forEach((c, i) => (c.priority = i + 1));
 }
 
+/**
+ * Oppdager kunden at stålet ikke holder? Små kunder i garasjen og verkstedet godtar litt over kravet
+ * (10 %) og sjekker ikke alt; større kunder sjekker nesten alltid (B-034).
+ */
+function complains(g: GameState, a: Analysis, grade: GradeId): boolean {
+  if (satisfies(a, grade)) return false;
+  if (g.stage <= 1) {
+    const spec = GRADES[grade];
+    const tolerant = a.p <= spec.pMax * 1.1 && a.tramp <= spec.trampMax * 1.1 && a.c <= spec.cMax * 1.1 && a.c >= spec.cMin * 0.9;
+    if (tolerant) return false;
+    return chance(g, 0.6);
+  }
+  return chance(g, 0.8);
+}
+
+/** Omtrent hvor mye verket faktisk lager per døgn: snittet av de siste døgnene, eller et forsiktig anslag */
+export function realisticDailyT(g: GameState, stats: PlantStats): number {
+  const recent = g.history.slice(-3).filter((d) => d.producedT > 0);
+  const est = recent.length >= 2 ? recent.reduce((a, d) => a + d.producedT, 0) / recent.length : stats.dailyProductT * 0.8;
+  return Math.max(0.05, Math.min(stats.dailyProductT, est));
+}
+
 function deliverContracts(g: GameState): void {
   const active = orderQueue(g);
   for (const c of active) {
@@ -1117,16 +1142,28 @@ function deliverContracts(g: GameState): void {
       lot.t -= take;
       c.delivered += take;
       addIncome(g, "kontrakt", take * c.pricePerT);
-      if (!satisfies(lot.analysis, c.grade) && chance(g, 0.8)) {
+      if (complains(g, lot.analysis, c.grade)) {
         const failures = gradeFailures(lot.analysis, c.grade);
-        g.complaints.push({
-          dueMin: g.minute + uniform(g, 0.5, 2.5) * MIN_PER_DAY,
-          customer: c.customer,
-          text: `${c.customer} reklamerer på ${fmtT(take)} ${PRODUCTS[c.product].name.toLowerCase()}: ${failures.join(", ")}.`,
-          refund: take * c.pricePerT,
-          // Omdømmetapet følger hvor stor del av kontrakten som var feil
-          repLoss: Math.max(0.5, (1 + c.repGain * 2) * (take / c.tonnes)),
-        });
+        // Flere dårlige partier til samme kontrakt blir én reklamasjon (B-034)
+        const open = g.complaints.find((x) => x.contractId === c.id);
+        if (open) {
+          open.tonnes = (open.tonnes ?? 0) + take;
+          open.refund += take * c.pricePerT;
+          open.repLoss = Math.max(0.5, (1 + c.repGain * 2) * (open.tonnes / c.tonnes));
+          open.text = `${c.customer} reklamerer på ${fmtT(open.tonnes)} ${PRODUCTS[c.product].name.toLowerCase()} levert fra dag ${open.deliveredDay}: ${failures.join(", ")}.`;
+        } else {
+          g.complaints.push({
+            contractId: c.id,
+            deliveredDay: day(g),
+            tonnes: take,
+            dueMin: g.minute + uniform(g, 0.5, 2.5) * MIN_PER_DAY,
+            customer: c.customer,
+            text: `${c.customer} reklamerer på ${fmtT(take)} ${PRODUCTS[c.product].name.toLowerCase()} levert dag ${day(g)}: ${failures.join(", ")}.`,
+            refund: take * c.pricePerT,
+            // Omdømmetapet følger hvor stor del av kontrakten som var feil
+            repLoss: Math.max(0.5, (1 + c.repGain * 2) * (take / c.tonnes)),
+          });
+        }
       }
     }
     if (c.tonnes - c.delivered <= 1e-6) {
@@ -1153,6 +1190,13 @@ function processComplaints(g: GameState): void {
   g.complaints = g.complaints.filter((c) => c.dueMin > g.minute);
   for (const c of due) {
     addCost(g, "bot", c.refund);
+    // Samme kontrakt trekker omdømme bare én gang (B-034)
+    const contract = g.contracts.find((x) => x.id === c.contractId);
+    if (contract?.complained) {
+      log(g, `${c.text} Kunden får pengene tilbake (${fmtKr(c.refund)}). Samme ordre som før, så ikke mer tap av omdømme.`, "bad");
+      continue;
+    }
+    if (contract) contract.complained = true;
     repLoss(g, c.repLoss, "reklamasjon");
     adjustMorale(g, -1);
     g.totals.complaints += 1;
@@ -1196,10 +1240,12 @@ function makeOffer(g: GameState, stats: PlantStats): Contract | null {
   const workDays = firstOrders ? uniform(g, 0.4, 0.8) : uniform(g, CONTRACT_DAYS[0], CONTRACT_DAYS[1]);
   const tonnes = roundTonnes(Math.max(customer.minT, Math.min(customer.maxT, capacity * workDays)));
   const pricePerT = Math.round(productPrice(g, product, grade) * (1 + stats.priceBonus) * uniform(g, 0.95, 1.1));
-  const days = Math.min(30, Math.ceil(tonnes / (capacity * 0.6)) + randInt(g, 2, 4));
+  const days = Math.min(30, Math.ceil(tonnes / (Math.min(capacity, realisticDailyT(g, stats)) * 0.6)) + randInt(g, 2, 4));
   const today = day(g);
   const size = Math.min(3, tonnes / capacity);
-  const repGain = Math.round((0.4 + 0.5 * size) * (GRADES[grade].premium > 1.1 ? 1.3 : 1) * 10) / 10;
+  // Små verk får mer omdømme per kontrakt, så starten ikke står og stamper på omdømmet (B-034)
+  const early = g.stage === 0 ? 1.5 : 1;
+  const repGain = Math.round((0.4 + 0.5 * size) * (GRADES[grade].premium > 1.1 ? 1.3 : 1) * early * 10) / 10;
   return {
     id: g.nextContractId++,
     customer: customer.name,
@@ -1237,6 +1283,7 @@ function trickleOffers(g: GameState, stats: PlantStats): void {
     g.bonusOffer = false;
     return;
   }
+  if (g.settings.pauseOffers) return;
   if (chance(g, (stats.offersPerDay * 0.6) / 24)) generateOffers(g, stats, 1);
 }
 
@@ -1327,6 +1374,22 @@ function refreshCandidates(g: GameState): void {
   // Noen søkere blir stående, resten erstattes
   g.candidates = g.candidates.filter(() => chance(g, 0.4)).slice(0, n);
   while (g.candidates.length < n) g.candidates.push(makeCandidate(g));
+  ensureCandidates(g);
+}
+
+/** Det skal alltid finnes søkere til plassene som mangler for neste skift (B-034) */
+export function ensureCandidates(g: GameState): void {
+  if (STAGES[g.stage].staffCap === 0) return;
+  const missing = computePlantStats(g).missing;
+  for (const [role, count] of Object.entries(missing) as [RoleId, number][]) {
+    const have = g.candidates.filter((c) => c.role === role).length;
+    for (let i = have; i < Math.min(count, 4); i++) g.candidates.push(makeCandidate(g, role));
+  }
+}
+
+/** Nye søkere med en gang, f.eks. når man flytter til et nytt nivå */
+export function newCandidates(g: GameState): void {
+  refreshCandidates(g);
 }
 
 // ------------------------------------------------------------------ //

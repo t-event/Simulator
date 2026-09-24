@@ -13,6 +13,10 @@ Verket for lang, Marked uintuitiv, støpefeil, fagbok-kapitler, potte/porten, na
 nestenulykke, søkere ved flytting, bryter for forespørsler, lang lagerliste, øseovnsoperatør, digel.
 Delt i fem pakker.
 
+**Pakke 2 (B-034):** Én reklamasjon per kontrakt, tålmodige små kunder, mer omdømme i garasjen,
+kvalitetsingeniør måler lageret, realistiske frister og «blir ferdig ca. dag X», bryter for forespørsler,
+søkere ved flytting, sjeldnere radioaktive kilder, støperiet 750 000 kr. Balanse 10 / 24 / 68 / 141.
+
 **Pakke 1 (B-033):** Små første ordre, spoling om natta, engangstips, varsel ved tomt skraplager og
 kreditt, 1× og klikksperre på kort, murere dagtid, nattillegg bare for skiftfolk, konkurs uten råd til
 foring. Testet i Playwright: første tilbud 0,4–0,6 døgn, tips kl. 16:00, knappene sperret et øyeblikk,

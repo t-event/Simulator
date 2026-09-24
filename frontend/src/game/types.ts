@@ -102,6 +102,8 @@ export interface Lot {
 }
 
 export interface Contract {
+  /** Kunden har allerede reklamert og trukket omdømme for denne kontrakten (B-034) */
+  complained?: boolean;
   id: number;
   customer: string;
   product: ProductId;
@@ -123,6 +125,10 @@ export interface Contract {
 }
 
 export interface Complaint {
+  /** Kontrakten reklamasjonen gjelder, så flere partier samles i én (B-034) */
+  contractId?: number;
+  deliveredDay?: number;
+  tonnes?: number;
   dueMin: number;
   customer: string;
   text: string;
@@ -210,6 +216,8 @@ export interface Settings {
   onePeak: boolean;
   /** Spol fram når verket står utenfor arbeidstida og ingenting skjer (B-033) */
   skipIdleNights: boolean;
+  /** Ikke ta imot nye forespørsler (B-034) */
+  pauseOffers: boolean;
   /** Klokketimen skiftene starter (6, 14 eller 22) */
   shiftStart: number;
   /** Start ikke ny charge når strømprisen er over dette (kr/kWh). null = ingen grense */
@@ -347,6 +355,8 @@ export interface GameState {
   tipsSeen: string[];
   /** Hvorfor spillet er over, vist på sluttskjermen */
   gameOverReason?: string;
+  /** Døgnet det sist kom en radioaktiv kilde med skrapet */
+  lastRadioDay?: number;
   /** Kassa er under null, og spilleren har fått varsel om det */
   inCredit?: boolean;
   /** Døgn på rad der verket står fordi det ikke er råd til omforing og lånet er fullt */

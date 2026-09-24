@@ -2,7 +2,7 @@
  * Det spilleren kan gjøre: bygge ut, kjøpe utstyr, ansette, låne og styre produksjonen.
  */
 import { ADDONS, CASTINGS, FURNACES, GRADES, PRODUCTS, SCRAP_IDS, STAGES, type Addon } from "./data";
-import { addCost, adjustMorale, fmtKr, fmtT, log, orderQueue, startReline, maxLoan, newFurnaceUnit, unlock, type PurchaseResult } from "./engine";
+import { addCost, adjustMorale, fmtKr, fmtT, log, newCandidates, orderQueue, startReline, maxLoan, newFurnaceUnit, unlock, type PurchaseResult } from "./engine";
 import { castingType, computePlantStats, day, fixedPowerOffer, furnaceType, has, isAbsent, POWER_BINDING_DAYS } from "./plant";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
 import type { GameState, GradeId, PowerDeal, ScrapId } from "./types";
@@ -163,6 +163,8 @@ export function buyUpgrade(g: GameState, id: string): PurchaseResult {
       g.stage = option.stage;
       g.celebrate = g.stage;
       log(g, `Du har flyttet inn i ${STAGES[g.stage].name.toLowerCase()}!`, "good");
+      // Søkere med en gang, også til de nye plassene (B-034)
+      newCandidates(g);
       if (g.stage === 1) unlock(g, "folk");
       if (g.stage === 2)
         log(g, "Fra nå av er du daglig leder og står ikke lenger i produksjonen selv. Sørg for å ha nok folk.", "info");

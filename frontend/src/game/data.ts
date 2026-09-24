@@ -299,7 +299,7 @@ export const STAGES: Stage[] = [
   {
     id: 2,
     name: "Støperi",
-    price: 550_000,
+    price: 750_000,
     reputation: 18,
     staffCap: 24,
     yardT: 600,

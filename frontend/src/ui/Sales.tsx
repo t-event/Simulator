@@ -1,5 +1,14 @@
 import { GRADES, PRODUCTS } from "../game/data";
-import { acceptContract, currentOrder, declineContract, orderQueue, recipeEstimate, sellLot, spotPrice } from "../game/engine";
+import {
+  acceptContract,
+  currentOrder,
+  declineContract,
+  orderQueue,
+  realisticDailyT,
+  recipeEstimate,
+  sellLot,
+  spotPrice,
+} from "../game/engine";
 import { moveInQueue } from "../game/actions";
 import { day, gradeFailures, hasPlanner, nearLimit, satisfiedGrades, type PlantStats } from "../game/plant";
 import type { Contract, GameState } from "../game/types";
@@ -22,9 +31,12 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
   const est = recipeEstimate(g, c.grade, stats);
   const recipeOk = est.grades.includes(c.grade);
   const failures = recipeOk ? [] : gradeFailures(est.analysis, c.grade);
-  const needDays = stats.dailyProductT > 0 ? (committed + c.tonnes) / stats.dailyProductT : Infinity;
+  // Anslaget bygger på det verket faktisk har laget de siste døgnene, med ordrekøen du alt har (B-034)
+  const perDay = stats.dailyProductT > 0 ? realisticDailyT(g, stats) : 0;
+  const needDays = perDay > 0 ? (committed + c.tonnes) / perDay : Infinity;
   const days = daysLeft(g, c);
   const tight = needDays > days;
+  const doneDay = day(g) + Math.ceil(needDays) - 1;
   const answerHours = Math.max(0, (c.offerExpiresMin - g.minute) / 60);
   return (
     <div className="g-contract">
@@ -59,7 +71,9 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
         {canMake && (
           <li className={tight ? "bad" : "ok"}>
             {Number.isFinite(needDays)
-              ? `Ca. ${fmtNum(Math.max(0.1, needDays), 1)} døgns produksjon med det du har fra før`
+              ? tight
+                ? `Rekker det neppe: med ordrekøen du har, blir den ferdig ca. dag ${doneDay}, fristen er dag ${c.deadlineDay}`
+                : `Blir ferdig ca. dag ${doneDay} med ordrekøen du har (frist dag ${c.deadlineDay})`
               : "Verket står – ingen produksjon nå"}
           </li>
         )}
@@ -92,7 +106,21 @@ export function Sales({ g, stats, act }: Props) {
     <div className="g-grid">
       <div className="g-col-wide">
         <Card title={`Forespørsler (${offers.length})`}>
-          {offers.length === 0 && <p className="g-muted">Ingen forespørsler akkurat nå. Nye kommer i løpet av døgnet.</p>}
+          <label className="g-toggle">
+            <input
+              type="checkbox"
+              checked={!g.settings.pauseOffers}
+              onChange={(e) => act((gg) => void (gg.settings.pauseOffers = !e.target.checked))}
+            />
+            <span>Ta imot nye forespørsler</span>
+          </label>
+          {offers.length === 0 && (
+            <p className="g-muted">
+              {g.settings.pauseOffers
+                ? "Du tar ikke imot nye forespørsler nå."
+                : "Ingen forespørsler akkurat nå. Nye kommer i løpet av døgnet."}
+            </p>
+          )}
           {offers.map((c) => (
             <OfferCard key={c.id} g={g} stats={stats} act={act} c={c} committed={committed} />
           ))}
