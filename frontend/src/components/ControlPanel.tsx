@@ -5,6 +5,8 @@ import { GRADES } from "../sim/grades";
 interface Props {
   state: FurnaceState;
   sendCommand: (action: string, payload?: Record<string, unknown>) => void;
+  /** Skjul knappene for ny charge når chargen er gitt på forhånd */
+  hideChargeStart?: boolean;
 }
 
 interface SliderProps {
@@ -43,7 +45,7 @@ function Slider({ label, value, min, max, step = 1, unit, disabled, onChange, hi
   );
 }
 
-export function ControlPanel({ state, sendCommand }: Props) {
+export function ControlPanel({ state, sendCommand, hideChargeStart = false }: Props) {
   const canStartCharge = state.phase === "klar" || state.phase === "klargjoring";
   const canTap = state.phase === "raffinering" || state.phase === "avslagging";
   const inSlagPosition = state.tilt_deg <= state.slag_position_deg + 1;
@@ -60,6 +62,7 @@ export function ControlPanel({ state, sendCommand }: Props) {
         <span>{state.grade?.code ?? "–"}</span>
       </div>
 
+      {!hideChargeStart && (
       <div className="control-row">
         {GRADES.map(({ code }) => (
           <button
@@ -72,6 +75,7 @@ export function ControlPanel({ state, sendCommand }: Props) {
           </button>
         ))}
       </div>
+      )}
 
       <div className="control-row">
         <button

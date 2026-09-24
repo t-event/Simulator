@@ -139,7 +139,6 @@ export class EAFSimulation {
     s.lastTapResult = null;
     s.alarms = [];
     s.nextAlarmId = 1;
-    s.scenario = null;
   }
 
   // ---------------------------------------------------------------- //
@@ -413,7 +412,7 @@ export class EAFSimulation {
   }
 
   // ---------------------------------------------------------------- //
-  // Instruktørstyrt feilinjeksjon
+  // Feilinjeksjon (brukes av valideringen)
   // ---------------------------------------------------------------- //
   injectFault(fault: string, payload: Record<string, unknown> = {}): void {
     const s = this.state;

@@ -1,135 +1,95 @@
-# Stålovn Simulator
+# Stålverket
 
-En web-basert simulator av en lysbueovn med conveyor-mating, laget for
-opplæring av kontrollromsoperatører i stålverk.
+Et tycoonspill der du bygger et skrapbasert stålverk fra bunnen av – fra en
+kald garasje med en gassfyrt digel til et storverk med lysbueovner,
+strengstøping, valseverk og hundrevis av ansatte.
 
-Operatøren kjører en komplett charge fra kontrollrommet: mater inn 92 tonn
-skrap med conveyor, bygger slagg med kalk og dolomitt, holder skumslagg med
-karbon og oksygen gjennom lansene, avfosforerer, slagger av og tapper
-innenfor temperaturvinduet. Et eget instruktørpanel styrer øvelser og
-injiserer feil.
+Spillet er laget for å lære bort hvordan et stålverk henger sammen. Det du må
+gjøre for å tjene penger, er det samme som gjelder i virkeligheten: velge
+riktig skrap, treffe analysen, holde ovnen og foringen i drift, bemanne
+skiftene og levere riktig kvalitet i tide. En fagbok låses opp kapittel for
+kapittel etter hvert som du møter nye deler av prosessen.
 
-Hele simuleringen kjører i nettleseren. Det er ingen server å drifte for
-vanlig bruk – appen publiseres på GitHub Pages og deles som en URL. Den
-fungerer på PC, nettbrett og mobil; på mobil vises én seksjon om gangen
-(Ovn, Styring, Kjemi, Alarmer, Instruktør) med nøkkeltallene alltid synlige
-øverst.
+Spillet kjører helt i nettleseren, fungerer på mobil, nettbrett og PC, og
+lagres automatisk i nettleseren. Det publiseres på GitHub Pages.
 
-## Hva som er modellert
+## Slik spiller du
 
-| Område | Modell |
-|---|---|
-| Innlasting | Conveyor med vannkjølt forvarmingsdel som varmes av avgassen. Lavere hastighet gir lengre oppholdstid og varmere skrap. Static seal påvirker falskluft og dermed forvarmingen. |
-| Smelting | Flatt bad med stålsump (25 t) som smelter skrapet kontinuerlig. Smeltehastigheten drives av overhetingen over likvidus, så mates det inn raskere enn effekten tåler, faller badtemperaturen og skrapet hoper seg opp. |
-| Elektrisk | Trafo med 8 spenningstapp, tre elektroder med automatisk regulering (AER) eller manuell posisjonering. |
-| Slaggkjemi | Massebasert modell av CaO, MgO, SiO₂, Al₂O₃, FeO, MnO, Cr₂O₃ og P₂O₅ med B2 = CaO/SiO₂ (mål 1,8) og B3 = CaO/(SiO₂+Al₂O₃) (mål 1,25). |
-| Oksygen | Fordeles på C, Si, Mn og Fe i Ellingham-rekkefølge. Lavt karboninnhold gir mer jernforbrenning og dermed høyere FeO, slik det er kjent fra lavkarbonkjøring. |
-| Skumslagg | Krever CO-utvikling fra karboninjeksjon og FeO-reduksjon, kombinert med riktig viskositet (B2 nær målet). Skummet isolerer lysbuen og reduserer strålevarmen. |
-| Avfosforering | Fosfor fordeles mellom stål og slagg avhengig av FeO, basisitet og temperatur. Kjøres temperaturen opp mens fosforrik slagg fortsatt ligger i ovnen, går reaksjonen motsatt vei – fosforbom. |
-| Elektrodeslitasje | Sideoksidasjon (dempes av elektrodekjøling), tippfordamping per MWh og tippbrudd når elektroden blir for kort. |
-| Overslag | Risiko øker med støv i hvelvet og med økt elektrodekjøling. Kan treffe vannkjølte elementer og gi vannlekkasje. |
-| Ildfast | Slitasje akkumuleres over charger og eskalerer kraftig ved overoppheting. Gjennombrenning avbryter chargen. |
-| Tapping | Temperaturmål ut fra likvidus for ferdig kvalitet (1518 − 70·%C) pluss påslag. Tapperapport sammenligner mot kravene til kvaliteten. |
+1. **Salg** – signer kontrakter. Hver kontrakt har mengde, kvalitet, pris og
+   frist. Spillet viser om resepten din holder kravet og om du rekker det.
+2. **Marked** – kjøp skrap og sett sammen resepten. Anslaget viser hvilke
+   kvaliteter resepten gir i ovnen du har.
+3. **Verket** – ovnen smelter automatisk etter resepten og kvaliteten du kjører
+   mot. Stålet støpes og legges på lager, og partier som holder kravet leveres
+   automatisk til aktive kontrakter.
+4. **Folk** – fra verkstedet og oppover trenger du ansatte. Hvert anlegg har et
+   fast mannskap per skift; flere skift gir flere driftstimer i døgnet.
+5. **Bygg** – kjøp nytt utstyr og flytt inn i neste nivå når du har penger og
+   omdømme nok.
 
-Modellen er lumped-parameter. Den gjengir riktig retning, rekkefølge og
-størrelsesorden på koblingene en operatør må håndtere, men er ikke en
-termodynamisk nøyaktig gjengivelse av noe bestemt anlegg. Parametrene er
-representative for en lysbueovn i 100-tonnsklassen, og bør kalibreres mot
-faktiske driftsdata før modellen brukes til annet enn prosedyretrening.
-
-`frontend/src/sim/validate.ts` kjører referansescenarioene og skriver ut
-nøkkeltallene. Den kjøres også i CI ved hver publisering. En normalt kjørt
-charge skal lande på:
-
-| Nøkkeltall | Simulator | Vanlig for lysbueovn |
+| Nivå | Typisk utstyr | Hva som er nytt |
 |---|---|---|
-| Tapp-til-tapp | ca. 59 min | 45–70 min |
-| Energiforbruk | ca. 390 kWh/t | 350–450 kWh/t, lavere med forvarming |
-| FeO i slagg | 29,3 % | 25–30 % |
-| B2 | 1,74 | 1,6–2,0 |
-| Ildfast per charge | 0,99 % | ca. 100 charger per potte |
+| Garasje | Gassfyrt digel, sandformer | Du gjør alt selv, 10 timer om dagen |
+| Verksted | Induksjonsovn 1 t, formlinje | De første ansatte, analysator, strålingsportal |
+| Støperi | Induksjonsovn 5 t, blokkstøping | Skiftarbeid, spektrometer, du blir daglig leder |
+| Stålverk | Lysbueovn 30 t, strengstøping | Avfosforering, øseovn, valseverk, *ta styringen* |
+| Storverk | Lysbueovn 90 t, fire strenger | Eksportkunder og fullskala drift |
 
-## Stålkvaliteter
+### Ta styringen
 
-Tre generiske kvaliteter som spenner ut det operatøren må kunne håndtere.
-Tallet i koden er ferdig karboninnhold i hundredeler; karbonvinduet i
-simulatoren er det stålovnen skal *tappe* på, siden karbon legeres opp igjen
-ved tapping og på øseovnen.
+Når verket har lysbueovn, kan du ta styringen på neste charge. Spillet
+pauses, og du havner i kontrollrommet med den fulle prosessmodellen og
+skrapet fra din egen resept: conveyor og forvarming, trafo-tapp, kalk og
+dolomitt, karbon og oksygen, avslagging og tapping. Resultatet – analyse,
+energiforbruk og slitasje – går tilbake inn i spillet som en vanlig charge.
+Godt kjørte charger bruker mindre strøm, får lavere fosfor og gir omdømme.
 
-| Kode | Type | Tappevindu %C | Maks %P |
-|---|---|---|---|
-| AR20 | Armeringskvalitet | 0,04–0,10 | 0,035 |
-| LK08 | Lavkarbon | 0,02–0,05 | 0,030 |
-| HK80 | Høykarbon | 0,25–0,45 | 0,040 |
+## Hva spillet lærer bort
 
-## Kjøremodus
+| Tema | Hvordan det virker i spillet |
+|---|---|
+| Sporelementer | Cu, Sn, Ni, Cr og Mo kan bare tynnes ut med rent skrap eller råjern. Resepten bestemmer hvilke kvaliteter du kan lage. |
+| Karbon | Kan alltid legges til, men bare fjernes med oksygen i lysbueovnen. Råjern i en induksjonsovn gir høykarbonstål, enten du vil eller ikke. |
+| Fosfor | Fjernes bare i lysbueovnen med basisk, oksiderende slagg. Induksjonsovnen gir ut det som kommer inn. |
+| Skrapkvalitet | Billig skrap har mer skitt: mindre stål per tonn, mer energi, og av og til et dårlig parti med mye fosfor. |
+| Analyse | Uten laboratorium er analysen anslått, og avvik oppdages av kunden. En håndholdt analysator måler sporelementer, et spektrometer måler alt. |
+| Radioaktivitet | Uten strålingsportal kan en skjult kilde havne i ovnen, med dyr opprydding. |
+| Ildfast | Foringen slites for hver charge og må byttes før den brenner gjennom. |
+| Støping | Utbytte fra sandstøping til strengstøping, støpefeil ved feil temperatur, strenggjennombrudd. |
+| Strøm | Prisen varierer over døgnet og med været. Du kan la være å starte charger når strømmen er dyr. |
+| Flaskehalser | Skraplager, ovn, øse, støping, valsing og ferdigvarelager kan alle stoppe produksjonen. |
 
-Simulatoren kan kjøres på tre måter, styrt av parametre i URL-en.
-
-**Lokal** (standard, og det GitHub Pages bruker): simuleringen kjører i denne
-nettleseren. Instruktøren bytter til Instruktør-fanen på samme skjerm.
-
-```
-https://<bruker>.github.io/Simulator/
-```
-
-**Flermaskin**: instruktør og operatør sitter på hver sin maskin. Én maskin er
-vert og kjører simuleringen; de andre kobler seg til som deltakere. En liten
-relay på lokalnettet serverer appen og formidler meldinger mellom dem – den
-inneholder ingen prosessmodell.
-
-```bash
-cd relay
-npm install
-npm run bygg       # bygger appen som relayen skal servere
-npm start          # skriver ut adressene som skal åpnes
-```
-
-Relayen skriver ut adresser av typen:
-
-```
-Vert (operatør):       http://192.168.1.10:8080/?modus=vert&rom=kurs1
-Deltaker (instruktør): http://192.168.1.10:8080/?modus=deltaker&rom=kurs1
-```
-
-Verten kjører ovnen og sender tilstanden videre; deltakerne ser det samme
-bildet og kan gripe inn – også fra mobil. `rom` skiller flere samtidige
-øvelser på samme relay. Starter en ny vert i et rom som allerede har en,
-overtar den nye, og den gamle får beskjed om det.
-
-Flermaskin må åpnes fra relayens adresse, ikke fra GitHub Pages. En side
-lastet over https får ikke lov av nettleseren til å koble seg til en
-ukryptert relay på lokalnettet, og Pages kan ikke selv kjøre en relay.
-
-## Scenarioer
-
-- **Normal charge** – komplett charge på AR20 uten forstyrrelser.
-- **Fosforbom** – høyfosfor-skrap som krever riktig rekkefølge: avfosforer, slagg av, og først deretter kjør opp temperaturen.
-- **Overslag og vannlekkasje** – støvfylt hvelv og høy elektrodekjøling.
-- **Kjølevannslekkasje i hvelv** – overvåk delta-T og reager før panelet tar skade.
-- **Falskluft i static seal** – kaldere skrap inn og høyere energiforbruk.
-- **Lavkarbon LK08** – mer oksygen, høyere FeO, dårligere stålutbytte.
+Tallene i spillet er oppfunnet. De er satt slik at retning og
+størrelsesorden stemmer med vanlig stålverksdrift, men de beskriver ikke noe
+bestemt anlegg.
 
 ## Arkitektur
 
 ```
 frontend/
-  src/sim/                  Prosessmodellen – eneste implementasjon
-    constants.ts             Prosessparametre
-    state.ts                 Intern ovnstilstand
-    grades.ts                Stålkvaliteter med tappevindu
-    eaf.ts                   Simuleringsmotor
-    scenarios.ts             Treningsscenarioer
-    commands.ts              Kommandodispatch, delt av lokal og fjernstyrt modus
-    serialize.ts             Intern tilstand -> flat tilstand for HMI
+  src/game/                 Spillmotoren (ren TypeScript, ingen React)
+    types.ts                 Spilltilstanden – ren JSON, lagres i nettleseren
+    data.ts                  Skrap, kvaliteter, produkter, utstyr, roller, kunder
+    plant.ts                 Utledede tall: kapasitet, bemanning, skift, priser
+    engine.ts                Tid, produksjon, marked, kontrakter, hendelser
+    actions.ts               Det spilleren kan gjøre
+    knowledge.ts             Fagboka
+    save.ts                  Lagring i nettleseren
+    useGame.ts               Spilløkka for React
+    balance.ts               Automatisk testspiller for balansering
+  src/ui/                   Spillets grensesnitt (mobil først)
+    ControlRoom.tsx          Kontrollrommet for «ta styringen»
+  src/sim/                  Prosessmodellen for lysbueovnen
+    eaf.ts                   Lumped-parameter-modell av en conveyormatet lysbueovn
     validate.ts              Referansekjøring med nøkkeltall
-  src/hooks/useSimulation.ts Tick-løkke (delsteg på maks 1 s) og eventuell relay-tilkobling
-  src/session.ts             Leser modus/rom/relay fra URL
-  src/components/            Kontrollrom-HMI
-
-relay/                      Serverer appen på lokalnettet og formidler meldinger (ingen fysikk)
-.github/workflows/pages.yml Bygger, validerer og publiserer til GitHub Pages
+  src/components/           HMI-komponentene i kontrollrommet
 ```
+
+Prosessmodellen i `src/sim/` gjengir koblingene en ovnsoperatør må håndtere:
+smelting drevet av overheting over likvidus, massebasert slaggkjemi med B2 og
+B3, oksygen fordelt i Ellingham-rekkefølge, skumslagg, avfosforering med
+fosforbom ved feil rekkefølge, elektrodeslitasje, overslag og slitasje på
+ildfast. Parametrene er representative for en lysbueovn i 100-tonnsklassen.
 
 ## Kjøre lokalt
 
@@ -141,37 +101,21 @@ npm run dev
 
 Åpne `http://localhost:5173`.
 
-Verifisere prosessmodellen:
+Sjekker (kjøres også i CI før hver publisering):
 
 ```bash
 cd frontend
-npx tsx src/sim/validate.ts
+npx tsx src/sim/validate.ts     # prosessmodellen gir forventede nøkkeltall
+npx tsx src/game/balance.ts     # testspilleren når hvert nivå innenfor målene, uten konkurs
+npm run lint
 ```
+
+`balance.ts` spiller seks spill med ulike frø. Den sjekker at medianen for når
+hvert nivå nås ligger innenfor målvinduet, at ingen går konkurs, og at en
+charge kjørt i kontrollrommet kommer riktig tilbake inn i spillet. Legg til
+`--verbose` for dag-for-dag-utskrift og `--finance` for kostnadsfordeling.
 
 ## Publisere
 
 Arbeidsflyten i `.github/workflows/pages.yml` bygger og publiserer ved hver
 push til `main`. Pages må stå på **Settings → Pages → Source: GitHub Actions**.
-
-## Kjøre en charge
-
-1. Velg kvalitet og trykk **Start AR20** for å gjøre en skrapkasse klar.
-2. Start **conveyor** og sett hastighet (2–2,5 t/min er et greit utgangspunkt).
-3. Slå på **lysbue** og velg trafo-tapp. Følg badtemperaturen: mates det inn
-   raskere enn effekten tåler, faller temperaturen og skrapet hoper seg opp.
-4. Sett **kalk** (ca. 40 kg/min) og **dolomitt** (ca. 34 kg/min) for å styre B2
-   mot 1,8, og **karbon** + **oksygen** på lansene for skumslagg og ferskning.
-5. Når alt skrapet er smeltet, gå til raffinering: juster karbon og fosfor.
-6. **Slagg av før du kjører opp temperaturen** – åpne slaggdøra og tipp til
-   slaggstilling. Gjør du det motsatt, kommer fosforet tilbake i stålet.
-7. Tilbake til vannrett, kjør opp mot tappemålet, og trykk **Start tapping**.
-   Tappetemperaturen er temperaturen når tappingen starter. Tapperapporten
-   viser avvik mot kravene til kvaliteten; energi og forbruk er per charge.
-
-## Videre arbeid
-
-- Øseovnen som eget område, slik at temperatur og legering kan følges videre
-  etter tapping.
-- Elektrodeskjøting som prosedyre i stedet for at brudd krever pottebytte.
-- Logging av øvelser for evaluering i etterkant.
-- Kalibrering av tidskonstanter og tilsatsrater mot faktiske driftsdata.

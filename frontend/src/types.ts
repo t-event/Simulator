@@ -132,7 +132,6 @@ export interface FurnaceState {
   last_tap_result: TapResult | null;
 
   alarms: Alarm[];
-  scenario: string | null;
 }
 
 

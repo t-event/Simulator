@@ -1,6 +1,6 @@
 import type { Phase, RegulationMode, Severity, TapResult } from "../types";
 
-/** TP-kvalitet med de kravene stålovnen skal levere på.
+/** Stålkvalitet med de kravene stålovnen skal levere på.
  *
  * Karbonvinduet er det stålovnen skal tappe på, ikke ferdig analyse: karbon
  * legeres opp igjen ved tapping og på øseovnen. */
@@ -112,5 +112,4 @@ export interface SimState {
 
   alarms: Alarm[];
   nextAlarmId: number;
-  scenario: string | null;
 }

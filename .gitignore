@@ -1,7 +1,6 @@
-# Node / frontend
-frontend/node_modules/
+# Node
+node_modules/
 frontend/dist/
-relay/node_modules/
 
 # Editors / OS
 .DS_Store

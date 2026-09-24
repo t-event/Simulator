@@ -1,10 +1,6 @@
 import type { EAFSimulation } from "./eaf";
-import { getScenario } from "./scenarios";
 
-/** Bruker en operatørkommando på ovnen.
- *
- * Samme dispatch brukes enten kommandoen kommer fra betjeningen i denne
- * nettleseren eller fra en annen maskin via relayen. */
+/** Bruker en operatørkommando fra betjeningen i kontrollrommet på ovnen. */
 export function applyOperatorCommand(
   sim: EAFSimulation,
   action: string,
@@ -77,35 +73,5 @@ export function applyOperatorCommand(
       break;
     default:
       console.warn("ukjent operatørkommando:", action);
-  }
-}
-
-export function applyInstructorCommand(
-  sim: EAFSimulation,
-  action: string,
-  payload: Record<string, unknown> = {},
-): void {
-  switch (action) {
-    case "inject_fault": {
-      const { fault, ...rest } = payload as { fault: string } & Record<string, unknown>;
-      sim.injectFault(fault, rest);
-      break;
-    }
-    case "load_scenario": {
-      const scenario = getScenario(String(payload.id ?? ""));
-      if (!scenario) {
-        console.warn("ukjent scenario:", payload.id);
-        return;
-      }
-      sim.reset();
-      sim.state.scenario = scenario.id;
-      sim.startCharge(scenario.grade);
-      for (const { fault, ...rest } of scenario.initialFaults) {
-        sim.injectFault(fault, rest);
-      }
-      break;
-    }
-    default:
-      console.warn("ukjent instruktørkommando:", action);
   }
 }
