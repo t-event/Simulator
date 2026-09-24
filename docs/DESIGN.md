@@ -94,7 +94,7 @@ Brukeren testet på mobil og fikk en annen person til å teste. Hvert punkt har 
 Oppdater listen når noe blir gjort, så arbeidet kan fortsette i en ny samtale.
 
 **A. Småfeil og språk**
-- [ ] Velge selv hvilken kontrakt som leveres først (løses i B)
+- [x] Velge selv hvilken kontrakt som leveres først (løses i B)
 - [x] Færre forespørsler om gangen; forespørsler har synlig svarfrist og avslås automatisk
 - [x] Hardere bot når en kontrakt ikke leveres
 - [x] Mottilbud på lønnskrav
@@ -104,8 +104,8 @@ Oppdater listen når noe blir gjort, så arbeidet kan fortsette i en ny samtale.
 - [x] Se etter og rett konsollfeil (ingen funnet i Chromium, verken utvikling, publisert bygg eller kontrollrom)
 
 **B. Planlegging** (brukerens valg: ordrekø + planlegger)
-- [ ] Ordrekø: spilleren sorterer aktive kontrakter; levering, kvalitet og resept følger køen
-- [ ] Planlegger (ansatt) som ordner køen og innkjøp automatisk; automatisk innkjøp krever planlegger
+- [x] Ordrekø: spilleren sorterer aktive kontrakter; levering, kvalitet og resept følger køen
+- [x] Planlegger (ansatt) som ordner køen og innkjøp automatisk; automatisk innkjøp krever planlegger
 
 **C. Foring og vedlikehold**
 - [ ] Ingen automatisk omforing fra start: knapp «Bytt foring», plan hver N døgn (forskning), eller en

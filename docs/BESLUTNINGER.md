@@ -192,3 +192,15 @@ Beslutning:
 - Lønnskrav kan besvares med mottilbud på 2 % (60 % sjanse for enighet, ellers 3 % og én slutter).
 - Navn: «Sandformer» → «Sandstøping»; «Lekkasje i spolen» → «Vannlekkasje i induksjonsspolen», med
   forklaring på at kobberspolen rundt digelen er vannkjølt.
+
+## B-021 Ordrekø, resept per kvalitet og planlegger (2026-09-24)
+Status: gjelder
+Beslutning:
+- Aktive kontrakter ligger i en ordrekø (`priority` på kontrakten). Spilleren flytter dem med
+  pilknapper. Levering og reservering av lager følger køen (ikke fristen).
+- «Følg ordrekøen» (på som standard): ovnen kjører kvaliteten til den øverste kontrakten som ikke
+  allerede er dekket av lageret (`currentOrder`).
+- Resepten huskes per kvalitet (`gradeRecipes`) og byttes når kvaliteten skifter.
+- Ny rolle **Planlegger** fra støperiet: sorterer køen etter frist (kan slås av) og kjøper skrap
+  automatisk. **Automatisk innkjøp krever planlegger** – før det kjøper spilleren skrap selv, så
+  det er mer å gjøre tidlig i spillet.

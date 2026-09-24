@@ -10,11 +10,11 @@ import { buyUpgrade, doResearch, hire, setRecipe, setTargetGrade, upgradeOptions
 import { resolveDecision } from "./decisions";
 import { researchOptions } from "./research";
 import { SCRAP_IDS, STAGES } from "./data";
-import { acceptContract, advance, completeManual, newGame, TARGET_C } from "./engine";
+import { acceptContract, advance, autoBuy, completeManual, newGame, TARGET_C } from "./engine";
 import { EAFSimulation } from "../sim/eaf";
 import { createSim } from "../ui/control/simSetup";
 import { MELT_BAND, SimpleRunner } from "../ui/control/simpleRunner";
-import { computePlantStats, day, satisfies } from "./plant";
+import { computePlantStats, day, hasPlanner, satisfies } from "./plant";
 declare const process: { argv: string[]; exitCode?: number; exit?: (code: number) => void };
 
 import type { Crew, GameState, GradeId, ManualRequest, RoleId, ScrapId } from "./types";
@@ -118,6 +118,8 @@ function botHour(g: GameState): void {
   applyRecipe(g, recipe);
 
   g.settings.autoBuy = true;
+  // Uten planlegger kjøper testspilleren skrap selv, på samme måte som planleggeren ville gjort
+  if (!hasPlanner(g)) autoBuy(g, stats);
   g.settings.autoSpot = true;
 
   // Ansettelser: fyll opp manglende plasser, deretter selgere og reparatører
@@ -135,7 +137,7 @@ function botHour(g: GameState): void {
   }
   const count = (r: RoleId) => g.workers.filter((w) => w.role === r).length;
   const crewTotal = Object.values(stats.crew).reduce((a, b) => a + (b ?? 0), 0) * 3;
-  const crewWorkers = g.workers.filter((w) => w.role !== "salg" && w.role !== "vedlikehold").length;
+  const crewWorkers = g.workers.filter((w) => w.role !== "salg" && w.role !== "vedlikehold" && w.role !== "planlegger").length;
   const spare = cap - g.workers.length - Math.max(0, crewTotal - crewWorkers);
   if (
     spare > 0 &&
@@ -145,6 +147,10 @@ function botHour(g: GameState): void {
     g.workers.length < cap
   ) {
     const c = g.candidates.find((x) => x.role === "salg");
+    if (c) hire(g, c.id);
+  }
+  if (spare > 0 && g.stage >= 2 && stats.shifts >= 2 && count("planlegger") < 1) {
+    const c = g.candidates.find((x) => x.role === "planlegger");
     if (c) hire(g, c.id);
   }
   if (spare > 1 && g.stage >= 2 && stats.shifts >= 2 && count("vedlikehold") < g.stage - 1 && g.workers.length < cap) {

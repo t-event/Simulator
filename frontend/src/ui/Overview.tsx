@@ -1,7 +1,7 @@
 import { requestManual, setTargetGrade, upgradeOptions } from "../game/actions";
 import { researchOptions } from "../game/research";
 import { GRADE_IDS, GRADES, PRODUCTS, ROLES, STAGES } from "../game/data";
-import { recipeEstimate, startReline } from "../game/engine";
+import { currentOrder, recipeEstimate, startReline } from "../game/engine";
 import { castingType, rollingActive, type PlantStats } from "../game/plant";
 import type { GameState, GradeId, RoleId } from "../game/types";
 import type { GameApi } from "../game/useGame";
@@ -74,6 +74,7 @@ function furnaceState(g: GameState, index: number): { text: string; progress: nu
 export function Overview({ g, stats, act, go }: Props) {
   const next = STAGES[g.stage + 1];
   const est = recipeEstimate(g, g.targetGrade, stats);
+  const order = currentOrder(g);
   const casting = castingType(g);
   const castHead = g.castQueue[0];
   const y = g.history[g.history.length - 1];
@@ -213,10 +214,30 @@ export function Overview({ g, stats, act, go }: Props) {
       </div>
 
       <div className="g-col">
-        <Card title="Styring av ovnen">
+        <Card title="Produksjon nå">
+          {order ? (
+            <p>
+              Produserer <strong>{GRADES[order.grade].name}</strong> til {order.customer} ({fmtT(order.tonnes - order.delivered)}{" "}
+              igjen).
+            </p>
+          ) : (
+            <p className="g-muted">Ingen kontrakt venter på produksjon. Verket lager {GRADES[g.targetGrade].name.toLowerCase()} for lager og spot.</p>
+          )}
+          <label className="g-toggle">
+            <input
+              type="checkbox"
+              checked={g.settings.followQueue}
+              onChange={(e) => act((gg) => void (gg.settings.followQueue = e.target.checked))}
+            />
+            <span>Følg ordrekøen (kvalitet og resept skifter etter kontrakten som står først)</span>
+          </label>
           <label className="g-field">
             <span>Kjør mot kvalitet</span>
-            <select value={g.targetGrade} onChange={(e) => act((gg) => setTargetGrade(gg, e.target.value as GradeId))}>
+            <select
+              value={g.targetGrade}
+              disabled={g.settings.followQueue && !!order}
+              onChange={(e) => act((gg) => setTargetGrade(gg, e.target.value as GradeId))}
+            >
               {GRADE_IDS.map((id) => (
                 <option key={id} value={id}>
                   {GRADES[id].name}

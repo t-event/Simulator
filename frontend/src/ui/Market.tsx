@@ -1,7 +1,7 @@
 import { setRecipe } from "../game/actions";
 import { GRADES, PRODUCTS, SCRAP_IDS, SCRAP_TYPES } from "../game/data";
 import { buyScrap, recipeEstimate, scrapPrice } from "../game/engine";
-import { powerPrice, productPrice, type PlantStats } from "../game/plant";
+import { hasPlanner, powerPrice, productPrice, type PlantStats } from "../game/plant";
 import type { GameState, ProductId } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { AnalysisLine, Bar, Card, GradeChips } from "./common";
@@ -94,16 +94,23 @@ export function Market({ g, stats, act }: Props) {
               );
             })}
           </div>
-          <label className="g-toggle">
-            <input
-              type="checkbox"
-              checked={g.settings.autoBuy}
-              onChange={(e) => act((gg) => void (gg.settings.autoBuy = e.target.checked))}
-            />
-            <span>
-              Kjøp inn automatisk etter resepten (holder ca. {fmtNum(g.settings.autoBuyDays, 1)} døgns forbruk)
-            </span>
-          </label>
+          {hasPlanner(g) ? (
+            <label className="g-toggle">
+              <input
+                type="checkbox"
+                checked={g.settings.autoBuy}
+                onChange={(e) => act((gg) => void (gg.settings.autoBuy = e.target.checked))}
+              />
+              <span>
+                La planleggeren kjøpe inn etter resepten (holder ca. {fmtNum(g.settings.autoBuyDays, 1)} døgns forbruk)
+              </span>
+            </label>
+          ) : (
+            <p className="g-note">
+              Du kjøper skrap selv. {g.stage >= 2 ? "Ansett en planlegger under Folk" : "Fra støperiet kan du ansette en planlegger"} som
+              kjøper inn automatisk.
+            </p>
+          )}
         </Card>
       </div>
 

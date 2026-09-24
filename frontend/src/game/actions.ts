@@ -2,7 +2,7 @@
  * Det spilleren kan gjøre: bygge ut, kjøpe utstyr, ansette, låne og styre produksjonen.
  */
 import { ADDONS, CASTINGS, FURNACES, GRADES, PRODUCTS, SCRAP_IDS, STAGES, type Addon } from "./data";
-import { addCost, fmtKr, fmtT, log, maxLoan, newFurnaceUnit, unlock, type PurchaseResult } from "./engine";
+import { addCost, fmtKr, fmtT, log, orderQueue, maxLoan, newFurnaceUnit, unlock, type PurchaseResult } from "./engine";
 import { castingType, computePlantStats, day, furnaceType, has } from "./plant";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions } from "./research";
 import type { GameState, GradeId, ScrapId } from "./types";
@@ -290,10 +290,25 @@ export function fire(g: GameState, workerId: number): PurchaseResult {
 // ------------------------------------------------------------------ //
 export function setRecipe(g: GameState, id: ScrapId, weight: number): void {
   g.recipe[id] = Math.max(0, Math.min(100, Math.round(weight)));
+  // Resepten huskes for kvaliteten som kjøres nå
+  g.gradeRecipes[g.targetGrade] = { ...g.recipe };
 }
 
 export function setTargetGrade(g: GameState, grade: GradeId): void {
-  if (GRADES[grade]) g.targetGrade = grade;
+  if (!GRADES[grade]) return;
+  g.targetGrade = grade;
+  const saved = g.gradeRecipes[grade];
+  if (saved) g.recipe = { ...saved };
+}
+
+/** Flytter en aktiv kontrakt opp (−1) eller ned (+1) i ordrekøen. */
+export function moveInQueue(g: GameState, id: number, dir: -1 | 1): void {
+  const queue = orderQueue(g);
+  const i = queue.findIndex((c) => c.id === id);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= queue.length) return;
+  [queue[i], queue[j]] = [queue[j], queue[i]];
+  queue.forEach((c, k) => (c.priority = k + 1));
 }
 
 export function recipeShares(g: GameState): Record<ScrapId, number> {

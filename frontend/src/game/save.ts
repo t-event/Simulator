@@ -47,6 +47,14 @@ export function migrate(g: GameState): GameState {
   if (loose.pendingDecision === undefined) loose.pendingDecision = null;
   if (loose.celebrate === undefined) loose.celebrate = null;
   if (loose.decisionSeen === undefined) loose.decisionSeen = {};
+  if (loose.gradeRecipes === undefined) loose.gradeRecipes = {};
+  if (g.settings.followQueue === undefined) g.settings.followQueue = true;
+  if (g.settings.plannerSorts === undefined) g.settings.plannerSorts = true;
+  const active = g.contracts.filter((c) => c.status === "aktiv").sort((a, b) => a.deadlineDay - b.deadlineDay);
+  active.forEach((c, i) => {
+    if (c.priority === undefined) c.priority = i + 1;
+  });
+  for (const c of g.contracts) if (c.priority === undefined) c.priority = 0;
   if (loose.sickUntilMin === undefined) loose.sickUntilMin = 0;
   if (loose.bonusOffer === undefined) loose.bonusOffer = false;
   for (const c of g.contracts) {

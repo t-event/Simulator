@@ -248,6 +248,7 @@ export function resolveDecision(g: GameState, option: number): void {
         penaltyPerT: Math.round(n("pricePerT") * 0.5),
         status: "tilbud",
         closedDay: null,
+        priority: 0,
       };
       g.contracts.push(c);
       acceptContract(g, c.id);

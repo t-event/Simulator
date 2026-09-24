@@ -1317,3 +1317,12 @@ button {
   color: var(--warning);
   font-weight: 600;
 }
+
+.g-contract.is-producing {
+  border-left: 3px solid var(--ok);
+}
+
+.g-queue-btns button {
+  min-width: 40px;
+  min-height: 36px;
+}
