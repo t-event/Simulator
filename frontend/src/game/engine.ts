@@ -746,7 +746,7 @@ export function startReline(
   if (g.cash - cost < -creditLimit(g)) return { ok: false, message: "Du har ikke råd til ny foring." };
   addCost(g, "vedlikehold", cost);
   const who = why === "plan" ? " etter vedlikeholdsplanen" : why === "reparatør" ? " av reparatøren" : "";
-  // Lysbueovn med ferdig reservepott: bytt pott på noen timer, og la murerne mure opp den slitte (B-030)
+  // Lysbueovn med ferdig reservepotte: bytt potte på noen timer, og la murerne mure opp den slitte (B-030)
   if (stats.furnace.arc && f.spareProgress >= 1) {
     const swap = potSwapHours(g) * stats.repairFactor;
     f.wear = 0;
@@ -754,11 +754,11 @@ export function startReline(
     f.lastRelineDay = day(g);
     f.spareProgress = 0;
     f.downUntilMin = g.minute + swap * 60;
-    f.downReason = "Planlagt stans: bytter pott";
+    f.downReason = "Planlagt stans: bytter potte";
     countEvent(g, "omforinger");
     log(
       g,
-      `Planlagt stans: ovn ${index + 1} får ny pott${who} (${swap.toFixed(0)} timer). Den slitte potta går til murerne (${fmtKr(cost)} i ildfast stein).`,
+      `Planlagt stans: ovn ${index + 1} får ny potte${who} (${swap.toFixed(0)} timer). Den slitte potta går til murerne (${fmtKr(cost)} i ildfast stein).`,
       "info",
     );
     unlock(g, "ildfast");

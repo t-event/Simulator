@@ -504,7 +504,7 @@ export function liningDays(g: GameState, stats: PlantStats): number {
   return 0.85 / (liningWearPerHeat(g) * heatsPerDay);
 }
 
-/** Oppmuring av en pott tar fire døgn med to murere; én murer bruker dobbelt så lang tid (B-030) */
+/** Oppmuring av en potte tar fire døgn med to murere; én murer bruker dobbelt så lang tid (B-030) */
 export const POT_REBUILD_DAYS = 4;
 export const MASONS_PER_POT = 2;
 
@@ -531,7 +531,7 @@ export function masonsAtWork(g: GameState, minute = g.minute): boolean {
   return h >= MASON_START_HOUR && h < MASON_START_HOUR + MASON_HOURS;
 }
 
-/** Hvor mye av en reservepott som mures opp per døgn, når murerne deles på pottene som trenger det */
+/** Hvor mye av en reservepotte som mures opp per døgn, når murerne deles på pottene som trenger det */
 export function potRebuildPerDay(g: GameState): number {
   const masons = presentWorkers(g).filter((w) => w.role === "murer").length;
   const pots = g.furnaces.filter((f) => f.spareProgress < 1).length;

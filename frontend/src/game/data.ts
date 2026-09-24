@@ -598,7 +598,7 @@ export const ADDONS: Addon[] = [
     name: "Strålingsportal",
     stage: 1,
     price: 90_000,
-    description: "Måler alle skraplass ved porten. Radioaktive kilder stoppes før de havner i ovnen.",
+    description: "Måler alle skraplass når de kjøres inn på verket. Radioaktive kilder stoppes før de havner i ovnen.",
   },
   {
     id: "salgskontor",
@@ -748,7 +748,7 @@ export const ROLES: Record<RoleId, Role> = {
     plural: "Skrapklassere",
     salary: 1800,
     description:
-      "Kontrollerer skrapet som kommer inn og sørger for at hver charge får den blandingen resepten sier. Stopper dårlige partier ved porten.",
+      "Kontrollerer skrapet som kommer inn og sørger for at hver charge får den blandingen resepten sier. Stopper dårlige partier før de tas imot.",
   },
   murer: {
     id: "murer",
@@ -756,7 +756,7 @@ export const ROLES: Record<RoleId, Role> = {
     plural: "Murere",
     salary: 1900,
     description:
-      "Murer opp den ene potta til lysbueovnen med ny ildfast stein mens den andre er i bruk. Jobber dagtid (07–15), ikke skift. To murere klarer en pott på ca. fire døgn.",
+      "Murer opp den ene potta til lysbueovnen med ny ildfast stein mens den andre er i bruk. Jobber dagtid (07–15), ikke skift. To murere klarer en potte på ca. fire døgn.",
   },
   salg: {
     id: "salg",

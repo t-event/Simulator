@@ -483,3 +483,18 @@ Beslutning:
 - **Støpefeil** håndteres automatisk: selg på spot (standard), smelt om som returskrap (kjent analyse,
   gratis skrap) eller behold (`secondsAction`). Det er ikke laget noen egen «spare til senere»-plan, fordi
   omsmelting til returskrap gir den muligheten på en enkel måte.
+
+## B-036 Småfeil og tekst: potte, porten, nattillegg, fagbok-kapitler, vedlikehold, nestenulykke (2026-09-24)
+Status: gjelder
+Beslutning:
+- «pott» → **«potte»** (reservepotte, bytt potte, per potte).
+- «porten» er ikke riktig ord: skrapet måles **«når det kommer inn på verket»**; skrapklasseren stopper
+  dårlige partier **«før de tas imot»**.
+- Skiftplanen viser **«Ingen nattillegg med dette skiftet»** i stedet for «0 %».
+- Forskning: knappen heter **«Les «kapittelnavn»»**, og kapitlet åpnes (og låses opp) selv om det ikke
+  var kommet i fagboka ennå.
+- Vedlikehold: planlagt omforing vises som en tydelig **låst boks** til «Vedlikeholdsplan» er forsket fram,
+  og **skjules** når reparatøren bytter foringen automatisk. Er reparatøren borte (ferie/syk), sier kortet
+  at foringen ikke byttes før hen er tilbake.
+- **Nestenulykke:** verneutstyr gir trivsel +5 og omdømme +1; å la det gå gir alltid trivsel −5 og
+  omdømme −1, i tillegg til risikoen for skade.
