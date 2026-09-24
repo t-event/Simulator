@@ -1,35 +1,37 @@
 /**
- * TP-kvaliteter som kan kjøres i simulatoren.
+ * Stålkvaliteter som kan kjøres i simulatoren.
  *
- * Ferdig karboninnhold for TP26 og TP77 er hentet fra kompendiet (kapittel 6.5),
- * der TP26 ligger rundt 0,2 %C med likvidus 1504 °C og TP77 rundt 0,8 %C med
- * likvidus 1462 °C. TP28 er omtalt som en lavkarbonkvalitet med mye oksygen.
+ * Kvalitetene er generiske eksempler som spenner ut det operatøren må kunne
+ * håndtere: en vanlig armeringskvalitet, en lavkarbonkvalitet som krever mer
+ * oksygen og gir høyere FeO i slaggen, og en høykarbonkvalitet som tappes
+ * varmere ned mot en lavere likvidustemperatur.
  *
- * Karbonvinduene under er det stålovnen skal tappe på; resten legeres opp ved
- * tapping og på øseovnen (kompendiet kapittel 5.2).
+ * Karbonvinduene er det stålovnen skal tappe på, ikke ferdig analyse: karbon
+ * legeres opp igjen ved tapping og på øseovnen. Tallet i koden er ferdig
+ * karboninnhold i hundredeler.
  */
 import type { SteelGrade } from "./state";
 
 export const GRADES: SteelGrade[] = [
   {
-    code: "TP26",
-    name: "TP26 – armeringsstål",
+    code: "AR20",
+    name: "AR20 – armeringskvalitet",
     tapCarbonMinPct: 0.04,
     tapCarbonMaxPct: 0.1,
     phosphorusMaxPct: 0.035,
     finalCarbonPct: 0.2,
   },
   {
-    code: "TP28",
-    name: "TP28 – lavkarbon",
+    code: "LK08",
+    name: "LK08 – lavkarbon",
     tapCarbonMinPct: 0.02,
     tapCarbonMaxPct: 0.05,
     phosphorusMaxPct: 0.03,
     finalCarbonPct: 0.08,
   },
   {
-    code: "TP77",
-    name: "TP77 – høykarbon",
+    code: "HK80",
+    name: "HK80 – høykarbon",
     tapCarbonMinPct: 0.25,
     tapCarbonMaxPct: 0.45,
     phosphorusMaxPct: 0.04,

@@ -1,9 +1,10 @@
 /**
  * Valideringskjøring for prosessmodellen.
  *
- * Kjør med `npx tsx src/sim/validate.ts` fra frontend/. Tallene skal ligge nær
- * slaggprøven og driftstallene i kompendiet: en normalt kjørt charge på rundt
- * 380 kWh/t og ca. 55 min tapp-til-tapp, med FeO rundt 29 % og B2 rundt 1,7.
+ * Kjør med `npx tsx src/sim/validate.ts` fra frontend/. Tallene skal ligge
+ * innenfor det som er vanlig for en lysbueovn i denne størrelsen: en normalt
+ * kjørt charge på rundt 390 kWh/t og ca. 59 min tapp-til-tapp, med FeO rundt
+ * 29 % og B2 rundt 1,7. Avvik her betyr at modellen har endret oppførsel.
  */
 import { EAFSimulation } from "./eaf";
 import { serializeState } from "./serialize";
@@ -22,7 +23,7 @@ interface RunResult {
 
 function runCharge(options: { deslagFirst: boolean; scrapP?: number; seed?: number }): RunResult {
   const sim = new EAFSimulation(options.seed ?? 11);
-  sim.startCharge("TP26");
+  sim.startCharge("AR20");
   if (options.scrapP) sim.injectFault("high_phosphorus_scrap", { value: options.scrapP });
   sim.setConveyor(true);
   sim.setConveyorRate(2.2);
@@ -106,8 +107,8 @@ console.log("=== Normal charge, riktig prosedyre (slagg av før oppvarming) ==="
 const normal = runCharge({ deslagFirst: true });
 console.log(`  Innsmelting ferdig:  ${fmt(normal.meltDoneS / 60, 0)} min, bad ${fmt(normal.tempAfterMelt, 0)} °C`);
 console.log(`  Tapp-til-tapp:       ${fmt(normal.totalS / 60, 0)} min`);
-console.log(`  Energi:              ${normal.kwhPerTonne} kWh/t   (kompendiet: conveyor sparer ~10 %)`);
-console.log(`  Slagg:               FeO ${fmt(normal.feo)} %, B2 ${fmt(normal.b2, 2)}   (prøve i [K 4.3.1]: FeO 28,8 %, B2 1,74)`);
+console.log(`  Energi:              ${normal.kwhPerTonne} kWh/t   (forvarming sparer ca. 10 % mot korgkjøring)`);
+console.log(`  Slagg:               FeO ${fmt(normal.feo)} %, B2 ${fmt(normal.b2, 2)}   (vanlig for basisk skumslagg: FeO 25-30 %, B2 1,6-2,0)`);
 console.log(`  Fosfor:              ${fmt(normal.pAfterMelt, 4)} etter innsmelting -> ${fmt(normal.tap!.phosphorus_pct, 4)} tappet`);
 console.log(`  Tapperesultat:       ${normal.tap!.ok ? "OK" : "AVVIK: " + normal.tap!.deviations.join("; ")}`);
 
@@ -127,7 +128,7 @@ for (const [label, opts] of [
 console.log("\n=== Overoppheting: ildfast ===");
 {
   const sim = new EAFSimulation(5);
-  sim.startCharge("TP26");
+  sim.startCharge("AR20");
   sim.setConveyor(true);
   sim.setConveyorRate(2.2);
   sim.setPower(true);
@@ -154,7 +155,7 @@ console.log("\n=== Overoppheting: ildfast ===");
 console.log("\n=== Ildfastforbruk ved normal drift ===");
 {
   const r = new EAFSimulation(11);
-  r.startCharge("TP26");
+  r.startCharge("AR20");
   r.setConveyor(true);
   r.setConveyorRate(2.2);
   r.setPower(true);

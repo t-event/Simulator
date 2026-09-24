@@ -1,11 +1,10 @@
 /**
  * Prosessmodell for stålovnen (lysbueovn med conveyor-mating).
  *
- * Modellen følger prosessen slik den er beskrevet i metallurgikompendiet for
- * Celsa Armeringsstål: skrapet mates kontinuerlig inn på et flatt bad med
- * stålsump via en forvarmet conveyor, slagg bygges med kalk og dolomitt,
- * oksygen og karbon blåses inn gjennom KT-lansene, fosfor tas ut gjennom
- * slaggen, og chargen slagges av før temperaturen kjøres opp mot tapping.
+ * Skrapet mates kontinuerlig inn på et flatt bad med stålsump via en
+ * forvarmet conveyor, slagg bygges med kalk og dolomitt, oksygen og karbon
+ * blåses inn gjennom lansene, fosfor tas ut gjennom slaggen, og chargen
+ * slagges av før temperaturen kjøres opp mot tapping.
  *
  * Modellen er lumped-parameter: den gjengir riktig retning, rekkefølge og
  * størrelsesorden på de koblingene en operatør faktisk må håndtere, men er
@@ -464,7 +463,7 @@ export class EAFSimulation {
     }
   }
 
-  /** Overslag: strømmen finner vei utenom stålbadet [kompendiet 1.5.4]. */
+  /** Overslag: strømmen finner vei utenom stålbadet. */
   private triggerOverslag(): void {
     const s = this.state;
     this.raiseAlarm("OVERSLAG", "Overslag fra elektrode – strøm på avveie", "critical");
@@ -511,7 +510,7 @@ export class EAFSimulation {
   private updateConveyor(dtS: number): void {
     const s = this.state;
     // Forvarmingsdelen henter varme fra avgassen. Lavere conveyorhastighet gir
-    // lengre oppholdstid og varmere skrap [kompendiet 3.1/3.4].
+    // lengre oppholdstid og varmere skrap.
     let targetPreheat: number;
     if (s.conveyorRunning && s.conveyorRateTMin > 0) {
       const speedRatio = s.conveyorRateTMin / C.CONVEYOR_MAX_RATE_T_MIN;

@@ -61,7 +61,7 @@ export function ControlPanel({ state, sendCommand }: Props) {
       </div>
 
       <div className="control-row">
-        {["TP26", "TP28", "TP77"].map((code) => (
+        {["AR20", "LK08", "HK80"].map((code) => (
           <button
             key={code}
             className={state.grade?.code === code ? "btn-primary" : ""}
