@@ -649,3 +649,11 @@ Beslutning:
   kreditten brukt opp, døgngrensen nådd, eller fullt skraplager). Grunnen står i varselet når ovnen stopper, i
   tipset på Verket og under planleggeren på Marked.
 - Startmeldingen i garasjen nevner ikke lenger digel.
+
+## B-049 Si hvilket skrap ovnen venter på (2026-09-24)
+Status: gjelder
+Brukeren sendte skjermbilder der ovn 1 sto med «Mangler skrap til resepten» for lavkarbon (bildene var fra før
+B-048 ble publisert). I test kjøper planleggeren rent nyskrap som den skal; uten planlegger må spilleren kjøpe selv.
+Beslutning: Varselet og tipset på Verket sier hvilke skraptyper resepten mangler til neste charge
+(«Resepten trenger rent nyskrap»). Under Marked er de skraptypene merket med oransje ramme og en linje om at
+ovnen venter på dem.

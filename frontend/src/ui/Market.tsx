@@ -1,5 +1,5 @@
 import { PRODUCTS, SCRAP_IDS, SCRAP_TYPES } from "../game/data";
-import { buyScrap, scrapPrice } from "../game/engine";
+import { buyScrap, scrapPrice, scrapShort } from "../game/engine";
 import { energyPrice, hasPlanner, plannerOrders, productPrice, type PlantStats } from "../game/plant";
 import { PowerCard } from "./Power";
 import { researchForScrap, scrapUnlocked } from "../game/research";
@@ -28,6 +28,8 @@ export function Market({ g, stats, act }: Props) {
   // Strømavtaler og effekttariff vises fra verkstedet; i garasjen holder det med prisen (B-045)
   const electric = stats.furnace.fuel === "strøm" && g.stage >= 1;
   const open = SCRAP_IDS.filter((id) => scrapUnlocked(g, id));
+  // Det resepten trenger til neste charge, men som mangler på lageret (B-049)
+  const short = scrapShort(g, stats);
   // Låste skraptyper gruppert etter forskningen som låser dem opp
   const locked = new Map<string, ScrapId[]>();
   for (const id of SCRAP_IDS.filter((x) => !scrapUnlocked(g, x))) {
@@ -60,11 +62,16 @@ export function Market({ g, stats, act }: Props) {
               const price = scrapPrice(g, id);
               const trend = price / type.price;
               return (
-                <div className="g-scrap" key={id}>
+                <div className={`g-scrap${short.includes(id) ? " is-short" : ""}`} key={id}>
                   <div className="g-scrap-head">
                     <strong>{type.name}</strong>
                     <span className="g-scrap-stock">{fmtT(g.scrap[id].t)} på lager</span>
                   </div>
+                  {short.includes(id) && (
+                    <p className="g-note g-warn">
+                      Resepten trenger mer {type.name.toLowerCase()} – ovnen venter på det.
+                    </p>
+                  )}
                   <p className="g-muted">{type.description}</p>
                   <div className="g-scrap-facts">
                     <span>
@@ -140,9 +147,7 @@ export function Market({ g, stats, act }: Props) {
                     />
                     <span>Planleggeren kan handle på kassekreditten når kassa er tom</span>
                   </label>
-                  {g.autoBuyNote && (
-                    <p className="g-note g-warn">Planleggeren får ikke kjøpt {g.autoBuyNote}.</p>
-                  )}
+                  {g.autoBuyNote && <p className="g-note g-warn">Planleggeren får ikke kjøpt {g.autoBuyNote}.</p>}
                   {!hasPlanner(g) && (
                     <p className="g-muted">Planleggeren er borte, men de faste bestillingene går som vanlig.</p>
                   )}

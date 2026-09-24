@@ -1914,3 +1914,8 @@ button {
 .g-subtabs button.is-alert:not(.is-active) {
   color: var(--warning, #f5a623);
 }
+
+/* Skraptype resepten mangler (B-049) */
+.g-scrap.is-short {
+  border-color: var(--warning);
+}
