@@ -76,7 +76,11 @@ export function migrate(g: GameState): GameState {
   // Før B-042 ble fastpris fornyet av seg selv; gamle spill beholder det
   if (g.settings.powerAutoRenew === undefined) g.settings.powerAutoRenew = g.settings.powerDeal === "fast";
   if (g.settings.offerGrades === undefined) g.settings.offerGrades = [];
+  // Garasjen startet med gassfyrt digel før B-045; nå er det en liten induksjonsovn
+  if (g.furnaceType === "digel") g.furnaceType = "induksjon025";
   if (g.settings.offerSort === undefined) g.settings.offerSort = "frist";
+  // Rent nyskrap har lavere karbon fra B-043
+  if (g.scrap.rent && g.scrap.rent.c > 0.06) g.scrap.rent.c = 0.06;
   if (g.settings.autoTemps === undefined) g.settings.autoTemps = false;
   if (g.settings.secondsAction === undefined) g.settings.secondsAction = "spot";
   if (g.settings.graderStrict === undefined) g.settings.graderStrict = true;

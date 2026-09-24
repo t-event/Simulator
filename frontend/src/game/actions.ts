@@ -77,7 +77,7 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
   }
   const currentFurnace = furnaceType(g);
   for (const f of FURNACES) {
-    if (f.id === "digel") continue;
+    if (f.id === "induksjon025") continue;
     const owned = f.id === currentFurnace.id;
     const outdated =
       f.stage < currentFurnace.stage || (f.stage === currentFurnace.stage && !owned && f.sizeT < currentFurnace.sizeT);

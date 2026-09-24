@@ -29,6 +29,7 @@ import { hasResearch, RESEARCH, scrapUnlocked } from "./research";
 import { checkMissions } from "./missions";
 import { maybeAdvisor, maybeCreateDecision } from "./decisions";
 import { maybeTip, setCreditHint } from "./tips";
+import { suggestRecipe } from "./recipe";
 import {
   castingType,
   computePlantStats,
@@ -143,7 +144,7 @@ export function newGame(seed = Date.now()): GameState {
     reputation: START_REPUTATION,
     stage: 0,
     owned: [],
-    furnaceType: "digel",
+    furnaceType: "induksjon025",
     furnaceCount: 1,
     castingType: "sandformer",
     furnaces: [newFurnaceUnit()],
@@ -511,8 +512,10 @@ function finalCarbon(g: GameState, mixC: number, grade: GradeId, stats: PlantSta
     return Math.max(0.02, target + noise(g, sd));
   }
   const base = mixC * 0.95;
-  if (base < target) return exact ? target : Math.max(0.01, target + noise(g, 0.025));
-  return exact ? base : Math.max(0.01, base + noise(g, 0.02));
+  // Med skrapklasser er blandingen i hver charge kjent, så karbonet spriker mindre (B-043)
+  const spread = hasGrader(g) ? 0.4 : 1;
+  if (base < target) return exact ? target : Math.max(0.01, target + noise(g, 0.025 * spread));
+  return exact ? base : Math.max(0.01, base + noise(g, 0.02 * spread));
 }
 
 export interface RecipeEstimate {
@@ -573,7 +576,7 @@ function wearFactor(g: GameState): number {
 }
 
 function tempOffRisk(g: GameState, stats: PlantStats): number {
-  let risk = stats.furnace.id === "digel" ? 0.14 : stats.furnace.arc ? 0.12 : 0.08;
+  let risk = stats.furnace.id === "induksjon025" ? 0.14 : stats.furnace.arc ? 0.12 : 0.08;
   // Riktig temperatur til støping er øseovnsoperatørens jobb (B-037)
   if (stats.furnace.arc && has(g, "oseovn")) return 0.03 * (1.8 - 0.2 * ladleSkill(g));
   return risk * (1.3 - 0.1 * stats.crewSkill);
@@ -674,7 +677,7 @@ function heatEvents(g: GameState, index: number, stats: PlantStats): number {
       addCost(g, "vedlikehold", 35_000);
       log(g, `Elektrodebrudd i ovn ${index + 1}. Elektroden skjøtes, og chargen forsinkes.`, "event");
     }
-  } else if (furnace.id !== "digel" && chance(g, 0.004 * m)) {
+  } else if (furnace.id !== "induksjon025" && chance(g, 0.004 * m)) {
     const hours = 8 * stats.repairFactor;
     f.downUntilMin = Math.max(f.downUntilMin, g.minute + stats.cycleMin + hours * 60);
     f.downReason = "Havari: vannlekkasje i induksjonsspolen";
@@ -1173,8 +1176,31 @@ export function furnaceOrder(g: GameState, index: number): Contract | null {
   return ordersToMake(g).find((c) => c.grade === grade) ?? null;
 }
 
+/**
+ * Når verket bytter til en kvalitet resepten ikke holder, legger skrapklasseren eller planleggeren om
+ * resepten selv (sikreste blanding av skrapet som er åpent). Uten dem får spilleren et varsel (B-043).
+ */
+function ensureRecipe(g: GameState, grade: GradeId, stats: PlantStats): void {
+  const recipe = gradeRecipe(g, grade);
+  if (recipeEstimate(g, grade, stats, recipe).grades.includes(grade)) return;
+  const who = hasGrader(g) ? "Skrapklasseren" : hasPlanner(g) ? "Planleggeren" : null;
+  const name = GRADES[grade].name.toLowerCase();
+  if (!who) {
+    log(g, `Resepten holder ikke kravet til ${name}. Juster den under Marked – eller ansett en skrapklasser.`, "event");
+    return;
+  }
+  const next = suggestRecipe(g, grade, stats, "sikker");
+  if (!next) {
+    log(g, `${who} finner ingen blanding av skrapet du har tilgang til som holder ${name}.`, "event");
+    return;
+  }
+  if (grade === g.targetGrade) g.recipe = { ...next.recipe };
+  g.gradeRecipes[grade] = { ...next.recipe };
+  log(g, `${who} la om resepten til ${name}, så den holder kravet.`, "info");
+}
+
 /** Ovnen følger ordrekøen: kvaliteten (og resepten for den) til ordren som produseres. */
-function followQueue(g: GameState): void {
+function followQueue(g: GameState, stats: PlantStats): void {
   if (!g.settings.followQueue) return;
   const orders = ordersToMake(g);
   const order = orders[0];
@@ -1183,10 +1209,13 @@ function followQueue(g: GameState): void {
     g.targetGrade = order.grade;
     const saved = g.gradeRecipes[order.grade];
     if (saved) g.recipe = { ...saved };
+    ensureRecipe(g, order.grade, stats);
   }
   // Ovn 2 (og 3 …) tar neste kvalitet i køen, hvis det er en annen (B-039)
   const other = g.settings.splitGrades ? orders.find((c) => c.grade !== g.targetGrade) : undefined;
+  const before = g.furnaces[1]?.grade ?? null;
   for (let i = 1; i < g.furnaces.length; i++) g.furnaces[i].grade = other?.grade ?? null;
+  if (other && other.grade !== before) ensureRecipe(g, other.grade, stats);
 }
 
 /** Planleggeren sorterer køen etter frist. */
@@ -1845,7 +1874,7 @@ function onHour(g: GameState, stats: PlantStats): void {
     if (lotsTonnage(g) > stats.storeT * 0.85) sellExcess(g, stats, 0.6);
   }
   plannerSort(g);
-  followQueue(g);
+  followQueue(g, stats);
   // Automatisk innkjøp krever en planlegger (se B-021)
   if (g.settings.autoBuy && hasPlanner(g)) autoBuy(g, stats);
 }

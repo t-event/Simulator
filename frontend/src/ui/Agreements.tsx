@@ -1,4 +1,4 @@
-import { GRADES, PRODUCTS, STAGES } from "../game/data";
+import { GRADES, PRODUCTS } from "../game/data";
 import {
   acceptAgreement,
   AGREEMENT_MAX_MISSED,
@@ -102,19 +102,7 @@ function AgreementRow({ a }: { a: Agreement }) {
 
 /** Rammeavtaler (B-040): faste ukeleveranser over flere uker, fra stålverket */
 export function Agreements({ g, stats, act }: Props) {
-  if (g.stage < AGREEMENT_STAGE - 1 && !g.agreements.length) return null;
-  if (g.stage < AGREEMENT_STAGE && !g.agreements.length)
-    return (
-      <Card title="Rammeavtaler">
-        <div className="g-locked-box">
-          <strong>🔒 Rammeavtaler</strong>
-          <span>
-            Når du har et {STAGES[AGREEMENT_STAGE].name.toLowerCase()}, vil store kunder inngå faste avtaler: like mye
-            stål hver uke i flere uker, til fast pris.
-          </span>
-        </div>
-      </Card>
-    );
+  if (g.stage < AGREEMENT_STAGE && !g.agreements.length) return null;
   const offers = g.agreements.filter((a) => a.status === "tilbud");
   const others = g.agreements.filter((a) => a.status !== "tilbud");
   return (
