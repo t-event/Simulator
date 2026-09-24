@@ -97,3 +97,7 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   bare et artefakt av skjermbildet.
 - Prosessmodellen er kalibrert med steg på maks 1 s – del opp større steg.
 - GitHub Pages bygger fra `main`; utviklingsgrenen synes ikke før PR er merget.
+- Se over `git status` og `git diff --stat` før commit. `git add -A` tok en gang med en hel
+  `node_modules`-mappe fordi en ignore-regel var fjernet. `.gitignore` har nå en generell
+  `node_modules/`-regel – ikke fjern den.
+- CI (`pages.yml`) kjører bare ved push til `main`, ikke på PR-er. Kjør sjekkene lokalt før PR.
