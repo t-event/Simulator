@@ -7,7 +7,7 @@
  */
 import { SCRAP_TYPES, STAGES } from "./data";
 import { acceptContract, addCost, addIncome, addScrapParti, adjustMorale, adjustReputation, fmtKr, fmtT, log, makeCandidate, scrapPrice, unlock } from "./engine";
-import { computePlantStats, day, isAbsent, productPrice } from "./plant";
+import { computePlantStats, day, isAbsent, productPrice, satisfiedGrades } from "./plant";
 import { chance, pick, rand, uniform } from "./random";
 import { knowledgeCard } from "./knowledge";
 import type { Contract, Decision, GameState, RepCause } from "./types";
@@ -474,6 +474,20 @@ export function resolveDecision(g: GameState, option: number): void {
       addCost(g, "annet", n("cost"));
       g.specialists[cause] = g.minute + SPECIALIST_DAYS * 1440;
       if (cause === "havari") for (const f of g.furnaces) if (f.wear > 0.5) f.relineRequested = true;
+      if (cause === "reklamasjon") {
+        // Kvalitetsingeniøren måler også stålet som ligger på lager, så dårlige partier ikke leveres (B-034)
+        let held = 0;
+        for (const lot of g.lots) {
+          lot.known = { ...lot.analysis };
+          lot.measured = { c: true, p: true, tramp: true };
+          if (!satisfiedGrades(lot.analysis).length) held += lot.t;
+        }
+        log(
+          g,
+          `Kvalitetsingeniøren har målt alt på lager.${held > 0 ? ` ${fmtT(held)} holder ingen kvalitet og blir ikke levert.` : ""} Reklamasjoner på stål som alt er levert, kan fortsatt komme de neste døgnene.`,
+          "info",
+        );
+      }
       log(g, `${ADVICE[cause].specialist} er leid inn i ${SPECIALIST_DAYS} døgn. ${ADVICE[cause].effect}`, "good");
       return;
     }
