@@ -612,7 +612,6 @@ export const ADDONS: Addon[] = [
     name: "Spektrometer",
     stage: 2,
     price: 450_000,
-    crew: { lab: 1 },
     description: "Gnistspektrometer i eget laboratorium: full analyse av hver charge, også karbon og fosfor.",
   },
   {
@@ -649,7 +648,7 @@ export const ADDONS: Addon[] = [
     name: "Øseovn",
     stage: 3,
     price: 3_000_000,
-    crew: { ovn: 1 },
+    crew: { lab: 1 },
     needsArc: true,
     description:
       "Varmer og legerer stålet i øsa etter tapping: karbon treffer målet, og temperaturen til støping blir riktig.",
@@ -723,10 +722,11 @@ export const ROLES: Record<RoleId, Role> = {
   },
   lab: {
     id: "lab",
-    name: "Laborant",
-    plural: "Laboranter",
-    salary: 1750,
-    description: "Tar prøver og kjører spektrometeret.",
+    name: "Øseovnsoperatør",
+    plural: "Øseovnsoperatører",
+    salary: 1900,
+    description:
+      "Kjører øseovnen: tar prøver, legerer øsa så stålet holder kravet, og sender det til støping med riktig temperatur. En slurvete operatør gir stål som må sperres, og for kaldt stål kan få strengen til å gro igjen.",
   },
   vedlikehold: {
     id: "vedlikehold",

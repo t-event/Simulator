@@ -123,6 +123,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
     paragraphs: [
       "Etter tapping fraktes stålet i øsa til øseovnen. Der varmes det med egne elektroder, legeres til riktig analyse og spyles med argon for å bli homogent.",
       "Øseovnen gjør at stålovnen kan konsentrere seg om å smelte og raffinere, og at støpemaskinen får stål med riktig temperatur.",
+      "Øseovnsoperatøren tar prøver, sjekker analysen på spektrometeret og legerer øsa til stålet holder kravet. Karbon kan justeres, men fosfor og kobber kan ikke tas ut her – kommer det for dårlig stål fra stålovnen, må det sperres. For kaldt stål kan få strengen til å gro igjen i støpemaskinen.",
     ],
   },
   {

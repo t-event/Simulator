@@ -162,6 +162,8 @@ function botHour(g: GameState): void {
     if (!cheapestRecipe(g, offer.grade)) continue;
     // Lavkarbon bommer for ofte i lysbueovnen uten øseovn til at en forsiktig spiller tar det
     if (offer.grade === "lavkarbon" && stats.furnace.arc && !g.owned.includes("oseovn")) continue;
+    // Smalt karbonvindu (armering) bommer også uten øseovn eller spektrometer
+    if (offer.grade === "armering" && stats.furnace.arc && !g.owned.includes("oseovn") && stats.lab < 2) continue;
     // En kvalitet om gangen, som en enkel spiller ville kjørt
     if (activeGrades.size > 0 && !activeGrades.has(offer.grade)) continue;
     const days = offer.deadlineDay - today + 0.5;

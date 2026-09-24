@@ -13,6 +13,11 @@ Verket for lang, Marked uintuitiv, støpefeil, fagbok-kapitler, potte/porten, na
 nestenulykke, søkere ved flytting, bryter for forespørsler, lang lagerliste, øseovnsoperatør, digel.
 Delt i fem pakker.
 
+**Pakke 5 (B-037):** Øseovnsoperatør i stedet for laborant, med prøver, legering, temperatur og sperret
+stål. Balanse 10 / 24 / 62 / 138.
+
+**Digel:** brukeren spurte om digelovn bare hører til aluminium. Svar i samtalen; ikke endret ennå.
+
 **Pakke 4 (B-036):** potte, porten, nattillegg, «Les «kapittel»» fra Forskning, låst/skjult planlagt
 omforing, varsel når reparatøren er borte, belønning og straff ved nestenulykke. Testet i Playwright.
 

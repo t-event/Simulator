@@ -508,6 +508,12 @@ export function liningDays(g: GameState, stats: PlantStats): number {
 export const POT_REBUILD_DAYS = 4;
 export const MASONS_PER_POT = 2;
 
+/** Ferdigheten til øseovnsoperatørene på jobb (B-037); 2 hvis ingen er der */
+export function ladleSkill(g: GameState): number {
+  const ops = presentWorkers(g).filter((w) => w.role === "lab");
+  return ops.length ? ops.reduce((a, w) => a + w.skill, 0) / ops.length : 2;
+}
+
 /** Hvor mye fortere tida går når verket står om natta og ingenting skjer (B-033) */
 export const IDLE_NIGHT_SPEED = 6;
 
