@@ -122,10 +122,10 @@ Oppdater listen når noe blir gjort, så arbeidet kan fortsette i en ny samtale.
       mer kommer med strøm i tema E og ansatte i tema G)
 
 **E. Strøm** (brukerens valg: alle fire)
-- [ ] Strømavtale: spot, fastpris eller nattariff, med bindingstid
-- [ ] Effekttariff: døgnets høyeste effektuttak koster; mange ovner samtidig blir dyrt
-- [ ] Skiftplan: velg når verket smelter (natt er billig strøm, men nattillegg i lønn)
-- [ ] Utkobling fra nettselskapet mot betaling (hendelse med valg)
+- [x] Strømavtale: spot, fastpris eller nattariff, med bindingstid
+- [x] Effekttariff: døgnets høyeste effektuttak koster; mange ovner samtidig blir dyrt
+- [x] Skiftplan: velg når verket smelter (natt er billig strøm, men nattillegg i lønn)
+- [x] Utkobling fra nettselskapet mot betaling (hendelse med valg)
 
 **F. Fagboka sentral** (brukerens valg: alle fire)
 - [ ] Quiz per kapittel som gir belønning

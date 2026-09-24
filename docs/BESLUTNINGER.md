@@ -245,3 +245,21 @@ Beslutning:
   mister noe de hadde.
 - Balanse etter endringen: 11 / 49 / 100 / 187 (innenfor målene; støperiet er nær øvre grense og
   vurderes igjen i tema G).
+
+## B-024 Strøm: avtale, effekttariff, skiftplan og utkobling (2026-09-24)
+Status: gjelder
+Beslutning (gjelder når verket har elektrisk ovn; gassdigelen har fast pris):
+- **Strømavtale** i Marked: *spotpris* (børsprisen time for time, som før), *fastpris* (samme pris
+  hele døgnet, satt ved signering til `0,85 × (0,7 + 0,3 × prisnivå) × 1,1` – en forsikring som
+  koster litt; fornyes til dagens pris etter bindingstida) eller *nattariff* (0,6 × grunnpris kl.
+  22–06, 1,2 × ellers). Fastpris og nattariff har 30 døgns binding. Kortet viser snittprisen i
+  driftstida for hver avtale, så valget blir konkret.
+- **Effekttariff:** 1 200 kr per MW av døgnets høyeste effekt (én ovn trekker
+  `størrelse × kWh/t ÷ syklustid`, fra 0,5 MW i verkstedet til 36 MW for den største lysbueovnen).
+  Med to ovner kan man velge «Bare én ovn smelter om gangen» for å halvere toppen.
+- **Skiftplan** under Folk (når verket ikke går døgnet rundt): skiftene kan starte kl. 06, 14 eller
+  22. Nattarbeid gir 30 % tillegg for timene 22–06, regnet mot vanlig start kl. 06, så døgnkontinuerlig
+  drift ikke blir dyrere enn før.
+- **Utkobling:** nytt hendelseskort der nettselskapet betaler for å koble ut ovnene kl. 07–11 neste
+  dag. Betalingen er 15–45 % av verdien av stålet man ikke får laget, så det lønner seg bare noen ganger.
+- Testspilleren beholder spotpris og dagskift, og sier nei til utkobling. Balanse: 12 / 44 / 104 / 185.

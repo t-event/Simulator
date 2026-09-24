@@ -4,7 +4,7 @@ import { Maintenance } from "./Maintenance";
 import { researchOptions } from "../game/research";
 import { GRADE_IDS, GRADES, PRODUCTS, ROLES, STAGES } from "../game/data";
 import { currentOrder, recipeEstimate } from "../game/engine";
-import { castingType, rollingActive, type PlantStats } from "../game/plant";
+import { castingType, rollingActive, shiftStart, type PlantStats } from "../game/plant";
 import type { GameState, GradeId, RoleId } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { AnalysisLine, Bar, Card, GradeChips, Stat } from "./common";
@@ -139,7 +139,7 @@ export function Overview({ g, stats, act, go }: Props) {
               {stats.hours > 0
                 ? stats.hours >= 24
                   ? "Døgnkontinuerlig drift"
-                  : `Drift ${fmtClock(6 * 60)}–${fmtClock(6 * 60 + stats.hours * 60)}`
+                  : `Drift ${fmtClock(shiftStart(g) * 60)}–${fmtClock(((shiftStart(g) + stats.hours) % 24) * 60)}`
                 : "Står – mangler folk"}
             </span>
           </div>
@@ -336,6 +336,9 @@ export function Overview({ g, stats, act, go }: Props) {
               />
             )}
             {y && <Stat label="Produsert i går" value={fmtT(y.producedT)} />}
+            {y && stats.furnaceMW > 0 && (
+              <Stat label="Strøm og effekt i går" value={fmtKr((y.costs.energi ?? 0) + (y.costs.nett ?? 0))} />
+            )}
             {stats.salaryPerDay > 0 && <Stat label="Lønn per døgn" value={fmtKr(stats.salaryPerDay)} />}
             <Stat label="Faste kostnader per døgn" value={fmtKr(STAGES[g.stage].fixedPerDay)} />
             {g.loan > 0 && <Stat label="Lån" value={fmtKr(g.loan)} tone="warning" />}

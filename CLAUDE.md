@@ -85,7 +85,7 @@ frontend/src/
     balance.ts   Automatisk testspiller
   ui/          Spillets skjermer (mobil først) og kontrollrommet
     views.ts     Fanene og når de låses opp   Upgrades.tsx, stations.ts  Utstyr per sted i anlegget
-    ResearchPage.tsx  Forskning-fanen (forskning, bank, nytt spill)
+    ResearchPage.tsx  Forskning-fanen (forskning, bank, nytt spill)   Power.tsx  Strøm og skiftplan
     control/     Kontrollrommet: enkel styring (standard) og full HMI (ekspert)
   sim/         Prosessmodell for lysbueovnen (brukes av kontrollrommet)
   components/  HMI-komponenter for full kontrollromsvisning

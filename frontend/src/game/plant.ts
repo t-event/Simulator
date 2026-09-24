@@ -20,7 +20,7 @@ import {
   type Stage,
 } from "./data";
 import { hasResearch } from "./research";
-import type { Analysis, Crew, GameState, GradeId, ProductId, RoleId } from "./types";
+import type { Analysis, Crew, GameState, GradeId, PowerDeal, ProductId, RoleId } from "./types";
 
 export const OWNER_SLOTS = 2;
 export const OWNER_HOURS = 10;
@@ -57,6 +57,8 @@ export interface PlantStats {
   yardUsed: number;
   storeUsed: number;
   salaryPerDay: number;
+  /** Effekt (MW) én ovn trekker mens den smelter; 0 for gass */
+  furnaceMW: number;
   /** Multiplikator på sannsynligheten for havarier */
   maintFactor: number;
   /** Multiplikator på reparasjonstid */
@@ -162,7 +164,32 @@ export function isOpen(g: GameState, hours: number, minute = g.minute): boolean 
   if (hours >= 24) return true;
   if (hours <= 0) return false;
   const hourOfDay = (minute % MIN_PER_DAY) / 60;
-  return (hourOfDay - SHIFT_START_HOUR + 24) % 24 < hours;
+  return (hourOfDay - shiftStart(g) + 24) % 24 < hours;
+}
+
+/** Klokketimen skiftene starter (spilleren kan legge driften til kveld og natt, B-024) */
+export function shiftStart(g: GameState): number {
+  return g.settings.shiftStart ?? SHIFT_START_HOUR;
+}
+
+/** Nattillegg: 30 % ekstra lønn for timene mellom 22 og 06 */
+export const NIGHT_PREMIUM = 0.3;
+const isNight = (h: number) => h >= 22 || h < 6;
+
+function nightHours(start: number, hours: number): number {
+  let n = 0;
+  for (let i = 0; i < Math.min(24, hours); i++) if (isNight((start + i) % 24)) n += 1;
+  return n;
+}
+
+/**
+ * Ekstra lønn (andel) for å legge skiftene til natta, sammenlignet med vanlig
+ * start kl. 06. Døgnkontinuerlig drift har nattarbeid uansett og gir ikke noe ekstra.
+ */
+export function nightExtra(g: GameState, hours: number): number {
+  if (hours <= 0 || hours >= 24) return 0;
+  const extra = nightHours(shiftStart(g), hours) - nightHours(SHIFT_START_HOUR, hours);
+  return Math.max(0, (NIGHT_PREMIUM * extra) / hours);
 }
 
 export function day(g: GameState, minute = g.minute): number {
@@ -181,9 +208,46 @@ const HOURLY_PROFILE = [
   1.05, 0.95, 0.85, 0.78,
 ];
 
-export function powerPrice(g: GameState, minute = g.minute): number {
+/** Strømprisen på børsen (spot) */
+export function spotPowerPrice(g: GameState, minute = g.minute): number {
   return POWER_BASE * g.market.powerFactor * HOURLY_PROFILE[hourOfDay(g, minute)];
 }
+
+/** Nattariff: billig om natta, dyrere på dagen */
+const NIGHT_TARIFF = { night: 0.6, day: 1.2 };
+/** Bindingstid for fastpris og nattariff, i døgn */
+export const POWER_BINDING_DAYS = 30;
+
+/** Fastprisen man får tilbud om i dag: en forsikring som koster litt ekstra */
+export function fixedPowerOffer(g: GameState): number {
+  return POWER_BASE * (0.7 + 0.3 * g.market.powerFactor) * 1.1;
+}
+
+/** Strømprisen verket betaler etter avtalen sin (B-024) */
+export function powerPrice(g: GameState, minute = g.minute): number {
+  return dealPrice(g, g.settings.powerDeal ?? "spot", minute);
+}
+
+/** Prisen en avtale ville gitt (fastpris: den man har, eller dagens tilbud) */
+export function dealPrice(g: GameState, deal: PowerDeal, minute = g.minute): number {
+  if (deal === "fast") return g.settings.powerDeal === "fast" ? g.settings.powerFixedPrice : fixedPowerOffer(g);
+  if (deal === "natt") {
+    const f = isNight(hourOfDay(g, minute)) ? NIGHT_TARIFF.night : NIGHT_TARIFF.day;
+    return POWER_BASE * g.market.powerFactor * f;
+  }
+  return spotPowerPrice(g, minute);
+}
+
+/** Snittprisen i timene verket er i drift i dag, med en gitt avtale */
+export function avgDealPrice(g: GameState, deal: PowerDeal, hours: number): number {
+  const start = Math.floor(g.minute / MIN_PER_DAY) * MIN_PER_DAY;
+  const open = Array.from({ length: 24 }, (_, h) => start + h * 60 + 30).filter((m) => isOpen(g, hours, m));
+  if (!open.length) return 0;
+  return open.reduce((a, m) => a + dealPrice(g, deal, m), 0) / open.length;
+}
+
+/** Effekttariff: kroner per MW av døgnets høyeste effektuttak */
+export const PEAK_RATE_PER_MW = 1200;
 
 export function energyPrice(g: GameState, minute = g.minute): number {
   return furnaceType(g).fuel === "gass" ? GAS_PRICE : powerPrice(g, minute);
@@ -246,7 +310,7 @@ export function computePlantStats(g: GameState): PlantStats {
   const yardUsed = Object.values(g.scrap).reduce((a, s) => a + s.t, 0);
   const storeUsed = g.lots.reduce((a, l) => a + l.t, 0);
 
-  const salaryPerDay = g.workers.reduce((a, w) => a + w.salary, 0);
+  const salaryPerDay = g.workers.reduce((a, w) => a + w.salary, 0) * (1 + nightExtra(g, staff.hours));
 
   const products: ProductId[] = [casting.product];
   if (rollingActive(g)) products.push("armering");
@@ -258,9 +322,13 @@ export function computePlantStats(g: GameState): PlantStats {
   let productPerDay = Math.min(liquidPerDay, casting.tph * 24) * casting.yield;
   if (rollingActive(g)) productPerDay = Math.min(productPerDay, rollingTph(g) * Math.max(8, staff.hours)) * ROLLING_YIELD;
 
+  // Effekten én ovn trekker mens den smelter
+  const furnaceMW = furnace.fuel === "strøm" ? (furnace.sizeT * kwhPerT) / (cycleMin / 60) / 1000 : 0;
+
   return {
     stage,
     furnace,
+    furnaceMW,
     furnaceCount: g.furnaceCount,
     casting,
     lab,

@@ -17,6 +17,7 @@ import {
   ROLES,
   SCRAP_IDS,
   SCRAP_TYPES,
+  SHIFT_START_HOUR,
   SPOT_DISCOUNT,
   STAGES,
   START_CASH,
@@ -31,10 +32,13 @@ import {
   computePlantStats,
   day,
   energyPrice,
+  fixedPowerOffer,
   gradeFailures,
   has,
   hasPlanner,
   isOpen,
+  PEAK_RATE_PER_MW,
+  POWER_BINDING_DAYS,
   productPrice,
   rollingActive,
   rollingTph,
@@ -149,6 +153,11 @@ export function newGame(seed = Date.now()): GameState {
       autoReline: false,
       relineAt: 0.85,
       relinePlanDays: null,
+      powerDeal: "spot",
+      powerDealUntilDay: 0,
+      powerFixedPrice: 0,
+      onePeak: false,
+      shiftStart: SHIFT_START_HOUR,
       maxPowerPrice: null,
       autoBuy: false,
       followQueue: true,
@@ -175,6 +184,7 @@ export function newGame(seed = Date.now()): GameState {
     bonusOffer: false,
     celebrate: null,
     seenViews: ["verket", "marked", "salg"],
+    gridCut: null,
     knowledge: [],
     unreadKnowledge: 0,
   };
@@ -718,6 +728,14 @@ function updateFurnaces(g: GameState, stats: PlantStats): void {
       f.waitReason = "Utenfor arbeidstid";
       continue;
     }
+    if (g.gridCut && g.minute >= g.gridCut.fromMin && g.minute < g.gridCut.untilMin) {
+      f.waitReason = "Utkoblet av nettselskapet";
+      continue;
+    }
+    if (g.settings.onePeak && g.furnaces.some((o, j) => j !== i && o.heat)) {
+      f.waitReason = "Venter: bare én ovn smelter om gangen";
+      continue;
+    }
     if (
       g.settings.maxPowerPrice !== null &&
       stats.furnace.fuel === "strøm" &&
@@ -1253,10 +1271,20 @@ function walk(g: GameState, value: number, mean: number, pull: number, sd: numbe
 
 function onDay(g: GameState, stats: PlantStats): void {
   const today = day(g);
+  // Effekttariff for døgnet som er slutt: betales for den høyeste effekten verket trakk
+  if (g.today.peakMW) addCost(g, "nett", g.today.peakMW * PEAK_RATE_PER_MW);
   g.today.cashEnd = g.cash;
   g.history.push(g.today);
   if (g.history.length > HISTORY_MAX) g.history.splice(0, g.history.length - HISTORY_MAX);
   g.today = newDay(today, g.cash);
+
+  // Strømavtalen: fastprisen fornyes til dagens pris når bindingstida er ute
+  if (g.settings.powerDeal === "fast" && today >= g.settings.powerDealUntilDay) {
+    g.settings.powerFixedPrice = fixedPowerOffer(g);
+    g.settings.powerDealUntilDay = today + POWER_BINDING_DAYS;
+    log(g, `Fastprisavtalen for strøm er fornyet for ${POWER_BINDING_DAYS} døgn til ${g.settings.powerFixedPrice.toFixed(2).replace(".", ",")} kr/kWh.`, "info");
+  }
+  if (g.gridCut && g.minute >= g.gridCut.untilMin) g.gridCut = null;
 
   // Faste kostnader
   addCost(g, "lonn", stats.salaryPerDay);
@@ -1366,6 +1394,9 @@ function step(g: GameState, dt: number): void {
   g.minute += dt;
   let stats = computePlantStats(g);
   updateFurnaces(g, stats);
+  // Effekttoppen: hvor mange ovner som smelter samtidig
+  const mw = g.furnaces.filter((f) => f.heat).length * stats.furnaceMW;
+  if (mw > (g.today.peakMW ?? 0)) g.today.peakMW = mw;
   updateCasting(g, stats, dt);
   updateRolling(g, stats, dt);
   processComplaints(g);

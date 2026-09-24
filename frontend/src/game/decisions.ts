@@ -6,7 +6,7 @@
  * stålverk drives.
  */
 import { SCRAP_TYPES, STAGES } from "./data";
-import { acceptContract, addCost, addScrapParti, adjustReputation, fmtKr, fmtT, log, makeCandidate, scrapPrice } from "./engine";
+import { acceptContract, addCost, addIncome, addScrapParti, adjustReputation, fmtKr, fmtT, log, makeCandidate, scrapPrice, unlock } from "./engine";
 import { computePlantStats, day, productPrice } from "./plant";
 import { chance, pick, uniform } from "./random";
 import type { Contract, Decision, GameState } from "./types";
@@ -112,6 +112,25 @@ const MAKERS: Record<string, Maker> = {
 };
 
 const MORE_MAKERS: Record<string, Maker> = {
+  utkobling: (g) => {
+    const stats = computePlantStats(g);
+    if (stats.furnaceMW <= 0 || stats.hours <= 0) return null;
+    const hours = 4;
+    // Tapt produksjon de fire timene, og en godtgjørelse som noen ganger lønner seg og noen ganger ikke
+    const lostT = ((hours * 60) / stats.cycleMin) * stats.sizeT * stats.furnaceCount * 0.9;
+    const pay = Math.round((lostT * productPrice(g, stats.mainProduct, "standard") * uniform(g, 0.15, 0.45)) / 100) * 100;
+    const mw = stats.furnaceMW * stats.furnaceCount;
+    return {
+      id: "utkobling",
+      title: "Nettselskapet ringer",
+      text: `Strømnettet er hardt belastet. Nettselskapet ber deg koble ut ovnene (${mw.toFixed(1).replace(".", ",")} MW) i morgen kl. 07–11 og tilbyr ${fmtKr(pay)} for det.`,
+      options: [
+        { label: `Godta (${fmtKr(pay)})`, hint: `Ingen nye charger i fire timer – omtrent ${fmtT(lostT)} mindre stål.` },
+        { label: "Nei takk", hint: "Har du dårlig tid med leveranser, er det tryggest å si nei." },
+      ],
+      data: { pay, from: (day(g)) * 1440 + 7 * 60, until: day(g) * 1440 + 11 * 60 },
+    };
+  },
   kurs: (g) => {
     const trainees = g.workers.filter((w) => w.role === "ovn" || w.role === "stoper" || w.role === "allround");
     if (g.stage < 1 || trainees.length < 2) return null;
@@ -354,6 +373,13 @@ export function resolveDecision(g: GameState, option: number): void {
       } else {
         log(g, "Det gikk bra denne gangen.", "info");
       }
+      return;
+    case "utkobling":
+      if (!yes) return;
+      g.gridCut = { fromMin: n("from"), untilMin: n("until") };
+      addIncome(g, "annet", n("pay"));
+      unlock(g, "strom");
+      log(g, `Avtalt utkobling i morgen kl. 07–11. Nettselskapet betalte ${fmtKr(n("pay"))}.`, "good");
       return;
     case "tilsyn":
       if (yes) {

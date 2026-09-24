@@ -3,9 +3,9 @@
  */
 import { ADDONS, CASTINGS, FURNACES, GRADES, PRODUCTS, SCRAP_IDS, STAGES, type Addon } from "./data";
 import { addCost, fmtKr, fmtT, log, orderQueue, startReline, maxLoan, newFurnaceUnit, unlock, type PurchaseResult } from "./engine";
-import { castingType, computePlantStats, day, furnaceType, has } from "./plant";
+import { castingType, computePlantStats, day, fixedPowerOffer, furnaceType, has, POWER_BINDING_DAYS } from "./plant";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
-import type { GameState, GradeId, ScrapId } from "./types";
+import type { GameState, GradeId, PowerDeal, ScrapId } from "./types";
 
 export type UpgradeKind = "stage" | "furnace" | "casting" | "addon";
 
@@ -363,4 +363,36 @@ export function repay(g: GameState, amount: number): PurchaseResult {
   g.cash -= a;
   log(g, `Du betalte ned ${fmtKr(a)} på lånet.`, "info");
   return { ok: true, message: `Betalte ned ${fmtKr(a)}.` };
+}
+
+// ------------------------------------------------------------------ //
+// Strøm og skift (B-024)
+// ------------------------------------------------------------------ //
+export const POWER_DEAL_NAMES: Record<PowerDeal, string> = { spot: "Spotpris", fast: "Fastpris", natt: "Nattariff" };
+
+export function setPowerDeal(g: GameState, deal: PowerDeal): PurchaseResult {
+  const s = g.settings;
+  if (deal === s.powerDeal) return { ok: true, message: "" };
+  if (s.powerDeal !== "spot" && day(g) < s.powerDealUntilDay)
+    return fail(`Du er bundet av ${POWER_DEAL_NAMES[s.powerDeal].toLowerCase()} til dag ${s.powerDealUntilDay}.`);
+  s.powerDeal = deal;
+  s.powerDealUntilDay = deal === "spot" ? 0 : day(g) + POWER_BINDING_DAYS;
+  if (deal === "fast") s.powerFixedPrice = fixedPowerOffer(g);
+  log(
+    g,
+    deal === "spot"
+      ? "Ny strømavtale: spotpris. Du betaler børsprisen time for time."
+      : deal === "fast"
+        ? `Ny strømavtale: fastpris ${s.powerFixedPrice.toFixed(2).replace(".", ",")} kr/kWh i ${POWER_BINDING_DAYS} døgn.`
+        : `Ny strømavtale: nattariff i ${POWER_BINDING_DAYS} døgn. Billig strøm 22–06, dyrere på dagen.`,
+    "info",
+  );
+  unlock(g, "strom");
+  return { ok: true, message: `${POWER_DEAL_NAMES[deal]} er avtalt.` };
+}
+
+export const SHIFT_STARTS = [6, 14, 22];
+
+export function setShiftStart(g: GameState, hour: number): void {
+  if (SHIFT_STARTS.includes(hour)) g.settings.shiftStart = hour;
 }
