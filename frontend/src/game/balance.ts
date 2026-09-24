@@ -10,7 +10,7 @@ import { bonusCost, buyUpgrade, courseCost, doResearch, giveBonus, hire, request
 import { resolveDecision } from "./decisions";
 import { researchOptions, scrapUnlocked } from "./research";
 import { CASTINGS, SCRAP_IDS, STAGES } from "./data";
-import { acceptContract, advance, autoBuy, completeManual, newGame, TARGET_C } from "./engine";
+import { acceptAgreement, acceptContract, advance, realisticDailyT, autoBuy, completeManual, newGame, TARGET_C } from "./engine";
 import { EAFSimulation } from "../sim/eaf";
 import { createSim } from "../ui/control/simSetup";
 import { MELT_BAND, SimpleRunner } from "../ui/control/simpleRunner";
@@ -174,6 +174,17 @@ function botHour(g: GameState): void {
     acceptContract(g, offer.id);
     committed += offer.tonnes;
     activeGrades.add(offer.grade);
+  }
+  // Rammeavtaler (B-040): tas når kvaliteten er grei og ukemengden er en liten del av produksjonen
+  for (const a of g.agreements.filter((x) => x.status === "tilbud")) {
+    if (!stats.products.includes(a.product) || !cheapestRecipe(g, a.grade)) continue;
+    if (switching.has(g) && a.product === stats.casting.product) continue;
+    if (stats.products.includes("armering") && a.product !== "armering") continue;
+    if ((a.grade === "lavkarbon" || a.grade === "armering") && stats.furnace.arc && !g.owned.includes("oseovn")) continue;
+    if (activeGrades.size > 0 && !activeGrades.has(a.grade)) continue;
+    if (a.weeklyT > realisticDailyT(g, stats) * 7 * 0.35) continue;
+    acceptAgreement(g, a.id);
+    activeGrades.add(a.grade);
   }
   const grade: GradeId = activeGrades.size ? [...activeGrades][0] : "standard";
   setTargetGrade(g, grade);

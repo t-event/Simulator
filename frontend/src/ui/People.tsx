@@ -10,17 +10,18 @@ import {
   hireForMissing,
   hireTemps,
   sendOnCourse,
-  tempsCost,
 } from "../game/actions";
 import { CREW_ROLES, ROLE_IDS, ROLES, STAGES } from "../game/data";
 import {
   crewCoverage,
   day,
+  daysUntilAllBack,
   isAbsent,
   moraleFactor,
   nightExtra,
   staffing,
   tempsActive,
+  tempsCost,
   type PlantStats,
 } from "../game/plant";
 import type { GameState, RoleId, Worker } from "../game/types";
@@ -106,6 +107,10 @@ function Absence({ g, stats, act }: Props) {
     .sort((a, b) => (a.absentFrom ?? 0) - (b.absentFrom ?? 0));
   const full = staffing(g, true).shifts;
   const temps = tempsActive(g);
+  const backDays = daysUntilAllBack(g);
+  // Går vikarene hjem før alle er tilbake? (B-039)
+  const lastBack = Math.max(0, ...now.map((w) => w.absentUntil ?? 0));
+  const tempsShort = temps && g.tempsUntilMin < lastBack;
   return (
     <Card title="Fravær">
       {now.length === 0 && upcoming.length === 0 && (
@@ -128,7 +133,11 @@ function Absence({ g, stats, act }: Props) {
       )}
       {now.length > 0 &&
         (temps ? (
-          <p className="g-note">Vikarer dekker fraværet til dag {day(g, g.tempsUntilMin - 1)}.</p>
+          <p className={tempsShort ? "g-note g-warn" : "g-note"}>
+            Vikarer dekker fraværet til dag {day(g, g.tempsUntilMin - 1)}.
+            {tempsShort &&
+              ` Noen er borte til dag ${day(g, lastBack - 1)} – når vikarene går hjem, går verket færre skift igjen.`}
+          </p>
         ) : stats.shifts < full ? (
           <p className="g-note g-warn">
             Fraværet koster skift: verket går {stats.shifts} skift i stedet for {full}. Lei inn vikarer, eller vent til
@@ -137,15 +146,24 @@ function Absence({ g, stats, act }: Props) {
         ) : (
           <p className="g-muted">Allroundere dekker plassene til dem som er borte, så verket går som normalt.</p>
         ))}
-      {now.length > 0 && !temps && (
+      {now.length > 0 && (!temps || tempsShort) && (
         <div className="g-row">
-          {[1, 3].map((d) => (
-            <button key={d} onClick={() => act((gg) => hireTemps(gg, d))}>
-              Vikarer i {d} døgn ({fmtKr(tempsCost(g, d))})
-            </button>
-          ))}
+          <button className="g-primary" onClick={() => act((gg) => hireTemps(gg, null))}>
+            Vikarer til alle er tilbake ({backDays} døgn, {fmtKr(tempsCost(g, backDays))})
+          </button>
+          {!temps && backDays > 1 && (
+            <button onClick={() => act((gg) => hireTemps(gg, 1))}>Vikarer i 1 døgn ({fmtKr(tempsCost(g, 1))})</button>
+          )}
         </div>
       )}
+      <label className="g-toggle">
+        <input
+          type="checkbox"
+          checked={g.settings.autoTemps}
+          onChange={(e) => act((gg) => void (gg.settings.autoTemps = e.target.checked))}
+        />
+        <span>Lei inn vikarer av seg selv når fravær ellers ville kostet skift</span>
+      </label>
       {upcoming.length > 0 && (
         <>
           <h3 className="g-subhead">Ferie som kommer</h3>

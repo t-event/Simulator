@@ -87,6 +87,7 @@ frontend/src/
     balance.ts   Automatisk testspiller
   ui/          Spillets skjermer (mobil først) og kontrollrommet
     Overview.tsx Verket med underfanene Oversikt, Anlegg og Økonomi   Recipe.tsx  Resepten på Marked
+    Agreements.tsx Rammeavtaler under Salg
     views.ts     Fanene og når de låses opp   Upgrades.tsx, stations.ts  Utstyr per sted i anlegget
     ResearchPage.tsx  Forskning-fanen (forskning, bank, nytt spill)   Power.tsx  Strøm og skiftplan
     Handbook.tsx Fagboka med quiz og oppdrag

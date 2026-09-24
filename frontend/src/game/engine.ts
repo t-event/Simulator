@@ -36,7 +36,9 @@ import {
   energyPrice,
   fixedPowerOffer,
   furnaceType,
+  furnaceGrade,
   gradeFailures,
+  gradeRecipe,
   has,
   hasGrader,
   hasPlanner,
@@ -45,6 +47,11 @@ import {
   nightExtra,
   PEAK_RATE_PER_MW,
   presentWorkers,
+  daysUntilAllBack,
+  isAbsent,
+  staffing,
+  tempsActive,
+  tempsCost,
   MASON_HOURS,
   masonsAtWork,
   potRebuildPerDay,
@@ -67,6 +74,7 @@ import type {
   FurnaceUnit,
   GameState,
   RepCause,
+  Agreement,
   GradeId,
   IncomeCategory,
   LiquidBatch,
@@ -113,6 +121,7 @@ export function newFurnaceUnit(today = 1): FurnaceUnit {
     lastRelineDay: today,
     relineRequested: false,
     spareProgress: 1,
+    grade: null,
     waitReason: null,
   };
 }
@@ -151,6 +160,8 @@ export function newGame(seed = Date.now()): GameState {
     nextLotId: 1,
     contracts: [],
     nextContractId: 1,
+    agreements: [],
+    nextAgreementId: 1,
     complaints: [],
     workers: [],
     candidates: [],
@@ -173,12 +184,14 @@ export function newGame(seed = Date.now()): GameState {
       onePeak: false,
       shiftStart: SHIFT_START_HOUR,
       pauseOffers: false,
+      autoTemps: false,
       secondsAction: "spot",
       graderStrict: true,
       skipIdleNights: true,
       maxPowerPrice: null,
       autoBuy: false,
       followQueue: true,
+      splitGrades: true,
       plannerSorts: true,
       autoBuyDays: 1.5,
       autoBuyCredit: false,
@@ -407,12 +420,17 @@ interface Mix {
 }
 
 /** Tar skrap fra lageret etter resepten. Mangler en type, fylles det opp med resten. */
-export function takeScrap(g: GameState, sizeT: number, dryRun = false): Mix | null {
+export function takeScrap(
+  g: GameState,
+  sizeT: number,
+  dryRun = false,
+  recipe: Record<ScrapId, number> = g.recipe,
+): Mix | null {
   const grader = hasGrader(g);
-  const recipeIds = SCRAP_IDS.filter((id) => g.recipe[id] > 0);
+  const recipeIds = SCRAP_IDS.filter((id) => recipe[id] > 0);
   // Uten skrapklasser blir blandingen omtrentlig: hver skraptype kan bomme med opptil en fjerdedel (B-029)
   const weights = Object.fromEntries(
-    SCRAP_IDS.map((id) => [id, g.recipe[id] * (grader || dryRun || g.recipe[id] <= 0 ? 1 : uniform(g, 0.75, 1.25))]),
+    SCRAP_IDS.map((id) => [id, recipe[id] * (grader || dryRun || recipe[id] <= 0 ? 1 : uniform(g, 0.75, 1.25))]),
   ) as Record<ScrapId, number>;
   const totalWeight = recipeIds.reduce((a, id) => a + weights[id], 0);
   const amounts = Object.fromEntries(SCRAP_IDS.map((id) => [id, 0])) as Record<ScrapId, number>;
@@ -561,7 +579,8 @@ function tempOffRisk(g: GameState, stats: PlantStats): number {
 function startHeat(g: GameState, index: number, stats: PlantStats): boolean {
   const f = g.furnaces[index];
   const size = stats.sizeT;
-  const mix = takeScrap(g, size);
+  const grade = furnaceGrade(g, index);
+  const mix = takeScrap(g, size, false, gradeRecipe(g, grade));
   if (!mix) return false;
   const furnace = stats.furnace;
   const metallicYield = Math.max(0.6, 1 - mix.dirt - furnace.oxidationLoss);
@@ -572,7 +591,7 @@ function startHeat(g: GameState, index: number, stats: PlantStats): boolean {
     g.pendingManual = {
       furnace: index,
       sizeT: size,
-      grade: g.targetGrade,
+      grade: grade,
       mix: mix.analysis,
       expectedMix: mix.expected,
       energyFactor: mix.energy,
@@ -587,12 +606,12 @@ function startHeat(g: GameState, index: number, stats: PlantStats): boolean {
 
   const dephos = furnace.dephos * uniform(g, 0.85, 1.1);
   const analysis: Analysis = {
-    c: finalCarbon(g, mix.analysis.c, g.targetGrade, stats, false),
+    c: finalCarbon(g, mix.analysis.c, grade, stats, false),
     p: Math.max(0.003, mix.analysis.p * (1 - dephos) * (1 + noise(g, 0.08))),
     tramp: Math.max(0.005, mix.analysis.tramp * (1 + noise(g, 0.06))),
   };
   const expected: Analysis = {
-    c: finalCarbon(g, mix.expected.c, g.targetGrade, stats, true),
+    c: finalCarbon(g, mix.expected.c, grade, stats, true),
     p: mix.expected.p * (1 - furnace.dephos),
     tramp: mix.expected.tramp,
   };
@@ -611,7 +630,7 @@ function startHeat(g: GameState, index: number, stats: PlantStats): boolean {
     endMin: g.minute + duration,
     sizeT: size,
     liquidT: size * metallicYield,
-    grade: g.targetGrade,
+    grade: grade,
     analysis,
     expected,
     tempOff,
@@ -1130,26 +1149,41 @@ export function orderQueue(g: GameState): Contract[] {
  * dekket av det som ligger på lager.
  */
 export function currentOrder(g: GameState): Contract | null {
+  return ordersToMake(g)[0] ?? null;
+}
+
+/** Kontraktene i køen som fortsatt må produseres for, i køens rekkefølge */
+export function ordersToMake(g: GameState): Contract[] {
   const reserved = lotReservations(g);
-  for (const c of orderQueue(g)) {
+  return orderQueue(g).filter((c) => {
     const left = c.tonnes - c.delivered;
     const inStock = g.lots
       .filter((l) => l.product === c.product && !l.second && satisfies(l.known, c.grade))
       .reduce((a, l) => a + Math.min(l.t, reserved.get(l.id) ?? 0), 0);
-    if (left - inStock > 1e-6) return c;
-  }
-  return null;
+    return left - inStock > 1e-6;
+  });
+}
+
+/** Kontrakten en ovn produserer for: ovn 1 den første i køen, de andre kan ta neste kvalitet (B-039) */
+export function furnaceOrder(g: GameState, index: number): Contract | null {
+  const grade = furnaceGrade(g, index);
+  return ordersToMake(g).find((c) => c.grade === grade) ?? null;
 }
 
 /** Ovnen følger ordrekøen: kvaliteten (og resepten for den) til ordren som produseres. */
 function followQueue(g: GameState): void {
   if (!g.settings.followQueue) return;
-  const order = currentOrder(g);
+  const orders = ordersToMake(g);
+  const order = orders[0];
   if (order && order.grade !== g.targetGrade) {
+    g.gradeRecipes[g.targetGrade] = { ...g.recipe };
     g.targetGrade = order.grade;
     const saved = g.gradeRecipes[order.grade];
     if (saved) g.recipe = { ...saved };
   }
+  // Ovn 2 (og 3 …) tar neste kvalitet i køen, hvis det er en annen (B-039)
+  const other = g.settings.splitGrades ? orders.find((c) => c.grade !== g.targetGrade) : undefined;
+  for (let i = 1; i < g.furnaces.length; i++) g.furnaces[i].grade = other?.grade ?? null;
 }
 
 /** Planleggeren sorterer køen etter frist. */
@@ -1231,6 +1265,7 @@ function deliverContracts(g: GameState): void {
       awardPoints(g, 1 + g.stage);
       log(g, `Kontrakten med ${c.customer} er levert. Omdømme +${gain.toFixed(1)}.`, "good");
       if (g.totals.contractsDone === 1) unlock(g, "omdomme");
+      if (c.agreementId) agreementWeekClosed(g, c, true);
     }
   }
   g.lots = g.lots.filter((l) => l.t > 1e-6);
@@ -1359,6 +1394,178 @@ function generateOffers(g: GameState, stats: PlantStats, count?: number): void {
   }
 }
 
+// ------------------------------------------------------------------ //
+// Rammeavtaler (B-040)
+// ------------------------------------------------------------------ //
+/** Rammeavtaler kommer fra stålverket */
+export const AGREEMENT_STAGE = 3;
+/** Så mange aktive rammeavtaler kundene gir deg samtidig, per nivå */
+const MAX_AGREEMENTS = [0, 0, 0, 2, 3];
+/** Uker uten full leveranse før kunden sier opp avtalen */
+export const AGREEMENT_MAX_MISSED = 2;
+
+function makeAgreement(g: GameState, stats: PlantStats): Agreement | null {
+  const eligible = CUSTOMERS.filter(
+    (c) => c.minStage <= g.stage && c.maxStage >= g.stage && c.products.some((p) => stats.products.includes(p)),
+  );
+  if (!eligible.length) return null;
+  const customer = pick(g, eligible);
+  const product = pick(
+    g,
+    customer.products.filter((p) => stats.products.includes(p)),
+  );
+  const grades = customer.grades.filter((id) => GRADES[id].minStage <= g.stage);
+  const grade = pick(g, grades.length ? grades : customer.grades);
+  // En fast del av det verket faktisk lager: en femdel til to femdeler av en ukes produksjon
+  const weekly = Math.min(stats.dailyProductT, realisticDailyT(g, stats)) * 7;
+  const weeklyT = roundTonnes(weekly * uniform(g, 0.2, 0.4));
+  const weeks = randInt(g, 4, 10);
+  const pricePerT = Math.round(productPrice(g, product, grade) * (1 + stats.priceBonus) * uniform(g, 0.97, 1.04));
+  return {
+    id: g.nextAgreementId++,
+    customer: customer.name,
+    product,
+    grade,
+    weeklyT,
+    pricePerT,
+    weeks,
+    weeksSent: 0,
+    weeksDone: 0,
+    weeksMissed: 0,
+    nextDay: 0,
+    bonusKr: Math.round((weeklyT * weeks * pricePerT * 0.05) / 1000) * 1000,
+    bonusRep: Math.round((2 + weeks * 0.4) * 10) / 10,
+    status: "tilbud",
+    offerExpiresMin: g.minute + 2 * MIN_PER_DAY,
+    closedDay: null,
+  };
+}
+
+/** Legger ukens leveranse i ordrekøen som en vanlig kontrakt med sju døgns frist */
+function sendAgreementWeek(g: GameState, a: Agreement): void {
+  const today = day(g);
+  a.weeksSent += 1;
+  a.nextDay = today + 7;
+  const repGain = 0.3;
+  g.contracts.push({
+    id: g.nextContractId++,
+    agreementId: a.id,
+    customer: a.customer,
+    product: a.product,
+    grade: a.grade,
+    tonnes: a.weeklyT,
+    delivered: 0,
+    pricePerT: a.pricePerT,
+    deadlineDay: today + 6,
+    offerExpiresMin: g.minute,
+    repGain,
+    repLoss: 2,
+    penaltyPerT: Math.round(a.pricePerT * 0.5),
+    status: "aktiv",
+    closedDay: null,
+    priority: Math.max(0, ...g.contracts.filter((x) => x.status === "aktiv").map((x) => x.priority)) + 1,
+  });
+  log(
+    g,
+    `Rammeavtalen med ${a.customer}, uke ${a.weeksSent} av ${a.weeks}: ${fmtT(a.weeklyT)} ${GRADES[a.grade].name.toLowerCase()} innen dag ${today + 6}.`,
+    "info",
+  );
+}
+
+/** En ukeleveranse er levert eller gikk ut: tell den, og gi bonus eller si opp avtalen */
+function agreementWeekClosed(g: GameState, c: Contract, ok: boolean): void {
+  const a = g.agreements.find((x) => x.id === c.agreementId);
+  if (!a || a.status !== "aktiv") return;
+  if (ok) a.weeksDone += 1;
+  else a.weeksMissed += 1;
+  if (a.weeksMissed >= AGREEMENT_MAX_MISSED) {
+    a.status = "brutt";
+    a.closedDay = day(g);
+    repLoss(g, a.bonusRep, "sen");
+    log(
+      g,
+      `${a.customer} sa opp rammeavtalen etter ${AGREEMENT_MAX_MISSED} uker uten full leveranse. Omdømme −${a.bonusRep.toFixed(1)}.`,
+      "bad",
+    );
+    return;
+  }
+  if (a.weeksDone + a.weeksMissed < a.weeks) return;
+  a.status = "fullfort";
+  a.closedDay = day(g);
+  if (a.weeksMissed === 0) {
+    addIncome(g, "kontrakt", a.bonusKr);
+    adjustReputation(g, a.bonusRep);
+    awardPoints(g, 2 + g.stage);
+    log(
+      g,
+      `Rammeavtalen med ${a.customer} er fullført, alle uker i tide! Bonus ${fmtKr(a.bonusKr)} og omdømme +${a.bonusRep.toFixed(1)}.`,
+      "good",
+    );
+  } else {
+    log(g, `Rammeavtalen med ${a.customer} er fullført. En uke kom for sent, så det ble ingen bonus.`, "info");
+  }
+}
+
+/**
+ * Lager verket ikke lenger varen i en rammeavtale (ny støping eller valseverk), avsluttes avtalen
+ * uten straff, og ukeleveransen som står i køen strykes (B-040).
+ */
+function endStaleAgreements(g: GameState, stats: PlantStats): void {
+  for (const a of g.agreements) {
+    if (a.status !== "aktiv" || stats.products.includes(a.product)) continue;
+    a.status = "brutt";
+    a.closedDay = day(g);
+    g.contracts = g.contracts.filter((c) => !(c.agreementId === a.id && c.status === "aktiv"));
+    log(
+      g,
+      `Rammeavtalen med ${a.customer} er avsluttet uten straff: verket lager ikke ${PRODUCTS[a.product].name.toLowerCase()} lenger.`,
+      "event",
+    );
+  }
+}
+
+/** Hvert døgn: ukeleveranser, nye tilbud om rammeavtaler og tilbud som går ut */
+function updateAgreements(g: GameState, stats: PlantStats): void {
+  const today = day(g);
+  for (const a of g.agreements) {
+    if (a.status === "tilbud" && a.offerExpiresMin <= g.minute) {
+      a.status = "brutt";
+      a.closedDay = -1;
+      log(g, `Tilbudet om rammeavtale fra ${a.customer} gikk ut.`, "info");
+    }
+    if (a.status === "aktiv" && a.weeksSent < a.weeks && a.nextDay <= today) sendAgreementWeek(g, a);
+  }
+  g.agreements = g.agreements.filter(
+    (a) => a.closedDay !== -1 && (a.status === "tilbud" || a.status === "aktiv" || (a.closedDay ?? 0) >= today - 10),
+  );
+  const max = MAX_AGREEMENTS[g.stage] ?? 0;
+  const active = g.agreements.filter((a) => a.status === "aktiv").length;
+  const open = g.agreements.some((a) => a.status === "tilbud");
+  if (max > 0 && !open && active < max && !g.settings.pauseOffers && chance(g, 0.2)) {
+    const a = makeAgreement(g, stats);
+    if (!a) return;
+    g.agreements.push(a);
+    log(
+      g,
+      `${a.customer} vil ha en rammeavtale: ${fmtT(a.weeklyT)} i uka i ${a.weeks} uker til fast pris. Se Salg.`,
+      "event",
+    );
+  }
+}
+
+export function acceptAgreement(g: GameState, id: number): PurchaseResult {
+  const a = g.agreements.find((x) => x.id === id);
+  if (!a || a.status !== "tilbud") return { ok: false, message: "Tilbudet finnes ikke lenger." };
+  a.status = "aktiv";
+  log(g, `Du signerte en rammeavtale med ${a.customer}: ${fmtT(a.weeklyT)} i uka i ${a.weeks} uker.`, "info");
+  sendAgreementWeek(g, a);
+  return { ok: true, message: "Rammeavtale signert." };
+}
+
+export function declineAgreement(g: GameState, id: number): void {
+  g.agreements = g.agreements.filter((a) => !(a.id === id && a.status === "tilbud"));
+}
+
 export function acceptContract(g: GameState, id: number): PurchaseResult {
   const c = g.contracts.find((x) => x.id === id);
   if (!c || c.status !== "tilbud") return { ok: false, message: "Tilbudet finnes ikke lenger." };
@@ -1464,6 +1671,42 @@ function updatePots(g: GameState, stats: PlantStats, dt: number): void {
  * Fravær (B-031): ferie kommer automatisk med tre døgns varsel, og enkeltpersoner kan bli syke –
  * oftere når trivselen er lav eller verket går nattskift. Ledige allroundere dekker plassene.
  */
+/** Leier inn vikarer som dekker alle som er borte, i et antall døgn (B-031, B-039) */
+export function bookTemps(g: GameState, days: number, auto = false): void {
+  const cost = tempsCost(g, days);
+  addCost(g, "lonn", cost);
+  g.tempsUntilMin = Math.max(g.tempsUntilMin ?? 0, g.minute) + days * MIN_PER_DAY;
+  log(
+    g,
+    `Vikarer er leid inn${auto ? " automatisk" : ""} til dag ${day(g, g.tempsUntilMin - 1)} (${fmtKr(cost)}). De dekker alle som er borte.`,
+    auto ? "event" : "info",
+  );
+}
+
+/**
+ * Vikarer når fravær koster skift: automatisk hvis spilleren har slått det på, ellers et varsel
+ * når vikarene går hjem mens folk fortsatt er borte (B-039).
+ */
+function checkTemps(g: GameState): void {
+  if (tempsActive(g)) return;
+  const absent = g.workers.filter((w) => isAbsent(g, w));
+  if (!absent.length) return;
+  const full = staffing(g, true).shifts;
+  const now = staffing(g).shifts;
+  if (now >= full) return;
+  if (g.settings.autoTemps) {
+    bookTemps(g, daysUntilAllBack(g), true);
+    return;
+  }
+  const until = g.tempsUntilMin ?? 0;
+  if (until > g.minute - 60 && until <= g.minute)
+    log(
+      g,
+      `Vikarene har gått hjem, men ${absent.length === 1 ? absent[0].name : `${absent.length} ansatte`} er fortsatt borte. Verket går ${now} skift i stedet for ${full}. Lei inn nye vikarer under Folk.`,
+      "bad",
+    );
+}
+
 function updateAbsence(g: GameState, stats: PlantStats): void {
   if (!g.workers.length) return;
   const today = day(g);
@@ -1474,6 +1717,8 @@ function updateAbsence(g: GameState, stats: PlantStats): void {
     if (w.absentUntil !== undefined && g.minute >= w.absentUntil) {
       w.absentFrom = w.absentUntil = w.absentReason = undefined;
     }
+    if (w.absentReason === "ferie" && w.absentFrom !== undefined && Math.abs(w.absentFrom - g.minute) < 60)
+      log(g, `${w.name} (${ROLES[w.role].name.toLowerCase()}) har ferie fra i dag til dag ${day(g, w.absentUntil! - 1)}.`, "event");
     if (w.nextVacationDay === undefined) w.nextVacationDay = today + randInt(g, 10, 110);
     const busy = w.absentUntil !== undefined;
     // Ferie: varsles tre døgn før, maks en tidel av de ansatte samtidig
@@ -1489,7 +1734,7 @@ function updateAbsence(g: GameState, stats: PlantStats): void {
       w.absentUntil = until;
       w.absentReason = "ferie";
       w.nextVacationDay = day(g, until) + randInt(g, 100, 140);
-      log(g, `${w.name} (${ROLES[w.role].name.toLowerCase()}) har ferie dag ${day(g, from)}–${day(g, until - 1)}.`, "info");
+      log(g, `${w.name} (${ROLES[w.role].name.toLowerCase()}) får ferie dag ${day(g, from)}–${day(g, until - 1)}.`, "event");
       continue;
     }
     // Sykdom
@@ -1529,6 +1774,7 @@ function onHour(g: GameState, stats: PlantStats): void {
     log(g, `Kassa er tom – du bruker nå kassekreditten (grense ${fmtKr(creditLimit(g, stats))}).`, "bad");
   } else if (g.cash >= 0) g.inCredit = false;
   maybeTip(g, stats);
+  checkTemps(g);
   // Kapitlene forskningen krever, kommer i fagboka når forskningen blir synlig (B-025)
   for (const r of RESEARCH) if (r.reads && r.stage <= g.stage) unlock(g, r.reads);
   checkMissions(g);
@@ -1566,15 +1812,22 @@ export function autoBuy(
   stats: PlantStats,
   opts: { credit: boolean; cap: number | null } = { credit: g.settings.autoBuyCredit, cap: g.settings.autoBuyMaxPerDay },
 ): void {
-  const recipeIds = SCRAP_IDS.filter((id) => g.recipe[id] > 0 && SCRAP_TYPES[id].buyable && scrapUnlocked(g, id));
-  const total = SCRAP_IDS.reduce((a, id) => a + g.recipe[id], 0);
+  // Med flere kvaliteter samtidig kjøpes skrap etter alle ovnenes resepter (B-039)
+  const recipe = Object.fromEntries(SCRAP_IDS.map((id) => [id, 0])) as Record<ScrapId, number>;
+  for (let i = 0; i < g.furnaces.length; i++) {
+    const r = gradeRecipe(g, furnaceGrade(g, i));
+    const sum = SCRAP_IDS.reduce((a, id) => a + r[id], 0) || 1;
+    for (const id of SCRAP_IDS) recipe[id] += (r[id] / sum) * 100;
+  }
+  const recipeIds = SCRAP_IDS.filter((id) => recipe[id] > 0 && SCRAP_TYPES[id].buyable && scrapUnlocked(g, id));
+  const total = SCRAP_IDS.reduce((a, id) => a + recipe[id], 0);
   if (!recipeIds.length || total <= 0) return;
   const need = Math.max(
     stats.sizeT * stats.furnaceCount * 2,
     (stats.dailyProductT / stats.castYield) * 1.1 * g.settings.autoBuyDays,
   );
   for (const id of recipeIds) {
-    const target = (need * g.recipe[id]) / total;
+    const target = (need * recipe[id]) / total;
     const stock = g.scrap[id].t;
     if (stock >= target * 0.6) continue;
     const s = computePlantStats(g);
@@ -1668,6 +1921,7 @@ function onDay(g: GameState, stats: PlantStats): void {
   m.spotSoldToday = {};
 
   // Kontrakter
+  endStaleAgreements(g, stats);
   for (const c of g.contracts) {
     if (c.status === "aktiv" && c.deadlineDay < today) {
       const remaining = c.tonnes - c.delivered;
@@ -1682,8 +1936,10 @@ function onDay(g: GameState, stats: PlantStats): void {
         "bad",
       );
       unlock(g, "omdomme");
+      if (c.agreementId) agreementWeekClosed(g, c, false);
     }
   }
+  updateAgreements(g, stats);
   // Tilbud som gikk ut fjernes; avsluttede kontrakter vises i fem dager
   g.contracts = g.contracts.filter((c) =>
     c.status === "aktiv" ? true : c.status === "tilbud" ? true : (c.closedDay ?? 0) >= today - 5,

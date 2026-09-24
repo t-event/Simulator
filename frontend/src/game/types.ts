@@ -82,6 +82,8 @@ export interface FurnaceUnit {
   relineRequested: boolean;
   /** Lysbueovn: hvor langt murerne har kommet med å mure opp reservepotta, 0–1 (1 = klar) (B-030) */
   spareProgress: number;
+  /** Kvaliteten denne ovnen lager hvis den skal lage en annen enn ovn 1; null = samme (B-039) */
+  grade: GradeId | null;
   /** Hvorfor ovnen står og venter, for visning */
   waitReason: string | null;
 }
@@ -104,6 +106,8 @@ export interface Lot {
 export interface Contract {
   /** Kunden har allerede reklamert og trukket omdømme for denne kontrakten (B-034) */
   complained?: boolean;
+  /** Ukeleveranse i en rammeavtale (B-040) */
+  agreementId?: number;
   id: number;
   customer: string;
   product: ProductId;
@@ -121,6 +125,34 @@ export interface Contract {
   /** Plass i ordrekøen: lavest leveres og produseres først */
   priority: number;
   status: "tilbud" | "aktiv" | "fullfort" | "misligholdt";
+  closedDay: number | null;
+}
+
+/**
+ * Rammeavtale (B-040): kunden bestiller like mye hver uke i flere uker til fast pris.
+ * Hver uke legges en vanlig kontrakt i ordrekøen.
+ */
+export interface Agreement {
+  id: number;
+  customer: string;
+  product: ProductId;
+  grade: GradeId;
+  /** Tonn per uke */
+  weeklyT: number;
+  /** Fast pris per tonn i hele avtalen */
+  pricePerT: number;
+  weeks: number;
+  /** Ukeleveranser lagt i ordrekøen så langt */
+  weeksSent: number;
+  weeksDone: number;
+  weeksMissed: number;
+  /** Dagen neste ukeleveranse legges i ordrekøen */
+  nextDay: number;
+  /** Bonus når alle ukene er levert i tide */
+  bonusKr: number;
+  bonusRep: number;
+  status: "tilbud" | "aktiv" | "fullfort" | "brutt";
+  offerExpiresMin: number;
   closedDay: number | null;
 }
 
@@ -222,6 +254,8 @@ export interface Settings {
   graderStrict: boolean;
   /** Ikke ta imot nye forespørsler (B-034) */
   pauseOffers: boolean;
+  /** Lei inn vikarer av seg selv når fravær ellers ville kostet skift (B-039) */
+  autoTemps: boolean;
   /** Klokketimen skiftene starter (6, 14 eller 22) */
   shiftStart: number;
   /** Start ikke ny charge når strømprisen er over dette (kr/kWh). null = ingen grense */
@@ -239,6 +273,8 @@ export interface Settings {
   manualNext: boolean;
   /** Ovnen kjører kvaliteten til øverste kontrakt i ordrekøen */
   followQueue: boolean;
+  /** Med flere ovner: ovn 2 lager neste kvalitet i ordrekøen når den er en annen enn ovn 1 sin (B-039) */
+  splitGrades: boolean;
   /** Planleggeren sorterer ordrekøen etter frist */
   plannerSorts: boolean;
 }
@@ -304,6 +340,9 @@ export interface GameState {
   nextLotId: number;
   contracts: Contract[];
   nextContractId: number;
+  /** Rammeavtaler: tilbud, aktive og nylig avsluttede (B-040) */
+  agreements: Agreement[];
+  nextAgreementId: number;
   complaints: Complaint[];
   workers: Worker[];
   candidates: Worker[];

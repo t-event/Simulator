@@ -2,8 +2,8 @@
  * Det spilleren kan gjøre: bygge ut, kjøpe utstyr, ansette, låne og styre produksjonen.
  */
 import { ADDONS, CASTINGS, FURNACES, GRADES, PRODUCTS, SCRAP_IDS, STAGES, type Addon } from "./data";
-import { addCost, adjustMorale, fmtKr, fmtT, log, newCandidates, orderQueue, startReline, maxLoan, newFurnaceUnit, unlock, type PurchaseResult } from "./engine";
-import { castingType, computePlantStats, day, fixedPowerOffer, furnaceType, has, isAbsent, POWER_BINDING_DAYS } from "./plant";
+import { addCost, adjustMorale, bookTemps, fmtKr, fmtT, log, newCandidates, orderQueue, startReline, maxLoan, newFurnaceUnit, unlock, type PurchaseResult } from "./engine";
+import { castingType, computePlantStats, day, daysUntilAllBack, gradeRecipe, fixedPowerOffer, furnaceType, has, isAbsent, POWER_BINDING_DAYS } from "./plant";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
 import type { GameState, GradeId, PowerDeal, ScrapId } from "./types";
 
@@ -292,9 +292,15 @@ export function fire(g: GameState, workerId: number): PurchaseResult {
 // ------------------------------------------------------------------ //
 // Produksjon
 // ------------------------------------------------------------------ //
-export function setRecipe(g: GameState, id: ScrapId, weight: number): void {
+/** Endrer resepten for en kvalitet: verkets kvalitet (standard) eller en annen ovn sin (B-039) */
+export function setRecipe(g: GameState, id: ScrapId, weight: number, grade: GradeId = g.targetGrade): void {
   if (weight > 0 && !scrapUnlocked(g, id)) return;
-  g.recipe[id] = Math.max(0, Math.min(100, Math.round(weight)));
+  const value = Math.max(0, Math.min(100, Math.round(weight)));
+  if (grade !== g.targetGrade) {
+    g.gradeRecipes[grade] = { ...gradeRecipe(g, grade), [id]: value };
+    return;
+  }
+  g.recipe[id] = value;
   // Resepten huskes for kvaliteten som kjøres nå
   g.gradeRecipes[g.targetGrade] = { ...g.recipe };
 }
@@ -303,10 +309,11 @@ export function setRecipe(g: GameState, id: ScrapId, weight: number): void {
  * Endrer andelen til én skraptype med ±10 prosentpoeng. De andre typene i resepten krymper eller vokser
  * i samme forhold, så summen alltid er 100 % (B-035).
  */
-export function nudgeRecipe(g: GameState, id: ScrapId, delta: number): void {
+export function nudgeRecipe(g: GameState, id: ScrapId, delta: number, grade: GradeId = g.targetGrade): void {
   if (delta > 0 && !scrapUnlocked(g, id)) return;
-  const total = SCRAP_IDS.reduce((a, x) => a + g.recipe[x], 0) || 1;
-  const shares = Object.fromEntries(SCRAP_IDS.map((x) => [x, (g.recipe[x] / total) * 100])) as Record<ScrapId, number>;
+  const recipe = gradeRecipe(g, grade);
+  const total = SCRAP_IDS.reduce((a, x) => a + recipe[x], 0) || 1;
+  const shares = Object.fromEntries(SCRAP_IDS.map((x) => [x, (recipe[x] / total) * 100])) as Record<ScrapId, number>;
   const others = SCRAP_IDS.filter((x) => x !== id && shares[x] > 0);
   const othersTotal = others.reduce((a, x) => a + shares[x], 0);
   const target = Math.max(0, Math.min(100, Math.round((shares[id] + delta) / 10) * 10));
@@ -328,12 +335,19 @@ export function nudgeRecipe(g: GameState, id: ScrapId, delta: number): void {
     const biggest = [...others].sort((a, b) => next[b] - next[a])[0] ?? id;
     next[biggest] += 100 - sum;
   }
-  applyRecipe(g, next);
+  applyRecipe(g, next, grade);
 }
 
 /** Setter hele resepten på én gang (f.eks. et forslag) */
-export function applyRecipe(g: GameState, recipe: Record<ScrapId, number>): void {
-  for (const id of SCRAP_IDS) setRecipe(g, id, recipe[id] ?? 0);
+export function applyRecipe(g: GameState, recipe: Record<ScrapId, number>, grade: GradeId = g.targetGrade): void {
+  for (const id of SCRAP_IDS) setRecipe(g, id, recipe[id] ?? 0, grade);
+}
+
+/** Kvaliteten en annen ovn enn ovn 1 skal lage; null = samme som ovn 1 (B-039) */
+export function setFurnaceGrade(g: GameState, index: number, grade: GradeId | null): void {
+  const f = g.furnaces[index];
+  if (!f || index === 0 || (grade && !GRADES[grade])) return;
+  f.grade = grade === g.targetGrade ? null : grade;
 }
 
 export function setTargetGrade(g: GameState, grade: GradeId): void {
@@ -478,17 +492,9 @@ export function sendOnCourse(g: GameState, workerId: number): PurchaseResult {
 // ------------------------------------------------------------------ //
 // Vikarer (B-031)
 // ------------------------------------------------------------------ //
-/** Vikarer koster halvannen gang lønna til dem som er borte */
-export function tempsCost(g: GameState, days: number): number {
-  const absent = g.workers.filter((w) => isAbsent(g, w));
-  return Math.round(absent.reduce((a, w) => a + w.salary, 0) * 1.5 * days);
-}
-
-export function hireTemps(g: GameState, days: number): PurchaseResult {
+/** Vikarer i et antall døgn, eller til alle som er borte nå, er tilbake (days = null) */
+export function hireTemps(g: GameState, days: number | null): PurchaseResult {
   if (!g.workers.some((w) => isAbsent(g, w))) return fail("Ingen er borte akkurat nå.");
-  const cost = tempsCost(g, days);
-  addCost(g, "lonn", cost);
-  g.tempsUntilMin = Math.max(g.tempsUntilMin ?? 0, g.minute) + days * 1440;
-  log(g, `Vikarer er leid inn i ${days} døgn (${fmtKr(cost)}). De dekker alle som er borte.`, "info");
+  bookTemps(g, days ?? daysUntilAllBack(g));
   return { ok: true, message: "Vikarene er på plass." };
 }

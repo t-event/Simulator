@@ -5,6 +5,25 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 19 – 2026-09-24: to kvaliteter, fraværsvarsler, rammeavtaler og vikarer
+
+**Brukeren ba om:** To kvaliteter samtidig med to linjer, varsel når noen tar ferie eller blir syk, faste
+kontrakter som varer lenger senere i spillet, og meldte at skiftgangen gikk ned selv med vikarer.
+
+**Gjort:**
+- B-039: egen kvalitet og resept per ovn, bryter «To kvaliteter samtidig» og valg for ovn 2 på Verket,
+  resept-faner, Salg viser hvilken ovn som lager hvilken kontrakt. Vikarer til alle er tilbake, automatisk
+  innleie, varsel når vikarene går hjem. Ferie varsles som hendelse.
+- B-040: rammeavtaler fra stålverket (nytt kort under Salg, `Agreements.tsx`).
+
+**Testet:** tsc, lint, balanse (10 / 24 / 62 / 142, alle OK). I Node: automatisk innleie og varsel når vikarer
+går hjem; to ovner med standard og armering samtidig. Playwright iPhone 13: Verket, Salg (signere
+rammeavtale), Marked (resept-faner) og Folk (fravær), 390 px uten horisontal scrolling, ingen konsollfeil.
+
+**Gjenstår:** Digel-spørsmålet (induksjonsovn i garasjen?) venter på svar fra brukeren.
+
+---
+
 ## Økt 18 – 2026-09-24: «døgn siden omforing» for ny ovn
 
 **Brukeren meldte (skjermbilde):** Ovn 2 var nylig kjøpt, men viste 62 døgn siden omforing.

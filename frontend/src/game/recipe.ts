@@ -157,13 +157,18 @@ export function suggestRecipe(
  * Den verste chargen resepten kan gi når blandingen er omtrentlig (±25 % per skraptype, uten skrapklasser):
  * mer av typene med mest fosfor og kobber/tinn, mindre av de reneste (B-035).
  */
-export function worstCase(g: GameState, grade: GradeId, stats: PlantStats): Analysis {
-  const base = recipeEstimate(g, grade, stats).analysis;
+export function worstCase(
+  g: GameState,
+  grade: GradeId,
+  stats: PlantStats,
+  recipe: Record<ScrapId, number> = g.recipe,
+): Analysis {
+  const base = recipeEstimate(g, grade, stats, recipe).analysis;
   const worst = { ...base };
   for (const key of ["p", "tramp"] as const) {
     const avg = base[key] / (key === "p" ? 1 - stats.dephos || 1 : 1);
     const skewed = Object.fromEntries(
-      SCRAP_IDS.map((id) => [id, g.recipe[id] * (SCRAP_TYPES[id][key] > avg ? 1.25 : 0.75)]),
+      SCRAP_IDS.map((id) => [id, recipe[id] * (SCRAP_TYPES[id][key] > avg ? 1.25 : 0.75)]),
     ) as Record<ScrapId, number>;
     worst[key] = recipeEstimate(g, grade, stats, skewed).analysis[key];
   }
