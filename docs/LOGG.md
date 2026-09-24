@@ -5,6 +5,42 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 6 – 2026-09-24: kontrakter tar lengre tid
+
+**Brukeren ba om:** «Det bør ta lengre tid å gjøre kontrakter. Det går altfor fort nå.»
+
+**Gjort:** Kontrakter settes nå til 1,5–4 døgns produksjon (B-016). Kundenes største ordre er
+hevet. Nytt analyseflagg `npx tsx src/game/balance.ts --kontrakter <frø>` viser snittid per kontrakt
+per nivå.
+
+**Testet:** Før → etter (min på 1×): garasje 0,6 → 5,3, verksted 0,9 → 2,5, støperi 1,1 → 5,0,
+stålverk 3,7 → 5,4. Balansetesten grønn (Verksted dag 13, Støperi 27, Stålverk 77, Storverk 152),
+ingen konkurs.
+
+**Gjenstår:** Hvis hele spillet fortsatt føles for raskt, er neste grep å senke spillklokka
+(`GAME_MIN_PER_REAL_S` i `data.ts`, i dag 1 døgn per minutt).
+
+---
+
+## Økt 5 – 2026-09-24: omdømmet ble vist avrundet opp
+
+**Brukeren meldte (skjermbilde fra mobil):** «Omdømme 5 av 5» med rødt kryss, og knappen
+«Flytt inn i verksted» var grå selv om pengene holdt.
+
+**Årsak:** Omdømmet ble vist med `toFixed(0)`, så 4,6 så ut som 5, mens kravet sjekker den
+eksakte verdien.
+
+**Gjort:** Ny `fmtRep()` i `ui/format.ts` viser én desimal og runder alltid ned. Brukt i toppfeltet,
+i «Neste nivå»-kortet og i målkortet på Verket. Kravlinja forklarer nå hva som mangler («lever
+flere kontrakter i tide»). Kassa vises også rundet ned der den sammenlignes med en pris.
+
+**Testet:** Playwright på iPhone 13 med omdømme 4,6: viser «4,6 av 5», knappen er grå, som den skal.
+Typesjekk og lint rene.
+
+**Lærdom:** Tall som sjekkes mot et krav må aldri vises avrundet opp.
+
+---
+
 ## Økt 4 – 2026-09-24: Game Dev Tycoon-inspirasjon, mobilspill, minne, enkel styring
 
 **Brukeren ba om:** Studere Game Dev Tycoon og hente inspirasjon. Det skal være

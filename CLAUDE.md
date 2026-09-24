@@ -49,6 +49,10 @@ GitHub Pages: https://t-event.github.io/Simulator/
   `src/game/save.ts`, ellers går gamle lagringer tapt.
 - **Git:** Utvikle på en egen gren og push dit. `main` publiseres automatisk,
   så endringer dit går via PR. Aldri force-push til `main`.
+- **PR og merge (brukerens stående beskjed):** Når en endring er ferdig og alle sjekker er grønne
+  lokalt, oppretter Claude selv PR til `main` og merger den, uten å spørre. Deretter sjekkes at
+  publiseringen i Actions («Publiser til GitHub Pages») går grønt. Er den rød, rettes feilen
+  med én gang (se B-017).
 
 ## Kommandoer (fra `frontend/`)
 
@@ -61,6 +65,8 @@ npx tsx src/sim/validate.ts      # prosessmodellen gir forventede nøkkeltall
 npx tsx src/game/balance.ts      # testspilleren: progresjon, ingen konkurs, kontrollrommet
 npx tsx src/game/balance.ts --verbose --finance --seed 3   # feilsøking av balansen
 npx tsx src/game/balance.ts --dump 3 > lagret.json         # lagret spill på nivå 3, for testing
+npx tsx src/game/balance.ts --kontrakter 1                 # hvor lang tid kontraktene tar per nivå
+npx tsx src/game/balance.ts --research 1                   # når testspilleren forsker
 npm run build
 ```
 
@@ -100,4 +106,6 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - Se over `git status` og `git diff --stat` før commit. `git add -A` tok en gang med en hel
   `node_modules`-mappe fordi en ignore-regel var fjernet. `.gitignore` har nå en generell
   `node_modules/`-regel – ikke fjern den.
+- Tall som sammenlignes med et krav (omdømme, penger, fagpoeng) skal vises rundet **ned**
+  (`fmtRep`, `Math.floor`), ellers ser et krav oppfylt ut når det ikke er det.
 - CI (`pages.yml`) kjører bare ved push til `main`, ikke på PR-er. Kjør sjekkene lokalt før PR.

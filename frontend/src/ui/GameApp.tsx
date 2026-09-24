@@ -11,7 +11,7 @@ import { upgradeOptions } from "../game/actions";
 import { buzz } from "./haptics";
 import type { GameState } from "../game/types";
 import { Build } from "./Build";
-import { fmtClock, fmtKr, fmtNum, fmtT } from "./format";
+import { fmtClock, fmtKr, fmtNum, fmtRep, fmtT } from "./format";
 import { Market } from "./Market";
 import { Overview } from "./Overview";
 import { People } from "./People";
@@ -214,10 +214,10 @@ function TopBar({ g, api, onBook }: { g: GameState; api: GameApi; onBook: () => 
       </div>
       <div className="g-top-row g-kpis">
         <span className={g.cash < 0 ? "tone-critical" : ""}>
-          <em>Kasse</em> {fmtKr(g.cash)}
+          <em>Kasse</em> {fmtKr(Math.floor(g.cash))}
         </span>
         <span>
-          <em>Omdømme</em> {g.reputation.toFixed(0)}
+          <em>Omdømme</em> {fmtRep(g.reputation)}
         </span>
         <span>
           <em>{stats.furnace.fuel === "gass" ? "Gass" : "Strøm"}</em> {fmtNum(energyPrice(g), 2)} kr/kWh

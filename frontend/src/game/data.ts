@@ -756,6 +756,7 @@ export interface CustomerType {
   maxStage: number;
   products: ProductId[];
   grades: GradeId[];
+  /** Minste ordre kunden legger inn, og største den kan ta imot (tonn) */
   minT: number;
   maxT: number;
 }
@@ -768,9 +769,9 @@ export const CUSTOMERS: CustomerType[] = [
     products: ["stopegods"],
     grades: ["enkel", "standard"],
     minT: 0.15,
-    maxT: 0.6,
+    maxT: 4,
   },
-  { name: "Gårdbruker", minStage: 0, maxStage: 1, products: ["stopegods"], grades: ["enkel"], minT: 0.1, maxT: 0.5 },
+  { name: "Gårdbruker", minStage: 0, maxStage: 1, products: ["stopegods"], grades: ["enkel"], minT: 0.1, maxT: 3 },
   {
     name: "Båtforeningen",
     minStage: 0,
@@ -778,7 +779,7 @@ export const CUSTOMERS: CustomerType[] = [
     products: ["stopegods"],
     grades: ["standard"],
     minT: 0.1,
-    maxT: 0.4,
+    maxT: 3,
   },
   {
     name: "Hagemøbelsnekker",
@@ -787,7 +788,7 @@ export const CUSTOMERS: CustomerType[] = [
     products: ["stopegods"],
     grades: ["enkel", "standard"],
     minT: 0.2,
-    maxT: 1,
+    maxT: 5,
   },
   {
     name: "Maskinverksted",
@@ -796,7 +797,7 @@ export const CUSTOMERS: CustomerType[] = [
     products: ["stopegods"],
     grades: ["standard", "hoykarbon"],
     minT: 0.5,
-    maxT: 4,
+    maxT: 60,
   },
   {
     name: "Kommunens driftsavdeling",
@@ -805,7 +806,7 @@ export const CUSTOMERS: CustomerType[] = [
     products: ["stopegods"],
     grades: ["enkel", "standard"],
     minT: 1,
-    maxT: 6,
+    maxT: 60,
   },
   {
     name: "Pumpefabrikk",
@@ -814,7 +815,7 @@ export const CUSTOMERS: CustomerType[] = [
     products: ["stopegods"],
     grades: ["standard", "premium"],
     minT: 1,
-    maxT: 8,
+    maxT: 80,
   },
   {
     name: "Smedbedrift",
@@ -823,7 +824,7 @@ export const CUSTOMERS: CustomerType[] = [
     products: ["blokk"],
     grades: ["standard", "hoykarbon"],
     minT: 15,
-    maxT: 80,
+    maxT: 400,
   },
   {
     name: "Verft",
@@ -832,7 +833,7 @@ export const CUSTOMERS: CustomerType[] = [
     products: ["blokk", "emne"],
     grades: ["standard", "premium"],
     minT: 30,
-    maxT: 200,
+    maxT: 1500,
   },
   {
     name: "Valseverk i Sverige",
@@ -841,7 +842,7 @@ export const CUSTOMERS: CustomerType[] = [
     products: ["blokk", "emne"],
     grades: ["standard", "armering", "lavkarbon"],
     minT: 50,
-    maxT: 400,
+    maxT: 2000,
   },
   {
     name: "Byggevarekjede",
@@ -850,7 +851,7 @@ export const CUSTOMERS: CustomerType[] = [
     products: ["armering"],
     grades: ["armering"],
     minT: 200,
-    maxT: 1500,
+    maxT: 4000,
   },
   {
     name: "Armeringsgrossist",
@@ -859,10 +860,10 @@ export const CUSTOMERS: CustomerType[] = [
     products: ["armering", "emne"],
     grades: ["armering"],
     minT: 300,
-    maxT: 2500,
+    maxT: 5000,
   },
-  { name: "Trådtrekkeri", minStage: 3, maxStage: 4, products: ["emne"], grades: ["lavkarbon"], minT: 200, maxT: 1500 },
-  { name: "Fjærfabrikk", minStage: 3, maxStage: 4, products: ["emne"], grades: ["hoykarbon"], minT: 100, maxT: 800 },
+  { name: "Trådtrekkeri", minStage: 3, maxStage: 4, products: ["emne"], grades: ["lavkarbon"], minT: 200, maxT: 3000 },
+  { name: "Fjærfabrikk", minStage: 3, maxStage: 4, products: ["emne"], grades: ["hoykarbon"], minT: 100, maxT: 2000 },
   {
     name: "Offshoreleverandør",
     minStage: 3,
@@ -870,7 +871,7 @@ export const CUSTOMERS: CustomerType[] = [
     products: ["emne", "blokk"],
     grades: ["premium"],
     minT: 150,
-    maxT: 1200,
+    maxT: 3000,
   },
   {
     name: "Eksportkunde",
@@ -879,7 +880,7 @@ export const CUSTOMERS: CustomerType[] = [
     products: ["emne", "armering"],
     grades: ["standard", "armering", "lavkarbon", "premium"],
     minT: 1000,
-    maxT: 8000,
+    maxT: 15000,
   },
   {
     name: "Bilindustrien",
@@ -888,7 +889,7 @@ export const CUSTOMERS: CustomerType[] = [
     products: ["emne"],
     grades: ["lavkarbon", "premium"],
     minT: 800,
-    maxT: 5000,
+    maxT: 10000,
   },
 ];
 

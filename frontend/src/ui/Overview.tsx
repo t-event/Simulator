@@ -6,7 +6,7 @@ import { castingType, rollingActive, type PlantStats } from "../game/plant";
 import type { GameState, GradeId, RoleId } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { AnalysisLine, Bar, Card, GradeChips, Stat } from "./common";
-import { fmtClock, fmtKr, fmtPct, fmtT } from "./format";
+import { fmtClock, fmtKr, fmtPct, fmtRep, fmtT } from "./format";
 import { PlantScene } from "./PlantScene";
 import { SceneBubbles } from "./SceneBubbles";
 import type { View } from "./views";
@@ -267,7 +267,7 @@ export function Overview({ g, stats, act, go }: Props) {
               <span>Omdømme</span>
               <Bar value={g.reputation / next.reputation} tone="ok" label="Omdømme" />
               <span>
-                {g.reputation.toFixed(0)} / {next.reputation}
+                {fmtRep(g.reputation)} / {next.reputation}
               </span>
             </div>
           </Card>

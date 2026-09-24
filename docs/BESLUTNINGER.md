@@ -52,7 +52,7 @@ Beslutning: `GameState` er ren JSON. Motoren endrer tilstanden på stedet. Lagre
 Begrunnelse: Enkel lagring, deterministisk testspiller, ingen server.
 
 ## B-006 Balansen styres av en automatisk testspiller i CI (tidligere økt)
-Status: gjelder
+Status: gjelder (målet for Verksted endret i B-016)
 Beslutning: `src/game/balance.ts` spiller seks spill. Medianen for når hvert nivå nås skal
 ligge i målvinduet, ingen får gå konkurs, og en charge fra kontrollrommet skal komme riktig
 tilbake. Mål: Verksted 4–14, Støperi 20–50, Stålverk 50–115, Storverk 100–185 dager.
@@ -126,3 +126,24 @@ følger rådene på skjermen (krav: minst 4 stjerner, under 3 minutter) og som e
 for å kunne testes slik.
 Begrunnelse: Kravet om at en uten kunnskap skal klare å kjøre manuelt skal ikke brytes i stillhet.
 Målt: nybegynner 4–5★ på ca. 105 s og 386 kWh/t; slurvete 1★ og ca. 418 kWh/t.
+
+## B-016 Kontrakter er små prosjekter på 1,5–4 døgns produksjon (2026-09-24)
+Status: gjelder
+Bakgrunn: Brukeren: «Det bør ta lengre tid å gjøre kontrakter. Det går altfor fort nå.»
+Målt: en kontrakt tok 0,6 min i garasjen og ca. 1 min i verkstedet og støperiet (1 døgn = 1 min på 1×).
+Beslutning: Kontraktstørrelsen settes ut fra verkets kapasitet: 1,5–4 døgns produksjon
+(`CONTRACT_DAYS` i `engine.ts`), begrenset av kundens minste og største ordre. Kundenes største
+ordre er hevet så de ikke kutter kontraktene. Fristene følger med som før.
+Resultat: garasje ca. 5 min, verksted 2,5 min, støperi og stålverk ca. 5 min per kontrakt.
+Testspilleren leverer ca. 80 kontrakter på 150 døgn i stedet for 240. Målet for Verksted er
+utvidet fra dag 4–14 til 5–18, fordi garasjefasen nå bevisst tar lengre tid (median dag 13).
+Spillklokka (1 døgn = 1 minutt) er ikke endret.
+
+## B-017 Claude oppretter og merger PR selv (2026-09-24)
+Status: gjelder
+Bakgrunn: Brukeren: «Opprett PR og merge hver gang selv.»
+Beslutning: Når en endring er ferdig, sjekket lokalt (typesjekk, lint, `validate.ts`,
+`balance.ts`, bygg, og nettlesertest der grensesnittet er endret) og pushet til utviklingsgrenen,
+oppretter Claude PR til `main` og merger den med vanlig merge-commit, uten å spørre først.
+Etterpå sjekkes Actions-kjøringen for publisering; feiler den, rettes det straks.
+Begrunnelse: Brukeren tester spillet på mobilen via GitHub Pages og vil se endringene uten ekstra runder.
