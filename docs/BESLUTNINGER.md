@@ -138,3 +138,12 @@ Resultat: garasje ca. 5 min, verksted 2,5 min, støperi og stålverk ca. 5 min p
 Testspilleren leverer ca. 80 kontrakter på 150 døgn i stedet for 240. Målet for Verksted er
 utvidet fra dag 4–14 til 5–18, fordi garasjefasen nå bevisst tar lengre tid (median dag 13).
 Spillklokka (1 døgn = 1 minutt) er ikke endret.
+
+## B-017 Claude oppretter og merger PR selv (2026-09-24)
+Status: gjelder
+Bakgrunn: Brukeren: «Opprett PR og merge hver gang selv.»
+Beslutning: Når en endring er ferdig, sjekket lokalt (typesjekk, lint, `validate.ts`,
+`balance.ts`, bygg, og nettlesertest der grensesnittet er endret) og pushet til utviklingsgrenen,
+oppretter Claude PR til `main` og merger den med vanlig merge-commit, uten å spørre først.
+Etterpå sjekkes Actions-kjøringen for publisering; feiler den, rettes det straks.
+Begrunnelse: Brukeren tester spillet på mobilen via GitHub Pages og vil se endringene uten ekstra runder.
