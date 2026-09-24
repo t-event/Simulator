@@ -53,6 +53,11 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
   }
   if (g.castWait === "Ferdigvarelageret er fullt")
     out.push({ text: "Ferdigvarelageret er fullt. Selg partier på spot under Salg.", view: "salg" });
+  if (stats.furnace.arc && g.furnaces.some((f) => f.spareProgress < 1) && !g.workers.some((w) => w.role === "murer"))
+    out.push({
+      text: "Reservepotta til lysbueovnen blir ikke murt opp. Ansett murere, ellers må foringen mures om inne i ovnen.",
+      view: "folk",
+    });
   if (g.furnaces.some((f) => f.wear > 0.8 && !f.relineRequested))
     out.push({ text: "Foringen er nesten slitt gjennom. Bytt den under Vedlikehold før den brenner gjennom." });
   const est = recipeEstimate(g, g.targetGrade, stats);

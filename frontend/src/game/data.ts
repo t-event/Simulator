@@ -750,6 +750,14 @@ export const ROLES: Record<RoleId, Role> = {
     description:
       "Kontrollerer skrapet som kommer inn og sørger for at hver charge får den blandingen resepten sier. Stopper dårlige partier ved porten.",
   },
+  murer: {
+    id: "murer",
+    name: "Murer",
+    plural: "Murere",
+    salary: 1900,
+    description:
+      "Murer opp den ene potta til lysbueovnen med ny ildfast stein mens den andre er i bruk. To murere klarer en pott på ca. fire døgn.",
+  },
   salg: {
     id: "salg",
     name: "Selger",

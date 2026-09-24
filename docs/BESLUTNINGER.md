@@ -368,3 +368,21 @@ Beslutning:
   (1 av 2 gir halvparten, 0 gir ingenting). Forklaringene vises etter at svarene er levert, og resultatet
   lagres (`quizScores`). Kapitler med quiz man allerede har bestått, regnes som 2 av 2.
 - Balanse: 12 / 36 / 74 / 146.
+
+## B-030 To potter per lysbueovn, og murere som murer opp reservepotta (2026-09-24)
+Status: gjelder
+Brukeren: «Vi trenger to potter per EAF. Man skal kunne ansette murere som bygger opp den ene potta mens
+den andre er i bruk. Dette skal ta ca. fire dager.»
+Beslutning:
+- Hver lysbueovn har en reservepott (`spareProgress` på ovnen, 0–1). Står den klar når foringen skal
+  byttes, blir det et pottebytte: stans på 20 % av omforingstida (minst 4 timer, f.eks. 6 t for 30 t-ovnen),
+  og den slitte potta går til murerne. Ildfast stein betales ved byttet (samme pris som en omforing).
+- Er reservepotta ikke klar, mures foringen om inne i ovnen som før (full stans), og loggen sier hvorfor.
+- Ny rolle **Murer** (fra stålverket, 1 900 kr/døgn, ikke på skift). Oppmuring tar 4 døgn med 2 murere per
+  pott, 8 døgn med én. Murerne deles likt mellom pottene som trenger det. Uten murere blir potta ikke murt opp.
+- Vedlikeholdskortet viser reservepotta (klar, hvor langt murerne har kommet og døgn igjen, eller «venter på
+  murere»), og knappen blir «Bytt pott nå (6 timer)». Verket varsler hvis reservepotta ikke blir murt opp.
+  Fagboka (Ildfast foring) forklarer to potter.
+- Gamle lagringer får en ferdig reservepott. Testspilleren ansetter to murere per lysbueovn.
+- Test i Node (to lysbueovner, 40 døgn): uten murere 74 ovnstimer planlagt stans og 3 omforinger i ovnen;
+  med to murere 18 ovnstimer og bare pottebytter. Balanse: 12 / 36 / 74 / 144.

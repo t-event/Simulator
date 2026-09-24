@@ -18,7 +18,8 @@ export type RoleId =
   | "salg"
   | "valse"
   | "planlegger"
-  | "klasser";
+  | "klasser"
+  | "murer";
 export type Crew = Partial<Record<RoleId, number>>;
 
 /** Analyse av stål: karbon, fosfor og sporelementer (Cu+Sn+Ni+Cr+Mo), alle i vekt-%. */
@@ -79,6 +80,8 @@ export interface FurnaceUnit {
   lastRelineDay: number;
   /** Spilleren har bedt om ny foring; skjer så snart ovnen er tom */
   relineRequested: boolean;
+  /** Lysbueovn: hvor langt murerne har kommet med å mure opp reservepotta, 0–1 (1 = klar) (B-030) */
+  spareProgress: number;
   /** Hvorfor ovnen står og venter, for visning */
   waitReason: string | null;
 }

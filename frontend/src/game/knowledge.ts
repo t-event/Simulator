@@ -80,6 +80,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
     paragraphs: [
       "Ovnen er foret med ildfast stein eller masse som slites litt for hver charge – mest når stålet er for varmt eller slaggen er feil.",
       "Foringen må byttes før den er slitt gjennom. Går flytende stål gjennom foringen, er det en alvorlig hendelse: ovnen står lenge, og reparasjonen koster mange ganger en planlagt omforing.",
+      "En lysbueovn har gjerne to potter – den nedre delen av ovnen med foringen. Mens den ene er i bruk, river murerne ut den slitte steinen i den andre og murer opp ny. Når foringen er slitt, løftes potta ut og den ferdige settes inn. Det tar noen timer i stedet for flere døgn.",
     ],
   },
   {
