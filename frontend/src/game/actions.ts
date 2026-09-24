@@ -1,0 +1,333 @@
+/**
+ * Det spilleren kan gjøre: bygge ut, kjøpe utstyr, ansette, låne og styre produksjonen.
+ */
+import { ADDONS, CASTINGS, FURNACES, GRADES, PRODUCTS, SCRAP_IDS, STAGES, type Addon } from "./data";
+import { addCost, fmtKr, fmtT, log, maxLoan, newFurnaceUnit, unlock, type PurchaseResult } from "./engine";
+import { castingType, computePlantStats, day, furnaceType, has } from "./plant";
+import { hasResearch, missingResearchFor, RESEARCH, researchOptions } from "./research";
+import type { GameState, GradeId, ScrapId } from "./types";
+
+export type UpgradeKind = "stage" | "furnace" | "casting" | "addon";
+
+export interface UpgradeOption {
+  id: string;
+  kind: UpgradeKind;
+  name: string;
+  description: string;
+  price: number;
+  stage: number;
+  owned: boolean;
+  /** Kan kjøpes nå */
+  available: boolean;
+  /** Hvorfor det ikke kan kjøpes, eller hva som mangler */
+  reason: string | null;
+  /** Ikke synlig ennå (for høyt nivå); vises som et hint om hva som kommer */
+  locked: boolean;
+  /** Konsekvens spilleren bør vite om før kjøpet */
+  warning?: string;
+}
+
+const fail = (message: string): PurchaseResult => ({ ok: false, message });
+
+function addonPrice(g: GameState, addon: Addon): number {
+  if (addon.id === "ovn2") return Math.max(100_000, Math.round(furnaceType(g).price * 0.7));
+  return addon.price;
+}
+
+function addonBlocker(g: GameState, addon: Addon): string | null {
+  if (addon.needsArc && !furnaceType(g).arc) return "Krever lysbueovn";
+  if (addon.needsContinuous && !castingType(g).continuous) return "Krever strengstøping";
+  for (const req of addon.requires ?? []) if (!has(g, req)) return `Krever ${nameOf(req)}`;
+  return null;
+}
+
+function nameOf(id: string): string {
+  return (
+    ADDONS.find((a) => a.id === id)?.name ??
+    FURNACES.find((f) => f.id === id)?.name ??
+    CASTINGS.find((c) => c.id === id)?.name ??
+    id
+  ).toLowerCase();
+}
+
+function researchBlocker(g: GameState, id: string): string | null {
+  const r = missingResearchFor(g, id);
+  return r ? `Forsk fram: ${r.name}` : null;
+}
+
+export function upgradeOptions(g: GameState): UpgradeOption[] {
+  const out: UpgradeOption[] = [];
+  const next = STAGES[g.stage + 1];
+  if (next) {
+    let reason: string | null = null;
+    if (g.reputation < next.reputation) reason = `Krever omdømme ${next.reputation}`;
+    else if (g.cash < next.price) reason = "For lite penger";
+    out.push({
+      id: `stage${next.id}`,
+      kind: "stage",
+      name: next.name,
+      description: next.description,
+      price: next.price,
+      stage: next.id,
+      owned: false,
+      available: reason === null,
+      reason,
+      locked: false,
+    });
+  }
+  const currentFurnace = furnaceType(g);
+  for (const f of FURNACES) {
+    if (f.id === "digel") continue;
+    const owned = f.id === currentFurnace.id;
+    const outdated =
+      f.stage < currentFurnace.stage || (f.stage === currentFurnace.stage && !owned && f.sizeT < currentFurnace.sizeT);
+    if (outdated && !owned) continue;
+    const price = f.price * g.furnaceCount;
+    let reason: string | null = researchBlocker(g, f.id);
+    for (const req of f.requires ?? []) if (!reason && !has(g, req)) reason = `Krever ${nameOf(req)}`;
+    if (!reason && g.cash < price) reason = "For lite penger";
+    out.push({
+      id: f.id,
+      kind: "furnace",
+      name: g.furnaceCount > 1 ? `${f.name} (×${g.furnaceCount})` : f.name,
+      description: f.description,
+      price,
+      stage: f.stage,
+      owned,
+      available: !owned && f.stage <= g.stage && reason === null,
+      reason: owned ? null : reason,
+      locked: f.stage > g.stage,
+    });
+  }
+  const currentCasting = castingType(g);
+  for (const c of CASTINGS) {
+    if (c.id === "sandformer") continue;
+    const owned = c.id === currentCasting.id;
+    if (c.stage < currentCasting.stage && !owned) continue;
+    const reason = researchBlocker(g, c.id) ?? (g.cash < c.price ? "For lite penger" : null);
+    let warning: string | undefined;
+    if (!owned && c.product !== currentCasting.product) {
+      const stuck = g.contracts
+        .filter((x) => x.status === "aktiv" && x.product === currentCasting.product)
+        .reduce((a, x) => a + x.tonnes - x.delivered, 0);
+      warning =
+        `Du går over fra ${PRODUCTS[currentCasting.product].name.toLowerCase()} til ${PRODUCTS[c.product].name.toLowerCase()}.` +
+        (stuck > 0 ? ` ${fmtT(stuck)} på aktive kontrakter kan da bare leveres fra lageret.` : "") +
+        " Produksjonen øker kraftig – ha penger til skrap og kunder som tar imot.";
+    }
+    out.push({
+      id: c.id,
+      kind: "casting",
+      warning,
+      name: c.name,
+      description: c.description,
+      price: c.price,
+      stage: c.stage,
+      owned,
+      available: !owned && c.stage <= g.stage && reason === null,
+      reason: owned ? null : reason,
+      locked: c.stage > g.stage,
+    });
+  }
+  for (const a of ADDONS) {
+    const owned = has(g, a.id);
+    const price = addonPrice(g, a);
+    let reason = researchBlocker(g, a.id) ?? addonBlocker(g, a);
+    if (!reason && g.cash < price) reason = "For lite penger";
+    out.push({
+      id: a.id,
+      kind: "addon",
+      name: a.name,
+      description: a.description,
+      price,
+      stage: a.stage,
+      owned,
+      available: !owned && a.stage <= g.stage && reason === null,
+      reason: owned ? null : reason,
+      locked: a.stage > g.stage,
+    });
+  }
+  return out;
+}
+
+export function buyUpgrade(g: GameState, id: string): PurchaseResult {
+  const option = upgradeOptions(g).find((o) => o.id === id);
+  if (!option) return fail("Ukjent oppgradering.");
+  if (option.owned) return fail("Du har den allerede.");
+  if (option.locked) return fail(`Krever ${STAGES[option.stage].name.toLowerCase()}.`);
+  if (!option.available) return fail(option.reason ?? "Kan ikke kjøpes nå.");
+  addCost(g, "investering", option.price);
+
+  switch (option.kind) {
+    case "stage": {
+      g.stage = option.stage;
+      g.celebrate = g.stage;
+      log(g, `Du har flyttet inn i ${STAGES[g.stage].name.toLowerCase()}!`, "good");
+      if (g.stage === 1) unlock(g, "folk");
+      if (g.stage === 2)
+        log(g, "Fra nå av er du daglig leder og står ikke lenger i produksjonen selv. Sørg for å ha nok folk.", "info");
+      if (g.stage === 3) unlock(g, "strom");
+      break;
+    }
+    case "furnace": {
+      g.furnaceType = id;
+      for (const f of g.furnaces) {
+        f.wear = 0;
+        f.heatsOnLining = 0;
+      }
+      const type = furnaceType(g);
+      if (type.arc) {
+        unlock(g, "lysbue");
+        unlock(g, "fosfor");
+        unlock(g, "karbon");
+      } else {
+        unlock(g, "induksjon");
+        unlock(g, "karbon");
+      }
+      log(g, `${type.name} er installert.`, "good");
+      break;
+    }
+    case "casting": {
+      g.castingType = id;
+      const type = castingType(g);
+      if (type.continuous) unlock(g, "streng");
+      else unlock(g, "stoping");
+      log(g, `${type.name} er satt i drift.`, "good");
+      break;
+    }
+    case "addon": {
+      g.owned.push(id);
+      if (id === "ovn2") {
+        g.furnaceCount = 2;
+        g.furnaces.push(newFurnaceUnit());
+      }
+      if (id === "xrf" || id === "oes") unlock(g, "analyse");
+      if (id === "portal") unlock(g, "radioaktivitet");
+      if (id === "oseovn") unlock(g, "oseovn");
+      if (id === "valseverk") unlock(g, "valsing");
+      log(g, `${option.name} er kjøpt.`, "good");
+      break;
+    }
+  }
+  return { ok: true, message: `${option.name} kjøpt for ${fmtKr(option.price)}.` };
+}
+
+// ------------------------------------------------------------------ //
+// Forskning
+// ------------------------------------------------------------------ //
+export function doResearch(g: GameState, id: string): PurchaseResult {
+  const option = researchOptions(g).find((r) => r.id === id);
+  if (!option) return fail("Ukjent forskning.");
+  if (option.done) return fail("Det er allerede forsket fram.");
+  if (!option.available) return fail(option.reason ?? "Kan ikke forskes på nå.");
+  g.researchPoints -= option.cost;
+  g.researched.push(id);
+  if (option.knowledge) unlock(g, option.knowledge);
+  log(g, `Forskning ferdig: ${option.name}. ${option.effect}.`, "good");
+  return { ok: true, message: `${option.name} er forsket fram.` };
+}
+
+/** Markerer forskning som gjort for utstyr spilleren allerede har (gamle lagringer). */
+export function grantResearchForOwned(g: GameState): void {
+  const owned = new Set([g.furnaceType, g.castingType, ...g.owned]);
+  for (const r of RESEARCH) {
+    if (hasResearch(g, r.id)) continue;
+    if (r.unlocks?.some((id) => owned.has(id))) g.researched.push(r.id);
+  }
+}
+
+// ------------------------------------------------------------------ //
+// Folk
+// ------------------------------------------------------------------ //
+export function hire(g: GameState, candidateId: number): PurchaseResult {
+  const c = g.candidates.find((x) => x.id === candidateId);
+  if (!c) return fail("Søkeren har takket ja til en annen jobb.");
+  const cap = STAGES[g.stage].staffCap;
+  if (g.workers.length >= cap) {
+    return fail(
+      cap === 0
+        ? "Det er ikke plass til ansatte i garasjen."
+        : `Plass til ${cap} ansatte. Bygg ut for å ansette flere.`,
+    );
+  }
+  g.candidates = g.candidates.filter((x) => x.id !== candidateId);
+  g.workers.push({ ...c, hiredDay: day(g) });
+  log(g, `${c.name} er ansatt.`, "info");
+  return { ok: true, message: `${c.name} er ansatt.` };
+}
+
+/** Ansetter søkere til plassene som mangler for neste skift. Allroundere fyller hull. */
+export function hireForMissing(g: GameState): PurchaseResult {
+  const cap = STAGES[g.stage].staffCap;
+  let hired = 0;
+  for (let guard = 0; guard < 200 && g.workers.length < cap; guard++) {
+    const missing = computePlantStats(g).missing;
+    const roles = Object.entries(missing)
+      .filter(([, n]) => (n ?? 0) > 0)
+      .map(([r]) => r);
+    if (!roles.length) break;
+    const cand = g.candidates.find((c) => roles.includes(c.role)) ?? g.candidates.find((c) => c.role === "allround");
+    if (!cand) break;
+    if (!hire(g, cand.id).ok) break;
+    hired += 1;
+  }
+  if (hired === 0) return fail("Ingen passende søkere akkurat nå. Nye kommer hver morgen.");
+  return { ok: true, message: `Ansatte ${hired} ${hired === 1 ? "person" : "personer"}.` };
+}
+
+export function fire(g: GameState, workerId: number): PurchaseResult {
+  const w = g.workers.find((x) => x.id === workerId);
+  if (!w) return fail("Finner ikke den ansatte.");
+  const severance = w.salary * 5;
+  addCost(g, "lonn", severance);
+  g.workers = g.workers.filter((x) => x.id !== workerId);
+  log(g, `${w.name} har sluttet (sluttpakke ${fmtKr(severance)}).`, "info");
+  return { ok: true, message: `${w.name} har sluttet.` };
+}
+
+// ------------------------------------------------------------------ //
+// Produksjon
+// ------------------------------------------------------------------ //
+export function setRecipe(g: GameState, id: ScrapId, weight: number): void {
+  g.recipe[id] = Math.max(0, Math.min(100, Math.round(weight)));
+}
+
+export function setTargetGrade(g: GameState, grade: GradeId): void {
+  if (GRADES[grade]) g.targetGrade = grade;
+}
+
+export function recipeShares(g: GameState): Record<ScrapId, number> {
+  const total = SCRAP_IDS.reduce((a, id) => a + g.recipe[id], 0);
+  return Object.fromEntries(SCRAP_IDS.map((id) => [id, total > 0 ? g.recipe[id] / total : 0])) as Record<
+    ScrapId,
+    number
+  >;
+}
+
+export function requestManual(g: GameState, on: boolean): PurchaseResult {
+  if (!furnaceType(g).arc) return fail("Du kan bare ta styringen over en lysbueovn.");
+  g.settings.manualNext = on;
+  return { ok: true, message: on ? "Du tar styringen på neste charge." : "Automatikken kjører videre." };
+}
+
+// ------------------------------------------------------------------ //
+// Bank
+// ------------------------------------------------------------------ //
+export function borrow(g: GameState, amount: number): PurchaseResult {
+  const room = maxLoan(g) - g.loan;
+  const a = Math.min(amount, room);
+  if (a <= 0) return fail("Banken vil ikke låne deg mer nå.");
+  g.loan += a;
+  g.cash += a;
+  log(g, `Du tok opp lån på ${fmtKr(a)}.`, "info");
+  return { ok: true, message: `Lånte ${fmtKr(a)}.` };
+}
+
+export function repay(g: GameState, amount: number): PurchaseResult {
+  const a = Math.min(amount, g.loan, Math.max(0, g.cash));
+  if (a <= 0) return fail("Ingenting å betale ned.");
+  g.loan -= a;
+  g.cash -= a;
+  log(g, `Du betalte ned ${fmtKr(a)} på lånet.`, "info");
+  return { ok: true, message: `Betalte ned ${fmtKr(a)}.` };
+}

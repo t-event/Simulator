@@ -126,6 +126,5 @@ export function serializeState(sim: EAFSimulation): FurnaceState {
         ack: a.ack,
         raised_at_s: round(a.raisedAtS, 1),
       })),
-    scenario: s.scenario,
   };
 }

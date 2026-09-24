@@ -1,0 +1,967 @@
+/**
+ * Datatabeller for spillet: skrap, kvaliteter, produkter, utstyr, roller og kunder.
+ *
+ * Tallene er oppfunnet for spillet. De er satt slik at retningen og
+ * størrelsesordenen stemmer med vanlig stålverksdrift (energi per tonn,
+ * utbytte, hvilke elementer som kan fjernes hvor), men de beskriver ikke noe
+ * bestemt anlegg.
+ */
+import type { Crew, GradeId, ProductId, RoleId, ScrapId } from "./types";
+
+// ------------------------------------------------------------------ //
+// Tid
+// ------------------------------------------------------------------ //
+export const MIN_PER_DAY = 24 * 60;
+/** Spillminutter per sekund ved 1x: ett døgn tar ett minutt */
+export const GAME_MIN_PER_REAL_S = 24;
+export const SHIFT_START_HOUR = 6;
+export const SPEEDS = [0, 1, 3, 10] as const;
+
+export const START_CASH = 25_000;
+export const START_REPUTATION = 0;
+/** Så mange døgn på rad under kredittgrensen før banken tar over */
+export const BANKRUPTCY_DAYS = 7;
+export const LOAN_INTEREST_PER_DAY = 0.0004;
+export const WIN_CASH = 100_000_000;
+
+// ------------------------------------------------------------------ //
+// Skrap
+// ------------------------------------------------------------------ //
+export interface ScrapType {
+  id: ScrapId;
+  name: string;
+  short: string;
+  price: number; // kr/t
+  /** Relativt energibehov ved smelting (tungt og kompakt skrap smelter langsommere) */
+  energy: number;
+  tramp: number;
+  p: number;
+  c: number;
+  /** Andel rust, jord, olje og annet som ikke blir stål */
+  dirt: number;
+  /** Faren for radioaktive kilder per tonn (skjulte kilder i blandet skrap) */
+  radioPerT: number;
+  buyable: boolean;
+  description: string;
+}
+
+export const SCRAP_TYPES: Record<ScrapId, ScrapType> = {
+  blandet: {
+    id: "blandet",
+    name: "Blandet skrap",
+    short: "Blandet",
+    price: 2500,
+    energy: 1.0,
+    tramp: 0.3,
+    p: 0.03,
+    c: 0.15,
+    dirt: 0.07,
+    radioPerT: 0.00006,
+    buyable: true,
+    description: "Billig og tilgjengelig, men med mye sporelementer, fosfor og skitt. Kan skjule alt mulig.",
+  },
+  tungt: {
+    id: "tungt",
+    name: "Tungt skrap",
+    short: "Tungt",
+    price: 3100,
+    energy: 1.04,
+    tramp: 0.16,
+    p: 0.02,
+    c: 0.2,
+    dirt: 0.03,
+    radioPerT: 0.00002,
+    buyable: true,
+    description: "Bjelker, plater og rør. Rimelig rent, men store stykker bruker lengre tid på å smelte.",
+  },
+  shredder: {
+    id: "shredder",
+    name: "Shredderskrap",
+    short: "Shredder",
+    price: 3300,
+    energy: 0.97,
+    tramp: 0.22,
+    p: 0.018,
+    c: 0.1,
+    dirt: 0.025,
+    radioPerT: 0.00004,
+    buyable: true,
+    description: "Kvernet og magnetsortert. Jevn størrelse og god smelting, men kobber fra ledninger følger med.",
+  },
+  spon: {
+    id: "spon",
+    name: "Spon og dreieavfall",
+    short: "Spon",
+    price: 1700,
+    energy: 1.1,
+    tramp: 0.35,
+    p: 0.035,
+    c: 0.3,
+    dirt: 0.12,
+    radioPerT: 0.00001,
+    buyable: true,
+    description: "Svært billig, men oljete og luftig. Mye går tapt som slagg og røyk.",
+  },
+  rent: {
+    id: "rent",
+    name: "Rent nyskrap",
+    short: "Rent",
+    price: 4200,
+    energy: 0.95,
+    tramp: 0.05,
+    p: 0.012,
+    c: 0.08,
+    dirt: 0.01,
+    radioPerT: 0,
+    buyable: true,
+    description: "Stanse- og klippavfall fra industrien. Kjent analyse, lite sporelementer – brukes til å tynne ut.",
+  },
+  rajern: {
+    id: "rajern",
+    name: "Råjern",
+    short: "Råjern",
+    price: 5000,
+    energy: 0.88,
+    tramp: 0.01,
+    p: 0.05,
+    c: 4.0,
+    dirt: 0.005,
+    radioPerT: 0,
+    buyable: true,
+    description: "Nesten fritt for sporelementer, men med rundt 4 % karbon. Karbonet må brennes bort med oksygen.",
+  },
+  retur: {
+    id: "retur",
+    name: "Returskrap",
+    short: "Retur",
+    price: 0,
+    energy: 0.97,
+    tramp: 0.15,
+    p: 0.02,
+    c: 0.2,
+    dirt: 0.01,
+    radioPerT: 0,
+    buyable: false,
+    description: "Egne kapp, skoller og vrak. Gratis og kjent, og går rett tilbake i ovnen.",
+  },
+};
+
+export const SCRAP_IDS = Object.keys(SCRAP_TYPES) as ScrapId[];
+
+// ------------------------------------------------------------------ //
+// Kvaliteter og produkter
+// ------------------------------------------------------------------ //
+export interface GradeSpec {
+  id: GradeId;
+  name: string;
+  cMin: number;
+  cMax: number;
+  pMax: number;
+  trampMax: number;
+  /** Prisfaktor mot standard */
+  premium: number;
+  /** Laveste nivå kundene begynner å spørre etter denne kvaliteten */
+  minStage: number;
+  description: string;
+}
+
+export const GRADES: Record<GradeId, GradeSpec> = {
+  enkel: {
+    id: "enkel",
+    name: "Enkel",
+    cMin: 0,
+    cMax: 0.8,
+    pMax: 0.05,
+    trampMax: 0.5,
+    premium: 0.9,
+    minStage: 0,
+    description: "Enkle konstruksjoner og gods uten særlige krav.",
+  },
+  standard: {
+    id: "standard",
+    name: "Standard",
+    cMin: 0.05,
+    cMax: 0.45,
+    pMax: 0.04,
+    trampMax: 0.3,
+    premium: 1.0,
+    minStage: 0,
+    description: "Vanlig konstruksjonsstål.",
+  },
+  armering: {
+    id: "armering",
+    name: "Armering",
+    cMin: 0.15,
+    cMax: 0.3,
+    pMax: 0.045,
+    trampMax: 0.4,
+    premium: 1.02,
+    minStage: 2,
+    description: "Armeringsstål tåler en del sporelementer, men karbonet må ligge riktig for sveisbarhet og styrke.",
+  },
+  lavkarbon: {
+    id: "lavkarbon",
+    name: "Lavkarbon",
+    cMin: 0,
+    cMax: 0.08,
+    pMax: 0.025,
+    trampMax: 0.2,
+    premium: 1.12,
+    minStage: 2,
+    description: "Til kaldforming og tråd. Karbonet må ned, og det krever oksygen.",
+  },
+  hoykarbon: {
+    id: "hoykarbon",
+    name: "Høykarbon",
+    cMin: 0.55,
+    cMax: 0.9,
+    pMax: 0.03,
+    trampMax: 0.15,
+    premium: 1.15,
+    minStage: 1,
+    description: "Fjærer, verktøy og slitedeler. Krever rent skrap og riktig karbon.",
+  },
+  premium: {
+    id: "premium",
+    name: "Premium",
+    cMin: 0.1,
+    cMax: 0.4,
+    pMax: 0.02,
+    trampMax: 0.1,
+    premium: 1.28,
+    minStage: 1,
+    description: "Krevende kunder med strenge krav til fosfor og sporelementer.",
+  },
+};
+
+export const GRADE_IDS = Object.keys(GRADES) as GradeId[];
+
+export interface Product {
+  id: ProductId;
+  name: string;
+  price: number; // kr/t, standardkvalitet og normalt marked
+  /** Tonn per døgn markedet tar unna på spot før prisen faller */
+  spotPerDay: number;
+}
+
+export const PRODUCTS: Record<ProductId, Product> = {
+  stopegods: { id: "stopegods", name: "Støpegods", price: 16_000, spotPerDay: 2 },
+  blokk: { id: "blokk", name: "Blokker", price: 7_400, spotPerDay: 60 },
+  emne: { id: "emne", name: "Emner", price: 7_000, spotPerDay: 500 },
+  armering: { id: "armering", name: "Armeringsstål", price: 8_300, spotPerDay: 600 },
+};
+
+export const SPOT_DISCOUNT = 0.78;
+
+// ------------------------------------------------------------------ //
+// Nivåer (bygninger)
+// ------------------------------------------------------------------ //
+export interface Stage {
+  id: number;
+  name: string;
+  price: number;
+  reputation: number;
+  staffCap: number;
+  yardT: number;
+  storeT: number;
+  /** Skraphåndtering som trengs per skift */
+  scrapCrew: number;
+  description: string;
+}
+
+export const STAGES: Stage[] = [
+  {
+    id: 0,
+    name: "Garasje",
+    price: 0,
+    reputation: 0,
+    staffCap: 0,
+    yardT: 6,
+    storeT: 4,
+    scrapCrew: 0,
+    description: "En kald garasje, en gassfyrt digel og deg selv.",
+  },
+  {
+    id: 1,
+    name: "Verksted",
+    price: 55_000,
+    reputation: 5,
+    staffCap: 4,
+    yardT: 40,
+    storeT: 30,
+    scrapCrew: 0,
+    description: "Leid verkstedhall med plass til en liten induksjonsovn og et par ansatte.",
+  },
+  {
+    id: 2,
+    name: "Støperi",
+    price: 400_000,
+    reputation: 18,
+    staffCap: 24,
+    yardT: 600,
+    storeT: 400,
+    scrapCrew: 1,
+    description: "Egen industritomt med skraplager, kran og plass til skiftarbeid.",
+  },
+  {
+    id: 3,
+    name: "Stålverk",
+    price: 5_000_000,
+    reputation: 40,
+    staffCap: 70,
+    yardT: 6000,
+    storeT: 5000,
+    scrapCrew: 2,
+    description: "Smelteverk med tung strømforsyning og jernbanespor. Her kan lysbueovnen stå.",
+  },
+  {
+    id: 4,
+    name: "Storverk",
+    price: 25_000_000,
+    reputation: 65,
+    staffCap: 220,
+    yardT: 25000,
+    storeT: 20000,
+    scrapCrew: 4,
+    description: "Et fullskala stålverk med skraphavn, egen kai og hundrevis av ansatte.",
+  },
+];
+
+// ------------------------------------------------------------------ //
+// Ovner
+// ------------------------------------------------------------------ //
+export interface FurnaceType {
+  id: string;
+  name: string;
+  stage: number;
+  price: number;
+  sizeT: number;
+  cycleMin: number;
+  kwhPerT: number;
+  fuel: "gass" | "strøm";
+  /** Jern som går tapt til slagg (oksidasjon) */
+  oxidationLoss: number;
+  /** Andel av fosforet som tas ut i slaggen (0 = ingen avfosforering) */
+  dephos: number;
+  /** Kan brenne ut karbon med oksygen */
+  decarb: boolean;
+  wearPerHeat: number;
+  relineCost: number;
+  relineHours: number;
+  crew: Crew;
+  /** Tilsatser, elektroder og annet forbruk per tonn */
+  consumablesPerT: number;
+  requires?: string[];
+  arc: boolean;
+  description: string;
+}
+
+export const FURNACES: FurnaceType[] = [
+  {
+    id: "digel",
+    name: "Gassfyrt digelovn",
+    stage: 0,
+    price: 0,
+    sizeT: 0.25,
+    cycleMin: 110,
+    kwhPerT: 1100,
+    fuel: "gass",
+    oxidationLoss: 0.03,
+    dephos: 0,
+    decarb: false,
+    wearPerHeat: 0.035,
+    relineCost: 2_000,
+    relineHours: 3,
+    crew: { ovn: 1 },
+    consumablesPerT: 180,
+    arc: false,
+    description: "En grafittdigel i en gassfyrt ovn. Smelter det du legger i – ikke mer, ikke mindre.",
+  },
+  {
+    id: "induksjon1",
+    name: "Induksjonsovn 1 t",
+    stage: 1,
+    price: 60_000,
+    sizeT: 1,
+    cycleMin: 70,
+    kwhPerT: 650,
+    fuel: "strøm",
+    oxidationLoss: 0.015,
+    dephos: 0,
+    decarb: false,
+    wearPerHeat: 0.02,
+    relineCost: 10_000,
+    relineHours: 6,
+    crew: { ovn: 1 },
+    consumablesPerT: 120,
+    arc: false,
+    description: "Rask og ren smelting med lite tap, men ingen raffinering: fosfor og sporelementer blir der de er.",
+  },
+  {
+    id: "induksjon5",
+    name: "Induksjonsovn 5 t",
+    stage: 2,
+    price: 950_000,
+    sizeT: 5,
+    cycleMin: 80,
+    kwhPerT: 600,
+    fuel: "strøm",
+    oxidationLoss: 0.015,
+    dephos: 0,
+    decarb: false,
+    wearPerHeat: 0.016,
+    relineCost: 50_000,
+    relineHours: 10,
+    crew: { ovn: 1 },
+    consumablesPerT: 110,
+    arc: false,
+    description: "Større induksjonsovn for skiftdrift. Fortsatt ingen raffinering.",
+  },
+  {
+    id: "lysbue30",
+    name: "Lysbueovn 30 t",
+    stage: 3,
+    price: 7_500_000,
+    sizeT: 30,
+    cycleMin: 75,
+    kwhPerT: 440,
+    fuel: "strøm",
+    oxidationLoss: 0.045,
+    dephos: 0.6,
+    decarb: true,
+    wearPerHeat: 0.012,
+    relineCost: 300_000,
+    relineHours: 20,
+    crew: { ovn: 3 },
+    consumablesPerT: 200,
+    requires: ["renseanlegg"],
+    arc: true,
+    description: "Lysbue, oksygenlanse og basisk slagg: nå kan fosfor og karbon tas ut. Krever røykgassrensing.",
+  },
+  {
+    id: "lysbue90",
+    name: "Lysbueovn 90 t",
+    stage: 4,
+    price: 22_000_000,
+    sizeT: 90,
+    cycleMin: 60,
+    kwhPerT: 400,
+    fuel: "strøm",
+    oxidationLoss: 0.045,
+    dephos: 0.65,
+    decarb: true,
+    wearPerHeat: 0.01,
+    relineCost: 700_000,
+    relineHours: 24,
+    crew: { ovn: 4 },
+    consumablesPerT: 180,
+    requires: ["renseanlegg"],
+    arc: true,
+    description: "Fullskala lysbueovn med flatt bad og stålsump.",
+  },
+];
+
+// ------------------------------------------------------------------ //
+// Støping
+// ------------------------------------------------------------------ //
+export interface CastingType {
+  id: string;
+  name: string;
+  stage: number;
+  price: number;
+  product: ProductId;
+  tph: number;
+  yield: number;
+  crew: Crew;
+  costPerT: number;
+  /** Grunnsannsynlighet for støpefeil per parti */
+  defectRisk: number;
+  continuous: boolean;
+  description: string;
+}
+
+export const CASTINGS: CastingType[] = [
+  {
+    id: "sandformer",
+    name: "Sandformer",
+    stage: 0,
+    price: 0,
+    product: "stopegods",
+    tph: 0.5,
+    yield: 0.8,
+    crew: { stoper: 1 },
+    costPerT: 800,
+    defectRisk: 0.1,
+    continuous: false,
+    description: "Håndformede sandformer. Mye av stålet havner i innløp og matere.",
+  },
+  {
+    id: "formlinje",
+    name: "Formlinje",
+    stage: 1,
+    price: 45_000,
+    product: "stopegods",
+    tph: 2,
+    yield: 0.84,
+    crew: { stoper: 1 },
+    costPerT: 550,
+    defectRisk: 0.07,
+    continuous: false,
+    description: "Formmaskin med gjenbruk av sand. Raskere og jevnere gods.",
+  },
+  {
+    id: "blokk",
+    name: "Blokkstøping",
+    stage: 2,
+    price: 600_000,
+    product: "blokk",
+    tph: 10,
+    yield: 0.9,
+    crew: { stoper: 2 },
+    costPerT: 250,
+    defectRisk: 0.06,
+    continuous: false,
+    description: "Stålet tappes i kokiller og størkner til blokker som selges til valseverk og smier.",
+  },
+  {
+    id: "streng1",
+    name: "Strengstøpemaskin, 1 streng",
+    stage: 3,
+    price: 5_500_000,
+    product: "emne",
+    tph: 32,
+    yield: 0.955,
+    crew: { stoper: 3 },
+    costPerT: 160,
+    defectRisk: 0.05,
+    continuous: true,
+    description: "Stålet renner fra fordeleren ned i en vannkjølt kokille og trekkes ut som en sammenhengende streng.",
+  },
+  {
+    id: "streng4",
+    name: "Strengstøpemaskin, 4 strenger",
+    stage: 4,
+    price: 16_000_000,
+    product: "emne",
+    tph: 110,
+    yield: 0.97,
+    crew: { stoper: 5 },
+    costPerT: 130,
+    defectRisk: 0.04,
+    continuous: true,
+    description: "Fire strenger i parallell holder følge med en stor lysbueovn.",
+  },
+];
+
+// ------------------------------------------------------------------ //
+// Tilleggsutstyr
+// ------------------------------------------------------------------ //
+export interface Addon {
+  id: string;
+  name: string;
+  stage: number;
+  price: number;
+  crew?: Crew;
+  /** Krever at ovnen er en lysbueovn */
+  needsArc?: boolean;
+  needsContinuous?: boolean;
+  requires?: string[];
+  description: string;
+}
+
+export const ADDONS: Addon[] = [
+  {
+    id: "lager",
+    name: "Lagerhall",
+    stage: 1,
+    price: 35_000,
+    description: "Dobbelt så mye plass til skrap og ferdigvare.",
+  },
+  {
+    id: "xrf",
+    name: "Håndholdt analysator",
+    stage: 1,
+    price: 30_000,
+    description:
+      "Røntgenfluorescens måler sporelementer som kobber, nikkel og krom direkte på stålet – men ikke karbon og fosfor.",
+  },
+  {
+    id: "portal",
+    name: "Strålingsportal",
+    stage: 1,
+    price: 90_000,
+    description: "Måler alle skraplass ved porten. Radioaktive kilder stoppes før de havner i ovnen.",
+  },
+  {
+    id: "salgskontor",
+    name: "Salgskontor",
+    stage: 1,
+    price: 60_000,
+    description: "Flere forespørsler fra kunder og litt bedre betalt.",
+  },
+  {
+    id: "oes",
+    name: "Spektrometer",
+    stage: 2,
+    price: 450_000,
+    crew: { lab: 1 },
+    description: "Gnistspektrometer i eget laboratorium: full analyse av hver charge, også karbon og fosfor.",
+  },
+  {
+    id: "sortering",
+    name: "Skrapsortering",
+    stage: 2,
+    price: 250_000,
+    crew: { skrap: 1 },
+    description: "Plukker ut kobberledninger, motorer og skitt før skrapet går til ovnen.",
+  },
+  {
+    id: "verksted",
+    name: "Vedlikeholdsverksted",
+    stage: 2,
+    price: 300_000,
+    description: "Færre havarier og raskere reparasjoner, særlig med egne reparatører.",
+  },
+  {
+    id: "ovn2",
+    name: "Ovn nummer to",
+    stage: 2,
+    price: 0,
+    description: "En ovn til av samme type. Dobbel smeltekapasitet, dobbelt mannskap.",
+  },
+  {
+    id: "renseanlegg",
+    name: "Røykgassrensing",
+    stage: 3,
+    price: 1_500_000,
+    description: "Filteranlegg for avgass og støv. Påbudt for lysbueovn.",
+  },
+  {
+    id: "oseovn",
+    name: "Øseovn",
+    stage: 3,
+    price: 3_000_000,
+    crew: { ovn: 1 },
+    needsArc: true,
+    description:
+      "Varmer og legerer stålet i øsa etter tapping: karbon treffer målet, og temperaturen til støping blir riktig.",
+  },
+  {
+    id: "conveyor",
+    name: "Conveyor med forvarming",
+    stage: 3,
+    price: 3_500_000,
+    needsArc: true,
+    description: "Mater skrapet kontinuerlig inn og forvarmer det med avgassen. Mindre strøm per tonn.",
+  },
+  {
+    id: "trafo",
+    name: "Større transformator",
+    stage: 3,
+    price: 2_500_000,
+    needsArc: true,
+    description: "Mer effekt i lysbuen gir kortere tapp-til-tapp.",
+  },
+  {
+    id: "valseverk",
+    name: "Valseverk",
+    stage: 3,
+    price: 9_000_000,
+    crew: { valse: 3 },
+    needsContinuous: true,
+    description: "Valser emner til armeringsstål, som betales bedre.",
+  },
+];
+
+// ------------------------------------------------------------------ //
+// Roller
+// ------------------------------------------------------------------ //
+export interface Role {
+  id: RoleId;
+  name: string;
+  plural: string;
+  salary: number; // kr per dag ved ferdighet 3
+  description: string;
+}
+
+export const ROLES: Record<RoleId, Role> = {
+  allround: {
+    id: "allround",
+    name: "Allrounder",
+    plural: "Allroundere",
+    salary: 1500,
+    description: "Kan fylle en plass hvor som helst, men blir ikke like god som en spesialist.",
+  },
+  ovn: {
+    id: "ovn",
+    name: "Ovnsoperatør",
+    plural: "Ovnsoperatører",
+    salary: 1900,
+    description: "Kjører ovnen. Flinke operatører gir kortere charger og færre feil.",
+  },
+  stoper: {
+    id: "stoper",
+    name: "Støper",
+    plural: "Støpere",
+    salary: 1750,
+    description: "Støper stålet. Flinke støpere gir færre støpefeil.",
+  },
+  skrap: {
+    id: "skrap",
+    name: "Kranfører",
+    plural: "Kranførere",
+    salary: 1650,
+    description: "Håndterer skraplageret og setter sammen skrapkassene.",
+  },
+  lab: {
+    id: "lab",
+    name: "Laborant",
+    plural: "Laboranter",
+    salary: 1750,
+    description: "Tar prøver og kjører spektrometeret.",
+  },
+  vedlikehold: {
+    id: "vedlikehold",
+    name: "Reparatør",
+    plural: "Reparatører",
+    salary: 1950,
+    description: "Forebyggende vedlikehold gir færre havarier og raskere reparasjon.",
+  },
+  salg: {
+    id: "salg",
+    name: "Selger",
+    plural: "Selgere",
+    salary: 2100,
+    description: "Skaffer flere og bedre betalte kontrakter.",
+  },
+  valse: {
+    id: "valse",
+    name: "Valseoperatør",
+    plural: "Valseoperatører",
+    salary: 1850,
+    description: "Kjører valseverket.",
+  },
+};
+
+export const ROLE_IDS = Object.keys(ROLES) as RoleId[];
+/** Roller som bemanner produksjonen per skift */
+export const CREW_ROLES: RoleId[] = ["ovn", "stoper", "skrap", "lab", "valse"];
+
+// ------------------------------------------------------------------ //
+// Kunder
+// ------------------------------------------------------------------ //
+export interface CustomerType {
+  name: string;
+  minStage: number;
+  maxStage: number;
+  products: ProductId[];
+  grades: GradeId[];
+  minT: number;
+  maxT: number;
+}
+
+export const CUSTOMERS: CustomerType[] = [
+  {
+    name: "Smia i bygda",
+    minStage: 0,
+    maxStage: 1,
+    products: ["stopegods"],
+    grades: ["enkel", "standard"],
+    minT: 0.15,
+    maxT: 0.6,
+  },
+  { name: "Gårdbruker", minStage: 0, maxStage: 1, products: ["stopegods"], grades: ["enkel"], minT: 0.1, maxT: 0.5 },
+  {
+    name: "Båtforeningen",
+    minStage: 0,
+    maxStage: 1,
+    products: ["stopegods"],
+    grades: ["standard"],
+    minT: 0.1,
+    maxT: 0.4,
+  },
+  {
+    name: "Hagemøbelsnekker",
+    minStage: 0,
+    maxStage: 2,
+    products: ["stopegods"],
+    grades: ["enkel", "standard"],
+    minT: 0.2,
+    maxT: 1,
+  },
+  {
+    name: "Maskinverksted",
+    minStage: 1,
+    maxStage: 2,
+    products: ["stopegods"],
+    grades: ["standard", "hoykarbon"],
+    minT: 0.5,
+    maxT: 4,
+  },
+  {
+    name: "Kommunens driftsavdeling",
+    minStage: 1,
+    maxStage: 2,
+    products: ["stopegods"],
+    grades: ["enkel", "standard"],
+    minT: 1,
+    maxT: 6,
+  },
+  {
+    name: "Pumpefabrikk",
+    minStage: 1,
+    maxStage: 3,
+    products: ["stopegods"],
+    grades: ["standard", "premium"],
+    minT: 1,
+    maxT: 8,
+  },
+  {
+    name: "Smedbedrift",
+    minStage: 2,
+    maxStage: 3,
+    products: ["blokk"],
+    grades: ["standard", "hoykarbon"],
+    minT: 15,
+    maxT: 80,
+  },
+  {
+    name: "Verft",
+    minStage: 2,
+    maxStage: 4,
+    products: ["blokk", "emne"],
+    grades: ["standard", "premium"],
+    minT: 30,
+    maxT: 200,
+  },
+  {
+    name: "Valseverk i Sverige",
+    minStage: 2,
+    maxStage: 4,
+    products: ["blokk", "emne"],
+    grades: ["standard", "armering", "lavkarbon"],
+    minT: 50,
+    maxT: 400,
+  },
+  {
+    name: "Byggevarekjede",
+    minStage: 3,
+    maxStage: 4,
+    products: ["armering"],
+    grades: ["armering"],
+    minT: 200,
+    maxT: 1500,
+  },
+  {
+    name: "Armeringsgrossist",
+    minStage: 3,
+    maxStage: 4,
+    products: ["armering", "emne"],
+    grades: ["armering"],
+    minT: 300,
+    maxT: 2500,
+  },
+  { name: "Trådtrekkeri", minStage: 3, maxStage: 4, products: ["emne"], grades: ["lavkarbon"], minT: 200, maxT: 1500 },
+  { name: "Fjærfabrikk", minStage: 3, maxStage: 4, products: ["emne"], grades: ["hoykarbon"], minT: 100, maxT: 800 },
+  {
+    name: "Offshoreleverandør",
+    minStage: 3,
+    maxStage: 4,
+    products: ["emne", "blokk"],
+    grades: ["premium"],
+    minT: 150,
+    maxT: 1200,
+  },
+  {
+    name: "Eksportkunde",
+    minStage: 4,
+    maxStage: 4,
+    products: ["emne", "armering"],
+    grades: ["standard", "armering", "lavkarbon", "premium"],
+    minT: 1000,
+    maxT: 8000,
+  },
+  {
+    name: "Bilindustrien",
+    minStage: 4,
+    maxStage: 4,
+    products: ["emne"],
+    grades: ["lavkarbon", "premium"],
+    minT: 800,
+    maxT: 5000,
+  },
+];
+
+// ------------------------------------------------------------------ //
+// Navn til ansatte
+// ------------------------------------------------------------------ //
+export const FIRST_NAMES = [
+  "Anne",
+  "Per",
+  "Kari",
+  "Ola",
+  "Ingrid",
+  "Lars",
+  "Silje",
+  "Jonas",
+  "Hanne",
+  "Erik",
+  "Mona",
+  "Arild",
+  "Tone",
+  "Geir",
+  "Line",
+  "Trond",
+  "Nina",
+  "Stian",
+  "Hilde",
+  "Rune",
+  "Sara",
+  "Tor",
+  "Marit",
+  "Kjell",
+  "Ida",
+  "Bjørn",
+  "Linn",
+  "Espen",
+  "Grete",
+  "Ali",
+  "Fatima",
+  "Tomasz",
+  "Agnieszka",
+  "Mikael",
+  "Aisha",
+  "Jan",
+  "Wenche",
+  "Sindre",
+  "Eva",
+  "Omar",
+];
+
+export const LAST_NAMES = [
+  "Hansen",
+  "Johansen",
+  "Olsen",
+  "Larsen",
+  "Andersen",
+  "Pedersen",
+  "Nilsen",
+  "Kristiansen",
+  "Jensen",
+  "Karlsen",
+  "Berg",
+  "Haugen",
+  "Hagen",
+  "Eriksen",
+  "Bakken",
+  "Dahl",
+  "Lund",
+  "Moen",
+  "Solberg",
+  "Strand",
+  "Nowak",
+  "Ahmed",
+  "Lie",
+  "Aas",
+  "Holm",
+];

@@ -1,0 +1,128 @@
+# Beslutninger
+
+Nummererte beslutninger med begrunnelse. Nyeste nederst. Slett aldri en
+beslutning – marker den som **erstattet av B-xxx** hvis den ikke gjelder lenger.
+
+Mal:
+
+```
+## B-xxx Tittel (dato)
+Status: gjelder | erstattet av B-yyy
+Bakgrunn: hvorfor spørsmålet kom opp
+Beslutning: hva vi valgte
+Begrunnelse: hvorfor, og hva vi valgte bort
+```
+
+---
+
+## B-001 Nettapp i React + TypeScript + Vite (tidligere økt)
+Status: gjelder
+Bakgrunn: Brukeren ville ha noe som kunne kjøres fra kontrollrom og deles enkelt.
+Beslutning: Alt kjører i nettleseren. Ingen server. Publiseres på GitHub Pages via Actions.
+Begrunnelse: Null drift, fungerer på PC og mobil, delbar som lenke. Python-backend ble fjernet.
+
+## B-002 Generiske tall og ingen identifiserende informasjon (tidligere økt)
+Status: gjelder
+Bakgrunn: Prosessmodellen ble tidlig kalibrert mot konfidensielt materiale fra industrien.
+Beslutning: Repoet inneholder bare generiske tall og tekst. Ingen dokumenter, bedriftsnavn,
+stedsnavn, personnavn, interne prosedyrenumre, leverandørnavn eller interne kvalitetskoder.
+Kvaliteter i prosessmodellen har oppdiktede koder (AR20, LK08, HK80).
+Begrunnelse: Repoet er offentlig. Git-historikken er allerede skrevet om én gang for å fjerne
+et dokument – det skal ikke skje igjen.
+
+## B-003 Prosessmodellen for lysbueovnen beholdes som «ekte» motor (tidligere økt)
+Status: gjelder
+Beslutning: `src/sim/eaf.ts` er en lumped-parameter-modell (smelting, slaggkjemi, B2/B3,
+oksygen, skumslagg, avfosforering med fosforbom, elektroder, overslag, ildfast).
+`src/sim/validate.ts` sjekker nøkkeltallene i CI.
+Begrunnelse: Gir et troverdig kontrollrom når spilleren tar styringen.
+
+## B-004 Simulatoren erstattes av et tycoonspill (tidligere økt)
+Status: gjelder
+Bakgrunn: Brukeren ville heller ha et spill enn et opplæringsverktøy, og spillet skal erstatte verktøyet.
+Beslutning: Spillet «Stålverket»: fra garasje med gassfyrt digel til storverk. Hele verket
+modelleres (skrap, ovn, støping, valsing, salg, folk), ikke bare ovnen. Relay for flere maskiner,
+instruktørpanel og scenarioer er fjernet.
+Begrunnelse: Et spill motiverer mer, og hele kjeden gir bedre forståelse enn bare ovnen.
+
+## B-005 Spilltilstand som ren JSON, lagret i nettleseren (tidligere økt)
+Status: gjelder (utvidet av B-013)
+Beslutning: `GameState` er ren JSON. Motoren endrer tilstanden på stedet. Lagres i
+`localStorage` under `stalverk-spill-v1`. Tilfeldighet er seedet og lagres i tilstanden.
+Begrunnelse: Enkel lagring, deterministisk testspiller, ingen server.
+
+## B-006 Balansen styres av en automatisk testspiller i CI (tidligere økt)
+Status: gjelder
+Beslutning: `src/game/balance.ts` spiller seks spill. Medianen for når hvert nivå nås skal
+ligge i målvinduet, ingen får gå konkurs, og en charge fra kontrollrommet skal komme riktig
+tilbake. Mål: Verksted 4–14, Støperi 20–50, Stålverk 50–115, Storverk 100–185 dager.
+Begrunnelse: Balanse faller lett sammen ved små endringer; testspilleren fanget blant annet
+dødsspiraler ved produktbytte og tom kasse.
+
+## B-007 Kassekreditt følger omsetningen (tidligere økt)
+Status: gjelder
+Beslutning: Kreditt = maks(25 000 × 5^nivå, to døgns produksjon × produktpris). Skrap og
+omforing kan kjøpes på kreditt; investeringer krever kontanter. Konkurs etter 7 døgn under grensen.
+Begrunnelse: Uten dette gikk verket konkurs når produksjonen økte kraftig før inntektene kom.
+
+## B-008 Game Dev Tycoon som hovedinspirasjon (2026-09-24)
+Status: gjelder
+Bakgrunn: Brukeren ba om å studere Game Dev Tycoon og hente inspirasjon.
+Beslutning: Vi tar over kjerne-loopen (lag noe → få dom → lær → bli bedre), liten start i
+garasje, fagpoeng og forskning, flytende bobler som belønning, hendelseskort med valg og
+feiring ved flytting. Se `docs/DESIGN.md`.
+Begrunnelse: Game Dev Tycoon er kjent for å være enkelt, vanedannende og godt egnet på mobil.
+
+## B-009 Mobilspill som PWA (2026-09-24)
+Status: gjelder
+Beslutning: Spillet er en installerbar PWA (manifest, ikoner, service worker, offline, stående
+format). App Store/Google Play er ikke med nå.
+Begrunnelse: Kan installeres på hjemskjermen uten butikk, og vi beholder én kodebase og
+GitHub Pages. Kan pakkes med Capacitor senere hvis det blir ønsket.
+
+## B-010 Kontrollrommet: enkel styring som standard (2026-09-24)
+Status: gjelder
+Bakgrunn: Brukeren: «Kontrollromstyringen må være veldig enkel, slik at en uten kunnskap klarer å kjøre manuelt.»
+Beslutning: Fire guidede steg med én hovedhandling hver: Smelt (mer/mindre strøm),
+Rens (hold for oksygen), Slagg av (ett trykk), Tapp (trykk når temperaturen er grønn).
+Automatikk tar alt annet (kalk, dolomitt, karbon, conveyor, elektroder). Stjerner og forklaring
+etterpå. Den fulle HMI-en finnes fortsatt som «ekspertmodus», bare én vei (enkel → ekspert).
+Begrunnelse: Målt i prosessmodellen: trafo-tapp 3 holder temperaturen i det grønne,
+tapp ≥ 5 overoppheter og sliter mye ildfast – så «mer/mindre strøm» gir ekte konsekvenser.
+
+## B-011 Høykarbon tappes som vanlig og legeres opp i øsa (2026-09-24)
+Status: gjelder
+Beslutning: I kontrollrommet kjøres alle kvaliteter mot tappevinduet til AR20, unntatt
+lavkarbon (LK08). Spillet legger på karbon i øsa for høykarbon.
+Begrunnelse: Karboninjeksjon løser seg for sakte i badet til å nå 0,25–0,45 % C.
+
+## B-012 Forskning med fagpoeng (2026-09-24)
+Status: gjelder
+Beslutning: Fagpoeng (FP) tjenes på charger, leverte kontrakter, charger kjørt selv og på feil
+(reklamasjoner og havarier – «du lærte noe»). FP brukes på forskning som låser opp utstyr og
+gir forbedringer. Forskning låser også opp kapitler i fagboka.
+Begrunnelse: Kjernen i Game Dev Tycoon; knytter læring til fremgang.
+
+## B-013 Migrering av lagrede spill (2026-09-24)
+Status: gjelder
+Beslutning: `migrate()` i `save.ts` fyller inn standardverdier for felt som mangler i gamle
+lagringer. `SAVE_VERSION` økes bare når en lagring ikke kan migreres.
+Begrunnelse: Spillere skal ikke miste spillet sitt når vi legger til funksjoner.
+
+## B-014 Fagpoeng per charge avtar med størrelsen på verket (2026-09-24)
+Status: gjelder
+Bakgrunn: Med 1 fagpoeng per charge hopet poengene seg opp fra støperiet og oppover
+(2 900 ubrukte på dag 150), fordi antall charger per døgn øker mye.
+Beslutning: 1 FP per charge i garasje og verksted, 0,6 i støperiet, 0,4 fra stålverket.
+Leverte kontrakter gir 2 + nivå. Forskning på nivå 2–4 koster 50–300 FP.
+Begrunnelse: Nå styrer forskningen tempoet på stålverksnivå (testspilleren forsker så snart
+poengene holder), uten at progresjonen havner utenfor målvinduene i B-006.
+
+## B-015 Den enkle styringen er testet med simulerte spillere (2026-09-24)
+Status: gjelder
+Beslutning: `balance.ts` kjører den enkle styringen (`SimpleRunner`) som en nybegynner som bare
+følger rådene på skjermen (krav: minst 4 stjerner, under 3 minutter) og som en slurvete spiller
+(krav: høyst 2 stjerner). Logikken ligger i `src/ui/control/simpleRunner.ts`, uten React, nettopp
+for å kunne testes slik.
+Begrunnelse: Kravet om at en uten kunnskap skal klare å kjøre manuelt skal ikke brytes i stillhet.
+Målt: nybegynner 4–5★ på ca. 105 s og 386 kWh/t; slurvete 1★ og ca. 418 kWh/t.

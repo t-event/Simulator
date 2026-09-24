@@ -23,6 +23,14 @@ body {
   color: var(--text);
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  /* Mobilspill: ingen dra-for-å-laste-på-nytt eller sprett ved kanten */
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 #root {
