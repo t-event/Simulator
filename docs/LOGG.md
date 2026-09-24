@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 13 – 2026-09-24: bemanningstabellen var forvirrende
+
+**Brukeren meldte (skjermbilde fra støperiet):** «Antall per skift stemmer vel ikke.» Tabellen viste
+2 ovnsoperatører per skift, 1 ansatt og likevel 3 av 3 skift.
+
+**Årsak:** Tallene var riktige, men tabellen viste ikke at allroundere fylte hullene (5 av 7 var
+ovnsoperatører), og ansatte som ikke går skift (selger, planlegger, skrapklasser) var ikke med.
+
+**Gjort:** Ny tabell: hvor mange som trengs for 3 skift (eller neste skift), hvor mange egne og hvor
+mange allroundere som fyller plassene, og hva som mangler. Under står hvor mange allroundere som er i bruk,
+ansatte som ikke går skift, og roller med flere enn skiftene trenger. Fordelingen regnes med samme
+metode som bemanningen (`crewCoverage` i `plant.ts`).
+
+**Testet:** Playwright på iPhone 13 med støperi på 3 og 2 skift; summene stemmer med antall ansatte.
+
+---
+
 ## Økt 12 – 2026-09-24: «fryser» → «størkner»
 
 **Brukeren meldte (skjermbilde av quizen):** Stål fryser ikke, det størkner.

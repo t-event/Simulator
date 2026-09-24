@@ -1630,3 +1630,21 @@ button {
     bottom: 16px;
   }
 }
+
+/* Bemanningstabellen: hvor mange som trengs og hvem som fyller plassene */
+.g-crew-table th,
+.g-crew-table td {
+  font-size: 13px;
+  padding: 6px 4px;
+  vertical-align: top;
+}
+
+.g-crew-table .g-muted {
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.g-crew-table .g-sub {
+  display: block;
+  white-space: nowrap;
+}
