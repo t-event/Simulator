@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 27 – 2026-09-24: vikarer når verket mangler folk
+
+**Brukeren meldte (skjermbilde):** «Vikarene fungerer ikke. Skiftet går ned uansett?»
+
+**Funn:** Vikarene dekket fraværet. Skiftet gikk ned fordi det manglet én støper for tre skift, og verket var
+fullt (24 av 24 ansatte).
+
+**Gjort (B-050):** Innleie av vikarer til plassene som mangler, tydelig tekst når verket er fullt, og visning
+av ansatte som ikke står på skift.
+
+**Testet:** tsc, lint, balanse (8 / 24 / 63 / 135). I Node: 2 → 3 skift med innleie, tilbake til 2 med varsel
+etter 3 døgn. Playwright (iPhone 13) med fullt verk: knappen virker, tabellen viser «+ 1 innleid», 390 px.
+
+---
+
 ## Økt 26 – 2026-09-24: hvilket skrap ovnen venter på
 
 **Brukeren sendte:** Skjermbilder av ovn 1 som venter på skrap til lavkarbon (fra før B-048 var publisert).

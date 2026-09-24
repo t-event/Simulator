@@ -1,11 +1,11 @@
 /**
  * Det spilleren kan gjøre: bygge ut, kjøpe utstyr, ansette, låne og styre produksjonen.
  */
-import { ADDONS, CASTINGS, FURNACES, GRADES, PRODUCTS, SCRAP_IDS, STAGES, type Addon } from "./data";
+import { ADDONS, CASTINGS, FURNACES, GRADES, PRODUCTS, ROLES, SCRAP_IDS, STAGES, type Addon } from "./data";
 import { addCost, adjustMorale, bookTemps, fmtKr, fmtT, log, newCandidates, orderQueue, startReline, maxLoan, newFurnaceUnit, unlock, type PurchaseResult } from "./engine";
 import { castingType, computePlantStats, day, daysUntilAllBack, gradeRecipe, fixedPowerOffer, furnaceType, has, isAbsent, POWER_BINDING_DAYS } from "./plant";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
-import type { GameState, GradeId, PowerDeal, ScrapId } from "./types";
+import type { GameState, GradeId, PowerDeal, RoleId, ScrapId } from "./types";
 
 export type UpgradeKind = "stage" | "furnace" | "casting" | "addon";
 
@@ -505,6 +505,30 @@ export function sendOnCourse(g: GameState, workerId: number): PurchaseResult {
 // ------------------------------------------------------------------ //
 // Vikarer (B-031)
 // ------------------------------------------------------------------ //
+/** Innleie til plassene som mangler for neste skift: halvannen gang lønna, teller ikke mot antall ansatte (B-050) */
+export function hiredCrewCost(g: GameState, days: number): number {
+  const missing = computePlantStats(g).missing;
+  return Math.round(
+    Object.entries(missing).reduce((a, [r, n]) => a + ROLES[r as RoleId].salary * (n ?? 0), 0) * 1.5 * days,
+  );
+}
+
+export function hireTempCrew(g: GameState, days: number): PurchaseResult {
+  const stats = computePlantStats(g);
+  const missing = Object.entries(stats.missing).filter(([, n]) => (n ?? 0) > 0);
+  if (!missing.length) return fail("Det mangler ingen på skiftene.");
+  const cost = hiredCrewCost(g, days);
+  addCost(g, "lonn", cost);
+  const crew: Record<string, number> = {};
+  const old = g.tempCrew && g.tempCrew.untilMin > g.minute ? g.tempCrew.crew : {};
+  for (const [r, n] of Object.entries(old)) crew[r] = n ?? 0;
+  for (const [r, n] of missing) crew[r] = (crew[r] ?? 0) + (n ?? 0);
+  g.tempCrew = { crew, untilMin: g.minute + days * 1440 };
+  const who = missing.map(([r, n]) => `${n} ${(n === 1 ? ROLES[r as RoleId].name : ROLES[r as RoleId].plural).toLowerCase()}`);
+  log(g, `Innleide vikarer (${who.join(", ")}) er på plass i ${days} døgn (${fmtKr(cost)}).`, "info");
+  return { ok: true, message: "Vikarene er på plass." };
+}
+
 /** Vikarer i et antall døgn, eller til alle som er borte nå, er tilbake (days = null) */
 export function hireTemps(g: GameState, days: number | null): PurchaseResult {
   if (!g.workers.some((w) => isAbsent(g, w))) return fail("Ingen er borte akkurat nå.");

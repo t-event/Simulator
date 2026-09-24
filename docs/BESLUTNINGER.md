@@ -657,3 +657,16 @@ B-048 ble publisert). I test kjøper planleggeren rent nyskrap som den skal; ute
 Beslutning: Varselet og tipset på Verket sier hvilke skraptyper resepten mangler til neste charge
 («Resepten trenger rent nyskrap»). Under Marked er de skraptypene merket med oransje ramme og en linje om at
 ovnen venter på dem.
+
+## B-050 Innleide vikarer til plasser som mangler (2026-09-24)
+Status: gjelder
+Brukeren meldte at skiftgangen gikk ned selv med vikarer. Skjermbildet viste at vikarene dekket den som hadde
+ferie, men at verket manglet én støper for tre skift og hadde fullt antall ansatte (24 av 24). Vikarer for
+fravær erstatter bare folk som er borte, ikke plasser ingen har.
+Beslutning:
+- «Lei inn vikarer i 3 døgn» fyller plassene som mangler for neste skift. Innleide koster halvannen gang lønna,
+  betales på forhånd og teller ikke mot antall ansatte. De går hjem når tida er ute, med varsel.
+- Skift-fanen sier når verket er fullt, og hva man kan gjøre: leie inn, si opp noen som ikke trengs på
+  skiftene, eller flytte.
+- Bemanningstabellen viser «+ N innleid», og under tabellen står andre jobber (ikke på skift) og ansatte i
+  roller verket ikke bruker nå (f.eks. øseovnsoperatører uten øseovn) som tar plass blant de ansatte.

@@ -164,7 +164,16 @@ export function presentWorkers(g: GameState): Worker[] {
 }
 
 function countRoles(g: GameState, ignoreAbsence = false): Record<RoleId, number> {
-  return countList(ignoreAbsence ? g.workers : presentWorkers(g));
+  const counts = countList(ignoreAbsence ? g.workers : presentWorkers(g));
+  // Innleide vikarer står på skiftene i tillegg til de ansatte (B-050)
+  const hired = hiredCrew(g);
+  for (const role of CREW_ROLES) counts[role] += hired[role] ?? 0;
+  return counts;
+}
+
+/** Innleide vikarer til ledige plasser, så lenge de er leid inn (B-050) */
+export function hiredCrew(g: GameState): Crew {
+  return g.tempCrew && g.tempCrew.untilMin > g.minute ? g.tempCrew.crew : {};
 }
 
 function countList(workers: Worker[]): Record<RoleId, number> {
@@ -215,6 +224,8 @@ export interface CrewRow {
   away: number;
   /** Av dem som er borte: hvor mange vikarer dekker (B-043) */
   temps: number;
+  /** Innleide vikarer på ledige plasser (B-050) */
+  hired: number;
 }
 
 /**
@@ -248,6 +259,7 @@ export function crewCoverage(
       missing: need - own - filled,
       away,
       temps: tempsActive(g) ? Math.min(away, own) : 0,
+      hired: Math.min(hiredCrew(g)[role] ?? 0, own),
     });
   }
   return { rows, wildcards, wildUsed: wildcards - spare, ownerSlots };
