@@ -31,7 +31,12 @@ resept»; nytt Kvalitet-kort. Testet på iPhone 13 (garasje og nivå 3): riktige
 forklaring, forslag setter resepten, utstyrsark åpner, ingen horisontal scroll, ingen konsollfeil.
 Balanse 11 / 49 / 100 / 187.
 
-**Gjenstår:** Tema E–G i arbeidslisten.
+**Tema E (B-024):** Strømavtale (spot, fastpris, nattariff med binding), effekttariff på døgnets
+høyeste effekt, skiftplan med nattillegg under Folk, og hendelseskort om betalt utkobling. Testet på
+iPhone 13 med et støperi på to skift: nattskift gir 15 % nattillegg og lavere strømpris, nattariff
+binder avtalen i 30 døgn, ingen horisontal scroll, ingen konsollfeil. Balanse 12 / 44 / 104 / 185.
+
+**Gjenstår:** Tema F–G i arbeidslisten.
 
 ---
 

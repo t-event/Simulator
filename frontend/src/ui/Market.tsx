@@ -1,7 +1,8 @@
 import { applyRecipe, setRecipe } from "../game/actions";
 import { GRADES, PRODUCTS, SCRAP_IDS, SCRAP_TYPES } from "../game/data";
 import { buyScrap, recipeEstimate, scrapPrice } from "../game/engine";
-import { hasPlanner, powerPrice, productPrice, type PlantStats } from "../game/plant";
+import { hasPlanner, productPrice, type PlantStats } from "../game/plant";
+import { PowerCard } from "./Power";
 import { gradeChecks, suggestRecipe } from "../game/recipe";
 import { researchForScrap, scrapUnlocked } from "../game/research";
 import type { GameState, ProductId, ScrapId } from "../game/types";
@@ -23,15 +24,11 @@ const BUY_AMOUNTS = [
   [1000, 2500, 5000],
 ];
 
-const POWER_LIMITS: (number | null)[] = [null, 0.7, 0.9, 1.1, 1.4, 2];
 
 export function Market({ g, stats, act }: Props) {
   const est = recipeEstimate(g, g.targetGrade, stats);
   const total = SCRAP_IDS.reduce((a, id) => a + g.recipe[id], 0);
   const amounts = BUY_AMOUNTS[g.stage];
-  const hourPrices = Array.from({ length: 24 }, (_, h) => powerPrice(g, Math.floor(g.minute / 1440) * 1440 + h * 60));
-  const maxHour = Math.max(...hourPrices);
-  const nowHour = Math.floor((g.minute % 1440) / 60);
   const electric = stats.furnace.fuel === "strøm";
   const open = SCRAP_IDS.filter((id) => scrapUnlocked(g, id));
   // Låste skraptyper gruppert etter forskningen som låser dem opp
@@ -186,47 +183,15 @@ export function Market({ g, stats, act }: Props) {
           )}
         </Card>
 
-        <Card title={electric ? "Strøm" : "Energi"}>
-          {electric ? (
-            <>
-              <p>
-                Nå: <strong>{fmtNum(powerPrice(g), 2)} kr/kWh</strong>
-                {g.market.powerSpikeDays > 0 && <span className="g-badge-bad"> Pristopp</span>}
-              </p>
-              <div className="g-power-chart" aria-label="Strømpris gjennom døgnet">
-                {hourPrices.map((p, h) => (
-                  <div
-                    key={h}
-                    className={`g-power-bar${h === nowHour ? " is-now" : ""}${g.settings.maxPowerPrice !== null && p > g.settings.maxPowerPrice ? " is-over" : ""}`}
-                    style={{ height: `${(p / maxHour) * 100}%` }}
-                    title={`${h}:00 – ${fmtNum(p, 2)} kr/kWh`}
-                  />
-                ))}
-              </div>
-              <label className="g-field">
-                <span>Ikke start charger over</span>
-                <select
-                  value={g.settings.maxPowerPrice ?? ""}
-                  onChange={(e) =>
-                    act(
-                      (gg) => void (gg.settings.maxPowerPrice = e.target.value === "" ? null : Number(e.target.value)),
-                    )
-                  }
-                >
-                  {POWER_LIMITS.map((v) => (
-                    <option key={String(v)} value={v ?? ""}>
-                      {v === null ? "Ingen grense" : `${fmtNum(v, 2)} kr/kWh`}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </>
-          ) : (
+        {electric ? (
+          <PowerCard g={g} stats={stats} act={act} />
+        ) : (
+          <Card title="Energi">
             <p className="g-muted">
               Digelen fyres med gass til fast pris. Strømprisen blir viktig når du får elektrisk ovn.
             </p>
-          )}
-        </Card>
+          </Card>
+        )}
 
         <Card title="Stålpriser">
           <table className="g-table">

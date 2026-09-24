@@ -6,6 +6,7 @@ import type { GameState, RoleId, Worker } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Card, Stat } from "./common";
 import { fmtKr, fmtNum } from "./format";
+import { ShiftPlan } from "./Power";
 
 interface Props {
   g: GameState;
@@ -142,6 +143,7 @@ export function People({ g, stats, act }: Props) {
             </details>
           ))}
         </Card>
+        <ShiftPlan g={g} stats={stats} act={act} />
       </div>
 
       <div className="g-col">

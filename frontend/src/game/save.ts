@@ -49,6 +49,14 @@ export function migrate(g: GameState): GameState {
   if (loose.celebrate === undefined) loose.celebrate = null;
   if (loose.decisionSeen === undefined) loose.decisionSeen = {};
   if (loose.gradeRecipes === undefined) loose.gradeRecipes = {};
+  if (g.settings.powerDeal === undefined) {
+    g.settings.powerDeal = "spot";
+    g.settings.powerDealUntilDay = 0;
+    g.settings.powerFixedPrice = 0;
+    g.settings.onePeak = false;
+    g.settings.shiftStart = 6;
+  }
+  if (loose.gridCut === undefined) loose.gridCut = null;
   if (loose.seenViews === undefined) {
     // Lagret før gradvis opplåsing (B-023): gi det spilleren allerede hadde tilgang til
     loose.seenViews = ["verket", "marked", "salg", "folk", "forskning"];

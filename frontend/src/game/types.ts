@@ -152,6 +152,7 @@ export type CostCategory =
   | "investering"
   | "bot"
   | "faste"
+  | "nett"
   | "annet";
 export type IncomeCategory = "kontrakt" | "spot" | "annet";
 
@@ -168,7 +169,11 @@ export interface DayFinance {
   offGradeT?: number;
   /** Tonn med støpefeil (sekunda) */
   secondT?: number;
+  /** Døgnets høyeste effektuttak (MW), grunnlaget for effekttariffen */
+  peakMW?: number;
 }
+
+export type PowerDeal = "spot" | "fast" | "natt";
 
 export interface Settings {
   /** Reparatøren bytter foringen når den når relineAt (krever en reparatør) */
@@ -176,6 +181,16 @@ export interface Settings {
   relineAt: number;
   /** Planlagt omforing hvert N. døgn (krever forskningen «Vedlikeholdsplan»); null = av */
   relinePlanDays: number | null;
+  /** Strømavtale (B-024): spot, fastpris eller nattariff */
+  powerDeal: PowerDeal;
+  /** Avtalen kan ikke byttes før denne dagen (bindingstid) */
+  powerDealUntilDay: number;
+  /** Prisen i fastprisavtalen, kr/kWh */
+  powerFixedPrice: number;
+  /** Bare én ovn smelter om gangen, for å holde effekttoppen nede */
+  onePeak: boolean;
+  /** Klokketimen skiftene starter (6, 14 eller 22) */
+  shiftStart: number;
   /** Start ikke ny charge når strømprisen er over dette (kr/kWh). null = ingen grense */
   maxPowerPrice: number | null;
   autoBuy: boolean;
@@ -277,6 +292,8 @@ export interface GameState {
   sickUntilMin: number;
   /** Et kundebesøk har gitt en god forespørsel som kommer snart */
   bonusOffer: boolean;
+  /** Avtalt utkobling fra nettselskapet: ingen nye charger i dette tidsrommet */
+  gridCut: { fromMin: number; untilMin: number } | null;
   /** Faner spilleren har sett (nye faner får et «Ny»-merke, B-023) */
   seenViews: string[];
   /** Nivået spilleren nettopp flyttet til, for feiring; null når det er sett */
