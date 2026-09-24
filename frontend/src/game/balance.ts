@@ -86,8 +86,11 @@ function botHour(g: GameState): void {
     const affordable = g.cash > Number(d.data.cost ?? 0) * 4;
     safe.messe = affordable ? 0 : 1;
     for (const id of ["kurs", "sykdom", "naboklage", "nestenulykke"]) if (!affordable) safe[id] = 1;
+    safe.radgiver = affordable ? 0 : 2;
     resolveDecision(g, safe[d.id] ?? 1);
   }
+  // Fagboka: testspilleren leser alle kapitler den får
+  for (const k of g.knowledge) if (!g.readChapters.includes(k)) g.readChapters.push(k);
   // Forskning: alt som er tilgjengelig, i tabellens rekkefølge
   for (const r of researchOptions(g)) if (r.available) doResearch(g, r.id);
   const stats = computePlantStats(g);

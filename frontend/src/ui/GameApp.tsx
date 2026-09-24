@@ -2,7 +2,6 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import "./game.css";
 import { STAGES, WIN_CASH } from "../game/data";
 import { completeManual } from "../game/engine";
-import { KNOWLEDGE, knowledgeCard } from "../game/knowledge";
 import { computePlantStats, day, energyPrice } from "../game/plant";
 import { useGame, type GameApi } from "../game/useGame";
 import { resolveDecision } from "../game/decisions";
@@ -11,6 +10,7 @@ import { upgradeOptions } from "../game/actions";
 import { buzz } from "./haptics";
 import type { GameState } from "../game/types";
 import { fmtClock, fmtKr, fmtNum, fmtRep, fmtT } from "./format";
+import { Handbook } from "./Handbook";
 import { Market } from "./Market";
 import { Overview } from "./Overview";
 import { People } from "./People";
@@ -56,42 +56,6 @@ function Intro({ hasSave, onNew, onContinue }: { hasSave: boolean; onNew: () => 
           <button className={hasSave ? "" : "g-primary"} onClick={onNew}>
             {hasSave ? "Nytt spill" : "Start"}
           </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Handbook({ g, onClose }: { g: GameState; onClose: () => void }) {
-  const [open, setOpen] = useState<string | null>(g.knowledge[g.knowledge.length - 1] ?? null);
-  const locked = KNOWLEDGE.length - g.knowledge.length;
-  return (
-    <div className="g-modal" role="dialog" aria-modal="true" aria-label="Fagboka" onClick={onClose}>
-      <div className="g-modal-card" onClick={(e) => e.stopPropagation()}>
-        <header className="g-card-head">
-          <h2>Fagboka</h2>
-          <button onClick={onClose} aria-label="Lukk">
-            ✕
-          </button>
-        </header>
-        <p className="g-muted">
-          Nye kapitler låses opp etter hvert som verket vokser og du møter nye utfordringer.
-          {locked > 0 && ` ${locked} kapitler gjenstår.`}
-        </p>
-        <div className="g-handbook">
-          {g.knowledge.map((id) => {
-            const card = knowledgeCard(id);
-            if (!card) return null;
-            const isOpen = open === id;
-            return (
-              <article key={id} className={isOpen ? "is-open" : ""}>
-                <button className="g-handbook-title" onClick={() => setOpen(isOpen ? null : id)} aria-expanded={isOpen}>
-                  {card.title}
-                </button>
-                {isOpen && card.paragraphs.map((p) => <p key={p}>{p}</p>)}
-              </article>
-            );
-          })}
         </div>
       </div>
     </div>
@@ -184,6 +148,7 @@ function Celebration({ g, onClose }: { g: GameState; onClose: () => void }) {
 
 function TopBar({ g, api, onBook }: { g: GameState; api: GameApi; onBook: () => void }) {
   const stats = computePlantStats(g);
+  const unread = g.knowledge.filter((k) => !g.readChapters.includes(k)).length;
   return (
     <header className="g-top">
       <div className="g-top-row">
@@ -221,7 +186,7 @@ function TopBar({ g, api, onBook }: { g: GameState; api: GameApi; onBook: () => 
         <button className="g-book" onClick={onBook} aria-label="Fagboka">
           <span aria-hidden="true">📖</span>
           <span className="hide-narrow"> Fagbok</span>
-          {g.unreadKnowledge > 0 && <span className="g-badge">{g.unreadKnowledge}</span>}
+          {unread > 0 && <span className="g-badge">{unread}</span>}
         </button>
       </div>
       <div className="g-top-row g-kpis">
@@ -249,6 +214,7 @@ export function GameApp() {
   const { game: g, act } = api;
   const [view, setView] = useState<View>("verket");
   const [bookOpen, setBookOpen] = useState(false);
+  const [bookChapter, setBookChapter] = useState<string | null>(null);
   const [winSeen, setWinSeen] = useState(false);
 
   useEffect(() => {
@@ -263,8 +229,14 @@ export function GameApp() {
     setView(v);
     if (!g.seenViews.includes(v)) act((gg) => void gg.seenViews.push(v));
   };
-  const openBook = () => {
-    act((gg) => void (gg.unreadKnowledge = 0));
+  /** Åpner fagboka på et kapittel (eller det første uleste) og merker det som lest */
+  const openBook = (chapter?: string) => {
+    const start = chapter ?? g.knowledge.find((k) => !g.readChapters.includes(k)) ?? null;
+    act((gg) => {
+      gg.unreadKnowledge = 0;
+      if (start && !gg.readChapters.includes(start)) gg.readChapters.push(start);
+    });
+    setBookChapter(start);
     setBookOpen(true);
   };
 
@@ -275,7 +247,7 @@ export function GameApp() {
     <div className="g-app">
       <div className="g-behind" inert={modalOpen}>
         <div className="g-head">
-          <TopBar g={g} api={api} onBook={openBook} />
+          <TopBar g={g} api={api} onBook={() => openBook()} />
 
           <nav className="g-nav" aria-label="Hovedmeny">
             {VIEWS.filter((v) => viewUnlocked(g, v.id)).map((v) => {
@@ -306,11 +278,11 @@ export function GameApp() {
         </div>
 
         <main className="g-main">
-          {shown === "verket" && <Overview g={g} stats={stats} act={act} go={go} />}
+          {shown === "verket" && <Overview g={g} stats={stats} act={act} go={go} openBook={openBook} />}
           {shown === "marked" && <Market g={g} stats={stats} act={act} />}
           {shown === "salg" && <Sales g={g} stats={stats} act={act} />}
           {shown === "folk" && <People g={g} stats={stats} act={act} />}
-          {shown === "forskning" && <ResearchPage g={g} stats={stats} act={act} onQuit={api.quit} />}
+          {shown === "forskning" && <ResearchPage g={g} stats={stats} act={act} onQuit={api.quit} openBook={openBook} />}
         </main>
       </div>
 
@@ -322,14 +294,16 @@ export function GameApp() {
         ))}
       </div>
 
-      {bookOpen && <Handbook g={g} onClose={() => setBookOpen(false)} />}
+      {bookOpen && <Handbook g={g} act={act} initial={bookChapter} onClose={() => setBookOpen(false)} />}
 
       {g.pendingDecision && !g.pendingManual && (
         <DecisionCard
           g={g}
           onChoose={(i) => {
+            const chapter = g.pendingDecision?.options[i]?.chapter;
             act((gg) => resolveDecision(gg, i));
             buzz(15);
+            if (chapter) openBook(chapter);
           }}
         />
       )}

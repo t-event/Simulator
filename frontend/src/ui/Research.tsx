@@ -7,7 +7,15 @@ import { Card } from "./common";
 import { buzz } from "./haptics";
 
 /** Forskning: fagpoeng brukes på å låse opp utstyr og forbedringer. */
-export function Research({ g, act }: { g: GameState; act: GameApi["act"] }) {
+export function Research({
+  g,
+  act,
+  openBook,
+}: {
+  g: GameState;
+  act: GameApi["act"];
+  openBook: (chapter?: string) => void;
+}) {
   const options = researchOptions(g);
   // Vis det som er aktuelt nå og ett nivå fram; resten som en teaser
   const rank = (r: (typeof options)[number]) => (r.available ? 0 : r.locked ? 2 : 1);
@@ -25,7 +33,8 @@ export function Research({ g, act }: { g: GameState; act: GameApi["act"] }) {
       className="g-research"
     >
       <p className="g-muted">
-        Fagpoeng tjener du på å smelte, levere og kjøre charger selv – og på feil, fordi du lærer av dem.
+        Fagpoeng tjener du på å smelte, levere og kjøre charger selv, på quizer og oppdrag i fagboka – og på feil,
+        fordi du lærer av dem. Før du forsker, må du lese kapitlet om det i fagboka.
         {ready > 0 && ` Du kan forske på ${ready} ting nå.`}
       </p>
       {open.length === 0 && <p className="g-muted">Alt som finnes på dette nivået, er forsket fram.</p>}
@@ -54,7 +63,13 @@ export function Research({ g, act }: { g: GameState; act: GameApi["act"] }) {
                 >
                   Forsk
                 </button>
-                {r.reason && <span className="g-muted">{r.reason}</span>}
+                {r.reads && !g.readChapters.includes(r.reads) ? (
+                  <button className="g-small" onClick={() => openBook(r.reads)}>
+                    📖 Les kapitlet
+                  </button>
+                ) : (
+                  r.reason && <span className="g-muted">{r.reason}</span>
+                )}
               </div>
             )}
           </div>

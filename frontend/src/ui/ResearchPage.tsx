@@ -14,9 +14,10 @@ interface Props {
   stats: PlantStats;
   act: GameApi["act"];
   onQuit: () => void;
+  openBook: (chapter?: string) => void;
 }
 
-export function ResearchPage({ g, stats, act, onQuit }: Props) {
+export function ResearchPage({ g, stats, act, onQuit, openBook }: Props) {
   const [confirmQuit, setConfirmQuit] = useState(false);
   const loanRoom = Math.max(0, maxLoan(g) - g.loan);
   const loanStep = Math.max(10_000, Math.round(maxLoan(g) / 4 / 10_000) * 10_000);
@@ -24,7 +25,7 @@ export function ResearchPage({ g, stats, act, onQuit }: Props) {
   return (
     <div className="g-grid">
       <div className="g-col-wide">
-        <Research g={g} act={act} />
+        <Research g={g} act={act} openBook={openBook} />
       </div>
 
       <div className="g-col">

@@ -36,7 +36,13 @@ høyeste effekt, skiftplan med nattillegg under Folk, og hendelseskort om betalt
 iPhone 13 med et støperi på to skift: nattskift gir 15 % nattillegg og lavere strømpris, nattariff
 binder avtalen i 30 døgn, ingen horisontal scroll, ingen konsollfeil. Balanse 12 / 44 / 104 / 185.
 
-**Gjenstår:** Tema F–G i arbeidslisten.
+**Tema F (B-025):** Forskning krever at kapitlet er lest, quiz per kapittel med fagpoeng, oppdrag
+fra fagboka med belønning, og rådgiver med spesialist ved gjentatte omdømmetap. Testet på iPhone 13:
+quiz riktig gir +2 FP og åpner Forskning-fanen, feil svar viser forklaring og sperre til neste døgn,
+«Les kapitlet» åpner riktig kapittel og låser opp forskningen. Rådgiveren testet i Node (spesialistene
+virker). Ingen konsollfeil. Balanse 10 / 40 / 104 / 180.
+
+**Gjenstår:** Tema G i arbeidslisten.
 
 ---
 

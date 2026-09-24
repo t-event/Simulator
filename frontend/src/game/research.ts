@@ -6,6 +6,7 @@
  * låser opp utstyr, forbedringer og kapitler i fagboka.
  */
 import { STAGES } from "./data";
+import { knowledgeCard } from "./knowledge";
 import type { GameState, ScrapId } from "./types";
 
 export interface Research {
@@ -20,6 +21,8 @@ export interface Research {
   scrap?: ScrapId[];
   /** Raskeste spillfart dette låser opp (3× eller 10×) */
   speed?: number;
+  /** Kapittel i fagboka som må være lest før man kan forske (B-025) */
+  reads?: string;
   /** Fagbokkapittel som låses opp */
   knowledge?: string;
   description: string;
@@ -282,6 +285,38 @@ export const RESEARCH: Research[] = [
   },
 ];
 
+/**
+ * Kapitlet man må lese før hver forskning (B-025). Kapitlet kommer i fagboka så
+ * snart forskningen er synlig, så lesing blir en del av å låse opp nye ting.
+ */
+const READS: Record<string, string> = {
+  skrapkjop: "skrap",
+  energistyring: "start",
+  kundepleie: "omdomme",
+  induksjon: "induksjon",
+  maskinforming: "stoping",
+  rontgen: "analyse",
+  stralevern: "radioaktivitet",
+  nyskrap: "skrap",
+  vedlikeholdsplan: "ildfast",
+  opplaering: "folk",
+  blokkstoping: "stoping",
+  spektrometri: "analyse",
+  sortering: "skrap",
+  rajern: "karbon",
+  sikkerhet: "folk",
+  ildfast: "ildfast",
+  lysbue: "lysbue",
+  strengstoping: "streng",
+  osemetallurgi: "oseovn",
+  forvarming: "lysbue",
+  hoyeffekt: "strom",
+  skumslagg: "fosfor",
+  valsing: "valsing",
+  eksport: "omdomme",
+};
+for (const r of RESEARCH) r.reads = READS[r.id];
+
 /** Skraptypene man kan kjøpe fra start */
 export const START_SCRAP: ScrapId[] = ["blandet", "tungt", "retur"];
 
@@ -329,6 +364,8 @@ export function researchOptions(g: GameState): ResearchOption[] {
     else {
       const missing = (r.requires ?? []).find((id) => !hasResearch(g, id));
       if (missing) reason = `Krever ${RESEARCH.find((x) => x.id === missing)?.name.toLowerCase() ?? missing}`;
+      else if (r.reads && !g.readChapters.includes(r.reads))
+        reason = `Les «${knowledgeCard(r.reads)?.title ?? r.reads}» i fagboka først`;
       else if (g.researchPoints < r.cost) reason = `Mangler ${Math.ceil(r.cost - g.researchPoints)} fagpoeng`;
     }
     return { ...r, done, locked, available: !done && reason === null, reason: done ? null : reason };

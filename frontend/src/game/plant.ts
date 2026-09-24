@@ -259,7 +259,8 @@ export function computePlantStats(g: GameState): PlantStats {
   const casting = castingType(g);
   const staff = staffing(g);
 
-  const lab: 0 | 1 | 2 = has(g, "oes") ? 2 : has(g, "xrf") ? 1 : 0;
+  // En innleid kvalitetsingeniør måler alt med spektrometer (B-025)
+  const lab: 0 | 1 | 2 = has(g, "oes") || (g.specialists?.reklamasjon ?? 0) > g.minute ? 2 : has(g, "xrf") ? 1 : 0;
 
   // Ferdigheten til de som faktisk står i produksjonen
   const floor = g.workers.filter((w) => w.role !== "salg" && w.role !== "vedlikehold" && w.role !== "planlegger");
@@ -408,5 +409,5 @@ export function unlockedAddons(g: GameState): Addon[] {
 }
 
 export function hasPlanner(g: GameState): boolean {
-  return g.workers.some((w) => w.role === "planlegger");
+  return g.workers.some((w) => w.role === "planlegger") || (g.specialists?.sen ?? 0) > g.minute;
 }

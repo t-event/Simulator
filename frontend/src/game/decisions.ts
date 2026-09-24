@@ -9,7 +9,8 @@ import { SCRAP_TYPES, STAGES } from "./data";
 import { acceptContract, addCost, addIncome, addScrapParti, adjustReputation, fmtKr, fmtT, log, makeCandidate, scrapPrice, unlock } from "./engine";
 import { computePlantStats, day, productPrice } from "./plant";
 import { chance, pick, uniform } from "./random";
-import type { Contract, Decision, GameState } from "./types";
+import { knowledgeCard } from "./knowledge";
+import type { Contract, Decision, GameState, RepCause } from "./types";
 
 const DAILY_CHANCE = 0.25;
 
@@ -229,6 +230,73 @@ export function maybeCreateDecision(g: GameState): void {
   }
 }
 
+// ------------------------------------------------------------------ //
+// Rådgiveren (B-025): kommer når omdømmet faller flere ganger av samme grunn
+// ------------------------------------------------------------------ //
+const ADVICE: Record<RepCause, { chapter: string; title: string; text: string; specialist: string; effect: string }> = {
+  reklamasjon: {
+    chapter: "analyse",
+    title: "Rådgiveren: kundene reklamerer",
+    text: "Kundene har reklamert flere ganger på kort tid. Det betyr at stålet ikke holder analysen de betaler for. Oftest er resepten for nær grensene, eller du vet ikke sikkert hva som er i stålet fordi du ikke måler det. Prøv «Foreslå billigste resept» under Marked, og skaff et analyseinstrument.",
+    specialist: "Kvalitetsingeniør",
+    effect: "Måler alt stål med spektrometer i ti døgn, så bare partier som holder kravet leveres.",
+  },
+  sen: {
+    chapter: "omdomme",
+    title: "Rådgiveren: leveransene kommer for sent",
+    text: "Flere kontrakter har gått over fristen. Enten tar du på deg mer enn verket rekker, eller så produseres ting i feil rekkefølge. Sett kontraktene med kortest frist øverst i ordrekøen, og si nei til forespørsler du ikke rekker.",
+    specialist: "Innleid planlegger",
+    effect: "Sorterer ordrekøen etter frist og kjøper inn skrap i ti døgn.",
+  },
+  havari: {
+    chapter: "ildfast",
+    title: "Rådgiveren: for mange havarier",
+    text: "Verket har hatt flere havarier på kort tid. En gjennombrent foring koster mange ganger en planlagt omforing. Bytt foringen før den er slitt, og vurder en vedlikeholdsplan.",
+    specialist: "Vedlikeholdsspesialist",
+    effect: "Bytter foringen i tide i ti døgn og går gjennom ovnene med en gang.",
+  },
+};
+
+const ADVISOR_WINDOW_DAYS = 10;
+const ADVISOR_COOLDOWN_DAYS = 20;
+export const SPECIALIST_DAYS = 10;
+
+export function specialistCost(g: GameState): number {
+  return 15_000 * (1 + g.stage) ** 2;
+}
+
+/** Tre omdømmetap av samme grunn på ti døgn gir besøk av rådgiveren. */
+export function maybeAdvisor(g: GameState): void {
+  const today = day(g);
+  for (const cause of Object.keys(ADVICE) as RepCause[]) {
+    const recent = g.repLog.filter((r) => r.cause === cause && r.day > today - ADVISOR_WINDOW_DAYS).length;
+    if (recent < 3) continue;
+    if ((g.advisorSeen[cause] ?? -999) > today - ADVISOR_COOLDOWN_DAYS) continue;
+    const a = ADVICE[cause];
+    const cost = specialistCost(g);
+    g.advisorSeen[cause] = today;
+    g.pendingDecision = {
+      id: "radgiver",
+      title: a.title,
+      text: a.text,
+      options: [
+        { label: `Lei inn ${a.specialist.toLowerCase()} (${fmtKr(cost)})`, hint: a.effect },
+        { label: "Les om det i fagboka", hint: knowledgeCard(a.chapter)?.title, chapter: a.chapter },
+        { label: "Jeg ordner det selv" },
+      ],
+      data: { cause, cost },
+      resumeSpeed: g.speed > 0 ? g.speed : 1,
+    };
+    g.speed = 0;
+    return;
+  }
+}
+
+/** Er en innleid spesialist for denne årsaken på jobb nå? */
+export function specialistActive(g: GameState, cause: RepCause): boolean {
+  return (g.specialists[cause] ?? 0) > g.minute;
+}
+
 export function resolveDecision(g: GameState, option: number): void {
   const d = g.pendingDecision;
   if (!d) return;
@@ -374,6 +442,15 @@ export function resolveDecision(g: GameState, option: number): void {
         log(g, "Det gikk bra denne gangen.", "info");
       }
       return;
+    case "radgiver": {
+      if (!yes) return;
+      const cause = d.data.cause as RepCause;
+      addCost(g, "annet", n("cost"));
+      g.specialists[cause] = g.minute + SPECIALIST_DAYS * 1440;
+      if (cause === "havari") for (const f of g.furnaces) if (f.wear > 0.5) f.relineRequested = true;
+      log(g, `${ADVICE[cause].specialist} er leid inn i ${SPECIALIST_DAYS} døgn. ${ADVICE[cause].effect}`, "good");
+      return;
+    }
     case "utkobling":
       if (!yes) return;
       g.gridCut = { fromMin: n("from"), untilMin: n("until") };
