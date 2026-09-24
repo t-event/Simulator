@@ -135,30 +135,6 @@ export function Build({ g, stats, act, onQuit }: Props) {
           </div>
         </Card>
 
-        <Card title="Foring">
-          <label className="g-toggle">
-            <input
-              type="checkbox"
-              checked={g.settings.autoReline}
-              onChange={(e) => act((gg) => void (gg.settings.autoReline = e.target.checked))}
-            />
-            <span>Bytt foring automatisk ved {fmtPct(g.settings.relineAt)} slitasje</span>
-          </label>
-          <input
-            type="range"
-            min={0.6}
-            max={1}
-            step={0.05}
-            value={g.settings.relineAt}
-            aria-label="Grense for automatisk omforing"
-            onChange={(e) => act((gg) => void (gg.settings.relineAt = Number(e.target.value)))}
-          />
-          <p className="g-muted">
-            Ny foring koster {fmtKr(stats.furnace.relineCost)} og tar {stats.furnace.relineHours} timer. Over 90 % øker
-            faren for gjennombrenning raskt.
-          </p>
-        </Card>
-
         {stats.furnace.arc && (
           <Card title="Valsing">
             <label className="g-toggle">

@@ -74,6 +74,10 @@ export interface FurnaceUnit {
   downUntilMin: number;
   downReason: string | null;
   heatsOnLining: number;
+  /** Døgnet foringen sist ble byttet */
+  lastRelineDay: number;
+  /** Spilleren har bedt om ny foring; skjer så snart ovnen er tom */
+  relineRequested: boolean;
   /** Hvorfor ovnen står og venter, for visning */
   waitReason: string | null;
 }
@@ -161,8 +165,11 @@ export interface DayFinance {
 }
 
 export interface Settings {
+  /** Reparatøren bytter foringen når den når relineAt (krever en reparatør) */
   autoReline: boolean;
   relineAt: number;
+  /** Planlagt omforing hvert N. døgn (krever forskningen «Vedlikeholdsplan»); null = av */
+  relinePlanDays: number | null;
   /** Start ikke ny charge når strømprisen er over dette (kr/kWh). null = ingen grense */
   maxPowerPrice: number | null;
   autoBuy: boolean;

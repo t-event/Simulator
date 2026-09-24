@@ -2,7 +2,7 @@
  * Det spilleren kan gjøre: bygge ut, kjøpe utstyr, ansette, låne og styre produksjonen.
  */
 import { ADDONS, CASTINGS, FURNACES, GRADES, PRODUCTS, SCRAP_IDS, STAGES, type Addon } from "./data";
-import { addCost, fmtKr, fmtT, log, orderQueue, maxLoan, newFurnaceUnit, unlock, type PurchaseResult } from "./engine";
+import { addCost, fmtKr, fmtT, log, orderQueue, startReline, maxLoan, newFurnaceUnit, unlock, type PurchaseResult } from "./engine";
 import { castingType, computePlantStats, day, furnaceType, has } from "./plant";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions } from "./research";
 import type { GameState, GradeId, ScrapId } from "./types";
@@ -299,6 +299,18 @@ export function setTargetGrade(g: GameState, grade: GradeId): void {
   g.targetGrade = grade;
   const saved = g.gradeRecipes[grade];
   if (saved) g.recipe = { ...saved };
+}
+
+/** Ber om ny foring: straks hvis ovnen er tom, ellers så snart chargen er ferdig. */
+export function requestReline(g: GameState, index: number): PurchaseResult {
+  const f = g.furnaces[index];
+  if (!f) return fail("Ukjent ovn.");
+  if (!f.heat && !f.holding && g.minute >= f.downUntilMin) return startReline(g, index);
+  f.relineRequested = !f.relineRequested;
+  return {
+    ok: true,
+    message: f.relineRequested ? "Foringen byttes når chargen er ferdig." : "Omforingen er avbestilt.",
+  };
 }
 
 /** Flytter en aktiv kontrakt opp (−1) eller ned (+1) i ordrekøen. */

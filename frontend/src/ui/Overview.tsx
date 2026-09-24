@@ -1,7 +1,8 @@
 import { requestManual, setTargetGrade, upgradeOptions } from "../game/actions";
+import { Maintenance } from "./Maintenance";
 import { researchOptions } from "../game/research";
 import { GRADE_IDS, GRADES, PRODUCTS, ROLES, STAGES } from "../game/data";
-import { currentOrder, recipeEstimate, startReline } from "../game/engine";
+import { currentOrder, recipeEstimate } from "../game/engine";
 import { castingType, rollingActive, type PlantStats } from "../game/plant";
 import type { GameState, GradeId, RoleId } from "../game/types";
 import type { GameApi } from "../game/useGame";
@@ -42,8 +43,8 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
   }
   if (g.castWait === "Ferdigvarelageret er fullt")
     out.push({ text: "Ferdigvarelageret er fullt. Selg partier på spot under Salg.", view: "salg" });
-  if (g.furnaces.some((f) => f.wear > 0.85) && !g.settings.autoReline)
-    out.push({ text: "Foringen er nesten slitt gjennom. Bytt den før den brenner gjennom." });
+  if (g.furnaces.some((f) => f.wear > 0.8 && !f.relineRequested))
+    out.push({ text: "Foringen er nesten slitt gjennom. Bytt den under Vedlikehold før den brenner gjennom." });
   const est = recipeEstimate(g, g.targetGrade, stats);
   if (!est.grades.includes(g.targetGrade))
     out.push({
@@ -158,18 +159,7 @@ export function Overview({ g, stats, act, go }: Props) {
                     <Bar value={0} />
                   )}
                   <p>{st.text}</p>
-                  <p className="g-muted">
-                    Foring {fmtPct(f.wear)} slitt
-                    {f.wear > 0.6 && (
-                      <button
-                        className="g-small"
-                        disabled={!!f.heat || !!f.holding}
-                        onClick={() => act((gg) => startReline(gg, i))}
-                      >
-                        Bytt foring ({fmtKr(stats.furnace.relineCost)})
-                      </button>
-                    )}
-                  </p>
+                  <p className="g-muted">Foring {fmtPct(f.wear)} slitt</p>
                 </div>
               );
             })}
@@ -211,6 +201,7 @@ export function Overview({ g, stats, act, go }: Props) {
             </div>
           </div>
         </Card>
+              <Maintenance g={g} stats={stats} act={act} />
       </div>
 
       <div className="g-col">

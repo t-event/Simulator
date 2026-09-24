@@ -6,7 +6,7 @@
  * rekker, ansetter folk og bygger ut når det er råd. Skriptet sjekker at
  * progresjonen havner innenfor målene, og feiler ellers (brukes i CI).
  */
-import { buyUpgrade, doResearch, hire, setRecipe, setTargetGrade, upgradeOptions } from "./actions";
+import { buyUpgrade, doResearch, hire, requestReline, setRecipe, setTargetGrade, upgradeOptions } from "./actions";
 import { resolveDecision } from "./decisions";
 import { researchOptions } from "./research";
 import { SCRAP_IDS, STAGES } from "./data";
@@ -91,6 +91,11 @@ function botHour(g: GameState): void {
   for (const r of researchOptions(g)) if (r.available) doResearch(g, r.id);
   const stats = computePlantStats(g);
   const today = day(g);
+
+  // Foring: bestill ny foring før den blir farlig tynn (skjer ikke av seg selv, B-022)
+  g.furnaces.forEach((f, i) => {
+    if (f.wear >= 0.88 && !f.relineRequested && g.minute >= f.downUntilMin) requestReline(g, i);
+  });
 
   // Kontrakter: ta de som kan lages og rekkes
   const active = g.contracts.filter((c) => c.status === "aktiv");

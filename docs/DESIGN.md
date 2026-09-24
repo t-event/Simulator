@@ -108,9 +108,9 @@ Oppdater listen når noe blir gjort, så arbeidet kan fortsette i en ny samtale.
 - [x] Planlegger (ansatt) som ordner køen og innkjøp automatisk; automatisk innkjøp krever planlegger
 
 **C. Foring og vedlikehold**
-- [ ] Ingen automatisk omforing fra start: knapp «Bytt foring», plan hver N døgn (forskning), eller en
-      vedlikeholdsleder som gjør det automatisk
-- [ ] Tydelig forskjell på planlagt stans (billig, kort) og havari (dyrt, langt, omdømme)
+- [x] Ingen automatisk omforing fra start: knapp «Bytt foring», plan hver N døgn (forskning), eller en
+      reparatør som gjør det automatisk (kortet «Vedlikehold» på Verket)
+- [x] Tydelig forskjell på planlagt stans (billig, kort) og havari (dyrt, langt, omdømme)
 
 **D. Gradvis opplåsing og ryddigere grensesnitt**
 - [ ] Mindre info i starten; faner og kort låses opp etter hvert
