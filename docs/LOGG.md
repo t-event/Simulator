@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 6 – 2026-09-24: kontrakter tar lengre tid
+
+**Brukeren ba om:** «Det bør ta lengre tid å gjøre kontrakter. Det går altfor fort nå.»
+
+**Gjort:** Kontrakter settes nå til 1,5–4 døgns produksjon (B-016). Kundenes største ordre er
+hevet. Nytt analyseflagg `npx tsx src/game/balance.ts --kontrakter <frø>` viser snittid per kontrakt
+per nivå.
+
+**Testet:** Før → etter (min på 1×): garasje 0,6 → 5,3, verksted 0,9 → 2,5, støperi 1,1 → 5,0,
+stålverk 3,7 → 5,4. Balansetesten grønn (Verksted dag 13, Støperi 27, Stålverk 77, Storverk 152),
+ingen konkurs.
+
+**Gjenstår:** Hvis hele spillet fortsatt føles for raskt, er neste grep å senke spillklokka
+(`GAME_MIN_PER_REAL_S` i `data.ts`, i dag 1 døgn per minutt).
+
+---
+
 ## Økt 5 – 2026-09-24: omdømmet ble vist avrundet opp
 
 **Brukeren meldte (skjermbilde fra mobil):** «Omdømme 5 av 5» med rødt kryss, og knappen

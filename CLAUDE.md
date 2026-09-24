@@ -61,6 +61,8 @@ npx tsx src/sim/validate.ts      # prosessmodellen gir forventede nøkkeltall
 npx tsx src/game/balance.ts      # testspilleren: progresjon, ingen konkurs, kontrollrommet
 npx tsx src/game/balance.ts --verbose --finance --seed 3   # feilsøking av balansen
 npx tsx src/game/balance.ts --dump 3 > lagret.json         # lagret spill på nivå 3, for testing
+npx tsx src/game/balance.ts --kontrakter 1                 # hvor lang tid kontraktene tar per nivå
+npx tsx src/game/balance.ts --research 1                   # når testspilleren forsker
 npm run build
 ```
 

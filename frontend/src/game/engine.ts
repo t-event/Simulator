@@ -971,6 +971,9 @@ function roundTonnes(t: number): number {
   return Math.max(step, Math.round(t / step) * step);
 }
 
+/** Hvor mange døgns produksjon en kontrakt tilsvarer (se B-016) */
+const CONTRACT_DAYS: [number, number] = [1.5, 4];
+
 function makeOffer(g: GameState, stats: PlantStats): Contract | null {
   const eligible = CUSTOMERS.filter(
     (c) => c.minStage <= g.stage && c.maxStage >= g.stage && c.products.some((p) => stats.products.includes(p)),
@@ -984,8 +987,9 @@ function makeOffer(g: GameState, stats: PlantStats): Contract | null {
   const grades = customer.grades.filter((id) => GRADES[id].minStage <= g.stage);
   const grade = pick(g, grades.length ? grades : customer.grades);
   const capacity = Math.max(0.1, stats.dailyProductT);
-  const maxT = Math.max(customer.minT, Math.min(customer.maxT, capacity * 5));
-  const tonnes = roundTonnes(uniform(g, customer.minT, maxT));
+  // En kontrakt skal være et lite prosjekt: 1,5–4 døgns produksjon, ikke noe som er ferdig på sekunder
+  const workDays = uniform(g, CONTRACT_DAYS[0], CONTRACT_DAYS[1]);
+  const tonnes = roundTonnes(Math.max(customer.minT, Math.min(customer.maxT, capacity * workDays)));
   const pricePerT = Math.round(productPrice(g, product, grade) * (1 + stats.priceBonus) * uniform(g, 0.95, 1.1));
   const days = Math.min(30, Math.ceil(tonnes / (capacity * 0.6)) + randInt(g, 2, 4));
   const today = day(g);

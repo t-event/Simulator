@@ -243,6 +243,29 @@ if (process.argv.includes("--research")) {
   console.log(`dag 150: ${Math.round(g.researchPoints)} FP ubrukt`);
   process.exit?.(0);
 }
+if (process.argv.includes("--kontrakter")) {
+  // Hvor lang tid kontraktene tar fra signering til levering, per nivå (1 døgn = 1 minutt på 1×)
+  const g = newGame(Number(process.argv[process.argv.indexOf("--kontrakter") + 1]));
+  const started = new Map<number, number>();
+  const spans: number[][] = [[], [], [], [], []];
+  while (day(g) <= 150) {
+    botHour(g);
+    advance(g, 60);
+    for (const c of g.contracts) {
+      if (c.status === "aktiv" && !started.has(c.id)) started.set(c.id, g.minute);
+      if (c.status === "fullfort" && started.has(c.id) && started.get(c.id)! >= 0) {
+        spans[g.stage].push((g.minute - started.get(c.id)!) / 1440);
+        started.set(c.id, -1);
+      }
+    }
+  }
+  spans.forEach((xs, i) => {
+    if (!xs.length) return;
+    const avg = xs.reduce((a, b) => a + b, 0) / xs.length;
+    console.log(`${STAGES[i].name.padEnd(9)} ${String(xs.length).padStart(3)} kontrakter, snitt ${avg.toFixed(1)} døgn (= ${avg.toFixed(1)} min på 1×)`);
+  });
+  process.exit?.(0);
+}
 if (process.argv.includes("--replog")) {
   // Skriver ut alt som har påvirket omdømmet, for feilsøking av balansen
   const g = newGame(Number(process.argv[process.argv.indexOf("--replog") + 1]));
@@ -263,7 +286,7 @@ const seeds = process.argv.includes("--seed")
   : [1, 2, 3, 4, 5, 6];
 const DAYS = 200;
 const targets = [
-  { stage: 1, min: 4, max: 14 },
+  { stage: 1, min: 5, max: 18 },
   { stage: 2, min: 20, max: 50 },
   { stage: 3, min: 50, max: 115 },
   { stage: 4, min: 100, max: 185 },
