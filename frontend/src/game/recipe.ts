@@ -38,7 +38,7 @@ export function gradeChecks(g: GameState, grade: GradeId, a: Analysis, stats: Pl
 
   const cOk = a.c >= spec.cMin && a.c <= spec.cMax;
   // Lysbueovnen treffer karbonet omtrent; uten øseovn er et smalt karbonvindu vanskelig
-  const cShaky = cOk && stats.furnace.decarb && !has(g, "oseovn") && spec.cMax - spec.cMin < 0.15;
+  const cShaky = cOk && stats.furnace.decarb && !has(g, "oseovn") && spec.cMax - spec.cMin <= 0.15;
   out.push({
     key: "c",
     label: "Karbon",

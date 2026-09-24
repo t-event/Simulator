@@ -498,3 +498,22 @@ Beslutning:
   at foringen ikke byttes før hen er tilbake.
 - **Nestenulykke:** verneutstyr gir trivsel +5 og omdømme +1; å la det gå gir alltid trivsel −5 og
   omdømme −1, i tillegg til risikoen for skade.
+
+## B-037 Øseovnsoperatør i stedet for laborant (2026-09-24)
+Status: gjelder (erstatter laborant-rollen)
+Brukeren: laboranten byttes med øseovnsoperatør, som tar prøver, sjekker spektro og legerer øsa så stålet
+er innenfor kravet før strengstøpingen. For dårlig stål fra stålovnen gir bom; feil temperatur kan få
+strengene til å gro igjen; stål utenfor kravet må skrapes eller sperres.
+Beslutning:
+- Rollen `lab` heter nå **Øseovnsoperatør** (1 900 kr/døgn). Den trengs én per skift når verket har
+  øseovn (ikke lenger for spektrometeret), og søkere kommer fra stålverket.
+- Ferdigheten til øseovnsoperatørene på jobb (`ladleSkill`) styrer:
+  - hvor presist karbonet treffes (spredning 0,012 × (1,6 − 0,15 × ferdighet)),
+  - sjansen for feil temperatur til støping (0,03 × (1,8 − 0,2 × ferdighet)); for kaldt stål gir
+    meldingen «strengen grodde igjen»,
+  - om stål som ikke holder kravet blir oppdaget (0,45 + 0,12 × ferdighet): karbon rettes i øsa;
+    fosfor og kobber kan ikke rettes, og da **sperres** stålet (2. sortering). Blir avviket ikke oppdaget,
+    sperres stålet når det oppdages senere.
+- Fagboka (Øseovnen) forklarer rollen. Reseptsjekken advarer nå også om armering (smalt karbonvindu)
+  uten øseovn, og testspilleren tar ikke armering uten øseovn eller spektrometer.
+- Balanse: 10 / 24 / 62 / 138.

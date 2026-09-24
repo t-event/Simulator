@@ -40,6 +40,7 @@ import {
   has,
   hasGrader,
   hasPlanner,
+  ladleSkill,
   isOpen,
   nightExtra,
   PEAK_RATE_PER_MW,
@@ -483,7 +484,8 @@ function finalCarbon(g: GameState, mixC: number, grade: GradeId, stats: PlantSta
   const target = TARGET_C[grade];
   if (stats.furnace.decarb) {
     if (exact) return target;
-    const sd = has(g, "oseovn") ? 0.012 : 0.045;
+    // Øseovnen finjusterer karbonet; hvor presist avhenger av øseovnsoperatøren (B-037)
+    const sd = has(g, "oseovn") ? 0.012 * (1.6 - 0.15 * ladleSkill(g)) : 0.045;
     return Math.max(0.02, target + noise(g, sd));
   }
   const base = mixC * 0.95;
@@ -550,7 +552,8 @@ function wearFactor(g: GameState): number {
 
 function tempOffRisk(g: GameState, stats: PlantStats): number {
   let risk = stats.furnace.id === "digel" ? 0.14 : stats.furnace.arc ? 0.12 : 0.08;
-  if (stats.furnace.arc && has(g, "oseovn")) risk = 0.03;
+  // Riktig temperatur til støping er øseovnsoperatørens jobb (B-037)
+  if (stats.furnace.arc && has(g, "oseovn")) return 0.03 * (1.8 - 0.2 * ladleSkill(g));
   return risk * (1.3 - 0.1 * stats.crewSkill);
 }
 
@@ -915,13 +918,39 @@ function castBatch(g: GameState, batch: LiquidBatch, stats: PlantStats): void {
     addCost(g, "vedlikehold", 60_000);
     addReturnScrap(g, t * 0.3, batch.analysis, stats);
     t *= 0.7;
-    log(g, `Strenggjennombrudd! Skallet revnet under kokillen. Støpemaskinen står i ${hours.toFixed(1)} timer.`, "bad");
+    log(
+      g,
+      batch.tempOff && has(g, "oseovn")
+        ? `Strengen grodde igjen: stålet fra øseovnen var for kaldt. Støpemaskinen står i ${hours.toFixed(1)} timer.`
+        : `Strenggjennombrudd! Skallet revnet under kokillen. Støpemaskinen står i ${hours.toFixed(1)} timer.`,
+      "bad",
+    );
     unlock(g, "streng");
+  }
+  // Øseovnen: operatøren tar prøver og legerer. Karbon kan rettes; fosfor og kobber kan ikke.
+  // Oppdages avviket ikke, eller kan det ikke rettes, sperres stålet (B-037)
+  let blocked = false;
+  if (has(g, "oseovn") && stats.furnace.arc && !satisfies(batch.analysis, batch.grade)) {
+    const caught = chance(g, Math.min(0.95, 0.45 + 0.12 * ladleSkill(g)));
+    const spec = GRADES[batch.grade];
+    const carbonOnly = batch.analysis.p <= spec.pMax && batch.analysis.tramp <= spec.trampMax;
+    if (caught && carbonOnly) {
+      batch.analysis = { ...batch.analysis, c: TARGET_C[batch.grade] };
+    } else {
+      blocked = true;
+      log(
+        g,
+        caught
+          ? `Øseovnen fant at stålet ikke holder ${spec.name.toLowerCase()} (fosfor eller kobber), og det kan ikke legeres bort. Stålet er sperret.`
+          : "Stål som ikke holdt kravet, gikk til støping uten nok prøver. Det er oppdaget og sperret.",
+        "event",
+      );
+    }
   }
   const productT = t * casting.yield;
   addReturnScrap(g, t - productT, batch.analysis, stats);
   const defectRisk = casting.defectRisk * (batch.tempOff ? 3 : 1) * (1.3 - 0.1 * stats.crewSkill);
-  const second = chance(g, Math.min(0.9, defectRisk));
+  const second = blocked || chance(g, Math.min(0.9, defectRisk));
   // Kvalitet: traff stålet kvaliteten det ble laget for, og ble det støpt uten feil?
   if (second) g.today.secondT = (g.today.secondT ?? 0) + productT;
   else if (satisfies(batch.analysis, batch.grade)) g.today.onGradeT = (g.today.onGradeT ?? 0) + productT;
@@ -1371,7 +1400,7 @@ export function makeCandidate(g: GameState, role?: RoleId): Worker {
       g,
       roles
         .filter((x) => x !== "valse" || g.stage >= 3)
-        .filter((x) => x !== "lab" || g.stage >= 2)
+        .filter((x) => x !== "lab" || g.stage >= 3)
         .filter((x) => x !== "planlegger" || g.stage >= 2)
         .filter((x) => x !== "klasser" || g.stage >= 1)
         .filter((x) => x !== "murer" || g.stage >= 3),
