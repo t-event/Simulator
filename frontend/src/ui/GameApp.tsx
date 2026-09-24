@@ -355,7 +355,15 @@ export function GameApp() {
 
         <main className="g-main">
           {shown === "verket" && <Overview g={g} stats={stats} act={act} go={go} openBook={openBook} />}
-          {shown === "marked" && <Market g={g} stats={stats} act={act} />}
+          {shown === "marked" && (
+            <Market
+              key={subTab.tab ? `marked-${subTab.n}` : "marked"}
+              g={g}
+              stats={stats}
+              act={act}
+              openTab={subTab.tab}
+            />
+          )}
           {shown === "salg" && (
             <Sales key={subTab.tab ? `salg-${subTab.n}` : "salg"} g={g} stats={stats} act={act} openTab={subTab.tab} />
           )}

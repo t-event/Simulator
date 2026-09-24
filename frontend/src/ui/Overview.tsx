@@ -53,9 +53,10 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
     out.push({
       text: `Skrapklasseren venter på skrap som passer resepten. ${scrapStopHelp(g)}`,
       view: "marked",
+      sub: "skrap",
     });
   if (waits.includes("Tomt for skrap"))
-    out.push({ text: `Ovnen står fordi skraplageret er tomt. ${scrapStopHelp(g)}`, view: "marked" });
+    out.push({ text: `Ovnen står fordi skraplageret er tomt. ${scrapStopHelp(g)}`, view: "marked", sub: "skrap" });
   if (waits.includes("Mangler folk")) {
     const missing = Object.entries(stats.missing)
       .map(
@@ -79,6 +80,7 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
       out.push({
         text: `Resepten din holder ikke kravet til ${GRADES[grade].name.toLowerCase()}. Juster resepten under Marked.`,
         view: "marked",
+        sub: "resept",
       });
   }
   const research = researchOptions(g).filter((r) => r.available);
@@ -157,7 +159,7 @@ function Quality({
             {fmtPct(second / total)} fikk støpefeil. Stål som bommer, kan ikke leveres på kontrakten og selges billig.
           </p>
           {off / total > 0.05 && (
-            <button className="g-small" onClick={() => go("marked")}>
+            <button className="g-small" onClick={() => go("marked", "resept")}>
               Se på resepten
             </button>
           )}
@@ -203,7 +205,7 @@ function CompactChain({
   return (
     <section className="g-card g-mini-chain" aria-label="Produksjonslinja">
       <div className="g-mini-row">
-        <button className="g-mini" onClick={() => go("marked")}>
+        <button className="g-mini" onClick={() => go("marked", "skrap")}>
           <span>Skrap</span>
           <Bar
             value={stats.yardUsed / stats.yardT}
@@ -506,7 +508,7 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
                     {fmtT(stats.yardUsed)} av {fmtT(stats.yardT)}
                   </p>
                   <div className="g-row">
-                    <button className="g-small" onClick={() => go("marked")}>
+                    <button className="g-small" onClick={() => go("marked", "skrap")}>
                       Kjøp skrap
                     </button>
                     <StationButton g={g} station="skrap" onOpen={setSheet} />

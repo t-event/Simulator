@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 28 – 2026-09-24: Marked og Forskning med underfaner
+
+**Brukeren ba om:** Kortere og mer intuitive Marked- og Forskning-sider.
+
+**Gjort (B-051):** Underfaner på begge sider, sammenfoldede beskrivelser og innstillinger, gruppert
+forskningsliste, lenker fra Verket til riktig fane.
+
+**Testet:** tsc, lint, balanse (8 / 24 / 63 / 135). Playwright (iPhone 13): Marked Skrap 1 118 px (før ca.
+3 000), Forskning 1 304 px (før ca. 2 800), alle faner 390 px brede, tips åpner riktig fane, ingen feil.
+
+---
+
 ## Økt 27 – 2026-09-24: vikarer når verket mangler folk
 
 **Brukeren meldte (skjermbilde):** «Vikarene fungerer ikke. Skiftet går ned uansett?»

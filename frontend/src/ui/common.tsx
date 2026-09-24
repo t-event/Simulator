@@ -110,3 +110,32 @@ export function GradeSpec({ id }: { id: GradeId }) {
     </span>
   );
 }
+
+/** Underfaner øverst på en side, så sidene blir korte (B-044, B-051) */
+export function SubTabs<T extends string>({
+  tabs,
+  value,
+  onChange,
+  label,
+}: {
+  tabs: { id: T; label: string; alert?: boolean }[];
+  value: T;
+  onChange: (id: T) => void;
+  label: string;
+}) {
+  return (
+    <div className="g-subtabs" role="tablist" aria-label={label}>
+      {tabs.map((t) => (
+        <button
+          key={t.id}
+          role="tab"
+          aria-selected={value === t.id}
+          className={`${value === t.id ? "is-active" : ""}${t.alert ? " is-alert" : ""}`}
+          onClick={() => onChange(t.id)}
+        >
+          {t.label}
+        </button>
+      ))}
+    </div>
+  );
+}
