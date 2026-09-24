@@ -97,7 +97,7 @@ export const QUIZ: Record<string, QuizQuestion[]> = {
   stoping: [
     {
       q: "Hva skjer hvis stålet er for kaldt når det støpes?",
-      options: ["Det blir sterkere", "Det kan fryse i innløpet", "Ingenting"],
+      options: ["Det blir sterkere", "Det kan størkne i innløpet", "Ingenting"],
       correct: 1,
       why: "Stålet trenger litt overheting for å renne ut i formen før det størkner.",
     },
@@ -209,7 +209,7 @@ export const QUIZ: Record<string, QuizQuestion[]> = {
   streng: [
     {
       q: "Hva er et strenggjennombrudd?",
-      options: ["At skallet revner og stålet renner ut", "At strengen blir for lang", "At kokillen fryser"],
+      options: ["At skallet revner og stålet renner ut", "At strengen blir for lang", "At kokillen smelter"],
       correct: 0,
       why: "Skallet under kokillen er tynt. Revner det, renner flytende stål ut.",
     },
