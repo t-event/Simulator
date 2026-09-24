@@ -3,8 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Meldingsformidler for flermaskin-øvelser i stålovnssimulatoren",
+  "description": "Serverer simulatoren på lokalnettet og formidler meldinger for flermaskin-øvelser",
   "scripts": {
+    "bygg": "npm --prefix ../frontend ci && npm --prefix ../frontend run build",
     "start": "node server.js"
   },
   "dependencies": {

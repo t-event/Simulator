@@ -6,19 +6,32 @@ import { DEFAULT_TICK_HZ } from "../sim/constants";
 import { readSessionConfig, type SessionConfig } from "../session";
 import type { FurnaceState } from "../types";
 
-export type ConnectionStatus = "lokal" | "connecting" | "open" | "closed";
+export type ConnectionStatus = "lokal" | "connecting" | "open" | "closed" | "erstattet" | "feil";
 
 const TICK_MS = 1000 / DEFAULT_TICK_HZ;
 // Fanen kan bli strupet i bakgrunnen; da vil vi heller hoppe over tid enn å
 // simulere et enormt sprang på ett steg
-const MAX_STEP_S = 2;
+const MAX_ELAPSED_S = 2;
+// Prosessmodellen er kalibrert med steg på 1 s. Ved høy tidsskalering deles
+// hvert tick opp, så modellen oppfører seg likt uansett hastighet.
+const MAX_SUBSTEP_S = 1;
+// Relayen lukker med denne koden når en annen vert tar over rommet
+const HOST_CLOSED_BY_TAKEOVER = 4000;
 
 interface SimulationApi {
   state: FurnaceState | null;
   status: ConnectionStatus;
+  statusDetail: string | null;
   session: SessionConfig;
   sendCommand: (action: string, payload?: Record<string, unknown>) => void;
   sendInstructor: (action: string, payload?: Record<string, unknown>) => void;
+}
+
+function missingRelayMessage(): string {
+  return (
+    "Flermaskin-modus trenger en relay. GitHub Pages kan ikke brukes til det – " +
+    "start relayen på lokalnettet og åpn adressen den skriver ut."
+  );
 }
 
 export function useSimulation(): SimulationApi {
@@ -32,35 +45,63 @@ export function useSimulation(): SimulationApi {
   const [state, setState] = useState<FurnaceState | null>(() =>
     sim ? serializeState(sim) : null,
   );
-  const [status, setStatus] = useState<ConnectionStatus>(
-    session.mode === "deltaker" ? "connecting" : "lokal",
+  const needsRelay = session.mode !== "lokal";
+  const [status, setStatus] = useState<ConnectionStatus>(() => {
+    if (!needsRelay) return "lokal";
+    return session.relayUrl ? "connecting" : "feil";
+  });
+  const [statusDetail, setStatusDetail] = useState<string | null>(() =>
+    needsRelay && !session.relayUrl ? missingRelayMessage() : null,
   );
   const wsRef = useRef<WebSocket | null>(null);
 
   // --- tilkobling til relay (vert og deltaker) ----------------------------
   useEffect(() => {
-    if (session.mode === "lokal" || !session.relayUrl) return;
+    if (!needsRelay || !session.relayUrl) return;
 
     let cancelled = false;
     let retryTimer: ReturnType<typeof setTimeout>;
+    const url = new URL(session.relayUrl);
+    url.searchParams.set("rom", session.room);
+    url.searchParams.set("rolle", session.mode === "vert" ? "vert" : "deltaker");
 
     const connect = () => {
       if (cancelled) return;
-      setStatus("connecting");
-      const url = `${session.relayUrl}?rom=${encodeURIComponent(session.room)}&rolle=${
-        session.mode === "vert" ? "vert" : "deltaker"
-      }`;
-      const socket = new WebSocket(url);
+      let socket: WebSocket;
+      try {
+        socket = new WebSocket(url);
+      } catch {
+        // Typisk en https-side som prøver å åpne ws:// – nettleseren nekter det
+        setStatus("feil");
+        setStatusDetail(
+          `Nettleseren nekter forbindelsen til ${session.relayUrl}. En side lastet over ` +
+            "https kan ikke koble til en ukryptert relay – åpn appen fra relayens egen adresse.",
+        );
+        return;
+      }
       wsRef.current = socket;
+      setStatus("connecting");
 
-      socket.onopen = () => setStatus("open");
-      socket.onclose = () => {
+      socket.onopen = () => {
+        setStatus("open");
+        setStatusDetail(null);
+      };
+      socket.onclose = (event) => {
+        if (event.code === HOST_CLOSED_BY_TAKEOVER) {
+          setStatus("erstattet");
+          setStatusDetail("En annen vert har tatt over rommet. Denne ovnen deles ikke lenger.");
+          return;
+        }
         setStatus("closed");
+        setStatusDetail(`Får ikke kontakt med relayen på ${url.host}. Prøver igjen…`);
         if (!cancelled) retryTimer = setTimeout(connect, 1500);
       };
       socket.onerror = () => socket.close();
       socket.onmessage = (event) => {
-        let msg: { type?: string; action?: string; payload?: Record<string, unknown> } & {
+        let msg: {
+          type?: string;
+          action?: string;
+          payload?: Record<string, unknown>;
           state?: FurnaceState;
         };
         try {
@@ -88,7 +129,7 @@ export function useSimulation(): SimulationApi {
       wsRef.current?.close();
       wsRef.current = null;
     };
-  }, [sim, session.mode, session.relayUrl, session.room]);
+  }, [sim, needsRelay, session.mode, session.relayUrl, session.room]);
 
   // --- simuleringsløkke ---------------------------------------------------
   useEffect(() => {
@@ -98,11 +139,14 @@ export function useSimulation(): SimulationApi {
 
     const timer = setInterval(() => {
       const now = performance.now();
-      const elapsedS = Math.min((now - last) / 1000, MAX_STEP_S);
+      const elapsedS = Math.min((now - last) / 1000, MAX_ELAPSED_S);
       last = now;
 
       const dtS = elapsedS * sim.state.timeScale;
-      if (dtS > 0) sim.step(dtS);
+      if (dtS > 0) {
+        const substeps = Math.ceil(dtS / MAX_SUBSTEP_S);
+        for (let i = 0; i < substeps; i++) sim.step(dtS / substeps);
+      }
 
       const snapshot = serializeState(sim);
       setState(snapshot);
@@ -142,5 +186,5 @@ export function useSimulation(): SimulationApi {
     [dispatch],
   );
 
-  return { state, status, session, sendCommand, sendInstructor };
+  return { state, status, statusDetail, session, sendCommand, sendInstructor };
 }

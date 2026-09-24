@@ -17,12 +17,16 @@
 }
 
 html,
-body,
-#root {
-  height: 100%;
+body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+#root {
+  min-height: 100vh;
 }
 
 button {
@@ -34,10 +38,15 @@ button {
   border-radius: 4px;
   padding: 6px 10px;
   font-size: 13px;
+  /* Fjerner forsinkelsen mobilnettlesere legger inn for dobbelttrykk-zoom */
+  touch-action: manipulation;
 }
 
-button:hover:not(:disabled) {
-  background: #344056;
+/* Bare på enheter med ekte hover – ellers blir stilen hengende etter et trykk */
+@media (hover: hover) {
+  button:hover:not(:disabled) {
+    background: #344056;
+  }
 }
 
 button:disabled {

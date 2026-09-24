@@ -2,11 +2,13 @@ import type { FurnaceState } from "../types";
 
 interface Props {
   state: FurnaceState;
+  /** Mobil: beskåret bilde med større tekst; nøkkeltallene vises under som HTML */
+  compact?: boolean;
 }
 
 const ELECTRODE_X = [330, 390, 450];
 
-export function FurnaceMimic({ state }: Props) {
+export function FurnaceMimic({ state, compact = false }: Props) {
   const arcOn = state.power_on;
   const chargeProgress =
     state.charge_total_kg > 0
@@ -15,8 +17,13 @@ export function FurnaceMimic({ state }: Props) {
   const bathFill = Math.min(1, state.liquid_mass_kg / 120000);
   const solidPile = Math.min(1, state.solid_scrap_kg / 12000);
 
-  return (
-    <svg viewBox="0 0 760 400" className="furnace-mimic" role="img" aria-label="Prosessdiagram stålovn">
+  const svg = (
+    <svg
+      viewBox={compact ? "0 20 560 380" : "0 0 760 400"}
+      className={`furnace-mimic${compact ? " compact" : ""}`}
+      role="img"
+      aria-label="Prosessdiagram stålovn"
+    >
       <rect x="0" y="0" width="760" height="400" fill="var(--panel-bg)" />
 
       {/* --- Conveyor med forvarmingsdel --- */}
@@ -24,8 +31,8 @@ export function FurnaceMimic({ state }: Props) {
         <text x="20" y="40" className="mimic-label">
           SKRAPLASTING
         </text>
-        <rect x="20" y="52" width="110" height="26" rx="3" fill="#2a3340" stroke="#4a5568" />
-        <text x="75" y="69" textAnchor="middle" className="mimic-value">
+        <rect x="20" y="52" width={compact ? 128 : 110} height="26" rx="3" fill="#2a3340" stroke="#4a5568" />
+        <text x={compact ? 84 : 75} y="70" textAnchor="middle" className="mimic-value">
           {(state.charge_remaining_kg / 1000).toFixed(1)} t igjen
         </text>
 
@@ -72,15 +79,27 @@ export function FurnaceMimic({ state }: Props) {
       </g>
 
       {/* --- Avgass til renseanlegg --- */}
-      <g>
-        <path d="M 470 150 L 560 150 L 560 40 L 700 40" fill="none" stroke="#4a5568" strokeWidth="10" />
-        <text x="610" y="30" textAnchor="middle" className="mimic-label">
-          AVGASS → RENSEANLEGG
-        </text>
-        <text x="610" y="60" textAnchor="middle" className="mimic-value">
-          {state.offgas_temp_c.toFixed(0)} °C · CO {state.offgas_co_pct.toFixed(1)} %
-        </text>
-      </g>
+      {compact ? (
+        <g>
+          <path d="M 470 150 L 536 150 L 536 30 L 560 30" fill="none" stroke="#4a5568" strokeWidth="10" />
+          <text x="524" y="44" textAnchor="end" className="mimic-label">
+            AVGASS
+          </text>
+          <text x="524" y="66" textAnchor="end" className="mimic-value">
+            {state.offgas_temp_c.toFixed(0)} °C · CO {state.offgas_co_pct.toFixed(1)} %
+          </text>
+        </g>
+      ) : (
+        <g>
+          <path d="M 470 150 L 560 150 L 560 40 L 700 40" fill="none" stroke="#4a5568" strokeWidth="10" />
+          <text x="610" y="30" textAnchor="middle" className="mimic-label">
+            AVGASS → RENSEANLEGG
+          </text>
+          <text x="610" y="60" textAnchor="middle" className="mimic-value">
+            {state.offgas_temp_c.toFixed(0)} °C · CO {state.offgas_co_pct.toFixed(1)} %
+          </text>
+        </g>
+      )}
 
       {/* --- Ovnen --- */}
       <g transform={`rotate(${state.tilt_deg} 390 300)`}>
@@ -163,10 +182,10 @@ export function FurnaceMimic({ state }: Props) {
                 className="arc-flicker"
               />
             )}
-            <text x={x} y={topY - 20} textAnchor="middle" className="mimic-value">
+            <text x={x} y={topY - (compact ? 24 : 20)} textAnchor="middle" className="mimic-value">
               E{e.index + 1}
             </text>
-            <text x={x} y={topY - 8} textAnchor="middle" className="mimic-label">
+            <text x={x} y={topY - (compact ? 6 : 8)} textAnchor="middle" className="mimic-label">
               {e.broken ? "BRUDD" : `${e.length_m.toFixed(1)}m`}
             </text>
           </g>
@@ -174,6 +193,7 @@ export function FurnaceMimic({ state }: Props) {
       })}
 
       {/* --- Nøkkeltall --- */}
+      {!compact && (
       <g>
         <text x="600" y="200" className="mimic-label">
           BAD
@@ -200,6 +220,37 @@ export function FurnaceMimic({ state }: Props) {
           {state.tilt_deg.toFixed(0)}° tipp
         </text>
       </g>
+      )}
     </svg>
+  );
+
+  if (!compact) return svg;
+
+  return (
+    <div className="mimic-wrap">
+      {svg}
+      <dl className="mimic-stats">
+        <div>
+          <dt>Likvidus</dt>
+          <dd>{state.liquidus_c.toFixed(0)} °C</dd>
+        </div>
+        <div>
+          <dt>Tappemål</dt>
+          <dd>{state.tap_target_temp_c.toFixed(0)} °C</dd>
+        </div>
+        <div>
+          <dt>Flytende</dt>
+          <dd>{(state.liquid_mass_kg / 1000).toFixed(1)} t</dd>
+        </div>
+        <div>
+          <dt>Umeltet</dt>
+          <dd>{(state.solid_scrap_kg / 1000).toFixed(1)} t</dd>
+        </div>
+        <div>
+          <dt>Tipp</dt>
+          <dd>{state.tilt_deg.toFixed(0)}°</dd>
+        </div>
+      </dl>
+    </div>
   );
 }

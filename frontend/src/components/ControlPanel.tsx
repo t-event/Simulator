@@ -1,5 +1,6 @@
 import type { FurnaceState } from "../types";
 import { PHASE_LABEL } from "../types";
+import { GRADES } from "../sim/grades";
 
 interface Props {
   state: FurnaceState;
@@ -45,7 +46,6 @@ function Slider({ label, value, min, max, step = 1, unit, disabled, onChange, hi
 export function ControlPanel({ state, sendCommand }: Props) {
   const canStartCharge = state.phase === "klar" || state.phase === "klargjoring";
   const canTap = state.phase === "raffinering" || state.phase === "avslagging";
-  const tilted = Math.abs(state.tilt_deg) > 3;
   const inSlagPosition = state.tilt_deg <= state.slag_position_deg + 1;
 
   return (
@@ -61,7 +61,7 @@ export function ControlPanel({ state, sendCommand }: Props) {
       </div>
 
       <div className="control-row">
-        {["AR20", "LK08", "HK80"].map((code) => (
+        {GRADES.map(({ code }) => (
           <button
             key={code}
             className={state.grade?.code === code ? "btn-primary" : ""}
@@ -228,7 +228,7 @@ export function ControlPanel({ state, sendCommand }: Props) {
         >
           Slaggstilling
         </button>
-        <button disabled={tilted && !inSlagPosition} onClick={() => sendCommand("set_tilt", { value: 0 })}>
+        <button onClick={() => sendCommand("set_tilt", { value: 0 })}>
           Vannrett
         </button>
       </div>

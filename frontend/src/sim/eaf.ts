@@ -135,6 +135,7 @@ export class EAFSimulation {
     s.energyTotalMwh = 0;
     s.refractoryWear = 0;
     s.heatNumber = 0;
+    s.tapStartTempC = null;
     s.lastTapResult = null;
     s.alarms = [];
     s.nextAlarmId = 1;
@@ -221,6 +222,14 @@ export class EAFSimulation {
         );
         return;
       }
+      if (s.refractoryWear >= 1) {
+        this.raiseAlarm(
+          "POWER_BLOCK_REFRACTORY",
+          "Kan ikke slå på lysbue: ovnspotta er gjennombrent",
+          "warning",
+        );
+        return;
+      }
       if (Math.abs(s.tiltDeg) > 3) {
         this.raiseAlarm(
           "POWER_BLOCK_TILT",
@@ -260,6 +269,13 @@ export class EAFSimulation {
     s.chargeRemainingKg = C.CHARGE_SCRAP_MASS_KG;
     s.scrapChargedKg = 0;
     s.heatNumber += 1;
+    s.tapStartTempC = null;
+    // Energi og forbruk rapporteres per charge
+    s.energyTotalMwh = 0;
+    s.limeTotalKg = 0;
+    s.dolomiteTotalKg = 0;
+    s.carbonTotalKg = 0;
+    s.oxygenTotalNm3 = 0;
     s.phase = "innsmelting";
     return true;
   }
@@ -320,6 +336,7 @@ export class EAFSimulation {
     this.setPower(false);
     s.phase = "tapping";
     s.tiltDeg = C.TAP_POSITION_DEG;
+    s.tapStartTempC = s.bathTempC;
     if (s.bathTempC < this.tapTargetTempC - C.TAP_SUPERHEAT_WINDOW_C) {
       this.raiseAlarm(
         "TAP_COLD",
@@ -367,14 +384,15 @@ export class EAFSimulation {
         `P ${s.phosphorusPct.toFixed(4)} % over maks ${grade.phosphorusMaxPct.toFixed(3)} %`,
       );
     }
-    const tempDev = s.bathTempC - this.tapTargetTempC;
+    const tapTempC = s.tapStartTempC ?? s.bathTempC;
+    const tempDev = tapTempC - this.tapTargetTempC;
     if (Math.abs(tempDev) > C.TAP_SUPERHEAT_WINDOW_C) {
       deviations.push(`Temperatur ${tempDev >= 0 ? "+" : ""}${tempDev.toFixed(0)} °C fra mål`);
     }
     return {
       heat_number: s.heatNumber,
       grade: grade.code,
-      tap_temp_c: round(s.bathTempC, 1),
+      tap_temp_c: round(tapTempC, 1),
       target_temp_c: round(this.tapTargetTempC, 1),
       carbon_pct: round(s.carbonPct, 3),
       phosphorus_pct: round(s.phosphorusPct, 4),
@@ -641,7 +659,8 @@ export class EAFSimulation {
     energyMj += carbonBurned * C.ENERGY_C_TO_CO_MJ_PER_KG_C;
     this.coGenerationKgS = (carbonBurned * (28 / 12)) / Math.max(dtS, 1e-6);
 
-    let o2Rest = nm3 - o2ToCarbon;
+    // Oksygen som ikke fant karbon går videre til Si, Mn og Fe
+    let o2Rest = nm3 - carbonBurned * C.O2_NM3_PER_KG_CARBON;
 
     // Ellingham-rekkefølge: silisium oksiderer først, så mangan, så jern
     const siAvailable = (s.siliconPct / 100) * s.liquidMassKg;
