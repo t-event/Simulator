@@ -151,7 +151,7 @@ function scoreCharge(sim: EAFSimulation, a: Auto, startWear: number): Score {
     (dev > 20
       ? " For varmt koster strøm og sliter på foringen."
       : dev < -20
-        ? " For kaldt kan stålet fryse i øsa og gi støpefeil."
+        ? " For kaldt kan stålet størkne i øsa og gi støpefeil."
         : "");
 
   const total = s1 + s2 + s3 + s4;

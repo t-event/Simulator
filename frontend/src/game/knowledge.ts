@@ -61,7 +61,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
     id: "stoping",
     title: "Støping og temperatur",
     paragraphs: [
-      "Stålet må ha riktig overheting når det støpes: for kaldt, og det fryser i innløpet; for varmt, og du får porer, sprekker og slitasje på ildfast.",
+      "Stålet må ha riktig overheting når det støpes: for kaldt, og det størkner i innløpet før formen er fylt; for varmt, og du får porer, sprekker og slitasje på ildfast.",
       "Innløp, matere og kapp blir ikke produkt. Det går tilbake til skraplageret som returskrap – gratis og med kjent analyse.",
     ],
   },

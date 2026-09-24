@@ -5,6 +5,17 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 12 – 2026-09-24: «fryser» → «størkner»
+
+**Brukeren meldte (skjermbilde av quizen):** Stål fryser ikke, det størkner.
+
+**Gjort:** Rettet ordet i fagboka (støping), to quizalternativer og en melding i kontrollrommet.
+Ingen andre forekomster.
+
+**Lærdom:** Bruk fagordet «størkne» om stål som går fra flytende til fast.
+
+---
+
 ## Økt 11 – 2026-09-24: skrapklasser og strengere quiz
 
 **Brukeren ba om:** En skrapklasser som gir riktig skrapmiks til resepten. Feil svar på quiz skal gi
