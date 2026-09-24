@@ -73,6 +73,10 @@ export function migrate(g: GameState): GameState {
   if (loose.tipsSeen === undefined) loose.tipsSeen = g.stage >= 1 ? ["tips-foring", "tips-skrap"] : [];
   if (g.settings.skipIdleNights === undefined) g.settings.skipIdleNights = true;
   if (g.settings.pauseOffers === undefined) g.settings.pauseOffers = false;
+  // Før B-042 ble fastpris fornyet av seg selv; gamle spill beholder det
+  if (g.settings.powerAutoRenew === undefined) g.settings.powerAutoRenew = g.settings.powerDeal === "fast";
+  if (g.settings.offerGrades === undefined) g.settings.offerGrades = [];
+  if (g.settings.offerSort === undefined) g.settings.offerSort = "frist";
   if (g.settings.autoTemps === undefined) g.settings.autoTemps = false;
   if (g.settings.secondsAction === undefined) g.settings.secondsAction = "spot";
   if (g.settings.graderStrict === undefined) g.settings.graderStrict = true;

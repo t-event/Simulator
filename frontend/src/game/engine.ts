@@ -181,6 +181,9 @@ export function newGame(seed = Date.now()): GameState {
       powerDeal: "spot",
       powerDealUntilDay: 0,
       powerFixedPrice: 0,
+      powerAutoRenew: false,
+      offerGrades: [],
+      offerSort: "frist",
       onePeak: false,
       shiftStart: SHIFT_START_HOUR,
       pauseOffers: false,
@@ -1308,9 +1311,26 @@ function roundTonnes(t: number): number {
 /** Hvor mange døgns produksjon en kontrakt tilsvarer (se B-016) */
 const CONTRACT_DAYS: [number, number] = [1.5, 4];
 
-function makeOffer(g: GameState, stats: PlantStats): Contract | null {
+/**
+ * Kunde, vare og kvalitet til en ny forespørsel. Har spilleren valgt hvilke kvaliteter hen vil ha,
+ * spør bare kunder som kjøper noen av dem (B-042).
+ */
+function pickCustomer(
+  g: GameState,
+  stats: PlantStats,
+): { customer: (typeof CUSTOMERS)[number]; product: ProductId; grade: GradeId } | null {
+  const wanted = g.settings.offerGrades ?? [];
+  const gradesFor = (c: (typeof CUSTOMERS)[number]) => {
+    const open = c.grades.filter((id) => GRADES[id].minStage <= g.stage);
+    const list = open.length ? open : c.grades;
+    return wanted.length ? list.filter((id) => wanted.includes(id)) : list;
+  };
   const eligible = CUSTOMERS.filter(
-    (c) => c.minStage <= g.stage && c.maxStage >= g.stage && c.products.some((p) => stats.products.includes(p)),
+    (c) =>
+      c.minStage <= g.stage &&
+      c.maxStage >= g.stage &&
+      c.products.some((p) => stats.products.includes(p)) &&
+      gradesFor(c).length > 0,
   );
   if (!eligible.length) return null;
   const customer = pick(g, eligible);
@@ -1318,8 +1338,13 @@ function makeOffer(g: GameState, stats: PlantStats): Contract | null {
     g,
     customer.products.filter((p) => stats.products.includes(p)),
   );
-  const grades = customer.grades.filter((id) => GRADES[id].minStage <= g.stage);
-  const grade = pick(g, grades.length ? grades : customer.grades);
+  return { customer, product, grade: pick(g, gradesFor(customer)) };
+}
+
+function makeOffer(g: GameState, stats: PlantStats): Contract | null {
+  const picked = pickCustomer(g, stats);
+  if (!picked) return null;
+  const { customer, product, grade } = picked;
   const capacity = Math.max(0.1, stats.dailyProductT);
   // En kontrakt skal være et lite prosjekt: 1,5–4 døgns produksjon, ikke noe som er ferdig på sekunder
   // De første kontraktene i garasjen er små, så starten går fort og man ser at det virker (B-033)
@@ -1405,17 +1430,9 @@ const MAX_AGREEMENTS = [0, 0, 0, 2, 3];
 export const AGREEMENT_MAX_MISSED = 2;
 
 function makeAgreement(g: GameState, stats: PlantStats): Agreement | null {
-  const eligible = CUSTOMERS.filter(
-    (c) => c.minStage <= g.stage && c.maxStage >= g.stage && c.products.some((p) => stats.products.includes(p)),
-  );
-  if (!eligible.length) return null;
-  const customer = pick(g, eligible);
-  const product = pick(
-    g,
-    customer.products.filter((p) => stats.products.includes(p)),
-  );
-  const grades = customer.grades.filter((id) => GRADES[id].minStage <= g.stage);
-  const grade = pick(g, grades.length ? grades : customer.grades);
+  const picked = pickCustomer(g, stats);
+  if (!picked) return null;
+  const { customer, product, grade } = picked;
   // En fast del av det verket faktisk lager: en femdel til to femdeler av en ukes produksjon
   const weekly = Math.min(stats.dailyProductT, realisticDailyT(g, stats)) * 7;
   const weeklyT = roundTonnes(weekly * uniform(g, 0.2, 0.4));
@@ -1707,6 +1724,37 @@ function checkTemps(g: GameState): void {
     );
 }
 
+/**
+ * Strømavtalen når bindingstida er ute (B-042): fornyes hvis spilleren har valgt det, ellers tilbake til
+ * spotpris, som er standard. Varsel tre døgn og ett døgn før.
+ */
+function updatePowerDeal(g: GameState, today: number): void {
+  const s = g.settings;
+  if (s.powerDeal === "spot") return;
+  const name = s.powerDeal === "fast" ? "Fastprisavtalen" : "Nattariffen";
+  const left = s.powerDealUntilDay - today;
+  if (left === 3 || left === 1)
+    log(
+      g,
+      `${name} for strøm går ut om ${left === 1 ? "ett døgn" : "tre døgn"} (dag ${s.powerDealUntilDay}). ${s.powerAutoRenew ? "Den fornyes av seg selv." : "Da går du tilbake til spotpris – velg ny avtale under Marked hvis du vil."}`,
+      "event",
+    );
+  if (left > 0) return;
+  if (s.powerAutoRenew) {
+    s.powerDealUntilDay = today + POWER_BINDING_DAYS;
+    if (s.powerDeal === "fast") s.powerFixedPrice = fixedPowerOffer(g);
+    log(
+      g,
+      `${name} for strøm er fornyet i ${POWER_BINDING_DAYS} døgn${s.powerDeal === "fast" ? ` til ${s.powerFixedPrice.toFixed(2).replace(".", ",")} kr/kWh` : ""}.`,
+      "event",
+    );
+    return;
+  }
+  s.powerDeal = "spot";
+  s.powerDealUntilDay = 0;
+  log(g, `${name} for strøm gikk ut. Du betaler nå spotpris, time for time, til du velger en ny avtale.`, "event");
+}
+
 function updateAbsence(g: GameState, stats: PlantStats): void {
   if (!g.workers.length) return;
   const today = day(g);
@@ -1863,12 +1911,7 @@ function onDay(g: GameState, stats: PlantStats): void {
   if (g.history.length > HISTORY_MAX) g.history.splice(0, g.history.length - HISTORY_MAX);
   g.today = newDay(today, g.cash);
 
-  // Strømavtalen: fastprisen fornyes til dagens pris når bindingstida er ute
-  if (g.settings.powerDeal === "fast" && today >= g.settings.powerDealUntilDay) {
-    g.settings.powerFixedPrice = fixedPowerOffer(g);
-    g.settings.powerDealUntilDay = today + POWER_BINDING_DAYS;
-    log(g, `Fastprisavtalen for strøm er fornyet for ${POWER_BINDING_DAYS} døgn til ${g.settings.powerFixedPrice.toFixed(2).replace(".", ",")} kr/kWh.`, "info");
-  }
+  updatePowerDeal(g, today);
   if (g.gridCut && g.minute >= g.gridCut.untilMin) g.gridCut = null;
 
   // Faste kostnader

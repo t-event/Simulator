@@ -559,3 +559,18 @@ Brukeren ville at ovn 2 skulle ha egen «utstyrsbutikk» som ovn 1.
 Beslutning: «Utstyr» vises på hver ovn i Anlegg og åpner ovnsutstyret. Alle ovnene er av samme type, og ny
 ovnstype eller nytt ovnsutstyr gjelder alle ovnene samtidig. Det står nå i butikken når verket har flere
 ovner. Egen ovnstype per ovn er ikke laget; det ville krevd at kapasitet, mannskap og strøm regnes per ovn.
+
+## B-042 Strømavtalen går ut, og valg av forespørsler (2026-09-24)
+Status: gjelder (erstatter delen av B-024 om at fastpris fornyes av seg selv)
+Brukeren ville se hvor lenge strømavtalen varer, få varsel når den går ut, vite hvilken avtale som er standard,
+og kunne velge hvilke forespørsler som kommer.
+Beslutning:
+- Spotpris er standard. Når bindingstida (30 døgn) er ute, går verket tilbake til spotpris, med mindre
+  «Forny fastpris og nattariff av seg selv» (`settings.powerAutoRenew`) er på. Da fornyes avtalen, fastpris til
+  dagens tilbudspris. Før B-042 ble fastpris fornyet av seg selv, så gamle lagringer med fastpris får valget på.
+- Strømkortet viser «N døgn igjen» og hvilken dag avtalen gjelder til. Varsel tre døgn og ett døgn før, og
+  når avtalen går ut eller fornyes.
+- Salg: spilleren velger hvilke kvaliteter hen vil ha forespørsler på (`settings.offerGrades`, tom = alle).
+  Nye forespørsler og rammeavtaler kommer bare fra kunder som kjøper noen av dem, og åpne forespørsler i en
+  kvalitet som velges bort, avslås. Forespørslene kan sorteres etter svarfrist, verdi, pris per tonn eller
+  kvalitet (`settings.offerSort`). Uten filter trekkes kunde og kvalitet som før, så balansen er uendret.
