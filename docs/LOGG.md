@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 25 – 2026-09-24: Lager-knappen og skrap til lavkarbon
+
+**Brukeren meldte:** Lager-knappen på Verket går til Forespørsler; ovnen stopper fordi lavkarbon-skrapet ikke
+kjøpes inn.
+
+**Gjort (B-048):** Lager-knappen åpner Salg → Lager. Innkjøpet går videre når planleggeren er borte, og
+grunnen vises når planleggeren ikke får kjøpt.
+
+**Testet:** tsc, lint, balanse (8 / 24 / 63 / 135). I Node: planlegger på ferie gir ingen stopp; lite penger
+gir riktig grunn. Playwright (iPhone 13): Lager og «Til salg» åpner Lager-fanen, vanlig Salg åpner
+Forespørsler, ingen feil.
+
+**Gjenstår:** Hvis ovnen fortsatt stopper hos brukeren, vil varselet nå si hvorfor.
+
+---
+
 ## Økt 24 – 2026-09-24: Avløser og ryddigere Folk-side
 
 **Brukeren ba om:** Allroundere skal ikke kunne være reparatør, skrapklasser eller murer; nytt navn «Avløser»;

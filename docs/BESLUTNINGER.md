@@ -636,3 +636,16 @@ Beslutning:
   hva som mangler for neste skift med knapp for å ansette, varsel når fravær koster skift, og bemanningstabellen
   sammenfoldet. Ansett har søkerne og rollebeskrivelsene (sammenfoldet). Ansatte har trivsel og listen.
   Fravær har vikarer og ferie. Fravær-fanen blir oransje når fraværet koster skift.
+
+## B-048 Lager-knappen og skrapinnkjøp som stopper (2026-09-24)
+Status: gjelder
+Brukeren meldte at Lager-knappen på Verket åpnet Forespørsler, og at ovnen fortsatt stoppet fordi skrapet til
+lavkarbon ikke ble kjøpt inn.
+Beslutning:
+- Navigasjonen kan åpne en underfane: Lager-knappen, «Til salg» og tipset om fullt lager åpner Salg → Lager.
+- Innkjøpet virket i test når planleggeren var på jobb og det var penger og plass. Men det stoppet helt når
+  planleggeren hadde ferie eller var syk. Nå går planleggerens faste bestillinger videre mens hen er borte.
+- Får planleggeren ikke kjøpt det resepten trenger, lagres grunnen (for lite penger og kreditt ikke tillatt,
+  kreditten brukt opp, døgngrensen nådd, eller fullt skraplager). Grunnen står i varselet når ovnen stopper, i
+  tipset på Verket og under planleggeren på Marked.
+- Startmeldingen i garasjen nevner ikke lenger digel.

@@ -339,6 +339,8 @@ export interface GameState {
   castingType: string;
   furnaces: FurnaceUnit[];
   castQueue: LiquidBatch[];
+  /** Hvorfor planleggeren sist ikke fikk kjøpt skrap resepten trenger, eller null (B-048) */
+  autoBuyNote?: string | null;
   /** Kvaliteten strengstøpemaskinen sist støpte, og når den ble ferdig (B-046) */
   lastCast: { grade: GradeId; min: number } | null;
   castProgressT: number;

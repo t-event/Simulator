@@ -607,6 +607,11 @@ export function hasGrader(g: GameState): boolean {
   return presentWorkers(g).some((w) => w.role === "klasser");
 }
 
+/** Planleggerens faste innkjøp går videre selv om planleggeren er syk eller har ferie (B-048) */
+export function plannerOrders(g: GameState): boolean {
+  return hasPlanner(g) || g.workers.some((w) => w.role === "planlegger");
+}
+
 export function hasPlanner(g: GameState): boolean {
   return presentWorkers(g).some((w) => w.role === "planlegger") || (g.specialists?.sen ?? 0) > g.minute;
 }

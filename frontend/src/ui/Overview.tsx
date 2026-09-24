@@ -3,7 +3,7 @@ import { requestManual, requestReline, setFurnaceGrade, setTargetGrade, upgradeO
 import { Maintenance } from "./Maintenance";
 import { researchOptions } from "../game/research";
 import { GRADE_IDS, GRADES, PRODUCTS, ROLES, STAGES } from "../game/data";
-import { currentOrder, furnaceOrder, recipeEstimate, SEQUENCE_WAIT_MIN } from "../game/engine";
+import { currentOrder, furnaceOrder, recipeEstimate, scrapStopHelp, SEQUENCE_WAIT_MIN } from "../game/engine";
 import {
   castingType,
   furnaceGrade,
@@ -31,13 +31,15 @@ interface Props {
   g: GameState;
   stats: PlantStats;
   act: GameApi["act"];
-  go: (view: View) => void;
+  go: (view: View, sub?: string) => void;
   openBook: (chapter?: string) => void;
 }
 
 interface Hint {
   text: string;
   view?: View;
+  /** Underfane i visningen, f.eks. lageret under Salg */
+  sub?: string;
 }
 
 function hints(g: GameState, stats: PlantStats): Hint[] {
@@ -49,11 +51,11 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
     out.push({ text: "Du har ingen kontrakter. Se på tilbudene under Salg.", view: "salg" });
   if (waits.includes("Mangler skrap til resepten"))
     out.push({
-      text: "Skrapklasseren venter på skrap som passer resepten. Kjøp de skraptypene resepten bruker under Marked.",
+      text: `Skrapklasseren venter på skrap som passer resepten. ${scrapStopHelp(g)}`,
       view: "marked",
     });
   if (waits.includes("Tomt for skrap"))
-    out.push({ text: "Ovnen står fordi skraplageret er tomt. Kjøp skrap under Marked.", view: "marked" });
+    out.push({ text: `Ovnen står fordi skraplageret er tomt. ${scrapStopHelp(g)}`, view: "marked" });
   if (waits.includes("Mangler folk")) {
     const missing = Object.entries(stats.missing)
       .map(
@@ -63,7 +65,7 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
     out.push({ text: `Verket mangler folk for å gå: ${missing}.`, view: "folk" });
   }
   if (g.castWait === "Ferdigvarelageret er fullt")
-    out.push({ text: "Ferdigvarelageret er fullt. Selg partier på spot under Salg.", view: "salg" });
+    out.push({ text: "Ferdigvarelageret er fullt. Selg partier på spot under Salg.", view: "salg", sub: "lager" });
   if (stats.furnace.arc && g.furnaces.some((f) => f.spareProgress < 1) && !g.workers.some((w) => w.role === "murer"))
     out.push({
       text: "Reservepotta til lysbueovnen blir ikke murt opp. Ansett murere, ellers må foringen mures om inne i ovnen.",
@@ -121,7 +123,7 @@ function Quality({
 }: {
   g: GameState;
   stats: PlantStats;
-  go: (v: View) => void;
+  go: (v: View, sub?: string) => void;
   right: ReactNode;
 }) {
   const days = [...g.history.slice(-6), g.today];
@@ -194,7 +196,7 @@ function CompactChain({
   stats: PlantStats;
   act: GameApi["act"];
   onOpen: () => void;
-  go: (v: View) => void;
+  go: (v: View, sub?: string) => void;
 }) {
   const castHead = g.castQueue[0];
   const worn = g.furnaces.map((f, i) => ({ f, i })).filter((x) => x.f.wear >= 0.6 && !x.f.relineRequested);
@@ -225,7 +227,7 @@ function CompactChain({
           <Bar value={castHead ? g.castProgressT / castHead.t : 0} tone="ok" label="Støping" />
           <small className={g.castWait ? "is-waiting" : ""}>{g.castWait ?? (castHead ? "Støper" : "Venter")}</small>
         </button>
-        <button className="g-mini" onClick={() => go("salg")}>
+        <button className="g-mini" onClick={() => go("salg", "lager")}>
           <span>Lager</span>
           <Bar
             value={stats.storeUsed / stats.storeT}
@@ -320,7 +322,7 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
         {tips.length > 0 && (
           <div className="g-cta-wrap">
             {tips[0].view ? (
-              <button className="g-primary g-cta" onClick={() => go(tips[0].view!)}>
+              <button className="g-primary g-cta" onClick={() => go(tips[0].view!, tips[0].sub)}>
                 {tips[0].text}
               </button>
             ) : (
@@ -331,7 +333,7 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
                 {tips.slice(1).map((t) => (
                   <li key={t.text}>
                     {t.view ? (
-                      <button className="g-link" onClick={() => go(t.view!)}>
+                      <button className="g-link" onClick={() => go(t.view!, t.sub)}>
                         {t.text}
                       </button>
                     ) : (
@@ -430,7 +432,9 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
                     value={f.grade ?? ""}
                     disabled={g.settings.followQueue && !!order}
                     onChange={(e) =>
-                      act((gg) => setFurnaceGrade(gg, j + 1, e.target.value === "" ? null : (e.target.value as GradeId)))
+                      act((gg) =>
+                        setFurnaceGrade(gg, j + 1, e.target.value === "" ? null : (e.target.value as GradeId)),
+                      )
                     }
                   >
                     <option value="">Samme som ovn 1</option>
@@ -566,7 +570,7 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
                     {fmtT(stats.storeUsed)} av {fmtT(stats.storeT)}
                   </p>
                   <div className="g-row">
-                    <button className="g-small" onClick={() => go("salg")}>
+                    <button className="g-small" onClick={() => go("salg", "lager")}>
                       Til salg
                     </button>
                     <StationButton g={g} station="lager" onOpen={setSheet} />
