@@ -330,3 +330,22 @@ Beslutning:
   ikke lavkarbon uten øseovn, og forsker på øsemetallurgi rett etter strengstøping. Uten dette gikk den
   i stålverket inn i bøter og omdømmefall som en forsiktig spiller ville unngått.
 - Balanse: 10 / 32 / 83 / 161, alle frø når storverket, ingen konkurs.
+
+## B-028 Foringen holder ca. ni døgn; menyen for planlagt omforing følger levetiden (2026-09-24)
+Status: gjelder (erstatter slitasjetallene i B-022)
+Brukeren meldte at foringen ble slitt på ett døgn, og at den bør holde minst sju døgn når alt går etter
+planen. Menyen for planlagt omforing hadde faste valg (4–14 døgn) som ikke passet med levetiden.
+Beslutning:
+- `wearPerHeat` er satt så foringen blir 85 % slitt etter ca. ni døgn døgnkontinuerlig drift med normal
+  syklustid (digel 0,0072, induksjon 1 t 0,0046, induksjon 5 t 0,0052, lysbue 30 t 0,0049, lysbue 90 t
+  0,0039). Med kortere drift per døgn varer den lenger. Feil temperatur og flinke folk (kortere
+  charger) trekker litt ned, derfor ni døgn og ikke sju.
+- En foring som varer tre ganger så lenge, er en større jobb: omforing koster og tar mer (digel
+  5 000 kr / 4 t, induksjon 1 t 25 000 kr / 10 t, induksjon 5 t 120 000 kr / 16 t, lysbue 30 t
+  750 000 kr / 30 t, lysbue 90 t 1,8 mill. kr / 36 t). Havari er fortsatt tre ganger dette.
+- Menyen for planlagt omforing lager valgene ut fra levetiden med dagens drift (50, 65, 80 og 90 % av
+  den), og viser hvor slitt foringen omtrent er på den dagen. Kortet sier hvor mange døgn foringen
+  holder, og advarer hvis planen er lengre enn det.
+- Med vedlikeholdsplan byttes foringen også hvis den blir 88 % slitt før planlagt dag.
+- Balanse: 10 / 32 / 74 / 154. Testspilleren blir rikere (0,06–1,1 mrd. kr på dag 240), så følg med
+  på om vinnergrensen på 1 mrd. kommer for tidlig.
