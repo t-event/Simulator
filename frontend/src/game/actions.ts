@@ -260,7 +260,7 @@ export function hire(g: GameState, candidateId: number): PurchaseResult {
   return { ok: true, message: `${c.name} er ansatt.` };
 }
 
-/** Ansetter søkere til plassene som mangler for neste skift. Allroundere fyller hull. */
+/** Ansetter søkere til plassene som mangler for neste skift. Avløsere fyller hull. */
 export function hireForMissing(g: GameState): PurchaseResult {
   const cap = STAGES[g.stage].staffCap;
   let hired = 0;

@@ -589,8 +589,8 @@ Beslutning:
   avkulling 60 % mindre.
 - Vikarer: motoren dekket fraværet riktig i test. Bemanningstabellen viser nå «herav N vikarer» og «N borte»,
   så det synes hvem som dekkes.
-- Allroundere fylte allerede hull på skiftene; det står nå tydelig. I tillegg går en allrounder som ikke trengs
-  på skiftene inn som reparatør, skrapklasser eller murer når alle med den rollen er borte.
+- Allroundere fylte allerede hull på skiftene; det står nå tydelig. ~~I tillegg går en allrounder som ikke trengs
+  på skiftene inn som reparatør, skrapklasser eller murer når alle med den rollen er borte.~~ (Erstattet av B-047.)
 - Testspilleren forsker på strålevern og kjøper strålingsportal etter en radioaktiv kilde, slik en fornuftig
   spiller ville gjort (ellers ble balansen avhengig av flaks).
 
@@ -623,3 +623,16 @@ Beslutning: Gjelder bare strengstøping (blokk- og formstøping støper hver øs
 Test: 2 × 30 t lysbueovn på 1-strengs maskin: 525 t på 48 t med to kvaliteter mot 584 t med én, 8 t
 overgangsemner. Små induksjonsøser gir ingen tap, fordi støpingen uansett står mellom øsene.
 Balanse uendret: 8 / 24 / 63 / 136.
+
+## B-047 Avløser i stedet for allrounder, og Folk med underfaner (2026-09-24)
+Status: gjelder (erstatter stedfortreder-delen av B-043)
+Brukeren ville ikke at allroundere skal kunne være reparatør, skrapklasser eller murer, ville kalle rollen
+«Avløser», og syntes Folk-siden var rotete.
+Beslutning:
+- Rollen heter Avløser (intern id er fortsatt `allround`, så lagrede spill virker). Avløsere tar bare plasser på
+  skiftene (ovn, støping, kran, øseovn, valsing), også når noen er borte. De står ikke for reparatør,
+  skrapklasser eller murer.
+- Folk har underfanene Skift, Ansett, Ansatte og Fravær. Skift viser hovedlinja («Verket går N av 3 skift»),
+  hva som mangler for neste skift med knapp for å ansette, varsel når fravær koster skift, og bemanningstabellen
+  sammenfoldet. Ansett har søkerne og rollebeskrivelsene (sammenfoldet). Ansatte har trivsel og listen.
+  Fravær har vikarer og ferie. Fravær-fanen blir oransje når fraværet koster skift.

@@ -1771,7 +1771,7 @@ function updatePots(g: GameState, stats: PlantStats, dt: number): void {
 
 /**
  * Fravær (B-031): ferie kommer automatisk med tre døgns varsel, og enkeltpersoner kan bli syke –
- * oftere når trivselen er lav eller verket går nattskift. Ledige allroundere dekker plassene.
+ * oftere når trivselen er lav eller verket går nattskift. Ledige avløsere dekker plassene.
  */
 /** Leier inn vikarer som dekker alle som er borte, i et antall døgn (B-031, B-039) */
 export function bookTemps(g: GameState, days: number, auto = false): void {
