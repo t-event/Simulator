@@ -176,6 +176,7 @@ export function buyUpgrade(g: GameState, id: string): PurchaseResult {
       for (const f of g.furnaces) {
         f.wear = 0;
         f.heatsOnLining = 0;
+        f.lastRelineDay = day(g);
         f.spareProgress = 1;
       }
       const type = furnaceType(g);
@@ -202,7 +203,7 @@ export function buyUpgrade(g: GameState, id: string): PurchaseResult {
       g.owned.push(id);
       if (id === "ovn2") {
         g.furnaceCount = 2;
-        g.furnaces.push(newFurnaceUnit());
+        g.furnaces.push(newFurnaceUnit(day(g)));
       }
       if (id === "xrf" || id === "oes") unlock(g, "analyse");
       if (id === "portal") unlock(g, "radioaktivitet");

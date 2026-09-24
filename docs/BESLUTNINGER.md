@@ -517,3 +517,9 @@ Beslutning:
 - Fagboka (Øseovnen) forklarer rollen. Reseptsjekken advarer nå også om armering (smalt karbonvindu)
   uten øseovn, og testspilleren tar ikke armering uten øseovn eller spektrometer.
 - Balanse: 10 / 24 / 62 / 138.
+
+## B-038 Ny ovn er «byttet» dagen den kjøpes (2026-09-24)
+Status: gjelder
+Brukeren meldte at «døgn siden omforing» var feil for ovn nummer to rett etter kjøpet (62 døgn).
+Beslutning: En ny ovn og en ny ovnstype får `lastRelineDay` = dagen de settes i drift. Gamle lagringer med
+«byttet dag 1» får dagen anslått ut fra antall charger på foringen og hvor mange charger verket kjører per døgn.

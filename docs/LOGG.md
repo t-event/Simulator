@@ -5,6 +5,15 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 18 – 2026-09-24: «døgn siden omforing» for ny ovn
+
+**Brukeren meldte (skjermbilde):** Ovn 2 var nylig kjøpt, men viste 62 døgn siden omforing.
+
+**Gjort (B-038):** Ny ovn og ny ovnstype får omforingsdag = kjøpsdagen; gamle lagringer rettes med et
+anslag ut fra antall charger. Testet i Node (kjøp dag 32 → «byttet dag 32»; gammel lagring → dag 22).
+
+---
+
 ## Økt 17 – 2026-09-24: ny tilbakemeldingsrunde (pakke 1 av 5: start og varsler)
 
 **Brukeren ba om:** Lang liste (se oppgavene i denne økta): murere på dagtid, raskere start, varsler og
