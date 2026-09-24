@@ -1,10 +1,9 @@
 /**
- * Quiz i fagboka (B-025): to spørsmål per kapittel. Alt riktig første gang gir
- * fagpoeng. Svarer man feil, kan man prøve igjen neste døgn.
+ * Quiz i fagboka (B-025, B-029): to spørsmål per kapittel og bare ett forsøk.
+ * Fagpoengene står i forhold til antall riktige svar.
  */
 import { awardPoints, log } from "./engine";
 import { knowledgeCard } from "./knowledge";
-import { day } from "./plant";
 import type { GameState } from "./types";
 
 export interface QuizQuestion {
@@ -255,26 +254,27 @@ export function quizReward(g: GameState): number {
   return 2 * (1 + g.stage);
 }
 
-export function quizAvailable(g: GameState, chapter: string): { ok: boolean; reason: string | null } {
-  if (!QUIZ[chapter]) return { ok: false, reason: null };
-  if (g.quizDone.includes(chapter)) return { ok: false, reason: "Bestått" };
-  const failed = g.quizFailedDay[chapter];
-  if (failed !== undefined && day(g) <= failed) return { ok: false, reason: "Du kan prøve igjen i morgen" };
-  return { ok: true, reason: null };
+/** Hver quiz kan tas én gang (B-029) */
+export function quizAvailable(g: GameState, chapter: string): boolean {
+  return !!QUIZ[chapter] && !g.quizDone.includes(chapter);
 }
 
-/** Retter en quiz. Alt riktig gir fagpoeng; ellers kan man prøve igjen neste døgn. */
-export function answerQuiz(g: GameState, chapter: string, answers: number[]): { passed: boolean; reward: number } {
+/**
+ * Retter en quiz. Én sjanse: fagpoengene står i forhold til hvor mange svar som er riktige,
+ * og feil svar gir færre eller ingen poeng (B-029).
+ */
+export function answerQuiz(g: GameState, chapter: string, answers: number[]): { correct: number; reward: number } {
   const quiz = QUIZ[chapter];
-  if (!quiz || !quizAvailable(g, chapter).ok) return { passed: false, reward: 0 };
-  const passed = quiz.every((q, i) => answers[i] === q.correct);
-  if (!passed) {
-    g.quizFailedDay[chapter] = day(g);
-    return { passed, reward: 0 };
-  }
-  const reward = quizReward(g);
+  if (!quiz || !quizAvailable(g, chapter)) return { correct: 0, reward: 0 };
+  const correct = quiz.filter((q, i) => answers[i] === q.correct).length;
+  const reward = Math.floor((quizReward(g) * correct) / quiz.length);
   g.quizDone.push(chapter);
+  g.quizScores[chapter] = correct;
   awardPoints(g, reward);
-  log(g, `Quiz bestått: «${knowledgeCard(chapter)?.title}». +${reward} fagpoeng.`, "good");
-  return { passed, reward };
+  log(
+    g,
+    `Quiz «${knowledgeCard(chapter)?.title}»: ${correct} av ${quiz.length} riktige. +${reward} fagpoeng.`,
+    correct === quiz.length ? "good" : "info",
+  );
+  return { correct, reward };
 }

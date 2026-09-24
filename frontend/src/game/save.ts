@@ -69,6 +69,11 @@ export function migrate(g: GameState): GameState {
   }
   if (loose.gridCut === undefined) loose.gridCut = null;
   if (loose.tutorial === undefined) loose.tutorial = null;
+  if (loose.quizScores === undefined) {
+    // Før B-029 kunne en quiz tas om igjen, og bare fullt hus ble lagret
+    loose.quizScores = Object.fromEntries((g.quizDone ?? []).map((c) => [c, 2]));
+    delete (loose as { quizFailedDay?: unknown }).quizFailedDay;
+  }
   if (g.settings.autoBuyCredit === undefined) {
     // Før B-027 handlet planleggeren alltid på kreditt; nå må spilleren tillate det
     g.settings.autoBuyCredit = false;
@@ -82,7 +87,7 @@ export function migrate(g: GameState): GameState {
     // Fagboka (B-025): kapitler man allerede har, regnes som lest, så forskning ikke stopper opp
     loose.readChapters = [...g.knowledge];
     loose.quizDone = [];
-    loose.quizFailedDay = {};
+    loose.quizScores = {};
     loose.missions = {};
     loose.counters = {};
     loose.repLog = [];

@@ -28,6 +28,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
       "Kobber, tinn, nikkel, krom og molybden kalles sporelementer. De er mindre villige til å gå i slaggen enn jern er, så de blir i stålet uansett hva du gjør i ovnen.",
       "Den eneste måten å få dem ned på er å tynne ut: bland inn rent skrap eller råjern. Resepten din bestemmer derfor hvilke kvaliteter du i det hele tatt kan lage.",
       "Billig skrap har mer rust, jord og olje. Det gir mindre stål per tonn, mer slagg og høyere energiforbruk. Det billigste skrapet er ikke alltid det billigste stålet.",
+      "En skrapklasser kontrollerer skrapet som kommer inn, og sørger for at hver skrapkasse får den blandingen resepten sier. Uten klassering blir blandingen omtrentlig, og mangler en skraptype, tar kranføreren det som ligger nærmest – da varierer analysen mye mer.",
     ],
   },
   {

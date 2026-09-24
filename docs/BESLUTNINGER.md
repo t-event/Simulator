@@ -349,3 +349,22 @@ Beslutning:
 - Med vedlikeholdsplan byttes foringen også hvis den blir 88 % slitt før planlagt dag.
 - Balanse: 10 / 32 / 74 / 154. Testspilleren blir rikere (0,06–1,1 mrd. kr på dag 240), så følg med
   på om vinnergrensen på 1 mrd. kommer for tidlig.
+
+## B-029 Skrapklasser, og quiz med ett forsøk (2026-09-24)
+Status: gjelder (erstatter omprøving av quiz i B-025)
+Brukeren ba om en skrapklasser som gir riktig skrapmiks til resepten, og at feil svar på quizen gir færre
+eller ingen poeng uten mulighet til å svare på nytt.
+Beslutning:
+- **Ny rolle: Skrapklasser** (fra verkstedet, 1 800 kr/døgn, ikke en del av skiftmannskapet).
+  - Uten skrapklasser blir blandingen i hver charge omtrentlig: hver skraptype i resepten kan bomme med
+    opptil ±25 %, og mangler en type, fylles chargen med det som ligger på lageret.
+  - Med skrapklasser følger chargen resepten nøyaktig, og manglende skrap fylles bare med andre typer i
+    resepten. Ellers venter ovnen («Mangler skrap til resepten»).
+  - Skrapklasseren stopper også dårlige lass (mye kobber og fosfor) ved porten og sender dem i retur for
+    full refusjon.
+  - Fagboka («Skrapvalg og sporelementer») forklarer rollen. Testspilleren ansetter én når verket går to
+    skift.
+- **Quiz:** bare ett forsøk per kapittel. Fagpoengene står i forhold til antall riktige svar
+  (1 av 2 gir halvparten, 0 gir ingenting). Forklaringene vises etter at svarene er levert, og resultatet
+  lagres (`quizScores`). Kapitler med quiz man allerede har bestått, regnes som 2 av 2.
+- Balanse: 12 / 36 / 74 / 146.

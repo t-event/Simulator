@@ -115,7 +115,18 @@ export function crewPerShift(g: GameState): Crew {
 }
 
 function countRoles(g: GameState): Record<RoleId, number> {
-  const counts = { allround: 0, ovn: 0, stoper: 0, skrap: 0, lab: 0, vedlikehold: 0, salg: 0, valse: 0, planlegger: 0 };
+  const counts = {
+    allround: 0,
+    ovn: 0,
+    stoper: 0,
+    skrap: 0,
+    lab: 0,
+    vedlikehold: 0,
+    salg: 0,
+    valse: 0,
+    planlegger: 0,
+    klasser: 0,
+  };
   for (const w of g.workers) counts[w.role] += 1;
   return counts;
 }
@@ -263,7 +274,9 @@ export function computePlantStats(g: GameState): PlantStats {
   const lab: 0 | 1 | 2 = has(g, "oes") || (g.specialists?.reklamasjon ?? 0) > g.minute ? 2 : has(g, "xrf") ? 1 : 0;
 
   // Ferdigheten til de som faktisk står i produksjonen
-  const floor = g.workers.filter((w) => w.role !== "salg" && w.role !== "vedlikehold" && w.role !== "planlegger");
+  const floor = g.workers.filter(
+    (w) => w.role !== "salg" && w.role !== "vedlikehold" && w.role !== "planlegger" && w.role !== "klasser",
+  );
   const skills = floor.map((w) => w.skill);
   if (staff.ownerWorks) skills.push(g.ownerSkill, g.ownerSkill);
   // Trivselen gjør de ansatte bedre eller dårligere enn ferdigheten tilsier (B-026)
@@ -425,6 +438,11 @@ export function liningDays(g: GameState, stats: PlantStats): number {
   const hours = stats.hours > 0 ? stats.hours : 24;
   const heatsPerDay = (hours * 60) / stats.cycleMin;
   return 0.85 / (liningWearPerHeat(g) * heatsPerDay);
+}
+
+/** En skrapklasser sørger for at chargene følger resepten (B-029) */
+export function hasGrader(g: GameState): boolean {
+  return g.workers.some((w) => w.role === "klasser");
 }
 
 export function hasPlanner(g: GameState): boolean {

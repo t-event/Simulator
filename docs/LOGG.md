@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 11 – 2026-09-24: skrapklasser og strengere quiz
+
+**Brukeren ba om:** En skrapklasser som gir riktig skrapmiks til resepten. Feil svar på quiz skal gi
+færre eller ingen poeng, uten ny sjanse.
+
+**Gjort (B-029):** Ny rolle Skrapklasser. Uten en blir blandingen omtrentlig og erstattes med hva som
+helst ved mangel. Med en følger chargen resepten, og dårlige lass sendes i retur. Quizen har ett forsøk
+med fagpoeng etter antall riktige.
+
+**Testet:** Playwright på iPhone 13: quiz med ett feil svar gir «1 av 2 riktige, +1 fagpoeng» og kan
+ikke tas igjen; skrapklasser kan ansettes under Folk. Balanse 12 / 36 / 74 / 146. Ingen konsollfeil.
+
+---
+
 ## Økt 10 – 2026-09-24: foringen varer for kort
 
 **Brukeren meldte:** Foringen slites på ett døgn; ovnen bør holde minst sju døgn når alt går etter

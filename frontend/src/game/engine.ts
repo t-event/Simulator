@@ -37,6 +37,7 @@ import {
   furnaceType,
   gradeFailures,
   has,
+  hasGrader,
   hasPlanner,
   isOpen,
   nightExtra,
@@ -193,7 +194,7 @@ export function newGame(seed = Date.now()): GameState {
     gridCut: null,
     readChapters: [],
     quizDone: [],
-    quizFailedDay: {},
+    quizScores: {},
     missions: {},
     counters: {},
     repLog: [],
@@ -342,6 +343,16 @@ export function buyScrap(g: GameState, id: ScrapId, t: number, stats = computePl
   // Et dårlig parti: mer fosfor og kobber enn normalt, uten at det synes på skrapet
   const quality = { p: type.p, tramp: type.tramp, c: type.c, dirt: type.dirt };
   if ((id === "blandet" || id === "spon" || id === "shredder") && chance(g, 0.05)) {
+    if (hasGrader(g)) {
+      // Skrapklasseren ser at partiet er dårlig og sender det tilbake (B-029)
+      addIncome(g, "annet", cost);
+      log(
+        g,
+        `Skrapklasseren avviste et lass ${type.name.toLowerCase()} med mye kobber og fosfor. Det er sendt i retur, og du har fått pengene tilbake.`,
+        "event",
+      );
+      return { ok: true, message: "Skrapklasseren sendte et dårlig lass i retur." };
+    }
     quality.p *= uniform(g, 1.6, 2.4);
     quality.tramp *= uniform(g, 1.2, 1.6);
   }
@@ -378,15 +389,21 @@ interface Mix {
 
 /** Tar skrap fra lageret etter resepten. Mangler en type, fylles det opp med resten. */
 export function takeScrap(g: GameState, sizeT: number, dryRun = false): Mix | null {
+  const grader = hasGrader(g);
   const recipeIds = SCRAP_IDS.filter((id) => g.recipe[id] > 0);
-  const totalWeight = recipeIds.reduce((a, id) => a + g.recipe[id], 0);
+  // Uten skrapklasser blir blandingen omtrentlig: hver skraptype kan bomme med opptil en fjerdedel (B-029)
+  const weights = Object.fromEntries(
+    SCRAP_IDS.map((id) => [id, g.recipe[id] * (grader || dryRun || g.recipe[id] <= 0 ? 1 : uniform(g, 0.75, 1.25))]),
+  ) as Record<ScrapId, number>;
+  const totalWeight = recipeIds.reduce((a, id) => a + weights[id], 0);
   const amounts = Object.fromEntries(SCRAP_IDS.map((id) => [id, 0])) as Record<ScrapId, number>;
   if (totalWeight > 0) {
-    for (const id of recipeIds) amounts[id] = Math.min(g.scrap[id].t, (sizeT * g.recipe[id]) / totalWeight);
+    for (const id of recipeIds) amounts[id] = Math.min(g.scrap[id].t, (sizeT * weights[id]) / totalWeight);
   }
   let short = sizeT - Object.values(amounts).reduce((a, b) => a + b, 0);
-  // Fyll opp med andre typer i resepten, deretter hva som helst som ligger på lageret
-  for (const pool of [recipeIds, SCRAP_IDS]) {
+  // Fyll opp med andre typer i resepten. Uten skrapklasser tas deretter hva som helst som ligger på
+  // lageret; skrapklasseren venter heller på riktig skrap enn å ødelegge analysen.
+  for (const pool of grader ? [recipeIds] : [recipeIds, SCRAP_IDS]) {
     for (let pass = 0; pass < 4 && short > 1e-9; pass++) {
       const spare = pool.map((id) => ({ id, spare: g.scrap[id].t - amounts[id] })).filter((x) => x.spare > 1e-9);
       const spareTotal = spare.reduce((a, x) => a + x.spare, 0);
@@ -795,7 +812,9 @@ function updateFurnaces(g: GameState, stats: PlantStats): void {
       f.waitReason = "Venter mens du er i kontrollrommet";
       continue;
     }
-    if (!startHeat(g, i, stats)) f.waitReason = "Tomt for skrap";
+    if (!startHeat(g, i, stats))
+      f.waitReason =
+        hasGrader(g) && stats.yardUsed >= stats.sizeT ? "Mangler skrap til resepten" : "Tomt for skrap";
   }
 }
 
@@ -1236,6 +1255,7 @@ export function makeCandidate(g: GameState, role?: RoleId): Worker {
     "salg",
     "valse",
     "planlegger",
+    "klasser",
   ];
   const r =
     role ??
@@ -1244,7 +1264,8 @@ export function makeCandidate(g: GameState, role?: RoleId): Worker {
       roles
         .filter((x) => x !== "valse" || g.stage >= 3)
         .filter((x) => x !== "lab" || g.stage >= 2)
-        .filter((x) => x !== "planlegger" || g.stage >= 2),
+        .filter((x) => x !== "planlegger" || g.stage >= 2)
+        .filter((x) => x !== "klasser" || g.stage >= 1),
     );
   const skill = Math.min(5, Math.max(1, Math.round((uniform(g, 0.6, 3.6) + (g.stage >= 3 ? 0.5 : 0)) * 10) / 10));
   return {

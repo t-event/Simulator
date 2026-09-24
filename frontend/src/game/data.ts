@@ -742,6 +742,14 @@ export const ROLES: Record<RoleId, Role> = {
     salary: 2300,
     description: "Holder orden på ordrekøen og kjøper inn skrap etter resepten, så verket aldri står tomt.",
   },
+  klasser: {
+    id: "klasser",
+    name: "Skrapklasser",
+    plural: "Skrapklassere",
+    salary: 1800,
+    description:
+      "Kontrollerer skrapet som kommer inn og sørger for at hver charge får den blandingen resepten sier. Stopper dårlige partier ved porten.",
+  },
   salg: {
     id: "salg",
     name: "Selger",
