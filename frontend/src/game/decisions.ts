@@ -7,8 +7,8 @@
  */
 import { SCRAP_TYPES, STAGES } from "./data";
 import { acceptContract, addCost, addIncome, addScrapParti, adjustMorale, adjustReputation, fmtKr, fmtT, log, makeCandidate, scrapPrice, unlock } from "./engine";
-import { computePlantStats, day, productPrice } from "./plant";
-import { chance, pick, uniform } from "./random";
+import { computePlantStats, day, isAbsent, productPrice } from "./plant";
+import { chance, pick, rand, uniform } from "./random";
 import { knowledgeCard } from "./knowledge";
 import type { Contract, Decision, GameState, RepCause } from "./types";
 
@@ -145,17 +145,26 @@ const MORE_MAKERS: Record<string, Maker> = {
     };
   },
   sykdom: (g) => {
-    if (g.stage < 1 || g.workers.length < 3) return null;
-    const cost = Math.round(g.workers.reduce((a, w) => a + w.salary, 0) * 0.8);
+    // Influensa: mange er borte samtidig (B-031)
+    if (g.stage < 1 || g.workers.length < 6) return null;
+    const healthy = g.workers.filter((w) => !isAbsent(g, w) && w.absentUntil === undefined);
+    const n = Math.min(healthy.length, Math.max(2, Math.round(g.workers.length * uniform(g, 0.2, 0.35))));
+    if (n < 2) return null;
+    const sick = [...healthy].sort(() => rand(g) - 0.5).slice(0, n);
+    const days = Math.round(uniform(g, 2, 4));
+    const cost = Math.round(sick.reduce((a, w) => a + w.salary, 0) * 1.5 * days);
     return {
       id: "sykdom",
       title: "Influensa",
-      text: "Flere av de ansatte er syke de neste to døgnene.",
+      text: `Influensaen har kommet til verket: ${n} av ${g.workers.length} ansatte er syke de neste ${days} døgnene. Allroundere kan dekke noen plasser, men neppe alle.`,
       options: [
-        { label: `Leie inn vikarer (${fmtKr(cost)})`, hint: "Verket går som normalt." },
-        { label: "Kjør med færre folk", hint: "Ett skift mindre i to døgn." },
+        { label: `Lei inn vikarer (${fmtKr(cost)})`, hint: "Verket går som normalt." },
+        {
+          label: "Gå ned på skiftgangen",
+          hint: "Verket kjører de skiftene det er folk til, til de syke er tilbake.",
+        },
       ],
-      data: { cost },
+      data: { cost, days, ids: sick.map((w) => w.id).join(",") },
     };
   },
   naboklage: (g) => {
@@ -406,15 +415,24 @@ export function resolveDecision(g: GameState, option: number): void {
       adjustMorale(g, 5);
       log(g, "Operatørene er tilbake fra kurs og har lært mye.", "good");
       return;
-    case "sykdom":
+    case "sykdom": {
+      const ids = String(d.data.ids ?? "").split(",").map(Number);
+      const until = g.minute + n("days") * 1440;
+      for (const w of g.workers)
+        if (ids.includes(w.id)) {
+          w.absentFrom = g.minute;
+          w.absentUntil = until;
+          w.absentReason = "syk";
+        }
       if (yes) {
         addCost(g, "lonn", n("cost"));
-        log(g, "Vikarene holdt verket i gang mens de syke var borte.", "info");
+        g.tempsUntilMin = Math.max(g.tempsUntilMin ?? 0, until);
+        log(g, "Vikarene holder verket i gang mens de syke er borte.", "info");
       } else {
-        g.sickUntilMin = g.minute + 2 * 1440;
-        log(g, "Verket går med ett skift mindre de neste to døgnene.", "event");
+        log(g, "Verket kjører med de folkene det har til de syke er tilbake.", "event");
       }
       return;
+    }
     case "naboklage":
       if (yes) {
         addCost(g, "annet", n("cost"));

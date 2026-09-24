@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 15 – 2026-09-24: fravær, influensa og vikarer
+
+**Brukeren ba om:** Forslaget om fravær, med automatisk ferie, influensa der flere er borte, og valget
+mellom å gå ned på skiftgangen eller leie vikarer.
+
+**Gjort (B-031):** Fravær per ansatt (ferie og sykdom), allroundere som dekker, nytt influensakort,
+vikarer under Folk, kort for fravær og varsel på Verket.
+
+**Testet:** Node-test av fravær over 60 døgn (se B-031). Playwright på iPhone 13: fraværskortet viser syk
+ansatt, tapt skift og ferie som kommer; vikarer i 1 døgn dekker fraværet. Balanse 12 / 31 / 73 / 150.
+Ingen konsollfeil.
+
+---
+
 ## Økt 14 – 2026-09-24: to potter per lysbueovn og murere
 
 **Brukeren ba om:** To potter per lysbueovn, og murere som bygger opp den ene mens den andre er i bruk

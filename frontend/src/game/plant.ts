@@ -20,7 +20,7 @@ import {
   type Stage,
 } from "./data";
 import { hasResearch } from "./research";
-import type { Analysis, Crew, GameState, GradeId, PowerDeal, ProductId, RoleId } from "./types";
+import type { Analysis, Crew, GameState, GradeId, PowerDeal, ProductId, RoleId, Worker } from "./types";
 
 export const OWNER_SLOTS = 2;
 export const OWNER_HOURS = 10;
@@ -114,7 +114,22 @@ export function crewPerShift(g: GameState): Crew {
   return crew;
 }
 
-function countRoles(g: GameState): Record<RoleId, number> {
+/** Er den ansatte borte (syk eller på ferie) akkurat nå? */
+export function isAbsent(g: GameState, w: Worker, minute = g.minute): boolean {
+  return w.absentFrom !== undefined && w.absentUntil !== undefined && minute >= w.absentFrom && minute < w.absentUntil;
+}
+
+/** Vikarer dekker fraværet? */
+export function tempsActive(g: GameState): boolean {
+  return (g.tempsUntilMin ?? 0) > g.minute;
+}
+
+/** De som er på jobb: alle som ikke er borte, eller alle hvis vikarer dekker fraværet (B-031) */
+export function presentWorkers(g: GameState): Worker[] {
+  return tempsActive(g) ? g.workers : g.workers.filter((w) => !isAbsent(g, w));
+}
+
+function countRoles(g: GameState, ignoreAbsence = false): Record<RoleId, number> {
   const counts = {
     allround: 0,
     ovn: 0,
@@ -128,7 +143,7 @@ function countRoles(g: GameState): Record<RoleId, number> {
     klasser: 0,
     murer: 0,
   };
-  for (const w of g.workers) counts[w.role] += 1;
+  for (const w of ignoreAbsence ? g.workers : presentWorkers(g)) counts[w.role] += 1;
   return counts;
 }
 
@@ -186,7 +201,11 @@ export function crewCoverage(
   return { rows, wildcards, wildUsed: wildcards - spare, ownerSlots };
 }
 
-export function staffing(g: GameState): {
+/** Bemanningen med de som er på jobb (eller med alle, for å se hva fraværet koster i skift) */
+export function staffing(
+  g: GameState,
+  ignoreAbsence = false,
+): {
   shifts: number;
   hours: number;
   ownerWorks: boolean;
@@ -194,7 +213,7 @@ export function staffing(g: GameState): {
   crew: Crew;
 } {
   const crew = crewPerShift(g);
-  const counts = countRoles(g);
+  const counts = countRoles(g, ignoreAbsence);
   const ownerWorks = g.stage <= 1;
   const wildcards = counts.allround + (ownerWorks ? OWNER_SLOTS : 0);
   let shifts = 0;
@@ -203,8 +222,6 @@ export function staffing(g: GameState): {
     else break;
   }
   const missing = shifts < 3 ? deficit(crew, counts, shifts + 1, wildcards) : {};
-  // Sykdom: ett skift mindre en periode
-  if (g.sickUntilMin > g.minute && shifts > 0) shifts -= 1;
   let hours = 0;
   if (shifts > 0) hours = Math.min(24, (ownerWorks ? OWNER_HOURS : 8) + 8 * (shifts - 1));
   return { shifts, hours, ownerWorks, missing, crew };
@@ -313,7 +330,7 @@ export function computePlantStats(g: GameState): PlantStats {
   const lab: 0 | 1 | 2 = has(g, "oes") || (g.specialists?.reklamasjon ?? 0) > g.minute ? 2 : has(g, "xrf") ? 1 : 0;
 
   // Ferdigheten til de som faktisk står i produksjonen
-  const floor = g.workers.filter(
+  const floor = presentWorkers(g).filter(
     (w) =>
       w.role !== "salg" &&
       w.role !== "vedlikehold" &&
@@ -341,7 +358,7 @@ export function computePlantStats(g: GameState): PlantStats {
   if (hasResearch(g, "energistyring")) kwhPerT *= 0.95;
   if (furnace.arc && hasResearch(g, "skumslagg")) kwhPerT *= 0.94;
 
-  const repairers = g.workers.filter((w) => w.role === "vedlikehold").length;
+  const repairers = presentWorkers(g).filter((w) => w.role === "vedlikehold").length;
   const repairCover = Math.min(1, repairers / Math.max(1, g.stage));
   let maintFactor = 1 - 0.35 * repairCover;
   let repairFactor = 1 - 0.3 * repairCover;
@@ -351,7 +368,7 @@ export function computePlantStats(g: GameState): PlantStats {
   }
   if (hasResearch(g, "sikkerhet")) maintFactor *= 0.8;
 
-  const sellers = g.workers.filter((w) => w.role === "salg").length;
+  const sellers = presentWorkers(g).filter((w) => w.role === "salg").length;
   const offersPerDay =
     1.2 +
     0.6 * g.stage +
@@ -490,7 +507,7 @@ export const MASONS_PER_POT = 2;
 
 /** Hvor mye av en reservepott som mures opp per døgn, når murerne deles på pottene som trenger det */
 export function potRebuildPerDay(g: GameState): number {
-  const masons = g.workers.filter((w) => w.role === "murer").length;
+  const masons = presentWorkers(g).filter((w) => w.role === "murer").length;
   const pots = g.furnaces.filter((f) => f.spareProgress < 1).length;
   if (!masons || !pots) return 0;
   return Math.min(MASONS_PER_POT, masons / pots) / MASONS_PER_POT / POT_REBUILD_DAYS;
@@ -503,9 +520,9 @@ export function potSwapHours(g: GameState): number {
 
 /** En skrapklasser sørger for at chargene følger resepten (B-029) */
 export function hasGrader(g: GameState): boolean {
-  return g.workers.some((w) => w.role === "klasser");
+  return presentWorkers(g).some((w) => w.role === "klasser");
 }
 
 export function hasPlanner(g: GameState): boolean {
-  return g.workers.some((w) => w.role === "planlegger") || (g.specialists?.sen ?? 0) > g.minute;
+  return presentWorkers(g).some((w) => w.role === "planlegger") || (g.specialists?.sen ?? 0) > g.minute;
 }

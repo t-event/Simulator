@@ -4,7 +4,7 @@ import { Maintenance } from "./Maintenance";
 import { researchOptions } from "../game/research";
 import { GRADE_IDS, GRADES, PRODUCTS, ROLES, STAGES } from "../game/data";
 import { currentOrder, recipeEstimate } from "../game/engine";
-import { castingType, rollingActive, shiftStart, type PlantStats } from "../game/plant";
+import { castingType, isAbsent, rollingActive, shiftStart, staffing, tempsActive, type PlantStats } from "../game/plant";
 import type { GameState, GradeId, RoleId } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { AnalysisLine, Bar, Card, GradeChips, Stat } from "./common";
@@ -72,6 +72,15 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
   const next = upgradeOptions(g).find((o) => o.kind === "stage");
   if (next?.available)
     out.push({ text: `Du kan flytte inn i ${next.name.toLowerCase()}! Trykk «Flytt inn» under Mål lenger ned.` });
+  {
+    const away = g.workers.filter((w) => isAbsent(g, w)).length;
+    const full = staffing(g, true).shifts;
+    if (away && !tempsActive(g) && stats.shifts < full)
+      out.push({
+        text: `${away} ${away === 1 ? "ansatt er" : "ansatte er"} borte, og verket går ${stats.shifts} skift i stedet for ${full}. Lei inn vikarer under Folk, eller vent til de er tilbake.`,
+        view: "folk",
+      });
+  }
   if (g.workers.length && g.morale < 40)
     out.push({ text: "Trivselen blant de ansatte er lav, og noen kan si opp. Se Folk.", view: "folk" });
   if (g.stage >= 1 && stats.staffCount === 0)

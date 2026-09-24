@@ -120,6 +120,7 @@ export function migrate(g: GameState): GameState {
   });
   for (const c of g.contracts) if (c.priority === undefined) c.priority = 0;
   if (loose.sickUntilMin === undefined) loose.sickUntilMin = 0;
+  if (loose.tempsUntilMin === undefined) loose.tempsUntilMin = 0;
   if (loose.bonusOffer === undefined) loose.bonusOffer = false;
   for (const c of g.contracts) {
     const old = c as typeof c & { offerExpiresDay?: number };

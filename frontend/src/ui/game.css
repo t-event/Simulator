@@ -1648,3 +1648,25 @@ button {
   display: block;
   white-space: nowrap;
 }
+
+/* Fravær (B-031) */
+.g-absence {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.g-absence li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+.g-worker-away {
+  font-size: 12px;
+}

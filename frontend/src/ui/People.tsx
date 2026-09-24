@@ -8,10 +8,21 @@ import {
   giveBonus,
   hire,
   hireForMissing,
+  hireTemps,
   sendOnCourse,
+  tempsCost,
 } from "../game/actions";
 import { CREW_ROLES, ROLE_IDS, ROLES, STAGES } from "../game/data";
-import { crewCoverage, day, moraleFactor, nightExtra, type PlantStats } from "../game/plant";
+import {
+  crewCoverage,
+  day,
+  isAbsent,
+  moraleFactor,
+  nightExtra,
+  staffing,
+  tempsActive,
+  type PlantStats,
+} from "../game/plant";
 import type { GameState, RoleId, Worker } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Bar, Card, Stat } from "./common";
@@ -38,12 +49,13 @@ function Stars({ skill }: { skill: number }) {
   );
 }
 
-function WorkerRow({ w, action }: { w: Worker; action: React.ReactNode }) {
+function WorkerRow({ w, action, away }: { w: Worker; action: React.ReactNode; away?: string }) {
   return (
     <li className="g-worker">
       <div>
         <strong>{w.name}</strong>
         <span className="g-muted"> · {ROLES[w.role].name}</span>
+        {away && <span className="g-badge-bad g-worker-away"> {away}</span>}
       </div>
       <Stars skill={w.skill} />
       <span className="g-muted">{fmtKr(w.salary)}/dag</span>
@@ -67,7 +79,11 @@ function Morale({ g, stats, act }: Props) {
         <span>{Math.round(m)} av 100</span>
       </div>
       <p className="g-muted">
-        {m >= 60 ? "Folk trives og lærer raskt." : m >= 35 ? "Stemningen er så som så." : "Folk mistrives, og noen kan si opp."}{" "}
+        {m >= 60
+          ? "Folk trives og lærer raskt."
+          : m >= 35
+            ? "Stemningen er så som så."
+            : "Folk mistrives, og noen kan si opp."}{" "}
         Innsatsen er {effect >= 0 ? `${effect} % bedre` : `${-effect} % dårligere`} enn ferdigheten tilsier.
       </p>
       <p className="g-muted">
@@ -77,6 +93,74 @@ function Morale({ g, stats, act }: Props) {
       <button className="g-primary" disabled={day(g) < nextBonus} onClick={() => act((gg) => giveBonus(gg))}>
         {day(g) < nextBonus ? `Bonus igjen dag ${nextBonus}` : `Gi alle bonus (${fmtKr(bonusCost(g))})`}
       </button>
+    </Card>
+  );
+}
+
+/** Fravær: hvem som er borte nå og hvem som skal ha ferie, og vikarer (B-031) */
+function Absence({ g, stats, act }: Props) {
+  if (!g.workers.length) return null;
+  const now = g.workers.filter((w) => isAbsent(g, w));
+  const upcoming = g.workers
+    .filter((w) => w.absentReason === "ferie" && (w.absentFrom ?? 0) > g.minute)
+    .sort((a, b) => (a.absentFrom ?? 0) - (b.absentFrom ?? 0));
+  const full = staffing(g, true).shifts;
+  const temps = tempsActive(g);
+  return (
+    <Card title="Fravær">
+      {now.length === 0 && upcoming.length === 0 && (
+        <p className="g-muted">
+          Ingen er borte. Ferie kommer av seg selv og varsles tre døgn før. Folk blir oftere syke når trivselen er lav
+          eller verket går nattskift.
+        </p>
+      )}
+      {now.length > 0 && (
+        <ul className="g-absence">
+          {now.map((w) => (
+            <li key={w.id}>
+              <strong>{w.name}</strong> <span className="g-muted">· {ROLES[w.role].name}</span>
+              <span className={w.absentReason === "syk" ? "g-badge-bad" : "g-badge-ok"}>
+                {w.absentReason === "syk" ? "Syk" : "Ferie"} til dag {day(g, (w.absentUntil ?? 0) - 1)}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {now.length > 0 &&
+        (temps ? (
+          <p className="g-note">Vikarer dekker fraværet til dag {day(g, g.tempsUntilMin - 1)}.</p>
+        ) : stats.shifts < full ? (
+          <p className="g-note g-warn">
+            Fraværet koster skift: verket går {stats.shifts} skift i stedet for {full}. Lei inn vikarer, eller vent til
+            folk er tilbake.
+          </p>
+        ) : (
+          <p className="g-muted">Allroundere dekker plassene til dem som er borte, så verket går som normalt.</p>
+        ))}
+      {now.length > 0 && !temps && (
+        <div className="g-row">
+          {[1, 3].map((d) => (
+            <button key={d} onClick={() => act((gg) => hireTemps(gg, d))}>
+              Vikarer i {d} døgn ({fmtKr(tempsCost(g, d))})
+            </button>
+          ))}
+        </div>
+      )}
+      {upcoming.length > 0 && (
+        <>
+          <h3 className="g-subhead">Ferie som kommer</h3>
+          <ul className="g-absence">
+            {upcoming.slice(0, 5).map((w) => (
+              <li key={w.id}>
+                <strong>{w.name}</strong> <span className="g-muted">· {ROLES[w.role].name}</span>
+                <span className="g-muted">
+                  dag {day(g, w.absentFrom ?? 0)}–{day(g, (w.absentUntil ?? 0) - 1)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </Card>
   );
 }
@@ -135,7 +219,11 @@ export function People({ g, stats, act }: Props) {
                   </td>
                   <td className="num">
                     {row.own} {row.own === 1 ? "egen" : "egne"}
-                    {row.filled > 0 && <span className="g-muted g-sub">+ {row.filled} {row.filled === 1 ? "allrounder" : "allroundere"}</span>}
+                    {row.filled > 0 && (
+                      <span className="g-muted g-sub">
+                        + {row.filled} {row.filled === 1 ? "allrounder" : "allroundere"}
+                      </span>
+                    )}
                   </td>
                   <td className={`num${row.missing ? " bad" : ""}`}>{row.missing || "–"}</td>
                 </tr>
@@ -157,6 +245,8 @@ export function People({ g, stats, act }: Props) {
           </p>
         </Card>
 
+        <Absence g={g} stats={stats} act={act} />
+
         <Morale g={g} stats={stats} act={act} />
 
         <Card title={`Ansatte (${g.workers.length})`}>
@@ -175,6 +265,11 @@ export function People({ g, stats, act }: Props) {
                     <WorkerRow
                       key={w.id}
                       w={w}
+                      away={
+                        isAbsent(g, w)
+                          ? `${w.absentReason === "syk" ? "Syk" : "Ferie"} til dag ${day(g, (w.absentUntil ?? 0) - 1)}`
+                          : undefined
+                      }
                       action={
                         confirmFire === w.id ? (
                           <span className="g-row">
@@ -196,7 +291,8 @@ export function People({ g, stats, act }: Props) {
                             <button
                               className="g-small"
                               disabled={
-                                w.skill >= 5 || (w.courseDay !== undefined && day(g) - w.courseDay < COURSE_COOLDOWN_DAYS)
+                                w.skill >= 5 ||
+                                (w.courseDay !== undefined && day(g) - w.courseDay < COURSE_COOLDOWN_DAYS)
                               }
                               title="Ferdighet +0,6"
                               onClick={() => act((gg) => sendOnCourse(gg, w.id))}

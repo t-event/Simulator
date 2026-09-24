@@ -3,7 +3,7 @@
  */
 import { ADDONS, CASTINGS, FURNACES, GRADES, PRODUCTS, SCRAP_IDS, STAGES, type Addon } from "./data";
 import { addCost, adjustMorale, fmtKr, fmtT, log, orderQueue, startReline, maxLoan, newFurnaceUnit, unlock, type PurchaseResult } from "./engine";
-import { castingType, computePlantStats, day, fixedPowerOffer, furnaceType, has, POWER_BINDING_DAYS } from "./plant";
+import { castingType, computePlantStats, day, fixedPowerOffer, furnaceType, has, isAbsent, POWER_BINDING_DAYS } from "./plant";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
 import type { GameState, GradeId, PowerDeal, ScrapId } from "./types";
 
@@ -438,4 +438,22 @@ export function sendOnCourse(g: GameState, workerId: number): PurchaseResult {
   adjustMorale(g, 1);
   log(g, `${w.name} har vært på kurs og er blitt flinkere.`, "good");
   return { ok: true, message: "Kurs gjennomført." };
+}
+
+// ------------------------------------------------------------------ //
+// Vikarer (B-031)
+// ------------------------------------------------------------------ //
+/** Vikarer koster halvannen gang lønna til dem som er borte */
+export function tempsCost(g: GameState, days: number): number {
+  const absent = g.workers.filter((w) => isAbsent(g, w));
+  return Math.round(absent.reduce((a, w) => a + w.salary, 0) * 1.5 * days);
+}
+
+export function hireTemps(g: GameState, days: number): PurchaseResult {
+  if (!g.workers.some((w) => isAbsent(g, w))) return fail("Ingen er borte akkurat nå.");
+  const cost = tempsCost(g, days);
+  addCost(g, "lonn", cost);
+  g.tempsUntilMin = Math.max(g.tempsUntilMin ?? 0, g.minute) + days * 1440;
+  log(g, `Vikarer er leid inn i ${days} døgn (${fmtKr(cost)}). De dekker alle som er borte.`, "info");
+  return { ok: true, message: "Vikarene er på plass." };
 }

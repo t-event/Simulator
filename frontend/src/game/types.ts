@@ -139,6 +139,12 @@ export interface Worker {
   hiredDay: number;
   /** Siste dag den ansatte var på kurs (B-026) */
   courseDay?: number;
+  /** Fravær (B-031): fra og til spillminutt, og hvorfor */
+  absentFrom?: number;
+  absentUntil?: number;
+  absentReason?: "syk" | "ferie";
+  /** Døgnet neste ferie starter (varsles tre døgn før) */
+  nextVacationDay?: number;
 }
 
 export interface LogEntry {
@@ -306,8 +312,10 @@ export interface GameState {
   pendingDecision: Decision | null;
   /** Dagen hvert hendelseskort sist ble vist, så de ikke gjentas for ofte */
   decisionSeen: Record<string, number>;
-  /** Syke ansatte: ett skift mindre til dette spillminuttet */
+  /** Utgått (B-031): erstattet av fravær per ansatt. Beholdes for gamle lagringer. */
   sickUntilMin: number;
+  /** Innleide vikarer dekker alle som er borte til dette spillminuttet (B-031) */
+  tempsUntilMin: number;
   /** Et kundebesøk har gitt en god forespørsel som kommer snart */
   bonusOffer: boolean;
   /** Avtalt utkobling fra nettselskapet: ingen nye charger i dette tidsrommet */
