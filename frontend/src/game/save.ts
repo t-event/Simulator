@@ -48,6 +48,13 @@ export function migrate(g: GameState): GameState {
   if (loose.celebrate === undefined) loose.celebrate = null;
   if (loose.decisionSeen === undefined) loose.decisionSeen = {};
   if (loose.gradeRecipes === undefined) loose.gradeRecipes = {};
+  if (g.settings.relinePlanDays === undefined) {
+    // Automatisk omforing krever nå en reparatør eller en plan (B-022)
+    g.settings.relinePlanDays = null;
+    g.settings.autoReline = g.workers.some((w) => w.role === "vedlikehold");
+  }
+  for (const f of g.furnaces) if (f.relineRequested === undefined) f.relineRequested = false;
+  for (const f of g.furnaces) if (f.lastRelineDay === undefined) f.lastRelineDay = Math.max(1, Math.floor(g.minute / 1440) + 1);
   if (g.settings.followQueue === undefined) g.settings.followQueue = true;
   if (g.settings.plannerSorts === undefined) g.settings.plannerSorts = true;
   const active = g.contracts.filter((c) => c.status === "aktiv").sort((a, b) => a.deadlineDay - b.deadlineDay);

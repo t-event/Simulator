@@ -83,6 +83,15 @@ export const RESEARCH: Research[] = [
     effect: "Åpner for strålingsportal",
   },
   {
+    id: "vedlikeholdsplan",
+    name: "Vedlikeholdsplan",
+    stage: 1,
+    cost: 15,
+    knowledge: "ildfast",
+    description: "Planlagt stans er billigere enn havari. Bytt foringen før den er slitt, på faste dager.",
+    effect: "Planlegg omforing hvert 4.–14. døgn",
+  },
+  {
     id: "opplaering",
     name: "Opplæringsprogram",
     stage: 1,

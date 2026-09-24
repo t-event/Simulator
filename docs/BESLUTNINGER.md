@@ -204,3 +204,17 @@ Beslutning:
 - Ny rolle **Planlegger** fra støperiet: sorterer køen etter frist (kan slås av) og kjøper skrap
   automatisk. **Automatisk innkjøp krever planlegger** – før det kjøper spilleren skrap selv, så
   det er mer å gjøre tidlig i spillet.
+
+## B-022 Foring byttes av spilleren, etter plan eller av reparatør (2026-09-24)
+Status: gjelder (erstatter automatisk omforing fra start)
+Beslutning:
+- Foringen byttes ikke lenger av seg selv. Kortet **Vedlikehold** på Verket viser slitasjen per
+  ovn og har knappen «Bytt foring» (nå hvis ovnen står, ellers etter chargen som pågår).
+- Forskningen **Vedlikeholdsplan** (verksted, 15 fagpoeng) lar spilleren planlegge omforing hver
+  4–14 døgn (`relinePlanDays`).
+- Med en **reparatør** ansatt kan «Reparatøren bytter foringen ved 85 % slitasje» slås på
+  (`autoReline`, av som standard). Gamle lagringer med reparatør beholder automatikken.
+- Planlagt stans heter «Planlagt stans: ny foring» og koster vanlig pris og tid. Havari
+  (gjennombrenning, vannlekkasje, strålekilde) heter «Havari: …». Gjennombrenning koster tre ganger
+  prisen og tiden, omdømme −5 (var −3), og meldingen sier hva en planlagt omforing ville kostet.
+- Testspilleren bestiller ny foring ved 88 % slitasje. Balanse: 11 / 43 / 98 / 182.

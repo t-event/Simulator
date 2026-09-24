@@ -20,7 +20,12 @@ riktigere navn. Konsollfeil: ingen funnet.
 resept per kvalitet, planlegger som sorterer køen og kjøper inn. Testet i nettleser og balansetest
 (11 / 38 / 94 / 173).
 
-**Gjenstår:** Tema C–G i arbeidslisten.
+**Tema C (B-022):** Foringen byttes ikke av seg selv lenger: knapp i nytt Vedlikehold-kort,
+planlagt omforing via forskning, eller reparatør. Planlagt stans og havari skilles tydelig i
+meldinger og straff. Testet på iPhone 13 (knappen bytter tekst, ingen horisontal scroll, ingen
+konsollfeil) og balansetest (11 / 43 / 98 / 182).
+
+**Gjenstår:** Tema D–G i arbeidslisten.
 
 ---
 

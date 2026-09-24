@@ -93,6 +93,8 @@ export function newFurnaceUnit(): FurnaceUnit {
     downUntilMin: 0,
     downReason: null,
     heatsOnLining: 0,
+    lastRelineDay: 1,
+    relineRequested: false,
     waitReason: null,
   };
 }
@@ -144,8 +146,9 @@ export function newGame(seed = Date.now()): GameState {
       spotSoldToday: {},
     },
     settings: {
-      autoReline: true,
-      relineAt: 0.9,
+      autoReline: false,
+      relineAt: 0.85,
+      relinePlanDays: null,
       maxPowerPrice: null,
       autoBuy: false,
       followQueue: true,
@@ -538,7 +541,7 @@ function heatEvents(g: GameState, index: number, stats: PlantStats): number {
       if (chance(g, 0.3)) {
         const hours = 3 * stats.repairFactor;
         f.downUntilMin = Math.max(f.downUntilMin, g.minute + stats.cycleMin + hours * 60);
-        f.downReason = "Vannlekkasje etter overslag";
+        f.downReason = "Havari: vannlekkasje etter overslag";
         addCost(g, "vedlikehold", 60_000);
         log(
           g,
@@ -557,7 +560,7 @@ function heatEvents(g: GameState, index: number, stats: PlantStats): number {
   } else if (furnace.id !== "digel" && chance(g, 0.004 * m)) {
     const hours = 8 * stats.repairFactor;
     f.downUntilMin = Math.max(f.downUntilMin, g.minute + stats.cycleMin + hours * 60);
-    f.downReason = "Vannlekkasje i induksjonsspolen";
+    f.downReason = "Havari: vannlekkasje i induksjonsspolen";
     addCost(g, "vedlikehold", 8_000 * furnace.sizeT + 10_000);
     log(
       g,
@@ -583,7 +586,7 @@ function finishHeat(g: GameState, index: number, stats: PlantStats): void {
     addCost(g, "annet", cleanup);
     adjustReputation(g, -12);
     f.downUntilMin = g.minute + 2 * MIN_PER_DAY;
-    f.downReason = "Opprydding etter radioaktiv kilde";
+    f.downReason = "Havari: opprydding etter radioaktiv kilde";
     g.castDownUntilMin = Math.max(g.castDownUntilMin, g.minute + MIN_PER_DAY);
     awardPoints(g, 3);
     log(
@@ -600,11 +603,12 @@ function finishHeat(g: GameState, index: number, stats: PlantStats): void {
     const cost = stats.furnace.relineCost * 3;
     const hours = stats.furnace.relineHours * 3 * stats.repairFactor;
     addCost(g, "vedlikehold", cost);
-    adjustReputation(g, -3);
+    adjustReputation(g, -5);
     f.wear = 0;
     f.heatsOnLining = 0;
+    f.lastRelineDay = day(g);
     f.downUntilMin = g.minute + hours * 60;
-    f.downReason = "Reparasjon etter gjennombrenning";
+    f.downReason = "Havari: gjennombrent foring";
     // Litt av stålet berges som skrap
     addScrap(
       g,
@@ -615,7 +619,7 @@ function finishHeat(g: GameState, index: number, stats: PlantStats): void {
     awardPoints(g, 3);
     log(
       g,
-      `Gjennombrenning i ovn ${index + 1}! Flytende stål gikk gjennom foringen. Reparasjon ${fmtKr(cost)}, ${hours.toFixed(0)} timer.`,
+      `HAVARI: gjennombrenning i ovn ${index + 1}! Flytende stål gikk gjennom foringen. Reparasjon ${fmtKr(cost)}, ${hours.toFixed(0)} timer, omdømme −5. En planlagt omforing hadde kostet ${fmtKr(stats.furnace.relineCost)} og ${stats.furnace.relineHours} timer.`,
       "bad",
     );
     unlock(g, "ildfast");
@@ -634,7 +638,12 @@ function finishHeat(g: GameState, index: number, stats: PlantStats): void {
   };
 }
 
-export function startReline(g: GameState, index: number, stats = computePlantStats(g)): PurchaseResult {
+export function startReline(
+  g: GameState,
+  index: number,
+  stats = computePlantStats(g),
+  why: "manuell" | "plan" | "reparatør" = "manuell",
+): PurchaseResult {
   const f = g.furnaces[index];
   if (!f) return { ok: false, message: "Ukjent ovn." };
   if (f.heat || f.holding) return { ok: false, message: "Ovnen må være tom før foringen kan byttes." };
@@ -646,9 +655,11 @@ export function startReline(g: GameState, index: number, stats = computePlantSta
   const hours = stats.furnace.relineHours * stats.repairFactor;
   f.wear = 0;
   f.heatsOnLining = 0;
+  f.lastRelineDay = day(g);
   f.downUntilMin = g.minute + hours * 60;
-  f.downReason = "Ny foring";
-  log(g, `Ovn ${index + 1} fores om (${fmtKr(cost)}, ${hours.toFixed(0)} timer).`, "info");
+  f.downReason = "Planlagt stans: ny foring";
+  const who = why === "plan" ? " etter vedlikeholdsplanen" : why === "reparatør" ? " av reparatøren" : "";
+  log(g, `Planlagt stans: ovn ${index + 1} fores om${who} (${fmtKr(cost)}, ${hours.toFixed(0)} timer).`, "info");
   unlock(g, "ildfast");
   return { ok: true, message: "Omforing startet." };
 }
@@ -680,9 +691,20 @@ function updateFurnaces(g: GameState, stats: PlantStats): void {
       f.downReason = null;
     }
     if (g.pendingManual?.furnace === i) continue;
-    if (g.settings.autoReline && f.wear >= g.settings.relineAt) {
-      if (startReline(g, i, stats).ok) continue;
-      f.waitReason = "Foringen er slitt – mangler penger til omforing";
+    // Planlagt omforing: etter plan (forskning) eller av en reparatør når foringen er slitt
+    const planDue =
+      g.settings.relinePlanDays !== null &&
+      hasResearch(g, "vedlikeholdsplan") &&
+      day(g) - f.lastRelineDay >= g.settings.relinePlanDays &&
+      f.wear > 0.15;
+    const repairerDue =
+      g.settings.autoReline && g.workers.some((w) => w.role === "vedlikehold") && f.wear >= g.settings.relineAt;
+    if (f.relineRequested || planDue || repairerDue) {
+      if (startReline(g, i, stats, f.relineRequested ? "manuell" : planDue ? "plan" : "reparatør").ok) {
+        f.relineRequested = false;
+        continue;
+      }
+      f.waitReason = "Foringen skal byttes – mangler penger til omforing";
       continue;
     }
     if (stats.shifts === 0) {
