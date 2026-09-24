@@ -196,7 +196,9 @@ function botHour(g: GameState): void {
   }
   const count = (r: RoleId) => g.workers.filter((w) => w.role === r).length;
   const crewTotal = Object.values(stats.crew).reduce((a, b) => a + (b ?? 0), 0) * 3;
-  const crewWorkers = g.workers.filter((w) => w.role !== "salg" && w.role !== "vedlikehold" && w.role !== "planlegger").length;
+  const crewWorkers = g.workers.filter(
+    (w) => w.role !== "salg" && w.role !== "vedlikehold" && w.role !== "planlegger" && w.role !== "klasser",
+  ).length;
   const spare = cap - g.workers.length - Math.max(0, crewTotal - crewWorkers);
   if (
     spare > 0 &&
@@ -206,6 +208,11 @@ function botHour(g: GameState): void {
     g.workers.length < cap
   ) {
     const c = g.candidates.find((x) => x.role === "salg");
+    if (c) hire(g, c.id);
+  }
+  // Skrapklasser når verket går flere skift, så chargene følger resepten (B-029)
+  if (spare > 0 && g.stage >= 1 && stats.shifts >= 2 && count("klasser") < 1) {
+    const c = g.candidates.find((x) => x.role === "klasser");
     if (c) hire(g, c.id);
   }
   if (spare > 0 && g.stage >= 2 && stats.shifts >= 2 && count("planlegger") < 1) {

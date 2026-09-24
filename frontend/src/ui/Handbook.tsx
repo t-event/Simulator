@@ -20,15 +20,24 @@ function order(q: string, n: number): number[] {
 function Quiz({ g, chapter, act }: { g: GameState; chapter: string; act: GameApi["act"] }) {
   const questions = QUIZ[chapter];
   const [answers, setAnswers] = useState<number[]>([]);
-  const [result, setResult] = useState<boolean | null>(null);
-  const status = quizAvailable(g, chapter);
+  const [result, setResult] = useState<{ correct: number; reward: number } | null>(null);
   if (!questions) return null;
-  if (g.quizDone.includes(chapter) && result === null) return <p className="g-badge-ok g-quiz-done">Quiz bestått ✓</p>;
+  if (!quizAvailable(g, chapter) && result === null) {
+    const score = g.quizScores[chapter] ?? 0;
+    return (
+      <p className={`g-quiz-done ${score === questions.length ? "g-badge-ok" : "g-muted"}`}>
+        Quiz tatt: {score} av {questions.length} riktige
+      </p>
+    );
+  }
   const ready = answers.filter((a) => a !== undefined).length === questions.length;
 
   return (
     <div className="g-quiz">
       <h3>Quiz – alt riktig gir {quizReward(g)} fagpoeng</h3>
+      {result === null && (
+        <p className="g-muted">Du har bare ett forsøk. Feil svar gir færre fagpoeng, så les kapitlet godt først.</p>
+      )}
       {questions.map((q, i) => (
         <fieldset key={q.q} disabled={result !== null}>
           <legend>{q.q}</legend>
@@ -58,18 +67,20 @@ function Quiz({ g, chapter, act }: { g: GameState; chapter: string; act: GameApi
       {result === null ? (
         <button
           className="g-primary"
-          disabled={!ready || !status.ok}
+          disabled={!ready}
           onClick={() => {
             const r = act((gg) => answerQuiz(gg, chapter, answers));
-            setResult(r.passed);
-            buzz(r.passed ? 30 : 10);
+            setResult(r);
+            buzz(r.correct === questions.length ? 30 : 10);
           }}
         >
-          {status.ok ? "Sjekk svarene" : status.reason}
+          Lever svarene
         </button>
       ) : (
-        <p className={result ? "g-note" : "g-note g-warn"}>
-          {result ? `Alt riktig! +${quizReward(g)} fagpoeng.` : "Ikke helt. Les kapitlet igjen og prøv i morgen."}
+        <p className={result.correct === questions.length ? "g-note" : "g-note g-warn"}>
+          {result.correct === questions.length
+            ? `Alt riktig! +${result.reward} fagpoeng.`
+            : `${result.correct} av ${questions.length} riktige. ${result.reward > 0 ? `+${result.reward} fagpoeng.` : "Ingen fagpoeng denne gangen."} Forklaringene står under hvert spørsmål.`}
         </p>
       )}
     </div>
@@ -150,7 +161,7 @@ export function Handbook({
             if (!card) return null;
             const isOpen = open === id;
             const unread = !g.readChapters.includes(id);
-            const quizOpen = QUIZ[id] && !g.quizDone.includes(id);
+            const quizOpen = quizAvailable(g, id);
             return (
               <article key={id} className={isOpen ? "is-open" : ""}>
                 <button className="g-handbook-title" onClick={() => toggle(id)} aria-expanded={isOpen}>

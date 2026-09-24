@@ -17,7 +17,8 @@ export type RoleId =
   | "vedlikehold"
   | "salg"
   | "valse"
-  | "planlegger";
+  | "planlegger"
+  | "klasser";
 export type Crew = Partial<Record<RoleId, number>>;
 
 /** Analyse av stål: karbon, fosfor og sporelementer (Cu+Sn+Ni+Cr+Mo), alle i vekt-%. */
@@ -311,7 +312,8 @@ export interface GameState {
   /** Fagboka (B-025): kapitler spilleren har åpnet, beståtte quizer og dagen en quiz sist ble feil */
   readChapters: string[];
   quizDone: string[];
-  quizFailedDay: Record<string, number>;
+  /** Antall riktige svar på hver quiz som er tatt (B-029) */
+  quizScores: Record<string, number>;
   /** Oppdrag fra fagboka: telleren da oppdraget startet, og om det er fullført */
   missions: Record<string, { base: number; done: boolean }>;
   /** Tellere for oppdrag (planlagte omforinger, rene døgn …) */

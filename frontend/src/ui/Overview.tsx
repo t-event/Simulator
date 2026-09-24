@@ -36,6 +36,11 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
   const waits = g.furnaces.map((f) => f.waitReason);
   if (!active.length && offers.length)
     out.push({ text: "Du har ingen kontrakter. Se på tilbudene under Salg.", view: "salg" });
+  if (waits.includes("Mangler skrap til resepten"))
+    out.push({
+      text: "Skrapklasseren venter på skrap som passer resepten. Kjøp de skraptypene resepten bruker under Marked.",
+      view: "marked",
+    });
   if (waits.includes("Tomt for skrap"))
     out.push({ text: "Ovnen står fordi skraplageret er tomt. Kjøp skrap under Marked.", view: "marked" });
   if (waits.includes("Mangler folk")) {
