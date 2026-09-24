@@ -1,6 +1,6 @@
 import { PRODUCTS, SCRAP_IDS, SCRAP_TYPES } from "../game/data";
 import { buyScrap, scrapPrice } from "../game/engine";
-import { hasPlanner, productPrice, type PlantStats } from "../game/plant";
+import { energyPrice, hasPlanner, productPrice, type PlantStats } from "../game/plant";
 import { PowerCard } from "./Power";
 import { researchForScrap, scrapUnlocked } from "../game/research";
 import type { GameState, ProductId, ScrapId } from "../game/types";
@@ -25,7 +25,8 @@ const BUY_AMOUNTS = [
 
 export function Market({ g, stats, act }: Props) {
   const amounts = BUY_AMOUNTS[g.stage];
-  const electric = stats.furnace.fuel === "strøm";
+  // Strømavtaler og effekttariff vises fra verkstedet; i garasjen holder det med prisen (B-045)
+  const electric = stats.furnace.fuel === "strøm" && g.stage >= 1;
   const open = SCRAP_IDS.filter((id) => scrapUnlocked(g, id));
   // Låste skraptyper gruppert etter forskningen som låser dem opp
   const locked = new Map<string, ScrapId[]>();
@@ -164,7 +165,9 @@ export function Market({ g, stats, act }: Props) {
         ) : (
           <Card title="Energi">
             <p className="g-muted">
-              Digelen fyres med gass til fast pris. Strømprisen blir viktig når du får elektrisk ovn.
+              {stats.furnace.fuel === "strøm"
+                ? `Induksjonsovnen går på strøm. Nå: ${fmtNum(energyPrice(g), 2)} kr/kWh. Strømmen er billigst om natta. Strømavtaler kan du velge fra verkstedet.`
+                : "Ovnen fyres med gass til fast pris."}
             </p>
           </Card>
         )}

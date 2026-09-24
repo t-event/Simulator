@@ -158,12 +158,55 @@ export function tempsCost(g: GameState, days: number): number {
   return Math.round(sum);
 }
 
-/** De som er på jobb: alle som ikke er borte, eller alle hvis vikarer dekker fraværet (B-031) */
+/** Rollene en ledig allrounder kan stå for når den faste er borte (B-043) */
+export const STANDIN_ROLES: RoleId[] = ["vedlikehold", "klasser", "murer"];
+
+/**
+ * De som er på jobb: alle som ikke er borte, eller alle hvis vikarer dekker fraværet (B-031).
+ * Er reparatøren, skrapklasseren eller murerne borte, går en allrounder som ikke trengs på skiftene
+ * inn i jobben deres så lenge (B-043).
+ */
 export function presentWorkers(g: GameState): Worker[] {
-  return tempsActive(g) ? g.workers : g.workers.filter((w) => !isAbsent(g, w));
+  if (tempsActive(g)) return g.workers;
+  const here = g.workers.filter((w) => !isAbsent(g, w));
+  const gaps = STANDIN_ROLES.filter(
+    (r) => !here.some((w) => w.role === r) && g.workers.some((w) => w.role === r && isAbsent(g, w)),
+  );
+  if (!gaps.length) return here;
+  let spare = spareAllrounders(g, countList(here));
+  const out = [...here];
+  for (const role of gaps) {
+    const i = out.findIndex((w) => w.role === "allround");
+    if (spare <= 0 || i < 0) break;
+    out[i] = { ...out[i], role, standIn: true };
+    spare -= 1;
+  }
+  return out;
+}
+
+/** Allroundere som står for noen som er borte, akkurat nå */
+export function standIns(g: GameState): Worker[] {
+  return presentWorkers(g).filter((w) => w.standIn);
+}
+
+/** Allroundere som ikke trengs på skiftene verket kan gå med disse folkene */
+function spareAllrounders(g: GameState, counts: Record<RoleId, number>): number {
+  const crew = crewPerShift(g);
+  const wildcards = counts.allround + (g.stage <= 1 ? OWNER_SLOTS : 0);
+  let shifts = 0;
+  for (let k = 1; k <= 3; k++) {
+    if (isEmpty(deficit(crew, counts, k, wildcards))) shifts = k;
+    else break;
+  }
+  const used = CREW_ROLES.reduce((a, r) => a + Math.max(0, (crew[r] ?? 0) * shifts - counts[r]), 0);
+  return Math.max(0, Math.min(counts.allround, wildcards - used));
 }
 
 function countRoles(g: GameState, ignoreAbsence = false): Record<RoleId, number> {
+  return countList(ignoreAbsence ? g.workers : presentWorkers(g));
+}
+
+function countList(workers: Worker[]): Record<RoleId, number> {
   const counts = {
     allround: 0,
     ovn: 0,
@@ -177,7 +220,7 @@ function countRoles(g: GameState, ignoreAbsence = false): Record<RoleId, number>
     klasser: 0,
     murer: 0,
   };
-  for (const w of ignoreAbsence ? g.workers : presentWorkers(g)) counts[w.role] += 1;
+  for (const w of workers) counts[w.role] += 1;
   return counts;
 }
 
@@ -207,6 +250,10 @@ export interface CrewRow {
   /** Plasser fylt av allroundere (og deg selv i garasjen og verkstedet) */
   filled: number;
   missing: number;
+  /** Egne folk i rollen som er borte nå (syke eller på ferie) */
+  away: number;
+  /** Av dem som er borte: hvor mange vikarer dekker (B-043) */
+  temps: number;
 }
 
 /**
@@ -230,7 +277,17 @@ export function crewCoverage(
     const own = Math.min(need, counts[role]);
     const filled = Math.min(need - own, spare);
     spare -= filled;
-    rows.push({ role, perShift, need, own, filled, missing: need - own - filled });
+    const away = g.workers.filter((w) => w.role === role && isAbsent(g, w)).length;
+    rows.push({
+      role,
+      perShift,
+      need,
+      own,
+      filled,
+      missing: need - own - filled,
+      away,
+      temps: tempsActive(g) ? Math.min(away, own) : 0,
+    });
   }
   return { rows, wildcards, wildUsed: wildcards - spare, ownerSlots };
 }

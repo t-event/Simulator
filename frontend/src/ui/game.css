@@ -1886,3 +1886,21 @@ button {
   background: #1d4d2c;
   border-color: var(--ok);
 }
+
+/* Sammenfoldbare detaljer og innstillinger, så sidene blir kortere (B-044) */
+.g-details {
+  margin: 6px 0;
+}
+
+.g-details summary {
+  cursor: pointer;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  color: var(--accent);
+  font-size: 14px;
+}
+
+.g-details[open] summary {
+  margin-bottom: 4px;
+}

@@ -175,6 +175,8 @@ export interface Worker {
   skill: number;
   salary: number;
   hiredDay: number;
+  /** Allrounder som står for en som er borte (bare i utregninger, lagres ikke) (B-043) */
+  standIn?: boolean;
   /** Siste dag den ansatte var på kurs (B-026) */
   courseDay?: number;
   /** Fravær (B-031): fra og til spillminutt, og hvorfor */

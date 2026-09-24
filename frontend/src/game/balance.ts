@@ -135,7 +135,9 @@ function botHour(g: GameState): void {
   for (const k of g.knowledge) if (!g.readChapters.includes(k)) g.readChapters.push(k);
   // Forskning: alt som er tilgjengelig, i tabellens rekkefølge
   // Forskning i prioritert rekkefølge, som en spiller som vet hva som gir mest: spar opp til det viktigste
-  for (const id of RESEARCH_PRIORITY) {
+  // Etter en radioaktiv kilde vil en fornuftig spiller ha strålingsportal (B-045)
+  const priority = g.lastRadioDay !== undefined ? ["stralevern", ...RESEARCH_PRIORITY] : RESEARCH_PRIORITY;
+  for (const id of priority) {
     const r = researchOptions(g).find((x) => x.id === id);
     if (!r || r.done || r.locked) continue;
     if (r.available) doResearch(g, r.id);
@@ -259,7 +261,7 @@ function botHour(g: GameState): void {
     ["renseanlegg", "lysbue30", "streng1", "oseovn", "conveyor", "trafo", "valseverk"],
     ["lysbue90", "streng4"],
   ];
-  const order = [...perStage[g.stage], `stage${g.stage + 1}`];
+  const order = [...(g.lastRadioDay !== undefined ? ["portal"] : []), ...perStage[g.stage], `stage${g.stage + 1}`];
   const options = upgradeOptions(g);
   for (const id of order) {
     const o = options.find((x) => x.id === id);

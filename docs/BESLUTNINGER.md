@@ -574,3 +574,37 @@ Beslutning:
   Nye forespørsler og rammeavtaler kommer bare fra kunder som kjøper noen av dem, og åpne forespørsler i en
   kvalitet som velges bort, avslås. Forespørslene kan sorteres etter svarfrist, verdi, pris per tonn eller
   kvalitet (`settings.offerSort`). Uten filter trekkes kunde og kvalitet som før, så balansen er uendret.
+
+## B-043 Lavkarbon, resept ved kvalitetsbytte, allroundere som stedfortredere (2026-09-24)
+Status: gjelder
+Brukeren meldte at skrapklasseren ikke fikset lavkarbon, at planleggeren ikke kjøpte skrap til lavkarbon, at
+vikarer ikke dekket støpere, og ville at allroundere flytter seg dit de trengs.
+Funn: Når ordrekøen byttet til en kvalitet uten lagret resept, ble den gamle resepten beholdt. Da fulgte
+skrapklasseren og planleggerens innkjøp feil blanding. I tillegg bommet lavkarbon ca. 4 av 10 charger i
+induksjonsovn selv med riktig resept, fordi rent nyskrap lå helt oppe ved grensen (C 0,08) og karbonet spriket.
+Beslutning:
+- Ved kvalitetsbytte (ovn 1 og ovn 2) sjekkes resepten. Holder den ikke, legger skrapklasseren eller
+  planleggeren om til sikreste blanding av åpent skrap; uten dem får spilleren varsel.
+- Rent nyskrap har C 0,06 (gamle lagre rettes ved lasting). Med skrapklasser spriker karbonet i ovner uten
+  avkulling 60 % mindre.
+- Vikarer: motoren dekket fraværet riktig i test. Bemanningstabellen viser nå «herav N vikarer» og «N borte»,
+  så det synes hvem som dekkes.
+- Allroundere fylte allerede hull på skiftene; det står nå tydelig. I tillegg går en allrounder som ikke trengs
+  på skiftene inn som reparatør, skrapklasser eller murer når alle med den rollen er borte.
+- Testspilleren forsker på strålevern og kjøper strålingsportal etter en radioaktiv kilde, slik en fornuftig
+  spiller ville gjort (ellers ble balansen avhengig av flaks).
+
+## B-044 Salg med underfaner (2026-09-24)
+Status: gjelder
+Brukeren syntes Salg-siden var for lang.
+Beslutning: Salg har underfanene Forespørsler, Ordrekø, Lager og Avtaler (sistnevnte bare når rammeavtaler er
+låst opp, fra Stålverk – ingen låst forhåndsvisning). Kvalitetsvalg og sortering, krav/omdømme/bot på hver
+forespørsel og lagerinnstillingene er foldet sammen.
+
+## B-045 Liten induksjonsovn i garasjen (2026-09-24)
+Status: gjelder (erstatter gassfyrt digel fra B-001)
+Brukeren ville starte med en liten induksjonsovn i stedet for gassfyrt digel.
+Beslutning: Garasjen starter med «Liten induksjonsovn 250 kg» (strøm, 750 kWh/t, 100 min per charge).
+Forskningen «Induksjonssmelting» heter nå «Større induksjonsovn». I garasjen vises bare strømprisen;
+strømavtaler og effekttariff kommer fra verkstedet. Gamle lagringer med digel får den nye ovnen.
+Balanse: 8 / 24 / 63 / 136.

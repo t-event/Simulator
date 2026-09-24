@@ -46,7 +46,7 @@ function Intro({
         <h1>Stålverket</h1>
         <p className="g-intro-lead">Fra garasje til storverk.</p>
         <p>
-          Du har leid en kald garasje, fått tak i en gassfyrt digelovn og har 25 000 kroner på konto. Naboen har ryddet
+          Du har leid en kald garasje, fått tak i en liten, brukt induksjonsovn og har 25 000 kroner på konto. Naboen har ryddet
           låven og gitt deg et tonn skrap.
         </p>
         <p>

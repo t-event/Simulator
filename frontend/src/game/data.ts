@@ -110,7 +110,7 @@ export const SCRAP_TYPES: Record<ScrapId, ScrapType> = {
     energy: 0.95,
     tramp: 0.05,
     p: 0.012,
-    c: 0.08,
+    c: 0.06,
     dirt: 0.01,
     radioPerT: 0,
     buyable: true,
@@ -282,7 +282,7 @@ export const STAGES: Stage[] = [
     storeT: 4,
     scrapCrew: 0,
     fixedPerDay: 200,
-    description: "En kald garasje, en gassfyrt digel og deg selv.",
+    description: "En kald garasje, en liten induksjonsovn og deg selv.",
   },
   {
     id: 1,
@@ -366,15 +366,15 @@ export interface FurnaceType {
 
 export const FURNACES: FurnaceType[] = [
   {
-    id: "digel",
-    name: "Gassfyrt digelovn",
+    id: "induksjon025",
+    name: "Liten induksjonsovn 250 kg",
     stage: 0,
     price: 0,
     sizeT: 0.25,
-    cycleMin: 110,
-    kwhPerT: 1100,
-    fuel: "gass",
-    oxidationLoss: 0.03,
+    cycleMin: 100,
+    kwhPerT: 750,
+    fuel: "strøm",
+    oxidationLoss: 0.02,
     dephos: 0,
     decarb: false,
     wearPerHeat: 0.0072,
@@ -383,7 +383,7 @@ export const FURNACES: FurnaceType[] = [
     crew: { ovn: 1 },
     consumablesPerT: 180,
     arc: false,
-    description: "En grafittdigel i en gassfyrt ovn. Smelter det du legger i – ikke mer, ikke mindre.",
+    description: "En brukt induksjonsovn som tar 250 kg. Smelter det du legger i – ikke mer, ikke mindre.",
   },
   {
     id: "induksjon1",

@@ -80,13 +80,13 @@ export const RESEARCH: Research[] = [
   // Verkstedet
   {
     id: "induksjon",
-    name: "Induksjonssmelting",
+    name: "Større induksjonsovn",
     stage: 1,
     cost: 20,
     unlocks: ["induksjon1", "induksjon5"],
     knowledge: "induksjon",
-    description: "Smelting med vekselstrøm i en vannkjølt spole – rent, raskt og uten flamme.",
-    effect: "Åpner for induksjonsovner",
+    description: "Kraftigere spole og større digel: mer stål per charge, og mindre strøm per tonn.",
+    effect: "Åpner for induksjonsovner på 1 og 5 tonn",
   },
   {
     id: "maskinforming",

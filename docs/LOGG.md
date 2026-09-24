@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 22 – 2026-09-24: Salg, folk, lavkarbon og ny startovn
+
+**Brukeren ba om:** Kortere og mer intuitiv Salg-side; vikarer som dekker støpere; skrapklasser og planlegger
+som fikser lavkarbon; allroundere som flytter seg dit de trengs; liten induksjonsovn i stedet for digel;
+rammeavtaler skjult til de er låst opp.
+
+**Gjort:** B-043 (resept ved kvalitetsbytte, lavkarbon, allroundere som stedfortredere, vikarer synlige i
+bemanningstabellen), B-044 (Salg med underfaner), B-045 (liten induksjonsovn i garasjen).
+
+**Testet:** tsc, lint, balanse (8 / 24 / 63 / 136). I Node: lavkarbon-treff med riktig resept, automatisk
+omlegging av resept, stedfortreder for reparatør. Playwright (iPhone 13): nytt spill med induksjonsovn, Salg-
+faner (maks ca. 920 px høy i stedet for en lang rull), Folk med vikarer, 390 px, ingen feil.
+
+---
+
 ## Økt 21 – 2026-09-24: strømavtalen og valg av forespørsler
 
 **Brukeren ba om:** Vise hvor lenge strømavtalen varer, varsel når den går ut, avklare hvilken avtale som er

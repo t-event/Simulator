@@ -20,6 +20,7 @@ import {
   moraleFactor,
   nightExtra,
   staffing,
+  standIns,
   tempsActive,
   tempsCost,
   type PlantStats,
@@ -111,6 +112,7 @@ function Absence({ g, stats, act }: Props) {
   // Går vikarene hjem før alle er tilbake? (B-039)
   const lastBack = Math.max(0, ...now.map((w) => w.absentUntil ?? 0));
   const tempsShort = temps && g.tempsUntilMin < lastBack;
+  const standing = standIns(g);
   return (
     <Card title="Fravær">
       {now.length === 0 && upcoming.length === 0 && (
@@ -146,6 +148,14 @@ function Absence({ g, stats, act }: Props) {
         ) : (
           <p className="g-muted">Allroundere dekker plassene til dem som er borte, så verket går som normalt.</p>
         ))}
+      {standing.length > 0 && (
+        <p className="g-note">
+          {standing
+            .map((w) => `${w.name} (allrounder) står for ${ROLES[w.role].name.toLowerCase()}en`)
+            .join(". ")}{" "}
+          mens de faste er borte.
+        </p>
+      )}
       {now.length > 0 && (!temps || tempsShort) && (
         <div className="g-row">
           <button className="g-primary" onClick={() => act((gg) => hireTemps(gg, null))}>
@@ -237,6 +247,12 @@ export function People({ g, stats, act }: Props) {
                   </td>
                   <td className="num">
                     {row.own} {row.own === 1 ? "egen" : "egne"}
+                    {row.temps > 0 && (
+                      <span className="g-muted g-sub">herav {row.temps} vikar{row.temps === 1 ? "" : "er"}</span>
+                    )}
+                    {row.away > row.temps && (
+                      <span className="g-muted g-sub">{row.away - row.temps} borte</span>
+                    )}
                     {row.filled > 0 && (
                       <span className="g-muted g-sub">
                         + {row.filled} {row.filled === 1 ? "allrounder" : "allroundere"}
@@ -250,7 +266,7 @@ export function People({ g, stats, act }: Props) {
           </table>
           <p className="g-muted">
             {coverage.wildcards > 0
-              ? `Allroundere${coverage.ownerSlots ? " (og deg selv på dagskiftet)" : ""} fyller plassene det mangler folk på: ${coverage.wildUsed} av ${coverage.wildcards} er i bruk.`
+              ? `Allroundere${coverage.ownerSlots ? " (og deg selv på dagskiftet)" : ""} går av seg selv dit det mangler folk, også når noen er syke eller har ferie: ${coverage.wildUsed} av ${coverage.wildcards} er i bruk.`
               : "Allroundere kan fylle plasser det mangler folk på."}
             {extra.length > 0 &&
               ` Ikke på skift: ${extra.map((r) => `${counts[r]} ${(counts[r] === 1 ? ROLES[r].name : ROLES[r].plural).toLowerCase()}`).join(", ")}.`}
