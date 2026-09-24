@@ -8,7 +8,16 @@
 export type ScrapId = "blandet" | "tungt" | "shredder" | "spon" | "rent" | "rajern" | "retur";
 export type ProductId = "stopegods" | "blokk" | "emne" | "armering";
 export type GradeId = "enkel" | "standard" | "armering" | "lavkarbon" | "hoykarbon" | "premium";
-export type RoleId = "allround" | "ovn" | "stoper" | "skrap" | "lab" | "vedlikehold" | "salg" | "valse";
+export type RoleId =
+  | "allround"
+  | "ovn"
+  | "stoper"
+  | "skrap"
+  | "lab"
+  | "vedlikehold"
+  | "salg"
+  | "valse"
+  | "planlegger";
 export type Crew = Partial<Record<RoleId, number>>;
 
 /** Analyse av stål: karbon, fosfor og sporelementer (Cu+Sn+Ni+Cr+Mo), alle i vekt-%. */
@@ -99,6 +108,8 @@ export interface Contract {
   repGain: number;
   repLoss: number;
   penaltyPerT: number;
+  /** Plass i ordrekøen: lavest leveres og produseres først */
+  priority: number;
   status: "tilbud" | "aktiv" | "fullfort" | "misligholdt";
   closedDay: number | null;
 }
@@ -161,6 +172,10 @@ export interface Settings {
   rolling: boolean;
   /** Ta styringen på neste charge i lysbueovnen */
   manualNext: boolean;
+  /** Ovnen kjører kvaliteten til øverste kontrakt i ordrekøen */
+  followQueue: boolean;
+  /** Planleggeren sorterer ordrekøen etter frist */
+  plannerSorts: boolean;
 }
 
 export interface ManualRequest {
@@ -216,6 +231,8 @@ export interface GameState {
   rollProgressT: number;
   scrap: Record<ScrapId, ScrapStock>;
   recipe: Record<ScrapId, number>;
+  /** Resepten spilleren har laget for hver kvalitet; brukes når kvaliteten skifter */
+  gradeRecipes: Partial<Record<GradeId, Record<ScrapId, number>>>;
   targetGrade: GradeId;
   lots: Lot[];
   nextLotId: number;

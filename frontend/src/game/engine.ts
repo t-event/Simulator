@@ -33,6 +33,7 @@ import {
   energyPrice,
   gradeFailures,
   has,
+  hasPlanner,
   isOpen,
   productPrice,
   rollingActive,
@@ -124,6 +125,7 @@ export function newGame(seed = Date.now()): GameState {
     rollProgressT: 0,
     scrap,
     recipe: { blandet: 30, tungt: 60, shredder: 0, spon: 0, rent: 0, rajern: 0, retur: 10 },
+    gradeRecipes: {},
     targetGrade: "standard",
     lots: [],
     nextLotId: 1,
@@ -146,6 +148,8 @@ export function newGame(seed = Date.now()): GameState {
       relineAt: 0.9,
       maxPowerPrice: null,
       autoBuy: false,
+      followQueue: true,
+      plannerSorts: true,
       autoBuyDays: 1.5,
       autoSpot: false,
       rolling: true,
@@ -896,7 +900,7 @@ export function sellExcess(g: GameState, stats: PlantStats, targetFraction: numb
 /** Hvor mye av hvert parti aktive kontrakter vil få, i samme rekkefølge som leveransene. */
 export function lotReservations(g: GameState): Map<number, number> {
   const reserved = new Map<number, number>();
-  const active = g.contracts.filter((c) => c.status === "aktiv").sort((a, b) => a.deadlineDay - b.deadlineDay);
+  const active = orderQueue(g);
   for (const c of active) {
     let left = c.tonnes - c.delivered;
     for (const lot of g.lots) {
@@ -912,8 +916,48 @@ export function lotReservations(g: GameState): Map<number, number> {
   return reserved;
 }
 
+/** Aktive kontrakter i ordrekøens rekkefølge. */
+export function orderQueue(g: GameState): Contract[] {
+  return g.contracts.filter((c) => c.status === "aktiv").sort((a, b) => a.priority - b.priority);
+}
+
+/**
+ * Kontrakten verket produserer for nå: den øverste i køen som ikke allerede er
+ * dekket av det som ligger på lager.
+ */
+export function currentOrder(g: GameState): Contract | null {
+  const reserved = lotReservations(g);
+  for (const c of orderQueue(g)) {
+    const left = c.tonnes - c.delivered;
+    const inStock = g.lots
+      .filter((l) => l.product === c.product && !l.second && satisfies(l.known, c.grade))
+      .reduce((a, l) => a + Math.min(l.t, reserved.get(l.id) ?? 0), 0);
+    if (left - inStock > 1e-6) return c;
+  }
+  return null;
+}
+
+/** Ovnen følger ordrekøen: kvaliteten (og resepten for den) til ordren som produseres. */
+function followQueue(g: GameState): void {
+  if (!g.settings.followQueue) return;
+  const order = currentOrder(g);
+  if (order && order.grade !== g.targetGrade) {
+    g.targetGrade = order.grade;
+    const saved = g.gradeRecipes[order.grade];
+    if (saved) g.recipe = { ...saved };
+  }
+}
+
+/** Planleggeren sorterer køen etter frist. */
+function plannerSort(g: GameState): void {
+  if (!hasPlanner(g) || !g.settings.plannerSorts) return;
+  orderQueue(g)
+    .sort((a, b) => a.deadlineDay - b.deadlineDay)
+    .forEach((c, i) => (c.priority = i + 1));
+}
+
 function deliverContracts(g: GameState): void {
-  const active = g.contracts.filter((c) => c.status === "aktiv").sort((a, b) => a.deadlineDay - b.deadlineDay);
+  const active = orderQueue(g);
   for (const c of active) {
     for (const lot of g.lots) {
       const remaining = c.tonnes - c.delivered;
@@ -1019,6 +1063,7 @@ function makeOffer(g: GameState, stats: PlantStats): Contract | null {
     penaltyPerT: Math.round(pricePerT * 0.5),
     status: "tilbud",
     closedDay: null,
+    priority: 0,
   };
 }
 
@@ -1065,6 +1110,7 @@ export function acceptContract(g: GameState, id: number): PurchaseResult {
   const c = g.contracts.find((x) => x.id === id);
   if (!c || c.status !== "tilbud") return { ok: false, message: "Tilbudet finnes ikke lenger." };
   c.status = "aktiv";
+  c.priority = Math.max(0, ...g.contracts.filter((x) => x.status === "aktiv" && x.id !== c.id).map((x) => x.priority)) + 1;
   log(
     g,
     `Du signerte med ${c.customer}: ${fmtT(c.tonnes)} ${PRODUCTS[c.product].name.toLowerCase()} (${GRADES[c.grade].name}) innen dag ${c.deadlineDay}.`,
@@ -1092,12 +1138,16 @@ export function makeCandidate(g: GameState, role?: RoleId): Worker {
     "vedlikehold",
     "salg",
     "valse",
+    "planlegger",
   ];
   const r =
     role ??
     pick(
       g,
-      roles.filter((x) => x !== "valse" || g.stage >= 3).filter((x) => x !== "lab" || g.stage >= 2),
+      roles
+        .filter((x) => x !== "valse" || g.stage >= 3)
+        .filter((x) => x !== "lab" || g.stage >= 2)
+        .filter((x) => x !== "planlegger" || g.stage >= 2),
     );
   const skill = Math.min(5, Math.max(1, Math.round((uniform(g, 0.6, 3.6) + (g.stage >= 3 ? 0.5 : 0)) * 10) / 10));
   return {
@@ -1142,10 +1192,14 @@ function onHour(g: GameState, stats: PlantStats): void {
     }
     if (lotsTonnage(g) > stats.storeT * 0.85) sellExcess(g, stats, 0.6);
   }
-  if (g.settings.autoBuy) autoBuy(g, stats);
+  plannerSort(g);
+  followQueue(g);
+  // Automatisk innkjøp krever en planlegger (se B-021)
+  if (g.settings.autoBuy && hasPlanner(g)) autoBuy(g, stats);
 }
 
-function autoBuy(g: GameState, stats: PlantStats): void {
+/** Kjøper skrap etter resepten for et par døgns forbruk (planleggerens jobb, eller spillerens). */
+export function autoBuy(g: GameState, stats: PlantStats): void {
   const recipeIds = SCRAP_IDS.filter((id) => g.recipe[id] > 0 && SCRAP_TYPES[id].buyable);
   const total = SCRAP_IDS.reduce((a, id) => a + g.recipe[id], 0);
   if (!recipeIds.length || total <= 0) return;

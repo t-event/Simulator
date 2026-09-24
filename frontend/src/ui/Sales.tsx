@@ -1,6 +1,7 @@
 import { GRADES, PRODUCTS } from "../game/data";
-import { acceptContract, declineContract, recipeEstimate, sellLot, spotPrice } from "../game/engine";
-import { day, gradeFailures, nearLimit, satisfiedGrades, type PlantStats } from "../game/plant";
+import { acceptContract, currentOrder, declineContract, orderQueue, recipeEstimate, sellLot, spotPrice } from "../game/engine";
+import { moveInQueue } from "../game/actions";
+import { day, gradeFailures, hasPlanner, nearLimit, satisfiedGrades, type PlantStats } from "../game/plant";
 import type { Contract, GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { AnalysisLine, Bar, Card, GradeChips, GradeSpec } from "./common";
@@ -79,7 +80,8 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
 
 export function Sales({ g, stats, act }: Props) {
   const offers = g.contracts.filter((c) => c.status === "tilbud");
-  const active = g.contracts.filter((c) => c.status === "aktiv").sort((a, b) => a.deadlineDay - b.deadlineDay);
+  const active = orderQueue(g);
+  const current = currentOrder(g);
   const closed = g.contracts
     .filter((c) => c.status === "fullfort" || c.status === "misligholdt")
     .slice(-6)
@@ -96,25 +98,57 @@ export function Sales({ g, stats, act }: Props) {
           ))}
         </Card>
 
-        <Card title={`Aktive kontrakter (${active.length})`}>
+        <Card title={`Ordrekø (${active.length})`}>
           {active.length === 0 && <p className="g-muted">Ingen aktive kontrakter.</p>}
-          {active.map((c) => {
+          {active.length > 1 && (
+            <p className="g-muted">
+              Øverste kontrakt leveres og produseres først. Flytt med pilene.
+              {hasPlanner(g) && g.settings.plannerSorts && " Planleggeren sorterer køen etter frist."}
+            </p>
+          )}
+          {active.map((c, i) => {
             const left = daysLeft(g, c);
+            const producing = current?.id === c.id;
             return (
-              <div className="g-contract" key={c.id}>
+              <div className={`g-contract${producing ? " is-producing" : ""}`} key={c.id}>
                 <div className="g-contract-head">
-                  <strong>{c.customer}</strong>
+                  <strong>
+                    {i + 1}. {c.customer}
+                  </strong>
                   <span className={left <= 1 ? "g-badge-bad" : "g-muted"}>
                     {left <= 0 ? "Frist i dag" : `${left} døgn igjen`}
                   </span>
                 </div>
+                {producing && <span className="g-badge-ok">Produseres nå</span>}
                 <p>
                   {PRODUCTS[c.product].name}, {GRADES[c.grade].name} · {fmtKr(c.pricePerT)}/t
                 </p>
                 <Bar value={c.delivered / c.tonnes} tone="ok" label="Levert" />
-                <p className="g-muted">
-                  Levert {fmtT(c.delivered)} av {fmtT(c.tonnes)}
-                </p>
+                <div className="g-contract-head">
+                  <span className="g-muted">
+                    Levert {fmtT(c.delivered)} av {fmtT(c.tonnes)}
+                  </span>
+                  {active.length > 1 && (
+                    <span className="g-row g-queue-btns">
+                      <button
+                        className="g-small"
+                        aria-label={`Flytt ${c.customer} opp`}
+                        disabled={i === 0}
+                        onClick={() => act((gg) => moveInQueue(gg, c.id, -1))}
+                      >
+                        ▲
+                      </button>
+                      <button
+                        className="g-small"
+                        aria-label={`Flytt ${c.customer} ned`}
+                        disabled={i === active.length - 1}
+                        onClick={() => act((gg) => moveInQueue(gg, c.id, 1))}
+                      >
+                        ▼
+                      </button>
+                    </span>
+                  )}
+                </div>
               </div>
             );
           })}

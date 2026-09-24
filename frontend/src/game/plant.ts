@@ -113,7 +113,7 @@ export function crewPerShift(g: GameState): Crew {
 }
 
 function countRoles(g: GameState): Record<RoleId, number> {
-  const counts = { allround: 0, ovn: 0, stoper: 0, skrap: 0, lab: 0, vedlikehold: 0, salg: 0, valse: 0 };
+  const counts = { allround: 0, ovn: 0, stoper: 0, skrap: 0, lab: 0, vedlikehold: 0, salg: 0, valse: 0, planlegger: 0 };
   for (const w of g.workers) counts[w.role] += 1;
   return counts;
 }
@@ -198,7 +198,7 @@ export function computePlantStats(g: GameState): PlantStats {
   const lab: 0 | 1 | 2 = has(g, "oes") ? 2 : has(g, "xrf") ? 1 : 0;
 
   // Ferdigheten til de som faktisk står i produksjonen
-  const floor = g.workers.filter((w) => w.role !== "salg" && w.role !== "vedlikehold");
+  const floor = g.workers.filter((w) => w.role !== "salg" && w.role !== "vedlikehold" && w.role !== "planlegger");
   const skills = floor.map((w) => w.skill);
   if (staff.ownerWorks) skills.push(g.ownerSkill, g.ownerSkill);
   const crewSkill = skills.length ? skills.reduce((a, b) => a + b, 0) / skills.length : g.ownerSkill;
@@ -337,4 +337,8 @@ export function productPrice(g: GameState, product: ProductId, grade: GradeId | 
 
 export function unlockedAddons(g: GameState): Addon[] {
   return ADDONS.filter((a) => a.stage <= g.stage);
+}
+
+export function hasPlanner(g: GameState): boolean {
+  return g.workers.some((w) => w.role === "planlegger");
 }

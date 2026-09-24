@@ -16,7 +16,11 @@ riktigere navn. Konsollfeil: ingen funnet.
 
 **Testet:** Balansetest grønn (12 / 37 / 103 / 179), nettlesertest av forespørsler og lønnskort.
 
-**Gjenstår:** Tema B–G i arbeidslisten.
+**Tema B (B-021):** Ordrekø med pilknapper, «Produseres nå», produksjonskort som følger køen,
+resept per kvalitet, planlegger som sorterer køen og kjøper inn. Testet i nettleser og balansetest
+(11 / 38 / 94 / 173).
+
+**Gjenstår:** Tema C–G i arbeidslisten.
 
 ---
 

@@ -734,6 +734,13 @@ export const ROLES: Record<RoleId, Role> = {
     salary: 1950,
     description: "Forebyggende vedlikehold gir færre havarier og raskere reparasjon.",
   },
+  planlegger: {
+    id: "planlegger",
+    name: "Planlegger",
+    plural: "Planleggere",
+    salary: 2300,
+    description: "Holder orden på ordrekøen og kjøper inn skrap etter resepten, så verket aldri står tomt.",
+  },
   salg: {
     id: "salg",
     name: "Selger",
