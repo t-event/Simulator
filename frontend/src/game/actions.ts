@@ -4,6 +4,7 @@
 import { ADDONS, CASTINGS, FURNACES, GRADES, PRODUCTS, SCRAP_IDS, STAGES, type Addon } from "./data";
 import { addCost, fmtKr, fmtT, log, maxLoan, newFurnaceUnit, unlock, type PurchaseResult } from "./engine";
 import { castingType, computePlantStats, day, furnaceType, has } from "./plant";
+import { hasResearch, missingResearchFor, RESEARCH, researchOptions } from "./research";
 import type { GameState, GradeId, ScrapId } from "./types";
 
 export type UpgradeKind = "stage" | "furnace" | "casting" | "addon";
@@ -49,6 +50,11 @@ function nameOf(id: string): string {
   ).toLowerCase();
 }
 
+function researchBlocker(g: GameState, id: string): string | null {
+  const r = missingResearchFor(g, id);
+  return r ? `Forsk fram: ${r.name}` : null;
+}
+
 export function upgradeOptions(g: GameState): UpgradeOption[] {
   const out: UpgradeOption[] = [];
   const next = STAGES[g.stage + 1];
@@ -77,8 +83,8 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
       f.stage < currentFurnace.stage || (f.stage === currentFurnace.stage && !owned && f.sizeT < currentFurnace.sizeT);
     if (outdated && !owned) continue;
     const price = f.price * g.furnaceCount;
-    let reason: string | null = null;
-    for (const req of f.requires ?? []) if (!has(g, req)) reason = `Krever ${nameOf(req)}`;
+    let reason: string | null = researchBlocker(g, f.id);
+    for (const req of f.requires ?? []) if (!reason && !has(g, req)) reason = `Krever ${nameOf(req)}`;
     if (!reason && g.cash < price) reason = "For lite penger";
     out.push({
       id: f.id,
@@ -98,7 +104,7 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
     if (c.id === "sandformer") continue;
     const owned = c.id === currentCasting.id;
     if (c.stage < currentCasting.stage && !owned) continue;
-    const reason = g.cash < c.price ? "For lite penger" : null;
+    const reason = researchBlocker(g, c.id) ?? (g.cash < c.price ? "For lite penger" : null);
     let warning: string | undefined;
     if (!owned && c.product !== currentCasting.product) {
       const stuck = g.contracts
@@ -126,7 +132,7 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
   for (const a of ADDONS) {
     const owned = has(g, a.id);
     const price = addonPrice(g, a);
-    let reason = addonBlocker(g, a);
+    let reason = researchBlocker(g, a.id) ?? addonBlocker(g, a);
     if (!reason && g.cash < price) reason = "For lite penger";
     out.push({
       id: a.id,
@@ -155,6 +161,7 @@ export function buyUpgrade(g: GameState, id: string): PurchaseResult {
   switch (option.kind) {
     case "stage": {
       g.stage = option.stage;
+      g.celebrate = g.stage;
       log(g, `Du har flyttet inn i ${STAGES[g.stage].name.toLowerCase()}!`, "good");
       if (g.stage === 1) unlock(g, "folk");
       if (g.stage === 2)
@@ -203,6 +210,30 @@ export function buyUpgrade(g: GameState, id: string): PurchaseResult {
     }
   }
   return { ok: true, message: `${option.name} kjøpt for ${fmtKr(option.price)}.` };
+}
+
+// ------------------------------------------------------------------ //
+// Forskning
+// ------------------------------------------------------------------ //
+export function doResearch(g: GameState, id: string): PurchaseResult {
+  const option = researchOptions(g).find((r) => r.id === id);
+  if (!option) return fail("Ukjent forskning.");
+  if (option.done) return fail("Det er allerede forsket fram.");
+  if (!option.available) return fail(option.reason ?? "Kan ikke forskes på nå.");
+  g.researchPoints -= option.cost;
+  g.researched.push(id);
+  if (option.knowledge) unlock(g, option.knowledge);
+  log(g, `Forskning ferdig: ${option.name}. ${option.effect}.`, "good");
+  return { ok: true, message: `${option.name} er forsket fram.` };
+}
+
+/** Markerer forskning som gjort for utstyr spilleren allerede har (gamle lagringer). */
+export function grantResearchForOwned(g: GameState): void {
+  const owned = new Set([g.furnaceType, g.castingType, ...g.owned]);
+  for (const r of RESEARCH) {
+    if (hasResearch(g, r.id)) continue;
+    if (r.unlocks?.some((id) => owned.has(id))) g.researched.push(r.id);
+  }
 }
 
 // ------------------------------------------------------------------ //

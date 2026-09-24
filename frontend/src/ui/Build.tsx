@@ -6,6 +6,7 @@ import type { PlantStats } from "../game/plant";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Card } from "./common";
+import { Research } from "./Research";
 import { fmtKr, fmtPct } from "./format";
 
 interface Props {
@@ -91,6 +92,8 @@ export function Build({ g, stats, act, onQuit }: Props) {
             <p>Du har bygget et fullskala stålverk. Klarer du å samle {fmtKr(100_000_000)} i egenkapital?</p>
           </Card>
         )}
+
+        <Research g={g} act={act} />
 
         {SECTIONS.map((section) => {
           const items = options.filter((o) => o.kind === section.kind);

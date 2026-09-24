@@ -1,42 +1,32 @@
 /**
- * Kontrollrommet: spilleren tar styringen over én charge i lysbueovnen.
+ * Ekspertmodus i kontrollrommet: hele HMI-et med alle styregrep.
  *
- * Chargen kjøres i den fulle prosessmodellen med skrapet fra spillets resept.
- * Når stålet er tappet, føres analysen, energiforbruket og slitasjen tilbake
- * til spillet som en vanlig charge.
+ * Brukes av dem som vil kjøre chargen helt selv. Standard er den enkle
+ * styringen i SimpleControl.
  */
-import { useEffect, useRef, useState } from "react";
-import "../controlroom.css";
-import { MOBILE_QUERY, useMediaQuery } from "../hooks/useMediaQuery";
-import { Readout } from "../components/Readout";
-import { FurnaceMimic } from "../components/FurnaceMimic";
-import { TrendChart, type TrendPoint } from "../components/TrendChart";
-import { AlarmPanel } from "../components/AlarmPanel";
-import { ControlPanel } from "../components/ControlPanel";
-import { SlagPanel } from "../components/SlagPanel";
-import { EAFSimulation } from "../sim/eaf";
-import { applyOperatorCommand } from "../sim/commands";
-import { serializeState } from "../sim/serialize";
-import { COOLING_LABEL, PHASE_LABEL, type FurnaceState } from "../types";
-import type { ManualResult } from "../game/engine";
-import { GRADES } from "../game/data";
-import type { GradeId, ManualRequest } from "../game/types";
+import { useEffect, useState } from "react";
+import "../../controlroom.css";
+import { MOBILE_QUERY, useMediaQuery } from "../../hooks/useMediaQuery";
+import { Readout } from "../../components/Readout";
+import { FurnaceMimic } from "../../components/FurnaceMimic";
+import { TrendChart, type TrendPoint } from "../../components/TrendChart";
+import { AlarmPanel } from "../../components/AlarmPanel";
+import { ControlPanel } from "../../components/ControlPanel";
+import { SlagPanel } from "../../components/SlagPanel";
+import type { EAFSimulation } from "../../sim/eaf";
+import { applyOperatorCommand } from "../../sim/commands";
+import { serializeState } from "../../sim/serialize";
+import { COOLING_LABEL, PHASE_LABEL, type FurnaceState } from "../../types";
+import type { ManualResult } from "../../game/engine";
+import { GRADES } from "../../game/data";
+import type { ManualRequest } from "../../game/types";
+import { buildResult } from "./simSetup";
 
 const TICK_MS = 250;
 const MAX_ELAPSED_S = 2;
 const MAX_SUBSTEP_S = 1;
 const MAX_TREND_POINTS = 600;
 const START_TIME_SCALE = 5;
-
-/** Spillets kvaliteter kjøres mot nærmeste kvalitet i prosessmodellen. */
-const SIM_GRADE: Record<GradeId, string> = {
-  enkel: "AR20",
-  standard: "AR20",
-  armering: "AR20",
-  premium: "AR20",
-  lavkarbon: "LK08",
-  hoykarbon: "HK80",
-};
 
 type MobileView = "ovn" | "styring" | "kjemi" | "alarmer";
 
@@ -63,25 +53,18 @@ function statusFor(state: FurnaceState) {
 }
 
 interface Props {
+  sim: EAFSimulation;
+  startWear: number;
   request: ManualRequest;
-  furnaceWear: number;
   onDone: (result: ManualResult | null) => void;
 }
 
-export function ControlRoom({ request, furnaceWear, onDone }: Props) {
+export function ExpertControl({ sim, startWear, request, onDone }: Props) {
   const isMobile = useMediaQuery(MOBILE_QUERY);
   const [mobileView, setMobileView] = useState<MobileView>("ovn");
-  const [sim] = useState(() => {
-    const s = new EAFSimulation();
-    s.startCharge(SIM_GRADE[request.grade]);
-    // Skrapet fra spillets resept bestemmer fosforet som kommer inn
-    s.state.scrapPhosphorusPct = request.mix.p;
-    s.state.phosphorusPct = request.mix.p;
-    s.state.refractoryWear = Math.min(0.99, furnaceWear);
-    s.setTimeScale(START_TIME_SCALE);
-    return s;
-  });
-  const startWear = useRef(sim.state.refractoryWear);
+  useEffect(() => {
+    if (sim.state.timeScale < START_TIME_SCALE) sim.setTimeScale(START_TIME_SCALE);
+  }, [sim]);
   const [state, setState] = useState<FurnaceState>(() => serializeState(sim));
   const [trend, setTrend] = useState<TrendPoint[]>([]);
   const [confirmAbort, setConfirmAbort] = useState(false);
@@ -126,32 +109,7 @@ export function ControlRoom({ request, furnaceWear, onDone }: Props) {
   const brokeThrough = sim.state.refractoryWear >= 1;
   const finished = state.phase === "klargjoring" && tap !== null;
 
-  const finish = () => {
-    if (brokeThrough && !finished) {
-      onDone({
-        carbonPct: sim.state.carbonPct,
-        phosphorusPct: sim.state.phosphorusPct,
-        tempDeviationC: 0,
-        kwhPerT: state.energy_per_tonne_kwh,
-        wear: 1.2,
-        minutes: sim.state.timeS / 60,
-        ok: false,
-        deviations: ["gjennombrenning"],
-      });
-      return;
-    }
-    if (!tap) return;
-    onDone({
-      carbonPct: tap.carbon_pct,
-      phosphorusPct: tap.phosphorus_pct,
-      tempDeviationC: tap.tap_temp_c - tap.target_temp_c,
-      kwhPerT: state.energy_per_tonne_kwh,
-      wear: Math.max(0, sim.state.refractoryWear - startWear.current),
-      minutes: sim.state.timeS / 60,
-      ok: tap.ok,
-      deviations: tap.deviations,
-    });
-  };
+  const finish = () => onDone(buildResult(sim, startWear));
 
   const activeAlarms = state.alarms.filter((a) => a.active).length;
   const { tempDeviation, tempStatus, pStatus } = statusFor(state);

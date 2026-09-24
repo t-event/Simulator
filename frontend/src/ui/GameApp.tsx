@@ -5,6 +5,10 @@ import { completeManual } from "../game/engine";
 import { KNOWLEDGE, knowledgeCard } from "../game/knowledge";
 import { computePlantStats, day, energyPrice } from "../game/plant";
 import { useGame, type GameApi } from "../game/useGame";
+import { resolveDecision } from "../game/decisions";
+import { researchOptions } from "../game/research";
+import { upgradeOptions } from "../game/actions";
+import { buzz } from "./haptics";
 import type { GameState } from "../game/types";
 import { Build } from "./Build";
 import { fmtClock, fmtKr, fmtNum, fmtT } from "./format";
@@ -15,7 +19,7 @@ import { Sales } from "./Sales";
 import { VIEWS, type View } from "./views";
 
 // Kontrollrommet drar med seg prosessmodellen og grafene; det lastes først når det trengs
-const ControlRoom = lazy(() => import("./ControlRoom").then((m) => ({ default: m.ControlRoom })));
+const ControlRoom = lazy(() => import("./control/ControlRoom").then((m) => ({ default: m.ControlRoom })));
 
 const SPEED_OPTIONS = [
   { speed: 0, label: "❚❚", title: "Pause" },
@@ -127,6 +131,56 @@ function EndScreen({ g, onRestart, onContinue }: { g: GameState; onRestart: () =
   );
 }
 
+function DecisionCard({ g, onChoose }: { g: GameState; onChoose: (i: number) => void }) {
+  const d = g.pendingDecision!;
+  return (
+    <div className="g-modal" role="dialog" aria-modal="true" aria-labelledby="decision-title">
+      <div className="g-modal-card g-decision">
+        <span className="g-decision-kicker">Dag {day(g)} · Et valg</span>
+        <h2 id="decision-title">{d.title}</h2>
+        <p>{d.text}</p>
+        <div className="g-decision-options">
+          {d.options.map((o, i) => (
+            <button key={o.label} className={i === 0 ? "g-primary" : ""} onClick={() => onChoose(i)}>
+              <strong>{o.label}</strong>
+              {o.hint && <span>{o.hint}</span>}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Celebration({ g, onClose }: { g: GameState; onClose: () => void }) {
+  const stage = STAGES[g.celebrate ?? g.stage];
+  const newResearch = researchOptions(g).filter((r) => r.stage === stage.id);
+  const newGear = upgradeOptions(g).filter((o) => o.stage === stage.id && o.kind !== "stage");
+  return (
+    <div className="g-modal" role="dialog" aria-modal="true" aria-labelledby="celebrate-title">
+      <div className="g-modal-card g-celebrate">
+        <div className="g-celebrate-burst" aria-hidden="true">
+          🎉
+        </div>
+        <h2 id="celebrate-title">Flyttedag: {stage.name}!</h2>
+        <p>{stage.description}</p>
+        <ul>
+          <li>Plass til {stage.staffCap} ansatte</li>
+          <li>
+            {Math.round(stage.yardT)} t skraplager og {Math.round(stage.storeT)} t ferdigvarelager
+          </li>
+          {newGear.length > 0 && <li>Nytt utstyr: {newGear.map((o) => o.name).join(", ")}</li>}
+          {newResearch.length > 0 && <li>Ny forskning: {newResearch.map((r) => r.name).join(", ")}</li>}
+          {stage.id === 2 && <li>Du er nå daglig leder – sørg for folk på alle plassene.</li>}
+        </ul>
+        <button className="g-primary" onClick={onClose}>
+          Sett i gang
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function TopBar({ g, api, onBook }: { g: GameState; api: GameApi; onBook: () => void }) {
   const stats = computePlantStats(g);
   return (
@@ -168,8 +222,8 @@ function TopBar({ g, api, onBook }: { g: GameState; api: GameApi; onBook: () => 
         <span>
           <em>{stats.furnace.fuel === "gass" ? "Gass" : "Strøm"}</em> {fmtNum(energyPrice(g), 2)} kr/kWh
         </span>
-        <span className="hide-narrow">
-          <em>Ansatte</em> {g.workers.length}
+        <span>
+          <em>Fagpoeng</em> {Math.floor(g.researchPoints)}
         </span>
       </div>
     </header>
@@ -196,7 +250,8 @@ export function GameApp() {
     setBookOpen(true);
   };
 
-  const modalOpen = bookOpen || !!g.pendingManual || g.gameOver || (g.won && !winSeen);
+  const modalOpen =
+    bookOpen || !!g.pendingManual || !!g.pendingDecision || g.celebrate !== null || g.gameOver || (g.won && !winSeen);
 
   return (
     <div className="g-app">
@@ -206,7 +261,12 @@ export function GameApp() {
 
           <nav className="g-nav" aria-label="Hovedmeny">
             {VIEWS.map((v) => {
-              const badge = v.id === "salg" ? g.contracts.filter((c) => c.status === "tilbud").length : 0;
+              const badge =
+                v.id === "salg"
+                  ? g.contracts.filter((c) => c.status === "tilbud").length
+                  : v.id === "bygg"
+                    ? researchOptions(g).filter((r) => r.available).length
+                    : 0;
               return (
                 <button
                   key={v.id}
@@ -240,6 +300,20 @@ export function GameApp() {
       </div>
 
       {bookOpen && <Handbook g={g} onClose={() => setBookOpen(false)} />}
+
+      {g.pendingDecision && !g.pendingManual && (
+        <DecisionCard
+          g={g}
+          onChoose={(i) => {
+            act((gg) => resolveDecision(gg, i));
+            buzz(15);
+          }}
+        />
+      )}
+
+      {g.celebrate !== null && !g.pendingDecision && !g.pendingManual && (
+        <Celebration g={g} onClose={() => act((gg) => void (gg.celebrate = null))} />
+      )}
 
       {g.pendingManual && (
         <Suspense fallback={<div className="control-room g-loading">Åpner kontrollrommet …</div>}>

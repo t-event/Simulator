@@ -174,6 +174,17 @@ export interface ManualRequest {
   resumeSpeed: number;
 }
 
+/** Et hendelseskort som venter på at spilleren velger. */
+export interface Decision {
+  id: string;
+  title: string;
+  text: string;
+  options: { label: string; hint?: string }[];
+  /** Tall kortet trenger når valget skal gjennomføres (mengde, pris …) */
+  data: Record<string, number | string>;
+  resumeSpeed: number;
+}
+
 export interface Market {
   steelFactor: number;
   scrapFactor: Record<ScrapId, number>;
@@ -224,6 +235,12 @@ export interface GameState {
   gameOver: boolean;
   won: boolean;
   pendingManual: ManualRequest | null;
+  /** Fagpoeng til forskning */
+  researchPoints: number;
+  researched: string[];
+  pendingDecision: Decision | null;
+  /** Nivået spilleren nettopp flyttet til, for feiring; null når det er sett */
+  celebrate: number | null;
   /** Kunnskapskort spilleren har låst opp, i rekkefølge */
   knowledge: string[];
   unreadKnowledge: number;

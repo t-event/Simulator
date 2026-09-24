@@ -19,6 +19,7 @@ import {
   type FurnaceType,
   type Stage,
 } from "./data";
+import { hasResearch } from "./research";
 import type { Analysis, Crew, GameState, GradeId, ProductId, RoleId } from "./types";
 
 export const OWNER_SLOTS = 2;
@@ -211,6 +212,8 @@ export function computePlantStats(g: GameState): PlantStats {
     cycleMin *= 0.85;
     kwhPerT *= 1.02;
   }
+  if (hasResearch(g, "energistyring")) kwhPerT *= 0.95;
+  if (furnace.arc && hasResearch(g, "skumslagg")) kwhPerT *= 0.94;
 
   const repairers = g.workers.filter((w) => w.role === "vedlikehold").length;
   const repairCover = Math.min(1, repairers / Math.max(1, g.stage));
@@ -220,10 +223,22 @@ export function computePlantStats(g: GameState): PlantStats {
     maintFactor *= 0.7;
     repairFactor *= 0.7;
   }
+  if (hasResearch(g, "sikkerhet")) maintFactor *= 0.8;
 
   const sellers = g.workers.filter((w) => w.role === "salg").length;
-  const offersPerDay = 1.2 + 0.6 * g.stage + (has(g, "salgskontor") ? 1 : 0) + Math.min(3, sellers) * 0.8;
-  const priceBonus = (has(g, "salgskontor") ? 0.03 : 0) + Math.min(4, sellers) * 0.02 + g.reputation * 0.0008;
+  const offersPerDay =
+    1.2 +
+    0.6 * g.stage +
+    (has(g, "salgskontor") ? 1 : 0) +
+    Math.min(3, sellers) * 0.8 +
+    (hasResearch(g, "kundepleie") ? 0.6 : 0) +
+    (hasResearch(g, "eksport") ? 1 : 0);
+  const priceBonus =
+    (has(g, "salgskontor") ? 0.03 : 0) +
+    Math.min(4, sellers) * 0.02 +
+    g.reputation * 0.0008 +
+    (hasResearch(g, "kundepleie") ? 0.02 : 0) +
+    (hasResearch(g, "eksport") ? 0.03 : 0);
 
   const storeMult = has(g, "lager") ? 2 : 1;
   const yardUsed = Object.values(g.scrap).reduce((a, s) => a + s.t, 0);

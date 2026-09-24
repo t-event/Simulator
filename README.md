@@ -1,6 +1,6 @@
 # Stålverket
 
-Et tycoonspill der du bygger et skrapbasert stålverk fra bunnen av – fra en
+Et mobilspill (tycoon, inspirert av Game Dev Tycoon) der du bygger et skrapbasert stålverk fra bunnen av – fra en
 kald garasje med en gassfyrt digel til et storverk med lysbueovner,
 strengstøping, valseverk og hundrevis av ansatte.
 
@@ -10,8 +10,10 @@ riktig skrap, treffe analysen, holde ovnen og foringen i drift, bemanne
 skiftene og levere riktig kvalitet i tide. En fagbok låses opp kapittel for
 kapittel etter hvert som du møter nye deler av prosessen.
 
-Spillet kjører helt i nettleseren, fungerer på mobil, nettbrett og PC, og
-lagres automatisk i nettleseren. Det publiseres på GitHub Pages.
+Spillet kjører helt i nettleseren og er laget for mobil. Det kan legges på
+hjemskjermen som en app («Legg til på Hjem-skjerm» i Safari, «Installer app» i
+Chrome) og spilles uten nett. Spillet lagres automatisk. Det publiseres på
+GitHub Pages.
 
 ## Slik spiller du
 
@@ -24,8 +26,13 @@ lagres automatisk i nettleseren. Det publiseres på GitHub Pages.
    automatisk til aktive kontrakter.
 4. **Folk** – fra verkstedet og oppover trenger du ansatte. Hvert anlegg har et
    fast mannskap per skift; flere skift gir flere driftstimer i døgnet.
-5. **Bygg** – kjøp nytt utstyr og flytt inn i neste nivå når du har penger og
-   omdømme nok.
+5. **Bygg** – forsk fram ny teknologi med fagpoeng, kjøp utstyr og flytt inn i
+   neste nivå når du har penger og omdømme nok.
+
+Underveis dukker det opp **hendelseskort** med valg – et billig skrapparti av
+ukjent opprinnelse, en hasteordre, et lønnskrav, en avisreportasje. **Fagpoeng**
+tjener du på å smelte, levere og kjøre charger selv, og på feil, fordi du lærer
+av dem.
 
 | Nivå | Typisk utstyr | Hva som er nytt |
 |---|---|---|
@@ -37,12 +44,20 @@ lagres automatisk i nettleseren. Det publiseres på GitHub Pages.
 
 ### Ta styringen
 
-Når verket har lysbueovn, kan du ta styringen på neste charge. Spillet
-pauses, og du havner i kontrollrommet med den fulle prosessmodellen og
-skrapet fra din egen resept: conveyor og forvarming, trafo-tapp, kalk og
-dolomitt, karbon og oksygen, avslagging og tapping. Resultatet – analyse,
-energiforbruk og slitasje – går tilbake inn i spillet som en vanlig charge.
-Godt kjørte charger bruker mindre strøm, får lavere fosfor og gir omdømme.
+Når verket har lysbueovn, kan du ta styringen på neste charge. Kontrollrommet
+er laget for folk uten forkunnskaper: fire steg med én forklaring, én måling
+med grønt felt og én knapp hver.
+
+1. **Smelt** – hold temperaturen i det grønne feltet med mer eller mindre strøm
+   mens skrapmatingen varierer.
+2. **Rens** – hold inne oksygenknappen til karbonet er i det grønne feltet.
+3. **Slagg av** – tipp ut slagget med fosforet i før oppvarmingen.
+4. **Tapp** – trykk når temperaturen er i det grønne feltet.
+
+En charge tar et par minutter. Etterpå får du stjerner og en forklaring på
+vanlig norsk. Under ligger den fulle prosessmodellen, så valgene har ekte
+konsekvenser for strømforbruk, fosfor og slitasje. Viderekomne kan bytte til
+det fulle kontrollrommet med alle styregrep.
 
 ## Hva spillet lærer bort
 
@@ -63,6 +78,12 @@ Tallene i spillet er oppfunnet. De er satt slik at retning og
 størrelsesorden stemmer med vanlig stålverksdrift, men de beskriver ikke noe
 bestemt anlegg.
 
+## For utviklere
+
+`CLAUDE.md` og `docs/` er prosjektets minne: `docs/LOGG.md` (hva som er gjort,
+økt for økt), `docs/BESLUTNINGER.md` (hvorfor ting er som de er) og
+`docs/DESIGN.md` (spilldesign og veikart).
+
 ## Arkitektur
 
 ```
@@ -73,12 +94,15 @@ frontend/
     plant.ts                 Utledede tall: kapasitet, bemanning, skift, priser
     engine.ts                Tid, produksjon, marked, kontrakter, hendelser
     actions.ts               Det spilleren kan gjøre
+    research.ts              Forskning og fagpoeng
+    decisions.ts             Hendelseskort med valg
     knowledge.ts             Fagboka
     save.ts                  Lagring i nettleseren
     useGame.ts               Spilløkka for React
     balance.ts               Automatisk testspiller for balansering
   src/ui/                   Spillets grensesnitt (mobil først)
-    ControlRoom.tsx          Kontrollrommet for «ta styringen»
+    control/                 Kontrollrommet: enkel styring (standard) og full HMI
+  public/                   PWA: manifest, ikoner og service worker for offline
   src/sim/                  Prosessmodellen for lysbueovnen
     eaf.ts                   Lumped-parameter-modell av en conveyormatet lysbueovn
     validate.ts              Referansekjøring med nøkkeltall
@@ -111,8 +135,10 @@ npm run lint
 ```
 
 `balance.ts` spiller seks spill med ulike frø. Den sjekker at medianen for når
-hvert nivå nås ligger innenfor målvinduet, at ingen går konkurs, og at en
-charge kjørt i kontrollrommet kommer riktig tilbake inn i spillet. Legg til
+hvert nivå nås ligger innenfor målvinduet og at ingen går konkurs. Den kjører
+også den enkle kontrollromsstyringen som en nybegynner som bare følger rådene
+på skjermen (skal få minst fire stjerner) og som en slurvete spiller (skal få
+høyst to), og sjekker at chargen kommer riktig tilbake inn i spillet. Legg til
 `--verbose` for dag-for-dag-utskrift og `--finance` for kostnadsfordeling.
 
 ## Publisere

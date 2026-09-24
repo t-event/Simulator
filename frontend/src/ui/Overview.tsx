@@ -1,4 +1,5 @@
 import { requestManual, setTargetGrade, upgradeOptions } from "../game/actions";
+import { researchOptions } from "../game/research";
 import { GRADE_IDS, GRADES, PRODUCTS, ROLES, STAGES } from "../game/data";
 import { recipeEstimate, startReline } from "../game/engine";
 import { castingType, rollingActive, type PlantStats } from "../game/plant";
@@ -7,6 +8,7 @@ import type { GameApi } from "../game/useGame";
 import { AnalysisLine, Bar, Card, GradeChips, Stat } from "./common";
 import { fmtClock, fmtKr, fmtPct, fmtT } from "./format";
 import { PlantScene } from "./PlantScene";
+import { SceneBubbles } from "./SceneBubbles";
 import type { View } from "./views";
 
 interface Props {
@@ -48,6 +50,9 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
       text: `Resepten din holder ikke kravet til ${GRADES[g.targetGrade].name}. Juster resepten under Marked.`,
       view: "marked",
     });
+  const research = researchOptions(g).filter((r) => r.available);
+  if (research.length)
+    out.push({ text: `Du har fagpoeng nok til å forske på ${research[0].name.toLowerCase()}.`, view: "bygg" });
   const next = upgradeOptions(g).find((o) => o.kind === "stage");
   if (next?.available) out.push({ text: `Du har råd til å flytte inn i ${next.name.toLowerCase()}!`, view: "bygg" });
   if (g.stage >= 1 && stats.staffCount === 0)
@@ -81,6 +86,7 @@ export function Overview({ g, stats, act, go }: Props) {
       <div className="g-col-wide">
         <div className="g-scene-wrap">
           <PlantScene g={g} stats={stats} />
+          <SceneBubbles g={g} />
           <div className="g-scene-caption">
             <strong>{stats.stage.name}</strong>
             <span>
@@ -94,21 +100,30 @@ export function Overview({ g, stats, act, go }: Props) {
         </div>
 
         {tips.length > 0 && (
-          <Card title="Neste steg" className="g-hints">
-            <ul>
-              {tips.map((t) => (
-                <li key={t.text}>
-                  {t.view ? (
-                    <button className="g-link" onClick={() => go(t.view!)}>
-                      {t.text}
-                    </button>
-                  ) : (
-                    t.text
-                  )}
-                </li>
-              ))}
-            </ul>
-          </Card>
+          <div className="g-cta-wrap">
+            {tips[0].view ? (
+              <button className="g-primary g-cta" onClick={() => go(tips[0].view!)}>
+                {tips[0].text}
+              </button>
+            ) : (
+              <p className="g-note">{tips[0].text}</p>
+            )}
+            {tips.length > 1 && (
+              <ul className="g-more-hints">
+                {tips.slice(1).map((t) => (
+                  <li key={t.text}>
+                    {t.view ? (
+                      <button className="g-link" onClick={() => go(t.view!)}>
+                        {t.text}
+                      </button>
+                    ) : (
+                      t.text
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         )}
 
         <Card title="Produksjonen">

@@ -24,6 +24,8 @@ import {
   WIN_CASH,
 } from "./data";
 import { knowledgeCard } from "./knowledge";
+import { hasResearch } from "./research";
+import { maybeCreateDecision } from "./decisions";
 import {
   castingType,
   computePlantStats,
@@ -158,6 +160,10 @@ export function newGame(seed = Date.now()): GameState {
     gameOver: false,
     won: false,
     pendingManual: null,
+    researchPoints: 0,
+    researched: [],
+    pendingDecision: null,
+    celebrate: null,
     knowledge: [],
     unreadKnowledge: 0,
   };
@@ -197,6 +203,11 @@ export function addIncome(g: GameState, category: IncomeCategory, amount: number
   g.today.income[category] = (g.today.income[category] ?? 0) + amount;
 }
 
+/** Fagpoeng til forskning. */
+export function awardPoints(g: GameState, points: number): void {
+  if (points > 0) g.researchPoints += points;
+}
+
 export function adjustReputation(g: GameState, delta: number): void {
   g.reputation = Math.max(0, Math.min(100, g.reputation + delta));
 }
@@ -217,6 +228,16 @@ function addScrap(
   s.dirt = (s.dirt * s.t + quality.dirt * t) / total;
   s.t = total;
   s.radioactive = s.radioactive || radioactive;
+}
+
+/** Legger et skrapparti med gitt innhold på lageret (brukes av hendelseskort). */
+export function addScrapParti(
+  g: GameState,
+  id: ScrapId,
+  t: number,
+  q: { p: number; tramp: number; c: number; dirt: number; radioactive: boolean },
+): void {
+  addScrap(g, id, t, q, q.radioactive);
 }
 
 export function scrapPrice(g: GameState, id: ScrapId): number {
@@ -422,6 +443,10 @@ export function recipeEstimate(
   };
 }
 
+function wearFactor(g: GameState): number {
+  return hasResearch(g, "ildfast") ? 0.85 : 1;
+}
+
 function tempOffRisk(g: GameState, stats: PlantStats): number {
   let risk = stats.furnace.id === "digel" ? 0.14 : stats.furnace.arc ? 0.12 : 0.08;
   if (stats.furnace.arc && has(g, "oseovn")) risk = 0.03;
@@ -475,7 +500,7 @@ function startHeat(g: GameState, index: number, stats: PlantStats): boolean {
 
   let duration = stats.cycleMin * mix.energy * uniform(g, 0.95, 1.08);
   duration += heatEvents(g, index, stats);
-  f.wear += furnace.wearPerHeat * (tempOff ? 1.3 : 1) * uniform(g, 0.9, 1.1);
+  f.wear += furnace.wearPerHeat * (tempOff ? 1.3 : 1) * uniform(g, 0.9, 1.1) * wearFactor(g);
   f.heat = {
     startMin: g.minute,
     endMin: g.minute + duration,
@@ -549,6 +574,7 @@ function finishHeat(g: GameState, index: number, stats: PlantStats): void {
     f.downUntilMin = g.minute + 2 * MIN_PER_DAY;
     f.downReason = "Opprydding etter radioaktiv kilde";
     g.castDownUntilMin = Math.max(g.castDownUntilMin, g.minute + MIN_PER_DAY);
+    awardPoints(g, 3);
     log(
       g,
       `En radioaktiv kilde ble smeltet i ovn ${index + 1}! Stålet og støvet er forurenset og må destrueres. Opprydding ${fmtKr(cleanup)}, anlegget står i to døgn.`,
@@ -575,6 +601,7 @@ function finishHeat(g: GameState, index: number, stats: PlantStats): void {
       heat.liquidT * 0.5,
       heat.analysis.c > 0 ? { ...heat.analysis, dirt: 0.05 } : SCRAP_TYPES.retur,
     );
+    awardPoints(g, 3);
     log(
       g,
       `Gjennombrenning i ovn ${index + 1}! Flytende stål gikk gjennom foringen. Reparasjon ${fmtKr(cost)}, ${hours.toFixed(0)} timer.`,
@@ -584,6 +611,8 @@ function finishHeat(g: GameState, index: number, stats: PlantStats): void {
     return;
   }
 
+  // Mange charger i et stort verk lærer deg mindre hver for seg
+  awardPoints(g, g.stage <= 1 ? 1 : g.stage === 2 ? 0.6 : 0.4);
   f.holding = {
     t: heat.liquidT,
     grade: heat.grade,
@@ -908,6 +937,7 @@ function deliverContracts(g: GameState): void {
       const gain = c.repGain * Math.max(0.25, 1 - g.reputation / 150);
       adjustReputation(g, gain);
       g.totals.contractsDone += 1;
+      awardPoints(g, 2 + g.stage);
       log(g, `Kontrakten med ${c.customer} er levert. Omdømme +${gain.toFixed(1)}.`, "good");
       if (g.totals.contractsDone === 1) unlock(g, "omdomme");
     }
@@ -923,7 +953,12 @@ function processComplaints(g: GameState): void {
     addCost(g, "bot", c.refund);
     adjustReputation(g, -c.repLoss);
     g.totals.complaints += 1;
-    log(g, `${c.text} Kunden får pengene tilbake (${fmtKr(c.refund)}), omdømme −${c.repLoss.toFixed(1)}.`, "bad");
+    awardPoints(g, 3);
+    log(
+      g,
+      `${c.text} Kunden får pengene tilbake (${fmtKr(c.refund)}), omdømme −${c.repLoss.toFixed(1)}. Du lærte noe: +3 fagpoeng.`,
+      "bad",
+    );
     unlock(g, "analyse");
   }
 }
@@ -1168,10 +1203,12 @@ function onDay(g: GameState, stats: PlantStats): void {
 
   // Folk blir flinkere av å jobbe
   if (stats.hours > 0) {
-    for (const w of g.workers) w.skill = Math.min(5, w.skill + 0.025);
+    const growth = hasResearch(g, "opplaering") ? 0.04 : 0.025;
+    for (const w of g.workers) w.skill = Math.min(5, w.skill + growth);
     if (stats.ownerWorks) g.ownerSkill = Math.min(4.5, g.ownerSkill + 0.04);
   }
   refreshCandidates(g);
+  maybeCreateDecision(g);
 
   // Banken
   if (g.cash < -creditLimit(g)) {
@@ -1219,7 +1256,7 @@ function step(g: GameState, dt: number): void {
 /** Flytter spillet fram et antall spillminutter. */
 export function advance(g: GameState, minutes: number): void {
   let left = minutes;
-  while (left > 1e-9 && !g.gameOver && !g.pendingManual) {
+  while (left > 1e-9 && !g.gameOver && !g.pendingManual && !g.pendingDecision) {
     const dt = Math.min(STEP_MIN, left);
     step(g, dt);
     left -= dt;
@@ -1238,6 +1275,8 @@ export interface ManualResult {
   minutes: number;
   ok: boolean;
   deviations: string[];
+  /** Karakter 1–5 fra den enkle styringen */
+  stars?: number;
 }
 
 /** Legger en charge spilleren kjørte selv inn i produksjonen. */
@@ -1262,7 +1301,7 @@ export function completeManual(g: GameState, result: ManualResult | null): void 
   const kwh = result.kwhPerT * req.sizeT;
   addCost(g, "energi", kwh * energyPrice(g));
   addCost(g, "forbruk", (stats.furnace.consumablesPerT + (lf ? 60 : 0)) * req.sizeT);
-  f.wear += result.wear * (stats.furnace.wearPerHeat / 0.01);
+  f.wear += result.wear * (stats.furnace.wearPerHeat / 0.01) * wearFactor(g);
   f.heat = {
     startMin: g.minute,
     endMin: g.minute + result.minutes,
@@ -1277,6 +1316,7 @@ export function completeManual(g: GameState, result: ManualResult | null): void 
     energyKwh: kwh,
   };
   f.waitReason = null;
+  awardPoints(g, result.stars !== undefined ? 2 + result.stars : 4);
   if (result.ok) {
     adjustReputation(g, 0.5);
     log(
@@ -1299,7 +1339,7 @@ function autoHeatFromRequest(g: GameState, req: ManualRequest, stats: PlantStats
   const kwh = stats.kwhPerT * req.energyFactor * req.sizeT;
   addCost(g, "energi", kwh * energyPrice(g));
   addCost(g, "forbruk", stats.furnace.consumablesPerT * req.sizeT);
-  g.furnaces[req.furnace].wear += stats.furnace.wearPerHeat;
+  g.furnaces[req.furnace].wear += stats.furnace.wearPerHeat * wearFactor(g);
   return {
     startMin: g.minute,
     endMin: g.minute + stats.cycleMin * req.energyFactor,

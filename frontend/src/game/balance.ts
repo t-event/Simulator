@@ -6,15 +6,18 @@
  * rekker, ansetter folk og bygger ut når det er råd. Skriptet sjekker at
  * progresjonen havner innenfor målene, og feiler ellers (brukes i CI).
  */
-import { buyUpgrade, hire, setRecipe, setTargetGrade, upgradeOptions } from "./actions";
+import { buyUpgrade, doResearch, hire, setRecipe, setTargetGrade, upgradeOptions } from "./actions";
+import { resolveDecision } from "./decisions";
+import { researchOptions } from "./research";
 import { SCRAP_IDS, STAGES } from "./data";
 import { acceptContract, advance, completeManual, newGame, TARGET_C } from "./engine";
 import { EAFSimulation } from "../sim/eaf";
-import { serializeState } from "../sim/serialize";
+import { createSim } from "../ui/control/simSetup";
+import { MELT_BAND, SimpleRunner } from "../ui/control/simpleRunner";
 import { computePlantStats, day, satisfies } from "./plant";
 declare const process: { argv: string[]; exitCode?: number; exit?: (code: number) => void };
 
-import type { Crew, GameState, GradeId, RoleId, ScrapId } from "./types";
+import type { Crew, GameState, GradeId, ManualRequest, RoleId, ScrapId } from "./types";
 
 type Recipe = Partial<Record<ScrapId, number>>;
 
@@ -74,6 +77,13 @@ function applyRecipe(g: GameState, r: Recipe): void {
 }
 
 function botHour(g: GameState): void {
+  // Hendelseskort: forsiktige valg, som en fornuftig spiller
+  if (g.pendingDecision) {
+    const safe: Record<string, number> = { billigparti: 1, hasteordre: 1, lonnskrav: 0, avis: 0, messe: 0, laerling: 0, tilsyn: 0 };
+    resolveDecision(g, safe[g.pendingDecision.id] ?? 1);
+  }
+  // Forskning: alt som er tilgjengelig, i tabellens rekkefølge
+  for (const r of researchOptions(g)) if (r.available) doResearch(g, r.id);
   const stats = computePlantStats(g);
   const today = day(g);
 
@@ -218,6 +228,21 @@ if (process.argv.includes("--dump")) {
   console.log(JSON.stringify(g));
   process.exit?.(0);
 }
+if (process.argv.includes("--research")) {
+  // Når testspilleren forsker, og hvor mange fagpoeng den har liggende
+  const g = newGame(Number(process.argv[process.argv.indexOf("--research") + 1]));
+  let done = 0;
+  while (day(g) <= 150) {
+    botHour(g);
+    advance(g, 60);
+    if (g.researched.length > done) {
+      done = g.researched.length;
+      console.log(`dag ${day(g)} (${STAGES[g.stage].name}): ${g.researched[done - 1]} – ${Math.round(g.researchPoints)} FP igjen`);
+    }
+  }
+  console.log(`dag 150: ${Math.round(g.researchPoints)} FP ubrukt`);
+  process.exit?.(0);
+}
 if (process.argv.includes("--replog")) {
   // Skriver ut alt som har påvirket omdømmet, for feilsøking av balansen
   const g = newGame(Number(process.argv[process.argv.indexOf("--replog") + 1]));
@@ -272,7 +297,59 @@ if (results.some((r) => r.bankrupt)) {
   failed = true;
   console.log("AVVIK: testspilleren gikk konkurs");
 }
-// Ta styringen: en charge kjørt i prosessmodellen skal komme tilbake som en vanlig charge
+// Kontrollrommet: den enkle styringen skal kunne kjøres av en nybegynner som bare
+// følger rådene på skjermen, og en slurvete kjøring skal gi dårlig karakter
+type SimplePolicy = "nybegynner" | "slurvete";
+function playSimple(policy: SimplePolicy, seed: number, req?: ManualRequest) {
+  const sim = req ? createSim(req, 0) : new EAFSimulation(seed);
+  if (!req) sim.startCharge("AR20");
+  let r = seed;
+  const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647;
+  const run = new SimpleRunner(sim, sim.state.refractoryWear, rnd);
+  run.start();
+  let real = 0;
+  let lastAct = 0;
+  while (run.step !== "ferdig" && real < 900) {
+    run.tick(0.1);
+    real += 0.1;
+    // En person reagerer omtrent hvert andre sekund
+    if (real - lastAct < 2) continue;
+    lastAct = real;
+    const t = sim.state.bathTempC;
+    const g = sim.state.grade!;
+    if (run.step === "smelt" && policy === "nybegynner") {
+      if (t < MELT_BAND[0] + 5) run.changeLevel(1);
+      else if (t > MELT_BAND[1] - 5) run.changeLevel(-1);
+    }
+    if (run.step === "rens") {
+      if (policy === "nybegynner" && sim.state.carbonPct > g.tapCarbonMaxPct - 0.015) run.setBlowing(true);
+      else {
+        run.setBlowing(false);
+        run.finishRefining();
+      }
+    }
+    if (run.step === "slagg") {
+      if (policy === "slurvete") run.skipDeslag();
+      else run.startDeslag();
+    }
+    if (run.step === "tapp" && (policy === "slurvete" ? t > sim.tapTargetTempC + 35 : t >= sim.tapTargetTempC - 12)) run.tap();
+  }
+  return { score: run.score!, real };
+}
+
+for (const seed of [1, 2, 3]) {
+  const novice = playSimple("nybegynner", seed);
+  const sloppy = playSimple("slurvete", seed);
+  const ok = novice.score.rating >= 4 && sloppy.score.rating <= 2 && novice.real < 180;
+  console.log(
+    `Enkel styring, frø ${seed}: nybegynner ${novice.score.rating}★ på ${Math.round(novice.real)} s ` +
+      `(${Math.round(novice.score.result.kwhPerT)} kWh/t), slurvete ${sloppy.score.rating}★ ` +
+      `(${Math.round(sloppy.score.result.kwhPerT)} kWh/t) ${ok ? "OK" : "AVVIK"}`,
+  );
+  if (!ok) failed = true;
+}
+
+// Ta styringen i spillet: chargen skal komme tilbake som en vanlig charge
 {
   const g = newGame(3);
   while (!computePlantStats(g).furnace.arc && day(g) < 300) {
@@ -290,61 +367,16 @@ if (results.some((r) => r.bankrupt)) {
     failed = true;
     console.log("AVVIK: ta styringen ga ingen charge å kjøre");
   } else {
-    const sim = new EAFSimulation(5);
-    sim.startCharge("AR20");
-    sim.state.scrapPhosphorusPct = req.mix.p;
-    sim.state.phosphorusPct = req.mix.p;
-    sim.setConveyor(true);
-    sim.setConveyorRate(2.2);
-    sim.setPower(true);
-    sim.setTransformerTap(6);
-    sim.setLimeRate(42);
-    sim.setDolomiteRate(32);
-    sim.setOxygenFlow(1700);
-    sim.setCarbonInjection(28);
-    let t = 0;
-    while (sim.state.phase === "innsmelting" && t < 8000) {
-      if (sim.state.bathTempC > 1620 && sim.state.transformerTap > 3) sim.setTransformerTap(3);
-      else if (sim.state.bathTempC < 1570 && sim.state.transformerTap < 6) sim.setTransformerTap(6);
-      sim.step(1);
-      t++;
-    }
-    sim.setOxygenFlow(0);
-    sim.setCarbonInjection(0);
-    sim.setLimeRate(0);
-    sim.setDolomiteRate(0);
-    sim.setConveyor(false);
-    sim.setPower(false);
-    sim.setSlagDoor(true);
-    sim.setTilt(-12);
-    for (let i = 0; i < 420; i++) sim.step(1);
-    sim.setTilt(0);
-    sim.setSlagDoor(false);
-    sim.setPower(true);
-    sim.setTransformerTap(5);
-    for (let i = 0; i < 3000 && sim.state.bathTempC < sim.tapTargetTempC; i++) sim.step(1);
-    sim.startTap();
-    for (let i = 0; i < 2000 && sim.state.phase === "tapping"; i++) sim.step(1);
-    const snap = serializeState(sim);
-    const tap = snap.last_tap_result!;
+    const { score } = playSimple("nybegynner", 7, req);
     const heatsBefore = g.totals.manualHeats;
-    const repBefore = g.reputation;
-    completeManual(g, {
-      carbonPct: tap.carbon_pct,
-      phosphorusPct: tap.phosphorus_pct,
-      tempDeviationC: tap.tap_temp_c - tap.target_temp_c,
-      kwhPerT: snap.energy_per_tonne_kwh,
-      wear: 0.01,
-      minutes: sim.state.timeS / 60,
-      ok: tap.ok,
-      deviations: tap.deviations,
-    });
-    advance(g, sim.state.timeS / 60 + 30);
+    const fpBefore = g.researchPoints;
+    completeManual(g, score.result);
+    advance(g, score.result.minutes + 30);
     const ok =
-      g.totals.manualHeats === heatsBefore + 1 && g.speed === speedBefore && tap.ok && g.reputation >= repBefore;
+      g.totals.manualHeats === heatsBefore + 1 && g.speed === speedBefore && g.researchPoints > fpBefore && score.rating >= 4;
     console.log(
-      `Ta styringen: tapping ${tap.ok ? "OK" : "avvik"}, ${snap.energy_per_tonne_kwh} kWh/t, P ${tap.phosphorus_pct}, ` +
-        `manuelle charger ${g.totals.manualHeats}, fart etterpå ${g.speed} ${ok ? "OK" : "AVVIK"}`,
+      `Ta styringen i spillet: ${score.rating}★, P ${score.result.phosphorusPct}, ` +
+        `manuelle charger ${g.totals.manualHeats}, fagpoeng +${Math.round(g.researchPoints - fpBefore)}, fart etterpå ${g.speed} ${ok ? "OK" : "AVVIK"}`,
     );
     if (!ok) failed = true;
   }

@@ -8,3 +8,12 @@ createRoot(document.getElementById("root")!).render(
     <GameApp />
   </StrictMode>,
 );
+
+// Offline og installasjon på hjemskjermen (bare i det publiserte bygget)
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => {
+      // Uten service worker virker spillet fortsatt, bare ikke offline
+    });
+  });
+}
