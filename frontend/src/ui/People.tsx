@@ -58,7 +58,7 @@ export function People({ g, stats, act }: Props) {
             <Stat label="Skift" value={`${stats.shifts} av 3`} tone={stats.shifts === 0 ? "critical" : undefined} />
             <Stat label="Drift per døgn" value={`${stats.hours} t`} />
             <Stat label="Ansatte" value={`${g.workers.length} / ${cap}`} />
-            <Stat label="Lønn per dag" value={fmtKr(stats.salaryPerDay)} />
+            <Stat label="Lønn per døgn" value={fmtKr(stats.salaryPerDay)} />
           </div>
           {stats.ownerWorks && (
             <p className="g-note">

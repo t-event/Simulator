@@ -55,9 +55,10 @@ const MAKERS: Record<string, Maker> = {
     return {
       id: "lonnskrav",
       title: "Lønnskrav",
-      text: `De ansatte ber om 4 % lønnstillegg (${fmtKr(cost)} mer per dag). De peker på at verket går godt.`,
+      text: `De ansatte ber om 4 % lønnstillegg (${fmtKr(cost)} mer per døgn). De peker på at verket går godt.`,
       options: [
-        { label: "Godta", hint: "Fornøyde folk blir, og lærer mer." },
+        { label: "Godta 4 %", hint: "Fornøyde folk blir, og lærer mer." },
+        { label: "Mottilbud: 2 %", hint: "Kanskje de godtar – kanskje ikke." },
         { label: "Avslå", hint: "Noen kan komme til å slutte." },
       ],
       data: { cost },
@@ -110,14 +111,99 @@ const MAKERS: Record<string, Maker> = {
   },
 };
 
+const MORE_MAKERS: Record<string, Maker> = {
+  kurs: (g) => {
+    const trainees = g.workers.filter((w) => w.role === "ovn" || w.role === "stoper" || w.role === "allround");
+    if (g.stage < 1 || trainees.length < 2) return null;
+    const cost = 3_000 * trainees.length * (1 + g.stage);
+    return {
+      id: "kurs",
+      title: "Kurs for operatørene",
+      text: `En leverandør tilbyr et kurs i smelting og støping for ${trainees.length} av dine folk. Det koster ${fmtKr(cost)}.`,
+      options: [{ label: "Send dem på kurs", hint: "Flinkere folk gir kortere charger og færre feil." }, { label: "Ikke nå" }],
+      data: { cost },
+    };
+  },
+  sykdom: (g) => {
+    if (g.stage < 1 || g.workers.length < 3) return null;
+    const cost = Math.round(g.workers.reduce((a, w) => a + w.salary, 0) * 0.8);
+    return {
+      id: "sykdom",
+      title: "Influensa",
+      text: "Flere av de ansatte er syke de neste to døgnene.",
+      options: [
+        { label: `Leie inn vikarer (${fmtKr(cost)})`, hint: "Verket går som normalt." },
+        { label: "Kjør med færre folk", hint: "Ett skift mindre i to døgn." },
+      ],
+      data: { cost },
+    };
+  },
+  naboklage: (g) => {
+    if (g.stage < 1) return null;
+    const cost = 20_000 * (1 + g.stage) ** 2;
+    return {
+      id: "naboklage",
+      title: "Naboene klager",
+      text: "Naboene klager på støy og støv fra verket, og har kontaktet kommunen.",
+      options: [
+        { label: `Sett opp støyskjerm og støvfilter (${fmtKr(cost)})`, hint: "Godt naboskap er godt omdømme." },
+        { label: "Beklag og vent", hint: "Kan gå over – eller havne i avisen." },
+      ],
+      data: { cost },
+    };
+  },
+  kundebesok: (g) => {
+    if (g.stage < 2) return null;
+    return {
+      id: "kundebesok",
+      title: "Kundebesøk",
+      text: "En stor kunde vil se verket før de bestemmer seg for en ny leverandør.",
+      options: [
+        { label: "Vis dem rundt", hint: "Et ryddig verk kan gi en god kontrakt." },
+        { label: "Ikke nå", hint: "Kunden finner en annen." },
+      ],
+      data: {},
+    };
+  },
+  nestenulykke: (g) => {
+    if (g.stage < 1) return null;
+    const cost = 10_000 * (1 + g.stage) ** 2;
+    return {
+      id: "nestenulykke",
+      title: "Nestenulykke",
+      text: "Flytende stål sprutet ved tappingen og var nær ved å treffe en operatør.",
+      options: [
+        { label: `Kjøp verneutstyr og skjermer (${fmtKr(cost)})`, hint: "Ingen skal skades på jobb." },
+        { label: "La det gå denne gangen", hint: "Neste gang kan det gå verre." },
+      ],
+      data: { cost },
+    };
+  },
+};
+
+/** Samme kort kommer ikke igjen før det har gått så mange døgn */
+const COOLDOWN_DAYS = 25;
+/** Minst så mange døgn mellom to kort */
+const MIN_GAP_DAYS = 2;
+
 /** Kalles én gang per døgn. Lager av og til et nytt kort og pauser spillet. */
 export function maybeCreateDecision(g: GameState): void {
   if (g.pendingDecision || g.pendingManual || g.gameOver || day(g) < 3) return;
+  const today = day(g);
+  const lastAny = Math.max(0, ...Object.values(g.decisionSeen));
+  if (today - lastAny < MIN_GAP_DAYS) return;
   if (!chance(g, DAILY_CHANCE)) return;
-  const ids = Object.keys(MAKERS);
-  for (let tries = 0; tries < 4; tries++) {
-    const d = MAKERS[pick(g, ids)](g);
-    if (!d) continue;
+  const all = { ...MAKERS, ...MORE_MAKERS };
+  // Kort som ikke har vært vist på lenge, først de som aldri er vist
+  const ids = Object.keys(all).filter((id) => today - (g.decisionSeen[id] ?? -999) >= COOLDOWN_DAYS);
+  for (let tries = 0; tries < 6 && ids.length; tries++) {
+    const id = pick(g, ids);
+    const d = all[id](g);
+    if (!d) {
+      ids.splice(ids.indexOf(id), 1);
+      continue;
+    }
+    g.decisionSeen[id] = today;
     g.pendingDecision = { ...d, resumeSpeed: g.speed > 0 ? g.speed : 1 };
     g.speed = 0;
     return;
@@ -156,10 +242,10 @@ export function resolveDecision(g: GameState, option: number): void {
         delivered: 0,
         pricePerT: n("pricePerT"),
         deadlineDay: day(g) + 2,
-        offerExpiresDay: day(g),
+        offerExpiresMin: g.minute,
         repGain: 1.5,
         repLoss: 3,
-        penaltyPerT: Math.round(n("pricePerT") * 0.3),
+        penaltyPerT: Math.round(n("pricePerT") * 0.5),
         status: "tilbud",
         closedDay: null,
       };
@@ -172,6 +258,14 @@ export function resolveDecision(g: GameState, option: number): void {
         for (const w of g.workers) w.salary = Math.round(w.salary * 1.04);
         for (const w of g.workers) w.skill = Math.min(5, w.skill + 0.1);
         log(g, "De ansatte fikk lønnstillegg og er fornøyde.", "good");
+      } else if (option === 1 && chance(g, 0.6)) {
+        for (const w of g.workers) w.salary = Math.round(w.salary * 1.02);
+        log(g, "De ansatte godtok mottilbudet på 2 %. Enighet uten bråk.", "good");
+      } else if (option === 1) {
+        for (const w of g.workers) w.salary = Math.round(w.salary * 1.03);
+        const quitter = pick(g, g.workers);
+        g.workers = g.workers.filter((w) => w !== quitter);
+        log(g, `Mottilbudet ble for lavt. Dere møttes på 3 %, men ${quitter.name} sa opp i protest.`, "bad");
       } else {
         const quitters = g.workers.filter(() => chance(g, 0.12)).slice(0, 3);
         g.workers = g.workers.filter((w) => !quitters.includes(w));
@@ -210,6 +304,54 @@ export function resolveDecision(g: GameState, option: number): void {
         w.name = `${w.name} (lærling)`;
         g.workers.push(w);
         log(g, `${w.name} har begynt som lærling.`, "info");
+      }
+      return;
+    case "kurs":
+      if (!yes) return;
+      addCost(g, "annet", n("cost"));
+      for (const w of g.workers)
+        if (w.role === "ovn" || w.role === "stoper" || w.role === "allround") w.skill = Math.min(5, w.skill + 0.4);
+      log(g, "Operatørene er tilbake fra kurs og har lært mye.", "good");
+      return;
+    case "sykdom":
+      if (yes) {
+        addCost(g, "lonn", n("cost"));
+        log(g, "Vikarene holdt verket i gang mens de syke var borte.", "info");
+      } else {
+        g.sickUntilMin = g.minute + 2 * 1440;
+        log(g, "Verket går med ett skift mindre de neste to døgnene.", "event");
+      }
+      return;
+    case "naboklage":
+      if (yes) {
+        addCost(g, "annet", n("cost"));
+        adjustReputation(g, 1);
+        log(g, "Støyskjermen og filteret er på plass. Naboene er fornøyde. Omdømme +1.", "good");
+      } else if (chance(g, 0.5)) {
+        adjustReputation(g, -3);
+        log(g, "Naboklagene havnet i avisen. Omdømme −3.", "bad");
+      } else {
+        log(g, "Klagene stilnet av denne gangen.", "info");
+      }
+      return;
+    case "kundebesok":
+      if (!yes) return;
+      adjustReputation(g, 1);
+      g.bonusOffer = true;
+      log(g, "Kunden var imponert. En god forespørsel kommer snart. Omdømme +1.", "good");
+      return;
+    case "nestenulykke":
+      if (yes) {
+        addCost(g, "annet", n("cost"));
+        log(g, "Nytt verneutstyr og sprutskjermer er på plass.", "good");
+      } else if (chance(g, 0.35) && g.workers.length) {
+        const hurt = pick(g, g.workers);
+        g.workers = g.workers.filter((w) => w !== hurt);
+        addCost(g, "bot", 50_000 * (1 + g.stage));
+        adjustReputation(g, -4);
+        log(g, `${hurt.name} ble skadet ved tappingen og er sykmeldt på ubestemt tid. Bot fra tilsynet og omdømme −4.`, "bad");
+      } else {
+        log(g, "Det gikk bra denne gangen.", "info");
       }
       return;
     case "tilsyn":

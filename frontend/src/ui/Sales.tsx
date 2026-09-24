@@ -24,15 +24,19 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
   const needDays = stats.dailyProductT > 0 ? (committed + c.tonnes) / stats.dailyProductT : Infinity;
   const days = daysLeft(g, c);
   const tight = needDays > days;
+  const answerHours = Math.max(0, (c.offerExpiresMin - g.minute) / 60);
   return (
     <div className="g-contract">
       <div className="g-contract-head">
         <strong>{c.customer}</strong>
         <span className="g-contract-value">{fmtKr(c.tonnes * c.pricePerT)}</span>
       </div>
+      <p className={`g-answer-by${answerHours <= 3 ? " is-urgent" : ""}`}>
+        Svar innen {answerHours < 1 ? "under en time" : `${Math.floor(answerHours)} timer`} – ellers går kunden videre
+      </p>
       <p>
         {fmtT(c.tonnes)} {PRODUCTS[c.product].name.toLowerCase()} i kvalitet <strong>{GRADES[c.grade].name}</strong> ·{" "}
-        {fmtKr(c.pricePerT)}/t · frist {days} {days === 1 ? "dag" : "dager"}
+        {fmtKr(c.pricePerT)}/t · leveres innen {days} døgn
       </p>
       <p>
         <GradeSpec id={c.grade} />
@@ -54,7 +58,7 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
         {canMake && (
           <li className={tight ? "bad" : "ok"}>
             {Number.isFinite(needDays)
-              ? `Ca. ${fmtNum(Math.max(0.1, needDays), 1)} dager produksjon med det du har fra før`
+              ? `Ca. ${fmtNum(Math.max(0.1, needDays), 1)} døgns produksjon med det du har fra før`
               : "Verket står – ingen produksjon nå"}
           </li>
         )}
@@ -86,7 +90,7 @@ export function Sales({ g, stats, act }: Props) {
     <div className="g-grid">
       <div className="g-col-wide">
         <Card title={`Forespørsler (${offers.length})`}>
-          {offers.length === 0 && <p className="g-muted">Ingen forespørsler akkurat nå. Nye kommer hver morgen.</p>}
+          {offers.length === 0 && <p className="g-muted">Ingen forespørsler akkurat nå. Nye kommer i løpet av døgnet.</p>}
           {offers.map((c) => (
             <OfferCard key={c.id} g={g} stats={stats} act={act} c={c} committed={committed} />
           ))}
@@ -101,7 +105,7 @@ export function Sales({ g, stats, act }: Props) {
                 <div className="g-contract-head">
                   <strong>{c.customer}</strong>
                   <span className={left <= 1 ? "g-badge-bad" : "g-muted"}>
-                    {left <= 0 ? "Frist i dag" : `${left} ${left === 1 ? "dag" : "dager"} igjen`}
+                    {left <= 0 ? "Frist i dag" : `${left} døgn igjen`}
                   </span>
                 </div>
                 <p>

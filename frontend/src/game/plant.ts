@@ -151,6 +151,8 @@ export function staffing(g: GameState): {
     else break;
   }
   const missing = shifts < 3 ? deficit(crew, counts, shifts + 1, wildcards) : {};
+  // Sykdom: ett skift mindre en periode
+  if (g.sickUntilMin > g.minute && shifts > 0) shifts -= 1;
   let hours = 0;
   if (shifts > 0) hours = Math.min(24, (ownerWorks ? OWNER_HOURS : 8) + 8 * (shifts - 1));
   return { shifts, hours, ownerWorks, missing, crew };

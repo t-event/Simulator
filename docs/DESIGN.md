@@ -95,13 +95,13 @@ Oppdater listen når noe blir gjort, så arbeidet kan fortsette i en ny samtale.
 
 **A. Småfeil og språk**
 - [ ] Velge selv hvilken kontrakt som leveres først (løses i B)
-- [ ] Færre forespørsler om gangen; forespørsler har synlig svarfrist og avslås automatisk
-- [ ] Hardere bot når en kontrakt ikke leveres
-- [ ] Mottilbud på lønnskrav
-- [ ] Flere hendelseskort, og ikke det samme om og om igjen
-- [ ] Bedre norsk: «I dag inn/ut», «I går resultat» osv.
-- [ ] Riktige navn: «Sandformer» → sandstøping; «Lekkasje i spolen» → vannlekkasje i induksjonsspolen
-- [ ] Se etter og rett konsollfeil
+- [x] Færre forespørsler om gangen; forespørsler har synlig svarfrist og avslås automatisk
+- [x] Hardere bot når en kontrakt ikke leveres
+- [x] Mottilbud på lønnskrav
+- [x] Flere hendelseskort, og ikke det samme om og om igjen
+- [x] Bedre norsk: «I dag inn/ut», «I går resultat» osv.
+- [x] Riktige navn: «Sandformer» → sandstøping; «Lekkasje i spolen» → vannlekkasje i induksjonsspolen
+- [x] Se etter og rett konsollfeil (ingen funnet i Chromium, verken utvikling, publisert bygg eller kontrollrom)
 
 **B. Planlegging** (brukerens valg: ordrekø + planlegger)
 - [ ] Ordrekø: spilleren sorterer aktive kontrakter; levering, kvalitet og resept følger køen
@@ -136,7 +136,7 @@ Oppdater listen når noe blir gjort, så arbeidet kan fortsette i en ny samtale.
 - [ ] Ansatte med mer å si (trivsel, kurs, spesialister)
 - [ ] Verkstedet: omdømme 18 og 1,8 mill. kr – kostnader og omdømme skjevt fordelt
 - [ ] Fagpoeng kommer fortsatt for fort
-- [ ] Ting bør ta mer tid
+- [x] Ting bør ta mer tid
 
 **Claudes egne forslag**
 - [ ] Sikkerhetskopi av lagret spill (Safari kan slette data for nettsider som ikke er brukt på 7 dager,

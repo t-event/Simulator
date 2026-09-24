@@ -163,6 +163,9 @@ export function newGame(seed = Date.now()): GameState {
     researchPoints: 0,
     researched: [],
     pendingDecision: null,
+    decisionSeen: {},
+    sickUntilMin: 0,
+    bonusOffer: false,
     celebrate: null,
     knowledge: [],
     unreadKnowledge: 0,
@@ -550,9 +553,13 @@ function heatEvents(g: GameState, index: number, stats: PlantStats): number {
   } else if (furnace.id !== "digel" && chance(g, 0.004 * m)) {
     const hours = 8 * stats.repairFactor;
     f.downUntilMin = Math.max(f.downUntilMin, g.minute + stats.cycleMin + hours * 60);
-    f.downReason = "Lekkasje i spolen";
+    f.downReason = "Vannlekkasje i induksjonsspolen";
     addCost(g, "vedlikehold", 8_000 * furnace.sizeT + 10_000);
-    log(g, `Vannlekkasje i spolen på ovn ${index + 1}. Ovnen tømmes og repareres (${hours.toFixed(0)} t).`, "bad");
+    log(
+      g,
+      `Vannlekkasje i induksjonsspolen på ovn ${index + 1}. Kobberspolen rundt digelen er vannkjølt; lekker den, må ovnen tømmes og spolen repareres (${hours.toFixed(0)} t).`,
+      "bad",
+    );
   }
   return extra;
 }
@@ -1004,19 +1011,51 @@ function makeOffer(g: GameState, stats: PlantStats): Contract | null {
     delivered: 0,
     pricePerT,
     deadlineDay: today + days,
-    offerExpiresDay: today + 1,
+    // Tilbudet står åpent 8–20 timer før kunden går videre
+    offerExpiresMin: g.minute + uniform(g, 8, 20) * 60,
     repGain,
-    repLoss: Math.round((repGain * 2 + 1) * 10) / 10,
-    penaltyPerT: Math.round(pricePerT * 0.25),
+    repLoss: Math.round((repGain * 3 + 2) * 10) / 10,
+    // Ulevert stål koster halve kontraktsprisen i bot (se B-020)
+    penaltyPerT: Math.round(pricePerT * 0.5),
     status: "tilbud",
     closedDay: null,
   };
 }
 
+/** Aldri flere åpne forespørsler enn dette samtidig */
+const MAX_OPEN_OFFERS = 3;
+
+/** Forespørsler kommer spredt gjennom døgnet i stedet for alle om morgenen. */
+function trickleOffers(g: GameState, stats: PlantStats): void {
+  if (g.bonusOffer) {
+    const offer = makeOffer(g, stats);
+    if (offer) {
+      offer.pricePerT = Math.round(offer.pricePerT * 1.15);
+      offer.repGain = Math.round(offer.repGain * 1.5 * 10) / 10;
+      offer.customer = `${offer.customer} (etter besøket)`;
+      g.contracts.push(offer);
+    }
+    g.bonusOffer = false;
+    return;
+  }
+  if (chance(g, (stats.offersPerDay * 0.6) / 24)) generateOffers(g, stats, 1);
+}
+
+function expireOffers(g: GameState): void {
+  for (const c of g.contracts) {
+    if (c.status === "tilbud" && c.offerExpiresMin <= g.minute) {
+      c.status = "misligholdt";
+      c.closedDay = -1;
+      log(g, `Forespørselen fra ${c.customer} gikk ut uten svar.`, "info");
+    }
+  }
+  g.contracts = g.contracts.filter((c) => c.closedDay !== -1);
+}
+
 function generateOffers(g: GameState, stats: PlantStats, count?: number): void {
   const n = count ?? Math.floor(stats.offersPerDay + rand(g));
   const open = g.contracts.filter((c) => c.status === "tilbud").length;
-  for (let i = 0; i < n && open + i < 8; i++) {
+  for (let i = 0; i < n && open + i < MAX_OPEN_OFFERS; i++) {
     const offer = makeOffer(g, stats);
     if (offer) g.contracts.push(offer);
   }
@@ -1086,6 +1125,8 @@ function refreshCandidates(g: GameState): void {
 // Døgn og time
 // ------------------------------------------------------------------ //
 function onHour(g: GameState, stats: PlantStats): void {
+  expireOffers(g);
+  trickleOffers(g, stats);
   deliverContracts(g);
   if (g.settings.autoSpot) {
     for (const lot of [...g.lots]) if (lot.second) sellLot(g, lot.id);
@@ -1202,9 +1243,8 @@ function onDay(g: GameState, stats: PlantStats): void {
   }
   // Tilbud som gikk ut fjernes; avsluttede kontrakter vises i fem dager
   g.contracts = g.contracts.filter((c) =>
-    c.status === "aktiv" ? true : c.status === "tilbud" ? c.offerExpiresDay >= today : (c.closedDay ?? 0) >= today - 5,
+    c.status === "aktiv" ? true : c.status === "tilbud" ? true : (c.closedDay ?? 0) >= today - 5,
   );
-  generateOffers(g, stats);
 
   // Folk blir flinkere av å jobbe
   if (stats.hours > 0) {
