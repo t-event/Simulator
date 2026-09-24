@@ -14,3 +14,12 @@ export function fmtPct(v: number, digits = 0): string {
 export function fmtNum(v: number, digits = 0): string {
   return v.toLocaleString("nb-NO", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 }
+
+/**
+ * Omdømme med én desimal, rundet ned. Kravene sjekker den eksakte verdien, så
+ * visningen må aldri runde opp til et tall spilleren ikke har nådd ennå.
+ */
+export function fmtRep(v: number): string {
+  const floored = Math.floor(v * 10 + 1e-9) / 10;
+  return Number.isInteger(floored) ? String(floored) : floored.toFixed(1).replace(".", ",");
+}

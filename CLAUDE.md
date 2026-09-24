@@ -100,4 +100,6 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - Se over `git status` og `git diff --stat` før commit. `git add -A` tok en gang med en hel
   `node_modules`-mappe fordi en ignore-regel var fjernet. `.gitignore` har nå en generell
   `node_modules/`-regel – ikke fjern den.
+- Tall som sammenlignes med et krav (omdømme, penger, fagpoeng) skal vises rundet **ned**
+  (`fmtRep`, `Math.floor`), ellers ser et krav oppfylt ut når det ikke er det.
 - CI (`pages.yml`) kjører bare ved push til `main`, ikke på PR-er. Kjør sjekkene lokalt før PR.

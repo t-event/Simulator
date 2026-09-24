@@ -7,7 +7,7 @@ import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Card } from "./common";
 import { Research } from "./Research";
-import { fmtKr, fmtPct } from "./format";
+import { fmtKr, fmtPct, fmtRep } from "./format";
 
 interface Props {
   g: GameState;
@@ -63,10 +63,13 @@ export function Build({ g, stats, act, onQuit }: Props) {
             <p>{next.description}</p>
             <ul className="g-checks">
               <li className={g.reputation >= next.reputation ? "ok" : "bad"}>
-                Omdømme {g.reputation.toFixed(0)} av {next.reputation}
+                Omdømme {fmtRep(g.reputation)} av {next.reputation}
+                {g.reputation < next.reputation && (
+                  <span className="g-muted"> – lever flere kontrakter i tide for å komme dit</span>
+                )}
               </li>
               <li className={g.cash >= next.price ? "ok" : "bad"}>
-                {fmtKr(next.price)} (du har {fmtKr(g.cash)})
+                {fmtKr(next.price)} (du har {fmtKr(Math.floor(g.cash))})
               </li>
               <li className="g-muted">
                 Plass til {next.staffCap} ansatte, {Math.round(next.yardT)} t skrap og {Math.round(next.storeT)} t

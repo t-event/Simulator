@@ -5,6 +5,25 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 5 – 2026-09-24: omdømmet ble vist avrundet opp
+
+**Brukeren meldte (skjermbilde fra mobil):** «Omdømme 5 av 5» med rødt kryss, og knappen
+«Flytt inn i verksted» var grå selv om pengene holdt.
+
+**Årsak:** Omdømmet ble vist med `toFixed(0)`, så 4,6 så ut som 5, mens kravet sjekker den
+eksakte verdien.
+
+**Gjort:** Ny `fmtRep()` i `ui/format.ts` viser én desimal og runder alltid ned. Brukt i toppfeltet,
+i «Neste nivå»-kortet og i målkortet på Verket. Kravlinja forklarer nå hva som mangler («lever
+flere kontrakter i tide»). Kassa vises også rundet ned der den sammenlignes med en pris.
+
+**Testet:** Playwright på iPhone 13 med omdømme 4,6: viser «4,6 av 5», knappen er grå, som den skal.
+Typesjekk og lint rene.
+
+**Lærdom:** Tall som sjekkes mot et krav må aldri vises avrundet opp.
+
+---
+
 ## Økt 4 – 2026-09-24: Game Dev Tycoon-inspirasjon, mobilspill, minne, enkel styring
 
 **Brukeren ba om:** Studere Game Dev Tycoon og hente inspirasjon. Det skal være
