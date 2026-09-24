@@ -3,7 +3,7 @@ import { requestManual, requestReline, setFurnaceGrade, setTargetGrade, upgradeO
 import { Maintenance } from "./Maintenance";
 import { researchOptions } from "../game/research";
 import { GRADE_IDS, GRADES, PRODUCTS, ROLES, STAGES } from "../game/data";
-import { currentOrder, furnaceOrder, recipeEstimate } from "../game/engine";
+import { currentOrder, furnaceOrder, recipeEstimate, SEQUENCE_WAIT_MIN } from "../game/engine";
 import {
   castingType,
   furnaceGrade,
@@ -128,6 +128,7 @@ function Quality({
   const on = days.reduce((a, d) => a + (d.onGradeT ?? 0), 0);
   const off = days.reduce((a, d) => a + (d.offGradeT ?? 0), 0);
   const second = days.reduce((a, d) => a + (d.secondT ?? 0), 0);
+  const transition = days.reduce((a, d) => a + (d.transitionT ?? 0), 0);
   const total = on + off + second;
   const lab = [
     "Ingen måling – du vet ikke sikkert hva som er i stålet",
@@ -160,6 +161,12 @@ function Quality({
           )}
           {second / total > 0.08 && (
             <p className="g-muted">Støpefeil kommer oftest av feil temperatur. Erfarne folk gir færre feil.</p>
+          )}
+          {transition > 0 && (
+            <p className="g-muted">
+              {fmtT(transition)} overgangsemner ble skrapet ved kvalitetsbytte i strengstøpingen. Færre bytter gir
+              mindre tap.
+            </p>
           )}
         </>
       )}
@@ -440,6 +447,8 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
               {split && (
                 <p className="g-muted">
                   Hver ovn bruker resepten for sin kvalitet. Stålet går til samme støpemaskin, én øse av gangen.
+                  {casting.continuous &&
+                    ` Strengstøpingen støper én kvalitet om gangen. Øsa med den andre kvaliteten venter til støpingen har stått en halvtime (sekvensen er slutt), men høyst ${fmtNum(SEQUENCE_WAIT_MIN / 60, 1)} timer. Byttes kvaliteten midt i en sekvens, blir overgangsemnene skrap (ca. ${fmtT(casting.tph * 0.05)}).`}
                 </p>
               )}
               <p className="g-muted">{GRADES[g.targetGrade].description}</p>

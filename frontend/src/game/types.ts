@@ -62,6 +62,10 @@ export interface Heat {
 export interface LiquidBatch {
   t: number;
   grade: GradeId;
+  /** Spillminuttet øsa kom i køen til støpemaskinen (B-046) */
+  queuedMin?: number;
+  /** Øsa startet en ny kvalitet midt i en sekvens, så overgangsemnene må skrapes (B-046) */
+  transition?: boolean;
   analysis: Analysis;
   expected: Analysis;
   tempOff: boolean;
@@ -221,6 +225,8 @@ export interface DayFinance {
   offGradeT?: number;
   /** Tonn med støpefeil (sekunda) */
   secondT?: number;
+  /** Overgangsemner skrapet ved kvalitetsbytte i strengstøpingen (B-046) */
+  transitionT?: number;
   /** Kroner planleggeren har kjøpt skrap for i døgnet */
   autoBuyKr?: number;
   /** Strøm brukt i døgnet (kWh), for snittprisen */
@@ -335,6 +341,8 @@ export interface GameState {
   castingType: string;
   furnaces: FurnaceUnit[];
   castQueue: LiquidBatch[];
+  /** Kvaliteten strengstøpemaskinen sist støpte, og når den ble ferdig (B-046) */
+  lastCast: { grade: GradeId; min: number } | null;
   castProgressT: number;
   castDownUntilMin: number;
   castWait: string | null;
