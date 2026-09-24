@@ -459,3 +459,27 @@ Beslutning:
   1 % per innkjøp og høyst én gang per 30 døgn; meldingen sier at det koster omdømme −12.
 - Støperiet koster 750 000 kr (var 550 000), fordi pengene kom raskere med færre bøter og tilbakebetalinger.
 - Balanse: 10 / 24 / 68 / 141.
+
+## B-035 Verket i underfaner, ny resept-editor, lagerliste og støpefeil (2026-09-24)
+Status: gjelder (erstatter reseptslideren og «Resepten gir»-kortet fra B-023)
+Brukeren: produksjonskortet tar for stor plass og Verket er for lang; slideren for skraptyper gir ikke
+mening; «Foreslå billigste resept» er for langt ned og det bør finnes en dyrere «beste» resept; pris ved
+kjøpsknappene; gjør skrapklasseren resepten riktig?; lista på ferdigvarelageret blir svært lang; hva med
+støpefeil?
+Beslutning:
+- **Verket har tre underfaner:** *Oversikt* (anleggsbilde, tips, kompakt produksjonslinje på én rad,
+  produksjon nå, mål, fagboka), *Anlegg* (hele kjeden med utstyrsknapper, vedlikehold, kvalitet) og
+  *Økonomi* (økonomi og logg). Den kompakte linja viser skrap, ovn(er), støping og lager, og en knapp
+  «Bytt foring» når foringen er over 60 % slitt.
+- **Resepten** står øverst på Marked: hver skraptype har − og + (10 prosentpoeng); de andre typene i
+  resepten justeres i samme forhold, så summen alltid er 100 % (`nudgeRecipe`). To forslag med pris per
+  tonn: *Billigst* (holder kravet med margin) og *Sikrest* (lengst unna grensene, dyrere). Kravsjekken og
+  kostnadene står i samme kort.
+- **Skrapklasser i resepten:** med skrapklasser står det at blandingen blir nøyaktig, med valget «Vent
+  heller enn å fylle med skrap som ikke står i resepten» (`graderStrict`). Uten skrapklasser viser kortet
+  hva en dårlig charge kan gi (±25 % per skraptype) og om det fortsatt holder.
+- **Kjøpsknappene** viser hva kjøpet koster.
+- **Ferdigvarelageret** viser de seks største partiene, med «Vis alle».
+- **Støpefeil** håndteres automatisk: selg på spot (standard), smelt om som returskrap (kjent analyse,
+  gratis skrap) eller behold (`secondsAction`). Det er ikke laget noen egen «spare til senere»-plan, fordi
+  omsmelting til returskrap gir den muligheten på en enkel måte.

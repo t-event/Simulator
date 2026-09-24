@@ -298,6 +298,38 @@ export function setRecipe(g: GameState, id: ScrapId, weight: number): void {
   g.gradeRecipes[g.targetGrade] = { ...g.recipe };
 }
 
+/**
+ * Endrer andelen til én skraptype med ±10 prosentpoeng. De andre typene i resepten krymper eller vokser
+ * i samme forhold, så summen alltid er 100 % (B-035).
+ */
+export function nudgeRecipe(g: GameState, id: ScrapId, delta: number): void {
+  if (delta > 0 && !scrapUnlocked(g, id)) return;
+  const total = SCRAP_IDS.reduce((a, x) => a + g.recipe[x], 0) || 1;
+  const shares = Object.fromEntries(SCRAP_IDS.map((x) => [x, (g.recipe[x] / total) * 100])) as Record<ScrapId, number>;
+  const others = SCRAP_IDS.filter((x) => x !== id && shares[x] > 0);
+  const othersTotal = others.reduce((a, x) => a + shares[x], 0);
+  const target = Math.max(0, Math.min(100, Math.round((shares[id] + delta) / 10) * 10));
+  // Kan ikke gi bort andel hvis ingen andre er med; da får returskrapet (eller første åpne type) resten
+  if (othersTotal <= 0 && target < 100) {
+    const fallback = SCRAP_IDS.find((x) => x !== id && scrapUnlocked(g, x));
+    if (!fallback) return;
+    others.push(fallback);
+    shares[fallback] = 1;
+  }
+  const rest = 100 - target;
+  const base = others.reduce((a, x) => a + shares[x], 0) || 1;
+  const next = Object.fromEntries(SCRAP_IDS.map((x) => [x, 0])) as Record<ScrapId, number>;
+  next[id] = target;
+  for (const x of others) next[x] = Math.round((shares[x] / base) * rest);
+  // Rett opp avrunding så summen blir nøyaktig 100
+  const sum = SCRAP_IDS.reduce((a, x) => a + next[x], 0);
+  if (sum !== 100) {
+    const biggest = [...others].sort((a, b) => next[b] - next[a])[0] ?? id;
+    next[biggest] += 100 - sum;
+  }
+  applyRecipe(g, next);
+}
+
 /** Setter hele resepten på én gang (f.eks. et forslag) */
 export function applyRecipe(g: GameState, recipe: Record<ScrapId, number>): void {
   for (const id of SCRAP_IDS) setRecipe(g, id, recipe[id] ?? 0);

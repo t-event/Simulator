@@ -13,6 +13,10 @@ Verket for lang, Marked uintuitiv, støpefeil, fagbok-kapitler, potte/porten, na
 nestenulykke, søkere ved flytting, bryter for forespørsler, lang lagerliste, øseovnsoperatør, digel.
 Delt i fem pakker.
 
+**Pakke 3 (B-035):** Verket i underfaner med kompakt produksjonslinje (siden er ca. 20 % kortere, og alt
+viktig står øverst), resept-editor med −/+ og forslagene Billigst og Sikrest, skrapklasser-info, pris på
+kjøpsknapper, kortere lagerliste, automatisk håndtering av støpefeil. Testet i Playwright på iPhone 13.
+
 **Pakke 2 (B-034):** Én reklamasjon per kontrakt, tålmodige små kunder, mer omdømme i garasjen,
 kvalitetsingeniør måler lageret, realistiske frister og «blir ferdig ca. dag X», bryter for forespørsler,
 søkere ved flytting, sjeldnere radioaktive kilder, støperiet 750 000 kr. Balanse 10 / 24 / 68 / 141.

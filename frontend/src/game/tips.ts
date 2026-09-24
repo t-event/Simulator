@@ -25,7 +25,7 @@ const TIPS: Tip[] = [
   {
     id: "tips-foring",
     title: "Foringen slites",
-    text: "Ovnen er foret med ildfast stein som slites for hver charge. Den byttes ikke av seg selv: trykk «Bytt foring» i Vedlikehold-kortet på Verket før den er 85 % slitt. Brenner den gjennom, blir det havari – dyrt, lang stans og tapt omdømme.",
+    text: "Ovnen er foret med ildfast stein som slites for hver charge. Den byttes ikke av seg selv: trykk «Bytt foring» på Verket (knappen dukker opp når foringen er slitt) før den er 85 % slitt. Brenner den gjennom, blir det havari – dyrt, lang stans og tapt omdømme.",
     when: (g) => g.furnaces.some((f) => f.wear >= 0.55),
   },
   {

@@ -83,8 +83,10 @@ frontend/src/
     quiz.ts      Quiz per kapittel         missions.ts  Oppdrag fra fagboka
     decisions.ts Hendelseskort med valg     knowledge.ts Fagboka
     save.ts      Lagring + migrering        useGame.ts   Spilløkka for React
-    tutorial.ts  Veiledet start          balance.ts   Automatisk testspiller
+    tutorial.ts  Veiledet start          tips.ts      Engangstips
+    balance.ts   Automatisk testspiller
   ui/          Spillets skjermer (mobil først) og kontrollrommet
+    Overview.tsx Verket med underfanene Oversikt, Anlegg og Økonomi   Recipe.tsx  Resepten på Marked
     views.ts     Fanene og når de låses opp   Upgrades.tsx, stations.ts  Utstyr per sted i anlegget
     ResearchPage.tsx  Forskning-fanen (forskning, bank, nytt spill)   Power.tsx  Strøm og skiftplan
     Handbook.tsx Fagboka med quiz og oppdrag

@@ -97,12 +97,28 @@ export interface Suggestion {
  * Billigste resept (i steg på 10 %) som holder kvaliteten med litt margin,
  * med skraptypene som er låst opp. Null hvis ingen blanding holder.
  */
-export function suggestRecipe(g: GameState, grade: GradeId, stats: PlantStats): Suggestion | null {
+/** Hvor nær grensene en analyse ligger: 1 = akkurat på grensen for fosfor eller kobber/tinn */
+function closeness(a: Analysis, grade: GradeId): number {
+  const spec = GRADES[grade];
+  return Math.max(a.p / spec.pMax, a.tramp / spec.trampMax);
+}
+
+/**
+ * Forslag til resept i steg på 10 % med skraptypene som er låst opp (B-035):
+ * «billig» er den billigste som holder kravet med margin; «sikker» er den som ligger lengst unna
+ * grensene – den koster mer, men tåler dårlige partier og en omtrentlig blanding.
+ */
+export function suggestRecipe(
+  g: GameState,
+  grade: GradeId,
+  stats: PlantStats,
+  mode: "billig" | "sikker" = "billig",
+): Suggestion | null {
   const ids = SCRAP_IDS.filter((id) => id !== "retur" && scrapUnlocked(g, id) && SCRAP_TYPES[id].buyable);
   // Uten full analyse holder en forsiktig spiller litt avstand til grensene
   const margin = stats.lab === 2 ? 0.95 : 0.85;
   const kwh = stats.furnace.kwhPerT * energyPrice(g);
-  let best: Suggestion | null = null;
+  let best: (Suggestion & { score: number }) | null = null;
   const weights = Object.fromEntries(SCRAP_IDS.map((id) => [id, 0])) as Record<ScrapId, number>;
 
   const test = () => {
@@ -110,7 +126,9 @@ export function suggestRecipe(g: GameState, grade: GradeId, stats: PlantStats): 
     const a = est.analysis;
     if (!satisfies({ c: a.c, p: a.p / margin, tramp: a.tramp / margin }, grade)) return;
     const cost = est.scrapCostPerT / est.metallicYield + est.energyFactor * kwh;
-    if (!best || cost < best.costPerT - 1e-6) best = { recipe: { ...weights }, costPerT: cost };
+    // Sikker: lavest nærhet til grensene; ved likt, billigst
+    const score = mode === "billig" ? cost : closeness(a, grade) * 1e6 + cost;
+    if (!best || score < best.score - 1e-6) best = { recipe: { ...weights }, costPerT: cost, score };
   };
   const fill = (i: number, left: number) => {
     if (i === ids.length - 1) {
@@ -130,5 +148,24 @@ export function suggestRecipe(g: GameState, grade: GradeId, stats: PlantStats): 
     weights.retur = retur;
     if (ids.length) fill(0, 100 - retur);
   }
-  return best;
+  if (!best) return null;
+  const found: Suggestion & { score: number } = best;
+  return { recipe: found.recipe, costPerT: found.costPerT };
+}
+
+/**
+ * Den verste chargen resepten kan gi når blandingen er omtrentlig (±25 % per skraptype, uten skrapklasser):
+ * mer av typene med mest fosfor og kobber/tinn, mindre av de reneste (B-035).
+ */
+export function worstCase(g: GameState, grade: GradeId, stats: PlantStats): Analysis {
+  const base = recipeEstimate(g, grade, stats).analysis;
+  const worst = { ...base };
+  for (const key of ["p", "tramp"] as const) {
+    const avg = base[key] / (key === "p" ? 1 - stats.dephos || 1 : 1);
+    const skewed = Object.fromEntries(
+      SCRAP_IDS.map((id) => [id, g.recipe[id] * (SCRAP_TYPES[id][key] > avg ? 1.25 : 0.75)]),
+    ) as Record<ScrapId, number>;
+    worst[key] = recipeEstimate(g, grade, stats, skewed).analysis[key];
+  }
+  return worst;
 }
