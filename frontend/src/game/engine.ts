@@ -507,6 +507,9 @@ export function recipeEstimate(
   };
 }
 
+/** Med vedlikeholdsplan byttes foringen også hvis den blir så slitt før planlagt dag (B-028) */
+export const PLAN_SAFETY_WEAR = 0.88;
+
 function wearFactor(g: GameState): number {
   return hasResearch(g, "ildfast") ? 0.85 : 1;
 }
@@ -752,8 +755,7 @@ function updateFurnaces(g: GameState, stats: PlantStats): void {
     const planDue =
       g.settings.relinePlanDays !== null &&
       hasResearch(g, "vedlikeholdsplan") &&
-      day(g) - f.lastRelineDay >= g.settings.relinePlanDays &&
-      f.wear > 0.15;
+      ((day(g) - f.lastRelineDay >= g.settings.relinePlanDays && f.wear > 0.15) || f.wear >= PLAN_SAFETY_WEAR);
     const repairerDue =
       (g.settings.autoReline && g.workers.some((w) => w.role === "vedlikehold") && f.wear >= g.settings.relineAt) ||
       ((g.specialists.havari ?? 0) > g.minute && f.wear >= 0.8);

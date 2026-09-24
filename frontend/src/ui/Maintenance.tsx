@@ -1,13 +1,19 @@
 import type { ReactNode } from "react";
 import { requestReline } from "../game/actions";
-import { day, type PlantStats } from "../game/plant";
+import { PLAN_SAFETY_WEAR } from "../game/engine";
+import { day, liningDays, type PlantStats } from "../game/plant";
 import { hasResearch } from "../game/research";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Bar, Card } from "./common";
-import { fmtKr, fmtPct } from "./format";
+import { fmtKr, fmtNum, fmtPct } from "./format";
 
-const PLAN_OPTIONS = [4, 6, 8, 10, 14];
+/** Valg for planlagt omforing: fra halvveis til nesten slitt, ut fra hvor lenge foringen holder nå (B-028) */
+function planOptions(life: number, current: number | null): number[] {
+  const days = [0.5, 0.65, 0.8, 0.9].map((f) => Math.max(1, Math.round(life * f)));
+  if (current !== null) days.push(current);
+  return [...new Set(days)].sort((a, b) => a - b);
+}
 
 /** Vedlikehold av foringen: manuelt, etter plan eller av en reparatør. Planlagt stans er billigere enn havari. */
 export function Maintenance({
@@ -24,6 +30,10 @@ export function Maintenance({
   const f0 = stats.furnace;
   const hasRepairer = g.workers.some((w) => w.role === "vedlikehold");
   const canPlan = hasResearch(g, "vedlikeholdsplan");
+  const life = liningDays(g, stats);
+  const plan = g.settings.relinePlanDays;
+  // Slitasjen etter et gitt antall døgn, med dagens drift
+  const wearAfter = (d: number) => Math.min(1, (d / life) * 0.85);
   return (
     <Card title="Vedlikehold" right={right}>
       <p className="g-muted">
@@ -57,9 +67,9 @@ export function Maintenance({
                 ? "Byttes når chargen er ferdig ✓"
                 : f.wear < 0.1
                   ? "Foringen er ny"
-                : busy
-                  ? "Bytt foring etter denne chargen"
-                  : `Bytt foring nå (${fmtKr(f0.relineCost)})`}
+                  : busy
+                    ? "Bytt foring etter denne chargen"
+                    : `Bytt foring nå (${fmtKr(f0.relineCost)})`}
             </button>
           </div>
         );
@@ -77,13 +87,19 @@ export function Maintenance({
               }
             >
               <option value="">Av – jeg bytter selv</option>
-              {PLAN_OPTIONS.map((d) => (
+              {planOptions(life, plan).map((d) => (
                 <option key={d} value={d}>
-                  Hvert {d}. døgn
+                  {d === 1 ? "Hvert døgn" : `Hvert ${d}. døgn`} (ca. {fmtPct(wearAfter(d))} slitt)
                 </option>
               ))}
             </select>
           </label>
+          <p className="g-muted">
+            Med dagens drift ({stats.hours > 0 && stats.hours < 24 ? `${stats.hours} timer i døgnet` : "døgnet rundt"}) er foringen 85 %
+            slitt etter ca. {fmtNum(life, 0)} døgn.
+            {plan !== null && wearAfter(plan) > 0.85 && " Planen er lengre enn foringen holder – velg færre døgn."}
+            {canPlan && ` Planen bytter uansett hvis foringen blir ${fmtPct(PLAN_SAFETY_WEAR)} slitt før dagen.`}
+          </p>
           {!canPlan && <p className="g-muted">Forsk fram «Vedlikeholdsplan» for å planlegge omforingen.</p>}
 
           <label className="g-toggle">

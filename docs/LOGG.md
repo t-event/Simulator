@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 10 – 2026-09-24: foringen varer for kort
+
+**Brukeren meldte:** Foringen slites på ett døgn; ovnen bør holde minst sju døgn når alt går etter
+planen. Valgene i menyen for planlagt omforing må fikses.
+
+**Gjort (B-028):** Slitasjen per charge er satt ned så foringen holder ca. ni døgn døgnet rundt.
+Omforing koster og tar mer til gjengjeld. Menyvalgene lages ut fra levetiden og viser hvor slitt
+foringen er på den dagen. Planen bytter også ved 88 % slitasje.
+
+**Testet:** Balanse 10 / 32 / 74 / 154, ingen konkurs. Playwright på iPhone 13: menyen viser «Hvert
+5.–8. døgn» med slitasje, og teksten om levetid. Ingen konsollfeil.
+
+**Gjenstår:** Følg med på lønnsomheten i storverket mot vinnergrensen.
+
+---
+
 ## Økt 9 – 2026-09-24: vinnergrense, planleggerens grense og veiledet start
 
 **Brukeren ba om:** Høyere vinnergrense. En grense for planleggeren, og et valg om den får handle på

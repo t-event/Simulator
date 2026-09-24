@@ -415,6 +415,18 @@ export function moraleFactor(g: GameState): number {
   return 0.85 + 0.3 * ((g.morale ?? 60) / 100);
 }
 
+/** Slitasjen per charge med forskning tatt med */
+export function liningWearPerHeat(g: GameState): number {
+  return furnaceType(g).wearPerHeat * (hasResearch(g, "ildfast") ? 0.85 : 1);
+}
+
+/** Omtrent hvor mange døgn til foringen er 85 % slitt, med dagens drift (døgnet rundt hvis verket står) */
+export function liningDays(g: GameState, stats: PlantStats): number {
+  const hours = stats.hours > 0 ? stats.hours : 24;
+  const heatsPerDay = (hours * 60) / stats.cycleMin;
+  return 0.85 / (liningWearPerHeat(g) * heatsPerDay);
+}
+
 export function hasPlanner(g: GameState): boolean {
   return g.workers.some((w) => w.role === "planlegger") || (g.specialists?.sen ?? 0) > g.minute;
 }
