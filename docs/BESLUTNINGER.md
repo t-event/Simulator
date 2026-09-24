@@ -670,3 +670,16 @@ Beslutning:
   skiftene, eller flytte.
 - Bemanningstabellen viser «+ N innleid», og under tabellen står andre jobber (ikke på skift) og ansatte i
   roller verket ikke bruker nå (f.eks. øseovnsoperatører uten øseovn) som tar plass blant de ansatte.
+
+## B-051 Marked og Forskning med underfaner (2026-09-24)
+Status: gjelder
+Brukeren syntes Marked- og Forskning-sidene var for lange.
+Beslutning:
+- Marked har underfanene Skrap, Resept, Strøm/Energi og Priser. Skrap er standard. Fanen blir oransje når
+  ovnen mangler skrap (Skrap) eller resepten ikke holder kravet (Resept). Tips og knapper på Verket åpner riktig
+  fane. Beskrivelsen av hver skraptype vises når man trykker på navnet (ⓘ), og planleggerens innstillinger er
+  foldet sammen (åpne når planleggeren ikke får kjøpt).
+- Forskning har underfanene Forskning, Bank og Innstillinger (nytt spill, sikkerhetskopi, spoling, valsing).
+  Forskningslista er delt i «Klar til å forske» (kort med knapp), «Trenger mer fagpoeng eller lesing» (kompakt
+  liste med leseknapp) og neste nivå / forsket fram (sammenfoldet).
+- Felles `SubTabs`-komponent i `ui/common.tsx`.

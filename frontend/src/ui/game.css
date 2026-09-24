@@ -1919,3 +1919,32 @@ button {
 .g-scrap.is-short {
   border-color: var(--warning);
 }
+
+/* Forskning som trenger mer fagpoeng: kompakt liste (B-051) */
+.g-research-later {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.g-research-later li {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.g-research-later li:last-child {
+  border-bottom: 0;
+}
+
+.g-scrap-about summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.g-scrap-about summary::-webkit-details-marker {
+  display: none;
+}
+
+.g-scrap-about strong {
+  color: var(--text, inherit);
+}
