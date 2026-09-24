@@ -38,11 +38,20 @@ export function PowerCard({ g, stats, act }: { g: GameState; stats: PlantStats; 
   const nowHour = Math.floor((g.minute % 1440) / 60);
   const s = g.settings;
   const bound = s.powerDeal !== "spot" && day(g) < s.powerDealUntilDay;
+  const daysLeft = s.powerDealUntilDay - day(g);
   const peak = g.today.peakMW ?? 0;
   const yesterdayPeak = g.history[g.history.length - 1]?.peakMW ?? 0;
 
   return (
-    <Card title="Strøm" right={<span className="g-muted">{POWER_DEAL_NAMES[s.powerDeal]}</span>}>
+    <Card
+      title="Strøm"
+      right={
+        <span className={bound && daysLeft <= 3 ? "g-badge-bad" : "g-muted"}>
+          {POWER_DEAL_NAMES[s.powerDeal]}
+          {bound ? ` · ${daysLeft} døgn igjen` : ""}
+        </span>
+      }
+    >
       <p>
         Nå: <strong>{kr(powerPrice(g))}</strong>
         {g.market.powerSpikeDays > 0 && <span className="g-badge-bad"> Pristopp</span>}
@@ -79,7 +88,27 @@ export function PowerCard({ g, stats, act }: { g: GameState; stats: PlantStats; 
           </button>
         ))}
       </div>
-      {bound && <p className="g-muted">Bundet til dag {s.powerDealUntilDay}. Da kan du bytte avtale.</p>}
+      {bound ? (
+        <p className={daysLeft <= 3 ? "g-note g-warn" : "g-note"}>
+          {POWER_DEAL_NAMES[s.powerDeal]} gjelder til dag {s.powerDealUntilDay} – {daysLeft} døgn igjen. Du kan ikke
+          bytte før da.{" "}
+          {s.powerAutoRenew
+            ? "Så fornyes avtalen av seg selv."
+            : "Så går du tilbake til spotpris, hvis du ikke velger en ny avtale."}
+        </p>
+      ) : (
+        <p className="g-muted">
+          Spotpris er standard: den gjelder når du ikke har valgt noe annet, og når en avtale går ut uten å fornyes.
+        </p>
+      )}
+      <label className="g-toggle">
+        <input
+          type="checkbox"
+          checked={s.powerAutoRenew}
+          onChange={(e) => act((gg) => void (gg.settings.powerAutoRenew = e.target.checked))}
+        />
+        <span>Forny fastpris og nattariff av seg selv når bindingstida er ute</span>
+      </label>
       <p className="g-muted">«Snitt» er prisen i timene verket går i dag.</p>
 
       <h3 className="g-subhead">Effekttariff</h3>

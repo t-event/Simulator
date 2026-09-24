@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { GRADES, PRODUCTS } from "../game/data";
+import { GRADE_IDS, GRADES, PRODUCTS } from "../game/data";
 import {
   acceptContract,
   furnaceOrder,
@@ -10,9 +10,17 @@ import {
   sellLot,
   spotPrice,
 } from "../game/engine";
-import { moveInQueue } from "../game/actions";
-import { day, gradeFailures, gradeRecipe, hasPlanner, nearLimit, satisfiedGrades, type PlantStats } from "../game/plant";
-import type { Contract, GameState } from "../game/types";
+import { moveInQueue, toggleOfferGrade } from "../game/actions";
+import {
+  day,
+  gradeFailures,
+  gradeRecipe,
+  hasPlanner,
+  nearLimit,
+  satisfiedGrades,
+  type PlantStats,
+} from "../game/plant";
+import type { Contract, GameState, Settings } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Agreements } from "./Agreements";
 import { AnalysisLine, Bar, Card, GradeChips, GradeSpec } from "./common";
@@ -99,7 +107,21 @@ const LOTS_SHOWN = 6;
 
 export function Sales({ g, stats, act }: Props) {
   const [showAll, setShowAll] = useState(false);
-  const offers = g.contracts.filter((c) => c.status === "tilbud");
+  const sort = g.settings.offerSort;
+  const offers = g.contracts
+    .filter((c) => c.status === "tilbud")
+    .sort((a, b) =>
+      sort === "verdi"
+        ? b.tonnes * b.pricePerT - a.tonnes * a.pricePerT
+        : sort === "pris"
+          ? b.pricePerT - a.pricePerT
+          : sort === "kvalitet"
+            ? GRADE_IDS.indexOf(a.grade) - GRADE_IDS.indexOf(b.grade) || a.offerExpiresMin - b.offerExpiresMin
+            : a.offerExpiresMin - b.offerExpiresMin,
+    );
+  // Kvalitetene som finnes på dette nivået; bare disse kan velges (B-042)
+  const openGrades = GRADE_IDS.filter((id) => GRADES[id].minStage <= g.stage);
+  const wanted = g.settings.offerGrades;
   const active = orderQueue(g);
   // Hvilken ovn som lager hvilken kontrakt; med to kvaliteter kan to kontrakter produseres samtidig (B-039)
   const producing = new Map<number, number[]>();
@@ -125,6 +147,41 @@ export function Sales({ g, stats, act }: Props) {
             />
             <span>Ta imot nye forespørsler</span>
           </label>
+          {openGrades.length > 1 && !g.settings.pauseOffers && (
+            <div className="g-offer-filter">
+              <span className="g-muted">Kvaliteter du vil ha forespørsler på:</span>
+              <div className="g-chip-row">
+                {openGrades.map((id) => {
+                  const on = !wanted.length || wanted.includes(id);
+                  return (
+                    <button
+                      key={id}
+                      className={`g-chip-btn${on ? " is-on" : ""}`}
+                      aria-pressed={on}
+                      onClick={() => act((gg) => toggleOfferGrade(gg, id, openGrades))}
+                    >
+                      {on ? "✓ " : ""}
+                      {GRADES[id].name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          {offers.length > 1 && (
+            <label className="g-field">
+              <span>Sorter forespørslene</span>
+              <select
+                value={sort}
+                onChange={(e) => act((gg) => void (gg.settings.offerSort = e.target.value as Settings["offerSort"]))}
+              >
+                <option value="frist">Kortest svarfrist først</option>
+                <option value="verdi">Mest verdt først</option>
+                <option value="pris">Best pris per tonn først</option>
+                <option value="kvalitet">Etter kvalitet</option>
+              </select>
+            </label>
+          )}
           {offers.length === 0 && (
             <p className="g-muted">
               {g.settings.pauseOffers

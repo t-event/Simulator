@@ -350,6 +350,19 @@ export function setFurnaceGrade(g: GameState, index: number, grade: GradeId | nu
   f.grade = grade === g.targetGrade ? null : grade;
 }
 
+/**
+ * Slår en kvalitet av eller på blant dem spilleren vil ha forespørsler på. Tom liste = alle.
+ * Åpne forespørsler i kvaliteter som er valgt bort, avslås (B-042).
+ */
+export function toggleOfferGrade(g: GameState, grade: GradeId, open: GradeId[]): void {
+  const current = g.settings.offerGrades.length ? g.settings.offerGrades : open;
+  const next = current.includes(grade) ? current.filter((id) => id !== grade) : [...current, grade];
+  // Alle eller ingen valgt betyr alle
+  g.settings.offerGrades = next.length === 0 || open.every((id) => next.includes(id)) ? [] : next;
+  const wanted = g.settings.offerGrades;
+  if (wanted.length) g.contracts = g.contracts.filter((c) => c.status !== "tilbud" || wanted.includes(c.grade));
+}
+
 export function setTargetGrade(g: GameState, grade: GradeId): void {
   if (!GRADES[grade]) return;
   g.targetGrade = grade;

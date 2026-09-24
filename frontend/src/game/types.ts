@@ -244,6 +244,8 @@ export interface Settings {
   powerDealUntilDay: number;
   /** Prisen i fastprisavtalen, kr/kWh */
   powerFixedPrice: number;
+  /** Forny strømavtalen når bindingstida er ute; ellers tilbake til spotpris (B-042) */
+  powerAutoRenew: boolean;
   /** Bare én ovn smelter om gangen, for å holde effekttoppen nede */
   onePeak: boolean;
   /** Spol fram når verket står utenfor arbeidstida og ingenting skjer (B-033) */
@@ -254,6 +256,10 @@ export interface Settings {
   graderStrict: boolean;
   /** Ikke ta imot nye forespørsler (B-034) */
   pauseOffers: boolean;
+  /** Kvalitetene spilleren vil ha forespørsler på; tom = alle (B-042) */
+  offerGrades: GradeId[];
+  /** Rekkefølgen forespørslene vises i (B-042) */
+  offerSort: "frist" | "verdi" | "pris" | "kvalitet";
   /** Lei inn vikarer av seg selv når fravær ellers ville kostet skift (B-039) */
   autoTemps: boolean;
   /** Klokketimen skiftene starter (6, 14 eller 22) */

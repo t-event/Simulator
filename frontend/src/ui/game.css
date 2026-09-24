@@ -1861,3 +1861,28 @@ button {
   margin: 0 0 8px;
   padding-left: 18px;
 }
+
+/* Hvilke kvaliteter spilleren vil ha forespørsler på (B-042) */
+.g-offer-filter {
+  margin: 8px 0;
+}
+
+.g-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.g-chip-btn {
+  min-height: 40px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: #2a3546;
+  border: 1px solid var(--panel-border);
+}
+
+.g-chip-btn.is-on {
+  background: #1d4d2c;
+  border-color: var(--ok);
+}

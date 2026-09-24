@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 21 – 2026-09-24: strømavtalen og valg av forespørsler
+
+**Brukeren ba om:** Vise hvor lenge strømavtalen varer, varsel når den går ut, avklare hvilken avtale som er
+standard, og kunne sortere etter ønskede forespørselstyper.
+
+**Gjort (B-042):** Spotpris er standard og det man går tilbake til; valg for automatisk fornyelse; nedtelling
+og varsler. Salg: velg kvaliteter du vil ha forespørsler på, og sorter forespørslene.
+
+**Testet:** tsc, lint, balanse (10 / 24 / 62 / 142). I Node: nattariff varsles 3 og 1 døgn før og går tilbake
+til spotpris; med bare standard valgt kommer bare standard-forespørsler. Playwright (iPhone 13): strømkortet
+og kvalitetsvalget i Salg, 390 px, ingen feil.
+
+---
+
 ## Økt 20 – 2026-09-24: utstyr på ovn 2
 
 **Brukeren meldte (skjermbilde):** Ovn 2 skal ha egen «utstyrsbutikk» som ovn 1.
