@@ -5,6 +5,26 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 64 – 2026-09-25: konsernforskning
+
+**Brukeren ba om:** Flere ting å forske på når konsernet åpnes.
+
+**Gjort:** B-120. Ni konsernprosjekter, et nytt kapittel i fagboka med quiz, egen gruppe under Forskning og en
+statuslinje på Konsern-fanen.
+
+**Testet:**
+- tsc, lint, `npm test` (ny test for konsernforskningen), og skriptet som sjekker at alle id-er finnes.
+- Balanse exit 0, `--vansker`.
+- Playwright på iPhone 13, låst og åpnet konsern:
+  - gruppen «Kommer når konsernet åpnes» vises når konsernet er låst
+  - kapitlet åpnes fra Forskning, og det går an å forske
+  - statuslinja på Konsern-fanen stemmer
+  - ingen feil og ingen horisontal scrolling
+
+**Gjenstår:** Ingenting.
+
+---
+
 ## Økt 63 – 2026-09-25: fullt lager og et tydeligere konsern
 
 **Brukeren ba om:**

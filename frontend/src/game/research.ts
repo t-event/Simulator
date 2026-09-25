@@ -28,6 +28,8 @@ export interface Research {
   description: string;
   /** Kort tekst om hva det gir, vist på kortet */
   effect: string;
+  /** Åpnes først når konsernet er åpnet (B-120) */
+  konsern?: boolean;
 }
 
 export const RESEARCH: Research[] = [
@@ -398,6 +400,94 @@ export const RESEARCH: Research[] = [
     description: "Dokumentert lavt klimaavtrykk: skrap i stedet for malm, ren strøm og gjenvunnet varme.",
     effect: "5 % bedre priser og flere forespørsler",
   },
+  // Konsernet (B-120): åpnes når konsernet er åpnet
+  {
+    id: "konsernstyring",
+    name: "Konsernstyring",
+    stage: 4,
+    cost: 250,
+    konsern: true,
+    description: "Felles mål, felles tall og en ledergruppe som følger opp alle verkene hver uke.",
+    effect: "Datterverkene gir 10 % mer overskudd",
+  },
+  {
+    id: "fellesvedlikehold",
+    name: "Felles vedlikehold",
+    stage: 4,
+    cost: 300,
+    konsern: true,
+    description: "Ett vedlikeholdslag som reiser mellom verkene, med felles reservedeler på lager.",
+    effect: "Halvparten så mange havarier i datterverkene, og kortere stans",
+  },
+  {
+    id: "kunnskapsdeling",
+    name: "Kunnskapsdeling",
+    stage: 4,
+    cost: 300,
+    konsern: true,
+    requires: ["konsernstyring"],
+    description: "Fagfolkene i verkene møtes og lærer av hverandres feil og gode grep.",
+    effect: "1 fagpoeng per døgn for hvert datterverk som går",
+  },
+  {
+    id: "konsernledelse",
+    name: "Profesjonell ledelse",
+    stage: 4,
+    cost: 350,
+    konsern: true,
+    requires: ["konsernstyring"],
+    description: "Konsernet får egne folk til salg, økonomi og personal, i stedet for å leie inn dyre konsulenter.",
+    effect: "Salgsdirektøren koster halvparten så mye i lønn",
+  },
+  {
+    id: "oppkjop",
+    name: "Oppkjøpsavdeling",
+    stage: 4,
+    cost: 400,
+    konsern: true,
+    description: "Folk som leter etter verk som er til salgs, og forhandler om prisen.",
+    effect: "Nye datterverk og utbygging til storverk 15 % billigere",
+  },
+  {
+    id: "standardverk",
+    name: "Standardiserte verk",
+    stage: 4,
+    cost: 400,
+    konsern: true,
+    requires: ["konsernstyring"],
+    description:
+      "Samme utstyr og samme arbeidsmåte i alle verkene, så en forbedring kan kopieres fra ett verk til alle.",
+    effect: "Modernisering 25 % billigere",
+  },
+  {
+    id: "konsernenergi",
+    name: "Kraftavtale for konsernet",
+    stage: 4,
+    cost: 450,
+    konsern: true,
+    description: "Konsernet kjøper strøm for alle verkene samlet, rett fra kraftprodusentene.",
+    effect: "10 % billigere strøm hjemme",
+  },
+  {
+    id: "storkonsern",
+    name: "Større konsern",
+    stage: 4,
+    cost: 600,
+    konsern: true,
+    requires: ["oppkjop"],
+    description: "En konsernledelse som kan styre mange verk samtidig.",
+    effect: "Plass til 8 datterverk i stedet for 6",
+  },
+  {
+    id: "gronnkonsern",
+    name: "Grønt konsern",
+    stage: 4,
+    cost: 700,
+    konsern: true,
+    requires: ["gronnstal", "konsernstyring"],
+    description: "Alle verkene lager grønt stål med dokumentert lavt klimaavtrykk.",
+    effect: "Datterverkene gir 10 % mer overskudd",
+  },
 ];
 
 /**
@@ -438,6 +528,15 @@ const READS: Record<string, string> = {
   ledelse: "folk",
   produktutvikling: "omdomme",
   gronnstal: "fosfor",
+  konsernstyring: "konsern",
+  fellesvedlikehold: "konsern",
+  kunnskapsdeling: "konsern",
+  konsernledelse: "konsern",
+  oppkjop: "konsern",
+  standardverk: "konsern",
+  konsernenergi: "konsern",
+  storkonsern: "konsern",
+  gronnkonsern: "konsern",
 };
 for (const r of RESEARCH) r.reads = READS[r.id];
 
@@ -509,12 +608,18 @@ export interface ResearchOption extends Research {
   reason: string | null;
 }
 
+/** Er konsernet åpnet? (Konsernforskningen venter til da, B-120) */
+export function konsernOpen(g: GameState): boolean {
+  return !!g.konsern?.unlocked;
+}
+
 export function researchOptions(g: GameState): ResearchOption[] {
   return RESEARCH.map((r) => {
     const done = hasResearch(g, r.id);
-    const locked = r.stage > g.stage;
+    const locked = r.stage > g.stage || (!!r.konsern && !konsernOpen(g));
     let reason: string | null = null;
-    if (locked) reason = `Krever ${stageRef(r.stage, g.stage)}`;
+    if (r.stage > g.stage) reason = `Krever ${stageRef(r.stage, g.stage)}`;
+    else if (locked) reason = "Åpnes når konsernet er åpnet";
     else {
       const missing = (r.requires ?? []).find((id) => !hasResearch(g, id));
       if (missing) reason = `Krever ${RESEARCH.find((x) => x.id === missing)?.name.toLowerCase() ?? missing}`;

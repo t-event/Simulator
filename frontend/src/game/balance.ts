@@ -186,6 +186,16 @@ const RESEARCH_PRIORITY = [
   "ledelse",
   "produktutvikling",
   "gronnstal",
+  // Konsernet (B-120)
+  "konsernstyring",
+  "fellesvedlikehold",
+  "kunnskapsdeling",
+  "oppkjop",
+  "standardverk",
+  "storkonsern",
+  "konsernenergi",
+  "gronnkonsern",
+  "konsernledelse",
 ];
 
 /** Spill der testspilleren venter med å bytte støping til kontraktene på det gamle produktet er levert */

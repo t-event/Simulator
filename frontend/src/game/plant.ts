@@ -447,7 +447,10 @@ export function avgDealPrice(g: GameState, deal: PowerDeal, hours: number): numb
 export const PEAK_RATE_PER_MW = 4000;
 
 export function energyPrice(g: GameState, minute = g.minute): number {
-  return furnaceType(g).fuel === "gass" ? GAS_PRICE : powerPrice(g, minute);
+  // Kraftavtale for konsernet: 10 % billigere strøm (B-120)
+  return furnaceType(g).fuel === "gass"
+    ? GAS_PRICE
+    : powerPrice(g, minute) * (hasResearch(g, "konsernenergi") ? 0.9 : 1);
 }
 
 export function computePlantStats(g: GameState): PlantStats {

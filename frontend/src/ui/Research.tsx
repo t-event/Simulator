@@ -50,11 +50,14 @@ export function Research({
   openBook: (chapter?: string) => void;
 }) {
   const options = researchOptions(g);
-  const current = options.filter((r) => !r.done && r.stage <= g.stage);
+  // Konsernforskningen står for seg, og venter til konsernet er åpnet (B-120)
+  const konsernOpen = !!g.konsern?.unlocked;
+  const current = options.filter((r) => !r.done && r.stage <= g.stage && !(r.konsern && !konsernOpen));
+  const konsernLater = g.stage >= 4 && !konsernOpen ? options.filter((r) => r.konsern && !r.done) : [];
   // Klar nå: nok fagpoeng og kapitlet er lest. Nesten: mangler fagpoeng eller lesing. Neste nivå: bare navnet.
   const ready = current.filter((r) => r.available);
   const later = current.filter((r) => !r.available);
-  const nextStage = options.filter((r) => !r.done && r.stage === g.stage + 1);
+  const nextStage = options.filter((r) => !r.done && r.stage === g.stage + 1 && !r.konsern);
   const done = options.filter((r) => r.done);
   const card = (r: (typeof options)[number]) => (
     <div key={r.id} className="g-upgrade">
@@ -140,8 +143,23 @@ export function Research({
           </ul>
         </>
       )}
-      {ready.length === 0 && later.length === 0 && (
+      {ready.length === 0 && later.length === 0 && konsernLater.length === 0 && (
         <p className="g-muted">Alt som finnes på dette nivået, er forsket fram.</p>
+      )}
+      {konsernLater.length > 0 && (
+        <details className="g-role-group">
+          <summary>Kommer når konsernet åpnes ({konsernLater.length})</summary>
+          <p className="g-muted g-small-text">
+            Konsernet åpnes når alt utstyret på storverket er kjøpt, eller egenkapitalen når 1 mrd. kr.
+          </p>
+          <ul className="g-closed">
+            {konsernLater.map((r) => (
+              <li key={r.id}>
+                {r.name} – {r.effect.toLowerCase()}
+              </li>
+            ))}
+          </ul>
+        </details>
       )}
       {nextStage.length > 0 && (
         <details className="g-role-group">

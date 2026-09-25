@@ -234,6 +234,20 @@ export const QUIZ: Record<string, QuizQuestion[]> = {
       why: "Ribbene gjør at stålet griper fast i betongen.",
     },
   ],
+  konsern: [
+    {
+      q: "Hva kalles selskapet på toppen i et konsern?",
+      options: ["Datterselskapet", "Morselskapet", "Søsterselskapet"],
+      correct: 1,
+      why: "Morselskapet eier datterselskapene. Her er det hjemmeverket ditt.",
+    },
+    {
+      q: "Hvorfor blir det billigere når flere verk kjøper skrap sammen?",
+      options: ["Store kjøp gir bedre pris", "Skrapet blir renere", "Staten gir tilskudd"],
+      correct: 0,
+      why: "Den som kjøper mye på en gang, får bedre pris. Det kalles stordriftsfordeler.",
+    },
+  ],
   omdomme: [
     {
       q: "Hva er verst for omdømmet?",

@@ -151,6 +151,17 @@ export const KNOWLEDGE: KnowledgeCard[] = [
       "For sen levering gir bot og dårligere omdømme. En reklamasjon er verre: kunden sender stålet tilbake og forteller det til andre.",
     ],
   },
+  {
+    id: "konsern",
+    title: "Konsern og datterselskap",
+    paragraphs: [
+      "Et konsern er flere selskap med samme eier. Selskapet på toppen kalles morselskapet – her er det hjemmeverket ditt. Verkene det eier, kalles datterselskap.",
+      "Datterverkene har egen ledelse og egne ansatte. Morselskapet bestemmer hvor pengene skal investeres, og får overskuddet.",
+      "Når flere verk gjør ting sammen, blir det billigere: den som kjøper skrap eller strøm for alle verkene samtidig, får bedre pris. Det kalles stordriftsfordeler.",
+      "Flere verk sprer også risikoen. Står ett verk etter et havari, går de andre videre, og konsernet tjener fortsatt penger.",
+      "Verdien av konsernet er mer enn pengene i banken: verkene er også verdt noe. Derfor teller det du har investert i datterverkene, med i konsernverdien.",
+    ],
+  },
 ];
 
 export function knowledgeCard(id: string): KnowledgeCard | undefined {
