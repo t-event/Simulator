@@ -239,7 +239,10 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
   lagring, nytt spill+ fjernet, ny start i sesongen og beste resultat på «Alle tider» (B-141).
 - Migrasjonene i `supabase/`: 001 grunnlag, 002 sikkerhet, 003 toppliste, 004 sesonger, 005 sesong på seks
   måneder, 006 tidslinje per sesong, 007 toppliste med nivå, 008 lagring med versjon, 009 ny start i sesongen,
-  010 rekorder («Alle tider» leser tabellen `records`, B-142).
+  010 rekorder («Alle tider» leser tabellen `records`, B-142), 011 sesongresultat (🎖 ved navnet og
+  `season_history()`, B-143).
+- Flere enheter samtidig: bare enheten som spilles på, lagrer; den andre settes på pause med «Spill her» (B-143).
+- Merker ved sesongslutt (fase 3) er bygget som 🎖 med beste plassering ved kallenavnet (B-143).
 - **Slik starter du en ny sesong:** i SQL Editor: `select public.start_season('Sesong 2', 26);` (navn, antall uker; 26 = seks måneder, B-130).
   **Slik legger du ut en hendelse:** `select public.add_event('skrapmangel', 7);` (skrapmangel, stromkrise,
   eksportboom, importpress, transportstreik; antall dager). Claude kan gjøre begge deler gjennom connectoren.

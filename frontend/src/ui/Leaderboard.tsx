@@ -15,6 +15,7 @@ import {
   type BoardRow,
 } from "../net/leaderboard";
 import { SeasonJoin, SeasonLine } from "./Season";
+import { fetchSeasonHistory, type SeasonResult } from "../net/season";
 import type { GameApi } from "../game/useGame";
 import type { GameState } from "../game/types";
 import { useSeasonStatus } from "./useSeason";
@@ -22,6 +23,42 @@ import { getSession, onSessionChange } from "../net/supabase";
 import { useSyncExternalStore } from "react";
 import { Card } from "./common";
 import { fmtKr, fmtRep } from "./format";
+
+/** Spillerens egne resultater fra sesonger som er over (B-143) */
+function SeasonHistory() {
+  const [results, setResults] = useState<SeasonResult[]>([]);
+  useEffect(() => {
+    let alive = true;
+    void fetchSeasonHistory()
+      .then((r) => alive && setResults(r))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+  if (!results.length) return null;
+  return (
+    <details className="g-details g-season-history">
+      <summary>Dine sesonger ({results.length})</summary>
+      <ul>
+        {results.map((r) => (
+          <li key={r.seasonId}>
+            <strong>
+              {r.name}: {r.plass <= 3 ? `${placeLabel(r.plass)} ` : ""}
+              {r.plass}. plass
+            </strong>{" "}
+            av {r.players} · {fmtKr(r.equity)} · {levelLabel({ stage: r.stage, league: resultLeague(r) })}
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
+}
+
+/** «gull» når resultatet var et konsern (storverk og over 1 mrd.), så merket blir «Konsern» */
+function resultLeague(r: SeasonResult): string {
+  return r.stage >= 4 && r.equity >= 1_000_000_000 ? "gull" : "";
+}
 
 function fmtValue(kind: BoardKind, v: number): string {
   const unit = BOARDS.find((b) => b.id === kind)?.unit;
@@ -194,8 +231,12 @@ export function Leaderboard({
             <li key={r.plass} className={r.is_me ? "is-me" : ""}>
               <span className={`g-board-rank${r.plass <= 3 ? " is-medal" : ""}`}>{placeLabel(r.plass)}</span>
               <span className="g-board-name">
-                <span className="g-board-nick">{r.nickname}</span>
-                <em className="g-league">{levelLabel(r)}</em>
+                <span className="g-board-line">
+                  <span className="g-board-nick">{r.nickname}</span>
+                  <em className="g-league">{levelLabel(r)}</em>
+                </span>
+                {/* Beste plassering i en sesong som er over (B-143) */}
+                {r.honor && <span className="g-board-honor">🎖 {r.honor}</span>}
               </span>
               <span className="g-board-value">{fmtValue(kind, r.value)}</span>
             </li>
@@ -205,10 +246,12 @@ export function Leaderboard({
       {session && nickname && myRank !== null && !rows?.some((r) => r.is_me) && (
         <p className="g-muted g-small-text">Du er nr. {myRank}.</p>
       )}
+      {session && <SeasonHistory />}
       <p className="g-muted g-small-text">
         Lista regnes ut på serveren av det som er lagret på nett, én gang per spilldøgn. I sesongen gjelder spillet du
         har nå; på «Alle tider» står ditt beste resultat. Merket ved navnet viser hvor langt spilleren har kommet: fra
-        Garasje til Storverk, og Konsern når konsernverdien passerer 1 mrd. Kontoer med urimelig vekst holdes utenfor.
+        Garasje til Storverk, og Konsern når konsernverdien passerer 1 mrd. 🎖 er den beste plasseringen i en sesong som
+        er over. Kontoer med urimelig vekst holdes utenfor.
       </p>
     </>
   );

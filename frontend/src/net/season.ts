@@ -4,7 +4,7 @@
  */
 import type { WorldEvent } from "../game/types";
 import { cloudConfigured } from "./config";
-import { rpc } from "./supabase";
+import { rpc, userId } from "./supabase";
 
 export interface Season {
   id: number;
@@ -22,6 +22,61 @@ export interface SeasonStatus {
 export async function fetchSeasonStatus(): Promise<SeasonStatus> {
   const s = await rpc<SeasonStatus>("season_status", {});
   return { current: s?.current ?? null, played_previous: !!s?.played_previous };
+}
+
+/** Et sesongresultat for spilleren selv (B-143) */
+export interface SeasonResult {
+  seasonId: number;
+  name: string;
+  plass: number;
+  /** Hvor mange som var med på lista i sesongen */
+  players: number;
+  equity: number;
+  day: number;
+  stage: number;
+}
+
+/** Spillerens egne sesongresultater, nyeste først. Tom uten innlogging. */
+export async function fetchSeasonHistory(): Promise<SeasonResult[]> {
+  if (!userId()) return [];
+  const rows = await rpc<
+    {
+      season_id: number;
+      name: string;
+      plass: number;
+      players: number;
+      equity: string | number;
+      day: number;
+      stage: number;
+    }[]
+  >("season_history", {});
+  return (rows ?? []).map((r) => ({
+    seasonId: r.season_id,
+    name: r.name,
+    plass: r.plass,
+    players: Number(r.players),
+    equity: Number(r.equity),
+    day: r.day,
+    stage: Number(r.stage),
+  }));
+}
+
+/** Nyeste sesongresultat spilleren har fått beskjed om, per konto (lagres i nettleseren) */
+const RESULT_SEEN_KEY = "stalverk-sesongresultat-v1";
+export function resultSeen(user: string): number {
+  try {
+    const v = JSON.parse(localStorage.getItem(RESULT_SEEN_KEY) ?? "null") as { user?: string; season?: number } | null;
+    return v && v.user === user && typeof v.season === "number" ? v.season : 0;
+  } catch {
+    return 0;
+  }
+}
+export function markResultSeen(user: string, season: number): void {
+  try {
+    localStorage.setItem(RESULT_SEEN_KEY, JSON.stringify({ user, season }));
+  } catch {
+    // Uten lagring i nettleseren kan beskjeden komme igjen neste gang
+  }
 }
 
 interface EventRow {
