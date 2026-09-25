@@ -50,6 +50,10 @@ export interface GameApi {
   quit: () => void;
   /** Starter fra en sikkerhetskopi. Gir false hvis fila ikke var et lagret spill. */
   loadBackup: (text: string) => boolean;
+  /** Bytter til et spill fra nettet (B-125), på pause */
+  adopt: (g: GameState) => void;
+  /** Legger et spill fra nettet i den lokale lagringen uten å starte det, så «Fortsett» tar det (B-125) */
+  stash: (g: GameState) => void;
 }
 
 export function useGame(): GameApi {
@@ -144,6 +148,18 @@ export function useGame(): GameApi {
     },
     [begin],
   );
+
+  const adopt = useCallback(
+    (g: GameState) => {
+      g.speed = 0;
+      begin(g);
+    },
+    [begin],
+  );
+  const stash = useCallback((g: GameState) => {
+    saveGame(g);
+    setHasSave(true);
+  }, []);
 
   const quit = useCallback(() => {
     gameRef.current = null;
@@ -260,5 +276,7 @@ export function useGame(): GameApi {
     dismissToast,
     quit,
     loadBackup,
+    adopt,
+    stash,
   };
 }

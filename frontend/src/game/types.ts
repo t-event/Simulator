@@ -438,6 +438,8 @@ export interface GameState {
   /** Konsernet (B-106) */
   /** Sist det ble varslet om fullt ferdigvarelager (spillminutt), så varselet ikke gjentas hele tida (B-118) */
   storeFullLogMin: number;
+  /** Kontoen spillet er koblet til (konto-id fra innloggingen), eller null uten konto (B-125) */
+  owner: string | null;
   konsern: {
     unlocked: boolean;
     plants: SisterPlant[];

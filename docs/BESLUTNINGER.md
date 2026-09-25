@@ -1596,3 +1596,35 @@ Beslutning: planen står i `docs/PLAN-NETT.md`. Hovedpunktene:
 - Rekkefølge: fase 0 grunnlag, 1 konto og lagring, 2 toppliste, 3 sesonger, ligaer og felles hendelser, 4 ventetid,
   5 anbud og auksjoner.
 - Nivå 3 (én felles verden i sanntid) er ikke med: det ville vært et nytt spill uten pause og fart.
+
+## B-125 Konto og lagring på nett – fase 0 og 1 (2026-09-25)
+Status: gjelder
+Brukeren: konto med e-post og passord (ikke bare overføringskode, fordi en delt sikkerhetskopi kan brukes til juks),
+og nåværende lagring skal kobles til kontoen. Supabase-prosjektet er opprettet, og nøklene er sendt.
+
+Beslutning:
+- **Ingen bibliotek.** `src/net/supabase.ts` snakker med innloggingen (GoTrue) og databasen (PostgREST) rett over
+  `fetch`. Det holder bygget lite, og alt kan testes uten nett ved å bytte ut `fetch`.
+- **Økta** ligger i localStorage (`stalverk-konto-v1`) og fornyes av seg selv. Uten nett beholdes den.
+- **Lagring på nett** (`src/net/sync.ts`): spillet lagres lokalt som før. Når man er logget inn, følger en kopi etter
+  til `saves` høyst én gang i minuttet, og med én gang når appen legges bort (`fetch` med `keepalive`). Én linje
+  per spilldøgn i `snapshots` (dag, kasse, konsernverdi, nivå) – grunnlaget for toppliste og juksesperre.
+- **Eier:** spillet får feltet `owner` (konto-id) første gang det lastes opp. Standardverdi null i `migrate()`.
+- **Kobling ved innlogging** (`linkOnLogin`):
+  - ingen spill på nett og et lokalt → lastes opp
+  - spill på nett og ikke noe lokalt (eller lokalt fra en annen konto) → spillet fra nettet
+  - begge på samme konto → det som har kommet lengst i spilltid
+  - begge, det lokale uten konto → spilleren velger («Fra nettet (dag 140)» eller «Herfra (dag 12)»)
+- **Sikkerhetskopi** som fil virker fortsatt, men bare på kontoen den tilhører. Fila fra en annen konto avvises.
+- **Nytt spill** med konto og et spill fra før spør først, siden det erstatter spillet på nett.
+- **Konto-kortet** står på startskjermen (så en ny mobil kan hente spillet før «Fortsett») og under ⚙️ Innstillinger:
+  logg inn, opprett konto (må bekreftes på e-post), glemt passord, bytt passord, logg ut og slett konto (SQL-funksjonen
+  `delete_my_account`, alt slettes med kontoen). En liten sky ved dagen i toppen viser om spillet er lagret på nett.
+- **Lenkene fra e-posten** (bekreftelse og nytt passord) lander på spillet med nøklene i adressen; de leses inn før
+  første tegning og adressen ryddes. Krever at Site URL i Supabase er satt til spillets adresse.
+- **Funksjonsbryter:** tabellen `config` (`features.cloud`) kan skru av lagring på nett uten ny publisering.
+- **SQL** i `supabase/001_grunnlag.sql`: tabellene `profiles`, `saves`, `snapshots`, `config`, profil-trigger,
+  `updated_at`, `delete_my_account` og tilgangsregler (RLS). Brukeren limer inn. Kan kjøres flere ganger.
+- **Personvern:** e-post og spillet lagres, ingenting annet. Det står under kontoen.
+- Spillmotoren vet ingenting om nettet: `save.ts` har en lytter (`setSaveListener`) som `sync.ts` henger seg på.
+  `balance.ts` og `tests.ts` kjører uten nett.

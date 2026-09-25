@@ -240,6 +240,7 @@ export function newGame(seed = Date.now(), round = 1): GameState {
     pendingCastingSwitch: null,
     konsern: { unlocked: false, plants: [], shared: [], nextId: 1, director: null, milestones: 0 },
     storeFullLogMin: -1e9,
+    owner: null,
     fpDealDay: -1,
     inboxSeenId: 0,
     researched: [],

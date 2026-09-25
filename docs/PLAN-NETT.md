@@ -204,8 +204,25 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
    Claude sier fra hver gang det trengs.
 5. Database → Extensions: slå på `pg_cron` (fase 5).
 
-## Åpne spørsmål
+## Brukerens svar (2026-09-25)
 
-- Skal topplista bruke hele Norge som ett felt, eller skal man kunne lage grupper (klasse, avdeling, venner)?
-- Skal sesongfordelen gjelde nytt spill+ bare, eller også spillet man har?
-- Hvilke storkunder skal legge ut anbud (brubygger, verft, vindpark …)? Generiske navn, som ellers i spillet.
+- **Grupper på topplista:** ikke ennå. Én liste for alle.
+- **Sesonger erstatter nytt spill+.** Når en ny sesong starter, starter alle et nytt spill fra garasjen. Den som var
+  med i forrige sesong, får en pitteliten fordel (forslag: 5 % mer startkapital og 10 fagpoeng – ikke mer, så nye
+  spillere har en sjanse). Spillet fra forrige sesong arkiveres med resultatet sitt. Det skal være lett for oss å
+  starte en ny sesong: én ny rad i `seasons`, så gjør appen resten.
+- **Storkunder som legger ut anbud** (generiske navn, som ellers i spillet). Forslag, ett anbud per liga:
+  | Storkunde | Vil ha | Krever |
+  | --- | --- | --- |
+  | Brubyggeren | armeringsstål, store mengder | omdømme 50 |
+  | Verftet | emner i kvalitetsstål | omdømme 60 |
+  | Jernbanen | høykarbon (skinner) | omdømme 60, spektrometer |
+  | Vindparken | konstruksjonsstål til tårn | omdømme 65 |
+  | Boreplattformen | høyfast stål, små mengder, høy pris | omdømme 75, øseovn |
+  | Bilfabrikken | renest mulig stål, lange rammeavtaler | omdømme 80, øseovn |
+  Kundene byttes ut etter hvert som spilleren stiger i liga, så det alltid er noe å strekke seg etter.
+- Supabase-prosjektet er opprettet, og nøklene ligger i `frontend/src/net/config.ts`.
+
+## Status
+
+- Fase 0 og 1 er bygget (B-125). Fase 2 (toppliste) er neste.
