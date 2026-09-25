@@ -10,6 +10,7 @@ Claudes langtidsminne sammen med `docs/`. Hold den kort og oppdatert.
    beslutning uten at brukeren ber om det; skriv i så fall en ny beslutning som
    erstatter den gamle.
 3. Les **`docs/DESIGN.md`** hvis oppgaven gjelder spillmekanikk eller grensesnitt.
+4. Les **`docs/PLAN-NETT.md`** hvis oppgaven gjelder konto, lagring på nett, toppliste, sesonger eller konkurranse.
 
 ## Før du avslutter en økt
 
@@ -37,6 +38,8 @@ GitHub Pages: https://t-event.github.io/Simulator/
   personnavn, interne prosedyrenumre, leverandørnavn eller interne
   kvalitetskoder fra ekte anlegg i noe som committes. Repoet er offentlig. Er
   du i tvil, spør brukeren før du committer.
+- **Nøkler:** Supabase sin offentlige nøkkel (anon/publishable) kan ligge i koden. Den hemmelige (service_role)
+  skal aldri committes, logges eller brukes av spillet. Se `docs/PLAN-NETT.md`.
 - **Enkelt for nybegynnere:** Alt spilleren må gjøre skal kunne forstås uten
   fagkunnskap. Forklar med vanlige ord; fagordene kan stå i fagboka.
 - **Mobil først:** Test alltid på iPhone-størrelse (390 px bred). Ingen
@@ -103,7 +106,7 @@ frontend/src/
     control/     Kontrollrommet: den enkle styringen (SimpleControl + simpleRunner)
   sim/         Prosessmodell for lysbueovnen (brukes av kontrollrommet)
 frontend/public/  PWA: manifest, ikoner, service worker
-docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md
+docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, PLAN-NETT.md (planen for nett og konkurranse)
 ```
 
 ## Testing i nettleseren

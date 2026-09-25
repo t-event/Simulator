@@ -1574,3 +1574,25 @@ til slutt det man kan kjøpe.
   - Etter ansettelsen: tallene, av/på-bryteren (B-122) og «Innstillinger og oppsigelse».
 - Alle knapper på siden er minst 40 px høye (før 34 px, og «Selg verket…» var en lenke på 16 px).
 - Målt på iPhone 13 med tre verk og salgsdirektør: siden er 2 393 px høy, mot 3 475 px før.
+
+## B-124 Konto, lagring på nett, toppliste og konkurranse – planen (2026-09-25)
+Status: gjelder
+Brukeren: vil ha toppliste, lagring uten fil, og et spill man ikke blir ferdig med på én dag – med konkurranse om
+skrap, kunder og priser, inspirert av spill der man konkurrerer i sanntid. Nåværende lagringer skal ikke gå tapt.
+Konto med e-post og passord, ikke bare overføringskode (fare for deling og juks). Supabase er greit. Nivå 1 og 2
+(sesonger og toppliste, så konkurranse der serveren avgjør). Litt ventetid, ikke 24 timer, og ulik etter hva man
+venter på.
+
+Beslutning: planen står i `docs/PLAN-NETT.md`. Hovedpunktene:
+- Supabase som tjeneste. All serverlogikk som SQL i `supabase/`, som brukeren limer inn. Den offentlige nøkkelen ligger
+  i koden, den hemmelige aldri.
+- Konto med e-post og passord. Den lokale lagringen kobles til kontoen ved første innlogging. Sikkerhetskopi som fil
+  virker bare på egen konto.
+- Alt på nett er valgfritt, lagringsformat og database vokser bare, funksjonsbrytere i databasen, testspilleren
+  kjører uten nett. Slik kan spillerne spille hele tiden mens vi bygger.
+- Konkurransen er på pris og kvalitet. Ingen kan ta noe fra andre. Anbud og auksjoner åpner på nivået Stålverk, med
+  ligaer etter nivå.
+- Ekte ventetid bare i konsernet og konkurransen, fra 30 minutter til 8 timer, og serverens klokke.
+- Rekkefølge: fase 0 grunnlag, 1 konto og lagring, 2 toppliste, 3 sesonger, ligaer og felles hendelser, 4 ventetid,
+  5 anbud og auksjoner.
+- Nivå 3 (én felles verden i sanntid) er ikke med: det ville vært et nytt spill uten pause og fart.
