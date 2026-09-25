@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 35 – 2026-09-25: skjult automatikk og skrapvarsel
+
+**Brukeren ba om:** Sjekke om omforing skjer automatisk uten reparatør/plan, og om skrapmiksen fikser seg uten
+skrapklasser. Varsel på Skrap-knappen når en skraptype mangler.
+
+**Gjort (B-063):** Planleggeren legger ikke lenger om resepten – bare skrapklasseren. Omforing skjer ikke av seg
+selv (testet), men loggen og Vedlikehold-kortet sier nå hvem som bytter foringen, og spesialisten fra rådgiveren
+kalles ikke lenger «reparatøren». Skrap-knappene har «!» og «Mangler …».
+
+**Testet:** tsc, lint, validate, balanse (8 / 26 / 66 / 133, nybegynner OK, exit 0), headless-test av omforing
+uten automatikk, Playwright på iPhone-størrelse (varsel på Skrap og Kjøp skrap, linja på Vedlikehold).
+
+**Gjenstår:** spørsmålet om storverket (mer innhold eller lavere vinnergrense) fra økt 34.
+
+---
+
 ## Økt 34 – 2026-09-25: foringsvarsel, merke på Anlegg og balanse
 
 **Brukeren ba om:** Varselet om å bytte foring skal gå til vedlikeholdskortet; Anlegg skal vise når en

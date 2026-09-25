@@ -2,13 +2,21 @@ import { useEffect, useState, type ReactNode } from "react";
 import { requestManual, requestReline, setFurnaceGrade, setTargetGrade, upgradeOptions } from "../game/actions";
 import { Maintenance } from "./Maintenance";
 import { auto, researchOptions } from "../game/research";
-import { GRADE_IDS, GRADES, PRODUCTS, ROLES, STAGES } from "../game/data";
-import { currentOrder, furnaceOrder, recipeEstimate, scrapStopHelp, SEQUENCE_WAIT_MIN } from "../game/engine";
+import { GRADE_IDS, GRADES, PRODUCTS, ROLES, SCRAP_TYPES, STAGES } from "../game/data";
+import {
+  currentOrder,
+  furnaceOrder,
+  recipeEstimate,
+  scrapShort,
+  scrapStopHelp,
+  SEQUENCE_WAIT_MIN,
+} from "../game/engine";
 import {
   castingType,
   furnaceGrade,
   gradeRecipe,
   gradesInUse,
+  hasGrader,
   isAbsent,
   rollingActive,
   shiftStart,
@@ -122,6 +130,12 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
   return out.slice(0, 3);
 }
 
+/** Skraptypene resepten mangler til neste charge, som tekst (B-063) */
+function missingScrap(g: GameState, stats: PlantStats): string | null {
+  const short = scrapShort(g, stats);
+  return short.length ? short.map((id) => SCRAP_TYPES[id].name.toLowerCase()).join(" og ") : null;
+}
+
 function furnaceState(g: GameState, index: number): { text: string; progress: number | null } {
   const f = g.furnaces[index];
   if (f.heat) {
@@ -220,18 +234,23 @@ function CompactChain({
   go: (v: View, sub?: string) => void;
 }) {
   const castHead = g.castQueue[0];
+  const missing = missingScrap(g, stats);
   const worn = g.furnaces.map((f, i) => ({ f, i })).filter((x) => x.f.wear >= 0.6 && !x.f.relineRequested);
   return (
     <section className="g-card g-mini-chain" aria-label="Produksjonslinja">
       <div className="g-mini-row">
-        <button className="g-mini" onClick={() => go("marked", "skrap")}>
-          <span>Skrap</span>
+        <button
+          className={`g-mini${missing ? " is-alert" : ""}`}
+          onClick={() => go("marked", "skrap")}
+          aria-label={missing ? `Skrap: mangler ${missing}` : undefined}
+        >
+          <span>Skrap{missing && <span className="g-badge">!</span>}</span>
           <Bar
             value={stats.yardUsed / stats.yardT}
-            tone={stats.yardUsed < stats.sizeT ? "critical" : "accent"}
+            tone={stats.yardUsed < stats.sizeT || missing ? "critical" : "accent"}
             label="Skraplager"
           />
-          <small>{fmtT(stats.yardUsed)}</small>
+          <small className={missing ? "is-waiting" : ""}>{missing ? "Mangler skrap" : fmtT(stats.yardUsed)}</small>
         </button>
         {g.furnaces.map((f, i) => {
           const st = furnaceState(g, i);
@@ -321,6 +340,7 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
   const sum = (o: Partial<Record<string, number>>) => Object.values(o).reduce<number>((a, b) => a + (b ?? 0), 0);
   const tips = hints(g, stats);
   const upgradesReady = readyUpgrades(g);
+  const missingNow = missingScrap(g, stats);
   // Varsel om foringen åpner Anlegg og ruller ned til vedlikeholdskortet
   const [scrollTo, setScrollTo] = useState(0);
   useEffect(() => {
@@ -543,9 +563,20 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
                   <p>
                     {fmtT(stats.yardUsed)} av {fmtT(stats.yardT)}
                   </p>
+                  {missingNow && (
+                    <p className="g-note g-warn">
+                      Resepten mangler {missingNow} til neste charge.{" "}
+                      {hasGrader(g)
+                        ? "Skrapklasseren venter til det kommer, så ovnen står."
+                        : "Uten skrapklasser fylles chargen opp med annet skrap, og analysen kan bomme."}
+                    </p>
+                  )}
                   <div className="g-row">
-                    <button className="g-small" onClick={() => go("marked", "skrap")}>
-                      Kjøp skrap
+                    <button
+                      className={missingNow ? "g-small g-primary" : "g-small"}
+                      onClick={() => go("marked", "skrap")}
+                    >
+                      Kjøp skrap{missingNow && <span className="g-badge">!</span>}
                     </button>
                     <StationButton g={g} station="skrap" onOpen={setSheet} />
                   </div>

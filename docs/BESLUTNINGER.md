@@ -813,3 +813,23 @@ Resultat: flink spiller 8 / 26 / 66 / 133 (før 8 / 26 / 66 / 159), nybegynner n
 konkurs. Penger og omdømme kommer nesten samtidig på hvert nivå.
 Ikke endret: på storverket tjener spilleren 10–12 mill. kr i døgnet og har lite å kjøpe, så de siste ca. 90 døgnene
 fram til vinnergrensen (1 mrd., B-027) er venting. Det er et spørsmål til brukeren (mer innhold eller lavere grense).
+
+## B-063 Ingen skjult automatikk for foring og resept, og varsel på Skrap (2026-09-25)
+Status: gjelder (justerer B-043)
+Brukeren mistenkte at omforing skjer av seg selv uten reparatør eller plan, og at resepten ordner seg uten
+skrapklasser. Ønsket også et varsel på Skrap-knappen når resepten mangler en skraptype.
+Funn:
+- **Foring:** motoren bytter bare foring når spilleren ber om det, etter vedlikeholdsplanen, av reparatøren (med
+  automatikken på) eller av vedlikeholdsspesialisten fra rådgiveren (ti døgn). En test med alt av i 25 døgn på tre
+  nivåer ga ingen omforinger, bare havarier (etter et havari er foringen ny). Men spesialisten ble logget som
+  «av reparatøren», og alle omforinger het «Planlagt stans», så det så ut som automatikk.
+- **Resept:** når ovnen byttet kvalitet etter ordrekøen, la **planleggeren** om resepten selv – også uten
+  skrapklasser.
+Beslutning:
+- Bare skrapklasseren legger om resepten (B-043 sa skrapklasser eller planlegger). Planleggeren kjøper bare inn.
+  Beskrivelsene av planlegger og skrapklasser er rettet.
+- Loggen sier hvem som bestilte omforingen («du bestilte det», planen, reparatøren, spesialisten).
+- Vedlikehold-kortet sier alltid hvem som bytter foringen nå, og «Ingen bytter foringen for deg» i gult når ingen
+  gjør det.
+- Skrap i produksjonslinja (Oversikt) og Skraplager under Anlegg får et «!» og «Mangler …» når lageret ikke har
+  nok av en skraptype til neste charge etter resepten, med forklaring på hva som skjer med og uten skrapklasser.
