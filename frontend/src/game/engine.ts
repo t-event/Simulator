@@ -436,6 +436,8 @@ export function scrapStopHelp(g: GameState): string {
     : "";
   if (!auto(g, "autoBuy") || !plannerOrders(g))
     return `${what} Kjøp det under Marked, eller ansett en planlegger som kjøper inn.`.trim();
+  if (g.autoBuyNote && !g.settings.autoBuyCredit && g.autoBuyNote.includes("kassa"))
+    return `Planleggeren får ikke kjøpt ${g.autoBuyNote}. Gi planleggeren lov til å bruke kassekreditten under Marked → Skrap, ta opp lån under Forskning → Bank, eller selg fra lageret.`;
   if (g.autoBuyNote) return `Planleggeren får ikke kjøpt ${g.autoBuyNote}.`;
   return `${what} Planleggeren bestiller mer.`.trim();
 }
@@ -781,7 +783,13 @@ function finishHeat(g: GameState, index: number, stats: PlantStats): void {
   // Mange charger i et stort verk lærer deg mindre hver for seg
   // Fagpoeng per charge: færre jo flere charger verket kjører (B-026). To like ovner lærer deg ikke dobbelt
   // så mye: med flere ovner gir hver charge mindre (B-052)
-  awardPoints(g, ([0.5, 0.2, 0.15, 0.2, 0.15][g.stage] ?? 0.15) / Math.sqrt(Math.max(1, g.furnaces.length)));
+  // En stor charge lærer deg mer enn en liten, men ikke i forhold til størrelsen: faktoren er kvadratroten av
+  // størrelsen over 5 t. Ellers ga lysbueovnen (færre, større charger) bare en firedel av fagpoengene (B-062)
+  const sizeFactor = Math.sqrt(Math.max(1, stats.sizeT / 5));
+  awardPoints(
+    g,
+    (([0.5, 0.2, 0.15, 0.2, 0.15][g.stage] ?? 0.15) * sizeFactor) / Math.sqrt(Math.max(1, g.furnaces.length)),
+  );
   f.holding = {
     t: heat.liquidT,
     grade: heat.grade,
@@ -1340,6 +1348,19 @@ function complains(g: GameState, a: Analysis, grade: GradeId): boolean {
 }
 
 /** Omtrent hvor mye verket faktisk lager per døgn: snittet av de siste døgnene, eller et forsiktig anslag */
+/** Andel av tida til fristen en kontrakt bør ta for å regnes som trygg på Salg; mer er «knapt» (B-062) */
+export const CONTRACT_MARGIN = 0.8;
+
+/** Ukeleveranser fra rammeavtalene som legges i ordrekøen før en gitt dag, til anslaget på Salg (B-062) */
+export function agreementLoadUntil(g: GameState, untilDay: number): number {
+  let t = 0;
+  for (const a of g.agreements) {
+    if (a.status !== "aktiv") continue;
+    for (let w = a.weeksSent, d = a.nextDay; w < a.weeks && d < untilDay; w++, d += 7) t += a.weeklyT;
+  }
+  return t;
+}
+
 export function realisticDailyT(g: GameState, stats: PlantStats): number {
   const recent = g.history.slice(-3).filter((d) => d.producedT > 0);
   const est =
@@ -2093,7 +2114,7 @@ export function autoBuy(
               ? "døgngrensen for innkjøp er brukt opp"
               : opts.credit
                 ? "kassekreditten er brukt opp"
-                : "det er ikke nok penger i kassa (kreditt er ikke tillatt)",
+                : "det er ikke nok penger i kassa, og planleggeren har ikke lov til å bruke kassekreditten",
           id,
         );
       continue;
@@ -2170,7 +2191,11 @@ function onDay(g: GameState, stats: PlantStats): void {
     if (chance(g, 0.04)) {
       m.powerSpikeDays = randInt(g, 1, 3);
       m.powerFactor = uniform(g, 2.0, 2.8);
-      log(g, `Kulde og lite vind: strømprisen er ${m.powerFactor.toFixed(1).replace(".", ",")} ganger normalt de neste døgnene.`, "event");
+      log(
+        g,
+        `Kulde og lite vind: strømprisen er ${m.powerFactor.toFixed(1).replace(".", ",")} ganger normalt de neste døgnene.`,
+        "event",
+      );
       if (stats.furnace.fuel === "strøm") unlock(g, "strom");
     }
   }

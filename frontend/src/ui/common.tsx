@@ -4,18 +4,20 @@ import { fmtNum } from "./format";
 import type { Analysis, GradeId } from "../game/types";
 
 export function Card({
+  id,
   title,
   right,
   children,
   className = "",
 }: {
+  id?: string;
   title?: ReactNode;
   right?: ReactNode;
   children: ReactNode;
   className?: string;
 }) {
   return (
-    <section className={`g-card ${className}`}>
+    <section id={id} className={`g-card ${className}`}>
       {(title || right) && (
         <header className="g-card-head">
           {title && <h2>{title}</h2>}

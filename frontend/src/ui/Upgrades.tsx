@@ -1,4 +1,4 @@
-import { buyUpgrade, upgradeOptions, type UpgradeOption } from "../game/actions";
+import { buyUpgrade, keyUpgrade, upgradeOptions, type UpgradeOption } from "../game/actions";
 import { STATION_NAMES, stationOptions, type Station } from "./stations";
 import { STAGES, stageRef, WIN_CASH } from "../game/data";
 import type { GameState } from "../game/types";
@@ -95,6 +95,24 @@ export function UpgradeSheet({
   );
 }
 
+/** Det store neste kjøpet på dette nivået, og hva som mangler for å kjøpe det (B-062) */
+function KeyUpgrade({ g }: { g: GameState }) {
+  const k = keyUpgrade(g);
+  if (!k) return null;
+  const why = k.available
+    ? "Du har råd nå – kjøp det under Anlegg."
+    : k.reason === "For lite penger"
+      ? `Spar opp: du har ${fmtKr(Math.floor(Math.max(0, g.cash)))}.`
+      : k.reason?.startsWith("Forsk fram: ")
+        ? `Forsk fram «${k.reason.slice("Forsk fram: ".length)}» under Forskning først.`
+        : `${k.reason}.`;
+  return (
+    <p className="g-note">
+      <strong>Neste store steg:</strong> {k.name} ({fmtKr(k.price)}) gir mer produksjon. {why}
+    </p>
+  );
+}
+
 /** Neste nivå: krav, hva det gir, og flytteknappen – rett på Verket */
 export function StageCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
   const stage = upgradeOptions(g).find((o) => o.kind === "stage");
@@ -103,6 +121,7 @@ export function StageCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
     return (
       <Card title="Storverket">
         <p>Du har bygget et fullskala stålverk. Klarer du å samle {fmtKr(WIN_CASH)} i egenkapital?</p>
+        <KeyUpgrade g={g} />
       </Card>
     );
   }
@@ -120,6 +139,7 @@ export function StageCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
           {fmtKr(next.price)} (du har {fmtKr(Math.floor(Math.max(0, g.cash)))})
         </li>
       </ul>
+      <KeyUpgrade g={g} />
       <details className="g-role-group">
         <summary>Hva får jeg?</summary>
         <ul className="g-closed">

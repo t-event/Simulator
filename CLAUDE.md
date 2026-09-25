@@ -68,6 +68,9 @@ npx tsx src/game/balance.ts --dump 3 > lagret.json         # lagret spill på ni
 npx tsx src/game/balance.ts --kontrakter 1                 # hvor lang tid kontraktene tar per nivå
 npx tsx src/game/balance.ts --research 1                   # når testspilleren forsker
 npx tsx src/game/balance.ts --sperrer                      # hva som sperrer neste nivå: penger, omdømme, fagpoeng
+npx tsx src/game/balance.ts --vansker                      # per nivå: hva spilleren venter på, flink og nybegynner
+npx tsx src/game/balance.ts --nybegynner --verbose --seed 2  # kjør som nybegynner (også --replog N --nybegynner)
+npx tsx src/game/balance.ts --seed 2 --repdrop             # alt som tok omdømmet ned, time for time
 npm run build
 ```
 
@@ -119,5 +122,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - Tall som sammenlignes med et krav (omdømme, penger, fagpoeng) skal vises rundet **ned**
   (`fmtRep`, `Math.floor`), ellers ser et krav oppfylt ut når det ikke er det.
 - CI (`pages.yml`) kjører bare ved push til `main`, ikke på PR-er. Kjør sjekkene lokalt før PR.
+- Testspilleren har en **nybegynner** (B-062) som følger rådene i spillet. Ny mekanikk som krever at spilleren
+  gjør noe, må også gis et råd i spillet (hint, advarsel, «Neste store steg») – og nybegynneren må følge det,
+  ellers feiler CI.
 - Se på **exit-koden** til `balance.ts`, ikke bare median-linjene: sjekken av kontrollrommet står helt nederst
   og kan være «AVVIK» selv om nivådagene er OK (publiseringen av #39 feilet slik).

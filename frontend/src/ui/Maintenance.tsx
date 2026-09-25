@@ -27,11 +27,13 @@ function planOptions(life: number, current: number | null): number[] {
 
 /** Vedlikehold av foringen: manuelt, etter plan eller av en reparatør. Planlagt stans er billigere enn havari. */
 export function Maintenance({
+  id,
   g,
   stats,
   act,
   right,
 }: {
+  id?: string;
   g: GameState;
   stats: PlantStats;
   act: GameApi["act"];
@@ -51,7 +53,7 @@ export function Maintenance({
   // Slitasjen etter et gitt antall døgn, med dagens drift
   const wearAfter = (d: number) => Math.min(1, (d / life) * 0.85);
   return (
-    <Card title="Vedlikehold" right={right}>
+    <Card id={id} title="Vedlikehold" right={right}>
       <p className="g-muted">
         Foringen slites for hver charge. Planlagt stans koster {fmtKr(f0.relineCost)} og {relineHours} timer. Brenner
         den gjennom, blir det havari: {fmtKr(f0.relineCost * 3)}, {relineHours * 3} timer og tapt omdømme.

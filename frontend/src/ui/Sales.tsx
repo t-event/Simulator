@@ -8,6 +8,8 @@ import {
   furnaceOrder,
   declineContract,
   orderQueue,
+  agreementLoadUntil,
+  CONTRACT_MARGIN,
   realisticDailyT,
   recipeEstimate,
   sellLot,
@@ -48,9 +50,12 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
   const failures = recipeOk ? [] : gradeFailures(est.analysis, c.grade);
   // Anslaget bygger på det verket faktisk har laget de siste døgnene, med ordrekøen du alt har (B-034)
   const perDay = stats.dailyProductT > 0 ? realisticDailyT(g, stats) : 0;
-  const needDays = perDay > 0 ? (committed + c.tonnes) / perDay : Infinity;
+  // Ukeleveranser fra rammeavtalene som kommer før fristen, tar også plass i køen (B-062)
+  const needDays = perDay > 0 ? (committed + agreementLoadUntil(g, c.deadlineDay) + c.tonnes) / perDay : Infinity;
   const days = daysLeft(g, c);
   const tight = needDays > days;
+  // Lite slingringsmonn: en omforing, fravær eller støpefeil kan gjøre den for sen (B-062)
+  const narrow = !tight && needDays > days * CONTRACT_MARGIN;
   const doneDay = day(g) + Math.ceil(needDays) - 1;
   const answerHours = Math.max(0, (c.offerExpiresMin - g.minute) / 60);
   return (
@@ -81,11 +86,13 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
             <li className="bad">Resepten gir {failures.join(", ")}</li>
           ))}
         {canMake && (
-          <li className={tight ? "bad" : "ok"}>
+          <li className={tight ? "bad" : narrow ? "warn" : "ok"}>
             {Number.isFinite(needDays)
               ? tight
                 ? `Rekker det neppe: med ordrekøen du har, blir den ferdig ca. dag ${doneDay}, fristen er dag ${c.deadlineDay}`
-                : `Blir ferdig ca. dag ${doneDay} med ordrekøen du har (frist dag ${c.deadlineDay})`
+                : narrow
+                  ? `Knapt: blir ferdig ca. dag ${doneDay}, fristen er dag ${c.deadlineDay}. En stans eller fravær kan gjøre den for sen.`
+                  : `Blir ferdig ca. dag ${doneDay} med ordrekøen du har (frist dag ${c.deadlineDay})`
               : "Verket står – ingen produksjon nå"}
           </li>
         )}
