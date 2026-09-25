@@ -385,6 +385,8 @@ export interface GameState {
   sickUntilMin: number;
   /** Innleide vikarer dekker alle som er borte til dette spillminuttet (B-031) */
   tempsUntilMin: number;
+  /** Gjennomgang av resepten for en ny kvalitet, og steget spilleren er på (B-058) */
+  recipeGuide: { grade: GradeId; step: number } | null;
   /** Lagringen har fått automatikk-forskningen (B-054); gamle spill får den de hadde fra før */
   automationResearch?: boolean;
   /** Innleide vikarer til plasser verket mangler folk på, og hvor lenge (B-050) */

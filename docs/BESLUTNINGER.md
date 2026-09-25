@@ -722,3 +722,27 @@ Rettet:
   for et kortvarig fravær. Nå telles bare plasser ingen har; fravær dekkes av vikarer.
 - Folk som er borte, ble flinkere av å jobbe.
 - Tipset om natta lovte spoling, som nå krever «Stødig drift».
+
+## B-056 Flere forespørsler i garasjen og verkstedet (2026-09-25)
+Status: gjelder
+Brukeren fikk for få ordrer å lage i garasjen og verkstedet. Målt: ca. 1,1 forespørsel i døgnet i garasjen og
+1,4 i verkstedet, og i verkstedet kunne én av fem ikke lages med skrapet som var åpent.
+Beslutning: Grunnraten er 2,2 i garasjen og 2,6 i verkstedet (før 1,2 og 1,8); nivåene over er uendret. Inntil
+fire åpne forespørsler samtidig (før tre). Ber en kunde om en kvalitet verket ikke kan lage med åpent skrap,
+byttes den i tre av fire tilfeller til en kvalitet kunden også kjøper og verket kan lage – resten viser hva som
+kan forskes fram. Balanse: 8 / 26 / 66 / 159.
+
+## B-057 Avbryte ordrer mot straff (2026-09-25)
+Status: gjelder
+Brukeren ville kunne avbryte ordrer, med straff. Beslutning: «Avbryt ordren…» i ordrekøen, med bekreftelse.
+Straffen er 60 % av boten for ulevert stål og halve omdømmetapet ved sen levering – billigere enn å bomme på
+fristen, fordi kunden får vite det i tide. En avbrutt ukeleveranse i en rammeavtale teller som en uke for sent.
+
+## B-058 Gjennomgang av resepten for nye kvaliteter (2026-09-25)
+Status: gjelder
+Brukeren ville få en gjennomgang av hvordan man lager riktig skrapresept når en bedre kvalitet låses opp.
+Beslutning: En reseptguide i samme boks som veiledningen i starten, i seks steg: kravene forklart, rent nok
+skrap (hvilken forskning som trengs), velg kvaliteten, lag resepten («Billigst»/«Sikrest»), kjøp skrapet og
+klar. Stegene går videre av seg selv når de er gjort, og «Vis meg» åpner riktig fane. Guiden starter når verket
+flytter til et nivå med nye kvaliteter, og kan startes fra Resept-fanen for kvaliteten som vises.
+Filer: `game/recipeGuide.ts`, `ui/RecipeGuide.tsx`.

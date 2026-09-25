@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 31 – 2026-09-25: avbryte ordrer, flere forespørsler og reseptguide
+
+**Brukeren ba om:** Avbryte ordrer med straff; flere ordrer å lage i garasje og verksted; gjennomgang av hvordan
+man lager riktig resept når en ny kvalitet låses opp.
+
+**Gjort:** B-056 (flere forespørsler, mest i kvaliteter man kan lage), B-057 (avbryt ordre), B-058
+(reseptguide).
+
+**Testet:** tsc, lint, balanse (8 / 26 / 66 / 159). I Node: guiden går gjennom alle stegene når spilleren gjør
+dem; avbrutt ordre gir bot og omdømmetap. Playwright (iPhone 13): guide med «Vis meg», bekreftelse ved avbryt,
+lenke i Resept-fanen, 390 px, ingen feil.
+
+---
+
 ## Økt 30 – 2026-09-25: gjennomgang av koden
 
 **Brukeren ba om:** Se over all kode og fiks feil.

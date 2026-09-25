@@ -4,6 +4,7 @@
 import { ADDONS, CASTINGS, FURNACES, GRADES, PRODUCTS, ROLES, SCRAP_IDS, STAGES, type Addon } from "./data";
 import { addCost, adjustMorale, bookTemps, fmtKr, fmtT, log, newCandidates, orderQueue, startReline, maxLoan, newFurnaceUnit, unlock, type PurchaseResult } from "./engine";
 import { castingType, day, daysUntilAllBack, staffing, gradeRecipe, fixedPowerOffer, furnaceType, has, isAbsent, POWER_BINDING_DAYS } from "./plant";
+import { newGradesAt, startRecipeGuide } from "./recipeGuide";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
 import type { GameState, GradeId, PowerDeal, RoleId, ScrapId } from "./types";
 
@@ -169,6 +170,11 @@ export function buyUpgrade(g: GameState, id: string): PurchaseResult {
       if (g.stage === 2)
         log(g, "Fra nå av er du daglig leder og står ikke lenger i produksjonen selv. Sørg for å ha nok folk.", "info");
       if (g.stage === 3) unlock(g, "strom");
+      // Nye kvaliteter: vis hvordan man lager resepten (B-058)
+      {
+        const fresh = newGradesAt(g.stage);
+        if (fresh.length) startRecipeGuide(g, fresh[0]);
+      }
       break;
     }
     case "furnace": {

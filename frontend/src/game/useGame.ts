@@ -4,6 +4,7 @@ import { advance, newGame, type PurchaseResult } from "./engine";
 import { IDLE_NIGHT_SPEED, idleOutsideHours } from "./plant";
 import { maxSpeed } from "./research";
 import { advanceTutorial } from "./tutorial";
+import { advanceRecipeGuide } from "./recipeGuide";
 import { clearSave, loadGame, parseSave, saveGame } from "./save";
 import type { GameState, LogEntry } from "./types";
 
@@ -111,6 +112,7 @@ export function useGame(): GameApi {
       if (!g) throw new Error("ingen spill");
       const result = fn(g);
       advanceTutorial(g);
+      advanceRecipeGuide(g);
       const r = result as unknown as PurchaseResult | undefined;
       if (r && typeof r === "object" && "ok" in r && "message" in r && !r.ok) pushToast(r.message, "bad");
       flushLog();
@@ -149,6 +151,7 @@ export function useGame(): GameApi {
         const boost = idleOutsideHours(g) ? IDLE_NIGHT_SPEED : 1;
         advance(g, elapsed * g.speed * boost * GAME_MIN_PER_REAL_S);
         advanceTutorial(g);
+        advanceRecipeGuide(g);
         flushLog();
       }
       if (now - lastSave > AUTOSAVE_MS) {

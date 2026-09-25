@@ -84,6 +84,7 @@ frontend/src/
     decisions.ts Hendelseskort med valg     knowledge.ts Fagboka
     save.ts      Lagring + migrering        useGame.ts   Spilløkka for React
     tutorial.ts  Veiledet start          tips.ts      Engangstips
+    recipeGuide.ts Reseptguide for nye kvaliteter (vises av ui/RecipeGuide.tsx)
     balance.ts   Automatisk testspiller
   ui/          Spillets skjermer (mobil først) og kontrollrommet
     Overview.tsx Verket med underfanene Oversikt, Anlegg og Økonomi   Recipe.tsx  Resepten på Marked

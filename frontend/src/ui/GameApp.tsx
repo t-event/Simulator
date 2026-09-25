@@ -1,3 +1,4 @@
+import { RecipeGuideCoach } from "./RecipeGuide";
 import { lazy, Suspense, useEffect, useState } from "react";
 import "./game.css";
 import { STAGES, WIN_CASH } from "../game/data";
@@ -319,7 +320,7 @@ export function GameApp() {
     bookOpen || !!g.pendingManual || !!g.pendingDecision || g.celebrate !== null || g.gameOver || (g.won && !winSeen);
 
   return (
-    <div className={`g-app${g.tutorial !== null ? " has-coach" : ""}`}>
+    <div className={`g-app${g.tutorial !== null || g.recipeGuide ? " has-coach" : ""}`}>
       <div className="g-behind" inert={modalOpen}>
         <div className="g-head">
           <TopBar g={g} api={api} onBook={() => openBook()} />
@@ -382,6 +383,7 @@ export function GameApp() {
       </div>
 
       {!modalOpen && <Coach g={g} act={act} />}
+      {!modalOpen && <RecipeGuideCoach g={g} act={act} go={go} />}
 
       <div className="g-toasts" aria-live="polite">
         {api.toasts.map((t) => (

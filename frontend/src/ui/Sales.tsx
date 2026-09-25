@@ -2,6 +2,8 @@ import { useState } from "react";
 import { GRADE_IDS, GRADES, PRODUCTS } from "../game/data";
 import {
   acceptContract,
+  cancelContract,
+  cancelPenalty,
   AGREEMENT_STAGE,
   furnaceOrder,
   declineContract,
@@ -115,6 +117,7 @@ type SalesTab = "tilbud" | "ko" | "lager" | "avtaler";
 
 export function Sales({ g, stats, act, openTab }: Props & { openTab?: string }) {
   const [showAll, setShowAll] = useState(false);
+  const [confirmCancel, setConfirmCancel] = useState<number | null>(null);
   const [tab, setTab] = useState<SalesTab>(() =>
     openTab && ["tilbud", "ko", "lager", "avtaler"].includes(openTab)
       ? (openTab as SalesTab)
@@ -303,6 +306,31 @@ export function Sales({ g, stats, act, openTab }: Props & { openTab?: string }) 
                       </span>
                     )}
                   </div>
+                  {confirmCancel === c.id ? (
+                    <div className="g-note g-warn">
+                      Avbryte ordren? Det koster {fmtKr(cancelPenalty(c).bot)} i bot og{" "}
+                      {fmtNum(cancelPenalty(c).rep, 1)} i omdømme. Det er billigere enn å bomme på fristen, men kunden
+                      blir skuffet.
+                      <div className="g-row">
+                        <button
+                          className="g-danger g-small"
+                          onClick={() => {
+                            act((gg) => cancelContract(gg, c.id));
+                            setConfirmCancel(null);
+                          }}
+                        >
+                          Ja, avbryt ordren
+                        </button>
+                        <button className="g-small" onClick={() => setConfirmCancel(null)}>
+                          Nei
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button className="g-link g-cancel-order" onClick={() => setConfirmCancel(c.id)}>
+                      Avbryt ordren…
+                    </button>
+                  )}
                 </div>
               );
             })}
