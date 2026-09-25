@@ -437,7 +437,9 @@ function ChallengesCard({ g }: { g: GameState }) {
 
 export function Overview({ g, stats, act, go, openBook }: Props) {
   const [sheet, setSheet] = useState<Station | null>(null);
-  const [tab, setTab] = useState<SubTab>("oversikt");
+  const [chosenTab, setTab] = useState<SubTab>("oversikt");
+  // Konsern-fanen finnes bare når konsernet er åpnet; lastes et annet spill, faller valget tilbake til Oversikt
+  const tab: SubTab = chosenTab === "konsern" && !g.konsern.unlocked ? "oversikt" : chosenTab;
   const est = recipeEstimate(g, g.targetGrade, stats);
   const order = currentOrder(g);
   const split = gradesInUse(g).length > 1;

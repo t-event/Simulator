@@ -1129,6 +1129,16 @@ function castBatch(g: GameState, batch: LiquidBatch, stats: PlantStats): void {
   g.totals.producedT += productT;
 }
 
+/**
+ * Får neste øse plass på ferdigvarelageret? Et tomt lager tar alltid imot, så en øse som er større enn lageret
+ * ikke låser støpingen (B-110). Selger på spot først hvis det er slått på.
+ */
+function storeHasRoom(g: GameState, stats: PlantStats, t: number): boolean {
+  const fits = () => lotsTonnage(g) <= 0 || lotsTonnage(g) + t <= stats.storeT;
+  if (!fits() && auto(g, "autoSpot")) sellExcess(g, stats, 0.8);
+  return fits();
+}
+
 function updateCasting(g: GameState, stats: PlantStats, dt: number): void {
   g.castWait = null;
   if (!g.castQueue.length) return;
@@ -1136,12 +1146,11 @@ function updateCasting(g: GameState, stats: PlantStats, dt: number): void {
     g.castWait = "Støpemaskinen står";
     return;
   }
-  if (lotsTonnage(g) >= stats.storeT) {
-    if (auto(g, "autoSpot")) sellExcess(g, stats, 0.8);
-    if (lotsTonnage(g) >= stats.storeT) {
-      g.castWait = "Ferdigvarelageret er fullt";
-      return;
-    }
+  // Er det ikke plass til øsa som støpes, venter støpingen – uten at framdriften samler seg opp, ellers ville
+  // flere øser blitt støpt på én gang når det ble plass (B-113)
+  if (!storeHasRoom(g, stats, g.castQueue[0].t)) {
+    g.castWait = "Ferdigvarelageret er fullt";
+    return;
   }
   if (g.castProgressT <= 1e-9 && !pickNextLadle(g)) {
     g.castWait = `Venter med ${GRADES[g.castQueue[0].grade].name.toLowerCase()} til sekvensen er ferdig`;
@@ -1150,14 +1159,10 @@ function updateCasting(g: GameState, stats: PlantStats, dt: number): void {
   g.castProgressT += stats.castTph * (dt / 60);
   while (g.castQueue.length && g.castProgressT >= g.castQueue[0].t) {
     // Lageret kan fylles midt i et langt tidssteg (10×): ikke støp mer enn det er plass til (B-110)
-    // (Et tomt lager tar alltid imot, så en øse som er større enn lageret ikke låser støpingen.)
-    if (lotsTonnage(g) > 0 && lotsTonnage(g) + g.castQueue[0].t > stats.storeT) {
-      if (auto(g, "autoSpot")) sellExcess(g, stats, 0.8);
-      if (lotsTonnage(g) > 0 && lotsTonnage(g) + g.castQueue[0].t > stats.storeT) {
-        g.castProgressT = g.castQueue[0].t;
-        g.castWait = "Ferdigvarelageret er fullt";
-        break;
-      }
+    if (!storeHasRoom(g, stats, g.castQueue[0].t)) {
+      g.castProgressT = g.castQueue[0].t;
+      g.castWait = "Ferdigvarelageret er fullt";
+      break;
     }
     const batch = g.castQueue.shift()!;
     g.castProgressT -= batch.t;

@@ -60,7 +60,7 @@ export function BankCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
           Lån {fmtKr(Math.min(loanStep, loanRoom))}
         </button>
         <button disabled={g.loan <= 0 || g.cash <= 0} onClick={() => act((gg) => repay(gg, loanStep))}>
-          Betal ned {fmtKr(Math.min(loanStep, g.loan))}
+          Betal ned {fmtKr(Math.min(loanStep, g.loan, Math.max(0, g.cash)))}
         </button>
       </div>
     </Card>

@@ -106,7 +106,7 @@ export const MISSIONS: Mission[] = [
   {
     id: "analyse",
     chapter: "analyse",
-    title: "Fem døgn på rad der alt holder kvaliteten",
+    title: "Fem døgn der alt stålet holder kvaliteten",
     goal: 5,
     value: counter("rene_dogn"),
     unit: "døgn",

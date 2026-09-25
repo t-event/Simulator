@@ -205,6 +205,45 @@ test("Anbefalte støtteroller: to skrapklassere og avløsere også med fem skift
   assert((allround?.want ?? 0) >= 1, "avløsere anbefales ikke");
 });
 
+test("Fullt ferdigvarelager: støpingen venter uten å samle opp framdrift", () => {
+  const g = newGame(1);
+  g.stage = 3;
+  g.castingType = "streng1";
+  g.workers = [];
+  const stats = computePlantStats(g);
+  // Lageret er nesten fullt, og to øser venter
+  const lot = {
+    product: "emne" as const,
+    grade: "standard" as const,
+    t: stats.storeT - 5,
+    analysis: { c: 0.2, p: 0.02, tramp: 0.1 },
+    known: { c: 0.2, p: 0.02, tramp: 0.1 },
+    measured: { c: true, p: true, tramp: true },
+    second: false,
+    madeDay: 1,
+  };
+  g.lots = [{ ...lot, id: 1 }];
+  const batch = {
+    t: 30,
+    grade: "standard" as const,
+    analysis: lot.analysis,
+    expected: lot.analysis,
+    tempOff: false,
+    manual: false,
+    queuedMin: g.minute,
+  };
+  g.castQueue = [{ ...batch }, { ...batch }];
+  advance(g, 240);
+  assert(g.castWait === "Ferdigvarelageret er fullt", `ventet ikke: ${g.castWait}`);
+  assert(g.castProgressT <= 1e-9, `framdriften samlet seg opp: ${g.castProgressT}`);
+  // Lageret tømmes: bare én øse støpes med en gang, den andre må vente på støpetida si
+  g.lots = [];
+  advance(g, 10);
+  assert(g.castQueue.length === 2 && g.castProgressT > 0, "støpingen kom ikke i gang igjen");
+  const before = g.lots.reduce((a, l) => a + l.t, 0);
+  assert(before === 0, `støpte uten framdrift: ${before}`);
+});
+
 test("Kontrollrommet: oksygen går ikke i tappingen, strømmen kan slås av", () => {
   const sim = new EAFSimulation(3);
   sim.startCharge("AR20");
