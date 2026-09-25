@@ -7,6 +7,16 @@ import { CHALLENGES, checkChallenges } from "./challenges";
 import { ADDONS, CASTINGS, FURNACES, WIN_CASH } from "./data";
 import { advance, checkWin, fmtKr, newGame } from "./engine";
 import { KNOWLEDGE } from "./knowledge";
+import {
+  buySister,
+  checkKonsernUnlock,
+  KONSERN_UNLOCK_EQUITY,
+  konsernDay,
+  konsernEquity,
+  modernizeSister,
+  SISTER_TYPES,
+  sisterProfit,
+} from "./konsern";
 import { computePlantStats, supportAdvice } from "./plant";
 import { RESEARCH } from "./research";
 import { parseSave } from "./save";
@@ -34,16 +44,43 @@ test("Beløp rundes ned, så et mål ikke ser nådd ut før det er det", () => {
   assert(fmtKr(1_000_000_000) === "1 mrd. kr", `fikk ${fmtKr(1_000_000_000)}`);
 });
 
-test("Seier: 1 mrd. i egenkapital på storverket, lån trekkes fra", () => {
+test("Seier: 10 mrd. i konsernverdi på storverket, lån trekkes fra", () => {
   const g = newGame(1);
   g.stage = 4;
   g.cash = WIN_CASH;
   g.loan = 1;
   checkWin(g);
-  assert(!g.won, "vant med lån som tar egenkapitalen under 1 mrd.");
+  assert(!g.won, "vant med lån som tar verdien under målet");
   g.loan = 0;
   checkWin(g);
-  assert(g.won, "vant ikke med 1 mrd. og uten lån");
+  assert(g.won, "vant ikke med nok penger og uten lån");
+});
+
+test("Konsernet: åpner seg på storverket, datterverk gir overskudd og teller mot sluttmålet", () => {
+  const g = newGame(1);
+  g.stage = 3;
+  g.cash = KONSERN_UNLOCK_EQUITY;
+  checkKonsernUnlock(g, 5);
+  assert(!g.konsern.unlocked, "åpnet før storverket");
+  g.stage = 4;
+  g.cash = KONSERN_UNLOCK_EQUITY - 1;
+  checkKonsernUnlock(g, 5);
+  assert(!g.konsern.unlocked, "åpnet under 1 mrd. med utstyr igjen");
+  checkKonsernUnlock(g, 0);
+  assert(g.konsern.unlocked, "åpnet ikke når alt utstyret er kjøpt");
+  g.cash = 2_000_000_000;
+  assert(!buySister(g, "storverk").ok, "storverk kjøpt før et stålverk");
+  assert(buySister(g, "stalverk").ok, "stålverket ble ikke kjøpt");
+  const price = SISTER_TYPES.stalverk.price;
+  assert(g.cash === 2_000_000_000 - price, "feil pris");
+  assert(konsernEquity(g) === g.cash + price * 0.8, "verket teller ikke 80 % mot konsernverdien");
+  const p = g.konsern.plants[0];
+  const before = sisterProfit(g, p);
+  assert(modernizeSister(g, p.id).ok && sisterProfit(g, p) > before, "moderniseringen ga ikke mer overskudd");
+  const income = g.today.income.konsern ?? 0;
+  p.downUntilDay = 0;
+  for (let i = 0; i < 20; i++) konsernDay(g);
+  assert((g.today.income.konsern ?? 0) > income, "datterverket ga ikke overskudd");
 });
 
 test("Nytt spill+ gir bonus, vanlig nytt spill gjør det ikke", () => {
@@ -59,10 +96,12 @@ test("Gamle lagringer får standardverdier for nye felt", () => {
   delete g.winSeen;
   delete g.inboxSeenId;
   delete (g.settings as Record<string, unknown>).toasts;
+  delete g.konsern;
   const m = parseSave(JSON.stringify(g));
   assert(m, "lagringen kunne ikke leses");
   assert(m!.round === 1 && m!.winSeen === false && typeof m!.inboxSeenId === "number", "mangler standardverdi");
   assert(m!.settings.toasts === "alle", "mangler standard for varsler");
+  assert(m!.konsern && !m!.konsern.unlocked && m!.konsern.plants.length === 0, "mangler standard for konsernet");
 });
 
 test("Forskning: unike id-er, krav og opplåsinger som finnes, kapitler som finnes", () => {

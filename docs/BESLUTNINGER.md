@@ -310,7 +310,7 @@ Beslutning:
 - Balanse: 10 / 32 / 101 / 185, ingen konkurs.
 
 ## B-027 Vinnergrense 1 mrd., planlegger med grense og kreditt-valg, veiledet start (2026-09-24)
-Status: gjelder (erstatter vinnergrensen på 100 mill. kr)
+Status: gjelder, men vinnergrensen er erstattet av B-106 (10 mrd. i konsernverdi)
 Brukeren svarte på spørsmålene fra tilbakemeldingsrunde 2: vinnergrensen må opp, planleggeren må få en
 grense og et valg om kreditt, og spillet skal ha en veiledet start som gamle spillere kan hoppe over.
 Beslutning:
@@ -1149,7 +1149,7 @@ Status: gjelder
   10 fagpoeng og +3 omdømme per runde. Runden lagres i `g.round`.
 
 ## B-091 Seieren ved 1 milliard (2026-09-25)
-Status: gjelder
+Status: gjelder, men målet er nå 10 mrd. i konsernverdi (B-106)
 Brukeren nådde 1 mrd., men ingenting skjedde. Seieren krever egenkapital (kasse minus lån) på 1 mrd. og ble bare
 sjekket ved midnatt. Samtidig rundet beløpene opp, så 999,996 mill. ble vist som «1 000,00 mill.».
 Beslutning:
@@ -1273,3 +1273,31 @@ Beslutning:
 - Et hint på Verket foreslår fastpris i starten av en tørr periode når fastprisen er billigere. Det gjelder ikke korte
   pristopper: der går prisen ned igjen før en 30-dagers fastpris lønner seg (målt: rådet ga mest ingenting eller tap).
 - Testspillerne følger rådet. Målt med og uten råd: høyere kasse på 5 av 6 frø.
+
+## B-106 Konsern med flere verk, og sluttmålet 10 mrd. (2026-09-25)
+Status: gjelder (erstatter vinnergrensen i B-027 og B-091)
+Brukeren syntes spillet ble for fort ferdig og ville utvide storverket til et konsern med flere verk. Sluttmålet skulle
+bli mye større, så det er det siste man når.
+Beslutning:
+- Konsernet åpner seg på storverket når alt utstyret er kjøpt, eller når egenkapitalen når 1 mrd. (det gamle målet).
+  Da kommer fanen Verket → Konsern (`konsern.ts`, `ui/Konsern.tsx`).
+- Datterverk har egen ledelse og egne folk. Spilleren bestemmer bare investeringene, så det blir ikke et nytt spill i
+  spillet.
+  - Stålverk: 300 mill., ca. 3,5 mill. per døgn.
+  - Storverk: 1,2 mrd., ca. 14 mill. per døgn. Krever et stålverk først.
+  - Begge betaler seg på ca. 86 døgn. Overskuddet følger stålprisen.
+  - Høyst seks datterverk.
+- Et datterverk kan stå 2–5 døgn etter et havari (1,2 % per døgn).
+- Modernisering: 30 % av prisen gir +25 % overskudd, inntil tre trinn.
+- Felles innkjøp (150 mill.) gir 5 % billigere skrap hjemme. Felles salgskontor (250 mill.) gir 3 % bedre pris
+  hjemme. Hver av dem gir også 5 % mer overskudd i datterverkene.
+- Sluttmålet er 10 mrd. i konsernverdi: kasse minus lån, pluss 80 % av det som er investert i datterverkene. Da teller
+  et kjøp nesten fullt med én gang, og spilleren straffes ikke for å investere.
+- Testspillerne kjøper felles funksjoner når de har et datterverk, ellers nye verk og så modernisering. De holder
+  100 mill. i reserve.
+- Målt med `--vansker`:
+  - Flink vinner dag 324–356.
+  - Nybegynneren vinner dag 337–449.
+  - Før vant den flinke rundt dag 200.
+  - Ingen konkurs.
+- `--vansker` kjører nå inntil 700 døgn.

@@ -529,6 +529,7 @@ export function computePlantStats(g: GameState): PlantStats {
     (hasResearch(g, "kundepleie") ? 0.02 : 0) +
     (hasResearch(g, "eksport") ? 0.03 : 0) +
     (hasResearch(g, "produktutvikling") ? 0.04 : 0) +
+    (g.konsern?.shared.includes("salg") ? 0.03 : 0) +
     (hasResearch(g, "gronnstal") ? 0.05 : 0) +
     (has(g, "havn") ? 0.02 : 0) +
     (has(g, "vakuum") ? 0.05 : 0);
