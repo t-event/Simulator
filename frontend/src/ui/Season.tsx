@@ -141,9 +141,7 @@ export function SeasonPrompt({ api, g, onOpenSettings }: { api: GameApi; g: Game
           </div>
         )}
         {confirm && (
-          <p className="g-muted g-small-text">
-            Spillet du har nå, erstattes. Vil du beholde det, ta en sikkerhetskopi under ⚙️ først.
-          </p>
+          <p className="g-muted g-small-text">Spillet du har nå, erstattes – også det som er lagret på nett.</p>
         )}
       </div>
     </div>
@@ -200,9 +198,7 @@ export function SeasonJoin({ api, g, onOpenSettings }: { api: GameApi; g: GameSt
         </div>
       )}
       {confirm && (
-        <p className="g-muted g-small-text">
-          Spillet du har nå, erstattes. Vil du beholde det, ta en sikkerhetskopi under ⚙️ først.
-        </p>
+        <p className="g-muted g-small-text">Spillet du har nå, erstattes – også det som er lagret på nett.</p>
       )}
     </div>
   );

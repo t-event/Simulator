@@ -43,7 +43,7 @@ export function loadGame(): GameState | null {
   }
 }
 
-/** Leser en sikkerhetskopi (JSON-fil fra «Last ned sikkerhetskopi»). Null hvis fila ikke er et lagret spill. */
+/** Leser et lagret spill fra tekst (brukes av testene). Null hvis teksten ikke er et lagret spill. */
 export function parseSave(text: string): GameState | null {
   try {
     const g = JSON.parse(text) as GameState;

@@ -5,7 +5,7 @@ import { IDLE_NIGHT_SPEED, idleOutsideHours } from "./plant";
 import { maxSpeed } from "./research";
 import { advanceTutorial } from "./tutorial";
 import { advanceRecipeGuide } from "./recipeGuide";
-import { clearSave, loadGame, parseSave, saveGame } from "./save";
+import { clearSave, loadGame, saveGame } from "./save";
 import { showToast } from "./inbox";
 import type { GameState, LogEntry } from "./types";
 
@@ -48,8 +48,6 @@ export interface GameApi {
   setSpeed: (speed: number) => void;
   dismissToast: (id: number) => void;
   quit: () => void;
-  /** Starter fra en sikkerhetskopi. Gir false hvis fila ikke var et lagret spill. */
-  loadBackup: (text: string) => boolean;
   /** Bytter til et spill fra nettet (B-125), på pause */
   adopt: (g: GameState) => void;
   /** Legger et spill fra nettet i den lokale lagringen uten å starte det, så «Fortsett» tar det (B-125) */
@@ -137,17 +135,6 @@ export function useGame(): GameApi {
     const g = loadGame();
     begin(g ?? newGame());
   }, [begin]);
-
-  const loadBackup = useCallback(
-    (text: string) => {
-      const g = parseSave(text);
-      if (!g) return false;
-      g.speed = 0;
-      begin(g);
-      return true;
-    },
-    [begin],
-  );
 
   const adopt = useCallback(
     (g: GameState) => {
@@ -275,7 +262,6 @@ export function useGame(): GameApi {
     setSpeed,
     dismissToast,
     quit,
-    loadBackup,
     adopt,
     stash,
   };

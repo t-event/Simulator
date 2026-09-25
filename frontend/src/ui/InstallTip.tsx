@@ -85,10 +85,7 @@ export function InstallTip() {
             )}
             <li>Start spillet fra ikonet på hjemskjermen etterpå.</li>
             {(os === "ios" || os === "annet") && (
-              <li>
-                På iPhone får appen på hjemskjermen sin egen lagring. Har du et spill i gang i Safari, ta en
-                sikkerhetskopi under ⚙️ Innstillinger først, og last den inn i appen.
-              </li>
+              <li>Logg inn i appen på hjemskjermen, så hentes spillet ditt fra nettet.</li>
             )}
           </ul>
         </details>
