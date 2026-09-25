@@ -18,8 +18,12 @@ export type Step = "intro" | "smelt" | "rens" | "slagg" | "tapp" | "tapper" | "f
 
 /** Simulerte sekunder per sekund på skjermen i hvert steg; hele chargen tar et par minutter. */
 export const SPEED: Record<Step, number> = { intro: 0, smelt: 40, rens: 20, slagg: 15, tapp: 10, tapper: 8, ferdig: 0 };
-/** Trafo-tapp for strømnivå 1–5 */
+/** Trafo-tapp for strømnivå 1–5 (nivå 0 = strømmen av, B-079) */
 const POWER_TAPS = [0, 1, 2, 3, 4];
+/** Karbon som blåses inn når spilleren slår på karbon i rensingen (kg/min, B-079) */
+const CARBON_BOOST_KG_MIN = 120;
+/** Under smeltingen holder automatikken karbonet over dette, også når oksygenet står på (B-079) */
+const MELT_CARBON_FLOOR_PCT = 0.12;
 const FEEDS = [1.8, 2.2, 2.45];
 export const MELT_BAND: [number, number] = [1550, 1630];
 /** Slagget er godt nok tippet ut under denne mengden */
@@ -48,6 +52,7 @@ interface Auto {
   feed: number;
   nextFeedS: number;
   oxygen: boolean;
+  carbon: boolean;
   deslag: "nei" | "pagar" | "ferdig" | "hoppet";
   slagLeftKg: number;
   steelSpilledKg: number;
@@ -69,6 +74,16 @@ export interface Score {
 // ------------------------------------------------------------------ //
 // Automatikken: alt spilleren ikke trenger å tenke på
 // ------------------------------------------------------------------ //
+/** Strømnivå 1–5 gir trafo-tapp, nivå 0 slår strømmen av */
+function applyPower(sim: EAFSimulation, level: number): void {
+  if (level <= 0) {
+    if (sim.state.powerOn) sim.setPower(false);
+    return;
+  }
+  sim.setTransformerTap(POWER_TAPS[level - 1]);
+  if (!sim.state.powerOn) sim.setPower(true);
+}
+
 function automate(sim: EAFSimulation, step: Step, a: Auto, random: () => number): void {
   const s = sim.state;
   switch (step) {
@@ -85,20 +100,20 @@ function automate(sim: EAFSimulation, step: Step, a: Auto, random: () => number)
       }
       sim.setConveyor(true);
       sim.setConveyorRate(a.feed);
-      sim.setTransformerTap(POWER_TAPS[a.level - 1]);
-      if (!s.powerOn) sim.setPower(true);
+      applyPower(sim, a.level);
       sim.setLimeRate(42);
       sim.setDolomiteRate(32);
       // Oksygen mens strømmen går: kjemisk varme og skummende slagg (B-076)
       sim.setOxygenFlow(a.oxygen ? OXYGEN_MELT_NM3H : 0);
-      sim.setCarbonInjection(28);
+      // Automatikken blåser inn mer karbon når oksygenet har brent det ned, så rensingen har noe å jobbe med
+      sim.setCarbonInjection(s.carbonPct < MELT_CARBON_FLOOR_PCT ? CARBON_BOOST_KG_MIN : 28);
       break;
     case "rens":
       // Rensing med strømmen på: oksygen brenner karbon, strømmen holder temperaturen (B-076)
       sim.setConveyor(false);
-      sim.setTransformerTap(POWER_TAPS[a.level - 1]);
-      if (!s.powerOn) sim.setPower(true);
-      sim.setCarbonInjection(8);
+      applyPower(sim, a.level);
+      // Karbon kan blåses inn igjen hvis spilleren har blåst for lenge (B-079)
+      sim.setCarbonInjection(a.carbon ? CARBON_BOOST_KG_MIN : 8);
       sim.setDolomiteRate(0);
       sim.setLimeRate(20);
       sim.setOxygenFlow(a.oxygen ? OXYGEN_REFINE_NM3H : 0);
@@ -119,8 +134,7 @@ function automate(sim: EAFSimulation, step: Step, a: Auto, random: () => number)
     case "tapp":
       sim.setSlagDoor(false);
       if (s.tiltDeg !== 0) sim.setTilt(0);
-      sim.setTransformerTap(POWER_TAPS[a.level - 1]);
-      if (!s.powerOn) sim.setPower(true);
+      applyPower(sim, a.level);
       sim.setOxygenFlow(a.oxygen ? OXYGEN_MELT_NM3H : 0);
       break;
     default:
@@ -237,6 +251,7 @@ export class SimpleRunner {
     feed: 2.2,
     nextFeedS: 300,
     oxygen: false,
+    carbon: false,
     deslag: "nei",
     slagLeftKg: 0,
     steelSpilledKg: 0,
@@ -265,6 +280,10 @@ export class SimpleRunner {
   get blowing(): boolean {
     return this.a.oxygen;
   }
+  /** Karboninnblåsing er slått på i rensingen (B-079) */
+  get carbonOn(): boolean {
+    return this.a.carbon;
+  }
   get deslag(): Auto["deslag"] {
     return this.a.deslag;
   }
@@ -291,11 +310,18 @@ export class SimpleRunner {
     if (this.step === "intro") this.step = "smelt";
   }
   changeLevel(delta: number): void {
-    this.a.level = Math.max(1, Math.min(5, this.a.level + delta));
+    this.a.level = Math.max(0, Math.min(5, this.a.level + delta));
   }
   /** Slår oksygenlansa av eller på. Virker mens strømmen går (B-076). */
   setOxygen(on: boolean): void {
     this.a.oxygen = on && (this.step === "smelt" || this.step === "rens" || this.step === "tapp");
+    // Oksygen og karbon motarbeider hverandre, så bare én av dem står på i rensingen
+    if (this.a.oxygen) this.a.carbon = false;
+  }
+  /** Blåser inn karbon i rensingen når karbonet er blitt for lavt (B-079) */
+  setCarbon(on: boolean): void {
+    this.a.carbon = on && this.step === "rens";
+    if (this.a.carbon) this.a.oxygen = false;
   }
   /** Beholdes for testspilleren: oksygen på/av i rensingen */
   setBlowing(on: boolean): void {
@@ -304,6 +330,7 @@ export class SimpleRunner {
   finishRefining(): void {
     if (this.step !== "rens") return;
     this.a.oxygen = false;
+    this.a.carbon = false;
     this.step = "slagg";
   }
   /** Tipper ovnen mot slaggdøra. Spilleren må rette den opp selv (B-076). */

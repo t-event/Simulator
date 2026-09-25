@@ -819,8 +819,12 @@ function playSimple(policy: SimplePolicy, seed: number, req?: ManualRequest) {
         // Strømmen holder badet varmt, men ikke over tappetemperaturen
         if (t > target - 25) run.changeLevel(-1);
         else if (t < MELT_BAND[0]) run.changeLevel(1);
+      } else if (policy === "nybegynner" && sim.state.carbonPct < g.tapCarbonMinPct + 0.005) {
+        // Blåst for lenge: karbon inn igjen, som rådet på skjermen sier (B-079)
+        run.setCarbon(true);
       } else {
         run.setOxygen(false);
+        run.setCarbon(false);
         run.finishRefining();
       }
     }
