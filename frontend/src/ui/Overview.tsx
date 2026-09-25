@@ -47,6 +47,7 @@ import { PlantScene } from "./PlantScene";
 import { SceneBubbles } from "./SceneBubbles";
 import { StageCard, StationButton, UpgradeSheet } from "./Upgrades";
 import { AutoToggle } from "./AutoToggle";
+import { konsernReady } from "../game/konsern";
 import { BankCard } from "./Settings";
 import { KonsernTab } from "./Konsern";
 import { readyUpgrades, stationOptions, stationReady, type Station } from "./stations";
@@ -450,6 +451,7 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
   // På Oversikt står målkortet øverst når du kan flytte, så hintet om det trengs bare på de andre underfanene (B-068)
   const tips = hints(g, stats).filter((t) => !(t.anchor === "mal" && tab === "oversikt"));
   const upgradesReady = readyUpgrades(g);
+  const konsernCanBuy = konsernReady(g);
   const missingNow = missingScrap(g, stats);
   // Varsel om foringen åpner Anlegg og ruller ned til vedlikeholdskortet
   // …og «Du kan flytte inn» åpner Oversikt og ruller til målkortet (B-064)
@@ -525,6 +527,11 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
               {t.id === "anlegg" && upgradesReady > 0 && (
                 <span className="g-badge" aria-label={`${upgradesReady} utstyr du har råd til`}>
                   {upgradesReady}
+                </span>
+              )}
+              {t.id === "konsern" && konsernCanBuy > 0 && (
+                <span className="g-badge" aria-label={`${konsernCanBuy} kjøp du har råd til`}>
+                  {konsernCanBuy}
                 </span>
               )}
             </button>

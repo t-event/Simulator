@@ -246,6 +246,12 @@ export function konsernOptions(g: GameState): KonsernOption[] {
   return out;
 }
 
+/** Kjøp i konsernet som ikke er sperret og som kassa rekker til nå – tallet på Konsern-fanen (B-144) */
+export function konsernReady(g: GameState): number {
+  if (!g.konsern.unlocked) return 0;
+  return konsernOptions(g).filter((o) => !o.blocked && g.cash >= o.price).length;
+}
+
 /**
  * «Neste steg» på Konsern-fanen (B-119): kjøpet som har betalt seg raskest regnet fra i dag – tida det tar å spare
  * opp, pluss tida kjøpet bruker på å betale seg. Da foreslås ikke noe som ligger et halvt år fram i tid.

@@ -44,8 +44,8 @@ Sluttmålet er et stålkonsern verdt 10 mrd. kr. Etterpå kan du spille videre.
 
 - **Konto** (e-post og passord) lagrer spillet på nett, så du kan fortsette på en annen mobil eller i en annen
   nettleser. Bytter du mellom to nettlesere, henter spillet det nyeste.
-- **Topplista** (🏆 øverst) viser konsernverdi, raskest til storverk, raskest til 10 mrd. og omdømme – for sesongen
-  som pågår og for alle tider.
+- **Topplista** (🏆 øverst) viser konsernverdi, mest penger på bok, raskest til storverk, raskest til 10 mrd. og
+  omdømme – for sesongen som pågår og for alle tider. Den oppdaterer seg mens du spiller.
 - **Sesonger** varer et halvt år. Alle som er med, starter i garasjen, og du kan bli med når som helst mens sesongen
   pågår. Var du med i forrige sesong, får du en liten fordel ved start.
 - **Felles hendelser** (skrapmangel, strømkrise, eksportboom …) treffer alle spillerne samtidig.

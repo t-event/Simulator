@@ -163,7 +163,8 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
     let warning: string | undefined;
     let confirm: string | undefined;
     let schedulable = false;
-    if (!owned && c.product !== currentCasting.product) {
+    // Mangler forskningen, er det den som står i veien – advarslene om byttet kommer når den er gjort (B-144)
+    if (!owned && c.product !== currentCasting.product && !reason) {
       const old = PRODUCTS[currentCasting.product].name.toLowerCase();
       const remaining = g.contracts
         .filter((x) => x.status === "aktiv" && x.product === currentCasting.product)
@@ -175,7 +176,7 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
       // over fristen og tatt med seg omdømmet, så de må leveres først (B-062)
       const stuck = remaining - inStock;
       if (!reason && stuck > 0.05) reason = `Lever først kontraktene på ${old} (${fmtT(stuck)} igjen)`;
-      schedulable = !!reason && !researchBlocker(g, c.id);
+      schedulable = !!reason;
       // Rammeavtaler på det gamle produktet avsluttes uten straff ved byttet (endStaleAgreements, B-040)
       const deals = g.agreements.filter((a) => a.status === "aktiv" && a.product === currentCasting.product).length;
       const next = PRODUCTS[c.product].name.toLowerCase();
@@ -269,8 +270,9 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
         0,
       ) / recent.length
     : 0;
+  // Bare for det som kan kjøpes nå: mangler forskning eller penger, er det det som står på kortet (B-144)
   for (const o of out) {
-    if (o.owned || o.locked || dailyCost <= 0 || o.price < dailyCost) continue;
+    if (!o.available || dailyCost <= 0 || o.price < dailyCost) continue;
     const left = (g.cash - o.price) / dailyCost;
     if (left >= 2) continue;
     const thin = `Etter kjøpet har du penger til drift i ${left < 1 ? "under ett døgn" : `bare ca. ${Math.floor(left)} døgn`}. Uten penger får du ikke kjøpt skrap, og verket stopper. Spar litt mer, eller ta opp lån under Verket → Økonomi.`;

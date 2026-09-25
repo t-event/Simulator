@@ -129,8 +129,9 @@ skysymbol i toppen viser om spillet er lagret på nett.
 Spilleren ser: fanen «Toppliste» (under Verket, eller bak 🏆 i toppen) med kallenavn og plassering.
 
 - Kallenavn velges ved opprettelse (ikke e-post, ikke krav om ekte navn).
-- Lister: konsernverdi, raskest til storverk (spilldøgn), raskest til 10 mrd., beste kontrollrom-parti, høyeste
-  omdømme. «Alle» og «denne sesongen».
+- Lister: konsernverdi, mest penger på bok (B-144), raskest til storverk (spilldøgn), raskest til 10 mrd., høyeste
+  omdømme. «Alle» og «denne sesongen». Beste kontrollrom-parti venter til kontrollrommet er ferdig (B-143).
+- En åpen toppliste henter på nytt hvert 15. sekund, så den følger med mens man spiller (B-144).
 - Serveren regner listene fra `snapshots`, appen sender ikke inn poeng selv.
 - Juksesperre (under). Brukeren kan sperre en konto fra Supabase.
 
@@ -240,7 +241,7 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
 - Migrasjonene i `supabase/`: 001 grunnlag, 002 sikkerhet, 003 toppliste, 004 sesonger, 005 sesong på seks
   måneder, 006 tidslinje per sesong, 007 toppliste med nivå, 008 lagring med versjon, 009 ny start i sesongen,
   010 rekorder («Alle tider» leser tabellen `records`, B-142), 011 sesongresultat (🎖 ved navnet og
-  `season_history()`, B-143).
+  `season_history()`, B-143), 012 toppliste med kassa («Mest penger på bok», `records.best_cash`, B-144).
 - Flere enheter samtidig: bare enheten som spilles på, lagrer; den andre settes på pause med «Spill her» (B-143).
 - Merker ved sesongslutt (fase 3) er bygget som 🎖 med beste plassering ved kallenavnet (B-143).
 - **Slik starter du en ny sesong:** i SQL Editor: `select public.start_season('Sesong 2', 26);` (navn, antall uker; 26 = seks måneder, B-130).

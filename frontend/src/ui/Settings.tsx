@@ -56,7 +56,6 @@ function ToastSettings({ g, act }: { g: GameState; act: GameApi["act"] }) {
           [
             ["alle", "Velg selv", "Problemer, hendelser og gode nyheter – i temaene du krysser av under"],
             ["problemer", "Bare problemer", "Bare det som går galt, uansett tema"],
-            ["ingen", "Ingen", "Ingen varsler på skjermen"],
           ] as const
         ).map(([id, label, hint]) => (
           <label key={id} className="g-toggle">
@@ -93,19 +92,17 @@ function ToastSettings({ g, act }: { g: GameState; act: GameApi["act"] }) {
           ))}
         </fieldset>
       )}
-      {mode !== "ingen" && (
-        <label className="g-field">
-          <span>Hvor lenge et varsel står</span>
-          <select
-            value={g.settings.toastSeconds ?? 6}
-            onChange={(e) => act((gg) => void (gg.settings.toastSeconds = Number(e.target.value)))}
-          >
-            <option value={3}>Kort (3 sekunder)</option>
-            <option value={6}>Normalt (6 sekunder)</option>
-            <option value={10}>Lenge (10 sekunder)</option>
-          </select>
-        </label>
-      )}
+      <label className="g-field">
+        <span>Hvor lenge et varsel står</span>
+        <select
+          value={g.settings.toastSeconds ?? 6}
+          onChange={(e) => act((gg) => void (gg.settings.toastSeconds = Number(e.target.value)))}
+        >
+          <option value={3}>Kort (3 sekunder)</option>
+          <option value={6}>Normalt (6 sekunder)</option>
+          <option value={10}>Lenge (10 sekunder)</option>
+        </select>
+      </label>
     </>
   );
 }

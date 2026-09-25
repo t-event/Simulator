@@ -62,7 +62,7 @@ export function logTopic(text: string): LogTopic {
 export function showToast(g: GameState, e: Pick<LogEntry, "kind" | "text">): boolean {
   if (e.kind === "info") return false;
   const mode = g.settings.toasts ?? "alle";
-  if (mode === "ingen" || (mode === "problemer" && e.kind !== "bad")) return false;
+  if (mode === "problemer" && e.kind !== "bad") return false;
   // Problemer vises alltid når valget er «bare problemer»; ellers bestemmer temaene
   if (mode === "problemer") return true;
   return g.settings.toastTopics?.[logTopic(e.text)] !== false;

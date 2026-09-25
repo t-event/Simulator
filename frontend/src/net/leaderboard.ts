@@ -4,10 +4,12 @@
  */
 import { rest, rpc, userId } from "./supabase";
 
-export type BoardKind = "verdi" | "omdomme" | "storverk" | "ferdig";
+export type BoardKind = "verdi" | "kasse" | "omdomme" | "storverk" | "ferdig";
 
 export const BOARDS: { id: BoardKind; label: string; unit: "kr" | "rep" | "dager" }[] = [
   { id: "verdi", label: "Konsernverdi", unit: "kr" },
+  // Kassa slik den står i tidslinja (B-144)
+  { id: "kasse", label: "Mest penger på bok", unit: "kr" },
   { id: "storverk", label: "Raskest til storverk", unit: "dager" },
   { id: "ferdig", label: "Raskest til 10 mrd.", unit: "dager" },
   { id: "omdomme", label: "Omdømme", unit: "rep" },
