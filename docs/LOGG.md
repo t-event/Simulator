@@ -17,9 +17,14 @@ nøkler er alt på nett slått av og spillet virker som før.
 - Playwright på iPhone 13 med `.env.local` og falsk Supabase: samme løp som i økt 69, alt OK.
 - Playwright uten `.env.local`: ingen kontokort, ingen feil.
 
-**Gjenstår:**
-- Brukeren legger inn `SUPABASE_URL` og `SUPABASE_KEY` som secrets i GitHub, lager en ny publishable-nøkkel og
-  sletter den gamle, kjører SQL-fila og setter Site URL.
+**Gjenstår (brukeren ba Claude ordne alt i Supabase, men sandkassen når ikke supabase.com):**
+- Brukeren åpner miljøet for `api.supabase.com` (og gjerne `<prosjekt>.supabase.co`) under Network access, og
+  legger inn en Supabase personal access token som miljøvariabelen `SUPABASE_ACCESS_TOKEN` (aldri i chatten).
+- Neste økt med token: kjør `supabase/001_grunnlag.sql` via Management API
+  (`POST https://api.supabase.com/v1/projects/<ref>/database/query`), sett `site_url` til
+  `https://t-event.github.io/Simulator/` (`PATCH /v1/projects/<ref>/config/auth`), lag ny publishable-nøkkel
+  (`POST /v1/projects/<ref>/api-keys`) og slett den gamle, og verifiser at tabellene og reglene finnes.
+- GitHub Secrets `SUPABASE_URL` og `SUPABASE_KEY` må brukeren legge inn selv (ingen verktøy for det her).
 
 ---
 
