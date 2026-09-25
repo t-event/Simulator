@@ -321,16 +321,21 @@ export function consumeAuthHash(hash = typeof location !== "undefined" ? locatio
 // ------------------------------------------------------------------ databasen
 
 /** Spørring mot en tabell, med økta til den som er logget inn. `path` er f.eks. "saves?select=state". */
+/** Grensen for keepalive i nettleserne er 64 KiB; litt margin for tegn som tar mer enn én byte */
+export const KEEPALIVE_MAX = 60_000;
+
 export async function rest<T>(
   path: string,
   init: { method?: string; body?: unknown; prefer?: string; keepalive?: boolean } = {},
 ): Promise<T> {
   const token = await getToken();
+  const body = init.body === undefined ? undefined : JSON.stringify(init.body);
   const res = await call(`${cloud.url}/rest/v1/${path}`, {
     method: init.method ?? "GET",
     headers: headers(token, init.prefer ? { Prefer: init.prefer } : undefined),
-    body: init.body === undefined ? undefined : JSON.stringify(init.body),
-    keepalive: init.keepalive,
+    body,
+    // Nettleserne avviser keepalive over 64 kB, og et stort spill er større (B-141): da sendes det som vanlig
+    keepalive: init.keepalive && (body?.length ?? 0) < KEEPALIVE_MAX,
   });
   if (!res.ok) throw await readError(res);
   if (res.status === 204 || res.headers.get("content-length") === "0") return undefined as T;

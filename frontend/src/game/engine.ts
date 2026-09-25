@@ -143,11 +143,10 @@ function newDay(dayNumber: number, cash: number): DayFinance {
 }
 
 /**
- * Nytt spill. «round» > 1 er nytt spill+ etter en seier (B-090): mer startkapital, noen fagpoeng og litt omdømme,
- * så neste runde går fortere – men garasjen er den samme.
+ * Nytt spill i garasjen. Nytt spill+ (runde 2+ med bonus, B-090) er fjernet: sesongene erstatter det (B-141).
+ * Feltet `round` står igjen for eldre lagringer.
  */
-export function newGame(seed = Date.now(), round = 1): GameState {
-  const bonus = Math.min(4, Math.max(0, round - 1));
+export function newGame(seed = Date.now()): GameState {
   const scrap = Object.fromEntries(SCRAP_IDS.map((id) => [id, emptyStock()])) as Record<ScrapId, ScrapStock>;
   const g: GameState = {
     version: SAVE_VERSION,
@@ -155,9 +154,9 @@ export function newGame(seed = Date.now(), round = 1): GameState {
     // Første dag starter kl. 06 når du låser opp garasjen
     minute: 6 * 60,
     speed: 1,
-    cash: START_CASH * (1 + bonus),
+    cash: START_CASH,
     loan: 0,
-    reputation: START_REPUTATION + 3 * bonus,
+    reputation: START_REPUTATION,
     stage: 0,
     owned: [],
     furnaceType: "induksjon025",
@@ -234,8 +233,8 @@ export function newGame(seed = Date.now(), round = 1): GameState {
     gameOver: false,
     won: false,
     pendingManual: null,
-    researchPoints: 10 * bonus,
-    round,
+    researchPoints: 0,
+    round: 1,
     winSeen: false,
     courseSeats: null,
     pendingCastingSwitch: null,
@@ -311,7 +310,6 @@ export function addIncome(g: GameState, category: IncomeCategory, amount: number
   g.today.income[category] = (g.today.income[category] ?? 0) + amount;
 }
 
-/** Fagpoeng til forskning. */
 /** Teller hendelser som oppdragene i fagboka følger med på */
 export function countEvent(g: GameState, key: string, n = 1): void {
   g.counters[key] = (g.counters[key] ?? 0) + n;
@@ -1468,7 +1466,6 @@ function complains(g: GameState, a: Analysis, grade: GradeId): boolean {
   return chance(g, 0.8);
 }
 
-/** Omtrent hvor mye verket faktisk lager per døgn: snittet av de siste døgnene, eller et forsiktig anslag */
 /** Andel av tida til fristen en kontrakt bør ta for å regnes som trygg på Salg; mer er «knapt» (B-062) */
 export const CONTRACT_MARGIN = 0.8;
 
@@ -1560,6 +1557,7 @@ export function assessOffer(g: GameState, stats: PlantStats, c: Contract, commit
   };
 }
 
+/** Omtrent hvor mye verket faktisk lager per døgn: snittet av de siste døgnene, eller et forsiktig anslag */
 export function realisticDailyT(g: GameState, stats: PlantStats): number {
   const recent = g.history.slice(-3).filter((d) => d.producedT > 0);
   const est =
@@ -2094,10 +2092,6 @@ function updatePots(g: GameState, stats: PlantStats, dt: number): void {
   });
 }
 
-/**
- * Fravær (B-031): ferie kommer automatisk med tre døgns varsel, og enkeltpersoner kan bli syke –
- * oftere når trivselen er lav eller verket går nattskift. Ledige avløsere dekker plassene.
- */
 /** Leier inn vikarer som dekker alle som er borte, i et antall døgn (B-031, B-039) */
 export function bookTemps(g: GameState, days: number, auto = false): void {
   const cost = tempsCost(g, days);
@@ -2175,6 +2169,10 @@ function updatePowerDeal(g: GameState, today: number): void {
   log(g, `${name} for strøm gikk ut. Du betaler nå spotpris, time for time, til du velger en ny avtale.`, "event");
 }
 
+/**
+ * Fravær (B-031): ferie kommer automatisk med tre døgns varsel, og enkeltpersoner kan bli syke –
+ * oftere når trivselen er lav eller verket går nattskift. Ledige avløsere dekker plassene.
+ */
 function updateAbsence(g: GameState, stats: PlantStats): void {
   if (!g.workers.length) return;
   const today = day(g);

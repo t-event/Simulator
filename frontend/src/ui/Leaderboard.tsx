@@ -206,9 +206,9 @@ export function Leaderboard({
         <p className="g-muted g-small-text">Du er nr. {myRank}.</p>
       )}
       <p className="g-muted g-small-text">
-        Lista regnes ut på serveren av det som er lagret på nett, én gang per spilldøgn. Merket ved navnet viser hvor
-        langt spilleren har kommet: fra Garasje til Storverk, og Konsern når konsernverdien passerer 1 mrd. Kontoer med
-        urimelig vekst holdes utenfor.
+        Lista regnes ut på serveren av det som er lagret på nett, én gang per spilldøgn. I sesongen gjelder spillet du
+        har nå; på «Alle tider» står ditt beste resultat. Merket ved navnet viser hvor langt spilleren har kommet: fra
+        Garasje til Storverk, og Konsern når konsernverdien passerer 1 mrd. Kontoer med urimelig vekst holdes utenfor.
       </p>
     </>
   );

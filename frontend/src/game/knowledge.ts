@@ -37,7 +37,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
     paragraphs: [
       "Karbon er det viktigste legeringselementet i stål: mer karbon gir hardere og sterkere stål, men dårligere sveisbarhet og formbarhet.",
       "Karbon kan alltid legges til med karburiseringsmiddel. Men i en induksjonsovn finnes det ingen måte å fjerne det på – det som er i skrapet, blir i stålet.",
-      "Råjern har rundt 4 % karbon. Det er gull for å tynne ut sporelementer, men det må ha en ovn med oksygen for å brenne karbonet ned igjen.",
+      "Råjern har rundt 4 % karbon. Det er gull for å tynne ut sporelementer, men da trengs en ovn med oksygen som kan brenne karbonet ned igjen.",
     ],
   },
   {
@@ -172,7 +172,7 @@ export const SEASON_CHAPTER: KnowledgeCard = {
     "Stålprisen svinger med konjunkturene: når det bygges mye, øker etterspørselen og prisen stiger. Når verden bygger mindre, eller billig import strømmer inn, faller den. Skrapprisen følger stålprisen, for skrap er råstoffet.",
     "Strømprisen svinger av andre grunner: tørre år gir lite vann i magasinene, og kalde vintre gir høyt forbruk. Et stålverk bruker enormt med strøm, så en strømkrise merkes med én gang.",
     "I spillet dukker slike perioder opp som felles hendelser som treffer alle spillerne samtidig: skrapmangel, strømkrise, eksportboom, importpress og streik. Se etter dem øverst på Marked, og tilpass deg: kjøp skrap før prisen stiger, selg når stålprisen er høy.",
-    "En sesong varer i et halvt år. Alle som er med, starter i garasjen samtidig, og topplista for sesongen viser bare spill fra den. Var du med i forrige sesong, får du en liten fordel ved start.",
+    "En sesong varer i et halvt år. Du trenger en konto for å være med, og du kan bli med når som helst mens sesongen pågår. Alle starter i garasjen, og topplista for sesongen viser bare spill som er startet i den. Var du med i forrige sesong, får du en liten fordel ved start.",
     "Merket ved navnet på topplista viser hvor langt spilleren har kommet: Garasje, Verksted, Støperi, Stålverk eller Storverk, og Konsern når konsernverdien passerer én milliard. Medaljene viser de tre beste plassene.",
   ],
 };

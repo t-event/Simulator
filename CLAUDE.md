@@ -11,6 +11,7 @@ Claudes langtidsminne sammen med `docs/`. Hold den kort og oppdatert.
    erstatter den gamle.
 3. Les **`docs/DESIGN.md`** hvis oppgaven gjelder spillmekanikk eller grensesnitt.
 4. Les **`docs/PLAN-NETT.md`** hvis oppgaven gjelder konto, lagring på nett, toppliste, sesonger eller konkurranse.
+5. Se **`docs/FORSLAG.md`** – åpne spørsmål til brukeren og forslag. Når noe avgjøres: ny beslutning, og oppdater lista.
 
 ## Før du avslutter en økt
 
@@ -118,7 +119,7 @@ frontend/src/
 frontend/public/  PWA: manifest, ikoner, service worker
 supabase/      SQL-migrasjonene, nummerert. Kjøres i prosjektet med Supabase-connectoren (apply_migration) og
                legges her samtidig, så repoet speiler databasen. Sjekk get_advisors (security) etter hver DDL-endring.
-docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, PLAN-NETT.md (planen for nett og konkurranse)
+docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, PLAN-NETT.md (planen for nett og konkurranse), FORSLAG.md
 ```
 
 ## Testing i nettleseren
@@ -157,6 +158,13 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   logger og nøkler for prosjektet `qzdwiamiangrjpmglpwy`. Den kan ikke endre Auth-innstillinger (Site URL) eller lage
   nøkler – det gjør brukeren i dashbordet. Nettlaget testes med en falsk tjeneste (`src/net/tests.ts`) og `page.route`
   i Playwright. Ekte innlogging må brukeren teste selv.
+- Nytt spill+ finnes ikke lenger (B-141): sesongene har tatt over. `round` står i spilltilstanden bare for eldre
+  lagringer – ikke bygg ny mekanikk på det.
+- `fetch` med `keepalive` avvises over 64 kB, og et stort spill er større. `rest()` i `net/supabase.ts` dropper
+  keepalive over `KEEPALIVE_MAX` (B-141) – ikke send store kropper med keepalive andre steder.
+- Lagring på nett skjer ca. 3 s etter en handling (`saveGame(g, true)` → `SOON_MS`), hvert 15. sekund ellers, og ved
+  `blur`/`pagehide`. Appen sjekker hvert 20. sekund om en annen enhet har lagret (B-141). I Playwright: vent minst
+  3 s etter en handling før du ser etter opplastingen.
 - Lagring på nett går gjennom `save_game()` med versjonsnummer (B-140), ikke rett i tabellen `saves`. En falsk
   server i Playwright må svare på `rpc/save_game` og gi `rev` og `device` på `saves?select=…`. To nettlesere
   simuleres med to `browser.newContext()` mot samme falske tilstand. «Appen vises igjen» utløses med

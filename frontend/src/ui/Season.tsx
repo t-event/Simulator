@@ -183,9 +183,8 @@ export function SeasonJoin({ api, g, onOpenSettings }: { api: GameApi; g: GameSt
   const bonus = !!status?.played_previous;
   return (
     <div className="g-note g-season-join">
-      <strong>Spillet ditt er ikke med i {cur.name}.</strong> Det står bare på «Alle tider». Bare vanlige spill som
-      fortsatt er i garasjen, kan bli med direkte (ikke nytt spill+), så vil du være med, starter du sesongen i
-      garasjen.
+      <strong>Spillet ditt er ikke med i {cur.name}.</strong> Det står bare på «Alle tider». {notJoinableReason(g)}, så
+      vil du være med, starter du sesongen med et nytt spill i garasjen.
       {bonus ? " Du var med sist og får 10 fagpoeng og 5 % mer i kassa." : ""}
       {confirm ? (
         <div className="g-row">

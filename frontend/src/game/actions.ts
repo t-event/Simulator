@@ -393,13 +393,13 @@ export function doResearch(g: GameState, id: string): PurchaseResult {
   return { ok: true, message: `${option.name} er forsket fram.` };
 }
 
+/** Samarbeidet kan brukes én gang per uke (B-071; var én gang per døgn i B-064) */
+export const FP_DEAL_DAYS = 7;
+
 /**
  * Forskningssamarbeid (B-064, B-071): kjøp fagpoeng for penger, én gang per uke. Gir en vei videre når
  * forskningen står fast og pengene hoper seg opp. Omtrent et døgns fagpoeng for en god del av et døgns overskudd.
  */
-/** Samarbeidet kan brukes én gang per uke (B-071; var én gang per døgn i B-064) */
-export const FP_DEAL_DAYS = 7;
-
 export const FP_DEAL: { fp: number; price: number }[] = [
   { fp: 0, price: 0 },
   { fp: 10, price: 30_000 },

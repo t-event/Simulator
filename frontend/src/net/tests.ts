@@ -9,6 +9,7 @@ import {
   consumeAuthHash,
   getSession,
   getToken,
+  KEEPALIVE_MAX,
   NetError,
   setFetch,
   setSession,
@@ -30,6 +31,7 @@ import {
   pullIfNewer,
   resetCloud,
   setClock,
+  SOON_MS,
   UPLOAD_INTERVAL_MS,
 } from "./sync";
 
@@ -69,6 +71,8 @@ interface Fake {
   >;
   nicknames: Map<string, string>;
   calls: string[];
+  /** keepalive per kall, samme rekkefølge som `calls` */
+  keepalive: boolean[];
   offline: boolean;
 }
 function makeFake(): Fake {
@@ -78,6 +82,7 @@ function makeFake(): Fake {
     snapshots: new Map(),
     nicknames: new Map(),
     calls: [],
+    keepalive: [],
     offline: false,
   };
   const json = (status: number, body: unknown) =>
@@ -95,6 +100,7 @@ function makeFake(): Fake {
     const url = String(input);
     const path = url.replace(/^https?:\/\/[^/]+/, "");
     f.calls.push(`${init?.method ?? "GET"} ${path}`);
+    f.keepalive.push(!!init?.keepalive);
     if (f.offline) throw new TypeError("Failed to fetch");
     const body = init?.body ? (JSON.parse(String(init.body)) as Record<string, unknown>) : {};
     if (path.startsWith("/auth/v1/signup")) {
@@ -659,6 +665,49 @@ const main = async () => {
     assert(f.saves.get("u-a@test")!.minute === 1440 * 300, "den eldre kopien overskrev før koblingen");
     const d = await linkOnLogin(old);
     assert(d.kind === "cloud" && isReconciled(), `fikk ${d.kind}`);
+  });
+
+  await test("Etter en handling lastes spillet opp om litt, selv om det er kort tid siden sist (B-141)", async () => {
+    const f = fresh();
+    await login(f);
+    let now = 9_000_000;
+    setClock(() => now);
+    const g = newGame(40);
+    await linkOnLogin(g);
+    const count = () => f.calls.filter((c) => c.startsWith("POST /rest/v1/rpc/save_game")).length;
+    const before = count();
+    g.cash = 42;
+    onLocalSave(g, true);
+    onLocalSave(g, true);
+    assert(count() === before, "skulle vente litt, så flere handlinger samles");
+    await new Promise((r) => setTimeout(r, SOON_MS + 50));
+    await flush();
+    assert(count() === before + 1, `lastet opp ${count() - before} ganger`);
+    assert((f.saves.get("u-a@test")!.state as { cash: number }).cash === 42, "handlingen kom ikke med");
+    setClock(() => Date.now());
+  });
+
+  await test("Stort spill sendes uten keepalive når appen legges bort (grensen er 64 kB, B-141)", async () => {
+    const f = fresh();
+    await login(f);
+    const g = newGame(41);
+    await linkOnLogin(g);
+    const small = f.calls.length;
+    onLocalSave(g);
+    await flush(true);
+    const i1 = f.calls.findIndex((c, i) => i >= small && c.includes("save_game"));
+    // Stort: fyll loggen til spillet er over grensen
+    for (let i = 0; i < 400; i++) g.log.push({ id: 10_000 + i, min: 0, text: "x".repeat(200), kind: "info" });
+    assert(JSON.stringify(g).length > KEEPALIVE_MAX, "testspillet er ikke stort nok");
+    const big = f.calls.length;
+    onLocalSave(g);
+    setClock(() => Date.now() + UPLOAD_INTERVAL_MS * 2);
+    onLocalSave(g);
+    await flush(true);
+    const i2 = f.calls.findIndex((c, i) => i >= big && c.includes("save_game"));
+    assert(i1 >= 0 && f.keepalive[i1], "lite spill skulle sendes med keepalive");
+    assert(i2 >= 0 && !f.keepalive[i2], "stort spill skulle sendes uten keepalive");
+    setClock(() => Date.now());
   });
 
   await test("Ikke logget inn: ingenting sendes", async () => {

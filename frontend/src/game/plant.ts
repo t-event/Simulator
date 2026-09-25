@@ -405,9 +405,12 @@ const HOURLY_PROFILE = [
   1.05, 0.95, 0.85, 0.78,
 ];
 
-/** Strømprisen på børsen (spot) */
+/**
+ * Strømprisen på børsen (spot). Felles hendelser som en strømkrise ganger prisen (B-129); det gjelder spot og
+ * nattariff, men ikke en fastpris man allerede har avtalt (B-141).
+ */
 export function spotPowerPrice(g: GameState, minute = g.minute): number {
-  return POWER_BASE * g.market.powerFactor * HOURLY_PROFILE[hourOfDay(g, minute)];
+  return POWER_BASE * g.market.powerFactor * worldFactor(g, "power") * HOURLY_PROFILE[hourOfDay(g, minute)];
 }
 
 /** Nattariff: billig om natta, dyrere på dagen */
@@ -415,9 +418,9 @@ const NIGHT_TARIFF = { night: 0.6, day: 1.2 };
 /** Bindingstid for fastpris og nattariff, i døgn */
 export const POWER_BINDING_DAYS = 30;
 
-/** Fastprisen man får tilbud om i dag: en forsikring som koster litt ekstra */
+/** Fastprisen man får tilbud om i dag: en forsikring som koster litt ekstra. Midt i en strømkrise er tilbudet dyrere. */
 export function fixedPowerOffer(g: GameState): number {
-  return POWER_BASE * (0.7 + 0.3 * g.market.powerFactor) * 1.1;
+  return POWER_BASE * (0.7 + 0.3 * g.market.powerFactor * worldFactor(g, "power")) * 1.1;
 }
 
 /** Strømprisen verket betaler etter avtalen sin (B-024) */
@@ -430,7 +433,7 @@ export function dealPrice(g: GameState, deal: PowerDeal, minute = g.minute): num
   if (deal === "fast") return g.settings.powerDeal === "fast" ? g.settings.powerFixedPrice : fixedPowerOffer(g);
   if (deal === "natt") {
     const f = isNight(hourOfDay(g, minute)) ? NIGHT_TARIFF.night : NIGHT_TARIFF.day;
-    return POWER_BASE * g.market.powerFactor * f;
+    return POWER_BASE * g.market.powerFactor * worldFactor(g, "power") * f;
   }
   return spotPowerPrice(g, minute);
 }
@@ -443,15 +446,17 @@ export function avgDealPrice(g: GameState, deal: PowerDeal, hours: number): numb
   return open.reduce((a, m) => a + dealPrice(g, deal, m), 0) / open.length;
 }
 
-/** Effekttariff: kroner per MW av døgnets høyeste effektuttak */
-/** Hevet fra 1 200 (B-105): toppen skal merkes, og «én ovn i topptimer» skal kunne lønne seg */
+/**
+ * Effekttariff: kroner per MW av døgnets høyeste effektuttak. Hevet fra 1 200 (B-105): toppen skal merkes, og
+ * «én ovn i topptimer» skal kunne lønne seg.
+ */
 export const PEAK_RATE_PER_MW = 4000;
 
 export function energyPrice(g: GameState, minute = g.minute): number {
-  // Kraftavtale for konsernet: 10 % billigere strøm (B-120)
+  // Kraftavtale for konsernet: 10 % billigere strøm (B-120). Felles hendelser ligger i avtaleprisen (B-141).
   return furnaceType(g).fuel === "gass"
     ? GAS_PRICE
-    : powerPrice(g, minute) * (hasResearch(g, "konsernenergi") ? 0.9 : 1) * worldFactor(g, "power");
+    : powerPrice(g, minute) * (hasResearch(g, "konsernenergi") ? 0.9 : 1);
 }
 
 export function computePlantStats(g: GameState): PlantStats {

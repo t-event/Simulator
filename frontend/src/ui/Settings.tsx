@@ -116,15 +116,12 @@ export function SettingsSheet({
   stats,
   api,
   onQuit,
-  onNextRound,
   onClose,
 }: {
   g: GameState;
   stats: PlantStats;
   api: GameApi;
   onQuit: () => void;
-  /** Mangler når spillet er med i sesongen som pågår: sesongene erstatter nytt spill+ (B-129, B-140) */
-  onNextRound?: () => void;
   onClose: () => void;
 }) {
   const [confirmQuit, setConfirmQuit] = useState(false);
@@ -161,23 +158,10 @@ export function SettingsSheet({
         <h3 className="g-subhead">Spill på mobilen</h3>
         <InstallTip />
         <h3 className="g-subhead">Nytt spill</h3>
-        {g.won && onNextRound && (
-          <p>
-            Du har vunnet og spiller videre. Når du vil, kan du starte runde {(g.round ?? 1) + 1} med mer startkapital,
-            fagpoeng og omdømme.
-            {season &&
-              ` Nytt spill+ er ikke med i ${season.name} – vil du være med, starter du sesongen under 🏆.`}{" "}
-            <button className="g-primary g-small" onClick={onNextRound}>
-              Nytt spill+ (runde {(g.round ?? 1) + 1})
-            </button>
-          </p>
-        )}
-        {g.won && !onNextRound && (
-          <p className="g-muted">
-            Du er med i {season?.name ?? "sesongen"}, så nytt spill+ er ikke tilgjengelig før sesongen er over. Spill
-            videre og hold plassen på topplista.
-          </p>
-        )}
+        <p className="g-muted">
+          Et nytt spill starter i garasjen. Spillet du har nå, slettes – også det som er lagret på nett.
+          {season && ` ${season.name} pågår: er du logget inn, blir det nye spillet med i sesongen.`}
+        </p>
         {confirmQuit ? (
           <div className="g-row">
             <button className="g-danger" onClick={onQuit}>

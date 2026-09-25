@@ -13,13 +13,16 @@ import type { GameState } from "./types";
 
 const KEY = "stalverk-spill-v1";
 
-/** Kalles etter hver lagring, så lagringen på nett kan følge etter (B-125). Settes fra net/sync.ts. */
-let saveListener: ((g: GameState) => void) | null = null;
-export function setSaveListener(fn: ((g: GameState) => void) | null): void {
+/**
+ * Kalles etter hver lagring, så lagringen på nett kan følge etter (B-125). Settes fra net/sync.ts.
+ * `soon`: spilleren har nettopp gjort noe, så lagringen på nett bør gå med en gang (B-141).
+ */
+let saveListener: ((g: GameState, soon?: boolean) => void) | null = null;
+export function setSaveListener(fn: ((g: GameState, soon?: boolean) => void) | null): void {
   saveListener = fn;
 }
 
-export function saveGame(g: GameState): boolean {
+export function saveGame(g: GameState, soon = false): boolean {
   let ok = false;
   try {
     localStorage.setItem(KEY, JSON.stringify(g));
@@ -27,7 +30,7 @@ export function saveGame(g: GameState): boolean {
   } catch {
     ok = false;
   }
-  saveListener?.(g);
+  saveListener?.(g, soon);
   return ok;
 }
 
@@ -107,6 +110,8 @@ export function migrate(g: GameState): GameState {
   if (g.konsern.director === undefined) g.konsern.director = null;
   if (g.konsern.director && g.konsern.director.active === undefined) g.konsern.director.active = true;
   if (g.konsern.milestones === undefined) g.konsern.milestones = 0;
+  // «Kystverket» er navnet på en ekte etat; datterverket heter nå «Nesverket» (B-141)
+  for (const p of g.konsern.plants) if (p.name === "Kystverket") p.name = "Nesverket";
   if (g.storeFullLogMin === undefined) g.storeFullLogMin = -1e9;
   // Gamle hendelser skal ikke telle som uleste i den nye varsellista (B-089)
   if (g.inboxSeenId === undefined) g.inboxSeenId = g.log.length ? g.log[g.log.length - 1].id : 0;

@@ -35,7 +35,7 @@ export function SceneBubbles({ g }: { g: GameState }) {
       // Salget nullstilles ved midnatt; da sammenlignes det med null
       const sold = now.day === last.day ? now.sales - last.sales : now.sales;
       if (sold > 1) add(`+${fmtKr(sold)}`, "money");
-      if (now.fp - last.fp >= 1) add(`+${Math.floor(now.fp - last.fp)} FP`, "fp");
+      if (now.fp - last.fp >= 1) add(`+${Math.floor(now.fp - last.fp)} fagpoeng`, "fp");
       last = now;
       if (!fresh.length) return;
       setBubbles((b) => [...b, ...fresh].slice(-MAX_BUBBLES));
