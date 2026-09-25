@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 58 – 2026-09-25: varslene er i veien
+
+**Brukeren ba om:** Varslene som kommer opp, er litt i veien. Brukeren valgte «én smal linje» blant fire forslag.
+
+**Gjort:** B-114. Ett varsel på én linje med «+N», trykk åpner varsellista, ✕ eller sveip fjerner.
+
+**Testet:**
+- tsc, lint, `npm test`, bygg.
+- Playwright på iPhone 13 på 10×:
+  - varselet er 42 px høyt og viser «+1» når et til venter
+  - trykk åpner varsellista og tømmer køen
+  - ingen feil og ingen horisontal scrolling
+
+**Gjenstår:** Ingenting.
+
+---
+
 ## Økt 57 – 2026-09-25: gjennomgang av hele spillkoden (runde 2)
 
 **Brukeren ba om:** Sjekk over hele spillkoden, se etter feil og bugs, og fiks dem.

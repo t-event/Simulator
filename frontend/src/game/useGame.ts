@@ -12,21 +12,31 @@ const TICK_MS = 200;
 // En strupet bakgrunnsfane skal ikke hoppe over flere spilltimer på ett tick
 const MAX_ELAPSED_S = 1;
 const AUTOSAVE_MS = 5000;
-/** Hvert varsel står minst så lenge; flere enn MAX_TOASTS venter i kø (B-098) */
-const TOAST_MS = 7000;
-const MAX_TOASTS = 3;
+/**
+ * Ett varsel om gangen på én linje, så det ikke dekker knappene (B-114). Står det flere i kø, går hvert raskere,
+ * så køen ikke henger etter spillet (B-098).
+ */
+const TOAST_MS = 6000;
+const TOAST_BUSY_MS = 3500;
+const MAX_TOASTS = 1;
 const MAX_QUEUE = 12;
 
 export interface Toast {
   id: number;
   text: string;
   kind: LogEntry["kind"];
+  /** Fra loggen (står i varsellista bak 🔔), eller svar på noe spilleren trykket på */
+  fromLog: boolean;
 }
 
 export interface GameApi {
   game: GameState | null;
   hasSave: boolean;
   toasts: Toast[];
+  /** Varsler som venter i kø bak det som vises */
+  toastsWaiting: number;
+  /** Fjerner alle varsler, f.eks. når varsellista åpnes */
+  clearToasts: () => void;
   /** Nytt spill, med eller uten veiledet start */
   startNew: (guided: boolean) => void;
   /** Nytt spill+ etter en seier: neste runde med bonus (B-090) */
@@ -47,6 +57,7 @@ export function useGame(): GameApi {
   const [, setVersion] = useState(0);
   const [hasSave, setHasSave] = useState(() => loadGame() !== null);
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [toastsWaiting, setWaiting] = useState(0);
   const lastLogId = useRef(0);
   const toastId = useRef(1);
 
@@ -57,6 +68,7 @@ export function useGame(): GameApi {
   const queue = useRef<Toast[]>([]);
   const pumpRef = useRef<() => void>(() => {});
   const removeToast = useCallback((id: number) => {
+    if (!visible.current.some((x) => x.id === id)) return;
     visible.current = visible.current.filter((x) => x.id !== id);
     setToasts(visible.current);
     pumpRef.current();
@@ -67,17 +79,24 @@ export function useGame(): GameApi {
       const t = queue.current.shift()!;
       visible.current = [...visible.current, t];
       changed = true;
-      setTimeout(() => removeToast(t.id), TOAST_MS);
+      setTimeout(() => removeToast(t.id), queue.current.length ? TOAST_BUSY_MS : TOAST_MS);
     }
     if (changed) setToasts(visible.current);
+    setWaiting(queue.current.length);
   }, [removeToast]);
+  const clearToasts = useCallback(() => {
+    queue.current = [];
+    visible.current = [];
+    setToasts([]);
+    setWaiting(0);
+  }, []);
   useEffect(() => {
     pumpRef.current = pump;
   }, [pump]);
 
   const pushToast = useCallback(
-    (text: string, kind: Toast["kind"]) => {
-      queue.current.push({ id: toastId.current++, text, kind });
+    (text: string, kind: Toast["kind"], fromLog = true) => {
+      queue.current.push({ id: toastId.current++, text, kind, fromLog });
       // Blir køen lang, går de eldste ut herfra – de står fortsatt i varsellista bak 🔔
       if (queue.current.length > MAX_QUEUE) queue.current.splice(0, queue.current.length - MAX_QUEUE);
       pump();
@@ -153,7 +172,7 @@ export function useGame(): GameApi {
       advanceTutorial(g);
       advanceRecipeGuide(g);
       const r = result as unknown as PurchaseResult | undefined;
-      if (r && typeof r === "object" && "ok" in r && "message" in r && !r.ok) pushToast(r.message, "bad");
+      if (r && typeof r === "object" && "ok" in r && "message" in r && !r.ok) pushToast(r.message, "bad", false);
       flushLog();
       bump();
       return result;
@@ -231,6 +250,8 @@ export function useGame(): GameApi {
     game,
     hasSave,
     toasts,
+    toastsWaiting,
+    clearToasts,
     startNew,
     startNextRound,
     continueSaved,

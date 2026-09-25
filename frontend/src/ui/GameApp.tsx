@@ -323,6 +323,47 @@ function TopBar({
   );
 }
 
+const TOAST_ICON = { bad: "⚠", event: "•", good: "✓", info: "•" } as const;
+
+/**
+ * Ett varsel om gangen på én linje over menyen (B-114). Trykk åpner varsellista med hele teksten, ✕ eller sveip
+ * fjerner det. Svar på noe spilleren trykket på (f.eks. «For lite penger») står ikke i lista, så de vises helt.
+ */
+function Toasts({ api, onOpen }: { api: GameApi; onOpen: () => void }) {
+  const [startX, setStartX] = useState<number | null>(null);
+  const t = api.toasts[0];
+  if (!t) return <div className="g-toasts" aria-live="polite" />;
+  return (
+    <div className="g-toasts" aria-live="polite">
+      <div
+        key={t.id}
+        className={`g-toast toast-${t.kind}${t.fromLog ? "" : " is-full"}`}
+        onTouchStart={(e) => setStartX(e.touches[0].clientX)}
+        onTouchEnd={(e) => {
+          if (startX !== null && Math.abs(e.changedTouches[0].clientX - startX) > 50) api.dismissToast(t.id);
+          setStartX(null);
+        }}
+      >
+        <button
+          className="g-toast-text"
+          onClick={() => (t.fromLog ? onOpen() : api.dismissToast(t.id))}
+          aria-label={t.fromLog ? `${t.text} – åpne varsellista` : t.text}
+        >
+          <span aria-hidden="true">{TOAST_ICON[t.kind]}</span> {t.text}
+        </button>
+        {api.toastsWaiting > 0 && (
+          <span className="g-toast-more" aria-label={`${api.toastsWaiting} varsler til`}>
+            +{api.toastsWaiting}
+          </span>
+        )}
+        <button className="g-toast-close" onClick={() => api.dismissToast(t.id)} aria-label="Fjern varselet">
+          ✕
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function GameApp() {
   const api = useGame();
   const { game: g, act } = api;
@@ -384,7 +425,10 @@ export function GameApp() {
             api={api}
             onBook={() => openBook()}
             onSettings={() => setSettingsOpen(true)}
-            onInbox={() => setInboxOpen(true)}
+            onInbox={() => {
+              api.clearToasts();
+              setInboxOpen(true);
+            }}
           />
 
           <nav className="g-nav" aria-label="Hovedmeny">
@@ -449,13 +493,13 @@ export function GameApp() {
       {!modalOpen && <Coach g={g} act={act} />}
       {!modalOpen && <RecipeGuideCoach g={g} act={act} go={go} />}
 
-      <div className="g-toasts" aria-live="polite">
-        {api.toasts.map((t) => (
-          <button key={t.id} className={`g-toast toast-${t.kind}`} onClick={() => api.dismissToast(t.id)}>
-            {t.text}
-          </button>
-        ))}
-      </div>
+      <Toasts
+        api={api}
+        onOpen={() => {
+          api.clearToasts();
+          setInboxOpen(true);
+        }}
+      />
 
       {bookOpen && <Handbook g={g} act={act} initial={bookChapter} onClose={() => setBookOpen(false)} />}
       {inboxOpen && <InboxSheet g={g} act={act} onClose={() => setInboxOpen(false)} />}
