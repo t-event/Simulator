@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 41 – 2026-09-25: tips når farten går ned
+
+**Brukeren ba om:** Et hint første gang farten går ned automatisk, og hvorfor.
+
+**Gjort (B-069):** Engangstipset «Hvorfor gikk farten ned til 1×?» etter første kort som setter ned farten fra
+3× eller 10×.
+
+**Testet:** tsc, lint, balanse (exit 0), headless-test: kort på 10× → farten 1× → tipset kommer, og bare én gang.
+
+**Gjenstår:** spørsmålet om storverket (mer innhold eller lavere vinnergrense).
+
+---
+
 ## Økt 40 – 2026-09-25: flytte-hintet rett over målkortet
 
 **Brukeren ba om:** «Du kan flytte inn … Trykk her» og målkortet rett under ga ikke mening (skjermbilde).

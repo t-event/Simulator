@@ -1,6 +1,6 @@
 /**
  * Engangstips (B-033): korte forklaringer som dukker opp første gang noe viktig skjer,
- * som et kort med «Skjønner». Spillet går videre på 1× etterpå.
+ * som et kort med «Skjønner». Spillet går videre på 1× etterpå (se «tips-fart-ned», B-069).
  */
 import { fmtKr } from "./engine";
 import { isOpen, type PlantStats } from "./plant";
@@ -10,6 +10,12 @@ import type { Decision, GameState } from "./types";
 type Tip = Omit<Decision, "resumeSpeed" | "options" | "data"> & { when: (g: GameState, stats: PlantStats) => boolean };
 
 const TIPS: Tip[] = [
+  {
+    id: "tips-fart-ned",
+    title: "Hvorfor gikk farten ned til 1×?",
+    text: "Når det skjer noe du må ta stilling til – et hendelseskort, et havari eller et tips – setter spillet farten ned til 1×. Da raser du ikke videre på 10× mens verket har problemer, og du rekker å se hva som skjedde. Se over Verket, og trykk 3× eller 10× øverst igjen når alt er i orden.",
+    when: (g) => (g.counters.fartNed ?? 0) > 0,
+  },
   {
     id: "tips-natt",
     title: "Arbeidsdagen er over",
@@ -55,7 +61,8 @@ export function maybeTip(g: GameState, stats: PlantStats): void {
       text,
       options: [{ label: "Skjønner" }],
       data: {},
-      resumeSpeed: 1,
+      // Farten før tipset, så resolveDecision ser at den settes ned (B-069)
+      resumeSpeed: g.speed > 0 ? g.speed : 1,
     };
     g.speed = 0;
     return;
