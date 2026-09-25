@@ -136,6 +136,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - «Ingen horisontal scrolling» er ikke nok i toppfeltet: sjekk også at knapper og tekst ikke avkortes
   (`scrollWidth > clientWidth`) eller havner utenfor skjermen, på 320 px bredde. Safari på iPhone har bredere
   skrift enn Chromium, så la det være litt luft (B-134).
+- På mobil (under 760 px) scroller bare `.g-main`, ikke vinduet (B-137). I Playwright: scroll med
+  `document.querySelector(".g-main").scrollBy(...)`. Fingersveip (`synthesizeScrollGesture`) virker ikke uten skjerm.
 - Skjermbilder med `fullPage: true` viser faste menyer midt på siden; det er
   bare et artefakt av skjermbildet.
 - Prosessmodellen er kalibrert med steg på maks 1 s – del opp større steg.
