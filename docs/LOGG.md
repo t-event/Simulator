@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 43 – 2026-09-25: 4- og 5-skift
+
+**Brukeren ba om:** 4 og 5 skift, så mange ansatte gir mening.
+
+**Gjort (B-073):** Skiftlag inntil fem, med fridager i turnusen: bedre trivsel, mindre sykdom, raskere læring og
+dekning av fravær. Folk → Skift viser ordningen og har «Ansett til 4-skift/5-skift».
+
+**Testet:** tsc, lint, balanse (8 / 26 / 66 / 142, nybegynner 155, exit 0), headless-test på storverket med 3, 4 og
+5 lag.
+
+**Gjenstår:** oppgraderinger per ovn, flere oppgraderinger på storverket, kontrollrommet.
+
+---
+
 ## Økt 42 – 2026-09-25: ansatte, småfikser, innstillinger og bank
 
 **Brukeren ba om:** Sjekk om murere, selgere og alle ansatte virker; hjemskjerm-tips før start; varsel på Folk

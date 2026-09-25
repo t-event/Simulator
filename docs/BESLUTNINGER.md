@@ -934,3 +934,18 @@ Brukeren ville ikke ha innstillinger og bank under Forskning. Banken står nå u
 er), og innstillingene (nattspoling, valsing, sikkerhetskopi, nytt spill) åpnes med ⚙️ øverst ved fagboka.
 Forskning-fanen har bare forskning. Tekster som viste til «Forskning → Bank» er rettet. Topplinja strammes inn på
 smale telefoner, så farten, fagboka og ⚙️ får plass på iPhone SE.
+
+## B-073 4- og 5-skift (2026-09-25)
+Status: gjelder
+Brukeren spurte hva man skal med 200 ansatte når man bare kan ha tre skift.
+Beslutning: døgnet har fortsatt tre vakter (8 timer), men verket kan ha inntil fem fulle **skiftlag**
+(`staffing().crews`, `MAX_CREWS`). Med fire eller fem lag får turnusen fridager når verket går døgnet rundt
+(`crewBenefits`):
+- 4-skift: trivselen trekkes mot 70 i stedet for 60, 20 % færre sykemeldinger, folk lærer 25 % fortere.
+- 5-skift: trivselen mot 80, 40 % færre sykemeldinger, 50 % raskere læring.
+- De ekstra lagene dekker fravær: skiftene regnes av dem som er på jobb, så verket mister ikke skift.
+Kostnaden er lønn til ett eller to lag til, og plass: i praksis stålverket (4-skift) og storverket (5-skift).
+Folk → Skift viser skiftordningen, hva neste lag gir, hva som mangler og en knapp «Ansett til 4-skift».
+«Ansett til manglende plasser» ansetter som før bare til tre skift (`hireForMissing(g, targetCrews)`).
+Målt på storverket i 30 døgn: 3 lag mistet 151 skifttimer til fravær, 4 og 5 lag ingen; 5 lag ga 25 % færre
+sykemeldinger per ansattdøgn (fem spill). Testspilleren bruker ikke 4- og 5-skift; balansen er uendret.

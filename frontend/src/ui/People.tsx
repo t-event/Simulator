@@ -16,8 +16,10 @@ import {
 import { CREW_ROLES, ROLE_IDS, ROLES, STAGES, stageRef } from "../game/data";
 import { auto } from "../game/research";
 import {
+  crewBenefits,
   crewCoverage,
   day,
+  MAX_CREWS,
   daysUntilAllBack,
   isAbsent,
   moraleFactor,
@@ -365,8 +367,19 @@ export function People({ g, stats, act }: Props) {
             <Card title="Skiftene">
               <p className="g-big-status">
                 Verket går <strong>{stats.shifts} av 3 skift</strong>
-                <span className="g-muted"> · {stats.hours} timer i døgnet</span>
+                <span className="g-muted">
+                  {" "}
+                  · {stats.hours} timer i døgnet{stats.crews > 3 ? ` · ${stats.crews}-skift (${stats.crews} lag)` : ""}
+                </span>
               </p>
+              {stats.crews > 3 && stats.hours >= 24 && (
+                <p className="g-note">
+                  <strong>{stats.crews}-skift:</strong> med {stats.crews} skiftlag får turnusen fridager. Trivselen blir
+                  bedre, færre blir syke ({Math.round((1 - crewBenefits(stats.crews, stats.hours).sick) * 100)} %
+                  færre), folk lærer {Math.round((crewBenefits(stats.crews, stats.hours).learn - 1) * 100)} % fortere,
+                  og de ekstra lagene dekker fravær, så verket ikke mister skift.
+                </p>
+              )}
               {stats.ownerWorks && (
                 <p className="g-muted">
                   Du står selv i produksjonen på dagskiftet{g.stage === 0 ? " og gjør alt." : " og fyller to plasser."}
@@ -412,6 +425,34 @@ export function People({ g, stats, act }: Props) {
                       Lei inn vikarer i 3 døgn ({fmtKr(hiredCrewCost(g, 3))})
                     </button>
                   </div>
+                </div>
+              )}
+              {permanent.shifts >= 3 && !stats.ownerWorks && permanent.crews < MAX_CREWS && cap > 0 && (
+                <div className="g-note">
+                  <strong>{permanent.crews + 1}-skift:</strong> med {permanent.crews + 1} skiftlag i stedet for{" "}
+                  {permanent.crews} får turnusen fridager: bedre trivsel, mindre sykdom, raskere læring, og fravær
+                  dekkes uten vikarer. Koster lønn til ett lag til.
+                  {missing.length > 0 && (
+                    <p className="g-small-text">
+                      Mangler:{" "}
+                      {missing
+                        .map(([r, n]) => `${n} ${(n === 1 ? ROLES[r].name : ROLES[r].plural).toLowerCase()}`)
+                        .join(", ")}
+                      .
+                    </p>
+                  )}
+                  {full || g.workers.length + missing.reduce((a, [, n]) => a + n, 0) > cap ? (
+                    <p className="g-small-text">
+                      Det er ikke plass til et lag til ({g.workers.length} av {cap} ansatte). Flytt til et større verk,
+                      eller si opp folk som ikke trengs.
+                    </p>
+                  ) : (
+                    <div className="g-row">
+                      <button onClick={() => act((gg) => hireForMissing(gg, permanent.crews + 1))}>
+                        Ansett til {permanent.crews + 1}-skift
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
               {hiredActive && (
