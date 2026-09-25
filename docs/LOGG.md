@@ -5,6 +5,17 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 60 – 2026-09-25: tekst om overslag
+
+**Brukeren ba om:** «Støv i hvelvet må suges bort» så ut som en skrivefeil.
+
+**Gjort:** Teksten er skrevet om med vanlige ord: «Overslag i ovn 1: en gnist slo over i støvet på ovnstaket
+(hvelvet). Taket må støvsuges.» Fagordet står i parentes, som regelen om nybegynnere sier.
+
+**Testet:** tsc, `npm test`, balanse exit 0. Varselet havner fortsatt under «Drift og havarier».
+
+---
+
 ## Økt 59 – 2026-09-25: varselinnstillinger
 
 **Brukeren ba om:** Mer spesifikke varselinnstillinger med flere valg.
