@@ -1,6 +1,7 @@
 import { buyUpgrade, keyUpgrade, upgradeOptions, type UpgradeOption } from "../game/actions";
 import { STATION_NAMES, stationOptions, type Station } from "./stations";
 import { STAGES, stageRef, WIN_CASH } from "../game/data";
+import { unitType } from "../game/plant";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Card } from "./common";
@@ -80,16 +81,36 @@ export function UpgradeSheet({
             ✕
           </button>
         </header>
-        {station === "ovn" && g.furnaces.length > 1 && (
-          <p className="g-muted">
-            Du har {g.furnaces.length} ovner. Ny ovnstype og utstyret her gjelder alle ovnene, så de bygges om samtidig.
-          </p>
+        {station === "ovn" && g.furnaces.length > 1 ? (
+          <>
+            <p className="g-muted">
+              Du har {g.furnaces.length} ovner. Hver ovn bygges om og får utstyr for seg, så du kan oppgradere én om
+              gangen.
+            </p>
+            {[undefined, ...g.furnaces.map((_, i) => i)].map((unit) => {
+              const list = options.filter((o) => o.unit === unit);
+              if (!list.length) return null;
+              return (
+                <section key={unit ?? "verket"}>
+                  <h3 className="g-subhead">
+                    {unit === undefined ? "Hele verket" : `Ovn ${unit + 1} – ${unitType(g, unit).name}`}
+                  </h3>
+                  <div className="g-upgrades">
+                    {list.map((o) => (
+                      <UpgradeCard key={o.id} o={o} stage={g.stage} act={act} />
+                    ))}
+                  </div>
+                </section>
+              );
+            })}
+          </>
+        ) : (
+          <div className="g-upgrades">
+            {options.map((o) => (
+              <UpgradeCard key={o.id} o={o} stage={g.stage} act={act} />
+            ))}
+          </div>
         )}
-        <div className="g-upgrades">
-          {options.map((o) => (
-            <UpgradeCard key={o.id} o={o} stage={g.stage} act={act} />
-          ))}
-        </div>
       </div>
     </div>
   );

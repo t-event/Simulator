@@ -28,6 +28,8 @@ import {
   has,
   isAbsent,
   POWER_BINDING_DAYS,
+  unitHas,
+  unitType,
 } from "./plant";
 import { newGradesAt, startRecipeGuide } from "./recipeGuide";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
@@ -36,7 +38,12 @@ import type { GameState, GradeId, PowerDeal, RoleId, ScrapId } from "./types";
 export type UpgradeKind = "stage" | "furnace" | "casting" | "addon";
 
 export interface UpgradeOption {
+  /** Id-en i utstyrslista; utstyr for ovn 2 og videre har «@nr», f.eks. «trafo@1» (B-074) */
   id: string;
+  /** Utstyrets egen id uten ovnsnummer, f.eks. «trafo» */
+  baseId: string;
+  /** Ovnen utstyret gjelder, for ovnstyper og ovnsutstyr */
+  unit?: number;
   kind: UpgradeKind;
   name: string;
   description: string;
@@ -55,8 +62,13 @@ export interface UpgradeOption {
 
 const fail = (message: string): PurchaseResult => ({ ok: false, message });
 
+/** Id for utstyr til ovn nr. i: ovn 1 beholder den vanlige id-en, de andre får «@nr» (B-074) */
+export function unitId(id: string, i: number): string {
+  return i === 0 ? id : `${id}@${i}`;
+}
+
 function addonPrice(g: GameState, addon: Addon): number {
-  if (addon.id === "ovn2") return Math.max(100_000, Math.round(furnaceType(g).price * 0.7));
+  if (addon.id === "ovn2") return Math.max(100_000, Math.round(unitType(g, 0).price * 0.7));
   return addon.price;
 }
 
@@ -90,6 +102,7 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
     else if (g.cash < next.price) reason = "For lite penger";
     out.push({
       id: `stage${next.id}`,
+      baseId: `stage${next.id}`,
       kind: "stage",
       name: next.name,
       description: next.description,
@@ -101,30 +114,35 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
       locked: false,
     });
   }
-  const currentFurnace = furnaceType(g);
-  for (const f of FURNACES) {
-    if (f.id === "induksjon025") continue;
-    const owned = f.id === currentFurnace.id;
-    const outdated =
-      f.stage < currentFurnace.stage || (f.stage === currentFurnace.stage && !owned && f.sizeT < currentFurnace.sizeT);
-    if (outdated && !owned) continue;
-    const price = f.price * g.furnaceCount;
-    let reason: string | null = researchBlocker(g, f.id);
-    for (const req of f.requires ?? []) if (!reason && !has(g, req)) reason = `Krever ${nameOf(req)}`;
-    if (!reason && g.cash < price) reason = "For lite penger";
-    out.push({
-      id: f.id,
-      kind: "furnace",
-      name: g.furnaceCount > 1 ? `${f.name} (×${g.furnaceCount})` : f.name,
-      description: f.description,
-      price,
-      stage: f.stage,
-      owned,
-      available: !owned && f.stage <= g.stage && reason === null,
-      reason: owned ? null : reason,
-      locked: f.stage > g.stage,
-    });
-  }
+  // Ovnstype per ovn: hver ovn bygges om for seg (B-074)
+  const many = g.furnaces.length > 1;
+  g.furnaces.forEach((_, i) => {
+    const current = unitType(g, i);
+    for (const f of FURNACES) {
+      if (f.id === "induksjon025") continue;
+      const owned = f.id === current.id;
+      const outdated = f.stage < current.stage || (f.stage === current.stage && !owned && f.sizeT < current.sizeT);
+      if (outdated && !owned) continue;
+      const price = f.price;
+      let reason: string | null = researchBlocker(g, f.id);
+      for (const req of f.requires ?? []) if (!reason && !has(g, req)) reason = `Krever ${nameOf(req)}`;
+      if (!reason && g.cash < price) reason = "For lite penger";
+      out.push({
+        id: unitId(f.id, i),
+        baseId: f.id,
+        unit: i,
+        kind: "furnace",
+        name: many ? `${f.name} – ovn ${i + 1}` : f.name,
+        description: f.description,
+        price,
+        stage: f.stage,
+        owned,
+        available: !owned && f.stage <= g.stage && reason === null,
+        reason: owned ? null : reason,
+        locked: f.stage > g.stage,
+      });
+    }
+  });
   const currentCasting = castingType(g);
   for (const c of CASTINGS) {
     if (c.id === "sandformer") continue;
@@ -151,6 +169,7 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
     if (!reason && g.cash < c.price) reason = "For lite penger";
     out.push({
       id: c.id,
+      baseId: c.id,
       kind: "casting",
       warning,
       name: c.name,
@@ -164,12 +183,38 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
     });
   }
   for (const a of ADDONS) {
+    // Ovnsutstyr (transformator, conveyor) kjøpes per ovn (B-074)
+    if (a.perFurnace) {
+      g.furnaces.forEach((_, i) => {
+        const owned = unitHas(g, i, a.id);
+        let reason = researchBlocker(g, a.id);
+        if (!reason && a.needsArc && !unitType(g, i).arc) reason = "Krever lysbueovn";
+        for (const req of a.requires ?? []) if (!reason && !has(g, req)) reason = `Krever ${nameOf(req)}`;
+        if (!reason && g.cash < a.price) reason = "For lite penger";
+        out.push({
+          id: unitId(a.id, i),
+          baseId: a.id,
+          unit: i,
+          kind: "addon",
+          name: many ? `${a.name} – ovn ${i + 1}` : a.name,
+          description: a.description,
+          price: a.price,
+          stage: a.stage,
+          owned,
+          available: !owned && a.stage <= g.stage && reason === null,
+          reason: owned ? null : reason,
+          locked: a.stage > g.stage,
+        });
+      });
+      continue;
+    }
     const owned = has(g, a.id);
     const price = addonPrice(g, a);
     let reason = researchBlocker(g, a.id) ?? addonBlocker(g, a);
     if (!reason && g.cash < price) reason = "For lite penger";
     out.push({
       id: a.id,
+      baseId: a.id,
       kind: "addon",
       name: a.name,
       description: a.description,
@@ -242,14 +287,18 @@ export function buyUpgrade(g: GameState, id: string): PurchaseResult {
       break;
     }
     case "furnace": {
-      g.furnaceType = id;
-      for (const f of g.furnaces) {
-        f.wear = 0;
-        f.heatsOnLining = 0;
-        f.lastRelineDay = day(g);
-        f.spareProgress = 1;
-      }
-      const type = furnaceType(g);
+      // Bare den ene ovnen bygges om (B-074)
+      const i = option.unit ?? 0;
+      const f = g.furnaces[i];
+      f.type = option.baseId;
+      f.wear = 0;
+      f.heatsOnLining = 0;
+      f.lastRelineDay = day(g);
+      f.spareProgress = 1;
+      // Utstyr som bare passer på lysbueovn, følger ikke med til en induksjonsovn
+      const type = unitType(g, i);
+      if (!type.arc) f.addons = (f.addons ?? []).filter((a) => !ADDONS.find((x) => x.id === a)?.needsArc);
+      g.furnaceType = furnaceType(g).id;
       if (type.arc) {
         unlock(g, "lysbue");
         unlock(g, "fosfor");
@@ -258,7 +307,7 @@ export function buyUpgrade(g: GameState, id: string): PurchaseResult {
         unlock(g, "induksjon");
         unlock(g, "karbon");
       }
-      log(g, `${type.name} er installert.`, "good");
+      log(g, `${type.name} er installert${g.furnaces.length > 1 ? ` i ovn ${i + 1}` : ""}.`, "good");
       break;
     }
     case "casting": {
@@ -270,10 +319,20 @@ export function buyUpgrade(g: GameState, id: string): PurchaseResult {
       break;
     }
     case "addon": {
+      if (option.unit !== undefined) {
+        // Ovnsutstyr kjøpes til én ovn (B-074)
+        const f = g.furnaces[option.unit];
+        f.addons = [...(f.addons ?? []), option.baseId];
+        log(g, `${option.name} er kjøpt.`, "good");
+        break;
+      }
       g.owned.push(id);
       if (id === "ovn2") {
         g.furnaceCount = 2;
-        g.furnaces.push(newFurnaceUnit(day(g)));
+        // Den nye ovnen er av samme type som ovn 1, uten ekstra utstyr
+        const unit = newFurnaceUnit(day(g));
+        unit.type = unitType(g, 0).id;
+        g.furnaces.push(unit);
       }
       if (id === "xrf" || id === "oes") unlock(g, "analyse");
       if (id === "portal") unlock(g, "radioaktivitet");

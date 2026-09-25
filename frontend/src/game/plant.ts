@@ -32,10 +32,36 @@ export function rollingTph(g: GameState): number {
 }
 export const ROLLING_YIELD = 0.96;
 
+/** Tall for én ovn (B-074) */
+export interface UnitStats {
+  furnace: FurnaceType;
+  sizeT: number;
+  cycleMin: number;
+  kwhPerT: number;
+  furnaceMW: number;
+}
+
+/** Statistikken sett fra ovn nr. i: dens type, størrelse, tid og strøm per charge (B-074) */
+export function unitView(stats: PlantStats, i: number): PlantStats {
+  const u = stats.units[i] ?? stats.units[0];
+  if (!u) return stats;
+  return {
+    ...stats,
+    furnace: u.furnace,
+    sizeT: u.sizeT,
+    cycleMin: u.cycleMin,
+    kwhPerT: u.kwhPerT,
+    furnaceMW: u.furnaceMW,
+    dephos: u.furnace.dephos,
+  };
+}
+
 export interface PlantStats {
   stage: Stage;
   furnace: FurnaceType;
   furnaceCount: number;
+  /** Hver ovn for seg (B-074) */
+  units: UnitStats[];
   casting: CastingType;
   lab: 0 | 1 | 2;
   sizeT: number;
@@ -80,8 +106,26 @@ export function has(g: GameState, id: string): boolean {
   return g.owned.includes(id);
 }
 
+/** Ovnstypen til ovn nr. i (B-074). Eldre lagringer uten type bruker verkets type. */
+export function unitType(g: GameState, i: number): FurnaceType {
+  const id = g.furnaces[i]?.type ?? g.furnaceType;
+  return FURNACES.find((f) => f.id === id) ?? FURNACES[0];
+}
+
+/** Har ovn nr. i dette utstyret (transformator, conveyor …)? (B-074) */
+export function unitHas(g: GameState, i: number, addon: string): boolean {
+  return g.furnaces[i]?.addons?.includes(addon) ?? false;
+}
+
+/**
+ * Verkets ovnstype: den mest avanserte ovnen (B-074). Brukes til det som gjelder hele verket – lysbue eller ikke,
+ * strøm eller gass, forskning – mens charger, strøm og slitasje regnes per ovn med unitView.
+ */
 export function furnaceType(g: GameState): FurnaceType {
-  return FURNACES.find((f) => f.id === g.furnaceType) ?? FURNACES[0];
+  if (!g.furnaces.length) return FURNACES.find((f) => f.id === g.furnaceType) ?? FURNACES[0];
+  return g.furnaces
+    .map((_, i) => unitType(g, i))
+    .reduce((a, b) => (b.stage > a.stage || (b.stage === a.stage && b.sizeT > a.sizeT) ? b : a));
 }
 
 export function castingType(g: GameState): CastingType {
@@ -103,7 +147,8 @@ export function rollingActive(g: GameState): boolean {
 export function crewPerShift(g: GameState): Crew {
   const crew: Crew = {};
   const f = furnaceType(g);
-  addCrew(crew, f.crew, g.furnaceCount);
+  // Hver ovn har sitt eget mannskap etter sin type (B-074)
+  g.furnaces.forEach((_, i) => addCrew(crew, unitType(g, i).crew));
   addCrew(crew, castingType(g).crew);
   const scrapCrew = STAGES[g.stage].scrapCrew;
   if (scrapCrew > 0) addCrew(crew, { skrap: scrapCrew });
@@ -429,18 +474,28 @@ export function computePlantStats(g: GameState): PlantStats {
   const crewSkill = Math.min(5, raw * (g.workers.length ? moraleFactor(g) : 1));
   const skillFactor = 1.12 - 0.04 * crewSkill;
 
-  let cycleMin = furnace.cycleMin * skillFactor;
-  let kwhPerT = furnace.kwhPerT;
-  if (furnace.arc && has(g, "conveyor")) {
-    cycleMin *= 0.92;
-    kwhPerT *= 0.88;
-  }
-  if (furnace.arc && has(g, "trafo")) {
-    cycleMin *= 0.85;
-    kwhPerT *= 1.02;
-  }
-  if (hasResearch(g, "energistyring")) kwhPerT *= 0.95;
-  if (furnace.arc && hasResearch(g, "skumslagg")) kwhPerT *= 0.94;
+  // Tid og strøm per charge for hver ovn, med ovnens eget utstyr (B-074)
+  const unitOf = (i: number): UnitStats => {
+    const t = unitType(g, i);
+    let cyc = t.cycleMin * skillFactor;
+    let kwh = t.kwhPerT;
+    if (t.arc && unitHas(g, i, "conveyor")) {
+      cyc *= 0.92;
+      kwh *= 0.88;
+    }
+    if (t.arc && unitHas(g, i, "trafo")) {
+      cyc *= 0.85;
+      kwh *= 1.02;
+    }
+    if (hasResearch(g, "energistyring")) kwh *= 0.95;
+    if (t.arc && hasResearch(g, "skumslagg")) kwh *= 0.94;
+    const mw = t.fuel === "strøm" ? (t.sizeT * kwh) / (cyc / 60) / 1000 : 0;
+    return { furnace: t, sizeT: t.sizeT, cycleMin: cyc, kwhPerT: kwh, furnaceMW: mw };
+  };
+  const units = (g.furnaces.length ? g.furnaces : [null]).map((_, i) => unitOf(i));
+  const bestUnit = units.find((u) => u.furnace.id === furnace.id) ?? units[0];
+  const cycleMin = bestUnit.cycleMin;
+  const kwhPerT = bestUnit.kwhPerT;
 
   const repairers = presentWorkers(g).filter((w) => w.role === "vedlikehold").length;
   const repairCover = Math.min(1, repairers / Math.max(1, g.stage));
@@ -481,14 +536,14 @@ export function computePlantStats(g: GameState): PlantStats {
   const mainProduct = rollingActive(g) ? "armering" : casting.product;
 
   // Anslått døgnproduksjon: smeltekapasitet i åpningstida, begrenset av støping og valsing
-  const heatsPerDay = staff.hours > 0 ? (staff.hours * 60) / cycleMin + 0.5 : 0;
-  const liquidPerDay = heatsPerDay * furnace.sizeT * g.furnaceCount * 0.93;
+  const liquidPerDay =
+    staff.hours > 0 ? units.reduce((a, u) => a + ((staff.hours * 60) / u.cycleMin + 0.5) * u.sizeT * 0.93, 0) : 0;
   let productPerDay = Math.min(liquidPerDay, casting.tph * 24) * casting.yield;
   if (rollingActive(g))
     productPerDay = Math.min(productPerDay, rollingTph(g) * Math.max(8, staff.hours)) * ROLLING_YIELD;
 
-  // Effekten én ovn trekker mens den smelter
-  const furnaceMW = furnace.fuel === "strøm" ? (furnace.sizeT * kwhPerT) / (cycleMin / 60) / 1000 : 0;
+  // Effekten den største ovnen trekker mens den smelter
+  const furnaceMW = Math.max(...units.map((u) => u.furnaceMW));
 
   return {
     stage,
@@ -497,7 +552,8 @@ export function computePlantStats(g: GameState): PlantStats {
     furnaceCount: g.furnaceCount,
     casting,
     lab,
-    sizeT: furnace.sizeT,
+    sizeT: Math.max(...units.map((u) => u.sizeT)),
+    units,
     cycleMin,
     kwhPerT,
     dephos: furnace.dephos,
@@ -584,8 +640,9 @@ export function moraleFactor(g: GameState): number {
 }
 
 /** Slitasjen per charge med forskning tatt med */
-export function liningWearPerHeat(g: GameState): number {
-  return furnaceType(g).wearPerHeat * (hasResearch(g, "ildfast") ? 0.85 : 1);
+export function liningWearPerHeat(g: GameState, i?: number): number {
+  const t = i === undefined ? furnaceType(g) : unitType(g, i);
+  return t.wearPerHeat * (hasResearch(g, "ildfast") ? 0.85 : 1);
 }
 
 /** Omtrent hvor mange døgn til foringen er 85 % slitt, med dagens drift (døgnet rundt hvis verket står) */
@@ -631,14 +688,16 @@ export function masonsAtWork(g: GameState, minute = g.minute): boolean {
 /** Hvor mye av en reservepotte som mures opp per døgn, når murerne deles på pottene som trenger det */
 export function potRebuildPerDay(g: GameState): number {
   const masons = presentWorkers(g).filter((w) => w.role === "murer").length;
-  const pots = g.furnaces.filter((f) => f.spareProgress < 1).length;
+  // Bare lysbueovner har reservepotte (B-074: ovnene kan være av ulik type)
+  const pots = g.furnaces.filter((f, i) => unitType(g, i).arc && f.spareProgress < 1).length;
   if (!masons || !pots) return 0;
   return Math.min(MASONS_PER_POT, masons / pots) / MASONS_PER_POT / POT_REBUILD_DAYS;
 }
 
 /** Timer et pottebytte tar, uten reparatørfaktor */
-export function potSwapHours(g: GameState): number {
-  return Math.max(4, Math.round(furnaceType(g).relineHours * 0.2));
+export function potSwapHours(g: GameState, i?: number): number {
+  const t = i === undefined ? furnaceType(g) : unitType(g, i);
+  return Math.max(4, Math.round(t.relineHours * 0.2));
 }
 
 /** En skrapklasser sørger for at chargene følger resepten (B-029) */

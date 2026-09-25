@@ -31,6 +31,7 @@ import {
   shiftStart,
   staffing,
   tempsActive,
+  unitType,
   type PlantStats,
 } from "../game/plant";
 import type { GameState, GradeId, RoleId } from "../game/types";
@@ -133,7 +134,7 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
   if (next?.available) out.push({ text: `Du kan flytte inn i ${next.name.toLowerCase()}! Trykk her.`, anchor: "mal" });
   // Står ny ovn eller støping fast på forskning, og fagpoengene mangler: vis veien videre (B-064)
   const key = keyUpgrade(g);
-  const needs = key?.reason?.startsWith("Forsk fram") ? missingResearchFor(g, key.id) : undefined;
+  const needs = key?.reason?.startsWith("Forsk fram") ? missingResearchFor(g, key.baseId) : undefined;
   if (needs && g.researchPoints < needs.cost) {
     const deal = fpDeal(g);
     const ways = [
@@ -640,7 +641,7 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
                   return (
                     <div className="g-chain-step" key={i}>
                       <h3>
-                        {stats.furnace.name}
+                        {unitType(g, i).name}
                         {g.furnaces.length > 1 ? ` nr. ${i + 1}` : ""}
                       </h3>
                       {st.progress !== null ? (

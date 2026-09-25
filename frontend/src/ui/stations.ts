@@ -32,7 +32,7 @@ const ADDON_STATION: Record<string, Station> = {
 function stationOf(o: UpgradeOption): Station | null {
   if (o.kind === "furnace") return "ovn";
   if (o.kind === "casting") return "stoping";
-  if (o.kind === "addon") return ADDON_STATION[o.id] ?? "lager";
+  if (o.kind === "addon") return ADDON_STATION[o.baseId] ?? "lager";
   return null;
 }
 

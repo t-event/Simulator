@@ -90,6 +90,10 @@ export interface FurnaceUnit {
   grade: GradeId | null;
   /** Hvorfor ovnen står og venter, for visning */
   waitReason: string | null;
+  /** Ovnstypen til akkurat denne ovnen (B-074); mangler i gamle lagringer (migrate setter den) */
+  type?: string;
+  /** Utstyr på akkurat denne ovnen, f.eks. transformator og conveyor (B-074) */
+  addons?: string[];
 }
 
 /** Ferdigvare på lager. Like partier slås sammen. */
