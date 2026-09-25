@@ -1550,3 +1550,27 @@ Beslutning:
   teksten under bryteren.
 - Bryteren «Salgsdirektøren signerer for meg» (`DirectorSwitch`) står både øverst under Salg → Forespørsler og på
   kortet for salgsdirektøren under Konsern. Den erstatter den faste teksten om salgsdirektøren på Salg.
+
+## B-123 Kortere og tydeligere Konsern-side (2026-09-25)
+Status: gjelder
+Brukeren: Konsern-siden er for lang og bør bli mer intuitiv.
+
+Beslutning: rekkefølgen følger det spilleren gjør. Først tallene og målet, så «Neste steg», så verkene man har, og
+til slutt det man kan kjøpe.
+
+- **Konsernet:**
+  - to tall (konsernverdi og hva datterverkene tjener)
+  - en linje mot sluttmålet og neste milepæl
+  - forklaringen i fire steg er foldet inn under «Slik fungerer konsernet». Den er åpen bare før man har kjøpt det
+    første verket.
+  - Forskning og hvordan konsernverdien regnes ut, står nederst i forklaringen.
+- **Dine verk:**
+  - én hovedknapp per verk: «Bygg ut til storverk» for et stålverk, «Moderniser» for et storverk
+  - modernisering av et stålverk og salg ligger under «Moderniser eller selg» eller «Selg verket»
+  - kortet vises ikke før man har et verk
+- **Kjøp og utvid:** nye verk og felles funksjoner i ett kort. Felles funksjoner som er i drift, står på én linje.
+- **Salgsdirektør:**
+  - Før ansettelsen: én linje og knappen. Detaljene ligger under «Hva gjør salgsdirektøren?».
+  - Etter ansettelsen: tallene, av/på-bryteren (B-122) og «Innstillinger og oppsigelse».
+- Alle knapper på siden er minst 40 px høye (før 34 px, og «Selg verket…» var en lenke på 16 px).
+- Målt på iPhone 13 med tre verk og salgsdirektør: siden er 2 393 px høy, mot 3 475 px før.

@@ -5,6 +5,27 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 67 – 2026-09-25: kortere Konsern-side
+
+**Brukeren ba om:** Konsern-siden er for lang og bør bli mer intuitiv.
+
+**Gjort:** B-123. Forklaringen er foldet sammen, hvert verk har én hovedknapp, kjøp og felles funksjoner er samlet i
+ett kort, salgsdirektøren er kortere, og alle knapper er minst 40 px høye.
+
+**Testet:**
+- tsc, lint, `npm test`, validate, balanse exit 0, build.
+- Playwright på iPhone 13:
+  - uten verk og med tre verk og salgsdirektør
+  - siden er 2 393 px høy, mot 3 475 px før
+  - ingen knapper under 40 px
+  - utbygging, salg og innstillingene for salgsdirektøren virker
+  - ingen feil og ingen horisontal scrolling
+- Desktop 1280 px: ingen feil.
+
+**Gjenstår:** Ingenting.
+
+---
+
 ## Økt 66 – 2026-09-25: skru salgsdirektøren av og på
 
 **Brukeren ba om:** En bryter under Forespørsler for å skru salgsdirektøren av og på. Brukeren spurte også hva

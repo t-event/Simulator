@@ -909,6 +909,10 @@ button {
   margin-top: 6px;
 }
 
+.g-konsern-buy button {
+  min-height: 40px;
+}
+
 .g-konsern-why {
   display: block;
   color: var(--warning);
