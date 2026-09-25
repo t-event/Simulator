@@ -22,7 +22,8 @@ export const START_REPUTATION = 0;
 /** Så mange døgn på rad under kredittgrensen før banken tar over */
 export const BANKRUPTCY_DAYS = 7;
 export const LOAN_INTEREST_PER_DAY = 0.0004;
-export const WIN_CASH = 1_000_000_000;
+/** Sluttmålet: konsernverdi (egenkapital + datterverk) på 10 mrd. 1 mrd. åpner konsernet (B-106) */
+export const WIN_CASH = 10_000_000_000;
 
 // ------------------------------------------------------------------ //
 // Skrap

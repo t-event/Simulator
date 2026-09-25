@@ -103,7 +103,7 @@ function EndScreen({
         <h2>{won ? "Et storverk!" : "Konkurs"}</h2>
         <p>
           {won
-            ? `Du startet i en garasje og har bygget et stålverk med ${g.workers.length} ansatte og over ${fmtKr(WIN_CASH)} i egenkapital.`
+            ? `Du startet i en garasje og har bygget et stålkonsern med ${g.konsern.plants.length + 1} verk og en verdi på over ${fmtKr(WIN_CASH)}.`
             : `Banken har tatt over verket. ${g.gameOverReason ?? ""} Neste gang: hold av penger til skrap, lønn og vedlikehold når du investerer.`}
         </p>
         <ul>

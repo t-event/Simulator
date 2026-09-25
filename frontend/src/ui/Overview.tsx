@@ -48,6 +48,7 @@ import { SceneBubbles } from "./SceneBubbles";
 import { StageCard, StationButton, UpgradeSheet } from "./Upgrades";
 import { AutoToggle } from "./AutoToggle";
 import { BankCard } from "./Settings";
+import { KonsernTab } from "./Konsern";
 import { readyUpgrades, stationReady, type Station } from "./stations";
 import type { View } from "./views";
 
@@ -266,11 +267,12 @@ function Quality({
   );
 }
 
-type SubTab = "oversikt" | "anlegg" | "okonomi";
+type SubTab = "oversikt" | "anlegg" | "okonomi" | "konsern";
 const SUBTABS: { id: SubTab; label: string }[] = [
   { id: "oversikt", label: "Oversikt" },
   { id: "anlegg", label: "Anlegg" },
   { id: "okonomi", label: "Økonomi" },
+  { id: "konsern", label: "Konsern" },
 ];
 
 /** Hele produksjonslinja på én rad, med varsel og knapp når foringen må byttes (B-035) */
@@ -507,7 +509,7 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
         )}
 
         <div className="g-subtabs" role="tablist" aria-label="Verket">
-          {SUBTABS.map((t) => (
+          {SUBTABS.filter((t) => t.id !== "konsern" || g.konsern.unlocked).map((t) => (
             <button
               key={t.id}
               role="tab"
@@ -827,6 +829,7 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
           </div>
         </>
       )}
+      {tab === "konsern" && g.konsern.unlocked && <KonsernTab g={g} act={act} />}
       {sheet && <UpgradeSheet g={g} station={sheet} act={act} onClose={() => setSheet(null)} />}
     </div>
   );

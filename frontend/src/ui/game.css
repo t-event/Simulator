@@ -1767,6 +1767,8 @@ button {
 
 .g-subtabs button {
   flex: 1;
+  min-width: 0;
+  padding: 0 4px;
   min-height: 40px;
   border: 0;
   background: transparent;

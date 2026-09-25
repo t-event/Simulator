@@ -216,7 +216,20 @@ export type CostCategory =
   | "faste"
   | "nett"
   | "annet";
-export type IncomeCategory = "kontrakt" | "spot" | "annet";
+export type IncomeCategory = "kontrakt" | "spot" | "annet" | "konsern";
+
+/** Datterverk i konsernet (B-106) */
+export type SisterType = "stalverk" | "storverk";
+export interface SisterPlant {
+  id: number;
+  type: SisterType;
+  name: string;
+  /** Moderniseringstrinn 0–3 */
+  level: number;
+  boughtDay: number;
+  /** Står etter havari til denne dagen */
+  downUntilDay: number;
+}
 
 export interface DayFinance {
   day: number;
@@ -403,6 +416,8 @@ export interface GameState {
   courseSeats: { start: number; used: number } | null;
   /** Støping som kjøpes av seg selv når ordrene på det gamle produktet er levert (B-102) */
   pendingCastingSwitch: string | null;
+  /** Konsernet (B-106) */
+  konsern: { unlocked: boolean; plants: SisterPlant[]; shared: string[]; nextId: number };
   researched: string[];
   pendingDecision: Decision | null;
   /** Dagen hvert hendelseskort sist ble vist, så de ikke gjentas for ofte */

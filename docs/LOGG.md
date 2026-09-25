@@ -5,6 +5,28 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 55 – 2026-09-25: konsern og nytt sluttmål
+
+**Brukeren ba om:** Når storverket er ferdig bygget, skal man kunne utvide til et konsern med flere verk, så spillet
+ikke blir så fort ferdig. Milliardmålet skal bli mye større.
+
+**Gjort:**
+- B-106: fanen Verket → Konsern med datterverk, modernisering og felles innkjøp og salg.
+- Sluttmålet er 10 mrd. i konsernverdi. Storverk-kortet og sluttskjermen er oppdatert.
+- Testspillerne bygger konsern.
+- Underfanene på Verket krymper, så fire faner får plass på 320 px.
+
+**Testet:**
+- tsc, lint, `npm test` (12 tester, ny test for konsernet), `validate.ts`, bygg.
+- Balanse: 8 / 25 / 67 / 141, nybegynner 142,5, exit 0.
+- `--vansker`: flink vinner ca. dag 342, nybegynner ca. dag 380. Ingen konkurs.
+- Playwright på iPhone 13 og 320 px: Konsern-fanen og kjøp av datterverk virker. Ingen feil og ingen horisontal
+  scrolling.
+
+**Gjenstår:** Ingenting fra brukerens liste.
+
+---
+
 ## Økt 54 – 2026-09-25: strøm, fravær, kurs, varsler og mye småtteri
 
 **Brukeren ba om:**

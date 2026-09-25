@@ -2,6 +2,7 @@ import { useState } from "react";
 import { buyUpgrade, keyUpgrade, scheduleCastingSwitch, upgradeOptions, type UpgradeOption } from "../game/actions";
 import { STATION_NAMES, stationOptions, type Station } from "./stations";
 import { STAGES, stageRef, WIN_CASH } from "../game/data";
+import { KONSERN_UNLOCK_EQUITY, konsernEquity } from "../game/konsern";
 import { unitType } from "../game/plant";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
@@ -195,14 +196,31 @@ export function StageCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
   if (!next || !stage) {
     return (
       <Card title="Storverket">
-        <p>Du har bygget et fullskala stålverk. Klarer du å samle {fmtKr(WIN_CASH)} i egenkapital?</p>
-        {!g.won && (
+        {!g.konsern.unlocked ? (
           <>
-            <Bar value={Math.max(0, g.cash - g.loan) / WIN_CASH} tone="ok" label="Egenkapital" />
+            <p>
+              Du har bygget et fullskala stålverk. Neste steg er et konsern med flere verk: det åpner seg når alt
+              utstyret her er kjøpt, eller egenkapitalen når {fmtKr(KONSERN_UNLOCK_EQUITY)}.
+            </p>
+            <Bar value={Math.max(0, g.cash - g.loan) / KONSERN_UNLOCK_EQUITY} tone="ok" label="Egenkapital" />
             <p className="g-muted">
-              Egenkapital {fmtKr(Math.floor(g.cash - g.loan))} av {fmtKr(WIN_CASH)}
+              Egenkapital {fmtKr(Math.floor(g.cash - g.loan))} av {fmtKr(KONSERN_UNLOCK_EQUITY)}
               {g.loan > 0 ? ` (kassa minus lånet på ${fmtKr(g.loan)})` : ""}.
             </p>
+          </>
+        ) : (
+          <>
+            <p>
+              Sluttmålet: et stålkonsern verdt {fmtKr(WIN_CASH)} – egenkapital pluss datterverkene. Se Verket → Konsern.
+            </p>
+            {!g.won && (
+              <>
+                <Bar value={Math.max(0, konsernEquity(g)) / WIN_CASH} tone="ok" label="Konsernverdi" />
+                <p className="g-muted">
+                  Konsernverdi {fmtKr(Math.floor(konsernEquity(g)))} av {fmtKr(WIN_CASH)}.
+                </p>
+              </>
+            )}
           </>
         )}
         <KeyUpgrade g={g} />

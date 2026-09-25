@@ -28,6 +28,7 @@ import { knowledgeCard } from "./knowledge";
 import { auto, hasResearch, RESEARCH, scrapUnlocked, secondsAction } from "./research";
 import { checkMissions } from "./missions";
 import { checkChallenges } from "./challenges";
+import { konsernDay, konsernEquity } from "./konsern";
 import { maybeAdvisor, maybeCreateDecision } from "./decisions";
 import { maybeTip, setCreditHint } from "./tips";
 import { suggestRecipe } from "./recipe";
@@ -234,6 +235,7 @@ export function newGame(seed = Date.now(), round = 1): GameState {
     winSeen: false,
     courseSeats: null,
     pendingCastingSwitch: null,
+    konsern: { unlocked: false, plants: [], shared: [], nextId: 1 },
     fpDealDay: -1,
     inboxSeenId: 0,
     researched: [],
@@ -371,7 +373,8 @@ export function scrapPrice(g: GameState, id: ScrapId): number {
     SCRAP_TYPES[id].price *
     g.market.scrapFactor[id] *
     (has(g, "skrapterminal") ? 0.94 : 1) *
-    (hasResearch(g, "skraplogistikk") ? 0.95 : 1)
+    (hasResearch(g, "skraplogistikk") ? 0.95 : 1) *
+    (g.konsern?.shared.includes("innkjop") ? 0.95 : 1)
   );
 }
 
@@ -2279,6 +2282,8 @@ function onDay(g: GameState, stats: PlantStats): void {
   const today = day(g);
   // Effekttariff for døgnet som er slutt: betales for den høyeste effekten verket trakk
   if (g.today.peakMW) addCost(g, "nett", g.today.peakMW * PEAK_RATE_PER_MW);
+  // Overskuddet fra datterverkene i konsernet (B-106)
+  if (g.konsern?.plants.length) konsernDay(g);
   {
     const t = g.today;
     const cast = (t.onGradeT ?? 0) + (t.offGradeT ?? 0) + (t.secondT ?? 0);
@@ -2438,11 +2443,13 @@ function onDay(g: GameState, stats: PlantStats): void {
   checkWin(g);
 }
 
-/** Seier: egenkapital (kasse minus lån) på 1 mrd. på storverket. Sjekkes hver time, ikke bare ved midnatt (B-091) */
+/**
+ * Seier: konsernverdi (egenkapital + datterverk) på 10 mrd. Sjekkes hver time, ikke bare ved midnatt (B-091, B-106)
+ */
 export function checkWin(g: GameState): void {
-  if (!g.won && !g.gameOver && g.stage === STAGES.length - 1 && g.cash - g.loan >= WIN_CASH) {
+  if (!g.won && !g.gameOver && g.stage === STAGES.length - 1 && konsernEquity(g) >= WIN_CASH) {
     g.won = true;
-    log(g, "Du har bygget et av landets største stålverk. Gratulerer!", "good");
+    log(g, "Du har bygget et av landets største stålkonsern. Gratulerer!", "good");
   }
 }
 
