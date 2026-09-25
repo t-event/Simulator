@@ -112,7 +112,7 @@ frontend/src/
     InstallTip.tsx    Tips om hjemskjerm på startskjermen   Power.tsx  Strøm og skiftplan
     Handbook.tsx Fagboka med quiz og oppdrag   Inbox.tsx  Varsellista (åpnes fra varsellinja øverst)
     Account.tsx  Konto: logg inn, opprett, glemt passord, velg spill ved konflikt (på startskjermen og i ⚙️)
-    Leaderboard.tsx Topplista (Verket → Økonomi)   Season.tsx  Sesongspørsmål, hendelser på Marked, sesonglinje
+    Leaderboard.tsx Topplista (arket bak 🏆 øverst)   Season.tsx  Sesongspørsmål, hendelser på Marked, sesonglinje
     control/     Kontrollrommet: den enkle styringen (SimpleControl + simpleRunner)
   sim/         Prosessmodell for lysbueovnen (brukes av kontrollrommet)
 frontend/public/  PWA: manifest, ikoner, service worker

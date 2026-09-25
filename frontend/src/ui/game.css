@@ -2328,3 +2328,18 @@ button {
 .g-season-join .g-row {
   margin-top: 6px;
 }
+
+/* Topplista bak 🏆 (B-133) */
+.g-board-bare {
+  position: relative;
+}
+
+.g-board-refresh {
+  display: flex;
+  justify-content: flex-end;
+  margin: -4px 0 2px;
+}
+
+.g-season-teaser {
+  margin-top: 10px;
+}

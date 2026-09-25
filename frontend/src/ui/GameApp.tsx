@@ -19,7 +19,8 @@ import { Overview } from "./Overview";
 import { People } from "./People";
 import { ResearchPage } from "./ResearchPage";
 import { AccountCard, CloudDot } from "./Account";
-import { SeasonPrompt, SeasonSync } from "./Season";
+import { SeasonPrompt, SeasonSync, SeasonTeaser } from "./Season";
+import { LeaderboardSheet } from "./Leaderboard";
 import { useSeasonStatus } from "./useSeason";
 import { BackupInput, SettingsSheet } from "./Settings";
 import { getSession } from "../net/supabase";
@@ -67,6 +68,7 @@ function Intro({ api }: { api: GameApi }) {
           <li>Med lysbueovn kan du ta styringen og kjøre chargene selv i kontrollrommet.</li>
         </ul>
         <InstallTip />
+        <SeasonTeaser />
         <div className="g-row g-intro-actions">
           {hasSave && (
             <button className="g-primary" onClick={onContinue}>
@@ -257,12 +259,14 @@ function TopBar({
   onBook,
   onSettings,
   onInbox,
+  onBoard,
 }: {
   g: GameState;
   api: GameApi;
   onBook: () => void;
   onSettings: () => void;
   onInbox: () => void;
+  onBoard: () => void;
 }) {
   const stats = computePlantStats(g);
   const unread = g.knowledge.filter((k) => !g.readChapters.includes(k)).length;
@@ -312,6 +316,9 @@ function TopBar({
           <span aria-hidden="true">📖</span>
           <span className="hide-narrow"> Fagbok</span>
           {unread > 0 && <span className="g-badge">{unread}</span>}
+        </button>
+        <button className="g-book" onClick={onBoard} aria-label="Toppliste">
+          <span aria-hidden="true">🏆</span>
         </button>
         <button className="g-book" onClick={onSettings} aria-label="Innstillinger">
           <span aria-hidden="true">⚙️</span>
@@ -392,6 +399,7 @@ export function GameApp() {
   const [subTab, setSubTab] = useState<{ tab?: string; n: number }>({ n: 0 });
   const [bookOpen, setBookOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [boardOpen, setBoardOpen] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(false);
   const [bookChapter, setBookChapter] = useState<string | null>(null);
   // Seiersskjermen vises én gang per spill; valget lagres i spillet (B-091)
@@ -455,6 +463,7 @@ export function GameApp() {
   const modalOpen =
     bookOpen ||
     settingsOpen ||
+    boardOpen ||
     inboxOpen ||
     !!g.pendingManual ||
     !!g.pendingDecision ||
@@ -471,6 +480,7 @@ export function GameApp() {
             api={api}
             onBook={() => openBook()}
             onSettings={() => setSettingsOpen(true)}
+            onBoard={() => setBoardOpen(true)}
             onInbox={() => {
               api.clearToasts();
               setInboxOpen(true);
@@ -518,17 +528,7 @@ export function GameApp() {
         </div>
 
         <main className="g-main">
-          {shown === "verket" && (
-            <Overview
-              g={g}
-              stats={stats}
-              act={act}
-              go={go}
-              openBook={openBook}
-              onSettings={() => setSettingsOpen(true)}
-              api={api}
-            />
-          )}
+          {shown === "verket" && <Overview g={g} stats={stats} act={act} go={go} openBook={openBook} />}
           {shown === "marked" && (
             <Market
               key={subTab.tab ? `marked-${subTab.n}` : "marked"}
@@ -551,6 +551,14 @@ export function GameApp() {
 
       {bookOpen && <Handbook g={g} act={act} initial={bookChapter} onClose={() => setBookOpen(false)} />}
       {inboxOpen && <InboxSheet g={g} act={act} onClose={() => setInboxOpen(false)} />}
+      {boardOpen && (
+        <LeaderboardSheet
+          api={api}
+          g={g}
+          onClose={() => setBoardOpen(false)}
+          onOpenSettings={() => setSettingsOpen(true)}
+        />
+      )}
       {settingsOpen && (
         <SettingsSheet
           g={g}

@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 78 – 2026-09-25: garasjen blir med direkte, topplista bak 🏆
+
+**Brukeren ba om:** Spillere som bare har gjort veiledningen, skal kunne være med i sesongen; de som har kommet
+langt, må starte på nytt. Topplista skal være mer synlig enn under Økonomi.
+
+**Gjort:** B-133. `canJoinDirectly` = garasjen. 🏆-knapp i toppfeltet med topplista som ark, fjernet fra Økonomi,
+sesonglinje på startskjermen.
+
+**Testet:** tsc, lint, `npm test`, build. Playwright på iPhone 13: 🏆 åpner arket med toppliste og sesongvalg, ingen
+horisontal scrolling i toppfeltet, spill i garasjen på dag 8 blir med direkte, spill på verkstedet får spørsmålet.
+
+**Gjenstår:** Fase 4 og 5.
+
+---
+
 ## Økt 77 – 2026-09-25: sesongvalget på topplista
 
 **Brukeren ba om:** Krysser man ut popupen om sesongen, må man finne det igjen et annet sted.
