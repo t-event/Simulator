@@ -4,7 +4,7 @@ import { startRecipeGuide } from "../game/recipeGuide";
 import { GRADES, SCRAP_IDS, SCRAP_TYPES } from "../game/data";
 import { recipeEstimate } from "../game/engine";
 import { furnaceGrade, gradeRecipe, gradesInUse, hasGrader, satisfies, type PlantStats } from "../game/plant";
-import { gradeChecks, suggestRecipe, worstCase } from "../game/recipe";
+import { gradeChecks, scrapResearchFor, scrapResearchHint, suggestRecipe, worstCase } from "../game/recipe";
 import { scrapUnlocked } from "../game/research";
 import type { GameState, GradeId } from "../game/types";
 import type { GameApi } from "../game/useGame";
@@ -28,6 +28,7 @@ export function RecipeCard({ g, stats, act }: { g: GameState; stats: PlantStats;
   const checks = gradeChecks(g, grade, est.analysis, stats);
   const cheap = suggestRecipe(g, grade, stats, "billig");
   const safe = suggestRecipe(g, grade, stats, "sikker");
+  const missingResearch = safe ? null : scrapResearchFor(g, grade, stats);
   const grader = hasGrader(g);
   const worst = worstCase(g, grade, stats, recipe);
   const worstOk = satisfies(worst, grade);
@@ -74,7 +75,9 @@ export function RecipeCard({ g, stats, act }: { g: GameState; stats: PlantStats;
       <p className="g-muted g-small-text">
         {cheap
           ? "Billigst holder kravet med litt margin. Sikrest ligger lengst unna grensene og tåler dårlige partier – men koster mer."
-          : `Ingen blanding av skrapet du har tilgang til, holder kravet til ${spec.name.toLowerCase()}.`}
+          : missingResearch
+            ? scrapResearchHint(g, grade, missingResearch)
+            : `Ingen blanding av skrapet du har tilgang til, holder kravet til ${spec.name.toLowerCase()}.`}
       </p>
 
       <ul className="g-recipe-rows">

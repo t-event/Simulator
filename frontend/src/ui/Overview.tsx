@@ -10,6 +10,7 @@ import {
 } from "../game/actions";
 import { Maintenance } from "./Maintenance";
 import { auto, missingResearchFor, researchOptions } from "../game/research";
+import { scrapResearchFor, scrapResearchHint } from "../game/recipe";
 import { GRADE_IDS, GRADES, PRODUCTS, ROLES, SCRAP_TYPES, STAGES } from "../game/data";
 import {
   currentOrder,
@@ -109,9 +110,15 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
     out.push({
       text: `${first.customer} vil ha ${GRADES[first.grade].name.toLowerCase()}, men ovnen lager ${GRADES[g.targetGrade].name.toLowerCase()}. Bytt kvalitet under «Produksjon nå» lenger ned.`,
     });
-  for (const grade of gradesInUse(g)) {
+  // Kvaliteter ovnen lager eller har kontrakter på. Trengs det skrap som ikke er forsket fram, sies det (B-067)
+  const inUse = gradesInUse(g);
+  const needed = [...new Set([...inUse, ...g.contracts.filter((c) => c.status === "aktiv").map((c) => c.grade)])];
+  for (const grade of needed) {
     const est = recipeEstimate(g, grade, stats, gradeRecipe(g, grade));
-    if (!est.grades.includes(grade))
+    if (est.grades.includes(grade)) continue;
+    const missing = scrapResearchFor(g, grade, stats);
+    if (missing) out.push({ text: scrapResearchHint(g, grade, missing), view: "forskning" });
+    else if (inUse.includes(grade))
       out.push({
         text: `Resepten din holder ikke kravet til ${GRADES[grade].name.toLowerCase()}. Juster resepten under Marked.`,
         view: "marked",

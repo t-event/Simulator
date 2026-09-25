@@ -16,6 +16,7 @@ import {
   spotPrice,
 } from "../game/engine";
 import { moveInQueue, toggleOfferGrade } from "../game/actions";
+import { scrapResearchFor, scrapResearchHint } from "../game/recipe";
 import {
   day,
   gradeFailures,
@@ -48,6 +49,7 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
   const est = recipeEstimate(g, c.grade, stats, gradeRecipe(g, c.grade));
   const recipeOk = est.grades.includes(c.grade);
   const failures = recipeOk ? [] : gradeFailures(est.analysis, c.grade);
+  const missingResearch = canMake && !recipeOk ? scrapResearchFor(g, c.grade, stats) : null;
   // Anslaget bygger på det verket faktisk har laget de siste døgnene, med ordrekøen du alt har (B-034)
   const perDay = stats.dailyProductT > 0 ? realisticDailyT(g, stats) : 0;
   // Ukeleveranser fra rammeavtalene som kommer før fristen, tar også plass i køen (B-062)
@@ -83,7 +85,9 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
               <li className="ok">Resepten holder kravet</li>
             )
           ) : (
-            <li className="bad">Resepten gir {failures.join(", ")}</li>
+            <li className="bad">
+              {missingResearch ? scrapResearchHint(g, c.grade, missingResearch) : `Resepten gir ${failures.join(", ")}`}
+            </li>
           ))}
         {canMake && (
           <li className={tight ? "bad" : narrow ? "warn" : "ok"}>

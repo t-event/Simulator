@@ -2,10 +2,10 @@
  * Hjelp med resepten: hva holder og hva bommer for en kvalitet, hvordan det
  * rettes, og et forslag til billigste resept med skraptypene spilleren har.
  */
-import { GRADES, SCRAP_IDS, SCRAP_TYPES } from "./data";
+import { GRADES, SCRAP_IDS, SCRAP_TYPES, stageRef } from "./data";
 import { recipeEstimate } from "./engine";
 import { energyPrice, has, satisfies, type PlantStats } from "./plant";
-import { researchForScrap, scrapUnlocked } from "./research";
+import { hasResearch, RESEARCH, researchForScrap, scrapUnlocked, type Research } from "./research";
 import type { Analysis, GameState, GradeId, ScrapId } from "./types";
 
 export interface GradeCheck {
@@ -173,4 +173,36 @@ export function worstCase(
     worst[key] = recipeEstimate(g, grade, stats, skewed).analysis[key];
   }
   return worst;
+}
+
+const scrapResearchMemo = new Map<string, Research | null>();
+
+/**
+ * Kan kvaliteten ikke lages med skrapet som er åpent, finner denne den billigste skrapforskningen som gjør det
+ * mulig (f.eks. «Rent nyskrap» til høykarbon). Null hvis kvaliteten kan lages, eller ingen forskning hjelper (B-067).
+ */
+export function scrapResearchFor(g: GameState, grade: GradeId, stats: PlantStats): Research | null {
+  const key = [grade, g.researched.join(","), g.furnaceType, g.owned.join(","), stats.lab].join("|");
+  const hit = scrapResearchMemo.get(key);
+  if (hit !== undefined) return hit;
+  let found: Research | null = null;
+  if (!suggestRecipe(g, grade, stats, "sikker")) {
+    const locked = RESEARCH.filter((r) => r.scrap?.length && !hasResearch(g, r.id)).sort((a, b) => a.cost - b.cost);
+    for (const r of locked) {
+      if (suggestRecipe({ ...g, researched: [...g.researched, r.id] }, grade, stats, "sikker")) {
+        found = r;
+        break;
+      }
+    }
+  }
+  if (scrapResearchMemo.size > 200) scrapResearchMemo.clear();
+  scrapResearchMemo.set(key, found);
+  return found;
+}
+
+/** Hintteksten: hvilken forskning som mangler for å lage kvaliteten, og hvilket skrap den gir (B-067) */
+export function scrapResearchHint(g: GameState, grade: GradeId, r: Research): string {
+  const scrap = (r.scrap ?? []).map((id) => SCRAP_TYPES[id].name.toLowerCase()).join(" og ");
+  const when = r.stage > g.stage ? ` Den kommer når du har flyttet til ${stageRef(r.stage, g.stage)}.` : "";
+  return `${GRADES[grade].name} kan ikke lages med skrapet du har tilgang til – det trengs ${scrap}. Forsk fram «${r.name}» under Forskning.${when}`;
 }
