@@ -105,7 +105,8 @@ export function Research({
           <li>Hver kontrakt du leverer ferdig, og rammeavtaler som holdes</li>
           <li>Quizene og oppdragene i fagboka 📖</li>
           <li>
-            Charger du kjører selv i kontrollrommet («Ta styringen» på Verket, med lysbueovn): opptil 6 per charge
+            Charger du kjører selv i kontrollrommet («Ta styringen» på Verket, med lysbueovn): opptil 21 for en perfekt
+            charge
           </li>
           <li>Forskningssamarbeid (under): kjøp fagpoeng én gang i uka</li>
         </ul>

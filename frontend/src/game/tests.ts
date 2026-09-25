@@ -2,14 +2,21 @@
  * Små, raske tester av spillmotoren (B-097). Kjøres med `npx tsx src/game/tests.ts` og i CI.
  * Hver test bygger sin egen tilstand, så de ikke er avhengige av lagrede filer.
  */
-import { doResearch, scheduleCastingSwitch } from "./actions";
+import { doResearch, scheduleCastingSwitch, setPowerDeal } from "./actions";
 import { CHALLENGES, checkChallenges } from "./challenges";
 import { ADDONS, CASTINGS, FURNACES, WIN_CASH } from "./data";
 import { advance, assessOffer, checkWin, fmtKr, log, newGame } from "./engine";
 import { logTopic, showToast, unseenCount } from "./inbox";
 import { KNOWLEDGE } from "./knowledge";
-import { applyWorldEvents, joinSeason, SEASON_BONUS_FP, worldFactor } from "./world";
-import { energyPrice, productPrice } from "./plant";
+import {
+  applyWorldEvents,
+  canJoinDirectly,
+  joinSeason,
+  notJoinableReason,
+  SEASON_BONUS_FP,
+  worldFactor,
+} from "./world";
+import { dealPrice, energyPrice, productPrice } from "./plant";
 import { scrapPrice } from "./engine";
 import {
   buySister,
@@ -190,11 +197,16 @@ test("Konsernforskning: låst til konsernet åpnes, og gir effekt", () => {
   assert(g.researchPoints >= after + 1 || p.downUntilDay > 0, `kunnskapsdeling ga ikke fagpoeng (${fp})`);
 });
 
-test("Nytt spill+ gir bonus, vanlig nytt spill gjør det ikke", () => {
+test("Nytt spill er alltid runde 1 uten bonus (nytt spill+ er fjernet, B-141)", () => {
   const a = newGame(1);
-  const b = newGame(1, 2);
-  assert(b.cash > a.cash && b.researchPoints > a.researchPoints, "runde 2 fikk ingen bonus");
-  assert(a.round === 1 && b.round === 2 && !b.winSeen, "feil runde eller winSeen");
+  assert(a.round === 1 && !a.winSeen && a.researchPoints === 0, "nytt spill skal starte likt for alle");
+});
+
+test("Et eldre nytt spill+ blir ikke med i sesongen direkte (B-140)", () => {
+  const a = newGame(1);
+  assert(canJoinDirectly(a), "et vanlig garasjespill skal kunne bli med");
+  a.round = 2;
+  assert(!canJoinDirectly(a) && notJoinableReason(a).includes("nytt spill+"), "nytt spill+ skulle holdes utenfor");
 });
 
 test("Gamle lagringer får standardverdier for nye felt", () => {
@@ -381,6 +393,18 @@ test("Kontrollrommet: oksygen går ikke i tappingen, strømmen kan slås av", ()
   run.step = "tapp";
   run.setOxygen(true);
   assert(!run.blowing, "oksygen kan slås på i tappingen");
+});
+
+test("En strømkrise gjør spot dyrere, men ikke en fastpris man alt har (B-141)", () => {
+  const g = newGame(2);
+  setPowerDeal(g, "fast");
+  const fixed = energyPrice(g);
+  const spot0 = dealPrice(g, "spot");
+  applyWorldEvents(g, [
+    { id: 9, kind: "stromkrise", title: "Strømkrise", text: "Dyr strøm.", scrap: 1, steel: 1, power: 1.5, until: "x" },
+  ]);
+  assert(Math.abs(energyPrice(g) - fixed) < 1e-9, "fastprisen ble ganget med hendelsen");
+  assert(Math.abs(dealPrice(g, "spot") / spot0 - 1.5) < 1e-9, "spotprisen ble ikke ganget");
 });
 
 test("Felles hendelser ganger skrap-, stål- og strømpris, og logges én gang (B-129)", () => {

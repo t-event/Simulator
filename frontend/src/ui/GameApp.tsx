@@ -43,11 +43,11 @@ const SPEED_OPTIONS = [
 
 function Intro({ api }: { api: GameApi }) {
   const { hasSave, startNew: onNew, continueSaved: onContinue } = api;
-  // Med konto og et spill fra før: nytt spill erstatter spillet på nett, så vi spør først (B-125)
-  // Alle nye spill starter med veiledningen (B-136)
+  // Et spill fra før slettes av et nytt spill, så vi spør alltid først – med konto erstattes også spillet på nett
+  // (B-125, B-141). Alle nye spill starter med veiledningen (B-136)
   const [confirmNew, setConfirmNew] = useState(false);
   const startNew = () => {
-    if (hasSave && getSession()) setConfirmNew(true);
+    if (hasSave) setConfirmNew(true);
     else onNew(true);
   };
   return (
@@ -82,7 +82,11 @@ function Intro({ api }: { api: GameApi }) {
         </div>
         {confirmNew && (
           <div className="g-note g-intro-confirm">
-            <p>Et nytt spill erstatter spillet som er lagret på kontoen din. Vil du det?</p>
+            <p>
+              {getSession()
+                ? "Et nytt spill erstatter spillet som er lagret på kontoen din. Vil du det?"
+                : "Et nytt spill sletter spillet du har i denne nettleseren. Vil du det?"}
+            </p>
             <div className="g-row">
               <button className="g-danger" onClick={() => onNew(true)}>
                 Ja, start nytt
@@ -101,18 +105,19 @@ function EndScreen({
   g,
   onRestart,
   onContinue,
-  onNextRound,
+  inSeason,
 }: {
   g: GameState;
   onRestart: () => void;
   onContinue?: () => void;
-  onNextRound?: () => void;
+  /** Spillet er med i sesongen som pågår */
+  inSeason?: boolean;
 }) {
   const won = g.won && !g.gameOver;
   return (
     <div className="g-modal" role="dialog" aria-modal="true">
       <div className="g-modal-card">
-        <h2>{won ? "Et storverk!" : "Konkurs"}</h2>
+        <h2>{won ? "Et stålkonsern!" : "Konkurs"}</h2>
         <p>
           {won
             ? `Du startet i en garasje og har bygget et stålkonsern med ${g.konsern.plants.length + 1} verk og en verdi på over ${fmtKr(WIN_CASH)}.`
@@ -127,16 +132,12 @@ function EndScreen({
           <li>Kontrakter levert: {g.totals.contractsDone}</li>
           <li>Reklamasjoner: {g.totals.complaints}</li>
         </ul>
-        {won && onNextRound && (
+        {won && (
           <p className="g-muted">
-            Nytt spill+ starter i garasjen igjen, men med mer startkapital, noen fagpoeng og litt omdømme. Utfordringene
-            på storverket står under Verket hvis du spiller videre.
-          </p>
-        )}
-        {won && !onNextRound && (
-          <p className="g-muted">
-            Du er med i en sesong: spill videre og hold plassen på topplista. Når neste sesong starter, starter alle i
-            garasjen igjen. Utfordringene på storverket står under Verket.
+            {inSeason
+              ? "Du er med i sesongen: spill videre og hold plassen på topplista. Når neste sesong starter, begynner alle i garasjen igjen."
+              : "Spill videre og la konsernet vokse. Vil du konkurrere med andre, kan du bli med i sesongen under 🏆 Toppliste – der starter alle i garasjen."}{" "}
+            Utfordringene på storverket står under Verket.
           </p>
         )}
         <div className="g-row">
@@ -145,8 +146,12 @@ function EndScreen({
               Spill videre
             </button>
           )}
-          {won && onNextRound && <button onClick={onNextRound}>Nytt spill+ (runde {(g.round ?? 1) + 1})</button>}
-          <button onClick={onRestart}>Nytt spill</button>
+          {/* Etter en seier ligger «Nytt spill» under ⚙️ med bekreftelse, så ingen sletter spillet ved et uhell */}
+          {!won && (
+            <button className="g-primary" onClick={onRestart}>
+              Nytt spill
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -402,7 +407,7 @@ export function GameApp() {
   const [bookChapter, setBookChapter] = useState<string | null>(null);
   // Seiersskjermen vises én gang per spill; valget lagres i spillet (B-091)
   const winSeen = !!g?.winSeen;
-  // Sesongene erstatter nytt spill+ (B-129): er spillet med i sesongen som pågår, tilbys ikke nytt spill+
+  // Er spillet med i sesongen som pågår? Seiersskjermen forklarer da topplista i stedet for sesongene (B-141)
   const seasonStatus = useSeasonStatus();
   const seasonActive = !!seasonStatus?.current && g?.season === seasonStatus.current.id;
 
@@ -412,7 +417,8 @@ export function GameApp() {
     document.querySelector(".g-main")?.scrollTo({ top: 0 });
   }, [view]);
 
-  // Lagring på nett følger den lokale lagringen; når appen legges bort, sendes det som venter med én gang (B-125)
+  // Lagring på nett følger den lokale lagringen; når appen legges bort eller man går til et annet vindu, sendes det
+  // som venter med én gang (B-125, B-141)
   useEffect(() => {
     setSaveListener(onLocalSave);
     const away = () => {
@@ -422,11 +428,17 @@ export function GameApp() {
     const onVisibility = () => {
       if (document.visibilityState === "hidden") away();
     };
+    const onBlur = () => {
+      if (api.game) saveGame(api.game);
+      void flush();
+    };
     window.addEventListener("pagehide", away);
+    window.addEventListener("blur", onBlur);
     document.addEventListener("visibilitychange", onVisibility);
     return () => {
       setSaveListener(null);
       window.removeEventListener("pagehide", away);
+      window.removeEventListener("blur", onBlur);
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [api.game]);
@@ -568,14 +580,6 @@ export function GameApp() {
             setSettingsOpen(false);
             api.quit();
           }}
-          onNextRound={
-            seasonActive
-              ? undefined
-              : () => {
-                  setSettingsOpen(false);
-                  api.startNextRound();
-                }
-          }
           onClose={() => setSettingsOpen(false)}
         />
       )}
@@ -620,7 +624,7 @@ export function GameApp() {
           g={g}
           onRestart={api.quit}
           onContinue={() => act((gg) => void (gg.winSeen = true))}
-          onNextRound={seasonActive ? undefined : api.startNextRound}
+          inSeason={seasonActive}
         />
       )}
     </div>

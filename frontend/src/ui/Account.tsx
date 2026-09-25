@@ -30,6 +30,7 @@ import {
   linkOnLogin,
   markReconciled,
   onCloudStatus,
+  PULL_INTERVAL_MS,
   pullIfNewer,
   resetCloud,
   type LinkDecision,
@@ -109,6 +110,10 @@ export function CloudFollow({ api }: { api: GameApi }) {
       }
     };
     void pull(true);
+    // Mens appen vises: sjekk jevnlig, så en annen enhet som står åpen ved siden av, også blir fanget opp (B-141)
+    const timer = setInterval(() => {
+      if (document.visibilityState === "visible") void pull(true);
+    }, PULL_INTERVAL_MS);
     const onVisible = () => {
       if (document.visibilityState === "visible") void pull();
     };
@@ -119,6 +124,7 @@ export function CloudFollow({ api }: { api: GameApi }) {
     window.addEventListener("pageshow", onVisible);
     window.addEventListener("focus", onVisible);
     return () => {
+      clearInterval(timer);
       off();
       document.removeEventListener("visibilitychange", onVisible);
       window.removeEventListener("pageshow", onVisible);

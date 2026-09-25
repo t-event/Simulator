@@ -165,7 +165,7 @@ export function checkChallenges(g: GameState): void {
     const rewards = [c.fp ? `+${c.fp} fagpoeng` : "", c.cash ? fmtKr(c.cash) : "", c.rep ? `omdømme +${c.rep}` : ""]
       .filter(Boolean)
       .join(" og ");
-    log(g, `Utfordring klart: ${c.title.toLowerCase()}! ${rewards}.`, "good");
+    log(g, `Utfordring fullført: ${c.title.toLowerCase()}! ${rewards}.`, "good");
   }
 }
 

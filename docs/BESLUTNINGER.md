@@ -1133,7 +1133,7 @@ Under ⚙️ velger spilleren hva som skal vises på skjermen: alle hendelser, b
 på toppraden, men da ble «10×» kuttet på smale telefoner, så den ble flyttet ned.
 
 ## B-090 Utfordringer på storverket og nytt spill+ (2026-09-25)
-Status: gjelder
+Status: utfordringene gjelder. Nytt spill+ er erstattet av sesongene (B-141).
 - Åtte utfordringer på storverket, med fagpoeng og penger (Verket → Oversikt):
   - rekorddøgn på 4 500 t
   - et døgn under 420 kWh/t
@@ -1854,7 +1854,8 @@ Beslutning:
 - Fagboka og forklaringen under lista er skrevet om uten ligaer.
 
 ## B-140 To nettlesere på samme konto, og nytt spill+ i sesongen (2026-09-25)
-Status: gjelder (erstatter «det som har kommet lengst, vinner» i B-125, og utvider B-129 og B-133)
+Status: gjelder (erstatter «det som har kommet lengst, vinner» i B-125, og utvider B-129 og B-133). Punktene om
+nytt spill+ under ⚙️ er erstattet av B-141: nytt spill+ er fjernet.
 Brukeren: «Om jeg er innlogget i to nettlesere og bytter mellom de er ikke handlingene jeg har gjort oppdatert.»
 Spurte også om nytt spill+ virkelig er borte for spill i sesongen, og om nytt spill+ blir med i sesongen av seg selv.
 
@@ -1884,4 +1885,55 @@ Beslutning:
   at spillet er nytt spill+ med en fordel. Vil man være med, starter man sesongen i garasjen uten bonus.
 - Under ⚙️ vises ikke nytt spill+ for spill som er med i sesongen som pågår; det står at det kommer tilbake når
   sesongen er over. Utenfor sesongen står det at nytt spill+ ikke er med i sesongen.
+
+## B-141 Hyppigere lagring, nytt spill+ fjernet, og en grundig gjennomgang (2026-09-25)
+Status: gjelder (erstatter nytt spill+ fra B-090 og punktene om nytt spill+ i B-140)
+Brukeren: «Fiks at den synkroniserer ofte nok.» Nytt spill+ er forvirrende når det ikke er med i sesongen –
+«kanskje man skal ta det bort?» Og: se over all kode og tekst, rett feil og skrivefeil, og fjern det som ikke passer
+med planen.
+
+**Lagring på nett (synkronisering)**
+- Etter en handling fra spilleren lastes spillet opp etter ca. 3 sekunder (0,8 s lokalt + 2 s på nett, så flere
+  handlinger samles). Vanlig lagring hvert 15. sekund i stedet for hvert minutt. Når man går til et annet vindu
+  (`blur`), lastes spillet opp med én gang.
+- Mens appen vises, sjekker den hvert 20. sekund om spillet er lagret fra en annen enhet (én liten spørring).
+- Feil som ble funnet: `keepalive` (brukt når appen legges bort) avvises av nettleserne over 64 kB. Et spill på
+  storverket er ca. 90 kB, så det ble aldri lagret når appen ble lagt bort. Nå sendes store spill uten keepalive.
+- `flush()` venter på en lagring som allerede er på vei.
+
+**Nytt spill+ er fjernet**
+- Brukeren sa allerede i B-129 at nytt spill+ blir borte når spillet aldri blir ferdig. Nå er det gjort: ingen knapp
+  på seiersskjermen eller under ⚙️. `newGame` har ikke lenger runde-bonus. Feltet `round` står igjen for eldre
+  lagringer, og et eldre nytt spill+ blir fortsatt ikke med i sesongen direkte (B-140).
+- Seiersskjermen: «Et stålkonsern!», «Spill videre», og en forklaring om sesongen. «Nytt spill» er fjernet derfra
+  (den slettet spillet uten å spørre, rett ved «Spill videre»); det ligger under ⚙️ med bekreftelse.
+- Under ⚙️ → Nytt spill står det at spillet slettes, også på nett, og at det nye spillet blir med i sesongen.
+
+**Ny start i sesongen (server, migrasjon 009)**
+- Startet man på nytt i en sesong, ble tidslinja fra det gamle spillet liggende, og topplista viste det gamle til det
+  nye hadde kommet like langt. Nå slettes radene med høyere dag i samme sesong når en lavere dag kommer inn.
+- En ny start (dag 1–2) merkes ikke som tilbakespoling; en eldre lagring senere i spillet gjør det fortsatt.
+- «Alle tider» viser spillerens beste resultat (høyeste konsernverdi eller omdømme), ikke bare det siste døgnet.
+
+**Feil i spillet**
+- Strømpris: felles hendelser (strømkrise) ganget også en fastpris man alt hadde, og sammenligningen av avtalene og
+  prisen på Marked regnet uten hendelsen. Nå ligger hendelsen i spot og nattariff og i nye fastpristilbud, ikke i
+  en fastpris man har avtalt.
+- Startskjermen: «Nytt spill» slettet spillet i nettleseren uten å spørre når man ikke var logget inn. Nå spør den
+  alltid.
+- «Markedet er sterkt/svakt» på Marked → Priser tar med felles hendelser.
+
+**Tekst**
+- Spillertekst med internt beslutningsnummer («(B-075)») er fjernet. Skrivefeil og kjønn rettet («de sjeldent slår»,
+  «Utfordring klart»). «Ovn nummer to» → «Ovn nr. 2». Lysbueovnen på 90 t er forklart uten fagord alene.
+- Datterverket «Kystverket» het det samme som en ekte etat; det heter nå «Nesverket» (også i gamle lagringer).
+- Fagboka: sesongkapitlet sier at man trenger konto og kan bli med når som helst; setningen om råjern er rettet.
+- Forskning: en charge man kjører selv gir opptil 21 fagpoeng (ikke 6). Boblene skriver «fagpoeng», ikke «FP».
+- Sesongtekstene nevner ikke lenger nytt spill+ for nye spillere; grunnen hentes fra spillet.
+- Topplista forklarer at sesongen viser spillet man har nå og «Alle tider» det beste.
+
+**Dokumentasjon**
+- README og DESIGN.md skrevet om etter planen slik den er nå (garasje med induksjonsovn, konsern, konto, sesonger).
+  PLAN-NETT.md rettet (sikkerhetskopi, «Confirm email», migrasjoner, lagring). Ny `docs/FORSLAG.md` med åpne
+  spørsmål og forslag.
 

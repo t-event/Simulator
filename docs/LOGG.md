@@ -5,6 +5,39 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 87 – 2026-09-25: hyppigere lagring, nytt spill+ fjernet, og grundig gjennomgang av alt
+
+**Brukeren ba om:** Fiks at spillet synkroniserer ofte nok. Nytt spill+ er forvirrende når det ikke er med i
+sesongen – ta det bort? Se over all kode, all tekst og alle .md-filer: rett feil og skrivefeil, fjern det som ikke
+passer planen, og kom med forslag.
+
+**Gjort:** B-141.
+- Lagring på nett: ca. 3 s etter hver handling, hvert 15. sekund ellers, og med én gang ved bytte av vindu. Appen
+  sjekker hvert 20. sekund om en annen enhet har lagret. Feil funnet: store spill ble aldri lagret når appen ble lagt
+  bort (keepalive over 64 kB).
+- Nytt spill+ fjernet (knapper, motor, tekst). Seiersskjermen har bare «Spill videre»; «Nytt spill» ligger under ⚙️.
+- Server (migrasjon 009): ny start i samme sesong fjerner radene fra det gamle spillet; «Alle tider» viser det beste.
+- Feil: strømkrise ganget også fastprisen; startskjermen slettet spillet uten å spørre uten innlogging;
+  markedsstyrken tok ikke med felles hendelser.
+- Tekst: internt nummer i spillertekst, skrivefeil, «Kystverket» → «Nesverket», fagboka om sesongen, fagpoeng for
+  kontrollrommet, «FP» → «fagpoeng», sesongtekster uten nytt spill+.
+- Docs: README og DESIGN.md skrevet om, PLAN-NETT.md rettet, CLAUDE.md oppdatert, ny `docs/FORSLAG.md`.
+- Gjennomgått: hele `game/`, `ui/` (inkl. kontrollrommet), `net/` og SQL-en. Funnene som ikke ble rettet, står i
+  `docs/FORSLAG.md`.
+
+**Testet:** tsc, lint, `npm test` (nye tester: strømkrise og fastpris, nytt spill er runde 1, eldre nytt spill+ blir
+ikke med i sesongen, opplasting like etter en handling, keepalive for store spill), `validate.ts`, `balance.ts`
+(exit 0, alle nivåer innenfor målene), build. Migrasjon 009 prøvd i en transaksjon som ble rullet tilbake (ny start:
+6 rader → 1, ikke merket; eldre lagring: senere rader slettet, merket). Playwright med to nettlesere: et kjøp i B er
+på nett innen 3,6 s uten at appen legges bort; A henter det ved fokus og av seg selv innen 20 s. Vunnet spill:
+«Et stålkonsern!» med bare «Spill videre», ingen nytt spill+ under ⚙️. Startskjermen spør før et spill slettes.
+Toppfeltet uten avkorting på 390 og 320 px. Sikkerhetsrådene i Supabase er uendret.
+
+**Gjenstår:** Spørsmålene i `docs/FORSLAG.md` (avslutt veiledningen, to åpne nettlesere, merker ved sesongslutt,
+toppliste for kontrollrommet). Fase 4 og 5.
+
+---
+
 ## Økt 86 – 2026-09-25: to nettlesere på samme konto, og nytt spill+ i sesongen
 
 **Brukeren ba om:** Spurte om nytt spill+ virkelig er borte for spill i sesongen, og om nytt spill+ blir med i

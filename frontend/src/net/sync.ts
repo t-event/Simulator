@@ -25,8 +25,12 @@ export type CloudStatus =
   /** Spillet på nett er lagret fra en annen nettleser siden sist: lagringen herfra ble avvist (B-140) */
   | { kind: "conflict" };
 
-/** Minst så lenge mellom to lagringer på nett */
-export const UPLOAD_INTERVAL_MS = 60_000;
+/** Minst så lenge mellom to vanlige lagringer på nett (B-141: var ett minutt, for sjeldent ved bytte av enhet) */
+export const UPLOAD_INTERVAL_MS = 15_000;
+/** Etter en handling fra spilleren lastes spillet opp etter så lang tid (flere handlinger samles) */
+export const SOON_MS = 2_000;
+/** Så ofte appen sjekker om spillet er lagret fra en annen enhet, mens den vises */
+export const PULL_INTERVAL_MS = 20_000;
 
 let status: CloudStatus = { kind: "off" };
 /**
@@ -40,6 +44,7 @@ let lastUpload = 0;
 let lastSavedAt: number | null = null;
 let lastSnapshotDay = -1;
 let inFlight: Promise<void> | null = null;
+let soonTimer: ReturnType<typeof setTimeout> | null = null;
 let clock: () => number = () => Date.now();
 /** Versjonen av spillet på nett som spillet her bygger på (0: ingen lagring på nett ennå). null: ikke avklart. */
 let knownRev: number | null = null;
@@ -192,14 +197,24 @@ export async function uploadSave(g: GameState, keepalive = false): Promise<void>
   }
 }
 
-/** Kalles etter hver lokale lagring (save.ts). Laster opp når det er på tide. */
-export function onLocalSave(g: GameState): void {
+/**
+ * Kalles etter hver lokale lagring (save.ts). Laster opp når det er på tide, eller om litt (`soon`) når spilleren
+ * nettopp har gjort noe – da er det med når man bytter til en annen enhet (B-141).
+ */
+export function onLocalSave(g: GameState, soon = false): void {
   if (!cloudConfigured() || !getSession()) return;
   // Ingenting lastes opp før spillet her er avklart mot kontoen (B-138)
   if (!reconciled) return;
   // Et spill som tilhører en annen konto, skal ikke overskrive kontoens spill (B-125)
   if (g.owner && g.owner !== userId()) return;
   dirty = g;
+  if (soon) {
+    soonTimer ??= setTimeout(() => {
+      soonTimer = null;
+      void flush();
+    }, SOON_MS);
+    return;
+  }
   if (clock() - lastUpload >= UPLOAD_INTERVAL_MS) void flush();
 }
 
@@ -236,6 +251,8 @@ export async function flush(keepalive = false): Promise<void> {
 
 /** Nullstiller etter utlogging */
 export function resetCloud(): void {
+  if (soonTimer) clearTimeout(soonTimer);
+  soonTimer = null;
   reconciled = false;
   knownRev = null;
   dirty = null;

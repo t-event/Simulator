@@ -40,8 +40,6 @@ export interface GameApi {
   clearToasts: () => void;
   /** Nytt spill, med eller uten veiledet start */
   startNew: (guided: boolean) => void;
-  /** Nytt spill+ etter en seier: neste runde med bonus (B-090) */
-  startNextRound: () => void;
   continueSaved: () => void;
   /** Kjører en handling på spillet og tegner på nytt. Resultatmeldinger vises som varsel. */
   act: <T>(fn: (g: GameState) => T) => T;
@@ -127,10 +125,6 @@ export function useGame(): GameApi {
     },
     [begin],
   );
-  const startNextRound = useCallback(() => {
-    const round = (gameRef.current?.round ?? 1) + 1;
-    begin(newGame(Date.now(), round));
-  }, [begin]);
   const continueSaved = useCallback(() => {
     const g = loadGame();
     begin(g ?? newGame());
@@ -167,11 +161,17 @@ export function useGame(): GameApi {
     if (g.log.length) lastLogId.current = g.log[g.log.length - 1].id;
   }, [pushToast]);
 
+  // Etter en handling lagres spillet om litt, så lagringen på nett får det med seg raskt (B-141)
+  const actSave = useRef<ReturnType<typeof setTimeout> | null>(null);
   const act = useCallback(
     <T>(fn: (g: GameState) => T): T => {
       const g = gameRef.current;
       if (!g) throw new Error("ingen spill");
       const result = fn(g);
+      actSave.current ??= setTimeout(() => {
+        actSave.current = null;
+        if (gameRef.current) saveGame(gameRef.current, true);
+      }, 800);
       advanceTutorial(g);
       advanceRecipeGuide(g);
       const r = result as unknown as PurchaseResult | undefined;
@@ -256,7 +256,6 @@ export function useGame(): GameApi {
     toastsWaiting,
     clearToasts,
     startNew,
-    startNextRound,
     continueSaved,
     act,
     setSpeed,

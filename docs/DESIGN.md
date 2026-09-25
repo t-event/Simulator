@@ -2,57 +2,58 @@
 
 ## Visjon
 
-Et mobilspill der du bygger et skrapbasert stålverk fra en garasje til et
-storverk, og lærer hvordan et stålverk henger sammen underveis. Målgruppen er
-folk uten forkunnskaper – nye ansatte, elever og nysgjerrige. Spillet skal være
-like enkelt å komme i gang med som Game Dev Tycoon, og like vanskelig å legge fra seg.
+Et mobilspill der du bygger et skrapbasert stålverk fra en garasje til et storverk og et stålkonsern, og lærer
+hvordan et stålverk henger sammen underveis. Målgruppen er folk uten forkunnskaper – nye ansatte, elever og
+nysgjerrige. Spillet skal være like enkelt å komme i gang med som Game Dev Tycoon, og like vanskelig å legge fra seg.
+
+Spillet blir aldri helt ferdig: sesonger på et halvt år, topplista og felles hendelser gir en ny grunn til å spille
+(se `PLAN-NETT.md`). Nytt spill+ er fjernet; sesongene har tatt over den rollen (B-141).
 
 ## Hva vi lærer av Game Dev Tycoon
 
-Game Dev Tycoon (Greenheart Games) lar deg starte et spillselskap i en garasje
-på 80-tallet og vokse til et stort studio. Det har fått svært gode kritikker på
-mobil (bl.a. 5/5 hos TouchArcade og 89 på Metacritic for iOS) for å være enkelt
-i presentasjonen, lett å spille i korte økter og vanskelig å legge fra seg.
+Game Dev Tycoon lar deg starte et spillselskap i en garasje og vokse til et stort studio. Det er kjent for å være
+enkelt i presentasjonen, lett å spille i korte økter og vanskelig å legge fra seg.
 
 | Game Dev Tycoon | Hvorfor det virker | Slik gjør vi det |
 |---|---|---|
-| Start alene i en garasje | Personlig og lite; veksten føles fortjent | Du starter alene i en garasje med digel og 25 000 kr |
+| Start alene i en garasje | Personlig og lite; veksten føles fortjent | Du starter alene i en garasje med en liten induksjonsovn og 25 000 kr |
 | Kjerne-loop: lag spill → anmeldelser → lær → lag bedre spill | Hver runde er kort og gir en dom du kan forbedre | Ta ordre → sett resept → smelt og støp → levering eller reklamasjon → lær → bygg ut |
 | Utviklingsfaser med glidebrytere | Få, meningsfulle valg per runde | Resept og kvalitet per ordre; i kontrollrommet fire steg med én handling hver |
 | Design- og teknikkbobler under utvikling | Konstant, liten belønning man ser | Bobler med tonn, kroner og fagpoeng stiger opp fra anlegget |
-| Forskningspoeng og forskning | Fremgang som ikke bare er penger | Fagpoeng fra charger, leveranser og feil; forskning låser opp utstyr og forbedringer |
+| Forskningspoeng og forskning | Fremgang som ikke bare er penger | Fagpoeng fra charger, leveranser, quiz og feil; forskning låser opp utstyr, automatikk og forbedringer |
 | Spillrapporten viser hva som var bra og dårlig | Lær gjennom oppdagelse | Tapperapport med stjerner og forklaring; reklamasjoner forklarer hva som var galt; fagboka låses opp |
 | Kontraktarbeid for trygg inntekt | Sikkerhetsnett tidlig | Små kontrakter fra smia og gårdbrukeren |
 | Flytting til større kontor med høyere kostnader | Tydelige milepæler med risiko | Fem nivåer; faste kostnader per døgn (200 kr i garasjen → 150 000 kr i storverket) og lønn hopper ved hver flytting; feiring ved flytting |
-| Hendelser som krever et valg | Variasjon og personlighet | Hendelseskort med to valg (billig skrapparti, hasteordre, lønnskrav, avisintervju …) |
-| Ansatte med ferdigheter som vokser | Folk du blir glad i | Ansatte med stjerner som blir flinkere av å jobbe |
-| Pause og fart | Spilleren styrer tempoet | Pause, 1×, 3×, 10× |
+| Hendelser som krever et valg | Variasjon og personlighet | Hendelseskort med to eller tre valg (billig skrapparti, hasteordre, lønnskrav, avisintervju …) |
+| Ansatte med ferdigheter som vokser | Folk du blir glad i | Ansatte med stjerner som blir flinkere av å jobbe, trivsel, kurs, ferie og sykdom |
+| Pause og fart | Spilleren styrer tempoet | Pause, 1×, 3×, 10× (farten låses opp med forskning) |
 | Én hovedskjerm med kontoret i midten | Oversiktlig på liten skjerm | Anleggsbildet øverst, én tydelig neste handling under |
 
 ## Kjerne-loopen
 
 1. **Ordre:** Signer en kontrakt – mengde, kvalitet, pris, frist.
 2. **Resept:** Velg skrap. Anslaget viser hvilke kvaliteter resepten gir.
-3. **Produksjon:** Ovnen smelter automatisk. Stålet støpes og legges på lager.
-   Med lysbueovn kan du ta styringen selv.
+3. **Produksjon:** Ovnen smelter automatisk. Stålet støpes og legges på lager. Med lysbueovn kan du ta styringen selv.
 4. **Dom:** Levering gir penger, omdømme og fagpoeng. Feil gir reklamasjon – og fagpoeng, fordi du lærte noe.
-5. **Utvikling:** Forsk, kjøp utstyr, ansett folk, flytt til neste nivå.
+5. **Utvikling:** Forsk, kjøp utstyr, ansett folk, flytt til neste nivå – og til slutt: bygg et konsern.
 
 ## Nivåene
 
 | Nivå | Følelse | Nytt |
 |---|---|---|
-| Garasje | Alene, alt for hånd | Digel, sandformer, små kontrakter |
-| Verksted | De første ansatte | Induksjonsovn, analysator, strålingsportal |
-| Støperi | Skiftarbeid; du blir leder | Større induksjonsovn, blokkstøping, spektrometer |
-| Stålverk | Tungindustri | Lysbueovn, strengstøping, øseovn, valseverk, ta styringen |
-| Storverk | Hundrevis av ansatte | Store ovner, fire strenger, eksport |
+| Garasje | Alene, alt for hånd | Liten induksjonsovn (250 kg), sandstøping, små kontrakter, veiledet start |
+| Verksted | De første ansatte | Induksjonsovn 1 t, formlinje, analysator, strålingsportal, strømavtaler, skrapklasser |
+| Støperi | Skiftarbeid; du blir leder | Induksjonsovn 5 t, blokkstøping, spektrometer, planlegger |
+| Stålverk | Tungindustri | Lysbueovn, strengstøping, øseovn, valseverk, rammeavtaler, ta styringen |
+| Storverk | Hundrevis av ansatte | Store ovner, fire eller seks strenger, eksport, utfordringer |
+| Konsern | Du eier flere verk | Datterverk, felles innkjøp og salg, salgsdirektør, milepæler mot 10 mrd. |
+
+Konsernet åpner seg på storverket når alt utstyret der er kjøpt, eller egenkapitalen når 1 mrd. (B-106).
 
 ## Kontrollrommet – enkel styring
 
-Kravet: en person uten fagkunnskap skal klare å kjøre en charge. Hvert steg har
-**én forklaring i vanlige ord, én måling med grønt felt og én hovedhandling**.
-Automatikken tar alt annet.
+Kravet: en person uten fagkunnskap skal klare å kjøre en charge. Hvert steg har **én forklaring i vanlige ord, én
+måling med grønt felt og én hovedhandling**. Automatikken tar alt annet.
 
 | Steg | Mål | Handling | Automatikk | Fart |
 |---|---|---|---|---|
@@ -61,88 +62,39 @@ Automatikken tar alt annet.
 | 3. Slagg av | Få slagget under ca. 1,2 t uten å søle stål | «Tipp mot slaggdøra» / «Rett opp ovnen» (kan hoppes over – da kommer fosforet tilbake). Under 0,5 t renner stål ut døra | Døra åpnes | 15× |
 | 4. Varm opp og tapp | Tapp når temperaturen er i det grønne vinduet (±8 °C), rett opp ovnen når øsa er 93–100 % full | Strøm ▲/▼, oksygen, «Tapp nå!», «Rett opp ovnen» | – | 10× / 8× |
 
-Etterpå: 0–3 stjerner for smelting, rensing, avslagging, tappetemperatur og øsa,
-en samlet karakter (5★ krever 14 av 15) og en forklaring i vanlige ord. Stjernene
-gir fagpoeng. Stål som søles eller renner over, går tapt (B-076).
-Det finnes bare denne styringen; det fulle kontrollrommet er fjernet (B-077).
+Etterpå: 0–3 stjerner for smelting, rensing, avslagging, tappetemperatur og øsa, en samlet karakter (5★ krever 14 av
+15) og en forklaring i vanlige ord. Stjernene gir fagpoeng, og 4–5 stjerner gir ekstra betalt for stålet (B-086).
+Stål som søles eller renner over, går tapt (B-076).
 
-## Forskning
+## Forskning og fagpoeng
 
-Fagpoeng (FP) tjenes slik: 0,5 / 0,3 / 0,2 per charge (avtar med størrelsen på
-verket), 1 + nivå per levert kontrakt, 2–6 per charge du kjører selv (etter
-stjerner), 2–3 per reklamasjon eller havari. Se B-018. Forskning
-koster FP, er umiddelbar og låser opp utstyr, forbedringer og kapitler i
-fagboka. Se `src/game/research.ts` for tabellen.
+Fagpoeng tjenes på charger (avtar med størrelsen på verket), leverte kontrakter (1 + nivå), rammeavtaler, quizene og
+oppdragene i fagboka, charger du kjører selv (1 + stjerner, og 8–15 ekstra for 4–5 stjerner), og på reklamasjoner og
+havarier (2–3). Forskning koster fagpoeng, er umiddelbar, krever at kapitlet i fagboka er lest, og låser opp utstyr,
+automatikk (B-054), forbedringer og kapitler. Se `src/game/research.ts`.
 
 ## Hendelseskort
 
-Omtrent ett kort hver fjerde dag. Spillet pauses til du har valgt. Se
-`src/game/decisions.ts`.
+Omtrent ett kort hver fjerde dag. Spillet pauses til du har valgt. Se `src/game/decisions.ts`. I tillegg kommer
+engangstips (`tips.ts`) og rådgiveren når omdømmet faller flere ganger av samme grunn.
 
-## Veikart (ikke gjort ennå)
+## Veikart
+
+Konto, lagring på nett, toppliste og sesonger er bygget. Neste steg står i `PLAN-NETT.md` (fase 4: ventetid i
+konsernet, fase 5: anbud og skrapauksjoner). Åpne spørsmål og mindre forslag står i `FORSLAG.md`.
+
+Ideer som ikke er bestemt:
 
 - Kundevurdering 1–10 per levert kontrakt, som anmeldelsene i Game Dev Tycoon.
 - Trender i markedet («etterspørselen etter armering øker») som styrer hvilke kontrakter som dukker opp.
-- Opplæring av ansatte (kurs som koster penger og tid), ferie og slitne ansatte.
-- Prestasjoner (første tonn, første lysbuecharge, ingen reklamasjoner på 30 dager …).
-- Lyd og vibrasjon ved viktige hendelser.
+- Prestasjoner (første tonn, første lysbuecharge, ingen reklamasjoner på 30 dager …) utenom utfordringene på
+  storverket.
+- Lyd ved viktige hendelser.
 - Flere produkter (tråd, profiler, plater) og ulike markeder.
 - App Store / Google Play via Capacitor, hvis ønsket (se B-009).
 
-## Tilbakemeldingsrunde 2 (2026-09-24) – arbeidsliste
+## Historikk
 
-Brukeren testet på mobil og fikk en annen person til å teste. Hvert punkt har en status.
-Oppdater listen når noe blir gjort, så arbeidet kan fortsette i en ny samtale.
-
-**A. Småfeil og språk**
-- [x] Velge selv hvilken kontrakt som leveres først (løses i B)
-- [x] Færre forespørsler om gangen; forespørsler har synlig svarfrist og avslås automatisk
-- [x] Hardere bot når en kontrakt ikke leveres
-- [x] Mottilbud på lønnskrav
-- [x] Flere hendelseskort, og ikke det samme om og om igjen
-- [x] Bedre norsk: «I dag inn/ut», «I går resultat» osv.
-- [x] Riktige navn: «Sandformer» → sandstøping; «Lekkasje i spolen» → vannlekkasje i induksjonsspolen
-- [x] Se etter og rett konsollfeil (ingen funnet i Chromium, verken utvikling, publisert bygg eller kontrollrom)
-
-**B. Planlegging** (brukerens valg: ordrekø + planlegger)
-- [x] Ordrekø: spilleren sorterer aktive kontrakter; levering, kvalitet og resept følger køen
-- [x] Planlegger (ansatt) som ordner køen og innkjøp automatisk; automatisk innkjøp krever planlegger
-
-**C. Foring og vedlikehold**
-- [x] Ingen automatisk omforing fra start: knapp «Bytt foring», plan hver N døgn (forskning), eller en
-      reparatør som gjør det automatisk (kortet «Vedlikehold» på Verket)
-- [x] Tydelig forskjell på planlagt stans (billig, kort) og havari (dyrt, langt, omdømme)
-
-**D. Gradvis opplåsing og ryddigere grensesnitt**
-- [x] Mindre info i starten; faner og kort låses opp etter hvert (Folk, Forskning, fart, skrap)
-- [x] Ovn, støping, utstyr og bygg mer sentralt – «Utstyr»-knapp på hvert sted i anlegget på Verket
-- [x] Skraptyper låses opp med fagpoeng; ikke alt fra start
-- [x] 3× og 10× fart låses opp med fagpoeng
-- [x] Resepten mer intuitiv: vis hva som mangler for kvaliteten og hvordan det rettes, med forslag
-- [x] Fokus på flere ting enn å godta kontrakter; kvaliteten man produserer mer sentral (Kvalitet-kort;
-      mer kommer med strøm i tema E og ansatte i tema G)
-
-**E. Strøm** (brukerens valg: alle fire)
-- [x] Strømavtale: spot, fastpris eller nattariff, med bindingstid
-- [x] Effekttariff: døgnets høyeste effektuttak koster; mange ovner samtidig blir dyrt
-- [x] Skiftplan: velg når verket smelter (natt er billig strøm, men nattillegg i lønn)
-- [x] Utkobling fra nettselskapet mot betaling (hendelse med valg)
-
-**F. Fagboka sentral** (brukerens valg: alle fire)
-- [x] Quiz per kapittel som gir belønning
-- [x] Forskning krever at kapitlet er lest
-- [x] Oppdrag fra fagboka med mål og belønning
-- [x] Rådgiver ved gjentatte omdømmetap: forklarer feilen, viser til kapittel, spesialist mot betaling
-
-**G. Ansatte og balanse**
-- [x] Ansatte med mer å si (trivsel, bonus, kurs per ansatt; spesialister via rådgiveren i tema F)
-- [x] Verkstedet: omdømme 18 og 1,8 mill. kr – pengene har nå flere nyttige formål (utstyr på Verket,
-      bonus, kurs), og penger og omdømme holder følge for testspilleren (se B-026)
-- [x] Fagpoeng kommer fortsatt for fort
-- [x] Ting bør ta mer tid
-
-**Claudes egne forslag**
-- [x] Sikkerhetskopi av lagret spill (Safari kan slette data for nettsider som ikke er brukt på 7 dager,
-      med mindre spillet er lagt på hjemskjermen)
-- [x] Spare batteri: tegne skjermen sjeldnere (ikke på pause eller i bakgrunnen)
-- [x] Veiledet start de første minuttene (kan hoppes over, B-027)
+Tilbakemeldingsrunde 2 (2026-09-24) ga arbeidslistene A–G (småfeil og språk, planlegging, foring, gradvis opplåsing,
+strøm, fagboka og ansatte). Alt på lista er gjort; se `LOGG.md` for detaljene. Sikkerhetskopi som fil ble lagt inn
+der, men er fjernet igjen (B-135) – et spill flyttes nå med konto.

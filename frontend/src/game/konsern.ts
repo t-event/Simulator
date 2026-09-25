@@ -71,7 +71,7 @@ export const SISTER_NAMES = [
   "Havneverket",
   "Skogverket",
   "Fjellverket",
-  "Kystverket",
+  "Nesverket",
   "Sletteverket",
 ];
 

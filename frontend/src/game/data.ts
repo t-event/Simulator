@@ -480,7 +480,8 @@ export const FURNACES: FurnaceType[] = [
     consumablesPerT: 180,
     requires: ["renseanlegg"],
     arc: true,
-    description: "Fullskala lysbueovn med flatt bad og stålsump.",
+    description:
+      "Fullskala lysbueovn som tar 90 tonn. Litt flytende stål blir igjen i bunnen etter tapping (stålsump), så neste charge smelter raskere.",
   },
 ];
 
@@ -587,8 +588,7 @@ export const CASTINGS: CastingType[] = [
     costPerT: 120,
     defectRisk: 0.035,
     continuous: true,
-    description:
-      "Seks strenger tar unna stålet fra tre store ovner. Uten flere ovner står strengene mye og venter (B-075).",
+    description: "Seks strenger tar unna stålet fra tre store ovner. Uten flere ovner står strengene mye og venter.",
   },
 ];
 
@@ -664,7 +664,7 @@ export const ADDONS: Addon[] = [
   },
   {
     id: "ovn2",
-    name: "Ovn nummer to",
+    name: "Ovn nr. 2",
     stage: 2,
     price: 0,
     description: "En ovn til av samme type. Dobbel smeltekapasitet, dobbelt mannskap.",
@@ -756,7 +756,7 @@ export const ADDONS: Addon[] = [
     needsArc: true,
     perFurnace: true,
     description:
-      "Tykkere kobberpaneler og følere som varsler lekkasjer. Halvparten så mange overslag, og de sjeldent slår hull i panelene.",
+      "Tykkere kobberpaneler og følere som varsler lekkasjer. Halvparten så mange overslag, og de slår sjelden hull i panelene.",
   },
   {
     id: "bruddvarsling",

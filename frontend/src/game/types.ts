@@ -440,7 +440,7 @@ export interface GameState {
   fpDealDay: number;
   /** Siste logglinje spilleren har sett i varsellista (B-089) */
   inboxSeenId: number;
-  /** Runde: 1 for første spill, 2+ for nytt spill+ etter en seier (B-090) */
+  /** Runde: 1 for nye spill. 2+ finnes bare i eldre lagringer fra nytt spill+ (B-090), som er fjernet (B-141). */
   round: number;
   /** Spilleren har sett seiersskjermen og valgt å spille videre */
   winSeen: boolean;
@@ -448,7 +448,6 @@ export interface GameState {
   courseSeats: { start: number; used: number } | null;
   /** Støping som kjøpes av seg selv når ordrene på det gamle produktet er levert (B-102) */
   pendingCastingSwitch: string | null;
-  /** Konsernet (B-106) */
   /** Sist det ble varslet om fullt ferdigvarelager (spillminutt), så varselet ikke gjentas hele tida (B-118) */
   storeFullLogMin: number;
   /** Kontoen spillet er koblet til (konto-id fra innloggingen), eller null uten konto (B-125) */
@@ -461,6 +460,7 @@ export interface GameState {
   seasonLoginPromptSeen: number | null;
   /** Felles hendelser fra serveren som pågår nå, og hvilke spilleren alt har fått beskjed om (B-129) */
   world: { events: WorldEvent[]; seenEventIds: number[] };
+  /** Konsernet (B-106) */
   konsern: {
     unlocked: boolean;
     plants: SisterPlant[];

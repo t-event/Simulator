@@ -16,6 +16,7 @@ import type { GameState, ProductId, ScrapId } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Bar, Card, SubTabs } from "./common";
 import { EventsNote } from "./Season";
+import { worldFactor } from "../game/world";
 import { RecipeCard } from "./Recipe";
 import { AutoToggle } from "./AutoToggle";
 import { fmtKr, fmtNum, fmtPct, fmtT } from "./format";
@@ -41,6 +42,8 @@ export function Market({ g, stats, act, openTab }: Props & { openTab?: string })
     openTab && ["skrap", "resept", "strom", "priser"].includes(openTab) ? (openTab as MarketTab) : "skrap",
   );
   const amounts = BUY_AMOUNTS[g.stage];
+  // Stålprisen mot normalt, med felles hendelser som eksportboom og importpress (B-129)
+  const steelNow = g.market.steelFactor * worldFactor(g, "steel");
   // Strømavtaler og effekttariff vises fra verkstedet; i garasjen holder det med prisen (B-045)
   const electric = stats.furnace.fuel === "strøm" && g.stage >= 1;
   const open = SCRAP_IDS.filter((id) => scrapUnlocked(g, id));
@@ -230,7 +233,8 @@ export function Market({ g, stats, act, openTab }: Props & { openTab?: string })
               </tbody>
             </table>
             <p className="g-muted">
-              Markedet er {g.market.steelFactor >= 1 ? "sterkt" : "svakt"} ({fmtPct(g.market.steelFactor)} av normalt).
+              Markedet er {steelNow >= 1 ? "sterkt" : "svakt"} ({fmtPct(steelNow)} av normalt
+              {worldFactor(g, "steel") !== 1 ? ", med hendelsen øverst" : ""}).
             </p>
             <h3 className="g-subhead">Skrappriser nå</h3>
             <table className="g-table">

@@ -18,13 +18,12 @@ konkurranse om kunder og skrap mellom spillerne. Fasene nederst er rekkefølgen 
 **Kan noen dele sikkerhetskopien og jukse?** Ja, med bare en overføringskode kunne man det. Derfor:
 
 - Konto med e-post og passord. Kontoen er identiteten på topplista, én konto per spiller.
-- En lagring som er koblet til en konto, merkes med konto-id. Fila fra «Last ned sikkerhetskopi» kan bare lastes inn
-  på den samme kontoen. Fila fra en annen konto blir avvist.
-- Serveren tar vare på tidslinja (spilldag, kasse, konsernverdi hver gang det lagres). Laster man inn en eldre kopi,
-  ser serveren at spilldagen går bakover, og spillet mister plassen i pågående anbud og auksjoner. Man kan fortsatt
-  bruke kopien til å redde et spill som gikk galt.
+- En lagring som er koblet til en konto, merkes med konto-id. Sikkerhetskopi som fil er fjernet helt (B-135): et
+  spill flyttes bare med konto.
+- Serveren tar vare på tidslinja (spilldag, kasse, konsernverdi, én rad per spilldøgn). Kommer en eldre lagring
+  (spilldagen går bakover), merkes kontoen, og radene fra det senere tidspunktet slettes, så topplista følger spillet
+  man har nå. En ny start i garasjen (dag 1–2) merkes ikke (B-141).
 - Det som avgjør konkurransen (anbud, auksjoner, sesongresultat), avgjøres på serveren, ikke i appen.
-- Sikkerhetskopi som fil er fjernet helt (B-135): et spill flyttes bare med konto.
 
 Det som ikke går å stoppe helt: spillet kjører på mobilen, så en teknisk kyndig spiller kan redigere sin egen lagring.
 Det vi gjør mot det står under «Juksesperre». Det er godt nok for et hobbyspill.
@@ -54,8 +53,8 @@ med den. GitHub Pages publiserer fortsatt selve spillet som i dag.
   i det publiserte spillet (nettleseren må ha den), og det er greit: sikkerheten ligger i tilgangsreglene (RLS) i
   databasen. Den hemmelige nøkkelen («service_role») skal aldri sendes, committes eller brukes av spillet.
 - **All serverlogikk som SQL i databasen:** tilgangsregler, sjekker og planlagte jobber (pg_cron) skrives som
-  SQL-filer i `supabase/` i repoet. Brukeren limer dem inn i SQL-editoren i Supabase. Da trengs verken CLI eller
-  hemmelige nøkler hos Claude.
+  SQL-filer i `supabase/` i repoet, nummerert. Claude kjører dem med Supabase-connectoren (`apply_migration`) og
+  legger fila i repoet samtidig, så repoet speiler databasen. Da trengs verken CLI eller hemmelige nøkler.
 - **Region:** EU.
 - **Personvern:** vi lagrer e-post, kallenavn og det lagrede spillet. Innstillinger får en kort personverntekst og en
   knapp for å slette kontoen med alt innhold.
@@ -101,7 +100,7 @@ sesonger, hendelser, åpne anbud og auksjoner).
 
 ### Fase 0 – grunnlag (1 økt)
 
-- Supabase-prosjekt (brukeren), nøkler inn i `frontend/src/net/config.ts`.
+- Supabase-prosjekt (brukeren). URL og offentlig nøkkel i GitHub Secrets, lest av `frontend/src/net/config.ts`.
 - Mappen `supabase/` med `001_grunnlag.sql`: `profiles`, `saves`, `snapshots`, `config` og tilgangsregler.
 - `frontend/src/net/` med klienten og `config`-lesing. Ingenting synlig for spilleren ennå.
 - Regel i CLAUDE.md: aldri commit den hemmelige nøkkelen.
@@ -112,13 +111,16 @@ Spilleren ser: «Konto» under ⚙️ Innstillinger, med opprett konto, logg inn
 skysymbol i toppen viser om spillet er lagret på nett.
 
 - Første innlogging: den lokale lagringen lastes opp og merkes med konto-id. Spillet fortsetter uten avbrudd.
-- Lagring på nett hvert minutt hvis noe har skjedd, og når appen legges bort.
+- Lagring på nett hvert 15. sekund hvis noe har skjedd, et par sekunder etter hver handling, og når appen legges
+  bort eller man går til et annet vindu (B-141; var hvert minutt).
+- To nettlesere på samme konto: hver lagring har et versjonsnummer. En nettleser lagrer bare over versjonen den
+  kjenner (`save_game`), og henter det nyeste når den vises igjen og hvert 20. sekund mens den vises (B-140, B-141).
 - Logger man inn på en annen mobil: spillet fra nettet lastes ned. Finnes det et lokalt spill også, velger spilleren
   («Fortsett fra nettet, dag 140» eller «Fortsett herfra, dag 12»).
 - Konflikt: den lagringen som har kommet lengst i spilltid, vinner. Ved tvil spør vi.
   Erstattet av versjonsnummer per lagring (B-140): det som sist ble lagret fra en annen nettleser, vinner, og en
   nettleser som står åpen med en gammel kopi, får ikke lagre over.
-- Sikkerhetskopi som fil: som før, men bare på samme konto.
+- Sikkerhetskopi som fil: fjernet (B-135).
 - Slett konto.
 - Tester: opp- og nedlasting, konflikt, uten nett, gammel lagring uten konto-id.
 
@@ -137,7 +139,7 @@ Spilleren ser: fanen «Toppliste» (under Verket, eller bak 🏆 i toppen) med k
 Spilleren ser: «Sesong 1 – 18 dager igjen» øverst på topplista, ligaen sin, ukas hendelse på Marked.
 
 - Sesong på 6 måneder (B-130; var 4 uker). Ved slutt: merker (vises ved kallenavnet), plassering i historikken, og en liten fordel inn i
-  neste sesong (fagpoeng eller startkapital i nytt spill+). Spillet fortsetter, ingen nullstilles.
+  neste sesong (10 fagpoeng og 5 % mer startkapital i det nye spillet). Spillet fortsetter, ingen nullstilles.
 - Ligaer etter nivå: **Bronse** (støperi og stålverk), **Sølv** (storverk), **Gull** (konsern). Man rykker opp
   når man flytter.
   Topplista viser ikke metallnavnene (de så ut som medaljer), men nivået ved navnet og medaljer for plass 1–3 (B-139).
@@ -195,17 +197,19 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
 - Serveren avviser verdier som er umulige på nivået (for eksempel 5 mrd. i garasjen).
 - Spilldag som går bakover, tar spillet ut av pågående anbud og auksjoner.
 - Bud sjekkes mot siste snapshot.
-- Sikkerhetskopi bare på egen konto.
+- Sikkerhetskopi som fil finnes ikke (B-135).
+- Starter man på nytt i samme sesong, slettes radene fra det gamle spillet, så topplista viser spillet man har nå
+  (B-141).
 - Brukeren kan sperre en konto og slette den fra topplista i Supabase.
 - Vi oppdager mistenkelige kontoer med en enkel liste i Supabase: «raskeste vekst siste døgn».
 
 ## Det brukeren gjør
 
 1. Opprett gratis konto på supabase.com og et prosjekt i EU.
-2. Authentication → Providers → Email: slå på. La «Confirm email» stå på.
+2. Authentication → Providers → Email: slå på. «Confirm email» er slått av (B-128): koden fra e-posten brukes bare
+   ved glemt passord. Egen e-postleverandør kommer senere.
 3. Send Claude prosjektets **URL** og den **offentlige** nøkkelen (anon/publishable). Aldri service_role.
-4. Når Claude har skrevet SQL-filene: lim dem inn i SQL Editor i Supabase, én fil om gangen, i nummerrekkefølge.
-   Claude sier fra hver gang det trengs.
+4. SQL-filene kjører Claude selv gjennom Supabase-connectoren.
 5. Database → Extensions: slå på `pg_cron` (fase 5).
 
 ## Brukerens svar (2026-09-25)
@@ -231,6 +235,10 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
 
 - Fase 0 og 1 er bygget (B-125, B-126). Fase 2 (toppliste) er bygget (B-127). Fase 3 (sesonger, ligaer og felles
   hendelser) er bygget (B-129). Fase 4 er neste.
+- Etterpå: topplista viser nivå og medaljer (B-139); to nettlesere på samme konto og nytt spill+ (B-140); hyppigere
+  lagring, nytt spill+ fjernet, ny start i sesongen og beste resultat på «Alle tider» (B-141).
+- Migrasjonene i `supabase/`: 001 grunnlag, 002 sikkerhet, 003 toppliste, 004 sesonger, 005 sesong på seks
+  måneder, 006 tidslinje per sesong, 007 toppliste med nivå, 008 lagring med versjon, 009 ny start i sesongen.
 - **Slik starter du en ny sesong:** i SQL Editor: `select public.start_season('Sesong 2', 26);` (navn, antall uker; 26 = seks måneder, B-130).
   **Slik legger du ut en hendelse:** `select public.add_event('skrapmangel', 7);` (skrapmangel, stromkrise,
   eksportboom, importpress, transportstreik; antall dager). Claude kan gjøre begge deler gjennom connectoren.
