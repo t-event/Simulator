@@ -5,6 +5,31 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 90 – 2026-09-25: mest penger på bok, topplista oppdaterer seg, kjøpsvarsler og veiledningen
+
+**Brukeren ba om:** «Mest penger på bok» på topplista; at topplista (og alt) oppdaterer seg mens man spiller; at
+utstyr som ikke er forsket fram sier at man må forske, ikke at pengene mangler; et tall på Konsern-fanen; tallet i
+varslingslinja bare én gang; sjekk av veiledningen; fjern «Ingen» under varsler i innstillingene.
+
+**Gjort:** B-144.
+- Migrasjon 012: `kind = 'kasse'` på topplista og `records.best_cash`. Ny fane «Mest penger på bok».
+- Åpen toppliste henter på nytt hvert 15. sekund.
+- `upgradeOptions`: pengeadvarsel bare på det som kan kjøpes nå, advarsel om produktbytte først etter forskningen.
+  Kortet sier «🔬 Forsk fram «X» under Forskning først».
+- `konsernReady` gir tallet på Konsern-fanen. Varslingslinja uten tall i teksten. «Ingen» fjernet (migreres til
+  «Bare problemer»).
+- Klokka i toppfeltet brytes i stedet for å kuttes.
+
+**Testet:** tsc, lint, `npm test` (ny test: utstyr som mangler forskning har ingen advarsel; «ingen» → «problemer»),
+`validate.ts`, `balance.ts` (exit 0), build. Migrasjon 012 kjørt; `leaderboard('kasse')` gir riktig kasse og dag;
+sikkerhetsrådene uendret. Playwright: veiledningen fra start til «Ferdig» uten og med konto, 390 og 320 px; topplista
+med fem faner uten avkutting, to nye hentinger på 33 s mens den er åpen og ingen etter lukking; Konsern-fanen med
+tall; innstillingene uten «Ingen».
+
+**Gjenstår:** Fase 4 og 5. Toppliste for kontrollrommet når kontrollrommet er ferdig. Lekkede passord (brukeren).
+
+---
+
 ## Økt 89 – 2026-09-25: flere enheter samtidig og sesongresultat ved kallenavnet
 
 **Brukeren svarte:** Nye spillere skal kunne avslutte veiledningen. Gjør det som fungerer best for flere nettlesere

@@ -97,6 +97,8 @@ export function migrate(g: GameState): GameState {
   if (g.settings.skipIdleNights === undefined) g.settings.skipIdleNights = true;
   if (g.settings.pauseOffers === undefined) g.settings.pauseOffers = false;
   if (g.settings.toasts === undefined) g.settings.toasts = "alle";
+  // «Ingen» er fjernet nå som varsellinja har fast plass; nærmeste valg er «bare problemer» (B-144)
+  if ((g.settings.toasts as string) === "ingen") g.settings.toasts = "problemer";
   if (g.settings.toastTopics === undefined) g.settings.toastTopics = {};
   if (g.settings.toastSeconds === undefined) g.settings.toastSeconds = 6;
   if (g.round === undefined) g.round = 1;

@@ -2,7 +2,7 @@
  * Små, raske tester av spillmotoren (B-097). Kjøres med `npx tsx src/game/tests.ts` og i CI.
  * Hver test bygger sin egen tilstand, så de ikke er avhengige av lagrede filer.
  */
-import { doResearch, scheduleCastingSwitch, setPowerDeal } from "./actions";
+import { doResearch, scheduleCastingSwitch, setPowerDeal, upgradeOptions } from "./actions";
 import { CHALLENGES, checkChallenges } from "./challenges";
 import { ADDONS, CASTINGS, FURNACES, WIN_CASH } from "./data";
 import { advance, assessOffer, checkWin, fmtKr, log, newGame } from "./engine";
@@ -379,8 +379,9 @@ test("Varsler per tema: ferie kan slås av, problemer vises alltid med «bare pr
   g.settings.toasts = "problemer";
   g.settings.toastTopics = { havari: false };
   assert(!showToast(g, ferie) && showToast(g, havari), "«bare problemer» skal vise alle problemer");
-  g.settings.toasts = "ingen";
-  assert(!showToast(g, havari), "«ingen» viste et varsel");
+  // «Ingen» er fjernet (B-144): gamle lagringer får «bare problemer»
+  (g.settings as unknown as Record<string, unknown>).toasts = "ingen";
+  assert(parseSave(JSON.stringify(g))!.settings.toasts === "problemer", "«ingen» ble ikke til «bare problemer»");
 });
 
 test("Kontrollrommet: oksygen går ikke i tappingen, strømmen kan slås av", () => {
@@ -451,6 +452,21 @@ test("Sesongfordelen er pitteliten: 5 % kasse og 10 fagpoeng (B-129)", () => {
   const h = newGame(2);
   joinSeason(h, 3, false);
   assert(h.cash === cash && h.researchPoints === 0, "uten fordel skulle ingenting endres");
+});
+
+test("Utstyr som mangler forskning, sier «forsk fram», ikke at pengene er for få (B-144)", () => {
+  const g = newGame(1);
+  g.stage = 2;
+  g.cash = 50_000;
+  // Høye driftskostnader, så advarselen om tynn kasse ville slått til for alt
+  const day = { day: 1, income: {}, costs: { skrap: 40_000 }, producedT: 0, heats: 0, cashEnd: 0 };
+  g.history = [day, { ...day, day: 2 }, { ...day, day: 3 }];
+  const blocked = upgradeOptions(g).filter((o) => o.reason?.startsWith("Forsk fram"));
+  assert(blocked.length > 0, "fant ikke utstyr som mangler forskning");
+  assert(
+    blocked.every((o) => !o.warning),
+    `advarsel på utstyr som mangler forskning: ${blocked.find((o) => o.warning)?.name}`,
+  );
 });
 
 if (failed) {

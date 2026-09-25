@@ -30,6 +30,13 @@ export function StationButton({
   );
 }
 
+/** Hvorfor noe ikke kan kjøpes. Mangler forskningen, er det den spilleren må gjøre først (B-144) */
+function reasonText(reason: string): string {
+  return reason.startsWith("Forsk fram: ")
+    ? `🔬 Forsk fram «${reason.slice("Forsk fram: ".length)}» under Forskning først`
+    : reason;
+}
+
 function UpgradeCard({
   o,
   stage,
@@ -67,7 +74,7 @@ function UpgradeCard({
           >
             Kjøp
           </button>
-          {o.reason && <span className="g-muted">{o.reason}</span>}
+          {o.reason && <span className="g-muted">{reasonText(o.reason)}</span>}
           {o.canSchedule &&
             (scheduled ? (
               <button className="g-small" onClick={() => act((g) => scheduleCastingSwitch(g, null))}>

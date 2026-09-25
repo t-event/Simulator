@@ -327,8 +327,8 @@ export interface Settings {
   splitGrades: boolean;
   /** Planleggeren sorterer ordrekøen etter frist */
   plannerSorts: boolean;
-  /** Hvilke hendelser som vises som varsel på skjermen (B-089): alle, bare problemer, eller ingen */
-  toasts: "alle" | "problemer" | "ingen";
+  /** Hvilke hendelser som vises i varsellinja (B-089): etter temaene, eller bare problemer. «Ingen» er fjernet (B-144) */
+  toasts: "alle" | "problemer";
   /** Temaer som er slått av for varsler på skjermen; mangler et tema, vises det (B-115) */
   toastTopics: Partial<Record<LogTopic, boolean>>;
   /** Sekunder et varsel står på skjermen (B-115) */

@@ -1,5 +1,5 @@
 /**
- * Topplista (B-127). Står under Verket → Økonomi. Fire lister, hentet fra serveren.
+ * Topplista (B-127). Arket bak 🏆 ved varsellinja (B-133). Fem lister, hentet fra serveren og oppdatert mens den er åpen (B-144).
  * Uten konto vises lista likevel, med en oppfordring om å logge inn.
  */
 import { useEffect, useState } from "react";
@@ -59,6 +59,9 @@ function SeasonHistory() {
 function resultLeague(r: SeasonResult): string {
   return r.stage >= 4 && r.equity >= 1_000_000_000 ? "gull" : "";
 }
+
+/** Hvor ofte en åpen toppliste hentes på nytt (B-144) */
+const BOARD_POLL_MS = 15_000;
 
 function fmtValue(kind: BoardKind, v: number): string {
   const unit = BOARDS.find((b) => b.id === kind)?.unit;
@@ -151,6 +154,16 @@ export function Leaderboard({
       alive = false;
     };
   }, [kind, session, tick, seasonId]);
+
+  // Lista hentes på nytt mens den er åpen, så den følger med mens man spiller (B-144). Snapshots lastes opp med
+  // lagringen på nett (ca. hvert 15. sekund), så oftere enn det gir ikke noe nytt.
+  useEffect(() => {
+    if (!cloudConfigured()) return;
+    const t = setInterval(() => {
+      if (document.visibilityState === "visible") setTick((x) => x + 1);
+    }, BOARD_POLL_MS);
+    return () => clearInterval(t);
+  }, []);
 
   if (!cloudConfigured()) return null;
 
@@ -248,10 +261,10 @@ export function Leaderboard({
       )}
       {session && <SeasonHistory />}
       <p className="g-muted g-small-text">
-        Lista regnes ut på serveren av det som er lagret på nett, én gang per spilldøgn. I sesongen gjelder spillet du
-        har nå; på «Alle tider» står ditt beste resultat. Merket ved navnet viser hvor langt spilleren har kommet: fra
-        Garasje til Storverk, og Konsern når konsernverdien passerer 1 mrd. 🎖 er den beste plasseringen i en sesong som
-        er over. Kontoer med urimelig vekst holdes utenfor.
+        Lista regnes ut på serveren av det som er lagret på nett, én gang per spilldøgn, og oppdaterer seg mens du
+        spiller. I sesongen gjelder spillet du har nå; på «Alle tider» står ditt beste resultat. Merket ved navnet viser
+        hvor langt spilleren har kommet: fra Garasje til Storverk, og Konsern når konsernverdien passerer 1 mrd. 🎖 er
+        den beste plasseringen i en sesong som er over. Kontoer med urimelig vekst holdes utenfor.
       </p>
     </>
   );

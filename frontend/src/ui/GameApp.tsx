@@ -277,8 +277,12 @@ function TopBar({
         <div className="g-when">
           <strong>{STAGES[g.stage].name}</strong>
           <span>
-            Dag {day(g)} · {fmtClock(g.minute)}
-            <CloudDot />
+            {/* Dag og klokke brytes heller enn å kuttes når toppraden er trang (B-144) */}
+            <span className="g-nw">Dag {day(g)} ·</span>{" "}
+            <span className="g-nw">
+              {fmtClock(g.minute)}
+              <CloudDot />
+            </span>
             {g.speed > 0 && idleOutsideHours(g, stats) && (
               <em className="g-ff" title="Verket står om natta – tida går fortere til arbeidsdagen starter">
                 {" "}
@@ -360,7 +364,8 @@ function NoticeLine({ api, unseen, onOpen }: { api: GameApi; unseen: number; onO
   const text = t
     ? t.text
     : unseen > 0
-      ? `${unseen === 1 ? "Ett nytt varsel" : `${unseen > 99 ? "99+" : unseen} nye varsler`} – trykk for å se`
+      ? // Tallet står på bjella; teksten gjentar det ikke (B-144)
+        `${unseen === 1 ? "Nytt varsel" : "Nye varsler"} – trykk for å se`
       : "Ingen nye varsler";
   return (
     <div

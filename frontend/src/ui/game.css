@@ -2084,6 +2084,13 @@ button {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* Klokka skal ikke kuttes: dag og klokke brytes til to linjer når det er trangt (B-144) */
+.g-when > span {
+  white-space: normal;
+}
+.g-when .g-nw {
+  white-space: nowrap;
+}
 @media (max-width: 359px) {
   .g-top-row:first-child {
     gap: 6px;

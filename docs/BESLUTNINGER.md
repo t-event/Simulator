@@ -1987,3 +1987,41 @@ Brukeren svarte på spørsmålene i `docs/FORSLAG.md`:
 - Når en sesong spilleren var med i er over, kommer én beskjed: «Sesong 1 er over! Du ble nr. 2 av 14 …». Den vises
   én gang per sesong og konto i nettleseren, og før spørsmålet om neste sesong.
 
+## B-144 Mest penger på bok, topplista oppdaterer seg, og kjøpsvarsler etter forskning (2026-09-25)
+Status: gjelder (utvider B-127, B-115, B-062 og B-119)
+Brukeren ba om:
+- «Mest penger på bok bør også være med på topplista.»
+- «Topplista oppdaterer seg ikke før man oppdaterer nettsiden. Om ting skal fungere etter planen senere må alt
+  oppdatere seg mens man spiller.»
+- Utstyr som ikke er forsket fram, skal si at man må forske – ikke at man mangler penger.
+- Konsern-fanen på Verket skal vise et tall når noe kan kjøpes, som de andre knappene.
+- Tallet i varslingslinja skal ikke stå to ganger (bjella og teksten).
+- Sjekk at veiledningen fortsatt virker.
+- Fjern «Ingen» under varsler i innstillingene, siden varslingslinja har fast plass.
+
+**Topplista**
+- Ny liste «Mest penger på bok» (`kind = 'kasse'`, migrasjon 012). I sesongen: kassa i siste døgn av spillet man har
+  nå. På «Alle tider»: den største kassa kontoen har hatt (`records.best_cash`, fylt fra tidslinja og oppdatert av
+  `update_records()`). Lån teller med i kassa, men lånegrensen (høyst noen titalls millioner) er liten mot det et verk
+  tjener, så den flytter ikke lista.
+- En åpen toppliste henter lista og plassen din på nytt hvert 15. sekund (bare når siden vises). Tidslinja lastes opp
+  med lagringen på nett, én gang per spilldøgn, så oftere enn det gir ikke noe nytt. Lukket liste henter ingenting.
+  Sesongstatus og felles hendelser hentes allerede hvert minutt.
+
+**Kjøpsvarsler**
+- Feilen: advarselen «Etter kjøpet har du penger til drift i under ett døgn …» ble lagt på alt som ikke var kjøpt,
+  også utstyr som manglet forskning. Advarselen om bytte av produkt (blokk → emner) kom også før forskningen.
+- Nå: pengeadvarselen gjelder bare det som kan kjøpes nå, og advarselen om produktbytte kommer når forskningen er gjort.
+  Kortet sier «🔬 Forsk fram «X» under Forskning først» i stedet for «Forsk fram: X». Test i `tests.ts`.
+
+**Konsern-fanen** får et tall (som Anlegg): kjøp i konsernet som ikke er sperret og som kassa rekker til
+(`konsernReady`).
+
+**Varslingslinja:** tallet står bare på bjella; teksten er «Nytt varsel / Nye varsler – trykk for å se».
+
+**Innstillinger:** valget «Ingen» er fjernet. Lagringer med «Ingen» får «Bare problemer», nærmeste valg (`migrate`).
+
+**Veiledningen** er gått gjennom i Playwright fra «Start spillet» til «Ferdig», uten og med konto (nytt spill med
+konto blir med i sesongen uten at noe vindu sperrer), på 390 og 320 px: alle sju stegene går videre av seg selv, riktig
+fane markeres, og ingen feil i konsollen. Funnet underveis: klokka i toppfeltet ble kuttet («Dag 1 · 16…») når
+fagboka hadde et tall. Dag og klokke brytes nå til to linjer i stedet.
