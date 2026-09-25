@@ -1,7 +1,15 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { requestManual, requestReline, setFurnaceGrade, setTargetGrade, upgradeOptions } from "../game/actions";
+import {
+  fpDeal,
+  keyUpgrade,
+  requestManual,
+  requestReline,
+  setFurnaceGrade,
+  setTargetGrade,
+  upgradeOptions,
+} from "../game/actions";
 import { Maintenance } from "./Maintenance";
-import { auto, researchOptions } from "../game/research";
+import { auto, missingResearchFor, researchOptions } from "../game/research";
 import { GRADE_IDS, GRADES, PRODUCTS, ROLES, SCRAP_TYPES, STAGES } from "../game/data";
 import {
   currentOrder,
@@ -44,13 +52,15 @@ interface Props {
   openBook: (chapter?: string) => void;
 }
 
+type Anchor = "vedlikehold" | "mal";
+
 interface Hint {
   text: string;
   view?: View;
   /** Underfane i visningen, f.eks. lageret under Salg */
   sub?: string;
-  /** Åpner vedlikeholdskortet under Anlegg her på Verket */
-  maintenance?: boolean;
+  /** Kort her på Verket som hintet ruller til: vedlikehold (under Anlegg) eller målkortet (B-064) */
+  anchor?: Anchor;
 }
 
 function hints(g: GameState, stats: PlantStats): Hint[] {
@@ -86,7 +96,7 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
   if (g.furnaces.some((f) => f.wear > 0.8 && !f.relineRequested))
     out.push({
       text: "Foringen er nesten slitt gjennom. Trykk her og bytt den under Vedlikehold før den brenner gjennom.",
-      maintenance: true,
+      anchor: "vedlikehold",
     });
   // Uten ordreplanlegging bytter ikke ovnen kvalitet selv (B-054)
   const first = currentOrder(g);
@@ -112,8 +122,22 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
   if (research.length)
     out.push({ text: `Du har fagpoeng nok til å forske på ${research[0].name.toLowerCase()}.`, view: "forskning" });
   const next = upgradeOptions(g).find((o) => o.kind === "stage");
-  if (next?.available)
-    out.push({ text: `Du kan flytte inn i ${next.name.toLowerCase()}! Trykk «Flytt inn» under Mål lenger ned.` });
+  if (next?.available) out.push({ text: `Du kan flytte inn i ${next.name.toLowerCase()}! Trykk her.`, anchor: "mal" });
+  // Står ny ovn eller støping fast på forskning, og fagpoengene mangler: vis veien videre (B-064)
+  const key = keyUpgrade(g);
+  const needs = key?.reason?.startsWith("Forsk fram") ? missingResearchFor(g, key.id) : undefined;
+  if (needs && g.researchPoints < needs.cost) {
+    const deal = fpDeal(g);
+    const ways = [
+      !deal.reason && "kjøp et forskningssamarbeid under Forskning",
+      stats.furnace.arc && "kjør charger selv («Ta styringen»)",
+      "lever kontrakter og ta quizene i fagboka",
+    ].filter(Boolean);
+    out.push({
+      text: `Du mangler ${Math.ceil(needs.cost - g.researchPoints)} fagpoeng til «${needs.name}». Få flere: ${ways.join(", ")}.`,
+      view: "forskning",
+    });
+  }
   {
     const away = g.workers.filter((w) => isAbsent(g, w)).length;
     const full = staffing(g, true).shifts;
@@ -342,15 +366,19 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
   const upgradesReady = readyUpgrades(g);
   const missingNow = missingScrap(g, stats);
   // Varsel om foringen åpner Anlegg og ruller ned til vedlikeholdskortet
-  const [scrollTo, setScrollTo] = useState(0);
+  // …og «Du kan flytte inn» åpner Oversikt og ruller til målkortet (B-064)
+  const [scrollTo, setScrollTo] = useState<{ id: Anchor; n: number } | null>(null);
   useEffect(() => {
-    if (scrollTo) document.getElementById("vedlikehold")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (scrollTo) document.getElementById(scrollTo.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [scrollTo]);
-  const openMaintenance = () => {
-    setTab("anlegg");
-    setScrollTo((n) => n + 1);
+  const openAnchor = (id: Anchor) => {
+    setTab(id === "vedlikehold" ? "anlegg" : "oversikt");
+    setScrollTo((prev) => ({ id, n: (prev?.n ?? 0) + 1 }));
   };
-  const runHint = (t: Hint) => (t.maintenance ? openMaintenance() : t.view && go(t.view, t.sub));
+  const openMaintenance = () => openAnchor("vedlikehold");
+  const runHint = (t: Hint) => (t.anchor ? openAnchor(t.anchor) : t.view && go(t.view, t.sub));
+  // Kan du flytte, står målkortet øverst i stedet for nederst (B-064)
+  const canMove = !!upgradeOptions(g).find((o) => o.kind === "stage")?.available;
   const recent = g.log.slice(-8).reverse();
 
   return (
@@ -373,7 +401,7 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
 
         {tips.length > 0 && (
           <div className="g-cta-wrap">
-            {tips[0].view || tips[0].maintenance ? (
+            {tips[0].view || tips[0].anchor ? (
               <button className="g-primary g-cta" onClick={() => runHint(tips[0])}>
                 {tips[0].text}
               </button>
@@ -384,7 +412,7 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
               <ul className="g-more-hints">
                 {tips.slice(1).map((t) => (
                   <li key={t.text}>
-                    {t.view || t.maintenance ? (
+                    {t.view || t.anchor ? (
                       <button className="g-link" onClick={() => runHint(t)}>
                         {t.text}
                       </button>
@@ -421,6 +449,7 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
       {tab === "oversikt" && (
         <>
           <div className="g-col-wide">
+            {canMove && <StageCard g={g} act={act} />}
             <CompactChain
               g={g}
               stats={stats}
@@ -541,7 +570,7 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
             </Card>
           </div>
           <div className="g-col">
-            <StageCard g={g} act={act} />
+            {!canMove && <StageCard g={g} act={act} />}
 
             <BookCard g={g} openBook={openBook} />
           </div>

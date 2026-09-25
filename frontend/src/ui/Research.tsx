@@ -1,11 +1,42 @@
-import { doResearch } from "../game/actions";
+import { buyFpDeal, doResearch, fpDeal } from "../game/actions";
 import { STAGES, stageRef } from "../game/data";
 import { knowledgeCard } from "../game/knowledge";
 import { researchOptions } from "../game/research";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Card } from "./common";
+import { fmtKr } from "./format";
 import { buzz } from "./haptics";
+
+/** Forskningssamarbeid: kjøp fagpoeng for penger når du står fast (B-064) */
+function FpDeal({ g, act }: { g: GameState; act: GameApi["act"] }) {
+  const deal = fpDeal(g);
+  if (deal.fp <= 0) return null;
+  return (
+    <div className="g-upgrade">
+      <div className="g-contract-head">
+        <strong>Forskningssamarbeid</strong>
+        <span className="g-fp-cost">+{deal.fp} FP</span>
+      </div>
+      <p className="g-muted g-small-text">
+        Leie inn forskere fra høyskolen i et døgn. Lønner seg når forskningen står fast og du har penger til overs.
+      </p>
+      <div className="g-row">
+        <button
+          className="g-primary g-small"
+          disabled={!!deal.reason}
+          onClick={() => {
+            act((gg) => buyFpDeal(gg));
+            buzz(20);
+          }}
+        >
+          Kjøp for {fmtKr(deal.price)}
+        </button>
+        {deal.reason && <span className="g-muted">{deal.reason}</span>}
+      </div>
+    </div>
+  );
+}
 
 /** Forskning: fagpoeng brukes på å låse opp utstyr og forbedringer. */
 export function Research({
@@ -63,10 +94,22 @@ export function Research({
       }
       className="g-research"
     >
-      <p className="g-muted">
-        Fagpoeng får du av å smelte, levere, kjøre charger selv, quizer og oppdrag i fagboka – og av feil. Les kapitlet
-        i fagboka før du forsker.
-      </p>
+      <details className="g-role-group">
+        <summary>Slik får du fagpoeng</summary>
+        <ul className="g-closed">
+          <li>Hver charge ovnen smelter (større charger gir mer)</li>
+          <li>Hver kontrakt du leverer ferdig, og rammeavtaler som holdes</li>
+          <li>Quizene og oppdragene i fagboka 📖</li>
+          <li>
+            Charger du kjører selv i kontrollrommet («Ta styringen» på Verket, med lysbueovn): opptil 6 per charge
+          </li>
+          <li>Forskningssamarbeid (under): kjøp fagpoeng én gang per døgn</li>
+        </ul>
+        <p className="g-muted">Les kapitlet i fagboka før du forsker.</p>
+      </details>
+      <div className="g-upgrades">
+        <FpDeal g={g} act={act} />
+      </div>
       {ready.length > 0 && (
         <>
           <h3 className="g-subhead">Klar til å forske ({ready.length})</h3>

@@ -59,6 +59,7 @@ export function clearSave(): void {
 export function migrate(g: GameState): GameState {
   const loose = g as Partial<GameState> & GameState;
   if (loose.researchPoints === undefined) loose.researchPoints = 0;
+  if (loose.fpDealDay === undefined) loose.fpDealDay = -1;
   if (loose.pendingDecision === undefined) loose.pendingDecision = null;
   if (loose.celebrate === undefined) loose.celebrate = null;
   if (loose.decisionSeen === undefined) loose.decisionSeen = {};

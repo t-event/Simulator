@@ -216,6 +216,7 @@ export function newGame(seed = Date.now()): GameState {
     won: false,
     pendingManual: null,
     researchPoints: 0,
+    fpDealDay: -1,
     researched: [],
     pendingDecision: null,
     decisionSeen: {},
