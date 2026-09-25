@@ -112,7 +112,8 @@ frontend/src/
     control/     Kontrollrommet: den enkle styringen (SimpleControl + simpleRunner)
   sim/         Prosessmodell for lysbueovnen (brukes av kontrollrommet)
 frontend/public/  PWA: manifest, ikoner, service worker
-supabase/      SQL som brukeren limer inn i Supabase (nummerert, kan kjøres flere ganger)
+supabase/      SQL-migrasjonene, nummerert. Kjøres i prosjektet med Supabase-connectoren (apply_migration) og
+               legges her samtidig, så repoet speiler databasen. Sjekk get_advisors (security) etter hver DDL-endring.
 docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, PLAN-NETT.md (planen for nett og konkurranse)
 ```
 
@@ -143,7 +144,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   ellers feiler CI.
 - Playwright-tester av kontoen trenger `frontend/.env.local` med en URL (verdien spiller ingen rolle, `page.route`
   fanger kallene) – uten den vises ikke kontokortet. Fjern fila før commit-sjekken; den er ignorert av git uansett.
-- Sandkassen når ikke supabase.co. Nettlaget testes med en falsk tjeneste (`src/net/tests.ts`) og med `page.route`
+- Sandkassen når ikke supabase.co direkte, men **Supabase-connectoren** (MCP) gir SQL, migrasjoner, tabeller, råd,
+  logger og nøkler for prosjektet `qzdwiamiangrjpmglpwy`. Den kan ikke endre Auth-innstillinger (Site URL) eller lage
+  nøkler – det gjør brukeren i dashbordet. Nettlaget testes med en falsk tjeneste (`src/net/tests.ts`) og `page.route`
   i Playwright. Ekte innlogging må brukeren teste selv.
 - Se på **exit-koden** til `balance.ts`, ikke bare median-linjene: sjekken av kontrollrommet står helt nederst
   og kan være «AVVIK» selv om nivådagene er OK (publiseringen av #39 feilet slik).

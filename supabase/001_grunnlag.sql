@@ -1,5 +1,5 @@
 -- Stålverket: grunnlaget for konto og lagring på nett (B-125, fase 0 og 1).
--- Lim inn hele fila i SQL Editor i Supabase og kjør den. Den kan kjøres flere ganger.
+-- Kjørt i prosjektet som migrasjonen «grunnlag_konto_og_lagring» (økt 71). Kan kjøres flere ganger.
 
 -- ------------------------------------------------------------------ tabeller
 
