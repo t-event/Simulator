@@ -46,6 +46,8 @@ export interface PlantStats {
   castYield: number;
   crew: Crew;
   shifts: number;
+  /** Fulle skiftlag på jobb (inntil 5, B-073) */
+  crews: number;
   hours: number;
   ownerWorks: boolean;
   /** Det som mangler for å bemanne ett skift til (eller det første) */
@@ -271,6 +273,8 @@ export function staffing(
   ignoreAbsence = false,
 ): {
   shifts: number;
+  /** Fulle skiftlag (inntil 5). Over tre lag får turnusen fridager (4- og 5-skift, B-073) */
+  crews: number;
   hours: number;
   ownerWorks: boolean;
   missing: Crew;
@@ -280,15 +284,31 @@ export function staffing(
   const counts = countRoles(g, ignoreAbsence);
   const ownerWorks = g.stage <= 1;
   const wildcards = counts.allround + (ownerWorks ? OWNER_SLOTS : 0);
-  let shifts = 0;
-  for (let k = 1; k <= 3; k++) {
-    if (isEmpty(deficit(crew, counts, k, wildcards))) shifts = k;
+  // Døgnet har tre vakter; lag nummer fire og fem gir fridager i turnusen og dekker fravær (B-073)
+  let crews = 0;
+  for (let k = 1; k <= MAX_CREWS; k++) {
+    if (isEmpty(deficit(crew, counts, k, wildcards))) crews = k;
     else break;
   }
-  const missing = shifts < 3 ? deficit(crew, counts, shifts + 1, wildcards) : {};
+  // I garasjen og verkstedet er det ikke plass til mer enn tre lag uansett
+  if (ownerWorks) crews = Math.min(3, crews);
+  const shifts = Math.min(3, crews);
+  const missing = crews < (ownerWorks ? 3 : MAX_CREWS) ? deficit(crew, counts, crews + 1, wildcards) : {};
   let hours = 0;
   if (shifts > 0) hours = Math.min(24, (ownerWorks ? OWNER_HOURS : 8) + 8 * (shifts - 1));
-  return { shifts, hours, ownerWorks, missing, crew };
+  return { shifts, crews, hours, ownerWorks, missing, crew };
+}
+
+/** Flest skiftlag: 5-skift (B-073) */
+export const MAX_CREWS = 5;
+
+/**
+ * Hva fire og fem skiftlag gir når verket går døgnet rundt (B-073): fridager i turnusen gir bedre trivsel, mindre
+ * sykdom og tid til opplæring. De ekstra lagene dekker også fravær, fordi skiftene regnes av dem som er på jobb.
+ */
+export function crewBenefits(crews: number, hours: number): { morale: number; sick: number; learn: number } {
+  if (hours < 24 || crews <= 3) return { morale: 0, sick: 1, learn: 1 };
+  return crews === 4 ? { morale: 0.5, sick: 0.8, learn: 1.25 } : { morale: 1, sick: 0.6, learn: 1.5 };
 }
 
 export function isOpen(g: GameState, hours: number, minute = g.minute): boolean {
@@ -485,6 +505,7 @@ export function computePlantStats(g: GameState): PlantStats {
     castYield: casting.yield,
     crew: staff.crew,
     shifts: staff.shifts,
+    crews: staff.crews,
     hours: staff.hours,
     ownerWorks: staff.ownerWorks,
     missing: staff.missing,

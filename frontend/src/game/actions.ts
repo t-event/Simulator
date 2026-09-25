@@ -369,10 +369,11 @@ export function hire(g: GameState, candidateId: number): PurchaseResult {
 }
 
 /** Ansetter søkere til plassene som mangler for neste skift. Avløsere fyller hull. */
-export function hireForMissing(g: GameState): PurchaseResult {
+export function hireForMissing(g: GameState, targetCrews = 3): PurchaseResult {
   const cap = STAGES[g.stage].staffCap;
   let hired = 0;
-  for (let guard = 0; guard < 200 && g.workers.length < cap; guard++) {
+  // Ansetter til målet: tre skift som før, eller fire og fem skiftlag når spilleren ber om det (B-073)
+  for (let guard = 0; guard < 300 && g.workers.length < cap && staffing(g, true).crews < targetCrews; guard++) {
     // Fravær teller ikke: syke og folk på ferie kommer tilbake, så de dekkes av vikarer, ikke nye ansatte
     const missing = staffing(g, true).missing;
     const roles = Object.entries(missing)

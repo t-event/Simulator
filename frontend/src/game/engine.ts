@@ -33,6 +33,7 @@ import { suggestRecipe } from "./recipe";
 import {
   castingType,
   computePlantStats,
+  crewBenefits,
   day,
   energyPrice,
   fixedPowerOffer,
@@ -2002,7 +2003,11 @@ function updateAbsence(g: GameState, stats: PlantStats): void {
       continue;
     }
     // Sykdom
-    const risk = 0.005 * (1 + Math.max(0, 60 - g.morale) / 60) * (nightExtra(g, stats.hours) > 0 ? 1.3 : 1);
+    const risk =
+      0.005 *
+      (1 + Math.max(0, 60 - g.morale) / 60) *
+      (nightExtra(g, stats.hours) > 0 ? 1.3 : 1) *
+      crewBenefits(stats.crews, stats.hours).sick;
     if (!busy && chance(g, risk)) {
       const len = randInt(g, 1, 3);
       w.absentFrom = g.minute;
@@ -2031,16 +2036,14 @@ export function quitText(ws: Worker[]): string {
 function updateMorale(g: GameState, stats: PlantStats): void {
   if (!g.workers.length) return;
   g.morale += (60 - g.morale) * 0.05;
+  // Fire og fem skiftlag gir fridager i turnusen (B-073)
+  adjustMorale(g, crewBenefits(stats.crews, stats.hours).morale);
   if (nightExtra(g, stats.hours) > 0) adjustMorale(g, -1.5);
   if (g.morale < 35) {
     const quitters = g.workers.filter(() => chance(g, ((35 - g.morale) / 35) * 0.04));
     if (quitters.length) {
       g.workers = g.workers.filter((w) => !quitters.includes(w));
-      log(
-        g,
-        `${quitText(quitters)} Trivselen er lav – gi bonus, send folk på kurs eller unngå nattskift.`,
-        "bad",
-      );
+      log(g, `${quitText(quitters)} Trivselen er lav – gi bonus, send folk på kurs eller unngå nattskift.`, "bad");
     }
   }
 }
@@ -2246,7 +2249,10 @@ function onDay(g: GameState, stats: PlantStats): void {
 
   // Folk blir flinkere av å jobbe
   if (stats.hours > 0) {
-    const growth = (hasResearch(g, "opplaering") ? 0.04 : 0.025) * (0.5 + g.morale / 100);
+    const growth =
+      (hasResearch(g, "opplaering") ? 0.04 : 0.025) *
+      (0.5 + g.morale / 100) *
+      crewBenefits(stats.crews, stats.hours).learn;
     // Bare de som er på jobb, blir flinkere av å jobbe
     for (const w of g.workers) if (!isAbsent(g, w)) w.skill = Math.min(5, w.skill + growth);
     if (stats.ownerWorks) g.ownerSkill = Math.min(4.5, g.ownerSkill + 0.04);
