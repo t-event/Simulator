@@ -5,7 +5,7 @@ import { STAGES, stageRef, WIN_CASH } from "../game/data";
 import { unitType } from "../game/plant";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
-import { Card } from "./common";
+import { Bar, Card } from "./common";
 import { fmtKr, fmtRep } from "./format";
 import { buzz } from "./haptics";
 
@@ -164,6 +164,15 @@ export function StageCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
     return (
       <Card title="Storverket">
         <p>Du har bygget et fullskala stålverk. Klarer du å samle {fmtKr(WIN_CASH)} i egenkapital?</p>
+        {!g.won && (
+          <>
+            <Bar value={Math.max(0, g.cash - g.loan) / WIN_CASH} tone="ok" label="Egenkapital" />
+            <p className="g-muted">
+              Egenkapital {fmtKr(Math.floor(g.cash - g.loan))} av {fmtKr(WIN_CASH)}
+              {g.loan > 0 ? ` (kassa minus lånet på ${fmtKr(g.loan)})` : ""}.
+            </p>
+          </>
+        )}
         <KeyUpgrade g={g} />
       </Card>
     );

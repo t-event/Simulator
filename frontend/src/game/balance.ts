@@ -172,6 +172,16 @@ const RESEARCH_PRIORITY = [
   "skumslagg",
   "forvarming",
   "eksport",
+  // Storverket (B-085)
+  "prosessdata",
+  "hoyhastighet",
+  "skraplogistikk",
+  "elektrodestyring",
+  "kvalitetsledelse",
+  "prediktivt",
+  "ledelse",
+  "produktutvikling",
+  "gronnstal",
 ];
 
 /** Spill der testspilleren venter med å bytte støping til kontraktene på det gamle produktet er levert */
@@ -393,8 +403,21 @@ function botHour(g: GameState): void {
     [],
     ["induksjon1", "formlinje", "lager", "xrf", "portal", "salgskontor"],
     ["induksjon5", "blokk", "oes", "ovn2", "verksted", "sortering"],
-    ["renseanlegg", "lysbue30", "streng1", "oseovn", "conveyor", "trafo", "valseverk"],
-    ["lysbue90", "streng4", "ovn3", "streng6", "varmegjenvinning", "skrapterminal", "havn", "vakuum", "valseverk2"],
+    ["renseanlegg", "lysbue30", "streng1", "oseovn", "conveyor", "trafo", "valseverk", "elektroderegulering"],
+    [
+      "lysbue90",
+      "streng4",
+      "ovn3",
+      "streng6",
+      "streng2",
+      "varmegjenvinning",
+      "bruddvarsling",
+      "panelvarsling",
+      "skrapterminal",
+      "havn",
+      "vakuum",
+      "valseverk2",
+    ],
   ];
   // Ovnstyper og ovnsutstyr kjøpes per ovn (B-074): ovn 1 først, så de andre
   const perUnit = new Set([...FURNACES.map((f) => f.id), ...ADDONS.filter((a) => a.perFurnace).map((a) => a.id)]);

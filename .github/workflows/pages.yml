@@ -35,6 +35,10 @@ jobs:
         working-directory: frontend
         run: npx tsx src/sim/validate.ts
 
+      - name: Tester av spillmotoren
+        working-directory: frontend
+        run: npx tsx src/game/tests.ts
+
       - name: Balansetest av spillet
         working-directory: frontend
         run: npx tsx src/game/balance.ts

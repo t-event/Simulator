@@ -61,6 +61,7 @@ npm install
 npm run dev                      # utviklingsserver på http://localhost:5173
 npx tsc -b                       # typesjekk
 npm run lint                     # oxlint
+npm test                         # raske tester av spillmotoren (src/game/tests.ts), også i CI
 npx tsx src/sim/validate.ts      # prosessmodellen gir forventede nøkkeltall
 npx tsx src/game/balance.ts      # testspilleren: progresjon, ingen konkurs, kontrollrommet
 npx tsx src/game/balance.ts --verbose --finance --seed 3   # feilsøking av balansen
@@ -84,6 +85,8 @@ frontend/src/
     actions.ts   Spillerhandlinger          research.ts  Forskning, fagpoeng, låste skraptyper og fart
     recipe.ts    Reseptsjekk og forslag til billigste resept
     quiz.ts      Quiz per kapittel         missions.ts  Oppdrag fra fagboka
+    challenges.ts Utfordringer på storverket   inbox.ts   Varsellista (hva som er viktig og nytt)
+    tests.ts     Raske tester av motoren (npm test)
     decisions.ts Hendelseskort med valg     knowledge.ts Fagboka
     save.ts      Lagring + migrering        useGame.ts   Spilløkka for React
     tutorial.ts  Veiledet start          tips.ts      Engangstips
@@ -95,7 +98,7 @@ frontend/src/
     views.ts     Fanene og når de låses opp   Upgrades.tsx, stations.ts  Utstyr per sted i anlegget
     ResearchPage.tsx  Forskning-fanen   Settings.tsx  ⚙️ innstillinger og banken (på Verket → Økonomi)
     InstallTip.tsx    Tips om hjemskjerm på startskjermen   Power.tsx  Strøm og skiftplan
-    Handbook.tsx Fagboka med quiz og oppdrag
+    Handbook.tsx Fagboka med quiz og oppdrag   Inbox.tsx  Varsellista bak 🔔
     control/     Kontrollrommet: den enkle styringen (SimpleControl + simpleRunner)
   sim/         Prosessmodell for lysbueovnen (brukes av kontrollrommet)
 frontend/public/  PWA: manifest, ikoner, service worker
@@ -112,6 +115,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 ## Kjente fallgruver
 
 - `pkill` returnerer 144 og avbryter resten av en `&&`-kjede – kjør det alene.
+- Ikke bruk `git checkout <fil>` for å angre en liten endring: det fjerner også alle andre endringer i fila som
+  ikke er committet (skjedde med `simpleRunner.ts`). Angre med en målrettet redigering i stedet.
 - Skjermbilder med `fullPage: true` viser faste menyer midt på siden; det er
   bare et artefakt av skjermbildet.
 - Prosessmodellen er kalibrert med steg på maks 1 s – del opp større steg.

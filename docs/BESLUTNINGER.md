@@ -1091,3 +1091,117 @@ Beslutning:
   som ligger på lageret og fortsatt kan selges.
 - Aktive rammeavtaler sperrer ikke byttet. Det ble prøvd, men da ble testspilleren stående på blokkstøping resten av
   spillet (frø 1 endte på −17 mill. kr). Avtalene avsluttes i stedet uten straff (B-040).
+
+## B-085 Mer å forske på for storverket (2026-09-25)
+Status: gjelder
+Brukeren gikk tom for forskning kort etter storverket (det fantes bare «Eksportsertifisering»).
+Beslutning: Ni nye forskninger på nivå 4, til sammen ca. 3 000 fagpoeng, hver med tydelig effekt:
+- Prosessoptimering med data: 5 % kortere tid per charge.
+- Elektroderegulering: 5 % mindre strøm i lysbueovnene.
+- Skraplogistikk: 5 % billigere skrap.
+- Kvalitetsledelse: 40 % færre støpefeil.
+- Prediktivt vedlikehold: 25 % færre havarier.
+- Høyhastighetsstøping: 15 % mer støpekapasitet.
+- Ledelse og arbeidsmiljø: 30 % mindre sykdom, og trivselen driver mot 70 i stedet for 60.
+- Produktutvikling: +4 % pris.
+- Grønt stål: +5 % pris og flere forespørsler.
+Med ca. 15–20 fagpoeng i døgnet varer de i 150–200 døgn. Testspilleren forsker på dem sist.
+
+## B-086 Kontrollrommet: mildere smelting, strømnivå per steg og belønning for godt håndverk (2026-09-25)
+Status: gjelder (utfyller B-076)
+- Smeltingen: 3★ ved 80 % av tida i det grønne (før 92 %), 2★ ved 60 %, 1★ ved 35 %. Hintene viser om temperaturen
+  stiger eller synker.
+- Strømmen settes til nivå 2 når rensingen starter og nivå 4 når tappingen starter, så spilleren ikke arver «strøm av».
+- 4★ gir 3 % og 5★ 6 % ekstra betaling for stålet i chargen, i tillegg til 8 eller 15 ekstra fagpoeng. 5★ gir også
+  omdømme +0,5. Før ga en god charge bare rundt +5 fagpoeng.
+
+## B-087 Symbol i tillegg til farge (2026-09-25)
+Status: gjelder
+Kontrollromsmålerne viser ✓ når verdien er i det grønne, og ▲/▼ når den er for høy eller lav. Stolpene i
+varsel- og faresonen får skrå striper. Da kan fargeblinde lese dem, og de synes bedre i sterkt sollys.
+
+## B-088 Fra kontrollrommet til fagboka (2026-09-25)
+Status: gjelder
+Steg som får under 3★, får «Hvorfor?» med en kort forklaring på vanlige ord og en knapp til kapitlet i fagboka
+(smelting → lysbue, rensing → karbon, avslagging → fosfor, tapping → ildfast, øse → øseovn).
+
+## B-089 Varselliste og valg for varsler (2026-09-25)
+Status: gjelder
+Varslene på skjermen forsvinner fort, særlig på 10×. 🔔 på raden med nøkkeltall åpner en liste over de siste viktige
+hendelsene. Lista kan filtreres på problemer, hendelser og gode nyheter, og merket på 🔔 viser hvor mange som er nye.
+Under ⚙️ velger spilleren hva som skal vises på skjermen: alle hendelser, bare problemer eller ingen. Knappen lå først
+på toppraden, men da ble «10×» kuttet på smale telefoner, så den ble flyttet ned.
+
+## B-090 Utfordringer på storverket og nytt spill+ (2026-09-25)
+Status: gjelder
+- Åtte utfordringer på storverket, med fagpoeng og penger (Verket → Oversikt):
+  - rekorddøgn på 4 500 t
+  - et døgn under 420 kWh/t
+  - 30 døgn der alt stålet holder kvaliteten
+  - tre perfekte charger i kontrollrommet
+  - tre rammeavtaler med bonus
+  - omdømme 100
+  - 5-skift
+  - forsk fram alt
+
+  Tilstanden lagres i `g.missions` med id-er som starter på «u-».
+- Seiersskjermen har «Nytt spill+». Neste runde starter i garasjen med mer startkapital (×2 per runde, inntil ×5),
+  10 fagpoeng og +3 omdømme per runde. Runden lagres i `g.round`.
+
+## B-091 Seieren ved 1 milliard (2026-09-25)
+Status: gjelder
+Brukeren nådde 1 mrd., men ingenting skjedde. Seieren krever egenkapital (kasse minus lån) på 1 mrd. og ble bare
+sjekket ved midnatt. Samtidig rundet beløpene opp, så 999,996 mill. ble vist som «1 000,00 mill.».
+Beslutning:
+- Seieren sjekkes hver time.
+- Beløp rundes ned.
+- Storverk-kortet viser egenkapitalen med en stolpe mot målet, og sier om lånet trekkes fra.
+- At seiersskjermen er sett, lagres i spillet (`g.winSeen`), så den vises én gang per spill også etter nytt spill+.
+
+## B-092 Færre fagpoeng per charge på storverket (2026-09-25)
+Status: gjelder (justerer B-014/B-026)
+Tre store ovner ga ca. 35 fagpoeng i døgnet uten noe å bruke dem på, og brukeren syntes de eksploderte. Satsen per
+charge på storverket er senket fra 0,15 til 0,1 (før størrelse og antall ovner). Nå er det rundt 15–20 i døgnet, og
+forskningen i B-085 bruker dem.
+
+## B-093 Kontrollrommet: oksygenråd, fosfor forklart, ikke oksygen i tappingen (2026-09-25)
+Status: gjelder (endrer B-076)
+- Smeltingen har en fast linje om oksygenet: vent til halvparten er smeltet, slå det på da, og en advarsel hvis det
+  står på for tidlig.
+- Avslaggingen: brukeren kunne ikke justere fosforet. Målt: ekstra kalk eller kaldere bad i rensingen flytter fosforet
+  under 0,0003 %. Fosforet bestemmes av skrapet og smeltingen. I stedet for en knapp uten effekt forklarer steget at
+  man styrer fosforet ved å få slagget ut.
+- Tappingen har ikke lenger oksygenbryter; badet varmes bare med strøm.
+
+## B-094 Utstyr mot havarier (2026-09-25)
+Status: gjelder
+Havariene skjer per charge, så et storverk med mange charger får mange av dem. Nye kjøp:
+- Hydraulisk elektroderegulering (per ovn, 4 mill., stålverket): 60 % færre elektrodebrudd og 30 % færre overslag.
+- Paneler med lekkasjevarsling (per ovn, 6 mill., storverket): halvparten så mange overslag, og 10 % i stedet for
+  30 % av dem slår hull.
+- Bruddvarsling i kokillen (8 mill., strengstøping): 60 % færre strenggjennombrudd.
+
+## B-095 Strengstøpemaskin nr. 2 (2026-09-25)
+Status: gjelder
+Tre lysbueovner på 90 t lager rundt 390 t/t, mens 6 strenger bare støper 170 t/t. Tredje ovn sto derfor og ventet.
+«Strengstøpemaskin nr. 2» (40 mill., storverket, 3 støpere per skift) dobler støpekapasiteten. Testspilleren
+produserer nå 420 000–540 000 t i stedet for rundt 380 000 t, og vinner rundt dag 200.
+
+## B-096 Anbefalte støtteroller (2026-09-25)
+Status: gjelder
+Når skiftene er fulle, viser Folk hvilke roller som ikke står på skift, hvor mange som anbefales, og hvorfor:
+- reparatører: én per nivå, pluss én i store verk
+- selgere: inntil 4
+- murere: 2 per lysbueovn
+- planlegger: 1
+- skrapklasser: 1
+- avløsere: 2, men ingen med 4–5 skiftlag
+
+Logikken ligger i `supportAdvice` i `plant.ts`.
+
+## B-097 Automatiske tester av spillmotoren (2026-09-25)
+Status: gjelder
+`src/game/tests.ts` (`npm test`) har små tester som bygger sin egen tilstand og kjører på under ett sekund. De
+dekker blant annet nedrunding av beløp, seier, nytt spill+, migrering, forskningsdata, tilbaketrekking av
+forespørsler, støpemaskin nr. 2, anbefalte roller, utfordringer og kontrollrommet. Testene kjøres i CI før
+balansetesten.

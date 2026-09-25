@@ -293,6 +293,8 @@ export interface Settings {
   splitGrades: boolean;
   /** Planleggeren sorterer ordrekøen etter frist */
   plannerSorts: boolean;
+  /** Hvilke hendelser som vises som varsel på skjermen (B-089): alle, bare problemer, eller ingen */
+  toasts: "alle" | "problemer" | "ingen";
 }
 
 export interface ManualRequest {
@@ -383,6 +385,12 @@ export interface GameState {
   researchPoints: number;
   /** Dagen spilleren sist kjøpte fagpoeng gjennom et forskningssamarbeid (B-064), −1 hvis aldri */
   fpDealDay: number;
+  /** Siste logglinje spilleren har sett i varsellista (B-089) */
+  inboxSeenId: number;
+  /** Runde: 1 for første spill, 2+ for nytt spill+ etter en seier (B-090) */
+  round: number;
+  /** Spilleren har sett seiersskjermen og valgt å spille videre */
+  winSeen: boolean;
   researched: string[];
   pendingDecision: Decision | null;
   /** Dagen hvert hendelseskort sist ble vist, så de ikke gjentas for ofte */

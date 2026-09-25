@@ -13,7 +13,7 @@ import { createSim } from "./simSetup";
 interface Props {
   request: ManualRequest;
   furnaceWear: number;
-  onDone: (result: ManualResult | null) => void;
+  onDone: (result: ManualResult | null, chapter?: string) => void;
 }
 
 export function ControlRoom({ request, furnaceWear, onDone }: Props) {

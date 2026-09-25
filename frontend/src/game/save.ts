@@ -78,6 +78,12 @@ export function migrate(g: GameState): GameState {
   if (loose.tipsSeen === undefined) loose.tipsSeen = g.stage >= 1 ? ["tips-foring", "tips-skrap"] : [];
   if (g.settings.skipIdleNights === undefined) g.settings.skipIdleNights = true;
   if (g.settings.pauseOffers === undefined) g.settings.pauseOffers = false;
+  if (g.settings.toasts === undefined) g.settings.toasts = "alle";
+  if (g.round === undefined) g.round = 1;
+  // Seiersskjermen ble ikke lagret som sett før; et vunnet spill får den én gang til
+  if (g.winSeen === undefined) g.winSeen = false;
+  // Gamle hendelser skal ikke telle som uleste i den nye varsellista (B-089)
+  if (g.inboxSeenId === undefined) g.inboxSeenId = g.log.length ? g.log[g.log.length - 1].id : 0;
   // Før B-042 ble fastpris fornyet av seg selv; gamle spill beholder det
   if (g.settings.powerAutoRenew === undefined) g.settings.powerAutoRenew = g.settings.powerDeal === "fast";
   if (g.settings.offerGrades === undefined) g.settings.offerGrades = [];

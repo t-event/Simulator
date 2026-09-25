@@ -5,6 +5,37 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 53 – 2026-09-25: storverket, slutten av spillet, kontrollrommet og tester
+
+**Brukeren ba om:**
+- For lite å forske på etter storverket.
+- Å gjennomføre alle forbedringsforslagene (kontrollrom, varselliste, symboler på målere, utfordringer og nytt spill+,
+  fagboka fra kontrollrommet, tester).
+- Oksygenråd i smeltingen, fosfor i avslaggingen og ikke oksygen i tappingen.
+- Ekstreme fagpoeng på storverket.
+- Mange overslag, strenggjennombrudd og elektrodebrudd.
+- Anbefalte støtteroller når skiftene er fulle.
+- Ingenting skjedde ved 1 mrd.
+- Tredje ovn er bortkastet fordi støpingen er for treg.
+
+**Gjort:** B-085 til B-097 (se BESLUTNINGER).
+
+**Underveis:** En `git checkout` av `simpleRunner.ts` tok med seg endringer som ikke var committet. De ble lagt inn
+på nytt og kontrollert mot tidligere diff og balansetall. Et forsøk på en kalk-knapp ble forkastet fordi den ikke
+ga målbar effekt.
+
+**Testet:**
+- tsc, lint, prettier, `npm test` (10 tester), `validate.ts`, bygg.
+- Balanse: 8 / 26 / 66 / 137, nybegynner 154, exit 0. Den flinke testspilleren vinner rundt dag 200.
+- Playwright på iPhone 13 og 320 px bredde:
+  - toppfeltet uten kutt og uten horisontal scrolling
+  - varsellista, utfordringskortet, anbefalte roller, varselvalg og det nye utstyret
+  - en hel charge i kontrollrommet med oksygenråd, uten oksygen i tappingen, med «Hvorfor?» i resultatet
+
+**Gjenstår:** Følge med på om fagpoeng og havarier føles riktige på storverket nå.
+
+---
+
 ## Økt 52 – 2026-09-25: blokk-forespørsler, varsel før produktbytte og fravær med 4–5 skift
 
 **Brukeren ba om:**
