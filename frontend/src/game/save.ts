@@ -211,6 +211,7 @@ export function migrate(g: GameState): GameState {
   if (loose.owner === undefined) loose.owner = null;
   if (loose.season === undefined) loose.season = null;
   if (loose.seasonPromptSeen === undefined) loose.seasonPromptSeen = null;
+  if (loose.seasonLoginPromptSeen === undefined) loose.seasonLoginPromptSeen = null;
   if (loose.world === undefined) loose.world = { events: [], seenEventIds: [] };
   for (const c of g.contracts) {
     const old = c as typeof c & { offerExpiresDay?: number };

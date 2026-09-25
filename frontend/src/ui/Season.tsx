@@ -64,12 +64,45 @@ export function SeasonSync({ api }: { api: GameApi }) {
 }
 
 /** Spør når en sesong pågår som spillet ikke er med i (og spillet ikke er helt nytt) */
-export function SeasonPrompt({ api, g }: { api: GameApi; g: GameState }) {
+export function SeasonPrompt({ api, g, onOpenSettings }: { api: GameApi; g: GameState; onOpenSettings: () => void }) {
   const session = useSession();
   const status = useSeasonStatus();
   const [confirm, setConfirm] = useState(false);
   const cur = status?.current ?? null;
-  if (!session || !cur || g.owner !== session.user.id) return null;
+  if (!cur) return null;
+  // Uten konto: én beskjed per sesong om at man må logge inn for å være med (B-131). Ikke midt i veiledningen.
+  if (!session) {
+    if (g.seasonLoginPromptSeen === cur.id || g.tutorial !== null) return null;
+    const seen = () => api.act((gg) => void (gg.seasonLoginPromptSeen = cur.id));
+    return (
+      <div className="g-modal" role="dialog" aria-modal="true" aria-label="Ny sesong">
+        <div className="g-modal-card">
+          <h2>{cur.name} er i gang – bli med!</h2>
+          <p>
+            Alle som er med i sesongen, konkurrerer på topplista fram til den slutter om {daysLeft(cur)} dager. For å
+            være med må du opprette en konto eller logge inn. Da lagres spillet på nett også.
+          </p>
+          <p className="g-muted">
+            Er spillet ditt nytt, blir det med i sesongen med en gang. Har du spilt en stund, får du velge om du vil
+            starte sesongen i garasjen eller spille videre utenfor.
+          </p>
+          <div className="g-row">
+            <button
+              className="g-primary"
+              onClick={() => {
+                seen();
+                onOpenSettings();
+              }}
+            >
+              Opprett konto eller logg inn
+            </button>
+            <button onClick={seen}>Ikke nå</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (g.owner !== session.user.id) return null;
   if (g.season === cur.id || g.seasonPromptSeen === cur.id || g.minute < AUTO_JOIN_MINUTES) return null;
   const bonus = !!status?.played_previous;
   return (
