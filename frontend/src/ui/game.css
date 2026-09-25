@@ -2343,3 +2343,23 @@ button {
 .g-season-teaser {
   margin-top: 10px;
 }
+
+/* Varsellinja med 🏆 ved siden av (B-134) */
+.g-notice-row {
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+}
+
+.g-notice-row .g-notice {
+  flex: 1;
+  min-width: 0;
+}
+
+.g-board-btn {
+  margin-top: 6px;
+  min-height: 40px;
+  width: 44px;
+  padding: 0;
+  font-size: 18px;
+}

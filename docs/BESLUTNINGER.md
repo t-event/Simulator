@@ -1766,3 +1766,11 @@ Beslutning:
 - **Topplista bak 🏆** i toppfeltet, ved siden av 📖 og ⚙️, som et eget ark (`LeaderboardSheet`) med sesongvalget
   øverst. Synlig fra alle skjermer. Fjernet fra Verket → Økonomi.
 - **Startskjermen** viser «🏆 Sesong 1 pågår – N dager igjen. Logg inn under for å være med.»
+
+## B-134 🏆 ved varsellinja, ikke i toppraden (2026-09-25)
+Status: gjelder (erstatter plasseringen av 🏆 i B-133)
+Brukeren: med 🏆 i toppraden ble det ikke plass: «10×» og klokka ble kuttet på iPhone.
+Beslutning: 🏆 står som en 40 px knapp til høyre for varsellinja (`g-notice-row`). Toppraden har igjen bare dag,
+fart, 📖 og ⚙️, som fikk plass før. Playwright-sjekken måler nå også at knapper og tekst i toppfeltet ikke
+avkortes eller havner utenfor skjermen (iPhone SE 320 px, iPhone 13 390 px, iPhone 14 Pro Max 430 px), ikke bare
+at siden ikke scroller sideveis.

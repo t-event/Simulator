@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 79 – 2026-09-25: 🏆 flyttet ved varsellinja
+
+**Brukeren ba om:** Det ble ikke plass til alt i toppraden (skjermbilde: «10×» og klokka kuttet).
+
+**Gjort:** B-134. 🏆 til høyre for varsellinja.
+
+**Testet:** tsc, lint, `npm test`, build. Playwright på iPhone SE, 13 og 14 Pro Max: ingen knapper eller tekster i
+toppfeltet avkortet eller utenfor skjermen, 🏆 40 px høy, ingen horisontal scrolling.
+
+**Gjenstår:** Fase 4 og 5.
+
+---
+
 ## Økt 78 – 2026-09-25: garasjen blir med direkte, topplista bak 🏆
 
 **Brukeren ba om:** Spillere som bare har gjort veiledningen, skal kunne være med i sesongen; de som har kommet
