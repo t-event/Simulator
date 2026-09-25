@@ -12,7 +12,17 @@ import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { applyWorldEvents, canJoinDirectly, joinSeason, notJoinableReason } from "../game/world";
 import { cloudConfigured } from "../net/config";
-import { daysLeft, refreshSeason, seasonStatus } from "../net/season";
+import {
+  daysLeft,
+  fetchSeasonHistory,
+  markResultSeen,
+  refreshSeason,
+  resultSeen,
+  seasonStatus,
+  type SeasonResult,
+} from "../net/season";
+import { levelLabel, placeLabel } from "../net/leaderboard";
+import { fmtKr } from "./format";
 import { useSeasonStatus, useWorldEvents } from "./useSeason";
 import { getSession, onSessionChange } from "../net/supabase";
 import { isReconciled, onCloudStatus } from "../net/sync";
@@ -211,6 +221,64 @@ export function SeasonJoin({ api, g, onOpenSettings }: { api: GameApi; g: GameSt
       {confirm && (
         <p className="g-muted g-small-text">Spillet du har nå, erstattes – også det som er lagret på nett.</p>
       )}
+    </div>
+  );
+}
+
+/**
+ * Beskjed når en sesong spilleren var med i, er over (B-143): plassen, antall spillere og resultatet. Vises én gang
+ * per sesong og konto i denne nettleseren. `onOpen` sier fra, så spørsmålet om neste sesong venter til den er lukket.
+ */
+export function SeasonResultNotice({ onOpen }: { onOpen: (open: boolean) => void }) {
+  const session = useSession();
+  const reconciled = useReconciled();
+  const status = useSeasonStatus();
+  const [result, setResult] = useState<SeasonResult | null>(null);
+  const user = session?.user.id ?? null;
+  useEffect(() => {
+    if (!user || !reconciled) return;
+    let alive = true;
+    void fetchSeasonHistory()
+      .then((h) => {
+        const newest = h[0];
+        if (alive && newest && newest.seasonId > resultSeen(user)) setResult(newest);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [user, reconciled, status?.current?.id]);
+  useEffect(() => {
+    onOpen(!!result);
+  }, [result, onOpen]);
+  if (!result || !user) return null;
+  const cur = status?.current ?? null;
+  const level = levelLabel({
+    stage: result.stage,
+    league: result.stage >= 4 && result.equity >= 1_000_000_000 ? "gull" : "",
+  });
+  const close = () => {
+    markResultSeen(user, result.seasonId);
+    setResult(null);
+  };
+  return (
+    <div className="g-modal" role="dialog" aria-modal="true" aria-label="Sesongen er over">
+      <div className="g-modal-card g-celebrate">
+        <div className="g-celebrate-burst" aria-hidden="true">
+          {result.plass <= 3 ? placeLabel(result.plass) : "🏁"}
+        </div>
+        <h2>{result.name} er over!</h2>
+        <p>
+          Du ble nr. {result.plass} av {result.players} med {fmtKr(result.equity)} ({level}, dag {result.day}).
+        </p>
+        <p className="g-muted">
+          Plasseringen står ved kallenavnet ditt på topplista (🎖), og i «Dine sesonger» bak 🏆.
+          {cur ? ` ${cur.name} er i gang – der starter alle i garasjen igjen.` : ""}
+        </p>
+        <button className="g-primary" onClick={close}>
+          Flott!
+        </button>
+      </div>
     </div>
   );
 }

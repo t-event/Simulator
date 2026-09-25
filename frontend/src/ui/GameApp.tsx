@@ -19,12 +19,12 @@ import { Overview } from "./Overview";
 import { People } from "./People";
 import { ResearchPage } from "./ResearchPage";
 import { AccountCard, CloudDot, CloudFollow } from "./Account";
-import { SeasonPrompt, SeasonSync, SeasonTeaser } from "./Season";
+import { SeasonPrompt, SeasonResultNotice, SeasonSync, SeasonTeaser } from "./Season";
 import { LeaderboardSheet } from "./Leaderboard";
 import { useSeasonStatus } from "./useSeason";
 import { SettingsSheet } from "./Settings";
 import { getSession } from "../net/supabase";
-import { flush, onLocalSave } from "../net/sync";
+import { leaving, onLocalSave } from "../net/sync";
 import { saveGame, setSaveListener } from "../game/save";
 import { InboxSheet } from "./Inbox";
 import { unseenCount } from "../game/inbox";
@@ -405,6 +405,8 @@ export function GameApp() {
   const [boardOpen, setBoardOpen] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(false);
   const [bookChapter, setBookChapter] = useState<string | null>(null);
+  // Beskjeden om at en sesong er over, vises før spørsmålet om neste sesong (B-143)
+  const [resultOpen, setResultOpen] = useState(false);
   // Seiersskjermen vises én gang per spill; valget lagres i spillet (B-091)
   const winSeen = !!g?.winSeen;
   // Er spillet med i sesongen som pågår? Seiersskjermen forklarer da topplista i stedet for sesongene (B-141)
@@ -422,15 +424,17 @@ export function GameApp() {
   useEffect(() => {
     setSaveListener(onLocalSave);
     const away = () => {
-      if (api.game) saveGame(api.game);
-      void flush(true);
+      if (!api.game) return;
+      saveGame(api.game);
+      void leaving(api.game, true);
     };
     const onVisibility = () => {
       if (document.visibilityState === "hidden") away();
     };
     const onBlur = () => {
-      if (api.game) saveGame(api.game);
-      void flush();
+      if (!api.game) return;
+      saveGame(api.game);
+      void leaving(api.game, false);
     };
     window.addEventListener("pagehide", away);
     window.addEventListener("blur", onBlur);
@@ -617,7 +621,8 @@ export function GameApp() {
 
       <SeasonSync api={api} />
       <CloudFollow api={api} />
-      {!modalOpen && <SeasonPrompt api={api} g={g} onOpenSettings={() => setSettingsOpen(true)} />}
+      {!modalOpen && <SeasonResultNotice onOpen={setResultOpen} />}
+      {!modalOpen && !resultOpen && <SeasonPrompt api={api} g={g} onOpenSettings={() => setSettingsOpen(true)} />}
       {g.gameOver && <EndScreen g={g} onRestart={api.quit} />}
       {g.won && !winSeen && !g.gameOver && (
         <EndScreen

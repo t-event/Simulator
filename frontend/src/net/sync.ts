@@ -45,6 +45,23 @@ let lastSavedAt: number | null = null;
 let lastSnapshotDay = -1;
 let inFlight: Promise<void> | null = null;
 let soonTimer: ReturnType<typeof setTimeout> | null = null;
+/**
+ * Flere enheter åpne samtidig (B-143): bare enheten som spilles på, laster opp. Spilleminuttet i det som sist ble
+ * lastet opp eller hentet, og om spilleren har gjort noe siden. En enhet som bare står åpen (på pause, eller i
+ * bakgrunnen), laster ikke opp og tar ikke over fra den som spilles på.
+ */
+let syncedMinute = -1;
+let actionPending = false;
+function synced(g: GameState): void {
+  syncedMinute = Math.floor(g.minute);
+  actionPending = false;
+}
+function pageVisible(): boolean {
+  return typeof document === "undefined" || document.visibilityState !== "hidden";
+}
+function changedSinceSync(g: GameState): boolean {
+  return actionPending || Math.floor(g.minute) !== syncedMinute;
+}
 let clock: () => number = () => Date.now();
 /** Versjonen av spillet på nett som spillet her bygger på (0: ingen lagring på nett ennå). null: ikke avklart. */
 let knownRev: number | null = null;
@@ -177,6 +194,7 @@ export async function uploadSave(g: GameState, keepalive = false): Promise<void>
   });
   if (rev === null || rev === undefined) throw new SaveConflictError();
   setKnownRev(id, Number(rev));
+  synced(g);
   if (day !== lastSnapshotDay) {
     await rest("snapshots", {
       method: "POST",
@@ -207,6 +225,9 @@ export function onLocalSave(g: GameState, soon = false): void {
   if (!reconciled) return;
   // Et spill som tilhører en annen konto, skal ikke overskrive kontoens spill (B-125)
   if (g.owner && g.owner !== userId()) return;
+  if (soon) actionPending = true;
+  // Står enheten bare åpen – på pause, eller i bakgrunnen mens tida går – lastes ingenting opp (B-143)
+  if (!actionPending && !(Math.floor(g.minute) !== syncedMinute && pageVisible())) return;
   dirty = g;
   if (soon) {
     soonTimer ??= setTimeout(() => {
@@ -216,6 +237,29 @@ export function onLocalSave(g: GameState, soon = false): void {
     return;
   }
   if (clock() - lastUpload >= UPLOAD_INTERVAL_MS) void flush();
+}
+
+/**
+ * Spilleren forlater enheten (appen legges bort, eller et annet vindu tas i bruk): last opp det som er spilt her,
+ * også om siden alt er skjult, så den andre enheten får det (B-143).
+ */
+export function leaving(g: GameState, keepalive = true): Promise<void> {
+  if (cloudConfigured() && getSession() && reconciled && !(g.owner && g.owner !== userId()) && changedSinceSync(g))
+    dirty = g;
+  return flush(keepalive);
+}
+
+/**
+ * Spilleren vil spille på denne enheten (B-143): lagre spillet her med én gang, så denne blir den som spilles på og
+ * den andre settes på pause når den ser det. Gir false hvis den andre lagret i mellomtiden (hent og prøv igjen).
+ */
+export async function claim(g: GameState): Promise<boolean> {
+  if (!cloudConfigured() || !getSession() || !reconciled) return true;
+  if (inFlight) await inFlight;
+  actionPending = true;
+  dirty = g;
+  await flush();
+  return status.kind !== "conflict";
 }
 
 /** Laster opp det som venter. Med `keepalive` når appen legges bort (fetch fullfører i bakgrunnen). */
@@ -255,6 +299,8 @@ export function resetCloud(): void {
   soonTimer = null;
   reconciled = false;
   knownRev = null;
+  syncedMinute = -1;
+  actionPending = false;
   dirty = null;
   lastUpload = 0;
   lastSavedAt = null;
@@ -302,6 +348,7 @@ export async function linkOnLogin(local: GameState | null): Promise<LinkDecision
   }
   if (!mine) {
     setKnownRev(id, row.rev);
+    synced(cloud);
     setStatus({ kind: "saved", at: clock() });
     markReconciled();
     return { kind: "cloud", cloud };
@@ -310,6 +357,7 @@ export async function linkOnLogin(local: GameState | null): Promise<LinkDecision
     const cloudNewer = stored === null ? cloud.minute > mine.minute : row.rev !== stored && row.device !== deviceId();
     if (cloudNewer) {
       setKnownRev(id, row.rev);
+      synced(cloud);
       setStatus({ kind: "saved", at: clock() });
       markReconciled();
       return { kind: "cloud", cloud };
@@ -356,6 +404,7 @@ export async function pullIfNewer(): Promise<GameState | null> {
   const full = await fetchCloudRow();
   if (!full) return null;
   setKnownRev(id, full.rev);
+  synced(full.game);
   dirty = null;
   lastSavedAt = clock();
   setStatus({ kind: "saved", at: lastSavedAt });

@@ -2305,6 +2305,32 @@ button {
   flex-shrink: 0;
 }
 
+/* Navn og nivå på én linje, beste sesongplassering under (B-143) */
+.g-board-name {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.g-board-line {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.g-board-honor {
+  font-size: 12px;
+  color: var(--text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.g-season-history ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  font-size: 14px;
+}
+
 .g-board-value {
   font-variant-numeric: tabular-nums;
 }

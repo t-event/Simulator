@@ -23,6 +23,8 @@ export interface BoardRow {
   league: string;
   /** Nivået spilleren er på (0 garasje … 4 storverk) */
   stage: number;
+  /** Beste plassering i en sesong som er over, f.eks. «Sesong 1: 3. plass» (B-143), eller null */
+  honor: string | null;
 }
 
 const STAGE_NAMES = ["Garasje", "Verksted", "Støperi", "Stålverk", "Storverk"];
@@ -56,9 +58,16 @@ export async function fetchLeaderboard(kind: BoardKind, season: number | null = 
       is_me: boolean;
       league: string | null;
       stage: number | null;
+      honor?: string | null;
     }[]
   >("leaderboard", { kind, lim, season });
-  return rows.map((r) => ({ ...r, value: Number(r.value), league: r.league ?? "bronse", stage: Number(r.stage ?? 0) }));
+  return rows.map((r) => ({
+    ...r,
+    value: Number(r.value),
+    league: r.league ?? "bronse",
+    stage: Number(r.stage ?? 0),
+    honor: r.honor ?? null,
+  }));
 }
 
 /** Min plass på lista, eller null hvis jeg ikke er med */

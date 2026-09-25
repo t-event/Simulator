@@ -29,6 +29,7 @@ import {
   keepLocal,
   linkOnLogin,
   markReconciled,
+  claim,
   onCloudStatus,
   PULL_INTERVAL_MS,
   pullIfNewer,
@@ -81,32 +82,52 @@ export function CloudDot() {
 export function CloudFollow({ api }: { api: GameApi }) {
   const session = useSession();
   const reconciled = useSyncExternalStore(onCloudStatus, isReconciled, isReconciled);
-  const [pulled, setPulled] = useState<{ day: number; speed: number } | null>(null);
+  const [pulled, setPulled] = useState<{ day: number; speed: number; wasRunning: boolean } | null>(null);
   const apiRef = useRef(api);
   useEffect(() => {
     apiRef.current = api;
   });
+  // Henting pågår, eller spilleren holder på å ta over her: da skal ikke en annen henting komme i veien
+  const busyRef = useRef(false);
+
+  /** «Spill her»: hent det nyeste fra den andre enheten, og lagre med én gang så den settes på pause (B-143) */
+  const playHere = async (speed: number) => {
+    busyRef.current = true;
+    try {
+      for (let i = 0; i < 3; i++) {
+        const newer = await pullIfNewer().catch(() => null);
+        if (newer) apiRef.current.adopt(newer);
+        const g = apiRef.current.game;
+        if (!g || (await claim(g).catch(() => true))) break;
+      }
+    } finally {
+      busyRef.current = false;
+    }
+    apiRef.current.setSpeed(speed > 0 ? speed : 1);
+    setPulled(null);
+  };
 
   useEffect(() => {
     if (!session || !reconciled) return;
-    let busy = false;
     let last = 0;
     const pull = async (always = false) => {
       // Ikke oftere enn hvert femte sekund (fokus og synlighet kommer ofte samtidig)
-      if (busy || (!always && Date.now() - last < 5000)) return;
-      busy = true;
+      if (busyRef.current || (!always && Date.now() - last < 5000)) return;
+      busyRef.current = true;
       last = Date.now();
       try {
         const newer = await pullIfNewer();
         if (newer) {
           const speed = newer.speed;
+          // Gikk spillet her også? Da spilles det på to enheter samtidig, og denne settes på pause (B-143)
+          const wasRunning = (apiRef.current.game?.speed ?? 0) > 0;
           apiRef.current.adopt(newer);
-          setPulled({ day: dayOf(newer), speed });
+          setPulled((prev) => ({ day: dayOf(newer), speed, wasRunning: wasRunning || !!prev?.wasRunning }));
         }
       } catch {
         // Uten nett: prøver igjen neste gang appen vises
       } finally {
-        busy = false;
+        busyRef.current = false;
       }
     };
     void pull(true);
@@ -136,20 +157,22 @@ export function CloudFollow({ api }: { api: GameApi }) {
   return (
     <div className="g-modal" role="dialog" aria-modal="true" aria-label="Hentet fra nettet">
       <div className="g-modal-card">
-        <h2>Hentet det nyeste spillet</h2>
-        <p>
-          Du har spilt videre på en annen enhet. Spillet her er byttet til det som er lagret på nett (dag {pulled.day}),
-          så det du gjorde der, er med.
-        </p>
+        <h2>{pulled.wasRunning ? "Spillet er i gang på en annen enhet" : "Hentet det nyeste spillet"}</h2>
+        {pulled.wasRunning ? (
+          <p>
+            Du spiller på en annen enhet samtidig. Her er spillet satt på pause og byttet til det som er lagret derfra
+            (dag {pulled.day}), så de to ikke skriver over hverandre. Trykker du «Spill her», fortsetter du på denne
+            enheten, og den andre settes på pause.
+          </p>
+        ) : (
+          <p>
+            Du har spilt videre på en annen enhet. Spillet her er byttet til det som er lagret på nett (dag {pulled.day}
+            ), så det du gjorde der, er med.
+          </p>
+        )}
         <div className="g-row">
-          <button
-            className="g-primary"
-            onClick={() => {
-              api.setSpeed(pulled.speed > 0 ? pulled.speed : 1);
-              setPulled(null);
-            }}
-          >
-            Spill videre
+          <button className="g-primary" onClick={() => void playHere(pulled.speed)}>
+            {pulled.wasRunning ? "Spill her" : "Spill videre"}
           </button>
         </div>
       </div>

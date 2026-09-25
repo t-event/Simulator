@@ -1957,3 +1957,33 @@ Beslutning:
 - Etter endringen: nytt spill utenfor sesongen → rekorden står; ny rekord i sesongen → den nye står; konkurs og ny
   start i sesongen → rekorden står, sesonglista viser det nye spillet. Én rad per spiller hele veien.
 
+## B-143 Flere enheter samtidig, sesongresultat ved kallenavnet, og svar på forslagene (2026-09-25)
+Status: gjelder (utvider B-140 og B-141)
+Brukeren svarte på spørsmålene i `docs/FORSLAG.md`:
+- «Nye spillere skal kunne trykke avslutt veiledning.» → Veiledningen beholder «Avslutt veiledningen» og «Hopp over
+  steget». Bare valget «Start uten veiledning» på startskjermen er borte (B-136).
+- «Gjør det som fungerer best for to nettlesere eller flere i gang samtidig.»
+- «Sesong 1: 3. plass» ved kallenavnet: «bra forslag! Ta det med.»
+- Toppliste for kontrollrommet: god idé, men vent til kontrollrommet er ferdig utviklet.
+- Vern mot lekkede passord i Supabase skal skrus på etter hvert (brukeren gjør det i dashbordet).
+
+**Flere enheter samtidig**
+- Feil som ble funnet: en nettleser som bare sto åpen på pause, lastet opp det samme spillet hvert 15. sekund og tok
+  over fra enheten man faktisk spilte på. Den mistet da det siste den hadde gjort og ble satt på pause.
+- Regel: bare enheten som spilles på, lagrer. En enhet laster opp når spilltida har gått der (og siden vises), når
+  spilleren har gjort noe, og når den forlates (`leaving`: appen legges bort eller et annet vindu tas i bruk). En
+  enhet på pause eller i bakgrunnen laster ikke opp.
+- Går spillet på to enheter samtidig, settes den som blir forbigått på pause med beskjeden «Spillet er i gang på en
+  annen enhet» og knappen «Spill her». «Spill her» henter det nyeste og lagrer med én gang (`claim`), så denne
+  enheten tar over, og den andre settes på pause når den ser det. Ingen frem-og-tilbake.
+- Playwright med to nettlesere: A på pause, B spiller → bare B lagrer. A trykker → A tar over, B settes på pause med
+  «Spill her», og etterpå lagrer bare A. Ingen avviste lagringer.
+
+**Sesongresultat**
+- Migrasjon 011: topplista gir hver spillers beste plassering i en sesong som er over (`honor`, f.eks. «Sesong 1:
+  2. plass»), og `season_history()` gir spilleren sine egne resultater (plass, antall spillere, konsernverdi, dag,
+  nivå).
+- Topplista viser 🎖 med plasseringen under navnet (begge listene), og «Dine sesonger» nederst.
+- Når en sesong spilleren var med i er over, kommer én beskjed: «Sesong 1 er over! Du ble nr. 2 av 14 …». Den vises
+  én gang per sesong og konto i nettleseren, og før spørsmålet om neste sesong.
+

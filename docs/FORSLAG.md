@@ -6,16 +6,14 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
-1. **«Avslutt veiledningen».** B-136 fjernet valget «Start uten veiledning» på startskjermen, men inne i veiledningen
-   står fortsatt «Avslutt veiledningen» (og «Hopp over steget» på steg med et mål). Skal nye spillere kunne avslutte
-   den? Forslag: behold «Hopp over steget», men fjern «Avslutt veiledningen» de tre første stegene.
-2. **To nettlesere åpne samtidig.** Når begge er i gang samtidig, tar de over for hverandre hver gang den ene lagrer
-   (B-140, B-141). Forslag: vis «Spillet er åpent på en annen enhet – fortsett her?» og sett den andre på pause.
-3. **Merker ved sesongslutt.** Planen (fase 3) nevner merker ved kallenavnet og plassering i historikken når en
-   sesong er over. Resultatet lagres (`season_results`), men vises ikke ennå. Skal vi vise «Sesong 1: 3. plass»
-   ved navnet og i en liten historikk?
-4. **Toppliste for kontrollrommet.** Planen (fase 2) nevner «beste kontrollrom-parti». Den er ikke laget. Ønskes
-   den?
+Ingen åpne akkurat nå.
+
+## Venter
+
+- **Toppliste for kontrollrommet** («beste kontrollrom-charge»): brukeren liker idéen, men den skal vente til
+  kontrollrommet er ferdig utviklet (B-143).
+- **Vern mot lekkede passord** i Supabase («Leaked password protection», under Authentication i dashbordet): skal
+  skrus på etter hvert. Det gjør brukeren selv; sikkerhetsrådene i Supabase minner om det.
 
 ## Forslag – spillet
 
@@ -28,8 +26,6 @@ til «Avgjort» nederst).
 ## Forslag – nett og konkurranse
 
 - **Fase 4 og 5** står i `PLAN-NETT.md`: ventetid i konsernet, og anbud og skrapauksjoner fra stålverket.
-- **Lekkede passord.** Supabase kan stoppe passord som finnes i kjente lekkasjer («Leaked password protection»,
-  under Authentication i dashbordet). Det slår brukeren på selv; sikkerhetsrådene i Supabase minner om det.
 - **Egen e-postleverandør** for kodene (glemt passord), så grensen på ca. 2 e-poster i timen forsvinner. Brukeren
   sa «en annen gang».
 - **Varsel på mobilen** når et anbud er avgjort eller et verk er ferdig bygget (fase 4–5).
@@ -37,3 +33,6 @@ til «Avgjort» nederst).
 ## Avgjort
 
 - Nytt spill+ er fjernet (B-141).
+- «Avslutt veiledningen» blir stående – nye spillere kan avslutte veiledningen (B-143).
+- Flere enheter samtidig: bare enheten som spilles på, lagrer; den andre settes på pause med «Spill her» (B-143).
+- Sesongresultat ved kallenavnet og «Dine sesonger» på topplista (B-143).

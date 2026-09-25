@@ -5,6 +5,29 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 89 – 2026-09-25: flere enheter samtidig og sesongresultat ved kallenavnet
+
+**Brukeren svarte:** Nye spillere skal kunne avslutte veiledningen. Gjør det som fungerer best for flere nettlesere
+i gang samtidig. Ta med «Sesong 1: 3. plass» ved kallenavnet. Toppliste for kontrollrommet venter til kontrollrommet
+er ferdig. Vern mot lekkede passord skrus på etter hvert.
+
+**Gjort:** B-143.
+- Bare enheten som spilles på, lagrer (feil funnet: en enhet på pause tok over hvert 15. sekund). Den som blir
+  forbigått, settes på pause med «Spill her», som tar over med én gang.
+- Migrasjon 011: beste sesongplassering på topplista og `season_history()`. 🎖 under navnet, «Dine sesonger», og
+  en engangsbeskjed når en sesong er over.
+- Veiledningen uendret (kan avsluttes). FORSLAG.md oppdatert med svarene.
+
+**Testet:** tsc, lint, `npm test` (nye nettester: enhet på pause laster ikke opp, handling og `leaving` gjør det;
+sesonghistorikk og beskjed per konto), `validate.ts`, `balance.ts`, build. Migrasjon 011 prøvd med en oppdiktet
+sesong i en transaksjon som ble rullet tilbake. Playwright: to nettlesere i gang samtidig (se B-143); beskjeden om
+sesongen kommer én gang og før spørsmålet om ny sesong; 🎖 under navnet uten å presse ut nivåmerket; 390 og 320 px
+uten horisontal scrolling.
+
+**Gjenstår:** Fase 4 og 5. Toppliste for kontrollrommet når kontrollrommet er ferdig. Lekkede passord (brukeren).
+
+---
+
 ## Økt 88 – 2026-09-25: rekorden på «Alle tider» ved ny start
 
 **Brukeren spurte:** Blir rekorden på «Alle tider» riktig overskrevet når man starter på nytt for å bli med i en

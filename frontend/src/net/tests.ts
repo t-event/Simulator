@@ -19,12 +19,20 @@ import {
   verifyCode,
 } from "./supabase";
 import { fetchLeaderboard, fetchMyRank, fetchProfile, setNickname } from "./leaderboard";
-import { daysLeft, fetchActiveEvents, fetchSeasonStatus } from "./season";
+import {
+  daysLeft,
+  fetchActiveEvents,
+  fetchSeasonHistory,
+  fetchSeasonStatus,
+  markResultSeen,
+  resultSeen,
+} from "./season";
 import {
   cloudStatus,
   flush,
   isReconciled,
   keepLocal,
+  leaving,
   linkOnLogin,
   markReconciled,
   onLocalSave,
@@ -212,6 +220,13 @@ function makeFake(): Fake {
       return json(200, rows);
     }
     if (path.startsWith("/rest/v1/rpc/my_rank")) return json(200, 1);
+    if (path.startsWith("/rest/v1/rpc/season_history"))
+      return json(
+        200,
+        id === "u-a@test"
+          ? [{ season_id: 1, name: "Sesong 1", plass: 3, players: 12, equity: "1200000000", day: 180, stage: 4 }]
+          : [],
+      );
     if (path.startsWith("/rest/v1/rpc/season_status"))
       return json(200, {
         current: { id: 1, name: "Sesong 1", starts_at: "2026-09-25T00:00:00Z", ends_at: "2026-10-23T00:00:00Z" },
@@ -426,6 +441,7 @@ const main = async () => {
     assert(d.kind === "cloud", `B skulle hente, fikk ${d.kind}`);
     const b = d.kind === "cloud" ? d.cloud : newGame();
     b.cash = 777_777;
+    b.minute += 60;
     now += UPLOAD_INTERVAL_MS;
     onLocalSave(b);
     await flush();
@@ -460,6 +476,7 @@ const main = async () => {
     other(222_222, "B");
     // A prøver å lagre: avvises, spillet på nett er urørt
     a.cash = 1;
+    a.minute += 60;
     now += UPLOAD_INTERVAL_MS;
     onLocalSave(a);
     await flush();
@@ -470,6 +487,7 @@ const main = async () => {
     assert(pulled?.cash === 222_222 && cloudStatus().kind === "saved", "A hentet ikke det nyeste");
     // Etter hentingen kan A lagre igjen
     pulled!.cash = 333_333;
+    pulled!.minute += 60;
     now += UPLOAD_INTERVAL_MS;
     onLocalSave(pulled!);
     await flush();
@@ -478,6 +496,7 @@ const main = async () => {
     assert((await pullIfNewer()) === null, "hentet sitt eget spill");
     other(333_333, "A");
     assert((await pullIfNewer()) === null, "hentet sin egen lagring uten svar");
+    pulled!.minute += 60;
     now += UPLOAD_INTERVAL_MS;
     onLocalSave(pulled!);
     await flush();
@@ -693,6 +712,7 @@ const main = async () => {
     const g = newGame(41);
     await linkOnLogin(g);
     const small = f.calls.length;
+    g.minute += 60;
     onLocalSave(g);
     await flush(true);
     const i1 = f.calls.findIndex((c, i) => i >= small && c.includes("save_game"));
@@ -700,6 +720,7 @@ const main = async () => {
     for (let i = 0; i < 400; i++) g.log.push({ id: 10_000 + i, min: 0, text: "x".repeat(200), kind: "info" });
     assert(JSON.stringify(g).length > KEEPALIVE_MAX, "testspillet er ikke stort nok");
     const big = f.calls.length;
+    g.minute += 60;
     onLocalSave(g);
     setClock(() => Date.now() + UPLOAD_INTERVAL_MS * 2);
     onLocalSave(g);
@@ -708,6 +729,63 @@ const main = async () => {
     assert(i1 >= 0 && f.keepalive[i1], "lite spill skulle sendes med keepalive");
     assert(i2 >= 0 && !f.keepalive[i2], "stort spill skulle sendes uten keepalive");
     setClock(() => Date.now());
+  });
+
+  await test("En enhet som bare står åpen, laster ikke opp og tar ikke over (B-143)", async () => {
+    const f = fresh();
+    await login(f);
+    let now = 12_000_000;
+    setClock(() => now);
+    const g = newGame(42);
+    await linkOnLogin(g);
+    const count = () => f.calls.filter((c) => c.startsWith("POST /rest/v1/rpc/save_game")).length;
+    const before = count();
+    // På pause: samme spillminutt, ingen handling – ingenting lastes opp, selv om det er lenge siden
+    now += UPLOAD_INTERVAL_MS * 4;
+    onLocalSave(g);
+    await flush();
+    assert(count() === before, "en enhet på pause lastet opp");
+    // Tida går (spillet spilles her): lastes opp
+    g.minute += 30;
+    onLocalSave(g);
+    await flush();
+    assert(count() === before + 1, "spill som går, ble ikke lastet opp");
+    // En handling på pause (samme minutt) lastes opp
+    g.cash += 1;
+    onLocalSave(g, true);
+    await new Promise((r) => setTimeout(r, SOON_MS + 50));
+    await flush();
+    assert(count() === before + 2, "en handling ble ikke lastet opp");
+    // Legges appen bort uten endring: ingenting sendes; med endring: sendes med én gang
+    await leaving(g);
+    assert(count() === before + 2, "sendte uten endring da appen ble lagt bort");
+    g.minute += 5;
+    await leaving(g);
+    assert(count() === before + 3, "det som var spilt, ble ikke sendt da appen ble lagt bort");
+    setClock(() => Date.now());
+  });
+
+  await test("Sesongresultater: egen historikk, og beskjeden om resultatet huskes per konto (B-143)", async () => {
+    const f = fresh();
+    assert((await fetchSeasonHistory()).length === 0, "uten innlogging skal historikken være tom");
+    await login(f);
+    const h = await fetchSeasonHistory();
+    assert(
+      h.length === 1 &&
+        h[0].plass === 3 &&
+        h[0].players === 12 &&
+        h[0].equity === 1_200_000_000 &&
+        h[0].name === "Sesong 1",
+      `historikk ${JSON.stringify(h)}`,
+    );
+    assert(resultSeen("u-a@test") === 0, "ingen beskjed sett ennå");
+    markResultSeen("u-a@test", 1);
+    assert(resultSeen("u-a@test") === 1 && resultSeen("u-b@test") === 0, "beskjeden skal huskes per konto");
+    const rows = await fetchLeaderboard("verdi");
+    assert(
+      rows.every((r) => r.honor === null),
+      "honor skal være null når serveren ikke sender den",
+    );
   });
 
   await test("Ikke logget inn: ingenting sendes", async () => {
