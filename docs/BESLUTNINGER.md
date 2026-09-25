@@ -683,3 +683,29 @@ Beslutning:
   Forskningslista er delt i «Klar til å forske» (kort med knapp), «Trenger mer fagpoeng eller lesing» (kompakt
   liste med leseknapp) og neste nivå / forsket fram (sammenfoldet).
 - Felles `SubTabs`-komponent i `ui/common.tsx`.
+
+## B-052 Færre fagpoeng per charge, og testspilleren tar quiz (2026-09-25)
+Status: gjelder (justerer B-026)
+Brukeren fikk fagpoeng for fort i støperiet. Testspilleren tok ikke quiz, så den fikk langt færre fagpoeng enn
+en ekte spiller, og balansen målte feil ting.
+Beslutning: Fagpoeng per charge er 0,5 / 0,2 / 0,15 / 0,2 / 0,15 per nivå (støperiet ned fra 0,25), og deles på
+kvadratroten av antall ovner (to like ovner lærer deg ikke dobbelt så mye). Testspilleren tar quizene med ca. tre
+av fire riktige. Nivådager etter endringen: 8 / 26 / 67 / 149.
+
+## B-053 Automatiske vikarer ved sykdom om natta (2026-09-25)
+Status: gjelder
+Brukeren meldte at automatiske vikarer kom for sent. Sykdom settes i døgnsjekken ved midnatt, som går etter
+timesjekken; vikarene ble først leid inn en time senere. Nå sjekkes vikarene rett etter at fraværet er satt.
+Test: 20 døgn med automatiske vikarer ga ingen timer med færre skift enn fullt.
+
+## B-054 Automatikk låses opp med fagpoeng (2026-09-25)
+Status: gjelder
+Brukeren ville at all automatikk skal forskes fram, så ikke alt skjer av seg selv fra start.
+Beslutning: Nye forskninger: «Faste salgsrutiner» (garasje, 5 FP: automatisk spot-salg og støpefeil),
+«Ordreplanlegging» (verksted, 10 FP: følg ordrekøen, to kvaliteter, planleggeren sorterer), «Innkjøpsplan»
+(støperi, 25 FP: planleggerens innkjøp) og «Bemanningsplan» (støperi, 20 FP: automatiske vikarer). Eksisterende
+forskning låser opp resten: «Vedlikeholdsplan» (reparatøren bytter foring), «Energistyring» (fornyelse av
+strømavtaler) og «Stødig drift» (spoling om natta). Låst automatikk vises med 🔒 og navnet på forskningen.
+Uten salgsrutiner blir støpefeil liggende på lageret. Uten ordreplanlegging får spilleren et tips når første
+ordre vil ha en annen kvalitet enn ovnen lager. Gamle lagringer får de nye forskningene for nivået sitt, så
+ingenting slutter å virke. Felles sjekk: `auto(g, key)` i `research.ts`, bryter: `ui/AutoToggle.tsx`.

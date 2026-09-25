@@ -385,6 +385,8 @@ export interface GameState {
   sickUntilMin: number;
   /** Innleide vikarer dekker alle som er borte til dette spillminuttet (B-031) */
   tempsUntilMin: number;
+  /** Lagringen har fått automatikk-forskningen (B-054); gamle spill får den de hadde fra før */
+  automationResearch?: boolean;
   /** Innleide vikarer til plasser verket mangler folk på, og hvor lenge (B-050) */
   tempCrew: { crew: Crew; untilMin: number } | null;
   /** Et kundebesøk har gitt en god forespørsel som kommer snart */

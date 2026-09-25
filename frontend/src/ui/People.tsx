@@ -31,6 +31,7 @@ import type { GameApi } from "../game/useGame";
 import { Bar, Card, Stat } from "./common";
 import { fmtKr, fmtNum } from "./format";
 import { ShiftPlan } from "./Power";
+import { AutoToggle } from "./AutoToggle";
 
 interface Props {
   g: GameState;
@@ -158,14 +159,12 @@ function Absence({ g, stats, act }: Props) {
           )}
         </div>
       )}
-      <label className="g-toggle">
-        <input
-          type="checkbox"
-          checked={g.settings.autoTemps}
-          onChange={(e) => act((gg) => void (gg.settings.autoTemps = e.target.checked))}
-        />
-        <span>Lei inn vikarer av seg selv når fravær ellers ville kostet skift</span>
-      </label>
+      <AutoToggle
+        g={g}
+        act={act}
+        k="autoTemps"
+        label="Lei inn vikarer av seg selv når fravær ellers ville kostet skift"
+      />
       {upcoming.length > 0 && (
         <>
           <h3 className="g-subhead">Ferie som kommer</h3>

@@ -25,7 +25,7 @@ import {
   WIN_CASH,
 } from "./data";
 import { knowledgeCard } from "./knowledge";
-import { hasResearch, RESEARCH, scrapUnlocked } from "./research";
+import { auto, hasResearch, RESEARCH, scrapUnlocked, secondsAction } from "./research";
 import { checkMissions } from "./missions";
 import { maybeAdvisor, maybeCreateDecision } from "./decisions";
 import { maybeTip, setCreditHint } from "./tips";
@@ -222,6 +222,7 @@ export function newGame(seed = Date.now()): GameState {
     sickUntilMin: 0,
     tempsUntilMin: 0,
     tempCrew: null,
+    automationResearch: true,
     bonusOffer: false,
     celebrate: null,
     seenViews: ["verket", "marked", "salg"],
@@ -432,7 +433,7 @@ export function scrapStopHelp(g: GameState): string {
   const what = short.length
     ? `Resepten trenger ${short.map((id) => SCRAP_TYPES[id].name.toLowerCase()).join(" og ")}.`
     : "";
-  if (!g.settings.autoBuy || !plannerOrders(g))
+  if (!auto(g, "autoBuy") || !plannerOrders(g))
     return `${what} Kjøp det under Marked, eller ansett en planlegger som kjøper inn.`.trim();
   if (g.autoBuyNote) return `Planleggeren får ikke kjøpt ${g.autoBuyNote}.`;
   return `${what} Planleggeren bestiller mer.`.trim();
@@ -777,8 +778,9 @@ function finishHeat(g: GameState, index: number, stats: PlantStats): void {
   }
 
   // Mange charger i et stort verk lærer deg mindre hver for seg
-  // Fagpoeng per charge: færre jo flere charger verket kjører (B-026)
-  awardPoints(g, [0.5, 0.2, 0.25, 0.2, 0.15][g.stage] ?? 0.15);
+  // Fagpoeng per charge: færre jo flere charger verket kjører (B-026). To like ovner lærer deg ikke dobbelt
+  // så mye: med flere ovner gir hver charge mindre (B-052)
+  awardPoints(g, ([0.5, 0.2, 0.15, 0.2, 0.15][g.stage] ?? 0.15) / Math.sqrt(Math.max(1, g.furnaces.length)));
   f.holding = {
     t: heat.liquidT,
     grade: heat.grade,
@@ -868,7 +870,7 @@ function updateFurnaces(g: GameState, stats: PlantStats): void {
       hasResearch(g, "vedlikeholdsplan") &&
       ((day(g) - f.lastRelineDay >= g.settings.relinePlanDays && f.wear > 0.15) || f.wear >= PLAN_SAFETY_WEAR);
     const repairerDue =
-      (g.settings.autoReline && presentWorkers(g).some((w) => w.role === "vedlikehold") && f.wear >= g.settings.relineAt) ||
+      (auto(g, "autoReline") && presentWorkers(g).some((w) => w.role === "vedlikehold") && f.wear >= g.settings.relineAt) ||
       ((g.specialists.havari ?? 0) > g.minute && f.wear >= 0.8);
     if (f.relineRequested || planDue || repairerDue) {
       if (startReline(g, i, stats, f.relineRequested ? "manuell" : planDue ? "plan" : "reparatør").ok) {
@@ -1051,7 +1053,7 @@ function updateCasting(g: GameState, stats: PlantStats, dt: number): void {
     return;
   }
   if (stats.storeUsed >= stats.storeT) {
-    if (g.settings.autoSpot) sellExcess(g, stats, 0.8);
+    if (auto(g, "autoSpot")) sellExcess(g, stats, 0.8);
     if (lotsTonnage(g) >= stats.storeT) {
       g.castWait = "Ferdigvarelageret er fullt";
       return;
@@ -1103,7 +1105,7 @@ function pickNextLadle(g: GameState): boolean {
 
 /** Støpefeil kan ikke leveres på kontrakt: selg dem, eller smelt dem om som returskrap med kjent analyse */
 function handleSeconds(g: GameState): void {
-  const action = g.settings.secondsAction ?? "spot";
+  const action = secondsAction(g);
   if (action === "behold") return;
   for (const lot of [...g.lots]) {
     if (!lot.second) continue;
@@ -1285,7 +1287,7 @@ function ensureRecipe(g: GameState, grade: GradeId, stats: PlantStats): void {
 
 /** Ovnen følger ordrekøen: kvaliteten (og resepten for den) til ordren som produseres. */
 function followQueue(g: GameState, stats: PlantStats): void {
-  if (!g.settings.followQueue) return;
+  if (!auto(g, "followQueue")) return;
   const orders = ordersToMake(g);
   const order = orders[0];
   if (order && order.grade !== g.targetGrade) {
@@ -1296,7 +1298,7 @@ function followQueue(g: GameState, stats: PlantStats): void {
     ensureRecipe(g, order.grade, stats);
   }
   // Ovn 2 (og 3 …) tar neste kvalitet i køen, hvis det er en annen (B-039)
-  const other = g.settings.splitGrades ? orders.find((c) => c.grade !== g.targetGrade) : undefined;
+  const other = auto(g, "splitGrades") ? orders.find((c) => c.grade !== g.targetGrade) : undefined;
   const before = g.furnaces[1]?.grade ?? null;
   for (let i = 1; i < g.furnaces.length; i++) g.furnaces[i].grade = other?.grade ?? null;
   if (other && other.grade !== before) ensureRecipe(g, other.grade, stats);
@@ -1304,7 +1306,7 @@ function followQueue(g: GameState, stats: PlantStats): void {
 
 /** Planleggeren sorterer køen etter frist. */
 function plannerSort(g: GameState): void {
-  if (!hasPlanner(g) || !g.settings.plannerSorts) return;
+  if (!hasPlanner(g) || !auto(g, "plannerSorts")) return;
   orderQueue(g)
     .sort((a, b) => a.deadlineDay - b.deadlineDay)
     .forEach((c, i) => (c.priority = i + 1));
@@ -1834,7 +1836,7 @@ function checkTemps(g: GameState): void {
   const full = staffing(g, true).shifts;
   const now = staffing(g).shifts;
   if (now >= full) return;
-  if (g.settings.autoTemps) {
+  if (auto(g, "autoTemps")) {
     bookTemps(g, daysUntilAllBack(g), true);
     return;
   }
@@ -1859,11 +1861,11 @@ function updatePowerDeal(g: GameState, today: number): void {
   if (left === 3 || left === 1)
     log(
       g,
-      `${name} for strøm går ut om ${left === 1 ? "ett døgn" : "tre døgn"} (dag ${s.powerDealUntilDay}). ${s.powerAutoRenew ? "Den fornyes av seg selv." : "Da går du tilbake til spotpris – velg ny avtale under Marked hvis du vil."}`,
+      `${name} for strøm går ut om ${left === 1 ? "ett døgn" : "tre døgn"} (dag ${s.powerDealUntilDay}). ${auto(g, "powerAutoRenew") ? "Den fornyes av seg selv." : "Da går du tilbake til spotpris – velg ny avtale under Marked hvis du vil."}`,
       "event",
     );
   if (left > 0) return;
-  if (s.powerAutoRenew) {
+  if (auto(g, "powerAutoRenew")) {
     s.powerDealUntilDay = today + POWER_BINDING_DAYS;
     if (s.powerDeal === "fast") s.powerFixedPrice = fixedPowerOffer(g);
     log(
@@ -1954,7 +1956,7 @@ function onHour(g: GameState, stats: PlantStats): void {
   deliverContracts(g);
   // Støpefeil håndteres automatisk etter valget (B-035)
   handleSeconds(g);
-  if (g.settings.autoSpot) {
+  if (auto(g, "autoSpot")) {
     // Det ingen kontrakt venter på, selges etter ett døgn – eller straks lageret fylles
     const reserved = lotReservations(g);
     const today = day(g);
@@ -1972,7 +1974,7 @@ function onHour(g: GameState, stats: PlantStats): void {
   // Automatisk innkjøp krever en planlegger (se B-021). Er planleggeren borte, går de faste bestillingene
   // videre (B-048)
   g.autoBuyNote = null;
-  if (g.settings.autoBuy && plannerOrders(g)) autoBuy(g, stats);
+  if (auto(g, "autoBuy") && plannerOrders(g)) autoBuy(g, stats);
 }
 
 /**
@@ -2138,6 +2140,8 @@ function onDay(g: GameState, stats: PlantStats): void {
   }
   updateMorale(g, stats);
   updateAbsence(g, stats);
+  // Sykdom settes her, etter timesjekken: sjekk vikarene med én gang, så skiftet ikke faller en time (B-053)
+  checkTemps(g);
   refreshCandidates(g);
   if (!g.pendingDecision) maybeAdvisor(g);
   maybeCreateDecision(g);

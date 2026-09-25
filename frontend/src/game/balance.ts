@@ -6,11 +6,33 @@
  * rekker, ansetter folk og bygger ut når det er råd. Skriptet sjekker at
  * progresjonen havner innenfor målene, og feiler ellers (brukes i CI).
  */
-import { bonusCost, buyUpgrade, courseCost, doResearch, giveBonus, hire, requestReline, sendOnCourse, setRecipe, setTargetGrade, upgradeOptions } from "./actions";
+import {
+  bonusCost,
+  buyUpgrade,
+  courseCost,
+  doResearch,
+  giveBonus,
+  hire,
+  requestReline,
+  sendOnCourse,
+  setRecipe,
+  setTargetGrade,
+  upgradeOptions,
+} from "./actions";
 import { resolveDecision } from "./decisions";
-import { researchOptions, scrapUnlocked } from "./research";
+import { answerQuiz, QUIZ, quizAvailable } from "./quiz";
+import { hasResearch, researchOptions, scrapUnlocked } from "./research";
 import { CASTINGS, SCRAP_IDS, STAGES } from "./data";
-import { acceptAgreement, acceptContract, advance, realisticDailyT, autoBuy, completeManual, newGame, TARGET_C } from "./engine";
+import {
+  acceptAgreement,
+  acceptContract,
+  advance,
+  realisticDailyT,
+  autoBuy,
+  completeManual,
+  newGame,
+  TARGET_C,
+} from "./engine";
 import { EAFSimulation } from "../sim/eaf";
 import { createSim } from "../ui/control/simSetup";
 import { MELT_BAND, SimpleRunner } from "../ui/control/simpleRunner";
@@ -80,9 +102,11 @@ function applyRecipe(g: GameState, r: Recipe): void {
 const RESEARCH_PRIORITY = [
   // Det som låser opp neste ovn og støping først – resten når det er råd
   "rutiner",
+  "salgsrutiner",
   "stodig",
   "skrapkjop",
   "induksjon",
+  "ordreplan",
   "nyskrap",
   "maskinforming",
   "blokkstoping",
@@ -93,6 +117,8 @@ const RESEARCH_PRIORITY = [
   "kundepleie",
   "energistyring",
   "vedlikeholdsplan",
+  "innkjop",
+  "bemanning",
   "stralevern",
   "rontgen",
   "opplaering",
@@ -117,7 +143,20 @@ function botHour(g: GameState): void {
   // Hendelseskort: forsiktige valg, som en fornuftig spiller
   if (g.pendingDecision) {
     const d = g.pendingDecision;
-    const safe: Record<string, number> = { billigparti: 1, hasteordre: 1, lonnskrav: 1, avis: 0, laerling: 0, tilsyn: 0, kurs: 0, sykdom: 0, naboklage: 0, kundebesok: 0, nestenulykke: 0, utkobling: 1 };
+    const safe: Record<string, number> = {
+      billigparti: 1,
+      hasteordre: 1,
+      lonnskrav: 1,
+      avis: 0,
+      laerling: 0,
+      tilsyn: 0,
+      kurs: 0,
+      sykdom: 0,
+      naboklage: 0,
+      kundebesok: 0,
+      nestenulykke: 0,
+      utkobling: 1,
+    };
     // Messa bare når det er god råd
     const affordable = g.cash > Number(d.data.cost ?? 0) * 4;
     safe.messe = affordable ? 0 : 1;
@@ -133,6 +172,15 @@ function botHour(g: GameState): void {
   }
   // Fagboka: testspilleren leser alle kapitler den får
   for (const k of g.knowledge) if (!g.readChapters.includes(k)) g.readChapters.push(k);
+  // …og tar quizen, som en vanlig spiller. Omtrent tre av fire svar riktige (B-052)
+  for (const k of g.knowledge) {
+    const quiz = QUIZ[k];
+    if (!quiz || !quizAvailable(g, k)) continue;
+    const answers = quiz.map((q, i) =>
+      i === 0 || g.quizDone.length % 2 === 0 ? q.correct : (q.correct + 1) % q.options.length,
+    );
+    answerQuiz(g, k, answers);
+  }
   // Forskning: alt som er tilgjengelig, i tabellens rekkefølge
   // Forskning i prioritert rekkefølge, som en spiller som vet hva som gir mest: spar opp til det viktigste
   // Etter en radioaktiv kilde vil en fornuftig spiller ha strålingsportal (B-045)
@@ -182,7 +230,8 @@ function botHour(g: GameState): void {
     if (!stats.products.includes(a.product) || !cheapestRecipe(g, a.grade)) continue;
     if (switching.has(g) && a.product === stats.casting.product) continue;
     if (stats.products.includes("armering") && a.product !== "armering") continue;
-    if ((a.grade === "lavkarbon" || a.grade === "armering") && stats.furnace.arc && !g.owned.includes("oseovn")) continue;
+    if ((a.grade === "lavkarbon" || a.grade === "armering") && stats.furnace.arc && !g.owned.includes("oseovn"))
+      continue;
     if (activeGrades.size > 0 && !activeGrades.has(a.grade)) continue;
     if (a.weeklyT > realisticDailyT(g, stats) * 7 * 0.35) continue;
     acceptAgreement(g, a.id);
@@ -196,7 +245,7 @@ function botHour(g: GameState): void {
   g.settings.autoBuy = true;
   // Uten planlegger kjøper testspilleren skrap selv, på samme måte som planleggeren ville gjort
   // Uten planlegger kjøper testspilleren selv, og strekker seg på kassekreditten når det trengs
-  if (!hasPlanner(g)) autoBuy(g, stats, { credit: true, cap: null });
+  if (!hasPlanner(g) || !hasResearch(g, "innkjop")) autoBuy(g, stats, { credit: true, cap: null });
   g.settings.autoSpot = true;
 
   // Ansettelser: fyll opp manglende plasser, deretter selgere og reparatører
@@ -319,7 +368,9 @@ function run(seed: number, days: number, verbose: boolean): RunSummary {
                 .map(([k, v]) => `${k} ${Math.round((v ?? 0) / 1000)}k`)
                 .join(", ")}] `
             : "") +
-          (y ? `kval ${Math.round(y.onGradeT ?? 0)}/${Math.round(y.offGradeT ?? 0)}/${Math.round(y.secondT ?? 0)} t  ` : "") +
+          (y
+            ? `kval ${Math.round(y.onGradeT ?? 0)}/${Math.round(y.offGradeT ?? 0)}/${Math.round(y.secondT ?? 0)} t  `
+            : "") +
           `mål ${g.targetGrade}  vent: ${g.furnaces.map((f) => f.waitReason ?? "-").join("/")}${g.castWait ? " støp:" + g.castWait : ""}`,
       );
     }
@@ -352,7 +403,9 @@ if (process.argv.includes("--research")) {
     advance(g, 60);
     if (g.researched.length > done) {
       done = g.researched.length;
-      console.log(`dag ${day(g)} (${STAGES[g.stage].name}): ${g.researched[done - 1]} – ${Math.round(g.researchPoints)} FP igjen`);
+      console.log(
+        `dag ${day(g)} (${STAGES[g.stage].name}): ${g.researched[done - 1]} – ${Math.round(g.researchPoints)} FP igjen`,
+      );
     }
   }
   console.log(`dag 150: ${Math.round(g.researchPoints)} FP ubrukt`);
@@ -377,7 +430,9 @@ if (process.argv.includes("--kontrakter")) {
   spans.forEach((xs, i) => {
     if (!xs.length) return;
     const avg = xs.reduce((a, b) => a + b, 0) / xs.length;
-    console.log(`${STAGES[i].name.padEnd(9)} ${String(xs.length).padStart(3)} kontrakter, snitt ${avg.toFixed(1)} døgn (= ${avg.toFixed(1)} min på 1×)`);
+    console.log(
+      `${STAGES[i].name.padEnd(9)} ${String(xs.length).padStart(3)} kontrakter, snitt ${avg.toFixed(1)} døgn (= ${avg.toFixed(1)} min på 1×)`,
+    );
   });
   process.exit?.(0);
 }
@@ -399,7 +454,9 @@ if (process.argv.includes("--sperrer")) {
     }
     console.log(
       `frø ${seed}: ` +
-        [1, 2, 3, 4].map((i) => `${STAGES[i].name}: penger dag ${cashDay[i] ?? "-"}, omdømme dag ${repDay[i] ?? "-"}`).join(" | ") +
+        [1, 2, 3, 4]
+          .map((i) => `${STAGES[i].name}: penger dag ${cashDay[i] ?? "-"}, omdømme dag ${repDay[i] ?? "-"}`)
+          .join(" | ") +
         ` | ubrukte FP ved slutten av hvert nivå: ${fpAt.join("/")}`,
     );
   }
@@ -494,7 +551,8 @@ function playSimple(policy: SimplePolicy, seed: number, req?: ManualRequest) {
       if (policy === "slurvete") run.skipDeslag();
       else run.startDeslag();
     }
-    if (run.step === "tapp" && (policy === "slurvete" ? t > sim.tapTargetTempC + 35 : t >= sim.tapTargetTempC - 12)) run.tap();
+    if (run.step === "tapp" && (policy === "slurvete" ? t > sim.tapTargetTempC + 35 : t >= sim.tapTargetTempC - 12))
+      run.tap();
   }
   return { score: run.score!, real };
 }
@@ -535,7 +593,10 @@ for (const seed of [1, 2, 3]) {
     completeManual(g, score.result);
     advance(g, score.result.minutes + 30);
     const ok =
-      g.totals.manualHeats === heatsBefore + 1 && g.speed === speedBefore && g.researchPoints > fpBefore && score.rating >= 4;
+      g.totals.manualHeats === heatsBefore + 1 &&
+      g.speed === speedBefore &&
+      g.researchPoints > fpBefore &&
+      score.rating >= 4;
     console.log(
       `Ta styringen i spillet: ${score.rating}★, P ${score.result.phosphorusPct}, ` +
         `manuelle charger ${g.totals.manualHeats}, fagpoeng +${Math.round(g.researchPoints - fpBefore)}, fart etterpå ${g.speed} ${ok ? "OK" : "AVVIK"}`,

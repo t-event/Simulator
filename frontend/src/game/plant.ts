@@ -19,7 +19,7 @@ import {
   type FurnaceType,
   type Stage,
 } from "./data";
-import { hasResearch } from "./research";
+import { auto, hasResearch } from "./research";
 import type { Analysis, Crew, GameState, GradeId, PowerDeal, ProductId, RoleId, ScrapId, Worker } from "./types";
 
 export const OWNER_SLOTS = 2;
@@ -586,7 +586,7 @@ export const IDLE_NIGHT_SPEED = 6;
  * Ikke når verket står fordi det mangler folk: da må spilleren gjøre noe.
  */
 export function idleOutsideHours(g: GameState, stats = computePlantStats(g)): boolean {
-  if (!g.settings.skipIdleNights || stats.hours <= 0 || stats.hours >= 24) return false;
+  if (!auto(g, "skipIdleNights") || stats.hours <= 0 || stats.hours >= 24) return false;
   if (isOpen(g, stats.hours) || g.pendingManual || g.pendingDecision) return false;
   if (g.furnaces.some((f) => f.heat || f.holding) || g.castQueue.length) return false;
   return true;

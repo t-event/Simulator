@@ -31,6 +31,39 @@ export interface Research {
 }
 
 export const RESEARCH: Research[] = [
+  // Automatikk (B-054): alt som skjer av seg selv, må forskes fram
+  {
+    id: "salgsrutiner",
+    name: "Faste salgsrutiner",
+    stage: 0,
+    cost: 5,
+    description: "Faste regler for hva som skjer med stål ingen kontrakt venter på, og med støpefeil.",
+    effect: "Overskudd og støpefeil kan selges eller smeltes om automatisk",
+  },
+  {
+    id: "ordreplan",
+    name: "Ordreplanlegging",
+    stage: 1,
+    cost: 10,
+    description: "Produksjonen følger ordrene: ovnen bytter kvalitet og resept etter kontrakten som står først.",
+    effect: "Ovnen kan følge ordrekøen av seg selv, og planleggeren kan sortere køen etter frist",
+  },
+  {
+    id: "innkjop",
+    name: "Innkjøpsplan",
+    stage: 2,
+    cost: 25,
+    description: "Faste avtaler med skraphandlerne, så planleggeren kan bestille etter resepten.",
+    effect: "Planleggeren kan kjøpe skrap automatisk",
+  },
+  {
+    id: "bemanning",
+    name: "Bemanningsplan",
+    stage: 2,
+    cost: 20,
+    description: "Avtale med et vikarbyrå, så det kommer folk når noen er syke eller har ferie.",
+    effect: "Vikarer kan leies inn automatisk ved fravær",
+  },
   // Garasjen
   {
     id: "rutiner",
@@ -57,7 +90,7 @@ export const RESEARCH: Research[] = [
     cost: 10,
     requires: ["rutiner"],
     description: "Verket går jevnt nok til at du kan spole fram til noe skjer.",
-    effect: "Låser opp 10× fart",
+    effect: "Låser opp 10× fart og spoling om natta",
     speed: 10,
   },
   {
@@ -66,7 +99,7 @@ export const RESEARCH: Research[] = [
     stage: 0,
     cost: 10,
     description: "Lokk på digelen, tettere ovn og riktig forvarming av skrapet.",
-    effect: "5 % mindre energi per tonn",
+    effect: "5 % mindre energi per tonn. Strømavtaler kan fornyes automatisk",
   },
   {
     id: "kundepleie",
@@ -133,7 +166,7 @@ export const RESEARCH: Research[] = [
     cost: 15,
     knowledge: "ildfast",
     description: "Planlagt stans er billigere enn havari. Bytt foringen før den er slitt, på faste dager.",
-    effect: "Planlegg omforing hvert 4.–14. døgn",
+    effect: "Planlegg omforing på faste dager, og la reparatøren bytte foring automatisk",
   },
   {
     id: "opplaering",
@@ -180,7 +213,8 @@ export const RESEARCH: Research[] = [
     stage: 2,
     cost: 60,
     scrap: ["rajern"],
-    description: "Råjern fra masovn er nesten fritt for kobber og tinn, og tynner ut sporelementene i resten av skrapet.",
+    description:
+      "Råjern fra masovn er nesten fritt for kobber og tinn, og tynner ut sporelementene i resten av skrapet.",
     effect: "Du kan kjøpe råjern",
   },
   {
@@ -341,6 +375,36 @@ export function researchForSpeed(speed: number): Research | undefined {
 
 export function hasResearch(g: GameState, id: string): boolean {
   return g.researched.includes(id);
+}
+
+/** Automatikk og forskningen som låser den opp (B-054) */
+export const AUTOMATION = {
+  followQueue: "ordreplan",
+  splitGrades: "ordreplan",
+  plannerSorts: "ordreplan",
+  autoSpot: "salgsrutiner",
+  secondsAction: "salgsrutiner",
+  autoBuy: "innkjop",
+  autoTemps: "bemanning",
+  autoReline: "vedlikeholdsplan",
+  powerAutoRenew: "energistyring",
+  skipIdleNights: "stodig",
+} as const;
+export type AutomationKey = keyof typeof AUTOMATION;
+
+/** Er automatikken forsket fram? */
+export function automationUnlocked(g: GameState, key: AutomationKey): boolean {
+  return hasResearch(g, AUTOMATION[key]);
+}
+
+/** Er automatikken både forsket fram og slått på? */
+export function auto(g: GameState, key: Exclude<AutomationKey, "secondsAction">): boolean {
+  return automationUnlocked(g, key) && !!g.settings[key];
+}
+
+/** Hva som skjer med støpefeil: uten salgsrutiner blir de liggende til du selger dem selv */
+export function secondsAction(g: GameState): "spot" | "retur" | "behold" {
+  return automationUnlocked(g, "secondsAction") ? (g.settings.secondsAction ?? "spot") : "behold";
 }
 
 /** Forskningen som låser opp et utstyr, hvis den ikke er gjort ennå. */

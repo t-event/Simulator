@@ -11,7 +11,8 @@ import {
   potSwapHours,
   type PlantStats,
 } from "../game/plant";
-import { hasResearch } from "../game/research";
+import { auto, hasResearch } from "../game/research";
+import { AutoToggle } from "./AutoToggle";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Bar, Card } from "./common";
@@ -39,7 +40,7 @@ export function Maintenance({
   const f0 = stats.furnace;
   const hasRepairer = g.workers.some((w) => w.role === "vedlikehold");
   const canPlan = hasResearch(g, "vedlikeholdsplan");
-  const repairerOn = g.settings.autoReline && hasRepairer;
+  const repairerOn = auto(g, "autoReline") && hasRepairer;
   // Reparatøren er borte (ferie eller syk): vis det, så foringen ikke glemmes (B-036)
   const repairersAway = hasRepairer && !presentWorkers(g).some((w) => w.role === "vedlikehold");
   const life = liningDays(g, stats);
@@ -153,19 +154,16 @@ export function Maintenance({
             </>
           )}
 
-          <label className="g-toggle">
-            <input
-              type="checkbox"
-              checked={g.settings.autoReline && hasRepairer}
-              disabled={!hasRepairer}
-              onChange={(e) => act((gg) => void (gg.settings.autoReline = e.target.checked))}
+          {!hasRepairer ? (
+            <p className="g-muted">Med en reparatør kan foringen byttes automatisk når den er slitt.</p>
+          ) : (
+            <AutoToggle
+              g={g}
+              act={act}
+              k="autoReline"
+              label={`La reparatøren bytte foringen ved ${fmtPct(g.settings.relineAt)} slitasje`}
             />
-            <span>
-              {hasRepairer
-                ? `La reparatøren bytte foringen ved ${fmtPct(g.settings.relineAt)} slitasje`
-                : "Med en reparatør kan foringen byttes automatisk når den er slitt"}
-            </span>
-          </label>
+          )}
         </>
       )}
     </Card>

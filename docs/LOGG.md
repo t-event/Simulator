@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 29 – 2026-09-25: fagpoeng, vikarer og automatikk som forskning
+
+**Brukeren ba om:** For mange fagpoeng i støperiet; automatiske vikarer kom for sent; all automatikk skal låses
+opp med fagpoeng; se over koden og fiks feil.
+
+**Gjort:** B-052 (færre fagpoeng per charge, testspilleren tar quiz), B-053 (vikarer rett etter sykdom),
+B-054 (automatikk som forskning, `AutoToggle`).
+
+**Testet:** tsc, lint, balanse (8 / 26 / 67 / 149). I Node: gammel lagring beholder automatikken, nytt spill
+starter uten; automatiske vikarer gir 0 timer med færre skift på 20 døgn. Playwright (iPhone 13): låste brytere
+på Verket, Marked, Folk og Salg, forskningene vises, 390 px, ingen feil.
+
+---
+
 ## Økt 28 – 2026-09-24: Marked og Forskning med underfaner
 
 **Brukeren ba om:** Kortere og mer intuitive Marked- og Forskning-sider.
