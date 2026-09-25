@@ -883,3 +883,9 @@ skrapet du har tilgang til – det trengs rent nyskrap. Forsk fram «Rent nyskra
 - på forespørsler under Salg i stedet for «Resepten gir …».
 «Rent nyskrap» i forskningen sier nå at det trengs til høykarbon, premium og lavkarbon (testet: uten det kan de
 ikke lages på noe nivå med induksjonsovn).
+
+## B-068 Flytte-hintet bare når målkortet ikke synes (2026-09-25)
+Status: gjelder (justerer B-064)
+Brukeren påpekte at «Du kan flytte inn … Trykk her» ga lite mening når målkortet med flytteknappen sto rett under.
+Beslutning: på Oversikt vises ikke flytte-hintet; målkortet står øverst og får grønn ramme (`is-ready`). På Anlegg
+og Økonomi vises hintet fortsatt, og det åpner Oversikt ved målkortet.
