@@ -64,7 +64,7 @@ npm install
 npm run dev                      # utviklingsserver på http://localhost:5173
 npx tsc -b                       # typesjekk
 npm run lint                     # oxlint
-npm test                         # raske tester av spillmotoren (src/game/tests.ts), også i CI
+npm test                         # raske tester av spillmotoren (src/game/tests.ts) og nettlaget (src/net/tests.ts), også i CI
 npx tsx src/sim/validate.ts      # prosessmodellen gir forventede nøkkeltall
 npx tsx src/game/balance.ts      # testspilleren: progresjon, ingen konkurs, kontrollrommet
 npx tsx src/game/balance.ts --verbose --finance --seed 3   # feilsøking av balansen
@@ -96,6 +96,9 @@ frontend/src/
     recipeGuide.ts Reseptguide for nye kvaliteter (vises av ui/RecipeGuide.tsx)
     konsern.ts   Datterverk og sluttmålet 10 mrd. (vises av ui/Konsern.tsx)
     balance.ts   Automatisk testspiller
+  net/         Konto og lagring på nett (B-125) – Supabase over fetch, uten bibliotek
+    config.ts    URL og offentlig nøkkel   supabase.ts  Innlogging, økt, spørringer   sync.ts  Lagring på nett og kobling
+    tests.ts     Tester uten nett (falsk tjeneste)
   ui/          Spillets skjermer (mobil først) og kontrollrommet
     Overview.tsx Verket med underfanene Oversikt, Anlegg, Økonomi (og Konsern)   Recipe.tsx  Resepten på Marked
     Agreements.tsx Rammeavtaler under Salg   AutoToggle.tsx  Brytere for automatikk (låst til den er forsket fram)
@@ -103,9 +106,11 @@ frontend/src/
     ResearchPage.tsx  Forskning-fanen   Settings.tsx  ⚙️ innstillinger og banken (på Verket → Økonomi)
     InstallTip.tsx    Tips om hjemskjerm på startskjermen   Power.tsx  Strøm og skiftplan
     Handbook.tsx Fagboka med quiz og oppdrag   Inbox.tsx  Varsellista (åpnes fra varsellinja øverst)
+    Account.tsx  Konto: logg inn, opprett, glemt passord, velg spill ved konflikt (på startskjermen og i ⚙️)
     control/     Kontrollrommet: den enkle styringen (SimpleControl + simpleRunner)
   sim/         Prosessmodell for lysbueovnen (brukes av kontrollrommet)
 frontend/public/  PWA: manifest, ikoner, service worker
+supabase/      SQL som brukeren limer inn i Supabase (nummerert, kan kjøres flere ganger)
 docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, PLAN-NETT.md (planen for nett og konkurranse)
 ```
 
@@ -134,5 +139,7 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - Testspilleren har en **nybegynner** (B-062) som følger rådene i spillet. Ny mekanikk som krever at spilleren
   gjør noe, må også gis et råd i spillet (hint, advarsel, «Neste store steg») – og nybegynneren må følge det,
   ellers feiler CI.
+- Sandkassen når ikke supabase.co. Nettlaget testes med en falsk tjeneste (`src/net/tests.ts`) og med `page.route`
+  i Playwright. Ekte innlogging må brukeren teste selv.
 - Se på **exit-koden** til `balance.ts`, ikke bare median-linjene: sjekken av kontrollrommet står helt nederst
   og kan være «AVVIK» selv om nivådagene er OK (publiseringen av #39 feilet slik).

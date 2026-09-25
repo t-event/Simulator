@@ -352,6 +352,16 @@ button {
   margin: 6px 0;
 }
 
+.g-field input {
+  font: inherit;
+  padding: 8px;
+  min-height: 40px;
+  background: #222b39;
+  color: var(--text);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+}
+
 .g-field select {
   font: inherit;
   padding: 8px;
@@ -2191,4 +2201,43 @@ button {
 
 .g-deal-compare li.is-best {
   outline: 1px solid var(--ok);
+}
+
+/* Konto og lagring på nett (B-125) */
+.g-account {
+  margin-top: 8px;
+}
+
+.g-account form {
+  max-width: 360px;
+}
+
+.g-account button {
+  min-height: 40px;
+}
+
+.g-account-info {
+  color: var(--ok);
+  font-size: 14px;
+  margin: 6px 0;
+}
+
+.g-account-error {
+  color: var(--warning);
+  font-size: 14px;
+  margin: 6px 0;
+}
+
+.g-intro-confirm {
+  margin-top: 10px;
+}
+
+.g-cloud {
+  font-style: normal;
+  color: var(--text-dim);
+}
+
+.g-cloud.is-offline,
+.g-cloud.is-error {
+  color: var(--warning);
 }

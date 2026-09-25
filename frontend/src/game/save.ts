@@ -13,13 +13,22 @@ import type { GameState } from "./types";
 
 const KEY = "stalverk-spill-v1";
 
+/** Kalles etter hver lagring, så lagringen på nett kan følge etter (B-125). Settes fra net/sync.ts. */
+let saveListener: ((g: GameState) => void) | null = null;
+export function setSaveListener(fn: ((g: GameState) => void) | null): void {
+  saveListener = fn;
+}
+
 export function saveGame(g: GameState): boolean {
+  let ok = false;
   try {
     localStorage.setItem(KEY, JSON.stringify(g));
-    return true;
+    ok = true;
   } catch {
-    return false;
+    ok = false;
   }
+  saveListener?.(g);
+  return ok;
 }
 
 export function loadGame(): GameState | null {
@@ -199,6 +208,7 @@ export function migrate(g: GameState): GameState {
     loose.automationResearch = true;
   }
   if (loose.bonusOffer === undefined) loose.bonusOffer = false;
+  if (loose.owner === undefined) loose.owner = null;
   for (const c of g.contracts) {
     const old = c as typeof c & { offerExpiresDay?: number };
     if (c.offerExpiresMin === undefined) c.offerExpiresMin = ((old.offerExpiresDay ?? 0) + 0) * 1440;

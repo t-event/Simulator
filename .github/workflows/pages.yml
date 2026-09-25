@@ -39,6 +39,10 @@ jobs:
         working-directory: frontend
         run: npx tsx src/game/tests.ts
 
+      - name: Tester av nettlaget
+        working-directory: frontend
+        run: npx tsx src/net/tests.ts
+
       - name: Balansetest av spillet
         working-directory: frontend
         run: npx tsx src/game/balance.ts

@@ -18,7 +18,11 @@ import { Market } from "./Market";
 import { Overview } from "./Overview";
 import { People } from "./People";
 import { ResearchPage } from "./ResearchPage";
+import { AccountCard, CloudDot } from "./Account";
 import { BackupInput, SettingsSheet } from "./Settings";
+import { getSession } from "../net/supabase";
+import { flush, onLocalSave } from "../net/sync";
+import { saveGame, setSaveListener } from "../game/save";
 import { InboxSheet } from "./Inbox";
 import { unseenCount } from "../game/inbox";
 import { Sales } from "./Sales";
@@ -34,17 +38,14 @@ const SPEED_OPTIONS = [
   { speed: 10, label: "10×", title: "Veldig rask" },
 ];
 
-function Intro({
-  hasSave,
-  onNew,
-  onContinue,
-  onLoadBackup,
-}: {
-  hasSave: boolean;
-  onNew: (guided: boolean) => void;
-  onContinue: () => void;
-  onLoadBackup: (text: string) => boolean;
-}) {
+function Intro({ api }: { api: GameApi }) {
+  const { hasSave, startNew: onNew, continueSaved: onContinue, loadBackup: onLoadBackup } = api;
+  // Med konto og et spill fra før: nytt spill erstatter spillet på nett, så vi spør først (B-125)
+  const [confirmNew, setConfirmNew] = useState<boolean | null>(null);
+  const startNew = (guided: boolean) => {
+    if (hasSave && getSession()) setConfirmNew(guided);
+    else onNew(guided);
+  };
   return (
     <div className="g-intro">
       <div className="g-intro-card">
@@ -70,16 +71,28 @@ function Intro({
               Fortsett
             </button>
           )}
-          <button className={hasSave ? "" : "g-primary"} onClick={() => onNew(true)}>
+          <button className={hasSave ? "" : "g-primary"} onClick={() => startNew(true)}>
             {hasSave ? "Nytt spill med veiledning" : "Start med veiledning"}
           </button>
-          <button onClick={() => onNew(false)}>
+          <button onClick={() => startNew(false)}>
             {hasSave ? "Nytt spill uten veiledning" : "Start uten veiledning"}
           </button>
         </div>
+        {confirmNew !== null && (
+          <div className="g-note g-intro-confirm">
+            <p>Et nytt spill erstatter spillet som er lagret på kontoen din. Vil du det?</p>
+            <div className="g-row">
+              <button className="g-danger" onClick={() => onNew(confirmNew)}>
+                Ja, start nytt
+              </button>
+              <button onClick={() => setConfirmNew(null)}>Avbryt</button>
+            </div>
+          </div>
+        )}
         <div className="g-intro-backup">
           <BackupInput onLoad={onLoadBackup} />
         </div>
+        <AccountCard api={api} />
       </div>
     </div>
   );
@@ -253,6 +266,7 @@ function TopBar({
           <strong>{STAGES[g.stage].name}</strong>
           <span>
             Dag {day(g)} · {fmtClock(g.minute)}
+            <CloudDot />
             {g.speed > 0 && idleOutsideHours(g, stats) && (
               <em className="g-ff" title="Verket står om natta – tida går fortere til arbeidsdagen starter">
                 {" "}
@@ -379,10 +393,26 @@ export function GameApp() {
     window.scrollTo({ top: 0 });
   }, [view]);
 
-  if (!g)
-    return (
-      <Intro hasSave={api.hasSave} onNew={api.startNew} onContinue={api.continueSaved} onLoadBackup={api.loadBackup} />
-    );
+  // Lagring på nett følger den lokale lagringen; når appen legges bort, sendes det som venter med én gang (B-125)
+  useEffect(() => {
+    setSaveListener(onLocalSave);
+    const away = () => {
+      if (api.game) saveGame(api.game);
+      void flush(true);
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") away();
+    };
+    window.addEventListener("pagehide", away);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      setSaveListener(null);
+      window.removeEventListener("pagehide", away);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [api.game]);
+
+  if (!g) return <Intro api={api} />;
 
   const stats = computePlantStats(g);
   const shown: View = viewUnlocked(g, view) ? view : "verket";
@@ -498,7 +528,7 @@ export function GameApp() {
         <SettingsSheet
           g={g}
           stats={stats}
-          act={act}
+          api={api}
           onQuit={() => {
             setSettingsOpen(false);
             api.quit();

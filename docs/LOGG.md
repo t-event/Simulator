@@ -5,6 +5,37 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 69 – 2026-09-25: konto og lagring på nett (fase 0 og 1)
+
+**Brukeren ba om:** Konto med e-post og passord, nåværende lagring koblet til kontoen, Supabase. Svar på de åpne
+spørsmålene: ingen grupper på topplista ennå, sesonger erstatter nytt spill+ med en pitteliten fordel, lett å starte
+ny sesong, forslag til storkunder.
+
+**Gjort:** B-125, svarene notert i `docs/PLAN-NETT.md`.
+- `src/net/`: klient mot Supabase over fetch, økt, lagring på nett, kobling ved innlogging, funksjonsbryter.
+- `ui/Account.tsx`: kontokortet på startskjermen og i innstillingene, sky i toppen.
+- `supabase/001_grunnlag.sql`.
+- CI kjører også nettestene.
+
+**Testet:**
+- tsc, lint, `npm test` (12 nye tester av nettlaget mot en falsk tjeneste), validate, balanse exit 0, build.
+- Playwright på iPhone 13 og desktop med falsk Supabase (`page.route`):
+  - opprett konto → beskjed om bekreftelse; logg inn ubekreftet → beskjed; logg inn → ingen spill ennå
+  - nytt spill lastes opp med eier, sky i toppen, innstillingene viser «Lagret på nett kl.»
+  - logg ut; tom nettleser + logg inn → spillet hentes og «Fortsett» vises
+  - lokalt spill uten konto + spill på nett → valg, «Herfra» laster opp
+  - sikkerhetskopi fra en annen konto avvises
+  - lenke for nytt passord viser skjemaet og rydder adressen
+  - ingen feil, ingen horisontal scrolling, alle knapper minst 40 px
+- Ekte innlogging kan ikke testes fra sandkassen (den når ikke supabase.co). Brukeren tester.
+
+**Gjenstår:**
+- Brukeren limer inn `supabase/001_grunnlag.sql` og setter Site URL i Supabase.
+- Brukeren tester opprett konto, bekreftelse, innlogging på to enheter og glemt passord.
+- Fase 2: toppliste.
+
+---
+
 ## Økt 68 – 2026-09-25: plan for konto, lagring på nett, toppliste og konkurranse
 
 **Brukeren ba om:** Svar på om toppliste og lagring uten fil er mulig med GitHub Pages, uten at noen mister spillet,

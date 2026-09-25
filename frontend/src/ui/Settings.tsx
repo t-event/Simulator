@@ -5,6 +5,8 @@ import { creditLimit, maxLoan } from "../game/engine";
 import type { PlantStats } from "../game/plant";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
+import { AccountCard } from "./Account";
+import { backupOwnerError } from "../net/sync";
 import { AutoToggle } from "./AutoToggle";
 import { InstallTip } from "./InstallTip";
 import { Card } from "./common";
@@ -24,7 +26,7 @@ function downloadBackup(g: GameState): void {
 
 /** Knapp som henter en sikkerhetskopi fra en fil */
 export function BackupInput({ onLoad }: { onLoad: (text: string) => boolean }) {
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   return (
     <label className="g-file-btn">
       Hent sikkerhetskopi
@@ -34,11 +36,14 @@ export function BackupInput({ onLoad }: { onLoad: (text: string) => boolean }) {
         onChange={async (e) => {
           const file = e.target.files?.[0];
           if (!file) return;
-          setError(!onLoad(await file.text()));
+          const text = await file.text();
+          // Kopier fra en annen konto avvises (B-125); ellers den vanlige sjekken
+          const owner = backupOwnerError(text);
+          setError(owner ?? (onLoad(text) ? null : "Fila er ikke et lagret spill."));
           e.target.value = "";
         }}
       />
-      {error && <span className="g-muted"> Fila er ikke et lagret spill.</span>}
+      {error && <span className="g-muted"> {error}</span>}
     </label>
   );
 }
@@ -144,7 +149,7 @@ function ToastSettings({ g, act }: { g: GameState; act: GameApi["act"] }) {
 export function SettingsSheet({
   g,
   stats,
-  act,
+  api,
   onQuit,
   onLoadBackup,
   onNextRound,
@@ -152,13 +157,14 @@ export function SettingsSheet({
 }: {
   g: GameState;
   stats: PlantStats;
-  act: GameApi["act"];
+  api: GameApi;
   onQuit: () => void;
   onLoadBackup: (text: string) => boolean;
   onNextRound: () => void;
   onClose: () => void;
 }) {
   const [confirmQuit, setConfirmQuit] = useState(false);
+  const act = api.act;
   return (
     <div className="g-modal" role="dialog" aria-modal="true" aria-label="Innstillinger" onClick={onClose}>
       <div className="g-modal-card" onClick={(e) => e.stopPropagation()}>
@@ -181,10 +187,12 @@ export function SettingsSheet({
           </label>
         )}
         <ToastSettings g={g} act={act} />
+        <AccountCard api={api} onDone={onClose} />
         <h3 className="g-subhead">Lagring</h3>
         <p className="g-muted">
-          Spillet lagres automatisk i denne nettleseren. Safari kan slette lagrede data for nettsider som ikke er brukt
-          på en uke – legg spillet på hjemskjermen, eller ta en sikkerhetskopi.
+          Spillet lagres automatisk i denne nettleseren, og på nett når du er logget inn. Safari kan slette lagrede data
+          for nettsider som ikke er brukt på en uke – logg inn, legg spillet på hjemskjermen, eller ta en
+          sikkerhetskopi.
         </p>
         <div className="g-row">
           <button onClick={() => downloadBackup(g)}>Last ned sikkerhetskopi</button>
