@@ -166,12 +166,20 @@ export function Sales({ g, stats, act, openTab }: Props & { openTab?: string }) 
   // Underfaner, så siden ikke blir en lang rull (B-044). Rammeavtaler vises først når de er låst opp.
   const showAgreements = g.stage >= AGREEMENT_STAGE || g.agreements.length > 0;
   const agreementOffers = g.agreements.filter((a) => a.status === "tilbud").length;
-  const tabs: { id: SalesTab; label: string }[] = [
+  // Fanen viser antall aktive avtaler; nye tilbud får et eget merke (B-081)
+  const agreementsActive = g.agreements.filter((a) => a.status === "aktiv").length;
+  const tabs: { id: SalesTab; label: string; badge?: string }[] = [
     { id: "tilbud", label: `Forespørsler${offers.length ? ` (${offers.length})` : ""}` },
     { id: "ko", label: `Ordrekø${active.length ? ` (${active.length})` : ""}` },
     { id: "lager", label: "Lager" },
     ...(showAgreements
-      ? [{ id: "avtaler" as const, label: `Avtaler${agreementOffers ? ` (${agreementOffers} nye)` : ""}` }]
+      ? [
+          {
+            id: "avtaler" as const,
+            label: `Avtaler${agreementsActive ? ` (${agreementsActive})` : ""}`,
+            badge: agreementOffers ? (agreementOffers === 1 ? "Ny" : `${agreementOffers} nye`) : undefined,
+          },
+        ]
       : []),
   ];
 
@@ -188,6 +196,7 @@ export function Sales({ g, stats, act, openTab }: Props & { openTab?: string }) 
               onClick={() => setTab(t.id)}
             >
               {t.label}
+              {t.badge && <span className="g-badge g-badge-new">{t.badge}</span>}
             </button>
           ))}
         </div>

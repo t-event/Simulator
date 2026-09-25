@@ -1054,3 +1054,9 @@ Beslutning:
   går fortere.» Stiger ikke temperaturen, står det «gi mer strøm». Trenden jevnes ut over ca. 0,8 s og starter på nytt
   i hvert steg.
 - Ovnstegningen kuttes ikke lenger nederst når den tippes.
+
+## B-081 Avtaler-fanen viser antall aktive avtaler (2026-09-25)
+Status: gjelder
+Brukeren ville se hvor mange aktive rammeavtaler man har, rett på fanen under Salg.
+Beslutning: Fanen heter «Avtaler (N)» med N = aktive avtaler. Nye tilbud vises med et grønt merke («Ny» eller «2 nye»)
+i stedet for i parentesen, så fanen holder seg på to linjer på mobil.

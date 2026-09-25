@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 51 – 2026-09-25: antall aktive avtaler på fanen
+
+**Brukeren ba om:** Avtaler-knappen under Salg skal vise hvor mange aktive avtaler man har.
+
+**Gjort (B-081):** «Avtaler (1)» med antall aktive. Nye tilbud får et grønt «Ny»-merke.
+
+**Testet:** tsc, lint, bygg, balanse (exit 0). Playwright på iPhone 13: «Avtaler (1)» og «Avtaler (1) Ny», fanen
+på to linjer, ingen horisontal scrolling.
+
+**Gjenstår:** –
+
+---
+
 ## Økt 50 – 2026-09-25: avslagging og tapping mer intuitivt
 
 **Brukeren ba om:** Avslaggingen (8,6 t slagg, måler helt til høyre) og tappingen (1614 °C, grønt fra 1616 °C)
