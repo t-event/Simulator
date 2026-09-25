@@ -317,9 +317,6 @@ function TopBar({
           <span className="hide-narrow"> Fagbok</span>
           {unread > 0 && <span className="g-badge">{unread}</span>}
         </button>
-        <button className="g-book" onClick={onBoard} aria-label="Toppliste">
-          <span aria-hidden="true">🏆</span>
-        </button>
         <button className="g-book" onClick={onSettings} aria-label="Innstillinger">
           <span aria-hidden="true">⚙️</span>
         </button>
@@ -340,7 +337,13 @@ function TopBar({
           </span>
         )}
       </div>
-      <NoticeLine api={api} unseen={unseen} onOpen={onInbox} />
+      {/* 🏆 står ved varsellinja, ikke i toppraden: der er det ikke plass på en smal mobil (B-134) */}
+      <div className="g-notice-row">
+        <NoticeLine api={api} unseen={unseen} onOpen={onInbox} />
+        <button className="g-book g-board-btn" onClick={onBoard} aria-label="Toppliste">
+          <span aria-hidden="true">🏆</span>
+        </button>
+      </div>
     </header>
   );
 }

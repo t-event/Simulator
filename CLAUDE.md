@@ -112,7 +112,7 @@ frontend/src/
     InstallTip.tsx    Tips om hjemskjerm på startskjermen   Power.tsx  Strøm og skiftplan
     Handbook.tsx Fagboka med quiz og oppdrag   Inbox.tsx  Varsellista (åpnes fra varsellinja øverst)
     Account.tsx  Konto: logg inn, opprett, glemt passord, velg spill ved konflikt (på startskjermen og i ⚙️)
-    Leaderboard.tsx Topplista (arket bak 🏆 øverst)   Season.tsx  Sesongspørsmål, hendelser på Marked, sesonglinje
+    Leaderboard.tsx Topplista (arket bak 🏆 ved varsellinja)   Season.tsx  Sesongspørsmål, hendelser på Marked, sesonglinje
     control/     Kontrollrommet: den enkle styringen (SimpleControl + simpleRunner)
   sim/         Prosessmodell for lysbueovnen (brukes av kontrollrommet)
 frontend/public/  PWA: manifest, ikoner, service worker
@@ -133,6 +133,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - `pkill` returnerer 144 og avbryter resten av en `&&`-kjede – kjør det alene.
 - Ikke bruk `git checkout <fil>` for å angre en liten endring: det fjerner også alle andre endringer i fila som
   ikke er committet (skjedde med `simpleRunner.ts`). Angre med en målrettet redigering i stedet.
+- «Ingen horisontal scrolling» er ikke nok i toppfeltet: sjekk også at knapper og tekst ikke avkortes
+  (`scrollWidth > clientWidth`) eller havner utenfor skjermen, på 320 px bredde. Safari på iPhone har bredere
+  skrift enn Chromium, så la det være litt luft (B-134).
 - Skjermbilder med `fullPage: true` viser faste menyer midt på siden; det er
   bare et artefakt av skjermbildet.
 - Prosessmodellen er kalibrert med steg på maks 1 s – del opp større steg.
