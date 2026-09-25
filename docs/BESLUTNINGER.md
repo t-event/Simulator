@@ -1037,3 +1037,20 @@ Beslutning:
 - I rensingen vises knappen «Karbon: av/PÅ» når karbonet er under det grønne feltet (120 kg/min, ca. 9 s fra
   0,01 til 0,05 %). Oksygen og karbon kan ikke stå på samtidig.
 - Nybegynneren i `balance.ts` slår på karbon hvis det blir for lavt. Resultatet er fortsatt 4★ og 1★.
+
+## B-080 Kontrollrommet: knappene sier når det er riktig å trykke (2026-09-25)
+Status: gjelder (utfyller B-076)
+Brukeren syntes avslaggingen og tappingen ikke var intuitive. Målt:
+- Slagget rant jevnt ut med ca. 0,4 t i sekundet på skjermen, så det grønne feltet (0,5–1,2 t) varte bare ca. 1,7 s.
+- Slaggmåleren gikk til 8 t og sto fast helt til høyre de første sekundene.
+- «Rett opp ovnen» og «Tapp nå!» var blå fra start og så klare ut før det var riktig tidspunkt.
+- Hintet «Varmer …» sa ikke om temperaturen faktisk steg.
+Beslutning:
+- Hovedknappen i avslagging, tapping og øse er **grå** til det er riktig tidspunkt, og **oransje og pulserende** når
+  det er riktig. Før temperaturen er i det grønne, heter tappeknappen «Tapp likevel (for kaldt)».
+- Slaggmåleren går fra 0 til mengden slagg da tippingen startet, så markøren beveger seg fra første sekund.
+- Avslaggingen går fortere med mye slagg (fart 20) og saktere under 2,5 t (fart 6). Det grønne feltet varer nå ca. 4 s.
+- Hintene viser trenden: «Slagget renner ut … (ca. 14 s)» og «Stiger 1,0 °C i sekundet – grønt om ca. 18 s. Mer strøm
+  går fortere.» Stiger ikke temperaturen, står det «gi mer strøm». Trenden jevnes ut over ca. 0,8 s og starter på nytt
+  i hvert steg.
+- Ovnstegningen kuttes ikke lenger nederst når den tippes.

@@ -331,7 +331,7 @@
   font-weight: 600;
 }
 
-.sc-tap.is-ready {
+.sc-main.is-ready {
   background: #c0561d;
   border-color: #ff8a3d;
   animation: sc-pulse 0.8s ease-in-out infinite alternate;
