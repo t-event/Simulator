@@ -5,6 +5,34 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 56 – 2026-09-25: bjella, kontrollrommet, elektrodebrudd, lageret, støtteroller og utstyrsmenyer
+
+**Brukeren ba om:**
+- Ikke tall på bjella for gode nyheter.
+- At man ikke må slå på oksygenet for tidlig i smeltingen.
+- At rensingen starter med strømmen av.
+- Færre elektrodebrudd med alt oppgradert.
+- At ferdigvarelageret ikke går over maks.
+- At anbefalte planleggere og skrapklassere tar høyde for fravær, og at avløsere anbefales.
+- Å se pengene i utstyrsmenyen.
+- At støpingen åpner menyen slik ovnen gjør.
+- Kortere og mer intuitive utstyrsmenyer.
+
+**Gjort:** B-107 til B-112.
+
+**Testet:**
+- tsc, lint, `npm test` (14 tester), `validate.ts`, bygg.
+- Balanse: 8 / 25 / 67 / 141, nybegynner 144, kontrollrommet 5★ og 1★, exit 0.
+- Egne skript:
+  - Temperaturen i smeltingen og rensingen.
+  - Lageret: før gikk det 16 t over, nå stopper det på 39 992 av 40 000 t.
+- Playwright på iPhone 13: støpingen åpner menyen, kassa vises, ovnsfanene virker. Ingen feil og ingen horisontal
+  scrolling.
+
+**Gjenstår:** Ingenting fra brukerens liste.
+
+---
+
 ## Økt 55 – 2026-09-25: konsern og nytt sluttmål
 
 **Brukeren ba om:** Når storverket er ferdig bygget, skal man kunne utvide til et konsern med flere verk, så spillet

@@ -760,18 +760,27 @@ export function supportAdvice(g: GameState): SupportAdvice[] {
     "Flere forespørsler og bedre pris. Mer enn fire gir ikke mer.",
   );
   add("murer", arcFurnaces * MASONS_PER_POT, "Murer opp reservepotter: to per lysbueovn, så pottebyttet går fort.");
+  // Planleggeren og skrapklasseren jobber bare når de er på jobb. Med én står jobben når den er syk eller har
+  // ferie, så fra stålverket anbefales to (B-111)
+  const spare = g.stage >= 3 ? 1 : 0;
+  const cover = spare ? " To, så den ene dekker når den andre er syk eller har ferie." : "";
   add(
     "planlegger",
-    hasResearch(g, "innkjop") || hasResearch(g, "ordreplan") ? 1 : 0,
-    "Kjøper skrap etter resepten og sorterer ordrekøen.",
+    hasResearch(g, "innkjop") || hasResearch(g, "ordreplan") ? 1 + spare : 0,
+    `Kjøper skrap etter resepten og sorterer ordrekøen.${cover}`,
   );
-  add("klasser", g.stage >= 2 ? 1 : 0, "Riktig skrapblanding i chargene, og dårlige partier sendes i retur.");
-  // Med 4- og 5-skift dekker de ekstra lagene fravær; med tre lag trengs avløsere
+  add(
+    "klasser",
+    g.stage >= 2 ? 1 + spare : 0,
+    `Riktig skrapblanding i chargene, og dårlige partier sendes i retur.${cover}`,
+  );
+  // Avløsere fyller hull i alle roller på skiftet. Ekstra skiftlag dekker mye fravær, men ikke når flere er borte
+  // i samme rolle (B-111)
   add(
     "allround",
-    crews >= 4 || g.stage < 2 ? 0 : 2,
+    g.stage < 2 ? 0 : crews >= 5 ? 1 : 2,
     crews >= 4
-      ? "Trengs ikke: de ekstra skiftlagene dekker fravær."
+      ? "Tar plassen til dem som er syke eller har ferie. De ekstra skiftlagene dekker mye, men er flere borte i samme rolle, fyller avløseren hullet."
       : "Tar plassen til dem som er syke eller har ferie.",
   );
   return out;

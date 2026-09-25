@@ -746,10 +746,17 @@ function heatEvents(g: GameState, index: number, plant: PlantStats): number {
         log(g, `Overslag i ovn ${index + 1}. Støv i hvelvet må suges bort.`, "event");
       }
     }
-    if (chance(g, 0.014 * m * (regulated ? 0.4 : 1))) {
+    // Mange charger i døgnet på storverket: regulering og forskning skal til sammen gjøre brudd sjeldne (B-109)
+    const steered = hasResearch(g, "elektrodestyring");
+    if (chance(g, 0.014 * m * (regulated ? 0.25 : 1) * (steered ? 0.5 : 1))) {
       extra += 35;
       addCost(g, "vedlikehold", 35_000);
-      log(g, `Elektrodebrudd i ovn ${index + 1}. Elektroden skjøtes, og chargen forsinkes.`, "event");
+      const tip = !regulated
+        ? " Hydraulisk elektroderegulering gir færre brudd."
+        : !steered
+          ? " Forskningen «Elektroderegulering» halverer bruddene."
+          : "";
+      log(g, `Elektrodebrudd i ovn ${index + 1}. Elektroden skjøtes, og chargen forsinkes.${tip}`, "event");
     }
   } else if (furnace.id !== "induksjon025" && chance(g, 0.004 * m)) {
     const hours = 8 * stats.repairFactor;
@@ -1129,7 +1136,7 @@ function updateCasting(g: GameState, stats: PlantStats, dt: number): void {
     g.castWait = "Støpemaskinen står";
     return;
   }
-  if (stats.storeUsed >= stats.storeT) {
+  if (lotsTonnage(g) >= stats.storeT) {
     if (auto(g, "autoSpot")) sellExcess(g, stats, 0.8);
     if (lotsTonnage(g) >= stats.storeT) {
       g.castWait = "Ferdigvarelageret er fullt";
@@ -1142,6 +1149,16 @@ function updateCasting(g: GameState, stats: PlantStats, dt: number): void {
   }
   g.castProgressT += stats.castTph * (dt / 60);
   while (g.castQueue.length && g.castProgressT >= g.castQueue[0].t) {
+    // Lageret kan fylles midt i et langt tidssteg (10×): ikke støp mer enn det er plass til (B-110)
+    // (Et tomt lager tar alltid imot, så en øse som er større enn lageret ikke låser støpingen.)
+    if (lotsTonnage(g) > 0 && lotsTonnage(g) + g.castQueue[0].t > stats.storeT) {
+      if (auto(g, "autoSpot")) sellExcess(g, stats, 0.8);
+      if (lotsTonnage(g) > 0 && lotsTonnage(g) + g.castQueue[0].t > stats.storeT) {
+        g.castProgressT = g.castQueue[0].t;
+        g.castWait = "Ferdigvarelageret er fullt";
+        break;
+      }
+    }
     const batch = g.castQueue.shift()!;
     g.castProgressT -= batch.t;
     castBatch(g, batch, stats);

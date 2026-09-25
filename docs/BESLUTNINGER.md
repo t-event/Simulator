@@ -1301,3 +1301,50 @@ Beslutning:
   - Før vant den flinke rundt dag 200.
   - Ingen konkurs.
 - `--vansker` kjører nå inntil 700 døgn.
+
+## B-107 Bjella teller bare problemer og hendelser (2026-09-25)
+Status: gjelder (justerer B-089)
+Brukeren ville ikke ha tall på bjella for gode nyheter. Gode nyheter står fortsatt i varsellista under «Gode nyheter»,
+men bare problemer og hendelser gir tall på bjella.
+
+## B-108 Kontrollrommet: sterkere strøm i smeltingen, rensingen starter med strømmen av (2026-09-25)
+Status: gjelder (justerer B-086 og B-093)
+Smeltingen: selv på full strøm falt temperaturen under det grønne feltet fra ca. 20 % til 50 % smeltet. Spilleren måtte
+slå på oksygenet før rådet sa det. Strømnivå 4 og 5 bruker nå trafo-tapp 4 og 6 i stedet for 3 og 4. Da holder nivå 4
+temperaturen til halvparten er smeltet, og nivå 5 har noe å gå på.
+Rensingen: med strømnivå 2 steg temperaturen ca. 5 °C/s med én gang, før spilleren rakk å reagere. Rensingen starter
+nå med strømmen av. Oksygenet alene gir ca. 2 °C/s, og tekstene sier at du gir litt strøm bare hvis badet blir for kaldt.
+Testspilleren som følger rådene, får nå 5★ (før 4★). Den slurvete får fortsatt 1★.
+
+## B-109 Færre elektrodebrudd med alt kjøpt (2026-09-25)
+Status: gjelder (justerer B-094)
+Tre store ovner kjører over 100 charger i døgnet, og sjansen for brudd er per charge. Med alt kjøpt kom det fortsatt
+et brudd med få dagers mellomrom.
+- Hydraulisk elektroderegulering gir nå 75 % færre brudd (før 60 %).
+- Forskningen «Elektroderegulering» halverer bruddene i tillegg.
+- Med alt kjøpt og forsket fram er bruddene ca. åtte ganger sjeldnere enn før.
+- Loggen sier hva som gir færre brudd når noe mangler.
+
+## B-110 Ferdigvarelageret går ikke over maks (2026-09-25)
+Status: gjelder
+På 10× kan ett tidssteg støpe flere øser, og lageret ble bare sjekket før det første. Lageret viste 60 041 av 60 000
+t. Nå sjekkes plassen før hver øse støpes. Er lageret fullt, venter støpingen (salg på spot hjelper hvis det er
+slått på). Et tomt lager tar alltid imot, så en stor øse ikke låser støpingen.
+
+## B-111 Anbefalte støtteroller tar høyde for fravær (2026-09-25)
+Status: gjelder (justerer B-096)
+Planleggeren og skrapklasseren jobber bare når de er på jobb. Med én står jobben når den er syk eller har ferie.
+- Fra stålverket anbefales to av hver.
+- Avløsere anbefales også med fire og fem skiftlag: to med fire lag og én med fem. Ekstra lag dekker mye fravær, men
+  ikke når flere er borte i samme rolle.
+
+## B-112 Oppgraderingsmenyene: kassa øverst, én fane per ovn, kortere lister (2026-09-25)
+Status: gjelder (justerer B-065 og B-074)
+- Menyen viser hvor mye penger du har, og den linja står fast øverst når du blar.
+- Med flere ovner har menyen én fane per ovn pluss «Verket», med tall for det du har råd til. Den starter på den
+  første fanen der du har råd til noe.
+- Det du kan kjøpe nå står øverst, og det du har råd til kommer først. Det som er i drift og det som kommer på neste
+  nivå er lagt sammen, og kan åpnes.
+- Trykk på ovnen og støpingen på Oversikt åpner alltid utstyret der. Før åpnet de bare når det var noe du hadde råd
+  til, så støpingen virket annerledes enn ovnen.
+

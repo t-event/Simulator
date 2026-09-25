@@ -334,8 +334,9 @@ export const RESEARCH: Research[] = [
     stage: 4,
     cost: 250,
     requires: ["lysbue"],
-    description: "Elektrodene reguleres raskere, så lysbuen står stabilt og taper mindre varme.",
-    effect: "5 % mindre strøm i lysbueovnene",
+    description:
+      "Elektrodene reguleres raskere, så lysbuen står stabilt, taper mindre varme og sliter mindre på elektrodene.",
+    effect: "5 % mindre strøm i lysbueovnene og halvparten så mange elektrodebrudd",
   },
   {
     id: "skraplogistikk",

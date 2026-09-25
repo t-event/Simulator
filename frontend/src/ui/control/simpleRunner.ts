@@ -21,11 +21,17 @@ export const SPEED: Record<Step, number> = { intro: 0, smelt: 40, rens: 20, slag
 /** Når det er lite slagg igjen, går avslaggingen saktere, så spilleren rekker å rette opp i det grønne (B-080) */
 const SLAG_SLOW_BELOW_KG = 2500;
 const SPEED_SLAG_END = 6;
-/** Strømnivået automatikken setter når et nytt steg starter, så spilleren ikke arver «strøm av» (B-086) */
-const RENS_START_LEVEL = 2;
+/**
+ * Strømnivået automatikken setter når et nytt steg starter (B-086). Rensingen starter med strømmen av: oksygenet gir
+ * varme selv, og med strøm steg temperaturen før spilleren rakk å reagere (B-108).
+ */
+const RENS_START_LEVEL = 0;
 const TAPP_START_LEVEL = 4;
-/** Trafo-tapp for strømnivå 1–5 (nivå 0 = strømmen av, B-079) */
-const POWER_TAPS = [0, 1, 2, 3, 4];
+/**
+ * Trafo-tapp for strømnivå 1–5 (nivå 0 = strømmen av, B-079). De øverste nivåene gir nok strøm til å holde
+ * smeltingen i det grønne uten oksygen til halve skrapet er smeltet, slik rådet sier (B-108).
+ */
+const POWER_TAPS = [0, 1, 2, 4, 6];
 /** Karbon som blåses inn når spilleren slår på karbon i rensingen (kg/min, B-079) */
 const CARBON_BOOST_KG_MIN = 120;
 /** Under smeltingen holder automatikken karbonet over dette, også når oksygenet står på (B-079) */
@@ -469,7 +475,7 @@ export class SimpleRunner {
     }
     if (st === "smelt" && sim.state.phase !== "innsmelting") {
       a.message = null;
-      // Rensingen starter med lite strøm: oksygenet gir mye varme selv (B-086)
+      // Rensingen starter med strømmen av: oksygenet gir mye varme selv (B-086, B-108)
       a.level = RENS_START_LEVEL;
       this.step = "rens";
       return "steg";

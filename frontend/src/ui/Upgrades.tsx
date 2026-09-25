@@ -109,6 +109,51 @@ function UpgradeCard({
   );
 }
 
+/**
+ * Utstyret delt i tre (B-112): det du kan kjøpe nå står øverst, det som er i drift og det som kommer på neste nivå
+ * er lagt sammen, så menyen ikke blir lang.
+ */
+function OptionList({ g, options, act }: { g: GameState; options: UpgradeOption[]; act: GameApi["act"] }) {
+  const owned = options.filter((o) => o.owned);
+  const later = options.filter((o) => !o.owned && o.locked);
+  const now = options
+    .filter((o) => !o.owned && !o.locked)
+    .sort((a, b) => Number(b.available) - Number(a.available) || a.price - b.price);
+  return (
+    <>
+      {now.length ? (
+        <div className="g-upgrades">
+          {now.map((o) => (
+            <UpgradeCard key={o.id} o={o} stage={g.stage} act={act} scheduled={g.pendingCastingSwitch === o.id} />
+          ))}
+        </div>
+      ) : (
+        <p className="g-muted">Ingenting mer å kjøpe her nå.</p>
+      )}
+      {owned.length > 0 && (
+        <details className="g-role-group g-sheet-group">
+          <summary>I drift ({owned.length})</summary>
+          <ul className="g-owned-list">
+            {owned.map((o) => (
+              <li key={o.id}>✓ {o.name}</li>
+            ))}
+          </ul>
+        </details>
+      )}
+      {later.length > 0 && (
+        <details className="g-role-group g-sheet-group">
+          <summary>Kommer på neste nivå ({later.length})</summary>
+          <div className="g-upgrades">
+            {later.map((o) => (
+              <UpgradeCard key={o.id} o={o} stage={g.stage} act={act} />
+            ))}
+          </div>
+        </details>
+      )}
+    </>
+  );
+}
+
 export function UpgradeSheet({
   g,
   station,
@@ -121,50 +166,56 @@ export function UpgradeSheet({
   onClose: () => void;
 }) {
   const options = stationOptions(g, station);
+  const units = station === "ovn" && g.furnaces.length > 1 ? [undefined, ...g.furnaces.map((_, i) => i)] : null;
+  const unitList = (unit: number | undefined) => options.filter((o) => o.unit === unit);
+  const buyable = (unit: number | undefined) => unitList(unit).filter((o) => o.available).length;
+  // Én fane per ovn (B-112): start på den første som har noe du kan kjøpe
+  const [unit, setUnit] = useState<number | undefined>(() => {
+    if (!units) return undefined;
+    const i = units.findIndex((u) => buyable(u) > 0);
+    return units[i >= 0 ? i : 1];
+  });
   return (
     <div className="g-modal" role="dialog" aria-modal="true" aria-label={STATION_NAMES[station]} onClick={onClose}>
       <div className="g-modal-card" onClick={(e) => e.stopPropagation()}>
-        <header className="g-card-head">
+        <header className="g-card-head g-sheet-head">
           <h2>{STATION_NAMES[station]}</h2>
+          <span className="g-sheet-cash">Du har {fmtKr(Math.floor(Math.max(0, g.cash)))}</span>
           <button onClick={onClose} aria-label="Lukk">
             ✕
           </button>
         </header>
-        {station === "ovn" && g.furnaces.length > 1 ? (
+        {units ? (
           <>
+            <div className="g-subtabs" role="tablist" aria-label="Ovner">
+              {units
+                .filter((u) => unitList(u).length)
+                .map((u) => (
+                  <button
+                    key={u ?? "verket"}
+                    role="tab"
+                    aria-selected={unit === u}
+                    className={unit === u ? "is-active" : ""}
+                    onClick={() => setUnit(u)}
+                  >
+                    {u === undefined ? "Verket" : `Ovn ${u + 1}`}
+                    {buyable(u) > 0 && <span className="g-badge">{buyable(u)}</span>}
+                  </button>
+                ))}
+            </div>
             <p className="g-muted">
-              Du har {g.furnaces.length} ovner. Hver ovn bygges om og får utstyr for seg, så du kan oppgradere én om
-              gangen.
+              {unit === undefined
+                ? "Utstyr for hele verket."
+                : `Ovn ${unit + 1} – ${unitType(g, unit).name}. Hver ovn får utstyr for seg.`}
             </p>
-            {[undefined, ...g.furnaces.map((_, i) => i)].map((unit) => {
-              const list = options.filter((o) => o.unit === unit);
-              if (!list.length) return null;
-              return (
-                <section key={unit ?? "verket"}>
-                  <h3 className="g-subhead">
-                    {unit === undefined ? "Hele verket" : `Ovn ${unit + 1} – ${unitType(g, unit).name}`}
-                  </h3>
-                  <div className="g-upgrades">
-                    {list.map((o) => (
-                      <UpgradeCard
-                        key={o.id}
-                        o={o}
-                        stage={g.stage}
-                        act={act}
-                        scheduled={g.pendingCastingSwitch === o.id}
-                      />
-                    ))}
-                  </div>
-                </section>
-              );
-            })}
+            <OptionList
+              g={g}
+              options={unitList(unit).map((o) => ({ ...o, name: o.name.replace(/ – ovn \d+$/, "") }))}
+              act={act}
+            />
           </>
         ) : (
-          <div className="g-upgrades">
-            {options.map((o) => (
-              <UpgradeCard key={o.id} o={o} stage={g.stage} act={act} scheduled={g.pendingCastingSwitch === o.id} />
-            ))}
-          </div>
+          <OptionList g={g} options={options} act={act} />
         )}
       </div>
     </div>

@@ -882,6 +882,36 @@ button {
   margin-bottom: 8px;
 }
 
+/* Utstyrsmenyen (B-112): kassa står fast øverst, og det som er i drift er lagt sammen */
+.g-sheet-head {
+  position: sticky;
+  top: -16px;
+  z-index: 1;
+  background: var(--panel-bg);
+  padding-top: 4px;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.g-sheet-cash {
+  flex: 1;
+  color: var(--text-dim);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.g-sheet-group {
+  margin-top: 10px;
+}
+
+.g-owned-list {
+  margin: 0;
+  padding-left: 4px;
+  list-style: none;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
 .g-role-group summary {
   cursor: pointer;
   font-weight: 600;

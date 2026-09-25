@@ -49,7 +49,7 @@ import { StageCard, StationButton, UpgradeSheet } from "./Upgrades";
 import { AutoToggle } from "./AutoToggle";
 import { BankCard } from "./Settings";
 import { KonsernTab } from "./Konsern";
-import { readyUpgrades, stationReady, type Station } from "./stations";
+import { readyUpgrades, stationOptions, stationReady, type Station } from "./stations";
 import type { View } from "./views";
 
 interface Props {
@@ -299,6 +299,8 @@ function CompactChain({
   const worn = g.furnaces.map((f, i) => ({ f, i })).filter((x) => x.f.wear >= 0.6 && !x.f.relineRequested);
   // Tall på knappen: utstyr der du kan kjøpe og har råd til. Et trykk åpner da utstyret direkte (B-065)
   const ready = (s: Station) => stationReady(g, s);
+  // Ovn og støping åpner alltid utstyret når det finnes noe der, også når du ikke har råd (B-112)
+  const has = (s: Station) => stationOptions(g, s).some((o) => !o.locked);
   const badge = (n: number) =>
     n > 0 ? (
       <span className="g-badge" aria-label={`${n} utstyr du har råd til`}>
@@ -324,7 +326,7 @@ function CompactChain({
         {g.furnaces.map((f, i) => {
           const st = furnaceState(g, i);
           return (
-            <button className="g-mini" key={i} onClick={() => (ready("ovn") ? onStation("ovn") : onOpen())}>
+            <button className="g-mini" key={i} onClick={() => (has("ovn") ? onStation("ovn") : onOpen())}>
               <span>
                 {g.furnaces.length > 1 ? `Ovn ${i + 1}` : "Ovn"}
                 {badge(ready("ovn"))}
@@ -334,7 +336,7 @@ function CompactChain({
             </button>
           );
         })}
-        <button className="g-mini" onClick={() => (ready("stoping") ? onStation("stoping") : onOpen())}>
+        <button className="g-mini" onClick={() => (has("stoping") ? onStation("stoping") : onOpen())}>
           <span>Støping{badge(ready("stoping"))}</span>
           <Bar value={castHead ? g.castProgressT / castHead.t : 0} tone="ok" label="Støping" />
           <small className={g.castWait ? "is-waiting" : ""}>{g.castWait ?? (castHead ? "Støper" : "Venter")}</small>
