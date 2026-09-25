@@ -77,6 +77,7 @@ npx tsx src/game/balance.ts --sperrer                      # hva som sperrer nes
 npx tsx src/game/balance.ts --vansker                      # per nivå: hva spilleren venter på, flink og nybegynner
 npx tsx src/game/balance.ts --nybegynner --verbose --seed 2  # kjør som nybegynner (også --replog N --nybegynner)
 npx tsx src/game/balance.ts --seed 2 --repdrop             # alt som tok omdømmet ned, time for time
+npx tsx src/game/balance.ts --vekst                        # største vekst per døgn og per nivå – grunnlaget for juksesperren
 npm run build
 ```
 

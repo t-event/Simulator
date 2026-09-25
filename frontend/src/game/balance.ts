@@ -27,7 +27,7 @@ import {
   upgradeOptions,
 } from "./actions";
 import { resolveDecision } from "./decisions";
-import { konsernAdvice } from "./konsern";
+import { konsernAdvice, konsernEquity } from "./konsern";
 import { answerQuiz, QUIZ, quizAvailable } from "./quiz";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
 import { ADDONS, CASTINGS, FURNACES, SCRAP_IDS, STAGES } from "./data";
@@ -526,17 +526,32 @@ interface RunSummary {
   final: GameState;
 }
 
+/** «--vekst»: største vekst i konsernverdi per spilldøgn, per nivå – grunnlag for juksesperren (B-127) */
+export const growth: { maxPerDay: number[]; maxEquity: number[] } = {
+  maxPerDay: [0, 0, 0, 0, 0],
+  maxEquity: [0, 0, 0, 0, 0],
+};
+
 function run(seed: number, days: number, verbose: boolean, novice = process.argv.includes("--nybegynner")): RunSummary {
   const g = newGame(seed);
   if (novice) novices.add(g);
   const stageDays: (number | null)[] = [1, null, null, null, null];
   let lastDay = 0;
   let hour = 0;
+  let equityAtDayStart = konsernEquity(g);
+  let growthDay = day(g);
   while (day(g) <= days && !g.gameOver) {
     if (!novice || hour++ % 3 === 0 || g.pendingDecision) botHour(g);
     const repBefore = g.reputation;
     const logBefore = g.log.at(-1)?.id ?? 0;
     advance(g, 60);
+    if (day(g) !== growthDay) {
+      const eq = konsernEquity(g);
+      growth.maxPerDay[g.stage] = Math.max(growth.maxPerDay[g.stage], eq - equityAtDayStart);
+      growth.maxEquity[g.stage] = Math.max(growth.maxEquity[g.stage], eq);
+      equityAtDayStart = eq;
+      growthDay = day(g);
+    }
     if (process.argv.includes("--repdrop") && g.reputation < repBefore - 0.5)
       console.log(
         "REP",
@@ -582,6 +597,17 @@ function run(seed: number, days: number, verbose: boolean, novice = process.argv
 }
 
 const verbose = process.argv.includes("--verbose");
+if (process.argv.includes("--vekst")) {
+  for (const seed of [1, 2, 3, 4, 5]) {
+    run(seed, 700, false, false);
+    run(seed, 700, false, true);
+  }
+  for (let s = 0; s < 5; s++)
+    console.log(
+      `${STAGES[s].name.padEnd(9)} maks vekst/døgn ${Math.round(growth.maxPerDay[s]).toLocaleString("nb-NO").padStart(14)}  maks konsernverdi ${Math.round(growth.maxEquity[s]).toLocaleString("nb-NO").padStart(16)}`,
+    );
+  process.exit?.(0);
+}
 if (process.argv.includes("--dump")) {
   // Lager et lagret spill på et gitt nivå, til testing av grensesnittet
   const stage = Number(process.argv[process.argv.indexOf("--dump") + 1]);

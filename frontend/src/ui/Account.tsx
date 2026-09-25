@@ -19,6 +19,7 @@ import {
   signUp,
   updatePassword,
 } from "../net/supabase";
+import { fetchProfile, setNickname as saveNickname } from "../net/leaderboard";
 import {
   cloudStatus,
   fetchFeatures,
@@ -101,6 +102,24 @@ export function AccountCard({ api, onDone }: { api: GameApi; onDone?: () => void
   const [choose, setChoose] = useState<{ cloud: GameState; local: GameState } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [cloudOn, setCloudOn] = useState(cloudConfigured());
+  // Kallenavnet på topplista (B-127): undefined = ikke hentet ennå
+  const [nickname, setNickname] = useState<string | null | undefined>(undefined);
+  const [nickDraft, setNickDraft] = useState("");
+  const [flagged, setFlagged] = useState(false);
+
+  useEffect(() => {
+    if (!session) {
+      setNickname(undefined);
+      return;
+    }
+    void fetchProfile()
+      .then((p) => {
+        setNickname(p?.nickname ?? null);
+        setNickDraft(p?.nickname ?? "");
+        setFlagged(!!p?.flagged_at || !!p?.banned);
+      })
+      .catch(() => setNickname(null));
+  }, [session]);
 
   useEffect(() => {
     void fetchFeatures().then((f) => {
@@ -209,6 +228,40 @@ export function AccountCard({ api, onDone }: { api: GameApi; onDone?: () => void
         </p>
         {info && <p className="g-account-info">{info}</p>}
         {error && <p className="g-account-error">{error}</p>}
+        <form
+          className="g-nick"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void run(async () => {
+              const n = await saveNickname(nickDraft);
+              setNickname(n);
+              setNickDraft(n);
+              setInfo(`Kallenavnet «${n}» er lagret. Du er med på topplista under Verket → Økonomi.`);
+            });
+          }}
+        >
+          <label className="g-field">
+            Kallenavn på topplista {nickname === null && <span className="g-muted">(ikke valgt ennå)</span>}
+            <input
+              type="text"
+              maxLength={20}
+              minLength={3}
+              autoComplete="nickname"
+              placeholder="3–20 tegn, vises for alle"
+              value={nickDraft}
+              onChange={(e) => setNickDraft(e.target.value)}
+            />
+          </label>
+          <button type="submit" disabled={busy || nickDraft.trim().length < 3 || nickDraft.trim() === nickname}>
+            {nickname ? "Endre kallenavn" : "Bli med på topplista"}
+          </button>
+        </form>
+        {flagged && (
+          <p className="g-account-error">
+            Kontoen er holdt utenfor topplista fordi spillet vokste raskere enn det som er mulig. Ta kontakt hvis du
+            mener det er feil.
+          </p>
+        )}
         <div className="g-row">
           <button
             disabled={busy}
