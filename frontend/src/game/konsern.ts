@@ -35,13 +35,13 @@ export const SISTER_TYPES: Record<SisterType, SisterSpec> = {
   stalverk: {
     name: "Stålverk",
     price: 300_000_000,
-    profitPerDay: 3_500_000,
+    profitPerDay: 5_000_000,
     description: "Et skrapbasert stålverk med én lysbueovn og strengstøping. Egen ledelse og egne folk.",
   },
   storverk: {
     name: "Storverk",
     price: 1_200_000_000,
-    profitPerDay: 14_000_000,
+    profitPerDay: 20_000_000,
     description: "Et fullskala stålverk med flere ovner, valseverk og havn.",
   },
 };
@@ -110,12 +110,20 @@ export function sisterProfit(g: GameState, p: SisterPlant): number {
   return spec.profitPerDay * (1 + MODERNIZE_GAIN * p.level) * shared * research * g.market.steelFactor;
 }
 
-/** Bokført verdi av datterverkene: 80 % av det som er investert */
+/**
+ * Et verk er verdt det det tjener (B-121): omtrent 60 døgns overskudd ved normal stålpris. Da går konsernverdien
+ * ikke ned når man kjøper et verk, og alt verket tjener etterpå, er gevinst. Et nytt verk er verdt det det koster.
+ */
+export const VALUE_DAYS = 60;
+
+export function sisterValue(g: GameState, p: SisterPlant): number {
+  const steel = g.market?.steelFactor || 1;
+  return (sisterProfit(g, p) / steel) * VALUE_DAYS;
+}
+
+/** Verdien av datterverkene til sammen */
 export function konsernValue(g: GameState): number {
-  return (g.konsern?.plants ?? []).reduce(
-    (a, p) => a + SISTER_TYPES[p.type].price * (1 + MODERNIZE_SHARE * p.level) * 0.8,
-    0,
-  );
+  return (g.konsern?.plants ?? []).reduce((a, p) => a + sisterValue(g, p), 0);
 }
 
 /** Egenkapital (kasse minus lån) pluss datterverkene */
@@ -296,6 +304,17 @@ export function buySister(g: GameState, type: SisterType): { ok: boolean; messag
     "good",
   );
   return { ok: true, message: `${name} er kjøpt.` };
+}
+
+/** Selger et datterverk for det det er verdt (B-121), f.eks. for å få råd til et storverk */
+export function sellSister(g: GameState, id: number): { ok: boolean; message: string } {
+  const p = g.konsern.plants.find((x) => x.id === id);
+  if (!p) return { ok: false, message: "Fant ikke verket." };
+  const value = sisterValue(g, p);
+  g.konsern.plants = g.konsern.plants.filter((x) => x.id !== id);
+  addIncome(g, "konsern", value);
+  log(g, `Konsernet har solgt ${p.name} for ${fmtKr(value)}.`, "info");
+  return { ok: true, message: `${p.name} er solgt.` };
 }
 
 /** Bygger ut et stålverk til et storverk (B-119) */

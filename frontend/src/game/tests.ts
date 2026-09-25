@@ -87,7 +87,8 @@ test("Konsernet: åpner seg på storverket, datterverk gir overskudd og teller m
   assert(buySister(g, "stalverk").ok, "stålverket ble ikke kjøpt");
   const price = SISTER_TYPES.stalverk.price;
   assert(g.cash === 2_000_000_000 - price, "feil pris");
-  assert(konsernEquity(g) === g.cash + price * 0.8, "verket teller ikke 80 % mot konsernverdien");
+  // Et nytt verk er verdt det det koster (B-121): konsernverdien går ikke ned ved kjøpet
+  assert(Math.abs(konsernEquity(g) - 2_000_000_000) < 1, `konsernverdien endret seg ved kjøpet: ${konsernEquity(g)}`);
   const p = g.konsern.plants[0];
   const before = sisterProfit(g, p);
   assert(modernizeSister(g, p.id).ok && sisterProfit(g, p) > before, "moderniseringen ga ikke mer overskudd");
