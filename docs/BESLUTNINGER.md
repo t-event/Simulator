@@ -773,3 +773,43 @@ eller hvor langt unna det er.
 - Tekstene sier «når du har flyttet til …» i stedet for «fra …»: planlegger og strømavtaler på Marked, ansatte og
   daglig leder under Folk, låst utstyr, låst forskning («Kommer i …»), søkere i garasjen og natt-tipset.
 - Målkortet på Verket heter «Mål: Støperi (nivå 3 av 5)», så «neste nivå» henger sammen med det spilleren ser.
+
+## B-061 Varselet om foringen åpner vedlikehold, og Anlegg viser utstyr du har råd til (2026-09-25)
+Status: gjelder
+Brukeren meldte at varselet om å bytte foring ikke førte til vedlikeholdskortet, og ville ha et merke på Anlegg
+når en oppgradering kan kjøpes.
+- Hintet «Foringen er nesten slitt gjennom» og varselet i produksjonslinja («Foringen er 84 % slitt. Se
+  vedlikehold →») åpner underfanen Anlegg og ruller til Vedlikehold-kortet. Kort med `id` har `scroll-margin-top`,
+  så de ikke havner under den faste toppen.
+- Underfanen Anlegg har et gult tall (`readyUpgrades` i `stations.ts`): utstyr på dette nivået som kan kjøpes nå og
+  som du har råd til.
+
+## B-062 Balanse hele veien: nybegynner i testspilleren, fagpoeng på stålverket og feller fjernet (2026-09-25)
+Status: gjelder (justerer B-052)
+Brukeren ba om en test av om spillet er for lett eller for vanskelig på de forskjellige nivåene.
+Nytt verktøy: `npx tsx src/game/balance.ts --vansker` viser per nivå hva som sperrer flyttingen, hvor ofte ny ovn
+eller støping venter på forskning, fagpoeng per døgn, minste kasse, resultat, leveranser og forsinkelser, for en
+flink spiller og en **nybegynner**. Nybegynneren ser innom hver tredje time, svarer riktig på halve quizen, tar bare
+kontrakter Salg viser grønt, bruker sikreste resept, forsker på det utstyrskortene sier mangler og følger
+«Neste store steg» og hintene. Den kjøres også i CI (storverket innen dag 240, ingen konkurs).
+Funn og tiltak:
+- **Fagpoeng på stålverket:** fagpoeng per døgn lå på 4–6 hele spillet, mens forskningen koster ti ganger mer.
+  Lysbueovnen (færre, større charger) ga bare en firedel av fagpoengene. Nå ganges fagpoeng per charge med
+  kvadratroten av chargestørrelsen over 5 t, og forskningen for nivå 4 koster ca. 25 % mindre (lysbue,
+  strengstøping og øsemetallurgi 150, forvarming og høyeffekt 120, skumslagg 150, valsing 180, eksport 300).
+  Nivå 0–3 er uendret (brukeren syntes fagpoengene kom for fort i støperiet).
+- **Bytte av støping:** å gå fra støpegods til blokker med støpegodskontrakter i køen ga en kjede av forsinkelser
+  som tok omdømmet fra 25 til 0. Nå kan støpingen ikke kjøpes før kontraktene på det gamle produktet er levert
+  (det som ligger på lager, teller med): «Lever først kontraktene på støpegods (X t igjen)».
+- **Tom kasse etter store kjøp:** planleggeren handler ikke på kreditt som standard, så et kjøp som tømte kassa
+  stoppet skrapinnkjøpet og verket til konkurs. Utstyr får en advarsel når det etter kjøpet er penger til under to
+  døgns drift, og hintet sier hva spilleren kan gjøre (gi planleggeren lov til kreditt, lån, selg fra lageret).
+- **Anslaget på Salg** regner med ukeleveransene fra rammeavtalene som kommer før fristen, og viser gult «Knapt»
+  når kontrakten tar mer enn 80 % av tida (`CONTRACT_MARGIN`). Før bommet selv forsiktige spillere på grønne
+  kontrakter.
+- **«Neste store steg»** på målkortet: den neste ovnen eller støpingen på nivået og hva som mangler (penger,
+  forskning eller levering). Nybegynneren brukte før pengene på småutstyr og sparte aldri til ovnen.
+Resultat: flink spiller 8 / 26 / 66 / 133 (før 8 / 26 / 66 / 159), nybegynner når storverket rundt dag 170, ingen
+konkurs. Penger og omdømme kommer nesten samtidig på hvert nivå.
+Ikke endret: på storverket tjener spilleren 10–12 mill. kr i døgnet og har lite å kjøpe, så de siste ca. 90 døgnene
+fram til vinnergrensen (1 mrd., B-027) er venting. Det er et spørsmål til brukeren (mer innhold eller lavere grense).

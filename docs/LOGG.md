@@ -5,6 +5,25 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 34 – 2026-09-25: foringsvarsel, merke på Anlegg og balanse
+
+**Brukeren ba om:** Varselet om å bytte foring skal gå til vedlikeholdskortet; Anlegg skal vise når en
+oppgradering kan kjøpes; test om spillet er for lett eller vanskelig på de forskjellige nivåene og gjør balansen bra.
+
+**Gjort:** B-061 (varsel åpner Vedlikehold, tall på Anlegg). B-062: ny `--vansker`-rapport og nybegynnerprofil i
+testspilleren (også i CI), flere fagpoeng for store charger og billigere forskning på stålverket, bytte av støping
+krever at gamle kontrakter er levert, advarsel når et kjøp tømmer kassa, hint om kreditt/lån når planleggeren ikke
+får kjøpt, anslaget på Salg regner med rammeavtaler og viser «Knapt», «Neste store steg» på målkortet.
+
+**Testet:** tsc, lint, validate, balanse (8 / 26 / 66 / 133, nybegynner storverket dag 131–198, exit 0).
+Playwright på iPhone-størrelse: varselet og hintet åpner Anlegg med Vedlikehold øverst, Anlegg-merket, målkortet,
+ingen konsollfeil, ingen horisontal scrolling.
+
+**Gjenstår:** storverket har lite å gjøre de siste ca. 90 døgnene før 1 mrd. – spør brukeren om mer innhold der
+eller lavere vinnergrense.
+
+---
+
 ## Økt 33 – 2026-09-25: nivåene forklart i teksten
 
 **Brukeren ba om:** «Fra støperiet» er ikke selvforklarende for en ny spiller.

@@ -130,17 +130,25 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
     if (c.id === "sandformer") continue;
     const owned = c.id === currentCasting.id;
     if (c.stage < currentCasting.stage && !owned) continue;
-    const reason = researchBlocker(g, c.id) ?? (g.cash < c.price ? "For lite penger" : null);
+    let reason = researchBlocker(g, c.id);
     let warning: string | undefined;
     if (!owned && c.product !== currentCasting.product) {
-      const stuck = g.contracts
+      const old = PRODUCTS[currentCasting.product].name.toLowerCase();
+      const remaining = g.contracts
         .filter((x) => x.status === "aktiv" && x.product === currentCasting.product)
         .reduce((a, x) => a + x.tonnes - x.delivered, 0);
+      const inStock = g.lots
+        .filter((l) => l.product === currentCasting.product && !l.second)
+        .reduce((a, l) => a + l.t, 0);
+      // Etter byttet kan det gamle produktet ikke lages. Kontrakter som ikke kan leveres fra lageret, ville gått
+      // over fristen og tatt med seg omdømmet, så de må leveres først (B-062)
+      const stuck = remaining - inStock;
+      if (!reason && stuck > 0.05) reason = `Lever først kontraktene på ${old} (${fmtT(stuck)} igjen)`;
       warning =
-        `Du går over fra ${PRODUCTS[currentCasting.product].name.toLowerCase()} til ${PRODUCTS[c.product].name.toLowerCase()}.` +
-        (stuck > 0 ? ` ${fmtT(stuck)} på aktive kontrakter kan da bare leveres fra lageret.` : "") +
+        `Du går over fra ${old} til ${PRODUCTS[c.product].name.toLowerCase()} og kan ikke lage ${old} etterpå. Ikke ta flere kontrakter på ${old} før byttet.` +
         " Produksjonen øker kraftig – ha penger til skrap og kunder som tar imot.";
     }
+    if (!reason && g.cash < c.price) reason = "For lite penger";
     out.push({
       id: c.id,
       kind: "casting",
@@ -173,7 +181,38 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
       locked: a.stage > g.stage,
     });
   }
+  // Et kjøp som tømmer kassa, stopper skrapinnkjøpet og dermed verket (B-062)
+  const recent = g.history.slice(-3);
+  const dailyCost = recent.length
+    ? recent.reduce(
+        (a, d) =>
+          a +
+          Object.entries(d.costs)
+            .filter(([k]) => k !== "investering" && k !== "bot")
+            .reduce((x, [, v]) => x + (v ?? 0), 0),
+        0,
+      ) / recent.length
+    : 0;
+  for (const o of out) {
+    if (o.owned || o.locked || dailyCost <= 0 || o.price < dailyCost) continue;
+    const left = (g.cash - o.price) / dailyCost;
+    if (left >= 2) continue;
+    const thin = `Etter kjøpet har du penger til drift i ${left < 1 ? "under ett døgn" : `bare ca. ${Math.floor(left)} døgn`}. Uten penger får du ikke kjøpt skrap, og verket stopper. Spar litt mer, eller ta opp lån under Forskning → Bank.`;
+    o.warning = o.warning ? `${o.warning} ${thin}` : thin;
+  }
   return out;
+}
+
+/**
+ * Det store neste steget på dette nivået: ny ovn eller støping som ikke er kjøpt, billigste først. Vises på
+ * målkortet, så en ny spiller vet hva som gir mer produksjon (B-062).
+ */
+export function keyUpgrade(g: GameState, options = upgradeOptions(g)): UpgradeOption | null {
+  return (
+    options
+      .filter((o) => (o.kind === "furnace" || o.kind === "casting") && !o.owned && !o.locked && o.stage <= g.stage)
+      .sort((a, b) => a.price - b.price)[0] ?? null
+  );
 }
 
 export function buyUpgrade(g: GameState, id: string): PurchaseResult {

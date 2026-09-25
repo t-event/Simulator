@@ -10,6 +10,7 @@ import {
   bonusCost,
   buyUpgrade,
   courseCost,
+  keyUpgrade,
   doResearch,
   giveBonus,
   hire,
@@ -21,12 +22,14 @@ import {
 } from "./actions";
 import { resolveDecision } from "./decisions";
 import { answerQuiz, QUIZ, quizAvailable } from "./quiz";
-import { hasResearch, researchOptions, scrapUnlocked } from "./research";
+import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
 import { CASTINGS, SCRAP_IDS, STAGES } from "./data";
 import {
   acceptAgreement,
   acceptContract,
+  agreementLoadUntil,
   advance,
+  CONTRACT_MARGIN,
   realisticDailyT,
   autoBuy,
   completeManual,
@@ -95,6 +98,41 @@ function cheapestRecipe(g: GameState, grade: GradeId): Recipe | null {
   return best;
 }
 
+/** Den sikreste resepten: minst forurensning, uansett pris (knappen «Sikrest») */
+function safestRecipe(g: GameState, grade: GradeId): Recipe | null {
+  const ok = PRESETS.filter(
+    (r) => SCRAP_IDS.every((id) => !r[id] || scrapUnlocked(g, id)) && expectedFor(g, r, grade).ok,
+  );
+  const tramp = (r: Recipe) => (r.rent ?? 0) + (r.rajern ?? 0);
+  return ok.sort((a, b) => tramp(b) - tramp(a))[0] ?? null;
+}
+
+/**
+ * Noterer én gang per døgn hva som sperrer: flyttingen til neste nivå (penger eller omdømme), og om ny ovn eller
+ * støping på dette nivået venter på forskning
+ */
+function noteWait(g: GameState, options: ReturnType<typeof upgradeOptions>): void {
+  const list = waits.get(g);
+  if (!list || list.at(-1)?.day === day(g)) return;
+  const move = options.find((o) => o.kind === "stage");
+  const on = !move
+    ? "ferdig"
+    : move.reason?.startsWith("Krever omdømme")
+      ? "omdømme"
+      : move.reason === "For lite penger"
+        ? "penger"
+        : "klar";
+  const research = options.some(
+    (o) =>
+      (o.kind === "furnace" || o.kind === "casting") &&
+      o.stage === g.stage &&
+      !o.owned &&
+      o.reason?.startsWith("Forsk fram"),
+  );
+  const fp = g.researchPoints + g.researched.reduce((a, id) => a + (RESEARCH.find((r) => r.id === id)?.cost ?? 0), 0);
+  list.push({ day: day(g), stage: g.stage, on, research, fp });
+}
+
 function applyRecipe(g: GameState, r: Recipe): void {
   for (const id of SCRAP_IDS) setRecipe(g, id, r[id] ?? 0);
 }
@@ -136,6 +174,15 @@ const RESEARCH_PRIORITY = [
 /** Spill der testspilleren venter med å bytte støping til kontraktene på det gamle produktet er levert */
 const switching = new WeakSet<GameState>();
 
+/**
+ * Nybegynner (B-062): en spiller som ser innom hver tredje time, svarer riktig på halve quizen, forsker på det
+ * billigste først, tar kontrakter litt optimistisk, bruker sikreste resept og kjøper utstyr uten plan.
+ */
+const novices = new WeakSet<GameState>();
+
+/** Hva testspilleren venter på per døgn (penger, omdømme, forskning), til --vansker */
+const waits = new WeakMap<GameState, { day: number; stage: number; on: string; research: boolean; fp: number }[]>();
+
 /** Testspilleren holder to murere per lysbueovn */
 const MASONS_BOT = 2;
 
@@ -165,8 +212,9 @@ function botHour(g: GameState): void {
     resolveDecision(g, safe[d.id] ?? 1);
   }
   // Folk: bonus når trivselen er lav, kurs til de minst erfarne når det er god råd (B-026)
-  if (g.workers.length && g.morale < 50 && g.cash > bonusCost(g) * 5) giveBonus(g);
-  if (g.stage >= 2 && g.cash > courseCost(g) * 40) {
+  const novice = novices.has(g);
+  if (!novice && g.workers.length && g.morale < 50 && g.cash > bonusCost(g) * 5) giveBonus(g);
+  if (!novice && g.stage >= 2 && g.cash > courseCost(g) * 40) {
     const w = g.workers.find((x) => x.skill < 2.5 && (x.courseDay === undefined || day(g) - x.courseDay >= 10));
     if (w) sendOnCourse(g, w.id);
   }
@@ -177,7 +225,13 @@ function botHour(g: GameState): void {
     const quiz = QUIZ[k];
     if (!quiz || !quizAvailable(g, k)) continue;
     const answers = quiz.map((q, i) =>
-      i === 0 || g.quizDone.length % 2 === 0 ? q.correct : (q.correct + 1) % q.options.length,
+      novice
+        ? i % 2 === 0
+          ? q.correct
+          : (q.correct + 1) % q.options.length
+        : i === 0 || g.quizDone.length % 2 === 0
+          ? q.correct
+          : (q.correct + 1) % q.options.length,
     );
     answerQuiz(g, k, answers);
   }
@@ -185,7 +239,21 @@ function botHour(g: GameState): void {
   // Forskning i prioritert rekkefølge, som en spiller som vet hva som gir mest: spar opp til det viktigste
   // Etter en radioaktiv kilde vil en fornuftig spiller ha strålingsportal (B-045)
   const priority = g.lastRadioDay !== undefined ? ["stralevern", ...RESEARCH_PRIORITY] : RESEARCH_PRIORITY;
-  for (const id of priority) {
+  // Nybegynneren forsker på det utstyrskortene sier mangler («Forsk fram: …»), ellers på det billigste som er klart
+  if (novice) {
+    const wanted = upgradeOptions(g)
+      .filter((o) => !o.owned && !o.locked && o.stage === g.stage && o.reason?.startsWith("Forsk fram"))
+      .map((o) => missingResearchFor(g, o.id)?.id);
+    const options = researchOptions(g);
+    const want = options.find((x) => wanted.includes(x.id));
+    const pick = want
+      ? want.available
+        ? want
+        : undefined
+      : options.filter((x) => x.available).sort((a, b) => a.cost - b.cost)[0];
+    if (pick) doResearch(g, pick.id);
+  }
+  for (const id of novice ? [] : priority) {
     const r = researchOptions(g).find((x) => x.id === id);
     if (!r || r.done || r.locked) continue;
     if (r.available) doResearch(g, r.id);
@@ -196,7 +264,7 @@ function botHour(g: GameState): void {
 
   // Foring: bestill ny foring før den blir farlig tynn (skjer ikke av seg selv, B-022)
   g.furnaces.forEach((f, i) => {
-    if (f.wear >= 0.88 && !f.relineRequested && g.minute >= f.downUntilMin) requestReline(g, i);
+    if (f.wear >= (novice ? 0.8 : 0.88) && !f.relineRequested && g.minute >= f.downUntilMin) requestReline(g, i);
   });
 
   // Kontrakter: ta de som kan lages og rekkes
@@ -207,6 +275,8 @@ function botHour(g: GameState): void {
     if (!stats.products.includes(offer.product)) continue;
     // Skal støpingen byttes til et nytt produkt, tas ikke flere kontrakter på det gamle
     if (switching.has(g) && offer.product === stats.casting.product) continue;
+    // Nybegynneren gjør som kortet sier: ingen nye kontrakter på det gamle produktet før byttet
+    if (novice && offer.product === stats.casting.product && keyUpgrade(g)?.reason?.startsWith("Lever først")) continue;
     // Med valseverket i drift går alle emner til armering
     if (stats.products.includes("armering") && offer.product !== "armering") continue;
     if (!cheapestRecipe(g, offer.grade)) continue;
@@ -220,7 +290,11 @@ function botHour(g: GameState): void {
     const recent = g.history.slice(-3);
     const produced = recent.length ? recent.reduce((a, d) => a + d.producedT, 0) / recent.length : stats.dailyProductT;
     const capacity = Math.min(stats.dailyProductT, Math.max(produced, stats.dailyProductT * 0.5));
-    if (committed + offer.tonnes > capacity * days * 0.7) continue;
+    if (novice) {
+      // Nybegynneren stoler på Salg: tar kontrakten når anslaget der er grønt
+      const need = committed + agreementLoadUntil(g, offer.deadlineDay) + offer.tonnes;
+      if (need / realisticDailyT(g, stats) > (offer.deadlineDay - today + 1) * CONTRACT_MARGIN) continue;
+    } else if (committed + offer.tonnes > capacity * days * 0.7) continue;
     acceptContract(g, offer.id);
     committed += offer.tonnes;
     activeGrades.add(offer.grade);
@@ -233,16 +307,19 @@ function botHour(g: GameState): void {
     if ((a.grade === "lavkarbon" || a.grade === "armering") && stats.furnace.arc && !g.owned.includes("oseovn"))
       continue;
     if (activeGrades.size > 0 && !activeGrades.has(a.grade)) continue;
-    if (a.weeklyT > realisticDailyT(g, stats) * 7 * 0.35) continue;
+    // Nybegynneren tar avtaler som Salg viser grønt (under 40 % av en ukes produksjon)
+    if (a.weeklyT > realisticDailyT(g, stats) * 7 * (novice ? 0.4 : 0.35)) continue;
     acceptAgreement(g, a.id);
     activeGrades.add(a.grade);
   }
   const grade: GradeId = activeGrades.size ? [...activeGrades][0] : "standard";
   setTargetGrade(g, grade);
-  const recipe = cheapestRecipe(g, grade) ?? PRESETS[0];
+  const recipe = (novice ? safestRecipe(g, grade) : cheapestRecipe(g, grade)) ?? PRESETS[0];
   applyRecipe(g, recipe);
 
   g.settings.autoBuy = true;
+  // Nybegynneren gjør det hintet sier når planleggeren ikke får kjøpt skrap fordi kassa er tom
+  if (novice && g.autoBuyNote?.includes("kassekreditten")) g.settings.autoBuyCredit = true;
   // Uten planlegger kjøper testspilleren skrap selv, på samme måte som planleggeren ville gjort
   // Uten planlegger kjøper testspilleren selv, og strekker seg på kassekreditten når det trengs
   if (!hasPlanner(g) || !hasResearch(g, "innkjop")) autoBuy(g, stats, { credit: true, cap: null });
@@ -312,9 +389,41 @@ function botHour(g: GameState): void {
   ];
   const order = [...(g.lastRadioDay !== undefined ? ["portal"] : []), ...perStage[g.stage], `stage${g.stage + 1}`];
   const options = upgradeOptions(g);
+  noteWait(g, options);
+  if (novice) {
+    // Nybegynneren flytter når det går, ellers kjøper den det billigste den har råd til, uten plan
+    // …men sparer til «Neste store steg» på målkortet når det bare er pengene som mangler
+    const move = options.find((o) => o.kind === "stage" && o.available);
+    const key = keyUpgrade(g, options);
+    const keyBuy =
+      key?.available && g.cash - key.price > reserve / 2 && !key.warning?.includes("penger til drift")
+        ? key
+        : undefined;
+    const saving = !!key && (key.reason === "For lite penger" || (key.available && !keyBuy));
+    const buy =
+      move ??
+      keyBuy ??
+      (saving ? [] : options)
+        .filter(
+          (o) =>
+            o.available &&
+            !o.owned &&
+            o.kind !== "stage" &&
+            g.cash - o.price > reserve / 2 &&
+            !o.warning?.includes("penger til drift"),
+        )
+        .sort((a, b) => a.price - b.price)[0];
+    if (buy) buyUpgrade(g, buy.id);
+    return;
+  }
   for (const id of order) {
     const o = options.find((x) => x.id === id);
     if (!o || o.owned || o.locked) continue;
+    // Ny støping med et annet produkt: lever ferdig kontraktene på det gamle først (B-062)
+    if (o.reason?.startsWith("Lever først")) {
+      switching.add(g);
+      break;
+    }
     if (!o.available && o.reason !== "For lite penger") continue;
     // Store investeringer krever en buffer til skrap og lønn mens produksjonen tar seg opp
     if (g.cash - o.price * (o.price > 1_000_000 ? 1.3 : 1) < reserve) break;
@@ -339,13 +448,29 @@ interface RunSummary {
   final: GameState;
 }
 
-function run(seed: number, days: number, verbose: boolean): RunSummary {
+function run(seed: number, days: number, verbose: boolean, novice = process.argv.includes("--nybegynner")): RunSummary {
   const g = newGame(seed);
+  if (novice) novices.add(g);
   const stageDays: (number | null)[] = [1, null, null, null, null];
   let lastDay = 0;
+  let hour = 0;
   while (day(g) <= days && !g.gameOver) {
-    botHour(g);
+    if (!novice || hour++ % 3 === 0 || g.pendingDecision) botHour(g);
+    const repBefore = g.reputation;
+    const logBefore = g.log.at(-1)?.id ?? 0;
     advance(g, 60);
+    if (process.argv.includes("--repdrop") && g.reputation < repBefore - 0.5)
+      console.log(
+        "REP",
+        day(g),
+        repBefore.toFixed(1),
+        "->",
+        g.reputation.toFixed(1),
+        g.log
+          .filter((e) => e.id > logBefore)
+          .map((e) => e.text.slice(0, 90))
+          .join(" || "),
+      );
     if (g.stage > 0 && stageDays[g.stage] === null) stageDays[g.stage] = day(g);
     if (verbose && day(g) !== lastDay && (day(g) % 5 === 0 || day(g) < 10 || process.argv.includes("--finance"))) {
       lastDay = day(g);
@@ -465,9 +590,12 @@ if (process.argv.includes("--sperrer")) {
 if (process.argv.includes("--replog")) {
   // Skriver ut alt som har påvirket omdømmet, for feilsøking av balansen
   const g = newGame(Number(process.argv[process.argv.indexOf("--replog") + 1]));
+  const novice = process.argv.includes("--nybegynner");
+  if (novice) novices.add(g);
   let seen = 0;
+  let hour = 0;
   while (day(g) <= 200) {
-    botHour(g);
+    if (!novice || hour++ % 3 === 0 || g.pendingDecision) botHour(g);
     advance(g, 60);
     for (const e of g.log) {
       if (e.id <= seen) continue;
@@ -477,10 +605,117 @@ if (process.argv.includes("--replog")) {
   }
   process.exit?.(0);
 }
+if (process.argv.includes("--vansker")) {
+  // Hvor lett eller vanskelig hvert nivå er, for en flink spiller og en nybegynner (B-062)
+  const pct = (n: number, of: number) => `${String(Math.round((100 * n) / Math.max(1, of))).padStart(3)} %`;
+  const med = (xs: number[]) => (xs.length ? [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)] : NaN);
+  const fmt = (n: number) => (Number.isFinite(n) ? Math.round(n).toLocaleString("nb-NO") : "-");
+  for (const profile of ["flink", "nybegynner"] as const) {
+    type Row = {
+      days: number;
+      wait: Record<string, number>;
+      research: number;
+      fp: number;
+      minCash: number;
+      redDays: number;
+      profit: number[];
+      done: number;
+      late: number;
+      repGain: number;
+    };
+    const rows: Row[][] = [[], [], [], [], []];
+    const wins: number[] = [];
+    let bankrupt = 0;
+    for (const seed of [1, 2, 3, 4, 5, 6]) {
+      const g = newGame(seed);
+      if (profile === "nybegynner") novices.add(g);
+      waits.set(g, []);
+      const cur: Row[] = [0, 1, 2, 3, 4].map(() => ({
+        days: 0,
+        wait: {},
+        research: 0,
+        fp: 0,
+        minCash: Infinity,
+        redDays: 0,
+        profit: [],
+        done: 0,
+        late: 0,
+        repGain: 0,
+      }));
+      let lastDay = 0;
+      let hour = 0;
+      while (day(g) <= 330 && !g.gameOver && !g.won) {
+        if (profile === "flink" || hour % 3 === 0 || g.pendingDecision) botHour(g);
+        const before = { done: g.totals.contractsDone, rep: g.reputation, stage: g.stage };
+        const lateBefore = g.contracts.filter((c) => c.status === "misligholdt").length;
+        advance(g, 60);
+        hour++;
+        const r = cur[g.stage];
+        if (g.stage === before.stage) {
+          r.done += g.totals.contractsDone - before.done;
+          r.late += Math.max(0, g.contracts.filter((c) => c.status === "misligholdt").length - lateBefore);
+          if (g.reputation > before.rep) r.repGain += g.reputation - before.rep;
+        }
+        r.minCash = Math.min(r.minCash, g.cash);
+        if (day(g) !== lastDay) {
+          lastDay = day(g);
+          r.days++;
+          if (g.cash < 0) r.redDays++;
+          const y = g.history.at(-1);
+          if (y) {
+            const inc = Object.values(y.income).reduce((a, b) => a + (b ?? 0), 0);
+            const cost = Object.entries(y.costs)
+              .filter(([k]) => k !== "investering")
+              .reduce((a, [, b]) => a + (b ?? 0), 0);
+            r.profit.push(inc - cost);
+          }
+        }
+      }
+      const list = waits.get(g) ?? [];
+      list.forEach((w, i) => {
+        const r = cur[w.stage];
+        r.wait[w.on] = (r.wait[w.on] ?? 0) + 1;
+        if (w.research) r.research++;
+        if (i > 0) r.fp += w.fp - list[i - 1].fp;
+      });
+      cur.forEach((r, i) => r.days && rows[i].push(r));
+      if (g.won) wins.push(day(g));
+      if (g.gameOver) bankrupt++;
+    }
+    console.log(`\n${profile.toUpperCase()}: ${bankrupt} av 6 konkurs, vant (1 mrd.) på dag ${wins.join(", ") || "-"}`);
+    console.log(
+      "nivå       døgn | flytting sperres av: omdømme penger  klar | ny ovn/støping venter på forskning | FP/døgn | minste kasse  døgn i minus  resultat/døgn | levert/10 d  for sent/10 d  omdømme +/10 d",
+    );
+    rows.forEach((rs, i) => {
+      if (!rs.length) return;
+      const d = med(rs.map((r) => r.days));
+      const share = (f: (r: Row) => number) => pct(med(rs.map((r) => f(r) / Math.max(1, r.days))) * 100, 100);
+      console.log(
+        `${STAGES[i].name.padEnd(9)} ${String(d).padStart(5)} |                    ${share((r) => r.wait["omdømme"] ?? 0)}  ${share((r) => r.wait.penger ?? 0)} ${share((r) => r.wait.klar ?? 0)} |                              ${share((r) => r.research)} | ${med(
+          rs.map((r) => r.fp / r.days),
+        )
+          .toFixed(1)
+          .padStart(7)} | ` +
+          `${fmt(med(rs.map((r) => r.minCash))).padStart(12)}  ${String(med(rs.map((r) => r.redDays))).padStart(12)}  ${fmt(med(rs.map((r) => med(r.profit)))).padStart(13)} | ${med(
+            rs.map((r) => (10 * r.done) / r.days),
+          )
+            .toFixed(1)
+            .padStart(11)}  ${med(rs.map((r) => (10 * r.late) / r.days))
+            .toFixed(1)
+            .padStart(12)}  ${med(rs.map((r) => (10 * r.repGain) / r.days))
+            .toFixed(1)
+            .padStart(14)}`,
+      );
+    });
+  }
+  process.exit?.(0);
+}
 const seeds = process.argv.includes("--seed")
   ? [Number(process.argv[process.argv.indexOf("--seed") + 1])]
   : [1, 2, 3, 4, 5, 6];
 const DAYS = 240;
+const NOVICE_DAYS = 260;
+const NOVICE_MAX_DAY = 240;
 const targets = [
   { stage: 1, min: 7, max: 20 },
   { stage: 2, min: 20, max: 50 },
@@ -515,6 +750,18 @@ for (const target of targets) {
 if (results.some((r) => r.bankrupt)) {
   failed = true;
   console.log("AVVIK: testspilleren gikk konkurs");
+}
+// Nybegynneren (B-062) følger rådene i spillet. Den skal ikke gå konkurs, og skal nå storverket innen rimelig tid
+if (!process.argv.includes("--seed") && !process.argv.includes("--nybegynner")) {
+  const novice = [1, 2, 3, 4].map((seed) => run(seed, NOVICE_DAYS, false, true));
+  const days = novice.map((r) => r.stageDays[4] ?? Infinity).sort((a, b) => a - b);
+  const median = (days[1] + days[2]) / 2;
+  const broke = novice.filter((r) => r.bankrupt).length;
+  const ok = broke === 0 && median <= NOVICE_MAX_DAY;
+  if (!ok) failed = true;
+  console.log(
+    `Nybegynner: storverket dag ${novice.map((r) => r.stageDays[4] ?? "-").join(" / ")} (median ${Number.isFinite(median) ? median : "ikke nådd"}, mål høyst ${NOVICE_MAX_DAY}), ${broke} konkurs ${ok ? "OK" : "AVVIK"}`,
+  );
 }
 // Kontrollrommet: den enkle styringen skal kunne kjøres av en nybegynner som bare
 // følger rådene på skjermen, og en slurvete kjøring skal gi dårlig karakter

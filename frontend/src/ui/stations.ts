@@ -40,3 +40,8 @@ function stationOf(o: UpgradeOption): Station | null {
 export function stationOptions(g: GameState, station: Station): UpgradeOption[] {
   return upgradeOptions(g).filter((o) => stationOf(o) === station && o.stage <= g.stage + 1);
 }
+
+/** Utstyr i anlegget som kan kjøpes nå og som du har råd til – vises som merke på Anlegg (B-061) */
+export function readyUpgrades(g: GameState): number {
+  return upgradeOptions(g).filter((o) => stationOf(o) !== null && o.available && o.stage <= g.stage).length;
+}

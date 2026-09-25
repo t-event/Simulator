@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { requestManual, requestReline, setFurnaceGrade, setTargetGrade, upgradeOptions } from "../game/actions";
 import { Maintenance } from "./Maintenance";
 import { auto, researchOptions } from "../game/research";
@@ -25,7 +25,7 @@ import { PlantScene } from "./PlantScene";
 import { SceneBubbles } from "./SceneBubbles";
 import { StageCard, StationButton, UpgradeSheet } from "./Upgrades";
 import { AutoToggle } from "./AutoToggle";
-import type { Station } from "./stations";
+import { readyUpgrades, type Station } from "./stations";
 import type { View } from "./views";
 
 interface Props {
@@ -41,6 +41,8 @@ interface Hint {
   view?: View;
   /** Underfane i visningen, f.eks. lageret under Salg */
   sub?: string;
+  /** Åpner vedlikeholdskortet under Anlegg her på Verket */
+  maintenance?: boolean;
 }
 
 function hints(g: GameState, stats: PlantStats): Hint[] {
@@ -74,7 +76,10 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
       view: "folk",
     });
   if (g.furnaces.some((f) => f.wear > 0.8 && !f.relineRequested))
-    out.push({ text: "Foringen er nesten slitt gjennom. Trykk «Bytt foring» her på Verket før den brenner gjennom." });
+    out.push({
+      text: "Foringen er nesten slitt gjennom. Trykk her og bytt den under Vedlikehold før den brenner gjennom.",
+      maintenance: true,
+    });
   // Uten ordreplanlegging bytter ikke ovnen kvalitet selv (B-054)
   const first = currentOrder(g);
   if (
@@ -204,12 +209,14 @@ function CompactChain({
   stats,
   act,
   onOpen,
+  onMaintenance,
   go,
 }: {
   g: GameState;
   stats: PlantStats;
   act: GameApi["act"];
   onOpen: () => void;
+  onMaintenance: () => void;
   go: (v: View, sub?: string) => void;
 }) {
   const castHead = g.castQueue[0];
@@ -253,9 +260,9 @@ function CompactChain({
       </div>
       {worn.map(({ f, i }) => (
         <div key={i} className="g-note g-warn g-mini-alert">
-          <span>
-            Foringen{g.furnaces.length > 1 ? ` i ovn ${i + 1}` : ""} er {fmtPct(f.wear)} slitt.
-          </span>
+          <button className="g-link" onClick={onMaintenance}>
+            Foringen{g.furnaces.length > 1 ? ` i ovn ${i + 1}` : ""} er {fmtPct(f.wear)} slitt. Se vedlikehold →
+          </button>
           <button className="g-small" onClick={() => act((gg) => requestReline(gg, i))}>
             Bytt foring
           </button>
@@ -313,6 +320,17 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
   const y = g.history[g.history.length - 1];
   const sum = (o: Partial<Record<string, number>>) => Object.values(o).reduce<number>((a, b) => a + (b ?? 0), 0);
   const tips = hints(g, stats);
+  const upgradesReady = readyUpgrades(g);
+  // Varsel om foringen åpner Anlegg og ruller ned til vedlikeholdskortet
+  const [scrollTo, setScrollTo] = useState(0);
+  useEffect(() => {
+    if (scrollTo) document.getElementById("vedlikehold")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [scrollTo]);
+  const openMaintenance = () => {
+    setTab("anlegg");
+    setScrollTo((n) => n + 1);
+  };
+  const runHint = (t: Hint) => (t.maintenance ? openMaintenance() : t.view && go(t.view, t.sub));
   const recent = g.log.slice(-8).reverse();
 
   return (
@@ -335,8 +353,8 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
 
         {tips.length > 0 && (
           <div className="g-cta-wrap">
-            {tips[0].view ? (
-              <button className="g-primary g-cta" onClick={() => go(tips[0].view!, tips[0].sub)}>
+            {tips[0].view || tips[0].maintenance ? (
+              <button className="g-primary g-cta" onClick={() => runHint(tips[0])}>
                 {tips[0].text}
               </button>
             ) : (
@@ -346,8 +364,8 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
               <ul className="g-more-hints">
                 {tips.slice(1).map((t) => (
                   <li key={t.text}>
-                    {t.view ? (
-                      <button className="g-link" onClick={() => go(t.view!, t.sub)}>
+                    {t.view || t.maintenance ? (
+                      <button className="g-link" onClick={() => runHint(t)}>
                         {t.text}
                       </button>
                     ) : (
@@ -370,6 +388,11 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
               onClick={() => setTab(t.id)}
             >
               {t.label}
+              {t.id === "anlegg" && upgradesReady > 0 && (
+                <span className="g-badge" aria-label={`${upgradesReady} utstyr du har råd til`}>
+                  {upgradesReady}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -378,7 +401,14 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
       {tab === "oversikt" && (
         <>
           <div className="g-col-wide">
-            <CompactChain g={g} stats={stats} act={act} onOpen={() => setTab("anlegg")} go={go} />
+            <CompactChain
+              g={g}
+              stats={stats}
+              act={act}
+              onOpen={() => setTab("anlegg")}
+              onMaintenance={openMaintenance}
+              go={go}
+            />
             <Card title="Produksjon nå">
               {split ? (
                 <ul className="g-furnace-grades">
@@ -587,6 +617,7 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
               </div>
             </Card>
             <Maintenance
+              id="vedlikehold"
               g={g}
               stats={stats}
               act={act}
