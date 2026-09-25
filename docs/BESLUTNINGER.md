@@ -870,3 +870,16 @@ varselet om oppsigelse burde si hvilken stilling personen hadde.
   knapperaden hadde én og samme høyde hele tida på både iPhone SE og iPhone 13.
 - Oppsigelser (lav trivsel, lønnskrav) og skader sier navn og stilling, f.eks. «Kari Berg (støper) har sagt opp»,
   og at man ansetter en ny under Folk → Ansett (`workerLabel`, `quitText` i `engine.ts`).
+
+## B-067 Hint når en kvalitet trenger skrap som ikke er forsket fram (2026-09-25)
+Status: gjelder
+En spiller forsto ikke at han måtte forske fram en ny skraptype for å lage høykarbon. Reseptguiden (B-058) sier
+det, men bare én gang når nivået skiftes.
+Beslutning: `scrapResearchFor` i `recipe.ts` finner den billigste skrapforskningen som gjør en kvalitet mulig når
+ingen blanding av åpent skrap holder kravet (mellomlagret; under 10 ms uten). Rådet («Høykarbon kan ikke lages med
+skrapet du har tilgang til – det trengs rent nyskrap. Forsk fram «Rent nyskrap» under Forskning.») vises
+- som hint på Verket for kvaliteter ovnen kjører mot eller har aktive kontrakter på,
+- på Marked → Resept i stedet for «Ingen blanding … holder kravet»,
+- på forespørsler under Salg i stedet for «Resepten gir …».
+«Rent nyskrap» i forskningen sier nå at det trengs til høykarbon, premium og lavkarbon (testet: uten det kan de
+ikke lages på noe nivå med induksjonsovn).

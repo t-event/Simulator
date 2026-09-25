@@ -156,8 +156,9 @@ export const RESEARCH: Research[] = [
     stage: 1,
     cost: 10,
     scrap: ["rent"],
-    description: "Avkapp fra fabrikker er rent og kjent, men koster mer. Det trengs til kvaliteter med strenge krav.",
-    effect: "Du kan kjøpe rent nyskrap",
+    description:
+      "Avkapp fra fabrikker er rent og kjent, men koster mer. Uten det kan du ikke lage høykarbon, premium eller lavkarbon – de har strenge krav til fosfor og kobber.",
+    effect: "Du kan kjøpe rent nyskrap (trengs til høykarbon, premium og lavkarbon)",
   },
   {
     id: "vedlikeholdsplan",

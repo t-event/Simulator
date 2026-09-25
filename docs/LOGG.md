@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 39 – 2026-09-25: hint om skrapforskning for nye kvaliteter
+
+**Brukeren ba om:** En spiller skjønte ikke at han måtte forske fram flere skraptyper for å lage høykarbon – det
+bør være et hint.
+
+**Gjort (B-067):** Hint på Verket, råd på Resept og på forespørsler under Salg når kvaliteten trenger skrap som
+ikke er forsket fram. Beskrivelsen av «Rent nyskrap» nevner kvalitetene.
+
+**Testet:** tsc, lint, balanse (exit 0), headless-test av hvilke kvaliteter som trenger hvilken forskning på nivå
+1–3, Playwright på iPhone-størrelse (hint på Verket og Resept, ingen konsollfeil).
+
+**Gjenstår:** spørsmålet om storverket (mer innhold eller lavere vinnergrense).
+
+---
+
 ## Økt 38 – 2026-09-25: Oversikt som hopper, og stilling i oppsigelser
 
 **Brukeren ba om:** Oversikt hoppet opp og ned når «Venter på» kom under ovnen; oppsigelsesvarselet skal si
