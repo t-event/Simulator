@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Nøkler til Supabase ligger lokalt her, aldri i git (B-126)
+.env
+.env.*
+!.env.example
