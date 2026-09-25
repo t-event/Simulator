@@ -5,6 +5,25 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 62 – 2026-09-25: salgsdirektør i konsernet
+
+**Brukeren ba om:** Når konsernet er åpnet, skal man kunne ansette noen som tar kontraktene og avtalene automatisk.
+Det skal være meget dyrt.
+
+**Gjort:** B-117. Salgsdirektør under Verket → Konsern. `assessOffer` er felles for Salg og direktøren.
+
+**Testet:**
+- tsc, lint, `npm test` (ny test for direktøren), bygg, balanse.
+- Skript: 30 døgn med og uten direktør på tre lagrede storverk.
+- Playwright på iPhone 13:
+  - en gammel lagring uten direktørfeltet åpner uten feil
+  - ansettelse fra Konsern-fanen virker, og merknaden vises på Salg
+  - ingen horisontal scrolling
+
+**Gjenstår:** Ingenting.
+
+---
+
 ## Økt 61 – 2026-09-25: egen plass for varslene
 
 **Brukeren ba om:** Varslene bør ha en egen plass. De kommer i veien for å signere kontrakter og kjøpe ting, så man

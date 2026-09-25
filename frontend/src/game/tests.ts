@@ -5,12 +5,17 @@
 import { scheduleCastingSwitch } from "./actions";
 import { CHALLENGES, checkChallenges } from "./challenges";
 import { ADDONS, CASTINGS, FURNACES, WIN_CASH } from "./data";
-import { advance, checkWin, fmtKr, log, newGame } from "./engine";
+import { advance, assessOffer, checkWin, fmtKr, log, newGame } from "./engine";
 import { logTopic, showToast, unseenCount } from "./inbox";
 import { KNOWLEDGE } from "./knowledge";
 import {
   buySister,
   checkKonsernUnlock,
+  DIRECTOR_HIRE,
+  DIRECTOR_PER_DAY,
+  directorHour,
+  fireDirector,
+  hireDirector,
   KONSERN_UNLOCK_EQUITY,
   konsernDay,
   konsernEquity,
@@ -82,6 +87,32 @@ test("Konsernet: åpner seg på storverket, datterverk gir overskudd og teller m
   p.downUntilDay = 0;
   for (let i = 0; i < 20; i++) konsernDay(g);
   assert((g.today.income.konsern ?? 0) > income, "datterverket ga ikke overskudd");
+});
+
+test("Salgsdirektøren: meget dyr, signerer bare trygge forespørsler, og lønna trekkes hvert døgn", () => {
+  const g = newGame(1);
+  g.cash = 1_000_000_000;
+  assert(!hireDirector(g).ok, "kunne ansettes før konsernet var åpnet");
+  g.konsern.unlocked = true;
+  assert(hireDirector(g).ok && g.cash === 1_000_000_000 - DIRECTOR_HIRE, "feil rekrutteringskostnad");
+  const stats = computePlantStats(g);
+  const safe = g.contracts
+    .filter((c) => c.status === "tilbud")
+    .filter((c) => {
+      const a = assessOffer(g, stats, c);
+      return a.canMake && a.recipeOk && !a.tight && !a.narrow;
+    }).length;
+  directorHour(g);
+  const signed = g.contracts.filter((c) => c.status === "aktiv").length;
+  assert(signed <= safe && g.konsern.director!.contracts === signed, `signerte ${signed}, trygge ${safe}`);
+  for (const c of g.contracts.filter((x) => x.status === "aktiv")) {
+    const a = assessOffer(g, stats, { ...c, status: "tilbud" }, 0);
+    assert(a.canMake && a.recipeOk, `signerte en kontrakt resepten ikke holder: ${c.grade}`);
+  }
+  const before = g.today.costs.lonn ?? 0;
+  konsernDay(g);
+  assert((g.today.costs.lonn ?? 0) - before === DIRECTOR_PER_DAY, "lønna ble ikke trukket");
+  assert(fireDirector(g).ok && g.konsern.director === null, "kunne ikke si opp");
 });
 
 test("Nytt spill+ gir bonus, vanlig nytt spill gjør det ikke", () => {

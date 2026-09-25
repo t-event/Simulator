@@ -1,7 +1,7 @@
 /**
  * Det spilleren kan gjøre: bygge ut, kjøpe utstyr, ansette, låne og styre produksjonen.
  */
-import { checkKonsernUnlock } from "./konsern";
+import { checkKonsernUnlock, directorHour } from "./konsern";
 import { ADDONS, CASTINGS, FURNACES, GRADES, PRODUCTS, ROLES, SCRAP_IDS, STAGES, stageRef, type Addon } from "./data";
 import {
   addCost,
@@ -827,6 +827,7 @@ export function hireTemps(g: GameState, days: number | null): PurchaseResult {
 /** Hver time: planlagt bytte av støping (B-102) og om konsernet kan åpnes (B-106) */
 function hourlyActions(g: GameState): void {
   runScheduledSwitch(g);
+  directorHour(g);
   if (g.stage >= 4 && !g.konsern.unlocked) {
     const remaining = upgradeOptions(g).filter((o) => o.stage === 4 && !o.owned && o.kind !== "stage").length;
     checkKonsernUnlock(g, remaining);

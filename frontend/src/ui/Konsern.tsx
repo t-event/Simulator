@@ -1,7 +1,13 @@
+import { useState } from "react";
 import { WIN_CASH } from "../game/data";
 import {
   buyShared,
   buySister,
+  DIRECTOR_AGREEMENT_SHARE,
+  DIRECTOR_HIRE,
+  DIRECTOR_PER_DAY,
+  fireDirector,
+  hireDirector,
   KONSERN_SHARED,
   konsernEquity,
   konsernValue,
@@ -20,6 +26,70 @@ import type { GameApi } from "../game/useGame";
 import { buzz } from "./haptics";
 import { Bar, Card, Stat } from "./common";
 import { fmtKr } from "./format";
+
+/** Salgsdirektøren (B-117): signerer kontrakter og rammeavtaler selv – meget dyrt */
+function DirectorCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
+  const d = g.konsern.director;
+  const [confirm, setConfirm] = useState(false);
+  return (
+    <Card title="Salgsdirektør">
+      <p className="g-muted">
+        Salgsdirektøren signerer forespørslene verket trygt rekker og som resepten holder, mest verdifulle først – og
+        rammeavtaler så lenge de til sammen tar under {Math.round(DIRECTOR_AGREEMENT_SHARE * 100)} % av ukeproduksjonen.
+        Resten får ligge under Salg, så du kan ta dem selv.
+      </p>
+      {d ? (
+        <>
+          <p>
+            Ansatt dag {d.hiredDay}. Har signert {d.contracts} {d.contracts === 1 ? "kontrakt" : "kontrakter"} og{" "}
+            {d.agreements} {d.agreements === 1 ? "rammeavtale" : "rammeavtaler"}. Lønn {fmtKr(DIRECTOR_PER_DAY)} per
+            døgn.
+          </p>
+          <label className="g-toggle">
+            <input
+              type="checkbox"
+              checked={d.agreementsOn}
+              onChange={(e) =>
+                act((gg) => void (gg.konsern.director && (gg.konsern.director.agreementsOn = e.target.checked)))
+              }
+            />
+            <span>Ta også rammeavtaler</span>
+          </label>
+          {confirm ? (
+            <div className="g-row">
+              <button className="g-danger g-small" onClick={() => act((gg) => fireDirector(gg))}>
+                Ja, si opp
+              </button>
+              <button className="g-small" onClick={() => setConfirm(false)}>
+                Avbryt
+              </button>
+            </div>
+          ) : (
+            <button className="g-small" onClick={() => setConfirm(true)}>
+              Si opp salgsdirektøren
+            </button>
+          )}
+        </>
+      ) : (
+        <>
+          <p className="g-note">
+            Meget dyrt: {fmtKr(DIRECTOR_HIRE)} i rekruttering og {fmtKr(DIRECTOR_PER_DAY)} i lønn per døgn.
+          </p>
+          <button
+            className="g-primary g-small"
+            disabled={g.cash < DIRECTOR_HIRE}
+            onClick={() => {
+              act((gg) => hireDirector(gg));
+              buzz(20);
+            }}
+          >
+            Ansett salgsdirektør
+          </button>
+        </>
+      )}
+    </Card>
+  );
+}
 
 /** Verket → Konsern (B-106): datterverk, modernisering og felles funksjoner */
 export function KonsernTab({ g, act }: { g: GameState; act: GameApi["act"] }) {
@@ -121,6 +191,7 @@ export function KonsernTab({ g, act }: { g: GameState; act: GameApi["act"] }) {
             );
           })}
         </Card>
+        <DirectorCard g={g} act={act} />
         <Card title="Felles for konsernet">
           {(Object.keys(KONSERN_SHARED) as SharedId[]).map((id) => {
             const spec = KONSERN_SHARED[id];

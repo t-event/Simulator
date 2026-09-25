@@ -3,8 +3,21 @@
  * som svinger med markedet og av og til stopper opp. Sluttmålet er 10 mrd. i konsernverdi: egenkapital pluss
  * verdien av datterverkene.
  */
-import { addCost, addIncome, fmtKr, log } from "./engine";
-import { day } from "./plant";
+import {
+  acceptAgreement,
+  acceptContract,
+  addCost,
+  agreementLoadUntil,
+  addIncome,
+  assessOffer,
+  committedT,
+  fmtKr,
+  log,
+  realisticDailyT,
+  recipeEstimate,
+} from "./engine";
+import { computePlantStats, day, gradeRecipe } from "./plant";
+import { auto } from "./research";
 import { chance, randInt } from "./random";
 import type { GameState, SisterPlant, SisterType } from "./types";
 
@@ -145,8 +158,91 @@ export function buyShared(g: GameState, id: SharedId): { ok: boolean; message: s
   return { ok: true, message: `${spec.name} etablert.` };
 }
 
-/** Hvert døgn: overskuddet fra datterverkene, og av og til en stans (B-106) */
+// ------------------------------------------------------------------ //
+// Salgsdirektøren (B-117)
+// ------------------------------------------------------------------ //
+/** Rekruttering og lønn: meget dyrt, med vilje – det skal koste å slippe salgsarbeidet */
+export const DIRECTOR_HIRE = 250_000_000;
+export const DIRECTOR_PER_DAY = 4_000_000;
+/** Rammeavtalene skal ikke ta mer enn dette av ukeproduksjonen til sammen (samme grense som «gult» på Salg, B-103) */
+export const DIRECTOR_AGREEMENT_SHARE = 0.5;
+/**
+ * Salgsdirektøren er forsiktigere enn «trygg» på Salg: den regner med det dårligste døgnet den siste uka (en
+ * stans eller et havari kan komme igjen) og vil ha minst 30 % av tida til fristen til overs.
+ */
+export const DIRECTOR_MARGIN = 0.7;
+
+/** Tonn per døgn salgsdirektøren regner med: det dårligste av de siste sju døgnene med produksjon */
+export function directorDailyT(g: GameState, stats: ReturnType<typeof computePlantStats>): number {
+  const recent = g.history
+    .slice(-7)
+    .map((d) => d.producedT)
+    .filter((t) => t > 0);
+  const worst = recent.length ? Math.min(...recent) : stats.dailyProductT * 0.6;
+  return Math.min(realisticDailyT(g, stats), worst);
+}
+
+export function hireDirector(g: GameState): { ok: boolean; message: string } {
+  if (!g.konsern.unlocked) return { ok: false, message: "Konsernet er ikke åpnet ennå." };
+  if (g.konsern.director) return { ok: false, message: "Du har allerede en salgsdirektør." };
+  if (g.cash < DIRECTOR_HIRE) return { ok: false, message: "For lite penger" };
+  addCost(g, "lonn", DIRECTOR_HIRE);
+  g.konsern.director = { hiredDay: day(g), contracts: 0, agreements: 0, agreementsOn: true };
+  log(
+    g,
+    `Konsernet har ansatt en salgsdirektør (${fmtKr(DIRECTOR_HIRE)} i rekruttering, ${fmtKr(DIRECTOR_PER_DAY)} per døgn). Kontraktene som verket rekker, signeres nå av seg selv.`,
+    "good",
+  );
+  return { ok: true, message: "Salgsdirektøren er ansatt." };
+}
+
+export function fireDirector(g: GameState): { ok: boolean; message: string } {
+  if (!g.konsern.director) return { ok: false, message: "Du har ingen salgsdirektør." };
+  g.konsern.director = null;
+  log(g, "Salgsdirektøren har sluttet. Nå signerer du kontraktene selv igjen.", "info");
+  return { ok: true, message: "Salgsdirektøren har sluttet." };
+}
+
+/**
+ * Hver time: salgsdirektøren signerer forespørsler verket trygt rekker (også i en dårlig uke), der resepten holder
+ * (eller skrapklasseren legger den om), mest verdifulle først. Rammeavtaler tas så lenge de til sammen er under
+ * halve ukeproduksjonen i en dårlig uke.
+ * Resten får ligge, så spilleren kan ta dem selv.
+ */
+export function directorHour(g: GameState): void {
+  const d = g.konsern?.director;
+  if (!d) return;
+  const stats = computePlantStats(g);
+  if (stats.dailyProductT <= 0) return;
+  const following = auto(g, "followQueue");
+  const offers = g.contracts
+    .filter((c) => c.status === "tilbud")
+    .sort((a, b) => b.tonnes * b.pricePerT - a.tonnes * a.pricePerT);
+  const perDay = directorDailyT(g, stats);
+  if (perDay <= 0) return;
+  for (const c of offers) {
+    const check = assessOffer(g, stats, c, committedT(g));
+    const recipeOk = check.recipeOk || (check.graderFix && following);
+    if (!check.canMake || !recipeOk || check.tight || check.narrow) continue;
+    // Samme regnestykke som på Salg, men med det dårligste døgnet og mer margin
+    const needDays = (committedT(g) + agreementLoadUntil(g, c.deadlineDay) + c.tonnes) / perDay;
+    if (needDays > check.days * DIRECTOR_MARGIN) continue;
+    if (acceptContract(g, c.id, "Salgsdirektøren").ok) d.contracts += 1;
+  }
+  if (!d.agreementsOn) return;
+  const perWeek = perDay * 7;
+  for (const a of g.agreements.filter((x) => x.status === "tilbud")) {
+    const used = g.agreements.filter((x) => x.status === "aktiv").reduce((t, x) => t + x.weeklyT, 0);
+    const canMake = stats.products.includes(a.product);
+    const recipeOk = recipeEstimate(g, a.grade, stats, gradeRecipe(g, a.grade)).grades.includes(a.grade);
+    if (!canMake || !recipeOk || perWeek <= 0 || (used + a.weeklyT) / perWeek > DIRECTOR_AGREEMENT_SHARE) continue;
+    if (acceptAgreement(g, a.id, "Salgsdirektøren").ok) d.agreements += 1;
+  }
+}
+
+/** Hvert døgn: lønna til salgsdirektøren, overskuddet fra datterverkene og av og til en stans (B-106, B-117) */
 export function konsernDay(g: GameState): void {
+  if (g.konsern.director) addCost(g, "lonn", DIRECTOR_PER_DAY);
   const today = day(g);
   for (const p of g.konsern.plants) {
     if (p.downUntilDay > today) continue;
