@@ -27,6 +27,7 @@ import {
 import { knowledgeCard } from "./knowledge";
 import { auto, hasResearch, RESEARCH, scrapUnlocked, secondsAction } from "./research";
 import { checkMissions } from "./missions";
+import { checkChallenges } from "./challenges";
 import { maybeAdvisor, maybeCreateDecision } from "./decisions";
 import { maybeTip, setCreditHint } from "./tips";
 import { suggestRecipe } from "./recipe";
@@ -68,6 +69,7 @@ import {
   satisfiedGrades,
   type PlantStats,
   unitType,
+  unitHas,
   unitView,
 } from "./plant";
 import { chance, noise, pick, rand, randInt, uniform } from "./random";
@@ -136,7 +138,12 @@ function newDay(dayNumber: number, cash: number): DayFinance {
   return { day: dayNumber, income: {}, costs: {}, producedT: 0, heats: 0, cashEnd: cash };
 }
 
-export function newGame(seed = Date.now()): GameState {
+/**
+ * Nytt spill. «round» > 1 er nytt spill+ etter en seier (B-090): mer startkapital, noen fagpoeng og litt omdømme,
+ * så neste runde går fortere – men garasjen er den samme.
+ */
+export function newGame(seed = Date.now(), round = 1): GameState {
+  const bonus = Math.min(4, Math.max(0, round - 1));
   const scrap = Object.fromEntries(SCRAP_IDS.map((id) => [id, emptyStock()])) as Record<ScrapId, ScrapStock>;
   const g: GameState = {
     version: SAVE_VERSION,
@@ -144,9 +151,9 @@ export function newGame(seed = Date.now()): GameState {
     // Første dag starter kl. 06 når du låser opp garasjen
     minute: 6 * 60,
     speed: 1,
-    cash: START_CASH,
+    cash: START_CASH * (1 + bonus),
     loan: 0,
-    reputation: START_REPUTATION,
+    reputation: START_REPUTATION + 3 * bonus,
     stage: 0,
     owned: [],
     furnaceType: "induksjon025",
@@ -194,6 +201,7 @@ export function newGame(seed = Date.now()): GameState {
       onePeak: false,
       shiftStart: SHIFT_START_HOUR,
       pauseOffers: false,
+      toasts: "alle",
       autoTemps: false,
       secondsAction: "spot",
       graderStrict: true,
@@ -219,8 +227,11 @@ export function newGame(seed = Date.now()): GameState {
     gameOver: false,
     won: false,
     pendingManual: null,
-    researchPoints: 0,
+    researchPoints: 10 * bonus,
+    round,
+    winSeen: false,
     fpDealDay: -1,
+    inboxSeenId: 0,
     researched: [],
     pendingDecision: null,
     decisionSeen: {},
@@ -347,7 +358,12 @@ export function addScrapParti(
 
 export function scrapPrice(g: GameState, id: ScrapId): number {
   // Skrapterminalen kjøper inn i store partier (B-075)
-  return SCRAP_TYPES[id].price * g.market.scrapFactor[id] * (has(g, "skrapterminal") ? 0.94 : 1);
+  return (
+    SCRAP_TYPES[id].price *
+    g.market.scrapFactor[id] *
+    (has(g, "skrapterminal") ? 0.94 : 1) *
+    (hasResearch(g, "skraplogistikk") ? 0.95 : 1)
+  );
 }
 
 setCreditHint((g) => creditLimit(g));
@@ -697,10 +713,14 @@ function heatEvents(g: GameState, index: number, plant: PlantStats): number {
   const furnace = stats.furnace;
   let extra = 0;
   if (furnace.arc) {
-    if (chance(g, 0.018 * m)) {
+    // Utstyr mot havarier per ovn (B-094)
+    const regulated = unitHas(g, index, "elektroderegulering");
+    const panels = unitHas(g, index, "panelvarsling");
+    const arcFlash = 0.018 * m * (regulated ? 0.7 : 1) * (panels ? 0.5 : 1);
+    if (chance(g, arcFlash)) {
       extra += 25;
       addCost(g, "vedlikehold", 15_000);
-      if (chance(g, 0.3)) {
+      if (chance(g, panels ? 0.1 : 0.3)) {
         const hours = 3 * stats.repairFactor;
         f.downUntilMin = Math.max(f.downUntilMin, g.minute + stats.cycleMin + hours * 60);
         f.downReason = "Havari: vannlekkasje etter overslag";
@@ -714,7 +734,7 @@ function heatEvents(g: GameState, index: number, plant: PlantStats): number {
         log(g, `Overslag i ovn ${index + 1}. Støv i hvelvet må suges bort.`, "event");
       }
     }
-    if (chance(g, 0.014 * m)) {
+    if (chance(g, 0.014 * m * (regulated ? 0.4 : 1))) {
       extra += 35;
       addCost(g, "vedlikehold", 35_000);
       log(g, `Elektrodebrudd i ovn ${index + 1}. Elektroden skjøtes, og chargen forsinkes.`, "event");
@@ -798,7 +818,8 @@ function finishHeat(g: GameState, index: number, plant: PlantStats): void {
   const sizeFactor = Math.sqrt(Math.max(1, stats.sizeT / 5));
   awardPoints(
     g,
-    (([0.5, 0.2, 0.15, 0.2, 0.15][g.stage] ?? 0.15) * sizeFactor) / Math.sqrt(Math.max(1, g.furnaces.length)),
+    // Storverket kjører så mange store charger at poengene hopet seg opp (B-092): lavere sats der
+    (([0.5, 0.2, 0.15, 0.2, 0.1][g.stage] ?? 0.1) * sizeFactor) / Math.sqrt(Math.max(1, g.furnaces.length)),
   );
   f.holding = {
     t: heat.liquidT,
@@ -1026,7 +1047,10 @@ function castBatch(g: GameState, batch: LiquidBatch, stats: PlantStats): void {
     }
     g.lastCast = { grade: batch.grade, min: g.minute };
   }
-  if (casting.continuous && chance(g, 0.01 * stats.maintFactor * (batch.tempOff ? 2.5 : 1))) {
+  if (
+    casting.continuous &&
+    chance(g, 0.01 * stats.maintFactor * (batch.tempOff ? 2.5 : 1) * (has(g, "bruddvarsling") ? 0.4 : 1))
+  ) {
     const hours = 4 * stats.repairFactor;
     g.castDownUntilMin = g.minute + hours * 60;
     addCost(g, "vedlikehold", 60_000);
@@ -1063,7 +1087,11 @@ function castBatch(g: GameState, batch: LiquidBatch, stats: PlantStats): void {
   }
   const productT = t * casting.yield;
   addReturnScrap(g, t - productT, batch.analysis, stats);
-  const defectRisk = casting.defectRisk * (batch.tempOff ? 3 : 1) * (1.3 - 0.1 * stats.crewSkill);
+  const defectRisk =
+    casting.defectRisk *
+    (batch.tempOff ? 3 : 1) *
+    (1.3 - 0.1 * stats.crewSkill) *
+    (hasResearch(g, "kvalitetsledelse") ? 0.6 : 1);
   const second = blocked || chance(g, Math.min(0.9, defectRisk));
   // Kvalitet: traff stålet kvaliteten det ble laget for, og ble det støpt uten feil?
   if (second) g.today.secondT = (g.today.secondT ?? 0) + productT;
@@ -1705,6 +1733,7 @@ function agreementWeekClosed(g: GameState, c: Contract, ok: boolean): void {
   a.status = "fullfort";
   a.closedDay = day(g);
   if (a.weeksMissed === 0) {
+    countEvent(g, "avtaler_bonus");
     addIncome(g, "kontrakt", a.bonusKr);
     adjustReputation(g, a.bonusRep);
     awardPoints(g, 2 + g.stage);
@@ -2042,7 +2071,8 @@ function updateAbsence(g: GameState, stats: PlantStats): void {
       0.005 *
       (1 + Math.max(0, 60 - g.morale) / 60) *
       (nightExtra(g, stats.hours) > 0 ? 1.3 : 1) *
-      crewBenefits(stats.crews, stats.hours).sick;
+      crewBenefits(stats.crews, stats.hours).sick *
+      (hasResearch(g, "ledelse") ? 0.7 : 1);
     if (!busy && chance(g, risk)) {
       const len = randInt(g, 1, 3);
       w.absentFrom = g.minute;
@@ -2070,7 +2100,8 @@ export function quitText(ws: Worker[]): string {
 /** Trivselen driver mot det normale, nattarbeid tærer, og misfornøyde folk slutter (B-026) */
 function updateMorale(g: GameState, stats: PlantStats): void {
   if (!g.workers.length) return;
-  g.morale += (60 - g.morale) * 0.05;
+  // Ledelse og arbeidsmiljø løfter det normale nivået (B-085)
+  g.morale += ((hasResearch(g, "ledelse") ? 70 : 60) - g.morale) * 0.05;
   // Fire og fem skiftlag gir fridager i turnusen (B-073)
   adjustMorale(g, crewBenefits(stats.crews, stats.hours).morale);
   if (nightExtra(g, stats.hours) > 0) adjustMorale(g, -1.5);
@@ -2094,6 +2125,8 @@ function onHour(g: GameState, stats: PlantStats): void {
   // Kapitlene forskningen krever, kommer i fagboka når forskningen blir synlig (B-025)
   for (const r of RESEARCH) if (r.reads && r.stage <= g.stage) unlock(g, r.reads);
   checkMissions(g);
+  checkChallenges(g);
+  checkWin(g);
   expireOffers(g, stats);
   trickleOffers(g, stats);
   deliverContracts(g);
@@ -2333,7 +2366,12 @@ function onDay(g: GameState, stats: PlantStats): void {
   } else {
     g.negativeDays = 0;
   }
-  if (!g.won && g.stage === STAGES.length - 1 && g.cash - g.loan >= WIN_CASH) {
+  checkWin(g);
+}
+
+/** Seier: egenkapital (kasse minus lån) på 1 mrd. på storverket. Sjekkes hver time, ikke bare ved midnatt (B-091) */
+export function checkWin(g: GameState): void {
+  if (!g.won && !g.gameOver && g.stage === STAGES.length - 1 && g.cash - g.loan >= WIN_CASH) {
     g.won = true;
     log(g, "Du har bygget et av landets største stålverk. Gratulerer!", "good");
   }
@@ -2434,6 +2472,23 @@ export function completeManual(g: GameState, result: ManualResult | null): void 
   f.waitReason = null;
   awardPoints(g, result.stars !== undefined ? 1 + result.stars : 3);
   if ((result.stars ?? 0) >= 4) countEvent(g, "gode_charger");
+  if ((result.stars ?? 0) >= 5) countEvent(g, "perfekte_charger");
+  // En godt kjørt charge skal lønne seg (B-086): kunden betaler ekstra for stålet, og du lærer mer
+  const stars = result.stars ?? 0;
+  if (stars >= 4) {
+    const share = stars >= 5 ? 0.06 : 0.03;
+    const value = f.heat.liquidT * productPrice(g, castingType(g).product, req.grade);
+    const bonus = Math.round(value * share);
+    const fp = stars >= 5 ? 15 : 8;
+    addIncome(g, "kontrakt", bonus);
+    awardPoints(g, fp);
+    if (stars >= 5) adjustReputation(g, 0.5);
+    log(
+      g,
+      `${stars >= 5 ? "Perfekt charge" : "Godt kjørt"}! Stålet er så jevnt at kundene betaler ${Math.round(share * 100)} % ekstra: +${fmtKr(bonus)}, og du fikk ${fp} ekstra fagpoeng${stars >= 5 ? " og omdømme +0,5" : ""}.`,
+      "good",
+    );
+  }
   if (result.ok) {
     adjustReputation(g, 0.5);
     log(
@@ -2492,8 +2547,10 @@ const nf2 = new Intl.NumberFormat("nb-NO", { maximumFractionDigits: 2 });
 export function fmtKr(v: number): string {
   const abs = Math.abs(v);
   const sign = v < 0 ? "−" : "";
-  if (abs >= 1_000_000_000) return `${sign}${nf2.format(abs / 1_000_000_000)} mrd. kr`;
-  if (abs >= 1_000_000) return `${sign}${nf2.format(abs / 1_000_000)} mill. kr`;
+  // Rundes ned (mot null), så 999,996 mill. ikke vises som 1 000,00 mill. (B-091)
+  const down = (x: number) => Math.floor(x * 100) / 100;
+  if (abs >= 1_000_000_000) return `${sign}${nf2.format(down(abs / 1_000_000_000))} mrd. kr`;
+  if (abs >= 1_000_000) return `${sign}${nf2.format(down(abs / 1_000_000))} mill. kr`;
   return `${sign}${nf0.format(abs)} kr`;
 }
 

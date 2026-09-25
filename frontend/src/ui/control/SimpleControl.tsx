@@ -30,7 +30,7 @@ interface Props {
   sim: EAFSimulation;
   startWear: number;
   request: ManualRequest;
-  onDone: (result: ManualResult | null) => void;
+  onDone: (result: ManualResult | null, chapter?: string) => void;
 }
 
 // ------------------------------------------------------------------ //
@@ -64,6 +64,13 @@ function ZoneGauge({ label, value, min, max, zone, digits, unit }: GaugeProps) {
       <div className="sc-gauge-head">
         <span>{label}</span>
         <strong className={inZone ? "is-ok" : "is-off"}>
+          {/* Symbol i tillegg til fargen, for fargeblinde og sterkt sollys (B-087) */}
+          <span
+            className="sc-gauge-sign"
+            aria-label={inZone ? "i det grønne" : side === "lav" ? "for lavt" : "for høyt"}
+          >
+            {inZone ? "✓" : side === "lav" ? "▼" : "▲"}
+          </span>{" "}
           {fmt(value, digits)} {unit}
         </strong>
       </div>
@@ -167,8 +174,8 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
     redraw();
   };
 
-  // Strøm og oksygen styres samtidig (B-076)
-  const controls = (
+  // Strøm og oksygen styres samtidig (B-076); i tappingen bare strøm (B-093)
+  const controls = (withOxygen = true) => (
     <div className="sc-controls">
       <div className="sc-power">
         <button
@@ -191,17 +198,19 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
           ▲ Mer
         </button>
       </div>
-      <button
-        className={`sc-o2${runner.blowing ? " is-on" : ""}`}
-        aria-pressed={runner.blowing}
-        onClick={() => {
-          runner.setOxygen(!runner.blowing);
-          buzz(15);
-          redraw();
-        }}
-      >
-        Oksygen: {runner.blowing ? "PÅ" : "av"}
-      </button>
+      {withOxygen && (
+        <button
+          className={`sc-o2${runner.blowing ? " is-on" : ""}`}
+          aria-pressed={runner.blowing}
+          onClick={() => {
+            runner.setOxygen(!runner.blowing);
+            buzz(15);
+            redraw();
+          }}
+        >
+          Oksygen: {runner.blowing ? "PÅ" : "av"}
+        </button>
+      )}
     </div>
   );
 
@@ -242,7 +251,11 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
         </div>
       );
       break;
-    case "smelt":
+    case "smelt": {
+      // Trend gjør det lettere å treffe det grønne feltet (B-086)
+      const r = runner.tempRate;
+      const early = melted < 0.5 && runner.blowing;
+      const meltTrend = Math.abs(r) > 0.3 ? ` Nå ${r > 0 ? "stiger" : "synker"} den ${fmt(Math.abs(r), 1)} °C/s.` : "";
       body = (
         <>
           <p className="sc-instruction">Skrapet mates inn og smelter. Hold temperaturen i det grønne feltet.</p>
@@ -263,23 +276,34 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
             <span>{Math.round(melted * 100)} %</span>
           </div>
           {runner.message && <p className="sc-message">{runner.message}</p>}
-          {controls}
+          {controls()}
+          {/* Fast råd om oksygenet, så spilleren vet når det skal på og av (B-093) */}
+          <p className={`sc-o2-advice${early ? " is-warn" : ""}`}>
+            {melted < 0.5
+              ? runner.blowing
+                ? "Oksygenet står på for tidlig: det brenner karbon før skrapet er smeltet. Slå det av til halvparten er smeltet."
+                : `Oksygen: vent til halvparten er smeltet (nå ${Math.round(melted * 100)} %).`
+              : runner.blowing
+                ? "✓ Oksygenet står på og gir ekstra varme. Blir badet for varmt, gi mindre strøm."
+                : "Nå er over halvparten smeltet – slå på oksygenet. Det gir ekstra varme og skumslagg som skjermer lysbuen."}
+          </p>
           <p className="sc-hint">
             {s.bathTempC < MELT_BAND[0]
               ? runner.level >= 5
                 ? "Full strøm er på. Badet varmes opp igjen når matingen roer seg."
-                : "For kaldt – skrapet smelter sakte. Gi mer strøm."
+                : `For kaldt – skrapet smelter sakte. Gi mer strøm.${meltTrend}`
               : s.bathTempC > MELT_BAND[1]
                 ? runner.level <= 0
                   ? "Strømmen er av. Slå av oksygenet, eller vent på tyngre skrap."
-                  : "For varmt – det sliter på foringen og koster strøm. Gi mindre strøm."
-                : melted > 0.5 && !runner.blowing
-                  ? "Fint! Slå på oksygen nå – det gir ekstra varme og skummende slagg som skjermer lysbuen."
+                  : `For varmt – det sliter på foringen og koster strøm. Gi mindre strøm.${meltTrend}`
+                : Math.abs(runner.tempRate) > 1.5
+                  ? `I det grønne, men ${runner.tempRate > 0 ? "stiger" : "synker"} fort (${fmt(Math.abs(runner.tempRate), 1)} °C/s) – ${runner.tempRate > 0 ? "gi litt mindre" : "gi litt mer"} strøm.`
                   : "Fint! Følg med når skrapmatingen endrer seg."}
           </p>
         </>
       );
       break;
+    }
     case "rens": {
       const cMax = Math.max(0.3, grade.tapCarbonMaxPct * 2.5);
       const cOk = s.carbonPct >= grade.tapCarbonMinPct && s.carbonPct <= grade.tapCarbonMaxPct;
@@ -307,7 +331,7 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
             digits={0}
             unit="°C"
           />
-          {controls}
+          {controls()}
           {(s.carbonPct < grade.tapCarbonMinPct || runner.carbonOn) && (
             <button
               className={`sc-o2${runner.carbonOn ? " is-on" : ""}`}
@@ -381,6 +405,10 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
             digits={3}
             unit="%"
           />
+          <p className="sc-hint">
+            Fosforet bestemmes av skrapet og smeltingen (oksygen og ikke for varmt bad). Her styrer du det ved å få
+            slagget ut: fosforet ligger i slagget, og blir det liggende når du varmer opp, går det tilbake i stålet.
+          </p>
           {runner.steelSpilledKg > 0 && (
             <p className={`sc-message${spilling ? " is-alarm" : ""}`}>
               {spilling ? "Stål renner ut slaggdøra! Rett opp ovnen nå!" : "Stål rant ut slaggdøra."} Tapt:{" "}
@@ -442,7 +470,7 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
             digits={0}
             unit="°C"
           />
-          {controls}
+          {controls(false)}
           <p className="sc-hint">
             {s.bathTempC < zone[0]
               ? runner.level <= 0
@@ -523,6 +551,17 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
                   <Stars n={x.stars} />
                 </div>
                 <p>{x.text}</p>
+                {x.stars < 3 && x.lesson && (
+                  <details className="sc-lesson">
+                    <summary>Hvorfor?</summary>
+                    <p>{x.lesson}</p>
+                    {x.chapter && (
+                      <button className="sc-link" onClick={() => onDone(score.result, x.chapter)}>
+                        Les mer i fagboka
+                      </button>
+                    )}
+                  </details>
+                )}
               </li>
             ))}
           </ul>

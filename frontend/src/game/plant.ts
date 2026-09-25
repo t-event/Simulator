@@ -488,6 +488,8 @@ export function computePlantStats(g: GameState): PlantStats {
       kwh *= 1.02;
     }
     if (hasResearch(g, "energistyring")) kwh *= 0.95;
+    if (hasResearch(g, "prosessdata")) cyc *= 0.95;
+    if (t.arc && hasResearch(g, "elektrodestyring")) kwh *= 0.95;
     if (t.arc && has(g, "varmegjenvinning")) kwh *= 0.92;
     if (t.arc && hasResearch(g, "skumslagg")) kwh *= 0.94;
     const mw = t.fuel === "strøm" ? (t.sizeT * kwh) / (cyc / 60) / 1000 : 0;
@@ -507,6 +509,7 @@ export function computePlantStats(g: GameState): PlantStats {
     repairFactor *= 0.7;
   }
   if (hasResearch(g, "sikkerhet")) maintFactor *= 0.8;
+  if (hasResearch(g, "prediktivt")) maintFactor *= 0.75;
 
   const sellers = presentWorkers(g).filter((w) => w.role === "salg").length;
   // Garasjen og verkstedet får flere forespørsler, så det finnes noe å velge mellom (B-056)
@@ -516,6 +519,7 @@ export function computePlantStats(g: GameState): PlantStats {
     Math.min(3, sellers) * 0.8 +
     (hasResearch(g, "kundepleie") ? 0.6 : 0) +
     (hasResearch(g, "eksport") ? 1 : 0) +
+    (hasResearch(g, "gronnstal") ? 0.8 : 0) +
     (has(g, "havn") ? 1.5 : 0);
   const priceBonus =
     (has(g, "salgskontor") ? 0.03 : 0) +
@@ -523,6 +527,8 @@ export function computePlantStats(g: GameState): PlantStats {
     g.reputation * 0.0008 +
     (hasResearch(g, "kundepleie") ? 0.02 : 0) +
     (hasResearch(g, "eksport") ? 0.03 : 0) +
+    (hasResearch(g, "produktutvikling") ? 0.04 : 0) +
+    (hasResearch(g, "gronnstal") ? 0.05 : 0) +
     (has(g, "havn") ? 0.02 : 0) +
     (has(g, "vakuum") ? 0.05 : 0);
 
@@ -542,7 +548,13 @@ export function computePlantStats(g: GameState): PlantStats {
   // Anslått døgnproduksjon: smeltekapasitet i åpningstida, begrenset av støping og valsing
   const liquidPerDay =
     staff.hours > 0 ? units.reduce((a, u) => a + ((staff.hours * 60) / u.cycleMin + 0.5) * u.sizeT * 0.93, 0) : 0;
-  let productPerDay = Math.min(liquidPerDay, casting.tph * 24) * casting.yield;
+  // Høyhastighetsstøping trekker strengen fortere (B-085)
+  // Strengstøpemaskin nr. 2 dobler kapasiteten, så tre ovner ikke venter på støpingen (B-095)
+  const castTph =
+    casting.tph *
+    (casting.continuous && hasResearch(g, "hoyhastighet") ? 1.15 : 1) *
+    (casting.continuous && has(g, "streng2") ? 2 : 1);
+  let productPerDay = Math.min(liquidPerDay, castTph * 24) * casting.yield;
   if (rollingActive(g))
     productPerDay = Math.min(productPerDay, rollingTph(g) * Math.max(8, staff.hours)) * ROLLING_YIELD;
 
@@ -561,7 +573,7 @@ export function computePlantStats(g: GameState): PlantStats {
     cycleMin,
     kwhPerT,
     dephos: furnace.dephos,
-    castTph: casting.tph,
+    castTph,
     castYield: casting.yield,
     crew: staff.crew,
     shifts: staff.shifts,
@@ -716,4 +728,49 @@ export function plannerOrders(g: GameState): boolean {
 
 export function hasPlanner(g: GameState): boolean {
   return presentWorkers(g).some((w) => w.role === "planlegger") || (g.specialists?.sen ?? 0) > g.minute;
+}
+
+/** Anbefalt antall av rollene som ikke står på skift, når skiftene er fulle (B-096) */
+export interface SupportAdvice {
+  role: RoleId;
+  want: number;
+  have: number;
+  why: string;
+}
+
+export function supportAdvice(g: GameState): SupportAdvice[] {
+  const count = (r: RoleId) => g.workers.filter((w) => w.role === r).length;
+  const arcFurnaces = g.furnaces.filter((_, i) => unitType(g, i).arc).length;
+  const crews = staffing(g, true).crews;
+  const out: SupportAdvice[] = [];
+  const add = (role: RoleId, want: number, why: string) => {
+    if (want > 0 || count(role) > 0) out.push({ role, want, have: count(role), why });
+  };
+  // Full effekt krever én reparatør per nivå på jobb; en ekstra dekker fravær i store verk
+  add(
+    "vedlikehold",
+    Math.max(1, g.stage) + (g.workers.length > 40 ? 1 : 0),
+    "Færre uhell og raskere reparasjoner. Full effekt med én per nivå på jobb, pluss én ekstra i store verk for fravær.",
+  );
+  add(
+    "salg",
+    g.stage >= 1 ? Math.min(4, 1 + g.stage) : 0,
+    "Flere forespørsler og bedre pris. Mer enn fire gir ikke mer.",
+  );
+  add("murer", arcFurnaces * MASONS_PER_POT, "Murer opp reservepotter: to per lysbueovn, så pottebyttet går fort.");
+  add(
+    "planlegger",
+    hasResearch(g, "innkjop") || hasResearch(g, "ordreplan") ? 1 : 0,
+    "Kjøper skrap etter resepten og sorterer ordrekøen.",
+  );
+  add("klasser", g.stage >= 2 ? 1 : 0, "Riktig skrapblanding i chargene, og dårlige partier sendes i retur.");
+  // Med 4- og 5-skift dekker de ekstra lagene fravær; med tre lag trengs avløsere
+  add(
+    "allround",
+    crews >= 4 || g.stage < 2 ? 0 : 2,
+    crews >= 4
+      ? "Trengs ikke: de ekstra skiftlagene dekker fravær."
+      : "Tar plassen til dem som er syke eller har ferie.",
+  );
+  return out;
 }

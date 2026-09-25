@@ -21,6 +21,9 @@ export const SPEED: Record<Step, number> = { intro: 0, smelt: 40, rens: 20, slag
 /** Når det er lite slagg igjen, går avslaggingen saktere, så spilleren rekker å rette opp i det grønne (B-080) */
 const SLAG_SLOW_BELOW_KG = 2500;
 const SPEED_SLAG_END = 6;
+/** Strømnivået automatikken setter når et nytt steg starter, så spilleren ikke arver «strøm av» (B-086) */
+const RENS_START_LEVEL = 2;
+const TAPP_START_LEVEL = 4;
 /** Trafo-tapp for strømnivå 1–5 (nivå 0 = strømmen av, B-079) */
 const POWER_TAPS = [0, 1, 2, 3, 4];
 /** Karbon som blåses inn når spilleren slår på karbon i rensingen (kg/min, B-079) */
@@ -69,7 +72,7 @@ interface Auto {
 }
 
 export interface Score {
-  steps: { title: string; stars: number; text: string }[];
+  steps: { title: string; stars: number; text: string; chapter?: string; lesson?: string }[];
   rating: number;
   headline: string;
   result: ManualResult;
@@ -139,7 +142,7 @@ function automate(sim: EAFSimulation, step: Step, a: Auto, random: () => number)
       sim.setSlagDoor(false);
       if (s.tiltDeg !== 0) sim.setTilt(0);
       applyPower(sim, a.level);
-      sim.setOxygenFlow(a.oxygen ? OXYGEN_MELT_NM3H : 0);
+      sim.setOxygenFlow(0);
       break;
     default:
       break;
@@ -172,7 +175,8 @@ function scoreCharge(sim: EAFSimulation, a: Auto, startWear: number): Score {
     };
   }
   const meltPct = a.meltS > 0 ? a.meltInBandS / a.meltS : 0;
-  const s1 = meltPct >= 0.92 ? 3 : meltPct >= 0.75 ? 2 : meltPct >= 0.45 ? 1 : 0;
+  // Smeltingen er lang og matingen varierer, så kravet er lavere enn før (B-086)
+  const s1 = meltPct >= 0.8 ? 3 : meltPct >= 0.6 ? 2 : meltPct >= 0.35 ? 1 : 0;
   const t1 =
     `Temperaturen var i det grønne ${Math.round(meltPct * 100)} % av tiden.` +
     (s1 < 3 ? " Følg med når skrapmatingen endrer seg, og juster strømmen." : "");
@@ -232,17 +236,45 @@ function scoreCharge(sim: EAFSimulation, a: Auto, startWear: number): Score {
   const headline = ["", "Det kan bli bedre", "Godt forsøk", "Bra kjørt!", "Veldig bra!", "Perfekt charge!"][rating];
   return {
     steps: [
-      { title: "Smelting", stars: s1, text: t1 },
-      { title: "Rensing", stars: s2, text: t2 },
-      { title: "Avslagging", stars: s3, text: t3 },
-      { title: "Tappetemperatur", stars: s4, text: t4 },
-      { title: "Øsa", stars: s5, text: t5 },
+      { title: "Smelting", stars: s1, text: t1, ...LESSONS.smelting },
+      { title: "Rensing", stars: s2, text: t2, ...LESSONS.rensing },
+      { title: "Avslagging", stars: s3, text: t3, ...LESSONS.avslagging },
+      { title: "Tappetemperatur", stars: s4, text: t4, ...LESSONS.tapping },
+      { title: "Øsa", stars: s5, text: t5, ...LESSONS.osa },
     ],
     rating,
     headline,
     result: { ...buildResult(sim, startWear, rating), lossFraction },
   };
 }
+
+/** Kort forklaring og kapittel i fagboka for hvert steg, vist når steget gikk dårlig (B-088) */
+const LESSONS: Record<string, { chapter: string; lesson: string }> = {
+  smelting: {
+    chapter: "lysbue",
+    lesson:
+      "Skrapet smelter jevnest når badet holdes like over smeltepunktet. For varmt sliter på foringen og koster strøm; for kaldt stopper smeltingen opp.",
+  },
+  rensing: {
+    chapter: "karbon",
+    lesson:
+      "Oksygen brenner karbonet til CO-gass. Når karbonet er brukt opp, brenner oksygenet jern i stedet – da går stål tapt i slagget.",
+  },
+  avslagging: {
+    chapter: "fosfor",
+    lesson:
+      "Fosforet samles i slagget. Tippes det ikke ut før oppvarmingen, går fosforet tilbake i stålet. Tipper du for lenge, renner stålet etter.",
+  },
+  tapping: {
+    chapter: "ildfast",
+    lesson:
+      "Stålet må være varmt nok til å holde seg flytende helt fram til støpingen, men hver grad ekstra koster strøm og sliter på foringen.",
+  },
+  osa: {
+    chapter: "oseovn",
+    lesson: "Øsa rommer bare så mye. Litt stål skal bli igjen i ovnen (sumpen), for det hjelper neste charge å smelte.",
+  },
+};
 
 export type RunnerEvent = "steg" | "ferdig" | "gjennombrenning" | "søl";
 
@@ -335,7 +367,8 @@ export class SimpleRunner {
   }
   /** Slår oksygenlansa av eller på. Virker mens strømmen går (B-076). */
   setOxygen(on: boolean): void {
-    this.a.oxygen = on && (this.step === "smelt" || this.step === "rens" || this.step === "tapp");
+    // Oksygen i smelting og rensing; ikke i tappingen, der skal badet bare varmes (B-093)
+    this.a.oxygen = on && (this.step === "smelt" || this.step === "rens");
     // Oksygen og karbon motarbeider hverandre, så bare én av dem står på i rensingen
     if (this.a.oxygen) this.a.carbon = false;
   }
@@ -367,12 +400,14 @@ export class SimpleRunner {
     this.a.slagLeftKg = this.sim.slagMassKg;
     this.sim.setTilt(0);
     this.sim.setSlagDoor(false);
+    this.a.level = TAPP_START_LEVEL;
     this.step = "tapp";
   }
   skipDeslag(): void {
     if (this.step !== "slagg" || this.a.deslag === "pagar") return;
     this.a.deslag = "hoppet";
     this.a.slagLeftKg = this.sim.slagMassKg;
+    this.a.level = TAPP_START_LEVEL;
     this.step = "tapp";
   }
   tap(): boolean {
@@ -434,6 +469,8 @@ export class SimpleRunner {
     }
     if (st === "smelt" && sim.state.phase !== "innsmelting") {
       a.message = null;
+      // Rensingen starter med lite strøm: oksygenet gir mye varme selv (B-086)
+      a.level = RENS_START_LEVEL;
       this.step = "rens";
       return "steg";
     }

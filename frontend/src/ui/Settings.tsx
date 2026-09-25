@@ -104,6 +104,27 @@ export function SettingsSheet({
             <span>Valse emner til armeringsstål (emner som kontrakter venter på, blir liggende)</span>
           </label>
         )}
+        <h3 className="g-subhead">Varsler på skjermen</h3>
+        <p className="g-muted">Alt samles uansett i varsellista bak 🔔 øverst.</p>
+        <div className="g-choice" role="radiogroup" aria-label="Varsler på skjermen">
+          {(
+            [
+              ["alle", "Alle hendelser"],
+              ["problemer", "Bare problemer"],
+              ["ingen", "Ingen"],
+            ] as const
+          ).map(([id, label]) => (
+            <label key={id} className="g-toggle">
+              <input
+                type="radio"
+                name="toasts"
+                checked={(g.settings.toasts ?? "alle") === id}
+                onChange={() => act((gg) => void (gg.settings.toasts = id))}
+              />
+              <span>{label}</span>
+            </label>
+          ))}
+        </div>
         <h3 className="g-subhead">Lagring</h3>
         <p className="g-muted">
           Spillet lagres automatisk i denne nettleseren. Safari kan slette lagrede data for nettsider som ikke er brukt

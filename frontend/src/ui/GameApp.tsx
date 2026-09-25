@@ -19,6 +19,8 @@ import { Overview } from "./Overview";
 import { People } from "./People";
 import { ResearchPage } from "./ResearchPage";
 import { BackupInput, SettingsSheet } from "./Settings";
+import { InboxSheet } from "./Inbox";
+import { unseenCount } from "../game/inbox";
 import { Sales } from "./Sales";
 import { VIEWS, viewUnlocked, type View } from "./views";
 
@@ -83,7 +85,17 @@ function Intro({
   );
 }
 
-function EndScreen({ g, onRestart, onContinue }: { g: GameState; onRestart: () => void; onContinue?: () => void }) {
+function EndScreen({
+  g,
+  onRestart,
+  onContinue,
+  onNextRound,
+}: {
+  g: GameState;
+  onRestart: () => void;
+  onContinue?: () => void;
+  onNextRound?: () => void;
+}) {
   const won = g.won && !g.gameOver;
   return (
     <div className="g-modal" role="dialog" aria-modal="true">
@@ -103,12 +115,19 @@ function EndScreen({ g, onRestart, onContinue }: { g: GameState; onRestart: () =
           <li>Kontrakter levert: {g.totals.contractsDone}</li>
           <li>Reklamasjoner: {g.totals.complaints}</li>
         </ul>
+        {won && (
+          <p className="g-muted">
+            Nytt spill+ starter i garasjen igjen, men med mer startkapital, noen fagpoeng og litt omdømme. Utfordringene
+            på storverket står under Verket hvis du spiller videre.
+          </p>
+        )}
         <div className="g-row">
           {won && onContinue && (
             <button className="g-primary" onClick={onContinue}>
               Spill videre
             </button>
           )}
+          {won && onNextRound && <button onClick={onNextRound}>Nytt spill+ (runde {(g.round ?? 1) + 1})</button>}
           <button onClick={onRestart}>Nytt spill</button>
         </div>
       </div>
@@ -216,14 +235,17 @@ function TopBar({
   api,
   onBook,
   onSettings,
+  onInbox,
 }: {
   g: GameState;
   api: GameApi;
   onBook: () => void;
   onSettings: () => void;
+  onInbox: () => void;
 }) {
   const stats = computePlantStats(g);
   const unread = g.knowledge.filter((k) => !g.readChapters.includes(k)).length;
+  const unseen = unseenCount(g);
   return (
     <header className="g-top">
       <div className="g-top-row">
@@ -288,6 +310,14 @@ function TopBar({
             <em>Fagpoeng</em> {Math.floor(g.researchPoints)}
           </span>
         )}
+        <button
+          className="g-book g-inbox-btn"
+          onClick={onInbox}
+          aria-label={`Varsler${unseen ? ` (${unseen} nye)` : ""}`}
+        >
+          <span aria-hidden="true">🔔</span>
+          {unseen > 0 && <span className="g-badge">{unseen > 99 ? "99+" : unseen}</span>}
+        </button>
       </div>
     </header>
   );
@@ -300,8 +330,10 @@ export function GameApp() {
   const [subTab, setSubTab] = useState<{ tab?: string; n: number }>({ n: 0 });
   const [bookOpen, setBookOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [inboxOpen, setInboxOpen] = useState(false);
   const [bookChapter, setBookChapter] = useState<string | null>(null);
-  const [winSeen, setWinSeen] = useState(false);
+  // Seiersskjermen vises én gang per spill; valget lagres i spillet (B-091)
+  const winSeen = !!g?.winSeen;
 
   useEffect(() => {
     window.scrollTo({ top: 0 });
@@ -336,6 +368,7 @@ export function GameApp() {
   const modalOpen =
     bookOpen ||
     settingsOpen ||
+    inboxOpen ||
     !!g.pendingManual ||
     !!g.pendingDecision ||
     g.celebrate !== null ||
@@ -346,7 +379,13 @@ export function GameApp() {
     <div className={`g-app${g.tutorial !== null || g.recipeGuide ? " has-coach" : ""}`}>
       <div className="g-behind" inert={modalOpen}>
         <div className="g-head">
-          <TopBar g={g} api={api} onBook={() => openBook()} onSettings={() => setSettingsOpen(true)} />
+          <TopBar
+            g={g}
+            api={api}
+            onBook={() => openBook()}
+            onSettings={() => setSettingsOpen(true)}
+            onInbox={() => setInboxOpen(true)}
+          />
 
           <nav className="g-nav" aria-label="Hovedmeny">
             {VIEWS.filter((v) => viewUnlocked(g, v.id)).map((v) => {
@@ -419,6 +458,7 @@ export function GameApp() {
       </div>
 
       {bookOpen && <Handbook g={g} act={act} initial={bookChapter} onClose={() => setBookOpen(false)} />}
+      {inboxOpen && <InboxSheet g={g} act={act} onClose={() => setInboxOpen(false)} />}
       {settingsOpen && (
         <SettingsSheet
           g={g}
@@ -459,13 +499,24 @@ export function GameApp() {
           <ControlRoom
             request={g.pendingManual}
             furnaceWear={g.furnaces[g.pendingManual.furnace]?.wear ?? 0}
-            onDone={(result) => act((gg) => completeManual(gg, result))}
+            onDone={(result, chapter) => {
+              act((gg) => completeManual(gg, result));
+              // Fra resultatet kan man gå rett til kapitlet som forklarer det som gikk dårlig (B-088)
+              if (chapter) openBook(chapter);
+            }}
           />
         </Suspense>
       )}
 
       {g.gameOver && <EndScreen g={g} onRestart={api.quit} />}
-      {g.won && !winSeen && !g.gameOver && <EndScreen g={g} onRestart={api.quit} onContinue={() => setWinSeen(true)} />}
+      {g.won && !winSeen && !g.gameOver && (
+        <EndScreen
+          g={g}
+          onRestart={api.quit}
+          onContinue={() => act((gg) => void (gg.winSeen = true))}
+          onNextRound={api.startNextRound}
+        />
+      )}
     </div>
   );
 }

@@ -26,6 +26,8 @@ export interface GameApi {
   toasts: Toast[];
   /** Nytt spill, med eller uten veiledet start */
   startNew: (guided: boolean) => void;
+  /** Nytt spill+ etter en seier: neste runde med bonus (B-090) */
+  startNextRound: () => void;
   continueSaved: () => void;
   /** Kjører en handling på spillet og tegner på nytt. Resultatmeldinger vises som varsel. */
   act: <T>(fn: (g: GameState) => T) => T;
@@ -72,6 +74,10 @@ export function useGame(): GameApi {
     },
     [begin],
   );
+  const startNextRound = useCallback(() => {
+    const round = (gameRef.current?.round ?? 1) + 1;
+    begin(newGame(Date.now(), round));
+  }, [begin]);
   const continueSaved = useCallback(() => {
     const g = loadGame();
     begin(g ?? newGame());
@@ -101,7 +107,10 @@ export function useGame(): GameApi {
     if (!g) return;
     for (const entry of g.log) {
       if (entry.id <= lastLogId.current) continue;
-      if (entry.kind !== "info") pushToast(entry.text, entry.kind);
+      // Spilleren velger under ⚙️ hvor mye som skal dukke opp på skjermen; alt står uansett i varsellista (B-089)
+      const mode = g.settings.toasts ?? "alle";
+      if (entry.kind !== "info" && (mode === "alle" || (mode === "problemer" && entry.kind === "bad")))
+        pushToast(entry.text, entry.kind);
     }
     if (g.log.length) lastLogId.current = g.log[g.log.length - 1].id;
   }, [pushToast]);
@@ -188,5 +197,17 @@ export function useGame(): GameApi {
     };
   }, [game, bump, flushLog]);
 
-  return { game, hasSave, toasts, startNew, continueSaved, act, setSpeed, dismissToast, quit, loadBackup };
+  return {
+    game,
+    hasSave,
+    toasts,
+    startNew,
+    startNextRound,
+    continueSaved,
+    act,
+    setSpeed,
+    dismissToast,
+    quit,
+    loadBackup,
+  };
 }

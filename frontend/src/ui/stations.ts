@@ -32,6 +32,10 @@ const ADDON_STATION: Record<string, Station> = {
   oseovn: "ovn",
   conveyor: "ovn",
   trafo: "ovn",
+  elektroderegulering: "ovn",
+  panelvarsling: "ovn",
+  bruddvarsling: "stoping",
+  streng2: "stoping",
   valseverk: "stoping",
 };
 

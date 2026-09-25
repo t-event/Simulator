@@ -39,6 +39,7 @@ import type { GameApi } from "../game/useGame";
 import { AnalysisLine, Bar, Card, GradeChips, Stat } from "./common";
 import { fmtClock, fmtKr, fmtNum, fmtPct, fmtT } from "./format";
 import { activeMissions, missionProgress } from "../game/missions";
+import { CHALLENGE_STAGE, CHALLENGES, challengeProgress, challengeShare, challengesDone } from "../game/challenges";
 import { PlantScene } from "./PlantScene";
 import { SceneBubbles } from "./SceneBubbles";
 import { StageCard, StationButton, UpgradeSheet } from "./Upgrades";
@@ -375,6 +376,39 @@ function BookCard({ g, openBook }: { g: GameState; openBook: (chapter?: string) 
   );
 }
 
+/** Utfordringer på storverket (B-090): noe å strekke seg etter når alt er kjøpt */
+function ChallengesCard({ g }: { g: GameState }) {
+  if (g.stage < CHALLENGE_STAGE) return null;
+  return (
+    <Card title={`Utfordringer (${challengesDone(g)} av ${CHALLENGES.length})`}>
+      {CHALLENGES.map((c) => {
+        const done = !!g.missions[c.id]?.done;
+        const p = challengeProgress(g, c);
+        return (
+          <div key={c.id} className={`g-mission${done ? " is-done" : ""}`}>
+            <strong>
+              {done ? "✓ " : ""}
+              {c.title}
+            </strong>
+            {!done && <Bar value={challengeShare(g, c)} tone="ok" label="Fremdrift" />}
+            <span className="g-muted">
+              {done
+                ? "Klart!"
+                : c.lower
+                  ? p > 0
+                    ? `Beste døgn: ${fmtNum(p, 0)} ${c.unit}. ${c.how}`
+                    : c.how
+                  : `${fmtNum(Math.floor(p), 0)} av ${fmtNum(c.goal, 0)} ${c.unit ?? ""}. ${c.how}`}
+              {!done &&
+                ` · ${[c.fp ? `${c.fp} fagpoeng` : "", c.cash ? fmtKr(c.cash) : "", c.rep ? `omdømme +${c.rep}` : ""].filter(Boolean).join(" og ")}`}
+            </span>
+          </div>
+        );
+      })}
+    </Card>
+  );
+}
+
 export function Overview({ g, stats, act, go, openBook }: Props) {
   const [sheet, setSheet] = useState<Station | null>(null);
   const [tab, setTab] = useState<SubTab>("oversikt");
@@ -598,6 +632,7 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
             {!canMove && <StageCard g={g} act={act} />}
 
             <BookCard g={g} openBook={openBook} />
+            <ChallengesCard g={g} />
           </div>
         </>
       )}

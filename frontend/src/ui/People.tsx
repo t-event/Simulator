@@ -29,6 +29,7 @@ import {
   presentWorkers,
   rollingActive,
   staffing,
+  supportAdvice,
   tempsActive,
   tempsCost,
   type PlantStats,
@@ -103,6 +104,34 @@ function roleEffect(g: GameState, stats: PlantStats, role: RoleId): string | nul
     default:
       return null;
   }
+}
+
+/** Anbefalte støtteroller når skiftene er fulle (B-096) */
+function SupportCard({ g }: { g: GameState }) {
+  const advice = supportAdvice(g);
+  if (!advice.length) return null;
+  const short = advice.filter((a) => a.have < a.want);
+  return (
+    <Card title="Anbefalt i tillegg til skiftene">
+      <p className="g-muted">
+        {short.length
+          ? "Skiftene er fulle. Disse rollene står ikke på skift, men gjør verket bedre:"
+          : "Skiftene er fulle, og du har det som anbefales av støtteroller."}
+      </p>
+      <ul className="g-support">
+        {advice.map((a) => (
+          <li key={a.role} className={a.have < a.want ? "is-short" : ""}>
+            <strong>
+              {a.have >= a.want ? "✓ " : ""}
+              {ROLES[a.role].plural}: {a.want === 0 ? `${a.have} – trengs ikke nå` : `${a.have} av ${a.want}`}
+            </strong>
+            <span className="g-muted">{a.why}</span>
+          </li>
+        ))}
+      </ul>
+      {short.length > 0 && <p className="g-muted">Ansett under «Ansett». Søkerne har rollen sin oppgitt.</p>}
+    </Card>
+  );
 }
 
 function Stars({ skill }: { skill: number }) {
@@ -495,6 +524,7 @@ export function People({ g, stats, act }: Props) {
                 </details>
               )}
             </Card>
+            {permanent.shifts >= 3 && <SupportCard g={g} />}
             <ShiftPlan g={g} stats={stats} act={act} />
           </>
         )}

@@ -736,6 +736,36 @@ export const ADDONS: Addon[] = [
     price: 25_000_000,
     description: "Tar imot skrap på båt og tog og klipper det til ovnen. Dobbelt skraplager og 6 % billigere skrap.",
   },
+  // Mot havarier når verket blir stort og kjører mange charger (B-094)
+  {
+    id: "elektroderegulering",
+    name: "Hydraulisk elektroderegulering",
+    stage: 3,
+    price: 4_000_000,
+    needsArc: true,
+    perFurnace: true,
+    description:
+      "Elektrodene flyttes raskt og mykt, og brudd fanges opp før de skjer. 60 % færre elektrodebrudd og 30 % færre overslag.",
+  },
+  {
+    id: "panelvarsling",
+    name: "Paneler med lekkasjevarsling",
+    stage: 4,
+    price: 6_000_000,
+    needsArc: true,
+    perFurnace: true,
+    description:
+      "Tykkere kobberpaneler og følere som varsler lekkasjer. Halvparten så mange overslag, og de sjeldent slår hull i panelene.",
+  },
+  {
+    id: "bruddvarsling",
+    name: "Bruddvarsling i kokillen",
+    stage: 3,
+    price: 8_000_000,
+    needsContinuous: true,
+    description:
+      "Temperaturfølere i kokillen ser når skallet er i ferd med å revne, og bremser strengen i tide. 60 % færre strenggjennombrudd.",
+  },
   {
     id: "varmegjenvinning",
     name: "Varmegjenvinning",
@@ -744,6 +774,16 @@ export const ADDONS: Addon[] = [
     needsArc: true,
     requires: ["renseanlegg"],
     description: "Varmen i avgassen blir til damp og strøm. Lysbueovnene bruker 8 % mindre strøm per tonn.",
+  },
+  {
+    id: "streng2",
+    name: "Strengstøpemaskin nr. 2",
+    stage: 4,
+    price: 40_000_000,
+    needsContinuous: true,
+    crew: { stoper: 3 },
+    description:
+      "En strengstøpemaskin til ved siden av den første, så støpingen holder følge med tre store ovner. Dobbel støpekapasitet.",
   },
   {
     id: "valseverk2",
