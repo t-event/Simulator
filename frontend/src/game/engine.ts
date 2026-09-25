@@ -223,6 +223,7 @@ export function newGame(seed = Date.now()): GameState {
     tempsUntilMin: 0,
     tempCrew: null,
     automationResearch: true,
+    recipeGuide: null,
     bonusOffer: false,
     celebrate: null,
     seenViews: ["verket", "marked", "salg"],
@@ -832,7 +833,11 @@ export function startReline(
   f.downReason = "Planlagt stans: ny foring";
   countEvent(g, "omforinger");
   const inPlace = stats.furnace.arc ? " Reservepotta var ikke klar, så foringen mures om inne i ovnen." : "";
-  log(g, `Planlagt stans: ovn ${index + 1} fores om${who} (${fmtKr(cost)}, ${hours.toFixed(0)} timer).${inPlace}`, "info");
+  log(
+    g,
+    `Planlagt stans: ovn ${index + 1} fores om${who} (${fmtKr(cost)}, ${hours.toFixed(0)} timer).${inPlace}`,
+    "info",
+  );
   unlock(g, "ildfast");
   return { ok: true, message: "Omforing startet." };
 }
@@ -870,7 +875,9 @@ function updateFurnaces(g: GameState, stats: PlantStats): void {
       hasResearch(g, "vedlikeholdsplan") &&
       ((day(g) - f.lastRelineDay >= g.settings.relinePlanDays && f.wear > 0.15) || f.wear >= PLAN_SAFETY_WEAR);
     const repairerDue =
-      (auto(g, "autoReline") && presentWorkers(g).some((w) => w.role === "vedlikehold") && f.wear >= g.settings.relineAt) ||
+      (auto(g, "autoReline") &&
+        presentWorkers(g).some((w) => w.role === "vedlikehold") &&
+        f.wear >= g.settings.relineAt) ||
       ((g.specialists.havari ?? 0) > g.minute && f.wear >= 0.8);
     if (f.relineRequested || planDue || repairerDue) {
       if (startReline(g, i, stats, f.relineRequested ? "manuell" : planDue ? "plan" : "reparatør").ok) {
@@ -910,11 +917,14 @@ function updateFurnaces(g: GameState, stats: PlantStats): void {
     }
     if (!startHeat(g, i, stats)) {
       const was = f.waitReason;
-      f.waitReason =
-        hasGrader(g) && stats.yardUsed >= stats.sizeT ? "Mangler skrap til resepten" : "Tomt for skrap";
+      f.waitReason = hasGrader(g) && stats.yardUsed >= stats.sizeT ? "Mangler skrap til resepten" : "Tomt for skrap";
       // Tydelig varsel når ovnen blir stående uten skrap (B-033)
       if (was !== f.waitReason && i === 0)
-        log(g, `Ovnen står: ${f.waitReason === "Tomt for skrap" ? "skraplageret er tomt" : "mangler skrap til resepten"}. ${scrapStopHelp(g)}`, "bad");
+        log(
+          g,
+          `Ovnen står: ${f.waitReason === "Tomt for skrap" ? "skraplageret er tomt" : "mangler skrap til resepten"}. ${scrapStopHelp(g)}`,
+          "bad",
+        );
     }
   }
 }
@@ -1319,7 +1329,8 @@ function complains(g: GameState, a: Analysis, grade: GradeId): boolean {
   if (satisfies(a, grade)) return false;
   if (g.stage <= 1) {
     const spec = GRADES[grade];
-    const tolerant = a.p <= spec.pMax * 1.1 && a.tramp <= spec.trampMax * 1.1 && a.c <= spec.cMax * 1.1 && a.c >= spec.cMin * 0.9;
+    const tolerant =
+      a.p <= spec.pMax * 1.1 && a.tramp <= spec.trampMax * 1.1 && a.c <= spec.cMax * 1.1 && a.c >= spec.cMin * 0.9;
     if (tolerant) return false;
     return chance(g, 0.6);
   }
@@ -1329,7 +1340,8 @@ function complains(g: GameState, a: Analysis, grade: GradeId): boolean {
 /** Omtrent hvor mye verket faktisk lager per døgn: snittet av de siste døgnene, eller et forsiktig anslag */
 export function realisticDailyT(g: GameState, stats: PlantStats): number {
   const recent = g.history.slice(-3).filter((d) => d.producedT > 0);
-  const est = recent.length >= 2 ? recent.reduce((a, d) => a + d.producedT, 0) / recent.length : stats.dailyProductT * 0.8;
+  const est =
+    recent.length >= 2 ? recent.reduce((a, d) => a + d.producedT, 0) / recent.length : stats.dailyProductT * 0.8;
   return Math.max(0.05, Math.min(stats.dailyProductT, est));
 }
 
@@ -1397,7 +1409,11 @@ function processComplaints(g: GameState): void {
     // Samme kontrakt trekker omdømme bare én gang (B-034)
     const contract = g.contracts.find((x) => x.id === c.contractId);
     if (contract?.complained) {
-      log(g, `${c.text} Kunden får pengene tilbake (${fmtKr(c.refund)}). Samme ordre som før, så ikke mer tap av omdømme.`, "bad");
+      log(
+        g,
+        `${c.text} Kunden får pengene tilbake (${fmtKr(c.refund)}). Samme ordre som før, så ikke mer tap av omdømme.`,
+        "bad",
+      );
       continue;
     }
     if (contract) contract.complained = true;
@@ -1452,7 +1468,15 @@ function pickCustomer(
     g,
     customer.products.filter((p) => stats.products.includes(p)),
   );
-  return { customer, product, grade: pick(g, gradesFor(customer)) };
+  let grade = pick(g, gradesFor(customer));
+  // De fleste forespørsler gjelder kvaliteter verket kan lage med skrapet som er åpent. Noen få gjelder
+  // kvaliteter man må forske fram skrap til – de viser hva som finnes (B-056)
+  const canMake = (id: GradeId) => !!suggestRecipe(g, id, stats, "billig");
+  if (!canMake(grade) && chance(g, 0.75)) {
+    const makeable = gradesFor(customer).filter(canMake);
+    if (makeable.length) grade = pick(g, makeable);
+  }
+  return { customer, product, grade };
 }
 
 function makeOffer(g: GameState, stats: PlantStats): Contract | null {
@@ -1462,11 +1486,15 @@ function makeOffer(g: GameState, stats: PlantStats): Contract | null {
   const capacity = Math.max(0.1, stats.dailyProductT);
   // En kontrakt skal være et lite prosjekt: 1,5–4 døgns produksjon, ikke noe som er ferdig på sekunder
   // De første kontraktene i garasjen er små, så starten går fort og man ser at det virker (B-033)
-  const firstOrders = g.stage === 0 && g.totals.contractsDone + g.contracts.filter((c) => c.status === "aktiv").length < 2;
+  const firstOrders =
+    g.stage === 0 && g.totals.contractsDone + g.contracts.filter((c) => c.status === "aktiv").length < 2;
   const workDays = firstOrders ? uniform(g, 0.4, 0.8) : uniform(g, CONTRACT_DAYS[0], CONTRACT_DAYS[1]);
   const tonnes = roundTonnes(Math.max(customer.minT, Math.min(customer.maxT, capacity * workDays)));
   const pricePerT = Math.round(productPrice(g, product, grade) * (1 + stats.priceBonus) * uniform(g, 0.95, 1.1));
-  const days = Math.min(30, Math.ceil(tonnes / (Math.min(capacity, realisticDailyT(g, stats)) * 0.6)) + randInt(g, 2, 4));
+  const days = Math.min(
+    30,
+    Math.ceil(tonnes / (Math.min(capacity, realisticDailyT(g, stats)) * 0.6)) + randInt(g, 2, 4),
+  );
   const today = day(g);
   const size = Math.min(3, tonnes / capacity);
   // Små verk får mer omdømme per kontrakt, så starten ikke står og stamper på omdømmet (B-034)
@@ -1494,7 +1522,7 @@ function makeOffer(g: GameState, stats: PlantStats): Contract | null {
 }
 
 /** Aldri flere åpne forespørsler enn dette samtidig */
-const MAX_OPEN_OFFERS = 3;
+const MAX_OPEN_OFFERS = 4;
 
 /** Forespørsler kommer spredt gjennom døgnet i stedet for alle om morgenen. */
 function trickleOffers(g: GameState, stats: PlantStats): void {
@@ -1701,13 +1729,38 @@ export function acceptContract(g: GameState, id: number): PurchaseResult {
   const c = g.contracts.find((x) => x.id === id);
   if (!c || c.status !== "tilbud") return { ok: false, message: "Tilbudet finnes ikke lenger." };
   c.status = "aktiv";
-  c.priority = Math.max(0, ...g.contracts.filter((x) => x.status === "aktiv" && x.id !== c.id).map((x) => x.priority)) + 1;
+  c.priority =
+    Math.max(0, ...g.contracts.filter((x) => x.status === "aktiv" && x.id !== c.id).map((x) => x.priority)) + 1;
   log(
     g,
     `Du signerte med ${c.customer}: ${fmtT(c.tonnes)} ${PRODUCTS[c.product].name.toLowerCase()} (${GRADES[c.grade].name}) innen dag ${c.deadlineDay}.`,
     "info",
   );
   return { ok: true, message: "Kontrakt signert." };
+}
+
+/** Straffen for å avbryte en aktiv kontrakt: litt billigere enn å bomme på fristen, fordi kunden får vite det i tide (B-057) */
+export function cancelPenalty(c: Contract): { bot: number; rep: number } {
+  const remaining = Math.max(0, c.tonnes - c.delivered);
+  return { bot: Math.round(remaining * c.penaltyPerT * 0.6), rep: Math.round(c.repLoss * 0.5 * 10) / 10 };
+}
+
+/** Avbryter en aktiv kontrakt mot bot og tapt omdømme (B-057) */
+export function cancelContract(g: GameState, id: number): PurchaseResult {
+  const c = g.contracts.find((x) => x.id === id && x.status === "aktiv");
+  if (!c) return { ok: false, message: "Kontrakten finnes ikke lenger." };
+  const { bot, rep } = cancelPenalty(c);
+  addCost(g, "bot", bot);
+  repLoss(g, rep, "sen");
+  c.status = "misligholdt";
+  c.closedDay = day(g);
+  log(
+    g,
+    `Du avbrøt kontrakten med ${c.customer} (${fmtT(c.tonnes - c.delivered)} ulevert). Bot ${fmtKr(bot)}, omdømme −${rep.toFixed(1)}.`,
+    "bad",
+  );
+  if (c.agreementId) agreementWeekClosed(g, c, false);
+  return { ok: true, message: "Kontrakten er avbrutt." };
 }
 
 export function declineContract(g: GameState, id: number): void {
@@ -1890,7 +1943,11 @@ function updateAbsence(g: GameState, stats: PlantStats): void {
       w.absentFrom = w.absentUntil = w.absentReason = undefined;
     }
     if (w.absentReason === "ferie" && w.absentFrom !== undefined && Math.abs(w.absentFrom - g.minute) < 60)
-      log(g, `${w.name} (${ROLES[w.role].name.toLowerCase()}) har ferie fra i dag til dag ${day(g, w.absentUntil! - 1)}.`, "event");
+      log(
+        g,
+        `${w.name} (${ROLES[w.role].name.toLowerCase()}) har ferie fra i dag til dag ${day(g, w.absentUntil! - 1)}.`,
+        "event",
+      );
     if (w.nextVacationDay === undefined) w.nextVacationDay = today + randInt(g, 10, 110);
     const busy = w.absentUntil !== undefined;
     // Ferie: varsles tre døgn før, maks en tidel av de ansatte samtidig
@@ -1906,7 +1963,11 @@ function updateAbsence(g: GameState, stats: PlantStats): void {
       w.absentUntil = until;
       w.absentReason = "ferie";
       w.nextVacationDay = day(g, until) + randInt(g, 100, 140);
-      log(g, `${w.name} (${ROLES[w.role].name.toLowerCase()}) får ferie dag ${day(g, from)}–${day(g, until - 1)}.`, "event");
+      log(
+        g,
+        `${w.name} (${ROLES[w.role].name.toLowerCase()}) får ferie dag ${day(g, from)}–${day(g, until - 1)}.`,
+        "event",
+      );
       continue;
     }
     // Sykdom
@@ -1916,7 +1977,11 @@ function updateAbsence(g: GameState, stats: PlantStats): void {
       w.absentFrom = g.minute;
       w.absentUntil = g.minute + len * MIN_PER_DAY;
       w.absentReason = "syk";
-      log(g, `${w.name} (${ROLES[w.role].name.toLowerCase()}) er syk ${len === 1 ? "i dag" : `i ${len} døgn`}.`, "event");
+      log(
+        g,
+        `${w.name} (${ROLES[w.role].name.toLowerCase()}) er syk ${len === 1 ? "i dag" : `i ${len} døgn`}.`,
+        "event",
+      );
     }
   }
 }
@@ -1984,7 +2049,10 @@ function onHour(g: GameState, stats: PlantStats): void {
 export function autoBuy(
   g: GameState,
   stats: PlantStats,
-  opts: { credit: boolean; cap: number | null } = { credit: g.settings.autoBuyCredit, cap: g.settings.autoBuyMaxPerDay },
+  opts: { credit: boolean; cap: number | null } = {
+    credit: g.settings.autoBuyCredit,
+    cap: g.settings.autoBuyMaxPerDay,
+  },
 ): void {
   // Med flere kvaliteter samtidig kjøpes skrap etter alle ovnenes resepter (B-039)
   const recipe = Object.fromEntries(SCRAP_IDS.map((id) => [id, 0])) as Record<ScrapId, number>;
@@ -2151,7 +2219,11 @@ function onDay(g: GameState, stats: PlantStats): void {
   if (cantReline && g.loan >= maxLoan(g) - 1) {
     g.stuckDays = (g.stuckDays ?? 0) + 1;
     if (g.stuckDays === 1)
-      log(g, "Verket står: det er ikke råd til ny foring, og banken låner ikke ut mer. Skaff penger innen tre døgn.", "bad");
+      log(
+        g,
+        "Verket står: det er ikke råd til ny foring, og banken låner ikke ut mer. Skaff penger innen tre døgn.",
+        "bad",
+      );
     if (g.stuckDays >= 3) {
       g.gameOver = true;
       g.speed = 0;

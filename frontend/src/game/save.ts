@@ -159,6 +159,7 @@ export function migrate(g: GameState): GameState {
   if (loose.sickUntilMin === undefined) loose.sickUntilMin = 0;
   if (loose.tempsUntilMin === undefined) loose.tempsUntilMin = 0;
   if (loose.tempCrew === undefined) loose.tempCrew = null;
+  if (loose.recipeGuide === undefined) loose.recipeGuide = null;
   // Før B-054 var automatikken gratis. Gamle spill får forskningen for sitt nivå, så ingenting slutter å virke
   if (!loose.automationResearch) {
     for (const r of RESEARCH)

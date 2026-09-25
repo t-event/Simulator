@@ -433,9 +433,9 @@ export function computePlantStats(g: GameState): PlantStats {
   if (hasResearch(g, "sikkerhet")) maintFactor *= 0.8;
 
   const sellers = presentWorkers(g).filter((w) => w.role === "salg").length;
+  // Garasjen og verkstedet får flere forespørsler, så det finnes noe å velge mellom (B-056)
   const offersPerDay =
-    1.2 +
-    0.6 * g.stage +
+    (g.stage === 0 ? 2.2 : g.stage === 1 ? 2.6 : 1.2 + 0.6 * g.stage) +
     (has(g, "salgskontor") ? 1 : 0) +
     Math.min(3, sellers) * 0.8 +
     (hasResearch(g, "kundepleie") ? 0.6 : 0) +

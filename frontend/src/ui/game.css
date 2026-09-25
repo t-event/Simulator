@@ -1955,3 +1955,21 @@ button {
   font-size: 14px;
   margin: 6px 0;
 }
+
+/* Avbryt ordre (B-057) */
+.g-cancel-order {
+  font-size: 13px;
+  min-height: 40px;
+  color: var(--muted, #8b98a8);
+}
+
+/* Reseptguiden (B-058) */
+.g-coach-row {
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.g-guide-link {
+  min-height: 40px;
+  text-align: left;
+}

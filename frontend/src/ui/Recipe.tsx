@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { applyRecipe, nudgeRecipe } from "../game/actions";
+import { startRecipeGuide } from "../game/recipeGuide";
 import { GRADES, SCRAP_IDS, SCRAP_TYPES } from "../game/data";
 import { recipeEstimate } from "../game/engine";
 import { furnaceGrade, gradeRecipe, gradesInUse, hasGrader, satisfies, type PlantStats } from "../game/plant";
@@ -49,6 +50,9 @@ export function RecipeCard({ g, stats, act }: { g: GameState; stats: PlantStats;
           ))}
         </div>
       )}
+      <button className="g-link g-guide-link" onClick={() => act((gg) => startRecipeGuide(gg, grade))}>
+        Vis meg steg for steg hvordan jeg lager resepten for {spec.name.toLowerCase()}
+      </button>
       <p className="g-muted">
         Resepten sier hvor mye av hver skraptype som går i ovnen. Den bestemmer hva som blir i stålet. Kvaliteten velger
         du på Verket.
