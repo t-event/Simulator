@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 30 – 2026-09-25: gjennomgang av koden
+
+**Brukeren ba om:** Se over all kode og fiks feil.
+
+**Gjort (B-055):** Fuzz-test av motoren (tilfeldige handlinger, invarianter, lagring) og klikk-gjennom av alle
+sider på alle nivåer. Fire feil rettet (støpefeil solgt mot spillerens valg, ansettelse for fravær, ferdighet for
+fraværende, natt-tipset).
+
+**Testet:** tsc, lint, build, balanse (8 / 26 / 65 / 161), prosessmodellen (validate). Ingen krasj, NaN eller
+konsollfeil; ingen horisontal scrolling.
+
+---
+
 ## Økt 29 – 2026-09-25: fagpoeng, vikarer og automatikk som forskning
 
 **Brukeren ba om:** For mange fagpoeng i støperiet; automatiske vikarer kom for sent; all automatikk skal låses
