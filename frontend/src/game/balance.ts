@@ -428,9 +428,15 @@ function botHour(g: GameState): void {
     const o = options.find((x) => x.id === id);
     if (!o || o.owned || o.locked) continue;
     // Ny støping med et annet produkt: lever ferdig kontraktene på det gamle først (B-062)
+    // …men bare når det er råd til byttet; ellers tas kontrakter som før, så verket ikke lever av spot (B-070)
+    const need = o.price * (o.price > 1_000_000 ? 1.3 : 1);
     if (o.reason?.startsWith("Lever først")) {
-      switching.add(g);
-      break;
+      if (g.cash - need >= reserve) {
+        switching.add(g);
+        break;
+      }
+      switching.delete(g);
+      continue;
     }
     if (!o.available && o.reason !== "For lite penger") continue;
     // Store investeringer krever en buffer til skrap og lønn mens produksjonen tar seg opp
@@ -516,7 +522,7 @@ if (process.argv.includes("--dump")) {
   // Lager et lagret spill på et gitt nivå, til testing av grensesnittet
   const stage = Number(process.argv[process.argv.indexOf("--dump") + 1]);
   const g = newGame(7);
-  while (g.stage < stage && day(g) < 400) {
+  while (g.stage < stage && day(g) < 400 && !g.gameOver) {
     botHour(g);
     advance(g, 60);
   }

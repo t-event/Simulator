@@ -42,6 +42,7 @@ import { PlantScene } from "./PlantScene";
 import { SceneBubbles } from "./SceneBubbles";
 import { StageCard, StationButton, UpgradeSheet } from "./Upgrades";
 import { AutoToggle } from "./AutoToggle";
+import { BankCard } from "./Settings";
 import { readyUpgrades, stationReady, type Station } from "./stations";
 import type { View } from "./views";
 
@@ -738,6 +739,7 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
             </Card>
           </div>
           <div className="g-col">
+            <BankCard g={g} act={act} />
             <Card title="Logg">
               <ul className="g-log">
                 {recent.map((e) => (

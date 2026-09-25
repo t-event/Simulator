@@ -438,7 +438,7 @@ export function scrapStopHelp(g: GameState): string {
   if (!auto(g, "autoBuy") || !plannerOrders(g))
     return `${what} Kjøp det under Marked, eller ansett en planlegger som kjøper inn.`.trim();
   if (g.autoBuyNote && !g.settings.autoBuyCredit && g.autoBuyNote.includes("kassa"))
-    return `Planleggeren får ikke kjøpt ${g.autoBuyNote}. Gi planleggeren lov til å bruke kassekreditten under Marked → Skrap, ta opp lån under Forskning → Bank, eller selg fra lageret.`;
+    return `Planleggeren får ikke kjøpt ${g.autoBuyNote}. Gi planleggeren lov til å bruke kassekreditten under Marked → Skrap, ta opp lån under Verket → Økonomi, eller selg fra lageret.`;
   if (g.autoBuyNote) return `Planleggeren får ikke kjøpt ${g.autoBuyNote}.`;
   return `${what} Planleggeren bestiller mer.`.trim();
 }

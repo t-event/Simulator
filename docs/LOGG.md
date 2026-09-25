@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 42 – 2026-09-25: ansatte, småfikser, innstillinger og bank
+
+**Brukeren ba om:** Sjekk om murere, selgere og alle ansatte virker; hjemskjerm-tips før start; varsel på Folk
+når folk mangler; fagpoeng én gang i uka; 4 og 5 skift; flere oppgraderinger på storverket; kontrollrommet med
+oksygen samtidig som strøm, manuell avslagging og tapping som kan renne over, og vanskeligere 5★; innstillinger og
+bank ut av Forskning; oppgraderinger per ovn; for lite tid til å svare på 10×.
+
+**Gjort i denne runden:** B-070 (målt alle roller, Folk viser effekten, testspiller-feil ved bytte av støping),
+B-071 (fagpoeng ukentlig, «!» på Folk, svarfrist i 1×, hjemskjerm-tips), B-072 (⚙️ og bank under Økonomi).
+
+**Testet:** tsc, lint, balanse (8 / 26 / 66 / 136, nybegynner 150, exit 0), frø 7–10, headless-målinger av
+rollene, Playwright på iPhone SE og iPhone 13.
+
+**Gjenstår:** 4 og 5 skift, oppgraderinger per ovn, flere oppgraderinger på storverket, kontrollrommet – tas i
+neste runder. Spørsmålet om storverket henger sammen med flere oppgraderinger.
+
+---
+
 ## Økt 41 – 2026-09-25: tips når farten går ned
 
 **Brukeren ba om:** Et hint første gang farten går ned automatisk, og hvorfor.

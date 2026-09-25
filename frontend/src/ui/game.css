@@ -1996,3 +1996,36 @@ button {
 .g-chain-state {
   min-height: 2.6em;
 }
+
+/* Tips om å legge spillet til på hjemskjermen (B-071) */
+.g-install {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  background: rgba(79, 195, 247, 0.08);
+}
+.g-install p {
+  margin: 0 0 8px;
+}
+
+/* Smale telefoner (iPhone SE): topplinja med fart, fagbok og ⚙️ må få plass uten å overlappe (B-072) */
+.g-when span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 359px) {
+  .g-top-row:first-child {
+    gap: 6px;
+  }
+  .g-speed button {
+    min-width: 30px;
+    padding: 6px 4px;
+  }
+  .g-book {
+    padding: 6px 6px;
+  }
+  .g-when span {
+    font-size: 11px;
+  }
+}

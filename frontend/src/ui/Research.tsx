@@ -19,7 +19,8 @@ function FpDeal({ g, act }: { g: GameState; act: GameApi["act"] }) {
         <span className="g-fp-cost">+{deal.fp} FP</span>
       </div>
       <p className="g-muted g-small-text">
-        Leie inn forskere fra høyskolen i et døgn. Lønner seg når forskningen står fast og du har penger til overs.
+        Leie inn forskere fra høyskolen. Kan brukes én gang i uka. Lønner seg når forskningen står fast og du har penger
+        til overs.
       </p>
       <div className="g-row">
         <button
@@ -103,7 +104,7 @@ export function Research({
           <li>
             Charger du kjører selv i kontrollrommet («Ta styringen» på Verket, med lysbueovn): opptil 6 per charge
           </li>
-          <li>Forskningssamarbeid (under): kjøp fagpoeng én gang per døgn</li>
+          <li>Forskningssamarbeid (under): kjøp fagpoeng én gang i uka</li>
         </ul>
         <p className="g-muted">Les kapitlet i fagboka før du forsker.</p>
       </details>
