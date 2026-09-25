@@ -4,7 +4,17 @@
  */
 import { useEffect, useState } from "react";
 import { cloudConfigured } from "../net/config";
-import { BOARDS, fetchLeaderboard, fetchMyRank, fetchProfile, type BoardKind, type BoardRow } from "../net/leaderboard";
+import {
+  BOARDS,
+  fetchLeaderboard,
+  fetchMyRank,
+  fetchProfile,
+  LEAGUE_NAMES,
+  type BoardKind,
+  type BoardRow,
+} from "../net/leaderboard";
+import { SeasonLine } from "./Season";
+import { useSeasonStatus } from "./useSeason";
 import { getSession, onSessionChange } from "../net/supabase";
 import { useSyncExternalStore } from "react";
 import { Card } from "./common";
@@ -20,6 +30,10 @@ function fmtValue(kind: BoardKind, v: number): string {
 export function Leaderboard({ onOpenSettings }: { onOpenSettings?: () => void }) {
   const session = useSyncExternalStore(onSessionChange, getSession, getSession);
   const [kind, setKind] = useState<BoardKind>("verdi");
+  // Denne sesongen eller alle tider (B-129)
+  const [scope, setScope] = useState<"sesong" | "alle">("sesong");
+  const status = useSeasonStatus();
+  const seasonId = scope === "sesong" ? (status?.current?.id ?? null) : null;
   const [rows, setRows] = useState<BoardRow[] | null>(null);
   const [myRank, setMyRank] = useState<number | null>(null);
   const [nickname, setNickname] = useState<string | null | undefined>(undefined);
@@ -35,8 +49,8 @@ export function Leaderboard({ onOpenSettings }: { onOpenSettings?: () => void })
         if (!alive) return;
         setError(null);
         const [list, rank, profile] = await Promise.all([
-          fetchLeaderboard(kind),
-          session ? fetchMyRank(kind).catch(() => null) : Promise.resolve(null),
+          fetchLeaderboard(kind, seasonId),
+          session ? fetchMyRank(kind, seasonId).catch(() => null) : Promise.resolve(null),
           session ? fetchProfile().catch(() => null) : Promise.resolve(null),
         ]);
         if (!alive) return;
@@ -50,7 +64,7 @@ export function Leaderboard({ onOpenSettings }: { onOpenSettings?: () => void })
     return () => {
       alive = false;
     };
-  }, [kind, session, tick]);
+  }, [kind, session, tick, seasonId]);
 
   if (!cloudConfigured()) return null;
 
@@ -63,6 +77,27 @@ export function Leaderboard({ onOpenSettings }: { onOpenSettings?: () => void })
         </button>
       }
     >
+      <SeasonLine />
+      {status?.current && (
+        <div className="g-subtabs g-board-scope" role="tablist" aria-label="Sesong eller alle tider">
+          <button
+            role="tab"
+            aria-selected={scope === "sesong"}
+            className={scope === "sesong" ? "is-active" : ""}
+            onClick={() => setScope("sesong")}
+          >
+            Denne sesongen
+          </button>
+          <button
+            role="tab"
+            aria-selected={scope === "alle"}
+            className={scope === "alle" ? "is-active" : ""}
+            onClick={() => setScope("alle")}
+          >
+            Alle tider
+          </button>
+        </div>
+      )}
       <div className="g-subtabs g-board-tabs" role="tablist" aria-label="Toppliste">
         {BOARDS.map((b) => (
           <button
@@ -110,7 +145,9 @@ export function Leaderboard({ onOpenSettings }: { onOpenSettings?: () => void })
           {rows.map((r) => (
             <li key={r.plass} className={r.is_me ? "is-me" : ""}>
               <span className="g-board-rank">{r.plass}.</span>
-              <span className="g-board-name">{r.nickname}</span>
+              <span className="g-board-name">
+                {r.nickname} <em className={`g-league is-${r.league}`}>{LEAGUE_NAMES[r.league] ?? r.league}</em>
+              </span>
               <span className="g-board-value">{fmtValue(kind, r.value)}</span>
             </li>
           ))}
@@ -120,8 +157,9 @@ export function Leaderboard({ onOpenSettings }: { onOpenSettings?: () => void })
         <p className="g-muted g-small-text">Du er nr. {myRank}.</p>
       )}
       <p className="g-muted g-small-text">
-        Lista regnes ut på serveren av det som er lagret på nett, én gang per spilldøgn. Kontoer med urimelig vekst
-        holdes utenfor.
+        Lista regnes ut på serveren av det som er lagret på nett, én gang per spilldøgn. Ligaer: Bronse til og med
+        stålverket, Sølv på storverket, Gull når konsernverdien passerer 1 mrd. Kontoer med urimelig vekst holdes
+        utenfor.
       </p>
     </Card>
   );

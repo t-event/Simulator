@@ -15,6 +15,7 @@ import { auto, automationUnlocked, researchForScrap, scrapUnlocked } from "../ga
 import type { GameState, ProductId, ScrapId } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Bar, Card, SubTabs } from "./common";
+import { EventsNote } from "./Season";
 import { RecipeCard } from "./Recipe";
 import { AutoToggle } from "./AutoToggle";
 import { fmtKr, fmtNum, fmtPct, fmtT } from "./format";
@@ -70,6 +71,7 @@ export function Market({ g, stats, act, openTab }: Props & { openTab?: string })
     <div className="g-grid">
       <div className="g-col-wide">
         <SubTabs tabs={tabs} value={tab} onChange={setTab} label="Marked" />
+        <EventsNote g={g} />
 
         {tab === "resept" && <RecipeCard g={g} stats={stats} act={act} />}
 

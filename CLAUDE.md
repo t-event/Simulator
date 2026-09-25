@@ -98,9 +98,11 @@ frontend/src/
     tutorial.ts  Veiledet start          tips.ts      Engangstips
     recipeGuide.ts Reseptguide for nye kvaliteter (vises av ui/RecipeGuide.tsx)
     konsern.ts   Datterverk og sluttmålet 10 mrd. (vises av ui/Konsern.tsx)
+    world.ts     Felles hendelser i motoren og sesongfordel (B-129)
     balance.ts   Automatisk testspiller
   net/         Konto og lagring på nett (B-125) – Supabase over fetch, uten bibliotek
     config.ts    URL og nøkkel fra miljøet (aldri i repoet)   supabase.ts  Innlogging, økt, spørringer   sync.ts  Lagring på nett
+    leaderboard.ts Toppliste og kallenavn   season.ts  Sesong og hendelser (butikk)
     tests.ts     Tester uten nett (falsk tjeneste)
   ui/          Spillets skjermer (mobil først) og kontrollrommet
     Overview.tsx Verket med underfanene Oversikt, Anlegg, Økonomi (og Konsern)   Recipe.tsx  Resepten på Marked
@@ -110,6 +112,7 @@ frontend/src/
     InstallTip.tsx    Tips om hjemskjerm på startskjermen   Power.tsx  Strøm og skiftplan
     Handbook.tsx Fagboka med quiz og oppdrag   Inbox.tsx  Varsellista (åpnes fra varsellinja øverst)
     Account.tsx  Konto: logg inn, opprett, glemt passord, velg spill ved konflikt (på startskjermen og i ⚙️)
+    Leaderboard.tsx Topplista (Verket → Økonomi)   Season.tsx  Sesongspørsmål, hendelser på Marked, sesonglinje
     control/     Kontrollrommet: den enkle styringen (SimpleControl + simpleRunner)
   sim/         Prosessmodell for lysbueovnen (brukes av kontrollrommet)
 frontend/public/  PWA: manifest, ikoner, service worker

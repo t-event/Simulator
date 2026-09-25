@@ -29,6 +29,7 @@ import { auto, hasResearch, RESEARCH, scrapUnlocked, secondsAction } from "./res
 import { checkMissions } from "./missions";
 import { checkChallenges } from "./challenges";
 import { konsernDay, konsernEquity } from "./konsern";
+import { worldFactor } from "./world";
 import { maybeAdvisor, maybeCreateDecision } from "./decisions";
 import { maybeTip, setCreditHint } from "./tips";
 import { scrapResearchFor, suggestRecipe } from "./recipe";
@@ -241,6 +242,9 @@ export function newGame(seed = Date.now(), round = 1): GameState {
     konsern: { unlocked: false, plants: [], shared: [], nextId: 1, director: null, milestones: 0 },
     storeFullLogMin: -1e9,
     owner: null,
+    season: null,
+    seasonPromptSeen: null,
+    world: { events: [], seenEventIds: [] },
     fpDealDay: -1,
     inboxSeenId: 0,
     researched: [],
@@ -373,10 +377,11 @@ export function addScrapParti(
 }
 
 export function scrapPrice(g: GameState, id: ScrapId): number {
-  // Skrapterminalen kjøper inn i store partier (B-075)
+  // Skrapterminalen kjøper inn i store partier (B-075); felles hendelser ganger prisen (B-129)
   return (
     SCRAP_TYPES[id].price *
     g.market.scrapFactor[id] *
+    worldFactor(g, "scrap") *
     (has(g, "skrapterminal") ? 0.94 : 1) *
     (hasResearch(g, "skraplogistikk") ? 0.95 : 1) *
     (g.konsern?.shared.includes("innkjop") ? 0.95 : 1)

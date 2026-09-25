@@ -226,4 +226,8 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
 
 ## Status
 
-- Fase 0 og 1 er bygget (B-125, B-126). Fase 2 (toppliste) er bygget (B-127). Fase 3 er neste.
+- Fase 0 og 1 er bygget (B-125, B-126). Fase 2 (toppliste) er bygget (B-127). Fase 3 (sesonger, ligaer og felles
+  hendelser) er bygget (B-129). Fase 4 er neste.
+- **Slik starter du en ny sesong:** i SQL Editor: `select public.start_season('Sesong 2', 4);` (navn, antall uker).
+  **Slik legger du ut en hendelse:** `select public.add_event('skrapmangel', 7);` (skrapmangel, stromkrise,
+  eksportboom, importpress, transportstreik; antall dager). Claude kan gjøre begge deler gjennom connectoren.

@@ -20,6 +20,7 @@ import {
   type Stage,
 } from "./data";
 import { auto, hasResearch } from "./research";
+import { worldFactor } from "./world";
 import type { Analysis, Crew, GameState, GradeId, PowerDeal, ProductId, RoleId, ScrapId, Worker } from "./types";
 
 export const OWNER_SLOTS = 2;
@@ -450,7 +451,7 @@ export function energyPrice(g: GameState, minute = g.minute): number {
   // Kraftavtale for konsernet: 10 % billigere strøm (B-120)
   return furnaceType(g).fuel === "gass"
     ? GAS_PRICE
-    : powerPrice(g, minute) * (hasResearch(g, "konsernenergi") ? 0.9 : 1);
+    : powerPrice(g, minute) * (hasResearch(g, "konsernenergi") ? 0.9 : 1) * worldFactor(g, "power");
 }
 
 export function computePlantStats(g: GameState): PlantStats {
@@ -647,7 +648,8 @@ export function gradeFailures(a: Analysis, grade: GradeId): string[] {
 }
 
 export function productPrice(g: GameState, product: ProductId, grade: GradeId | null): number {
-  const base = PRODUCTS[product].price * g.market.steelFactor;
+  // Felles hendelser (eksportboom, importpress) ganger stålprisen (B-129)
+  const base = PRODUCTS[product].price * g.market.steelFactor * worldFactor(g, "steel");
   return base * (grade ? GRADES[grade].premium : 1);
 }
 

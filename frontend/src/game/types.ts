@@ -360,6 +360,19 @@ export interface Decision {
   resumeSpeed: number;
 }
 
+/** Felles hendelse i markedet fra serveren (B-129): ganger prisene så lenge den varer */
+export interface WorldEvent {
+  id: number;
+  kind: string;
+  title: string;
+  text: string;
+  scrap: number;
+  steel: number;
+  power: number;
+  /** ISO-tidspunkt for når den slutter (ekte tid) */
+  until: string;
+}
+
 export interface Market {
   steelFactor: number;
   scrapFactor: Record<ScrapId, number>;
@@ -440,6 +453,12 @@ export interface GameState {
   storeFullLogMin: number;
   /** Kontoen spillet er koblet til (konto-id fra innloggingen), eller null uten konto (B-125) */
   owner: string | null;
+  /** Sesongen spillet er med i (B-129), eller null */
+  season: number | null;
+  /** Sesongen spilleren sist svarte på spørsmålet om, så det ikke stilles igjen */
+  seasonPromptSeen: number | null;
+  /** Felles hendelser fra serveren som pågår nå, og hvilke spilleren alt har fått beskjed om (B-129) */
+  world: { events: WorldEvent[]; seenEventIds: number[] };
   konsern: {
     unlocked: boolean;
     plants: SisterPlant[];

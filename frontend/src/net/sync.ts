@@ -72,10 +72,19 @@ export async function uploadSave(g: GameState, keepalive = false): Promise<void>
   if (!id) return;
   g.owner = id;
   const day = dayOf(g);
+  // Sesongen leses før første await, så lagringen og tidslinja får samme verdi
+  const season = g.season;
   await rest("saves", {
     method: "POST",
     prefer: "resolution=merge-duplicates,return=minimal",
-    body: { user_id: id, state: g, minute: Math.floor(g.minute), day, client_version: APP_VERSION },
+    body: {
+      user_id: id,
+      state: g,
+      minute: Math.floor(g.minute),
+      day,
+      client_version: APP_VERSION,
+      season_id: g.season,
+    },
     keepalive,
   });
   if (day !== lastSnapshotDay) {
@@ -89,6 +98,7 @@ export async function uploadSave(g: GameState, keepalive = false): Promise<void>
         equity: Math.round(konsernEquity(g)),
         stage: g.stage,
         reputation: Math.round(g.reputation * 10) / 10,
+        season_id: season,
         client_version: APP_VERSION,
       },
       keepalive,

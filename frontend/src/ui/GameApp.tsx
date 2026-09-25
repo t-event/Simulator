@@ -19,6 +19,8 @@ import { Overview } from "./Overview";
 import { People } from "./People";
 import { ResearchPage } from "./ResearchPage";
 import { AccountCard, CloudDot } from "./Account";
+import { SeasonPrompt, SeasonSync } from "./Season";
+import { useSeasonStatus } from "./useSeason";
 import { BackupInput, SettingsSheet } from "./Settings";
 import { getSession } from "../net/supabase";
 import { flush, onLocalSave } from "../net/sync";
@@ -128,10 +130,16 @@ function EndScreen({
           <li>Kontrakter levert: {g.totals.contractsDone}</li>
           <li>Reklamasjoner: {g.totals.complaints}</li>
         </ul>
-        {won && (
+        {won && onNextRound && (
           <p className="g-muted">
             Nytt spill+ starter i garasjen igjen, men med mer startkapital, noen fagpoeng og litt omdømme. Utfordringene
             på storverket står under Verket hvis du spiller videre.
+          </p>
+        )}
+        {won && !onNextRound && (
+          <p className="g-muted">
+            Du er med i en sesong: spill videre og hold plassen på topplista. Når neste sesong starter, starter alle i
+            garasjen igjen. Utfordringene på storverket står under Verket.
           </p>
         )}
         <div className="g-row">
@@ -388,6 +396,9 @@ export function GameApp() {
   const [bookChapter, setBookChapter] = useState<string | null>(null);
   // Seiersskjermen vises én gang per spill; valget lagres i spillet (B-091)
   const winSeen = !!g?.winSeen;
+  // Sesongene erstatter nytt spill+ (B-129): er spillet med i sesongen som pågår, tilbys ikke nytt spill+
+  const seasonStatus = useSeasonStatus();
+  const seasonActive = !!seasonStatus?.current && g?.season === seasonStatus.current.id;
 
   useEffect(() => {
     window.scrollTo({ top: 0 });
@@ -412,7 +423,13 @@ export function GameApp() {
     };
   }, [api.game]);
 
-  if (!g) return <Intro api={api} />;
+  if (!g)
+    return (
+      <>
+        <SeasonSync api={api} />
+        <Intro api={api} />
+      </>
+    );
 
   const stats = computePlantStats(g);
   const shown: View = viewUnlocked(g, view) ? view : "verket";
@@ -586,13 +603,15 @@ export function GameApp() {
         </Suspense>
       )}
 
+      <SeasonSync api={api} />
+      {!modalOpen && <SeasonPrompt api={api} g={g} />}
       {g.gameOver && <EndScreen g={g} onRestart={api.quit} />}
       {g.won && !winSeen && !g.gameOver && (
         <EndScreen
           g={g}
           onRestart={api.quit}
           onContinue={() => act((gg) => void (gg.winSeen = true))}
-          onNextRound={api.startNextRound}
+          onNextRound={seasonActive ? undefined : api.startNextRound}
         />
       )}
     </div>
