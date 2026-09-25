@@ -5,6 +5,29 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 71 – 2026-09-25: databasen satt opp gjennom Supabase-connectoren
+
+**Brukeren ba om:** Ordne alt i Supabase. La til Supabase som connector.
+
+**Gjort:**
+- Migrasjonen `grunnlag_konto_og_lagring` (= `supabase/001_grunnlag.sql`) er kjørt i prosjektet: `profiles`,
+  `saves`, `snapshots`, `config`, triggere, `delete_my_account` og tilgangsregler.
+- Sikkerhetsrådene fra Supabase rettet med migrasjonen `sikkerhet_funksjoner` (= `supabase/002_sikkerhet.sql`):
+  låst `search_path` og ingen API-tilgang til trigger-funksjonene, «slett konto» bare for innloggede.
+- GitHub Secrets er lagt inn av brukeren, og publiseringen med nøkler gikk grønt (kjøring 81).
+- CLAUDE.md: connectoren og regelen om at `supabase/` speiler databasen.
+
+**Testet:** tabellene og reglene lest tilbake fra databasen; sikkerhetsrådene viser bare det tilsiktede: innloggede kan kalle «slett konto».
+
+**Gjenstår:**
+- Brukeren setter Site URL (Authentication → URL Configuration) til `https://t-event.github.io/Simulator/`.
+  Connectoren kan ikke endre Auth-innstillinger.
+- Brukeren tester opprett konto, bekreftelse, innlogging på to enheter og glemt passord.
+- Tokenet som ble limt inn i chatten, bør slettes i Supabase (Access Tokens).
+- Fase 2: toppliste.
+
+---
+
 ## Økt 70 – 2026-09-25: nøklene ut av repoet
 
 **Brukeren ba om:** Ingen koder på GitHub, de skal i GitHub Secrets. Og: holder gratisversjonen av Supabase?
@@ -17,7 +40,7 @@ nøkler er alt på nett slått av og spillet virker som før.
 - Playwright på iPhone 13 med `.env.local` og falsk Supabase: samme løp som i økt 69, alt OK.
 - Playwright uten `.env.local`: ingen kontokort, ingen feil.
 
-**Gjenstår (brukeren ba Claude ordne alt i Supabase, men sandkassen når ikke supabase.com):**
+**Gjenstår:** *(ordnet i økt 71 gjennom Supabase-connectoren)*
 - Brukeren åpner miljøet for `api.supabase.com` (og gjerne `<prosjekt>.supabase.co`) under Network access, og
   legger inn en Supabase personal access token som miljøvariabelen `SUPABASE_ACCESS_TOKEN` (aldri i chatten).
 - Neste økt med token: kjør `supabase/001_grunnlag.sql` via Management API
