@@ -477,8 +477,9 @@ export function AccountCard({ api, onDone }: { api: GameApi; onDone?: () => void
     <div className="g-account">
       <h3 className="g-subhead">Konto</h3>
       <p className="g-muted">
-        Med konto lagres spillet på nett, så du kan fortsette på en annen mobil eller fra hjemskjermen – og du er med på
-        topplista når den kommer. Spillet du har her, blir koblet til kontoen.
+        Med konto lagres spillet på nett, så du kan fortsette på en annen mobil eller fra hjemskjermen, og du kan være
+        med på topplista og i sesongen. Spillet du har her, kan kobles til kontoen: finnes det alt et spill på kontoen,
+        får du velge hvilket du vil fortsette med.
       </p>
       {info && <p className="g-account-info">{info}</p>}
       <form

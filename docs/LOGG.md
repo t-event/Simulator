@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 80 – 2026-09-25: rettet tekst på kontokortet
+
+**Brukeren ba om:** Teksten sa «topplista når den kommer» (den har kommet) og at spillet «blir» koblet (det kan
+kobles, og man velger ved konflikt).
+
+**Gjort:** Ny tekst: konto gir lagring på nett, topplista og sesongen; spillet kan kobles, og finnes det alt et spill
+på kontoen, velger man. Ingen andre steder sa «når den kommer».
+
+**Testet:** tsc, lint, `npm test`, build.
+
+**Gjenstår:** Fase 4 og 5.
+
+---
+
 ## Økt 79 – 2026-09-25: 🏆 flyttet ved varsellinja
 
 **Brukeren ba om:** Det ble ikke plass til alt i toppraden (skjermbilde: «10×» og klokka kuttet).
