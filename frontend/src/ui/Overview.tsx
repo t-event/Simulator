@@ -32,6 +32,7 @@ import {
   staffing,
   tempsActive,
   unitType,
+  fixedPriceAdvice,
   type PlantStats,
 } from "../game/plant";
 import type { GameState, GradeId, RoleId } from "../game/types";
@@ -39,6 +40,8 @@ import type { GameApi } from "../game/useGame";
 import { AnalysisLine, Bar, Card, GradeChips, Stat } from "./common";
 import { fmtClock, fmtKr, fmtNum, fmtPct, fmtT } from "./format";
 import { activeMissions, missionProgress } from "../game/missions";
+import { canWarn } from "../game/actions";
+import { sickSpells } from "../game/engine";
 import { CHALLENGE_STAGE, CHALLENGES, challengeProgress, challengeShare, challengesDone } from "../game/challenges";
 import { PlantScene } from "./PlantScene";
 import { SceneBubbles } from "./SceneBubbles";
@@ -159,6 +162,25 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
   }
   if (g.workers.length && g.morale < 40)
     out.push({ text: "Trivselen blant de ansatte er lav, og noen kan si opp. Se Folk.", view: "folk" });
+  {
+    // Høy strømpris: råd om fastpris (B-105)
+    const advice = fixedPriceAdvice(g, stats.hours);
+    if (advice)
+      out.push({
+        text: `Strømprisen er høy (${fmtNum(advice.spot, 2)} kr/kWh på spot). Fastpris nå: ${fmtNum(advice.fixed, 2)} kr/kWh i 30 døgn. Trykk her for å se strømavtalene.`,
+        view: "marked",
+        sub: "strom",
+      });
+  }
+  {
+    // Ofte borte: råd om advarsel (B-101)
+    const often = g.workers.find((w) => canWarn(g, w));
+    if (often)
+      out.push({
+        text: `${often.name} har vært syk ${sickSpells(g, often)} ganger på 60 døgn. Vurder en advarsel under Folk → Fravær.`,
+        view: "folk",
+      });
+  }
   if (g.stage >= 1 && stats.staffCount === 0)
     out.push({ text: "Nå har du plass til ansatte. Med flere folk kan verket gå flere skift.", view: "folk" });
   return out.slice(0, 3);
@@ -633,6 +655,20 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
 
             <BookCard g={g} openBook={openBook} />
             <ChallengesCard g={g} />
+            {/* Loggen synlig på Oversikt, ikke bare under Økonomi (B-098) */}
+            <Card title="Siste hendelser">
+              <ul className="g-log">
+                {recent.slice(0, 5).map((e) => (
+                  <li key={e.id} className={`log-${e.kind}`}>
+                    <span className="g-log-time">
+                      Dag {Math.floor(e.min / 1440) + 1} {fmtClock(e.min)}
+                    </span>
+                    {e.text}
+                  </li>
+                ))}
+              </ul>
+              <p className="g-muted">Alle viktige hendelser ligger i varsellista bak 🔔 øverst.</p>
+            </Card>
           </div>
         </>
       )}

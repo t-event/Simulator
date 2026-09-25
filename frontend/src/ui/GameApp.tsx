@@ -473,6 +473,10 @@ export function GameApp() {
             if (ok) setSettingsOpen(false);
             return ok;
           }}
+          onNextRound={() => {
+            setSettingsOpen(false);
+            api.startNextRound();
+          }}
           onClose={() => setSettingsOpen(false)}
         />
       )}

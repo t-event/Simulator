@@ -2,7 +2,9 @@ import { useState } from "react";
 import {
   BONUS_COOLDOWN_DAYS,
   bonusCost,
+  canWarn,
   COURSE_COOLDOWN_DAYS,
+  courseSession,
   courseCost,
   fire,
   giveBonus,
@@ -12,7 +14,9 @@ import {
   hireTempCrew,
   hiredCrewCost,
   sendOnCourse,
+  warnAbsence,
 } from "../game/actions";
+import { sickSpells, WARNING_DAYS } from "../game/engine";
 import { CREW_ROLES, ROLE_IDS, ROLES, STAGES, stageRef } from "../game/data";
 import { auto } from "../game/research";
 import {
@@ -148,13 +152,14 @@ function Stars({ skill }: { skill: number }) {
   );
 }
 
-function WorkerRow({ w, action, away }: { w: Worker; action: React.ReactNode; away?: string }) {
+function WorkerRow({ w, action, away, sick }: { w: Worker; action: React.ReactNode; away?: string; sick?: number }) {
   return (
     <li className="g-worker">
       <div>
         <strong>{w.name}</strong>
         <span className="g-muted"> · {ROLES[w.role].name}</span>
         {away && <span className="g-badge-bad g-worker-away"> {away}</span>}
+        {!!sick && sick >= 3 && <span className="g-badge-bad g-worker-away"> Syk {sick}× på 60 døgn</span>}
       </div>
       <Stars skill={w.skill} />
       <span className="g-muted">{fmtKr(w.salary)}/dag</span>
@@ -197,6 +202,45 @@ function Morale({ g, stats, act }: Props) {
 }
 
 /** Fravær: hvem som er borte nå og hvem som skal ha ferie, og vikarer (B-031) */
+/** Ansatte som ofte er syke, med mulighet for advarsel (B-101) */
+function FrequentAbsence({ g, act }: { g: GameState; act: GameApi["act"] }) {
+  const often = g.workers.filter((w) => sickSpells(g, w) >= 2).sort((a, b) => sickSpells(g, b) - sickSpells(g, a));
+  return (
+    <>
+      <h3 className="g-subhead">Fravær per ansatt (siste 60 døgn)</h3>
+      {often.length === 0 ? (
+        <p className="g-muted">Ingen har vært syke mer enn én gang de siste 60 døgnene.</p>
+      ) : (
+        <ul className="g-absence">
+          {often.slice(0, 12).map((w) => {
+            const n = sickSpells(g, w);
+            const warned = w.warnedDay !== undefined && day(g) - w.warnedDay < WARNING_DAYS;
+            return (
+              <li key={w.id}>
+                <strong>{w.name}</strong> <span className="g-muted">· {ROLES[w.role].name}</span>
+                <span className={n >= 3 ? "g-badge-bad" : "g-muted"}>Syk {n} ganger</span>
+                {warned ? (
+                  <span className="g-muted">Advart dag {w.warnedDay}</span>
+                ) : (
+                  canWarn(g, w) && (
+                    <button className="g-small" onClick={() => act((gg) => warnAbsence(gg, w.id))}>
+                      Gi advarsel
+                    </button>
+                  )
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      <p className="g-muted">
+        Noen misbruker egenmelding. En advarsel til den som er borte tre ganger eller mer, gjør fraværet sjeldnere – men
+        var personen faktisk syk, synes kollegene det er urettferdig, og trivselen går ned.
+      </p>
+    </>
+  );
+}
+
 function Absence({ g, stats, act }: Props) {
   if (!g.workers.length) return null;
   const now = g.workers.filter((w) => isAbsent(g, w));
@@ -275,6 +319,7 @@ function Absence({ g, stats, act }: Props) {
           </ul>
         </>
       )}
+      <FrequentAbsence g={g} act={act} />
     </Card>
   );
 }
@@ -352,6 +397,7 @@ export function People({ g, stats, act }: Props) {
   const [tab, setTab] = useState<PeopleTab>("skift");
   const [confirmFire, setConfirmFire] = useState<number | null>(null);
   const cap = STAGES[g.stage].staffCap;
+  const session = courseSession(g);
   const counts = Object.fromEntries(ROLE_IDS.map((r) => [r, g.workers.filter((w) => w.role === r).length])) as Record<
     RoleId,
     number
@@ -583,7 +629,10 @@ export function People({ g, stats, act }: Props) {
               {g.workers.length === 0 && <p className="g-muted">Ingen ansatte ennå.</p>}
               {g.workers.length > 0 && (
                 <p className="g-muted">
-                  Alle blir flinkere av å jobbe. Kurs gir et raskt løft ({fmtKr(courseCost(g))}).
+                  Alle blir flinkere av å jobbe. Kurs gir et raskt løft ({fmtKr(courseCost(g))}).{" "}
+                  {session.open
+                    ? `Bedriftshelsetjenesten og sikkerhetssenteret har kurs nå: ${session.left} av ${session.seats} plasser ledige, påmelding til og med dag ${session.end}.`
+                    : `Neste kursrunde hos bedriftshelsetjenesten og sikkerhetssenteret starter dag ${session.start} (${session.seats} plasser, hver 14. dag).`}
                 </p>
               )}
               {ROLE_IDS.filter((r) => counts[r] > 0).map((r) => (
@@ -599,6 +648,7 @@ export function People({ g, stats, act }: Props) {
                         <WorkerRow
                           key={w.id}
                           w={w}
+                          sick={sickSpells(g, w)}
                           away={
                             isAbsent(g, w)
                               ? `${w.absentReason === "syk" ? "Syk" : "Ferie"} til dag ${day(g, (w.absentUntil ?? 0) - 1)}`
@@ -626,6 +676,8 @@ export function People({ g, stats, act }: Props) {
                                   className="g-small"
                                   disabled={
                                     w.skill >= 5 ||
+                                    !session.open ||
+                                    session.left <= 0 ||
                                     (w.courseDay !== undefined && day(g) - w.courseDay < COURSE_COOLDOWN_DAYS)
                                   }
                                   title="Ferdighet +0,6"

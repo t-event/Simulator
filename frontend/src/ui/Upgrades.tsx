@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { buyUpgrade, keyUpgrade, upgradeOptions, type UpgradeOption } from "../game/actions";
+import { buyUpgrade, keyUpgrade, scheduleCastingSwitch, upgradeOptions, type UpgradeOption } from "../game/actions";
 import { STATION_NAMES, stationOptions, type Station } from "./stations";
 import { STAGES, stageRef, WIN_CASH } from "../game/data";
 import { unitType } from "../game/plant";
@@ -29,7 +29,17 @@ export function StationButton({
   );
 }
 
-function UpgradeCard({ o, stage, act }: { o: UpgradeOption; stage: number; act: GameApi["act"] }) {
+function UpgradeCard({
+  o,
+  stage,
+  act,
+  scheduled,
+}: {
+  o: UpgradeOption;
+  stage: number;
+  act: GameApi["act"];
+  scheduled?: boolean;
+}) {
   const [asking, setAsking] = useState(false);
   const buy = () => {
     act((g) => buyUpgrade(g, o.id));
@@ -57,7 +67,23 @@ function UpgradeCard({ o, stage, act }: { o: UpgradeOption; stage: number; act: 
             Kjøp
           </button>
           {o.reason && <span className="g-muted">{o.reason}</span>}
+          {o.canSchedule &&
+            (scheduled ? (
+              <button className="g-small" onClick={() => act((g) => scheduleCastingSwitch(g, null))}>
+                Planlagt – avbestill
+              </button>
+            ) : (
+              <button className="g-small" onClick={() => act((g) => scheduleCastingSwitch(g, o.id))}>
+                Bytt når ordrene er levert
+              </button>
+            ))}
         </div>
+      )}
+      {o.canSchedule && scheduled && (
+        <p className="g-note">
+          Byttet skjer av seg selv når ordrene er levert og det er penger nok. Nye forespørsler på det gamle produktet
+          er stoppet imens.
+        </p>
       )}
       {asking && o.confirm && (
         <div className="g-modal" role="alertdialog" aria-modal="true">
@@ -119,7 +145,13 @@ export function UpgradeSheet({
                   </h3>
                   <div className="g-upgrades">
                     {list.map((o) => (
-                      <UpgradeCard key={o.id} o={o} stage={g.stage} act={act} />
+                      <UpgradeCard
+                        key={o.id}
+                        o={o}
+                        stage={g.stage}
+                        act={act}
+                        scheduled={g.pendingCastingSwitch === o.id}
+                      />
                     ))}
                   </div>
                 </section>
@@ -129,7 +161,7 @@ export function UpgradeSheet({
         ) : (
           <div className="g-upgrades">
             {options.map((o) => (
-              <UpgradeCard key={o.id} o={o} stage={g.stage} act={act} />
+              <UpgradeCard key={o.id} o={o} stage={g.stage} act={act} scheduled={g.pendingCastingSwitch === o.id} />
             ))}
           </div>
         )}

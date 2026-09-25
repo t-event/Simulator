@@ -16,7 +16,7 @@ import {
   spotPrice,
 } from "../game/engine";
 import { moveInQueue, toggleOfferGrade } from "../game/actions";
-import { scrapResearchFor, scrapResearchHint } from "../game/recipe";
+import { scrapResearchFor, scrapResearchHint, suggestRecipe } from "../game/recipe";
 import {
   day,
   gradeFailures,
@@ -50,6 +50,10 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
   const recipeOk = est.grades.includes(c.grade);
   const failures = recipeOk ? [] : gradeFailures(est.analysis, c.grade);
   const missingResearch = canMake && !recipeOk ? scrapResearchFor(g, c.grade, stats) : null;
+  const hasKlasser = g.workers.some((w) => w.role === "klasser");
+  const following = auto(g, "followQueue");
+  const graderFix =
+    canMake && !recipeOk && !missingResearch && hasKlasser && !!suggestRecipe(g, c.grade, stats, "sikker");
   // Anslaget bygger på det verket faktisk har laget de siste døgnene, med ordrekøen du alt har (B-034)
   const perDay = stats.dailyProductT > 0 ? realisticDailyT(g, stats) : 0;
   // Ukeleveranser fra rammeavtalene som kommer før fristen, tar også plass i køen (B-062)
@@ -84,9 +88,22 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
             ) : (
               <li className="ok">Resepten holder kravet</li>
             )
+          ) : missingResearch ? (
+            <li className="bad">{scrapResearchHint(g, c.grade, missingResearch)}</li>
+          ) : graderFix ? (
+            // Skrapklasseren legger om resepten når ordren skal lages (B-099)
+            <li className={following ? "ok" : "warn"}>
+              {following
+                ? `Resepten din gir ${failures.join(", ")} nå, men skrapklasseren legger den om når ordren skal lages, så den holder kravet.`
+                : `Resepten gir ${failures.join(", ")}. Skrapklasseren kan legge den om hvis ovnen følger ordrekøen (Verket) – ellers juster den selv under Marked.`}
+            </li>
           ) : (
             <li className="bad">
-              {missingResearch ? scrapResearchHint(g, c.grade, missingResearch) : `Resepten gir ${failures.join(", ")}`}
+              {`Resepten gir ${failures.join(", ")}. ${
+                hasKlasser
+                  ? "Heller ikke skrapklasseren finner en blanding av skrapet du har tilgang til som holder."
+                  : "Juster den under Marked – eller ansett en skrapklasser som legger den om for deg."
+              }`}
             </li>
           ))}
         {canMake && (

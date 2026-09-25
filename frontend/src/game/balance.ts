@@ -18,6 +18,9 @@ import {
   hire,
   requestReline,
   sendOnCourse,
+  setPowerDeal,
+  canWarn,
+  warnAbsence,
   setRecipe,
   setTargetGrade,
   unitId,
@@ -42,7 +45,7 @@ import {
 import { EAFSimulation } from "../sim/eaf";
 import { createSim } from "../ui/control/simSetup";
 import { MELT_BAND, SimpleRunner, SLAG_DONE_KG } from "../ui/control/simpleRunner";
-import { computePlantStats, day, hasPlanner, satisfies } from "./plant";
+import { computePlantStats, day, fixedPriceAdvice, hasPlanner, satisfies } from "./plant";
 declare const process: { argv: string[]; exitCode?: number; exit?: (code: number) => void };
 
 import type { Crew, GameState, GradeId, ManualRequest, RoleId, ScrapId } from "./types";
@@ -227,8 +230,13 @@ function botHour(g: GameState): void {
   // Folk: bonus når trivselen er lav, kurs til de minst erfarne når det er god råd (B-026)
   const novice = novices.has(g);
   if (!novice && g.workers.length && g.morale < 50 && g.cash > bonusCost(g) * 5) giveBonus(g);
+  // En fornuftig spiller gir advarsel til dem som ofte er borte (B-101)
+  // Begge følger rådet på Verket om fastpris når strømprisen er høy (B-105)
+  if (fixedPriceAdvice(g, computePlantStats(g).hours)) setPowerDeal(g, "fast");
+  // Nybegynneren følger rådet på Verket om å gi advarsel
+  for (const w of g.workers) if (canWarn(g, w)) warnAbsence(g, w.id);
   if (!novice && g.stage >= 2 && g.cash > courseCost(g) * 40) {
-    const w = g.workers.find((x) => x.skill < 2.5 && (x.courseDay === undefined || day(g) - x.courseDay >= 10));
+    const w = g.workers.find((x) => x.skill < 2.5 && (x.courseDay === undefined || day(g) - x.courseDay >= 30));
     if (w) sendOnCourse(g, w.id);
   }
   // Fagboka: testspilleren leser alle kapitler den får

@@ -4,6 +4,7 @@ import {
   AGREEMENT_MAX_MISSED,
   AGREEMENT_STAGE,
   declineAgreement,
+  MAX_AGREEMENTS,
   realisticDailyT,
   recipeEstimate,
 } from "../game/engine";
@@ -24,6 +25,9 @@ function AgreementOffer({ g, stats, a, act }: Props & { a: Agreement }) {
   const recipeOk = recipeEstimate(g, a.grade, stats, gradeRecipe(g, a.grade)).grades.includes(a.grade);
   const perWeek = realisticDailyT(g, stats) * 7;
   const share = perWeek > 0 ? a.weeklyT / perWeek : Infinity;
+  // Med avtalene du alt har (B-103)
+  const usedT = g.agreements.filter((x) => x.status === "aktiv").reduce((t, x) => t + x.weeklyT, 0);
+  const totalShare = perWeek > 0 ? (usedT + a.weeklyT) / perWeek : Infinity;
   const hours = Math.max(0, (a.offerExpiresMin - g.minute) / 60);
   return (
     <div className="g-contract">
@@ -47,9 +51,11 @@ function AgreementOffer({ g, stats, a, act }: Props & { a: Agreement }) {
           </li>
         )}
         {canMake && (
-          <li className={share > 0.6 ? "bad" : share > 0.4 ? "warn" : "ok"}>
+          <li className={totalShare > 0.7 ? "bad" : totalShare > 0.5 ? "warn" : "ok"}>
             {Number.isFinite(share)
-              ? `Tar ca. ${fmtPct(share)} av det verket lager i en uke`
+              ? `Tar ca. ${fmtPct(share)} av det verket lager i en uke${
+                  usedT > 0 ? ` – sammen med avtalene du har, ${fmtPct(totalShare)}` : ""
+                }`
               : "Verket står – ingen produksjon nå"}
           </li>
         )}
@@ -100,6 +106,33 @@ function AgreementRow({ a }: { a: Agreement }) {
   );
 }
 
+/** Hvor mye av ukeproduksjonen rammeavtalene bruker, og hvor mange man kan ha (B-103) */
+function Capacity({ g, stats }: { g: GameState; stats: PlantStats }) {
+  const active = g.agreements.filter((a) => a.status === "aktiv");
+  const perWeek = realisticDailyT(g, stats) * 7;
+  const usedT = active.reduce((t, a) => t + a.weeklyT, 0);
+  const share = perWeek > 0 ? usedT / perWeek : 0;
+  const max = MAX_AGREEMENTS[g.stage] ?? 0;
+  return (
+    <div className="g-agreement-capacity">
+      <div className="g-goal">
+        <span>Kapasitet</span>
+        <Bar
+          value={Math.min(1, share)}
+          tone={share > 0.7 ? "critical" : share > 0.5 ? "warning" : "ok"}
+          label="Kapasitet"
+        />
+        <span>{fmtPct(share)}</span>
+      </div>
+      <p className="g-muted">
+        Avtalene tar {fmtT(usedT)} av ca. {fmtT(perWeek)} verket lager i uka. Ledig til vanlige kontrakter:{" "}
+        {fmtT(Math.max(0, perWeek - usedT))} i uka. Du kan ha {max} avtaler samtidig ({active.length} nå). Over ca. 50 %
+        blir det trangt når noe stopper.
+      </p>
+    </div>
+  );
+}
+
 /** Rammeavtaler (B-040): faste ukeleveranser over flere uker, fra stålverket */
 export function Agreements({ g, stats, act }: Props) {
   if (g.stage < AGREEMENT_STAGE && !g.agreements.length) return null;
@@ -112,6 +145,7 @@ export function Agreements({ g, stats, act }: Props) {
         markedet gjør. Hver ukes leveranse legges i ordrekøen med sju døgns frist. Leverer du alle ukene i tide, får du
         bonus.
       </p>
+      <Capacity g={g} stats={stats} />
       {offers.map((a) => (
         <AgreementOffer key={a.id} g={g} stats={stats} act={act} a={a} />
       ))}

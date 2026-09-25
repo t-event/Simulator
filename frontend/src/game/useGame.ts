@@ -12,7 +12,10 @@ const TICK_MS = 200;
 // En strupet bakgrunnsfane skal ikke hoppe over flere spilltimer på ett tick
 const MAX_ELAPSED_S = 1;
 const AUTOSAVE_MS = 5000;
-const TOAST_MS = 5000;
+/** Hvert varsel står minst så lenge; flere enn MAX_TOASTS venter i kø (B-098) */
+const TOAST_MS = 7000;
+const MAX_TOASTS = 3;
+const MAX_QUEUE = 12;
 
 export interface Toast {
   id: number;
@@ -49,11 +52,38 @@ export function useGame(): GameApi {
 
   const bump = useCallback(() => setVersion((v) => v + 1), []);
 
-  const pushToast = useCallback((text: string, kind: Toast["kind"]) => {
-    const id = toastId.current++;
-    setToasts((t) => [...t.slice(-2), { id, text, kind }]);
-    setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), TOAST_MS);
+  // Varslene står i kø i stedet for å skyve hverandre bort, så de rekker å bli lest også på 10× (B-098)
+  const visible = useRef<Toast[]>([]);
+  const queue = useRef<Toast[]>([]);
+  const pumpRef = useRef<() => void>(() => {});
+  const removeToast = useCallback((id: number) => {
+    visible.current = visible.current.filter((x) => x.id !== id);
+    setToasts(visible.current);
+    pumpRef.current();
   }, []);
+  const pump = useCallback(() => {
+    let changed = false;
+    while (visible.current.length < MAX_TOASTS && queue.current.length) {
+      const t = queue.current.shift()!;
+      visible.current = [...visible.current, t];
+      changed = true;
+      setTimeout(() => removeToast(t.id), TOAST_MS);
+    }
+    if (changed) setToasts(visible.current);
+  }, [removeToast]);
+  useEffect(() => {
+    pumpRef.current = pump;
+  }, [pump]);
+
+  const pushToast = useCallback(
+    (text: string, kind: Toast["kind"]) => {
+      queue.current.push({ id: toastId.current++, text, kind });
+      // Blir køen lang, går de eldste ut herfra – de står fortsatt i varsellista bak 🔔
+      if (queue.current.length > MAX_QUEUE) queue.current.splice(0, queue.current.length - MAX_QUEUE);
+      pump();
+    },
+    [pump],
+  );
 
   const begin = useCallback((g: GameState) => {
     gameRef.current = g;
@@ -141,7 +171,7 @@ export function useGame(): GameApi {
     [bump],
   );
 
-  const dismissToast = useCallback((id: number) => setToasts((t) => t.filter((x) => x.id !== id)), []);
+  const dismissToast = removeToast;
 
   // Spilløkka
   useEffect(() => {

@@ -5,6 +5,43 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 54 – 2026-09-25: strøm, fravær, kurs, varsler og mye småtteri
+
+**Brukeren ba om:**
+- Strømavtaler med mer å si.
+- Nytt spill+ etter «Spill videre».
+- For mange fagpoeng ved seier.
+- Fravær per ansatt og advarsler.
+- Å se om produksjonen holder ved utkobling.
+- Skrapklasser og reseptkrav i forespørsler.
+- Hjelp til å installere på hjemskjermen.
+- Sjeldnere kurs.
+- Varsler som forsvinner for fort, og en logg som ligger for gjemt.
+- Konsern.
+- Automatisk bytte blokk → emner.
+- Kapasitet for rammeavtaler.
+
+**Gjort:**
+- B-098 til B-105.
+- Nytt spill+ og hjemskjerm-hjelp ligger også under ⚙️.
+- Fagpoengene ved seier ble håndtert i forrige runde (B-085/B-092): mer å forske på og lavere sats på storverket.
+
+**Testet:**
+- tsc, lint, `npm test` (11 tester), bygg.
+- Balanse: 8 / 25 / 67 / 141, nybegynner 142,5, exit 0.
+- Playwright på iPhone 13:
+  - «Siste hendelser» og advarsel-hintet
+  - kapasiteten for avtaler
+  - «Gi advarsel» under Fravær
+  - teksten om kursrunder
+  - hjemskjerm-hjelp i ⚙️
+  - ingen feil og ingen horisontal scrolling
+- Headless: strømsammenligningen samles per døgn.
+
+**Gjenstår:** Konsern med flere verk og et større sluttmål (neste runde).
+
+---
+
 ## Økt 53 – 2026-09-25: storverket, slutten av spillet, kontrollrommet og tester
 
 **Brukeren ba om:**

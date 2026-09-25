@@ -1205,3 +1205,71 @@ Status: gjelder
 dekker blant annet nedrunding av beløp, seier, nytt spill+, migrering, forskningsdata, tilbaketrekking av
 forespørsler, støpemaskin nr. 2, anbefalte roller, utfordringer og kontrollrommet. Testene kjøres i CI før
 balansetesten.
+
+## B-098 Varsler i kø og loggen synlig på Oversikt (2026-09-25)
+Status: gjelder (utfyller B-089)
+Brukeren: varslene forsvinner for fort på 10×, og loggen ligger for gjemt.
+Beslutning:
+- Varslene står i kø i stedet for å skyve hverandre bort. Maks 3 vises samtidig, og hvert står minst 7 sekunder.
+  Køen holder inntil 12; resten ligger i varsellista bak 🔔.
+- Verket → Oversikt har kortet «Siste hendelser» med de fem siste linjene i loggen.
+
+## B-099 Skrapklasseren og reseptkravet i forespørsler (2026-09-25)
+Status: gjelder
+Brukeren: forespørselen sa at resepten ikke holder kravet, selv om skrapklasseren kan legge den om.
+Beslutning: Holder ikke resepten, men skrapklasseren finner en blanding som gjør det, sier forespørselen det. Den er
+grønn når ovnen følger ordrekøen, og gul ellers. Skrapklasseren retter nå også resepten til kvaliteten som alt kjøres,
+ikke bare når kvaliteten skifter.
+
+## B-100 Kursrunder hos bedriftshelsetjenesten og sikkerhetssenteret (2026-09-25)
+Status: gjelder (endrer B-026)
+Brukeren: man bør ikke kunne sende folk på kurs så ofte. Kurs er noe bedriftshelsetjenesten og sikkerhetssenteret
+holder med jevne mellomrom.
+Beslutning: Kurs holdes hver 14. dag med påmelding i to døgn og 2 + nivå plasser. Samme ansatt må vente 30 døgn
+mellom kurs (før 10). Folk viser når neste kursrunde er og hvor mange plasser som er ledige.
+
+## B-101 Fravær per ansatt og advarsel om egenmelding (2026-09-25)
+Status: gjelder
+Brukeren ville se fraværet til hver ansatt, så man kan gi advarsel når egenmelding misbrukes.
+Beslutning:
+- Hver ansatt har en historikk over sykefravær. Folk → Fravær viser dem som har vært syke to ganger eller mer på 60
+  døgn, og ansattlista merker dem med tre eller mer.
+- Omtrent hver femte er «ofte syk» (risiko × 2). Resten har risiko × 0,75, så snittet er som før. Dette avgjøres av
+  den ansattes id, ikke av tilfeldighetsgeneratoren, så resten av spillet trekker de samme tallene.
+- Etter tre sykefravær på 60 døgn kan man gi en advarsel. Hos den som misbruker, blir risikoen normal i 90 døgn og
+  trivselen −1. Var personen faktisk syk, synes kollegene det er urettferdig (trivsel −4).
+- Et hint på Verket foreslår advarsel. Begge testspillerne følger det. Uten hint nådde nybegynneren storverket først på
+  dag 236 på ett frø.
+
+## B-102 Planlagt bytte av støping (2026-09-25)
+Status: gjelder (utfyller B-084)
+Brukeren: man bør kunne trykke «oppgrader» og få byttet fra blokk til emner når blokk-ordrene er levert.
+Beslutning: Når byttet er sperret av ordrer på det gamle produktet, har støpekortet knappen «Bytt når ordrene er
+levert». Byttet gjøres av seg selv hver time når det går og det er penger nok, og kommer da uten spørsmål. Imens kommer
+det ingen nye forespørsler eller avtaletilbud på det gamle produktet. Motoren kaller byttet gjennom
+`setScheduledSwitch`, så `engine.ts` ikke importerer `actions.ts`.
+
+## B-103 Kapasitet for rammeavtaler (2026-09-25)
+Status: gjelder
+Avtaler-fanen viser hvor mye av ukeproduksjonen de aktive avtalene tar, hvor mye som er ledig til vanlige kontrakter,
+og hvor mange avtaler man kan ha. Hvert tilbud viser også hvor mye avtalene tar til sammen hvis man signerer det. Over
+50 % er gult, over 70 % rødt.
+
+## B-104 Utkobling: rekker ordrekøen det? (2026-09-25)
+Status: gjelder
+Brukeren måtte gjette om produksjonen holdt når nettselskapet ba om stopp. Kortet regner nå ut hvor mange kontrakter
+som blir for sene med og uten de fire timene stans (`lateContracts` i `engine.ts`). «Nei takk» merkes som anbefalt når
+utkoblingen gjør leveranser for sene.
+
+## B-105 Strømavtalene har mer å si (2026-09-25)
+Status: gjelder (utfyller B-024)
+Brukeren vant spillet uten å røre strømavtalen. Strøm var ca. 4–5 % av inntektene og effekttariffen ca. 0,3 %.
+Beslutning:
+- Spotprisen er mer urolig. Pristopper kommer oftere (5 % per døgn, 2,2–3,2 × i 2–4 døgn).
+- Tørre perioder (1,2 % per døgn) holder prisen rundt 1,7 × i 12–25 døgn. Fastpris beskytter mot dem.
+- Effekttariffen er hevet fra 1 200 til 4 000 kr per MW, så toppen merkes.
+- Strøm-siden viser hva strømmen til ovnene hadde kostet med hver avtale de siste sju døgnene, og hvilken som var
+  billigst.
+- Et hint på Verket foreslår fastpris i starten av en tørr periode når fastprisen er billigere. Det gjelder ikke korte
+  pristopper: der går prisen ned igjen før en 30-dagers fastpris lønner seg (målt: rådet ga mest ingenting eller tap).
+- Testspillerne følger rådet. Målt med og uten råd: høyere kasse på 5 av 6 frø.

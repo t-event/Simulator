@@ -443,7 +443,8 @@ export function avgDealPrice(g: GameState, deal: PowerDeal, hours: number): numb
 }
 
 /** Effekttariff: kroner per MW av døgnets høyeste effektuttak */
-export const PEAK_RATE_PER_MW = 1200;
+/** Hevet fra 1 200 (B-105): toppen skal merkes, og «én ovn i topptimer» skal kunne lønne seg */
+export const PEAK_RATE_PER_MW = 4000;
 
 export function energyPrice(g: GameState, minute = g.minute): number {
   return furnaceType(g).fuel === "gass" ? GAS_PRICE : powerPrice(g, minute);
@@ -773,4 +774,18 @@ export function supportAdvice(g: GameState): SupportAdvice[] {
       : "Tar plassen til dem som er syke eller har ferie.",
   );
   return out;
+}
+
+/**
+ * Råd om fastpris (B-105): en tørr periode med høy strømpris er i gang, verket har spotpris uten binding, og
+ * fastprisen som tilbys nå er billigere enn spot i timene verket går. Brukes av hintet på Verket og testspilleren.
+ */
+export function fixedPriceAdvice(g: GameState, hours: number): { fixed: number; spot: number } | null {
+  const s = g.settings;
+  if (hours <= 0 || s.powerDeal !== "spot" || furnaceType(g).fuel !== "strøm") return null;
+  // Bare i starten av en tørr periode: en kort pristopp går over før en 30-dagers fastpris lønner seg
+  if ((g.market.powerDryDays ?? 0) < 8) return null;
+  const fixed = fixedPowerOffer(g);
+  const spot = avgDealPrice(g, "spot", hours);
+  return fixed < spot * 0.9 ? { fixed, spot } : null;
 }

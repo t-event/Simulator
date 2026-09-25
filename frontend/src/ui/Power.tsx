@@ -32,6 +32,38 @@ function dealText(g: GameState, deal: PowerDeal): string {
   return `${kr(dealPrice(g, "natt", start + 60))} kl. 22–06, ellers ${kr(dealPrice(g, "natt", start + 12 * 60))}. Lønner seg når verket går om natta. Bindingstid ${POWER_BINDING_DAYS} døgn.`;
 }
 
+/** Hva strømmen de siste sju døgnene ville kostet med hver avtale (B-105) */
+function DealComparison({ g }: { g: GameState }) {
+  const days = [...g.history.slice(-6), g.today];
+  const sum = (deal: PowerDeal) => days.reduce((a, d) => a + (d.altEnergy?.[deal] ?? 0), 0);
+  const totals = DEALS.map((d) => ({ deal: d, cost: sum(d) }));
+  if (totals.every((t) => t.cost <= 0)) return null;
+  const best = totals.reduce((a, b) => (b.cost < a.cost ? b : a));
+  const mine = totals.find((t) => t.deal === g.settings.powerDeal)!;
+  return (
+    <>
+      <h3 className="g-subhead">Hva hadde strømmen til ovnene kostet? (siste 7 døgn)</h3>
+      <ul className="g-deal-compare">
+        {totals.map((t) => (
+          <li key={t.deal} className={t.deal === best.deal ? "is-best" : ""}>
+            <span>
+              {t.deal === best.deal ? "✓ " : ""}
+              {POWER_DEAL_NAMES[t.deal]}
+              {t.deal === g.settings.powerDeal ? " (din)" : ""}
+            </span>
+            <strong>{fmtKr(t.cost)}</strong>
+          </li>
+        ))}
+      </ul>
+      <p className="g-muted">
+        {best.deal === mine.deal
+          ? "Du har den billigste avtalen for måten verket har gått på."
+          : `${POWER_DEAL_NAMES[best.deal]} hadde spart ca. ${fmtKr(mine.cost - best.cost)} de siste sju døgnene. Fastprisen er tallet du får tilbud om nå.`}
+      </p>
+    </>
+  );
+}
+
 /** Strøm: pris gjennom døgnet, strømavtale og effekttariff (B-024) */
 export function PowerCard({ g, stats, act }: { g: GameState; stats: PlantStats; act: GameApi["act"] }) {
   const start = Math.floor(g.minute / 1440) * 1440;
@@ -110,6 +142,7 @@ export function PowerCard({ g, stats, act }: { g: GameState; stats: PlantStats; 
         label="Forny fastpris og nattariff av seg selv når bindingstida er ute"
       />
       <p className="g-muted">«Snitt» er prisen i timene verket går i dag.</p>
+      <DealComparison g={g} />
 
       <h3 className="g-subhead">Effekttariff</h3>
       <p className="g-muted">

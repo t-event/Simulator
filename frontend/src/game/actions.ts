@@ -14,7 +14,11 @@ import {
   startReline,
   maxLoan,
   newFurnaceUnit,
+  oftenSick,
+  setScheduledSwitch,
+  sickSpells,
   unlock,
+  WARNING_DAYS,
   type PurchaseResult,
 } from "./engine";
 import {
@@ -33,7 +37,7 @@ import {
 } from "./plant";
 import { newGradesAt, startRecipeGuide } from "./recipeGuide";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
-import type { GameState, GradeId, PowerDeal, RoleId, ScrapId } from "./types";
+import type { GameState, GradeId, PowerDeal, RoleId, ScrapId, Worker } from "./types";
 
 export type UpgradeKind = "stage" | "furnace" | "casting" | "addon";
 
@@ -60,6 +64,8 @@ export interface UpgradeOption {
   warning?: string;
   /** Spørsmål spilleren må svare ja på før kjøpet, f.eks. bytte av produkt (B-084) */
   confirm?: string;
+  /** Kjøpet kan planlegges til ordrene på det gamle produktet er levert (B-102) */
+  canSchedule?: boolean;
 }
 
 const fail = (message: string): PurchaseResult => ({ ok: false, message });
@@ -155,6 +161,7 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
     let reason = researchBlocker(g, c.id);
     let warning: string | undefined;
     let confirm: string | undefined;
+    let schedulable = false;
     if (!owned && c.product !== currentCasting.product) {
       const old = PRODUCTS[currentCasting.product].name.toLowerCase();
       const remaining = g.contracts
@@ -167,6 +174,7 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
       // over fristen og tatt med seg omdømmet, så de må leveres først (B-062)
       const stuck = remaining - inStock;
       if (!reason && stuck > 0.05) reason = `Lever først kontraktene på ${old} (${fmtT(stuck)} igjen)`;
+      schedulable = !!reason && !researchBlocker(g, c.id);
       // Rammeavtaler på det gamle produktet avsluttes uten straff ved byttet (endStaleAgreements, B-040)
       const deals = g.agreements.filter((a) => a.status === "aktiv" && a.product === currentCasting.product).length;
       const next = PRODUCTS[c.product].name.toLowerCase();
@@ -193,6 +201,7 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
       kind: "casting",
       warning,
       confirm,
+      canSchedule: !owned && schedulable,
       name: c.name,
       description: c.description,
       price: c.price,
@@ -407,6 +416,38 @@ export function fpDeal(g: GameState): { fp: number; price: number; reason: strin
           ? "For lite penger"
           : null;
   return { ...deal, reason };
+}
+
+/**
+ * Planlegger bytte av støping (B-102): kjøpes av seg selv når ordrene på det gamle produktet er levert og det er
+ * penger nok. Imens kommer det ikke nye forespørsler på det gamle produktet.
+ */
+export function scheduleCastingSwitch(g: GameState, id: string | null): PurchaseResult {
+  g.pendingCastingSwitch = id;
+  if (!id) return { ok: true, message: "Byttet er avbestilt." };
+  const c = CASTINGS.find((x) => x.id === id);
+  log(
+    g,
+    `${c?.name ?? "Den nye støpingen"} kjøpes når ordrene på ${PRODUCTS[castingType(g).product].name.toLowerCase()} er levert. Nye forespørsler på dem stoppes imens.`,
+    "info",
+  );
+  return { ok: true, message: "Byttet er planlagt." };
+}
+
+/** Kjøres hver time: gjennomfører et planlagt bytte når det går */
+export function runScheduledSwitch(g: GameState): void {
+  const id = g.pendingCastingSwitch;
+  if (!id) return;
+  const option = upgradeOptions(g).find((o) => o.id === id);
+  if (!option || option.owned) {
+    g.pendingCastingSwitch = null;
+    return;
+  }
+  if (!option.available) return;
+  g.pendingCastingSwitch = null;
+  const res = buyUpgrade(g, id);
+  if (res.ok)
+    log(g, `Ordrene er levert – ${option.name.toLowerCase()} er kjøpt og satt i drift, som planlagt.`, "good");
 }
 
 export function buyFpDeal(g: GameState): PurchaseResult {
@@ -654,7 +695,27 @@ export function setShiftStart(g: GameState, hour: number): void {
 // Trivsel og kurs (B-026)
 // ------------------------------------------------------------------ //
 export const BONUS_COOLDOWN_DAYS = 7;
-export const COURSE_COOLDOWN_DAYS = 10;
+export const COURSE_COOLDOWN_DAYS = 30;
+/** Bedriftshelsetjenesten og sikkerhetssenteret holder kurs hver 14. dag, med påmelding i to døgn (B-100) */
+export const COURSE_INTERVAL_DAYS = 14;
+const COURSE_OPEN_DAYS = 2;
+
+/** Kursrunden som er åpen nå, eller neste: første dag, siste påmeldingsdag og antall plasser */
+export function courseSession(g: GameState): {
+  start: number;
+  end: number;
+  open: boolean;
+  seats: number;
+  left: number;
+} {
+  const today = day(g);
+  const start = Math.floor((today - 1) / COURSE_INTERVAL_DAYS) * COURSE_INTERVAL_DAYS + 1;
+  const open = today - start < COURSE_OPEN_DAYS;
+  const next = open ? start : start + COURSE_INTERVAL_DAYS;
+  const seats = 2 + g.stage;
+  const used = g.courseSeats?.start === next ? g.courseSeats.used : 0;
+  return { start: next, end: next + COURSE_OPEN_DAYS - 1, open, seats, left: Math.max(0, seats - used) };
+}
 
 /** Bonus til alle: to dagers lønn, trivselen +15. Én gang i uka. */
 export function bonusCost(g: GameState): number {
@@ -673,6 +734,33 @@ export function giveBonus(g: GameState): PurchaseResult {
   return { ok: true, message: "Bonus utbetalt." };
 }
 
+/**
+ * Advarsel om fravær (B-101): mulig når en ansatt har vært syk tre ganger eller mer på 60 døgn. Virker på dem som
+ * misbruker egenmelding. Var den ansatte faktisk syk, går trivselen ned.
+ */
+export function canWarn(g: GameState, w: Worker): boolean {
+  return sickSpells(g, w) >= 3 && (w.warnedDay === undefined || day(g) - w.warnedDay >= WARNING_DAYS);
+}
+
+export function warnAbsence(g: GameState, workerId: number): PurchaseResult {
+  const w = g.workers.find((x) => x.id === workerId);
+  if (!w) return fail("Fant ikke den ansatte.");
+  if (!canWarn(g, w)) return fail(`${w.name} har ikke så mye fravær at en advarsel er rimelig.`);
+  w.warnedDay = day(g);
+  if (oftenSick(w)) {
+    adjustMorale(g, -1);
+    log(g, `${w.name} fikk en advarsel om fraværet. Egenmeldingene bør bli sjeldnere nå.`, "info");
+  } else {
+    adjustMorale(g, -4);
+    log(
+      g,
+      `${w.name} fikk en advarsel, men hadde vært skikkelig syk. Kollegene syntes det var urettferdig – trivselen går ned.`,
+      "bad",
+    );
+  }
+  return { ok: true, message: "Advarsel gitt." };
+}
+
 export function courseCost(g: GameState): number {
   return 3_000 * (1 + g.stage);
 }
@@ -684,6 +772,11 @@ export function sendOnCourse(g: GameState, workerId: number): PurchaseResult {
   if (w.skill >= 5) return fail(`${w.name} kan alt kurset lærer bort.`);
   if (w.courseDay !== undefined && day(g) - w.courseDay < COURSE_COOLDOWN_DAYS)
     return fail(`${w.name} var nylig på kurs. Neste mulighet dag ${w.courseDay + COURSE_COOLDOWN_DAYS}.`);
+  const session = courseSession(g);
+  if (!session.open) return fail(`Ingen kurs nå. Neste kursrunde starter dag ${session.start}.`);
+  if (session.left <= 0)
+    return fail(`Kurset er fullt. Neste kursrunde starter dag ${session.start + COURSE_INTERVAL_DAYS}.`);
+  g.courseSeats = { start: session.start, used: session.seats - session.left + 1 };
   addCost(g, "annet", courseCost(g));
   w.skill = Math.min(5, w.skill + 0.6);
   w.courseDay = day(g);
@@ -727,3 +820,5 @@ export function hireTemps(g: GameState, days: number | null): PurchaseResult {
   bookTemps(g, days ?? daysUntilAllBack(g));
   return { ok: true, message: "Vikarene er på plass." };
 }
+
+setScheduledSwitch(runScheduledSwitch);
