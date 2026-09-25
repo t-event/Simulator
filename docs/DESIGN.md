@@ -57,7 +57,7 @@ Automatikken tar alt annet.
 | Steg | Mål | Handling | Automatikk | Fart |
 |---|---|---|---|---|
 | 1. Smelt skrapet | Hold temperaturen i det grønne feltet mens skrapet mates inn | ▲ Mer strøm / ▼ Mindre strøm (5 nivåer) og oksygenbryter | Conveyor, kalk, dolomitt og karbon. Matingen varierer («tung kasse på vei») | 40× |
-| 2. Rens stålet | Få karbonet ned i det grønne feltet | Oksygenbryter, strøm ▲/▼ | Kalk | 20× |
+| 2. Rens stålet | Få karbonet ned i det grønne feltet | Oksygenbryter, strøm ▲/▼ (helt av). Blir karbonet for lavt, vises «Karbon» (B-079) | Kalk | 20× |
 | 3. Slagg av | Få slagget under ca. 1,2 t uten å søle stål | «Tipp mot slaggdøra» / «Rett opp ovnen» (kan hoppes over – da kommer fosforet tilbake). Under 0,5 t renner stål ut døra | Døra åpnes | 15× |
 | 4. Varm opp og tapp | Tapp når temperaturen er i det grønne vinduet (±8 °C), rett opp ovnen når øsa er 93–100 % full | Strøm ▲/▼, oksygen, «Tapp nå!», «Rett opp ovnen» | – | 10× / 8× |
 

@@ -174,13 +174,13 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
         <button
           className="sc-step-btn"
           onClick={() => setLevel(-1)}
-          disabled={runner.level <= 1}
+          disabled={runner.level <= 0}
           aria-label="Mindre strøm"
         >
           ▼ Mindre
         </button>
-        <div className="sc-level" aria-label={`Strøm nivå ${runner.level} av 5`}>
-          <span>Strøm</span>
+        <div className="sc-level" aria-label={runner.level > 0 ? `Strøm nivå ${runner.level} av 5` : "Strømmen er av"}>
+          <span>{runner.level > 0 ? "Strøm" : "Strøm av"}</span>
           <div>
             {[1, 2, 3, 4, 5].map((l) => (
               <i key={l} className={l <= runner.level ? "on" : ""} />
@@ -270,8 +270,8 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
                 ? "Full strøm er på. Badet varmes opp igjen når matingen roer seg."
                 : "For kaldt – skrapet smelter sakte. Gi mer strøm."
               : s.bathTempC > MELT_BAND[1]
-                ? runner.level <= 1
-                  ? "Strømmen er på det laveste. Slå av oksygenet, eller vent på tyngre skrap."
+                ? runner.level <= 0
+                  ? "Strømmen er av. Slå av oksygenet, eller vent på tyngre skrap."
                   : "For varmt – det sliter på foringen og koster strøm. Gi mindre strøm."
                 : melted > 0.5 && !runner.blowing
                   ? "Fint! Slå på oksygen nå – det gir ekstra varme og skummende slagg som skjermer lysbuen."
@@ -287,7 +287,7 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
         <>
           <p className="sc-instruction">
             Oksygen brenner bort karbon mens strømmen holder varmen. Blås til karbonet er i det grønne feltet – ikke for
-            lenge – og hold badet under tappetemperaturen.
+            lenge – og hold badet under tappetemperaturen. Blir det for varmt, kan strømmen skrus helt av.
           </p>
           <ZoneGauge
             label="Karbon i stålet"
@@ -308,15 +308,37 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
             unit="°C"
           />
           {controls}
+          {(s.carbonPct < grade.tapCarbonMinPct || runner.carbonOn) && (
+            <button
+              className={`sc-o2${runner.carbonOn ? " is-on" : ""}`}
+              aria-pressed={runner.carbonOn}
+              onClick={() => {
+                runner.setCarbon(!runner.carbonOn);
+                buzz(15);
+                redraw();
+              }}
+            >
+              Karbon: {runner.carbonOn ? "PÅ" : "av"}
+            </button>
+          )}
           <p className="sc-hint">
             {s.carbonPct > grade.tapCarbonMaxPct
-              ? runner.blowing
-                ? "Karbonet går ned …"
-                : "Karbonet er for høyt – slå på oksygenet."
+              ? runner.carbonOn
+                ? "Karbonet er høyt nok – slå av karbonet."
+                : runner.blowing
+                  ? "Karbonet går ned …"
+                  : "Karbonet er for høyt – slå på oksygenet."
               : s.carbonPct < grade.tapCarbonMinPct
-                ? "Nå er karbonet for lavt – oksygenet brenner jern i stedet. Slå av oksygenet!"
-                : "Karbonet er i det grønne feltet. Slå av oksygenet og gå videre."}
-            {s.bathTempC > target - 15 && " Badet er varmt – gi mindre strøm."}
+                ? runner.carbonOn
+                  ? "Karbon blåses inn i stålet – karbonet går opp …"
+                  : runner.blowing
+                    ? "Nå er karbonet for lavt – oksygenet brenner jern i stedet. Slå av oksygenet!"
+                    : "Karbonet er for lavt. Slå på karbon, så blåses det inn igjen."
+                : runner.carbonOn
+                  ? "Karbonet er i det grønne feltet. Slå av karbonet og gå videre."
+                  : "Karbonet er i det grønne feltet. Slå av oksygenet og gå videre."}
+            {s.bathTempC > target - 15 &&
+              (runner.level > 0 ? " Badet er varmt – gi mindre strøm." : " Strømmen er av, badet kjøles ned.")}
           </p>
           <button
             className={`sc-main${cOk ? "" : " is-quiet"}`}
@@ -420,7 +442,9 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
           {controls}
           <p className="sc-hint">
             {s.bathTempC < zone[0]
-              ? `Varmer … ${Math.round(zone[0] - s.bathTempC)} °C igjen.${runner.level < 3 ? " Gi mer strøm." : ""}`
+              ? runner.level <= 0
+                ? `Strømmen er av – gi strøm for å varme opp. ${Math.round(zone[0] - s.bathTempC)} °C igjen.`
+                : `Varmer … ${Math.round(zone[0] - s.bathTempC)} °C igjen.${runner.level < 3 ? " Gi mer strøm." : ""}`
               : hot
                 ? "For varmt! Tapp med en gang."
                 : "Nå! Tapp!"}

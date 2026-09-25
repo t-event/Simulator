@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 49 – 2026-09-25: karbonet for lavt og temperaturen stiger i rensingen
+
+**Brukeren ba om:** I rensingen kunne ikke karbonet justeres (0,002 %), og temperaturen steg selv om alt var av.
+
+**Gjort (B-079):** Strømmen kan nå slås helt av (nivå 0). Automatikken holder karbonet over 0,12 % under
+smeltingen. Rensingen har fått en «Karbon»-knapp når karbonet er for lavt, og hintene i rensing og tapping er nye.
+Testspilleren følger rådet.
+
+**Testet:** tsc, lint, bygg, balanse (exit 0, 4★ / 1★, P 0,0201). Headless: oksygen hele smeltingen gir 0,115 % C
+ved rensing. Strøm av kjøler 1650 → 1620 °C på 30 s. Karbon på: 0,01 → 0,05 % på 9 s. Playwright på iPhone 13:
+blåste for lenge, strøm av, karbon inn igjen, tappet med 4★, ingen feil.
+
+**Gjenstår:** –
+
+---
+
 ## Økt 48 – 2026-09-25: «3 av 3 skift» med 4-skift
 
 **Brukeren ba om:** Folk viste «3 av 3 skift» selv om verket hadde flere skiftlag.

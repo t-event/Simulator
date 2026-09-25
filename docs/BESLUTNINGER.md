@@ -1021,3 +1021,19 @@ antall **skiftlag** som bytter på dem.
 Beslutning: Når verket går døgnet rundt, står det «Verket går døgnet rundt med N skiftlag · N-skift». Ellers står det
 «X av 3 skift · T timer i døgnet». Skiftlagene telles uten fravær. Gjør fraværet at færre lag er fulle, står det i
 tillegg. Bemanningstabellen viser «Trengs N lag» og «per lag» når verket har mer enn tre lag.
+
+## B-079 Kontrollrommet: strømmen kan slås av, og karbonet kan hentes tilbake (2026-09-25)
+Status: gjelder (utfyller B-076)
+Brukeren kom ikke videre i rensingen. Karbonet var 0,002 %, og temperaturen steg selv om «alt var av».
+Årsaker, målt i prosessmodellen:
+- Med oksygen på gjennom hele smeltingen brente oksygenet karbonet ned til 0,005 % før rensingen startet.
+  Automatikken blåste bare inn en fast mengde karbon, og i rensingen fantes det ingen måte å få karbonet opp igjen.
+- Laveste strømnivå var trafo-tapp 0, ikke av. Det varmet et flatt bad med ca. 2 °C per minutt.
+Beslutning:
+- Strømmen har nivå 0 = av («Strøm av»). Da kjøles badet ned (ca. 1,3 °C per sekund på skjermen ved 1650 °C).
+- Under smeltingen blåser automatikken inn mer karbon når karbonet er under 0,12 %. Rensingen starter da alltid
+  over det grønne feltet (0,115 % selv med oksygen hele smeltingen). Grensen er lav med vilje: mer karbon reduserer
+  FeO i slagget og gir mindre fosforfjerning (P 0,0201 i testen mot 0,0255 med grense 0,3).
+- I rensingen vises knappen «Karbon: av/PÅ» når karbonet er under det grønne feltet (120 kg/min, ca. 9 s fra
+  0,01 til 0,05 %). Oksygen og karbon kan ikke stå på samtidig.
+- Nybegynneren i `balance.ts` slår på karbon hvis det blir for lavt. Resultatet er fortsatt 4★ og 1★.
