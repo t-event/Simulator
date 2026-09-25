@@ -6,6 +6,7 @@ import { maxSpeed } from "./research";
 import { advanceTutorial } from "./tutorial";
 import { advanceRecipeGuide } from "./recipeGuide";
 import { clearSave, loadGame, parseSave, saveGame } from "./save";
+import { showToast } from "./inbox";
 import type { GameState, LogEntry } from "./types";
 
 const TICK_MS = 200;
@@ -16,8 +17,8 @@ const AUTOSAVE_MS = 5000;
  * Ett varsel om gangen på én linje, så det ikke dekker knappene (B-114). Står det flere i kø, går hvert raskere,
  * så køen ikke henger etter spillet (B-098).
  */
-const TOAST_MS = 6000;
-const TOAST_BUSY_MS = 3500;
+/** Står flere i kø, går hvert varsel på litt over halve tida (B-115: tida velges under ⚙️) */
+const TOAST_BUSY_SHARE = 0.6;
 const MAX_TOASTS = 1;
 const MAX_QUEUE = 12;
 
@@ -79,7 +80,8 @@ export function useGame(): GameApi {
       const t = queue.current.shift()!;
       visible.current = [...visible.current, t];
       changed = true;
-      setTimeout(() => removeToast(t.id), queue.current.length ? TOAST_BUSY_MS : TOAST_MS);
+      const ms = (gameRef.current?.settings.toastSeconds ?? 6) * 1000;
+      setTimeout(() => removeToast(t.id), queue.current.length ? ms * TOAST_BUSY_SHARE : ms);
     }
     if (changed) setToasts(visible.current);
     setWaiting(queue.current.length);
@@ -156,10 +158,8 @@ export function useGame(): GameApi {
     if (!g) return;
     for (const entry of g.log) {
       if (entry.id <= lastLogId.current) continue;
-      // Spilleren velger under ⚙️ hvor mye som skal dukke opp på skjermen; alt står uansett i varsellista (B-089)
-      const mode = g.settings.toasts ?? "alle";
-      if (entry.kind !== "info" && (mode === "alle" || (mode === "problemer" && entry.kind === "bad")))
-        pushToast(entry.text, entry.kind);
+      // Spilleren velger under ⚙️ hva som skal dukke opp på skjermen; alt står uansett i varsellista (B-089, B-115)
+      if (showToast(g, entry)) pushToast(entry.text, entry.kind);
     }
     if (g.log.length) lastLogId.current = g.log[g.log.length - 1].id;
   }, [pushToast]);

@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 59 – 2026-09-25: varselinnstillinger
+
+**Brukeren ba om:** Mer spesifikke varselinnstillinger med flere valg.
+
+**Gjort:** B-115. Sju temaer som kan slås av og på, og valg av hvor lenge et varsel står.
+
+**Testet:**
+- tsc, lint, `npm test` (ny test for temaene), bygg.
+- Skript: alle varseltekster fra 40 døgn i fem lagrede spill får et tema.
+- Playwright på iPhone 13:
+  - en gammel lagring uten de nye feltene åpner uten feil
+  - med «Ferie og sykdom» slått av kom ingen ferie- eller sykdomsvarsler på 10×
+  - ingen horisontal scrolling
+
+**Gjenstår:** Ingenting.
+
+---
+
 ## Økt 58 – 2026-09-25: varslene er i veien
 
 **Brukeren ba om:** Varslene som kommer opp, er litt i veien. Brukeren valgte «én smal linje» blant fire forslag.

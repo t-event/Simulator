@@ -205,6 +205,8 @@ export function newGame(seed = Date.now(), round = 1): GameState {
       shiftStart: SHIFT_START_HOUR,
       pauseOffers: false,
       toasts: "alle",
+      toastTopics: {},
+      toastSeconds: 6,
       autoTemps: false,
       secondsAction: "spot",
       graderStrict: true,

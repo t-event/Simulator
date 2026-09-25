@@ -197,6 +197,9 @@ export interface Worker {
   warnedDay?: number;
 }
 
+/** Tema for varsler, så spilleren kan velge hva som dukker opp på skjermen (B-115) */
+export type LogTopic = "fravaer" | "havari" | "okonomi" | "fremgang" | "salg" | "marked" | "folk" | "annet";
+
 export interface LogEntry {
   id: number;
   min: number;
@@ -314,6 +317,10 @@ export interface Settings {
   plannerSorts: boolean;
   /** Hvilke hendelser som vises som varsel på skjermen (B-089): alle, bare problemer, eller ingen */
   toasts: "alle" | "problemer" | "ingen";
+  /** Temaer som er slått av for varsler på skjermen; mangler et tema, vises det (B-115) */
+  toastTopics: Partial<Record<LogTopic, boolean>>;
+  /** Sekunder et varsel står på skjermen (B-115) */
+  toastSeconds: number;
 }
 
 export interface ManualRequest {

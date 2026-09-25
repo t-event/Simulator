@@ -6,7 +6,7 @@ import { scheduleCastingSwitch } from "./actions";
 import { CHALLENGES, checkChallenges } from "./challenges";
 import { ADDONS, CASTINGS, FURNACES, WIN_CASH } from "./data";
 import { advance, checkWin, fmtKr, log, newGame } from "./engine";
-import { unseenCount } from "./inbox";
+import { logTopic, showToast, unseenCount } from "./inbox";
 import { KNOWLEDGE } from "./knowledge";
 import {
   buySister,
@@ -242,6 +242,24 @@ test("Fullt ferdigvarelager: støpingen venter uten å samle opp framdrift", () 
   assert(g.castQueue.length === 2 && g.castProgressT > 0, "støpingen kom ikke i gang igjen");
   const before = g.lots.reduce((a, l) => a + l.t, 0);
   assert(before === 0, `støpte uten framdrift: ${before}`);
+});
+
+test("Varsler per tema: ferie kan slås av, problemer vises alltid med «bare problemer»", () => {
+  const g = newGame(1);
+  const ferie = { kind: "event" as const, text: "Kari Berg (støper) får ferie dag 12–15." };
+  const havari = {
+    kind: "bad" as const,
+    text: "HAVARI: gjennombrenning i ovn 1! Flytende stål gikk gjennom foringen.",
+  };
+  assert(logTopic(ferie.text) === "fravaer" && logTopic(havari.text) === "havari", "feil tema");
+  assert(showToast(g, ferie) && showToast(g, havari), "standard skal vise alt");
+  g.settings.toastTopics = { fravaer: false };
+  assert(!showToast(g, ferie) && showToast(g, havari), "ferie ble ikke skjult");
+  g.settings.toasts = "problemer";
+  g.settings.toastTopics = { havari: false };
+  assert(!showToast(g, ferie) && showToast(g, havari), "«bare problemer» skal vise alle problemer");
+  g.settings.toasts = "ingen";
+  assert(!showToast(g, havari), "«ingen» viste et varsel");
 });
 
 test("Kontrollrommet: oksygen går ikke i tappingen, strømmen kan slås av", () => {

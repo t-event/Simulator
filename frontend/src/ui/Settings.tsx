@@ -8,6 +8,7 @@ import type { GameApi } from "../game/useGame";
 import { AutoToggle } from "./AutoToggle";
 import { InstallTip } from "./InstallTip";
 import { Card } from "./common";
+import { LOG_TOPICS } from "../game/inbox";
 import { fmtKr, fmtPct } from "./format";
 
 /** Laster ned hele spillet som en JSON-fil */
@@ -67,6 +68,77 @@ export function BankCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
   );
 }
 
+/**
+ * Varsler på skjermen (B-115): hvor mye, hvilke temaer og hvor lenge. Alt havner uansett i varsellista bak 🔔.
+ */
+function ToastSettings({ g, act }: { g: GameState; act: GameApi["act"] }) {
+  const mode = g.settings.toasts ?? "alle";
+  const topics = g.settings.toastTopics ?? {};
+  return (
+    <>
+      <h3 className="g-subhead">Varsler på skjermen</h3>
+      <p className="g-muted">
+        Varslene dukker opp én om gangen over menyen. Alt samles uansett i varsellista bak 🔔 øverst.
+      </p>
+      <div className="g-choice" role="radiogroup" aria-label="Hvor mange varsler">
+        {(
+          [
+            ["alle", "Velg selv", "Problemer, hendelser og gode nyheter – i temaene du krysser av under"],
+            ["problemer", "Bare problemer", "Bare det som går galt, uansett tema"],
+            ["ingen", "Ingen", "Ingen varsler på skjermen"],
+          ] as const
+        ).map(([id, label, hint]) => (
+          <label key={id} className="g-toggle">
+            <input
+              type="radio"
+              name="toasts"
+              checked={mode === id}
+              onChange={() => act((gg) => void (gg.settings.toasts = id))}
+            />
+            <span>
+              {label}
+              <small className="g-muted g-toggle-hint">{hint}</small>
+            </span>
+          </label>
+        ))}
+      </div>
+      {mode === "alle" && (
+        <fieldset className="g-toast-topics">
+          <legend>Temaer</legend>
+          {LOG_TOPICS.map((t) => (
+            <label key={t.id} className="g-toggle">
+              <input
+                type="checkbox"
+                checked={topics[t.id] !== false}
+                onChange={(e) =>
+                  act((gg) => void (gg.settings.toastTopics = { ...gg.settings.toastTopics, [t.id]: e.target.checked }))
+                }
+              />
+              <span>
+                {t.label}
+                <small className="g-muted g-toggle-hint">{t.hint}</small>
+              </span>
+            </label>
+          ))}
+        </fieldset>
+      )}
+      {mode !== "ingen" && (
+        <label className="g-field">
+          <span>Hvor lenge et varsel står</span>
+          <select
+            value={g.settings.toastSeconds ?? 6}
+            onChange={(e) => act((gg) => void (gg.settings.toastSeconds = Number(e.target.value)))}
+          >
+            <option value={3}>Kort (3 sekunder)</option>
+            <option value={6}>Normalt (6 sekunder)</option>
+            <option value={10}>Lenge (10 sekunder)</option>
+          </select>
+        </label>
+      )}
+    </>
+  );
+}
+
 /** Innstillinger bak ⚙️ i toppen: nytt spill, sikkerhetskopi, valsing og nattspoling (B-072) */
 export function SettingsSheet({
   g,
@@ -107,27 +179,7 @@ export function SettingsSheet({
             <span>Valse emner til armeringsstål (emner som kontrakter venter på, blir liggende)</span>
           </label>
         )}
-        <h3 className="g-subhead">Varsler på skjermen</h3>
-        <p className="g-muted">Alt samles uansett i varsellista bak 🔔 øverst.</p>
-        <div className="g-choice" role="radiogroup" aria-label="Varsler på skjermen">
-          {(
-            [
-              ["alle", "Alle hendelser"],
-              ["problemer", "Bare problemer"],
-              ["ingen", "Ingen"],
-            ] as const
-          ).map(([id, label]) => (
-            <label key={id} className="g-toggle">
-              <input
-                type="radio"
-                name="toasts"
-                checked={(g.settings.toasts ?? "alle") === id}
-                onChange={() => act((gg) => void (gg.settings.toasts = id))}
-              />
-              <span>{label}</span>
-            </label>
-          ))}
-        </div>
+        <ToastSettings g={g} act={act} />
         <h3 className="g-subhead">Lagring</h3>
         <p className="g-muted">
           Spillet lagres automatisk i denne nettleseren. Safari kan slette lagrede data for nettsider som ikke er brukt
