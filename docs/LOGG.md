@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 50 – 2026-09-25: avslagging og tapping mer intuitivt
+
+**Brukeren ba om:** Avslaggingen (8,6 t slagg, måler helt til høyre) og tappingen (1614 °C, grønt fra 1616 °C)
+fungerte ikke intuitivt.
+
+**Gjort (B-080):**
+- Hovedknappene er grå til riktig tidspunkt og oransje når det er riktig. «Tapp likevel (for kaldt)» når badet er for kaldt.
+- Slaggmåleren er skalert til slagget da tippingen startet.
+- Avslaggingen går saktere på slutten, så det grønne feltet varer ca. 4 s.
+- Hintene viser sekunder igjen og om temperaturen stiger. Ovnstegningen kuttes ikke lenger nederst når den tippes.
+
+**Testet:** tsc, lint, bygg, balanse (exit 0, 4★ / 1★). Playwright på iPhone 13 gjennom en hel charge med skjermbilder
+midt i avslagging og tapping, ingen feil, ingen horisontal scrolling.
+
+**Gjenstår:** –
+
+---
+
 ## Økt 49 – 2026-09-25: karbonet for lavt og temperaturen stiger i rensingen
 
 **Brukeren ba om:** I rensingen kunne ikke karbonet justeres (0,002 %), og temperaturen steg selv om alt var av.

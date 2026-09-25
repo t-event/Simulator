@@ -91,7 +91,7 @@ function Furnace({ sim, blowing }: { sim: EAFSimulation; blowing: boolean }) {
   const slag = Math.min(14, (sim.slagMassKg / 8000) * 14);
   const scrapLeft = s.solidScrapKg / 20000;
   return (
-    <svg className="sc-furnace" viewBox="0 0 220 130" aria-hidden="true">
+    <svg className="sc-furnace" viewBox="0 0 220 142" aria-hidden="true">
       <g transform={`rotate(${s.tiltDeg} 110 90)`}>
         <path d="M40 60 L180 60 L170 118 Q110 128 50 118 Z" fill="#4a3b30" stroke="#7a6350" strokeWidth={2} />
         <path d="M50 96 L170 96 L166 114 Q110 123 54 114 Z" fill={bath} className={s.powerOn ? "sc-bath-live" : ""} />
@@ -367,7 +367,7 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
             label="Slagg i ovnen"
             value={sim.slagMassKg / 1000}
             min={0}
-            max={Math.max(8, sim.slagMassKg / 1000)}
+            max={Math.max(3, runner.slagStartKg, sim.slagMassKg) / 1000}
             zone={[SLAG_SPILL_KG / 1000, SLAG_DONE_KG / 1000]}
             digits={1}
             unit="t"
@@ -388,7 +388,7 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
             </p>
           )}
           <button
-            className={`sc-main${pagar && sim.slagMassKg < SLAG_DONE_KG ? " is-ready" : ""}`}
+            className={`sc-main${pagar ? (sim.slagMassKg < SLAG_DONE_KG ? " is-ready" : " is-quiet") : ""}`}
             onClick={() => {
               if (pagar) runner.stopDeslag();
               else runner.startDeslag();
@@ -402,7 +402,9 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
             {!pagar
               ? "Slagget renner ut mens ovnen er tippet."
               : sim.slagMassKg > SLAG_DONE_KG
-                ? "Slagget renner ut …"
+                ? runner.slagRate > 20
+                  ? `Slagget renner ut … vent til det grønne feltet (ca. ${Math.ceil((sim.slagMassKg - SLAG_DONE_KG) / runner.slagRate)} s).`
+                  : "Slagget renner ut … vent til det grønne feltet."
                 : spilling
                   ? "Rett opp!"
                   : "Nå er det lite slagg igjen – rett opp ovnen."}
@@ -425,6 +427,7 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
     case "tapp": {
       const zone: [number, number] = [target - TAP_TEMP_OK_C, target + TAP_TEMP_OK_C];
       const hot = s.bathTempC > zone[1];
+      const rate = runner.tempRate;
       body = (
         <>
           <p className="sc-instruction">
@@ -444,19 +447,22 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
             {s.bathTempC < zone[0]
               ? runner.level <= 0
                 ? `Strømmen er av – gi strøm for å varme opp. ${Math.round(zone[0] - s.bathTempC)} °C igjen.`
-                : `Varmer … ${Math.round(zone[0] - s.bathTempC)} °C igjen.${runner.level < 3 ? " Gi mer strøm." : ""}`
+                : rate > 0.2
+                  ? `Stiger ${fmt(rate, 1)} °C i sekundet – grønt om ca. ${Math.ceil((zone[0] - s.bathTempC) / rate)} s. Vent med å tappe.` +
+                    ((zone[0] - s.bathTempC) / rate > 15 && runner.level < 5 ? " Mer strøm går fortere." : "")
+                  : `Temperaturen stiger ikke – gi mer strøm. ${Math.round(zone[0] - s.bathTempC)} °C igjen.`
               : hot
                 ? "For varmt! Tapp med en gang."
                 : "Nå! Tapp!"}
           </p>
           <button
-            className={`sc-main sc-tap${s.bathTempC >= zone[0] ? " is-ready" : ""}`}
+            className={`sc-main sc-tap${s.bathTempC >= zone[0] ? " is-ready" : " is-quiet"}`}
             onClick={() => {
               if (runner.tap()) buzz([20, 30, 20]);
               redraw();
             }}
           >
-            Tapp nå!
+            {s.bathTempC >= zone[0] ? "Tapp nå!" : "Tapp likevel (for kaldt)"}
           </button>
         </>
       );
@@ -482,7 +488,7 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
           />
           {over && <p className="sc-message is-alarm">Øsa renner over! Rett opp ovnen!</p>}
           <button
-            className={`sc-main${fill >= LADLE_BAND[0] ? " is-ready" : ""}`}
+            className={`sc-main${fill >= LADLE_BAND[0] ? " is-ready" : " is-quiet"}`}
             onClick={() => {
               runner.stopTap();
               buzz([20, 30, 20]);
@@ -491,7 +497,13 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
           >
             Rett opp ovnen
           </button>
-          <p className="sc-hint">{fill < LADLE_BAND[0] ? "Fyller …" : over ? "For sent!" : "Full – rett opp nå!"}</p>
+          <p className="sc-hint">
+            {fill < LADLE_BAND[0]
+              ? "Fyller … vent til øsa er i det grønne feltet."
+              : over
+                ? "For sent!"
+                : "Full – rett opp nå!"}
+          </p>
         </>
       );
       break;

@@ -17,7 +17,10 @@ import { buildResult } from "./simSetup";
 export type Step = "intro" | "smelt" | "rens" | "slagg" | "tapp" | "tapper" | "ferdig";
 
 /** Simulerte sekunder per sekund på skjermen i hvert steg; hele chargen tar et par minutter. */
-export const SPEED: Record<Step, number> = { intro: 0, smelt: 40, rens: 20, slagg: 15, tapp: 10, tapper: 8, ferdig: 0 };
+export const SPEED: Record<Step, number> = { intro: 0, smelt: 40, rens: 20, slagg: 20, tapp: 10, tapper: 8, ferdig: 0 };
+/** Når det er lite slagg igjen, går avslaggingen saktere, så spilleren rekker å rette opp i det grønne (B-080) */
+const SLAG_SLOW_BELOW_KG = 2500;
+const SPEED_SLAG_END = 6;
 /** Trafo-tapp for strømnivå 1–5 (nivå 0 = strømmen av, B-079) */
 const POWER_TAPS = [0, 1, 2, 3, 4];
 /** Karbon som blåses inn når spilleren slår på karbon i rensingen (kg/min, B-079) */
@@ -55,6 +58,7 @@ interface Auto {
   carbon: boolean;
   deslag: "nei" | "pagar" | "ferdig" | "hoppet";
   slagLeftKg: number;
+  slagStartKg: number;
   steelSpilledKg: number;
   meltS: number;
   meltInBandS: number;
@@ -254,6 +258,7 @@ export class SimpleRunner {
     carbon: false,
     deslag: "nei",
     slagLeftKg: 0,
+    slagStartKg: 0,
     steelSpilledKg: 0,
     meltS: 0,
     meltInBandS: 0,
@@ -266,6 +271,10 @@ export class SimpleRunner {
   readonly sim: EAFSimulation;
   private readonly startWear: number;
   private readonly random: () => number;
+  /** Utjevnet endring per sekund på skjermen, for hint som «stiger 1 °C/s» (B-080) */
+  private tempRateS = 0;
+  private slagRateS = 0;
+  private rateStep: Step = "intro";
 
   constructor(sim: EAFSimulation, startWear: number, random: () => number = Math.random) {
     this.sim = sim;
@@ -296,6 +305,18 @@ export class SimpleRunner {
       0,
       Math.min(1, (CHARGE_SCRAP_MASS_KG - s.chargeRemainingKg - s.solidScrapKg) / CHARGE_SCRAP_MASS_KG),
     );
+  }
+  /** Temperaturendring i badet, °C per sekund på skjermen */
+  get tempRate(): number {
+    return this.tempRateS;
+  }
+  /** Hvor fort slagget renner ut, kg per sekund på skjermen */
+  get slagRate(): number {
+    return this.slagRateS;
+  }
+  /** Slagg i ovnen da spilleren begynte å tippe (kg) */
+  get slagStartKg(): number {
+    return this.a.slagStartKg;
   }
   /** Stål som har rent ut slaggdøra (kg) */
   get steelSpilledKg(): number {
@@ -337,6 +358,7 @@ export class SimpleRunner {
   startDeslag(): void {
     if (this.step !== "slagg" || this.a.deslag === "pagar") return;
     this.a.deslag = "pagar";
+    this.a.slagStartKg = this.sim.slagMassKg;
   }
   /** Retter opp ovnen etter avslagging og går videre til oppvarming og tapping */
   stopDeslag(): void {
@@ -374,8 +396,11 @@ export class SimpleRunner {
     const st = this.step;
     const a = this.a;
     const sim = this.sim;
-    const seconds = realSeconds * SPEED[st];
+    const slow = st === "slagg" && a.deslag === "pagar" && sim.slagMassKg < SLAG_SLOW_BELOW_KG;
+    const seconds = realSeconds * (slow ? SPEED_SLAG_END : SPEED[st]);
     const n = Math.ceil(seconds);
+    const t0 = sim.state.bathTempC;
+    const slag0 = sim.slagMassKg;
     let event: RunnerEvent | null = null;
     for (let i = 0; i < n; i++) {
       const dt = seconds / n;
@@ -394,6 +419,13 @@ export class SimpleRunner {
         a.steelSpilledKg += spill;
       }
       if (st === "tapper" && sim.state.phase === "tapping") a.ladleKg = a.tapStartKg - sim.state.liquidMassKg;
+    }
+    if (realSeconds > 0) {
+      // Nytt steg: start trenden på nytt, ellers henger den igjen fra forrige steg
+      const k = st !== this.rateStep ? 1 : Math.min(1, realSeconds / 0.8);
+      this.rateStep = st;
+      this.tempRateS += ((sim.state.bathTempC - t0) / realSeconds - this.tempRateS) * k;
+      this.slagRateS += ((slag0 - sim.slagMassKg) / realSeconds - this.slagRateS) * k;
     }
     if (sim.state.refractoryWear >= 1 && st !== "ferdig") {
       this.score = scoreCharge(sim, a, this.startWear);
