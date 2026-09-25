@@ -1732,3 +1732,9 @@ Beslutning:
 - Nytt kapittel i fagboka: «Konjunkturer, sesonger og ligaer», låses opp når spillet kobles til en sesong.
 - Sesong 1 er startet i databasen (4 uker fra 2026-09-25).
 - SQL i `supabase/004_sesonger.sql`, kjørt som migrasjonene «sesonger» og «liga_search_path».
+
+## B-130 Sesongen varer i seks måneder (2026-09-25)
+Status: gjelder (erstatter «4 uker» i B-124 og B-129)
+Brukeren: sesongen må vare i 6 måneder.
+Beslutning: Sesong 1 er forlenget til seks måneder fra starten (til 2027-03-25). `start_season` har 26 uker som
+standard. Tekstene i spillet og fagboka sier «et halvt år».

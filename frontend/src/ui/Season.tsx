@@ -77,7 +77,7 @@ export function SeasonPrompt({ api, g }: { api: GameApi; g: GameState }) {
       <div className="g-modal-card">
         <h2>{cur.name} er i gang</h2>
         <p>
-          En sesong varer i noen uker, og alle som er med, starter i garasjen samtidig. Topplista for sesongen viser
+          En sesong varer i et halvt år, og alle som er med, starter i garasjen samtidig. Topplista for sesongen viser
           bare spill som er startet i den. Sesongen slutter om {daysLeft(cur)} dager.
         </p>
         <p className="g-muted">

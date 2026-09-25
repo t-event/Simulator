@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 75 – 2026-09-25: sesongen varer i seks måneder
+
+**Brukeren ba om:** Sesongen må vare i 6 måneder.
+
+**Gjort:** B-130. Sesong 1 forlenget i databasen, `start_season` med 26 uker som standard, tekster oppdatert.
+
+**Testet:** tsc, lint, `npm test`, build. Sesongen lest tilbake fra databasen.
+
+**Gjenstår:** Fase 4 og 5.
+
+---
+
 ## Økt 74 – 2026-09-25: sesonger, ligaer og felles hendelser (fase 3)
 
 **Brukeren ba om:** Bekreftelse slått av i Supabase; Claude gikk videre med fase 3.
