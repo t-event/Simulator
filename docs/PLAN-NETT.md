@@ -226,4 +226,4 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
 
 ## Status
 
-- Fase 0 og 1 er bygget (B-125). Fase 2 (toppliste) er neste.
+- Fase 0 og 1 er bygget (B-125, B-126). Fase 2 (toppliste) er bygget (B-127). Fase 3 er neste.

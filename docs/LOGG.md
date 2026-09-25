@@ -5,6 +5,31 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 72 – 2026-09-25: toppliste (fase 2)
+
+**Brukeren ba om:** Site URL satt og tokenet slettet. Claude gikk videre med fase 2.
+
+**Gjort:** B-127.
+- `supabase/003_toppliste.sql` kjørt som migrasjon: kallenavn, tidslinje med omdømme, juksesperre, `leaderboard`
+  og `my_rank`.
+- `net/leaderboard.ts`, `ui/Leaderboard.tsx` (under Verket → Økonomi), kallenavn i kontokortet.
+- `balance.ts --vekst` måler veksten per nivå (grunnlaget for grensene).
+
+**Testet:**
+- tsc, lint, `npm test` (to nye nettester: tidslinja med omdømme, kallenavn og toppliste), validate, balanse
+  exit 0, build.
+- Playwright på iPhone 13 og desktop med falsk Supabase: topplista uten konto med oppfordring, bytte av liste,
+  innlogging fra topplista, kallenavn som er tatt → feilmelding, kallenavn OK → «Endre kallenavn», egen rad uthevet,
+  ingen feil, ingen horisontal scrolling, alle knapper minst 40 px.
+- `leaderboard('verdi', 10)` kjørt i databasen: tom liste uten feil. Sikkerhetsrådene viser bare tilsiktede funn.
+
+**Gjenstår:**
+- Brukeren tester med ekte konto: kallenavn og at man dukker opp på lista etter et døgn i spillet.
+- «Leaked password protection» kan slås på under Authentication → Settings i Supabase (anbefalt).
+- Fase 3: sesonger, ligaer og felles hendelser.
+
+---
+
 ## Økt 71 – 2026-09-25: databasen satt opp gjennom Supabase-connectoren
 
 **Brukeren ba om:** Ordne alt i Supabase. La til Supabase som connector.

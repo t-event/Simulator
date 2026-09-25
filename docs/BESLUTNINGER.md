@@ -1645,3 +1645,37 @@ Beslutning:
 - Nøkkelen fra B-125 ligger i git-historikken til `main` (PR #78). Vi skriver aldri om historikken til `main`;
   brukeren lager i stedet en ny publishable-nøkkel i Supabase og sletter den gamle når secrets er på plass.
 - Nettestene setter en falsk kobling med `setCloudConfig`.
+
+## B-127 Toppliste, kallenavn og juksesperre – fase 2 (2026-09-25)
+Status: gjelder
+Brukeren: toppliste, uten grupper foreløpig.
+
+Beslutning:
+- **Kallenavn** velges under ⚙️ Innstillinger → Konto («Bli med på topplista»). 3–20 tegn, bokstaver, tall, mellomrom,
+  punktum, bindestrek og understrek. Unikt uten hensyn til store og små bokstaver. Settes gjennom SQL-funksjonen
+  `set_nickname`, og spilleren kan ikke endre andre felt på profilen sin (ikke sperre, ikke liga).
+- **Topplista** står under Verket → Økonomi, også uten konto (da med oppfordring om å logge inn). Fire lister:
+  konsernverdi nå, raskest til storverk, raskest til 10 mrd., omdømme nå. Serveren regner dem ut fra tidslinja
+  (`snapshots`) med funksjonen `leaderboard(kind, lim)`; appen sender aldri inn poeng. `my_rank` gir min plass også
+  utenfor de 50 første. Egen rad er uthevet.
+- **Tidslinja** har fått omdømme. Én rad per spilldøgn, skrevet ved første lagring på nett den dagen.
+- **Juksesperre** i databasen (trigger `snapshots_check`), målt med `balance.ts --vekst` over fem frø, flink og
+  nybegynner, og ganget med 3–5:
+
+  | Nivå | Maks vekst per døgn | Maks konsernverdi |
+  | --- | --- | --- |
+  | Garasje | 100 000 kr | 1 mill. kr |
+  | Verksted | 600 000 kr | 6 mill. kr |
+  | Støperi | 2,5 mill. kr | 50 mill. kr |
+  | Stålverk | 20 mill. kr | 250 mill. kr |
+  | Storverk | 1,5 mrd. kr | – |
+
+  Veksten får i tillegg være 25 % av forrige konsernverdi per døgn (forskning som hever alle verkene, gjør at
+  verdien hopper). Over grensen **merkes** kontoen (`profiles.flagged_at`, `flag_reason`) og holdes utenfor topplista
+  til brukeren har sett på den i Supabase. Spillet stoppes ikke. Målt i spillet var det største hoppet 2,5 mrd. på
+  én dag på storverket med 6–8 datterverk (konsernstyring-forskning), godt innenfor.
+- **Tilbakespoling**: en snapshot med lavere dag enn det som finnes fra før, setter `profiles.rewound_at`. Brukes
+  av anbud og auksjoner senere (fase 5).
+- Funksjonene `leaderboard` (også for anon), `my_rank` og `set_nickname` er med vilje tilgjengelige via API-et;
+  sikkerhetsrådene i Supabase peker på dem, og det er tilsiktet.
+- SQL i `supabase/003_toppliste.sql`, kjørt som migrasjonen «toppliste».

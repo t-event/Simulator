@@ -2241,3 +2241,55 @@ button {
 .g-cloud.is-error {
   color: var(--warning);
 }
+
+/* Topplista (B-127) */
+.g-board {
+  list-style: none;
+  margin: 8px 0;
+  padding: 0;
+}
+
+.g-board li {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding: 6px 4px;
+  border-bottom: 1px solid #2c3647;
+  font-size: 14px;
+}
+
+.g-board li.is-me {
+  background: #1d3a52;
+  border-radius: 6px;
+}
+
+.g-board-rank {
+  width: 28px;
+  color: var(--text-dim);
+  text-align: right;
+}
+
+.g-board-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.g-board-value {
+  font-variant-numeric: tabular-nums;
+}
+
+.g-board-tabs {
+  flex-wrap: wrap;
+}
+
+.g-board-tabs button {
+  flex: 1 1 45%;
+  font-size: 13px;
+}
+
+.g-nick {
+  max-width: 360px;
+}

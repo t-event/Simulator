@@ -16,6 +16,7 @@ import {
   signUp,
   translateError,
 } from "./supabase";
+import { fetchLeaderboard, fetchMyRank, fetchProfile, setNickname } from "./leaderboard";
 import {
   cloudStatus,
   flush,
@@ -57,12 +58,20 @@ function assert(ok: unknown, msg: string): void {
 interface Fake {
   users: Map<string, { id: string; password: string; confirmed: boolean }>;
   saves: Map<string, { state: unknown; minute: number; day: number }>;
-  snapshots: Map<string, { day: number }[]>;
+  snapshots: Map<string, { day: number; equity: number; stage: number; reputation: number }[]>;
+  nicknames: Map<string, string>;
   calls: string[];
   offline: boolean;
 }
 function makeFake(): Fake {
-  const f: Fake = { users: new Map(), saves: new Map(), snapshots: new Map(), calls: [], offline: false };
+  const f: Fake = {
+    users: new Map(),
+    saves: new Map(),
+    snapshots: new Map(),
+    nicknames: new Map(),
+    calls: [],
+    offline: false,
+  };
   const json = (status: number, body: unknown) =>
     new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
   const token = (id: string) => {
@@ -118,10 +127,39 @@ function makeFake(): Fake {
     }
     if (path.startsWith("/rest/v1/snapshots")) {
       const list = f.snapshots.get(id) ?? [];
-      list.push({ day: Number(body.day) });
+      list.push({
+        day: Number(body.day),
+        equity: Number(body.equity),
+        stage: Number(body.stage),
+        reputation: Number(body.reputation),
+      });
       f.snapshots.set(id, list);
       return new Response(null, { status: 201 });
     }
+    if (path.startsWith("/rest/v1/profiles")) {
+      return json(200, [{ nickname: f.nicknames.get(id) ?? null, flagged_at: null, flag_reason: null, banned: false }]);
+    }
+    if (path.startsWith("/rest/v1/rpc/set_nickname")) {
+      const n = String(body.name).trim();
+      if (n.length < 3 || n.length > 20) return json(400, { message: "Kallenavnet må ha 3–20 tegn." });
+      if ([...f.nicknames.entries()].some(([u, x]) => u !== id && x.toLowerCase() === n.toLowerCase()))
+        return json(400, { message: "Kallenavnet er tatt. Velg et annet." });
+      f.nicknames.set(id, n);
+      return json(200, n);
+    }
+    if (path.startsWith("/rest/v1/rpc/leaderboard")) {
+      const rows = [...f.nicknames.entries()]
+        .map(([u, nick]) => {
+          const snaps = f.snapshots.get(u) ?? [];
+          const last = snaps[snaps.length - 1];
+          return last ? { nickname: nick, value: String(last.equity), day: last.day, is_me: u === id } : null;
+        })
+        .filter((r): r is NonNullable<typeof r> => r !== null)
+        .sort((a, b) => Number(b.value) - Number(a.value))
+        .map((r, i) => ({ plass: i + 1, ...r }));
+      return json(200, rows);
+    }
+    if (path.startsWith("/rest/v1/rpc/my_rank")) return json(200, 1);
     if (path.startsWith("/rest/v1/config")) return json(200, [{ value: { cloud: true } }]);
     return json(404, { message: "ukjent" });
   });
@@ -323,6 +361,44 @@ const main = async () => {
     await flush();
     assert(f.calls.length === n, "en annen kontos spill ble lastet opp");
     setClock(() => Date.now());
+  });
+
+  await test("Tidslinja får dag, kasse, konsernverdi, nivå og omdømme", async () => {
+    const f = fresh();
+    await login(f);
+    const g = newGame(10);
+    g.reputation = 42.34;
+    await linkOnLogin(g);
+    const s = f.snapshots.get("u-a@test")?.[0];
+    assert(s && s.day === 1 && s.stage === 0 && s.reputation === 42.3 && s.equity > 0, `snapshot ${JSON.stringify(s)}`);
+  });
+
+  await test("Kallenavn: for kort, tatt, og så OK; topplista viser meg", async () => {
+    const f = fresh();
+    await login(f);
+    f.nicknames.set("u-annen", "Smelteren");
+    let msg = "";
+    try {
+      await setNickname("ab");
+    } catch (e) {
+      msg = (e as Error).message;
+    }
+    assert(msg.includes("3–20"), `for kort: «${msg}»`);
+    try {
+      await setNickname("smelteren");
+    } catch (e) {
+      msg = (e as Error).message;
+    }
+    assert(msg.includes("tatt"), `tatt: «${msg}»`);
+    assert((await setNickname("  Stålkongen ")) === "Stålkongen", "kallenavnet ble ikke trimmet og lagret");
+    assert((await fetchProfile())?.nickname === "Stålkongen", "profilen har ikke kallenavnet");
+    const g = newGame(11);
+    g.cash = 500_000;
+    await linkOnLogin(g);
+    const rows = await fetchLeaderboard("verdi");
+    assert(rows.length === 1 && rows[0].is_me && rows[0].nickname === "Stålkongen", `rader ${JSON.stringify(rows)}`);
+    assert(typeof rows[0].value === "number" && rows[0].value >= 500_000, "verdien er ikke et tall");
+    assert((await fetchMyRank("verdi")) === 1, "min plass");
   });
 
   await test("Ikke logget inn: ingenting sendes", async () => {

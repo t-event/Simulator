@@ -88,6 +88,7 @@ export async function uploadSave(g: GameState, keepalive = false): Promise<void>
         cash: Math.round(g.cash),
         equity: Math.round(konsernEquity(g)),
         stage: g.stage,
+        reputation: Math.round(g.reputation * 10) / 10,
         client_version: APP_VERSION,
       },
       keepalive,
