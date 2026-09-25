@@ -916,6 +916,12 @@ button {
   border-color: #4a6a8a;
 }
 
+/* Klar til å flytte: målkortet står øverst og lyser opp (B-068) */
+.g-stage-card.is-ready {
+  border-color: var(--ok);
+  box-shadow: 0 0 0 1px var(--ok);
+}
+
 /* ---------------------------------------------------------------- Varsler og modaler */
 .g-toasts {
   position: fixed;

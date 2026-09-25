@@ -383,7 +383,8 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
   const castHead = g.castQueue[0];
   const y = g.history[g.history.length - 1];
   const sum = (o: Partial<Record<string, number>>) => Object.values(o).reduce<number>((a, b) => a + (b ?? 0), 0);
-  const tips = hints(g, stats);
+  // På Oversikt står målkortet øverst når du kan flytte, så hintet om det trengs bare på de andre underfanene (B-068)
+  const tips = hints(g, stats).filter((t) => !(t.anchor === "mal" && tab === "oversikt"));
   const upgradesReady = readyUpgrades(g);
   const missingNow = missingScrap(g, stats);
   // Varsel om foringen åpner Anlegg og ruller ned til vedlikeholdskortet

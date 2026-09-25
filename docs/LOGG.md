@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 40 – 2026-09-25: flytte-hintet rett over målkortet
+
+**Brukeren ba om:** «Du kan flytte inn … Trykk her» og målkortet rett under ga ikke mening (skjermbilde).
+
+**Gjort (B-068):** Hintet skjules på Oversikt; målkortet får grønn ramme når du kan flytte. På Anlegg og Økonomi
+vises hintet fortsatt.
+
+**Testet:** tsc, lint, Playwright på iPhone-størrelse (ingen hint på Oversikt, hint på Økonomi som åpner målkortet).
+
+**Gjenstår:** spørsmålet om storverket (mer innhold eller lavere vinnergrense).
+
+---
+
 ## Økt 39 – 2026-09-25: hint om skrapforskning for nye kvaliteter
 
 **Brukeren ba om:** En spiller skjønte ikke at han måtte forske fram flere skraptyper for å lage høykarbon – det

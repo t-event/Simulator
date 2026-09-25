@@ -126,7 +126,11 @@ export function StageCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
     );
   }
   return (
-    <Card id="mal" title={`Mål: ${next.name} (nivå ${g.stage + 2} av ${STAGES.length})`} className="g-stage-card">
+    <Card
+      id="mal"
+      title={`Mål: ${next.name} (nivå ${g.stage + 2} av ${STAGES.length})`}
+      className={`g-stage-card${stage.available ? " is-ready" : ""}`}
+    >
       <p className="g-muted">{next.description}</p>
       <ul className="g-checks">
         <li className={g.reputation >= next.reputation ? "ok" : "bad"}>
