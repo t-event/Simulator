@@ -481,7 +481,7 @@ export function People({ g, stats, act }: Props) {
               {absenceCosts && (
                 <p className="g-note g-warn">
                   {away.length === 1 ? "Én ansatt" : `${away.length} ansatte`} er borte, så verket går {stats.shifts}{" "}
-                  skift i stedet for {full}.{" "}
+                  skift i stedet for {fullShifts}.{" "}
                   <button className="g-link" onClick={() => setTab("fravaer")}>
                     Se fravær og vikarer
                   </button>

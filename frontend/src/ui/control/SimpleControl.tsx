@@ -393,7 +393,7 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
             label="Slagg i ovnen"
             value={sim.slagMassKg / 1000}
             min={0}
-            max={Math.max(3, runner.slagStartKg, sim.slagMassKg) / 1000}
+            max={Math.max(3000, runner.slagStartKg, sim.slagMassKg) / 1000}
             zone={[SLAG_SPILL_KG / 1000, SLAG_DONE_KG / 1000]}
             digits={1}
             unit="t"

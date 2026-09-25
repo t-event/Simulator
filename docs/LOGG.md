@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 57 – 2026-09-25: gjennomgang av hele spillkoden (runde 2)
+
+**Brukeren ba om:** Sjekk over hele spillkoden, se etter feil og bugs, og fiks dem.
+
+**Gjort:** B-113. Åtte feil rettet, se beslutningen. Ny test for støpingen ved fullt lager.
+
+**Testet:**
+- tsc, lint, `npm test` (15 tester), `validate.ts`, bygg.
+- Balanse: exit 0.
+- Skript: alle id-er i tabellene finnes; invariantsjekker på lagrede spill i 60 døgn uten funn (de eneste avvikene
+  lå i håndlagde testfiler).
+
+**Gjenstår:** Ingenting fra brukerens liste.
+
+---
+
 ## Økt 56 – 2026-09-25: bjella, kontrollrommet, elektrodebrudd, lageret, støtteroller og utstyrsmenyer
 
 **Brukeren ba om:**

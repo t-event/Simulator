@@ -1348,3 +1348,22 @@ Status: gjelder (justerer B-065 og B-074)
 - Trykk på ovnen og støpingen på Oversikt åpner alltid utstyret der. Før åpnet de bare når det var noe du hadde råd
   til, så støpingen virket annerledes enn ovnen.
 
+## B-113 Gjennomgang av koden, runde 2: feil som ble rettet (2026-09-25)
+Status: gjelder
+Brukeren ba om en gjennomgang av hele spillkoden. Alle filene i `game/`, `ui/` og `ui/control/` ble lest, tabellene
+ble sjekket med et skript (alle id-er i `requires`, `unlocks`, `reads`, kapitler og tellere finnes), og lagrede spill
+ble kjørt 60 døgn med invariantsjekker (ingen NaN, ingen negative lagre, ferdigvarelageret under maks, kontrakter og
+fravær konsistente). Rettet:
+- **Støpingen samlet opp framdrift** mens den ventet på plass i lageret (etter B-110), så flere øser ble støpt på én
+  gang når det ble plass. Nå venter støpingen uten framdrift. Egen test.
+- **Ny støpemaskin** arvet sekvensen fra den gamle, så første øse kunne regnes som et kvalitetsbytte med overgangstap.
+- **Folk → Skiftene:** «verket går 2 skift i stedet for .» – variabelen var «verket er fullt», ikke antall skift.
+- **Banken:** «Betal ned»-knappen viste et beløp kassa ikke dekket.
+- **Verket:** lastes en sikkerhetskopi uten konsern mens Konsern-fanen står valgt, faller valget tilbake til Oversikt.
+- **Kontrollrommet:** slaggmålerens minste skala var 3 kg, ikke 3 t.
+- **Lagring:** forskningslista fylles inn før blokkene som leser den (svært gamle lagringer), og fravær som bare er
+  halvt satt, ryddes bort.
+- **Oppdraget «Fem døgn på rad»** teller døgn til sammen; teksten sier nå det.
+Sett over, men ikke endret: fagpoeng, økonomi, rammeavtaler, fravær, planleggeren, hendelseskortene og
+prosessmodellen.
+

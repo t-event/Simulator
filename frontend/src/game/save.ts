@@ -59,6 +59,12 @@ export function clearSave(): void {
  */
 export function migrate(g: GameState): GameState {
   const loose = g as Partial<GameState> & GameState;
+  // Forskningslista må finnes før blokkene under som leser den (gamle lagringer fra før forskningen fantes)
+  if (loose.researched === undefined) {
+    loose.researched = [];
+    // Utstyr spilleren alt har, skal ikke kreve forskning i ettertid
+    grantResearchForOwned(g);
+  }
   if (loose.researchPoints === undefined) loose.researchPoints = 0;
   if (loose.fpDealDay === undefined) loose.fpDealDay = -1;
   if (loose.pendingDecision === undefined) loose.pendingDecision = null;
@@ -190,10 +196,10 @@ export function migrate(g: GameState): GameState {
     const old = c as typeof c & { offerExpiresDay?: number };
     if (c.offerExpiresMin === undefined) c.offerExpiresMin = ((old.offerExpiresDay ?? 0) + 0) * 1440;
   }
-  if (loose.researched === undefined) {
-    loose.researched = [];
-    // Utstyr spilleren alt har, skal ikke kreve forskning i ettertid
-    grantResearchForOwned(g);
-  }
+  // Fravær som bare er halvt satt (én av «fra» og «til» mangler) kan ikke tolkes: den ansatte regnes som på jobb
+  for (const w of g.workers)
+    if ((w.absentFrom === undefined) !== (w.absentUntil === undefined)) {
+      w.absentFrom = w.absentUntil = w.absentReason = undefined;
+    }
   return g;
 }

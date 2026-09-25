@@ -343,6 +343,8 @@ export function buyUpgrade(g: GameState, id: string): PurchaseResult {
     }
     case "casting": {
       g.castingType = id;
+      // Den nye maskinen starter uten sekvens fra den gamle, så første øse ikke regnes som et kvalitetsbytte
+      g.lastCast = null;
       const type = castingType(g);
       if (type.continuous) unlock(g, "streng");
       else unlock(g, "stoping");
