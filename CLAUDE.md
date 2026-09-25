@@ -157,5 +157,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   logger og nøkler for prosjektet `qzdwiamiangrjpmglpwy`. Den kan ikke endre Auth-innstillinger (Site URL) eller lage
   nøkler – det gjør brukeren i dashbordet. Nettlaget testes med en falsk tjeneste (`src/net/tests.ts`) og `page.route`
   i Playwright. Ekte innlogging må brukeren teste selv.
+- Lagring på nett går gjennom `save_game()` med versjonsnummer (B-140), ikke rett i tabellen `saves`. En falsk
+  server i Playwright må svare på `rpc/save_game` og gi `rev` og `device` på `saves?select=…`. To nettlesere
+  simuleres med to `browser.newContext()` mot samme falske tilstand. «Appen vises igjen» utløses med
+  `document.dispatchEvent(new Event("visibilitychange"))`, «legges bort» med `pagehide`.
 - Se på **exit-koden** til `balance.ts`, ikke bare median-linjene: sjekken av kontrollrommet står helt nederst
   og kan være «AVVIK» selv om nivådagene er OK (publiseringen av #39 feilet slik).

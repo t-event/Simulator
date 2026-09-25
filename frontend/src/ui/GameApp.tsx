@@ -18,7 +18,7 @@ import { Market } from "./Market";
 import { Overview } from "./Overview";
 import { People } from "./People";
 import { ResearchPage } from "./ResearchPage";
-import { AccountCard, CloudDot } from "./Account";
+import { AccountCard, CloudDot, CloudFollow } from "./Account";
 import { SeasonPrompt, SeasonSync, SeasonTeaser } from "./Season";
 import { LeaderboardSheet } from "./Leaderboard";
 import { useSeasonStatus } from "./useSeason";
@@ -568,10 +568,14 @@ export function GameApp() {
             setSettingsOpen(false);
             api.quit();
           }}
-          onNextRound={() => {
-            setSettingsOpen(false);
-            api.startNextRound();
-          }}
+          onNextRound={
+            seasonActive
+              ? undefined
+              : () => {
+                  setSettingsOpen(false);
+                  api.startNextRound();
+                }
+          }
           onClose={() => setSettingsOpen(false)}
         />
       )}
@@ -608,6 +612,7 @@ export function GameApp() {
       )}
 
       <SeasonSync api={api} />
+      <CloudFollow api={api} />
       {!modalOpen && <SeasonPrompt api={api} g={g} onOpenSettings={() => setSettingsOpen(true)} />}
       {g.gameOver && <EndScreen g={g} onRestart={api.quit} />}
       {g.won && !winSeen && !g.gameOver && (

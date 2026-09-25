@@ -5,6 +5,29 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 86 – 2026-09-25: to nettlesere på samme konto, og nytt spill+ i sesongen
+
+**Brukeren ba om:** Spurte om nytt spill+ virkelig er borte for spill i sesongen, og om nytt spill+ blir med i
+sesongen av seg selv. Meldte at handlingene ikke er oppdatert når man bytter mellom to innloggede nettlesere.
+
+**Gjort:** B-140.
+- Lagring på nett med versjonsnummer og merkelapp for nettleseren (migrasjon 008, `save_game`).
+- Appen henter det nyeste når den vises igjen, og når en lagring avvises. Spilleren får en beskjed.
+- Innlogging og omstart bruker versjonen i stedet for lengst spilltid.
+- Nytt spill+ blir ikke med i sesongen direkte, og vises ikke under ⚙️ for spill i sesongen.
+- `flush()` venter nå på en lagring som allerede er på vei.
+
+**Testet:** tsc, lint, `npm test` (tre nye nettester for to nettlesere; to eldre tester er gjort om til å gjelde
+en annen nettleser), `validate.ts`, `balance.ts` (exit 0), build. `save_game` er prøvd i databasen i en transaksjon
+som ble rullet tilbake: riktig versjon lagres, utdatert avvises. Playwright med to nettlesere mot en felles falsk
+server: B spiller videre og legges bort; A vises igjen, henter B sitt spill og viser beskjeden; A lagrer videre uten
+avvisning. Nytt spill+ i sesongen: runde 2 blir ikke med, spørsmålet forklarer hvorfor; spill i sesongen har ingen
+knapp for nytt spill+ under ⚙️. Sikkerhetsrådene i Supabase er uendret.
+
+**Gjenstår:** Brukeren tester to ekte nettlesere. Fase 4 og 5.
+
+---
+
 ## Økt 85 – 2026-09-25: medaljer og nivå på topplista
 
 **Brukeren ba om:** «To brukere. Førsteplass gull og andreplass bronse? Det er feil».

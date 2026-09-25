@@ -1598,7 +1598,7 @@ Beslutning: planen står i `docs/PLAN-NETT.md`. Hovedpunktene:
 - Nivå 3 (én felles verden i sanntid) er ikke med: det ville vært et nytt spill uten pause og fart.
 
 ## B-125 Konto og lagring på nett – fase 0 og 1 (2026-09-25)
-Status: gjelder
+Status: gjelder (regelen «det som har kommet lengst, vinner» er erstattet av versjonsnummer i B-140)
 Brukeren: konto med e-post og passord (ikke bare overføringskode, fordi en delt sikkerhetskopi kan brukes til juks),
 og nåværende lagring skal kobles til kontoen. Supabase-prosjektet er opprettet, og nøklene er sendt.
 
@@ -1757,7 +1757,8 @@ i Sesong 1: opprett konto eller logg inn»; med konto og et eldre spill «Spille
 finnes igjen.
 
 ## B-133 Garasjen kan bli med i sesongen direkte, og topplista bak 🏆 øverst (2026-09-25)
-Status: gjelder (erstatter «første døgn» i B-129 og plasseringen under Økonomi i B-127)
+Status: gjelder (erstatter «første døgn» i B-129 og plasseringen under Økonomi i B-127). Nytt spill+ blir ikke med
+direkte, se B-140.
 Brukeren: de som bare har gjort veiledningen, skal kunne være med i sesongen; de som har kommet langt, må starte
 på nytt. Topplista skal være mer synlig enn under Økonomi, så det blir populært å være med.
 
@@ -1851,4 +1852,36 @@ Beslutning:
   Ligaen beholdes i databasen og i svaret; den kan brukes til å dele spillerne senere (anbud og auksjoner i fase 5).
 - Navnet kortes av med «…», nivåmerket blir alltid stående.
 - Fagboka og forklaringen under lista er skrevet om uten ligaer.
+
+## B-140 To nettlesere på samme konto, og nytt spill+ i sesongen (2026-09-25)
+Status: gjelder (erstatter «det som har kommet lengst, vinner» i B-125, og utvider B-129 og B-133)
+Brukeren: «Om jeg er innlogget i to nettlesere og bytter mellom de er ikke handlingene jeg har gjort oppdatert.»
+Spurte også om nytt spill+ virkelig er borte for spill i sesongen, og om nytt spill+ blir med i sesongen av seg selv.
+
+Årsak:
+- Spillet ble bare hentet fra nettet når siden ble lastet. En nettleser som sto åpen i bakgrunnen, fortsatte med sin
+  gamle kopi og lastet den opp etter et minutt – over det som var gjort i den andre nettleseren.
+- Ved innlogging vant det spillet som hadde kommet lengst i spilltid. Det stemmer ikke når man bytter nettleser: den
+  gamle kopien kan ha kjørt lenger.
+- Nytt spill+ ble skjult på seiersskjermen for spill i sesongen, men ikke under ⚙️.
+- Nytt spill+ starter i garasjen og ble derfor koblet til sesongen automatisk, med runde-bonusen (mer penger,
+  fagpoeng og omdømme). Det er urettferdig i konkurransen.
+
+Beslutning:
+- Lagringen på nett har versjonsnummer (`rev`) og merkelapp for nettleseren (`device`, tilfeldig, uten
+  personopplysninger). Migrasjonen «lagring_med_versjon», `supabase/008_lagring_med_versjon.sql`.
+- Appen lagrer med `save_game()`, som bare skriver hvis versjonen på nett er den appen bygger på. Ellers skrives
+  ingenting, og statusen blir «conflict».
+- Når appen vises igjen (synlig, fokus, `pageshow`), når spillet startes, og når en lagring ble avvist, sjekker
+  appen versjonen (`pullIfNewer`). Er spillet lagret fra en annen nettleser, byttes det ut med det fra nettet.
+  Spilleren får beskjeden «Hentet det nyeste spillet» (dag N), og spillet står på pause til «Spill videre».
+- Egen lagring der svaret ikke kom fram (appen lagt bort), gjenkjennes på merkelappen og hentes ikke på nytt.
+- Ved innlogging eller omstart: er spillet på nett lagret fra en annen nettleser siden denne sist lagret, vinner
+  nettet. Ellers vinner spillet her, også om det har kortere spilltid (for eksempel et nytt sesongspill). Uten husket
+  versjon (første gang etter oppdateringen) gjelder den gamle regelen om lengst spilltid.
+- Triggeren øker versjonen også når en eldre utgave av appen skriver rett i tabellen.
+- Nytt spill+ blir aldri med i sesongen direkte (`canJoinDirectly` krever runde 1). Spørsmålet om sesongen forklarer
+  at spillet er nytt spill+ med en fordel. Vil man være med, starter man sesongen i garasjen uten bonus.
+- Under ⚙️ vises ikke nytt spill+ for spill som er med i sesongen som pågår; det står at det kommer tilbake når
+  sesongen er over. Utenfor sesongen står det at nytt spill+ ikke er med i sesongen.
 

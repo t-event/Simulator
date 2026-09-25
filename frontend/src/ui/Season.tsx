@@ -8,10 +8,9 @@
 import { useEffect, useSyncExternalStore } from "react";
 import { useState } from "react";
 import { newGame, unlock } from "../game/engine";
-import { day } from "../game/plant";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
-import { applyWorldEvents, canJoinDirectly, joinSeason } from "../game/world";
+import { applyWorldEvents, canJoinDirectly, joinSeason, notJoinableReason } from "../game/world";
 import { cloudConfigured } from "../net/config";
 import { daysLeft, refreshSeason, seasonStatus } from "../net/season";
 import { useSeasonStatus, useWorldEvents } from "./useSeason";
@@ -120,9 +119,8 @@ export function SeasonPrompt({ api, g, onOpenSettings }: { api: GameApi; g: Game
           bare spill som er startet i den. Sesongen slutter om {daysLeft(cur)} dager.
         </p>
         <p className="g-muted">
-          Spillet ditt (dag {day(g)}) har kommet lenger enn garasjen og er ikke med i sesongen. Du kan spille det videre
-          – det står på lista «Alle tider» – eller starte et nytt spill for sesongen. Valget finner du igjen under 🏆
-          Toppliste øverst.
+          {notJoinableReason(g)}, så det er ikke med i sesongen. Du kan spille det videre – det står på lista «Alle
+          tider» – eller starte et nytt spill for sesongen. Valget finner du igjen under 🏆 Toppliste øverst.
           {bonus ? " Du var med i forrige sesong, så du starter med 10 fagpoeng og 5 % mer i kassa." : ""}
         </p>
         {confirm ? (
@@ -185,8 +183,9 @@ export function SeasonJoin({ api, g, onOpenSettings }: { api: GameApi; g: GameSt
   const bonus = !!status?.played_previous;
   return (
     <div className="g-note g-season-join">
-      <strong>Spillet ditt er ikke med i {cur.name}.</strong> Det står bare på «Alle tider». Bare spill som fortsatt er
-      i garasjen, kan bli med direkte, så vil du være med, starter du sesongen i garasjen.
+      <strong>Spillet ditt er ikke med i {cur.name}.</strong> Det står bare på «Alle tider». Bare vanlige spill som
+      fortsatt er i garasjen, kan bli med direkte (ikke nytt spill+), så vil du være med, starter du sesongen i
+      garasjen.
       {bonus ? " Du var med sist og får 10 fagpoeng og 5 % mer i kassa." : ""}
       {confirm ? (
         <div className="g-row">

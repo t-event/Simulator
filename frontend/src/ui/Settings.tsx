@@ -6,6 +6,7 @@ import type { PlantStats } from "../game/plant";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { AccountCard } from "./Account";
+import { useSeasonStatus } from "./useSeason";
 import { AutoToggle } from "./AutoToggle";
 import { InstallTip } from "./InstallTip";
 import { Card } from "./common";
@@ -122,10 +123,12 @@ export function SettingsSheet({
   stats: PlantStats;
   api: GameApi;
   onQuit: () => void;
-  onNextRound: () => void;
+  /** Mangler når spillet er med i sesongen som pågår: sesongene erstatter nytt spill+ (B-129, B-140) */
+  onNextRound?: () => void;
   onClose: () => void;
 }) {
   const [confirmQuit, setConfirmQuit] = useState(false);
+  const season = useSeasonStatus()?.current ?? null;
   const act = api.act;
   return (
     <div className="g-modal" role="dialog" aria-modal="true" aria-label="Innstillinger" onClick={onClose}>
@@ -158,13 +161,21 @@ export function SettingsSheet({
         <h3 className="g-subhead">Spill på mobilen</h3>
         <InstallTip />
         <h3 className="g-subhead">Nytt spill</h3>
-        {g.won && (
+        {g.won && onNextRound && (
           <p>
             Du har vunnet og spiller videre. Når du vil, kan du starte runde {(g.round ?? 1) + 1} med mer startkapital,
-            fagpoeng og omdømme.{" "}
+            fagpoeng og omdømme.
+            {season &&
+              ` Nytt spill+ er ikke med i ${season.name} – vil du være med, starter du sesongen under 🏆.`}{" "}
             <button className="g-primary g-small" onClick={onNextRound}>
               Nytt spill+ (runde {(g.round ?? 1) + 1})
             </button>
+          </p>
+        )}
+        {g.won && !onNextRound && (
+          <p className="g-muted">
+            Du er med i {season?.name ?? "sesongen"}, så nytt spill+ er ikke tilgjengelig før sesongen er over. Spill
+            videre og hold plassen på topplista.
           </p>
         )}
         {confirmQuit ? (

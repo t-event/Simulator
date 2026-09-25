@@ -27,6 +27,7 @@ import {
   linkOnLogin,
   markReconciled,
   onLocalSave,
+  pullIfNewer,
   resetCloud,
   setClock,
   UPLOAD_INTERVAL_MS,
@@ -61,7 +62,7 @@ function assert(ok: unknown, msg: string): void {
 /** En falsk Supabase: brukere, ett spill per konto, og en logg over kallene */
 interface Fake {
   users: Map<string, { id: string; password: string; confirmed: boolean }>;
-  saves: Map<string, { state: unknown; minute: number; day: number }>;
+  saves: Map<string, { state: unknown; minute: number; day: number; rev: number; device: string | null }>;
   snapshots: Map<
     string,
     { day: number; equity: number; stage: number; reputation: number; season_id?: number | null }[]
@@ -138,11 +139,36 @@ function makeFake(): Fake {
     if (!id) return json(401, { message: "JWT" });
     if (path.startsWith("/rest/v1/saves")) {
       if (init?.method === "POST") {
-        f.saves.set(id, { state: body.state, minute: Number(body.minute), day: Number(body.day) });
+        // Eldre utgave av appen: skriver rett i tabellen, versjonen øker likevel (triggeren i 008)
+        const old = f.saves.get(id);
+        f.saves.set(id, {
+          state: body.state,
+          minute: Number(body.minute),
+          day: Number(body.day),
+          rev: (old?.rev ?? 0) + 1,
+          device: old?.device ?? null,
+        });
         return new Response(null, { status: 201 });
       }
       const s = f.saves.get(id);
-      return json(200, s ? [{ state: s.state, minute: s.minute, day: s.day, updated_at: "now" }] : []);
+      return json(
+        200,
+        s ? [{ state: s.state, minute: s.minute, day: s.day, updated_at: "now", rev: s.rev, device: s.device }] : [],
+      );
+    }
+    if (path.startsWith("/rest/v1/rpc/save_game")) {
+      // Som save_game i 008: lagrer bare over versjonen klienten kjenner
+      const old = f.saves.get(id);
+      if (old && old.rev !== Number(body.p_base_rev)) return json(200, null);
+      const rev = (old?.rev ?? 0) + 1;
+      f.saves.set(id, {
+        state: body.p_state,
+        minute: Number(body.p_minute),
+        day: Number(body.p_day),
+        rev,
+        device: (body.p_device as string) ?? null,
+      });
+      return json(200, rev);
     }
     if (path.startsWith("/rest/v1/snapshots")) {
       const list = f.snapshots.get(id) ?? [];
@@ -210,6 +236,23 @@ function fresh(): Fake {
   resetCloud();
   store.clear();
   return makeFake();
+}
+
+/** En annen nettleser: ny merkelapp, og ingen husket versjon (økta beholdes) */
+function otherBrowser(name: string): void {
+  resetCloud();
+  store.set("stalverk-enhet-v1", name);
+  store.delete("stalverk-sky-v1");
+}
+/** Bytter til en nettleser med merkelapp og husket versjon fra før (som etter omstart av appen) */
+function switchTo(browser: { device: string; rev: string | undefined }): void {
+  resetCloud();
+  store.set("stalverk-enhet-v1", browser.device);
+  if (browser.rev === undefined) store.delete("stalverk-sky-v1");
+  else store.set("stalverk-sky-v1", browser.rev);
+}
+function snapshotBrowser(): { device: string; rev: string | undefined } {
+  return { device: store.get("stalverk-enhet-v1")!, rev: store.get("stalverk-sky-v1") };
 }
 
 const main = async () => {
@@ -340,22 +383,117 @@ const main = async () => {
     assert(d.kind === "cloud" && d.cloud.minute === 1440 * 40, `fikk ${d.kind}`);
   });
 
-  await test("Kobling: begge på samme konto → det som har kommet lengst vinner", async () => {
+  await test("Kobling uten husket versjon (eldre app): begge på samme konto → det som har kommet lengst vinner", async () => {
     const f = fresh();
     await login(f);
     const older = newGame(3);
     older.minute = 1440 * 10;
     await linkOnLogin(older);
+    store.delete("stalverk-sky-v1");
     const newer = newGame(3);
     newer.minute = 1440 * 20;
     newer.owner = "u-a@test";
     let d = await linkOnLogin(newer);
     assert(d.kind === "uploaded" && f.saves.get("u-a@test")?.minute === 1440 * 20, "det nyeste lokale skulle opp");
+    store.delete("stalverk-sky-v1");
     const behind = newGame(3);
     behind.minute = 1440 * 5;
     behind.owner = "u-a@test";
     d = await linkOnLogin(behind);
     assert(d.kind === "cloud" && d.cloud.minute === 1440 * 20, "det nyeste på nett skulle ned");
+  });
+
+  await test("To nettlesere (B-140): den som åpnes igjen, får det som ble gjort i den andre", async () => {
+    const f = fresh();
+    await login(f);
+    let now = 5_000_000;
+    setClock(() => now);
+    // Nettleser A lagrer dag 10
+    store.set("stalverk-enhet-v1", "A");
+    const a = newGame(30);
+    a.minute = 1440 * 10;
+    await linkOnLogin(a);
+    const browserA = snapshotBrowser();
+    // Nettleser B åpnes: henter dag 10, gjør noe og lagrer
+    otherBrowser("B");
+    const d = await linkOnLogin(null);
+    assert(d.kind === "cloud", `B skulle hente, fikk ${d.kind}`);
+    const b = d.kind === "cloud" ? d.cloud : newGame();
+    b.cash = 777_777;
+    now += UPLOAD_INTERVAL_MS;
+    onLocalSave(b);
+    await flush();
+    assert(f.saves.get("u-a@test")!.device === "B", "B lagret ikke");
+    // Tilbake til A etter omstart: A sitt spill har kjørt lenger enn B sitt, men B lagret sist → nettet vinner
+    switchTo(browserA);
+    a.minute = 1440 * 11;
+    const d2 = await linkOnLogin(a);
+    assert(d2.kind === "cloud" && d2.cloud.cash === 777_777, `A skulle hente B sitt spill, fikk ${d2.kind}`);
+    setClock(() => Date.now());
+  });
+
+  await test("To nettlesere åpne samtidig (B-140): den eldre får ikke lagre over, og henter det nyeste", async () => {
+    const f = fresh();
+    await login(f);
+    let now = 6_000_000;
+    setClock(() => now);
+    store.set("stalverk-enhet-v1", "A");
+    const a = newGame(32);
+    a.minute = 1440 * 10;
+    await linkOnLogin(a);
+    // Den andre nettleseren (B) lagrer mens A står åpen
+    const other = (cash: number, device: string) => {
+      const cur = f.saves.get("u-a@test")!;
+      f.saves.set("u-a@test", {
+        ...cur,
+        state: { ...(cur.state as object), cash },
+        rev: cur.rev + 1,
+        device,
+      });
+    };
+    other(222_222, "B");
+    // A prøver å lagre: avvises, spillet på nett er urørt
+    a.cash = 1;
+    now += UPLOAD_INTERVAL_MS;
+    onLocalSave(a);
+    await flush();
+    assert(cloudStatus().kind === "conflict", `status ${cloudStatus().kind}`);
+    assert((f.saves.get("u-a@test")!.state as { cash: number }).cash === 222_222, "A skrev over B");
+    // A henter det nyeste
+    const pulled = await pullIfNewer();
+    assert(pulled?.cash === 222_222 && cloudStatus().kind === "saved", "A hentet ikke det nyeste");
+    // Etter hentingen kan A lagre igjen
+    pulled!.cash = 333_333;
+    now += UPLOAD_INTERVAL_MS;
+    onLocalSave(pulled!);
+    await flush();
+    assert((f.saves.get("u-a@test")!.state as { cash: number }).cash === 333_333, "A fikk ikke lagre etter hentingen");
+    // Egen lagring hentes ikke på nytt, heller ikke når svaret ikke kom fram (appen lagt bort)
+    assert((await pullIfNewer()) === null, "hentet sitt eget spill");
+    other(333_333, "A");
+    assert((await pullIfNewer()) === null, "hentet sin egen lagring uten svar");
+    now += UPLOAD_INTERVAL_MS;
+    onLocalSave(pulled!);
+    await flush();
+    assert(cloudStatus().kind === "saved", `kunne ikke lagre etter egen lagring uten svar: ${cloudStatus().kind}`);
+    setClock(() => Date.now());
+  });
+
+  await test("Kobling: begge på samme konto, samme nettleser og ingen andre har lagret → spillet her vinner", async () => {
+    const f = fresh();
+    await login(f);
+    const old = newGame(33);
+    old.minute = 1440 * 50;
+    await linkOnLogin(old);
+    // Et nytt spill (f.eks. sesongen) i samme nettleser: lastes opp selv om det har kortere spilltid
+    const season = newGame(34);
+    season.owner = "u-a@test";
+    season.season = 1;
+    const d = await linkOnLogin(season);
+    assert(
+      d.kind === "uploaded" && f.saves.get("u-a@test")!.minute === Math.floor(season.minute),
+      `fikk ${d.kind}, minutt ${f.saves.get("u-a@test")!.minute}`,
+    );
   });
 
   await test("Kobling: spill på nett + lokalt uten konto → spilleren velger; en annen kontos spill overses", async () => {
@@ -387,16 +525,19 @@ const main = async () => {
     setClock(() => now);
     const g = newGame(7);
     await linkOnLogin(g);
-    const before = f.calls.filter((c) => c.startsWith("POST /rest/v1/saves")).length;
+    const before = f.calls.filter((c) => c.startsWith("POST /rest/v1/rpc/save_game")).length;
     g.minute += 60;
     onLocalSave(g);
     await new Promise((r) => setTimeout(r, 0));
-    assert(f.calls.filter((c) => c.startsWith("POST /rest/v1/saves")).length === before, "lastet opp for tidlig");
+    assert(
+      f.calls.filter((c) => c.startsWith("POST /rest/v1/rpc/save_game")).length === before,
+      "lastet opp for tidlig",
+    );
     now += UPLOAD_INTERVAL_MS;
     onLocalSave(g);
     await new Promise((r) => setTimeout(r, 0));
     await flush();
-    assert(f.calls.filter((c) => c.startsWith("POST /rest/v1/saves")).length === before + 1, "lastet ikke opp");
+    assert(f.calls.filter((c) => c.startsWith("POST /rest/v1/rpc/save_game")).length === before + 1, "lastet ikke opp");
     // Uten nett: status «offline», og det prøves igjen senere
     f.offline = true;
     now += UPLOAD_INTERVAL_MS;
@@ -509,7 +650,7 @@ const main = async () => {
     const ahead = newGame(22);
     ahead.minute = 1440 * 300;
     await linkOnLogin(ahead);
-    resetCloud();
+    otherBrowser("eldre");
     const old = newGame(22);
     old.minute = 1440 * 100;
     old.owner = "u-a@test";
