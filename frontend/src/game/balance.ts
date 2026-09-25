@@ -8,8 +8,10 @@
  */
 import {
   bonusCost,
+  buyFpDeal,
   buyUpgrade,
   courseCost,
+  fpDeal,
   keyUpgrade,
   doResearch,
   giveBonus,
@@ -252,6 +254,12 @@ function botHour(g: GameState): void {
         : undefined
       : options.filter((x) => x.available).sort((a, b) => a.cost - b.cost)[0];
     if (pick) doResearch(g, pick.id);
+    // Står forskningen fast, følger nybegynneren hintet og kjøper et forskningssamarbeid når det er penger til overs (B-064)
+    const key = keyUpgrade(g);
+    const keyResearch = key?.reason?.startsWith("Forsk fram") ? missingResearchFor(g, key.id) : undefined;
+    const need = keyResearch ? keyResearch.cost - g.researchPoints : 0;
+    const deal = fpDeal(g);
+    if (need > 0 && !deal.reason && g.cash > deal.price * 10) buyFpDeal(g);
   }
   for (const id of novice ? [] : priority) {
     const r = researchOptions(g).find((x) => x.id === id);

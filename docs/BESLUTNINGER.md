@@ -833,3 +833,22 @@ Beslutning:
   gjør det.
 - Skrap i produksjonslinja (Oversikt) og Skraplager under Anlegg får et «!» og «Mangler …» når lageret ikke har
   nok av en skraptype til neste charge etter resepten, med forklaring på hva som skjer med og uten skrapklasser.
+
+## B-064 Forskningssamarbeid: kjøp fagpoeng når forskningen står fast, og «Flytt inn» som er lett å finne (2026-09-25)
+Status: gjelder
+En kollega av brukeren sto fast på stålverket fordi fagpoengene kom for sakte, og fant ikke «Flytt inn» (målkortet
+lå nederst på Oversikt).
+Beslutning:
+- **Forskningssamarbeid** under Forskning: kjøp fagpoeng for penger, én gang per døgn (`fpDealDay`). Verksted
+  5 FP for 15 000 kr, støperi 8 FP for 60 000 kr, stålverk 15 FP for 250 000 kr, storverk 30 FP for 1,5 mill. kr
+  (`FP_DEAL`). Omtrent et døgns fagpoeng for en fjerdedel til halvparten av et døgns overskudd. Pengene hoper seg
+  opp mens spilleren venter på omdømme, så dette gir en vei videre uten å gjøre forskningen gratis.
+  Første forsøk (dobbel pris) gjorde nybegynneren tregere, fordi pengene manglet til neste nivå.
+- Står ny ovn eller støping fast på forskning og fagpoengene mangler, viser Verket hvor mange som mangler og
+  hvordan man får flere (samarbeid, «Ta styringen», kontrakter og quiz).
+- «Slik får du fagpoeng» står på Forskning.
+- Hintet «Du kan flytte inn …» åpner Oversikt og ruller til målkortet, og målkortet står øverst når flyttingen er
+  mulig.
+- Nybegynneren i testspilleren kjøper samarbeid bare når hovedutstyret står fast og den har god råd (minst ti
+  ganger prisen). Den når storverket rundt dag 165 (før 174), og forskningen sperrer hovedutstyret på stålverket
+  14 % av tida (før 47–69 %).

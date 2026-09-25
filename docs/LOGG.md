@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 36 – 2026-09-25: fagpoeng når man står fast, og «Flytt inn»
+
+**Brukeren ba om:** En kollega på stålverket syntes det var for vanskelig å få fagpoeng – man må kunne tjene
+fagpoeng når man står fast. «Flytt inn under Mål lenger ned» ble ikke funnet.
+
+**Gjort (B-064):** Forskningssamarbeid (kjøp fagpoeng én gang per døgn), hint på Verket når hovedutstyret
+venter på fagpoeng, «Slik får du fagpoeng» på Forskning, flytte-hintet ruller til målkortet, og målkortet står
+øverst når du kan flytte. Nytt felt `fpDealDay` med standardverdi i `migrate()`.
+
+**Testet:** tsc, lint, validate, balanse (8 / 26 / 66 / 133, nybegynner storverket median 165, exit 0),
+Playwright på iPhone-størrelse (kjøp av samarbeid, hint, flytte-hint til målkortet, ingen konsollfeil).
+
+**Gjenstår:** spørsmålet om storverket (mer innhold eller lavere vinnergrense).
+
+---
+
 ## Økt 35 – 2026-09-25: skjult automatikk og skrapvarsel
 
 **Brukeren ba om:** Sjekke om omforing skjer automatisk uten reparatør/plan, og om skrapmiksen fikser seg uten

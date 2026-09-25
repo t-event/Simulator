@@ -301,6 +301,41 @@ export function doResearch(g: GameState, id: string): PurchaseResult {
   return { ok: true, message: `${option.name} er forsket fram.` };
 }
 
+/**
+ * Forskningssamarbeid (B-064): kjøp fagpoeng for penger, én gang per døgn. Gir en vei videre når
+ * forskningen står fast og pengene hoper seg opp. Omtrent et døgns fagpoeng for en god del av et døgns overskudd.
+ */
+export const FP_DEAL: { fp: number; price: number }[] = [
+  { fp: 0, price: 0 },
+  { fp: 5, price: 15_000 },
+  { fp: 8, price: 60_000 },
+  { fp: 15, price: 250_000 },
+  { fp: 30, price: 1_500_000 },
+];
+
+export function fpDeal(g: GameState): { fp: number; price: number; reason: string | null } {
+  const deal = FP_DEAL[g.stage] ?? FP_DEAL[FP_DEAL.length - 1];
+  const reason =
+    deal.fp <= 0
+      ? `Kommer når du har flyttet til ${stageRef(1, g.stage)}`
+      : g.fpDealDay === day(g)
+        ? "Du har brukt samarbeidet i dag – nytt tilbud i morgen"
+        : g.cash < deal.price
+          ? "For lite penger"
+          : null;
+  return { ...deal, reason };
+}
+
+export function buyFpDeal(g: GameState): PurchaseResult {
+  const deal = fpDeal(g);
+  if (deal.reason) return fail(deal.reason);
+  addCost(g, "annet", deal.price);
+  g.researchPoints += deal.fp;
+  g.fpDealDay = day(g);
+  log(g, `Forskningssamarbeidet ga ${deal.fp} fagpoeng (${fmtKr(deal.price)}).`, "good");
+  return { ok: true, message: `+${deal.fp} fagpoeng.` };
+}
+
 /** Markerer forskning som gjort for utstyr spilleren allerede har (gamle lagringer). */
 export function grantResearchForOwned(g: GameState): void {
   const owned = new Set([g.furnaceType, g.castingType, ...g.owned]);

@@ -377,6 +377,8 @@ export interface GameState {
   pendingManual: ManualRequest | null;
   /** Fagpoeng til forskning */
   researchPoints: number;
+  /** Dagen spilleren sist kjøpte fagpoeng gjennom et forskningssamarbeid (B-064), −1 hvis aldri */
+  fpDealDay: number;
   researched: string[];
   pendingDecision: Decision | null;
   /** Dagen hvert hendelseskort sist ble vist, så de ikke gjentas for ofte */
