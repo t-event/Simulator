@@ -1738,3 +1738,11 @@ Status: gjelder (erstatter «4 uker» i B-124 og B-129)
 Brukeren: sesongen må vare i 6 måneder.
 Beslutning: Sesong 1 er forlenget til seks måneder fra starten (til 2027-03-25). `start_season` har 26 uker som
 standard. Tekstene i spillet og fagboka sier «et halvt år».
+
+## B-131 Sesongbeskjed også uten konto (2026-09-25)
+Status: gjelder
+Brukeren: de som ikke er logget inn, må også få popupen: for å være med i en sesong må man opprette konto eller
+logge inn.
+Beslutning: uten konto vises «Sesong 1 er i gang – bli med!» én gang per sesong (`seasonLoginPromptSeen`), ikke
+midt i veiledningen. Knappen «Opprett konto eller logg inn» åpner ⚙️ Innstillinger med kontokortet; «Ikke nå»
+lukker. Logger man inn, gjelder reglene fra B-129: et nytt spill blir med direkte, et eldre får valget.

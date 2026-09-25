@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 76 – 2026-09-25: sesongbeskjed uten konto
+
+**Brukeren ba om:** De som ikke er logget inn, må også få popupen om sesongen.
+
+**Gjort:** B-131. Popup én gang per sesong for spillere uten konto, med knapp til kontokortet.
+
+**Testet:** tsc, lint, `npm test`, build. Playwright på iPhone 13: popupen vises uten konto, knappen åpner
+innstillingene med kontokortet, og den kommer ikke igjen. Ingen feil, ingen horisontal scrolling.
+
+**Gjenstår:** Fase 4 og 5.
+
+---
+
 ## Økt 75 – 2026-09-25: sesongen varer i seks måneder
 
 **Brukeren ba om:** Sesongen må vare i 6 måneder.

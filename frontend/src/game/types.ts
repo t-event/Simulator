@@ -457,6 +457,8 @@ export interface GameState {
   season: number | null;
   /** Sesongen spilleren sist svarte på spørsmålet om, så det ikke stilles igjen */
   seasonPromptSeen: number | null;
+  /** Sesongen en spiller uten konto sist fikk beskjed om at man må logge inn for å være med (B-131) */
+  seasonLoginPromptSeen: number | null;
   /** Felles hendelser fra serveren som pågår nå, og hvilke spilleren alt har fått beskjed om (B-129) */
   world: { events: WorldEvent[]; seenEventIds: number[] };
   konsern: {

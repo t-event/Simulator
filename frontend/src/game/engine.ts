@@ -244,6 +244,7 @@ export function newGame(seed = Date.now(), round = 1): GameState {
     owner: null,
     season: null,
     seasonPromptSeen: null,
+    seasonLoginPromptSeen: null,
     world: { events: [], seenEventIds: [] },
     fpDealDay: -1,
     inboxSeenId: 0,

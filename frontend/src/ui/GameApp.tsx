@@ -604,7 +604,7 @@ export function GameApp() {
       )}
 
       <SeasonSync api={api} />
-      {!modalOpen && <SeasonPrompt api={api} g={g} />}
+      {!modalOpen && <SeasonPrompt api={api} g={g} onOpenSettings={() => setSettingsOpen(true)} />}
       {g.gameOver && <EndScreen g={g} onRestart={api.quit} />}
       {g.won && !winSeen && !g.gameOver && (
         <EndScreen
