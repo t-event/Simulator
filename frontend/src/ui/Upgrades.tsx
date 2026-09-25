@@ -1,6 +1,6 @@
 import { buyUpgrade, upgradeOptions, type UpgradeOption } from "../game/actions";
 import { STATION_NAMES, stationOptions, type Station } from "./stations";
-import { STAGES, WIN_CASH } from "../game/data";
+import { STAGES, stageRef, WIN_CASH } from "../game/data";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Card } from "./common";
@@ -27,7 +27,7 @@ export function StationButton({
   );
 }
 
-function UpgradeCard({ o, act }: { o: UpgradeOption; act: GameApi["act"] }) {
+function UpgradeCard({ o, stage, act }: { o: UpgradeOption; stage: number; act: GameApi["act"] }) {
   return (
     <div className={`g-upgrade${o.owned ? " is-owned" : ""}${o.locked ? " is-locked" : ""}`}>
       <div className="g-contract-head">
@@ -39,7 +39,7 @@ function UpgradeCard({ o, act }: { o: UpgradeOption; act: GameApi["act"] }) {
       {o.owned ? (
         <span className="g-badge-ok">I drift</span>
       ) : o.locked ? (
-        <span className="g-muted">Krever {STAGES[o.stage].name.toLowerCase()}</span>
+        <span className="g-muted">Krever {stageRef(o.stage, stage)}</span>
       ) : (
         <div className="g-row">
           <button
@@ -87,7 +87,7 @@ export function UpgradeSheet({
         )}
         <div className="g-upgrades">
           {options.map((o) => (
-            <UpgradeCard key={o.id} o={o} act={act} />
+            <UpgradeCard key={o.id} o={o} stage={g.stage} act={act} />
           ))}
         </div>
       </div>
@@ -107,7 +107,7 @@ export function StageCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
     );
   }
   return (
-    <Card title={`Mål: ${next.name}`} className="g-stage-card">
+    <Card title={`Mål: ${next.name} (nivå ${g.stage + 2} av ${STAGES.length})`} className="g-stage-card">
       <p className="g-muted">{next.description}</p>
       <ul className="g-checks">
         <li className={g.reputation >= next.reputation ? "ok" : "bad"}>

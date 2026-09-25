@@ -1,9 +1,34 @@
 /**
  * Det spilleren kan gjøre: bygge ut, kjøpe utstyr, ansette, låne og styre produksjonen.
  */
-import { ADDONS, CASTINGS, FURNACES, GRADES, PRODUCTS, ROLES, SCRAP_IDS, STAGES, type Addon } from "./data";
-import { addCost, adjustMorale, bookTemps, fmtKr, fmtT, log, newCandidates, orderQueue, startReline, maxLoan, newFurnaceUnit, unlock, type PurchaseResult } from "./engine";
-import { castingType, day, daysUntilAllBack, staffing, gradeRecipe, fixedPowerOffer, furnaceType, has, isAbsent, POWER_BINDING_DAYS } from "./plant";
+import { ADDONS, CASTINGS, FURNACES, GRADES, PRODUCTS, ROLES, SCRAP_IDS, STAGES, stageRef, type Addon } from "./data";
+import {
+  addCost,
+  adjustMorale,
+  bookTemps,
+  fmtKr,
+  fmtT,
+  log,
+  newCandidates,
+  orderQueue,
+  startReline,
+  maxLoan,
+  newFurnaceUnit,
+  unlock,
+  type PurchaseResult,
+} from "./engine";
+import {
+  castingType,
+  day,
+  daysUntilAllBack,
+  staffing,
+  gradeRecipe,
+  fixedPowerOffer,
+  furnaceType,
+  has,
+  isAbsent,
+  POWER_BINDING_DAYS,
+} from "./plant";
 import { newGradesAt, startRecipeGuide } from "./recipeGuide";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
 import type { GameState, GradeId, PowerDeal, RoleId, ScrapId } from "./types";
@@ -155,7 +180,7 @@ export function buyUpgrade(g: GameState, id: string): PurchaseResult {
   const option = upgradeOptions(g).find((o) => o.id === id);
   if (!option) return fail("Ukjent oppgradering.");
   if (option.owned) return fail("Du har den allerede.");
-  if (option.locked) return fail(`Krever ${STAGES[option.stage].name.toLowerCase()}.`);
+  if (option.locked) return fail(`Krever at du har flyttet til ${stageRef(option.stage, g.stage)}.`);
   if (!option.available) return fail(option.reason ?? "Kan ikke kjøpes nå.");
   addCost(g, "investering", option.price);
 
@@ -531,7 +556,9 @@ export function hireTempCrew(g: GameState, days: number): PurchaseResult {
   for (const [r, n] of Object.entries(old)) crew[r] = n ?? 0;
   for (const [r, n] of missing) crew[r] = (crew[r] ?? 0) + (n ?? 0);
   g.tempCrew = { crew, untilMin: g.minute + days * 1440 };
-  const who = missing.map(([r, n]) => `${n} ${(n === 1 ? ROLES[r as RoleId].name : ROLES[r as RoleId].plural).toLowerCase()}`);
+  const who = missing.map(
+    ([r, n]) => `${n} ${(n === 1 ? ROLES[r as RoleId].name : ROLES[r as RoleId].plural).toLowerCase()}`,
+  );
   log(g, `Innleide vikarer (${who.join(", ")}) er på plass i ${days} døgn (${fmtKr(cost)}).`, "info");
   return { ok: true, message: "Vikarene er på plass." };
 }

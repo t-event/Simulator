@@ -763,3 +763,13 @@ Rettet:
 - «innen to dager» → «døgn», «de neste dagene» → «døgnene»; «under kredittgrensen» → «over».
 - Tips som viste til steder som er flyttet: lån under Forskning → Bank; «Bytt foring» på Verket.
 - Desimaltall i meldinger vises med komma (omdømme −4,8, 1,5 timer) i stedet for punktum.
+
+## B-060 Nivåene nevnes så en ny spiller forstår dem (2026-09-25)
+Status: gjelder
+Brukeren påpekte at «Fra støperiet kan du …» ikke sier en ny spiller noe: man vet ikke at støperiet er et nivå,
+eller hvor langt unna det er.
+- Ny hjelper `stageRef(nivå, nåværende)` i `data.ts` gir «støperiet (neste nivå)» når det er neste nivå, ellers
+  «stålverket (nivå 4 av 5)».
+- Tekstene sier «når du har flyttet til …» i stedet for «fra …»: planlegger og strømavtaler på Marked, ansatte og
+  daglig leder under Folk, låst utstyr, låst forskning («Kommer i …»), søkere i garasjen og natt-tipset.
+- Målkortet på Verket heter «Mål: Støperi (nivå 3 av 5)», så «neste nivå» henger sammen med det spilleren ser.
