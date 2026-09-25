@@ -6,7 +6,7 @@
  * stålverk drives.
  */
 import { SCRAP_TYPES, STAGES } from "./data";
-import { acceptContract, addCost, addIncome, addScrapParti, adjustMorale, adjustReputation, fmtKr, fmtT, log, makeCandidate, quitText, scrapPrice, unlock, workerLabel } from "./engine";
+import { acceptContract, addCost, addIncome, addScrapParti, adjustMorale, adjustReputation, countEvent, fmtKr, fmtT, log, makeCandidate, quitText, scrapPrice, unlock, workerLabel } from "./engine";
 import { computePlantStats, day, isAbsent, productPrice, satisfiedGrades } from "./plant";
 import { chance, pick, rand, uniform } from "./random";
 import { knowledgeCard } from "./knowledge";
@@ -315,6 +315,8 @@ export function resolveDecision(g: GameState, option: number): void {
   g.pendingDecision = null;
   // Etter et kort går spillet videre på 1×, så man ikke raser videre på 10× (B-033)
   g.speed = d.resumeSpeed > 0 ? 1 : 0;
+  // Første gang farten settes ned fra 3× eller 10×, forklares det med et tips (B-069)
+  if (d.resumeSpeed > 1 && d.id !== "tips-fart-ned") countEvent(g, "fartNed");
   const yes = option === 0;
   const n = (k: string) => Number(d.data[k] ?? 0);
   switch (d.id) {

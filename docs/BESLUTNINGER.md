@@ -889,3 +889,11 @@ Status: gjelder (justerer B-064)
 Brukeren påpekte at «Du kan flytte inn … Trykk her» ga lite mening når målkortet med flytteknappen sto rett under.
 Beslutning: på Oversikt vises ikke flytte-hintet; målkortet står øverst og får grønn ramme (`is-ready`). På Anlegg
 og Økonomi vises hintet fortsatt, og det åpner Oversikt ved målkortet.
+
+## B-069 Tips første gang farten settes ned (2026-09-25)
+Status: gjelder (utfyller B-033)
+Brukeren ville ha en forklaring første gang spillet setter farten ned av seg selv.
+Beslutning: når et hendelseskort eller tips løses og farten var 3× eller 10×, telles det (`counters.fartNed`).
+Første gang kommer engangstipset «Hvorfor gikk farten ned til 1×?»: spillet setter farten ned når det skjer noe du
+må ta stilling til, så du ikke raser videre på 10× mens verket har problemer; trykk 3× eller 10× igjen når alt er i
+orden. Engangstipsene husker nå farten før de dukket opp (før sto det alltid 1×), så også de teller.
