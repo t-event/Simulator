@@ -35,6 +35,7 @@ import {
   castingType,
   computePlantStats,
   crewBenefits,
+  dealPrice,
   day,
   energyPrice,
   fixedPowerOffer,
@@ -186,6 +187,7 @@ export function newGame(seed = Date.now(), round = 1): GameState {
       scrapFactor: Object.fromEntries(SCRAP_IDS.map((id) => [id, 1])) as Record<ScrapId, number>,
       powerFactor: 1,
       powerSpikeDays: 0,
+      powerDryDays: 0,
       spotSoldToday: {},
     },
     settings: {
@@ -230,6 +232,8 @@ export function newGame(seed = Date.now(), round = 1): GameState {
     researchPoints: 10 * bonus,
     round,
     winSeen: false,
+    courseSeats: null,
+    pendingCastingSwitch: null,
     fpDealDay: -1,
     inboxSeenId: 0,
     researched: [],
@@ -311,7 +315,12 @@ function repLoss(g: GameState, amount: number, cause: RepCause): void {
 /** Strøm brukt, for snittprisen per døgn */
 function chargeEnergy(g: GameState, kwh: number): void {
   addCost(g, "energi", kwh * energyPrice(g));
-  if (furnaceType(g).fuel === "strøm") g.today.kwh = (g.today.kwh ?? 0) + kwh;
+  if (furnaceType(g).fuel === "strøm") {
+    g.today.kwh = (g.today.kwh ?? 0) + kwh;
+    // Hva den samme strømmen ville kostet med de andre avtalene, så spilleren kan sammenligne (B-105)
+    const alt = (g.today.altEnergy ??= {});
+    for (const deal of ["spot", "fast", "natt"] as const) alt[deal] = (alt[deal] ?? 0) + kwh * dealPrice(g, deal);
+  }
 }
 
 /** Endrer trivselen blant de ansatte (0–100) */
@@ -1361,6 +1370,9 @@ function followQueue(g: GameState, stats: PlantStats): void {
     const saved = g.gradeRecipes[order.grade];
     if (saved) g.recipe = { ...saved };
     ensureRecipe(g, order.grade, stats);
+  } else if (order && hasGrader(g)) {
+    // Skrapklasseren retter også resepten til kvaliteten som alt kjøres, når en ny ordre krever det (B-099)
+    ensureRecipe(g, order.grade, stats);
   }
   // Ovn 2 (og 3 …) tar neste kvalitet i køen, hvis det er en annen (B-039)
   const other = auto(g, "splitGrades") ? orders.find((c) => c.grade !== g.targetGrade) : undefined;
@@ -1407,6 +1419,23 @@ export function agreementLoadUntil(g: GameState, untilDay: number): number {
     for (let w = a.weeksSent, d = a.nextDay; w < a.weeks && d < untilDay; w++, d += 7) t += a.weeklyT;
   }
   return t;
+}
+
+/**
+ * Kontraktene i ordrekøen som ikke rekker fristen, hvis verket mister «lostT» tonn produksjon nå
+ * (f.eks. ved utkobling fra nettselskapet, B-104). Anslaget bruker samme døgnproduksjon som forespørslene.
+ */
+export function lateContracts(g: GameState, stats: PlantStats, lostT = 0): Contract[] {
+  const perDay = realisticDailyT(g, stats);
+  if (perDay <= 0) return orderQueue(g);
+  let cum = lostT;
+  const late: Contract[] = [];
+  for (const c of orderQueue(g)) {
+    cum += c.tonnes - c.delivered;
+    const doneDay = day(g) + cum / perDay - 1;
+    if (doneDay > c.deadlineDay) late.push(c);
+  }
+  return late;
 }
 
 export function realisticDailyT(g: GameState, stats: PlantStats): number {
@@ -1526,18 +1555,21 @@ function pickCustomer(
     const list = open.length ? open : c.grades;
     return wanted.length ? list.filter((id) => wanted.includes(id)) : list;
   };
+  // Er et bytte av støping planlagt, kommer det ikke nye forespørsler på det gamle produktet (B-102)
+  const leaving = g.pendingCastingSwitch ? castingType(g).product : null;
+  const products = stats.products.filter((p) => p !== leaving);
   const eligible = CUSTOMERS.filter(
     (c) =>
       c.minStage <= g.stage &&
       c.maxStage >= g.stage &&
-      c.products.some((p) => stats.products.includes(p)) &&
+      c.products.some((p) => products.includes(p)) &&
       gradesFor(c).length > 0,
   );
   if (!eligible.length) return null;
   const customer = pick(g, eligible);
   const product = pick(
     g,
-    customer.products.filter((p) => stats.products.includes(p)),
+    customer.products.filter((p) => products.includes(p)),
   );
   let grade = pick(g, gradesFor(customer));
   // De fleste forespørsler gjelder kvaliteter verket kan lage med skrapet som er åpent. Noen få gjelder
@@ -1648,7 +1680,7 @@ function generateOffers(g: GameState, stats: PlantStats, count?: number): void {
 /** Rammeavtaler kommer fra stålverket */
 export const AGREEMENT_STAGE = 3;
 /** Så mange aktive rammeavtaler kundene gir deg samtidig, per nivå */
-const MAX_AGREEMENTS = [0, 0, 0, 2, 3];
+export const MAX_AGREEMENTS = [0, 0, 0, 2, 3];
 /** Uker uten full leveranse før kunden sier opp avtalen */
 export const AGREEMENT_MAX_MISSED = 2;
 
@@ -2072,12 +2104,15 @@ function updateAbsence(g: GameState, stats: PlantStats): void {
       (1 + Math.max(0, 60 - g.morale) / 60) *
       (nightExtra(g, stats.hours) > 0 ? 1.3 : 1) *
       crewBenefits(stats.crews, stats.hours).sick *
-      (hasResearch(g, "ledelse") ? 0.7 : 1);
+      (hasResearch(g, "ledelse") ? 0.7 : 1) *
+      // Noen er oftere borte; en advarsel virker på dem (B-101)
+      (oftenSick(w) && (w.warnedDay === undefined || today - w.warnedDay >= WARNING_DAYS) ? 2.0 : 0.75);
     if (!busy && chance(g, risk)) {
       const len = randInt(g, 1, 3);
       w.absentFrom = g.minute;
       w.absentUntil = g.minute + len * MIN_PER_DAY;
       w.absentReason = "syk";
+      w.sickDays = [...(w.sickDays ?? []), today].slice(-12);
       log(
         g,
         `${w.name} (${ROLES[w.role].name.toLowerCase()}) er syk ${len === 1 ? "i dag" : `i ${len} døgn`}.`,
@@ -2085,6 +2120,21 @@ function updateAbsence(g: GameState, stats: PlantStats): void {
       );
     }
   }
+}
+
+/**
+ * Noen ansatte er oftere borte enn andre (B-101). Det avgjøres av id-en, ikke av tilfeldighetsgeneratoren, så
+ * resten av spillet trekker de samme tallene som før. Omtrent hver femte er «ofte syk».
+ */
+export function oftenSick(w: Worker): boolean {
+  return ((w.id * 2654435761) >>> 0) % 100 < 20;
+}
+export const WARNING_DAYS = 90;
+
+/** Hvor mange ganger den ansatte har vært syk de siste døgnene */
+export function sickSpells(g: GameState, w: Worker, days = 60): number {
+  const today = day(g);
+  return (w.sickDays ?? []).filter((d) => today - d < days).length;
 }
 
 /** Navn og stilling, f.eks. «Kari Berg (støper)», så spilleren ser hvilken plass som må fylles (B-066) */
@@ -2114,6 +2164,12 @@ function updateMorale(g: GameState, stats: PlantStats): void {
   }
 }
 
+let scheduledSwitch: (g: GameState) => void = () => {};
+/** Planlagt bytte av støping (B-102) registreres fra actions.ts, så motoren slipper å importere den i ring */
+export function setScheduledSwitch(fn: (g: GameState) => void): void {
+  scheduledSwitch = fn;
+}
+
 function onHour(g: GameState, stats: PlantStats): void {
   // Varsel når kassa går tom og kassekreditten tas i bruk (B-033)
   if (g.cash < 0 && !g.inCredit) {
@@ -2126,6 +2182,7 @@ function onHour(g: GameState, stats: PlantStats): void {
   for (const r of RESEARCH) if (r.reads && r.stage <= g.stage) unlock(g, r.reads);
   checkMissions(g);
   checkChallenges(g);
+  scheduledSwitch(g);
   checkWin(g);
   expireOffers(g, stats);
   trickleOffers(g, stats);
@@ -2276,10 +2333,22 @@ function onDay(g: GameState, stats: PlantStats): void {
       log(g, "Strømprisen er på vei ned igjen.", "info");
     }
   } else {
-    m.powerFactor = walk(g, m.powerFactor, 1, 0.2, 0.08, 0.5, 1.6);
-    if (chance(g, 0.04)) {
-      m.powerSpikeDays = randInt(g, 1, 3);
-      m.powerFactor = uniform(g, 2.0, 2.8);
+    // Tørre perioder: prisen ligger høyt i flere uker, så en fastprisavtale lønner seg (B-105)
+    if (m.powerDryDays > 0) {
+      m.powerDryDays -= 1;
+      if (m.powerDryDays === 0) log(g, "Det har regnet: strømprisen faller mot normalt igjen.", "info");
+    } else if (chance(g, 0.012)) {
+      m.powerDryDays = randInt(g, 12, 25);
+      log(
+        g,
+        "Tørt og lite vann i magasinene: strømprisen blir høy de neste ukene. Fastpris kan lønne seg nå.",
+        "event",
+      );
+    }
+    m.powerFactor = walk(g, m.powerFactor, m.powerDryDays > 0 ? 1.7 : 1, 0.2, 0.11, 0.5, 2.2);
+    if (chance(g, 0.05)) {
+      m.powerSpikeDays = randInt(g, 2, 4);
+      m.powerFactor = uniform(g, 2.2, 3.2);
       log(
         g,
         `Kulde og lite vind: strømprisen er ${m.powerFactor.toFixed(1).replace(".", ",")} ganger normalt de neste døgnene.`,

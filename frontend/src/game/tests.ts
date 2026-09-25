@@ -2,6 +2,7 @@
  * Små, raske tester av spillmotoren (B-097). Kjøres med `npx tsx src/game/tests.ts` og i CI.
  * Hver test bygger sin egen tilstand, så de ikke er avhengige av lagrede filer.
  */
+import { scheduleCastingSwitch } from "./actions";
 import { CHALLENGES, checkChallenges } from "./challenges";
 import { ADDONS, CASTINGS, FURNACES, WIN_CASH } from "./data";
 import { advance, checkWin, fmtKr, newGame } from "./engine";
@@ -95,6 +96,20 @@ test("Forespørsler på et produkt verket ikke lager lenger, trekkes tilbake", (
   g.pendingDecision = null;
   advance(g, 61);
   assert(!g.contracts.some((c) => c.status === "tilbud" && c.product === "blokk"), "blokk-forespørselen ble liggende");
+});
+
+test("Planlagt bytte av støping skjer av seg selv når det går", () => {
+  const g = newGame(4);
+  g.stage = 3;
+  g.castingType = "blokk";
+  g.cash = 1e9;
+  g.researched.push("strengstoping");
+  g.contracts = g.contracts.filter((c) => c.status !== "aktiv");
+  scheduleCastingSwitch(g, "streng1");
+  g.pendingDecision = null;
+  advance(g, 61);
+  assert(g.castingType === "streng1", `støpingen er fortsatt ${g.castingType}`);
+  assert(g.pendingCastingSwitch === null, "byttet står fortsatt som planlagt");
 });
 
 test("Strengstøpemaskin nr. 2 dobler støpekapasiteten", () => {

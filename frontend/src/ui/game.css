@@ -2041,3 +2041,24 @@ button {
   margin-left: auto;
   padding: 4px 10px;
 }
+
+/* Sammenligning av strømavtaler (B-105) */
+.g-deal-compare {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.g-deal-compare li {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #1c2533;
+}
+
+.g-deal-compare li.is-best {
+  outline: 1px solid var(--ok);
+}

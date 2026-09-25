@@ -16,6 +16,7 @@ import {
   countEvent,
   fmtKr,
   fmtT,
+  lateContracts,
   log,
   makeCandidate,
   quitText,
@@ -143,16 +144,37 @@ const MORE_MAKERS: Record<string, Maker> = {
     const pay =
       Math.round((lostT * productPrice(g, stats.mainProduct, "standard") * uniform(g, 0.15, 0.45)) / 100) * 100;
     const mw = stats.units.reduce((a, u) => a + u.furnaceMW, 0);
+    // Rekker ordrekøen fristene med og uten utkobling? Så slipper spilleren å gjette (B-104)
+    const lateNow = lateContracts(g, stats).length;
+    const lateWith = lateContracts(g, stats, lostT);
+    const queued = g.contracts.filter((c) => c.status === "aktiv").length;
+    const check =
+      queued === 0
+        ? "Du har ingen kontrakter i ordrekøen nå."
+        : lateWith.length === lateNow
+          ? lateNow === 0
+            ? `Ordrekøen tåler det: alle ${queued} kontraktene rekker fristen også med utkoblingen.`
+            : `${lateNow} av ${queued} kontrakter ser ut til å bli for sene uansett – utkoblingen gjør det ikke verre.`
+          : `Med utkoblingen blir ${lateWith.length - lateNow} kontrakt${lateWith.length - lateNow === 1 ? "" : "er"} for sen (${lateWith
+              .slice(0, 2)
+              .map((c) => c.customer)
+              .join(", ")}). Uten: ${lateNow === 0 ? "alle rekker fristen" : `${lateNow} for sene`}.`;
     return {
       id: "utkobling",
       title: "Nettselskapet ringer",
-      text: `Strømnettet er hardt belastet. Nettselskapet ber deg koble ut ovnene (${mw.toFixed(1).replace(".", ",")} MW) i morgen kl. 07–11 og tilbyr ${fmtKr(pay)} for det.`,
+      text: `Strømnettet er hardt belastet. Nettselskapet ber deg koble ut ovnene (${mw.toFixed(1).replace(".", ",")} MW) i morgen kl. 07–11 og tilbyr ${fmtKr(pay)} for det. ${check}`,
       options: [
         {
           label: `Godta (${fmtKr(pay)})`,
           hint: `Ingen nye charger i fire timer – omtrent ${fmtT(lostT)} mindre stål.`,
         },
-        { label: "Nei takk", hint: "Har du dårlig tid med leveranser, er det tryggest å si nei." },
+        {
+          label: "Nei takk",
+          hint:
+            lateWith.length > lateNow
+              ? "Anbefalt: utkoblingen ville gjort leveranser for sene."
+              : "Har du dårlig tid med leveranser, er det tryggest å si nei.",
+        },
       ],
       data: { pay, from: day(g) * 1440 + 7 * 60, until: day(g) * 1440 + 11 * 60 },
     };

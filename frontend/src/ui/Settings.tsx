@@ -6,6 +6,7 @@ import type { PlantStats } from "../game/plant";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { AutoToggle } from "./AutoToggle";
+import { InstallTip } from "./InstallTip";
 import { Card } from "./common";
 import { fmtKr, fmtPct } from "./format";
 
@@ -73,6 +74,7 @@ export function SettingsSheet({
   act,
   onQuit,
   onLoadBackup,
+  onNextRound,
   onClose,
 }: {
   g: GameState;
@@ -80,6 +82,7 @@ export function SettingsSheet({
   act: GameApi["act"];
   onQuit: () => void;
   onLoadBackup: (text: string) => boolean;
+  onNextRound: () => void;
   onClose: () => void;
 }) {
   const [confirmQuit, setConfirmQuit] = useState(false);
@@ -134,7 +137,18 @@ export function SettingsSheet({
           <button onClick={() => downloadBackup(g)}>Last ned sikkerhetskopi</button>
           <BackupInput onLoad={onLoadBackup} />
         </div>
+        <h3 className="g-subhead">Spill på mobilen</h3>
+        <InstallTip />
         <h3 className="g-subhead">Nytt spill</h3>
+        {g.won && (
+          <p>
+            Du har vunnet og spiller videre. Når du vil, kan du starte runde {(g.round ?? 1) + 1} med mer startkapital,
+            fagpoeng og omdømme.{" "}
+            <button className="g-primary g-small" onClick={onNextRound}>
+              Nytt spill+ (runde {(g.round ?? 1) + 1})
+            </button>
+          </p>
+        )}
         {confirmQuit ? (
           <div className="g-row">
             <button className="g-danger" onClick={onQuit}>

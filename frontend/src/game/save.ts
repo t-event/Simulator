@@ -82,6 +82,9 @@ export function migrate(g: GameState): GameState {
   if (g.round === undefined) g.round = 1;
   // Seiersskjermen ble ikke lagret som sett før; et vunnet spill får den én gang til
   if (g.winSeen === undefined) g.winSeen = false;
+  if (g.courseSeats === undefined) g.courseSeats = null;
+  if (g.pendingCastingSwitch === undefined) g.pendingCastingSwitch = null;
+  if (g.market.powerDryDays === undefined) g.market.powerDryDays = 0;
   // Gamle hendelser skal ikke telle som uleste i den nye varsellista (B-089)
   if (g.inboxSeenId === undefined) g.inboxSeenId = g.log.length ? g.log[g.log.length - 1].id : 0;
   // Før B-042 ble fastpris fornyet av seg selv; gamle spill beholder det

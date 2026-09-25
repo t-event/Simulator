@@ -191,6 +191,10 @@ export interface Worker {
   absentReason?: "syk" | "ferie";
   /** Døgnet neste ferie starter (varsles tre døgn før) */
   nextVacationDay?: number;
+  /** Dagene sykefraværene startet, de siste tolv (B-101) */
+  sickDays?: number[];
+  /** Dagen den ansatte sist fikk en advarsel om fravær (B-101) */
+  warnedDay?: number;
 }
 
 export interface LogEntry {
@@ -233,6 +237,8 @@ export interface DayFinance {
   autoBuyKr?: number;
   /** Strøm brukt i døgnet (kWh), for snittprisen */
   kwh?: number;
+  /** Hva døgnets strøm ville kostet med hver avtale (B-105) */
+  altEnergy?: Partial<Record<PowerDeal, number>>;
   /** Døgnets høyeste effektuttak (MW), grunnlaget for effekttariffen */
   peakMW?: number;
 }
@@ -327,6 +333,8 @@ export interface Market {
   scrapFactor: Record<ScrapId, number>;
   powerFactor: number;
   powerSpikeDays: number;
+  /** Tørr periode: strømprisen ligger høyt i flere uker (B-105) */
+  powerDryDays: number;
   spotSoldToday: Partial<Record<ProductId, number>>;
 }
 
@@ -391,6 +399,10 @@ export interface GameState {
   round: number;
   /** Spilleren har sett seiersskjermen og valgt å spille videre */
   winSeen: boolean;
+  /** Plasser brukt i kursrunden som starter på dag «start» (B-100) */
+  courseSeats: { start: number; used: number } | null;
+  /** Støping som kjøpes av seg selv når ordrene på det gamle produktet er levert (B-102) */
+  pendingCastingSwitch: string | null;
   researched: string[];
   pendingDecision: Decision | null;
   /** Dagen hvert hendelseskort sist ble vist, så de ikke gjentas for ofte */
