@@ -1937,3 +1937,23 @@ med planen.
   PLAN-NETT.md rettet (sikkerhetskopi, «Confirm email», migrasjoner, lagring). Ny `docs/FORSLAG.md` med åpne
   spørsmål og forslag.
 
+## B-142 Rekordene på «Alle tider» lagres for seg (2026-09-25)
+Status: gjelder (erstatter «Alle tider» fra tidslinja i B-141)
+Brukeren: «Om man starter på nytt for å bli med i en sesong, og slår sin egen alle tider-rekord – blir den riktig
+overskrevet? Og at det ikke blir dobbelt.»
+
+Sjekket i databasen (transaksjon som ble rullet tilbake):
+- Dobbelt: nei. Topplista har alltid én rad per spiller.
+- Ny rekord i et sesongspill: ble riktig vist.
+- Feil (innført i B-141): et nytt spill utenfor en sesong slettet tidslinja fra det gamle spillet, og rekorden på
+  «Alle tider» falt fra 28,9 mrd. til 25 000 kr. Det samme skjedde med det beste fra et sesongspill som gikk konkurs.
+
+Beslutning:
+- Ny tabell `records` (migrasjon 010): én rad per konto med beste konsernverdi (og dagen), beste omdømme, høyeste
+  nivå, færrest døgn til storverket og til 10 mrd. En trigger på `snapshots` oppdaterer den etter hver lagring, og
+  verdiene blir bare bedre. Rekordene fra tidslinja som fantes, ble lagt inn.
+- «Alle tider» leser rekordene. Sesonglista leser fortsatt spillet man har nå (siste døgn i sesongen).
+- `records` har tilgangsregler: spilleren kan bare lese sin egen rad; skriving skjer bare fra triggeren.
+- Etter endringen: nytt spill utenfor sesongen → rekorden står; ny rekord i sesongen → den nye står; konkurs og ny
+  start i sesongen → rekorden står, sesonglista viser det nye spillet. Én rad per spiller hele veien.
+

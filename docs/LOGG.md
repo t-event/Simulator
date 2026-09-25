@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 88 – 2026-09-25: rekorden på «Alle tider» ved ny start
+
+**Brukeren spurte:** Blir rekorden på «Alle tider» riktig overskrevet når man starter på nytt for å bli med i en
+sesong og slår den – og uten at man står dobbelt?
+
+**Gjort:** B-142. Sjekket i databasen: aldri dobbelt, og en ny rekord ble vist riktig, men et nytt spill utenfor en
+sesong slettet den gamle rekorden (feil fra B-141). Rekordene lagres nå i egen tabell (`records`, migrasjon 010),
+og «Alle tider» leser derfra.
+
+**Testet:** Migrasjon 010 prøvd i en transaksjon som ble rullet tilbake: nytt spill utenfor sesong → 28,92 mrd.
+står; sesongrekord → ny verdi står; konkurs og ny start i sesongen → rekorden står, sesonglista viser det nye spillet;
+to rader på lista og én rekordrad per spiller hele veien. Rekordene fra tidslinja er lagt inn for begge spillerne.
+Sikkerhetsrådene uendret. Ingen endring i appen.
+
+**Gjenstår:** Som i økt 87.
+
+---
+
 ## Økt 87 – 2026-09-25: hyppigere lagring, nytt spill+ fjernet, og grundig gjennomgang av alt
 
 **Brukeren ba om:** Fiks at spillet synkroniserer ofte nok. Nytt spill+ er forvirrende når det ikke er med i
