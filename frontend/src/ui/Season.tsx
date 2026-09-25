@@ -123,6 +123,8 @@ export function SeasonPrompt({ api, g, onOpenSettings }: { api: GameApi; g: Game
               className="g-danger"
               onClick={() => {
                 const ng = newGame();
+                ng.tutorial = 0;
+                ng.speed = 0;
                 joinSeason(ng, cur.id, bonus);
                 unlock(ng, "sesong");
                 api.adopt(ng);
@@ -183,6 +185,8 @@ export function SeasonJoin({ api, g, onOpenSettings }: { api: GameApi; g: GameSt
             className="g-danger"
             onClick={() => {
               const ng = newGame();
+              ng.tutorial = 0;
+              ng.speed = 0;
               joinSeason(ng, cur.id, bonus);
               unlock(ng, "sesong");
               api.adopt(ng);
