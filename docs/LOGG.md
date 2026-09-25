@@ -5,6 +5,27 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 61 – 2026-09-25: egen plass for varslene
+
+**Brukeren ba om:** Varslene bør ha en egen plass. De kommer i veien for å signere kontrakter og kjøpe ting, så man
+må pause og krysse dem ut først.
+
+**Gjort:** B-116. Varsellinja er en fast linje i toppfeltet med bjella. De flytende varslene er fjernet.
+
+**Testet:**
+- tsc, lint, `npm test`, bygg.
+- Playwright på iPhone 13 og på desktop:
+  - linja er alltid 40 px høy
+  - ingen varsler ligger oppå siden
+  - 13 kontrakter ble signert på 10× uten å pause
+  - trykk åpner varsellista
+  - nytt spill starter uten feil
+  - ingen horisontal scrolling
+
+**Gjenstår:** Ingenting.
+
+---
+
 ## Økt 60 – 2026-09-25: tekst om overslag
 
 **Brukeren ba om:** «Støv i hvelvet må suges bort» så ut som en skrivefeil.

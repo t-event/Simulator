@@ -1368,7 +1368,7 @@ Sett over, men ikke endret: fagpoeng, økonomi, rammeavtaler, fravær, planlegge
 prosessmodellen.
 
 ## B-114 Ett varsel om gangen, på én linje (2026-09-25)
-Status: gjelder (erstatter visningen i B-098)
+Status: gjelder, men plasseringen er erstattet av B-116 (varsellinja øverst)
 Brukeren syntes varslene var i veien: opptil tre store varsler sto over menyen nederst og dekket knapper. Brukeren
 valgte «én smal linje» blant fire forslag.
 Beslutning:
@@ -1398,4 +1398,18 @@ Beslutning:
   Reglene prøves i rekkefølge. Det som ikke passer noe tema («annet»), vises alltid med «Velg selv».
 - Sjekket med et skript som samlet alle ulike varseltekster fra 40 døgn i fem lagrede spill: alle havnet i et tema.
 - Varsellista bak 🔔 viser fortsatt alt.
+
+## B-116 Varsellinja: en fast plass for varslene øverst (2026-09-25)
+Status: gjelder (erstatter plasseringen i B-114)
+Brukeren: varslene kom fortsatt i veien for å signere kontrakter og kjøpe ting. Man måtte pause spillet og krysse ut
+varslene først. Et varsel som legger seg oppå siden, vil alltid kunne dekke en knapp.
+Beslutning:
+- Varslene har en egen, fast linje nederst i toppfeltet, under kassa og omdømmet. Linja er alltid 40 px høy og
+  ligger ikke oppå noe, så knappene verken dekkes eller flytter seg når et varsel kommer.
+- Bjella er flyttet inn i linja, med antall nye varsler.
+- Uten varsel viser linja «Ingen nye varsler», eller «3 nye varsler – trykk for å se».
+- Trykk på linja åpner varsellista. ✕ fjerner varselet. «+N» viser hvor mange som venter.
+- Svar på noe spilleren trykket på (f.eks. «For lite penger») kan bruke to linjer. Da vokser linja et øyeblikk, men
+  bare etter spillerens eget trykk.
+- De flytende varslene over menyen er fjernet.
 

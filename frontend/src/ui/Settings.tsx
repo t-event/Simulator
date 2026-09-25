@@ -78,7 +78,8 @@ function ToastSettings({ g, act }: { g: GameState; act: GameApi["act"] }) {
     <>
       <h3 className="g-subhead">Varsler på skjermen</h3>
       <p className="g-muted">
-        Varslene dukker opp én om gangen over menyen. Alt samles uansett i varsellista bak 🔔 øverst.
+        Varslene dukker opp ett om gangen i varsellinja øverst, under kassa. Alt samles uansett i varsellista – trykk på
+        linja.
       </p>
       <div className="g-choice" role="radiogroup" aria-label="Hvor mange varsler">
         {(

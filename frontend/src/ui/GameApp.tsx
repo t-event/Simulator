@@ -310,15 +310,8 @@ function TopBar({
             <em>Fagpoeng</em> {Math.floor(g.researchPoints)}
           </span>
         )}
-        <button
-          className="g-book g-inbox-btn"
-          onClick={onInbox}
-          aria-label={`Varsler${unseen ? ` (${unseen} nye)` : ""}`}
-        >
-          <span aria-hidden="true">🔔</span>
-          {unseen > 0 && <span className="g-badge">{unseen > 99 ? "99+" : unseen}</span>}
-        </button>
       </div>
+      <NoticeLine api={api} unseen={unseen} onOpen={onInbox} />
     </header>
   );
 }
@@ -326,40 +319,46 @@ function TopBar({
 const TOAST_ICON = { bad: "⚠", event: "•", good: "✓", info: "•" } as const;
 
 /**
- * Ett varsel om gangen på én linje over menyen (B-114). Trykk åpner varsellista med hele teksten, ✕ eller sveip
- * fjerner det. Svar på noe spilleren trykket på (f.eks. «For lite penger») står ikke i lista, så de vises helt.
+ * Varsellinja (B-116): en fast linje nederst i toppfeltet med bjella og det nyeste varselet. Den har alltid samme
+ * høyde og ligger ikke oppå siden, så den kommer aldri i veien for knapper. Trykk åpner varsellista, ✕ fjerner
+ * varselet. Svar på noe spilleren trykket på (f.eks. «For lite penger») står ikke i lista, så de vises helt.
  */
-function Toasts({ api, onOpen }: { api: GameApi; onOpen: () => void }) {
-  const [startX, setStartX] = useState<number | null>(null);
+function NoticeLine({ api, unseen, onOpen }: { api: GameApi; unseen: number; onOpen: () => void }) {
   const t = api.toasts[0];
-  if (!t) return <div className="g-toasts" aria-live="polite" />;
+  const text = t
+    ? t.text
+    : unseen > 0
+      ? `${unseen === 1 ? "Ett nytt varsel" : `${unseen > 99 ? "99+" : unseen} nye varsler`} – trykk for å se`
+      : "Ingen nye varsler";
   return (
-    <div className="g-toasts" aria-live="polite">
-      <div
-        key={t.id}
-        className={`g-toast toast-${t.kind}${t.fromLog ? "" : " is-full"}`}
-        onTouchStart={(e) => setStartX(e.touches[0].clientX)}
-        onTouchEnd={(e) => {
-          if (startX !== null && Math.abs(e.changedTouches[0].clientX - startX) > 50) api.dismissToast(t.id);
-          setStartX(null);
-        }}
+    <div
+      className={`g-notice${t ? ` toast-${t.kind}` : ""}${t && !t.fromLog ? " is-full" : ""}`}
+      role="status"
+      aria-live="polite"
+    >
+      <button
+        className="g-notice-text"
+        onClick={() => (t && !t.fromLog ? api.dismissToast(t.id) : onOpen())}
+        aria-label={`Varsler${unseen ? ` (${unseen} nye)` : ""}: ${text}`}
       >
-        <button
-          className="g-toast-text"
-          onClick={() => (t.fromLog ? onOpen() : api.dismissToast(t.id))}
-          aria-label={t.fromLog ? `${t.text} – åpne varsellista` : t.text}
-        >
-          <span aria-hidden="true">{TOAST_ICON[t.kind]}</span> {t.text}
-        </button>
-        {api.toastsWaiting > 0 && (
-          <span className="g-toast-more" aria-label={`${api.toastsWaiting} varsler til`}>
-            +{api.toastsWaiting}
-          </span>
-        )}
+        <span className="g-notice-bell" aria-hidden="true">
+          🔔{unseen > 0 && <span className="g-badge">{unseen > 99 ? "99+" : unseen}</span>}
+        </span>
+        <span className={`g-notice-msg${t ? "" : " is-idle"}`}>
+          {t && <span aria-hidden="true">{TOAST_ICON[t.kind]} </span>}
+          {text}
+        </span>
+      </button>
+      {api.toastsWaiting > 0 && (
+        <span className="g-toast-more" aria-label={`${api.toastsWaiting} varsler til`}>
+          +{api.toastsWaiting}
+        </span>
+      )}
+      {t && (
         <button className="g-toast-close" onClick={() => api.dismissToast(t.id)} aria-label="Fjern varselet">
           ✕
         </button>
-      </div>
+      )}
     </div>
   );
 }
@@ -492,14 +491,6 @@ export function GameApp() {
 
       {!modalOpen && <Coach g={g} act={act} />}
       {!modalOpen && <RecipeGuideCoach g={g} act={act} go={go} />}
-
-      <Toasts
-        api={api}
-        onOpen={() => {
-          api.clearToasts();
-          setInboxOpen(true);
-        }}
-      />
 
       {bookOpen && <Handbook g={g} act={act} initial={bookChapter} onClose={() => setBookOpen(false)} />}
       {inboxOpen && <InboxSheet g={g} act={act} onClose={() => setInboxOpen(false)} />}
