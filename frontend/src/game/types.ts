@@ -229,6 +229,8 @@ export interface SalesDirector {
   agreements: number;
   /** Tar også rammeavtaler, ikke bare vanlige kontrakter */
   agreementsOn: boolean;
+  /** Skrudd på: signerer av seg selv. Av: gjør ingenting, men får fortsatt lønn (B-122) */
+  active: boolean;
 }
 
 /** Datterverk i konsernet (B-106) */

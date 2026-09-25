@@ -78,6 +78,29 @@ function BuyButton({
   );
 }
 
+/** Bryter for å skru salgsdirektøren av og på (B-122). Vises på Konsern og under Forespørsler på Salg */
+export function DirectorSwitch({ g, act }: { g: GameState; act: Act }) {
+  const d = g.konsern?.director;
+  if (!d) return null;
+  return (
+    <>
+      <label className="g-toggle">
+        <input
+          type="checkbox"
+          checked={d.active}
+          onChange={(e) => act((gg) => void (gg.konsern.director && (gg.konsern.director.active = e.target.checked)))}
+        />
+        <span>Salgsdirektøren signerer for meg</span>
+      </label>
+      <p className="g-note">
+        {d.active
+          ? `Salgsdirektøren signerer forespørsler verket trygt rekker og som resepten holder${d.agreementsOn ? ", og rammeavtaler det er plass til" : ""}. Resten ligger under Salg, så du kan ta dem selv.`
+          : "Salgsdirektøren er skrudd av: du signerer alt selv. Lønna går likevel, så lenge direktøren er ansatt."}
+      </p>
+    </>
+  );
+}
+
 /** Salgsdirektøren (B-117): signerer kontrakter og rammeavtaler selv – meget dyrt */
 function DirectorCard({ g, act }: { g: GameState; act: Act }) {
   const d = g.konsern.director;
@@ -97,6 +120,7 @@ function DirectorCard({ g, act }: { g: GameState; act: Act }) {
             {d.agreements} {d.agreements === 1 ? "rammeavtale" : "rammeavtaler"}. Lønn {fmtKr(directorPerDay(g))} per
             døgn.
           </p>
+          <DirectorSwitch g={g} act={act} />
           <label className="g-toggle">
             <input
               type="checkbox"

@@ -96,6 +96,7 @@ export function migrate(g: GameState): GameState {
   if (g.konsern === undefined)
     g.konsern = { unlocked: false, plants: [], shared: [], nextId: 1, director: null, milestones: 0 };
   if (g.konsern.director === undefined) g.konsern.director = null;
+  if (g.konsern.director && g.konsern.director.active === undefined) g.konsern.director.active = true;
   if (g.konsern.milestones === undefined) g.konsern.milestones = 0;
   if (g.storeFullLogMin === undefined) g.storeFullLogMin = -1e9;
   // Gamle hendelser skal ikke telle som uleste i den nye varsellista (B-089)

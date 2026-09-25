@@ -5,6 +5,25 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 66 – 2026-09-25: skru salgsdirektøren av og på
+
+**Brukeren ba om:** En bryter under Forespørsler for å skru salgsdirektøren av og på. Brukeren spurte også hva
+«Elveverket» er, men fant selv ut at det er navnet på et datterverk.
+
+**Gjort:** B-122. Bryteren står under Salg → Forespørsler og på Konsern.
+
+**Testet:**
+- tsc, lint, `npm test` (direktøren signerer ingenting når den er av), balanse exit 0.
+- Playwright på iPhone 13 med en gammel lagring uten det nye feltet:
+  - bryteren er på fra start
+  - klikk skrur den av
+  - valget er lagret etter at siden er lastet på nytt
+  - ingen feil og ingen horisontal scrolling
+
+**Gjenstår:** Ingenting.
+
+---
+
 ## Økt 65 – 2026-09-25: det skal lønne seg å investere i konsernet
 
 **Brukeren ba om:**

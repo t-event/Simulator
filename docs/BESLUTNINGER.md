@@ -1538,3 +1538,15 @@ Målt med `--vansker` (flink / nybegynner):
 - Den som sparer, vinner dag 438–478 / 579–681.
 - Å investere vinner nå omtrent 150 døgn før for en flink spiller og omtrent 300 døgn før for en nybegynner.
 - Ingen konkurs.
+
+## B-122 Salgsdirektøren kan skrus av og på (2026-09-25)
+Status: gjelder
+Brukeren: når man har ansatt salgsdirektør, bør det være en knapp under Forespørsler for å skru den av og på.
+
+Beslutning:
+- Nytt felt `active` på `SalesDirector`. Standardverdien er `true`, også i `migrate()` for gamle lagringer.
+- Når direktøren er skrudd av, gjør `directorHour` ingenting.
+- Lønna går likevel: direktøren er fortsatt ansatt. Vil man slippe lønna, må man si opp direktøren. Dette står i
+  teksten under bryteren.
+- Bryteren «Salgsdirektøren signerer for meg» (`DirectorSwitch`) står både øverst under Salg → Forespørsler og på
+  kortet for salgsdirektøren under Konsern. Den erstatter den faste teksten om salgsdirektøren på Salg.

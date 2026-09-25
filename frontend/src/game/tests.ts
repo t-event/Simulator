@@ -118,6 +118,12 @@ test("Salgsdirektøren: meget dyr, signerer bare trygge forespørsler, og lønna
     const a = assessOffer(g, stats, { ...c, status: "tilbud" }, 0);
     assert(a.canMake && a.recipeOk, `signerte en kontrakt resepten ikke holder: ${c.grade}`);
   }
+  // Skrudd av: signerer ingenting (B-122)
+  g.konsern.director!.active = false;
+  for (const c of g.contracts) if (c.status === "aktiv") c.status = "tilbud";
+  directorHour(g);
+  assert(g.contracts.filter((c) => c.status === "aktiv").length === 0, "salgsdirektøren signerte selv om den var av");
+  g.konsern.director!.active = true;
   const before = g.today.costs.lonn ?? 0;
   konsernDay(g);
   assert((g.today.costs.lonn ?? 0) - before === DIRECTOR_PER_DAY, "lønna ble ikke trukket");
