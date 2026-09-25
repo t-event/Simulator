@@ -577,7 +577,7 @@ for (const seed of [1, 2, 3]) {
     advance(g, 60);
   }
   g.settings.manualNext = true;
-  const speedBefore = (g.speed = 3);
+  g.speed = 3;
   for (let i = 0; i < 48 && !g.pendingManual; i++) {
     botHour(g);
     advance(g, 60);
@@ -594,7 +594,8 @@ for (const seed of [1, 2, 3]) {
     advance(g, score.result.minutes + 30);
     const ok =
       g.totals.manualHeats === heatsBefore + 1 &&
-      g.speed === speedBefore &&
+      // Farten skal være den samme som da kontrollrommet åpnet (et hendelseskort i ventetida kan ha satt 1×)
+      g.speed === req.resumeSpeed &&
       g.researchPoints > fpBefore &&
       score.rating >= 4;
     console.log(
