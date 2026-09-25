@@ -133,19 +133,3 @@ export interface FurnaceState {
 
   alarms: Alarm[];
 }
-
-
-export const PHASE_LABEL: Record<Phase, string> = {
-  klar: "Klar",
-  innsmelting: "Innsmelting",
-  raffinering: "Raffinering",
-  avslagging: "Avslagging",
-  tapping: "Tapping",
-  klargjoring: "Klargjøring",
-};
-
-export const COOLING_LABEL: Record<string, string> = {
-  hvelv: "Hvelv",
-  paneler: "Paneler",
-  conveyor_hood: "Conveyor-hood",
-};
