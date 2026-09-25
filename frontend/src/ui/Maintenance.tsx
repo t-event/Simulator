@@ -50,6 +50,16 @@ export function Maintenance({
   const swapHours = Math.round(potSwapHours(g) * stats.repairFactor);
   const relineHours = Math.round(f0.relineHours * stats.repairFactor);
   const plan = g.settings.relinePlanDays;
+  // Hvem bytter foringen nå? Omforing skjer aldri av seg selv (B-063)
+  const specialistUntil = g.specialists.havari ?? 0;
+  const whoRelines =
+    specialistUntil > g.minute
+      ? `Den innleide vedlikeholdsspesialisten bytter foringen ved 80 % slitasje til dag ${Math.floor(specialistUntil / 1440) + 1}. Etter det må du, en plan eller en reparatør gjøre det.`
+      : repairerOn && !repairersAway
+        ? `Reparatøren bytter foringen ved ${fmtPct(g.settings.relineAt)} slitasje.`
+        : canPlan && plan !== null
+          ? `Vedlikeholdsplanen bytter foringen hvert ${plan === 1 ? "" : `${plan}. `}døgn.`
+          : null;
   // Slitasjen etter et gitt antall døgn, med dagens drift
   const wearAfter = (d: number) => Math.min(1, (d / life) * 0.85);
   return (
@@ -65,6 +75,9 @@ export function Maintenance({
           klar, tar et bytte bare {swapHours} timer i stedet for {relineHours}.
         </p>
       )}
+      <p className={whoRelines ? "g-note" : "g-note g-warn"}>
+        {whoRelines ?? "Ingen bytter foringen for deg. Trykk «Bytt foring» før den er 85 % slitt."}
+      </p>
       {g.furnaces.map((f, i) => {
         const tone = f.wear > 0.85 ? "critical" : f.wear > 0.6 ? "warning" : "ok";
         const busy = !!f.heat || !!f.holding;

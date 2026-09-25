@@ -757,7 +757,7 @@ export const ROLES: Record<RoleId, Role> = {
     plural: "Planleggere",
     salary: 2300,
     description:
-      "Sorterer ordrekøen etter frist og kjøper skrap etter resepten (når «Ordreplanlegging» og «Innkjøpsplan» er forsket fram), og legger om resepten når kvaliteten skifter.",
+      "Sorterer ordrekøen etter frist og kjøper skrap etter resepten (når «Ordreplanlegging» og «Innkjøpsplan» er forsket fram). Resepten må du eller skrapklasseren lage.",
   },
   klasser: {
     id: "klasser",
@@ -765,7 +765,7 @@ export const ROLES: Record<RoleId, Role> = {
     plural: "Skrapklassere",
     salary: 1800,
     description:
-      "Kontrollerer skrapet som kommer inn og sørger for at hver charge får den blandingen resepten sier. Stopper dårlige partier før de tas imot.",
+      "Kontrollerer skrapet som kommer inn og sørger for at hver charge får den blandingen resepten sier. Stopper dårlige partier før de tas imot, og legger om resepten når kvaliteten skifter og den gamle ikke holder.",
   },
   murer: {
     id: "murer",

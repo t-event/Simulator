@@ -804,7 +804,7 @@ export function startReline(
   g: GameState,
   index: number,
   stats = computePlantStats(g),
-  why: "manuell" | "plan" | "reparatør" = "manuell",
+  why: "manuell" | "plan" | "reparatør" | "spesialist" = "manuell",
 ): PurchaseResult {
   const f = g.furnaces[index];
   if (!f) return { ok: false, message: "Ukjent ovn." };
@@ -814,7 +814,13 @@ export function startReline(
   // Omforing kan tas på kassekreditten: en ovn som står, tjener ingen penger
   if (g.cash - cost < -creditLimit(g)) return { ok: false, message: "Du har ikke råd til ny foring." };
   addCost(g, "vedlikehold", cost);
-  const who = why === "plan" ? " etter vedlikeholdsplanen" : why === "reparatør" ? " av reparatøren" : "";
+  // Hvem som bestilte omforingen, så spilleren ser at den ikke skjer av seg selv (B-063)
+  const who = {
+    manuell: " – du bestilte det",
+    plan: " etter vedlikeholdsplanen",
+    reparatør: " av reparatøren",
+    spesialist: " av den innleide vedlikeholdsspesialisten",
+  }[why];
   // Lysbueovn med ferdig reservepotte: bytt potte på noen timer, og la murerne mure opp den slitte (B-030)
   if (stats.furnace.arc && f.spareProgress >= 1) {
     const swap = potSwapHours(g) * stats.repairFactor;
@@ -883,12 +889,12 @@ function updateFurnaces(g: GameState, stats: PlantStats): void {
       hasResearch(g, "vedlikeholdsplan") &&
       ((day(g) - f.lastRelineDay >= g.settings.relinePlanDays && f.wear > 0.15) || f.wear >= PLAN_SAFETY_WEAR);
     const repairerDue =
-      (auto(g, "autoReline") &&
-        presentWorkers(g).some((w) => w.role === "vedlikehold") &&
-        f.wear >= g.settings.relineAt) ||
-      ((g.specialists.havari ?? 0) > g.minute && f.wear >= 0.8);
-    if (f.relineRequested || planDue || repairerDue) {
-      if (startReline(g, i, stats, f.relineRequested ? "manuell" : planDue ? "plan" : "reparatør").ok) {
+      auto(g, "autoReline") && presentWorkers(g).some((w) => w.role === "vedlikehold") && f.wear >= g.settings.relineAt;
+    // Vedlikeholdsspesialisten fra rådgiveren (ti døgn) bytter ved 80 % slitasje
+    const specialistDue = (g.specialists.havari ?? 0) > g.minute && f.wear >= 0.8;
+    if (f.relineRequested || planDue || repairerDue || specialistDue) {
+      const why = f.relineRequested ? "manuell" : planDue ? "plan" : repairerDue ? "reparatør" : "spesialist";
+      if (startReline(g, i, stats, why).ok) {
         f.relineRequested = false;
         continue;
       }
@@ -1280,13 +1286,14 @@ export function furnaceOrder(g: GameState, index: number): Contract | null {
 }
 
 /**
- * Når verket bytter til en kvalitet resepten ikke holder, legger skrapklasseren eller planleggeren om
- * resepten selv (sikreste blanding av skrapet som er åpent). Uten dem får spilleren et varsel (B-043).
+ * Når verket bytter til en kvalitet resepten ikke holder, legger skrapklasseren om resepten selv (sikreste
+ * blanding av skrapet som er åpent). Uten skrapklasser får spilleren et varsel (B-043). Planleggeren kjøper
+ * bare inn; den rører ikke resepten (B-063).
  */
 function ensureRecipe(g: GameState, grade: GradeId, stats: PlantStats): void {
   const recipe = gradeRecipe(g, grade);
   if (recipeEstimate(g, grade, stats, recipe).grades.includes(grade)) return;
-  const who = hasGrader(g) ? "Skrapklasseren" : hasPlanner(g) ? "Planleggeren" : null;
+  const who = hasGrader(g) ? "Skrapklasseren" : null;
   const name = GRADES[grade].name.toLowerCase();
   if (!who) {
     log(g, `Resepten holder ikke kravet til ${name}. Juster den under Marked – eller ansett en skrapklasser.`, "event");
