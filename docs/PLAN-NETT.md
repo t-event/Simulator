@@ -116,6 +116,8 @@ skysymbol i toppen viser om spillet er lagret på nett.
 - Logger man inn på en annen mobil: spillet fra nettet lastes ned. Finnes det et lokalt spill også, velger spilleren
   («Fortsett fra nettet, dag 140» eller «Fortsett herfra, dag 12»).
 - Konflikt: den lagringen som har kommet lengst i spilltid, vinner. Ved tvil spør vi.
+  Erstattet av versjonsnummer per lagring (B-140): det som sist ble lagret fra en annen nettleser, vinner, og en
+  nettleser som står åpen med en gammel kopi, får ikke lagre over.
 - Sikkerhetskopi som fil: som før, men bare på samme konto.
 - Slett konto.
 - Tester: opp- og nedlasting, konflikt, uten nett, gammel lagring uten konto-id.

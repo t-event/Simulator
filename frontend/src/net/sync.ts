@@ -3,6 +3,10 @@
  * tabellen `saves`, høyst én gang i minuttet og når appen legges bort. Én gang per spilldøgn skrives også en
  * linje i `snapshots` (dag, kasse, konsernverdi, nivå) – tidslinja for toppliste og juksesperre.
  *
+ * To nettlesere på samme konto (B-140): hver lagring på nett har et versjonsnummer. En nettleser lagrer bare over
+ * versjonen den kjenner (`save_game`). Er spillet lagret fra en annen nettleser i mellomtiden, avvises lagringen
+ * («conflict»), og appen henter det nyeste med `pullIfNewer` – det gjør den også hver gang appen vises igjen.
+ *
  * Spillmotoren vet ingenting om dette: den kaller bare lytteren i save.ts.
  */
 import { konsernEquity } from "../game/konsern";
@@ -17,7 +21,9 @@ export type CloudStatus =
   | { kind: "saving" }
   | { kind: "saved"; at: number }
   | { kind: "offline"; at: number | null }
-  | { kind: "error"; message: string; at: number | null };
+  | { kind: "error"; message: string; at: number | null }
+  /** Spillet på nett er lagret fra en annen nettleser siden sist: lagringen herfra ble avvist (B-140) */
+  | { kind: "conflict" };
 
 /** Minst så lenge mellom to lagringer på nett */
 export const UPLOAD_INTERVAL_MS = 60_000;
@@ -35,6 +41,53 @@ let lastSavedAt: number | null = null;
 let lastSnapshotDay = -1;
 let inFlight: Promise<void> | null = null;
 let clock: () => number = () => Date.now();
+/** Versjonen av spillet på nett som spillet her bygger på (0: ingen lagring på nett ennå). null: ikke avklart. */
+let knownRev: number | null = null;
+
+const DEVICE_KEY = "stalverk-enhet-v1";
+const REV_KEY = "stalverk-sky-v1";
+let memDevice: string | null = null;
+
+/** Merkelapp for denne nettleseren (tilfeldig, ingen personopplysninger) */
+export function deviceId(): string {
+  try {
+    let d = localStorage.getItem(DEVICE_KEY);
+    if (!d) {
+      d = Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
+      localStorage.setItem(DEVICE_KEY, d);
+    }
+    return d;
+  } catch {
+    memDevice ??= Math.random().toString(36).slice(2, 12);
+    return memDevice;
+  }
+}
+
+/** Versjonen denne nettleseren sist lagret eller hentet for kontoen, også etter omstart */
+function storedRev(user: string): number | null {
+  try {
+    const v = JSON.parse(localStorage.getItem(REV_KEY) ?? "null") as { user?: string; rev?: number } | null;
+    return v && v.user === user && typeof v.rev === "number" ? v.rev : null;
+  } catch {
+    return null;
+  }
+}
+function setKnownRev(user: string, rev: number): void {
+  knownRev = rev;
+  try {
+    localStorage.setItem(REV_KEY, JSON.stringify({ user, rev }));
+  } catch {
+    // Uten lagring i nettleseren huskes versjonen bare til appen lukkes
+  }
+}
+
+/** Lagringen ble avvist fordi spillet på nett er nyere (B-140) */
+export class SaveConflictError extends Error {
+  constructor() {
+    super("Spillet på nett er lagret fra en annen enhet.");
+    this.name = "SaveConflictError";
+  }
+}
 
 export function setClock(fn: () => number): void {
   clock = fn;
@@ -65,21 +118,38 @@ interface SaveRow {
   minute: number;
   day: number;
   updated_at: string;
+  rev?: number;
+  device?: string | null;
+}
+
+/** Spillet på nett med versjon og hvilken nettleser som lagret det */
+export interface CloudSave {
+  game: GameState;
+  rev: number;
+  device: string | null;
 }
 
 function dayOf(g: GameState): number {
   return Math.floor(g.minute / 1440) + 1;
 }
 
-/** Spillet på kontoen, eller null hvis kontoen ikke har noe spill ennå */
-export async function fetchCloudSave(): Promise<GameState | null> {
-  const rows = await rest<SaveRow[]>("saves?select=state,minute,day,updated_at");
+/** Spillet på kontoen med versjon, eller null hvis kontoen ikke har noe (brukbart) spill ennå */
+export async function fetchCloudRow(): Promise<CloudSave | null> {
+  const rows = await rest<SaveRow[]>("saves?select=state,minute,day,updated_at,rev,device");
   const row = rows[0];
   if (!row || !row.state || row.state.version !== SAVE_VERSION || typeof row.state.minute !== "number") return null;
-  return migrate(row.state);
+  return { game: migrate(row.state), rev: Number(row.rev ?? 0), device: row.device ?? null };
 }
 
-/** Laster opp spillet nå og merker det med kontoen. Kaster NetError. */
+/** Spillet på kontoen, eller null hvis kontoen ikke har noe spill ennå */
+export async function fetchCloudSave(): Promise<GameState | null> {
+  return (await fetchCloudRow())?.game ?? null;
+}
+
+/**
+ * Laster opp spillet nå og merker det med kontoen. Lagrer bare over versjonen spillet her bygger på (B-140).
+ * Kaster NetError, eller SaveConflictError hvis spillet på nett er lagret fra en annen nettleser i mellomtiden.
+ */
 export async function uploadSave(g: GameState, keepalive = false): Promise<void> {
   const id = userId();
   if (!id) return;
@@ -87,19 +157,21 @@ export async function uploadSave(g: GameState, keepalive = false): Promise<void>
   const day = dayOf(g);
   // Sesongen leses før første await, så lagringen og tidslinja får samme verdi
   const season = g.season;
-  await rest("saves", {
+  const rev = await rest<number | null>("rpc/save_game", {
     method: "POST",
-    prefer: "resolution=merge-duplicates,return=minimal",
     body: {
-      user_id: id,
-      state: g,
-      minute: Math.floor(g.minute),
-      day,
-      client_version: APP_VERSION,
-      season_id: g.season,
+      p_state: g,
+      p_minute: Math.floor(g.minute),
+      p_day: day,
+      p_client_version: APP_VERSION,
+      p_season_id: season,
+      p_device: deviceId(),
+      p_base_rev: knownRev ?? 0,
     },
     keepalive,
   });
+  if (rev === null || rev === undefined) throw new SaveConflictError();
+  setKnownRev(id, Number(rev));
   if (day !== lastSnapshotDay) {
     await rest("snapshots", {
       method: "POST",
@@ -133,8 +205,9 @@ export function onLocalSave(g: GameState): void {
 
 /** Laster opp det som venter. Med `keepalive` når appen legges bort (fetch fullfører i bakgrunnen). */
 export async function flush(keepalive = false): Promise<void> {
-  if (!dirty || !getSession()) return;
+  // Er en lagring på vei, venter vi på den (det som er nytt, tas neste gang)
   if (inFlight) return inFlight;
+  if (!dirty || !getSession()) return;
   const g = dirty;
   dirty = null;
   lastUpload = clock();
@@ -145,6 +218,11 @@ export async function flush(keepalive = false): Promise<void> {
       lastSavedAt = clock();
       setStatus({ kind: "saved", at: lastSavedAt });
     } catch (e) {
+      if (e instanceof SaveConflictError) {
+        // Ikke prøv igjen: spillet her er eldre enn det på nett. Appen henter det nyeste (pullIfNewer).
+        setStatus({ kind: "conflict" });
+        return;
+      }
       // Prøver igjen ved neste lagring
       dirty = dirty ?? g;
       if (e instanceof NetError && e.offline) setStatus({ kind: "offline", at: lastSavedAt });
@@ -159,6 +237,7 @@ export async function flush(keepalive = false): Promise<void> {
 /** Nullstiller etter utlogging */
 export function resetCloud(): void {
   reconciled = false;
+  knownRev = null;
   dirty = null;
   lastUpload = 0;
   lastSavedAt = null;
@@ -177,16 +256,21 @@ export type LinkDecision =
  * Kobler det lokale spillet til kontoen ved innlogging:
  * - ingen spill på nett, lokalt spill → lastes opp og merkes med kontoen
  * - spill på nett, ikke noe lokalt (eller det lokale tilhører en annen konto) → spillet fra nettet
- * - begge, samme konto → det som har kommet lengst i spilltid
+ * - begge, samme konto → spillet på nett hvis det er lagret fra en annen nettleser siden denne sist lagret eller
+ *   hentet (B-140), ellers spillet her. Uten kjent versjon (eldre utgave av appen): det som har kommet lengst.
  * - begge, det lokale uten konto → spilleren velger
  */
 export async function linkOnLogin(local: GameState | null): Promise<LinkDecision> {
   const id = userId();
   reconciled = false;
+  knownRev = null;
   if (!id) return { kind: "none" };
-  const cloud = await fetchCloudSave();
+  const row = await fetchCloudRow();
+  const stored = storedRev(id);
+  const cloud = row?.game ?? null;
+  knownRev = row ? row.rev : 0;
   const mine = local && (local.owner === null || local.owner === id) ? local : null;
-  if (!cloud) {
+  if (!cloud || !row) {
     if (!mine) {
       markReconciled();
       return { kind: "none" };
@@ -200,12 +284,15 @@ export async function linkOnLogin(local: GameState | null): Promise<LinkDecision
     return { kind: "uploaded" };
   }
   if (!mine) {
+    setKnownRev(id, row.rev);
     setStatus({ kind: "saved", at: clock() });
     markReconciled();
     return { kind: "cloud", cloud };
   }
   if (mine.owner === id) {
-    if (cloud.minute > mine.minute) {
+    const cloudNewer = stored === null ? cloud.minute > mine.minute : row.rev !== stored && row.device !== deviceId();
+    if (cloudNewer) {
+      setKnownRev(id, row.rev);
       setStatus({ kind: "saved", at: clock() });
       markReconciled();
       return { kind: "cloud", cloud };
@@ -228,6 +315,34 @@ export async function keepLocal(local: GameState): Promise<void> {
   lastUpload = lastSavedAt;
   setStatus({ kind: "saved", at: lastSavedAt });
   markReconciled();
+}
+
+/**
+ * Er spillet på nett lagret fra en annen nettleser siden spillet her sist ble lagret eller hentet (B-140)?
+ * Gir i så fall spillet fra nettet, som appen bytter til. Kalles når appen vises igjen og når en lagring ble avvist.
+ */
+export async function pullIfNewer(): Promise<GameState | null> {
+  const id = userId();
+  if (!id || !reconciled || knownRev === null) return null;
+  const rows = await rest<{ rev: number; device: string | null }[]>("saves?select=rev,device");
+  const row = rows[0];
+  if (!row || Number(row.rev) === knownRev) {
+    if (status.kind === "conflict") setStatus({ kind: "saved", at: lastSavedAt ?? clock() });
+    return null;
+  }
+  if (row.device === deviceId()) {
+    // Lagret herfra (svaret kom ikke fram, f.eks. da appen ble lagt bort): spillet her er like nytt
+    setKnownRev(id, Number(row.rev));
+    if (status.kind === "conflict") setStatus({ kind: "saved", at: lastSavedAt ?? clock() });
+    return null;
+  }
+  const full = await fetchCloudRow();
+  if (!full) return null;
+  setKnownRev(id, full.rev);
+  dirty = null;
+  lastSavedAt = clock();
+  setStatus({ kind: "saved", at: lastSavedAt });
+  return full.game;
 }
 
 /** Funksjonsbryterne i tabellen `config` (kan skru av lagring på nett uten ny publisering) */

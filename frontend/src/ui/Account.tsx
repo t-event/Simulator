@@ -3,7 +3,7 @@
  * Logg inn, opprett konto, glemt passord, nytt passord, logg ut og slett konto – og kobling av det lokale spillet
  * til kontoen ved innlogging.
  */
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { loadGame, saveGame } from "../game/save";
 import { cloudConfigured } from "../net/config";
 import type { GameState } from "../game/types";
@@ -25,10 +25,12 @@ import {
   cloudStatus,
   fetchFeatures,
   flush,
+  isReconciled,
   keepLocal,
   linkOnLogin,
   markReconciled,
   onCloudStatus,
+  pullIfNewer,
   resetCloud,
   type LinkDecision,
 } from "../net/sync";
@@ -60,12 +62,92 @@ export function CloudDot() {
         ? "Lagrer på nett …"
         : s.kind === "offline"
           ? "Uten nett – lagres når nettet er tilbake"
-          : `Lagring på nett feilet: ${s.message}`;
+          : s.kind === "conflict"
+            ? "Spillet er lagret fra en annen enhet – henter det nyeste"
+            : `Lagring på nett feilet: ${s.message}`;
   return (
     <em className={`g-cloud is-${s.kind}`} title={text} aria-label={text}>
       {" "}
       ☁{s.kind === "saved" ? "" : s.kind === "saving" ? "…" : "!"}
     </em>
+  );
+}
+
+/**
+ * To nettlesere på samme konto (B-140): når appen vises igjen, eller en lagring ble avvist, hentes spillet fra nettet
+ * hvis det er spilt videre et annet sted. Spilleren får beskjed, og spillet står på pause til man trykker videre.
+ */
+export function CloudFollow({ api }: { api: GameApi }) {
+  const session = useSession();
+  const reconciled = useSyncExternalStore(onCloudStatus, isReconciled, isReconciled);
+  const [pulled, setPulled] = useState<{ day: number; speed: number } | null>(null);
+  const apiRef = useRef(api);
+  useEffect(() => {
+    apiRef.current = api;
+  });
+
+  useEffect(() => {
+    if (!session || !reconciled) return;
+    let busy = false;
+    let last = 0;
+    const pull = async (always = false) => {
+      // Ikke oftere enn hvert femte sekund (fokus og synlighet kommer ofte samtidig)
+      if (busy || (!always && Date.now() - last < 5000)) return;
+      busy = true;
+      last = Date.now();
+      try {
+        const newer = await pullIfNewer();
+        if (newer) {
+          const speed = newer.speed;
+          apiRef.current.adopt(newer);
+          setPulled({ day: dayOf(newer), speed });
+        }
+      } catch {
+        // Uten nett: prøver igjen neste gang appen vises
+      } finally {
+        busy = false;
+      }
+    };
+    void pull(true);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void pull();
+    };
+    const off = onCloudStatus(() => {
+      if (cloudStatus().kind === "conflict") void pull(true);
+    });
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("pageshow", onVisible);
+    window.addEventListener("focus", onVisible);
+    return () => {
+      off();
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("pageshow", onVisible);
+      window.removeEventListener("focus", onVisible);
+    };
+  }, [session, reconciled]);
+
+  if (!pulled) return null;
+  return (
+    <div className="g-modal" role="dialog" aria-modal="true" aria-label="Hentet fra nettet">
+      <div className="g-modal-card">
+        <h2>Hentet det nyeste spillet</h2>
+        <p>
+          Du har spilt videre på en annen enhet. Spillet her er byttet til det som er lagret på nett (dag {pulled.day}),
+          så det du gjorde der, er med.
+        </p>
+        <div className="g-row">
+          <button
+            className="g-primary"
+            onClick={() => {
+              api.setSpeed(pulled.speed > 0 ? pulled.speed : 1);
+              setPulled(null);
+            }}
+          >
+            Spill videre
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -81,6 +163,8 @@ function cloudLine(s: ReturnType<typeof cloudStatus>): string {
       return "Uten nett akkurat nå. Spillet lagres på nett så snart nettet er tilbake.";
     case "error":
       return `Lagring på nett feilet: ${s.message}`;
+    case "conflict":
+      return "Spillet er lagret fra en annen enhet siden sist. Det nyeste hentes.";
   }
 }
 

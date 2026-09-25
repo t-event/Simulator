@@ -34,10 +34,17 @@ export function applyWorldEvents(g: GameState, events: WorldEvent[]): void {
 
 /**
  * Et spill som fortsatt er i garasjen (bare veiledningen og litt til), blir med i sesongen direkte (B-133).
- * Har man flyttet videre, må man starte sesongen på nytt i garasjen.
+ * Har man flyttet videre, må man starte sesongen på nytt i garasjen. Nytt spill+ blir aldri med direkte: det
+ * starter med mer penger, fagpoeng og omdømme, og det ville vært urettferdig i sesongen (B-140).
  */
 export function canJoinDirectly(g: GameState): boolean {
-  return g.stage === 0;
+  return g.stage === 0 && (g.round ?? 1) <= 1;
+}
+
+/** Hvorfor spillet ikke kan bli med i sesongen direkte, i vanlige ord */
+export function notJoinableReason(g: GameState): string {
+  if ((g.round ?? 1) > 1) return `Spillet ditt er nytt spill+ (runde ${g.round}) og starter med en fordel`;
+  return `Spillet ditt (dag ${Math.floor(g.minute / 1440) + 1}) har kommet lenger enn garasjen`;
 }
 
 /** Kobler et nytt spill til sesongen, med fordelen for den som var med sist */
