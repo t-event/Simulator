@@ -1495,9 +1495,46 @@ gruppen «Kommer når konsernet åpnes» under Forskning.
 - Nytt kapittel i fagboka, «Konsern og datterselskap», med quiz. Det forklarer morselskap og datterselskap,
   stordriftsfordeler, spredning av risiko og hvorfor verkene teller i konsernverdien. Prosjektene krever at det er
   lest, og det låses opp når konsernet åpnes.
-- Den bokførte verdien av et verk følger listeprisen, også når oppkjøpsavdelingen gir rabatt.
+- Den bokførte verdien av et verk følger listeprisen, også når oppkjøpsavdelingen gir rabatt. *(Erstattet av B-121:
+  verdien følger nå overskuddet.)*
 - Den flinke testspilleren forsker på prosjektene etter storverkets, og nybegynneren tar det billigste først.
 - Målt med `--vansker`: flink vinner dag 320–362, nybegynner dag 329–435, ingen konkurs. Det er litt raskere enn
   før (324–364 og 342–457).
 - «Forsk fram alt» (utfordring) omfatter nå også konsernprosjektene.
 
+
+## B-121 Konsernet: det skal lønne seg å investere (2026-09-25)
+Status: gjelder
+Brukeren:
+- Har man bare kjøpt stålverk, bør man kunne gå over til storverk.
+- Det tar så lang tid å tjene inn et storverk at noen heller vil spare til 10 mrd.
+
+Årsak:
+- Et verk ble regnet som 80 % av prisen. Et kjøp senket derfor konsernverdien med en gang.
+- Et storverk brukte 86 døgn på å tjene seg inn.
+- Målt med det nye flagget `--sparer` (testspilleren kjøper ingen verk):
+  - flink sparer vant dag ca. 455, mot ca. 345 for den som investerer
+  - en nybegynner som sparte, vant ca. dag 620
+  - forskjellen var mindre enn det burde være
+
+Beslutning:
+- **Verdien følger det verket tjener:** `VALUE_DAYS = 60` døgns overskudd ved normal stålpris (`sisterValue`).
+  - Et nytt verk er verdt omtrent det det koster, så et kjøp senker aldri konsernverdien.
+  - Alt verket tjener etterpå, er gevinst.
+  - Modernisering, felles funksjoner og forskning gjør verkene mer verdt.
+- **Høyere overskudd:**
+  - stålverk 5 mill. kr per døgn (var 3,5)
+  - storverk 20 mill. kr per døgn (var 14)
+  - Storverket tjener seg inn på 60 døgn i stedet for 86.
+- **Salg:** «Selg verket…» på hvert datterverk, med et bekreftelsessteg. Man får verdien i kassa. Da kan man for
+  eksempel selge et stålverk for å få råd til et storverk.
+- **Tydeligere vei til storverk:**
+  - «Bygg ut til storverk» er hovedknappen på hvert stålverk.
+  - Kjøpekortet for storverk sier at det er billigere å bygge ut et stålverk man har.
+- Ny forklaring på Konsern-fanen: «Det lønner seg å investere». Fagboka er oppdatert.
+
+Målt med `--vansker` (flink / nybegynner):
+- Den som investerer, vinner dag 290–327 / 284–403.
+- Den som sparer, vinner dag 438–478 / 579–681.
+- Å investere vinner nå omtrent 150 døgn før for en flink spiller og omtrent 300 døgn før for en nybegynner.
+- Ingen konkurs.

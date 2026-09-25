@@ -17,6 +17,10 @@ import {
   MODERNIZE_MAX,
   SISTER_TYPES,
   sisterProfit,
+  sellSister,
+  sisterValue,
+  upgradeCost,
+  VALUE_DAYS,
   type KonsernOption,
   type SharedId,
 } from "../game/konsern";
@@ -158,6 +162,7 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
   const byKey = (key: string) => options.find((o) => o.key === key);
   const advice = konsernAdvice(g);
   const next = KONSERN_MILESTONES[k.milestones];
+  const [selling, setSelling] = useState<number | null>(null);
   const konsernResearch = {
     total: RESEARCH.filter((r) => r.konsern).length,
     done: RESEARCH.filter((r) => r.konsern && g.researched.includes(r.id)).length,
@@ -179,13 +184,19 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
               <strong>Felles innkjøp og salg</strong> gjør alle verkene litt bedre – også hjemmeverket.
             </li>
             <li>
-              <strong>Storverk</strong> ({fmtKr(SISTER_TYPES.storverk.price)}) gir fire ganger så mye. Du kan kjøpe et
-              nytt, eller bygge ut et stålverk du har.
+              <strong>Storverk</strong> ({fmtKr(SISTER_TYPES.storverk.price)}) gir fire ganger så mye. Har du et
+              stålverk, bygger du det ut for {fmtKr(upgradeCost(g))} – knappen står ved verket under «Datterverk». Du
+              kan også selge et verk for å få råd.
             </li>
             <li>
               <strong>Moderniser</strong> verkene for {Math.round(MODERNIZE_GAIN * 100)} % mer overskudd per trinn.
             </li>
           </ol>
+          <p className="g-note">
+            <strong>Det lønner seg å investere:</strong> et verk er verdt omtrent {VALUE_DAYS} døgns overskudd, så
+            konsernverdien går ikke ned når du kjøper. Alt verket tjener etterpå, er gevinst. Å bare spare pengene er
+            den tregeste veien til målet.
+          </p>
           <p className="g-note">
             Under Forskning finnes egne prosjekter for konsernet: {konsernResearch.done} av {konsernResearch.total} er
             forsket fram. De gir mer overskudd, billigere verk og plass til flere.
@@ -199,8 +210,8 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
             <>
               <Bar value={Math.max(0, equity) / WIN_CASH} tone="ok" label="Mot sluttmålet" />
               <p className="g-muted">
-                Sluttmålet er en konsernverdi på {fmtKr(WIN_CASH)}: kassa minus lån, pluss 80 % av det du har investert
-                i datterverkene – så et kjøp teller nesten fullt med én gang.
+                Sluttmålet er en konsernverdi på {fmtKr(WIN_CASH)}: kassa minus lån, pluss det datterverkene er verdt
+                (ca. {VALUE_DAYS} døgns overskudd hver).
                 {next ? ` Neste milepæl: ${fmtKr(next)} (gir fagpoeng).` : ""}
               </p>
             </>
@@ -233,10 +244,31 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
                   </span>
                 </div>
                 <p className="g-muted">
-                  Modernisert {p.level} av {MODERNIZE_MAX} trinn. Kjøpt dag {p.boughtDay}.
+                  Modernisert {p.level} av {MODERNIZE_MAX} trinn. Kjøpt dag {p.boughtDay}. Verdi{" "}
+                  {fmtKr(sisterValue(g, p))}.
                 </p>
+                {upgrade && <BuyButton g={g} act={act} o={upgrade} label="Bygg ut til storverk" />}
                 {modernize && <BuyButton g={g} act={act} o={modernize} primary={false} label="Moderniser" />}
-                {upgrade && <BuyButton g={g} act={act} o={upgrade} primary={false} label="Bygg ut til storverk" />}
+                {selling === p.id ? (
+                  <div className="g-row">
+                    <button
+                      className="g-danger g-small"
+                      onClick={() => {
+                        act((gg) => sellSister(gg, p.id));
+                        setSelling(null);
+                      }}
+                    >
+                      Ja, selg for {fmtKr(sisterValue(g, p))}
+                    </button>
+                    <button className="g-small" onClick={() => setSelling(null)}>
+                      Avbryt
+                    </button>
+                  </div>
+                ) : (
+                  <button className="g-link" onClick={() => setSelling(p.id)}>
+                    Selg verket…
+                  </button>
+                )}
               </div>
             );
           })}
@@ -254,6 +286,11 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
                 </div>
                 <p className="g-muted">{spec.description}</p>
                 <BuyButton g={g} act={act} o={o} />
+                {t === "storverk" && k.plants.some((p) => p.type === "stalverk") && (
+                  <p className="g-muted g-small-text">
+                    Billigere: bygg ut et stålverk du har, for {fmtKr(upgradeCost(g))} (under «Datterverk»).
+                  </p>
+                )}
               </div>
             );
           })}

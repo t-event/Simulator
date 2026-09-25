@@ -159,7 +159,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
       "Datterverkene har egen ledelse og egne ansatte. Morselskapet bestemmer hvor pengene skal investeres, og får overskuddet.",
       "Når flere verk gjør ting sammen, blir det billigere: den som kjøper skrap eller strøm for alle verkene samtidig, får bedre pris. Det kalles stordriftsfordeler.",
       "Flere verk sprer også risikoen. Står ett verk etter et havari, går de andre videre, og konsernet tjener fortsatt penger.",
-      "Verdien av konsernet er mer enn pengene i banken: verkene er også verdt noe. Derfor teller det du har investert i datterverkene, med i konsernverdien.",
+      "Verdien av konsernet er mer enn pengene i banken: verkene er også verdt noe. Et datterverk er verdt omtrent det det tjener på 60 døgn, og den verdien teller med i konsernverdien. Derfor taper du ikke på å kjøpe et verk: pengene blir til et verk som er verdt like mye.",
     ],
   },
 ];

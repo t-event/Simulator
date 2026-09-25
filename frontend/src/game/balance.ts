@@ -452,7 +452,8 @@ function botHour(g: GameState): void {
     g.konsern.unlocked &&
     (g.cash > 1_500_000_000 || options.every((o) => o.owned || o.locked || o.kind === "stage"))
   ) {
-    konsernBuy(g, Math.max(reserve, 100_000_000));
+    // «--sparer»: en spiller som bare sparer til sluttmålet uten å kjøpe noe i konsernet (B-121)
+    if (!process.argv.includes("--sparer")) konsernBuy(g, Math.max(reserve, 100_000_000));
     return;
   }
   if (novice) {

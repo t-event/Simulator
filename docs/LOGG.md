@@ -5,6 +5,32 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 65 – 2026-09-25: det skal lønne seg å investere i konsernet
+
+**Brukeren ba om:**
+- Å kunne gå fra stålverk til storverk i konsernet.
+- At det ikke skal lønne seg å bare spare til 10 mrd.
+
+**Gjort:** B-121.
+- Et verk er verdt 60 døgns overskudd, så et kjøp senker ikke konsernverdien.
+- Høyere overskudd: stålverk 5 mill. kr og storverk 20 mill. kr per døgn.
+- Man kan selge datterverk.
+- «Bygg ut til storverk» er hovedknappen på hvert stålverk.
+- Nytt flagg i testspilleren: `--sparer`.
+
+**Testet:**
+- tsc, lint, `npm test`.
+- Balanse exit 0.
+- `--vansker` med og uten `--sparer`: å investere vinner omtrent 150 døgn før (flink) og 300 døgn før (nybegynner).
+- Playwright på iPhone 13:
+  - to stålverk, ett bygget ut til storverk og ett solgt
+  - kassa og konsernverdien stemmer
+  - ingen feil og ingen horisontal scrolling
+
+**Gjenstår:** Ingenting.
+
+---
+
 ## Økt 64 – 2026-09-25: konsernforskning
 
 **Brukeren ba om:** Flere ting å forske på når konsernet åpnes.
