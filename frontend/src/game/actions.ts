@@ -68,7 +68,7 @@ export function unitId(id: string, i: number): string {
 }
 
 function addonPrice(g: GameState, addon: Addon): number {
-  if (addon.id === "ovn2") return Math.max(100_000, Math.round(unitType(g, 0).price * 0.7));
+  if (addon.id === "ovn2" || addon.id === "ovn3") return Math.max(100_000, Math.round(unitType(g, 0).price * 0.7));
   return addon.price;
 }
 
@@ -147,7 +147,9 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
   for (const c of CASTINGS) {
     if (c.id === "sandformer") continue;
     const owned = c.id === currentCasting.id;
-    if (c.stage < currentCasting.stage && !owned) continue;
+    // Eldre eller mindre støping enn den du har, vises ikke (B-075: 4 strenger etter 6 strenger)
+    if (!owned && (c.stage < currentCasting.stage || (c.stage === currentCasting.stage && c.tph < currentCasting.tph)))
+      continue;
     let reason = researchBlocker(g, c.id);
     let warning: string | undefined;
     if (!owned && c.product !== currentCasting.product) {
@@ -327,8 +329,8 @@ export function buyUpgrade(g: GameState, id: string): PurchaseResult {
         break;
       }
       g.owned.push(id);
-      if (id === "ovn2") {
-        g.furnaceCount = 2;
+      if (id === "ovn2" || id === "ovn3") {
+        g.furnaceCount = g.furnaces.length + 1;
         // Den nye ovnen er av samme type som ovn 1, uten ekstra utstyr
         const unit = newFurnaceUnit(day(g));
         unit.type = unitType(g, 0).id;

@@ -967,3 +967,21 @@ Beslutning:
 - Utstyrsarket for Ovn viser «Hele verket», «Ovn 1 – …» og «Ovn 2 – …».
 - Gamle lagringer: `migrate` gir hver ovn verkets type og flytter transformator/conveyor fra `owned` til ovnene.
 - Testspilleren kjøper ovnstyper og ovnsutstyr til alle ovnene. Balanse 8 / 26 / 66 / 134.
+
+## B-075 Flere oppgraderinger på storverket (2026-09-25)
+Status: gjelder (svar på spørsmålet om storverket fra B-062)
+En kollega av brukeren hadde storverket i ti minutter og alle oppgraderingene. Storverket hadde bare to egne
+(lysbueovn 90 t og strengstøping med 4 strenger).
+Nye oppgraderinger på nivå 5 (storverket), 20–60 mill. kr, alle med tydelig effekt:
+- **Ovn nr. 3** (krever ovn nr. 2): en tredje ovn, 70 % av prisen på ovn 1.
+- **Strengstøpemaskin, 6 strenger** (45 mill., 170 t/t) – tar unna stålet fra tre ovner.
+- **Vakuumavgassing** (30 mill., krever øseovn): 5 % bedre pris.
+- **Havnekai** (40 mill., krever forskningen «Eksportsertifisering»): flere forespørsler, 2 % bedre pris,
+  halvannen gang så stort ferdigvarelager.
+- **Skrapterminal med skrapsaks** (25 mill.): dobbelt skraplager og 6 % billigere skrap.
+- **Varmegjenvinning** (20 mill., krever røykgassrensing): lysbueovnene bruker 8 % mindre strøm.
+- **Valseverk nr. 2** (35 mill., krever valseverk): dobbel valsekapasitet.
+I tillegg kjøpes lysbueovn 90 t og ovnsutstyr nå per ovn (B-074). Samtidig rettet: en mindre støping på samme nivå
+(4 strenger når man har 6) vises ikke lenger som kjøp – testspilleren byttet fram og tilbake.
+Resultat: den flinke testspilleren når 1 mrd. rundt dag 207 (før ca. 230) og har kjøp å jobbe mot på storverket;
+nybegynneren rundt dag 243. Nivådagene er uendret (8 / 26 / 66 / 134).

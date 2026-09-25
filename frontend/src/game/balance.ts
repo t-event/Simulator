@@ -394,7 +394,7 @@ function botHour(g: GameState): void {
     ["induksjon1", "formlinje", "lager", "xrf", "portal", "salgskontor"],
     ["induksjon5", "blokk", "oes", "ovn2", "verksted", "sortering"],
     ["renseanlegg", "lysbue30", "streng1", "oseovn", "conveyor", "trafo", "valseverk"],
-    ["lysbue90", "streng4"],
+    ["lysbue90", "streng4", "ovn3", "streng6", "varmegjenvinning", "skrapterminal", "havn", "vakuum", "valseverk2"],
   ];
   // Ovnstyper og ovnsutstyr kjøpes per ovn (B-074): ovn 1 først, så de andre
   const perUnit = new Set([...FURNACES.map((f) => f.id), ...ADDONS.filter((a) => a.perFurnace).map((a) => a.id)]);

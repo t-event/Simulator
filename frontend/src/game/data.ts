@@ -574,6 +574,21 @@ export const CASTINGS: CastingType[] = [
     continuous: true,
     description: "Fire strenger i parallell holder følge med en stor lysbueovn.",
   },
+  {
+    id: "streng6",
+    name: "Strengstøpemaskin, 6 strenger",
+    stage: 4,
+    price: 45_000_000,
+    product: "emne",
+    tph: 170,
+    yield: 0.975,
+    crew: { stoper: 7 },
+    costPerT: 120,
+    defectRisk: 0.035,
+    continuous: true,
+    description:
+      "Seks strenger tar unna stålet fra tre store ovner. Uten flere ovner står strengene mye og venter (B-075).",
+  },
 ];
 
 // ------------------------------------------------------------------ //
@@ -687,6 +702,57 @@ export const ADDONS: Addon[] = [
     needsArc: true,
     perFurnace: true,
     description: "Mer effekt i lysbuen gir kortere tapp-til-tapp.",
+  },
+  {
+    id: "ovn3",
+    name: "Ovn nr. 3",
+    stage: 4,
+    price: 0,
+    requires: ["ovn2"],
+    description:
+      "En tredje ovn av samme type som ovn 1. Krever mer strøm, folk og støpekapasitet – se strengstøping med 6 strenger.",
+  },
+  {
+    id: "vakuum",
+    name: "Vakuumavgassing",
+    stage: 4,
+    price: 30_000_000,
+    needsArc: true,
+    requires: ["oseovn"],
+    description: "Suger ut hydrogen og nitrogen av stålet i øsa. Renere stål som kundene betaler 5 % mer for.",
+  },
+  {
+    id: "havn",
+    name: "Havnekai",
+    stage: 4,
+    price: 40_000_000,
+    description:
+      "Egen kai for skip: stålet kan selges over hele Europa. Flere forespørsler, litt bedre priser og halvannen gang så stort ferdigvarelager.",
+  },
+  {
+    id: "skrapterminal",
+    name: "Skrapterminal med skrapsaks",
+    stage: 4,
+    price: 25_000_000,
+    description: "Tar imot skrap på båt og tog og klipper det til ovnen. Dobbelt skraplager og 6 % billigere skrap.",
+  },
+  {
+    id: "varmegjenvinning",
+    name: "Varmegjenvinning",
+    stage: 4,
+    price: 20_000_000,
+    needsArc: true,
+    requires: ["renseanlegg"],
+    description: "Varmen i avgassen blir til damp og strøm. Lysbueovnene bruker 8 % mindre strøm per tonn.",
+  },
+  {
+    id: "valseverk2",
+    name: "Valseverk nr. 2",
+    stage: 4,
+    price: 35_000_000,
+    requires: ["valseverk"],
+    crew: { valse: 3 },
+    description: "Et valseverk til, så valsingen holder følge når støpingen blir større. Dobbel valsekapasitet.",
   },
   {
     id: "valseverk",
