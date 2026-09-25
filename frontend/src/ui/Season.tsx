@@ -11,7 +11,7 @@ import { newGame, unlock } from "../game/engine";
 import { day } from "../game/plant";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
-import { applyWorldEvents, joinSeason } from "../game/world";
+import { applyWorldEvents, canJoinDirectly, joinSeason } from "../game/world";
 import { cloudConfigured } from "../net/config";
 import { daysLeft, refreshSeason, seasonStatus } from "../net/season";
 import { useSeasonStatus, useWorldEvents } from "./useSeason";
@@ -20,9 +20,6 @@ import { getSession, onSessionChange } from "../net/supabase";
 function useSession() {
   return useSyncExternalStore(onSessionChange, getSession, getSession);
 }
-
-/** Et nytt spill (første døgn) uten sesong regnes rett inn i sesongen som pågår, uten å spørre */
-const AUTO_JOIN_MINUTES = 24 * 60;
 
 /** Usynlig: henter status ved start og hvert tiende minutt, og legger hendelsene inn i spillet */
 export function SeasonSync({ api }: { api: GameApi }) {
@@ -52,7 +49,7 @@ export function SeasonSync({ api }: { api: GameApi }) {
   const cur = status?.current ?? null;
   useEffect(() => {
     if (!g || !session || !cur) return;
-    if (g.season === null && g.minute < AUTO_JOIN_MINUTES && (g.owner === null || g.owner === session.user.id))
+    if (g.season === null && canJoinDirectly(g) && (g.owner === null || g.owner === session.user.id))
       api.act((gg) => {
         joinSeason(gg, cur.id, !!status?.played_previous);
         unlock(gg, "sesong");
@@ -83,9 +80,9 @@ export function SeasonPrompt({ api, g, onOpenSettings }: { api: GameApi; g: Game
             være med må du opprette en konto eller logge inn. Da lagres spillet på nett også.
           </p>
           <p className="g-muted">
-            Er spillet ditt nytt, blir det med i sesongen med en gang. Har du spilt en stund, får du velge om du vil
-            starte sesongen i garasjen eller spille videre utenfor. Du finner dette igjen under Verket → Økonomi →
-            Toppliste.
+            Er spillet ditt fortsatt i garasjen, blir det med i sesongen med en gang. Har du flyttet videre, får du
+            velge om du vil starte sesongen i garasjen eller spille videre utenfor. Du finner dette igjen under 🏆
+            Toppliste øverst.
           </p>
           <div className="g-row">
             <button
@@ -104,7 +101,7 @@ export function SeasonPrompt({ api, g, onOpenSettings }: { api: GameApi; g: Game
     );
   }
   if (g.owner && g.owner !== session.user.id) return null;
-  if (g.season === cur.id || g.seasonPromptSeen === cur.id || g.minute < AUTO_JOIN_MINUTES) return null;
+  if (g.season === cur.id || g.seasonPromptSeen === cur.id || canJoinDirectly(g)) return null;
   const bonus = !!status?.played_previous;
   return (
     <div className="g-modal" role="dialog" aria-modal="true" aria-label="Ny sesong">
@@ -115,8 +112,9 @@ export function SeasonPrompt({ api, g, onOpenSettings }: { api: GameApi; g: Game
           bare spill som er startet i den. Sesongen slutter om {daysLeft(cur)} dager.
         </p>
         <p className="g-muted">
-          Spillet ditt (dag {day(g)}) er ikke med i sesongen. Du kan spille det videre – det står på lista «Alle tider»
-          – eller starte et nytt spill for sesongen. Valget finner du igjen under Verket → Økonomi → Toppliste.
+          Spillet ditt (dag {day(g)}) har kommet lenger enn garasjen og er ikke med i sesongen. Du kan spille det videre
+          – det står på lista «Alle tider» – eller starte et nytt spill for sesongen. Valget finner du igjen under 🏆
+          Toppliste øverst.
           {bonus ? " Du var med i forrige sesong, så du starter med 10 fagpoeng og 5 % mer i kassa." : ""}
         </p>
         {confirm ? (
@@ -178,8 +176,9 @@ export function SeasonJoin({ api, g, onOpenSettings }: { api: GameApi; g: GameSt
   const bonus = !!status?.played_previous;
   return (
     <div className="g-note g-season-join">
-      <strong>Spillet ditt er ikke med i {cur.name}.</strong> Det står bare på «Alle tider». Vil du være med, starter du
-      sesongen i garasjen.{bonus ? " Du var med sist og får 10 fagpoeng og 5 % mer i kassa." : ""}
+      <strong>Spillet ditt er ikke med i {cur.name}.</strong> Det står bare på «Alle tider». Bare spill som fortsatt er
+      i garasjen, kan bli med direkte, så vil du være med, starter du sesongen i garasjen.
+      {bonus ? " Du var med sist og får 10 fagpoeng og 5 % mer i kassa." : ""}
       {confirm ? (
         <div className="g-row">
           <button
@@ -224,6 +223,20 @@ export function EventsNote({ g }: { g: GameState }) {
         ))}
       </ul>
     </div>
+  );
+}
+
+/** På startskjermen: at en sesong pågår, og at man må logge inn for å være med (B-133) */
+export function SeasonTeaser() {
+  const status = useSeasonStatus();
+  const cur = status?.current ?? null;
+  if (!cur) return null;
+  const left = daysLeft(cur);
+  return (
+    <p className="g-note g-season-teaser">
+      🏆 <strong>{cur.name}</strong> pågår – {left} {left === 1 ? "dag" : "dager"} igjen. Logg inn under for å være med
+      på topplista. Spill som fortsatt er i garasjen, blir med direkte.
+    </p>
   );
 }
 

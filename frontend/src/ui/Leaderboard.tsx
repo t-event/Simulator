@@ -29,7 +29,53 @@ function fmtValue(kind: BoardKind, v: number): string {
   return `dag ${Math.round(v)}`;
 }
 
-export function Leaderboard({ onOpenSettings, api, g }: { onOpenSettings?: () => void; api?: GameApi; g?: GameState }) {
+/** Topplista som eget ark bak 🏆 øverst (B-133), så den er synlig fra alle skjermer */
+export function LeaderboardSheet({
+  api,
+  g,
+  onClose,
+  onOpenSettings,
+}: {
+  api: GameApi;
+  g: GameState;
+  onClose: () => void;
+  onOpenSettings: () => void;
+}) {
+  return (
+    <div className="g-modal" role="dialog" aria-modal="true" aria-label="Toppliste" onClick={onClose}>
+      <div className="g-modal-card" onClick={(e) => e.stopPropagation()}>
+        <header className="g-card-head">
+          <h2>Toppliste</h2>
+          <button onClick={onClose} aria-label="Lukk">
+            ✕
+          </button>
+        </header>
+        <Leaderboard
+          api={api}
+          g={g}
+          bare
+          onOpenSettings={() => {
+            onClose();
+            onOpenSettings();
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+export function Leaderboard({
+  onOpenSettings,
+  api,
+  g,
+  bare,
+}: {
+  onOpenSettings?: () => void;
+  api?: GameApi;
+  g?: GameState;
+  /** Uten kortramme (inne i arket bak 🏆) */
+  bare?: boolean;
+}) {
   const session = useSyncExternalStore(onSessionChange, getSession, getSession);
   const [kind, setKind] = useState<BoardKind>("verdi");
   // Denne sesongen eller alle tider (B-129)
@@ -70,15 +116,13 @@ export function Leaderboard({ onOpenSettings, api, g }: { onOpenSettings?: () =>
 
   if (!cloudConfigured()) return null;
 
-  return (
-    <Card
-      title="Toppliste"
-      right={
-        <button className="g-small" onClick={() => setTick((t) => t + 1)} aria-label="Oppdater topplista">
-          ↻
-        </button>
-      }
-    >
+  const refresh = (
+    <button className="g-small" onClick={() => setTick((t) => t + 1)} aria-label="Oppdater topplista">
+      ↻
+    </button>
+  );
+  const body = (
+    <>
       <SeasonLine />
       {api && g && <SeasonJoin api={api} g={g} onOpenSettings={onOpenSettings} />}
       {status?.current && (
@@ -164,6 +208,16 @@ export function Leaderboard({ onOpenSettings, api, g }: { onOpenSettings?: () =>
         stålverket, Sølv på storverket, Gull når konsernverdien passerer 1 mrd. Kontoer med urimelig vekst holdes
         utenfor.
       </p>
+    </>
+  );
+  return bare ? (
+    <div className="g-board-bare">
+      <div className="g-board-refresh">{refresh}</div>
+      {body}
+    </div>
+  ) : (
+    <Card title="Toppliste" right={refresh}>
+      {body}
     </Card>
   );
 }

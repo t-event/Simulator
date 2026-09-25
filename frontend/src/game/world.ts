@@ -32,6 +32,14 @@ export function applyWorldEvents(g: GameState, events: WorldEvent[]): void {
   if (g.world.seenEventIds.length > 50) g.world.seenEventIds.splice(0, g.world.seenEventIds.length - 50);
 }
 
+/**
+ * Et spill som fortsatt er i garasjen (bare veiledningen og litt til), blir med i sesongen direkte (B-133).
+ * Har man flyttet videre, må man starte sesongen på nytt i garasjen.
+ */
+export function canJoinDirectly(g: GameState): boolean {
+  return g.stage === 0;
+}
+
 /** Kobler et nytt spill til sesongen, med fordelen for den som var med sist */
 export function joinSeason(g: GameState, seasonId: number, bonus: boolean): void {
   g.season = seasonId;

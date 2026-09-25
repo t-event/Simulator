@@ -1754,3 +1754,15 @@ Beslutning: øverst på topplista (Verket → Økonomi) står `SeasonJoin` med s
 i Sesong 1: opprett konto eller logg inn»; med konto og et eldre spill «Spillet ditt er ikke med» med «Start sesongen
 (nytt spill)» og bekreftelse; med et spill i sesongen «Spillet ditt er med i Sesong 1». Popupene sier hvor valget
 finnes igjen.
+
+## B-133 Garasjen kan bli med i sesongen direkte, og topplista bak 🏆 øverst (2026-09-25)
+Status: gjelder (erstatter «første døgn» i B-129 og plasseringen under Økonomi i B-127)
+Brukeren: de som bare har gjort veiledningen, skal kunne være med i sesongen; de som har kommet langt, må starte
+på nytt. Topplista skal være mer synlig enn under Økonomi, så det blir populært å være med.
+
+Beslutning:
+- **Direkte med så lenge man er i garasjen** (`canJoinDirectly`: nivå 0). Veiledningen og de første dagene er i
+  garasjen. Har man flyttet til verkstedet eller lenger, må man starte sesongen i garasjen. Tekstene sier det.
+- **Topplista bak 🏆** i toppfeltet, ved siden av 📖 og ⚙️, som et eget ark (`LeaderboardSheet`) med sesongvalget
+  øverst. Synlig fra alle skjermer. Fjernet fra Verket → Økonomi.
+- **Startskjermen** viser «🏆 Sesong 1 pågår – N dager igjen. Logg inn under for å være med.»

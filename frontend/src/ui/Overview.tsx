@@ -48,7 +48,6 @@ import { SceneBubbles } from "./SceneBubbles";
 import { StageCard, StationButton, UpgradeSheet } from "./Upgrades";
 import { AutoToggle } from "./AutoToggle";
 import { BankCard } from "./Settings";
-import { Leaderboard } from "./Leaderboard";
 import { KonsernTab } from "./Konsern";
 import { readyUpgrades, stationOptions, stationReady, type Station } from "./stations";
 import type { View } from "./views";
@@ -59,10 +58,6 @@ interface Props {
   act: GameApi["act"];
   go: (view: View, sub?: string) => void;
   openBook: (chapter?: string) => void;
-  /** Åpner ⚙️ Innstillinger (kontoen og kallenavnet, B-127) */
-  onSettings?: () => void;
-  /** Hele spill-API-et, til sesongvalget på topplista (B-132) */
-  api?: GameApi;
 }
 
 type Anchor = "vedlikehold" | "mal";
@@ -440,7 +435,7 @@ function ChallengesCard({ g }: { g: GameState }) {
   );
 }
 
-export function Overview({ g, stats, act, go, openBook, onSettings, api }: Props) {
+export function Overview({ g, stats, act, go, openBook }: Props) {
   const [sheet, setSheet] = useState<Station | null>(null);
   const [chosenTab, setTab] = useState<SubTab>("oversikt");
   // Konsern-fanen finnes bare når konsernet er åpnet; lastes et annet spill, faller valget tilbake til Oversikt
@@ -820,7 +815,6 @@ export function Overview({ g, stats, act, go, openBook, onSettings, api }: Props
                 {g.loan > 0 && <Stat label="Lån" value={fmtKr(g.loan)} tone="warning" />}
               </div>
             </Card>
-            <Leaderboard onOpenSettings={onSettings} api={api} g={g} />
           </div>
           <div className="g-col">
             <BankCard g={g} act={act} />
