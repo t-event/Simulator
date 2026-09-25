@@ -9,7 +9,7 @@ import { konsernEquity } from "../game/konsern";
 import { migrate, parseSave } from "../game/save";
 import { SAVE_VERSION } from "../game/engine";
 import type { GameState } from "../game/types";
-import { APP_VERSION } from "./config";
+import { APP_VERSION, cloudConfigured } from "./config";
 import { getSession, NetError, rest, userId } from "./supabase";
 
 export type CloudStatus =
@@ -98,7 +98,7 @@ export async function uploadSave(g: GameState, keepalive = false): Promise<void>
 
 /** Kalles etter hver lokale lagring (save.ts). Laster opp når det er på tide. */
 export function onLocalSave(g: GameState): void {
-  if (!getSession()) return;
+  if (!cloudConfigured() || !getSession()) return;
   // Et spill som tilhører en annen konto, skal ikke overskrive kontoens spill (B-125)
   if (g.owner && g.owner !== userId()) return;
   dirty = g;
@@ -203,6 +203,7 @@ export function backupOwnerError(text: string): string | null {
 
 /** Funksjonsbryterne i tabellen `config` (kan skru av lagring på nett uten ny publisering) */
 export async function fetchFeatures(): Promise<Record<string, boolean>> {
+  if (!cloudConfigured()) return { cloud: false };
   try {
     const rows = await rest<{ value: Record<string, boolean> }[]>("config?select=value&id=eq.features");
     return rows[0]?.value ?? {};

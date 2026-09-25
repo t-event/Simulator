@@ -38,8 +38,10 @@ GitHub Pages: https://t-event.github.io/Simulator/
   personnavn, interne prosedyrenumre, leverandørnavn eller interne
   kvalitetskoder fra ekte anlegg i noe som committes. Repoet er offentlig. Er
   du i tvil, spør brukeren før du committer.
-- **Nøkler:** Supabase sin offentlige nøkkel (anon/publishable) kan ligge i koden. Den hemmelige (service_role)
-  skal aldri committes, logges eller brukes av spillet. Se `docs/PLAN-NETT.md`.
+- **Nøkler (brukerens beskjed, B-126):** ingen nøkler i repoet, heller ikke den offentlige. URL og offentlig nøkkel
+  til Supabase ligger i GitHub Secrets (`SUPABASE_URL`, `SUPABASE_KEY`) og legges inn av bygget som
+  `VITE_SUPABASE_URL` og `VITE_SUPABASE_KEY`. Lokalt: `frontend/.env.local` (ignorert av git). Den hemmelige
+  nøkkelen (service_role) skal aldri committes, logges eller brukes av spillet. Se `docs/PLAN-NETT.md`.
 - **Enkelt for nybegynnere:** Alt spilleren må gjøre skal kunne forstås uten
   fagkunnskap. Forklar med vanlige ord; fagordene kan stå i fagboka.
 - **Mobil først:** Test alltid på iPhone-størrelse (390 px bred). Ingen
@@ -97,7 +99,7 @@ frontend/src/
     konsern.ts   Datterverk og sluttmålet 10 mrd. (vises av ui/Konsern.tsx)
     balance.ts   Automatisk testspiller
   net/         Konto og lagring på nett (B-125) – Supabase over fetch, uten bibliotek
-    config.ts    URL og offentlig nøkkel   supabase.ts  Innlogging, økt, spørringer   sync.ts  Lagring på nett og kobling
+    config.ts    URL og nøkkel fra miljøet (aldri i repoet)   supabase.ts  Innlogging, økt, spørringer   sync.ts  Lagring på nett
     tests.ts     Tester uten nett (falsk tjeneste)
   ui/          Spillets skjermer (mobil først) og kontrollrommet
     Overview.tsx Verket med underfanene Oversikt, Anlegg, Økonomi (og Konsern)   Recipe.tsx  Resepten på Marked
@@ -139,6 +141,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - Testspilleren har en **nybegynner** (B-062) som følger rådene i spillet. Ny mekanikk som krever at spilleren
   gjør noe, må også gis et råd i spillet (hint, advarsel, «Neste store steg») – og nybegynneren må følge det,
   ellers feiler CI.
+- Playwright-tester av kontoen trenger `frontend/.env.local` med en URL (verdien spiller ingen rolle, `page.route`
+  fanger kallene) – uten den vises ikke kontokortet. Fjern fila før commit-sjekken; den er ignorert av git uansett.
 - Sandkassen når ikke supabase.co. Nettlaget testes med en falsk tjeneste (`src/net/tests.ts`) og med `page.route`
   i Playwright. Ekte innlogging må brukeren teste selv.
 - Se på **exit-koden** til `balance.ts`, ikke bare median-linjene: sjekken av kontrollrommet står helt nederst

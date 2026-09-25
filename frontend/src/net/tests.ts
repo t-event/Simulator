@@ -3,6 +3,7 @@
  * Kjøres med `npx tsx src/net/tests.ts` og i `npm test`.
  */
 import { newGame } from "../game/engine";
+import { setCloudConfig } from "./config";
 import { setSaveListener } from "../game/save";
 import {
   consumeAuthHash,
@@ -35,6 +36,8 @@ const store = new Map<string, string>();
   setItem: (k: string, v: string) => void store.set(k, v),
   removeItem: (k: string) => void store.delete(k),
 };
+
+setCloudConfig("https://test.local", "test-nokkel");
 
 let failed = 0;
 async function test(name: string, fn: () => Promise<void> | void): Promise<void> {

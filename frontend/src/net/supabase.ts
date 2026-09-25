@@ -4,7 +4,7 @@
  *
  * `fetch` kan byttes ut i tester (setFetch), så ingenting her trenger nett for å testes.
  */
-import { SUPABASE_KEY, SUPABASE_URL } from "./config";
+import { cloud } from "./config";
 
 export interface Session {
   access_token: string;
@@ -125,8 +125,8 @@ async function call(url: string, init: RequestInit): Promise<Response> {
 
 function headers(token?: string | null, extra?: Record<string, string>): Record<string, string> {
   return {
-    apikey: SUPABASE_KEY,
-    Authorization: `Bearer ${token ?? SUPABASE_KEY}`,
+    apikey: cloud.key,
+    Authorization: `Bearer ${token ?? cloud.key}`,
     "Content-Type": "application/json",
     ...extra,
   };
@@ -147,7 +147,7 @@ function toSession(body: Record<string, unknown>): Session {
 
 /** Oppretter konto. Gir true hvis kontoen må bekreftes på e-post før man kan logge inn. */
 export async function signUp(email: string, password: string): Promise<{ needsConfirm: boolean }> {
-  const res = await call(`${SUPABASE_URL}/auth/v1/signup`, {
+  const res = await call(`${cloud.url}/auth/v1/signup`, {
     method: "POST",
     headers: headers(),
     body: JSON.stringify({ email, password }),
@@ -168,7 +168,7 @@ export async function signUp(email: string, password: string): Promise<{ needsCo
 }
 
 export async function signIn(email: string, password: string): Promise<Session> {
-  const res = await call(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+  const res = await call(`${cloud.url}/auth/v1/token?grant_type=password`, {
     method: "POST",
     headers: headers(),
     body: JSON.stringify({ email, password }),
@@ -184,7 +184,7 @@ export async function signOut(): Promise<void> {
   setSession(null);
   if (!s) return;
   try {
-    await fetchImpl(`${SUPABASE_URL}/auth/v1/logout`, { method: "POST", headers: headers(s.access_token) });
+    await fetchImpl(`${cloud.url}/auth/v1/logout`, { method: "POST", headers: headers(s.access_token) });
   } catch {
     // Økta er borte lokalt uansett
   }
@@ -192,7 +192,7 @@ export async function signOut(): Promise<void> {
 
 /** Sender e-post med lenke for å sette nytt passord */
 export async function recover(email: string): Promise<void> {
-  const res = await call(`${SUPABASE_URL}/auth/v1/recover`, {
+  const res = await call(`${cloud.url}/auth/v1/recover`, {
     method: "POST",
     headers: headers(),
     body: JSON.stringify({ email }),
@@ -203,7 +203,7 @@ export async function recover(email: string): Promise<void> {
 export async function updatePassword(password: string): Promise<void> {
   const token = await getToken();
   if (!token) throw new NetError("Du er ikke logget inn.", 401);
-  const res = await call(`${SUPABASE_URL}/auth/v1/user`, {
+  const res = await call(`${cloud.url}/auth/v1/user`, {
     method: "PUT",
     headers: headers(token),
     body: JSON.stringify({ password }),
@@ -227,7 +227,7 @@ export async function getToken(): Promise<string | null> {
   if (!refreshing) {
     refreshing = (async () => {
       try {
-        const res = await call(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+        const res = await call(`${cloud.url}/auth/v1/token?grant_type=refresh_token`, {
           method: "POST",
           headers: headers(),
           body: JSON.stringify({ refresh_token: s.refresh_token }),
@@ -292,7 +292,7 @@ export async function rest<T>(
   init: { method?: string; body?: unknown; prefer?: string; keepalive?: boolean } = {},
 ): Promise<T> {
   const token = await getToken();
-  const res = await call(`${SUPABASE_URL}/rest/v1/${path}`, {
+  const res = await call(`${cloud.url}/rest/v1/${path}`, {
     method: init.method ?? "GET",
     headers: headers(token, init.prefer ? { Prefer: init.prefer } : undefined),
     body: init.body === undefined ? undefined : JSON.stringify(init.body),

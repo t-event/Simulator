@@ -1623,8 +1623,25 @@ Beslutning:
 - **Lenkene fra e-posten** (bekreftelse og nytt passord) lander på spillet med nøklene i adressen; de leses inn før
   første tegning og adressen ryddes. Krever at Site URL i Supabase er satt til spillets adresse.
 - **Funksjonsbryter:** tabellen `config` (`features.cloud`) kan skru av lagring på nett uten ny publisering.
+- ~~Nøklene ligger i `frontend/src/net/config.ts`.~~ *(Erstattet av B-126: GitHub Secrets.)*
 - **SQL** i `supabase/001_grunnlag.sql`: tabellene `profiles`, `saves`, `snapshots`, `config`, profil-trigger,
   `updated_at`, `delete_my_account` og tilgangsregler (RLS). Brukeren limer inn. Kan kjøres flere ganger.
 - **Personvern:** e-post og spillet lagres, ingenting annet. Det står under kontoen.
 - Spillmotoren vet ingenting om nettet: `save.ts` har en lytter (`setSaveListener`) som `sync.ts` henger seg på.
   `balance.ts` og `tests.ts` kjører uten nett.
+
+## B-126 Ingen nøkler i repoet – GitHub Secrets (2026-09-25)
+Status: gjelder (erstatter nøkkeldelen av B-125)
+Brukeren: ingen koder skal ut på GitHub, de skal i GitHub Secrets.
+
+Beslutning:
+- `frontend/src/net/config.ts` leser `VITE_SUPABASE_URL` og `VITE_SUPABASE_KEY` fra miljøet. Bygget i `pages.yml`
+  får dem fra GitHub Secrets `SUPABASE_URL` og `SUPABASE_KEY`. Lokalt: `frontend/.env.local`, ignorert av git
+  (`.env`, `.env.*` unntatt `.env.example`).
+- Mangler nøklene (fork, lokal utvikling uten fil), er alt på nett slått av: kontokortet vises ikke, ingenting
+  sendes, og spillet virker som før.
+- Den offentlige nøkkelen er fortsatt synlig i det publiserte spillet, slik alle nettleserapper har det. Sikkerheten
+  ligger i tilgangsreglene i databasen, ikke i at nøkkelen er hemmelig.
+- Nøkkelen fra B-125 ligger i git-historikken til `main` (PR #78). Vi skriver aldri om historikken til `main`;
+  brukeren lager i stedet en ny publishable-nøkkel i Supabase og sletter den gamle når secrets er på plass.
+- Nettestene setter en falsk kobling med `setCloudConfig`.

@@ -5,6 +5,7 @@
  */
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { loadGame, saveGame } from "../game/save";
+import { cloudConfigured } from "../net/config";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import {
@@ -99,7 +100,7 @@ export function AccountCard({ api, onDone }: { api: GameApi; onDone?: () => void
   );
   const [choose, setChoose] = useState<{ cloud: GameState; local: GameState } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [cloudOn, setCloudOn] = useState(true);
+  const [cloudOn, setCloudOn] = useState(cloudConfigured());
 
   useEffect(() => {
     void fetchFeatures().then((f) => {
@@ -147,6 +148,7 @@ export function AccountCard({ api, onDone }: { api: GameApi; onDone?: () => void
     }
   };
 
+  if (!cloudConfigured()) return null;
   if (!cloudOn && !session)
     return (
       <div className="g-account">

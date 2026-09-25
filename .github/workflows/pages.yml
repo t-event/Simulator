@@ -55,6 +55,9 @@ jobs:
         working-directory: frontend
         env:
           GITHUB_PAGES: "true"
+          # Nøklene til Supabase ligger i GitHub Secrets, ikke i repoet (B-126)
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: npm run build
 
       - uses: actions/configure-pages@v5

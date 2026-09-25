@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 70 – 2026-09-25: nøklene ut av repoet
+
+**Brukeren ba om:** Ingen koder på GitHub, de skal i GitHub Secrets. Og: holder gratisversjonen av Supabase?
+
+**Gjort:** B-126. URL og nøkkel leses fra miljøet, bygget får dem fra secrets, `.env.local` er ignorert. Uten
+nøkler er alt på nett slått av og spillet virker som før.
+
+**Testet:**
+- tsc, lint, `npm test`, build. Bygget inneholder verken URL eller nøkkel når miljøet er tomt.
+- Playwright på iPhone 13 med `.env.local` og falsk Supabase: samme løp som i økt 69, alt OK.
+- Playwright uten `.env.local`: ingen kontokort, ingen feil.
+
+**Gjenstår:**
+- Brukeren legger inn `SUPABASE_URL` og `SUPABASE_KEY` som secrets i GitHub, lager en ny publishable-nøkkel og
+  sletter den gamle, kjører SQL-fila og setter Site URL.
+
+---
+
 ## Økt 69 – 2026-09-25: konto og lagring på nett (fase 0 og 1)
 
 **Brukeren ba om:** Konto med e-post og passord, nåværende lagring koblet til kontoen, Supabase. Svar på de åpne

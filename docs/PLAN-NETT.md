@@ -49,9 +49,10 @@ Supabase er en gratis nettjeneste med database, innlogging og planlagte jobber. 
 med den. GitHub Pages publiserer fortsatt selve spillet som i dag.
 
 - **Innlogging:** e-post og passord (Supabase Auth). Glemt passord via e-post.
-- **Nøkler:** prosjektets URL og den offentlige nøkkelen («anon»/«publishable») ligger i koden. Den er laget for å
-  være offentlig, sikkerheten ligger i tilgangsreglene (RLS) i databasen. Den hemmelige nøkkelen («service_role»)
-  skal aldri sendes, committes eller brukes av spillet.
+- **Nøkler:** ingen nøkler i repoet (brukerens beskjed). Prosjektets URL og den offentlige nøkkelen
+  («publishable») ligger i GitHub Secrets og legges inn når spillet bygges. Den offentlige nøkkelen er likevel synlig
+  i det publiserte spillet (nettleseren må ha den), og det er greit: sikkerheten ligger i tilgangsreglene (RLS) i
+  databasen. Den hemmelige nøkkelen («service_role») skal aldri sendes, committes eller brukes av spillet.
 - **All serverlogikk som SQL i databasen:** tilgangsregler, sjekker og planlagte jobber (pg_cron) skrives som
   SQL-filer i `supabase/` i repoet. Brukeren limer dem inn i SQL-editoren i Supabase. Da trengs verken CLI eller
   hemmelige nøkler hos Claude.
@@ -221,7 +222,7 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
   | Boreplattformen | høyfast stål, små mengder, høy pris | omdømme 75, øseovn |
   | Bilfabrikken | renest mulig stål, lange rammeavtaler | omdømme 80, øseovn |
   Kundene byttes ut etter hvert som spilleren stiger i liga, så det alltid er noe å strekke seg etter.
-- Supabase-prosjektet er opprettet, og nøklene ligger i `frontend/src/net/config.ts`.
+- Supabase-prosjektet er opprettet. Nøklene ligger i GitHub Secrets (B-126).
 
 ## Status
 
