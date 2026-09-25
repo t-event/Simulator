@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 68 – 2026-09-25: plan for konto, lagring på nett, toppliste og konkurranse
+
+**Brukeren ba om:** Svar på om toppliste og lagring uten fil er mulig med GitHub Pages, uten at noen mister spillet,
+og en skikkelig plan for et spill man ikke blir ferdig med – med konto (e-post og passord), Supabase, nivå 1 og 2,
+og litt ventetid som varierer.
+
+**Gjort:** B-124 og `docs/PLAN-NETT.md` med svar på spørsmålene, grunnlaget i Supabase, tabeller, reglene for å
+utvikle uten at noen mister spillet, seks faser, ventetidene og juksesperren.
+
+**Testet:** Ingen kode endret.
+
+**Gjenstår:**
+- Brukeren oppretter Supabase-prosjekt og sender URL og offentlig nøkkel.
+- Brukeren svarer på de åpne spørsmålene i planen (grupper på topplista, sesongfordel, storkunder).
+- Deretter fase 0 og 1.
+
+---
+
 ## Økt 67 – 2026-09-25: kortere Konsern-side
 
 **Brukeren ba om:** Konsern-siden er for lang og bør bli mer intuitiv.
