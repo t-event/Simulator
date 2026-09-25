@@ -745,7 +745,11 @@ function heatEvents(g: GameState, index: number, plant: PlantStats): number {
           "bad",
         );
       } else {
-        log(g, `Overslag i ovn ${index + 1}. Støv i hvelvet må suges bort.`, "event");
+        log(
+          g,
+          `Overslag i ovn ${index + 1}: en gnist slo over i støvet på ovnstaket (hvelvet). Taket må støvsuges.`,
+          "event",
+        );
       }
     }
     // Mange charger i døgnet på storverket: regulering og forskning skal til sammen gjøre brudd sjeldne (B-109)
