@@ -61,6 +61,8 @@ interface Props {
   openBook: (chapter?: string) => void;
   /** Åpner ⚙️ Innstillinger (kontoen og kallenavnet, B-127) */
   onSettings?: () => void;
+  /** Hele spill-API-et, til sesongvalget på topplista (B-132) */
+  api?: GameApi;
 }
 
 type Anchor = "vedlikehold" | "mal";
@@ -438,7 +440,7 @@ function ChallengesCard({ g }: { g: GameState }) {
   );
 }
 
-export function Overview({ g, stats, act, go, openBook, onSettings }: Props) {
+export function Overview({ g, stats, act, go, openBook, onSettings, api }: Props) {
   const [sheet, setSheet] = useState<Station | null>(null);
   const [chosenTab, setTab] = useState<SubTab>("oversikt");
   // Konsern-fanen finnes bare når konsernet er åpnet; lastes et annet spill, faller valget tilbake til Oversikt
@@ -818,7 +820,7 @@ export function Overview({ g, stats, act, go, openBook, onSettings }: Props) {
                 {g.loan > 0 && <Stat label="Lån" value={fmtKr(g.loan)} tone="warning" />}
               </div>
             </Card>
-            <Leaderboard onOpenSettings={onSettings} />
+            <Leaderboard onOpenSettings={onSettings} api={api} g={g} />
           </div>
           <div className="g-col">
             <BankCard g={g} act={act} />

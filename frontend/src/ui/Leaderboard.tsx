@@ -13,7 +13,9 @@ import {
   type BoardKind,
   type BoardRow,
 } from "../net/leaderboard";
-import { SeasonLine } from "./Season";
+import { SeasonJoin, SeasonLine } from "./Season";
+import type { GameApi } from "../game/useGame";
+import type { GameState } from "../game/types";
 import { useSeasonStatus } from "./useSeason";
 import { getSession, onSessionChange } from "../net/supabase";
 import { useSyncExternalStore } from "react";
@@ -27,7 +29,7 @@ function fmtValue(kind: BoardKind, v: number): string {
   return `dag ${Math.round(v)}`;
 }
 
-export function Leaderboard({ onOpenSettings }: { onOpenSettings?: () => void }) {
+export function Leaderboard({ onOpenSettings, api, g }: { onOpenSettings?: () => void; api?: GameApi; g?: GameState }) {
   const session = useSyncExternalStore(onSessionChange, getSession, getSession);
   const [kind, setKind] = useState<BoardKind>("verdi");
   // Denne sesongen eller alle tider (B-129)
@@ -78,6 +80,7 @@ export function Leaderboard({ onOpenSettings }: { onOpenSettings?: () => void })
       }
     >
       <SeasonLine />
+      {api && g && <SeasonJoin api={api} g={g} onOpenSettings={onOpenSettings} />}
       {status?.current && (
         <div className="g-subtabs g-board-scope" role="tablist" aria-label="Sesong eller alle tider">
           <button

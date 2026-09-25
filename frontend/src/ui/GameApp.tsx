@@ -526,6 +526,7 @@ export function GameApp() {
               go={go}
               openBook={openBook}
               onSettings={() => setSettingsOpen(true)}
+              api={api}
             />
           )}
           {shown === "marked" && (

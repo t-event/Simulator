@@ -52,7 +52,7 @@ export function SeasonSync({ api }: { api: GameApi }) {
   const cur = status?.current ?? null;
   useEffect(() => {
     if (!g || !session || !cur) return;
-    if (g.season === null && g.minute < AUTO_JOIN_MINUTES && g.owner === session.user.id)
+    if (g.season === null && g.minute < AUTO_JOIN_MINUTES && (g.owner === null || g.owner === session.user.id))
       api.act((gg) => {
         joinSeason(gg, cur.id, !!status?.played_previous);
         unlock(gg, "sesong");
@@ -84,7 +84,8 @@ export function SeasonPrompt({ api, g, onOpenSettings }: { api: GameApi; g: Game
           </p>
           <p className="g-muted">
             Er spillet ditt nytt, blir det med i sesongen med en gang. Har du spilt en stund, får du velge om du vil
-            starte sesongen i garasjen eller spille videre utenfor.
+            starte sesongen i garasjen eller spille videre utenfor. Du finner dette igjen under Verket → Økonomi →
+            Toppliste.
           </p>
           <div className="g-row">
             <button
@@ -102,7 +103,7 @@ export function SeasonPrompt({ api, g, onOpenSettings }: { api: GameApi; g: Game
       </div>
     );
   }
-  if (g.owner !== session.user.id) return null;
+  if (g.owner && g.owner !== session.user.id) return null;
   if (g.season === cur.id || g.seasonPromptSeen === cur.id || g.minute < AUTO_JOIN_MINUTES) return null;
   const bonus = !!status?.played_previous;
   return (
@@ -115,7 +116,7 @@ export function SeasonPrompt({ api, g, onOpenSettings }: { api: GameApi; g: Game
         </p>
         <p className="g-muted">
           Spillet ditt (dag {day(g)}) er ikke med i sesongen. Du kan spille det videre – det står på lista «Alle tider»
-          – eller starte et nytt spill for sesongen.
+          – eller starte et nytt spill for sesongen. Valget finner du igjen under Verket → Økonomi → Toppliste.
           {bonus ? " Du var med i forrige sesong, så du starter med 10 fagpoeng og 5 % mer i kassa." : ""}
         </p>
         {confirm ? (
@@ -147,6 +148,63 @@ export function SeasonPrompt({ api, g, onOpenSettings }: { api: GameApi; g: Game
           </p>
         )}
       </div>
+    </div>
+  );
+}
+
+/**
+ * Fast plass for å bli med i sesongen (B-132), på topplista under Verket → Økonomi. Samme valg som popupen, så den
+ * som krysset ut popupen, finner det igjen her.
+ */
+export function SeasonJoin({ api, g, onOpenSettings }: { api: GameApi; g: GameState; onOpenSettings?: () => void }) {
+  const session = useSession();
+  const status = useSeasonStatus();
+  const [confirm, setConfirm] = useState(false);
+  const cur = status?.current ?? null;
+  if (!cur) return null;
+  if (!session)
+    return (
+      <div className="g-note g-season-join">
+        <strong>Bli med i {cur.name}:</strong> opprett konto eller logg inn, så er du med på sesonglista.{" "}
+        {onOpenSettings && (
+          <button className="g-link" onClick={onOpenSettings}>
+            Opprett konto eller logg inn
+          </button>
+        )}
+      </div>
+    );
+  if (g.owner && g.owner !== session.user.id) return null;
+  if (g.season === cur.id) return <p className="g-muted g-small-text">Spillet ditt er med i {cur.name}.</p>;
+  const bonus = !!status?.played_previous;
+  return (
+    <div className="g-note g-season-join">
+      <strong>Spillet ditt er ikke med i {cur.name}.</strong> Det står bare på «Alle tider». Vil du være med, starter du
+      sesongen i garasjen.{bonus ? " Du var med sist og får 10 fagpoeng og 5 % mer i kassa." : ""}
+      {confirm ? (
+        <div className="g-row">
+          <button
+            className="g-danger"
+            onClick={() => {
+              const ng = newGame();
+              joinSeason(ng, cur.id, bonus);
+              unlock(ng, "sesong");
+              api.adopt(ng);
+            }}
+          >
+            Ja, start {cur.name} i garasjen
+          </button>
+          <button onClick={() => setConfirm(false)}>Avbryt</button>
+        </div>
+      ) : (
+        <div className="g-row">
+          <button onClick={() => setConfirm(true)}>Start sesongen (nytt spill)</button>
+        </div>
+      )}
+      {confirm && (
+        <p className="g-muted g-small-text">
+          Spillet du har nå, erstattes. Vil du beholde det, ta en sikkerhetskopi under ⚙️ først.
+        </p>
+      )}
     </div>
   );
 }
