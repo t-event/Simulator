@@ -1,5 +1,5 @@
 import { doResearch } from "../game/actions";
-import { STAGES } from "../game/data";
+import { STAGES, stageRef } from "../game/data";
 import { knowledgeCard } from "../game/knowledge";
 import { researchOptions } from "../game/research";
 import type { GameState } from "../game/types";
@@ -102,7 +102,7 @@ export function Research({
       {nextStage.length > 0 && (
         <details className="g-role-group">
           <summary>
-            Kommer i {STAGES[Math.min(STAGES.length - 1, g.stage + 1)].name.toLowerCase()}et ({nextStage.length})
+            Kommer i {stageRef(Math.min(STAGES.length - 1, g.stage + 1), g.stage)} ({nextStage.length})
           </summary>
           <ul className="g-closed">
             {nextStage.map((r) => (

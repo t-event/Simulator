@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 33 – 2026-09-25: nivåene forklart i teksten
+
+**Brukeren ba om:** «Fra støperiet» er ikke selvforklarende for en ny spiller.
+
+**Gjort (B-060):** `stageRef()` skriver nivået som «støperiet (neste nivå)» eller «stålverket (nivå 4 av 5)».
+Brukt på Marked, Folk, utstyr, forskning, søkere og natt-tipset. Målkortet på Verket viser «(nivå X av 5)».
+
+**Testet:** tsc, lint, validate, balanse (8 / 26 / 66 / 159, exit 0), Marked og Folk på iPhone-størrelse
+(ingen konsollfeil, ingen horisontal scrolling).
+
+**Gjenstår:** ingenting kjent.
+
+---
+
 ## Økt 32 – 2026-09-25: tekstene i spillet
 
 **Brukeren ba om:** Endre quiz-spørsmålet om analyse, og se over tekst i spillet så den gir mening.

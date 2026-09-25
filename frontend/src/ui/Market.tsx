@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PRODUCTS, SCRAP_IDS, SCRAP_TYPES } from "../game/data";
+import { PRODUCTS, SCRAP_IDS, SCRAP_TYPES, stageRef } from "../game/data";
 import { buyScrap, recipeEstimate, scrapPrice, scrapShort } from "../game/engine";
 import {
   energyPrice,
@@ -193,8 +193,10 @@ export function Market({ g, stats, act, openTab }: Props & { openTab?: string })
             ) : (
               <p className="g-note">
                 Du kjøper skrap selv.{" "}
-                {g.stage >= 2 ? "Ansett en planlegger under Folk" : "Fra støperiet kan du ansette en planlegger"} som
-                kjøper inn automatisk.
+                {g.stage >= 2
+                  ? "Ansett en planlegger under Folk"
+                  : `Når du har flyttet til ${stageRef(2, g.stage)}, kan du ansette en planlegger`}{" "}
+                som kjøper inn automatisk.
               </p>
             )}
           </Card>
@@ -207,7 +209,7 @@ export function Market({ g, stats, act, openTab }: Props & { openTab?: string })
             <Card title={stats.furnace.fuel === "strøm" ? "Strøm" : "Energi"}>
               <p className="g-muted">
                 {stats.furnace.fuel === "strøm"
-                  ? `Induksjonsovnen går på strøm. Nå: ${fmtNum(energyPrice(g), 2)} kr/kWh. Strømmen er billigst om natta. Strømavtaler kan du velge fra verkstedet.`
+                  ? `Induksjonsovnen går på strøm. Nå: ${fmtNum(energyPrice(g), 2)} kr/kWh. Strømmen er billigst om natta. Strømavtaler kan du velge når du har flyttet til ${stageRef(1, g.stage)}.`
                   : "Ovnen fyres med gass til fast pris."}
               </p>
             </Card>

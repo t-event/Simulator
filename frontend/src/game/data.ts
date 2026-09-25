@@ -208,7 +208,8 @@ export const GRADES: Record<GradeId, GradeSpec> = {
     trampMax: 0.2,
     premium: 1.12,
     minStage: 2,
-    description: "Til kaldforming og tråd. Karbonet må være lavt: bruk rent skrap med lite karbon, eller en ovn som brenner karbonet ned med oksygen.",
+    description:
+      "Til kaldforming og tråd. Karbonet må være lavt: bruk rent skrap med lite karbon, eller en ovn som brenner karbonet ned med oksygen.",
   },
   hoykarbon: {
     id: "hoykarbon",
@@ -269,6 +270,19 @@ export interface Stage {
   /** Faste kostnader per døgn: husleie, forsikring, strøm til bygg (se B-018) */
   fixedPerDay: number;
   description: string;
+}
+
+/** Nivåene i bestemt form, til tekst som «når du har flyttet til støperiet» */
+const STAGE_DEFINITE = ["garasjen", "verkstedet", "støperiet", "stålverket", "storverket"];
+
+/**
+ * Et nivå forklart for en ny spiller: «støperiet (nivå 3 av 5)», eller «verkstedet (neste nivå)» når det er
+ * nivået rett etter det spilleren står på (B-060).
+ */
+export function stageRef(stage: number, current?: number): string {
+  const name = STAGE_DEFINITE[stage] ?? "neste nivå";
+  if (current !== undefined && stage === current + 1) return `${name} (neste nivå)`;
+  return `${name} (nivå ${stage + 1} av ${STAGE_DEFINITE.length})`;
 }
 
 export const STAGES: Stage[] = [
@@ -501,7 +515,8 @@ export const CASTINGS: CastingType[] = [
     costPerT: 800,
     defectRisk: 0.1,
     continuous: false,
-    description: "Stålet støpes i former av sand som lages for hånd rundt en modell. Enkelt og billig, men mye av stålet havner i innløp og matere.",
+    description:
+      "Stålet støpes i former av sand som lages for hånd rundt en modell. Enkelt og billig, men mye av stålet havner i innløp og matere.",
   },
   {
     id: "formlinje",
@@ -741,7 +756,8 @@ export const ROLES: Record<RoleId, Role> = {
     name: "Planlegger",
     plural: "Planleggere",
     salary: 2300,
-    description: "Sorterer ordrekøen etter frist og kjøper skrap etter resepten (når «Ordreplanlegging» og «Innkjøpsplan» er forsket fram), og legger om resepten når kvaliteten skifter.",
+    description:
+      "Sorterer ordrekøen etter frist og kjøper skrap etter resepten (når «Ordreplanlegging» og «Innkjøpsplan» er forsket fram), og legger om resepten når kvaliteten skifter.",
   },
   klasser: {
     id: "klasser",

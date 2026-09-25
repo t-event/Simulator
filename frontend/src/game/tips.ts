@@ -13,7 +13,7 @@ const TIPS: Tip[] = [
   {
     id: "tips-natt",
     title: "Arbeidsdagen er over",
-    text: "Verket står når ingen er på jobb. Trykk 3× eller 10× for å komme raskere til morgenen – med forskningen «Stødig drift» spoler spillet fram av seg selv om natta. Vil du lage mer stål, trenger du flere folk: i verkstedet kan du ansette folk og kjøre flere skift (Folk-fanen). Med tre skift går verket døgnet rundt.",
+    text: "Verket står når ingen er på jobb. Trykk 3× eller 10× for å komme raskere til morgenen – med forskningen «Stødig drift» spoler spillet fram av seg selv om natta. Vil du lage mer stål, trenger du flere folk: når du har flyttet til verkstedet (neste nivå, se «Mål» på Verket), kan du ansette folk og kjøre flere skift under Folk. Med tre skift går verket døgnet rundt.",
     when: (g, s) => s.hours > 0 && s.hours < 24 && !isOpen(g, s.hours) && g.totals.heats >= 1,
   },
   {

@@ -5,7 +5,7 @@
  * feil, fordi man lærer av dem. Forskning koster fagpoeng, skjer med en gang og
  * låser opp utstyr, forbedringer og kapitler i fagboka.
  */
-import { STAGES } from "./data";
+import { stageRef } from "./data";
 import { knowledgeCard } from "./knowledge";
 import type { GameState, ScrapId } from "./types";
 
@@ -424,7 +424,7 @@ export function researchOptions(g: GameState): ResearchOption[] {
     const done = hasResearch(g, r.id);
     const locked = r.stage > g.stage;
     let reason: string | null = null;
-    if (locked) reason = `Krever ${STAGES[r.stage].name.toLowerCase()}`;
+    if (locked) reason = `Krever ${stageRef(r.stage, g.stage)}`;
     else {
       const missing = (r.requires ?? []).find((id) => !hasResearch(g, id));
       if (missing) reason = `Krever ${RESEARCH.find((x) => x.id === missing)?.name.toLowerCase() ?? missing}`;

@@ -13,7 +13,7 @@ import {
   hiredCrewCost,
   sendOnCourse,
 } from "../game/actions";
-import { CREW_ROLES, ROLE_IDS, ROLES, STAGES } from "../game/data";
+import { CREW_ROLES, ROLE_IDS, ROLES, STAGES, stageRef } from "../game/data";
 import {
   crewCoverage,
   day,
@@ -307,8 +307,8 @@ export function People({ g, stats, act }: Props) {
                 <p className="g-muted">
                   Du står selv i produksjonen på dagskiftet{g.stage === 0 ? " og gjør alt." : " og fyller to plasser."}
                   {g.stage === 0
-                    ? " Ansatte kan du ha fra verkstedet."
-                    : " Fra støperiet må alle plassene fylles av ansatte."}
+                    ? ` Ansatte kan du ha når du har flyttet til ${stageRef(1, g.stage)}.`
+                    : ` Når du flytter til ${stageRef(2, g.stage)}, blir du daglig leder, og da må alle plassene fylles av ansatte.`}
                 </p>
               )}
               {absenceCosts && (
@@ -382,7 +382,10 @@ export function People({ g, stats, act }: Props) {
         {shown === "ansett" && (
           <Card title="Søkere">
             {cap === 0 ? (
-              <p className="g-muted">Det er ikke plass til ansatte i garasjen. Flytt inn i et verksted først.</p>
+              <p className="g-muted">
+                Det er ikke plass til ansatte i garasjen. Du kan ansette når du har flyttet til {stageRef(1, g.stage)}–
+                se «Mål» på Verket.
+              </p>
             ) : g.candidates.length === 0 ? (
               <p className="g-muted">Ingen søkere i dag. Nye kommer hver morgen.</p>
             ) : (
