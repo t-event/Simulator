@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 45 – 2026-09-25: flere oppgraderinger på storverket
+
+**Brukeren ba om:** Flere oppgraderinger på storverket (en kollega hadde alle etter ti minutter).
+
+**Gjort (B-075):** Sju nye oppgraderinger (ovn nr. 3, 6 strenger, vakuumavgassing, havnekai, skrapterminal,
+varmegjenvinning, valseverk nr. 2). Mindre støping på samme nivå skjules.
+
+**Testet:** tsc, lint, balanse (exit 0), `--vansker` (vinner rundt dag 207), headless-liste over utstyret per sted.
+
+**Gjenstår:** kontrollrommet (oksygen samtidig med strøm, manuell avslagging, tapping som renner over,
+vanskeligere 5★).
+
+---
+
 ## Økt 44 – 2026-09-25: oppgraderinger per ovn
 
 **Brukeren ba om:** Oppgraderinger skal kjøpes per ovn, ikke komme på begge.

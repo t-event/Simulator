@@ -346,7 +346,8 @@ export function addScrapParti(
 }
 
 export function scrapPrice(g: GameState, id: ScrapId): number {
-  return SCRAP_TYPES[id].price * g.market.scrapFactor[id];
+  // Skrapterminalen kjøper inn i store partier (B-075)
+  return SCRAP_TYPES[id].price * g.market.scrapFactor[id] * (has(g, "skrapterminal") ? 0.94 : 1);
 }
 
 setCreditHint((g) => creditLimit(g));

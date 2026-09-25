@@ -28,7 +28,7 @@ const ROLLING_TPH = 45;
 
 /** Valseverket bygges ut sammen med storverket, så det holder følge med fire strenger. */
 export function rollingTph(g: GameState): number {
-  return ROLLING_TPH * (g.stage >= 4 ? 2.5 : 1);
+  return ROLLING_TPH * (g.stage >= 4 ? 2.5 : 1) * (has(g, "valseverk2") ? 2 : 1);
 }
 export const ROLLING_YIELD = 0.96;
 
@@ -488,6 +488,7 @@ export function computePlantStats(g: GameState): PlantStats {
       kwh *= 1.02;
     }
     if (hasResearch(g, "energistyring")) kwh *= 0.95;
+    if (t.arc && has(g, "varmegjenvinning")) kwh *= 0.92;
     if (t.arc && hasResearch(g, "skumslagg")) kwh *= 0.94;
     const mw = t.fuel === "strøm" ? (t.sizeT * kwh) / (cyc / 60) / 1000 : 0;
     return { furnace: t, sizeT: t.sizeT, cycleMin: cyc, kwhPerT: kwh, furnaceMW: mw };
@@ -514,13 +515,16 @@ export function computePlantStats(g: GameState): PlantStats {
     (has(g, "salgskontor") ? 1 : 0) +
     Math.min(3, sellers) * 0.8 +
     (hasResearch(g, "kundepleie") ? 0.6 : 0) +
-    (hasResearch(g, "eksport") ? 1 : 0);
+    (hasResearch(g, "eksport") ? 1 : 0) +
+    (has(g, "havn") ? 1.5 : 0);
   const priceBonus =
     (has(g, "salgskontor") ? 0.03 : 0) +
     Math.min(4, sellers) * 0.02 +
     g.reputation * 0.0008 +
     (hasResearch(g, "kundepleie") ? 0.02 : 0) +
-    (hasResearch(g, "eksport") ? 0.03 : 0);
+    (hasResearch(g, "eksport") ? 0.03 : 0) +
+    (has(g, "havn") ? 0.02 : 0) +
+    (has(g, "vakuum") ? 0.05 : 0);
 
   const storeMult = has(g, "lager") ? 2 : 1;
   const yardUsed = Object.values(g.scrap).reduce((a, s) => a + s.t, 0);
@@ -567,8 +571,8 @@ export function computePlantStats(g: GameState): PlantStats {
     missing: staff.missing,
     staffCount: g.workers.length,
     staffCap: stage.staffCap,
-    yardT: stage.yardT * storeMult,
-    storeT: stage.storeT * storeMult,
+    yardT: stage.yardT * storeMult * (has(g, "skrapterminal") ? 2 : 1),
+    storeT: stage.storeT * storeMult * (has(g, "havn") ? 1.5 : 1),
     yardUsed,
     storeUsed,
     salaryPerDay,

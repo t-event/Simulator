@@ -252,7 +252,7 @@ export const RESEARCH: Research[] = [
     name: "Strengstøping",
     stage: 3,
     cost: 150,
-    unlocks: ["streng1", "streng4"],
+    unlocks: ["streng1", "streng4", "streng6"],
     knowledge: "streng",
     description: "Kontinuerlig støping gjennom en vannkjølt kokille.",
     effect: "Åpner for strengstøpemaskiner",
@@ -316,7 +316,8 @@ export const RESEARCH: Research[] = [
     stage: 4,
     cost: 300,
     description: "Sertifiserte kvalitetssystemer som store utenlandske kunder krever.",
-    effect: "Flere store forespørsler og 3 % bedre priser",
+    effect: "Flere store forespørsler og 3 % bedre priser. Åpner for havnekai",
+    unlocks: ["havn"],
   },
 ];
 
