@@ -1379,3 +1379,23 @@ Beslutning:
   linjer), og et trykk fjerner dem.
 - Valget under ⚙️ (alle, bare problemer, ingen) gjelder som før.
 
+## B-115 Varselinnstillinger per tema og varighet (2026-09-25)
+Status: gjelder (utvider B-089 og B-114)
+Brukeren ville ha mer spesifikke valg for varslene på skjermen.
+Beslutning:
+- Under ⚙️: «Velg selv», «Bare problemer» eller «Ingen».
+- Med «Velg selv» kan sju temaer slås av og på:
+  - Ferie og sykdom
+  - Drift og havarier
+  - Kasse og bank
+  - Forskning, oppdrag og utbygging
+  - Kunder og omdømme
+  - Marked og strøm
+  - Ansatte og trivsel
+- «Bare problemer» viser alle problemer, uansett tema, så noe viktig ikke skjules ved et uhell.
+- Hvor lenge et varsel står: 3, 6 eller 10 sekunder. Står flere i kø, går hvert på 60 % av tida.
+- Temaet leses ut fra teksten (`logTopic` i `inbox.ts`), så gamle lagringer og logglinjer virker uten endring.
+  Reglene prøves i rekkefølge. Det som ikke passer noe tema («annet»), vises alltid med «Velg selv».
+- Sjekket med et skript som samlet alle ulike varseltekster fra 40 døgn i fem lagrede spill: alle havnet i et tema.
+- Varsellista bak 🔔 viser fortsatt alt.
+

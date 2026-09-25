@@ -900,6 +900,25 @@ button {
   white-space: nowrap;
 }
 
+/* Varselinnstillinger (B-115) */
+.g-toggle-hint {
+  display: block;
+  font-size: 12px;
+}
+
+.g-toast-topics {
+  margin: 8px 0;
+  padding: 4px 10px 6px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+}
+
+.g-toast-topics legend {
+  padding: 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .g-sheet-group {
   margin-top: 10px;
 }

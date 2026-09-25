@@ -85,6 +85,8 @@ export function migrate(g: GameState): GameState {
   if (g.settings.skipIdleNights === undefined) g.settings.skipIdleNights = true;
   if (g.settings.pauseOffers === undefined) g.settings.pauseOffers = false;
   if (g.settings.toasts === undefined) g.settings.toasts = "alle";
+  if (g.settings.toastTopics === undefined) g.settings.toastTopics = {};
+  if (g.settings.toastSeconds === undefined) g.settings.toastSeconds = 6;
   if (g.round === undefined) g.round = 1;
   // Seiersskjermen ble ikke lagret som sett før; et vunnet spill får den én gang til
   if (g.winSeen === undefined) g.winSeen = false;
