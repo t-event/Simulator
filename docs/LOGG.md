@@ -5,6 +5,29 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 52 – 2026-09-25: blokk-forespørsler, varsel før produktbytte og fravær med 4–5 skift
+
+**Brukeren ba om:**
+- Hvorfor det kom forespørsler på blokker når verket ikke kunne lage dem.
+- Et varsel før man går fra blokker til emner.
+- Ingen fraværsvarsler med 4–5 skift, med mindre skiftgangen går ned.
+
+**Gjort:**
+- B-082: forespørsler og avtaletilbud på produkter verket ikke lager lenger, trekkes tilbake.
+- B-083: fravær som de ekstra lagene dekker, står bare i loggen. Utløpt fravær fjernes før varslene.
+- B-084: engangstips når strengstøping kan kjøpes, og bekreftelse ved «Kjøp» med konsekvensene.
+
+**Testet:**
+- tsc, lint, bygg og balanse (8 / 26 / 66 / 134, nybegynner 155, exit 0). Et første forsøk med sperre på aktive
+  rammeavtaler ga −17 mill. kr for frø 1 og ble forkastet.
+- Headless: blokk-forespørsler trekkes tilbake en time etter byttet. Over 30 døgn med 4 lag er 14 av 58
+  fraværsmeldinger varsel (bare når et skift ellers ville gått tapt), med 3 lag 53 av 53.
+- Playwright på iPhone 13: tipset vises, bekreftelsen vises, og «Ja, bytt» setter strengstøpingen i drift. Ingen feil.
+
+**Gjenstår:** –
+
+---
+
 ## Økt 51 – 2026-09-25: antall aktive avtaler på fanen
 
 **Brukeren ba om:** Avtaler-knappen under Salg skal vise hvor mange aktive avtaler man har.

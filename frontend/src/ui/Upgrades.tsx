@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { buyUpgrade, keyUpgrade, upgradeOptions, type UpgradeOption } from "../game/actions";
 import { STATION_NAMES, stationOptions, type Station } from "./stations";
 import { STAGES, stageRef, WIN_CASH } from "../game/data";
@@ -29,6 +30,11 @@ export function StationButton({
 }
 
 function UpgradeCard({ o, stage, act }: { o: UpgradeOption; stage: number; act: GameApi["act"] }) {
+  const [asking, setAsking] = useState(false);
+  const buy = () => {
+    act((g) => buyUpgrade(g, o.id));
+    buzz(20);
+  };
   return (
     <div className={`g-upgrade${o.owned ? " is-owned" : ""}${o.locked ? " is-locked" : ""}`}>
       <div className="g-contract-head">
@@ -46,14 +52,30 @@ function UpgradeCard({ o, stage, act }: { o: UpgradeOption; stage: number; act: 
           <button
             className="g-primary g-small"
             disabled={!o.available}
-            onClick={() => {
-              act((g) => buyUpgrade(g, o.id));
-              buzz(20);
-            }}
+            onClick={() => (o.confirm ? setAsking(true) : buy())}
           >
             Kjøp
           </button>
           {o.reason && <span className="g-muted">{o.reason}</span>}
+        </div>
+      )}
+      {asking && o.confirm && (
+        <div className="g-modal" role="alertdialog" aria-modal="true">
+          <div className="g-modal-card">
+            <p>{o.confirm}</p>
+            <div className="g-row">
+              <button
+                className="g-primary"
+                onClick={() => {
+                  setAsking(false);
+                  buy();
+                }}
+              >
+                Ja, bytt
+              </button>
+              <button onClick={() => setAsking(false)}>Nei</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
