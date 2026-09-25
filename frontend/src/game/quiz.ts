@@ -81,10 +81,10 @@ export const QUIZ: Record<string, QuizQuestion[]> = {
       q: "Hva kan en håndholdt røntgenanalysator (XRF) ikke måle godt?",
       options: ["Kobber", "Karbon", "Nikkel"],
       correct: 1,
-      why: "Røntgen ser tunge grunnstoffer. Lette grunnstoffer som karbon må måles med gnistspektrometer.",
+      why: "Røntgen ser tunge grunnstoffer. Lette grunnstoffer som karbon må måles med et spektrometer.",
     },
     {
-      q: "Hvorfor lønner det seg å måle analysen?",
+      q: "Hvorfor lønner det seg å analysere stålet?",
       options: [
         "Du leverer bare partier du vet holder kravet",
         "Stålet blir sterkere av å bli målt",
@@ -173,7 +173,7 @@ export const QUIZ: Record<string, QuizQuestion[]> = {
     },
     {
       q: "Hvorfor tilsettes kalk?",
-      options: ["For å gi en basisk slagg", "For å få mer karbon", "For å farge stålet"],
+      options: ["For å gi en basisk (kalkrik) slagg", "For å få mer karbon", "For å farge stålet"],
       correct: 0,
       why: "Basisk slagg skummer bedre og tar opp fosfor.",
     },
@@ -181,9 +181,9 @@ export const QUIZ: Record<string, QuizQuestion[]> = {
   fosfor: [
     {
       q: "Når går avfosforeringen best?",
-      options: ["Ved høy temperatur", "Ved lav temperatur med nok FeO og kalk", "Uten slagg"],
+      options: ["Ved høy temperatur", "Ved lav temperatur, med nok oksygen og kalk i slaggen", "Uten slagg"],
       correct: 1,
-      why: "Fosfor går til slaggen når det er kaldt nok, oksiderende og basisk.",
+      why: "Fosfor går over i slaggen når stålet ikke er for varmt, og slaggen har nok oksygen (jernoksid) og kalk.",
     },
     {
       q: "Hvorfor slagges det av før temperaturen kjøres opp?",

@@ -36,7 +36,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
     title: "Karbon: lett å legge til, vanskelig å ta ut",
     paragraphs: [
       "Karbon er det viktigste legeringselementet i stål: mer karbon gir hardere og sterkere stål, men dårligere sveisbarhet og formbarhet.",
-      "Karbon kan alltid legges til med karburiseringsmiddel. Men i en digel- eller induksjonsovn finnes det ingen måte å fjerne det på – det som er i skrapet, blir i stålet.",
+      "Karbon kan alltid legges til med karburiseringsmiddel. Men i en induksjonsovn finnes det ingen måte å fjerne det på – det som er i skrapet, blir i stålet.",
       "Råjern har rundt 4 % karbon. Det er gull for å tynne ut sporelementer, men det må ha en ovn med oksygen for å brenne karbonet ned igjen.",
     ],
   },
@@ -52,7 +52,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
     id: "analyse",
     title: "Analyse: vet du hva du selger?",
     paragraphs: [
-      "Uten laboratorium gjetter du analysen ut fra resepten. Skrap varierer, og et dårlig parti merkes først når kunden reklamerer.",
+      "Uten analyseutstyr gjetter du analysen ut fra resepten. Skrap varierer, og et dårlig parti merkes først når kunden reklamerer.",
       "En håndholdt røntgenanalysator (XRF) måler tunge elementer som kobber, nikkel og krom, men ikke lette elementer som karbon. Fosfor kan den heller ikke stole på i stål.",
       "Et gnistspektrometer (OES) måler alt, også karbon og fosfor. Da leverer du bare partier du vet holder kravet, og resten kan selges som enklere kvalitet.",
     ],
@@ -112,7 +112,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
     id: "fosfor",
     title: "Fosfor og avslagging",
     paragraphs: [
-      "Fosfor gjør stålet sprøtt. Det kan bare fjernes i en oksiderende, basisk slagg – det vil si i lysbueovnen, med nok FeO og kalk.",
+      "Fosfor gjør stålet sprøtt. Det kan bare fjernes i en oksiderende, basisk slagg – det vil si i lysbueovnen, med nok FeO (jernoksid) og kalk i slaggen.",
       "Avfosforeringen går best ved lav temperatur. Kjøres temperaturen opp mens fosforrik slagg ligger i ovnen, går fosforet tilbake i stålet.",
       "Derfor slagges det av før temperaturen kjøres opp mot tapping. Ta styringen på en charge for å prøve selv.",
     ],

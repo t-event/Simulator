@@ -98,7 +98,7 @@ export const RESEARCH: Research[] = [
     name: "Energistyring",
     stage: 0,
     cost: 10,
-    description: "Lokk på digelen, tettere ovn og riktig forvarming av skrapet.",
+    description: "Lokk på ovnen, bedre isolasjon, tørt skrap – og faste rutiner for strømavtalene.",
     effect: "5 % mindre energi per tonn. Strømavtaler kan fornyes automatisk",
   },
   {

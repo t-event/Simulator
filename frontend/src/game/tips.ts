@@ -37,7 +37,7 @@ const TIPS: Tip[] = [
   {
     id: "tips-kreditt",
     title: "Kassa er tom",
-    text: "Du bruker nå kassekreditten. Den er en buffer, ikke penger du har: blir du stående over kredittgrensen i en uke, går verket konkurs. Lever kontrakter, selg på spot, vent med innkjøp – eller ta opp et lån i banken under Forskning.",
+    text: "Du bruker nå kassekreditten. Den er en buffer, ikke penger du har: blir du stående over kredittgrensen i en uke, går verket konkurs. Lever kontrakter, selg på spot, vent med innkjøp – eller ta opp et lån under Forskning → Bank.",
     when: (g) => g.cash < 0,
   },
 ];

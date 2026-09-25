@@ -184,7 +184,7 @@ export function Market({ g, stats, act, openTab }: Props & { openTab?: string })
                     <p className="g-muted">
                       Brukt i dag: {fmtKr(g.today.autoBuyKr ?? 0)}.{" "}
                       {g.settings.autoBuyCredit
-                        ? "Kassa kan gå i minus – husk at en uke under kredittgrensen er konkurs."
+                        ? "Kassa kan gå i minus – husk at en uke over kredittgrensen er konkurs."
                         : "Uten kreditt lar planleggeren lønn og faste kostnader for ett døgn ligge igjen i kassa."}
                     </p>
                   </>

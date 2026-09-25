@@ -74,7 +74,7 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
       view: "folk",
     });
   if (g.furnaces.some((f) => f.wear > 0.8 && !f.relineRequested))
-    out.push({ text: "Foringen er nesten slitt gjennom. Bytt den under Vedlikehold før den brenner gjennom." });
+    out.push({ text: "Foringen er nesten slitt gjennom. Trykk «Bytt foring» her på Verket før den brenner gjennom." });
   // Uten ordreplanlegging bytter ikke ovnen kvalitet selv (B-054)
   const first = currentOrder(g);
   if (

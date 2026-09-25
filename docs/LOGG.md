@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 32 – 2026-09-25: tekstene i spillet
+
+**Brukeren ba om:** Endre quiz-spørsmålet om analyse, og se over tekst i spillet så den gir mening.
+
+**Gjort (B-059):** Gikk gjennom quiz, fagbok, forskning, beskrivelser, hendelser, tips, meldinger og skjermtekst.
+Rettet utdaterte henvisninger (digel, «Foreslå billigste resept», lån under Forskning), dager/døgn, fagord uten
+forklaring og desimalpunktum. Innleid planlegger virker uten automatikk-forskning.
+
+**Testet:** tsc, lint, balanse (8 / 26 / 66 / 159).
+
+---
+
 ## Økt 31 – 2026-09-25: avbryte ordrer, flere forespørsler og reseptguide
 
 **Brukeren ba om:** Avbryte ordrer med straff; flere ordrer å lage i garasje og verksted; gjennomgang av hvordan
