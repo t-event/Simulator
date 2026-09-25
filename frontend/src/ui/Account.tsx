@@ -27,6 +27,7 @@ import {
   flush,
   keepLocal,
   linkOnLogin,
+  markReconciled,
   onCloudStatus,
   resetCloud,
   type LinkDecision,
@@ -196,6 +197,7 @@ export function AccountCard({ api, onDone }: { api: GameApi; onDone?: () => void
               void run(async () => {
                 if (api.game) api.adopt(choose.cloud);
                 else api.stash(choose.cloud);
+                markReconciled();
                 setChoose(null);
                 setInfo(`Hentet spillet fra nettet (dag ${dayOf(choose.cloud)}).`);
                 onDone?.();

@@ -16,9 +16,14 @@ import { cloudConfigured } from "../net/config";
 import { daysLeft, refreshSeason, seasonStatus } from "../net/season";
 import { useSeasonStatus, useWorldEvents } from "./useSeason";
 import { getSession, onSessionChange } from "../net/supabase";
+import { isReconciled, onCloudStatus } from "../net/sync";
 
 function useSession() {
   return useSyncExternalStore(onSessionChange, getSession, getSession);
+}
+/** Er spillet her avklart mot kontoen (B-138)? Til da kobles det ikke til sesongen og spørres ikke om noe */
+function useReconciled() {
+  return useSyncExternalStore(onCloudStatus, isReconciled, isReconciled);
 }
 
 /** Usynlig: henter status ved start og hvert tiende minutt, og legger hendelsene inn i spillet */
@@ -26,6 +31,7 @@ export function SeasonSync({ api }: { api: GameApi }) {
   const session = useSession();
   const status = useSeasonStatus();
   const events = useWorldEvents();
+  const reconciled = useReconciled();
   const g = api.game;
 
   useEffect(() => {
@@ -48,14 +54,15 @@ export function SeasonSync({ api }: { api: GameApi }) {
   // Et ferskt spill kobles rett til sesongen
   const cur = status?.current ?? null;
   useEffect(() => {
-    if (!g || !session || !cur) return;
+    // Bare et spill som er avklart mot kontoen, kan kobles til sesongen (B-138)
+    if (!g || !session || !cur || !reconciled) return;
     if (g.season === null && canJoinDirectly(g) && (g.owner === null || g.owner === session.user.id))
       api.act((gg) => {
         joinSeason(gg, cur.id, !!status?.played_previous);
         unlock(gg, "sesong");
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [g, session, cur?.id]);
+  }, [g, session, cur?.id, reconciled, g?.owner]);
 
   return null;
 }
@@ -63,6 +70,7 @@ export function SeasonSync({ api }: { api: GameApi }) {
 /** Spør når en sesong pågår som spillet ikke er med i (og spillet ikke er helt nytt) */
 export function SeasonPrompt({ api, g, onOpenSettings }: { api: GameApi; g: GameState; onOpenSettings: () => void }) {
   const session = useSession();
+  const reconciled = useReconciled();
   const status = useSeasonStatus();
   const [confirm, setConfirm] = useState(false);
   const cur = status?.current ?? null;
@@ -100,7 +108,7 @@ export function SeasonPrompt({ api, g, onOpenSettings }: { api: GameApi; g: Game
       </div>
     );
   }
-  if (g.owner && g.owner !== session.user.id) return null;
+  if (!reconciled || (g.owner && g.owner !== session.user.id)) return null;
   if (g.season === cur.id || g.seasonPromptSeen === cur.id || canJoinDirectly(g)) return null;
   const bonus = !!status?.played_previous;
   return (
@@ -156,6 +164,7 @@ export function SeasonPrompt({ api, g, onOpenSettings }: { api: GameApi; g: Game
  */
 export function SeasonJoin({ api, g, onOpenSettings }: { api: GameApi; g: GameState; onOpenSettings?: () => void }) {
   const session = useSession();
+  const reconciled = useReconciled();
   const status = useSeasonStatus();
   const [confirm, setConfirm] = useState(false);
   const cur = status?.current ?? null;
@@ -171,7 +180,7 @@ export function SeasonJoin({ api, g, onOpenSettings }: { api: GameApi; g: GameSt
         )}
       </div>
     );
-  if (g.owner && g.owner !== session.user.id) return null;
+  if (!reconciled || (g.owner && g.owner !== session.user.id)) return null;
   if (g.season === cur.id) return <p className="g-muted g-small-text">Spillet ditt er med i {cur.name}.</p>;
   const bonus = !!status?.played_previous;
   return (
