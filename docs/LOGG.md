@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 37 – 2026-09-25: tall på Ovn-knappen
+
+**Brukeren ba om:** Varsel på Ovn-knappen i Oversikt når man kan kjøpe oppgraderinger (B-061 dekket bare Anlegg).
+
+**Gjort (B-065):** Tall på Skrap, Ovn, Støping og Lager i produksjonslinja; et trykk åpner utstyret for stedet.
+
+**Testet:** tsc, lint, Playwright på iPhone-størrelse (tallet på Ovn, trykk åpner Ovn-utstyret, ingen konsollfeil).
+
+**Gjenstår:** spørsmålet om storverket (mer innhold eller lavere vinnergrense).
+
+---
+
 ## Økt 36 – 2026-09-25: fagpoeng når man står fast, og «Flytt inn»
 
 **Brukeren ba om:** En kollega på stålverket syntes det var for vanskelig å få fagpoeng – man må kunne tjene
