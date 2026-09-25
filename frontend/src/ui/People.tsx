@@ -14,6 +14,7 @@ import {
   sendOnCourse,
 } from "../game/actions";
 import { CREW_ROLES, ROLE_IDS, ROLES, STAGES, stageRef } from "../game/data";
+import { auto } from "../game/research";
 import {
   crewCoverage,
   day,
@@ -21,6 +22,10 @@ import {
   isAbsent,
   moraleFactor,
   nightExtra,
+  plannerOrders,
+  potRebuildPerDay,
+  presentWorkers,
+  rollingActive,
   staffing,
   tempsActive,
   tempsCost,
@@ -37,6 +42,65 @@ interface Props {
   g: GameState;
   stats: PlantStats;
   act: GameApi["act"];
+}
+
+/**
+ * Hva støtterollene gjør akkurat nå, så spilleren ser at de virker – eller hvorfor de ikke gjør det (B-070).
+ * Tallene er de samme som motoren regner med.
+ */
+function roleEffect(g: GameState, stats: PlantStats, role: RoleId): string | null {
+  const present = presentWorkers(g).filter((w) => w.role === role).length;
+  const total = g.workers.filter((w) => w.role === role).length;
+  const away = total - present;
+  const awayText = away > 0 ? ` (${away} borte nå)` : "";
+  switch (role) {
+    case "salg": {
+      const extra = Math.min(3, present) * 0.8 * 0.6;
+      const text = `${present} på jobb${awayText}: ca. ${fmtNum(extra, 1)} flere forespørsler per døgn og ${Math.min(4, present) * 2} % bedre pris.`;
+      return present > 4 ? `${text} Flere enn fire selgere gir ikke mer.` : text;
+    }
+    case "murer": {
+      if (!stats.furnace.arc)
+        return "Murerne murer opp reservepotter til lysbueovnen. Før du har lysbueovn, har de ingenting å gjøre.";
+      const perDay = potRebuildPerDay(g);
+      const pots = g.furnaces.filter((f) => f.spareProgress < 1).length;
+      if (!pots) return `Alle reservepottene er klare${awayText}. Murerne begynner på neste potte etter et pottebytte.`;
+      return perDay > 0
+        ? `${present} på jobb (07–15)${awayText}: ${pots === 1 ? "reservepotta" : `${pots} reservepotter`} blir ferdig på ca. ${fmtNum((1 - Math.min(...g.furnaces.map((f) => f.spareProgress))) / perDay, 1)} døgn.`
+        : `Ingen murere på jobb${awayText} – reservepotta blir ikke murt opp.`;
+    }
+    case "vedlikehold": {
+      const cover = Math.min(1, present / Math.max(1, g.stage));
+      const auto_ = auto(g, "autoReline");
+      return `${present} av ${Math.max(1, g.stage)} som trengs på dette nivået${awayText}: ${Math.round(35 * cover)} % færre uhell og ${Math.round(30 * cover)} % raskere reparasjoner. ${
+        auto_
+          ? "Bytter foringen automatisk."
+          : "Bytter ikke foringen automatisk – slå det på under Verket → Anlegg → Vedlikehold."
+      }`;
+    }
+    case "planlegger": {
+      if (!present && !plannerOrders(g)) return "Borte nå – ingen kjøper skrap for deg.";
+      const buys = auto(g, "autoBuy");
+      const sorts = auto(g, "plannerSorts");
+      return `${buys ? "Kjøper skrap etter resepten." : "Kjøper ikke skrap ennå – forsk fram «Innkjøpsplan» og slå på innkjøp under Marked."} ${
+        sorts ? "Sorterer ordrekøen etter frist." : "Sorterer ikke ordrekøen – det krever «Ordreplanlegging»."
+      }${awayText}`;
+    }
+    case "klasser":
+      return present
+        ? "På jobb: chargene får blandingen resepten sier, dårlige skrappartier sendes i retur, og resepten legges om når kvaliteten skifter."
+        : "Borte nå – chargene blir omtrentlige, og resepten legges ikke om.";
+    case "lab":
+      return stats.furnace.arc && g.owned.includes("oseovn")
+        ? `Kjører øseovnen og holder karbonet presist${awayText}.`
+        : "Trengs først når du har lysbueovn og øseovn. Til da fyller de bare plasser som avløsere ikke kan ta.";
+    case "valse":
+      return rollingActive(g) ? `Kjører valseverket${awayText}.` : "Trengs først når valseverket går.";
+    case "allround":
+      return `${present} på jobb${awayText}: fyller plasser som mangler på skiftene (ovn, støping, kran, øseovn, valseverk).`;
+    default:
+      return null;
+  }
 }
 
 function Stars({ skill }: { skill: number }) {
@@ -441,6 +505,7 @@ export function People({ g, stats, act }: Props) {
                   <summary>
                     {ROLES[r].plural} ({counts[r]})
                   </summary>
+                  {roleEffect(g, stats, r) && <p className="g-muted g-small-text">{roleEffect(g, stats, r)}</p>}
                   <ul className="g-workers">
                     {g.workers
                       .filter((w) => w.role === r)

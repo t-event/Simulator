@@ -2,8 +2,9 @@ import { RecipeGuideCoach } from "./RecipeGuide";
 import { lazy, Suspense, useEffect, useState } from "react";
 import "./game.css";
 import { STAGES, WIN_CASH } from "../game/data";
+import { InstallTip } from "./InstallTip";
 import { completeManual, unlock } from "../game/engine";
-import { computePlantStats, day, energyPrice, idleOutsideHours } from "../game/plant";
+import { computePlantStats, day, energyPrice, idleOutsideHours, staffing } from "../game/plant";
 import { useGame, type GameApi } from "../game/useGame";
 import { resolveDecision } from "../game/decisions";
 import { maxSpeed, researchForSpeed, researchOptions } from "../game/research";
@@ -16,7 +17,8 @@ import { Handbook } from "./Handbook";
 import { Market } from "./Market";
 import { Overview } from "./Overview";
 import { People } from "./People";
-import { BackupInput, ResearchPage } from "./ResearchPage";
+import { ResearchPage } from "./ResearchPage";
+import { BackupInput, SettingsSheet } from "./Settings";
 import { Sales } from "./Sales";
 import { VIEWS, viewUnlocked, type View } from "./views";
 
@@ -59,6 +61,7 @@ function Intro({
           <li>Lever riktig kvalitet i tide. Reklamasjoner og forsinkelser koster omdømme.</li>
           <li>Med lysbueovn kan du ta styringen og kjøre chargene selv i kontrollrommet.</li>
         </ul>
+        <InstallTip />
         <div className="g-row g-intro-actions">
           {hasSave && (
             <button className="g-primary" onClick={onContinue}>
@@ -208,7 +211,17 @@ function Coach({ g, act }: { g: GameState; act: GameApi["act"] }) {
   );
 }
 
-function TopBar({ g, api, onBook }: { g: GameState; api: GameApi; onBook: () => void }) {
+function TopBar({
+  g,
+  api,
+  onBook,
+  onSettings,
+}: {
+  g: GameState;
+  api: GameApi;
+  onBook: () => void;
+  onSettings: () => void;
+}) {
   const stats = computePlantStats(g);
   const unread = g.knowledge.filter((k) => !g.readChapters.includes(k)).length;
   return (
@@ -256,6 +269,9 @@ function TopBar({ g, api, onBook }: { g: GameState; api: GameApi; onBook: () => 
           <span className="hide-narrow"> Fagbok</span>
           {unread > 0 && <span className="g-badge">{unread}</span>}
         </button>
+        <button className="g-book" onClick={onSettings} aria-label="Innstillinger">
+          <span aria-hidden="true">⚙️</span>
+        </button>
       </div>
       <div className="g-top-row g-kpis">
         <span className={g.cash < 0 ? "tone-critical" : ""}>
@@ -283,6 +299,7 @@ export function GameApp() {
   const [view, setView] = useState<View>("verket");
   const [subTab, setSubTab] = useState<{ tab?: string; n: number }>({ n: 0 });
   const [bookOpen, setBookOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [bookChapter, setBookChapter] = useState<string | null>(null);
   const [winSeen, setWinSeen] = useState(false);
 
@@ -317,18 +334,31 @@ export function GameApp() {
   };
 
   const modalOpen =
-    bookOpen || !!g.pendingManual || !!g.pendingDecision || g.celebrate !== null || g.gameOver || (g.won && !winSeen);
+    bookOpen ||
+    settingsOpen ||
+    !!g.pendingManual ||
+    !!g.pendingDecision ||
+    g.celebrate !== null ||
+    g.gameOver ||
+    (g.won && !winSeen);
 
   return (
     <div className={`g-app${g.tutorial !== null || g.recipeGuide ? " has-coach" : ""}`}>
       <div className="g-behind" inert={modalOpen}>
         <div className="g-head">
-          <TopBar g={g} api={api} onBook={() => openBook()} />
+          <TopBar g={g} api={api} onBook={() => openBook()} onSettings={() => setSettingsOpen(true)} />
 
           <nav className="g-nav" aria-label="Hovedmeny">
             {VIEWS.filter((v) => viewUnlocked(g, v.id)).map((v) => {
               const isNew = !g.seenViews.includes(v.id);
               const hint = g.tutorial !== null && TUTORIAL[g.tutorial]?.view === v.id && shown !== v.id;
+              // Folk: «!» når verket står eller går færre skift enn det kunne, fordi folk mangler (B-071)
+              const folkAlert =
+                v.id === "folk" &&
+                g.stage >= 1 &&
+                (stats.shifts === 0 ||
+                  stats.shifts < staffing(g, true).shifts ||
+                  (g.stage >= 2 && stats.shifts < 3 && g.workers.length < STAGES[g.stage].staffCap));
               const badge =
                 v.id === "salg"
                   ? g.contracts.filter((c) => c.status === "tilbud").length
@@ -345,6 +375,10 @@ export function GameApp() {
                   {v.label}
                   {isNew ? (
                     <span className="g-badge g-badge-new">Ny</span>
+                  ) : folkAlert ? (
+                    <span className="g-badge" aria-label="Mangler folk">
+                      !
+                    </span>
                   ) : (
                     badge > 0 && <span className="g-badge">{badge}</span>
                   )}
@@ -369,16 +403,7 @@ export function GameApp() {
             <Sales key={subTab.tab ? `salg-${subTab.n}` : "salg"} g={g} stats={stats} act={act} openTab={subTab.tab} />
           )}
           {shown === "folk" && <People g={g} stats={stats} act={act} />}
-          {shown === "forskning" && (
-            <ResearchPage
-              g={g}
-              stats={stats}
-              act={act}
-              onQuit={api.quit}
-              openBook={openBook}
-              onLoadBackup={api.loadBackup}
-            />
-          )}
+          {shown === "forskning" && <ResearchPage g={g} act={act} openBook={openBook} />}
         </main>
       </div>
 
@@ -394,6 +419,23 @@ export function GameApp() {
       </div>
 
       {bookOpen && <Handbook g={g} act={act} initial={bookChapter} onClose={() => setBookOpen(false)} />}
+      {settingsOpen && (
+        <SettingsSheet
+          g={g}
+          stats={stats}
+          act={act}
+          onQuit={() => {
+            setSettingsOpen(false);
+            api.quit();
+          }}
+          onLoadBackup={(text) => {
+            const ok = api.loadBackup(text);
+            if (ok) setSettingsOpen(false);
+            return ok;
+          }}
+          onClose={() => setSettingsOpen(false)}
+        />
+      )}
 
       {g.pendingDecision && !g.pendingManual && (
         <DecisionCard

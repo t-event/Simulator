@@ -897,3 +897,40 @@ Beslutning: når et hendelseskort eller tips løses og farten var 3× eller 10×
 Første gang kommer engangstipset «Hvorfor gikk farten ned til 1×?»: spillet setter farten ned når det skjer noe du
 må ta stilling til, så du ikke raser videre på 10× mens verket har problemer; trykk 3× eller 10× igjen når alt er i
 orden. Engangstipsene husker nå farten før de dukket opp (før sto det alltid 1×), så også de teller.
+
+## B-070 Sjekk av alle ansatte, og Folk viser hva støtterollene gjør (2026-09-25)
+Status: gjelder
+Brukeren spurte om murere, selgere og de andre ansatte virker som de skal. Målt med lagrede spill (med og uten
+rollen, fravær slått av):
+- Selgere: 3 selgere ga 50 % flere forespørsler (2,8 → 4,1 per døgn) og ca. 4 % bedre pris. Virker.
+- Murere: to murere per potte gir en ferdig reservepotte på ca. fire døgn, fire murere dobbelt så fort. Virker.
+- Reparatører: full dekning (én per nivå) ga 36 % færre elektrodebrudd, færre overslag og 22 % raskere
+  reparasjon. Virker.
+- Planlegger: uten planlegger stopper innkjøpet (280 mot 683 t på fem døgn). Virker.
+- Skrapklasser: færre bom på analysen; effekten er liten med en trygg resept og størst nær grensene.
+- Øseovnsoperatør, støper, kranfører, avløser: bemanningen regnes riktig; avløsere fyller hull i rolle-rekkefølge.
+Ingen feil i rollene, men Folk viste ikke hva de gjorde. Folk → Ansatte har nå en linje under hver støtterolle med
+effekten akkurat nå (f.eks. «3 på jobb: ca. 1,4 flere forespørsler per døgn og 6 % bedre pris», «Før du har
+lysbueovn, har de ingenting å gjøre»).
+Funnet under testen: testspilleren (frø 7) gikk konkurs fordi den sluttet å ta kontrakter for å bytte støping
+(«Lever først», B-062) uten å ha råd til byttet. Nå gjør den det bare når pengene er der. `--dump` henger ikke
+lenger ved konkurs.
+
+## B-071 Fagpoeng ukentlig, «!» på Folk, svarfrist i vanlig tempo og hjemskjerm (2026-09-25)
+Status: gjelder (justerer B-064)
+- Forskningssamarbeidet kan brukes én gang per uke (`FP_DEAL_DAYS`), ikke per døgn – man fikk kjøpt ekstreme
+  mengder. Pakkene er større: verksted 10 FP/30 000 kr, støperi 16/120 000, stålverk 30/500 000, storverk
+  60/3 mill. (`FP_DEAL`).
+- Folk-fanen får «!» når verket står, går færre skift enn det kunne på grunn av fravær, eller (fra støperiet) går
+  under tre skift og har ledige plasser.
+- Svarfristen på forespørsler og rammeavtaler går i vanlig tempo (1×) også på 3× og 10×, så man rekker å svare.
+- Startskjermen tipser om å legge spillet til på hjemskjermen (fullskjerm). Android/Chrome får en knapp når
+  nettleseren tilbyr det; ellers vises en oppskrift for iPhone (Del → Legg til på Hjem-skjerm) og Android (⋮ →
+  Legg til på startskjermen), og at appen på iPhone har egen lagring.
+
+## B-072 Innstillinger bak ⚙️, banken under Verket → Økonomi (2026-09-25)
+Status: gjelder
+Brukeren ville ikke ha innstillinger og bank under Forskning. Banken står nå under Verket → Økonomi (der pengene
+er), og innstillingene (nattspoling, valsing, sikkerhetskopi, nytt spill) åpnes med ⚙️ øverst ved fagboka.
+Forskning-fanen har bare forskning. Tekster som viste til «Forskning → Bank» er rettet. Topplinja strammes inn på
+smale telefoner, så farten, fagboka og ⚙️ får plass på iPhone SE.

@@ -197,7 +197,7 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
     if (o.owned || o.locked || dailyCost <= 0 || o.price < dailyCost) continue;
     const left = (g.cash - o.price) / dailyCost;
     if (left >= 2) continue;
-    const thin = `Etter kjøpet har du penger til drift i ${left < 1 ? "under ett døgn" : `bare ca. ${Math.floor(left)} døgn`}. Uten penger får du ikke kjøpt skrap, og verket stopper. Spar litt mer, eller ta opp lån under Forskning → Bank.`;
+    const thin = `Etter kjøpet har du penger til drift i ${left < 1 ? "under ett døgn" : `bare ca. ${Math.floor(left)} døgn`}. Uten penger får du ikke kjøpt skrap, og verket stopper. Spar litt mer, eller ta opp lån under Verket → Økonomi.`;
     o.warning = o.warning ? `${o.warning} ${thin}` : thin;
   }
   return out;
@@ -302,15 +302,18 @@ export function doResearch(g: GameState, id: string): PurchaseResult {
 }
 
 /**
- * Forskningssamarbeid (B-064): kjøp fagpoeng for penger, én gang per døgn. Gir en vei videre når
+ * Forskningssamarbeid (B-064, B-071): kjøp fagpoeng for penger, én gang per uke. Gir en vei videre når
  * forskningen står fast og pengene hoper seg opp. Omtrent et døgns fagpoeng for en god del av et døgns overskudd.
  */
+/** Samarbeidet kan brukes én gang per uke (B-071; var én gang per døgn i B-064) */
+export const FP_DEAL_DAYS = 7;
+
 export const FP_DEAL: { fp: number; price: number }[] = [
   { fp: 0, price: 0 },
-  { fp: 5, price: 15_000 },
-  { fp: 8, price: 60_000 },
-  { fp: 15, price: 250_000 },
-  { fp: 30, price: 1_500_000 },
+  { fp: 10, price: 30_000 },
+  { fp: 16, price: 120_000 },
+  { fp: 30, price: 500_000 },
+  { fp: 60, price: 3_000_000 },
 ];
 
 export function fpDeal(g: GameState): { fp: number; price: number; reason: string | null } {
@@ -318,8 +321,8 @@ export function fpDeal(g: GameState): { fp: number; price: number; reason: strin
   const reason =
     deal.fp <= 0
       ? `Kommer når du har flyttet til ${stageRef(1, g.stage)}`
-      : g.fpDealDay === day(g)
-        ? "Du har brukt samarbeidet i dag – nytt tilbud i morgen"
+      : g.fpDealDay >= 0 && day(g) - g.fpDealDay < FP_DEAL_DAYS
+        ? `Brukt denne uka – nytt tilbud dag ${g.fpDealDay + FP_DEAL_DAYS}`
         : g.cash < deal.price
           ? "For lite penger"
           : null;
