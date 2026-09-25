@@ -1,15 +1,31 @@
 /* Stålverket – spillets grensesnitt. Mobil først, bredere oppsett fra 760 px. */
 
+/*
+ * Mobil: appen er en fast ramme på hele skjermen, og bare innholdet (.g-main) scroller (B-137). Da scroller aldri
+ * selve siden, Safari endrer ikke adresselinja, og toppfeltet og menyen nederst kan ikke hoppe når den krymper.
+ */
 .g-app {
   --nav-h: 58px;
-  min-height: 100vh;
-  padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 8px);
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.g-behind {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ---------------------------------------------------------------- Toppfelt */
 .g-head {
-  position: sticky;
-  top: 0;
+  display: contents;
+}
+
+.g-head > .g-top {
+  flex: none;
   z-index: 20;
 }
 
@@ -121,10 +137,8 @@
 
 /* ---------------------------------------------------------------- Navigasjon */
 .g-nav {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  order: 3;
+  flex: none;
   z-index: 20;
   display: flex;
   background: #151c27;
@@ -164,6 +178,13 @@
 
 /* ---------------------------------------------------------------- Innhold */
 .g-main {
+  order: 2;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: 10px max(10px, env(safe-area-inset-right)) 10px max(10px, env(safe-area-inset-left));
   max-width: 1280px;
   margin: 0 auto;
@@ -1143,8 +1164,28 @@ button {
 
 /* ---------------------------------------------------------------- Bredere skjermer */
 @media (min-width: 760px) {
+  /* Bred skjerm: vanlig side som scroller, med toppfeltet og menyen klistret øverst */
   .g-app {
+    position: static;
+    display: block;
+    min-height: 100vh;
     padding-bottom: 16px;
+  }
+
+  .g-behind {
+    display: block;
+  }
+
+  .g-head {
+    display: block;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+
+  .g-main {
+    overflow: visible;
+    min-height: 0;
   }
 
   .g-nav {

@@ -1799,3 +1799,19 @@ Beslutning:
 - Hjemskjerm-tipset viser alltid oppskriften for både iPhone og Android (Chrome, Samsung Internet, Firefox), med den
   som passer telefonen først, så man også kan hjelpe andre. Chrome-knappen «Legg til på hjemskjermen» vises i tillegg
   når nettleseren tilbyr den.
+
+## B-137 Mobil: fast ramme, bare innholdet scroller (2026-09-25)
+Status: gjelder
+Brukeren: i Safari hopper toppfeltet og menyen nederst når man scroller ned (skjermbilde: toppfeltet halvt ute av
+skjermen, menyen over adresselinja med innhold under).
+
+Årsak: Safari krymper og utvider adresselinja når selve siden scroller, og flytter da faste (`fixed`) og klistrede
+(`sticky`) elementer feil, særlig med den flytende adresselinja på nyere iPhone.
+
+Beslutning:
+- Under 760 px er `.g-app` en fast ramme (`position: fixed; inset: 0`) med flex i kolonne: toppfeltet øverst, så
+  `.g-main` som eneste del som scroller (`overflow-y: auto`, `overscroll-behavior: contain`), og menyen nederst som
+  vanlig flex-element (ikke `fixed`). Selve siden scroller aldri, så Safari endrer ikke adresselinja.
+- `.g-head` er `display: contents` på mobil, så toppfeltet og menyen kan ligge på hver sin side av innholdet.
+- Fra 760 px er alt som før: siden scroller, toppfeltet og menyen er klistret øverst.
+- Ved bytte av fane settes både vinduet og `.g-main` til toppen. `scrollIntoView` virker i `.g-main` som før.

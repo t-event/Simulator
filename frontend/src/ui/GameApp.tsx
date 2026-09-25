@@ -406,8 +406,10 @@ export function GameApp() {
   const seasonStatus = useSeasonStatus();
   const seasonActive = !!seasonStatus?.current && g?.season === seasonStatus.current.id;
 
+  // Mobil scroller i .g-main (B-137), bred skjerm i vinduet: begge settes til toppen ved bytte av fane
   useEffect(() => {
     window.scrollTo({ top: 0 });
+    document.querySelector(".g-main")?.scrollTo({ top: 0 });
   }, [view]);
 
   // Lagring på nett følger den lokale lagringen; når appen legges bort, sendes det som venter med én gang (B-125)

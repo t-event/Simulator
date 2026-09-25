@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 83 – 2026-09-25: toppfelt og meny hopper ikke i Safari
+
+**Brukeren ba om:** I Safari hopper toppfeltet og menyen når man scroller ned.
+
+**Gjort:** B-137. Fast ramme på mobil der bare innholdet scroller.
+
+**Testet:** tsc, lint, `npm test`, build. Playwright på iPhone 13, iPhone SE, Pixel 7 og desktop: etter scrolling
+står toppfeltet på 0 og menyen helt nederst, siden selv scroller ikke (bare `.g-main`), bytte av fane går til
+toppen, veiledningen står over menyen, innstillinger åpnes. På desktop scroller siden som før med klistret toppfelt.
+Fingersveip kan ikke simuleres i Chromium uten skjerm (virker heller ikke på en minimal testside), så selve
+sveipet må brukeren sjekke på iPhone.
+
+**Gjenstår:** Brukeren sjekker i Safari på iPhone. Fase 4 og 5.
+
+---
+
 ## Økt 82 – 2026-09-25: alltid veiledning, Android-oppskrift
 
 **Brukeren ba om:** Instruksjoner for Android under «Spill i fullskjerm», og at «Start uten veiledning» fjernes.
