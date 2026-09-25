@@ -119,3 +119,5 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - Tall som sammenlignes med et krav (omdømme, penger, fagpoeng) skal vises rundet **ned**
   (`fmtRep`, `Math.floor`), ellers ser et krav oppfylt ut når det ikke er det.
 - CI (`pages.yml`) kjører bare ved push til `main`, ikke på PR-er. Kjør sjekkene lokalt før PR.
+- Se på **exit-koden** til `balance.ts`, ikke bare median-linjene: sjekken av kontrollrommet står helt nederst
+  og kan være «AVVIK» selv om nivådagene er OK (publiseringen av #39 feilet slik).

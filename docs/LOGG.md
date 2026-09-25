@@ -15,6 +15,9 @@ forklaring og desimalpunktum. Innleid planlegger virker uten automatikk-forsknin
 
 **Testet:** tsc, lint, balanse (8 / 26 / 66 / 159).
 
+**Feil i publiseringen av #39:** kontrollrom-sjekken i `balance.ts` sammenlignet farten etterpå med farten
+før et hendelseskort satte 1×. Rettet til å sammenligne med farten da kontrollrommet åpnet. Lærdom lagt i CLAUDE.md.
+
 ---
 
 ## Økt 31 – 2026-09-25: avbryte ordrer, flere forespørsler og reseptguide
