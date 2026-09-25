@@ -434,6 +434,8 @@ export interface GameState {
   /** Støping som kjøpes av seg selv når ordrene på det gamle produktet er levert (B-102) */
   pendingCastingSwitch: string | null;
   /** Konsernet (B-106) */
+  /** Sist det ble varslet om fullt ferdigvarelager (spillminutt), så varselet ikke gjentas hele tida (B-118) */
+  storeFullLogMin: number;
   konsern: {
     unlocked: boolean;
     plants: SisterPlant[];
@@ -441,6 +443,8 @@ export interface GameState {
     nextId: number;
     /** Salgsdirektøren som signerer kontrakter og rammeavtaler selv (B-117); null = ikke ansatt */
     director: SalesDirector | null;
+    /** Antall milepæler for konsernverdien som er nådd (B-119) */
+    milestones: number;
   };
   researched: string[];
   pendingDecision: Decision | null;

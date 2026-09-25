@@ -17,7 +17,7 @@ export const LOG_TOPICS: { id: LogTopic; label: string; hint: string; match: Reg
     label: "Drift og havarier",
     hint: "Ovnen står, gjennombrenning, overslag, brudd, og skrap som sendes i retur",
     match:
-      /HAVARI|[Oo]verslag|[Ee]lektrodebrudd|[Ss]trenggjennombrudd|[Ss]trengen grodde|[Vv]annlekkasje|[Oo]vnen står|radioaktiv|etter et havari|[Ss]krapklasseren avviste|[Ss]trålingsportalen/,
+      /HAVARI|[Oo]verslag|[Ee]lektrodebrudd|[Ss]trenggjennombrudd|[Ss]trengen grodde|[Vv]annlekkasje|[Oo]vnen står|radioaktiv|etter et havari|[Ll]ageret er fullt|[Ss]krapklasseren avviste|[Ss]trålingsportalen/,
   },
   {
     id: "okonomi",

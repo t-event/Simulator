@@ -1435,3 +1435,41 @@ Beslutning:
   ekstra marginen.
 - Testspillerne ansetter ikke direktøren. Den er et valg og påvirker ikke balansen.
 
+## B-118 Varsel når ferdigvarelageret er fullt (2026-09-25)
+Status: gjelder
+Brukeren: når lageret er fullt og ovnene står på grunn av det, bør man få varsel. Før sto det bare et hint på Verket.
+Beslutning:
+- Når støpingen stopper fordi lageret er fullt, kommer et problemvarsel («Drift og havarier») med råd:
+  - Er automatisk salg av: selg på spot under Salg → Lager, slå på automatisk salg, eller bygg ut lageret.
+  - Er automatisk salg på: lageret er fullt av stål som kontraktene venter på. Lever eller avbryt ordrer, eller
+    bygg ut lageret.
+- Varselet kommer når lageret *blir* fullt, og høyst hver 12. time (`storeFullLogMin`), så det ikke gjentas hele tida.
+
+## B-119 Konsernet: neste steg, grunner på knappene, utbygging og milepæler (2026-09-25)
+Status: gjelder (utvider B-106)
+Brukeren: med bare stålverk fikk man ikke kjøpt storverk, felles innkjøp eller salgskontor. Konsernet skulle bli mer
+intuitivt, morsomt og bedre forklart.
+Årsak: knappene ble grå uten forklaring når kassa var for liten (typisk etter noen stålverk). Med seks stålverk var
+konsernet fullt, og da gikk det ikke an å kjøpe storverk i det hele tatt.
+Beslutning:
+- **Forklaring i fire steg** øverst på fanen:
+  1. Kjøp et stålverk.
+  2. Kjøp felles innkjøp og salg.
+  3. Kjøp eller bygg ut til storverk.
+  4. Moderniser verkene.
+- **Hvert kjøp** viser hva det gir per døgn og hvor mange døgn det tar å betale seg. En grå knapp sier hvorfor den er
+  grå: at noe annet må kjøpes først, at konsernet er fullt, eller hvor mye som mangler og omtrent hvor mange døgn det
+  tar å spare opp med dagens overskudd.
+- **«Neste steg»** foreslår kjøpet som har betalt seg raskest regnet fra i dag: tida det tar å spare opp, pluss tida
+  før kjøpet har betalt seg. Da foreslås ikke noe som ligger et halvt år fram i tid. Testspillerne følger forslaget.
+- **Bygg ut stålverk til storverk** for prisforskjellen (900 mill. kr). Moderniseringen starter på nytt. Da blir et
+  fullt konsern med stålverk ikke en blindvei.
+- **Navn på verkene**, i stedet for «Verk nr. 2»: Elveverket, Fjordverket, Dalverket osv. Det er vanlige ord, ikke
+  ekte steder. Gamle lagringer beholder navnene de har.
+- **Milepæler** ved 2, 4, 6 og 8 mrd. i konsernverdi. Hver gir 40 fagpoeng og en god nyhet.
+- **Produksjonsrekord:** et datterverk gir av og til (1,5 % per døgn) dobbelt overskudd det døgnet, med en god
+  nyhet.
+- Nye felt (`konsern.milestones`, `storeFullLogMin`) har standardverdi i `migrate()`.
+- Målt med `--vansker` når testspillerne følger «Neste steg»: flink vinner dag 324–364, nybegynner dag 342–457,
+  ingen konkurs. Det er omtrent som før (B-106).
+

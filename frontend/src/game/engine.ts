@@ -238,7 +238,8 @@ export function newGame(seed = Date.now(), round = 1): GameState {
     winSeen: false,
     courseSeats: null,
     pendingCastingSwitch: null,
-    konsern: { unlocked: false, plants: [], shared: [], nextId: 1, director: null },
+    konsern: { unlocked: false, plants: [], shared: [], nextId: 1, director: null, milestones: 0 },
+    storeFullLogMin: -1e9,
     fpDealDay: -1,
     inboxSeenId: 0,
     researched: [],
@@ -1146,7 +1147,28 @@ function storeHasRoom(g: GameState, stats: PlantStats, t: number): boolean {
   return fits();
 }
 
+/**
+ * Varsler om fullt ferdigvarelager, med råd (B-118). Varselet kommer når lageret blir fullt (ikke hvert tidssteg),
+ * og høyst hver 12. time.
+ */
+const STORE_FULL = "Ferdigvarelageret er fullt";
+function storeFull(g: GameState, wasFull: boolean): void {
+  g.castWait = STORE_FULL;
+  if (wasFull || g.minute - (g.storeFullLogMin ?? -1e9) < 12 * 60) return;
+  g.storeFullLogMin = g.minute;
+  log(
+    g,
+    `${STORE_FULL}: støpingen står, og ovnene stopper når øsene er fulle. ${
+      auto(g, "autoSpot")
+        ? "Automatisk salg er på, men lageret er fullt av stål som kontraktene venter på. Lever eller avbryt ordrer, eller bygg ut lageret."
+        : "Selg på spot under Salg → Lager, slå på automatisk salg der, eller bygg ut lageret."
+    }`,
+    "bad",
+  );
+}
+
 function updateCasting(g: GameState, stats: PlantStats, dt: number): void {
+  const wasFull = g.castWait === STORE_FULL;
   g.castWait = null;
   if (!g.castQueue.length) return;
   if (g.minute < g.castDownUntilMin) {
@@ -1156,7 +1178,7 @@ function updateCasting(g: GameState, stats: PlantStats, dt: number): void {
   // Er det ikke plass til øsa som støpes, venter støpingen – uten at framdriften samler seg opp, ellers ville
   // flere øser blitt støpt på én gang når det ble plass (B-113)
   if (!storeHasRoom(g, stats, g.castQueue[0].t)) {
-    g.castWait = "Ferdigvarelageret er fullt";
+    storeFull(g, wasFull);
     return;
   }
   if (g.castProgressT <= 1e-9 && !pickNextLadle(g)) {
@@ -1168,7 +1190,7 @@ function updateCasting(g: GameState, stats: PlantStats, dt: number): void {
     // Lageret kan fylles midt i et langt tidssteg (10×): ikke støp mer enn det er plass til (B-110)
     if (!storeHasRoom(g, stats, g.castQueue[0].t)) {
       g.castProgressT = g.castQueue[0].t;
-      g.castWait = "Ferdigvarelageret er fullt";
+      storeFull(g, wasFull);
       break;
     }
     const batch = g.castQueue.shift()!;

@@ -10,7 +10,12 @@ import { logTopic, showToast, unseenCount } from "./inbox";
 import { KNOWLEDGE } from "./knowledge";
 import {
   buySister,
+  checkKonsernMilestones,
   checkKonsernUnlock,
+  konsernAdvice,
+  konsernOptions,
+  SISTER_NAMES,
+  upgradeSister,
   DIRECTOR_HIRE,
   DIRECTOR_PER_DAY,
   directorHour,
@@ -113,6 +118,35 @@ test("Salgsdirektøren: meget dyr, signerer bare trygge forespørsler, og lønna
   konsernDay(g);
   assert((g.today.costs.lonn ?? 0) - before === DIRECTOR_PER_DAY, "lønna ble ikke trukket");
   assert(fireDirector(g).ok && g.konsern.director === null, "kunne ikke si opp");
+});
+
+test("Konsernet: neste steg, utbygging til storverk, milepæler og fullt konsern", () => {
+  const g = newGame(1);
+  g.stage = 4;
+  g.konsern.unlocked = true;
+  g.cash = 5_000_000_000;
+  assert(konsernAdvice(g)?.key === "kjop-stalverk", `første råd: ${konsernAdvice(g)?.key}`);
+  const storverk = konsernOptions(g).find((o) => o.key === "kjop-storverk")!;
+  assert(!!storverk.blocked, "storverk kunne kjøpes før et stålverk");
+  buySister(g, "stalverk");
+  assert(g.konsern.plants[0].name === SISTER_NAMES[0], "datterverket fikk ikke navn");
+  assert(!konsernOptions(g).find((o) => o.key === "kjop-storverk")!.blocked, "storverk sperret etter stålverk");
+  // Seks stålverk: fullt, men et stålverk kan bygges ut til storverk
+  for (let i = 0; i < 5; i++) buySister(g, "stalverk");
+  assert(!!konsernOptions(g).find((o) => o.key === "kjop-storverk")!.blocked, "kunne kjøpe et sjuende verk");
+  const p = g.konsern.plants[0];
+  const before = sisterProfit(g, p);
+  assert(
+    upgradeSister(g, p.id).ok && p.type === "storverk" && sisterProfit(g, p) > before * 3,
+    "utbyggingen virket ikke",
+  );
+  // Milepæler gir fagpoeng én gang
+  const fp = g.researchPoints;
+  checkKonsernMilestones(g);
+  assert(g.konsern.milestones > 0 && g.researchPoints > fp, "ingen milepæl ved over 2 mrd.");
+  const n = g.konsern.milestones;
+  checkKonsernMilestones(g);
+  assert(g.konsern.milestones === n, "milepælen ble gitt to ganger");
 });
 
 test("Nytt spill+ gir bonus, vanlig nytt spill gjør det ikke", () => {
@@ -267,6 +301,9 @@ test("Fullt ferdigvarelager: støpingen venter uten å samle opp framdrift", () 
   advance(g, 240);
   assert(g.castWait === "Ferdigvarelageret er fullt", `ventet ikke: ${g.castWait}`);
   assert(g.castProgressT <= 1e-9, `framdriften samlet seg opp: ${g.castProgressT}`);
+  // Spilleren får ett varsel med råd, ikke ett per tidssteg (B-118)
+  const warnings = g.log.filter((e) => e.kind === "bad" && e.text.startsWith("Ferdigvarelageret er fullt"));
+  assert(warnings.length === 1, `fikk ${warnings.length} varsler om fullt lager`);
   // Lageret tømmes: bare én øse støpes med en gang, den andre må vente på støpetida si
   g.lots = [];
   advance(g, 10);
