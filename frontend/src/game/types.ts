@@ -221,6 +221,16 @@ export type CostCategory =
   | "annet";
 export type IncomeCategory = "kontrakt" | "spot" | "annet" | "konsern";
 
+/** Salgsdirektøren i konsernet (B-117) */
+export interface SalesDirector {
+  hiredDay: number;
+  /** Kontrakter og rammeavtaler signert siden ansettelsen */
+  contracts: number;
+  agreements: number;
+  /** Tar også rammeavtaler, ikke bare vanlige kontrakter */
+  agreementsOn: boolean;
+}
+
 /** Datterverk i konsernet (B-106) */
 export type SisterType = "stalverk" | "storverk";
 export interface SisterPlant {
@@ -424,7 +434,14 @@ export interface GameState {
   /** Støping som kjøpes av seg selv når ordrene på det gamle produktet er levert (B-102) */
   pendingCastingSwitch: string | null;
   /** Konsernet (B-106) */
-  konsern: { unlocked: boolean; plants: SisterPlant[]; shared: string[]; nextId: number };
+  konsern: {
+    unlocked: boolean;
+    plants: SisterPlant[];
+    shared: string[];
+    nextId: number;
+    /** Salgsdirektøren som signerer kontrakter og rammeavtaler selv (B-117); null = ikke ansatt */
+    director: SalesDirector | null;
+  };
   researched: string[];
   pendingDecision: Decision | null;
   /** Dagen hvert hendelseskort sist ble vist, så de ikke gjentas for ofte */

@@ -8,18 +8,15 @@ import {
   furnaceOrder,
   declineContract,
   orderQueue,
-  agreementLoadUntil,
-  CONTRACT_MARGIN,
-  realisticDailyT,
+  assessOffer,
   recipeEstimate,
   sellLot,
   spotPrice,
 } from "../game/engine";
 import { moveInQueue, toggleOfferGrade } from "../game/actions";
-import { scrapResearchFor, scrapResearchHint, suggestRecipe } from "../game/recipe";
+import { scrapResearchHint } from "../game/recipe";
 import {
   day,
-  gradeFailures,
   gradeRecipe,
   hasPlanner,
   nearLimit,
@@ -45,24 +42,12 @@ function daysLeft(g: GameState, c: Contract): number {
 }
 
 function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; committed: number }) {
-  const canMake = stats.products.includes(c.product);
+  // Samme vurdering som salgsdirektøren bruker (B-117): resept, ordrekø og rammeavtaler før fristen
+  const { canMake, recipeOk, failures, missingResearch, graderFix, needDays, days, tight, narrow, doneDay } =
+    assessOffer(g, stats, c, committed);
   const est = recipeEstimate(g, c.grade, stats, gradeRecipe(g, c.grade));
-  const recipeOk = est.grades.includes(c.grade);
-  const failures = recipeOk ? [] : gradeFailures(est.analysis, c.grade);
-  const missingResearch = canMake && !recipeOk ? scrapResearchFor(g, c.grade, stats) : null;
   const hasKlasser = g.workers.some((w) => w.role === "klasser");
   const following = auto(g, "followQueue");
-  const graderFix =
-    canMake && !recipeOk && !missingResearch && hasKlasser && !!suggestRecipe(g, c.grade, stats, "sikker");
-  // Anslaget bygger på det verket faktisk har laget de siste døgnene, med ordrekøen du alt har (B-034)
-  const perDay = stats.dailyProductT > 0 ? realisticDailyT(g, stats) : 0;
-  // Ukeleveranser fra rammeavtalene som kommer før fristen, tar også plass i køen (B-062)
-  const needDays = perDay > 0 ? (committed + agreementLoadUntil(g, c.deadlineDay) + c.tonnes) / perDay : Infinity;
-  const days = daysLeft(g, c);
-  const tight = needDays > days;
-  // Lite slingringsmonn: en omforing, fravær eller støpefeil kan gjøre den for sen (B-062)
-  const narrow = !tight && needDays > days * CONTRACT_MARGIN;
-  const doneDay = day(g) + Math.ceil(needDays) - 1;
   const answerHours = Math.max(0, (c.offerExpiresMin - g.minute) / 60);
   return (
     <div className="g-contract">
@@ -269,6 +254,13 @@ export function Sales({ g, stats, act, openTab }: Props & { openTab?: string }) 
                   </label>
                 )}
               </details>
+            )}
+            {g.konsern?.director && (
+              <p className="g-note">
+                Salgsdirektøren signerer forespørsler verket trygt rekker og som resepten holder
+                {g.konsern.director.agreementsOn ? ", og rammeavtaler det er plass til" : ""}. Resten ligger her, så du
+                kan ta dem selv.
+              </p>
             )}
             {offers.length === 0 && (
               <p className="g-muted">

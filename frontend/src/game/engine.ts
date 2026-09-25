@@ -31,7 +31,8 @@ import { checkChallenges } from "./challenges";
 import { konsernDay, konsernEquity } from "./konsern";
 import { maybeAdvisor, maybeCreateDecision } from "./decisions";
 import { maybeTip, setCreditHint } from "./tips";
-import { suggestRecipe } from "./recipe";
+import { scrapResearchFor, suggestRecipe } from "./recipe";
+import type { Research } from "./research";
 import {
   castingType,
   computePlantStats,
@@ -237,7 +238,7 @@ export function newGame(seed = Date.now(), round = 1): GameState {
     winSeen: false,
     courseSeats: null,
     pendingCastingSwitch: null,
-    konsern: { unlocked: false, plants: [], shared: [], nextId: 1 },
+    konsern: { unlocked: false, plants: [], shared: [], nextId: 1, director: null },
     fpDealDay: -1,
     inboxSeenId: 0,
     researched: [],
@@ -1469,6 +1470,67 @@ export function lateContracts(g: GameState, stats: PlantStats, lostT = 0): Contr
   return late;
 }
 
+/** Tonn som gjenstår i ordrekøen */
+export function committedT(g: GameState): number {
+  return orderQueue(g).reduce((a, c) => a + c.tonnes - c.delivered, 0);
+}
+
+export interface OfferCheck {
+  /** Verket lager varen */
+  canMake: boolean;
+  /** Resepten for kvaliteten holder kravet nå */
+  recipeOk: boolean;
+  /** Hva som bommer med resepten nå */
+  failures: string[];
+  /** Skrapforskning som mangler før kvaliteten kan lages */
+  missingResearch: Research | null;
+  /** Skrapklasseren kan legge om resepten så den holder (B-099) */
+  graderFix: boolean;
+  /** Døgn ordrekøen og kontrakten trenger, og døgn til fristen */
+  needDays: number;
+  days: number;
+  /** Rekker det neppe */
+  tight: boolean;
+  /** Knapt: lite slingringsmonn (B-062) */
+  narrow: boolean;
+  doneDay: number;
+}
+
+/**
+ * Vurderingen av en forespørsel på Salg (B-034, B-062, B-099): kan verket lage den, holder resepten, og rekker den
+ * fristen med ordrekøen og rammeavtalene som alt ligger der. Brukes også av salgsdirektøren (B-117).
+ */
+export function assessOffer(g: GameState, stats: PlantStats, c: Contract, committed = committedT(g)): OfferCheck {
+  const canMake = stats.products.includes(c.product);
+  const est = recipeEstimate(g, c.grade, stats, gradeRecipe(g, c.grade));
+  const recipeOk = est.grades.includes(c.grade);
+  const failures = recipeOk ? [] : gradeFailures(est.analysis, c.grade);
+  const missingResearch = canMake && !recipeOk ? scrapResearchFor(g, c.grade, stats) : null;
+  const graderFix =
+    canMake &&
+    !recipeOk &&
+    !missingResearch &&
+    g.workers.some((w) => w.role === "klasser") &&
+    !!suggestRecipe(g, c.grade, stats, "sikker");
+  const perDay = stats.dailyProductT > 0 ? realisticDailyT(g, stats) : 0;
+  const needDays = perDay > 0 ? (committed + agreementLoadUntil(g, c.deadlineDay) + c.tonnes) / perDay : Infinity;
+  const days = c.deadlineDay - day(g) + 1;
+  const tight = needDays > days;
+  const narrow = !tight && needDays > days * CONTRACT_MARGIN;
+  return {
+    canMake,
+    recipeOk,
+    failures,
+    missingResearch,
+    graderFix,
+    needDays,
+    days,
+    tight,
+    narrow,
+    doneDay: day(g) + Math.ceil(needDays) - 1,
+  };
+}
+
 export function realisticDailyT(g: GameState, stats: PlantStats): number {
   const recent = g.history.slice(-3).filter((d) => d.producedT > 0);
   const est =
@@ -1863,11 +1925,12 @@ function updateAgreements(g: GameState, stats: PlantStats): void {
   }
 }
 
-export function acceptAgreement(g: GameState, id: number): PurchaseResult {
+/** «by» er den som signerer, når det ikke er spilleren selv (f.eks. salgsdirektøren, B-117) */
+export function acceptAgreement(g: GameState, id: number, by = "Du"): PurchaseResult {
   const a = g.agreements.find((x) => x.id === id);
   if (!a || a.status !== "tilbud") return { ok: false, message: "Tilbudet finnes ikke lenger." };
   a.status = "aktiv";
-  log(g, `Du signerte en rammeavtale med ${a.customer}: ${fmtT(a.weeklyT)} i uka i ${a.weeks} uker.`, "info");
+  log(g, `${by} signerte en rammeavtale med ${a.customer}: ${fmtT(a.weeklyT)} i uka i ${a.weeks} uker.`, "info");
   sendAgreementWeek(g, a);
   return { ok: true, message: "Rammeavtale signert." };
 }
@@ -1876,7 +1939,7 @@ export function declineAgreement(g: GameState, id: number): void {
   g.agreements = g.agreements.filter((a) => !(a.id === id && a.status === "tilbud"));
 }
 
-export function acceptContract(g: GameState, id: number): PurchaseResult {
+export function acceptContract(g: GameState, id: number, by = "Du"): PurchaseResult {
   const c = g.contracts.find((x) => x.id === id);
   if (!c || c.status !== "tilbud") return { ok: false, message: "Tilbudet finnes ikke lenger." };
   c.status = "aktiv";
@@ -1884,7 +1947,7 @@ export function acceptContract(g: GameState, id: number): PurchaseResult {
     Math.max(0, ...g.contracts.filter((x) => x.status === "aktiv" && x.id !== c.id).map((x) => x.priority)) + 1;
   log(
     g,
-    `Du signerte med ${c.customer}: ${fmtT(c.tonnes)} ${PRODUCTS[c.product].name.toLowerCase()} (${GRADES[c.grade].name}) innen dag ${c.deadlineDay}.`,
+    `${by} signerte med ${c.customer}: ${fmtT(c.tonnes)} ${PRODUCTS[c.product].name.toLowerCase()} (${GRADES[c.grade].name}) innen dag ${c.deadlineDay}.`,
     "info",
   );
   return { ok: true, message: "Kontrakt signert." };
@@ -2311,7 +2374,7 @@ function onDay(g: GameState, stats: PlantStats): void {
   // Effekttariff for døgnet som er slutt: betales for den høyeste effekten verket trakk
   if (g.today.peakMW) addCost(g, "nett", g.today.peakMW * PEAK_RATE_PER_MW);
   // Overskuddet fra datterverkene i konsernet (B-106)
-  if (g.konsern?.plants.length) konsernDay(g);
+  if (g.konsern?.plants.length || g.konsern?.director) konsernDay(g);
   {
     const t = g.today;
     const cast = (t.onGradeT ?? 0) + (t.offGradeT ?? 0) + (t.secondT ?? 0);

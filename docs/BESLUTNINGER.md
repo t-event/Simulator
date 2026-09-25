@@ -1413,3 +1413,25 @@ Beslutning:
   bare etter spillerens eget trykk.
 - De flytende varslene over menyen er fjernet.
 
+## B-117 Salgsdirektør i konsernet (2026-09-25)
+Status: gjelder
+Brukeren: når konsernet er åpnet, bør man kunne ansette noen som tar seg av kontraktene og avtalene automatisk. Det
+skal være meget dyrt.
+Beslutning:
+- Kortet «Salgsdirektør» står under Verket → Konsern når konsernet er åpnet (B-106).
+- Prisen er 250 mill. kr i rekruttering og 4 mill. kr i lønn per døgn. Storverket gir i snitt ca. 51 mill. kr i
+  resultat per døgn (median i `--vansker`), så lønna tar ca. 8 %. Tidlig på storverket taper man penger på
+  direktøren; den lønner seg først når verket går godt og spilleren vil slippe salgsarbeidet.
+- Hver time signerer direktøren forespørsler, mest verdifulle først. Kravene:
+  - Verket lager varen.
+  - Resepten holder, eller skrapklasseren legger den om og ovnen følger ordrekøen.
+  - Forespørselen er «trygg» på Salg.
+  - Den rekker fristen også med det dårligste døgnet den siste uka, med minst 30 % av tida til overs.
+- Rammeavtaler tas (kan slås av) så lenge de til sammen er under halve ukeproduksjonen i en dårlig uke. Resten blir
+  liggende, så spilleren kan ta dem selv.
+- Vurderingen av en forespørsel er flyttet til `assessOffer` i `engine.ts`, så Salg og direktøren regner likt.
+- Målt i 30 døgn på tre lagrede storverk (der ovnene i tillegg brant gjennom foringen jevnlig): 9–11 leverte
+  kontrakter mot 6 uten direktør, og 0, 0 og 1 for sene. Med bare «trygg» som krav ble 3 av 9 for sene; derfor den
+  ekstra marginen.
+- Testspillerne ansetter ikke direktøren. Den er et valg og påvirker ikke balansen.
+
