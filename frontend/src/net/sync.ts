@@ -23,6 +23,11 @@ export type CloudStatus =
 export const UPLOAD_INTERVAL_MS = 60_000;
 
 let status: CloudStatus = { kind: "off" };
+/**
+ * Er spillet her avklart mot kontoen (B-138)? Før koblingen ved innlogging er ferdig – eller mens spilleren velger
+ * mellom spillet her og spillet på nett – lastes ingenting opp, og spillet kobles ikke til en sesong.
+ */
+let reconciled = false;
 const listeners = new Set<() => void>();
 let dirty: GameState | null = null;
 let lastUpload = 0;
@@ -37,6 +42,14 @@ export function setClock(fn: () => number): void {
 
 export function cloudStatus(): CloudStatus {
   return status;
+}
+export function isReconciled(): boolean {
+  return reconciled;
+}
+/** Spillet her er avklart mot kontoen: opplasting og sesong kan gå som normalt */
+export function markReconciled(): void {
+  reconciled = true;
+  for (const fn of listeners) fn();
 }
 export function onCloudStatus(fn: () => void): () => void {
   listeners.add(fn);
@@ -110,6 +123,8 @@ export async function uploadSave(g: GameState, keepalive = false): Promise<void>
 /** Kalles etter hver lokale lagring (save.ts). Laster opp når det er på tide. */
 export function onLocalSave(g: GameState): void {
   if (!cloudConfigured() || !getSession()) return;
+  // Ingenting lastes opp før spillet her er avklart mot kontoen (B-138)
+  if (!reconciled) return;
   // Et spill som tilhører en annen konto, skal ikke overskrive kontoens spill (B-125)
   if (g.owner && g.owner !== userId()) return;
   dirty = g;
@@ -143,6 +158,7 @@ export async function flush(keepalive = false): Promise<void> {
 
 /** Nullstiller etter utlogging */
 export function resetCloud(): void {
+  reconciled = false;
   dirty = null;
   lastUpload = 0;
   lastSavedAt = null;
@@ -166,25 +182,32 @@ export type LinkDecision =
  */
 export async function linkOnLogin(local: GameState | null): Promise<LinkDecision> {
   const id = userId();
+  reconciled = false;
   if (!id) return { kind: "none" };
   const cloud = await fetchCloudSave();
   const mine = local && (local.owner === null || local.owner === id) ? local : null;
   if (!cloud) {
-    if (!mine) return { kind: "none" };
+    if (!mine) {
+      markReconciled();
+      return { kind: "none" };
+    }
     await uploadSave(mine);
     saveGame(mine);
     lastSavedAt = clock();
     lastUpload = lastSavedAt;
     setStatus({ kind: "saved", at: lastSavedAt });
+    markReconciled();
     return { kind: "uploaded" };
   }
   if (!mine) {
     setStatus({ kind: "saved", at: clock() });
+    markReconciled();
     return { kind: "cloud", cloud };
   }
   if (mine.owner === id) {
     if (cloud.minute > mine.minute) {
       setStatus({ kind: "saved", at: clock() });
+      markReconciled();
       return { kind: "cloud", cloud };
     }
     await uploadSave(mine);
@@ -192,6 +215,7 @@ export async function linkOnLogin(local: GameState | null): Promise<LinkDecision
     lastSavedAt = clock();
     lastUpload = lastSavedAt;
     setStatus({ kind: "saved", at: lastSavedAt });
+    markReconciled();
     return { kind: "uploaded" };
   }
   return { kind: "choose", cloud, local: mine };
@@ -203,6 +227,7 @@ export async function keepLocal(local: GameState): Promise<void> {
   lastSavedAt = clock();
   lastUpload = lastSavedAt;
   setStatus({ kind: "saved", at: lastSavedAt });
+  markReconciled();
 }
 
 /** Funksjonsbryterne i tabellen `config` (kan skru av lagring på nett uten ny publisering) */

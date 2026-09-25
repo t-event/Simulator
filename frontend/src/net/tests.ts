@@ -22,8 +22,10 @@ import { daysLeft, fetchActiveEvents, fetchSeasonStatus } from "./season";
 import {
   cloudStatus,
   flush,
+  isReconciled,
   keepLocal,
   linkOnLogin,
+  markReconciled,
   onLocalSave,
   resetCloud,
   setClock,
@@ -474,6 +476,48 @@ const main = async () => {
     await linkOnLogin(g);
     const snap = f.snapshots.get("u-a@test")?.[0] as { season_id?: number } | undefined;
     assert(snap?.season_id === 1, "tidslinja mangler sesongen");
+  });
+
+  await test("Ingenting lastes opp før spillet er avklart mot kontoen, heller ikke mens man velger (B-138)", async () => {
+    const f = fresh();
+    await login(f);
+    const cloud = newGame(20);
+    cloud.minute = 1440 * 300;
+    await linkOnLogin(cloud);
+    const cloudMinute = f.saves.get("u-a@test")!.minute;
+    // Ny nettleser: et lokalt spill uten konto, og økta finnes før koblingen er ferdig
+    resetCloud();
+    const local = newGame(21);
+    local.season = 1;
+    onLocalSave(local);
+    await flush();
+    assert(f.saves.get("u-a@test")!.minute === cloudMinute, "lastet opp før koblingen");
+    const d = await linkOnLogin(local);
+    assert(d.kind === "choose" && !isReconciled(), "skulle vente på valget");
+    onLocalSave(local);
+    await flush();
+    assert(f.saves.get("u-a@test")!.minute === cloudMinute, "lastet opp mens spilleren velger");
+    assert(!(f.snapshots.get("u-a@test") ?? []).some((s) => s.season_id === 1), "sesongrad fra spillet som venter");
+    // «Fra nettet»: avklart, og spillet fra nettet lastes opp videre
+    markReconciled();
+    assert(isReconciled(), "skulle være avklart");
+  });
+
+  await test("Samme konto, eldre kopi her: lastes ikke opp over et spill som har kommet lenger (B-138)", async () => {
+    const f = fresh();
+    await login(f);
+    const ahead = newGame(22);
+    ahead.minute = 1440 * 300;
+    await linkOnLogin(ahead);
+    resetCloud();
+    const old = newGame(22);
+    old.minute = 1440 * 100;
+    old.owner = "u-a@test";
+    onLocalSave(old);
+    await flush();
+    assert(f.saves.get("u-a@test")!.minute === 1440 * 300, "den eldre kopien overskrev før koblingen");
+    const d = await linkOnLogin(old);
+    assert(d.kind === "cloud" && isReconciled(), `fikk ${d.kind}`);
   });
 
   await test("Ikke logget inn: ingenting sendes", async () => {

@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 84 – 2026-09-25: feil spill på sesonglista etter innlogging i ny nettleser
+
+**Brukeren ba om:** Logget inn i en ny nettleser, og kontoen kom på sesonglista med spillet fra nettleseren, selv om
+sesongen ikke var startet.
+
+**Gjort:** B-138. Ingen opplasting eller sesongkobling før spillet er avklart mot kontoen; tidslinja skiller sesonger;
+feilaktig rad slettet i databasen (spillet på nett, dag 388, var urørt).
+
+**Testet:** tsc, lint, `npm test` (to nye nettester), build. Playwright med brukerens tilfelle: garasjespill uten
+konto i ny nettleser → logg inn → mens man velger: ingen opplasting, ingen sesong; «Fra nettet» → dag 145-spillet,
+ingen sesongrad. Kode-flyten og topplista-testene går fortsatt. `leaderboard('verdi', 10, 1)` er tom.
+
+**Gjenstår:** Tre eldre Playwright-skript i /tmp er utdaterte (topplista flyttet, bare start med veiledning). Fase 4 og 5.
+
+---
+
 ## Økt 83 – 2026-09-25: toppfelt og meny hopper ikke i Safari
 
 **Brukeren ba om:** I Safari hopper toppfeltet og menyen når man scroller ned.

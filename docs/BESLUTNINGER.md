@@ -1815,3 +1815,22 @@ Beslutning:
 - `.g-head` er `display: contents` på mobil, så toppfeltet og menyen kan ligge på hver sin side av innholdet.
 - Fra 760 px er alt som før: siden scroller, toppfeltet og menyen er klistret øverst.
 - Ved bytte av fane settes både vinduet og `.g-main` til toppen. `scrollIntoView` virker i `.g-main` som før.
+
+## B-138 Ingenting lastes opp eller kobles til sesongen før spillet er avklart mot kontoen (2026-09-25)
+Status: gjelder
+Brukeren: logget inn i en ny nettleser; da kom kontoen på sesonglista med spillet som lå i nettleseren fra før, selv
+om sesongen ikke var startet på kontoen.
+
+Årsak:
+- Et spill uten eier (i garasjen) ble koblet til sesongen med én gang økta fantes (B-133), og ble lastet opp på
+  kontoen mens spilleren fortsatt skulle velge mellom «Fra nettet» og «Herfra». Det kunne også ha overskrevet
+  spillet på nett et øyeblikk. Samme risiko fantes for en eldre kopi av spillet på samme konto i en annen nettleser.
+- Tidslinja hadde nøkkelen (konto, dag), så et sesongspill og et gammelt spill på samme konto delte rader.
+
+Beslutning:
+- `sync.ts` har `reconciled`: ingenting lastes opp før koblingen ved innlogging er ferdig. Mens spilleren velger
+  («choose»), lastes ingenting opp. «Herfra» (`keepLocal`) og «Fra nettet» (`markReconciled`) avklarer.
+- Sesongen (`SeasonSync`, `SeasonPrompt`, `SeasonJoin`) gjør ingenting før spillet er avklart.
+- Tidslinja har nøkkelen (konto, sesong, dag) med `season_key = coalesce(season_id, 0)`.
+- Den feilaktige raden (Tuster, dag 1, Sesong 1) er slettet. Spillet på nett (dag 388) var ikke rørt.
+- To nye nettester dekker begge tilfellene; Playwright gjenskaper brukerens tilfelle.
