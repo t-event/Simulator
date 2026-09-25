@@ -138,6 +138,7 @@ Spilleren ser: «Sesong 1 – 18 dager igjen» øverst på topplista, ligaen sin
   neste sesong (fagpoeng eller startkapital i nytt spill+). Spillet fortsetter, ingen nullstilles.
 - Ligaer etter nivå: **Bronse** (støperi og stålverk), **Sølv** (storverk), **Gull** (konsern). Man rykker opp
   når man flytter.
+  Topplista viser ikke metallnavnene (de så ut som medaljer), men nivået ved navnet og medaljer for plass 1–3 (B-139).
 - Felles hendelser som treffer alle samme uke: skrapmangel (skrap +20 %), strømkrise, eksportboom (pris +10 %),
   streik i transporten. Ligger i `events`, appen leser dem og legger dem på markedet. Uten nett: ingen hendelse.
 - Fagboka: kapittel om konjunkturer og hvorfor stålprisen svinger.

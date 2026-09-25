@@ -1700,7 +1700,8 @@ Beslutning:
 - Feilteksten «Koden er feil eller utløpt» på norsk.
 
 ## B-129 Sesonger, ligaer og felles hendelser – fase 3 (2026-09-25)
-Status: gjelder (erstatter nytt spill+ fra B-090 for spill som er med i en sesong)
+Status: gjelder (erstatter nytt spill+ fra B-090 for spill som er med i en sesong). Metallnavnene på ligaene vises
+ikke lenger på topplista, se B-139.
 Brukeren: sesonger erstatter nytt spill+; alle starter i garasjen når en ny sesong starter; en pitteliten fordel
 for den som var med sist; lett å starte ny sesong; ingen grupper på topplista ennå.
 
@@ -1834,3 +1835,20 @@ Beslutning:
 - Tidslinja har nøkkelen (konto, sesong, dag) med `season_key = coalesce(season_id, 0)`.
 - Den feilaktige raden (Tuster, dag 1, Sesong 1) er slettet. Spillet på nett (dag 388) var ikke rørt.
 - To nye nettester dekker begge tilfellene; Playwright gjenskaper brukerens tilfelle.
+
+## B-139 Topplista: medaljer for plassen, nivå ved navnet (2026-09-25)
+Status: gjelder (erstatter visningen av ligaen fra B-129)
+Brukeren: «To brukere. Førsteplass gull og andreplass bronse? Det er feil».
+
+Årsak: merket ved navnet viste ligaen med metallnavn (Bronse, Sølv, Gull). Ved siden av en plassering leses det som
+medaljer, så nr. 2 med «Bronse» så ut som en feil.
+
+Beslutning:
+- Plass 1–3 vises med medaljene 🥇 🥈 🥉, resten med tall. Medaljene betyr alltid plassering.
+- Merket ved navnet viser nivået: Garasje, Verksted, Støperi, Stålverk, Storverk, og Konsern når konsernverdien
+  passerer 1 mrd. (ligaen «gull»). Vanlige ord, ingen metaller.
+- `leaderboard()` gir nå også `stage` (migrasjonen «toppliste_med_niva», `supabase/007_toppliste_med_niva.sql`).
+  Ligaen beholdes i databasen og i svaret; den kan brukes til å dele spillerne senere (anbud og auksjoner i fase 5).
+- Navnet kortes av med «…», nivåmerket blir alltid stående.
+- Fagboka og forklaringen under lista er skrevet om uten ligaer.
+

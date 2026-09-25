@@ -19,11 +19,24 @@ export interface BoardRow {
   value: number;
   day: number;
   is_me: boolean;
-  /** bronse, solv eller gull (B-129) */
+  /** bronse, solv eller gull (B-129): brukes til å dele spillerne etter nivå, vises ikke som metall (B-139) */
   league: string;
+  /** Nivået spilleren er på (0 garasje … 4 storverk) */
+  stage: number;
 }
 
-export const LEAGUE_NAMES: Record<string, string> = { bronse: "Bronse", solv: "Sølv", gull: "Gull" };
+const STAGE_NAMES = ["Garasje", "Verksted", "Støperi", "Stålverk", "Storverk"];
+
+/** Merket ved navnet på topplista: hvor langt spilleren har kommet (B-139) */
+export function levelLabel(r: Pick<BoardRow, "stage" | "league">): string {
+  if (r.league === "gull") return "Konsern";
+  return STAGE_NAMES[r.stage] ?? "Garasje";
+}
+
+/** 🥇🥈🥉 for de tre første, ellers plassnummeret */
+export function placeLabel(plass: number): string {
+  return plass === 1 ? "🥇" : plass === 2 ? "🥈" : plass === 3 ? "🥉" : `${plass}.`;
+}
 
 export interface Profile {
   nickname: string | null;
@@ -35,9 +48,17 @@ export interface Profile {
 /** `season` = sesongens id, eller null for «alle tider» */
 export async function fetchLeaderboard(kind: BoardKind, season: number | null = null, lim = 50): Promise<BoardRow[]> {
   const rows = await rpc<
-    { plass: number; nickname: string; value: string | number; day: number; is_me: boolean; league: string | null }[]
+    {
+      plass: number;
+      nickname: string;
+      value: string | number;
+      day: number;
+      is_me: boolean;
+      league: string | null;
+      stage: number | null;
+    }[]
   >("leaderboard", { kind, lim, season });
-  return rows.map((r) => ({ ...r, value: Number(r.value), league: r.league ?? "bronse" }));
+  return rows.map((r) => ({ ...r, value: Number(r.value), league: r.league ?? "bronse", stage: Number(r.stage ?? 0) }));
 }
 
 /** Min plass på lista, eller null hvis jeg ikke er med */

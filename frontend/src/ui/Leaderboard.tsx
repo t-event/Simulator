@@ -9,7 +9,8 @@ import {
   fetchLeaderboard,
   fetchMyRank,
   fetchProfile,
-  LEAGUE_NAMES,
+  levelLabel,
+  placeLabel,
   type BoardKind,
   type BoardRow,
 } from "../net/leaderboard";
@@ -191,9 +192,10 @@ export function Leaderboard({
         <ol className="g-board">
           {rows.map((r) => (
             <li key={r.plass} className={r.is_me ? "is-me" : ""}>
-              <span className="g-board-rank">{r.plass}.</span>
+              <span className={`g-board-rank${r.plass <= 3 ? " is-medal" : ""}`}>{placeLabel(r.plass)}</span>
               <span className="g-board-name">
-                {r.nickname} <em className={`g-league is-${r.league}`}>{LEAGUE_NAMES[r.league] ?? r.league}</em>
+                <span className="g-board-nick">{r.nickname}</span>
+                <em className="g-league">{levelLabel(r)}</em>
               </span>
               <span className="g-board-value">{fmtValue(kind, r.value)}</span>
             </li>
@@ -204,9 +206,9 @@ export function Leaderboard({
         <p className="g-muted g-small-text">Du er nr. {myRank}.</p>
       )}
       <p className="g-muted g-small-text">
-        Lista regnes ut på serveren av det som er lagret på nett, én gang per spilldøgn. Ligaer: Bronse til og med
-        stålverket, Sølv på storverket, Gull når konsernverdien passerer 1 mrd. Kontoer med urimelig vekst holdes
-        utenfor.
+        Lista regnes ut på serveren av det som er lagret på nett, én gang per spilldøgn. Merket ved navnet viser hvor
+        langt spilleren har kommet: fra Garasje til Storverk, og Konsern når konsernverdien passerer 1 mrd. Kontoer med
+        urimelig vekst holdes utenfor.
       </p>
     </>
   );
