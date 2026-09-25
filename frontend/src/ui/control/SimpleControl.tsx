@@ -12,7 +12,16 @@ import { GRADES } from "../../game/data";
 import type { ManualRequest } from "../../game/types";
 import type { EAFSimulation } from "../../sim/eaf";
 import { buzz } from "../haptics";
-import { fmt, MELT_BAND, SimpleRunner, SLAG_DONE_KG, STEPS } from "./simpleRunner";
+import {
+  fmt,
+  LADLE_BAND,
+  MELT_BAND,
+  SimpleRunner,
+  SLAG_DONE_KG,
+  SLAG_SPILL_KG,
+  STEPS,
+  TAP_TEMP_OK_C,
+} from "./simpleRunner";
 import "./control.css";
 
 const TICK_MS = 100;
@@ -97,10 +106,20 @@ function Furnace({ sim, blowing }: { sim: EAFSimulation; blowing: boolean }) {
         {[85, 110, 135].map((x) => (
           <g key={x}>
             <rect x={x - 4} y={14} width={8} height={62} fill="#2b2b2b" />
-            {s.powerOn && <path className="sc-arc" d={`M${x} 76 L${x - 3} 84 L${x + 2} 88 L${x} ${94 - slag}`} stroke="#fff5b0" strokeWidth={2} fill="none" />}
+            {s.powerOn && (
+              <path
+                className="sc-arc"
+                d={`M${x} 76 L${x - 3} 84 L${x + 2} 88 L${x} ${94 - slag}`}
+                stroke="#fff5b0"
+                strokeWidth={2}
+                fill="none"
+              />
+            )}
           </g>
         ))}
-        {blowing && <line className="sc-lance" x1={180} y1={40} x2={140} y2={92 - slag} stroke="#9ad7ff" strokeWidth={3} />}
+        {blowing && (
+          <line className="sc-lance" x1={180} y1={40} x2={140} y2={92 - slag} stroke="#9ad7ff" strokeWidth={3} />
+        )}
       </g>
       {s.conveyorRunning && (
         <g>
@@ -109,40 +128,6 @@ function Furnace({ sim, blowing }: { sim: EAFSimulation; blowing: boolean }) {
         </g>
       )}
     </svg>
-  );
-}
-
-function HoldButton({ onChange, children }: { onChange: (down: boolean) => void; children: ReactNode }) {
-  const [down, setDown] = useState(false);
-  const set = (v: boolean) => {
-    if (v === down) return;
-    setDown(v);
-    onChange(v);
-    if (v) buzz(15);
-  };
-  return (
-    <button
-      className={`sc-hold${down ? " is-down" : ""}`}
-      aria-pressed={down}
-      onPointerDown={(e) => {
-        e.currentTarget.setPointerCapture(e.pointerId);
-        set(true);
-      }}
-      onPointerUp={() => set(false)}
-      onPointerCancel={() => set(false)}
-      onLostPointerCapture={() => set(false)}
-      onKeyDown={(e) => {
-        if (e.key === " " || e.key === "Enter") {
-          e.preventDefault();
-          set(true);
-        }
-      }}
-      onKeyUp={() => set(false)}
-      onBlur={() => set(false)}
-      onContextMenu={(e) => e.preventDefault()}
-    >
-      {children}
-    </button>
   );
 }
 
@@ -162,6 +147,7 @@ export function SimpleControl({ sim, startWear, request, onDone, onExpert }: Pro
       if (event === "steg") buzz(30);
       else if (event === "ferdig") buzz([30, 30, 30]);
       else if (event === "gjennombrenning") buzz([60, 40, 60]);
+      else if (event === "søl") buzz([80, 40, 80]);
       setVersion((v) => v + 1);
     }, TICK_MS);
     return () => clearInterval(timer);
@@ -182,27 +168,66 @@ export function SimpleControl({ sim, startWear, request, onDone, onExpert }: Pro
     redraw();
   };
 
+  // Strøm og oksygen styres samtidig (B-076)
+  const controls = (
+    <div className="sc-controls">
+      <div className="sc-power">
+        <button
+          className="sc-step-btn"
+          onClick={() => setLevel(-1)}
+          disabled={runner.level <= 1}
+          aria-label="Mindre strøm"
+        >
+          ▼ Mindre
+        </button>
+        <div className="sc-level" aria-label={`Strøm nivå ${runner.level} av 5`}>
+          <span>Strøm</span>
+          <div>
+            {[1, 2, 3, 4, 5].map((l) => (
+              <i key={l} className={l <= runner.level ? "on" : ""} />
+            ))}
+          </div>
+        </div>
+        <button className="sc-step-btn" onClick={() => setLevel(1)} disabled={runner.level >= 5} aria-label="Mer strøm">
+          ▲ Mer
+        </button>
+      </div>
+      <button
+        className={`sc-o2${runner.blowing ? " is-on" : ""}`}
+        aria-pressed={runner.blowing}
+        onClick={() => {
+          runner.setOxygen(!runner.blowing);
+          buzz(15);
+          redraw();
+        }}
+      >
+        Oksygen: {runner.blowing ? "PÅ" : "av"}
+      </button>
+    </div>
+  );
+
   let body: ReactNode = null;
   switch (step) {
     case "intro":
       body = (
         <div className="sc-intro">
           <p>
-            Du skal kjøre én charge – {request.sizeT} tonn {GRADES[request.grade].name.toLowerCase()} – fra skrap til flytende
-            stål. Det tar et par minutter. Automatikken tar alt annet; du tar de fire viktige valgene:
+            Du skal kjøre én charge – {request.sizeT} tonn {GRADES[request.grade].name.toLowerCase()} – fra skrap til
+            flytende stål. Det tar et par minutter. Automatikken tar resten; du styrer det viktigste:
           </p>
           <ol className="sc-plan">
             <li>
-              <strong>Smelt</strong> – hold temperaturen i det grønne feltet med mer eller mindre strøm.
+              <strong>Smelt</strong> – hold temperaturen i det grønne feltet med strømmen. Slå på oksygen når halve
+              skrapet er smeltet.
             </li>
             <li>
-              <strong>Rens</strong> – hold inne oksygenknappen til karbonet er i det grønne feltet.
+              <strong>Rens</strong> – blås oksygen til karbonet er i det grønne feltet, mens strømmen holder varmen.
             </li>
             <li>
-              <strong>Slagg av</strong> – tipp ut slagget med fosforet i.
+              <strong>Slagg av</strong> – tipp ovnen mot slaggdøra, og rett den opp før stålet renner ut.
             </li>
             <li>
-              <strong>Tapp</strong> – trykk når temperaturen er i det grønne feltet.
+              <strong>Tapp</strong> – tapp når temperaturen er riktig, og rett opp ovnen når øsa er full.
             </li>
           </ol>
           <button
@@ -222,7 +247,15 @@ export function SimpleControl({ sim, startWear, request, onDone, onExpert }: Pro
       body = (
         <>
           <p className="sc-instruction">Skrapet mates inn og smelter. Hold temperaturen i det grønne feltet.</p>
-          <ZoneGauge label="Temperatur i badet" value={s.bathTempC} min={1480} max={1720} zone={MELT_BAND} digits={0} unit="°C" />
+          <ZoneGauge
+            label="Temperatur i badet"
+            value={s.bathTempC}
+            min={1480}
+            max={1720}
+            zone={MELT_BAND}
+            digits={0}
+            unit="°C"
+          />
           <div className="sc-progress">
             <span>Smeltet</span>
             <div className="sc-progress-track">
@@ -231,22 +264,7 @@ export function SimpleControl({ sim, startWear, request, onDone, onExpert }: Pro
             <span>{Math.round(melted * 100)} %</span>
           </div>
           {runner.message && <p className="sc-message">{runner.message}</p>}
-          <div className="sc-power">
-            <button className="sc-step-btn" onClick={() => setLevel(-1)} disabled={runner.level <= 1} aria-label="Mindre strøm">
-              ▼ Mindre
-            </button>
-            <div className="sc-level" aria-label={`Strøm nivå ${runner.level} av 5`}>
-              <span>Strøm</span>
-              <div>
-                {[1, 2, 3, 4, 5].map((l) => (
-                  <i key={l} className={l <= runner.level ? "on" : ""} />
-                ))}
-              </div>
-            </div>
-            <button className="sc-step-btn" onClick={() => setLevel(1)} disabled={runner.level >= 5} aria-label="Mer strøm">
-              ▲ Mer
-            </button>
-          </div>
+          {controls}
           <p className="sc-hint">
             {s.bathTempC < MELT_BAND[0]
               ? runner.level >= 5
@@ -254,9 +272,11 @@ export function SimpleControl({ sim, startWear, request, onDone, onExpert }: Pro
                 : "For kaldt – skrapet smelter sakte. Gi mer strøm."
               : s.bathTempC > MELT_BAND[1]
                 ? runner.level <= 1
-                  ? "Strømmen er på det laveste. Badet kjøles når det kommer tyngre skrap."
+                  ? "Strømmen er på det laveste. Slå av oksygenet, eller vent på tyngre skrap."
                   : "For varmt – det sliter på foringen og koster strøm. Gi mindre strøm."
-                : "Fint! Følg med når skrapmatingen endrer seg."}
+                : melted > 0.5 && !runner.blowing
+                  ? "Fint! Slå på oksygen nå – det gir ekstra varme og skummende slagg som skjermer lysbuen."
+                  : "Fint! Følg med når skrapmatingen endrer seg."}
           </p>
         </>
       );
@@ -267,7 +287,8 @@ export function SimpleControl({ sim, startWear, request, onDone, onExpert }: Pro
       body = (
         <>
           <p className="sc-instruction">
-            Oksygen brenner bort karbon. Hold inne knappen til karbonet er i det grønne feltet – ikke for lenge.
+            Oksygen brenner bort karbon mens strømmen holder varmen. Blås til karbonet er i det grønne feltet – ikke for
+            lenge – og hold badet under tappetemperaturen.
           </p>
           <ZoneGauge
             label="Karbon i stålet"
@@ -278,21 +299,25 @@ export function SimpleControl({ sim, startWear, request, onDone, onExpert }: Pro
             digits={3}
             unit="%"
           />
-          <ZoneGauge label="Fosfor i stålet" value={s.phosphorusPct} min={0} max={Math.max(0.06, pMax * 1.5)} zone={[0, pMax]} digits={3} unit="%" />
-          <HoldButton
-            onChange={(down) => {
-              runner.setBlowing(down);
-              redraw();
-            }}
-          >
-            {runner.blowing ? "Blåser oksygen …" : "Hold for å blåse oksygen"}
-          </HoldButton>
+          <ZoneGauge
+            label="Temperatur i badet"
+            value={s.bathTempC}
+            min={1480}
+            max={target + 60}
+            zone={[MELT_BAND[0], target - 15]}
+            digits={0}
+            unit="°C"
+          />
+          {controls}
           <p className="sc-hint">
             {s.carbonPct > grade.tapCarbonMaxPct
-              ? "Karbonet er for høyt ennå."
+              ? runner.blowing
+                ? "Karbonet går ned …"
+                : "Karbonet er for høyt – slå på oksygenet."
               : s.carbonPct < grade.tapCarbonMinPct
-                ? "Nå er karbonet for lavt – oksygenet brenner jern i stedet. Slipp knappen!"
-                : "Karbonet er i det grønne feltet."}
+                ? "Nå er karbonet for lavt – oksygenet brenner jern i stedet. Slå av oksygenet!"
+                : "Karbonet er i det grønne feltet. Slå av oksygenet og gå videre."}
+            {s.bathTempC > target - 15 && " Badet er varmt – gi mindre strøm."}
           </p>
           <button
             className={`sc-main${cOk ? "" : " is-quiet"}`}
@@ -310,24 +335,57 @@ export function SimpleControl({ sim, startWear, request, onDone, onExpert }: Pro
     }
     case "slagg": {
       const pagar = runner.deslag === "pagar";
+      const spilling = pagar && sim.slagMassKg < SLAG_SPILL_KG;
       body = (
         <>
           <p className="sc-instruction">
-            Fosforet ligger nå i slagget oppå stålet. Tipp det ut før du varmer opp, ellers går fosforet tilbake i stålet.
+            Fosforet ligger nå i slagget oppå stålet. Tipp ovnen mot slaggdøra, og rett den opp når slagget nesten er
+            ute – tipper du for lenge, renner stålet etter.
           </p>
-          <ZoneGauge label="Slagg i ovnen" value={sim.slagMassKg / 1000} min={0} max={Math.max(8, sim.slagMassKg / 1000)} zone={[0, SLAG_DONE_KG / 1000]} digits={1} unit="t" />
-          <ZoneGauge label="Fosfor i stålet" value={s.phosphorusPct} min={0} max={Math.max(0.06, pMax * 1.5)} zone={[0, pMax]} digits={3} unit="%" />
+          <ZoneGauge
+            label="Slagg i ovnen"
+            value={sim.slagMassKg / 1000}
+            min={0}
+            max={Math.max(8, sim.slagMassKg / 1000)}
+            zone={[SLAG_SPILL_KG / 1000, SLAG_DONE_KG / 1000]}
+            digits={1}
+            unit="t"
+          />
+          <ZoneGauge
+            label="Fosfor i stålet"
+            value={s.phosphorusPct}
+            min={0}
+            max={Math.max(0.06, pMax * 1.5)}
+            zone={[0, pMax]}
+            digits={3}
+            unit="%"
+          />
+          {runner.steelSpilledKg > 0 && (
+            <p className={`sc-message${spilling ? " is-alarm" : ""}`}>
+              {spilling ? "Stål renner ut slaggdøra! Rett opp ovnen nå!" : "Stål rant ut slaggdøra."} Tapt:{" "}
+              {fmt(runner.steelSpilledKg / 1000, 1)} t
+            </p>
+          )}
           <button
-            className="sc-main"
-            disabled={pagar}
+            className={`sc-main${pagar && sim.slagMassKg < SLAG_DONE_KG ? " is-ready" : ""}`}
             onClick={() => {
-              runner.startDeslag();
+              if (pagar) runner.stopDeslag();
+              else runner.startDeslag();
               buzz(20);
               redraw();
             }}
           >
-            {pagar ? "Tipper ut slagget …" : "Tipp ut slagget"}
+            {pagar ? "Rett opp ovnen" : "Tipp mot slaggdøra"}
           </button>
+          <p className="sc-hint">
+            {!pagar
+              ? "Slagget renner ut mens ovnen er tippet."
+              : sim.slagMassKg > SLAG_DONE_KG
+                ? "Slagget renner ut …"
+                : spilling
+                  ? "Rett opp!"
+                  : "Nå er det lite slagg igjen – rett opp ovnen."}
+          </p>
           {!pagar && (
             <button
               className="sc-link"
@@ -343,37 +401,74 @@ export function SimpleControl({ sim, startWear, request, onDone, onExpert }: Pro
       );
       break;
     }
-    case "tapp":
-    case "tapper": {
-      const zone: [number, number] = [target - 20, target + 20];
+    case "tapp": {
+      const zone: [number, number] = [target - TAP_TEMP_OK_C, target + TAP_TEMP_OK_C];
       const hot = s.bathTempC > zone[1];
       body = (
         <>
           <p className="sc-instruction">
-            {step === "tapper"
-              ? "Stålet renner ned i øsa …"
-              : "Ovnen varmer stålet opp. Tapp når temperaturen er i det grønne feltet."}
+            Varm opp stålet med strømmen, og tapp når temperaturen er i det grønne feltet.
           </p>
-          <ZoneGauge label="Temperatur i badet" value={s.bathTempC} min={target - 120} max={target + 80} zone={zone} digits={0} unit="°C" />
+          <ZoneGauge
+            label="Temperatur i badet"
+            value={s.bathTempC}
+            min={target - 120}
+            max={target + 60}
+            zone={zone}
+            digits={0}
+            unit="°C"
+          />
+          {controls}
           <p className="sc-hint">
-            {step === "tapper"
-              ? "Tapper."
-              : s.bathTempC < zone[0]
-                ? `Vent … ${Math.round(zone[0] - s.bathTempC)} °C igjen.`
-                : hot
-                  ? "For varmt! Tapp med en gang."
-                  : "Nå! Tapp!"}
+            {s.bathTempC < zone[0]
+              ? `Varmer … ${Math.round(zone[0] - s.bathTempC)} °C igjen.${runner.level < 3 ? " Gi mer strøm." : ""}`
+              : hot
+                ? "For varmt! Tapp med en gang."
+                : "Nå! Tapp!"}
           </p>
           <button
             className={`sc-main sc-tap${s.bathTempC >= zone[0] ? " is-ready" : ""}`}
-            disabled={step === "tapper"}
             onClick={() => {
               if (runner.tap()) buzz([20, 30, 20]);
               redraw();
             }}
           >
-            {step === "tapper" ? "Tapper …" : "Tapp nå!"}
+            Tapp nå!
           </button>
+        </>
+      );
+      break;
+    }
+    case "tapper": {
+      const fill = runner.ladleFill;
+      const over = fill > 1;
+      body = (
+        <>
+          <p className="sc-instruction">
+            Stålet renner ned i øsa. Rett opp ovnen når øsa er full – ellers renner den over. Litt stål blir igjen i
+            ovnen som sump til neste charge.
+          </p>
+          <ZoneGauge
+            label="Øsa"
+            value={fill * 100}
+            min={0}
+            max={110}
+            zone={[LADLE_BAND[0] * 100, LADLE_BAND[1] * 100]}
+            digits={0}
+            unit="%"
+          />
+          {over && <p className="sc-message is-alarm">Øsa renner over! Rett opp ovnen!</p>}
+          <button
+            className={`sc-main${fill >= LADLE_BAND[0] ? " is-ready" : ""}`}
+            onClick={() => {
+              runner.stopTap();
+              buzz([20, 30, 20]);
+              redraw();
+            }}
+          >
+            Rett opp ovnen
+          </button>
+          <p className="sc-hint">{fill < LADLE_BAND[0] ? "Fyller …" : over ? "For sent!" : "Full – rett opp nå!"}</p>
         </>
       );
       break;
@@ -397,7 +492,8 @@ export function SimpleControl({ sim, startWear, request, onDone, onExpert }: Pro
             ))}
           </ul>
           <p className="sc-hint">
-            Strøm: {Math.round(score.result.kwhPerT)} kWh per tonn · Tid: {Math.round(score.result.minutes)} minutter i ovnen
+            Strøm: {Math.round(score.result.kwhPerT)} kWh per tonn · Tid: {Math.round(score.result.minutes)} minutter i
+            ovnen
           </p>
           <button className="sc-main" onClick={() => onDone(score.result)}>
             Tilbake til verket
