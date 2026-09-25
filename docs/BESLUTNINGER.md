@@ -1679,3 +1679,22 @@ Beslutning:
 - Funksjonene `leaderboard` (også for anon), `my_rank` og `set_nickname` er med vilje tilgjengelige via API-et;
   sikkerhetsrådene i Supabase peker på dem, og det er tilsiktet.
 - SQL i `supabase/003_toppliste.sql`, kjørt som migrasjonen «toppliste».
+
+## B-128 Bekreftelse med kode i stedet for lenke (2026-09-25)
+Status: gjelder
+Brukeren: lenken i bekreftelses-e-posten åpnet i Safari, ikke i appen på hjemskjermen, og gikk til feil adresse
+(uten `/Simulator/`). Redd for at feil spill blir koblet til kontoen.
+
+Årsak: lenker fra e-post åpner alltid i Safari på iPhone, aldri i appen på hjemskjermen, og de to har hver sin
+lagring. Site URL i Supabase manglet `/Simulator/`.
+
+Beslutning:
+- **Kode i stedet for lenke.** E-posten inneholder en sekssifret kode (`{{ .Token }}` i malene i Supabase) som
+  spilleren skriver inn i appen. Da skjer alt i den appen man spiller i. Appen kaller `/auth/v1/verify` med
+  `type: signup` (opprett konto) eller `type: recovery` (glemt passord, så nytt passord). Brukeren må endre
+  e-postmalene i Supabase (Authentication → Emails) til å inneholde koden.
+- **Lenken virker fortsatt** (hvis malen har den), men etter en lenke kobles ikke noe spill før spilleren velger
+  «Jeg spiller her i nettleseren». «Jeg spiller fra hjemskjermen» logger ut i Safari, så man logger inn i appen.
+- Appen sender `redirect_to` med sin egen adresse (med `/Simulator/`) i opprett- og glemt-passord-kallene, så
+  lenkene peker riktig hvis adressen er tillatt i Supabase.
+- Feilteksten «Koden er feil eller utløpt» på norsk.

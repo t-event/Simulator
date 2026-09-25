@@ -18,6 +18,7 @@ import {
   signOut,
   signUp,
   updatePassword,
+  verifyCode,
 } from "../net/supabase";
 import { fetchProfile, setNickname as saveNickname } from "../net/leaderboard";
 import {
@@ -82,7 +83,8 @@ function cloudLine(s: ReturnType<typeof cloudStatus>): string {
   }
 }
 
-type Mode = "login" | "signup" | "forgot" | "reset";
+/** confirm: skriv koden fra e-posten etter opprettelse. recoverCode: koden fra «glemt passord», så nytt passord. */
+type Mode = "login" | "signup" | "forgot" | "reset" | "confirm" | "recoverCode";
 
 /**
  * Kontokortet. `api` gir det spillet som kjører (hvis noe), og tar imot spillet fra nettet.
@@ -96,9 +98,11 @@ export function AccountCard({ api, onDone }: { api: GameApi; onDone?: () => void
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [info, setInfo] = useState<string | null>(
-    authEvent === "signup" ? "E-posten er bekreftet. Du er logget inn." : null,
-  );
+  const [info, setInfo] = useState<string | null>(null);
+  const [code, setCode] = useState("");
+  // Kom man hit fra lenken i e-posten (Safari, ikke appen på hjemskjermen), kobles ikke noe spill før spilleren
+  // sier at det er her man spiller (B-128)
+  const [fromLink, setFromLink] = useState(authEvent === "signup");
   const [choose, setChoose] = useState<{ cloud: GameState; local: GameState } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [cloudOn, setCloudOn] = useState(cloudConfigured());
@@ -150,9 +154,9 @@ export function AccountCard({ api, onDone }: { api: GameApi; onDone?: () => void
 
   // Ved sidelasting med en økt fra før: hent spillet fra nettet før spilleren trykker «Fortsett»
   useEffect(() => {
-    if (session && !linkedThisLoad && mode !== "reset") void link();
+    if (session && !linkedThisLoad && mode !== "reset" && !fromLink) void link();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session]);
+  }, [session, fromLink]);
 
   const run = async (fn: () => Promise<void>) => {
     setBusy(true);
@@ -212,6 +216,41 @@ export function AccountCard({ api, onDone }: { api: GameApi; onDone?: () => void
             }
           >
             Herfra (dag {dayOf(choose.local)})
+          </button>
+        </div>
+        {error && <p className="g-account-error">{error}</p>}
+      </div>
+    );
+
+  if (session && fromLink && mode !== "reset")
+    return (
+      <div className="g-account">
+        <h3 className="g-subhead">E-posten er bekreftet</h3>
+        <p>
+          Kontoen <strong>{session.user.email}</strong> er klar. Lenken åpnet i nettleseren, og spillet på hjemskjermen
+          har sin egen lagring.
+        </p>
+        <p className="g-muted">
+          <strong>Spiller du fra hjemskjermen?</strong> Lukk denne siden og logg inn i appen der. Da blir spillet du har
+          der, koblet til kontoen.
+        </p>
+        <div className="g-row">
+          <button
+            className="g-primary"
+            disabled={busy}
+            onClick={() =>
+              void run(async () => {
+                await signOut();
+                resetCloud();
+                setFromLink(false);
+                setInfo("Du er logget ut her. Logg inn i appen du spiller i.");
+              })
+            }
+          >
+            Jeg spiller fra hjemskjermen
+          </button>
+          <button disabled={busy} onClick={() => setFromLink(false)}>
+            Jeg spiller her i nettleseren
           </button>
         </div>
         {error && <p className="g-account-error">{error}</p>}
@@ -354,20 +393,77 @@ export function AccountCard({ api, onDone }: { api: GameApi; onDone?: () => void
       </div>
     );
 
+  if (mode === "confirm" || mode === "recoverCode")
+    return (
+      <div className="g-account">
+        <h3 className="g-subhead">{mode === "confirm" ? "Bekreft e-posten" : "Kode fra e-posten"}</h3>
+        <p className="g-muted">
+          Vi har sendt en e-post til <strong>{email.trim()}</strong> med en kode. Skriv den her, så skjer alt i appen du
+          spiller i. Sjekk også søppelposten.
+        </p>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void run(async () => {
+              if (mode === "confirm") {
+                await verifyCode(email.trim(), code, "signup");
+                setCode("");
+                setPassword("");
+                setMode("login");
+                setInfo("E-posten er bekreftet, og du er logget inn.");
+                await link();
+              } else {
+                await verifyCode(email.trim(), code, "recovery");
+                setCode("");
+                setMode("reset");
+              }
+            });
+          }}
+        >
+          <label className="g-field">
+            Kode
+            <input
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              placeholder="6 sifre"
+              required
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+            />
+          </label>
+          {error && <p className="g-account-error">{error}</p>}
+          <div className="g-row">
+            <button className="g-primary" type="submit" disabled={busy || code.trim().length < 6}>
+              {mode === "confirm" ? "Bekreft" : "Bruk koden"}
+            </button>
+            <button type="button" disabled={busy} onClick={() => setMode("login")}>
+              Tilbake
+            </button>
+          </div>
+        </form>
+        <p className="g-muted g-small-text">
+          {mode === "confirm"
+            ? "Trykket du på lenken i e-posten i stedet? Da er kontoen bekreftet – gå tilbake og logg inn her."
+            : "Fikk du ingen e-post? Gå tilbake og prøv «Glemt passord?» på nytt om noen minutter."}
+        </p>
+      </div>
+    );
+
   const submit = () =>
     void run(async () => {
       const mail = email.trim();
       if (mode === "forgot") {
         await recover(mail);
-        setMode("login");
-        setInfo("Vi har sendt en e-post med en lenke for å sette nytt passord. Sjekk også søppelposten.");
+        setCode("");
+        setMode("recoverCode");
         return;
       }
       if (mode === "signup") {
         const r = await signUp(mail, password);
         if (r.needsConfirm) {
-          setMode("login");
-          setInfo("Kontoen er opprettet. Trykk på lenken i e-posten for å bekrefte den, og logg inn her etterpå.");
+          setCode("");
+          setMode("confirm");
           return;
         }
       } else {
@@ -418,7 +514,7 @@ export function AccountCard({ api, onDone }: { api: GameApi; onDone?: () => void
         {error && <p className="g-account-error">{error}</p>}
         <div className="g-row">
           <button className="g-primary" type="submit" disabled={busy}>
-            {mode === "signup" ? "Opprett konto" : mode === "forgot" ? "Send lenke" : "Logg inn"}
+            {mode === "signup" ? "Opprett konto" : mode === "forgot" ? "Send kode" : "Logg inn"}
           </button>
           {mode === "login" && (
             <button type="button" disabled={busy} onClick={() => setMode("signup")}>

@@ -5,6 +5,27 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 73 – 2026-09-25: bekreftelse med kode
+
+**Brukeren ba om:** Lenken fra e-posten åpnet i Safari (ikke appen på hjemskjermen) og gikk til feil adresse.
+Redd for at feil spill kobles til kontoen.
+
+**Gjort:** B-128. Kode fra e-posten skrives inn i appen (opprett konto og glemt passord). Etter en lenke spør appen om
+man spiller her eller på hjemskjermen før noe kobles. `redirect_to` med riktig adresse.
+
+**Testet:**
+- tsc, lint, `npm test` (ny nettest: feil kode, så riktig), build.
+- Playwright på iPhone 13 med falsk Supabase: opprett konto → kode-skjema → feil kode gir melding → riktig kode
+  logger inn og laster opp spillet; glemt passord → kode → nytt passord; lenke i «Safari» med et annet spill lokalt →
+  ingen stille kobling, «Jeg spiller fra hjemskjermen» logger ut. Ingen feil, ingen horisontal scrolling.
+
+**Gjenstår:**
+- Brukeren endrer e-postmalene i Supabase til kode (`{{ .Token }}`) og setter Site URL til
+  `https://t-event.github.io/Simulator/` (den manglet `/Simulator/`).
+- Brukeren tester på nytt fra appen på hjemskjermen.
+
+---
+
 ## Økt 72 – 2026-09-25: toppliste (fase 2)
 
 **Brukeren ba om:** Site URL satt og tokenet slettet. Claude gikk videre med fase 2.

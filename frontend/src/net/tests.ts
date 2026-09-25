@@ -15,6 +15,7 @@ import {
   signIn,
   signUp,
   translateError,
+  verifyCode,
 } from "./supabase";
 import { fetchLeaderboard, fetchMyRank, fetchProfile, setNickname } from "./leaderboard";
 import {
@@ -94,6 +95,18 @@ function makeFake(): Fake {
       if (f.users.has(email)) return json(200, { id: "x", identities: [] });
       f.users.set(email, { id: `u-${email}`, password: String(body.password), confirmed: false });
       return json(200, { id: `u-${email}`, identities: [{}] });
+    }
+    if (path.startsWith("/auth/v1/verify")) {
+      const u = f.users.get(String(body.email));
+      if (!u || body.token !== "123456")
+        return json(403, { error_code: "otp_expired", msg: "Token has expired or is invalid" });
+      if (body.type === "signup") u.confirmed = true;
+      return json(200, {
+        access_token: token(u.id),
+        refresh_token: "r1",
+        expires_in: 3600,
+        user: { id: u.id, email: body.email },
+      });
     }
     if (path.startsWith("/auth/v1/token?grant_type=password")) {
       const u = f.users.get(String(body.email));
@@ -194,6 +207,26 @@ const main = async () => {
       msg = (e as Error).message;
     }
     assert(msg.includes("alt en konto"), `fikk «${msg}»`);
+  });
+
+  await test("Koden fra e-posten bekrefter kontoen i appen (B-128): feil kode, så riktig", async () => {
+    const f = fresh();
+    await signUp("k@test", "hemmelig");
+    let msg = "";
+    try {
+      await verifyCode("k@test", "000000", "signup");
+    } catch (e) {
+      msg = (e as Error).message;
+    }
+    assert(msg.includes("feil eller utløpt"), `feil kode: «${msg}»`);
+    assert(getSession() === null, "skulle ikke være logget inn etter feil kode");
+    const s = await verifyCode("k@test", "123 456", "signup");
+    assert(s.user.id === "u-k@test" && f.users.get("k@test")!.confirmed, "koden bekreftet ikke kontoen");
+    assert(getSession()?.user.id === "u-k@test", "økta ble ikke satt");
+    assert(
+      f.calls.some((c) => c.includes("/auth/v1/signup?redirect_to=")) === false,
+      "i Node finnes ingen adresse å sende med",
+    );
   });
 
   await test("Logg inn: feil passord, ubekreftet e-post, og så riktig", async () => {
