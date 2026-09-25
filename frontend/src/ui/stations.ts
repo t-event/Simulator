@@ -45,3 +45,8 @@ export function stationOptions(g: GameState, station: Station): UpgradeOption[] 
 export function readyUpgrades(g: GameState): number {
   return upgradeOptions(g).filter((o) => stationOf(o) !== null && o.available && o.stage <= g.stage).length;
 }
+
+/** Utstyr ett sted i anlegget som kan kjøpes nå og som du har råd til – merke på knappene på Oversikt (B-065) */
+export function stationReady(g: GameState, station: Station): number {
+  return stationOptions(g, station).filter((o) => o.available && o.stage <= g.stage).length;
+}

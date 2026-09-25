@@ -41,7 +41,7 @@ import { PlantScene } from "./PlantScene";
 import { SceneBubbles } from "./SceneBubbles";
 import { StageCard, StationButton, UpgradeSheet } from "./Upgrades";
 import { AutoToggle } from "./AutoToggle";
-import { readyUpgrades, type Station } from "./stations";
+import { readyUpgrades, stationReady, type Station } from "./stations";
 import type { View } from "./views";
 
 interface Props {
@@ -248,6 +248,7 @@ function CompactChain({
   act,
   onOpen,
   onMaintenance,
+  onStation,
   go,
 }: {
   g: GameState;
@@ -255,20 +256,30 @@ function CompactChain({
   act: GameApi["act"];
   onOpen: () => void;
   onMaintenance: () => void;
+  /** Åpner utstyret for et sted, når det er noe der du kan kjøpe (B-065) */
+  onStation: (s: Station) => void;
   go: (v: View, sub?: string) => void;
 }) {
   const castHead = g.castQueue[0];
   const missing = missingScrap(g, stats);
   const worn = g.furnaces.map((f, i) => ({ f, i })).filter((x) => x.f.wear >= 0.6 && !x.f.relineRequested);
+  // Tall på knappen: utstyr der du kan kjøpe og har råd til. Et trykk åpner da utstyret direkte (B-065)
+  const ready = (s: Station) => stationReady(g, s);
+  const badge = (n: number) =>
+    n > 0 ? (
+      <span className="g-badge" aria-label={`${n} utstyr du har råd til`}>
+        {n}
+      </span>
+    ) : null;
   return (
     <section className="g-card g-mini-chain" aria-label="Produksjonslinja">
       <div className="g-mini-row">
         <button
           className={`g-mini${missing ? " is-alert" : ""}`}
-          onClick={() => go("marked", "skrap")}
+          onClick={() => (!missing && ready("skrap") ? onStation("skrap") : go("marked", "skrap"))}
           aria-label={missing ? `Skrap: mangler ${missing}` : undefined}
         >
-          <span>Skrap{missing && <span className="g-badge">!</span>}</span>
+          <span>Skrap{missing ? <span className="g-badge">!</span> : badge(ready("skrap"))}</span>
           <Bar
             value={stats.yardUsed / stats.yardT}
             tone={stats.yardUsed < stats.sizeT || missing ? "critical" : "accent"}
@@ -279,20 +290,23 @@ function CompactChain({
         {g.furnaces.map((f, i) => {
           const st = furnaceState(g, i);
           return (
-            <button className="g-mini" key={i} onClick={onOpen}>
-              <span>{g.furnaces.length > 1 ? `Ovn ${i + 1}` : "Ovn"}</span>
+            <button className="g-mini" key={i} onClick={() => (ready("ovn") ? onStation("ovn") : onOpen())}>
+              <span>
+                {g.furnaces.length > 1 ? `Ovn ${i + 1}` : "Ovn"}
+                {badge(ready("ovn"))}
+              </span>
               <Bar value={st.progress ?? 0} tone="warning" label="Smelting" />
               <small className={f.heat ? "" : "is-waiting"}>{f.heat ? `Smelter` : st.text}</small>
             </button>
           );
         })}
-        <button className="g-mini" onClick={onOpen}>
-          <span>Støping</span>
+        <button className="g-mini" onClick={() => (ready("stoping") ? onStation("stoping") : onOpen())}>
+          <span>Støping{badge(ready("stoping"))}</span>
           <Bar value={castHead ? g.castProgressT / castHead.t : 0} tone="ok" label="Støping" />
           <small className={g.castWait ? "is-waiting" : ""}>{g.castWait ?? (castHead ? "Støper" : "Venter")}</small>
         </button>
-        <button className="g-mini" onClick={() => go("salg", "lager")}>
-          <span>Lager</span>
+        <button className="g-mini" onClick={() => (ready("lager") ? onStation("lager") : go("salg", "lager"))}>
+          <span>Lager{badge(ready("lager"))}</span>
           <Bar
             value={stats.storeUsed / stats.storeT}
             tone={stats.storeUsed > stats.storeT * 0.9 ? "critical" : "accent"}
@@ -456,6 +470,7 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
               act={act}
               onOpen={() => setTab("anlegg")}
               onMaintenance={openMaintenance}
+              onStation={setSheet}
               go={go}
             />
             <Card title="Produksjon nå">

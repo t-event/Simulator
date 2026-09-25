@@ -852,3 +852,11 @@ Beslutning:
 - Nybegynneren i testspilleren kjøper samarbeid bare når hovedutstyret står fast og den har god råd (minst ti
   ganger prisen). Den når storverket rundt dag 165 (før 174), og forskningen sperrer hovedutstyret på stålverket
   14 % av tida (før 47–69 %).
+
+## B-065 Tall på Ovn, Støping, Skrap og Lager på Oversikt (2026-09-25)
+Status: gjelder (utvider B-061)
+Brukeren ville se på Ovn-knappen i produksjonslinja (Oversikt) når en oppgradering kan kjøpes; B-061 la bare
+merket på underfanen Anlegg.
+Beslutning: knappene Skrap, Ovn, Støping og Lager viser hvor mye utstyr på det stedet du kan kjøpe og har råd til
+(`stationReady` i `stations.ts`). Har knappen et tall, åpner et trykk utstyret for stedet direkte; ellers går den dit
+den gikk før. Mangler resepten skrap, vinner «!» på Skrap-knappen, og den går til Marked.
