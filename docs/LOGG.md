@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 85 – 2026-09-25: medaljer og nivå på topplista
+
+**Brukeren ba om:** «To brukere. Førsteplass gull og andreplass bronse? Det er feil».
+
+**Gjort:** B-139. Medaljer for plass 1–3, og nivået (Garasje … Storverk, Konsern) ved navnet i stedet for
+ligaen med metallnavn. `leaderboard()` gir nivået (migrasjon 007). Fagboka og forklaringen er skrevet om.
+
+**Testet:** tsc, lint, `npm test`, `validate.ts`, `balance.ts` (exit 0), build. Playwright med fire falske spillere på
+iPhone 13 og 320 px: 🥇🥈🥉 og «4.», merkene Konsern/Storverk/Støperi/Garasje, langt navn kortes av mens merket står,
+ingen horisontal scrolling, ingen feil i konsollen. Sikkerhetsrådene i Supabase er uendret (bare de tilsiktede).
+
+**Gjenstår:** Fase 4 og 5.
+
+---
+
 ## Økt 84 – 2026-09-25: feil spill på sesonglista etter innlogging i ny nettleser
 
 **Brukeren ba om:** Logget inn i en ny nettleser, og kontoen kom på sesonglista med spillet fra nettleseren, selv om

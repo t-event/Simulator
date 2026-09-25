@@ -2279,12 +2279,30 @@ button {
   text-align: right;
 }
 
+/* Medaljer for de tre første plassene (B-139) */
+.g-board-rank.is-medal {
+  font-size: 18px;
+  line-height: 1;
+  text-align: center;
+}
+
 .g-board-name {
   flex: 1;
   min-width: 0;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* Navnet kortes av, nivåmerket blir stående (B-139) */
+.g-board-nick {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+}
+
+.g-board-name .g-league {
+  flex-shrink: 0;
 }
 
 .g-board-value {
@@ -2304,7 +2322,7 @@ button {
   max-width: 360px;
 }
 
-/* Sesonger, ligaer og felles hendelser (B-129) */
+/* Sesonger, nivåmerket på topplista og felles hendelser (B-129, B-139) */
 .g-league {
   font-style: normal;
   font-size: 11px;
@@ -2314,16 +2332,6 @@ button {
   color: var(--text-dim);
   margin-left: 4px;
   vertical-align: middle;
-}
-
-.g-league.is-solv {
-  background: #3a4557;
-  color: var(--text);
-}
-
-.g-league.is-gull {
-  background: #5a4a1d;
-  color: #ffd76a;
 }
 
 .g-board-scope button {
