@@ -746,3 +746,20 @@ skrap (hvilken forskning som trengs), velg kvaliteten, lag resepten («Billigst�
 klar. Stegene går videre av seg selv når de er gjort, og «Vis meg» åpner riktig fane. Guiden starter når verket
 flytter til et nivå med nye kvaliteter, og kan startes fra Resept-fanen for kvaliteten som vises.
 Filer: `game/recipeGuide.ts`, `ui/RecipeGuide.tsx`.
+
+## B-059 Gjennomgang av tekstene i spillet (2026-09-25)
+Status: gjelder
+Brukeren ba om at spørsmålet «Hvorfor lønner det seg å måle analysen?» heter «… å analysere stålet?», og om
+en gjennomgang av teksten i spillet.
+Rettet:
+- Quiz: spørsmålet over; fagord forklart («basisk (kalkrik) slagg», oksygen/jernoksid i stedet for bare FeO);
+  «spektrometer» i stedet for «gnistspektrometer».
+- Fagboka: «digel- eller induksjonsovn» → «induksjonsovn» (garasjen har ikke digel lenger), «analyseutstyr»
+  i stedet for «laboratorium», FeO forklart.
+- Rådgiveren viste til knappen «Foreslå billigste resept», som ikke finnes; nå «Sikrest» under Marked → Resept.
+  Den innleide planleggeren sorterer og kjøper nå også uten forskningen for automatikk.
+- Beskrivelser: lavkarbon (kan lages med rent skrap med lite karbon), planleggeren (krever forskning), verkstedet
+  (større induksjonsovn), energistyring (ikke «digel»).
+- «innen to dager» → «døgn», «de neste dagene» → «døgnene»; «under kredittgrensen» → «over».
+- Tips som viste til steder som er flyttet: lån under Forskning → Bank; «Bytt foring» på Verket.
+- Desimaltall i meldinger vises med komma (omdømme −4,8, 1,5 timer) i stedet for punktum.

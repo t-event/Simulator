@@ -208,7 +208,7 @@ export const GRADES: Record<GradeId, GradeSpec> = {
     trampMax: 0.2,
     premium: 1.12,
     minStage: 2,
-    description: "Til kaldforming og tråd. Karbonet må ned, og det krever oksygen.",
+    description: "Til kaldforming og tråd. Karbonet må være lavt: bruk rent skrap med lite karbon, eller en ovn som brenner karbonet ned med oksygen.",
   },
   hoykarbon: {
     id: "hoykarbon",
@@ -294,7 +294,7 @@ export const STAGES: Stage[] = [
     storeT: 30,
     scrapCrew: 0,
     fixedPerDay: 1500,
-    description: "Leid verkstedhall med plass til en liten induksjonsovn og et par ansatte.",
+    description: "Leid verkstedhall med plass til en større induksjonsovn og et par ansatte.",
   },
   {
     id: 2,
@@ -741,7 +741,7 @@ export const ROLES: Record<RoleId, Role> = {
     name: "Planlegger",
     plural: "Planleggere",
     salary: 2300,
-    description: "Holder orden på ordrekøen og kjøper inn skrap etter resepten, så verket aldri står tomt.",
+    description: "Sorterer ordrekøen etter frist og kjøper skrap etter resepten (når «Ordreplanlegging» og «Innkjøpsplan» er forsket fram), og legger om resepten når kvaliteten skifter.",
   },
   klasser: {
     id: "klasser",

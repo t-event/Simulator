@@ -464,7 +464,8 @@ export function computePlantStats(g: GameState): PlantStats {
   const heatsPerDay = staff.hours > 0 ? (staff.hours * 60) / cycleMin + 0.5 : 0;
   const liquidPerDay = heatsPerDay * furnace.sizeT * g.furnaceCount * 0.93;
   let productPerDay = Math.min(liquidPerDay, casting.tph * 24) * casting.yield;
-  if (rollingActive(g)) productPerDay = Math.min(productPerDay, rollingTph(g) * Math.max(8, staff.hours)) * ROLLING_YIELD;
+  if (rollingActive(g))
+    productPerDay = Math.min(productPerDay, rollingTph(g) * Math.max(8, staff.hours)) * ROLLING_YIELD;
 
   // Effekten én ovn trekker mens den smelter
   const furnaceMW = furnace.fuel === "strøm" ? (furnace.sizeT * kwhPerT) / (cycleMin / 60) / 1000 : 0;
@@ -534,11 +535,16 @@ export function nearLimit(a: Analysis, grade: GradeId): boolean {
 export function gradeFailures(a: Analysis, grade: GradeId): string[] {
   const spec = GRADES[grade];
   const out: string[] = [];
-  if (a.p > spec.pMax) out.push(`fosfor ${a.p.toFixed(3)} % over maks ${spec.pMax.toFixed(3)} %`);
+  if (a.p > spec.pMax)
+    out.push(`fosfor ${a.p.toFixed(3).replace(".", ",")} % over maks ${spec.pMax.toFixed(3).replace(".", ",")} %`);
   if (a.tramp > spec.trampMax)
-    out.push(`sporelementer ${a.tramp.toFixed(2)} % over maks ${spec.trampMax.toFixed(2)} %`);
-  if (a.c > spec.cMax) out.push(`karbon ${a.c.toFixed(2)} % over maks ${spec.cMax.toFixed(2)} %`);
-  if (a.c < spec.cMin) out.push(`karbon ${a.c.toFixed(2)} % under min ${spec.cMin.toFixed(2)} %`);
+    out.push(
+      `sporelementer ${a.tramp.toFixed(2).replace(".", ",")} % over maks ${spec.trampMax.toFixed(2).replace(".", ",")} %`,
+    );
+  if (a.c > spec.cMax)
+    out.push(`karbon ${a.c.toFixed(2).replace(".", ",")} % over maks ${spec.cMax.toFixed(2).replace(".", ",")} %`);
+  if (a.c < spec.cMin)
+    out.push(`karbon ${a.c.toFixed(2).replace(".", ",")} % under min ${spec.cMin.toFixed(2).replace(".", ",")} %`);
   return out;
 }
 

@@ -42,7 +42,7 @@ const MAKERS: Record<string, Maker> = {
     return {
       id: "hasteordre",
       title: "Hasteordre",
-      text: `En kunde har fått stopp i produksjonen og trenger ${fmtT(t)} i standardkvalitet innen to dager. De betaler 35 % over vanlig pris.`,
+      text: `En kunde har fått stopp i produksjonen og trenger ${fmtT(t)} i standardkvalitet innen to døgn. De betaler 35 % over vanlig pris.`,
       options: [
         { label: "Ta oppdraget", hint: "Rekker du det ikke, blir det bot og dårligere omdømme." },
         { label: "Avslå" },
@@ -249,7 +249,7 @@ const ADVICE: Record<RepCause, { chapter: string; title: string; text: string; s
   reklamasjon: {
     chapter: "analyse",
     title: "Rådgiveren: kundene reklamerer",
-    text: "Kundene har reklamert flere ganger på kort tid. Det betyr at stålet ikke holder analysen de betaler for. Oftest er resepten for nær grensene, eller du vet ikke sikkert hva som er i stålet fordi du ikke måler det. Prøv «Foreslå billigste resept» under Marked, og skaff et analyseinstrument.",
+    text: "Kundene har reklamert flere ganger på kort tid. Det betyr at stålet ikke holder analysen de betaler for. Oftest er resepten for nær grensene, eller du vet ikke sikkert hva som er i stålet fordi du ikke måler det. Trykk «Sikrest» under Marked → Resept, og skaff et analyseinstrument.",
     specialist: "Kvalitetsingeniør",
     effect: "Måler alt stål med spektrometer i ti døgn, så bare partier som holder kravet leveres.",
   },

@@ -696,7 +696,7 @@ function heatEvents(g: GameState, index: number, stats: PlantStats): number {
         addCost(g, "vedlikehold", 60_000);
         log(
           g,
-          `Overslag i ovn ${index + 1} traff et vannkjølt panel. Ovnen stoppes for reparasjon (${hours.toFixed(1)} t).`,
+          `Overslag i ovn ${index + 1} traff et vannkjølt panel. Ovnen stoppes for reparasjon (${hours.toFixed(1).replace(".", ",")} t).`,
           "bad",
         );
       } else {
@@ -1008,8 +1008,8 @@ function castBatch(g: GameState, batch: LiquidBatch, stats: PlantStats): void {
     log(
       g,
       batch.tempOff && has(g, "oseovn")
-        ? `Strengen grodde igjen: stålet fra øseovnen var for kaldt. Støpemaskinen står i ${hours.toFixed(1)} timer.`
-        : `Strenggjennombrudd! Skallet revnet under kokillen. Støpemaskinen står i ${hours.toFixed(1)} timer.`,
+        ? `Strengen grodde igjen: stålet fra øseovnen var for kaldt. Støpemaskinen står i ${hours.toFixed(1).replace(".", ",")} timer.`
+        : `Strenggjennombrudd! Skallet revnet under kokillen. Støpemaskinen står i ${hours.toFixed(1).replace(".", ",")} timer.`,
       "bad",
     );
     unlock(g, "streng");
@@ -1315,7 +1315,9 @@ function followQueue(g: GameState, stats: PlantStats): void {
 
 /** Planleggeren sorterer køen etter frist. */
 function plannerSort(g: GameState): void {
-  if (!hasPlanner(g) || !auto(g, "plannerSorts")) return;
+  // Den innleide planleggeren fra rådgiveren sorterer uansett forskning (B-059)
+  const specialist = (g.specialists?.sen ?? 0) > g.minute;
+  if (!hasPlanner(g) || (!auto(g, "plannerSorts") && !specialist)) return;
   orderQueue(g)
     .sort((a, b) => a.deadlineDay - b.deadlineDay)
     .forEach((c, i) => (c.priority = i + 1));
@@ -1392,7 +1394,7 @@ function deliverContracts(g: GameState): void {
       countEvent(g, "leveranser");
       adjustMorale(g, 0.5);
       awardPoints(g, 1 + g.stage);
-      log(g, `Kontrakten med ${c.customer} er levert. Omdømme +${gain.toFixed(1)}.`, "good");
+      log(g, `Kontrakten med ${c.customer} er levert. Omdømme +${gain.toFixed(1).replace(".", ",")}.`, "good");
       if (g.totals.contractsDone === 1) unlock(g, "omdomme");
       if (c.agreementId) agreementWeekClosed(g, c, true);
     }
@@ -1423,7 +1425,7 @@ function processComplaints(g: GameState): void {
     awardPoints(g, 2);
     log(
       g,
-      `${c.text} Kunden får pengene tilbake (${fmtKr(c.refund)}), omdømme −${c.repLoss.toFixed(1)}. Du lærte noe: +2 fagpoeng.`,
+      `${c.text} Kunden får pengene tilbake (${fmtKr(c.refund)}), omdømme −${c.repLoss.toFixed(1).replace(".", ",")}. Du lærte noe: +2 fagpoeng.`,
       "bad",
     );
     unlock(g, "analyse");
@@ -1643,7 +1645,7 @@ function agreementWeekClosed(g: GameState, c: Contract, ok: boolean): void {
     repLoss(g, a.bonusRep, "sen");
     log(
       g,
-      `${a.customer} sa opp rammeavtalen etter ${AGREEMENT_MAX_MISSED} uker uten full leveranse. Omdømme −${a.bonusRep.toFixed(1)}.`,
+      `${a.customer} sa opp rammeavtalen etter ${AGREEMENT_MAX_MISSED} uker uten full leveranse. Omdømme −${a.bonusRep.toFixed(1).replace(".", ",")}.`,
       "bad",
     );
     return;
@@ -1657,7 +1659,7 @@ function agreementWeekClosed(g: GameState, c: Contract, ok: boolean): void {
     awardPoints(g, 2 + g.stage);
     log(
       g,
-      `Rammeavtalen med ${a.customer} er fullført, alle uker i tide! Bonus ${fmtKr(a.bonusKr)} og omdømme +${a.bonusRep.toFixed(1)}.`,
+      `Rammeavtalen med ${a.customer} er fullført, alle uker i tide! Bonus ${fmtKr(a.bonusKr)} og omdømme +${a.bonusRep.toFixed(1).replace(".", ",")}.`,
       "good",
     );
   } else {
@@ -1756,7 +1758,7 @@ export function cancelContract(g: GameState, id: number): PurchaseResult {
   c.closedDay = day(g);
   log(
     g,
-    `Du avbrøt kontrakten med ${c.customer} (${fmtT(c.tonnes - c.delivered)} ulevert). Bot ${fmtKr(bot)}, omdømme −${rep.toFixed(1)}.`,
+    `Du avbrøt kontrakten med ${c.customer} (${fmtT(c.tonnes - c.delivered)} ulevert). Bot ${fmtKr(bot)}, omdømme −${rep.toFixed(1).replace(".", ",")}.`,
     "bad",
   );
   if (c.agreementId) agreementWeekClosed(g, c, false);
@@ -2038,7 +2040,7 @@ function onHour(g: GameState, stats: PlantStats): void {
   // Automatisk innkjøp krever en planlegger (se B-021). Er planleggeren borte, går de faste bestillingene
   // videre (B-048)
   g.autoBuyNote = null;
-  if (auto(g, "autoBuy") && plannerOrders(g)) autoBuy(g, stats);
+  if ((auto(g, "autoBuy") || (g.specialists?.sen ?? 0) > g.minute) && plannerOrders(g)) autoBuy(g, stats);
 }
 
 /**
@@ -2168,7 +2170,7 @@ function onDay(g: GameState, stats: PlantStats): void {
     if (chance(g, 0.04)) {
       m.powerSpikeDays = randInt(g, 1, 3);
       m.powerFactor = uniform(g, 2.0, 2.8);
-      log(g, `Kulde og lite vind: strømprisen er ${m.powerFactor.toFixed(1)} ganger normalt de neste dagene.`, "event");
+      log(g, `Kulde og lite vind: strømprisen er ${m.powerFactor.toFixed(1).replace(".", ",")} ganger normalt de neste døgnene.`, "event");
       if (stats.furnace.fuel === "strøm") unlock(g, "strom");
     }
   }
@@ -2186,7 +2188,7 @@ function onDay(g: GameState, stats: PlantStats): void {
       c.closedDay = today;
       log(
         g,
-        `Fristen til ${c.customer} gikk ut med ${fmtT(remaining)} ulevert. Bot ${fmtKr(penalty)}, omdømme −${c.repLoss.toFixed(1)}.`,
+        `Fristen til ${c.customer} gikk ut med ${fmtT(remaining)} ulevert. Bot ${fmtKr(penalty)}, omdømme −${c.repLoss.toFixed(1).replace(".", ",")}.`,
         "bad",
       );
       unlock(g, "omdomme");
@@ -2349,7 +2351,7 @@ export function completeManual(g: GameState, result: ManualResult | null): void 
     adjustReputation(g, 0.5);
     log(
       g,
-      `Du kjørte charge i ovn ${req.furnace + 1} selv: ${result.kwhPerT.toFixed(0)} kWh/t, P ${result.phosphorusPct.toFixed(3)} %. Innenfor krav – omdømme +0,5.`,
+      `Du kjørte charge i ovn ${req.furnace + 1} selv: ${result.kwhPerT.toFixed(0)} kWh/t, P ${result.phosphorusPct.toFixed(3).replace(".", ",")} %. Innenfor krav – omdømme +0,5.`,
       "good",
     );
   } else {

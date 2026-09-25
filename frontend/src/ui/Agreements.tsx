@@ -54,8 +54,8 @@ function AgreementOffer({ g, stats, a, act }: Props & { a: Agreement }) {
           </li>
         )}
         <li className="g-muted">
-          Alle uker i tide: bonus {fmtKr(a.bonusKr)} og omdømme +{a.bonusRep.toFixed(1)}. {AGREEMENT_MAX_MISSED} uker
-          for sent: kunden sier opp, omdømme −{a.bonusRep.toFixed(1)}.
+          Alle uker i tide: bonus {fmtKr(a.bonusKr)} og omdømme +{a.bonusRep.toFixed(1).replace(".", ",")}.{" "}
+          {AGREEMENT_MAX_MISSED} uker for sent: kunden sier opp, omdømme −{a.bonusRep.toFixed(1).replace(".", ",")}.
         </li>
       </ul>
       <div className="g-row">
