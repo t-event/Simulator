@@ -15,17 +15,11 @@ import {
 } from "../game/engine";
 import { moveInQueue, toggleOfferGrade } from "../game/actions";
 import { scrapResearchHint } from "../game/recipe";
-import {
-  day,
-  gradeRecipe,
-  hasPlanner,
-  nearLimit,
-  satisfiedGrades,
-  type PlantStats,
-} from "../game/plant";
+import { day, gradeRecipe, hasPlanner, nearLimit, satisfiedGrades, type PlantStats } from "../game/plant";
 import type { Contract, GameState, Settings } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Agreements } from "./Agreements";
+import { DirectorSwitch } from "./Konsern";
 import { AutoLocked, AutoToggle } from "./AutoToggle";
 import { auto, automationUnlocked } from "../game/research";
 import { AnalysisLine, Bar, Card, GradeChips, GradeSpec } from "./common";
@@ -255,13 +249,7 @@ export function Sales({ g, stats, act, openTab }: Props & { openTab?: string }) 
                 )}
               </details>
             )}
-            {g.konsern?.director && (
-              <p className="g-note">
-                Salgsdirektøren signerer forespørsler verket trygt rekker og som resepten holder
-                {g.konsern.director.agreementsOn ? ", og rammeavtaler det er plass til" : ""}. Resten ligger her, så du
-                kan ta dem selv.
-              </p>
-            )}
+            <DirectorSwitch g={g} act={act} />
             {offers.length === 0 && (
               <p className="g-muted">
                 {g.settings.pauseOffers
