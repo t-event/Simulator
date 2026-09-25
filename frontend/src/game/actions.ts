@@ -58,6 +58,8 @@ export interface UpgradeOption {
   locked: boolean;
   /** Konsekvens spilleren bør vite om før kjøpet */
   warning?: string;
+  /** Spørsmål spilleren må svare ja på før kjøpet, f.eks. bytte av produkt (B-084) */
+  confirm?: string;
 }
 
 const fail = (message: string): PurchaseResult => ({ ok: false, message });
@@ -152,6 +154,7 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
       continue;
     let reason = researchBlocker(g, c.id);
     let warning: string | undefined;
+    let confirm: string | undefined;
     if (!owned && c.product !== currentCasting.product) {
       const old = PRODUCTS[currentCasting.product].name.toLowerCase();
       const remaining = g.contracts
@@ -164,9 +167,24 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
       // over fristen og tatt med seg omdømmet, så de må leveres først (B-062)
       const stuck = remaining - inStock;
       if (!reason && stuck > 0.05) reason = `Lever først kontraktene på ${old} (${fmtT(stuck)} igjen)`;
+      // Rammeavtaler på det gamle produktet avsluttes uten straff ved byttet (endStaleAgreements, B-040)
+      const deals = g.agreements.filter((a) => a.status === "aktiv" && a.product === currentCasting.product).length;
+      const next = PRODUCTS[c.product].name.toLowerCase();
       warning =
-        `Du går over fra ${old} til ${PRODUCTS[c.product].name.toLowerCase()} og kan ikke lage ${old} etterpå. Ikke ta flere kontrakter på ${old} før byttet.` +
+        `Du går over fra ${old} til ${next} og kan ikke lage ${old} etterpå. Lever ordrene på ${old} først, og ikke ta nye forespørsler på ${old} før byttet.` +
         " Produksjonen øker kraftig – ha penger til skrap og kunder som tar imot.";
+      const offers =
+        g.contracts.filter((x) => x.status === "tilbud" && x.product === currentCasting.product).length +
+        g.agreements.filter((a) => a.status === "tilbud" && a.product === currentCasting.product).length;
+      confirm =
+        `Bytte fra ${old} til ${next}? Etterpå kan verket ikke lage ${old} lenger.` +
+        (offers
+          ? ` ${offers === 1 ? "Én forespørsel" : `${offers} forespørsler`} på ${old} blir trukket tilbake.`
+          : "") +
+        (deals
+          ? ` ${deals === 1 ? "Rammeavtalen" : `${deals} rammeavtaler`} på ${old} avsluttes uten straff, men uten bonus.`
+          : "") +
+        (inStock > 0.05 ? ` ${fmtT(inStock)} ${old} på lageret kan fortsatt selges.` : "");
     }
     if (!reason && g.cash < c.price) reason = "For lite penger";
     out.push({
@@ -174,6 +192,7 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
       baseId: c.id,
       kind: "casting",
       warning,
+      confirm,
       name: c.name,
       description: c.description,
       price: c.price,

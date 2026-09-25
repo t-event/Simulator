@@ -1584,9 +1584,19 @@ function trickleOffers(g: GameState, stats: PlantStats): void {
   if (chance(g, (stats.offersPerDay * 0.6) / 24)) generateOffers(g, stats, 1);
 }
 
-function expireOffers(g: GameState): void {
+function expireOffers(g: GameState, stats: PlantStats): void {
   for (const c of g.contracts) {
-    if (c.status === "tilbud" && c.offerExpiresMin <= g.minute) {
+    if (c.status !== "tilbud") continue;
+    if (!stats.products.includes(c.product)) {
+      // Verket har byttet støping og lager ikke produktet lenger: kunden spør noen andre (B-082)
+      c.status = "misligholdt";
+      c.closedDay = -1;
+      log(
+        g,
+        `${c.customer} trakk forespørselen på ${PRODUCTS[c.product].name.toLowerCase()} – verket lager ikke det lenger.`,
+        "info",
+      );
+    } else if (c.offerExpiresMin <= g.minute) {
       c.status = "misligholdt";
       c.closedDay = -1;
       log(g, `Forespørselen fra ${c.customer} gikk ut uten svar.`, "info");
@@ -1730,10 +1740,16 @@ function endStaleAgreements(g: GameState, stats: PlantStats): void {
 function updateAgreements(g: GameState, stats: PlantStats): void {
   const today = day(g);
   for (const a of g.agreements) {
-    if (a.status === "tilbud" && a.offerExpiresMin <= g.minute) {
+    if (a.status === "tilbud" && (a.offerExpiresMin <= g.minute || !stats.products.includes(a.product))) {
       a.status = "brutt";
       a.closedDay = -1;
-      log(g, `Tilbudet om rammeavtale fra ${a.customer} gikk ut.`, "info");
+      log(
+        g,
+        a.offerExpiresMin <= g.minute
+          ? `Tilbudet om rammeavtale fra ${a.customer} gikk ut.`
+          : `${a.customer} trakk tilbudet om rammeavtale – verket lager ikke ${PRODUCTS[a.product].name.toLowerCase()} lenger.`,
+        "info",
+      );
     }
     if (a.status === "aktiv" && a.weeksSent < a.weeks && a.nextDay <= today) sendAgreementWeek(g, a);
   }
@@ -1979,17 +1995,24 @@ function updateAbsence(g: GameState, stats: PlantStats): void {
   if (!g.workers.length) return;
   const today = day(g);
   const vacationCap = Math.max(1, Math.floor(g.workers.length * 0.1));
+  // Med 4- og 5-skift dekker de ekstra lagene fravær. Da står det bare i loggen, ikke som varsel – med mindre
+  // fraværet gjør at verket mister et skift (B-083). «spare» = et lag mer enn de tre som trengs.
+  const extraCrews = staffing(g, true).crews > 3;
+  const kind = (spare: boolean): "info" | "event" => (extraCrews && spare ? "info" : "event");
   const onVacation = (from: number, until: number) =>
     g.workers.filter((w) => w.absentReason === "ferie" && w.absentFrom! < until && w.absentUntil! > from).length;
+  // Fravær som er over, fjernes først, så varslene under regner med dem som faktisk er borte
   for (const w of g.workers) {
     if (w.absentUntil !== undefined && g.minute >= w.absentUntil) {
       w.absentFrom = w.absentUntil = w.absentReason = undefined;
     }
+  }
+  for (const w of g.workers) {
     if (w.absentReason === "ferie" && w.absentFrom !== undefined && Math.abs(w.absentFrom - g.minute) < 60)
       log(
         g,
         `${w.name} (${ROLES[w.role].name.toLowerCase()}) har ferie fra i dag til dag ${day(g, w.absentUntil! - 1)}.`,
-        "event",
+        kind(staffing(g).crews >= 3),
       );
     if (w.nextVacationDay === undefined) w.nextVacationDay = today + randInt(g, 10, 110);
     const busy = w.absentUntil !== undefined;
@@ -2009,7 +2032,8 @@ function updateAbsence(g: GameState, stats: PlantStats): void {
       log(
         g,
         `${w.name} (${ROLES[w.role].name.toLowerCase()}) får ferie dag ${day(g, from)}–${day(g, until - 1)}.`,
-        "event",
+        // Forhåndsvarsel: med ekstra lag bare i loggen; mister verket et skift, varsles det på selve dagen
+        kind(true),
       );
       continue;
     }
@@ -2027,7 +2051,7 @@ function updateAbsence(g: GameState, stats: PlantStats): void {
       log(
         g,
         `${w.name} (${ROLES[w.role].name.toLowerCase()}) er syk ${len === 1 ? "i dag" : `i ${len} døgn`}.`,
-        "event",
+        kind(staffing(g).crews >= 3),
       );
     }
   }
@@ -2070,7 +2094,7 @@ function onHour(g: GameState, stats: PlantStats): void {
   // Kapitlene forskningen krever, kommer i fagboka når forskningen blir synlig (B-025)
   for (const r of RESEARCH) if (r.reads && r.stage <= g.stage) unlock(g, r.reads);
   checkMissions(g);
-  expireOffers(g);
+  expireOffers(g, stats);
   trickleOffers(g, stats);
   deliverContracts(g);
   // Støpefeil håndteres automatisk etter valget (B-035)

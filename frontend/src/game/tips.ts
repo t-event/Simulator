@@ -2,12 +2,30 @@
  * Engangstips (B-033): korte forklaringer som dukker opp første gang noe viktig skjer,
  * som et kort med «Skjønner». Spillet går videre på 1× etterpå (se «tips-fart-ned», B-069).
  */
+import { CASTINGS, PRODUCTS } from "./data";
 import { fmtKr } from "./engine";
-import { isOpen, type PlantStats } from "./plant";
-import { hasResearch } from "./research";
+import { castingType, isOpen, type PlantStats } from "./plant";
+import { hasResearch, missingResearchFor } from "./research";
 import type { Decision, GameState } from "./types";
 
-type Tip = Omit<Decision, "resumeSpeed" | "options" | "data"> & { when: (g: GameState, stats: PlantStats) => boolean };
+type Tip = Omit<Decision, "resumeSpeed" | "options" | "data"> & {
+  when: (g: GameState, stats: PlantStats) => boolean;
+  /** Tekst som avhenger av spillet, i stedet for den faste teksten */
+  textFor?: (g: GameState) => string;
+};
+
+/** Støping verket kan kjøpe nå som lager et annet produkt enn i dag (f.eks. emner i stedet for blokker) */
+function productSwitch(g: GameState) {
+  const cur = castingType(g);
+  // Samme regel som utstyrslisten: bare støping som er et steg opp, ikke eldre typer (B-084)
+  return CASTINGS.find(
+    (c) =>
+      c.product !== cur.product &&
+      (c.stage > cur.stage || (c.stage === cur.stage && c.tph > cur.tph)) &&
+      c.stage <= g.stage &&
+      !missingResearchFor(g, c.id),
+  );
+}
 
 const TIPS: Tip[] = [
   {
@@ -41,6 +59,18 @@ const TIPS: Tip[] = [
     when: (g) => g.furnaces.some((f) => f.waitReason === "Tomt for skrap"),
   },
   {
+    id: "tips-bytt-produkt",
+    title: "Før du bytter støping",
+    text: "",
+    textFor: (g) => {
+      const c = productSwitch(g)!;
+      const old = PRODUCTS[castingType(g).product].name.toLowerCase();
+      const next = PRODUCTS[c.product].name.toLowerCase();
+      return `Nå kan du kjøpe ${c.name.toLowerCase()}. Den lager ${next}, ikke ${old} – etter byttet kan verket ikke lage ${old} lenger. Lever ordrene på ${old} i ordrekøen først, og ikke ta nye forespørsler på ${old} (skru gjerne av «Ta imot nye forespørsler» under Salg mens du gjør deg ferdig). Byttet er sperret til ordrene er levert. Ubesvarte forespørsler på ${old} trekkes tilbake når du bytter.`;
+    },
+    when: (g) => !!productSwitch(g),
+  },
+  {
     id: "tips-kreditt",
     title: "Kassa er tom",
     text: "Du bruker nå kassekreditten. Den er en buffer, ikke penger du har: blir du stående over kredittgrensen i en uke, går verket konkurs. Lever kontrakter, selg på spot, vent med innkjøp – eller ta opp et lån under Verket → Økonomi (banken).",
@@ -54,7 +84,8 @@ export function maybeTip(g: GameState, stats: PlantStats): void {
   for (const t of TIPS) {
     if (g.tipsSeen.includes(t.id) || !t.when(g, stats)) continue;
     g.tipsSeen.push(t.id);
-    const text = t.id === "tips-kreditt" ? `${t.text} (Grensen er nå ca. ${fmtKr(creditHint(g))}.)` : t.text;
+    const base = t.textFor ? t.textFor(g) : t.text;
+    const text = t.id === "tips-kreditt" ? `${base} (Grensen er nå ca. ${fmtKr(creditHint(g))}.)` : base;
     g.pendingDecision = {
       id: t.id,
       title: t.title,

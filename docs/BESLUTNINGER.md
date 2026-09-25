@@ -1060,3 +1060,34 @@ Status: gjelder
 Brukeren ville se hvor mange aktive rammeavtaler man har, rett på fanen under Salg.
 Beslutning: Fanen heter «Avtaler (N)» med N = aktive avtaler. Nye tilbud vises med et grønt merke («Ny» eller «2 nye»)
 i stedet for i parentesen, så fanen holder seg på to linjer på mobil.
+
+## B-082 Forespørsler på produkter verket ikke lager lenger, trekkes tilbake (2026-09-25)
+Status: gjelder
+Brukeren fikk forespørsler på blokker etter at verket var gått over til strengstøping. Nye forespørsler lages bare for
+produkter verket kan lage. Gamle, ubesvarte forespørsler ble derimot liggende etter byttet: kjøpssperren (B-062) ser
+bare på aktive kontrakter.
+Beslutning: Hver time trekkes ubesvarte forespørsler og tilbud om rammeavtaler på produkter verket ikke lager lenger
+tilbake, med en linje i loggen («… trakk forespørselen på blokker – verket lager ikke det lenger»). Aktive
+rammeavtaler avsluttes fortsatt uten straff (B-040).
+
+## B-083 Med 4- og 5-skift varsles ikke fravær som de ekstra lagene dekker (2026-09-25)
+Status: gjelder (justerer fraværsvarslene fra B-039/B-050)
+Brukeren: med 4 og 5 skift trengs det ikke varsel om ferie og sykdom, med mindre skiftgangen går ned.
+Beslutning: Med flere enn tre fulle skiftlag (uten fravær) står ferie og sykdom bare i loggen, ikke som varsel på
+skjermen. Forhåndsvarselet om ferie står også bare i loggen. Mister verket likevel et skift, blir meldingen på selve dagen
+et varsel som før. Fravær som er over, fjernes nå før varslene, så telleren ikke regner med folk som er tilbake.
+Målt over 30 døgn med 4 lag: 14 av 58 fraværsmeldinger er varsel, og alle gjelder dager da verket ellers ville mistet et
+skift.
+
+## B-084 Varsel og bekreftelse før man bytter produkt (blokker → emner) (2026-09-25)
+Status: gjelder (utfyller B-062)
+Brukeren: man bør få beskjed før man går fra blokker til emner, fordi verket ikke kan lage blokker etterpå.
+Beslutning:
+- Et engangstips («Før du bytter støping») kommer når en støping med nytt produkt kan kjøpes. Det sier at man skal levere
+  ordrene på det gamle produktet først, ikke ta nye forespørsler (eventuelt skru av «Ta imot nye forespørsler»), og at
+  ubesvarte forespørsler trekkes tilbake ved byttet. Tipset gjelder bare støping et steg opp, ikke eldre typer.
+- «Kjøp» spør først: «Bytte fra blokker til emner? Etterpå kan verket ikke lage blokker lenger.» Spørsmålet sier også
+  hvor mange forespørsler som trekkes tilbake, om rammeavtaler avsluttes uten straff (men uten bonus), og hvor mye
+  som ligger på lageret og fortsatt kan selges.
+- Aktive rammeavtaler sperrer ikke byttet. Det ble prøvd, men da ble testspilleren stående på blokkstøping resten av
+  spillet (frø 1 endte på −17 mill. kr). Avtalene avsluttes i stedet uten straff (B-040).
