@@ -1367,3 +1367,15 @@ fravær konsistente). Rettet:
 Sett over, men ikke endret: fagpoeng, økonomi, rammeavtaler, fravær, planleggeren, hendelseskortene og
 prosessmodellen.
 
+## B-114 Ett varsel om gangen, på én linje (2026-09-25)
+Status: gjelder (erstatter visningen i B-098)
+Brukeren syntes varslene var i veien: opptil tre store varsler sto over menyen nederst og dekket knapper. Brukeren
+valgte «én smal linje» blant fire forslag.
+Beslutning:
+- Ett varsel om gangen, på én linje (ca. 40 px) rett over menyen. Står det flere i kø, vises «+N».
+- Hvert varsel står i 6 sekunder, eller 3,5 sekunder når flere venter, så køen ikke henger etter spillet.
+- Trykk på varselet åpner varsellista bak 🔔 med hele teksten, og tømmer køen. ✕ eller sveip fjerner det.
+- Svar på noe spilleren trykket på (f.eks. «For lite penger») står ikke i varsellista, så de vises helt (inntil to
+  linjer), og et trykk fjerner dem.
+- Valget under ⚙️ (alle, bare problemer, ingen) gjelder som før.
+
