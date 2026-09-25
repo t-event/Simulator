@@ -3,7 +3,7 @@
  */
 import { ADDONS, CASTINGS, FURNACES, GRADES, PRODUCTS, ROLES, SCRAP_IDS, STAGES, type Addon } from "./data";
 import { addCost, adjustMorale, bookTemps, fmtKr, fmtT, log, newCandidates, orderQueue, startReline, maxLoan, newFurnaceUnit, unlock, type PurchaseResult } from "./engine";
-import { castingType, computePlantStats, day, daysUntilAllBack, gradeRecipe, fixedPowerOffer, furnaceType, has, isAbsent, POWER_BINDING_DAYS } from "./plant";
+import { castingType, day, daysUntilAllBack, staffing, gradeRecipe, fixedPowerOffer, furnaceType, has, isAbsent, POWER_BINDING_DAYS } from "./plant";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
 import type { GameState, GradeId, PowerDeal, RoleId, ScrapId } from "./types";
 
@@ -265,7 +265,8 @@ export function hireForMissing(g: GameState): PurchaseResult {
   const cap = STAGES[g.stage].staffCap;
   let hired = 0;
   for (let guard = 0; guard < 200 && g.workers.length < cap; guard++) {
-    const missing = computePlantStats(g).missing;
+    // Fravær teller ikke: syke og folk på ferie kommer tilbake, så de dekkes av vikarer, ikke nye ansatte
+    const missing = staffing(g, true).missing;
     const roles = Object.entries(missing)
       .filter(([, n]) => (n ?? 0) > 0)
       .map(([r]) => r);
@@ -507,15 +508,15 @@ export function sendOnCourse(g: GameState, workerId: number): PurchaseResult {
 // ------------------------------------------------------------------ //
 /** Innleie til plassene som mangler for neste skift: halvannen gang lønna, teller ikke mot antall ansatte (B-050) */
 export function hiredCrewCost(g: GameState, days: number): number {
-  const missing = computePlantStats(g).missing;
+  const missing = staffing(g, true).missing;
   return Math.round(
     Object.entries(missing).reduce((a, [r, n]) => a + ROLES[r as RoleId].salary * (n ?? 0), 0) * 1.5 * days,
   );
 }
 
 export function hireTempCrew(g: GameState, days: number): PurchaseResult {
-  const stats = computePlantStats(g);
-  const missing = Object.entries(stats.missing).filter(([, n]) => (n ?? 0) > 0);
+  // Plasser ingen har (fravær dekkes av vikarer for fravær)
+  const missing = Object.entries(staffing(g, true).missing).filter(([, n]) => (n ?? 0) > 0);
   if (!missing.length) return fail("Det mangler ingen på skiftene.");
   const cost = hiredCrewCost(g, days);
   addCost(g, "lonn", cost);

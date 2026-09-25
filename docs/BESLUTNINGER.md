@@ -709,3 +709,16 @@ strømavtaler) og «Stødig drift» (spoling om natta). Låst automatikk vises m
 Uten salgsrutiner blir støpefeil liggende på lageret. Uten ordreplanlegging får spilleren et tips når første
 ordre vil ha en annen kvalitet enn ovnen lager. Gamle lagringer får de nye forskningene for nivået sitt, så
 ingenting slutter å virke. Felles sjekk: `auto(g, key)` i `research.ts`, bryter: `ui/AutoToggle.tsx`.
+
+## B-055 Gjennomgang: småfeil rettet (2026-09-25)
+Status: gjelder
+Brukeren ba om en gjennomgang av koden. Testet med en «tilfeldig spiller» (16 spill fra verksted til storverk,
+alle handlinger i tilfeldig rekkefølge, sjekk av NaN, negative lagre, lagring/lasting) og en klikk-gjennom av
+alle sider og underfaner på alle nivåer på mobil og desktop. Ingen krasj eller konsollfeil.
+Rettet:
+- Fullt lager med automatisk salg solgte alle støpefeil, også når spilleren hadde valgt omsmelting eller å
+  beholde dem.
+- «Ansett til manglende plasser» og innleie regnet syke og folk på ferie som manglende, så man ansatte fast folk
+  for et kortvarig fravær. Nå telles bare plasser ingen har; fravær dekkes av vikarer.
+- Folk som er borte, ble flinkere av å jobbe.
+- Tipset om natta lovte spoling, som nå krever «Stødig drift».

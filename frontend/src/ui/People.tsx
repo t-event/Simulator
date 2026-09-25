@@ -261,7 +261,9 @@ export function People({ g, stats, act }: Props) {
   >;
   // Tabellen viser neste skift hvis verket ikke går alle tre, ellers de tre som går
   const planShifts = Math.min(3, stats.shifts + (stats.shifts < 3 ? 1 : 0));
-  const missing = Object.entries(stats.missing).filter(([, n]) => (n ?? 0) > 0) as [RoleId, number][];
+  // Plasser som mangler uten å regne med fravær: det er dem man ansetter til (fravær dekkes av vikarer)
+  const permanent = staffing(g, true);
+  const missing = Object.entries(permanent.missing).filter(([, n]) => (n ?? 0) > 0) as [RoleId, number][];
   const away = g.workers.filter((w) => isAbsent(g, w));
   const fullShifts = staffing(g, true).shifts;
   const absenceCosts = away.length > 0 && !tempsActive(g) && stats.shifts < fullShifts;
@@ -318,9 +320,9 @@ export function People({ g, stats, act }: Props) {
                   </button>
                 </p>
               )}
-              {stats.shifts < 3 && cap > 0 && missing.length > 0 && (
+              {permanent.shifts < 3 && cap > 0 && missing.length > 0 && (
                 <div className="g-note">
-                  For {stats.shifts + 1} skift mangler:{" "}
+                  For {permanent.shifts + 1} skift mangler:{" "}
                   {missing
                     .map(([r, n]) => `${n} ${(n === 1 ? ROLES[r].name : ROLES[r].plural).toLowerCase()}`)
                     .join(", ")}

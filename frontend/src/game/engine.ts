@@ -1200,9 +1200,8 @@ export function sellLot(g: GameState, lotId: number, t?: number): PurchaseResult
 
 /** Selger partier ingen kontrakt venter på, til lageret er under målet. */
 export function sellExcess(g: GameState, stats: PlantStats, targetFraction: number): void {
-  for (const lot of [...g.lots]) {
-    if (lot.second) sellLot(g, lot.id);
-  }
+  // Støpefeil selges først, men bare hvis spilleren har valgt at de skal selges (ikke omsmelting eller beholde)
+  if (secondsAction(g) === "spot") for (const lot of [...g.lots]) if (lot.second) sellLot(g, lot.id);
   const reserved = lotReservations(g);
   for (const lot of [...g.lots]) {
     const over = lotsTonnage(g) - stats.storeT * targetFraction;
@@ -2135,7 +2134,8 @@ function onDay(g: GameState, stats: PlantStats): void {
   // Folk blir flinkere av å jobbe
   if (stats.hours > 0) {
     const growth = (hasResearch(g, "opplaering") ? 0.04 : 0.025) * (0.5 + g.morale / 100);
-    for (const w of g.workers) w.skill = Math.min(5, w.skill + growth);
+    // Bare de som er på jobb, blir flinkere av å jobbe
+    for (const w of g.workers) if (!isAbsent(g, w)) w.skill = Math.min(5, w.skill + growth);
     if (stats.ownerWorks) g.ownerSkill = Math.min(4.5, g.ownerSkill + 0.04);
   }
   updateMorale(g, stats);
