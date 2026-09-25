@@ -639,7 +639,7 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
                       ) : (
                         <Bar value={0} />
                       )}
-                      <p>{st.text}</p>
+                      <p className="g-chain-state">{st.text}</p>
                       <p className="g-muted">Foring {fmtPct(f.wear)} slitt</p>
                       <StationButton g={g} station="ovn" onOpen={setSheet} />
                     </div>

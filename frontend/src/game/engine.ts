@@ -2017,6 +2017,16 @@ function updateAbsence(g: GameState, stats: PlantStats): void {
   }
 }
 
+/** Navn og stilling, f.eks. «Kari Berg (støper)», så spilleren ser hvilken plass som må fylles (B-066) */
+export function workerLabel(w: Worker): string {
+  return `${w.name} (${ROLES[w.role].name.toLowerCase()})`;
+}
+
+/** Hvem som sluttet, med stilling, og hva spilleren bør gjøre (B-066) */
+export function quitText(ws: Worker[]): string {
+  return `${ws.map(workerLabel).join(", ")} har sagt opp. Ansett ${ws.length === 1 ? "en ny" : "nye"} under Folk → Ansett.`;
+}
+
 /** Trivselen driver mot det normale, nattarbeid tærer, og misfornøyde folk slutter (B-026) */
 function updateMorale(g: GameState, stats: PlantStats): void {
   if (!g.workers.length) return;
@@ -2028,7 +2038,7 @@ function updateMorale(g: GameState, stats: PlantStats): void {
       g.workers = g.workers.filter((w) => !quitters.includes(w));
       log(
         g,
-        `${quitters.map((w) => w.name).join(", ")} sa opp. Trivselen er lav – gi bonus, send folk på kurs eller unngå nattskift.`,
+        `${quitText(quitters)} Trivselen er lav – gi bonus, send folk på kurs eller unngå nattskift.`,
         "bad",
       );
     }

@@ -1812,6 +1812,8 @@ button {
   color: var(--text-dim);
   font-size: 11px;
   line-height: 1.2;
+  /* Alltid plass til to linjer, så siden ikke hopper når «Venter på støping» kommer og går (B-066) */
+  min-height: 2.4em;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -1982,4 +1984,9 @@ button {
 /* Skrap-knappen i produksjonslinja når resepten mangler en skraptype (B-063) */
 .g-mini.is-alert {
   border-color: var(--warning);
+}
+
+/* Tilstanden til ovnen under Anlegg: fast høyde, så kortet ikke hopper (B-066) */
+.g-chain-state {
+  min-height: 2.6em;
 }

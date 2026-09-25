@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 38 – 2026-09-25: Oversikt som hopper, og stilling i oppsigelser
+
+**Brukeren ba om:** Oversikt hoppet opp og ned når «Venter på» kom under ovnen; oppsigelsesvarselet skal si
+hvilken stilling personen hadde.
+
+**Gjort (B-066):** Fast høyde på teksten i produksjonslinja og ovnstilstanden under Anlegg. Oppsigelser og skader
+viser stilling og peker til Folk → Ansett.
+
+**Testet:** tsc, lint, balanse (exit 0), Playwright på iPhone SE og iPhone 13 med spillet på 10× i 18 sekunder:
+knapperaden hadde samme høyde hele tida.
+
+**Gjenstår:** spørsmålet om storverket (mer innhold eller lavere vinnergrense).
+
+---
+
 ## Økt 37 – 2026-09-25: tall på Ovn-knappen
 
 **Brukeren ba om:** Varsel på Ovn-knappen i Oversikt når man kan kjøpe oppgraderinger (B-061 dekket bare Anlegg).
