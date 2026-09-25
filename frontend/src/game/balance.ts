@@ -20,12 +20,13 @@ import {
   sendOnCourse,
   setRecipe,
   setTargetGrade,
+  unitId,
   upgradeOptions,
 } from "./actions";
 import { resolveDecision } from "./decisions";
 import { answerQuiz, QUIZ, quizAvailable } from "./quiz";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
-import { CASTINGS, SCRAP_IDS, STAGES } from "./data";
+import { ADDONS, CASTINGS, FURNACES, SCRAP_IDS, STAGES } from "./data";
 import {
   acceptAgreement,
   acceptContract,
@@ -245,7 +246,7 @@ function botHour(g: GameState): void {
   if (novice) {
     const wanted = upgradeOptions(g)
       .filter((o) => !o.owned && !o.locked && o.stage === g.stage && o.reason?.startsWith("Forsk fram"))
-      .map((o) => missingResearchFor(g, o.id)?.id);
+      .map((o) => missingResearchFor(g, o.baseId)?.id);
     const options = researchOptions(g);
     const want = options.find((x) => wanted.includes(x.id));
     const pick = want
@@ -256,7 +257,7 @@ function botHour(g: GameState): void {
     if (pick) doResearch(g, pick.id);
     // Står forskningen fast, følger nybegynneren hintet og kjøper et forskningssamarbeid når det er penger til overs (B-064)
     const key = keyUpgrade(g);
-    const keyResearch = key?.reason?.startsWith("Forsk fram") ? missingResearchFor(g, key.id) : undefined;
+    const keyResearch = key?.reason?.startsWith("Forsk fram") ? missingResearchFor(g, key.baseId) : undefined;
     const need = keyResearch ? keyResearch.cost - g.researchPoints : 0;
     const deal = fpDeal(g);
     if (need > 0 && !deal.reason && g.cash > deal.price * 10) buyFpDeal(g);
@@ -395,7 +396,13 @@ function botHour(g: GameState): void {
     ["renseanlegg", "lysbue30", "streng1", "oseovn", "conveyor", "trafo", "valseverk"],
     ["lysbue90", "streng4"],
   ];
-  const order = [...(g.lastRadioDay !== undefined ? ["portal"] : []), ...perStage[g.stage], `stage${g.stage + 1}`];
+  // Ovnstyper og ovnsutstyr kjøpes per ovn (B-074): ovn 1 først, så de andre
+  const perUnit = new Set([...FURNACES.map((f) => f.id), ...ADDONS.filter((a) => a.perFurnace).map((a) => a.id)]);
+  const order = [
+    ...(g.lastRadioDay !== undefined ? ["portal"] : []),
+    ...perStage[g.stage],
+    `stage${g.stage + 1}`,
+  ].flatMap((id) => (perUnit.has(id) ? g.furnaces.map((_, i) => unitId(id, i)) : [id]));
   const options = upgradeOptions(g);
   noteWait(g, options);
   if (novice) {

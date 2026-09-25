@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { requestReline } from "../game/actions";
 import { PLAN_SAFETY_WEAR } from "../game/engine";
+import { unitType } from "../game/plant";
 import {
   day,
   liningDays,
@@ -79,6 +80,8 @@ export function Maintenance({
         {whoRelines ?? "Ingen bytter foringen for deg. Trykk «Bytt foring» før den er 85 % slitt."}
       </p>
       {g.furnaces.map((f, i) => {
+        // Hver ovn har sin egen type (B-074)
+        const u = unitType(g, i);
         const tone = f.wear > 0.85 ? "critical" : f.wear > 0.6 ? "warning" : "ok";
         const busy = !!f.heat || !!f.holding;
         const down = g.minute < f.downUntilMin;
@@ -86,7 +89,7 @@ export function Maintenance({
           <div className="g-maint" key={i}>
             <div className="g-contract-head">
               <strong>
-                {f0.name}
+                {u.name}
                 {g.furnaces.length > 1 ? ` nr. ${i + 1}` : ""}
               </strong>
               <span className="g-muted">Byttet dag {f.lastRelineDay}</span>
@@ -96,7 +99,7 @@ export function Maintenance({
               {fmtPct(f.wear)} slitt · {day(g) - f.lastRelineDay} døgn siden omforing
               {down && f.downReason ? ` · ${f.downReason}` : ""}
             </p>
-            {f0.arc && (
+            {u.arc && (
               <p className={f.spareProgress >= 1 ? "g-muted" : "g-note"}>
                 {f.spareProgress >= 1
                   ? "Reservepotte: klar ✓ – neste bytte tar bare noen timer."
@@ -115,12 +118,12 @@ export function Maintenance({
                 : f.wear < 0.1
                   ? "Foringen er ny"
                   : busy
-                    ? f0.arc && f.spareProgress >= 1
+                    ? u.arc && f.spareProgress >= 1
                       ? "Bytt potte etter denne chargen"
                       : "Bytt foring etter denne chargen"
-                    : f0.arc && f.spareProgress >= 1
+                    : u.arc && f.spareProgress >= 1
                       ? `Bytt potte nå (${swapHours} timer)`
-                      : `${f0.arc ? "Mur om i ovnen" : "Bytt foring nå"} (${fmtKr(f0.relineCost)})`}
+                      : `${u.arc ? "Mur om i ovnen" : "Bytt foring nå"} (${fmtKr(u.relineCost)})`}
             </button>
           </div>
         );

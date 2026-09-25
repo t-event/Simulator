@@ -587,6 +587,8 @@ export interface Addon {
   crew?: Crew;
   /** Krever at ovnen er en lysbueovn */
   needsArc?: boolean;
+  /** Kjøpes per ovn, ikke for hele verket (B-074) */
+  perFurnace?: boolean;
   needsContinuous?: boolean;
   requires?: string[];
   description: string;
@@ -674,6 +676,7 @@ export const ADDONS: Addon[] = [
     stage: 3,
     price: 3_500_000,
     needsArc: true,
+    perFurnace: true,
     description: "Mater skrapet kontinuerlig inn og forvarmer det med avgassen. Mindre strøm per tonn.",
   },
   {
@@ -682,6 +685,7 @@ export const ADDONS: Addon[] = [
     stage: 3,
     price: 2_500_000,
     needsArc: true,
+    perFurnace: true,
     description: "Mer effekt i lysbuen gir kortere tapp-til-tapp.",
   },
   {

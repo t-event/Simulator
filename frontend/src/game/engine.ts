@@ -67,6 +67,8 @@ import {
   satisfies,
   satisfiedGrades,
   type PlantStats,
+  unitType,
+  unitView,
 } from "./plant";
 import { chance, noise, pick, rand, randInt, uniform } from "./random";
 import type {
@@ -126,6 +128,7 @@ export function newFurnaceUnit(today = 1): FurnaceUnit {
     spareProgress: 1,
     grade: null,
     waitReason: null,
+    addons: [],
   };
 }
 
@@ -453,7 +456,7 @@ export function scrapShort(g: GameState, stats = computePlantStats(g)): ScrapId[
   for (let i = 0; i < g.furnaces.length; i++) {
     const r = gradeRecipe(g, furnaceGrade(g, i));
     const sum = SCRAP_IDS.reduce((a, id) => a + r[id], 0) || 1;
-    for (const id of SCRAP_IDS) need[id] += (stats.sizeT * r[id]) / sum;
+    for (const id of SCRAP_IDS) need[id] += ((stats.units[i]?.sizeT ?? stats.sizeT) * r[id]) / sum;
   }
   return SCRAP_IDS.filter((id) => need[id] > 1e-6 && g.scrap[id].t < need[id]);
 }
@@ -617,7 +620,9 @@ function tempOffRisk(g: GameState, stats: PlantStats): number {
   return risk * (1.3 - 0.1 * stats.crewSkill);
 }
 
-function startHeat(g: GameState, index: number, stats: PlantStats): boolean {
+function startHeat(g: GameState, index: number, plant: PlantStats): boolean {
+  // Størrelse, tid og strøm etter akkurat denne ovnen (B-074)
+  const stats = unitView(plant, index);
   const f = g.furnaces[index];
   const size = stats.sizeT;
   const grade = furnaceGrade(g, index);
@@ -684,7 +689,8 @@ function startHeat(g: GameState, index: number, stats: PlantStats): boolean {
 }
 
 /** Hendelser i løpet av en charge. Returnerer ekstra minutter chargen tar. */
-function heatEvents(g: GameState, index: number, stats: PlantStats): number {
+function heatEvents(g: GameState, index: number, plant: PlantStats): number {
+  const stats = unitView(plant, index);
   const f = g.furnaces[index];
   const m = stats.maintFactor;
   const furnace = stats.furnace;
@@ -726,7 +732,8 @@ function heatEvents(g: GameState, index: number, stats: PlantStats): number {
   return extra;
 }
 
-function finishHeat(g: GameState, index: number, stats: PlantStats): void {
+function finishHeat(g: GameState, index: number, plant: PlantStats): void {
+  const stats = unitView(plant, index);
   const f = g.furnaces[index];
   const heat = f.heat;
   if (!heat) return;
@@ -805,9 +812,11 @@ function finishHeat(g: GameState, index: number, stats: PlantStats): void {
 export function startReline(
   g: GameState,
   index: number,
-  stats = computePlantStats(g),
+  plant = computePlantStats(g),
   why: "manuell" | "plan" | "reparatør" | "spesialist" = "manuell",
 ): PurchaseResult {
+  // Foring, pris og tid etter akkurat denne ovnen (B-074)
+  const stats = unitView(plant, index);
   const f = g.furnaces[index];
   if (!f) return { ok: false, message: "Ukjent ovn." };
   if (f.heat || f.holding) return { ok: false, message: "Ovnen må være tom før foringen kan byttes." };
@@ -825,7 +834,7 @@ export function startReline(
   }[why];
   // Lysbueovn med ferdig reservepotte: bytt potte på noen timer, og la murerne mure opp den slitte (B-030)
   if (stats.furnace.arc && f.spareProgress >= 1) {
-    const swap = potSwapHours(g) * stats.repairFactor;
+    const swap = potSwapHours(g, index) * stats.repairFactor;
     f.wear = 0;
     f.heatsOnLining = 0;
     f.lastRelineDay = day(g);
@@ -921,7 +930,7 @@ function updateFurnaces(g: GameState, stats: PlantStats): void {
     }
     if (
       g.settings.maxPowerPrice !== null &&
-      stats.furnace.fuel === "strøm" &&
+      unitView(stats, i).furnace.fuel === "strøm" &&
       energyPrice(g) > g.settings.maxPowerPrice
     ) {
       f.waitReason = "Strømprisen er over grensen";
@@ -933,7 +942,8 @@ function updateFurnaces(g: GameState, stats: PlantStats): void {
     }
     if (!startHeat(g, i, stats)) {
       const was = f.waitReason;
-      f.waitReason = hasGrader(g) && stats.yardUsed >= stats.sizeT ? "Mangler skrap til resepten" : "Tomt for skrap";
+      f.waitReason =
+        hasGrader(g) && stats.yardUsed >= unitView(stats, i).sizeT ? "Mangler skrap til resepten" : "Tomt for skrap";
       // Tydelig varsel når ovnen blir stående uten skrap (B-033)
       if (was !== f.waitReason && i === 0)
         log(
@@ -1876,7 +1886,7 @@ function updatePots(g: GameState, stats: PlantStats, dt: number): void {
   const perDay = potRebuildPerDay(g);
   if (perDay <= 0 || !masonsAtWork(g)) return;
   g.furnaces.forEach((f, i) => {
-    if (f.spareProgress >= 1) return;
+    if (f.spareProgress >= 1 || !unitType(g, i).arc) return;
     // Hele døgnets oppmuring gjøres i arbeidstida
     f.spareProgress = Math.min(1, f.spareProgress + (perDay * dt) / (MASON_HOURS * 60));
     if (f.spareProgress >= 1) log(g, `Murerne er ferdige: reservepotta til ovn ${i + 1} er klar.`, "good");
@@ -2112,7 +2122,7 @@ export function autoBuy(
   const note = (text: string, id: ScrapId) =>
     void (g.autoBuyNote = g.autoBuyNote ?? `${SCRAP_TYPES[id].name.toLowerCase()}: ${text}`);
   const need = Math.max(
-    stats.sizeT * stats.furnaceCount * 2,
+    stats.units.reduce((a, u) => a + u.sizeT, 0) * 2,
     (stats.dailyProductT / stats.castYield) * 1.1 * g.settings.autoBuyDays,
   );
   for (const id of recipeIds) {
@@ -2313,8 +2323,8 @@ function step(g: GameState, dt: number): void {
   let stats = computePlantStats(g);
   updateFurnaces(g, stats);
   updatePots(g, stats, dt);
-  // Effekttoppen: hvor mange ovner som smelter samtidig
-  const mw = g.furnaces.filter((f) => f.heat).length * stats.furnaceMW;
+  // Effekttoppen: effekten til ovnene som smelter samtidig (B-074: hver ovn sin effekt)
+  const mw = g.furnaces.reduce((a, f, i) => a + (f.heat ? (stats.units[i]?.furnaceMW ?? stats.furnaceMW) : 0), 0);
   if (mw > (g.today.peakMW ?? 0)) g.today.peakMW = mw;
   updateCasting(g, stats, dt);
   updateRolling(g, stats, dt);
@@ -2364,7 +2374,7 @@ export function completeManual(g: GameState, result: ManualResult | null): void 
   g.pendingManual = null;
   g.speed = req.resumeSpeed;
   const f = g.furnaces[req.furnace];
-  const stats = computePlantStats(g);
+  const stats = unitView(computePlantStats(g), req.furnace);
   if (!result) {
     // Avbrutt: automatikken kjører chargen i stedet
     const heat = autoHeatFromRequest(g, req, stats);

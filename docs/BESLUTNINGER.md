@@ -949,3 +949,21 @@ Folk → Skift viser skiftordningen, hva neste lag gir, hva som mangler og en kn
 «Ansett til manglende plasser» ansetter som før bare til tre skift (`hireForMissing(g, targetCrews)`).
 Målt på storverket i 30 døgn: 3 lag mistet 151 skifttimer til fravær, 4 og 5 lag ingen; 5 lag ga 25 % færre
 sykemeldinger per ansattdøgn (fem spill). Testspilleren bruker ikke 4- og 5-skift; balansen er uendret.
+
+## B-074 Oppgraderinger per ovn (2026-09-25)
+Status: gjelder (erstatter at ovnstype og ovnsutstyr gjaldt alle ovnene, fra runden med «Ovn 2 skal ha egen
+utstyrsbutikk»)
+Brukeren: når man kjøper en oppgradering på ovn 1, skal den ikke komme på ovn 2 også.
+Beslutning:
+- Hver ovn har sin egen **type** (`FurnaceUnit.type`) og sitt eget **ovnsutstyr** (`FurnaceUnit.addons`:
+  transformator og conveyor, `Addon.perFurnace`). De kjøpes for én ovn om gangen, til enkeltpris. Utstyr for ovn 2
+  har id-en «trafo@1» osv. (`unitId`, `UpgradeOption.unit`/`baseId`). Utstyr for hele verket (røykgassrensing,
+  øseovn, ovn nr. 2 …) er som før.
+- Charger, strøm, effekt, slitasje, foring og pottebytte regnes per ovn med `unitView(stats, i)`; kapasitet og
+  mannskap summeres over ovnene. Verkets ovnstype (`furnaceType`, `g.furnaceType`) er den mest avanserte ovnen og
+  brukes til det som gjelder hele verket (lysbue eller ikke, forskning, kontrollrommet).
+- Bygges en lysbueovn om til induksjonsovn, forsvinner lysbueutstyret fra den ovnen. En ny ovn nr. 2 er av samme
+  type som ovn 1, uten ekstra utstyr. Murerne bygger bare potter til lysbueovner.
+- Utstyrsarket for Ovn viser «Hele verket», «Ovn 1 – …» og «Ovn 2 – …».
+- Gamle lagringer: `migrate` gir hver ovn verkets type og flytter transformator/conveyor fra `owned` til ovnene.
+- Testspilleren kjøper ovnstyper og ovnsutstyr til alle ovnene. Balanse 8 / 26 / 66 / 134.

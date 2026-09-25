@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 44 – 2026-09-25: oppgraderinger per ovn
+
+**Brukeren ba om:** Oppgraderinger skal kjøpes per ovn, ikke komme på begge.
+
+**Gjort (B-074):** Egen type og eget utstyr per ovn, per-ovn-beregning av charger/strøm/slitasje (`unitView`),
+utstyrsark gruppert per ovn, migrering av gamle lagringer, testspilleren kjøper per ovn.
+
+**Testet:** tsc, lint, balanse (8 / 26 / 66 / 134, nybegynner 155, exit 0), headless: bare ovn 1 bygges om til
+lysbue med transformator, ovn 2 lager fortsatt 5 t-charger; Playwright: utstyrsarket per ovn.
+
+**Gjenstår:** flere oppgraderinger på storverket, kontrollrommet.
+
+---
+
 ## Økt 43 – 2026-09-25: 4- og 5-skift
 
 **Brukeren ba om:** 4 og 5 skift, så mange ansatte gir mening.

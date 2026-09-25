@@ -6,7 +6,23 @@
  * stålverk drives.
  */
 import { SCRAP_TYPES, STAGES } from "./data";
-import { acceptContract, addCost, addIncome, addScrapParti, adjustMorale, adjustReputation, countEvent, fmtKr, fmtT, log, makeCandidate, quitText, scrapPrice, unlock, workerLabel } from "./engine";
+import {
+  acceptContract,
+  addCost,
+  addIncome,
+  addScrapParti,
+  adjustMorale,
+  adjustReputation,
+  countEvent,
+  fmtKr,
+  fmtT,
+  log,
+  makeCandidate,
+  quitText,
+  scrapPrice,
+  unlock,
+  workerLabel,
+} from "./engine";
 import { computePlantStats, day, isAbsent, productPrice, satisfiedGrades } from "./plant";
 import { chance, pick, rand, uniform } from "./random";
 import { knowledgeCard } from "./knowledge";
@@ -27,7 +43,10 @@ const MAKERS: Record<string, Maker> = {
       title: "Billig skrapparti",
       text: `En skraphandler du ikke kjenner tilbyr ${fmtT(t)} blandet skrap for ${fmtKr(price)} – halv pris. Han vil ikke si hvor det kommer fra.`,
       options: [
-        { label: `Kjøp for ${fmtKr(price)}`, hint: "Billig, men ukjent skrap kan ha mye fosfor og kobber – eller verre." },
+        {
+          label: `Kjøp for ${fmtKr(price)}`,
+          hint: "Billig, men ukjent skrap kan ha mye fosfor og kobber – eller verre.",
+        },
         { label: "Nei takk" },
       ],
       data: { t, price },
@@ -73,7 +92,9 @@ const MAKERS: Record<string, Maker> = {
       { label: "Si ja", hint: "Godt for omdømmet – med mindre det har vært bråk med kunder nylig." },
       { label: "Nei takk" },
     ],
-    data: { recentComplaints: g.log.filter((e) => e.min > g.minute - 10 * 1440 && e.text.includes("reklamerer")).length },
+    data: {
+      recentComplaints: g.log.filter((e) => e.min > g.minute - 10 * 1440 && e.text.includes("reklamerer")).length,
+    },
   }),
   messe: (g) => {
     if (g.stage < 1) return null;
@@ -118,18 +139,22 @@ const MORE_MAKERS: Record<string, Maker> = {
     if (stats.furnaceMW <= 0 || stats.hours <= 0) return null;
     const hours = 4;
     // Tapt produksjon de fire timene, og en godtgjørelse som noen ganger lønner seg og noen ganger ikke
-    const lostT = ((hours * 60) / stats.cycleMin) * stats.sizeT * stats.furnaceCount * 0.9;
-    const pay = Math.round((lostT * productPrice(g, stats.mainProduct, "standard") * uniform(g, 0.15, 0.45)) / 100) * 100;
-    const mw = stats.furnaceMW * stats.furnaceCount;
+    const lostT = stats.units.reduce((a, u) => a + ((hours * 60) / u.cycleMin) * u.sizeT * 0.9, 0);
+    const pay =
+      Math.round((lostT * productPrice(g, stats.mainProduct, "standard") * uniform(g, 0.15, 0.45)) / 100) * 100;
+    const mw = stats.units.reduce((a, u) => a + u.furnaceMW, 0);
     return {
       id: "utkobling",
       title: "Nettselskapet ringer",
       text: `Strømnettet er hardt belastet. Nettselskapet ber deg koble ut ovnene (${mw.toFixed(1).replace(".", ",")} MW) i morgen kl. 07–11 og tilbyr ${fmtKr(pay)} for det.`,
       options: [
-        { label: `Godta (${fmtKr(pay)})`, hint: `Ingen nye charger i fire timer – omtrent ${fmtT(lostT)} mindre stål.` },
+        {
+          label: `Godta (${fmtKr(pay)})`,
+          hint: `Ingen nye charger i fire timer – omtrent ${fmtT(lostT)} mindre stål.`,
+        },
         { label: "Nei takk", hint: "Har du dårlig tid med leveranser, er det tryggest å si nei." },
       ],
-      data: { pay, from: (day(g)) * 1440 + 7 * 60, until: day(g) * 1440 + 11 * 60 },
+      data: { pay, from: day(g) * 1440 + 7 * 60, until: day(g) * 1440 + 11 * 60 },
     };
   },
   kurs: (g) => {
@@ -140,7 +165,10 @@ const MORE_MAKERS: Record<string, Maker> = {
       id: "kurs",
       title: "Kurs for operatørene",
       text: `En leverandør tilbyr et kurs i smelting og støping for ${trainees.length} av dine folk. Det koster ${fmtKr(cost)}.`,
-      options: [{ label: "Send dem på kurs", hint: "Flinkere folk gir kortere charger og færre feil." }, { label: "Ikke nå" }],
+      options: [
+        { label: "Send dem på kurs", hint: "Flinkere folk gir kortere charger og færre feil." },
+        { label: "Ikke nå" },
+      ],
       data: { cost },
     };
   },
@@ -206,7 +234,10 @@ const MORE_MAKERS: Record<string, Maker> = {
           label: `Kjøp verneutstyr og skjermer (${fmtKr(cost)})`,
           hint: "Ingen skal skades på jobb. Folk og kunder merker det.",
         },
-        { label: "La det gå denne gangen", hint: "Folk merker at sikkerheten ikke prioriteres – og neste gang kan det gå verre." },
+        {
+          label: "La det gå denne gangen",
+          hint: "Folk merker at sikkerheten ikke prioriteres – og neste gang kan det gå verre.",
+        },
       ],
       data: { cost },
     };
@@ -422,7 +453,9 @@ export function resolveDecision(g: GameState, option: number): void {
       log(g, "Operatørene er tilbake fra kurs og har lært mye.", "good");
       return;
     case "sykdom": {
-      const ids = String(d.data.ids ?? "").split(",").map(Number);
+      const ids = String(d.data.ids ?? "")
+        .split(",")
+        .map(Number);
       const until = g.minute + n("days") * 1440;
       for (const w of g.workers)
         if (ids.includes(w.id)) {
@@ -462,7 +495,11 @@ export function resolveDecision(g: GameState, option: number): void {
         addCost(g, "annet", n("cost"));
         adjustMorale(g, 5);
         adjustReputation(g, 1);
-        log(g, "Nytt verneutstyr og sprutskjermer er på plass. De ansatte er fornøyde (trivsel +5), omdømme +1.", "good");
+        log(
+          g,
+          "Nytt verneutstyr og sprutskjermer er på plass. De ansatte er fornøyde (trivsel +5), omdømme +1.",
+          "good",
+        );
       } else if (chance(g, 0.35) && g.workers.length) {
         const hurt = pick(g, g.workers);
         g.workers = g.workers.filter((w) => w !== hurt);

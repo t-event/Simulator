@@ -4,6 +4,7 @@
  */
 import { grantResearchForOwned } from "./actions";
 import { RESEARCH } from "./research";
+import { ADDONS } from "./data";
 
 /** Forskning som ble lagt til med B-054; de andre automatikk-forskningene fantes fra før */
 const NEW_AUTOMATION = ["salgsrutiner", "ordreplan", "innkjop", "bemanning"];
@@ -130,6 +131,13 @@ export function migrate(g: GameState): GameState {
     g.settings.autoReline = g.workers.some((w) => w.role === "vedlikehold");
   }
   for (const f of g.furnaces) if (f.relineRequested === undefined) f.relineRequested = false;
+  // Før B-074 hadde alle ovnene samme type og utstyr; nå har hver ovn sin egen
+  const perFurnace = ADDONS.filter((a) => a.perFurnace).map((a) => a.id);
+  for (const f of g.furnaces) {
+    if (f.type === undefined) f.type = g.furnaceType;
+    if (f.addons === undefined) f.addons = g.owned.filter((id) => perFurnace.includes(id));
+  }
+  g.owned = g.owned.filter((id) => !perFurnace.includes(id));
   // Ovner kjøpt før B-038 fikk «byttet dag 1»: anslå dagen ut fra antall charger på foringen
   const today = Math.floor(g.minute / 1440) + 1;
   for (const f of g.furnaces)
