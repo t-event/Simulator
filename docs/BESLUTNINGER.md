@@ -860,3 +860,13 @@ merket på underfanen Anlegg.
 Beslutning: knappene Skrap, Ovn, Støping og Lager viser hvor mye utstyr på det stedet du kan kjøpe og har råd til
 (`stationReady` i `stations.ts`). Har knappen et tall, åpner et trykk utstyret for stedet direkte; ellers går den dit
 den gikk før. Mangler resepten skrap, vinner «!» på Skrap-knappen, og den går til Marked.
+
+## B-066 Oversikt hopper ikke, og oppsigelser sier hvilken stilling (2026-09-25)
+Status: gjelder
+Brukeren meldte at Oversikt flyttet seg opp og ned på noen enheter når «Venter på …» kom under Ovn, og at
+varselet om oppsigelse burde si hvilken stilling personen hadde.
+- Teksten under knappene i produksjonslinja har alltid plass til to linjer (og kuttes etter to), så knappene har
+  samme høyde uansett tilstand. Ovnstilstanden under Anlegg har også fast høyde. Målt med spillet på 10×:
+  knapperaden hadde én og samme høyde hele tida på både iPhone SE og iPhone 13.
+- Oppsigelser (lav trivsel, lønnskrav) og skader sier navn og stilling, f.eks. «Kari Berg (støper) har sagt opp»,
+  og at man ansetter en ny under Folk → Ansett (`workerLabel`, `quitText` i `engine.ts`).

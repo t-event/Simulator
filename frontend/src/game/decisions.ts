@@ -6,7 +6,7 @@
  * stålverk drives.
  */
 import { SCRAP_TYPES, STAGES } from "./data";
-import { acceptContract, addCost, addIncome, addScrapParti, adjustMorale, adjustReputation, fmtKr, fmtT, log, makeCandidate, scrapPrice, unlock } from "./engine";
+import { acceptContract, addCost, addIncome, addScrapParti, adjustMorale, adjustReputation, fmtKr, fmtT, log, makeCandidate, quitText, scrapPrice, unlock, workerLabel } from "./engine";
 import { computePlantStats, day, isAbsent, productPrice, satisfiedGrades } from "./plant";
 import { chance, pick, rand, uniform } from "./random";
 import { knowledgeCard } from "./knowledge";
@@ -369,7 +369,7 @@ export function resolveDecision(g: GameState, option: number): void {
         const quitter = pick(g, g.workers);
         g.workers = g.workers.filter((w) => w !== quitter);
         adjustMorale(g, -5);
-        log(g, `Mottilbudet ble for lavt. Dere møttes på 3 %, men ${quitter.name} sa opp i protest.`, "bad");
+        log(g, `Mottilbudet ble for lavt. Dere møttes på 3 %, men ${quitText([quitter])}`, "bad");
       } else {
         adjustMorale(g, -15);
         const quitters = g.workers.filter(() => chance(g, 0.12)).slice(0, 3);
@@ -377,7 +377,7 @@ export function resolveDecision(g: GameState, option: number): void {
         log(
           g,
           quitters.length
-            ? `Lønnskravet ble avslått. ${quitters.map((w) => w.name).join(", ")} sa opp.`
+            ? `Lønnskravet ble avslått. ${quitText(quitters)}`
             : "Lønnskravet ble avslått. Stemningen er dårlig, men alle blir.",
           quitters.length ? "bad" : "info",
         );
@@ -467,7 +467,11 @@ export function resolveDecision(g: GameState, option: number): void {
         adjustMorale(g, -15);
         addCost(g, "bot", 50_000 * (1 + g.stage));
         adjustReputation(g, -4);
-        log(g, `${hurt.name} ble skadet ved tappingen og er sykmeldt på ubestemt tid. Bot fra tilsynet og omdømme −4.`, "bad");
+        log(
+          g,
+          `${workerLabel(hurt)} ble skadet ved tappingen og er sykmeldt på ubestemt tid. Bot fra tilsynet og omdømme −4. Ansett en ny under Folk → Ansett.`,
+          "bad",
+        );
       } else {
         adjustMorale(g, -5);
         adjustReputation(g, -1);
