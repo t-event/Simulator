@@ -134,7 +134,7 @@ Spilleren ser: fanen «Toppliste» (under Verket, eller bak 🏆 i toppen) med k
 
 Spilleren ser: «Sesong 1 – 18 dager igjen» øverst på topplista, ligaen sin, ukas hendelse på Marked.
 
-- Sesong på 4 uker. Ved slutt: merker (vises ved kallenavnet), plassering i historikken, og en liten fordel inn i
+- Sesong på 6 måneder (B-130; var 4 uker). Ved slutt: merker (vises ved kallenavnet), plassering i historikken, og en liten fordel inn i
   neste sesong (fagpoeng eller startkapital i nytt spill+). Spillet fortsetter, ingen nullstilles.
 - Ligaer etter nivå: **Bronse** (støperi og stålverk), **Sølv** (storverk), **Gull** (konsern). Man rykker opp
   når man flytter.
@@ -181,7 +181,7 @@ Spilleren ser: fanen «Anbud» under Salg og «Auksjon» under Marked, fra nivå
 | Ansette salgsdirektør | 30 minutter | Rekruttering |
 | Skrapauksjon | avgjøres hver kveld kl. 20 | Alle må rekke å by |
 | Anbud fra storkunde | 48 timer å by, nytt hver tredje dag | Gir tid til å planlegge |
-| Sesong | 4 uker | Lang nok til å komme fra garasje til konsern |
+| Sesong | 6 måneder (B-130) | Lang nok til å komme fra garasje til konsern, og til at folk kan være borte en stund |
 
 Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
 
@@ -228,6 +228,6 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
 
 - Fase 0 og 1 er bygget (B-125, B-126). Fase 2 (toppliste) er bygget (B-127). Fase 3 (sesonger, ligaer og felles
   hendelser) er bygget (B-129). Fase 4 er neste.
-- **Slik starter du en ny sesong:** i SQL Editor: `select public.start_season('Sesong 2', 4);` (navn, antall uker).
+- **Slik starter du en ny sesong:** i SQL Editor: `select public.start_season('Sesong 2', 26);` (navn, antall uker; 26 = seks måneder, B-130).
   **Slik legger du ut en hendelse:** `select public.add_event('skrapmangel', 7);` (skrapmangel, stromkrise,
   eksportboom, importpress, transportstreik; antall dager). Claude kan gjøre begge deler gjennom connectoren.

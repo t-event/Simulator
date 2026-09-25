@@ -193,8 +193,8 @@ $$;
 grant execute on function public.season_status() to anon, authenticated;
 
 -- Starter en ny sesong: den som pågår avsluttes nå, og resultatet regnes ut. Bare fra SQL Editor / connectoren.
--- Eksempel: select public.start_season('Sesong 2', 4);
-create or replace function public.start_season(name text, weeks int default 4)
+-- Eksempel: select public.start_season('Sesong 2', 26); (26 uker = seks måneder, B-130)
+create or replace function public.start_season(name text, weeks int default 26)
 returns int
 language plpgsql
 security definer
