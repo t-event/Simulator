@@ -2366,6 +2366,8 @@ export interface ManualResult {
   deviations: string[];
   /** Karakter 1–5 fra den enkle styringen */
   stars?: number;
+  /** Andel av stålet som gikk tapt ut slaggdøra eller over øsa (B-076) */
+  lossFraction?: number;
 }
 
 /** Legger en charge spilleren kjørte selv inn i produksjonen. */
@@ -2395,7 +2397,8 @@ export function completeManual(g: GameState, result: ManualResult | null): void 
     startMin: g.minute,
     endMin: g.minute + result.minutes,
     sizeT: req.sizeT,
-    liquidT: req.sizeT * req.metallicYield,
+    // Stål som rant ut slaggdøra eller over øsa, er tapt (B-076)
+    liquidT: req.sizeT * req.metallicYield * (1 - (result.lossFraction ?? 0)),
     grade: req.grade,
     analysis,
     expected: { c: TARGET_C[req.grade], p: result.phosphorusPct, tramp: req.expectedMix.tramp },
@@ -2417,6 +2420,12 @@ export function completeManual(g: GameState, result: ManualResult | null): void 
   } else {
     log(g, `Du kjørte charge i ovn ${req.furnace + 1} selv, med avvik: ${result.deviations.join("; ")}.`, "event");
   }
+  if ((result.lossFraction ?? 0) > 0.01)
+    log(
+      g,
+      `${Math.round((result.lossFraction ?? 0) * 100)} % av stålet i chargen gikk tapt – ut slaggdøra eller over øsa.`,
+      "bad",
+    );
   unlock(g, "fosfor");
 }
 

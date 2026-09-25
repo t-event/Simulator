@@ -41,7 +41,7 @@ import {
 } from "./engine";
 import { EAFSimulation } from "../sim/eaf";
 import { createSim } from "../ui/control/simSetup";
-import { MELT_BAND, SimpleRunner } from "../ui/control/simpleRunner";
+import { MELT_BAND, SimpleRunner, SLAG_DONE_KG } from "../ui/control/simpleRunner";
 import { computePlantStats, day, hasPlanner, satisfies } from "./plant";
 declare const process: { argv: string[]; exitCode?: number; exit?: (code: number) => void };
 
@@ -799,28 +799,46 @@ function playSimple(policy: SimplePolicy, seed: number, req?: ManualRequest) {
   while (run.step !== "ferdig" && real < 900) {
     run.tick(0.1);
     real += 0.1;
-    // En person reagerer omtrent hvert andre sekund
-    if (real - lastAct < 2) continue;
+    // En person reagerer omtrent hvert andre sekund, men følger godt med når hen står klar med en knapp
+    // (avslagging og tapping, B-076)
+    const focused = run.step === "slagg" || run.step === "tapp" || run.step === "tapper";
+    if (real - lastAct < (focused ? 0.5 : 2)) continue;
     lastAct = real;
     const t = sim.state.bathTempC;
     const g = sim.state.grade!;
+    const target = sim.tapTargetTempC;
     if (run.step === "smelt" && policy === "nybegynner") {
       if (t < MELT_BAND[0] + 5) run.changeLevel(1);
       else if (t > MELT_BAND[1] - 5) run.changeLevel(-1);
+      // Oksygen når halve skrapet er smeltet, som rådet på skjermen sier
+      run.setOxygen(run.melted > 0.5);
     }
     if (run.step === "rens") {
-      if (policy === "nybegynner" && sim.state.carbonPct > g.tapCarbonMaxPct - 0.015) run.setBlowing(true);
-      else {
-        run.setBlowing(false);
+      if (policy === "nybegynner" && sim.state.carbonPct > g.tapCarbonMaxPct - 0.015) {
+        run.setOxygen(true);
+        // Strømmen holder badet varmt, men ikke over tappetemperaturen
+        if (t > target - 25) run.changeLevel(-1);
+        else if (t < MELT_BAND[0]) run.changeLevel(1);
+      } else {
+        run.setOxygen(false);
         run.finishRefining();
       }
     }
     if (run.step === "slagg") {
       if (policy === "slurvete") run.skipDeslag();
-      else run.startDeslag();
+      else if (run.deslag === "nei") run.startDeslag();
+      else if (sim.slagMassKg < SLAG_DONE_KG) run.stopDeslag();
     }
-    if (run.step === "tapp" && (policy === "slurvete" ? t > sim.tapTargetTempC + 35 : t >= sim.tapTargetTempC - 12))
-      run.tap();
+    if (run.step === "tapp") {
+      if (policy === "slurvete") {
+        if (t > target + 35) run.tap();
+      } else {
+        if (t < target - 30) run.changeLevel(1);
+        else if (t > target - 15 && run.level > 2) run.changeLevel(-1);
+        if (t >= target - 6) run.tap();
+      }
+    }
+    if (run.step === "tapper" && policy === "nybegynner" && run.ladleFill >= 0.95) run.stopTap();
   }
   return { score: run.score!, real };
 }

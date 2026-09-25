@@ -424,3 +424,27 @@
 .sc-rating h2 {
   margin: 4px 0 0;
 }
+
+/* Strøm og oksygen side om side (B-076) */
+.sc .sc-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px 0;
+}
+.sc .sc-o2 {
+  min-height: 48px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 16px;
+}
+.sc .sc-o2.is-on {
+  background: #1f6fa8;
+  border-color: #9ad7ff;
+  color: #fff;
+}
+.sc .sc-message.is-alarm {
+  background: #5a1f1f;
+  color: #ffd0d0;
+  font-weight: 700;
+}

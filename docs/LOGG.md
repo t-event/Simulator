@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 46 – 2026-09-25: kontrollrommet med oksygen, avslagging og øse
+
+**Brukeren ba om:** Oksygen styrt samtidig med strømmen, ikke automatisk avslagging (for mye → stål ut
+slaggdøra), rette opp ovnen når øsa er full (ellers renner den over), og vanskeligere å få perfekt charge.
+
+**Gjort (B-076):** `simpleRunner.ts` og `SimpleControl.tsx` er skrevet om: oksygenbryter ved siden av
+strømknappene, manuell tipping mot slaggdøra med slaggmåler og søl-alarm, øse-måler og «Rett opp ovnen» ved
+tapping, fem deler i stjerneberegningen og strengere krav. Tapt stål trekkes fra chargen i `engine.ts`.
+Testspilleren i `balance.ts` følger de nye stegene. Tappingen går litt fortere (fart 8).
+
+**Testet:** tsc, lint, balanse (8 / 26 / 66 / 134, nybegynner 155, enkel styring 4★ / 1★, exit 0), Playwright
+på iPhone 13 gjennom alle stegene (ingen feil i konsollen, ingen horisontal scrolling).
+
+**Gjenstår:** Følge med på om spillerne synes avslaggingen og øsa er for vanskelig eller for lett.
+
+---
+
 ## Økt 45 – 2026-09-25: flere oppgraderinger på storverket
 
 **Brukeren ba om:** Flere oppgraderinger på storverket (en kollega hadde alle etter ti minutter).
