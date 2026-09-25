@@ -16,9 +16,10 @@ import {
   log,
   realisticDailyT,
   recipeEstimate,
+  unlock,
 } from "./engine";
 import { computePlantStats, day, gradeRecipe } from "./plant";
-import { auto } from "./research";
+import { auto, hasResearch } from "./research";
 import { chance, randInt } from "./random";
 import type { GameState, SisterPlant, SisterType } from "./types";
 
@@ -50,9 +51,29 @@ export const MODERNIZE_SHARE = 0.3;
 export const MODERNIZE_GAIN = 0.25;
 export const MODERNIZE_MAX = 3;
 export const MAX_SISTERS = 6;
+/** Med forskningen «Større konsern» er det plass til flere (B-120) */
+export const MAX_SISTERS_BIG = 8;
+
+export function maxSisters(g: GameState): number {
+  return hasResearch(g, "storkonsern") ? MAX_SISTERS_BIG : MAX_SISTERS;
+}
+
+/** Pris på et nytt datterverk, med oppkjøpsavdelingen (B-120) */
+export function sisterPrice(g: GameState, type: SisterType): number {
+  return SISTER_TYPES[type].price * (hasResearch(g, "oppkjop") ? 0.85 : 1);
+}
 
 /** Navn på datterverkene, i kjøpsrekkefølge (vanlige ord, ingen ekte steder) */
-export const SISTER_NAMES = ["Elveverket", "Fjordverket", "Dalverket", "Havneverket", "Skogverket", "Fjellverket"];
+export const SISTER_NAMES = [
+  "Elveverket",
+  "Fjordverket",
+  "Dalverket",
+  "Havneverket",
+  "Skogverket",
+  "Fjellverket",
+  "Kystverket",
+  "Sletteverket",
+];
 
 /** Milepæler for konsernverdien på veien mot sluttmålet, med fagpoeng som belønning (B-119) */
 export const KONSERN_MILESTONES = [2_000_000_000, 4_000_000_000, 6_000_000_000, 8_000_000_000];
@@ -84,7 +105,9 @@ export function hasShared(g: GameState, id: SharedId): boolean {
 export function sisterProfit(g: GameState, p: SisterPlant): number {
   const spec = SISTER_TYPES[p.type];
   const shared = 1 + (hasShared(g, "innkjop") ? 0.05 : 0) + (hasShared(g, "salg") ? 0.05 : 0);
-  return spec.profitPerDay * (1 + MODERNIZE_GAIN * p.level) * shared * g.market.steelFactor;
+  // Konsernforskningen (B-120)
+  const research = (hasResearch(g, "konsernstyring") ? 1.1 : 1) * (hasResearch(g, "gronnkonsern") ? 1.1 : 1);
+  return spec.profitPerDay * (1 + MODERNIZE_GAIN * p.level) * shared * research * g.market.steelFactor;
 }
 
 /** Bokført verdi av datterverkene: 80 % av det som er investert */
@@ -100,13 +123,13 @@ export function konsernEquity(g: GameState): number {
   return g.cash - g.loan + konsernValue(g);
 }
 
-export function modernizeCost(p: SisterPlant): number {
-  return SISTER_TYPES[p.type].price * MODERNIZE_SHARE;
+export function modernizeCost(p: SisterPlant, g?: GameState): number {
+  return SISTER_TYPES[p.type].price * MODERNIZE_SHARE * (g && hasResearch(g, "standardverk") ? 0.75 : 1);
 }
 
 /** Å bygge ut et stålverk til storverk koster forskjellen i pris; moderniseringen starter på nytt (B-119) */
-export function upgradeCost(): number {
-  return SISTER_TYPES.storverk.price - SISTER_TYPES.stalverk.price;
+export function upgradeCost(g?: GameState): number {
+  return (SISTER_TYPES.storverk.price - SISTER_TYPES.stalverk.price) * (g && hasResearch(g, "oppkjop") ? 0.85 : 1);
 }
 
 /** Overskudd per døgn et datterverk av en type og et nivå ville gitt nå */
@@ -153,23 +176,23 @@ export function konsernOptions(g: GameState): KonsernOption[] {
   const out: KonsernOption[] = [];
   const add = (o: Omit<KonsernOption, "payback">) =>
     out.push({ ...o, payback: o.gain > 0 ? o.price / o.gain : Infinity });
-  const full = k.plants.length >= MAX_SISTERS;
+  const full = k.plants.length >= maxSisters(g);
   const hasStalverk = k.plants.some((p) => p.type === "stalverk");
   add({
     key: "kjop-stalverk",
     title: "Kjøp et stålverk",
-    price: SISTER_TYPES.stalverk.price,
+    price: sisterPrice(g, "stalverk"),
     gain: profitOf(g, "stalverk", 0),
-    blocked: full ? `Konsernet er fullt (${MAX_SISTERS} datterverk) – bygg ut eller moderniser i stedet` : null,
+    blocked: full ? `Konsernet er fullt (${maxSisters(g)} datterverk) – bygg ut eller moderniser i stedet` : null,
     run: (gg) => buySister(gg, "stalverk"),
   });
   add({
     key: "kjop-storverk",
     title: "Kjøp et storverk",
-    price: SISTER_TYPES.storverk.price,
+    price: sisterPrice(g, "storverk"),
     gain: profitOf(g, "storverk", 0),
     blocked: full
-      ? `Konsernet er fullt (${MAX_SISTERS} datterverk) – bygg ut et stålverk til storverk i stedet`
+      ? `Konsernet er fullt (${maxSisters(g)} datterverk) – bygg ut et stålverk til storverk i stedet`
       : !hasStalverk
         ? "Kjøp et stålverk først – konsernet må lære å drive et verk før det tar på seg et storverk"
         : null,
@@ -197,7 +220,7 @@ export function konsernOptions(g: GameState): KonsernOption[] {
       add({
         key: `bygg-${p.id}`,
         title: `Bygg ut ${p.name} til storverk`,
-        price: upgradeCost(),
+        price: upgradeCost(g),
         gain: profitOf(g, "storverk", 0) - profitOf(g, "stalverk", p.level),
         blocked: null,
         run: (gg) => upgradeSister(gg, p.id),
@@ -206,8 +229,8 @@ export function konsernOptions(g: GameState): KonsernOption[] {
       add({
         key: `mod-${p.id}`,
         title: `Moderniser ${p.name}`,
-        price: modernizeCost(p),
-        gain: SISTER_TYPES[p.type].profitPerDay * MODERNIZE_GAIN * sharedNow * g.market.steelFactor,
+        price: modernizeCost(p, g),
+        gain: profitOf(g, p.type, p.level + 1) - profitOf(g, p.type, p.level),
         blocked: null,
         run: (gg) => modernizeSister(gg, p.id),
       });
@@ -245,11 +268,12 @@ export function checkKonsernUnlock(g: GameState, remaining: number): void {
   const equity = g.cash - g.loan;
   if (remaining > 0 && equity < KONSERN_UNLOCK_EQUITY) return;
   g.konsern.unlocked = true;
+  unlock(g, "konsern");
   log(
     g,
     remaining === 0
       ? "Storverket er ferdig bygget! Nå kan du bygge et konsern med flere verk – se Verket → Konsern."
-      : `Egenkapitalen har passert ${fmtKr(KONSERN_UNLOCK_EQUITY)}! Nå kan du bygge et konsern med flere verk – se Verket → Konsern.`,
+      : `Egenkapitalen har passert ${fmtKr(KONSERN_UNLOCK_EQUITY)}! Nå kan du bygge et konsern med flere verk – se Verket → Konsern. Nye prosjekter venter under Forskning.`,
     "good",
   );
 }
@@ -257,17 +281,18 @@ export function checkKonsernUnlock(g: GameState, remaining: number): void {
 export function buySister(g: GameState, type: SisterType): { ok: boolean; message: string } {
   const spec = SISTER_TYPES[type];
   if (!g.konsern.unlocked) return { ok: false, message: "Konsernet er ikke åpnet ennå." };
-  if (g.konsern.plants.length >= MAX_SISTERS) return { ok: false, message: `Høyst ${MAX_SISTERS} datterverk.` };
+  if (g.konsern.plants.length >= maxSisters(g)) return { ok: false, message: `Høyst ${maxSisters(g)} datterverk.` };
   if (type === "storverk" && !g.konsern.plants.some((p) => p.type === "stalverk"))
     return { ok: false, message: "Kjøp et stålverk først – konsernet må lære å drive et verk til." };
-  if (g.cash < spec.price) return { ok: false, message: "For lite penger" };
-  addCost(g, "investering", spec.price);
+  const price = sisterPrice(g, type);
+  if (g.cash < price) return { ok: false, message: "For lite penger" };
+  addCost(g, "investering", price);
   const used = new Set(g.konsern.plants.map((p) => p.name));
   const name = SISTER_NAMES.find((x) => !used.has(x)) ?? `Verk nr. ${g.konsern.plants.length + 2}`;
   g.konsern.plants.push({ id: g.konsern.nextId++, type, name, level: 0, boughtDay: day(g), downUntilDay: 0 });
   log(
     g,
-    `Konsernet har kjøpt ${name}, et ${spec.name.toLowerCase()}, for ${fmtKr(spec.price)}. Det gir ca. ${fmtKr(profitOf(g, type, 0))} i overskudd per døgn.`,
+    `Konsernet har kjøpt ${name}, et ${spec.name.toLowerCase()}, for ${fmtKr(price)}. Det gir ca. ${fmtKr(profitOf(g, type, 0))} i overskudd per døgn.`,
     "good",
   );
   return { ok: true, message: `${name} er kjøpt.` };
@@ -277,7 +302,7 @@ export function buySister(g: GameState, type: SisterType): { ok: boolean; messag
 export function upgradeSister(g: GameState, id: number): { ok: boolean; message: string } {
   const p = g.konsern.plants.find((x) => x.id === id);
   if (!p || p.type !== "stalverk") return { ok: false, message: "Bare et stålverk kan bygges ut til storverk." };
-  const cost = upgradeCost();
+  const cost = upgradeCost(g);
   if (g.cash < cost) return { ok: false, message: "For lite penger" };
   addCost(g, "investering", cost);
   p.type = "storverk";
@@ -310,7 +335,7 @@ export function modernizeSister(g: GameState, id: number): { ok: boolean; messag
   const p = g.konsern.plants.find((x) => x.id === id);
   if (!p) return { ok: false, message: "Fant ikke verket." };
   if (p.level >= MODERNIZE_MAX) return { ok: false, message: "Verket er fullt modernisert." };
-  const cost = modernizeCost(p);
+  const cost = modernizeCost(p, g);
   if (g.cash < cost) return { ok: false, message: "For lite penger" };
   addCost(g, "investering", cost);
   p.level += 1;
@@ -335,6 +360,11 @@ export function buyShared(g: GameState, id: SharedId): { ok: boolean; message: s
 /** Rekruttering og lønn: meget dyrt, med vilje – det skal koste å slippe salgsarbeidet */
 export const DIRECTOR_HIRE = 250_000_000;
 export const DIRECTOR_PER_DAY = 4_000_000;
+
+/** Lønna til salgsdirektøren, halvert med «Profesjonell ledelse» (B-120) */
+export function directorPerDay(g: GameState): number {
+  return DIRECTOR_PER_DAY * (hasResearch(g, "konsernledelse") ? 0.5 : 1);
+}
 /** Rammeavtalene skal ikke ta mer enn dette av ukeproduksjonen til sammen (samme grense som «gult» på Salg, B-103) */
 export const DIRECTOR_AGREEMENT_SHARE = 0.5;
 /**
@@ -361,7 +391,7 @@ export function hireDirector(g: GameState): { ok: boolean; message: string } {
   g.konsern.director = { hiredDay: day(g), contracts: 0, agreements: 0, agreementsOn: true };
   log(
     g,
-    `Konsernet har ansatt en salgsdirektør (${fmtKr(DIRECTOR_HIRE)} i rekruttering, ${fmtKr(DIRECTOR_PER_DAY)} per døgn). Kontraktene som verket rekker, signeres nå av seg selv.`,
+    `Konsernet har ansatt en salgsdirektør (${fmtKr(DIRECTOR_HIRE)} i rekruttering, ${fmtKr(directorPerDay(g))} per døgn). Kontraktene som verket rekker, signeres nå av seg selv.`,
     "good",
   );
   return { ok: true, message: "Salgsdirektøren er ansatt." };
@@ -413,12 +443,13 @@ export function directorHour(g: GameState): void {
 
 /** Hvert døgn: lønna til salgsdirektøren, overskuddet fra datterverkene og av og til en stans (B-106, B-117) */
 export function konsernDay(g: GameState): void {
-  if (g.konsern.director) addCost(g, "lonn", DIRECTOR_PER_DAY);
+  if (g.konsern.director) addCost(g, "lonn", directorPerDay(g));
   const today = day(g);
   for (const p of g.konsern.plants) {
     if (p.downUntilDay > today) continue;
-    if (chance(g, 0.012)) {
-      const days = randInt(g, 2, 5);
+    const maintained = hasResearch(g, "fellesvedlikehold");
+    if (chance(g, 0.012 * (maintained ? 0.5 : 1))) {
+      const days = maintained ? randInt(g, 1, 3) : randInt(g, 2, 5);
       p.downUntilDay = today + days;
       log(g, `${p.name} står i ${days} døgn etter et havari. Ingen overskudd derfra imens.`, "event");
       continue;
@@ -426,6 +457,8 @@ export function konsernDay(g: GameState): void {
     // Av og til går det ekstra godt: dobbelt overskudd det døgnet (B-119)
     const record = chance(g, 0.015);
     addIncome(g, "konsern", sisterProfit(g, p) * (record ? 2 : 1));
+    // Kunnskapsdeling: hjemmeverket lærer av datterverkene som går (B-120)
+    if (hasResearch(g, "kunnskapsdeling")) awardPoints(g, 1);
     if (record)
       log(
         g,

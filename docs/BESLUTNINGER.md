@@ -1473,3 +1473,31 @@ Beslutning:
 - Målt med `--vansker` når testspillerne følger «Neste steg»: flink vinner dag 324–364, nybegynner dag 342–457,
   ingen konkurs. Det er omtrent som før (B-106).
 
+## B-120 Konsernforskning (2026-09-25)
+Status: gjelder
+Brukeren: man bør ha flere ting å forske på når konsernet åpnes.
+Beslutning: ni nye prosjekter (`konsern: true` i `research.ts`) som er låst til konsernet er åpnet. Før det står de i
+gruppen «Kommer når konsernet åpnes» under Forskning.
+
+| Prosjekt | FP | Krever | Gir |
+| --- | --- | --- | --- |
+| Konsernstyring | 250 | – | +10 % overskudd i datterverkene |
+| Felles vedlikehold | 300 | – | halvparten så mange havarier, 1–3 døgns stans |
+| Kunnskapsdeling | 300 | Konsernstyring | 1 fagpoeng per døgn per datterverk som går |
+| Profesjonell ledelse | 350 | Konsernstyring | halv lønn til salgsdirektøren |
+| Oppkjøpsavdeling | 400 | – | nye verk og utbygging 15 % billigere |
+| Standardiserte verk | 400 | Konsernstyring | modernisering 25 % billigere |
+| Kraftavtale for konsernet | 450 | – | 10 % billigere strøm hjemme |
+| Større konsern | 600 | Oppkjøpsavdeling | plass til 8 datterverk |
+| Grønt konsern | 700 | Grønt stål, Konsernstyring | +10 % overskudd i datterverkene |
+
+- Til sammen 3 750 fagpoeng, omtrent det konsernfasen gir med storverkets fagpoeng, milepælene og kunnskapsdelingen.
+- Nytt kapittel i fagboka, «Konsern og datterselskap», med quiz. Det forklarer morselskap og datterselskap,
+  stordriftsfordeler, spredning av risiko og hvorfor verkene teller i konsernverdien. Prosjektene krever at det er
+  lest, og det låses opp når konsernet åpnes.
+- Den bokførte verdien av et verk følger listeprisen, også når oppkjøpsavdelingen gir rabatt.
+- Den flinke testspilleren forsker på prosjektene etter storverkets, og nybegynneren tar det billigste først.
+- Målt med `--vansker`: flink vinner dag 320–362, nybegynner dag 329–435, ingen konkurs. Det er litt raskere enn
+  før (324–364 og 342–457).
+- «Forsk fram alt» (utfordring) omfatter nå også konsernprosjektene.
+

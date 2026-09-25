@@ -2295,7 +2295,8 @@ function onHour(g: GameState, stats: PlantStats): void {
   maybeTip(g, stats);
   checkTemps(g);
   // Kapitlene forskningen krever, kommer i fagboka når forskningen blir synlig (B-025)
-  for (const r of RESEARCH) if (r.reads && r.stage <= g.stage) unlock(g, r.reads);
+  for (const r of RESEARCH)
+    if (r.reads && r.stage <= g.stage && (!r.konsern || g.konsern?.unlocked)) unlock(g, r.reads);
   checkMissions(g);
   checkChallenges(g);
   scheduledSwitch(g);

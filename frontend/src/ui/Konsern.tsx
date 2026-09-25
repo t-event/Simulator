@@ -4,7 +4,7 @@ import {
   daysToAfford,
   DIRECTOR_AGREEMENT_SHARE,
   DIRECTOR_HIRE,
-  DIRECTOR_PER_DAY,
+  directorPerDay,
   fireDirector,
   hireDirector,
   KONSERN_MILESTONES,
@@ -12,7 +12,7 @@ import {
   konsernAdvice,
   konsernEquity,
   konsernOptions,
-  MAX_SISTERS,
+  maxSisters,
   MODERNIZE_GAIN,
   MODERNIZE_MAX,
   SISTER_TYPES,
@@ -21,6 +21,7 @@ import {
   type SharedId,
 } from "../game/konsern";
 import { day } from "../game/plant";
+import { RESEARCH } from "../game/research";
 import type { GameState, SisterType } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { buzz } from "./haptics";
@@ -89,7 +90,7 @@ function DirectorCard({ g, act }: { g: GameState; act: Act }) {
         <>
           <p>
             Ansatt dag {d.hiredDay}. Har signert {d.contracts} {d.contracts === 1 ? "kontrakt" : "kontrakter"} og{" "}
-            {d.agreements} {d.agreements === 1 ? "rammeavtale" : "rammeavtaler"}. Lønn {fmtKr(DIRECTOR_PER_DAY)} per
+            {d.agreements} {d.agreements === 1 ? "rammeavtale" : "rammeavtaler"}. Lønn {fmtKr(directorPerDay(g))} per
             døgn.
           </p>
           <label className="g-toggle">
@@ -120,8 +121,8 @@ function DirectorCard({ g, act }: { g: GameState; act: Act }) {
       ) : (
         <>
           <p className="g-note">
-            Meget dyrt: {fmtKr(DIRECTOR_HIRE)} i rekruttering og {fmtKr(DIRECTOR_PER_DAY)} i lønn per døgn. Gir ikke mer
-            overskudd – du slipper bare å signere selv.
+            Meget dyrt: {fmtKr(DIRECTOR_HIRE)} i rekruttering og {fmtKr(directorPerDay(g))} i lønn per døgn. Gir ikke
+            mer overskudd – du slipper bare å signere selv.
           </p>
           <div className="g-konsern-buy">
             <button
@@ -157,6 +158,10 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
   const byKey = (key: string) => options.find((o) => o.key === key);
   const advice = konsernAdvice(g);
   const next = KONSERN_MILESTONES[k.milestones];
+  const konsernResearch = {
+    total: RESEARCH.filter((r) => r.konsern).length,
+    done: RESEARCH.filter((r) => r.konsern && g.researched.includes(r.id)).length,
+  };
   return (
     <>
       <div className="g-col-wide">
@@ -181,8 +186,12 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
               <strong>Moderniser</strong> verkene for {Math.round(MODERNIZE_GAIN * 100)} % mer overskudd per trinn.
             </li>
           </ol>
+          <p className="g-note">
+            Under Forskning finnes egne prosjekter for konsernet: {konsernResearch.done} av {konsernResearch.total} er
+            forsket fram. De gir mer overskudd, billigere verk og plass til flere.
+          </p>
           <div className="g-stats">
-            <Stat label="Verk i konsernet" value={`${k.plants.length + 1} av ${MAX_SISTERS + 1}`} />
+            <Stat label="Verk i konsernet" value={`${k.plants.length + 1} av ${maxSisters(g) + 1}`} />
             <Stat label="Datterverkene tjener per døgn" value={fmtKr(perDay)} />
             <Stat label="Konsernverdi" value={fmtKr(Math.floor(equity))} />
           </div>
@@ -205,7 +214,7 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
             <BuyButton g={g} act={act} o={advice} label="Gjør det" />
           </Card>
         )}
-        <Card title={`Datterverk (${k.plants.length} av ${MAX_SISTERS})`}>
+        <Card title={`Datterverk (${k.plants.length} av ${maxSisters(g)})`}>
           {k.plants.length === 0 && (
             <p className="g-muted">Ingen datterverk ennå. Start med et stålverk – se «Kjøp datterverk».</p>
           )}

@@ -2,7 +2,7 @@
  * Små, raske tester av spillmotoren (B-097). Kjøres med `npx tsx src/game/tests.ts` og i CI.
  * Hver test bygger sin egen tilstand, så de ikke er avhengige av lagrede filer.
  */
-import { scheduleCastingSwitch } from "./actions";
+import { doResearch, scheduleCastingSwitch } from "./actions";
 import { CHALLENGES, checkChallenges } from "./challenges";
 import { ADDONS, CASTINGS, FURNACES, WIN_CASH } from "./data";
 import { advance, assessOffer, checkWin, fmtKr, log, newGame } from "./engine";
@@ -11,6 +11,9 @@ import { KNOWLEDGE } from "./knowledge";
 import {
   buySister,
   checkKonsernMilestones,
+  directorPerDay,
+  maxSisters,
+  sisterPrice,
   checkKonsernUnlock,
   konsernAdvice,
   konsernOptions,
@@ -29,7 +32,7 @@ import {
   sisterProfit,
 } from "./konsern";
 import { computePlantStats, supportAdvice } from "./plant";
-import { RESEARCH } from "./research";
+import { RESEARCH, researchOptions } from "./research";
 import { parseSave } from "./save";
 import { EAFSimulation } from "../sim/eaf";
 import { SimpleRunner } from "../ui/control/simpleRunner";
@@ -147,6 +150,34 @@ test("Konsernet: neste steg, utbygging til storverk, milepæler og fullt konsern
   const n = g.konsern.milestones;
   checkKonsernMilestones(g);
   assert(g.konsern.milestones === n, "milepælen ble gitt to ganger");
+});
+
+test("Konsernforskning: låst til konsernet åpnes, og gir effekt", () => {
+  const g = newGame(1);
+  g.stage = 4;
+  g.researchPoints = 10_000;
+  g.readChapters.push("konsern");
+  const opt = () => researchOptions(g).find((r) => r.id === "konsernstyring")!;
+  assert(opt().locked && !opt().available, "konsernforskning var åpen før konsernet");
+  g.konsern.unlocked = true;
+  g.cash = 5_000_000_000;
+  buySister(g, "stalverk");
+  const p = g.konsern.plants[0];
+  const before = sisterProfit(g, p);
+  const price = sisterPrice(g, "stalverk");
+  assert(doResearch(g, "konsernstyring").ok, "kunne ikke forske på konsernstyring");
+  assert(Math.abs(sisterProfit(g, p) / before - 1.1) < 1e-9, "konsernstyring ga ikke 10 %");
+  doResearch(g, "oppkjop");
+  assert(Math.abs(sisterPrice(g, "stalverk") / price - 0.85) < 1e-9, "oppkjøp ga ikke rabatt");
+  doResearch(g, "storkonsern");
+  assert(maxSisters(g) === 8, "større konsern ga ikke plass til 8");
+  doResearch(g, "konsernledelse");
+  assert(directorPerDay(g) === DIRECTOR_PER_DAY / 2, "lønna til direktøren ble ikke halvert");
+  const fp = g.researchPoints;
+  doResearch(g, "kunnskapsdeling");
+  const after = g.researchPoints;
+  konsernDay(g);
+  assert(g.researchPoints >= after + 1 || p.downUntilDay > 0, `kunnskapsdeling ga ikke fagpoeng (${fp})`);
 });
 
 test("Nytt spill+ gir bonus, vanlig nytt spill gjør det ikke", () => {
