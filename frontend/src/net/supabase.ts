@@ -94,6 +94,13 @@ export function translateError(status: number, raw: string): string {
     return "Passordet må ha minst 6 tegn.";
   if (t.includes("unable to validate email") || t.includes("invalid email") || t.includes("invalid format"))
     return "Skriv en gyldig e-postadresse.";
+  if (
+    t.includes("token has expired") ||
+    t.includes("otp_expired") ||
+    t.includes("invalid otp") ||
+    t.includes("token is invalid")
+  )
+    return "Koden er feil eller utløpt. Sjekk e-posten, eller be om en ny.";
   if (t.includes("rate limit") || t.includes("too many") || status === 429)
     return "For mange forsøk på kort tid. Vent et par minutter og prøv igjen.";
   if (t.includes("signups not allowed") || t.includes("signup is disabled"))
@@ -146,8 +153,19 @@ function toSession(body: Record<string, unknown>): Session {
 // ------------------------------------------------------------------ innlogging
 
 /** Oppretter konto. Gir true hvis kontoen må bekreftes på e-post før man kan logge inn. */
+/** Adressen spillet kjører på (med /Simulator/), så lenkene i e-postene peker hit hvis Supabase tillater den */
+function appUrl(): string | null {
+  if (typeof location === "undefined") return null;
+  const base = (import.meta as { env?: { BASE_URL?: string } }).env?.BASE_URL ?? "/";
+  return `${location.origin}${base}`;
+}
+function redirectQuery(): string {
+  const u = appUrl();
+  return u ? `?redirect_to=${encodeURIComponent(u)}` : "";
+}
+
 export async function signUp(email: string, password: string): Promise<{ needsConfirm: boolean }> {
-  const res = await call(`${cloud.url}/auth/v1/signup`, {
+  const res = await call(`${cloud.url}/auth/v1/signup${redirectQuery()}`, {
     method: "POST",
     headers: headers(),
     body: JSON.stringify({ email, password }),
@@ -192,12 +210,28 @@ export async function signOut(): Promise<void> {
 
 /** Sender e-post med lenke for å sette nytt passord */
 export async function recover(email: string): Promise<void> {
-  const res = await call(`${cloud.url}/auth/v1/recover`, {
+  const res = await call(`${cloud.url}/auth/v1/recover${redirectQuery()}`, {
     method: "POST",
     headers: headers(),
     body: JSON.stringify({ email }),
   });
   if (!res.ok) throw await readError(res);
+}
+
+/**
+ * Bekrefter e-posten eller «glemt passord» med koden fra e-posten (B-128), så alt skjer i appen man spiller i –
+ * lenker fra e-post åpner alltid i Safari, aldri i appen på hjemskjermen. Gir en økt.
+ */
+export async function verifyCode(email: string, token: string, type: "signup" | "recovery"): Promise<Session> {
+  const res = await call(`${cloud.url}/auth/v1/verify`, {
+    method: "POST",
+    headers: headers(),
+    body: JSON.stringify({ type, email, token: token.replace(/\s+/g, "") }),
+  });
+  if (!res.ok) throw await readError(res);
+  const s = toSession((await res.json()) as Record<string, unknown>);
+  setSession(s);
+  return s;
 }
 
 export async function updatePassword(password: string): Promise<void> {
