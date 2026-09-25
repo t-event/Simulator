@@ -5,6 +5,30 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 74 – 2026-09-25: sesonger, ligaer og felles hendelser (fase 3)
+
+**Brukeren ba om:** Bekreftelse slått av i Supabase; Claude gikk videre med fase 3.
+
+**Gjort:** B-129.
+- `supabase/004_sesonger.sql` kjørt: `seasons`, `season_results`, `events`, `league_of`, `close_season`,
+  `season_status`, `start_season`, `add_event`, `active_events`, toppliste per sesong med liga. Sesong 1 startet.
+- `game/world.ts` (hendelser i motoren, sesongfordel), `net/season.ts` (butikk), `ui/Season.tsx` (synk, spørsmål,
+  hendelser på Marked, sesonglinje), `ui/useSeason.ts`, toppliste med sesong/alle og liga, fagbokkapittel.
+
+**Testet:**
+- tsc, lint, `npm test` (nye tester: hendelser ganger prisene og logges én gang, sesongfordel, sesong og hendelser
+  fra tjenesten), validate, balanse exit 0, build.
+- Playwright på iPhone 13 med falsk Supabase: eldre spill får spørsmålet og kan fortsette; hendelsen vises på Marked;
+  topplista viser sesonglinje, «Denne sesongen»/«Alle tider» og liga; nytt spill kobles til sesongen med fordel.
+  Ingen feil, ingen horisontal scrolling.
+- Sikkerhetsrådene i Supabase: bare tilsiktede funn.
+
+**Gjenstår:**
+- Brukeren tester med ekte konto: spillet på dag 385 får spørsmålet om Sesong 1.
+- Fase 4: ventetid i konsernet. Fase 5: anbud og auksjoner.
+
+---
+
 ## Økt 73 – 2026-09-25: bekreftelse med kode
 
 **Brukeren ba om:** Lenken fra e-posten åpnet i Safari (ikke appen på hjemskjermen) og gikk til feil adresse.

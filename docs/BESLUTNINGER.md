@@ -1698,3 +1698,37 @@ Beslutning:
 - Appen sender `redirect_to` med sin egen adresse (med `/Simulator/`) i opprett- og glemt-passord-kallene, så
   lenkene peker riktig hvis adressen er tillatt i Supabase.
 - Feilteksten «Koden er feil eller utløpt» på norsk.
+
+## B-129 Sesonger, ligaer og felles hendelser – fase 3 (2026-09-25)
+Status: gjelder (erstatter nytt spill+ fra B-090 for spill som er med i en sesong)
+Brukeren: sesonger erstatter nytt spill+; alle starter i garasjen når en ny sesong starter; en pitteliten fordel
+for den som var med sist; lett å starte ny sesong; ingen grupper på topplista ennå.
+
+Beslutning:
+- **Sesong** = en rad i `seasons` (navn, start, slutt). Serveren eier den. Én sesong om gangen.
+  - `start_season('Sesong 2', 4)` (bare fra SQL Editor eller connectoren) avslutter den som pågår, regner ut
+    sluttresultatet (`season_results`, rangert etter konsernverdi) og starter en ny på 4 uker. Det er alt som trengs.
+  - `season_status()` (appen kaller den) gir sesongen som pågår og om spilleren var med i forrige. Sesonger som er
+    over uten resultat, lukkes der, så ingen planlagt jobb trengs.
+- **Spillet** har `season` (id eller null) og `seasonPromptSeen`. Tidslinja og lagringen på nett sender `season_id`.
+  - Et nytt spill (første døgn) med konto kobles rett til sesongen som pågår, uten spørsmål.
+  - Et eldre spill som ikke er med, får spørsmålet «Sesong 1 er i gang» én gang: start sesongen (nytt spill i
+    garasjen, med bekreftelse) eller fortsett dette spillet (står bare på «Alle tider»).
+  - **Fordelen** for den som var med i forrige sesong: 5 % mer startkapital og 10 fagpoeng (`joinSeason`). Med
+    vilje lite.
+  - Er spillet med i sesongen, tilbys ikke nytt spill+ på seiersskjermen.
+- **Topplista** har «Denne sesongen» og «Alle tider» (`leaderboard(kind, lim, season)`), sesonglinja med dager
+  igjen, og liga ved hvert navn.
+- **Ligaer** regnes av serveren fra siste tidslinje (`league_of`): Bronse til og med stålverket, Sølv på storverket,
+  Gull når konsernverdien passerer 1 mrd. (der konsernet åpner). Skrives på profilen. Brukes til anbud og
+  auksjoner i fase 5.
+- **Felles hendelser** = rader i `events` med faktorer for skrap, stål og strøm og en sluttid i ekte tid.
+  - `add_event('skrapmangel', 7)` (bare admin) legger ut en fra lista: skrapmangel (skrap ×1,2), strømkrise
+    (strøm ×1,5), eksportboom (stål ×1,1), importpress (stål ×0,9), transportstreik (skrap ×1,1, stål ×0,95).
+  - Appen henter `active_events()` ved start og hvert tiende minutt, og `applyWorldEvents` legger dem i
+    `g.world.events`. Motoren ganger `scrapPrice`, `productPrice` og `energyPrice` (bare strøm) med faktorene
+    (`worldFactor`). Nye hendelser logges én gang («event»). Marked viser «Nå i markedet».
+  - Uten nett eller nøkler: ingen hendelser. Testspilleren kjører uten.
+- Nytt kapittel i fagboka: «Konjunkturer, sesonger og ligaer», låses opp når spillet kobles til en sesong.
+- Sesong 1 er startet i databasen (4 uker fra 2026-09-25).
+- SQL i `supabase/004_sesonger.sql`, kjørt som migrasjonene «sesonger» og «liga_search_path».

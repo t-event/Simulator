@@ -1,0 +1,151 @@
+/**
+ * Sesonger og felles hendelser i grensesnittet (B-129):
+ * - SeasonSync holder sesong og hendelser oppdatert og legger hendelsene inn i spillet
+ * - SeasonPrompt spør om man vil starte sesongen når en ny sesong er i gang
+ * - EventsNote viser hendelsene som pågår, på Marked
+ * - SeasonLine er tekstlinja «Sesong … · N dager igjen» på topplista
+ */
+import { useEffect, useSyncExternalStore } from "react";
+import { useState } from "react";
+import { newGame, unlock } from "../game/engine";
+import { day } from "../game/plant";
+import type { GameState } from "../game/types";
+import type { GameApi } from "../game/useGame";
+import { applyWorldEvents, joinSeason } from "../game/world";
+import { cloudConfigured } from "../net/config";
+import { daysLeft, refreshSeason, seasonStatus } from "../net/season";
+import { useSeasonStatus, useWorldEvents } from "./useSeason";
+import { getSession, onSessionChange } from "../net/supabase";
+
+function useSession() {
+  return useSyncExternalStore(onSessionChange, getSession, getSession);
+}
+
+/** Et nytt spill (første døgn) uten sesong regnes rett inn i sesongen som pågår, uten å spørre */
+const AUTO_JOIN_MINUTES = 24 * 60;
+
+/** Usynlig: henter status ved start og hvert tiende minutt, og legger hendelsene inn i spillet */
+export function SeasonSync({ api }: { api: GameApi }) {
+  const session = useSession();
+  const status = useSeasonStatus();
+  const events = useWorldEvents();
+  const g = api.game;
+
+  useEffect(() => {
+    if (!cloudConfigured()) return;
+    // Første gang med én gang; ved bytte av økt bare hvis det er lenge siden
+    void refreshSeason(seasonStatus() === null);
+    const t = setInterval(() => void refreshSeason(), 60_000);
+    return () => clearInterval(t);
+  }, [session]);
+
+  // Hendelsene inn i spillet når de endrer seg
+  const ids = events.map((e) => e.id).join(",");
+  useEffect(() => {
+    if (!g) return;
+    const current = (g.world?.events ?? []).map((e) => e.id).join(",");
+    if (current !== ids) api.act((gg) => applyWorldEvents(gg, events));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ids, g]);
+
+  // Et ferskt spill kobles rett til sesongen
+  const cur = status?.current ?? null;
+  useEffect(() => {
+    if (!g || !session || !cur) return;
+    if (g.season === null && g.minute < AUTO_JOIN_MINUTES && g.owner === session.user.id)
+      api.act((gg) => {
+        joinSeason(gg, cur.id, !!status?.played_previous);
+        unlock(gg, "sesong");
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [g, session, cur?.id]);
+
+  return null;
+}
+
+/** Spør når en sesong pågår som spillet ikke er med i (og spillet ikke er helt nytt) */
+export function SeasonPrompt({ api, g }: { api: GameApi; g: GameState }) {
+  const session = useSession();
+  const status = useSeasonStatus();
+  const [confirm, setConfirm] = useState(false);
+  const cur = status?.current ?? null;
+  if (!session || !cur || g.owner !== session.user.id) return null;
+  if (g.season === cur.id || g.seasonPromptSeen === cur.id || g.minute < AUTO_JOIN_MINUTES) return null;
+  const bonus = !!status?.played_previous;
+  return (
+    <div className="g-modal" role="dialog" aria-modal="true" aria-label="Ny sesong">
+      <div className="g-modal-card">
+        <h2>{cur.name} er i gang</h2>
+        <p>
+          En sesong varer i noen uker, og alle som er med, starter i garasjen samtidig. Topplista for sesongen viser
+          bare spill som er startet i den. Sesongen slutter om {daysLeft(cur)} dager.
+        </p>
+        <p className="g-muted">
+          Spillet ditt (dag {day(g)}) er ikke med i sesongen. Du kan spille det videre – det står på lista «Alle tider»
+          – eller starte et nytt spill for sesongen.
+          {bonus ? " Du var med i forrige sesong, så du starter med 10 fagpoeng og 5 % mer i kassa." : ""}
+        </p>
+        {confirm ? (
+          <div className="g-row">
+            <button
+              className="g-danger"
+              onClick={() => {
+                const ng = newGame();
+                joinSeason(ng, cur.id, bonus);
+                unlock(ng, "sesong");
+                api.adopt(ng);
+              }}
+            >
+              Ja, start {cur.name} i garasjen
+            </button>
+            <button onClick={() => setConfirm(false)}>Avbryt</button>
+          </div>
+        ) : (
+          <div className="g-row">
+            <button className="g-primary" onClick={() => setConfirm(true)}>
+              Start sesongen (nytt spill)
+            </button>
+            <button onClick={() => api.act((gg) => void (gg.seasonPromptSeen = cur.id))}>Fortsett dette spillet</button>
+          </div>
+        )}
+        {confirm && (
+          <p className="g-muted g-small-text">
+            Spillet du har nå, erstattes. Vil du beholde det, ta en sikkerhetskopi under ⚙️ først.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** Hendelsene som pågår, på Marked */
+export function EventsNote({ g }: { g: GameState }) {
+  const events = g.world?.events ?? [];
+  if (events.length === 0) return null;
+  return (
+    <div className="g-note g-events">
+      <strong>Nå i markedet</strong>
+      <ul>
+        {events.map((e) => (
+          <li key={e.id}>
+            <strong>{e.title}:</strong> {e.text}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** «Sesong 1 · 18 dager igjen», eller at ingen sesong pågår */
+export function SeasonLine() {
+  const status = useSeasonStatus();
+  if (!status) return null;
+  const cur = status.current;
+  if (!cur) return <p className="g-muted g-small-text">Ingen sesong pågår akkurat nå.</p>;
+  const left = daysLeft(cur);
+  return (
+    <p className="g-muted g-small-text">
+      <strong>{cur.name}</strong> · {left === 0 ? "siste dag" : `${left} ${left === 1 ? "dag" : "dager"} igjen`}
+    </p>
+  );
+}

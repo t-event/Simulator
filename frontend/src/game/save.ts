@@ -209,6 +209,9 @@ export function migrate(g: GameState): GameState {
   }
   if (loose.bonusOffer === undefined) loose.bonusOffer = false;
   if (loose.owner === undefined) loose.owner = null;
+  if (loose.season === undefined) loose.season = null;
+  if (loose.seasonPromptSeen === undefined) loose.seasonPromptSeen = null;
+  if (loose.world === undefined) loose.world = { events: [], seenEventIds: [] };
   for (const c of g.contracts) {
     const old = c as typeof c & { offerExpiresDay?: number };
     if (c.offerExpiresMin === undefined) c.offerExpiresMin = ((old.offerExpiresDay ?? 0) + 0) * 1440;

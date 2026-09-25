@@ -18,6 +18,7 @@ import {
   verifyCode,
 } from "./supabase";
 import { fetchLeaderboard, fetchMyRank, fetchProfile, setNickname } from "./leaderboard";
+import { daysLeft, fetchActiveEvents, fetchSeasonStatus } from "./season";
 import {
   cloudStatus,
   flush,
@@ -59,7 +60,10 @@ function assert(ok: unknown, msg: string): void {
 interface Fake {
   users: Map<string, { id: string; password: string; confirmed: boolean }>;
   saves: Map<string, { state: unknown; minute: number; day: number }>;
-  snapshots: Map<string, { day: number; equity: number; stage: number; reputation: number }[]>;
+  snapshots: Map<
+    string,
+    { day: number; equity: number; stage: number; reputation: number; season_id?: number | null }[]
+  >;
   nicknames: Map<string, string>;
   calls: string[];
   offline: boolean;
@@ -145,6 +149,7 @@ function makeFake(): Fake {
         equity: Number(body.equity),
         stage: Number(body.stage),
         reputation: Number(body.reputation),
+        season_id: body.season_id as number | null,
       });
       f.snapshots.set(id, list);
       return new Response(null, { status: 201 });
@@ -173,6 +178,25 @@ function makeFake(): Fake {
       return json(200, rows);
     }
     if (path.startsWith("/rest/v1/rpc/my_rank")) return json(200, 1);
+    if (path.startsWith("/rest/v1/rpc/season_status"))
+      return json(200, {
+        current: { id: 1, name: "Sesong 1", starts_at: "2026-09-25T00:00:00Z", ends_at: "2026-10-23T00:00:00Z" },
+        played_previous: id === "u-a@test",
+      });
+    if (path.startsWith("/rest/v1/rpc/active_events"))
+      return json(200, [
+        {
+          id: 3,
+          kind: "stromkrise",
+          title: "Strømkrise",
+          text: "Dyr strøm.",
+          scrap: "1",
+          steel: "1",
+          power: "1.5",
+          starts_at: "x",
+          ends_at: "2026-10-01T00:00:00Z",
+        },
+      ]);
     if (path.startsWith("/rest/v1/config")) return json(200, [{ value: { cloud: true } }]);
     return json(404, { message: "ukjent" });
   });
@@ -432,6 +456,24 @@ const main = async () => {
     assert(rows.length === 1 && rows[0].is_me && rows[0].nickname === "Stålkongen", `rader ${JSON.stringify(rows)}`);
     assert(typeof rows[0].value === "number" && rows[0].value >= 500_000, "verdien er ikke et tall");
     assert((await fetchMyRank("verdi")) === 1, "min plass");
+  });
+
+  await test("Sesong og hendelser hentes, og tidslinja får sesongen (B-129)", async () => {
+    const f = fresh();
+    await login(f);
+    const s = await fetchSeasonStatus();
+    assert(s.current?.id === 1 && s.played_previous, `status ${JSON.stringify(s)}`);
+    assert(daysLeft(s.current!, Date.parse("2026-10-20T12:00:00Z")) === 3, "dager igjen");
+    const ev = await fetchActiveEvents();
+    assert(
+      ev.length === 1 && ev[0].power === 1.5 && ev[0].until === "2026-10-01T00:00:00Z",
+      `hendelser ${JSON.stringify(ev)}`,
+    );
+    const g = newGame(12);
+    g.season = 1;
+    await linkOnLogin(g);
+    const snap = f.snapshots.get("u-a@test")?.[0] as { season_id?: number } | undefined;
+    assert(snap?.season_id === 1, "tidslinja mangler sesongen");
   });
 
   await test("Ikke logget inn: ingenting sendes", async () => {

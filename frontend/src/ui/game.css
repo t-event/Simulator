@@ -2293,3 +2293,34 @@ button {
 .g-nick {
   max-width: 360px;
 }
+
+/* Sesonger, ligaer og felles hendelser (B-129) */
+.g-league {
+  font-style: normal;
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: #2c3647;
+  color: var(--text-dim);
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.g-league.is-solv {
+  background: #3a4557;
+  color: var(--text);
+}
+
+.g-league.is-gull {
+  background: #5a4a1d;
+  color: #ffd76a;
+}
+
+.g-board-scope button {
+  font-size: 13px;
+}
+
+.g-events ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}

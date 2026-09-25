@@ -19,7 +19,11 @@ export interface BoardRow {
   value: number;
   day: number;
   is_me: boolean;
+  /** bronse, solv eller gull (B-129) */
+  league: string;
 }
+
+export const LEAGUE_NAMES: Record<string, string> = { bronse: "Bronse", solv: "Sølv", gull: "Gull" };
 
 export interface Profile {
   nickname: string | null;
@@ -28,18 +32,18 @@ export interface Profile {
   banned: boolean;
 }
 
-export async function fetchLeaderboard(kind: BoardKind, lim = 50): Promise<BoardRow[]> {
-  const rows = await rpc<{ plass: number; nickname: string; value: string | number; day: number; is_me: boolean }[]>(
-    "leaderboard",
-    { kind, lim },
-  );
-  return rows.map((r) => ({ ...r, value: Number(r.value) }));
+/** `season` = sesongens id, eller null for «alle tider» */
+export async function fetchLeaderboard(kind: BoardKind, season: number | null = null, lim = 50): Promise<BoardRow[]> {
+  const rows = await rpc<
+    { plass: number; nickname: string; value: string | number; day: number; is_me: boolean; league: string | null }[]
+  >("leaderboard", { kind, lim, season });
+  return rows.map((r) => ({ ...r, value: Number(r.value), league: r.league ?? "bronse" }));
 }
 
 /** Min plass på lista, eller null hvis jeg ikke er med */
-export async function fetchMyRank(kind: BoardKind): Promise<number | null> {
+export async function fetchMyRank(kind: BoardKind, season: number | null = null): Promise<number | null> {
   if (!userId()) return null;
-  const r = await rpc<number | null>("my_rank", { kind });
+  const r = await rpc<number | null>("my_rank", { kind, season });
   return r ?? null;
 }
 

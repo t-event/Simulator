@@ -8,6 +8,9 @@ import { ADDONS, CASTINGS, FURNACES, WIN_CASH } from "./data";
 import { advance, assessOffer, checkWin, fmtKr, log, newGame } from "./engine";
 import { logTopic, showToast, unseenCount } from "./inbox";
 import { KNOWLEDGE } from "./knowledge";
+import { applyWorldEvents, joinSeason, SEASON_BONUS_FP, worldFactor } from "./world";
+import { energyPrice, productPrice } from "./plant";
+import { scrapPrice } from "./engine";
 import {
   buySister,
   checkKonsernMilestones,
@@ -378,6 +381,52 @@ test("Kontrollrommet: oksygen går ikke i tappingen, strømmen kan slås av", ()
   run.step = "tapp";
   run.setOxygen(true);
   assert(!run.blowing, "oksygen kan slås på i tappingen");
+});
+
+test("Felles hendelser ganger skrap-, stål- og strømpris, og logges én gang (B-129)", () => {
+  const g = newGame(1);
+  const scrap0 = scrapPrice(g, "blandet");
+  const steel0 = productPrice(g, "stopegods", null);
+  const power0 = energyPrice(g);
+  const ev = {
+    id: 7,
+    kind: "skrapmangel",
+    title: "Skrapmangel",
+    text: "Dyrt skrap.",
+    scrap: 1.2,
+    steel: 1.1,
+    power: 1.5,
+    until: "2030-01-01T00:00:00Z",
+  };
+  applyWorldEvents(g, [ev]);
+  assert(Math.abs(scrapPrice(g, "blandet") / scrap0 - 1.2) < 1e-9, "skrapprisen ble ikke ganget");
+  assert(Math.abs(productPrice(g, "stopegods", null) / steel0 - 1.1) < 1e-9, "stålprisen ble ikke ganget");
+  assert(
+    Math.abs(energyPrice(g) / power0 - 1.5) < 1e-9,
+    "strømprisen ble ikke ganget (gass skal ikke, men garasjen har induksjonsovn)",
+  );
+  assert(worldFactor(g, "scrap") === 1.2, "worldFactor");
+  const logged = g.log.filter((e) => e.text.startsWith("Skrapmangel")).length;
+  applyWorldEvents(g, [ev]);
+  applyWorldEvents(g, []);
+  applyWorldEvents(g, [ev]);
+  assert(
+    g.log.filter((e) => e.text.startsWith("Skrapmangel")).length === logged && logged === 1,
+    "hendelsen skulle logges én gang",
+  );
+  applyWorldEvents(g, []);
+  assert(scrapPrice(g, "blandet") === scrap0, "prisen skulle tilbake når hendelsen er over");
+});
+
+test("Sesongfordelen er pitteliten: 5 % kasse og 10 fagpoeng (B-129)", () => {
+  const g = newGame(2);
+  const cash = g.cash;
+  joinSeason(g, 3, true);
+  assert(g.season === 3 && g.seasonPromptSeen === 3, "sesongen ble ikke satt");
+  assert(g.cash === Math.round(cash * 1.05) && g.researchPoints === SEASON_BONUS_FP, "fordelen stemmer ikke");
+  const h = newGame(2);
+  joinSeason(h, 3, false);
+  assert(h.cash === cash && h.researchPoints === 0, "uten fordel skulle ingenting endres");
 });
 
 if (failed) {
