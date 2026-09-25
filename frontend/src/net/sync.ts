@@ -6,7 +6,7 @@
  * Spillmotoren vet ingenting om dette: den kaller bare lytteren i save.ts.
  */
 import { konsernEquity } from "../game/konsern";
-import { migrate, parseSave, saveGame } from "../game/save";
+import { migrate, saveGame } from "../game/save";
 import { SAVE_VERSION } from "../game/engine";
 import type { GameState } from "../game/types";
 import { APP_VERSION, cloudConfigured } from "./config";
@@ -203,15 +203,6 @@ export async function keepLocal(local: GameState): Promise<void> {
   lastSavedAt = clock();
   lastUpload = lastSavedAt;
   setStatus({ kind: "saved", at: lastSavedAt });
-}
-
-/** Sikkerhetskopier kan bare lastes inn på kontoen de tilhører (B-125). Gir feilmeldingen, eller null. */
-export function backupOwnerError(text: string): string | null {
-  const g = parseSave(text);
-  if (!g) return "Fila er ikke et lagret spill.";
-  if (g.owner && g.owner !== userId())
-    return "Denne sikkerhetskopien tilhører en annen konto. Logg inn på den kontoen først.";
-  return null;
 }
 
 /** Funksjonsbryterne i tabellen `config` (kan skru av lagring på nett uten ny publisering) */

@@ -22,7 +22,7 @@ import { AccountCard, CloudDot } from "./Account";
 import { SeasonPrompt, SeasonSync, SeasonTeaser } from "./Season";
 import { LeaderboardSheet } from "./Leaderboard";
 import { useSeasonStatus } from "./useSeason";
-import { BackupInput, SettingsSheet } from "./Settings";
+import { SettingsSheet } from "./Settings";
 import { getSession } from "../net/supabase";
 import { flush, onLocalSave } from "../net/sync";
 import { saveGame, setSaveListener } from "../game/save";
@@ -42,7 +42,7 @@ const SPEED_OPTIONS = [
 ];
 
 function Intro({ api }: { api: GameApi }) {
-  const { hasSave, startNew: onNew, continueSaved: onContinue, loadBackup: onLoadBackup } = api;
+  const { hasSave, startNew: onNew, continueSaved: onContinue } = api;
   // Med konto og et spill fra før: nytt spill erstatter spillet på nett, så vi spør først (B-125)
   const [confirmNew, setConfirmNew] = useState<boolean | null>(null);
   const startNew = (guided: boolean) => {
@@ -93,9 +93,6 @@ function Intro({ api }: { api: GameApi }) {
             </div>
           </div>
         )}
-        <div className="g-intro-backup">
-          <BackupInput onLoad={onLoadBackup} />
-        </div>
         <AccountCard api={api} />
       </div>
     </div>
@@ -570,11 +567,6 @@ export function GameApp() {
           onQuit={() => {
             setSettingsOpen(false);
             api.quit();
-          }}
-          onLoadBackup={(text) => {
-            const ok = api.loadBackup(text);
-            if (ok) setSettingsOpen(false);
-            return ok;
           }}
           onNextRound={() => {
             setSettingsOpen(false);

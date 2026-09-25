@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 81 – 2026-09-25: sikkerhetskopi fjernet
+
+**Brukeren ba om:** Ta bort teksten om egen lagring på iPhone og sikkerhetskopi, og ta bort sikkerhetskopi helt, da
+det kan føre til juks.
+
+**Gjort:** B-135. Knappene, koden og CSS-en for sikkerhetskopi er fjernet; tekstene er skrevet om til å peke på konto.
+
+**Testet:** tsc, lint, `npm test`, build. Playwright på iPhone 13: ingen sikkerhetskopi-knapper på startskjermen eller
+i innstillingene, hjemskjerm-tipset uten iPhone-teksten, ingen feil, ingen horisontal scrolling.
+
+**Gjenstår:** Fase 4 og 5.
+
+---
+
 ## Økt 80 – 2026-09-25: rettet tekst på kontokortet
 
 **Brukeren ba om:** Teksten sa «topplista når den kommer» (den har kommet) og at spillet «blir» koblet (det kan

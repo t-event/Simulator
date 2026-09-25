@@ -24,7 +24,7 @@ konkurranse om kunder og skrap mellom spillerne. Fasene nederst er rekkefølgen 
   ser serveren at spilldagen går bakover, og spillet mister plassen i pågående anbud og auksjoner. Man kan fortsatt
   bruke kopien til å redde et spill som gikk galt.
 - Det som avgjør konkurransen (anbud, auksjoner, sesongresultat), avgjøres på serveren, ikke i appen.
-- Sikkerhetskopien blir sjelden nødvendig når spillet ligger på nett, men vi beholder den.
+- Sikkerhetskopi som fil er fjernet helt (B-135): et spill flyttes bare med konto.
 
 Det som ikke går å stoppe helt: spillet kjører på mobilen, så en teknisk kyndig spiller kan redigere sin egen lagring.
 Det vi gjør mot det står under «Juksesperre». Det er godt nok for et hobbyspill.

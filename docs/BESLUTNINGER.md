@@ -1774,3 +1774,16 @@ Beslutning: 🏆 står som en 40 px knapp til høyre for varsellinja (`g-notice-
 fart, 📖 og ⚙️, som fikk plass før. Playwright-sjekken måler nå også at knapper og tekst i toppfeltet ikke
 avkortes eller havner utenfor skjermen (iPhone SE 320 px, iPhone 13 390 px, iPhone 14 Pro Max 430 px), ikke bare
 at siden ikke scroller sideveis.
+
+## B-135 Sikkerhetskopi som fil er fjernet (2026-09-25)
+Status: gjelder (erstatter B-026 og sikkerhetskopi-delen av B-125)
+Brukeren: ta bort muligheten for sikkerhetskopi, da det kan føre til juks mellom spillere; ta bort teksten om at
+iPhone-appen har sin egen lagring og at man skal ta en sikkerhetskopi.
+
+Beslutning:
+- «Last ned sikkerhetskopi» og «Hent sikkerhetskopi» er borte fra startskjermen og ⚙️ Innstillinger, med
+  `downloadBackup`, `BackupInput`, `loadBackup` og `backupOwnerError`. Et spill kan bare flyttes mellom nettlesere og
+  enheter med konto.
+- Hjemskjerm-tipset sier nå bare «Logg inn i appen på hjemskjermen, så hentes spillet ditt fra nettet.»
+- Tekstene som nevnte sikkerhetskopi (lagring i innstillingene, sesongvalget), er skrevet om.
+- `parseSave` blir i `save.ts`, men brukes bare av testene.

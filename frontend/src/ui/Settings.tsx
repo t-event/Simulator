@@ -6,47 +6,11 @@ import type { PlantStats } from "../game/plant";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { AccountCard } from "./Account";
-import { backupOwnerError } from "../net/sync";
 import { AutoToggle } from "./AutoToggle";
 import { InstallTip } from "./InstallTip";
 import { Card } from "./common";
 import { LOG_TOPICS } from "../game/inbox";
 import { fmtKr, fmtPct } from "./format";
-
-/** Laster ned hele spillet som en JSON-fil */
-function downloadBackup(g: GameState): void {
-  const blob = new Blob([JSON.stringify(g)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `stalverket-dag-${Math.floor(g.minute / 1440) + 1}.json`;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-/** Knapp som henter en sikkerhetskopi fra en fil */
-export function BackupInput({ onLoad }: { onLoad: (text: string) => boolean }) {
-  const [error, setError] = useState<string | null>(null);
-  return (
-    <label className="g-file-btn">
-      Hent sikkerhetskopi
-      <input
-        type="file"
-        accept="application/json,.json"
-        onChange={async (e) => {
-          const file = e.target.files?.[0];
-          if (!file) return;
-          const text = await file.text();
-          // Kopier fra en annen konto avvises (B-125); ellers den vanlige sjekken
-          const owner = backupOwnerError(text);
-          setError(owner ?? (onLoad(text) ? null : "Fila er ikke et lagret spill."));
-          e.target.value = "";
-        }}
-      />
-      {error && <span className="g-muted"> {error}</span>}
-    </label>
-  );
-}
 
 /** Banken: lån og kassekreditt. Står under Verket → Økonomi, der pengene er (B-072). */
 export function BankCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
@@ -145,13 +109,12 @@ function ToastSettings({ g, act }: { g: GameState; act: GameApi["act"] }) {
   );
 }
 
-/** Innstillinger bak ⚙️ i toppen: nytt spill, sikkerhetskopi, valsing og nattspoling (B-072) */
+/** Innstillinger bak ⚙️ i toppen: konto, nytt spill, valsing og nattspoling (B-072). Sikkerhetskopi er fjernet (B-135). */
 export function SettingsSheet({
   g,
   stats,
   api,
   onQuit,
-  onLoadBackup,
   onNextRound,
   onClose,
 }: {
@@ -159,7 +122,6 @@ export function SettingsSheet({
   stats: PlantStats;
   api: GameApi;
   onQuit: () => void;
-  onLoadBackup: (text: string) => boolean;
   onNextRound: () => void;
   onClose: () => void;
 }) {
@@ -191,13 +153,8 @@ export function SettingsSheet({
         <h3 className="g-subhead">Lagring</h3>
         <p className="g-muted">
           Spillet lagres automatisk i denne nettleseren, og på nett når du er logget inn. Safari kan slette lagrede data
-          for nettsider som ikke er brukt på en uke – logg inn, legg spillet på hjemskjermen, eller ta en
-          sikkerhetskopi.
+          for nettsider som ikke er brukt på en uke – logg inn, så ligger spillet trygt på nett.
         </p>
-        <div className="g-row">
-          <button onClick={() => downloadBackup(g)}>Last ned sikkerhetskopi</button>
-          <BackupInput onLoad={onLoadBackup} />
-        </div>
         <h3 className="g-subhead">Spill på mobilen</h3>
         <InstallTip />
         <h3 className="g-subhead">Nytt spill</h3>
