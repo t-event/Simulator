@@ -5,7 +5,8 @@
 import { scheduleCastingSwitch } from "./actions";
 import { CHALLENGES, checkChallenges } from "./challenges";
 import { ADDONS, CASTINGS, FURNACES, WIN_CASH } from "./data";
-import { advance, checkWin, fmtKr, newGame } from "./engine";
+import { advance, checkWin, fmtKr, log, newGame } from "./engine";
+import { unseenCount } from "./inbox";
 import { KNOWLEDGE } from "./knowledge";
 import {
   buySister,
@@ -184,6 +185,24 @@ test("Utfordringer starter på storverket og gir belønning når de nås", () =>
     CHALLENGES.every((c) => c.goal > 0),
     "utfordring uten mål",
   );
+});
+
+test("Bjella teller problemer og hendelser, ikke gode nyheter", () => {
+  const g = newGame(1);
+  g.inboxSeenId = g.log.length ? g.log[g.log.length - 1].id : 0;
+  log(g, "Noe bra", "good");
+  log(g, "Noe galt", "bad");
+  log(g, "Noe skjedde", "event");
+  assert(unseenCount(g) === 2, `telte ${unseenCount(g)}`);
+});
+
+test("Anbefalte støtteroller: to skrapklassere og avløsere også med fem skiftlag", () => {
+  const g = newGame(1);
+  g.stage = 3;
+  const klasser = supportAdvice(g).find((a) => a.role === "klasser");
+  assert(klasser?.want === 2, `skrapklassere: ${klasser?.want}`);
+  const allround = supportAdvice(g).find((a) => a.role === "allround");
+  assert((allround?.want ?? 0) >= 1, "avløsere anbefales ikke");
 });
 
 test("Kontrollrommet: oksygen går ikke i tappingen, strømmen kan slås av", () => {

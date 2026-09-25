@@ -229,7 +229,8 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
               skrapet er smeltet.
             </li>
             <li>
-              <strong>Rens</strong> – blås oksygen til karbonet er i det grønne feltet, mens strømmen holder varmen.
+              <strong>Rens</strong> – strømmen er av når steget starter, for oksygenet gir varme selv. Blås oksygen til
+              karbonet er i det grønne feltet.
             </li>
             <li>
               <strong>Slagg av</strong> – tipp ovnen mot slaggdøra, og rett den opp før stålet renner ut.
@@ -310,8 +311,8 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
       body = (
         <>
           <p className="sc-instruction">
-            Oksygen brenner bort karbon mens strømmen holder varmen. Blås til karbonet er i det grønne feltet – ikke for
-            lenge – og hold badet under tappetemperaturen. Blir det for varmt, kan strømmen skrus helt av.
+            Oksygen brenner bort karbon og gir varme selv, så strømmen er av når rensingen starter. Blås til karbonet er
+            i det grønne feltet – ikke for lenge. Gi litt strøm bare hvis badet blir for kaldt.
           </p>
           <ZoneGauge
             label="Karbon i stålet"
@@ -362,7 +363,8 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
                   ? "Karbonet er i det grønne feltet. Slå av karbonet og gå videre."
                   : "Karbonet er i det grønne feltet. Slå av oksygenet og gå videre."}
             {s.bathTempC > target - 15 &&
-              (runner.level > 0 ? " Badet er varmt – gi mindre strøm." : " Strømmen er av, badet kjøles ned.")}
+              (runner.level > 0 ? " Badet er varmt – gi mindre strøm." : " Badet er varmt – bli ferdig med blåsingen.")}
+            {s.bathTempC < MELT_BAND[0] && " Badet er for kaldt – gi litt strøm."}
           </p>
           <button
             className={`sc-main${cOk ? "" : " is-quiet"}`}

@@ -6,7 +6,10 @@ export function importantLog(g: GameState): LogEntry[] {
   return g.log.filter((e) => e.kind !== "info");
 }
 
-/** Antall viktige hendelser siden spilleren sist åpnet varsellista */
+/**
+ * Antall problemer og hendelser siden spilleren sist åpnet varsellista. Gode nyheter står i lista, men gir
+ * ikke tall på bjella (B-107) – den skal bare rope når noe trenger oppmerksomhet.
+ */
 export function unseenCount(g: GameState): number {
-  return importantLog(g).filter((e) => e.id > (g.inboxSeenId ?? 0)).length;
+  return importantLog(g).filter((e) => e.kind !== "good" && e.id > (g.inboxSeenId ?? 0)).length;
 }

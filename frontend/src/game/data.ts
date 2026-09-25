@@ -746,7 +746,7 @@ export const ADDONS: Addon[] = [
     needsArc: true,
     perFurnace: true,
     description:
-      "Elektrodene flyttes raskt og mykt, og brudd fanges opp før de skjer. 60 % færre elektrodebrudd og 30 % færre overslag.",
+      "Elektrodene flyttes raskt og mykt, og brudd fanges opp før de skjer. 75 % færre elektrodebrudd og 30 % færre overslag.",
   },
   {
     id: "panelvarsling",
