@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 48 – 2026-09-25: «3 av 3 skift» med 4-skift
+
+**Brukeren ba om:** Folk viste «3 av 3 skift» selv om verket hadde flere skiftlag.
+
+**Gjort (B-078):** Skiftkortet skiller nå skift i døgnet og skiftlag: «døgnet rundt med 4 skiftlag · 4-skift». Det
+står også når fraværet gjør at færre lag er fulle. Bemanningstabellen regner og viser per lag når det er 4–5 lag.
+
+**Testet:** tsc, lint, bygg, balanse (exit 0). Playwright på iPhone 13 med en lagring med 4 lag og 2 borte: teksten
+stemmer, tabellen viser «Trengs 4 lag», ingen horisontal scrolling.
+
+**Gjenstår:** –
+
+---
+
 ## Økt 47 – 2026-09-25: bare den enkle styringen i kontrollrommet
 
 **Brukeren ba om:** Fjerne den fulle styringen og bare bruke den enkle.

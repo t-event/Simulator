@@ -272,7 +272,7 @@ function CrewTable({ g, stats, shifts }: { g: GameState; stats: PlantStats; shif
             <th className="num">
               Trengs
               <br />
-              <span className="g-muted">{shifts} skift</span>
+              <span className="g-muted">{shifts > 3 ? `${shifts} lag` : `${shifts} skift`}</span>
             </th>
             <th className="num">Fylt av</th>
             <th className="num">Mangler</th>
@@ -284,7 +284,9 @@ function CrewTable({ g, stats, shifts }: { g: GameState; stats: PlantStats; shif
               <td>{ROLES[row.role].plural}</td>
               <td className="num">
                 {row.need}
-                <span className="g-muted g-sub">{row.perShift} per skift</span>
+                <span className="g-muted g-sub">
+                  {row.perShift} per {shifts > 3 ? "lag" : "skift"}
+                </span>
               </td>
               <td className="num">
                 {row.own - row.hired} {row.own - row.hired === 1 ? "egen" : "egne"}
@@ -325,10 +327,12 @@ export function People({ g, stats, act }: Props) {
     RoleId,
     number
   >;
-  // Tabellen viser neste skift hvis verket ikke går alle tre, ellers de tre som går
-  const planShifts = Math.min(3, stats.shifts + (stats.shifts < 3 ? 1 : 0));
   // Plasser som mangler uten å regne med fravær: det er dem man ansetter til (fravær dekkes av vikarer)
   const permanent = staffing(g, true);
+  // Tabellen viser neste skift hvis verket ikke går alle tre, ellers alle skiftlagene (3–5) uten å regne med fravær
+  const planShifts = stats.shifts < 3 ? stats.shifts + 1 : Math.max(3, permanent.crews);
+  // Skiftlagene verket er bemannet for (fravær trekker ikke fra; det vises for seg)
+  const crews = Math.max(stats.crews, permanent.crews);
   const missing = Object.entries(permanent.missing).filter(([, n]) => (n ?? 0) > 0) as [RoleId, number][];
   const away = g.workers.filter((w) => isAbsent(g, w));
   const fullShifts = staffing(g, true).shifts;
@@ -366,18 +370,29 @@ export function People({ g, stats, act }: Props) {
           <>
             <Card title="Skiftene">
               <p className="g-big-status">
-                Verket går <strong>{stats.shifts} av 3 skift</strong>
-                <span className="g-muted">
-                  {" "}
-                  · {stats.hours} timer i døgnet{stats.crews > 3 ? ` · ${stats.crews}-skift (${stats.crews} lag)` : ""}
-                </span>
+                {stats.hours >= 24 ? (
+                  <>
+                    Verket går <strong>døgnet rundt</strong> med <strong>{crews} skiftlag</strong>
+                    <span className="g-muted">
+                      {" "}
+                      · {crews}‑skift
+                      {stats.crews < crews ? ` · fraværet gjør at bare ${stats.crews} lag er fulle nå` : ""}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    Verket går <strong>{stats.shifts} av 3 skift</strong>
+                    <span className="g-muted"> · {stats.hours} timer i døgnet</span>
+                  </>
+                )}
               </p>
               {stats.crews > 3 && stats.hours >= 24 && (
                 <p className="g-note">
-                  <strong>{stats.crews}-skift:</strong> med {stats.crews} skiftlag får turnusen fridager. Trivselen blir
-                  bedre, færre blir syke ({Math.round((1 - crewBenefits(stats.crews, stats.hours).sick) * 100)} %
-                  færre), folk lærer {Math.round((crewBenefits(stats.crews, stats.hours).learn - 1) * 100)} % fortere,
-                  og de ekstra lagene dekker fravær, så verket ikke mister skift.
+                  <strong>{stats.crews}-skift:</strong> døgnet har tre skift à 8 timer, men med {stats.crews} skiftlag
+                  som bytter på, får turnusen fridager. Trivselen blir bedre, færre blir syke (
+                  {Math.round((1 - crewBenefits(stats.crews, stats.hours).sick) * 100)} % færre), folk lærer{" "}
+                  {Math.round((crewBenefits(stats.crews, stats.hours).learn - 1) * 100)} % fortere, og de ekstra lagene
+                  dekker fravær, så verket ikke mister skift.
                 </p>
               )}
               {stats.ownerWorks && (

@@ -1013,3 +1013,11 @@ HMI-et er tatt bort: `ExpertControl.tsx`, `src/components/`, `controlroom.css`, 
 enkle styringen og i `validate.ts`.
 Begrunnelse: Den enkle styringen har fått de viktigste grepene (oksygen, avslagging, øse – B-076), og spillet skal
 være enkelt. Mindre kode å vedlikeholde og et mindre bygg.
+
+## B-078 «Skift» og «skiftlag» vises hver for seg (2026-09-25)
+Status: gjelder (presiserer visningen i B-073)
+Brukeren hadde 4-skift, men Folk viste «3 av 3 skift». Døgnet har bare tre skift à 8 timer. 4- og 5-skift betyr
+antall **skiftlag** som bytter på dem.
+Beslutning: Når verket går døgnet rundt, står det «Verket går døgnet rundt med N skiftlag · N-skift». Ellers står det
+«X av 3 skift · T timer i døgnet». Skiftlagene telles uten fravær. Gjør fraværet at færre lag er fulle, står det i
+tillegg. Bemanningstabellen viser «Trengs N lag» og «per lag» når verket har mer enn tre lag.
