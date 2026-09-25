@@ -1746,3 +1746,11 @@ logge inn.
 Beslutning: uten konto vises «Sesong 1 er i gang – bli med!» én gang per sesong (`seasonLoginPromptSeen`), ikke
 midt i veiledningen. Knappen «Opprett konto eller logg inn» åpner ⚙️ Innstillinger med kontokortet; «Ikke nå»
 lukker. Logger man inn, gjelder reglene fra B-129: et nytt spill blir med direkte, et eldre får valget.
+
+## B-132 Sesongvalget har en fast plass på topplista (2026-09-25)
+Status: gjelder
+Brukeren: krysser man ut popupen om sesongen, må man kunne finne det igjen et annet sted.
+Beslutning: øverst på topplista (Verket → Økonomi) står `SeasonJoin` med samme valg som popupen: uten konto «Bli med
+i Sesong 1: opprett konto eller logg inn»; med konto og et eldre spill «Spillet ditt er ikke med» med «Start sesongen
+(nytt spill)» og bekreftelse; med et spill i sesongen «Spillet ditt er med i Sesong 1». Popupene sier hvor valget
+finnes igjen.

@@ -6,7 +6,7 @@
  * Spillmotoren vet ingenting om dette: den kaller bare lytteren i save.ts.
  */
 import { konsernEquity } from "../game/konsern";
-import { migrate, parseSave } from "../game/save";
+import { migrate, parseSave, saveGame } from "../game/save";
 import { SAVE_VERSION } from "../game/engine";
 import type { GameState } from "../game/types";
 import { APP_VERSION, cloudConfigured } from "./config";
@@ -172,6 +172,7 @@ export async function linkOnLogin(local: GameState | null): Promise<LinkDecision
   if (!cloud) {
     if (!mine) return { kind: "none" };
     await uploadSave(mine);
+    saveGame(mine);
     lastSavedAt = clock();
     lastUpload = lastSavedAt;
     setStatus({ kind: "saved", at: lastSavedAt });
@@ -187,6 +188,7 @@ export async function linkOnLogin(local: GameState | null): Promise<LinkDecision
       return { kind: "cloud", cloud };
     }
     await uploadSave(mine);
+    saveGame(mine);
     lastSavedAt = clock();
     lastUpload = lastSavedAt;
     setStatus({ kind: "saved", at: lastSavedAt });

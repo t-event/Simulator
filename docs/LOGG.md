@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 77 – 2026-09-25: sesongvalget på topplista
+
+**Brukeren ba om:** Krysser man ut popupen om sesongen, må man finne det igjen et annet sted.
+
+**Gjort:** B-132. `SeasonJoin` øverst på topplista, med samme valg som popupen. Popupene henviser dit.
+
+**Testet:** tsc, lint, `npm test`, build. Playwright på iPhone 13: uten konto vises lenken til kontokortet; med konto
+og eldre spill vises «Start sesongen» med bekreftelse, og etter start er spillet med i sesongen. Ingen feil, ingen
+horisontal scrolling.
+
+**Gjenstår:** Fase 4 og 5.
+
+---
+
 ## Økt 76 – 2026-09-25: sesongbeskjed uten konto
 
 **Brukeren ba om:** De som ikke er logget inn, må også få popupen om sesongen.
