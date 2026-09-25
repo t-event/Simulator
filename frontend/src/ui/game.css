@@ -900,6 +900,31 @@ button {
   white-space: nowrap;
 }
 
+/* Konsern (B-119): kjøpsknapp med hva det gir, og hvorfor den er grå */
+.g-konsern-buy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin-top: 6px;
+}
+
+.g-konsern-why {
+  display: block;
+  color: var(--warning);
+}
+
+.g-konsern-steps {
+  margin: 6px 0 8px;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.g-konsern-next {
+  border-color: var(--accent);
+}
+
 /* Varselinnstillinger (B-115) */
 .g-toggle-hint {
   display: block;

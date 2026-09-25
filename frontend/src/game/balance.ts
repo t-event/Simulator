@@ -27,17 +27,7 @@ import {
   upgradeOptions,
 } from "./actions";
 import { resolveDecision } from "./decisions";
-import {
-  buyShared,
-  buySister,
-  KONSERN_SHARED,
-  MAX_SISTERS,
-  MODERNIZE_MAX,
-  modernizeCost,
-  modernizeSister,
-  SISTER_TYPES,
-  type SharedId,
-} from "./konsern";
+import { konsernAdvice } from "./konsern";
 import { answerQuiz, QUIZ, quizAvailable } from "./quiz";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
 import { ADDONS, CASTINGS, FURNACES, SCRAP_IDS, STAGES } from "./data";
@@ -59,7 +49,7 @@ import { MELT_BAND, SimpleRunner, SLAG_DONE_KG } from "../ui/control/simpleRunne
 import { computePlantStats, day, fixedPriceAdvice, hasPlanner, satisfies } from "./plant";
 declare const process: { argv: string[]; exitCode?: number; exit?: (code: number) => void };
 
-import type { Crew, GameState, GradeId, ManualRequest, RoleId, ScrapId, SisterType } from "./types";
+import type { Crew, GameState, GradeId, ManualRequest, RoleId, ScrapId } from "./types";
 
 type Recipe = Partial<Record<ScrapId, number>>;
 
@@ -512,25 +502,10 @@ function botHour(g: GameState): void {
   }
 }
 
-/** Testspillerens konsernkjøp: felles salg og innkjøp når det er to verk, ellers nytt verk før modernisering */
+/** Testspillerens konsernkjøp: følger «Neste steg» på Konsern-fanen, som en spiller ville gjort (B-119) */
 function konsernBuy(g: GameState, reserve: number): void {
-  const k = g.konsern;
-  const free = g.cash - reserve;
-  if (k.plants.length >= 1) {
-    for (const id of ["salg", "innkjop"] as SharedId[]) {
-      if (!k.shared.includes(id) && free >= KONSERN_SHARED[id].price) {
-        buyShared(g, id);
-        return;
-      }
-    }
-  }
-  if (k.plants.length < MAX_SISTERS) {
-    const type: SisterType = k.plants.some((p) => p.type === "stalverk") ? "storverk" : "stalverk";
-    if (free >= SISTER_TYPES[type].price) buySister(g, type);
-    return;
-  }
-  const p = k.plants.filter((x) => x.level < MODERNIZE_MAX).sort((a, b) => modernizeCost(a) - modernizeCost(b))[0];
-  if (p && free >= modernizeCost(p)) modernizeSister(g, p.id);
+  const next = konsernAdvice(g);
+  if (next && g.cash - reserve >= next.price) next.run(g);
 }
 
 interface RunSummary {

@@ -93,8 +93,11 @@ export function migrate(g: GameState): GameState {
   if (g.courseSeats === undefined) g.courseSeats = null;
   if (g.pendingCastingSwitch === undefined) g.pendingCastingSwitch = null;
   if (g.market.powerDryDays === undefined) g.market.powerDryDays = 0;
-  if (g.konsern === undefined) g.konsern = { unlocked: false, plants: [], shared: [], nextId: 1, director: null };
+  if (g.konsern === undefined)
+    g.konsern = { unlocked: false, plants: [], shared: [], nextId: 1, director: null, milestones: 0 };
   if (g.konsern.director === undefined) g.konsern.director = null;
+  if (g.konsern.milestones === undefined) g.konsern.milestones = 0;
+  if (g.storeFullLogMin === undefined) g.storeFullLogMin = -1e9;
   // Gamle hendelser skal ikke telle som uleste i den nye varsellista (B-089)
   if (g.inboxSeenId === undefined) g.inboxSeenId = g.log.length ? g.log[g.log.length - 1].id : 0;
   // Før B-042 ble fastpris fornyet av seg selv; gamle spill beholder det

@@ -5,6 +5,35 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 63 – 2026-09-25: fullt lager og et tydeligere konsern
+
+**Brukeren ba om:**
+- Varsel når lageret er fullt og ovnene står.
+- Konsernet var rart: med bare stålverk fikk man ikke kjøpt storverk eller felles innkjøp og salgskontor. Det
+  skulle bli mer intuitivt, morsomt og bedre forklart.
+
+**Gjort:**
+- B-118: varsel om fullt lager.
+- B-119 for konsernet:
+  - forklaring i steg og «Neste steg»
+  - grunner og nedtelling på grå knapper
+  - utbygging fra stålverk til storverk
+  - navn på verkene, milepæler og produksjonsrekorder
+- Testspilleren følger «Neste steg».
+
+**Testet:**
+- tsc, lint, `npm test` (nye tester for konsernet og varselet om fullt lager), bygg.
+- Balanse og `--vansker`.
+- Playwright på iPhone 13 med bare stålverk og lite penger:
+  - «Neste steg» foreslår det det er råd til
+  - alle 8 grå knapper forklarer hvorfor de er grå
+  - «Bygg ut til storverk» vises
+  - ingen feil og ingen horisontal scrolling
+
+**Gjenstår:** Ingenting.
+
+---
+
 ## Økt 62 – 2026-09-25: salgsdirektør i konsernet
 
 **Brukeren ba om:** Når konsernet er åpnet, skal man kunne ansette noen som tar kontraktene og avtalene automatisk.
