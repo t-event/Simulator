@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 
 /**
  * Legg til på hjemskjermen (B-071): da åpner spillet i fullskjerm uten nettleserlinjer.
- * Android/Chrome gir en «installer»-hendelse vi kan bruke til en knapp; iPhone/Safari har ingen slik, så der vises
- * en kort oppskrift.
+ * Android/Chrome gir en «installer»-hendelse vi kan bruke til en knapp; iPhone/Safari har ingen slik. Oppskriften for
+ * både iPhone og Android vises alltid, med den som passer telefonen først (B-136).
  */
 interface InstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -57,39 +57,44 @@ export function InstallTip() {
     setTick((n) => n + 1);
   };
 
+  // Begge oppskriftene vises alltid (så man kan hjelpe andre), med den som passer denne telefonen først (B-136)
+  const ios = (
+    <li key="ios">
+      <strong>iPhone og iPad (Safari):</strong> trykk Del-knappen (firkanten med pil opp) nederst eller øverst, bla ned
+      og velg «Legg til på Hjem-skjerm». Trykk «Legg til».
+    </li>
+  );
+  const android = (
+    <li key="android">
+      <strong>Android (Chrome):</strong> trykk menyen ⋮ øverst til høyre og velg «Installer app» eller «Legg til på
+      startskjermen». Trykk «Installer» eller «Legg til».
+      <br />
+      <strong>Samsung Internet:</strong> trykk menyen ☰ nederst, velg «Legg til side på» og så «Startskjerm».
+      <br />
+      <strong>Firefox:</strong> trykk menyen ⋮ og velg «Installer» eller «Legg til på startskjermen».
+    </li>
+  );
+  const steps = os === "android" ? [android, ios] : [ios, android];
+
   return (
     <div className="g-install">
       <p>
         <strong>📱 Spill i fullskjerm:</strong> legg spillet til på hjemskjermen, så åpner det som en app uten
         nettleserlinjer – og virker uten nett.
       </p>
-      {deferred ? (
+      {deferred && (
         <button className="g-primary g-small" onClick={install}>
           Legg til på hjemskjermen
         </button>
-      ) : (
-        <details className="g-role-group" open={open} onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}>
-          <summary>Slik gjør du det</summary>
-          <ul className="g-closed">
-            {(os === "ios" || os === "annet") && (
-              <li>
-                <strong>iPhone og iPad (Safari):</strong> trykk Del-knappen (firkanten med pil opp) nederst eller
-                øverst, bla ned og velg «Legg til på Hjem-skjerm». Trykk «Legg til».
-              </li>
-            )}
-            {(os === "android" || os === "annet") && (
-              <li>
-                <strong>Android (Chrome):</strong> trykk menyen ⋮ øverst til høyre og velg «Legg til på startskjermen»
-                eller «Installer app».
-              </li>
-            )}
-            <li>Start spillet fra ikonet på hjemskjermen etterpå.</li>
-            {(os === "ios" || os === "annet") && (
-              <li>Logg inn i appen på hjemskjermen, så hentes spillet ditt fra nettet.</li>
-            )}
-          </ul>
-        </details>
       )}
+      <details className="g-role-group" open={open} onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}>
+        <summary>{deferred ? "Eller gjør det selv" : "Slik gjør du det"}</summary>
+        <ul className="g-closed">
+          {steps}
+          <li>Start spillet fra ikonet på hjemskjermen etterpå.</li>
+          <li>Logg inn i appen på hjemskjermen, så hentes spillet ditt fra nettet.</li>
+        </ul>
+      </details>
     </div>
   );
 }

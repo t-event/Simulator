@@ -44,10 +44,11 @@ const SPEED_OPTIONS = [
 function Intro({ api }: { api: GameApi }) {
   const { hasSave, startNew: onNew, continueSaved: onContinue } = api;
   // Med konto og et spill fra før: nytt spill erstatter spillet på nett, så vi spør først (B-125)
-  const [confirmNew, setConfirmNew] = useState<boolean | null>(null);
-  const startNew = (guided: boolean) => {
-    if (hasSave && getSession()) setConfirmNew(guided);
-    else onNew(guided);
+  // Alle nye spill starter med veiledningen (B-136)
+  const [confirmNew, setConfirmNew] = useState(false);
+  const startNew = () => {
+    if (hasSave && getSession()) setConfirmNew(true);
+    else onNew(true);
   };
   return (
     <div className="g-intro">
@@ -75,21 +76,18 @@ function Intro({ api }: { api: GameApi }) {
               Fortsett
             </button>
           )}
-          <button className={hasSave ? "" : "g-primary"} onClick={() => startNew(true)}>
-            {hasSave ? "Nytt spill med veiledning" : "Start med veiledning"}
-          </button>
-          <button onClick={() => startNew(false)}>
-            {hasSave ? "Nytt spill uten veiledning" : "Start uten veiledning"}
+          <button className={hasSave ? "" : "g-primary"} onClick={startNew}>
+            {hasSave ? "Nytt spill" : "Start spillet"}
           </button>
         </div>
-        {confirmNew !== null && (
+        {confirmNew && (
           <div className="g-note g-intro-confirm">
             <p>Et nytt spill erstatter spillet som er lagret på kontoen din. Vil du det?</p>
             <div className="g-row">
-              <button className="g-danger" onClick={() => onNew(confirmNew)}>
+              <button className="g-danger" onClick={() => onNew(true)}>
                 Ja, start nytt
               </button>
-              <button onClick={() => setConfirmNew(null)}>Avbryt</button>
+              <button onClick={() => setConfirmNew(false)}>Avbryt</button>
             </div>
           </div>
         )}

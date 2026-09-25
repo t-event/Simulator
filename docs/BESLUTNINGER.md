@@ -1787,3 +1787,15 @@ Beslutning:
 - Hjemskjerm-tipset sier nå bare «Logg inn i appen på hjemskjermen, så hentes spillet ditt fra nettet.»
 - Tekstene som nevnte sikkerhetskopi (lagring i innstillingene, sesongvalget), er skrevet om.
 - `parseSave` blir i `save.ts`, men brukes bare av testene.
+
+## B-136 Alltid start med veiledning, og oppskrift for Android også (2026-09-25)
+Status: gjelder
+Brukeren: få med instruksjoner for Android-mobiler under «Spill i fullskjerm»; «Start uten veiledning» skal ikke
+være mulig.
+
+Beslutning:
+- Startskjermen har én knapp: «Start spillet» (eller «Fortsett» og «Nytt spill» når det finnes et spill). Alle nye
+  spill starter med veiledningen, også «Start sesongen» i garasjen. «Avslutt veiledningen» underveis står som før.
+- Hjemskjerm-tipset viser alltid oppskriften for både iPhone og Android (Chrome, Samsung Internet, Firefox), med den
+  som passer telefonen først, så man også kan hjelpe andre. Chrome-knappen «Legg til på hjemskjermen» vises i tillegg
+  når nettleseren tilbyr den.

@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 82 – 2026-09-25: alltid veiledning, Android-oppskrift
+
+**Brukeren ba om:** Instruksjoner for Android under «Spill i fullskjerm», og at «Start uten veiledning» fjernes.
+
+**Gjort:** B-136. Én startknapp, alle nye spill (også sesongstart) med veiledning; oppskrift for iPhone og Android
+(Chrome, Samsung Internet, Firefox) alltid, riktig først.
+
+**Testet:** tsc, lint, `npm test`, build. Playwright på iPhone 13 og Pixel 7: bare «Start spillet», begge oppskriftene
+i riktig rekkefølge, spillet starter med veiledningen på pause. Ingen feil, ingen horisontal scrolling.
+
+**Gjenstår:** Fase 4 og 5.
+
+---
+
 ## Økt 81 – 2026-09-25: sikkerhetskopi fjernet
 
 **Brukeren ba om:** Ta bort teksten om egen lagring på iPhone og sikkerhetskopi, og ta bort sikkerhetskopi helt, da
