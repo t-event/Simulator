@@ -15,6 +15,8 @@ import {
 import type { GameState, PowerDeal } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Card } from "./common";
+import { AutoToggle } from "./AutoToggle";
+import { auto } from "../game/research";
 import { fmtClock, fmtKr, fmtNum, fmtPct } from "./format";
 
 const POWER_LIMITS: (number | null)[] = [null, 0.7, 0.9, 1.1, 1.4, 2];
@@ -92,7 +94,7 @@ export function PowerCard({ g, stats, act }: { g: GameState; stats: PlantStats; 
         <p className={daysLeft <= 3 ? "g-note g-warn" : "g-note"}>
           {POWER_DEAL_NAMES[s.powerDeal]} gjelder til dag {s.powerDealUntilDay} – {daysLeft} døgn igjen. Du kan ikke
           bytte før da.{" "}
-          {s.powerAutoRenew
+          {auto(g, "powerAutoRenew")
             ? "Så fornyes avtalen av seg selv."
             : "Så går du tilbake til spotpris, hvis du ikke velger en ny avtale."}
         </p>
@@ -101,14 +103,12 @@ export function PowerCard({ g, stats, act }: { g: GameState; stats: PlantStats; 
           Spotpris er standard: den gjelder når du ikke har valgt noe annet, og når en avtale går ut uten å fornyes.
         </p>
       )}
-      <label className="g-toggle">
-        <input
-          type="checkbox"
-          checked={s.powerAutoRenew}
-          onChange={(e) => act((gg) => void (gg.settings.powerAutoRenew = e.target.checked))}
-        />
-        <span>Forny fastpris og nattariff av seg selv når bindingstida er ute</span>
-      </label>
+      <AutoToggle
+        g={g}
+        act={act}
+        k="powerAutoRenew"
+        label="Forny fastpris og nattariff av seg selv når bindingstida er ute"
+      />
       <p className="g-muted">«Snitt» er prisen i timene verket går i dag.</p>
 
       <h3 className="g-subhead">Effekttariff</h3>

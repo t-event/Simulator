@@ -24,6 +24,8 @@ import {
 import type { Contract, GameState, Settings } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Agreements } from "./Agreements";
+import { AutoLocked, AutoToggle } from "./AutoToggle";
+import { auto, automationUnlocked } from "../game/research";
 import { AnalysisLine, Bar, Card, GradeChips, GradeSpec } from "./common";
 import { fmtKr, fmtNum, fmtT } from "./format";
 
@@ -249,7 +251,7 @@ export function Sales({ g, stats, act, openTab }: Props & { openTab?: string }) 
             {active.length > 1 && (
               <p className="g-muted">
                 Øverste kontrakt leveres og produseres først. Flytt med pilene.
-                {hasPlanner(g) && g.settings.plannerSorts && " Planleggeren sorterer køen etter frist."}
+                {hasPlanner(g) && auto(g, "plannerSorts") && " Planleggeren sorterer køen etter frist."}
               </p>
             )}
             {active.map((c, i) => {
@@ -373,34 +375,36 @@ export function Sales({ g, stats, act, openTab }: Props & { openTab?: string }) 
             )}
             <details className="g-details">
               <summary>Støpefeil og automatisk salg</summary>
-              <label className="g-field">
-                <span>Støpefeil (2. sortering)</span>
-                <select
-                  value={g.settings.secondsAction}
-                  onChange={(e) =>
-                    act(
-                      (gg) =>
-                        void (gg.settings.secondsAction = e.target.value as GameState["settings"]["secondsAction"]),
-                    )
-                  }
-                >
-                  <option value="spot">Selg automatisk på spot</option>
-                  <option value="retur">Smelt om som returskrap</option>
-                  <option value="behold">Behold på lager</option>
-                </select>
-              </label>
+              {automationUnlocked(g, "secondsAction") ? (
+                <label className="g-field">
+                  <span>Støpefeil (2. sortering)</span>
+                  <select
+                    value={g.settings.secondsAction}
+                    onChange={(e) =>
+                      act(
+                        (gg) =>
+                          void (gg.settings.secondsAction = e.target.value as GameState["settings"]["secondsAction"]),
+                      )
+                    }
+                  >
+                    <option value="spot">Selg automatisk på spot</option>
+                    <option value="retur">Smelt om som returskrap</option>
+                    <option value="behold">Behold på lager</option>
+                  </select>
+                </label>
+              ) : (
+                <AutoLocked k="secondsAction" label="Automatisk salg eller omsmelting av støpefeil" />
+              )}
               <p className="g-muted g-small-text">
                 Støpefeil kan ikke leveres på kontrakt. Omsmelting gir returskrap med kjent analyse – gratis skrap til
                 neste charge, men det koster strøm og tar plass på skraplageret.
               </p>
-              <label className="g-toggle">
-                <input
-                  type="checkbox"
-                  checked={g.settings.autoSpot}
-                  onChange={(e) => act((gg) => void (gg.settings.autoSpot = e.target.checked))}
-                />
-                <span>Selg automatisk på spot partier ingen kontrakt venter på, etter ett døgn</span>
-              </label>
+              <AutoToggle
+                g={g}
+                act={act}
+                k="autoSpot"
+                label="Selg automatisk på spot partier ingen kontrakt venter på, etter ett døgn"
+              />
             </details>
           </Card>
         )}

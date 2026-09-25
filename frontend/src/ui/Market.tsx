@@ -11,11 +11,12 @@ import {
   type PlantStats,
 } from "../game/plant";
 import { PowerCard } from "./Power";
-import { researchForScrap, scrapUnlocked } from "../game/research";
+import { auto, automationUnlocked, researchForScrap, scrapUnlocked } from "../game/research";
 import type { GameState, ProductId, ScrapId } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Bar, Card, SubTabs } from "./common";
 import { RecipeCard } from "./Recipe";
+import { AutoToggle } from "./AutoToggle";
 import { fmtKr, fmtNum, fmtPct, fmtT } from "./format";
 
 interface Props {
@@ -137,21 +138,16 @@ export function Market({ g, stats, act, openTab }: Props & { openTab?: string })
             {plannerOrders(g) ? (
               <details className="g-details g-planner" open={!!g.autoBuyNote}>
                 <summary>
-                  Planleggerens innkjøp: {g.settings.autoBuy ? "på" : "av"}
+                  Planleggerens innkjøp: {auto(g, "autoBuy") ? "på" : automationUnlocked(g, "autoBuy") ? "av" : "låst"}
                   {g.autoBuyNote ? " – får ikke kjøpt alt" : ""}
                 </summary>
-                <label className="g-toggle">
-                  <input
-                    type="checkbox"
-                    checked={g.settings.autoBuy}
-                    onChange={(e) => act((gg) => void (gg.settings.autoBuy = e.target.checked))}
-                  />
-                  <span>
-                    La planleggeren kjøpe inn etter resepten (holder ca. {fmtNum(g.settings.autoBuyDays, 1)} døgns
-                    forbruk)
-                  </span>
-                </label>
-                {g.settings.autoBuy && (
+                <AutoToggle
+                  g={g}
+                  act={act}
+                  k="autoBuy"
+                  label={`La planleggeren kjøpe inn etter resepten (holder ca. ${fmtNum(g.settings.autoBuyDays, 1)} døgns forbruk)`}
+                />
+                {auto(g, "autoBuy") && (
                   <>
                     <label className="g-field">
                       <span>Planleggeren kan bruke per døgn</span>

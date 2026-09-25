@@ -4,6 +4,9 @@
  */
 import { grantResearchForOwned } from "./actions";
 import { RESEARCH } from "./research";
+
+/** Forskning som ble lagt til med B-054; de andre automatikk-forskningene fantes fra før */
+const NEW_AUTOMATION = ["salgsrutiner", "ordreplan", "innkjop", "bemanning"];
 import { SAVE_VERSION } from "./engine";
 import type { GameState } from "./types";
 
@@ -156,6 +159,12 @@ export function migrate(g: GameState): GameState {
   if (loose.sickUntilMin === undefined) loose.sickUntilMin = 0;
   if (loose.tempsUntilMin === undefined) loose.tempsUntilMin = 0;
   if (loose.tempCrew === undefined) loose.tempCrew = null;
+  // Før B-054 var automatikken gratis. Gamle spill får forskningen for sitt nivå, så ingenting slutter å virke
+  if (!loose.automationResearch) {
+    for (const r of RESEARCH)
+      if (NEW_AUTOMATION.includes(r.id) && r.stage <= g.stage && !g.researched.includes(r.id)) g.researched.push(r.id);
+    loose.automationResearch = true;
+  }
   if (loose.bonusOffer === undefined) loose.bonusOffer = false;
   for (const c of g.contracts) {
     const old = c as typeof c & { offerExpiresDay?: number };

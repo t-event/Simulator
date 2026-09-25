@@ -1948,3 +1948,10 @@ button {
 .g-scrap-about strong {
   color: var(--text, inherit);
 }
+
+/* Automatikk som ikke er forsket fram ennå (B-054) */
+.g-locked-auto {
+  color: var(--muted, #8b98a8);
+  font-size: 14px;
+  margin: 6px 0;
+}

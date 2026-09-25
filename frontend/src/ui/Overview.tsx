@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { requestManual, requestReline, setFurnaceGrade, setTargetGrade, upgradeOptions } from "../game/actions";
 import { Maintenance } from "./Maintenance";
-import { researchOptions } from "../game/research";
+import { auto, researchOptions } from "../game/research";
 import { GRADE_IDS, GRADES, PRODUCTS, ROLES, STAGES } from "../game/data";
 import { currentOrder, furnaceOrder, recipeEstimate, scrapStopHelp, SEQUENCE_WAIT_MIN } from "../game/engine";
 import {
@@ -24,6 +24,7 @@ import { activeMissions, missionProgress } from "../game/missions";
 import { PlantScene } from "./PlantScene";
 import { SceneBubbles } from "./SceneBubbles";
 import { StageCard, StationButton, UpgradeSheet } from "./Upgrades";
+import { AutoToggle } from "./AutoToggle";
 import type { Station } from "./stations";
 import type { View } from "./views";
 
@@ -74,6 +75,17 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
     });
   if (g.furnaces.some((f) => f.wear > 0.8 && !f.relineRequested))
     out.push({ text: "Foringen er nesten slitt gjennom. Bytt den under Vedlikehold før den brenner gjennom." });
+  // Uten ordreplanlegging bytter ikke ovnen kvalitet selv (B-054)
+  const first = currentOrder(g);
+  if (
+    first &&
+    !auto(g, "followQueue") &&
+    first.grade !== g.targetGrade &&
+    g.furnaces.every((_, i) => furnaceGrade(g, i) !== first.grade)
+  )
+    out.push({
+      text: `${first.customer} vil ha ${GRADES[first.grade].name.toLowerCase()}, men ovnen lager ${GRADES[g.targetGrade].name.toLowerCase()}. Bytt kvalitet under «Produksjon nå» lenger ned.`,
+    });
   for (const grade of gradesInUse(g)) {
     const est = recipeEstimate(g, grade, stats, gradeRecipe(g, grade));
     if (!est.grades.includes(grade))
@@ -392,32 +404,26 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
                 </p>
               )}
               {(g.stage >= 1 || g.contracts.filter((c) => c.status === "aktiv").length > 1) && (
-                <label className="g-toggle">
-                  <input
-                    type="checkbox"
-                    checked={g.settings.followQueue}
-                    onChange={(e) => act((gg) => void (gg.settings.followQueue = e.target.checked))}
-                  />
-                  <span>Følg ordrekøen (kvalitet og resept skifter etter kontrakten som står først)</span>
-                </label>
+                <AutoToggle
+                  g={g}
+                  act={act}
+                  k="followQueue"
+                  label="Følg ordrekøen (kvalitet og resept skifter etter kontrakten som står først)"
+                />
               )}
-              {g.furnaces.length > 1 && g.settings.followQueue && (
-                <label className="g-toggle">
-                  <input
-                    type="checkbox"
-                    checked={g.settings.splitGrades}
-                    onChange={(e) => act((gg) => void (gg.settings.splitGrades = e.target.checked))}
-                  />
-                  <span>
-                    To kvaliteter samtidig: ovn 2 lager neste kvalitet i køen når den er en annen enn ovn 1 sin
-                  </span>
-                </label>
+              {g.furnaces.length > 1 && auto(g, "followQueue") && (
+                <AutoToggle
+                  g={g}
+                  act={act}
+                  k="splitGrades"
+                  label="To kvaliteter samtidig: ovn 2 lager neste kvalitet i køen når den er en annen enn ovn 1 sin"
+                />
               )}
               <label className="g-field">
                 <span>{g.furnaces.length > 1 ? "Ovn 1 kjører mot" : "Kjør mot kvalitet"}</span>
                 <select
                   value={g.targetGrade}
-                  disabled={g.settings.followQueue && !!order}
+                  disabled={auto(g, "followQueue") && !!order}
                   onChange={(e) => act((gg) => setTargetGrade(gg, e.target.value as GradeId))}
                 >
                   {GRADE_IDS.filter((id) => GRADES[id].minStage <= g.stage || id === g.targetGrade).map((id) => (
@@ -432,7 +438,7 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
                   <span>Ovn {j + 2} kjører mot</span>
                   <select
                     value={f.grade ?? ""}
-                    disabled={g.settings.followQueue && !!order}
+                    disabled={auto(g, "followQueue") && !!order}
                     onChange={(e) =>
                       act((gg) =>
                         setFurnaceGrade(gg, j + 1, e.target.value === "" ? null : (e.target.value as GradeId)),

@@ -8,6 +8,7 @@ import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Card, SubTabs } from "./common";
 import { Research } from "./Research";
+import { AutoToggle } from "./AutoToggle";
 import { fmtKr, fmtPct } from "./format";
 
 interface Props {
@@ -124,14 +125,12 @@ export function ResearchPage({ g, stats, act, onQuit, openBook, onLoadBackup }: 
               Spillet lagres automatisk i denne nettleseren. Safari kan slette lagrede data for nettsider som ikke er
               brukt på en uke – legg spillet på hjemskjermen, eller ta en sikkerhetskopi.
             </p>
-            <label className="g-toggle">
-              <input
-                type="checkbox"
-                checked={g.settings.skipIdleNights}
-                onChange={(e) => act((gg) => void (gg.settings.skipIdleNights = e.target.checked))}
-              />
-              <span>Spol fram om natta når verket står og ingenting skjer</span>
-            </label>
+            <AutoToggle
+              g={g}
+              act={act}
+              k="skipIdleNights"
+              label="Spol fram om natta når verket står og ingenting skjer"
+            />
             <div className="g-row">
               <button onClick={() => downloadBackup(g)}>Last ned sikkerhetskopi</button>
               <BackupInput onLoad={onLoadBackup} />
