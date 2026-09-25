@@ -1,10 +1,10 @@
 /**
- * Enkel styring av kontrollrommet (standard).
+ * Styringen i kontrollrommet.
  *
  * Laget for folk uten forkunnskaper: fire steg, én forklaring, én måling med
  * grønt felt og én hovedhandling per steg. Automatikken tar resten. Under
- * ligger den samme prosessmodellen som i ekspertmodus, så valgene gir ekte
- * konsekvenser for temperatur, karbon, fosfor, strøm og foring.
+ * ligger den fulle prosessmodellen, så valgene gir ekte konsekvenser for
+ * temperatur, karbon, fosfor, strøm og foring.
  */
 import { useEffect, useState, type ReactNode } from "react";
 import type { ManualResult } from "../../game/engine";
@@ -31,7 +31,6 @@ interface Props {
   startWear: number;
   request: ManualRequest;
   onDone: (result: ManualResult | null) => void;
-  onExpert: () => void;
 }
 
 // ------------------------------------------------------------------ //
@@ -131,10 +130,10 @@ function Furnace({ sim, blowing }: { sim: EAFSimulation; blowing: boolean }) {
   );
 }
 
-export function SimpleControl({ sim, startWear, request, onDone, onExpert }: Props) {
+export function SimpleControl({ sim, startWear, request, onDone }: Props) {
   const [runner] = useState(() => new SimpleRunner(sim, startWear));
   const [, setVersion] = useState(0);
-  const [confirm, setConfirm] = useState<"avbryt" | "ekspert" | null>(null);
+  const [confirm, setConfirm] = useState(false);
   const redraw = () => setVersion((v) => v + 1);
 
   useEffect(() => {
@@ -508,7 +507,7 @@ export function SimpleControl({ sim, startWear, request, onDone, onExpert }: Pro
       <header className="sc-head">
         <h1>Kontrollrommet</h1>
         {step !== "ferdig" && (
-          <button className="sc-close" onClick={() => setConfirm("avbryt")} aria-label="Gi fra deg styringen">
+          <button className="sc-close" onClick={() => setConfirm(true)} aria-label="Gi fra deg styringen">
             ✕
           </button>
         )}
@@ -525,31 +524,16 @@ export function SimpleControl({ sim, startWear, request, onDone, onExpert }: Pro
       )}
       <Furnace sim={sim} blowing={runner.blowing} />
       <main className="sc-body">{body}</main>
-      {step !== "ferdig" && (
-        <button className="sc-link sc-expert" onClick={() => setConfirm("ekspert")}>
-          Fullt kontrollrom (for viderekomne)
-        </button>
-      )}
 
       {confirm && (
         <div className="g-modal" role="alertdialog" aria-modal="true">
           <div className="g-modal-card">
-            <p>
-              {confirm === "avbryt"
-                ? "Gi fra deg styringen? Automatikken kjører chargen ferdig."
-                : "Bytte til fullt kontrollrom? Der styrer du alt selv, og du kan ikke gå tilbake til den enkle styringen for denne chargen."}
-            </p>
+            <p>Gi fra deg styringen? Automatikken kjører chargen ferdig.</p>
             <div className="g-row">
-              <button
-                className="g-primary"
-                onClick={() => {
-                  if (confirm === "avbryt") onDone(null);
-                  else onExpert();
-                }}
-              >
+              <button className="g-primary" onClick={() => onDone(null)}>
                 Ja
               </button>
-              <button onClick={() => setConfirm(null)}>Nei</button>
+              <button onClick={() => setConfirm(false)}>Nei</button>
             </div>
           </div>
         </div>

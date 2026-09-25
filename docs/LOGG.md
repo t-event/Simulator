@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 47 – 2026-09-25: bare den enkle styringen i kontrollrommet
+
+**Brukeren ba om:** Fjerne den fulle styringen og bare bruke den enkle.
+
+**Gjort (B-077):** Knappen til det fulle kontrollrommet er borte. `ExpertControl.tsx`, HMI-komponentene i
+`src/components/`, `controlroom.css`, `useMediaQuery`, `sim/commands.ts` og `recharts` er slettet. README, DESIGN og
+CLAUDE.md er oppdatert (også tabellen over stegene etter B-076).
+
+**Testet:** tsc, lint, `validate.ts`, balanse (exit 0, enkel styring 4★ / 1★), bygg, Playwright på iPhone 13
+gjennom en hel charge (ingen feil, ingen horisontal scrolling).
+
+**Gjenstår:** Ingenting fra denne økta.
+
+---
+
 ## Økt 46 – 2026-09-25: kontrollrommet med oksygen, avslagging og øse
 
 **Brukeren ba om:** Oksygen styrt samtidig med strømmen, ikke automatisk avslagging (for mye → stål ut

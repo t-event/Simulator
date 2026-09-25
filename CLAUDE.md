@@ -96,9 +96,8 @@ frontend/src/
     ResearchPage.tsx  Forskning-fanen   Settings.tsx  ⚙️ innstillinger og banken (på Verket → Økonomi)
     InstallTip.tsx    Tips om hjemskjerm på startskjermen   Power.tsx  Strøm og skiftplan
     Handbook.tsx Fagboka med quiz og oppdrag
-    control/     Kontrollrommet: enkel styring (standard) og full HMI (ekspert)
+    control/     Kontrollrommet: den enkle styringen (SimpleControl + simpleRunner)
   sim/         Prosessmodell for lysbueovnen (brukes av kontrollrommet)
-  components/  HMI-komponenter for full kontrollromsvisning
 frontend/public/  PWA: manifest, ikoner, service worker
 docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md
 ```

@@ -371,10 +371,6 @@
   align-self: center;
 }
 
-.sc-expert {
-  margin-top: 12px;
-}
-
 .sc-stars {
   color: var(--warning);
   letter-spacing: 2px;

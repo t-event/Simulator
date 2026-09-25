@@ -56,14 +56,15 @@ Automatikken tar alt annet.
 
 | Steg | Mål | Handling | Automatikk | Fart |
 |---|---|---|---|---|
-| 1. Smelt skrapet | Hold temperaturen i det grønne feltet mens skrapet mates inn | ▲ Mer strøm / ▼ Mindre strøm (5 nivåer) | Conveyor, kalk, dolomitt, litt oksygen og karbon. Matingen varierer («tung kasse på vei») | 40× |
-| 2. Rens stålet | Få karbonet ned i det grønne feltet | Hold inne «Blås oksygen» | Strømmen av, kalk på | 20× |
-| 3. Slagg av | Få den fosforrike slaggen ut før oppvarming | Ett trykk: «Tipp ut slagget» (kan hoppes over – da kommer fosforet tilbake) | Døra åpnes, ovnen tippes og rettes opp igjen | 30× |
-| 4. Varm opp og tapp | Tapp når temperaturen er i det grønne vinduet | «Tapp nå!» | Strømmen på | 10× |
+| 1. Smelt skrapet | Hold temperaturen i det grønne feltet mens skrapet mates inn | ▲ Mer strøm / ▼ Mindre strøm (5 nivåer) og oksygenbryter | Conveyor, kalk, dolomitt og karbon. Matingen varierer («tung kasse på vei») | 40× |
+| 2. Rens stålet | Få karbonet ned i det grønne feltet | Oksygenbryter, strøm ▲/▼ | Kalk | 20× |
+| 3. Slagg av | Få slagget under ca. 1,2 t uten å søle stål | «Tipp mot slaggdøra» / «Rett opp ovnen» (kan hoppes over – da kommer fosforet tilbake). Under 0,5 t renner stål ut døra | Døra åpnes | 15× |
+| 4. Varm opp og tapp | Tapp når temperaturen er i det grønne vinduet (±8 °C), rett opp ovnen når øsa er 93–100 % full | Strøm ▲/▼, oksygen, «Tapp nå!», «Rett opp ovnen» | – | 10× / 8× |
 
-Etterpå: 0–3 stjerner per steg, en samlet karakter og en forklaring i vanlige
-ord («Temperaturen var 12 °C over målet – bra»). Stjernene gir fagpoeng.
-Ekspertmodus med full HMI kan åpnes fra den enkle styringen (bare én vei).
+Etterpå: 0–3 stjerner for smelting, rensing, avslagging, tappetemperatur og øsa,
+en samlet karakter (5★ krever 14 av 15) og en forklaring i vanlige ord. Stjernene
+gir fagpoeng. Stål som søles eller renner over, går tapt (B-076).
+Det finnes bare denne styringen; det fulle kontrollrommet er fjernet (B-077).
 
 ## Forskning
 

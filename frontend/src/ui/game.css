@@ -1056,26 +1056,6 @@ button {
   justify-content: center;
 }
 
-.cr-actions {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  font-size: 13px;
-}
-
-.cr-brief {
-  font-size: 13px;
-}
-
-.cr-result {
-  margin: 8px;
-}
-
-.cr-result .btn-primary {
-  margin-top: 8px;
-  padding: 10px 16px;
-}
-
 /* ---------------------------------------------------------------- Bredere skjermer */
 @media (min-width: 760px) {
   .g-app {

@@ -81,7 +81,7 @@ Begrunnelse: Kan installeres på hjemskjermen uten butikk, og vi beholder én ko
 GitHub Pages. Kan pakkes med Capacitor senere hvis det blir ønsket.
 
 ## B-010 Kontrollrommet: enkel styring som standard (2026-09-24)
-Status: gjelder, men stegene er endret av B-076 (oksygen samtidig med strøm, manuell avslagging, øsa)
+Status: gjelder, men stegene er endret av B-076, og ekspertmodusen er fjernet (B-077)
 Bakgrunn: Brukeren: «Kontrollromstyringen må være veldig enkel, slik at en uten kunnskap klarer å kjøre manuelt.»
 Beslutning: Fire guidede steg med én hovedhandling hver: Smelt (mer/mindre strøm),
 Rens (hold for oksygen), Slagg av (ett trykk), Tapp (trykk når temperaturen er grønn).
@@ -1003,3 +1003,13 @@ Beslutning:
 - Stål som går tapt (`lossFraction`) trekkes fra det flytende stålet når chargen leveres til spillet.
 Testet: nybegynneren i `balance.ts` (følger rådene på skjermen, reagerer på 0,5 s i avslagging og tapping) får 4★ på
 ca. 120 s; den slurvete får 1★. Playwright på iPhone 13 gikk gjennom alle stegene til resultatet.
+
+## B-077 Det fulle kontrollrommet er fjernet (2026-09-25)
+Status: gjelder (erstatter delen av B-010 om ekspertmodus)
+Brukeren: «fjern den fulle styringen, og kun bruk den enkle».
+Beslutning: Kontrollrommet har bare den enkle styringen. Knappen «Fullt kontrollrom (for viderekomne)» og hele
+HMI-et er tatt bort: `ExpertControl.tsx`, `src/components/`, `controlroom.css`, `hooks/useMediaQuery.ts`,
+`sim/commands.ts` og biblioteket `recharts`. Prosessmodellen i `src/sim/` er uendret og brukes fortsatt under den
+enkle styringen og i `validate.ts`.
+Begrunnelse: Den enkle styringen har fått de viktigste grepene (oksygen, avslagging, øse – B-076), og spillet skal
+være enkelt. Mindre kode å vedlikeholde og et mindre bygg.

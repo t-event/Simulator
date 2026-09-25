@@ -46,18 +46,19 @@ av dem.
 
 Når verket har lysbueovn, kan du ta styringen på neste charge. Kontrollrommet
 er laget for folk uten forkunnskaper: fire steg med én forklaring, én måling
-med grønt felt og én knapp hver.
+med grønt felt og noen få knapper.
 
 1. **Smelt** – hold temperaturen i det grønne feltet med mer eller mindre strøm
-   mens skrapmatingen varierer.
-2. **Rens** – hold inne oksygenknappen til karbonet er i det grønne feltet.
-3. **Slagg av** – tipp ut slagget med fosforet i før oppvarmingen.
-4. **Tapp** – trykk når temperaturen er i det grønne feltet.
+   mens skrapmatingen varierer. Oksygenet kan slås av og på samtidig.
+2. **Rens** – blås oksygen til karbonet er i det grønne feltet.
+3. **Slagg av** – tipp ovnen mot slaggdøra og rett den opp når slagget er ute.
+   Tipper du for lenge, renner stål ut døra.
+4. **Tapp** – tapp når temperaturen er i det grønne feltet, og rett opp ovnen når
+   øsa er full, ellers renner den over.
 
 En charge tar et par minutter. Etterpå får du stjerner og en forklaring på
 vanlig norsk. Under ligger den fulle prosessmodellen, så valgene har ekte
-konsekvenser for strømforbruk, fosfor og slitasje. Viderekomne kan bytte til
-det fulle kontrollrommet med alle styregrep.
+konsekvenser for strømforbruk, fosfor og slitasje.
 
 ## Hva spillet lærer bort
 
@@ -101,12 +102,11 @@ frontend/
     useGame.ts               Spilløkka for React
     balance.ts               Automatisk testspiller for balansering
   src/ui/                   Spillets grensesnitt (mobil først)
-    control/                 Kontrollrommet: enkel styring (standard) og full HMI
+    control/                 Kontrollrommet (den enkle styringen)
   public/                   PWA: manifest, ikoner og service worker for offline
   src/sim/                  Prosessmodellen for lysbueovnen
     eaf.ts                   Lumped-parameter-modell av en conveyormatet lysbueovn
     validate.ts              Referansekjøring med nøkkeltall
-  src/components/           HMI-komponentene i kontrollrommet
 ```
 
 Prosessmodellen i `src/sim/` gjengir koblingene en ovnsoperatør må håndtere:
