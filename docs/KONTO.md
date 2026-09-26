@@ -45,6 +45,7 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Kundevurdering 1–10 og sesongquiz | Nei (sesongquizen krever sesong, men teller ikke i prestasjonene) | Regel 1 | B-161 |
 | Lærlinger tar fagbrev | Nei | Regel 1 | B-163 |
 | Avløsere og «Si opp» viser hva som skjer med skiftene | Nei | Regel 1 | B-164 |
+| Mesterskapet «Holdbare ovnspotter» | Nei | Regel 1 | B-165 |
 | Ventetid i konsernet (fase 4) | Nei (serverklokke med konto) | Regel 5 | PLAN-NETT |
 | Anbud og skrapauksjoner (fase 5) | Ja | Regel 3 og 7 | PLAN-NETT |
 | Varsel på mobilen (senere) | Ja | Varselet knyttes til kontoen | – |

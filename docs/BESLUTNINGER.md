@@ -2618,3 +2618,28 @@ plutselig en støper. Tabellen skrev også «herav 14 vikarer» under egne folk,
 - Ved neste skiftlag står det at de ledige avløserne er regnet med i det som mangler.
 - Ingen endring i hvordan bemanningen regnes; bare hvordan den vises. Balansen er uendret.
 - **Konto (KONTO.md):** nei, regel 1.
+
+## B-165 Lagring som henger på mobilnettet, og mesterskapet «Holdbare ovnspotter» (2026-09-26)
+Status: gjelder
+Brukeren: «På en spillers Android-telefon står hans egen topplistetall stille mens andres øker. Er det en kodefeil?» og «Man
+bør kunne bruke fagpoeng på at ovnspottene holder lenger (mesterskap).»
+
+**Topplista på Android:** Ditt eget tall kommer fra lagringen på nett. Tidslinja til spilleren viste 21 minutter uten
+en eneste lagring (dag 823 → 914) mens spillet gikk, så kom alt på en gang. Neste lagring venter på den forrige
+(`inFlight` i `net/sync.ts`), og et kall uten tidsgrense kan henge lenge på et mobilnett, f.eks. ved bytte mellom wifi og
+5G. Det er mer vanlig på Android enn på iPhone.
+- Alle kall til tjenesten (`call` i `net/supabase.ts`) avbrytes etter 30 s og regnes som «ingen kontakt med nettet».
+  Neste lagring prøver igjen. Ny nettest med et kall som aldri svarer.
+- Topplista sier fra når spillet ikke er lagret på nett («… siden kl. 14.23, så tallet ditt står stille»), eller når
+  en annen enhet har lagret.
+
+**Mesterskapet «Holdbare ovnspotter»** (`foring` i `mastery.ts`): mindre slitasje på foringen for hver charge, opptil
+30 % (samme kurve som de andre: nivå 1 gir 3 %, stadig mindre per nivå). Grunnpris 100 fagpoeng. Virker sammen med
+forskningen «Ildfast» (`wearFactor`, `liningWearPerHeat`).
+- **Konto (KONTO.md):** nei, regel 1 (mesterskapet er i spillet, som de andre).
+
+**Svar til brukeren om Figen og Grane:** begge har 12 stålkomplekser og tjener like mye per spilldøgn (5,2 mrd.). Figen
+har spilt mer den siste tida (129 døgn på 30 min mot Granes 54 døgn på 12 min), og Granes tall sto stille i 21 min på
+grunn av feilen over.
+
+**Balanse:** uendret (8/23/66/137, nybegynner 184).

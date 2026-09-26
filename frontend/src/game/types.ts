@@ -246,7 +246,7 @@ export interface SalesDirector {
 /** Datterverk i konsernet (B-106) */
 export type SisterType = "stalverk" | "storverk" | "kompleks";
 /** Mesterskap (B-150): forskning som kan tas om og om igjen */
-export type MasteryId = "pris" | "strom" | "skrap" | "datterverk";
+export type MasteryId = "pris" | "strom" | "skrap" | "datterverk" | "foring";
 export interface SisterPlant {
   id: number;
   type: SisterType;

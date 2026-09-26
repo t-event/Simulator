@@ -203,6 +203,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   beskjeden «Du er logget ut» (`loggedOutByServer`); 408/429 er ikke en død økt.
 - Grensene i juksesperren (`check_snapshot`) må sjekkes mot det største utstyret **med alt utstyr og flinke folk**,
   ikke mot grunntallene. Tonnsperren på 30 000 t flagget en ærlig spiller med 420-tonnere (B-158).
+- Alle kall til tjenesten har en tidsgrense på 30 s (`call` i `net/supabase.ts`, B-165). Uten den kunne ett kall som hang
+  på mobilnettet stoppe lagringen på nett i over 20 minutter. Tester kan korte den ned med `setRequestTimeout`.
 - Tall til tidslinja (`snapshots`) leses i **samme øyeblikk** som dagen, før første `await` i `uploadSave` (B-162).
   Spillet går videre mens lagringen venter på svar; ble tallene lest etterpå, fikk én dag flere døgns tonn, og en
   ærlig spiller ble flagget.

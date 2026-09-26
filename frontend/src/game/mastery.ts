@@ -41,6 +41,15 @@ export const MASTERY: Record<MasteryId, MasteryDef> = {
     max: 0.1,
     base: 100,
   },
+  // Brukeren (B-165): fagpoeng til at ovnspottene holder lenger
+  foring: {
+    name: "Holdbare ovnspotter",
+    description:
+      "Bedre ildfast stein, murere som lærer av hver pott og jevnere drift gjør at foringen i ovnene tåler flere charger.",
+    effect: "mindre slitasje på foringen",
+    max: 0.3,
+    base: 100,
+  },
   datterverk: {
     name: "Konsernledelse",
     description: "Erfaringene fra hjemmeverket deles med datterverkene.",

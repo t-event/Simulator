@@ -16,6 +16,7 @@ import {
   clearLoggedOut,
   rememberPrefs,
   setFetch,
+  setRequestTimeout,
   setRememberPrefs,
   setSession,
   signIn,
@@ -103,6 +104,8 @@ interface Fake {
   onRefresh: (() => void) | null;
   /** Kalles mens save_game behandles, som om spillet går videre mens klienten venter på svar (B-162) */
   onSaveGame: (() => void) | null;
+  /** Kall til save_game som aldri svarer, som på et mobilnett som henger (B-165) */
+  hangSave: boolean;
 }
 function makeFake(): Fake {
   const f: Fake = {
@@ -116,6 +119,7 @@ function makeFake(): Fake {
     offline: false,
     onRefresh: null,
     onSaveGame: null,
+    hangSave: false,
   };
   const json = (status: number, body: unknown) =>
     new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
@@ -199,6 +203,7 @@ function makeFake(): Fake {
       // Som save_game i 008: lagrer bare over versjonen klienten kjenner
       const old = f.saves.get(id);
       if (old && old.rev !== Number(body.p_base_rev)) return json(200, null);
+      if (f.hangSave) return new Promise<Response>(() => {});
       f.onSaveGame?.();
       const rev = (old?.rev ?? 0) + 1;
       f.saves.set(id, {
@@ -803,6 +808,27 @@ const main = async () => {
     await linkOnLogin(g);
     const s = f.snapshots.get("u-a@test")?.[0];
     assert(s && s.day === 1 && s.produced_t === 1000, `snapshot ${JSON.stringify(s)}`);
+  });
+
+  await test("Lagring som henger (B-165): gir opp etter tidsgrensen, og neste lagring går", async () => {
+    const f = fresh();
+    await login(f);
+    const g = newGame(12);
+    await linkOnLogin(g);
+    setRequestTimeout(50);
+    try {
+      f.hangSave = true;
+      g.minute += 60;
+      onLocalSave(g, true);
+      await flush();
+      assert(cloudStatus().kind === "offline", `status ${cloudStatus().kind}`);
+      f.hangSave = false;
+      g.minute += 60;
+      await flush();
+      assert(cloudStatus().kind === "saved", `status etter ny lagring ${cloudStatus().kind}`);
+    } finally {
+      setRequestTimeout(30_000);
+    }
   });
 
   await test("Kallenavn: for kort, tatt, og så OK; topplista viser meg", async () => {

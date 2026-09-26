@@ -661,7 +661,8 @@ export function recipeEstimate(
 export const PLAN_SAFETY_WEAR = 0.88;
 
 function wearFactor(g: GameState): number {
-  return hasResearch(g, "ildfast") ? 0.85 : 1;
+  // Mesterskapet «Holdbare ovnspotter» (B-165) gjør foringen enda mer holdbar
+  return (hasResearch(g, "ildfast") ? 0.85 : 1) * masteryFactor(g, "foring");
 }
 
 function tempOffRisk(g: GameState, stats: PlantStats): number {
