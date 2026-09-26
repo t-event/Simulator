@@ -7,10 +7,10 @@
  */
 import { useEffect, useSyncExternalStore } from "react";
 import { useState } from "react";
-import { log, newGame, unlock } from "../game/engine";
+import { log, unlock } from "../game/engine";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
-import { applySeasonTwist, applyWorldEvents, canJoinDirectly, joinSeason, notJoinableReason } from "../game/world";
+import { applySeasonTwist, applyWorldEvents, canJoinDirectly, joinSeason } from "../game/world";
 import { cloudConfigured } from "../net/config";
 import {
   daysLeft,
@@ -75,13 +75,17 @@ export function SeasonSync({ api }: { api: GameApi }) {
   useEffect(() => {
     // Bare et spill som er avklart mot kontoen, kan kobles til sesongen (B-138)
     if (!g || !session || !cur || !reconciled) return;
-    if (canJoinDirectly(g) && (g.owner === null || g.owner === session.user.id))
+    if (canJoinDirectly(g, cur.id) && (g.owner === null || g.owner === session.user.id))
       api.act((gg) => {
         // Fordelen fra forrige sesong gjelder bare et nytt spill i garasjen, ikke et spill som har kommet langt (B-166)
         const fresh = gg.stage === 0;
+        const carried = gg.season !== null;
         joinSeason(gg, cur.id, !!status?.played_previous && fresh);
         unlock(gg, "sesong");
-        if (!fresh) log(gg, `🏆 Spillet ditt er nå med i ${cur.name} og står på sesonglista under 🏆.`, "good");
+        // En ny sesong har startet, og spillet blir med videre (B-167)
+        if (carried)
+          log(gg, `🏆 ${cur.name} har startet. Spillet ditt er med videre og står på den nye sesonglista.`, "good");
+        else if (!fresh) log(gg, `🏆 Spillet ditt er nå med i ${cur.name} og står på sesonglista under 🏆.`, "good");
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [g, session, cur?.id, reconciled, g?.owner]);
@@ -89,12 +93,10 @@ export function SeasonSync({ api }: { api: GameApi }) {
   return null;
 }
 
-/** Spør når en sesong pågår som spillet ikke er med i (og spillet ikke er helt nytt) */
+/** Uten konto: én beskjed per sesong om at man må logge inn for å være med (B-131) */
 export function SeasonPrompt({ api, g, onOpenSettings }: { api: GameApi; g: GameState; onOpenSettings: () => void }) {
   const session = useSession();
-  const reconciled = useReconciled();
   const status = useSeasonStatus();
-  const [confirm, setConfirm] = useState(false);
   const cur = status?.current ?? null;
   if (!cur) return null;
   // Uten konto: én beskjed per sesong om at man må logge inn for å være med (B-131). Ikke midt i veiledningen.
@@ -129,64 +131,18 @@ export function SeasonPrompt({ api, g, onOpenSettings }: { api: GameApi; g: Game
       </div>
     );
   }
-  if (!reconciled || (g.owner && g.owner !== session.user.id)) return null;
-  if (g.season === cur.id || g.seasonPromptSeen === cur.id || canJoinDirectly(g)) return null;
-  const bonus = !!status?.played_previous;
-  return (
-    <div className="g-modal" role="dialog" aria-modal="true" aria-label="Ny sesong">
-      <div className="g-modal-card">
-        <h2>{cur.name} er i gang</h2>
-        <p>
-          En sesong varer i et halvt år, og topplista for sesongen viser spillene som er med i den. Sesongen slutter om{" "}
-          {daysLeft(cur)} dager.
-        </p>
-        <p className="g-muted">
-          {notJoinableReason(g)}, så det er ikke med i sesongen. Du kan spille det videre – det står på lista «Alle
-          tider» – eller starte et nytt spill for sesongen. Valget finner du igjen under 🏆 Toppliste øverst.
-          {bonus ? " Du var med i forrige sesong, så du starter med 10 fagpoeng og 5 % mer i kassa." : ""}
-        </p>
-        {confirm ? (
-          <div className="g-row">
-            <button
-              className="g-danger"
-              onClick={() => {
-                const ng = newGame();
-                ng.tutorial = 0;
-                ng.speed = 0;
-                joinSeason(ng, cur.id, bonus);
-                unlock(ng, "sesong");
-                api.adopt(ng);
-              }}
-            >
-              Ja, start {cur.name} i garasjen
-            </button>
-            <button onClick={() => setConfirm(false)}>Avbryt</button>
-          </div>
-        ) : (
-          <div className="g-row">
-            <button className="g-primary" onClick={() => setConfirm(true)}>
-              Start sesongen (nytt spill)
-            </button>
-            <button onClick={() => api.act((gg) => void (gg.seasonPromptSeen = cur.id))}>Fortsett dette spillet</button>
-          </div>
-        )}
-        {confirm && (
-          <p className="g-muted g-small-text">Spillet du har nå, erstattes – også det som er lagret på nett.</p>
-        )}
-      </div>
-    </div>
-  );
+  // Med konto blir spillet med i sesongen av seg selv (B-166, B-167), så det er ingenting å spørre om
+  return null;
 }
 
 /**
- * Fast plass for å bli med i sesongen (B-132), på topplista under Verket → Økonomi. Samme valg som popupen, så den
- * som krysset ut popupen, finner det igjen her.
+ * Sesonglinja øverst på topplista (B-132): uten konto hvordan man blir med, ellers om spillet er med. Med konto blir
+ * spillet med av seg selv (B-166, B-167).
  */
-export function SeasonJoin({ api, g, onOpenSettings }: { api: GameApi; g: GameState; onOpenSettings?: () => void }) {
+export function SeasonJoin({ g, onOpenSettings }: { api?: GameApi; g: GameState; onOpenSettings?: () => void }) {
   const session = useSession();
   const reconciled = useReconciled();
   const status = useSeasonStatus();
-  const [confirm, setConfirm] = useState(false);
   const cur = status?.current ?? null;
   if (!cur) return null;
   if (!session)
@@ -202,39 +158,8 @@ export function SeasonJoin({ api, g, onOpenSettings }: { api: GameApi; g: GameSt
     );
   if (!reconciled || (g.owner && g.owner !== session.user.id)) return null;
   if (g.season === cur.id) return <p className="g-muted g-small-text">Spillet ditt er med i {cur.name}.</p>;
-  const bonus = !!status?.played_previous;
-  return (
-    <div className="g-note g-season-join">
-      <strong>Spillet ditt er ikke med i {cur.name}.</strong> Det står bare på «Alle tider». {notJoinableReason(g)}, så
-      vil du være med i {cur.name}, starter du med et nytt spill i garasjen.
-      {bonus ? " Du var med sist og får 10 fagpoeng og 5 % mer i kassa." : ""}
-      {confirm ? (
-        <div className="g-row">
-          <button
-            className="g-danger"
-            onClick={() => {
-              const ng = newGame();
-              ng.tutorial = 0;
-              ng.speed = 0;
-              joinSeason(ng, cur.id, bonus);
-              unlock(ng, "sesong");
-              api.adopt(ng);
-            }}
-          >
-            Ja, start {cur.name} i garasjen
-          </button>
-          <button onClick={() => setConfirm(false)}>Avbryt</button>
-        </div>
-      ) : (
-        <div className="g-row">
-          <button onClick={() => setConfirm(true)}>Start sesongen (nytt spill)</button>
-        </div>
-      )}
-      {confirm && (
-        <p className="g-muted g-small-text">Spillet du har nå, erstattes – også det som er lagret på nett.</p>
-      )}
-    </div>
-  );
+  // Spillet kobles til sesongen av seg selv (SeasonSync); dette står bare et øyeblikk
+  return <p className="g-muted g-small-text">Spillet ditt blir med i {cur.name} …</p>;
 }
 
 /**

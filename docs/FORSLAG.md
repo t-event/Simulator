@@ -6,8 +6,7 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
-- **Sesong 2:** når neste sesong starter, skal spill fra Sesong 1 få fortsette i den nye sesongen (som alle fikk i
-  Sesong 1, B-166), eller starte i garasjen? I dag får de valget: start i garasjen, eller spill videre på «Alle tider».
+Ingen åpne akkurat nå.
 
 ## Venter
 
@@ -38,6 +37,8 @@ til «Avgjort» nederst).
   Krever konto. Brukeren: «Ingen varsel på mobilen enda» (B-149).
 
 ## Avgjort
+
+- Sesong 2 starter av seg selv når Sesong 1 er over, og alle spillene blir med videre (B-167).
 
 - Varsel for alle ovner uten skrap, quiz for sesongkapitlet, «slaggen» overalt og kundevurdering 1–10 (B-161).
 - Ukens toppliste er bygget som «Ukens utfordring» (B-152).

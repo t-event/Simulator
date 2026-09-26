@@ -235,7 +235,7 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
 ## Status
 
 - Fase 0 og 1 er bygget (B-125, B-126). Fase 2 (toppliste) er bygget (B-127). Fase 3 (sesonger, ligaer og felles
-  hendelser) er bygget (B-129). Alle spill uten tidligere sesong blir med i sesongen som pågår (B-166). Fase 4 er neste, men brukeren vil vente med den (2026-09-26).
+  hendelser) er bygget (B-129). Alle spill blir med i sesongen som pågår, og neste sesong starter av seg selv med alle med videre (B-166, B-167). Fase 4 er neste, men brukeren vil vente med den (2026-09-26).
 - Også bygget: daglig belønning og dagens oppdrag (B-149), mesterskap og titler (B-150), ukens utfordring og sesonger
   med vri (B-152). Vern mot lekkede passord er på. Glemt passord er ikke testet med ekte e-post ennå.
 - Etterpå: topplista viser nivå og medaljer (B-139); to nettlesere på samme konto og nytt spill+ (B-140); hyppigere
@@ -247,11 +247,12 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
   (daglig belønning, dagens oppdrag, mens du var borte og bonusdøgn i juksesperren, B-149), 014 tittel ved
   kallenavnet på topplista (`title_of()`, B-150), 015 juksesperren tillater 50 % vekst per døgn etter
   sluttmålet (B-150), 016 ukens utfordring, sesonger med vri og utmerkelse for topp 10 (B-152), 017 ukekiste bare til topp 3 (B-155), 018 romsligere
-  tonnsperre (B-158), 019 tonnsperren tåler tall fra et senere døgn i eldre apper (B-162).
+  tonnsperre (B-158), 019 tonnsperren tåler tall fra et senere døgn i eldre apper (B-162), 020 neste sesong starter av seg selv (B-167).
 - Hva som krever konto, nå og i fase 4 og 5: `docs/KONTO.md` (B-149).
 - Flere enheter samtidig: bare enheten som spilles på, lagrer; den andre settes på pause med «Spill her» (B-143).
 - Merker ved sesongslutt (fase 3) er bygget som 🎖 med beste plassering ved kallenavnet (B-143).
-- **Slik starter du en ny sesong:** i SQL Editor: `select public.start_season('Sesong 2', 26);` (navn, antall uker; 26 = seks måneder, B-130).
+- **Neste sesong starter av seg selv** når den som pågår er over (26 uker, B-167). Vil du starte en med en gang eller med en vri:
+  i SQL Editor: `select public.start_season('Sesong 2', 26);` (navn, antall uker; 26 = seks måneder, B-130).
   Med en vri (B-152): `select public.start_season('Sesong 2', 26, 'skrapmangel');` – vriene står i tabellen
   `season_twists` (skrapmangel, eksportboom, energikrise, gronnstrom).
   **Slik legger du ut en hendelse:** `select public.add_event('skrapmangel', 7);` (skrapmangel, stromkrise,
