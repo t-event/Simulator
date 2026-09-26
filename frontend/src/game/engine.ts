@@ -58,6 +58,8 @@ import {
   PEAK_RATE_PER_MW,
   presentWorkers,
   daysUntilAllBack,
+  liftMorale,
+  moraleNormal,
   isAbsent,
   staffing,
   tempsActive,
@@ -1632,7 +1634,7 @@ function deliverContracts(g: GameState): void {
       adjustReputation(g, gain);
       g.totals.contractsDone += 1;
       countEvent(g, "leveranser");
-      adjustMorale(g, 0.5);
+      liftMorale(g, 0.5);
       awardPoints(g, 1 + g.stage);
       log(g, `Kontrakten med ${c.customer} er levert. Omdømme +${gain.toFixed(1).replace(".", ",")}.`, "good");
       if (g.totals.contractsDone === 1) unlock(g, "omdomme");
@@ -2293,10 +2295,10 @@ export function quitText(ws: Worker[]): string {
 /** Trivselen driver mot det normale, nattarbeid tærer, og misfornøyde folk slutter (B-026) */
 function updateMorale(g: GameState, stats: PlantStats): void {
   if (!g.workers.length) return;
-  // Ledelse og arbeidsmiljø løfter det normale nivået (B-085)
-  g.morale += ((hasResearch(g, "ledelse") ? 70 : 60) - g.morale) * 0.05;
-  // Fire og fem skiftlag gir fridager i turnusen (B-073)
-  adjustMorale(g, crewBenefits(stats.crews, stats.hours).morale);
+  // Ledelse og arbeidsmiljø løfter det normale nivået (B-085); lenge siden bonus senker det (B-159)
+  g.morale += (moraleNormal(g) - g.morale) * 0.05;
+  // Fire og fem skiftlag gir fridager i turnusen (B-073), men høyst 15 over normalnivået (B-159)
+  liftMorale(g, crewBenefits(stats.crews, stats.hours).morale);
   if (nightExtra(g, stats.hours) > 0) adjustMorale(g, -1.5);
   if (g.morale < 35) {
     const quitters = g.workers.filter(() => chance(g, ((35 - g.morale) / 35) * 0.04));

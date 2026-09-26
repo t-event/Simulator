@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 105 – 2026-09-26: trivselen sto på 100 uten bonus
+
+**Brukeren spurte:** hvorfor trivselen er 100 % når det er lenge siden forrige bonus.
+
+**Funnet:** +0,5 per levert kontrakt (mange i døgnet med salgsdirektør) og +1 i døgnet fra 5 skiftlag løftet trivselen
+fortere enn den drev ned mot normalen.
+
+**Gjort:** B-159. Normalen synker opptil 15 etter 14 døgn uten bonus (fra stålverket). Løft i hverdagen når bare
+normalen + 15. Kortet «Trivsel» forklarer det, og et nytt råd på Verket sender spilleren til Folk → Ansatte. Test i
+`tests.ts`.
+
+**Testet:** tsc, lint, `npm test`, validate, balance (exit 0), build. Playwright på 390 og 320 px: rådet vises, åpner
+Ansatte, merknaden står på kortet, bonusknappen løfter trivselen, ingen horisontal scrolling.
+
+**Gjenstår:** –
+
+---
+
 ## Økt 104 – 2026-09-26: Figen borte fra topplista
 
 **Brukeren spurte:** hvorfor spilleren Figen ble borte fra topplista.

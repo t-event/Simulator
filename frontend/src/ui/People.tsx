@@ -20,7 +20,9 @@ import { sickSpells, WARNING_DAYS } from "../game/engine";
 import { CREW_ROLES, ROLE_IDS, ROLES, STAGES, stageRef } from "../game/data";
 import { auto } from "../game/research";
 import {
+  bonusGap,
   crewBenefits,
+  moraleNormal,
   crewCoverage,
   day,
   MAX_CREWS,
@@ -190,6 +192,13 @@ function Morale({ g, stats, act }: Props) {
             : "Folk mistrives, og noen kan si opp."}{" "}
         Innsatsen er {effect >= 0 ? `${effect} % bedre` : `${-effect} % dårligere`} enn ferdigheten tilsier.
       </p>
+      {bonusGap(g) > 0 && (
+        <p className="g-note g-warn">
+          Det er {day(g) - g.lastBonusDay > 900 ? "lenge" : `${day(g) - g.lastBonusDay} døgn`} siden forrige bonus, så
+          trivselen synker mot {Math.round(moraleNormal(g))} i stedet for {Math.round(moraleNormal(g) + bonusGap(g))}.
+          En bonus løfter den med én gang.
+        </p>
+      )}
       <p className="g-muted">
         Trivselen stiger med bonus, kurs, lønnstillegg og leveranser i tide. Den synker med havarier, reklamasjoner,
         avslåtte lønnskrav{nightExtra(g, stats.hours) > 0 ? " og nattskift (som du har nå)" : " og nattskift"}.

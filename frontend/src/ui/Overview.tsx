@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import {
+  BONUS_COOLDOWN_DAYS,
   fpDeal,
   keyUpgrade,
   requestManual,
@@ -21,7 +22,9 @@ import {
   SEQUENCE_WAIT_MIN,
 } from "../game/engine";
 import {
+  bonusGap,
   castingType,
+  day,
   furnaceGrade,
   gradeRecipe,
   gradesInUse,
@@ -177,8 +180,21 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
         sub: "fravaer",
       });
   }
+  // Lenge siden bonus (B-159): trivselen synker, si fra før folk begynner å slutte
+  if (
+    g.workers.length &&
+    g.morale >= 40 &&
+    g.morale < 70 &&
+    bonusGap(g) >= 10 &&
+    day(g) - g.lastBonusDay >= BONUS_COOLDOWN_DAYS
+  )
+    out.push({
+      text: "Det er lenge siden de ansatte fikk bonus, og trivselen synker. Gi alle bonus under Folk.",
+      view: "folk",
+      sub: "ansatte",
+    });
   if (g.workers.length && g.morale < 40)
-    out.push({ text: "Trivselen blant de ansatte er lav, og noen kan si opp. Se Folk.", view: "folk" });
+    out.push({ text: "Trivselen blant de ansatte er lav, og noen kan si opp. Se Folk.", view: "folk", sub: "ansatte" });
   {
     // Høy strømpris: råd om fastpris (B-105)
     const advice = fixedPriceAdvice(g, stats.hours);

@@ -2473,3 +2473,25 @@ To grunner til at grensen var for lav:
 
 **Lærdom:** når nytt utstyr øker produksjonen, må grensene i juksesperren sjekkes mot det nye maksimumet med alt utstyr,
 ikke mot grunntallene.
+
+## B-159 Trivselen synker uten bonus (2026-09-26)
+Status: gjelder (justerer trivselen i B-026)
+Brukeren: «Det er lenge siden jeg ga bonus. Hvorfor er trivsel på 100 % enda da?»
+
+**Årsak:** Hver levert kontrakt ga +0,5 i trivsel. Med salgsdirektør leveres mange kontrakter i døgnet. I tillegg gir 4 og
+5 skiftlag +0,5 og +1 i døgnet. Til sammen var det mye mer enn driften ned mot normalen (60 eller 70 med ledelse), så
+trivselen sto fast på 100 uten bonus.
+
+**Endring:**
+- Fra stålverket (nivå 3) synker normalen etter 14 døgn uten bonus: 0,5 per døgn, høyst 15 (`bonusGap`, `moraleNormal` i
+  `plant.ts`). En bonus nullstiller det.
+- Løft i hverdagen (leveranser og skiftlag) når bare opp til normalen + 15 (`liftMorale`). Bonus, kurs og valgkort kan
+  fortsatt gi opp til 100.
+- Lenge uten bonus ender trivselen rundt 60–70, ikke 100. Det gir fortsatt god innsats, men bonusen har en verdi igjen.
+- **Råd i spillet:** kortet «Trivsel» sier hvor lenge det er siden bonus og hvor trivselen er på vei. Et råd på Verket
+  («Det er lenge siden de ansatte fikk bonus …») kommer når trivselen er under 70 og bonus kan gis. Rådet, og rådet om lav
+  trivsel, åpner Folk → Ansatte der bonusknappen er.
+- **Konto (KONTO.md):** nei, dette er vanlig spillmekanikk.
+
+**Balanse:** Verksted 8, Støperi 25, Stålverk 65, Storverk 138 døgn (median), nybegynneren 165. Nybegynneren gir ikke
+bonus oftere enn før; trivselen rundt 60–70 holder den godt nok.
