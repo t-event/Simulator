@@ -5,6 +5,28 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 94 – 2026-09-26: automatisk oppdatering og innlogging etter spill uten nett
+
+**Brukeren spurte:** Oppdateringer skal komme automatisk. Hva skjer med spill mens man er logget ut – kommer det med,
+og blir man flagget? Kan man få en venns framgang ved å logge inn i vennens nettleser?
+
+**Gjort:** B-148.
+- `version.json` og automatisk omlasting, med sperre mot løkke.
+- Valg når både spillet her og spillet på nett er spilt videre.
+- `balance.ts --opphold` sjekker juksesperren med lange opphold.
+- Test for at en venns spill ikke blir ditt.
+- Rettet: kontokortet på startskjermen koblet ikke spillet til kontoen etter B-147.
+
+**Testet:** tsc, lint, `npm test` (to nye nettester, én endret), `validate.ts`, `balance.ts` (exit 0),
+`balance.ts --opphold` (ingen flagget, høyst 33 %), build. Playwright på det bygde spillet:
+- koblet til kontoen på startskjermen
+- ny versjon gir én omlasting med lagring først, og ingen løkke
+- valget åpner seg selv på startskjermen
+
+**Gjenstår:** Fase 4 og 5.
+
+---
+
 ## Økt 93 – 2026-09-26: kortere startskjerm
 
 **Brukeren ba om:** Startskjermen er for lang – gjør den kortere og mer intuitiv.

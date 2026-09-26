@@ -519,12 +519,60 @@ const main = async () => {
     onLocalSave(b);
     await flush();
     assert(f.saves.get("u-a@test")!.device === "B", "B lagret ikke");
-    // Tilbake til A etter omstart: A sitt spill har kjørt lenger enn B sitt, men B lagret sist → nettet vinner
+    // Tilbake til A etter omstart: B lagret sist og har kommet lengst → nettet vinner. (Har A kommet lengst, får
+    // spilleren velge, se testen for spill mens man var logget ut, B-148)
     switchTo(browserA);
-    a.minute = 1440 * 11;
+    a.minute = 1440 * 10 + 30;
     const d2 = await linkOnLogin(a);
     assert(d2.kind === "cloud" && d2.cloud.cash === 777_777, `A skulle hente B sitt spill, fikk ${d2.kind}`);
     setClock(() => Date.now());
+  });
+
+  await test("Spilt videre mens man var logget ut (B-148): framgangen blir med, eller spilleren velger", async () => {
+    const f = fresh();
+    await login(f);
+    store.set("stalverk-enhet-v1", "A");
+    const a = newGame(40);
+    a.minute = 1440 * 10;
+    await linkOnLogin(a);
+    const browserA = snapshotBrowser();
+    // Logget ut på A, spiller videre til dag 20, logger inn igjen: ingen andre har lagret → dag 20 lastes opp
+    a.minute = 1440 * 20;
+    let d = await linkOnLogin(a);
+    assert(d.kind === "uploaded" && f.saves.get("u-a@test")?.minute === 1440 * 20, `framgangen ble borte: ${d.kind}`);
+    // Nå lagrer B dag 22, mens A (logget ut) kommer til dag 30: begge har spilt videre, A lengst → spilleren velger
+    otherBrowser("B");
+    const fromCloud = await linkOnLogin(null);
+    const b = fromCloud.kind === "cloud" ? fromCloud.cloud : newGame();
+    b.minute = 1440 * 22;
+    await keepLocal(b);
+    switchTo(browserA);
+    a.minute = 1440 * 30;
+    d = await linkOnLogin(a);
+    assert(d.kind === "choose", `skulle få velge, fikk ${d.kind}`);
+    // Har B kommet lengst, hentes B sitt spill som før
+    a.minute = 1440 * 21;
+    d = await linkOnLogin(a);
+    assert(d.kind === "cloud" && d.cloud.minute === 1440 * 22, `skulle hente B, fikk ${d.kind}`);
+  });
+
+  await test("En venns spill i nettleseren blir ikke ditt når du logger inn der (B-148)", async () => {
+    const f = fresh();
+    await login(f);
+    // Vennen har kommet langt og logget ut; spillet i nettleseren tilhører vennens konto
+    const friend = newGame(41);
+    friend.minute = 1440 * 300;
+    friend.cash = 9_000_000_000;
+    friend.owner = "u-venn";
+    const d = await linkOnLogin(friend);
+    assert(d.kind === "none", `vennens spill skulle ikke kobles, fikk ${d.kind}`);
+    friend.minute += 60;
+    onLocalSave(friend, true);
+    await flush();
+    assert(
+      !f.saves.has("u-a@test") && !f.snapshots.get("u-a@test")?.length,
+      "vennens spill ble lastet opp på din konto",
+    );
   });
 
   await test("To nettlesere åpne samtidig (B-140): den eldre får ikke lagre over, og henter det nyeste", async () => {

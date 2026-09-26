@@ -1,5 +1,5 @@
 import { RecipeGuideCoach } from "./RecipeGuide";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import "./game.css";
 import { STAGES, WIN_CASH } from "../game/data";
 import { InstallTip } from "./InstallTip";
@@ -24,7 +24,8 @@ import { LeaderboardSheet } from "./Leaderboard";
 import { useSeasonStatus } from "./useSeason";
 import { SettingsSheet } from "./Settings";
 import { getSession } from "../net/supabase";
-import { leaving, onLocalSave } from "../net/sync";
+import { flush, leaving, onLocalSave } from "../net/sync";
+import { newVersionAvailable, shouldReloadFor, UPDATE_CHECK_MS } from "../net/update";
 import { loadGame, saveGame, setSaveListener } from "../game/save";
 import { InboxSheet } from "./Inbox";
 import { unseenCount } from "../game/inbox";
@@ -109,6 +110,75 @@ function Intro({ api }: { api: GameApi }) {
         </details>
         <InstallTip />
       </div>
+    </div>
+  );
+}
+
+/**
+ * Automatisk oppdatering (B-148): ser etter en ny versjon hvert 5. minutt og når appen vises igjen. Finnes det en,
+ * lagres spillet (også på nett), og siden lastes inn på nytt. Under en charge i kontrollrommet, eller mens man skriver
+ * i et felt, venter den.
+ */
+function AutoUpdate({ api }: { api: GameApi }) {
+  const [found, setFound] = useState<string | null>(null);
+  // Kom den gamle siden tilbake etter omlastingen (mellomlager), ber vi spilleren lukke og åpne appen
+  const [stuck, setStuck] = useState(false);
+  const busy = !!api.game?.pendingManual;
+  useEffect(() => {
+    if (!import.meta.env.PROD) return;
+    let alive = true;
+    const check = async () => {
+      if (document.visibilityState !== "visible") return;
+      const id = await newVersionAvailable(import.meta.env.BASE_URL);
+      if (id && alive) setFound(id);
+    };
+    void check();
+    const t = setInterval(() => void check(), UPDATE_CHECK_MS);
+    const onShow = () => void check();
+    document.addEventListener("visibilitychange", onShow);
+    window.addEventListener("focus", onShow);
+    return () => {
+      alive = false;
+      clearInterval(t);
+      document.removeEventListener("visibilitychange", onShow);
+      window.removeEventListener("focus", onShow);
+    };
+  }, []);
+  const gameRef = useRef(api.game);
+  useEffect(() => {
+    gameRef.current = api.game;
+  });
+  useEffect(() => {
+    if (!found || busy) return;
+    let timer: ReturnType<typeof setTimeout>;
+    const reload = async () => {
+      const typing = document.activeElement?.matches("input, textarea, select");
+      if (typing) {
+        timer = setTimeout(() => void reload(), 5000);
+        return;
+      }
+      if (!shouldReloadFor(found)) {
+        setStuck(true);
+        return;
+      }
+      if (gameRef.current) saveGame(gameRef.current);
+      // Det som venter på å lagres på nett, sendes først (høyst tre sekunder)
+      await Promise.race([flush(false).catch(() => {}), new Promise((r) => setTimeout(r, 3000))]);
+      // Hent siden forbi mellomlageret først, så omlastingen får den nye versjonen
+      await fetch(window.location.href, { cache: "reload" }).catch(() => {});
+      window.location.reload();
+    };
+    // Et lite øyeblikk med beskjeden, så spilleren ser hvorfor siden lastes på nytt
+    timer = setTimeout(() => void reload(), 1500);
+    return () => clearTimeout(timer);
+  }, [found, busy]);
+  if (!found) return null;
+  return (
+    // Et trykk skjuler beskjeden (den kommer igjen ved neste sjekk hvis appen fortsatt er gammel)
+    <div className="g-update" role="status" onClick={() => stuck && setFound(null)}>
+      {stuck
+        ? "🔄 Ny versjon av spillet er klar – lukk appen og åpne den igjen"
+        : `🔄 Ny versjon av spillet – ${busy ? "oppdaterer når chargen er ferdig" : "oppdaterer …"}`}
     </div>
   );
 }
@@ -468,6 +538,7 @@ export function GameApp() {
     return (
       <>
         <SeasonSync api={api} />
+        <AutoUpdate api={api} />
         <Intro api={api} />
       </>
     );
@@ -637,6 +708,7 @@ export function GameApp() {
       )}
 
       <SeasonSync api={api} />
+      <AutoUpdate api={api} />
       <CloudFollow api={api} />
       {!modalOpen && <LoggedOutNotice onLogin={() => setSettingsOpen(true)} />}
       {!modalOpen && <SeasonResultNotice onOpen={setResultOpen} />}

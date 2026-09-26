@@ -109,7 +109,11 @@ export function IntroAccount({ api }: { api: GameApi }) {
           {open ? "Skjul" : session ? "Konto" : "Logg inn"}
         </button>
       </div>
-      {open && <AccountCard api={api} compact />}
+      {/* Kortet er alltid med (skjult når det er lukket): det kobler spillet til kontoen når siden lastes, og åpner
+          seg selv når spilleren må velge noe (B-148) */}
+      <div hidden={!open}>
+        <AccountCard api={api} compact onAttention={() => setOpen(true)} />
+      </div>
     </div>
   );
 }
@@ -280,11 +284,14 @@ export function AccountCard({
   api,
   onDone,
   compact,
+  onAttention,
 }: {
   api: GameApi;
   onDone?: () => void;
   /** På startskjermen: uten overskrift og innledning, de står allerede over (B-147) */
   compact?: boolean;
+  /** Kalles når kortet viser noe spilleren må ta stilling til (valg av spill, feil, e-postlenken) */
+  onAttention?: () => void;
 }) {
   const session = useSession();
   const status = useCloudStatus();
@@ -354,6 +361,11 @@ export function AccountCard({
     if (session && !linkedThisLoad && mode !== "reset" && !fromLink) void link();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, fromLink]);
+
+  useEffect(() => {
+    if (choose || fromLink || error) onAttention?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [choose, fromLink, error]);
 
   const run = async (fn: () => Promise<void>) => {
     setBusy(true);
