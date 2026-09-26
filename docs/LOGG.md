@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 115 – 2026-09-26: sikkerhetskopi av spillene
+
+**Brukeren ba om:** daglig sikkerhetskopi av spillene på nett, så man kan rulle tilbake.
+
+**Gjort:** B-169. Migrasjon 021: `save_backups` med en kopi per spiller per dag og en ekstra før et spill erstattes av
+et med mye lavere dag, 14 dager tilbake, bare lesbar for utvikleren. `restore_save(id)` ruller tilbake. Oppskrift i
+CLAUDE.md.
+
+**Testet:** i databasen med en transaksjon som rulles tilbake (kopiene tas når de skal, gjenoppretting virker, anon
+kan ikke lese). Sikkerhetsrådene: bare «RLS uten policy» for den nye tabellen, som er meningen.
+
+**Gjenstår:** –
+
+---
+
 ## Økt 114 – 2026-09-26: Sjæfen får tilbake storverket
 
 **Brukeren ba om:** at Sjæfen, som startet Sesong 1 på nytt før B-166, får fortsette der han var.

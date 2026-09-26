@@ -201,6 +201,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   økta i sessionStorage. Passord huskes av mobilens passordlager via `autocomplete`.
 - Utlogging skal være `scope=local` (B-145): standarden i Supabase logger ut alle enheter. En avvist økt gir
   beskjeden «Du er logget ut» (`loggedOutByServer`); 408/429 er ikke en død økt.
+- **Rulle tilbake et spill** (B-169): sikkerhetskopiene ligger i `save_backups` (daglig og før en «lavere dag», 14 dager).
+  Finn kopien med `select id, taken_at, reason, day from save_backups where user_id = (select id from profiles where
+  nickname = '…') order by taken_at desc;` og kjør `select restore_save(<id>);`. Appen henter spillet selv.
 - Grensene i juksesperren (`check_snapshot`) må sjekkes mot det største utstyret **med alt utstyr og flinke folk**,
   ikke mot grunntallene. Tonnsperren på 30 000 t flagget en ærlig spiller med 420-tonnere (B-158).
 - Alle kall til tjenesten har en tidsgrense på 30 s (`call` i `net/supabase.ts`, B-165). Uten den kunne ett kall som hang
