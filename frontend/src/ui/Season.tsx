@@ -10,7 +10,7 @@ import { useState } from "react";
 import { newGame, unlock } from "../game/engine";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
-import { applyWorldEvents, canJoinDirectly, joinSeason, notJoinableReason } from "../game/world";
+import { applySeasonTwist, applyWorldEvents, canJoinDirectly, joinSeason, notJoinableReason } from "../game/world";
 import { cloudConfigured } from "../net/config";
 import {
   daysLeft,
@@ -62,6 +62,16 @@ export function SeasonSync({ api }: { api: GameApi }) {
 
   // Et ferskt spill kobles rett til sesongen
   const cur = status?.current ?? null;
+
+  // Sesongens vri (B-152) inn i spillet når det er med i sesongen, ut ellers
+  const twistKey = `${cur?.id ?? ""}:${cur?.twist?.id ?? ""}:${g?.season ?? ""}`;
+  useEffect(() => {
+    if (!g || !status) return;
+    const want = cur?.twist && g.season === cur.id ? cur.twist.id : null;
+    if ((g.world?.twist?.id ?? null) !== want)
+      api.act((gg) => applySeasonTwist(gg, cur?.id ?? null, cur?.twist ?? null));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [twistKey, !!g, !!status]);
   useEffect(() => {
     // Bare et spill som er avklart mot kontoen, kan kobles til sesongen (B-138)
     if (!g || !session || !cur || !reconciled) return;
@@ -271,8 +281,16 @@ export function SeasonResultNotice({ onOpen }: { onOpen: (open: boolean) => void
         <p>
           Du ble nr. {result.plass} av {result.players} med {fmtKr(result.equity)} ({level}, dag {result.day}).
         </p>
+        {result.plass <= 10 && (
+          <p>
+            <strong>
+              {result.plass === 1 ? `🏆 Du vant ${result.name}!` : `🎖 Du er blant de ti beste i ${result.name}!`}
+            </strong>{" "}
+            Det står ved kallenavnet ditt på topplista for alltid.
+          </p>
+        )}
         <p className="g-muted">
-          Plasseringen står ved kallenavnet ditt på topplista (🎖), og i «Dine sesonger» bak 🏆.
+          Plasseringen står ved kallenavnet ditt på topplista, og i «Dine sesonger» bak 🏆.
           {cur ? ` ${cur.name} er i gang – der starter alle i garasjen igjen.` : ""}
         </p>
         <button className="g-primary" onClick={close}>
@@ -286,11 +304,17 @@ export function SeasonResultNotice({ onOpen }: { onOpen: (open: boolean) => void
 /** Hendelsene som pågår, på Marked */
 export function EventsNote({ g }: { g: GameState }) {
   const events = g.world?.events ?? [];
-  if (events.length === 0) return null;
+  const twist = g.world?.twist ?? null;
+  if (events.length === 0 && !twist) return null;
   return (
     <div className="g-note g-events">
       <strong>Nå i markedet</strong>
       <ul>
+        {twist && (
+          <li>
+            <strong>Sesongens vri – {twist.title}:</strong> {twist.text}
+          </li>
+        )}
         {events.map((e) => (
           <li key={e.id}>
             <strong>{e.title}:</strong> {e.text}
@@ -324,6 +348,7 @@ export function SeasonLine() {
   return (
     <p className="g-muted g-small-text">
       <strong>{cur.name}</strong> · {left === 0 ? "siste dag" : `${left} ${left === 1 ? "dag" : "dager"} igjen`}
+      {cur.twist && ` · Vri: ${cur.twist.title} – ${cur.twist.text}`}
     </p>
   );
 }

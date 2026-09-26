@@ -18,6 +18,7 @@ import type { GameApi } from "../game/useGame";
 import { Bar, Card } from "./common";
 import { fmtNum } from "./format";
 import { PlantScene } from "./PlantScene";
+import { Portal } from "./Portal";
 
 /** Den som er nærmest å bli nådd – vises først */
 function nextUp(g: GameState): Achievement | undefined {
@@ -96,66 +97,68 @@ export function PyntModal({
   onClose: () => void;
 }) {
   return (
-    <div className="g-modal" role="dialog" aria-modal="true" aria-label="Pynt verket" onClick={onClose}>
-      <div className="g-modal-card" onClick={(e) => e.stopPropagation()}>
-        <header className="g-card-head">
-          <h2>🎨 Pynt verket</h2>
-          <button onClick={onClose} aria-label="Lukk">
-            ✕
-          </button>
-        </header>
-        <div className="g-scene-wrap g-pynt-preview">
-          <PlantScene g={g} stats={stats} />
+    <Portal>
+      <div className="g-modal" role="dialog" aria-modal="true" aria-label="Pynt verket" onClick={onClose}>
+        <div className="g-modal-card" onClick={(e) => e.stopPropagation()}>
+          <header className="g-card-head">
+            <h2>🎨 Pynt verket</h2>
+            <button onClick={onClose} aria-label="Lukk">
+              ✕
+            </button>
+          </header>
+          <div className="g-scene-wrap g-pynt-preview">
+            <PlantScene g={g} stats={stats} />
+          </div>
+          <p className="g-muted">
+            Pynten gjør bare verket finere – den gir ingen fordel. Du har{" "}
+            <strong>{Math.floor(g.researchPoints)}</strong> fagpoeng.
+          </p>
+          <ul className="g-pynt-list">
+            {COSMETICS.map((c) => {
+              const owned = ownsCosmetic(g, c.id);
+              const on = !!g.cosmetics.on.includes(c.id);
+              const blocked = cosmeticBlocked(g, c.id);
+              const hidden = g.stage < (c.minStage ?? 0);
+              const need = c.needs ? ACHIEVEMENT_BY_ID[c.needs] : null;
+              return (
+                <li key={c.id} className="g-pynt-item">
+                  <span className="g-pynt-icon" aria-hidden="true">
+                    {c.icon}
+                  </span>
+                  <div className="g-pynt-text">
+                    <strong>{c.name}</strong>
+                    <span className="g-muted">
+                      {c.description}
+                      {hidden && ` Synes fra ${STAGES[c.minStage ?? 0].name.toLowerCase()}.`}
+                    </span>
+                  </div>
+                  {owned ? (
+                    <button
+                      className={on ? "g-small is-on" : "g-small"}
+                      aria-pressed={on}
+                      onClick={() => act((gg) => setCosmetic(gg, c.id, !on))}
+                    >
+                      {on ? "På" : "Av"}
+                    </button>
+                  ) : blocked === "needs" && need ? (
+                    <span className="g-pynt-lock">
+                      🔒 Krever {need.icon} {need.name}
+                    </span>
+                  ) : (
+                    <button
+                      className="g-small g-primary"
+                      disabled={blocked === "fp"}
+                      onClick={() => act((gg) => buyCosmetic(gg, c.id))}
+                    >
+                      {c.fp} fp
+                    </button>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         </div>
-        <p className="g-muted">
-          Pynten gjør bare verket finere – den gir ingen fordel. Du har <strong>{Math.floor(g.researchPoints)}</strong>{" "}
-          fagpoeng.
-        </p>
-        <ul className="g-pynt-list">
-          {COSMETICS.map((c) => {
-            const owned = ownsCosmetic(g, c.id);
-            const on = !!g.cosmetics.on.includes(c.id);
-            const blocked = cosmeticBlocked(g, c.id);
-            const hidden = g.stage < (c.minStage ?? 0);
-            const need = c.needs ? ACHIEVEMENT_BY_ID[c.needs] : null;
-            return (
-              <li key={c.id} className="g-pynt-item">
-                <span className="g-pynt-icon" aria-hidden="true">
-                  {c.icon}
-                </span>
-                <div className="g-pynt-text">
-                  <strong>{c.name}</strong>
-                  <span className="g-muted">
-                    {c.description}
-                    {hidden && ` Synes fra ${STAGES[c.minStage ?? 0].name.toLowerCase()}.`}
-                  </span>
-                </div>
-                {owned ? (
-                  <button
-                    className={on ? "g-small is-on" : "g-small"}
-                    aria-pressed={on}
-                    onClick={() => act((gg) => setCosmetic(gg, c.id, !on))}
-                  >
-                    {on ? "På" : "Av"}
-                  </button>
-                ) : blocked === "needs" && need ? (
-                  <span className="g-pynt-lock">
-                    🔒 Krever {need.icon} {need.name}
-                  </span>
-                ) : (
-                  <button
-                    className="g-small g-primary"
-                    disabled={blocked === "fp"}
-                    onClick={() => act((gg) => buyCosmetic(gg, c.id))}
-                  >
-                    {c.fp} fp
-                  </button>
-                )}
-              </li>
-            );
-          })}
-        </ul>
       </div>
-    </div>
+    </Portal>
   );
 }

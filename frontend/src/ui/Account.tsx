@@ -12,6 +12,7 @@ import {
   consumeAuthHash,
   clearLoggedOut,
   loggedOutByServer,
+  logoutReason,
   rememberPrefs,
   setRememberPrefs,
   deleteAccount,
@@ -54,7 +55,8 @@ let linkedThisLoad = false;
 export function LoggedOutNotice({ onLogin }: { onLogin: () => void }) {
   const session = useSession();
   const [, setTick] = useState(0);
-  if (session || !cloudConfigured() || !loggedOutByServer()) return null;
+  const reason = session || !cloudConfigured() ? null : logoutReason();
+  if (!reason) return null;
   const close = () => {
     clearLoggedOut();
     setTick((t) => t + 1);
@@ -63,10 +65,22 @@ export function LoggedOutNotice({ onLogin }: { onLogin: () => void }) {
     <div className="g-modal" role="dialog" aria-modal="true" aria-label="Du er logget ut">
       <div className="g-modal-card">
         <h2>Du er logget ut</h2>
-        <p>
-          Innloggingen på denne enheten var ikke lenger gyldig, for eksempel fordi du logget ut et annet sted. Spillet
-          her er beholdt. Logg inn igjen, så lagres det på nett og du er med på topplista.
-        </p>
+        {reason === "server" ? (
+          <p>
+            Innloggingen på denne enheten var ikke lenger gyldig, for eksempel fordi du logget ut et annet sted. Spillet
+            her er beholdt. Logg inn igjen, så lagres det på nett og du er med på topplista.
+          </p>
+        ) : (
+          <>
+            <p>
+              Innloggingen ble borte her på enheten – serveren logget deg ikke ut.{" "}
+              {rememberPrefs().remember
+                ? "Det skjer når nettleserdata slettes, eller når spillet åpnes et annet sted: Safari og appen på hjemskjermen har hver sin innlogging."
+                : "«Husk meg på denne enheten» var ikke på, så innloggingen ble slettet da appen ble lukket."}
+            </p>
+            <p>Spillet er trygt på kontoen. Logg inn igjen med «Husk meg» på, så holder du deg innlogget.</p>
+          </>
+        )}
         <div className="g-row">
           <button
             className="g-primary"

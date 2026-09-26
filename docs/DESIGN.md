@@ -56,6 +56,12 @@ Etter sluttmålet (10 mrd., tittelen Stålbaron) fortsetter spillet (B-150):
 - Når all forskning er gjort, åpner mesterskapet: fire prosjekter som kan tas om og om igjen, så fagpoengene alltid
   har noe å gå til.
 
+Ukens utfordring og sesonger med vri (B-152):
+- Hver uke en toppliste per liga (bronse, sølv, gull) med en oppgave som går på omgang: mest vekst i konsernverdi,
+  flest tonn og flest spilldøgn. Topp 3 får medalje, topp 10 en ukekiste med 25–100 fagpoeng. Kortet står på Verket.
+- En sesong kan ha en vri som gjelder hele sesongen (skrapmangel, eksportboom, energikrise, grønn strøm). Den står
+  under «Nå i markedet» og på topplista. Topp 10 i en sesong får 🎖, vinneren 🏆, ved kallenavnet.
+
 Prestasjoner og pynt (B-151):
 - 29 prestasjoner fra første charge til Stållegende gir merker på Verket og litt fagpoeng. Trykk på et merke for å se
   hva som skal til.

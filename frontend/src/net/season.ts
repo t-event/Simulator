@@ -2,7 +2,7 @@
  * Sesonger og felles hendelser (B-129). Serveren eier sesongen; appen leser status og hendelser og legger
  * hendelsene på markedet i spillet. En liten butikk med lyttere, så flere kort kan vise det samme.
  */
-import type { WorldEvent } from "../game/types";
+import type { SeasonTwist, WorldEvent } from "../game/types";
 import { cloudConfigured } from "./config";
 import { rpc, userId } from "./supabase";
 
@@ -11,6 +11,8 @@ export interface Season {
   name: string;
   starts_at: string;
   ends_at: string;
+  /** Sesongens vri (B-152), eller null */
+  twist?: SeasonTwist | null;
 }
 
 export interface SeasonStatus {
@@ -21,7 +23,12 @@ export interface SeasonStatus {
 
 export async function fetchSeasonStatus(): Promise<SeasonStatus> {
   const s = await rpc<SeasonStatus>("season_status", {});
-  return { current: s?.current ?? null, played_previous: !!s?.played_previous };
+  const cur = s?.current ?? null;
+  const t = cur?.twist;
+  const twist = t
+    ? { ...t, scrap: Number(t.scrap) || 1, steel: Number(t.steel) || 1, power: Number(t.power) || 1 }
+    : null;
+  return { current: cur ? { ...cur, twist } : null, played_previous: !!s?.played_previous };
 }
 
 /** Et sesongresultat for spilleren selv (B-143) */

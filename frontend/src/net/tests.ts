@@ -12,6 +12,8 @@ import {
   KEEPALIVE_MAX,
   NetError,
   loggedOutByServer,
+  logoutReason,
+  clearLoggedOut,
   rememberPrefs,
   setFetch,
   setRememberPrefs,
@@ -24,6 +26,7 @@ import {
 } from "./supabase";
 import { fetchLeaderboard, fetchMyRank, fetchProfile, setNickname } from "./leaderboard";
 import { claimAway, fetchDailyStatus } from "./daily";
+import { claimWeekChest, fetchWeeklyBoard, fetchWeeklyStatus, weekDaysLeft } from "./weekly";
 import {
   daysLeft,
   fetchActiveEvents,
@@ -85,9 +88,11 @@ function assert(ok: unknown, msg: string): void {
 interface Fake {
   users: Map<string, { id: string; password: string; confirmed: boolean }>;
   saves: Map<string, { state: unknown; minute: number; day: number; rev: number; device: string | null }>;
+  /** Fagpoeng i ukekista som venter (B-152) */
+  chestFp: number;
   snapshots: Map<
     string,
-    { day: number; equity: number; stage: number; reputation: number; season_id?: number | null }[]
+    { day: number; equity: number; stage: number; reputation: number; season_id?: number | null; produced_t?: number }[]
   >;
   nicknames: Map<string, string>;
   calls: string[];
@@ -101,6 +106,7 @@ function makeFake(): Fake {
   const f: Fake = {
     users: new Map(),
     saves: new Map(),
+    chestFp: 0,
     snapshots: new Map(),
     nicknames: new Map(),
     calls: [],
@@ -208,6 +214,7 @@ function makeFake(): Fake {
         stage: Number(body.stage),
         reputation: Number(body.reputation),
         season_id: body.season_id as number | null,
+        produced_t: body.produced_t as number | undefined,
       });
       f.snapshots.set(id, list);
       return new Response(null, { status: 201 });
@@ -245,7 +252,20 @@ function makeFake(): Fake {
       );
     if (path.startsWith("/rest/v1/rpc/season_status"))
       return json(200, {
-        current: { id: 1, name: "Sesong 1", starts_at: "2026-09-25T00:00:00Z", ends_at: "2026-10-23T00:00:00Z" },
+        current: {
+          id: 1,
+          name: "Sesong 1",
+          starts_at: "2026-09-25T00:00:00Z",
+          ends_at: "2026-10-23T00:00:00Z",
+          twist: {
+            id: "skrapmangel",
+            title: "Skrapmangel",
+            text: "Dyrt skrap.",
+            scrap: "1.15",
+            steel: "1",
+            power: "1",
+          },
+        },
         played_previous: id === "u-a@test",
       });
     if (path.startsWith("/rest/v1/rpc/active_events"))
@@ -262,6 +282,27 @@ function makeFake(): Fake {
           ends_at: "2026-10-01T00:00:00Z",
         },
       ]);
+    if (path.startsWith("/rest/v1/rpc/weekly_status"))
+      return json(200, {
+        week_start: "2026-09-21",
+        ends_at: "2026-09-27T22:00:00+00:00",
+        kind: "tonn",
+        league: "solv",
+        plass: 2,
+        value: "12345",
+        players: 7,
+        chest: f.chestFp > 0 ? { fp: f.chestFp, count: 1, best: 2, week: "2026-09-14" } : null,
+        gold: 1,
+        silver: 2,
+        bronze: 0,
+      });
+    if (path.startsWith("/rest/v1/rpc/claim_week_chest")) {
+      const fp = f.chestFp;
+      f.chestFp = 0;
+      return json(200, fp);
+    }
+    if (path.startsWith("/rest/v1/rpc/weekly_board"))
+      return json(200, [{ plass: 1, nickname: "Tuster", value: "5000", is_me: false, gold: 3 }]);
     if (path.startsWith("/rest/v1/config")) return json(200, [{ value: { cloud: true } }]);
     return json(404, { message: "ukjent" });
   });
@@ -439,6 +480,22 @@ const main = async () => {
     assert(getSession()?.user.id === "u-a@test", "fortsatt innlogget i denne økta");
     setRememberPrefs({ remember: true, email: "a@test" });
     assert(store.has("stalverk-konto-v1") && !tabStore.has("stalverk-konto-v1"), "økta ble ikke flyttet tilbake");
+  });
+
+  await test("Økta som blir borte på enheten gir en forklaring, egen utlogging gjør ikke (B-152)", async () => {
+    const f = fresh();
+    f.users.set("a@test", { id: "u-a@test", password: "hemmelig", confirmed: true });
+    assert(logoutReason() === null, "grunn uten at noen har vært inne");
+    await signIn("a@test", "hemmelig");
+    assert(logoutReason() === null, "grunn mens man er inne");
+    // Som når appen lukkes uten «Husk meg» eller nettleserdata slettes: økta forsvinner uten utlogging
+    setSession(null);
+    assert(logoutReason() === "lost", `grunn ${logoutReason()}`);
+    clearLoggedOut();
+    assert(logoutReason() === null, "beskjeden kom igjen etter at den var sett");
+    await signIn("a@test", "hemmelig");
+    await signOut();
+    assert(logoutReason() === null, "egen utlogging ga beskjed");
   });
 
   await test("Daglig (B-149): uten konto hentes ingenting fra serveren", async () => {
@@ -772,6 +829,25 @@ const main = async () => {
     await linkOnLogin(g);
     const snap = f.snapshots.get("u-a@test")?.[0] as { season_id?: number } | undefined;
     assert(snap?.season_id === 1, "tidslinja mangler sesongen");
+    // Sesongens vri (B-152) og tonn i tidslinja
+    assert(s.current?.twist?.scrap === 1.15, `vrien ${JSON.stringify(s.current?.twist)}`);
+    assert(typeof f.snapshots.get("u-a@test")?.[0]?.produced_t === "number", "tidslinja mangler tonn");
+  });
+
+  await test("Ukens utfordring: status, lista og kista som bare kan åpnes én gang (B-152)", async () => {
+    const f = fresh();
+    assert((await fetchWeeklyStatus()) === null, "status uten innlogging");
+    await login(f);
+    f.chestFp = 75;
+    const s = await fetchWeeklyStatus();
+    assert(
+      s?.kind === "tonn" && s.league === "solv" && s.plass === 2 && s.value === 12345 && s.medals.silver === 2,
+      `status ${JSON.stringify(s)}`,
+    );
+    assert(s?.chest?.fp === 75 && weekDaysLeft(s, Date.parse("2026-09-26T12:00:00Z")) === 2, "kiste eller dager");
+    const rows = await fetchWeeklyBoard("solv");
+    assert(rows[0].value === 5000 && rows[0].gold === 3 && !rows[0].isMe, `lista ${JSON.stringify(rows)}`);
+    assert((await claimWeekChest()) === 75 && (await claimWeekChest()) === 0, "kista ga fagpoeng to ganger");
   });
 
   await test("Ingenting lastes opp før spillet er avklart mot kontoen, heller ikke mens man velger (B-138)", async () => {

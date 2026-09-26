@@ -692,7 +692,9 @@ export function GameApp() {
           {shown === "salg" && (
             <Sales key={subTab.tab ? `salg-${subTab.n}` : "salg"} g={g} stats={stats} act={act} openTab={subTab.tab} />
           )}
-          {shown === "folk" && <People g={g} stats={stats} act={act} />}
+          {shown === "folk" && (
+            <People key={subTab.tab ? `folk-${subTab.n}` : "folk"} g={g} stats={stats} act={act} openTab={subTab.tab} />
+          )}
           {shown === "forskning" && <ResearchPage g={g} act={act} openBook={openBook} />}
         </main>
       </div>

@@ -13,6 +13,10 @@ export const ACCOUNT_FEATURES = {
   },
   oppdrag: { name: "Dagens oppdrag", why: "Serveren vet hvilken dag det er og om bonusen alt er hentet." },
   borte: { name: "Mens du var borte", why: "Serveren måler hvor lenge du har vært borte." },
+  ukens: {
+    name: "Ukens utfordring",
+    why: "Du konkurrerer mot andre i samme liga, og serveren regner ut plassen, medaljene og ukekista.",
+  },
 } as const;
 
 export type AccountFeature = keyof typeof ACCOUNT_FEATURES;

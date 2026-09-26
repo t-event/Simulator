@@ -33,6 +33,7 @@ import {
   notJoinableReason,
   SEASON_BONUS_FP,
   worldFactor,
+  applySeasonTwist,
 } from "./world";
 import { dealPrice, energyPrice, productPrice } from "./plant";
 import { scrapPrice } from "./engine";
@@ -668,6 +669,25 @@ test("Pynt (B-151): kjøpes for fagpoeng, én fasade om gangen, noen krever pres
   assert(buyCosmetic(g, "statue"), "statuen kunne ikke kjøpes etter Stålbaron");
   buyCosmetic(g, "vind");
   assert(!cosmeticOn(g, "vind"), "vindmølla synes før stålverket");
+});
+
+test("Sesongens vri (B-152): gjelder bare spill i sesongen, ganges med prisene og logges én gang", () => {
+  const g = newGame(65);
+  const twist = { id: "skrapmangel", title: "Skrapmangel", text: "Dyrt skrap.", scrap: 1.15, steel: 1, power: 1 };
+  const before = scrapPrice(g, "blandet");
+  applySeasonTwist(g, 3, twist);
+  assert(!g.world.twist && scrapPrice(g, "blandet") === before, "vrien virket på et spill utenfor sesongen");
+  g.season = 3;
+  const lines = g.log.length;
+  applySeasonTwist(g, 3, twist);
+  applySeasonTwist(g, 3, twist);
+  assert(
+    g.world.twist?.id === "skrapmangel" && g.log.length === lines + 1,
+    "vrien ble ikke lagt inn og logget én gang",
+  );
+  assert(Math.abs(scrapPrice(g, "blandet") / before - 1.15) < 0.001, "skrapprisen fikk ikke vrien");
+  applySeasonTwist(g, 4, twist);
+  assert(!g.world.twist, "vrien ble værende etter at sesongen var over");
 });
 
 if (failed) {

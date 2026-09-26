@@ -3,7 +3,7 @@
  * `applyWorldEvents` legger dem inn her. Prisene i motoren ganges med faktorene så lenge hendelsene ligger i lista.
  */
 import { log } from "./engine";
-import type { GameState, WorldEvent } from "./types";
+import type { GameState, SeasonTwist, WorldEvent } from "./types";
 
 /** Startkapital og fagpoeng for den som var med i forrige sesong: med vilje lite (brukerens beskjed) */
 export const SEASON_BONUS_CASH = 1.05;
@@ -12,10 +12,23 @@ export const SEASON_BONUS_FP = 10;
 /** Produktet av faktorene til hendelsene som pågår, for skrap, stål eller strøm */
 export function worldFactor(g: GameState, key: "scrap" | "steel" | "power"): number {
   const events = g.world?.events;
-  if (!events || events.length === 0) return 1;
-  let f = 1;
+  // Sesongens vri (B-152) regnes med som en hendelse som varer hele sesongen
+  let f = g.world?.twist?.[key] ?? 1;
+  if (!events || events.length === 0) return f;
   for (const e of events) f *= e[key];
   return f;
+}
+
+/**
+ * Sesongens vri (B-152): legges inn når spillet er med i sesongen som pågår, og fjernes ellers. Første gang står den i
+ * loggen.
+ */
+export function applySeasonTwist(g: GameState, seasonId: number | null, twist: SeasonTwist | null): void {
+  if (!g.world) g.world = { events: [], seenEventIds: [] };
+  const next = twist && seasonId !== null && g.season === seasonId ? twist : null;
+  const before = g.world.twist?.id ?? null;
+  g.world.twist = next;
+  if (next && next.id !== before) log(g, `Sesongens vri – ${next.title}: ${next.text}`, "event");
 }
 
 /** Bytter ut hendelsene med det serveren sier pågår nå, og logger dem som er nye for spilleren */

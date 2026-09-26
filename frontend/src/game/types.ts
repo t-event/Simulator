@@ -375,6 +375,16 @@ export interface WorldEvent {
   until: string;
 }
 
+/** Sesongens vri (B-152): gjelder hele sesongen, bare for spill som er med i den */
+export interface SeasonTwist {
+  id: string;
+  title: string;
+  text: string;
+  scrap: number;
+  steel: number;
+  power: number;
+}
+
 export interface Market {
   steelFactor: number;
   scrapFactor: Record<ScrapId, number>;
@@ -461,7 +471,7 @@ export interface GameState {
   /** Sesongen en spiller uten konto sist fikk beskjed om at man må logge inn for å være med (B-131) */
   seasonLoginPromptSeen: number | null;
   /** Felles hendelser fra serveren som pågår nå, og hvilke spilleren alt har fått beskjed om (B-129) */
-  world: { events: WorldEvent[]; seenEventIds: number[] };
+  world: { events: WorldEvent[]; seenEventIds: number[]; twist?: SeasonTwist | null };
   /** Konsernet (B-106) */
   konsern: {
     unlocked: boolean;
