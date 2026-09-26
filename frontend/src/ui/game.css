@@ -2479,3 +2479,20 @@ button {
 .g-account form .g-toggle {
   margin: 6px 0 12px;
 }
+
+/* Automatisk oppdatering (B-148): en liten beskjed øverst mens siden lastes på nytt */
+.g-update {
+  position: fixed;
+  top: max(8px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  max-width: calc(100vw - 24px);
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--panel-bg);
+  border: 1px solid var(--accent);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  font-size: 14px;
+  text-align: center;
+}

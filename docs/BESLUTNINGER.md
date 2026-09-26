@@ -2097,3 +2097,47 @@ Nå, ovenfra og ned:
 
 Høyden på iPhone-størrelse gikk fra over 1600 px til ca. 500 px, uten scrolling. Samme tipsboks er foldet sammen
 under ⚙️ også.
+
+## B-148 Automatisk oppdatering, spill mens man var logget ut, og spillet til en annen konto (2026-09-26)
+Status: gjelder (utvider B-140 og B-127; erstatter delen av B-140 der nettet alltid vant når det var lagret fra en
+annen enhet)
+Brukeren spurte:
+- En oppdatering skal nå alle som spiller, uten at man må si ifra om å laste siden på nytt.
+- Hva skjer om man spiller videre etter å ha blitt logget ut? Kommer framgangen med når man logger inn igjen, og blir
+  man flagget for juks?
+- Er det sikkert at man ikke kan logge inn i nettleseren til en venn som har kommet langt, og få vennens framgang?
+
+**Automatisk oppdatering**
+- Bygget lager `version.json` med en egen id per bygg (tidspunkt og commit, `vite.config.ts`). Appen har samme id.
+- Appen ser etter en ny versjon hvert 5. minutt og når den vises igjen. Service workeren slipper `version.json`
+  rett til nettet.
+- Finnes en ny versjon, vises «🔄 Ny versjon av spillet – oppdaterer …». Spillet lagres (også på nett, høyst 3 s),
+  siden hentes forbi mellomlageret, og appen laster seg inn på nytt.
+- Den venter under en charge i kontrollrommet og mens spilleren skriver i et felt.
+- Sperre mot evig omlasting: GitHub Pages lar nettleseren bruke en lagret side i opptil 10 minutter. Appen prøver
+  derfor bare én gang per ny versjon innen 10 minutter. Kom den gamle siden tilbake, står det «lukk appen og åpne den
+  igjen».
+- Testet på det bygde spillet: én omlasting, spillet lagret først, ingen løkke.
+
+**Spill mens man var logget ut**
+- Spillet går videre og lagres på enheten. Når man logger inn igjen, og ingen annen enhet har lagret i mellomtiden,
+  lastes framgangen opp (som før).
+- Har en annen enhet lagret i mellomtiden, og spillet her har kommet lengst, får spilleren nå velge («Fra nettet» /
+  «Herfra»). Før vant spillet på nett uten spørsmål. Har spillet på nett kommet lengst, hentes det som før.
+- Juksesperren sammenligner med forrige snapshot og tillater (tak + 25 %) per spilldøgn i mellom. Et langt opphold gir
+  derfor like stort rom. Sjekket med `balance.ts --opphold`: alle opphold opp til 400 døgn for flink spiller og
+  nybegynner, 6 frø. Den største veksten var 33 % av det sperren tillater, og ingen ville blitt flagget.
+
+**En venns spill**
+- Et spill som er spilt med konto, er merket med kontoen (`owner`).
+- Logger en annen inn i samme nettleser, kobles det spillet aldri til den nye kontoen. Den nye kontoen får sitt eget
+  spill fra nettet, og vennens spill lastes aldri opp (`onLocalSave` hopper over et spill med en annen eier). Test i
+  `net/tests.ts`.
+- Unntak etter planen: et spill som aldri har vært koblet til noen konto, kan kobles til den som logger inn. Det
+  trengs for å kunne starte uten konto og opprette konto senere. Et slikt spill kan bare bli med i sesongen mens det
+  er i garasjen (B-138), så det kommer ikke inn på sesonglista, bare på «Alle tider». Det er som å dele passord;
+  sperren kan ikke skille det fra at eieren selv logger inn.
+
+**Feil funnet og rettet:** etter B-147 var kontokortet på startskjermen lukket, og da ble spillet ikke koblet til
+kontoen når siden ble lastet. Kortet er nå alltid med, bare skjult, og åpner seg selv ved valg, feil eller
+e-postlenken.

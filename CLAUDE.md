@@ -79,6 +79,7 @@ npx tsx src/game/balance.ts --vansker                      # per nivå: hva spil
 npx tsx src/game/balance.ts --nybegynner --verbose --seed 2  # kjør som nybegynner (også --replog N --nybegynner)
 npx tsx src/game/balance.ts --seed 2 --repdrop             # alt som tok omdømmet ned, time for time
 npx tsx src/game/balance.ts --vekst                        # største vekst per døgn og per nivå – grunnlaget for juksesperren
+npx tsx src/game/balance.ts --opphold                      # juksesperren med lange opphold (spill uten innlogging)
 npm run build
 ```
 
@@ -171,6 +172,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   server i Playwright må svare på `rpc/save_game` og gi `rev` og `device` på `saves?select=…`. To nettlesere
   simuleres med to `browser.newContext()` mot samme falske tilstand. «Appen vises igjen» utløses med
   `document.dispatchEvent(new Event("visibilitychange"))`, «legges bort» med `pagehide`.
+- Appen oppdaterer seg selv (B-148): `version.json` fra bygget mot `__BUILD_ID__`. Den virker bare i det bygde
+  spillet (`vite preview`), ikke i `npm run dev`. Kontokortet på startskjermen må alltid være montert (skjult), for
+  det kobler spillet til kontoen når siden lastes.
 - Spillet lagrer aldri passordet (B-146). «Husk meg» husker e-posten og holder økta i localStorage; uten den ligger
   økta i sessionStorage. Passord huskes av mobilens passordlager via `autocomplete`.
 - Utlogging skal være `scope=local` (B-145): standarden i Supabase logger ut alle enheter. En avvist økt gir

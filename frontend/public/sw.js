@@ -28,6 +28,8 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
+  // Versjonsfila skal alltid hentes fra nettet, ellers ser ikke appen at en ny versjon er publisert (B-148)
+  if (new URL(request.url).pathname.endsWith("/version.json")) return;
 
   if (request.mode === "navigate") {
     event.respondWith(

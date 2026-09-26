@@ -361,6 +361,9 @@ export async function linkOnLogin(local: GameState | null): Promise<LinkDecision
   }
   if (mine.owner === id) {
     const cloudNewer = stored === null ? cloud.minute > mine.minute : row.rev !== stored && row.device !== deviceId();
+    // Spilt videre både her (f.eks. mens man var logget ut) og på en annen enhet, og spillet her har kommet lengst:
+    // spilleren velger, så framgangen her ikke forsvinner uten at man vet det (B-148)
+    if (cloudNewer && stored !== null && mine.minute > cloud.minute) return { kind: "choose", cloud, local: mine };
     if (cloudNewer) {
       setKnownRev(id, row.rev);
       synced(cloud);

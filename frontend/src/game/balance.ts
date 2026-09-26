@@ -531,6 +531,8 @@ export const growth: { maxPerDay: number[]; maxEquity: number[] } = {
   maxPerDay: [0, 0, 0, 0, 0],
   maxEquity: [0, 0, 0, 0, 0],
 };
+/** Konsernverdi ved slutten av hvert døgn i siste kjøring – til «--opphold» (B-148) */
+let equitySeries: { day: number; eq: number; stage: number }[] = [];
 
 function run(seed: number, days: number, verbose: boolean, novice = process.argv.includes("--nybegynner")): RunSummary {
   const g = newGame(seed);
@@ -540,6 +542,7 @@ function run(seed: number, days: number, verbose: boolean, novice = process.argv
   let hour = 0;
   let equityAtDayStart = konsernEquity(g);
   let growthDay = day(g);
+  equitySeries = [{ day: day(g), eq: equityAtDayStart, stage: g.stage }];
   while (day(g) <= days && !g.gameOver) {
     if (!novice || hour++ % 3 === 0 || g.pendingDecision) botHour(g);
     const repBefore = g.reputation;
@@ -551,6 +554,7 @@ function run(seed: number, days: number, verbose: boolean, novice = process.argv
       growth.maxEquity[g.stage] = Math.max(growth.maxEquity[g.stage], eq);
       equityAtDayStart = eq;
       growthDay = day(g);
+      equitySeries.push({ day: day(g), eq, stage: g.stage });
     }
     if (process.argv.includes("--repdrop") && g.reputation < repBefore - 0.5)
       console.log(
@@ -607,6 +611,38 @@ if (process.argv.includes("--vekst")) {
       `${STAGES[s].name.padEnd(9)} maks vekst/døgn ${Math.round(growth.maxPerDay[s]).toLocaleString("nb-NO").padStart(14)}  maks konsernverdi ${Math.round(growth.maxEquity[s]).toLocaleString("nb-NO").padStart(16)}`,
     );
   process.exit?.(0);
+}
+if (process.argv.includes("--opphold")) {
+  // Juksesperren (check_snapshot i supabase/) med opphold: spiller man mange døgn uten å være logget inn, kommer neste
+  // snapshot mange døgn senere. Sperren tillater (tak + 25 % av forrige verdi) per døgn i oppholdet. Her sjekkes alle
+  // opphold opp til 400 døgn for en flink spiller og en nybegynner (B-148)
+  const CAP = [100_000, 600_000, 2_500_000, 20_000_000, 1_500_000_000];
+  const MAXEQ = [1_000_000, 6_000_000, 50_000_000, 250_000_000, Infinity];
+  let worst = { ratio: 0, text: "" };
+  let flagged = 0;
+  for (const seed of [1, 2, 3, 4, 5, 6]) {
+    for (const novice of [false, true]) {
+      run(seed, 600, false, novice);
+      const s = equitySeries;
+      for (let j = 1; j < s.length; j++) {
+        if (s[j].eq > MAXEQ[s[j].stage]) flagged++;
+        for (let i = Math.max(0, j - 400); i < j; i++) {
+          const gap = Math.max(s[j].day - s[i].day, 1);
+          const allowed = (CAP[s[j].stage] + 0.25 * Math.max(s[i].eq, 0)) * gap;
+          const ratio = (s[j].eq - s[i].eq) / allowed;
+          if (ratio > 1) flagged++;
+          if (ratio > worst.ratio)
+            worst = {
+              ratio,
+              text: `frø ${seed}${novice ? " nybegynner" : ""}: dag ${s[i].day}→${s[j].day} (${STAGES[s[j].stage].name}), vekst ${Math.round(s[j].eq - s[i].eq).toLocaleString("nb-NO")} av tillatt ${Math.round(allowed).toLocaleString("nb-NO")}`,
+            };
+        }
+      }
+    }
+  }
+  console.log(`Største andel av det sperren tillater: ${(worst.ratio * 100).toFixed(0)} % – ${worst.text}`);
+  console.log(flagged ? `AVVIK: ${flagged} opphold ville blitt flagget` : "Ingen opphold ville blitt flagget OK");
+  process.exit?.(flagged ? 1 : 0);
 }
 if (process.argv.includes("--dump")) {
   // Lager et lagret spill på et gitt nivå, til testing av grensesnittet
