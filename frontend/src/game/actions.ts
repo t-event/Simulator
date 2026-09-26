@@ -49,6 +49,7 @@ import {
   POWER_BINDING_DAYS,
   unitHas,
   unitType,
+  wildcardUse,
 } from "./plant";
 import { newGradesAt, startRecipeGuide } from "./recipeGuide";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
@@ -284,17 +285,7 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
     });
   }
   // Et kjøp som tømmer kassa, stopper skrapinnkjøpet og dermed verket (B-062)
-  const recent = g.history.slice(-3);
-  const dailyCost = recent.length
-    ? recent.reduce(
-        (a, d) =>
-          a +
-          Object.entries(d.costs)
-            .filter(([k]) => k !== "investering" && k !== "bot")
-            .reduce((x, [, v]) => x + (v ?? 0), 0),
-        0,
-      ) / recent.length
-    : 0;
+  const dailyCost = dailyRunningCost(g);
   // Bare for det som kan kjøpes nå: mangler forskning eller penger, er det det som står på kortet (B-144)
   for (const o of out) {
     if (!o.available || dailyCost <= 0 || o.price < dailyCost) continue;
@@ -304,6 +295,32 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
     o.warning = o.warning ? `${o.warning} ${thin}` : thin;
   }
   return out;
+}
+
+/** Driftskostnad per døgn (uten investeringer og bøter), snitt av de tre siste døgnene */
+export function dailyRunningCost(g: GameState): number {
+  const recent = g.history.slice(-3);
+  return recent.length
+    ? recent.reduce(
+        (a, d) =>
+          a +
+          Object.entries(d.costs)
+            .filter(([k]) => k !== "investering" && k !== "bot")
+            .reduce((x, [, v]) => x + (v ?? 0), 0),
+        0,
+      ) / recent.length
+    : 0;
+}
+
+/** Døgn med drift et planlagt bytte av støping skal la være igjen i kassa (B-170): produksjonen øker kraftig etterpå */
+export const SWITCH_BUFFER_DAYS = 3;
+
+/**
+ * Hva kassa må ha før et bytte av støping planlegges (B-170): prisen pluss noen døgns drift. Planlegges byttet før,
+ * stopper nye ordrer på det gamle produktet mens pengene ennå ikke rekker, og verket kan gå tom.
+ */
+export function switchCashNeeded(g: GameState, price: number): number {
+  return price + dailyRunningCost(g) * SWITCH_BUFFER_DAYS;
 }
 
 /**
@@ -473,6 +490,7 @@ export function fpDeal(g: GameState): { fp: number; price: number; reason: strin
  */
 export function scheduleCastingSwitch(g: GameState, id: string | null): PurchaseResult {
   g.pendingCastingSwitch = id;
+  g.switchWaitNoted = false;
   if (!id) return { ok: true, message: "Byttet er avbestilt." };
   const c = CASTINGS.find((x) => x.id === id);
   log(
@@ -493,7 +511,21 @@ export function runScheduledSwitch(g: GameState): void {
     return;
   }
   if (!option.available) return;
+  // Ordrene er levert, men byttet venter til det er penger til drift etterpå, ellers stopper verket (B-170)
+  const need = switchCashNeeded(g, option.price);
+  if (g.cash < need) {
+    if (!g.switchWaitNoted) {
+      g.switchWaitNoted = true;
+      log(
+        g,
+        `Ordrene er levert, men ${option.name.toLowerCase()} kjøpes først når det er ${fmtKr(need)} i kassa, så det er penger til skrap og lønn etterpå. Nye forespørsler på det gamle produktet er fortsatt stoppet.`,
+        "info",
+      );
+    }
+    return;
+  }
   g.pendingCastingSwitch = null;
+  g.switchWaitNoted = false;
   const res = buyUpgrade(g, id);
   if (res.ok)
     log(g, `Ordrene er levert – ${option.name.toLowerCase()} er kjøpt og satt i drift, som planlagt.`, "good");
@@ -557,6 +589,29 @@ export function hireForMissing(g: GameState, targetCrews = 3): PurchaseResult {
   }
   if (hired === 0) return fail("Ingen passende søkere akkurat nå. Nye kommer hver morgen.");
   return { ok: true, message: `Ansatte ${hired} ${hired === 1 ? "person" : "personer"}.` };
+}
+
+/**
+ * Ansetter egne folk til plassene avløserne står fast på (B-170), så avløserne blir ledige til fravær. Bare søkere
+ * med rollen som mangler, og bare så langt det er plass.
+ */
+export function hireForWildcards(g: GameState): PurchaseResult {
+  const cap = STAGES[g.stage].staffCap;
+  let hired = 0;
+  for (let guard = 0; guard < 100 && g.workers.length < cap; guard++) {
+    const use = wildcardUse(g);
+    if (use.tied <= 0) break;
+    const cand = g.candidates.find((c) => (use.byRole[c.role] ?? 0) > 0);
+    if (!cand || !hire(g, cand.id).ok) break;
+    hired += 1;
+  }
+  if (hired === 0)
+    return fail(
+      g.workers.length >= cap
+        ? `Plass til ${cap} ansatte. Bygg ut for å ansette flere.`
+        : "Ingen søkere med de rollene akkurat nå. Nye kommer hver morgen.",
+    );
+  return { ok: true, message: `Ansatte ${hired} ${hired === 1 ? "person" : "personer"} – avløserne er ledige igjen.` };
 }
 
 export function fire(g: GameState, workerId: number): PurchaseResult {

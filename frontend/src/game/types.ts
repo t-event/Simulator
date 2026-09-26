@@ -472,6 +472,8 @@ export interface GameState {
   courseSeats: { start: number; used: number } | null;
   /** Støping som kjøpes av seg selv når ordrene på det gamle produktet er levert (B-102) */
   pendingCastingSwitch: string | null;
+  /** Varselet om at et planlagt bytte venter på penger er gitt (B-170) */
+  switchWaitNoted?: boolean;
   /** Sist det ble varslet om fullt ferdigvarelager (spillminutt), så varselet ikke gjentas hele tida (B-118) */
   storeFullLogMin: number;
   /** Kontoen spillet er koblet til (konto-id fra innloggingen), eller null uten konto (B-125) */

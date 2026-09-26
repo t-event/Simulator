@@ -150,6 +150,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 ## Kjente fallgruver
 
 - `pkill` returnerer 144 og avbryter resten av en `&&`-kjede – kjør det alene.
+- Prettier har ingen config-fil i repoet: kjør `npx prettier --print-width 120 …`. Uten den brytes mange urørte linjer
+  (og objekter som først er brutt, blir stående brutt), og diffen blir stor.
 - Ikke bruk `git checkout <fil>` for å angre en liten endring: det fjerner også alle andre endringer i fila som
   ikke er committet (skjedde med `simpleRunner.ts`). Angre med en målrettet redigering i stedet.
 - «Ingen horisontal scrolling» er ikke nok i toppfeltet: sjekk også at knapper og tekst ikke avkortes

@@ -65,7 +65,8 @@ export const LEGENDS: { equity: number; title: string; fp: number; unlocks: stri
     equity: 50_000_000_000,
     title: "Stålfyrste",
     fp: 250,
-    unlocks: "Stålkomplekser kan kjøpes, og det er plass til to datterverk til.",
+    unlocks:
+      "Stålkomplekser kan kjøpes, og det er plass til to datterverk til. Et kompleks tjener like mye som fem storverk – bytt ut de små verkene etter hvert.",
   },
   { equity: 100_000_000_000, title: "Stålkonge", fp: 400, unlocks: "Datterverkene kan moderniseres til trinn 5." },
   { equity: 250_000_000_000, title: "Stålkeiser", fp: 700, unlocks: "Plass til to datterverk til." },
@@ -290,7 +291,9 @@ export function konsernOptions(g: GameState): KonsernOption[] {
       title: "Kjøp et stålkompleks",
       price: sisterPrice(g, "kompleks"),
       gain: profitOf(g, "kompleks", 0),
-      blocked: full ? `Konsernet er fullt (${maxSisters(g)} datterverk) – selg et lite verk for å få plass` : null,
+      blocked: full
+        ? `Konsernet er fullt (${maxSisters(g)} datterverk) – bytt et lite verk mot komplekset under «Dine verk»`
+        : null,
       run: (gg) => buySister(gg, "kompleks"),
     });
   // Felles funksjoner: 5 % mer i alle datterverkene, og litt hjemme
@@ -311,6 +314,17 @@ export function konsernOptions(g: GameState): KonsernOption[] {
     });
   }
   for (const p of k.plants) {
+    // Når konsernet er fullt, er et stålkompleks i stedet for et lite verk det som gir mest (B-170): det tjener like
+    // mye som fem storverk, men tar bare én plass
+    if (full && kompleksOpen(g) && p.type !== "kompleks")
+      add({
+        key: `bytt-${p.id}`,
+        title: `Selg ${p.name} og kjøp et stålkompleks`,
+        price: Math.max(0, sisterPrice(g, "kompleks") - sisterValue(g, p)),
+        gain: profitOf(g, "kompleks", 0) - profitOf(g, p.type, p.level),
+        blocked: null,
+        run: (gg) => swapForKompleks(gg, p.id),
+      });
     if (p.type === "stalverk")
       add({
         key: `bygg-${p.id}`,
@@ -410,6 +424,16 @@ export function sellSister(g: GameState, id: number): { ok: boolean; message: st
   addIncome(g, "konsern", value);
   log(g, `Konsernet har solgt ${p.name} for ${fmtKr(value)}.`, "info");
   return { ok: true, message: `${p.name} er solgt.` };
+}
+
+/** Selger et lite verk og kjøper et stålkompleks på plassen (B-170). Kassa må rekke før noe selges */
+export function swapForKompleks(g: GameState, id: number): { ok: boolean; message: string } {
+  const p = g.konsern.plants.find((x) => x.id === id);
+  if (!p || p.type === "kompleks") return { ok: false, message: "Fant ikke verket." };
+  if (!kompleksOpen(g)) return buySister(g, "kompleks");
+  if (g.cash + sisterValue(g, p) < sisterPrice(g, "kompleks")) return { ok: false, message: "For lite penger" };
+  sellSister(g, id);
+  return buySister(g, "kompleks");
 }
 
 /** Bygger ut et stålverk til et storverk (B-119) */

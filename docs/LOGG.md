@@ -5,6 +5,26 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 116 – 2026-09-26: de små tingene
+
+**Brukeren ba om:** «Ta alle de små tingene»: råd om stålkomplekser, ansette til plassene avløserne fyller, «koblet til
+på dag N» på topplista og bedre råd om rekkefølgen ovn/støping.
+
+**Gjort:** B-170. Bytt et lite datterverk mot et stålkompleks (knapp og «Neste steg»). «Ansett til plassene (N)» på
+Folk. Migrasjon 022: `linked_day` på topplista, vist som «Koblet til på dag N». Planlagt bytte av støping venter på
+prisen pluss tre døgns drift; «Neste store steg» forklarer sparing, planlegging og flaskehalsen; nybegynneren følger
+rådet.
+
+**Testet:** tsc, lint, tester (nye for byttet til kompleks, «Ansett til plassene» og bufferen ved bytte), validate,
+balanse (exit 0, nybegynneren 184 → 152,5 døgn), build. Playwright 390 og 320 px: byttet gir et kompleks, knappen i Folk
+ansetter og er 40 px høy, topplista viser linjen uten avkorting, «Neste store steg» med og uten penger, ingen
+horisontal scrolling, ingen feil i konsollen. `leaderboard()` i databasen gir `linked_day` (Grane 1019); sikkerhetsrådene
+som før.
+
+**Gjenstår:** –
+
+---
+
 ## Økt 115 – 2026-09-26: sikkerhetskopi av spillene
 
 **Brukeren ba om:** daglig sikkerhetskopi av spillene på nett, så man kan rulle tilbake.

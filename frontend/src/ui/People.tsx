@@ -10,6 +10,7 @@ import {
   giveBonus,
   hire,
   hireForMissing,
+  hireForWildcards,
   hireTemps,
   hireTempCrew,
   hiredCrewCost,
@@ -116,8 +117,15 @@ function roleEffect(g: GameState, stats: PlantStats, role: RoleId): string | nul
 }
 
 /** Anbefalte støtteroller når skiftene er fulle (B-096) */
-function SupportCard({ g }: { g: GameState }) {
+function SupportCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
   const advice = supportAdvice(g);
+  // Søkere som kan ta plassene avløserne står fast på (B-170)
+  const wild = wildcardUse(g);
+  const fits = Object.entries(wild.byRole).reduce(
+    (a, [r, n]) => a + Math.min(n ?? 0, g.candidates.filter((c) => c.role === r).length),
+    0,
+  );
+  const room = STAGES[g.stage].staffCap - g.workers.length;
   if (!advice.length) return null;
   const short = advice.filter((a) => a.have < a.want);
   return (
@@ -137,6 +145,21 @@ function SupportCard({ g }: { g: GameState }) {
             </strong>
             <span className="g-muted">{a.why}</span>
             {a.note && <span className="g-muted g-support-note">{a.note}</span>}
+            {a.role === "allround" && wild.tied > 0 && (
+              <span className="g-support-action">
+                {fits > 0 && room > 0 ? (
+                  <button onClick={() => act((gg) => hireForWildcards(gg))}>
+                    Ansett til plassene ({Math.min(wild.tied, fits, room)})
+                  </button>
+                ) : (
+                  <span className="g-muted">
+                    {room <= 0
+                      ? "Det er ikke plass til flere ansatte."
+                      : "Ingen søkere med de rollene i dag. Nye kommer hver morgen."}
+                  </span>
+                )}
+              </span>
+            )}
           </li>
         ))}
       </ul>
@@ -238,7 +261,8 @@ function Morale({ g, stats, act }: Props) {
       )}
       <p className="g-muted">
         Trivselen stiger med bonus, kurs, lønnstillegg og leveranser i tide. Den synker med havarier, reklamasjoner,
-        avslåtte lønnskrav{nightExtra(g, stats.hours) > 0 ? " og nattskift (som du har nå)" : " og nattskift"}.
+        avslåtte lønnskrav
+        {nightExtra(g, stats.hours) > 0 ? " og nattskift (som du har nå)" : " og nattskift"}.
       </p>
       <button className="g-primary" disabled={day(g) < nextBonus} onClick={() => act((gg) => giveBonus(gg))}>
         {day(g) < nextBonus ? `Bonus igjen dag ${nextBonus}` : `Gi alle bonus (${fmtKr(bonusCost(g))})`}
@@ -467,7 +491,10 @@ export function People({ g, stats, act, openTab }: Props & { openTab?: string })
   const hiredActive = !!g.tempCrew && g.tempCrew.untilMin > g.minute;
   const tabs: { id: PeopleTab; label: string }[] = [
     { id: "skift", label: "Skift" },
-    { id: "ansett", label: `Ansett${g.candidates.length && cap > 0 ? ` (${g.candidates.length})` : ""}` },
+    {
+      id: "ansett",
+      label: `Ansett${g.candidates.length && cap > 0 ? ` (${g.candidates.length})` : ""}`,
+    },
     { id: "ansatte", label: `Ansatte (${g.workers.length})` },
     { id: "fravaer", label: `Fravær${away.length ? ` (${away.length})` : ""}` },
   ];
@@ -523,7 +550,8 @@ export function People({ g, stats, act, openTab }: Props & { openTab?: string })
               )}
               {stats.ownerWorks && (
                 <p className="g-muted">
-                  Du står selv i produksjonen på dagskiftet{g.stage === 0 ? " og gjør alt." : " og fyller to plasser."}
+                  Du står selv i produksjonen på dagskiftet
+                  {g.stage === 0 ? " og gjør alt." : " og fyller to plasser."}
                   {g.stage === 0
                     ? ` Ansatte kan du ha når du har flyttet til ${stageRef(1, g.stage)}.`
                     : ` Når du flytter til ${stageRef(2, g.stage)}, blir du daglig leder, og da må alle plassene fylles av ansatte.`}
@@ -621,7 +649,7 @@ export function People({ g, stats, act, openTab }: Props & { openTab?: string })
                 </details>
               )}
             </Card>
-            {permanent.shifts >= 3 && <SupportCard g={g} />}
+            {permanent.shifts >= 3 && <SupportCard g={g} act={act} />}
             <ShiftPlan g={g} stats={stats} act={act} />
           </>
         )}

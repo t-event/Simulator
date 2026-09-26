@@ -13,6 +13,8 @@ import {
   courseCost,
   fpDeal,
   keyUpgrade,
+  scheduleCastingSwitch,
+  switchCashNeeded,
   doResearch,
   giveBonus,
   hire,
@@ -492,6 +494,10 @@ function botHour(g: GameState): void {
     // …men sparer til «Neste store steg» på målkortet når det bare er pengene som mangler
     const move = options.find((o) => o.kind === "stage" && o.available);
     const key = keyUpgrade(g, options);
+    // Nybegynneren gjør som «Neste store steg» sier: planlegger byttet av støping (B-170)
+    // …når kassa rekker til byttet og noen døgns drift, som rådet sier
+    if (key?.canSchedule && g.pendingCastingSwitch !== key.id && g.cash >= switchCashNeeded(g, key.price))
+      scheduleCastingSwitch(g, key.id);
     const keyBuy =
       key?.available && g.cash - key.price > reserve / 2 && !key.warning?.includes("penger til drift")
         ? key

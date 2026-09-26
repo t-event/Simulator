@@ -2719,3 +2719,37 @@ skjer?» – ja.
   gjenoppretting gir riktig dag og ny versjon.
 - Størrelse: et spill er 100–190 kB før komprimering; 14 kopier per spiller er noen få MB med dagens spillere.
 - **Konto (KONTO.md):** gjelder bare spill lagret på nett (konto); spilleren merker ingenting.
+
+## B-170 Små forbedringer: stålkomplekser, avløsere, «koblet til», bytte av støping (2026-09-26)
+Status: gjelder
+Brukeren: «Ta alle de små tingene» (de fire forslagene fra forrige økt).
+
+**1. Stålkomplekser:** når konsernet er fullt og komplekser er åpnet (Stålfyrste), får hvert datterverk som ikke er et
+kompleks valget «Selg X og kjøp et stålkompleks» (`bytt-<id>` i `konsernOptions`, `swapForKompleks`). Prisen er
+komplekset minus det verket er verdt, og gevinsten er forskjellen i overskudd. Kassa må rekke før noe selges. Knappen
+står under «Moderniser eller selg» på verket, og «Neste steg» foreslår byttet når det betaler seg raskest (med en
+forklaring: et kompleks tjener som fem storverk, men tar én plass). Sperreteksten på «Nytt stålkompleks» og beskjeden
+ved Stålfyrste peker dit.
+
+**2. Avløsere:** «Ansett til plassene (N)» under «Ledige avløsere» på Folk → Skift, når avløsere står fast på plasser
+(`hireForWildcards`). Den ansetter søkere med rollene som mangler, så langt det er plass; mangler søkere eller plass,
+står det i stedet.
+
+**3. Topplista:** «Koblet til på dag N» under navnet når spillet ble koblet til kontoen på dag 6 eller senere
+(`linked_day`, første dag i tidslinja: i sesongen den første i sesongen, på «Alle tider» den første i det hele tatt).
+Det forklarer rask vekst hos dem som spilte uten konto før (Grane: dag 1019). Migrasjon 022 lager `leaderboard()` og
+`my_rank()` på nytt (ny kolonne til slutt). Linjene under navnet brytes nå i stedet for å kuttes på 320 px.
+
+**4. Rekkefølgen ovn/støping:** nybegynneren sto 80 døgn med blokkstøping fordi «Lever først kontraktene på blokker»
+aldri ble oppfylt: nye ordrer (også ukene i rammeavtaler) kom hele tiden. Rekkefølgen etter pris stemmer allerede med
+flaskehalsen på alle nivåer, så den er ikke endret. I stedet:
+- Det planlagte byttet (B-102) kjøpes først når kassa har prisen **pluss tre døgns drift** (`switchCashNeeded`,
+  `SWITCH_BUFFER_DAYS`). Venter det på penger, sier loggen det én gang (`switchWaitNoted`, standard i `migrate()`).
+- «Neste store steg» sier hva man skal gjøre: spar opp til byttet (og ta ordrer som før), så trykk «Bytt når ordrene er
+  levert». Den sier også hva som er flaskehalsen (ovnene eller støpingen, i tonn i timen).
+- Nybegynneren følger rådet og planlegger byttet når kassa rekker. (Å planlegge før kassa rekker stopper ordrene og ga
+  konkurs i testspilleren – derfor rådet om å spare først.)
+
+**Balanse:** Verksted 8, Støperi 23, Stålverk 66, Storverk 137 (som før). Nybegynneren 152,5 (var 184), 0 konkurs.
+
+**Konto (KONTO.md):** 1, 2 og 4 nei (regel 1). 3 ja, en del av topplista (regel 3).

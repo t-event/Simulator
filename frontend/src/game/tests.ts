@@ -2,7 +2,17 @@
  * Små, raske tester av spillmotoren (B-097). Kjøres med `npx tsx src/game/tests.ts` og i CI.
  * Hver test bygger sin egen tilstand, så de ikke er avhengige av lagrede filer.
  */
-import { buyMastery, doResearch, giveBonus, scheduleCastingSwitch, setPowerDeal, upgradeOptions } from "./actions";
+import {
+  buyMastery,
+  doResearch,
+  giveBonus,
+  hireForWildcards,
+  runScheduledSwitch,
+  scheduleCastingSwitch,
+  switchCashNeeded,
+  setPowerDeal,
+  upgradeOptions,
+} from "./actions";
 import { MASTERY, masteryCost, masteryEffect, masteryOpen } from "./mastery";
 import { achievementsDone, checkAchievements, hasAchievement } from "./achievements";
 import { buyCosmetic, cosmeticBlocked, cosmeticOn, FACADE, facadeColors, setCosmetic } from "./cosmetics";
@@ -305,6 +315,27 @@ test("Planlagt bytte av støping skjer av seg selv når det går", () => {
   advance(g, 61);
   assert(g.castingType === "streng1", `støpingen er fortsatt ${g.castingType}`);
   assert(g.pendingCastingSwitch === null, "byttet står fortsatt som planlagt");
+});
+
+test("Planlagt bytte venter til det er penger til drift etterpå (B-170)", () => {
+  const g = newGame(4);
+  g.stage = 3;
+  g.castingType = "blokk";
+  g.researched.push("strengstoping");
+  g.contracts = g.contracts.filter((c) => c.status !== "aktiv");
+  // Tre døgn med 1 mill. i drift: byttet skal la 3 mill. være igjen
+  const costs = { skrap: 1_000_000 };
+  g.history = [0, 1, 2].map(() => ({ ...structuredClone(g.today), costs }));
+  const price = upgradeOptions(g).find((o) => o.id === "streng1")!.price;
+  assert(Math.abs(switchCashNeeded(g, price) - (price + 3_000_000)) < 1, `trenger ${switchCashNeeded(g, price)}`);
+  g.cash = price + 1_000_000;
+  scheduleCastingSwitch(g, "streng1");
+  runScheduledSwitch(g);
+  assert(g.castingType === "blokk" && g.pendingCastingSwitch === "streng1", "byttet uten penger til drift");
+  assert(!!g.switchWaitNoted, "ingen beskjed om at byttet venter");
+  g.cash = price + 4_000_000;
+  runScheduledSwitch(g);
+  assert(g.castingType === "streng1" && g.pendingCastingSwitch === null, `støpingen er ${g.castingType}`);
 });
 
 test("Strengstøpemaskin nr. 2 dobler støpekapasiteten", () => {
@@ -623,6 +654,25 @@ test("Stålmilepæler (B-150): titler etter sluttmålet, fagpoeng, flere verk og
   assert(g.konsern.legends === 3 && titleOf(g) === "Stålkonge", `fikk ${titleOf(g)}`);
   assert(modernizeMax(g) === 5 && maxSisters(g) === sisters + 2 && kompleksOpen(g), "opplåsingen stemmer ikke");
   assert(buySister(g, "kompleks").ok && g.konsern.plants.some((p) => p.type === "kompleks"), "kjøp av kompleks");
+});
+
+test("Stålkompleks i stedet for et lite verk når konsernet er fullt (B-170)", () => {
+  const g = newGame(63);
+  g.stage = 4;
+  g.konsern.unlocked = true;
+  g.won = true;
+  g.konsern.legends = 2;
+  g.cash = 100_000_000_000;
+  while (g.konsern.plants.length < maxSisters(g)) assert(buySister(g, "stalverk").ok, "kjøp av stålverk");
+  assert(!!konsernOptions(g).find((o) => o.key === "kjop-kompleks")!.blocked, "kompleks ikke sperret når fullt");
+  const advice = konsernAdvice(g);
+  assert(!!advice?.key.startsWith("bytt-"), `rådet er ${advice?.key}`);
+  const n = g.konsern.plants.length;
+  g.cash = 1_000_000;
+  assert(!advice!.run(g).ok && g.konsern.plants.length === n, "solgte uten råd til komplekset");
+  g.cash = 100_000_000_000;
+  assert(advice!.run(g).ok, "byttet feilet");
+  assert(g.konsern.plants.length === n && g.konsern.plants.some((p) => p.type === "kompleks"), "byttet ga feil verk");
 });
 
 test("Gamle lagringer får mesterskap og stålmilepæler (B-150)", () => {
@@ -955,6 +1005,14 @@ test("Avløsere (B-164): de som står fast på plasser, teller ikke som ledige, 
   g.workers = g.workers.filter((w) => w.id !== avl[0].id);
   const hit = fireImpact(g, avl[1].id);
   assert(hit.after < 3 && hit.missing.stoper === 1, `etter oppsigelse ${JSON.stringify(hit)}`);
+  // B-170: «Ansett til plassene» tar søkere med rollen som mangler, og avløserne blir ledige
+  g.candidates = [makeCandidate(g, "stoper"), makeCandidate(g, "stoper"), makeCandidate(g, "stoper")];
+  g.candidates.push(makeCandidate(g, "murer"));
+  const r = hireForWildcards(g);
+  const after = wildcardUse(g);
+  assert(r.ok && after.tied === 0 && after.spare === 2, `etter ansettelse ${JSON.stringify(after)}`);
+  assert(g.candidates.length === 2 && g.candidates.some((c) => c.role === "murer"), "ansatte feil søkere");
+  assert(!hireForWildcards(g).ok, "ansatte uten at noen avløser står fast");
 });
 
 test("Mesterskap «Holdbare ovnspotter» (B-165): foringen slites mindre for hvert nivå", () => {
