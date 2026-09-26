@@ -2656,9 +2656,28 @@ sesong.»
 - Fordelen for den som var med i forrige sesong (5 % mer i kassa og 10 fagpoeng) gis bare til et nytt spill i
   garasjen, ikke til et spill som har kommet langt.
 - Et spill fra en **tidligere** sesong får fortsatt valget når en ny sesong starter: start i garasjen, eller spill
-  videre på «Alle tider». Det må avgjøres før Sesong 2 om det skal være slik (FORSLAG.md).
+  videre på «Alle tider». (Erstattet av B-167: alle blir med videre.)
 - Tekstene er skrevet om: popupen uten konto, sesongpopupen, fagboka (sesongkapitlet) og seiersskjermen sier ikke
   lenger at alle starter i garasjen.
 - Serveren trenger ingen endring: sesonglista viser alle med tidslinje i sesongen. Juksesperren ser bare på lagringer
   i samme sesong, så den første lagringen i sesongen sammenlignes ikke med tida før.
 - **Konto (KONTO.md):** som før – sesongen krever konto (regel 3).
+
+## B-167 Neste sesong starter av seg selv, og alle blir med videre (2026-09-26)
+Status: gjelder (erstatter «alle starter i garasjen når en ny sesong starter» i B-129, og valget for spill fra en
+tidligere sesong i B-166)
+Brukeren: «Når sesong 1 er ferdig går vi over til sesong 2 automatisk. Alle blir med over.»
+
+**Server (migrasjon 020):** `season_status()`, som appen kaller hvert minutt, lukker sesongen som er over
+(`close_season`, med sluttresultat og 🎖 som før) og starter den neste: «Sesong N», 26 uker, fra der den forrige
+sluttet. Har ingen spilt på over et halvt år, starter den nye nå. En lås (`pg_advisory_xact_lock`) hindrer at to som
+spør samtidig, starter hver sin. `start_season(...)` virker som før for den som vil starte en sesong med en vri.
+Testet i databasen (rullet tilbake): Sesong 1 lukkes med resultater, Sesong 2 starter på sluttidspunktet, et nytt kall
+starter ikke en til.
+
+**Appen:** alle spill med konto blir med i sesongen som pågår – også videre når en ny sesong starter
+(`canJoinDirectly(g, sesong)`). Loggen sier «Sesong 2 har startet. Spillet ditt er med videre …». Spørsmålet om å
+starte på nytt i garasjen er fjernet; uten konto kommer beskjeden om å logge inn som før. Fordelen for den som var
+med sist, gis fortsatt bare til nye spill i garasjen.
+
+**Konto (KONTO.md):** som før – sesongen krever konto.

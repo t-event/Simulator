@@ -46,18 +46,12 @@ export function applyWorldEvents(g: GameState, events: WorldEvent[]): void {
 }
 
 /**
- * Hvilke spill blir med i sesongen som pågår, uten å starte på nytt? Brukeren (B-166): ingen ville starte på nytt for
- * å bli med, så alle spill som ikke har vært med i en sesong før, blir med som de er – også de som har kommet langt
- * (erstatter «bare garasjen» fra B-133 og regelen om nytt spill+ fra B-140). Et spill fra en tidligere sesong får
- * fortsatt valget om å starte den nye sesongen i garasjen.
+ * Blir spillet med i sesongen som pågår? Alltid, som det er (B-166, B-167): ingen må starte på nytt, og når en sesong
+ * er over og den neste starter, blir alle spillene med videre. Erstatter «bare garasjen» (B-133) og valget om å
+ * starte en ny sesong i garasjen (B-129).
  */
-export function canJoinDirectly(g: GameState): boolean {
-  return g.season === null;
-}
-
-/** Hvorfor spillet ikke kan bli med i sesongen direkte, i vanlige ord */
-export function notJoinableReason(_g: GameState): string {
-  return "Spillet ditt var med i en tidligere sesong";
+export function canJoinDirectly(g: GameState, seasonId: number): boolean {
+  return g.season !== seasonId;
 }
 
 /** Kobler et nytt spill til sesongen, med fordelen for den som var med sist */

@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 113 – 2026-09-26: neste sesong starter av seg selv
+
+**Brukeren ba om:** at Sesong 2 starter automatisk når Sesong 1 er over, og at alle blir med over.
+
+**Gjort:** B-167. Migrasjon 020: `season_status()` lukker sesongen som er over og starter den neste (26 uker, med lås).
+Appen kobler alle spill med konto til sesongen som pågår, også videre til neste. Spørsmålet om å starte på nytt er
+fjernet.
+
+**Testet:** overgangen i databasen (rullet tilbake). tsc, lint, `npm test`, validate, balance, build. Playwright med
+falsk server: et spill fra en tidligere sesong blir med i den nye uten popup og uten ekstra kasse.
+
+**Gjenstår:** –
+
+---
+
 ## Økt 112 – 2026-09-26: alle blir med i sesongen
 
 **Brukeren ba om:** at alle spillere kan bli med i sesongen som pågår uten å starte på nytt.

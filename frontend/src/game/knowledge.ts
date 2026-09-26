@@ -175,7 +175,7 @@ export const SEASON_CHAPTER: KnowledgeCard = {
     "Stålprisen svinger med konjunkturene: når det bygges mye, øker etterspørselen og prisen stiger. Når verden bygger mindre, eller billig import strømmer inn, faller den. Skrapprisen følger stålprisen, for skrap er råstoffet.",
     "Strømprisen svinger av andre grunner: tørre år gir lite vann i magasinene, og kalde vintre gir høyt forbruk. Et stålverk bruker enormt med strøm, så en strømkrise merkes med én gang.",
     "I spillet dukker slike perioder opp som felles hendelser som treffer alle spillerne samtidig: skrapmangel, strømkrise, eksportboom, importpress og streik. Se etter dem øverst på Marked, og tilpass deg: kjøp skrap før prisen stiger, selg når stålprisen er høy.",
-    "En sesong varer i et halvt år. Du trenger en konto for å være med, og du kan bli med når som helst mens sesongen pågår – spillet du har, blir med som det er. Var du med i forrige sesong, får du en liten fordel når du starter et nytt spill.",
+    "En sesong varer i et halvt år, og når den er over, starter den neste av seg selv. Du trenger en konto for å være med, og spillet du har, blir med som det er – også videre til neste sesong. Var du med i forrige sesong, får du en liten fordel når du starter et nytt spill.",
     "Merket ved navnet på topplista viser hvor langt spilleren har kommet: Garasje, Verksted, Støperi, Stålverk eller Storverk, og Konsern når konsernverdien passerer én milliard. Medaljene viser de tre beste plassene.",
   ],
 };

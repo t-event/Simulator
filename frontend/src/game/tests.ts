@@ -27,15 +27,7 @@ import {
   STREAK_REWARDS,
   streakReward,
 } from "./daily";
-import {
-  applyWorldEvents,
-  canJoinDirectly,
-  joinSeason,
-  notJoinableReason,
-  SEASON_BONUS_FP,
-  worldFactor,
-  applySeasonTwist,
-} from "./world";
+import { applyWorldEvents, canJoinDirectly, joinSeason, SEASON_BONUS_FP, worldFactor, applySeasonTwist } from "./world";
 import { dealPrice, energyPrice, productPrice } from "./plant";
 import { scrapPrice, spotQuota } from "./engine";
 import {
@@ -242,15 +234,16 @@ test("Nytt spill er alltid runde 1 uten bonus (nytt spill+ er fjernet, B-141)", 
   assert(a.round === 1 && !a.winSeen && a.researchPoints === 0, "nytt spill skal starte likt for alle");
 });
 
-test("Alle spill som ikke har vært med i en sesong, blir med som de er (B-166)", () => {
+test("Alle spill blir med i sesongen som pågår, også videre til neste sesong (B-166, B-167)", () => {
   const a = newGame(1);
-  assert(canJoinDirectly(a), "et nytt spill skal kunne bli med");
+  assert(canJoinDirectly(a, 1), "et nytt spill skal kunne bli med");
   a.stage = 4;
   a.minute = 800 * 1440;
   a.round = 2;
-  assert(canJoinDirectly(a), "et spill som har kommet langt, skal også bli med");
+  assert(canJoinDirectly(a, 1), "et spill som har kommet langt, skal også bli med");
   a.season = 1;
-  assert(!canJoinDirectly(a) && notJoinableReason(a).includes("tidligere sesong"), "spill fra en tidligere sesong");
+  assert(!canJoinDirectly(a, 1), "spillet er alt med i sesongen");
+  assert(canJoinDirectly(a, 2), "spillet skal bli med videre til neste sesong");
 });
 
 test("Gamle lagringer får standardverdier for nye felt", () => {
