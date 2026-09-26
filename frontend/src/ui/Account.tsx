@@ -25,6 +25,7 @@ import {
   verifyCode,
 } from "../net/supabase";
 import { fetchProfile, setNickname as saveNickname } from "../net/leaderboard";
+import { ACCOUNT_FEATURES, type AccountFeature } from "../net/features";
 import {
   cloudStatus,
   fetchFeatures,
@@ -115,6 +116,27 @@ export function IntroAccount({ api }: { api: GameApi }) {
         <AccountCard api={api} compact onAttention={() => setOpen(true)} />
       </div>
     </div>
+  );
+}
+
+/**
+ * «X krever konto» med grunnen og en knapp til innloggingen (B-149). Brukes for alt i ACCOUNT_FEATURES, så teksten er
+ * lik overalt (docs/KONTO.md, regel 6: funksjonen skjules ikke).
+ */
+export function NeedsAccount({ feature, onLogin }: { feature: AccountFeature; onLogin?: () => void }) {
+  const f = ACCOUNT_FEATURES[feature];
+  return (
+    <p className="g-note g-needs-account">
+      🔒 <strong>{f.name}</strong> krever konto. {f.why}
+      {onLogin && (
+        <>
+          {" "}
+          <button className="g-link" onClick={onLogin}>
+            Logg inn eller opprett konto
+          </button>
+        </>
+      )}
+    </p>
   );
 }
 

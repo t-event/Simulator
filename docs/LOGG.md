@@ -5,6 +5,34 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 95 – 2026-09-26: hva krever konto, daglig belønning, dagens oppdrag og mens du var borte
+
+**Brukeren ba om:**
+- Noe som får folk tilbake hver dag.
+- Oversikt over alt som skal kreve konto nå og senere, og automatikk for nye funksjoner.
+- Dagens oppdrag og mens du var borte.
+- Ingen varsel på mobilen ennå. Test med fagpoeng og timers drift.
+
+**Gjort:** B-149.
+- `docs/KONTO.md` med regler og oversikt, `net/features.ts`, `NeedsAccount` og regel i CLAUDE.md.
+- `game/daily.ts` (spillreglene), `net/daily.ts`, `ui/Daily.tsx` (velkomstvindu, kort på Verket), migrasjon 013 (tabellen
+  `daily`, fire funksjoner, lagring husker sist sett, juksesperren med bonusdøgn).
+- `balance.ts --daglig N`.
+
+**Testet:**
+- tsc, lint, `npm test` (fire nye motortester, én nettest), `validate.ts`, build.
+- `balance.ts` (exit 0, uendret), `--daglig 15` (innenfor alle mål) og `--opphold --daglig 15` (ingen flagget).
+- SQL med testbruker og tilbakerulling. Sikkerhetsrådene er som før.
+- Playwright på 390 og 320 px:
+  - velkomstvinduet med tid borte og uka, hent dag 3
+  - kortet med oppdrag, hent bonusen, kassa øker med riktig beløp
+  - ingen nytt vindu etter ny innlasting
+  - uten konto: kortet forklarer at det krever konto
+
+**Gjenstår:** Varsel på mobilen (senere, krever konto). Fase 4 og 5.
+
+---
+
 ## Økt 94 – 2026-09-26: automatisk oppdatering og innlogging etter spill uten nett
 
 **Brukeren spurte:** Oppdateringer skal komme automatisk. Hva skjer med spill mens man er logget ut – kommer det med,

@@ -241,7 +241,9 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
 - Migrasjonene i `supabase/`: 001 grunnlag, 002 sikkerhet, 003 toppliste, 004 sesonger, 005 sesong på seks
   måneder, 006 tidslinje per sesong, 007 toppliste med nivå, 008 lagring med versjon, 009 ny start i sesongen,
   010 rekorder («Alle tider» leser tabellen `records`, B-142), 011 sesongresultat (🎖 ved navnet og
-  `season_history()`, B-143), 012 toppliste med kassa («Mest penger på bok», `records.best_cash`, B-144).
+  `season_history()`, B-143), 012 toppliste med kassa («Mest penger på bok», `records.best_cash`, B-144), 013 daglig
+  (daglig belønning, dagens oppdrag, mens du var borte og bonusdøgn i juksesperren, B-149).
+- Hva som krever konto, nå og i fase 4 og 5: `docs/KONTO.md` (B-149).
 - Flere enheter samtidig: bare enheten som spilles på, lagrer; den andre settes på pause med «Spill her» (B-143).
 - Merker ved sesongslutt (fase 3) er bygget som 🎖 med beste plassering ved kallenavnet (B-143).
 - **Slik starter du en ny sesong:** i SQL Editor: `select public.start_season('Sesong 2', 26);` (navn, antall uker; 26 = seks måneder, B-130).

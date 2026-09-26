@@ -9,6 +9,21 @@ import { advance, assessOffer, checkWin, fmtKr, log, newGame } from "./engine";
 import { logTopic, showToast, unseenCount } from "./inbox";
 import { KNOWLEDGE } from "./knowledge";
 import {
+  applyMissionBonus,
+  applyStreakReward,
+  AWAY_DAYS_PER_HOUR,
+  AWAY_MAX_HOURS,
+  awayReward,
+  dayOfDrift,
+  DRIFT_FLOOR,
+  MISSION_BONUS,
+  missionBonusReady,
+  pickMissions,
+  startMissionDay,
+  STREAK_REWARDS,
+  streakReward,
+} from "./daily";
+import {
   applyWorldEvents,
   canJoinDirectly,
   joinSeason,
@@ -467,6 +482,77 @@ test("Utstyr som mangler forskning, sier «forsk fram», ikke at pengene er for 
     blocked.every((o) => !o.warning),
     `advarsel på utstyr som mangler forskning: ${blocked.find((o) => o.warning)?.name}`,
   );
+});
+
+test("Daglig belønning (B-149): vokser gjennom uka og følger nivået", () => {
+  const g = newGame(50);
+  const unit = dayOfDrift(g);
+  assert(unit === DRIFT_FLOOR[0], `garasjen skulle få gulvet, fikk ${unit}`);
+  assert(STREAK_REWARDS.length === 7 && STREAK_REWARDS[6].days >= STREAK_REWARDS[5].days, "dag 7 skal være størst");
+  const cash = g.cash;
+  const fp = g.researchPoints;
+  const r = applyStreakReward(g, 7, fmtKr);
+  assert(r.cash === 3 * unit && g.cash === cash + r.cash && g.researchPoints === fp + 5, "dag 7 ga feil belønning");
+  // Utenfor 1–7 brukes nærmeste dag
+  assert(streakReward(g, 12).fp === 5 && streakReward(g, 0).fp === 1, "dag utenfor serien");
+  // Storverket får mer (gulvet eller overskuddet)
+  const big = newGame(50);
+  big.stage = 4;
+  assert(dayOfDrift(big) >= DRIFT_FLOOR[4], "storverket skulle få minst gulvet");
+});
+
+test("Mens du var borte (B-149): minst en halvtime, høyst åtte timer", () => {
+  const g = newGame(51);
+  const unit = dayOfDrift(g);
+  assert(awayReward(g, 20 * 60).cash === 0, "20 minutter skulle ikke gi noe");
+  assert(awayReward(g, 2 * 3600).cash === Math.round(2 * AWAY_DAYS_PER_HOUR * unit), "to timer ga feil");
+  assert(
+    awayReward(g, 30 * 3600).cash === Math.round(AWAY_MAX_HOURS * AWAY_DAYS_PER_HOUR * unit),
+    "skulle stoppe på åtte timer",
+  );
+});
+
+test("Dagens oppdrag (B-149): samme for alle samme dag, fremdrift fra dagens start, bonus én gang", () => {
+  const a = newGame(52);
+  const b = newGame(53);
+  assert(pickMissions(a, "2026-09-26").join() === pickMissions(b, "2026-09-26").join(), "ulike oppdrag samme dag");
+  const days = new Set(["2026-09-26", "2026-09-27", "2026-09-28", "2026-09-29"].map((d) => pickMissions(a, d).join()));
+  assert(days.size > 1, "samme oppdrag hver dag");
+  // Garasjen kan ikke få «kjør en charge selv» (ingen lysbueovn)
+  for (let d = 1; d <= 28; d++) assert(!pickMissions(a, `2026-10-${d}`).includes("selv"), "selv i garasjen");
+  const g = newGame(54);
+  g.totals.contractsDone = 5;
+  startMissionDay(g, "2026-09-26", false);
+  assert(g.daily.missions.length === 3, `fikk ${g.daily.missions.length} oppdrag`);
+  // Gjør alt: fremdriften måles fra dagens start
+  g.totals.contractsDone += 2;
+  g.totals.producedT += 1000;
+  g.reputation += 5;
+  g.researched.push("x");
+  g.readChapters.push("y");
+  g.quizDone.push("z");
+  assert(missionBonusReady(g), "alle oppdrag skulle være gjort");
+  const cash = g.cash;
+  applyMissionBonus(g, fmtKr);
+  assert(
+    g.cash === cash + Math.round(MISSION_BONUS.days * dayOfDrift(g)) && !missionBonusReady(g),
+    "bonusen ble gitt feil",
+  );
+  // Samme dag igjen: ingenting nullstilles; ny dag: nye oppdrag
+  startMissionDay(g, "2026-09-26", false);
+  assert(g.daily.claimed, "samme dag skulle ikke nullstille");
+  startMissionDay(g, "2026-09-27", false);
+  assert(!g.daily.claimed && g.daily.date === "2026-09-27", "ny dag skulle gi nye oppdrag");
+  // Hentet på en annen enhet: serveren sier fra
+  startMissionDay(g, "2026-09-27", true);
+  assert(g.daily.claimed, "bonus hentet et annet sted ble ikke merket");
+});
+
+test("Gamle lagringer får dagens oppdrag (B-149)", () => {
+  const g = newGame(55) as unknown as Record<string, unknown>;
+  delete g.daily;
+  const m = parseSave(JSON.stringify(g));
+  assert(m!.daily && m!.daily.date === null && m!.daily.missions.length === 0, "mangler standard for daily");
 });
 
 if (failed) {

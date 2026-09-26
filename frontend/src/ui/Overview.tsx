@@ -48,6 +48,7 @@ import { SceneBubbles } from "./SceneBubbles";
 import { StageCard, StationButton, UpgradeSheet } from "./Upgrades";
 import { AutoToggle } from "./AutoToggle";
 import { konsernReady } from "../game/konsern";
+import { DailyCard } from "./Daily";
 import { BankCard } from "./Settings";
 import { KonsernTab } from "./Konsern";
 import { readyUpgrades, stationOptions, stationReady, type Station } from "./stations";
@@ -59,6 +60,8 @@ interface Props {
   act: GameApi["act"];
   go: (view: View, sub?: string) => void;
   openBook: (chapter?: string) => void;
+  /** Åpner ⚙️ (innloggingen), fra kortet med dagens oppdrag */
+  onOpenSettings?: () => void;
 }
 
 type Anchor = "vedlikehold" | "mal";
@@ -436,7 +439,7 @@ function ChallengesCard({ g }: { g: GameState }) {
   );
 }
 
-export function Overview({ g, stats, act, go, openBook }: Props) {
+export function Overview({ g, stats, act, go, openBook, onOpenSettings }: Props) {
   const [sheet, setSheet] = useState<Station | null>(null);
   const [chosenTab, setTab] = useState<SubTab>("oversikt");
   // Konsern-fanen finnes bare når konsernet er åpnet; lastes et annet spill, faller valget tilbake til Oversikt
@@ -552,6 +555,8 @@ export function Overview({ g, stats, act, go, openBook }: Props) {
               onStation={setSheet}
               go={go}
             />
+            {/* Dagens oppdrag og uka med daglig belønning (B-149); ikke mens veiledningen pågår */}
+            {g.tutorial === null && <DailyCard g={g} act={act} onLogin={onOpenSettings} />}
             <Card title="Produksjon nå">
               {split ? (
                 <ul className="g-furnace-grades">

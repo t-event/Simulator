@@ -12,6 +12,7 @@ Claudes langtidsminne sammen med `docs/`. Hold den kort og oppdatert.
 3. Les **`docs/DESIGN.md`** hvis oppgaven gjelder spillmekanikk eller grensesnitt.
 4. Les **`docs/PLAN-NETT.md`** hvis oppgaven gjelder konto, lagring på nett, toppliste, sesonger eller konkurranse.
 5. Se **`docs/FORSLAG.md`** – åpne spørsmål til brukeren og forslag. Når noe avgjøres: ny beslutning, og oppdater lista.
+6. Skal du lage noe nytt, avgjør om det **krever konto** etter reglene i **`docs/KONTO.md`** (se «Faste regler»).
 
 ## Før du avslutter en økt
 
@@ -43,6 +44,10 @@ GitHub Pages: https://t-event.github.io/Simulator/
   til Supabase ligger i GitHub Secrets (`SUPABASE_URL`, `SUPABASE_KEY`) og legges inn av bygget som
   `VITE_SUPABASE_URL` og `VITE_SUPABASE_KEY`. Lokalt: `frontend/.env.local` (ignorert av git). Den hemmelige
   nøkkelen (service_role) skal aldri committes, logges eller brukes av spillet. Se `docs/PLAN-NETT.md`.
+- **Konto (B-149):** Hver ny funksjon avgjøres etter reglene i `docs/KONTO.md`. Selve spillet krever aldri konto; det
+  som lagres på nett, sammenlignes med andre eller belønner virkelig tid, krever konto. Skriv svaret i beslutningen,
+  legg funksjonen i tabellen i KONTO.md og, hvis den krever konto, i `ACCOUNT_FEATURES` (`net/features.ts`). Uten
+  konto vises funksjonen med `NeedsAccount`, ikke skjult. Serverfunksjonen sjekker `auth.uid()` og er tatt fra `anon`.
 - **Enkelt for nybegynnere:** Alt spilleren må gjøre skal kunne forstås uten
   fagkunnskap. Forklar med vanlige ord; fagordene kan stå i fagboka.
 - **Mobil først:** Test alltid på iPhone-størrelse (390 px bred). Ingen
@@ -80,6 +85,7 @@ npx tsx src/game/balance.ts --nybegynner --verbose --seed 2  # kjør som nybegyn
 npx tsx src/game/balance.ts --seed 2 --repdrop             # alt som tok omdømmet ned, time for time
 npx tsx src/game/balance.ts --vekst                        # største vekst per døgn og per nivå – grunnlaget for juksesperren
 npx tsx src/game/balance.ts --opphold                      # juksesperren med lange opphold (spill uten innlogging)
+npx tsx src/game/balance.ts --daglig 15                    # som over/vanlig kjøring, men henter daglige belønninger (B-149)
 npm run build
 ```
 
@@ -101,10 +107,12 @@ frontend/src/
     recipeGuide.ts Reseptguide for nye kvaliteter (vises av ui/RecipeGuide.tsx)
     konsern.ts   Datterverk og sluttmålet 10 mrd. (vises av ui/Konsern.tsx)
     world.ts     Felles hendelser i motoren og sesongfordel (B-129)
+    daily.ts     Daglig belønning, dagens oppdrag og mens du var borte (B-149)
     balance.ts   Automatisk testspiller
   net/         Konto og lagring på nett (B-125) – Supabase over fetch, uten bibliotek
     config.ts    URL og nøkkel fra miljøet (aldri i repoet)   supabase.ts  Innlogging, økt, spørringer   sync.ts  Lagring på nett
     leaderboard.ts Toppliste og kallenavn   season.ts  Sesong og hendelser (butikk)
+    daily.ts     Daglig på serveren (status, henting)   features.ts  Hva som krever konto   update.ts  Automatisk oppdatering
     tests.ts     Tester uten nett (falsk tjeneste)
   ui/          Spillets skjermer (mobil først) og kontrollrommet
     Overview.tsx Verket med underfanene Oversikt, Anlegg, Økonomi (og Konsern)   Recipe.tsx  Resepten på Marked
@@ -115,12 +123,14 @@ frontend/src/
     Handbook.tsx Fagboka med quiz og oppdrag   Inbox.tsx  Varsellista (åpnes fra varsellinja øverst)
     Account.tsx  Konto: logg inn, opprett, glemt passord, velg spill ved konflikt (på startskjermen og i ⚙️)
     Leaderboard.tsx Topplista (arket bak 🏆 ved varsellinja)   Season.tsx  Sesongspørsmål, hendelser på Marked, sesonglinje
+    Daily.tsx    Velkommen tilbake, daglig belønning og kortet «Dagens oppdrag» på Verket
     control/     Kontrollrommet: den enkle styringen (SimpleControl + simpleRunner)
   sim/         Prosessmodell for lysbueovnen (brukes av kontrollrommet)
 frontend/public/  PWA: manifest, ikoner, service worker
 supabase/      SQL-migrasjonene, nummerert. Kjøres i prosjektet med Supabase-connectoren (apply_migration) og
                legges her samtidig, så repoet speiler databasen. Sjekk get_advisors (security) etter hver DDL-endring.
-docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, PLAN-NETT.md (planen for nett og konkurranse), FORSLAG.md
+docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, PLAN-NETT.md (planen for nett og konkurranse), FORSLAG.md,
+               KONTO.md (hva som krever konto)
 ```
 
 ## Testing i nettleseren
@@ -172,6 +182,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   server i Playwright må svare på `rpc/save_game` og gi `rev` og `device` på `saves?select=…`. To nettlesere
   simuleres med to `browser.newContext()` mot samme falske tilstand. «Appen vises igjen» utløses med
   `document.dispatchEvent(new Event("visibilitychange"))`, «legges bort» med `pagehide`.
+- Belønninger i «døgns drift» (B-149) må stemme mellom `game/daily.ts` og `supabase/013_daglig.sql` (`streak_days`,
+  bonus i `claim_daily_missions`/`claim_away`), ellers kan juksesperren flagge den som henter dem. Endres
+  belønningene: kjør `balance.ts --daglig 15` og `--opphold --daglig 15`.
 - Appen oppdaterer seg selv (B-148): `version.json` fra bygget mot `__BUILD_ID__`. Den virker bare i det bygde
   spillet (`vite preview`), ikke i `npm run dev`. Kontokortet på startskjermen må alltid være montert (skjult), for
   det kobler spillet til kontoen når siden lastes.

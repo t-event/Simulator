@@ -2141,3 +2141,75 @@ Brukeren spurte:
 **Feil funnet og rettet:** etter B-147 var kontokortet på startskjermen lukket, og da ble spillet ikke koblet til
 kontoen når siden ble lastet. Kortet er nå alltid med, bare skjult, og åpner seg selv ved valg, feil eller
 e-postlenken.
+
+## B-149 Hva krever konto, daglig belønning, dagens oppdrag og mens du var borte (2026-09-26)
+Status: gjelder
+Brukeren ba om:
+- Noe som får spillerne tilbake hver dag: en belønning for hver virkelige dag, bedre for hver dag i en uke, og start på
+  nytt hvis man hopper over en dag. «Vi tester med fagpoeng og timers drift.»
+- «Belønningen kan kreve konto. Finn ut alle ting som skal kreve konto både nå og senere … og at det er automatikk i å
+  tenke på om nye utviklinger skal kreve konto eller ikke.»
+- «Legg inn dagens oppdrag.» «Legg inn mens du var borte.» «Ingen varsel på mobilen ennå.»
+
+**Hva krever konto:** reglene og oversikten står i `docs/KONTO.md`. Kort fortalt:
+- Selve spillet krever aldri konto.
+- Det som lagres på nett, sammenlignes med andre eller belønner virkelig tid, krever konto.
+- Ventetid (fase 4) virker uten konto med mobilens klokke.
+- Uten konto vises funksjonen med en forklaring, ikke skjult.
+
+Automatikken:
+- CLAUDE.md sier at hver ny funksjon skal avgjøres etter KONTO.md.
+- `ACCOUNT_FEATURES` (`net/features.ts`) og `NeedsAccount` (`ui/Account.tsx`) gir samme tekst overalt.
+
+**Daglig belønning** (krever konto):
+- Første gang man åpner spillet en ny dag (norsk dato fra serveren), kommer et vindu med uka som sju ruter.
+- Dag 1–7 gir 1 fagpoeng, 12 timers drift, 2 fagpoeng, 1 døgns drift, 3 fagpoeng, 1,5 døgns drift, og som
+  ukeskiste 5 fagpoeng og 3 døgns drift.
+- Hopper man over en dag, starter serien på dag 1. Etter dag 7 begynner en ny uke.
+- «Drift» er det verket tjener i spillet (snittet av de tre siste døgnene, hele konsernet), med et gulv per nivå. Da
+  betyr belønningen like mye i garasjen som på storverket.
+- «Timers drift» betyr timer i spillet. To timer i spillet er bare fem sekunder, så dagene i serien gir 12–72 timer.
+
+**Dagens oppdrag** (krever konto):
+- Tre oppdrag per dag. De er i samme rekkefølge for alle, men bare det man kan gjøre på sitt nivå:
+  - lever kontrakter
+  - lag et antall tonn (ca. tre døgns produksjon)
+  - kjør en charge selv
+  - forsk fram noe
+  - les et kapittel
+  - ta en quiz
+  - øk omdømmet med 2
+- Fremdriften måles fra dagens start.
+- Alle tre gir en bonus på 24 timers drift og 3 fagpoeng, én gang per dag. Serveren husker det, også på tvers av
+  enheter.
+- Kortet står på Verket → Oversikt. Uten konto viser det hva man får med konto. Det vises ikke under veiledningen.
+
+**Mens du var borte** (krever konto):
+- Serveren måler tida fra forrige lagring eller henting (minst 10 minutter).
+- Fra 30 minutter gir det 6 timers drift per time borte, høyst 8 timer (2 døgns drift).
+- Vises som «Velkommen tilbake! Du var borte i 3 t 20 min …» sammen med dagens belønning.
+- Tida i spillet står ikke stille for det (spillet simulerer ikke timene), men kassa får pengene.
+
+**Balanse:**
+- Belønningene jeg foreslo først (1–5 døgn per dag, 1 døgn per time borte), var for sterke. Med `balance.ts
+  --daglig 15` (en spiller som tar 15 spilldøgn per virkelige dag og henter alt hver dag) kom støperiet på dag 18,
+  under målet.
+- Med verdiene over: verksted 8, støperi 22, stålverk 60 og storverk 128, nybegynner 121,5. Alt er innenfor målene.
+  Uten belønninger er tallene uendret (8/25/67/141).
+- Juksesperren:
+  - Hver henting legger døgnene til i `daily.bonus_days`.
+  - `check_snapshot` tillater så mange døgn ekstra vekst, og nullstiller så.
+  - `balance.ts --opphold --daglig 15`: høyst 25 % av det sperren tillater, og ingen flagget.
+
+**Server (migrasjon 013):**
+- Tabellen `daily`.
+- Funksjonene `daily_status()`, `claim_daily_reward()`, `claim_daily_missions()` og `claim_away()`, alle med
+  `auth.uid()` og tatt fra `anon`.
+- `touch_activity()` kalles av `save_game`. Den husker oppholdet til det hentes, så rekkefølgen på lagring og henting
+  spiller ingen rolle.
+- Prøvd med en testbruker i en transaksjon som ble rullet tilbake:
+  - serien 1→2, 7→1, 3→4, og tilbake til 1 etter hoppet over
+  - andre henting samme dag gir ingenting
+  - tida borte er 0 første gang, deretter 3 t, så 0, og 2 t etter en lagring
+  - vekst på 100 mill. på ett døgn: ikke flagget med 5 bonusdøgn, flagget uten
+- Sikkerhetsrådene viser bare det som er meningen.
