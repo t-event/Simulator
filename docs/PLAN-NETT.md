@@ -107,7 +107,7 @@ sesonger, hendelser, åpne anbud og auksjoner).
 
 ### Fase 1 – konto og lagring på nett (2–3 økter)
 
-Spilleren ser: «Konto» under ⚙️ Innstillinger, med opprett konto, logg inn, glemt passord og logg ut. Et lite
+Spilleren ser: «Konto» under ⚙️ Innstillinger, med opprett konto, logg inn, glemt passord og logg ut (bare denne enheten, B-145). Et lite
 skysymbol i toppen viser om spillet er lagret på nett.
 
 - Første innlogging: den lokale lagringen lastes opp og merkes med konto-id. Spillet fortsetter uten avbrudd.

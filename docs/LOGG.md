@@ -5,6 +5,29 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 91 – 2026-09-26: logget ut om morgenen
+
+**Brukeren spurte:** Hvorfor var jeg logget ut da jeg åpnet appen i dag?
+
+**Funnet (innloggingsloggene):** «Logg ut» på en iPhone kl. 23:44 logget ut alle enheter, fordi det er
+standarden til Supabase. Den andre appen på mobilen fikk nei da den prøvde å fornye kl. 04:55, og logget ut uten å
+si fra.
+
+**Gjort:** B-145.
+- Utlogging gjelder bare denne enheten.
+- Beskjed «Du er logget ut» når økta avvises.
+- ☁ og lagring på nett stopper når økta dør.
+- 429 og 408 logger ikke ut.
+- To faner deler den fornyede økta.
+
+**Testet:** tsc, lint, `npm test` (ny nettest), `validate.ts`, `balance.ts` (exit 0), build. Playwright med en
+avvist økt på 390 og 320 px: beskjeden vises, ☁ borte, «Logg inn» åpner innloggingen, beskjeden kommer ikke igjen.
+Innlogget spill (sesongresultat og toppliste) virker som før.
+
+**Gjenstår:** Brukeren må logge inn igjen én gang på enheten som ble logget ut. Fase 4 og 5.
+
+---
+
 ## Økt 90 – 2026-09-25: mest penger på bok, topplista oppdaterer seg, kjøpsvarsler og veiledningen
 
 **Brukeren ba om:** «Mest penger på bok» på topplista; at topplista (og alt) oppdaterer seg mens man spiller; at

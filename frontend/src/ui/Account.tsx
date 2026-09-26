@@ -10,6 +10,8 @@ import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import {
   consumeAuthHash,
+  clearLoggedOut,
+  loggedOutByServer,
   deleteAccount,
   getSession,
   onSessionChange,
@@ -41,6 +43,43 @@ import {
 const authEvent = consumeAuthHash();
 /** Kobling mot kontoen gjøres én gang per sidelasting */
 let linkedThisLoad = false;
+
+/**
+ * Beskjed når spilleren er logget ut av seg selv (økta ble avvist, f.eks. etter utlogging et annet sted før B-145).
+ * Spillet her er beholdt; «Logg inn» åpner innstillingene.
+ */
+export function LoggedOutNotice({ onLogin }: { onLogin: () => void }) {
+  const session = useSession();
+  const [, setTick] = useState(0);
+  if (session || !cloudConfigured() || !loggedOutByServer()) return null;
+  const close = () => {
+    clearLoggedOut();
+    setTick((t) => t + 1);
+  };
+  return (
+    <div className="g-modal" role="dialog" aria-modal="true" aria-label="Du er logget ut">
+      <div className="g-modal-card">
+        <h2>Du er logget ut</h2>
+        <p>
+          Innloggingen på denne enheten var ikke lenger gyldig, for eksempel fordi du logget ut et annet sted. Spillet
+          her er beholdt. Logg inn igjen, så lagres det på nett og du er med på topplista.
+        </p>
+        <div className="g-row">
+          <button
+            className="g-primary"
+            onClick={() => {
+              close();
+              onLogin();
+            }}
+          >
+            Logg inn
+          </button>
+          <button onClick={close}>Senere</button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function useSession() {
   return useSyncExternalStore(onSessionChange, getSession, getSession);
@@ -390,7 +429,7 @@ export function AccountCard({ api, onDone }: { api: GameApi; onDone?: () => void
               const n = await saveNickname(nickDraft);
               setNickname(n);
               setNickDraft(n);
-              setInfo(`Kallenavnet «${n}» er lagret. Du er med på topplista under Verket → Økonomi.`);
+              setInfo(`Kallenavnet «${n}» er lagret. Du er med på topplista bak 🏆.`);
             });
           }}
         >
@@ -597,6 +636,12 @@ export function AccountCard({ api, onDone }: { api: GameApi; onDone?: () => void
         får du velge hvilket du vil fortsette med.
       </p>
       {info && <p className="g-account-info">{info}</p>}
+      {loggedOutByServer() && (
+        <p className="g-note">
+          Du ble logget ut på denne enheten, for eksempel fordi du logget ut et annet sted. Spillet her er beholdt –
+          logg inn igjen, så fortsetter det på nett.
+        </p>
+      )}
       <form
         onSubmit={(e) => {
           e.preventDefault();

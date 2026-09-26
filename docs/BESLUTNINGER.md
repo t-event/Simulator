@@ -2025,3 +2025,27 @@ Brukeren ba om:
 konto blir med i sesongen uten at noe vindu sperrer), på 390 og 320 px: alle sju stegene går videre av seg selv, riktig
 fane markeres, og ingen feil i konsollen. Funnet underveis: klokka i toppfeltet ble kuttet («Dag 1 · 16…») når
 fagboka hadde et tall. Dag og klokke brytes nå til to linjer i stedet.
+
+## B-145 Utlogging gjelder bare én enhet, og spilleren får vite det når hen er logget ut (2026-09-26)
+Status: gjelder (utvider B-125 og B-140)
+Brukeren spurte: «Når jeg våknet i dag og skulle inn og se i appen, så var jeg logget ut?»
+
+**Hva som skjedde (fra innloggingsloggene i Supabase):**
+- 23:44 kvelden før ble det trykket «Logg ut» på en iPhone (Safari) på kontoen.
+- `POST /auth/v1/logout` logger som standard ut **alle** enheter (`scope=global`), så økta i den andre appen på
+  mobilen ble ugyldig.
+- 04:55 prøvde den andre appen å fornye økta og fikk «Refresh Token Not Found». Appen logget da ut stille, uten
+  beskjed.
+- Spillet på enheten var ikke rørt, og spillet på nett var heller ikke rørt.
+
+**Endringer**
+- «Logg ut» (og «Jeg spiller fra hjemskjermen» etter e-postlenken) logger bare ut denne enheten: `/logout?scope=local`.
+- Avviser tjenesten økta, får spilleren én beskjed: «Du er logget ut – … Spillet her er beholdt. Logg inn igjen …»
+  med «Logg inn» (åpner innstillingene) og «Senere». Beskjeden står også over innloggingen til man logger inn.
+- Lagring på nett slås av når økta dør (☁ forsvinner fra toppfeltet), og kall som krever innlogging stopper i stedet
+  for å gå videre uten (`rest()` kaster «Du er ikke logget inn.»).
+- 408 og 429 (for mange forsøk) regnes ikke lenger som en død økt.
+- To faner i samme nettleser: fornyer den ene fanen økta, bruker den andre den nye. Før kunne den andre fanen prøve
+  den brukte nøkkelen, få nei og logge ut. Fanene følger også hverandre ved inn- og utlogging (`storage`-hendelsen).
+- Test i `net/tests.ts`: scope=local, beskjed ved avvist økt, økt fra en annen fane, fornyelse i en annen fane
+  samtidig.
