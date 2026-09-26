@@ -9,6 +9,7 @@ import {
   BANKRUPTCY_DAYS,
   CUSTOMERS,
   FIRST_NAMES,
+  FURNACES,
   GRADES,
   LAST_NAMES,
   LOAN_INTEREST_PER_DAY,
@@ -1308,7 +1309,21 @@ function updateRolling(g: GameState, stats: PlantStats, dt: number): void {
 // Salg
 // ------------------------------------------------------------------ //
 export function spotQuota(g: GameState, product: ProductId): number {
-  return PRODUCTS[product].spotPerDay * (1 + g.reputation / 50);
+  return PRODUCTS[product].spotPerDay * (1 + g.reputation / 50) * bigPlantMarket(g);
+}
+
+/**
+ * Stormodellene (B-154): et verk som smelter mer enn tre 90-tonnere, selger også til eksport, så markedet vokser –
+ * men mindre enn produksjonen (potens 0,7), så det lønner seg ikke uten grense.
+ */
+function bigPlantMarket(g: GameState): number {
+  if (g.stage < 4) return 1;
+  let tpm = 0;
+  for (const f of g.furnaces) {
+    const t = FURNACES.find((x) => x.id === f.type);
+    if (t) tpm += t.sizeT / t.cycleMin;
+  }
+  return Math.max(1, tpm / 4.5) ** 0.7;
 }
 
 /** Spotpris per tonn akkurat nå. Prisen faller jo mer du selger samme dag. */

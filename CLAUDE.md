@@ -86,6 +86,7 @@ npx tsx src/game/balance.ts --seed 2 --repdrop             # alt som tok omdømm
 npx tsx src/game/balance.ts --vekst                        # største vekst per døgn og per nivå – grunnlaget for juksesperren
 npx tsx src/game/balance.ts --opphold                      # juksesperren med lange opphold (spill uten innlogging)
 npx tsx src/game/balance.ts --daglig 15                    # som over/vanlig kjøring, men henter daglige belønninger (B-149)
+npx tsx src/game/balance.ts --storovn 330                  # samme konsernspill med ulike ovner: tonn og overskudd (B-154)
 npm run build
 ```
 

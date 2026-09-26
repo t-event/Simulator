@@ -4,7 +4,19 @@
 import { MASTERY, MASTERY_IDS, masteryCost, masteryEffect, masteryLevel, masteryOpen } from "./mastery";
 import { checkKonsernMilestones, checkKonsernUnlock, checkLegends, directorHour } from "./konsern";
 import { checkAchievements } from "./achievements";
-import { ADDONS, CASTINGS, FURNACES, GRADES, PRODUCTS, ROLES, SCRAP_IDS, STAGES, stageRef, type Addon } from "./data";
+import {
+  ADDONS,
+  CASTINGS,
+  FURNACES,
+  GRADES,
+  PRODUCTS,
+  ROLES,
+  SCRAP_IDS,
+  STAGES,
+  stageRef,
+  type Addon,
+  type Gate,
+} from "./data";
 import {
   addCost,
   adjustMorale,
@@ -104,6 +116,14 @@ function researchBlocker(g: GameState, id: string): string | null {
   return r ? `Forsk fram: ${r.name}` : null;
 }
 
+/** Stormodellene (B-154) åpner når konsernet åpner, ved sluttmålet eller ved Stålmagnat. Null når de er åpne. */
+export function gateBlocker(g: GameState, gate?: Gate): string | null {
+  if (!gate) return null;
+  if (gate === "konsern") return g.konsern?.unlocked ? null : "Åpner når konsernet åpner (1 mrd.)";
+  if (gate === "baron") return g.won ? null : "Åpner ved sluttmålet (10 mrd., Stålbaron)";
+  return (g.konsern?.legends ?? 0) >= 1 ? null : "Åpner ved Stålmagnat (25 mrd.)";
+}
+
 export function upgradeOptions(g: GameState): UpgradeOption[] {
   const out: UpgradeOption[] = [];
   const next = STAGES[g.stage + 1];
@@ -135,7 +155,8 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
       const outdated = f.stage < current.stage || (f.stage === current.stage && !owned && f.sizeT < current.sizeT);
       if (outdated && !owned) continue;
       const price = f.price;
-      let reason: string | null = researchBlocker(g, f.id);
+      const gated = gateBlocker(g, f.gate);
+      let reason: string | null = gated ?? researchBlocker(g, f.id);
       for (const req of f.requires ?? []) if (!reason && !has(g, req)) reason = `Krever ${nameOf(req)}`;
       if (!reason && g.cash < price) reason = "For lite penger";
       out.push({
@@ -150,7 +171,7 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
         owned,
         available: !owned && f.stage <= g.stage && reason === null,
         reason: owned ? null : reason,
-        locked: f.stage > g.stage,
+        locked: f.stage > g.stage || (!owned && !!gated),
       });
     }
   });
@@ -161,7 +182,8 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
     // Eldre eller mindre støping enn den du har, vises ikke (B-075: 4 strenger etter 6 strenger)
     if (!owned && (c.stage < currentCasting.stage || (c.stage === currentCasting.stage && c.tph < currentCasting.tph)))
       continue;
-    let reason = researchBlocker(g, c.id);
+    const gated = gateBlocker(g, c.gate);
+    let reason = gated ?? researchBlocker(g, c.id);
     let warning: string | undefined;
     let confirm: string | undefined;
     let schedulable = false;
@@ -213,7 +235,7 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
       owned,
       available: !owned && c.stage <= g.stage && reason === null,
       reason: owned ? null : reason,
-      locked: c.stage > g.stage,
+      locked: c.stage > g.stage || (!owned && !!gated),
     });
   }
   for (const a of ADDONS) {
@@ -244,7 +266,8 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
     }
     const owned = has(g, a.id);
     const price = addonPrice(g, a);
-    let reason = researchBlocker(g, a.id) ?? addonBlocker(g, a);
+    const gated = gateBlocker(g, a.gate);
+    let reason = gated ?? researchBlocker(g, a.id) ?? addonBlocker(g, a);
     if (!reason && g.cash < price) reason = "For lite penger";
     out.push({
       id: a.id,
@@ -257,7 +280,7 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
       owned,
       available: !owned && a.stage <= g.stage && reason === null,
       reason: owned ? null : reason,
-      locked: a.stage > g.stage,
+      locked: a.stage > g.stage || (!owned && !!gated),
     });
   }
   // Et kjøp som tømmer kassa, stopper skrapinnkjøpet og dermed verket (B-062)

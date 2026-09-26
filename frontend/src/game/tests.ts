@@ -37,7 +37,7 @@ import {
   applySeasonTwist,
 } from "./world";
 import { dealPrice, energyPrice, productPrice } from "./plant";
-import { scrapPrice } from "./engine";
+import { scrapPrice, spotQuota } from "./engine";
 import {
   buySister,
   checkKonsernMilestones,
@@ -708,6 +708,36 @@ test("Dagens oppdrag i sluttspillet (B-153): større mål, nye oppdrag og flere 
   const k = late.daily.missions.find((m) => m.id === "kontrakter");
   if (k) assert(k.target === 8, `kontrakter i konsernet: ${k.target}`);
   assert(missionBonus(late).fp > missionBonus(early).fp, "ikke flere fagpoeng i konsernet");
+});
+
+test("Stormodeller (B-154): låst til konsernet, sluttmålet og Stålmagnat; lengre charger, flere tonn og større marked", () => {
+  const g = newGame(68);
+  g.stage = 4;
+  g.cash = 5_000_000_000;
+  g.researched = RESEARCH.map((r) => r.id);
+  g.owned.push("renseanlegg", "valseverk", "valseverk2");
+  const opt = (id: string) => upgradeOptions(g).find((o) => o.baseId === id);
+  assert(opt("lysbue150")?.locked && /konsernet/.test(opt("lysbue150")?.reason ?? ""), "150 t var ikke låst");
+  g.konsern.unlocked = true;
+  assert(opt("lysbue150")?.available && opt("streng8")?.available, "150 t eller 8 strenger åpnet ikke med konsernet");
+  assert(opt("lysbue250")?.locked && opt("valseverk3")?.locked, "250 t eller valseverk 3 åpnet før sluttmålet");
+  g.won = true;
+  assert(opt("lysbue250")?.available && opt("valseverk3")?.available, "250 t åpnet ikke ved sluttmålet");
+  assert(opt("likestrom420")?.locked, "420 t åpnet før Stålmagnat");
+  g.konsern.legends = 1;
+  assert(opt("likestrom420")?.available, "420 t åpnet ikke ved Stålmagnat");
+  // Jo større ovn, jo lengre charge – men flere tonn i timen
+  const big = ["lysbue30", "lysbue90", "lysbue150", "lysbue250", "likestrom420"].map(
+    (id) => FURNACES.find((f) => f.id === id)!,
+  );
+  for (let i = 1; i < big.length; i++) {
+    assert(big[i].cycleMin > big[i - 1].cycleMin, `${big[i].id} er ikke tregere enn ${big[i - 1].id}`);
+    assert(big[i].sizeT / big[i].cycleMin > big[i - 1].sizeT / big[i - 1].cycleMin, `${big[i].id} gir ikke flere tonn`);
+  }
+  assert(Math.abs((420 / 70) * 60 - 360) < 1, "420-tonneren skal gi ca. 360 t i timen");
+  const quota = spotQuota(g, "emne");
+  g.furnaces.forEach((f) => (f.type = "likestrom420"));
+  assert(spotQuota(g, "emne") > quota * 1.15, "markedet vokser ikke med stormodellene");
 });
 
 if (failed) {

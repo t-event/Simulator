@@ -352,6 +352,12 @@ export const STAGES: Stage[] = [
 // ------------------------------------------------------------------ //
 // Ovner
 // ------------------------------------------------------------------ //
+/**
+ * Utstyr som først kan kjøpes langt ute i spillet (B-154): når konsernet åpner, ved sluttmålet (Stålbaron) eller ved
+ * Stålmagnat (25 mrd.). Ingen ny forskning, så mesterskapet (som krever all forskning) blir ikke stengt igjen.
+ */
+export type Gate = "konsern" | "baron" | "magnat";
+
 export interface FurnaceType {
   id: string;
   name: string;
@@ -375,6 +381,7 @@ export interface FurnaceType {
   /** Tilsatser, elektroder og annet forbruk per tonn */
   consumablesPerT: number;
   requires?: string[];
+  gate?: Gate;
   arc: boolean;
   description: string;
 }
@@ -446,13 +453,14 @@ export const FURNACES: FurnaceType[] = [
     stage: 3,
     price: 7_500_000,
     sizeT: 30,
-    cycleMin: 75,
+    // Tida fra tapping til tapping øker med størrelsen (B-154): 55 min for 30 t, 60 for 90 t … 70 for 420 t
+    cycleMin: 55,
     kwhPerT: 440,
     fuel: "strøm",
     oxidationLoss: 0.045,
     dephos: 0.6,
     decarb: true,
-    wearPerHeat: 0.0049,
+    wearPerHeat: 0.0036,
     relineCost: 750_000,
     relineHours: 30,
     crew: { ovn: 3 },
@@ -483,6 +491,78 @@ export const FURNACES: FurnaceType[] = [
     description:
       "Fullskala lysbueovn som tar 90 tonn. Litt flytende stål blir igjen i bunnen etter tapping (stålsump), så neste charge smelter raskere.",
   },
+  // Stormodellene (B-154). Jo større ovn, jo lengre tar hver charge, men tonnene i timen øker mye. Verdens største er
+  // likestrømsovner på rundt 420 tonn, bygd for omtrent 360 tonn i timen (ca. 70 minutter fra tapping til tapping).
+  // Slitasjen er satt så foringen varer omtrent like mange døgn som på 90-tonneren.
+  {
+    id: "lysbue150",
+    name: "Lysbueovn 150 t",
+    stage: 4,
+    price: 90_000_000,
+    sizeT: 150,
+    cycleMin: 64,
+    kwhPerT: 390,
+    fuel: "strøm",
+    oxidationLoss: 0.045,
+    dephos: 0.65,
+    decarb: true,
+    wearPerHeat: 0.0042,
+    relineCost: 3_000_000,
+    relineHours: 40,
+    crew: { ovn: 4 },
+    consumablesPerT: 170,
+    requires: ["renseanlegg"],
+    gate: "konsern",
+    arc: true,
+    description:
+      "Stormodell som tar 150 tonn. Hver charge tar litt lengre tid (64 minutter), men ovnen lager mye mer stål i timen. Krever mer støpe- og valsekapasitet.",
+  },
+  {
+    id: "lysbue250",
+    name: "Lysbueovn 250 t",
+    stage: 4,
+    price: 220_000_000,
+    sizeT: 250,
+    cycleMin: 68,
+    kwhPerT: 380,
+    fuel: "strøm",
+    oxidationLoss: 0.045,
+    dephos: 0.65,
+    decarb: true,
+    wearPerHeat: 0.0044,
+    relineCost: 5_000_000,
+    relineHours: 44,
+    crew: { ovn: 4 },
+    consumablesPerT: 165,
+    requires: ["renseanlegg"],
+    gate: "baron",
+    arc: true,
+    description:
+      "En av de største vekselstrømsovnene: 250 tonn per charge og 68 minutter fra tapping til tapping. Stor transformator og kraftig oksygen.",
+  },
+  {
+    id: "likestrom420",
+    name: "Likestrømsovn 420 t",
+    stage: 4,
+    price: 700_000_000,
+    sizeT: 420,
+    cycleMin: 70,
+    kwhPerT: 360,
+    fuel: "strøm",
+    oxidationLoss: 0.04,
+    dephos: 0.65,
+    decarb: true,
+    wearPerHeat: 0.0046,
+    relineCost: 9_000_000,
+    relineHours: 48,
+    crew: { ovn: 4 },
+    consumablesPerT: 140,
+    requires: ["renseanlegg"],
+    gate: "magnat",
+    arc: true,
+    description:
+      "Som verdens største lysbueovner: likestrøm, 420 tonn og omtrent 360 tonn stål i timen. Én elektrode i taket og en bunnelektrode gir mindre elektrodeforbruk og mindre flimmer på strømnettet.",
+  },
 ];
 
 // ------------------------------------------------------------------ //
@@ -501,6 +581,7 @@ export interface CastingType {
   /** Grunnsannsynlighet for støpefeil per parti */
   defectRisk: number;
   continuous: boolean;
+  gate?: Gate;
   description: string;
 }
 
@@ -590,6 +671,21 @@ export const CASTINGS: CastingType[] = [
     continuous: true,
     description: "Seks strenger tar unna stålet fra tre store ovner. Uten flere ovner står strengene mye og venter.",
   },
+  {
+    id: "streng8",
+    name: "Strengstøpemaskin, 8 strenger",
+    stage: 4,
+    price: 120_000_000,
+    product: "emne",
+    tph: 400,
+    yield: 0.978,
+    crew: { stoper: 7 },
+    costPerT: 115,
+    defectRisk: 0.03,
+    continuous: true,
+    gate: "konsern",
+    description: "Åtte strenger med større emner som trekkes fortere. Holder følge med stormodellene av ovner (B-154).",
+  },
 ];
 
 // ------------------------------------------------------------------ //
@@ -607,6 +703,7 @@ export interface Addon {
   perFurnace?: boolean;
   needsContinuous?: boolean;
   requires?: string[];
+  gate?: Gate;
   description: string;
 }
 
@@ -794,6 +891,17 @@ export const ADDONS: Addon[] = [
     requires: ["valseverk"],
     crew: { valse: 3 },
     description: "Et valseverk til, så valsingen holder følge når støpingen blir større. Dobbel valsekapasitet.",
+  },
+  {
+    id: "valseverk3",
+    name: "Valseverk nr. 3",
+    stage: 4,
+    price: 90_000_000,
+    requires: ["valseverk2"],
+    crew: { valse: 3 },
+    gate: "baron",
+    description:
+      "Et tredje, raskere valseverk for stormodellene av ovner. Omtrent 60 % mer valsekapasitet enn to valseverk.",
   },
   {
     id: "valseverk",

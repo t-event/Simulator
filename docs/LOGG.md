@@ -5,6 +5,29 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 100 – 2026-09-26: stormodeller – større ovner og støpemaskiner
+
+**Brukeren ba om:** større ovner og støpeanlegg, som i virkeligheten (opp til en likestrømsovn på 420 t), og lengre
+smeltetid jo større ovnen er.
+
+**Gjort:** B-154.
+- Lysbueovn 150 t og 250 t, likestrømsovn 420 t, strengstøpemaskin med 8 strenger og valseverk nr. 3. De åpner når
+  konsernet åpner, ved sluttmålet og ved Stålmagnat.
+- Tapp-til-tapp øker med størrelsen: 55 min (30 t, før 75) til 70 min (420 t).
+- Markedet vokser for de største verkene.
+- Fagboka forklarer ovnsstørrelse og tapp-til-tapp.
+- `balance.ts --storovn N` sammenligner ovnene i samme konsernspill.
+
+**Testet:**
+- tsc, lint, `npm test` (ny test for låser, tider og marked), `validate.ts` og build.
+- `balance.ts` (exit 0, uendret) og `--opphold` (ingen flagget).
+- Playwright på 390 og 320 px: ovnsmenyen med 150 t til salgs og 250 t og 420 t under «Kommer senere». Ingen
+  horisontal scrolling, ingen feil.
+
+**Gjenstår:** –
+
+---
+
 ## Økt 99 – 2026-09-26: nettselskapet og dagens oppdrag i sluttspillet
 
 **Brukeren ba om:**

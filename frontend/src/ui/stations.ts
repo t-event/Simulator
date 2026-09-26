@@ -28,6 +28,7 @@ const ADDON_STATION: Record<string, Station> = {
   havn: "lager",
   skrapterminal: "skrap",
   valseverk2: "stoping",
+  valseverk3: "stoping",
   renseanlegg: "ovn",
   oseovn: "ovn",
   conveyor: "ovn",

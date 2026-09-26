@@ -30,7 +30,7 @@ const ROLLING_TPH = 45;
 
 /** Valseverket bygges ut sammen med storverket, så det holder følge med fire strenger. */
 export function rollingTph(g: GameState): number {
-  return ROLLING_TPH * (g.stage >= 4 ? 2.5 : 1) * (has(g, "valseverk2") ? 2 : 1);
+  return ROLLING_TPH * (g.stage >= 4 ? 2.5 : 1) * (has(g, "valseverk3") ? 3.2 : has(g, "valseverk2") ? 2 : 1);
 }
 export const ROLLING_YIELD = 0.96;
 

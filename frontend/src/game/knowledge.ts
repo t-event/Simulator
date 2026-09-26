@@ -106,6 +106,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
       "I lysbueovnen går strømmen gjennom grafittelektroder og lager lysbuer ned mot skrapet. Oksygen og karbon blåses inn gjennom lanser.",
       "Oksygen brenner karbon til CO, og karbon reduserer FeO i slaggen. Gassen skummer opp slaggen, som legger seg rundt lysbuen og holder varmen i badet.",
       "Kalk og dolomitt gir en basisk slagg. Basisiteten B2 = CaO/SiO₂ må ligge rundt 1,8 for at slaggen skal skumme og ta opp fosfor.",
+      "Ovnene finnes fra noen titalls tonn opp til rundt 420 tonn. De største er likestrømsovner med to skall, bygd for omtrent 360 tonn stål i timen. En større ovn trenger lengre tid per charge – mer skrap skal smeltes, og effekten vokser ikke like fort som størrelsen – men den lager likevel mange flere tonn i timen. Tida fra én tapping til neste kalles tapp-til-tapp.",
     ],
   },
   {
