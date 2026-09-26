@@ -26,7 +26,7 @@ import {
 } from "./supabase";
 import { fetchLeaderboard, fetchMyRank, fetchProfile, setNickname } from "./leaderboard";
 import { claimAway, fetchDailyStatus } from "./daily";
-import { claimWeekChest, fetchWeeklyBoard, fetchWeeklyStatus, weekDaysLeft } from "./weekly";
+import { chestFp, claimWeekChest, fetchWeeklyBoard, fetchWeeklyStatus, weekDaysLeft } from "./weekly";
 import {
   daysLeft,
   fetchActiveEvents,
@@ -848,6 +848,8 @@ const main = async () => {
     const rows = await fetchWeeklyBoard("solv");
     assert(rows[0].value === 5000 && rows[0].gold === 3 && !rows[0].isMe, `lista ${JSON.stringify(rows)}`);
     assert((await claimWeekChest()) === 75 && (await claimWeekChest()) === 0, "kista ga fagpoeng to ganger");
+    // Bare topp 3 får kiste (B-155)
+    assert(chestFp(1) === 100 && chestFp(3) === 50 && chestFp(4) === 0, "kiste utenfor topp 3");
   });
 
   await test("Ingenting lastes opp før spillet er avklart mot kontoen, heller ikke mens man velger (B-138)", async () => {

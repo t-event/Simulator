@@ -65,7 +65,7 @@ datterverk (B-153).
 
 Ukens utfordring og sesonger med vri (B-152):
 - Hver uke en toppliste per liga (bronse, sølv, gull) med en oppgave som går på omgang: mest vekst i konsernverdi,
-  flest tonn og flest spilldøgn. Topp 3 får medalje, topp 10 en ukekiste med 25–100 fagpoeng. Kortet står på Verket.
+  flest tonn og flest spilldøgn. Topp 3 får medalje og ukekiste med 50–100 fagpoeng (B-155). Kortet står på Verket.
 - En sesong kan ha en vri som gjelder hele sesongen (skrapmangel, eksportboom, energikrise, grønn strøm). Den står
   under «Nå i markedet» og på topplista. Topp 10 i en sesong får 🎖, vinneren 🏆, ved kallenavnet.
 

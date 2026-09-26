@@ -1,6 +1,6 @@
 /**
  * Ukens utfordring (B-152, supabase/016_ukens_utfordring.sql): en toppliste per liga og uke, regnet ut på serveren fra
- * tidslinja. Topp 3 får medalje og topp 10 en ukekiste med fagpoeng når uka er over. Krever konto for å være med;
+ * tidslinja. Topp 3 får medalje og ukekiste med fagpoeng når uka er over (B-155). Krever konto for å være med;
  * lista kan leses uten.
  */
 import { rpc, userId } from "./supabase";
@@ -18,7 +18,8 @@ export const LEAGUES: Record<League, string> = { bronse: "Bronseligaen", solv: "
 
 /** Fagpoeng i ukekista etter plass (samme som i finish_weeks på serveren) */
 export function chestFp(plass: number): number {
-  return plass === 1 ? 100 : plass === 2 ? 75 : plass === 3 ? 50 : plass <= 10 ? 25 : 0;
+  // Bare topp 3 får kiste så lenge det er få spillere (B-155)
+  return plass === 1 ? 100 : plass === 2 ? 75 : plass === 3 ? 50 : 0;
 }
 
 export interface WeeklyStatus {

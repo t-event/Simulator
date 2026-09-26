@@ -2302,7 +2302,7 @@ fordel (regel 1). Skal merker eller pynt senere vises for andre spillere, krever
 144, mål høyst 240). Alle mål er OK.
 
 ## B-152 Ukens utfordring og sesonger med vri (2026-09-26)
-Status: gjelder (utvider B-129 og B-143)
+Status: gjelder, men ukekista går bare til topp 3 (endret i B-155) (utvider B-129 og B-143)
 Brukeren: «Kjør på med alle dine forslag.» Dette er forslag 3 og 4. Samtidig er tre feil brukeren meldte, rettet.
 
 **Ukens utfordring** (migrasjon 016, `net/weekly.ts`, `ui/Weekly.tsx`):
@@ -2407,3 +2407,12 @@ Brukeren: «De største ovnene er 90 tonn og strengstøpeanlegget er veldig lite
 **Balanse:**
 - `balance.ts`: 8/23/63/132, nybegynner 157. Testspilleren kjøper stormodellene i konsernet.
 - `--opphold`: ingen flagget, høyst 68 %.
+
+## B-155 Ukekista bare til topp 3 (2026-09-26)
+Status: gjelder (endrer B-152)
+Brukeren: «Ukens utfordring, vi har ikke så mange spillere enda, så det bør være topp 3 som får ukeskiste.»
+- Når uka er over, får topp 3 i hver liga medalje og ukekiste: 100, 75 og 50 fagpoeng. Plass 4–10 får ikke lenger kiste
+  (før 25 fagpoeng).
+- Migrasjon 017 endrer `finish_weeks()`. Ingen uke var avsluttet ennå, så ingen kister måtte ryddes.
+- Testet i databasen med fem testspillere i en avsluttet uke (tilbakerullet): bare de tre beste fikk kiste.
+- Kan utvides igjen (f.eks. topp 10) når det er flere spillere.
