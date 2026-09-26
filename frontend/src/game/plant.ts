@@ -639,6 +639,18 @@ export function nearLimit(a: Analysis, grade: GradeId): boolean {
   );
 }
 
+/**
+ * Hvor god margin analysen har til kravene (B-161): 1 er langt unna alle grensene, 0 er akkurat på en grense, og
+ * under 0 er utenfor. Fosfor og sporelementer regnes mot maks, karbon mot bredden på vinduet.
+ */
+export function specMargin(a: Analysis, grade: GradeId): number {
+  const spec = GRADES[grade];
+  const cSpan = Math.max(1e-6, spec.cMax - spec.cMin);
+  const m = [1 - a.p / spec.pMax, 1 - a.tramp / spec.trampMax, (spec.cMax - a.c) / cSpan];
+  if (spec.cMin > 0) m.push((a.c - spec.cMin) / cSpan);
+  return Math.min(...m);
+}
+
 /** Hva som er galt med analysen mot kravet, i klartekst. */
 export function gradeFailures(a: Analysis, grade: GradeId): string[] {
   const spec = GRADES[grade];

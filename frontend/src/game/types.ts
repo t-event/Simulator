@@ -134,6 +134,14 @@ export interface Contract {
   priority: number;
   status: "tilbud" | "aktiv" | "fullfort" | "misligholdt";
   closedDay: number | null;
+  /** Dagen kontrakten ble signert (B-161); mangler i eldre lagringer */
+  acceptedDay?: number;
+  /** Minste margin til kravene i partiene som er levert, 0–1 (B-161) */
+  qMargin?: number;
+  /** Kundens vurdering 1–10 når kontrakten er levert (B-161) */
+  rating?: number;
+  /** Hvorfor kunden ga den karakteren, kort */
+  ratingNote?: string;
 }
 
 /**
@@ -522,6 +530,8 @@ export interface GameState {
   missions: Record<string, { base: number; done: boolean }>;
   /** Tellere for oppdrag (planlagte omforinger, rene døgn …) */
   counters: Record<string, number>;
+  /** Kundenes vurderinger av de siste leveransene, 1–10, nyeste sist (B-161) */
+  ratings: number[];
   /** Dagens oppdrag (B-149): datoen (norsk dato fra serveren), oppdragene og om bonusen er hentet */
   daily: DailyState;
   /** Omdømmetap siste tid, med årsak, så rådgiveren kan se mønstre */

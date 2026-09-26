@@ -71,6 +71,11 @@ import { bonusGap, computePlantStats, liftMorale, moraleNormal, supportAdvice } 
 import { RESEARCH, researchOptions } from "./research";
 import { parseSave } from "./save";
 import { resolveDecision } from "./decisions";
+import { avgRating, rateDelivery, ratingFactor } from "./engine";
+import { specMargin } from "./plant";
+import { QUIZ } from "./quiz";
+import { GRADES } from "./data";
+import type { Analysis, Contract } from "./types";
 import { EAFSimulation } from "../sim/eaf";
 import { SimpleRunner } from "../ui/control/simpleRunner";
 
@@ -809,6 +814,57 @@ test("Fart etter kort (B-160): 1× som standard, samme fart hvis spilleren har v
   const old = JSON.parse(JSON.stringify(g));
   delete old.settings.keepSpeed;
   assert(parseSave(JSON.stringify(old))!.settings.keepSpeed === false, "migrate gir standardverdi");
+});
+
+test("Kundevurdering (B-161): tid, margin og reklamasjon gir karakter 1–10", () => {
+  const g = newGame(72);
+  g.minute = 10 * 1440; // dag 11
+  const c = {
+    id: 999,
+    customer: "Test",
+    product: "blokk",
+    grade: "standard",
+    tonnes: 1,
+    delivered: 1,
+    pricePerT: 1,
+    deadlineDay: 16,
+    offerExpiresMin: 0,
+    repGain: 1,
+    repLoss: 1,
+    penaltyPerT: 1,
+    priority: 1,
+    status: "aktiv",
+    closedDay: null,
+    acceptedDay: 10,
+    qMargin: 0.5,
+  } as Contract;
+  assert(rateDelivery(g, c).score === 10, `i god tid og god margin: ${rateDelivery(g, c).score}`);
+  c.deadlineDay = 11;
+  c.acceptedDay = 8;
+  c.qMargin = 0.02;
+  assert(rateDelivery(g, c).score === 5, `siste liten og på kanten: ${rateDelivery(g, c).score}`);
+  c.qMargin = 0.2;
+  c.complained = true;
+  assert(rateDelivery(g, c).score <= 3, "reklamasjon gir høyst 3");
+  assert(ratingFactor(10) > ratingFactor(7) && Math.abs(ratingFactor(7) - 0.99) < 1e-9, "faktoren");
+  g.ratings = [8, 9, 10];
+  assert(avgRating(g) === 9, "snittet");
+  // Margin: midt i karbonvinduet og lavt fosfor er god margin; over maks er under 0
+  const spec = GRADES.standard;
+  const mid = { c: (spec.cMin + spec.cMax) / 2, p: spec.pMax * 0.3, tramp: spec.trampMax * 0.3, s: 0 } as Analysis;
+  assert(specMargin(mid, "standard") > 0.3, `midt i vinduet: ${specMargin(mid, "standard")}`);
+  assert(specMargin({ ...mid, p: spec.pMax * 1.1 }, "standard") < 0, "over maks");
+  const old = JSON.parse(JSON.stringify(g));
+  delete old.ratings;
+  assert(Array.isArray(parseSave(JSON.stringify(old))!.ratings), "migrate gir ratings");
+});
+
+test("Sesongquiz (B-161): finnes, men teller ikke i «Fagekspert»", () => {
+  assert(QUIZ.sesong?.length === 2, "sesongkapitlet mangler quiz");
+  const g = newGame(73);
+  g.quizDone = Object.keys(QUIZ).filter((k) => k !== "sesong");
+  checkAchievements(g);
+  assert(hasAchievement(g, "quizalle"), "alle quizer uten sesong skal gi «Fagekspert»");
 });
 
 if (failed) {

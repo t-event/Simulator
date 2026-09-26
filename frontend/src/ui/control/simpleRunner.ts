@@ -38,7 +38,7 @@ const CARBON_BOOST_KG_MIN = 120;
 const MELT_CARBON_FLOOR_PCT = 0.12;
 const FEEDS = [1.8, 2.2, 2.45];
 export const MELT_BAND: [number, number] = [1550, 1630];
-/** Slagget er godt nok tippet ut under denne mengden */
+/** Slaggen er godt nok tippet ut under denne mengden */
 export const SLAG_DONE_KG = 1200;
 /** Under denne mengden slagg følger stålet med ut slaggdøra (B-076) */
 export const SLAG_SPILL_KG = 500;
@@ -204,14 +204,14 @@ function scoreCharge(sim: EAFSimulation, a: Auto, startWear: number): Score {
   let s3 = 0;
   let t3: string;
   if (a.deslag !== "ferdig") {
-    t3 = `Slagget ble ikke tippet ut. Når stålet varmes opp, går fosfor fra slagget tilbake i stålet. Fosfor ${fmt(p, 3)} % (maks ${fmt(grade.phosphorusMaxPct, 3)} %).`;
+    t3 = `Slaggen ble ikke tippet ut. Når stålet varmes opp, går fosfor fra slaggen tilbake i stålet. Fosfor ${fmt(p, 3)} % (maks ${fmt(grade.phosphorusMaxPct, 3)} %).`;
   } else {
     const clean = a.slagLeftKg <= SLAG_DONE_KG;
     s3 = a.steelSpilledKg > 4000 ? 0 : a.steelSpilledKg > 1500 ? 1 : clean && a.steelSpilledKg <= 300 && pOk ? 3 : 2;
     t3 =
       `${fmt(a.slagLeftKg / 1000, 1)} t slagg ble igjen (grønt: under ${fmt(SLAG_DONE_KG / 1000, 1)} t). Fosfor ${fmt(p, 3)} % (maks ${fmt(grade.phosphorusMaxPct, 3)} %).` +
       (a.steelSpilledKg > 300
-        ? ` Du tippet for lenge: ${fmt(a.steelSpilledKg / 1000, 1)} t stål rant ut slaggdøra. Rett opp ovnen når slagget nesten er ute.`
+        ? ` Du tippet for lenge: ${fmt(a.steelSpilledKg / 1000, 1)} t stål rant ut slaggdøra. Rett opp ovnen når slaggen nesten er ute.`
         : !clean
           ? " Det ble igjen mye slagg – tipp litt lenger neste gang."
           : "");
@@ -264,12 +264,12 @@ const LESSONS: Record<string, { chapter: string; lesson: string }> = {
   rensing: {
     chapter: "karbon",
     lesson:
-      "Oksygen brenner karbonet til CO-gass. Når karbonet er brukt opp, brenner oksygenet jern i stedet – da går stål tapt i slagget.",
+      "Oksygen brenner karbonet til CO-gass. Når karbonet er brukt opp, brenner oksygenet jern i stedet – da går stål tapt i slaggen.",
   },
   avslagging: {
     chapter: "fosfor",
     lesson:
-      "Fosforet samles i slagget. Tippes det ikke ut før oppvarmingen, går fosforet tilbake i stålet. Tipper du for lenge, renner stålet etter.",
+      "Fosforet samles i slaggen. Tippes den ikke ut før oppvarmingen, går fosforet tilbake i stålet. Tipper du for lenge, renner stålet etter.",
   },
   tapping: {
     chapter: "ildfast",
@@ -348,7 +348,7 @@ export class SimpleRunner {
   get tempRate(): number {
     return this.tempRateS;
   }
-  /** Hvor fort slagget renner ut, kg per sekund på skjermen */
+  /** Hvor fort slaggen renner ut, kg per sekund på skjermen */
   get slagRate(): number {
     return this.slagRateS;
   }

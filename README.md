@@ -62,7 +62,7 @@ fire steg med én forklaring, én måling med grønt felt og noen få knapper.
 1. **Smelt** – hold temperaturen i det grønne feltet med mer eller mindre strøm mens skrapmatingen varierer.
    Oksygenet kan slås av og på samtidig.
 2. **Rens** – blås oksygen til karbonet er i det grønne feltet.
-3. **Slagg av** – tipp ovnen mot slaggdøra og rett den opp når slagget er ute. Tipper du for lenge, renner stål ut
+3. **Slagg av** – tipp ovnen mot slaggdøra og rett den opp når slaggen er ute. Tipper du for lenge, renner stål ut
    døra.
 4. **Tapp** – tapp når temperaturen er i det grønne feltet, og rett opp ovnen når øsa er full, ellers renner den over.
 

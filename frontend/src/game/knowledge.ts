@@ -150,6 +150,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
     paragraphs: [
       "Hver kontrakt har mengde, kvalitet og frist. Leverer du i tide, stiger omdømmet, og større kunder begynner å spørre.",
       "For sen levering gir bot og dårligere omdømme. En reklamasjon er verre: kunden sender stålet tilbake og forteller det til andre.",
+      "Etter hver levering gir kunden en karakter fra 1 til 10. Den blir høy når stålet kommer i god tid før fristen, og når analysen ligger godt innenfor kravene – ikke bare så vidt. Kunder med høy karakter snakker varmt om verket, og da stiger omdømmet mer. En reklamasjon gir høyst 3.",
     ],
   },
   {

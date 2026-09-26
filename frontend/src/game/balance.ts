@@ -572,7 +572,11 @@ const dailyEvery = process.argv.includes("--daglig")
   ? Number(process.argv[process.argv.indexOf("--daglig") + 1]) || 15
   : 0;
 
+/** Kundevurderingene per nivå fra siste run() (B-161), for --vurdering */
+let ratingLog: { stage: number; score: number }[] = [];
+
 function run(seed: number, days: number, verbose: boolean, novice = process.argv.includes("--nybegynner")): RunSummary {
+  ratingLog = [];
   const g = newGame(seed);
   if (novice) novices.add(g);
   const stageDays: (number | null)[] = [1, null, null, null, null];
@@ -586,7 +590,10 @@ function run(seed: number, days: number, verbose: boolean, novice = process.argv
     if (!novice || hour++ % 3 === 0 || g.pendingDecision) botHour(g);
     const repBefore = g.reputation;
     const logBefore = g.log.at(-1)?.id ?? 0;
+    const doneBefore = g.totals.contractsDone;
     advance(g, 60);
+    const newRatings = g.totals.contractsDone - doneBefore;
+    if (newRatings > 0) for (const score of g.ratings.slice(-newRatings)) ratingLog.push({ stage: g.stage, score });
     if (day(g) !== growthDay) {
       // En ny virkelig dag: alt som kan hentes, hentes (B-149). Døgnene går til juksesperren som på serveren
       let bonus = 0;
@@ -697,6 +704,28 @@ if (process.argv.includes("--opphold")) {
   console.log(flagged ? `AVVIK: ${flagged} opphold ville blitt flagget` : "Ingen opphold ville blitt flagget OK");
   process.exit?.(flagged ? 1 : 0);
 }
+if (process.argv.includes("--vurdering")) {
+  // Kundevurderingen (B-161): hvilke karakterer flink og nybegynner får på hvert nivå
+  for (const novice of [false, true]) {
+    const all: { stage: number; score: number }[] = [];
+    for (const seed of [1, 2, 3]) {
+      run(seed, 250, false, novice);
+      all.push(...ratingLog);
+    }
+    console.log(novice ? "Nybegynner" : "Flink");
+    for (let s = 0; s < STAGES.length; s++) {
+      const r = all.filter((x) => x.stage === s).map((x) => x.score);
+      if (!r.length) continue;
+      const hist = Array.from({ length: 10 }, (_, i) => r.filter((x) => x === i + 1).length);
+      const avg = r.reduce((a, b) => a + b, 0) / r.length;
+      console.log(
+        `  ${STAGES[s].name.padEnd(9)} snitt ${avg.toFixed(1)}  (${r.length} kontrakter)  1–10: ${hist.join(" ")}`,
+      );
+    }
+  }
+  process.exit?.(0);
+}
+
 if (process.argv.includes("--storovn")) {
   // Stormodellene (B-154): samme konsernspill med ulike ovner. Viser tonn og overskudd hjemme per døgn over ti døgn
   const base = run(1, Number(process.argv[process.argv.indexOf("--storovn") + 1]) || 330, false, false).final;
@@ -1092,7 +1121,12 @@ for (const seed of [1, 2, 3]) {
     const heatsBefore = g.totals.manualHeats;
     const fpBefore = g.researchPoints;
     completeManual(g, score.result);
-    advance(g, score.result.minutes + 30);
+    // Et hendelseskort kan dukke opp mens chargen gjør seg ferdig; svar på det og behold farten (B-160)
+    g.settings.keepSpeed = true;
+    for (let m = 0; m < score.result.minutes + 30; m += 10) {
+      if (g.pendingDecision) resolveDecision(g, g.pendingDecision.options.length - 1);
+      advance(g, 10);
+    }
     const ok =
       g.totals.manualHeats === heatsBefore + 1 &&
       // Farten skal være den samme som da kontrollrommet åpnet (et hendelseskort i ventetida kan ha satt 1×)

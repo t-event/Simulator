@@ -911,6 +911,15 @@ button {
   color: #f3a3a3;
 }
 
+.g-closed li + li {
+  margin-top: 4px;
+}
+
+.g-rating {
+  font-size: 13px;
+  margin: 0 0 8px;
+}
+
 .g-lots {
   list-style: none;
   padding: 0;

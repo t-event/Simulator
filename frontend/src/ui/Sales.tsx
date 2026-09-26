@@ -9,6 +9,7 @@ import {
   declineContract,
   orderQueue,
   assessOffer,
+  avgRating,
   recipeEstimate,
   sellLot,
   spotPrice,
@@ -354,11 +355,19 @@ export function Sales({ g, stats, act, openTab }: Props & { openTab?: string }) 
             {closed.length > 0 && (
               <>
                 <h3 className="g-subhead">Nylig avsluttet</h3>
+                <RatingSummary g={g} />
                 <ul className="g-closed">
                   {closed.map((c) => (
-                    <li key={c.id} className={c.status === "fullfort" ? "ok" : "bad"}>
+                    <li key={c.id} className={c.status === "fullfort" && (c.rating ?? 10) >= 5 ? "ok" : "bad"}>
                       {c.customer}: {fmtT(c.tonnes)} {GRADES[c.grade].name.toLowerCase()} –{" "}
                       {c.status === "fullfort" ? "levert" : "ikke levert i tide"}
+                      {c.rating !== undefined && (
+                        <>
+                          {" "}
+                          · <strong>{c.rating}/10</strong>
+                          {c.ratingNote && <span className="g-muted"> ({c.ratingNote})</span>}
+                        </>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -455,5 +464,21 @@ export function Sales({ g, stats, act, openTab }: Props & { openTab?: string }) 
         )}
       </div>
     </div>
+  );
+}
+
+/** Kundevurderingen (B-161): snittet av de siste leveransene og hva som gir høyere karakter */
+function RatingSummary({ g }: { g: GameState }) {
+  const avg = avgRating(g);
+  if (avg === null) return null;
+  return (
+    <p className="g-rating">
+      Kundene gir deg <strong>{fmtNum(Math.floor(avg * 10) / 10, 1)} av 10</strong> i snitt ({g.ratings.length}{" "}
+      {g.ratings.length === 1 ? "leveranse" : "siste leveranser"}).{" "}
+      <span className="g-muted">
+        Karakteren blir høyere når du leverer i god tid før fristen, og når stålet har god margin til kravene. Høy
+        karakter gir mer omdømme.
+      </span>
+    </p>
   );
 }

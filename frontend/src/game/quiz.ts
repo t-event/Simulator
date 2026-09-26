@@ -262,6 +262,21 @@ export const QUIZ: Record<string, QuizQuestion[]> = {
       why: "Gode leveranser gjør deg kjent, og større kunder tør å bestille.",
     },
   ],
+  // Sesongkapitlet (B-161); låses opp med sesongen, så det teller ikke med i «Fagekspert»
+  sesong: [
+    {
+      q: "Hvorfor stiger skrapprisen når stålprisen stiger?",
+      options: ["Skrap er råstoffet til stålet", "Skrapet blir renere", "Det blir mindre skrap i verden"],
+      correct: 0,
+      why: "Når stål er ettertraktet, vil alle verkene ha mer skrap, og da stiger prisen på det også.",
+    },
+    {
+      q: "Hvorfor kan strømmen bli dyr etter et tørt år?",
+      options: ["Stålverkene bruker mer strøm", "Det er lite vann i magasinene", "Strømnettet blir slitt"],
+      correct: 1,
+      why: "Mye av strømmen kommer fra vannkraft. Lite vann i magasinene gir mindre strøm og høyere pris.",
+    },
+  ],
 };
 
 export function quizReward(g: GameState): number {

@@ -386,7 +386,7 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
       body = (
         <>
           <p className="sc-instruction">
-            Fosforet ligger nå i slagget oppå stålet. Tipp ovnen mot slaggdøra, og rett den opp når slagget nesten er
+            Fosforet ligger nå i slaggen oppå stålet. Tipp ovnen mot slaggdøra, og rett den opp når slaggen nesten er
             ute – tipper du for lenge, renner stålet etter.
           </p>
           <ZoneGauge
@@ -409,7 +409,7 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
           />
           <p className="sc-hint">
             Fosforet bestemmes av skrapet og smeltingen (oksygen og ikke for varmt bad). Her styrer du det ved å få
-            slagget ut: fosforet ligger i slagget, og blir det liggende når du varmer opp, går det tilbake i stålet.
+            slaggen ut: fosforet ligger i slaggen, og blir det liggende når du varmer opp, går det tilbake i stålet.
           </p>
           {runner.steelSpilledKg > 0 && (
             <p className={`sc-message${spilling ? " is-alarm" : ""}`}>
@@ -430,11 +430,11 @@ export function SimpleControl({ sim, startWear, request, onDone }: Props) {
           </button>
           <p className="sc-hint">
             {!pagar
-              ? "Slagget renner ut mens ovnen er tippet."
+              ? "Slaggen renner ut mens ovnen er tippet."
               : sim.slagMassKg > SLAG_DONE_KG
                 ? runner.slagRate > 20
-                  ? `Slagget renner ut … vent til det grønne feltet (ca. ${Math.ceil((sim.slagMassKg - SLAG_DONE_KG) / runner.slagRate)} s).`
-                  : "Slagget renner ut … vent til det grønne feltet."
+                  ? `Slaggen renner ut … vent til det grønne feltet (ca. ${Math.ceil((sim.slagMassKg - SLAG_DONE_KG) / runner.slagRate)} s).`
+                  : "Slaggen renner ut … vent til det grønne feltet."
                 : spilling
                   ? "Rett opp!"
                   : "Nå er det lite slagg igjen – rett opp ovnen."}

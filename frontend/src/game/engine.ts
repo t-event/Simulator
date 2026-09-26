@@ -74,6 +74,7 @@ import {
   rollingTph,
   ROLLING_YIELD,
   satisfies,
+  specMargin,
   satisfiedGrades,
   type PlantStats,
   unitType,
@@ -275,6 +276,7 @@ export function newGame(seed = Date.now()): GameState {
     quizScores: {},
     missions: {},
     counters: {},
+    ratings: [],
     repLog: [],
     advisorSeen: {},
     specialists: {},
@@ -938,6 +940,8 @@ function maxLadlesWaiting(g: GameState): number {
 
 function updateFurnaces(g: GameState, stats: PlantStats): void {
   const open = isOpen(g, stats.hours);
+  // Ovner som nettopp ble stående uten skrap; varsles samlet etter løkka (B-161)
+  const stopped: { i: number; why: string }[] = [];
   for (let i = 0; i < g.furnaces.length; i++) {
     const f = g.furnaces[i];
     if (f.heat && g.minute >= f.heat.endMin) finishHeat(g, i, stats);
@@ -1009,15 +1013,22 @@ function updateFurnaces(g: GameState, stats: PlantStats): void {
       const was = f.waitReason;
       f.waitReason =
         hasGrader(g) && stats.yardUsed >= unitView(stats, i).sizeT ? "Mangler skrap til resepten" : "Tomt for skrap";
-      // Tydelig varsel når ovnen blir stående uten skrap (B-033)
-      if (was !== f.waitReason && i === 0)
-        log(
-          g,
-          `Ovnen står: ${f.waitReason === "Tomt for skrap" ? "skraplageret er tomt" : "mangler skrap til resepten"}. ${scrapStopHelp(g)}`,
-          "bad",
-        );
+      // Tydelig varsel når en ovn blir stående uten skrap (B-033), for alle ovnene (B-161)
+      if (was !== f.waitReason) stopped.push({ i, why: f.waitReason });
     }
   }
+  if (stopped.length) {
+    const who =
+      g.furnaces.length === 1
+        ? "Ovnen står"
+        : `${stopped.length === 1 ? "Ovn" : "Ovnene"} ${joinAnd(stopped.map((s) => String(s.i + 1)))} står`;
+    const why = stopped.some((s) => s.why === "Tomt for skrap") ? "skraplageret er tomt" : "mangler skrap til resepten";
+    log(g, `${who}: ${why}. ${scrapStopHelp(g)}`, "bad");
+  }
+}
+
+function joinAnd(parts: string[]): string {
+  return parts.length < 2 ? parts.join("") : `${parts.slice(0, -1).join(", ")} og ${parts[parts.length - 1]}`;
 }
 
 // ------------------------------------------------------------------ //
@@ -1602,6 +1613,8 @@ function deliverContracts(g: GameState): void {
       lot.t -= take;
       c.delivered += take;
       addIncome(g, "kontrakt", take * c.pricePerT);
+      // Kunden merker seg hvor godt stålet holdt kravene (B-161)
+      c.qMargin = Math.min(c.qMargin ?? 1, specMargin(lot.analysis, c.grade));
       if (complains(g, lot.analysis, c.grade)) {
         const failures = gradeFailures(lot.analysis, c.grade);
         // Flere dårlige partier til samme kontrakt blir én reklamasjon (B-034)
@@ -1630,19 +1643,77 @@ function deliverContracts(g: GameState): void {
       c.delivered = c.tonnes;
       c.status = "fullfort";
       c.closedDay = day(g);
+      // Kundens vurdering 1–10 (B-161): fornøyde kunder snakker varmere om verket
+      const r = rateDelivery(g, c);
+      c.rating = r.score;
+      c.ratingNote = r.note;
+      g.ratings = [...g.ratings, r.score].slice(-RATINGS_KEPT);
+      if (r.score >= 10) countEvent(g, "tiavti");
       // Jo høyere omdømme, jo mindre flytter én kontrakt
-      const gain = c.repGain * Math.max(0.25, 1 - g.reputation / 150);
+      const gain = c.repGain * Math.max(0.25, 1 - g.reputation / 150) * ratingFactor(r.score);
       adjustReputation(g, gain);
       g.totals.contractsDone += 1;
       countEvent(g, "leveranser");
       liftMorale(g, 0.5);
       awardPoints(g, 1 + g.stage);
-      log(g, `Kontrakten med ${c.customer} er levert. Omdømme +${gain.toFixed(1).replace(".", ",")}.`, "good");
+      log(
+        g,
+        `Kontrakten med ${c.customer} er levert. Kunden gir ${r.score}/10: «${r.quote}» Omdømme +${gain.toFixed(1).replace(".", ",")}.`,
+        r.score >= 5 ? "good" : "bad",
+      );
       if (g.totals.contractsDone === 1) unlock(g, "omdomme");
       if (c.agreementId) agreementWeekClosed(g, c, true);
     }
   }
   g.lots = g.lots.filter((l) => l.t > 1e-6);
+}
+
+/** Så mange vurderinger huskes, for snittet på Salg (B-161) */
+export const RATINGS_KEPT = 20;
+
+/**
+ * Kundens vurdering av en levert kontrakt (B-161), som anmeldelsene i Game Dev Tycoon. Tre ting teller:
+ * - tid: levert i god tid før fristen (+2), minst et døgn før (+1), eller på fristdagen (0)
+ * - kvalitet: margin til kravene i det dårligste partiet: god (+2), grei (+1), nær grensen (0) eller helt på kanten (−1)
+ * - reklamasjon: kunden gir høyst 3
+ */
+export function rateDelivery(g: GameState, c: Contract): { score: number; note: string; quote: string } {
+  const left = c.deadlineDay - day(g);
+  const span = Math.max(1, c.deadlineDay - (c.acceptedDay ?? c.deadlineDay - 3));
+  const time = left / span >= 0.4 ? 2 : left >= 1 ? 1 : 0;
+  const margin = c.qMargin ?? 0.5;
+  const quality = margin >= 0.3 ? 2 : margin >= 0.15 ? 1 : margin >= 0.05 ? 0 : -1;
+  const complained = !!c.complained || g.complaints.some((x) => x.contractId === c.id);
+  let score = Math.max(1, Math.min(10, 6 + time + quality));
+  if (complained) score = Math.max(1, Math.min(3, score - 4));
+  const note = complained
+    ? "stålet holdt ikke kravene"
+    : `${time === 2 ? "i god tid" : time === 1 ? "før fristen" : "i siste liten"} · ${quality === 2 ? "god margin" : quality === 1 ? "grei margin" : "nær grensene"}`;
+  const quote = complained
+    ? "Stålet holdt ikke kravene våre. Det er skuffende."
+    : score >= 10
+      ? "Før fristen og god margin på alt. Dere er de beste vi har!"
+      : score >= 8
+        ? time < 2
+          ? "Fint stål. Litt tidligere levering, så er det perfekt."
+          : "God levering. Litt mer margin på kvaliteten, så er det perfekt."
+        : score >= 6
+          ? time === 0
+            ? "Greit, men det var i siste liten."
+            : "Greit levert, men kvaliteten var nær grensene."
+          : "Vi fikk det vi ba om, men så vidt. Både tida og kvaliteten var på kanten.";
+  return { score, note, quote };
+}
+
+/** Hvor mye mer (eller mindre) omdømme en levering gir etter kundens vurdering: 7 er vanlig, 10 gir 20 % mer */
+export function ratingFactor(score: number): number {
+  return 0.5 + score * 0.07;
+}
+
+/** Snittet av de siste vurderingene, eller null uten noen */
+export function avgRating(g: GameState, n = RATINGS_KEPT): number | null {
+  const r = g.ratings.slice(-n);
+  return r.length ? r.reduce((a, b) => a + b, 0) / r.length : null;
 }
 
 function processComplaints(g: GameState): void {
@@ -1880,6 +1951,7 @@ function sendAgreementWeek(g: GameState, a: Agreement): void {
     penaltyPerT: Math.round(a.pricePerT * 0.5),
     status: "aktiv",
     closedDay: null,
+    acceptedDay: today,
     priority: Math.max(0, ...g.contracts.filter((x) => x.status === "aktiv").map((x) => x.priority)) + 1,
   });
   log(
@@ -1995,6 +2067,7 @@ export function acceptContract(g: GameState, id: number, by = "Du"): PurchaseRes
   const c = g.contracts.find((x) => x.id === id);
   if (!c || c.status !== "tilbud") return { ok: false, message: "Tilbudet finnes ikke lenger." };
   c.status = "aktiv";
+  c.acceptedDay = day(g);
   c.priority =
     Math.max(0, ...g.contracts.filter((x) => x.status === "aktiv" && x.id !== c.id).map((x) => x.priority)) + 1;
   log(
