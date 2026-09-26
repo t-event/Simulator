@@ -3,6 +3,7 @@
  * blokkerte data), så alle kall er pakket inn og spillet fungerer uten.
  */
 import { grantResearchForOwned } from "./actions";
+import { checkAchievements } from "./achievements";
 import { RESEARCH } from "./research";
 import { ADDONS } from "./data";
 
@@ -104,6 +105,8 @@ export function migrate(g: GameState): GameState {
   // Mesterskap og stålmilepæler (B-150)
   if (loose.mastery === undefined) loose.mastery = {};
   if (loose.legendCelebrate === undefined) loose.legendCelebrate = null;
+  if (!loose.achievements) loose.achievements = {};
+  if (!loose.cosmetics) loose.cosmetics = { owned: [], on: [] };
   // Dagens oppdrag (B-149)
   if (loose.daily === undefined) loose.daily = { date: null, missions: [], claimed: false };
   if (g.round === undefined) g.round = 1;
@@ -235,5 +238,7 @@ export function migrate(g: GameState): GameState {
     if ((w.absentFrom === undefined) !== (w.absentUntil === undefined)) {
       w.absentFrom = w.absentUntil = w.absentReason = undefined;
     }
+  // Prestasjoner (B-151) man alt har klart, vises med én gang, ikke først etter en spilltime
+  checkAchievements(g);
   return g;
 }

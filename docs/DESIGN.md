@@ -56,6 +56,12 @@ Etter sluttmålet (10 mrd., tittelen Stålbaron) fortsetter spillet (B-150):
 - Når all forskning er gjort, åpner mesterskapet: fire prosjekter som kan tas om og om igjen, så fagpoengene alltid
   har noe å gå til.
 
+Prestasjoner og pynt (B-151):
+- 29 prestasjoner fra første charge til Stållegende gir merker på Verket og litt fagpoeng. Trykk på et merke for å se
+  hva som skal til.
+- Pynt til anleggsbildet kjøpes for fagpoeng (🎨): flagg, lyslenke, trær, fasadefarge, solceller, vindmølle, statue,
+  fyrverkeri og gullpipe. Pynten gir ingen fordel, og de dyreste krever en prestasjon.
+
 ## Kontrollrommet – enkel styring
 
 Kravet: en person uten fagkunnskap skal klare å kjøre en charge. Hvert steg har **én forklaring i vanlige ord, én

@@ -5,6 +5,28 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 97 – 2026-09-26: prestasjoner og pynt
+
+**Brukeren ba om:** «Kjør på med alle dine forslag» (forslag 5 av 5: pynt og prestasjoner).
+
+**Gjort:** B-151.
+- `game/achievements.ts`: 29 prestasjoner med fagpoeng, sjekket hver time og ved lasting.
+- `game/cosmetics.ts`: pynt for fagpoeng, tegnet i `ui/PlantScene.tsx`.
+- `ui/Achievements.tsx`: kortet på Verket og arket «Pynt verket» (🎨 på anleggsbildet).
+
+**Testet:**
+- tsc, lint, `npm test` (to nye tester), `validate.ts` og build.
+- `balance.ts` (exit 0; 8/23/63/133, nybegynner 168).
+- Playwright på 390 og 320 px, dag og natt, stålverk og garasje:
+  - all pynt i bildet og arket
+  - kjøp av flagg (fagpoeng trekkes, knappen blir «På»)
+  - merkene på kortet og 13 av 29 med én gang for en gammel lagring
+  - ingen horisontal scrolling, ingen konsollfeil
+
+**Gjenstår:** B-152 (ukens utfordring og sesonger med vri).
+
+---
+
 ## Økt 96 – 2026-09-26: sluttspillet – mesterskap og stålmilepæler
 
 **Brukeren spurte:** Hva gjør vi så de som er «ferdige» ikke blir lei? Daglig belønning er meningsløs når alt er

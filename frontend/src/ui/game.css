@@ -606,13 +606,91 @@ button {
   }
 }
 
+/* Pynt i anleggsbildet (B-151) */
+.scene-flag {
+  animation: scene-flag 1.6s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: left center;
+}
+
+@keyframes scene-flag {
+  from {
+    transform: skewY(-4deg) scaleX(0.92);
+  }
+  to {
+    transform: skewY(4deg) scaleX(1);
+  }
+}
+
+.scene-lights circle {
+  opacity: 0.55;
+}
+
+.scene-lights.is-night circle {
+  opacity: 1;
+  animation: scene-twinkle 1.2s ease-in-out infinite alternate;
+}
+
+.scene-lights.is-night circle:nth-child(odd) {
+  animation-delay: 0.6s;
+}
+
+@keyframes scene-twinkle {
+  from {
+    opacity: 0.45;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.scene-rotor {
+  animation: scene-rotor 6s linear infinite;
+}
+
+@keyframes scene-rotor {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.scene-firework {
+  opacity: 0;
+  animation: scene-firework 2.6s ease-out infinite;
+}
+
+@keyframes scene-firework {
+  0% {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  15% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.15);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .scene-glow,
-  .scene-smoke .puff {
+  .scene-smoke .puff,
+  .scene-flag,
+  .scene-lights.is-night circle,
+  .scene-rotor,
+  .scene-firework {
     animation: none;
   }
   .scene-smoke .puff-1 {
     opacity: 0.4;
+  }
+  .scene-firework {
+    opacity: 1;
   }
 }
 
@@ -2567,4 +2645,103 @@ button {
 /* «X krever konto» (B-149, docs/KONTO.md) */
 .g-needs-account {
   margin: 0 0 6px;
+}
+
+/* Prestasjoner og pynt (B-151) */
+.g-scene-pynt {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  font-size: 18px;
+  background: rgba(10, 14, 20, 0.65);
+  border-radius: 8px;
+}
+
+.g-badges {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+  gap: 6px;
+  margin: 4px 0 8px;
+}
+
+.g-badge-tile {
+  min-height: 40px;
+  padding: 0;
+  font-size: 20px;
+  border-radius: 8px;
+  filter: grayscale(1);
+  opacity: 0.35;
+}
+
+.g-badge-tile.is-got {
+  filter: none;
+  opacity: 1;
+  background: #2a3b24;
+  border-color: #5f8a3c;
+}
+
+.g-badge-tile.is-picked {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  opacity: 1;
+}
+
+.g-mission.is-done strong {
+  color: var(--ok);
+}
+
+.g-pynt-preview {
+  margin-bottom: 8px;
+}
+
+.g-pynt-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.g-pynt-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.g-pynt-icon {
+  font-size: 22px;
+  width: 28px;
+  text-align: center;
+  flex: none;
+}
+
+.g-pynt-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+}
+
+.g-pynt-item > button {
+  flex: none;
+  min-width: 64px;
+}
+
+.g-pynt-item > button.is-on {
+  background: var(--ok);
+  border-color: var(--ok);
+  color: #06200a;
+}
+
+.g-pynt-lock {
+  flex: none;
+  max-width: 110px;
+  font-size: 12px;
+  text-align: right;
+  color: var(--muted, #9aa3ad);
 }

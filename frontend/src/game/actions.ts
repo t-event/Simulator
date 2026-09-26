@@ -3,6 +3,7 @@
  */
 import { MASTERY, MASTERY_IDS, masteryCost, masteryEffect, masteryLevel, masteryOpen } from "./mastery";
 import { checkKonsernMilestones, checkKonsernUnlock, checkLegends, directorHour } from "./konsern";
+import { checkAchievements } from "./achievements";
 import { ADDONS, CASTINGS, FURNACES, GRADES, PRODUCTS, ROLES, SCRAP_IDS, STAGES, stageRef, type Addon } from "./data";
 import {
   addCost,
@@ -852,6 +853,7 @@ function hourlyActions(g: GameState): void {
   directorHour(g);
   checkKonsernMilestones(g);
   checkLegends(g);
+  checkAchievements(g);
   if (g.stage >= 4 && !g.konsern.unlocked) {
     const remaining = upgradeOptions(g).filter((o) => o.stage === 4 && !o.owned && o.kind !== "stage").length;
     checkKonsernUnlock(g, remaining);
