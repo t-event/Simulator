@@ -2698,3 +2698,24 @@ og versjonen økte (487), så appen hans henter spillet fra nett. Juksesperren t
 
 **Lærdom:** før B-166 kunne en ny sesongstart slette et spill som hadde kommet langt. Nå trengs det ikke, men spill som
 erstattes (⚙️ → Nytt spill), kan fortsatt ikke hentes tilbake.
+
+## B-169 Sikkerhetskopi av spillene på nett (2026-09-26)
+Status: gjelder
+Brukeren: «Skal vi lage backups av saves til folk en gang per dag slik at man kan rulle tilbake om noe uforutsett
+skjer?» – ja.
+
+**Migrasjon 021:**
+- Tabellen `save_backups` (spiller, tidspunkt, grunn, dag, versjon, sesong, spillet). Triggeren `saves_backup` tar kopi
+  av spillet slik det var **før** det overskrives:
+  - første lagring hver dag (norsk tid) – «daglig», og
+  - når et spill over dag 5 erstattes av et med mer enn to døgn lavere dag – «lavere dag» (ny start eller gammel
+    lagring; det ville ha reddet storverket i B-168).
+- Kopier eldre enn 14 dager slettes når spilleren lagrer. Kopiene slettes med kontoen (`on delete cascade`).
+- Ingen spiller kan lese kopiene (RLS uten policy, tatt fra anon og authenticated), så de kan ikke brukes til juks
+  (B-135). Sikkerhetsrådet «RLS uten policy» for tabellen er derfor med vilje.
+- `restore_save(id)` (bare SQL Editor/connectoren) legger kopien inn som spillet på nett, med ny versjon og `device`
+  «gjenopprettet», så appen til spilleren henter det. Spillet slik det var, tas vare på først.
+- Testet i databasen (rullet tilbake): én daglig kopi, ingen ved andre lagring, «lavere dag» ved ny start, og
+  gjenoppretting gir riktig dag og ny versjon.
+- Størrelse: et spill er 100–190 kB før komprimering; 14 kopier per spiller er noen få MB med dagens spillere.
+- **Konto (KONTO.md):** gjelder bare spill lagret på nett (konto); spilleren merker ingenting.
