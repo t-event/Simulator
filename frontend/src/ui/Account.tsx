@@ -83,6 +83,37 @@ export function LoggedOutNotice({ onLogin }: { onLogin: () => void }) {
   );
 }
 
+/**
+ * Kontoen på startskjermen (B-147): én linje med en knapp som åpner kontokortet, så siden blir kort. Kortet er åpent
+ * fra start når man kommer fra lenken i e-posten, eller når man ble logget ut av seg selv.
+ */
+export function IntroAccount({ api }: { api: GameApi }) {
+  const session = useSession();
+  const [open, setOpen] = useState(() => !!authEvent || loggedOutByServer());
+  if (!cloudConfigured()) return null;
+  return (
+    <div className="g-intro-account">
+      <div className="g-intro-account-head">
+        <span>
+          {session ? (
+            <>
+              ☁ Innlogget som <strong>{session.user.email || "…"}</strong>
+            </>
+          ) : (
+            <>
+              <strong>Konto</strong> <span className="g-muted">– lagre på nett og bli med på topplista</span>
+            </>
+          )}
+        </span>
+        <button className="g-small" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+          {open ? "Skjul" : session ? "Konto" : "Logg inn"}
+        </button>
+      </div>
+      {open && <AccountCard api={api} compact />}
+    </div>
+  );
+}
+
 function useSession() {
   return useSyncExternalStore(onSessionChange, getSession, getSession);
 }
@@ -245,7 +276,16 @@ type Mode = "login" | "signup" | "forgot" | "reset" | "confirm" | "recoverCode";
  * Kontokortet. `api` gir det spillet som kjører (hvis noe), og tar imot spillet fra nettet.
  * `onDone` kalles når noe er lastet inn, så innstillingene kan lukkes.
  */
-export function AccountCard({ api, onDone }: { api: GameApi; onDone?: () => void }) {
+export function AccountCard({
+  api,
+  onDone,
+  compact,
+}: {
+  api: GameApi;
+  onDone?: () => void;
+  /** På startskjermen: uten overskrift og innledning, de står allerede over (B-147) */
+  compact?: boolean;
+}) {
   const session = useSession();
   const status = useCloudStatus();
   const [mode, setMode] = useState<Mode>(authEvent === "recovery" ? "reset" : "login");
@@ -418,7 +458,7 @@ export function AccountCard({ api, onDone }: { api: GameApi; onDone?: () => void
   if (session && mode !== "reset")
     return (
       <div className="g-account">
-        <h3 className="g-subhead">Konto</h3>
+        {!compact && <h3 className="g-subhead">Konto</h3>}
         <p>
           Logget inn som <strong>{session.user.email || "…"}</strong>.{" "}
           <span className="g-muted">{cloudLine(status)}</span>
@@ -635,12 +675,16 @@ export function AccountCard({ api, onDone }: { api: GameApi; onDone?: () => void
 
   return (
     <div className="g-account">
-      <h3 className="g-subhead">Konto</h3>
-      <p className="g-muted">
-        Med konto lagres spillet på nett, så du kan fortsette på en annen mobil eller fra hjemskjermen, og du kan være
-        med på topplista og i sesongen. Spillet du har her, kan kobles til kontoen: finnes det alt et spill på kontoen,
-        får du velge hvilket du vil fortsette med.
-      </p>
+      {!compact && (
+        <>
+          <h3 className="g-subhead">Konto</h3>
+          <p className="g-muted">
+            Med konto lagres spillet på nett, så du kan fortsette på en annen mobil eller fra hjemskjermen, og du kan
+            være med på topplista og i sesongen. Spillet du har her, kan kobles til kontoen: finnes det alt et spill på
+            kontoen, får du velge hvilket du vil fortsette med.
+          </p>
+        </>
+      )}
       {info && <p className="g-account-info">{info}</p>}
       {loggedOutByServer() && (
         <p className="g-note">
