@@ -100,6 +100,15 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
       .join(", ");
     out.push({ text: `Verket mangler folk for å gå: ${missing}.`, view: "folk" });
   }
+  // Ovnene smelter mer enn støpingen tar unna (B-157): si hva som gir mer støpekapasitet
+  if (g.stage >= 4 && stats.casting.continuous && stats.hours > 0 && stats.meltTph > stats.castTph * 1.15) {
+    const more = upgradeOptions(g).find(
+      (o) => !o.owned && (o.kind === "casting" || o.baseId === "streng2" || o.baseId === "streng3"),
+    );
+    out.push({
+      text: `Ovnene smelter ca. ${fmtT(stats.meltTph)} i timen, men støpingen tar bare ${fmtT(stats.castTph)}, så ovnene venter på støping.${more ? ` Mer støpekapasitet: ${more.name}${more.reason && more.reason !== "For lite penger" ? ` (${more.reason.toLowerCase()})` : " under Anlegg → Støping og valsing"}.` : ""}`,
+    });
+  }
   if (g.castWait === "Ferdigvarelageret er fullt")
     out.push({ text: "Ferdigvarelageret er fullt. Selg partier på spot under Salg.", view: "salg", sub: "lager" });
   if (stats.furnace.arc && g.furnaces.some((f) => f.spareProgress < 1) && !g.workers.some((w) => w.role === "murer"))

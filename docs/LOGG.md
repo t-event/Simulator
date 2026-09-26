@@ -5,6 +5,27 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 103 – 2026-09-26: støpingen holder følge med stormodellene
+
+**Brukeren meldte:** ovn 3 venter ofte på støping etter at alt er oppgradert.
+
+**Funnet:** Med trafo, conveyor, flinke folk og forskning tar en charge i 420-tonneren ca. 48 min, ikke 70. Tre ovner
+smelter da ca. 1 470 t/h, mens støpingen (8 strenger × 2 maskiner) tok 920 t/h.
+
+**Gjort:** B-157.
+- 8 strenger: 460 t/h.
+- Ny strengstøpemaskin nr. 3 ved Stålmagnat.
+- Tips på Verket når ovnene smelter mer enn støpingen tar, med hva som hjelper.
+
+**Testet:**
+- tsc, lint, `npm test` (ny test for kapasiteten), `validate.ts`, build.
+- `balance.ts` (exit 0, uendret) og `--opphold` (ingen flagget, høyst 70 %).
+- Playwright på 390 og 320 px: tipset peker på maskin nr. 3.
+
+**Gjenstår:** –
+
+---
+
 ## Økt 102 – 2026-09-26: økonomi – hjemmeverket for seg
 
 **Brukeren meldte:** resultatet på Økonomi gikk ikke opp etter at ovnene ble oppgradert.

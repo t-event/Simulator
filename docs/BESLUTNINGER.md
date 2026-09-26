@@ -2365,7 +2365,7 @@ mål er for lett for de som har kommet langt».
 mål OK.
 
 ## B-154 Stormodeller: større ovner og støpemaskiner, og lengre charger jo større ovnen er (2026-09-26)
-Status: gjelder (utvider B-106 og B-150)
+Status: gjelder, men støpingen er rettet i B-157 (utvider B-106 og B-150)
 Brukeren: «De største ovnene er 90 tonn og strengstøpeanlegget er veldig lite. Det finnes mye større i virkeligheten
 … likestrømsovn 420 tonn. Jo større ovn, jo lengre tid skal smelteprosessen ta.»
 
@@ -2434,3 +2434,22 @@ Brukeren: «Resultatet i økonomi gikk ikke opp når ovnene ble oppgradert.»
 - «Verket, snitt 7 døgn»: jevner ut kontrakter som betales ved levering.
 - «Datterverkene i går» og «Investert i går» for seg.
 - En kort forklaring under tallene. «Resultat i går» står som før.
+
+## B-157 Støpingen holder følge med stormodellene (2026-09-26)
+Status: gjelder (retter B-154)
+Brukeren: «Ovn 3 venter ofte på støping etter alt er oppgradert.»
+
+**Årsak:** I B-154 ble støpingen regnet mot ovnenes grunntid (70 min for 420 t). Med trafo, conveyor, flinke folk og
+forskning tar en charge bare ca. 48 min. Brukerens tre 420-tonnere smelter da ca. 1 470 t/h, mens 8 strenger ×
+2 maskiner (med høyhastighetsstøping) tok 920 t/h. Med 90-tonnerne var det i balanse (ca. 370 mot 390 t/h).
+
+**Endring:**
+- Strengstøpemaskin med 8 strenger: 460 t/h (før 400). To maskiner holder følge med tre 250-tonnere med alt utstyr.
+- Ny: Strengstøpemaskin nr. 3 (150 mill., åpner ved Stålmagnat som 420-tonneren, krever maskin nr. 2). Tre maskiner:
+  ca. 1 590 t/h, nok til tre 420-tonnere. I virkeligheten forsyner en så stor ovn gjerne to støpemaskiner.
+- Nytt tips på Verket fra storverket: når ovnene smelter mer enn 15 % over det støpingen tar, står det hvor mye og hva som
+  gir mer støpekapasitet (`meltTph` i `PlantStats`). Ikke på stålverket, der støpingen alltid er flaskehalsen.
+- Testspilleren kjøper maskin nr. 3.
+
+**Test:** med alt utstyr og flinke folk holder 2 maskiner følge med 250 t, 420 t trenger maskin nr. 3, og med den holder
+støpingen følge.

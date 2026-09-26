@@ -740,6 +740,34 @@ test("Stormodeller (B-154): låst til konsernet, sluttmålet og Stålmagnat; len
   assert(spotQuota(g, "emne") > quota * 1.15, "markedet vokser ikke med stormodellene");
 });
 
+test("Støpingen holder følge med stormodellene (B-157): 2 × 8 strenger til 250 t, 3 maskiner til 420 t", () => {
+  const g = newGame(69);
+  g.stage = 4;
+  g.researched = RESEARCH.map((r) => r.id);
+  g.konsern.unlocked = true;
+  g.won = true;
+  g.konsern.legends = 1;
+  g.owned.push("renseanlegg", "ovn2", "ovn3", "streng2", "valseverk", "valseverk2", "valseverk3");
+  while (g.furnaces.length < 3) g.furnaces.push(JSON.parse(JSON.stringify(g.furnaces[0])));
+  g.furnaceCount = 3;
+  g.castingType = "streng8";
+  for (const f of g.furnaces) f.addons = ["trafo", "conveyor"];
+  // Flinke folk, så ovnene går så fort de kan
+  g.ownerSkill = 5;
+  for (const f of g.furnaces) f.type = "lysbue250";
+  let s = computePlantStats(g);
+  assert(s.castTph >= s.meltTph * 0.98, `250 t: smelter ${s.meltTph.toFixed(0)}, støper ${s.castTph.toFixed(0)}`);
+  for (const f of g.furnaces) f.type = "likestrom420";
+  s = computePlantStats(g);
+  assert(s.castTph < s.meltTph, "420 t skal trenge maskin nr. 3");
+  g.owned.push("streng3");
+  s = computePlantStats(g);
+  assert(
+    s.castTph >= s.meltTph * 0.98,
+    `420 t med 3 maskiner: smelter ${s.meltTph.toFixed(0)}, støper ${s.castTph.toFixed(0)}`,
+  );
+});
+
 if (failed) {
   console.log(`\n${failed} test(er) feilet`);
   process.exitCode = 1;
