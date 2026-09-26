@@ -12,6 +12,8 @@ import {
   consumeAuthHash,
   clearLoggedOut,
   loggedOutByServer,
+  rememberPrefs,
+  setRememberPrefs,
   deleteAccount,
   getSession,
   onSessionChange,
@@ -247,8 +249,10 @@ export function AccountCard({ api, onDone }: { api: GameApi; onDone?: () => void
   const session = useSession();
   const status = useCloudStatus();
   const [mode, setMode] = useState<Mode>(authEvent === "recovery" ? "reset" : "login");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => rememberPrefs().email);
   const [password, setPassword] = useState("");
+  // «Husk meg på denne enheten» (B-146): på som standard
+  const [remember, setRemember] = useState(() => rememberPrefs().remember);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
@@ -561,6 +565,7 @@ export function AccountCard({ api, onDone }: { api: GameApi; onDone?: () => void
             void run(async () => {
               if (mode === "confirm") {
                 await verifyCode(email.trim(), code, "signup");
+                setRememberPrefs({ remember, email: email.trim() });
                 setCode("");
                 setPassword("");
                 setMode("login");
@@ -623,6 +628,7 @@ export function AccountCard({ api, onDone }: { api: GameApi; onDone?: () => void
       } else {
         await signIn(mail, password);
       }
+      setRememberPrefs({ remember, email: mail });
       setPassword("");
       await link();
     });
@@ -652,7 +658,9 @@ export function AccountCard({ api, onDone }: { api: GameApi; onDone?: () => void
           E-post
           <input
             type="email"
-            autoComplete="email"
+            name="email"
+            // «username» sammen med «current-password» gjør at mobilens passordlager kjenner igjen innloggingen
+            autoComplete={mode === "signup" ? "email" : "username"}
             inputMode="email"
             required
             value={email}
@@ -664,12 +672,26 @@ export function AccountCard({ api, onDone }: { api: GameApi; onDone?: () => void
             Passord{mode === "signup" ? " (minst 6 tegn)" : ""}
             <input
               type="password"
+              name="password"
               autoComplete={mode === "signup" ? "new-password" : "current-password"}
               minLength={6}
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+          </label>
+        )}
+        {mode !== "forgot" && (
+          <label className="g-toggle">
+            <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+            <span>
+              Husk meg på denne enheten
+              <small className="g-muted g-toggle-hint">
+                {remember
+                  ? "E-posten huskes, og du holdes innlogget. Passordet kan mobilen eller nettleseren huske for deg – spillet lagrer det ikke selv."
+                  : "Du logges ut når appen lukkes, og e-posten glemmes."}
+              </small>
+            </span>
           </label>
         )}
         {error && <p className="g-account-error">{error}</p>}

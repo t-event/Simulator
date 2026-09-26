@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 92 – 2026-09-26: sletting av konto og «Husk meg»
+
+**Brukeren ba om:** Sjekk at sletting av egen konto ikke sletter alle. «Husk brukernavn og passord» som avhuking.
+
+**Gjort:** B-146.
+- `delete_my_account()` er kontrollert og prøvd med en testbruker i en transaksjon som ble rullet tilbake: bare den
+  innloggede slettes. Ingen endring trengtes.
+- Avhukingen «Husk meg på denne enheten»: husker e-posten og holder deg innlogget. Passordet huskes av mobilens
+  passordlager, ikke av spillet.
+
+**Testet:** tsc, lint, `npm test` (ny nettest), `validate.ts`, `balance.ts` (exit 0), build. Playwright 390 og
+320 px: avhukingen er på fra start. Uten den: logget ut i ny fane og e-posten tom. Med den: innlogget i ny fane.
+Passordet ligger ikke i lagringen.
+
+**Gjenstår:** Fase 4 og 5.
+
+---
+
 ## Økt 91 – 2026-09-26: logget ut om morgenen
 
 **Brukeren spurte:** Hvorfor var jeg logget ut da jeg åpnet appen i dag?

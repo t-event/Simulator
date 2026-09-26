@@ -2414,3 +2414,8 @@ button {
   padding: 0;
   font-size: 18px;
 }
+
+/* «Husk meg» i innloggingen (B-146): litt luft før knappene */
+.g-account form .g-toggle {
+  margin: 6px 0 12px;
+}
