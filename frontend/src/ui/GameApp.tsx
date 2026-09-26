@@ -18,14 +18,14 @@ import { Market } from "./Market";
 import { Overview } from "./Overview";
 import { People } from "./People";
 import { ResearchPage } from "./ResearchPage";
-import { AccountCard, CloudDot, CloudFollow, LoggedOutNotice } from "./Account";
+import { CloudDot, CloudFollow, IntroAccount, LoggedOutNotice } from "./Account";
 import { SeasonPrompt, SeasonResultNotice, SeasonSync, SeasonTeaser } from "./Season";
 import { LeaderboardSheet } from "./Leaderboard";
 import { useSeasonStatus } from "./useSeason";
 import { SettingsSheet } from "./Settings";
 import { getSession } from "../net/supabase";
 import { leaving, onLocalSave } from "../net/sync";
-import { saveGame, setSaveListener } from "../game/save";
+import { loadGame, saveGame, setSaveListener } from "../game/save";
 import { InboxSheet } from "./Inbox";
 import { unseenCount } from "../game/inbox";
 import { Sales } from "./Sales";
@@ -46,6 +46,8 @@ function Intro({ api }: { api: GameApi }) {
   // Et spill fra før slettes av et nytt spill, så vi spør alltid først – med konto erstattes også spillet på nett
   // (B-125, B-141). Alle nye spill starter med veiledningen (B-136)
   const [confirmNew, setConfirmNew] = useState(false);
+  // Hvor langt det lagrede spillet har kommet, så «Fortsett» sier hva man fortsetter med (B-147)
+  const [saved] = useState(() => (hasSave ? loadGame() : null));
   const startNew = () => {
     if (hasSave) setConfirmNew(true);
     else onNew(true);
@@ -55,28 +57,23 @@ function Intro({ api }: { api: GameApi }) {
       <div className="g-intro-card">
         <h1>Stålverket</h1>
         <p className="g-intro-lead">Fra garasje til storverk.</p>
-        <p>
-          Du har leid en kald garasje, fått tak i en liten, brukt induksjonsovn og har 25 000 kroner på konto. Naboen
-          har ryddet låven og gitt deg et tonn skrap.
+        <p className="g-intro-short">
+          Smelt skrap, lever stål til kundene og bygg ut – fra en kald garasje til et storverk. Underveis lærer du
+          hvordan et stålverk virker.
         </p>
-        <p>
-          Smelt skrap, støp gods og selg til kundene i bygda. Bygg ut til verksted, støperi og stålverk – og til slutt
-          et storverk med hundrevis av ansatte, lysbueovner og strengstøping.
-        </p>
-        <ul>
-          <li>Velg skrap med omhu: sporelementer kan bare tynnes ut, aldri fjernes.</li>
-          <li>Lever riktig kvalitet i tide. Reklamasjoner og forsinkelser koster omdømme.</li>
-          <li>Med lysbueovn kan du ta styringen og kjøre chargene selv i kontrollrommet.</li>
-        </ul>
-        <InstallTip />
-        <SeasonTeaser />
-        <div className="g-row g-intro-actions">
+        {saved && (
+          <p className="g-intro-save">
+            Ditt spill: <strong>{STAGES[saved.stage]?.name ?? "Garasje"}</strong> · dag {day(saved)} ·{" "}
+            {fmtKr(Math.floor(saved.cash))}
+          </p>
+        )}
+        <div className="g-intro-actions">
           {hasSave && (
-            <button className="g-primary" onClick={onContinue}>
+            <button className="g-primary g-intro-main" onClick={onContinue}>
               Fortsett
             </button>
           )}
-          <button className={hasSave ? "" : "g-primary"} onClick={startNew}>
+          <button className={hasSave ? "g-intro-new" : "g-primary g-intro-main"} onClick={startNew}>
             {hasSave ? "Nytt spill" : "Start spillet"}
           </button>
         </div>
@@ -95,7 +92,22 @@ function Intro({ api }: { api: GameApi }) {
             </div>
           </div>
         )}
-        <AccountCard api={api} />
+        <SeasonTeaser />
+        <IntroAccount api={api} />
+        <details className="g-details g-intro-more">
+          <summary>📖 Slik spiller du</summary>
+          <p>
+            Du har leid en kald garasje, fått tak i en liten, brukt induksjonsovn og har 25 000 kroner på konto. Naboen
+            har gitt deg et tonn skrap. En veiledning viser deg de første stegene.
+          </p>
+          <ul>
+            <li>Velg skrap med omhu: sporelementer kan bare tynnes ut, aldri fjernes.</li>
+            <li>Lever riktig kvalitet i tide. Reklamasjoner og forsinkelser koster omdømme.</li>
+            <li>Bygg ut til verksted, støperi, stålverk og storverk – og til slutt et konsern.</li>
+            <li>Med lysbueovn kan du ta styringen og kjøre chargene selv i kontrollrommet.</li>
+          </ul>
+        </details>
+        <InstallTip />
       </div>
     </div>
   );

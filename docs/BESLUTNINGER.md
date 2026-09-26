@@ -2076,3 +2076,24 @@ Brukeren ba om:
   `current-password`, så mobilens passordlager (iCloud-nøkkelring, Google) eller nettleseren kan huske og fylle det
   inn. Teksten under avhukingen sier det.
 - Valget lagres i `stalverk-husk-v1`. Test i `net/tests.ts`; passordet finnes ikke i lagringen.
+
+## B-147 Kortere og tydeligere startskjerm (2026-09-26)
+Status: gjelder (erstatter oppsettet av startskjermen fra B-136; oppskriftene for hjemskjermen står fortsatt der)
+Brukeren (med skjermbilde): «Siden her er for lang. Fiks den og gjør den mer intuitiv.»
+
+Før: fortelling, tre punkter, sesongtekst, knappene midt på, og hele kontokortet med en lang innledning under. På en
+iPhone måtte man scrolle for å se kontoen.
+
+Nå, ovenfra og ned:
+- Tittel, «Fra garasje til storverk.» og én setning om spillet.
+- «Ditt spill: Støperi · dag 32 · 733 411 kr» når det finnes et lagret spill, så man ser hva «Fortsett» fortsetter.
+- Knappene: «Fortsett» (stor) og «Nytt spill», eller «Start spillet» for nye spillere.
+- Sesongen på én linje: «🏆 Sesong 1 pågår – 179 dager igjen».
+- Kontoen som én linje med knapp («Logg inn», eller «☁ Innlogget som …» og «Konto»).
+  - Knappen åpner kontokortet uten overskrift og innledning (`AccountCard compact`).
+  - Kortet er åpent fra start når man kommer fra e-postlenken eller ble logget ut av seg selv.
+- «📖 Slik spiller du» (foldet sammen): fortellingen og punktene.
+- Tipset om hjemskjermen (bare i nettleseren) er foldet sammen. Kan nettleseren installere selv, står knappen synlig.
+
+Høyden på iPhone-størrelse gikk fra over 1600 px til ca. 500 px, uten scrolling. Samme tipsboks er foldet sammen
+under ⚙️ også.

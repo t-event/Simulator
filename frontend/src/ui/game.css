@@ -1119,13 +1119,70 @@ button {
   font-size: 15px;
 }
 
+/* Startskjermen (B-147): kort innledning, lagret spill og knappene øverst, resten foldet sammen */
+.g-intro-short {
+  margin: 8px 0 0;
+}
+
+.g-intro-save {
+  margin: 12px 0 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(79, 195, 247, 0.08);
+  border: 1px solid var(--panel-border);
+}
+
 .g-intro-actions {
-  margin-top: 14px;
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .g-intro-actions button {
-  padding: 10px 20px;
+  min-height: 44px;
+  padding: 10px 16px;
   font-size: 15px;
+}
+
+.g-intro-actions .g-intro-main {
+  flex: 1;
+  font-size: 17px;
+}
+
+.g-intro-account {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+}
+
+.g-intro-account-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.g-intro-account-head > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.g-intro-account-head button {
+  flex: none;
+  min-height: 40px;
+}
+
+.g-intro-account .g-account {
+  margin-top: 8px;
+}
+
+.g-intro-more {
+  margin-top: 12px;
+}
+
+.g-install summary {
+  cursor: pointer;
 }
 
 .g-handbook article {
@@ -2069,14 +2126,17 @@ button {
 
 /* Tips om å legge spillet til på hjemskjermen (B-071) */
 .g-install {
-  margin: 12px 0;
+  margin: 12px 0 0;
   padding: 10px 12px;
   border: 1px solid var(--panel-border);
   border-radius: 10px;
   background: rgba(79, 195, 247, 0.08);
 }
 .g-install p {
-  margin: 0 0 8px;
+  margin: 8px 0;
+}
+.g-install > button {
+  margin-bottom: 8px;
 }
 
 /* Smale telefoner (iPhone SE): topplinja med fart, fagbok og ⚙️ må få plass uten å overlappe (B-072) */

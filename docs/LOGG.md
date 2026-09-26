@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 93 – 2026-09-26: kortere startskjerm
+
+**Brukeren ba om:** Startskjermen er for lang – gjør den kortere og mer intuitiv.
+
+**Gjort:** B-147. Knappene øverst, med lagret spill («Ditt spill: Støperi · dag 32 …»). Sesongen på én linje.
+Kontoen er én linje med knapp. «Slik spiller du» og tipset om hjemskjermen er foldet sammen.
+
+**Testet:** tsc, lint, `npm test`, `validate.ts`, `balance.ts` (exit 0), build. Playwright på 390×844 og 320×568,
+som ny spiller, med lagret spill og innlogget: ca. 500 px høy, ingen horisontal scrolling og knapper på 40–44 px.
+«Logg inn» åpner skjemaet, og «Fortsett» virker.
+
+**Gjenstår:** Fase 4 og 5.
+
+---
+
 ## Økt 92 – 2026-09-26: sletting av konto og «Husk meg»
 
 **Brukeren ba om:** Sjekk at sletting av egen konto ikke sletter alle. «Husk brukernavn og passord» som avhuking.

@@ -308,9 +308,8 @@ export function SeasonTeaser() {
   if (!cur) return null;
   const left = daysLeft(cur);
   return (
-    <p className="g-note g-season-teaser">
-      🏆 <strong>{cur.name}</strong> pågår – {left} {left === 1 ? "dag" : "dager"} igjen. Logg inn under for å være med
-      på topplista. Spill som fortsatt er i garasjen, blir med direkte.
+    <p className="g-season-teaser">
+      🏆 <strong>{cur.name}</strong> pågår – {left} {left === 1 ? "dag" : "dager"} igjen
     </p>
   );
 }

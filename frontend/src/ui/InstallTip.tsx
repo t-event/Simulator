@@ -77,18 +77,17 @@ export function InstallTip() {
   const steps = os === "android" ? [android, ios] : [ios, android];
 
   return (
+    // Foldet sammen, så startskjermen blir kort (B-147); begge oppskriftene står inni (B-136). Kan nettleseren
+    // installere selv, står knappen synlig
     <div className="g-install">
-      <p>
-        <strong>📱 Spill i fullskjerm:</strong> legg spillet til på hjemskjermen, så åpner det som en app uten
-        nettleserlinjer – og virker uten nett.
-      </p>
       {deferred && (
         <button className="g-primary g-small" onClick={install}>
-          Legg til på hjemskjermen
+          📱 Legg til på hjemskjermen
         </button>
       )}
-      <details className="g-role-group" open={open} onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}>
-        <summary>{deferred ? "Eller gjør det selv" : "Slik gjør du det"}</summary>
+      <details open={open} onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}>
+        <summary>{deferred ? "Eller gjør det selv" : "📱 Spill i fullskjerm: legg spillet på hjemskjermen"}</summary>
+        <p>Da åpner det som en app uten nettleserlinjer – og virker uten nett.</p>
         <ul className="g-closed">
           {steps}
           <li>Start spillet fra ikonet på hjemskjermen etterpå.</li>
