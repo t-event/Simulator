@@ -200,5 +200,7 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   økta i sessionStorage. Passord huskes av mobilens passordlager via `autocomplete`.
 - Utlogging skal være `scope=local` (B-145): standarden i Supabase logger ut alle enheter. En avvist økt gir
   beskjeden «Du er logget ut» (`loggedOutByServer`); 408/429 er ikke en død økt.
+- Grensene i juksesperren (`check_snapshot`) må sjekkes mot det største utstyret **med alt utstyr og flinke folk**,
+  ikke mot grunntallene. Tonnsperren på 30 000 t flagget en ærlig spiller med 420-tonnere (B-158).
 - Se på **exit-koden** til `balance.ts`, ikke bare median-linjene: sjekken av kontrollrommet står helt nederst
   og kan være «AVVIK» selv om nivådagene er OK (publiseringen av #39 feilet slik).
