@@ -20,8 +20,6 @@ Ingen åpne akkurat nå.
 
 ## Forslag – spillet
 
-- **Råd om stålkomplekser:** når det går an, lønner det seg å selge storverk og kjøpe komplekser (et kompleks tjener
-  ca. fem ganger så mye). Mange spillere beholder storverkene (økt 108).
 - **Trender i markedet** («etterspørselen etter armering øker») som styrer hvilke kontrakter som dukker opp (se
   `DESIGN.md`).
 
@@ -31,8 +29,8 @@ Ingen åpne akkurat nå.
 - **Egen e-postleverandør** for kodene (glemt passord), så grensen på ca. 2 e-poster i timen forsvinner. Brukeren
   sa «en annen gang».
 - **Sjekk av første opplasting:** spill som kobles til en konto sent (f.eks. dag 610), sjekkes ikke av juksesperren
-  før koblingen. En fornuftssjekk mot det testspilleren klarer på samme døgn, og/eller «koblet til på dag N» på
-  topplista (økt 108).
+  før koblingen. En fornuftssjekk mot det testspilleren klarer på samme døgn (økt 108). «Koblet til på dag N» står nå
+  på topplista (B-170).
 - **Varsel på mobilen** når et anbud er avgjort, et verk er ferdig bygget (fase 4–5) eller dagens belønning er klar.
   Krever konto. Brukeren: «Ingen varsel på mobilen enda» (B-149).
 

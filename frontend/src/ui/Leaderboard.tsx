@@ -10,6 +10,7 @@ import {
   fetchMyRank,
   fetchProfile,
   levelLabel,
+  LINKED_SHOWN_FROM,
   placeLabel,
   type BoardKind,
   type BoardRow,
@@ -252,6 +253,10 @@ export function Leaderboard({
                 </span>
                 {/* Beste plassering i en sesong som er over (B-143) */}
                 {r.honor && <span className="g-board-honor">{r.honor}</span>}
+                {/* Spilt uten konto før innloggingen (B-170): forklarer en rask vekst på lista */}
+                {r.linked_day !== null && r.linked_day >= LINKED_SHOWN_FROM && (
+                  <span className="g-board-honor">Koblet til på dag {r.linked_day}</span>
+                )}
               </span>
               <span className="g-board-value">{fmtValue(kind, r.value)}</span>
             </li>
@@ -267,8 +272,9 @@ export function Leaderboard({
         spiller. I sesongen gjelder spillet du har nå; på «Alle tider» står ditt beste resultat. Merket ved navnet viser
         hvor langt spilleren har kommet: fra Garasje til Storverk, Konsern når konsernverdien passerer 1 mrd., og en
         tittel fra 10 mrd. (Stålbaron, Stålmagnat, Stålfyrste, Stålkonge, Stålkeiser, Stållegende). Ved navnet står også
-        den beste plasseringen i en sesong som er over: 🏆 for vinneren og 🎖 for topp 10. Kontoer med urimelig vekst
-        holdes utenfor.
+        den beste plasseringen i en sesong som er over: 🏆 for vinneren og 🎖 for topp 10. «Koblet til på dag N» betyr
+        at spillet ble spilt uten konto før det: da kan det ha vokst fort på lista. Kontoer med urimelig vekst holdes
+        utenfor.
       </p>
     </>
   );

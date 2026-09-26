@@ -247,7 +247,7 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
   (daglig belønning, dagens oppdrag, mens du var borte og bonusdøgn i juksesperren, B-149), 014 tittel ved
   kallenavnet på topplista (`title_of()`, B-150), 015 juksesperren tillater 50 % vekst per døgn etter
   sluttmålet (B-150), 016 ukens utfordring, sesonger med vri og utmerkelse for topp 10 (B-152), 017 ukekiste bare til topp 3 (B-155), 018 romsligere
-  tonnsperre (B-158), 019 tonnsperren tåler tall fra et senere døgn i eldre apper (B-162), 020 neste sesong starter av seg selv (B-167), 021 sikkerhetskopi av spillene (B-169).
+  tonnsperre (B-158), 019 tonnsperren tåler tall fra et senere døgn i eldre apper (B-162), 020 neste sesong starter av seg selv (B-167), 021 sikkerhetskopi av spillene (B-169), 022 «koblet til på dag N» på topplista (B-170).
 - Hva som krever konto, nå og i fase 4 og 5: `docs/KONTO.md` (B-149).
 - Flere enheter samtidig: bare enheten som spilles på, lagrer; den andre settes på pause med «Spill her» (B-143).
 - Merker ved sesongslutt (fase 3) er bygget som 🎖 med beste plassering ved kallenavnet (B-143).

@@ -1,13 +1,20 @@
 import { useState } from "react";
-import { buyUpgrade, keyUpgrade, scheduleCastingSwitch, upgradeOptions, type UpgradeOption } from "../game/actions";
+import {
+  buyUpgrade,
+  keyUpgrade,
+  scheduleCastingSwitch,
+  switchCashNeeded,
+  upgradeOptions,
+  type UpgradeOption,
+} from "../game/actions";
 import { STATION_NAMES, stationOptions, type Station } from "./stations";
 import { STAGES, stageRef, WIN_CASH } from "../game/data";
 import { KONSERN_UNLOCK_EQUITY, konsernEquity } from "../game/konsern";
-import { unitType } from "../game/plant";
+import { computePlantStats, unitType } from "../game/plant";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Bar, Card } from "./common";
-import { fmtKr, fmtRep } from "./format";
+import { fmtKr, fmtNum, fmtRep } from "./format";
 import { buzz } from "./haptics";
 import { Portal } from "./Portal";
 
@@ -93,8 +100,8 @@ function UpgradeCard({
       )}
       {o.canSchedule && scheduled && (
         <p className="g-note">
-          Byttet skjer av seg selv når ordrene er levert og det er penger nok. Nye forespørsler på det gamle produktet
-          er stoppet imens.
+          Byttet skjer av seg selv når ordrene er levert og det er penger til noen døgns drift i tillegg. Nye
+          forespørsler på det gamle produktet er stoppet imens.
         </p>
       )}
       {asking && o.confirm && (
@@ -241,16 +248,34 @@ export function UpgradeSheet({
 function KeyUpgrade({ g }: { g: GameState }) {
   const k = keyUpgrade(g);
   if (!k) return null;
-  const why = k.available
-    ? "Du har råd nå – kjøp det under Anlegg."
-    : k.reason === "For lite penger"
-      ? `Spar opp: du har ${fmtKr(Math.floor(Math.max(0, g.cash)))}.`
-      : k.reason?.startsWith("Forsk fram: ")
-        ? `Forsk fram «${k.reason.slice("Forsk fram: ".length)}» under Forskning først.`
-        : `${k.reason}.`;
+  // Nytt produkt (B-170): uten et planlagt bytte kommer det stadig nye ordrer på det gamle, og byttet skjer aldri
+  const why = k.canSchedule
+    ? g.pendingCastingSwitch === k.id
+      ? "Byttet er planlagt: det skjer av seg selv når ordrene på det gamle produktet er levert."
+      : g.cash < switchCashNeeded(g, k.price)
+        ? `Spar opp til ca. ${fmtKr(Math.ceil(switchCashNeeded(g, k.price)))} (prisen og noen døgns drift) og ta ordrer som før. Trykk så «Bytt når ordrene er levert» på støpingen under Anlegg.`
+        : `${k.reason}. Trykk «Bytt når ordrene er levert» på støpingen under Anlegg – ellers kommer det stadig nye ordrer på det gamle produktet.`
+    : k.available
+      ? "Du har råd nå – kjøp det under Anlegg."
+      : k.reason === "For lite penger"
+        ? `Spar opp: du har ${fmtKr(Math.floor(Math.max(0, g.cash)))}.`
+        : k.reason?.startsWith("Forsk fram: ")
+          ? `Forsk fram «${k.reason.slice("Forsk fram: ".length)}» under Forskning først.`
+          : `${k.reason}.`;
+  // Hva som holder produksjonen igjen (B-170): ovnene eller støpingen
+  const stats = computePlantStats(g);
+  const melt = fmtNum(stats.meltTph, 1);
+  const cast = fmtNum(stats.castTph, 1);
+  const neck =
+    k.kind === "casting" && stats.castTph < stats.meltTph
+      ? `Ovnene smelter mer enn støpingen tar unna (${melt} mot ${cast} t i timen), så støpingen er flaskehalsen. `
+      : k.kind === "furnace" && stats.meltTph < stats.castTph
+        ? `Støpingen tar unna mer enn ovnene smelter (${cast} mot ${melt} t i timen), så ovnene er flaskehalsen. `
+        : "";
   return (
     <p className="g-note">
-      <strong>Neste store steg:</strong> {k.name} ({fmtKr(k.price)}) gir mer produksjon. {why}
+      <strong>Neste store steg:</strong> {k.name} ({fmtKr(k.price)}) gir mer produksjon. {neck}
+      {why}
     </p>
   );
 }

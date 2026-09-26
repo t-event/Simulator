@@ -29,7 +29,12 @@ export interface BoardRow {
   honor: string | null;
   /** Tittel etter sluttmålet (Stålbaron … Stållegende, B-150), eller null */
   title: string | null;
+  /** Spilldagen spillet ble koblet til kontoen (første dag i tidslinja, B-170), eller null */
+  linked_day: number | null;
 }
+
+/** Fra hvilken dag et spill må være koblet til for at det vises på lista: de første dagene er ingen forskjell */
+export const LINKED_SHOWN_FROM = 6;
 
 const STAGE_NAMES = ["Garasje", "Verksted", "Støperi", "Stålverk", "Storverk"];
 
@@ -65,6 +70,7 @@ export async function fetchLeaderboard(kind: BoardKind, season: number | null = 
       stage: number | null;
       honor?: string | null;
       title?: string | null;
+      linked_day?: number | null;
     }[]
   >("leaderboard", { kind, lim, season });
   return rows.map((r) => ({
@@ -74,6 +80,7 @@ export async function fetchLeaderboard(kind: BoardKind, season: number | null = 
     stage: Number(r.stage ?? 0),
     honor: r.honor ?? null,
     title: r.title ?? null,
+    linked_day: r.linked_day ?? null,
   }));
 }
 

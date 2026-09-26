@@ -117,6 +117,7 @@ export function migrate(g: GameState): GameState {
   if (g.winSeen === undefined) g.winSeen = false;
   if (g.courseSeats === undefined) g.courseSeats = null;
   if (g.pendingCastingSwitch === undefined) g.pendingCastingSwitch = null;
+  if (g.switchWaitNoted === undefined) g.switchWaitNoted = false;
   if (g.market.powerDryDays === undefined) g.market.powerDryDays = 0;
   if (g.konsern === undefined)
     g.konsern = { unlocked: false, plants: [], shared: [], nextId: 1, director: null, milestones: 0, legends: 0 };

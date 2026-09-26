@@ -47,6 +47,8 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Avløsere og «Si opp» viser hva som skjer med skiftene | Nei | Regel 1 | B-164 |
 | Mesterskapet «Holdbare ovnspotter» | Nei | Regel 1 | B-165 |
 | Sikkerhetskopi av spillet på nett (14 dager, bare utvikleren kan rulle tilbake) | Ja (gjelder lagring på nett) | Regel 2 | B-169 |
+| Bytt et lite datterverk mot et stålkompleks, «Ansett til plassene», råd om bytte av støping | Nei | Regel 1 | B-170 |
+| «Koblet til på dag N» på topplista | Ja (en del av topplista) | Regel 3 | B-170 |
 | Ventetid i konsernet (fase 4) | Nei (serverklokke med konto) | Regel 5 | PLAN-NETT |
 | Anbud og skrapauksjoner (fase 5) | Ja | Regel 3 og 7 | PLAN-NETT |
 | Varsel på mobilen (senere) | Ja | Varselet knyttes til kontoen | – |

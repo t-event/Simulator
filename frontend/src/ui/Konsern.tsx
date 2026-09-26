@@ -219,6 +219,7 @@ function PlantRow({ g, act, p, options }: { g: GameState; act: Act; p: SisterPla
   const down = p.downUntilDay > day(g);
   const upgrade = options.find((o) => o.key === `bygg-${p.id}`);
   const modernize = options.find((o) => o.key === `mod-${p.id}`);
+  const swap = options.find((o) => o.key === `bytt-${p.id}`);
   // Stålverk: utbygging er hovedknappen. Storverk: modernisering.
   const main = upgrade ?? modernize;
   const extra = upgrade ? modernize : undefined;
@@ -237,6 +238,7 @@ function PlantRow({ g, act, p, options }: { g: GameState; act: Act; p: SisterPla
       <details className="g-details" onToggle={(e) => !(e.target as HTMLDetailsElement).open && setSelling(false)}>
         <summary>{extra ? "Moderniser eller selg" : "Selg verket"}</summary>
         {extra && <BuyButton g={g} act={act} o={extra} primary={false} label="Moderniser" />}
+        {swap && <BuyButton g={g} act={act} o={swap} primary={false} label="Bytt til stålkompleks" />}
         {selling ? (
           <div className="g-row g-konsern-buy">
             <button
@@ -326,6 +328,12 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
             <p>
               <strong>{advice.title}</strong> – det som betaler seg raskest nå.
             </p>
+            {advice.key.startsWith("bytt-") && (
+              <p className="g-muted g-small-text">
+                Et stålkompleks tjener omtrent like mye som fem storverk, men tar bare én plass. Verket selges for det
+                det er verdt, og pengene går til komplekset.
+              </p>
+            )}
             <BuyButton g={g} act={act} o={advice} label="Gjør det" />
           </Card>
         )}

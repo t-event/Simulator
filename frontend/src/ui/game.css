@@ -2290,6 +2290,20 @@ button {
   font-size: 12px;
 }
 
+/* «Ansett til plassene» avløserne står på (B-170) */
+.g-support-action {
+  margin-top: 4px;
+  justify-self: start;
+}
+
+.g-support-action button {
+  min-height: 40px;
+}
+
+.g-support-action .g-muted {
+  font-size: 12px;
+}
+
 /* Hva som skjer med skiftene hvis man sier opp noen (B-164): bekreftelsen får hele bredden i raden */
 .g-worker > .g-fire-confirm {
   grid-column: 1 / -1;
@@ -2503,9 +2517,9 @@ button {
 .g-board-honor {
   font-size: 12px;
   color: var(--text-dim);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  /* Brytes heller enn å kuttes på smale skjermer (B-170) */
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .g-season-history ul {
