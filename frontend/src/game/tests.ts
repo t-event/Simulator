@@ -28,7 +28,17 @@ import {
 } from "./cosmetics";
 import { CHALLENGES, checkChallenges } from "./challenges";
 import { ADDONS, CASTINGS, FURNACES, WIN_CASH } from "./data";
-import { advance, assessOffer, checkWin, completeManual, fmtKr, log, makeCandidate, newGame } from "./engine";
+import {
+  advance,
+  assessOffer,
+  checkWin,
+  completeManual,
+  fmtKr,
+  log,
+  makeCandidate,
+  newGame,
+  oftenSick,
+} from "./engine";
 import { logTopic, showToast, unseenCount } from "./inbox";
 import { KNOWLEDGE } from "./knowledge";
 import {
@@ -520,6 +530,33 @@ test("Kontrollrommet (B-175): hold virker bare i sine runder, stål i raka koste
   assert(g.furnaces[0].heat?.manual, "chargen ble ikke lagt inn som manuell");
 });
 
+test("Skiftlederen (B-178) gir advarsel til den som misbruker egenmelding, ikke til den som var syk", () => {
+  const g = newGame(5);
+  g.stage = 3;
+  g.minute = 100 * 1440 + 600;
+  const make = (role: RoleId, often: boolean) => {
+    let w = makeCandidate(g, role);
+    while (oftenSick(w) !== often) w = makeCandidate(g, role);
+    w.hiredDay = 1;
+    g.workers.push(w);
+    return w;
+  };
+  const leader = make("skiftleder", false);
+  const shirker = make("ovn", true);
+  const ill = make("ovn", false);
+  shirker.sickDays = [90, 94, 98];
+  ill.sickDays = [90, 94, 98];
+  advance(g, 1440);
+  assert(shirker.warnedDay !== undefined, "den som misbruker, fikk ingen advarsel");
+  assert(ill.warnedDay === undefined, "den som var syk, fikk advarsel");
+  assert(leader.warnedDay === undefined, "skiftlederen advarte seg selv");
+  // Uten skiftleder skjer ingenting av seg selv
+  g.workers = g.workers.filter((w) => w !== leader);
+  shirker.warnedDay = undefined;
+  advance(g, 1440);
+  assert(shirker.warnedDay === undefined, "advarsel uten skiftleder");
+});
+
 test("En strømkrise gjør spot dyrere, men ikke en fastpris man alt har (B-141)", () => {
   const g = newGame(2);
   setPowerDeal(g, "fast");
@@ -816,6 +853,12 @@ test("Landemerker (B-174): ett nytt per dag, belønning når det er levert", () 
   landmarkHour(g, "2026-10-01");
   const c = landmarkContract(g);
   assert(!!c && c.landmark === "benker" && c.status === "tilbud", `fikk ${c?.landmark}`);
+  // Salgsdirektøren lar landemerket stå: det tar spilleren selv (B-177)
+  g.cash = 1_000_000_000;
+  g.konsern.unlocked = true;
+  hireDirector(g);
+  directorHour(g);
+  assert(c!.status === "tilbud", "salgsdirektøren tok landemerket");
   landmarkHour(g, "2026-10-01");
   assert(g.contracts.filter((x) => x.landmark).length === 1, "to landemerker samme dag");
   // Levert: fagpoeng, omdømme og i samlingen; neste kommer først neste dag

@@ -264,6 +264,7 @@ export function newGame(seed = Date.now()): GameState {
     decisionSeen: {},
     landmarks: { done: [], date: null, contractId: null },
     controlBest: 0,
+    boostMin: 0,
     sickUntilMin: 0,
     tempsUntilMin: 0,
     tempCrew: null,
@@ -2192,6 +2193,7 @@ export function makeCandidate(g: GameState, role?: RoleId): Worker {
     "planlegger",
     "klasser",
     "murer",
+    "skiftleder",
   ];
   const r =
     role ??
@@ -2202,7 +2204,8 @@ export function makeCandidate(g: GameState, role?: RoleId): Worker {
         .filter((x) => x !== "lab" || g.stage >= 3)
         .filter((x) => x !== "planlegger" || g.stage >= 2)
         .filter((x) => x !== "klasser" || g.stage >= 1)
-        .filter((x) => x !== "murer" || g.stage >= 3),
+        .filter((x) => x !== "murer" || g.stage >= 3)
+        .filter((x) => x !== "skiftleder" || g.stage >= 3),
     );
   const skill = Math.min(5, Math.max(1, Math.round((uniform(g, 0.6, 3.6) + (g.stage >= 3 ? 0.5 : 0)) * 10) / 10));
   return {
@@ -2436,6 +2439,8 @@ function updateAbsence(g: GameState, stats: PlantStats): void {
       (nightExtra(g, stats.hours) > 0 ? 1.3 : 1) *
       crewBenefits(stats.crews, stats.hours).sick *
       (hasResearch(g, "ledelse") ? 0.7 : 1) *
+      // Tett oppfølging fra en skiftleder på jobb (B-178)
+      (shiftLeaderAtWork(g) ? SHIFT_LEADER_SICK : 1) *
       // Noen er oftere borte; en advarsel virker på dem (B-101)
       (oftenSick(w) && (w.warnedDay === undefined || today - w.warnedDay >= WARNING_DAYS) ? 2.0 : 0.75);
     if (!busy && chance(g, risk)) {
@@ -2461,6 +2466,34 @@ export function oftenSick(w: Worker): boolean {
   return ((w.id * 2654435761) >>> 0) % 100 < 20;
 }
 export const WARNING_DAYS = 90;
+/** Sykdomsrisikoen med en skiftleder på jobb (B-178) */
+export const SHIFT_LEADER_SICK = 0.85;
+
+export function shiftLeaderAtWork(g: GameState): boolean {
+  return g.workers.some((w) => w.role === "skiftleder" && !isAbsent(g, w));
+}
+
+/**
+ * Skiftlederen følger opp fraværet hvert døgn (B-178): den som har vært syk tre ganger på 60 døgn og misbruker
+ * egenmelding, får en advarsel – som advarselen spilleren kan gi under Folk → Fravær. Skiftlederen kjenner folka sine
+ * og tar aldri samtalen med dem som faktisk var syke, så trivselen ikke går ned for det.
+ */
+function shiftLeaderFollowUp(g: GameState): void {
+  const leader = g.workers.find((w) => w.role === "skiftleder" && !isAbsent(g, w));
+  if (!leader) return;
+  const today = day(g);
+  for (const w of g.workers) {
+    if (w === leader || !oftenSick(w) || sickSpells(g, w) < 3) continue;
+    if (w.warnedDay !== undefined && today - w.warnedDay < WARNING_DAYS) continue;
+    w.warnedDay = today;
+    adjustMorale(g, -1);
+    log(
+      g,
+      `Skiftleder ${leader.name} tok en samtale med ${workerLabel(w)} om fraværet. Egenmeldingene bør bli sjeldnere nå.`,
+      "info",
+    );
+  }
+}
 
 /** Hvor mange ganger den ansatte har vært syk de siste døgnene */
 export function sickSpells(g: GameState, w: Worker, days = 60): number {
@@ -2781,6 +2814,7 @@ function onDay(g: GameState, stats: PlantStats): void {
   apprenticeExams(g);
   updateMorale(g, stats);
   updateAbsence(g, stats);
+  shiftLeaderFollowUp(g);
   // Sykdom settes her, etter timesjekken: sjekk vikarene med én gang, så skiftet ikke faller en time (B-053)
   checkTemps(g);
   refreshCandidates(g);

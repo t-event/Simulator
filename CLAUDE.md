@@ -20,6 +20,9 @@ Claudes langtidsminne sammen med `docs/`. Hold den kort og oppdatert.
   som ble gjort, hva som ble testet, og hva som gjenstår.
 - Legg til nye beslutninger i `docs/BESLUTNINGER.md` (neste nummer, aldri
   slett gamle – marker dem som erstattet).
+- **Endringsloggen (B-179, brukerens beskjed: hver eneste gang):** legg til en oppføring øverst i
+  `frontend/src/game/changelog.ts` med det spillerne merker, skrevet med vanlige ord, og `b:` lik det nyeste
+  beslutningsnummeret. `npm test` og publiseringen stopper hvis den mangler (`scripts/sjekk-endringslogg.mjs`).
 - Oppdater denne fila hvis kommandoer, struktur eller regler har endret seg.
 - Commit og push til utviklingsgrenen.
 
@@ -72,7 +75,7 @@ npm install
 npm run dev                      # utviklingsserver på http://localhost:5173
 npx tsc -b                       # typesjekk
 npm run lint                     # oxlint
-npm test                         # raske tester av spillmotoren (src/game/tests.ts) og nettlaget (src/net/tests.ts), også i CI
+npm test                         # raske tester av spillmotoren og nettlaget, og at endringsloggen er oppdatert (også i CI)
 npx tsx src/sim/validate.ts      # prosessmodellen gir forventede nøkkeltall
 npx tsx src/game/balance.ts      # testspilleren: progresjon, ingen konkurs, kontrollrommet
 npx tsx src/game/balance.ts --verbose --finance --seed 3   # feilsøking av balansen
@@ -113,6 +116,8 @@ frontend/src/
     mastery.ts   Mesterskap: forskning som tas om og om igjen etter all forskning (B-150)
     achievements.ts Prestasjoner (merker)   cosmetics.ts  Pynt i anleggsbildet for fagpoeng (B-151)
     landmarks.ts Landemerker: store byggeprosjekter som forespørsler, ett per virkelig dag (B-174)
+    changelog.ts Endringsloggen «Hva er nytt» (B-179) – ny oppføring ved hver endring
+    tabLock.ts   Bare én fane spiller om gangen (B-176)
     balance.ts   Automatisk testspiller
   net/         Konto og lagring på nett (B-125) – Supabase over fetch, uten bibliotek
     config.ts    URL og nøkkel fra miljøet (aldri i repoet)   supabase.ts  Innlogging, økt, spørringer   sync.ts  Lagring på nett
@@ -134,8 +139,10 @@ frontend/src/
     Achievements.tsx Prestasjonskortet på Verket og arket «Pynt verket» (🎨 på anleggsbildet)
     Weekly.tsx   Kortet «Ukens utfordring» på Verket og ukelista   Portal.tsx  Ark fra Verket legges i <body>
     SeasonTrack.tsx Kortet «Sesongstigen» på Verket (B-173)   Landmarks.tsx  Kortet «Landemerker» på Verket (B-174)
+    Changelog.tsx «Hva er nytt» etter en oppdatering og under ⚙️ (B-179)
     control/     Kontrollrommet: spillet i fire runder (chargeGame.ts: logikk og testspiller, ControlRoom.tsx, B-175)
   sim/         Prosessmodell for lysbueovnen (brukes ikke av spillet lenger, sjekkes av sim/validate.ts)
+frontend/scripts/ sjekk-endringslogg.mjs: endringsloggen dekker nyeste beslutning (npm test og CI)
 frontend/public/  PWA: manifest, ikoner, service worker
 supabase/      SQL-migrasjonene, nummerert. Kjøres i prosjektet med Supabase-connectoren (apply_migration) og
                legges her samtidig, så repoet speiler databasen. Sjekk get_advisors (security) etter hver DDL-endring.
@@ -218,3 +225,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   ærlig spiller ble flagget.
 - Se på **exit-koden** til `balance.ts`, ikke bare median-linjene: sjekken av kontrollrommet står helt nederst
   og kan være «AVVIK» selv om nivådagene er OK (publiseringen av #39 feilet slik).
+- **Bare én fane spiller** (B-176): åpnes spillet i en ny fane, lagrer den gamle og står stille. To sider i samme
+  `browser.newContext()` i Playwright deler localStorage og stopper hverandre – bruk egne kontekster for to nettlesere.
+- **Fartskontrollen** (B-176) i `check_snapshot` regner med 120 spillminutter per sekund (10×) og 720 når verket står om
+  natta (`g.boostMin`, telles i `useGame`). Kommer en ny fart eller en ny måte tida hopper på, må sjekken følge med,
+  ellers flagges ærlige spillere.
+

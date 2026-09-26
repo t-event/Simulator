@@ -2,6 +2,7 @@
  * Lagring i nettleseren. Nettleseren kan nekte lagring (privat modus,
  * blokkerte data), så alle kall er pakket inn og spillet fungerer uten.
  */
+import { isElsewhere } from "./tabLock";
 import { grantResearchForOwned } from "./actions";
 import { checkAchievements } from "./achievements";
 import { RESEARCH } from "./research";
@@ -24,6 +25,8 @@ export function setSaveListener(fn: ((g: GameState, soon?: boolean) => void) | n
 }
 
 export function saveGame(g: GameState, soon = false): boolean {
+  // Spilles spillet i en annen fane, skal denne fanen ikke skrive over lagringen (B-176)
+  if (isElsewhere()) return false;
   let ok = false;
   try {
     localStorage.setItem(KEY, JSON.stringify(g));
@@ -87,6 +90,8 @@ export function migrate(g: GameState): GameState {
   if (g.landmarks === undefined) g.landmarks = { done: [], date: null, contractId: null };
   // Beste poengsum i kontrollrommet (B-175)
   if (g.controlBest === undefined) g.controlBest = 0;
+  // Spilltid som er spolt fram om natta, til fartskontrollen på nett (B-176)
+  if (g.boostMin === undefined) g.boostMin = 0;
   if (loose.gradeRecipes === undefined) loose.gradeRecipes = {};
   if (g.settings.powerDeal === undefined) {
     g.settings.powerDeal = "spot";

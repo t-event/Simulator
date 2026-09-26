@@ -54,6 +54,7 @@ import {
   realisticDailyT,
   autoBuy,
   completeManual,
+  shiftLeaderAtWork,
   fmtKr,
   fmtT,
   newGame,
@@ -269,7 +270,8 @@ function botHour(g: GameState): void {
   // Begge følger rådet på Verket om fastpris når strømprisen er høy (B-105)
   if (fixedPriceAdvice(g, computePlantStats(g).hours)) setPowerDeal(g, "fast");
   // Nybegynneren følger rådet på Verket om å gi advarsel
-  for (const w of g.workers) if (canWarn(g, w)) warnAbsence(g, w.id);
+  // (med en skiftleder på jobb står ikke rådet der: skiftlederen gjør det, B-178)
+  if (!shiftLeaderAtWork(g)) for (const w of g.workers) if (canWarn(g, w)) warnAbsence(g, w.id);
   if (!novice && g.stage >= 2 && g.cash > courseCost(g) * 40) {
     const w = g.workers.find((x) => x.skill < 2.5 && (x.courseDay === undefined || day(g) - x.courseDay >= 30));
     if (w) sendOnCourse(g, w.id);
@@ -418,7 +420,8 @@ function botHour(g: GameState): void {
       w.role !== "vedlikehold" &&
       w.role !== "planlegger" &&
       w.role !== "klasser" &&
-      w.role !== "murer",
+      w.role !== "murer" &&
+      w.role !== "skiftleder",
   ).length;
   const spare = cap - g.workers.length - Math.max(0, crewTotal - crewWorkers);
   if (
@@ -443,6 +446,11 @@ function botHour(g: GameState): void {
   }
   if (spare > 0 && g.stage >= 2 && stats.shifts >= 2 && count("planlegger") < 1) {
     const c = g.candidates.find((x) => x.role === "planlegger");
+    if (c) hire(g, c.id);
+  }
+  // Skiftleder som følger opp fraværet (B-178)
+  if (spare > 1 && g.stage >= 3 && count("skiftleder") < g.stage - 2 && g.workers.length < cap) {
+    const c = g.candidates.find((x) => x.role === "skiftleder");
     if (c) hire(g, c.id);
   }
   if (spare > 1 && g.stage >= 2 && stats.shifts >= 2 && count("vedlikehold") < g.stage - 1 && g.workers.length < cap) {

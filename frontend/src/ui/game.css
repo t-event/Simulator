@@ -2846,3 +2846,33 @@ button {
   gap: 8px;
   align-items: flex-start;
 }
+
+/* «Hva er nytt» (B-179) */
+.g-changelog section + section {
+  border-top: 1px solid var(--panel-border);
+  margin-top: 8px;
+  padding-top: 4px;
+}
+.g-changelog h3 {
+  font-size: 15px;
+  margin: 8px 0 4px;
+}
+.g-changelog ul {
+  margin: 0 0 8px;
+  padding-left: 20px;
+}
+.g-changelog li {
+  margin: 4px 0;
+  line-height: 1.4;
+}
+.g-changelog > .g-primary {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 6px;
+}
+
+/* «Spill her» når spillet er åpent i en annen fane (B-176) */
+.g-wide-action {
+  width: 100%;
+  min-height: 44px;
+}

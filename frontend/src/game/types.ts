@@ -19,7 +19,8 @@ export type RoleId =
   | "valse"
   | "planlegger"
   | "klasser"
-  | "murer";
+  | "murer"
+  | "skiftleder";
 export type Crew = Partial<Record<RoleId, number>>;
 
 /** Analyse av stål: karbon, fosfor og sporelementer (Cu+Sn+Ni+Cr+Mo), alle i vekt-%. */
@@ -472,6 +473,8 @@ export interface GameState {
   pendingManual: ManualRequest | null;
   /** Beste poengsum i kontrollrommet (B-175) */
   controlBest?: number;
+  /** Spillminutter som er spolt fram om natta (6×), så juksesperren kan regne ut hvor lang tid dagene minst tar (B-176) */
+  boostMin?: number;
   /** Fagpoeng til forskning */
   researchPoints: number;
   /** Dagen spilleren sist kjøpte fagpoeng gjennom et forskningssamarbeid (B-064), −1 hvis aldri */

@@ -44,7 +44,7 @@ import { AnalysisLine, Bar, Card, GradeChips, Stat } from "./common";
 import { fmtClock, fmtKr, fmtNum, fmtPct, fmtT } from "./format";
 import { activeMissions, missionProgress } from "../game/missions";
 import { canWarn } from "../game/actions";
-import { avgRating, sickSpells } from "../game/engine";
+import { avgRating, shiftLeaderAtWork, sickSpells } from "../game/engine";
 import { CHALLENGE_STAGE, CHALLENGES, challengeProgress, challengeShare, challengesDone } from "../game/challenges";
 import { PlantScene } from "./PlantScene";
 import { SceneBubbles } from "./SceneBubbles";
@@ -224,10 +224,13 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
   }
   {
     // Ofte borte: råd om advarsel (B-101)
-    const often = g.workers.find((w) => canWarn(g, w));
+    // Med en skiftleder på jobb følges fraværet opp av seg selv (B-178)
+    const often = shiftLeaderAtWork(g) ? undefined : g.workers.find((w) => canWarn(g, w));
     if (often)
       out.push({
-        text: `${often.name} har vært syk ${sickSpells(g, often)} ganger på 60 døgn. Vurder en advarsel under Folk → Fravær.`,
+        text:
+          `${often.name} har vært syk ${sickSpells(g, often)} ganger på 60 døgn. Vurder en advarsel under Folk → Fravær.` +
+          (g.stage >= 3 ? " En skiftleder følger opp fraværet for deg." : ""),
         view: "folk",
         sub: "fravaer",
       });

@@ -2917,3 +2917,71 @@ balansen er uendret: Verksted 7, Støperi 25, Stålverk 67, Storverk 159, nybegy
 
 **Konto (KONTO.md):** nei, regel 1. Rekorden er lokal.
 
+## B-176 Én fane om gangen og fartskontroll (2026-09-26)
+Status: gjelder
+Brukeren: en spiller prøvde å lure spillet med to faner oppe samtidig for å se om ting gikk dobbelt så fort, og med
+utvidelser i nettleseren som skal få tida til å gå fortere. Dobbelsjekk at det ikke går.
+
+**Hva vi fant:**
+- **To faner** ga ikke dobbel fart. Hver fane har sitt eget spill i minnet og går i vanlig fart, men de lagret over
+  hverandre – lokalt og på nett (samme enhet, så sperren i B-140 slapp begge gjennom). Ingen fordel, men spillet kunne
+  hoppe fram og tilbake.
+- **Fartsutvidelser** kunne virke. Spilløkka måler tida med `performance.now()`, og en utvidelse som får den og
+  tidtakerne til å gå fortere, gir flere spilldøgn per time. Juksesperren sjekket bare veksten per spilldøgn, ikke hvor
+  fort døgnene gikk, og ukens «dager», sesongstigen og topplistene belønner spilldøgn. `at` i tidslinja kunne dessuten
+  settes av appen.
+
+**Endring:**
+- **Én fane om gangen** (`game/tabLock.ts`): når spillet åpnes i en ny fane eller et nytt vindu, lagrer den gamle fanen
+  og står stille med beskjeden «Spillet er åpent et annet sted» og knappen «Spill her». En fane som ikke spiller, kan ikke
+  lagre (`saveGame` sjekker det).
+- **Fartskontroll** (migrasjon 025): appen sender spillminuttene (`game_min`) og minuttene som er spolt fram om natta
+  (`boost_min`, telles i spilløkka) med tidslinja. Raskeste ærlige fart er 10× (120 spillminutter per sekund) og 6× så
+  fort når verket står om natta. Serveren regner ut hvor lang tid spillminuttene siden en lagring minst 10 minutter
+  tilbake minst må ha tatt, og sammenligner med sin egen klokke. Går det mer enn 15 % og ett minutt for fort, flagges
+  spilleren (ute av listene, som før). `at` settes nå alltid av serveren.
+- Testet i databasen (rullet tilbake): 60 døgn på 15 min og 200 døgn med 150 spolte på 15 min ga ikke flagg; 350 døgn på
+  15 min (dobbel fart) ble flagget. Ærlige spillere har hatt høyst ca. 5 døgn per minutt.
+- Eldre utgaver av appen sender ikke tallene; da hopper sjekken over, til de er oppdatert (B-148).
+
+**Konto (KONTO.md):** fanesperren nei (regel 1); fartskontrollen gjelder det som ligger på nett (regel 2).
+
+## B-177 Landemerkene tas manuelt (2026-09-26)
+Status: gjelder (endrer B-174)
+Brukeren: «Landemerker bør tas manuelt, slik at ikke salgsdirektøren gjør det for spillerne.»
+**Endring:** salgsdirektøren hopper over landemerkene. Når direktøren er på, viser Salg likevel tall for landemerker som
+venter, og kortet «Landemerker» sier at du tar dem selv på Salg. Test: direktøren signerer forespørselen når den ikke er
+merket som landemerke, men lar landemerket stå.
+
+**Konto (KONTO.md):** nei, regel 1.
+
+## B-178 Skiftleder som følger opp fraværet (2026-09-26)
+Status: gjelder (utfyller B-101)
+Brukeren: «Man bør kunne ansette skiftledere sent i spillet som følger opp fraværet automatisk.»
+**Endring:** ny rolle **Skiftleder** (søkere fra stålverket, lønn 2 600).
+- Med en skiftleder på jobb følges fraværet opp hvert døgn: den som har vært syk tre ganger på 60 døgn og misbruker
+  egenmelding, får advarsel (som den spilleren kan gi under Folk → Fravær, trivsel −1). Skiftlederen kjenner folka sine og
+  tar aldri samtalen med dem som faktisk var syke – den feilen (trivsel −4) kan bare spilleren gjøre.
+- Tett oppfølging: sykdomsrisikoen er 15 % lavere med en skiftleder på jobb.
+- «Anbefalt i tillegg til skiftene» foreslår én på stålverket og to på storverket (den ene dekker ferie). Rådet om
+  advarsel på Verket vises ikke når en skiftleder er på jobb, og nevner skiftlederen fra stålverket.
+- Testspilleren ansetter skiftledere fra stålverket. Balanse: Verksted 7, Støperi 25, Stålverk 67, Storverk 139 (fra
+  159: færre syke gir flere skift), nybegynneren 138,5, 0 konkurs.
+
+**Konto (KONTO.md):** nei, regel 1.
+
+## B-179 Endringslogg i spillet: «Hva er nytt» (2026-09-26)
+Status: gjelder
+Brukeren: «Spillerne bør få kunne se en changelog i spillet når det har blitt oppdatert. Husk å legg det til i dine
+systemer så det huskes hver eneste gang.»
+**Endring:**
+- `game/changelog.ts` har oppføringer, nyeste først, hver med det høyeste B-nummeret den dekker og kort tekst for
+  spillerne. Etter en oppdatering vises «Hva er nytt» med det som er nytt siden sist (husket per enhet). En ny spiller
+  uten lagret spill får ikke lista; en som spilte før endringsloggen kom, får de tre siste. Hele lista ligger under ⚙️.
+- Arket kommer ikke oppå andre vinduer eller veiledningen, og «Velkommen tilbake» venter til det er lukket.
+- **Så det ikke glemmes:** `scripts/sjekk-endringslogg.mjs` kjøres av `npm test` og i publiseringen. Den stopper hvis
+  den nyeste oppføringen ikke dekker den nyeste beslutningen i denne fila. Regelen står også i CLAUDE.md under «Før du
+  avslutter en økt».
+
+**Konto (KONTO.md):** nei, regel 1.
+

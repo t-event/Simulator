@@ -1007,6 +1007,14 @@ export const ROLES: Record<RoleId, Role> = {
     description:
       "Hver lysbueovn har to potter. Murerne murer opp reservepotta med ny ildfast stein mens den andre er i bruk – for alle lysbueovnene. Jobber dagtid (07–15), ikke skift. To murere klarer en potte på ca. fire døgn, så ta to per ovn.",
   },
+  skiftleder: {
+    id: "skiftleder",
+    name: "Skiftleder",
+    plural: "Skiftledere",
+    salary: 2600,
+    description:
+      "Følger opp fraværet (B-178): tar samtalen med dem som misbruker egenmelding – aldri med dem som faktisk var syke – og holder sykefraværet nede med tett oppfølging. Fra stålverket.",
+  },
   salg: {
     id: "salg",
     name: "Selger",

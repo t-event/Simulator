@@ -55,7 +55,8 @@ export function LandmarksCard({ g, onSales }: { g: GameState; onSales: () => voi
         <p className="g-muted">Flere landemerker kommer når verket blir større.</p>
       )}
       <p className="g-muted g-small-text">
-        Ett nytt landemerke per dag: bruer, stadioner, vindparker og mer. De betaler godt og gir fagpoeng og omdømme.
+        Ett nytt landemerke per dag: bruer, stadioner, vindparker og mer. De betaler godt og gir fagpoeng og omdømme. Du
+        tar dem selv på Salg – salgsdirektøren lar dem stå.
       </p>
     </Card>
   );
