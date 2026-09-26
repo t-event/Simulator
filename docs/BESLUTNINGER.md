@@ -2416,3 +2416,21 @@ Brukeren: «Ukens utfordring, vi har ikke så mange spillere enda, så det bør 
 - Migrasjon 017 endrer `finish_weeks()`. Ingen uke var avsluttet ennå, så ingen kister måtte ryddes.
 - Testet i databasen med fem testspillere i en avsluttet uke (tilbakerullet): bare de tre beste fikk kiste.
 - Kan utvides igjen (f.eks. topp 10) når det er flere spillere.
+
+## B-156 Økonomi: hjemmeverket for seg (2026-09-26)
+Status: gjelder
+Brukeren: «Resultatet i økonomi gikk ikke opp når ovnene ble oppgradert.»
+
+**Hva som skjedde** (brukerens lagrede spill, dag 640–669):
+- Med tre likestrømsovner på 420 t, 8 strenger og valseverk nr. 3 gikk produksjonen fra ca. 6 000 til ca. 19 500 t per
+  døgn, og hjemmeverket fra ca. 40 til ca. 130 mill. kr per døgn i snitt. Lageret var lite (5 700 t), så stålet ble
+  solgt.
+- «Resultat i går» regnet med overskuddet fra datterverkene (1,3–2,1 mrd. per døgn) og alle kjøp (2,3 mrd. for ovnene
+  dag 658, 23,7 mrd. for datterverk dag 667). Økningen i hjemmeverket ble da bare noen prosent av tallet, og kontrakter
+  som betales ved levering, gjør tallet ujevnt.
+
+**Endring** (Verket → Økonomi), når konsernet er åpnet eller noe ble kjøpt i går:
+- «Verket i går (drift)»: det hjemmeverket tjente på stålet, uten datterverkene og uten investeringer.
+- «Verket, snitt 7 døgn»: jevner ut kontrakter som betales ved levering.
+- «Datterverkene i går» og «Investert i går» for seg.
+- En kort forklaring under tallene. «Resultat i går» står som før.

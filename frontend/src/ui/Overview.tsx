@@ -35,7 +35,7 @@ import {
   fixedPriceAdvice,
   type PlantStats,
 } from "../game/plant";
-import type { GameState, GradeId, RoleId } from "../game/types";
+import type { DayFinance, GameState, GradeId, RoleId } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { AnalysisLine, Bar, Card, GradeChips, Stat } from "./common";
 import { fmtClock, fmtKr, fmtNum, fmtPct, fmtT } from "./format";
@@ -443,6 +443,18 @@ function ChallengesCard({ g }: { g: GameState }) {
   );
 }
 
+/** Det hjemmeverket tjente et døgn: uten datterverkene og uten investeringer (B-156) */
+function plantResult(d: DayFinance): number {
+  const income = Object.entries(d.income).reduce((a, [k, v]) => a + (k === "konsern" ? 0 : (v ?? 0)), 0);
+  const costs = Object.entries(d.costs).reduce((a, [k, v]) => a + (k === "investering" ? 0 : (v ?? 0)), 0);
+  return income - costs;
+}
+
+function avgPlantResult(g: GameState): number {
+  const days = g.history.slice(-7);
+  return days.length ? days.reduce((a, d) => a + plantResult(d), 0) / days.length : 0;
+}
+
 export function Overview({ g, stats, act, go, openBook, onOpenSettings }: Props) {
   const [sheet, setSheet] = useState<Station | null>(null);
   const [chosenTab, setTab] = useState<SubTab>("oversikt");
@@ -830,6 +842,21 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings }: Props)
                     tone={sum(y.income) - sum(y.costs) >= 0 ? "ok" : "critical"}
                   />
                 )}
+                {/* Hjemmeverket for seg (B-156): uten datterverkene og uten kjøp, så man ser hva utstyret gir */}
+                {y && (g.konsern.unlocked || (y.costs.investering ?? 0) > 0) && (
+                  <>
+                    <Stat
+                      label="Verket i går (drift)"
+                      value={fmtKr(plantResult(y))}
+                      tone={plantResult(y) >= 0 ? "ok" : "critical"}
+                    />
+                    <Stat label="Verket, snitt 7 døgn" value={fmtKr(avgPlantResult(g))} />
+                    {g.konsern.unlocked && <Stat label="Datterverkene i går" value={fmtKr(y.income.konsern ?? 0)} />}
+                    {(y.costs.investering ?? 0) > 0 && (
+                      <Stat label="Investert i går" value={fmtKr(y.costs.investering ?? 0)} tone="warning" />
+                    )}
+                  </>
+                )}
                 {y && <Stat label="Produsert i går" value={fmtT(y.producedT)} />}
                 {y && stats.furnaceMW > 0 && (
                   <Stat label="Strøm og effekt i går" value={fmtKr((y.costs.energi ?? 0) + (y.costs.nett ?? 0))} />
@@ -838,6 +865,13 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings }: Props)
                 <Stat label="Faste kostnader per døgn" value={fmtKr(STAGES[g.stage].fixedPerDay)} />
                 {g.loan > 0 && <Stat label="Lån" value={fmtKr(g.loan)} tone="warning" />}
               </div>
+              {y && (g.konsern.unlocked || (y.costs.investering ?? 0) > 0) && (
+                <p className="g-muted g-small-text">
+                  «Resultat i går» tar med alt: {g.konsern.unlocked ? "overskuddet fra datterverkene og " : ""}det du
+                  kjøpte. «Verket (drift)» viser bare det hjemmeverket tjener på stålet, så du ser hva nytt utstyr gir.
+                  Kontraktene betales når de er levert, så snittet over 7 døgn er mest rettferdig.
+                </p>
+              )}
             </Card>
           </div>
           <div className="g-col">
