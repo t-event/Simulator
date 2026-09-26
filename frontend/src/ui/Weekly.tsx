@@ -121,8 +121,8 @@ export function WeeklyCard({ g, act, onLogin }: { g: GameState; act: GameApi["ac
           ? `Du er nr. ${status.plass} av ${status.players} (${fmtValue(status.kind, status.value ?? 0)}).`
           : "Du er ikke på lista ennå – den fylles når spillet lagres på nett."}{" "}
         <span className="g-muted">
-          {left <= 1 ? "Siste dag!" : `${left} dager igjen.`} Topp 3 får medalje, topp 10 en ukekiste ({chestFp(10)}–
-          {chestFp(1)} fagpoeng).
+          {left <= 1 ? "Siste dag!" : `${left} dager igjen.`} Topp 3 får medalje og ukekiste ({chestFp(3)}–{chestFp(1)}{" "}
+          fagpoeng).
         </span>
       </p>
       {m.gold + m.silver + m.bronze > 0 && (
@@ -211,8 +211,7 @@ function WeeklyBoard({
           )}
           <p className="g-muted g-small-text">
             Uka går fra mandag til mandag. Ligaen følger hvor langt du har kommet: bronse før storverket, sølv på
-            storverket og gull fra 1 mrd. Når uka er over, får topp 3 i hver liga medalje og topp 10 en ukekiste med
-            fagpoeng.
+            storverket og gull fra 1 mrd. Når uka er over, får topp 3 i hver liga medalje og en ukekiste med fagpoeng.
           </p>
         </div>
       </div>

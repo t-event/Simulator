@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 101 – 2026-09-26: ukekista bare til topp 3
+
+**Brukeren ba om:** at bare topp 3 får ukekiste, siden det ikke er så mange spillere ennå.
+
+**Gjort:** B-155. Migrasjon 017 (`finish_weeks` gir kiste bare til plass 1–3). Teksten på kortet og ukelista er
+endret, og `chestFp` gir 0 utenfor topp 3.
+
+**Testet:**
+- SQL med fem testspillere i en avsluttet uke (tilbakerullet): 100, 75 og 50 fagpoeng til de tre beste, ingen til
+  resten.
+- tsc, lint, `npm test` (utvidet nettest), `validate.ts`, `balance.ts`, build.
+
+**Gjenstår:** –
+
+---
+
 ## Økt 100 – 2026-09-26: stormodeller – større ovner og støpemaskiner
 
 **Brukeren ba om:** større ovner og støpeanlegg, som i virkeligheten (opp til en likestrømsovn på 420 t), og lengre
