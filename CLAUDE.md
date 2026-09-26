@@ -87,6 +87,7 @@ npx tsx src/game/balance.ts --vekst                        # største vekst per 
 npx tsx src/game/balance.ts --opphold                      # juksesperren med lange opphold (spill uten innlogging)
 npx tsx src/game/balance.ts --daglig 15                    # som over/vanlig kjøring, men henter daglige belønninger (B-149)
 npx tsx src/game/balance.ts --storovn 330                  # samme konsernspill med ulike ovner: tonn og overskudd (B-154)
+npx tsx src/game/balance.ts --vurdering                    # kundevurderingene 1–10 per nivå, flink og nybegynner (B-161)
 npm run build
 ```
 

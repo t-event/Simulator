@@ -5,6 +5,28 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 107 – 2026-09-26: skrapvarsel, sesongquiz, «slaggen» og kundevurdering
+
+**Brukeren ba om:** varsel for alle ovner uten skrap, quiz for sesongkapitlene, «slaggen» (ikke «slagget») og
+kundevurdering. Vern mot lekkede passord er på. Glemt passord er ikke testet. Ikke begynn på fase 4 ennå.
+
+**Gjort:** B-161.
+- Alle ovner varsles når de blir stående uten skrap, samlet i ett varsel.
+- Quiz for sesongkapitlet (teller ikke i «Fagekspert»).
+- «Slaggen» i kontrollrommet.
+- Kundevurdering 1–10 per levert kontrakt, med snitt og karakter på Salg, råd ved lav karakter, fagboktekst og
+  prestasjonen «Ti av ti». `balance.ts --vurdering`.
+- Sjekken av kontrollrommet i `balance.ts` tåler hendelseskort.
+- Docs: FORSLAG (avgjort og ryddet), DESIGN, PLAN-NETT (status), KONTO, CLAUDE.md.
+
+**Testet:** tsc, lint, `npm test` (nye tester for vurdering og sesongquiz), validate, balance (exit 0), build.
+Simulering: to tomme ovner gir «Ovnene 1 og 2 står: skraplageret er tomt». Playwright på 390 og 320 px: rådet om lav
+karakter åpner Salg → Ordrekø, snitt og karakterer vises, ingen horisontal scrolling.
+
+**Gjenstår:** brukeren tester glemt passord. Fase 4 venter til brukeren sier fra.
+
+---
+
 ## Økt 106 – 2026-09-26: fortsett på 10× etter popups
 
 **Brukeren ba om:** et valg om å fortsette på 10× etter popups, i stedet for at tida alltid går ned til 1×.

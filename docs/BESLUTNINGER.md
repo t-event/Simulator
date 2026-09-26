@@ -2513,3 +2513,37 @@ raste videre på 10×. Kontrollrommet tok allerede tilbake farten fra før.
   forteller nå om valget.
 - **Konto (KONTO.md):** nei, regel 1.
 - Nytt felt har standardverdi i `migrate()`. Test i `tests.ts`.
+
+## B-161 Varsel for alle ovner, sesongquiz, «slaggen» og kundevurdering (2026-09-26)
+Status: gjelder
+Brukeren: «Fiks at de andre ovnene også får varsel om de står uten skrap. Fiks quiz for alle sesongkapitler. Slaggen er
+riktig. Fiks det du nevnte om kundevurdering.» Vern mot lekkede passord er på; glemt passord er ikke testet.
+
+**Skrapvarsel for alle ovner:** «Ovnen står: skraplageret er tomt» kom bare for ovn 1. Nå varsles hver ovn som blir
+stående uten skrap, samlet i ett varsel («Ovnene 1 og 2 står: …»). Rådet på Verket sier også hvilke ovner som står.
+
+**Sesongquiz:** sesongkapitlet («Konjunkturer og sesonger») er det eneste sesongkapitlet, og har fått to spørsmål
+(skrappris følger stålpris, tørt år gir dyr strøm). Kapitlet låses opp med en sesong, som krever konto. Derfor teller
+det ikke med i prestasjonen «Fagekspert» (alle quizer), så den kan fortsatt nås uten konto (KONTO.md regel 1).
+
+**«Slaggen»:** kontrollrommet skrev «slagget». Nå står «slaggen» overalt i spillet, README og DESIGN (eldre
+beslutninger og logg er ikke endret).
+
+**Kundevurdering 1–10** (som anmeldelsene i Game Dev Tycoon): kunden gir en karakter når en kontrakt er levert.
+- Tid: levert med minst 40 % av tida igjen (+2), minst et døgn før fristen (+1), eller på fristdagen (0).
+- Kvalitet: margin til kravene i det dårligste partiet (`specMargin`): minst 0,3 (+2), 0,15 (+1), 0,05 (0), ellers −1.
+  Margin 1 er langt unna alle grensene, 0 er akkurat på en grense.
+- Karakteren er 6 + tid + kvalitet. En reklamasjon gir høyst 3.
+- Omdømmet fra leveringen ganges med `0,5 + 0,07 × karakter`: 7 gir som før, 10 gir ca. 20 % mer, 3 ca. 30 % mindre.
+- Visning: varselet («Kunden gir 9/10: «…»»), snittet og karakteren per kontrakt under Salg → Ordrekø → «Nylig
+  avsluttet», ny tekst i fagboka (Kunder og omdømme), prestasjonen «Ti av ti».
+- Råd: når snittet av de siste fem er under 6, kommer et råd på Verket om å levere tidligere og velge en resept med mer
+  margin.
+- Nye felt: `ratings` i spilltilstanden (standard i `migrate()`), og `acceptedDay`, `qMargin`, `rating`, `ratingNote`
+  på kontraktene (valgfrie; eldre kontrakter regnes som signert tre døgn før fristen).
+- `balance.ts --vurdering` viser karakterene per nivå. Flink: snitt 7,3–8,8; nybegynner 8,2–9,5 (tryggere resepter).
+- **Konto (KONTO.md):** nei, regel 1.
+
+**Balanse:** Verksted 8, Støperi 23, Stålverk 66, Storverk 137, nybegynner 155. Sjekken av kontrollrommet i
+`balance.ts` svarer nå på hendelseskort som dukker opp mens chargen gjør seg ferdig (og beholder farten, B-160).
+Ellers stoppet tida, og sjekken feilet når tilfeldighetene ga et kort akkurat da.

@@ -12,16 +12,13 @@ Ingen åpne akkurat nå.
 
 - **Toppliste for kontrollrommet** («beste kontrollrom-charge»): brukeren liker idéen, men den skal vente til
   kontrollrommet er ferdig utviklet (B-143).
-- **Vern mot lekkede passord** i Supabase («Leaked password protection», under Authentication i dashbordet): skal
-  skrus på etter hvert. Det gjør brukeren selv; sikkerhetsrådene i Supabase minner om det.
+- **Glemt passord** er ikke testet med ekte e-post ennå (brukeren, 2026-09-26). Ekte innlogging virker. Test det
+  neste gang: «Glemt passord?» på kontokortet → koden i e-posten → nytt passord. Husk grensen på ca. 2 e-poster i timen.
 
 ## Forslag – spillet
 
-- **Varsel når ovn 2 står uten skrap.** «Ovnen står: skraplageret er tomt» kommer bare for ovn 1. Med to kvaliteter
-  kan ovn 2 stå uten at det varsles (den vises likevel som «Mangler skrap» i produksjonslinja).
-- **Quiz for sesongkapitlet** («Konjunkturer og sesonger»), som de andre kapitlene har.
-- **Samme ord for slagg.** Kontrollrommet skriver «slagget», fagboka «slaggen». Begge er riktig bokmål; velg ett.
-- **Kundevurdering** 1–10 per levert kontrakt, som anmeldelsene i Game Dev Tycoon (se `DESIGN.md`).
+- **Trender i markedet** («etterspørselen etter armering øker») som styrer hvilke kontrakter som dukker opp (se
+  `DESIGN.md`).
 
 ## Forslag – nett og konkurranse
 
@@ -30,9 +27,12 @@ Ingen åpne akkurat nå.
   sa «en annen gang».
 - **Varsel på mobilen** når et anbud er avgjort, et verk er ferdig bygget (fase 4–5) eller dagens belønning er klar.
   Krever konto. Brukeren: «Ingen varsel på mobilen enda» (B-149).
-- **Ukens toppliste** (hvem som vokste mest denne uka, nullstilles hver mandag). Krever konto.
 
 ## Avgjort
+
+- Varsel for alle ovner uten skrap, quiz for sesongkapitlet, «slaggen» overalt og kundevurdering 1–10 (B-161).
+- Vern mot lekkede passord er skrudd på i Supabase (brukeren, 2026-09-26).
+- Ukens toppliste er bygget som «Ukens utfordring» (B-152).
 
 - Nytt spill+ er fjernet (B-141).
 - «Avslutt veiledningen» blir stående – nye spillere kan avslutte veiledningen (B-143).

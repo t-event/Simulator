@@ -18,7 +18,9 @@ export interface Achievement {
   progress: (g: GameState) => [number, number];
 }
 
-const QUIZ_COUNT = Object.keys(QUIZ).length;
+// Sesongkapitlet krever konto (sesong), så det teller ikke med i «Fagekspert» (B-161, KONTO.md regel 1)
+const QUIZ_COUNT = Object.keys(QUIZ).filter((k) => k !== "sesong").length;
+const quizzesDone = (g: GameState) => g.quizDone.filter((k) => k !== "sesong").length;
 const masterySum = (g: GameState) => MASTERY_IDS.reduce((a, id) => a + masteryLevel(g, id), 0);
 const sisters = (g: GameState) => g.konsern?.plants.length ?? 0;
 
@@ -47,10 +49,11 @@ export const ACHIEVEMENTS: Achievement[] = [
   count("kontrakt50", "🤝", "Femti kontrakter", "Lever 50 kontrakter.", 10, 50, (g) => g.totals.contractsDone),
   count("stalverk", "🏭", "Ekte stålverk", "Flytt til et stålverk.", 10, 3, (g) => g.stage),
   count("omdomme", "🌟", "Kundenes favoritt", "Nå omdømme 95.", 10, 95, (g) => Math.floor(g.reputation)),
+  count("tiavti", "💯", "Ti av ti", "Få 10 av 10 fra en kunde.", 5, 1, (g) => g.counters.tiavti ?? 0),
   count("charge1000", "🔥", "Tusen charger", "Smelt 1 000 charger.", 15, 1000, (g) => g.totals.heats),
   count("tonn100k", "⚖️", "Hundre tusen tonn", "Produser 100 000 tonn stål.", 15, 100_000, (g) => g.totals.producedT),
   count("selv25", "🎛️", "Erfaren smelter", "Kjør 25 charger selv.", 15, 25, (g) => g.totals.manualHeats),
-  count("quizalle", "🎓", "Fagekspert", "Bestå alle quizene i fagboka.", 20, QUIZ_COUNT, (g) => g.quizDone.length),
+  count("quizalle", "🎓", "Fagekspert", "Bestå alle quizene i fagboka.", 20, QUIZ_COUNT, quizzesDone),
   count("storverk", "🏗️", "Storverket", "Bygg ut til et storverk.", 20, 4, (g) => g.stage),
   count("milliard", "💰", "Milliardær", "Få en konsernverdi på 1 milliard.", 20, 1e9, (g) => konsernEquity(g)),
   count("datter1", "🏢", "Første datterverk", "Kjøp et datterverk i konsernet.", 10, 1, sisters),

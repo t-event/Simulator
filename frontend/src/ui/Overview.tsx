@@ -44,7 +44,7 @@ import { AnalysisLine, Bar, Card, GradeChips, Stat } from "./common";
 import { fmtClock, fmtKr, fmtNum, fmtPct, fmtT } from "./format";
 import { activeMissions, missionProgress } from "../game/missions";
 import { canWarn } from "../game/actions";
-import { sickSpells } from "../game/engine";
+import { avgRating, sickSpells } from "../game/engine";
 import { CHALLENGE_STAGE, CHALLENGES, challengeProgress, challengeShare, challengesDone } from "../game/challenges";
 import { PlantScene } from "./PlantScene";
 import { SceneBubbles } from "./SceneBubbles";
@@ -93,8 +93,15 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
       view: "marked",
       sub: "skrap",
     });
-  if (waits.includes("Tomt for skrap"))
-    out.push({ text: `Ovnen står fordi skraplageret er tomt. ${scrapStopHelp(g)}`, view: "marked", sub: "skrap" });
+  if (waits.includes("Tomt for skrap")) {
+    // Med flere ovner: si hvilke som står (B-161)
+    const empty = waits.flatMap((w, i) => (w === "Tomt for skrap" ? [String(i + 1)] : []));
+    const who =
+      waits.length === 1
+        ? "Ovnen står"
+        : `${empty.length === 1 ? "Ovn" : "Ovnene"} ${empty.slice(0, -1).join(", ")}${empty.length > 1 ? " og " : ""}${empty[empty.length - 1]} står`;
+    out.push({ text: `${who} fordi skraplageret er tomt. ${scrapStopHelp(g)}`, view: "marked", sub: "skrap" });
+  }
   if (waits.includes("Mangler folk")) {
     const missing = Object.entries(stats.missing)
       .map(
@@ -195,6 +202,14 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
     });
   if (g.workers.length && g.morale < 40)
     out.push({ text: "Trivselen blant de ansatte er lav, og noen kan si opp. Se Folk.", view: "folk", sub: "ansatte" });
+  // Lav kundevurdering (B-161): si hva som gir bedre karakter
+  const recentRating = g.ratings.length >= 5 ? avgRating(g, 5) : null;
+  if (recentRating !== null && recentRating < 6)
+    out.push({
+      text: `Kundene gir deg lav karakter (${fmtNum(Math.floor(recentRating * 10) / 10, 1)} av 10). Lever tidligere, og velg en resept med mer margin til kravene. Se Salg → Ordrekø.`,
+      view: "salg",
+      sub: "ko",
+    });
   {
     // Høy strømpris: råd om fastpris (B-105)
     const advice = fixedPriceAdvice(g, stats.hours);
