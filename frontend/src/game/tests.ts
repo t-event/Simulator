@@ -16,7 +16,16 @@ import {
 } from "./actions";
 import { MASTERY, masteryCost, masteryEffect, masteryOpen } from "./mastery";
 import { achievementsDone, checkAchievements, hasAchievement } from "./achievements";
-import { buyCosmetic, cosmeticBlocked, cosmeticOn, FACADE, facadeColors, setCosmetic } from "./cosmetics";
+import {
+  buyCosmetic,
+  cosmeticBlocked,
+  cosmeticOn,
+  FACADE,
+  facadeColors,
+  grantCosmetic,
+  setCosmetic,
+  trackCosmetic,
+} from "./cosmetics";
 import { CHALLENGES, checkChallenges } from "./challenges";
 import { ADDONS, CASTINGS, FURNACES, WIN_CASH } from "./data";
 import { advance, assessOffer, checkWin, fmtKr, log, makeCandidate, newGame } from "./engine";
@@ -752,6 +761,24 @@ test("Hendelser (B-171): messe ikke med omdømme på topp, naboene klager ikke i
     g.pendingDecision = { ...card!, resumeSpeed: 1 };
     resolveDecision(g, 0);
   }
+});
+
+test("Sesongstigen og nye titler (B-173): pynt på trinn 10–50, titler etter Stållegende", () => {
+  const g = newGame(85);
+  assert(
+    trackCosmetic(10)?.id === "sesongflagg" && trackCosmetic(50)?.id === "pokal" && !trackCosmetic(11),
+    "pynt på feil trinn",
+  );
+  assert(cosmeticBlocked(g, "pokal") === "season", "stigepynt kunne kjøpes");
+  grantCosmetic(g, "pokal");
+  assert(g.cosmetics.owned.includes("pokal") && g.cosmetics.on.includes("pokal"), "pynten ble ikke gitt");
+  g.stage = 4;
+  g.konsern.unlocked = true;
+  g.won = true;
+  const before = maxSisters(g);
+  g.cash = 6_000_000_000_000;
+  checkLegends(g);
+  assert(titleOf(g) === "Stålgigant" && maxSisters(g) === before + 6, `tittel ${titleOf(g)}, plass ${maxSisters(g)}`);
 });
 
 test("Salgsdirektøren kan oppgraderes i tre trinn (B-172)", () => {

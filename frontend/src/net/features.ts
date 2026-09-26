@@ -15,7 +15,11 @@ export const ACCOUNT_FEATURES = {
   borte: { name: "Mens du var borte", why: "Serveren måler hvor lenge du har vært borte." },
   ukens: {
     name: "Ukens utfordring",
-    why: "Du konkurrerer mot andre i samme liga, og serveren regner ut plassen, medaljene og ukekista.",
+    why: "Du konkurrerer mot de andre spillerne, og serveren regner ut plassen, medaljene og ukekista.",
+  },
+  stigen: {
+    name: "Sesongstigen",
+    why: "Serveren teller dagene du spiller, belønningene og ukeplasseringene, så stigen følger virkelig tid.",
   },
 } as const;
 

@@ -100,11 +100,34 @@ const ROOF: { apex: [number, number]; line: [number, number][] }[] = [
   },
 ];
 
-function Flag({ x, y }: { x: number; y: number }) {
+function Flag({ x, y, color = "#d23b3b" }: { x: number; y: number; color?: string }) {
   return (
     <g>
       <line x1={x} y1={y} x2={x} y2={y - 22} stroke="#d8dde3" strokeWidth={1.2} />
-      <path className="scene-flag" d={`M${x} ${y - 22} q 7 -3 14 0 t 0 9 q -7 3 -14 0 Z`} fill="#d23b3b" />
+      <path className="scene-flag" d={`M${x} ${y - 22} q 7 -3 14 0 t 0 9 q -7 3 -14 0 Z`} fill={color} />
+    </g>
+  );
+}
+
+/** Stjerna over verket (sesongstigen, B-173) */
+function Star({ x, y }: { x: number; y: number }) {
+  const pts = Array.from({ length: 10 }, (_, i) => {
+    const r = i % 2 ? 3 : 7.5;
+    const a = (Math.PI / 5) * i - Math.PI / 2;
+    return `${(x + r * Math.cos(a)).toFixed(1)},${(y + r * Math.sin(a)).toFixed(1)}`;
+  }).join(" ");
+  return <polygon className="scene-star" points={pts} fill="#ffd24a" stroke="#fff3c0" strokeWidth={0.6} />;
+}
+
+/** Sesongpokalen foran verket (sesongstigen, B-173) */
+function Trophy({ x }: { x: number }) {
+  return (
+    <g transform={`translate(${x} 178)`}>
+      <rect x={-6} y={-4} width={12} height={4} fill="#6b5a2a" />
+      <rect x={-1.5} y={-10} width={3} height={6} fill="#d4af37" />
+      <path d="M -7 -22 h 14 v 4 q 0 8 -7 8 q -7 0 -7 -8 Z" fill="#e6c34a" />
+      <path d="M -7 -20 q -4 0 -4 4 q 0 3 4 3" fill="none" stroke="#e6c34a" strokeWidth={1.2} />
+      <path d="M 7 -20 q 4 0 4 4 q 0 3 -4 3" fill="none" stroke="#e6c34a" strokeWidth={1.2} />
     </g>
   );
 }
@@ -407,7 +430,11 @@ export function PlantScene({ g, stats }: Props) {
       {/* Pynt på taket og foran verket (B-151) */}
       {cosmeticOn(g, "sol") && <SolarPanels from={roof.line[0]} to={roof.apex} />}
       {cosmeticOn(g, "lys") && <Lights line={roof.line} night={night} />}
-      {cosmeticOn(g, "flagg") && <Flag x={roof.apex[0]} y={roof.apex[1]} />}
+      {(cosmeticOn(g, "flagg") || cosmeticOn(g, "sesongflagg")) && (
+        <Flag x={roof.apex[0]} y={roof.apex[1]} color={cosmeticOn(g, "sesongflagg") ? "#e0b030" : undefined} />
+      )}
+      {cosmeticOn(g, "stjerne") && <Star x={roof.apex[0]} y={Math.max(14, roof.apex[1] - 38)} />}
+      {cosmeticOn(g, "pokal") && <Trophy x={stage === 0 ? 180 : 355} />}
       {cosmeticOn(g, "statue") && <Statue x={stage === 0 ? 150 : 385} />}
 
       {/* Ferdigvarelager */}

@@ -18,6 +18,8 @@ export interface Cosmetic {
   minStage?: number;
   /** Prestasjonen som trengs for å kjøpe */
   needs?: string;
+  /** Bare som belønning på sesongstigen, på dette trinnet (B-173) – kan ikke kjøpes */
+  seasonTier?: number;
 }
 
 export const COSMETICS: Cosmetic[] = [
@@ -67,7 +69,62 @@ export const COSMETICS: Cosmetic[] = [
     fp: 500,
     needs: "legende",
   },
+  // Sesongstigen (B-173): bare som belønning, aldri til salgs
+  {
+    id: "sesongflagg",
+    icon: "🏁",
+    name: "Sesongflagg",
+    description: "Et gyllent flagg på taket – du har klatret ti trinn på sesongstigen.",
+    fp: 0,
+    seasonTier: 10,
+  },
+  {
+    id: "gullfasade",
+    icon: "🟨",
+    name: "Gullfasade",
+    description: "Hallene i gull.",
+    fp: 0,
+    group: "fasade",
+    seasonTier: 20,
+  },
+  {
+    id: "nattfasade",
+    icon: "⬛",
+    name: "Nattsvart fasade",
+    description: "Matt svarte haller.",
+    fp: 0,
+    group: "fasade",
+    seasonTier: 30,
+  },
+  {
+    id: "stjerne",
+    icon: "⭐",
+    name: "Stjerne over verket",
+    description: "En stjerne som lyser over verket.",
+    fp: 0,
+    seasonTier: 40,
+  },
+  {
+    id: "pokal",
+    icon: "🏆",
+    name: "Sesongpokal",
+    description: "En stor pokal foran verket – toppen av sesongstigen.",
+    fp: 0,
+    seasonTier: 50,
+  },
 ];
+
+/** Pynten som gis på et trinn av sesongstigen, eller null */
+export function trackCosmetic(tier: number): Cosmetic | null {
+  return COSMETICS.find((c) => c.seasonTier === tier) ?? null;
+}
+
+/** Gir pynten fra sesongstigen (B-173) og slår den på */
+export function grantCosmetic(g: GameState, id: string): void {
+  if (!COSMETIC_BY_ID[id] || ownsCosmetic(g, id)) return;
+  g.cosmetics.owned.push(id);
+  setCosmetic(g, id, true);
+}
 
 export const COSMETIC_BY_ID = Object.fromEntries(COSMETICS.map((c) => [c.id, c])) as Record<string, Cosmetic>;
 
@@ -76,6 +133,8 @@ export const FACADE: Record<string, [string, string]> = {
   rod: ["#9a4a3c", "#864131"],
   bla: ["#3f6a94", "#365c82"],
   gronn: ["#4f7a55", "#436a48"],
+  gullfasade: ["#b8962e", "#a3842a"],
+  nattfasade: ["#2b2f36", "#23272d"],
 };
 
 export function ownsCosmetic(g: GameState, id: string): boolean {
@@ -93,6 +152,7 @@ export function cosmeticBlocked(g: GameState, id: string): string | null {
   const c = COSMETIC_BY_ID[id];
   if (!c) return "Finnes ikke";
   if (ownsCosmetic(g, id)) return null;
+  if (c.seasonTier) return "season";
   if (c.needs && !hasAchievement(g, c.needs)) return "needs";
   if (g.researchPoints < c.fp) return "fp";
   return null;

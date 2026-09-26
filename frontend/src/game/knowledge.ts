@@ -177,6 +177,7 @@ export const SEASON_CHAPTER: KnowledgeCard = {
     "I spillet dukker slike perioder opp som felles hendelser som treffer alle spillerne samtidig: skrapmangel, strømkrise, eksportboom, importpress og streik. Se etter dem øverst på Marked, og tilpass deg: kjøp skrap før prisen stiger, selg når stålprisen er høy.",
     "En sesong varer i et halvt år, og når den er over, starter den neste av seg selv. Du trenger en konto for å være med, og spillet du har, blir med som det er – også videre til neste sesong. Var du med i forrige sesong, får du en liten fordel når du starter et nytt spill.",
     "Merket ved navnet på topplista viser hvor langt spilleren har kommet: Garasje, Verksted, Støperi, Stålverk eller Storverk, og Konsern når konsernverdien passerer én milliard. Medaljene viser de tre beste plassene.",
+    "Sesongstigen på Verket varer hele sesongen: hver dag du spiller, henter dagens belønning og fullfører dagens oppdrag, gir poeng, og det samme gjør topp 3 på ukelista. Hvert trinn gir fagpoeng, og trinn 10, 20, 30, 40 og 50 gir pynt som bare finnes der. Den som spiller litt hver dag, kommer lengst.",
   ],
 };
 KNOWLEDGE.push(SEASON_CHAPTER);

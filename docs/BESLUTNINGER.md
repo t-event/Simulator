@@ -2827,3 +2827,33 @@ Topp 3 av alle får medalje og kiste. Kolonnen `league` står igjen med «alle»
 Salg-merket nederst vises ikke når salgsdirektøren signerer (B-171).
 
 **Konto (KONTO.md):** varsellinja og salgsdirektøren nei (regel 1); ukelista krever konto som før (regel 3).
+
+## B-173 Sesongstigen og flere titler (2026-09-26)
+Status: gjelder
+Brukeren: «En sesong varer akkurat nå i 6 mnd. På dag 3 har jeg absolutt alt. Jeg trenger ting å gjøre i 6 mnd. Lag
+ting som fungerer hele veien, slik at man ikke blir lei, du kan utvide med det vi allerede har laget.»
+
+**Hvorfor noe som følger virkelig tid:** på 10× går et spilldøgn på 12 sekunder, så alt som måles i spilldøgn, tonn eller
+kroner er borte på få dager for den som spiller mye. Det eneste som varer, er det som er bundet til virkelige dager.
+
+**Sesongstigen (migrasjon 024, kortet på Verket):** 50 trinn, 20 poeng per trinn. Poengene regnes ut på serveren av det
+den alt vet, og som bare kan skje én gang per virkelige dag eller uke (norsk tid):
+- 1 poeng per dag med spill i sesongen (en lagring på nett den dagen),
+- 2 poeng for dagens belønning og 3 for dagens oppdrag (`add_season_points` i `claim_daily_reward`/`claim_daily_missions`,
+  tabellen `season_points`),
+- 12 / 9 / 7 poeng for 1., 2. og 3. plass på ukelista (fra `weekly_results` i sesongen).
+Med spill hver dag blir det ca. 6 poeng per dag, så toppen nås omtrent ved sesongslutt; den som spiller et par dager i uka,
+kommer halvveis. Hvert trinn gir 20 + 2 × trinn fagpoeng (`claim_season_tiers`, `season_track_claims`, kan hentes én gang,
+også på tvers av enheter). Trinn 10, 20, 30, 40 og 50 gir pynt som bare finnes på stigen: sesongflagg, gullfasade,
+nattsvart fasade, stjerne over verket og sesongpokal (kan ikke kjøpes, «🔒 Sesongstigen, trinn N» i Pynt-arket).
+Fagboka (sesongkapitlet) forklarer stigen.
+
+**Flere titler:** etter Stållegende (1 000 mrd.) kommer Stålgigant (5 000 mrd., to datterverk til), Stålkolosse
+(25 000 mrd., modernisering til trinn 6), Stålmyte (100 000 mrd.) og Stålikon (1 000 000 mrd.). `title_of()` på serveren
+har de samme grensene.
+
+**Ikke gjort (forslag):** ventetid i konsernet (fase 4) ville også strukket spillet i virkelig tid, men brukeren ville
+vente med den. Landemerker (store byggeprosjekter med ett nytt per dag) kommer i neste leveranse.
+
+**Konto (KONTO.md):** stigen krever konto (regel 3 og 5: sammenlignbar og belønner virkelig tid), `stigen` i
+`ACCOUNT_FEATURES`; uten konto vises kortet med `NeedsAccount`. Titlene: som før.
