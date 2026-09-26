@@ -2,13 +2,13 @@
  * Små, raske tester av spillmotoren (B-097). Kjøres med `npx tsx src/game/tests.ts` og i CI.
  * Hver test bygger sin egen tilstand, så de ikke er avhengige av lagrede filer.
  */
-import { buyMastery, doResearch, scheduleCastingSwitch, setPowerDeal, upgradeOptions } from "./actions";
+import { buyMastery, doResearch, giveBonus, scheduleCastingSwitch, setPowerDeal, upgradeOptions } from "./actions";
 import { MASTERY, masteryCost, masteryEffect, masteryOpen } from "./mastery";
 import { achievementsDone, checkAchievements, hasAchievement } from "./achievements";
 import { buyCosmetic, cosmeticBlocked, cosmeticOn, FACADE, facadeColors, setCosmetic } from "./cosmetics";
 import { CHALLENGES, checkChallenges } from "./challenges";
 import { ADDONS, CASTINGS, FURNACES, WIN_CASH } from "./data";
-import { advance, assessOffer, checkWin, fmtKr, log, newGame } from "./engine";
+import { advance, assessOffer, checkWin, fmtKr, log, makeCandidate, newGame } from "./engine";
 import { logTopic, showToast, unseenCount } from "./inbox";
 import { KNOWLEDGE } from "./knowledge";
 import {
@@ -67,7 +67,7 @@ import {
   SISTER_TYPES,
   sisterProfit,
 } from "./konsern";
-import { computePlantStats, supportAdvice } from "./plant";
+import { bonusGap, computePlantStats, liftMorale, moraleNormal, supportAdvice } from "./plant";
 import { RESEARCH, researchOptions } from "./research";
 import { parseSave } from "./save";
 import { EAFSimulation } from "../sim/eaf";
@@ -766,6 +766,27 @@ test("Støpingen holder følge med stormodellene (B-157): 2 × 8 strenger til 25
     s.castTph >= s.meltTph * 0.98,
     `420 t med 3 maskiner: smelter ${s.meltTph.toFixed(0)}, støper ${s.castTph.toFixed(0)}`,
   );
+});
+
+test("Trivsel (B-159): lenge siden bonus senker normalnivået fra stålverket, bonus løfter det igjen", () => {
+  const g = newGame(70);
+  g.stage = 2;
+  g.workers.push(makeCandidate(g, "ovn"));
+  g.minute = 200 * 1440;
+  g.lastBonusDay = 0;
+  assert(bonusGap(g) === 0, "gap før stålverket");
+  g.stage = 3;
+  assert(bonusGap(g) === 15, `gap etter 200 døgn: ${bonusGap(g)}`);
+  g.lastBonusDay = 201 - 20;
+  assert(bonusGap(g) === 3, `gap etter 20 døgn: ${bonusGap(g)}`);
+  g.lastBonusDay = -99;
+  g.cash = 1e9;
+  assert(giveBonus(g).ok && bonusGap(g) === 0, "bonus fjernet ikke gapet");
+  // Hverdagsglede løfter høyst 15 over normalnivået; bonus kan gå helt til 100
+  g.lastBonusDay = -99;
+  g.morale = 50;
+  for (let i = 0; i < 200; i++) liftMorale(g, 0.5);
+  assert(Math.abs(g.morale - (moraleNormal(g) + 15)) < 1e-9, `taket: ${g.morale} mot ${moraleNormal(g) + 15}`);
 });
 
 if (failed) {

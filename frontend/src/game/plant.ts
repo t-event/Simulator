@@ -668,6 +668,31 @@ export function unlockedAddons(g: GameState): Addon[] {
 }
 
 /** Hvor mye trivselen løfter (over 1) eller trekker ned (under 1) de ansattes innsats */
+/**
+ * Hvor mye lavere normalnivået for trivselen er fordi det er lenge siden forrige bonus (B-159): fra stålverket faller
+ * det et halvt poeng per døgn etter 14 døgn uten bonus, høyst 15 poeng.
+ */
+export const BONUS_GRACE_DAYS = 14;
+export function bonusGap(g: GameState): number {
+  if (g.stage < 3 || !g.workers.length) return 0;
+  return Math.min(15, Math.max(0, day(g) - g.lastBonusDay - BONUS_GRACE_DAYS) * 0.5);
+}
+
+/** Normalnivået trivselen driver mot: 60, 70 med ledelse, lavere når det er lenge siden bonus (B-159) */
+export function moraleNormal(g: GameState): number {
+  return (hasResearch(g, "ledelse") ? 70 : 60) - bonusGap(g);
+}
+
+/**
+ * Hverdagsglede (skiftlag med fridager, leveranser i tide) løfter trivselen høyst 15 over normalnivået (B-159).
+ * Bonus, kurs og lønnstillegg kan løfte den helt til 100.
+ */
+export const EVERYDAY_LIFT = 15;
+export function liftMorale(g: GameState, amount: number): void {
+  const cap = Math.min(100, moraleNormal(g) + EVERYDAY_LIFT);
+  if (g.morale < cap) g.morale = Math.min(cap, g.morale + amount);
+}
+
 export function moraleFactor(g: GameState): number {
   return 0.85 + 0.3 * ((g.morale ?? 60) / 100);
 }
