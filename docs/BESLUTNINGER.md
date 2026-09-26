@@ -2547,3 +2547,24 @@ beslutninger og logg er ikke endret).
 **Balanse:** Verksted 8, Støperi 23, Stålverk 66, Storverk 137, nybegynner 155. Sjekken av kontrollrommet i
 `balance.ts` svarer nå på hendelseskort som dukker opp mens chargen gjør seg ferdig (og beholder farten, B-160).
 Ellers stoppet tida, og sjekken feilet når tilfeldighetene ga et kort akkurat da.
+
+## B-162 Tidslinja får tall fra samme øyeblikk som dagen (2026-09-26)
+Status: gjelder (justerer tonnsperren i B-158)
+Brukeren: «Figen ble borte fra topplista igjen?»
+
+**Hva skjedde:** Juksesperren flagget Figen for «117598 tonn på 1 døgn». Tidslinja viste dag 1026 → 1027 med
++117 598 t og dag 1027 → 1030 med bare +7 708 t. Til sammen ca. 31 000 t per døgn, som vanlig. Feilen var i appen:
+`uploadSave` leste dagen før den ventet på `save_game`, men kasse, konsernverdi og tonn etterpå. Spillet går videre
+mens lagringen venter på svar, så på 10× kunne dag 1027 få tallene fra dag 1030.
+
+**Endring:**
+- Appen leser alle tallene til tidslinja samtidig med dagen (`snapshot` i `net/sync.ts`). Ny nettest med en falsk
+  server som lar spillet gå tre døgn videre mens lagringen behandles.
+- Migrasjon 019: tonnsperren flagger bare hvis også snittet fra en lagring minst tre døgn tilbake er over 100 000 t per
+  døgn. Gamle utgaver av appen (før de har oppdatert seg) flagger da ikke ærlige spillere. Testet i databasen: feilen
+  over gir ikke flagg, 500 000 t på ett døgn gjør det.
+- Tonnflagg der snittet over noen døgn rundt flagget er normalt, er fjernet (bare Figen).
+
+**Lærdom:** alt som sendes sammen med en dag, må leses før første `await` (lagt i CLAUDE.md under fallgruver).
+
+**Konto (KONTO.md):** ingen ny funksjon.

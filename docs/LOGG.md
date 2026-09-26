@@ -5,6 +5,27 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 108 – 2026-09-26: topplista – Grane og Figen
+
+**Brukeren spurte:** om tallene på topplista stemmer (Grane fikk mye), og hvorfor Figen ble borte igjen.
+
+**Funnet:**
+- Grane er ærlig: spilte 610 døgn uten konto før første opplasting, og har 12 stålkomplekser (4,6 mrd. per døgn fra
+  konsernet) der de andre har 8 storverk og 4 komplekser. Samme tonn hjemme.
+- Figen ble flagget for «117598 tonn på 1 døgn» av en feil i appen: tallene til tidslinja ble lest etter at
+  lagringen var ferdig, mens dagen ble lest før.
+
+**Gjort:** B-162. Appen leser tallene samtidig med dagen (ny nettest). Migrasjon 019: tonnsperren ser også på snittet
+fra minst tre døgn tilbake, og Figens flagg er fjernet. Figen er tilbake på topplista.
+
+**Testet:** `npm test` (den nye testen feiler med den gamle koden), tsc, lint, validate, balance, build. Sperren
+testet i databasen med en transaksjon som rulles tilbake. Sikkerhetsrådene som før.
+
+**Gjenstår:** Supabase melder fortsatt «Leaked password protection disabled» (brukeren trodde det var skrudd på).
+Forslagene om Grane: råd om å bytte storverk med komplekser, sjekk av første opplasting, «koblet til på dag N».
+
+---
+
 ## Økt 107 – 2026-09-26: skrapvarsel, sesongquiz, «slaggen» og kundevurdering
 
 **Brukeren ba om:** varsel for alle ovner uten skrap, quiz for sesongkapitlene, «slaggen» (ikke «slagget») og

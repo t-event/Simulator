@@ -101,6 +101,8 @@ interface Fake {
   offline: boolean;
   /** Kalles når appen fornyer økta – en annen fane kan fornye samtidig */
   onRefresh: (() => void) | null;
+  /** Kalles mens save_game behandles, som om spillet går videre mens klienten venter på svar (B-162) */
+  onSaveGame: (() => void) | null;
 }
 function makeFake(): Fake {
   const f: Fake = {
@@ -113,6 +115,7 @@ function makeFake(): Fake {
     keepalive: [],
     offline: false,
     onRefresh: null,
+    onSaveGame: null,
   };
   const json = (status: number, body: unknown) =>
     new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
@@ -196,6 +199,7 @@ function makeFake(): Fake {
       // Som save_game i 008: lagrer bare over versjonen klienten kjenner
       const old = f.saves.get(id);
       if (old && old.rev !== Number(body.p_base_rev)) return json(200, null);
+      f.onSaveGame?.();
       const rev = (old?.rev ?? 0) + 1;
       f.saves.set(id, {
         state: body.p_state,
@@ -783,6 +787,22 @@ const main = async () => {
     await linkOnLogin(g);
     const s = f.snapshots.get("u-a@test")?.[0];
     assert(s && s.day === 1 && s.stage === 0 && s.reputation === 42.3 && s.equity > 0, `snapshot ${JSON.stringify(s)}`);
+  });
+
+  await test("Tidslinja (B-162): tallene er fra samme øyeblikk som dagen, selv om spillet går videre under lagringen", async () => {
+    const f = fresh();
+    await login(f);
+    const g = newGame(11);
+    g.totals.producedT = 1000;
+    // Spillet går tre døgn og 99 000 t videre mens lagringen venter på svar
+    f.onSaveGame = () => {
+      g.minute += 3 * 1440;
+      g.totals.producedT += 99_000;
+      g.cash += 1e9;
+    };
+    await linkOnLogin(g);
+    const s = f.snapshots.get("u-a@test")?.[0];
+    assert(s && s.day === 1 && s.produced_t === 1000, `snapshot ${JSON.stringify(s)}`);
   });
 
   await test("Kallenavn: for kort, tatt, og så OK; topplista viser meg", async () => {

@@ -179,6 +179,20 @@ export async function uploadSave(g: GameState, keepalive = false): Promise<void>
   const day = dayOf(g);
   // Sesongen leses før første await, så lagringen og tidslinja får samme verdi
   const season = g.season;
+  // Tallene til tidslinja leses samtidig med dagen (B-162). Spillet går videre mens lagringen venter på svar, og
+  // leses de etterpå, får dagen tall fra flere døgn senere – det så ut som 117 000 t på ett døgn for juksesperren
+  const snapshot = {
+    user_id: id,
+    day,
+    cash: Math.round(g.cash),
+    equity: Math.round(konsernEquity(g)),
+    stage: g.stage,
+    reputation: Math.round(g.reputation * 10) / 10,
+    // Til ukens utfordring (B-152)
+    produced_t: Math.round(g.totals.producedT),
+    season_id: season,
+    client_version: APP_VERSION,
+  };
   const rev = await rest<number | null>("rpc/save_game", {
     method: "POST",
     body: {
@@ -199,18 +213,7 @@ export async function uploadSave(g: GameState, keepalive = false): Promise<void>
     await rest("snapshots", {
       method: "POST",
       prefer: "resolution=merge-duplicates,return=minimal",
-      body: {
-        user_id: id,
-        day,
-        cash: Math.round(g.cash),
-        equity: Math.round(konsernEquity(g)),
-        stage: g.stage,
-        reputation: Math.round(g.reputation * 10) / 10,
-        // Til ukens utfordring (B-152)
-        produced_t: Math.round(g.totals.producedT),
-        season_id: season,
-        client_version: APP_VERSION,
-      },
+      body: snapshot,
       keepalive,
     });
     lastSnapshotDay = day;
