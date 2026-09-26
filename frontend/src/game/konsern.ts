@@ -20,6 +20,7 @@ import {
 } from "./engine";
 import { computePlantStats, day, gradeRecipe } from "./plant";
 import { auto, hasResearch } from "./research";
+import { masteryFactor } from "./mastery";
 import { chance, randInt } from "./random";
 import type { GameState, SisterPlant, SisterType } from "./types";
 
@@ -44,7 +45,67 @@ export const SISTER_TYPES: Record<SisterType, SisterSpec> = {
     profitPerDay: 20_000_000,
     description: "Et fullskala stålverk med flere ovner, valseverk og havn.",
   },
+  kompleks: {
+    name: "Stålkompleks",
+    price: 6_000_000_000,
+    profitPerDay: 110_000_000,
+    description:
+      "Flere storverk på ett sted med egen havn, eget kraftverk og valseverk for plater og profiler. Åpnes med tittelen Stålfyrste.",
+  },
 };
+
+/**
+ * Stålmilepæler etter sluttmålet (B-150): konsernet kan alltid vokse videre. Hver milepæl gir en tittel ved
+ * kallenavnet, fagpoeng (til mesterskapet) og mer å bruke pengene på. Sluttmålet 10 mrd. gir tittelen Stålbaron.
+ */
+export const WIN_TITLE = "Stålbaron";
+export const LEGENDS: { equity: number; title: string; fp: number; unlocks: string }[] = [
+  { equity: 25_000_000_000, title: "Stålmagnat", fp: 150, unlocks: "Datterverkene kan moderniseres til trinn 4." },
+  {
+    equity: 50_000_000_000,
+    title: "Stålfyrste",
+    fp: 250,
+    unlocks: "Stålkomplekser kan kjøpes, og det er plass til to datterverk til.",
+  },
+  { equity: 100_000_000_000, title: "Stålkonge", fp: 400, unlocks: "Datterverkene kan moderniseres til trinn 5." },
+  { equity: 250_000_000_000, title: "Stålkeiser", fp: 700, unlocks: "Plass til to datterverk til." },
+  { equity: 1_000_000_000_000, title: "Stållegende", fp: 1500, unlocks: "Du er en legende i stålverdenen." },
+];
+
+/** Tittelen spilleren har (den høyeste milepælen), eller null før sluttmålet */
+export function titleOf(g: GameState): string | null {
+  const n = g.konsern?.legends ?? 0;
+  if (n > 0) return LEGENDS[n - 1].title;
+  return g.won ? WIN_TITLE : null;
+}
+
+/** Høyeste moderniseringstrinn: 3, 4 med Stålmagnat, 5 med Stålkonge (B-150) */
+export function modernizeMax(g: GameState): number {
+  const n = g.konsern?.legends ?? 0;
+  return MODERNIZE_MAX + (n >= 1 ? 1 : 0) + (n >= 3 ? 1 : 0);
+}
+
+/** Stålkomplekser åpnes med tittelen Stålfyrste */
+export function kompleksOpen(g: GameState): boolean {
+  return (g.konsern?.legends ?? 0) >= 2;
+}
+
+/** Stålmilepælene etter sluttmålet: tittel, fagpoeng og en feiring */
+export function checkLegends(g: GameState): void {
+  const k = g.konsern;
+  if (!k?.unlocked || !g.won) return;
+  while (k.legends < LEGENDS.length && konsernEquity(g) >= LEGENDS[k.legends].equity) {
+    const l = LEGENDS[k.legends];
+    k.legends += 1;
+    awardPoints(g, l.fp);
+    g.legendCelebrate = k.legends - 1;
+    log(
+      g,
+      `Ny tittel: ${l.title}! Konsernet er verdt over ${fmtKr(l.equity)}. +${l.fp} fagpoeng. ${l.unlocks}`,
+      "good",
+    );
+  }
+}
 
 /** Modernisering av et datterverk: 30 % av prisen, +25 % overskudd per trinn, inntil tre trinn */
 export const MODERNIZE_SHARE = 0.3;
@@ -55,7 +116,9 @@ export const MAX_SISTERS = 6;
 export const MAX_SISTERS_BIG = 8;
 
 export function maxSisters(g: GameState): number {
-  return hasResearch(g, "storkonsern") ? MAX_SISTERS_BIG : MAX_SISTERS;
+  // Stålfyrste og Stålkeiser gir plass til to til hver (B-150)
+  const n = g.konsern?.legends ?? 0;
+  return (hasResearch(g, "storkonsern") ? MAX_SISTERS_BIG : MAX_SISTERS) + (n >= 2 ? 2 : 0) + (n >= 4 ? 2 : 0);
 }
 
 /** Pris på et nytt datterverk, med oppkjøpsavdelingen (B-120) */
@@ -73,6 +136,10 @@ export const SISTER_NAMES = [
   "Fjellverket",
   "Nesverket",
   "Sletteverket",
+  "Øyverket",
+  "Viksverket",
+  "Bakkeverket",
+  "Strandverket",
 ];
 
 /** Milepæler for konsernverdien på veien mot sluttmålet, med fagpoeng som belønning (B-119) */
@@ -107,7 +174,15 @@ export function sisterProfit(g: GameState, p: SisterPlant): number {
   const shared = 1 + (hasShared(g, "innkjop") ? 0.05 : 0) + (hasShared(g, "salg") ? 0.05 : 0);
   // Konsernforskningen (B-120)
   const research = (hasResearch(g, "konsernstyring") ? 1.1 : 1) * (hasResearch(g, "gronnkonsern") ? 1.1 : 1);
-  return spec.profitPerDay * (1 + MODERNIZE_GAIN * p.level) * shared * research * g.market.steelFactor;
+  // Mesterskapet «Konsernledelse» (B-150)
+  return (
+    spec.profitPerDay *
+    (1 + MODERNIZE_GAIN * p.level) *
+    shared *
+    research *
+    masteryFactor(g, "datterverk") *
+    g.market.steelFactor
+  );
 }
 
 /**
@@ -118,7 +193,9 @@ export const VALUE_DAYS = 60;
 
 export function sisterValue(g: GameState, p: SisterPlant): number {
   const steel = g.market?.steelFactor || 1;
-  return (sisterProfit(g, p) / steel) * VALUE_DAYS;
+  // Uten mesterskapet (B-150): ellers hopper konsernverdien når man kjøper mange nivåer på en gang, og juksesperren
+  // flagger det. Mesterskapet gir mer overskudd, og det kommer inn døgn for døgn.
+  return (sisterProfit(g, p) / steel / masteryFactor(g, "datterverk")) * VALUE_DAYS;
 }
 
 /** Verdien av datterverkene til sammen */
@@ -206,6 +283,16 @@ export function konsernOptions(g: GameState): KonsernOption[] {
         : null,
     run: (gg) => buySister(gg, "storverk"),
   });
+  // Stålkomplekset åpnes med tittelen Stålfyrste (B-150); før det vises det ikke
+  if (kompleksOpen(g))
+    add({
+      key: "kjop-kompleks",
+      title: "Kjøp et stålkompleks",
+      price: sisterPrice(g, "kompleks"),
+      gain: profitOf(g, "kompleks", 0),
+      blocked: full ? `Konsernet er fullt (${maxSisters(g)} datterverk) – selg et lite verk for å få plass` : null,
+      run: (gg) => buySister(gg, "kompleks"),
+    });
   // Felles funksjoner: 5 % mer i alle datterverkene, og litt hjemme
   const sisters = k.plants.reduce((a, p) => a + profitOf(g, p.type, p.level), 0);
   const sharedNow = 1 + (hasShared(g, "innkjop") ? 0.05 : 0) + (hasShared(g, "salg") ? 0.05 : 0);
@@ -233,7 +320,7 @@ export function konsernOptions(g: GameState): KonsernOption[] {
         blocked: null,
         run: (gg) => upgradeSister(gg, p.id),
       });
-    if (p.level < MODERNIZE_MAX)
+    if (p.level < modernizeMax(g))
       add({
         key: `mod-${p.id}`,
         title: `Moderniser ${p.name}`,
@@ -296,6 +383,8 @@ export function buySister(g: GameState, type: SisterType): { ok: boolean; messag
   const spec = SISTER_TYPES[type];
   if (!g.konsern.unlocked) return { ok: false, message: "Konsernet er ikke åpnet ennå." };
   if (g.konsern.plants.length >= maxSisters(g)) return { ok: false, message: `Høyst ${maxSisters(g)} datterverk.` };
+  if (type === "kompleks" && !kompleksOpen(g))
+    return { ok: false, message: "Stålkomplekser åpnes med tittelen Stålfyrste (konsernverdi 50 mrd.)." };
   if (type === "storverk" && !g.konsern.plants.some((p) => p.type === "stalverk"))
     return { ok: false, message: "Kjøp et stålverk først – konsernet må lære å drive et verk til." };
   const price = sisterPrice(g, type);
@@ -359,7 +448,7 @@ export function checkKonsernMilestones(g: GameState): void {
 export function modernizeSister(g: GameState, id: number): { ok: boolean; message: string } {
   const p = g.konsern.plants.find((x) => x.id === id);
   if (!p) return { ok: false, message: "Fant ikke verket." };
-  if (p.level >= MODERNIZE_MAX) return { ok: false, message: "Verket er fullt modernisert." };
+  if (p.level >= modernizeMax(g)) return { ok: false, message: "Verket er fullt modernisert." };
   const cost = modernizeCost(p, g);
   if (g.cash < cost) return { ok: false, message: "For lite penger" };
   addCost(g, "investering", cost);

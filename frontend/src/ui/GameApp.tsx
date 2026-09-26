@@ -2,13 +2,14 @@ import { RecipeGuideCoach } from "./RecipeGuide";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import "./game.css";
 import { STAGES, WIN_CASH } from "../game/data";
+import { LEGENDS, WIN_TITLE } from "../game/konsern";
 import { InstallTip } from "./InstallTip";
 import { completeManual, unlock } from "../game/engine";
 import { computePlantStats, day, energyPrice, idleOutsideHours, staffing } from "../game/plant";
 import { useGame, type GameApi } from "../game/useGame";
 import { resolveDecision } from "../game/decisions";
 import { maxSpeed, researchForSpeed, researchOptions } from "../game/research";
-import { upgradeOptions } from "../game/actions";
+import { masteryReady, upgradeOptions } from "../game/actions";
 import { buzz } from "./haptics";
 import { nextTutorialStep, skipTutorial, TUTORIAL } from "../game/tutorial";
 import type { GameState } from "../game/types";
@@ -223,6 +224,13 @@ function EndScreen({
             Utfordringene på storverket står under Verket.
           </p>
         )}
+        {won && (
+          <p>
+            👑 Du har fått tittelen <strong>{WIN_TITLE}</strong>. Nye titler venter: {LEGENDS[0].title} ved{" "}
+            {fmtKr(LEGENDS[0].equity)} og mer. Når all forskning er gjort, åpner <strong>mesterskapet</strong> under
+            Forskning, så fagpoengene alltid har noe å gå til.
+          </p>
+        )}
         <div className="g-row">
           {won && onContinue && (
             <button className="g-primary" onClick={onContinue}>
@@ -295,6 +303,34 @@ function Celebration({ g, onClose }: { g: GameState; onClose: () => void }) {
         </ul>
         <button className="g-primary" onClick={onClose}>
           Sett i gang
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Ny tittel etter sluttmålet (B-150): Stålmagnat, Stålfyrste … med det den låser opp */
+function LegendCelebration({ g, onClose }: { g: GameState; onClose: () => void }) {
+  const l = LEGENDS[g.legendCelebrate ?? 0];
+  const next = LEGENDS[(g.legendCelebrate ?? 0) + 1];
+  return (
+    <div className="g-modal" role="dialog" aria-modal="true" aria-labelledby="legend-title">
+      <div className="g-modal-card g-celebrate">
+        <div className="g-celebrate-burst" aria-hidden="true">
+          👑
+        </div>
+        <h2 id="legend-title">Ny tittel: {l.title}!</h2>
+        <p>
+          Konsernet er verdt over {fmtKr(l.equity)}. Du får {l.fp} fagpoeng til mesterskapet under Forskning.
+        </p>
+        <p>{l.unlocks}</p>
+        {next && (
+          <p className="g-muted">
+            Neste: {next.title} ved {fmtKr(next.equity)}.
+          </p>
+        )}
+        <button className="g-primary" onClick={onClose}>
+          Videre
         </button>
       </div>
     </div>
@@ -573,6 +609,7 @@ export function GameApp() {
     !!g.pendingManual ||
     !!g.pendingDecision ||
     g.celebrate !== null ||
+    g.legendCelebrate !== null ||
     g.gameOver ||
     (g.won && !winSeen);
 
@@ -607,7 +644,7 @@ export function GameApp() {
                 v.id === "salg"
                   ? g.contracts.filter((c) => c.status === "tilbud").length
                   : v.id === "forskning"
-                    ? researchOptions(g).filter((r) => r.available).length
+                    ? researchOptions(g).filter((r) => r.available).length + masteryReady(g)
                     : 0;
               return (
                 <button
@@ -699,6 +736,9 @@ export function GameApp() {
         />
       )}
 
+      {g.legendCelebrate !== null && g.celebrate === null && !g.pendingDecision && !g.pendingManual && (
+        <LegendCelebration g={g} onClose={() => act((gg) => void (gg.legendCelebrate = null))} />
+      )}
       {g.celebrate !== null && !g.pendingDecision && !g.pendingManual && (
         <Celebration g={g} onClose={() => act((gg) => void (gg.celebrate = null))} />
       )}

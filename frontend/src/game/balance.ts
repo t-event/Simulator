@@ -25,7 +25,10 @@ import {
   setTargetGrade,
   unitId,
   upgradeOptions,
+  buyMastery,
+  masteryReady,
 } from "./actions";
+import { MASTERY_IDS, masteryCost, masteryLevel } from "./mastery";
 import { resolveDecision } from "./decisions";
 import {
   applyAwayReward,
@@ -306,6 +309,16 @@ function botHour(g: GameState): void {
     if (!r || r.done || r.locked) continue;
     if (r.available) doResearch(g, r.id);
     else if (!r.reason?.startsWith("Krever")) break;
+  }
+  // I konsernet forsker testspilleren fram resten, og bruker så fagpoengene i mesterskapet (B-150)
+  if (g.konsern.unlocked) {
+    for (const r of researchOptions(g)) if (r.available) doResearch(g, r.id);
+    for (let i = 0; i < 20 && masteryReady(g) > 0; i++) {
+      const cheapest = MASTERY_IDS.map((id) => ({ id, cost: masteryCost(id, masteryLevel(g, id)) })).sort(
+        (a, b) => a.cost - b.cost,
+      )[0];
+      if (!buyMastery(g, cheapest.id).ok) break;
+    }
   }
   const stats = computePlantStats(g);
   const today = day(g);
@@ -658,7 +671,9 @@ if (process.argv.includes("--opphold")) {
           // Belønninger i mellom gir plass til like mange døgn til (bonus_days på serveren, B-149)
           let bonus = 0;
           for (let k = i + 1; k <= j; k++) bonus += s[k].bonus;
-          const allowed = (CAP[s[j].stage] + 0.25 * Math.max(s[i].eq, 0)) * (gap + bonus);
+          // Etter sluttmålet 50 % per døgn (migrasjon 015, B-150)
+          const pct = s[j].stage >= 4 && s[i].eq >= 10_000_000_000 ? 0.5 : 0.25;
+          const allowed = (CAP[s[j].stage] + pct * Math.max(s[i].eq, 0)) * (gap + bonus);
           const ratio = (s[j].eq - s[i].eq) / allowed;
           if (ratio > 1) flagged++;
           if (ratio > worst.ratio)

@@ -9,12 +9,15 @@ import {
   hireDirector,
   KONSERN_MILESTONES,
   KONSERN_SHARED,
+  kompleksOpen,
+  LEGENDS,
+  titleOf,
   konsernAdvice,
   konsernEquity,
   konsernOptions,
   maxSisters,
   MODERNIZE_GAIN,
-  MODERNIZE_MAX,
+  modernizeMax,
   SISTER_TYPES,
   sisterProfit,
   sellSister,
@@ -33,6 +36,34 @@ import { Bar, Card, Stat } from "./common";
 import { fmtKr } from "./format";
 
 type Act = GameApi["act"];
+
+/** Etter sluttmålet (B-150): tittelen og veien mot neste stålmilepæl */
+function LegendProgress({ g, equity }: { g: GameState; equity: number }) {
+  const n = g.konsern.legends;
+  const next = LEGENDS[n];
+  const from = n > 0 ? LEGENDS[n - 1].equity : WIN_CASH;
+  return (
+    <>
+      <p className="g-legend-title">
+        👑 Tittel: <strong>{titleOf(g)}</strong>
+      </p>
+      {next ? (
+        <>
+          <Bar
+            value={(Math.max(0, equity) - from) / (next.equity - from)}
+            tone="ok"
+            label={`Mot ${next.title}, ${fmtKr(next.equity)}`}
+          />
+          <p className="g-muted g-small-text">
+            Neste: <strong>{next.title}</strong> ved {fmtKr(next.equity)} – {next.fp} fagpoeng. {next.unlocks}
+          </p>
+        </>
+      ) : (
+        <p className="g-muted g-small-text">Alle stålmilepælene er nådd. Konsernet kan fortsatt vokse.</p>
+      )}
+    </>
+  );
+}
 
 /** Hvorfor en knapp ikke kan trykkes: sperret, eller hvor mye som mangler og omtrent når det er råd (B-119) */
 function whyNot(g: GameState, o: KonsernOption): string | null {
@@ -200,7 +231,7 @@ function PlantRow({ g, act, p, options }: { g: GameState; act: Act; p: SisterPla
         </span>
       </div>
       <p className="g-muted g-small-text">
-        {SISTER_TYPES[p.type].name} · modernisert {p.level} av {MODERNIZE_MAX} · verdt {fmtKr(sisterValue(g, p))}
+        {SISTER_TYPES[p.type].name} · modernisert {p.level} av {modernizeMax(g)} · verdt {fmtKr(sisterValue(g, p))}
       </p>
       {main && <BuyButton g={g} act={act} o={main} label={upgrade ? "Bygg ut til storverk" : "Moderniser"} />}
       <details className="g-details" onToggle={(e) => !(e.target as HTMLDetailsElement).open && setSelling(false)}>
@@ -264,6 +295,7 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
               {next && <p className="g-muted g-small-text">Neste milepæl: {fmtKr(next)} (gir fagpoeng).</p>}
             </>
           )}
+          {g.won && <LegendProgress g={g} equity={equity} />}
           <details className="g-details" open={k.plants.length === 0}>
             <summary>Slik fungerer konsernet</summary>
             <ol className="g-konsern-steps">
@@ -307,19 +339,21 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
       </div>
       <div className="g-col">
         <Card title="Kjøp og utvid">
-          {(Object.keys(SISTER_TYPES) as SisterType[]).map((t) => {
-            const spec = SISTER_TYPES[t];
-            return (
-              <div key={t} className="g-upgrade">
-                <strong>Nytt {spec.name.toLowerCase()}</strong>
-                <span className="g-muted g-small-text">
-                  {spec.description}
-                  {t === "storverk" && hasStalverk ? ` Billigere: bygg ut et av stålverkene dine.` : ""}
-                </span>
-                <BuyButton g={g} act={act} o={byKey(`kjop-${t}`)!} primary={false} />
-              </div>
-            );
-          })}
+          {(Object.keys(SISTER_TYPES) as SisterType[])
+            .filter((t) => t !== "kompleks" || kompleksOpen(g))
+            .map((t) => {
+              const spec = SISTER_TYPES[t];
+              return (
+                <div key={t} className="g-upgrade">
+                  <strong>Nytt {spec.name.toLowerCase()}</strong>
+                  <span className="g-muted g-small-text">
+                    {spec.description}
+                    {t === "storverk" && hasStalverk ? ` Billigere: bygg ut et av stålverkene dine.` : ""}
+                  </span>
+                  <BuyButton g={g} act={act} o={byKey(`kjop-${t}`)!} primary={false} />
+                </div>
+              );
+            })}
           {sharedIds
             .filter((id) => !owned.includes(id))
             .map((id) => {

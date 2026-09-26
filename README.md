@@ -38,7 +38,9 @@ og på feil, fordi du lærer av dem.
 | Stålverk | Lysbueovn 30 t, strengstøping | Avfosforering, øseovn, valseverk, rammeavtaler, *ta styringen* |
 | Storverk | Lysbueovn 90 t, fire eller seks strenger | Eksport, utfordringer, og konsernet med datterverk |
 
-Sluttmålet er et stålkonsern verdt 10 mrd. kr. Etterpå kan du spille videre.
+Sluttmålet er et stålkonsern verdt 10 mrd. kr og tittelen Stålbaron. Etterpå fortsetter spillet: nye titler ved 25,
+50, 100 og 250 mrd. og 1 billion, stålkomplekser i konsernet, og et mesterskap i Forskning der fagpoengene alltid har
+noe å gå til.
 
 ### Konto, toppliste og sesonger
 

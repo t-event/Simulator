@@ -2,7 +2,8 @@
  * Små, raske tester av spillmotoren (B-097). Kjøres med `npx tsx src/game/tests.ts` og i CI.
  * Hver test bygger sin egen tilstand, så de ikke er avhengige av lagrede filer.
  */
-import { doResearch, scheduleCastingSwitch, setPowerDeal, upgradeOptions } from "./actions";
+import { buyMastery, doResearch, scheduleCastingSwitch, setPowerDeal, upgradeOptions } from "./actions";
+import { MASTERY, masteryCost, masteryEffect, masteryOpen } from "./mastery";
 import { CHALLENGES, checkChallenges } from "./challenges";
 import { ADDONS, CASTINGS, FURNACES, WIN_CASH } from "./data";
 import { advance, assessOffer, checkWin, fmtKr, log, newGame } from "./engine";
@@ -36,6 +37,12 @@ import { scrapPrice } from "./engine";
 import {
   buySister,
   checkKonsernMilestones,
+  checkLegends,
+  kompleksOpen,
+  LEGENDS,
+  modernizeMax,
+  titleOf,
+  WIN_TITLE,
   directorPerDay,
   maxSisters,
   sisterPrice,
@@ -553,6 +560,63 @@ test("Gamle lagringer får dagens oppdrag (B-149)", () => {
   delete g.daily;
   const m = parseSave(JSON.stringify(g));
   assert(m!.daily && m!.daily.date === null && m!.daily.missions.length === 0, "mangler standard for daily");
+});
+
+test("Mesterskap (B-150): åpner etter all forskning, stigende pris, avtagende gevinst, virker på prisene", () => {
+  const g = newGame(60);
+  g.stage = 4;
+  g.researchPoints = 100_000;
+  assert(!masteryOpen(g) && !buyMastery(g, "pris").ok, "mesterskapet skulle være stengt");
+  g.researched = RESEARCH.map((r) => r.id);
+  assert(masteryOpen(g), "mesterskapet åpnet ikke etter all forskning");
+  const price = productPrice(g, "armering", null);
+  const scrap = scrapPrice(g, "blandet");
+  const power = energyPrice(g);
+  const fp = g.researchPoints;
+  assert(buyMastery(g, "pris").ok && buyMastery(g, "skrap").ok && buyMastery(g, "strom").ok, "kjøpet feilet");
+  assert(g.researchPoints === fp - 3 * masteryCost("pris", 0), "trakk feil antall fagpoeng");
+  assert(productPrice(g, "armering", null) > price * 1.009, "stålprisen gikk ikke opp");
+  assert(scrapPrice(g, "blandet") < scrap && energyPrice(g) < power, "skrap eller strøm ble ikke billigere");
+  // Hvert nivå koster mer og gir mindre, men aldri over maks
+  assert(masteryCost("pris", 5) > masteryCost("pris", 4), "prisen stiger ikke");
+  const gain = (l: number) => masteryEffect("pris", l + 1) - masteryEffect("pris", l);
+  assert(gain(10) < gain(1) && masteryEffect("pris", 500) <= MASTERY.pris.max, "gevinsten avtar ikke");
+  g.researchPoints = 0;
+  assert(!buyMastery(g, "datterverk").ok, "kunne kjøpe uten fagpoeng");
+});
+
+test("Stålmilepæler (B-150): titler etter sluttmålet, fagpoeng, flere verk og høyere modernisering", () => {
+  const g = newGame(61);
+  g.stage = 4;
+  g.konsern.unlocked = true;
+  g.won = false;
+  g.cash = 30_000_000_000;
+  checkLegends(g);
+  assert(g.konsern.legends === 0 && titleOf(g) === null, "titler før sluttmålet");
+  g.won = true;
+  assert(titleOf(g) === WIN_TITLE, "mangler tittelen for sluttmålet");
+  const fp = g.researchPoints;
+  const sisters = maxSisters(g);
+  checkLegends(g);
+  assert(g.konsern.legends === 1 && titleOf(g) === LEGENDS[0].title, `fikk ${titleOf(g)}`);
+  assert(g.researchPoints === fp + LEGENDS[0].fp && g.legendCelebrate === 0, "fagpoeng eller feiring mangler");
+  assert(modernizeMax(g) === 4 && maxSisters(g) === sisters && !kompleksOpen(g), "Stålmagnat ga feil opplåsing");
+  checkLegends(g);
+  assert(g.konsern.legends === 1, "samme milepæl to ganger");
+  g.cash = 120_000_000_000;
+  checkLegends(g);
+  assert(g.konsern.legends === 3 && titleOf(g) === "Stålkonge", `fikk ${titleOf(g)}`);
+  assert(modernizeMax(g) === 5 && maxSisters(g) === sisters + 2 && kompleksOpen(g), "opplåsingen stemmer ikke");
+  assert(buySister(g, "kompleks").ok && g.konsern.plants.some((p) => p.type === "kompleks"), "kjøp av kompleks");
+});
+
+test("Gamle lagringer får mesterskap og stålmilepæler (B-150)", () => {
+  const g = newGame(62) as unknown as Record<string, unknown>;
+  delete g.mastery;
+  delete g.legendCelebrate;
+  delete (g.konsern as Record<string, unknown>).legends;
+  const m = parseSave(JSON.stringify(g))!;
+  assert(m.mastery && m.legendCelebrate === null && m.konsern.legends === 0, "mangler standardverdier");
 });
 
 if (failed) {

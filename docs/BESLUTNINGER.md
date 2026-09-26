@@ -2213,3 +2213,57 @@ Automatikken:
   - tida borte er 0 første gang, deretter 3 t, så 0, og 2 t etter en lagring
   - vekst på 100 mill. på ett døgn: ikke flagget med 5 bonusdøgn, flagget uten
 - Sikkerhetsrådene viser bare det som er meningen.
+
+## B-150 Sluttspillet: mesterskap og stålmilepæler med titler (2026-09-26)
+Status: gjelder (utvider B-106, B-119 og B-120)
+Brukeren: «Hva skal vi gjøre for at de som er ferdig med spillet, fortsatt fortsetter … Daglig belønning blir litt
+meningsløs når man har fått alt. Noen har flere tusen fagpoeng.» Svar på forslagene: «Kjør på med alle dine forslag.»
+Denne beslutningen dekker forslag 1 og 2. Pynt og prestasjoner kommer i B-151, ukens utfordring og sesonger med vri i
+B-152.
+
+**Mesterskap** (`game/mastery.ts`, Forskning-fanen):
+- Åpner når all forskning er gjort, også konsernprosjektene.
+- Fire prosjekter som kan tas om og om igjen:
+  - Bedre priser: stålprisen, høyst +10 %
+  - Energieffektivisering: strømkostnaden, høyst −15 %
+  - Smartere skrapkjøp: skrapprisen, høyst −10 %
+  - Konsernledelse: overskuddet i datterverkene, høyst +30 %
+- Hvert nivå gir 10 % av det som gjenstår opp mot maks, så gevinsten per nivå blir mindre. Nivå 1 gir 1 % på prisen,
+  nivå 10 ca. 6,5 %.
+- Prisen er 100 fagpoeng for nivå 1 (150 for Konsernledelse) og stiger 25 % per nivå.
+- De som har tusenvis av fagpoeng, får brukt dem med én gang. Fagpoengene fra den daglige belønningen får mening igjen.
+- Tallet på Forskning-fanen teller også mesterskapsprosjekter man har råd til.
+- Før det åpner, står en kort forklaring på storverket.
+
+**Stålmilepæler etter sluttmålet** (`LEGENDS` i `game/konsern.ts`):
+- Sluttmålet 10 mrd. gir tittelen **Stålbaron**. Videre gir hver milepæl en tittel, fagpoeng og en feiring med 👑:
+
+| Konsernverdi | Tittel | Fagpoeng | Låser opp |
+| --- | --- | --- | --- |
+| 25 mrd. | Stålmagnat | 150 | Modernisering til trinn 4 |
+| 50 mrd. | Stålfyrste | 250 | Stålkomplekser (6 mrd., 110 mill. kr/døgn) og plass til 2 datterverk til |
+| 100 mrd. | Stålkonge | 400 | Modernisering til trinn 5 |
+| 250 mrd. | Stålkeiser | 700 | Plass til 2 datterverk til |
+| 1 billion | Stållegende | 1500 | – |
+
+- Konsernsiden viser tittelen og en stolpe mot neste milepæl. Seiersskjermen nevner titlene og mesterskapet.
+- Topplista viser tittelen i stedet for nivåmerket (migrasjon 014, `title_of()`). I sesongen gjelder verdien nå, på
+  «Alle tider» den beste noensinne.
+- Nye navn på datterverk: Øyverket, Viksverket, Bakkeverket, Strandverket.
+
+**Konto (KONTO.md):** mesterskapet og milepælene krever ikke konto, fordi de bare gjelder ditt eget spill (regel 1).
+Tittelen på topplista krever konto (regel 3).
+
+**Balanse:**
+- `balance.ts` er uendret (8/25/67/141, nybegynner 144). Mesterskapet åpner først etter all forskning.
+- Testspilleren forsker nå fram resten i konsernet og bruker fagpoengene i mesterskapet, så de lange kjøringene tar
+  det med.
+- `balance.ts --opphold` med mesterskap og milepæler flagget først fire opphold (133 % av det sperren tillater). Ved
+  50 mrd. kjøper testspilleren fire stålkomplekser og moderniserer dem samme døgn. Hvert kjøp er verdt litt mer enn
+  det koster (B-121), så konsernverdien steg 37 % på ett døgn.
+- **Juksesperren etter sluttmålet** (migrasjon 015): når forrige konsernverdi er minst 10 mrd., tillates 50 % vekst per
+  døgn i stedet for 25 %. Før sluttmålet er alt som før. Testet i databasen: +40 % flagges ikke, +79 % flagges.
+  `--opphold` gir nå høyst 70 %, ingen flagget.
+- Verdien av datterverkene regnes uten mesterskapet «Konsernledelse» (`sisterValue`). Ellers ville konsernverdien
+  hoppe når noen med tusenvis av fagpoeng kjøper mange nivåer på en gang. Mesterskapet gir mer overskudd, og det kommer
+  inn døgn for døgn.

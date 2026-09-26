@@ -27,12 +27,15 @@ export interface BoardRow {
   stage: number;
   /** Beste plassering i en sesong som er over, f.eks. «Sesong 1: 3. plass» (B-143), eller null */
   honor: string | null;
+  /** Tittel etter sluttmålet (Stålbaron … Stållegende, B-150), eller null */
+  title: string | null;
 }
 
 const STAGE_NAMES = ["Garasje", "Verksted", "Støperi", "Stålverk", "Storverk"];
 
 /** Merket ved navnet på topplista: hvor langt spilleren har kommet (B-139) */
-export function levelLabel(r: Pick<BoardRow, "stage" | "league">): string {
+export function levelLabel(r: Pick<BoardRow, "stage" | "league"> & { title?: string | null }): string {
+  if (r.title) return r.title;
   if (r.league === "gull") return "Konsern";
   return STAGE_NAMES[r.stage] ?? "Garasje";
 }
@@ -61,6 +64,7 @@ export async function fetchLeaderboard(kind: BoardKind, season: number | null = 
       league: string | null;
       stage: number | null;
       honor?: string | null;
+      title?: string | null;
     }[]
   >("leaderboard", { kind, lim, season });
   return rows.map((r) => ({
@@ -69,6 +73,7 @@ export async function fetchLeaderboard(kind: BoardKind, season: number | null = 
     league: r.league ?? "bronse",
     stage: Number(r.stage ?? 0),
     honor: r.honor ?? null,
+    title: r.title ?? null,
   }));
 }
 

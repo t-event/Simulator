@@ -35,6 +35,9 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Daglig belønning (sju dager) | Ja | Regel 4 | B-149 |
 | Dagens oppdrag | Ja | Regel 4 (bonusen én gang per virkelig dag) | B-149 |
 | Mens du var borte | Ja | Regel 4 | B-149 |
+| Mesterskap (forskning som tas om og om igjen) | Nei | Regel 1 | B-150 |
+| Stålmilepæler og titler i spillet | Nei | Regel 1 | B-150 |
+| Tittel ved kallenavnet på topplista | Ja | Regel 3 | B-150 |
 | Ventetid i konsernet (fase 4) | Nei (serverklokke med konto) | Regel 5 | PLAN-NETT |
 | Anbud og skrapauksjoner (fase 5) | Ja | Regel 3 og 7 | PLAN-NETT |
 | Varsel på mobilen (senere) | Ja | Varselet knyttes til kontoen | – |

@@ -1,7 +1,8 @@
 /**
  * Det spilleren kan gjøre: bygge ut, kjøpe utstyr, ansette, låne og styre produksjonen.
  */
-import { checkKonsernMilestones, checkKonsernUnlock, directorHour } from "./konsern";
+import { MASTERY, MASTERY_IDS, masteryCost, masteryEffect, masteryLevel, masteryOpen } from "./mastery";
+import { checkKonsernMilestones, checkKonsernUnlock, checkLegends, directorHour } from "./konsern";
 import { ADDONS, CASTINGS, FURNACES, GRADES, PRODUCTS, ROLES, SCRAP_IDS, STAGES, stageRef, type Addon } from "./data";
 import {
   addCost,
@@ -38,7 +39,7 @@ import {
 } from "./plant";
 import { newGradesAt, startRecipeGuide } from "./recipeGuide";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
-import type { GameState, GradeId, PowerDeal, RoleId, ScrapId, Worker } from "./types";
+import type { GameState, GradeId, MasteryId, PowerDeal, RoleId, ScrapId, Worker } from "./types";
 
 export type UpgradeKind = "stage" | "furnace" | "casting" | "addon";
 
@@ -393,6 +394,25 @@ export function doResearch(g: GameState, id: string): PurchaseResult {
   if (option.knowledge) unlock(g, option.knowledge);
   log(g, `Forskning ferdig: ${option.name}. ${option.effect}.`, "good");
   return { ok: true, message: `${option.name} er forsket fram.` };
+}
+
+/** Mesterskap (B-150): ett nivå til i et prosjekt, for fagpoeng */
+export function buyMastery(g: GameState, id: MasteryId): PurchaseResult {
+  if (!masteryOpen(g)) return fail("Mesterskapet åpnes når all forskning er gjort.");
+  const level = masteryLevel(g, id);
+  const cost = masteryCost(id, level);
+  if (g.researchPoints < cost) return fail(`Mangler ${Math.ceil(cost - g.researchPoints)} fagpoeng.`);
+  g.researchPoints -= cost;
+  g.mastery[id] = level + 1;
+  const pct = (masteryEffect(id, level + 1) * 100).toFixed(1).replace(".", ",");
+  log(g, `Mesterskap: ${MASTERY[id].name} nivå ${level + 1} – nå ${pct} % ${MASTERY[id].effect}.`, "good");
+  return { ok: true, message: `${MASTERY[id].name} nivå ${level + 1}.` };
+}
+
+/** Så mange mesterskapsprosjekter spilleren har fagpoeng til nå (tallet på Forskning-fanen) */
+export function masteryReady(g: GameState): number {
+  if (!masteryOpen(g)) return 0;
+  return MASTERY_IDS.filter((id) => g.researchPoints >= masteryCost(id, masteryLevel(g, id))).length;
 }
 
 /** Samarbeidet kan brukes én gang per uke (B-071; var én gang per døgn i B-064) */
@@ -831,6 +851,7 @@ function hourlyActions(g: GameState): void {
   runScheduledSwitch(g);
   directorHour(g);
   checkKonsernMilestones(g);
+  checkLegends(g);
   if (g.stage >= 4 && !g.konsern.unlocked) {
     const remaining = upgradeOptions(g).filter((o) => o.stage === 4 && !o.owned && o.kind !== "stage").length;
     checkKonsernUnlock(g, remaining);

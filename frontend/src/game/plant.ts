@@ -20,6 +20,7 @@ import {
   type Stage,
 } from "./data";
 import { auto, hasResearch } from "./research";
+import { masteryFactor } from "./mastery";
 import { worldFactor } from "./world";
 import type { Analysis, Crew, GameState, GradeId, PowerDeal, ProductId, RoleId, ScrapId, Worker } from "./types";
 
@@ -456,7 +457,7 @@ export function energyPrice(g: GameState, minute = g.minute): number {
   // Kraftavtale for konsernet: 10 % billigere strøm (B-120). Felles hendelser ligger i avtaleprisen (B-141).
   return furnaceType(g).fuel === "gass"
     ? GAS_PRICE
-    : powerPrice(g, minute) * (hasResearch(g, "konsernenergi") ? 0.9 : 1);
+    : powerPrice(g, minute) * (hasResearch(g, "konsernenergi") ? 0.9 : 1) * masteryFactor(g, "strom");
 }
 
 export function computePlantStats(g: GameState): PlantStats {
@@ -654,7 +655,8 @@ export function gradeFailures(a: Analysis, grade: GradeId): string[] {
 
 export function productPrice(g: GameState, product: ProductId, grade: GradeId | null): number {
   // Felles hendelser (eksportboom, importpress) ganger stålprisen (B-129)
-  const base = PRODUCTS[product].price * g.market.steelFactor * worldFactor(g, "steel");
+  // Mesterskapet «Bedre priser» (B-150)
+  const base = PRODUCTS[product].price * g.market.steelFactor * worldFactor(g, "steel") * masteryFactor(g, "pris");
   return base * (grade ? GRADES[grade].premium : 1);
 }
 

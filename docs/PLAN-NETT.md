@@ -242,7 +242,9 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
   måneder, 006 tidslinje per sesong, 007 toppliste med nivå, 008 lagring med versjon, 009 ny start i sesongen,
   010 rekorder («Alle tider» leser tabellen `records`, B-142), 011 sesongresultat (🎖 ved navnet og
   `season_history()`, B-143), 012 toppliste med kassa («Mest penger på bok», `records.best_cash`, B-144), 013 daglig
-  (daglig belønning, dagens oppdrag, mens du var borte og bonusdøgn i juksesperren, B-149).
+  (daglig belønning, dagens oppdrag, mens du var borte og bonusdøgn i juksesperren, B-149), 014 tittel ved
+  kallenavnet på topplista (`title_of()`, B-150), 015 juksesperren tillater 50 % vekst per døgn etter
+  sluttmålet (B-150).
 - Hva som krever konto, nå og i fase 4 og 5: `docs/KONTO.md` (B-149).
 - Flere enheter samtidig: bare enheten som spilles på, lagrer; den andre settes på pause med «Spill her» (B-143).
 - Merker ved sesongslutt (fase 3) er bygget som 🎖 med beste plassering ved kallenavnet (B-143).
