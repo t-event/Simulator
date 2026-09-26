@@ -2285,6 +2285,24 @@ button {
   border-left-color: var(--warning);
 }
 
+/* Avløsere som står fast på plasser (B-164) */
+.g-support-note {
+  font-size: 12px;
+}
+
+/* Hva som skjer med skiftene hvis man sier opp noen (B-164): bekreftelsen får hele bredden i raden */
+.g-worker > .g-fire-confirm {
+  grid-column: 1 / -1;
+}
+
+.g-fire-confirm > .g-small-text {
+  flex-basis: 100%;
+}
+
+.g-bad-text {
+  color: #f3a3a3;
+}
+
 /* Varsellista ligger på raden med nøkkeltall, så toppraden ikke blir for trang (B-089) */
 /* Varsellinja nederst i toppfeltet (B-116): fast høyde, så den aldri dekker eller flytter knapper */
 .g-notice {

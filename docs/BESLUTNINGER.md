@@ -2596,3 +2596,25 @@ Med fagprøven slått av blir tallet 155 igjen, men utslaget kommer fra at nybeg
 rundt dag 97 i frø 1, og den kjøpte lysbueovn før strengstøping og sto 80 døgn med blokkstøping), ikke fra lønna: uten
 lønnsøkningen ved fagbrev blir det også 184. Nybegynneren med «planlegg byttet» ble prøvd, men ga konkurs (byttet kjøpes
 uten buffer), så den ble fjernet.
+
+## B-164 Avløsere og oppsigelser blir forståelige (2026-09-26)
+Status: gjelder (justerer avløseranbefalingen i B-111)
+Brukeren: «Det er vanskelig å forstå hvor mange av hver type ansatt man trenger. Mange klager på at om man sparker en
+avløser, så trenger man plutselig en støper selv om man har 23 avløsere.»
+
+**Årsak:** Avløsere gjør to ting: de fyller faste plasser der det mangler egne folk (f.eks. støpere), og de tar plassen
+til dem som er syke. Kortet «Anbefalt i tillegg» talte alle avløserne mot de to som anbefales for fravær («23 av 2»),
+også dem som sto fast som støpere. Da så det ut som man hadde mange for mye, og sa man opp en som sto fast, manglet
+plutselig en støper. Tabellen skrev også «herav 14 vikarer» under egne folk, som var uklart.
+
+**Endring:**
+- `wildcardUse` (plant.ts): hvor mange avløsere som står fast på plasser (og som hva), og hvor mange som er ledige.
+- Anbefalingen heter «Ledige avløsere» og teller bare de ledige. Står noen fast, står det f.eks. «6 av 23 avløsere står
+  fast som 2 ovnsoperatører og 4 støpere, fordi det mangler egne folk der. Ansetter du dem, blir avløserne ledige.»
+- «Si opp» viser hva som skjer før man bekrefter (`fireImpact`): «Skiftene går som før», eller «Da går verket 2 skift i
+  stedet for 3: det mangler 1 støper.» Gjelder alle ansatte, ikke bare avløsere.
+- Tabellen: «X av Y står på en plass nå, Z er ledige til fravær. Sier du opp en avløser som står på en plass, mangler
+  den plassen.» Vikarer vises som «N borte, vikarer dekker».
+- Ved neste skiftlag står det at de ledige avløserne er regnet med i det som mangler.
+- Ingen endring i hvordan bemanningen regnes; bare hvordan den vises. Balansen er uendret.
+- **Konto (KONTO.md):** nei, regel 1.
