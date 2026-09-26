@@ -2029,7 +2029,11 @@ function updateAgreements(g: GameState, stats: PlantStats): void {
         "info",
       );
     }
-    if (a.status === "aktiv" && a.weeksSent < a.weeks && a.nextDay <= today) sendAgreementWeek(g, a);
+    // Er et bytte av støping planlagt, kommer det ikke nye ukeleveranser på det gamle produktet (B-163). Ellers ble
+    // byttet aldri gjort mens avtalen varte; avtalen avsluttes uten straff ved byttet (endStaleAgreements, B-040)
+    const leaving = g.pendingCastingSwitch ? castingType(g).product : null;
+    if (a.status === "aktiv" && a.weeksSent < a.weeks && a.nextDay <= today && a.product !== leaving)
+      sendAgreementWeek(g, a);
   }
   g.agreements = g.agreements.filter(
     (a) => a.closedDay !== -1 && (a.status === "tilbud" || a.status === "aktiv" || (a.closedDay ?? 0) >= today - 10),
@@ -2142,9 +2146,53 @@ export function makeCandidate(g: GameState, role?: RoleId): Worker {
     name: `${pick(g, FIRST_NAMES)} ${pick(g, LAST_NAMES)}`,
     role: r,
     skill,
-    salary: Math.round(ROLES[r].salary * (0.8 + 0.1 * skill) * (1 + 0.05 * g.stage)),
+    salary: normalSalary(g, r, skill),
     hiredDay: 0,
   };
+}
+
+/** Læretid for lærlinger i døgn, før fagprøven (B-163) */
+export const APPRENTICE_DAYS = 30;
+/** Ferdigheten som trengs for å bestå fagprøven, og døgn til neste forsøk ved stryk */
+export const EXAM_SKILL = 1.6;
+export const EXAM_RETRY_DAYS = 7;
+
+/** Vanlig lønn for en rolle og ferdighet på dette nivået (samme som for nye kandidater) */
+export function normalSalary(g: GameState, role: RoleId, skill: number): number {
+  return Math.round(ROLES[role].salary * (0.8 + 0.1 * skill) * (1 + 0.05 * g.stage));
+}
+
+/**
+ * Fagprøven (B-163): når læretida er over, går lærlingen opp til prøven. Består lærlingen, får den fagbrev, er ikke
+ * lærling lenger og får vanlig lønn. Stryker den, tas prøven på nytt om en uke.
+ */
+export function apprenticeExams(g: GameState): void {
+  const today = day(g);
+  for (const w of g.workers) {
+    if (w.apprenticeUntil === undefined || today < w.apprenticeUntil || isAbsent(g, w)) continue;
+    const name = w.name.replace(/ \(lærling\)$/, "");
+    if (w.skill >= EXAM_SKILL) {
+      w.apprenticeUntil = undefined;
+      w.name = name;
+      w.skill = Math.min(5, w.skill + 0.2);
+      w.salary = Math.max(w.salary, normalSalary(g, w.role, w.skill));
+      adjustMorale(g, 1);
+      awardPoints(g, 2);
+      countEvent(g, "fagbrev");
+      log(
+        g,
+        `🎓 ${name} har bestått fagprøven og fått fagbrev! Nå er ${name} fagarbeider med vanlig lønn (${fmtKr(w.salary)} per døgn). +2 fagpoeng.`,
+        "good",
+      );
+    } else {
+      w.apprenticeUntil = today + EXAM_RETRY_DAYS;
+      log(
+        g,
+        `${name} strøk på fagprøven og prøver igjen om ${EXAM_RETRY_DAYS} døgn. Folk lærer fortere med god trivsel og kurs.`,
+        "info",
+      );
+    }
+  }
 }
 
 function refreshCandidates(g: GameState): void {
@@ -2616,6 +2664,7 @@ function onDay(g: GameState, stats: PlantStats): void {
     for (const w of g.workers) if (!isAbsent(g, w)) w.skill = Math.min(5, w.skill + growth);
     if (stats.ownerWorks) g.ownerSkill = Math.min(4.5, g.ownerSkill + 0.04);
   }
+  apprenticeExams(g);
   updateMorale(g, stats);
   updateAbsence(g, stats);
   // Sykdom settes her, etter timesjekken: sjekk vikarene med én gang, så skiftet ikke faller en time (B-053)

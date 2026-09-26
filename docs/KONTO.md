@@ -43,6 +43,7 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Merker eller pynt vist for andre spillere (senere) | Ja | Regel 3 | B-151 |
 | Fortsett i samme fart etter et hendelseskort | Nei | Regel 1 | B-160 |
 | Kundevurdering 1–10 og sesongquiz | Nei (sesongquizen krever sesong, men teller ikke i prestasjonene) | Regel 1 | B-161 |
+| Lærlinger tar fagbrev | Nei | Regel 1 | B-163 |
 | Ventetid i konsernet (fase 4) | Nei (serverklokke med konto) | Regel 5 | PLAN-NETT |
 | Anbud og skrapauksjoner (fase 5) | Ja | Regel 3 og 7 | PLAN-NETT |
 | Varsel på mobilen (senere) | Ja | Varselet knyttes til kontoen | – |

@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 109 – 2026-09-26: lærlinger tar fagbrev
+
+**Brukeren ba om:** at lærlinger kan ta fagbrev, så de ikke er lærlinger for alltid.
+
+**Gjort:** B-163. Læretid 30 døgn, så fagprøve: bestått gir fagbrev, vanlig lønn og «(lærling)» fjernes; stryk gir ny
+prøve om 7 døgn. «🎓 Fagprøve om N døgn» under Folk → Ansatte, tekst i hendelseskortet og fagboka. Gamle lærlinger får
+fagprøve om tre døgn. Funnet underveis: et planlagt bytte av støping ble aldri gjort mens en rammeavtale på det gamle
+produktet varte – rettet.
+
+**Testet:** tsc, lint, `npm test` (to nye tester), validate, balance (exit 0; nybegynneren 184, se B-163), build.
+Playwright på 390 og 320 px: merket vises, ingen horisontal scrolling.
+
+**Gjenstår:** –
+
+---
+
 ## Økt 108 – 2026-09-26: topplista – Grane og Figen
 
 **Brukeren spurte:** om tallene på topplista stemmer (Grane fikk mye), og hvorfor Figen ble borte igjen.
