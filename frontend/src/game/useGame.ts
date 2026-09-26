@@ -6,6 +6,7 @@ import { maxSpeed } from "./research";
 import { advanceTutorial } from "./tutorial";
 import { advanceRecipeGuide } from "./recipeGuide";
 import { clearSave, loadGame, saveGame } from "./save";
+import { claimTab, isElsewhere, setBeforeRelease } from "./tabLock";
 import { showToast } from "./inbox";
 import type { GameState, LogEntry } from "./types";
 
@@ -201,6 +202,15 @@ export function useGame(): GameApi {
 
   const dismissToast = removeToast;
 
+  // Bare én fane spiller om gangen (B-176): denne fanen tar over, og en annen fane lagrer og stopper
+  useEffect(() => {
+    claimTab();
+    setBeforeRelease(() => {
+      if (gameRef.current) saveGame(gameRef.current);
+    });
+    return () => setBeforeRelease(null);
+  }, []);
+
   // Spilløkka
   useEffect(() => {
     if (!game) return;
@@ -208,16 +218,17 @@ export function useGame(): GameApi {
     let lastSave = last;
     const timer = setInterval(() => {
       const g = gameRef.current;
-      if (!g) return;
       const now = performance.now();
       const elapsed = Math.min((now - last) / 1000, MAX_ELAPSED_S);
       last = now;
+      if (!g || isElsewhere()) return;
       const wasRunning = g.speed > 0;
       if (g.speed > 0 && !g.pendingManual && !g.gameOver) {
         // Om natta, når verket står og ingenting skjer, går tida fortere (B-033)
         const boost = idleOutsideHours(g) ? IDLE_NIGHT_SPEED : 1;
         const gameMin = elapsed * g.speed * boost * GAME_MIN_PER_REAL_S;
         advance(g, gameMin);
+        if (boost > 1) g.boostMin = (g.boostMin ?? 0) + gameMin;
         // Svarfristen på forespørsler og rammeavtaler går i vanlig tempo (1×) selv om du spoler, så du rekker å
         // svare på 3× og 10× (B-071)
         const factor = g.speed * boost;

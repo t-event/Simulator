@@ -5,6 +5,27 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 122 – 2026-09-26: juks, skiftleder, endringslogg og landemerker
+
+**Brukeren ba om:** dobbeltsjekk at to faner eller fartsutvidelser i nettleseren ikke kan lure spillet; skiftledere
+sent i spillet som følger opp fraværet; en endringslogg i spillet (og at den huskes hver gang); landemerker skal tas
+manuelt, ikke av salgsdirektøren.
+
+**Gjort:**
+- B-176: to faner ga ikke dobbel fart, men lagret over hverandre – nå spiller bare én fane om gangen. Fartsutvidelser
+  kunne gi flere spilldøgn per time; migrasjon 025 legger inn fartskontroll i juksesperren (spillminutter mot serverens
+  klokke), og `at` settes av serveren.
+- B-177: salgsdirektøren lar landemerkene stå; Salg viser tall for dem.
+- B-178: rollen Skiftleder fra stålverket.
+- B-179: «Hva er nytt» etter oppdatering og under ⚙️, med sjekk i `npm test` og CI.
+
+**Testet:** tsc, lint, tester (nye for skiftleder og landemerker), endringslogg-sjekken, balanse (exit 0), build.
+Fartskontrollen i databasen (rullet tilbake). Playwright 390 og 320 px: to faner, «Hva er nytt», skiftlederen.
+
+**Gjenstår:** brukeren kan be testeren prøve fartsutvidelsen igjen – spilleren skal da bli flagget etter ca. 10 minutter.
+
+---
+
 ## Økt 121 – 2026-09-26: nytt kontrollrom
 
 **Brukeren ba om:** (fra lista i økt 117) «Å kjøre ovnen manuelt syntes alle er kjedelig. Bytt ut hele greia med noe som

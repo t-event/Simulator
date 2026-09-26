@@ -43,6 +43,10 @@ jobs:
         working-directory: frontend
         run: npx tsx src/net/tests.ts
 
+      - name: Endringsloggen dekker nyeste beslutning
+        working-directory: frontend
+        run: node scripts/sjekk-endringslogg.mjs
+
       - name: Balansetest av spillet
         working-directory: frontend
         run: npx tsx src/game/balance.ts

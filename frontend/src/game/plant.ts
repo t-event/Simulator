@@ -241,6 +241,7 @@ function countList(workers: Worker[]): Record<RoleId, number> {
     planlegger: 0,
     klasser: 0,
     murer: 0,
+    skiftleder: 0,
   };
   for (const w of workers) counts[w.role] += 1;
   return counts;
@@ -518,7 +519,8 @@ export function computePlantStats(g: GameState): PlantStats {
       w.role !== "vedlikehold" &&
       w.role !== "planlegger" &&
       w.role !== "klasser" &&
-      w.role !== "murer",
+      w.role !== "murer" &&
+      w.role !== "skiftleder",
   );
   const skills = floor.map((w) => w.skill);
   if (staff.ownerWorks) skills.push(g.ownerSkill, g.ownerSkill);
@@ -875,6 +877,13 @@ export function supportAdvice(g: GameState): SupportAdvice[] {
     "klasser",
     g.stage >= 2 ? 1 + spare : 0,
     `Riktig skrapblanding i chargene, og dårlige partier sendes i retur.${cover}`,
+  );
+  // Skiftlederen følger opp fraværet (B-178); på storverket to, så den ene dekker ferie
+  add(
+    "skiftleder",
+    g.stage >= 4 ? 2 : g.stage >= 3 ? 1 : 0,
+    "Følger opp fraværet av seg selv: advarsel til dem som misbruker egenmelding (ikke til dem som var syke), og færre syke." +
+      (g.stage >= 4 ? " To, så den ene dekker når den andre har ferie." : ""),
   );
   // Avløsere fyller hull i alle roller på skiftet. Ekstra skiftlag dekker mye fravær, men ikke når flere er borte
   // i samme rolle (B-111)

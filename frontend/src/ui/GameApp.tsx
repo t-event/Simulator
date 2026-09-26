@@ -1,6 +1,9 @@
 import { RecipeGuideCoach } from "./RecipeGuide";
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import "./game.css";
+import { isElsewhere, onTabChange, playHere } from "../game/tabLock";
+import { markChangelogSeen, unseenChangelog } from "../game/changelog";
+import { ChangelogSheet } from "./Changelog";
 import { STAGES, WIN_CASH } from "../game/data";
 import { LEGENDS, WIN_TITLE } from "../game/konsern";
 import { InstallTip } from "./InstallTip";
@@ -543,9 +546,31 @@ function NoticeLine({ api, unseen, onOpen }: { api: GameApi; unseen: number; onO
   );
 }
 
+/** Spillet er åpnet i en annen fane (B-176): denne fanen står stille til spilleren tar det tilbake */
+function OtherTab() {
+  const elsewhere = useSyncExternalStore(onTabChange, isElsewhere, isElsewhere);
+  if (!elsewhere) return null;
+  return (
+    <div className="g-modal" role="alertdialog" aria-modal="true" aria-label="Spillet er åpent i en annen fane">
+      <div className="g-modal-card">
+        <h2>Spillet er åpent et annet sted</h2>
+        <p>
+          Du har åpnet spillet i en annen fane eller et annet vindu. Bare ett vindu kan spille om gangen – ellers lagrer
+          de over hverandre. Spillet er lagret, og står stille her.
+        </p>
+        <button className="g-primary g-wide-action" onClick={playHere}>
+          Spill her
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function GameApp() {
   const api = useGame();
   const { game: g, act } = api;
+  // «Hva er nytt» etter en oppdatering (B-179). Regnes ut én gang: en ny spiller uten lagret spill får ikke lista
+  const [news, setNews] = useState(() => unseenChangelog(api.hasSave));
   const [view, setView] = useState<View>("verket");
   const [subTab, setSubTab] = useState<{ tab?: string; n: number }>({ n: 0 });
   const [bookOpen, setBookOpen] = useState(false);
@@ -601,6 +626,7 @@ export function GameApp() {
         <SeasonSync api={api} />
         <AutoUpdate api={api} />
         <Intro api={api} />
+        <OtherTab />
       </>
     );
 
@@ -664,13 +690,12 @@ export function GameApp() {
                 (stats.shifts === 0 ||
                   stats.shifts < staffing(g, true).shifts ||
                   (g.stage >= 2 && stats.shifts < 3 && g.workers.length < STAGES[g.stage].staffCap));
-              // Signerer salgsdirektøren for deg, trenger ikke Salg et tall (B-171)
+              // Signerer salgsdirektøren for deg, trenger ikke Salg et tall (B-171) – bortsett fra landemerkene, som du
+              // tar selv (B-177)
               const director = !!g.konsern?.director?.active;
               const badge =
                 v.id === "salg"
-                  ? director
-                    ? 0
-                    : g.contracts.filter((c) => c.status === "tilbud").length
+                  ? g.contracts.filter((c) => c.status === "tilbud" && (!director || c.landmark)).length
                   : v.id === "forskning"
                     ? researchOptions(g).filter((r) => r.available).length + masteryReady(g)
                     : 0;
@@ -795,8 +820,18 @@ export function GameApp() {
       <SeasonSync api={api} />
       <AutoUpdate api={api} />
       <CloudFollow api={api} />
+      <OtherTab />
       {/* Velkommen tilbake og daglig belønning (B-149): ikke oppå andre vinduer eller veiledningen */}
-      <DailySync api={api} blocked={modalOpen || resultOpen || g.tutorial !== null} />
+      {news.length > 0 && !modalOpen && !resultOpen && g.tutorial === null && (
+        <ChangelogSheet
+          entries={news}
+          onClose={() => {
+            markChangelogSeen();
+            setNews([]);
+          }}
+        />
+      )}
+      <DailySync api={api} blocked={modalOpen || resultOpen || g.tutorial !== null || news.length > 0} />
       {!modalOpen && <LoggedOutNotice onLogin={() => setSettingsOpen(true)} />}
       {!modalOpen && <SeasonResultNotice onOpen={setResultOpen} />}
       {!modalOpen && !resultOpen && <SeasonPrompt api={api} g={g} onOpenSettings={() => setSettingsOpen(true)} />}

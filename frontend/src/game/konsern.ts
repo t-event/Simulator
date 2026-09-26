@@ -625,7 +625,8 @@ export function directorHour(g: GameState): void {
   // Kundenettverket skaffer en forespørsel til når ordrekøen er kortere enn to døgns produksjon (B-172)
   if (level >= 2 && committedT(g) < perDay * 2 && chance(g, 0.25)) extraOffer(g, stats);
   const offers = g.contracts
-    .filter((c) => c.status === "tilbud")
+    // Landemerkene tar spilleren selv (B-177): de er en samling, ikke vanlig salg
+    .filter((c) => c.status === "tilbud" && !c.landmark)
     .sort((a, b) => b.tonnes * b.pricePerT - a.tonnes * a.pricePerT);
   for (const c of offers) {
     const check = assessOffer(g, stats, c, committedT(g));

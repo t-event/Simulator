@@ -190,6 +190,9 @@ export async function uploadSave(g: GameState, keepalive = false): Promise<void>
     reputation: Math.round(g.reputation * 10) / 10,
     // Til ukens utfordring (B-152)
     produced_t: Math.round(g.totals.producedT),
+    // Til fartskontrollen (B-176): spillminutter i alt og minutter spolt fram om natta
+    game_min: Math.floor(g.minute),
+    boost_min: Math.floor(g.boostMin ?? 0),
     season_id: season,
     client_version: APP_VERSION,
   };

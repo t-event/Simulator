@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { CHANGELOG } from "../game/changelog";
+import { ChangelogSheet } from "./Changelog";
 import { borrow, repay } from "../game/actions";
 import { LOAN_INTEREST_PER_DAY } from "../game/data";
 import { creditLimit, maxLoan } from "../game/engine";
@@ -123,6 +125,7 @@ export function SettingsSheet({
   onClose: () => void;
 }) {
   const [confirmQuit, setConfirmQuit] = useState(false);
+  const [news, setNews] = useState(false);
   const season = useSeasonStatus()?.current ?? null;
   const act = api.act;
   return (
@@ -164,6 +167,12 @@ export function SettingsSheet({
           data – når du tømmer historikken, bruker privat modus eller ikke har åpnet siden på en stund. Logg inn, så
           ligger spillet trygt på nett uansett nettleser og enhet.
         </p>
+        <h3 className="g-subhead">Hva er nytt</h3>
+        <p className="g-muted">
+          Siste oppdatering: {CHANGELOG[0].title.toLowerCase()} ({CHANGELOG[0].date.split("-").reverse().join(".")}).
+        </p>
+        <button onClick={() => setNews(true)}>🆕 Se hva som er nytt</button>
+        {news && <ChangelogSheet onClose={() => setNews(false)} />}
         <h3 className="g-subhead">Spill på mobilen</h3>
         <InstallTip />
         <h3 className="g-subhead">Nytt spill</h3>

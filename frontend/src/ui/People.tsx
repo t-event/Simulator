@@ -17,7 +17,7 @@ import {
   sendOnCourse,
   warnAbsence,
 } from "../game/actions";
-import { sickSpells, WARNING_DAYS } from "../game/engine";
+import { SHIFT_LEADER_SICK, sickSpells, WARNING_DAYS } from "../game/engine";
 import { CREW_ROLES, ROLE_IDS, ROLES, STAGES, stageRef } from "../game/data";
 import { auto } from "../game/research";
 import {
@@ -115,6 +115,12 @@ function roleEffect(g: GameState, stats: PlantStats, role: RoleId): string | nul
         : "Trengs først når du har lysbueovn og øseovn. Til da fyller de bare plasser som avløsere ikke kan ta.";
     case "valse":
       return rollingActive(g) ? `Kjører valseverket${awayText}.` : "Trengs først når valseverket går.";
+    case "skiftleder": {
+      const often = g.workers.filter((w) => canWarn(g, w)).length;
+      return present
+        ? `På jobb${awayText}: følger opp fraværet og gir advarsel til dem som misbruker egenmelding. ${Math.round((1 - SHIFT_LEADER_SICK) * 100)} % færre syke.`
+        : `Borte nå – fraværet følges ikke opp${often ? ` (${often} med mye fravær)` : ""}.`;
+    }
     case "allround":
       return `${present} på jobb${awayText}: fyller plasser som mangler på skiftene (ovn, støping, kran, øseovn, valseverk).`;
     default:

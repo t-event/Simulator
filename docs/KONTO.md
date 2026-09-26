@@ -56,6 +56,11 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Flere titler etter Stållegende | Nei (titlen på topplista krever konto som før) | Regel 1 | B-173 |
 | Landemerker (ett per virkelig dag, mobilens dato) | Nei | Regel 1 | B-174 |
 | Kontrollrommet som spill, med rekord (lokal) | Nei | Regel 1 | B-175 |
+| Én fane om gangen | Nei | Regel 1 | B-176 |
+| Fartskontroll i juksesperren (tidslinja på nett) | Ja (gjelder bare det som lagres på nett) | Regel 2 | B-176 |
+| Landemerker tas manuelt (ikke av salgsdirektøren) | Nei | Regel 1 | B-177 |
+| Skiftleder som følger opp fraværet | Nei | Regel 1 | B-178 |
+| «Hva er nytt» (endringslogg) | Nei | Regel 1 | B-179 |
 | Ventetid i konsernet (fase 4) | Nei (serverklokke med konto) | Regel 5 | PLAN-NETT |
 | Anbud og skrapauksjoner (fase 5) | Ja | Regel 3 og 7 | PLAN-NETT |
 | Varsel på mobilen (senere) | Ja | Varselet knyttes til kontoen | – |
