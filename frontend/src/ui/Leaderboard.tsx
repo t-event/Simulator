@@ -290,10 +290,10 @@ export function Leaderboard({
         Lista regnes ut på serveren av det som er lagret på nett, én gang per spilldøgn, og oppdaterer seg mens du
         spiller. I sesongen gjelder spillet du har nå; på «Alle tider» står ditt beste resultat. Merket ved navnet viser
         hvor langt spilleren har kommet: fra Garasje til Storverk, Konsern når konsernverdien passerer 1 mrd., og en
-        tittel fra 10 mrd. (Stålbaron, Stålmagnat, Stålfyrste, Stålkonge, Stålkeiser, Stållegende). Ved navnet står også
-        den beste plasseringen i en sesong som er over: 🏆 for vinneren og 🎖 for topp 10. «Koblet til på dag N» betyr
-        at spillet ble spilt uten konto før det: da kan det ha vokst fort på lista. Kontoer med urimelig vekst holdes
-        utenfor.
+        tittel fra 10 mrd. (Stålbaron, Stålmagnat, Stålfyrste, Stålkonge, Stålkeiser, Stållegende og videre til
+        Stålikon). Ved navnet står også den beste plasseringen i en sesong som er over: 🏆 for vinneren og 🎖 for topp
+        10. «Koblet til på dag N» betyr at spillet ble spilt uten konto før det: da kan det ha vokst fort på lista.
+        Kontoer med urimelig vekst holdes utenfor.
       </p>
     </>
   );

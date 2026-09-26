@@ -72,6 +72,16 @@ export const LEGENDS: { equity: number; title: string; fp: number; unlocks: stri
   { equity: 100_000_000_000, title: "Stålkonge", fp: 400, unlocks: "Datterverkene kan moderniseres til trinn 5." },
   { equity: 250_000_000_000, title: "Stålkeiser", fp: 700, unlocks: "Plass til to datterverk til." },
   { equity: 1_000_000_000_000, title: "Stållegende", fp: 1500, unlocks: "Du er en legende i stålverdenen." },
+  // Flere titler etter Stållegende (B-173): de beste spillerne var der etter få dager
+  { equity: 5_000_000_000_000, title: "Stålgigant", fp: 2500, unlocks: "Plass til to datterverk til." },
+  {
+    equity: 25_000_000_000_000,
+    title: "Stålkolosse",
+    fp: 4000,
+    unlocks: "Datterverkene kan moderniseres til trinn 6.",
+  },
+  { equity: 100_000_000_000_000, title: "Stålmyte", fp: 6000, unlocks: "Du er en myte i stålverdenen." },
+  { equity: 1_000_000_000_000_000, title: "Stålikon", fp: 10000, unlocks: "Ingen har kommet lenger." },
 ];
 
 /** Tittelen spilleren har (den høyeste milepælen), eller null før sluttmålet */
@@ -81,10 +91,10 @@ export function titleOf(g: GameState): string | null {
   return g.won ? WIN_TITLE : null;
 }
 
-/** Høyeste moderniseringstrinn: 3, 4 med Stålmagnat, 5 med Stålkonge (B-150) */
+/** Høyeste moderniseringstrinn: 3, 4 med Stålmagnat, 5 med Stålkonge (B-150), 6 med Stålkolosse (B-173) */
 export function modernizeMax(g: GameState): number {
   const n = g.konsern?.legends ?? 0;
-  return MODERNIZE_MAX + (n >= 1 ? 1 : 0) + (n >= 3 ? 1 : 0);
+  return MODERNIZE_MAX + (n >= 1 ? 1 : 0) + (n >= 3 ? 1 : 0) + (n >= 7 ? 1 : 0);
 }
 
 /** Stålkomplekser åpnes med tittelen Stålfyrste */
@@ -120,7 +130,12 @@ export const MAX_SISTERS_BIG = 8;
 export function maxSisters(g: GameState): number {
   // Stålfyrste og Stålkeiser gir plass til to til hver (B-150)
   const n = g.konsern?.legends ?? 0;
-  return (hasResearch(g, "storkonsern") ? MAX_SISTERS_BIG : MAX_SISTERS) + (n >= 2 ? 2 : 0) + (n >= 4 ? 2 : 0);
+  return (
+    (hasResearch(g, "storkonsern") ? MAX_SISTERS_BIG : MAX_SISTERS) +
+    (n >= 2 ? 2 : 0) +
+    (n >= 4 ? 2 : 0) +
+    (n >= 6 ? 2 : 0)
+  );
 }
 
 /** Pris på et nytt datterverk, med oppkjøpsavdelingen (B-120) */

@@ -118,6 +118,7 @@ frontend/src/
     leaderboard.ts Toppliste og kallenavn   season.ts  Sesong og hendelser (butikk)
     daily.ts     Daglig på serveren (status, henting)   features.ts  Hva som krever konto   update.ts  Automatisk oppdatering
     weekly.ts    Ukens utfordring: status, ukelista og ukekista (B-152)
+    seasonTrack.ts Sesongstigen: poeng, trinn og henting (B-173)
     tests.ts     Tester uten nett (falsk tjeneste)
   ui/          Spillets skjermer (mobil først) og kontrollrommet
     Overview.tsx Verket med underfanene Oversikt, Anlegg, Økonomi (og Konsern)   Recipe.tsx  Resepten på Marked
@@ -131,6 +132,7 @@ frontend/src/
     Daily.tsx    Velkommen tilbake, daglig belønning og kortet «Dagens oppdrag» på Verket
     Achievements.tsx Prestasjonskortet på Verket og arket «Pynt verket» (🎨 på anleggsbildet)
     Weekly.tsx   Kortet «Ukens utfordring» på Verket og ukelista   Portal.tsx  Ark fra Verket legges i <body>
+    SeasonTrack.tsx Kortet «Sesongstigen» på Verket (B-173)
     control/     Kontrollrommet: den enkle styringen (SimpleControl + simpleRunner)
   sim/         Prosessmodell for lysbueovnen (brukes av kontrollrommet)
 frontend/public/  PWA: manifest, ikoner, service worker

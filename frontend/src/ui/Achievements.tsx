@@ -140,6 +140,8 @@ export function PyntModal({
                     >
                       {on ? "På" : "Av"}
                     </button>
+                  ) : blocked === "season" ? (
+                    <span className="g-pynt-lock">🔒 Sesongstigen, trinn {c.seasonTier}</span>
                   ) : blocked === "needs" && need ? (
                     <span className="g-pynt-lock">
                       🔒 Krever {need.icon} {need.name}

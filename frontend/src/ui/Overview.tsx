@@ -54,6 +54,7 @@ import { konsernReady } from "../game/konsern";
 import { DailyCard } from "./Daily";
 import { AchievementsCard, PyntModal } from "./Achievements";
 import { WeeklyCard } from "./Weekly";
+import { SeasonTrackCard } from "./SeasonTrack";
 import { BankCard } from "./Settings";
 import { KonsernTab } from "./Konsern";
 import { readyUpgrades, stationOptions, stationReady, type Station } from "./stations";
@@ -620,6 +621,7 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings }: Props)
             {g.tutorial === null && <DailyCard g={g} act={act} onLogin={onOpenSettings} />}
             {/* Ukens utfordring (B-152) */}
             {g.tutorial === null && <WeeklyCard g={g} act={act} onLogin={onOpenSettings} />}
+            {g.tutorial === null && <SeasonTrackCard g={g} act={act} onLogin={onOpenSettings} />}
             <Card title="Produksjon nå">
               {split ? (
                 <ul className="g-furnace-grades">

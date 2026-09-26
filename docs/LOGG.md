@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 119 – 2026-09-26: sesongstigen og flere titler
+
+**Brukeren ba om:** (fra lista i økt 117) noe å gjøre hele sesongen på seks måneder.
+
+**Gjort:** B-173. Migrasjon 024: sesongstigen med poeng fra spilte dager, dagens belønning, dagens oppdrag og topp 3 på
+ukelista, 50 trinn med fagpoeng og fem pyntegjenstander bare fra stigen. Kortet «Sesongstigen» på Verket. Fire nye titler
+etter Stållegende med to opplåsinger.
+
+**Testet:** tsc, lint, tester (ny for pynt og titler), balanse (exit 0), build. I databasen (rullet tilbake): poeng for
+dag, belønning og oppdrag, henting av trinn 1–5 gir 130 fagpoeng og kan ikke hentes to ganger. Sikkerhetsrådene som før
+(to nye tabeller uten policy, som meningen er). Playwright 390 og 320 px: kortet, «Hent» gir fagpoeng og sesongflagg,
+pynten i Pynt-arket, ingen horisontal scrolling, ingen feil.
+
+**Gjenstår:** landemerker og nytt kontrollrom.
+
+---
+
 ## Økt 118 – 2026-09-26: varsellinja, ukelista og salgsdirektøren
 
 **Brukeren ba om:** (fra lista i økt 117) varsellinja, ligaene og at salgsdirektøren kan oppgraderes.
