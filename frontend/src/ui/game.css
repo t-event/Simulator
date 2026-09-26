@@ -1488,6 +1488,15 @@ button {
   opacity: 0.85;
 }
 
+/* Farten etter kortet (B-160): hele linja kan trykkes */
+.g-decision-speed {
+  align-items: center;
+  min-height: 44px;
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--panel-border);
+}
+
 .g-celebrate {
   text-align: center;
 }

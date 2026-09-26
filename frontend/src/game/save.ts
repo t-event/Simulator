@@ -102,6 +102,7 @@ export function migrate(g: GameState): GameState {
   if ((g.settings.toasts as string) === "ingen") g.settings.toasts = "problemer";
   if (g.settings.toastTopics === undefined) g.settings.toastTopics = {};
   if (g.settings.toastSeconds === undefined) g.settings.toastSeconds = 6;
+  if (g.settings.keepSpeed === undefined) g.settings.keepSpeed = false;
   // Mesterskap og stålmilepæler (B-150)
   if (loose.mastery === undefined) loose.mastery = {};
   if (loose.legendCelebrate === undefined) loose.legendCelebrate = null;

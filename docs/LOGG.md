@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 106 – 2026-09-26: fortsett på 10× etter popups
+
+**Brukeren ba om:** et valg om å fortsette på 10× etter popups, i stedet for at tida alltid går ned til 1×.
+
+**Gjort:** B-160. Hendelseskort, tips og råd har linja «Fortsett på 10× etterpå» nederst når farten var over 1×.
+Valget huskes (`settings.keepSpeed`) og finnes også under ⚙️. Standard er 1× som før.
+
+**Testet:** tsc, lint, `npm test` (ny test), validate, balance, build. Playwright på 390 og 320 px: linja er 44 px høy
+og innenfor skjermen, huk av → spillet går på 10× etter kortet, ingen horisontal scrolling.
+
+**Gjenstår:** –
+
+---
+
 ## Økt 105 – 2026-09-26: trivselen sto på 100 uten bonus
 
 **Brukeren spurte:** hvorfor trivselen er 100 % når det er lenge siden forrige bonus.

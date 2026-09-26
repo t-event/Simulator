@@ -31,7 +31,7 @@ const TIPS: Tip[] = [
   {
     id: "tips-fart-ned",
     title: "Hvorfor gikk farten ned til 1×?",
-    text: "Når det skjer noe du må ta stilling til – et hendelseskort, et havari eller et tips – setter spillet farten ned til 1×. Da raser du ikke videre på 10× mens verket har problemer, og du rekker å se hva som skjedde. Se over Verket, og trykk 3× eller 10× øverst igjen når alt er i orden.",
+    text: "Når det skjer noe du må ta stilling til – et hendelseskort, et havari eller et tips – setter spillet farten ned til 1×. Da raser du ikke videre på 10× mens verket har problemer, og du rekker å se hva som skjedde. Se over Verket, og trykk 3× eller 10× øverst igjen når alt er i orden. Vil du heller fortsette i samme fart, huk av for det nederst på kortet.",
     when: (g) => (g.counters.fartNed ?? 0) > 0,
   },
   {

@@ -2495,3 +2495,21 @@ trivselen sto fast på 100 uten bonus.
 
 **Balanse:** Verksted 8, Støperi 25, Stålverk 65, Storverk 138 døgn (median), nybegynneren 165. Nybegynneren gir ikke
 bonus oftere enn før; trivselen rundt 60–70 holder den godt nok.
+
+## B-160 Valg om å fortsette i samme fart etter et kort (2026-09-26)
+Status: gjelder (justerer «1× etter kort» i B-033)
+Brukeren: «På alle popups går jo tiden ned til 1×. Man bør få et valg om å fortsette med 10× om man hadde det på fra
+før.»
+
+**Før:** Etter hvert hendelseskort, tips og råd gikk spillet videre på 1× (B-033), fordi brukeren tidlig trykket feil og
+raste videre på 10×. Kontrollrommet tok allerede tilbake farten fra før.
+
+**Endring:**
+- Kortet har en linje nederst, «Fortsett på 10× etterpå» (eller 3×), når farten før kortet var over 1×. Den kan hukes av
+  med én gang. Knappene på kortet venter fortsatt 0,8 s (B-033).
+- Valget huskes (`settings.keepSpeed`, standard av, så nye spillere får 1× som før). Det kan også slås av og på under ⚙️
+  Innstillinger når 3× er forsket fram.
+- Med valget på teller ikke kortet som «farten ble satt ned», så tipset om 1× (B-069) kommer ikke av det. Tipset
+  forteller nå om valget.
+- **Konto (KONTO.md):** nei, regel 1.
+- Nytt felt har standardverdi i `migrate()`. Test i `tests.ts`.

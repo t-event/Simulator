@@ -369,10 +369,12 @@ export function resolveDecision(g: GameState, option: number): void {
   const d = g.pendingDecision;
   if (!d) return;
   g.pendingDecision = null;
-  // Etter et kort går spillet videre på 1×, så man ikke raser videre på 10× (B-033)
-  g.speed = d.resumeSpeed > 0 ? 1 : 0;
+  // Etter et kort går spillet videre på 1×, så man ikke raser videre på 10× (B-033) – med mindre spilleren har
+  // valgt å fortsette i samme fart (B-160)
+  const keep = g.settings.keepSpeed && d.resumeSpeed > 1;
+  g.speed = d.resumeSpeed > 0 ? (keep ? d.resumeSpeed : 1) : 0;
   // Første gang farten settes ned fra 3× eller 10×, forklares det med et tips (B-069)
-  if (d.resumeSpeed > 1 && d.id !== "tips-fart-ned") countEvent(g, "fartNed");
+  if (d.resumeSpeed > 1 && !keep && d.id !== "tips-fart-ned") countEvent(g, "fartNed");
   const yes = option === 0;
   const n = (k: string) => Number(d.data[k] ?? 0);
   switch (d.id) {

@@ -335,6 +335,8 @@ export interface Settings {
   toastTopics: Partial<Record<LogTopic, boolean>>;
   /** Sekunder et varsel står på skjermen (B-115) */
   toastSeconds: number;
+  /** Etter et kort fortsetter spillet på farten fra før (3× eller 10×) i stedet for 1× (B-160) */
+  keepSpeed: boolean;
 }
 
 export interface ManualRequest {
