@@ -70,6 +70,7 @@ import {
 import { bonusGap, computePlantStats, liftMorale, moraleNormal, supportAdvice } from "./plant";
 import { RESEARCH, researchOptions } from "./research";
 import { parseSave } from "./save";
+import { resolveDecision } from "./decisions";
 import { EAFSimulation } from "../sim/eaf";
 import { SimpleRunner } from "../ui/control/simpleRunner";
 
@@ -787,6 +788,27 @@ test("Trivsel (B-159): lenge siden bonus senker normalnivået fra stålverket, b
   g.morale = 50;
   for (let i = 0; i < 200; i++) liftMorale(g, 0.5);
   assert(Math.abs(g.morale - (moraleNormal(g) + 15)) < 1e-9, `taket: ${g.morale} mot ${moraleNormal(g) + 15}`);
+});
+
+test("Fart etter kort (B-160): 1× som standard, samme fart hvis spilleren har valgt det", () => {
+  const g = newGame(71);
+  const card = (speed: number) => {
+    g.pendingDecision = { id: "test", title: "", text: "", options: [{ label: "OK" }], data: {}, resumeSpeed: speed };
+    g.speed = 0;
+  };
+  card(10);
+  resolveDecision(g, 0);
+  assert(g.speed === 1 && (g.counters.fartNed ?? 0) === 1, `standard: ${g.speed}`);
+  g.settings.keepSpeed = true;
+  card(10);
+  resolveDecision(g, 0);
+  assert(g.speed === 10 && g.counters.fartNed === 1, `samme fart: ${g.speed}`);
+  card(3);
+  resolveDecision(g, 0);
+  assert(g.speed === 3, `3×: ${g.speed}`);
+  const old = JSON.parse(JSON.stringify(g));
+  delete old.settings.keepSpeed;
+  assert(parseSave(JSON.stringify(old))!.settings.keepSpeed === false, "migrate gir standardverdi");
 });
 
 if (failed) {

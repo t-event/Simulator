@@ -2,6 +2,7 @@ import { useState } from "react";
 import { borrow, repay } from "../game/actions";
 import { LOAN_INTEREST_PER_DAY } from "../game/data";
 import { creditLimit, maxLoan } from "../game/engine";
+import { maxSpeed } from "../game/research";
 import type { PlantStats } from "../game/plant";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
@@ -134,6 +135,16 @@ export function SettingsSheet({
           </button>
         </header>
         <AutoToggle g={g} act={act} k="skipIdleNights" label="Spol fram om natta når verket står og ingenting skjer" />
+        {maxSpeed(g) > 1 && (
+          <label className="g-toggle">
+            <input
+              type="checkbox"
+              checked={g.settings.keepSpeed}
+              onChange={(e) => act((gg) => void (gg.settings.keepSpeed = e.target.checked))}
+            />
+            <span>Fortsett i samme fart (3× eller 10×) etter et hendelseskort, i stedet for å gå ned til 1×</span>
+          </label>
+        )}
         {stats.furnace.arc && (
           <label className="g-toggle">
             <input

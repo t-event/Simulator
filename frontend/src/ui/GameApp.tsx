@@ -249,7 +249,15 @@ function EndScreen({
   );
 }
 
-function DecisionCard({ g, onChoose }: { g: GameState; onChoose: (i: number) => void }) {
+function DecisionCard({
+  g,
+  onChoose,
+  onKeepSpeed,
+}: {
+  g: GameState;
+  onChoose: (i: number) => void;
+  onKeepSpeed: (keep: boolean) => void;
+}) {
   const d = g.pendingDecision!;
   // Knappene virker først etter et øyeblikk, så et trykk ment for noe annet ikke velger for deg (B-033)
   const [ready, setReady] = useState(false);
@@ -274,6 +282,18 @@ function DecisionCard({ g, onChoose }: { g: GameState; onChoose: (i: number) => 
             </button>
           ))}
         </div>
+        {d.resumeSpeed > 1 && (
+          // Farten etterpå (B-160): 1× som før (B-033), eller samme fart som før kortet. Valget huskes.
+          <label className="g-toggle g-decision-speed">
+            <input type="checkbox" checked={g.settings.keepSpeed} onChange={(e) => onKeepSpeed(e.target.checked)} />
+            <span>
+              Fortsett på {d.resumeSpeed}× etterpå
+              <span className="g-toggle-hint g-muted">
+                {g.settings.keepSpeed ? "Valget huskes til neste kort." : "Ellers går spillet videre på 1×."}
+              </span>
+            </span>
+          </label>
+        )}
       </div>
     </div>
   );
@@ -735,6 +755,7 @@ export function GameApp() {
             buzz(15);
             if (chapter) openBook(chapter);
           }}
+          onKeepSpeed={(keep) => act((gg) => void (gg.settings.keepSpeed = keep))}
         />
       )}
 
