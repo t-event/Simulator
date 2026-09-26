@@ -65,7 +65,10 @@ function UpgradeCard({
       {o.owned ? (
         <span className="g-badge-ok">I drift</span>
       ) : o.locked ? (
-        <span className="g-muted">Krever {stageRef(o.stage, stage)}</span>
+        <span className="g-muted">
+          {/* Stormodellene (B-154) er låst på storverket til konsernet, sluttmålet eller Stålmagnat */}
+          {o.stage <= stage && o.reason ? o.reason : `Krever ${stageRef(o.stage, stage)}`}
+        </span>
       ) : (
         <div className="g-row">
           <button
@@ -150,7 +153,9 @@ function OptionList({ g, options, act }: { g: GameState; options: UpgradeOption[
       )}
       {later.length > 0 && (
         <details className="g-role-group g-sheet-group">
-          <summary>Kommer på neste nivå ({later.length})</summary>
+          <summary>
+            {g.stage >= 4 ? "Kommer senere" : "Kommer på neste nivå"} ({later.length})
+          </summary>
           <div className="g-upgrades">
             {later.map((o) => (
               <UpgradeCard key={o.id} o={o} stage={g.stage} act={act} />

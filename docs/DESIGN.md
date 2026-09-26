@@ -56,6 +56,10 @@ Etter sluttmålet (10 mrd., tittelen Stålbaron) fortsetter spillet (B-150):
 - Når all forskning er gjort, åpner mesterskapet: fire prosjekter som kan tas om og om igjen, så fagpoengene alltid
   har noe å gå til.
 
+Stormodeller (B-154): lysbueovn 150 t og strengstøping med 8 strenger når konsernet åpner, 250 t og valseverk nr. 3
+ved sluttmålet, og en likestrømsovn på 420 t ved Stålmagnat. Jo større ovn, jo lengre charge (55–70 min), men flere
+tonn i timen.
+
 Dagens oppdrag blir større jo lenger man har kommet, og i konsernet kommer oppdrag om mesterskap, konsernverdi og
 datterverk (B-153).
 

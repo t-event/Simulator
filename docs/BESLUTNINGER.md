@@ -2363,3 +2363,47 @@ mål er for lett for de som har kommet langt».
 
 **Balanse:** `balance.ts` uendret (8/23/63/133, nybegynner 168). `--daglig 15`: 8/21/58/120, nybegynner 139,5; alle
 mål OK.
+
+## B-154 Stormodeller: større ovner og støpemaskiner, og lengre charger jo større ovnen er (2026-09-26)
+Status: gjelder (utvider B-106 og B-150)
+Brukeren: «De største ovnene er 90 tonn og strengstøpeanlegget er veldig lite. Det finnes mye større i virkeligheten
+… likestrømsovn 420 tonn. Jo større ovn, jo lengre tid skal smelteprosessen ta.»
+
+**Virkeligheten** (sjekket på nett):
+- Verdens største lysbueovn er en tvilling-likestrømsovn på 420 t, laget for ca. 360 t i timen. Det gir omtrent 70
+  minutter fra tapping til tapping.
+- De beste ovnene på 100–130 t klarer 30–40 minutter.
+- Spillets tider er lengre enn virkeligheten, så jeg skalerte fra 90-tonneren (60 min) og lot 420-tonneren treffe
+  360 t/h.
+
+**Nye ovner og utstyr** (ingen ny forskning, så mesterskapet ikke stenges igjen for dem som har forsket fram alt):
+
+| Utstyr | Pris | Tapp-til-tapp | Åpner |
+| --- | --- | --- | --- |
+| Lysbueovn 150 t | 90 mill. | 64 min | Når konsernet åpner |
+| Strengstøpemaskin, 8 strenger | 120 mill. | 400 t/h | Når konsernet åpner |
+| Lysbueovn 250 t | 220 mill. | 68 min | Ved sluttmålet (Stålbaron) |
+| Valseverk nr. 3 | 90 mill. | valsing ×3,2 (før ×2) | Ved sluttmålet |
+| Likestrømsovn 420 t | 700 mill. | 70 min, 360 kWh/t, mindre elektrodeforbruk | Ved Stålmagnat (25 mrd.) |
+
+- Lysbueovnen på 30 t går fra 75 til 55 minutter, så tida øker jevnt med størrelsen: 55, 60, 64, 68 og 70 min.
+  Slitasjen per charge er justert, så foringen varer like mange døgn som før. `balance.ts` er uendret.
+- Låste stormodeller står under «Kommer senere» i ovnsmenyen med hva som åpner dem (`gateBlocker`).
+- Markedet vokser for de største verkene (eksport): spotkvoten ganges med (smeltekapasitet / tre 90-tonnere)^0,7,
+  aldri under 1. Uten dette tjente 420-tonneren mindre enn 250-tonneren, fordi spotprisen falt.
+- Fagboka (Lysbueovnen) forklarer hvorfor større ovner bruker lengre tid per charge, men lager flere tonn i timen.
+
+**Målt** med `balance.ts --storovn 330` (samme konsernspill, tre ovner, 14 døgn):
+
+| Ovner | Tonn per døgn | Overskudd per døgn |
+| --- | --- | --- |
+| 90 t (som før) | 5 900 | 254 mill. |
+| 150 t + 8 strenger | 9 200 | 311 mill. |
+| 250 t + 8 strenger + valseverk 3 | 14 200 | 340 mill. |
+| 420 t + 8 strenger + valseverk 3 | 19 300 | 369 mill. |
+
+**Konto:** krever ikke konto (regel 1).
+
+**Balanse:**
+- `balance.ts`: 8/23/63/132, nybegynner 157. Testspilleren kjøper stormodellene i konsernet.
+- `--opphold`: ingen flagget, høyst 68 %.

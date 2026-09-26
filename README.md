@@ -40,7 +40,7 @@ og på feil, fordi du lærer av dem.
 
 Sluttmålet er et stålkonsern verdt 10 mrd. kr og tittelen Stålbaron. Etterpå fortsetter spillet: nye titler ved 25,
 50, 100 og 250 mrd. og 1 billion, stålkomplekser i konsernet, og et mesterskap i Forskning der fagpoengene alltid har
-noe å gå til. Prestasjoner gir merker på Verket, og fagpoeng kan brukes på pynt til anleggsbildet.
+noe å gå til. Stormodeller av ovner opp til en likestrømsovn på 420 tonn åpner i sluttspillet. Prestasjoner gir merker på Verket, og fagpoeng kan brukes på pynt til anleggsbildet.
 
 ### Konto, toppliste og sesonger
 

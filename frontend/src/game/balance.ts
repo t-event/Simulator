@@ -53,6 +53,7 @@ import {
   autoBuy,
   completeManual,
   fmtKr,
+  fmtT,
   newGame,
   TARGET_C,
 } from "./engine";
@@ -459,6 +460,12 @@ function botHour(g: GameState): void {
       "havn",
       "vakuum",
       "valseverk2",
+      // Stormodellene (B-154) åpner i konsernet og etter sluttmålet
+      "streng8",
+      "lysbue150",
+      "valseverk3",
+      "lysbue250",
+      "likestrom420",
     ],
   ];
   // Ovnstyper og ovnsutstyr kjøpes per ovn (B-074): ovn 1 først, så de andre
@@ -688,6 +695,43 @@ if (process.argv.includes("--opphold")) {
   console.log(`Største andel av det sperren tillater: ${(worst.ratio * 100).toFixed(0)} % – ${worst.text}`);
   console.log(flagged ? `AVVIK: ${flagged} opphold ville blitt flagget` : "Ingen opphold ville blitt flagget OK");
   process.exit?.(flagged ? 1 : 0);
+}
+if (process.argv.includes("--storovn")) {
+  // Stormodellene (B-154): samme konsernspill med ulike ovner. Viser tonn og overskudd hjemme per døgn over ti døgn
+  const base = run(1, Number(process.argv[process.argv.indexOf("--storovn") + 1]) || 330, false, false).final;
+  const variants: [string, string | null, string | null, string[]][] = [
+    ["som nå (90 t)", null, null, []],
+    ["150 t + 8 strenger", "lysbue150", "streng8", []],
+    ["250 t + 8 strenger + valseverk 3", "lysbue250", "streng8", ["valseverk3"]],
+    ["420 t + 8 strenger + valseverk 3", "likestrom420", "streng8", ["valseverk3"]],
+  ];
+  console.log(
+    `Utgangspunkt: dag ${day(base)}, ${base.furnaces.length} ovner (${base.furnaces.map((f) => f.type).join(", ")}), ${base.castingType}, kasse ${fmtKr(base.cash)}`,
+  );
+  for (const [name, furnace, casting, addons] of variants) {
+    const g = JSON.parse(JSON.stringify(base)) as GameState;
+    if (furnace) for (const f of g.furnaces) f.type = furnace;
+    if (casting) g.castingType = casting;
+    for (const a of addons) if (!g.owned.includes(a)) g.owned.push(a);
+    for (let h = 0; h < 24 * 14; h++) {
+      botHour(g);
+      advance(g, 60);
+    }
+    const days = g.history.slice(-10);
+    const sum = (f: (d: (typeof days)[number]) => number) => days.reduce((a, d) => a + f(d), 0) / days.length;
+    const net = sum(
+      (d) =>
+        Object.values(d.income).reduce((a, v) => a + (v ?? 0), 0) -
+        Object.entries(d.costs)
+          .filter(([k]) => k !== "investering")
+          .reduce((a, [, v]) => a + (v ?? 0), 0),
+    );
+    const st = computePlantStats(g);
+    console.log(
+      `${name.padEnd(34)} ${fmtT(sum((d) => d.producedT)).padStart(10)}/døgn  overskudd ${fmtKr(net).padStart(14)}/døgn  skift ${st.shifts}  mangler ${JSON.stringify(st.missing)}`,
+    );
+  }
+  process.exit?.(0);
 }
 if (process.argv.includes("--dump")) {
   // Lager et lagret spill på et gitt nivå, til testing av grensesnittet
