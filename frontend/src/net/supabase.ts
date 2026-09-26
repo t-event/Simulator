@@ -15,6 +15,8 @@ export interface Session {
 }
 
 const SESSION_KEY = "stalverk-konto-v1";
+/** Satt når økta ble avvist av tjenesten, så spilleren får vite hvorfor hen er logget ut (B-145) */
+const LOGGED_OUT_KEY = "stalverk-utlogget-v1";
 /** Fornyes når det er mindre enn dette igjen av økta */
 const REFRESH_MARGIN_S = 60;
 
@@ -63,7 +65,50 @@ export function setSession(s: Session | null): void {
   loaded = true;
   session = s;
   persist();
+  if (s) clearLoggedOut();
   notify();
+}
+
+/** Økta slik den står i localStorage – en annen fane i samme nettleser kan ha fornyet den (B-145) */
+function storedSession(): Session | null {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    return raw ? (JSON.parse(raw) as Session) : null;
+  } catch {
+    return null;
+  }
+}
+
+// Logger en annen fane inn, ut eller fornyer økta, følger denne fanen med (B-145)
+if (typeof window !== "undefined" && typeof window.addEventListener === "function")
+  window.addEventListener("storage", (e) => {
+    if (e.key !== SESSION_KEY) return;
+    loaded = true;
+    session = storedSession();
+    notify();
+  });
+
+/** Ble spilleren logget ut av seg selv (økta avvist)? Vises én gang ved innloggingen (B-145) */
+export function loggedOutByServer(): boolean {
+  try {
+    return localStorage.getItem(LOGGED_OUT_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+export function clearLoggedOut(): void {
+  try {
+    localStorage.removeItem(LOGGED_OUT_KEY);
+  } catch {
+    // Privat modus
+  }
+}
+function markLoggedOut(): void {
+  try {
+    localStorage.setItem(LOGGED_OUT_KEY, "1");
+  } catch {
+    // Privat modus
+  }
 }
 
 /** Konto-id for den som er logget inn, eller null */
@@ -202,7 +247,9 @@ export async function signOut(): Promise<void> {
   setSession(null);
   if (!s) return;
   try {
-    await fetchImpl(`${cloud.url}/auth/v1/logout`, { method: "POST", headers: headers(s.access_token) });
+    // Bare denne enheten (scope=local). Standarden er å logge ut alle enheter, så spillet på mobilen ble logget ut
+    // når man logget ut i en annen nettleser (B-145)
+    await fetchImpl(`${cloud.url}/auth/v1/logout?scope=local`, { method: "POST", headers: headers(s.access_token) });
   } catch {
     // Økta er borte lokalt uansett
   }
@@ -255,8 +302,14 @@ let refreshing: Promise<string | null> | null = null;
 
 /** Gyldig tilgangsnøkkel, fornyet om nødvendig. Null hvis ingen er logget inn eller økta er død. */
 export async function getToken(): Promise<string | null> {
-  const s = getSession();
+  let s = getSession();
   if (!s) return null;
+  // Har en annen fane fornyet økta, brukes den. En brukt refresh token avvises av tjenesten (B-145)
+  const stored = storedSession();
+  if (stored && stored.user.id === s.user.id && stored.expires_at > s.expires_at) {
+    session = s = stored;
+    notify();
+  }
   if (s.expires_at - Date.now() / 1000 > REFRESH_MARGIN_S) return s.access_token;
   if (!refreshing) {
     refreshing = (async () => {
@@ -267,8 +320,18 @@ export async function getToken(): Promise<string | null> {
           body: JSON.stringify({ refresh_token: s.refresh_token }),
         });
         if (!res.ok) {
-          // Uten nett beholder vi økta og prøver igjen senere; sier tjenesten nei, er økta død
-          if (res.status >= 400 && res.status < 500) setSession(null);
+          // Uten nett eller ved for mange forsøk (429) beholder vi økta og prøver igjen senere
+          if (res.status < 400 || res.status >= 500 || res.status === 408 || res.status === 429) return null;
+          // En annen fane kan ha fornyet økta i mellomtiden: da er den nye gyldig
+          const other = storedSession();
+          if (other && other.refresh_token !== s.refresh_token) {
+            session = other;
+            notify();
+            return other.access_token;
+          }
+          // Tjenesten sier nei: økta er død (f.eks. logget ut et annet sted). Spilleren får beskjed (B-145)
+          markLoggedOut();
+          setSession(null);
           return null;
         }
         const next = toSession((await res.json()) as Record<string, unknown>);
@@ -328,7 +391,10 @@ export async function rest<T>(
   path: string,
   init: { method?: string; body?: unknown; prefer?: string; keepalive?: boolean } = {},
 ): Promise<T> {
+  const hadSession = getSession() !== null;
   const token = await getToken();
+  // Døde økta underveis (avvist av tjenesten), skal ikke kallet gå videre uten innlogging (B-145)
+  if (hadSession && !getSession()) throw new NetError("Du er ikke logget inn.", 401);
   const body = init.body === undefined ? undefined : JSON.stringify(init.body);
   const res = await call(`${cloud.url}/rest/v1/${path}`, {
     method: init.method ?? "GET",

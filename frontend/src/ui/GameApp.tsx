@@ -18,7 +18,7 @@ import { Market } from "./Market";
 import { Overview } from "./Overview";
 import { People } from "./People";
 import { ResearchPage } from "./ResearchPage";
-import { AccountCard, CloudDot, CloudFollow } from "./Account";
+import { AccountCard, CloudDot, CloudFollow, LoggedOutNotice } from "./Account";
 import { SeasonPrompt, SeasonResultNotice, SeasonSync, SeasonTeaser } from "./Season";
 import { LeaderboardSheet } from "./Leaderboard";
 import { useSeasonStatus } from "./useSeason";
@@ -626,6 +626,7 @@ export function GameApp() {
 
       <SeasonSync api={api} />
       <CloudFollow api={api} />
+      {!modalOpen && <LoggedOutNotice onLogin={() => setSettingsOpen(true)} />}
       {!modalOpen && <SeasonResultNotice onOpen={setResultOpen} />}
       {!modalOpen && !resultOpen && <SeasonPrompt api={api} g={g} onOpenSettings={() => setSettingsOpen(true)} />}
       {g.gameOver && <EndScreen g={g} onRestart={api.quit} />}

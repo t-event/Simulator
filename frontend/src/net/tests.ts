@@ -11,9 +11,11 @@ import {
   getToken,
   KEEPALIVE_MAX,
   NetError,
+  loggedOutByServer,
   setFetch,
   setSession,
   signIn,
+  signOut,
   signUp,
   translateError,
   verifyCode,
@@ -82,6 +84,8 @@ interface Fake {
   /** keepalive per kall, samme rekkefølge som `calls` */
   keepalive: boolean[];
   offline: boolean;
+  /** Kalles når appen fornyer økta – en annen fane kan fornye samtidig */
+  onRefresh: (() => void) | null;
 }
 function makeFake(): Fake {
   const f: Fake = {
@@ -92,6 +96,7 @@ function makeFake(): Fake {
     calls: [],
     keepalive: [],
     offline: false,
+    onRefresh: null,
   };
   const json = (status: number, body: unknown) =>
     new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
@@ -141,6 +146,7 @@ function makeFake(): Fake {
       });
     }
     if (path.startsWith("/auth/v1/token?grant_type=refresh_token")) {
+      f.onRefresh?.();
       if (body.refresh_token !== "r1") return json(400, { error_description: "Invalid Refresh Token" });
       return json(200, {
         access_token: token("u-a@test"),
@@ -365,6 +371,48 @@ const main = async () => {
       user: { id: "u-a@test", email: "" },
     });
     assert((await getToken()) === null && getSession() !== null, "økta skulle beholdes uten nett");
+  });
+
+  await test("Utlogging gjelder bare denne enheten, og avvist økt gir beskjed (B-145)", async () => {
+    const f = fresh();
+    const soon = (refresh: string, access = "gammel") => ({
+      access_token: access,
+      refresh_token: refresh,
+      expires_at: Date.now() / 1000 + 10,
+      user: { id: "u-a@test", email: "" },
+    });
+    // Logg ut: bare denne enheten (scope=local), ellers logges mobilen ut når man logger ut i en annen nettleser
+    setSession(soon("r1"));
+    await signOut();
+    assert(
+      f.calls.some((c) => c.includes("/auth/v1/logout?scope=local")),
+      `logget ut alle enheter: ${f.calls.filter((c) => c.includes("logout")).join(", ")}`,
+    );
+    assert(!loggedOutByServer(), "egen utlogging skal ikke gi beskjed om avvist økt");
+    // Tjenesten avviser økta: logget ut, og beskjeden huskes til man logger inn igjen
+    setSession(soon("ukjent"));
+    assert((await getToken()) === null && getSession() === null, "avvist økt ble ikke logget ut");
+    assert(loggedOutByServer(), "mangler beskjed om at økta ble avvist");
+    setSession(soon("r1"));
+    assert(!loggedOutByServer(), "beskjeden ble ikke fjernet ved innlogging");
+    // En annen fane har fornyet økta: den nye brukes, uten ny fornyelse og uten utlogging
+    setSession(soon("r1"));
+    store.set(
+      "stalverk-konto-v1",
+      JSON.stringify({ ...soon("r9", "fra-annen-fane"), expires_at: Date.now() / 1000 + 3600 }),
+    );
+    const before = f.calls.length;
+    assert((await getToken()) === "fra-annen-fane", "brukte ikke økta fra den andre fanen");
+    assert(!f.calls.slice(before).some((c) => c.includes("grant_type=refresh_token")), "fornyet unødvendig");
+    // Fornyet den andre fanen mens denne ventet på svar, er den nye økta gyldig
+    setSession(soon("brukt"));
+    f.onRefresh = () =>
+      store.set(
+        "stalverk-konto-v1",
+        JSON.stringify({ ...soon("r9", "ny-fra-fanen"), expires_at: Date.now() / 1000 + 3600 }),
+      );
+    assert((await getToken()) === "ny-fra-fanen" && getSession() !== null, "logget ut selv om fanen hadde fornyet");
+    f.onRefresh = null;
   });
 
   await test("Lenken fra e-posten logger inn og rydder adressen", () => {

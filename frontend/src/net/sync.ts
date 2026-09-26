@@ -14,7 +14,7 @@ import { migrate, saveGame } from "../game/save";
 import { SAVE_VERSION } from "../game/engine";
 import type { GameState } from "../game/types";
 import { APP_VERSION, cloudConfigured } from "./config";
-import { getSession, NetError, rest, userId } from "./supabase";
+import { getSession, NetError, onSessionChange, rest, userId } from "./supabase";
 
 export type CloudStatus =
   | { kind: "off" }
@@ -307,6 +307,12 @@ export function resetCloud(): void {
   lastSnapshotDay = -1;
   setStatus({ kind: "off" });
 }
+
+// Logges spilleren ut av seg selv (økta avvist, eller utlogget i en annen fane), slås lagringen på nett av, så
+// ☁ ikke står igjen i toppfeltet (B-145)
+onSessionChange(() => {
+  if (!getSession() && status.kind !== "off") resetCloud();
+});
 
 /** Hva som skal skje med spillet når man logger inn (B-125) */
 export type LinkDecision =
