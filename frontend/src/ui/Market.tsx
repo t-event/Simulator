@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { PRODUCTS, SCRAP_IDS, SCRAP_TYPES, stageRef } from "../game/data";
-import { buyScrap, recipeEstimate, scrapPrice, scrapShort } from "../game/engine";
+import {
+  buyScrap,
+  recipeEstimate,
+  SCRAP_SELL_SHARE,
+  scrapPrice,
+  scrapSellPrice,
+  scrapShort,
+  sellScrap,
+} from "../game/engine";
 import {
   energyPrice,
   gradeRecipe,
@@ -102,6 +110,11 @@ export function Market({ g, stats, act, openTab }: Props & { openTab?: string })
                         <span className="g-scrap-stock">{fmtT(g.scrap[id].t)} på lager</span>
                       </summary>
                       <p className="g-muted">{type.description}</p>
+                      {g.scrap[id].t >= 1 && (
+                        <button className="g-small" onClick={() => act((gg) => sellScrap(gg, id, gg.scrap[id].t))}>
+                          Selg alt ({fmtT(g.scrap[id].t)}) for {fmtKr(g.scrap[id].t * scrapSellPrice(g, id))}
+                        </button>
+                      )}
                     </details>
                     {short.includes(id) && (
                       <p className="g-note g-warn">
@@ -181,6 +194,17 @@ export function Market({ g, stats, act, openTab }: Props & { openTab?: string })
                         onChange={(e) => act((gg) => void (gg.settings.autoBuyCredit = e.target.checked))}
                       />
                       <span>Planleggeren kan handle på kassekreditten når kassa er tom</span>
+                    </label>
+                    <label className="g-toggle">
+                      <input
+                        type="checkbox"
+                        checked={g.settings.plannerSells !== false}
+                        onChange={(e) => act((gg) => void (gg.settings.plannerSells = e.target.checked))}
+                      />
+                      <span>
+                        Planleggeren kan selge skrap ingen resept i ordrekøen trenger, når lageret er fullt (
+                        {Math.round(SCRAP_SELL_SHARE * 100)} % av prisen)
+                      </span>
                     </label>
                     {g.autoBuyNote && <p className="g-note g-warn">Planleggeren får ikke kjøpt {g.autoBuyNote}.</p>}
                     {!hasPlanner(g) && (

@@ -502,7 +502,9 @@ function botHour(g: GameState): void {
       key?.available && g.cash - key.price > reserve / 2 && !key.warning?.includes("penger til drift")
         ? key
         : undefined;
-    const saving = !!key && (key.reason === "For lite penger" || (key.available && !keyBuy));
+    // …og kjøper ikke annet mens et bytte av støping er planlagt, så pengene til byttet er der (B-171)
+    const saving =
+      !!g.pendingCastingSwitch || (!!key && (key.reason === "For lite penger" || (key.available && !keyBuy)));
     const buy =
       move ??
       keyBuy ??

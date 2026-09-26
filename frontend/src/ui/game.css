@@ -2449,6 +2449,38 @@ button {
   color: var(--warning);
 }
 
+/* Lagrer: skyen blinker svakt i stedet for å bli bredere (B-171) */
+.g-cloud.is-saving {
+  animation: g-cloud-pulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes g-cloud-pulse {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .g-cloud.is-saving {
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
+/* Oppdater-knappen på topplista snurrer mens den henter (B-171) */
+.g-board-reload.is-loading {
+  animation: g-spin 0.8s linear infinite;
+}
+
+@keyframes g-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Topplista (B-127) */
 .g-board {
   list-style: none;

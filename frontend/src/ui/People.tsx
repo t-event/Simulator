@@ -28,6 +28,7 @@ import {
   crewList,
   fireImpact,
   wildcardUse,
+  unitType,
   day,
   MAX_CREWS,
   daysUntilAllBack,
@@ -74,13 +75,18 @@ function roleEffect(g: GameState, stats: PlantStats, role: RoleId): string | nul
     }
     case "murer": {
       if (!stats.furnace.arc)
-        return "Murerne murer opp reservepotter til lysbueovnen. Før du har lysbueovn, har de ingenting å gjøre.";
+        return "Murerne murer opp reservepotter til lysbueovnene. Før du har lysbueovn, har de ingenting å gjøre.";
       const perDay = potRebuildPerDay(g);
-      const pots = g.furnaces.filter((f) => f.spareProgress < 1).length;
-      if (!pots) return `Alle reservepottene er klare${awayText}. Murerne begynner på neste potte etter et pottebytte.`;
+      // Hver lysbueovn har sin egen reservepotte (B-171)
+      const arcs = g.furnaces.filter((_, i) => unitType(g, i).arc);
+      const waiting = arcs.filter((f) => f.spareProgress < 1);
+      const pots = waiting.length;
+      const of = arcs.length > 1 ? ` (${pots} av ${arcs.length} ovner)` : "";
+      if (!pots)
+        return `${arcs.length > 1 ? `Reservepottene til alle ${arcs.length} lysbueovnene` : "Reservepotta"} er klare${awayText}. Murerne begynner på neste potte etter et pottebytte.`;
       return perDay > 0
-        ? `${present} på jobb (07–15)${awayText}: ${pots === 1 ? "reservepotta" : `${pots} reservepotter`} blir ferdig på ca. ${fmtNum((1 - Math.min(...g.furnaces.map((f) => f.spareProgress))) / perDay, 1)} døgn.`
-        : `Ingen murere på jobb${awayText} – reservepotta blir ikke murt opp.`;
+        ? `${present} på jobb (07–15)${awayText}: ${pots === 1 ? "reservepotta" : "reservepottene"}${of} blir ferdig på ca. ${fmtNum((1 - Math.min(...waiting.map((f) => f.spareProgress))) / perDay, 1)} døgn.`
+        : `Ingen murere på jobb${awayText} – ${pots === 1 ? "reservepotta" : "reservepottene"}${of} blir ikke murt opp.`;
     }
     case "vedlikehold": {
       const cover = Math.min(1, present / Math.max(1, g.stage));
@@ -472,6 +478,8 @@ export function People({ g, stats, act, openTab }: Props & { openTab?: string })
   );
   const [confirmFire, setConfirmFire] = useState<number | null>(null);
   const cap = STAGES[g.stage].staffCap;
+  // På storverket finnes det ikke noe større sted å flytte til (B-171)
+  const topStage = g.stage >= STAGES.length - 1;
   const session = courseSession(g);
   const counts = Object.fromEntries(ROLE_IDS.map((r) => [r, g.workers.filter((w) => w.role === r).length])) as Record<
     RoleId,
@@ -575,8 +583,10 @@ export function People({ g, stats, act, openTab }: Props & { openTab?: string })
                   .
                   {full ? (
                     <p className="g-small-text">
-                      Verket er fullt: {cap} av {cap} ansatte. Lei inn vikarer til plassene, si opp noen som ikke trengs
-                      på skiftene, eller flytt til et større verk.
+                      Verket er fullt: {cap} av {cap} ansatte. Lei inn vikarer til plassene
+                      {topStage
+                        ? " eller si opp noen som ikke trengs på skiftene."
+                        : ", si opp noen som ikke trengs på skiftene, eller flytt til et større verk."}
                     </p>
                   ) : (
                     <p className="g-small-text">
@@ -612,8 +622,10 @@ export function People({ g, stats, act, openTab }: Props & { openTab?: string })
                   )}
                   {full || g.workers.length + missing.reduce((a, [, n]) => a + n, 0) > cap ? (
                     <p className="g-small-text">
-                      Det er ikke plass til et lag til ({g.workers.length} av {cap} ansatte). Flytt til et større verk,
-                      eller si opp folk som ikke trengs.
+                      Det er ikke plass til et lag til ({g.workers.length} av {cap} ansatte).{" "}
+                      {topStage
+                        ? "Si opp folk som ikke trengs."
+                        : "Flytt til et større verk, eller si opp folk som ikke trengs."}
                     </p>
                   ) : (
                     <div className="g-row">
@@ -666,7 +678,12 @@ export function People({ g, stats, act, openTab }: Props & { openTab?: string })
             ) : (
               <>
                 {g.workers.length >= cap && (
-                  <p className="g-note g-warn">Verket er fullt ({cap} ansatte). Flytt til et større sted for flere.</p>
+                  <p className="g-note g-warn">
+                    {/* På storverket finnes det ikke noe større sted (B-171) */}
+                    {topStage
+                      ? `Verket er fullt (${cap} ansatte). Vil du ansette noen av søkerne, må du si opp noen først – f.eks. ledige avløsere eller støtteroller det er flere av enn anbefalt.`
+                      : `Verket er fullt (${cap} ansatte). Flytt til et større sted for flere.`}
+                  </p>
                 )}
                 <ul className="g-workers">
                   {g.candidates.map((w) => (

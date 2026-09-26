@@ -5,7 +5,7 @@
  * Hvert kort har en fristelse og en risiko, og lærer bort noe om hvordan et
  * stålverk drives.
  */
-import { SCRAP_TYPES, STAGES } from "./data";
+import { ROLES, SCRAP_TYPES, STAGES } from "./data";
 import {
   acceptContract,
   addCost,
@@ -29,7 +29,7 @@ import {
 import { computePlantStats, day, isAbsent, productPrice, satisfiedGrades } from "./plant";
 import { chance, pick, rand, uniform } from "./random";
 import { knowledgeCard } from "./knowledge";
-import type { Contract, Decision, GameState, RepCause } from "./types";
+import type { Contract, Decision, GameState, RepCause, Worker } from "./types";
 
 const DAILY_CHANCE = 0.25;
 
@@ -100,7 +100,8 @@ const MAKERS: Record<string, Maker> = {
     },
   }),
   messe: (g) => {
-    if (g.stage < 1) return null;
+    // Med omdømme på topp gir en messe ingenting (B-171)
+    if (g.stage < 1 || g.reputation >= 90) return null;
     const cost = 8_000 * (1 + g.stage) ** 2;
     return {
       id: "messe",
@@ -222,7 +223,8 @@ const MORE_MAKERS: Record<string, Maker> = {
     };
   },
   naboklage: (g) => {
-    if (g.stage < 1) return null;
+    // Er støyskjerm og filter satt opp på dette nivået, klager ikke naboene igjen før verket blir større (B-171)
+    if (g.stage < 1 || (g.decisionFixed?.naboklage ?? -1) >= g.stage) return null;
     const cost = 20_000 * (1 + g.stage) ** 2;
     return {
       id: "naboklage",
@@ -233,6 +235,119 @@ const MORE_MAKERS: Record<string, Maker> = {
         { label: "Beklag og vent", hint: "Kan gå over – eller havne i avisen." },
       ],
       data: { cost },
+    };
+  },
+  // Nye kort (B-171), så det ikke er de samme hele tida
+  firmafest: (g) => {
+    if (g.stage < 1 || g.workers.length < 4) return null;
+    const cost = 300 * g.workers.length * (1 + g.stage);
+    return {
+      id: "firmafest",
+      title: "Sommerfest",
+      text: `De ansatte spør om det blir sommerfest i år. Mat, musikk og buss koster ${fmtKr(cost)}.`,
+      options: [
+        { label: `Arranger fest (${fmtKr(cost)})`, hint: "Trivselen går opp." },
+        { label: "Ikke i år", hint: "Noen blir skuffet." },
+      ],
+      data: { cost },
+    };
+  },
+  sponsor: (g) => {
+    if (g.stage < 1 || g.reputation >= 95) return null;
+    const cost = 5_000 * (1 + g.stage) ** 2;
+    return {
+      id: "sponsor",
+      title: "Idrettslaget spør",
+      text: `Det lokale idrettslaget trenger nye drakter og spør om verket vil sponse dem for ${fmtKr(cost)}. Mange av de ansatte har barn på laget.`,
+      options: [
+        { label: `Spons laget (${fmtKr(cost)})`, hint: "Godt for omdømmet og trivselen." },
+        { label: "Nei takk" },
+      ],
+      data: { cost },
+    };
+  },
+  soknad: (g) => {
+    if (g.stage < 2) return null;
+    const cost = 30_000 * g.stage ** 2;
+    return {
+      id: "soknad",
+      title: "Innovasjonsmidler",
+      text: `Det er utlyst støtte til å gjøre stålproduksjon grønnere. En god søknad tar tid for ingeniørene og koster ca. ${fmtKr(cost)}. Omtrent halvparten av søkerne får støtte.`,
+      options: [
+        {
+          label: `Søk (${fmtKr(cost)})`,
+          hint: `Får du støtte: ${fmtKr(cost * 4)} og fagpoeng. Ellers er pengene brukt.`,
+        },
+        { label: "Ikke nå" },
+      ],
+      data: { cost },
+    };
+  },
+  pensjonist: (g) => {
+    if (g.stage < 1 || g.workers.length >= STAGES[g.stage].staffCap) return null;
+    const roles = g.workers.filter((w) => w.role === "ovn" || w.role === "stoper").map((w) => w.role);
+    const role = roles.length ? pick(g, roles) : "allround";
+    const w = makeCandidate(g, role);
+    w.skill = 4.5;
+    w.salary = Math.round(w.salary * 1.3);
+    return {
+      id: "pensjonist",
+      title: "Erfaren fagarbeider",
+      text: `${w.name} har jobbet 30 år på stålverk og er lei av å være pensjonist. Vil gjerne jobbe som ${ROLES[role].name.toLowerCase()} igjen, for ${fmtKr(w.salary)} per døgn – litt over vanlig lønn.`,
+      options: [{ label: "Ansett", hint: "Svært flink fra første dag, og lærer opp de andre." }, { label: "Nei takk" }],
+      data: { role, name: w.name, salary: w.salary },
+    };
+  },
+  kobbertyveri: (g) => {
+    if (g.stage < 1) return null;
+    const cost = 15_000 * (1 + g.stage) ** 2;
+    return {
+      id: "kobbertyveri",
+      title: "Kobbertyver i området",
+      text: `Politiet varsler om tyver som stjeler kobberkabler fra industriområder. Kameraer og vakthold koster ${fmtKr(cost)}.`,
+      options: [
+        { label: `Sett opp kameraer (${fmtKr(cost)})`, hint: "Trygt." },
+        { label: "Ta sjansen", hint: `Stjeler de kablene, kan reparasjonen koste ${fmtKr(cost * 3)}.` },
+      ],
+      data: { cost },
+    };
+  },
+  studenter: (g) => {
+    if (g.stage < 1) return null;
+    return {
+      id: "studenter",
+      title: "Besøk fra fagskolen",
+      text: "En klasse fra fagskolen vil se hvordan stål lages. Det tar litt tid for de ansatte, men elevene stiller gode spørsmål.",
+      options: [{ label: "Vis dem rundt", hint: "Fagpoeng – og kanskje en ny søker." }, { label: "Ikke nå" }],
+      data: {},
+    };
+  },
+  video: (g) => {
+    if (g.stage < 2) return null;
+    const cost = 10_000 * g.stage ** 2;
+    return {
+      id: "video",
+      title: "Video på nett",
+      text: `En video av mørk røyk fra verket sprer seg på sosiale medier. Det var damp fra kjølevannet, men mange tror det er forurensning. En åpen dag og målinger koster ${fmtKr(cost)}.`,
+      options: [
+        { label: `Forklar og vis målingene (${fmtKr(cost)})`, hint: "Folk får vite hva det var." },
+        { label: "Ignorer det", hint: "Det kan gå over – eller bli en sak." },
+      ],
+      data: { cost },
+    };
+  },
+  utlandsordre: (g) => {
+    const stats = computePlantStats(g);
+    if (g.stage < 3 || stats.dailyProductT <= 0) return null;
+    const product = stats.mainProduct;
+    const t = Math.max(1, Math.round(stats.dailyProductT * uniform(g, 2.5, 4)));
+    const pricePerT = Math.round(productPrice(g, product, "standard") * 1.15);
+    return {
+      id: "utlandsordre",
+      title: "Stor ordre fra utlandet",
+      text: `En kunde i utlandet vil ha ${fmtT(t)} i standardkvalitet innen ti døgn, og betaler 15 % over vanlig pris. En så stor ordre tar mye av kapasiteten.`,
+      options: [{ label: "Ta ordren", hint: "God pris, men sjekk at ordrekøen tåler det." }, { label: "Avslå" }],
+      data: { t, pricePerT, product },
     };
   },
   kundebesok: (g) => {
@@ -270,8 +385,16 @@ const MORE_MAKERS: Record<string, Maker> = {
   },
 };
 
+/** Lager kortet med denne id-en nå, eller null hvis det ikke passer (brukes av testene) */
+export function makeDecision(g: GameState, id: string): Omit<Decision, "resumeSpeed"> | null {
+  const all = { ...MAKERS, ...MORE_MAKERS };
+  return all[id]?.(g) ?? null;
+}
+
 /** Samme kort kommer ikke igjen før det har gått så mange døgn */
 const COOLDOWN_DAYS = 25;
+/** Noen kort kom for ofte (B-171): nettselskapet, naboene og messa får lengre pause */
+const CARD_COOLDOWN: Record<string, number> = { utkobling: 50, naboklage: 60, messe: 50, avis: 40, tilsyn: 40 };
 /** Minst så mange døgn mellom to kort */
 const MIN_GAP_DAYS = 2;
 
@@ -284,7 +407,9 @@ export function maybeCreateDecision(g: GameState): void {
   if (!chance(g, DAILY_CHANCE)) return;
   const all = { ...MAKERS, ...MORE_MAKERS };
   // Kort som ikke har vært vist på lenge, først de som aldri er vist
-  const ids = Object.keys(all).filter((id) => today - (g.decisionSeen[id] ?? -999) >= COOLDOWN_DAYS);
+  const ids = Object.keys(all).filter(
+    (id) => today - (g.decisionSeen[id] ?? -999) >= (CARD_COOLDOWN[id] ?? COOLDOWN_DAYS),
+  );
   for (let tries = 0; tries < 6 && ids.length; tries++) {
     const id = pick(g, ids);
     const d = all[id](g);
@@ -506,7 +631,12 @@ export function resolveDecision(g: GameState, option: number): void {
       if (yes) {
         addCost(g, "annet", n("cost"));
         adjustReputation(g, 1);
-        log(g, "Støyskjermen og filteret er på plass. Naboene er fornøyde. Omdømme +1.", "good");
+        g.decisionFixed = { ...(g.decisionFixed ?? {}), naboklage: g.stage };
+        log(
+          g,
+          "Støyskjermen og filteret er på plass. Naboene er fornøyde, og klager ikke igjen før verket blir større. Omdømme +1.",
+          "good",
+        );
       } else if (chance(g, 0.5)) {
         adjustReputation(g, -3);
         log(g, "Naboklagene havnet i avisen. Omdømme −3.", "bad");
@@ -514,6 +644,104 @@ export function resolveDecision(g: GameState, option: number): void {
         log(g, "Klagene stilnet av denne gangen.", "info");
       }
       return;
+    case "firmafest":
+      if (yes) {
+        addCost(g, "annet", n("cost"));
+        adjustMorale(g, 8);
+        log(g, "Sommerfesten ble en suksess. Trivsel +8.", "good");
+      } else {
+        adjustMorale(g, -2);
+        log(g, "Ingen sommerfest i år. Noen er skuffet (trivsel −2).", "info");
+      }
+      return;
+    case "sponsor":
+      if (!yes) return;
+      addCost(g, "annet", n("cost"));
+      adjustReputation(g, 2);
+      adjustMorale(g, 2);
+      log(g, "Laget spiller med verkets logo på draktene. Omdømme +2, trivsel +2.", "good");
+      return;
+    case "soknad":
+      if (!yes) return;
+      addCost(g, "annet", n("cost"));
+      if (chance(g, 0.5)) {
+        addIncome(g, "annet", n("cost") * 4);
+        awardPoints(g, 5 + g.stage * 2);
+        log(
+          g,
+          `Søknaden gikk gjennom! Verket får ${fmtKr(n("cost") * 4)} i støtte og ${5 + g.stage * 2} fagpoeng.`,
+          "good",
+        );
+      } else {
+        log(g, "Søknaden fikk avslag denne gangen.", "info");
+      }
+      return;
+    case "pensjonist": {
+      if (!yes || g.workers.length >= STAGES[g.stage].staffCap) return;
+      const w = makeCandidate(g, d.data.role as Worker["role"]);
+      w.name = String(d.data.name);
+      w.skill = 4.5;
+      w.salary = n("salary");
+      w.hiredDay = day(g);
+      g.workers.push(w);
+      log(g, `${w.name} er tilbake i arbeid og deler gjerne av 30 års erfaring.`, "good");
+      return;
+    }
+    case "kobbertyveri":
+      if (yes) {
+        addCost(g, "annet", n("cost"));
+        log(g, "Kameraene er oppe. Tyvene holder seg unna.", "good");
+      } else if (chance(g, 0.4)) {
+        addCost(g, "vedlikehold", n("cost") * 3);
+        log(g, `Tyver stjal kobberkabler i natt. Reparasjonen kostet ${fmtKr(n("cost") * 3)}.`, "bad");
+      } else {
+        log(g, "Tyvene gikk til et annet område denne gangen.", "info");
+      }
+      return;
+    case "studenter":
+      if (!yes) return;
+      awardPoints(g, 2 + g.stage);
+      adjustReputation(g, 1);
+      if (chance(g, 0.3)) {
+        g.candidates.push(makeCandidate(g));
+        log(g, `Elevene lærte mye, og en av dem søkte jobb (se Folk → Ansett). +${2 + g.stage} fagpoeng.`, "good");
+      } else log(g, `Elevene lærte mye, og de ansatte også. +${2 + g.stage} fagpoeng, omdømme +1.`, "good");
+      return;
+    case "video":
+      if (yes) {
+        addCost(g, "annet", n("cost"));
+        adjustReputation(g, 1);
+        log(g, "Målingene viste at det var damp. Folk syntes verket var åpent og ærlig. Omdømme +1.", "good");
+      } else if (chance(g, 0.5)) {
+        adjustReputation(g, -2);
+        log(g, "Videoen ble en sak i lokalavisen. Omdømme −2.", "bad");
+      } else {
+        log(g, "Videoen ble glemt etter noen dager.", "info");
+      }
+      return;
+    case "utlandsordre": {
+      if (!yes) return;
+      const c: Contract = {
+        id: g.nextContractId++,
+        customer: "Kunde i utlandet",
+        product: d.data.product as Contract["product"],
+        grade: "standard",
+        tonnes: n("t"),
+        delivered: 0,
+        pricePerT: n("pricePerT"),
+        deadlineDay: day(g) + 10,
+        offerExpiresMin: g.minute,
+        repGain: 2,
+        repLoss: 3,
+        penaltyPerT: Math.round(n("pricePerT") * 0.3),
+        status: "tilbud",
+        closedDay: null,
+        priority: 0,
+      };
+      g.contracts.push(c);
+      acceptContract(g, c.id);
+      return;
+    }
     case "kundebesok":
       if (!yes) return;
       adjustReputation(g, 1);

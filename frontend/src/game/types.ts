@@ -327,6 +327,8 @@ export interface Settings {
   autoBuyDays: number;
   /** Planleggeren kan handle på kassekreditten (B-027) */
   autoBuyCredit: boolean;
+  /** Planleggeren selger skrap ingen resept i ordrekøen bruker, når lageret er for fullt til det som trengs (B-171) */
+  plannerSells: boolean;
   /** Største beløp planleggeren kan bruke på skrap per døgn; null = ingen grense */
   autoBuyMaxPerDay: number | null;
   autoSpot: boolean;
@@ -424,6 +426,8 @@ export interface GameState {
   castQueue: LiquidBatch[];
   /** Hvorfor planleggeren sist ikke fikk kjøpt skrap resepten trenger, eller null (B-048) */
   autoBuyNote?: string | null;
+  /** Dagen skrapklasseren sist byttet inn annet skrap (B-171), så loggen får det én gang per døgn */
+  graderSubDay?: number;
   /** Kvaliteten strengstøpemaskinen sist støpte, og når den ble ferdig (B-046) */
   lastCast: { grade: GradeId; min: number } | null;
   castProgressT: number;
@@ -474,6 +478,8 @@ export interface GameState {
   pendingCastingSwitch: string | null;
   /** Varselet om at et planlagt bytte venter på penger er gitt (B-170) */
   switchWaitNoted?: boolean;
+  /** Dagen et planlagt bytte begynte å vente på penger (B-171), eller null */
+  switchWaitDay?: number | null;
   /** Sist det ble varslet om fullt ferdigvarelager (spillminutt), så varselet ikke gjentas hele tida (B-118) */
   storeFullLogMin: number;
   /** Kontoen spillet er koblet til (konto-id fra innloggingen), eller null uten konto (B-125) */
@@ -511,6 +517,8 @@ export interface GameState {
   pendingDecision: Decision | null;
   /** Dagen hvert hendelseskort sist ble vist, så de ikke gjentas for ofte */
   decisionSeen: Record<string, number>;
+  /** Hendelser som er ordnet for dette nivået, f.eks. støyskjerm mot naboklager (B-171): nivået det ble gjort på */
+  decisionFixed?: Record<string, number>;
   /** Utgått (B-031): erstattet av fravær per ansatt. Beholdes for gamle lagringer. */
   sickUntilMin: number;
   /** Innleide vikarer dekker alle som er borte til dette spillminuttet (B-031) */

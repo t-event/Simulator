@@ -1005,7 +1005,7 @@ export const ROLES: Record<RoleId, Role> = {
     plural: "Murere",
     salary: 1900,
     description:
-      "Murer opp den ene potta til lysbueovnen med ny ildfast stein mens den andre er i bruk. Jobber dagtid (07–15), ikke skift. To murere klarer en potte på ca. fire døgn.",
+      "Hver lysbueovn har to potter. Murerne murer opp reservepotta med ny ildfast stein mens den andre er i bruk – for alle lysbueovnene. Jobber dagtid (07–15), ikke skift. To murere klarer en potte på ca. fire døgn, så ta to per ovn.",
   },
   salg: {
     id: "salg",

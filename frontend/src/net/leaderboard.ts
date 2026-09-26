@@ -12,7 +12,7 @@ export const BOARDS: { id: BoardKind; label: string; unit: "kr" | "rep" | "dager
   { id: "kasse", label: "Mest penger på bok", unit: "kr" },
   { id: "storverk", label: "Raskest til storverk", unit: "dager" },
   { id: "ferdig", label: "Raskest til 10 mrd.", unit: "dager" },
-  { id: "omdomme", label: "Omdømme", unit: "rep" },
+  // «Omdømme» er tatt bort (B-171): nesten alle står på 100, så lista sa ingenting. Serveren kan fortsatt regne den ut
 ];
 
 export interface BoardRow {
