@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 110 – 2026-09-26: avløsere og oppsigelser
+
+**Brukeren meldte:** det er vanskelig å forstå hvor mange av hver ansatt man trenger; sier man opp en avløser, mangler
+plutselig en støper selv med 23 avløsere.
+
+**Gjort:** B-164. «Ledige avløsere» teller bare avløsere som ikke står fast på plasser, og sier hvilke plasser de andre
+fyller. «Si opp» viser hva som skjer med skiftene før man bekrefter. Tydeligere tekst i bemanningstabellen.
+
+**Testet:** tsc, lint, `npm test` (ny test), validate, balance (exit 0, uendret), build. Playwright på 390 og 320 px:
+med én ledig avløser går skiftene som før; uten ledige sier «Si opp» at det mangler 1 støper; ingen horisontal scrolling.
+
+**Gjenstår:** –
+
+---
+
 ## Økt 109 – 2026-09-26: lærlinger tar fagbrev
 
 **Brukeren ba om:** at lærlinger kan ta fagbrev, så de ikke er lærlinger for alltid.

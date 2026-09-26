@@ -24,6 +24,9 @@ import {
   crewBenefits,
   moraleNormal,
   crewCoverage,
+  crewList,
+  fireImpact,
+  wildcardUse,
   day,
   MAX_CREWS,
   daysUntilAllBack,
@@ -129,9 +132,11 @@ function SupportCard({ g }: { g: GameState }) {
           <li key={a.role} className={a.have < a.want ? "is-short" : ""}>
             <strong>
               {a.have >= a.want ? "✓ " : ""}
-              {ROLES[a.role].plural}: {a.want === 0 ? `${a.have} – trengs ikke nå` : `${a.have} av ${a.want}`}
+              {a.role === "allround" ? "Ledige avløsere" : ROLES[a.role].plural}:{" "}
+              {a.want === 0 ? `${a.have} – trengs ikke nå` : `${a.have} av ${a.want}`}
             </strong>
             <span className="g-muted">{a.why}</span>
+            {a.note && <span className="g-muted g-support-note">{a.note}</span>}
           </li>
         ))}
       </ul>
@@ -150,6 +155,18 @@ function Stars({ skill }: { skill: number }) {
     >
       {"★".repeat(full)}
       <span className="g-stars-off">{"★".repeat(5 - full)}</span>
+    </span>
+  );
+}
+
+/** Hva skjer med skiftene hvis den ansatte slutter (B-164) – vises før man bekrefter */
+function FireImpact({ g, id }: { g: GameState; id: number }) {
+  const { before, after, missing } = fireImpact(g, id);
+  if (after >= before) return <span className="g-muted g-small-text">Skiftene går som før.</span>;
+  return (
+    <span className="g-bad-text g-small-text">
+      Da går verket {after > 3 ? `${after} lag` : `${after} skift`} i stedet for{" "}
+      {before > 3 ? `${before} lag` : `${before} skift`}: det mangler {crewList(missing)}.
     </span>
   );
 }
@@ -396,7 +413,7 @@ function CrewTable({ g, stats, shifts }: { g: GameState; stats: PlantStats; shif
                 {row.hired > 0 && <span className="g-muted g-sub">+ {row.hired} innleid</span>}
                 {row.temps > 0 && (
                   <span className="g-muted g-sub">
-                    herav {row.temps} vikar{row.temps === 1 ? "" : "er"}
+                    {row.temps} borte, vikar{row.temps === 1 ? "" : "er"} dekker
                   </span>
                 )}
                 {row.away > row.temps && <span className="g-muted g-sub">{row.away - row.temps} borte</span>}
@@ -413,7 +430,9 @@ function CrewTable({ g, stats, shifts }: { g: GameState; stats: PlantStats; shif
       </table>
       <p className="g-muted">
         {coverage.wildcards > 0
-          ? `Avløsere${coverage.ownerSlots ? " (og du selv på dagskiftet)" : ""} går dit det mangler folk: ${coverage.wildUsed} av ${coverage.wildcards} er i bruk.`
+          ? coverage.ownerSlots
+            ? `Avløsere (og du selv på dagskiftet) går dit det mangler folk: ${coverage.wildUsed} av ${coverage.wildcards} er i bruk.`
+            : `Avløsere går dit det mangler folk: ${coverage.wildUsed} av ${coverage.wildcards} står på en plass nå, ${coverage.wildcards - coverage.wildUsed} ${coverage.wildcards - coverage.wildUsed === 1 ? "er ledig" : "er ledige"} til fravær. Sier du opp en avløser som står på en plass, mangler den plassen.`
           : "Avløsere kan ta plassen til den som mangler på skiftet."}
         {others.length > 0 && ` Andre jobber (ikke på skift): ${others.join(", ")}.`}
         {idle.length > 0 && ` Trengs ikke nå, men tar plass blant de ansatte: ${idle.join(", ")}.`}
@@ -556,7 +575,7 @@ export function People({ g, stats, act, openTab }: Props & { openTab?: string })
                   dekkes uten vikarer. Koster lønn til ett lag til.
                   {missing.length > 0 && (
                     <p className="g-small-text">
-                      Mangler:{" "}
+                      {wildcardUse(g).spare > 0 ? "De ledige avløserne er regnet med. Mangler: " : "Mangler: "}
                       {missing
                         .map(([r, n]) => `${n} ${(n === 1 ? ROLES[r].name : ROLES[r].plural).toLowerCase()}`)
                         .join(", ")}
@@ -689,7 +708,8 @@ export function People({ g, stats, act, openTab }: Props & { openTab?: string })
                           }
                           action={
                             confirmFire === w.id ? (
-                              <span className="g-row">
+                              <span className="g-row g-fire-confirm">
+                                <FireImpact g={g} id={w.id} />
                                 <button
                                   className="g-danger g-small"
                                   onClick={() => {

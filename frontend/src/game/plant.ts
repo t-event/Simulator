@@ -18,6 +18,7 @@ import {
   type CastingType,
   type FurnaceType,
   type Stage,
+  ROLES,
 } from "./data";
 import { auto, hasResearch } from "./research";
 import { masteryFactor } from "./mastery";
@@ -346,6 +347,45 @@ export function staffing(
   let hours = 0;
   if (shifts > 0) hours = Math.min(24, (ownerWorks ? OWNER_HOURS : 8) + 8 * (shifts - 1));
   return { shifts, crews, hours, ownerWorks, missing, crew };
+}
+
+/**
+ * Avløsere som står fast på skiftene (B-164): plasser uten egne folk i rollen fylles av avløsere, og de er da ikke
+ * ledige til fravær. Regnes med alle ansatte (uten fravær) for skiftlagene verket er bemannet for.
+ */
+export function wildcardUse(g: GameState): { total: number; tied: number; spare: number; byRole: Crew } {
+  const counts = countRoles(g, true);
+  const ownerSlots = g.stage <= 1 ? OWNER_SLOTS : 0;
+  const total = counts.allround;
+  const { crews } = staffing(g, true);
+  const crew = crewPerShift(g);
+  const byRole: Crew = {};
+  let left = total + ownerSlots;
+  let tied = 0;
+  for (const role of CREW_ROLES) {
+    const short = Math.max(0, (crew[role] ?? 0) * crews - counts[role]);
+    const covered = Math.min(short, left);
+    left -= covered;
+    if (covered > 0) byRole[role] = covered;
+    tied += covered;
+  }
+  // Eieren (garasjen og verkstedet) tar plassene først, så avløserne bare teller det som er igjen
+  const tiedWorkers = Math.max(0, tied - ownerSlots);
+  return { total, tied: Math.min(total, tiedWorkers), spare: Math.max(0, total - tiedWorkers), byRole };
+}
+
+/**
+ * Hva skjer med skiftene hvis en ansatt slutter (B-164)? Skiftlag før og etter, og hva som mangler for lagene man
+ * hadde. Brukes når spilleren skal si opp noen.
+ */
+export function fireImpact(g: GameState, workerId: number): { before: number; after: number; missing: Crew } {
+  const before = staffing(g, true).crews;
+  const without = { ...g, workers: g.workers.filter((w) => w.id !== workerId) } as GameState;
+  const after = staffing(without, true).crews;
+  const counts = countRoles(without, true);
+  const missing =
+    after < before ? deficit(crewPerShift(g), counts, before, counts.allround + (g.stage <= 1 ? OWNER_SLOTS : 0)) : {};
+  return { before, after, missing };
 }
 
 /** Flest skiftlag: 5-skift (B-073) */
@@ -790,6 +830,16 @@ export interface SupportAdvice {
   want: number;
   have: number;
   why: string;
+  /** Tilleggsforklaring, f.eks. avløsere som står fast på plasser (B-164) */
+  note?: string;
+}
+
+/** «6 støpere og 2 kranførere» */
+export function crewList(crew: Crew): string {
+  const parts = (Object.entries(crew) as [RoleId, number][])
+    .filter(([, n]) => n > 0)
+    .map(([r, n]) => `${n} ${(n === 1 ? ROLES[r].name : ROLES[r].plural).toLowerCase()}`);
+  return parts.length < 2 ? parts.join("") : `${parts.slice(0, -1).join(", ")} og ${parts[parts.length - 1]}`;
 }
 
 export function supportAdvice(g: GameState): SupportAdvice[] {
@@ -828,13 +878,22 @@ export function supportAdvice(g: GameState): SupportAdvice[] {
   );
   // Avløsere fyller hull i alle roller på skiftet. Ekstra skiftlag dekker mye fravær, men ikke når flere er borte
   // i samme rolle (B-111)
-  add(
-    "allround",
-    g.stage < 2 ? 0 : crews >= 5 ? 1 : 2,
-    crews >= 4
-      ? "Tar plassen til dem som er syke eller har ferie. De ekstra skiftlagene dekker mye, men er flere borte i samme rolle, fyller avløseren hullet."
-      : "Tar plassen til dem som er syke eller har ferie.",
-  );
+  // Bare ledige avløsere dekker fravær: de som står fast på plasser uten egne folk, teller ikke (B-164)
+  const wild = wildcardUse(g);
+  const want = g.stage < 2 ? 0 : crews >= 5 ? 1 : 2;
+  if (want > 0 || wild.total > 0)
+    out.push({
+      role: "allround",
+      want,
+      have: wild.spare,
+      why:
+        crews >= 4
+          ? "Ledige avløsere tar plassen til dem som er syke eller har ferie. De ekstra skiftlagene dekker mye, men er flere borte i samme rolle, fyller avløseren hullet."
+          : "Ledige avløsere tar plassen til dem som er syke eller har ferie.",
+      note: wild.tied
+        ? `${wild.tied} av ${wild.total} avløsere står fast som ${crewList(wild.byRole)}, fordi det mangler egne folk der. Ansetter du dem, blir avløserne ledige.`
+        : undefined,
+    });
   return out;
 }
 

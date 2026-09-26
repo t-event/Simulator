@@ -80,10 +80,10 @@ import {
   rateDelivery,
   ratingFactor,
 } from "./engine";
-import { specMargin } from "./plant";
+import { crewPerShift, fireImpact, specMargin, staffing, wildcardUse } from "./plant";
 import { QUIZ } from "./quiz";
 import { GRADES } from "./data";
-import type { Agreement, Analysis, Contract } from "./types";
+import type { Agreement, Analysis, Contract, RoleId } from "./types";
 import { EAFSimulation } from "../sim/eaf";
 import { SimpleRunner } from "../ui/control/simpleRunner";
 
@@ -934,6 +934,30 @@ test("Planlagt bytte av støping (B-163): rammeavtaler på det gamle produktet s
   };
   assert(make(false) === 1, "uten planlagt bytte skulle uka komme");
   assert(make(true) === 0, "planlagt bytte skulle stoppe nye uker");
+});
+
+test("Avløsere (B-164): de som står fast på plasser, teller ikke som ledige, og oppsigelse viser hva som mangler", () => {
+  const g = newGame(76);
+  g.stage = 3;
+  g.castingType = "streng1";
+  g.workers = [];
+  const crew = crewPerShift(g);
+  // Fullt for tre skift, bortsett fra to støpere; tre avløsere
+  for (const [role, n] of Object.entries(crew) as [RoleId, number][])
+    for (let i = 0; i < n * 3 - (role === "stoper" ? 2 : 0); i++) g.workers.push(makeCandidate(g, role));
+  for (let i = 0; i < 3; i++) g.workers.push(makeCandidate(g, "allround"));
+  assert(staffing(g, true).crews === 3, `lag: ${staffing(g, true).crews}`);
+  const wild = wildcardUse(g);
+  assert(wild.total === 3 && wild.tied === 2 && wild.spare === 1, `avløsere ${JSON.stringify(wild)}`);
+  assert(wild.byRole.stoper === 2, "avløserne står ikke som støpere");
+  const advice = supportAdvice(g).find((a) => a.role === "allround");
+  assert(advice?.have === 1 && !!advice.note?.includes("støpere"), `anbefaling ${JSON.stringify(advice)}`);
+  // Én ledig avløser kan sies opp uten at skiftene endres; sier man opp en til, mangler en støper
+  const avl = g.workers.filter((w) => w.role === "allround");
+  assert(fireImpact(g, avl[0].id).after === 3, "første avløser skulle kunne gå");
+  g.workers = g.workers.filter((w) => w.id !== avl[0].id);
+  const hit = fireImpact(g, avl[1].id);
+  assert(hit.after < 3 && hit.missing.stoper === 1, `etter oppsigelse ${JSON.stringify(hit)}`);
 });
 
 if (failed) {
