@@ -1935,6 +1935,11 @@ function expireOffers(g: GameState, stats: PlantStats): void {
   g.contracts = g.contracts.filter((c) => c.closedDay !== -1);
 }
 
+/** En forespørsel ekstra, f.eks. fra salgsdirektørens kundenettverk (B-172). Aldri flere enn taket for åpne */
+export function extraOffer(g: GameState, stats: PlantStats): void {
+  generateOffers(g, stats, 1);
+}
+
 function generateOffers(g: GameState, stats: PlantStats, count?: number): void {
   const n = count ?? Math.floor(stats.offersPerDay + rand(g));
   const open = g.contracts.filter((c) => c.status === "tilbud").length;

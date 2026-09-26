@@ -125,6 +125,7 @@ export function migrate(g: GameState): GameState {
     g.konsern = { unlocked: false, plants: [], shared: [], nextId: 1, director: null, milestones: 0, legends: 0 };
   if (g.konsern.director === undefined) g.konsern.director = null;
   if (g.konsern.director && g.konsern.director.active === undefined) g.konsern.director.active = true;
+  if (g.konsern.director && g.konsern.director.level === undefined) g.konsern.director.level = 0;
   if (g.konsern.milestones === undefined) g.konsern.milestones = 0;
   if (g.konsern.legends === undefined) g.konsern.legends = 0;
   // «Kystverket» er navnet på en ekte etat; datterverket heter nå «Nesverket» (B-141)

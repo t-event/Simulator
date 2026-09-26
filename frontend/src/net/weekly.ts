@@ -1,5 +1,5 @@
 /**
- * Ukens utfordring (B-152, supabase/016_ukens_utfordring.sql): en toppliste per liga og uke, regnet ut på serveren fra
+ * Ukens utfordring (B-152, supabase/016 og 023): én toppliste per uke for alle (B-172), regnet ut på serveren fra
  * tidslinja. Topp 3 får medalje og ukekiste med fagpoeng når uka er over (B-155). Krever konto for å være med;
  * lista kan leses uten.
  */
@@ -8,13 +8,18 @@ import { rpc, userId } from "./supabase";
 export type WeekKind = "vekst" | "tonn" | "dager";
 export type League = "bronse" | "solv" | "gull";
 
+// Én liste for alle, målt i prosent, så små og store verk kan konkurrere (B-172)
 export const WEEK_KINDS: Record<WeekKind, { title: string; how: string }> = {
-  vekst: { title: "Mest vekst i konsernverdi", how: "Få konsernverdien til å vokse mest mulig denne uka." },
-  tonn: { title: "Flest tonn stål", how: "Produser mest mulig stål denne uka." },
+  vekst: {
+    title: "Størst vekst i konsernverdi",
+    how: "Få konsernverdien til å vokse mest mulig i prosent denne uka (regnet fra minst 50 mill.).",
+  },
+  tonn: {
+    title: "Mer stål enn før",
+    how: "Lag mest mulig stål per spilldøgn denne uka, i prosent av det verket laget per døgn før uka.",
+  },
   dager: { title: "Flest spilldøgn", how: "Hold verket i gang: flest døgn i spillet denne uka." },
 };
-
-export const LEAGUES: Record<League, string> = { bronse: "Bronseligaen", solv: "Sølvligaen", gull: "Gullligaen" };
 
 /** Fagpoeng i ukekista etter plass (samme som i finish_weeks på serveren) */
 export function chestFp(plass: number): number {

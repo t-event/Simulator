@@ -241,6 +241,8 @@ export interface SalesDirector {
   agreementsOn: boolean;
   /** Skrudd på: signerer av seg selv. Av: gjør ingenting, men får fortsatt lønn (B-122) */
   active: boolean;
+  /** Oppgraderinger (B-172): 0 ingen, 1 salgsteam, 2 kundenettverk, 3 eksportkontor */
+  level?: number;
 }
 
 /** Datterverk i konsernet (B-106) */

@@ -98,8 +98,14 @@ export function useGame(): GameApi {
 
   const pushToast = useCallback(
     (text: string, kind: Toast["kind"], fromLog = true) => {
-      queue.current.push({ id: toastId.current++, text, kind, fromLog });
-      // Blir køen lang, går de eldste ut herfra – de står fortsatt i varsellista bak 🔔
+      // Det nyeste vises med en gang (B-171): før sto nye varsler i kø bak de gamle, og det siste som skjedde
+      // kom for sent. Det som skyves bort, står i varsellista bak 🔔.
+      const t: Toast = { id: toastId.current++, text, kind, fromLog };
+      // Svar på noe spilleren trykket på, skal ikke skyves bort av et varsel fra loggen
+      const keep = visible.current.filter((x) => !x.fromLog && fromLog);
+      queue.current = keep.length ? [t] : [];
+      visible.current = keep.length ? keep : [];
+      if (!keep.length) queue.current.push(t);
       if (queue.current.length > MAX_QUEUE) queue.current.splice(0, queue.current.length - MAX_QUEUE);
       pump();
     },

@@ -77,6 +77,12 @@ export function importantLog(g: GameState): LogEntry[] {
  * Antall problemer og hendelser siden spilleren sist åpnet varsellista. Gode nyheter står i lista, men gir
  * ikke tall på bjella (B-107) – den skal bare rope når noe trenger oppmerksomhet.
  */
+/** Markerer alle varsler som sett, så tallet på bjella blir 0 (B-171: krysset på varsellinja) */
+export function markAllSeen(g: GameState): void {
+  const last = g.log[g.log.length - 1];
+  if (last) g.inboxSeenId = last.id;
+}
+
 export function unseenCount(g: GameState): number {
   return importantLog(g).filter((e) => e.kind !== "good" && e.id > (g.inboxSeenId ?? 0)).length;
 }

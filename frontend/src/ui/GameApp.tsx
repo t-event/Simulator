@@ -30,7 +30,7 @@ import { flush, leaving, onLocalSave } from "../net/sync";
 import { newVersionAvailable, shouldReloadFor, UPDATE_CHECK_MS } from "../net/update";
 import { loadGame, saveGame, setSaveListener } from "../game/save";
 import { InboxSheet } from "./Inbox";
-import { unseenCount } from "../game/inbox";
+import { markAllSeen, unseenCount } from "../game/inbox";
 import { Sales } from "./Sales";
 import { VIEWS, viewUnlocked, type View } from "./views";
 
@@ -495,8 +495,9 @@ const TOAST_ICON = { bad: "⚠", event: "•", good: "✓", info: "•" } as con
 
 /**
  * Varsellinja (B-116): en fast linje nederst i toppfeltet med bjella og det nyeste varselet. Den har alltid samme
- * høyde og ligger ikke oppå siden, så den kommer aldri i veien for knapper. Trykk åpner varsellista, ✕ fjerner
- * varselet. Svar på noe spilleren trykket på (f.eks. «For lite penger») står ikke i lista, så de vises helt.
+ * høyde og ligger ikke oppå siden, så den kommer aldri i veien for knapper. Trykk åpner varsellista. Det nyeste
+ * varselet vises alltid, og ✕ fjerner alle og nullstiller tallet på bjella (B-171). Svar på noe spilleren trykket på
+ * (f.eks. «For lite penger») står ikke i lista, så de vises helt.
  */
 function NoticeLine({ api, unseen, onOpen }: { api: GameApi; unseen: number; onOpen: () => void }) {
   const t = api.toasts[0];
@@ -525,13 +526,16 @@ function NoticeLine({ api, unseen, onOpen }: { api: GameApi; unseen: number; onO
           {text}
         </span>
       </button>
-      {api.toastsWaiting > 0 && (
-        <span className="g-toast-more" aria-label={`${api.toastsWaiting} varsler til`}>
-          +{api.toastsWaiting}
-        </span>
-      )}
-      {t && (
-        <button className="g-toast-close" onClick={() => api.dismissToast(t.id)} aria-label="Fjern varselet">
+      {/* Krysset fjerner alle varsler og tallet på bjella (B-171). Lista bak 🔔 har dem fortsatt */}
+      {(t || unseen > 0) && (
+        <button
+          className="g-toast-close"
+          onClick={() => {
+            api.clearToasts();
+            api.act((gg) => markAllSeen(gg));
+          }}
+          aria-label="Fjern alle varsler"
+        >
           ✕
         </button>
       )}

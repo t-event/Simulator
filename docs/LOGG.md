@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 118 – 2026-09-26: varsellinja, ukelista og salgsdirektøren
+
+**Brukeren ba om:** (fra lista i økt 117) varsellinja, ligaene og at salgsdirektøren kan oppgraderes.
+
+**Gjort:** B-172. Varsellinja viser det nyeste, ett tall, ✕ fjerner alt. Migrasjon 023: én ukeliste for alle, målt i
+prosent. Salgsdirektøren har tre oppgraderinger.
+
+**Testet:** tsc, lint, tester (ny for oppgraderingene), balanse (exit 0), build. `weekly_scores` på de ekte spillerne.
+Sikkerhetsrådene som før. Playwright 390 og 320 px: ✕ nullstiller bjella, ukelista i prosent uten ligafaner,
+oppgradering av salgsdirektøren, ingen salgsmerke, ingen horisontal scrolling, ingen feil.
+
+**Gjenstår:** innhold for hele sesongen og nytt kontrollrom (neste puljer).
+
+---
+
 ## Økt 117 – 2026-09-26: skrapinnkjøperen, hendelser og småfeil
 
 **Brukeren ba om:** fjerne omdømme-topplista, sjekke Sjæfen på topplista, skyen som gjør toppmenyen høyere, at

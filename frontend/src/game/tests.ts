@@ -55,6 +55,9 @@ import {
   sisterPrice,
   checkKonsernUnlock,
   konsernAdvice,
+  directorLevel,
+  nextDirectorUpgrade,
+  upgradeDirector,
   konsernOptions,
   SISTER_NAMES,
   upgradeSister,
@@ -749,6 +752,18 @@ test("Hendelser (B-171): messe ikke med omdømme på topp, naboene klager ikke i
     g.pendingDecision = { ...card!, resumeSpeed: 1 };
     resolveDecision(g, 0);
   }
+});
+
+test("Salgsdirektøren kan oppgraderes i tre trinn (B-172)", () => {
+  const g = newGame(84);
+  g.stage = 4;
+  g.konsern.unlocked = true;
+  g.cash = 20_000_000_000;
+  assert(!upgradeDirector(g).ok, "oppgraderte uten salgsdirektør");
+  assert(hireDirector(g).ok, "kunne ikke ansette");
+  for (let i = 0; i < 3; i++) assert(upgradeDirector(g).ok, `trinn ${i + 1} feilet`);
+  assert(directorLevel(g) === 3 && nextDirectorUpgrade(g) === null, "feil nivå");
+  assert(!upgradeDirector(g).ok, "kunne oppgradere forbi siste trinn");
 });
 
 test("Stålkompleks i stedet for et lite verk når konsernet er fullt (B-170)", () => {

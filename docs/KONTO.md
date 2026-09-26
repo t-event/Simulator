@@ -50,6 +50,8 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Bytt et lite datterverk mot et stålkompleks, «Ansett til plassene», råd om bytte av støping | Nei | Regel 1 | B-170 |
 | «Koblet til på dag N» på topplista | Ja (en del av topplista) | Regel 3 | B-170 |
 | Planleggeren selger overskuddsskrap, skrapklasseren bytter inn skrap, nye hendelser | Nei | Regel 1 | B-171 |
+| Varsellinja (nyeste, ✕ fjerner alle) og oppgraderinger av salgsdirektøren | Nei | Regel 1 | B-172 |
+| Ukelista: én liste for alle, målt i prosent | Ja (som før) | Regel 3 | B-172 |
 | Ventetid i konsernet (fase 4) | Nei (serverklokke med konto) | Regel 5 | PLAN-NETT |
 | Anbud og skrapauksjoner (fase 5) | Ja | Regel 3 og 7 | PLAN-NETT |
 | Varsel på mobilen (senere) | Ja | Varselet knyttes til kontoen | – |

@@ -13,20 +13,18 @@ import {
   claimWeekChest,
   fetchWeeklyBoard,
   fetchWeeklyStatus,
-  LEAGUES,
   onWeeklyChange,
   setWeeklyStatus,
   WEEK_KINDS,
   weekDaysLeft,
   weeklyStatus,
-  type League,
   type WeekKind,
   type WeeklyRow,
 } from "../net/weekly";
 import { placeLabel } from "../net/leaderboard";
 import { NeedsAccount } from "./Account";
 import { Card } from "./common";
-import { fmtKr, fmtNum, fmtT } from "./format";
+import { fmtNum } from "./format";
 import { buzz } from "./haptics";
 import { Portal } from "./Portal";
 
@@ -41,8 +39,8 @@ function useWeekly() {
 }
 
 function fmtValue(kind: WeekKind, v: number): string {
-  if (kind === "vekst") return `+${fmtKr(v)}`;
-  if (kind === "tonn") return fmtT(v);
+  if (kind === "vekst") return `+${fmtNum(v, 1)} %`;
+  if (kind === "tonn") return `${fmtNum(v, 0)} %`;
   return `${fmtNum(v, 0)} døgn`;
 }
 
@@ -104,7 +102,7 @@ export function WeeklyCard({ g, act, onLogin }: { g: GameState; act: GameApi["ac
             🎁 <strong>Ukekiste!</strong>{" "}
             {status.chest.count > 1
               ? `${status.chest.count} kister venter`
-              : `Du ble nr. ${status.chest.best} i ligaen forrige uke`}{" "}
+              : `Du ble nr. ${status.chest.best} på ukelista forrige uke`}{" "}
             – {status.chest.fp} fagpoeng.
           </span>
           <button className="g-primary" disabled={busy} onClick={() => void open()}>
@@ -113,8 +111,7 @@ export function WeeklyCard({ g, act, onLogin }: { g: GameState; act: GameApi["ac
         </div>
       )}
       <p>
-        <strong>{kind.title}</strong> i {LEAGUES[status.league].toLowerCase()}.{" "}
-        <span className="g-muted">{kind.how}</span>
+        <strong>{kind.title}</strong>. <span className="g-muted">{kind.how}</span>
       </p>
       <p>
         {status.plass
@@ -130,36 +127,26 @@ export function WeeklyCard({ g, act, onLogin }: { g: GameState; act: GameApi["ac
           Dine medaljer: 🥇 {m.gold} · 🥈 {m.silver} · 🥉 {m.bronze}
         </p>
       )}
-      {board && <WeeklyBoard g={g} league={status.league} kind={status.kind} onClose={() => setBoard(false)} />}
+      {board && <WeeklyBoard kind={status.kind} onClose={() => setBoard(false)} />}
     </Card>
   );
 }
 
-function WeeklyBoard({
-  league: mine,
-  kind,
-  onClose,
-}: {
-  g: GameState;
-  league: League;
-  kind: WeekKind;
-  onClose: () => void;
-}) {
-  const [league, setLeague] = useState<League>(mine);
-  // Svaret huskes med ligaen det gjelder, så en annen liga viser «Henter …» til den er hentet
-  const [data, setData] = useState<{ league: League; rows: WeeklyRow[] | null } | null>(null);
-  const rows = data?.league === league ? data.rows : null;
-  const error = data?.league === league && data.rows === null;
+/** Ukelista: én liste for alle spillerne (B-172) */
+function WeeklyBoard({ kind, onClose }: { kind: WeekKind; onClose: () => void }) {
+  const [data, setData] = useState<{ rows: WeeklyRow[] | null } | null>(null);
+  const rows = data ? data.rows : null;
+  const error = !!data && data.rows === null;
   useEffect(() => {
     let alive = true;
-    fetchWeeklyBoard(league).then(
-      (r) => alive && setData({ league, rows: r }),
-      () => alive && setData({ league, rows: null }),
+    fetchWeeklyBoard(null).then(
+      (r) => alive && setData({ rows: r }),
+      () => alive && setData({ rows: null }),
     );
     return () => {
       alive = false;
     };
-  }, [league]);
+  }, []);
   return (
     <Portal>
       <div className="g-modal" role="dialog" aria-modal="true" aria-label="Ukens utfordring" onClick={onClose}>
@@ -170,25 +157,12 @@ function WeeklyBoard({
               ✕
             </button>
           </header>
-          <div className="g-chips" role="tablist" aria-label="Liga">
-            {(Object.keys(LEAGUES) as League[]).map((l) => (
-              <button
-                key={l}
-                role="tab"
-                aria-selected={league === l}
-                className={league === l ? "g-chip-btn is-on" : "g-chip-btn"}
-                onClick={() => setLeague(l)}
-              >
-                {LEAGUES[l]}
-              </button>
-            ))}
-          </div>
           {error ? (
             <p className="g-muted">Fikk ikke hentet lista. Prøv igjen senere.</p>
           ) : !rows ? (
             <p className="g-muted">Henter …</p>
           ) : rows.length === 0 ? (
-            <p className="g-muted">Ingen på lista i denne ligaen ennå denne uka.</p>
+            <p className="g-muted">Ingen på lista ennå denne uka.</p>
           ) : (
             <ol className="g-board">
               {rows.map((r) => (
@@ -210,8 +184,8 @@ function WeeklyBoard({
             </ol>
           )}
           <p className="g-muted g-small-text">
-            Uka går fra mandag til mandag. Ligaen følger hvor langt du har kommet: bronse før storverket, sølv på
-            storverket og gull fra 1 mrd. Når uka er over, får topp 3 i hver liga medalje og en ukekiste med fagpoeng.
+            Uka går fra mandag til mandag. Alle er på samme liste, og vekst og stål måles i prosent, så et lite verk kan
+            slå et stort. Når uka er over, får topp 3 medalje og en ukekiste med fagpoeng. {WEEK_KINDS[kind].how}
           </p>
         </div>
       </div>
