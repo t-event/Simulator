@@ -752,7 +752,7 @@ export function moraleFactor(g: GameState): number {
 /** Slitasjen per charge med forskning tatt med */
 export function liningWearPerHeat(g: GameState, i?: number): number {
   const t = i === undefined ? furnaceType(g) : unitType(g, i);
-  return t.wearPerHeat * (hasResearch(g, "ildfast") ? 0.85 : 1);
+  return t.wearPerHeat * (hasResearch(g, "ildfast") ? 0.85 : 1) * masteryFactor(g, "foring");
 }
 
 /** Omtrent hvor mange døgn til foringen er 85 % slitt, med dagens drift (døgnet rundt hvis verket står) */

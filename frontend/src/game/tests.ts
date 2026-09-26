@@ -80,7 +80,7 @@ import {
   rateDelivery,
   ratingFactor,
 } from "./engine";
-import { crewPerShift, fireImpact, specMargin, staffing, wildcardUse } from "./plant";
+import { crewPerShift, fireImpact, liningWearPerHeat, specMargin, staffing, wildcardUse } from "./plant";
 import { QUIZ } from "./quiz";
 import { GRADES } from "./data";
 import type { Agreement, Analysis, Contract, RoleId } from "./types";
@@ -958,6 +958,17 @@ test("Avløsere (B-164): de som står fast på plasser, teller ikke som ledige, 
   g.workers = g.workers.filter((w) => w.id !== avl[0].id);
   const hit = fireImpact(g, avl[1].id);
   assert(hit.after < 3 && hit.missing.stoper === 1, `etter oppsigelse ${JSON.stringify(hit)}`);
+});
+
+test("Mesterskap «Holdbare ovnspotter» (B-165): foringen slites mindre for hvert nivå", () => {
+  const g = newGame(77);
+  g.researched = RESEARCH.map((r) => r.id);
+  const before = liningWearPerHeat(g);
+  g.researchPoints = 10_000;
+  assert(buyMastery(g, "foring").ok && buyMastery(g, "foring").ok, "kunne ikke kjøpe");
+  const after = liningWearPerHeat(g);
+  assert(Math.abs(after / before - (1 - masteryEffect("foring", 2))) < 1e-9, `slitasje ${before} → ${after}`);
+  assert(MASTERY.foring.max <= 0.3, "for stor gevinst");
 });
 
 if (failed) {

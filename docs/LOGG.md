@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 111 – 2026-09-26: Figen mot Grane, topplista på Android, mesterskap for foringen
+
+**Brukeren spurte/ba om:** hvorfor Figen vokser fortere enn Grane; hvorfor Granes eget tall står stille på Android;
+mesterskap der fagpoeng gjør at ovnspottene holder lenger.
+
+**Funnet:** Figen og Grane tjener like mye per spilldøgn (5,2 mrd.) med 12 komplekser hver. Figen har spilt mer. Granes
+lagring på nett sto stille i 21 minutter (dag 823 → 914) – et kall som hang uten tidsgrense.
+
+**Gjort:** B-165. Tidsgrense på 30 s for alle kall til tjenesten, og topplista sier fra når ditt spill ikke er lagret.
+Nytt mesterskap «Holdbare ovnspotter» (opptil 30 % mindre slitasje på foringen).
+
+**Testet:** tsc, lint, `npm test` (to nye tester), validate, balance (exit 0, uendret), build.
+
+**Gjenstår:** Grane bør se om tallet nå følger med. Hvis ikke, se tidslinja hans igjen (gap mellom lagringene).
+
+---
+
 ## Økt 110 – 2026-09-26: avløsere og oppsigelser
 
 **Brukeren meldte:** det er vanskelig å forstå hvor mange av hver ansatt man trenger; sier man opp en avløser, mangler

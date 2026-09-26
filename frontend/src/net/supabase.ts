@@ -245,11 +245,31 @@ async function readError(res: Response): Promise<NetError> {
   return new NetError(translateError(res.status, raw), res.status);
 }
 
+/**
+ * Tidsgrense for kall (B-165). Et kall som henger på mobilnettet (f.eks. ved bytte mellom wifi og 5G) holdt før
+ * lagringen på nett igjen i over 20 minutter, fordi neste lagring venter på den forrige. Nå avbrytes det og prøves igjen.
+ */
+let requestTimeoutMs = 30_000;
+export function setRequestTimeout(ms: number): void {
+  requestTimeoutMs = ms;
+}
+
 async function call(url: string, init: RequestInit): Promise<Response> {
+  const abort = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      abort.abort();
+      reject(new NetError("Ingen kontakt med nettet.", 0, true));
+    }, requestTimeoutMs);
+  });
   try {
-    return await fetchImpl(url, init);
-  } catch {
+    return await Promise.race([fetchImpl(url, { ...init, signal: abort.signal }), timeout]);
+  } catch (e) {
+    if (e instanceof NetError) throw e;
     throw new NetError("Ingen kontakt med nettet.", 0, true);
+  } finally {
+    clearTimeout(timer);
   }
 }
 

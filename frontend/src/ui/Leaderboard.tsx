@@ -20,6 +20,7 @@ import type { GameApi } from "../game/useGame";
 import type { GameState } from "../game/types";
 import { useSeasonStatus } from "./useSeason";
 import { getSession, onSessionChange } from "../net/supabase";
+import { cloudStatus, onCloudStatus } from "../net/sync";
 import { useSyncExternalStore } from "react";
 import { Card } from "./common";
 import { fmtKr, fmtRep } from "./format";
@@ -236,6 +237,7 @@ export function Leaderboard({
         </p>
       )}
       {error && <p className="g-account-error">{error}</p>}
+      {session && <OwnSaveNote />}
       {rows === null && !error && <p className="g-muted">Henter …</p>}
       {rows && rows.length === 0 && <p className="g-muted">Ingen på lista ennå. Du kan bli den første.</p>}
       {rows && rows.length > 0 && (
@@ -279,5 +281,25 @@ export function Leaderboard({
     <Card title="Toppliste" right={refresh}>
       {body}
     </Card>
+  );
+}
+
+/**
+ * Ditt eget tall på lista kommer fra lagringen på nett. Virker ikke lagringen, står tallet stille mens de andres øker
+ * (B-165): da sier lista det, og når det sist ble lagret.
+ */
+function OwnSaveNote() {
+  const status = useSyncExternalStore(onCloudStatus, cloudStatus, cloudStatus);
+  if (status.kind !== "offline" && status.kind !== "error" && status.kind !== "conflict") return null;
+  const at =
+    status.kind !== "conflict" && status.at
+      ? ` siden kl. ${new Date(status.at).toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" })}`
+      : "";
+  return (
+    <p className="g-note g-warn">
+      {status.kind === "conflict"
+        ? "Spillet er lagret fra en annen enhet, så tallet ditt her oppdateres ikke. Åpne spillet der du vil spille."
+        : `Spillet ditt er ikke lagret på nett${at}, så tallet ditt står stille. Det oppdateres av seg selv når nettet virker igjen.`}
+    </p>
   );
 }
