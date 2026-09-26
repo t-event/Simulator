@@ -109,6 +109,7 @@ frontend/src/
     world.ts     Felles hendelser i motoren og sesongfordel (B-129)
     daily.ts     Daglig belønning, dagens oppdrag og mens du var borte (B-149)
     mastery.ts   Mesterskap: forskning som tas om og om igjen etter all forskning (B-150)
+    achievements.ts Prestasjoner (merker)   cosmetics.ts  Pynt i anleggsbildet for fagpoeng (B-151)
     balance.ts   Automatisk testspiller
   net/         Konto og lagring på nett (B-125) – Supabase over fetch, uten bibliotek
     config.ts    URL og nøkkel fra miljøet (aldri i repoet)   supabase.ts  Innlogging, økt, spørringer   sync.ts  Lagring på nett
@@ -125,6 +126,7 @@ frontend/src/
     Account.tsx  Konto: logg inn, opprett, glemt passord, velg spill ved konflikt (på startskjermen og i ⚙️)
     Leaderboard.tsx Topplista (arket bak 🏆 ved varsellinja)   Season.tsx  Sesongspørsmål, hendelser på Marked, sesonglinje
     Daily.tsx    Velkommen tilbake, daglig belønning og kortet «Dagens oppdrag» på Verket
+    Achievements.tsx Prestasjonskortet på Verket og arket «Pynt verket» (🎨 på anleggsbildet)
     control/     Kontrollrommet: den enkle styringen (SimpleControl + simpleRunner)
   sim/         Prosessmodell for lysbueovnen (brukes av kontrollrommet)
 frontend/public/  PWA: manifest, ikoner, service worker

@@ -49,6 +49,7 @@ import { StageCard, StationButton, UpgradeSheet } from "./Upgrades";
 import { AutoToggle } from "./AutoToggle";
 import { konsernReady } from "../game/konsern";
 import { DailyCard } from "./Daily";
+import { AchievementsCard, PyntModal } from "./Achievements";
 import { BankCard } from "./Settings";
 import { KonsernTab } from "./Konsern";
 import { readyUpgrades, stationOptions, stationReady, type Station } from "./stations";
@@ -442,6 +443,7 @@ function ChallengesCard({ g }: { g: GameState }) {
 export function Overview({ g, stats, act, go, openBook, onOpenSettings }: Props) {
   const [sheet, setSheet] = useState<Station | null>(null);
   const [chosenTab, setTab] = useState<SubTab>("oversikt");
+  const [pynt, setPynt] = useState(false);
   // Konsern-fanen finnes bare når konsernet er åpnet; lastes et annet spill, faller valget tilbake til Oversikt
   const tab: SubTab = chosenTab === "konsern" && !g.konsern.unlocked ? "oversikt" : chosenTab;
   const est = recipeEstimate(g, g.targetGrade, stats);
@@ -474,10 +476,14 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings }: Props)
 
   return (
     <div className="g-grid">
+      {pynt && <PyntModal g={g} stats={stats} act={act} onClose={() => setPynt(false)} />}
       <div className="g-col-wide">
         <div className="g-scene-wrap">
           <PlantScene g={g} stats={stats} />
           <SceneBubbles g={g} />
+          <button className="g-scene-pynt" onClick={() => setPynt(true)} aria-label="Pynt verket">
+            🎨
+          </button>
           <div className="g-scene-caption">
             <strong>{stats.stage.name}</strong>
             <span>
@@ -673,6 +679,7 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings }: Props)
 
             <BookCard g={g} openBook={openBook} />
             <ChallengesCard g={g} />
+            <AchievementsCard g={g} onOpenPynt={() => setPynt(true)} />
             {/* Loggen synlig på Oversikt, ikke bare under Økonomi (B-098) */}
             <Card title="Siste hendelser">
               <ul className="g-log">

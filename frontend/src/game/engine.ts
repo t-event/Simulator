@@ -242,6 +242,8 @@ export function newGame(seed = Date.now()): GameState {
     konsern: { unlocked: false, plants: [], shared: [], nextId: 1, director: null, milestones: 0, legends: 0 },
     mastery: {},
     legendCelebrate: null,
+    achievements: {},
+    cosmetics: { owned: [], on: [] },
     daily: { date: null, missions: [], claimed: false },
     storeFullLogMin: -1e9,
     owner: null,

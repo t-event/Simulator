@@ -2267,3 +2267,36 @@ Tittelen på topplista krever konto (regel 3).
 - Verdien av datterverkene regnes uten mesterskapet «Konsernledelse» (`sisterValue`). Ellers ville konsernverdien
   hoppe når noen med tusenvis av fagpoeng kjøper mange nivåer på en gang. Mesterskapet gir mer overskudd, og det kommer
   inn døgn for døgn.
+
+## B-151 Prestasjoner og pynt (2026-09-26)
+Status: gjelder
+Brukeren: «Kjør på med alle dine forslag.» Dette er forslag 5: pynt og prestasjoner, så fagpoengene har mer å gå til og
+man har noe å samle på.
+
+**Prestasjoner** (`game/achievements.ts`, kortet på Verket → Oversikt):
+- 29 merker, fra «Første smelte» (2 fagpoeng) til «Stållegende» (100 fagpoeng):
+  - charger, tonn og kontrakter i flere trinn
+  - nivåene og kontrollrommet
+  - fagboka, forskning og mesterskapet
+  - milliarden, datterverk og titlene
+- De sjekkes hver time og når spillet lastes, så gamle lagringer får merkene sine med én gang. Mange nye på en gang gir
+  én linje i loggen, ikke én per merke.
+- Kortet viser alle merkene som ruter (grå til de er klart). Trykk på et merke for å se hva som skal til og hvor langt
+  man er kommet. Uten valg vises det som er nærmest.
+
+**Pynt** (`game/cosmetics.ts`, tegnes i `ui/PlantScene.tsx`):
+- Kjøpes for fagpoeng under 🎨 på anleggsbildet eller «🎨 Pynt» på prestasjonskortet. Arket viser verket mens man
+  velger.
+- Flagg 10, lyslenke 20, trær 25, rød/blå/grønn fasade 30 (én om gangen), solceller 60 (fra støperiet), vindmølle
+  100 (fra stålverket).
+- Statue 150 krever Stålbaron, fyrverkeri 250 krever Stålmagnat, og gullpipe 500 krever Stållegende.
+- Kan slås av og på. Pynten gir ingen fordel.
+- Animasjonene (flagg, lys, vindmølle, fyrverkeri) står stille med «reduser bevegelse».
+
+**Konto (KONTO.md):** prestasjoner og pynt krever ikke konto, fordi de bare gjelder ditt eget spill og ikke gir noen
+fordel (regel 1). Skal merker eller pynt senere vises for andre spillere, krever det konto (regel 3).
+
+**Lagring:** `achievements` og `cosmetics` har standardverdier i `migrate()`.
+
+**Balanse:** prestasjonene gir litt fagpoeng tidlig. `balance.ts`: 8/23/63/133 (før 8/25/67/141), nybegynner 168 (før
+144, mål høyst 240). Alle mål er OK.

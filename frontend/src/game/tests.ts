@@ -4,6 +4,8 @@
  */
 import { buyMastery, doResearch, scheduleCastingSwitch, setPowerDeal, upgradeOptions } from "./actions";
 import { MASTERY, masteryCost, masteryEffect, masteryOpen } from "./mastery";
+import { achievementsDone, checkAchievements, hasAchievement } from "./achievements";
+import { buyCosmetic, cosmeticBlocked, cosmeticOn, FACADE, facadeColors, setCosmetic } from "./cosmetics";
 import { CHALLENGES, checkChallenges } from "./challenges";
 import { ADDONS, CASTINGS, FURNACES, WIN_CASH } from "./data";
 import { advance, assessOffer, checkWin, fmtKr, log, newGame } from "./engine";
@@ -617,6 +619,55 @@ test("Gamle lagringer får mesterskap og stålmilepæler (B-150)", () => {
   delete (g.konsern as Record<string, unknown>).legends;
   const m = parseSave(JSON.stringify(g))!;
   assert(m.mastery && m.legendCelebrate === null && m.konsern.legends === 0, "mangler standardverdier");
+});
+
+test("Prestasjoner (B-151): gir fagpoeng én gang, og mange på en gang gir én logglinje", () => {
+  const g = newGame(62);
+  checkAchievements(g);
+  assert(achievementsDone(g) === 0, "prestasjoner i et nytt spill");
+  g.totals.heats = 1;
+  const fp = g.researchPoints;
+  checkAchievements(g);
+  assert(hasAchievement(g, "charge1") && g.researchPoints === fp + 2, "første charge ga ikke prestasjon og 2 fagpoeng");
+  checkAchievements(g);
+  assert(g.researchPoints === fp + 2, "fagpoeng gitt to ganger");
+  // En gammel lagring langt ute i spillet får alle på en gang, med én linje i loggen
+  const old = newGame(63) as unknown as Record<string, unknown>;
+  delete old.achievements;
+  delete old.cosmetics;
+  const m = parseSave(JSON.stringify(old))!;
+  assert(!!m.achievements && Array.isArray(m.cosmetics.owned), "migrate ga ikke standardverdier");
+  m.stage = 4;
+  m.totals.heats = 2000;
+  m.totals.contractsDone = 60;
+  const lines = m.log.length;
+  checkAchievements(m);
+  assert(achievementsDone(m) >= 6 && m.log.length === lines + 1, "mange prestasjoner ga ikke én logglinje");
+});
+
+test("Pynt (B-151): kjøpes for fagpoeng, én fasade om gangen, noen krever prestasjon", () => {
+  const g = newGame(64);
+  g.researchPoints = 5;
+  assert(!buyCosmetic(g, "flagg"), "kjøpte uten nok fagpoeng");
+  g.researchPoints = 1000;
+  assert(
+    buyCosmetic(g, "flagg") && g.researchPoints === 990 && cosmeticOn(g, "flagg"),
+    "flagget ble ikke kjøpt og slått på",
+  );
+  assert(!buyCosmetic(g, "flagg"), "kjøpte samme pynt to ganger");
+  setCosmetic(g, "flagg", false);
+  assert(!cosmeticOn(g, "flagg"), "flagget ble ikke slått av");
+  buyCosmetic(g, "rod");
+  buyCosmetic(g, "bla");
+  assert(
+    !cosmeticOn(g, "rod") && cosmeticOn(g, "bla") && facadeColors(g)?.[0] === FACADE.bla[0],
+    "to fasader på samtidig",
+  );
+  assert(cosmeticBlocked(g, "statue") === "needs" && !buyCosmetic(g, "statue"), "statuen krever Stålbaron");
+  g.achievements.baron = 100;
+  assert(buyCosmetic(g, "statue"), "statuen kunne ikke kjøpes etter Stålbaron");
+  buyCosmetic(g, "vind");
+  assert(!cosmeticOn(g, "vind"), "vindmølla synes før stålverket");
 });
 
 if (failed) {

@@ -479,6 +479,10 @@ export interface GameState {
   mastery: Partial<Record<MasteryId, number>>;
   /** Ny tittel som skal feires (indeks i LEGENDS), eller null (B-150) */
   legendCelebrate: number | null;
+  /** Prestasjoner (B-151): id → dagen den ble nådd */
+  achievements: Record<string, number>;
+  /** Pynt (B-151): kjøpt og slått på */
+  cosmetics: { owned: string[]; on: string[] };
   researched: string[];
   pendingDecision: Decision | null;
   /** Dagen hvert hendelseskort sist ble vist, så de ikke gjentas for ofte */
