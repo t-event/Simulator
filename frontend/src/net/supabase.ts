@@ -39,10 +39,51 @@ function notify(): void {
   for (const fn of listeners) fn();
 }
 
+/** «Husk meg på denne enheten» (B-146): e-posten huskes og økta overlever at appen lukkes */
+const REMEMBER_KEY = "stalverk-husk-v1";
+export interface RememberPrefs {
+  remember: boolean;
+  email: string;
+}
+export function rememberPrefs(): RememberPrefs {
+  try {
+    const raw = localStorage.getItem(REMEMBER_KEY);
+    if (raw) {
+      const p = JSON.parse(raw) as Partial<RememberPrefs>;
+      return { remember: p.remember !== false, email: typeof p.email === "string" ? p.email : "" };
+    }
+  } catch {
+    // Privat modus
+  }
+  return { remember: true, email: "" };
+}
+export function setRememberPrefs(p: RememberPrefs): void {
+  try {
+    localStorage.setItem(REMEMBER_KEY, JSON.stringify(p.remember ? p : { remember: false, email: "" }));
+  } catch {
+    // Privat modus
+  }
+  persist();
+}
+
+/** sessionStorage finnes ikke overalt (tester i Node); da brukes bare localStorage */
+function tabStorage(): Storage | null {
+  try {
+    return typeof sessionStorage === "undefined" ? null : sessionStorage;
+  } catch {
+    return null;
+  }
+}
+
 function persist(): void {
   try {
-    if (session) localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    else localStorage.removeItem(SESSION_KEY);
+    // Uten «Husk meg» ligger økta bare i sessionStorage og er borte når appen lukkes (B-146)
+    const keep = rememberPrefs().remember || !tabStorage();
+    const target = keep ? localStorage : tabStorage()!;
+    const other = keep ? tabStorage() : localStorage;
+    other?.removeItem(SESSION_KEY);
+    if (session) target.setItem(SESSION_KEY, JSON.stringify(session));
+    else target.removeItem(SESSION_KEY);
   } catch {
     // Privat modus: økta lever bare til siden lukkes
   }
@@ -52,8 +93,7 @@ export function getSession(): Session | null {
   if (!loaded) {
     loaded = true;
     try {
-      const raw = localStorage.getItem(SESSION_KEY);
-      if (raw) session = JSON.parse(raw) as Session;
+      session = storedSession();
     } catch {
       session = null;
     }
@@ -72,7 +112,7 @@ export function setSession(s: Session | null): void {
 /** Økta slik den står i localStorage – en annen fane i samme nettleser kan ha fornyet den (B-145) */
 function storedSession(): Session | null {
   try {
-    const raw = localStorage.getItem(SESSION_KEY);
+    const raw = localStorage.getItem(SESSION_KEY) ?? tabStorage()?.getItem(SESSION_KEY);
     return raw ? (JSON.parse(raw) as Session) : null;
   } catch {
     return null;

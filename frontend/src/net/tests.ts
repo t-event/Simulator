@@ -12,7 +12,9 @@ import {
   KEEPALIVE_MAX,
   NetError,
   loggedOutByServer,
+  rememberPrefs,
   setFetch,
+  setRememberPrefs,
   setSession,
   signIn,
   signOut,
@@ -53,6 +55,13 @@ const store = new Map<string, string>();
   getItem: (k: string) => store.get(k) ?? null,
   setItem: (k: string, v: string) => void store.set(k, v),
   removeItem: (k: string) => void store.delete(k),
+};
+// sessionStorage: for «Husk meg» av (B-146)
+const tabStore = new Map<string, string>();
+(globalThis as { sessionStorage?: unknown }).sessionStorage = {
+  getItem: (k: string) => tabStore.get(k) ?? null,
+  setItem: (k: string, v: string) => void tabStore.set(k, v),
+  removeItem: (k: string) => void tabStore.delete(k),
 };
 
 setCloudConfig("https://test.local", "test-nokkel");
@@ -413,6 +422,22 @@ const main = async () => {
       );
     assert((await getToken()) === "ny-fra-fanen" && getSession() !== null, "logget ut selv om fanen hadde fornyet");
     f.onRefresh = null;
+  });
+
+  await test("«Husk meg»: e-posten huskes, og uten avhuking lever økta bare til appen lukkes (B-146)", async () => {
+    const f = fresh();
+    f.users.set("a@test", { id: "u-a@test", password: "hemmelig", confirmed: true });
+    assert(rememberPrefs().remember, "«Husk meg» skal være på som standard");
+    await signIn("a@test", "hemmelig");
+    setRememberPrefs({ remember: true, email: "a@test" });
+    assert(rememberPrefs().email === "a@test" && store.has("stalverk-konto-v1"), "e-post eller økt ble ikke husket");
+    assert(![...store.values()].some((v) => v.includes("hemmelig")), "passordet ble lagret");
+    setRememberPrefs({ remember: false, email: "a@test" });
+    assert(rememberPrefs().email === "", "e-posten skulle glemmes");
+    assert(!store.has("stalverk-konto-v1") && tabStore.has("stalverk-konto-v1"), "økta skulle bare ligge i fanen");
+    assert(getSession()?.user.id === "u-a@test", "fortsatt innlogget i denne økta");
+    setRememberPrefs({ remember: true, email: "a@test" });
+    assert(store.has("stalverk-konto-v1") && !tabStore.has("stalverk-konto-v1"), "økta ble ikke flyttet tilbake");
   });
 
   await test("Lenken fra e-posten logger inn og rydder adressen", () => {

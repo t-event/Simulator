@@ -171,6 +171,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   server i Playwright må svare på `rpc/save_game` og gi `rev` og `device` på `saves?select=…`. To nettlesere
   simuleres med to `browser.newContext()` mot samme falske tilstand. «Appen vises igjen» utløses med
   `document.dispatchEvent(new Event("visibilitychange"))`, «legges bort» med `pagehide`.
+- Spillet lagrer aldri passordet (B-146). «Husk meg» husker e-posten og holder økta i localStorage; uten den ligger
+  økta i sessionStorage. Passord huskes av mobilens passordlager via `autocomplete`.
 - Utlogging skal være `scope=local` (B-145): standarden i Supabase logger ut alle enheter. En avvist økt gir
   beskjeden «Du er logget ut» (`loggedOutByServer`); 408/429 er ikke en død økt.
 - Se på **exit-koden** til `balance.ts`, ikke bare median-linjene: sjekken av kontrollrommet står helt nederst

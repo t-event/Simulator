@@ -2049,3 +2049,30 @@ Brukeren spurte: «Når jeg våknet i dag og skulle inn og se i appen, så var j
   den brukte nøkkelen, få nei og logge ut. Fanene følger også hverandre ved inn- og utlogging (`storage`-hendelsen).
 - Test i `net/tests.ts`: scope=local, beskjed ved avvist økt, økt fra en annen fane, fornyelse i en annen fane
   samtidig.
+
+## B-146 Sletting av konto er sjekket, og «Husk meg på denne enheten» (2026-09-26)
+Status: gjelder (utvider B-125)
+Brukeren ba om:
+- «Pass på at om en sletter brukeren sin, at ikke alle brukere slettes.»
+- «Husk brukernavn og passord – avhuking hadde vært fint.»
+
+**Sletting av konto**
+- `delete_my_account()` sletter bare `where id = auth.uid()`. Uten innlogging stopper den med «ikke logget inn», og
+  anon kan ikke kalle den.
+- Alle tabeller som peker på kontoen, sletter bare kontoens egne rader (`on delete cascade` på user_id): profiles,
+  records, saves, season_results og snapshots.
+- Prøvd i databasen med en midlertidig testbruker i en transaksjon som ble rullet tilbake:
+  - før prøven 2 kontoer, med testbrukeren 3, etter slettingen 2
+  - testbrukeren var borte
+  - kall uten innlogging ble avvist
+  - etterpå fortsatt 2 kontoer og ingen testbruker
+- Ingen endring trengtes.
+
+**«Husk meg på denne enheten»**
+- Avhuking i innloggingen, på som standard.
+- Med avhuking huskes e-posten (fylles inn neste gang), og økta ligger i localStorage som før.
+- Uten avhuking ligger økta bare i sessionStorage (logget ut når appen lukkes), og e-posten glemmes.
+- Passordet lagres **ikke** av spillet; det ville vært usikkert. Skjemaet har `autocomplete="username"` og
+  `current-password`, så mobilens passordlager (iCloud-nøkkelring, Google) eller nettleseren kan huske og fylle det
+  inn. Teksten under avhukingen sier det.
+- Valget lagres i `stalverk-husk-v1`. Test i `net/tests.ts`; passordet finnes ikke i lagringen.
