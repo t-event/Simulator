@@ -71,11 +71,19 @@ import { bonusGap, computePlantStats, liftMorale, moraleNormal, supportAdvice } 
 import { RESEARCH, researchOptions } from "./research";
 import { parseSave } from "./save";
 import { resolveDecision } from "./decisions";
-import { avgRating, rateDelivery, ratingFactor } from "./engine";
+import {
+  apprenticeExams,
+  APPRENTICE_DAYS,
+  avgRating,
+  EXAM_RETRY_DAYS,
+  normalSalary,
+  rateDelivery,
+  ratingFactor,
+} from "./engine";
 import { specMargin } from "./plant";
 import { QUIZ } from "./quiz";
 import { GRADES } from "./data";
-import type { Analysis, Contract } from "./types";
+import type { Agreement, Analysis, Contract } from "./types";
 import { EAFSimulation } from "../sim/eaf";
 import { SimpleRunner } from "../ui/control/simpleRunner";
 
@@ -865,6 +873,67 @@ test("Sesongquiz (B-161): finnes, men teller ikke i «Fagekspert»", () => {
   g.quizDone = Object.keys(QUIZ).filter((k) => k !== "sesong");
   checkAchievements(g);
   assert(hasAchievement(g, "quizalle"), "alle quizer uten sesong skal gi «Fagekspert»");
+});
+
+test("Lærling og fagbrev (B-163): fagprøve etter læretida, stryk gir ny prøve, bestått gir vanlig lønn", () => {
+  const g = newGame(74);
+  g.stage = 2;
+  g.pendingDecision = { id: "laerling", title: "", text: "", options: [{ label: "Ja" }], data: {}, resumeSpeed: 1 };
+  resolveDecision(g, 0);
+  const w = g.workers.find((x) => x.name.endsWith("(lærling)"))!;
+  assert(w && w.apprenticeUntil === 1 + APPRENTICE_DAYS, `fagprøvedag ${w?.apprenticeUntil}`);
+  const lowPay = w.salary;
+  // Før læretida er over: ingenting skjer
+  g.minute = 10 * 1440;
+  apprenticeExams(g);
+  assert(w.apprenticeUntil !== undefined, "tok prøven for tidlig");
+  // For lite ferdighet: stryk og ny prøve om en uke
+  g.minute = APPRENTICE_DAYS * 1440;
+  w.skill = 1.3;
+  apprenticeExams(g);
+  assert(w.apprenticeUntil === 1 + APPRENTICE_DAYS + EXAM_RETRY_DAYS, `ny prøve ${w.apprenticeUntil}`);
+  // Nok ferdighet: fagbrev
+  g.minute = (APPRENTICE_DAYS + EXAM_RETRY_DAYS) * 1440;
+  w.skill = 1.9;
+  apprenticeExams(g);
+  assert(w.apprenticeUntil === undefined && !w.name.includes("lærling"), `ikke fagbrev: ${w.name}`);
+  assert(w.salary > lowPay && w.salary === normalSalary(g, w.role, w.skill), `lønn ${lowPay} → ${w.salary}`);
+  // Lærlinger fra gamle lagringer får en fagprøve
+  const old = JSON.parse(JSON.stringify(g));
+  old.workers.push({ ...old.workers[0], id: 999, name: "Gammel Lærling (lærling)", apprenticeUntil: undefined });
+  const m = parseSave(JSON.stringify(old))!;
+  assert(m.workers.find((x) => x.id === 999)?.apprenticeUntil !== undefined, "gammel lærling fikk ingen fagprøve");
+});
+
+test("Planlagt bytte av støping (B-163): rammeavtaler på det gamle produktet sender ikke nye uker", () => {
+  const make = (planned: boolean) => {
+    const g = newGame(75);
+    g.stage = 2;
+    const product = computePlantStats(g).casting.product;
+    g.agreements.push({
+      id: 1,
+      customer: "Test",
+      product,
+      grade: "standard",
+      weeklyT: 1,
+      pricePerT: 1,
+      weeks: 5,
+      weeksSent: 1,
+      weeksDone: 1,
+      weeksMissed: 0,
+      nextDay: 1,
+      bonusKr: 0,
+      bonusRep: 0,
+      status: "aktiv",
+      offerExpiresMin: 0,
+      closedDay: null,
+    } as Agreement);
+    if (planned) g.pendingCastingSwitch = "streng1";
+    advance(g, 1440);
+    return g.contracts.filter((c) => c.agreementId === 1).length;
+  };
+  assert(make(false) === 1, "uten planlagt bytte skulle uka komme");
+  assert(make(true) === 0, "planlagt bytte skulle stoppe nye uker");
 });
 
 if (failed) {

@@ -72,6 +72,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
       "Hvert anlegg trenger et fast mannskap per skift. Med ett skift går verket 8 timer i døgnet; med tre skift går det døgnet rundt.",
       "Erfarne folk jobber raskere og gjør færre feil, og alle blir flinkere av å jobbe. Avløsere kan ta hvilken plass som helst på skiftet.",
       "Lønn betales hver dag, også når verket står. Et ekstra skift lønner seg bare hvis du får solgt det du lager.",
+      "En lærling lærer faget på jobben og har lavere lønn mens læretida varer. Til slutt tar lærlingen fagprøven. Består lærlingen, får den fagbrev og er fagarbeider med vanlig lønn. I spillet varer læretida 30 døgn.",
     ],
   },
   {

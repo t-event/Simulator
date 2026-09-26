@@ -203,6 +203,8 @@ export interface Worker {
   sickDays?: number[];
   /** Dagen den ansatte sist fikk en advarsel om fravær (B-101) */
   warnedDay?: number;
+  /** Lærling (B-163): døgnet lærlingen går opp til fagprøven. Mangler for dem som ikke er lærlinger */
+  apprenticeUntil?: number;
 }
 
 /** Tema for varsler, så spilleren kan velge hva som dukker opp på skjermen (B-115) */

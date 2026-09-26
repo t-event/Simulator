@@ -14,6 +14,7 @@ import {
   adjustMorale,
   awardPoints,
   adjustReputation,
+  APPRENTICE_DAYS,
   countEvent,
   fmtKr,
   fmtT,
@@ -114,7 +115,7 @@ const MAKERS: Record<string, Maker> = {
     return {
       id: "laerling",
       title: "Lærling",
-      text: "Yrkesskolen spør om du kan ta inn en lærling. Lærlingen koster lite, men kan ikke så mye ennå.",
+      text: `Yrkesskolen spør om du kan ta inn en lærling. Lærlingen koster lite, men kan ikke så mye ennå. Etter ${APPRENTICE_DAYS} døgn går lærlingen opp til fagprøven og får fagbrev.`,
       options: [{ label: "Ta inn lærlingen", hint: "Billig arbeidskraft som blir flinkere." }, { label: "Ikke nå" }],
       data: {},
     };
@@ -467,8 +468,10 @@ export function resolveDecision(g: GameState, option: number): void {
         w.salary = Math.round(w.salary * 0.5);
         w.hiredDay = day(g);
         w.name = `${w.name} (lærling)`;
+        // Etter læretida går lærlingen opp til fagprøven og får fagbrev (B-163)
+        w.apprenticeUntil = day(g) + APPRENTICE_DAYS;
         g.workers.push(w);
-        log(g, `${w.name} har begynt som lærling.`, "info");
+        log(g, `${w.name} har begynt som lærling. Fagprøven er om ${APPRENTICE_DAYS} døgn.`, "info");
       }
       return;
     case "kurs":

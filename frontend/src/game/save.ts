@@ -241,6 +241,11 @@ export function migrate(g: GameState): GameState {
     if ((w.absentFrom === undefined) !== (w.absentUntil === undefined)) {
       w.absentFrom = w.absentUntil = w.absentReason = undefined;
     }
+  // Lærlinger fra før fagprøven fantes (B-163): prøven om tre døgn, eller etter vanlig læretid hvis de er nye
+  const nowDay = Math.floor(g.minute / 1440) + 1;
+  for (const w of g.workers)
+    if (w.apprenticeUntil === undefined && w.name.endsWith(" (lærling)"))
+      w.apprenticeUntil = Math.max(nowDay + 3, (w.hiredDay ?? 0) + 30);
   // Prestasjoner (B-151) man alt har klart, vises med én gang, ikke først etter en spilltime
   checkAchievements(g);
   return g;

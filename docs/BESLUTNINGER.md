@@ -2568,3 +2568,31 @@ mens lagringen venter på svar, så på 10× kunne dag 1027 få tallene fra dag 
 **Lærdom:** alt som sendes sammen med en dag, må leses før første `await` (lagt i CLAUDE.md under fallgruver).
 
 **Konto (KONTO.md):** ingen ny funksjon.
+
+## B-163 Lærlinger tar fagbrev (2026-09-26)
+Status: gjelder
+Brukeren: «Lærlinger må kunne ta fagbrev slik at de ikke står som lærlinger for alltid.»
+
+**Før:** En lærling (hendelseskortet fra yrkesskolen) var en allrounder med «(lærling)» i navnet og halv lønn – for
+alltid, også med fem stjerner.
+
+**Endring:**
+- Læretida er 30 døgn (`APPRENTICE_DAYS`, `apprenticeUntil` på den ansatte). Så går lærlingen opp til fagprøven.
+- Bestått (ferdighet minst 1,6): fagbrev. «(lærling)» fjernes fra navnet, lønna blir vanlig lønn for faget
+  (`normalSalary`, samme som nye kandidater), ferdighet +0,2, trivsel +1 og +2 fagpoeng.
+- Strøk: ny prøve om 7 døgn. Varselet sier at trivsel og kurs gjør at folk lærer fortere.
+- Under Folk → Ansatte står «🎓 Fagprøve om N døgn» ved lærlingen. Hendelseskortet og fagboka (Folk og skift) forteller
+  om læretid og fagbrev.
+- Eldre lagringer: lærlinger (navnet slutter på «(lærling)») får fagprøve om tre døgn, eller når 30 døgn er gått.
+- Ingen handling kreves av spilleren, så nybegynneren trenger ikke noe nytt råd.
+- **Konto (KONTO.md):** nei, regel 1.
+
+**Funnet underveis:** et planlagt bytte av støping («bytt når ordrene er levert», B-102) ble aldri gjennomført mens en
+rammeavtale på det gamle produktet varte, fordi hver uke la en ny ukeleveranse i ordrekøen. Nå sendes ingen nye uker på
+det gamle produktet når et bytte er planlagt; avtalen avsluttes uten straff ved byttet (B-040). Test i `tests.ts`.
+
+**Balanse:** Verksted 8, Støperi 23, Stålverk 66, Storverk 137 (som før). Nybegynneren 184 (var 155, mål høyst 240).
+Med fagprøven slått av blir tallet 155 igjen, men utslaget kommer fra at nybegynneren tar andre veier (to frister gikk ut
+rundt dag 97 i frø 1, og den kjøpte lysbueovn før strengstøping og sto 80 døgn med blokkstøping), ikke fra lønna: uten
+lønnsøkningen ved fagbrev blir det også 184. Nybegynneren med «planlegg byttet» ble prøvd, men ga konkurs (byttet kjøpes
+uten buffer), så den ble fjernet.

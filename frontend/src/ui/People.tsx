@@ -154,7 +154,26 @@ function Stars({ skill }: { skill: number }) {
   );
 }
 
-function WorkerRow({ w, action, away, sick }: { w: Worker; action: React.ReactNode; away?: string; sick?: number }) {
+/** Når lærlingen tar fagprøven (B-163) */
+function ApprenticeBadge({ left }: { left: number }) {
+  return (
+    <span className="g-muted g-worker-exam"> · 🎓 {left <= 0 ? "Fagprøve i dag" : `Fagprøve om ${left} døgn`}</span>
+  );
+}
+
+function WorkerRow({
+  w,
+  action,
+  away,
+  sick,
+  today,
+}: {
+  w: Worker;
+  action: React.ReactNode;
+  away?: string;
+  sick?: number;
+  today?: number;
+}) {
   return (
     <li className="g-worker">
       <div>
@@ -162,6 +181,7 @@ function WorkerRow({ w, action, away, sick }: { w: Worker; action: React.ReactNo
         <span className="g-muted"> · {ROLES[w.role].name}</span>
         {away && <span className="g-badge-bad g-worker-away"> {away}</span>}
         {!!sick && sick >= 3 && <span className="g-badge-bad g-worker-away"> Syk {sick}× på 60 døgn</span>}
+        {w.apprenticeUntil !== undefined && today !== undefined && <ApprenticeBadge left={w.apprenticeUntil - today} />}
       </div>
       <Stars skill={w.skill} />
       <span className="g-muted">{fmtKr(w.salary)}/dag</span>
@@ -660,6 +680,7 @@ export function People({ g, stats, act, openTab }: Props & { openTab?: string })
                         <WorkerRow
                           key={w.id}
                           w={w}
+                          today={day(g)}
                           sick={sickSpells(g, w)}
                           away={
                             isAbsent(g, w)
