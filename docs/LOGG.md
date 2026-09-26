@@ -5,6 +5,34 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 96 – 2026-09-26: sluttspillet – mesterskap og stålmilepæler
+
+**Brukeren spurte:** Hva gjør vi så de som er «ferdige» ikke blir lei? Daglig belønning er meningsløs når alt er
+forsket fram, og noen har tusenvis av fagpoeng. Svar på forslagene: «Kjør på med alle dine forslag.»
+
+**Gjort:** B-150 (forslag 1 og 2 av 5).
+- `game/mastery.ts`: mesterskap med fire prosjekter som kan tas om og om igjen (pris, strøm, skrap, datterverk).
+  Kortene står på Forskning-fanen når all forskning er gjort.
+- Stålmilepæler etter 10 mrd. (`LEGENDS` i `konsern.ts`): titler fra Stålbaron til Stållegende, fagpoeng, feiring med 👑,
+  modernisering til trinn 5, stålkomplekser og flere datterverk. Konsernsiden viser tittelen og neste milepæl.
+- Migrasjon 014: tittelen ved kallenavnet på topplista. Migrasjon 015: juksesperren tillater 50 % vekst per døgn
+  etter sluttmålet.
+- Verdien av datterverkene regnes uten mesterskapet, så konsernverdien ikke hopper ved kjøp av mange nivåer.
+- Testspilleren bruker fagpoengene i mesterskapet i konsernet.
+
+**Testet:**
+- tsc, lint, `npm test` (tre nye tester), `validate.ts`, `balance.ts` (exit 0, uendret), build.
+- `--opphold`: først 4 opphold flagget. Ved 50 mrd. kjøpte testspilleren fire stålkomplekser og moderniserte dem
+  samme døgn (+37 %). Etter migrasjon 015 (50 % per døgn etter sluttmålet): høyst 70 %, ingen flagget. SQL-test av 015:
+  +40 % flagges ikke, +79 % flagges.
+- SQL: `title_of()` og topplista med tittel. Sikkerhetsrådene er som før.
+- Playwright på 390 og 320 px: feiringen «Ny tittel: Stålmagnat!», mesterskapskortene (fagpoeng trekkes, nivået øker),
+  tittelen på Konsern. Ingen horisontal scrolling.
+
+**Gjenstår:** B-151 (pynt og prestasjoner) og B-152 (ukens utfordring og sesonger med vri).
+
+---
+
 ## Økt 95 – 2026-09-26: hva krever konto, daglig belønning, dagens oppdrag og mens du var borte
 
 **Brukeren ba om:**

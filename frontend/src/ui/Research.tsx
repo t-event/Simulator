@@ -1,4 +1,5 @@
-import { buyFpDeal, doResearch, fpDeal } from "../game/actions";
+import { buyFpDeal, buyMastery, doResearch, fpDeal } from "../game/actions";
+import { MASTERY, MASTERY_IDS, masteryCost, masteryEffect, masteryLevel, masteryOpen } from "../game/mastery";
 import { STAGES, stageRef } from "../game/data";
 import { knowledgeCard } from "../game/knowledge";
 import { researchOptions } from "../game/research";
@@ -36,6 +37,65 @@ function FpDeal({ g, act }: { g: GameState; act: GameApi["act"] }) {
         {deal.reason && <span className="g-muted">{deal.reason}</span>}
       </div>
     </div>
+  );
+}
+
+/** Mesterskap (B-150): forskning som kan tas om og om igjen når all vanlig forskning er gjort */
+function Mastery({ g, act }: { g: GameState; act: GameApi["act"] }) {
+  const open = masteryOpen(g);
+  if (!open)
+    return g.stage >= 4 ? (
+      <p className="g-muted g-small-text">
+        🏅 <strong>Mesterskap:</strong> når all forskning er gjort (også konsernprosjektene), åpner forskning som kan
+        tas om og om igjen. Da har fagpoengene alltid noe å gå til.
+      </p>
+    ) : null;
+  const pct = (v: number) => `${(v * 100).toFixed(1).replace(".", ",")} %`;
+  return (
+    <>
+      <h3 className="g-subhead">🏅 Mesterskap</h3>
+      <p className="g-muted g-small-text">
+        All forskning er gjort. Hvert prosjekt kan tas om og om igjen: hvert nivå koster mer, og gevinsten blir litt
+        mindre for hvert nivå.
+      </p>
+      <div className="g-upgrades">
+        {MASTERY_IDS.map((id) => {
+          const m = MASTERY[id];
+          const level = masteryLevel(g, id);
+          const cost = masteryCost(id, level);
+          const can = g.researchPoints >= cost;
+          return (
+            <div key={id} className="g-upgrade">
+              <div className="g-contract-head">
+                <strong>
+                  {m.name} {level > 0 && <span className="g-muted">nivå {level}</span>}
+                </strong>
+                <span className="g-fp-cost">{cost} FP</span>
+              </div>
+              <p className="g-effect">
+                Nå: {pct(masteryEffect(id, level))} {m.effect} · neste nivå: {pct(masteryEffect(id, level + 1))}
+              </p>
+              <p className="g-muted g-small-text">{m.description}</p>
+              <div className="g-row">
+                <button
+                  className="g-primary g-small"
+                  disabled={!can}
+                  onClick={() => {
+                    act((gg) => buyMastery(gg, id));
+                    buzz(20);
+                  }}
+                >
+                  Forsk nivå {level + 1}
+                </button>
+                {!can && (
+                  <span className="g-muted g-small-text">Mangler {Math.ceil(cost - g.researchPoints)} fagpoeng</span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
 }
 
@@ -144,9 +204,10 @@ export function Research({
           </ul>
         </>
       )}
-      {ready.length === 0 && later.length === 0 && konsernLater.length === 0 && (
+      {ready.length === 0 && later.length === 0 && konsernLater.length === 0 && !masteryOpen(g) && (
         <p className="g-muted">Alt som finnes på dette nivået, er forsket fram.</p>
       )}
+      <Mastery g={g} act={act} />
       {konsernLater.length > 0 && (
         <details className="g-role-group">
           <summary>Kommer når konsernet åpnes ({konsernLater.length})</summary>

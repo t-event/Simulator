@@ -101,6 +101,9 @@ export function migrate(g: GameState): GameState {
   if ((g.settings.toasts as string) === "ingen") g.settings.toasts = "problemer";
   if (g.settings.toastTopics === undefined) g.settings.toastTopics = {};
   if (g.settings.toastSeconds === undefined) g.settings.toastSeconds = 6;
+  // Mesterskap og stålmilepæler (B-150)
+  if (loose.mastery === undefined) loose.mastery = {};
+  if (loose.legendCelebrate === undefined) loose.legendCelebrate = null;
   // Dagens oppdrag (B-149)
   if (loose.daily === undefined) loose.daily = { date: null, missions: [], claimed: false };
   if (g.round === undefined) g.round = 1;
@@ -110,10 +113,11 @@ export function migrate(g: GameState): GameState {
   if (g.pendingCastingSwitch === undefined) g.pendingCastingSwitch = null;
   if (g.market.powerDryDays === undefined) g.market.powerDryDays = 0;
   if (g.konsern === undefined)
-    g.konsern = { unlocked: false, plants: [], shared: [], nextId: 1, director: null, milestones: 0 };
+    g.konsern = { unlocked: false, plants: [], shared: [], nextId: 1, director: null, milestones: 0, legends: 0 };
   if (g.konsern.director === undefined) g.konsern.director = null;
   if (g.konsern.director && g.konsern.director.active === undefined) g.konsern.director.active = true;
   if (g.konsern.milestones === undefined) g.konsern.milestones = 0;
+  if (g.konsern.legends === undefined) g.konsern.legends = 0;
   // «Kystverket» er navnet på en ekte etat; datterverket heter nå «Nesverket» (B-141)
   for (const p of g.konsern.plants) if (p.name === "Kystverket") p.name = "Nesverket";
   if (g.storeFullLogMin === undefined) g.storeFullLogMin = -1e9;

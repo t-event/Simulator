@@ -50,6 +50,12 @@ enkelt i presentasjonen, lett å spille i korte økter og vanskelig å legge fra
 
 Konsernet åpner seg på storverket når alt utstyret der er kjøpt, eller egenkapitalen når 1 mrd. (B-106).
 
+Etter sluttmålet (10 mrd., tittelen Stålbaron) fortsetter spillet (B-150):
+- Stålmilepæler ved 25, 50, 100 og 250 mrd. og 1 billion gir nye titler (Stålmagnat … Stållegende), fagpoeng og mer å
+  bruke pengene på: modernisering til trinn 5, stålkomplekser og flere datterverk.
+- Når all forskning er gjort, åpner mesterskapet: fire prosjekter som kan tas om og om igjen, så fagpoengene alltid
+  har noe å gå til.
+
 ## Kontrollrommet – enkel styring
 
 Kravet: en person uten fagkunnskap skal klare å kjøre en charge. Hvert steg har **én forklaring i vanlige ord, én

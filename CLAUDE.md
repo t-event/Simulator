@@ -108,6 +108,7 @@ frontend/src/
     konsern.ts   Datterverk og sluttmålet 10 mrd. (vises av ui/Konsern.tsx)
     world.ts     Felles hendelser i motoren og sesongfordel (B-129)
     daily.ts     Daglig belønning, dagens oppdrag og mens du var borte (B-149)
+    mastery.ts   Mesterskap: forskning som tas om og om igjen etter all forskning (B-150)
     balance.ts   Automatisk testspiller
   net/         Konto og lagring på nett (B-125) – Supabase over fetch, uten bibliotek
     config.ts    URL og nøkkel fra miljøet (aldri i repoet)   supabase.ts  Innlogging, økt, spørringer   sync.ts  Lagring på nett

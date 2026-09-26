@@ -234,7 +234,9 @@ export interface SalesDirector {
 }
 
 /** Datterverk i konsernet (B-106) */
-export type SisterType = "stalverk" | "storverk";
+export type SisterType = "stalverk" | "storverk" | "kompleks";
+/** Mesterskap (B-150): forskning som kan tas om og om igjen */
+export type MasteryId = "pris" | "strom" | "skrap" | "datterverk";
 export interface SisterPlant {
   id: number;
   type: SisterType;
@@ -470,7 +472,13 @@ export interface GameState {
     director: SalesDirector | null;
     /** Antall milepæler for konsernverdien som er nådd (B-119) */
     milestones: number;
+    /** Antall stålmilepæler etter sluttmålet som er nådd (25 mrd … 1 billion, B-150) */
+    legends: number;
   };
+  /** Mesterskap (B-150): nivå per prosjekt */
+  mastery: Partial<Record<MasteryId, number>>;
+  /** Ny tittel som skal feires (indeks i LEGENDS), eller null (B-150) */
+  legendCelebrate: number | null;
   researched: string[];
   pendingDecision: Decision | null;
   /** Dagen hvert hendelseskort sist ble vist, så de ikke gjentas for ofte */

@@ -26,6 +26,7 @@ import {
 } from "./data";
 import { knowledgeCard } from "./knowledge";
 import { auto, hasResearch, RESEARCH, scrapUnlocked, secondsAction } from "./research";
+import { masteryFactor } from "./mastery";
 import { checkMissions } from "./missions";
 import { checkChallenges } from "./challenges";
 import { konsernDay, konsernEquity } from "./konsern";
@@ -238,7 +239,9 @@ export function newGame(seed = Date.now()): GameState {
     winSeen: false,
     courseSeats: null,
     pendingCastingSwitch: null,
-    konsern: { unlocked: false, plants: [], shared: [], nextId: 1, director: null, milestones: 0 },
+    konsern: { unlocked: false, plants: [], shared: [], nextId: 1, director: null, milestones: 0, legends: 0 },
+    mastery: {},
+    legendCelebrate: null,
     daily: { date: null, missions: [], claimed: false },
     storeFullLogMin: -1e9,
     owner: null,
@@ -384,7 +387,8 @@ export function scrapPrice(g: GameState, id: ScrapId): number {
     worldFactor(g, "scrap") *
     (has(g, "skrapterminal") ? 0.94 : 1) *
     (hasResearch(g, "skraplogistikk") ? 0.95 : 1) *
-    (g.konsern?.shared.includes("innkjop") ? 0.95 : 1)
+    (g.konsern?.shared.includes("innkjop") ? 0.95 : 1) *
+    masteryFactor(g, "skrap")
   );
 }
 
