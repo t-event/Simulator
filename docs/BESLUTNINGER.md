@@ -2453,3 +2453,23 @@ forskning tar en charge bare ca. 48 min. Brukerens tre 420-tonnere smelter da ca
 
 **Test:** med alt utstyr og flinke folk holder 2 maskiner følge med 250 t, 420 t trenger maskin nr. 3, og med den holder
 støpingen følge.
+
+## B-158 Romsligere tonnsperre etter stormodellene (2026-09-26)
+Status: gjelder (endrer tonnsperren i B-152)
+Brukeren: «Spilleren Figen ble borte fra topplista, hva skjedde?»
+
+**Hva skjedde:** Juksesperren flagget Figen kl. 08.41 med «33048 tonn på 1 døgn». Grensen var 30 000 t per døgn
+(B-152), satt før stormodellene fantes (B-154). Figen har tre likestrømsovner på 420 t, og tidslinja viser 7 000–38 000 t
+per døgn, jevnt over mange døgn: helt ærlig. Flaggede spillere holdes utenfor topplista.
+
+To grunner til at grensen var for lav:
+- Med alt utstyr smelter tre 420-tonnere ca. 1 500 t/h, altså rundt 40 000 t i døgnet.
+- Et «døgn» mellom to lagringer kan være mer enn 24 timer, fordi lagringen skjer når som helst i døgnet. Da kan
+  nesten to døgns produksjon havne på ett døgn.
+
+**Endring** (migrasjon 018):
+- Tonnsperren er 100 000 t per døgn mellom to lagringer. Den stopper fortsatt urimelige tall.
+- Flagg som bare skyldtes tonnsperren, er fjernet (bare Figen). Figen er tilbake som nr. 1 på «Alle tider» (383 mrd.).
+
+**Lærdom:** når nytt utstyr øker produksjonen, må grensene i juksesperren sjekkes mot det nye maksimumet med alt utstyr,
+ikke mot grunntallene.

@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 104 – 2026-09-26: Figen borte fra topplista
+
+**Brukeren spurte:** hvorfor spilleren Figen ble borte fra topplista.
+
+**Funnet:** Juksesperren flagget Figen for «33048 tonn på 1 døgn». Grensen på 30 000 t (B-152) var for lav for tre
+likestrømsovner på 420 t med alt utstyr. Tidslinja viste ærlig spill.
+
+**Gjort:** B-158. Migrasjon 018: tonnsperren er 100 000 t per døgn, og flagg som bare skyldtes tonn, er fjernet. Figen
+er tilbake som nr. 1.
+
+**Testet:** topplista i databasen viser Figen igjen. Sikkerhetsrådene er som før. tsc og `npm test`.
+
+**Gjenstår:** –
+
+---
+
 ## Økt 103 – 2026-09-26: støpingen holder følge med stormodellene
 
 **Brukeren meldte:** ovn 3 venter ofte på støping etter at alt er oppgradert.
