@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 102 – 2026-09-26: økonomi – hjemmeverket for seg
+
+**Brukeren meldte:** resultatet på Økonomi gikk ikke opp etter at ovnene ble oppgradert.
+
+**Funnet:** Brukerens spill på serveren viser at hjemmeverket gikk fra ca. 40 til ca. 130 mill. kr per døgn. Men
+«Resultat i går» tok med datterverkene (1,3–2,1 mrd.) og kjøp (2,3 og 23,7 mrd.), så økningen var nesten usynlig.
+
+**Gjort:** B-156. Økonomi viser verket i går (drift), snitt over 7 døgn, datterverkene og investeringer hver for seg.
+
+**Testet:** tsc, lint, `npm test`, `validate.ts`, `balance.ts`, build. Playwright på 390 og 320 px: kortet med
+de nye tallene, ingen horisontal scrolling.
+
+**Gjenstår:** –
+
+---
+
 ## Økt 101 – 2026-09-26: ukekista bare til topp 3
 
 **Brukeren ba om:** at bare topp 3 får ukekiste, siden det ikke er så mange spillere ennå.
