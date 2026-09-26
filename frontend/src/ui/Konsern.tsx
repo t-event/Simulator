@@ -4,7 +4,11 @@ import {
   daysToAfford,
   DIRECTOR_AGREEMENT_SHARE,
   DIRECTOR_HIRE,
+  DIRECTOR_UPGRADES,
+  directorLevel,
   directorPerDay,
+  nextDirectorUpgrade,
+  upgradeDirector,
   fireDirector,
   hireDirector,
   KONSERN_MILESTONES,
@@ -132,6 +136,42 @@ export function DirectorSwitch({ g, act }: { g: GameState; act: Act }) {
   );
 }
 
+/** Oppgradering av salgsdirektøren (B-172): hva den har, og neste steg med pris */
+function DirectorUpgrade({ g, act }: { g: GameState; act: Act }) {
+  const level = directorLevel(g);
+  const next = nextDirectorUpgrade(g);
+  const have = DIRECTOR_UPGRADES.slice(0, level).map((u) => u.name);
+  return (
+    <div className="g-upgrade">
+      {have.length > 0 && <p className="g-muted g-small-text">✓ Har: {have.join(", ")}.</p>}
+      {next ? (
+        <>
+          <strong>Oppgrader: {next.name}</strong>
+          <span className="g-muted g-small-text">{next.text}</span>
+          <div className="g-konsern-buy">
+            <button
+              disabled={g.cash < next.price}
+              onClick={() => {
+                act((gg) => upgradeDirector(gg));
+                buzz(20);
+              }}
+            >
+              Kjøp ({fmtKr(next.price)})
+            </button>
+            {g.cash < next.price && (
+              <span className="g-konsern-why g-small-text">
+                Du mangler {fmtKr(Math.ceil(next.price - Math.max(0, g.cash)))}.
+              </span>
+            )}
+          </div>
+        </>
+      ) : (
+        <p className="g-muted g-small-text">Salgsdirektøren er fullt oppgradert.</p>
+      )}
+    </div>
+  );
+}
+
 /** Salgsdirektøren (B-117): signerer kontrakter og rammeavtaler selv – meget dyrt. Kort, med resten foldet bort (B-123) */
 function DirectorCard({ g, act }: { g: GameState; act: Act }) {
   const d = g.konsern.director;
@@ -158,6 +198,7 @@ function DirectorCard({ g, act }: { g: GameState; act: Act }) {
             døgn
           </p>
           <DirectorSwitch g={g} act={act} />
+          <DirectorUpgrade g={g} act={act} />
           <details className="g-details">
             <summary>Innstillinger og oppsigelse</summary>
             <label className="g-toggle">

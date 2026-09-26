@@ -12,6 +12,7 @@ import {
   assessOffer,
   awardPoints,
   committedT,
+  extraOffer,
   fmtKr,
   log,
   realisticDailyT,
@@ -511,14 +512,63 @@ export const DIRECTOR_AGREEMENT_SHARE = 0.5;
  */
 export const DIRECTOR_MARGIN = 0.7;
 
-/** Tonn per døgn salgsdirektøren regner med: det dårligste av de siste sju døgnene med produksjon */
+/**
+ * Tonn per døgn salgsdirektøren regner med: det dårligste av de siste sju døgnene med produksjon. Med salgsteam
+ * (B-172) snittet av dem.
+ */
 export function directorDailyT(g: GameState, stats: ReturnType<typeof computePlantStats>): number {
   const recent = g.history
     .slice(-7)
     .map((d) => d.producedT)
     .filter((t) => t > 0);
-  const worst = recent.length ? Math.min(...recent) : stats.dailyProductT * 0.6;
-  return Math.min(realisticDailyT(g, stats), worst);
+  const typical = recent.length
+    ? directorLevel(g) >= 1
+      ? recent.reduce((a, b) => a + b, 0) / recent.length
+      : Math.min(...recent)
+    : stats.dailyProductT * 0.6;
+  return Math.min(realisticDailyT(g, stats), typical);
+}
+/** Hvor mye av tida til fristen salgsdirektøren bruker, per oppgradering (B-172) */
+const DIRECTOR_MARGINS = [DIRECTOR_MARGIN, 0.85, 0.85, 0.85];
+
+/** Oppgraderinger av salgsdirektøren (B-172): brukeren så at den av og til ikke hadde noen ordrer */
+export const DIRECTOR_UPGRADES: { name: string; price: number; text: string }[] = [
+  {
+    name: "Salgsteam",
+    price: 500_000_000,
+    text: "Regner med et vanlig døgn i stedet for det dårligste, trenger mindre luft til fristen og tar også ordrer der resepten er nær grensen.",
+  },
+  {
+    name: "Kundenettverk",
+    price: 2_000_000_000,
+    text: "Skaffer flere forespørsler selv når ordrekøen er kort, så verket ikke står uten ordrer.",
+  },
+  {
+    name: "Eksportkontor",
+    price: 8_000_000_000,
+    text: "Forhandler 5 % bedre pris på kontraktene den signerer, og tar rammeavtaler opp til 70 % av ukeproduksjonen.",
+  },
+];
+
+export function directorLevel(g: GameState): number {
+  return g.konsern?.director?.level ?? 0;
+}
+
+/** Neste oppgradering av salgsdirektøren, eller null når alt er kjøpt */
+export function nextDirectorUpgrade(g: GameState): (typeof DIRECTOR_UPGRADES)[number] | null {
+  return g.konsern?.director ? (DIRECTOR_UPGRADES[directorLevel(g)] ?? null) : null;
+}
+
+export function upgradeDirector(g: GameState): { ok: boolean; message: string } {
+  const d = g.konsern.director;
+  if (!d) return { ok: false, message: "Du har ingen salgsdirektør." };
+  const up = nextDirectorUpgrade(g);
+  if (!up) return { ok: false, message: "Salgsdirektøren har alt." };
+  if (g.cash < up.price) return { ok: false, message: "For lite penger" };
+  addCost(g, "investering", up.price);
+  d.level = directorLevel(g) + 1;
+  log(g, `Salgsdirektøren har fått ${up.name.toLowerCase()}: ${up.text}`, "good");
+  return { ok: true, message: `${up.name} er på plass.` };
 }
 
 export function hireDirector(g: GameState): { ok: boolean; message: string } {
@@ -526,7 +576,7 @@ export function hireDirector(g: GameState): { ok: boolean; message: string } {
   if (g.konsern.director) return { ok: false, message: "Du har allerede en salgsdirektør." };
   if (g.cash < DIRECTOR_HIRE) return { ok: false, message: "For lite penger" };
   addCost(g, "lonn", DIRECTOR_HIRE);
-  g.konsern.director = { hiredDay: day(g), contracts: 0, agreements: 0, agreementsOn: true, active: true };
+  g.konsern.director = { hiredDay: day(g), contracts: 0, agreements: 0, agreementsOn: true, active: true, level: 0 };
   log(
     g,
     `Konsernet har ansatt en salgsdirektør (${fmtKr(DIRECTOR_HIRE)} i rekruttering, ${fmtKr(directorPerDay(g))} per døgn). Kontraktene som verket rekker, signeres nå av seg selv.`,
@@ -554,27 +604,33 @@ export function directorHour(g: GameState): void {
   const stats = computePlantStats(g);
   if (stats.dailyProductT <= 0) return;
   const following = auto(g, "followQueue");
+  const perDay = directorDailyT(g, stats);
+  if (perDay <= 0) return;
+  const level = directorLevel(g);
+  // Kundenettverket skaffer en forespørsel til når ordrekøen er kortere enn to døgns produksjon (B-172)
+  if (level >= 2 && committedT(g) < perDay * 2 && chance(g, 0.25)) extraOffer(g, stats);
   const offers = g.contracts
     .filter((c) => c.status === "tilbud")
     .sort((a, b) => b.tonnes * b.pricePerT - a.tonnes * a.pricePerT);
-  const perDay = directorDailyT(g, stats);
-  if (perDay <= 0) return;
   for (const c of offers) {
     const check = assessOffer(g, stats, c, committedT(g));
     const recipeOk = check.recipeOk || (check.graderFix && following);
-    if (!check.canMake || !recipeOk || check.tight || check.narrow) continue;
+    if (!check.canMake || !recipeOk || check.tight || (check.narrow && level < 1)) continue;
     // Samme regnestykke som på Salg, men med det dårligste døgnet og mer margin
     const needDays = (committedT(g) + agreementLoadUntil(g, c.deadlineDay) + c.tonnes) / perDay;
-    if (needDays > check.days * DIRECTOR_MARGIN) continue;
+    if (needDays > check.days * (DIRECTOR_MARGINS[level] ?? DIRECTOR_MARGIN)) continue;
+    // Eksportkontoret forhandler bedre pris (B-172)
+    if (level >= 3) c.pricePerT = Math.round(c.pricePerT * 1.05);
     if (acceptContract(g, c.id, "Salgsdirektøren").ok) d.contracts += 1;
   }
   if (!d.agreementsOn) return;
+  const share = level >= 3 ? 0.7 : DIRECTOR_AGREEMENT_SHARE;
   const perWeek = perDay * 7;
   for (const a of g.agreements.filter((x) => x.status === "tilbud")) {
     const used = g.agreements.filter((x) => x.status === "aktiv").reduce((t, x) => t + x.weeklyT, 0);
     const canMake = stats.products.includes(a.product);
     const recipeOk = recipeEstimate(g, a.grade, stats, gradeRecipe(g, a.grade)).grades.includes(a.grade);
-    if (!canMake || !recipeOk || perWeek <= 0 || (used + a.weeklyT) / perWeek > DIRECTOR_AGREEMENT_SHARE) continue;
+    if (!canMake || !recipeOk || perWeek <= 0 || (used + a.weeklyT) / perWeek > share) continue;
     if (acceptAgreement(g, a.id, "Salgsdirektøren").ok) d.agreements += 1;
   }
 }

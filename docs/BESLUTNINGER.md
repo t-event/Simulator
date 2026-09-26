@@ -2302,7 +2302,7 @@ fordel (regel 1). Skal merker eller pynt senere vises for andre spillere, krever
 144, mål høyst 240). Alle mål er OK.
 
 ## B-152 Ukens utfordring og sesonger med vri (2026-09-26)
-Status: gjelder, men ukekista går bare til topp 3 (endret i B-155) (utvider B-129 og B-143)
+Status: gjelder, men ukekista går bare til topp 3 (endret i B-155), og ligaene er erstattet av én ukeliste for alle, målt i prosent (B-172) (utvider B-129 og B-143)
 Brukeren: «Kjør på med alle dine forslag.» Dette er forslag 3 og 4. Samtidig er tre feil brukeren meldte, rettet.
 
 **Ukens utfordring** (migrasjon 016, `net/weekly.ts`, `ui/Weekly.tsx`):
@@ -2799,3 +2799,31 @@ rettede sesongspillet: ikke flagget, 27,6 mill. og storverk dag 179 i sesongen.
 (var 152,5), 0 konkurs. Den flinke testspilleren er litt tregere fordi byttet av støping og skrapet går annerledes.
 
 **Konto (KONTO.md):** nei, regel 1.
+
+## B-172 Varsellinja, ukelista for alle og salgsdirektøren som kan oppgraderes (2026-09-26)
+Status: gjelder. Erstatter ligadelen av B-152 (ukelista per liga).
+Brukeren: «Syntes varslingslinja fungerer dårlig. Får ikke med meg det siste … Varslene på linja stemmer heller ikke.
+Kryss ut bør bety fjern alle varsler og antallet varsler.» «Ligaene gir ikke mening i dag. Fiks.» «Salgsdirektøren bør
+kunne oppgraderes. Ser jeg av og til ikke har noen ordre.»
+
+**Varsellinja:** varslene sto i kø, så det eldste ble vist først og det siste som skjedde kom for sent. Nå vises det
+**nyeste** med en gang (det som skyves bort, står i varsellista bak 🔔). «+N» for køen er borte – bare bjella har tall.
+**✕ fjerner alle varsler og nullstiller tallet** på bjella (`markAllSeen`); lista bak 🔔 har dem fortsatt. Svar på noe
+spilleren trykket på («For lite penger») skyves ikke bort av loggen.
+
+**Ukelista (migrasjon 023):** ligaene målte vekst og tonn i kroner og tonn, så den største i gull-ligaen vant alltid,
+og en alene i bronse eller sølv fikk medalje uansett. Nå er det **én liste for alle**:
+- vekst: prosent vekst i konsernverdi i uka, regnet fra minst 50 mill. (ellers vokser et lite verk tusenvis av
+  prosent; testet på de ekte spillerne: 192 %, 122 %, 56 %, 55 %, 2 %),
+- tonn: stål per spilldøgn i uka i prosent av det verket laget per døgn før uka,
+- dager: spilldøgn i uka, som før.
+Topp 3 av alle får medalje og kiste. Kolonnen `league` står igjen med «alle». Ligafanene i appen er fjernet.
+
+**Salgsdirektøren:** tre oppgraderinger under Konsern → Salgsdirektør (`DIRECTOR_UPGRADES`, `director.level`):
+1. Salgsteam (500 mill.): regner med et vanlig døgn i stedet for det dårligste, bruker 85 % av tida til fristen (før
+   70 %), og tar ordrer der resepten er nær grensen.
+2. Kundenettverk (2 mrd.): skaffer flere forespørsler når ordrekøen er kortere enn to døgns produksjon.
+3. Eksportkontor (8 mrd.): 5 % bedre pris på kontraktene den signerer, rammeavtaler opp til 70 % av ukeproduksjonen.
+Salg-merket nederst vises ikke når salgsdirektøren signerer (B-171).
+
+**Konto (KONTO.md):** varsellinja og salgsdirektøren nei (regel 1); ukelista krever konto som før (regel 3).
