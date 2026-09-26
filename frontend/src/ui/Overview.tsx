@@ -50,6 +50,7 @@ import { AutoToggle } from "./AutoToggle";
 import { konsernReady } from "../game/konsern";
 import { DailyCard } from "./Daily";
 import { AchievementsCard, PyntModal } from "./Achievements";
+import { WeeklyCard } from "./Weekly";
 import { BankCard } from "./Settings";
 import { KonsernTab } from "./Konsern";
 import { readyUpgrades, stationOptions, stationReady, type Station } from "./stations";
@@ -164,6 +165,7 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
       out.push({
         text: `${away} ${away === 1 ? "ansatt er" : "ansatte er"} borte, og verket går ${stats.shifts} skift i stedet for ${full}. Lei inn vikarer under Folk, eller vent til de er tilbake.`,
         view: "folk",
+        sub: "fravaer",
       });
   }
   if (g.workers.length && g.morale < 40)
@@ -185,6 +187,7 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
       out.push({
         text: `${often.name} har vært syk ${sickSpells(g, often)} ganger på 60 døgn. Vurder en advarsel under Folk → Fravær.`,
         view: "folk",
+        sub: "fravaer",
       });
   }
   if (g.stage >= 1 && stats.staffCount === 0)
@@ -563,6 +566,8 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings }: Props)
             />
             {/* Dagens oppdrag og uka med daglig belønning (B-149); ikke mens veiledningen pågår */}
             {g.tutorial === null && <DailyCard g={g} act={act} onLogin={onOpenSettings} />}
+            {/* Ukens utfordring (B-152) */}
+            {g.tutorial === null && <WeeklyCard g={g} act={act} onLogin={onOpenSettings} />}
             <Card title="Produksjon nå">
               {split ? (
                 <ul className="g-furnace-grades">

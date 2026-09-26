@@ -2300,3 +2300,42 @@ fordel (regel 1). Skal merker eller pynt senere vises for andre spillere, krever
 
 **Balanse:** prestasjonene gir litt fagpoeng tidlig. `balance.ts`: 8/23/63/133 (før 8/25/67/141), nybegynner 168 (før
 144, mål høyst 240). Alle mål er OK.
+
+## B-152 Ukens utfordring og sesonger med vri (2026-09-26)
+Status: gjelder (utvider B-129 og B-143)
+Brukeren: «Kjør på med alle dine forslag.» Dette er forslag 3 og 4. Samtidig er tre feil brukeren meldte, rettet.
+
+**Ukens utfordring** (migrasjon 016, `net/weekly.ts`, `ui/Weekly.tsx`):
+- Uka går fra mandag til mandag, norsk tid. Hver liga (bronse før storverket, sølv på storverket, gull fra 1 mrd.)
+  har sin egen liste.
+- Oppgaven går på omgang: mest vekst i konsernverdi, flest tonn produsert, flest spilldøgn.
+- Serveren regner alt ut fra tidslinja (`snapshots`), som nå også får tonn produsert (`produced_t`). Grunnlaget er
+  siste snapshot før uka, i samme sesong.
+- Når uka er over (regnes ut første gang noen ser på lista eller statusen): topp 3 i hver liga får medalje, topp 10 en
+  ukekiste med fagpoeng: 100, 75, 50, ellers 25. Kista åpnes på kortet og kan bare åpnes én gang (`claim_week_chest`).
+- Juksesperren flagger mer enn 30 000 tonn per spilldøgn.
+- Kortet står på Verket etter dagens oppdrag. Uten konto vises det fra verkstedet med «krever konto».
+
+**Sesonger med vri:**
+- Tabellen `season_twists`: skrapmangel (skrap +15 %), eksportboom (stål +10 %, skrap +5 %), energikrise (strøm
+  +30 %, stål +5 %), grønn strøm (strøm −15 %).
+- Vrien velges når sesongen startes: `select public.start_season('Sesong 2', 26, 'skrapmangel');`. Sesong 1 som
+  pågår, har ingen vri (det ville vært urettferdig midt i sesongen).
+- Vrien gjelder bare spill som er med i sesongen. Den ganges inn som en felles hendelse som varer hele sesongen
+  (`worldFactor`), står under «Nå i markedet», på topplista, og i loggen første gang.
+
+**Utmerkelse for topp 10:** ved kallenavnet står «🏆 Vinner av Sesong 1» eller «🎖 Topp 10 i Sesong 1 (3. plass)»,
+ellers plasseringen. Vinduet ved sesongslutt sier det også.
+
+**Konto (KONTO.md):** ukens utfordring krever konto (regel 3 og 7); lista kan leses uten. Topp 10-merket krever
+konto. Vrien gjelder bare sesongspill, som krever konto.
+
+**Feil som er rettet:**
+- «Pynt verket» kunne ikke scrolles på iPhone. Ark som åpnes fra innholdet på Verket (pynt, ukelista, utstyr per sted),
+  legges nå rett i `<body>` med `ui/Portal.tsx`. Inne i `.g-main` (B-137) klipper Safari arket til innholdet.
+- Utlogging uten forklaring: serveren hadde fortsatt en gyldig økt for mobilen (fornyet kl. 07.20), så økta ble borte
+  på enheten. Det skjer når «Husk meg» ikke var på og appen ble lukket, når nettleserdata slettes, eller når spillet
+  åpnes et annet sted (Safari og appen på hjemskjermen har hver sin lagring). Appen husker nå at noen har vært
+  innlogget (`stalverk-sist-innlogget-v1`). Er økta borte uten at man logget ut selv, sier vinduet «Du er logget ut»
+  hvorfor.
+- Varsler om fravær («ansatte er borte», «vurder en advarsel») åpner nå Folk → Fravær, ikke Skift.

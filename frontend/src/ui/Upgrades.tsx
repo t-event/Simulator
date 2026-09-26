@@ -9,6 +9,7 @@ import type { GameApi } from "../game/useGame";
 import { Bar, Card } from "./common";
 import { fmtKr, fmtRep } from "./format";
 import { buzz } from "./haptics";
+import { Portal } from "./Portal";
 
 /** Knapp som åpner utstyret for et sted; skjules når det ikke finnes noe der ennå */
 export function StationButton({
@@ -183,49 +184,51 @@ export function UpgradeSheet({
     return units[i >= 0 ? i : 1];
   });
   return (
-    <div className="g-modal" role="dialog" aria-modal="true" aria-label={STATION_NAMES[station]} onClick={onClose}>
-      <div className="g-modal-card" onClick={(e) => e.stopPropagation()}>
-        <header className="g-card-head g-sheet-head">
-          <h2>{STATION_NAMES[station]}</h2>
-          <span className="g-sheet-cash">Du har {fmtKr(Math.floor(Math.max(0, g.cash)))}</span>
-          <button onClick={onClose} aria-label="Lukk">
-            ✕
-          </button>
-        </header>
-        {units ? (
-          <>
-            <div className="g-subtabs" role="tablist" aria-label="Ovner">
-              {units
-                .filter((u) => unitList(u).length)
-                .map((u) => (
-                  <button
-                    key={u ?? "verket"}
-                    role="tab"
-                    aria-selected={unit === u}
-                    className={unit === u ? "is-active" : ""}
-                    onClick={() => setUnit(u)}
-                  >
-                    {u === undefined ? "Verket" : `Ovn ${u + 1}`}
-                    {buyable(u) > 0 && <span className="g-badge">{buyable(u)}</span>}
-                  </button>
-                ))}
-            </div>
-            <p className="g-muted">
-              {unit === undefined
-                ? "Utstyr for hele verket."
-                : `Ovn ${unit + 1} – ${unitType(g, unit).name}. Hver ovn får utstyr for seg.`}
-            </p>
-            <OptionList
-              g={g}
-              options={unitList(unit).map((o) => ({ ...o, name: o.name.replace(/ – ovn \d+$/, "") }))}
-              act={act}
-            />
-          </>
-        ) : (
-          <OptionList g={g} options={options} act={act} />
-        )}
+    <Portal>
+      <div className="g-modal" role="dialog" aria-modal="true" aria-label={STATION_NAMES[station]} onClick={onClose}>
+        <div className="g-modal-card" onClick={(e) => e.stopPropagation()}>
+          <header className="g-card-head g-sheet-head">
+            <h2>{STATION_NAMES[station]}</h2>
+            <span className="g-sheet-cash">Du har {fmtKr(Math.floor(Math.max(0, g.cash)))}</span>
+            <button onClick={onClose} aria-label="Lukk">
+              ✕
+            </button>
+          </header>
+          {units ? (
+            <>
+              <div className="g-subtabs" role="tablist" aria-label="Ovner">
+                {units
+                  .filter((u) => unitList(u).length)
+                  .map((u) => (
+                    <button
+                      key={u ?? "verket"}
+                      role="tab"
+                      aria-selected={unit === u}
+                      className={unit === u ? "is-active" : ""}
+                      onClick={() => setUnit(u)}
+                    >
+                      {u === undefined ? "Verket" : `Ovn ${u + 1}`}
+                      {buyable(u) > 0 && <span className="g-badge">{buyable(u)}</span>}
+                    </button>
+                  ))}
+              </div>
+              <p className="g-muted">
+                {unit === undefined
+                  ? "Utstyr for hele verket."
+                  : `Ovn ${unit + 1} – ${unitType(g, unit).name}. Hver ovn får utstyr for seg.`}
+              </p>
+              <OptionList
+                g={g}
+                options={unitList(unit).map((o) => ({ ...o, name: o.name.replace(/ – ovn \d+$/, "") }))}
+                act={act}
+              />
+            </>
+          ) : (
+            <OptionList g={g} options={options} act={act} />
+          )}
+        </div>
       </div>
-    </div>
+    </Portal>
   );
 }
 

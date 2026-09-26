@@ -115,6 +115,7 @@ frontend/src/
     config.ts    URL og nøkkel fra miljøet (aldri i repoet)   supabase.ts  Innlogging, økt, spørringer   sync.ts  Lagring på nett
     leaderboard.ts Toppliste og kallenavn   season.ts  Sesong og hendelser (butikk)
     daily.ts     Daglig på serveren (status, henting)   features.ts  Hva som krever konto   update.ts  Automatisk oppdatering
+    weekly.ts    Ukens utfordring: status, ukelista og ukekista (B-152)
     tests.ts     Tester uten nett (falsk tjeneste)
   ui/          Spillets skjermer (mobil først) og kontrollrommet
     Overview.tsx Verket med underfanene Oversikt, Anlegg, Økonomi (og Konsern)   Recipe.tsx  Resepten på Marked
@@ -127,6 +128,7 @@ frontend/src/
     Leaderboard.tsx Topplista (arket bak 🏆 ved varsellinja)   Season.tsx  Sesongspørsmål, hendelser på Marked, sesonglinje
     Daily.tsx    Velkommen tilbake, daglig belønning og kortet «Dagens oppdrag» på Verket
     Achievements.tsx Prestasjonskortet på Verket og arket «Pynt verket» (🎨 på anleggsbildet)
+    Weekly.tsx   Kortet «Ukens utfordring» på Verket og ukelista   Portal.tsx  Ark fra Verket legges i <body>
     control/     Kontrollrommet: den enkle styringen (SimpleControl + simpleRunner)
   sim/         Prosessmodell for lysbueovnen (brukes av kontrollrommet)
 frontend/public/  PWA: manifest, ikoner, service worker
@@ -153,6 +155,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   skrift enn Chromium, så la det være litt luft (B-134).
 - På mobil (under 760 px) scroller bare `.g-main`, ikke vinduet (B-137). I Playwright: scroll med
   `document.querySelector(".g-main").scrollBy(...)`. Fingersveip (`synthesizeScrollGesture`) virker ikke uten skjerm.
+- Ark (`.g-modal`) som åpnes fra innhold inne i `.g-main`, må pakkes i `<Portal>` (B-152). Ellers klipper Safari på
+  iPhone arket til innholdet, og det kan ikke scrolles (skjedde med «Pynt verket»).
 - Skjermbilder med `fullPage: true` viser faste menyer midt på siden; det er
   bare et artefakt av skjermbildet.
 - Prosessmodellen er kalibrert med steg på maks 1 s – del opp større steg.

@@ -206,6 +206,8 @@ export async function uploadSave(g: GameState, keepalive = false): Promise<void>
         equity: Math.round(konsernEquity(g)),
         stage: g.stage,
         reputation: Math.round(g.reputation * 10) / 10,
+        // Til ukens utfordring (B-152)
+        produced_t: Math.round(g.totals.producedT),
         season_id: season,
         client_version: APP_VERSION,
       },

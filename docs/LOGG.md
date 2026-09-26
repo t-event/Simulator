@@ -5,6 +5,37 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 98 – 2026-09-26: ukens utfordring, sesonger med vri, og tre feil
+
+**Brukeren ba om:**
+- «Kjør på med alle dine forslag» (forslag 3 og 4 av 5).
+- Meldte at pynt-arket ikke kan scrolles, at hen ble logget ut igjen, og at fraværsvarselet åpner Skift.
+
+**Gjort:** B-152.
+- Migrasjon 016: ukens utfordring (`weekly_*`, `claim_week_chest`), tonn i tidslinja, vri på sesongen
+  (`season_twists`), topp 10-utmerkelse ved kallenavnet.
+- `net/weekly.ts` og `ui/Weekly.tsx`: kortet på Verket, ukelista per liga og ukekista.
+- Vrien i spillmotoren (`applySeasonTwist`, `worldFactor`).
+- `ui/Portal.tsx` for ark fra Verket.
+- Forklaring når økta blir borte på enheten.
+- Varsler om fravær åpner Folk → Fravær.
+
+**Testet:**
+- tsc, lint, `npm test` (én ny motortest, to nye nettester).
+- SQL med testbruker og tilbakerulling: ukesvekst, plass, kiste én gang, tonnsperren, vri, oppgaven på omgang.
+  Sikkerhetsrådene viser bare det som er meningen.
+- Playwright på 390 og 320 px med falsk server:
+  - kortet, kista (+75 fagpoeng), ukelista i body uten horisontal scrolling
+  - pynt-arket i body kan scrolles
+  - vrien under «Nå i markedet»
+  - uten konto: «krever konto»
+
+**Gjenstår:**
+- Brukerens nye ønsker: nettselskapets tilbud i sluttspillet, vanskeligere dagens oppdrag for dem som har kommet
+  langt, og større ovner og støpemaskiner med lengre smeltetid.
+
+---
+
 ## Økt 97 – 2026-09-26: prestasjoner og pynt
 
 **Brukeren ba om:** «Kjør på med alle dine forslag» (forslag 5 av 5: pynt og prestasjoner).

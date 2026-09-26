@@ -1175,6 +1175,8 @@ button {
   max-width: 560px;
   max-height: 100%;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .g-intro-card h1 {
@@ -2744,4 +2746,12 @@ button {
   font-size: 12px;
   text-align: right;
   color: var(--muted, #9aa3ad);
+}
+
+/* Ukens utfordring (B-152) */
+.g-week-chest {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
 }

@@ -97,6 +97,8 @@ export function getSession(): Session | null {
     } catch {
       session = null;
     }
+    // Innlogget fra før B-152: husk det, så en økt som blir borte senere gir forklaring
+    if (session) markSignedIn();
   }
   return session;
 }
@@ -105,8 +107,42 @@ export function setSession(s: Session | null): void {
   loaded = true;
   session = s;
   persist();
-  if (s) clearLoggedOut();
+  if (s) {
+    clearLoggedOut();
+    markSignedIn();
+  }
   notify();
+}
+
+/**
+ * Hvem som sist var logget inn på denne enheten, alltid i localStorage (B-152). Er økta borte uten at spilleren logget
+ * ut selv og uten at serveren avviste den, ble den borte her på enheten – da får spilleren vite hvorfor.
+ */
+const LAST_KEY = "stalverk-sist-innlogget-v1";
+function markSignedIn(): void {
+  try {
+    localStorage.setItem(LAST_KEY, "1");
+  } catch {
+    // Privat modus
+  }
+}
+function forgetSignedIn(): void {
+  try {
+    localStorage.removeItem(LAST_KEY);
+  } catch {
+    // Privat modus
+  }
+}
+
+/** Hvorfor spilleren ikke er logget inn: avvist av serveren, borte fra enheten, eller null (logget ut selv / aldri inne) */
+export function logoutReason(): "server" | "lost" | null {
+  if (getSession()) return null;
+  if (loggedOutByServer()) return "server";
+  try {
+    return localStorage.getItem(LAST_KEY) === "1" ? "lost" : null;
+  } catch {
+    return null;
+  }
 }
 
 /** Økta slik den står i localStorage – en annen fane i samme nettleser kan ha fornyet den (B-145) */
@@ -139,6 +175,8 @@ export function loggedOutByServer(): boolean {
 export function clearLoggedOut(): void {
   try {
     localStorage.removeItem(LOGGED_OUT_KEY);
+    // Beskjeden om at økta ble borte er sett (eller spilleren er inne igjen)
+    if (!session) localStorage.removeItem(LAST_KEY);
   } catch {
     // Privat modus
   }
@@ -284,6 +322,7 @@ export async function signIn(email: string, password: string): Promise<Session> 
 
 export async function signOut(): Promise<void> {
   const s = getSession();
+  forgetSignedIn();
   setSession(null);
   if (!s) return;
   try {
@@ -335,6 +374,7 @@ export async function updatePassword(password: string): Promise<void> {
 /** Sletter kontoen med alt innhold (SQL-funksjonen delete_my_account, se supabase/001_grunnlag.sql) */
 export async function deleteAccount(): Promise<void> {
   await rpc("delete_my_account", {});
+  forgetSignedIn();
   setSession(null);
 }
 

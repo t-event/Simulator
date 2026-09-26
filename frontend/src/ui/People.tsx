@@ -393,8 +393,11 @@ function CrewTable({ g, stats, shifts }: { g: GameState; stats: PlantStats; shif
   );
 }
 
-export function People({ g, stats, act }: Props) {
-  const [tab, setTab] = useState<PeopleTab>("skift");
+export function People({ g, stats, act, openTab }: Props & { openTab?: string }) {
+  // Et varsel kan åpne en bestemt fane, f.eks. Fravær (B-152)
+  const [tab, setTab] = useState<PeopleTab>(() =>
+    openTab === "ansett" || openTab === "ansatte" || openTab === "fravaer" ? openTab : "skift",
+  );
   const [confirmFire, setConfirmFire] = useState<number | null>(null);
   const cap = STAGES[g.stage].staffCap;
   const session = courseSession(g);

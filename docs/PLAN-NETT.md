@@ -244,10 +244,12 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
   `season_history()`, B-143), 012 toppliste med kassa («Mest penger på bok», `records.best_cash`, B-144), 013 daglig
   (daglig belønning, dagens oppdrag, mens du var borte og bonusdøgn i juksesperren, B-149), 014 tittel ved
   kallenavnet på topplista (`title_of()`, B-150), 015 juksesperren tillater 50 % vekst per døgn etter
-  sluttmålet (B-150).
+  sluttmålet (B-150), 016 ukens utfordring, sesonger med vri og utmerkelse for topp 10 (B-152).
 - Hva som krever konto, nå og i fase 4 og 5: `docs/KONTO.md` (B-149).
 - Flere enheter samtidig: bare enheten som spilles på, lagrer; den andre settes på pause med «Spill her» (B-143).
 - Merker ved sesongslutt (fase 3) er bygget som 🎖 med beste plassering ved kallenavnet (B-143).
 - **Slik starter du en ny sesong:** i SQL Editor: `select public.start_season('Sesong 2', 26);` (navn, antall uker; 26 = seks måneder, B-130).
+  Med en vri (B-152): `select public.start_season('Sesong 2', 26, 'skrapmangel');` – vriene står i tabellen
+  `season_twists` (skrapmangel, eksportboom, energikrise, gronnstrom).
   **Slik legger du ut en hendelse:** `select public.add_event('skrapmangel', 7);` (skrapmangel, stromkrise,
   eksportboom, importpress, transportstreik; antall dager). Claude kan gjøre begge deler gjennom connectoren.

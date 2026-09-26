@@ -45,7 +45,10 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Anbud og skrapauksjoner (fase 5) | Ja | Regel 3 og 7 | PLAN-NETT |
 | Varsel på mobilen (senere) | Ja | Varselet knyttes til kontoen | – |
 | Toppliste for kontrollrommet (venter) | Ja | Regel 3 | B-143 |
-| Ukens toppliste, venner, klubber (ideer) | Ja | Regel 3 | – |
+| Ukens utfordring, medaljer og ukekiste | Ja (lista kan leses uten) | Regel 3 og 7 | B-152 |
+| Sesongens vri | Nei for selve vrien, men den gjelder bare spill i sesongen (som krever konto) | Regel 3 | B-152 |
+| Utmerkelse for topp 10 i sesongen (🏆/🎖) | Ja | Regel 3 | B-152 |
+| Venner, klubber (ideer) | Ja | Regel 3 | – |
 
 ## Slik ser det ut i appen
 
