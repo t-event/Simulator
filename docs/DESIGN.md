@@ -80,8 +80,9 @@ engangstips (`tips.ts`) og rådgiveren når omdømmet faller flere ganger av sam
 
 ## Veikart
 
-Konto, lagring på nett, toppliste og sesonger er bygget. Neste steg står i `PLAN-NETT.md` (fase 4: ventetid i
-konsernet, fase 5: anbud og skrapauksjoner). Åpne spørsmål og mindre forslag står i `FORSLAG.md`.
+Konto, lagring på nett, toppliste og sesonger er bygget, og det samme er daglig belønning, dagens oppdrag og «mens du
+var borte» (B-149). Neste steg står i `PLAN-NETT.md` (fase 4: ventetid i konsernet, fase 5: anbud og
+skrapauksjoner). Hva som krever konto, står i `KONTO.md`. Åpne spørsmål og mindre forslag står i `FORSLAG.md`.
 
 Ideer som ikke er bestemt:
 

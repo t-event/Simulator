@@ -239,6 +239,7 @@ export function newGame(seed = Date.now()): GameState {
     courseSeats: null,
     pendingCastingSwitch: null,
     konsern: { unlocked: false, plants: [], shared: [], nextId: 1, director: null, milestones: 0 },
+    daily: { date: null, missions: [], claimed: false },
     storeFullLogMin: -1e9,
     owner: null,
     season: null,

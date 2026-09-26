@@ -101,6 +101,8 @@ export function migrate(g: GameState): GameState {
   if ((g.settings.toasts as string) === "ingen") g.settings.toasts = "problemer";
   if (g.settings.toastTopics === undefined) g.settings.toastTopics = {};
   if (g.settings.toastSeconds === undefined) g.settings.toastSeconds = 6;
+  // Dagens oppdrag (B-149)
+  if (loose.daily === undefined) loose.daily = { date: null, missions: [], claimed: false };
   if (g.round === undefined) g.round = 1;
   // Seiersskjermen ble ikke lagret som sett før; et vunnet spill får den én gang til
   if (g.winSeen === undefined) g.winSeen = false;

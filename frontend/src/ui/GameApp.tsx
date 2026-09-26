@@ -20,6 +20,7 @@ import { People } from "./People";
 import { ResearchPage } from "./ResearchPage";
 import { CloudDot, CloudFollow, IntroAccount, LoggedOutNotice } from "./Account";
 import { SeasonPrompt, SeasonResultNotice, SeasonSync, SeasonTeaser } from "./Season";
+import { DailySync } from "./Daily";
 import { LeaderboardSheet } from "./Leaderboard";
 import { useSeasonStatus } from "./useSeason";
 import { SettingsSheet } from "./Settings";
@@ -632,7 +633,16 @@ export function GameApp() {
         </div>
 
         <main className="g-main">
-          {shown === "verket" && <Overview g={g} stats={stats} act={act} go={go} openBook={openBook} />}
+          {shown === "verket" && (
+            <Overview
+              g={g}
+              stats={stats}
+              act={act}
+              go={go}
+              openBook={openBook}
+              onOpenSettings={() => setSettingsOpen(true)}
+            />
+          )}
           {shown === "marked" && (
             <Market
               key={subTab.tab ? `marked-${subTab.n}` : "marked"}
@@ -710,6 +720,8 @@ export function GameApp() {
       <SeasonSync api={api} />
       <AutoUpdate api={api} />
       <CloudFollow api={api} />
+      {/* Velkommen tilbake og daglig belønning (B-149): ikke oppå andre vinduer eller veiledningen */}
+      <DailySync api={api} blocked={modalOpen || resultOpen || g.tutorial !== null} />
       {!modalOpen && <LoggedOutNotice onLogin={() => setSettingsOpen(true)} />}
       {!modalOpen && <SeasonResultNotice onOpen={setResultOpen} />}
       {!modalOpen && !resultOpen && <SeasonPrompt api={api} g={g} onOpenSettings={() => setSettingsOpen(true)} />}

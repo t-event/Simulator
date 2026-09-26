@@ -49,6 +49,8 @@ Sluttmålet er et stålkonsern verdt 10 mrd. kr. Etterpå kan du spille videre.
 - **Sesonger** varer et halvt år. Alle som er med, starter i garasjen, og du kan bli med når som helst mens sesongen
   pågår. Var du med i forrige sesong, får du en liten fordel ved start.
 - **Felles hendelser** (skrapmangel, strømkrise, eksportboom …) treffer alle spillerne samtidig.
+- **Hver dag:** en daglig belønning som vokser gjennom uka (hopper du over en dag, starter den på nytt), tre av dagens
+  oppdrag med en bonus, og verket tjener litt mens du er borte. Dette krever konto, fordi serveren teller dagene.
 
 ### Ta styringen
 
@@ -93,6 +95,7 @@ de beskriver ikke noe bestemt anlegg.
 - `docs/DESIGN.md` – spilldesign, nivåer og veikart
 - `docs/PLAN-NETT.md` – konto, lagring på nett, toppliste, sesonger og konkurranse
 - `docs/FORSLAG.md` – åpne spørsmål og forslag til videre utvikling
+- `docs/KONTO.md` – hva som krever konto, og reglene for nye funksjoner
 
 ## Arkitektur
 

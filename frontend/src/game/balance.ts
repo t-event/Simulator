@@ -27,6 +27,15 @@ import {
   upgradeOptions,
 } from "./actions";
 import { resolveDecision } from "./decisions";
+import {
+  applyAwayReward,
+  applyMissionBonus,
+  applyStreakReward,
+  AWAY_DAYS_PER_HOUR,
+  AWAY_MAX_HOURS,
+  MISSION_BONUS,
+  STREAK_REWARDS,
+} from "./daily";
 import { konsernAdvice, konsernEquity } from "./konsern";
 import { answerQuiz, QUIZ, quizAvailable } from "./quiz";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
@@ -40,6 +49,7 @@ import {
   realisticDailyT,
   autoBuy,
   completeManual,
+  fmtKr,
   newGame,
   TARGET_C,
 } from "./engine";
@@ -532,7 +542,14 @@ export const growth: { maxPerDay: number[]; maxEquity: number[] } = {
   maxEquity: [0, 0, 0, 0, 0],
 };
 /** Konsernverdi ved slutten av hvert døgn i siste kjøring – til «--opphold» (B-148) */
-let equitySeries: { day: number; eq: number; stage: number }[] = [];
+let equitySeries: { day: number; eq: number; stage: number; bonus: number }[] = [];
+/**
+ * «--daglig N»: spilleren spiller N spilldøgn per virkelige dag og henter alt hver dag: daglig belønning, bonusen for
+ * dagens oppdrag og åtte timer borte (B-149). 0 = av.
+ */
+const dailyEvery = process.argv.includes("--daglig")
+  ? Number(process.argv[process.argv.indexOf("--daglig") + 1]) || 15
+  : 0;
 
 function run(seed: number, days: number, verbose: boolean, novice = process.argv.includes("--nybegynner")): RunSummary {
   const g = newGame(seed);
@@ -542,19 +559,29 @@ function run(seed: number, days: number, verbose: boolean, novice = process.argv
   let hour = 0;
   let equityAtDayStart = konsernEquity(g);
   let growthDay = day(g);
-  equitySeries = [{ day: day(g), eq: equityAtDayStart, stage: g.stage }];
+  equitySeries = [{ day: day(g), eq: equityAtDayStart, stage: g.stage, bonus: 0 }];
+  let streak = 0;
   while (day(g) <= days && !g.gameOver) {
     if (!novice || hour++ % 3 === 0 || g.pendingDecision) botHour(g);
     const repBefore = g.reputation;
     const logBefore = g.log.at(-1)?.id ?? 0;
     advance(g, 60);
     if (day(g) !== growthDay) {
+      // En ny virkelig dag: alt som kan hentes, hentes (B-149). Døgnene går til juksesperren som på serveren
+      let bonus = 0;
+      if (dailyEvery > 0 && day(g) % dailyEvery === 0) {
+        streak = (streak % 7) + 1;
+        applyStreakReward(g, streak, fmtKr);
+        applyMissionBonus(g, fmtKr);
+        applyAwayReward(g, AWAY_MAX_HOURS * 3600, fmtKr);
+        bonus = STREAK_REWARDS[streak - 1].days + MISSION_BONUS.days + AWAY_MAX_HOURS * AWAY_DAYS_PER_HOUR;
+      }
       const eq = konsernEquity(g);
       growth.maxPerDay[g.stage] = Math.max(growth.maxPerDay[g.stage], eq - equityAtDayStart);
       growth.maxEquity[g.stage] = Math.max(growth.maxEquity[g.stage], eq);
       equityAtDayStart = eq;
       growthDay = day(g);
-      equitySeries.push({ day: day(g), eq, stage: g.stage });
+      equitySeries.push({ day: day(g), eq, stage: g.stage, bonus });
     }
     if (process.argv.includes("--repdrop") && g.reputation < repBefore - 0.5)
       console.log(
@@ -628,7 +655,10 @@ if (process.argv.includes("--opphold")) {
         if (s[j].eq > MAXEQ[s[j].stage]) flagged++;
         for (let i = Math.max(0, j - 400); i < j; i++) {
           const gap = Math.max(s[j].day - s[i].day, 1);
-          const allowed = (CAP[s[j].stage] + 0.25 * Math.max(s[i].eq, 0)) * gap;
+          // Belønninger i mellom gir plass til like mange døgn til (bonus_days på serveren, B-149)
+          let bonus = 0;
+          for (let k = i + 1; k <= j; k++) bonus += s[k].bonus;
+          const allowed = (CAP[s[j].stage] + 0.25 * Math.max(s[i].eq, 0)) * (gap + bonus);
           const ratio = (s[j].eq - s[i].eq) / allowed;
           if (ratio > 1) flagged++;
           if (ratio > worst.ratio)

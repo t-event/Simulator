@@ -23,3 +23,8 @@ export function fmtRep(v: number): string {
   const floored = Math.floor(v * 10 + 1e-9) / 10;
   return Number.isInteger(floored) ? String(floored) : floored.toFixed(1).replace(".", ",");
 }
+
+/** «12 timers drift» / «1,5 døgns drift»: det verket tjener på så lang tid i spillet (B-149) */
+export function driftText(days: number): string {
+  return days < 1 ? `${Math.round(days * 24)} timers drift` : `${fmtNum(days, days % 1 ? 1 : 0)} døgns drift`;
+}

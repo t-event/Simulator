@@ -2496,3 +2496,75 @@ button {
   font-size: 14px;
   text-align: center;
 }
+
+/* Daglig belønning (B-149): uka som sju ruter, dag 7 er en ukeskiste */
+.g-streak {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+}
+.g-streak li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 2px;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  font-size: 11px;
+  text-align: center;
+  min-width: 0;
+}
+.g-streak-day {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.g-streak-what {
+  color: var(--text-dim);
+  overflow-wrap: anywhere;
+}
+.g-streak li.is-done {
+  background: rgba(102, 187, 106, 0.18);
+  border-color: var(--ok);
+}
+.g-streak li.is-next {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.35);
+}
+.g-streak li.is-chest .g-streak-day {
+  font-size: 16px;
+}
+
+/* Dagens oppdrag (B-149) */
+.g-missions {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.g-mission-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+.g-mission-line > span:first-child {
+  min-width: 0;
+}
+.g-mission-line > span:last-child {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+.g-missions li.is-done .g-mission-line > span:first-child {
+  color: var(--text-dim);
+}
+
+/* «X krever konto» (B-149, docs/KONTO.md) */
+.g-needs-account {
+  margin: 0 0 6px;
+}

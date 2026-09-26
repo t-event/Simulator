@@ -23,6 +23,7 @@ import {
   verifyCode,
 } from "./supabase";
 import { fetchLeaderboard, fetchMyRank, fetchProfile, setNickname } from "./leaderboard";
+import { claimAway, fetchDailyStatus } from "./daily";
 import {
   daysLeft,
   fetchActiveEvents,
@@ -438,6 +439,14 @@ const main = async () => {
     assert(getSession()?.user.id === "u-a@test", "fortsatt innlogget i denne økta");
     setRememberPrefs({ remember: true, email: "a@test" });
     assert(store.has("stalverk-konto-v1") && !tabStore.has("stalverk-konto-v1"), "økta ble ikke flyttet tilbake");
+  });
+
+  await test("Daglig (B-149): uten konto hentes ingenting fra serveren", async () => {
+    const f = fresh();
+    setSession(null);
+    const before = f.calls.length;
+    assert((await fetchDailyStatus()) === null && (await claimAway()) === 0, "skulle gi tomt uten konto");
+    assert(f.calls.length === before, "sendte kall uten konto");
   });
 
   await test("Lenken fra e-posten logger inn og rydder adressen", () => {

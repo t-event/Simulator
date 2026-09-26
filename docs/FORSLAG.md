@@ -28,7 +28,9 @@ Ingen åpne akkurat nå.
 - **Fase 4 og 5** står i `PLAN-NETT.md`: ventetid i konsernet, og anbud og skrapauksjoner fra stålverket.
 - **Egen e-postleverandør** for kodene (glemt passord), så grensen på ca. 2 e-poster i timen forsvinner. Brukeren
   sa «en annen gang».
-- **Varsel på mobilen** når et anbud er avgjort eller et verk er ferdig bygget (fase 4–5).
+- **Varsel på mobilen** når et anbud er avgjort, et verk er ferdig bygget (fase 4–5) eller dagens belønning er klar.
+  Krever konto. Brukeren: «Ingen varsel på mobilen enda» (B-149).
+- **Ukens toppliste** (hvem som vokste mest denne uka, nullstilles hver mandag). Krever konto.
 
 ## Avgjort
 

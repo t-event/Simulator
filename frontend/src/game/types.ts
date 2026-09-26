@@ -498,6 +498,8 @@ export interface GameState {
   missions: Record<string, { base: number; done: boolean }>;
   /** Tellere for oppdrag (planlagte omforinger, rene døgn …) */
   counters: Record<string, number>;
+  /** Dagens oppdrag (B-149): datoen (norsk dato fra serveren), oppdragene og om bonusen er hentet */
+  daily: DailyState;
   /** Omdømmetap siste tid, med årsak, så rådgiveren kan se mønstre */
   repLog: { day: number; cause: RepCause }[];
   /** Dagen rådgiveren sist kom for hver årsak */
@@ -527,4 +529,18 @@ export interface GameState {
   /** Kunnskapskort spilleren har låst opp, i rekkefølge */
   knowledge: string[];
   unreadKnowledge: number;
+}
+
+/** Et av dagens oppdrag (B-149): fremdriften er økningen i et tall i spillet fra `base` */
+export type MissionId = "kontrakter" | "tonn" | "selv" | "forsk" | "les" | "quiz" | "omdomme";
+export interface DailyMission {
+  id: MissionId;
+  /** Tallet ved dagens start */
+  base: number;
+  target: number;
+}
+export interface DailyState {
+  date: string | null;
+  missions: DailyMission[];
+  claimed: boolean;
 }
