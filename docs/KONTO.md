@@ -55,6 +55,7 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Sesongstigen (poeng for spilte dager, belønning, oppdrag og ukeplassering; fagpoeng og pynt) | Ja | Regel 3 og 5 | B-173 |
 | Flere titler etter Stållegende | Nei (titlen på topplista krever konto som før) | Regel 1 | B-173 |
 | Landemerker (ett per virkelig dag, mobilens dato) | Nei | Regel 1 | B-174 |
+| Kontrollrommet som spill, med rekord (lokal) | Nei | Regel 1 | B-175 |
 | Ventetid i konsernet (fase 4) | Nei (serverklokke med konto) | Regel 5 | PLAN-NETT |
 | Anbud og skrapauksjoner (fase 5) | Ja | Regel 3 og 7 | PLAN-NETT |
 | Varsel på mobilen (senere) | Ja | Varselet knyttes til kontoen | – |

@@ -726,7 +726,8 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings }: Props)
                     {g.settings.manualNext ? "Du tar neste charge ✓" : "Ta styringen på neste charge"}
                   </button>
                   <p className="g-muted">
-                    Kjør chargen selv i kontrollrommet. God kjøring gir mindre strøm, lavere fosfor og bedre omdømme.
+                    Kjør chargen selv: fire korte runder, under ett minutt. God kjøring gir fagpoeng, lavere fosfor og
+                    bedre betalt stål{(g.controlBest ?? 0) > 0 && ` · rekord ${fmtNum(g.controlBest ?? 0)} poeng`}.
                   </p>
                 </div>
               ) : (

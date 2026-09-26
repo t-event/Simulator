@@ -9,7 +9,7 @@ import { computePlantStats, day, energyPrice, idleOutsideHours, staffing } from 
 import { useGame, type GameApi } from "../game/useGame";
 import { resolveDecision } from "../game/decisions";
 import { maxSpeed, researchForSpeed, researchOptions } from "../game/research";
-import { masteryReady, upgradeOptions } from "../game/actions";
+import { masteryReady, requestManual, upgradeOptions } from "../game/actions";
 import { buzz } from "./haptics";
 import { nextTutorialStep, skipTutorial, TUTORIAL } from "../game/tutorial";
 import type { GameState } from "../game/types";
@@ -34,7 +34,7 @@ import { markAllSeen, unseenCount } from "../game/inbox";
 import { Sales } from "./Sales";
 import { VIEWS, viewUnlocked, type View } from "./views";
 
-// Kontrollrommet drar med seg prosessmodellen og grafene; det lastes først når det trengs
+// Kontrollrommet (spillet i fire runder) lastes først når det trengs
 const ControlRoom = lazy(() => import("./control/ControlRoom").then((m) => ({ default: m.ControlRoom })));
 
 const SPEED_OPTIONS = [
@@ -778,9 +778,13 @@ export function GameApp() {
         <Suspense fallback={<div className="control-room g-loading">Åpner kontrollrommet …</div>}>
           <ControlRoom
             request={g.pendingManual}
-            furnaceWear={g.furnaces[g.pendingManual.furnace]?.wear ?? 0}
-            onDone={(result, chapter) => {
-              act((gg) => completeManual(gg, result));
+            best={g.controlBest ?? 0}
+            onDone={(result, chapter, again) => {
+              act((gg) => {
+                completeManual(gg, result);
+                // «Ta neste charge også» (B-175)
+                if (again) requestManual(gg, true);
+              });
               // Fra resultatet kan man gå rett til kapitlet som forklarer det som gikk dårlig (B-088)
               if (chapter) openBook(chapter);
             }}

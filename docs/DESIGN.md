@@ -18,7 +18,7 @@ enkelt i presentasjonen, lett å spille i korte økter og vanskelig å legge fra
 |---|---|---|
 | Start alene i en garasje | Personlig og lite; veksten føles fortjent | Du starter alene i en garasje med en liten induksjonsovn og 25 000 kr |
 | Kjerne-loop: lag spill → anmeldelser → lær → lag bedre spill | Hver runde er kort og gir en dom du kan forbedre | Ta ordre → sett resept → smelt og støp → levering eller reklamasjon → lær → bygg ut |
-| Utviklingsfaser med glidebrytere | Få, meningsfulle valg per runde | Resept og kvalitet per ordre; i kontrollrommet fire steg med én handling hver |
+| Utviklingsfaser med glidebrytere | Få, meningsfulle valg per runde | Resept og kvalitet per ordre; i kontrollrommet fire korte runder med én handling hver |
 | Design- og teknikkbobler under utvikling | Konstant, liten belønning man ser | Bobler med tonn, kroner og fagpoeng stiger opp fra anlegget |
 | Forskningspoeng og forskning | Fremgang som ikke bare er penger | Fagpoeng fra charger, leveranser, quiz og feil; forskning låser opp utstyr, automatikk og forbedringer |
 | Spillrapporten viser hva som var bra og dårlig | Lær gjennom oppdagelse | Tapperapport med stjerner og forklaring; reklamasjoner forklarer hva som var galt; fagboka låses opp |
@@ -75,21 +75,20 @@ Prestasjoner og pynt (B-151):
 - Pynt til anleggsbildet kjøpes for fagpoeng (🎨): flagg, lyslenke, trær, fasadefarge, solceller, vindmølle, statue,
   fyrverkeri og gullpipe. Pynten gir ingen fordel, og de dyreste krever en prestasjon.
 
-## Kontrollrommet – enkel styring
+## Kontrollrommet – et spill i fire runder (B-175)
 
-Kravet: en person uten fagkunnskap skal klare å kjøre en charge. Hvert steg har **én forklaring i vanlige ord, én
-måling med grønt felt og én hovedhandling**. Automatikken tar alt annet.
+Kravet: kort, morsomt og forståelig uten fagkunnskap. Under ett minutt, én ting å gjøre per runde, og et kort før hver
+runde som sier hva som skjer i ovnen og hva du gjør.
 
-| Steg | Mål | Handling | Automatikk | Fart |
-|---|---|---|---|---|
-| 1. Smelt skrapet | Hold temperaturen i det grønne feltet mens skrapet mates inn | ▲ Mer strøm / ▼ Mindre strøm (5 nivåer) og oksygenbryter | Conveyor, kalk, dolomitt og karbon. Matingen varierer («tung kasse på vei») | 40× |
-| 2. Rens stålet | Få karbonet ned i det grønne feltet | Oksygenbryter, strøm ▲/▼ (helt av). Blir karbonet for lavt, vises «Karbon» (B-079) | Kalk | 20× |
-| 3. Slagg av | Få slaggen under ca. 1,2 t uten å søle stål | «Tipp mot slaggdøra» / «Rett opp ovnen» (kan hoppes over – da kommer fosforet tilbake). Under 0,5 t renner stål ut døra | Døra åpnes | 15× |
-| 4. Varm opp og tapp | Tapp når temperaturen er i det grønne vinduet (±8 °C), rett opp ovnen når øsa er 93–100 % full | Strøm ▲/▼, oksygen, «Tapp nå!», «Rett opp ovnen» | – | 10× / 8× |
+| Runde | Mål | Handling |
+|---|---|---|
+| 1. Smelt | Hold temperaturen i det grønne til alt er smeltet. Skrapkurver varsles (tung kjøler, lett varmer) | Hold inne for strøm |
+| 2. Blås ut karbonet | Karbonet i det grønne uten at slaggen koker over | Hold inne for oksygen, «Ferdig» |
+| 3. Rak ut slaggen | Få ut slaggklumpene (fosforet) før de synker, ikke ta stålet | Trykk på klumpene |
+| 4. Tapp | Tapp ved riktig temperatur (±8 °C) og fyll øsa til 93–100 % | «Tapp!», hold inne for å helle |
 
-Etterpå: 0–3 stjerner for smelting, rensing, avslagging, tappetemperatur og øsa, en samlet karakter (5★ krever 14 av
-15) og en forklaring i vanlige ord. Stjernene gir fagpoeng, og 4–5 stjerner gir ekstra betalt for stålet (B-086).
-Stål som søles eller renner over, går tapt (B-076).
+Etterpå: poeng med kombo og rekord, 0–3 stjerner per del og en samlet karakter (5★ krever 14 av 15). Stjernene gir
+fagpoeng, og 4–5 stjerner gir ekstra betalt for stålet (B-086).
 
 ## Forskning og fagpoeng
 

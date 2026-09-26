@@ -28,7 +28,7 @@ import {
 } from "./cosmetics";
 import { CHALLENGES, checkChallenges } from "./challenges";
 import { ADDONS, CASTINGS, FURNACES, WIN_CASH } from "./data";
-import { advance, assessOffer, checkWin, fmtKr, log, makeCandidate, newGame } from "./engine";
+import { advance, assessOffer, checkWin, completeManual, fmtKr, log, makeCandidate, newGame } from "./engine";
 import { logTopic, showToast, unseenCount } from "./inbox";
 import { KNOWLEDGE } from "./knowledge";
 import {
@@ -99,9 +99,8 @@ import {
 import { crewPerShift, fireImpact, liningWearPerHeat, specMargin, staffing, wildcardUse } from "./plant";
 import { QUIZ } from "./quiz";
 import { GRADES } from "./data";
-import type { Agreement, Analysis, Contract, RoleId } from "./types";
-import { EAFSimulation } from "../sim/eaf";
-import { SimpleRunner } from "../ui/control/simpleRunner";
+import type { Agreement, Analysis, Contract, ManualRequest, RoleId } from "./types";
+import { autoPlay, ChargeGame } from "../ui/control/chargeGame";
 
 declare const process: { exitCode?: number };
 
@@ -482,16 +481,43 @@ test("Varsler per tema: ferie kan slås av, problemer vises alltid med «bare pr
   assert(parseSave(JSON.stringify(g))!.settings.toasts === "problemer", "«ingen» ble ikke til «bare problemer»");
 });
 
-test("Kontrollrommet: oksygen går ikke i tappingen, strømmen kan slås av", () => {
-  const sim = new EAFSimulation(3);
-  sim.startCharge("AR20");
-  const run = new SimpleRunner(sim, sim.state.refractoryWear, () => 0.5);
-  run.start();
-  run.changeLevel(-9);
-  assert(run.level === 0, "strømmen kan ikke slås av");
-  run.step = "tapp";
-  run.setOxygen(true);
-  assert(!run.blowing, "oksygen kan slås på i tappingen");
+test("Kontrollrommet (B-175): hold virker bare i sine runder, stål i raka koster, rekorden lagres", () => {
+  const g = newGame(3);
+  const mix = { c: 0.3, p: 0.03, tramp: 0.2 };
+  const req: ManualRequest = {
+    furnace: 0,
+    sizeT: 40,
+    grade: "standard",
+    mix,
+    expectedMix: mix,
+    energyFactor: 1,
+    metallicYield: 0.92,
+    radioactive: false,
+    resumeSpeed: 1,
+  };
+  const game = new ChargeGame(req, () => 0.5);
+  game.hold(true);
+  assert(!game.holding, "kan holde inne før runden har startet");
+  game.start();
+  game.hold(true);
+  assert(game.holding, "kan ikke holde inne for strøm i smeltingen");
+  // Til avslaggingen: der er det trykk, ikke hold
+  while (game.roundId === "smelt") if (game.tick(0.1) === "runde") game.start();
+  game.finishRefining();
+  game.start();
+  assert(game.roundId === "slagg", `runden er ${game.roundId}`);
+  game.hold(true);
+  assert(!game.holding, "kan holde inne i avslaggingen");
+  for (let i = 0; i < 40 && !game.targets.some((o) => o.state === "oppe" && o.kind === "stal"); i++) game.tick(0.1);
+  const steel = game.targets.find((o) => o.state === "oppe" && o.kind === "stal");
+  assert(steel && game.rake(steel.id) === "stal" && game.steelRaked === 1, "stålet ble ikke telt");
+  // En hel flink charge gir resultat med poeng; completeManual lagrer rekorden
+  const good = autoPlay(new ChargeGame(req, () => 0.3), "flink").score;
+  assert(good.rating >= 4 && (good.result.points ?? 0) > 0, `flink fikk ${good.rating}★`);
+  g.pendingManual = req;
+  completeManual(g, good.result);
+  assert(g.controlBest === good.points, "rekorden ble ikke lagret");
+  assert(g.furnaces[0].heat?.manual, "chargen ble ikke lagt inn som manuell");
 });
 
 test("En strømkrise gjør spot dyrere, men ikke en fastpris man alt har (B-141)", () => {

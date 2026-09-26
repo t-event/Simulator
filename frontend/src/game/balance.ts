@@ -59,9 +59,7 @@ import {
   newGame,
   TARGET_C,
 } from "./engine";
-import { EAFSimulation } from "../sim/eaf";
-import { createSim } from "../ui/control/simSetup";
-import { MELT_BAND, SimpleRunner, SLAG_DONE_KG } from "../ui/control/simpleRunner";
+import { autoPlay, ChargeGame, type Policy } from "../ui/control/chargeGame";
 import { computePlantStats, day, fixedPriceAdvice, hasPlanner, satisfies } from "./plant";
 declare const process: { argv: string[]; exitCode?: number; exit?: (code: number) => void };
 
@@ -1042,76 +1040,35 @@ if (!process.argv.includes("--seed") && !process.argv.includes("--nybegynner")) 
     `Nybegynner: storverket dag ${novice.map((r) => r.stageDays[4] ?? "-").join(" / ")} (median ${Number.isFinite(median) ? median : "ikke nådd"}, mål høyst ${NOVICE_MAX_DAY}), ${broke} konkurs ${ok ? "OK" : "AVVIK"}`,
   );
 }
-// Kontrollrommet: den enkle styringen skal kunne kjøres av en nybegynner som bare
-// følger rådene på skjermen, og en slurvete kjøring skal gi dårlig karakter
-type SimplePolicy = "nybegynner" | "slurvete";
-function playSimple(policy: SimplePolicy, seed: number, req?: ManualRequest) {
-  const sim = req ? createSim(req, 0) : new EAFSimulation(seed);
-  if (!req) sim.startCharge("AR20");
-  let r = seed;
+// Kontrollrommet (B-175): en flink spiller skal få minst 4★ på under ett minutt, en slurvete høyst 2★
+function playCharge(policy: Policy, seed: number, req?: ManualRequest) {
+  let r = seed * 7919;
   const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647;
-  const run = new SimpleRunner(sim, sim.state.refractoryWear, rnd);
-  run.start();
-  let real = 0;
-  let lastAct = 0;
-  while (run.step !== "ferdig" && real < 900) {
-    run.tick(0.1);
-    real += 0.1;
-    // En person reagerer omtrent hvert andre sekund, men følger godt med når hen står klar med en knapp
-    // (avslagging og tapping, B-076)
-    const focused = run.step === "slagg" || run.step === "tapp" || run.step === "tapper";
-    if (real - lastAct < (focused ? 0.5 : 2)) continue;
-    lastAct = real;
-    const t = sim.state.bathTempC;
-    const g = sim.state.grade!;
-    const target = sim.tapTargetTempC;
-    if (run.step === "smelt" && policy === "nybegynner") {
-      if (t < MELT_BAND[0] + 5) run.changeLevel(1);
-      else if (t > MELT_BAND[1] - 5) run.changeLevel(-1);
-      // Oksygen når halve skrapet er smeltet, som rådet på skjermen sier
-      run.setOxygen(run.melted > 0.5);
-    }
-    if (run.step === "rens") {
-      if (policy === "nybegynner" && sim.state.carbonPct > g.tapCarbonMaxPct - 0.015) {
-        run.setOxygen(true);
-        // Strømmen holder badet varmt, men ikke over tappetemperaturen
-        if (t > target - 25) run.changeLevel(-1);
-        else if (t < MELT_BAND[0]) run.changeLevel(1);
-      } else if (policy === "nybegynner" && sim.state.carbonPct < g.tapCarbonMinPct + 0.005) {
-        // Blåst for lenge: karbon inn igjen, som rådet på skjermen sier (B-079)
-        run.setCarbon(true);
-      } else {
-        run.setOxygen(false);
-        run.setCarbon(false);
-        run.finishRefining();
-      }
-    }
-    if (run.step === "slagg") {
-      if (policy === "slurvete") run.skipDeslag();
-      else if (run.deslag === "nei") run.startDeslag();
-      else if (sim.slagMassKg < SLAG_DONE_KG) run.stopDeslag();
-    }
-    if (run.step === "tapp") {
-      if (policy === "slurvete") {
-        if (t > target + 35) run.tap();
-      } else {
-        if (t < target - 30) run.changeLevel(1);
-        else if (t > target - 15 && run.level > 2) run.changeLevel(-1);
-        if (t >= target - 6) run.tap();
-      }
-    }
-    if (run.step === "tapper" && policy === "nybegynner" && run.ladleFill >= 0.95) run.stopTap();
-  }
-  return { score: run.score!, real };
+  const mix = { c: 0.3, p: 0.03, tramp: 0.2 };
+  const request: ManualRequest = req ?? {
+    furnace: 0,
+    sizeT: 40,
+    grade: seed === 2 ? "lavkarbon" : seed === 3 ? "premium" : "standard",
+    mix,
+    expectedMix: mix,
+    energyFactor: 1,
+    metallicYield: 0.92,
+    radioactive: false,
+    resumeSpeed: 1,
+    dephos: 0.62,
+    kwhPerT: 420,
+    cycleMin: 60,
+  };
+  return autoPlay(new ChargeGame(request, rnd), policy);
 }
 
 for (const seed of [1, 2, 3]) {
-  const novice = playSimple("nybegynner", seed);
-  const sloppy = playSimple("slurvete", seed);
-  const ok = novice.score.rating >= 4 && sloppy.score.rating <= 2 && novice.real < 180;
+  const good = playCharge("flink", seed);
+  const sloppy = playCharge("slurvete", seed);
+  const ok = good.score.rating >= 4 && sloppy.score.rating <= 2 && good.seconds < 60;
   console.log(
-    `Enkel styring, frø ${seed}: nybegynner ${novice.score.rating}★ på ${Math.round(novice.real)} s ` +
-      `(${Math.round(novice.score.result.kwhPerT)} kWh/t), slurvete ${sloppy.score.rating}★ ` +
+    `Kontrollrommet, frø ${seed}: flink ${good.score.rating}★ på ${Math.round(good.seconds)} s ` +
+      `(${good.score.points} poeng, ${Math.round(good.score.result.kwhPerT)} kWh/t), slurvete ${sloppy.score.rating}★ ` +
       `(${Math.round(sloppy.score.result.kwhPerT)} kWh/t) ${ok ? "OK" : "AVVIK"}`,
   );
   if (!ok) failed = true;
@@ -1135,7 +1092,7 @@ for (const seed of [1, 2, 3]) {
     failed = true;
     console.log("AVVIK: ta styringen ga ingen charge å kjøre");
   } else {
-    const { score } = playSimple("nybegynner", 7, req);
+    const { score } = playCharge("flink", 7, req);
     const heatsBefore = g.totals.manualHeats;
     const fpBefore = g.researchPoints;
     completeManual(g, score.result);

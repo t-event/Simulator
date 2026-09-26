@@ -263,6 +263,7 @@ export function newGame(seed = Date.now()): GameState {
     pendingDecision: null,
     decisionSeen: {},
     landmarks: { done: [], date: null, contractId: null },
+    controlBest: 0,
     sickUntilMin: 0,
     tempsUntilMin: 0,
     tempCrew: null,
@@ -750,6 +751,9 @@ function startHeat(g: GameState, index: number, plant: PlantStats): boolean {
       metallicYield,
       radioactive: mix.radioactive,
       resumeSpeed: g.speed > 0 ? g.speed : 1,
+      dephos: stats.dephos,
+      kwhPerT: stats.kwhPerT * mix.energy,
+      cycleMin: stats.cycleMin * mix.energy,
     };
     g.speed = 0;
     f.waitReason = "Venter på deg i kontrollrommet";
@@ -2882,6 +2886,8 @@ export interface ManualResult {
   stars?: number;
   /** Andel av stålet som gikk tapt ut slaggdøra eller over øsa (B-076) */
   lossFraction?: number;
+  /** Poeng i kontrollrommet (B-175) */
+  points?: number;
 }
 
 /** Legger en charge spilleren kjørte selv inn i produksjonen. */
@@ -2951,10 +2957,19 @@ export function completeManual(g: GameState, result: ManualResult | null): void 
   } else {
     log(g, `Du kjørte charge i ovn ${req.furnace + 1} selv, med avvik: ${result.deviations.join("; ")}.`, "event");
   }
+  if (result.points !== undefined && result.points > (g.controlBest ?? 0)) {
+    if ((g.controlBest ?? 0) > 0)
+      log(
+        g,
+        `🏆 Ny rekord i kontrollrommet: ${nf0.format(result.points)} poeng (før ${nf0.format(g.controlBest ?? 0)}).`,
+        "good",
+      );
+    g.controlBest = result.points;
+  }
   if ((result.lossFraction ?? 0) > 0.01)
     log(
       g,
-      `${Math.round((result.lossFraction ?? 0) * 100)} % av stålet i chargen gikk tapt – ut slaggdøra eller over øsa.`,
+      `${Math.round((result.lossFraction ?? 0) * 100)} % av stålet i chargen gikk tapt – i slaggen som kokte over, med slaggen du raket ut eller over øsa.`,
       "bad",
     );
   unlock(g, "fosfor");

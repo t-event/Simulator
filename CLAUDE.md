@@ -134,8 +134,8 @@ frontend/src/
     Achievements.tsx Prestasjonskortet på Verket og arket «Pynt verket» (🎨 på anleggsbildet)
     Weekly.tsx   Kortet «Ukens utfordring» på Verket og ukelista   Portal.tsx  Ark fra Verket legges i <body>
     SeasonTrack.tsx Kortet «Sesongstigen» på Verket (B-173)   Landmarks.tsx  Kortet «Landemerker» på Verket (B-174)
-    control/     Kontrollrommet: den enkle styringen (SimpleControl + simpleRunner)
-  sim/         Prosessmodell for lysbueovnen (brukes av kontrollrommet)
+    control/     Kontrollrommet: spillet i fire runder (chargeGame.ts: logikk og testspiller, ControlRoom.tsx, B-175)
+  sim/         Prosessmodell for lysbueovnen (brukes ikke av spillet lenger, sjekkes av sim/validate.ts)
 frontend/public/  PWA: manifest, ikoner, service worker
 supabase/      SQL-migrasjonene, nummerert. Kjøres i prosjektet med Supabase-connectoren (apply_migration) og
                legges her samtidig, så repoet speiler databasen. Sjekk get_advisors (security) etter hver DDL-endring.
@@ -156,7 +156,7 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - Prettier har ingen config-fil i repoet: kjør `npx prettier --print-width 120 …`. Uten den brytes mange urørte linjer
   (og objekter som først er brutt, blir stående brutt), og diffen blir stor.
 - Ikke bruk `git checkout <fil>` for å angre en liten endring: det fjerner også alle andre endringer i fila som
-  ikke er committet (skjedde med `simpleRunner.ts`). Angre med en målrettet redigering i stedet.
+  ikke er committet (skjedde med den gamle kontrollromsfila). Angre med en målrettet redigering i stedet.
 - «Ingen horisontal scrolling» er ikke nok i toppfeltet: sjekk også at knapper og tekst ikke avkortes
   (`scrollWidth > clientWidth`) eller havner utenfor skjermen, på 320 px bredde. Safari på iPhone har bredere
   skrift enn Chromium, så la det være litt luft (B-134).
