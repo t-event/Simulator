@@ -7,7 +7,8 @@
  * som på storverket. Juksesperren på serveren (check_snapshot) gir plass til de samme døgnene (bonus_days).
  */
 import { log } from "./engine";
-import { konsernProfitPerDay } from "./konsern";
+import { konsernEquity, konsernOptions, konsernProfitPerDay } from "./konsern";
+import { MASTERY_IDS, masteryLevel, masteryOpen } from "./mastery";
 import { computePlantStats } from "./plant";
 import { QUIZ } from "./quiz";
 import { researchOptions } from "./research";
@@ -99,21 +100,43 @@ interface MissionTemplate {
   target: (g: GameState) => number;
 }
 
+/** Hvor langt spilleren har kommet: 0 garasje … 4 storverk, 5 konsern (B-153: oppdragene blir større) */
+function tier(g: GameState): number {
+  return g.konsern?.unlocked ? 5 : g.stage;
+}
+
 const TEMPLATES: Record<MissionId, MissionTemplate> = {
   kontrakter: {
     value: (g) => g.totals.contractsDone,
     eligible: () => true,
-    target: (g) => (g.stage === 0 ? 1 : 2),
+    target: (g) => [1, 2, 3, 4, 6, 8][tier(g)],
   },
   tonn: {
     value: (g) => g.totals.producedT,
     eligible: (g) => computePlantStats(g).dailyProductT > 0,
-    // Omtrent tre døgns produksjon
-    target: (g) => roundNice(computePlantStats(g).dailyProductT * 3),
+    // Tre døgns produksjon tidlig, opp mot ti i konsernet
+    target: (g) => roundNice(computePlantStats(g).dailyProductT * [3, 3, 3, 5, 8, 10][tier(g)]),
   },
   selv: {
     value: (g) => g.totals.manualHeats,
     eligible: (g) => computePlantStats(g).furnace.arc,
+    target: (g) => (tier(g) >= 4 ? 3 : 1),
+  },
+  mester: {
+    value: (g) => MASTERY_IDS.reduce((a, id) => a + masteryLevel(g, id), 0),
+    eligible: (g) => masteryOpen(g),
+    target: () => 1,
+  },
+  verdi: {
+    value: (g) => konsernEquity(g),
+    eligible: (g) => !!g.konsern?.unlocked,
+    // Omtrent tre døgns overskudd i hele konsernet
+    target: (g) => roundNice(3 * dayOfDrift(g)),
+  },
+  datter: {
+    // Et nytt datterverk eller et trinn modernisering teller
+    value: (g) => (g.konsern?.plants ?? []).reduce((a, p) => a + 1 + p.level, 0),
+    eligible: (g) => !!g.konsern?.unlocked && konsernOptions(g).some((o) => !o.blocked),
     target: () => 1,
   },
   forsk: {
@@ -200,7 +223,9 @@ export function missionBonusReady(g: GameState): boolean {
 }
 
 export function missionBonus(g: GameState): Reward {
-  return { cash: Math.round(MISSION_BONUS.days * dayOfDrift(g)), fp: MISSION_BONUS.fp };
+  // Større oppdrag, flere fagpoeng (B-153). Døgnene må stemme med serveren (bonus_days), fagpoengene ikke
+  const fp = MISSION_BONUS.fp + [0, 0, 0, 1, 3, 7][tier(g)];
+  return { cash: Math.round(MISSION_BONUS.days * dayOfDrift(g)), fp };
 }
 
 export function applyMissionBonus(g: GameState, fmtKr: (v: number) => string): Reward {

@@ -212,7 +212,13 @@ function missionText(m: DailyMission): string {
     case "tonn":
       return `Lag ${fmtT(m.target)} stål`;
     case "selv":
-      return "Kjør en charge selv (Ta styringen)";
+      return m.target === 1 ? "Kjør en charge selv (Ta styringen)" : `Kjør ${m.target} charger selv (Ta styringen)`;
+    case "mester":
+      return "Ta et nivå i mesterskapet (Forskning)";
+    case "verdi":
+      return `Øk konsernverdien med ${fmtKr(m.target)}`;
+    case "datter":
+      return "Kjøp eller moderniser et datterverk";
     case "forsk":
       return "Forsk fram noe nytt";
     case "les":
@@ -227,6 +233,7 @@ function missionText(m: DailyMission): string {
 function progressText(g: GameState, m: DailyMission): string {
   const p = missionProgress(g, m);
   if (m.id === "tonn") return `${fmtT(p)} / ${fmtT(m.target)}`;
+  if (m.id === "verdi") return `${fmtKr(p)} / ${fmtKr(m.target)}`;
   if (m.id === "omdomme") return `${fmtNum(Math.floor(p * 10) / 10, 1)} / ${m.target}`;
   return `${Math.floor(p)} / ${m.target}`;
 }

@@ -5,6 +5,25 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 99 – 2026-09-26: nettselskapet og dagens oppdrag i sluttspillet
+
+**Brukeren ba om:**
+- Tilbudet fra nettselskapet er uinteressant langt ute i spillet.
+- Dagens oppdrag er for lett for dem som har kommet langt.
+
+**Gjort:** B-153.
+- Nettselskapet betaler mer og gir fagpoeng.
+- Dagens oppdrag skalerer med nivå. Nye oppdrag i sluttspillet: mesterskap, konsernverdi og datterverk. Bonusen gir
+  flere fagpoeng.
+
+**Testet:**
+- tsc, lint, `npm test` (ny test for oppdragene i sluttspillet), `validate.ts`, build.
+- `balance.ts` (exit 0) og `--daglig 15` (exit 0, alle mål OK).
+
+**Gjenstår:** større ovner og støpemaskiner med lengre smeltetid (B-154).
+
+---
+
 ## Økt 98 – 2026-09-26: ukens utfordring, sesonger med vri, og tre feil
 
 **Brukeren ba om:**
