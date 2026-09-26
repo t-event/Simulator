@@ -112,6 +112,7 @@ frontend/src/
     daily.ts     Daglig belønning, dagens oppdrag og mens du var borte (B-149)
     mastery.ts   Mesterskap: forskning som tas om og om igjen etter all forskning (B-150)
     achievements.ts Prestasjoner (merker)   cosmetics.ts  Pynt i anleggsbildet for fagpoeng (B-151)
+    landmarks.ts Landemerker: store byggeprosjekter som forespørsler, ett per virkelig dag (B-174)
     balance.ts   Automatisk testspiller
   net/         Konto og lagring på nett (B-125) – Supabase over fetch, uten bibliotek
     config.ts    URL og nøkkel fra miljøet (aldri i repoet)   supabase.ts  Innlogging, økt, spørringer   sync.ts  Lagring på nett
@@ -132,7 +133,7 @@ frontend/src/
     Daily.tsx    Velkommen tilbake, daglig belønning og kortet «Dagens oppdrag» på Verket
     Achievements.tsx Prestasjonskortet på Verket og arket «Pynt verket» (🎨 på anleggsbildet)
     Weekly.tsx   Kortet «Ukens utfordring» på Verket og ukelista   Portal.tsx  Ark fra Verket legges i <body>
-    SeasonTrack.tsx Kortet «Sesongstigen» på Verket (B-173)
+    SeasonTrack.tsx Kortet «Sesongstigen» på Verket (B-173)   Landmarks.tsx  Kortet «Landemerker» på Verket (B-174)
     control/     Kontrollrommet: den enkle styringen (SimpleControl + simpleRunner)
   sim/         Prosessmodell for lysbueovnen (brukes av kontrollrommet)
 frontend/public/  PWA: manifest, ikoner, service worker

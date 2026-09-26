@@ -55,6 +55,7 @@ import { DailyCard } from "./Daily";
 import { AchievementsCard, PyntModal } from "./Achievements";
 import { WeeklyCard } from "./Weekly";
 import { SeasonTrackCard } from "./SeasonTrack";
+import { LandmarksCard } from "./Landmarks";
 import { BankCard } from "./Settings";
 import { KonsernTab } from "./Konsern";
 import { readyUpgrades, stationOptions, stationReady, type Station } from "./stations";
@@ -739,6 +740,7 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings }: Props)
             <BookCard g={g} openBook={openBook} />
             <ChallengesCard g={g} />
             <AchievementsCard g={g} onOpenPynt={() => setPynt(true)} />
+            <LandmarksCard g={g} onSales={() => go("salg")} />
             {/* Loggen synlig på Oversikt, ikke bare under Økonomi (B-098) */}
             <Card title="Siste hendelser">
               <ul className="g-log">

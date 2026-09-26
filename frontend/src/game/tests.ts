@@ -86,6 +86,7 @@ import { bonusGap, computePlantStats, liftMorale, moraleNormal, supportAdvice } 
 import { RESEARCH, researchOptions } from "./research";
 import { parseSave } from "./save";
 import { makeDecision, resolveDecision } from "./decisions";
+import { landmarkContract, landmarkHour } from "./landmarks";
 import {
   apprenticeExams,
   APPRENTICE_DAYS,
@@ -779,6 +780,37 @@ test("Sesongstigen og nye titler (B-173): pynt på trinn 10–50, titler etter S
   g.cash = 6_000_000_000_000;
   checkLegends(g);
   assert(titleOf(g) === "Stålgigant" && maxSisters(g) === before + 6, `tittel ${titleOf(g)}, plass ${maxSisters(g)}`);
+});
+
+test("Landemerker (B-174): ett nytt per dag, belønning når det er levert", () => {
+  // Garasjen: eieren står i produksjonen, så verket lager stål
+  const g = newGame(86);
+  g.tutorial = null;
+  g.minute = 3 * 1440;
+  landmarkHour(g, "2026-10-01");
+  const c = landmarkContract(g);
+  assert(!!c && c.landmark === "benker" && c.status === "tilbud", `fikk ${c?.landmark}`);
+  landmarkHour(g, "2026-10-01");
+  assert(g.contracts.filter((x) => x.landmark).length === 1, "to landemerker samme dag");
+  // Levert: fagpoeng, omdømme og i samlingen; neste kommer først neste dag
+  const fp = g.researchPoints;
+  c!.status = "fullfort";
+  landmarkHour(g, "2026-10-01");
+  assert(g.landmarks!.done.includes("benker") && g.researchPoints > fp, "ingen belønning");
+  landmarkHour(g, "2026-10-01");
+  assert(!landmarkContract(g), "nytt landemerke samme dag");
+  // Kumlokket krever verkstedet: i garasjen kommer det ikke noe nytt
+  landmarkHour(g, "2026-10-02");
+  assert(!landmarkContract(g), "landemerke fra et høyere nivå");
+  g.stage = 1;
+  g.landmarks!.date = null;
+  landmarkHour(g, "2026-10-03");
+  assert(landmarkContract(g)?.landmark === "kumlokk", `neste: ${landmarkContract(g)?.landmark}`);
+  // Ikke levert: kommer igjen en annen dag
+  landmarkContract(g)!.status = "misligholdt";
+  landmarkHour(g, "2026-10-03");
+  landmarkHour(g, "2026-10-04");
+  assert(landmarkContract(g)?.landmark === "kumlokk", "det samme landemerket kom ikke igjen");
 });
 
 test("Salgsdirektøren kan oppgraderes i tre trinn (B-172)", () => {

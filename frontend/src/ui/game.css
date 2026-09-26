@@ -2290,6 +2290,15 @@ button {
   font-size: 12px;
 }
 
+/* Landemerker som er levert (B-174) */
+.g-landmarks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-size: 22px;
+  margin: 4px 0;
+}
+
 /* «Ansett til plassene» avløserne står på (B-170) */
 .g-support-action {
   margin-top: 4px;

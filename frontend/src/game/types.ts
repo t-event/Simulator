@@ -142,6 +142,8 @@ export interface Contract {
   rating?: number;
   /** Hvorfor kunden ga den karakteren, kort */
   ratingNote?: string;
+  /** Landemerket kontrakten gjelder (B-174) */
+  landmark?: string;
 }
 
 /**
@@ -519,6 +521,8 @@ export interface GameState {
   pendingDecision: Decision | null;
   /** Dagen hvert hendelseskort sist ble vist, så de ikke gjentas for ofte */
   decisionSeen: Record<string, number>;
+  /** Landemerker (B-174): levert, dagen det siste kom (mobilens dato) og kontrakten som pågår */
+  landmarks?: { done: string[]; date: string | null; contractId: number | null };
   /** Hendelser som er ordnet for dette nivået, f.eks. støyskjerm mot naboklager (B-171): nivået det ble gjort på */
   decisionFixed?: Record<string, number>;
   /** Utgått (B-031): erstattet av fravær per ansatt. Beholdes for gamle lagringer. */

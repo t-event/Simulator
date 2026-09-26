@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 120 – 2026-09-26: landemerker
+
+**Brukeren ba om:** (fra lista i økt 117) noe å gjøre hele sesongen – andre del.
+
+**Gjort:** B-174. 27 landemerker som egne forespørsler, ett nytt per virkelig dag, med belønning og samling på Verket.
+Kortet «Kobbertyver» tidligst på støperiet og mildere.
+
+**Testet:** tsc, lint, tester (ny for landemerker), balanse (exit 0), build. Playwright 390 og 320 px: kortet med
+samlingen, lenken til Salg, forespørselen på Salg, ingen horisontal scrolling, ingen feil.
+
+**Gjenstår:** nytt kontrollrom.
+
+---
+
 ## Økt 119 – 2026-09-26: sesongstigen og flere titler
 
 **Brukeren ba om:** (fra lista i økt 117) noe å gjøre hele sesongen på seks måneder.
