@@ -219,8 +219,8 @@ function EndScreen({
         {won && (
           <p className="g-muted">
             {inSeason
-              ? "Du er med i sesongen: spill videre og hold plassen på topplista. Når neste sesong starter, begynner alle i garasjen igjen."
-              : "Spill videre og la konsernet vokse. Vil du konkurrere med andre, kan du bli med i sesongen under 🏆 Toppliste – der starter alle i garasjen."}{" "}
+              ? "Du er med i sesongen: spill videre og hold plassen på topplista."
+              : "Spill videre og la konsernet vokse. Vil du konkurrere med andre, kan du bli med i sesongen under 🏆 Toppliste."}{" "}
             Utfordringene på storverket står under Verket.
           </p>
         )}

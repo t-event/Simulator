@@ -242,11 +242,15 @@ test("Nytt spill er alltid runde 1 uten bonus (nytt spill+ er fjernet, B-141)", 
   assert(a.round === 1 && !a.winSeen && a.researchPoints === 0, "nytt spill skal starte likt for alle");
 });
 
-test("Et eldre nytt spill+ blir ikke med i sesongen direkte (B-140)", () => {
+test("Alle spill som ikke har vært med i en sesong, blir med som de er (B-166)", () => {
   const a = newGame(1);
-  assert(canJoinDirectly(a), "et vanlig garasjespill skal kunne bli med");
+  assert(canJoinDirectly(a), "et nytt spill skal kunne bli med");
+  a.stage = 4;
+  a.minute = 800 * 1440;
   a.round = 2;
-  assert(!canJoinDirectly(a) && notJoinableReason(a).includes("nytt spill+"), "nytt spill+ skulle holdes utenfor");
+  assert(canJoinDirectly(a), "et spill som har kommet langt, skal også bli med");
+  a.season = 1;
+  assert(!canJoinDirectly(a) && notJoinableReason(a).includes("tidligere sesong"), "spill fra en tidligere sesong");
 });
 
 test("Gamle lagringer får standardverdier for nye felt", () => {

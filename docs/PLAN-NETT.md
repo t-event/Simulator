@@ -235,7 +235,7 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
 ## Status
 
 - Fase 0 og 1 er bygget (B-125, B-126). Fase 2 (toppliste) er bygget (B-127). Fase 3 (sesonger, ligaer og felles
-  hendelser) er bygget (B-129). Fase 4 er neste, men brukeren vil vente med den (2026-09-26).
+  hendelser) er bygget (B-129). Alle spill uten tidligere sesong blir med i sesongen som pågår (B-166). Fase 4 er neste, men brukeren vil vente med den (2026-09-26).
 - Også bygget: daglig belønning og dagens oppdrag (B-149), mesterskap og titler (B-150), ukens utfordring og sesonger
   med vri (B-152). Vern mot lekkede passord er på. Glemt passord er ikke testet med ekte e-post ennå.
 - Etterpå: topplista viser nivå og medaljer (B-139); to nettlesere på samme konto og nytt spill+ (B-140); hyppigere
