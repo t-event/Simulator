@@ -554,7 +554,18 @@ export interface GameState {
 }
 
 /** Et av dagens oppdrag (B-149): fremdriften er økningen i et tall i spillet fra `base` */
-export type MissionId = "kontrakter" | "tonn" | "selv" | "forsk" | "les" | "quiz" | "omdomme";
+export type MissionId =
+  | "kontrakter"
+  | "tonn"
+  | "selv"
+  | "forsk"
+  | "les"
+  | "quiz"
+  | "omdomme"
+  // Sluttspillet (B-153)
+  | "mester"
+  | "verdi"
+  | "datter";
 export interface DailyMission {
   id: MissionId;
   /** Tallet ved dagens start */

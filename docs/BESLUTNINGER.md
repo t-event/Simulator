@@ -2339,3 +2339,27 @@ konto. Vrien gjelder bare sesongspill, som krever konto.
   innlogget (`stalverk-sist-innlogget-v1`). Er økta borte uten at man logget ut selv, sier vinduet «Du er logget ut»
   hvorfor.
 - Varsler om fravær («ansatte er borte», «vurder en advarsel») åpner nå Folk → Fravær, ikke Skift.
+
+## B-153 Nettselskapets tilbud og dagens oppdrag i sluttspillet (2026-09-26)
+Status: gjelder (endrer B-149 og tilbudet fra nettselskapet)
+Brukeren: «Tilbudet fra nettselskapet er uinteressant når jeg har kommet langt og har kjøpt salgsdirektør» og «Dagens
+mål er for lett for de som har kommet langt».
+
+**Nettselskapet ringer:**
+- Betalingen er 25–60 % av salgsverdien av stålet man mister på fire timer (før 15–45 %).
+- Tilbudet gir også fagpoeng: 5 på stålverket, 12 på storverket og 25 i konsernet. Penger betyr lite når kassa er på
+  milliarder; fagpoeng betyr noe hele spillet (mesterskapet, pynt).
+
+**Dagens oppdrag** (`game/daily.ts`) skalerer med hvor langt man har kommet (garasje … storverk, og konsern):
+- Kontrakter: 1, 2, 3, 4, 6, 8.
+- Tonn: 3 døgns produksjon fram til støperiet, 5 på stålverket, 8 på storverket, 10 i konsernet.
+- Kjør selv: 3 charger på storverket og i konsernet (før 1).
+- Nye oppdrag i sluttspillet: ta et nivå i mesterskapet, øk konsernverdien med omtrent tre døgns overskudd, og kjøp
+  eller moderniser et datterverk.
+- Bonusen gir flere fagpoeng: 3 tidlig, 4 på stålverket, 6 på storverket, 10 i konsernet. Døgnene i bonusen er som før,
+  så juksesperren (bonus_days) stemmer.
+
+**Konto:** som før (B-149): dagens oppdrag krever konto. Nettselskapets tilbud krever ikke konto.
+
+**Balanse:** `balance.ts` uendret (8/23/63/133, nybegynner 168). `--daglig 15`: 8/21/58/120, nybegynner 139,5; alle
+mål OK.

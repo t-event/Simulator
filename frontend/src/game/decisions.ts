@@ -12,6 +12,7 @@ import {
   addIncome,
   addScrapParti,
   adjustMorale,
+  awardPoints,
   adjustReputation,
   countEvent,
   fmtKr,
@@ -142,7 +143,9 @@ const MORE_MAKERS: Record<string, Maker> = {
     // Tapt produksjon de fire timene, og en godtgjørelse som noen ganger lønner seg og noen ganger ikke
     const lostT = stats.units.reduce((a, u) => a + ((hours * 60) / u.cycleMin) * u.sizeT * 0.9, 0);
     const pay =
-      Math.round((lostT * productPrice(g, stats.mainProduct, "standard") * uniform(g, 0.15, 0.45)) / 100) * 100;
+      Math.round((lostT * productPrice(g, stats.mainProduct, "standard") * uniform(g, 0.25, 0.6)) / 100) * 100;
+    // Penger betyr lite når kassa er full; fagpoeng betyr noe hele spillet (B-153). Mest i konsernet
+    const fp = g.konsern?.unlocked ? 25 : g.stage >= 4 ? 12 : g.stage >= 3 ? 5 : 0;
     const mw = stats.units.reduce((a, u) => a + u.furnaceMW, 0);
     // Rekker ordrekøen fristene med og uten utkobling? Så slipper spilleren å gjette (B-104)
     const lateNow = lateContracts(g, stats).length;
@@ -162,10 +165,10 @@ const MORE_MAKERS: Record<string, Maker> = {
     return {
       id: "utkobling",
       title: "Nettselskapet ringer",
-      text: `Strømnettet er hardt belastet. Nettselskapet ber deg koble ut ovnene (${mw.toFixed(1).replace(".", ",")} MW) i morgen kl. 07–11 og tilbyr ${fmtKr(pay)} for det. ${check}`,
+      text: `Strømnettet er hardt belastet. Nettselskapet ber deg koble ut ovnene (${mw.toFixed(1).replace(".", ",")} MW) i morgen kl. 07–11 og tilbyr ${fmtKr(pay)} for det${fp ? `, og ${fp} fagpoeng: dere lærer om fleksibelt strømforbruk sammen` : ""}. ${check}`,
       options: [
         {
-          label: `Godta (${fmtKr(pay)})`,
+          label: `Godta (${fmtKr(pay)}${fp ? ` + ${fp} fagpoeng` : ""})`,
           hint: `Ingen nye charger i fire timer – omtrent ${fmtT(lostT)} mindre stål.`,
         },
         {
@@ -176,7 +179,7 @@ const MORE_MAKERS: Record<string, Maker> = {
               : "Har du dårlig tid med leveranser, er det tryggest å si nei.",
         },
       ],
-      data: { pay, from: day(g) * 1440 + 7 * 60, until: day(g) * 1440 + 11 * 60 },
+      data: { pay, fp, from: day(g) * 1440 + 7 * 60, until: day(g) * 1440 + 11 * 60 },
     };
   },
   kurs: (g) => {
@@ -566,8 +569,13 @@ export function resolveDecision(g: GameState, option: number): void {
       if (!yes) return;
       g.gridCut = { fromMin: n("from"), untilMin: n("until") };
       addIncome(g, "annet", n("pay"));
+      awardPoints(g, n("fp"));
       unlock(g, "strom");
-      log(g, `Avtalt utkobling i morgen kl. 07–11. Nettselskapet betalte ${fmtKr(n("pay"))}.`, "good");
+      log(
+        g,
+        `Avtalt utkobling i morgen kl. 07–11. Nettselskapet betalte ${fmtKr(n("pay"))}${n("fp") ? ` og ${n("fp")} fagpoeng` : ""}.`,
+        "good",
+      );
       return;
     case "tilsyn":
       if (yes) {

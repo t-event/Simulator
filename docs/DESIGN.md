@@ -56,6 +56,9 @@ Etter sluttmålet (10 mrd., tittelen Stålbaron) fortsetter spillet (B-150):
 - Når all forskning er gjort, åpner mesterskapet: fire prosjekter som kan tas om og om igjen, så fagpoengene alltid
   har noe å gå til.
 
+Dagens oppdrag blir større jo lenger man har kommet, og i konsernet kommer oppdrag om mesterskap, konsernverdi og
+datterverk (B-153).
+
 Ukens utfordring og sesonger med vri (B-152):
 - Hver uke en toppliste per liga (bronse, sølv, gull) med en oppgave som går på omgang: mest vekst i konsernverdi,
   flest tonn og flest spilldøgn. Topp 3 får medalje, topp 10 en ukekiste med 25–100 fagpoeng. Kortet står på Verket.

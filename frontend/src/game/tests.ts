@@ -22,6 +22,7 @@ import {
   MISSION_BONUS,
   missionBonusReady,
   pickMissions,
+  missionBonus,
   startMissionDay,
   STREAK_REWARDS,
   streakReward,
@@ -688,6 +689,25 @@ test("Sesongens vri (B-152): gjelder bare spill i sesongen, ganges med prisene o
   assert(Math.abs(scrapPrice(g, "blandet") / before - 1.15) < 0.001, "skrapprisen fikk ikke vrien");
   applySeasonTwist(g, 4, twist);
   assert(!g.world.twist, "vrien ble værende etter at sesongen var over");
+});
+
+test("Dagens oppdrag i sluttspillet (B-153): større mål, nye oppdrag og flere fagpoeng", () => {
+  const early = newGame(66);
+  const late = newGame(67);
+  late.stage = 4;
+  late.konsern.unlocked = true;
+  late.researched = RESEARCH.map((r) => r.id);
+  late.reputation = 100;
+  late.cash = 20_000_000_000;
+  const seen = new Set<string>();
+  for (let d = 1; d <= 28; d++) for (const id of pickMissions(late, `2026-10-${d}`)) seen.add(id);
+  assert(seen.has("mester") && seen.has("verdi") && seen.has("datter"), `oppdrag i konsernet: ${[...seen]}`);
+  assert(!seen.has("forsk") && !seen.has("omdomme"), "oppdrag som ikke kan gjøres");
+  for (let d = 1; d <= 28; d++) assert(!pickMissions(early, `2026-10-${d}`).includes("verdi"), "verdi i garasjen");
+  startMissionDay(late, "2026-11-02", false);
+  const k = late.daily.missions.find((m) => m.id === "kontrakter");
+  if (k) assert(k.target === 8, `kontrakter i konsernet: ${k.target}`);
+  assert(missionBonus(late).fp > missionBonus(early).fp, "ikke flere fagpoeng i konsernet");
 });
 
 if (failed) {
