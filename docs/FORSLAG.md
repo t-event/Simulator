@@ -6,7 +6,8 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
-Ingen åpne akkurat nå.
+- **Sesong 2:** når neste sesong starter, skal spill fra Sesong 1 få fortsette i den nye sesongen (som alle fikk i
+  Sesong 1, B-166), eller starte i garasjen? I dag får de valget: start i garasjen, eller spill videre på «Alle tider».
 
 ## Venter
 

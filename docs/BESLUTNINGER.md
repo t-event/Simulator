@@ -1758,7 +1758,7 @@ finnes igjen.
 
 ## B-133 Garasjen kan bli med i sesongen direkte, og topplista bak 🏆 øverst (2026-09-25)
 Status: gjelder (erstatter «første døgn» i B-129 og plasseringen under Økonomi i B-127). Nytt spill+ blir ikke med
-direkte, se B-140.
+direkte, se B-140. «Bare garasjen» er erstattet av B-166: alle spill uten tidligere sesong blir med.
 Brukeren: de som bare har gjort veiledningen, skal kunne være med i sesongen; de som har kommet langt, må starte
 på nytt. Topplista skal være mer synlig enn under Økonomi, så det blir populært å være med.
 
@@ -2643,3 +2643,22 @@ har spilt mer den siste tida (129 døgn på 30 min mot Granes 54 døgn på 12 mi
 grunn av feilen over.
 
 **Balanse:** uendret (8/23/66/137, nybegynner 184).
+
+## B-166 Alle spill blir med i sesongen som pågår (2026-09-26)
+Status: gjelder (erstatter «bare garasjen» i B-133 og regelen om nytt spill+ i B-140)
+Brukeren: «Ingen vil starte på nytt for å bli med på sesong 1. Jeg tror vi må la alle spillere nå bli med i aktiv
+sesong.»
+
+**Endring:**
+- Et spill som ikke har vært med i en sesong før (`season` er tom), blir med i sesongen som pågår med en gang
+  spilleren er logget inn – uansett hvor langt det har kommet (`canJoinDirectly` i `world.ts`). Spillet fortsetter som
+  det er, og står på sesonglista fra neste lagring. Loggen sier «Spillet ditt er nå med i Sesong 1».
+- Fordelen for den som var med i forrige sesong (5 % mer i kassa og 10 fagpoeng) gis bare til et nytt spill i
+  garasjen, ikke til et spill som har kommet langt.
+- Et spill fra en **tidligere** sesong får fortsatt valget når en ny sesong starter: start i garasjen, eller spill
+  videre på «Alle tider». Det må avgjøres før Sesong 2 om det skal være slik (FORSLAG.md).
+- Tekstene er skrevet om: popupen uten konto, sesongpopupen, fagboka (sesongkapitlet) og seiersskjermen sier ikke
+  lenger at alle starter i garasjen.
+- Serveren trenger ingen endring: sesonglista viser alle med tidslinje i sesongen. Juksesperren ser bare på lagringer
+  i samme sesong, så den første lagringen i sesongen sammenlignes ikke med tida før.
+- **Konto (KONTO.md):** som før – sesongen krever konto (regel 3).

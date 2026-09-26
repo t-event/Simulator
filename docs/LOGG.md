@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 112 – 2026-09-26: alle blir med i sesongen
+
+**Brukeren ba om:** at alle spillere kan bli med i sesongen som pågår uten å starte på nytt.
+
+**Gjort:** B-166. Spill uten tidligere sesong blir med med en gang spilleren er innlogget, uansett nivå, uten
+sesongfordelen. Tekstene om «alle starter i garasjen» er skrevet om. Spill fra en tidligere sesong får valget som før.
+
+**Testet:** tsc, lint, `npm test` (oppdatert test), validate, balance, build. Playwright med falsk server på 390 og
+320 px: et spill på dag 144 blir med i Sesong 1, uten ekstra kasse, med melding i loggen og uten popup; et spill fra en
+tidligere sesong får popupen med ny tekst.
+
+**Gjenstår:** avgjøre før Sesong 2 om spill fra forrige sesong også skal få fortsette (FORSLAG.md).
+
+---
+
 ## Økt 111 – 2026-09-26: Figen mot Grane, topplista på Android, mesterskap for foringen
 
 **Brukeren spurte/ba om:** hvorfor Figen vokser fortere enn Grane; hvorfor Granes eget tall står stille på Android;

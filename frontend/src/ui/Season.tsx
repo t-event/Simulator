@@ -7,7 +7,7 @@
  */
 import { useEffect, useSyncExternalStore } from "react";
 import { useState } from "react";
-import { newGame, unlock } from "../game/engine";
+import { log, newGame, unlock } from "../game/engine";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { applySeasonTwist, applyWorldEvents, canJoinDirectly, joinSeason, notJoinableReason } from "../game/world";
@@ -75,10 +75,13 @@ export function SeasonSync({ api }: { api: GameApi }) {
   useEffect(() => {
     // Bare et spill som er avklart mot kontoen, kan kobles til sesongen (B-138)
     if (!g || !session || !cur || !reconciled) return;
-    if (g.season === null && canJoinDirectly(g) && (g.owner === null || g.owner === session.user.id))
+    if (canJoinDirectly(g) && (g.owner === null || g.owner === session.user.id))
       api.act((gg) => {
-        joinSeason(gg, cur.id, !!status?.played_previous);
+        // Fordelen fra forrige sesong gjelder bare et nytt spill i garasjen, ikke et spill som har kommet langt (B-166)
+        const fresh = gg.stage === 0;
+        joinSeason(gg, cur.id, !!status?.played_previous && fresh);
         unlock(gg, "sesong");
+        if (!fresh) log(gg, `🏆 Spillet ditt er nå med i ${cur.name} og står på sesonglista under 🏆.`, "good");
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [g, session, cur?.id, reconciled, g?.owner]);
@@ -107,9 +110,8 @@ export function SeasonPrompt({ api, g, onOpenSettings }: { api: GameApi; g: Game
             være med må du opprette en konto eller logge inn. Da lagres spillet på nett også.
           </p>
           <p className="g-muted">
-            Er spillet ditt fortsatt i garasjen, blir det med i sesongen med en gang. Har du flyttet videre, får du
-            velge om du vil starte sesongen i garasjen eller spille videre utenfor. Du finner dette igjen under 🏆
-            Toppliste øverst.
+            Spillet ditt blir med i sesongen med en gang du logger inn, uansett hvor langt du har kommet. Du finner
+            dette igjen under 🏆 Toppliste øverst.
           </p>
           <div className="g-row">
             <button
@@ -135,8 +137,8 @@ export function SeasonPrompt({ api, g, onOpenSettings }: { api: GameApi; g: Game
       <div className="g-modal-card">
         <h2>{cur.name} er i gang</h2>
         <p>
-          En sesong varer i et halvt år, og alle som er med, starter i garasjen samtidig. Topplista for sesongen viser
-          bare spill som er startet i den. Sesongen slutter om {daysLeft(cur)} dager.
+          En sesong varer i et halvt år, og topplista for sesongen viser spillene som er med i den. Sesongen slutter om{" "}
+          {daysLeft(cur)} dager.
         </p>
         <p className="g-muted">
           {notJoinableReason(g)}, så det er ikke med i sesongen. Du kan spille det videre – det står på lista «Alle
@@ -204,7 +206,7 @@ export function SeasonJoin({ api, g, onOpenSettings }: { api: GameApi; g: GameSt
   return (
     <div className="g-note g-season-join">
       <strong>Spillet ditt er ikke med i {cur.name}.</strong> Det står bare på «Alle tider». {notJoinableReason(g)}, så
-      vil du være med, starter du sesongen med et nytt spill i garasjen.
+      vil du være med i {cur.name}, starter du med et nytt spill i garasjen.
       {bonus ? " Du var med sist og får 10 fagpoeng og 5 % mer i kassa." : ""}
       {confirm ? (
         <div className="g-row">
