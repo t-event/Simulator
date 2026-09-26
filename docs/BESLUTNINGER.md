@@ -2681,3 +2681,20 @@ starte på nytt i garasjen er fjernet; uten konto kommer beskjeden om å logge i
 med sist, gis fortsatt bare til nye spill i garasjen.
 
 **Konto (KONTO.md):** som før – sesongen krever konto.
+
+## B-168 Sjæfen får tilbake framgangen fra spillet før sesongen (2026-09-26)
+Status: gjelder (engangsretting av data)
+Brukeren: Sjæfen hadde kommet til storverket, men startet Sesong 1 på nytt før B-166 lot alle bli med som de var –
+«klarer du å reversere slik at han får fortsette fra der han var?»
+
+**Funnet:** Det gamle spillet (uten sesong) nådde storverket på dag 171 og konsernverdi 27,6 mill. (dag 205). Ved ny
+start ble lagringen overskrevet; databasen har bare det siste spillet, så det kan ikke hentes tilbake nøyaktig.
+Sesongspillet sto på stålverket på dag 179 og var gått konkurs (kasse −4 mill., lån 5,7 mill.).
+
+**Retting (brukeren valgte «løft sesongspillet»):** lagringen på nett ble endret med SQL: nivå storverk, kasse
+27 551 659 kr og lån 0 (samme konsernverdi som det gamle spillet), konkursen og tellerne for den fjernet, flyttefeiring,
+pause og en forklaring i loggen. Folk, forskning og fagpoeng er hans egne. `device` ble satt til «rettet-av-utvikler»
+og versjonen økte (487), så appen hans henter spillet fra nett. Juksesperren tillater hoppet (storverk).
+
+**Lærdom:** før B-166 kunne en ny sesongstart slette et spill som hadde kommet langt. Nå trengs det ikke, men spill som
+erstattes (⚙️ → Nytt spill), kan fortsatt ikke hentes tilbake.
