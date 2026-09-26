@@ -81,7 +81,7 @@ Begrunnelse: Kan installeres på hjemskjermen uten butikk, og vi beholder én ko
 GitHub Pages. Kan pakkes med Capacitor senere hvis det blir ønsket.
 
 ## B-010 Kontrollrommet: enkel styring som standard (2026-09-24)
-Status: gjelder, men stegene er endret av B-076, og ekspertmodusen er fjernet (B-077)
+Status: erstattet av B-175 (kontrollrommet er et spill i fire runder)
 Bakgrunn: Brukeren: «Kontrollromstyringen må være veldig enkel, slik at en uten kunnskap klarer å kjøre manuelt.»
 Beslutning: Fire guidede steg med én hovedhandling hver: Smelt (mer/mindre strøm),
 Rens (hold for oksygen), Slagg av (ett trykk), Tapp (trykk når temperaturen er grønn).
@@ -987,7 +987,7 @@ Resultat: den flinke testspilleren når 1 mrd. rundt dag 207 (før ca. 230) og h
 nybegynneren rundt dag 243. Nivådagene er uendret (8 / 26 / 66 / 134).
 
 ## B-076 Kontrollrommet: oksygen samtidig med strøm, manuell avslagging og øse som kan renne over (2026-09-25)
-Status: gjelder (endrer stegene i B-010)
+Status: erstattet av B-175
 Brukeren: oksygenet skal kunne styres mens strømmen går, slaggen skal ikke tømmes av seg selv (for mye avslagging
 sender stål ut slaggdøra), ovnen må rettes opp når øsa er full (ellers renner den over), og det var for lett å få
 perfekt charge.
@@ -1023,7 +1023,7 @@ Beslutning: Når verket går døgnet rundt, står det «Verket går døgnet rund
 tillegg. Bemanningstabellen viser «Trengs N lag» og «per lag» når verket har mer enn tre lag.
 
 ## B-079 Kontrollrommet: strømmen kan slås av, og karbonet kan hentes tilbake (2026-09-25)
-Status: gjelder (utfyller B-076)
+Status: erstattet av B-175
 Brukeren kom ikke videre i rensingen. Karbonet var 0,002 %, og temperaturen steg selv om «alt var av».
 Årsaker, målt i prosessmodellen:
 - Med oksygen på gjennom hele smeltingen brente oksygenet karbonet ned til 0,005 % før rensingen startet.
@@ -1039,7 +1039,7 @@ Beslutning:
 - Nybegynneren i `balance.ts` slår på karbon hvis det blir for lavt. Resultatet er fortsatt 4★ og 1★.
 
 ## B-080 Kontrollrommet: knappene sier når det er riktig å trykke (2026-09-25)
-Status: gjelder (utfyller B-076)
+Status: erstattet av B-175
 Brukeren syntes avslaggingen og tappingen ikke var intuitive. Målt:
 - Slagget rant jevnt ut med ca. 0,4 t i sekundet på skjermen, så det grønne feltet (0,5–1,2 t) varte bare ca. 1,7 s.
 - Slaggmåleren gikk til 8 t og sto fast helt til høyre de første sekundene.
@@ -1108,7 +1108,7 @@ Beslutning: Ni nye forskninger på nivå 4, til sammen ca. 3 000 fagpoeng, hver 
 Med ca. 15–20 fagpoeng i døgnet varer de i 150–200 døgn. Testspilleren forsker på dem sist.
 
 ## B-086 Kontrollrommet: mildere smelting, strømnivå per steg og belønning for godt håndverk (2026-09-25)
-Status: gjelder (utfyller B-076)
+Status: stegene er erstattet av B-175; belønningen for 4–5 stjerner gjelder fortsatt
 - Smeltingen: 3★ ved 80 % av tida i det grønne (før 92 %), 2★ ved 60 %, 1★ ved 35 %. Hintene viser om temperaturen
   stiger eller synker.
 - Strømmen settes til nivå 2 når rensingen starter og nivå 4 når tappingen starter, så spilleren ikke arver «strøm av».
@@ -1165,7 +1165,7 @@ charge på storverket er senket fra 0,15 til 0,1 (før størrelse og antall ovne
 forskningen i B-085 bruker dem.
 
 ## B-093 Kontrollrommet: oksygenråd, fosfor forklart, ikke oksygen i tappingen (2026-09-25)
-Status: gjelder (endrer B-076)
+Status: erstattet av B-175
 - Smeltingen har en fast linje om oksygenet: vent til halvparten er smeltet, slå det på da, og en advarsel hvis det
   står på for tidlig.
 - Avslaggingen: brukeren kunne ikke justere fosforet. Målt: ekstra kalk eller kaldere bad i rensingen flytter fosforet
@@ -1308,7 +1308,7 @@ Brukeren ville ikke ha tall på bjella for gode nyheter. Gode nyheter står fort
 men bare problemer og hendelser gir tall på bjella.
 
 ## B-108 Kontrollrommet: sterkere strøm i smeltingen, rensingen starter med strømmen av (2026-09-25)
-Status: gjelder (justerer B-086 og B-093)
+Status: erstattet av B-175
 Smeltingen: selv på full strøm falt temperaturen under det grønne feltet fra ca. 20 % til 50 % smeltet. Spilleren måtte
 slå på oksygenet før rådet sa det. Strømnivå 4 og 5 bruker nå trafo-tapp 4 og 6 i stedet for 3 og 4. Da holder nivå 4
 temperaturen til halvparten er smeltet, og nivå 5 har noe å gå på.
@@ -2880,3 +2880,40 @@ Testspilleren velger forsiktig på de nye kortene.
 **Balanse:** Verksted 7, Støperi 25, Stålverk 67, Storverk 159. Nybegynneren 137,5, 0 konkurs.
 
 **Konto (KONTO.md):** nei, regel 1.
+
+## B-175 Kontrollrommet er et spill i fire runder (2026-09-26)
+Status: gjelder (erstatter den enkle styringen i B-010, B-076, B-079, B-080, B-093 og B-108 og stegene i B-086)
+Brukeren: «Å kjøre ovnen manuelt syntes alle er kjedelig. Bytt ut hele greia med noe som fungerer skikkelig bra og som er
+morsomt.»
+
+**Hvorfor det var kjedelig:** én charge tok 2–3 minutter, det meste var venting på en måler, og strøm ▲/▼ i fem nivåer
+ga lite å gjøre med hendene. Prosessmodellen under var riktig, men for treg til å være morsom.
+
+**Endring:** «Ta styringen» åpner et kort spill (`ui/control/chargeGame.ts` og `ControlRoom.tsx`), under ett minutt, i fire
+runder med hver sin mekanikk og et kort før hver runde som sier hva som skjer i ovnen og hva du gjør:
+1. **Smelt** (ca. 14 s): hold inne for strøm, slipp for å kjøle, og hold temperaturen i det grønne. Skrapkurver varsles
+   ett sekund før de faller i – en tung kjøler, en lett varmer. Oksygenet slås på halvveis og gir mer varme.
+2. **Blås ut karbonet** (ca. 6 s): hold inne for oksygen. Karbonet går ned, men slaggen skummer; når skummet når kanten,
+   koker det over (−100 poeng, litt stål tapt). Trykk «Ferdig» når karbonet er i det grønne.
+3. **Rak ut slaggen** (8 s): trykk på de grå slaggklumpene før de synker. Blanke klumper er stål og koster.
+4. **Tapp** (ca. 8 s): temperaturen stiger fortere og fortere – trykk «Tapp!» i det grønne (±8 °C). Hold så inne for å
+   helle i øsa; strålen renner litt etter at du slipper, så slipp før streken.
+
+Poeng med kombo (i det grønne over tid, klumper på rad), stjerner som før (0–3 for smelting, rensing, avslagging,
+tappetemperatur og øsa; 5★ krever 14 av 15), en **rekord** (`controlBest`, vises på Verket og i resultatet) og knappen
+«Ta neste charge også». Belønningen er som før (B-086): 1 + stjerner i fagpoeng, og 4–5 stjerner gir 8–15 ekstra
+fagpoeng og 3–6 % bedre pris.
+
+**Til spillet:** resultatet regnes i samme skala som prosessmodellen ga, ut fra ovnens avfosforering, strøm per tonn og
+smeltetid (nye valgfrie felt i `ManualRequest`): karbonet fra runde 2, fosforet fra skrapet og hvor mye slagg du raket
+ut, strøm og foringsslitasje fra hvor lenge badet var for kaldt eller varmt, tapt stål fra overkoking, stål i raka og
+øsa som rant over. Gjennombrenning finnes ikke lenger i kontrollrommet.
+
+Prosessmodellen (`src/sim/`) står igjen og sjekkes fortsatt av `sim/validate.ts`, men brukes ikke av spillet.
+
+**Balanse:** testspilleren sjekker at en flink spiller (reagerer hvert 0,2 s) får minst 4★ på under 60 s og en slurvete
+høyst 2★, på standard, lavkarbon og premium. En middels spiller (0,4 s, ser ikke på kurvene) fikk 3–5★. Resten av
+balansen er uendret: Verksted 7, Støperi 25, Stålverk 67, Storverk 159, nybegynneren 137,5, 0 konkurs.
+
+**Konto (KONTO.md):** nei, regel 1. Rekorden er lokal.
+

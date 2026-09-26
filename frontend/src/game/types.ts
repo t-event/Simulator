@@ -366,6 +366,10 @@ export interface ManualRequest {
   radioactive: boolean;
   /** Farten spillet hadde før det ble satt på pause for kontrollrommet */
   resumeSpeed: number;
+  /** Ovnens avfosforering, strøm per tonn og smeltetid, så spillet i kontrollrommet gir samme skala (B-175) */
+  dephos?: number;
+  kwhPerT?: number;
+  cycleMin?: number;
 }
 
 /** Et hendelseskort som venter på at spilleren velger. */
@@ -466,6 +470,8 @@ export interface GameState {
   gameOver: boolean;
   won: boolean;
   pendingManual: ManualRequest | null;
+  /** Beste poengsum i kontrollrommet (B-175) */
+  controlBest?: number;
   /** Fagpoeng til forskning */
   researchPoints: number;
   /** Dagen spilleren sist kjøpte fagpoeng gjennom et forskningssamarbeid (B-064), −1 hvis aldri */

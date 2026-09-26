@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 121 – 2026-09-26: nytt kontrollrom
+
+**Brukeren ba om:** (fra lista i økt 117) «Å kjøre ovnen manuelt syntes alle er kjedelig. Bytt ut hele greia med noe som
+fungerer skikkelig bra og som er morsomt.»
+
+**Gjort:** B-175. Kontrollrommet er et spill i fire runder under ett minutt: smelt (hold for strøm, skrapkurver), blås ut
+karbonet (hold for oksygen, ikke kok over), rak ut slaggen (trykk på klumpene) og tapp (treff temperaturen, fyll øsa).
+Poeng, kombo, rekord og «Ta neste charge også». Den enkle styringen på prosessmodellen er fjernet.
+
+**Testet:** tsc, lint, tester (ny for kontrollrommet), balanse (exit 0, ny sjekk: flink ≥ 4★ under 60 s, slurvete
+≤ 2★), build. Playwright 390 og 320 px: hele chargen spilt med hold og trykk, 5★, rekorden lagret, ingen horisontal
+scrolling, ingen knapper under 40 px, ingen feil.
+
+**Gjenstår:** ingenting fra lista i økt 117. Brukeren bør prøve kontrollrommet selv og si om det er for lett eller vanskelig.
+
+---
+
 ## Økt 120 – 2026-09-26: landemerker
 
 **Brukeren ba om:** (fra lista i økt 117) noe å gjøre hele sesongen – andre del.

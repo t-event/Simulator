@@ -120,7 +120,7 @@ frontend/
     tests.ts                 Raske tester av motoren
   src/net/                  Konto og lagring på nett (Supabase over fetch, uten bibliotek)
   src/ui/                   Spillets grensesnitt (mobil først)
-    control/                 Kontrollrommet (den enkle styringen)
+    control/                 Kontrollrommet (spillet i fire runder)
   src/sim/                  Prosessmodellen for lysbueovnen
   public/                   PWA: manifest, ikoner og service worker for offline
 supabase/                   SQL-migrasjonene for databasen, nummerert
