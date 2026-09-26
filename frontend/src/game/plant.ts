@@ -71,6 +71,8 @@ export interface PlantStats {
   kwhPerT: number;
   dephos: number;
   castTph: number;
+  /** Hvor mye ovnene smelter i timen til sammen, med alt utstyr (B-157) */
+  meltTph: number;
   castYield: number;
   crew: Crew;
   shifts: number;
@@ -565,7 +567,7 @@ export function computePlantStats(g: GameState): PlantStats {
   const castTph =
     casting.tph *
     (casting.continuous && hasResearch(g, "hoyhastighet") ? 1.15 : 1) *
-    (casting.continuous && has(g, "streng2") ? 2 : 1);
+    (casting.continuous ? (has(g, "streng3") ? 3 : has(g, "streng2") ? 2 : 1) : 1);
   let productPerDay = Math.min(liquidPerDay, castTph * 24) * casting.yield;
   if (rollingActive(g))
     productPerDay = Math.min(productPerDay, rollingTph(g) * Math.max(8, staff.hours)) * ROLLING_YIELD;
@@ -586,6 +588,7 @@ export function computePlantStats(g: GameState): PlantStats {
     kwhPerT,
     dephos: furnace.dephos,
     castTph,
+    meltTph: units.reduce((a, u) => a + (u.sizeT * 60 * 0.93) / u.cycleMin, 0),
     castYield: casting.yield,
     crew: staff.crew,
     shifts: staff.shifts,

@@ -466,6 +466,7 @@ function botHour(g: GameState): void {
       "valseverk3",
       "lysbue250",
       "likestrom420",
+      "streng3",
     ],
   ];
   // Ovnstyper og ovnsutstyr kjøpes per ovn (B-074): ovn 1 først, så de andre

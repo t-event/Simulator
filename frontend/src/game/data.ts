@@ -677,7 +677,8 @@ export const CASTINGS: CastingType[] = [
     stage: 4,
     price: 120_000_000,
     product: "emne",
-    tph: 400,
+    // To maskiner holder følge med tre 250-tonnere med alt utstyr; tre 420-tonnere trenger maskin nr. 3 (B-157)
+    tph: 460,
     yield: 0.978,
     crew: { stoper: 7 },
     costPerT: 115,
@@ -882,6 +883,18 @@ export const ADDONS: Addon[] = [
     crew: { stoper: 3 },
     description:
       "En strengstøpemaskin til ved siden av den første, så støpingen holder følge med tre store ovner. Dobbel støpekapasitet.",
+  },
+  {
+    id: "streng3",
+    name: "Strengstøpemaskin nr. 3",
+    stage: 4,
+    price: 150_000_000,
+    needsContinuous: true,
+    requires: ["streng2"],
+    crew: { stoper: 3 },
+    gate: "magnat",
+    description:
+      "En tredje strengstøpemaskin, så støpingen holder følge med tre likestrømsovner på 420 tonn. Tre ganger så mye som én maskin (B-157).",
   },
   {
     id: "valseverk2",

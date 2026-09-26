@@ -58,7 +58,7 @@ Etter sluttmålet (10 mrd., tittelen Stålbaron) fortsetter spillet (B-150):
 
 Stormodeller (B-154): lysbueovn 150 t og strengstøping med 8 strenger når konsernet åpner, 250 t og valseverk nr. 3
 ved sluttmålet, og en likestrømsovn på 420 t ved Stålmagnat. Jo større ovn, jo lengre charge (55–70 min), men flere
-tonn i timen.
+tonn i timen. Tre 420-tonnere trenger strengstøpemaskin nr. 3 (B-157).
 
 Dagens oppdrag blir større jo lenger man har kommet, og i konsernet kommer oppdrag om mesterskap, konsernverdi og
 datterverk (B-153).

@@ -37,6 +37,7 @@ const ADDON_STATION: Record<string, Station> = {
   panelvarsling: "ovn",
   bruddvarsling: "stoping",
   streng2: "stoping",
+  streng3: "stoping",
   valseverk: "stoping",
 };
 
