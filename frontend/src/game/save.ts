@@ -84,6 +84,7 @@ export function migrate(g: GameState): GameState {
   if (loose.celebrate === undefined) loose.celebrate = null;
   if (loose.decisionSeen === undefined) loose.decisionSeen = {};
   if (g.decisionFixed === undefined) g.decisionFixed = {};
+  if (g.landmarks === undefined) g.landmarks = { done: [], date: null, contractId: null };
   if (loose.gradeRecipes === undefined) loose.gradeRecipes = {};
   if (g.settings.powerDeal === undefined) {
     g.settings.powerDeal = "spot";

@@ -2857,3 +2857,26 @@ vente med den. Landemerker (store byggeprosjekter med ett nytt per dag) kommer i
 
 **Konto (KONTO.md):** stigen krever konto (regel 3 og 5: sammenlignbar og belønner virkelig tid), `stigen` i
 `ACCOUNT_FEATURES`; uten konto vises kortet med `NeedsAccount`. Titlene: som før.
+
+## B-174 Landemerker (2026-09-26)
+Status: gjelder
+Brukeren: se B-173 («ting å gjøre i 6 mnd.»). Landemerkene er den andre delen.
+
+**Endring:** 27 landemerker (`game/landmarks.ts`): parkbenker, kumlokk, fyrlykt, gangbru, kai, skole, sykehus, tunnel,
+stadion, vindpark, hengebru, operahus, skyskraper, plattform, oppskytningsrampe, høyhastighetsbane, modul til
+romstasjon og til slutt verdens lengste bru – hvert med én setning om hva stålet brukes til.
+- Det neste landemerket kommer som en egen forespørsel når en **ny virkelig dag** begynner (mobilens dato, `todayKey`),
+  og bare på nivået det hører til. Så varer samlingen i uker, selv om et spilldøgn går på 12 sekunder.
+- Forespørselen er på 1–10 døgns produksjon i standardkvalitet, 25 % over vanlig pris, og står til du svarer.
+- Levert: fagpoeng (5–150), omdømme +2, og det står i samlingen på kortet «Landemerker» på Verket. Går det ut eller blir
+  avslått, kommer det samme igjen en annen dag.
+- Ikke under den veiledede starten eller de første tre døgnene.
+- Mobilens dato kan stilles, men det gir bare vanlig kontraktspris og fagpoeng – ingen fordel på topplistene utover det.
+
+**Rettet samtidig:** kortet «Kobbertyver» (B-171) kunne koste 180 000 kr på verkstedet og ga en nybegynner konkurs i
+testspilleren. Det kommer nå først fra støperiet, og tyveriet koster det dobbelte av kameraene (ikke tredobbelt).
+Testspilleren velger forsiktig på de nye kortene.
+
+**Balanse:** Verksted 7, Støperi 25, Stålverk 67, Storverk 159. Nybegynneren 137,5, 0 konkurs.
+
+**Konto (KONTO.md):** nei, regel 1.

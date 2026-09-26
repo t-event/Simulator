@@ -52,6 +52,7 @@ import {
   wildcardUse,
 } from "./plant";
 import { newGradesAt, startRecipeGuide } from "./recipeGuide";
+import { landmarkHour } from "./landmarks";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
 import type { GameState, GradeId, MasteryId, PowerDeal, RoleId, ScrapId, Worker } from "./types";
 
@@ -944,6 +945,7 @@ export function hireTemps(g: GameState, days: number | null): PurchaseResult {
 /** Hver time: planlagt bytte av støping (B-102) og om konsernet kan åpnes (B-106) */
 function hourlyActions(g: GameState): void {
   runScheduledSwitch(g);
+  landmarkHour(g);
   directorHour(g);
   checkKonsernMilestones(g);
   checkLegends(g);

@@ -262,6 +262,7 @@ export function newGame(seed = Date.now()): GameState {
     researched: [],
     pendingDecision: null,
     decisionSeen: {},
+    landmarks: { done: [], date: null, contractId: null },
     sickUntilMin: 0,
     tempsUntilMin: 0,
     tempCrew: null,

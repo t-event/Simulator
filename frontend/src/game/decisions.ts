@@ -299,7 +299,8 @@ const MORE_MAKERS: Record<string, Maker> = {
     };
   },
   kobbertyveri: (g) => {
-    if (g.stage < 1) return null;
+    // Ikke før støperiet: på verkstedet kunne tyveriet ta hele kassa (B-174)
+    if (g.stage < 2) return null;
     const cost = 15_000 * (1 + g.stage) ** 2;
     return {
       id: "kobbertyveri",
@@ -307,7 +308,7 @@ const MORE_MAKERS: Record<string, Maker> = {
       text: `Politiet varsler om tyver som stjeler kobberkabler fra industriområder. Kameraer og vakthold koster ${fmtKr(cost)}.`,
       options: [
         { label: `Sett opp kameraer (${fmtKr(cost)})`, hint: "Trygt." },
-        { label: "Ta sjansen", hint: `Stjeler de kablene, kan reparasjonen koste ${fmtKr(cost * 3)}.` },
+        { label: "Ta sjansen", hint: `Stjeler de kablene, kan reparasjonen koste ${fmtKr(cost * 2)}.` },
       ],
       data: { cost },
     };
@@ -692,8 +693,8 @@ export function resolveDecision(g: GameState, option: number): void {
         addCost(g, "annet", n("cost"));
         log(g, "Kameraene er oppe. Tyvene holder seg unna.", "good");
       } else if (chance(g, 0.4)) {
-        addCost(g, "vedlikehold", n("cost") * 3);
-        log(g, `Tyver stjal kobberkabler i natt. Reparasjonen kostet ${fmtKr(n("cost") * 3)}.`, "bad");
+        addCost(g, "vedlikehold", n("cost") * 2);
+        log(g, `Tyver stjal kobberkabler i natt. Reparasjonen kostet ${fmtKr(n("cost") * 2)}.`, "bad");
       } else {
         log(g, "Tyvene gikk til et annet område denne gangen.", "info");
       }

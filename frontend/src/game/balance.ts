@@ -246,11 +246,21 @@ function botHour(g: GameState): void {
       kundebesok: 0,
       nestenulykke: 0,
       utkobling: 1,
+      // Kortene fra B-171: forsiktig, som en fornuftig spiller
+      firmafest: 1,
+      sponsor: 1,
+      soknad: 1,
+      pensjonist: 1,
+      kobbertyveri: 0,
+      studenter: 0,
+      video: 0,
+      utlandsordre: 1,
     };
     // Messa bare når det er god råd
     const affordable = g.cash > Number(d.data.cost ?? 0) * 4;
     safe.messe = affordable ? 0 : 1;
-    for (const id of ["kurs", "sykdom", "naboklage", "nestenulykke"]) if (!affordable) safe[id] = 1;
+    for (const id of ["kurs", "sykdom", "naboklage", "nestenulykke", "kobbertyveri", "video"])
+      if (!affordable) safe[id] = 1;
     safe.radgiver = affordable ? 0 : 2;
     resolveDecision(g, safe[d.id] ?? 1);
   }
