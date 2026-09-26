@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 114 – 2026-09-26: Sjæfen får tilbake storverket
+
+**Brukeren ba om:** at Sjæfen, som startet Sesong 1 på nytt før B-166, får fortsette der han var.
+
+**Gjort:** B-168. Det gamle spillet var overskrevet. Etter valg fra brukeren ble sesongspillet hans løftet på nett:
+storverket, konsernverdi 27,6 mill. som før, konkursen fjernet, forklaring i loggen. Appen henter det (versjon 487).
+
+**Testet:** raden på nett har de nye verdiene (nivå 4, kasse 27 551 659, lån 0, ikke konkurs, versjon 487).
+
+**Gjenstår:** at Sjæfen åpner spillet og ser at det er hentet (flyttefeiring «Storverk»).
+
+---
+
 ## Økt 113 – 2026-09-26: neste sesong starter av seg selv
 
 **Brukeren ba om:** at Sesong 2 starter automatisk når Sesong 1 er over, og at alle blir med over.
