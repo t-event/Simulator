@@ -225,6 +225,7 @@ export function newGame(seed = Date.now()): GameState {
       plannerSorts: true,
       autoBuyDays: 1.5,
       autoBuyCredit: false,
+      plannerSells: true,
       autoBuyMaxPerDay: null,
       autoSpot: false,
       rolling: true,
@@ -476,6 +477,25 @@ export function buyScrap(g: GameState, id: ScrapId, t: number, stats = computePl
   return { ok: true, message: `Kjøpte ${fmtT(amount)} ${type.name.toLowerCase()}${note}.` };
 }
 
+/** Hva skraphandleren betaler for skrap du selger (B-171): 60 % av prisen. Returskrap betales som tungt skrap */
+export const SCRAP_SELL_SHARE = 0.6;
+export function scrapSellPrice(g: GameState, id: ScrapId): number {
+  return scrapPrice(g, SCRAP_TYPES[id].buyable ? id : "tungt") * SCRAP_SELL_SHARE;
+}
+
+/** Selger skrap fra lageret til skraphandleren, f.eks. skrap ingen resept bruker og som tar plass (B-171) */
+export function sellScrap(g: GameState, id: ScrapId, t: number): PurchaseResult {
+  const stock = g.scrap[id];
+  const amount = Math.min(t, stock.t);
+  if (amount <= 0.001) return { ok: false, message: "Ingenting å selge." };
+  if (stock.radioactive) return { ok: false, message: "Skrapet kan være radioaktivt og kan ikke selges." };
+  const value = amount * scrapSellPrice(g, id);
+  stock.t -= amount;
+  if (stock.t < 1e-9) g.scrap[id] = emptyStock();
+  addIncome(g, "annet", value);
+  return { ok: true, message: `Solgte ${fmtT(amount)} ${SCRAP_TYPES[id].name.toLowerCase()} for ${fmtKr(value)}.` };
+}
+
 interface Mix {
   analysis: Analysis;
   expected: Analysis;
@@ -545,7 +565,40 @@ export function takeScrap(
       short = sizeT - Object.values(amounts).reduce((a, b) => a + b, 0);
     }
   }
+  // Skrapklasseren bytter inn skrap som er minst like rent (fosfor og sporelementer) når en type i resepten er tom,
+  // f.eks. returskrap som ikke kan kjøpes, i stedet for å la ovnen vente (B-171)
+  let substituted: ScrapId[] = [];
+  if (short > 1e-6 && grader && g.settings.graderStrict !== false) {
+    const empty = recipeIds.filter((id) => g.scrap[id].t - amounts[id] <= 1e-9);
+    const maxP = Math.max(0, ...empty.map((id) => SCRAP_TYPES[id].p));
+    const maxTramp = Math.max(0, ...empty.map((id) => SCRAP_TYPES[id].tramp));
+    const subs = SCRAP_IDS.filter(
+      (id) =>
+        !recipeIds.includes(id) &&
+        SCRAP_TYPES[id].p <= maxP &&
+        SCRAP_TYPES[id].tramp <= maxTramp &&
+        g.scrap[id].t > 1e-9 &&
+        !g.scrap[id].radioactive,
+    );
+    for (const id of subs) {
+      if (short <= 1e-9) break;
+      const take = Math.min(g.scrap[id].t, short);
+      amounts[id] += take;
+      short -= take;
+      substituted.push(id);
+    }
+    if (short > 1e-6) substituted = [];
+  }
   if (short > 1e-6) return null;
+  if (substituted.length && !dryRun && g.graderSubDay !== day(g)) {
+    g.graderSubDay = day(g);
+    const missing = recipeIds.filter((id) => g.scrap[id].t - amounts[id] <= 1e-9);
+    log(
+      g,
+      `Skrapklasseren brukte ${joinAnd(substituted.map((id) => SCRAP_TYPES[id].name.toLowerCase()))} i stedet for ${joinAnd(missing.map((id) => SCRAP_TYPES[id].name.toLowerCase()))}, som var tomt, så ovnen slapp å vente.`,
+      "info",
+    );
+  }
 
   const sorting = has(g, "sortering");
   const mix: Mix = {
@@ -2480,8 +2533,8 @@ function onHour(g: GameState, stats: PlantStats): void {
 }
 
 /**
- * Kjøper skrap etter resepten for et par døgns forbruk (planleggerens jobb, eller spillerens).
- * Planleggeren holder seg innenfor døgngrensen, og bruker bare kassekreditten hvis spilleren
+ * Kjøper skrap for et par døgns forbruk (planleggerens jobb, eller spillerens): etter reseptene til kvalitetene i
+ * ordrekøen (B-171). Planleggeren holder seg innenfor døgngrensen, og bruker bare kassekreditten hvis spilleren
  * har tillatt det; ellers lar den lønn og faste kostnader for ett døgn ligge igjen i kassa (B-027).
  */
 export function autoBuy(
@@ -2492,39 +2545,89 @@ export function autoBuy(
     cap: g.settings.autoBuyMaxPerDay,
   },
 ): void {
-  // Med flere kvaliteter samtidig kjøpes skrap etter alle ovnenes resepter (B-039)
-  const recipe = Object.fromEntries(SCRAP_IDS.map((id) => [id, 0])) as Record<ScrapId, number>;
-  for (let i = 0; i < g.furnaces.length; i++) {
-    const r = gradeRecipe(g, furnaceGrade(g, i));
-    const sum = SCRAP_IDS.reduce((a, id) => a + r[id], 0) || 1;
-    for (const id of SCRAP_IDS) recipe[id] += (r[id] / sum) * 100;
-  }
-  const recipeIds = SCRAP_IDS.filter((id) => recipe[id] > 0 && SCRAP_TYPES[id].buyable && scrapUnlocked(g, id));
-  const total = SCRAP_IDS.reduce((a, id) => a + recipe[id], 0);
-  if (!recipeIds.length || total <= 0) return;
-  // Hvorfor planleggeren ikke fikk kjøpt det resepten trenger, så spilleren kan se det (B-048)
-  const note = (text: string, id: ScrapId) =>
-    void (g.autoBuyNote = g.autoBuyNote ?? `${SCRAP_TYPES[id].name.toLowerCase()}: ${text}`);
   const need = Math.max(
     stats.units.reduce((a, u) => a + u.sizeT, 0) * 2,
     (stats.dailyProductT / stats.castYield) * 1.1 * g.settings.autoBuyDays,
   );
-  for (const id of recipeIds) {
-    const target = (need * recipe[id]) / total;
+  // Hvor mye av hver skraptype de neste døgnene trenger (B-171): kvalitetene i ordrekøen, i rekkefølge, til
+  // innkjøpet er dekket. Er køen kort, fylles resten med det ovnene kjører nå (med flere kvaliteter samtidig, B-039)
+  const demand = Object.fromEntries(SCRAP_IDS.map((id) => [id, 0])) as Record<ScrapId, number>;
+  const addGrade = (grade: GradeId, t: number) => {
+    const r = gradeRecipe(g, grade);
+    const sum = SCRAP_IDS.reduce((a, id) => a + r[id], 0) || 1;
+    for (const id of SCRAP_IDS) demand[id] += (t * r[id]) / sum;
+  };
+  let planned = 0;
+  for (const c of ordersToMake(g)) {
+    if (planned >= need) break;
+    const t = Math.min((c.tonnes - c.delivered) / Math.max(0.5, stats.castYield), need - planned);
+    addGrade(c.grade, t);
+    planned += t;
+  }
+  if (planned < need)
+    for (let i = 0; i < g.furnaces.length; i++) addGrade(furnaceGrade(g, i), (need - planned) / g.furnaces.length);
+  // Returskrap kan ikke kjøpes: det som mangler av det, kjøpes som de andre typene i blandingen
+  const buyableIds = SCRAP_IDS.filter((id) => demand[id] > 0 && SCRAP_TYPES[id].buyable && scrapUnlocked(g, id));
+  const buyableSum = buyableIds.reduce((a, id) => a + demand[id], 0);
+  const target = { ...demand };
+  for (const id of SCRAP_IDS) {
+    if (demand[id] <= 0 || buyableIds.includes(id)) continue;
+    const gap = Math.max(0, demand[id] - g.scrap[id].t);
+    if (buyableSum > 0) for (const b of buyableIds) target[b] += (gap * demand[b]) / buyableSum;
+  }
+  if (!buyableIds.length) return;
+  // Hvorfor planleggeren ikke fikk kjøpt det resepten trenger, så spilleren kan se det (B-048)
+  const note = (text: string, id: ScrapId) =>
+    void (g.autoBuyNote = g.autoBuyNote ?? `${SCRAP_TYPES[id].name.toLowerCase()}: ${text}`);
+  // Lageret fullt av skrap ingen resept i køen bruker? Planleggeren selger det, så det blir plass (B-171)
+  if (g.settings.plannerSells !== false) {
+    const missing = buyableIds.reduce(
+      (a, id) => a + (g.scrap[id].t < target[id] * 0.6 ? target[id] - g.scrap[id].t : 0),
+      0,
+    );
+    const free = stats.yardT - stats.yardUsed;
+    let toFree = missing - free;
+    if (toFree > stats.sizeT * 0.1) {
+      const sold: string[] = [];
+      let income = 0;
+      const surplus = SCRAP_IDS.map((id) => ({ id, t: g.scrap[id].t - (demand[id] > 0 ? target[id] * 1.5 : 0) }))
+        .filter((x) => x.t > stats.sizeT * 0.1 && !g.scrap[x.id].radioactive)
+        .sort((a, b) => (demand[a.id] > 0 ? 1 : 0) - (demand[b.id] > 0 ? 1 : 0) || b.t - a.t);
+      for (const x of surplus) {
+        if (toFree <= 0) break;
+        const t = Math.min(x.t, toFree);
+        const before = g.cash;
+        if (!sellScrap(g, x.id, t).ok) continue;
+        income += g.cash - before;
+        toFree -= t;
+        sold.push(`${fmtT(t)} ${SCRAP_TYPES[x.id].name.toLowerCase()}`);
+      }
+      if (sold.length)
+        log(
+          g,
+          `Planleggeren solgte ${joinAnd(sold)} som ingen resept i ordrekøen trenger, for å få plass til det som trengs (${fmtKr(income)}).`,
+          "info",
+        );
+    }
+  }
+  for (const id of buyableIds) {
+    const want = target[id];
     const stock = g.scrap[id].t;
-    if (stock >= target * 0.6) continue;
+    if (stock >= want * 0.6) continue;
     const s = computePlantStats(g);
     const reserve = stats.salaryPerDay + STAGES[g.stage].fixedPerDay;
     let money = opts.credit ? g.cash + creditLimit(g) * 0.9 : g.cash - reserve;
     if (opts.cap !== null) money = Math.min(money, opts.cap - (g.today.autoBuyKr ?? 0));
     const afford = Math.max(0, money / scrapPrice(g, id));
     const room = s.yardT - s.yardUsed;
-    const amount = Math.min(target - stock, afford, room);
+    const amount = Math.min(want - stock, afford, room);
     if (amount <= stats.sizeT * 0.1) {
-      if (target - stock > stats.sizeT * 0.1)
+      if (want - stock > stats.sizeT * 0.1)
         note(
           room <= stats.sizeT * 0.1
-            ? "skraplageret er fullt av annet skrap"
+            ? g.settings.plannerSells === false
+              ? "skraplageret er fullt av annet skrap (la planleggeren selge det under Marked → Skrap)"
+              : "skraplageret er fullt av skrap som trengs i ordrekøen"
             : opts.cap !== null && opts.cap - (g.today.autoBuyKr ?? 0) <= scrapPrice(g, id) * stats.sizeT * 0.1
               ? "døgngrensen for innkjøp er brukt opp"
               : opts.credit

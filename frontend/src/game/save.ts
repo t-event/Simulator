@@ -83,6 +83,7 @@ export function migrate(g: GameState): GameState {
   if (loose.pendingDecision === undefined) loose.pendingDecision = null;
   if (loose.celebrate === undefined) loose.celebrate = null;
   if (loose.decisionSeen === undefined) loose.decisionSeen = {};
+  if (g.decisionFixed === undefined) g.decisionFixed = {};
   if (loose.gradeRecipes === undefined) loose.gradeRecipes = {};
   if (g.settings.powerDeal === undefined) {
     g.settings.powerDeal = "spot";
@@ -118,6 +119,7 @@ export function migrate(g: GameState): GameState {
   if (g.courseSeats === undefined) g.courseSeats = null;
   if (g.pendingCastingSwitch === undefined) g.pendingCastingSwitch = null;
   if (g.switchWaitNoted === undefined) g.switchWaitNoted = false;
+  if (g.switchWaitDay === undefined) g.switchWaitDay = null;
   if (g.market.powerDryDays === undefined) g.market.powerDryDays = 0;
   if (g.konsern === undefined)
     g.konsern = { unlocked: false, plants: [], shared: [], nextId: 1, director: null, milestones: 0, legends: 0 };
@@ -137,6 +139,8 @@ export function migrate(g: GameState): GameState {
   if (g.furnaceType === "digel") g.furnaceType = "induksjon025";
   if (loose.lastCast === undefined) loose.lastCast = null;
   if (loose.autoBuyNote === undefined) loose.autoBuyNote = null;
+  if (g.graderSubDay === undefined) g.graderSubDay = -1;
+  if (g.settings.plannerSells === undefined) g.settings.plannerSells = true;
   if (g.settings.offerSort === undefined) g.settings.offerSort = "frist";
   // Rent nyskrap har lavere karbon fra B-043
   if (g.scrap.rent && g.scrap.rent.c > 0.06) g.scrap.rent.c = 0.06;

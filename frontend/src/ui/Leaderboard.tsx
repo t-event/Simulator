@@ -125,7 +125,11 @@ export function Leaderboard({
   const [scope, setScope] = useState<"sesong" | "alle">("sesong");
   const status = useSeasonStatus();
   const seasonId = scope === "sesong" ? (status?.current?.id ?? null) : null;
-  const [rows, setRows] = useState<BoardRow[] | null>(null);
+  // Radene huskes sammen med lista de hører til (B-171): bytter man liste, vises ikke tallene fra den forrige
+  const key = `${kind}:${seasonId ?? "alle"}`;
+  const [loaded, setLoaded] = useState<{ key: string; rows: BoardRow[]; at: number } | null>(null);
+  const rows = loaded && loaded.key === key ? loaded.rows : null;
+  const [loading, setLoading] = useState(false);
   const [myRank, setMyRank] = useState<number | null>(null);
   const [nickname, setNickname] = useState<string | null | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
@@ -139,17 +143,20 @@ export function Leaderboard({
         await Promise.resolve();
         if (!alive) return;
         setError(null);
+        setLoading(true);
         const [list, rank, profile] = await Promise.all([
           fetchLeaderboard(kind, seasonId),
           session ? fetchMyRank(kind, seasonId).catch(() => null) : Promise.resolve(null),
           session ? fetchProfile().catch(() => null) : Promise.resolve(null),
         ]);
         if (!alive) return;
-        setRows(list);
+        setLoaded({ key: `${kind}:${seasonId ?? "alle"}`, rows: list, at: Date.now() });
         setMyRank(rank);
         setNickname(profile ? profile.nickname : null);
       } catch (e) {
         if (alive) setError(e instanceof Error ? e.message : String(e));
+      } finally {
+        if (alive) setLoading(false);
       }
     })();
     return () => {
@@ -169,8 +176,14 @@ export function Leaderboard({
 
   if (!cloudConfigured()) return null;
 
+  // Knappen viser at den henter, og når lista sist ble hentet (B-171)
   const refresh = (
-    <button className="g-small" onClick={() => setTick((t) => t + 1)} aria-label="Oppdater topplista">
+    <button
+      className={`g-small g-board-reload${loading ? " is-loading" : ""}`}
+      onClick={() => setTick((t) => t + 1)}
+      aria-label="Oppdater topplista"
+      aria-busy={loading}
+    >
       ↻
     </button>
   );
@@ -262,6 +275,12 @@ export function Leaderboard({
             </li>
           ))}
         </ol>
+      )}
+      {rows && loaded && (
+        <p className="g-muted g-small-text">
+          Oppdatert kl.{" "}
+          {new Date(loaded.at).toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+        </p>
       )}
       {session && nickname && myRank !== null && !rows?.some((r) => r.is_me) && (
         <p className="g-muted g-small-text">Du er nr. {myRank}.</p>

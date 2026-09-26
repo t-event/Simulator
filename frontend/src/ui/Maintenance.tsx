@@ -71,9 +71,10 @@ export function Maintenance({
       </p>
       {f0.arc && (
         <p className="g-muted">
-          Lysbueovnen har to potter. Mens den ene er i bruk, murer murerne opp den andre med ny foring (ca.{" "}
-          {POT_REBUILD_DAYS} døgn med {MASONS_PER_POT} murere per potte; murerne jobber dagtid 07–15). Står reservepotta
-          klar, tar et bytte bare {swapHours} timer i stedet for {relineHours}.
+          {g.furnaces.length > 1 ? "Hver lysbueovn har sine egne to potter." : "Lysbueovnen har to potter."} Mens den
+          ene er i bruk, murer murerne opp den andre med ny foring (ca. {POT_REBUILD_DAYS} døgn med {MASONS_PER_POT}{" "}
+          murere per potte; murerne jobber dagtid 07–15). Står reservepotta klar, tar et bytte bare {swapHours} timer i
+          stedet for {relineHours}.
         </p>
       )}
       <p className={whoRelines ? "g-note" : "g-note g-warn"}>

@@ -160,8 +160,9 @@ export function SettingsSheet({
         <AccountCard api={api} onDone={onClose} />
         <h3 className="g-subhead">Lagring</h3>
         <p className="g-muted">
-          Spillet lagres automatisk i denne nettleseren, og på nett når du er logget inn. Safari kan slette lagrede data
-          for nettsider som ikke er brukt på en uke – logg inn, så ligger spillet trygt på nett.
+          Spillet lagres automatisk i denne nettleseren, og på nett når du er logget inn. Nettlesere kan slette lagrede
+          data – når du tømmer historikken, bruker privat modus eller ikke har åpnet siden på en stund. Logg inn, så
+          ligger spillet trygt på nett uansett nettleser og enhet.
         </p>
         <h3 className="g-subhead">Spill på mobilen</h3>
         <InstallTip />

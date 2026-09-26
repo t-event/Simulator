@@ -10,6 +10,7 @@ import {
   runScheduledSwitch,
   scheduleCastingSwitch,
   switchCashNeeded,
+  SWITCH_WAIT_DAYS,
   setPowerDeal,
   upgradeOptions,
 } from "./actions";
@@ -39,7 +40,7 @@ import {
 } from "./daily";
 import { applyWorldEvents, canJoinDirectly, joinSeason, SEASON_BONUS_FP, worldFactor, applySeasonTwist } from "./world";
 import { dealPrice, energyPrice, productPrice } from "./plant";
-import { scrapPrice, spotQuota } from "./engine";
+import { autoBuy, scrapPrice, scrapSellPrice, sellScrap, spotQuota, takeScrap } from "./engine";
 import {
   buySister,
   checkKonsernMilestones,
@@ -72,7 +73,7 @@ import {
 import { bonusGap, computePlantStats, liftMorale, moraleNormal, supportAdvice } from "./plant";
 import { RESEARCH, researchOptions } from "./research";
 import { parseSave } from "./save";
-import { resolveDecision } from "./decisions";
+import { makeDecision, resolveDecision } from "./decisions";
 import {
   apprenticeExams,
   APPRENTICE_DAYS,
@@ -336,6 +337,22 @@ test("Planlagt bytte venter til det er penger til drift etterpå (B-170)", () =>
   g.cash = price + 4_000_000;
   runScheduledSwitch(g);
   assert(g.castingType === "streng1" && g.pendingCastingSwitch === null, `støpingen er ${g.castingType}`);
+  // B-171: kommer ikke pengene, avbestilles byttet etter noen døgn, så forespørslene kommer igjen
+  const h = newGame(4);
+  h.stage = 3;
+  h.castingType = "blokk";
+  h.researched.push("strengstoping");
+  h.contracts = h.contracts.filter((c) => c.status !== "aktiv");
+  h.cash = 1_000_000;
+  scheduleCastingSwitch(h, "streng1");
+  runScheduledSwitch(h);
+  assert(h.pendingCastingSwitch === "streng1" && h.switchWaitDay !== null, "byttet venter ikke på penger");
+  h.minute += SWITCH_WAIT_DAYS * 1440;
+  runScheduledSwitch(h);
+  assert(
+    h.pendingCastingSwitch === null && h.log.some((l) => l.text.includes("avbestilt")),
+    "byttet ble ikke avbestilt",
+  );
 });
 
 test("Strengstøpemaskin nr. 2 dobler støpekapasiteten", () => {
@@ -654,6 +671,84 @@ test("Stålmilepæler (B-150): titler etter sluttmålet, fagpoeng, flere verk og
   assert(g.konsern.legends === 3 && titleOf(g) === "Stålkonge", `fikk ${titleOf(g)}`);
   assert(modernizeMax(g) === 5 && maxSisters(g) === sisters + 2 && kompleksOpen(g), "opplåsingen stemmer ikke");
   assert(buySister(g, "kompleks").ok && g.konsern.plants.some((p) => p.type === "kompleks"), "kjøp av kompleks");
+});
+
+test("Skrapinnkjøperen selger skrap ingen resept trenger når lageret er fullt (B-171)", () => {
+  const g = newGame(81);
+  g.stage = 3;
+  const stats = computePlantStats(g);
+  g.contracts = g.contracts.filter((c) => c.status !== "aktiv");
+  // Lageret fullt av tungt skrap; resepten vil bare ha blandet skrap
+  for (const id of Object.keys(g.scrap) as (keyof typeof g.scrap)[]) g.scrap[id].t = 0;
+  g.scrap.tungt = { ...g.scrap.tungt, t: stats.yardT, p: 0.02, tramp: 0.16, c: 0.2, dirt: 0.03, radioactive: false };
+  g.recipe = { rent: 0, spon: 0, retur: 0, tungt: 0, rajern: 0, blandet: 100, shredder: 0 };
+  g.gradeRecipes[g.targetGrade] = { ...g.recipe };
+  for (const f of g.furnaces) f.grade = null;
+  g.cash = 1e9;
+  autoBuy(g, computePlantStats(g), { credit: false, cap: null });
+  assert(g.scrap.tungt.t < stats.yardT, "solgte ikke noe tungt skrap");
+  assert(g.scrap.blandet.t > 0, `kjøpte ikke blandet skrap (${g.autoBuyNote})`);
+  assert(
+    g.log.some((l) => l.text.includes("Planleggeren solgte")),
+    "ingen beskjed om salget",
+  );
+  // Uten lov til å selge står det fast, med en forklaring
+  const h = newGame(81);
+  h.stage = 3;
+  for (const id of Object.keys(h.scrap) as (keyof typeof h.scrap)[]) h.scrap[id].t = 0;
+  h.scrap.tungt.t = stats.yardT;
+  h.recipe = { ...g.recipe };
+  h.gradeRecipes[h.targetGrade] = { ...g.recipe };
+  h.settings.plannerSells = false;
+  h.cash = 1e9;
+  autoBuy(h, computePlantStats(h), { credit: false, cap: null });
+  assert(h.scrap.tungt.t === stats.yardT && !!h.autoBuyNote?.includes("selge"), `note: ${h.autoBuyNote}`);
+  // Selg for hånd: 60 % av prisen
+  const cash = h.cash;
+  assert(sellScrap(h, "tungt", 100).ok, "salg feilet");
+  assert(Math.abs(h.cash - cash - 100 * scrapSellPrice(h, "tungt")) < 1, "feil pris ved salg");
+});
+
+test("Skrapklasseren bruker renere skrap når returskrapet er tomt (B-171)", () => {
+  const g = newGame(82);
+  g.stage = 2;
+  g.workers.push({ ...makeCandidate(g, "klasser"), hiredDay: 1 });
+  for (const id of Object.keys(g.scrap) as (keyof typeof g.scrap)[]) g.scrap[id].t = 0;
+  g.scrap.tungt.t = 8;
+  g.scrap.rent = { ...g.scrap.rent, t: 50, p: 0.012, tramp: 0.05, c: 0.06, dirt: 0.01, radioactive: false };
+  const recipe = { rent: 0, spon: 0, retur: 20, tungt: 80, rajern: 0, blandet: 0, shredder: 0 };
+  // Tungt skrap til 80 %, men returskrapet mangler: rent skrap (renere) fyller inn
+  const mix = takeScrap(g, 10, false, recipe);
+  assert(mix !== null, "ovnen ble stående og vente på returskrap");
+  assert(g.scrap.rent.t < 50, "brukte ikke rent skrap");
+  assert(
+    g.log.some((l) => l.text.includes("Skrapklasseren brukte")),
+    "ingen beskjed om byttet",
+  );
+});
+
+test("Hendelser (B-171): messe ikke med omdømme på topp, naboene klager ikke igjen etter skjermen, nye kort", () => {
+  const g = newGame(83);
+  g.stage = 3;
+  g.reputation = 95;
+  assert(makeDecision(g, "messe") === null, "messe med omdømme 95");
+  g.reputation = 60;
+  assert(makeDecision(g, "messe") !== null, "ingen messe med omdømme 60");
+  const d = makeDecision(g, "naboklage")!;
+  g.pendingDecision = { ...d, resumeSpeed: 1 };
+  resolveDecision(g, 0);
+  assert(makeDecision(g, "naboklage") === null, "naboene klaget igjen på samme nivå");
+  g.stage = 4;
+  assert(makeDecision(g, "naboklage") !== null, "naboene klager aldri igjen, heller ikke på et større verk");
+  for (let i = 0; i < 6; i++) g.workers.push({ ...makeCandidate(g, "ovn"), hiredDay: 1 });
+  // Den store utlandsordren kommer bare når verket produserer noe
+  assert(makeDecision(g, "utlandsordre") === null, "utlandsordre uten produksjon");
+  for (const id of ["firmafest", "sponsor", "soknad", "kobbertyveri", "studenter", "video"]) {
+    const card = makeDecision(g, id);
+    assert(!!card && card.options.length >= 2, `kortet ${id} mangler`);
+    g.pendingDecision = { ...card!, resumeSpeed: 1 };
+    resolveDecision(g, 0);
+  }
 });
 
 test("Stålkompleks i stedet for et lite verk når konsernet er fullt (B-170)", () => {

@@ -5,6 +5,25 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 117 – 2026-09-26: skrapinnkjøperen, hendelser og småfeil
+
+**Brukeren ba om:** fjerne omdømme-topplista, sjekke Sjæfen på topplista, skyen som gjør toppmenyen høyere, at
+skrapinnkjøperen er ubrukelig (fra en spiller), reservepotte til alle ovner, og i neste melding en lang liste:
+returskrap, varsellinja, Safari-teksten, flere hendelser, ligaer, innhold for hele sesongen, nytt kontrollrom,
+topplista, salgsdirektøren, nettselskapet, Sjæfens «alle tider», «flytt til et større sted» på storverket.
+
+**Gjort:** B-171 (første pulje): skrapinnkjøperen, skrapklasseren, planlagt bytte som avbestilles, hendelser,
+topplista, reservepotte-tekster, skyen, Safari-teksten, storverk-teksten, salgsmerket. Svar om Sjæfen.
+
+**Testet:** tsc, lint, tester (nye for innkjøper/salg, skrapklasser, avbestilt bytte, hendelser), validate, balanse
+(exit 0), build. Playwright 390 og 320 px: salgsbryter og «Selg alt», topplista ved bytte av liste, ingen horisontal
+scrolling, ingen feil. Sjæfens opplasting simulert i databasen (rullet tilbake).
+
+**Gjenstår (neste puljer):** varsellinja, ligaene, salgsdirektøren kan oppgraderes, innhold for hele sesongen, nytt
+kontrollrom.
+
+---
+
 ## Økt 116 – 2026-09-26: de små tingene
 
 **Brukeren ba om:** «Ta alle de små tingene»: råd om stålkomplekser, ansette til plassene avløserne fyller, «koblet til

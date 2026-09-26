@@ -314,6 +314,8 @@ export function dailyRunningCost(g: GameState): number {
 
 /** Døgn med drift et planlagt bytte av støping skal la være igjen i kassa (B-170): produksjonen øker kraftig etterpå */
 export const SWITCH_BUFFER_DAYS = 3;
+/** Døgn et planlagt bytte kan vente på penger før det avbestilles (B-171) */
+export const SWITCH_WAIT_DAYS = 5;
 
 /**
  * Hva kassa må ha før et bytte av støping planlegges (B-170): prisen pluss noen døgns drift. Planlegges byttet før,
@@ -491,6 +493,7 @@ export function fpDeal(g: GameState): { fp: number; price: number; reason: strin
 export function scheduleCastingSwitch(g: GameState, id: string | null): PurchaseResult {
   g.pendingCastingSwitch = id;
   g.switchWaitNoted = false;
+  g.switchWaitDay = null;
   if (!id) return { ok: true, message: "Byttet er avbestilt." };
   const c = CASTINGS.find((x) => x.id === id);
   log(
@@ -510,15 +513,27 @@ export function runScheduledSwitch(g: GameState): void {
     g.pendingCastingSwitch = null;
     return;
   }
-  if (!option.available) return;
+  // Ordrene på det gamle produktet er ikke levert ennå, eller noe annet enn penger står i veien
+  if (!option.available && option.reason !== "For lite penger") return;
   // Ordrene er levert, men byttet venter til det er penger til drift etterpå, ellers stopper verket (B-170)
   const need = switchCashNeeded(g, option.price);
   if (g.cash < need) {
     if (!g.switchWaitNoted) {
       g.switchWaitNoted = true;
+      g.switchWaitDay = day(g);
       log(
         g,
-        `Ordrene er levert, men ${option.name.toLowerCase()} kjøpes først når det er ${fmtKr(need)} i kassa, så det er penger til skrap og lønn etterpå. Nye forespørsler på det gamle produktet er fortsatt stoppet.`,
+        `Ordrene er levert, men ${option.name.toLowerCase()} kjøpes først når det er ${fmtKr(need)} i kassa, så det er penger til skrap og lønn etterpå. Nye forespørsler på det gamle produktet er stoppet imens – kommer ikke pengene innen ${SWITCH_WAIT_DAYS} døgn, avbestilles byttet.`,
+        "info",
+      );
+    } else if (day(g) - (g.switchWaitDay ?? day(g)) >= SWITCH_WAIT_DAYS) {
+      // Uten nye ordrer kommer pengene kanskje aldri (B-171): avbestill, så forespørslene kommer igjen
+      g.pendingCastingSwitch = null;
+      g.switchWaitNoted = false;
+      g.switchWaitDay = null;
+      log(
+        g,
+        `Byttet til ${option.name.toLowerCase()} er avbestilt: pengene kom ikke på ${SWITCH_WAIT_DAYS} døgn. Nå kommer forespørslene på det gamle produktet igjen. Planlegg byttet på nytt når du har ca. ${fmtKr(need)}.`,
         "info",
       );
     }
@@ -526,6 +541,7 @@ export function runScheduledSwitch(g: GameState): void {
   }
   g.pendingCastingSwitch = null;
   g.switchWaitNoted = false;
+  g.switchWaitDay = null;
   const res = buyUpgrade(g, id);
   if (res.ok)
     log(g, `Ordrene er levert – ${option.name.toLowerCase()} er kjøpt og satt i drift, som planlagt.`, "good");

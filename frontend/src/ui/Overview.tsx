@@ -123,7 +123,7 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
     out.push({ text: "Ferdigvarelageret er fullt. Selg partier på spot under Salg.", view: "salg", sub: "lager" });
   if (stats.furnace.arc && g.furnaces.some((f) => f.spareProgress < 1) && !g.workers.some((w) => w.role === "murer"))
     out.push({
-      text: "Reservepotta til lysbueovnen blir ikke murt opp. Ansett murere, ellers må foringen mures om inne i ovnen.",
+      text: "Reservepottene til lysbueovnene blir ikke murt opp. Ansett murere (to per ovn), ellers må foringen mures om inne i ovnen.",
       view: "folk",
     });
   if (g.furnaces.some((f) => f.wear > 0.8 && !f.relineRequested))

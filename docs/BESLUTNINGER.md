@@ -2753,3 +2753,49 @@ flaskehalsen på alle nivåer, så den er ikke endret. I stedet:
 **Balanse:** Verksted 8, Støperi 23, Stålverk 66, Storverk 137 (som før). Nybegynneren 152,5 (var 184), 0 konkurs.
 
 **Konto (KONTO.md):** 1, 2 og 4 nei (regel 1). 3 ja, en del av topplista (regel 3).
+
+## B-171 Skrapinnkjøperen, skrapklasseren, hendelser og småfeil (2026-09-26)
+Status: gjelder
+Brukeren (og spillere): «Han skrapinnkjøperen var jo ubrukelig», «Venter mye på returskrap», «Får ofte de samme
+popupsene … messer med 100 i omdømme», «Naboene klager veldig ofte», «Nettselskapet ringer for ofte», «Toppliste
+omdømme er ikke vits», reservepotte bare til ovn 1?, skyen gjør toppmenyen høyere, tekster om Safari og «flytt til et
+større sted» på storverket, oppdater-knappen og gamle tall på topplista, salgsmerket med salgsdirektør.
+
+**Skrapinnkjøperen (planleggeren):** i et ekte spill var skraplageret (6 000 t) nesten fullt av skrap den gjeldende
+resepten ikke brukte (1 300 t tungt skrap ingen resept brukte, 1 400 t returskrap, 1 500 t shredder), så planleggeren
+fikk ikke plass til det som trengtes, og kjøpte bare for kvaliteten som ble kjørt nå. Nå:
+- Den kjøper etter **ordrekøen**: kvalitetene i køen, i rekkefølge, til innkjøpet for de neste døgnene er dekket.
+- Det som mangler av returskrap (kan ikke kjøpes), kjøpes som de andre typene i blandingen.
+- Er lageret for fullt, **selger** den skrap ingen resept i køen trenger, til skraphandleren for 60 % av prisen
+  (returskrap som tungt skrap), med en linje i loggen. Kan slås av under Marked → Skrap («Planleggeren kan selge …»).
+- Spilleren kan selge selv: «Selg alt» når man trykker på en skraptype.
+
+**Skrapklasseren:** når en type i resepten er tom (oftest returskrap), bytter den inn skrap som er minst like rent
+(fosfor og sporelementer) i stedet for å la ovnen vente. Loggen sier fra én gang per døgn (`graderSubDay`).
+
+**Planlagt bytte av støping (B-170):** venter byttet på penger i 5 døgn (`SWITCH_WAIT_DAYS`, `switchWaitDay`),
+avbestilles det, så forespørslene på det gamle produktet kommer igjen. Ellers kunne verket stå uten ordrer for alltid
+(nybegynneren gikk konkurs slik da pengene gikk til en ovn). Nybegynneren kjøper ikke annet mens et bytte er planlagt.
+
+**Hendelser:** åtte nye kort (sommerfest, idrettslaget, innovasjonsmidler, erfaren fagarbeider, kobbertyver,
+fagskolebesøk, video på nett, stor ordre fra utlandet). Lengre pause for nettselskapet (50 døgn), naboklager (60),
+messe (50), avis og tilsyn (40). Messa kommer ikke med omdømme 90 eller mer. Etter støyskjerm og filter klager naboene
+ikke igjen før verket flytter til et større nivå (`decisionFixed`).
+
+**Småfeil:**
+- Topplista: «Omdømme» er fjernet (nesten alle har 100). Lista viser ikke tallene fra forrige liste når man bytter,
+  oppdater-knappen snurrer mens den henter, og «Oppdatert kl. …» står under lista.
+- Reservepotter: motoren hadde én per lysbueovn hele tida (sjekket i spillene på nett), men tekstene sa «lysbueovnen
+  har to potter» og «den ene potta». Tekstene sier nå at hver lysbueovn har sine egne.
+- Skyen i toppfeltet blinker mens den lagrer i stedet for å bli «☁…», så klokka ikke brytes til to linjer.
+- Lagring i ⚙️ og kontokortet nevner ikke bare Safari.
+- På storverket står det ikke «flytt til et større sted».
+- Salg-merket nederst vises ikke når salgsdirektøren signerer.
+
+**Sjæfen:** «alle tider» sto hele tida (27,6 mill., 5. plass) – rekordene går aldri ned. Simulert opplasting av det
+rettede sesongspillet: ikke flagget, 27,6 mill. og storverk dag 179 i sesongen.
+
+**Balanse:** Verksted 8, Støperi 29, Stålverk 71, Storverk 151 (var 8/23/66/137; innenfor målene). Nybegynneren 142,5
+(var 152,5), 0 konkurs. Den flinke testspilleren er litt tregere fordi byttet av støping og skrapet går annerledes.
+
+**Konto (KONTO.md):** nei, regel 1.

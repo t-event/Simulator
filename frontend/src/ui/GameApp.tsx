@@ -660,9 +660,13 @@ export function GameApp() {
                 (stats.shifts === 0 ||
                   stats.shifts < staffing(g, true).shifts ||
                   (g.stage >= 2 && stats.shifts < 3 && g.workers.length < STAGES[g.stage].staffCap));
+              // Signerer salgsdirektøren for deg, trenger ikke Salg et tall (B-171)
+              const director = !!g.konsern?.director?.active;
               const badge =
                 v.id === "salg"
-                  ? g.contracts.filter((c) => c.status === "tilbud").length
+                  ? director
+                    ? 0
+                    : g.contracts.filter((c) => c.status === "tilbud").length
                   : v.id === "forskning"
                     ? researchOptions(g).filter((r) => r.available).length + masteryReady(g)
                     : 0;

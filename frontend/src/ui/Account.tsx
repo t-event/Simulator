@@ -75,7 +75,7 @@ export function LoggedOutNotice({ onLogin }: { onLogin: () => void }) {
             <p>
               Innloggingen ble borte her på enheten – serveren logget deg ikke ut.{" "}
               {rememberPrefs().remember
-                ? "Det skjer når nettleserdata slettes, eller når spillet åpnes et annet sted: Safari og appen på hjemskjermen har hver sin innlogging."
+                ? "Det skjer når nettleserdata slettes, eller når spillet åpnes et annet sted: nettleseren og appen på hjemskjermen har hver sin innlogging."
                 : "«Husk meg på denne enheten» var ikke på, så innloggingen ble slettet da appen ble lukket."}
             </p>
             <p>Spillet er trygt på kontoen. Logg inn igjen med «Husk meg» på, så holder du deg innlogget.</p>
@@ -179,10 +179,11 @@ export function CloudDot() {
           : s.kind === "conflict"
             ? "Spillet er lagret fra en annen enhet – henter det nyeste"
             : `Lagring på nett feilet: ${s.message}`;
+  // Samme bredde mens den lagrer (B-171): «☁…» gjorde toppraden bredere, og klokka brøt til to linjer
   return (
     <em className={`g-cloud is-${s.kind}`} title={text} aria-label={text}>
       {" "}
-      ☁{s.kind === "saved" ? "" : s.kind === "saving" ? "…" : "!"}
+      ☁{s.kind === "saved" || s.kind === "saving" ? "" : "!"}
     </em>
   );
 }
