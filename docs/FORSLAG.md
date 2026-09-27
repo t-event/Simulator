@@ -6,7 +6,11 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
-- Ingen åpne spørsmål om UI akkurat nå. UI-1a (B-191) er merget; neste er UI-1b (app-skallet).
+- **UI-1b (B-192) – varsellinja på mobil:** toppfeltet er 117 px (fra 133). Målet i UI.md var ≤ 88 px, men det krever
+  at varsellinja slutter å være en fast rad og varsler kommer som en kort toast under toppfeltet (samles i bjella).
+  Det gjør om B-116 (varsler skal aldri ligge oppå noe). Alternativ: flytte hele varsellinja ned over menyen nederst
+  (toppfeltet ca. 76 px, like mye plass totalt). Eierens valg – til da står B-116.
+- UI-1b er bygget og vises med skjermbilder før merge.
 
 ## Venter
 

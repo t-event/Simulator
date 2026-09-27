@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 130 – 2026-09-27: UI-1b – app-skallet
+
+**Brukeren ba om:** «Merge» for UI-1a (PR #138, publiseringen grønn), så «Fortsett» – neste steg i planen, UI-1b.
+
+**Gjort:** B-192. PC-skall fra 900 px med sidemeny (Konsern som eget punkt når det er åpnet) og topplinje på én rad;
+innholdet scroller i `.g-main` på alle størrelser. Underfanene i Verket øverst, styrt fra `GameApp`
+(`ui/verketTabs.ts`). Mobilmenyen med ikoner; nøkkeltallene som ikon + tall (133 → 117 px). Fagbok, varsler,
+toppliste og innstillinger som ark fra høyre på PC. Varsellinja står etter B-116; spørsmålet om toast er lagt i
+FORSLAG. Endringsloggen, UI.md, CLAUDE.md.
+
+**Testet:** tsc, lint, `npm test`, balanse (exit 0), build; Playwright på 7 størrelser før/etter, Konsern-navigasjon,
+ark fra høyre, nytt spill med veiledningen (320 og 1 366).
+
+**Gjenstår:** eierens svar på skjermbildene og om varsellinja på mobil (FORSLAG). Deretter UI-2a (Oversikt).
+
+---
+
 ## Økt 129 – 2026-09-27: UI-1a – tokens, skrift, ikoner og ett kontokort
 
 **Brukeren ba om:** UI-fase 1-valgene (egen liten skrift for overskrifter og tall, Lucide, ett samlet kontokort,

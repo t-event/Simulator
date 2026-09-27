@@ -143,7 +143,7 @@ export function Handbook({
   };
 
   return (
-    <div className="g-modal" role="dialog" aria-modal="true" aria-label="Fagboka" onClick={onClose}>
+    <div className="g-modal g-side-sheet" role="dialog" aria-modal="true" aria-label="Fagboka" onClick={onClose}>
       <div className="g-modal-card" onClick={(e) => e.stopPropagation()}>
         <header className="g-card-head">
           <h2>Fagboka</h2>

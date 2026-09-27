@@ -15,6 +15,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 192,
+    date: "2026-09-27",
+    title: "Ny meny på PC og mer plass på mobilen",
+    items: [
+      "På PC står menyen til venstre, og Konsern har fått sitt eget punkt der når konsernet er åpnet.",
+      "Toppen på PC er én smal rad med tall, varsler og knapper – mer plass til selve verket.",
+      "Oversikt, Anlegg og Økonomi står nå øverst på Verket, så du slipper å scrolle forbi bildet.",
+      "Menyen nederst på mobilen har fått ikoner, og tallene øverst tar mindre plass.",
+      "Fagboka, varslene, topplista og innstillingene åpnes fra høyre på PC, så du ser spillet bak.",
+    ],
+  },
+  {
     b: 191,
     date: "2026-09-27",
     title: "Et ryddigere utseende – første steg",

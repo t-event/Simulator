@@ -148,7 +148,8 @@ frontend/src/
     scrapIncome.ts Skraplagerets inntekt i ekte tid – speiler SQL-en i 029 (B-188); scrapTests.ts viser at fart ikke hjelper
     tests.ts     Tester uten nett (falsk tjeneste)
   ui/          Spillets skjermer (mobil først) og kontrollrommet
-    Overview.tsx Verket med underfanene Oversikt, Anlegg, Økonomi (og Konsern)   Recipe.tsx  Resepten på Marked
+    Overview.tsx Verket med underfanene Oversikt, Anlegg, Økonomi (og Konsern; valget i verketTabs.ts/GameApp)
+    Recipe.tsx  Resepten på Marked
     Agreements.tsx Rammeavtaler under Salg   AutoToggle.tsx  Brytere for automatikk (låst til den er forsket fram)
     views.ts     Fanene og når de låses opp   Upgrades.tsx, stations.ts  Utstyr per sted i anlegget
     ResearchPage.tsx  Forskning-fanen   Settings.tsx  ⚙️ innstillinger og banken (på Verket → Økonomi)
@@ -194,8 +195,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - «Ingen horisontal scrolling» er ikke nok i toppfeltet: sjekk også at knapper og tekst ikke avkortes
   (`scrollWidth > clientWidth`) eller havner utenfor skjermen, på 320 px bredde. Safari på iPhone har bredere
   skrift enn Chromium, så la det være litt luft (B-134).
-- På mobil (under 760 px) scroller bare `.g-main`, ikke vinduet (B-137). I Playwright: scroll med
+- Bare `.g-main` scroller, ikke vinduet – på mobil (B-137) og nå også på PC (B-192). I Playwright: scroll med
   `document.querySelector(".g-main").scrollBy(...)`. Fingersveip (`synthesizeScrollGesture`) virker ikke uten skjerm.
+- **To skall** (B-192): under 900 px mobil (meny nederst), fra 900 px PC (sidemeny, topplinje). Konsern er eget punkt i
+  sidemenyen på PC (`.g-nav-pc`) og underfane på mobil. Underfanen i Verket står i `GameApp` (`ui/verketTabs.ts`).
 - Ark (`.g-modal`) som åpnes fra innhold inne i `.g-main`, må pakkes i `<Portal>` (B-152). Ellers klipper Safari på
   iPhone arket til innholdet, og det kan ikke scrolles (skjedde med «Pynt verket»).
 - Skjermbilder med `fullPage: true` viser faste menyer midt på siden; det er
