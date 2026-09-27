@@ -293,6 +293,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   ikke flyttes til konsernkassa og teller ikke som penger på bok. Skal migreres når sluttspillet er rebalansert.
 - **Døgnproduksjon og valseverket** (B-217): `stats.dailyProductT` er alt verket lager (emner og armering). Armering er
   begrenset av valseverket (`stats.rolledDailyT`); bruk `productCapT(stats, vare)` når noe gjelder én vare.
+- **Skrapvarsel** (B-219): varsler i grensesnittet bruker `scrapAlert` (neste charge står fast), ikke `scrapShort` (en
+  type i resepten er under én charge – ovnen fyller da opp med annet). Ellers varsles det om returskrap som ikke kan kjøpes.
 - **Anbud og inntekt** (B-189) avgjøres «lat» av `world_status()` → `world_tick()`. Test livsløpet med midlertidige
   testkontoer i en DO-blokk som ender med `raise exception`; sett `closes_at` bakover for å avgjøre et anbud.
 - **Serveren endrer et lagret spill** (B-211): øk alltid `state.serverEdit` (og sett `device` til `'server'`). `save_game()`

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { PRODUCTS, SCRAP_IDS, SCRAP_TYPES, stageRef } from "../game/data";
-import { buyScrap, SCRAP_SELL_SHARE, scrapPrice, scrapSellPrice, scrapShort, sellScrap } from "../game/engine";
+import { buyScrap, SCRAP_SELL_SHARE, scrapPrice, scrapSellPrice, sellScrap, scrapAlert } from "../game/engine";
 import { energyPrice, hasPlanner, plannerOrders, productPrice, type PlantStats } from "../game/plant";
 import { PowerCard } from "./Power";
 import { auto, automationUnlocked, researchForScrap, scrapUnlocked } from "../game/research";
@@ -88,7 +88,7 @@ export function Market({ g, stats, act, openTab }: Props & { openTab?: string })
   const electric = stats.furnace.fuel === "strøm" && g.stage >= 1;
   const open = SCRAP_IDS.filter((id) => scrapUnlocked(g, id));
   // Det resepten trenger til neste charge, men som mangler på lageret (B-049)
-  const short = scrapShort(g, stats);
+  const short = scrapAlert(g, stats);
   // Låste skraptyper gruppert etter forskningen som låser dem opp
   const locked = new Map<string, ScrapId[]>();
   for (const id of SCRAP_IDS.filter((x) => !scrapUnlocked(g, x))) {

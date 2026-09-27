@@ -3943,3 +3943,25 @@ Brukeren: «Landemerker boksen bør ligge sammen med dagens oppdrag. Også bør 
 - **Rettet samtidig (følge av B-217):** landemerket fikk størrelse etter hele døgnproduksjonen, også når varen er
   armering. Nå brukes `productCapT` (valseverket for armering), som før B-217.
 - Konto: nei (samme funksjon som før, bare flyttet). Ny test i `game/tests.ts`.
+
+## B-219 Holdeknappen uten tekstmarkering, skrapvarsel bare når ovnen står fast, Granes Hall of Fame tilbake (2026-09-27)
+Status: gjelder
+Brukeren: «Når man holder Knappen nederst i kontrollrommet begynner mobilen å prøver å kopiere teksten», «Hall of fame
+til [Grane] skal jo være rundt 8500 mrd. men det er jo ikke det han faktisk skal ha på sin bruker i sesongen nå» og «Jeg
+får ofte opp at skrap mangler selv om at jeg har planlegger».
+- **Kontrollrommet:** CSS-en (`user-select: none`, `-webkit-touch-callout: none`) sto bare på knappen og rommet, og
+  Safari på iPhone starter likevel markering og «Kopier» ved langt trykk. Nå: samme CSS på alt inne i kontrollrommet,
+  en vanlig (ikke passiv) `touchstart`-lytter som stopper standardhandlingen på holdeknappen og slaggklumpene,
+  `selectstart` og `contextmenu` stoppes i hele rommet, og en markering fjernes når knappen trykkes. Knappene styres
+  av pekerhendelsene som før (sjekket i Playwright: holdt nede → på, sluppet → av).
+- **Skrapvarselet:** `scrapShort` sa «mangler skrap» så snart én type i resepten var under én charge – også når ovnen
+  fyller opp med de andre typene, og når typen ikke kan kjøpes (returskrap i resepten til høykarbon, premium og enkel).
+  Ny `scrapAlert`: varsler bare når neste charge i en ovn faktisk står fast (tørrkjøring av `takeScrap`). Med
+  planlegger som kjøper inn gis ellers ingen varsel (får den ikke kjøpt, vises det som før med «!» på Marked). Uten
+  planlegger vises typene som mangler og kan kjøpes. Brukes av produksjonslinja, skrapkortet og Skrap-fanen på Marked.
+  `scrapShort` står for forklaringen når ovnen står og for reseptguiden. Merk også B-217: planleggeren kjøpte for et
+  par døgn etter `dailyProductT`, som var en firedel av det store verk bruker – det er rettet der.
+- **Grane:** eieren godkjente å legge tilbake Hall of Fame-rekordene (dry-run i B-217). `supabase/038_granes_rekorder.sql`
+  endrer bare rekordraden (konsernverdi 8 562,6 mrd. og kasse 8 285,9 mrd. dag 2 190, storverk og ferdig dag 610,
+  omdømme 100). Spillet, kassa (11,29 mrd.) og sesongen er ikke rørt. Kontroll: Grane er nr. 1 på «Alle tider» med
+  8 563 mrd.

@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 219,
+    date: "2026-09-27",
+    title: "Roligere skrapvarsel og holdeknapp uten kopiering",
+    items: [
+      "Når du holder knappen i kontrollrommet, prøver ikke mobilen lenger å markere eller kopiere teksten.",
+      "«Mangler skrap» vises bare når ovnen faktisk ikke kan starte neste charge. Mangler én skraptype, fyller ovnen opp med de andre – og med planlegger kjøper den inn det som trengs.",
+    ],
+  },
+  {
     b: 218,
     date: "2026-09-27",
     title: "Landemerker på Mål, uten frist",

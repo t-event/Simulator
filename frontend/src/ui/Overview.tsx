@@ -4,7 +4,7 @@ import { Maintenance } from "./Maintenance";
 import { RecipeCard } from "./Recipe";
 import { auto } from "../game/research";
 import { GRADE_IDS, GRADES, PRODUCTS, SCRAP_TYPES, STAGES } from "../game/data";
-import { currentOrder, furnaceOrder, recipeEstimate, scrapShort, SEQUENCE_WAIT_MIN } from "../game/engine";
+import { currentOrder, furnaceOrder, recipeEstimate, scrapAlert, SEQUENCE_WAIT_MIN } from "../game/engine";
 import {
   castingType,
   furnaceGrade,
@@ -53,7 +53,7 @@ interface Props {
 }
 
 function missingScrap(g: GameState, stats: PlantStats): string | null {
-  const short = scrapShort(g, stats);
+  const short = scrapAlert(g, stats);
   return short.length ? short.map((id) => SCRAP_TYPES[id].name.toLowerCase()).join(" og ") : null;
 }
 

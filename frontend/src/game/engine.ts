@@ -540,6 +540,25 @@ export function scrapShort(g: GameState, stats = computePlantStats(g)): ScrapId[
   return SCRAP_IDS.filter((id) => need[id] > 1e-6 && g.scrap[id].t < need[id]);
 }
 
+/**
+ * Skrapet som bør gi varsel (B-219): før varslet spillet hver gang en type i resepten var under én charge, også når
+ * ovnen fyller opp med de andre typene, og når typen ikke kan kjøpes (returskrap). Nå:
+ * - står neste charge i en ovn fast (ikke nok skrap å fylle med), vises typene som mangler;
+ * - ellers, med planlegger som kjøper inn, ingen varsel – planleggeren kjøper det som mangler, og får den det ikke
+ *   til, vises det med «!» på Marked (autoBuyNote);
+ * - uten planlegger vises typene som mangler og kan kjøpes, så spilleren vet hva som skal kjøpes.
+ */
+export function scrapAlert(g: GameState, stats = computePlantStats(g)): ScrapId[] {
+  const short = scrapShort(g, stats);
+  if (!short.length) return [];
+  const stuck = g.furnaces.some(
+    (f, i) => !f.heat && !takeScrap(g, stats.units[i]?.sizeT ?? stats.sizeT, true, gradeRecipe(g, furnaceGrade(g, i))),
+  );
+  if (stuck) return short;
+  if (auto(g, "autoBuy") && plannerOrders(g)) return [];
+  return short.filter((id) => SCRAP_TYPES[id].buyable && scrapUnlocked(g, id));
+}
+
 /** Høyeste andel av en charge skrapklasseren fyller med verkets eget returskrap (B-208) */
 export const RETURN_MAX_SHARE = 0.25;
 

@@ -250,6 +250,26 @@ export function ControlRoom({ request, best, onDone }: Props) {
     return () => cancelAnimationFrame(raf);
   }, [game]);
 
+  // Langt trykk på mobil skal ikke markere tekst eller vise «Kopier» (B-219). CSS alene holder ikke i Safari på iPhone:
+  // touchstart må stoppes med en vanlig lytter (ikke passiv). Knappene styres av pekerhendelsene, som kommer likevel.
+  const rootRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const onTouch = (e: TouchEvent) => {
+      if ((e.target as Element | null)?.closest?.(".cg-hold, .cg-lump")) e.preventDefault();
+    };
+    const stop = (e: Event) => e.preventDefault();
+    root.addEventListener("touchstart", onTouch, { passive: false });
+    root.addEventListener("selectstart", stop);
+    root.addEventListener("contextmenu", stop);
+    return () => {
+      root.removeEventListener("touchstart", onTouch);
+      root.removeEventListener("selectstart", stop);
+      root.removeEventListener("contextmenu", stop);
+    };
+  }, []);
+
   // Mellomrom holder inne på tastatur
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -271,6 +291,7 @@ export function ControlRoom({ request, best, onDone }: Props) {
   const holdProps = {
     onPointerDown: (e: RPointerEvent<HTMLButtonElement>) => {
       e.preventDefault();
+      window.getSelection()?.removeAllRanges();
       try {
         e.currentTarget.setPointerCapture(e.pointerId);
       } catch {
@@ -538,7 +559,7 @@ export function ControlRoom({ request, best, onDone }: Props) {
   }
 
   return (
-    <div className="control-room cg" role="dialog" aria-modal="true" aria-label="Kontrollrommet">
+    <div ref={rootRef} className="control-room cg" role="dialog" aria-modal="true" aria-label="Kontrollrommet">
       <header className="cg-head">
         <h1>Kontrollrommet</h1>
         {phase !== "ferdig" && (
