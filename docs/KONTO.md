@@ -15,8 +15,10 @@ skriv svaret i beslutningen (B-xxx) og legg funksjonen inn i tabellen her. Kreve
    annet som gir noe for dager eller timer i virkeligheten. Klokka på mobilen kan stilles, så serveren må telle.
 5. **Ventetid (fase 4) krever ikke konto.** Med konto kommer tida fra serveren. Uten konto brukes klokka på mobilen.
    Da kan man bare jukse i sitt eget spill, og det er ikke med i konkurransen (PLAN-NETT, fase 4).
-6. **Uten konto skjules ikke funksjonen.** Den vises med en kort forklaring om at den krever konto, og en knapp for å
-   logge inn. Kontoen er frivillig, men det skal være tydelig hva man får med den.
+6. **Uten konto skjules ikke funksjonen** – når spilleren har kommet dit den hører hjemme. Da vises den med en kort
+   forklaring om at den krever konto, og en knapp for å logge inn. Før det vises den ikke i det hele tatt, verken for
+   spillere med eller uten konto (gradvis synlighet, B-180). Kontoen er frivillig, men det skal være tydelig hva man
+   får med den.
 7. **Det som avgjør noe mellom spillere, avgjøres på serveren**, aldri i appen (anbud, auksjoner, sesongresultat).
 
 Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for alt som gir en fordel på topplista.
@@ -76,3 +78,17 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 - `NeedsAccount` (i `ui/Account.tsx`) viser «X krever konto» med grunnen og en knapp til innloggingen.
 - Serverfunksjoner som krever konto, starter med `if auth.uid() is null then raise exception 'ikke logget inn'`, og
   `execute` er tatt fra `anon`.
+
+### Planlagt (B-180, `RETNING.md`)
+
+| Funksjon | Krever konto | Hvorfor | Beslutning |
+| --- | --- | --- | --- |
+| Økonomireformen (engangs) | Gjelder spill på nett | Endrer lagringen på nett | planlagt, B-180 |
+| Strategiske bedrifter (eie, investere, inntekt fra andres aktivitet) | Ja | Regel 3 og 7: deles med andre, avgjøres på serveren | planlagt, B-180 |
+| Konsernkassen (penger flyttet inn i verdenen) | Ja | Regel 2 og 7 | planlagt, B-180 |
+| Kontroll og overtakelser | Ja | Regel 3 og 7 | planlagt, B-180 |
+| Industrimakt på profilen og topplista | Ja | Regel 3 | planlagt, B-180 |
+| Verksjefer, mandat og «Verksjefen ringer» i datterverkene | Nei | Regel 1: ditt eget spill | planlagt, B-180 |
+| Rekonstruksjon ved konkurs | Nei | Regel 1 | planlagt, B-180 |
+| Æraer og Hall of Fame | Ja | Regel 3 | planlagt, B-180 |
+

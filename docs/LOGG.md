@@ -5,6 +5,33 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 123 – 2026-09-26/27: ny hovedretning (fase 0)
+
+**Brukeren ba om:** innarbeide en eiergodkjent ny hovedretning i designminnet og arkitekturen – fra stålverk til
+industrimakt (strategiske bedrifter, Kontroll, overtakelser, verksjefer, æraer, økonomireform). Ikke kode alt; først
+lese hele prosjektminnet, vurdere retningen kritisk, lage en overgangsplan, oppdatere dokumentene, planlegge
+økonomireformen som dry-run, og foreslå en liten første leveranse. Før dette: «Dropp alt jeg nettopp sa» om forrige
+liste (menyopprydding m.m.) – den er droppet, og ingen kode var endret for den.
+
+**Gjort:** B-180 og `docs/RETNING.md` (retning, pilarer, kritisk vurdering, datamodeller, faser 0–6, første leveranse,
+dry-run, tabell over gamle beslutninger, risiko, balansering, åpne spørsmål). Statuslinjene på B-033, B-106, B-119,
+B-121, B-124, B-129, B-130, B-149, B-150 og B-167 viser hva som justeres. DESIGN (visjon, designpilarer, nivåtabell,
+veikart), PLAN-NETT (merknad øverst, fase 4 og 5 på vent), FORSLAG (sju spørsmål til eieren), KONTO (regel 6 og
+planlagte funksjoner), README og CLAUDE.md (nye faste regler) beskriver samme spill. Dry-run-spørringen ligger i
+`supabase/utkast/`. `sjekk-endringslogg.mjs` hopper over beslutninger merket «Endringslogg: nei».
+
+**Viktigste funn:** inntektsmotoren (12–14 stålkomplekser på trinn 5, 5–6 mrd. per spilldøgn) gjør at en ren
+kassereform er tjent inn igjen på 1–5 timer på 10×; spilltid og ekte tid må skilles (konsernkasse med begrenset
+innskudd); KONTO-regel 6 må tolkes med gradvis synlighet; automatisk Sesong 2 i mars bør skrus av.
+
+**Testet:** dry-run-spørringen kjørt mot databasen (bare lesing, ingen data endret), endringslogg-sjekken begge veier,
+`npm test`.
+
+**Gjenstår:** eierens svar på de sju spørsmålene i FORSLAG.md. Så fase 1: økonomireform (etter ny dry-run og ekstra
+sikkerhetskopi), inntektsmotoren i konsernet, `world_config`/`company_types`, aktiv spiller.
+
+---
+
 ## Økt 122 – 2026-09-26: juks, skiftleder, endringslogg og landemerker
 
 **Brukeren ba om:** dobbeltsjekk at to faner eller fartsutvidelser i nettleseren ikke kan lure spillet; skiftledere

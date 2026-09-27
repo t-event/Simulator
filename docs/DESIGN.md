@@ -4,10 +4,35 @@
 
 Et mobilspill der du bygger et skrapbasert stålverk fra en garasje til et storverk og et stålkonsern, og lærer
 hvordan et stålverk henger sammen underveis. Målgruppen er folk uten forkunnskaper – nye ansatte, elever og
-nysgjerrige. Spillet skal være like enkelt å komme i gang med som Game Dev Tycoon, og like vanskelig å legge fra seg.
+nysgjerrige. Spillet skal være like enkelt å komme i gang med som Game Dev Tycoon, og like vanskelig å legge fra seg:
+et godt tycoon- og strategispill som tilfeldigvis lærer deg mye om stål og industri.
 
-Spillet blir aldri helt ferdig: sesonger på et halvt år, topplista og felles hendelser gir en ny grunn til å spille
-(se `PLAN-NETT.md`). Nytt spill+ er fjernet; sesongene har tatt over den rollen (B-141).
+**Hovedretning (B-180):** rollen vokser fra operatør via daglig leder, verkseier og konserneier til industrimagnat.
+Stålproduksjonen er inngangen; sluttspillet handler om eierskap, ledelse og kontroll over industrien rundt verkene, i
+konkurranse med ekte spillere. Starten beskyttes. Overgangsplanen står i `RETNING.md`.
+
+> Jeg bygde ikke bare det største stålverket. Jeg bygde et industriimperium – og nå prøver de andre å ta det fra meg.
+
+Spillet blir aldri helt ferdig: topplista, felles hendelser og (i dag) sesonger på et halvt år gir en ny grunn til å
+spille (se `PLAN-NETT.md`). Sesongene skal revurderes mot langsiktige æraer (B-180). Nytt spill+ er fjernet (B-141).
+
+## Designpilarer (B-180)
+
+Gjelder for alt nytt:
+
+1. **Gradvis synlighet.** Spør: *når trenger spilleren å vite at dette finnes?* Er svaret «senere», vises det ikke –
+   ikke som låst kort, ikke som hengelås i en meny. Forklar rett før spilleren trenger det: kort forklaring → én
+   konkret handling → lært. Ingen lange veiledninger eller tekstvegger.
+2. **Ingen unødvendige valutaer.** Penger og fagpoeng holder. Nye egenskaper er avledede verdier (Industrimakt på
+   profilen, Kontroll for én bedrift), ikke poeng man bruker.
+3. **Valg, ikke regneark.** Avansert under panseret, forståelige valg på skjermen.
+4. **Størrelse skaper nye problemer.** Garasje: hvordan lager jeg stål? Stålverk: hvordan driver jeg effektivt?
+   Storverk: kapasitet mot marked. Konsern: hvordan leder jeg flere virksomheter? Industrimagnat: hvordan beholder jeg
+   kontrollen?
+5. **Penger er viktige, men ikke makt alene.** Kapital virker med sterkt avtagende effekt i alt som gjelder andre
+   spillere.
+6. **Serveren avgjør alt mellom spillere**, og utfallet skal kunne forklares.
+7. **Ikke avhengig av å sjekke mobilen.** Det som skjer i ekte tid mellom spillere, varer døgn, ikke minutter.
 
 ## Hva vi lærer av Game Dev Tycoon
 
@@ -46,11 +71,13 @@ enkelt i presentasjonen, lett å spille i korte økter og vanskelig å legge fra
 | Støperi | Skiftarbeid; du blir leder | Induksjonsovn 5 t, blokkstøping, spektrometer, planlegger |
 | Stålverk | Tungindustri | Lysbueovn, strengstøping, øseovn, valseverk, rammeavtaler, ta styringen |
 | Storverk | Hundrevis av ansatte | Store ovner, fire eller seks strenger, eksport, utfordringer |
-| Konsern | Du eier flere verk | Datterverk, felles innkjøp og salg, salgsdirektør, milepæler mot 10 mrd. |
+| Konsern | Du eier flere verk | Datterverk, felles innkjøp og salg, salgsdirektør, milepæler mot 10 mrd. (etter B-180: verksjefer med mandat) |
+| Industrien (planlagt, B-180) | Du konkurrerer om kontrollen | Strategiske bedrifter rundt verkene, Kontroll, overtakelser, Industrimakt – se `RETNING.md` |
 
 Konsernet åpner seg på storverket når alt utstyret der er kjøpt, eller egenkapitalen når 1 mrd. (B-106).
 
-Etter sluttmålet (10 mrd., tittelen Stålbaron) fortsetter spillet (B-150):
+Etter 10 mrd. (tittelen Stålbaron) fortsetter spillet (B-150). Pengemilepælene og titlene under beholdes som
+historikk, men det lages ingen nye pengemål (B-180):
 - Stålmilepæler ved 25, 50, 100 og 250 mrd. og 1 billion gir nye titler (Stålmagnat … Stållegende), fagpoeng og mer å
   bruke pengene på: modernisering til trinn 5, stålkomplekser og flere datterverk.
 - Når all forskning er gjort, åpner mesterskapet: fire prosjekter som kan tas om og om igjen, så fagpoengene alltid
@@ -105,8 +132,10 @@ engangstips (`tips.ts`) og rådgiveren når omdømmet faller flere ganger av sam
 ## Veikart
 
 Konto, lagring på nett, toppliste og sesonger er bygget, og det samme er daglig belønning, dagens oppdrag og «mens du
-var borte» (B-149). Neste steg står i `PLAN-NETT.md` (fase 4: ventetid i konsernet, fase 5: anbud og
-skrapauksjoner). Hva som krever konto, står i `KONTO.md`. Åpne spørsmål og mindre forslag står i `FORSLAG.md`.
+var borte» (B-149). **Neste store steg er hovedretningen i `RETNING.md` (B-180):** økonomireform, strategiske
+bedrifter, Kontroll, overtakelser, verksjefer og æraer, i faser. Fase 4 og 5 i `PLAN-NETT.md` (ventetid, anbud og
+auksjoner) står på vent og vurderes inn i den. Hva som krever konto, står i `KONTO.md`. Åpne spørsmål og mindre
+forslag står i `FORSLAG.md`.
 
 Kundevurdering 1–10 per levert kontrakt er bygget (B-161), og prestasjoner finnes (B-151).
 

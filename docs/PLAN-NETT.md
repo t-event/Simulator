@@ -1,5 +1,10 @@
 # Plan: konto, lagring på nett, toppliste og konkurranse
 
+> **Ny hovedretning (B-180, 2026-09-26):** sluttspillet blir eierskap og kontroll over industrien rundt verkene, i
+> konkurranse mellom spillerne. Overgangsplanen står i `RETNING.md`. Denne fila beskriver det som er bygget (fase 0–3)
+> og de tekniske prinsippene, som fortsatt gjelder. Fase 4 og 5 under står på vent og vurderes inn i den nye planen.
+> «Ingen kan ta noe fra andre» gjelder nå bare til og med storverket.
+
 Vedtatt i B-124 (2026-09-25). Dette er arbeidsplanen for å gjøre Stålverket til et spill man ikke blir ferdig
 med: lagring på nett med konto, toppliste, sesonger med ligaer, felles hendelser, ventetid på de store tingene, og
 konkurranse om kunder og skrap mellom spillerne. Fasene nederst er rekkefølgen vi bygger i.
@@ -10,7 +15,8 @@ konkurranse om kunder og skrap mellom spillerne. Fasene nederst er rekkefølgen 
 - Ingen mister spillet sitt. Den lokale lagringen kobles til kontoen første gang man logger inn.
 - Man kan sammenligne seg med andre, og hver sesong gir en ny grunn til å spille.
 - Konkurransen skal være på pris og kvalitet, ikke sabotasje. Spillet skal fortsatt lære bort hvordan et stålverk
-  fungerer, og en ny spiller skal kunne spille hele kampanjen uten å bry seg om konkurransen.
+  fungerer, og en ny spiller skal kunne spille hele kampanjen uten å bry seg om konkurransen. (B-180: i sluttspillet
+  kan eierskap til strategiske bedrifter utfordres – fortsatt uten sabotasje, se `RETNING.md`.)
 - Spillerne skal kunne spille hele tiden mens vi bygger dette.
 
 ## Svar på spørsmålene som kom opp
@@ -148,7 +154,7 @@ Spilleren ser: «Sesong 1 – 18 dager igjen» øverst på topplista, ligaen sin
   streik i transporten. Ligger i `events`, appen leser dem og legger dem på markedet. Uten nett: ingen hendelse.
 - Fagboka: kapittel om konjunkturer og hvorfor stålprisen svinger.
 
-### Fase 4 – ventetid i konsernet (1–2 økter)
+### Fase 4 – ventetid i konsernet (1–2 økter) – på vent (B-180)
 
 Spilleren ser: «Bygges – ferdig om 3 t 40 min» på verket i konsernet, med et varsel når det er ferdig.
 
@@ -157,7 +163,7 @@ Spilleren ser: «Bygges – ferdig om 3 t 40 min» på verket i konsernet, med e
 - Testspilleren: klokka følger spilltiden, så balansen kan måles som før. Målet er at kampanjen til storverk går
   som i dag, og at konsernfasen strekker seg over noen virkelige dager.
 
-### Fase 5 – anbud og skrapauksjoner (3–4 økter)
+### Fase 5 – anbud og skrapauksjoner (3–4 økter) – på vent (B-180; anbud kan gjenbrukes til første tildeling av strategiske bedrifter)
 
 Spilleren ser: fanen «Anbud» under Salg og «Auksjon» under Marked, fra nivået Stålverk.
 
@@ -234,6 +240,9 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
 
 ## Status
 
+- **B-180:** ny hovedretning, se `RETNING.md`. Neste er fase 1 der (økonomireform etter dry-run, inntektsmotoren i
+  konsernet, definisjon av aktiv spiller, `world_config` og `company_types`). Dry-run-spørringen ligger i
+  `supabase/utkast/` (ikke en migrasjon).
 - Fase 0 og 1 er bygget (B-125, B-126). Fase 2 (toppliste) er bygget (B-127). Fase 3 (sesonger, ligaer og felles
   hendelser) er bygget (B-129). Alle spill blir med i sesongen som pågår, og neste sesong starter av seg selv med alle med videre (B-166, B-167). Fase 4 er neste, men brukeren vil vente med den (2026-09-26).
 - Også bygget: daglig belønning og dagens oppdrag (B-149), mesterskap og titler (B-150), ukens utfordring og sesonger

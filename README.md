@@ -4,6 +4,10 @@ Et mobilspill (tycoon, inspirert av Game Dev Tycoon) der du bygger et skrapbaser
 kald garasje med en liten induksjonsovn til et storverk med lysbueovner, strengstøping, valseverk og hundrevis av
 ansatte, og til slutt et stålkonsern med flere verk.
 
+Du starter som operatør og vokser til daglig leder, verkseier og konserneier. Den nye hovedretningen (B-180) gjør
+sluttspillet til en kamp mellom spillerne om eierskap og kontroll over industrien rundt verkene – planen står i
+`docs/RETNING.md`, og den bygges i faser.
+
 Spillet er laget for å lære bort hvordan et stålverk henger sammen. Det du må gjøre for å tjene penger, er det samme
 som gjelder i virkeligheten: velge riktig skrap, treffe analysen, holde ovnen og foringen i drift, bemanne skiftene
 og levere riktig kvalitet i tide. En fagbok låses opp kapittel for kapittel etter hvert som du møter nye deler av
@@ -48,26 +52,23 @@ noe å gå til. Stormodeller av ovner opp til en likestrømsovn på 420 tonn åp
   nettleser. Bytter du mellom to nettlesere, henter spillet det nyeste.
 - **Topplista** (🏆 øverst) viser konsernverdi, mest penger på bok, raskest til storverk, raskest til 10 mrd. og
   omdømme – for sesongen som pågår og for alle tider. Den oppdaterer seg mens du spiller.
-- **Sesonger** varer et halvt år. Alle som er med, starter i garasjen, og du kan bli med når som helst mens sesongen
-  pågår. Var du med i forrige sesong, får du en liten fordel ved start.
+- **Sesonger** varer et halvt år. Alle spill med konto er med i sesongen som pågår, og neste sesong starter av seg selv
+  (B-166, B-167). Sesongene skal revurderes mot langsiktige æraer (B-180).
 - **Felles hendelser** (skrapmangel, strømkrise, eksportboom …) treffer alle spillerne samtidig.
 - **Hver dag:** en daglig belønning som vokser gjennom uka (hopper du over en dag, starter den på nytt), tre av dagens
   oppdrag med en bonus, og verket tjener litt mens du er borte. Dette krever konto, fordi serveren teller dagene.
 
 ### Ta styringen
 
-Når verket har lysbueovn, kan du ta styringen på neste charge. Kontrollrommet er laget for folk uten forkunnskaper:
-fire steg med én forklaring, én måling med grønt felt og noen få knapper.
+Når verket har lysbueovn, kan du ta styringen på neste charge. Kontrollrommet er et kort spill i fire runder, under
+ett minutt (B-175):
 
-1. **Smelt** – hold temperaturen i det grønne feltet med mer eller mindre strøm mens skrapmatingen varierer.
-   Oksygenet kan slås av og på samtidig.
-2. **Rens** – blås oksygen til karbonet er i det grønne feltet.
-3. **Slagg av** – tipp ovnen mot slaggdøra og rett den opp når slaggen er ute. Tipper du for lenge, renner stål ut
-   døra.
-4. **Tapp** – tapp når temperaturen er i det grønne feltet, og rett opp ovnen når øsa er full, ellers renner den over.
+1. **Smelt** – hold inne for strøm og hold temperaturen i det grønne mens skrapkurvene kommer.
+2. **Blås ut karbonet** – hold inne for oksygen, men slipp før slaggen koker over.
+3. **Rak ut slaggen** – trykk på slaggklumpene før de synker, ikke på det blanke stålet.
+4. **Tapp** – treff temperaturen og fyll øsa til streken.
 
-En charge tar et par minutter. Etterpå får du stjerner og en forklaring på vanlig norsk. Under ligger den fulle
-prosessmodellen, så valgene har ekte konsekvenser for strømforbruk, fosfor og slitasje.
+Etterpå får du stjerner, poeng og en forklaring på vanlig norsk. Resultatet blir en vanlig charge i spillet.
 
 ## Hva spillet lærer bort
 
@@ -94,7 +95,8 @@ de beskriver ikke noe bestemt anlegg.
 
 - `docs/LOGG.md` – hva som er gjort, økt for økt (nyeste øverst)
 - `docs/BESLUTNINGER.md` – hvorfor ting er som de er (B-001 …)
-- `docs/DESIGN.md` – spilldesign, nivåer og veikart
+- `docs/DESIGN.md` – spilldesign, designpilarer, nivåer og veikart
+- `docs/RETNING.md` – hovedretningen for sluttspillet og overgangsplanen (B-180)
 - `docs/PLAN-NETT.md` – konto, lagring på nett, toppliste, sesonger og konkurranse
 - `docs/FORSLAG.md` – åpne spørsmål og forslag til videre utvikling
 - `docs/KONTO.md` – hva som krever konto, og reglene for nye funksjoner
