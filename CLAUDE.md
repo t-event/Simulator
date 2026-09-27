@@ -9,7 +9,8 @@ Claudes langtidsminne sammen med `docs/`. Hold den kort og oppdatert.
 2. Les **`docs/BESLUTNINGER.md`** – hvorfor ting er som de er. Ikke gjør om en
    beslutning uten at brukeren ber om det; skriv i så fall en ny beslutning som
    erstatter den gamle.
-3. Les **`docs/DESIGN.md`** hvis oppgaven gjelder spillmekanikk eller grensesnitt.
+3. Les **`docs/DESIGN.md`** hvis oppgaven gjelder spillmekanikk eller grensesnitt, og **`docs/RETNING.md`** hvis den
+   gjelder sluttspillet, konsernet, økonomien eller konkurranse mellom spillere (hovedretningen, B-180).
 4. Les **`docs/PLAN-NETT.md`** hvis oppgaven gjelder konto, lagring på nett, toppliste, sesonger eller konkurranse.
 5. Se **`docs/FORSLAG.md`** – åpne spørsmål til brukeren og forslag. Når noe avgjøres: ny beslutning, og oppdater lista.
 6. Skal du lage noe nytt, avgjør om det **krever konto** etter reglene i **`docs/KONTO.md`** (se «Faste regler»).
@@ -23,6 +24,7 @@ Claudes langtidsminne sammen med `docs/`. Hold den kort og oppdatert.
 - **Endringsloggen (B-179, brukerens beskjed: hver eneste gang):** legg til en oppføring øverst i
   `frontend/src/game/changelog.ts` med det spillerne merker, skrevet med vanlige ord, og `b:` lik det nyeste
   beslutningsnummeret. `npm test` og publiseringen stopper hvis den mangler (`scripts/sjekk-endringslogg.mjs`).
+  En beslutning som ikke endrer noe i spillet (ren planlegging), får linja `Endringslogg: nei` og hoppes over.
 - Oppdater denne fila hvis kommandoer, struktur eller regler har endret seg.
 - Commit og push til utviklingsgrenen.
 
@@ -53,6 +55,14 @@ GitHub Pages: https://t-event.github.io/Simulator/
   konto vises funksjonen med `NeedsAccount`, ikke skjult. Serverfunksjonen sjekker `auth.uid()` og er tatt fra `anon`.
 - **Enkelt for nybegynnere:** Alt spilleren må gjøre skal kunne forstås uten
   fagkunnskap. Forklar med vanlige ord; fagordene kan stå i fagboka.
+- **Gradvis synlighet (B-180):** spør alltid «når trenger spilleren å vite at dette finnes?». Er svaret «senere»,
+  vises det ikke – heller ikke som låst kort eller hengelås. Forklar rett før spilleren trenger det: kort forklaring →
+  én handling. Ingen tekstvegger.
+- **Ingen nye valutaer (B-180):** penger og fagpoeng holder. Nye egenskaper er avledede verdier (Industrimakt,
+  Kontroll), ikke poeng man bruker. Spilleren tar valg, ikke administrerer regneark.
+- **Serveren avgjør alt mellom spillere (B-180):** eierskap, overtakelser, frister i ekte tid, inntekt fra andres
+  aktivitet og økonomireformen regnes på serveren. Penger fra eget spill (spilltid, opptil 10×) kan bare flyttes inn i
+  verdenen (ekte tid) i et begrenset tempo. Ekte spillerdata endres aldri uten dry-run og eierens godkjenning først.
 - **Mobil først:** Test alltid på iPhone-størrelse (390 px bred). Ingen
   horisontal scrolling, knapper minst ca. 40 px høye.
 - **Balanse:** Endringer i økonomi eller progresjon skal gjennom
@@ -146,8 +156,9 @@ frontend/scripts/ sjekk-endringslogg.mjs: endringsloggen dekker nyeste beslutnin
 frontend/public/  PWA: manifest, ikoner, service worker
 supabase/      SQL-migrasjonene, nummerert. Kjøres i prosjektet med Supabase-connectoren (apply_migration) og
                legges her samtidig, så repoet speiler databasen. Sjekk get_advisors (security) etter hver DDL-endring.
-docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, PLAN-NETT.md (planen for nett og konkurranse), FORSLAG.md,
-               KONTO.md (hva som krever konto)
+supabase/utkast/ Spørringer som bare leser (f.eks. dry-run av økonomireformen) – ikke migrasjoner
+docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretningen for sluttspillet, B-180),
+               PLAN-NETT.md (det som er bygget på nett), FORSLAG.md, KONTO.md (hva som krever konto)
 ```
 
 ## Testing i nettleseren

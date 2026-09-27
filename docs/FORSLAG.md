@@ -6,7 +6,19 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
-Ingen åpne akkurat nå.
+Fra den nye hovedretningen (B-180, `RETNING.md` avsnitt 13):
+
+1. **Økonomireformen:** modell A (k = 0,35) eller B (k = 0,45), og hva gjøres med datterverkene (12–14 komplekser på
+   trinn 5 tjener 5–6 mrd. per spilldøgn)? Se dry-run i `RETNING.md` avsnitt 9.
+2. **Konsernkassen:** er det greit at penger fra eget spill bare kan flyttes inn i verdenen mellom spillerne i et
+   begrenset tempo per virkelige døgn?
+3. **Sesongene:** skal automatisk Sesong 2 (2027-03-25) skrus av nå, og skal tida fram til reformen hete
+   «Grunnleggeræraen»?
+4. **Varsler ved overtakelser:** holder varsel inne i appen (72 timer), eller trengs e-post (krever egen
+   e-postleverandør)?
+5. **Første tildeling** av en strategisk bedrift: anbud med tak på budet, eller noe annet?
+6. **Aktiv spiller:** er «minst 2 av de siste 14 dagene» greit i starten?
+7. **Nytt navn på «Alle tider»** når Hall of Fame kommer?
 
 ## Venter
 
@@ -25,7 +37,7 @@ Ingen åpne akkurat nå.
 
 ## Forslag – nett og konkurranse
 
-- **Fase 4 og 5** står i `PLAN-NETT.md`: ventetid i konsernet, og anbud og skrapauksjoner fra stålverket.
+- **Fase 4 og 5** i `PLAN-NETT.md` (ventetid, anbud og auksjoner) står på vent og vurderes inn i `RETNING.md` (B-180).
 - **Egen e-postleverandør** for kodene (glemt passord), så grensen på ca. 2 e-poster i timen forsvinner. Brukeren
   sa «en annen gang».
 - **Sjekk av første opplasting:** spill som kobles til en konto sent (f.eks. dag 610), sjekkes ikke av juksesperren

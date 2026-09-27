@@ -414,7 +414,7 @@ Beslutning: Veiledningskortet har «Hopp over steget» (neste steg) på steg som
 spilleren gjør noe, og lenken «Avslutt veiledningen» øverst for å fjerne hele veiledningen.
 
 ## B-033 Raskere start, engangstips, murere på dagtid, 1× etter kort, konkurs uten råd til foring (2026-09-24)
-Status: gjelder
+Status: gjelder, men konkurs revurderes for spill som har nådd konsernet: rekonstruksjon i stedet for full restart (B-180)
 Brukeren: starten tar for lang tid; murerne skal gå dagtid; varsel første gang verket stopper om kvelden,
 tips om fart etter «Faste rutiner», varsel om foring i starten, bedre varsel om tomt skraplager og
 kreditt, 1× etter popup (trykket feil på 10×), konkurs hvis man ikke har råd til omforing med fullt lån.
@@ -1275,7 +1275,7 @@ Beslutning:
 - Testspillerne følger rådet. Målt med og uten råd: høyere kasse på 5 av 6 frø.
 
 ## B-106 Konsern med flere verk, og sluttmålet 10 mrd. (2026-09-25)
-Status: gjelder (erstatter vinnergrensen i B-027 og B-091)
+Status: gjelder (erstatter vinnergrensen i B-027 og B-091). Justeres av B-180: 10 mrd. er en milepæl, ikke slutten, og «datterverk er bare investeringer» erstattes av verksjef og mandat (fase 5)
 Brukeren syntes spillet ble for fort ferdig og ville utvide storverket til et konsern med flere verk. Sluttmålet skulle
 bli mye større, så det er det siste man når.
 Beslutning:
@@ -1446,7 +1446,7 @@ Beslutning:
 - Varselet kommer når lageret *blir* fullt, og høyst hver 12. time (`storeFullLogMin`), så det ikke gjentas hele tida.
 
 ## B-119 Konsernet: neste steg, grunner på knappene, utbygging og milepæler (2026-09-25)
-Status: gjelder (utvider B-106)
+Status: gjelder (utvider B-106). Datterverkene justeres av B-180
 Brukeren: med bare stålverk fikk man ikke kjøpt storverk, felles innkjøp eller salgskontor. Konsernet skulle bli mer
 intuitivt, morsomt og bedre forklart.
 Årsak: knappene ble grå uten forklaring når kassa var for liten (typisk etter noen stålverk). Med seks stålverk var
@@ -1504,7 +1504,7 @@ gruppen «Kommer når konsernet åpnes» under Forskning.
 
 
 ## B-121 Konsernet: det skal lønne seg å investere (2026-09-25)
-Status: gjelder
+Status: gjelder. Overskuddet i datterverkene justeres i fase 1 av B-180 (avtagende overskudd og lederkostnader)
 Brukeren:
 - Har man bare kjøpt stålverk, bør man kunne gå over til storverk.
 - Det tar så lang tid å tjene inn et storverk at noen heller vil spare til 10 mrd.
@@ -1576,7 +1576,7 @@ til slutt det man kan kjøpe.
 - Målt på iPhone 13 med tre verk og salgsdirektør: siden er 2 393 px høy, mot 3 475 px før.
 
 ## B-124 Konto, lagring på nett, toppliste og konkurranse – planen (2026-09-25)
-Status: gjelder
+Status: gjelder, men «konkurransen er på pris og kvalitet; ingen kan ta noe fra andre» gjelder bare til og med storverket – i sluttspillet kan eierskap til strategiske bedrifter utfordres (B-180). De tekniske prinsippene gjelder
 Brukeren: vil ha toppliste, lagring uten fil, og et spill man ikke blir ferdig med på én dag – med konkurranse om
 skrap, kunder og priser, inspirert av spill der man konkurrerer i sanntid. Nåværende lagringer skal ikke gå tapt.
 Konto med e-post og passord, ikke bare overføringskode (fare for deling og juks). Supabase er greit. Nivå 1 og 2
@@ -1700,7 +1700,7 @@ Beslutning:
 - Feilteksten «Koden er feil eller utløpt» på norsk.
 
 ## B-129 Sesonger, ligaer og felles hendelser – fase 3 (2026-09-25)
-Status: gjelder (erstatter nytt spill+ fra B-090 for spill som er med i en sesong). Metallnavnene på ligaene vises
+Status: gjelder, men sesongene revurderes mot æraer (B-180) (erstatter nytt spill+ fra B-090 for spill som er med i en sesong). Metallnavnene på ligaene vises
 ikke lenger på topplista, se B-139.
 Brukeren: sesonger erstatter nytt spill+; alle starter i garasjen når en ny sesong starter; en pitteliten fordel
 for den som var med sist; lett å starte ny sesong; ingen grupper på topplista ennå.
@@ -1735,7 +1735,7 @@ Beslutning:
 - SQL i `supabase/004_sesonger.sql`, kjørt som migrasjonene «sesonger» og «liga_search_path».
 
 ## B-130 Sesongen varer i seks måneder (2026-09-25)
-Status: gjelder (erstatter «4 uker» i B-124 og B-129)
+Status: gjelder (erstatter «4 uker» i B-124 og B-129). Sesongene revurderes mot æraer (B-180)
 Brukeren: sesongen må vare i 6 måneder.
 Beslutning: Sesong 1 er forlenget til seks måneder fra starten (til 2027-03-25). `start_season` har 26 uker som
 standard. Tekstene i spillet og fagboka sier «et halvt år».
@@ -2143,7 +2143,7 @@ kontoen når siden ble lastet. Kortet er nå alltid med, bare skjult, og åpner 
 e-postlenken.
 
 ## B-149 Hva krever konto, daglig belønning, dagens oppdrag og mens du var borte (2026-09-26)
-Status: gjelder
+Status: gjelder. Regel 6 er justert for gradvis synlighet: en funksjon vises først når spilleren har kommet dit den hører hjemme (B-180)
 Brukeren ba om:
 - Noe som får spillerne tilbake hver dag: en belønning for hver virkelige dag, bedre for hver dag i en uke, og start på
   nytt hvis man hopper over en dag. «Vi tester med fagpoeng og timers drift.»
@@ -2215,7 +2215,7 @@ Automatikken:
 - Sikkerhetsrådene viser bare det som er meningen.
 
 ## B-150 Sluttspillet: mesterskap og stålmilepæler med titler (2026-09-26)
-Status: gjelder (utvider B-106, B-119 og B-120)
+Status: gjelder som historikk (titler og rekorder beholdes), men det lages ingen nye pengemål (B-180) (utvider B-106, B-119 og B-120)
 Brukeren: «Hva skal vi gjøre for at de som er ferdig med spillet, fortsatt fortsetter … Daglig belønning blir litt
 meningsløs når man har fått alt. Noen har flere tusen fagpoeng.» Svar på forslagene: «Kjør på med alle dine forslag.»
 Denne beslutningen dekker forslag 1 og 2. Pynt og prestasjoner kommer i B-151, ukens utfordring og sesonger med vri i
@@ -2664,7 +2664,7 @@ sesong.»
 - **Konto (KONTO.md):** som før – sesongen krever konto (regel 3).
 
 ## B-167 Neste sesong starter av seg selv, og alle blir med videre (2026-09-26)
-Status: gjelder (erstatter «alle starter i garasjen når en ny sesong starter» i B-129, og valget for spill fra en
+Status: gjelder inntil videre – automatisk neste sesong bør skrus av, se B-180 (erstatter «alle starter i garasjen når en ny sesong starter» i B-129, og valget for spill fra en
 tidligere sesong i B-166)
 Brukeren: «Når sesong 1 er ferdig går vi over til sesong 2 automatisk. Alle blir med over.»
 
@@ -2984,4 +2984,51 @@ systemer så det huskes hver eneste gang.»
   avslutter en økt».
 
 **Konto (KONTO.md):** nei, regel 1.
+
+## B-180 Ny hovedretning: fra stålverk til industrimakt (2026-09-26)
+Status: gjelder (justerer B-033, B-106, B-119, B-121, B-124, B-129, B-130, B-149, B-150 og B-167 – se tabellen i
+`docs/RETNING.md`, avsnitt 10)
+Endringslogg: nei (ingen endring i spillet ennå)
+Brukeren (eieren) har fått en ekstern gjennomgang av spillet og godkjent en ny hovedretning. Den skal først inn i
+designminnet og arkitekturen, og så bygges i små, testbare faser – ikke alt på en gang.
+
+**Retningen:** spillet begynner som i dag i garasjen. Rollen vokser fra operatør via daglig leder, verkseier og
+konserneier til industrimagnat. Sluttspillet handler om eierskap, ledelse og kontroll over industrien rundt verkene, i
+konkurranse med ekte spillere – ikke om større ovner og større tall på konto. Alt til og med storverket beskyttes.
+
+**Nye designpilarer** (står i `DESIGN.md` og `CLAUDE.md`): gradvis synlighet (spilleren ser aldri mer enn hen trenger
+nå), ingen unødvendige valutaer (Industrimakt og Kontroll er avledede verdier), valg i stedet for regneark, størrelse
+skaper nye problemer, penger er viktige men ikke makt alene, serveren avgjør alt mellom spillere, forklarbart utfall,
+og ingenting i ekte tid krever at man sjekker mobilen ofte.
+
+**Plan:** `docs/RETNING.md` har den kritiske vurderingen, datamodellene, fasene 0–6, risiko for lagringer, balansering
+og åpne spørsmål. Fase 0 (denne) er bare dokumentasjon; ingen spillkode er endret.
+
+**Viktigste funn i vurderingen:**
+- Inntektsmotoren er problemet, ikke bare kassa. De tre største har 12–14 stålkomplekser på trinn 5 og tjener 5–6
+  mrd. per spilldøgn – ca. 1 500 mrd. i timen på 10×. Kuttes bare kassa, er den tjent inn igjen på 1–5 timer. Reformen
+  må også endre datterverkenes overskudd.
+- To klokker: hvert spill har egen fart (pause–10×), mens verdenen mellom spillerne må gå i ekte tid på serveren.
+  Penger fra eget spill kan bare flyttes inn i verdenen i et begrenset tempo per virkelige døgn (forslag: en
+  konsernkasse på serveren – vanlige kroner, ingen ny valuta).
+- Klienten eier økonomien. Alt som påvirker andre, går via serveren og sjekkes mot tidslinja og juksesperren.
+- KONTO-regel 6 justeres: en funksjon vises først når spilleren har kommet dit den hører hjemme; da vises den med
+  «krever konto» for den som ikke har konto. Strategiske bedrifter vises aldri i garasjen, heller ikke låst.
+- Sesong 2 starter av seg selv 2027-03-25 (B-167). Anbefaling: skru av med en bryter og gå over til æraer som
+  administrator avslutter. Ingen irreversibel omskriving nå.
+
+**Økonomireformen:** dry-run er kjørt (bare lesing, `supabase/utkast/okonomireform_dryrun.sql`) og vist i
+`RETNING.md` avsnitt 9. Ingen spillerdata er endret. To komprimerende modeller (k = 0,35 og 0,45 over 50 mill.)
+beholder rekkefølgen og gjør største/minste til ca. 120 : 1 eller 400 : 1 (før ca. 300 000 : 1). Utføring krever
+eierens valg, ekstra sikkerhetskopi og en egen migrasjon.
+
+**Første spillbare leveranse (forslag):** økonomireformen, avtagende overskudd i konsernet, ett strategisk selskap
+(skraplageret) med tildeling via anbud og inntekt fra alles skrapkjøp, og Industrimakt på topplista. Slagghåndtering og
+mekanisk verksted rett etter.
+
+**Konto (KONTO.md):** alt mellom spillere krever konto (regel 3 og 7). Reglene er uendret bortsett fra justeringen av
+regel 6. De planlagte funksjonene står i tabellen med «planlagt».
+
+**Endringsloggen:** beslutninger som ikke endrer noe spillerne merker, merkes «Endringslogg: nei» og hoppes over av
+`scripts/sjekk-endringslogg.mjs`.
 
