@@ -353,6 +353,10 @@ dag). Til rebalanseringen av sluttspillet er ferdig, har disponibel kasse en myk
 en bunden konsernreserve som teller i konsernverdien, men ikke kan brukes eller flyttes til verden. Rebalanseringen
 må bestemme hva reserven blir, og om grensen skal bort. Ventilen er ikke løsningen.
 
+**Første del av rebalanseringen (B-209):** bygging og modernisering i konsernet tar ekte timer uansett spillfart,
+utbyttet er trimmet (fullt konsern ca. 1,1 mrd. netto per døgn i stedet for 3,3), og hjemmeverket gir inntil +20 %
+utbytte som flaggskip. Reserven og kassegrensen er fortsatt ikke avgjort.
+
 ## 10. Gamle beslutninger – hva gjelder
 
 Ingen historikk slettes. Statuslinjene i `BESLUTNINGER.md` er oppdatert der det står «justeres» eller «revurderes».

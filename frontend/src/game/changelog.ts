@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 209,
+    date: "2026-09-27",
+    title: "Konsernet bygger i ekte tid",
+    items: [
+      "Å bygge, bygge ut og modernisere datterverk tar nå ekte timer, uansett spillfart: et stålverk 2 timer, et storverk 6, et stålkompleks 12 og hvert trinn modernisering 4. Du ser nedtellingen under Dine verk.",
+      "Utbyttet fra datterverkene er trimmet. Et stålkompleks tjener mindre, men koster også mindre. Et fullt konsern gir omtrent en tredjedel av det det ga før, og konsernverdien er lavere. Titlene du har nådd, beholder du.",
+      "Hjemmeverket er flaggskipet: godt omdømme og stål som holder kvaliteten gir inntil 20 % mer utbytte fra alle datterverkene.",
+    ],
+  },
+  {
     b: 208,
     date: "2026-09-27",
     title: "Returskrapet brukes opp",

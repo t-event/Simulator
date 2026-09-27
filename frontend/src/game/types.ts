@@ -262,6 +262,16 @@ export interface SisterPlant {
   boughtDay: number;
   /** Står etter havari til denne dagen */
   downUntilDay: number;
+  /** Bygging, utbygging eller modernisering som pågår, i ekte tid (B-209). Mangler i eldre lagringer */
+  project?: SisterProject;
+}
+
+/** Et byggeprosjekt i konsernet (B-209): tar ekte timer, uansett spillfart */
+export interface SisterProject {
+  kind: "bygg" | "utbygging" | "modernisering";
+  /** Ekte tid (ms siden 1970) da prosjektet startet og blir ferdig */
+  startedAt: number;
+  readyAt: number;
 }
 
 export interface DayFinance {

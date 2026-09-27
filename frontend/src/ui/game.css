@@ -4096,3 +4096,19 @@ button {
     background: var(--accent);
   }
 }
+
+/* Byggeprosjekt i konsernet (B-209): hva som skjer og når det er ferdig */
+.g-project {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin-top: var(--sp-2);
+  min-width: 160px;
+}
+
+.g-project .ds-icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.12em;
+  color: var(--accent);
+}

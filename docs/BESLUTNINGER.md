@@ -3034,7 +3034,7 @@ regel 6. De planlagte funksjonene står i tabellen med «planlagt».
 
 
 ## B-181 Fase 1: eierens valg, og ny økonomi i datterverkene (2026-09-27)
-Status: gjelder (svarer på de sju spørsmålene i B-180; justerer B-119 og B-121)
+Status: gjelder, men tallene i `KONSERN_ECONOMY` (keepShare, upstreamDecay) er justert av B-209 (svarer på de sju spørsmålene i B-180; justerer B-119 og B-121)
 Bakgrunn: Eieren godkjente fase 0 (B-180) og svarte på spørsmålene i `RETNING.md` avsnitt 13.
 
 **Eierens valg (fase 1):**
@@ -3675,4 +3675,33 @@ Beslutning:
 Konto (B-149): ingen ny funksjon.
 Testet: `npm test` (ny test for innbytte, skittent retur, induksjonsovn, reserve og plass på lageret; den feiler uten
 plassregelen), balanse (exit 0, nybegynner median 136), simulering av brukerens oppsett, tsc, lint, build.
+
+## B-209 Konsernet bygger i ekte tid, utbyttet er trimmet, og hjemmeverket er flaggskipet (2026-09-27)
+Status: gjelder (justerer B-121 og B-181; første del av rebalanseringen av sluttspillet i RETNING.md)
+Brukeren: «Utbyttet er vel kanskje litt for ekstremt? Skal vi balansere inntektene litt?» – og etter anbefalingen: «Gå for
+din anbefaling.»
+Funnet: fire spillere hadde bygd ut alt (12–14 stålkomplekser på trinn 5) og sto på kassegrensen på 100 mrd. med 49 mrd.
+til 8 200 mrd. i bunden reserve. Hjemmeverket ga 1–6 % av inntekten. Hovedproblemet var tempoet: på 10× er et spilldøgn 12
+sekunder, så et kompleks som betaler seg på 50–90 døgn, var tjent inn på 10–18 minutter. Å bare kutte utbyttet ville bare
+gitt mindre tall på en konto som ikke kan brukes.
+Beslutning:
+- **Byggetid i ekte tid, uansett spillfart:** et stålverk tar 2 timer å bygge, et storverk 6, et stålkompleks 12;
+  utbygging fra stålverk til storverk 6 timer; hvert trinn modernisering 4 timer. Ett prosjekt om gangen per verk. Et verk
+  som bygges, tjener ingenting og har ingen konsernledelse; et verk som bygges ut eller moderniseres, går som før imens.
+  Verdien regnes som om prosjektet er ferdig (pengene er betalt), så konsernverdien faller ikke. Prosjektene blir ferdige
+  også når spillet står på pause (`finishKonsernProjects` i spilløkka). Tida er lokal (`realNow`); det er greit fordi
+  konsernet er eget spill – det som avgjøres mellom spillere, regnes fortsatt på serveren (B-190).
+- **Trim av utbyttet:** et stålkompleks tjener 60 mill. per døgn før modernisering (var 110 mill.), og prisen fulgte med
+  (3,6 mrd., var 6 mrd.), så et nytt verk fortsatt er verdt det det koster (B-121). Verkene beholder 30 % (var 20 %), og
+  utbyttet avtar 10 % per verk nedover i rekken (var 5 %). Et fullt konsern med 14 komplekser på trinn 5 gir 1,1 mrd. netto
+  per døgn (var 3,3 mrd.).
+- **Hjemmeverket er flaggskipet:** omdømme og andelen stål som holdt kvaliteten de siste sju døgnene gir inntil +20 %
+  utbytte fra alle datterverkene (`flagshipBonus`). Da lønner det seg fortsatt å drive selve verket godt.
+- Spillerne merker det med én gang: inntekten fra et fullt konsern blir omtrent en tredjedel, og konsernverdien faller
+  (verdien er 60 døgns overskudd). Titlene som er nådd, beholdes. Lagringene endres ikke.
+- Ikke avgjort ennå (resten av rebalanseringen): hva den bundne reserven (B-193) blir, og om kassegrensen skal bort.
+Konto (B-149): ingen ny funksjon – konsernet er en del av selve spillet.
+Testet: ny test (bygging i ekte tid, spillfart hjelper ikke, ett prosjekt per verk, verdien faller ikke, flaggskipet),
+de gamle konserntestene spoler klokka fram; `balance.ts` (exit 0; testspilleren får en ekte klokke som om den spiller på
+3×) og `--konsern`; Playwright på Konsern med prosjekter som pågår, 7 størrelser.
 

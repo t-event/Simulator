@@ -10,6 +10,7 @@ import { claimTab, isElsewhere, setBeforeRelease } from "./tabLock";
 import { showToast } from "./inbox";
 import type { GameState, LogEntry } from "./types";
 import { applyCashCap } from "./reserve";
+import { finishKonsernProjects } from "./konsern";
 
 const TICK_MS = 200;
 // En strupet bakgrunnsfane skal ikke hoppe over flere spilltimer på ett tick
@@ -243,6 +244,11 @@ export function useGame(): GameApi {
         advanceTutorial(g);
         advanceRecipeGuide(g);
         flushLog();
+      }
+      // Byggeprosjektene i konsernet går i ekte tid, også når spillet står på pause (B-209)
+      if (!wasRunning && g.konsern?.plants.some((p) => p.project) && finishKonsernProjects(g)) {
+        flushLog();
+        bump();
       }
       if (now - lastSave > AUTOSAVE_MS) {
         saveGame(g);
