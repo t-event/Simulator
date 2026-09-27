@@ -340,7 +340,8 @@ export const STAGES: Stage[] = [
     name: "Storverk",
     price: 32_000_000,
     reputation: 65,
-    staffCap: 220,
+    // Fullt utbygd trenger verket 40 per skift, 200 til fem skiftlag, pluss de anbefalte støtterollene (B-207)
+    staffCap: 240,
     yardT: 25000,
     storeT: 20000,
     scrapCrew: 4,

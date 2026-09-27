@@ -27,7 +27,7 @@ import {
   trackCosmetic,
 } from "./cosmetics";
 import { CHALLENGES, checkChallenges } from "./challenges";
-import { ADDONS, CASTINGS, FURNACES, WIN_CASH } from "./data";
+import { ADDONS, CASTINGS, FURNACES, STAGES, WIN_CASH } from "./data";
 import {
   advance,
   assessOffer,
@@ -109,7 +109,7 @@ import {
   rateDelivery,
   ratingFactor,
 } from "./engine";
-import { crewPerShift, fireImpact, liningWearPerHeat, specMargin, staffing, wildcardUse } from "./plant";
+import { crewPerShift, fireImpact, liningWearPerHeat, MAX_CREWS, specMargin, staffing, wildcardUse } from "./plant";
 import { QUIZ } from "./quiz";
 import { GRADES } from "./data";
 import type { Agreement, Analysis, Contract, ManualRequest, RoleId } from "./types";
@@ -1371,3 +1371,30 @@ if (failed) {
 } else {
   console.log("\nAlle tester OK");
 }
+
+test("Plass til fem skiftlag og alle anbefalte støtteroller på et fullt utbygd storverk (B-207)", () => {
+  const g = newGame(207);
+  g.stage = STAGES.length - 1;
+  // Største ovn og støping verket kan ha, tre ovner og alt tilleggsutstyr
+  const biggest = <T extends { crew: Partial<Record<RoleId, number>> }>(list: T[]) =>
+    list.reduce((a, b) =>
+      Object.values(b.crew).reduce((x, y) => x + (y ?? 0), 0) > Object.values(a.crew).reduce((x, y) => x + (y ?? 0), 0)
+        ? b
+        : a,
+    );
+  const furnace = biggest(FURNACES.filter((f) => f.stage <= g.stage));
+  g.furnaceType = furnace.id;
+  g.castingType = biggest(CASTINGS.filter((c) => c.stage <= g.stage)).id;
+  g.owned = ADDONS.filter((a) => a.stage <= g.stage && !a.perFurnace).map((a) => a.id);
+  while (g.furnaces.length < 3) g.furnaces.push(structuredClone(g.furnaces[0]));
+  g.furnaces.forEach((f) => (f.type = furnace.id));
+  g.settings.rolling = true;
+  g.researched.push("innkjop", "ordreplan");
+  g.workers = [];
+  for (const [role, n] of Object.entries(crewPerShift(g)) as [RoleId, number][])
+    for (let i = 0; i < n * MAX_CREWS; i++) g.workers.push(makeCandidate(g, role));
+  assert(staffing(g, true).crews === MAX_CREWS, `lag: ${staffing(g, true).crews}`);
+  const support = supportAdvice(g).reduce((a, s) => a + Math.max(0, s.want - s.have), 0);
+  const need = g.workers.length + support;
+  assert(need <= STAGES[g.stage].staffCap, `trenger ${need}, plass til ${STAGES[g.stage].staffCap}`);
+});

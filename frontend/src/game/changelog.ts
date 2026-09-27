@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 207,
+    date: "2026-09-27",
+    title: "Plass til flere på storverket",
+    items: [
+      "Storverket har plass til 240 ansatte i stedet for 220. Da får du plass til fem skiftlag og alle de anbefalte rollene, som murere og reparatører.",
+    ],
+  },
+  {
     b: 206,
     date: "2026-09-27",
     title: "Konsernet som hovedkontor",
