@@ -3995,3 +3995,18 @@ Eieren: «Det skal ikke være sluttdato noen plass. Ny sesong skal gjøres manue
 - **Appen:** `Season.ends_at` er `string | null`, og `daysLeft` er fjernet (nedtellingen ble tatt bort i B-220).
 - Ingen nye sikkerhetsråd (`get_advisors`). Konto: ingen endring.
 Endringslogg: nei
+
+## B-222 Spillet står på pause mens Salg er åpen (2026-09-27)
+Status: gjelder
+Ønske fra en spiller (via brukeren): «når man går inn på salg så pauses spillet frem til man går ut av salg vinduet eller
+starter tiden igjen manuelt mens man er inne i salg vinduet».
+- Når spilleren åpner Salg og tida går, settes spillet på pause, og farten fra før huskes. Når Salg lukkes (en annen
+  fane), går spillet videre i samme fart – men bare hvis det fortsatt står på pause og ingen hendelseskort eller
+  kontrollrommet venter. Starter spilleren tida selv mens Salg er åpen, blir den stående slik, også etterpå.
+- Øverst på Salg står en kort forklaring mens pausen varer: «Spillet står på pause mens du er på Salg. Det går videre når
+  du går ut – eller start tida selv øverst.»
+- Innstilling under ⚙️: «Sett spillet på pause mens du er på Salg» (`settings.pauseOnSales`, på som standard; gamle
+  lagringer får `true` i `migrate()`).
+- Logikken står i `GameApp` (effekter på `onSales` og farten), ikke i spillmotoren: det er bare et valg i grensesnittet,
+  så testspilleren og juksesperren påvirkes ikke (tida står bare stille).
+- Konto: nei (regel 1, ditt eget spill). Lagt i KONTO.md.

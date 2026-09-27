@@ -116,6 +116,7 @@ export function migrate(g: GameState): GameState {
   if (g.settings.toastTopics === undefined) g.settings.toastTopics = {};
   if (g.settings.toastSeconds === undefined) g.settings.toastSeconds = 6;
   if (g.settings.keepSpeed === undefined) g.settings.keepSpeed = false;
+  if (g.settings.pauseOnSales === undefined) g.settings.pauseOnSales = true;
   // Kundevurdering (B-161)
   if (!Array.isArray(loose.ratings)) loose.ratings = [];
   // Mesterskap og stålmilepæler (B-150)

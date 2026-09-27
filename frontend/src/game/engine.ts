@@ -217,6 +217,7 @@ export function newGame(seed = Date.now()): GameState {
       toastTopics: {},
       toastSeconds: 6,
       keepSpeed: false,
+      pauseOnSales: true,
       autoTemps: false,
       secondsAction: "spot",
       graderStrict: true,

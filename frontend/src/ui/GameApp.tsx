@@ -742,6 +742,36 @@ export function GameApp() {
     };
   }, [api.game]);
 
+  // Pause på Salg (B-222): spillet står stille mens spilleren leser forespørslene, og går videre i samme fart når Salg
+  // lukkes. Starter spilleren tida selv på Salg, blir den stående slik.
+  const onSales = !!g && viewUnlocked(g, view) && view === "salg";
+  const salesResume = useRef<number | null>(null);
+  const [salesPaused, setSalesPaused] = useState(false);
+  useEffect(() => {
+    const gg = api.game;
+    if (!gg) return;
+    if (onSales) {
+      if (gg.settings.pauseOnSales && gg.speed > 0 && !gg.gameOver) {
+        salesResume.current = gg.speed;
+        api.setSpeed(0);
+        setSalesPaused(true);
+      }
+    } else if (salesResume.current !== null) {
+      if (gg.speed === 0 && !gg.gameOver && !gg.pendingDecision && !gg.pendingManual) api.setSpeed(salesResume.current);
+      salesResume.current = null;
+      setSalesPaused(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onSales]);
+  const speedNow = g?.speed ?? 0;
+  useEffect(() => {
+    // Bare etter at pausen er satt (salesPaused), ellers ser farten fra før pausen ut som om spilleren startet tida
+    if (onSales && salesPaused && speedNow > 0) {
+      salesResume.current = null;
+      setSalesPaused(false);
+    }
+  }, [onSales, salesPaused, speedNow]);
+
   // Varsellinja står over menyen nederst på mobil (B-201). Høyden følges, så veiledningen legger seg over den
   const isPc = useIsPc();
   const appRef = useRef<HTMLDivElement>(null);
@@ -937,7 +967,14 @@ export function GameApp() {
             />
           )}
           {shown === "salg" && (
-            <Sales key={subTab.tab ? `salg-${subTab.n}` : "salg"} g={g} stats={stats} act={act} openTab={subTab.tab} />
+            <Sales
+              key={subTab.tab ? `salg-${subTab.n}` : "salg"}
+              g={g}
+              stats={stats}
+              act={act}
+              openTab={subTab.tab}
+              paused={salesPaused}
+            />
           )}
           {shown === "folk" && (
             <People key={subTab.tab ? `folk-${subTab.n}` : "folk"} g={g} stats={stats} act={act} openTab={subTab.tab} />

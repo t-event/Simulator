@@ -368,6 +368,8 @@ export interface Settings {
   toastSeconds: number;
   /** Etter et kort fortsetter spillet på farten fra før (3× eller 10×) i stedet for 1× (B-160) */
   keepSpeed: boolean;
+  /** Spillet står på pause mens Salg er åpen, og går videre på samme fart etterpå (B-222) */
+  pauseOnSales: boolean;
 }
 
 export interface ManualRequest {

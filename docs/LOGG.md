@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 159 – 2026-09-27: Pause på Salg
+
+**Brukeren ba om (fra en spiller):** spillet skal stå på pause mens Salg er åpen, til man går ut eller starter tida selv.
+
+**Gjort:** B-222. Pause når Salg åpnes, samme fart igjen når Salg lukkes; startes tida på Salg, blir den stående.
+Forklaring øverst på Salg. Innstilling under ⚙️ (på som standard, `pauseOnSales` i `migrate()`).
+
+**Testet:** tsc, lint, `npm test`, Playwright på 320, 390 og 1 920 px (3× → pause på Salg → 3× på Verket; 1× startet på
+Salg → 1× etterpå; ingen horisontal scrolling).
+
+**Gjenstår:** UI-4b, UI-4c, UI-4d; reserven og kassegrensen; Google/Apple senere.
+
+---
+
 ## Økt 158 – 2026-09-27: Sesonger uten sluttdato
 
 **Brukeren ba om:** ingen sluttdato noen plass; ny sesong skal gjøres manuelt.
