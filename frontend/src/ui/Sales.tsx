@@ -23,7 +23,9 @@ import { Agreements } from "./Agreements";
 import { DirectorSwitch } from "./Konsern";
 import { AutoLocked, AutoToggle } from "./AutoToggle";
 import { auto, automationUnlocked } from "../game/research";
-import { AnalysisLine, Bar, Card, GradeChips, GradeSpec } from "./common";
+import { AnalysisLine, Bar, Card, GradeChips, GradeSpec, SubTabs } from "./common";
+import { StatusBadge } from "./ds";
+import { Icon, type IconName } from "./icons";
 import { fmtKr, fmtNum, fmtT } from "./format";
 
 interface Props {
@@ -36,67 +38,114 @@ function daysLeft(g: GameState, c: Contract): number {
   return c.deadlineDay - day(g) + 1;
 }
 
-function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; committed: number }) {
-  // Samme vurdering som salgsdirektøren bruker (B-117): resept, ordrekø og rammeavtaler før fristen
+type Tone = "ok" | "warn" | "bad";
+
+/** Vurderingen av en forespørsel (B-117): samme som salgsdirektøren bruker – resept, ordrekø og avtaler før fristen */
+function offerChecks(g: GameState, stats: PlantStats, c: Contract, committed: number) {
   const { canMake, recipeOk, failures, missingResearch, graderFix, needDays, days, tight, narrow, doneDay } =
     assessOffer(g, stats, c, committed);
   const est = recipeEstimate(g, c.grade, stats, gradeRecipe(g, c.grade));
   const hasKlasser = g.workers.some((w) => w.role === "klasser");
   const following = auto(g, "followQueue");
-  const answerHours = Math.max(0, (c.offerExpiresMin - g.minute) / 60);
+  const checks: { tone: Tone; text: string }[] = [];
+  if (!canMake) checks.push({ tone: "bad", text: `Du lager ikke ${PRODUCTS[c.product].name.toLowerCase()}` });
+  if (canMake) {
+    if (recipeOk) {
+      checks.push(
+        nearLimit(est.analysis, c.grade) && stats.lab < 2
+          ? {
+              tone: "warn",
+              text: "Resepten ligger nær grensen. Uten full analyse kan et dårlig skrapparti gi reklamasjon.",
+            }
+          : { tone: "ok", text: "Resepten holder kravet" },
+      );
+    } else if (missingResearch) {
+      checks.push({ tone: "bad", text: scrapResearchHint(g, c.grade, missingResearch) });
+    } else if (graderFix) {
+      // Skrapklasseren legger om resepten når ordren skal lages (B-099)
+      checks.push({
+        tone: following ? "ok" : "warn",
+        text: following
+          ? `Resepten din gir ${failures.join(", ")} nå, men skrapklasseren legger den om når ordren skal lages, så den holder kravet.`
+          : `Resepten gir ${failures.join(", ")}. Skrapklasseren kan legge den om hvis ovnen følger ordrekøen (Verket) – ellers juster den selv under Marked.`,
+      });
+    } else {
+      checks.push({
+        tone: "bad",
+        text: `Resepten gir ${failures.join(", ")}. ${
+          hasKlasser
+            ? "Heller ikke skrapklasseren finner en blanding av skrapet du har tilgang til som holder."
+            : "Juster den under Marked – eller ansett en skrapklasser som legger den om for deg."
+        }`,
+      });
+    }
+    checks.push({
+      tone: tight ? "bad" : narrow ? "warn" : "ok",
+      text: Number.isFinite(needDays)
+        ? tight
+          ? `Rekker det neppe: med ordrekøen du har, blir den ferdig ca. dag ${doneDay}, fristen er dag ${c.deadlineDay}`
+          : narrow
+            ? `Knapt: blir ferdig ca. dag ${doneDay}, fristen er dag ${c.deadlineDay}. En stans eller fravær kan gjøre den for sen.`
+            : `Blir ferdig ca. dag ${doneDay} med ordrekøen du har (frist dag ${c.deadlineDay})`
+        : "Verket står – ingen produksjon nå",
+    });
+  }
+  const tone: Tone = checks.some((ch) => ch.tone === "bad")
+    ? "bad"
+    : checks.some((ch) => ch.tone === "warn")
+      ? "warn"
+      : "ok";
+  return { checks, tone, days };
+}
+
+/** Samlet vurdering med ikon + ord (UI.md 6.2), brukt i lista over forespørsler på PC */
+const VERDICT: Record<Tone, { label: string; icon: IconName; cls: string }> = {
+  ok: { label: "Rekker det", icon: "ok", cls: "is-ok" },
+  warn: { label: "Usikkert", icon: "warning", cls: "is-heat" },
+  bad: { label: "Rekker det ikke", icon: "error", cls: "is-critical" },
+};
+
+function Verdict({ tone }: { tone: Tone }) {
+  const v = VERDICT[tone];
   return (
-    <div className="g-contract">
+    <span className={`ds-status-line ${v.cls}`}>
+      <Icon name={v.icon} />
+      <span>{v.label}</span>
+    </span>
+  );
+}
+
+function answerHours(g: GameState, c: Contract) {
+  return Math.max(0, (c.offerExpiresMin - g.minute) / 60);
+}
+
+function answerText(hours: number) {
+  return hours < 1 ? "under en time" : `${Math.floor(hours)} timer`;
+}
+
+function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; committed: number }) {
+  const { checks, days } = offerChecks(g, stats, c, committed);
+  const hours = answerHours(g, c);
+  return (
+    <div className="g-contract g-offer">
       <div className="g-contract-head">
-        <strong>{c.customer}</strong>
+        <strong className="g-offer-customer">{c.customer}</strong>
         <span className="g-contract-value">{fmtKr(c.tonnes * c.pricePerT)}</span>
       </div>
-      <p className={`g-answer-by${answerHours <= 3 ? " is-urgent" : ""}`}>
-        Svar innen {answerHours < 1 ? "under en time" : `${Math.floor(answerHours)} timer`} – ellers går kunden videre
-      </p>
-      <p>
+      <p className="g-offer-meta">
         {fmtT(c.tonnes)} {PRODUCTS[c.product].name.toLowerCase()} i kvalitet <strong>{GRADES[c.grade].name}</strong> ·{" "}
         {fmtKr(c.pricePerT)}/t · leveres innen {days} døgn
       </p>
+      <p className={`g-answer-by${hours <= 3 ? " is-urgent" : ""}`}>
+        <Icon name="clock" />
+        Svar innen {answerText(hours)} – ellers går kunden videre
+      </p>
       <ul className="g-checks">
-        {!canMake && <li className="bad">Du lager ikke {PRODUCTS[c.product].name.toLowerCase()}</li>}
-        {canMake &&
-          (recipeOk ? (
-            nearLimit(est.analysis, c.grade) && stats.lab < 2 ? (
-              <li className="warn">
-                Resepten ligger nær grensen. Uten full analyse kan et dårlig skrapparti gi reklamasjon.
-              </li>
-            ) : (
-              <li className="ok">Resepten holder kravet</li>
-            )
-          ) : missingResearch ? (
-            <li className="bad">{scrapResearchHint(g, c.grade, missingResearch)}</li>
-          ) : graderFix ? (
-            // Skrapklasseren legger om resepten når ordren skal lages (B-099)
-            <li className={following ? "ok" : "warn"}>
-              {following
-                ? `Resepten din gir ${failures.join(", ")} nå, men skrapklasseren legger den om når ordren skal lages, så den holder kravet.`
-                : `Resepten gir ${failures.join(", ")}. Skrapklasseren kan legge den om hvis ovnen følger ordrekøen (Verket) – ellers juster den selv under Marked.`}
-            </li>
-          ) : (
-            <li className="bad">
-              {`Resepten gir ${failures.join(", ")}. ${
-                hasKlasser
-                  ? "Heller ikke skrapklasseren finner en blanding av skrapet du har tilgang til som holder."
-                  : "Juster den under Marked – eller ansett en skrapklasser som legger den om for deg."
-              }`}
-            </li>
-          ))}
-        {canMake && (
-          <li className={tight ? "bad" : narrow ? "warn" : "ok"}>
-            {Number.isFinite(needDays)
-              ? tight
-                ? `Rekker det neppe: med ordrekøen du har, blir den ferdig ca. dag ${doneDay}, fristen er dag ${c.deadlineDay}`
-                : narrow
-                  ? `Knapt: blir ferdig ca. dag ${doneDay}, fristen er dag ${c.deadlineDay}. En stans eller fravær kan gjøre den for sen.`
-                  : `Blir ferdig ca. dag ${doneDay} med ordrekøen du har (frist dag ${c.deadlineDay})`
-              : "Verket står – ingen produksjon nå"}
+        {checks.map((ch) => (
+          <li key={ch.text} className={ch.tone}>
+            {ch.text}
           </li>
-        )}
+        ))}
       </ul>
       <details className="g-details">
         <summary>Krav til stålet, omdømme og bot</summary>
@@ -108,12 +157,54 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
           sent.
         </p>
       </details>
-      <div className="g-row">
+      <div className="g-row g-offer-actions">
         <button className="g-primary" onClick={() => act((gg) => acceptContract(gg, c.id))}>
           Signer
         </button>
         <button onClick={() => act((gg) => declineContract(gg, c.id))}>Avslå</button>
       </div>
+    </div>
+  );
+}
+
+/** PC (B-198): forespørslene som liste til venstre, den valgte med vurdering og knapper til høyre */
+function OfferMasterDetail({ g, stats, act, offers, committed }: Props & { offers: Contract[]; committed: number }) {
+  const [sel, setSel] = useState<number | null>(null);
+  const selected = offers.find((c) => c.id === sel) ?? offers[0];
+  if (!selected) return null;
+  return (
+    <div className="g-offers-md">
+      <ul className="g-offer-list" aria-label="Forespørsler">
+        {offers.map((c) => {
+          const { tone, days } = offerChecks(g, stats, c, committed);
+          const hours = answerHours(g, c);
+          return (
+            <li key={c.id}>
+              <button
+                className={`g-offer-row${c.id === selected.id ? " is-selected" : ""}`}
+                aria-pressed={c.id === selected.id}
+                onClick={() => setSel(c.id)}
+              >
+                <span className="g-offer-row-head">
+                  <strong>{c.customer}</strong>
+                  <span className="g-contract-value">{fmtKr(c.tonnes * c.pricePerT)}</span>
+                </span>
+                <span className="g-offer-row-meta">
+                  {fmtT(c.tonnes)} · {GRADES[c.grade].name} · {days} døgn
+                </span>
+                <span className="g-offer-row-foot">
+                  <Verdict tone={tone} />
+                  <span className={`g-answer-by${hours <= 3 ? " is-urgent" : ""}`}>
+                    <Icon name="clock" />
+                    {answerText(hours)}
+                  </span>
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      <OfferCard g={g} stats={stats} act={act} c={selected} committed={committed} />
     </div>
   );
 }
@@ -165,15 +256,16 @@ export function Sales({ g, stats, act, openTab }: Props & { openTab?: string }) 
   const agreementOffers = g.agreements.filter((a) => a.status === "tilbud").length;
   // Fanen viser antall aktive avtaler; nye tilbud får et eget merke (B-081)
   const agreementsActive = g.agreements.filter((a) => a.status === "aktiv").length;
-  const tabs: { id: SalesTab; label: string; badge?: string }[] = [
-    { id: "tilbud", label: `Forespørsler${offers.length ? ` (${offers.length})` : ""}` },
-    { id: "ko", label: `Ordrekø${active.length ? ` (${active.length})` : ""}` },
+  const tabs: { id: SalesTab; label: string; count?: number; badge?: string }[] = [
+    { id: "tilbud", label: "Forespørsler", count: offers.length },
+    { id: "ko", label: "Ordrekø", count: active.length },
     { id: "lager", label: "Lager" },
     ...(showAgreements
       ? [
           {
             id: "avtaler" as const,
-            label: `Avtaler${agreementsActive ? ` (${agreementsActive})` : ""}`,
+            label: "Avtaler",
+            count: agreementsActive,
             badge: agreementOffers ? (agreementOffers === 1 ? "Ny" : `${agreementOffers} nye`) : undefined,
           },
         ]
@@ -181,22 +273,9 @@ export function Sales({ g, stats, act, openTab }: Props & { openTab?: string }) 
   ];
 
   return (
-    <div className="g-grid">
+    <div className={`g-grid g-sales is-${tab}`}>
       <div className="g-col-wide">
-        <div className="g-subtabs" role="tablist" aria-label="Salg">
-          {tabs.map((t) => (
-            <button
-              key={t.id}
-              role="tab"
-              aria-selected={tab === t.id}
-              className={tab === t.id ? "is-active" : ""}
-              onClick={() => setTab(t.id)}
-            >
-              {t.label}
-              {t.badge && <span className="g-badge g-badge-new">{t.badge}</span>}
-            </button>
-          ))}
-        </div>
+        <SubTabs tabs={tabs} value={tab} onChange={setTab} label="Salg" />
 
         {tab === "tilbud" && (
           <Card title={`Forespørsler (${offers.length})`}>
@@ -258,9 +337,12 @@ export function Sales({ g, stats, act, openTab }: Props & { openTab?: string }) 
                   : "Ingen forespørsler akkurat nå. Nye kommer i løpet av døgnet."}
               </p>
             )}
-            {offers.map((c) => (
-              <OfferCard key={c.id} g={g} stats={stats} act={act} c={c} committed={committed} />
-            ))}
+            <div className="g-offers-cards">
+              {offers.map((c) => (
+                <OfferCard key={c.id} g={g} stats={stats} act={act} c={c} committed={committed} />
+              ))}
+            </div>
+            <OfferMasterDetail g={g} stats={stats} act={act} offers={offers} committed={committed} />
           </Card>
         )}
 
@@ -284,22 +366,29 @@ export function Sales({ g, stats, act, openTab }: Props & { openTab?: string }) 
                     <strong>
                       {i + 1}. {c.customer}
                     </strong>
-                    <span className={left <= 1 ? "g-badge-bad" : "g-muted"}>
-                      {left <= 0 ? "Frist i dag" : `${left} døgn igjen`}
-                    </span>
+                    {left <= 1 ? (
+                      <span className="ds-status is-heat">
+                        <Icon name="clock" />
+                        {left <= 0 ? "Frist i dag" : "1 døgn igjen"}
+                      </span>
+                    ) : (
+                      <span className="g-muted">{left} døgn igjen</span>
+                    )}
                   </div>
                   {ovens && (
-                    <span className="g-badge-ok">
-                      Produseres nå
-                      {g.furnaces.length > 1 && ovens.length < g.furnaces.length ? ` i ovn ${ovens.join(" og ")}` : ""}
-                    </span>
+                    <StatusBadge
+                      status="kjorer"
+                      label={`Produseres nå${
+                        g.furnaces.length > 1 && ovens.length < g.furnaces.length ? ` i ovn ${ovens.join(" og ")}` : ""
+                      }`}
+                    />
                   )}
                   <p>
                     {PRODUCTS[c.product].name}, {GRADES[c.grade].name} · {fmtKr(c.pricePerT)}/t
                     {c.agreementId ? " · rammeavtale" : ""}
                   </p>
                   <Bar value={c.delivered / c.tonnes} tone="ok" label="Levert" />
-                  <div className="g-contract-head">
+                  <div className="g-contract-head g-queue-foot">
                     <span className="g-muted">
                       Levert {fmtT(c.delivered)} av {fmtT(c.tonnes)}
                     </span>
@@ -311,7 +400,7 @@ export function Sales({ g, stats, act, openTab }: Props & { openTab?: string }) 
                           disabled={i === 0}
                           onClick={() => act((gg) => moveInQueue(gg, c.id, -1))}
                         >
-                          ▲
+                          <Icon name="chevron-up" />
                         </button>
                         <button
                           className="g-small"
@@ -319,7 +408,7 @@ export function Sales({ g, stats, act, openTab }: Props & { openTab?: string }) 
                           disabled={i === active.length - 1}
                           onClick={() => act((gg) => moveInQueue(gg, c.id, 1))}
                         >
-                          ▼
+                          <Icon name="chevron-down" />
                         </button>
                       </span>
                     )}

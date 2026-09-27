@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 136 – 2026-09-27: UI-2d – Salg
+
+**Brukeren ba om:** «Merge» av UI-2c (PR #143) og en anbefaling for varsellinja på mobil; deretter «Fortsett».
+
+**Gjort:** PR #143 merget. Anbefalt å flytte varsellinja ned over menyen (alternativ 3), som en egen prøve med
+skjermbilder – venter på «Ja». B-198: forespørsler som liste + detaljer på PC, kortet med tydelig kunde/verdi og større
+Signer, ordrekøen med statusmerker og ikoner, underfaner som ikke kutter navnet på 320 px. Endringsloggen, UI.md.
+
+**Testet:** tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter på 4 størrelser (alle fanene) og 7 for
+vannrett scrolling, avkortet tekst og knappehøyde; valg og signering i lista på PC.
+
+**Gjenstår:** eierens svar på skjermbildene og på prøven av varsellinja. Deretter UI-3a (Økonomi).
+
+---
+
 ## Økt 135 – 2026-09-27: UI-2c – Marked
 
 **Brukeren ba om:** «Fortsett» etter «Merge» av UI-2b (PR #142).

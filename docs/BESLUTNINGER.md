@@ -3464,3 +3464,26 @@ Beslutning:
 Konto (B-149): ingen ny funksjon.
 Testet: tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter på 320, 390, 1 366 og 1 920 px (stålverk og
 storverk, alle fire fanene) og de 7 størrelsene uten vannrett scrolling.
+
+## B-198 UI-2d: Salg – forespørsler som liste og detaljer på PC, underfaner som ikke kuttes (2026-09-27)
+Status: gjelder (UI.md 3.3, 6 og 8; bygger på B-197)
+Beslutning:
+- **Forespørsler på PC (fra 1 000 px):** lista til venstre viser kunde, verdi, tonn · kvalitet · døgn, samlet vurdering
+  med ikon + ord (Rekker det / Usikkert / Rekker det ikke) og svarfristen. Den valgte står til høyre med alle
+  sjekkene, kravene og knappene. Første forespørsel er valgt når fanen åpnes.
+- **Mobil:** alle forespørslene som kort, som før, uten et ekstra trykk for å se detaljene (et avvik fra UI.md 3.3, der
+  mobil skulle åpne detaljene som et ark: kortene er korte nok, og ett trykk mindre er viktigere på mobil).
+- **Hierarki i kortet:** kunde og verdi (visningsskriften) først; tonn, kvalitet, pris og frist som metadata under;
+  svarfristen med klokkeikon. «Signer» og «Avslå» er minst 44 px høye.
+- **Samme vurdering overalt:** sjekkene er flyttet til `offerChecks` i `ui/Sales.tsx`, så lista og kortet aldri
+  sier noe ulikt. Teksten fra før står uendret.
+- **Ordrekøen:** «Produseres nå» som statusmerke, frist i dag / 1 døgn igjen som oransje merke med klokke, pilene
+  som ikoner, og knappene brytes ikke lenger under hverandre på 320 px.
+- **Underfaner (alle sider):** antallet står under navnet på mobil og etter navnet fra 600 px, og navnet brytes aldri
+  midt i ordet (før: «Forespørs» på 320 px). Er det likevel for trangt, kortes navnet med «…».
+- På PC er Salg like bred som hovedområdet på Forespørsler; de andre fanene høyst 960 px (som Marked, B-197).
+- Ingen endring i spillet.
+Konto (B-149): ingen ny funksjon.
+Testet: tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter på 320, 390, 1 366 og 1 920 px (stålverk og
+storverk, alle fire fanene), de 7 størrelsene uten vannrett scrolling eller avkortet tekst og med knapper minst 40 px,
+Marked-fanene på nytt (nye underfaner), og valg + «Signer» i lista på PC.

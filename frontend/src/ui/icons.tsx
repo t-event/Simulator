@@ -126,6 +126,7 @@ const ICONS = {
   ],
   "chevron-right": [["path", { d: "m9 18 6-6-6-6" }]],
   "chevron-down": [["path", { d: "m6 9 6 6 6-6" }]],
+  "chevron-up": [["path", { d: "m18 15-6-6-6 6" }]],
   menu: [
     ["path", { d: "M4 5h16" }],
     ["path", { d: "M4 12h16" }],
