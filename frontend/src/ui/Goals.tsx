@@ -8,12 +8,12 @@ import { CHALLENGE_STAGE, CHALLENGES, challengeProgress, challengeShare, challen
 import type { PlantStats } from "../game/plant";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
-import { AccountFeaturesCard } from "./Account";
 import { AchievementsCard, PyntModal } from "./Achievements";
 import { Bar, Card, SubTabs } from "./common";
 import { DailyCard } from "./Daily";
 import { fmtKr, fmtNum } from "./format";
 import { Leaderboard } from "./Leaderboard";
+import { MissingOutCard } from "./MissingOut";
 import { SeasonTrackCard } from "./SeasonTrack";
 import { WeeklyCard } from "./Weekly";
 
@@ -72,11 +72,12 @@ export function GoalsPage({
   const act = api.act;
   const [tab, setTab] = useState<GoalsTab>(isGoalsTab(openTab) ? openTab : "idag");
   const [pynt, setPynt] = useState(false);
-  // Ukens utfordring og sesongstigen først etter garasjen (gradvis synlighet, B-180)
+  // Ukens utfordring og sesongstigen først etter garasjen (gradvis synlighet, B-180). Korte navn, så alle fire får
+  // plass på 320 px (B-212)
   const tabs: { id: GoalsTab; label: string }[] = [
     { id: "idag", label: "I dag" },
-    ...(g.stage >= 1 ? [{ id: "uke" as const, label: "Uke og sesong" }] : []),
-    { id: "prestasjoner", label: "Prestasjoner" },
+    ...(g.stage >= 1 ? [{ id: "uke" as const, label: "Uka" }] : []),
+    { id: "prestasjoner", label: "Merker" },
     { id: "toppliste", label: "Toppliste" },
   ];
   const shown = tabs.some((t) => t.id === tab) ? tab : "idag";
@@ -91,19 +92,15 @@ export function GoalsPage({
         )}
         {shown === "idag" && !coaching && (
           <>
+            <MissingOutCard g={g} onLogin={onOpenSettings} />
             <DailyCard g={g} act={act} />
-            <AccountFeaturesCard
-              features={["oppdrag"]}
-              note="Du får også en daglig belønning som vokser gjennom uka, og verket tjener litt mens du er borte."
-              onLogin={onOpenSettings}
-            />
           </>
         )}
         {shown === "uke" && !coaching && (
           <>
             <WeeklyCard act={act} />
             <SeasonTrackCard act={act} />
-            <AccountFeaturesCard features={["ukens", "stigen"]} onLogin={onOpenSettings} />
+            <MissingOutCard g={g} onLogin={onOpenSettings} />
           </>
         )}
         {shown === "prestasjoner" && (

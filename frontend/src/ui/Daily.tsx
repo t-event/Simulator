@@ -25,6 +25,7 @@ import { Bar, Card } from "./common";
 import { driftText, fmtKr, fmtNum, fmtT } from "./format";
 import { useDailyStatus } from "./useDaily";
 import { buzz } from "./haptics";
+import { Icon } from "./icons";
 
 function useSession() {
   return useSyncExternalStore(onSessionChange, getSession, getSession);
@@ -161,7 +162,7 @@ export function DailySync({ api, blocked }: { api: GameApi; blocked: boolean }) 
                 const state = n < day7 || (claimed && n === day7) ? "is-done" : n === day7 ? "is-next" : "";
                 return (
                   <li key={n} className={`${state}${n === 7 ? " is-chest" : ""}`}>
-                    <span className="g-streak-day">{n === 7 ? "🎁" : `Dag ${n}`}</span>
+                    <span className="g-streak-day">{n === 7 ? <Icon name="gift" label="Kiste" /> : `Dag ${n}`}</span>
                     <span className="g-streak-what">
                       {r.fp > 0 && `${r.fp} fp`}
                       {r.fp > 0 && r.days > 0 && " + "}
@@ -276,7 +277,7 @@ export function DailyCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
               <li key={m.id} className={done ? "is-done" : ""}>
                 <div className="g-mission-line">
                   <span>
-                    {done ? "✅ " : ""}
+                    {done && <Icon name="check" className="g-mission-check" label="Gjort" />}
                     {missionText(m)}
                   </span>
                   <span className="g-muted">{progressText(g, m)}</span>

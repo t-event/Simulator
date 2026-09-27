@@ -3767,3 +3767,48 @@ krever det fortsatt. Vernet i `save_game` gjelder alle kontoer.
 Testet: ny spilltest (landemerke først i køen og hos planleggeren, vikarer fra skiftlederen), ny nettest (serveren har
 endret spillet: lavere `serverEdit` avvises og appen tar serverens spill), `npm test`, balanse exit 0 (storverk 147,
 nybegynner 153,5), tsc, lint, build, Playwright på Mål-siden på 7 størrelser og 320 px, rådgiverne etter migrasjonen.
+
+## B-212 Gjestekonto, «Det går du glipp av», juksesperren på stålverket og ikoner på Mål (2026-09-27)
+Status: gjelder (avgjør spørsmålet om kontoer i B-210; justerer B-149, B-158 og B-211)
+Brukeren: «Automatisk gjestekonto, men de får ikke gjort noe mer før de faktisk oppretter konto. Vis hva de går glipp
+av. Ja vi kan fikse innlogging med Google og Apple senere.» Og: «Dagens oppdrag bruker enda emojier» og «Noen spillere
+som er flagget? Ser det mangler noen fra topplista».
+- **Gjestekonto:** spiller man uten konto, lager appen en anonym konto i bakgrunnen (Supabase «anonymous sign-ins») når
+  spillet har kommet til dag 2, og lagrer spillet der én gang i minuttet (`net/guest.ts`). Gjestens økt ligger for seg
+  selv, ikke som innlogging, så resten av spillet ser spilleren som «uten konto». Et spill som alt tilhører en konto,
+  blir aldri gjest. Gjesten får ikke noe mer: ingen toppliste, kallenavn, daglig belønning, oppdrag, «mens du var
+  borte», uke, sesong, anbud eller konsernkasse. Oppretter spilleren konto eller logger inn, tar kontoen over gjesten
+  (`adopt_guest`, via en engangskode fra `guest_handover`), gjesten slettes, og spillet kobles til kontoen som før.
+  Hvorfor gjest når den ikke får noe: spillet er sikret på nett fra første stund, eieren ser hvor mange som spiller, og
+  overgangen til konto er klar for Google/Apple senere.
+- **Sperren på serveren** (migrasjon `035_gjestekonto.sql`): én funksjon, `guest_gate`, kjøres av PostgREST før hvert
+  kall (`pgrst.db_pre_request`). Vanlige kontoer og kall uten innlogging slipper rett gjennom; en gjest slipper bare til
+  `save_game`, `guest_handover`, `delete_my_account`, egne rader i `saves`/`snapshots`, `config` og det alle kan lese
+  (toppliste, sesong, hendelser, ukelista). Alt annet – også funksjoner som lages senere – gir 403 «Dette krever en
+  konto». `set_nickname` sjekker i tillegg selv. Gjester teller ikke som aktive spillere (`note_activity`), gir ikke
+  skraplageret inntekt (`meter_snapshot`) og får ikke «mens du var borte» (`touch_activity`). Testet i DO-blokker som
+  rulles tilbake: vanlig konto og uten innlogging slipper gjennom, gjesten nektes bud og profiler, gjesten får lagre,
+  overtakelsen flytter tidslinja og sletter gjesten, og koden virker bare én gang. Lagringene til de ekte spillerne gikk
+  som før etter migrasjonen.
+- **Må gjøres av eieren:** slå på «Allow anonymous sign-ins» i dashbordet (FORSLAG.md). Til da prøver appen én gang i
+  døgnet og gjør ellers ingenting.
+- **Det går du glipp av:** uten konto (også som gjest) står ett kort øverst på Mål → I dag og Uka, etter den veiledede
+  starten: plassen man ville hatt på topplista denne sesongen (regnet i appen fra lista alle kan lese), hva en uke med
+  daglig belønning gir, bonusen for dagens oppdrag, uke og sesong (fra stålverket), skraplageret og konsernkassa (når
+  konsernet er åpnet) og spillet på flere enheter. Én knapp: «Opprett konto eller logg inn». Erstatter
+  `AccountFeaturesCard` på Mål.
+- **Flagget spiller manglet på topplista:** enzo var flagget for «konsernverdi 51,5 mill. på nivå 2». Det var feil:
+  enzo ble værende på stålverket i 300 døgn og sparte jevnt (ca. 0,5 mill. per døgn, langt under vekstsperren). Taket
+  på konsernverdi per nivå gjelder nå bare det første tallet i sesongen (når det ikke finnes noe å sammenligne med);
+  etterpå passer vekstsperren på. Flagget er fjernet (som for Figen i B-158 og H4WK3N5 i B-194). Ingen andre er flagget;
+  alle andre spillere står på lista.
+- **Ikoner i stedet for emojier på Mål:** dagens oppdrag (hake), daglig belønning (gave), ukens utfordring (medalje,
+  gave; medaljene skrives «gull/sølv/bronse»), sesongstigen og pynt (pensel, lås, lukk). To nye ikoner fra Lucide:
+  `gift` og `medal`. Pynten selv og merkene beholder symbolene sine – de er innholdet, ikke knapper.
+- **Kortere navn på underfanene på Mål:** «I dag, Uka, Merker, Toppliste». «Uke og sesong» og «Prestasjoner» ble
+  avkortet på 320 px (feil i B-211).
+Konto (B-149): gjestekontoen og kortet krever ikke konto (KONTO.md); alt gjesten ikke får, krever konto som før.
+Testet: to nye nettester (gjest lagres fra dag 2 høyst én gang i minuttet, nektes daglig belønning, kontoen tar over og
+gjesten forsvinner; avslått i Supabase prøves ikke igjen før et døgn; et kontospill blir aldri gjest), `npm test`, tsc,
+lint, build, Playwright på Mål (7 størrelser, alle fire underfaner, kortet med plassen på topplista), SQL-testene over.
+

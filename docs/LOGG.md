@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 149 – 2026-09-27: Gjestekonto, «Det går du glipp av», flagget spiller og emojier
+
+**Brukeren ba om:** emojier i Dagens oppdrag; flaggede spillere / noen mangler på topplista; automatisk gjestekonto
+som ikke får gjøre noe før man oppretter konto, og vise hva man går glipp av; Google/Apple senere.
+
+**Gjort:** B-212. Migrasjon 035: `guest_gate` (pre-request) slipper gjester bare til lagringen, overtakelse av gjest
+(`guest_handover`/`adopt_guest`), gjester ute av aktive spillere og skraplagerinntekt, og taket per nivå i juksesperren
+bare for første tall. Flagget på enzo fjernet (feilflagg). `net/guest.ts`, `restAs`, `signInAnonymously`, kortet
+«Det går du glipp av» (`ui/MissingOut.tsx`), ikoner i stedet for emojier på Mål, kortere fanenavn.
+
+**Testet:** SQL i DO-blokker (sperren, overtakelsen), lagringene til spillerne gikk som før etter migrasjonen,
+`npm test` med to nye nettester, tsc, lint, build, Playwright på Mål (7 størrelser).
+
+**Gjenstår:** eieren må slå på «Allow anonymous sign-ins» i Supabase; godkjenning av rettingen av Granes spill (B-211);
+Google/Apple senere; rydde gamle gjester når det blir mange; reserven og kassegrensen; UI-4a–d.
+
+---
+
 ## Økt 148 – 2026-09-27: Landemerker, Mål-side, økonomireformen og vikarer
 
 **Brukeren ba om:** landemerker blir ikke laget med salgsdirektør; mål og belønninger for gjemt på Verket; en spiller

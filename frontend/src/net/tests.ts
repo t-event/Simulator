@@ -53,6 +53,7 @@ import {
   UPLOAD_INTERVAL_MS,
   uploadSave,
 } from "./sync";
+import { forgetGuest, isGuest, onGuestSave, setGuestClock } from "./guest";
 import { DEPOSIT_REFUSAL_TEXT, depositToTreasury, fetchTreasury } from "./treasury";
 import { BID_REFUSAL_TEXT, fetchWorldStatus, placeBid, timeLeft } from "./world";
 
@@ -114,6 +115,9 @@ interface Fake {
   treasury: Map<string, { balance: number; used: number }>;
   /** Bud i anbudet (B-189) */
   bids: Map<string, number>;
+  /** Gjestekontoer (B-212) og om anonyme kontoer er slått av i Supabase */
+  guests: Set<string>;
+  guestsOff: boolean;
 }
 function makeFake(): Fake {
   const f: Fake = {
@@ -130,6 +134,8 @@ function makeFake(): Fake {
     hangSave: false,
     treasury: new Map(),
     bids: new Map(),
+    guests: new Set(),
+    guestsOff: false,
   };
   const json = (status: number, body: unknown) =>
     new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
@@ -149,6 +155,14 @@ function makeFake(): Fake {
     f.keepalive.push(!!init?.keepalive);
     if (f.offline) throw new TypeError("Failed to fetch");
     const body = init?.body ? (JSON.parse(String(init.body)) as Record<string, unknown>) : {};
+    // Gjest (B-212): anonym innlogging uten e-post
+    if (path.startsWith("/auth/v1/signup") && body.email === undefined) {
+      if (f.guestsOff)
+        return json(422, { code: "anonymous_provider_disabled", msg: "Anonymous sign-ins are disabled" });
+      const gid = `g-${f.guests.size + 1}`;
+      f.guests.add(gid);
+      return json(200, { access_token: token(gid), refresh_token: "rg", expires_in: 3600, user: { id: gid } });
+    }
     if (path.startsWith("/auth/v1/signup")) {
       const email = String(body.email);
       if (f.users.has(email)) return json(200, { id: "x", identities: [] });
@@ -190,6 +204,19 @@ function makeFake(): Fake {
     }
     const id = who(init);
     if (!id) return json(401, { message: "JWT" });
+    // Som guest_gate i 035: en gjest får bare lagre spillet og overlevere seg selv
+    if (f.guests.has(id)) {
+      if (path.startsWith("/rest/v1/rpc/guest_handover")) return json(200, `kode-${id}`);
+      if (!/^\/rest\/v1\/(rpc\/save_game|saves|snapshots|config)/.test(path))
+        return json(403, { code: "GJEST", message: "Dette krever en konto." });
+    }
+    if (path.startsWith("/rest/v1/rpc/adopt_guest")) {
+      const gid = String(body.p_code).replace(/^kode-/, "");
+      if (!f.guests.has(gid)) return json(200, { ok: false, moved: 0 });
+      f.guests.delete(gid);
+      f.saves.delete(gid);
+      return json(200, { ok: true, moved: 0 });
+    }
     if (path.startsWith("/rest/v1/saves")) {
       if (init?.method === "POST") {
         // Eldre utgave av appen: skriver rett i tabellen, versjonen øker likevel (triggeren i 008)
@@ -425,6 +452,7 @@ function fresh(): Fake {
   setSession(null);
   resetCloud();
   store.clear();
+  forgetGuest();
   return makeFake();
 }
 
@@ -1249,6 +1277,69 @@ const main = async () => {
     assert(off.ok && off.balance === 50_000_000, `trukket bud gir pengene tilbake: ${JSON.stringify(off)}`);
     assert(timeLeft("2026-09-29T01:00:00Z", Date.parse("2026-09-27T18:00:00Z")) === "31 t", "tid igjen");
     assert(timeLeft("2026-09-29T01:00:00Z", Date.parse("2026-09-29T00:15:00Z")) === "45 min", "minutter igjen");
+  });
+
+  await test("Gjestekonto (B-212): lagres som gjest fra dag 2, får ikke noe mer, og kontoen tar over", async () => {
+    const f = fresh();
+    let now = 1_000_000;
+    setGuestClock(() => now);
+    const g = newGame(41);
+    g.minute = 1440 * 1;
+    await onGuestSave(g);
+    assert(!f.calls.some((c) => c.includes("/auth/v1/signup")), "gjesten skal ikke lages før dag 2");
+    g.minute = 1440 * 3;
+    onLocalSave(g);
+    await onGuestSave(g);
+    assert(isGuest() && f.saves.get("g-1")?.minute === 1440 * 3, "gjesten lagret ikke spillet");
+    assert(g.owner === null && getSession() === null, "gjesten skal ikke være innlogging eller eier");
+    // Høyst én gang i minuttet
+    g.minute += 60;
+    await onGuestSave(g);
+    assert(f.saves.get("g-1")?.minute === 1440 * 3, "gjesten lagret for ofte");
+    now += 61_000;
+    await onGuestSave(g);
+    assert(f.saves.get("g-1")?.minute === 1440 * 3 + 60, "gjesten lagret ikke etter et minutt");
+    // Gjesten får ikke hente daglig belønning
+    let refused = false;
+    try {
+      const { restAs } = await import("./supabase");
+      await restAs(JSON.parse(store.get("stalverk-gjest-v1")!).session.access_token, "rpc/daily_status", {
+        method: "POST",
+        body: {},
+      });
+    } catch (e) {
+      refused = e instanceof NetError && e.status === 403;
+    }
+    assert(refused, "gjesten skulle nektes");
+    // Oppretter konto: kontoen tar over gjesten, og spillet kobles til kontoen
+    await signUp("ny@test", "hemmelig");
+    await verifyCode("ny@test", "123456", "signup");
+    const d = await linkOnLogin(g);
+    assert(d.kind === "uploaded", `fikk ${d.kind}`);
+    assert(
+      f.calls.some((c) => c.includes("rpc/adopt_guest")),
+      "kontoen tok ikke over gjesten",
+    );
+    assert(!f.guests.has("g-1") && !f.saves.has("g-1") && !isGuest(), "gjesten skulle være borte");
+    assert(f.saves.get("u-ny@test")?.minute === g.minute && g.owner === "u-ny@test", "spillet ble ikke koblet til");
+    setGuestClock(() => Date.now());
+  });
+
+  await test("Gjestekonto (B-212): avslått i Supabase prøves ikke igjen før et døgn; et kontospill blir aldri gjest", async () => {
+    const f = fresh();
+    f.guestsOff = true;
+    const g = newGame(42);
+    g.minute = 1440 * 5;
+    await onGuestSave(g, true);
+    await onGuestSave(g, true);
+    const tries = f.calls.filter((c) => c.includes("/auth/v1/signup")).length;
+    assert(tries === 1 && !isGuest(), `skulle prøve én gang, prøvde ${tries}`);
+    const f2 = fresh();
+    const owned = newGame(43);
+    owned.minute = 1440 * 5;
+    owned.owner = "u-a@test";
+    await onGuestSave(owned, true);
+    assert(!f2.calls.length, "et spill som tilhører en konto, skal ikke bli gjest");
   });
 
   await test("NetError uten nett merkes som offline", async () => {

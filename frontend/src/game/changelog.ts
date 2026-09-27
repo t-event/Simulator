@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 212,
+    date: "2026-09-27",
+    title: "Gjest og Mål",
+    items: [
+      "Spiller du uten konto, lagres spillet på nett i bakgrunnen som gjest. Oppretter du konto, følger spillet med.",
+      "På Mål ser du hva en konto gir deg: plassen du ville hatt på topplista, den daglige belønningen og bonusen for dagens oppdrag.",
+      "Mål har fått ikoner i stedet for emojier, og kortere navn på fanene: I dag, Uka, Merker og Toppliste.",
+      "En spiller som ble lenge på stålverket og sparte, ble tatt for juks ved en feil. Det er rettet.",
+    ],
+  },
+  {
     b: 211,
     date: "2026-09-27",
     title: "Landemerker, egen Mål-side og vikarer",

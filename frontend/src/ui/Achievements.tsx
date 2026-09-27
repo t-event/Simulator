@@ -19,6 +19,7 @@ import { Bar, Card } from "./common";
 import { fmtNum } from "./format";
 import { PlantScene } from "./PlantScene";
 import { Portal } from "./Portal";
+import { Icon } from "./icons";
 
 /** Den som er nærmest å bli nådd – vises først */
 function nextUp(g: GameState): Achievement | undefined {
@@ -43,7 +44,7 @@ export function AchievementsCard({ g, onOpenPynt }: { g: GameState; onOpenPynt: 
       title={`Prestasjoner (${done} av ${ACHIEVEMENTS.length})`}
       right={
         <button className="g-small" onClick={onOpenPynt}>
-          🎨 Pynt
+          <Icon name="palette" /> Pynt
         </button>
       }
     >
@@ -101,9 +102,11 @@ export function PyntModal({
       <div className="g-modal" role="dialog" aria-modal="true" aria-label="Pynt verket" onClick={onClose}>
         <div className="g-modal-card" onClick={(e) => e.stopPropagation()}>
           <header className="g-card-head">
-            <h2>🎨 Pynt verket</h2>
+            <h2>
+              <Icon name="palette" /> Pynt verket
+            </h2>
             <button onClick={onClose} aria-label="Lukk">
-              ✕
+              <Icon name="close" />
             </button>
           </header>
           <div className="g-scene-wrap g-pynt-preview">
@@ -141,10 +144,12 @@ export function PyntModal({
                       {on ? "På" : "Av"}
                     </button>
                   ) : blocked === "season" ? (
-                    <span className="g-pynt-lock">🔒 Sesongstigen, trinn {c.seasonTier}</span>
+                    <span className="g-pynt-lock">
+                      <Icon name="lock" /> Sesongstigen, trinn {c.seasonTier}
+                    </span>
                   ) : blocked === "needs" && need ? (
                     <span className="g-pynt-lock">
-                      🔒 Krever {need.icon} {need.name}
+                      <Icon name="lock" /> Krever {need.icon} {need.name}
                     </span>
                   ) : (
                     <button
