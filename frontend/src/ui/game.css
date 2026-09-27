@@ -3608,3 +3608,15 @@ button {
     }
   }
 }
+
+/* Verket har fem underfaner når Konsern er åpnet (B-199): tettere på de smaleste telefonene, så navnene får plass */
+@media (max-width: 360px) {
+  .g-verket-tabs {
+    gap: 0;
+  }
+
+  .g-verket-tabs button {
+    font-size: var(--fs-caption);
+    padding: 0 1px;
+  }
+}

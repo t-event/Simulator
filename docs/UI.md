@@ -206,7 +206,7 @@ Prinsipp: **samme data og handlinger, forskjellig mengde synlig samtidig.** Grad
 | Verket → Anlegg | Vertikal liste per sted, tydelig status | Driftsdashbord: produksjonsflyt i midten, sidepanel med skraplager, ovner, støping, valsing, lager, vedlikehold, hendelser | Ja |
 | Verket → Økonomi | Resultat øverst, så inntekt/kostnad | Dashbord med hierarki: resultat → inntekt/kostnad → hovedverk/datterverk → produksjon/strøm/lønn; små grafer bare der de forteller noe (resultat 7/30 døgn) | Ja |
 | Verket → Konsern | Verdi, netto, neste steg, verk | Hovedkontor: nøkkeltall øverst, verkene som tabell/kart, beslutninger og varsler fra verk i egen sone (plass til verksjefer og strategiske bedrifter senere, uten tomme plassholdere) | Ja |
-| Marked | Kort per skraptype, resept, strøm | Skraptabell (Type · Pris · P · Spor · C · Skitt · Eget lager · Handling) + detaljpanel; resept og strøm ved siden av | Ja |
+| Marked | Kort per skraptype, strøm (resepten er flyttet til Verket, B-199) | Skraptabell (Type · Pris · P · Spor · C · Skitt · Eget lager · Handling) + detaljpanel; resept og strøm ved siden av | Ja |
 | Salg | Kort per forespørsel | Master/detail: forespørsler · ordrekø · lager · avtaler til venstre, valgt ordre til høyre (kunde, verdi, tonn, kvalitet, frist, forventet levering, reseptstatus, kapasitet, mulig bot, handling) | Ja |
 | Folk | Enkel liste og anbefaling | Bemanningstabell (Område · Behov · Bemannet · Ferdighet · Fravær), utvidbar med verksjefer/ledelse | Ja |
 | Forskning | Kort, gruppert | Kategoriliste · oversikt · detaljpanel. Ikke et stort tech tree | Ja |

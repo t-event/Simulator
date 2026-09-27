@@ -149,8 +149,8 @@ frontend/src/
     scrapIncome.ts Skraplagerets inntekt i ekte tid – speiler SQL-en i 029 (B-188); scrapTests.ts viser at fart ikke hjelper
     tests.ts     Tester uten nett (falsk tjeneste)
   ui/          Spillets skjermer (mobil først) og kontrollrommet
-    Overview.tsx Verket med underfanene Oversikt, Anlegg, Økonomi (og Konsern; valget i verketTabs.ts/GameApp)
-    Recipe.tsx  Resepten på Marked
+    Overview.tsx Verket med underfanene Oversikt, Anlegg, Resept, Økonomi (og Konsern; valget i verketTabs.ts/GameApp)
+    Recipe.tsx  Resepten (Verket → Resept, B-199)
     Agreements.tsx Rammeavtaler under Salg   AutoToggle.tsx  Brytere for automatikk (låst til den er forsket fram)
     views.ts     Fanene og når de låses opp   Upgrades.tsx, stations.ts  Utstyr per sted i anlegget
     ResearchPage.tsx  Forskning-fanen   Settings.tsx  ⚙️ innstillinger og banken (på Verket → Økonomi)

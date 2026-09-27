@@ -71,8 +71,8 @@ export function guideSteps(g: GameState, grade: GradeId): GuideStep[] {
     },
     {
       title: "Lag resepten",
-      text: `Gå til Marked → Resept og trykk «Billigst» – da blandes skrapet så det holder kravet. Uten skrapklasser blir blandingen omtrentlig, og da er «Sikrest» tryggere. Grønne haker betyr at kravet holder.`,
-      view: "marked",
+      text: `Gå til Verket → Resept og trykk «Billigst» – da blandes skrapet så det holder kravet. Uten skrapklasser blir blandingen omtrentlig, og da er «Sikrest» tryggere. Grønne haker betyr at kravet holder.`,
+      view: "verket",
       sub: "resept",
       done: (gg) => recipeEstimate(gg, grade, computePlantStats(gg), gradeRecipe(gg, grade)).grades.includes(grade),
     },

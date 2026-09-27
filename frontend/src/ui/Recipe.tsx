@@ -56,7 +56,7 @@ export function RecipeCard({ g, stats, act }: { g: GameState; stats: PlantStats;
       </button>
       <p className="g-muted">
         Resepten sier hvor mye av hver skraptype som går i ovnen. Den bestemmer hva som blir i stålet. Kvaliteten velger
-        du på Verket.
+        du under Oversikt («Produksjon nå»).
         {inUse.length > 1 && ` Denne resepten brukes i ovn ${ovens.map((i) => i + 1).join(" og ")}.`}
       </p>
 

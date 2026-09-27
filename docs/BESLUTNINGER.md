@@ -672,7 +672,7 @@ Beslutning:
   roller verket ikke bruker nå (f.eks. øseovnsoperatører uten øseovn) som tar plass blant de ansatte.
 
 ## B-051 Marked og Forskning med underfaner (2026-09-24)
-Status: gjelder
+Status: gjelder, men Resept er flyttet fra Marked til Verket (B-199)
 Brukeren syntes Marked- og Forskning-sidene var for lange.
 Beslutning:
 - Marked har underfanene Skrap, Resept, Strøm/Energi og Priser. Skrap er standard. Fanen blir oransje når
@@ -3487,3 +3487,22 @@ Konto (B-149): ingen ny funksjon.
 Testet: tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter på 320, 390, 1 366 og 1 920 px (stålverk og
 storverk, alle fire fanene), de 7 størrelsene uten vannrett scrolling eller avkortet tekst og med knapper minst 40 px,
 Marked-fanene på nytt (nye underfaner), og valg + «Signer» i lista på PC.
+
+## B-199 Resepten flyttes fra Marked til Verket (2026-09-27)
+Status: gjelder (erstatter delen av B-051 om Resept under Marked)
+Brukeren: «Resept bør ikke ligge under marked.»
+Beslutning:
+- Resepten er en del av produksjonen – hva som går i ovnen og hva som blir i stålet – ikke av markedet. Den er nå
+  en egen underfane på Verket: **Oversikt · Anlegg · Resept · Økonomi** (· Konsern). Kvaliteten velges fortsatt under
+  Oversikt («Produksjon nå»), så begge delene av «hva lager vi» ligger på Verket.
+- Marked har underfanene Skrap, Strøm/Energi og Priser. Skrap resepten venter på, er fortsatt merket under Skrap.
+- Resept-fanen blir oransje når resepten ikke holder kravet til en kvalitet som lages nå (som før på Marked).
+- Alle råd, varsler, hendelseskort og reseptguiden som viste til «Marked → Resept», viser nå til «Verket → Resept»
+  og åpner den fanen.
+- På PC står resepten ved siden av anleggsbildet og rådene. På de smaleste telefonene (≤ 360 px) er Verket-fanene
+  tettere, så alle fem navnene får plass når Konsern er åpnet.
+- Ingen endring i spillet eller i lagrede spill (underfanen lagres ikke).
+Konto (B-149): ingen ny funksjon.
+Testet: tsc, lint, `npm test`, balanse (exit 0), build; Playwright på de 7 størrelsene (stålverk og storverk med
+konsern): ingen vannrett scrolling og ingen avkortede fanenavn; en resept som ikke holder, gir oransje fane, og rådet
+åpner Verket → Resept; Marked har tre faner.
