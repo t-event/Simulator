@@ -6,7 +6,8 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
-Ingen åpne akkurat nå (fase 1-svarene står i B-181 og B-186).
+Fra UI-fase 0 (B-187, `UI.md` avsnitt 12): egen skrift eller systemskrift; ikoner fra Lucide; samle «krever
+konto»-kortene i ett (justerer KONTO-regel 6); Konsern i sidemenyen på PC og som underfane på mobil; klar for UI-1a.
 
 ## Venter
 

@@ -3191,4 +3191,33 @@ Beslutning:
   skraplager og anbud – ingen priser skal bygges på at dagens grenser er faste.
 - **Pilotkonsesjonen er 14 ekte dager** (to helger; med tre aktive spillere gir sju dager for lite data).
 - Før fase 1B: automatiske testcaser som viser at lokal fart (1×, 3×, 10×), ulik spilletid, pause/offline og en gammel
-  lagring ikke kan øke inntekten til skraplageret – og hvorfor (B-187).
+  lagring ikke kan øke inntekten til skraplageret – og hvorfor (B-188).
+
+## B-187 Stålverket er både mobilspill og PC-spill – plan for designsystem og redesign (2026-09-27)
+Status: gjelder (utvider «Mobil først» i CLAUDE.md; justerer ikke gameplay)
+Endringslogg: nei (ren planlegging – UI-fase 0)
+Bakgrunn: Eieren har gått gjennom mobilgrensesnittet med en ekstern vurdering. Til nå har utviklingen handlet om hvordan
+spillet virker; utseendet har blitt til underveis. I mid/late game (storverk, hundrevis av ansatte, konsern, strategiske
+bedrifter, overtakelser) blir informasjonsmengden så stor at PC/nettleser naturlig bør bli den beste måten å styre på.
+Beslutning:
+- **Mobil = rask, fokusert og enkel drift. PC = kontrollrom/hovedkontor med mye bedre oversikt.** Samme spill, samme
+  designsystem, samme komponenter og data; ulike layouter der det gir bedre oversikt. Ingen viktig funksjon er PC-only.
+  PC skal ikke være mobilversjonen med større max-width.
+- **Visuell identitet:** nordisk industri + moderne kontrollrom + tycoon. Mørk grafitt, ståltoner, cyan for det
+  interaktive (beholdes), grønt for positiv drift, gult/oransje for varme/vedlikehold/advarsel, rødt bare for faktiske
+  feil. Ikke generisk dashbord, ikke rust og flammer, ikke AI-kunst som UI.
+- **Designsystemet først** (tokens, typografi, knapper, faner, status, varsler, dialog/ark, tabeller, sidepaneler …),
+  så sidene. Hierarki med avstand og typografi, ikke kort i kort. Én ikonfamilie i stedet for emoji i hoved-UI-et.
+- **Gradvis synlighet er absolutt**, også på PC: områder finnes ikke i navigasjonen før de er låst opp (ingen
+  hengelåser).
+- **Teknisk:** ett app-skall, ikke `MobileApp`/`DesktopApp`. Gameplaylogikken splittes aldri mellom mobil og PC.
+  Tilgjengelighet (trykkflater, kontrast, fokus, tastatur, ingen status bare i farge) og ytelse (ingen tunge
+  biblioteker, PWA) er krav.
+- **Faser:** UI-0 audit og plan (denne) → UI-1 designsystem og app-skall → UI-2 Oversikt, Anlegg, Marked, Salg →
+  UI-3 Økonomi, Folk, Forskning, Konsern → UI-4 Kontrollrom, Toppliste/Hall of Fame, øvrige ark, polering. Logo og
+  app-ikon venter til designsystemet finnes. Test på 7 faktiske størrelser fra 320×568 til 2 560×1 080.
+- Planen med kritisk vurdering, designsystem, brytepunkter, app-skall, side-for-side, komponenter, PR-rekkefølge,
+  risiko og spørsmål står i **`docs/UI.md`**.
+Funn i vurderingen (målt): toppfeltet på mobil er 133 px (34 % av en 320×568-skjerm sammen med menyen); innholdet er
+låst til 1 248 px midtstilt på PC; 76 ulike farger, 19 skriftstørrelser, 10 radier og 42 padding-verdier i CSS-en;
+121 emoji i komponentene; bare to ekte brytepunkter.

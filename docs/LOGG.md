@@ -5,6 +5,27 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 126 – 2026-09-27: UI-fase 0 – mobil + PC og designplan
+
+**Brukeren ba om:** en separat oppgave etter fase 1A: UI/UX, visuell identitet og en ekte PC-versjon. Stålverket skal
+være både mobilspill og PC-spill (mobil = rask drift, PC = kontrollrom/hovedkontor). Først UI-fase 0: kritisk
+vurdering, designsystem, PC-arkitektur, responsiv strategi, komponenter som endres, hva som beholdes, PR-rekkefølge og
+problemer med retningen – og oppdatere prosjektminnet. Ingen stor implementering før planen er gjennomgått. Ikke logo
+eller app-ikon ennå.
+
+**Gjort:** B-187 og `docs/UI.md`. Målt dagens UI i Playwright på 7 størrelser (320×568 til 2 560×1 080) og lest `ui/`
+og CSS-en. CLAUDE.md («Mobil og PC», les UI.md), DESIGN.md (plattformer).
+
+**Viktigste funn:** mobiltoppfeltet er 133 px (34 % av en liten skjerm med menyen); PC er mobilversjonen låst til
+1 248 px; 76 farger, 19 skriftstørrelser, 10 radier i CSS-en; 121 emoji i komponentene; underfanene i Verket ligger
+under anleggsbildet; tre «krever konto»-kort fyller høyrekolonnen på PC.
+
+**Testet:** bare målinger og skjermbilder; ingen kode endret.
+
+**Gjenstår:** eierens svar på spørsmålene i `UI.md` avsnitt 12, så UI-1a (tokens og grunnkomponenter).
+
+---
+
 ## Økt 125 – 2026-09-27: økonomireformen gjennomført
 
 **Brukeren ba om:** «go» på reformen, men med et større urørt gulv eller en jevn overgang, så små spill (H4WK3N5 79 → 62
