@@ -1,51 +1,26 @@
 import { useEffect, useState, type ReactNode } from "react";
-import {
-  BONUS_COOLDOWN_DAYS,
-  fpDeal,
-  keyUpgrade,
-  requestManual,
-  requestReline,
-  setFurnaceGrade,
-  setTargetGrade,
-  upgradeOptions,
-} from "../game/actions";
+import { requestManual, requestReline, setFurnaceGrade, setTargetGrade, upgradeOptions } from "../game/actions";
 import { Maintenance } from "./Maintenance";
 import { RecipeCard } from "./Recipe";
-import { auto, missingResearchFor, researchOptions } from "../game/research";
-import { scrapResearchFor, scrapResearchHint } from "../game/recipe";
-import { GRADE_IDS, GRADES, PRODUCTS, ROLES, SCRAP_TYPES, STAGES } from "../game/data";
+import { auto } from "../game/research";
+import { GRADE_IDS, GRADES, PRODUCTS, SCRAP_TYPES, STAGES } from "../game/data";
+import { currentOrder, furnaceOrder, recipeEstimate, scrapShort, SEQUENCE_WAIT_MIN } from "../game/engine";
 import {
-  currentOrder,
-  furnaceOrder,
-  recipeEstimate,
-  scrapShort,
-  scrapStopHelp,
-  SEQUENCE_WAIT_MIN,
-} from "../game/engine";
-import {
-  bonusGap,
   castingType,
-  day,
   furnaceGrade,
   gradeRecipe,
   gradesInUse,
   hasGrader,
-  isAbsent,
   rollingActive,
   shiftStart,
-  staffing,
-  tempsActive,
   unitType,
-  fixedPriceAdvice,
   type PlantStats,
 } from "../game/plant";
-import type { DayFinance, GameState, GradeId, RoleId } from "../game/types";
+import type { DayFinance, GameState, GradeId } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { AnalysisLine, Bar, Card, GradeChips, Stat } from "./common";
 import { fmtClock, fmtKr, fmtNum, fmtPct, fmtT } from "./format";
 import { activeMissions, missionProgress } from "../game/missions";
-import { canWarn } from "../game/actions";
-import { avgRating, shiftLeaderAtWork, sickSpells } from "../game/engine";
 import { CHALLENGE_STAGE, CHALLENGES, challengeProgress, challengeShare, challengesDone } from "../game/challenges";
 import { PlantScene } from "./PlantScene";
 import { SceneBubbles } from "./SceneBubbles";
@@ -66,6 +41,7 @@ import type { View } from "./views";
 import { Icon } from "./icons";
 import { CASH_RESERVE } from "../game/reserve";
 import { Callout, StatusBadge, StatusLine, type Status } from "./ds";
+import { hints, type Anchor, type Hint } from "./hints";
 
 interface Props {
   g: GameState;
@@ -80,176 +56,6 @@ interface Props {
   setTab: (t: VerketTab) => void;
 }
 
-type Anchor = "vedlikehold" | "mal";
-
-interface Hint {
-  text: string;
-  view?: View;
-  /** Underfane i visningen, f.eks. lageret under Salg */
-  sub?: string;
-  /** Kort her på Verket som hintet ruller til: vedlikehold (under Anlegg) eller målkortet (B-064) */
-  anchor?: Anchor;
-}
-
-function hints(g: GameState, stats: PlantStats): Hint[] {
-  const out: Hint[] = [];
-  const active = g.contracts.filter((c) => c.status === "aktiv");
-  const offers = g.contracts.filter((c) => c.status === "tilbud");
-  const waits = g.furnaces.map((f) => f.waitReason);
-  if (!active.length && offers.length)
-    out.push({ text: "Du har ingen kontrakter. Se på tilbudene under Salg.", view: "salg" });
-  if (waits.includes("Mangler skrap til resepten"))
-    out.push({
-      text: `Skrapklasseren venter på skrap som passer resepten. ${scrapStopHelp(g)}`,
-      view: "marked",
-      sub: "skrap",
-    });
-  if (waits.includes("Tomt for skrap")) {
-    // Med flere ovner: si hvilke som står (B-161)
-    const empty = waits.flatMap((w, i) => (w === "Tomt for skrap" ? [String(i + 1)] : []));
-    const who =
-      waits.length === 1
-        ? "Ovnen står"
-        : `${empty.length === 1 ? "Ovn" : "Ovnene"} ${empty.slice(0, -1).join(", ")}${empty.length > 1 ? " og " : ""}${empty[empty.length - 1]} står`;
-    out.push({ text: `${who} fordi skraplageret er tomt. ${scrapStopHelp(g)}`, view: "marked", sub: "skrap" });
-  }
-  if (waits.includes("Mangler folk")) {
-    const missing = Object.entries(stats.missing)
-      .map(
-        ([r, n]) => `${n} ${n === 1 ? ROLES[r as RoleId].name.toLowerCase() : ROLES[r as RoleId].plural.toLowerCase()}`,
-      )
-      .join(", ");
-    out.push({ text: `Verket mangler folk for å gå: ${missing}.`, view: "folk" });
-  }
-  // Ovnene smelter mer enn støpingen tar unna (B-157): si hva som gir mer støpekapasitet
-  if (g.stage >= 4 && stats.casting.continuous && stats.hours > 0 && stats.meltTph > stats.castTph * 1.15) {
-    const more = upgradeOptions(g).find(
-      (o) => !o.owned && (o.kind === "casting" || o.baseId === "streng2" || o.baseId === "streng3"),
-    );
-    out.push({
-      text: `Ovnene smelter ca. ${fmtT(stats.meltTph)} i timen, men støpingen tar bare ${fmtT(stats.castTph)}, så ovnene venter på støping.${more ? ` Mer støpekapasitet: ${more.name}${more.reason && more.reason !== "For lite penger" ? ` (${more.reason.toLowerCase()})` : " under Anlegg → Støping og valsing"}.` : ""}`,
-    });
-  }
-  if (g.castWait === "Ferdigvarelageret er fullt")
-    out.push({ text: "Ferdigvarelageret er fullt. Selg partier på spot under Salg.", view: "salg", sub: "lager" });
-  if (stats.furnace.arc && g.furnaces.some((f) => f.spareProgress < 1) && !g.workers.some((w) => w.role === "murer"))
-    out.push({
-      text: "Reservepottene til lysbueovnene blir ikke murt opp. Ansett murere (to per ovn), ellers må foringen mures om inne i ovnen.",
-      view: "folk",
-    });
-  if (g.furnaces.some((f) => f.wear > 0.8 && !f.relineRequested))
-    out.push({
-      text: "Foringen er nesten slitt gjennom. Trykk her og bytt den under Vedlikehold før den brenner gjennom.",
-      anchor: "vedlikehold",
-    });
-  // Uten ordreplanlegging bytter ikke ovnen kvalitet selv (B-054)
-  const first = currentOrder(g);
-  if (
-    first &&
-    !auto(g, "followQueue") &&
-    first.grade !== g.targetGrade &&
-    g.furnaces.every((_, i) => furnaceGrade(g, i) !== first.grade)
-  )
-    out.push({
-      text: `${first.customer} vil ha ${GRADES[first.grade].name.toLowerCase()}, men ovnen lager ${GRADES[g.targetGrade].name.toLowerCase()}. Bytt kvalitet under «Produksjon nå» lenger ned.`,
-    });
-  // Kvaliteter ovnen lager eller har kontrakter på. Trengs det skrap som ikke er forsket fram, sies det (B-067)
-  const inUse = gradesInUse(g);
-  const needed = [...new Set([...inUse, ...g.contracts.filter((c) => c.status === "aktiv").map((c) => c.grade)])];
-  for (const grade of needed) {
-    const est = recipeEstimate(g, grade, stats, gradeRecipe(g, grade));
-    if (est.grades.includes(grade)) continue;
-    const missing = scrapResearchFor(g, grade, stats);
-    if (missing) out.push({ text: scrapResearchHint(g, grade, missing), view: "forskning" });
-    else if (inUse.includes(grade))
-      out.push({
-        text: `Resepten din holder ikke kravet til ${GRADES[grade].name.toLowerCase()}. Juster den under Verket → Resept.`,
-        view: "verket",
-        sub: "resept",
-      });
-  }
-  const research = researchOptions(g).filter((r) => r.available);
-  if (research.length)
-    out.push({ text: `Du har fagpoeng nok til å forske på ${research[0].name.toLowerCase()}.`, view: "forskning" });
-  const next = upgradeOptions(g).find((o) => o.kind === "stage");
-  if (next?.available) out.push({ text: `Du kan flytte inn i ${next.name.toLowerCase()}! Trykk her.`, anchor: "mal" });
-  // Står ny ovn eller støping fast på forskning, og fagpoengene mangler: vis veien videre (B-064)
-  const key = keyUpgrade(g);
-  const needs = key?.reason?.startsWith("Forsk fram") ? missingResearchFor(g, key.baseId) : undefined;
-  if (needs && g.researchPoints < needs.cost) {
-    const deal = fpDeal(g);
-    const ways = [
-      !deal.reason && "kjøp et forskningssamarbeid under Forskning",
-      stats.furnace.arc && "kjør charger selv («Ta styringen»)",
-      "lever kontrakter og ta quizene i fagboka",
-    ].filter(Boolean);
-    out.push({
-      text: `Du mangler ${Math.ceil(needs.cost - g.researchPoints)} fagpoeng til «${needs.name}». Få flere: ${ways.join(", ")}.`,
-      view: "forskning",
-    });
-  }
-  {
-    const away = g.workers.filter((w) => isAbsent(g, w)).length;
-    const full = staffing(g, true).shifts;
-    if (away && !tempsActive(g) && stats.shifts < full)
-      out.push({
-        text: `${away} ${away === 1 ? "ansatt er" : "ansatte er"} borte, og verket går ${stats.shifts} skift i stedet for ${full}. Lei inn vikarer under Folk, eller vent til de er tilbake.`,
-        view: "folk",
-        sub: "fravaer",
-      });
-  }
-  // Lenge siden bonus (B-159): trivselen synker, si fra før folk begynner å slutte
-  if (
-    g.workers.length &&
-    g.morale >= 40 &&
-    g.morale < 70 &&
-    bonusGap(g) >= 10 &&
-    day(g) - g.lastBonusDay >= BONUS_COOLDOWN_DAYS
-  )
-    out.push({
-      text: "Det er lenge siden de ansatte fikk bonus, og trivselen synker. Gi alle bonus under Folk.",
-      view: "folk",
-      sub: "ansatte",
-    });
-  if (g.workers.length && g.morale < 40)
-    out.push({ text: "Trivselen blant de ansatte er lav, og noen kan si opp. Se Folk.", view: "folk", sub: "ansatte" });
-  // Lav kundevurdering (B-161): si hva som gir bedre karakter
-  const recentRating = g.ratings.length >= 5 ? avgRating(g, 5) : null;
-  if (recentRating !== null && recentRating < 6)
-    out.push({
-      text: `Kundene gir deg lav karakter (${fmtNum(Math.floor(recentRating * 10) / 10, 1)} av 10). Lever tidligere, og velg en resept med mer margin til kravene. Se Salg → Ordrekø.`,
-      view: "salg",
-      sub: "ko",
-    });
-  {
-    // Høy strømpris: råd om fastpris (B-105)
-    const advice = fixedPriceAdvice(g, stats.hours);
-    if (advice)
-      out.push({
-        text: `Strømprisen er høy (${fmtNum(advice.spot, 2)} kr/kWh på spot). Fastpris nå: ${fmtNum(advice.fixed, 2)} kr/kWh i 30 døgn. Trykk her for å se strømavtalene.`,
-        view: "marked",
-        sub: "strom",
-      });
-  }
-  {
-    // Ofte borte: råd om advarsel (B-101)
-    // Med en skiftleder på jobb følges fraværet opp av seg selv (B-178)
-    const often = shiftLeaderAtWork(g) ? undefined : g.workers.find((w) => canWarn(g, w));
-    if (often)
-      out.push({
-        text:
-          `${often.name} har vært syk ${sickSpells(g, often)} ganger på 60 døgn. Vurder en advarsel under Folk → Fravær.` +
-          (g.stage >= 3 ? " En skiftleder følger opp fraværet for deg." : ""),
-        view: "folk",
-        sub: "fravaer",
-      });
-  }
-  if (g.stage >= 1 && stats.staffCount === 0)
-    out.push({ text: "Nå har du plass til ansatte. Med flere folk kan verket gå flere skift.", view: "folk" });
-  return out.slice(0, 3);
-}
-
-/** Skraptypene resepten mangler til neste charge, som tekst (B-063) */
 function missingScrap(g: GameState, stats: PlantStats): string | null {
   const short = scrapShort(g, stats);
   return short.length ? short.map((id) => SCRAP_TYPES[id].name.toLowerCase()).join(" og ") : null;

@@ -3538,3 +3538,25 @@ Konto (B-149): ingen ny funksjon.
 Testet: tsc, lint, `npm test`, balanse (exit 0), build; Playwright på de 7 størrelsene (stålverk og storverk): ingen
 vannrett scrolling og ingen avkortede knapper; toppfeltet 71 px på 390–820 px, PC uendret (57 px); varsellista og
 topplista åpnes fra raden nederst; veiledningen slutter over raden.
+
+## B-202 Varsel på Marked og Folk, og varsellinja viser det siste varselet (2026-09-27)
+Status: gjelder (bygger på B-071, B-116, B-144, B-201)
+Brukeren: «Marked-knappen bør få varsel om man mangler skrap eller andre slike ting. Varslingslinja sier bare at man
+har et varsel, men viser ingenting når det siste varselet er borte. Folk-knappen bør få varsel om det er noe man må ta
+tak i.»
+Beslutning:
+- **«!» på Marked og Folk i menyen** når et av rådene på Verket peker dit – samme regler som rådene, så menyen og rådene
+  aldri sier noe ulikt. Rådene er flyttet til `ui/hints.ts` og brukes av begge. Marked: skrap mangler eller lageret er
+  tomt, planleggeren får ikke kjøpt, høy strømpris med bedre fastpris. Folk: mangler folk, fravær som koster skift,
+  murere til reservepottene, lenge siden bonus, lav trivsel, ofte borte, plass til ansatte. Det gamle «!» for manglende
+  folk (B-071) står som før.
+- Et råd som noe i spillet ordner selv (planleggeren bestiller skrapet), står på Verket, men gir ikke «!».
+- Trykk på knappen med «!» åpner underfanen rådet peker til (f.eks. Marked → Skrap). Merket forklares for skjermlesere
+  og som verktøytips med rådets tekst. «Ny» går foran «!» (fanen er aldri åpnet).
+- **Varsellinja** viser det nyeste varselet spilleren ikke har sett (samme utvalg som tallet på bjella) når det korte
+  varselet har gått ut, i stedet for «Nye varsler – trykk for å se». Fargen følger varselet. Ingen usette: «Ingen nye
+  varsler» som før.
+Konto (B-149): ingen ny funksjon.
+Testet: tsc, lint, `npm test`, balanse (exit 0), build; Playwright (390 og 1 366 px): tomt skraplager uten planlegger og
+lav trivsel gir «!» på Marked og Folk, og trykk åpner Marked → Skrap og Folk → Ansatte; med planleggeren som bestiller
+får Marked ikke «!»; varsellinja viser teksten i det nyeste usette varselet.

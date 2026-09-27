@@ -15,11 +15,12 @@ import { maxSpeed, researchForSpeed, researchOptions } from "../game/research";
 import { masteryReady, requestManual, upgradeOptions } from "../game/actions";
 import { buzz } from "./haptics";
 import { nextTutorialStep, skipTutorial, TUTORIAL } from "../game/tutorial";
-import type { GameState } from "../game/types";
+import type { GameState, LogEntry } from "../game/types";
 import { fmtClock, fmtKr, fmtNum, fmtRep, fmtT } from "./format";
 import { Handbook } from "./Handbook";
 import { Market } from "./Market";
 import { Overview } from "./Overview";
+import { hints, type Hint } from "./hints";
 import { People } from "./People";
 import { ResearchPage } from "./ResearchPage";
 import { CloudDot, CloudFollow, IntroAccount, LoggedOutNotice } from "./Account";
@@ -33,7 +34,7 @@ import { flush, leaving, onLocalSave } from "../net/sync";
 import { newVersionAvailable, shouldReloadFor, UPDATE_CHECK_MS } from "../net/update";
 import { loadGame, saveGame, setSaveListener } from "../game/save";
 import { InboxSheet } from "./Inbox";
-import { markAllSeen, unseenCount } from "../game/inbox";
+import { importantLog, markAllSeen, unseenCount } from "../game/inbox";
 import { Sales } from "./Sales";
 import { VIEWS, viewUnlocked, type View } from "./views";
 import { Icon, type IconName } from "./icons";
@@ -525,7 +526,7 @@ function NoticeRow({
 }) {
   return (
     <div className={`g-notice-row ${className}`.trim()}>
-      <NoticeLine api={api} unseen={unseenCount(g)} onOpen={onInbox} />
+      <NoticeLine api={api} unseen={unseenCount(g)} latest={latestUnseen(g)} onOpen={onInbox} />
       <button className="g-book g-board-btn" onClick={onBoard} aria-label="Toppliste">
         <Icon name="trophy" />
       </button>
@@ -575,17 +576,36 @@ const TOAST_ICON = { bad: "⚠", event: "•", good: "✓", info: "•" } as con
  * varselet vises alltid, og ✕ fjerner alle og nullstiller tallet på bjella (B-171). Svar på noe spilleren trykket på
  * (f.eks. «For lite penger») står ikke i lista, så de vises helt.
  */
-function NoticeLine({ api, unseen, onOpen }: { api: GameApi; unseen: number; onOpen: () => void }) {
+/** Det nyeste varselet spilleren ikke har sett (samme utvalg som tallet på bjella), eller ingenting (B-202) */
+function latestUnseen(g: GameState): LogEntry | undefined {
+  const seen = g.inboxSeenId ?? 0;
+  const list = importantLog(g);
+  for (let i = list.length - 1; i >= 0; i--) {
+    const e = list[i];
+    if (e.id <= seen) break;
+    if (e.kind !== "good") return e;
+  }
+  return undefined;
+}
+
+function NoticeLine({
+  api,
+  unseen,
+  latest,
+  onOpen,
+}: {
+  api: GameApi;
+  unseen: number;
+  latest?: LogEntry;
+  onOpen: () => void;
+}) {
   const t = api.toasts[0];
-  const text = t
-    ? t.text
-    : unseen > 0
-      ? // Tallet står på bjella; teksten gjentar det ikke (B-144)
-        `${unseen === 1 ? "Nytt varsel" : "Nye varsler"} – trykk for å se`
-      : "Ingen nye varsler";
+  // Når varselet har gått ut av linja, står det nyeste usette varselet der fortsatt (B-202). Tallet står på bjella
+  const kind = t?.kind ?? (unseen > 0 ? latest?.kind : undefined);
+  const text = t ? t.text : unseen > 0 ? (latest?.text ?? "Nye varsler – trykk for å se") : "Ingen nye varsler";
   return (
     <div
-      className={`g-notice${t ? ` toast-${t.kind}` : ""}${t && !t.fromLog ? " is-full" : ""}`}
+      className={`g-notice${kind ? ` toast-${kind}` : ""}${t && !t.fromLog ? " is-full" : ""}`}
       role="status"
       aria-live="polite"
     >
@@ -598,8 +618,8 @@ function NoticeLine({ api, unseen, onOpen }: { api: GameApi; unseen: number; onO
           <Icon name="bell" />
           {unseen > 0 && <span className="g-badge">{unseen > 99 ? "99+" : unseen}</span>}
         </span>
-        <span className={`g-notice-msg${t ? "" : " is-idle"}`}>
-          {t && <span aria-hidden="true">{TOAST_ICON[t.kind]} </span>}
+        <span className={`g-notice-msg${kind ? "" : " is-idle"}`}>
+          {kind && <span aria-hidden="true">{TOAST_ICON[kind]} </span>}
           {text}
         </span>
       </button>
@@ -733,6 +753,11 @@ export function GameApp() {
     setSubTab((prev) => ({ tab: sub, n: prev.n + 1 }));
     if (!g.seenViews.includes(v)) act((gg) => void gg.seenViews.push(v));
   };
+  // Rådene som peker til Marked eller Folk (det første per fane), og planleggeren som ikke får kjøpt skrap (B-202)
+  const navAlerts = new Map<View, Hint>();
+  for (const t of hints(g, stats)) if (t.view && !t.handled && !navAlerts.has(t.view)) navAlerts.set(t.view, t);
+  if (!navAlerts.has("marked") && g.autoBuyNote)
+    navAlerts.set("marked", { text: `Planleggeren får ikke kjøpt ${g.autoBuyNote}.`, view: "marked", sub: "skrap" });
   const openInbox = () => {
     api.clearToasts();
     setInboxOpen(true);
@@ -792,6 +817,8 @@ export function GameApp() {
               // Signerer salgsdirektøren for deg, trenger ikke Salg et tall (B-171) – bortsett fra landemerkene, som du
               // tar selv (B-177)
               const director = !!g.konsern?.director?.active;
+              // Marked og Folk: «!» når et råd på Verket peker dit – samme regler som rådene (B-202)
+              const alertHint = v.id === "marked" || v.id === "folk" ? navAlerts.get(v.id) : undefined;
               const badge =
                 v.id === "salg"
                   ? g.contracts.filter((c) => c.status === "tilbud" && (!director || c.landmark)).length
@@ -803,14 +830,16 @@ export function GameApp() {
                   key={v.id}
                   className={`${active ? "is-active" : ""}${hint ? " is-hint" : ""}${v.id === "verket" && konsernOpen ? " is-verket-konsern" : ""}`}
                   aria-current={active ? "page" : undefined}
-                  onClick={() => (v.id === "verket" && konsernOpen ? go("verket", "oversikt") : go(v.id))}
+                  onClick={() =>
+                    v.id === "verket" && konsernOpen ? go("verket", "oversikt") : go(v.id, alertHint?.sub)
+                  }
                 >
                   <Icon name={NAV_ICON[v.id]} className="g-nav-icon" />
                   <span className="g-nav-label">{v.label}</span>
                   {isNew ? (
                     <span className="g-badge g-badge-new">Ny</span>
-                  ) : folkAlert ? (
-                    <span className="g-badge" aria-label="Mangler folk">
+                  ) : folkAlert || alertHint ? (
+                    <span className="g-badge" aria-label={alertHint?.text ?? "Mangler folk"} title={alertHint?.text}>
                       !
                     </span>
                   ) : (
