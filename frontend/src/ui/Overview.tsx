@@ -55,6 +55,7 @@ import { DailyCard } from "./Daily";
 import { AchievementsCard, PyntModal } from "./Achievements";
 import { WeeklyCard } from "./Weekly";
 import { SeasonTrackCard } from "./SeasonTrack";
+import { AccountFeaturesCard } from "./Account";
 import { LandmarksCard } from "./Landmarks";
 import { BankCard } from "./Settings";
 import { KonsernTab } from "./Konsern";
@@ -625,10 +626,18 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings }: Props)
               go={go}
             />
             {/* Dagens oppdrag og uka med daglig belønning (B-149); ikke mens veiledningen pågår */}
-            {g.tutorial === null && <DailyCard g={g} act={act} onLogin={onOpenSettings} />}
+            {g.tutorial === null && <DailyCard g={g} act={act} />}
             {/* Ukens utfordring (B-152) */}
-            {g.tutorial === null && <WeeklyCard g={g} act={act} onLogin={onOpenSettings} />}
-            {g.tutorial === null && <SeasonTrackCard g={g} act={act} onLogin={onOpenSettings} />}
+            {g.tutorial === null && <WeeklyCard act={act} />}
+            {g.tutorial === null && <SeasonTrackCard act={act} />}
+            {/* Uten konto: ett kort for alt over som krever konto (B-191). Ukens og stigen først etter garasjen */}
+            {g.tutorial === null && (
+              <AccountFeaturesCard
+                features={g.stage < 1 ? ["oppdrag"] : ["oppdrag", "ukens", "stigen"]}
+                note="Du får også en daglig belønning som vokser gjennom uka, og verket tjener litt mens du er borte."
+                onLogin={onOpenSettings}
+              />
+            )}
             <Card title="Produksjon nå">
               {split ? (
                 <ul className="g-furnace-grades">

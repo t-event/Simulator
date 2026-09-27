@@ -36,6 +36,7 @@ import { InboxSheet } from "./Inbox";
 import { markAllSeen, unseenCount } from "../game/inbox";
 import { Sales } from "./Sales";
 import { VIEWS, viewUnlocked, type View } from "./views";
+import { Icon } from "./icons";
 
 // Kontrollrommet (spillet i fire runder) lastes først når det trengs
 const ControlRoom = lazy(() => import("./control/ControlRoom").then((m) => ({ default: m.ControlRoom })));
@@ -459,12 +460,12 @@ function TopBar({
           })}
         </div>
         <button className="g-book" onClick={onBook} aria-label="Fagboka">
-          <span aria-hidden="true">📖</span>
+          <Icon name="book" />
           <span className="hide-narrow"> Fagbok</span>
           {unread > 0 && <span className="g-badge">{unread}</span>}
         </button>
         <button className="g-book" onClick={onSettings} aria-label="Innstillinger">
-          <span aria-hidden="true">⚙️</span>
+          <Icon name="settings" />
         </button>
       </div>
       <div className="g-top-row g-kpis">
@@ -487,7 +488,7 @@ function TopBar({
       <div className="g-notice-row">
         <NoticeLine api={api} unseen={unseen} onOpen={onInbox} />
         <button className="g-book g-board-btn" onClick={onBoard} aria-label="Toppliste">
-          <span aria-hidden="true">🏆</span>
+          <Icon name="trophy" />
         </button>
       </div>
     </header>
@@ -522,7 +523,8 @@ function NoticeLine({ api, unseen, onOpen }: { api: GameApi; unseen: number; onO
         aria-label={`Varsler${unseen ? ` (${unseen} nye)` : ""}: ${text}`}
       >
         <span className="g-notice-bell" aria-hidden="true">
-          🔔{unseen > 0 && <span className="g-badge">{unseen > 99 ? "99+" : unseen}</span>}
+          <Icon name="bell" />
+          {unseen > 0 && <span className="g-badge">{unseen > 99 ? "99+" : unseen}</span>}
         </span>
         <span className={`g-notice-msg${t ? "" : " is-idle"}`}>
           {t && <span aria-hidden="true">{TOAST_ICON[t.kind]} </span>}
@@ -539,7 +541,7 @@ function NoticeLine({ api, unseen, onOpen }: { api: GameApi; unseen: number; onO
           }}
           aria-label="Fjern alle varsler"
         >
-          ✕
+          <Icon name="close" />
         </button>
       )}
     </div>

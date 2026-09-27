@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 191,
+    date: "2026-09-27",
+    title: "Et ryddigere utseende – første steg",
+    items: [
+      "Faste farger og skriftstørrelser overalt: grønt betyr god drift, gult og oransje varme og advarsel, rødt bare feil.",
+      "Overskrifter og store tall har fått en egen, tydelig skrift der sifrene står rett under hverandre.",
+      "Nye, rolige ikoner i toppfeltet i stedet for emoji.",
+      "Uten konto: ett kort som viser hva du får med konto, i stedet for tre.",
+    ],
+  },
+  {
     b: 190,
     date: "2026-09-27",
     title: "Samme klokke for alle",

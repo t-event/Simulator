@@ -6,8 +6,8 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
-Fra UI-fase 0 (B-187, `UI.md` avsnitt 12): egen skrift eller systemskrift; ikoner fra Lucide; samle «krever
-konto»-kortene i ett (justerer KONTO-regel 6); Konsern i sidemenyen på PC og som underfane på mobil; klar for UI-1a.
+- **UI-1a** (B-191) er bygget, og PR-en venter på eierens klarsignal før merge (skjermbilder er vist). Spørsmålene fra
+  UI-fase 0 er besvart i B-191.
 
 ## Venter
 

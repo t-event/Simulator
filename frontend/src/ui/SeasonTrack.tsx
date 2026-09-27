@@ -5,12 +5,10 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { grantCosmetic, trackCosmetic } from "../game/cosmetics";
 import { awardPoints, log } from "../game/engine";
-import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { claimSeasonTiers, fetchSeasonTrack, tierFp, TRACK_COSMETIC_TIERS, type SeasonTrack } from "../net/seasonTrack";
 import { getSession, onSessionChange } from "../net/supabase";
 import { isReconciled, onCloudStatus } from "../net/sync";
-import { NeedsAccount } from "./Account";
 import { Bar, Card } from "./common";
 import { buzz } from "./haptics";
 
@@ -21,7 +19,7 @@ function useReconciled() {
   return useSyncExternalStore(onCloudStatus, isReconciled, isReconciled);
 }
 
-export function SeasonTrackCard({ g, act, onLogin }: { g: GameState; act: GameApi["act"]; onLogin?: () => void }) {
+export function SeasonTrackCard({ act }: { act: GameApi["act"] }) {
   const session = useSession();
   const reconciled = useReconciled();
   const [track, setTrack] = useState<SeasonTrack | null>(null);
@@ -37,12 +35,8 @@ export function SeasonTrackCard({ g, act, onLogin }: { g: GameState; act: GameAp
     return () => clearInterval(t);
   }, [user, reconciled]);
 
-  if (!session)
-    return g.stage < 1 ? null : (
-      <Card title="Sesongstigen">
-        <NeedsAccount feature="stigen" onLogin={onLogin} />
-      </Card>
-    );
+  // Uten konto står Sesongstigen i det samlede kontokortet (AccountFeaturesCard, B-191)
+  if (!session) return null;
   if (!track) return null;
 
   const unclaimed = Array.from({ length: track.tier }, (_, i) => i + 1).filter((t) => !track.claimed.includes(t));

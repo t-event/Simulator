@@ -1,15 +1,8 @@
 :root {
-  --bg: #10161f;
-  --panel-bg: #1b2330;
-  --panel-border: #384357;
-  --text: #e6ebf2;
-  --text-dim: #8a94a6;
-  --accent: #4fc3f7;
-  --warning: #ffb020;
-  --critical: #ff4d4d;
-  --ok: #4caf50;
+  /* Fargene, skriftene og målene ligger i ui/tokens.css (designsystemet, B-191) */
   color-scheme: dark;
-  font-family: "Segoe UI", Roboto, system-ui, sans-serif;
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
 }
 
 * {
@@ -40,12 +33,12 @@ button {
 button {
   font-family: inherit;
   cursor: pointer;
-  background: #2a3546;
+  background: var(--surface-3);
   color: var(--text);
-  border: 1px solid var(--panel-border);
-  border-radius: 4px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
   padding: 6px 10px;
-  font-size: 13px;
+  font-size: var(--fs-meta);
   /* Fjerner forsinkelsen mobilnettlesere legger inn for dobbelttrykk-zoom */
   touch-action: manipulation;
 }
@@ -53,7 +46,7 @@ button {
 /* Bare på enheter med ekte hover – ellers blir stilen hengende etter et trykk */
 @media (hover: hover) {
   button:hover:not(:disabled) {
-    background: #344056;
+    background: var(--surface-hover);
   }
 }
 

@@ -4,7 +4,6 @@
  */
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { awardPoints, log } from "../game/engine";
-import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { getSession, onSessionChange } from "../net/supabase";
 import { isReconciled, onCloudStatus } from "../net/sync";
@@ -22,7 +21,6 @@ import {
   type WeeklyRow,
 } from "../net/weekly";
 import { placeLabel } from "../net/leaderboard";
-import { NeedsAccount } from "./Account";
 import { Card } from "./common";
 import { fmtNum } from "./format";
 import { buzz } from "./haptics";
@@ -44,7 +42,7 @@ function fmtValue(kind: WeekKind, v: number): string {
   return `${fmtNum(v, 0)} ${v === 1 ? "dag" : "dager"}`;
 }
 
-export function WeeklyCard({ g, act, onLogin }: { g: GameState; act: GameApi["act"]; onLogin?: () => void }) {
+export function WeeklyCard({ act }: { act: GameApi["act"] }) {
   const session = useSession();
   const reconciled = useReconciled();
   const status = useWeekly();
@@ -61,13 +59,8 @@ export function WeeklyCard({ g, act, onLogin }: { g: GameState; act: GameApi["ac
     return () => clearInterval(t);
   }, [user, reconciled]);
 
-  // Uten konto: vises først etter garasjen, så nybegynneren ikke møter to låste kort med én gang
-  if (!session)
-    return g.stage < 1 ? null : (
-      <Card title="Ukens utfordring">
-        <NeedsAccount feature="ukens" onLogin={onLogin} />
-      </Card>
-    );
+  // Uten konto står Ukens utfordring i det samlede kontokortet (AccountFeaturesCard, B-191)
+  if (!session) return null;
   if (!status) return null;
   const kind = WEEK_KINDS[status.kind];
   const left = weekDaysLeft(status);

@@ -30,7 +30,7 @@
 }
 
 .g-top {
-  background: #151c27;
+  background: var(--surface-chrome);
   border-bottom: 1px solid var(--panel-border);
   padding: calc(6px + env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 6px
     max(12px, env(safe-area-inset-left));
@@ -51,12 +51,12 @@
 }
 
 .g-when strong {
-  font-size: 15px;
+  font-size: var(--fs-title);
 }
 
 .g-when span {
   white-space: nowrap;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
 }
@@ -64,7 +64,7 @@
 .g-speed {
   display: flex;
   border: 1px solid var(--panel-border);
-  border-radius: 6px;
+  border-radius: var(--r-md);
   overflow: hidden;
 }
 
@@ -78,7 +78,7 @@
 
 .g-speed button.is-active {
   background: var(--accent);
-  color: #0b1520;
+  color: var(--accent-fg);
   font-weight: 700;
 }
 
@@ -87,7 +87,7 @@
   white-space: nowrap;
   flex: none;
   padding: 6px 8px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
 }
 
 .g-top-row:first-child {
@@ -120,7 +120,7 @@
 
 .g-kpis {
   gap: 4px 14px;
-  font-size: 13px;
+  font-size: var(--fs-meta);
   margin-top: 4px;
   font-variant-numeric: tabular-nums;
 }
@@ -141,7 +141,7 @@
   flex: none;
   z-index: 20;
   display: flex;
-  background: #151c27;
+  background: var(--surface-chrome);
   border-top: 1px solid var(--panel-border);
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -153,7 +153,7 @@
   border: 0;
   border-radius: 0;
   background: transparent;
-  font-size: 13px;
+  font-size: var(--fs-meta);
   color: var(--text-dim);
 }
 
@@ -168,10 +168,10 @@
   min-width: 18px;
   padding: 1px 5px;
   margin-left: 4px;
-  border-radius: 9px;
+  border-radius: var(--r-md);
   background: var(--warning);
-  color: #1a1200;
-  font-size: 11px;
+  color: var(--on-heat);
+  font-size: var(--fs-badge);
   font-weight: 700;
   line-height: 16px;
 }
@@ -202,7 +202,7 @@
 .g-card {
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
-  border-radius: 8px;
+  border-radius: var(--r-md);
   padding: 12px;
   min-width: 0;
 }
@@ -217,35 +217,35 @@
 
 .g-card h2 {
   margin: 0;
-  font-size: 15px;
+  font-size: var(--fs-title);
   letter-spacing: 0.02em;
 }
 
 .g-card h3,
 .g-subhead {
   margin: 0 0 6px;
-  font-size: 13px;
+  font-size: var(--fs-meta);
   color: var(--text-dim);
   font-weight: 600;
 }
 
 .g-card p {
   margin: 4px 0;
-  font-size: 14px;
+  font-size: var(--fs-body);
   line-height: 1.4;
 }
 
 .g-muted {
   color: var(--text-dim);
-  font-size: 13px;
+  font-size: var(--fs-meta);
 }
 
 .g-note {
-  background: #232d3c;
+  background: var(--surface-2);
   border-left: 3px solid var(--accent);
   padding: 6px 8px;
-  border-radius: 4px;
-  font-size: 13px;
+  border-radius: var(--r-sm);
+  font-size: var(--fs-meta);
 }
 
 .g-note.g-warn {
@@ -260,25 +260,25 @@
 }
 
 .g-primary {
-  background: #1f6fa0;
-  border-color: #2b8ac4;
+  background: var(--accent-strong);
+  border-color: var(--accent-border);
   font-weight: 600;
 }
 
 .g-primary.is-on {
   background: var(--ok);
   border-color: var(--ok);
-  color: #06200a;
+  color: var(--on-ok);
 }
 
 .g-danger {
-  background: #8a2a2a;
-  border-color: #b33;
+  background: var(--critical-strong);
+  border-color: var(--critical-border);
 }
 
 .g-small {
   padding: 5px 9px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
 }
 
 button {
@@ -292,22 +292,22 @@ button {
   min-height: 0;
   color: var(--accent);
   text-align: left;
-  font-size: 14px;
+  font-size: var(--fs-body);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
 .g-bar {
   height: 8px;
-  background: #2a3444;
-  border-radius: 4px;
+  background: var(--surface-3);
+  border-radius: var(--r-sm);
   overflow: hidden;
   margin: 4px 0;
 }
 
 .g-bar-fill {
   height: 100%;
-  border-radius: 4px;
+  border-radius: var(--r-sm);
   transition: width 0.25s linear;
 }
 
@@ -323,7 +323,7 @@ button {
 /* Striper på varsel- og faresonen, så stolpen ikke bare skilles på farge (B-087) */
 .g-bar-fill.tone-warning,
 .g-bar-fill.tone-critical {
-  background-image: repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.28) 0 3px, transparent 3px 6px);
+  background-image: repeating-linear-gradient(-45deg, var(--hatch) 0 3px, transparent 3px 6px);
 }
 
 .g-bar-fill.tone-critical {
@@ -340,18 +340,18 @@ button {
 .g-stat {
   display: flex;
   flex-direction: column;
-  background: #222b39;
-  border-radius: 6px;
+  background: var(--surface-2);
+  border-radius: var(--r-md);
   padding: 6px 8px;
 }
 
 .g-stat span {
-  font-size: 11px;
+  font-size: var(--fs-badge);
   color: var(--text-dim);
 }
 
 .g-stat strong {
-  font-size: 15px;
+  font-size: var(--fs-title);
   font-variant-numeric: tabular-nums;
 }
 
@@ -369,7 +369,7 @@ button {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  font-size: 13px;
+  font-size: var(--fs-meta);
   margin: 6px 0;
 }
 
@@ -377,26 +377,26 @@ button {
   font: inherit;
   padding: 8px;
   min-height: 40px;
-  background: #222b39;
+  background: var(--surface-2);
   color: var(--text);
   border: 1px solid var(--panel-border);
-  border-radius: 6px;
+  border-radius: var(--r-md);
 }
 
 .g-field select {
   font: inherit;
   padding: 8px;
-  background: #222b39;
+  background: var(--surface-2);
   color: var(--text);
   border: 1px solid var(--panel-border);
-  border-radius: 6px;
+  border-radius: var(--r-md);
 }
 
 .g-toggle {
   display: flex;
   gap: 8px;
   align-items: flex-start;
-  font-size: 13px;
+  font-size: var(--fs-meta);
   margin-top: 10px;
   line-height: 1.35;
 }
@@ -415,15 +415,15 @@ button {
 }
 
 .g-chip {
-  font-size: 11px;
+  font-size: var(--fs-badge);
   padding: 2px 7px;
-  border-radius: 10px;
-  background: #2a3546;
+  border-radius: var(--r-md);
+  background: var(--surface-3);
   border: 1px solid var(--panel-border);
 }
 
 .g-chip.is-hl {
-  background: #1d4d2c;
+  background: var(--ok-bg);
   border-color: var(--ok);
 }
 
@@ -431,7 +431,7 @@ button {
   display: inline-flex;
   flex-wrap: wrap;
   gap: 4px 10px;
-  font-size: 13px;
+  font-size: var(--fs-meta);
   font-variant-numeric: tabular-nums;
 }
 
@@ -439,7 +439,7 @@ button {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  font-size: 13px;
+  font-size: var(--fs-meta);
   margin: 8px 0;
 }
 
@@ -447,7 +447,7 @@ button {
   list-style: none;
   padding: 0;
   margin: 6px 0;
-  font-size: 13px;
+  font-size: var(--fs-meta);
 }
 
 .g-checks li {
@@ -480,26 +480,26 @@ button {
 
 .g-badge-bad,
 .g-badge-ok {
-  font-size: 11px;
+  font-size: var(--fs-badge);
   padding: 2px 7px;
-  border-radius: 10px;
+  border-radius: var(--r-md);
   font-weight: 600;
 }
 
 .g-badge-bad {
-  background: #5a1f1f;
-  color: #ffb3b3;
+  background: var(--critical-bg);
+  color: var(--critical-fg);
 }
 
 .g-badge-ok {
-  background: #1d4d2c;
-  color: #b6f0c0;
+  background: var(--ok-bg);
+  color: var(--ok-fg);
 }
 
 .g-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: var(--fs-meta);
   margin: 6px 0;
 }
 
@@ -507,13 +507,13 @@ button {
 .g-table td {
   text-align: left;
   padding: 5px 4px;
-  border-bottom: 1px solid #2c3647;
+  border-bottom: 1px solid var(--line);
 }
 
 .g-table th {
   color: var(--text-dim);
   font-weight: 600;
-  font-size: 12px;
+  font-size: var(--fs-caption);
 }
 
 .g-table .num {
@@ -533,7 +533,7 @@ button {
 /* ---------------------------------------------------------------- Verket */
 .g-scene-wrap {
   position: relative;
-  border-radius: 8px;
+  border-radius: var(--r-md);
   overflow: hidden;
   border: 1px solid var(--panel-border);
 }
@@ -550,22 +550,22 @@ button {
   top: 8px;
   display: flex;
   flex-direction: column;
-  background: rgba(10, 14, 20, 0.65);
+  background: var(--scrim-soft);
   padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 12px;
+  border-radius: var(--r-md);
+  font-size: var(--fs-caption);
 }
 
 .g-scene-caption strong {
-  font-size: 14px;
+  font-size: var(--fs-body);
 }
 
 .win-lit {
-  fill: #ffd27a;
+  fill: var(--art-window-lit);
 }
 
 .win-dark {
-  fill: #2c3440;
+  fill: var(--art-window-dark);
 }
 
 .scene-glow {
@@ -582,7 +582,7 @@ button {
 }
 
 .scene-smoke .puff {
-  fill: #b9c0c8;
+  fill: var(--art-smoke);
   opacity: 0;
   animation: puff 3s linear infinite;
 }
@@ -703,7 +703,7 @@ button {
 }
 
 .g-hints {
-  border-color: #4a6a8a;
+  border-color: var(--info-border);
 }
 
 .g-chain {
@@ -713,13 +713,13 @@ button {
 }
 
 .g-chain-step {
-  background: #222b39;
-  border-radius: 6px;
+  background: var(--surface-2);
+  border-radius: var(--r-md);
   padding: 8px 10px;
 }
 
 .g-chain-step p {
-  font-size: 13px;
+  font-size: var(--fs-meta);
 }
 
 .g-chain-step .g-small {
@@ -731,7 +731,7 @@ button {
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 4px 8px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-variant-numeric: tabular-nums;
 }
 
@@ -748,7 +748,7 @@ button {
   list-style: none;
   margin: 0;
   padding: 0;
-  font-size: 13px;
+  font-size: var(--fs-meta);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -756,7 +756,7 @@ button {
 
 .g-log li {
   line-height: 1.35;
-  border-left: 3px solid #3a4658;
+  border-left: 3px solid var(--line-strong);
   padding-left: 8px;
 }
 
@@ -773,7 +773,7 @@ button {
 .g-log-time {
   display: block;
   color: var(--text-dim);
-  font-size: 11px;
+  font-size: var(--fs-badge);
 }
 
 /* ---------------------------------------------------------------- Marked */
@@ -785,8 +785,8 @@ button {
 }
 
 .g-scrap {
-  background: #222b39;
-  border-radius: 6px;
+  background: var(--surface-2);
+  border-radius: var(--r-md);
   padding: 8px 10px;
 }
 
@@ -798,7 +798,7 @@ button {
 }
 
 .g-scrap-stock {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
 }
@@ -807,7 +807,7 @@ button {
   display: flex;
   flex-wrap: wrap;
   gap: 2px 12px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-variant-numeric: tabular-nums;
   margin: 4px 0;
 }
@@ -841,7 +841,7 @@ button {
   grid-template-columns: auto 1fr 44px;
   gap: 8px;
   align-items: center;
-  font-size: 12px;
+  font-size: var(--fs-caption);
 }
 
 .g-recipe input {
@@ -864,12 +864,12 @@ button {
 
 .g-power-bar {
   flex: 1;
-  background: #3b5577;
+  background: var(--info-border);
   border-radius: 2px 2px 0 0;
 }
 
 .g-power-bar.is-over {
-  background: #7a3b3b;
+  background: var(--critical-strong);
 }
 
 .g-power-bar.is-now {
@@ -878,8 +878,8 @@ button {
 
 /* ---------------------------------------------------------------- Salg */
 .g-contract {
-  background: #222b39;
-  border-radius: 6px;
+  background: var(--surface-2);
+  border-radius: var(--r-md);
   padding: 8px 10px;
   margin-bottom: 8px;
 }
@@ -900,15 +900,15 @@ button {
   list-style: none;
   padding: 0;
   margin: 0;
-  font-size: 13px;
+  font-size: var(--fs-meta);
 }
 
 .g-closed .ok {
-  color: #9fdca8;
+  color: var(--ok-fg);
 }
 
 .g-closed .bad {
-  color: #f3a3a3;
+  color: var(--critical-fg);
 }
 
 .g-closed li + li {
@@ -916,7 +916,7 @@ button {
 }
 
 .g-rating {
-  font-size: 13px;
+  font-size: var(--fs-meta);
   margin: 0 0 8px;
 }
 
@@ -930,8 +930,8 @@ button {
 }
 
 .g-lots li {
-  background: #222b39;
-  border-radius: 6px;
+  background: var(--surface-2);
+  border-radius: var(--r-md);
   padding: 8px 10px;
   display: flex;
   flex-direction: column;
@@ -958,10 +958,10 @@ button {
   grid-template-columns: 1fr auto;
   gap: 2px 10px;
   align-items: center;
-  background: #222b39;
-  border-radius: 6px;
+  background: var(--surface-2);
+  border-radius: var(--r-md);
   padding: 8px 10px;
-  font-size: 14px;
+  font-size: var(--fs-body);
 }
 
 .g-worker > :nth-child(3) {
@@ -971,16 +971,16 @@ button {
 .g-stars {
   color: var(--warning);
   letter-spacing: 1px;
-  font-size: 13px;
+  font-size: var(--fs-meta);
 }
 
 .g-stars-off {
-  color: #3c4656;
+  color: var(--line-strong);
 }
 
 .g-roles {
   margin: 0;
-  font-size: 13px;
+  font-size: var(--fs-meta);
 }
 
 .g-roles div {
@@ -1014,7 +1014,7 @@ button {
 .g-sheet-cash {
   flex: 1;
   color: var(--text-dim);
-  font-size: 14px;
+  font-size: var(--fs-body);
   white-space: nowrap;
 }
 
@@ -1039,7 +1039,7 @@ button {
 .g-konsern-steps {
   margin: 6px 0 8px;
   padding-left: 20px;
-  font-size: 14px;
+  font-size: var(--fs-body);
   line-height: 1.45;
 }
 
@@ -1050,19 +1050,19 @@ button {
 /* Varselinnstillinger (B-115) */
 .g-toggle-hint {
   display: block;
-  font-size: 12px;
+  font-size: var(--fs-caption);
 }
 
 .g-toast-topics {
   margin: 8px 0;
   padding: 4px 10px 6px;
   border: 1px solid var(--panel-border);
-  border-radius: 8px;
+  border-radius: var(--r-md);
 }
 
 .g-toast-topics legend {
   padding: 0 4px;
-  font-size: 13px;
+  font-size: var(--fs-meta);
   font-weight: 600;
 }
 
@@ -1075,13 +1075,13 @@ button {
   padding-left: 4px;
   list-style: none;
   color: var(--text-dim);
-  font-size: 14px;
+  font-size: var(--fs-body);
 }
 
 .g-role-group summary {
   cursor: pointer;
   font-weight: 600;
-  font-size: 14px;
+  font-size: var(--fs-body);
   padding: 6px 0;
 }
 
@@ -1093,8 +1093,8 @@ button {
 }
 
 .g-upgrade {
-  background: #222b39;
-  border-radius: 6px;
+  background: var(--surface-2);
+  border-radius: var(--r-md);
   padding: 8px 10px;
   display: flex;
   flex-direction: column;
@@ -1115,7 +1115,7 @@ button {
 }
 
 .g-stage-card {
-  border-color: #4a6a8a;
+  border-color: var(--info-border);
 }
 
 /* Klar til å flytte: målkortet står øverst og lyser opp (B-068) */
@@ -1126,7 +1126,7 @@ button {
 
 .g-toast-more {
   flex: none;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 700;
   color: var(--text-dim);
 }
@@ -1163,7 +1163,7 @@ button {
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgba(5, 8, 12, 0.75);
+  background: var(--scrim);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1171,14 +1171,14 @@ button {
 }
 
 .g-intro {
-  background: radial-gradient(circle at 50% 110%, #5a2a10 0%, var(--bg) 60%);
+  background: radial-gradient(circle at 50% 110%, var(--art-ember-dark) 0%, var(--bg) 60%);
 }
 
 .g-modal-card,
 .g-intro-card {
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
-  border-radius: 10px;
+  border-radius: var(--r-md);
   padding: 16px;
   width: 100%;
   max-width: 560px;
@@ -1190,7 +1190,7 @@ button {
 
 .g-intro-card h1 {
   margin: 0;
-  font-size: 30px;
+  font-size: var(--fs-hero);
   letter-spacing: 0.03em;
 }
 
@@ -1205,7 +1205,7 @@ button {
 .g-modal-card p,
 .g-modal-card li {
   line-height: 1.45;
-  font-size: 15px;
+  font-size: var(--fs-title);
 }
 
 /* Startskjermen (B-147): kort innledning, lagret spill og knappene øverst, resten foldet sammen */
@@ -1216,8 +1216,8 @@ button {
 .g-intro-save {
   margin: 12px 0 0;
   padding: 8px 12px;
-  border-radius: 8px;
-  background: rgba(79, 195, 247, 0.08);
+  border-radius: var(--r-md);
+  background: var(--accent-tint);
   border: 1px solid var(--panel-border);
 }
 
@@ -1230,19 +1230,19 @@ button {
 .g-intro-actions button {
   min-height: 44px;
   padding: 10px 16px;
-  font-size: 15px;
+  font-size: var(--fs-title);
 }
 
 .g-intro-actions .g-intro-main {
   flex: 1;
-  font-size: 17px;
+  font-size: var(--fs-section);
 }
 
 .g-intro-account {
   margin-top: 12px;
   padding: 10px 12px;
   border: 1px solid var(--panel-border);
-  border-radius: 10px;
+  border-radius: var(--r-md);
 }
 
 .g-intro-account-head {
@@ -1275,7 +1275,7 @@ button {
 }
 
 .g-handbook article {
-  border-top: 1px solid #2c3647;
+  border-top: 1px solid var(--line);
 }
 
 .g-handbook-title {
@@ -1285,7 +1285,7 @@ button {
   border: 0;
   padding: 10px 0;
   font-weight: 600;
-  font-size: 15px;
+  font-size: var(--fs-title);
 }
 
 .g-handbook article.is-open .g-handbook-title {
@@ -1345,7 +1345,7 @@ button {
   .g-nav button {
     flex: 0 1 140px;
     height: 44px;
-    font-size: 14px;
+    font-size: var(--fs-body);
   }
 
   .g-nav button.is-active {
@@ -1400,27 +1400,27 @@ button {
   bottom: 30%;
   transform: translateX(-50%);
   padding: 3px 9px;
-  border-radius: 12px;
-  font-size: 13px;
+  border-radius: var(--r-lg);
+  font-size: var(--fs-meta);
   font-weight: 700;
   white-space: nowrap;
   animation: g-bubble 2.2s ease-out forwards;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-sm);
 }
 
 .bubble-steel {
-  background: #d9dee5;
-  color: #1a2230;
+  background: var(--art-steel);
+  color: var(--art-steel-fg);
 }
 
 .bubble-money {
-  background: #2f8f46;
-  color: #fff;
+  background: var(--ok-strong);
+  color: var(--on-strong);
 }
 
 .bubble-fp {
-  background: #2b7fc0;
-  color: #fff;
+  background: var(--info-strong);
+  color: var(--on-strong);
 }
 
 @keyframes g-bubble {
@@ -1445,24 +1445,24 @@ button {
 }
 
 .g-fp {
-  font-size: 13px;
+  font-size: var(--fs-meta);
   font-weight: 700;
-  color: #7cc4ff;
+  color: var(--info);
 }
 
 .g-fp-cost {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   font-weight: 700;
-  color: #7cc4ff;
+  color: var(--info);
 }
 
 .g-effect {
-  font-size: 13px;
-  color: #b8e0c0;
+  font-size: var(--fs-meta);
+  color: var(--ok-fg);
 }
 
 .g-decision-kicker {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: var(--warning);
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -1487,12 +1487,12 @@ button {
   gap: 2px;
   text-align: left;
   padding: 12px 14px;
-  font-size: 15px;
-  border-radius: 10px;
+  font-size: var(--fs-title);
+  border-radius: var(--r-md);
 }
 
 .g-decision-options button span {
-  font-size: 13px;
+  font-size: var(--fs-meta);
   font-weight: 400;
   opacity: 0.85;
 }
@@ -1515,7 +1515,7 @@ button {
 }
 
 .g-celebrate-burst {
-  font-size: 48px;
+  font-size: var(--fs-display);
   animation: g-burst 0.6s ease-out;
 }
 
@@ -1528,7 +1528,7 @@ button {
 
 .g-celebrate .g-primary {
   padding: 12px 24px;
-  font-size: 16px;
+  font-size: var(--fs-section);
 }
 
 /* Én tydelig neste handling under anleggsbildet */
@@ -1542,8 +1542,8 @@ button {
   width: 100%;
   min-height: 52px;
   padding: 12px 14px;
-  font-size: 15px;
-  border-radius: 10px;
+  font-size: var(--fs-title);
+  border-radius: var(--r-md);
   text-align: left;
 }
 
@@ -1569,7 +1569,7 @@ button {
 }
 
 .g-answer-by {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: var(--text-dim);
 }
 
@@ -1588,8 +1588,8 @@ button {
 }
 
 .g-maint {
-  background: #222b39;
-  border-radius: 6px;
+  background: var(--surface-2);
+  border-radius: var(--r-md);
   padding: 8px 10px;
   margin: 8px 0;
 }
@@ -1607,14 +1607,14 @@ button {
 
 .g-speed button.is-locked::after {
   content: "🔒";
-  font-size: 9px;
+  font-size: var(--fs-badge);
   margin-left: 1px;
 }
 
 .g-badge.g-badge-new {
   background: var(--ok);
-  color: #06200a;
-  font-size: 10px;
+  color: var(--on-ok);
+  font-size: var(--fs-badge);
   padding: 0 4px;
   width: auto;
 }
@@ -1638,7 +1638,7 @@ button {
 .g-fix {
   display: block;
   color: var(--text-dim);
-  font-size: 12px;
+  font-size: var(--fs-caption);
   line-height: 1.35;
 }
 
@@ -1649,7 +1649,7 @@ button {
 
 .g-subhead {
   margin: 14px 0 6px;
-  font-size: 15px;
+  font-size: var(--fs-title);
 }
 
 .g-deals {
@@ -1677,17 +1677,17 @@ button {
   display: flex;
   justify-content: space-between;
   gap: 8px;
-  font-size: 14px;
+  font-size: var(--fs-body);
 }
 
 .g-deal-head span {
   color: var(--text-dim);
-  font-size: 13px;
+  font-size: var(--fs-meta);
 }
 
 .g-deal-text {
   color: var(--text-dim);
-  font-size: 12px;
+  font-size: var(--fs-caption);
   line-height: 1.35;
 }
 
@@ -1710,11 +1710,11 @@ button {
 }
 
 .g-handbook-tag {
-  font-size: 11px;
+  font-size: var(--fs-badge);
   font-weight: 600;
   color: var(--warning);
   border: 1px solid var(--warning);
-  border-radius: 9px;
+  border-radius: var(--r-md);
   padding: 0 6px;
 }
 
@@ -1722,12 +1722,12 @@ button {
   margin: 10px 0 14px;
   padding: 10px;
   border: 1px solid var(--panel-border);
-  border-radius: 10px;
+  border-radius: var(--r-md);
 }
 
 .g-quiz h3 {
   margin: 0 0 8px;
-  font-size: 14px;
+  font-size: var(--fs-body);
 }
 
 .g-quiz fieldset {
@@ -1739,7 +1739,7 @@ button {
 
 .g-quiz legend {
   font-weight: 600;
-  font-size: 14px;
+  font-size: var(--fs-body);
   margin-bottom: 4px;
   padding: 0;
 }
@@ -1751,8 +1751,8 @@ button {
   min-height: 40px;
   padding: 4px 8px;
   border: 1px solid transparent;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: var(--r-md);
+  font-size: var(--fs-body);
 }
 
 .g-quiz-option.is-picked {
@@ -1761,12 +1761,12 @@ button {
 
 .g-quiz-option.is-right {
   border-color: var(--ok);
-  background: rgba(76, 175, 80, 0.12);
+  background: var(--ok-tint);
 }
 
 .g-quiz-option.is-wrong {
-  border-color: var(--critical, #e53935);
-  background: rgba(229, 57, 53, 0.12);
+  border-color: var(--critical);
+  background: var(--critical-tint);
 }
 
 .g-quiz-done {
@@ -1779,7 +1779,7 @@ button {
   flex-direction: column;
   gap: 4px;
   margin: 8px 0;
-  font-size: 13px;
+  font-size: var(--fs-meta);
 }
 
 .g-mission-btn {
@@ -1802,11 +1802,11 @@ button {
   flex-direction: column;
   gap: 4px;
   padding: 10px 12px;
-  background: #1d3147;
+  background: var(--info-bg);
   border: 1px solid var(--accent);
-  border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
-  font-size: 14px;
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-overlay);
+  font-size: var(--fs-body);
 }
 
 .g-coach p {
@@ -1818,12 +1818,12 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 12px;
+  font-size: var(--fs-caption);
 }
 
 .g-coach-head .g-link {
   min-height: 32px;
-  font-size: 13px;
+  font-size: var(--fs-meta);
 }
 
 .g-coach .g-primary {
@@ -1844,7 +1844,7 @@ button {
 
 @keyframes g-hint {
   to {
-    background: rgba(79, 195, 247, 0.18);
+    background: var(--accent-tint-strong);
   }
 }
 
@@ -1863,13 +1863,13 @@ button {
 /* Bemanningstabellen: hvor mange som trengs og hvem som fyller plassene */
 .g-crew-table th,
 .g-crew-table td {
-  font-size: 13px;
+  font-size: var(--fs-meta);
   padding: 6px 4px;
   vertical-align: top;
 }
 
 .g-crew-table .g-muted {
-  font-size: 11px;
+  font-size: var(--fs-badge);
   font-weight: 400;
 }
 
@@ -1886,7 +1886,7 @@ button {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 14px;
+  font-size: var(--fs-body);
 }
 
 .g-absence li {
@@ -1897,7 +1897,7 @@ button {
 }
 
 .g-worker-away {
-  font-size: 12px;
+  font-size: var(--fs-caption);
 }
 
 .g-coach .g-coach-skip {
@@ -1925,7 +1925,7 @@ button {
 }
 
 .g-small-text {
-  font-size: 12px;
+  font-size: var(--fs-caption);
 }
 
 .g-recipe-rows {
@@ -1944,7 +1944,7 @@ button {
   gap: 8px;
   padding: 6px 8px;
   background: var(--panel-bg);
-  border-radius: 8px;
+  border-radius: var(--r-md);
 }
 
 .g-recipe-name {
@@ -1954,7 +1954,7 @@ button {
 }
 
 .g-recipe-name .g-muted {
-  font-size: 12px;
+  font-size: var(--fs-caption);
 }
 
 .g-stepper {
@@ -1968,7 +1968,7 @@ button {
   width: 40px;
   min-height: 40px;
   padding: 0;
-  font-size: 20px;
+  font-size: var(--fs-page);
   font-weight: 700;
 }
 
@@ -1987,7 +1987,7 @@ button {
 }
 
 .g-buy small {
-  font-size: 11px;
+  font-size: var(--fs-badge);
   color: var(--text-dim);
 }
 
@@ -1999,7 +1999,7 @@ button {
   padding: 3px;
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
-  border-radius: 10px;
+  border-radius: var(--r-md);
 }
 
 .g-subtabs button {
@@ -2014,7 +2014,7 @@ button {
 
 .g-subtabs button.is-active {
   background: var(--accent);
-  color: #0b1520;
+  color: var(--accent-fg);
 }
 
 .g-mini-row {
@@ -2031,17 +2031,17 @@ button {
   padding: 6px;
   min-height: 64px;
   text-align: left;
-  font-size: 12px;
+  font-size: var(--fs-caption);
 }
 
 .g-mini span {
   font-weight: 700;
-  font-size: 13px;
+  font-size: var(--fs-meta);
 }
 
 .g-mini small {
   color: var(--text-dim);
-  font-size: 11px;
+  font-size: var(--fs-badge);
   line-height: 1.2;
   /* Alltid plass til to linjer, så siden ikke hopper når «Venter på støping» kommer og går (B-066) */
   min-height: 2.4em;
@@ -2075,9 +2075,9 @@ button {
   margin: 8px 0;
   padding: 8px 10px;
   border: 1px dashed var(--panel-border);
-  border-radius: 8px;
+  border-radius: var(--r-md);
   color: var(--text-dim);
-  font-size: 13px;
+  font-size: var(--fs-meta);
 }
 
 .g-locked-box strong {
@@ -2110,13 +2110,13 @@ button {
 .g-chip-btn {
   min-height: 40px;
   padding: 6px 12px;
-  border-radius: 20px;
-  background: #2a3546;
+  border-radius: var(--r-pill);
+  background: var(--surface-3);
   border: 1px solid var(--panel-border);
 }
 
 .g-chip-btn.is-on {
-  background: #1d4d2c;
+  background: var(--ok-bg);
   border-color: var(--ok);
 }
 
@@ -2131,7 +2131,7 @@ button {
   display: flex;
   align-items: center;
   color: var(--accent);
-  font-size: 14px;
+  font-size: var(--fs-body);
 }
 
 .g-details[open] summary {
@@ -2140,12 +2140,12 @@ button {
 
 /* Folk: hovedlinja om skiftene, og fanen som trenger oppmerksomhet (B-047) */
 .g-big-status {
-  font-size: 18px;
+  font-size: var(--fs-section);
   margin: 0 0 8px;
 }
 
 .g-subtabs button.is-alert:not(.is-active) {
-  color: var(--warning, #f5a623);
+  color: var(--heat);
 }
 
 /* Skraptype resepten mangler (B-049) */
@@ -2184,16 +2184,16 @@ button {
 
 /* Automatikk som ikke er forsket fram ennå (B-054) */
 .g-locked-auto {
-  color: var(--muted, #8b98a8);
-  font-size: 14px;
+  color: var(--text-3);
+  font-size: var(--fs-body);
   margin: 6px 0;
 }
 
 /* Avbryt ordre (B-057) */
 .g-cancel-order {
-  font-size: 13px;
+  font-size: var(--fs-meta);
   min-height: 40px;
-  color: var(--muted, #8b98a8);
+  color: var(--text-3);
 }
 
 /* Reseptguiden (B-058) */
@@ -2227,8 +2227,8 @@ button {
   margin: 12px 0 0;
   padding: 10px 12px;
   border: 1px solid var(--panel-border);
-  border-radius: 10px;
-  background: rgba(79, 195, 247, 0.08);
+  border-radius: var(--r-md);
+  background: var(--accent-tint);
 }
 .g-install p {
   margin: 8px 0;
@@ -2261,7 +2261,7 @@ button {
     padding: 6px 6px;
   }
   .g-when span {
-    font-size: 11px;
+    font-size: var(--fs-badge);
   }
 }
 
@@ -2287,7 +2287,7 @@ button {
 
 /* Avløsere som står fast på plasser (B-164) */
 .g-support-note {
-  font-size: 12px;
+  font-size: var(--fs-caption);
 }
 
 /* Landemerker som er levert (B-174) */
@@ -2295,7 +2295,7 @@ button {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  font-size: 22px;
+  font-size: var(--fs-page);
   margin: 4px 0;
 }
 
@@ -2310,7 +2310,7 @@ button {
 }
 
 .g-support-action .g-muted {
-  font-size: 12px;
+  font-size: var(--fs-caption);
 }
 
 /* Hva som skjer med skiftene hvis man sier opp noen (B-164): bekreftelsen får hele bredden i raden */
@@ -2323,7 +2323,7 @@ button {
 }
 
 .g-bad-text {
-  color: #f3a3a3;
+  color: var(--critical-fg);
 }
 
 /* Varsellista ligger på raden med nøkkeltall, så toppraden ikke blir for trang (B-089) */
@@ -2334,8 +2334,8 @@ button {
   gap: 2px;
   height: 40px;
   margin-top: 6px;
-  border-radius: 8px;
-  background: #1d2634;
+  border-radius: var(--r-md);
+  background: var(--surface-1);
   border: 1px solid var(--panel-border);
   border-left-width: 4px;
 }
@@ -2366,7 +2366,7 @@ button {
   border: 0;
   background: none;
   text-align: left;
-  font-size: 13px;
+  font-size: var(--fs-meta);
   line-height: 1.3;
 }
 
@@ -2411,8 +2411,8 @@ button {
   display: flex;
   justify-content: space-between;
   padding: 6px 8px;
-  border-radius: 6px;
-  background: #1c2533;
+  border-radius: var(--r-md);
+  background: var(--surface-1);
 }
 
 .g-deal-compare li.is-best {
@@ -2434,13 +2434,13 @@ button {
 
 .g-account-info {
   color: var(--ok);
-  font-size: 14px;
+  font-size: var(--fs-body);
   margin: 6px 0;
 }
 
 .g-account-error {
   color: var(--warning);
-  font-size: 14px;
+  font-size: var(--fs-body);
   margin: 6px 0;
 }
 
@@ -2502,13 +2502,13 @@ button {
   gap: 8px;
   align-items: baseline;
   padding: 6px 4px;
-  border-bottom: 1px solid #2c3647;
-  font-size: 14px;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-body);
 }
 
 .g-board li.is-me {
-  background: #1d3a52;
-  border-radius: 6px;
+  background: var(--accent-soft);
+  border-radius: var(--r-md);
 }
 
 .g-board-rank {
@@ -2519,7 +2519,7 @@ button {
 
 /* Medaljer for de tre første plassene (B-139) */
 .g-board-rank.is-medal {
-  font-size: 18px;
+  font-size: var(--fs-section);
   line-height: 1;
   text-align: center;
 }
@@ -2556,7 +2556,7 @@ button {
 }
 
 .g-board-honor {
-  font-size: 12px;
+  font-size: var(--fs-caption);
   color: var(--text-dim);
   /* Brytes heller enn å kuttes på smale skjermer (B-170) */
   white-space: normal;
@@ -2566,7 +2566,7 @@ button {
 .g-season-history ul {
   margin: 6px 0 0;
   padding-left: 18px;
-  font-size: 14px;
+  font-size: var(--fs-body);
 }
 
 .g-board-value {
@@ -2579,7 +2579,7 @@ button {
 
 .g-board-tabs button {
   flex: 1 1 45%;
-  font-size: 13px;
+  font-size: var(--fs-meta);
 }
 
 .g-nick {
@@ -2589,17 +2589,17 @@ button {
 /* Sesonger, nivåmerket på topplista og felles hendelser (B-129, B-139) */
 .g-league {
   font-style: normal;
-  font-size: 11px;
+  font-size: var(--fs-badge);
   padding: 1px 6px;
-  border-radius: 8px;
-  background: #2c3647;
+  border-radius: var(--r-md);
+  background: var(--line);
   color: var(--text-dim);
   margin-left: 4px;
   vertical-align: middle;
 }
 
 .g-board-scope button {
-  font-size: 13px;
+  font-size: var(--fs-meta);
 }
 
 .g-events ul {
@@ -2643,7 +2643,7 @@ button {
   min-height: 40px;
   width: 44px;
   padding: 0;
-  font-size: 18px;
+  font-size: var(--fs-section);
 }
 
 /* «Husk meg» i innloggingen (B-146): litt luft før knappene */
@@ -2660,11 +2660,11 @@ button {
   z-index: 200;
   max-width: calc(100vw - 24px);
   padding: 8px 14px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--panel-bg);
   border: 1px solid var(--accent);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-  font-size: 14px;
+  box-shadow: var(--shadow-md);
+  font-size: var(--fs-body);
   text-align: center;
 }
 
@@ -2684,8 +2684,8 @@ button {
   gap: 2px;
   padding: 6px 2px;
   border: 1px solid var(--panel-border);
-  border-radius: 8px;
-  font-size: 11px;
+  border-radius: var(--r-md);
+  font-size: var(--fs-badge);
   text-align: center;
   min-width: 0;
 }
@@ -2698,15 +2698,15 @@ button {
   overflow-wrap: anywhere;
 }
 .g-streak li.is-done {
-  background: rgba(102, 187, 106, 0.18);
+  background: var(--ok-tint);
   border-color: var(--ok);
 }
 .g-streak li.is-next {
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(79, 195, 247, 0.35);
+  box-shadow: 0 0 0 2px var(--accent-ring);
 }
 .g-streak li.is-chest .g-streak-day {
-  font-size: 16px;
+  font-size: var(--fs-section);
 }
 
 /* Dagens oppdrag (B-149) */
@@ -2748,9 +2748,9 @@ button {
   min-width: 40px;
   min-height: 40px;
   padding: 0;
-  font-size: 18px;
-  background: rgba(10, 14, 20, 0.65);
-  border-radius: 8px;
+  font-size: var(--fs-section);
+  background: var(--scrim-soft);
+  border-radius: var(--r-md);
 }
 
 .g-badges {
@@ -2763,8 +2763,8 @@ button {
 .g-badge-tile {
   min-height: 40px;
   padding: 0;
-  font-size: 20px;
-  border-radius: 8px;
+  font-size: var(--fs-page);
+  border-radius: var(--r-md);
   filter: grayscale(1);
   opacity: 0.35;
 }
@@ -2772,8 +2772,8 @@ button {
 .g-badge-tile.is-got {
   filter: none;
   opacity: 1;
-  background: #2a3b24;
-  border-color: #5f8a3c;
+  background: var(--ok-bg);
+  border-color: var(--ok-border);
 }
 
 .g-badge-tile.is-picked {
@@ -2806,7 +2806,7 @@ button {
 }
 
 .g-pynt-icon {
-  font-size: 22px;
+  font-size: var(--fs-page);
   width: 28px;
   text-align: center;
   flex: none;
@@ -2817,7 +2817,7 @@ button {
   flex-direction: column;
   flex: 1;
   min-width: 0;
-  font-size: 13px;
+  font-size: var(--fs-meta);
 }
 
 .g-pynt-item > button {
@@ -2828,15 +2828,15 @@ button {
 .g-pynt-item > button.is-on {
   background: var(--ok);
   border-color: var(--ok);
-  color: #06200a;
+  color: var(--on-ok);
 }
 
 .g-pynt-lock {
   flex: none;
   max-width: 110px;
-  font-size: 12px;
+  font-size: var(--fs-caption);
   text-align: right;
-  color: var(--muted, #9aa3ad);
+  color: var(--text-3);
 }
 
 /* Ukens utfordring (B-152) */
@@ -2854,7 +2854,7 @@ button {
   padding-top: 4px;
 }
 .g-changelog h3 {
-  font-size: 15px;
+  font-size: var(--fs-title);
   margin: 8px 0 4px;
 }
 .g-changelog ul {
@@ -2879,7 +2879,7 @@ button {
 
 /* Strategiske selskaper (B-189): skraplageret på Konsern-fanen */
 .g-company h3 {
-  font-size: 15px;
+  font-size: var(--fs-title);
   margin: 12px 0 4px;
 }
 
@@ -2901,7 +2901,7 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: var(--fs-meta);
   color: var(--text-dim);
 }
 
@@ -2909,12 +2909,12 @@ button {
   width: 110px;
   min-height: 44px;
   padding: 6px 10px;
-  font-size: 16px;
+  font-size: var(--fs-section);
   font-family: inherit;
   color: var(--text);
-  background: #0e141c;
+  background: var(--bg);
   border: 1px solid var(--panel-border);
-  border-radius: 8px;
+  border-radius: var(--r-md);
 }
 
 .g-amount input:focus-visible {
@@ -2924,4 +2924,69 @@ button {
 
 .g-amount-row button {
   min-height: 44px;
+}
+
+/* Designsystemet (B-191): overskrifter og store nøkkeltall får visningsskriften med tabulære tall. Den er smalere enn
+   brødteksten, så den står ett trinn større. */
+.g-card h2,
+.g-when strong,
+.g-stat strong,
+.g-intro-card h1,
+.g-decision h2,
+.g-celebrate h2,
+.g-big-status {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.g-card h2,
+.g-when strong,
+.g-stat strong {
+  font-size: var(--fs-section);
+}
+
+/* Ikonene i toppfeltet (B-191): samme størrelse overalt, uansett skriftstørrelsen på knappen */
+.g-top .ds-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.g-notice-bell {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-2);
+}
+
+/* Det samlede kontokortet (B-191): én liste med det som krever konto, og én knapp */
+.g-account-list {
+  list-style: none;
+  margin: var(--sp-3) 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  font-size: var(--fs-body);
+  line-height: 1.4;
+}
+
+.g-account-list li {
+  display: flex;
+  gap: var(--sp-3);
+  align-items: flex-start;
+}
+
+.g-account-list .ds-icon {
+  margin-top: 0.15em;
+  color: var(--text-3);
+}
+
+.g-account-card .ds-button {
+  width: 100%;
+  min-height: var(--touch);
+}
+
+.g-needs-account .ds-icon {
+  color: var(--text-3);
 }
