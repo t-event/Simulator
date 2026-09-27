@@ -9,6 +9,7 @@ import { GRADES } from "../../game/data";
 import type { ManualRequest } from "../../game/types";
 import { fmtNum } from "../format";
 import { buzz } from "../haptics";
+import { Icon, type IconName } from "../icons";
 import {
   BUCKET_WARN_S,
   ChargeGame,
@@ -29,6 +30,9 @@ interface Props {
   /** again: spilleren vil ta neste charge også */
   onDone: (result: ManualResult | null, chapter?: string, again?: boolean) => void;
 }
+
+/** Ikonet for hver runde (B-216: ikoner i stedet for emoji) */
+const ROUND_ICON: Record<string, IconName> = { smelt: "flame", rens: "wind", slagg: "rake", tapp: "droplet" };
 
 const fmt = (v: number, d: number) => v.toFixed(d).replace(".", ",");
 
@@ -198,6 +202,19 @@ function Ladle({ game }: { game: ChargeGame }) {
   );
 }
 
+/**
+ * En runde i spill (B-216): bildet (ovnen, badet eller øsa) og måler, råd og knapper. Mobil: under hverandre, med
+ * knappen nederst der tommelen er. PC: bildet til venstre og det man styrer med til høyre.
+ */
+function Play({ stage, children }: { stage: ReactNode; children: ReactNode }) {
+  return (
+    <div className="cg-play">
+      <div className="cg-stage">{stage}</div>
+      <div className="cg-panel">{children}</div>
+    </div>
+  );
+}
+
 export function ControlRoom({ request, best, onDone }: Props) {
   const [game] = useState(() => new ChargeGame(request));
   const [, setFrame] = useState(0);
@@ -276,7 +293,7 @@ export function ControlRoom({ request, best, onDone }: Props) {
     body = (
       <div className="cg-card">
         <div className="cg-card-icon" aria-hidden="true">
-          {round.icon}
+          <Icon name={ROUND_ICON[round.id]} />
         </div>
         <p className="cg-muted">
           Runde {game.round + 1} av {ROUNDS.length}
@@ -308,8 +325,7 @@ export function ControlRoom({ request, best, onDone }: Props) {
         const t = game.temp;
         const b = game.bucket;
         body = (
-          <>
-            <Furnace game={game} />
+          <Play stage={<Furnace game={game} />}>
             <Gauge label="Temperatur i badet" value={t} min={1480} max={1700} zone={MELT_BAND} digits={0} unit="°C" />
             <div className="cg-progress">
               <span>Smeltet</span>
@@ -319,10 +335,11 @@ export function ControlRoom({ request, best, onDone }: Props) {
               <span>{Math.round(game.melted * 100)} %</span>
             </div>
             <p className={`cg-hint${b ? " is-warn" : ""}`}>
+              {b && <Icon name="warning" />}
               {b
                 ? b.kind === "tung"
-                  ? "⚠️ Tung kurv på vei – den kjøler badet. Hold inne i forkant!"
-                  : "⚠️ Lett kurv på vei – den varmer badet. Slipp i forkant!"
+                  ? "Tung kurv på vei – den kjøler badet. Hold inne i forkant!"
+                  : "Lett kurv på vei – den varmer badet. Slipp i forkant!"
                 : t < MELT_BAND[0]
                   ? "For kaldt – hold inne for strøm."
                   : t > MELT_BAND[1]
@@ -332,9 +349,9 @@ export function ControlRoom({ request, best, onDone }: Props) {
                       : "I det grønne – hold det der."}
             </p>
             <button className={`cg-hold${game.holding ? " is-down" : ""}`} {...holdProps}>
-              ⚡ Hold for strøm
+              <Icon name="power" /> Hold for strøm
             </button>
-          </>
+          </Play>
         );
         break;
       }
@@ -343,8 +360,7 @@ export function ControlRoom({ request, best, onDone }: Props) {
         const inC = game.carbon >= lo && game.carbon <= hi;
         const locked = game.lockS > 0;
         body = (
-          <>
-            <Furnace game={game} />
+          <Play stage={<Furnace game={game} />}>
             <Gauge label="Karbon i stålet" value={game.carbon} min={0} max={0.35} zone={[lo, hi]} digits={3} unit="%" />
             <Gauge
               label="Skum"
@@ -372,7 +388,7 @@ export function ControlRoom({ request, best, onDone }: Props) {
                 className={`cg-hold${game.holding ? " is-down" : ""}${locked ? " is-locked" : ""}`}
                 {...holdProps}
               >
-                💨 Hold for oksygen
+                <Icon name="wind" /> Hold for oksygen
               </button>
               <button
                 className={`cg-main cg-side${inC ? " is-ready" : " is-quiet"}`}
@@ -382,46 +398,49 @@ export function ControlRoom({ request, best, onDone }: Props) {
                   redraw();
                 }}
               >
-                Ferdig ✓
+                Ferdig <Icon name="check" />
               </button>
             </div>
-          </>
+          </Play>
         );
         break;
       }
       case "slagg": {
         const left = Math.max(0, SLAG_S - game.t);
         body = (
-          <>
-            <div className="cg-bath" role="group" aria-label="Badet sett ovenfra">
-              {game.targets
-                .filter((o) => o.state === "oppe")
-                .map((o) => {
-                  const age = (game.t - o.born) / o.life;
-                  return (
-                    <button
-                      key={o.id}
-                      className={`cg-lump is-${o.kind}${age > 0.7 ? " is-sinking" : ""}`}
-                      style={{ left: `${o.x * 100}%`, top: `${o.y * 100}%` }}
-                      aria-label={o.kind === "slagg" ? "Slaggklump" : "Blankt stål"}
-                      onPointerDown={(e) => {
-                        e.preventDefault();
-                        const hit = game.rake(o.id);
-                        if (hit === "slagg") {
-                          buzz(12);
-                          flash(`+${40 * game.mult}`, "good");
-                        } else if (hit === "stal") {
-                          buzz([60, 30, 60]);
-                          flash("Det var stål!", "bad");
-                        }
-                        redraw();
-                      }}
-                    >
-                      {o.kind === "slagg" ? "P" : "✦"}
-                    </button>
-                  );
-                })}
-            </div>
+          <Play
+            stage={
+              <div className="cg-bath" role="group" aria-label="Badet sett ovenfra">
+                {game.targets
+                  .filter((o) => o.state === "oppe")
+                  .map((o) => {
+                    const age = (game.t - o.born) / o.life;
+                    return (
+                      <button
+                        key={o.id}
+                        className={`cg-lump is-${o.kind}${age > 0.7 ? " is-sinking" : ""}`}
+                        style={{ left: `${o.x * 100}%`, top: `${o.y * 100}%` }}
+                        aria-label={o.kind === "slagg" ? "Slaggklump" : "Blankt stål"}
+                        onPointerDown={(e) => {
+                          e.preventDefault();
+                          const hit = game.rake(o.id);
+                          if (hit === "slagg") {
+                            buzz(12);
+                            flash(`+${40 * game.mult}`, "good");
+                          } else if (hit === "stal") {
+                            buzz([60, 30, 60]);
+                            flash("Det var stål!", "bad");
+                          }
+                          redraw();
+                        }}
+                      >
+                        {o.kind === "slagg" ? "P" : "✦"}
+                      </button>
+                    );
+                  })}
+              </div>
+            }
+          >
             <div className="cg-progress">
               <span>Tid</span>
               <div className="cg-progress-track is-time">
@@ -433,7 +452,7 @@ export function ControlRoom({ request, best, onDone }: Props) {
               Raket ut {game.raked} slaggklumper{game.steelRaked > 0 ? ` · ${game.steelRaked} stål tapt` : ""}. Trykk på
               de grå (P) – ikke det blanke stålet!
             </p>
-          </>
+          </Play>
         );
         break;
       }
@@ -442,8 +461,7 @@ export function ControlRoom({ request, best, onDone }: Props) {
           const zone: [number, number] = [game.tapTarget - TAP_OK_C, game.tapTarget + TAP_OK_C];
           const inZone = game.tapTemp >= zone[0] && game.tapTemp <= zone[1];
           body = (
-            <>
-              <Furnace game={game} />
+            <Play stage={<Furnace game={game} />}>
               <Gauge
                 label="Temperatur i badet"
                 value={game.tapTemp}
@@ -472,13 +490,12 @@ export function ControlRoom({ request, best, onDone }: Props) {
               >
                 Tapp!
               </button>
-            </>
+            </Play>
           );
         } else {
           const f = game.fill;
           body = (
-            <>
-              <Ladle game={game} />
+            <Play stage={<Ladle game={game} />}>
               <div className="cg-progress">
                 <span>Øsa</span>
                 <div className="cg-progress-track is-ladle">
@@ -496,7 +513,7 @@ export function ControlRoom({ request, best, onDone }: Props) {
               </p>
               <div className="cg-row">
                 <button className={`cg-hold${game.holding ? " is-down" : ""}`} {...holdProps}>
-                  🫗 Hold for å helle
+                  <Icon name="droplet" /> Hold for å helle
                 </button>
                 {f > 0 && (
                   <button
@@ -510,7 +527,7 @@ export function ControlRoom({ request, best, onDone }: Props) {
                   </button>
                 )}
               </div>
-            </>
+            </Play>
           );
         }
         break;
@@ -526,7 +543,7 @@ export function ControlRoom({ request, best, onDone }: Props) {
         <h1>Kontrollrommet</h1>
         {phase !== "ferdig" && (
           <button className="cg-close" onClick={() => setConfirm(true)} aria-label="Gi fra deg styringen">
-            ✕
+            <Icon name="close" />
           </button>
         )}
       </header>
@@ -539,7 +556,7 @@ export function ControlRoom({ request, best, onDone }: Props) {
                 className={i < game.round ? "done" : i === game.round ? "now" : ""}
                 aria-label={`${x.title}${i < game.round ? " (ferdig)" : ""}`}
               >
-                {i < game.round ? "✓" : x.icon}
+                <Icon name={i < game.round ? "check" : ROUND_ICON[x.id]} />
               </li>
             ))}
           </ol>
@@ -587,7 +604,10 @@ function Result({ score, best, onDone }: { score: Score; best: number; onDone: P
         <p className="cg-total">
           {fmtNum(score.points)} poeng
           {record ? (
-            <span className="cg-record"> 🏆 Ny rekord!</span>
+            <span className="cg-record">
+              {" "}
+              <Icon name="trophy" /> Ny rekord!
+            </span>
           ) : (
             <span className="cg-muted"> · rekord {fmtNum(best)}</span>
           )}
@@ -617,12 +637,14 @@ function Result({ score, best, onDone }: { score: Score; best: number; onDone: P
           </li>
         ))}
       </ul>
-      <button className="cg-main is-ready" onClick={() => onDone(score.result, undefined, true)}>
-        Ta neste charge også
-      </button>
-      <button className="cg-main is-quiet" onClick={() => onDone(score.result)}>
-        Tilbake til verket
-      </button>
+      <div className="cg-result-actions">
+        <button className="cg-main is-ready" onClick={() => onDone(score.result, undefined, true)}>
+          Ta neste charge også
+        </button>
+        <button className="cg-main is-quiet" onClick={() => onDone(score.result)}>
+          Tilbake til verket
+        </button>
+      </div>
     </div>
   );
 }

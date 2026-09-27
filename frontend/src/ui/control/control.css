@@ -618,6 +618,140 @@
   }
 }
 
+/* UI-4a (B-216): ikoner i stedet for emoji, og en runde er bilde + styring */
+.cg-rounds li .ds-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.cg-card-icon .ds-icon {
+  width: 52px;
+  height: 52px;
+  color: var(--accent);
+}
+
+.cg-hint .ds-icon,
+.cg-hold .ds-icon,
+.cg-record .ds-icon {
+  margin-right: 6px;
+}
+
+.cg-main .ds-icon {
+  margin-left: 4px;
+}
+
+.cg-close .ds-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.cg-play {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cg-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Mobil: det man trykker på, står nederst der tommelen er */
+.cg-panel > .cg-hold:last-child,
+.cg-panel > .cg-row:last-child,
+.cg-panel > .cg-main:last-child {
+  margin-top: auto;
+}
+
+.cg-result-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Høye mobiler: ovnen får mer av plassen over knappen */
+@media (max-width: 899px) and (min-height: 760px) {
+  .cg-furnace {
+    height: 30vh;
+    max-height: 300px;
+  }
+}
+
+/* PC (B-216): kontrollrommet bruker bredden – bildet til venstre, målere, råd og knapper til høyre */
+@media (min-width: 900px) {
+  /* Midt i høyden (marg i stedet for justify-content, så et høyt resultat fortsatt kan scrolles til toppen) */
+  .cg-body > .cg-play,
+  .cg-body > .cg-card,
+  .cg-body > .cg-result {
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+
+  .control-room.cg {
+    padding-left: max(24px, calc((100vw - 1120px) / 2));
+    padding-right: max(24px, calc((100vw - 1120px) / 2));
+  }
+
+  .cg-play {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 32px;
+    align-items: center;
+    flex: none;
+  }
+
+  .cg-panel {
+    flex: none;
+    gap: 14px;
+  }
+
+  .cg-panel > .cg-hold:last-child,
+  .cg-panel > .cg-row:last-child,
+  .cg-panel > .cg-main:last-child {
+    margin-top: 6px;
+  }
+
+  .cg-furnace {
+    height: 46vh;
+    max-height: 440px;
+  }
+
+  .cg-bath {
+    height: 52vh;
+    max-height: 480px;
+  }
+
+  .cg-card {
+    max-width: 580px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .cg-result {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    grid-template-areas: "rating lines" "actions lines";
+    grid-template-rows: auto 1fr;
+    gap: 16px 32px;
+    align-items: start;
+  }
+
+  .cg-rating {
+    grid-area: rating;
+  }
+
+  .cg-result ul {
+    grid-area: lines;
+  }
+
+  .cg-result-actions {
+    grid-area: actions;
+  }
+}
+
 /* Designsystemet (B-191): overskrifter og poeng i visningsskriften */
 .cg-head h1,
 .cg-card h2,

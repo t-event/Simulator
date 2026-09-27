@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 153 – 2026-09-27: UI-4a Kontrollrommet
+
+**Brukeren ba om:** «Fortsett» (etter at Figen var fornøyd med forklaringen; utbyttet står).
+
+**Gjort:** B-216. Ikoner i stedet for emoji i kontrollrommet (tre nye: `wind`, `droplet`, `rake`), holdeknappen nederst
+på mobil, ovn til venstre og styring til høyre på PC, resultatet i to kolonner. Seiersskjermen venter til chargen er
+ferdig.
+
+**Testet:** tsc, lint, `npm test`, Playwright på 7 størrelser og gjennomspilling av alle rundene (mobil og PC).
+
+**Gjenstår:** UI-4b (toppliste/Hall of Fame), UI-4c, UI-4d; reserven og kassegrensen; Google/Apple senere.
+
+---
+
 ## Økt 152 – 2026-09-27: Figens verk «går ofte i minus»
 
 **Brukeren ba om:** Figen liker ikke økonomien fordi verket ofte går i minus.

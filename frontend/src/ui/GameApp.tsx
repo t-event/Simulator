@@ -1037,7 +1037,7 @@ export function GameApp() {
       {!modalOpen && <SeasonResultNotice onOpen={setResultOpen} />}
       {!modalOpen && !resultOpen && <SeasonPrompt api={api} g={g} onOpenSettings={() => setSettingsOpen(true)} />}
       {g.gameOver && <EndScreen g={g} onRestart={api.quit} />}
-      {g.won && !winSeen && !g.gameOver && (
+      {g.won && !winSeen && !g.gameOver && !g.pendingManual && (
         <EndScreen
           g={g}
           onRestart={api.quit}

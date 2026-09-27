@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 216,
+    date: "2026-09-27",
+    title: "Nytt kontrollrom",
+    items: [
+      "Kontrollrommet har fått ikoner i stedet for emojier, og knappen du holder inne, står nederst der tommelen er.",
+      "På PC står ovnen til venstre og målerne og knappene til høyre, og resultatet vises i to kolonner.",
+    ],
+  },
+  {
     b: 215,
     date: "2026-09-27",
     title: "Tydeligere økonomi",
