@@ -3397,3 +3397,20 @@ spillet i det øyeblikket kassa når grensen)
 Testet: `npm test` (ny test: flytting, konsernverdi uendret, én forklaring, døgnlinje, motoren, ikke brukbar,
 konkurs, slått av, gamle lagringer og lagring), balanse (exit 0), `--konsern` (dag 240: kasse 100 mrd. + 339 mrd.
 bundet, samme konsernverdi 715,75 mrd. som uten ventil), Playwright med kasse 100,5 mrd. (390, 320, 1 366).
+
+## B-194 Vekstsperren ser over tre døgn (2026-09-27)
+Status: gjelder (justerer vekstsperren fra B-150; samme grep som tonnsperren i B-162)
+Bakgrunn: eieren spurte hvorfor H4WK3N5 forsvant fra topplista. Juksesperren flagget kontoen kl. 12.20 for «vekst
+30 261 845 198 på 1 døgn, nivå 4». Mellom dag 790 og 791 gikk kassa fra 25,35 til 1,31 mrd. og konsernverdien fra
+50,90 til 81,17 mrd.: flere verk ble kjøpt og modernisert. Et datterverk verdsettes til 60 døgns overskudd, og en
+modernisering koster 30 % av prisen, men løfter overskuddet mye – så kjøp kan øke konsernverdien mer enn de koster.
+Sperren tillot 1,5 mrd. + 50 % av 50,9 mrd. = 26,95 mrd.; over tre døgn var veksten 31,5 mrd. av 79 mrd. tillatt.
+Ærlig spill, ikke juks. (Skjedde før B-192/B-193 ble publisert og har ingenting med reserven å gjøre.)
+Beslutning (migrasjon `032_vekstsperre_tre_dogn.sql`, eierens godkjenning):
+- Et hopp i konsernverdien på ett døgn flagges bare hvis også veksten fra et tall minst tre døgn tilbake er for høy
+  (samme grense per døgn). Tall fra før økonomireformen (`pre_reform`) brukes ikke som utgangspunkt (B-190).
+- Flagget på H4WK3N5 er fjernet (bare det ene flagget, samme grunn). Ingen andre kontoer var flagget.
+Testet i databasen (DO-blokk som ble rullet tilbake) med H4WK3N5s ekte tall dag 785–791: gammel regel flagger, ny regel
+flagger ikke, og et juksehopp til 500 mrd. flagges fortsatt. Etterpå: 0 flaggede kontoer, H4WK3N5 er nr. 1 på
+konsernverdi-lista, sikkerhetsrådene som før.
+Konto (B-149): ingen ny funksjon.
