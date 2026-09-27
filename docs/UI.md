@@ -283,7 +283,7 @@ Hver PR er liten, går gjennom alle sjekker, Playwright på **7 størrelser** (3
    toppliste/fagbok/innstillinger, brytepunktene.
 3. **UI-2a Oversikt** (bygget, B-195) (inkl. boblereglene og første runde av anleggsbildet) · **UI-2b Anlegg** (bygget, B-196; statusspråk,
    driftsdashbord) · **UI-2c Marked** (bygget, B-197; skraptabell på PC, kort på mobil) · **UI-2d Salg** (bygget, B-198; liste + detaljer for forespørsler på PC, kort på mobil).
-4. **UI-3a Økonomi** (bygget, B-203; resultat øverst, graf per døgn, poster) · **UI-3b Folk** · **UI-3c Forskning** · **UI-3d Konsern** (hovedkontoret).
+4. **UI-3a Økonomi** (bygget, B-203; resultat øverst, graf per døgn, poster) · **UI-3b Folk** (bygget, B-204; bemanning synlig på PC, Ferdighet-kolonne) · **UI-3c Forskning** · **UI-3d Konsern** (hovedkontoret).
 5. **UI-4a Kontrollrommet** · **UI-4b Toppliste/Hall of Fame** · **UI-4c øvrige ark og små skjermer** ·
    **UI-4d polering og animasjon** (inkl. anleggsbildet per nivå).
 6. Etterpå: logo, app-ikon og tittelbilde (bevisst sist, B-187).

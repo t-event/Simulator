@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 141 – 2026-09-27: UI-3b – Folk
+
+**Brukeren ba om:** «Merge. Bare merge uten å spørre fremover. Fortsett.»
+
+**Gjort:** PR #148 (UI-3a) merget. B-204: Folk med felles underfaner, Skift i to kolonner på PC med bemanningstabellen
+alltid synlig, Ferdighet-kolonne, rollegruppene i to kolonner, 44 px knapper; tabellen ga sideveis scrolling på 320 px –
+rettet. Regelen i CLAUDE.md: også UI-faser merges uten å vente. `servers.sh` i kladdemappa starter testserverne.
+
+**Testet:** tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter og de 7 størrelsene.
+
+**Gjenstår:** UI-3c (Forskning).
+
+---
+
 ## Økt 140 – 2026-09-27: UI-3a – Økonomi
 
 **Brukeren ba om:** «Fortsett» (neste steg i UI-planen).

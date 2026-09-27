@@ -47,7 +47,7 @@ import {
 } from "../game/plant";
 import type { GameState, RoleId, Worker } from "../game/types";
 import type { GameApi } from "../game/useGame";
-import { Bar, Card, Stat } from "./common";
+import { Bar, Card, Stat, SubTabs } from "./common";
 import { fmtKr, fmtNum } from "./format";
 import { ShiftPlan } from "./Power";
 import { AutoToggle } from "./AutoToggle";
@@ -419,6 +419,12 @@ function CrewTable({ g, stats, shifts }: { g: GameState; stats: PlantStats; shif
     label(r, count(r)),
   );
   const idle = CREW_ROLES.filter((r) => !inTable.has(r) && count(r) > 0).map((r) => label(r, count(r)));
+  // Snittferdigheten til egne folk i rollen (B-204): viser hvor et kurs eller en flink søker gir mest
+  const skillOf = (r: RoleId) => {
+    const ws = g.workers.filter((w) => w.role === r);
+    return ws.length ? ws.reduce((a, w) => a + w.skill, 0) / ws.length : null;
+  };
+  const fmtSkill = (v: number | null) => (v === null ? "–" : fmtNum(Math.floor(v * 10) / 10, 1));
   return (
     <>
       <table className="g-table g-crew-table">
@@ -431,6 +437,7 @@ function CrewTable({ g, stats, shifts }: { g: GameState; stats: PlantStats; shif
               <span className="g-muted">{shifts > 3 ? `${shifts} lag` : `${shifts} skift`}</span>
             </th>
             <th className="num">Fylt av</th>
+            <th className="num g-col-skill">Ferdighet</th>
             <th className="num">Mangler</th>
           </tr>
         </thead>
@@ -459,6 +466,7 @@ function CrewTable({ g, stats, shifts }: { g: GameState; stats: PlantStats; shif
                   </span>
                 )}
               </td>
+              <td className="num g-col-skill">{fmtSkill(skillOf(row.role))}</td>
               <td className={`num${row.missing ? " bad" : ""}`}>{row.missing || "–"}</td>
             </tr>
           ))}
@@ -503,173 +511,168 @@ export function People({ g, stats, act, openTab }: Props & { openTab?: string })
   const absenceCosts = away.length > 0 && !tempsActive(g) && stats.shifts < fullShifts;
   const full = cap > 0 && g.workers.length >= cap;
   const hiredActive = !!g.tempCrew && g.tempCrew.untilMin > g.minute;
-  const tabs: { id: PeopleTab; label: string }[] = [
+  const tabs: { id: PeopleTab; label: string; count?: number; alert?: boolean }[] = [
     { id: "skift", label: "Skift" },
-    {
-      id: "ansett",
-      label: `Ansett${g.candidates.length && cap > 0 ? ` (${g.candidates.length})` : ""}`,
-    },
-    { id: "ansatte", label: `Ansatte (${g.workers.length})` },
-    { id: "fravaer", label: `Fravær${away.length ? ` (${away.length})` : ""}` },
+    { id: "ansett", label: "Ansett", count: cap > 0 ? g.candidates.length : 0 },
+    { id: "ansatte", label: "Ansatte", count: g.workers.length },
+    { id: "fravaer", label: "Fravær", count: away.length, alert: absenceCosts },
   ];
   const shown: PeopleTab = cap === 0 && !g.workers.length ? "skift" : tab;
 
+  const crewTable = stats.crew && Object.keys(stats.crew).length > 0;
   return (
-    <div className="g-grid">
+    <div className={`g-grid g-folk is-${shown}`}>
       <div className="g-col-wide">
-        {(cap > 0 || g.workers.length > 0) && (
-          <div className="g-subtabs" role="tablist" aria-label="Folk">
-            {tabs.map((t) => (
-              <button
-                key={t.id}
-                role="tab"
-                aria-selected={shown === t.id}
-                className={`${shown === t.id ? "is-active" : ""}${t.id === "fravaer" && absenceCosts ? " is-alert" : ""}`}
-                onClick={() => setTab(t.id)}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-        )}
+        {(cap > 0 || g.workers.length > 0) && <SubTabs tabs={tabs} value={shown} onChange={setTab} label="Folk" />}
 
         {shown === "skift" && (
-          <>
-            <Card title="Skiftene">
-              <p className="g-big-status">
-                {stats.hours >= 24 ? (
-                  <>
-                    Verket går <strong>døgnet rundt</strong> med <strong>{crews} skiftlag</strong>
-                    <span className="g-muted">
-                      {" "}
-                      · {crews}‑skift
-                      {stats.crews < crews ? ` · fraværet gjør at bare ${stats.crews} lag er fulle nå` : ""}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    Verket går <strong>{stats.shifts} av 3 skift</strong>
-                    <span className="g-muted"> · {stats.hours} timer i døgnet</span>
-                  </>
+          <div className="g-folk-cols">
+            <div className="g-folk-main">
+              <Card title="Skiftene">
+                <p className="g-big-status">
+                  {stats.hours >= 24 ? (
+                    <>
+                      Verket går <strong>døgnet rundt</strong> med <strong>{crews} skiftlag</strong>
+                      <span className="g-muted">
+                        {" "}
+                        · {crews}‑skift
+                        {stats.crews < crews ? ` · fraværet gjør at bare ${stats.crews} lag er fulle nå` : ""}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      Verket går <strong>{stats.shifts} av 3 skift</strong>
+                      <span className="g-muted"> · {stats.hours} timer i døgnet</span>
+                    </>
+                  )}
+                </p>
+                {stats.crews > 3 && stats.hours >= 24 && (
+                  <p className="g-note">
+                    <strong>{stats.crews}-skift:</strong> døgnet har tre skift à 8 timer, men med {stats.crews} skiftlag
+                    som bytter på, får turnusen fridager. Trivselen blir bedre, færre blir syke (
+                    {Math.round((1 - crewBenefits(stats.crews, stats.hours).sick) * 100)} % færre), folk lærer{" "}
+                    {Math.round((crewBenefits(stats.crews, stats.hours).learn - 1) * 100)} % fortere, og de ekstra
+                    lagene dekker fravær, så verket ikke mister skift.
+                  </p>
                 )}
-              </p>
-              {stats.crews > 3 && stats.hours >= 24 && (
-                <p className="g-note">
-                  <strong>{stats.crews}-skift:</strong> døgnet har tre skift à 8 timer, men med {stats.crews} skiftlag
-                  som bytter på, får turnusen fridager. Trivselen blir bedre, færre blir syke (
-                  {Math.round((1 - crewBenefits(stats.crews, stats.hours).sick) * 100)} % færre), folk lærer{" "}
-                  {Math.round((crewBenefits(stats.crews, stats.hours).learn - 1) * 100)} % fortere, og de ekstra lagene
-                  dekker fravær, så verket ikke mister skift.
-                </p>
-              )}
-              {stats.ownerWorks && (
-                <p className="g-muted">
-                  Du står selv i produksjonen på dagskiftet
-                  {g.stage === 0 ? " og gjør alt." : " og fyller to plasser."}
-                  {g.stage === 0
-                    ? ` Ansatte kan du ha når du har flyttet til ${stageRef(1, g.stage)}.`
-                    : ` Når du flytter til ${stageRef(2, g.stage)}, blir du daglig leder, og da må alle plassene fylles av ansatte.`}
-                </p>
-              )}
-              {absenceCosts && (
-                <p className="g-note g-warn">
-                  {away.length === 1 ? "Én ansatt" : `${away.length} ansatte`} er borte, så verket går {stats.shifts}{" "}
-                  skift i stedet for {fullShifts}.{" "}
-                  <button className="g-link" onClick={() => setTab("fravaer")}>
-                    Se fravær og vikarer
-                  </button>
-                </p>
-              )}
-              {permanent.shifts < 3 && cap > 0 && missing.length > 0 && (
-                <div className="g-note">
-                  For {permanent.shifts + 1} skift mangler:{" "}
-                  {missing
-                    .map(([r, n]) => `${n} ${(n === 1 ? ROLES[r].name : ROLES[r].plural).toLowerCase()}`)
-                    .join(", ")}
-                  .
-                  {full ? (
-                    <p className="g-small-text">
-                      Verket er fullt: {cap} av {cap} ansatte. Lei inn vikarer til plassene
-                      {topStage
-                        ? " eller si opp noen som ikke trengs på skiftene."
-                        : ", si opp noen som ikke trengs på skiftene, eller flytt til et større verk."}
-                    </p>
-                  ) : (
-                    <p className="g-small-text">
-                      Vikarer for fravær dekker bare folk som er borte. Plasser ingen har, må du ansette til – eller
-                      leie inn.
-                    </p>
-                  )}
-                  <div className="g-row">
-                    {!full && (
-                      <button className="g-primary" onClick={() => act((gg) => hireForMissing(gg))}>
-                        Ansett til manglende plasser
-                      </button>
-                    )}
-                    <button className={full ? "g-primary" : ""} onClick={() => act((gg) => hireTempCrew(gg, 3))}>
-                      Lei inn vikarer i 3 døgn ({fmtKr(hiredCrewCost(g, 3))})
+                {stats.ownerWorks && (
+                  <p className="g-muted">
+                    Du står selv i produksjonen på dagskiftet
+                    {g.stage === 0 ? " og gjør alt." : " og fyller to plasser."}
+                    {g.stage === 0
+                      ? ` Ansatte kan du ha når du har flyttet til ${stageRef(1, g.stage)}.`
+                      : ` Når du flytter til ${stageRef(2, g.stage)}, blir du daglig leder, og da må alle plassene fylles av ansatte.`}
+                  </p>
+                )}
+                {absenceCosts && (
+                  <p className="g-note g-warn">
+                    {away.length === 1 ? "Én ansatt" : `${away.length} ansatte`} er borte, så verket går {stats.shifts}{" "}
+                    skift i stedet for {fullShifts}.{" "}
+                    <button className="g-link" onClick={() => setTab("fravaer")}>
+                      Se fravær og vikarer
                     </button>
-                  </div>
-                </div>
-              )}
-              {permanent.shifts >= 3 && !stats.ownerWorks && permanent.crews < MAX_CREWS && cap > 0 && (
-                <div className="g-note">
-                  <strong>{permanent.crews + 1}-skift:</strong> med {permanent.crews + 1} skiftlag i stedet for{" "}
-                  {permanent.crews} får turnusen fridager: bedre trivsel, mindre sykdom, raskere læring, og fravær
-                  dekkes uten vikarer. Koster lønn til ett lag til.
-                  {missing.length > 0 && (
-                    <p className="g-small-text">
-                      {wildcardUse(g).spare > 0 ? "De ledige avløserne er regnet med. Mangler: " : "Mangler: "}
-                      {missing
-                        .map(([r, n]) => `${n} ${(n === 1 ? ROLES[r].name : ROLES[r].plural).toLowerCase()}`)
-                        .join(", ")}
-                      .
-                    </p>
-                  )}
-                  {full || g.workers.length + missing.reduce((a, [, n]) => a + n, 0) > cap ? (
-                    <p className="g-small-text">
-                      Det er ikke plass til et lag til ({g.workers.length} av {cap} ansatte).{" "}
-                      {topStage
-                        ? "Si opp folk som ikke trengs."
-                        : "Flytt til et større verk, eller si opp folk som ikke trengs."}
-                    </p>
-                  ) : (
+                  </p>
+                )}
+                {permanent.shifts < 3 && cap > 0 && missing.length > 0 && (
+                  <div className="g-note">
+                    For {permanent.shifts + 1} skift mangler:{" "}
+                    {missing
+                      .map(([r, n]) => `${n} ${(n === 1 ? ROLES[r].name : ROLES[r].plural).toLowerCase()}`)
+                      .join(", ")}
+                    .
+                    {full ? (
+                      <p className="g-small-text">
+                        Verket er fullt: {cap} av {cap} ansatte. Lei inn vikarer til plassene
+                        {topStage
+                          ? " eller si opp noen som ikke trengs på skiftene."
+                          : ", si opp noen som ikke trengs på skiftene, eller flytt til et større verk."}
+                      </p>
+                    ) : (
+                      <p className="g-small-text">
+                        Vikarer for fravær dekker bare folk som er borte. Plasser ingen har, må du ansette til – eller
+                        leie inn.
+                      </p>
+                    )}
                     <div className="g-row">
-                      <button onClick={() => act((gg) => hireForMissing(gg, permanent.crews + 1))}>
-                        Ansett til {permanent.crews + 1}-skift
+                      {!full && (
+                        <button className="g-primary" onClick={() => act((gg) => hireForMissing(gg))}>
+                          Ansett til manglende plasser
+                        </button>
+                      )}
+                      <button className={full ? "g-primary" : ""} onClick={() => act((gg) => hireTempCrew(gg, 3))}>
+                        Lei inn vikarer i 3 døgn ({fmtKr(hiredCrewCost(g, 3))})
                       </button>
                     </div>
-                  )}
+                  </div>
+                )}
+                {permanent.shifts >= 3 && !stats.ownerWorks && permanent.crews < MAX_CREWS && cap > 0 && (
+                  <div className="g-note">
+                    <strong>{permanent.crews + 1}-skift:</strong> med {permanent.crews + 1} skiftlag i stedet for{" "}
+                    {permanent.crews} får turnusen fridager: bedre trivsel, mindre sykdom, raskere læring, og fravær
+                    dekkes uten vikarer. Koster lønn til ett lag til.
+                    {missing.length > 0 && (
+                      <p className="g-small-text">
+                        {wildcardUse(g).spare > 0 ? "De ledige avløserne er regnet med. Mangler: " : "Mangler: "}
+                        {missing
+                          .map(([r, n]) => `${n} ${(n === 1 ? ROLES[r].name : ROLES[r].plural).toLowerCase()}`)
+                          .join(", ")}
+                        .
+                      </p>
+                    )}
+                    {full || g.workers.length + missing.reduce((a, [, n]) => a + n, 0) > cap ? (
+                      <p className="g-small-text">
+                        Det er ikke plass til et lag til ({g.workers.length} av {cap} ansatte).{" "}
+                        {topStage
+                          ? "Si opp folk som ikke trengs."
+                          : "Flytt til et større verk, eller si opp folk som ikke trengs."}
+                      </p>
+                    ) : (
+                      <div className="g-row">
+                        <button onClick={() => act((gg) => hireForMissing(gg, permanent.crews + 1))}>
+                          Ansett til {permanent.crews + 1}-skift
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {hiredActive && (
+                  <p className="g-note">
+                    Innleide vikarer:{" "}
+                    {Object.entries(g.tempCrew!.crew)
+                      .filter(([, n]) => (n ?? 0) > 0)
+                      .map(
+                        ([r, n]) =>
+                          `${n} ${(n === 1 ? ROLES[r as RoleId].name : ROLES[r as RoleId].plural).toLowerCase()}`,
+                      )
+                      .join(", ")}{" "}
+                    til dag {day(g, g.tempCrew!.untilMin - 1)}. De koster halvannen gang lønna og teller ikke som
+                    ansatte.
+                  </p>
+                )}
+                <div className="g-stats">
+                  <Stat label="Ansatte" value={`${g.workers.length} / ${cap}`} />
+                  <Stat label="Lønn per døgn" value={fmtKr(stats.salaryPerDay)} />
+                  <Stat label="Ferdighet" value={`${fmtNum(stats.crewSkill, 1)} av 5`} />
                 </div>
-              )}
-              {hiredActive && (
-                <p className="g-note">
-                  Innleide vikarer:{" "}
-                  {Object.entries(g.tempCrew!.crew)
-                    .filter(([, n]) => (n ?? 0) > 0)
-                    .map(
-                      ([r, n]) =>
-                        `${n} ${(n === 1 ? ROLES[r as RoleId].name : ROLES[r as RoleId].plural).toLowerCase()}`,
-                    )
-                    .join(", ")}{" "}
-                  til dag {day(g, g.tempCrew!.untilMin - 1)}. De koster halvannen gang lønna og teller ikke som ansatte.
-                </p>
-              )}
-              <div className="g-stats">
-                <Stat label="Ansatte" value={`${g.workers.length} / ${cap}`} />
-                <Stat label="Lønn per døgn" value={fmtKr(stats.salaryPerDay)} />
-                <Stat label="Ferdighet" value={`${fmtNum(stats.crewSkill, 1)} av 5`} />
-              </div>
-              {stats.crew && Object.keys(stats.crew).length > 0 && (
-                <details className="g-details">
-                  <summary>Se hvem som står hvor</summary>
+                {/* Mobil: tabellen bak et trykk. PC: alltid synlig i høyre kolonne (B-204) */}
+                {crewTable && (
+                  <details className="g-details g-mobile-only">
+                    <summary>Se hvem som står hvor</summary>
+                    <CrewTable g={g} stats={stats} shifts={planShifts} />
+                  </details>
+                )}
+              </Card>
+              {permanent.shifts >= 3 && <SupportCard g={g} act={act} />}
+              <ShiftPlan g={g} stats={stats} act={act} />
+            </div>
+            {crewTable && (
+              <div className="g-folk-side g-pc-only">
+                <Card title="Bemanning">
                   <CrewTable g={g} stats={stats} shifts={planShifts} />
-                </details>
-              )}
-            </Card>
-            {permanent.shifts >= 3 && <SupportCard g={g} act={act} />}
-            <ShiftPlan g={g} stats={stats} act={act} />
-          </>
+                </Card>
+              </div>
+            )}
+          </div>
         )}
 
         {shown === "ansett" && (
@@ -737,69 +740,71 @@ export function People({ g, stats, act, openTab }: Props & { openTab?: string })
                     : `Neste kursrunde hos bedriftshelsetjenesten og sikkerhetssenteret starter dag ${session.start} (${session.seats} plasser, hver 14. dag).`}
                 </p>
               )}
-              {ROLE_IDS.filter((r) => counts[r] > 0).map((r) => (
-                <details key={r} className="g-role-group" open={g.workers.length <= 8}>
-                  <summary>
-                    {ROLES[r].plural} ({counts[r]})
-                  </summary>
-                  {roleEffect(g, stats, r) && <p className="g-muted g-small-text">{roleEffect(g, stats, r)}</p>}
-                  <ul className="g-workers">
-                    {g.workers
-                      .filter((w) => w.role === r)
-                      .map((w) => (
-                        <WorkerRow
-                          key={w.id}
-                          w={w}
-                          today={day(g)}
-                          sick={sickSpells(g, w)}
-                          away={
-                            isAbsent(g, w)
-                              ? `${w.absentReason === "syk" ? "Syk" : "Ferie"} til dag ${day(g, (w.absentUntil ?? 0) - 1)}`
-                              : undefined
-                          }
-                          action={
-                            confirmFire === w.id ? (
-                              <span className="g-row g-fire-confirm">
-                                <FireImpact g={g} id={w.id} />
-                                <button
-                                  className="g-danger g-small"
-                                  onClick={() => {
-                                    act((gg) => fire(gg, w.id));
-                                    setConfirmFire(null);
-                                  }}
-                                >
-                                  Si opp ({fmtKr(w.salary * 5)})
-                                </button>
-                                <button className="g-small" onClick={() => setConfirmFire(null)}>
-                                  Avbryt
-                                </button>
-                              </span>
-                            ) : (
-                              <span className="g-row">
-                                <button
-                                  className="g-small"
-                                  disabled={
-                                    w.skill >= 5 ||
-                                    !session.open ||
-                                    session.left <= 0 ||
-                                    (w.courseDay !== undefined && day(g) - w.courseDay < COURSE_COOLDOWN_DAYS)
-                                  }
-                                  title="Ferdighet +0,6"
-                                  onClick={() => act((gg) => sendOnCourse(gg, w.id))}
-                                >
-                                  Kurs
-                                </button>
-                                <button className="g-small" onClick={() => setConfirmFire(w.id)}>
-                                  Si opp
-                                </button>
-                              </span>
-                            )
-                          }
-                        />
-                      ))}
-                  </ul>
-                </details>
-              ))}
+              <div className="g-role-groups">
+                {ROLE_IDS.filter((r) => counts[r] > 0).map((r) => (
+                  <details key={r} className="g-role-group" open={g.workers.length <= 8}>
+                    <summary>
+                      {ROLES[r].plural} ({counts[r]})
+                    </summary>
+                    {roleEffect(g, stats, r) && <p className="g-muted g-small-text">{roleEffect(g, stats, r)}</p>}
+                    <ul className="g-workers">
+                      {g.workers
+                        .filter((w) => w.role === r)
+                        .map((w) => (
+                          <WorkerRow
+                            key={w.id}
+                            w={w}
+                            today={day(g)}
+                            sick={sickSpells(g, w)}
+                            away={
+                              isAbsent(g, w)
+                                ? `${w.absentReason === "syk" ? "Syk" : "Ferie"} til dag ${day(g, (w.absentUntil ?? 0) - 1)}`
+                                : undefined
+                            }
+                            action={
+                              confirmFire === w.id ? (
+                                <span className="g-row g-fire-confirm">
+                                  <FireImpact g={g} id={w.id} />
+                                  <button
+                                    className="g-danger g-small"
+                                    onClick={() => {
+                                      act((gg) => fire(gg, w.id));
+                                      setConfirmFire(null);
+                                    }}
+                                  >
+                                    Si opp ({fmtKr(w.salary * 5)})
+                                  </button>
+                                  <button className="g-small" onClick={() => setConfirmFire(null)}>
+                                    Avbryt
+                                  </button>
+                                </span>
+                              ) : (
+                                <span className="g-row">
+                                  <button
+                                    className="g-small"
+                                    disabled={
+                                      w.skill >= 5 ||
+                                      !session.open ||
+                                      session.left <= 0 ||
+                                      (w.courseDay !== undefined && day(g) - w.courseDay < COURSE_COOLDOWN_DAYS)
+                                    }
+                                    title="Ferdighet +0,6"
+                                    onClick={() => act((gg) => sendOnCourse(gg, w.id))}
+                                  >
+                                    Kurs
+                                  </button>
+                                  <button className="g-small" onClick={() => setConfirmFire(w.id)}>
+                                    Si opp
+                                  </button>
+                                </span>
+                              )
+                            }
+                          />
+                        ))}
+                    </ul>
+                  </details>
+                ))}
+              </div>
             </Card>
           </>
         )}

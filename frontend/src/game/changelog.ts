@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 204,
+    date: "2026-09-27",
+    title: "Ryddigere Folk",
+    items: [
+      "Bemanningstabellen viser hvor flinke folkene er i hver rolle, så du ser hvor kurs gir mest.",
+      "På PC står bemanningen alltid synlig ved siden av skiftene, og de ansatte står i to kolonner.",
+      "Knappene for å ansette, leie inn vikarer og gi bonus er større på mobil.",
+    ],
+  },
+  {
     b: 203,
     date: "2026-09-27",
     title: "Tydeligere økonomi",
