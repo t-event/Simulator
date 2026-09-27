@@ -381,6 +381,14 @@ export async function linkOnLogin(local: GameState | null): Promise<LinkDecision
     markReconciled();
     return { kind: "cloud", cloud };
   }
+  // Serveren har endret spillet på nett (B-211, f.eks. økonomireformen): det lokale spillet er eldre og kan ikke velges
+  if ((cloud.serverEdit ?? 0) > (mine.serverEdit ?? 0)) {
+    setKnownRev(id, row.rev);
+    synced(cloud);
+    setStatus({ kind: "saved", at: clock() });
+    markReconciled();
+    return { kind: "cloud", cloud };
+  }
   if (mine.owner === id) {
     const cloudNewer = stored === null ? cloud.minute > mine.minute : row.rev !== stored && row.device !== deviceId();
     // Spilt videre både her (f.eks. mens man var logget ut) og på en annen enhet, og spillet her har kommet lengst:
@@ -422,11 +430,13 @@ export async function pullIfNewer(): Promise<GameState | null> {
   if (!id || !reconciled || knownRev === null) return null;
   const rows = await rest<{ rev: number; device: string | null }[]>("saves?select=rev,device");
   const row = rows[0];
-  if (!row || Number(row.rev) === knownRev) {
+  // Samme versjon, men lagringen ble avvist: serveren har endret spillet (B-211), så det fra nett gjelder
+  const refused = !!row && Number(row.rev) === knownRev && status.kind === "conflict";
+  if (!row || (Number(row.rev) === knownRev && !refused)) {
     if (status.kind === "conflict") setStatus({ kind: "saved", at: lastSavedAt ?? clock() });
     return null;
   }
-  if (row.device === deviceId()) {
+  if (row.device === deviceId() && !refused) {
     // Lagret herfra (svaret kom ikke fram, f.eks. da appen ble lagt bort): spillet her er like nytt
     setKnownRev(id, Number(row.rev));
     if (status.kind === "conflict") setStatus({ kind: "saved", at: lastSavedAt ?? clock() });

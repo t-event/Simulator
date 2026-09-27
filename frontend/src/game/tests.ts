@@ -64,6 +64,8 @@ import {
 import { applyWorldEvents, canJoinDirectly, joinSeason, SEASON_BONUS_FP, worldFactor, applySeasonTwist } from "./world";
 import { dealPrice, energyPrice, productPrice } from "./plant";
 import {
+  acceptContract,
+  orderQueue,
   autoBuy,
   ensureCandidates,
   RETURN_MAX_SHARE,
@@ -136,6 +138,7 @@ import {
   fireImpact,
   isAbsent,
   liningWearPerHeat,
+  tempsActive,
   MAX_CREWS,
   specMargin,
   staffing,
@@ -1616,6 +1619,35 @@ test("Søker til skiftleder, kameraer stopper tyvene, like kort i ekte tid og le
   assert(w.role === "ovn", "ble skiftleder for tidlig");
   run(2);
   assert(w.role === "skiftleder" && !isAbsent(g, w), `ble ikke skiftleder (${w.role})`);
+});
+
+test("Landemerket går først i køen, og skiftlederen kan leie vikarer for alle som er borte (B-211)", () => {
+  const g = newGame(212);
+  g.stage = 3;
+  for (const c of g.contracts) c.status = "tilbud";
+  const [a, b] = g.contracts;
+  acceptContract(g, a.id);
+  acceptContract(g, b.id);
+  const lm: Contract = { ...structuredClone(a), id: g.nextContractId++, landmark: "fyr", status: "tilbud" };
+  g.contracts.push(lm);
+  acceptContract(g, lm.id);
+  assert(orderQueue(g)[0].id === lm.id, "landemerket står ikke først i køen");
+  // Skiftlederen og vikarene
+  g.workers = [];
+  for (const [role, n] of Object.entries(crewPerShift(g)) as [RoleId, number][])
+    for (let i = 0; i < n * 4; i++) g.workers.push(makeCandidate(g, role));
+  g.workers.push(makeCandidate(g, "skiftleder"));
+  const w = g.workers[0];
+  w.absentFrom = g.minute;
+  w.absentUntil = g.minute + 3 * 1440;
+  w.absentReason = "syk";
+  g.pendingDecision = null;
+  advance(g, 60);
+  assert(!tempsActive(g), "leide vikarer uten at det var valgt (fire lag dekker fraværet)");
+  g.settings.leaderTemps = true;
+  g.pendingDecision = null;
+  advance(g, 60);
+  assert(tempsActive(g), "skiftlederen leide ikke vikarer");
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

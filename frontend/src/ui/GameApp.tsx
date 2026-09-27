@@ -26,7 +26,7 @@ import { ResearchPage } from "./ResearchPage";
 import { CloudDot, CloudFollow, IntroAccount, LoggedOutNotice } from "./Account";
 import { SeasonPrompt, SeasonResultNotice, SeasonSync, SeasonTeaser } from "./Season";
 import { DailySync } from "./Daily";
-import { LeaderboardSheet } from "./Leaderboard";
+import { GoalsPage } from "./Goals";
 import { useSeasonStatus } from "./useSeason";
 import { SettingsSheet } from "./Settings";
 import { getSession } from "../net/supabase";
@@ -46,6 +46,7 @@ const NAV_ICON: Record<View, IconName> = {
   salg: "sales",
   folk: "people",
   forskning: "research",
+  mal: "trophy",
 };
 
 // Kontrollrommet (spillet i fire runder) lastes først når det trengs
@@ -527,7 +528,7 @@ function NoticeRow({
   return (
     <div className={`g-notice-row ${className}`.trim()}>
       <NoticeLine api={api} unseen={unseenCount(g)} latest={latestUnseen(g)} onOpen={onInbox} />
-      <button className="g-book g-board-btn" onClick={onBoard} aria-label="Toppliste">
+      <button className="g-book g-board-btn" onClick={onBoard} aria-label="Mål og toppliste" title="Mål og toppliste">
         <Icon name="trophy" />
       </button>
     </div>
@@ -671,7 +672,6 @@ export function GameApp() {
   const [verketTab, setVerketTab] = useState<VerketTab>("oversikt");
   const [bookOpen, setBookOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [boardOpen, setBoardOpen] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(false);
   const [bookChapter, setBookChapter] = useState<string | null>(null);
   // Beskjeden om at en sesong er over, vises før spørsmålet om neste sesong (B-143)
@@ -778,7 +778,6 @@ export function GameApp() {
   const modalOpen =
     bookOpen ||
     settingsOpen ||
-    boardOpen ||
     inboxOpen ||
     !!g.pendingManual ||
     !!g.pendingDecision ||
@@ -797,7 +796,7 @@ export function GameApp() {
             notice={isPc}
             onBook={() => openBook()}
             onSettings={() => setSettingsOpen(true)}
-            onBoard={() => setBoardOpen(true)}
+            onBoard={() => go("mal")}
             onInbox={openInbox}
           />
 
@@ -863,15 +862,18 @@ export function GameApp() {
                 )}
               </button>
             )}
+            {/* Mål (B-211): eget punkt i sidemenyen på PC; på mobil pokalen ved varsellinja */}
+            <button
+              className={`g-nav-pc${shown === "mal" ? " is-active" : ""}`}
+              aria-current={shown === "mal" ? "page" : undefined}
+              onClick={() => go("mal")}
+            >
+              <Icon name="trophy" className="g-nav-icon" />
+              <span className="g-nav-label">Mål</span>
+            </button>
           </nav>
           {!isPc && (
-            <NoticeRow
-              className="g-notice-bar"
-              g={g}
-              api={api}
-              onInbox={openInbox}
-              onBoard={() => setBoardOpen(true)}
-            />
+            <NoticeRow className="g-notice-bar" g={g} api={api} onInbox={openInbox} onBoard={() => go("mal")} />
           )}
         </div>
 
@@ -904,6 +906,16 @@ export function GameApp() {
             <People key={subTab.tab ? `folk-${subTab.n}` : "folk"} g={g} stats={stats} act={act} openTab={subTab.tab} />
           )}
           {shown === "forskning" && <ResearchPage g={g} act={act} openBook={openBook} />}
+          {shown === "mal" && (
+            <GoalsPage
+              key={subTab.tab ? `mal-${subTab.n}` : "mal"}
+              g={g}
+              stats={stats}
+              api={api}
+              onOpenSettings={() => setSettingsOpen(true)}
+              openTab={subTab.tab}
+            />
+          )}
         </main>
       </div>
 
@@ -912,14 +924,6 @@ export function GameApp() {
 
       {bookOpen && <Handbook g={g} act={act} initial={bookChapter} onClose={() => setBookOpen(false)} />}
       {inboxOpen && <InboxSheet g={g} act={act} onClose={() => setInboxOpen(false)} />}
-      {boardOpen && (
-        <LeaderboardSheet
-          api={api}
-          g={g}
-          onClose={() => setBoardOpen(false)}
-          onOpenSettings={() => setSettingsOpen(true)}
-        />
-      )}
       {settingsOpen && (
         <SettingsSheet
           g={g}

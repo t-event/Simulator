@@ -21,17 +21,12 @@ import type { GameApi } from "../game/useGame";
 import { AnalysisLine, Bar, Card, GradeChips, Stat } from "./common";
 import { fmtClock, fmtKr, fmtNum, fmtPct, fmtT } from "./format";
 import { activeMissions, missionProgress } from "../game/missions";
-import { CHALLENGE_STAGE, CHALLENGES, challengeProgress, challengeShare, challengesDone } from "../game/challenges";
 import { PlantScene } from "./PlantScene";
 import { SceneBubbles } from "./SceneBubbles";
 import { StageCard, StationButton, UpgradeSheet } from "./Upgrades";
 import { AutoToggle } from "./AutoToggle";
 import { konsernReady } from "../game/konsern";
-import { DailyCard } from "./Daily";
-import { AchievementsCard, PyntModal } from "./Achievements";
-import { WeeklyCard } from "./Weekly";
-import { SeasonTrackCard } from "./SeasonTrack";
-import { AccountFeaturesCard } from "./Account";
+import { PyntModal } from "./Achievements";
 import { LandmarksCard } from "./Landmarks";
 import { BankCard } from "./Settings";
 import { KonsernTab } from "./Konsern";
@@ -317,39 +312,6 @@ function BookCard({ g, openBook }: { g: GameState; openBook: (chapter?: string) 
   );
 }
 
-/** Utfordringer på storverket (B-090): noe å strekke seg etter når alt er kjøpt */
-function ChallengesCard({ g }: { g: GameState }) {
-  if (g.stage < CHALLENGE_STAGE) return null;
-  return (
-    <Card title={`Utfordringer (${challengesDone(g)} av ${CHALLENGES.length})`}>
-      {CHALLENGES.map((c) => {
-        const done = !!g.missions[c.id]?.done;
-        const p = challengeProgress(g, c);
-        return (
-          <div key={c.id} className={`g-mission${done ? " is-done" : ""}`}>
-            <strong>
-              {done ? "✓ " : ""}
-              {c.title}
-            </strong>
-            {!done && <Bar value={challengeShare(g, c)} tone="ok" label="Fremdrift" />}
-            <span className="g-muted">
-              {done
-                ? "Klart!"
-                : c.lower
-                  ? p > 0
-                    ? `Beste døgn: ${fmtNum(p, 0)} ${c.unit}. ${c.how}`
-                    : c.how
-                  : `${fmtNum(Math.floor(p), 0)} av ${fmtNum(c.goal, 0)} ${c.unit ?? ""}. ${c.how}`}
-              {!done &&
-                ` · ${[c.fp ? `${c.fp} fagpoeng` : "", c.cash ? fmtKr(c.cash) : "", c.rep ? `omdømme +${c.rep}` : ""].filter(Boolean).join(" og ")}`}
-            </span>
-          </div>
-        );
-      })}
-    </Card>
-  );
-}
-
 /** Det hjemmeverket tjente et døgn: uten datterverkene, konsernkostnadene (B-181) og investeringer (B-156) */
 function plantResult(d: DayFinance): number {
   const income = Object.entries(d.income).reduce((a, [k, v]) => a + (k === "konsern" ? 0 : (v ?? 0)), 0);
@@ -371,7 +333,7 @@ function avgPlantResult(g: GameState): number {
   return days.length ? days.reduce((a, d) => a + plantResult(d), 0) / days.length : 0;
 }
 
-export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: chosenTab, setTab }: Props) {
+export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }: Props) {
   const [sheet, setSheet] = useState<Station | null>(null);
   const [pynt, setPynt] = useState(false);
   // Konsern-fanen finnes bare når konsernet er åpnet; lastes et annet spill, faller valget tilbake til Oversikt
@@ -491,18 +453,15 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
               onStation={setSheet}
               go={go}
             />
-            {/* Dagens oppdrag og uka med daglig belønning (B-149); ikke mens veiledningen pågår */}
-            {g.tutorial === null && <DailyCard g={g} act={act} />}
-            {/* Ukens utfordring (B-152) */}
-            {g.tutorial === null && <WeeklyCard act={act} />}
-            {g.tutorial === null && <SeasonTrackCard act={act} />}
-            {/* Uten konto: ett kort for alt over som krever konto (B-191). Ukens og stigen først etter garasjen */}
+            {/* Daglig belønning, oppdrag, ukens utfordring, sesongstigen og prestasjoner ligger under Mål (B-211) */}
             {g.tutorial === null && (
-              <AccountFeaturesCard
-                features={g.stage < 1 ? ["oppdrag"] : ["oppdrag", "ukens", "stigen"]}
-                note="Du får også en daglig belønning som vokser gjennom uka, og verket tjener litt mens du er borte."
-                onLogin={onOpenSettings}
-              />
+              <button className="g-goals-link" onClick={() => go("mal")}>
+                <Icon name="trophy" />
+                <span>
+                  <strong>Mål</strong> – daglig belønning, dagens oppdrag, ukens utfordring og prestasjoner
+                </span>
+                <Icon name="chevron-right" />
+              </button>
             )}
             <Card title="Produksjon nå">
               {split ? (
@@ -632,8 +591,6 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
             {!canMove && <StageCard g={g} act={act} />}
 
             <BookCard g={g} openBook={openBook} />
-            <ChallengesCard g={g} />
-            <AchievementsCard g={g} onOpenPynt={() => setPynt(true)} />
             <LandmarksCard g={g} onSales={() => go("salg")} />
             {/* Loggen synlig på Oversikt, ikke bare under Økonomi (B-098) */}
             <Card title="Siste hendelser">

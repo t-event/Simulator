@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 148 – 2026-09-27: Landemerker, Mål-side, økonomireformen og vikarer
+
+**Brukeren ba om:** landemerker blir ikke laget med salgsdirektør; mål og belønninger for gjemt på Verket; en spiller
+(Grane) har fortsatt 8 500 mrd. etter reformen; bryter for om skiftlederen skal leie vikarer for alle som er borte.
+
+**Gjort:** B-211. Landemerker først i køen og hos planleggeren, salgsdirektøren holder av plass. Ny side Mål
+(`ui/Goals.tsx`) bak pokalen, lenke på Oversikt, i sidemenyen på PC. Reformen: Granes spill ble overskrevet av en enhet
+med det gamle spillet; migrasjon 034 (`serverEdit`-vern i `save_game`) og appen tar serverens spill. Dry-run for å rette
+Granes spill er gjort, venter på eierens godkjenning. Bryter `leaderTemps` på Folk → Fravær. B-210 rettet (feil spiller).
+
+**Testet:** `npm test` (ny spilltest og nettest), balanse exit 0 (storverk 147, nybegynner 153,5), tsc, lint, build,
+Playwright på Mål-siden (7 størrelser, 320 px), rådgiverne i Supabase.
+
+**Gjenstår:** eierens godkjenning av rettingen av Granes spill; eierens valg om kontoer (FORSLAG.md); reserven og
+kassegrensen; UI-4a–d.
+
+---
+
 ## Økt 147 – 2026-09-27: Tilbakemeldinger fra spillerne (åtte punkter)
 
 **Brukeren ba om:** anbudet for skjult (vis hvem som har bydd), operatør til skiftleder via lederutvikling,

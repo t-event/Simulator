@@ -827,12 +827,14 @@ export function directorHour(g: GameState): void {
     // Landemerkene tar spilleren selv (B-177): de er en samling, ikke vanlig salg
     .filter((c) => c.status === "tilbud" && !c.landmark)
     .sort((a, b) => b.tonnes * b.pricePerT - a.tonnes * a.pricePerT);
+  // Et landemerke som venter på svar, går først i køen når du tar det (B-211): salgsdirektøren holder av plass til det
+  const landmarkT = g.contracts.filter((c) => c.status === "tilbud" && c.landmark).reduce((a, c) => a + c.tonnes, 0);
   for (const c of offers) {
-    const check = assessOffer(g, stats, c, committedT(g));
+    const check = assessOffer(g, stats, c, committedT(g) + landmarkT);
     const recipeOk = check.recipeOk || (check.graderFix && following);
     if (!check.canMake || !recipeOk || check.tight || (check.narrow && level < 1)) continue;
     // Samme regnestykke som på Salg, men med det dårligste døgnet og mer margin
-    const needDays = (committedT(g) + agreementLoadUntil(g, c.deadlineDay) + c.tonnes) / perDay;
+    const needDays = (committedT(g) + landmarkT + agreementLoadUntil(g, c.deadlineDay) + c.tonnes) / perDay;
     if (needDays > check.days * (DIRECTOR_MARGINS[level] ?? DIRECTOR_MARGIN)) continue;
     // Eksportkontoret forhandler bedre pris (B-172)
     if (level >= 3) c.pricePerT = Math.round(c.pricePerT * 1.05);

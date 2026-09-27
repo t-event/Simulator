@@ -1577,8 +1577,9 @@ function plannerSort(g: GameState): void {
   // Den innleide planleggeren fra rådgiveren sorterer uansett forskning (B-059)
   const specialist = (g.specialists?.sen ?? 0) > g.minute;
   if (!hasPlanner(g) || (!auto(g, "plannerSorts") && !specialist)) return;
+  // Landemerker først (B-211), så etter frist
   orderQueue(g)
-    .sort((a, b) => a.deadlineDay - b.deadlineDay)
+    .sort((a, b) => (a.landmark ? 0 : 1) - (b.landmark ? 0 : 1) || a.deadlineDay - b.deadlineDay)
     .forEach((c, i) => (c.priority = i + 1));
 }
 
@@ -2173,8 +2174,9 @@ export function acceptContract(g: GameState, id: number, by = "Du"): PurchaseRes
   if (!c || c.status !== "tilbud") return { ok: false, message: "Tilbudet finnes ikke lenger." };
   c.status = "aktiv";
   c.acceptedDay = day(g);
-  c.priority =
-    Math.max(0, ...g.contracts.filter((x) => x.status === "aktiv" && x.id !== c.id).map((x) => x.priority)) + 1;
+  const others = g.contracts.filter((x) => x.status === "aktiv" && x.id !== c.id).map((x) => x.priority);
+  // Et landemerke går først i køen (B-211): med salgsdirektøren var køen alltid full, og landemerket kom for sent
+  c.priority = c.landmark ? Math.min(1, ...others) - 1 : Math.max(0, ...others) + 1;
   log(
     g,
     `${by} signerte med ${c.customer}: ${fmtT(c.tonnes)} ${PRODUCTS[c.product].name.toLowerCase()} (${GRADES[c.grade].name}) innen dag ${c.deadlineDay}.`,
@@ -2377,6 +2379,11 @@ function checkTemps(g: GameState): void {
   if (tempsActive(g)) return;
   const absent = g.workers.filter((w) => isAbsent(g, w));
   if (!absent.length) return;
+  // Skiftlederen dekker alt fravær med vikarer når spilleren har valgt det (B-211), også når skiftene går likevel
+  if (g.settings.leaderTemps && shiftLeaderAtWork(g)) {
+    bookTemps(g, daysUntilAllBack(g), true);
+    return;
+  }
   const full = staffing(g, true).shifts;
   const now = staffing(g).shifts;
   if (now >= full) return;

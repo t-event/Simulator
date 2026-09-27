@@ -335,6 +335,8 @@ export interface Settings {
   offerSort: "frist" | "verdi" | "pris" | "kvalitet";
   /** Lei inn vikarer av seg selv når fravær ellers ville kostet skift (B-039) */
   autoTemps: boolean;
+  /** Skiftlederen leier inn vikarer for alle som er borte, også når skiftene går likevel (B-211). Mangler = av */
+  leaderTemps?: boolean;
   /** Klokketimen skiftene starter (6, 14 eller 22) */
   shiftStart: number;
   /** Start ikke ny charge når strømprisen er over dette (kr/kWh). null = ingen grense */
@@ -497,6 +499,9 @@ export interface GameState {
    * flyttes til konsernkassa, teller ikke som penger på bok, men i konsernverdien. null til første gang det skjer.
    */
   lockedReserve?: { total: number; firstDay: number; movedToday: number } | null;
+  /** Øker når serveren endrer spillet (B-211), f.eks. økonomireformen. En enhet med et eldre spill (lavere tall) får
+   * ikke lagre over det; appen henter spillet fra nett i stedet. Mangler i eldre lagringer (= 0) */
+  serverEdit?: number;
   /** Fagpoeng til forskning */
   researchPoints: number;
   /** Dagen spilleren sist kjøpte fagpoeng gjennom et forskningssamarbeid (B-064), −1 hvis aldri */

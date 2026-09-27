@@ -1,6 +1,7 @@
 import type { GameState } from "../game/types";
 
-export type View = "verket" | "marked" | "salg" | "folk" | "forskning";
+/** «mal» (Mål, B-211) står ikke i menyen nederst på mobil: den åpnes med pokalen ved varsellinja */
+export type View = "verket" | "marked" | "salg" | "folk" | "forskning" | "mal";
 
 export const VIEWS: { id: View; label: string }[] = [
   { id: "verket", label: "Verket" },
