@@ -538,6 +538,9 @@ export function scrapShort(g: GameState, stats = computePlantStats(g)): ScrapId[
   return SCRAP_IDS.filter((id) => need[id] > 1e-6 && g.scrap[id].t < need[id]);
 }
 
+/** Høyeste andel av en charge skrapklasseren fyller med verkets eget returskrap (B-208) */
+export const RETURN_MAX_SHARE = 0.25;
+
 /** Tar skrap fra lageret etter resepten. Mangler en type, fylles det opp med resten. */
 export function takeScrap(
   g: GameState,
@@ -555,6 +558,31 @@ export function takeScrap(
   const amounts = Object.fromEntries(SCRAP_IDS.map((id) => [id, 0])) as Record<ScrapId, number>;
   if (totalWeight > 0) {
     for (const id of recipeIds) amounts[id] = Math.min(g.scrap[id].t, (sizeT * weights[id]) / totalWeight);
+  }
+  // Skrapklasseren smelter om verkets eget returskrap (B-208): kapp fra støping og valsing og omsmeltet sekunda. Det
+  // bytter inn for kjøpt skrap som er minst like skittent (fosfor og sporelementer), inntil en fjerdedel av chargen. Uten dette hopet returskrapet seg opp, og lageret ble for fullt til å kjøpe det resepten trengte.
+  if (grader && totalWeight > 0) {
+    const ret = g.scrap.retur;
+    // Det reseptene som skal ha retur, trenger til to charger per ovn, blir liggende
+    const reserve = g.furnaces.reduce((a, _, i) => {
+      const r = gradeRecipe(g, furnaceGrade(g, i));
+      const sum = SCRAP_IDS.reduce((x, id) => x + r[id], 0) || 1;
+      return a + (sizeT * 2 * r.retur) / sum;
+    }, 0);
+    const room = Math.min(ret.t - amounts.retur - reserve, sizeT * RETURN_MAX_SHARE - amounts.retur);
+    // Induksjonsovnen brenner ikke av karbon: der må returen heller ikke gi mer karbon enn det den erstatter
+    const decarb = g.furnaces.every((_, i) => unitType(g, i).decarb);
+    const swap = SCRAP_IDS.filter((id) => {
+      if (id === "retur" || amounts[id] <= 0) return false;
+      const a = g.scrap[id].t > 0 ? g.scrap[id] : SCRAP_TYPES[id];
+      return a.p >= ret.p && a.tramp >= ret.tramp && (decarb || a.c >= ret.c);
+    });
+    const swapT = swap.reduce((a, id) => a + amounts[id], 0);
+    if (room > 1e-6 && swapT > 1e-6 && !ret.radioactive) {
+      const take = Math.min(room, swapT);
+      for (const id of swap) amounts[id] -= (take * amounts[id]) / swapT;
+      amounts.retur += take;
+    }
   }
   let short = sizeT - Object.values(amounts).reduce((a, b) => a + b, 0);
   // Fyll opp med andre typer i resepten. Uten skrapklasser tas deretter hva som helst som ligger på
@@ -2636,11 +2664,17 @@ export function autoBuy(
       0,
     );
     const free = stats.yardT - stats.yardUsed;
-    let toFree = missing - free;
+    // Planleggeren holder av plass (B-208): er lageret over 90 % fullt, selges det som ikke trengs, ned til 80 %, i én
+    // omgang. Før solgte den bare det neste kjøp trengte, så lageret sto alltid fullt og innkjøpet kom for sent.
+    const crowded = stats.yardUsed > stats.yardT * 0.9 ? stats.yardUsed - stats.yardT * 0.8 : 0;
+    let toFree = Math.max(missing - free, crowded);
     if (toFree > stats.sizeT * 0.1) {
       const sold: string[] = [];
       let income = 0;
-      const surplus = SCRAP_IDS.map((id) => ({ id, t: g.scrap[id].t - (demand[id] > 0 ? target[id] * 1.5 : 0) }))
+      // Returskrapet skrapklasseren bruker i innkjøpsperioden, beholdes
+      const keep = (id: ScrapId) =>
+        Math.max(demand[id] > 0 ? target[id] * 1.5 : 0, id === "retur" && hasGrader(g) ? need * RETURN_MAX_SHARE : 0);
+      const surplus = SCRAP_IDS.map((id) => ({ id, t: g.scrap[id].t - keep(id) }))
         .filter((x) => x.t > stats.sizeT * 0.1 && !g.scrap[x.id].radioactive)
         .sort((a, b) => (demand[a.id] > 0 ? 1 : 0) - (demand[b.id] > 0 ? 1 : 0) || b.t - a.t);
       for (const x of surplus) {

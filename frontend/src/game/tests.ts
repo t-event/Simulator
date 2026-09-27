@@ -59,7 +59,7 @@ import {
 } from "./daily";
 import { applyWorldEvents, canJoinDirectly, joinSeason, SEASON_BONUS_FP, worldFactor, applySeasonTwist } from "./world";
 import { dealPrice, energyPrice, productPrice } from "./plant";
-import { autoBuy, scrapPrice, scrapSellPrice, sellScrap, spotQuota, takeScrap } from "./engine";
+import { autoBuy, RETURN_MAX_SHARE, scrapPrice, scrapSellPrice, sellScrap, spotQuota, takeScrap } from "./engine";
 import {
   buySister,
   checkKonsernMilestones,
@@ -1365,13 +1365,6 @@ test("Bunden konsernreserve (B-193): kassa over grensen flyttes, ikke slettes, o
   );
 });
 
-if (failed) {
-  console.log(`\n${failed} test(er) feilet`);
-  process.exitCode = 1;
-} else {
-  console.log("\nAlle tester OK");
-}
-
 test("Plass til fem skiftlag og alle anbefalte støtteroller på et fullt utbygd storverk (B-207)", () => {
   const g = newGame(207);
   g.stage = STAGES.length - 1;
@@ -1398,3 +1391,84 @@ test("Plass til fem skiftlag og alle anbefalte støtteroller på et fullt utbygd
   const need = g.workers.length + support;
   assert(need <= STAGES[g.stage].staffCap, `trenger ${need}, plass til ${STAGES[g.stage].staffCap}`);
 });
+
+test("Skrapklasseren smelter om eget returskrap, og planleggeren holder av plass på lageret (B-208)", () => {
+  const clean = { p: 0.006, tramp: 0.046, c: 0.2, dirt: 0.01, radioactive: false };
+  const setup = () => {
+    const g = newGame(208);
+    g.stage = 3;
+    g.workers.push({ ...makeCandidate(g, "klasser"), hiredDay: 1 });
+    for (const id of Object.keys(g.scrap) as (keyof typeof g.scrap)[]) g.scrap[id].t = 0;
+    g.scrap.rent = { ...g.scrap.rent, t: 500, p: 0.012, tramp: 0.05, c: 0.06, dirt: 0.01, radioactive: false };
+    g.scrap.rajern = { ...g.scrap.rajern, t: 500, p: 0.05, tramp: 0.01, c: 4, dirt: 0.005, radioactive: false };
+    // Lysbueovn: karbonet brennes av, så returens karbon betyr ikke noe
+    g.furnaceType = "lysbue30";
+    for (const f of g.furnaces) {
+      f.grade = null;
+      f.type = "lysbue30";
+    }
+    g.recipe = { rent: 90, spon: 0, retur: 0, tungt: 0, rajern: 10, blandet: 0, shredder: 0 };
+    g.gradeRecipes[g.targetGrade] = { ...g.recipe };
+    return g;
+  };
+  // Mye rent returskrap: en fjerdedel av chargen blir retur, i stedet for rent skrap. Råjernet (renere) står
+  const g = setup();
+  g.scrap.retur = { t: 1000, ...clean };
+  takeScrap(g, 100, false, g.recipe);
+  assert(Math.abs(1000 - g.scrap.retur.t - 100 * RETURN_MAX_SHARE) < 0.01, `retur brukt: ${1000 - g.scrap.retur.t}`);
+  assert(Math.abs(500 - g.scrap.rajern.t - 10) < 0.01, `råjern brukt: ${500 - g.scrap.rajern.t}`);
+  assert(Math.abs(500 - g.scrap.rent.t - 65) < 0.01, `rent brukt: ${500 - g.scrap.rent.t}`);
+  // Induksjonsovnen brenner ikke av karbon: retur (0,2 % C) byttes ikke inn for rent skrap (0,06 % C)
+  const ind = setup();
+  ind.furnaceType = "induksjon5";
+  for (const f of ind.furnaces) f.type = "induksjon5";
+  ind.scrap.retur = { t: 1000, ...clean };
+  takeScrap(ind, 100, false, ind.recipe);
+  assert(ind.scrap.retur.t === 1000, "byttet inn returskrap med mer karbon i en induksjonsovn");
+  // Skittent returskrap (fra en enkel kvalitet) byttes ikke inn for rent skrap
+  const d = setup();
+  d.scrap.retur = { t: 1000, ...clean, tramp: 0.3 };
+  takeScrap(d, 100, false, d.recipe);
+  assert(d.scrap.retur.t === 1000, "brukte skittent returskrap");
+  // En resept som selv skal ha retur, får beholde det den trenger til to charger
+  const r = setup();
+  r.scrap.retur = { t: 30, ...clean };
+  r.furnaces.push(structuredClone(r.furnaces[0]));
+  r.furnaces[1].grade = "premium";
+  r.gradeRecipes.premium = { rent: 60, spon: 0, retur: 10, tungt: 0, rajern: 30, blandet: 0, shredder: 0 };
+  takeScrap(r, 100, false, r.recipe);
+  // Premium trenger 10 % av 100 t til to charger = 20 t; bare det som er over, kan brukes
+  assert(Math.abs(r.scrap.retur.t - 20) < 0.01, `tok returen premium-resepten trenger (${r.scrap.retur.t} t igjen)`);
+  // Lageret over 90 % fullt av skrap ingen resept trenger: planleggeren selger ned til 80 % i én omgang
+  const p = setup();
+  p.workers.push({ ...makeCandidate(p, "planlegger"), hiredDay: 1 });
+  p.researched = RESEARCH.map((r) => r.id);
+  p.contracts = p.contracts.filter((c) => c.status !== "aktiv");
+  const stats = computePlantStats(p);
+  p.scrap.rajern.t = 0;
+  p.scrap.rent.t = stats.yardT * 0.3;
+  p.scrap.blandet = {
+    ...p.scrap.blandet,
+    t: stats.yardT * 0.65,
+    p: 0.03,
+    tramp: 0.3,
+    c: 0.15,
+    dirt: 0.07,
+    radioactive: false,
+  };
+  p.cash = 1e9;
+  autoBuy(p, computePlantStats(p), { credit: false, cap: null });
+  // Minst det som trengs for å komme ned til 80 %, solgt i én omgang, og så kjøpt det resepten trenger
+  const soldT = stats.yardT * 0.65 - p.scrap.blandet.t;
+  assert(soldT >= stats.yardT * 0.15 - 1, `solgte bare ${Math.round(soldT)} t av ${Math.round(stats.yardT)} t lager`);
+  assert(p.scrap.rajern.t > 0, `kjøpte ikke råjern (${p.autoBuyNote})`);
+  assert(computePlantStats(p).yardUsed <= stats.yardT + 1e-6, "lageret er overfylt");
+});
+
+// Oppsummeringen står sist, så alle testene over teller med i exit-koden
+if (failed) {
+  console.log(`\n${failed} test(er) feilet`);
+  process.exitCode = 1;
+} else {
+  console.log("\nAlle tester OK");
+}

@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 145 – 2026-09-27: Returskrapet hopet seg opp, og planleggeren kom for sent
+
+**Brukeren ba om:** planleggeren er dårlig til å kjøpe inn etter resepten, stadige varsler om tomt for skrap, og
+returskrapet samler seg opp på lageret.
+
+**Gjort:** Lest brukerens spill på serveren (bare lest): 73 000 t returskrap, reseptene brukte 0 % retur. B-208:
+skrapklasseren bytter inn eget returskrap (inntil 25 %, bare der det er minst like rent, og ikke mer karbon i
+induksjonsovn), og planleggeren selger det som ikke trengs når lageret er over 90 % fullt. Rettet at testfila ikke talte
+med testene etter oppsummeringen.
+
+**Testet:** simulering av et verk som brukerens før/etter, `npm test`, balanse (exit 0), tsc, lint, build.
+
+**Gjenstår:** brukerens valg om utbyttet; UI-4a–d.
+
+---
+
 ## Økt 144 – 2026-09-27: Plass til de anbefalte rollene på storverket
 
 **Brukeren ba om:** 1) «Utbyttet er vel kanskje litt for ekstremt? Skal vi balansere inntektene litt?» 2) Med fem skiftlag
