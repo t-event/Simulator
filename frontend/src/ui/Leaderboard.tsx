@@ -121,7 +121,7 @@ export function Leaderboard({
 }) {
   const session = useSyncExternalStore(onSessionChange, getSession, getSession);
   const [kind, setKind] = useState<BoardKind>("verdi");
-  // Denne sesongen eller alle tider (B-129)
+  // Denne sesongen eller Hall of Fame (B-129, B-182)
   const [scope, setScope] = useState<"sesong" | "alle">("sesong");
   const status = useSeasonStatus();
   const seasonId = scope === "sesong" ? (status?.current?.id ?? null) : null;
@@ -192,7 +192,7 @@ export function Leaderboard({
       <SeasonLine />
       {api && g && <SeasonJoin api={api} g={g} onOpenSettings={onOpenSettings} />}
       {status?.current && (
-        <div className="g-subtabs g-board-scope" role="tablist" aria-label="Sesong eller alle tider">
+        <div className="g-subtabs g-board-scope" role="tablist" aria-label="Sesong eller Hall of Fame">
           <button
             role="tab"
             aria-selected={scope === "sesong"}
@@ -207,7 +207,7 @@ export function Leaderboard({
             className={scope === "alle" ? "is-active" : ""}
             onClick={() => setScope("alle")}
           >
-            Alle tider
+            Hall of Fame
           </button>
         </div>
       )}
@@ -288,9 +288,9 @@ export function Leaderboard({
       {session && <SeasonHistory />}
       <p className="g-muted g-small-text">
         Lista regnes ut på serveren av det som er lagret på nett, én gang per spilldøgn, og oppdaterer seg mens du
-        spiller. I sesongen gjelder spillet du har nå; på «Alle tider» står ditt beste resultat. Merket ved navnet viser
-        hvor langt spilleren har kommet: fra Garasje til Storverk, Konsern når konsernverdien passerer 1 mrd., og en
-        tittel fra 10 mrd. (Stålbaron, Stålmagnat, Stålfyrste, Stålkonge, Stålkeiser, Stållegende og videre til
+        spiller. I sesongen gjelder spillet du har nå; i «Hall of Fame» står ditt beste resultat. Merket ved navnet
+        viser hvor langt spilleren har kommet: fra Garasje til Storverk, Konsern når konsernverdien passerer 1 mrd., og
+        en tittel fra 10 mrd. (Stålbaron, Stålmagnat, Stålfyrste, Stålkonge, Stålkeiser, Stållegende og videre til
         Stålikon). Ved navnet står også den beste plasseringen i en sesong som er over: 🏆 for vinneren og 🎖 for topp
         10. «Koblet til på dag N» betyr at spillet ble spilt uten konto før det: da kan det ha vokst fort på lista.
         Kontoer med urimelig vekst holdes utenfor.

@@ -265,6 +265,7 @@ export function newGame(seed = Date.now()): GameState {
     landmarks: { done: [], date: null, contractId: null },
     controlBest: 0,
     boostMin: 0,
+    treasuryOut: 0,
     sickUntilMin: 0,
     tempsUntilMin: 0,
     tempCrew: null,

@@ -215,6 +215,66 @@ export function sisterValue(g: GameState, p: SisterPlant): number {
   return (sisterProfit(g, p) / steel / masteryFactor(g, "datterverk")) * VALUE_DAYS;
 }
 
+// ------------------------------------------------------------------ //
+// Utbytte og konsernkostnader (B-181)
+// ------------------------------------------------------------------ //
+/**
+ * Et datterverk beholder driftsresultatet sitt – et godt drevet verk tjener like godt uansett hvor mange verk eieren
+ * har. Men ikke alt kan løftes opp til morselskapet:
+ * - en fast del blir igjen i verket til vedlikehold, lokal ledelse og arbeidskapital/reinvestering
+ * - andelen av resten som kan løftes opp som utbytte, avtar når konsernet vokser
+ * - konsernet har egne kostnader: ledelse per verk, og koordinering, reise og finansiering som øker med antall verk
+ * Da er 14 verk fortsatt mye bedre enn 2, men overskuddet til morselskapet vokser ikke lineært.
+ * Tallene er målt med `balance.ts --konsern` (3, 6, 10 og 14 moderniserte verk). Samlet i ett objekt så simulatoren
+ * kan prøve andre tall.
+ */
+export const KONSERN_ECONOMY = {
+  /** Del av driftsresultatet som blir igjen i verket (vedlikehold, lokal ledelse, arbeidskapital) */
+  keepShare: 0.2,
+  /** Hvor mye mindre av overskuddet som kan løftes opp for hvert verk nedover i rekken (sortert etter overskudd) */
+  upstreamDecay: 0.05,
+  /** Konsernledelse per verk og døgn, etter type */
+  leadCost: { stalverk: 750_000, storverk: 3_000_000, kompleks: 10_000_000 } as Record<SisterType, number>,
+  /** Koordinering, reise og finansiering: ledelseskostnaden per verk øker med så mye per verk utover det første */
+  coordGrowth: 0.08,
+};
+
+/**
+ * Andelen av det verket har igjen, som kan løftes opp til morselskapet. Verkene stilles i rekke etter overskudd:
+ * det beste gir full andel, det neste litt mindre, og så videre (rank 1 = best). Ledelsen strekker seg tynnere jo
+ * flere verk den har, men et nytt verk trekker aldri ned utbyttet fra dem man har fra før.
+ */
+export function upstreamShare(rank: number): number {
+  return 1 / (1 + KONSERN_ECONOMY.upstreamDecay * Math.max(0, rank - 1));
+}
+
+/** Utbytte til morselskapet per døgn fra hvert verk, i samme rekkefølge som `plants` (uten havari og rekorder) */
+export function dividends(g: GameState, plants: SisterPlant[]): number[] {
+  const profits = plants.map((p) => sisterProfit(g, p));
+  const order = profits.map((_, i) => i).sort((a, b) => profits[b] - profits[a] || a - b);
+  const out = new Array<number>(plants.length);
+  order.forEach((i, r) => (out[i] = profits[i] * (1 - KONSERN_ECONOMY.keepShare) * upstreamShare(r + 1)));
+  return out;
+}
+
+/** Utbytte til morselskapet per døgn fra ett verk i konsernet */
+export function sisterDividend(g: GameState, p: SisterPlant, plants = g.konsern.plants): number {
+  const i = plants.indexOf(p);
+  return i < 0 ? 0 : dividends(g, plants)[i];
+}
+
+/** Konsernkostnader per døgn: ledelse per verk ganger koordinering som øker med antall verk */
+export function konsernCosts(plants: SisterPlant[]): number {
+  if (!plants.length) return 0;
+  const coord = 1 + KONSERN_ECONOMY.coordGrowth * (plants.length - 1);
+  return plants.reduce((a, p) => a + KONSERN_ECONOMY.leadCost[p.type], 0) * coord;
+}
+
+/** Netto til morselskapet per døgn med disse verkene i drift: utbytte minus konsernkostnader */
+export function konsernNetFor(g: GameState, plants: SisterPlant[]): number {
+  return dividends(g, plants).reduce((a, b) => a + b, 0) - konsernCosts(plants);
+}
+
 /** Verdien av datterverkene til sammen */
 export function konsernValue(g: GameState): number {
   return (g.konsern?.plants ?? []).reduce((a, p) => a + sisterValue(g, p), 0);
@@ -237,6 +297,15 @@ export function upgradeCost(g?: GameState): number {
 /** Overskudd per døgn et datterverk av en type og et nivå ville gitt nå */
 function profitOf(g: GameState, type: SisterType, level: number): number {
   return sisterProfit(g, { id: 0, type, name: "", level, boughtDay: 0, downUntilDay: 0 });
+}
+
+function plantOf(type: SisterType, level: number, id = -1): SisterPlant {
+  return { id, type, name: "", level, boughtDay: 0, downUntilDay: 0 };
+}
+
+/** Hvor mye mer morselskapet får per døgn hvis verkene byttes med disse (B-181): utbytte minus konsernkostnader */
+function netGain(g: GameState, next: SisterPlant[]): number {
+  return konsernNetFor(g, next) - konsernNetFor(g, g.konsern.plants);
 }
 
 /** Gjennomsnitt per døgn de siste tre døgnene for noen inntekts- eller kostnadsposter */
@@ -284,7 +353,7 @@ export function konsernOptions(g: GameState): KonsernOption[] {
     key: "kjop-stalverk",
     title: "Kjøp et stålverk",
     price: sisterPrice(g, "stalverk"),
-    gain: profitOf(g, "stalverk", 0),
+    gain: netGain(g, [...k.plants, plantOf("stalverk", 0)]),
     blocked: full ? `Konsernet er fullt (${maxSisters(g)} datterverk) – bygg ut eller moderniser i stedet` : null,
     run: (gg) => buySister(gg, "stalverk"),
   });
@@ -292,7 +361,7 @@ export function konsernOptions(g: GameState): KonsernOption[] {
     key: "kjop-storverk",
     title: "Kjøp et storverk",
     price: sisterPrice(g, "storverk"),
-    gain: profitOf(g, "storverk", 0),
+    gain: netGain(g, [...k.plants, plantOf("storverk", 0)]),
     blocked: full
       ? `Konsernet er fullt (${maxSisters(g)} datterverk) – bygg ut et stålverk til storverk i stedet`
       : !hasStalverk
@@ -306,14 +375,14 @@ export function konsernOptions(g: GameState): KonsernOption[] {
       key: "kjop-kompleks",
       title: "Kjøp et stålkompleks",
       price: sisterPrice(g, "kompleks"),
-      gain: profitOf(g, "kompleks", 0),
+      gain: netGain(g, [...k.plants, plantOf("kompleks", 0)]),
       blocked: full
         ? `Konsernet er fullt (${maxSisters(g)} datterverk) – bytt et lite verk mot komplekset under «Dine verk»`
         : null,
       run: (gg) => buySister(gg, "kompleks"),
     });
   // Felles funksjoner: 5 % mer i alle datterverkene, og litt hjemme
-  const sisters = k.plants.reduce((a, p) => a + profitOf(g, p.type, p.level), 0);
+  const sisters = dividends(g, k.plants).reduce((a, b) => a + b, 0);
   const sharedNow = 1 + (hasShared(g, "innkjop") ? 0.05 : 0) + (hasShared(g, "salg") ? 0.05 : 0);
   const sisterGain = (sisters / sharedNow) * 0.05;
   const scrapPerDay = recentPerDay(g, (d) => d.costs.skrap ?? 0);
@@ -337,7 +406,10 @@ export function konsernOptions(g: GameState): KonsernOption[] {
         key: `bytt-${p.id}`,
         title: `Selg ${p.name} og kjøp et stålkompleks`,
         price: Math.max(0, sisterPrice(g, "kompleks") - sisterValue(g, p)),
-        gain: profitOf(g, "kompleks", 0) - profitOf(g, p.type, p.level),
+        gain: netGain(
+          g,
+          k.plants.map((x) => (x === p ? plantOf("kompleks", 0, x.id) : x)),
+        ),
         blocked: null,
         run: (gg) => swapForKompleks(gg, p.id),
       });
@@ -346,7 +418,10 @@ export function konsernOptions(g: GameState): KonsernOption[] {
         key: `bygg-${p.id}`,
         title: `Bygg ut ${p.name} til storverk`,
         price: upgradeCost(g),
-        gain: profitOf(g, "storverk", 0) - profitOf(g, "stalverk", p.level),
+        gain: netGain(
+          g,
+          k.plants.map((x) => (x === p ? plantOf("storverk", 0, x.id) : x)),
+        ),
         blocked: null,
         run: (gg) => upgradeSister(gg, p.id),
       });
@@ -355,7 +430,10 @@ export function konsernOptions(g: GameState): KonsernOption[] {
         key: `mod-${p.id}`,
         title: `Moderniser ${p.name}`,
         price: modernizeCost(p, g),
-        gain: profitOf(g, p.type, p.level + 1) - profitOf(g, p.type, p.level),
+        gain: netGain(
+          g,
+          k.plants.map((x) => (x === p ? plantOf(p.type, p.level + 1, x.id) : x)),
+        ),
         blocked: null,
         run: (gg) => modernizeSister(gg, p.id),
       });
@@ -654,26 +732,26 @@ export function directorHour(g: GameState): void {
 /** Hvert døgn: lønna til salgsdirektøren, overskuddet fra datterverkene og av og til en stans (B-106, B-117) */
 export function konsernDay(g: GameState): void {
   if (g.konsern.director) addCost(g, "lonn", directorPerDay(g));
+  // Konsernledelse, koordinering, reise og finansiering (B-181) – også for verk som står etter et havari
+  const costs = konsernCosts(g.konsern.plants);
+  if (costs > 0) addCost(g, "konsern", costs);
   const today = day(g);
-  for (const p of g.konsern.plants) {
-    if (p.downUntilDay > today) continue;
+  const div = dividends(g, g.konsern.plants);
+  g.konsern.plants.forEach((p, i) => {
+    if (p.downUntilDay > today) return;
     const maintained = hasResearch(g, "fellesvedlikehold");
     if (chance(g, 0.012 * (maintained ? 0.5 : 1))) {
       const days = maintained ? randInt(g, 1, 3) : randInt(g, 2, 5);
       p.downUntilDay = today + days;
       log(g, `${p.name} står i ${days} døgn etter et havari. Ingen overskudd derfra imens.`, "event");
-      continue;
+      return;
     }
     // Av og til går det ekstra godt: dobbelt overskudd det døgnet (B-119)
     const record = chance(g, 0.015);
-    addIncome(g, "konsern", sisterProfit(g, p) * (record ? 2 : 1));
+    // Utbytte til morselskapet (B-181): verket beholder vedlikehold, ledelse og reserve, og andelen avtar nedover i rekken
+    addIncome(g, "konsern", div[i] * (record ? 2 : 1));
     // Kunnskapsdeling: hjemmeverket lærer av datterverkene som går (B-120)
     if (hasResearch(g, "kunnskapsdeling")) awardPoints(g, 1);
-    if (record)
-      log(
-        g,
-        `${p.name} satte produksjonsrekord og ga dobbelt overskudd i dag: ${fmtKr(sisterProfit(g, p) * 2)}.`,
-        "good",
-      );
-  }
+    if (record) log(g, `${p.name} satte produksjonsrekord og ga dobbelt utbytte i dag: ${fmtKr(div[i] * 2)}.`, "good");
+  });
 }

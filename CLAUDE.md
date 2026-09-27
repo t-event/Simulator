@@ -101,6 +101,7 @@ npx tsx src/game/balance.ts --opphold                      # juksesperren med la
 npx tsx src/game/balance.ts --daglig 15                    # som over/vanlig kjøring, men henter daglige belønninger (B-149)
 npx tsx src/game/balance.ts --storovn 330                  # samme konsernspill med ulike ovner: tonn og overskudd (B-154)
 npx tsx src/game/balance.ts --vurdering                    # kundevurderingene 1–10 per nivå, flink og nybegynner (B-161)
+npx tsx src/game/balance.ts --konsern                      # konsernøkonomien med 1–14 verk og vekst over tid (B-181)
 npm run build
 ```
 
@@ -135,6 +136,7 @@ frontend/src/
     daily.ts     Daglig på serveren (status, henting)   features.ts  Hva som krever konto   update.ts  Automatisk oppdatering
     weekly.ts    Ukens utfordring: status, ukelista og ukekista (B-152)
     seasonTrack.ts Sesongstigen: poeng, trinn og henting (B-173)
+    treasury.ts  Konsernkassa på serveren: status og overføring (B-183, skjult til fase 1B)
     tests.ts     Tester uten nett (falsk tjeneste)
   ui/          Spillets skjermer (mobil først) og kontrollrommet
     Overview.tsx Verket med underfanene Oversikt, Anlegg, Økonomi (og Konsern)   Recipe.tsx  Resepten på Marked
@@ -241,4 +243,12 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Fartskontrollen** (B-176) i `check_snapshot` regner med 120 spillminutter per sekund (10×) og 720 når verket står om
   natta (`g.boostMin`, telles i `useGame`). Kommer en ny fart eller en ny måte tida hopper på, må sjekken følge med,
   ellers flagges ærlige spillere.
+- **Konsernøkonomien** (B-181): datterverkene har driftsresultat (`sisterProfit`, også verdien), men morselskapet får
+  utbytte (`dividends`, i rekke etter resultat) minus konsernkostnader (`konsernCosts`, egen kostnadspost «konsern»).
+  Kjøp og råd regnes på netto (`konsernNetFor`). Endres tallene i `KONSERN_ECONOMY`: kjør `balance.ts --konsern`.
+- **Neste sesong starter ikke av seg selv** (B-182): `config.world.auto_next_season = false`. `season_status()` må tåle at
+  ingen sesong pågår (den krasjet på en tom post før B-182).
+- **Konsernkassa** (B-183): `treasuryOut` i spillet går aldri ned – en trigger på `saves` trekker kassa hvis et spill med
+  lavere tall lagres. Overføringen gjøres av serveren (`deposit_to_treasury`), og appen bygger videre på versjonen den
+  gir (`adoptServerRev`). Test SQL mot ekte tabeller bare i én DO-blokk som ender med `raise exception` (rulles tilbake).
 

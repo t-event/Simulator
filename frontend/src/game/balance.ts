@@ -41,7 +41,20 @@ import {
   MISSION_BONUS,
   STREAK_REWARDS,
 } from "./daily";
-import { konsernAdvice, konsernEquity } from "./konsern";
+import {
+  konsernAdvice,
+  konsernCosts,
+  konsernDay,
+  KONSERN_ECONOMY,
+  konsernEquity,
+  konsernNetFor,
+  konsernOptions,
+  maxSisters,
+  modernizeCost,
+  sisterDividend,
+  sisterPrice,
+  sisterProfit,
+} from "./konsern";
 import { answerQuiz, QUIZ, quizAvailable } from "./quiz";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
 import { ADDONS, CASTINGS, FURNACES, SCRAP_IDS, STAGES } from "./data";
@@ -785,6 +798,95 @@ if (process.argv.includes("--storovn")) {
       `${name.padEnd(34)} ${fmtT(sum((d) => d.producedT)).padStart(10)}/døgn  overskudd ${fmtKr(net).padStart(14)}/døgn  skift ${st.shifts}  mangler ${JSON.stringify(st.missing)}`,
     );
   }
+  process.exit?.(0);
+}
+if (process.argv.includes("--konsern")) {
+  // B-181: konsernøkonomien med 3, 6, 10 og 14 moderniserte datterverk – før (alt driftsresultat til morselskapet) og
+  // nå (utbytte etter vedlikehold, ledelse og reserve, avtagende andel, og konsernkostnader). Som hos spillerne som har
+  // kommet lengst: felles innkjøp og salg, konsernforskningen og mesterskapet «Konsernledelse» på nivå 15.
+  type Eco = typeof KONSERN_ECONOMY;
+  const NOW: Eco = { ...KONSERN_ECONOMY, leadCost: { ...KONSERN_ECONOMY.leadCost } };
+  const OLD: Eco = {
+    keepShare: 0,
+    upstreamDecay: 0,
+    leadCost: { stalverk: 0, storverk: 0, kompleks: 0 },
+    coordGrowth: 0,
+  };
+  const setEco = (e: Eco) => Object.assign(KONSERN_ECONOMY, { ...e, leadCost: { ...e.leadCost } });
+  const make = (n: number, type: "storverk" | "kompleks", level: number): GameState => {
+    const g = newGame(1);
+    g.stage = 4;
+    g.konsern.unlocked = true;
+    g.konsern.shared = ["innkjop", "salg"];
+    g.konsern.legends = 6;
+    g.researched.push("konsernstyring", "gronnkonsern", "storkonsern");
+    g.mastery = { datterverk: 15 };
+    g.konsern.plants = Array.from({ length: n }, (_, i) => ({
+      id: i + 1,
+      type,
+      name: `Verk ${i + 1}`,
+      level,
+      boughtDay: 0,
+      downUntilDay: 0,
+    }));
+    g.konsern.nextId = n + 1;
+    return g;
+  };
+  const mrd = (v: number) => `${(v / 1e9).toFixed(2).replace(".", ",")} mrd.`;
+  for (const [type, level] of [
+    ["storverk", 3],
+    ["kompleks", 5],
+  ] as const) {
+    console.log(`\n${type === "kompleks" ? "Stålkomplekser, trinn 5" : "Storverk, trinn 3"} (per spilldøgn):`);
+    console.log(
+      "verk  drift i verkene   før: til mor   nå: utbytte   konsernkostn.   nå: netto   nå/før   neste verk (samme trinn): +/døgn  betalt på",
+    );
+    for (const n of [1, 3, 6, 10, 14]) {
+      const g = make(n, type, level);
+      setEco(NOW);
+      const drift = g.konsern.plants.reduce((a, p) => a + sisterProfit(g, p), 0);
+      const div = g.konsern.plants.reduce((a, p) => a + sisterDividend(g, p), 0);
+      const costs = konsernCosts(g.konsern.plants);
+      const net = konsernNetFor(g, g.konsern.plants);
+      // Neste verk kjøpt og modernisert til samme trinn: hva det gir per døgn, og hvor lang tid hele investeringen tar
+      const next = [...g.konsern.plants, { id: 99, type, name: "", level, boughtDay: 0, downUntilDay: 0 }];
+      const gain = konsernNetFor(g, next) - net;
+      const price = sisterPrice(g, type) + level * modernizeCost(next[n], g);
+      console.log(
+        `${String(n).padStart(4)}  ${mrd(drift).padStart(15)}  ${mrd(drift).padStart(13)}  ${mrd(div).padStart(12)}  ${mrd(costs).padStart(14)}  ${mrd(net).padStart(10)}  ${((net / drift) * 100).toFixed(0).padStart(5)} %  ${mrd(gain).padStart(28)}  ${gain > 0 ? `${Math.round(price / gain)} døgn` : "aldri"}`,
+      );
+    }
+  }
+  // Vekst over tid: starter med 3 nye stålkomplekser og 20 mrd., kjøper det som lønner seg best (som testspilleren),
+  // bare med det konsernet tjener. Viser om pengene vokser lineært eller eksplosivt.
+  console.log("\nVekst over tid (3 nye komplekser og 20 mrd. i kassa, reinvesterer det som lønner seg best):");
+  for (const [name, eco] of [
+    ["før", OLD],
+    ["nå", NOW],
+  ] as const) {
+    setEco(eco);
+    const g = make(3, "kompleks", 0);
+    g.cash = 20e9;
+    const marks: string[] = [];
+    for (let d = 1; d <= 240; d++) {
+      g.minute += 1440;
+      konsernDay(g);
+      for (let k = 0; k < 20; k++) {
+        const o = konsernAdvice(g);
+        if (!o || o.price > g.cash - 1e9) break;
+        o.run(g);
+      }
+      if ([30, 60, 120, 240].includes(d))
+        marks.push(
+          `dag ${d}: ${g.konsern.plants.length} verk (snitt trinn ${(g.konsern.plants.reduce((a, p) => a + p.level, 0) / g.konsern.plants.length).toFixed(1)}), netto ${mrd(konsernNetFor(g, g.konsern.plants))}/døgn, kasse ${mrd(g.cash)}, konsernverdi ${mrd(konsernEquity(g))}`,
+        );
+    }
+    console.log(`${name}:\n  ${marks.join("\n  ")}`);
+  }
+  setEco(NOW);
+  console.log(
+    `\nPlass til ${maxSisters(make(0, "kompleks", 0))} datterverk. Neste kjøp tilbys av konsernOptions (${konsernOptions(make(3, "kompleks", 5)).length} valg).`,
+  );
   process.exit?.(0);
 }
 if (process.argv.includes("--dump")) {

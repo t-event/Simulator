@@ -159,8 +159,9 @@ export const KNOWLEDGE: KnowledgeCard[] = [
     title: "Konsern og datterselskap",
     paragraphs: [
       "Et konsern er flere selskap med samme eier. Selskapet på toppen kalles morselskapet – her er det hjemmeverket ditt. Verkene det eier, kalles datterselskap.",
-      "Datterverkene har egen ledelse og egne ansatte. Morselskapet bestemmer hvor pengene skal investeres, og får overskuddet.",
+      "Datterverkene har egen ledelse og egne ansatte. Morselskapet bestemmer hvor pengene skal investeres, og får utbytte: det verket har igjen etter vedlikehold, lokal ledelse og en reserve til dårlige tider.",
       "Når flere verk gjør ting sammen, blir det billigere: den som kjøper skrap eller strøm for alle verkene samtidig, får bedre pris. Det kalles stordriftsfordeler.",
+      "Et stort konsern har også stordriftsulemper. Ledelsen må følge med på flere verk, og det blir mer koordinering, flere reiser og dyrere finansiering. Derfor gir hvert nytt verk litt mindre enn det forrige – men flere verk gir fortsatt mer.",
       "Flere verk sprer også risikoen. Står ett verk etter et havari, går de andre videre, og konsernet tjener fortsatt penger.",
       "Verdien av konsernet er mer enn pengene i banken: verkene er også verdt noe. Et datterverk er verdt omtrent det det tjener på 60 døgn, og den verdien teller med i konsernverdien. Derfor taper du ikke på å kjøpe et verk: pengene blir til et verk som er verdt like mye.",
     ],

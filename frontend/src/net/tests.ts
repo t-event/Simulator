@@ -50,7 +50,9 @@ import {
   setClock,
   SOON_MS,
   UPLOAD_INTERVAL_MS,
+  uploadSave,
 } from "./sync";
+import { DEPOSIT_REFUSAL_TEXT, depositToTreasury, fetchTreasury } from "./treasury";
 
 declare const process: { exitCode?: number };
 
@@ -106,6 +108,8 @@ interface Fake {
   onSaveGame: (() => void) | null;
   /** Kall til save_game som aldri svarer, som på et mobilnett som henger (B-165) */
   hangSave: boolean;
+  /** Konsernkassa (B-183): saldo og det som er flyttet inn siste døgn; grensen er fast 100 mill. her */
+  treasury: Map<string, { balance: number; used: number }>;
 }
 function makeFake(): Fake {
   const f: Fake = {
@@ -120,6 +124,7 @@ function makeFake(): Fake {
     onRefresh: null,
     onSaveGame: null,
     hangSave: false,
+    treasury: new Map(),
   };
   const json = (status: number, body: unknown) =>
     new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
@@ -215,6 +220,44 @@ function makeFake(): Fake {
       });
       return json(200, rev);
     }
+    // Som deposit_to_treasury i 027: versjonen må stemme, bare egne penger, grense per døgn, og serveren endrer spillet
+    if (path.startsWith("/rest/v1/rpc/deposit_to_treasury")) {
+      const save = f.saves.get(id);
+      if (!save || save.rev !== Number(body.p_base_rev)) return json(200, { ok: false, reason: "lagre_forst" });
+      const st = save.state as {
+        stage: number;
+        cash: number;
+        loan: number;
+        treasuryOut?: number;
+        konsern: { unlocked: boolean };
+      };
+      if (st.stage < 4 || !st.konsern.unlocked) return json(200, { ok: false, reason: "konsern" });
+      const amt = Math.floor(Number(body.p_amount));
+      if (amt > st.cash - st.loan) return json(200, { ok: false, reason: "kasse" });
+      const t = f.treasury.get(id) ?? { balance: 0, used: 0 };
+      if (t.used + amt > 100_000_000) return json(200, { ok: false, reason: "grense", left: 100_000_000 - t.used });
+      save.state = { ...st, cash: st.cash - amt, treasuryOut: (st.treasuryOut ?? 0) + amt };
+      save.rev++;
+      save.device = "server";
+      f.treasury.set(id, { balance: t.balance + amt, used: t.used + amt });
+      return json(200, {
+        ok: true,
+        rev: save.rev,
+        amount: amt,
+        balance: t.balance + amt,
+        left: 100_000_000 - t.used - amt,
+      });
+    }
+    if (path.startsWith("/rest/v1/rpc/treasury_status")) {
+      const t = f.treasury.get(id) ?? { balance: 0, used: 0 };
+      return json(200, {
+        balance: String(t.balance),
+        limit: "100000000",
+        used: String(t.used),
+        left: String(100_000_000 - t.used),
+        freed_at: t.used ? "2026-09-28T00:00:00Z" : null,
+      });
+    }
     if (path.startsWith("/rest/v1/snapshots")) {
       const list = f.snapshots.get(id) ?? [];
       list.push({
@@ -276,6 +319,7 @@ function makeFake(): Fake {
           },
         },
         played_previous: id === "u-a@test",
+        era: { id: 1, name: "Grunnleggeræraen", starts_at: "2026-09-25T00:00:00Z" },
       });
     if (path.startsWith("/rest/v1/rpc/active_events"))
       return json(200, [
@@ -864,6 +908,7 @@ const main = async () => {
     await login(f);
     const s = await fetchSeasonStatus();
     assert(s.current?.id === 1 && s.played_previous, `status ${JSON.stringify(s)}`);
+    assert(s.era?.name === "Grunnleggeræraen", `æraen mangler (B-182): ${JSON.stringify(s.era)}`);
     assert(daysLeft(s.current!, Date.parse("2026-10-20T12:00:00Z")) === 3, "dager igjen");
     const ev = await fetchActiveEvents();
     assert(
@@ -1049,6 +1094,38 @@ const main = async () => {
     await flush();
     assert(f.calls.length === 0, "sendte noe uten innlogging");
     assert(cloudStatus().kind === "off", "status skulle være av");
+  });
+
+  await test("Konsernkassa (B-183): serveren trekker kassa, appen gjør det samme, og døgngrensen holder", async () => {
+    const f = fresh();
+    await login(f);
+    const g = newGame(13);
+    g.stage = 4;
+    g.konsern.unlocked = true;
+    g.cash = 5_000_000_000;
+    await linkOnLogin(g);
+    const r = await depositToTreasury(g, 60_000_000);
+    assert(r.ok && r.amount === 60_000_000 && r.balance === 60_000_000, `svar ${JSON.stringify(r)}`);
+    assert(g.cash === 4_940_000_000 && g.treasuryOut === 60_000_000, `spillet: ${g.cash} / ${g.treasuryOut}`);
+    const server = f.saves.get("u-a@test")!;
+    assert((server.state as { cash: number }).cash === 4_940_000_000, "kassa på nett er ikke trukket");
+    // Neste lagring bygger på versjonen serveren laget, så den avvises ikke
+    await uploadSave(g);
+    assert(f.saves.get("u-a@test")!.device !== "server", "lagringen etter overføringen ble avvist");
+    const again = await depositToTreasury(g, 60_000_000);
+    assert(!again.ok && again.reason === "grense" && again.left === 40_000_000, `grensen: ${JSON.stringify(again)}`);
+    assert(g.cash === 4_940_000_000, "kassa endret seg selv om overføringen ble avvist");
+    assert(DEPOSIT_REFUSAL_TEXT.grense.length > 0, "ingen forklaring");
+    const st = await fetchTreasury();
+    assert(
+      st.balance === 60_000_000 && st.left === 40_000_000 && st.limit === 100_000_000,
+      `status ${JSON.stringify(st)}`,
+    );
+    // Uten konsern sier serveren nei
+    const h = newGame(14);
+    await uploadSave(h);
+    const no = await depositToTreasury(h, 1_000);
+    assert(!no.ok && no.reason === "konsern", `uten konsern: ${JSON.stringify(no)}`);
   });
 
   await test("NetError uten nett merkes som offline", async () => {

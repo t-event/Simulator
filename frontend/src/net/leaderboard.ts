@@ -57,7 +57,7 @@ export interface Profile {
   banned: boolean;
 }
 
-/** `season` = sesongens id, eller null for «alle tider» */
+/** `season` = sesongens id, eller null for «Hall of Fame» (alle tider) */
 export async function fetchLeaderboard(kind: BoardKind, season: number | null = null, lim = 50): Promise<BoardRow[]> {
   const rows = await rpc<
     {

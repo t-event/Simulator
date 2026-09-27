@@ -229,6 +229,12 @@ README og CLAUDE.md beskriver samme spill, og dry-run av økonomireformen er vis
 - Bryter for automatisk ny sesong skrus av (etter eierens valg).
 - Industrimakt som avledet verdi regnes, men vises ikke før fase 2.
 
+**Status fase 1A (2026-09-27, B-181–B-185):** ny konsernøkonomi (utbytte og konsernkostnader, i stedet for avtagende
+overskudd per verk – eierens valg), konsernkasse på serveren (skjult), Sesong 2 av med bryter, Grunnleggeræraen,
+«Hall of Fame», aktive dager på serveren, fersk dry-run og klar utføring av reformen (venter på «go»), og analysen av
+ekte-tids-normalisering (avsnitt 14). **Fase 1B:** ett skraplager, 48-timers skjult anbud, pilotkonsesjon på 7 eller 14
+ekte dager, ekte inntekt fra andres skrapbruk etter avsnitt 14.
+
 ### Fase 2 – de første strategiske bedriftene
 
 - Rekkefølge: **skraplager** (inntekt fra alles skrapkjøp), **slagghåndtering** (fra tonnene alle lager – finnes
@@ -316,6 +322,22 @@ titler, rekorder (fryses som «Grunnleggeræraen»), profil og kallenavn.
 - **Sikkerhetskopi:** `save_backups` har kopier av alle fem (daglig, 14 dager). Før utføring tas en ekstra kopi av alle
   lagringene, og `economy_reform` lagrer før og etter, så reformen kan rulles tilbake per spiller.
 
+**Fersk dry-run 2026-09-27 (modell B valgt, B-184):**
+
+| Spiller | Kasse nå | Ny kasse (B) | Inntekt per spilldøgn, ny konsernøkonomi | Gammel kasse tjent inn igjen på 10× |
+| --- | --- | --- | --- | --- |
+| Grane | 8 286 mrd. | 11,16 mrd. | 3,34 mrd. (før 5,86) | ca. 8 timer |
+| Tuster | 3 651 mrd. | 7,72 mrd. | 2,89 mrd. (før 4,87) | ca. 4 timer |
+| Figen | 1 562 mrd. | 5,27 mrd. | 2,90 mrd. (før 4,89) | ca. 2 timer |
+| H4WK3N5 | 79 mill. | 62 mill. | – | – |
+| Sjæfen | 28 mill. | uendret | – | – |
+
+Utføringen er klar i `supabase/utkast/okonomireform_utforing.sql` (sikkerhetskopi → logg → endring → kontroll i én
+transaksjon) og er prøvekjørt i en blokk som ble rullet tilbake. **Den er ikke kjørt.** Funnet: selv med den nye
+konsernøkonomien er kassa tjent inn igjen på timer i det lokale spillet. Det som beskytter verden, er grensen på
+konsernkassa (B-183). Reformen gjør topplista og konsernverdien sammenlignbare og markerer Grunnleggeræraen, men
+endrer lite i spillet hjemme. Eieren avgjør om den kjøres.
+
 ## 10. Gamle beslutninger – hva gjelder
 
 Ingen historikk slettes. Statuslinjene i `BESLUTNINGER.md` er oppdatert der det står «justeres» eller «revurderes».
@@ -367,7 +389,11 @@ de fem spillerne er den viktigste testen.
 
 ## 13. Åpne spørsmål til eieren
 
-Står også i `FORSLAG.md`.
+**Besvart 2026-09-27 – se B-181.** Kort: modell B; driftsresultatet står, utbyttet oppover avtar og konsernkostnadene
+øker; konsernkasse ja, med sterkt avtagende grense per ekte døgn; Sesong 2 av og Grunnleggeræraen; varsel i appen i
+testene, push før full lansering, ingen immunitet; skjult anbud i 48 timer med tak etter selskapets verdi, trekning ved
+likt bud og pilotkonsesjon; aktiv = 2 av 14 dager; «Hall of Fame»; Industrimakt skjult til eierskap og Kontroll finnes.
+Spørsmålene slik de ble stilt:
 
 1. **Reformmodell:** A (k = 0,35) eller B (k = 0,45), og hva gjøres med datterverkene (avsnitt 9)?
 2. **Konsernkassen:** er det greit at penger fra eget spill bare kan flyttes inn i verdenen i et begrenset tempo per
@@ -379,3 +405,38 @@ Står også i `FORSLAG.md`.
 5. **Første tildeling** av en bedrift: anbud med tak på budet, eller noe annet?
 6. **Aktiv spiller:** er «minst 2 av de siste 14 dagene» greit i starten?
 7. **Navn på «Alle tider»** når Hall of Fame kommer (f.eks. «Grunnleggeræraen» / «Æraens rekorder»)?
+
+## 14. Inntekt fra andres aktivitet i ekte tid (B-185)
+
+Skraplageret (fase 1B) skal tjene på at andre spillere bruker skrap. Men hvert spill går i sin egen fart: den som
+spiller på 10×, bruker ti ganger så mye skrap per time som den som spiller på 1×, og den som lar spillet stå på hele
+dagen, bruker mer enn den som spiller et kvarter. Uten normalisering ville skraplageret belønne fart og skjermtid hos
+kundene – og kundene kunne pumpe opp inntekten til en venn.
+
+**Vurderte modeller:**
+
+| Modell | 10× gir fordel? | Svakhet |
+| --- | --- | --- |
+| Tonn per ekte time | Ja, 10 ganger | Belønner fart direkte |
+| Kapasitetsnormalisert volum (tonn / verkets kapasitet) | Delvis | Sier ikke noe om hvor mye som faktisk ble spilt |
+| Tak per kunde per ekte time | Nei per time, men | Belønner lange økter; mange timer = mer |
+| Rapporterte skrapkjøp | Ja | Kan pumpes med kjøp og salg av skrap |
+| **Aktivitetsdøgn med tak per kunde (anbefalt)** | Nei | Krever én dags historikk per kunde |
+
+**Anbefalt: aktivitetsdøgn med tak per kunde.** For hver kunde og hver ekte (UTC-)dag:
+
+`bidrag = min(skrap brukt i dag, kundens normale skrapbruk per spilldøgn)`
+
+- *Skrap brukt* regnes av tonnene kunden har laget den dagen (økningen i `produced_t` i tidslinja) × ca. 1,1 t skrap
+  per tonn stål. `produced_t` er allerede sjekket av juksesperren og fartskontrollen (B-158, B-176), og tonn kan ikke
+  lages ved å kjøpe og selge skrap.
+- *Normal skrapbruk per spilldøgn* er medianen av kundens tonn per spilldøgn de siste dagene (fra tidslinja) × 1,1.
+- Da teller en kunde høyst én normal spilldag per ekte dag, enten hen spilte 10 minutter på 10× eller 10 timer på 1×.
+  Det som teller, er at kunden spilte den dagen (aktive dager, B-182) og hvor stort verket er.
+- Eierens egne tonn teller ikke. Flaggede spillere og spill uten lagring på nett teller ikke.
+- Inntekten = gebyr per tonn × summen av bidragene. Den regnes og betales inn i eierens konsernkasse på serveren én gang
+  per ekte dag, merket med datoen i `treasury_ledger` (så den aldri betales to ganger). Ingen planlagt jobb trengs:
+  som `season_status()` kan den regnes «lat» første gang noen spør etter dagens status.
+- Gebyret og taket står i `config.world`, så de kan stilles inn uten ny kode. Simuleres før lansering med tidslinjene
+  til dagens spillere (bare lesing).
+

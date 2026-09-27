@@ -270,10 +270,24 @@ export function SeasonLine() {
   const status = useSeasonStatus();
   if (!status) return null;
   const cur = status.current;
-  if (!cur) return <p className="g-muted g-small-text">Ingen sesong pågår akkurat nå.</p>;
+  // Æraen (B-182) står først; neste sesong starter ikke av seg selv
+  const era = status.era?.name;
+  if (!cur)
+    return (
+      <p className="g-muted g-small-text">
+        {era ? (
+          <>
+            <strong>{era}</strong> · ingen sesong pågår. Hall of Fame står.
+          </>
+        ) : (
+          "Ingen sesong pågår akkurat nå."
+        )}
+      </p>
+    );
   const left = daysLeft(cur);
   return (
     <p className="g-muted g-small-text">
+      {era && <strong>{era} · </strong>}
       <strong>{cur.name}</strong> · {left === 0 ? "siste dag" : `${left} ${left === 1 ? "dag" : "dager"} igjen`}
       {cur.twist && ` · Vri: ${cur.twist.title} – ${cur.twist.text}`}
     </p>

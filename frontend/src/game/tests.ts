@@ -87,7 +87,10 @@ import {
   hireDirector,
   KONSERN_UNLOCK_EQUITY,
   konsernDay,
+  konsernCosts,
   konsernEquity,
+  konsernNetFor,
+  dividends,
   modernizeSister,
   SISTER_TYPES,
   sisterProfit,
@@ -1251,6 +1254,46 @@ test("Avløsere (B-164): de som står fast på plasser, teller ikke som ledige, 
   assert(r.ok && after.tied === 0 && after.spare === 2, `etter ansettelse ${JSON.stringify(after)}`);
   assert(g.candidates.length === 2 && g.candidates.some((c) => c.role === "murer"), "ansatte feil søkere");
   assert(!hireForWildcards(g).ok, "ansatte uten at noen avløser står fast");
+});
+
+test("Konsernøkonomien (B-181): driften står, utbyttet avtar nedover, kostnadene øker, og flere verk gir mer", () => {
+  const g = newGame(81);
+  g.stage = 4;
+  g.konsern.unlocked = true;
+  const plant = (id: number, level = 5) =>
+    ({ id, type: "kompleks", name: `Verk ${id}`, level, boughtDay: 0, downUntilDay: 0 }) as const;
+  // Et verk tjener like mye uansett hvor mange verk eieren har
+  const one = [plant(1)];
+  const many = Array.from({ length: 14 }, (_, i) => plant(i + 1));
+  assert(sisterProfit(g, one[0]) === sisterProfit(g, many[0]), "driftsresultatet avhenger av antall verk");
+  // Netto til morselskapet øker for hvert verk, men mindre og mindre (ikke lineært)
+  let prev = 0;
+  let prevStep = Infinity;
+  for (let n = 1; n <= 14; n++) {
+    const net = konsernNetFor(g, many.slice(0, n));
+    assert(net > prev, `netto går ned ved ${n} verk`);
+    assert(net - prev < prevStep + 1, `verk ${n} gir mer enn verket før`);
+    prevStep = net - prev;
+    prev = net;
+  }
+  assert(prev < 14 * konsernNetFor(g, one) * 0.75, "14 verk gir nesten 14 ganger så mye som ett");
+  // Et nytt (umodernisert) verk trekker aldri ned utbyttet fra verkene man har
+  const before = dividends(g, many.slice(0, 10));
+  const after = dividends(g, [...many.slice(0, 10), plant(11, 0)]);
+  assert(
+    before.every((d, i) => Math.abs(after[i] - d) < 1),
+    "et nytt verk senket utbyttet fra de gamle",
+  );
+  // Konsernkostnadene per verk øker med antall verk
+  assert(konsernCosts(many) / 14 > konsernCosts(one), "konsernkostnaden per verk øker ikke");
+  // Døgnet bokfører utbyttet som inntekt og konsernkostnadene som egen post
+  g.konsern.plants = many.slice(0, 3).map((p) => ({ ...p }));
+  g.market.steelFactor = 1;
+  konsernDay(g);
+  assert((g.today.costs.konsern ?? 0) > 0, "ingen konsernkostnader bokført");
+  const expected = dividends(g, g.konsern.plants).reduce((a, b) => a + b, 0);
+  const got = g.today.income.konsern ?? 0;
+  assert(got > 0 && got <= expected * 2 + 1, `utbytte ${got}, ventet omtrent ${expected}`);
 });
 
 test("Mesterskap «Holdbare ovnspotter» (B-165): foringen slites mindre for hvert nivå", () => {

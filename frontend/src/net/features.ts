@@ -21,6 +21,10 @@ export const ACCOUNT_FEATURES = {
     name: "Sesongstigen",
     why: "Serveren teller dagene du spiller, belønningene og ukeplasseringene, så stigen følger virkelig tid.",
   },
+  konsernkasse: {
+    name: "Konsernkassa",
+    why: "Kassa ligger på serveren og går i virkelig tid, så overføringene og det du kjøper i verden avgjøres der.",
+  },
 } as const;
 
 export type AccountFeature = keyof typeof ACCOUNT_FEATURES;

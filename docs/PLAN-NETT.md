@@ -244,7 +244,7 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
   konsernet, definisjon av aktiv spiller, `world_config` og `company_types`). Dry-run-spørringen ligger i
   `supabase/utkast/` (ikke en migrasjon).
 - Fase 0 og 1 er bygget (B-125, B-126). Fase 2 (toppliste) er bygget (B-127). Fase 3 (sesonger, ligaer og felles
-  hendelser) er bygget (B-129). Alle spill blir med i sesongen som pågår, og neste sesong starter av seg selv med alle med videre (B-166, B-167). Fase 4 er neste, men brukeren vil vente med den (2026-09-26).
+  hendelser) er bygget (B-129). Alle spill blir med i sesongen som pågår, og alle spill blir med videre (B-166, B-167); neste sesong starter ikke av seg selv (B-182). Fase 4 er neste, men brukeren vil vente med den (2026-09-26).
 - Også bygget: daglig belønning og dagens oppdrag (B-149), mesterskap og titler (B-150), ukens utfordring og sesonger
   med vri (B-152). Vern mot lekkede passord er på. Glemt passord er ikke testet med ekte e-post ennå.
 - Etterpå: topplista viser nivå og medaljer (B-139); to nettlesere på samme konto og nytt spill+ (B-140); hyppigere
@@ -256,11 +256,13 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
   (daglig belønning, dagens oppdrag, mens du var borte og bonusdøgn i juksesperren, B-149), 014 tittel ved
   kallenavnet på topplista (`title_of()`, B-150), 015 juksesperren tillater 50 % vekst per døgn etter
   sluttmålet (B-150), 016 ukens utfordring, sesonger med vri og utmerkelse for topp 10 (B-152), 017 ukekiste bare til topp 3 (B-155), 018 romsligere
-  tonnsperre (B-158), 019 tonnsperren tåler tall fra et senere døgn i eldre apper (B-162), 020 neste sesong starter av seg selv (B-167), 021 sikkerhetskopi av spillene (B-169), 022 «koblet til på dag N» på topplista (B-170), 023 én ukeliste for alle, målt i prosent (B-172), 024 sesongstigen og titler etter Stållegende (B-173).
+  tonnsperre (B-158), 019 tonnsperren tåler tall fra et senere døgn i eldre apper (B-162), 020 neste sesong starter av seg selv (B-167), 021 sikkerhetskopi av spillene (B-169), 022 «koblet til på dag N» på topplista (B-170), 023 én ukeliste for alle, målt i prosent (B-172), 024 sesongstigen og titler etter Stållegende (B-173), 025 fartskontroll (B-176), 026 Grunnleggeræraen, bryter for neste sesong og aktive dager (B-182), 027 konsernkassa (B-183).
 - Hva som krever konto, nå og i fase 4 og 5: `docs/KONTO.md` (B-149).
 - Flere enheter samtidig: bare enheten som spilles på, lagrer; den andre settes på pause med «Spill her» (B-143).
 - Merker ved sesongslutt (fase 3) er bygget som 🎖 med beste plassering ved kallenavnet (B-143).
-- **Neste sesong starter av seg selv** når den som pågår er over (26 uker, B-167). Vil du starte en med en gang eller med en vri:
+- **Neste sesong starter ikke av seg selv lenger** (B-182): `config.world.auto_next_season` er `false`. Koden fra B-167
+  står; slå den på igjen med `update public.config set value = value || '{"auto_next_season": true}' where id = 'world';`.
+  Vil du starte en sesong for hånd eller med en vri:
   i SQL Editor: `select public.start_season('Sesong 2', 26);` (navn, antall uker; 26 = seks måneder, B-130).
   Med en vri (B-152): `select public.start_season('Sesong 2', 26, 'skrapmangel');` – vriene står i tabellen
   `season_twists` (skrapmangel, eksportboom, energikrise, gronnstrom).

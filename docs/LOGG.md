@@ -5,6 +5,43 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 124 – 2026-09-27: fase 1A (konsernøkonomi, konsernkasse, Grunnleggeræraen)
+
+**Brukeren ba om:** fase 1-valgene (B-181): modell B for reformen (først fersk dry-run, sikkerhetskopi og kontroll);
+datterverkene beholder driftsresultatet, utbyttet oppover avtar og konsernkostnadene øker, stilt inn med simulator for
+3, 6, 10 og 14 verk; konsernkasse på serveren med sterkt avtagende døgngrense; analyse av ekte-tids-normalisering før
+skraplageret; Sesong 2 av og Grunnleggeræraen; skjult anbud og pilotkonsesjon (1B); aktiv = 2 av 14 dager; «Hall of
+Fame»; Industrimakt skjult. Leveranse: fase 1A nå, 1B etterpå.
+
+**Gjort:**
+- B-181: `KONSERN_ECONOMY`, `dividends` (rekke etter resultat, 20 % blir igjen, andelen avtar 5 % per plass),
+  `konsernCosts` (ledelse per verk × koordinering), netto i alle kjøp og i «Neste steg», ny kostnadspost «konsern»,
+  Konsern-fanen viser utbytte per verk og drift/beholdt/kostnader, Økonomi skiller konsernet fra hjemmeverket, fagboka.
+  `balance.ts --konsern` (tabell og vekst). Ny test i `game/tests.ts`.
+- B-182: migrasjon 026 – bryter `auto_next_season` (av), `eras` med Grunnleggeræraen, `activity_days` fra `saves`,
+  `active_players()`, `season_status()` med æra. Rettet en feil som ville krasjet `season_status()` når Sesong 1 er over.
+  Sesonglinja viser æraen; «Alle tider» → «Hall of Fame».
+- B-183: migrasjon 027 – `treasury`, `treasury_ledger`, `treasury_limit()`, `treasury_status()`,
+  `deposit_to_treasury()`, sperre på `saves` mot å doble penger. `net/treasury.ts`, `treasuryOut` i spillet, tester med
+  falsk tjeneste. Ingenting vises i spillet ennå.
+- B-184: fersk dry-run og klar utføring av reformen (`supabase/utkast/okonomireform_utforing.sql`), prøvekjørt og rullet
+  tilbake. **Ikke kjørt** – venter på eierens «go». Funn: kassa er tjent inn igjen på timer selv med ny konsernøkonomi.
+- B-185: analysen av ekte-tids-normalisering (`RETNING.md` avsnitt 14): aktivitetsdøgn med tak per kunde, regnet av
+  `produced_t`.
+- RETNING (fase 1-status, fersk dry-run, avsnitt 14), FORSLAG (nye spørsmål, svarene under «Avgjort»), KONTO,
+  PLAN-NETT, CLAUDE.md, endringsloggen.
+
+**Testet:** `npx tsc -b`, `npm run lint`, `npm test` (motor og nett), `balance.ts` (exit 0), `balance.ts --konsern`.
+Migrasjonene kjørt; bryteren testet ved å avslutte Sesong 1 i en transaksjon som ble rullet tilbake; kassa testet med en
+midlertidig testkonto i en transaksjon som ble rullet tilbake; reformen prøvekjørt og rullet tilbake (sjekket etterpå at
+ingenting var endret). Sikkerhetsråd: bare forventede funn (tabell uten regler for serverfunksjoner, funksjoner for
+innloggede som sjekker `auth.uid()`). Playwright på Konsern-fanen og topplista (390 og 320 px).
+
+**Gjenstår:** eierens «go» (eller nei) på reformen, grensen på kassa og lengden på pilotkonsesjonen (FORSLAG.md). Så
+fase 1B: skraplageret med 48-timers skjult anbud, pilotkonsesjon og inntekt etter avsnitt 14.
+
+---
+
 ## Økt 123 – 2026-09-26/27: ny hovedretning (fase 0)
 
 **Brukeren ba om:** innarbeide en eiergodkjent ny hovedretning i designminnet og arkitekturen – fra stålverk til

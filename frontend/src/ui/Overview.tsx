@@ -488,10 +488,13 @@ function ChallengesCard({ g }: { g: GameState }) {
   );
 }
 
-/** Det hjemmeverket tjente et døgn: uten datterverkene og uten investeringer (B-156) */
+/** Det hjemmeverket tjente et døgn: uten datterverkene, konsernkostnadene (B-181) og investeringer (B-156) */
 function plantResult(d: DayFinance): number {
   const income = Object.entries(d.income).reduce((a, [k, v]) => a + (k === "konsern" ? 0 : (v ?? 0)), 0);
-  const costs = Object.entries(d.costs).reduce((a, [k, v]) => a + (k === "investering" ? 0 : (v ?? 0)), 0);
+  const costs = Object.entries(d.costs).reduce(
+    (a, [k, v]) => a + (k === "investering" || k === "konsern" ? 0 : (v ?? 0)),
+    0,
+  );
   return income - costs;
 }
 
@@ -899,7 +902,12 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings }: Props)
                       tone={plantResult(y) >= 0 ? "ok" : "critical"}
                     />
                     <Stat label="Verket, snitt 7 døgn" value={fmtKr(avgPlantResult(g))} />
-                    {g.konsern.unlocked && <Stat label="Datterverkene i går" value={fmtKr(y.income.konsern ?? 0)} />}
+                    {g.konsern.unlocked && (
+                      <Stat
+                        label="Datterverkene i går"
+                        value={fmtKr((y.income.konsern ?? 0) - (y.costs.konsern ?? 0))}
+                      />
+                    )}
                     {(y.costs.investering ?? 0) > 0 && (
                       <Stat label="Investert i går" value={fmtKr(y.costs.investering ?? 0)} tone="warning" />
                     )}
@@ -915,9 +923,10 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings }: Props)
               </div>
               {y && (g.konsern.unlocked || (y.costs.investering ?? 0) > 0) && (
                 <p className="g-muted g-small-text">
-                  «Resultat i går» tar med alt: {g.konsern.unlocked ? "overskuddet fra datterverkene og " : ""}det du
-                  kjøpte. «Verket (drift)» viser bare det hjemmeverket tjener på stålet, så du ser hva nytt utstyr gir.
-                  Kontraktene betales når de er levert, så snittet over 7 døgn er mest rettferdig.
+                  «Resultat i går» tar med alt:{" "}
+                  {g.konsern.unlocked ? "utbyttet fra datterverkene, konsernkostnadene og " : ""}
+                  det du kjøpte. «Verket (drift)» viser bare det hjemmeverket tjener på stålet, så du ser hva nytt
+                  utstyr gir. Kontraktene betales når de er levert, så snittet over 7 døgn er mest rettferdig.
                 </p>
               )}
             </Card>
