@@ -3812,3 +3812,20 @@ Testet: to nye nettester (gjest lagres fra dag 2 høyst én gang i minuttet, nek
 gjesten forsvinner; avslått i Supabase prøves ikke igjen før et døgn; et kontospill blir aldri gjest), `npm test`, tsc,
 lint, build, Playwright på Mål (7 størrelser, alle fire underfaner, kortet med plassen på topplista), SQL-testene over.
 
+## B-213 Økonomireformen for Grane kjørt på nytt (2026-09-27)
+Status: gjelder (fullfører B-186 for én spiller; se B-211)
+Eieren: «Gjør rettingen» (etter dry-run i B-211). Reformen traff Grane kl. 01.02 (8 286 → 11,17 mrd.), men en enhet
+med det gamle spillet lastet det opp igjen, og spillet gikk videre på de gamle pengene.
+- Fersk dry-run rett før (Grane hadde spilt videre): dag 2 273, kasse 99,9997 mrd. + bunden reserve 8 441,13 mrd. =
+  8 541,13 mrd. Samme regel som reformen på summen: 250 mill. × (sum / 250 mill.)^0,365 = **11,29 mrd.**
+- Endret (`supabase/036_retting_grane.sql`, én blokk med kontroll): kassa 11,29 mrd., reserven null, `serverEdit` 1 (så
+  eldre kopier avvises, B-211) og `device = 'server'` (appen henter spillet). De 54 tidslinjetallene etter reformen er
+  merket `pre_reform`. Rekorden for konsernverdi på «Alle tider» er satt tilbake til det beste tallet før reformen
+  (8 562,6 mrd., dag 2 190); de 200 mrd. over kom fra det gamle spillet. Rekorden for kasse (8 285,9 mrd.) var fra før
+  reformen og står, som for alle andre (B-186).
+- Står: verk, forskning, fagpoeng, lån og konsernkassa (100 mill., overført etter de vanlige reglene med lik grense for
+  alle).
+- Sikkerhetskopi i `save_backups` (grunn «okonomireform-retting») og for alltid i `economy_reform_log.old_state`.
+- Kontroll etterpå: kasse 11,29 mrd., reserve null, `serverEdit` 1, ingen umerkede tidslinjetall, kopi finnes.
+Endringslogg: nei
+
