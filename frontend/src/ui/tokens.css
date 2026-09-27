@@ -205,6 +205,36 @@
   color: var(--critical-fg);
 }
 
+/* ---------------------------------------------------------- kompakt status (ui/ds.tsx, B-195) */
+.ds-status-line {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  color: var(--text-2);
+}
+
+.ds-status-line > .ds-icon {
+  margin-top: 0.05em;
+  width: 1.1em;
+  height: 1.1em;
+}
+
+.ds-status-line.is-ok > .ds-icon {
+  color: var(--ok);
+}
+
+.ds-status-line.is-info {
+  color: var(--info);
+}
+
+.ds-status-line.is-heat {
+  color: var(--heat);
+}
+
+.ds-status-line.is-critical {
+  color: var(--critical);
+}
+
 /* ---------------------------------------------------------- melding (ui/ds.tsx) */
 .ds-callout {
   display: flex;

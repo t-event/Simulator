@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 133 – 2026-09-27: UI-2a – Oversikt
+
+**Brukeren ba om:** «Fortsett» (neste steg i UI-planen).
+
+**Gjort:** B-195. Det første rådet som rolig flate med ikon og pil, høyst to råd til og resten bak «Flere råd»;
+statusspråket (`StatusLine`) i rutene i produksjonslinja; boblene etter reglene i UI.md 7 (maks 3, faste baner,
+sammenslått, stille linje med redusert bevegelse); pynt-knappen med ikon. Endringsloggen, UI.md.
+
+**Testet:** tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter på 4 størrelser (stålverk og storverk)
+og 7 størrelser for vannrett scrolling; boblene på 10× og med redusert bevegelse.
+
+**Gjenstår:** eierens svar på skjermbildene og varsellinja på mobil (FORSLAG). Deretter UI-2b (Anlegg).
+
+---
+
 ## Økt 132 – 2026-09-27: H4WK3N5 borte fra topplista
 
 **Brukeren spurte:** hvorfor H4WK3N5 ble borte fra topplista. Etter svaret: «Begge deler» – rett sperren og fjern flagget.

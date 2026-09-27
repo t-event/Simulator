@@ -64,6 +64,7 @@ import { VERKET_TABS, type VerketTab } from "./verketTabs";
 import type { View } from "./views";
 import { Icon } from "./icons";
 import { CASH_RESERVE } from "../game/reserve";
+import { Callout, StatusLine, type Status } from "./ds";
 
 interface Props {
   g: GameState;
@@ -264,6 +265,44 @@ function furnaceState(g: GameState, index: number): { text: string; progress: nu
   return { text: f.waitReason ?? "Klar", progress: null };
 }
 
+/** Rådene etter det første: to synlige, resten bak «Flere råd» så det ikke blir en tekstvegg (B-195) */
+function HintList({ tips, run }: { tips: Hint[]; run: (t: Hint) => void }) {
+  const item = (t: Hint) => (
+    <li key={t.text}>
+      {t.view || t.anchor ? (
+        <button className="g-link" onClick={() => run(t)}>
+          {t.text}
+        </button>
+      ) : (
+        t.text
+      )}
+    </li>
+  );
+  return (
+    <>
+      <ul className="g-more-hints">{tips.slice(0, 2).map(item)}</ul>
+      {tips.length > 2 && (
+        <details className="g-more-hints-rest">
+          <summary>Flere råd ({tips.length - 2})</summary>
+          <ul className="g-more-hints">{tips.slice(2).map(item)}</ul>
+        </details>
+      )}
+    </>
+  );
+}
+
+/** Statusspråket (UI.md 6.2, B-195): hva teksten fra motoren betyr, så ruta får riktig ikon og farge */
+function statusOf(text: string): Status {
+  if (/^Havari/.test(text)) return "feil";
+  if (/^Planlagt stans|[Ff]oringen skal byttes/.test(text)) return "vedlikehold";
+  if (/Mangler skrap/.test(text)) return "tomt";
+  if (/fullt/.test(text)) return "fullt";
+  if (/Mangler folk/.test(text)) return "folk";
+  if (/Utenfor arbeidstid|Strømprisen|Utkoblet|står/.test(text)) return "stopp";
+  if (/^Smelter|^Støper/.test(text)) return "kjorer";
+  return "venter";
+}
+
 /** Kvalitet de siste sju døgnene: holdt stålet kvaliteten det ble laget for? */
 function Quality({
   g,
@@ -375,7 +414,7 @@ function CompactChain({
             tone={stats.yardUsed < stats.sizeT || missing ? "critical" : "accent"}
             label="Skraplager"
           />
-          <small className={missing ? "is-waiting" : ""}>{missing ? "Mangler skrap" : fmtT(stats.yardUsed)}</small>
+          <small>{missing ? <StatusLine status="tomt" label="Mangler skrap" /> : fmtT(stats.yardUsed)}</small>
         </button>
         {g.furnaces.map((f, i) => {
           const st = furnaceState(g, i);
@@ -386,14 +425,21 @@ function CompactChain({
                 {badge(ready("ovn"))}
               </span>
               <Bar value={st.progress ?? 0} tone="warning" label="Smelting" />
-              <small className={f.heat ? "" : "is-waiting"}>{f.heat ? `Smelter` : st.text}</small>
+              <small>
+                <StatusLine status={f.heat ? "kjorer" : statusOf(st.text)} label={f.heat ? "Smelter" : st.text} />
+              </small>
             </button>
           );
         })}
         <button className="g-mini" onClick={() => (has("stoping") ? onStation("stoping") : onOpen())}>
           <span>Støping{badge(ready("stoping"))}</span>
           <Bar value={castHead ? g.castProgressT / castHead.t : 0} tone="ok" label="Støping" />
-          <small className={g.castWait ? "is-waiting" : ""}>{g.castWait ?? (castHead ? "Støper" : "Venter")}</small>
+          <small>
+            <StatusLine
+              status={g.castWait ? statusOf(g.castWait) : castHead ? "kjorer" : "venter"}
+              label={g.castWait ?? (castHead ? "Støper" : "Venter")}
+            />
+          </small>
         </button>
         <button className="g-mini" onClick={() => (ready("lager") ? onStation("lager") : go("salg", "lager"))}>
           <span>Lager{badge(ready("lager"))}</span>
@@ -402,7 +448,13 @@ function CompactChain({
             tone={stats.storeUsed > stats.storeT * 0.9 ? "critical" : "accent"}
             label="Ferdigvarelager"
           />
-          <small>{fmtT(stats.storeUsed)}</small>
+          <small>
+            {stats.storeUsed >= stats.storeT * 0.999 ? (
+              <StatusLine status="fullt" label={`Fullt · ${fmtT(stats.storeUsed)}`} />
+            ) : (
+              fmtT(stats.storeUsed)
+            )}
+          </small>
         </button>
       </div>
       {worn.map(({ f, i }) => (
@@ -573,7 +625,7 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
           <PlantScene g={g} stats={stats} />
           <SceneBubbles g={g} />
           <button className="g-scene-pynt" onClick={() => setPynt(true)} aria-label="Pynt verket">
-            🎨
+            <Icon name="palette" />
           </button>
           <div className="g-scene-caption">
             <strong>{stats.stage.name}</strong>
@@ -587,30 +639,19 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
           </div>
         </div>
 
+        {/* Det viktigste akkurat nå (UI.md 6.1, B-195): én linje med handling, så noen få råd til */}
         {tips.length > 0 && (
           <div className="g-cta-wrap">
             {tips[0].view || tips[0].anchor ? (
-              <button className="g-primary g-cta" onClick={() => runHint(tips[0])}>
-                {tips[0].text}
+              <button className="g-cta" onClick={() => runHint(tips[0])}>
+                <Icon name="info" />
+                <span>{tips[0].text}</span>
+                <Icon name="chevron-right" className="g-cta-go" />
               </button>
             ) : (
-              <p className="g-note">{tips[0].text}</p>
+              <Callout>{tips[0].text}</Callout>
             )}
-            {tips.length > 1 && (
-              <ul className="g-more-hints">
-                {tips.slice(1).map((t) => (
-                  <li key={t.text}>
-                    {t.view || t.anchor ? (
-                      <button className="g-link" onClick={() => runHint(t)}>
-                        {t.text}
-                      </button>
-                    ) : (
-                      t.text
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
+            {tips.length > 1 && <HintList tips={tips.slice(1)} run={runHint} />}
           </div>
         )}
       </div>

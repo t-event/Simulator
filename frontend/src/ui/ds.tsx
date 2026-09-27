@@ -10,7 +10,7 @@ import { Icon, type IconName } from "./icons";
 export type Tone = "neutral" | "ok" | "info" | "heat" | "critical";
 
 /** Statusspråket for utstyr og ordre (UI.md 6.2) */
-export type Status = "kjorer" | "venter" | "stopp" | "vedlikehold" | "feil" | "fullt" | "tomt";
+export type Status = "kjorer" | "venter" | "stopp" | "vedlikehold" | "feil" | "fullt" | "tomt" | "folk";
 
 const STATUS: Record<Status, { label: string; icon: IconName; tone: Tone }> = {
   kjorer: { label: "Kjører", icon: "play", tone: "ok" },
@@ -20,6 +20,7 @@ const STATUS: Record<Status, { label: string; icon: IconName; tone: Tone }> = {
   feil: { label: "Feil", icon: "warning", tone: "critical" },
   fullt: { label: "Fullt", icon: "warehouse", tone: "heat" },
   tomt: { label: "Tomt", icon: "package", tone: "heat" },
+  folk: { label: "Mangler folk", icon: "people", tone: "heat" },
 };
 
 export function StatusBadge({ status, label }: { status: Status; label?: string }) {
@@ -28,6 +29,17 @@ export function StatusBadge({ status, label }: { status: Status; label?: string 
     <span className={`ds-status is-${s.tone}`}>
       <Icon name={s.icon} />
       {label ?? s.label}
+    </span>
+  );
+}
+
+/** Kompakt status i en rute (produksjonslinja): ikon + ord i statusfargen, uten pille (B-195) */
+export function StatusLine({ status, label }: { status: Status; label?: string }) {
+  const s = STATUS[status];
+  return (
+    <span className={`ds-status-line is-${s.tone}`}>
+      <Icon name={s.icon} />
+      <span>{label ?? s.label}</span>
     </span>
   );
 }
