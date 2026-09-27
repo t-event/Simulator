@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 186,
+    date: "2026-09-27",
+    title: "Økonomireformen",
+    items: [
+      "De aller største kassene er gjort mindre, så topplista kan sammenlignes igjen. Kasser under 250 mill. er ikke rørt.",
+      "Verkene, forskningen, fagpoengene og rekordene i Hall of Fame står som før. Rekkefølgen mellom spillerne er den samme.",
+    ],
+  },
+  {
     b: 182,
     date: "2026-09-27",
     title: "Konsernet gir utbytte, og Grunnleggeræraen",

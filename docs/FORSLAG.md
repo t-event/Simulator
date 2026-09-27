@@ -6,12 +6,7 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
-1. **Økonomireformen – «go»?** Utføringen (modell B) er klar og prøvekjørt, men ikke kjørt (B-184). Merk funnet: med
-   den nye konsernøkonomien er kassa tjent inn igjen på timer i spillet hjemme; det som skiller spilltid fra verden, er
-   grensen på konsernkassa. Reformen gjør topplista sammenlignbar og markerer æraen, men endrer lite i spillet.
-2. **Grensen på konsernkassa:** 100 mill. per ekte døgn ved 1 mrd. i egenkapital, 150 mill. ved 10 mrd., 250 mill. ved
-   1 000 mrd. (B-183). Kan stilles i `config.world` uten ny kode.
-3. **Pilotkonsesjonen:** 7 eller 14 ekte dager?
+Ingen åpne akkurat nå (fase 1-svarene står i B-181 og B-186).
 
 ## Venter
 
@@ -40,6 +35,9 @@ til «Avgjort» nederst).
   Krever konto. Brukeren: «Ingen varsel på mobilen enda» (B-149).
 
 ## Avgjort
+
+- Økonomireformen er gjennomført med urørt gulv på 250 mill.; konsernkassa godkjent som utgangspunkt (grensene kan
+  justeres); pilotkonsesjonen er 14 dager (B-186).
 
 - Eierens svar på de sju spørsmålene fra B-180 (B-181): modell B; utbytte og konsernkostnader i datterverkene;
   konsernkasse på serveren; Sesong 2 av og Grunnleggeræraen; varsel i appen i testene og push før full lansering;

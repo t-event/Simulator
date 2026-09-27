@@ -3167,3 +3167,28 @@ Da gir fart og spilletimer ingen fordel: 10 minutter på 10× og 10 timer på 1�
 normal dag. Det som teller, er at kunden spilte den dagen og hvor stort verket er.
 Valgt bort: tonn per ekte time (10× gir 10 ganger så mye), bare tak per kunde per time (belønner lange økter),
 rapporterte kjøp (kan pumpes med kjøp og salg).
+
+## B-186 Økonomireformen er gjennomført, med gulv for små spill (2026-09-27)
+Status: gjelder (erstatter modellen i B-184; eierens svar på spørsmålene etter fase 1A)
+Bakgrunn: Eieren ga «go» på modell B, men ville ikke at små spill skulle få et merkbart kutt bare fordi de akkurat hadde
+passert 50 mill. (H4WK3N5 ville gått fra 79 til 62 mill.): «lag et større urørt gulv (100 eller 250 mill.) eller en jevn
+overgang». Så: siste ferske dry-run, vis resultatet, ekstra sikkerhetskopi, og gjennomfør hvis kontrollen er OK.
+Beslutning:
+- **Modell:** urørt gulv på **250 mill.** Over: ny kasse = 250 mill. × (kasse / 250 mill.)^**0,365**. Eksponenten er valgt
+  så toppen blir som i modell B (Grane 11,17 mrd.; B ga 11,16). Et gulv på 100 mill. (k = 0,416) ga nesten samme topp,
+  men beskytter mindre. En «myk overgang» som beholder k = 0,45 for de største, ble forkastet: de enkle formene gjorde
+  kassa lavere for en som hadde litt mer (rekkefølgen kunne byttes).
+- **Resultat (migrasjon `028_okonomireform.sql`, kjørt 2026-09-27 01:02 UTC):** Grane 8 286 → 11,17 mrd., Tuster 3 664 →
+  8,29 mrd., Figen 1 562 → 6,07 mrd. H4WK3N5 (97 mill.) og Sjæfen (27,5 mill.) er urørt. Tuster og Figen får litt mer
+  enn i modell B (8,29 mot 7,73 og 6,07 mot 5,27), fordi gulvet er høyere.
+- **Sikkerhetskopi:** i `save_backups` (grunn «okonomireform», kan legges tilbake med `restore_save`, men slettes etter 14
+  dager) og for alltid i `economy_reform_log.old_state`. Kontrollen (ny kasse, kopi finnes, samme rekkefølge, ingen
+  under gulvet rørt) gikk gjennom i samme blokk – ellers ville alt blitt rullet tilbake. Prøvekjørt og rullet tilbake
+  rett før.
+- Bare kassa er endret. Verk, lån, forskning, fagpoeng og Hall of Fame (rekordene) står. `device = 'server'` og ny versjon,
+  så appen henter spillet; en lagring fra en app med gamle tall avvises (B-140).
+- **Konsernkassa** (B-183) er godkjent som utgangspunkt. Grensene står i `config.world` og skal justeres etter testing av
+  skraplager og anbud – ingen priser skal bygges på at dagens grenser er faste.
+- **Pilotkonsesjonen er 14 ekte dager** (to helger; med tre aktive spillere gir sju dager for lite data).
+- Før fase 1B: automatiske testcaser som viser at lokal fart (1×, 3×, 10×), ulik spilletid, pause/offline og en gammel
+  lagring ikke kan øke inntekten til skraplageret – og hvorfor (B-187).

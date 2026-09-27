@@ -1,4 +1,5 @@
--- Økonomireformen, modell B – UTFØRING (B-184). IKKE KJØRT. Kjøres bare etter eierens uttrykkelige «go».
+-- Økonomireformen, modell B – UTFØRING (B-184). ERSTATTET: reformen ble kjørt med gulv på 250 mill. i
+-- migrasjonen 028_okonomireform.sql (B-186). Denne fila står bare som historikk – ikke kjør den.
 -- Rekkefølgen er fast (B-180): 1. fersk dry-run (okonomireform_dryrun.sql), 2. sikkerhetskopi, 3. endring,
 -- 4. kontroll av resultatet. Alt i én transaksjon: feiler kontrollen, rulles alt tilbake.
 --
