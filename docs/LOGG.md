@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 161 – 2026-09-27: UI-4b Topplista og Hall of Fame
+
+**Brukeren ba om:** «Fortsett».
+
+**Gjort:** B-224. Topplista med ikonknapper i toppen, sesong/Hall of Fame som valg med én forklarende linje, din plass
+øverst, lasteskisse, Callout for oppfordringer, forklaringen bak «Slik virker lista». UI.md: UI-4b bygget.
+
+**Testet:** tsc, lint, `npm test`, Playwright på 7 størrelser uten konto og 3 med konto (falsk tjeneste).
+
+**Gjenstår:** UI-4c (øvrige ark og små skjermer), UI-4d (polering, anleggsbildet per nivå); reserven og kassegrensen;
+Google/Apple senere.
+
+---
+
 ## Økt 160 – 2026-09-27: «Hva skjedde med planleggerne mine?»
 
 **Brukeren ba om:** forklaring på rådgiverkortet som tilbød en innleid planlegger.

@@ -2511,9 +2511,10 @@ button {
 
 .g-board li {
   display: flex;
-  gap: 8px;
+  gap: var(--sp-2);
   align-items: baseline;
-  padding: 6px 4px;
+  padding: var(--sp-2) var(--sp-1);
+  min-height: 40px;
   border-bottom: 1px solid var(--line);
   font-size: var(--fs-body);
 }
@@ -2623,15 +2624,106 @@ button {
   margin-top: 6px;
 }
 
-/* Topplista bak 🏆 (B-133) */
-.g-board-bare {
-  position: relative;
+/* Topplista bak 🏆 (B-133), formen fra UI-4b (B-224) */
+.g-board-head-actions {
+  display: flex;
+  gap: var(--sp-2);
 }
 
-.g-board-refresh {
+.g-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch);
+  height: var(--touch);
+  padding: 0;
+  border-radius: var(--r-md);
+}
+
+.g-icon-btn .ds-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Pokalen ved siden av «Hall of Fame», ikke over (underfanene står i kolonne for antallet) */
+.g-subtabs.g-board-scope button {
+  flex-direction: row;
+  gap: var(--sp-2);
+}
+
+.g-board-scope button .ds-icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.12em;
+}
+
+.g-board-scope-note {
+  margin: var(--sp-2) 0;
+}
+
+/* Din plass for seg øverst */
+.g-board-me {
   display: flex;
-  justify-content: flex-end;
-  margin: -4px 0 2px;
+  align-items: center;
+  gap: var(--sp-3);
+  margin: var(--sp-3) 0;
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--r-lg);
+}
+
+.g-board-me-rank {
+  min-width: 36px;
+  font-family: var(--font-display);
+  font-size: var(--fs-page);
+  text-align: center;
+}
+
+.g-board-me-name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.g-board-me-name strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.g-board li.is-top .g-board-nick {
+  font-weight: 700;
+}
+
+/* Lasteskisse mens lista hentes */
+.g-board.is-loading li {
+  padding: var(--sp-3) var(--sp-1);
+}
+
+.g-board-skel {
+  display: block;
+  width: 100%;
+  height: 16px;
+  border-radius: var(--r-sm);
+  background: var(--surface-3);
+  animation: g-skel 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes g-skel {
+  from {
+    opacity: 0.45;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .g-board-skel {
+    animation: none;
+  }
 }
 
 .g-season-teaser {
@@ -4207,4 +4299,3 @@ button {
   background: var(--warning);
   box-shadow: 0 0 0 2px var(--surface-chrome);
 }
-
