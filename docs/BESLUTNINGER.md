@@ -3856,3 +3856,25 @@ Testet: nettest (regelen og ledig-sjekken uten innlogging), `npm test`, tsc, lin
 (knappene ved varsellinja uten avkutting, pokalen åpner arket «Toppliste», Mål har tre faner) og hele løpet for ny konto
 på mobil og PC (tatt navn avvises, ledig navn settes etter bekreftelsen).
 
+## B-215 Figens verk «går ofte i minus»: hva tallene viser, og snittet først på Økonomi (2026-09-27)
+Status: gjelder (justerer visningen i B-156/B-203; ingen endring i økonomien)
+Brukeren: «Figen sier han ikke liker det vi har gjort med økonomien pga hans verk går ofte i minus.»
+Funnet i Figens lagrede spill (120 døgn, dag 1 357–1 476, 12 stålkomplekser):
+- **Hele resultatet** har vært i pluss hvert eneste døgn: +1,1 til +3,3 mrd. per døgn.
+- **Utbyttet fra datterverkene** falt fra ca. 2,9 til ca. 1,3 mrd. netto per døgn rundt dag 1 450. Det er trimmen i
+  B-209, som brukeren valgte («Gå for din anbefaling»). Det er den endringen Figen merker.
+- **Hjemmeverket alene** gikk i minus 10 av 120 døgn, alle mellom dag 1 430 og 1 468. De døgnene kjøpte planleggeren
+  skrap for 110–150 mill. (vanlig 30–60 mill.) mens returskrapet hopet seg opp – problemet B-208 rettet. Etter at B-208
+  virket (fra ca. dag 1 470) har skrapet kostet ca. 1 500 kr/t mot 3 400–3 600 kr/t før, og ingen døgn har vært i
+  minus. Snittet for hjemmeverket er +187 mill. per døgn.
+- På Verket → Økonomi sto «Verket i går (drift)» i rødt først. Et døgn i minus er som regel bare at skrapet er betalt
+  før ordren er levert og betalt.
+Beslutning:
+- «Verket, snitt 7 døgn» står nå først, med farge. «Verket i går» er gul (ikke rød) når snittet er i pluss, og da står
+  én linje under: verket gikk i minus i går, men tjener X i snitt; skrapet betales når det kjøpes, kontraktene når de
+  leveres.
+- Utbyttet endres ikke uten at eieren ber om det (B-209 står). Mulige grep hvis Figen fortsatt synes det er for lite:
+  mindre trim for de beste verkene, eller at modernisering (Figens verk er ikke modernisert) gir mer.
+Konto (B-149): ingen ny funksjon.
+Testet: tsc, lint, `npm test`, Playwright på Verket → Økonomi (320, 390 og PC) med et døgn i minus.
+

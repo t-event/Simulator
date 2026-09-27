@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 215,
+    date: "2026-09-27",
+    title: "Tydeligere økonomi",
+    items: [
+      "På Verket → Økonomi står verkets snitt for sju døgn først. Går verket i minus et enkelt døgn fordi skrapet er betalt før ordrene er levert, står det forklart – og tallet er gult, ikke rødt, når snittet er i pluss.",
+    ],
+  },
+  {
     b: 214,
     date: "2026-09-27",
     title: "Topplista og brukernavn",

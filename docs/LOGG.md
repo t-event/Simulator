@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 152 – 2026-09-27: Figens verk «går ofte i minus»
+
+**Brukeren ba om:** Figen liker ikke økonomien fordi verket ofte går i minus.
+
+**Gjort:** B-215. Gikk gjennom Figens 120 siste døgn: alt samlet i pluss hvert døgn; utbyttet halvert av B-209;
+hjemmeverket i minus 10 døgn (dag 1 430–1 468) på grunn av skrapkjøp før B-208 virket, ingen etter. Økonomi-siden
+viser snittet først, gult i stedet for rødt og én forklarende linje når et enkelt døgn er i minus.
+
+**Testet:** tsc, lint, `npm test`, Playwright (320, 390, PC).
+
+**Gjenstår:** eierens valg om utbyttet (se B-215); resten som i økt 151.
+
+---
+
 ## Økt 151 – 2026-09-27: Topplista for seg, Mål-knapp og brukernavn ved ny konto
 
 **Brukeren ba om:** topplisteknappen skal ikke vise I dag/uke/prestasjoner; brukernavn når man lager konto, og da med
