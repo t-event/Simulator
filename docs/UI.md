@@ -279,7 +279,7 @@ Hver PR er liten, går gjennom alle sjekker, Playwright på **7 størrelser** (3
 1. **UI-1a Tokens og grunnkomponenter** (ferdig, B-191, PR #138): `tokens.css`, typografi, `Button`, `Icon`, `Tabs`/`SegmentedControl`,
    `Callout`, `StatusBadge`, `Stat`, `ProgressBar`, `Section`. Eksisterende klasser kobles til tokens (små synlige
    endringer).
-2. **UI-1b App-skall** (bygget, B-192 – varsellinja står etter B-116, se FORSLAG): kompakt mobiltoppfelt, underfaner øverst i Verket, PC-toppfelt, sidemeny, `Sheet` for
+2. **UI-1b App-skall** (ferdig, B-192, PR #139 – varsellinja står etter B-116, se FORSLAG): kompakt mobiltoppfelt, underfaner øverst i Verket, PC-toppfelt, sidemeny, `Sheet` for
    toppliste/fagbok/innstillinger, brytepunktene.
 3. **UI-2a Oversikt** (inkl. boblereglene og første runde av anleggsbildet) · **UI-2b Anlegg** (statusspråk,
    driftsdashbord) · **UI-2c Marked** (`DataTable`) · **UI-2d Salg** (`MasterDetail`).

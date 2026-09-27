@@ -20,8 +20,8 @@ etter eierens beskjed.
 
 **Testet:** `npm test` (ny reservetest), tsc, lint, balanse (exit 0), `--konsern`, Playwright med kasse 100,5 mrd.
 
-**Gjenstår:** bygger på grenen med UI-1b (PR #139, venter på eieren). Reserven skal migreres når sluttspillet er
-rebalansert (FORSLAG).
+**Gjenstår:** eieren sa «Merge» – PR #139 (UI-1b + ventilen) er merget, og publiseringen gikk grønt. Reserven skal
+migreres når sluttspillet er rebalansert (FORSLAG).
 
 ---
 
@@ -38,7 +38,8 @@ FORSLAG. Endringsloggen, UI.md, CLAUDE.md.
 **Testet:** tsc, lint, `npm test`, balanse (exit 0), build; Playwright på 7 størrelser før/etter, Konsern-navigasjon,
 ark fra høyre, nytt spill med veiledningen (320 og 1 366).
 
-**Gjenstår:** eierens svar på skjermbildene og om varsellinja på mobil (FORSLAG). Deretter UI-2a (Oversikt).
+**Gjenstår:** merget i PR #139 sammen med B-193. Eierens svar om varsellinja på mobil (FORSLAG). Deretter UI-2a
+(Oversikt).
 
 ---
 

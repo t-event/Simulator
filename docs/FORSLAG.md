@@ -10,7 +10,6 @@ til «Avgjort» nederst).
   at varsellinja slutter å være en fast rad og varsler kommer som en kort toast under toppfeltet (samles i bjella).
   Det gjør om B-116 (varsler skal aldri ligge oppå noe). Alternativ: flytte hele varsellinja ned over menyen nederst
   (toppfeltet ca. 76 px, like mye plass totalt). Eierens valg – til da står B-116.
-- UI-1b er bygget og vises med skjermbilder før merge.
 
 ## Venter
 
