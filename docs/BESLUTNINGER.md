@@ -3613,3 +3613,23 @@ Beslutning:
 Konto (B-149): ingen ny funksjon.
 Testet: tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter på 320, 390, 1 366 og 1 920 px og de 7
 størrelsene: ingen vannrett scrolling, ingen avkortet tekst, ingen hovedknapper under 40 px.
+
+## B-206 UI-3d: Konsern – hovedkontoret med nøkkeltall, neste steg og verkene som tabell (2026-09-27)
+Status: gjelder (UI.md 6; bygger på B-192, B-200, B-205)
+Brukeren: «Fortsett» – siste fase i UI-3.
+Beslutning:
+- **PC:** Konsern er en egen side i sidemenyen (B-192), så anleggsbildet og rådene for hjemmeverket står ikke lenger
+  øverst der. Før ble konsernet klemt inn i høyrekolonnen under bildet, med et stort tomrom til venstre.
+- **Oppsett på PC:** nøkkeltallene (konsernverdien stort, netto fra verkene, antall datterverk, tittel eller målet) og
+  «Neste steg» side om side øverst; «Dine verk» som tabell over hele bredden; «Kjøp og utvid» til venstre og
+  Skraplageret og salgsdirektøren til høyre. Mobil: samme rekkefølge i én kolonne, og verkene som kort som før.
+- **Verkstabellen** viser verk og type, modernisering som trinn, driftsresultat, utbytte til deg, verdi og hovedknappen
+  (bygg ut eller moderniser). «Mer» åpner en rad under med resten (modernisere et stålverk, bytte til kompleks, selge
+  med bekreftelse). Verket «Neste steg» gjelder, er merket.
+- **Én blå knapp:** bare verket rådet gjelder, får blå hovedknapp – både i tabellen og i kortene på mobil. Før var alle
+  verkenes knapper blå.
+- Ikoner i stedet for emoji (fabrikk, pokal for tittelen). Ingen endring i spillet.
+Konto (B-149): ingen ny funksjon.
+Testet: tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter på 320, 390, 1 366 og 1 920 px, et konsern uten
+verk, «Mer»-raden med salg, og de 7 størrelsene: ingen vannrett scrolling, ingen avkortet tekst, ingen små knapper.
+

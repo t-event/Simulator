@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 143 – 2026-09-27: UI-3d – Konsern
+
+**Brukeren ba om:** «Fortsett» (neste steg i UI-planen).
+
+**Gjort:** PR #150 (UI-3c) merget. B-206: Konsern som hovedkontor. PC: uten anleggsbildet, nøkkeltall og neste steg
+øverst, verkene som tabell med «Mer»-rad, kjøp til venstre og Skraplageret og salgsdirektøren til høyre. Mobil: samme
+rekkefølge, bare verket rådet gjelder, har blå knapp. Endringsloggen, UI.md.
+
+**Testet:** tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter, tomt konsern, «Mer»-raden, 7 størrelser.
+
+**Gjenstår:** UI-4a–d (kontrollrommet, topplista, andre ark og små skjermer, finpuss), senere logo og appikon.
+
+---
+
 ## Økt 142 – 2026-09-27: UI-3c – Forskning
 
 **Brukeren ba om:** «Fortsett» (neste steg i UI-planen).

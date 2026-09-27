@@ -3941,3 +3941,158 @@ button {
   height: 1em;
   vertical-align: -0.15em;
 }
+
+/* Verket → Konsern (UI-3d, B-206): hovedkontoret. Verkene som kort på mobil og som tabell på PC */
+.g-plant-name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.g-plant-name .ds-icon {
+  width: 1em;
+  height: 1em;
+  color: var(--text-3);
+}
+
+.g-legend-title .ds-icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.12em;
+  color: var(--warning);
+}
+
+.g-plant-table {
+  display: none;
+}
+
+.g-plant-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+@media (min-width: 900px) {
+  /* PC: Konsern er eget punkt i sidemenyen, ikke en del av verket */
+  .g-grid.is-konsern > .g-verket-top {
+    display: none;
+  }
+}
+
+@media (min-width: 1000px) {
+  .g-grid.is-konsern > .g-konsern-head-col,
+  .g-grid.is-konsern > .g-konsern-buy-col {
+    grid-column: 1;
+  }
+
+  .g-grid.is-konsern > .g-konsern-next-col,
+  .g-grid.is-konsern > .g-konsern-side {
+    grid-column: 2;
+  }
+
+  .g-grid.is-konsern > .g-konsern-plants {
+    grid-column: 1 / -1;
+  }
+
+  /* Neste steg fyller høyden ved siden av nøkkeltallene */
+  .g-grid.is-konsern > .g-konsern-next-col {
+    align-self: stretch;
+  }
+
+  .g-konsern-next-col > .g-konsern-next {
+    flex: 1;
+  }
+
+  .g-plant-cards {
+    display: none;
+  }
+
+  .g-plant-table {
+    display: table;
+    width: 100%;
+    margin-top: var(--sp-2);
+    border-collapse: collapse;
+    font-size: var(--fs-body);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .g-plant-table th {
+    text-align: left;
+    font-size: var(--fs-caption);
+    font-weight: 600;
+    color: var(--text-3);
+    padding: var(--sp-2) var(--sp-3);
+    border-bottom: 1px solid var(--line-strong);
+    white-space: nowrap;
+  }
+
+  .g-plant-table td {
+    padding: var(--sp-3);
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+  }
+
+  .g-plant-table .num {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .g-plant-table td > .g-small-text {
+    display: block;
+  }
+
+  .g-plant-table tr.is-advice > td {
+    background: var(--surface-2);
+  }
+
+  .g-plant-table tr.is-advice > td:first-child {
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+
+  .g-plant-table .g-konsern-buy {
+    margin-top: 0;
+  }
+
+  .g-plant-table .g-konsern-buy button {
+    white-space: nowrap;
+  }
+
+  .g-plant-more-row > td {
+    background: var(--surface-2);
+  }
+
+  .g-plant-more-row .g-konsern-buy {
+    margin: var(--sp-1) 0;
+  }
+
+  .g-plant-more {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-1);
+    min-height: 40px;
+    white-space: nowrap;
+  }
+
+  .g-plant-more .ds-icon {
+    width: 1em;
+    height: 1em;
+  }
+
+  /* Modernisering som prikker: fylt for hvert trinn */
+  .g-plant-level {
+    display: flex;
+    gap: 3px;
+    margin-bottom: 2px;
+  }
+
+  .g-plant-level i {
+    width: 12px;
+    height: 6px;
+    border-radius: 2px;
+    background: var(--line-strong);
+  }
+
+  .g-plant-level i.is-on {
+    background: var(--accent);
+  }
+}

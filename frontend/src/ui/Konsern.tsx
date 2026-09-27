@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { WIN_CASH } from "../game/data";
 import {
   daysToAfford,
@@ -39,9 +39,10 @@ import { RESEARCH } from "../game/research";
 import type { GameState, SisterPlant, SisterType } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { buzz } from "./haptics";
-import { Bar, Card, Stat } from "./common";
+import { Bar, Card } from "./common";
 import { StrategicCompanies } from "./Companies";
 import { fmtKr } from "./format";
+import { Icon } from "./icons";
 
 type Act = GameApi["act"];
 
@@ -53,7 +54,7 @@ function LegendProgress({ g, equity }: { g: GameState; equity: number }) {
   return (
     <>
       <p className="g-legend-title">
-        👑 Tittel: <strong>{titleOf(g)}</strong>
+        <Icon name="trophy" /> Tittel: <strong>{titleOf(g)}</strong>
       </p>
       {next ? (
         <>
@@ -258,13 +259,53 @@ function DirectorCard({ g, act }: { g: GameState; act: Act }) {
   );
 }
 
-/** Ett datterverk: utbyttet og hva det tjener, den viktigste knappen, og resten (modernisering, salg) foldet bort (B-123) */
+/** Knappene for et verk som ikke er hovedknappen: modernisere (for stålverk), bytte til kompleks og selge (B-123) */
+function PlantMore({ g, act, p, options }: { g: GameState; act: Act; p: SisterPlant; options: KonsernOption[] }) {
+  const [selling, setSelling] = useState(false);
+  const upgrade = options.find((o) => o.key === `bygg-${p.id}`);
+  const extra = upgrade ? options.find((o) => o.key === `mod-${p.id}`) : undefined;
+  const swap = options.find((o) => o.key === `bytt-${p.id}`);
+  return (
+    <>
+      {extra && <BuyButton g={g} act={act} o={extra} primary={false} label="Moderniser" />}
+      {swap && <BuyButton g={g} act={act} o={swap} primary={false} label="Bytt til stålkompleks" />}
+      {selling ? (
+        <div className="g-row g-konsern-buy">
+          <button
+            className="g-danger"
+            onClick={() => {
+              act((gg) => sellSister(gg, p.id));
+              setSelling(false);
+            }}
+          >
+            Ja, selg for {fmtKr(sisterValue(g, p))}
+          </button>
+          <button onClick={() => setSelling(false)}>Avbryt</button>
+        </div>
+      ) : (
+        <div className="g-konsern-buy">
+          <button onClick={() => setSelling(true)}>Selg for {fmtKr(sisterValue(g, p))}…</button>
+          <span className="g-muted g-small-text">Pengene går i kassa, f.eks. til et storverk.</span>
+        </div>
+      )}
+    </>
+  );
+}
+
+/** Hovedknappen for et verk: utbygging for stålverk, ellers modernisering */
+function mainOption(p: SisterPlant, options: KonsernOption[]) {
+  const upgrade = options.find((o) => o.key === `bygg-${p.id}`);
+  return { main: upgrade ?? options.find((o) => o.key === `mod-${p.id}`), isUpgrade: !!upgrade };
+}
+
+/** Ett datterverk som kort (mobil): utbyttet og hva det tjener, den viktigste knappen, og resten foldet bort (B-123) */
 function PlantRow({
   g,
   act,
   p,
   dividend,
   options,
+  advised,
 }: {
   g: GameState;
   act: Act;
@@ -272,19 +313,18 @@ function PlantRow({
   /** Utbyttet verket gir konsernet per døgn (B-181) */
   dividend: number;
   options: KonsernOption[];
+  /** Rådet under «Neste steg» gjelder dette verket: bare da er knappen blå (B-206) */
+  advised: boolean;
 }) {
-  const [selling, setSelling] = useState(false);
+  const [open, setOpen] = useState(0);
   const down = p.downUntilDay > day(g);
-  const upgrade = options.find((o) => o.key === `bygg-${p.id}`);
-  const modernize = options.find((o) => o.key === `mod-${p.id}`);
-  const swap = options.find((o) => o.key === `bytt-${p.id}`);
-  // Stålverk: utbygging er hovedknappen. Storverk: modernisering.
-  const main = upgrade ?? modernize;
-  const extra = upgrade ? modernize : undefined;
+  const { main, isUpgrade } = mainOption(p, options);
   return (
     <div className="g-upgrade">
       <div className="g-contract-head">
-        <strong>🏭 {p.name}</strong>
+        <strong className="g-plant-name">
+          <Icon name="factory" /> {p.name}
+        </strong>
         <span className={down ? "g-badge-bad" : "g-muted"}>
           {down ? `Står til dag ${p.downUntilDay}` : `+${fmtKr(dividend)}/døgn`}
         </span>
@@ -293,32 +333,127 @@ function PlantRow({
         {SISTER_TYPES[p.type].name} · modernisert {p.level} av {modernizeMax(g)} · tjener {fmtKr(sisterProfit(g, p))}
         /døgn · verdt {fmtKr(sisterValue(g, p))}
       </p>
-      {main && <BuyButton g={g} act={act} o={main} label={upgrade ? "Bygg ut til storverk" : "Moderniser"} />}
-      <details className="g-details" onToggle={(e) => !(e.target as HTMLDetailsElement).open && setSelling(false)}>
-        <summary>{extra ? "Moderniser eller selg" : "Selg verket"}</summary>
-        {extra && <BuyButton g={g} act={act} o={extra} primary={false} label="Moderniser" />}
-        {swap && <BuyButton g={g} act={act} o={swap} primary={false} label="Bytt til stålkompleks" />}
-        {selling ? (
-          <div className="g-row g-konsern-buy">
-            <button
-              className="g-danger"
-              onClick={() => {
-                act((gg) => sellSister(gg, p.id));
-                setSelling(false);
-              }}
-            >
-              Ja, selg for {fmtKr(sisterValue(g, p))}
-            </button>
-            <button onClick={() => setSelling(false)}>Avbryt</button>
-          </div>
-        ) : (
-          <div className="g-konsern-buy">
-            <button onClick={() => setSelling(true)}>Selg for {fmtKr(sisterValue(g, p))}…</button>
-            <span className="g-muted g-small-text">Pengene går i kassa, f.eks. til et storverk.</span>
-          </div>
-        )}
+      {main && (
+        <BuyButton
+          g={g}
+          act={act}
+          o={main}
+          primary={advised}
+          label={isUpgrade ? "Bygg ut til storverk" : "Moderniser"}
+        />
+      )}
+      {/* Nøkkelen nullstiller salgsbekreftelsen når feltet lukkes */}
+      <details className="g-details" onToggle={(e) => !(e.target as HTMLDetailsElement).open && setOpen((n) => n + 1)}>
+        <summary>{isUpgrade ? "Moderniser eller selg" : "Selg verket"}</summary>
+        <PlantMore key={open} g={g} act={act} p={p} options={options} />
       </details>
     </div>
+  );
+}
+
+/**
+ * Verkene som tabell (PC, UI-3d, B-206): alle tallene side om side, så verkene kan sammenlignes. Hovedknappen står i
+ * raden; «Mer» åpner en rad under med modernisering, bytte og salg. Verket rådet gjelder, er merket.
+ */
+function PlantTable({
+  g,
+  act,
+  div,
+  options,
+  adviceKey,
+}: {
+  g: GameState;
+  act: Act;
+  div: number[];
+  options: KonsernOption[];
+  adviceKey?: string;
+}) {
+  const [more, setMore] = useState<number | null>(null);
+  const today = day(g);
+  const max = modernizeMax(g);
+  return (
+    <table className="g-plant-table">
+      <thead>
+        <tr>
+          <th>Verk</th>
+          <th>Modernisert</th>
+          <th className="num">Driftsresultat</th>
+          <th className="num">Utbytte til deg</th>
+          <th className="num">Verdi</th>
+          <th>Neste steg for verket</th>
+          <th aria-label="Flere valg" />
+        </tr>
+      </thead>
+      <tbody>
+        {g.konsern.plants.map((p, i) => {
+          const down = p.downUntilDay > today;
+          const { main, isUpgrade } = mainOption(p, options);
+          const advised = !!adviceKey && adviceKey.endsWith(`-${p.id}`);
+          const open = more === p.id;
+          return (
+            <Fragment key={p.id}>
+              <tr className={advised ? "is-advice" : undefined}>
+                <td>
+                  <strong className="g-plant-name">
+                    <Icon name="factory" /> {p.name}
+                  </strong>
+                  <span className="g-muted g-small-text">{SISTER_TYPES[p.type].name}</span>
+                </td>
+                <td>
+                  <span className="g-plant-level" aria-label={`${p.level} av ${max}`}>
+                    {Array.from({ length: max }, (_, n) => (
+                      <i key={n} className={n < p.level ? "is-on" : undefined} />
+                    ))}
+                  </span>
+                  <span className="g-muted g-small-text">
+                    {p.level} av {max}
+                  </span>
+                </td>
+                <td className="num">{fmtKr(sisterProfit(g, p))}/døgn</td>
+                <td className="num">
+                  {down ? (
+                    <span className="g-badge-bad">Står til dag {p.downUntilDay}</span>
+                  ) : (
+                    <strong>+{fmtKr(div[i])}/døgn</strong>
+                  )}
+                </td>
+                <td className="num">{fmtKr(sisterValue(g, p))}</td>
+                <td>
+                  {main ? (
+                    <BuyButton
+                      g={g}
+                      act={act}
+                      o={main}
+                      primary={advised}
+                      label={isUpgrade ? "Bygg ut til storverk" : "Moderniser"}
+                    />
+                  ) : (
+                    <span className="g-muted g-small-text">Fullt modernisert</span>
+                  )}
+                </td>
+                <td>
+                  <button
+                    className="g-plant-more"
+                    aria-expanded={open}
+                    aria-label={`Flere valg for ${p.name}`}
+                    onClick={() => setMore(open ? null : p.id)}
+                  >
+                    Mer <Icon name={open ? "chevron-up" : "chevron-down"} />
+                  </button>
+                </td>
+              </tr>
+              {open && (
+                <tr className="g-plant-more-row">
+                  <td colSpan={7}>
+                    <PlantMore g={g} act={act} p={p} options={options} />
+                  </td>
+                </tr>
+              )}
+            </Fragment>
+          );
+        })}
+      </tbody>
+    </table>
   );
 }
 
@@ -349,12 +484,31 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
   const hasStalverk = k.plants.some((p) => p.type === "stalverk");
   return (
     <>
-      <div className="g-col-wide">
+      {/* UI-3d (B-206): hovedkontoret. PC: nøkkeltallene og neste steg side om side, verkene som tabell over hele
+          bredden, så kjøp til venstre og selskapene og salgsdirektøren til høyre. Mobil: samme rekkefølge, én kolonne */}
+      <div className="g-col-wide g-konsern-head-col">
         <Card title="Konsernet">
-          <div className="g-stats">
-            <Stat label="Konsernverdi" value={fmtKr(Math.floor(equity))} />
-            {g.lockedReserve && <Stat label="Herav bunden reserve" value={fmtKr(Math.floor(g.lockedReserve.total))} />}
-            <Stat label="Netto fra verkene" value={`${fmtKr(dividend - costs)}/døgn`} />
+          <div className="g-finance-head">
+            <div className="g-finance-result">
+              <span>Konsernverdi</span>
+              <strong>{fmtKr(Math.floor(equity))}</strong>
+            </div>
+            <div className="g-finance-side">
+              <span>
+                Netto fra verkene <strong>{fmtKr(dividend - costs)}/døgn</strong>
+              </span>
+              <span>
+                Datterverk{" "}
+                <strong>
+                  {k.plants.length} av {maxSisters(g)}
+                </strong>
+              </span>
+              {g.lockedReserve && (
+                <span>
+                  Herav bunden reserve <strong>{fmtKr(Math.floor(g.lockedReserve.total))}</strong>
+                </span>
+              )}
+            </div>
           </div>
           {k.plants.length > 0 && (
             <p className="g-muted g-small-text">
@@ -400,7 +554,9 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
             </p>
           </details>
         </Card>
-        {advice && (
+      </div>
+      {advice && (
+        <div className="g-col g-konsern-next-col">
           <Card title="Neste steg" className="g-konsern-next">
             <p>
               <strong>{advice.title}</strong> – det som betaler seg raskest nå.
@@ -413,17 +569,29 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
             )}
             <BuyButton g={g} act={act} o={advice} label="Gjør det" />
           </Card>
-        )}
-        {k.plants.length > 0 && (
+        </div>
+      )}
+      {k.plants.length > 0 && (
+        <div className="g-col-wide g-konsern-plants">
           <Card title={`Dine verk (${k.plants.length} av ${maxSisters(g)} datterverk)`}>
-            {k.plants.map((p, i) => (
-              <PlantRow key={p.id} g={g} act={act} p={p} dividend={div[i]} options={options} />
-            ))}
+            <div className="g-plant-cards">
+              {k.plants.map((p, i) => (
+                <PlantRow
+                  key={p.id}
+                  g={g}
+                  act={act}
+                  p={p}
+                  dividend={div[i]}
+                  options={options}
+                  advised={!!advice && advice.key.endsWith(`-${p.id}`)}
+                />
+              ))}
+            </div>
+            <PlantTable g={g} act={act} div={div} options={options} adviceKey={advice?.key} />
           </Card>
-        )}
-      </div>
-      <div className="g-col">
-        <StrategicCompanies g={g} act={act} />
+        </div>
+      )}
+      <div className="g-col-wide g-konsern-buy-col">
         <Card title="Kjøp og utvid">
           {(Object.keys(SISTER_TYPES) as SisterType[])
             .filter((t) => t !== "kompleks" || kompleksOpen(g))
@@ -456,6 +624,9 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
             <p className="g-muted g-small-text">✓ I drift: {owned.map((id) => KONSERN_SHARED[id].name).join(", ")}.</p>
           )}
         </Card>
+      </div>
+      <div className="g-col g-konsern-side">
+        <StrategicCompanies g={g} act={act} />
         <DirectorCard g={g} act={act} />
       </div>
     </>

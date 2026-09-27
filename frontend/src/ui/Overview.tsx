@@ -441,7 +441,8 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
           </button>
         ))}
       </div>
-      <div className="g-col-wide">
+      {/* På PC er Konsern en egen side i sidemenyen (B-192), så anleggsbildet og rådene for verket står ikke der (B-206) */}
+      <div className="g-col-wide g-verket-top">
         <div className="g-scene-wrap">
           <PlantScene g={g} stats={stats} />
           <SceneBubbles g={g} />
