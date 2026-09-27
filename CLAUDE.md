@@ -162,14 +162,14 @@ frontend/src/
     InstallTip.tsx    Tips om hjemskjerm på startskjermen   Power.tsx  Strøm og skiftplan
     Handbook.tsx Fagboka med quiz og oppdrag   Inbox.tsx  Varsellista (åpnes fra varsellinja)
     Account.tsx  Konto: logg inn, opprett, glemt passord, velg spill ved konflikt (på startskjermen og i ⚙️)
-    Leaderboard.tsx Topplista (på Mål, bak 🏆 ved varsellinja)   Season.tsx  Sesongspørsmål, hendelser på Marked, sesonglinje
+    Leaderboard.tsx Topplista (arket bak 🏆, B-214)   Season.tsx  Sesongspørsmål, hendelser på Marked, sesonglinje
     Daily.tsx    Velkommen tilbake, daglig belønning og kortet «Dagens oppdrag» på Mål
     Achievements.tsx Prestasjonskortet på Mål og arket «Pynt verket» (🎨 på anleggsbildet)
     Weekly.tsx   Kortet «Ukens utfordring» på Mål og ukelista   Portal.tsx  Ark fra Verket legges i <body>
     SeasonTrack.tsx Kortet «Sesongstigen» på Mål (B-173)   Landmarks.tsx  Kortet «Landemerker» på Verket (B-174)
     Changelog.tsx «Hva er nytt» etter en oppdatering og under ⚙️ (B-179)
     MissingOut.tsx «Det går du glipp av» på Mål for spillere uten konto (B-212)
-    Goals.tsx    Mål-siden (pokalen ved varslene): daglig, uke og sesong, prestasjoner, toppliste (B-211)
+    Goals.tsx    Mål-siden (egen knapp ved varsellinja på mobil, sidemenyen på PC): I dag, Uka, Merker (B-211, B-214)
     tokens.css   Designsystemet (B-191): alle farger, skriftstørrelser, radier, avstander – nye stiler bruker disse
     icons.tsx    Ikoner fra Lucide, kopiert inn (lisens i icons-LICENSE.txt)   ds.tsx  StatusBadge, Callout, Button
     fonts/       Visningsskriften for overskrifter og store tall (Barlow Semi Condensed 600, OFL)

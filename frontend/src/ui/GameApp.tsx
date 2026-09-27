@@ -27,6 +27,9 @@ import { CloudDot, CloudFollow, IntroAccount, LoggedOutNotice } from "./Account"
 import { SeasonPrompt, SeasonResultNotice, SeasonSync, SeasonTeaser } from "./Season";
 import { DailySync } from "./Daily";
 import { GoalsPage } from "./Goals";
+import { LeaderboardSheet } from "./Leaderboard";
+import { useDailyStatus } from "./useDaily";
+import { missionBonusReady } from "../game/daily";
 import { useSeasonStatus } from "./useSeason";
 import { SettingsSheet } from "./Settings";
 import { getSession } from "../net/supabase";
@@ -46,7 +49,7 @@ const NAV_ICON: Record<View, IconName> = {
   salg: "sales",
   folk: "people",
   forskning: "research",
-  mal: "trophy",
+  mal: "target",
 };
 
 // Kontrollrommet (spillet i fire runder) lastes først når det trengs
@@ -517,21 +520,42 @@ function NoticeRow({
   api,
   onInbox,
   onBoard,
+  onGoals,
   className = "",
 }: {
   g: GameState;
   api: GameApi;
   onInbox: () => void;
   onBoard: () => void;
+  /** Mål (B-214): egen knapp på mobil; på PC står Mål i sidemenyen */
+  onGoals?: () => void;
   className?: string;
 }) {
   return (
     <div className={`g-notice-row ${className}`.trim()}>
       <NoticeLine api={api} unseen={unseenCount(g)} latest={latestUnseen(g)} onOpen={onInbox} />
-      <button className="g-book g-board-btn" onClick={onBoard} aria-label="Mål og toppliste" title="Mål og toppliste">
+      {onGoals && <GoalsButton g={g} onClick={onGoals} />}
+      <button className="g-book g-board-btn" onClick={onBoard} aria-label="Toppliste" title="Toppliste">
         <Icon name="trophy" />
       </button>
     </div>
+  );
+}
+
+/** Knappen til Mål (B-214), med en prikk når dagens belønning eller oppdragsbonusen kan hentes */
+function GoalsButton({ g, onClick }: { g: GameState; onClick: () => void }) {
+  const status = useDailyStatus();
+  const ready = g.tutorial === null && !!status && (!status.claimed || (!g.daily.claimed && missionBonusReady(g)));
+  return (
+    <button
+      className="g-book g-board-btn g-goals-btn"
+      onClick={onClick}
+      aria-label={ready ? "Mål – noe venter på deg" : "Mål: dagens oppdrag, uka og merker"}
+      title="Mål"
+    >
+      <Icon name="target" />
+      {ready && <span className="g-goals-dot" aria-hidden="true" />}
+    </button>
   );
 }
 
@@ -673,6 +697,8 @@ export function GameApp() {
   const [bookOpen, setBookOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(false);
+  // Topplista er et eget ark bak 🏆 igjen (B-214); Mål er en egen side
+  const [boardOpen, setBoardOpen] = useState(false);
   const [bookChapter, setBookChapter] = useState<string | null>(null);
   // Beskjeden om at en sesong er over, vises før spørsmålet om neste sesong (B-143)
   const [resultOpen, setResultOpen] = useState(false);
@@ -779,6 +805,7 @@ export function GameApp() {
     bookOpen ||
     settingsOpen ||
     inboxOpen ||
+    boardOpen ||
     !!g.pendingManual ||
     !!g.pendingDecision ||
     g.celebrate !== null ||
@@ -796,7 +823,7 @@ export function GameApp() {
             notice={isPc}
             onBook={() => openBook()}
             onSettings={() => setSettingsOpen(true)}
-            onBoard={() => go("mal")}
+            onBoard={() => setBoardOpen(true)}
             onInbox={openInbox}
           />
 
@@ -868,12 +895,19 @@ export function GameApp() {
               aria-current={shown === "mal" ? "page" : undefined}
               onClick={() => go("mal")}
             >
-              <Icon name="trophy" className="g-nav-icon" />
+              <Icon name="target" className="g-nav-icon" />
               <span className="g-nav-label">Mål</span>
             </button>
           </nav>
           {!isPc && (
-            <NoticeRow className="g-notice-bar" g={g} api={api} onInbox={openInbox} onBoard={() => go("mal")} />
+            <NoticeRow
+              className="g-notice-bar"
+              g={g}
+              api={api}
+              onInbox={openInbox}
+              onBoard={() => setBoardOpen(true)}
+              onGoals={() => go("mal")}
+            />
           )}
         </div>
 
@@ -924,6 +958,14 @@ export function GameApp() {
 
       {bookOpen && <Handbook g={g} act={act} initial={bookChapter} onClose={() => setBookOpen(false)} />}
       {inboxOpen && <InboxSheet g={g} act={act} onClose={() => setInboxOpen(false)} />}
+      {boardOpen && (
+        <LeaderboardSheet
+          api={api}
+          g={g}
+          onClose={() => setBoardOpen(false)}
+          onOpenSettings={() => setSettingsOpen(true)}
+        />
+      )}
       {settingsOpen && (
         <SettingsSheet
           g={g}

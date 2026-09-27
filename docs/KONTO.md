@@ -76,6 +76,7 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Skraplageret: anbud (hvem som har bydd er synlig, beløpene skjult), pilotkonsesjon og inntekt fra andres skrapbruk | Ja | Regel 3 og 7 | B-189, B-210 |
 | Ukens utfordring «dager» i ekte aktive dager, delt plass ved likt | Ja (lista kan leses uten) | Regel 3 | B-190 |
 | Gjestekonto: spillet lagres på nett i bakgrunnen (ingenting annet) | Nei (gjesten er ingen konto for spilleren) | Regel 1 og 2: en gjest får bare lagre; alt annet krever konto | B-212 |
+| Brukernavn ved ny konto, med på topplista med én gang | Ja (en del av kontoen) | Regel 3 | B-214 |
 | «Det går du glipp av» på Mål (plassen man ville hatt, belønningene) | Nei | Regel 6: vis hva kontoen gir | B-212 |
 | Ventetid i konsernet (fase 4) | Nei (serverklokke med konto) | Regel 5 | PLAN-NETT |
 | Anbud og skrapauksjoner (fase 5) | Ja | Regel 3 og 7 | PLAN-NETT |

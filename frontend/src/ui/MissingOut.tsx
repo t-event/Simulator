@@ -52,7 +52,7 @@ export function MissingOutCard({ g, onLogin }: { g: GameState; onLogin: () => vo
   if (place)
     items.push([
       "Topplista",
-      `Du ville vært nr. ${place.place} av ${place.of}${season ? " denne sesongen" : ""}, med kallenavnet ditt.`,
+      `Du ville vært nr. ${place.place} av ${place.of}${season ? " denne sesongen" : ""}, med brukernavnet ditt.`,
     ]);
   const week = [1, 2, 3, 4, 5, 6, 7].map((d) => streakReward(g, d));
   const weekSum = { cash: week.reduce((a, r) => a + r.cash, 0), fp: week.reduce((a, r) => a + r.fp, 0) };

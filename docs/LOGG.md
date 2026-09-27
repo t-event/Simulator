@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 151 – 2026-09-27: Topplista for seg, Mål-knapp og brukernavn ved ny konto
+
+**Brukeren ba om:** topplisteknappen skal ikke vise I dag/uke/prestasjoner; brukernavn når man lager konto, og da med
+på topplista; gjester er slått på i Supabase.
+
+**Gjort:** B-214. Pokalen åpner topplista som ark igjen, Mål har egen knapp (blinkskive, prikk når noe kan hentes) og
+tre faner. Brukernavn i skjemaet for ny konto, sjekket mot `nickname_available` (migrasjon 037), satt etter
+bekreftelsen. RLS gjennomgått etter at gjester ble slått på.
+
+**Testet:** nettest, `npm test`, tsc, lint, build, Playwright (7 størrelser og ny konto på mobil og PC).
+
+**Gjenstår:** følge med på at gjester dukker opp i `auth.users` (0 da dette ble skrevet); Google/Apple senere; reserven
+og kassegrensen; UI-4a–d.
+
+---
+
 ## Økt 150 – 2026-09-27: Rettingen av Granes spill
 
 **Brukeren ba om:** «Gjør rettingen» (økonomireformen for Grane, dry-run i B-211).

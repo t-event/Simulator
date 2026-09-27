@@ -239,12 +239,12 @@ export function Leaderboard({
       )}
       {session && nickname === null && (
         <p className="g-note">
-          Velg et kallenavn under ⚙️ Innstillinger → Konto, så kommer du med på lista.
+          Velg et brukernavn under ⚙️ Innstillinger → Konto, så kommer du med på lista.
           {onOpenSettings && (
             <>
               {" "}
               <button className="g-link" onClick={onOpenSettings}>
-                Velg kallenavn
+                Velg brukernavn
               </button>
             </>
           )}

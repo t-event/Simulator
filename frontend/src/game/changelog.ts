@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 214,
+    date: "2026-09-27",
+    title: "Topplista og brukernavn",
+    items: [
+      "Pokalen viser bare topplista igjen. Mål (dagens oppdrag, uka og merker) har fått sin egen knapp ved siden av, med en prikk når noe kan hentes.",
+      "Når du lager konto, velger du et brukernavn – og da er du med på topplista med én gang.",
+    ],
+  },
+  {
     b: 212,
     date: "2026-09-27",
     title: "Gjest og Mål",

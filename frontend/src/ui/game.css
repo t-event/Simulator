@@ -4191,3 +4191,20 @@ button {
   color: var(--accent);
   flex: none;
 }
+
+/* Knappen til Mål ved varsellinja på mobil (B-214), med prikk når noe kan hentes */
+.g-goals-btn {
+  position: relative;
+}
+
+.g-goals-dot {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--warning);
+  box-shadow: 0 0 0 2px var(--surface-chrome);
+}
+
