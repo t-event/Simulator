@@ -30,7 +30,7 @@ import { auto, hasResearch, RESEARCH, scrapUnlocked, secondsAction } from "./res
 import { masteryFactor } from "./mastery";
 import { checkMissions } from "./missions";
 import { checkChallenges } from "./challenges";
-import { konsernDay, konsernEquity } from "./konsern";
+import { finishKonsernProjects, konsernDay, konsernEquity } from "./konsern";
 import { worldFactor } from "./world";
 import { maybeAdvisor, maybeCreateDecision } from "./decisions";
 import { maybeTip, setCreditHint } from "./tips";
@@ -2925,6 +2925,8 @@ function step(g: GameState, dt: number): void {
   updateCasting(g, stats, dt);
   updateRolling(g, stats, dt);
   processComplaints(g);
+  // Byggeprosjekter i konsernet blir ferdige i ekte tid (B-209)
+  if (g.konsern?.plants.length) finishKonsernProjects(g);
 
   const hourBefore = Math.floor(before / 60);
   const hourNow = Math.floor(g.minute / 60);

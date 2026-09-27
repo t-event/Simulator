@@ -54,6 +54,8 @@ import {
   sisterDividend,
   sisterPrice,
   sisterProfit,
+  finishKonsernProjects,
+  setRealClock,
 } from "./konsern";
 import { answerQuiz, QUIZ, quizAvailable } from "./quiz";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
@@ -242,7 +244,18 @@ const waits = new WeakMap<GameState, { day: number; stage: number; on: string; r
 /** Testspilleren holder to murere per lysbueovn */
 const MASONS_BOT = 2;
 
+/**
+ * Ekte tid for testspilleren (B-209): byggeprosjektene i konsernet tar ekte timer. Testspilleren regnes som om den
+ * spiller på 3× hele tida (36 spillminutter per sekund), så ett spilldøgn er 40 sekunder og 12 timer er 1 080 døgn.
+ */
+const SIM_START = 1_700_000_000_000;
+const SIM_MS_PER_GAME_MIN = 1000 / 36;
+function simClock(g: GameState): void {
+  setRealClock(() => SIM_START + g.minute * SIM_MS_PER_GAME_MIN);
+}
+
 function botHour(g: GameState): void {
+  simClock(g);
   // Hendelseskort: forsiktige valg, som en fornuftig spiller
   if (g.pendingDecision) {
     const d = g.pendingDecision;
@@ -860,7 +873,9 @@ if (process.argv.includes("--konsern")) {
   }
   // Vekst over tid: starter med 3 nye stålkomplekser og 20 mrd., kjøper det som lønner seg best (som testspilleren),
   // bare med det konsernet tjener. Viser om pengene vokser lineært eller eksplosivt.
-  console.log("\nVekst over tid (3 nye komplekser og 20 mrd. i kassa, reinvesterer det som lønner seg best):");
+  console.log(
+    "\nVekst over tid (3 nye komplekser og 20 mrd. i kassa, reinvesterer det som lønner seg best; «nå» med byggetid i ekte tid, spilt på 3× hele tida):",
+  );
   for (const [name, eco] of [
     ["før", OLD],
     ["nå", NOW],
@@ -868,9 +883,16 @@ if (process.argv.includes("--konsern")) {
     setEco(eco);
     const g = make(3, "kompleks", 0);
     g.cash = 20e9;
+    // Før B-209 var alt ferdig med én gang; nå går byggingen i ekte tid
+    // (klokka hopper 1 000 timer fram for hvert kall, så alt er ferdig ved neste sjekk)
+    let jump = 0;
+    if (name === "før") setRealClock(() => (jump += 1000 * 3_600_000));
+    else simClock(g);
+    finishKonsernProjects(g);
     const marks: string[] = [];
     for (let d = 1; d <= 240; d++) {
       g.minute += 1440;
+      finishKonsernProjects(g);
       konsernDay(g);
       // Myk grense for kassa (B-193): overskuddet går til den bundne reserven, som i spillet
       applyCashCap(g);
@@ -878,6 +900,7 @@ if (process.argv.includes("--konsern")) {
         const o = konsernAdvice(g);
         if (!o || o.price > g.cash - 1e9) break;
         o.run(g);
+        if (name === "før") finishKonsernProjects(g);
       }
       if ([30, 60, 120, 240].includes(d))
         marks.push(

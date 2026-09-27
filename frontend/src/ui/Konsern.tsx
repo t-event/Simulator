@@ -6,6 +6,14 @@ import {
   KONSERN_ECONOMY,
   konsernCosts,
   DIRECTOR_AGREEMENT_SHARE,
+  BUILD_HOURS,
+  flagshipBonus,
+  FLAGSHIP_MAX,
+  MODERNIZE_HOURS,
+  projectLabel,
+  projectProgress,
+  realNow,
+  underConstruction,
   DIRECTOR_HIRE,
   DIRECTOR_UPGRADES,
   directorLevel,
@@ -112,6 +120,7 @@ function BuyButton({
       </button>
       <span className="g-muted g-small-text">
         {o.gain > 0 && `+${fmtKr(o.gain)} per døgn · betaler seg på ca. ${Math.ceil(o.payback)} døgn`}
+        {o.hours > 0 && ` · tar ${o.hours} t å bygge`}
         {reason && <span className="g-konsern-why">{reason}</span>}
       </span>
     </div>
@@ -259,6 +268,28 @@ function DirectorCard({ g, act }: { g: GameState; act: Act }) {
   );
 }
 
+/** Tid som gjenstår, med vanlige ord: «3 t 20 min», «12 min» */
+function fmtLeft(ms: number): string {
+  const min = Math.ceil(ms / 60_000);
+  if (min <= 1) return "under ett minutt";
+  const h = Math.floor(min / 60);
+  return h > 0 ? `${h} t ${min % 60} min` : `${min} min`;
+}
+
+/** Et byggeprosjekt som pågår (B-209): hva som skjer, når det er ferdig, og hvor langt det er kommet */
+function ProjectStatus({ p }: { p: SisterPlant }) {
+  if (!p.project) return null;
+  const left = Math.max(0, p.project.readyAt - realNow());
+  return (
+    <div className="g-project">
+      <span className="g-small-text">
+        <Icon name="clock" /> {projectLabel(p)} · ferdig om {fmtLeft(left)}
+      </span>
+      <Bar value={projectProgress(p)} tone="accent" />
+    </div>
+  );
+}
+
 /** Knappene for et verk som ikke er hovedknappen: modernisere (for stålverk), bytte til kompleks og selge (B-123) */
 function PlantMore({ g, act, p, options }: { g: GameState; act: Act; p: SisterPlant; options: KonsernOption[] }) {
   const [selling, setSelling] = useState(false);
@@ -326,13 +357,14 @@ function PlantRow({
           <Icon name="factory" /> {p.name}
         </strong>
         <span className={down ? "g-badge-bad" : "g-muted"}>
-          {down ? `Står til dag ${p.downUntilDay}` : `+${fmtKr(dividend)}/døgn`}
+          {underConstruction(p) ? "Bygges" : down ? `Står til dag ${p.downUntilDay}` : `+${fmtKr(dividend)}/døgn`}
         </span>
       </div>
       <p className="g-muted g-small-text">
-        {SISTER_TYPES[p.type].name} · modernisert {p.level} av {modernizeMax(g)} · tjener {fmtKr(sisterProfit(g, p))}
-        /døgn · verdt {fmtKr(sisterValue(g, p))}
+        {SISTER_TYPES[p.type].name} · modernisert {p.level} av {modernizeMax(g)}
+        {underConstruction(p) ? "" : ` · tjener ${fmtKr(sisterProfit(g, p))}/døgn`} · verdt {fmtKr(sisterValue(g, p))}
       </p>
+      <ProjectStatus p={p} />
       {main && (
         <BuyButton
           g={g}
@@ -344,7 +376,7 @@ function PlantRow({
       )}
       {/* Nøkkelen nullstiller salgsbekreftelsen når feltet lukkes */}
       <details className="g-details" onToggle={(e) => !(e.target as HTMLDetailsElement).open && setOpen((n) => n + 1)}>
-        <summary>{isUpgrade ? "Moderniser eller selg" : "Selg verket"}</summary>
+        <summary>{isUpgrade && !p.project ? "Moderniser eller selg" : "Selg verket"}</summary>
         <PlantMore key={open} g={g} act={act} p={p} options={options} />
       </details>
     </div>
@@ -409,9 +441,11 @@ function PlantTable({
                     {p.level} av {max}
                   </span>
                 </td>
-                <td className="num">{fmtKr(sisterProfit(g, p))}/døgn</td>
+                <td className="num">{underConstruction(p) ? "–" : `${fmtKr(sisterProfit(g, p))}/døgn`}</td>
                 <td className="num">
-                  {down ? (
+                  {underConstruction(p) ? (
+                    <span className="g-muted">Bygges</span>
+                  ) : down ? (
                     <span className="g-badge-bad">Står til dag {p.downUntilDay}</span>
                   ) : (
                     <strong>+{fmtKr(div[i])}/døgn</strong>
@@ -419,7 +453,9 @@ function PlantTable({
                 </td>
                 <td className="num">{fmtKr(sisterValue(g, p))}</td>
                 <td>
-                  {main ? (
+                  {p.project ? (
+                    <ProjectStatus p={p} />
+                  ) : main ? (
                     <BuyButton
                       g={g}
                       act={act}
@@ -497,6 +533,11 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
               <span>
                 Netto fra verkene <strong>{fmtKr(dividend - costs)}/døgn</strong>
               </span>
+              {k.plants.length > 0 && (
+                <span title="Utbyttet øker når hjemmeverket har godt omdømme og lager stål som holder kvaliteten">
+                  Flaggskipet <strong>+{Math.round(flagshipBonus(g) * 100)} %</strong> utbytte
+                </span>
+              )}
               <span>
                 Datterverk{" "}
                 <strong>
@@ -543,6 +584,16 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
                 konsernledelsen koster mer. Flere verk gir fortsatt mer – men ikke dobbelt så mye.
               </li>
               <li>
+                <strong>Bygging tar tid – ekte tid,</strong> uansett spillfart: et stålverk {BUILD_HOURS.stalverk}{" "}
+                timer, et storverk {BUILD_HOURS.storverk}, et stålkompleks {BUILD_HOURS.kompleks}, og hvert trinn
+                modernisering {MODERNIZE_HOURS}. Verket går som før mens det moderniseres. Ett prosjekt om gangen per
+                verk.
+              </li>
+              <li>
+                <strong>Hjemmeverket er flaggskipet:</strong> godt omdømme og stål som holder kvaliteten gir inntil +
+                {Math.round(FLAGSHIP_MAX * 100)} % utbytte fra alle datterverkene.
+              </li>
+              <li>
                 <strong>Du taper ikke på å kjøpe:</strong> et verk er verdt ca. {VALUE_DAYS} døgns overskudd og teller
                 med i konsernverdien. Å bare spare er den tregeste veien til målet.
               </li>
@@ -563,7 +614,7 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
             </p>
             {advice.key.startsWith("bytt-") && (
               <p className="g-muted g-small-text">
-                Et stålkompleks tjener omtrent like mye som fem storverk, men tar bare én plass. Verket selges for det
+                Et stålkompleks tjener omtrent like mye som tre storverk, men tar bare én plass. Verket selges for det
                 det er verdt, og pengene går til komplekset.
               </p>
             )}

@@ -24,7 +24,7 @@ import { auto, hasResearch } from "./research";
 import { masteryFactor } from "./mastery";
 import { chance, randInt } from "./random";
 import { reserveTotal } from "./reserve";
-import type { GameState, SisterPlant, SisterType } from "./types";
+import type { GameState, SisterPlant, SisterProject, SisterType } from "./types";
 
 export interface SisterSpec {
   name: string;
@@ -49,8 +49,9 @@ export const SISTER_TYPES: Record<SisterType, SisterSpec> = {
   },
   kompleks: {
     name: "Stålkompleks",
-    price: 6_000_000_000,
-    profitPerDay: 110_000_000,
+    // Trimmet i B-209: 110 mill. per døgn til 60 mill., og prisen fulgte med, så verket fortsatt er verdt det det koster
+    price: 3_600_000_000,
+    profitPerDay: 60_000_000,
     description:
       "Flere storverk på ett sted med egen havn, eget kraftverk og valseverk for plater og profiler. Åpnes med tittelen Stålfyrste.",
   },
@@ -68,7 +69,7 @@ export const LEGENDS: { equity: number; title: string; fp: number; unlocks: stri
     title: "Stålfyrste",
     fp: 250,
     unlocks:
-      "Stålkomplekser kan kjøpes, og det er plass til to datterverk til. Et kompleks tjener like mye som fem storverk – bytt ut de små verkene etter hvert.",
+      "Stålkomplekser kan kjøpes, og det er plass til to datterverk til. Et kompleks tjener like mye som tre storverk – bytt ut de små verkene etter hvert.",
   },
   { equity: 100_000_000_000, title: "Stålkonge", fp: 400, unlocks: "Datterverkene kan moderniseres til trinn 5." },
   { equity: 250_000_000_000, title: "Stålkeiser", fp: 700, unlocks: "Plass til to datterverk til." },
@@ -186,6 +187,87 @@ export function hasShared(g: GameState, id: SharedId): boolean {
   return !!g.konsern?.shared.includes(id);
 }
 
+// ------------------------------------------------------------------ //
+// Byggetid i ekte tid (B-209)
+// ------------------------------------------------------------------ //
+/**
+ * Å bygge, bygge ut og modernisere datterverk tar ekte timer, uansett spillfart. Før betalte et stålkompleks seg på
+ * 10–18 minutter på 10×, og hele konsernet var ferdig utbygd på noen timer. Nå er det døgnene som avgjør hvor fort
+ * konsernet vokser, ikke fartsknappen.
+ */
+export const BUILD_HOURS: Record<SisterType, number> = { stalverk: 2, storverk: 6, kompleks: 12 };
+export const UPGRADE_HOURS = 6;
+export const MODERNIZE_HOURS = 4;
+const HOUR_MS = 3_600_000;
+
+let clock: () => number = () => Date.now();
+/** Ekte tid i ms. Testspilleren og testene setter sin egen klokke med setRealClock */
+export function realNow(): number {
+  return clock();
+}
+export function setRealClock(fn: () => number): void {
+  clock = fn;
+}
+
+/** Et nytt verk som ikke er ferdig bygget: det tjener ingenting og har ingen ledelse ennå */
+export function underConstruction(p: SisterPlant): boolean {
+  return p.project?.kind === "bygg";
+}
+
+/** Verket slik det blir når prosjektet er ferdig */
+export function plannedPlant(p: SisterPlant): SisterPlant {
+  if (!p.project) return p;
+  if (p.project.kind === "utbygging") return { ...p, type: "storverk", level: 0 };
+  if (p.project.kind === "modernisering") return { ...p, level: p.level + 1 };
+  return p;
+}
+
+/** Hva som pågår, med vanlige ord */
+export function projectLabel(p: SisterPlant): string {
+  const k = p.project?.kind;
+  if (k === "bygg") return `Bygges (${SISTER_TYPES[p.type].name.toLowerCase()})`;
+  if (k === "utbygging") return "Bygges ut til storverk";
+  if (k === "modernisering") return `Moderniseres til trinn ${p.level + 1}`;
+  return "";
+}
+
+/** Hvor langt prosjektet er kommet (0–1) */
+export function projectProgress(p: SisterPlant, now = realNow()): number {
+  const pr = p.project;
+  if (!pr) return 1;
+  return Math.min(1, Math.max(0, (now - pr.startedAt) / Math.max(1, pr.readyAt - pr.startedAt)));
+}
+
+function startProject(kind: SisterProject["kind"], hours: number): SisterProject {
+  const now = realNow();
+  return { kind, startedAt: now, readyAt: now + hours * HOUR_MS };
+}
+
+/** Fullfører prosjektene som er ferdige i ekte tid. Kalles fra spilløkka, også når spillet står på pause */
+export function finishKonsernProjects(g: GameState): number {
+  const now = realNow();
+  let done = 0;
+  for (const p of g.konsern?.plants ?? []) {
+    if (!p.project || p.project.readyAt > now) continue;
+    const kind = p.project.kind;
+    const after = plannedPlant(p);
+    p.type = after.type;
+    p.level = after.level;
+    delete p.project;
+    done += 1;
+    log(
+      g,
+      kind === "bygg"
+        ? `${p.name} er ferdig bygget og i drift. Det gir ca. ${fmtKr(sisterProfit(g, p))} i overskudd per døgn.`
+        : kind === "utbygging"
+          ? `${p.name} er bygget ut til storverk! Overskuddet øker til ca. ${fmtKr(sisterProfit(g, p))} per døgn.`
+          : `${p.name} er modernisert (trinn ${p.level}): mer overskudd hver dag.`,
+      "good",
+    );
+  }
+  return done;
+}
+
 /** Overskudd per døgn for ett datterverk nå (uten tilfeldig svingning) */
 export function sisterProfit(g: GameState, p: SisterPlant): number {
   const spec = SISTER_TYPES[p.type];
@@ -210,6 +292,8 @@ export function sisterProfit(g: GameState, p: SisterPlant): number {
 export const VALUE_DAYS = 60;
 
 export function sisterValue(g: GameState, p: SisterPlant): number {
+  // Verdien regnes som om prosjektet er ferdig (B-209): pengene er betalt, så konsernverdien faller ikke imens
+  p = plannedPlant(p);
   const steel = g.market?.steelFactor || 1;
   // Uten mesterskapet (B-150): ellers hopper konsernverdien når man kjøper mange nivåer på en gang, og juksesperren
   // flagger det. Mesterskapet gir mer overskudd, og det kommer inn døgn for døgn.
@@ -231,9 +315,9 @@ export function sisterValue(g: GameState, p: SisterPlant): number {
  */
 export const KONSERN_ECONOMY = {
   /** Del av driftsresultatet som blir igjen i verket (vedlikehold, lokal ledelse, arbeidskapital) */
-  keepShare: 0.2,
+  keepShare: 0.3,
   /** Hvor mye mindre av overskuddet som kan løftes opp for hvert verk nedover i rekken (sortert etter overskudd) */
-  upstreamDecay: 0.05,
+  upstreamDecay: 0.1,
   /** Konsernledelse per verk og døgn, etter type */
   leadCost: { stalverk: 750_000, storverk: 3_000_000, kompleks: 10_000_000 } as Record<SisterType, number>,
   /** Koordinering, reise og finansiering: ledelseskostnaden per verk øker med så mye per verk utover det første */
@@ -251,11 +335,26 @@ export function upstreamShare(rank: number): number {
 
 /** Utbytte til morselskapet per døgn fra hvert verk, i samme rekkefølge som `plants` (uten havari og rekorder) */
 export function dividends(g: GameState, plants: SisterPlant[]): number[] {
-  const profits = plants.map((p) => sisterProfit(g, p));
+  // Et verk som bygges, tjener ingenting ennå (B-209)
+  const profits = plants.map((p) => (underConstruction(p) ? 0 : sisterProfit(g, p)));
   const order = profits.map((_, i) => i).sort((a, b) => profits[b] - profits[a] || a - b);
   const out = new Array<number>(plants.length);
-  order.forEach((i, r) => (out[i] = profits[i] * (1 - KONSERN_ECONOMY.keepShare) * upstreamShare(r + 1)));
+  const flagship = 1 + flagshipBonus(g);
+  order.forEach((i, r) => (out[i] = profits[i] * (1 - KONSERN_ECONOMY.keepShare) * upstreamShare(r + 1) * flagship));
   return out;
+}
+
+/**
+ * Flaggskipet (B-209): går hjemmeverket godt, får datterverkene bedre ledelse og mer utbytte – inntil +20 % med
+ * omdømme 100 og bare stål som holder kvaliteten de siste sju døgnene. Da lønner det seg fortsatt å drive verket godt.
+ */
+export const FLAGSHIP_MAX = 0.2;
+export function flagshipBonus(g: GameState): number {
+  const days = g.history.slice(-7);
+  const good = days.reduce((a, d) => a + (d.onGradeT ?? 0), 0);
+  const all = days.reduce((a, d) => a + (d.onGradeT ?? 0) + (d.offGradeT ?? 0) + (d.secondT ?? 0), 0);
+  const quality = all > 0 ? good / all : 0;
+  return FLAGSHIP_MAX * Math.min(1, Math.max(0, g.reputation / 100)) * quality;
 }
 
 /** Utbytte til morselskapet per døgn fra ett verk i konsernet */
@@ -266,9 +365,11 @@ export function sisterDividend(g: GameState, p: SisterPlant, plants = g.konsern.
 
 /** Konsernkostnader per døgn: ledelse per verk ganger koordinering som øker med antall verk */
 export function konsernCosts(plants: SisterPlant[]): number {
-  if (!plants.length) return 0;
-  const coord = 1 + KONSERN_ECONOMY.coordGrowth * (plants.length - 1);
-  return plants.reduce((a, p) => a + KONSERN_ECONOMY.leadCost[p.type], 0) * coord;
+  // Verk som bygges, har ingen ledelse ennå (B-209)
+  const running = plants.filter((p) => !underConstruction(p));
+  if (!running.length) return 0;
+  const coord = 1 + KONSERN_ECONOMY.coordGrowth * (running.length - 1);
+  return running.reduce((a, p) => a + KONSERN_ECONOMY.leadCost[p.type], 0) * coord;
 }
 
 /** Netto til morselskapet per døgn med disse verkene i drift: utbytte minus konsernkostnader */
@@ -336,6 +437,8 @@ export interface KonsernOption {
   payback: number;
   /** Hvorfor det ikke kan kjøpes nå (utenom penger), eller null */
   blocked: string | null;
+  /** Ekte timer før det er ferdig (B-209); 0 for det som virker med én gang */
+  hours: number;
   run: (g: GameState) => { ok: boolean; message: string };
 }
 
@@ -356,6 +459,7 @@ export function konsernOptions(g: GameState): KonsernOption[] {
     price: sisterPrice(g, "stalverk"),
     gain: netGain(g, [...k.plants, plantOf("stalverk", 0)]),
     blocked: full ? `Konsernet er fullt (${maxSisters(g)} datterverk) – bygg ut eller moderniser i stedet` : null,
+    hours: BUILD_HOURS.stalverk,
     run: (gg) => buySister(gg, "stalverk"),
   });
   add({
@@ -368,6 +472,7 @@ export function konsernOptions(g: GameState): KonsernOption[] {
       : !hasStalverk
         ? "Kjøp et stålverk først – konsernet må lære å drive et verk før det tar på seg et storverk"
         : null,
+    hours: BUILD_HOURS.storverk,
     run: (gg) => buySister(gg, "storverk"),
   });
   // Stålkomplekset åpnes med tittelen Stålfyrste (B-150); før det vises det ikke
@@ -380,6 +485,7 @@ export function konsernOptions(g: GameState): KonsernOption[] {
       blocked: full
         ? `Konsernet er fullt (${maxSisters(g)} datterverk) – bytt et lite verk mot komplekset under «Dine verk»`
         : null,
+      hours: BUILD_HOURS.kompleks,
       run: (gg) => buySister(gg, "kompleks"),
     });
   // Felles funksjoner: 5 % mer i alle datterverkene, og litt hjemme
@@ -396,12 +502,15 @@ export function konsernOptions(g: GameState): KonsernOption[] {
       price: KONSERN_SHARED[id].price,
       gain: sisterGain + (id === "innkjop" ? scrapPerDay * 0.05 : salesPerDay * 0.03),
       blocked: null,
+      hours: 0,
       run: (gg) => buyShared(gg, id),
     });
   }
   for (const p of k.plants) {
+    // Ett prosjekt om gangen per verk (B-209): mens det bygges, kan verket ikke bygges ut, moderniseres eller byttes
+    if (p.project) continue;
     // Når konsernet er fullt, er et stålkompleks i stedet for et lite verk det som gir mest (B-170): det tjener like
-    // mye som fem storverk, men tar bare én plass
+    // mye som tre storverk, men tar bare én plass
     if (full && kompleksOpen(g) && p.type !== "kompleks")
       add({
         key: `bytt-${p.id}`,
@@ -412,6 +521,7 @@ export function konsernOptions(g: GameState): KonsernOption[] {
           k.plants.map((x) => (x === p ? plantOf("kompleks", 0, x.id) : x)),
         ),
         blocked: null,
+        hours: BUILD_HOURS.kompleks,
         run: (gg) => swapForKompleks(gg, p.id),
       });
     if (p.type === "stalverk")
@@ -424,6 +534,7 @@ export function konsernOptions(g: GameState): KonsernOption[] {
           k.plants.map((x) => (x === p ? plantOf("storverk", 0, x.id) : x)),
         ),
         blocked: null,
+        hours: UPGRADE_HOURS,
         run: (gg) => upgradeSister(gg, p.id),
       });
     if (p.level < modernizeMax(g))
@@ -436,6 +547,7 @@ export function konsernOptions(g: GameState): KonsernOption[] {
           k.plants.map((x) => (x === p ? plantOf(p.type, p.level + 1, x.id) : x)),
         ),
         blocked: null,
+        hours: MODERNIZE_HOURS,
         run: (gg) => modernizeSister(gg, p.id),
       });
   }
@@ -501,13 +613,21 @@ export function buySister(g: GameState, type: SisterType): { ok: boolean; messag
   addCost(g, "investering", price);
   const used = new Set(g.konsern.plants.map((p) => p.name));
   const name = SISTER_NAMES.find((x) => !used.has(x)) ?? `Verk nr. ${g.konsern.plants.length + 2}`;
-  g.konsern.plants.push({ id: g.konsern.nextId++, type, name, level: 0, boughtDay: day(g), downUntilDay: 0 });
+  g.konsern.plants.push({
+    id: g.konsern.nextId++,
+    type,
+    name,
+    level: 0,
+    boughtDay: day(g),
+    downUntilDay: 0,
+    project: startProject("bygg", BUILD_HOURS[type]),
+  });
   log(
     g,
-    `Konsernet har kjøpt ${name}, et ${spec.name.toLowerCase()}, for ${fmtKr(price)}. Det gir ca. ${fmtKr(profitOf(g, type, 0))} i overskudd per døgn.`,
+    `Konsernet har kjøpt ${name}, et ${spec.name.toLowerCase()}, for ${fmtKr(price)}. Byggingen tar ${BUILD_HOURS[type]} timer (ekte tid, uansett spillfart). Deretter gir det ca. ${fmtKr(profitOf(g, type, 0))} i overskudd per døgn.`,
     "good",
   );
-  return { ok: true, message: `${name} er kjøpt.` };
+  return { ok: true, message: `${name} er kjøpt. Ferdig bygget om ${BUILD_HOURS[type]} timer.` };
 }
 
 /** Selger et datterverk for det det er verdt (B-121), f.eks. for å få råd til et storverk */
@@ -535,17 +655,17 @@ export function swapForKompleks(g: GameState, id: number): { ok: boolean; messag
 export function upgradeSister(g: GameState, id: number): { ok: boolean; message: string } {
   const p = g.konsern.plants.find((x) => x.id === id);
   if (!p || p.type !== "stalverk") return { ok: false, message: "Bare et stålverk kan bygges ut til storverk." };
+  if (p.project) return { ok: false, message: `${projectLabel(p)} – vent til det er ferdig.` };
   const cost = upgradeCost(g);
   if (g.cash < cost) return { ok: false, message: "For lite penger" };
   addCost(g, "investering", cost);
-  p.type = "storverk";
-  p.level = 0;
+  p.project = startProject("utbygging", UPGRADE_HOURS);
   log(
     g,
-    `${p.name} er bygget ut til storverk! Overskuddet øker til ca. ${fmtKr(sisterProfit(g, p))} per døgn. Moderniseringen starter på nytt.`,
+    `${p.name} bygges ut til storverk. Det tar ${UPGRADE_HOURS} timer (ekte tid), og verket går som før imens. Moderniseringen starter på nytt.`,
     "good",
   );
-  return { ok: true, message: `${p.name} er bygget ut.` };
+  return { ok: true, message: `${p.name} bygges ut. Ferdig om ${UPGRADE_HOURS} timer.` };
 }
 
 /** Milepæler for konsernverdien (B-119): fagpoeng og en god nyhet på veien mot 10 mrd. */
@@ -568,12 +688,17 @@ export function modernizeSister(g: GameState, id: number): { ok: boolean; messag
   const p = g.konsern.plants.find((x) => x.id === id);
   if (!p) return { ok: false, message: "Fant ikke verket." };
   if (p.level >= modernizeMax(g)) return { ok: false, message: "Verket er fullt modernisert." };
+  if (p.project) return { ok: false, message: `${projectLabel(p)} – vent til det er ferdig.` };
   const cost = modernizeCost(p, g);
   if (g.cash < cost) return { ok: false, message: "For lite penger" };
   addCost(g, "investering", cost);
-  p.level += 1;
-  log(g, `${p.name} er modernisert (trinn ${p.level}): mer overskudd hver dag.`, "good");
-  return { ok: true, message: "Modernisert." };
+  p.project = startProject("modernisering", MODERNIZE_HOURS);
+  log(
+    g,
+    `${p.name} moderniseres til trinn ${p.level + 1}. Det tar ${MODERNIZE_HOURS} timer (ekte tid), og verket går som før imens.`,
+    "good",
+  );
+  return { ok: true, message: `Moderniseringen er i gang. Ferdig om ${MODERNIZE_HOURS} timer.` };
 }
 
 export function buyShared(g: GameState, id: SharedId): { ok: boolean; message: string } {
@@ -739,7 +864,7 @@ export function konsernDay(g: GameState): void {
   const today = day(g);
   const div = dividends(g, g.konsern.plants);
   g.konsern.plants.forEach((p, i) => {
-    if (p.downUntilDay > today) return;
+    if (p.downUntilDay > today || underConstruction(p)) return;
     const maintained = hasResearch(g, "fellesvedlikehold");
     if (chance(g, 0.012 * (maintained ? 0.5 : 1))) {
       const days = maintained ? randInt(g, 1, 3) : randInt(g, 2, 5);

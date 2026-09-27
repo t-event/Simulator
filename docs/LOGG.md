@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 146 – 2026-09-27: Utbyttet – byggetid i ekte tid, trim og flaggskip
+
+**Brukeren ba om:** «Gå for din anbefaling» (om utbyttet, økt 144).
+
+**Gjort:** B-209. Bygging, utbygging og modernisering i konsernet tar ekte timer (2/6/12 t for nye verk, 6 t utbygging,
+4 t per trinn), ett prosjekt per verk, ferdig også på pause. Trim: kompleks 60 mill./døgn og 3,6 mrd., keepShare 0,3,
+upstreamDecay 0,1. Flaggskipet: inntil +20 % utbytte etter omdømme og kvalitet hjemme. Konsern-siden viser prosjekter med
+nedtelling, byggetid på knappene og flaggskipet i nøkkeltallene. Testspilleren har en ekte klokke (3×).
+
+**Testet:** `npm test` (ny test B-209), balanse exit 0, `--konsern`, tsc, lint, build, Playwright med prosjekter (7
+størrelser).
+
+**Gjenstår:** hva den bundne reserven blir og om kassegrensen skal bort; UI-4a–d.
+
+---
+
 ## Økt 145 – 2026-09-27: Returskrapet hopet seg opp, og planleggeren kom for sent
 
 **Brukeren ba om:** planleggeren er dårlig til å kjøpe inn etter resepten, stadige varsler om tomt for skrap, og

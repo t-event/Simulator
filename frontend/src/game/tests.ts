@@ -94,6 +94,15 @@ import {
   modernizeSister,
   SISTER_TYPES,
   sisterProfit,
+  BUILD_HOURS,
+  sisterValue,
+  FLAGSHIP_MAX,
+  flagshipBonus,
+  MODERNIZE_HOURS,
+  underConstruction,
+  finishKonsernProjects,
+  realNow,
+  setRealClock,
 } from "./konsern";
 import { bonusGap, computePlantStats, liftMorale, moraleNormal, supportAdvice } from "./plant";
 import { RESEARCH, researchOptions } from "./research";
@@ -112,7 +121,7 @@ import {
 import { crewPerShift, fireImpact, liningWearPerHeat, MAX_CREWS, specMargin, staffing, wildcardUse } from "./plant";
 import { QUIZ } from "./quiz";
 import { GRADES } from "./data";
-import type { Agreement, Analysis, Contract, ManualRequest, RoleId } from "./types";
+import type { Agreement, Analysis, Contract, GameState, ManualRequest, RoleId } from "./types";
 import { autoPlay, ChargeGame } from "../ui/control/chargeGame";
 import { applyCashCap, CASH_RESERVE, reserveDayLog, reserveTotal } from "./reserve";
 
@@ -130,6 +139,14 @@ function test(name: string, fn: () => void): void {
 }
 function assert(ok: unknown, msg: string): void {
   if (!ok) throw new Error(msg);
+}
+
+/** Byggeprosjektene i konsernet går i ekte tid (B-209): testene spoler klokka 1 000 timer fram og fullfører dem */
+function finishProjects(g: GameState): void {
+  const now = realNow();
+  setRealClock(() => now + 1000 * 3_600_000);
+  finishKonsernProjects(g);
+  setRealClock(() => Date.now());
 }
 
 test("Beløp rundes ned, så et mål ikke ser nådd ut før det er det", () => {
@@ -168,9 +185,12 @@ test("Konsernet: åpner seg på storverket, datterverk gir overskudd og teller m
   assert(g.cash === 2_000_000_000 - price, "feil pris");
   // Et nytt verk er verdt det det koster (B-121): konsernverdien går ikke ned ved kjøpet
   assert(Math.abs(konsernEquity(g) - 2_000_000_000) < 1, `konsernverdien endret seg ved kjøpet: ${konsernEquity(g)}`);
+  finishProjects(g);
   const p = g.konsern.plants[0];
   const before = sisterProfit(g, p);
-  assert(modernizeSister(g, p.id).ok && sisterProfit(g, p) > before, "moderniseringen ga ikke mer overskudd");
+  assert(modernizeSister(g, p.id).ok && sisterProfit(g, p) === before, "moderniseringen virket før den var ferdig");
+  finishProjects(g);
+  assert(sisterProfit(g, p) > before, "moderniseringen ga ikke mer overskudd");
   const income = g.today.income.konsern ?? 0;
   p.downUntilDay = 0;
   for (let i = 0; i < 20; i++) konsernDay(g);
@@ -223,12 +243,12 @@ test("Konsernet: neste steg, utbygging til storverk, milepæler og fullt konsern
   // Seks stålverk: fullt, men et stålverk kan bygges ut til storverk
   for (let i = 0; i < 5; i++) buySister(g, "stalverk");
   assert(!!konsernOptions(g).find((o) => o.key === "kjop-storverk")!.blocked, "kunne kjøpe et sjuende verk");
+  finishProjects(g);
   const p = g.konsern.plants[0];
   const before = sisterProfit(g, p);
-  assert(
-    upgradeSister(g, p.id).ok && p.type === "storverk" && sisterProfit(g, p) > before * 3,
-    "utbyggingen virket ikke",
-  );
+  assert(upgradeSister(g, p.id).ok && p.type === "stalverk", "utbyggingen var ferdig med én gang");
+  finishProjects(g);
+  assert(p.type === "storverk" && sisterProfit(g, p) > before * 3, "utbyggingen virket ikke");
   // Milepæler gir fagpoeng én gang
   const fp = g.researchPoints;
   checkKonsernMilestones(g);
@@ -248,6 +268,7 @@ test("Konsernforskning: låst til konsernet åpnes, og gir effekt", () => {
   g.konsern.unlocked = true;
   g.cash = 5_000_000_000;
   buySister(g, "stalverk");
+  finishProjects(g);
   const p = g.konsern.plants[0];
   const before = sisterProfit(g, p);
   const price = sisterPrice(g, "stalverk");
@@ -906,9 +927,12 @@ test("Stålkompleks i stedet for et lite verk når konsernet er fullt (B-170)", 
   g.konsern.legends = 2;
   g.cash = 100_000_000_000;
   while (g.konsern.plants.length < maxSisters(g)) assert(buySister(g, "stalverk").ok, "kjøp av stålverk");
+  finishProjects(g);
   assert(!!konsernOptions(g).find((o) => o.key === "kjop-kompleks")!.blocked, "kompleks ikke sperret når fullt");
-  const advice = konsernAdvice(g);
-  assert(!!advice?.key.startsWith("bytt-"), `rådet er ${advice?.key}`);
+  // Med trimmen i B-209 kan modernisering av et stålverk betale seg litt raskere enn byttet, så rådet kan være begge
+  const advice = konsernOptions(g).find((o) => o.key.startsWith("bytt-"));
+  assert(!!advice && !advice.blocked, "ikke noe valg om å bytte til kompleks");
+  assert(!!konsernAdvice(g), "ingen råd når konsernet er fullt");
   const n = g.konsern.plants.length;
   g.cash = 1_000_000;
   assert(!advice!.run(g).ok && g.konsern.plants.length === n, "solgte uten råd til komplekset");
@@ -1463,6 +1487,51 @@ test("Skrapklasseren smelter om eget returskrap, og planleggeren holder av plass
   assert(soldT >= stats.yardT * 0.15 - 1, `solgte bare ${Math.round(soldT)} t av ${Math.round(stats.yardT)} t lager`);
   assert(p.scrap.rajern.t > 0, `kjøpte ikke råjern (${p.autoBuyNote})`);
   assert(computePlantStats(p).yardUsed <= stats.yardT + 1e-6, "lageret er overfylt");
+});
+
+test("Konsernet bygger i ekte tid, verdien faller ikke imens, og flaggskipet gir mer utbytte (B-209)", () => {
+  const g = newGame(209);
+  g.stage = 4;
+  g.konsern.unlocked = true;
+  g.cash = 5_000_000_000;
+  let now = 1_000_000_000_000;
+  setRealClock(() => now);
+  const equity = konsernEquity(g);
+  assert(buySister(g, "stalverk").ok, "kjøpet feilet");
+  const p = g.konsern.plants[0];
+  // Under bygging: ikke noe utbytte, ingen konsernkostnader, men verdien teller (konsernverdien står stille)
+  assert(p.project?.kind === "bygg" && underConstruction(p), "verket bygges ikke");
+  assert(dividends(g, g.konsern.plants)[0] === 0 && konsernCosts(g.konsern.plants) === 0, "bygget verk tjener");
+  assert(Math.abs(konsernEquity(g) - equity) < 1, "konsernverdien falt ved kjøpet");
+  assert(!konsernOptions(g).some((o) => o.key === `mod-${p.id}`), "kunne modernisere et verk som bygges");
+  // Spillfarten betyr ingenting: ett spilldøgn går, men ingen ekte tid
+  advance(g, 1440);
+  assert(!!p.project, "ble ferdig av spilltid");
+  now += (BUILD_HOURS.stalverk - 0.5) * 3_600_000;
+  assert(finishKonsernProjects(g) === 0 && !!p.project, "ble ferdig for tidlig");
+  now += 3_600_000;
+  assert(finishKonsernProjects(g) === 1 && !p.project, "ble ikke ferdig");
+  assert(dividends(g, g.konsern.plants)[0] > 0, "ferdig verk ga ikke utbytte");
+  // Modernisering: verket går som før, og verdien regnes som ferdig modernisert
+  const before = sisterProfit(g, p);
+  const value = sisterValue(g, p);
+  assert(modernizeSister(g, p.id).ok, "moderniseringen startet ikke");
+  assert(sisterProfit(g, p) === before && p.level === 0, "moderniseringen virket med én gang");
+  assert(sisterValue(g, p) > value, "verdien regnes ikke som ferdig modernisert");
+  assert(!modernizeSister(g, p.id).ok, "to prosjekter på samme verk");
+  now += MODERNIZE_HOURS * 3_600_000;
+  finishKonsernProjects(g);
+  assert(p.level === 1 && sisterProfit(g, p) > before, "moderniseringen ble ikke ferdig");
+  // Flaggskipet: omdømme 100 og bare stål som holder kvaliteten gir +20 %; ingen produksjon gir ingenting
+  g.history = [];
+  assert(flagshipBonus(g) === 0, "flaggskip uten produksjon");
+  g.reputation = 100;
+  g.history = [0, 1, 2].map((d) => ({ ...structuredClone(g.today), day: d, onGradeT: 100, offGradeT: 0, secondT: 0 }));
+  assert(Math.abs(flagshipBonus(g) - FLAGSHIP_MAX) < 1e-9, `flaggskip ${flagshipBonus(g)}`);
+  g.reputation = 50;
+  g.history[0].secondT = 300;
+  assert(Math.abs(flagshipBonus(g) - FLAGSHIP_MAX * 0.5 * 0.5) < 1e-9, `flaggskip ${flagshipBonus(g)}`);
+  setRealClock(() => Date.now());
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden
