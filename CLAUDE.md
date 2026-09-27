@@ -139,7 +139,9 @@ frontend/src/
     daily.ts     Daglig på serveren (status, henting)   features.ts  Hva som krever konto   update.ts  Automatisk oppdatering
     weekly.ts    Ukens utfordring: status, ukelista og ukekista (B-152)
     seasonTrack.ts Sesongstigen: poeng, trinn og henting (B-173)
-    treasury.ts  Konsernkassa på serveren: status og overføring (B-183, skjult til fase 1B)
+    treasury.ts  Konsernkassa på serveren: status og overføring (B-183)
+    world.ts     Strategiske selskaper: status, anbud og bud (B-189)
+    scrapIncome.ts Skraplagerets inntekt i ekte tid – speiler SQL-en i 029 (B-188); scrapTests.ts viser at fart ikke hjelper
     tests.ts     Tester uten nett (falsk tjeneste)
   ui/          Spillets skjermer (mobil først) og kontrollrommet
     Overview.tsx Verket med underfanene Oversikt, Anlegg, Økonomi (og Konsern)   Recipe.tsx  Resepten på Marked
@@ -155,6 +157,7 @@ frontend/src/
     Weekly.tsx   Kortet «Ukens utfordring» på Verket og ukelista   Portal.tsx  Ark fra Verket legges i <body>
     SeasonTrack.tsx Kortet «Sesongstigen» på Verket (B-173)   Landmarks.tsx  Kortet «Landemerker» på Verket (B-174)
     Changelog.tsx «Hva er nytt» etter en oppdatering og under ⚙️ (B-179)
+    Companies.tsx Kortet «Skraplageret» på Konsern-fanen: anbud, konsernkassa, eier (B-189)
     control/     Kontrollrommet: spillet i fire runder (chargeGame.ts: logikk og testspiller, ControlRoom.tsx, B-175)
   sim/         Prosessmodell for lysbueovnen (brukes ikke av spillet lenger, sjekkes av sim/validate.ts)
 frontend/scripts/ sjekk-endringslogg.mjs: endringsloggen dekker nyeste beslutning (npm test og CI)
@@ -255,4 +258,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Konsernkassa** (B-183): `treasuryOut` i spillet går aldri ned – en trigger på `saves` trekker kassa hvis et spill med
   lavere tall lagres. Overføringen gjøres av serveren (`deposit_to_treasury`), og appen bygger videre på versjonen den
   gir (`adoptServerRev`). Test SQL mot ekte tabeller bare i én DO-blokk som ender med `raise exception` (rulles tilbake).
+- **Skraplagerets inntekt** (B-188) regnes på serveren (`029_produksjonsmaler.sql`) og speiles i `net/scrapIncome.ts`.
+  Endres regelen, må begge endres, og `npm test` (scrapTests.ts) og SQL-scenariene i B-188 kjøres på nytt. Farten måles
+  med spillminuttene (`game_min`), aldri med hele spilldager (det ga 10× opptil 37 % for mye).
+- **Anbud og inntekt** (B-189) avgjøres «lat» av `world_status()` → `world_tick()`. Test livsløpet med midlertidige
+  testkontoer i en DO-blokk som ender med `raise exception`; sett `closes_at` bakover for å avgjøre et anbud.
 

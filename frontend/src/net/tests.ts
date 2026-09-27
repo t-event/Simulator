@@ -53,6 +53,7 @@ import {
   uploadSave,
 } from "./sync";
 import { DEPOSIT_REFUSAL_TEXT, depositToTreasury, fetchTreasury } from "./treasury";
+import { BID_REFUSAL_TEXT, fetchWorldStatus, placeBid, timeLeft } from "./world";
 
 declare const process: { exitCode?: number };
 
@@ -110,6 +111,8 @@ interface Fake {
   hangSave: boolean;
   /** Konsernkassa (B-183): saldo og det som er flyttet inn siste døgn; grensen er fast 100 mill. her */
   treasury: Map<string, { balance: number; used: number }>;
+  /** Bud i anbudet (B-189) */
+  bids: Map<string, number>;
 }
 function makeFake(): Fake {
   const f: Fake = {
@@ -125,6 +128,7 @@ function makeFake(): Fake {
     onSaveGame: null,
     hangSave: false,
     treasury: new Map(),
+    bids: new Map(),
   };
   const json = (status: number, body: unknown) =>
     new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
@@ -247,6 +251,55 @@ function makeFake(): Fake {
         balance: t.balance + amt,
         left: 100_000_000 - t.used - amt,
       });
+    }
+    // Som world_status/place_bid i 030: skjulte bud, penger holdes av i konsernkassa
+    if (path.startsWith("/rest/v1/rpc/world_status")) {
+      const t = f.treasury.get(id) ?? { balance: 0, used: 0 };
+      return json(200, {
+        companies: [
+          {
+            id: 1,
+            type: "skraplager",
+            name: "Skraplageret",
+            owner: null,
+            mine: false,
+            concession_until: null,
+            next_owner: null,
+            next_mine: false,
+            income_yesterday: null,
+            income_mine: "0",
+            estimate_per_day: "65902630",
+            tender: {
+              id: 7,
+              opens_at: "2026-09-27T01:00:00Z",
+              closes_at: "2026-09-29T01:00:00Z",
+              min_bid: "1000000",
+              max_bid: "923000000",
+              my_bid: f.bids.get(id) ?? null,
+            },
+            last_result: null,
+          },
+        ],
+        treasury: {
+          balance: String(t.balance),
+          limit: "100000000",
+          used: String(t.used),
+          left: String(100_000_000 - t.used),
+          freed_at: null,
+        },
+      });
+    }
+    if (path.startsWith("/rest/v1/rpc/place_bid")) {
+      const t = f.treasury.get(id) ?? { balance: 0, used: 0 };
+      const amt = Math.floor(Number(body.p_amount));
+      if (amt !== 0 && (amt < 1_000_000 || amt > 923_000_000)) return json(200, { ok: false, reason: "utenfor" });
+      const diff = amt - (f.bids.get(id) ?? 0);
+      if (diff > t.balance) return json(200, { ok: false, reason: "kasse", balance: t.balance });
+      t.balance -= diff;
+      f.treasury.set(id, t);
+      if (amt === 0) f.bids.delete(id);
+      else f.bids.set(id, amt);
+      return json(200, { ok: true, bid: amt, balance: t.balance });
     }
     if (path.startsWith("/rest/v1/rpc/treasury_status")) {
       const t = f.treasury.get(id) ?? { balance: 0, used: 0 };
@@ -1126,6 +1179,38 @@ const main = async () => {
     await uploadSave(h);
     const no = await depositToTreasury(h, 1_000);
     assert(!no.ok && no.reason === "konsern", `uten konsern: ${JSON.stringify(no)}`);
+  });
+
+  await test("Skraplageret (B-189): status, bud fra konsernkassa, endre og trekke budet", async () => {
+    const f = fresh();
+    await login(f);
+    const g = newGame(15);
+    g.stage = 4;
+    g.konsern.unlocked = true;
+    g.cash = 5_000_000_000;
+    await linkOnLogin(g);
+    let applied = 0;
+    const d = await depositToTreasury(g, 50_000_000, (a) => (applied += a));
+    assert(d.ok && applied === 50_000_000, `innskudd ${JSON.stringify(d)}, brukt ${applied}`);
+    const w = await fetchWorldStatus();
+    const c = w.companies[0];
+    assert(c.name === "Skraplageret" && c.tender?.id === 7 && c.tender.maxBid === 923_000_000, JSON.stringify(c));
+    assert(w.treasury.balance === 50_000_000 && c.estimatePerDay === 65_902_630, JSON.stringify(w.treasury));
+    assert((await placeBid(7, 500)).ok === false, "bud under minste ble godtatt");
+    const over = await placeBid(7, 60_000_000);
+    assert(
+      !over.ok && over.reason === "kasse" && BID_REFUSAL_TEXT.kasse.length > 0,
+      `mer enn saldo: ${JSON.stringify(over)}`,
+    );
+    const b = await placeBid(7, 30_000_000);
+    assert(b.ok && b.balance === 20_000_000, `bud ${JSON.stringify(b)}`);
+    assert((await fetchWorldStatus()).companies[0].tender?.myBid === 30_000_000, "eget bud vises ikke");
+    const up = await placeBid(7, 45_000_000);
+    assert(up.ok && up.balance === 5_000_000, `høyere bud trekker bare forskjellen: ${JSON.stringify(up)}`);
+    const off = await placeBid(7, 0);
+    assert(off.ok && off.balance === 50_000_000, `trukket bud gir pengene tilbake: ${JSON.stringify(off)}`);
+    assert(timeLeft("2026-09-29T01:00:00Z", Date.parse("2026-09-27T18:00:00Z")) === "31 t", "tid igjen");
+    assert(timeLeft("2026-09-29T01:00:00Z", Date.parse("2026-09-29T00:15:00Z")) === "45 min", "minutter igjen");
   });
 
   await test("NetError uten nett merkes som offline", async () => {

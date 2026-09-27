@@ -2876,3 +2876,52 @@ button {
   width: 100%;
   min-height: 44px;
 }
+
+/* Strategiske selskaper (B-189): skraplageret på Konsern-fanen */
+.g-company h3 {
+  font-size: 15px;
+  margin: 12px 0 4px;
+}
+
+.g-company-tender,
+.g-company-treasury {
+  border-top: 1px solid var(--panel-border);
+  margin-top: 10px;
+  padding-top: 2px;
+}
+
+.g-amount-row {
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 6px 0;
+}
+
+.g-amount {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.g-amount input {
+  width: 110px;
+  min-height: 44px;
+  padding: 6px 10px;
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--text);
+  background: #0e141c;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+}
+
+.g-amount input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.g-amount-row button {
+  min-height: 44px;
+}

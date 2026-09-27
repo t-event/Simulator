@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 189,
+    date: "2026-09-27",
+    title: "Skraplageret – det første selskapet i verden",
+    items: [
+      "Har du et konsern, finner du Skraplageret på Konsern-fanen. Eieren tjener på skrapet de andre spillerne bruker.",
+      "Det deles ut ved anbud i 48 timer. Budene er skjulte, høyeste bud vinner, og likt bud avgjøres ved trekning. Vinneren driver lageret i 14 dager.",
+      "Bud betales fra konsernkassa. Du flytter penger dit fra kassa i spillet – et visst beløp per døgn.",
+      "Farten i spillet gir ingen fordel: hver spiller teller høyst én vanlig dags skrapbruk per dag.",
+    ],
+  },
+  {
     b: 186,
     date: "2026-09-27",
     title: "Økonomireformen",

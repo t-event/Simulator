@@ -40,6 +40,7 @@ import type { GameState, SisterPlant, SisterType } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { buzz } from "./haptics";
 import { Bar, Card, Stat } from "./common";
+import { StrategicCompanies } from "./Companies";
 import { fmtKr } from "./format";
 
 type Act = GameApi["act"];
@@ -420,6 +421,7 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
         )}
       </div>
       <div className="g-col">
+        <StrategicCompanies g={g} act={act} />
         <Card title="Kjøp og utvid">
           {(Object.keys(SISTER_TYPES) as SisterType[])
             .filter((t) => t !== "kompleks" || kompleksOpen(g))

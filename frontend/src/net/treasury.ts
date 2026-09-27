@@ -70,9 +70,14 @@ export function applyTreasuryDeposit(g: GameState, amount: number): void {
 
 /**
  * Flytt penger fra spillet til konsernkassa. Lagrer først, så versjonen på nett er den spillet her bygger på.
- * Kaster NetError ved nettfeil.
+ * `apply` gjør det samme med spillet her (i appen gjennom `act`, så skjermen tegnes på nytt). Kaster NetError ved
+ * nettfeil.
  */
-export async function depositToTreasury(g: GameState, amount: number): Promise<DepositResult> {
+export async function depositToTreasury(
+  g: GameState,
+  amount: number,
+  apply: (amount: number) => void = (a) => applyTreasuryDeposit(g, a),
+): Promise<DepositResult> {
   await uploadSave(g);
   const r = await rpc<DepositRow>("deposit_to_treasury", {
     p_amount: Math.floor(amount),
@@ -81,7 +86,7 @@ export async function depositToTreasury(g: GameState, amount: number): Promise<D
   if (!r?.ok)
     return { ok: false, reason: r?.reason ?? "lagre_forst", left: r?.left === undefined ? undefined : Number(r.left) };
   const amt = Number(r.amount) || 0;
-  applyTreasuryDeposit(g, amt);
   adoptServerRev(Number(r.rev));
+  apply(amt);
   return { ok: true, amount: amt, balance: Number(r.balance) || 0, left: Number(r.left) || 0 };
 }
