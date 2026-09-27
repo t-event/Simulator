@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 206,
+    date: "2026-09-27",
+    title: "Konsernet som hovedkontor",
+    items: [
+      "På PC har Konsern fått en egen side: konsernverdien og neste steg øverst, og verkene i en tabell du kan sammenligne.",
+      "Bare verket rådet gjelder, har blå knapp, så du ser hva som lønner seg mest.",
+      "Salg og bytte av et verk ligger under «Mer» i tabellen.",
+    ],
+  },
+  {
     b: 205,
     date: "2026-09-27",
     title: "Ryddigere forskning",
