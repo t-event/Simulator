@@ -27,6 +27,9 @@ import {
 } from "../net/supabase";
 import { fetchProfile, setNickname as saveNickname } from "../net/leaderboard";
 import { ACCOUNT_FEATURES, type AccountFeature } from "../net/features";
+import { Card } from "./common";
+import { Icon } from "./icons";
+import { Button } from "./ds";
 import {
   cloudStatus,
   fetchFeatures,
@@ -141,7 +144,7 @@ export function NeedsAccount({ feature, onLogin }: { feature: AccountFeature; on
   const f = ACCOUNT_FEATURES[feature];
   return (
     <p className="g-note g-needs-account">
-      🔒 <strong>{f.name}</strong> krever konto. {f.why}
+      <Icon name="lock" /> <strong>{f.name}</strong> krever konto. {f.why}
       {onLogin && (
         <>
           {" "}
@@ -151,6 +154,44 @@ export function NeedsAccount({ feature, onLogin }: { feature: AccountFeature; on
         </>
       )}
     </p>
+  );
+}
+
+/**
+ * Ett kort for alt på samme sted som krever konto (B-191, KONTO-regel 6): i stedet for ett låst kort per funksjon
+ * står de i én liste med én knapp. Vises bare uten konto, og bare med funksjonene spilleren har kommet til.
+ */
+export function AccountFeaturesCard({
+  features,
+  note,
+  onLogin,
+}: {
+  features: AccountFeature[];
+  note?: string;
+  onLogin?: () => void;
+}) {
+  const session = useSession();
+  if (session || features.length === 0) return null;
+  return (
+    <Card title="Med konto" className="g-account-card">
+      <p className="g-muted">Spillet er ditt uten konto. Med en gratis konto får du også:</p>
+      <ul className="g-account-list">
+        {features.map((k) => (
+          <li key={k}>
+            <Icon name="lock" />
+            <span>
+              <strong>{ACCOUNT_FEATURES[k].name}.</strong> {ACCOUNT_FEATURES[k].why}
+            </span>
+          </li>
+        ))}
+      </ul>
+      {note && <p className="g-muted g-small-text">{note}</p>}
+      {onLogin && (
+        <Button variant="primary" icon="user" onClick={onLogin}>
+          Logg inn eller opprett konto
+        </Button>
+      )}
+    </Card>
   );
 }
 

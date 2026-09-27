@@ -53,7 +53,7 @@ GitHub Pages: https://t-event.github.io/Simulator/
 - **Konto (B-149):** Hver ny funksjon avgjøres etter reglene i `docs/KONTO.md`. Selve spillet krever aldri konto; det
   som lagres på nett, sammenlignes med andre eller belønner virkelig tid, krever konto. Skriv svaret i beslutningen,
   legg funksjonen i tabellen i KONTO.md og, hvis den krever konto, i `ACCOUNT_FEATURES` (`net/features.ts`). Uten
-  konto vises funksjonen med `NeedsAccount`, ikke skjult. Serverfunksjonen sjekker `auth.uid()` og er tatt fra `anon`.
+  konto vises funksjonen med `NeedsAccount` (flere på samme sted: ett `AccountFeaturesCard`, B-191), ikke skjult. Serverfunksjonen sjekker `auth.uid()` og er tatt fra `anon`.
 - **Enkelt for nybegynnere:** Alt spilleren må gjøre skal kunne forstås uten
   fagkunnskap. Forklar med vanlige ord; fagordene kan stå i fagboka.
 - **Gradvis synlighet (B-180):** spør alltid «når trenger spilleren å vite at dette finnes?». Er svaret «senere»,
@@ -161,6 +161,9 @@ frontend/src/
     Weekly.tsx   Kortet «Ukens utfordring» på Verket og ukelista   Portal.tsx  Ark fra Verket legges i <body>
     SeasonTrack.tsx Kortet «Sesongstigen» på Verket (B-173)   Landmarks.tsx  Kortet «Landemerker» på Verket (B-174)
     Changelog.tsx «Hva er nytt» etter en oppdatering og under ⚙️ (B-179)
+    tokens.css   Designsystemet (B-191): alle farger, skriftstørrelser, radier, avstander – nye stiler bruker disse
+    icons.tsx    Ikoner fra Lucide, kopiert inn (lisens i icons-LICENSE.txt)   ds.tsx  StatusBadge, Callout, Button
+    fonts/       Visningsskriften for overskrifter og store tall (Barlow Semi Condensed 600, OFL)
     Companies.tsx Kortet «Skraplageret» på Konsern-fanen: anbud, konsernkassa, eier (B-189)
     control/     Kontrollrommet: spillet i fire runder (chargeGame.ts: logikk og testspiller, ControlRoom.tsx, B-175)
   sim/         Prosessmodell for lysbueovnen (brukes ikke av spillet lenger, sjekkes av sim/validate.ts)

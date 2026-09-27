@@ -5,6 +5,28 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 129 – 2026-09-27: UI-1a – tokens, skrift, ikoner og ett kontokort
+
+**Brukeren ba om:** UI-fase 1-valgene (egen liten skrift for overskrifter og tall, Lucide, ett samlet kontokort,
+Konsern i sidemenyen på PC) og UI-1a: fargetokens, typografi og grunnkomponenter – ikke redesigne sidene. Skjermbilder
+før merge (liten mobil, iPhone, 1 366×768, 1 920×1 080) av Verket/Anlegg og en tung side. Vente med merge til eieren
+sier ifra.
+
+**Gjort:** B-191. `ui/tokens.css` (farger med mening, 9 skriftstørrelser, radier, avstander, skygger, bevegelse,
+fokus), visningsskriften i `ui/fonts/`, Lucide-utvalget i `ui/icons.tsx`, `ui/ds.tsx` (StatusBadge, Callout, Button).
+Alle faste farger, skriftstørrelser og radier i game.css, control.css og index.css byttet til tokens med et skript
+(76 farger → 0, 19 størrelser → 9). Toppfeltet har ikoner i stedet for emoji. De tre «krever konto»-kortene på Verket er
+ett (`AccountFeaturesCard`), KONTO-regel 6 justert. UI.md, KONTO.md, CLAUDE.md, endringsloggen.
+
+**Testet:** tsc, lint, `npm test`, balanse (exit-kode), build. Playwright før/etter på 320, 390, 1 366 og 1 920 px
+(Verket, kontokortet, Anlegg, Økonomi, Marked) – ingen vannrett scrolling, ingen feil i konsollen; 412/820/2 560 for
+vannrett scrolling.
+
+**Gjenstår:** eierens klarsignal, så merge. Deretter UI-1b (app-skallet: kompakt mobiltoppfelt, sidemeny på PC med
+Konsern). Tegningene (anleggsbildet, kontrollrommet) får tokens i UI-2a/UI-4a.
+
+---
+
 ## Økt 128 – 2026-09-27: felles klokke
 
 **Brukeren ba om:** lik innskuddsgrense for alle (`treasury_log_step` = 0) i hvert fall gjennom pilotperioden; rette

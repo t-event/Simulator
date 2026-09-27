@@ -21,7 +21,6 @@ import type { GameApi } from "../game/useGame";
 import { claimAway, claimDailyMissions, claimDailyReward, fetchDailyStatus, setDailyStatus } from "../net/daily";
 import { getSession, onSessionChange } from "../net/supabase";
 import { isReconciled, onCloudStatus } from "../net/sync";
-import { NeedsAccount } from "./Account";
 import { Bar, Card } from "./common";
 import { driftText, fmtKr, fmtNum, fmtT } from "./format";
 import { useDailyStatus } from "./useDaily";
@@ -238,20 +237,13 @@ function progressText(g: GameState, m: DailyMission): string {
   return `${Math.floor(p)} / ${m.target}`;
 }
 
-/** Dagens oppdrag og hvor langt du er i uka, på Verket → Oversikt. Uten konto: hva man får med konto. */
-export function DailyCard({ g, act, onLogin }: { g: GameState; act: GameApi["act"]; onLogin?: () => void }) {
+/** Dagens oppdrag og hvor langt du er i uka, på Verket → Oversikt. Bare med konto. */
+export function DailyCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
   const session = useSession();
   const status = useDailyStatus();
   const [busy, setBusy] = useState(false);
-  if (!session)
-    return (
-      <Card title="Dagens oppdrag">
-        <NeedsAccount feature="oppdrag" onLogin={onLogin} />
-        <p className="g-muted g-small-text">
-          Med konto får du også en daglig belønning som vokser gjennom uka, og verket tjener litt mens du er borte.
-        </p>
-      </Card>
-    );
+  // Uten konto står Dagens oppdrag i det samlede kontokortet (AccountFeaturesCard, B-191)
+  if (!session) return null;
   if (!status || g.daily.date !== status.today) return null;
   const ready = missionBonusReady(g);
   const bonus = missionBonus(g);

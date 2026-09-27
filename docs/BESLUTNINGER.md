@@ -3301,3 +3301,34 @@ Beslutning (migrasjon `031_felles_klokke.sql`):
 Testet: grensen er 100 mill. for alle; sesonglista uten gamle tall; ukens «vekst» regnet fra tall etter reformen;
 «dager» testet ved å late som uka var en «dager»-uke i en transaksjon som ble rullet tilbake (Tuster 3, H4WK3N5 2,
 Sjæfen 2 – delt 2. plass).
+
+## B-191 UI-fase 1: eierens valg og UI-1a – tokens, skrift, ikoner og ett kontokort (2026-09-27)
+Status: gjelder (svarer på spørsmålene i UI.md 12, justerer KONTO-regel 6 fra B-149/B-180)
+Bakgrunn: UI-fase 0 (B-187) fant 76 faste farger og 19 skriftstørrelser i CSS-en og tre store «krever konto»-kort på
+Verket for spillere uten konto. Eieren svarte på de fem spørsmålene og ga klarsignal for UI-1a: «Start med fargetokens,
+typografi og grunnkomponenter. Ikke redesign alle sidene samtidig.» Skjermbilder før merge; UI-1a merges først når
+eieren sier ifra.
+Beslutning:
+- **Skrift:** systemskrift for brødtekst og knapper. Én liten, selvhostet og åpen skrift for overskrifter og store tall:
+  Barlow Semi Condensed 600 (SIL OFL, 23 kB woff2, full æøå, tabulære tall) under navnet «Stal Display»
+  (`ui/fonts/`, lisensen ved siden av). Den er smalere enn brødteksten og står derfor ett trinn større.
+- **Ikoner:** et kuratert utvalg fra Lucide (ISC), kopiert inn i `ui/icons.tsx` uten ny avhengighet, lisensen i
+  `ui/icons-LICENSE.txt`. Erstatter emoji som UI-ikoner gradvis; emoji blir i spilltekster, hendelser og prestasjoner.
+  Først ut: toppfeltet (fagbok, innstillinger, bjella, toppliste, kryss) og låsen i «krever konto».
+- **«Krever konto»:** funksjoner som står på samme sted, samles i ett kort med én knapp (`AccountFeaturesCard`).
+  På Verket: Dagens oppdrag, og etter garasjen Ukens utfordring og Sesongstigen. KONTO-regel 6 er justert. Gradvis
+  synlighet gjelder fortsatt: kortet viser bare det spilleren har kommet til.
+- **Konsern:** eget hovedpunkt i sidemenyen på PC når det er låst opp; på mobil blir det underfane under Verket.
+  Bygges i UI-1b (app-skallet).
+- **UI-1a (denne PR-en):** `ui/tokens.css` med alle farger (flater, tekst, cyan for interaktivt, grønt for god drift,
+  gult/oransje for varme og advarsel, rødt bare for feil, egne `--art-*` for illustrasjoner), 9 skriftstørrelser,
+  radier, avstander, skygger og bevegelse. Alle faste farger, skriftstørrelser og radier i `game.css`,
+  `control.css` og `index.css` er byttet til tokens (76 → 0 faste farger; 19 → 9 størrelser; SVG-teksten 8 px i
+  kontrollrommet står). Grunnkomponenter i `ui/ds.tsx`: `StatusBadge`, `Callout`, `Button`; `Card`, `Bar`, `Stat` og
+  `SubTabs` i `ui/common.tsx` bruker de samme tokenene. Synlig fokus for tastatur overalt, redusert bevegelse
+  respekteres. Ingen sider er redesignet; spillet og oppsettet er urørt.
+- Tegningene i anleggsbildet og kontrollrommet (farger i TSX) tas i UI-2a og UI-4a.
+Konto (B-149): ingen ny funksjon; kontokortet er samme funksjoner som før, bare samlet.
+Testet: tsc, lint, `npm test`, balanse (exit-kode), build; Playwright før/etter på 320×568, 390×844, 1 366×768 og
+1 920×1 080 (Verket → Oversikt, kontokortet, Anlegg, Økonomi, Marked), uten vannrett scrolling; og
+412/820/2 560 for vannrett scrolling.

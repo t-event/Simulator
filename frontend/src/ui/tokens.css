@@ -1,0 +1,262 @@
+/*
+ * Stålverket – designsystemets tokens (B-187, B-191, docs/UI.md).
+ * Alle farger, skriftstørrelser, radier og avstander i grensesnittet kommer herfra. Nye stiler bruker disse, ikke nye
+ * faste verdier. Fargene har mening: cyan = interaktivt/valgt, grønt = god drift og fortjeneste, gult/oransje = varme,
+ * vedlikehold og advarsel, rødt = bare faktiske feil. Ingen status uttrykkes med farge alene.
+ */
+
+@font-face {
+  font-family: "Stal Display";
+  src: url("./fonts/barlow-semi-condensed-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* ---------------------------------------------------------- flater */
+  --bg: #0e141c;
+  --surface-chrome: #131a24;
+  --surface-1: #19212d;
+  --surface-2: #212a38;
+  --surface-3: #2a3546;
+  --surface-hover: #33405a;
+  --line: #283344;
+  --line-strong: #384357;
+
+  /* ---------------------------------------------------------- tekst */
+  --text: #e8edf3;
+  --text-2: #a3aebd;
+  --text-3: #7d899b;
+  --on-strong: #ffffff;
+
+  /* ---------------------------------------------------------- interaktivt (cyan) */
+  --accent: #4fc3f7;
+  --accent-strong: #1f6fa0;
+  --accent-border: #2b8ac4;
+  --accent-soft: #1d3a52;
+  --accent-fg: #0b1520;
+
+  /* ---------------------------------------------------------- nøytral informasjon */
+  --info: #7cc4ff;
+  --info-strong: #2b7fc0;
+  --info-bg: #1d3147;
+  --info-border: #4a6a8a;
+
+  /* ---------------------------------------------------------- god drift, fortjeneste */
+  --ok: #4cc38a;
+  --ok-strong: #2f8f46;
+  --ok-bg: #1d4d2c;
+  --ok-fg: #b6f0c0;
+  --ok-border: #5f8a3c;
+  --on-ok: #06200a;
+
+  /* ---------------------------------------------------------- varme prosesser, vedlikehold, advarsel */
+  --heat: #f5a524;
+  --heat-strong: #c0561d;
+  --heat-border: #ff8a3d;
+  --heat-bg: #3a2a10;
+  --heat-fg: #ffd27a;
+  --on-heat: #1a1200;
+
+  /* ---------------------------------------------------------- faktiske feil */
+  --critical: #ff5c5c;
+  --critical-strong: #8a2a2a;
+  --critical-border: #bb3333;
+  --critical-bg: #5a1f1f;
+  --critical-fg: #ffb3b3;
+
+  /* ---------------------------------------------------------- gjennomsiktige lag */
+  --accent-tint: rgba(79, 195, 247, 0.08);
+  --accent-tint-strong: rgba(79, 195, 247, 0.18);
+  --accent-ring: rgba(79, 195, 247, 0.35);
+  --ok-tint: rgba(76, 195, 138, 0.16);
+  --ok-zone: rgba(76, 195, 138, 0.45);
+  --heat-tint: rgba(245, 165, 36, 0.18);
+  --heat-glow: rgba(255, 138, 61, 0.8);
+  --critical-tint: rgba(255, 92, 92, 0.12);
+  --scrim: rgba(5, 8, 12, 0.75);
+  --scrim-soft: rgba(10, 14, 20, 0.65);
+  --hatch: rgba(0, 0, 0, 0.28);
+
+  /* ---------------------------------------------------------- illustrasjoner (anlegget, kontrollrommet, bobler) */
+  --art-window-lit: #ffd27a;
+  --art-window-dark: #2c3440;
+  --art-smoke: #b9c0c8;
+  --art-steel: #d9dee5;
+  --art-steel-fg: #1a2230;
+  --art-ember-dark: #5a2a10;
+  --art-melt: #ff9a2e;
+  --art-melt-hot: #ffcf6b;
+  --art-melt-deep: #d8531f;
+  --art-melt-over: #ff5a36;
+  --art-ladle: #4a3b30;
+  --art-foam: #b9b27a;
+  --art-foam-hot: #e0864a;
+  --art-bubble: #f2eab8;
+  --art-slag: #6f7257;
+  --art-slag-edge: #3e4030;
+  --art-slag-fg: #e7e3c0;
+  --art-steel-lump: #ffe9b0;
+  --art-steel-lump-2: #ffb347;
+  --art-steel-lump-edge: #fff4d0;
+  --art-steel-lump-fg: #b25a00;
+  --art-glow: rgba(255, 255, 255, 0.8);
+
+  /* ---------------------------------------------------------- typografi */
+  --font-ui: "Segoe UI", Roboto, system-ui, -apple-system, sans-serif;
+  --font-display: "Stal Display", "Segoe UI", Roboto, system-ui, sans-serif;
+  --fs-badge: 11px;
+  --fs-caption: 12px;
+  --fs-meta: 13px;
+  --fs-body: 14px;
+  --fs-title: 15px;
+  --fs-section: 17px;
+  --fs-page: 20px;
+  --fs-hero: 28px;
+  --fs-display: 48px;
+
+  /* ---------------------------------------------------------- avstand, radius, skygge, bevegelse */
+  --sp-1: 2px;
+  --sp-2: 4px;
+  --sp-3: 8px;
+  --sp-4: 12px;
+  --sp-5: 16px;
+  --sp-6: 24px;
+  --sp-7: 32px;
+  --sp-8: 48px;
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-pill: 999px;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-overlay: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --t-fast: 120ms;
+  --t-panel: 200ms;
+  --touch: 44px;
+
+  /* ---------------------------------------------------------- gamle navn (brukes fortsatt i eldre CSS) */
+  --panel-bg: var(--surface-1);
+  --panel-border: var(--line-strong);
+  --text-dim: var(--text-2);
+  --warning: var(--heat);
+}
+
+/* Overskrifter og store nøkkeltall: én nøktern, teknisk skrift med tabulære tall */
+.ds-display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+.ds-num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Synlig fokus for tastatur overalt */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------- ikoner (ui/icons.tsx) */
+.ds-icon {
+  display: inline-block;
+  width: 1.15em;
+  height: 1.15em;
+  vertical-align: -0.2em;
+  flex: none;
+}
+
+/* ---------------------------------------------------------- statusmerke (ui/ds.tsx) */
+.ds-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 1px var(--sp-3) 1px var(--sp-2);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  line-height: 1.6;
+  white-space: nowrap;
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+
+.ds-status.is-ok {
+  background: var(--ok-bg);
+  color: var(--ok-fg);
+}
+
+.ds-status.is-info {
+  background: var(--info-bg);
+  color: var(--info);
+}
+
+.ds-status.is-heat {
+  background: var(--heat-bg);
+  color: var(--heat-fg);
+}
+
+.ds-status.is-critical {
+  background: var(--critical-bg);
+  color: var(--critical-fg);
+}
+
+/* ---------------------------------------------------------- melding (ui/ds.tsx) */
+.ds-callout {
+  display: flex;
+  gap: var(--sp-3);
+  align-items: flex-start;
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-md);
+  border-left: 3px solid var(--info);
+  background: var(--surface-2);
+  font-size: var(--fs-body);
+}
+
+.ds-callout > .ds-icon {
+  margin-top: 0.1em;
+  color: var(--info);
+}
+
+.ds-callout.is-ok {
+  border-left-color: var(--ok);
+}
+
+.ds-callout.is-ok > .ds-icon {
+  color: var(--ok);
+}
+
+.ds-callout.is-heat {
+  border-left-color: var(--heat);
+}
+
+.ds-callout.is-heat > .ds-icon {
+  color: var(--heat);
+}
+
+.ds-callout.is-critical {
+  border-left-color: var(--critical);
+}
+
+.ds-callout.is-critical > .ds-icon {
+  color: var(--critical);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-fast: 0ms;
+    --t-panel: 0ms;
+  }
+}
+
+/* ---------------------------------------------------------- knapp med ikon (ui/ds.tsx) */
+.ds-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+}

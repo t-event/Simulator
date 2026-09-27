@@ -18,7 +18,8 @@ skriv svaret i beslutningen (B-xxx) og legg funksjonen inn i tabellen her. Kreve
 6. **Uten konto skjules ikke funksjonen** – når spilleren har kommet dit den hører hjemme. Da vises den med en kort
    forklaring om at den krever konto, og en knapp for å logge inn. Før det vises den ikke i det hele tatt, verken for
    spillere med eller uten konto (gradvis synlighet, B-180). Kontoen er frivillig, men det skal være tydelig hva man
-   får med den.
+   får med den. **Står flere slike funksjoner på samme sted, samles de i ett kort med én knapp**
+   (`AccountFeaturesCard` i `ui/Account.tsx`, B-191) – ikke ett låst kort per funksjon.
 7. **Det som avgjør noe mellom spillere, avgjøres på serveren**, aldri i appen (anbud, auksjoner, sesongresultat).
 
 Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for alt som gir en fordel på topplista.
@@ -83,6 +84,7 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 
 - `ACCOUNT_FEATURES` i `net/features.ts` har navn og en kort grunn for hver funksjon som krever konto.
 - `NeedsAccount` (i `ui/Account.tsx`) viser «X krever konto» med grunnen og en knapp til innloggingen.
+- `AccountFeaturesCard` (samme fil, B-191) samler flere slike funksjoner på samme sted i ett kort med én knapp.
 - Serverfunksjoner som krever konto, starter med `if auth.uid() is null then raise exception 'ikke logget inn'`, og
   `execute` er tatt fra `anon`.
 

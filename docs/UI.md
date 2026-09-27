@@ -104,7 +104,12 @@ Ingen status uttrykkes med farge alene: alltid ikon og/eller ord i tillegg.
 
 ### 3.3 Typografi
 
-Systemskrift beholdes for brødtekst (rask, offline, ingen nedlasting). Alle tall med `tabular-nums`. Skala:
+Systemskrift beholdes for brødtekst (rask, offline, ingen nedlasting). Alle tall med `tabular-nums`.
+**Valgt (B-191):** overskrifter og store tall bruker visningsskriften «Stal Display» = Barlow Semi Condensed 600
+(OFL, 23 kB, `ui/fonts/`), klassen `.ds-display` eller `var(--font-display)`. Den er smal og står ett trinn større.
+Tokenene i `ui/tokens.css`: `--fs-badge` 11, `--fs-caption` 12, `--fs-meta` 13, `--fs-body` 14, `--fs-title` 15,
+`--fs-section` 17, `--fs-page` 20, `--fs-hero` 28, `--fs-display` 48 (9 trinn; tabellen under er målbildet per rolle).
+Skala:
 
 | Rolle | Mobil | PC | Bruk |
 | --- | --- | --- | --- |
@@ -118,13 +123,14 @@ Systemskrift beholdes for brødtekst (rask, offline, ingen nedlasting). Alle tal
 
 Fra 19 størrelser til 7. Eksempel Salg: **Offshoreleverandør** (korttittel) og **39,7 mill. kr** (nøkkeltall) dominerer;
 tonn/kvalitet/frist som metadata under; analyse og levering foldet eller i detaljpanelet; **Signer** som eneste
-primærknapp. En egen display-skrift for overskrifter og store tall kan vurderes senere (spørsmål 12.1).
+primærknapp. Visningsskriften er valgt (B-191, se over).
 
 ### 3.4 Ikoner
 Én ikonfamilie: **inline SVG, 24-rute, 1,75 px strek, runde ender** (samme uttrykk som Lucide, ISC-lisens – et utvalg
 på ca. 40 ikoner kopieres inn i `ui/icons.tsx` med lisensmerknad, ingen ny avhengighet). `<Icon name="book" />` arver
 tekstfargen og står på grunnlinja. Emoji blir igjen i spilltekster, hendelser, titler og prestasjoner der de gir
-personlighet – ikke i navigasjon, knapper og statuser.
+personlighet – ikke i navigasjon, knapper og statuser. **Valgt (B-191):** Lucide, kopiert inn; toppfeltet er byttet i
+UI-1a, resten byttes etter hvert som sidene tas.
 
 ### 3.5 Komponentene i systemet
 Hver komponent får én fil (eller én gruppe) i `ui/ds/` og én stilblokk:
@@ -270,7 +276,7 @@ blir bildet større og stedene kan trykkes (åpner stedet i sidepanelet). Bygges
 Hver PR er liten, går gjennom alle sjekker, Playwright på **7 størrelser** (320×568, 390×844, 412×915, 820×1180,
 1 366×768, 1 920×1 080, 2 560×1 080) og har skjermbilder før/etter. Gameplay holdes urørt.
 
-1. **UI-1a Tokens og grunnkomponenter:** `tokens.css`, typografi, `Button`, `Icon`, `Tabs`/`SegmentedControl`,
+1. **UI-1a Tokens og grunnkomponenter** (bygget, B-191 – venter på eierens klarsignal før merge): `tokens.css`, typografi, `Button`, `Icon`, `Tabs`/`SegmentedControl`,
    `Callout`, `StatusBadge`, `Stat`, `ProgressBar`, `Section`. Eksisterende klasser kobles til tokens (små synlige
    endringer).
 2. **UI-1b App-skall:** kompakt mobiltoppfelt, underfaner øverst i Verket, PC-toppfelt, sidemeny, `Sheet` for
@@ -296,7 +302,7 @@ bygges om.
   PC-layoutene viser flere detaljer om det spilleren har – ikke nye systemer.
 - **KONTO-regel 6 mot «vis ikke det spilleren ikke trenger»:** i dag får en spiller uten konto tre store «krever
   konto»-kort. Forslag: ett lite, samlet «Med konto får du …»-kort (fortsatt synlig, som regelen krever), ikke tre.
-  Krever en justering av regel 6 – eierens valg (12.3).
+  Krever en justering av regel 6 – eierens valg (12.3). **Avgjort (B-191):** ett samlet kort, regel 6 er justert.
 - **Konsern på mobil vs PC:** eieren vil ha Konsern i sidemenyen på PC; på mobil er det en underfane i Verket (fem
   faner i menyen er det som får plass). Forslag: samme visning, ulik plassering – sidemeny på PC, underfane på mobil.
 - **Safari-fellene** (bare `.g-main` scroller, ark i Portal, bredere skrift, B-134/B-137/B-152) gjelder fortsatt; nytt
@@ -308,6 +314,9 @@ bygges om.
   redusert bevegelse respekteres.
 
 ## 12. Spørsmål til eieren
+
+**Besvart 2026-09-27 (B-191):** 1 egen visningsskrift for overskrifter og tall, systemskrift ellers · 2 Lucide ja ·
+3 ett samlet kontokort · 4 Konsern i sidemenyen på PC, underfane på mobil · 5 UI-1a ja, uten å redesigne sidene.
 
 1. **Skrift:** systemskrift overalt (raskest, ingen nedlasting) – eller en egen, selvhostet skrift for overskrifter og
    store tall (ca. 20–40 kB, gir mer identitet)?
