@@ -595,7 +595,7 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
   const recent = g.log.slice(-8).reverse();
 
   return (
-    <div className={`g-grid${tab === "anlegg" ? " is-anlegg" : ""}`}>
+    <div className={`g-grid is-${tab}`}>
       {pynt && <PyntModal g={g} stats={stats} act={act} onClose={() => setPynt(false)} />}
       {/* Underfanene står øverst (B-192), over bildet og rådene, og over begge kolonnene på PC */}
       <div
@@ -665,7 +665,7 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
 
       {tab === "oversikt" && (
         <>
-          <div className="g-col-wide">
+          <div className="g-col-wide g-side">
             {canMove && <StageCard g={g} act={act} />}
             <CompactChain
               g={g}
@@ -955,7 +955,7 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
               </div>
             </Card>
           </div>
-          <div className="g-col-wide">
+          <div className="g-col-wide g-side">
             <Maintenance
               id="vedlikehold"
               g={g}
@@ -978,7 +978,7 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
 
       {tab === "okonomi" && (
         <>
-          <div className="g-col-wide">
+          <div className="g-col-wide g-side">
             <Card title="Økonomi">
               <div className="g-stats">
                 <Stat label="Inntekter i dag" value={fmtKr(sum(g.today.income))} />

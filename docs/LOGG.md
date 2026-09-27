@@ -5,7 +5,7 @@ ble testet, og hva som gjenstår.
 
 ---
 
-## Økt 137 – 2026-09-27: Resepten flyttes til Verket
+## Økt 137 – 2026-09-27: Resepten flyttes til Verket, og tomrommet på PC
 
 **Brukeren ba om:** «Merge» av UI-2d (PR #144), og: «Resept bør ikke ligge under marked.»
 
@@ -15,6 +15,9 @@ viste til «Marked → Resept», viser til «Verket → Resept». Tettere Verket
 
 **Testet:** tsc, lint, `npm test`, balanse (exit 0), build; Playwright på 7 størrelser (fanene får plass, ingen
 vannrett scrolling), oransje fane og rådet som åpner resepten.
+
+Deretter, etter brukerens melding om tomrom på PC: B-200 – høyrekolonnen på Verket går over to rader, så Mål og de
+andre kortene følger rett under anleggsbildet (Oversikt, Anlegg, Økonomi). Målt på 4 PC-bredder: største hull 12 px.
 
 **Gjenstår:** eierens svar på skjermbildene og på prøven av varsellinja. Deretter UI-3a (Økonomi).
 

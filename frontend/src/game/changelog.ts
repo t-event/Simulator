@@ -15,6 +15,12 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 200,
+    date: "2026-09-27",
+    title: "Ikke lenger tomrom på Verket på PC",
+    items: ["På PC følger målet og de andre kortene rett under bildet av verket, uten et stort tomt felt imellom."],
+  },
+  {
     b: 199,
     date: "2026-09-27",
     title: "Resepten har flyttet til Verket",

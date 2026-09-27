@@ -3506,3 +3506,18 @@ Konto (B-149): ingen ny funksjon.
 Testet: tsc, lint, `npm test`, balanse (exit 0), build; Playwright på de 7 størrelsene (stålverk og storverk med
 konsern): ingen vannrett scrolling og ingen avkortede fanenavn; en resept som ikke holder, gir oransje fane, og rådet
 åpner Verket → Resept; Marked har tre faner.
+
+## B-200 PC: ikke tomrom under anleggsbildet på Verket (2026-09-27)
+Status: gjelder (UI.md 5; bygger på B-192)
+Brukeren: «På pc er det et stort åpent rom mellom grafikken av verket og «mål»-ruta.»
+Årsak: på PC (fra 1 000 px) er Verket et rutenett med to kolonner. Anleggsbildet og høyrekolonnen (produksjonslinja,
+dagens oppdrag, «Produksjon nå» …) lå på samme rad, så kortene under bildet (Mål, Fagboka …) begynte først under
+den høye høyrekolonnen – opptil 300–600 px tomt. Det samme skjedde på Anlegg (Vedlikehold til høyre) og Økonomi.
+Beslutning:
+- Høyrekolonnen (`g-side`) går over to rader i rutenettet, og den siste raden tar resten av høyden
+  (`grid-template-rows: … 1fr`). Kortene til venstre følger da rett under bildet og rådene, og høyrekolonnen står ved
+  siden av så langt den rekker. Gjelder Oversikt, Anlegg og Økonomi.
+- Mobil og skjermer under 1 000 px er uendret (én kolonne i samme rekkefølge).
+Konto (B-149): ingen ny funksjon.
+Testet: Playwright på 1 000, 1 366, 1 920 og 2 560 px (stålverk og storverk): største loddrette avstand mellom to kort i
+venstre kolonne er 12 px (før: opptil 636 px) på alle fire Verket-fanene.

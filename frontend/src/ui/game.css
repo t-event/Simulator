@@ -3324,6 +3324,31 @@ button {
   margin: 0;
 }
 
+/* PC, Oversikt, Anlegg og Økonomi (B-200): høyrekolonnen går over to rader, så kortene til venstre (Mål, Fagboka …) følger rett under
+   anleggsbildet i stedet for å vente til høyrekolonnen er ferdig. Den siste raden tar resten av høyden. */
+@media (min-width: 1000px) {
+  .g-grid.is-oversikt,
+  .g-grid.is-okonomi {
+    grid-template-rows: auto auto 1fr;
+  }
+
+  .g-grid.is-oversikt > .g-side,
+  .g-grid.is-okonomi > .g-side {
+    grid-column: 2;
+    grid-row: 2 / span 2;
+  }
+
+  /* Anlegg: underfaner, produksjonsflyten over hele bredden, så bildet og vedlikeholdet */
+  .g-grid.is-anlegg {
+    grid-template-rows: auto auto auto 1fr;
+  }
+
+  .g-grid.is-anlegg > .g-side {
+    grid-column: 2;
+    grid-row: 3 / span 2;
+  }
+}
+
 /* PC: produksjonsflyten over begge kolonnene, rett under underfanene */
 @media (min-width: 1000px) {
   .g-grid.is-anlegg > .g-verket-tabs {
