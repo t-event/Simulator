@@ -4148,3 +4148,46 @@ button {
 .g-hire-director {
   margin: var(--sp-4) 0 var(--sp-2);
 }
+
+/* Mål (B-211): egen side for belønninger, oppdrag, prestasjoner og topplista */
+.g-grid.g-goals > .g-col-wide {
+  grid-column: 1 / -1;
+}
+
+.g-goals > .g-col-wide > .g-card,
+.g-goals > .g-col-wide > .g-subtabs {
+  width: 100%;
+  max-width: 960px;
+}
+
+/* Lenken fra Verket → Oversikt til Mål */
+.g-goals-link {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  min-height: 48px;
+  padding: var(--sp-3) var(--sp-4);
+  text-align: left;
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  color: var(--text);
+}
+
+.g-goals-link span {
+  flex: 1;
+  font-size: var(--fs-meta);
+  color: var(--text-2);
+}
+
+.g-goals-link strong {
+  color: var(--text);
+}
+
+.g-goals-link .ds-icon {
+  width: 1.2em;
+  height: 1.2em;
+  color: var(--accent);
+  flex: none;
+}

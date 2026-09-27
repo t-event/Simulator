@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 211,
+    date: "2026-09-27",
+    title: "Landemerker, egen Mål-side og vikarer",
+    items: [
+      "Tar du et landemerke, går det først i ordrekøen – også når salgsdirektøren har fylt opp køen. Direktøren holder av plass til landemerker som venter på svar.",
+      "Daglig belønning, dagens oppdrag, ukens utfordring, sesongstigen, utfordringer og prestasjoner har fått sin egen side: Mål. Trykk på pokalen ved varslene.",
+      "Ny bryter på Folk → Fravær: skiftlederen kan leie inn vikarer for alle som er borte, ikke bare når et skift ellers faller bort.",
+      "Et spill som serveren har rettet, kan ikke lenger bli overskrevet av en gammel kopi fra en annen enhet.",
+    ],
+  },
+  {
     b: 210,
     date: "2026-09-27",
     title: "Tilbakemeldinger fra spillerne",

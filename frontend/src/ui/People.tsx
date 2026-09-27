@@ -412,6 +412,23 @@ function Absence({ g, stats, act }: Props) {
         k="autoTemps"
         label="Lei inn vikarer av seg selv når fravær ellers ville kostet skift"
       />
+      {/* Skiftlederen og vikarene (B-211): valget vises når du har en skiftleder */}
+      {g.workers.some((w) => w.role === "skiftleder") && (
+        <label className="g-toggle">
+          <input
+            type="checkbox"
+            checked={!!g.settings.leaderTemps}
+            onChange={(e) => act((gg) => void (gg.settings.leaderTemps = e.target.checked))}
+          />
+          <span>
+            Skiftlederen leier inn vikarer for alle som er borte
+            <span className="g-toggle-hint g-muted">
+              Også når skiftene går likevel. Vikarer koster halvannen gang lønna, men verket mister verken folk eller
+              ferdighet.
+            </span>
+          </span>
+        </label>
+      )}
       {upcoming.length > 0 && (
         <>
           <h3 className="g-subhead">Ferie som kommer</h3>

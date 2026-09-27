@@ -1,0 +1,123 @@
+/**
+ * Mål (B-211): daglig belønning, dagens oppdrag, ukens utfordring, sesongstigen, utfordringer, prestasjoner og topplista
+ * samlet på én side. Før lå de nederst på Verket → Oversikt, og mange fant dem ikke. PC: eget punkt i sidemenyen.
+ * Mobil: pokalen ved varsellinja.
+ */
+import { useState } from "react";
+import { CHALLENGE_STAGE, CHALLENGES, challengeProgress, challengeShare, challengesDone } from "../game/challenges";
+import type { PlantStats } from "../game/plant";
+import type { GameState } from "../game/types";
+import type { GameApi } from "../game/useGame";
+import { AccountFeaturesCard } from "./Account";
+import { AchievementsCard, PyntModal } from "./Achievements";
+import { Bar, Card, SubTabs } from "./common";
+import { DailyCard } from "./Daily";
+import { fmtKr, fmtNum } from "./format";
+import { Leaderboard } from "./Leaderboard";
+import { SeasonTrackCard } from "./SeasonTrack";
+import { WeeklyCard } from "./Weekly";
+
+export type GoalsTab = "idag" | "uke" | "prestasjoner" | "toppliste";
+
+function isGoalsTab(t: string | undefined): t is GoalsTab {
+  return t === "idag" || t === "uke" || t === "prestasjoner" || t === "toppliste";
+}
+
+/** Utfordringer på storverket (B-090): noe å strekke seg etter når alt er kjøpt */
+export function ChallengesCard({ g }: { g: GameState }) {
+  if (g.stage < CHALLENGE_STAGE) return null;
+  return (
+    <Card title={`Utfordringer (${challengesDone(g)} av ${CHALLENGES.length})`}>
+      {CHALLENGES.map((c) => {
+        const done = !!g.missions[c.id]?.done;
+        const p = challengeProgress(g, c);
+        return (
+          <div key={c.id} className={`g-mission${done ? " is-done" : ""}`}>
+            <strong>
+              {done ? "✓ " : ""}
+              {c.title}
+            </strong>
+            {!done && <Bar value={challengeShare(g, c)} tone="ok" label="Fremdrift" />}
+            <span className="g-muted">
+              {done
+                ? "Klart!"
+                : c.lower
+                  ? p > 0
+                    ? `Beste døgn: ${fmtNum(p, 0)} ${c.unit}. ${c.how}`
+                    : c.how
+                  : `${fmtNum(Math.floor(p), 0)} av ${fmtNum(c.goal, 0)} ${c.unit ?? ""}. ${c.how}`}
+              {!done &&
+                ` · ${[c.fp ? `${c.fp} fagpoeng` : "", c.cash ? fmtKr(c.cash) : "", c.rep ? `omdømme +${c.rep}` : ""].filter(Boolean).join(" og ")}`}
+            </span>
+          </div>
+        );
+      })}
+    </Card>
+  );
+}
+
+export function GoalsPage({
+  g,
+  stats,
+  api,
+  onOpenSettings,
+  openTab,
+}: {
+  g: GameState;
+  stats: PlantStats;
+  api: GameApi;
+  onOpenSettings: () => void;
+  openTab?: string;
+}) {
+  const act = api.act;
+  const [tab, setTab] = useState<GoalsTab>(isGoalsTab(openTab) ? openTab : "idag");
+  const [pynt, setPynt] = useState(false);
+  // Ukens utfordring og sesongstigen først etter garasjen (gradvis synlighet, B-180)
+  const tabs: { id: GoalsTab; label: string }[] = [
+    { id: "idag", label: "I dag" },
+    ...(g.stage >= 1 ? [{ id: "uke" as const, label: "Uke og sesong" }] : []),
+    { id: "prestasjoner", label: "Prestasjoner" },
+    { id: "toppliste", label: "Toppliste" },
+  ];
+  const shown = tabs.some((t) => t.id === tab) ? tab : "idag";
+  const coaching = g.tutorial !== null;
+  return (
+    <div className={`g-grid g-goals is-${shown}`}>
+      {pynt && <PyntModal g={g} stats={stats} act={act} onClose={() => setPynt(false)} />}
+      <div className="g-col-wide">
+        <SubTabs tabs={tabs} value={shown} onChange={setTab} label="Mål" />
+        {coaching && shown !== "toppliste" && shown !== "prestasjoner" && (
+          <p className="g-muted">Dagens oppdrag og belønningene kommer når den veiledede starten er ferdig.</p>
+        )}
+        {shown === "idag" && !coaching && (
+          <>
+            <DailyCard g={g} act={act} />
+            <AccountFeaturesCard
+              features={["oppdrag"]}
+              note="Du får også en daglig belønning som vokser gjennom uka, og verket tjener litt mens du er borte."
+              onLogin={onOpenSettings}
+            />
+          </>
+        )}
+        {shown === "uke" && !coaching && (
+          <>
+            <WeeklyCard act={act} />
+            <SeasonTrackCard act={act} />
+            <AccountFeaturesCard features={["ukens", "stigen"]} onLogin={onOpenSettings} />
+          </>
+        )}
+        {shown === "prestasjoner" && (
+          <>
+            <ChallengesCard g={g} />
+            <AchievementsCard g={g} onOpenPynt={() => setPynt(true)} />
+          </>
+        )}
+        {shown === "toppliste" && (
+          <Card title="Toppliste">
+            <Leaderboard api={api} g={g} bare onOpenSettings={onOpenSettings} />
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+}

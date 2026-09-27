@@ -161,12 +161,13 @@ frontend/src/
     InstallTip.tsx    Tips om hjemskjerm på startskjermen   Power.tsx  Strøm og skiftplan
     Handbook.tsx Fagboka med quiz og oppdrag   Inbox.tsx  Varsellista (åpnes fra varsellinja)
     Account.tsx  Konto: logg inn, opprett, glemt passord, velg spill ved konflikt (på startskjermen og i ⚙️)
-    Leaderboard.tsx Topplista (arket bak 🏆 ved varsellinja)   Season.tsx  Sesongspørsmål, hendelser på Marked, sesonglinje
-    Daily.tsx    Velkommen tilbake, daglig belønning og kortet «Dagens oppdrag» på Verket
-    Achievements.tsx Prestasjonskortet på Verket og arket «Pynt verket» (🎨 på anleggsbildet)
-    Weekly.tsx   Kortet «Ukens utfordring» på Verket og ukelista   Portal.tsx  Ark fra Verket legges i <body>
-    SeasonTrack.tsx Kortet «Sesongstigen» på Verket (B-173)   Landmarks.tsx  Kortet «Landemerker» på Verket (B-174)
+    Leaderboard.tsx Topplista (på Mål, bak 🏆 ved varsellinja)   Season.tsx  Sesongspørsmål, hendelser på Marked, sesonglinje
+    Daily.tsx    Velkommen tilbake, daglig belønning og kortet «Dagens oppdrag» på Mål
+    Achievements.tsx Prestasjonskortet på Mål og arket «Pynt verket» (🎨 på anleggsbildet)
+    Weekly.tsx   Kortet «Ukens utfordring» på Mål og ukelista   Portal.tsx  Ark fra Verket legges i <body>
+    SeasonTrack.tsx Kortet «Sesongstigen» på Mål (B-173)   Landmarks.tsx  Kortet «Landemerker» på Verket (B-174)
     Changelog.tsx «Hva er nytt» etter en oppdatering og under ⚙️ (B-179)
+    Goals.tsx    Mål-siden (pokalen ved varslene): daglig, uke og sesong, prestasjoner, toppliste (B-211)
     tokens.css   Designsystemet (B-191): alle farger, skriftstørrelser, radier, avstander – nye stiler bruker disse
     icons.tsx    Ikoner fra Lucide, kopiert inn (lisens i icons-LICENSE.txt)   ds.tsx  StatusBadge, Callout, Button
     fonts/       Visningsskriften for overskrifter og store tall (Barlow Semi Condensed 600, OFL)
@@ -290,4 +291,6 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   ikke flyttes til konsernkassa og teller ikke som penger på bok. Skal migreres når sluttspillet er rebalansert.
 - **Anbud og inntekt** (B-189) avgjøres «lat» av `world_status()` → `world_tick()`. Test livsløpet med midlertidige
   testkontoer i en DO-blokk som ender med `raise exception`; sett `closes_at` bakover for å avgjøre et anbud.
-
+- **Serveren endrer et lagret spill** (B-211): øk alltid `state.serverEdit` (og sett `device` til `'server'`). `save_game()`
+  avviser da kopier med lavere `serverEdit`, og appen henter serverens spill. Uten det kan en enhet med det gamle spillet
+  laste det opp igjen (skjedde med økonomireformen).

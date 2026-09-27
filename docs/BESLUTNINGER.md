@@ -3737,3 +3737,33 @@ Konto (B-149): anbudet krever konto som før; de andre endringene er i selve spi
 Testet: ny spilltest (søker til skiftleder, kameraer, like kort i ekte tid, lederutvikling), nettesten ser budgiverne,
 `npm test`, balanse exit 0, tsc, lint, build, Playwright på Folk (Skift, Ansatte, Ansett) og Salg på 7 størrelser.
 
+
+## B-211 Landemerker med salgsdirektør, egen side for mål, vern mot gamle lagringer og vikarer fra skiftlederen (2026-09-27)
+Status: gjelder (justerer B-174/B-177 og B-210)
+Brukeren sendte fire punkter. Beslutning per punkt:
+- **Landemerker ble ikke laget med salgsdirektør:** direktøren fylte køen med andre ordrer, og et landemerke som ble
+  tatt, havnet bakerst. Nå går et landemerke først i ordrekøen når det tas (`acceptContract`), planleggeren sorterer
+  landemerker først (så etter frist), og salgsdirektøren holder av plass til et landemerke som venter på svar – tonnene
+  telles med når hen vurderer andre forespørsler (`directorHour`).
+- **Mål-sidene var gjemt nederst på Verket → Oversikt:** daglig belønning, dagens oppdrag, ukens utfordring,
+  sesongstigen, utfordringene og prestasjonene har fått en egen side, **Mål** (`ui/Goals.tsx`), med underfanene I dag,
+  Uke og sesong (fra storverket), Prestasjoner og Toppliste. Den åpnes med pokalen ved varsellinja (før bare topplista)
+  og med en lenke øverst på Oversikt; på PC står den også i sidemenyen. Ikke egen knapp i menyen nederst på mobil – den
+  er full, og pokalen er alltid synlig. Funksjoner som krever konto, vises med `AccountFeaturesCard` som før.
+- **Økonomireformen og «den ene spilleren» – rettelse av B-210:** spilleren brukeren mente, er **Grane**, ikke
+  H4WK3N5. Reformen traff Grane (8 286 → 11,17 mrd. kl. 01.02, sikkerhetskopi før reformen finnes), men en enhet med
+  det gamle spillet lastet det opp igjen etterpå (via valget «behold dette spillet» eller en gammel app). Hullet er
+  tettet: spilltilstanden har `serverEdit`, som serveren øker når den endrer et spill. `save_game()` avviser et spill
+  med lavere `serverEdit` enn det som ligger lagret (migrasjon `034_serverendring_vern.sql`), og appen tar da
+  serverens spill (`pullIfNewer`, og `linkOnLogin` ved innlogging). **Fast regel:** hver gang serveren endrer et lagret
+  spill, økes `state.serverEdit`. Granes spill er ikke rettet ennå: dry-run er gjort (kasse 11,26 mrd., reserve 0,
+  `serverEdit` 1, tidslinjetallene etter reformen merkes `pre_reform`), og det venter på eierens godkjenning.
+- **Vikarer for alle som er borte:** ny bryter på Folk → Fravær, «Skiftlederen leier inn vikarer for alle som er
+  borte» (`settings.leaderTemps`, av som standard, vises når verket har en skiftleder). Da leier skiftlederen inn
+  vikarer ved alt fravær, også når skiftene ville gått likevel – til alle er tilbake. Uten bryteren er det som før
+  (vikarer bare når fravær ellers koster skift, B-104).
+Konto (B-149): Mål-siden og vikarbryteren er selve spillet og krever ikke konto; det på siden som krevde konto før,
+krever det fortsatt. Vernet i `save_game` gjelder alle kontoer.
+Testet: ny spilltest (landemerke først i køen og hos planleggeren, vikarer fra skiftlederen), ny nettest (serveren har
+endret spillet: lavere `serverEdit` avvises og appen tar serverens spill), `npm test`, balanse exit 0 (storverk 147,
+nybegynner 153,5), tsc, lint, build, Playwright på Mål-siden på 7 størrelser og 320 px, rådgiverne etter migrasjonen.

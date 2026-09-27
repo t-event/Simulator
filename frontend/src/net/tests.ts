@@ -2,6 +2,7 @@
  * Tester av nettlaget (B-125) uten nett: `fetch` byttes ut med en falsk tjeneste i minnet.
  * Kjøres med `npx tsx src/net/tests.ts` og i `npm test`.
  */
+import type { GameState } from "../game/types";
 import { newGame } from "../game/engine";
 import { setCloudConfig } from "./config";
 import { setSaveListener } from "../game/save";
@@ -212,6 +213,9 @@ function makeFake(): Fake {
       // Som save_game i 008: lagrer bare over versjonen klienten kjenner
       const old = f.saves.get(id);
       if (old && old.rev !== Number(body.p_base_rev)) return json(200, null);
+      // Som save_game i 034 (B-211): et spill serveren har endret, kan ikke overskrives av et eldre spill
+      const edit = (st: unknown) => Number((st as { serverEdit?: number } | null)?.serverEdit ?? 0);
+      if (old && edit(body.p_state) < edit(old.state)) return json(200, null);
       if (f.hangSave) return new Promise<Response>(() => {});
       f.onSaveGame?.();
       const rev = (old?.rev ?? 0) + 1;
@@ -814,6 +818,33 @@ const main = async () => {
       d.kind === "uploaded" && f.saves.get("u-a@test")!.minute === Math.floor(season.minute),
       `fikk ${d.kind}, minutt ${f.saves.get("u-a@test")!.minute}`,
     );
+  });
+
+  await test("Serveren har endret spillet (B-211): det gamle spillet på enheten kan ikke velges eller lastes opp", async () => {
+    const f = fresh();
+    await login(f);
+    const g = newGame(35);
+    g.minute = 1440 * 40;
+    await linkOnLogin(g);
+    // Serveren endrer spillet på nett (som økonomireformen): mindre penger og serverEdit 1
+    const row = f.saves.get("u-a@test")!;
+    row.state = { ...(row.state as object), cash: 11, serverEdit: 1 };
+    row.rev += 1;
+    row.device = "server";
+    // Enheten har spilt videre på det gamle spillet
+    g.minute += 1440;
+    g.cash = 8_000_000_000_000;
+    const d = await linkOnLogin(g);
+    assert(d.kind === "cloud", `skulle ta spillet fra nett, fikk ${d.kind}`);
+    // Et gammelt spill slipper heller ikke gjennom en vanlig lagring
+    const stale = { ...g, serverEdit: 0 } as GameState;
+    let refused = false;
+    try {
+      await uploadSave(stale);
+    } catch {
+      refused = true;
+    }
+    assert(refused && (f.saves.get("u-a@test")!.state as { cash: number }).cash === 11, "det gamle spillet ble lagret");
   });
 
   await test("Kobling: spill på nett + lokalt uten konto → spilleren velger; en annen kontos spill overses", async () => {
