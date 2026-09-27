@@ -481,6 +481,14 @@ function TopBar({
       <div className="g-top-row g-kpis">
         <Kpi icon="money" label="Kasse" className={`g-kpi-cash${g.cash < 0 ? " tone-critical" : ""}`}>
           {fmtKr(Math.floor(g.cash))}
+          {/* Kassa står ved den myke grensen; overskuddet går til den bundne reserven (B-193) */}
+          {g.lockedReserve && (
+            <Icon
+              name="lock"
+              className="g-kpi-lock"
+              label={`Kassa er ved grensen – overskuddet settes av i den bundne konsernreserven (${fmtKr(Math.floor(g.lockedReserve.total))})`}
+            />
+          )}
         </Kpi>
         <Kpi icon="star" label="Omdømme">
           {fmtRep(g.reputation)}

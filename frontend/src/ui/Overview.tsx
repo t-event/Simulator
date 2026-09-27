@@ -62,6 +62,8 @@ import { KonsernTab } from "./Konsern";
 import { readyUpgrades, stationOptions, stationReady, type Station } from "./stations";
 import { VERKET_TABS, type VerketTab } from "./verketTabs";
 import type { View } from "./views";
+import { Icon } from "./icons";
+import { CASH_RESERVE } from "../game/reserve";
 
 interface Props {
   g: GameState;
@@ -930,7 +932,19 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
                 {stats.salaryPerDay > 0 && <Stat label="Lønn per døgn" value={fmtKr(stats.salaryPerDay)} />}
                 <Stat label="Faste kostnader per døgn" value={fmtKr(STAGES[g.stage].fixedPerDay)} />
                 {g.loan > 0 && <Stat label="Lån" value={fmtKr(g.loan)} tone="warning" />}
+                {g.lockedReserve && (
+                  <Stat label="Bunden konsernreserve" value={fmtKr(Math.floor(g.lockedReserve.total))} />
+                )}
               </div>
+              {/* Den bundne reserven (B-193) vises først når kassa har nådd grensen */}
+              {g.lockedReserve && (
+                <p className="g-muted g-small-text g-reserve-note">
+                  <Icon name="lock" /> Kassa kan ha høyst {fmtKr(CASH_RESERVE.softCap ?? 0)}. Det du tjener utover,
+                  settes av i den bundne konsernreserven: pengene er dine og teller i konsernverdien, men kan ikke
+                  brukes eller flyttes til konsernkassa ennå. Dette er midlertidig til økonomien i sluttspillet er
+                  justert.
+                </p>
+              )}
               {y && (g.konsern.unlocked || (y.costs.investering ?? 0) > 0) && (
                 <p className="g-muted g-small-text">
                   «Resultat i går» tar med alt:{" "}

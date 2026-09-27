@@ -3358,3 +3358,42 @@ Konto (B-149): ingen ny funksjon.
 Testet: tsc, lint, `npm test`, balanse (exit 0), build. Playwright på de 7 størrelsene (Verket, kontokortet, Anlegg,
 Økonomi, Marked), uten vannrett scrolling; Konsern i sidemenyen og tilbake til Verket (1 000, 1 366, 1 920) og som
 underfane på 390; fagboka som ark fra høyre; nytt spill med veiledningen på 320 og 1 366.
+
+## B-193 Midlertidig sikkerhetsventil: myk grense for kassa og bunden konsernreserve (2026-09-27)
+Status: gjelder – **midlertidig**, til rebalanseringen av økonomien i sluttspillet. Ikke en erstatning for den.
+Bakgrunn: eieren vil hindre at kassene eksploderer igjen før sluttspillet er rebalansert. Ingen hard grense der
+inntekt slettes. På serveren nå: H4WK3N5 80,4 mrd., Tuster 46,4 mrd. (fra 8,3 mrd. etter reformen i morges).
+Beslutning:
+- **Myk grense for disponibel kasse: 100 mrd. kr** (`CASH_RESERVE.softCap` i `game/reserve.ts`; `null` slår den av).
+  Det kassa ellers ville hatt over grensen, flyttes til **den bundne konsernreserven** (`g.lockedReserve`).
+  Flyttingen skjer i hvert tidssteg i motoren og etter hver handling (også belønninger mens spillet står på pause).
+  Står kassa over grensen når oppdateringen kommer, flyttes overskuddet første gang spillet lastes.
+- **Reserven:** kan ikke brukes (alle kjøp sjekker `cash`); kan ikke flyttes til konsernkassa (serveren leser bare
+  `cash − loan` i `deposit_to_treasury`, og appen likeså); påvirker ikke anbud, Kontroll eller Industrimakt (B-190);
+  teller ikke på «Mest penger på bok» (tidslinja sender `cash`); lagres i spilltilstanden (lokalt og på nett i
+  `saves.state`), så den kan migreres eller få en funksjon senere.
+- **Den teller i konsernverdien** (`konsernEquity`). Grunner fra sjekken:
+  - titlene går til 5 000 mrd. (Stålgigant) og regnes av konsernverdien – uten reserven ville de stoppet ved ca.
+    100 mrd. kasse + verkene;
+  - juksesperrens vekstkontroll (`check_snapshot`) og ligaen bruker `equity`; med reserven i er tallene som før
+    (en brå nedgang ville ikke flagget, men ligaen ville falt, og en senere frigjøring ville sett ut som et hopp);
+  - konsernverdi er en karriereliste som ikke brukes i fellesverdenen (B-190).
+  Eieren kan be om at den tas ut; da endres bare `konsernEquity`.
+- **Konkurs:** banken ser reserven som sikkerhet – et verk med reserve større enn underskuddet går ikke konkurs.
+  (I praksis umulig uansett: ingen kjøp koster over 6 mrd., så man må bruke nesten 100 mrd. først.)
+- **Vises først når det skjer (B-180):** første gang et varsel under «Kasse og bank» med en kort forklaring; deretter
+  én linje per døgn om hva som ble satt av; «Bunden konsernreserve» og en kort tekst på Verket → Økonomi, «Herav
+  bunden reserve» på Konsern, og en liten lås ved kassa i toppfeltet. Ingenting vises før grensen er nådd.
+- **Sjekket, ingen endring trengs:** lagringsformatet (nytt felt, `null` i `migrate()` og nye spill; eldre utgaver av
+  appen beholder feltet); serverens konsernkasse og vakta på `treasuryOut`; topplistene («mest penger på bok» flater
+  ut ved 100 mrd. for dem som når grensen – det er meningen); kjøp (dyreste er 6 mrd.); konsernåpningen (1 mrd.);
+  sluttmålet (10 mrd., konsernverdi); «Mens du var borte», daglige belønninger og oppdrag (går gjennom grensen).
+  Ingen SQL-endring.
+- **Når sluttspillet er rebalansert:** reserven skal migreres (f.eks. konverteres etter en ny modell) eller få en
+  ordentlig funksjon, og grensen fjernes eller justeres. Står i FORSLAG.md og RETNING.md.
+Konto (B-149): nei – regel 1, eget spill (lagres på nett med resten av spillet for dem som har konto).
+Endringslogg: nei (eierens beskjed: ikke introduser reserven for spilleren før det skjer – forklaringen kommer i
+spillet i det øyeblikket kassa når grensen)
+Testet: `npm test` (ny test: flytting, konsernverdi uendret, én forklaring, døgnlinje, motoren, ikke brukbar,
+konkurs, slått av, gamle lagringer og lagring), balanse (exit 0), `--konsern` (dag 240: kasse 100 mrd. + 339 mrd.
+bundet, samme konsernverdi 715,75 mrd. som uten ventil), Playwright med kasse 100,5 mrd. (390, 320, 1 366).

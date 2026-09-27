@@ -5,6 +5,26 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 131 – 2026-09-27: midlertidig sikkerhetsventil for kassa
+
+**Brukeren ba om:** før rebalanseringen av sluttspillet: en myk grense på 100 mrd. for disponibel kasse, der
+overskuddet flyttes til en bunden konsernreserve (ikke brukbar, ikke til konsernkassa, ikke i PvP/anbud/Kontroll/
+Industrimakt, ikke på «mest penger på bok», lagres, kan migreres senere); grensen i config; vises først når det skjer;
+og en sjekk av lagringsformat, konsernverdi, topplister, konkurs og andre beregninger først.
+
+**Gjort:** B-193. Sjekken (se beslutningen): ingen SQL-endring trengs; reserven teller i konsernverdien så titler,
+sluttmål, liga og juksesperre regner som før; banken ser reserven som sikkerhet. `game/reserve.ts`, feltet
+`lockedReserve` (null i `migrate()` og nye spill), motoren og `act` flytter overskuddet, varsel første gang og én linje
+per døgn, visning på Økonomi, Konsern og en lås ved kassa. Simulatoren (`--konsern`) bruker grensen. Endringslogg: nei
+etter eierens beskjed.
+
+**Testet:** `npm test` (ny reservetest), tsc, lint, balanse (exit 0), `--konsern`, Playwright med kasse 100,5 mrd.
+
+**Gjenstår:** bygger på grenen med UI-1b (PR #139, venter på eieren). Reserven skal migreres når sluttspillet er
+rebalansert (FORSLAG).
+
+---
+
 ## Økt 130 – 2026-09-27: UI-1b – app-skallet
 
 **Brukeren ba om:** «Merge» for UI-1a (PR #138, publiseringen grønn), så «Fortsett» – neste steg i planen, UI-1b.

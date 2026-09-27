@@ -14,6 +14,10 @@ til «Avgjort» nederst).
 
 ## Venter
 
+- **Bunden konsernreserve (B-193)** er midlertidig. Når økonomien i sluttspillet er rebalansert: bestem hva reserven blir
+  (konverteres etter ny modell, blir en funksjon, eller utbetales gradvis) og fjern eller juster grensen på 100 mrd.
+  Avgjør også om reserven fortsatt skal telle i konsernverdien.
+
 - **Vern mot lekkede passord:** brukeren sa det var skrudd på, men sikkerhetsrådene i Supabase melder det fortsatt av
   (2026-09-26, økt 108). Sjekk under Authentication → «Leaked password protection» at det er lagret.
 

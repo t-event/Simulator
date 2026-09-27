@@ -93,6 +93,8 @@ export function migrate(g: GameState): GameState {
   // Spilltid som er spolt fram om natta, til fartskontrollen på nett (B-176)
   if (g.boostMin === undefined) g.boostMin = 0;
   if (g.treasuryOut === undefined) g.treasuryOut = 0;
+  // Bunden konsernreserve (B-193): finnes ikke før kassa første gang går over grensen
+  if (g.lockedReserve === undefined) g.lockedReserve = null;
   if (loose.gradeRecipes === undefined) loose.gradeRecipes = {};
   if (g.settings.powerDeal === undefined) {
     g.settings.powerDeal = "spot";

@@ -130,6 +130,7 @@ frontend/src/
     recipeGuide.ts Reseptguide for nye kvaliteter (vises av ui/RecipeGuide.tsx)
     konsern.ts   Datterverk og sluttmålet 10 mrd. (vises av ui/Konsern.tsx)
     world.ts     Felles hendelser i motoren og sesongfordel (B-129)
+    reserve.ts   Midlertidig myk grense for kassa (100 mrd.) og bunden konsernreserve (B-193) – grensen står her
     daily.ts     Daglig belønning, dagens oppdrag og mens du var borte (B-149)
     mastery.ts   Mesterskap: forskning som tas om og om igjen etter all forskning (B-150)
     achievements.ts Prestasjoner (merker)   cosmetics.ts  Pynt i anleggsbildet for fagpoeng (B-151)
@@ -271,6 +272,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Skraplagerets inntekt** (B-188) regnes på serveren (`029_produksjonsmaler.sql`) og speiles i `net/scrapIncome.ts`.
   Endres regelen, må begge endres, og `npm test` (scrapTests.ts) og SQL-scenariene i B-188 kjøres på nytt. Farten måles
   med spillminuttene (`game_min`), aldri med hele spilldager (det ga 10× opptil 37 % for mye).
+- **Bunden konsernreserve** (B-193, midlertidig): kassa over `CASH_RESERVE.softCap` flyttes til `g.lockedReserve` i
+  hvert tidssteg og etter hver handling. Reserven er med i `konsernEquity`, men ikke i `cash` – så den kan ikke brukes,
+  ikke flyttes til konsernkassa og teller ikke som penger på bok. Skal migreres når sluttspillet er rebalansert.
 - **Anbud og inntekt** (B-189) avgjøres «lat» av `world_status()` → `world_tick()`. Test livsløpet med midlertidige
   testkontoer i en DO-blokk som ender med `raise exception`; sett `closes_at` bakover for å avgjøre et anbud.
 

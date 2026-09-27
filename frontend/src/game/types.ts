@@ -481,6 +481,11 @@ export interface GameState {
    * spill med lavere tall lagres (en annen nettleser, en tilbakerulling), så pengene ikke kan dobles.
    */
   treasuryOut?: number;
+  /**
+   * Midlertidig bunden konsernreserve (B-193): det kassa ville hatt over den myke grensen. Kan ikke brukes eller
+   * flyttes til konsernkassa, teller ikke som penger på bok, men i konsernverdien. null til første gang det skjer.
+   */
+  lockedReserve?: { total: number; firstDay: number; movedToday: number } | null;
   /** Fagpoeng til forskning */
   researchPoints: number;
   /** Dagen spilleren sist kjøpte fagpoeng gjennom et forskningssamarbeid (B-064), −1 hvis aldri */

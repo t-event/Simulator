@@ -9,6 +9,7 @@ import { clearSave, loadGame, saveGame } from "./save";
 import { claimTab, isElsewhere, setBeforeRelease } from "./tabLock";
 import { showToast } from "./inbox";
 import type { GameState, LogEntry } from "./types";
+import { applyCashCap } from "./reserve";
 
 const TICK_MS = 200;
 // En strupet bakgrunnsfane skal ikke hoppe over flere spilltimer på ett tick
@@ -175,6 +176,8 @@ export function useGame(): GameApi {
       const g = gameRef.current;
       if (!g) throw new Error("ingen spill");
       const result = fn(g);
+      // Belønninger og salg kan løfte kassa over den myke grensen også mens spillet står på pause (B-193)
+      applyCashCap(g);
       actSave.current ??= setTimeout(() => {
         actSave.current = null;
         if (gameRef.current) saveGame(gameRef.current, true);
