@@ -151,6 +151,7 @@ frontend/src/
   ui/          Spillets skjermer (mobil først) og kontrollrommet
     Overview.tsx Verket med underfanene Oversikt, Anlegg, Resept, Økonomi (og Konsern; valget i verketTabs.ts/GameApp)
     hints.ts     Rådene på Verket; gir også «!» på Marked og Folk i menyen (B-202)
+    Finance.tsx  Resultatgrafen og postene på Verket → Økonomi (B-203); navnene på postene i financeNames.ts
     Recipe.tsx  Resepten (Verket → Resept, B-199)
     Agreements.tsx Rammeavtaler under Salg   AutoToggle.tsx  Brytere for automatikk (låst til den er forsket fram)
     views.ts     Fanene og når de låses opp   Upgrades.tsx, stations.ts  Utstyr per sted i anlegget

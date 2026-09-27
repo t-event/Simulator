@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 140 – 2026-09-27: UI-3a – Økonomi
+
+**Brukeren ba om:** «Fortsett» (neste steg i UI-planen).
+
+**Gjort:** B-203. Verket → Økonomi: resultatet i går stort øverst, snitt 7 døgn og i dag hittil; stolpegraf over
+resultatet per døgn (inntil 30, uteliggere kappet med bruddmerke, verktøytips); inntekter og kostnader i går per post
+(`ui/Finance.tsx`, `ui/financeNames.ts`); banken og loggen i høyrekolonnen på PC. Endringsloggen, UI.md.
+
+**Testet:** tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter på 7 størrelser.
+
+**Gjenstår:** eierens svar på skjermbildene. Deretter UI-3b (Folk).
+
+---
+
 ## Økt 139 – 2026-09-27: Varsel på Marked og Folk, og hva varsellinja viser
 
 **Brukeren ba om:** «Merge» av PR #146 (varsellinja nederst), og: varsel på Marked når skrap mangler o.l., varsel på Folk

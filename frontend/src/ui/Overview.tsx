@@ -16,7 +16,7 @@ import {
   unitType,
   type PlantStats,
 } from "../game/plant";
-import type { DayFinance, GameState, GradeId } from "../game/types";
+import type { CostCategory, DayFinance, GameState, GradeId, IncomeCategory } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { AnalysisLine, Bar, Card, GradeChips, Stat } from "./common";
 import { fmtClock, fmtKr, fmtNum, fmtPct, fmtT } from "./format";
@@ -42,6 +42,8 @@ import { Icon } from "./icons";
 import { CASH_RESERVE } from "../game/reserve";
 import { Callout, StatusBadge, StatusLine, type Status } from "./ds";
 import { hints, type Anchor, type Hint } from "./hints";
+import { Breakdown, ResultChart } from "./Finance";
+import { COST_NAMES, dayResult, INCOME_NAMES } from "./financeNames";
 
 interface Props {
   g: GameState;
@@ -356,6 +358,12 @@ function plantResult(d: DayFinance): number {
     0,
   );
   return income - costs;
+}
+
+/** Snittet av hele resultatet (med datterverk og kjøp) de siste sju døgnene */
+function avgResult(g: GameState): number {
+  const days = g.history.slice(-7);
+  return days.length ? days.reduce((a, d) => a + dayResult(d), 0) / days.length : 0;
 }
 
 function avgPlantResult(g: GameState): number {
@@ -784,18 +792,39 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
 
       {tab === "okonomi" && (
         <>
-          <div className="g-col-wide g-side">
+          {/* UI-3a (B-203): resultatet øverst, så utviklingen, så hvor pengene kom fra og gikk til */}
+          <div className="g-col-wide g-finance">
             <Card title="Økonomi">
+              {y && (
+                <div className="g-finance-head">
+                  <div className={`g-finance-result ${dayResult(y) >= 0 ? "is-plus" : "is-minus"}`}>
+                    <span>Resultat i går</span>
+                    <strong>
+                      {dayResult(y) >= 0 ? "+" : ""}
+                      {fmtKr(dayResult(y))}
+                    </strong>
+                  </div>
+                  <div className="g-finance-side">
+                    <span>
+                      Snitt 7 døgn, alt med <strong>{fmtKr(avgResult(g))}</strong>
+                    </span>
+                    <span>
+                      I dag hittil{" "}
+                      <strong>
+                        {fmtKr(sum(g.today.income))} inn · {fmtKr(sum(g.today.costs))} ut
+                      </strong>
+                    </span>
+                  </div>
+                </div>
+              )}
+              {!y && (
+                <div className="g-stats">
+                  <Stat label="Inntekter i dag" value={fmtKr(sum(g.today.income))} />
+                  <Stat label="Utgifter i dag" value={fmtKr(sum(g.today.costs))} />
+                </div>
+              )}
+              <ResultChart days={g.history.slice(-30)} />
               <div className="g-stats">
-                <Stat label="Inntekter i dag" value={fmtKr(sum(g.today.income))} />
-                <Stat label="Utgifter i dag" value={fmtKr(sum(g.today.costs))} />
-                {y && (
-                  <Stat
-                    label="Resultat i går"
-                    value={fmtKr(sum(y.income) - sum(y.costs))}
-                    tone={sum(y.income) - sum(y.costs) >= 0 ? "ok" : "critical"}
-                  />
-                )}
                 {/* Hjemmeverket for seg (B-156): uten datterverkene og uten kjøp, så man ser hva utstyret gir */}
                 {y && (g.konsern.unlocked || (y.costs.investering ?? 0) > 0) && (
                   <>
@@ -817,9 +846,6 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
                   </>
                 )}
                 {y && <Stat label="Produsert i går" value={fmtT(y.producedT)} />}
-                {y && stats.furnaceMW > 0 && (
-                  <Stat label="Strøm og effekt i går" value={fmtKr((y.costs.energi ?? 0) + (y.costs.nett ?? 0))} />
-                )}
                 {stats.salaryPerDay > 0 && <Stat label="Lønn per døgn" value={fmtKr(stats.salaryPerDay)} />}
                 <Stat label="Faste kostnader per døgn" value={fmtKr(STAGES[g.stage].fixedPerDay)} />
                 {g.loan > 0 && <Stat label="Lån" value={fmtKr(g.loan)} tone="warning" />}
@@ -827,6 +853,24 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
                   <Stat label="Bunden konsernreserve" value={fmtKr(Math.floor(g.lockedReserve.total))} />
                 )}
               </div>
+              {y && (
+                <div className="g-breakdowns">
+                  <Breakdown
+                    title="Inntekter i går"
+                    rows={Object.entries(y.income).map(([k, v]) => ({
+                      label: INCOME_NAMES[k as IncomeCategory] ?? k,
+                      value: v ?? 0,
+                    }))}
+                  />
+                  <Breakdown
+                    title="Kostnader i går"
+                    rows={Object.entries(y.costs).map(([k, v]) => ({
+                      label: COST_NAMES[k as CostCategory] ?? k,
+                      value: v ?? 0,
+                    }))}
+                  />
+                </div>
+              )}
               {/* Den bundne reserven (B-193) vises først når kassa har nådd grensen */}
               {g.lockedReserve && (
                 <p className="g-muted g-small-text g-reserve-note">
@@ -846,7 +890,7 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
               )}
             </Card>
           </div>
-          <div className="g-col">
+          <div className="g-col g-side">
             <BankCard g={g} act={act} />
             <Card title="Logg">
               <ul className="g-log">
