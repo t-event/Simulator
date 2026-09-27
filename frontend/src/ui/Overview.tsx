@@ -798,12 +798,17 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
                 {/* Hjemmeverket for seg (B-156): uten datterverkene og uten kjøp, så man ser hva utstyret gir */}
                 {y && (g.konsern.unlocked || (y.costs.investering ?? 0) > 0) && (
                   <>
+                    {/* B-215: snittet først – ett døgn i minus er ofte bare at skrapet er betalt før ordren er levert */}
+                    <Stat
+                      label="Verket, snitt 7 døgn"
+                      value={fmtKr(avgPlantResult(g))}
+                      tone={avgPlantResult(g) >= 0 ? "ok" : "critical"}
+                    />
                     <Stat
                       label="Verket i går (drift)"
                       value={fmtKr(plantResult(y))}
-                      tone={plantResult(y) >= 0 ? "ok" : "critical"}
+                      tone={plantResult(y) >= 0 ? "ok" : avgPlantResult(g) >= 0 ? "warning" : "critical"}
                     />
-                    <Stat label="Verket, snitt 7 døgn" value={fmtKr(avgPlantResult(g))} />
                     {g.konsern.unlocked && (
                       <Stat
                         label="Datterverkene i går"
@@ -848,6 +853,12 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
                   settes av i den bundne konsernreserven: pengene er dine og teller i konsernverdien, men kan ikke
                   brukes eller flyttes til konsernkassa ennå. Dette er midlertidig til økonomien i sluttspillet er
                   justert.
+                </p>
+              )}
+              {y && plantResult(y) < 0 && avgPlantResult(g) >= 0 && (
+                <p className="g-small-text">
+                  Verket gikk i minus i går, men tjener {fmtKr(avgPlantResult(g))} i snitt per døgn. Skrapet betales når
+                  det kjøpes, mens kontraktene betales når de leveres – derfor svinger enkeltdøgnene.
                 </p>
               )}
               {y && (g.konsern.unlocked || (y.costs.investering ?? 0) > 0) && (
