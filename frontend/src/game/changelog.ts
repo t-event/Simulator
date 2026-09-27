@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 220,
+    date: "2026-09-27",
+    title: "Ryddigere Verket og topplista",
+    items: [
+      "På Verket er kortet om storverket og sluttmålet borte når konsernet er åpnet – sluttmålet står på Konsern. Før det viser kortet neste steg: konsernet.",
+      "Topplista viser ikke lenger hvor mange dager som er igjen av sesongen.",
+    ],
+  },
+  {
     b: 219,
     date: "2026-09-27",
     title: "Roligere skrapvarsel og holdeknapp uten kopiering",

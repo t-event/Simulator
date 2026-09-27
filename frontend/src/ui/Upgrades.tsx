@@ -8,8 +8,8 @@ import {
   type UpgradeOption,
 } from "../game/actions";
 import { STATION_NAMES, stationOptions, type Station } from "./stations";
-import { STAGES, stageRef, WIN_CASH } from "../game/data";
-import { KONSERN_UNLOCK_EQUITY, konsernEquity } from "../game/konsern";
+import { STAGES, stageRef } from "../game/data";
+import { KONSERN_UNLOCK_EQUITY } from "../game/konsern";
 import { computePlantStats, unitType } from "../game/plant";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
@@ -285,35 +285,27 @@ export function StageCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
   const stage = upgradeOptions(g).find((o) => o.kind === "stage");
   const next = STAGES[g.stage + 1];
   if (!next || !stage) {
+    // Storverket (B-220): konsernet er neste steg til det er åpnet. Etterpå står sluttmålet og konsernverdien på
+    // Konsern, så her vises bare «Neste store steg» når det finnes et – ellers ikke noe kort
+    if (g.konsern.unlocked) {
+      if (!keyUpgrade(g)) return null;
+      return (
+        <Card title="Neste store steg">
+          <KeyUpgrade g={g} />
+        </Card>
+      );
+    }
     return (
-      <Card title="Storverket">
-        {!g.konsern.unlocked ? (
-          <>
-            <p>
-              Du har bygget et fullskala stålverk. Neste steg er et konsern med flere verk: det åpner seg når alt
-              utstyret her er kjøpt, eller egenkapitalen når {fmtKr(KONSERN_UNLOCK_EQUITY)}.
-            </p>
-            <Bar value={Math.max(0, g.cash - g.loan) / KONSERN_UNLOCK_EQUITY} tone="ok" label="Egenkapital" />
-            <p className="g-muted">
-              Egenkapital {fmtKr(Math.floor(g.cash - g.loan))} av {fmtKr(KONSERN_UNLOCK_EQUITY)}
-              {g.loan > 0 ? ` (kassa minus lånet på ${fmtKr(g.loan)})` : ""}.
-            </p>
-          </>
-        ) : (
-          <>
-            <p>
-              Sluttmålet: et stålkonsern verdt {fmtKr(WIN_CASH)} – egenkapital pluss datterverkene. Se Verket → Konsern.
-            </p>
-            {!g.won && (
-              <>
-                <Bar value={Math.max(0, konsernEquity(g)) / WIN_CASH} tone="ok" label="Konsernverdi" />
-                <p className="g-muted">
-                  Konsernverdi {fmtKr(Math.floor(konsernEquity(g)))} av {fmtKr(WIN_CASH)}.
-                </p>
-              </>
-            )}
-          </>
-        )}
+      <Card title="Neste steg: konsernet">
+        <p>
+          Du har bygget et fullskala stålverk. Neste steg er et konsern med flere verk: det åpner seg når alt utstyret
+          her er kjøpt, eller egenkapitalen når {fmtKr(KONSERN_UNLOCK_EQUITY)}.
+        </p>
+        <Bar value={Math.max(0, g.cash - g.loan) / KONSERN_UNLOCK_EQUITY} tone="ok" label="Egenkapital" />
+        <p className="g-muted">
+          Egenkapital {fmtKr(Math.floor(g.cash - g.loan))} av {fmtKr(KONSERN_UNLOCK_EQUITY)}
+          {g.loan > 0 ? ` (kassa minus lånet på ${fmtKr(g.loan)})` : ""}.
+        </p>
         <KeyUpgrade g={g} />
       </Card>
     );

@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 157 – 2026-09-27: Storverk-kortet og sesongnedtellingen
+
+**Brukeren ba om:** Storverk-kortet med sluttmål på Verket gir ikke mening lenger; topplista viser dager igjen av
+sesongen, men det har vi ikke lenger.
+
+**Gjort:** B-220. Før konsernet: «Neste steg: konsernet». Etter: bare «Neste store steg» når det finnes, ellers intet
+kort (sluttmålet står på Konsern). Sesonglinja, startskjermen og «bli med»-beskjeden uten antall dager.
+
+**Testet:** tsc, lint, `npm test`, Playwright på 320, 390 og 1 920 px med og uten konsern (riktig kort, ingen
+horisontal scrolling, «Grunnleggeræraen · Sesong 1 pågår»).
+
+**Gjenstår:** UI-4b, UI-4c, UI-4d; reserven og kassegrensen; Google/Apple senere; om Sesong 1 skal beholde sluttdatoen
+2027-03-25 i databasen.
+
+---
+
 ## Økt 156 – 2026-09-27: Holdeknappen, skrapvarselet og Granes Hall of Fame
 
 **Brukeren ba om:** mobilen skal ikke prøve å kopiere tekst når man holder knappen i kontrollrommet; Granes Hall of Fame

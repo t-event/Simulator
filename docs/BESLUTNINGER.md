@@ -3965,3 +3965,17 @@ får ofte opp at skrap mangler selv om at jeg har planlegger».
   endrer bare rekordraden (konsernverdi 8 562,6 mrd. og kasse 8 285,9 mrd. dag 2 190, storverk og ferdig dag 610,
   omdømme 100). Spillet, kassa (11,29 mrd.) og sesongen er ikke rørt. Kontroll: Grane er nr. 1 på «Alle tider» med
   8 563 mrd.
+
+## B-220 Storverk-kortet på Verket ryddet, og ingen nedtelling for sesongen (2026-09-27)
+Status: gjelder (justerer B-182 og B-150)
+Brukeren: «Storverket ruta med sluttmål info i verket fanen føler jeg ikke gir mening lengere. Fiks det/og flytt det eller
+fjern det» og «I topplista står det antall dager igjen av sesong. Men vi har jo ikke antall dager igjen lengere».
+- **Kortet på Verket → Oversikt** (storverket, ikke flere nivåer): før konsernet er åpnet heter det «Neste steg:
+  konsernet» med egenkapitalen mot grensen – det er det neste spilleren skal gjøre. Når konsernet er åpnet, er kortet
+  med sluttmålet (10 mrd.) og konsernverdien fjernet; det står på Konsern-fanen fra før. Da vises bare «Neste store
+  steg» (utstyret som gir mest produksjon), og ellers ikke noe kort.
+- **Sesongen uten nedtelling:** topplista viser «Grunnleggeræraen · Sesong 1 pågår», startskjermen «Sesong 1 pågår», og
+  beskjeden om å bli med nevner ikke antall dager. Neste sesong starter ikke av seg selv, og æraen avsluttes av
+  administrator (B-182), så en nedtelling ga feil inntrykk. Sesong 1 har fortsatt sluttdatoen 2027-03-25 i databasen
+  (resultatene lages da); den er ikke endret.
+- Konto: nei (bare tekst og plassering).

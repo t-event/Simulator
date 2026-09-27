@@ -162,7 +162,7 @@ frontend/src/
     InstallTip.tsx    Tips om hjemskjerm på startskjermen   Power.tsx  Strøm og skiftplan
     Handbook.tsx Fagboka med quiz og oppdrag   Inbox.tsx  Varsellista (åpnes fra varsellinja)
     Account.tsx  Konto: logg inn, opprett, glemt passord, velg spill ved konflikt (på startskjermen og i ⚙️)
-    Leaderboard.tsx Topplista (arket bak 🏆, B-214)   Season.tsx  Sesongspørsmål, hendelser på Marked, sesonglinje
+    Leaderboard.tsx Topplista (arket bak 🏆, B-214)   Season.tsx  Sesongspørsmål, hendelser på Marked, sesonglinje (uten nedtelling, B-220)
     Daily.tsx    Velkommen tilbake, daglig belønning og kortet «Dagens oppdrag» på Mål
     Achievements.tsx Prestasjonskortet på Mål og arket «Pynt verket» (🎨 på anleggsbildet)
     Weekly.tsx   Kortet «Ukens utfordring» på Mål og ukelista   Portal.tsx  Ark fra Verket legges i <body>

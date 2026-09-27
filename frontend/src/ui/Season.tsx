@@ -3,7 +3,7 @@
  * - SeasonSync holder sesong og hendelser oppdatert og legger hendelsene inn i spillet
  * - SeasonPrompt spør om man vil starte sesongen når en ny sesong er i gang
  * - EventsNote viser hendelsene som pågår, på Marked
- * - SeasonLine er tekstlinja «Sesong … · N dager igjen» på topplista
+ * - SeasonLine er tekstlinja «Æra · Sesong … pågår» på topplista (uten nedtelling, B-220)
  */
 import { useEffect, useSyncExternalStore } from "react";
 import { useState } from "react";
@@ -13,7 +13,6 @@ import type { GameApi } from "../game/useGame";
 import { applySeasonTwist, applyWorldEvents, canJoinDirectly, joinSeason } from "../game/world";
 import { cloudConfigured } from "../net/config";
 import {
-  daysLeft,
   fetchSeasonHistory,
   markResultSeen,
   refreshSeason,
@@ -108,8 +107,8 @@ export function SeasonPrompt({ api, g, onOpenSettings }: { api: GameApi; g: Game
         <div className="g-modal-card">
           <h2>{cur.name} er i gang – bli med!</h2>
           <p>
-            Alle som er med i sesongen, konkurrerer på topplista fram til den slutter om {daysLeft(cur)} dager. For å
-            være med må du opprette en konto eller logge inn. Da lagres spillet på nett også.
+            Alle som er med i sesongen, konkurrerer på topplista. For å være med må du opprette en konto eller logge
+            inn. Da lagres spillet på nett også.
           </p>
           <p className="g-muted">
             Spillet ditt blir med i sesongen med en gang du logger inn, uansett hvor langt du har kommet. Du finner
@@ -257,15 +256,15 @@ export function SeasonTeaser() {
   const status = useSeasonStatus();
   const cur = status?.current ?? null;
   if (!cur) return null;
-  const left = daysLeft(cur);
+  // Ingen nedtelling (B-220): neste sesong starter ikke av seg selv, og æraen avsluttes av administrator (B-182)
   return (
     <p className="g-season-teaser">
-      🏆 <strong>{cur.name}</strong> pågår – {left} {left === 1 ? "dag" : "dager"} igjen
+      🏆 <strong>{cur.name}</strong> pågår
     </p>
   );
 }
 
-/** «Sesong 1 · 18 dager igjen», eller at ingen sesong pågår */
+/** «Grunnleggeræraen · Sesong 1 pågår», eller at ingen sesong pågår */
 export function SeasonLine() {
   const status = useSeasonStatus();
   if (!status) return null;
@@ -284,11 +283,11 @@ export function SeasonLine() {
         )}
       </p>
     );
-  const left = daysLeft(cur);
+  // Ingen «N dager igjen» (B-220): æraen avsluttes av administrator, ikke på en dato (B-182)
   return (
     <p className="g-muted g-small-text">
       {era && <strong>{era} · </strong>}
-      <strong>{cur.name}</strong> · {left === 0 ? "siste dag" : `${left} ${left === 1 ? "dag" : "dager"} igjen`}
+      <strong>{cur.name}</strong> pågår
       {cur.twist && ` · Vri: ${cur.twist.title} – ${cur.twist.text}`}
     </p>
   );
