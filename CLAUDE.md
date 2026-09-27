@@ -64,6 +64,10 @@ GitHub Pages: https://t-event.github.io/Simulator/
 - **Serveren avgjør alt mellom spillere (B-180):** eierskap, overtakelser, frister i ekte tid, inntekt fra andres
   aktivitet og økonomireformen regnes på serveren. Penger fra eget spill (spilltid, opptil 10×) kan bare flyttes inn i
   verdenen (ekte tid) i et begrenset tempo. Ekte spillerdata endres aldri uten dry-run og eierens godkjenning først.
+- **Felles klokke (B-190, fast regel):** Industrimakt, Kontroll, strategisk eierskap og overtakelser skal baseres på
+  serverautoritative verdier og ekte tid. Lokal kasse, lokal egenkapital og lokal spillfart skal aldri direkte avgjøre
+  disse systemene. Konsernkassa har lik grense for alle. Konkurranser mellom spillere måles i ekte tid (f.eks. ekte aktive
+  dager), ikke i spilldøgn. Tidslinjetall merket `pre_reform` brukes aldri i serverberegninger.
 - **Mobil og PC (B-187):** mobil = rask drift, PC = kontrollrom/hovedkontor med mer oversikt. Samme spill og
   komponenter; ingen viktig funksjon bare på PC. Test alltid på iPhone-størrelse (390 px) og 320 px – ingen horisontal
   scrolling, knapper minst ca. 44 px høye – og, når layout endres, på de 7 størrelsene i `docs/UI.md` (opp til

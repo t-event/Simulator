@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 190,
+    date: "2026-09-27",
+    title: "Samme klokke for alle",
+    items: [
+      "Alle kan flytte like mye inn i konsernkassa: 100 mill. kr per døgn, uansett hvor stor kassa hjemme er.",
+      "Ukens utfordring «dager» teller nå ekte dager du har spilt, ikke døgn i spillet. Likt antall gir delt plass.",
+      "Spill så mye og så fort du vil hjemme – i verden mellom spillerne går alle på samme klokke.",
+    ],
+  },
+  {
     b: 189,
     date: "2026-09-27",
     title: "Skraplageret – det første selskapet i verden",

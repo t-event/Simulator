@@ -18,7 +18,11 @@ export const WEEK_KINDS: Record<WeekKind, { title: string; how: string }> = {
     title: "Mer stål enn før",
     how: "Lag mest mulig stål per spilldøgn denne uka, i prosent av det verket laget per døgn før uka.",
   },
-  dager: { title: "Flest spilldøgn", how: "Hold verket i gang: flest døgn i spillet denne uka." },
+  // Ekte dager, ikke spilldøgn (B-190): farten i spillet skal ikke avgjøre en konkurranse mellom spillere
+  dager: {
+    title: "Flest aktive dager",
+    how: "Spill litt hver dag: flest dager denne uka med spillet ditt lagret på nett. Farten i spillet teller ikke. Likt antall dager gir delt plass.",
+  },
 };
 
 /** Fagpoeng i ukekista etter plass (samme som i finish_weeks på serveren) */

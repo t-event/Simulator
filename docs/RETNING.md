@@ -40,6 +40,12 @@ De 15 prinsippene fra eieren (behold disse hvis alt annet glemmes):
 14. Sesonger må revurderes; langsiktige æraer er mer interessante.
 15. Ikke bygg alt på én gang.
 
+**Fast regel (B-190): Industrimakt, Kontroll, strategisk eierskap og overtakelser skal baseres på serverautoritative
+verdier og ekte tid. Lokal kasse, lokal egenkapital og lokal spillfart skal aldri direkte avgjøre disse systemene.**
+Lokalt spill: spill så mye og så fort du vil. Fellesverden: samme klokke og samme grunnleggende mulighet for alle. Det
+eneste som flytter verdi fra eget spill inn i verden, er konsernkassa – med lik grense for alle (100 mill. per ekte døgn).
+Karrierelistene (konsernverdi, kasse) kan påvirkes av 10×, men brukes aldri som grunnlag for fordeler i verden.
+
 ## 2. Rollen gjennom spillet
 
 Hvert nivå gir et nytt hovedspørsmål, og et nytt system dukker opp først når spilleren trenger det.

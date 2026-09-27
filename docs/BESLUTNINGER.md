@@ -3270,3 +3270,34 @@ Beslutning (migrasjon `030_skraplageret.sql`, `net/world.ts`, `ui/Companies.tsx`
   kolliderte, og en saldooppdatering som stoppet på sjekken), rettet før noe anbud fantes.
 - Det første anbudet åpnet da appen fikk kortet (migrasjonen «skraplageret_start»).
 Konto: krever konto (regel 3 og 7), står i `ACCOUNT_FEATURES` som «Skraplageret».
+
+## B-190 Felles klokke: samme mulighet for alle i fellesverdenen (2026-09-27)
+Status: gjelder (justerer B-183 og B-152/B-172 for uka «dager»)
+Bakgrunn: Eieren kontrollerte modellen: hva i fellesverdenen blir større hvis en spiller grinder 10× i fem timer og
+bygger opp tusenvis av milliarder igjen? Svaret var bare én økonomisk kobling – grensen på konsernkassa steg
+logaritmisk med egenkapitalen (223 → 285 mill. per døgn) – pluss en feil: Granes grense var 297 mill., fordi et
+tidslinjetall fra før økonomireformen (8 563 mrd.) ble brukt.
+Beslutning (migrasjon `031_felles_klokke.sql`):
+- **Lokalt spill: spill så mye og så fort du vil. Fellesverden: samme klokke og samme grunnleggende mulighet for alle.**
+- **Konsernkassa:** `treasury_log_step` = 0 – alle kan flytte inn høyst 100 mill. kr per ekte døgn (gjennom
+  pilotperioden, og til noe annet er bestemt). Grensen leser ikke lenger kasse eller egenkapital fra spillet i det hele
+  tatt (`treasury_limit(bruker)`). En høyere grense kan senere tjenes gjennom serverautoritative ting i ekte tid
+  (strategisk eierskap, historikk, omdømme) – aldri lokal kasse eller lokal egenkapital.
+- **Tidslinjetall fra før reformen** er merket `pre_reform` (2 384 tall) og brukes ikke i serverberegninger:
+  sesonglista, sesongresultatet og ukens utfordring. Merket kan ikke settes eller fjernes fra appen. Rekordene i Hall of
+  Fame står (B-186). Grane og Figen står på sesonglista igjen når de har lagret etter reformen.
+- **Første skraplageranbud:** ingen hadde flyttet penger inn eller budt med den gamle grensen (sjekket i
+  `treasury_ledger`, `tender_bids`, `treasury`). Anbudet fortsetter; taket (923 mill.) var regnet av produksjon, ikke av
+  grensen.
+- **Ukens utfordring, «dager»:** ekte aktive dager (dager i uka, norsk tid, med minst ett tall i tidslinja), maks 7 –
+  ikke spilldøgn. En konkurranse mellom spillere skal ikke vinnes av den som lar 10× stå lengst. Likt resultat gir delt
+  plass (rank) i alle ukene, så alle som var aktive alle dagene, deler førsteplassen.
+- **Konsernverdi og «Mest penger på bok»** blir stående som karriere- og progresjonslister. Det er greit at 10× påvirker
+  dem – så lenge de aldri brukes som grunnlag for Industrimakt, Kontroll, overtakelser eller andre fordeler i
+  fellesverdenen.
+- **Fast regel** (står i RETNING.md og CLAUDE.md): Industrimakt, Kontroll, strategisk eierskap og overtakelser skal
+  baseres på serverautoritative verdier og ekte tid. Lokal kasse, lokal egenkapital og lokal spillfart skal aldri direkte
+  avgjøre disse systemene.
+Testet: grensen er 100 mill. for alle; sesonglista uten gamle tall; ukens «vekst» regnet fra tall etter reformen;
+«dager» testet ved å late som uka var en «dager»-uke i en transaksjon som ble rullet tilbake (Tuster 3, H4WK3N5 2,
+Sjæfen 2 – delt 2. plass).
