@@ -5,7 +5,7 @@
  * Ingen fordel mot andre spillere utover vanlig kontraktspris, så ingen konto trengs (KONTO.md, regel 1).
  */
 import { adjustReputation, awardPoints, fmtT, log, realisticDailyT } from "./engine";
-import { computePlantStats, day, productPrice } from "./plant";
+import { computePlantStats, day, productCapT, productPrice } from "./plant";
 import type { Contract, GameState } from "./types";
 
 export interface Landmark {
@@ -314,9 +314,10 @@ export function landmarkHour(g: GameState, today = todayKey()): void {
   const next = nextLandmark(g);
   if (!next) return;
   const stats = computePlantStats(g);
-  const perDay = Math.min(stats.dailyProductT, realisticDailyT(g, stats));
-  if (perDay <= 0) return;
   const product = stats.mainProduct;
+  // Armering er begrenset av valseverket (B-217)
+  const perDay = Math.min(productCapT(stats, product), realisticDailyT(g, stats));
+  if (perDay <= 0) return;
   const tonnes = Math.max(0.5, Math.round(perDay * next.days * 10) / 10);
   const c: Contract = {
     id: g.nextContractId++,
@@ -327,7 +328,7 @@ export function landmarkHour(g: GameState, today = todayKey()): void {
     delivered: 0,
     pricePerT: Math.round(productPrice(g, product, "standard") * 1.25),
     deadlineDay: day(g) + Math.ceil(next.days * 1.8) + 3,
-    // Står til du svarer, eller til dagen er over (da kommer det igjen i morgen)
+    // Står til du svarer, og har ingen frist når det er signert (B-218). deadlineDay brukes bare som anslag
     offerExpiresMin: g.minute + 1440 * 365,
     repGain: 2,
     repLoss: 3,

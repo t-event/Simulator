@@ -1,7 +1,7 @@
 /**
- * Mål (B-211, B-214): daglig belønning, dagens oppdrag, ukens utfordring, sesongstigen, utfordringer og prestasjoner
- * samlet på én side. Før lå de nederst på Verket → Oversikt, og mange fant dem ikke. PC: eget punkt i sidemenyen.
- * Mobil: egen knapp ved varsellinja. Topplista er ikke her, men i arket bak pokalen (B-214).
+ * Mål (B-211, B-214): daglig belønning, dagens oppdrag, landemerker (B-218), ukens utfordring, sesongstigen,
+ * utfordringer og prestasjoner samlet på én side. Før lå de nederst på Verket → Oversikt, og mange fant dem ikke.
+ * PC: eget punkt i sidemenyen. Mobil: egen knapp ved varsellinja. Topplista er ikke her, men i arket bak pokalen (B-214).
  */
 import { useState } from "react";
 import { CHALLENGE_STAGE, CHALLENGES, challengeProgress, challengeShare, challengesDone } from "../game/challenges";
@@ -11,6 +11,7 @@ import type { GameApi } from "../game/useGame";
 import { AchievementsCard, PyntModal } from "./Achievements";
 import { Bar, Card, SubTabs } from "./common";
 import { DailyCard } from "./Daily";
+import { LandmarksCard } from "./Landmarks";
 import { fmtKr, fmtNum } from "./format";
 import { MissingOutCard } from "./MissingOut";
 import { SeasonTrackCard } from "./SeasonTrack";
@@ -60,12 +61,15 @@ export function GoalsPage({
   stats,
   api,
   onOpenSettings,
+  onSales,
   openTab,
 }: {
   g: GameState;
   stats: PlantStats;
   api: GameApi;
   onOpenSettings: () => void;
+  /** Landemerket tas på Salg (B-174) */
+  onSales: () => void;
   openTab?: string;
 }) {
   const act = api.act;
@@ -92,6 +96,8 @@ export function GoalsPage({
           <>
             <MissingOutCard g={g} onLogin={onOpenSettings} />
             <DailyCard g={g} act={act} />
+            {/* Landemerket er også noe som kommer hver dag (B-218) */}
+            <LandmarksCard g={g} onSales={onSales} />
           </>
         )}
         {shown === "uke" && !coaching && (

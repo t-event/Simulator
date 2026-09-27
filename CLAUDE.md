@@ -166,7 +166,7 @@ frontend/src/
     Daily.tsx    Velkommen tilbake, daglig belønning og kortet «Dagens oppdrag» på Mål
     Achievements.tsx Prestasjonskortet på Mål og arket «Pynt verket» (🎨 på anleggsbildet)
     Weekly.tsx   Kortet «Ukens utfordring» på Mål og ukelista   Portal.tsx  Ark fra Verket legges i <body>
-    SeasonTrack.tsx Kortet «Sesongstigen» på Mål (B-173)   Landmarks.tsx  Kortet «Landemerker» på Verket (B-174)
+    SeasonTrack.tsx Kortet «Sesongstigen» på Mål (B-173)   Landmarks.tsx  Kortet «Landemerker» på Mål → I dag (B-218)
     Changelog.tsx «Hva er nytt» etter en oppdatering og under ⚙️ (B-179)
     MissingOut.tsx «Det går du glipp av» på Mål for spillere uten konto (B-212)
     Goals.tsx    Mål-siden (egen knapp ved varsellinja på mobil, sidemenyen på PC): I dag, Uka, Merker (B-211, B-214)

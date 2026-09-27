@@ -27,7 +27,6 @@ import { StageCard, StationButton, UpgradeSheet } from "./Upgrades";
 import { AutoToggle } from "./AutoToggle";
 import { konsernReady } from "../game/konsern";
 import { PyntModal } from "./Achievements";
-import { LandmarksCard } from "./Landmarks";
 import { BankCard } from "./Settings";
 import { KonsernTab } from "./Konsern";
 import { readyUpgrades, stationOptions, stationReady, type Station } from "./stations";
@@ -591,7 +590,6 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
             {!canMove && <StageCard g={g} act={act} />}
 
             <BookCard g={g} openBook={openBook} />
-            <LandmarksCard g={g} onSales={() => go("salg")} />
             {/* Loggen synlig på Oversikt, ikke bare under Økonomi (B-098) */}
             <Card title="Siste hendelser">
               <ul className="g-log">

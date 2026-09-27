@@ -950,6 +950,7 @@ export function GameApp() {
               stats={stats}
               api={api}
               onOpenSettings={() => setSettingsOpen(true)}
+              onSales={() => go("salg", "tilbud")}
               openTab={subTab.tab}
             />
           )}

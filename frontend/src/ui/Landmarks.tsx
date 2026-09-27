@@ -1,5 +1,6 @@
 /**
- * Landemerker (B-174): samlingen på Verket – de som er levert, det som pågår, og når det neste kommer.
+ * Landemerker (B-174): samlingen på Mål → I dag, sammen med dagens oppdrag (B-218) – de som er levert, det som pågår,
+ * og når det neste kommer.
  */
 import { LANDMARKS, landmarkContract, nextLandmark, todayKey } from "../game/landmarks";
 import type { GameState } from "../game/types";
@@ -37,7 +38,7 @@ export function LandmarksCard({ g, onSales }: { g: GameState; onSales: () => voi
           <strong>{c.customer}</strong>:{" "}
           {c.status === "tilbud"
             ? "venter på svar. "
-            : `${fmtT(c.delivered)} av ${fmtT(c.tonnes)} levert, frist dag ${c.deadlineDay}. `}
+            : `${fmtT(c.delivered)} av ${fmtT(c.tonnes)} levert – står først i ordrekøen, ingen frist. `}
           {c.status === "tilbud" && (
             <button className="g-link" onClick={onSales}>
               Se forespørselen under Salg
@@ -55,8 +56,8 @@ export function LandmarksCard({ g, onSales }: { g: GameState; onSales: () => voi
         <p className="g-muted">Flere landemerker kommer når verket blir større.</p>
       )}
       <p className="g-muted g-small-text">
-        Ett nytt landemerke per dag: bruer, stadioner, vindparker og mer. De betaler godt og gir fagpoeng og omdømme. Du
-        tar dem selv på Salg – salgsdirektøren lar dem stå.
+        Ett nytt landemerke per dag: bruer, stadioner, vindparker og mer. De betaler godt, gir fagpoeng og omdømme, og
+        har ingen frist. Du tar dem selv på Salg – salgsdirektøren lar dem stå.
       </p>
     </Card>
   );
