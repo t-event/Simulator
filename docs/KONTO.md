@@ -66,7 +66,9 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Ny konsernøkonomi: utbytte og konsernkostnader | Nei | Regel 1: ditt eget spill | B-181 |
 | Grunnleggeræraen, Hall of Fame, ingen automatisk sesong 2 | Ja (lista og sesongen krever konto; æranavnet kan leses uten) | Regel 3 | B-182 |
 | Aktive dager (registrert av serveren ved lagring) | Ja | Regel 2: bare lagring på nett teller | B-182 |
-| Konsernkassa på serveren (flytte penger inn i verden, grense per ekte døgn) – skjult til fase 1B | Ja | Regel 2 og 7 | B-183 |
+| Konsernkassa på serveren (flytte penger inn i verden, grense per ekte døgn) | Ja | Regel 2 og 7 | B-183 |
+| Produksjonsmåleren (tonn per ekte dag fra tidslinja) | Ja (bare lagring på nett teller) | Regel 2 | B-188 |
+| Skraplageret: skjult anbud, pilotkonsesjon og inntekt fra andres skrapbruk | Ja | Regel 3 og 7 | B-189 |
 | Ventetid i konsernet (fase 4) | Nei (serverklokke med konto) | Regel 5 | PLAN-NETT |
 | Anbud og skrapauksjoner (fase 5) | Ja | Regel 3 og 7 | PLAN-NETT |
 | Varsel på mobilen (senere) | Ja | Varselet knyttes til kontoen | – |
@@ -88,8 +90,8 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Funksjon | Krever konto | Hvorfor | Beslutning |
 | --- | --- | --- | --- |
 | Økonomireformen (engangs) | Gjelder spill på nett | Endrer lagringen på nett | gjennomført 2026-09-27, B-186 |
-| Strategiske bedrifter (eie, investere, inntekt fra andres aktivitet) | Ja | Regel 3 og 7: deles med andre, avgjøres på serveren | planlagt, B-180 |
-| Konsernkassen (penger flyttet inn i verdenen) | Ja | Regel 2 og 7 | bygget på serveren, B-183 (vises i fase 1B) |
+| Strategiske bedrifter (eie, investere, inntekt fra andres aktivitet) | Ja | Regel 3 og 7: deles med andre, avgjøres på serveren | skraplageret bygget (B-189); flere planlagt |
+| Konsernkassen (penger flyttet inn i verdenen) | Ja | Regel 2 og 7 | bygget, B-183; vises på skraplagerkortet (B-189) |
 | Kontroll og overtakelser | Ja | Regel 3 og 7 | planlagt, B-180 |
 | Industrimakt på profilen og topplista | Ja | Regel 3 | planlagt, B-180 |
 | Verksjefer, mandat og «Verksjefen ringer» i datterverkene | Nei | Regel 1: ditt eget spill | planlagt, B-180 |

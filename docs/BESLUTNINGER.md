@@ -3221,3 +3221,52 @@ Beslutning:
 Funn i vurderingen (målt): toppfeltet på mobil er 133 px (34 % av en 320×568-skjerm sammen med menyen); innholdet er
 låst til 1 248 px midtstilt på PC; 76 ulike farger, 19 skriftstørrelser, 10 radier og 42 padding-verdier i CSS-en;
 121 emoji i komponentene; bare to ekte brytepunkter.
+
+## B-188 Produksjonsmåleren: lokal fart kan ikke øke inntekt i verden – med testcaser (2026-09-27)
+Status: gjelder (bygger ut B-185)
+Endringslogg: nei (grunnlag på serveren; spillerne merker det gjennom skraplageret, B-189)
+Bakgrunn: Eieren ville ha automatiske testcaser før fase 1B som viser at lokal spillfart ikke kan øke serverinntekten:
+samme fabrikk på 1×, 3× og 10× over ulik virkelig spilletid, pause/offline og en gammel lagring – og hvorfor.
+Beslutning (migrasjon `029_produksjonsmaler.sql`, speilet i `net/scrapIncome.ts`):
+- For hver spiller fører serveren en måler fra tidslinja (`snapshots.produced_t`, sjekket av juksesperren og
+  fartskontrollen): **høyeste tonn** (bare tonn over det høyeste noen gang teller som nye – en gammel lagring gir ikke
+  de samme tonnene to ganger) og **nye tonn per ekte UTC-dag** (serverens klokke).
+- **Normal fart** = tonn per spilldøgn over de siste 8 tallene i tidslinja, regnet med spillminuttene (`game_min`).
+- Det som teller én ekte dag: min(nye tonn, normal fart × 1 spilldøgn) × 1,1 t skrap per tonn stål.
+- **Testene fant to feil før noe ble kjørt:** (1) med hele spilldager i stedet for spillminutter ble farten målt
+  opptil **37 % for høy på 10×** (tidslinja får tall midt i en spilldag), så 10× ga faktisk mer; (2) medianen av
+  enkeltintervaller var **12 % ujevn** med skiftdrift og hele charger. Begge er rettet.
+- Resultat (`npm test` skriver tabellen): samme fabrikk (1 540 t per spilldøgn) teller 1 694 t skrap per ekte dag på
+  1× i 5 minutter, 1× i 1 time, 3× i 1 time, 10× i 1 time, 10× i 8 timer og 10× med 50 minutters pause – fordi taket er
+  én normal spilldag, og en normal spilldag er like stor i alle farter. Pause gir 0. Borte en dag gir 0 den dagen og tas
+  ikke igjen. Tre dager uten nett teller som én dag. En gammel lagring gir 0 til spilleren er forbi det høyeste igjen.
+  Skiftdrift: 1 697 t på 1× og 1 667 t på 10× (aldri mer på 10×). Et dobbelt så stort verk teller dobbelt.
+- De samme scenariene er kjørt mot SQL-funksjonene i en transaksjon som ble rullet tilbake: identiske tall.
+- Tallene (1,1 t skrap per tonn, 1 takdøgn, 8 tall, 1 000 kr per tonn) står i `config.world`.
+
+## B-189 Fase 1B: skraplageret med skjult anbud og pilotkonsesjon (2026-09-27)
+Status: gjelder
+Bakgrunn: Fase 1B i B-181 og B-186: ett strategisk selskap, 48-timers skjult anbud, pilotkonsesjon (14 dager), ekte
+inntekt fra andres skrapbruk normalisert til ekte tid.
+Beslutning (migrasjon `030_skraplageret.sql`, `net/world.ts`, `ui/Companies.tsx`):
+- **Skraplageret** er det første selskapet. Kortet står på Konsern-fanen og vises først når konsernet er åpnet (gradvis
+  synlighet). Krever konto (vises med «krever konto» uten).
+- **Anbud:** 48 ekte timer. Bud fra konsernkassa, holdt av til anbudet er avgjort. Budene er skjulte – ingen ser andres
+  bud eller hvor mange som har budt før det stenger. Høyeste bud vinner; likt bud avgjøres ved trekning (regelen står i
+  kortet). De andre får budet tilbake. Bud kan endres (bare forskjellen trekkes) eller trekkes. Tak på budet = anslått
+  inntekt i en konsesjon (rundet til hele millioner, minst 10 mill.), ikke spillerens rikdom; minstebud 1 mill.
+- **Pilotkonsesjon: 14 ekte dager.** Nytt anbud åpner 48 timer før den går ut, så det alltid er en eier. Uten bud
+  åpner et nytt anbud med en gang.
+- **Inntekt:** gebyr (1 000 kr per tonn) × tonn skrap som teller fra alle andre spillere (B-188), betalt inn i eierens
+  konsernkasse dagen etter, én gang (eieren kl. 12 UTC den dagen får dagen). Eierens egne tonn og flaggede spillere
+  teller ikke.
+- Alt avgjøres på serveren; `world_status()` avgjør anbud og betaler inntekt «lat» når noen spør (ingen planlagt jobb).
+  `place_bid()` sjekker konto, konsern, sperre, åpent anbud, grenser og saldo.
+- Kortet viser eier og konsesjon, anslått inntekt, anbudet med tid igjen og eget bud, konsernkassa med hvor mye som kan
+  flyttes inn, og forrige resultat. Varsel om utfallet står i kortet (in-app holder i pilottesten, B-181).
+- Testet i databasen med fire midlertidige testkontoer i en transaksjon som ble rullet tilbake: bud, over taket, uten
+  konsern, skjulte bud, likt bud avgjort ved trekning, tilbakebetaling, konsesjon, inntekt (to kjøpere × 1 694 t, uten
+  eierens egne), ikke betalt to ganger, nytt anbud 47 timer før slutt. Testen fant to feil i migrasjonen (et navn som
+  kolliderte, og en saldooppdatering som stoppet på sjekken), rettet før noe anbud fantes.
+- Det første anbudet åpnet da appen fikk kortet (migrasjonen «skraplageret_start»).
+Konto: krever konto (regel 3 og 7), står i `ACCOUNT_FEATURES` som «Skraplageret».

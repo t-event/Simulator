@@ -5,6 +5,26 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 127 – 2026-09-27: testcaser for skraplagerinntekten og fase 1B
+
+**Brukeren ba om:** før fase 1B, automatiske testcaser som viser at lokal fart ikke kan øke serverinntekten (1×, 3×, 10×,
+ulik spilletid, pause/offline, gammel lagring) og hvorfor; deretter fase 1B som planlagt (pilotkonsesjon 14 dager).
+
+**Gjort:** B-188: produksjonsmåleren på serveren (029) og speilet i `net/scrapIncome.ts`, med `net/scrapTests.ts` i
+`npm test`. Testene fant to feil i den planlagte målingen (37 % for mye på 10× med hele spilldager; 12 % ujevnt med
+median og skiftdrift) – rettet til stigning over 8 tall med spillminutter. B-189: skraplageret (030) med skjult anbud,
+bud fra konsernkassa, trekning ved likt bud, pilotkonsesjon 14 dager, daglig inntekt; `net/world.ts`, kortet i
+`ui/Companies.tsx`, «krever konto» uten konto. Endringsloggen, KONTO, RETNING, PLAN-NETT, CLAUDE.md.
+
+**Testet:** `npm test` (motor, nett, skraplager), tsc, lint, balanse (exit 0), build. SQL: scenariene mot de ekte
+funksjonene (identiske tall), livsløpet til anbudet med fire testkontoer (rullet tilbake) – fant og rettet to feil i
+migrasjonen. Playwright på Konsern-fanen 390 og 320 px, med og uten konto (overføring, bud, for høyt bud).
+
+**Gjenstår:** følge første anbud (stenger 48 timer etter start) og første inntekt; justere gebyr og tak i `config.world`
+etter testing. UI-fase 1 venter på eierens svar i `UI.md` avsnitt 12.
+
+---
+
 ## Økt 126 – 2026-09-27: UI-fase 0 – mobil + PC og designplan
 
 **Brukeren ba om:** en separat oppgave etter fase 1A: UI/UX, visuell identitet og en ekte PC-versjon. Stålverket skal

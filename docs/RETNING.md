@@ -232,8 +232,8 @@ README og CLAUDE.md beskriver samme spill, og dry-run av økonomireformen er vis
 **Status fase 1A (2026-09-27, B-181–B-185):** ny konsernøkonomi (utbytte og konsernkostnader, i stedet for avtagende
 overskudd per verk – eierens valg), konsernkasse på serveren (skjult), Sesong 2 av med bryter, Grunnleggeræraen,
 «Hall of Fame», aktive dager på serveren, fersk dry-run og klar utføring av reformen (venter på «go»), og analysen av
-ekte-tids-normalisering (avsnitt 14). **Fase 1B:** ett skraplager, 48-timers skjult anbud, pilotkonsesjon på 14
-ekte dager (B-186), ekte inntekt fra andres skrapbruk etter avsnitt 14.
+ekte-tids-normalisering (avsnitt 14). **Fase 1B (bygget, B-188/B-189):** ett skraplager, 48-timers skjult anbud,
+pilotkonsesjon på 14 ekte dager (B-186), ekte inntekt fra andres skrapbruk etter avsnitt 14.
 
 ### Fase 2 – de første strategiske bedriftene
 
@@ -434,7 +434,9 @@ kundene – og kundene kunne pumpe opp inntekten til en venn.
 - *Skrap brukt* regnes av tonnene kunden har laget den dagen (økningen i `produced_t` i tidslinja) × ca. 1,1 t skrap
   per tonn stål. `produced_t` er allerede sjekket av juksesperren og fartskontrollen (B-158, B-176), og tonn kan ikke
   lages ved å kjøpe og selge skrap.
-- *Normal skrapbruk per spilldøgn* er medianen av kundens tonn per spilldøgn de siste dagene (fra tidslinja) × 1,1.
+- *Normal skrapbruk per spilldøgn* er tonn per spilldøgn over de siste 8 tallene i tidslinja, regnet med spillminuttene
+  (`game_min`), × 1,1. (Planen var medianen av hele spilldager; testene viste at det ga opptil 37 % for mye på 10× og
+  var ujevnt med skiftdrift, B-188.)
 - Da teller en kunde høyst én normal spilldag per ekte dag, enten hen spilte 10 minutter på 10× eller 10 timer på 1×.
   Det som teller, er at kunden spilte den dagen (aktive dager, B-182) og hvor stort verket er.
 - Eierens egne tonn teller ikke. Flaggede spillere og spill uten lagring på nett teller ikke.
@@ -443,4 +445,8 @@ kundene – og kundene kunne pumpe opp inntekten til en venn.
   som `season_status()` kan den regnes «lat» første gang noen spør etter dagens status.
 - Gebyret og taket står i `config.world`, så de kan stilles inn uten ny kode. Simuleres før lansering med tidslinjene
   til dagens spillere (bare lesing).
+
+**Bygget og testet (B-188, B-189):** måleren (`029_produksjonsmaler.sql`, speilet i `frontend/src/net/scrapIncome.ts`),
+testcasene i `frontend/src/net/scrapTests.ts` (1×/3×/10×, 5 minutter til 8 timer, pause, borte, uten nett, gammel
+lagring, skiftdrift – alle gir høyst ett tak per ekte dag) og skraplageret med anbud og inntekt (`030_skraplageret.sql`).
 

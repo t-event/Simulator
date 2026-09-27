@@ -21,6 +21,10 @@ export const ACCOUNT_FEATURES = {
     name: "Sesongstigen",
     why: "Serveren teller dagene du spiller, belønningene og ukeplasseringene, så stigen følger virkelig tid.",
   },
+  skraplager: {
+    name: "Skraplageret",
+    why: "Anbudet, eierskapet og inntekten avgjøres på serveren i virkelig tid, i konkurranse med de andre spillerne.",
+  },
   konsernkasse: {
     name: "Konsernkassa",
     why: "Kassa ligger på serveren og går i virkelig tid, så overføringene og det du kjøper i verden avgjøres der.",
