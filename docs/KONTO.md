@@ -87,7 +87,7 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 
 | Funksjon | Krever konto | Hvorfor | Beslutning |
 | --- | --- | --- | --- |
-| Økonomireformen (engangs) | Gjelder spill på nett | Endrer lagringen på nett | planlagt, B-180 |
+| Økonomireformen (engangs) | Gjelder spill på nett | Endrer lagringen på nett | gjennomført 2026-09-27, B-186 |
 | Strategiske bedrifter (eie, investere, inntekt fra andres aktivitet) | Ja | Regel 3 og 7: deles med andre, avgjøres på serveren | planlagt, B-180 |
 | Konsernkassen (penger flyttet inn i verdenen) | Ja | Regel 2 og 7 | bygget på serveren, B-183 (vises i fase 1B) |
 | Kontroll og overtakelser | Ja | Regel 3 og 7 | planlagt, B-180 |

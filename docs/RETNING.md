@@ -232,8 +232,8 @@ README og CLAUDE.md beskriver samme spill, og dry-run av økonomireformen er vis
 **Status fase 1A (2026-09-27, B-181–B-185):** ny konsernøkonomi (utbytte og konsernkostnader, i stedet for avtagende
 overskudd per verk – eierens valg), konsernkasse på serveren (skjult), Sesong 2 av med bryter, Grunnleggeræraen,
 «Hall of Fame», aktive dager på serveren, fersk dry-run og klar utføring av reformen (venter på «go»), og analysen av
-ekte-tids-normalisering (avsnitt 14). **Fase 1B:** ett skraplager, 48-timers skjult anbud, pilotkonsesjon på 7 eller 14
-ekte dager, ekte inntekt fra andres skrapbruk etter avsnitt 14.
+ekte-tids-normalisering (avsnitt 14). **Fase 1B:** ett skraplager, 48-timers skjult anbud, pilotkonsesjon på 14
+ekte dager (B-186), ekte inntekt fra andres skrapbruk etter avsnitt 14.
 
 ### Fase 2 – de første strategiske bedriftene
 
@@ -337,6 +337,10 @@ transaksjon) og er prøvekjørt i en blokk som ble rullet tilbake. **Den er ikke
 konsernøkonomien er kassa tjent inn igjen på timer i det lokale spillet. Det som beskytter verden, er grensen på
 konsernkassa (B-183). Reformen gjør topplista og konsernverdien sammenlignbare og markerer Grunnleggeræraen, men
 endrer lite i spillet hjemme. Eieren avgjør om den kjøres.
+
+**Gjennomført 2026-09-27 (B-186)** med urørt gulv på 250 mill. og k = 0,365 (samme topp som modell B): Grane 8 286 →
+11,17 mrd., Tuster 3 664 → 8,29 mrd., Figen 1 562 → 6,07 mrd. Små spill er urørt. Kopi av alle endrede spill ligger i
+`save_backups` og for alltid i `economy_reform_log`.
 
 ## 10. Gamle beslutninger – hva gjelder
 

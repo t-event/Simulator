@@ -5,6 +5,25 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 125 – 2026-09-27: økonomireformen gjennomført
+
+**Brukeren ba om:** «go» på reformen, men med et større urørt gulv eller en jevn overgang, så små spill (H4WK3N5 79 → 62
+mill.) ikke får et merkbart kutt. Siste ferske dry-run, vis resultatet, ekstra sikkerhetskopi, gjennomfør hvis
+kontrollen er OK. Konsernkassa godkjent som utgangspunkt; pilotkonsesjon 14 dager; testcaser for normaliseringen før
+fase 1B. (I samme melding: en ny, separat oppgave om UI/UX og PC-versjon – se neste økt.)
+
+**Gjort:** B-186. Gulv 250 mill. og k = 0,365 (samme topp som modell B). Fersk dry-run → prøvekjøring rullet tilbake →
+migrasjon `028_okonomireform.sql` (sikkerhetskopi i `save_backups` og for alltid i `economy_reform_log.old_state`,
+endring, kontroll i én blokk). Grane 8 286 → 11,17 mrd., Tuster 3 664 → 8,29 mrd., Figen 1 562 → 6,07 mrd.; H4WK3N5 og
+Sjæfen urørt. Endringsloggen i spillet forklarer reformen.
+
+**Testet:** kontrollen i migrasjonen gikk gjennom; spørring etterpå viser ny kasse, én kopi per spill og kopien i loggen.
+H4WK3N5 lagret videre uten problemer rett etter.
+
+**Gjenstår:** se at Tuster, Grane og Figen henter det nye spillet neste gang de åpner appen (ingen lagring med gamle tall).
+
+---
+
 ## Økt 124 – 2026-09-27: fase 1A (konsernøkonomi, konsernkasse, Grunnleggeræraen)
 
 **Brukeren ba om:** fase 1-valgene (B-181): modell B for reformen (først fersk dry-run, sikkerhetskopi og kontroll);
