@@ -20,7 +20,7 @@ import { day, gradeRecipe, hasPlanner, nearLimit, satisfiedGrades, type PlantSta
 import type { Contract, GameState, Settings } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Agreements } from "./Agreements";
-import { DirectorSwitch } from "./Konsern";
+import { DirectorOffer, DirectorSwitch } from "./Konsern";
 import { AutoLocked, AutoToggle } from "./AutoToggle";
 import { auto, automationUnlocked } from "../game/research";
 import { AnalysisLine, Bar, Card, GradeChips, GradeSpec, SubTabs } from "./common";
@@ -330,6 +330,7 @@ export function Sales({ g, stats, act, openTab }: Props & { openTab?: string }) 
               </details>
             )}
             <DirectorSwitch g={g} act={act} />
+            <DirectorOffer g={g} act={act} />
             {offers.length === 0 && (
               <p className="g-muted">
                 {g.settings.pauseOffers

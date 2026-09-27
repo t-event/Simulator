@@ -62,6 +62,7 @@ import {
   moraleNormal,
   isAbsent,
   staffing,
+  supportAdvice,
   tempsActive,
   tempsCost,
   MASON_HOURS,
@@ -2317,6 +2318,12 @@ export function ensureCandidates(g: GameState): void {
     const have = g.candidates.filter((c) => c.role === role).length;
     for (let i = have; i < Math.min(count, 4); i++) g.candidates.push(makeCandidate(g, role));
   }
+  // Minst én søker til hver anbefalt støtterolle som mangler (B-210). Før kom f.eks. skiftlederen bare tilfeldig, så
+  // anbefalingen var umulig å følge
+  for (const a of supportAdvice(g)) {
+    if (a.role === "allround" || a.have >= a.want) continue;
+    if (!g.candidates.some((c) => c.role === a.role)) g.candidates.push(makeCandidate(g, a.role));
+  }
 }
 
 /** Nye søkere med en gang, f.eks. når man flytter til et nytt nivå */
@@ -2434,6 +2441,12 @@ function updateAbsence(g: GameState, stats: PlantStats): void {
   // Fravær som er over, fjernes først, så varslene under regner med dem som faktisk er borte
   for (const w of g.workers) {
     if (w.absentUntil !== undefined && g.minute >= w.absentUntil) {
+      // Ferdig med lederutviklingen (B-210): blir skiftleder, med skiftlederlønn
+      if (w.absentReason === "lederkurs") {
+        w.role = "skiftleder";
+        w.salary = normalSalary(g, "skiftleder", w.skill);
+        log(g, `${w.name} er ferdig med lederutviklingen og er nå skiftleder.`, "good");
+      }
       w.absentFrom = w.absentUntil = w.absentReason = undefined;
     }
   }

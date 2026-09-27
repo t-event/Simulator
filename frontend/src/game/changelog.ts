@@ -15,6 +15,19 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 210,
+    date: "2026-09-27",
+    title: "Tilbakemeldinger fra spillerne",
+    items: [
+      "Anbudet på skraplageret viser hvem som har bydd – men ikke hvor mye.",
+      "En flink operatør kan bli skiftleder: send hen på lederutvikling under Folk → Ansatte. Kurset er dyrt og tar 60 døgn.",
+      "Salgsdirektøren kan ansettes rett fra Salg og fra Folk → Ansett.",
+      "Er kvalitetsvalget grått fordi ordrekøen styrer, står det nå hvorfor – med en knapp for å velge selv.",
+      "Det finnes alltid søkere til de anbefalte rollene, og du kan ansette rett fra anbefalingen.",
+      "Samme hendelse kommer ikke igjen og igjen på 10×, og etter kameraene holder kobbertyvene seg unna verket.",
+    ],
+  },
+  {
     b: 209,
     date: "2026-09-27",
     title: "Konsernet bygger i ekte tid",

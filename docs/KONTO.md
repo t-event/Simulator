@@ -69,7 +69,7 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Aktive dager (registrert av serveren ved lagring) | Ja | Regel 2: bare lagring på nett teller | B-182 |
 | Konsernkassa på serveren (flytte penger inn i verden, grense per ekte døgn) | Ja | Regel 2 og 7 | B-183 |
 | Produksjonsmåleren (tonn per ekte dag fra tidslinja) | Ja (bare lagring på nett teller) | Regel 2 | B-188 |
-| Skraplageret: skjult anbud, pilotkonsesjon og inntekt fra andres skrapbruk | Ja | Regel 3 og 7 | B-189 |
+| Skraplageret: anbud (hvem som har bydd er synlig, beløpene skjult), pilotkonsesjon og inntekt fra andres skrapbruk | Ja | Regel 3 og 7 | B-189, B-210 |
 | Ukens utfordring «dager» i ekte aktive dager, delt plass ved likt | Ja (lista kan leses uten) | Regel 3 | B-190 |
 | Ventetid i konsernet (fase 4) | Nei (serverklokke med konto) | Regel 5 | PLAN-NETT |
 | Anbud og skrapauksjoner (fase 5) | Ja | Regel 3 og 7 | PLAN-NETT |

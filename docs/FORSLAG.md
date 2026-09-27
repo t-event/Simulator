@@ -6,6 +6,16 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
+- **Mange lager ikke konto (B-210).** Anbefaling i tre steg – eieren velger:
+  1. **Automatisk gjestekonto** (Supabase «anonymous sign-ins»): alle får en konto i bakgrunnen første gang spillet åpnes,
+     med lagring på nett, kallenavn og toppliste. «Sikre kontoen» med e-post og passord kan gjøres når som helst, og da
+     beholdes spillet. Fjerner hele terskelen. Krever at eieren slår på «Allow anonymous sign-ins» under Authentication i
+     dashbordet (connectoren kan ikke), og at KONTO.md og B-149 skiller mellom gjestekonto og sikret konto (f.eks. at
+     konsernkassa og anbud krever sikret konto).
+  2. **Vis hva man går glipp av i riktig øyeblikk** (gradvis synlighet): «Du ville vært nr. 3 på topplista», «Daglig
+     belønning venter» – ett kort med én knapp når det faktisk betyr noe, ikke en tekstvegg på startskjermen.
+  3. **Logg inn med Google/Apple** senere, hvis gjestekonto ikke er nok. Krever oppsett i dashbordet og hos Google/Apple.
+
 
 ## Venter
 

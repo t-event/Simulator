@@ -558,6 +558,18 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
                   ))}
                 </select>
               </label>
+              {/* Valget er grått når ordrekøen styrer (B-210): mange skjønte ikke hvorfor de ikke kunne velge selv */}
+              {auto(g, "followQueue") && !!order && (
+                <div className="g-note g-queue-lock">
+                  <span>
+                    Ordrekøen styrer kvaliteten nå: ovnen lager det kontrakten øverst i køen trenger. Vil du velge selv,
+                    slå av «Følg ordrekøen».
+                  </span>
+                  <button className="g-small" onClick={() => act((gg) => void (gg.settings.followQueue = false))}>
+                    Velg selv
+                  </button>
+                </div>
+              )}
               {g.furnaces.slice(1).map((f, j) => (
                 <label className="g-field" key={j}>
                   <span>Ovn {j + 2} kjører mot</span>

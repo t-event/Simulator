@@ -87,6 +87,7 @@ export function migrate(g: GameState): GameState {
   if (loose.celebrate === undefined) loose.celebrate = null;
   if (loose.decisionSeen === undefined) loose.decisionSeen = {};
   if (g.decisionFixed === undefined) g.decisionFixed = {};
+  if (g.decisionSeenAt === undefined) g.decisionSeenAt = {};
   if (g.landmarks === undefined) g.landmarks = { done: [], date: null, contractId: null };
   // Beste poengsum i kontrollrommet (B-175)
   if (g.controlBest === undefined) g.controlBest = 0;

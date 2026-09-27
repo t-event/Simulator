@@ -3705,3 +3705,35 @@ Testet: ny test (bygging i ekte tid, spillfart hjelper ikke, ett prosjekt per ve
 de gamle konserntestene spoler klokka fram; `balance.ts` (exit 0; testspilleren får en ekte klokke som om den spiller på
 3×) og `--konsern`; Playwright på Konsern med prosjekter som pågår, 7 størrelser.
 
+## B-210 Tilbakemeldinger fra spillerne: anbudet, skiftleder, salgsdirektør, ordrekøen og kort som gjentas (2026-09-27)
+Status: gjelder (justerer B-178, B-189 og kortpausen i B-150/B-171)
+Brukeren sendte åtte punkter fra spillerne. Beslutning per punkt:
+- **Skraplageranbudet var for skjult:** alle som er logget inn, ser nå hvem som har lagt inn bud (kallenavn, sortert
+  alfabetisk så rekkefølgen ikke avslører noe), men ikke beløpene. Migrasjon `033_anbud_budgivere.sql` (`world_status()`
+  gir `tender.bidders`). Rådgiverne viste ingen nye punkter.
+- **Operatør til skiftleder:** en flink operatør på skiftet (ovn, støping, skrap, lab, valse; ferdighet minst 4, ikke
+  lærling) kan sendes på lederutvikling fra Folk → Ansatte («Gjør til skiftleder»). Kurset koster 150 000 × (nivå + 1)²
+  (3,75 mill. på storverket) og tar 60 spilldøgn med full lønn, borte fra skiftet. Etterpå er hen skiftleder med
+  skiftlederlønn. Anbefalingen for skiftleder nevner muligheten.
+- **Salgsdirektøren var vanskelig å finne:** den kan nå ansettes der man signerer forespørsler (Salg → Forespørsler) og
+  der man ansetter folk (Folk → Ansett, «Ledelse»), i tillegg til Konsern. Vises bare når konsernet er åpnet.
+- **«Følg ordrekøen» forvirret nye spillere:** når ordrekøen styrer, står det rett under kvalitetsvalget hvorfor det er
+  grått, med knappen «Velg selv» som slår av «Følg ordrekøen».
+- **Anbefalt skiftleder kunne ikke følges:** anbefalingen var riktig, men det ble bare laget søkere til plassene på
+  skiftene, så en skiftleder dukket bare opp tilfeldig. Nå finnes det alltid minst én søker til hver anbefalt
+  støtterolle som mangler (`ensureCandidates`), og hver rolle i anbefalingen har en «Ansett»-knapp for den flinkeste
+  søkeren.
+- **Samme hendelseskort mange ganger på rad:** pausen mellom like kort var 25 spilldøgn – fem minutter på 10×. Samme kort
+  kommer nå heller ikke igjen før det har gått 20 minutter i ekte tid (`SAME_CARD_REAL_MS`, klokka i `game/clock.ts`).
+  Kjøper man kameraer mot kobbertyver, kommer det kortet ikke igjen på samme verk (som støyskjermen, B-171). En time ble
+  prøvd først, men da fikk spillere på 1× og testspilleren (3×) langt færre kort; 20 minutter endrer lite der. Med
+  pausen blir nybegynneren i testene ca. 7–10 døgn senere til storverket (snitt 160 mot 149 over åtte frø), godt innenfor
+  målet på 240.
+- **Økonomireformen og én spiller (H4WK3N5):** reformen virket for alle. Spillet hadde 0,09 mrd. da reformen ble kjørt
+  (under gulvet på 250 mill.), så det var urørt etter regelen. Alt etterpå er tjent under de nye reglene (50 mrd. elleve
+  timer senere) – det var nettopp tempoet B-209 tar tak i. Ingen data er endret.
+- **Mange lager ikke konto:** besvart med en anbefaling til eieren, se FORSLAG.md. Ingen endring i spillet.
+Konto (B-149): anbudet krever konto som før; de andre endringene er i selve spillet og krever ikke konto.
+Testet: ny spilltest (søker til skiftleder, kameraer, like kort i ekte tid, lederutvikling), nettesten ser budgiverne,
+`npm test`, balanse exit 0, tsc, lint, build, Playwright på Folk (Skift, Ansatte, Ansett) og Salg på 7 størrelser.
+

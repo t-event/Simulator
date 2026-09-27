@@ -276,6 +276,8 @@ function makeFake(): Fake {
               min_bid: "1000000",
               max_bid: "923000000",
               my_bid: f.bids.get(id) ?? null,
+              // Bare kallenavnene, sortert, uten beløp (B-210)
+              bidders: f.bids.get(id) ? ["Grane", "Testspiller"] : ["Grane"],
             },
             last_result: null,
           },
@@ -1195,6 +1197,7 @@ const main = async () => {
     const w = await fetchWorldStatus();
     const c = w.companies[0];
     assert(c.name === "Skraplageret" && c.tender?.id === 7 && c.tender.maxBid === 923_000_000, JSON.stringify(c));
+    assert(c.tender?.bidders.length === 1 && c.tender.bidders[0] === "Grane", "budgiverne før eget bud");
     assert(w.treasury.balance === 50_000_000 && c.estimatePerDay === 65_902_630, JSON.stringify(w.treasury));
     assert((await placeBid(7, 500)).ok === false, "bud under minste ble godtatt");
     const over = await placeBid(7, 60_000_000);
@@ -1205,6 +1208,10 @@ const main = async () => {
     const b = await placeBid(7, 30_000_000);
     assert(b.ok && b.balance === 20_000_000, `bud ${JSON.stringify(b)}`);
     assert((await fetchWorldStatus()).companies[0].tender?.myBid === 30_000_000, "eget bud vises ikke");
+    assert(
+      (await fetchWorldStatus()).companies[0].tender?.bidders.join(",") === "Grane,Testspiller",
+      "ser ikke hvem som har bydd",
+    );
     const up = await placeBid(7, 45_000_000);
     assert(up.ok && up.balance === 5_000_000, `høyere bud trekker bare forskjellen: ${JSON.stringify(up)}`);
     const off = await placeBid(7, 0);

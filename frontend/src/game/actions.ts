@@ -907,6 +907,48 @@ export function sendOnCourse(g: GameState, workerId: number): PurchaseResult {
 }
 
 // ------------------------------------------------------------------ //
+// Lederutvikling (B-210): en flink operatør blir skiftleder
+// ------------------------------------------------------------------ //
+/** Kurset tar lang tid og koster mye: operatøren er borte fra skiftet i 60 døgn med full lønn */
+export const LEADER_COURSE_DAYS = 60;
+export const LEADER_MIN_SKILL = 4;
+/** Rollene på skiftet som kan bli skiftleder */
+export const LEADER_FROM: RoleId[] = ["ovn", "stoper", "skrap", "lab", "valse"];
+
+export function leaderCourseCost(g: GameState): number {
+  return 150_000 * (1 + g.stage) ** 2;
+}
+
+/** Hvorfor den ansatte ikke kan sendes på lederutvikling nå, eller null */
+export function leaderCourseBlock(g: GameState, w: Worker): string | null {
+  if (g.stage < 3) return "Skiftledere finnes først på stålverket.";
+  if (!LEADER_FROM.includes(w.role)) return "Bare folk på skiftet kan bli skiftleder.";
+  if (w.apprenticeUntil !== undefined) return "Lærlinger må ta fagbrevet først.";
+  if (w.skill < LEADER_MIN_SKILL) return `Trenger ferdighet ${LEADER_MIN_SKILL} av 5.`;
+  if (isAbsent(g, w) || w.absentUntil !== undefined) return "Er borte eller har fravær planlagt.";
+  return null;
+}
+
+export function sendOnLeaderCourse(g: GameState, workerId: number): PurchaseResult {
+  const w = g.workers.find((x) => x.id === workerId);
+  if (!w) return fail("Fant ikke den ansatte.");
+  const block = leaderCourseBlock(g, w);
+  if (block) return fail(block);
+  const cost = leaderCourseCost(g);
+  if (g.cash < cost) return fail("For lite penger.");
+  addCost(g, "annet", cost);
+  w.absentFrom = g.minute;
+  w.absentUntil = g.minute + LEADER_COURSE_DAYS * 1440;
+  w.absentReason = "lederkurs";
+  log(
+    g,
+    `${w.name} (${ROLES[w.role].name.toLowerCase()}) er på lederutvikling til dag ${day(g, w.absentUntil - 1)}. Etterpå blir hen skiftleder.`,
+    "info",
+  );
+  return { ok: true, message: `${w.name} er på lederutvikling.` };
+}
+
+// ------------------------------------------------------------------ //
 // Vikarer (B-031)
 // ------------------------------------------------------------------ //
 /** Innleie til plassene som mangler for neste skift: halvannen gang lønna, teller ikke mot antall ansatte (B-050) */

@@ -7,6 +7,10 @@ import {
   doResearch,
   giveBonus,
   hireForWildcards,
+  LEADER_COURSE_DAYS,
+  leaderCourseBlock,
+  leaderCourseCost,
+  sendOnLeaderCourse,
   runScheduledSwitch,
   scheduleCastingSwitch,
   switchCashNeeded,
@@ -59,7 +63,16 @@ import {
 } from "./daily";
 import { applyWorldEvents, canJoinDirectly, joinSeason, SEASON_BONUS_FP, worldFactor, applySeasonTwist } from "./world";
 import { dealPrice, energyPrice, productPrice } from "./plant";
-import { autoBuy, RETURN_MAX_SHARE, scrapPrice, scrapSellPrice, sellScrap, spotQuota, takeScrap } from "./engine";
+import {
+  autoBuy,
+  ensureCandidates,
+  RETURN_MAX_SHARE,
+  scrapPrice,
+  scrapSellPrice,
+  sellScrap,
+  spotQuota,
+  takeScrap,
+} from "./engine";
 import {
   buySister,
   checkKonsernMilestones,
@@ -107,7 +120,7 @@ import {
 import { bonusGap, computePlantStats, liftMorale, moraleNormal, supportAdvice } from "./plant";
 import { RESEARCH, researchOptions } from "./research";
 import { parseSave } from "./save";
-import { makeDecision, resolveDecision } from "./decisions";
+import { makeDecision, maybeCreateDecision, resolveDecision, SAME_CARD_REAL_MS } from "./decisions";
 import { landmarkContract, landmarkHour } from "./landmarks";
 import {
   apprenticeExams,
@@ -118,7 +131,16 @@ import {
   rateDelivery,
   ratingFactor,
 } from "./engine";
-import { crewPerShift, fireImpact, liningWearPerHeat, MAX_CREWS, specMargin, staffing, wildcardUse } from "./plant";
+import {
+  crewPerShift,
+  fireImpact,
+  isAbsent,
+  liningWearPerHeat,
+  MAX_CREWS,
+  specMargin,
+  staffing,
+  wildcardUse,
+} from "./plant";
 import { QUIZ } from "./quiz";
 import { GRADES } from "./data";
 import type { Agreement, Analysis, Contract, GameState, ManualRequest, RoleId } from "./types";
@@ -1532,6 +1554,68 @@ test("Konsernet bygger i ekte tid, verdien faller ikke imens, og flaggskipet gir
   g.history[0].secondT = 300;
   assert(Math.abs(flagshipBonus(g) - FLAGSHIP_MAX * 0.5 * 0.5) < 1e-9, `flaggskip ${flagshipBonus(g)}`);
   setRealClock(() => Date.now());
+});
+
+test("Søker til skiftleder, kameraer stopper tyvene, like kort i ekte tid og lederutvikling (B-210)", () => {
+  // Anbefalt skiftleder: det finnes alltid en søker til rollen
+  const g = newGame(210);
+  g.stage = 3;
+  g.castingType = "streng1";
+  g.workers = [];
+  for (const [role, n] of Object.entries(crewPerShift(g)) as [RoleId, number][])
+    for (let i = 0; i < n * 3; i++) g.workers.push(makeCandidate(g, role));
+  g.candidates = [];
+  ensureCandidates(g);
+  assert(
+    g.candidates.some((c) => c.role === "skiftleder"),
+    "ingen søker til skiftleder",
+  );
+  // Kameraer: tyverikortet kommer ikke igjen på samme verk, men på et nytt
+  const d = makeDecision(g, "kobbertyveri")!;
+  g.pendingDecision = { ...d, resumeSpeed: 1 };
+  resolveDecision(g, 0);
+  assert(makeDecision(g, "kobbertyveri") === null, "tyverikortet kom igjen etter kameraene");
+  g.stage = 4;
+  assert(makeDecision(g, "kobbertyveri") !== null, "tyverikortet kommer aldri på et nytt verk");
+  // Samme kort ikke igjen på seks timer i ekte tid, uansett hvor mange spilldøgn som går
+  let now = 5_000_000_000_000;
+  setRealClock(() => now);
+  const h = newGame(211);
+  h.stage = 3;
+  const seen: string[] = [];
+  for (let d2 = 0; d2 < 400; d2++) {
+    h.minute += 1440;
+    h.pendingDecision = null;
+    maybeCreateDecision(h);
+    if (h.pendingDecision) seen.push((h.pendingDecision as { id: string }).id);
+  }
+  assert(seen.length > 0 && new Set(seen).size === seen.length, `samme kort to ganger: ${seen.join(", ")}`);
+  now += SAME_CARD_REAL_MS;
+  setRealClock(() => Date.now());
+  // Lederutvikling: flink operatør, dyrt, borte lenge, blir skiftleder
+  const w = g.workers.find((x) => x.role === "ovn")!;
+  w.skill = 3.5;
+  assert(!!leaderCourseBlock(g, w), "kunne sende en middels flink operatør");
+  w.skill = 4.2;
+  g.cash = 1e9;
+  const cash = g.cash;
+  assert(sendOnLeaderCourse(g, w.id).ok, "kurset startet ikke");
+  assert(
+    Math.abs(cash - g.cash - leaderCourseCost(g)) < 1 && isAbsent(g, w),
+    "kurset kostet feil eller var ikke fravær",
+  );
+  // Hendelseskort stopper tida, så de ryddes bort underveis
+  const run = (days: number) => {
+    for (let h = 0; h < days * 24; h++) {
+      g.pendingDecision = null;
+      g.pendingManual = null;
+      advance(g, 60);
+    }
+  };
+  run(LEADER_COURSE_DAYS - 1);
+  assert(w.role === "ovn", "ble skiftleder for tidlig");
+  run(2);
+  assert(w.role === "skiftleder" && !isAbsent(g, w), `ble ikke skiftleder (${w.role})`);
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden
