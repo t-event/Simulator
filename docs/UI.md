@@ -276,7 +276,7 @@ blir bildet større og stedene kan trykkes (åpner stedet i sidepanelet). Bygges
 Hver PR er liten, går gjennom alle sjekker, Playwright på **7 størrelser** (320×568, 390×844, 412×915, 820×1180,
 1 366×768, 1 920×1 080, 2 560×1 080) og har skjermbilder før/etter. Gameplay holdes urørt.
 
-1. **UI-1a Tokens og grunnkomponenter** (bygget, B-191 – venter på eierens klarsignal før merge): `tokens.css`, typografi, `Button`, `Icon`, `Tabs`/`SegmentedControl`,
+1. **UI-1a Tokens og grunnkomponenter** (ferdig, B-191, PR #138): `tokens.css`, typografi, `Button`, `Icon`, `Tabs`/`SegmentedControl`,
    `Callout`, `StatusBadge`, `Stat`, `ProgressBar`, `Section`. Eksisterende klasser kobles til tokens (små synlige
    endringer).
 2. **UI-1b App-skall:** kompakt mobiltoppfelt, underfaner øverst i Verket, PC-toppfelt, sidemeny, `Sheet` for

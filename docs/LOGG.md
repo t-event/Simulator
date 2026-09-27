@@ -22,7 +22,7 @@ ett (`AccountFeaturesCard`), KONTO-regel 6 justert. UI.md, KONTO.md, CLAUDE.md, 
 (Verket, kontokortet, Anlegg, Økonomi, Marked) – ingen vannrett scrolling, ingen feil i konsollen; 412/820/2 560 for
 vannrett scrolling.
 
-**Gjenstår:** eierens klarsignal, så merge. Deretter UI-1b (app-skallet: kompakt mobiltoppfelt, sidemeny på PC med
+**Gjenstår:** eieren så skjermbildene og sa «Merge» – PR #138 er merget. Neste er UI-1b (app-skallet: kompakt mobiltoppfelt, sidemeny på PC med
 Konsern). Tegningene (anleggsbildet, kontrollrommet) får tokens i UI-2a/UI-4a.
 
 ---

@@ -6,8 +6,7 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
-- **UI-1a** (B-191) er bygget, og PR-en venter på eierens klarsignal før merge (skjermbilder er vist). Spørsmålene fra
-  UI-fase 0 er besvart i B-191.
+- Ingen åpne spørsmål om UI akkurat nå. UI-1a (B-191) er merget; neste er UI-1b (app-skallet).
 
 ## Venter
 
