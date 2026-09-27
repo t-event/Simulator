@@ -816,11 +816,13 @@ button {
   font-style: normal;
 }
 
-.g-scrap-facts .up {
-  color: var(--critical);
+.g-scrap-facts .up,
+.g-trend.up {
+  color: var(--heat);
 }
 
-.g-scrap-facts .down {
+.g-scrap-facts .down,
+.g-trend.down {
   color: var(--ok);
 }
 
@@ -3331,5 +3333,100 @@ button {
   .g-grid.is-anlegg > .g-anlegg-flow {
     grid-column: 1 / -1;
     order: -1;
+  }
+}
+
+/* Marked (B-197): skraptabell på PC, kort på mobil. Samme data og knapper */
+.g-scrap-table {
+  display: none;
+}
+
+.g-trend.ds-icon {
+  margin-left: var(--sp-2);
+}
+
+.g-scrap-info.ds-icon {
+  width: 0.95em;
+  height: 0.95em;
+  color: var(--text-3);
+}
+
+.g-locked-scrap .ds-icon {
+  color: var(--text-3);
+}
+
+@media (min-width: 1000px) {
+  .g-market > .g-col-wide {
+    grid-column: 1 / -1;
+  }
+
+  /* Bare skraptabellen trenger hele bredden; tekst og lister blir tunge å lese over 1 600 px */
+  .g-market:not(.is-skrap) > .g-col-wide > .g-card {
+    max-width: 960px;
+  }
+
+  .g-scrap-list {
+    display: none;
+  }
+
+  .g-scrap-table {
+    display: table;
+    width: 100%;
+    margin-top: var(--sp-4);
+    border-collapse: collapse;
+    font-size: var(--fs-body);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .g-scrap-table th {
+    text-align: left;
+    font-size: var(--fs-caption);
+    font-weight: 600;
+    color: var(--text-3);
+    padding: var(--sp-2) var(--sp-3);
+    border-bottom: 1px solid var(--line-strong);
+    white-space: nowrap;
+  }
+
+  .g-scrap-table td {
+    padding: var(--sp-3);
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+  }
+
+  .g-scrap-table .num {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .g-scrap-table tr.is-short td {
+    background: var(--heat-tint);
+  }
+
+  .g-scrap-table tr.is-short td:first-child {
+    box-shadow: inset 3px 0 0 var(--heat);
+  }
+
+  .g-scrap-table .g-scrap-about summary {
+    min-height: 0;
+  }
+
+  .g-scrap-table .g-scrap-about p {
+    max-width: 44ch;
+  }
+
+  .g-scrap-table .g-scrap-actions {
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+  }
+
+  .g-scrap-table .g-buy {
+    min-width: 96px;
+  }
+
+  @media (hover: hover) {
+    .g-scrap-table tbody tr:hover td {
+      background: var(--surface-2);
+    }
   }
 }

@@ -3447,3 +3447,20 @@ Beslutning:
 Konto (B-149): ingen ny funksjon.
 Testet: tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter på 320, 390, 1 366 og 1 920 px (stålverk og
 storverk) og de 7 størrelsene uten vannrett scrolling.
+
+## B-197 UI-2c: Marked – skraptabell på PC, samme kort på mobil (2026-09-27)
+Status: gjelder (UI.md 6 og 8; bygger på B-191/B-192)
+Beslutning:
+- **PC (fra 1 000 px):** «Kjøp skrap» er en tabell over hele bredden: skraptype, pris per tonn med trend, P, spor, C,
+  skitt, på lager og kjøpsknappene på samme rad. Tallene står høyrejustert med like brede sifre, så de kan
+  sammenlignes nedover. Skrap resepten venter på, får oransje kant og «Resepten venter på dette».
+- **Mobil:** kortene som før, men med de samme delene (navn med forklaring, trend med ikon, kjøpsknapper), så
+  tabellen og kortene aldri viser ulike tall.
+- Trenden vises med ikon (pil opp/ned) i stedet for ▲/▼; stigende pris i varmefargen, synkende i grønt. Låste
+  skraptyper har hengelås-ikon i stedet for emoji.
+- De andre fanene (Resept, Strøm/Energi, Priser) blir ikke bredere enn 960 px på PC; tekst og lister er tunge å lese
+  over hele skjermen. Underfanene står over hele bredden.
+- Ingen endring i spillet eller i hva knappene gjør.
+Konto (B-149): ingen ny funksjon.
+Testet: tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter på 320, 390, 1 366 og 1 920 px (stålverk og
+storverk, alle fire fanene) og de 7 størrelsene uten vannrett scrolling.

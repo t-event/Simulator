@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 197,
+    date: "2026-09-27",
+    title: "Skrapmarkedet som tabell på PC",
+    items: [
+      "På PC står alle skraptypene i én tabell med pris, innhold, lager og kjøpsknapper på samme rad.",
+      "Pristrenden vises med en pil: oransje når prisen stiger, grønn når den faller.",
+    ],
+  },
+  {
     b: 196,
     date: "2026-09-27",
     title: "Tydeligere Anlegg",
