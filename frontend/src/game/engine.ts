@@ -1625,7 +1625,7 @@ export function lateContracts(g: GameState, stats: PlantStats, lostT = 0): Contr
   for (const c of orderQueue(g)) {
     cum += c.tonnes - c.delivered;
     const doneDay = day(g) + cum / perDay - 1;
-    if (doneDay > c.deadlineDay) late.push(c);
+    if (doneDay > c.deadlineDay && !c.landmark) late.push(c);
   }
   return late;
 }
@@ -1699,8 +1699,9 @@ export function assessOffer(g: GameState, stats: PlantStats, c: Contract, commit
         )
       : Infinity;
   const days = c.deadlineDay - day(g) + 1;
-  const tight = needDays > days;
-  const narrow = !tight && needDays > days * CONTRACT_MARGIN;
+  // Et landemerke har ingen frist (B-218), så det kan ikke bli for sent
+  const tight = !c.landmark && needDays > days;
+  const narrow = !c.landmark && !tight && needDays > days * CONTRACT_MARGIN;
   return {
     canMake,
     recipeOk,
@@ -1802,7 +1803,7 @@ export const RATINGS_KEPT = 20;
 export function rateDelivery(g: GameState, c: Contract): { score: number; note: string; quote: string } {
   const left = c.deadlineDay - day(g);
   const span = Math.max(1, c.deadlineDay - (c.acceptedDay ?? c.deadlineDay - 3));
-  const time = left / span >= 0.4 ? 2 : left >= 1 ? 1 : 0;
+  const time = c.landmark || left / span >= 0.4 ? 2 : left >= 1 ? 1 : 0;
   const margin = c.qMargin ?? 0.5;
   const quality = margin >= 0.3 ? 2 : margin >= 0.15 ? 1 : margin >= 0.05 ? 0 : -1;
   const complained = !!c.complained || g.complaints.some((x) => x.contractId === c.id);
@@ -1984,7 +1985,8 @@ function trickleOffers(g: GameState, stats: PlantStats): void {
 
 function expireOffers(g: GameState, stats: PlantStats): void {
   for (const c of g.contracts) {
-    if (c.status !== "tilbud") continue;
+    // Landemerket venter til du svarer (B-218), også mens verket lager noe annet en stund
+    if (c.status !== "tilbud" || c.landmark) continue;
     if (!stats.products.includes(c.product)) {
       // Verket har byttet støping og lager ikke produktet lenger: kunden spør noen andre (B-082)
       c.status = "misligholdt";
@@ -2866,7 +2868,8 @@ function onDay(g: GameState, stats: PlantStats): void {
   // Kontrakter
   endStaleAgreements(g, stats);
   for (const c of g.contracts) {
-    if (c.status === "aktiv" && c.deadlineDay < today) {
+    // Landemerker har ingen frist (B-218): de står i køen til de er levert
+    if (c.status === "aktiv" && !c.landmark && c.deadlineDay < today) {
       const remaining = c.tonnes - c.delivered;
       const penalty = remaining * c.penaltyPerT;
       addCost(g, "bot", penalty);

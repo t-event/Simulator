@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 218,
+    date: "2026-09-27",
+    title: "Landemerker på Mål, uten frist",
+    items: [
+      "Landemerkene står nå på Mål, sammen med dagens oppdrag.",
+      "Et landemerke går aldri ut: forespørselen venter til du svarer, og når du har signert, står det først i køen til det er levert – uten frist og uten bot.",
+    ],
+  },
+  {
     b: 217,
     date: "2026-09-27",
     title: "Salgsdirektøren tar avtaler igjen",

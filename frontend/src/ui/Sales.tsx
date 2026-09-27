@@ -82,11 +82,13 @@ function offerChecks(g: GameState, stats: PlantStats, c: Contract, committed: nu
     checks.push({
       tone: tight ? "bad" : narrow ? "warn" : "ok",
       text: Number.isFinite(needDays)
-        ? tight
-          ? `Rekker det neppe: med ordrekøen du har, blir den ferdig ca. dag ${doneDay}, fristen er dag ${c.deadlineDay}`
-          : narrow
-            ? `Knapt: blir ferdig ca. dag ${doneDay}, fristen er dag ${c.deadlineDay}. En stans eller fravær kan gjøre den for sen.`
-            : `Blir ferdig ca. dag ${doneDay} med ordrekøen du har (frist dag ${c.deadlineDay})`
+        ? c.landmark
+          ? `Ingen frist – landemerket står først i ordrekøen og blir ferdig ca. dag ${doneDay}`
+          : tight
+            ? `Rekker det neppe: med ordrekøen du har, blir den ferdig ca. dag ${doneDay}, fristen er dag ${c.deadlineDay}`
+            : narrow
+              ? `Knapt: blir ferdig ca. dag ${doneDay}, fristen er dag ${c.deadlineDay}. En stans eller fravær kan gjøre den for sen.`
+              : `Blir ferdig ca. dag ${doneDay} med ordrekøen du har (frist dag ${c.deadlineDay})`
         : "Verket står – ingen produksjon nå",
     });
   }
@@ -134,12 +136,19 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
       </div>
       <p className="g-offer-meta">
         {fmtT(c.tonnes)} {PRODUCTS[c.product].name.toLowerCase()} i kvalitet <strong>{GRADES[c.grade].name}</strong> ·{" "}
-        {fmtKr(c.pricePerT)}/t · leveres innen {days} døgn
+        {fmtKr(c.pricePerT)}/t · {c.landmark ? "ingen frist" : `leveres innen ${days} døgn`}
       </p>
-      <p className={`g-answer-by${hours <= 3 ? " is-urgent" : ""}`}>
-        <Icon name="clock" />
-        Svar innen {answerText(hours)} – ellers går kunden videre
-      </p>
+      {c.landmark ? (
+        <p className="g-answer-by">
+          <Icon name="clock" />
+          Venter til du svarer – landemerker går ikke ut
+        </p>
+      ) : (
+        <p className={`g-answer-by${hours <= 3 ? " is-urgent" : ""}`}>
+          <Icon name="clock" />
+          Svar innen {answerText(hours)} – ellers går kunden videre
+        </p>
+      )}
       <ul className="g-checks">
         {checks.map((ch) => (
           <li key={ch.text} className={ch.tone}>
@@ -148,13 +157,14 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
         ))}
       </ul>
       <details className="g-details">
-        <summary>Krav til stålet, omdømme og bot</summary>
+        <summary>{c.landmark ? "Krav til stålet og omdømme" : "Krav til stålet, omdømme og bot"}</summary>
         <p>
           <GradeSpec id={c.grade} />
         </p>
         <p className="g-muted">
-          Omdømme +{fmtNum(c.repGain, 1)} ved levering, −{fmtNum(c.repLoss, 1)} og bot {fmtKr(c.penaltyPerT)}/t hvis for
-          sent.
+          {c.landmark
+            ? `Omdømme +${fmtNum(c.repGain, 1)} ved levering. Ingen frist og ingen bot.`
+            : `Omdømme +${fmtNum(c.repGain, 1)} ved levering, −${fmtNum(c.repLoss, 1)} og bot ${fmtKr(c.penaltyPerT)}/t hvis for sent.`}
         </p>
       </details>
       <div className="g-row g-offer-actions">
@@ -190,13 +200,13 @@ function OfferMasterDetail({ g, stats, act, offers, committed }: Props & { offer
                   <span className="g-contract-value">{fmtKr(c.tonnes * c.pricePerT)}</span>
                 </span>
                 <span className="g-offer-row-meta">
-                  {fmtT(c.tonnes)} · {GRADES[c.grade].name} · {days} døgn
+                  {fmtT(c.tonnes)} · {GRADES[c.grade].name} · {c.landmark ? "ingen frist" : `${days} døgn`}
                 </span>
                 <span className="g-offer-row-foot">
                   <Verdict tone={tone} />
-                  <span className={`g-answer-by${hours <= 3 ? " is-urgent" : ""}`}>
+                  <span className={`g-answer-by${!c.landmark && hours <= 3 ? " is-urgent" : ""}`}>
                     <Icon name="clock" />
-                    {answerText(hours)}
+                    {c.landmark ? "venter" : answerText(hours)}
                   </span>
                 </span>
               </button>
@@ -367,7 +377,9 @@ export function Sales({ g, stats, act, openTab }: Props & { openTab?: string }) 
                     <strong>
                       {i + 1}. {c.customer}
                     </strong>
-                    {left <= 1 ? (
+                    {c.landmark ? (
+                      <span className="g-muted">Ingen frist</span>
+                    ) : left <= 1 ? (
                       <span className="ds-status is-heat">
                         <Icon name="clock" />
                         {left <= 0 ? "Frist i dag" : "1 døgn igjen"}

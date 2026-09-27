@@ -121,6 +121,7 @@ import {
 } from "./konsern";
 import {
   bonusGap,
+  day,
   computePlantStats,
   gradeRecipe,
   liftMorale,
@@ -1717,6 +1718,29 @@ test("Valseverket rekker mindre enn støpingen (B-217): emnene teller med, og sa
   g.agreements.push(agreement(3, "armering", Math.round(stats.rolledDailyT * 7 * 0.6), "tilbud"));
   directorHour(g);
   assert(g.agreements.find((a) => a.id === 3)?.status === "tilbud", "signerte mer armering enn valseverket rekker");
+});
+
+test("Landemerker går ikke ut (B-218): ingen svarfrist og ingen leveringsfrist", () => {
+  const g = newGame(218);
+  g.tutorial = null;
+  g.minute = 3 * 1440;
+  g.pendingDecision = null;
+  landmarkHour(g, "2026-10-01");
+  const c = landmarkContract(g)!;
+  assert(!!c && c.status === "tilbud", "fikk ikke landemerket");
+  // Svarfristen er passert: forespørselen står likevel
+  c.offerExpiresMin = 0;
+  advance(g, 60);
+  assert(c.status === "tilbud" && g.contracts.includes(c), "forespørselen gikk ut");
+  acceptContract(g, c.id);
+  // Fristen er passert: kontrakten står i køen, uten bot
+  c.deadlineDay = day(g) - 5;
+  const bot = g.today.costs.bot ?? 0;
+  g.pendingDecision = null;
+  advance(g, 1440);
+  assert(c.status !== "misligholdt", "landemerket ble misligholdt etter fristen");
+  assert((g.today.costs.bot ?? 0) === 0 || (g.today.costs.bot ?? 0) === bot, "bot for et landemerke");
+  assert(!assessOffer(g, computePlantStats(g), { ...c, status: "tilbud" }).tight, "landemerket vurderes som for sent");
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

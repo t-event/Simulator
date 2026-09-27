@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 155 – 2026-09-27: Landemerker på Mål, og de går ikke ut
+
+**Brukeren ba om:** landemerkekortet sammen med dagens oppdrag; landemerkekontrakten skal ikke kunne gå ut.
+
+**Gjort:** B-218. Kortet står på Mål → I dag under dagens oppdrag (ikke lenger på Oversikt). Landemerker har ingen
+svarfrist og ingen leveringsfrist, trekkes ikke ved bytte av vare, og Salg sier «ingen frist». Landemerker i armering
+får igjen størrelse etter valseverket (følge av B-217).
+
+**Testet:** tsc, lint, `npm test` (ny test), `balance.ts` (exit 0), Playwright på de 7 størrelsene (Mål og Salg: ingen
+horisontal scrolling, ingen avkortet tekst, lenken til Salg virker).
+
+**Gjenstår:** eierens godkjenning av Granes rekorder (B-217); UI-4b, UI-4c, UI-4d; reserven og kassegrensen;
+Google/Apple senere.
+
+---
+
 ## Økt 154 – 2026-09-27: Salgsdirektøren og rammeavtalene, Verket på PC, Grane på Hall of Fame
 
 **Brukeren ba om:** salgsdirektøren signerer ikke nye rammeavtaler; på PC går Konsern → Marked → Verket tilbake til

@@ -3927,3 +3927,19 @@ der om man er på konsernsiden, trykker på marked også kjapt trykker på verke
   kontoen er endring av ekte spillerdata og venter på eierens godkjenning. Dry-run: konsernverdi 162,2 → 8 562,6 mrd.
   (dag 2 190), kasse 11,29 → 8 285,9 mrd. (dag 2 190), storverk og ferdig dag 2 273 → 610. «Koblet til på dag» regnes
   fra tidslinja og står på 2 273.
+
+## B-218 Landemerker på Mål sammen med dagens oppdrag, og de går aldri ut (2026-09-27)
+Status: gjelder (justerer B-174 og B-177)
+Brukeren: «Landemerker boksen bør ligge sammen med dagens oppdrag. Også bør ikke landemerker kontrakten kunne gå ut».
+- **Plassen:** kortet «Landemerker» er flyttet fra Verket → Oversikt til Mål → I dag, under dagens oppdrag. Landemerket
+  kommer én gang per virkelig dag, som oppdragene. Lenken «Se forespørselen under Salg» åpner Salg → Forespørsler.
+- **Går aldri ut:** forespørselen har ingen svarfrist og trekkes heller ikke når verket en stund lager en annen vare
+  (`expireOffers` hopper over landemerker). Den signerte kontrakten har ingen frist: den står først i ordrekøen til den
+  er levert, uten bot og uten tapt omdømme (dagsløkka hopper over landemerker). `assessOffer` regner den aldri som for
+  sen, `lateContracts` (varsel ved utkobling) tar den ikke med, og kundevurderingen gir full uttelling for tid.
+  `deadlineDay` står fortsatt og brukes bare som anslag. Spilleren kan selv avslå eller avbryte, som før.
+- **Salg:** forespørselen viser «ingen frist» og «Venter til du svarer – landemerker går ikke ut»; i ordrekøen står
+  «Ingen frist».
+- **Rettet samtidig (følge av B-217):** landemerket fikk størrelse etter hele døgnproduksjonen, også når varen er
+  armering. Nå brukes `productCapT` (valseverket for armering), som før B-217.
+- Konto: nei (samme funksjon som før, bare flyttet). Ny test i `game/tests.ts`.
