@@ -3302,3 +3302,34 @@ button {
     display: none;
   }
 }
+
+/* Anlegg (B-196): tittel og statusmerke på samme linje i hvert sted */
+.g-chain-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.g-chain-head .ds-status {
+  max-width: 100%;
+  white-space: normal;
+}
+
+.g-chain-head h3 {
+  margin: 0;
+}
+
+/* PC: produksjonsflyten over begge kolonnene, rett under underfanene */
+@media (min-width: 1000px) {
+  .g-grid.is-anlegg > .g-verket-tabs {
+    order: -2;
+  }
+
+  .g-grid.is-anlegg > .g-anlegg-flow {
+    grid-column: 1 / -1;
+    order: -1;
+  }
+}

@@ -3433,3 +3433,17 @@ Konto (B-149): ingen ny funksjon.
 Testet: tsc, lint, `npm test`, balanse (exit 0), build. Playwright før/etter på 320, 390, 1 366 og 1 920 px (stålverk og
 storverk med konsern), og de 7 størrelsene uten vannrett scrolling; boblene målt på 10× (maks 1 samtidig, sammenslått)
 og med redusert bevegelse (stille linje).
+
+## B-196 UI-2b: Anlegg – statusmerker og produksjonsflyten over hele bredden på PC (2026-09-27)
+Status: gjelder (UI.md 6 og 6.2; bygger på B-195)
+Beslutning:
+- Hvert sted i «Produksjonen» (skraplager, ovner, støping, valseverk, ferdigvarelager) har tittel og statusmerke
+  (`StatusBadge`: ikon + ord + farge) på samme linje, og merket bryter under tittelen når ruta er smal. Ovner og
+  støping har alltid merke (kjører, venter, vedlikehold, feil …); lagrene bare når noe er galt (tomt, mangler skrap,
+  nesten fullt, fullt).
+- **PC (fra 1 000 px):** produksjonsflyten står over begge kolonnene rett under underfanene, så alle stedene står på
+  én rad; vedlikehold og kvalitet står under. Mobil er uendret: én kolonne i samme rekkefølge.
+- Ingen endring i spillet eller i knappene; teksten fra motoren står som før.
+Konto (B-149): ingen ny funksjon.
+Testet: tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter på 320, 390, 1 366 og 1 920 px (stålverk og
+storverk) og de 7 størrelsene uten vannrett scrolling.

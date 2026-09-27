@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 196,
+    date: "2026-09-27",
+    title: "Tydeligere Anlegg",
+    items: [
+      "Hvert sted i produksjonen viser status med et merke: smelter, venter, støper, mangler skrap, lager fullt.",
+      "På PC står hele produksjonslinja på én rad øverst på Anlegg.",
+    ],
+  },
+  {
     b: 195,
     date: "2026-09-27",
     title: "Roligere oversikt",
