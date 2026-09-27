@@ -1,6 +1,6 @@
 /**
- * Topplista (B-127). Arket bak 🏆 ved varsellinja (B-133). Fem lister, hentet fra serveren og oppdatert mens den er åpen (B-144).
- * Uten konto vises lista likevel, med en oppfordring om å logge inn.
+ * Topplista (B-127). Arket bak 🏆 ved varsellinja (B-133). Fire lister, hentet fra serveren og oppdatert mens den er
+ * åpen (B-144). Uten konto vises lista likevel, med en oppfordring om å logge inn. Formen fra UI-4b (B-224).
  */
 import { useEffect, useState } from "react";
 import { cloudConfigured } from "../net/config";
@@ -23,8 +23,9 @@ import { useSeasonStatus } from "./useSeason";
 import { getSession, onSessionChange } from "../net/supabase";
 import { cloudStatus, onCloudStatus } from "../net/sync";
 import { useSyncExternalStore } from "react";
-import { Card } from "./common";
+import { Callout } from "./ds";
 import { fmtKr, fmtRep } from "./format";
+import { Icon } from "./icons";
 
 /** Spillerens egne resultater fra sesonger som er over (B-143) */
 function SeasonHistory() {
@@ -72,7 +73,10 @@ function fmtValue(kind: BoardKind, v: number): string {
   return `dag ${Math.round(v)}`;
 }
 
-/** Topplista som eget ark bak 🏆 øverst (B-133), så den er synlig fra alle skjermer */
+/**
+ * Topplista som eget ark bak 🏆 (B-133, B-214). UI-4b (B-224): ikoner i toppen (oppdater, lukk), sesong eller Hall of
+ * Fame som valg, din plass for seg øverst, lasteskisse mens lista hentes, og forklaringen bak «Slik virker lista».
+ */
 export function LeaderboardSheet({
   api,
   g,
@@ -84,19 +88,14 @@ export function LeaderboardSheet({
   onClose: () => void;
   onOpenSettings: () => void;
 }) {
+  if (!cloudConfigured()) return null;
   return (
     <div className="g-modal g-side-sheet" role="dialog" aria-modal="true" aria-label="Toppliste" onClick={onClose}>
-      <div className="g-modal-card" onClick={(e) => e.stopPropagation()}>
-        <header className="g-card-head">
-          <h2>Toppliste</h2>
-          <button onClick={onClose} aria-label="Lukk">
-            ✕
-          </button>
-        </header>
+      <div className="g-modal-card g-board-sheet" onClick={(e) => e.stopPropagation()}>
         <Leaderboard
           api={api}
           g={g}
-          bare
+          onClose={onClose}
           onOpenSettings={() => {
             onClose();
             onOpenSettings();
@@ -107,24 +106,25 @@ export function LeaderboardSheet({
   );
 }
 
-export function Leaderboard({
+function Leaderboard({
   onOpenSettings,
+  onClose,
   api,
   g,
-  bare,
 }: {
-  onOpenSettings?: () => void;
-  api?: GameApi;
-  g?: GameState;
-  /** Uten kortramme (inne i arket bak 🏆) */
-  bare?: boolean;
+  onOpenSettings: () => void;
+  onClose: () => void;
+  api: GameApi;
+  g: GameState;
 }) {
   const session = useSyncExternalStore(onSessionChange, getSession, getSession);
   const [kind, setKind] = useState<BoardKind>("verdi");
   // Denne sesongen eller Hall of Fame (B-129, B-182)
   const [scope, setScope] = useState<"sesong" | "alle">("sesong");
   const status = useSeasonStatus();
-  const seasonId = scope === "sesong" ? (status?.current?.id ?? null) : null;
+  const current = status?.current ?? null;
+  const seasonId = scope === "sesong" ? (current?.id ?? null) : null;
+  const hallOfFame = seasonId === null;
   // Radene huskes sammen med lista de hører til (B-171): bytter man liste, vises ikke tallene fra den forrige
   const key = `${kind}:${seasonId ?? "alle"}`;
   const [loaded, setLoaded] = useState<{ key: string; rows: BoardRow[]; at: number } | null>(null);
@@ -136,7 +136,6 @@ export function Leaderboard({
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
-    if (!cloudConfigured()) return;
     let alive = true;
     void (async () => {
       try {
@@ -167,31 +166,36 @@ export function Leaderboard({
   // Lista hentes på nytt mens den er åpen, så den følger med mens man spiller (B-144). Snapshots lastes opp med
   // lagringen på nett (ca. hvert 15. sekund), så oftere enn det gir ikke noe nytt.
   useEffect(() => {
-    if (!cloudConfigured()) return;
     const t = setInterval(() => {
       if (document.visibilityState === "visible") setTick((x) => x + 1);
     }, BOARD_POLL_MS);
     return () => clearInterval(t);
   }, []);
 
-  if (!cloudConfigured()) return null;
-
-  // Knappen viser at den henter, og når lista sist ble hentet (B-171)
-  const refresh = (
-    <button
-      className={`g-small g-board-reload${loading ? " is-loading" : ""}`}
-      onClick={() => setTick((t) => t + 1)}
-      aria-label="Oppdater topplista"
-      aria-busy={loading}
-    >
-      ↻
-    </button>
-  );
-  const body = (
+  const me = rows?.find((r) => r.is_me) ?? null;
+  const board = BOARDS.find((b) => b.id === kind)!;
+  return (
     <>
+      <header className="g-card-head g-board-head">
+        <h2>{hallOfFame && current ? "Hall of Fame" : "Toppliste"}</h2>
+        <span className="g-board-head-actions">
+          {/* Knappen viser at den henter, og når lista sist ble hentet (B-171) */}
+          <button
+            className={`g-icon-btn g-board-reload${loading ? " is-loading" : ""}`}
+            onClick={() => setTick((t) => t + 1)}
+            aria-label="Oppdater topplista"
+            aria-busy={loading}
+          >
+            <Icon name="refresh" />
+          </button>
+          <button className="g-icon-btn" onClick={onClose} aria-label="Lukk">
+            <Icon name="close" />
+          </button>
+        </span>
+      </header>
       <SeasonLine />
-      {api && g && <SeasonJoin api={api} g={g} onOpenSettings={onOpenSettings} />}
-      {status?.current && (
+      <SeasonJoin api={api} g={g} onOpenSettings={onOpenSettings} />
+      {current && (
         <div className="g-subtabs g-board-scope" role="tablist" aria-label="Sesong eller Hall of Fame">
           <button
             role="tab"
@@ -199,7 +203,7 @@ export function Leaderboard({
             className={scope === "sesong" ? "is-active" : ""}
             onClick={() => setScope("sesong")}
           >
-            Denne sesongen
+            {current.name}
           </button>
           <button
             role="tab"
@@ -207,11 +211,11 @@ export function Leaderboard({
             className={scope === "alle" ? "is-active" : ""}
             onClick={() => setScope("alle")}
           >
-            Hall of Fame
+            <Icon name="trophy" /> Hall of Fame
           </button>
         </div>
       )}
-      <div className="g-subtabs g-board-tabs" role="tablist" aria-label="Toppliste">
+      <div className="g-subtabs g-board-tabs" role="tablist" aria-label="Liste">
         {BOARDS.map((b) => (
           <button
             key={b.id}
@@ -224,40 +228,54 @@ export function Leaderboard({
           </button>
         ))}
       </div>
+      <p className="g-muted g-small-text g-board-scope-note">
+        {hallOfFame
+          ? `Beste resultat noensinne${status?.era ? ` i ${status.era.name}` : ""}: ${board.label.toLowerCase()}.`
+          : `Spillet slik det står nå: ${board.label.toLowerCase()}.`}
+      </p>
       {!session && (
-        <p className="g-muted g-small-text">
-          Logg inn under ⚙️ Innstillinger for å være med på lista.
-          {onOpenSettings && (
-            <>
-              {" "}
-              <button className="g-link" onClick={onOpenSettings}>
-                Åpne innstillinger
-              </button>
-            </>
-          )}
-        </p>
+        <Callout>
+          Logg inn for å være med på lista.{" "}
+          <button className="g-link" onClick={onOpenSettings}>
+            Åpne innstillinger
+          </button>
+        </Callout>
       )}
       {session && nickname === null && (
-        <p className="g-note">
-          Velg et brukernavn under ⚙️ Innstillinger → Konto, så kommer du med på lista.
-          {onOpenSettings && (
-            <>
-              {" "}
-              <button className="g-link" onClick={onOpenSettings}>
-                Velg brukernavn
-              </button>
-            </>
-          )}
-        </p>
+        <Callout tone="heat">
+          Velg et brukernavn under ⚙️ Innstillinger → Konto, så kommer du med på lista.{" "}
+          <button className="g-link" onClick={onOpenSettings}>
+            Velg brukernavn
+          </button>
+        </Callout>
       )}
-      {error && <p className="g-account-error">{error}</p>}
       {session && <OwnSaveNote />}
-      {rows === null && !error && <p className="g-muted">Henter …</p>}
+      {/* Din plass for seg øverst (B-224), også når du står lenger ned enn lista viser */}
+      {session && nickname && (me || myRank !== null) && (
+        <div className="g-board-me" aria-label="Din plass">
+          <span className="g-board-me-rank">{placeLabel(me?.plass ?? myRank!)}</span>
+          <span className="g-board-me-name">
+            <strong>{nickname}</strong>
+            <span className="g-muted g-small-text">Din plass</span>
+          </span>
+          {me && <span className="g-board-value">{fmtValue(kind, me.value)}</span>}
+        </div>
+      )}
+      {error && <Callout tone="critical">{error}</Callout>}
+      {rows === null && !error && (
+        <ol className="g-board is-loading" aria-label="Henter topplista">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <li key={i}>
+              <span className="g-board-skel" />
+            </li>
+          ))}
+        </ol>
+      )}
       {rows && rows.length === 0 && <p className="g-muted">Ingen på lista ennå. Du kan bli den første.</p>}
       {rows && rows.length > 0 && (
         <ol className="g-board">
           {rows.map((r) => (
-            <li key={r.plass} className={r.is_me ? "is-me" : ""}>
+            <li key={r.plass} className={`${r.is_me ? "is-me" : ""}${r.plass <= 3 ? " is-top" : ""}`}>
               <span className={`g-board-rank${r.plass <= 3 ? " is-medal" : ""}`}>{placeLabel(r.plass)}</span>
               <span className="g-board-name">
                 <span className="g-board-line">
@@ -282,30 +300,20 @@ export function Leaderboard({
           {new Date(loaded.at).toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
         </p>
       )}
-      {session && nickname && myRank !== null && !rows?.some((r) => r.is_me) && (
-        <p className="g-muted g-small-text">Du er nr. {myRank}.</p>
-      )}
       {session && <SeasonHistory />}
-      <p className="g-muted g-small-text">
-        Lista regnes ut på serveren av det som er lagret på nett, én gang per spilldøgn, og oppdaterer seg mens du
-        spiller. I sesongen gjelder spillet du har nå; i «Hall of Fame» står ditt beste resultat. Merket ved navnet
-        viser hvor langt spilleren har kommet: fra Garasje til Storverk, Konsern når konsernverdien passerer 1 mrd., og
-        en tittel fra 10 mrd. (Stålbaron, Stålmagnat, Stålfyrste, Stålkonge, Stålkeiser, Stållegende og videre til
-        Stålikon). Ved navnet står også den beste plasseringen i en sesong som er over: 🏆 for vinneren og 🎖 for topp
-        10. «Koblet til på dag N» betyr at spillet ble spilt uten konto før det: da kan det ha vokst fort på lista.
-        Kontoer med urimelig vekst holdes utenfor.
-      </p>
+      <details className="g-details">
+        <summary>Slik virker lista</summary>
+        <p className="g-muted g-small-text">
+          Lista regnes ut på serveren av det som er lagret på nett, én gang per spilldøgn, og oppdaterer seg mens du
+          spiller. I sesongen gjelder spillet du har nå; i «Hall of Fame» står ditt beste resultat. Merket ved navnet
+          viser hvor langt spilleren har kommet: fra Garasje til Storverk, Konsern når konsernverdien passerer 1 mrd.,
+          og en tittel fra 10 mrd. (Stålbaron, Stålmagnat, Stålfyrste, Stålkonge, Stålkeiser, Stållegende og videre til
+          Stålikon). Ved navnet står også den beste plasseringen i en sesong som er over: 🏆 for vinneren og 🎖 for topp
+          10. «Koblet til på dag N» betyr at spillet ble spilt uten konto før det: da kan det ha vokst fort på lista.
+          Kontoer med urimelig vekst holdes utenfor.
+        </p>
+      </details>
     </>
-  );
-  return bare ? (
-    <div className="g-board-bare">
-      <div className="g-board-refresh">{refresh}</div>
-      {body}
-    </div>
-  ) : (
-    <Card title="Toppliste" right={refresh}>
-      {body}
-    </Card>
   );
 }
 

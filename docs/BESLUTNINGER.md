@@ -4028,3 +4028,19 @@ planleggerne mine?»
 - **Rådgiveren:** har verket egne planleggere, tilbyr kortet ikke en innleid planlegger (den sorterer bare køen, som
   planleggerne alt gjør). Teksten sier i stedet at verket har tatt på seg mer enn det rekker, og at man kan si nei eller
   slå av rammeavtalene til salgsdirektøren.
+
+## B-224 UI-4b: Topplista og Hall of Fame i designsystemet (2026-09-27)
+Status: gjelder (fase UI-4b i docs/UI.md)
+Brukeren: «Fortsett» (neste steg i planen etter UI-4a).
+- **Toppen:** tittelen er «Toppliste», eller «Hall of Fame» når den er valgt. Oppdater og lukk er ikonknapper (Lucide
+  `refresh`/`close`, 44 px). Oppdater snurrer mens lista hentes.
+- **Valgene:** sesongen heter det den heter («Sesong 1») mot «🏆 Hall of Fame» (ikon fra Lucide). Under listevalget står én
+  linje om hva lista viser: «Spillet slik det står nå: …» eller «Beste resultat noensinne i Grunnleggeræraen: …».
+- **Din plass** står for seg øverst (plass, brukernavn og tallet), også når du er lenger ned enn lista viser.
+- **Lasteskisse** (fem grå rader) i stedet for «Henter …», uten animasjon når telefonen ber om mindre bevegelse.
+- Oppfordringene (logg inn, velg brukernavn) og feil er `Callout`. Forklaringen av lista er flyttet bak «Slik virker
+  lista» (ingen tekstvegg). De tre første har uthevet navn; medaljene står.
+- Bare arket bruker topplista nå, så kortvarianten er fjernet fra `Leaderboard.tsx`.
+- Testet i Playwright på de 7 størrelsene (uten konto) og på 320, 390 og 1 920 px med konto: ingen horisontal
+  scrolling, ingen avkortede knapper, verdiene innenfor arket, din plass riktig i sesong og Hall of Fame.
+- Konto: nei (samme funksjon, ny form).
