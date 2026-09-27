@@ -3829,3 +3829,30 @@ med det gamle spillet lastet det opp igjen, og spillet gikk videre på de gamle 
 - Kontroll etterpå: kasse 11,29 mrd., reserve null, `serverEdit` 1, ingen umerkede tidslinjetall, kopi finnes.
 Endringslogg: nei
 
+## B-214 Topplista for seg, egen knapp til Mål, brukernavn ved ny konto og gjester slått på (2026-09-27)
+Status: gjelder (justerer B-211 og B-212)
+Brukeren: «Nå er jo i dag, uke og sesong og prestasjoner på topplisteknappen. Det fungerer ikke så bra, fiks dette»,
+«Når man lager bruker skal man måtte lage brukernavn. Da skal man automatisk bli med på topplista» og «Allow anonymous
+sign-ins er på».
+- **Topplista for seg:** pokalen åpner igjen bare topplista, som et ark (`LeaderboardSheet`), på mobil og PC. Mål har
+  ikke lenger en fane for topplista; fanene er I dag, Uka og Merker.
+- **Egen knapp til Mål på mobil:** et blinkskive-ikon (`target`) ved siden av pokalen ved varsellinja, med en prikk når
+  dagens belønning eller oppdragsbonusen kan hentes. På PC står Mål i sidemenyen (samme ikon), og pokalen i topplinja.
+  Lenken på Verket → Oversikt står som før. Ingen egen knapp i menyen nederst – den er full.
+- **Brukernavn ved ny konto:** skjemaet for ny konto har feltet «Brukernavn (vises på topplista)», påkrevd. Appen
+  sjekker regelen (3–20 tegn, samme tegn som `set_nickname`) og at navnet er ledig (`nickname_available`, migrasjon
+  `037_ledig_brukernavn.sql`, kan kalles uten innlogging og svarer bare ja/nei – kallenavnene står på topplista fra før)
+  før kontoen lages. Navnet huskes i localStorage til e-posten er bekreftet, og settes da med `set_nickname`, så
+  spilleren er med på topplista med én gang. Ble navnet tatt i mellomtiden, får spilleren beskjed og velger et annet.
+  I appen heter det nå «brukernavn» der spilleren velger det; det er det samme som kallenavnet på lista.
+- **Gjestekontoer er slått på** av eieren i dashbordet. Supabase advarer om at gjester får rollen `authenticated` og
+  dermed RLS-reglene for den. Gjennomgått: `guest_gate` (B-212) stopper gjester før RLS for alt annet enn lagringen, og
+  reglene på tabellene gjelder uansett bare egne rader (`saves`, `snapshots`, `profiles`, `records`, `daily`,
+  `treasury`) eller det alle kan lese (`config`, sesonger, hendelser, æraer, sesongresultater). Tabeller uten regler er
+  stengt for alle. Gjester kan ikke sette brukernavn (`set_nickname` sjekker selv) og kommer derfor aldri på lista.
+  Enheter som prøvde før gjester ble slått på, prøver igjen etter et døgn (B-212).
+Konto (B-149): brukernavnet hører til kontoen (regel 3); Mål-knappen og arket krever ikke konto.
+Testet: nettest (regelen og ledig-sjekken uten innlogging), `npm test`, tsc, lint, build, Playwright på 7 størrelser
+(knappene ved varsellinja uten avkutting, pokalen åpner arket «Toppliste», Mål har tre faner) og hele løpet for ny konto
+på mobil og PC (tatt navn avvises, ledig navn settes etter bekreftelsen).
+

@@ -25,7 +25,7 @@ import {
   updatePassword,
   verifyCode,
 } from "../net/supabase";
-import { fetchProfile, setNickname as saveNickname } from "../net/leaderboard";
+import { fetchProfile, nicknameAvailable, nicknameProblem, setNickname as saveNickname } from "../net/leaderboard";
 import { ACCOUNT_FEATURES, type AccountFeature } from "../net/features";
 import { Card } from "./common";
 import { Icon } from "./icons";
@@ -193,6 +193,24 @@ export function AccountFeaturesCard({
       )}
     </Card>
   );
+}
+
+/** Brukernavnet fra skjemaet til kontoen er bekreftet (B-214). Ligger i localStorage, så det tåler at appen lukkes */
+const PENDING_NICK_KEY = "stalverk-nytt-brukernavn-v1";
+function pendingNick(): string | null {
+  try {
+    return localStorage.getItem(PENDING_NICK_KEY);
+  } catch {
+    return null;
+  }
+}
+function setPendingNick(n: string | null): void {
+  try {
+    if (n) localStorage.setItem(PENDING_NICK_KEY, n);
+    else localStorage.removeItem(PENDING_NICK_KEY);
+  } catch {
+    // Privat modus: brukernavnet velges etterpå
+  }
 }
 
 function useSession() {
@@ -392,19 +410,43 @@ export function AccountCard({
   const [nickname, setNickname] = useState<string | null | undefined>(undefined);
   const [nickDraft, setNickDraft] = useState("");
   const [flagged, setFlagged] = useState(false);
+  // Brukernavnet som velges når kontoen opprettes (B-214)
+  const [newNick, setNewNick] = useState("");
 
   useEffect(() => {
     if (!session) {
       setNickname(undefined);
       return;
     }
+    let alive = true;
     void fetchProfile()
-      .then((p) => {
-        setNickname(p?.nickname ?? null);
-        setNickDraft(p?.nickname ?? "");
+      .then(async (p) => {
+        if (!alive) return;
         setFlagged(!!p?.flagged_at || !!p?.banned);
+        // Ny konto (B-214): brukernavnet fra skjemaet settes med én gang, så spilleren er med på topplista
+        const pending = pendingNick();
+        if (p && !p.nickname && pending) {
+          setPendingNick(null);
+          try {
+            const n = await saveNickname(pending);
+            if (!alive) return;
+            setNickname(n);
+            setNickDraft(n);
+            setInfo(`Du er med på topplista som «${n}».`);
+            return;
+          } catch {
+            if (!alive) return;
+            setError(`Brukernavnet «${pending}» ble tatt i mellomtiden. Velg et annet under.`);
+            setNickDraft(pending);
+          }
+        }
+        setNickname(p?.nickname ?? null);
+        if (p?.nickname) setNickDraft(p.nickname);
       })
-      .catch(() => setNickname(null));
+      .catch(() => alive && setNickname(null));
+    return () => {
+      alive = false;
+    };
   }, [session]);
 
   useEffect(() => {
@@ -563,12 +605,12 @@ export function AccountCard({
               const n = await saveNickname(nickDraft);
               setNickname(n);
               setNickDraft(n);
-              setInfo(`Kallenavnet «${n}» er lagret. Du er med på topplista bak 🏆.`);
+              setInfo(`Brukernavnet «${n}» er lagret. Du er med på topplista.`);
             });
           }}
         >
           <label className="g-field">
-            Kallenavn på topplista {nickname === null && <span className="g-muted">(ikke valgt ennå)</span>}
+            Brukernavn på topplista {nickname === null && <span className="g-muted">(ikke valgt ennå)</span>}
             <input
               type="text"
               maxLength={20}
@@ -580,7 +622,7 @@ export function AccountCard({
             />
           </label>
           <button type="submit" disabled={busy || nickDraft.trim().length < 3 || nickDraft.trim() === nickname}>
-            {nickname ? "Endre kallenavn" : "Bli med på topplista"}
+            {nickname ? "Endre brukernavn" : "Bli med på topplista"}
           </button>
         </form>
         {flagged && (
@@ -749,6 +791,11 @@ export function AccountCard({
         return;
       }
       if (mode === "signup") {
+        // Brukernavnet er påkrevd og må være ledig før kontoen lages (B-214)
+        const problem = nicknameProblem(newNick);
+        if (problem) throw new Error(problem);
+        if (!(await nicknameAvailable(newNick))) throw new Error("Brukernavnet er tatt. Velg et annet.");
+        setPendingNick(newNick.trim());
         const r = await signUp(mail, password);
         if (r.needsConfirm) {
           setCode("");
@@ -801,6 +848,22 @@ export function AccountCard({
             onChange={(e) => setEmail(e.target.value)}
           />
         </label>
+        {mode === "signup" && (
+          <label className="g-field">
+            Brukernavn (vises på topplista)
+            <input
+              type="text"
+              name="nickname"
+              autoComplete="nickname"
+              minLength={3}
+              maxLength={20}
+              required
+              placeholder="3–20 tegn"
+              value={newNick}
+              onChange={(e) => setNewNick(e.target.value)}
+            />
+          </label>
+        )}
         {mode !== "forgot" && (
           <label className="g-field">
             Passord{mode === "signup" ? " (minst 6 tegn)" : ""}

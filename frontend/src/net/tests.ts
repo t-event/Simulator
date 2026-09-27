@@ -26,7 +26,14 @@ import {
   translateError,
   verifyCode,
 } from "./supabase";
-import { fetchLeaderboard, fetchMyRank, fetchProfile, setNickname } from "./leaderboard";
+import {
+  fetchLeaderboard,
+  fetchMyRank,
+  fetchProfile,
+  nicknameAvailable,
+  nicknameProblem,
+  setNickname,
+} from "./leaderboard";
 import { claimAway, fetchDailyStatus } from "./daily";
 import { chestFp, claimWeekChest, fetchWeeklyBoard, fetchWeeklyStatus, weekDaysLeft } from "./weekly";
 import {
@@ -201,6 +208,14 @@ function makeFake(): Fake {
         expires_in: 3600,
         user: { id: "u-a@test" },
       });
+    }
+    // Som nickname_available i 037 (B-214): uten innlogging
+    if (path.startsWith("/rest/v1/rpc/nickname_available")) {
+      const n = String(body.name).trim().toLowerCase();
+      return json(
+        200,
+        n.length >= 3 && n.length <= 20 && ![...f.nicknames.values()].some((x) => x.toLowerCase() === n),
+      );
     }
     const id = who(init);
     if (!id) return json(401, { message: "JWT" });
@@ -1340,6 +1355,16 @@ const main = async () => {
     owned.owner = "u-a@test";
     await onGuestSave(owned, true);
     assert(!f2.calls.length, "et spill som tilhører en konto, skal ikke bli gjest");
+  });
+
+  await test("Brukernavn ved ny konto (B-214): regelen i appen og ledig-sjekken uten innlogging", async () => {
+    const f = fresh();
+    assert(nicknameProblem("ab") !== null && nicknameProblem("a".repeat(21)) !== null, "lengden skulle sjekkes");
+    assert(nicknameProblem("Ola<script>") !== null, "ulovlige tegn skulle avvises");
+    assert(nicknameProblem(" Stålmester 2 ") === null, "et vanlig navn skulle godtas");
+    f.nicknames.set("u-annen", "Grane");
+    assert(!(await nicknameAvailable("grane")) && (await nicknameAvailable("Nyspiller")), "ledig-sjekken");
+    assert(getSession() === null, "sjekken skal gå uten innlogging");
   });
 
   await test("NetError uten nett merkes som offline", async () => {

@@ -97,6 +97,20 @@ export async function fetchProfile(): Promise<Profile | null> {
   return rows[0] ?? null;
 }
 
+/** Samme regel som set_nickname på serveren: 3–20 tegn, bokstaver, tall, mellomrom og . _ - */
+export function nicknameProblem(name: string): string | null {
+  const n = name.trim();
+  if (n.length < 3 || n.length > 20) return "Brukernavnet må ha 3–20 tegn.";
+  if (!/^[A-Za-z0-9ÆØÅæøåÄÖÜäöüÉéÈè _.-]+$/.test(n))
+    return "Bruk bare bokstaver, tall, mellomrom, punktum, bindestrek og understrek i brukernavnet.";
+  return null;
+}
+
+/** Er brukernavnet ledig? Sjekkes før kontoen opprettes (B-214), uten innlogging */
+export async function nicknameAvailable(name: string): Promise<boolean> {
+  return rpc<boolean>("nickname_available", { name: name.trim() });
+}
+
 /** Setter kallenavnet. Serveren sjekker lengde, tegn og at det er ledig; feil kommer som norsk melding. */
 export async function setNickname(name: string): Promise<string> {
   return rpc<string>("set_nickname", { name });
