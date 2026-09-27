@@ -3901,3 +3901,43 @@ button {
     break-inside: avoid;
   }
 }
+
+/* Forskning (UI-3c, B-205): fagpoengene stort i sidekolonnen, stolpe mot prisen på det som mangler fagpoeng */
+.g-fp-hero {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  margin: 0 0 var(--sp-3);
+  color: var(--text-2);
+}
+
+.g-fp-hero .ds-icon {
+  width: 22px;
+  height: 22px;
+  align-self: center;
+  color: var(--accent);
+}
+
+.g-fp-hero strong {
+  font-family: var(--font-display);
+  font-size: var(--fs-hero);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.g-upgrades.g-upgrades-single {
+  grid-template-columns: 1fr;
+}
+
+.g-research-later .g-bar {
+  margin: var(--sp-1) 0;
+}
+
+.g-research-later button .ds-icon,
+.g-research .g-upgrade button .ds-icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+}

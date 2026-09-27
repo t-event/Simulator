@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 142 – 2026-09-27: UI-3c – Forskning
+
+**Brukeren ba om:** «Fortsett» (neste steg i UI-planen).
+
+**Gjort:** B-205. Forskning i to kolonner på PC: forskningen til venstre (klare kort i rutenett, fremdriftslinje mot prisen
+for det som mangler fagpoeng, mesterskap), fagpoengene til høyre (stort tall, slik får du fagpoeng, samarbeidet, kommer
+senere, forsket fram). Bok-ikon i stedet for emoji. Endringsloggen, UI.md.
+
+**Testet:** tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter og de 7 størrelsene.
+
+**Gjenstår:** UI-3d (Konsern), deretter UI-4a–d.
+
+---
+
 ## Økt 141 – 2026-09-27: UI-3b – Folk
 
 **Brukeren ba om:** «Merge. Bare merge uten å spørre fremover. Fortsett.»
