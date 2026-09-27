@@ -19,7 +19,7 @@ import {
   recipeEstimate,
   unlock,
 } from "./engine";
-import { computePlantStats, day, gradeRecipe } from "./plant";
+import { computePlantStats, day, gradeRecipe, productCapT } from "./plant";
 import { auto, hasResearch } from "./research";
 import { masteryFactor } from "./mastery";
 import { chance, randInt } from "./random";
@@ -834,7 +834,12 @@ export function directorHour(g: GameState): void {
     const recipeOk = check.recipeOk || (check.graderFix && following);
     if (!check.canMake || !recipeOk || check.tight || (check.narrow && level < 1)) continue;
     // Samme regnestykke som på Salg, men med det dårligste døgnet og mer margin
-    const needDays = (committedT(g) + landmarkT + agreementLoadUntil(g, c.deadlineDay) + c.tonnes) / perDay;
+    let needDays = (committedT(g) + landmarkT + agreementLoadUntil(g, c.deadlineDay) + c.tonnes) / perDay;
+    // Armering må også rekkes av valseverket (B-217)
+    if (c.product === "armering" && stats.rolledDailyT > 0) {
+      const load = committedT(g, "armering") + agreementLoadUntil(g, c.deadlineDay, "armering") + c.tonnes;
+      needDays = Math.max(needDays, load / Math.min(perDay, productCapT(stats, "armering")));
+    }
     if (needDays > check.days * (DIRECTOR_MARGINS[level] ?? DIRECTOR_MARGIN)) continue;
     // Eksportkontoret forhandler bedre pris (B-172)
     if (level >= 3) c.pricePerT = Math.round(c.pricePerT * 1.05);
@@ -844,10 +849,16 @@ export function directorHour(g: GameState): void {
   const share = level >= 3 ? 0.7 : DIRECTOR_AGREEMENT_SHARE;
   const perWeek = perDay * 7;
   for (const a of g.agreements.filter((x) => x.status === "tilbud")) {
-    const used = g.agreements.filter((x) => x.status === "aktiv").reduce((t, x) => t + x.weeklyT, 0);
+    const active = g.agreements.filter((x) => x.status === "aktiv");
+    const used = active.reduce((t, x) => t + x.weeklyT, 0);
     const canMake = stats.products.includes(a.product);
     const recipeOk = recipeEstimate(g, a.grade, stats, gradeRecipe(g, a.grade)).grades.includes(a.grade);
     if (!canMake || !recipeOk || perWeek <= 0 || (used + a.weeklyT) / perWeek > share) continue;
+    // Armering: samme andel av det valseverket rekker (B-217)
+    if (a.product === "armering" && stats.rolledDailyT > 0) {
+      const usedArm = active.filter((x) => x.product === "armering").reduce((t, x) => t + x.weeklyT, 0);
+      if ((usedArm + a.weeklyT) / (Math.min(perDay, productCapT(stats, "armering")) * 7) > share) continue;
+    }
     if (acceptAgreement(g, a.id, "Salgsdirektøren").ok) d.agreements += 1;
   }
 }

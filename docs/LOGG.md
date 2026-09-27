@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 154 – 2026-09-27: Salgsdirektøren og rammeavtalene, Verket på PC, Grane på Hall of Fame
+
+**Brukeren ba om:** salgsdirektøren signerer ikke nye rammeavtaler; på PC går Konsern → Marked → Verket tilbake til
+Konsern; Grane mistet plassen på Hall of Fame.
+
+**Gjort:** B-217. Døgnproduksjonen ble kuttet til valseverket (en firedel av det storverkene støper); nå teller emnene
+med, og armering sjekkes mot valseverket for seg (`rolledDailyT`, `productCapT`, `rollingNeedDays`). Verket i
+sidemenyen på PC åpner Oversikt når underfanen var Konsern. Grane: den gamle kontoen ble slettet med «Slett konto» og en
+ny laget 22.05; rekordene kan legges tilbake (dry-run i B-217), men venter på eierens godkjenning.
+
+**Testet:** tsc, lint, `npm test` (ny test for valseverket), `balance.ts` (exit 0), directorHour på en ekte lagring
+(New Guy: avtalen signeres), Playwright på 1 366 px før/etter (Konsern → Marked → Verket gir Oversikt).
+
+**Gjenstår:** eierens godkjenning av Granes rekorder; UI-4b (toppliste/Hall of Fame), UI-4c, UI-4d; reserven og
+kassegrensen; Google/Apple senere.
+
+---
+
 ## Økt 153 – 2026-09-27: UI-4a Kontrollrommet
 
 **Brukeren ba om:** «Fortsett» (etter at Figen var fornøyd med forklaringen; utbyttet står).

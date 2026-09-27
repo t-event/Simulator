@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 217,
+    date: "2026-09-27",
+    title: "Salgsdirektøren tar avtaler igjen",
+    items: [
+      "Salgsdirektøren regnet bare med det valseverket rekker, ikke emnene verket lager i tillegg, og sa derfor nei til nye rammeavtaler. Nå regner den med alt verket lager – og armering bare med det valseverket rekker.",
+      "På PC åpner Verket i sidemenyen Oversikt, ikke Konsern, når du kommer fra en annen side.",
+    ],
+  },
+  {
     b: 216,
     date: "2026-09-27",
     title: "Nytt kontrollrom",

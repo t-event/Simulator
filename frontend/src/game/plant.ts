@@ -101,10 +101,22 @@ export interface PlantStats {
   skillFactor: number;
   products: ProductId[];
   mainProduct: ProductId;
-  /** Anslått produksjon av ferdigvare per døgn ved full drift */
+  /** Anslått produksjon av ferdigvare per døgn ved full drift (emner og armering til sammen) */
   dailyProductT: number;
+  /** Armering valseverket rekker per døgn (0 uten valsing). Resten av det som støpes, blir emner (B-217). */
+  rolledDailyT: number;
   offersPerDay: number;
   priceBonus: number;
+}
+
+/**
+ * Hvor mye av en vare verket kan lage per døgn: armering er begrenset av valseverket, emner av støpingen (B-217).
+ * Emner som kontraktene venter på, valses ikke (updateRolling), så emnene kan ta hele støpingen.
+ */
+export function productCapT(stats: PlantStats, product: ProductId): number {
+  return product === "armering" && stats.rolledDailyT > 0
+    ? Math.min(stats.dailyProductT, stats.rolledDailyT)
+    : stats.dailyProductT;
 }
 
 export function has(g: GameState, id: string): boolean {
@@ -611,8 +623,14 @@ export function computePlantStats(g: GameState): PlantStats {
     (casting.continuous && hasResearch(g, "hoyhastighet") ? 1.15 : 1) *
     (casting.continuous ? (has(g, "streng3") ? 3 : has(g, "streng2") ? 2 : 1) : 1);
   let productPerDay = Math.min(liquidPerDay, castTph * 24) * casting.yield;
-  if (rollingActive(g))
-    productPerDay = Math.min(productPerDay, rollingTph(g) * Math.max(8, staff.hours)) * ROLLING_YIELD;
+  let rolledDailyT = 0;
+  // Valseverket gjør emner om til armering. Det verket støper utover det valseverket rekker, blir emner og telles
+  // med (B-217): før ble døgnproduksjonen kuttet til valseverket, og salgsdirektøren trodde verket laget en firedel.
+  if (rollingActive(g)) {
+    const rolledT = Math.min(productPerDay, rollingTph(g) * Math.max(8, staff.hours));
+    productPerDay -= rolledT * (1 - ROLLING_YIELD);
+    rolledDailyT = rolledT * ROLLING_YIELD;
+  }
 
   // Effekten den største ovnen trekker mens den smelter
   const furnaceMW = Math.max(...units.map((u) => u.furnaceMW));
@@ -652,6 +670,7 @@ export function computePlantStats(g: GameState): PlantStats {
     products,
     mainProduct,
     dailyProductT: productPerDay,
+    rolledDailyT,
     offersPerDay,
     priceBonus,
   };

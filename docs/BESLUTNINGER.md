@@ -3896,3 +3896,34 @@ Konto (B-149): ingen ny funksjon.
 Testet: tsc, lint, `npm test`, Playwright på 7 størrelser (rundekort og smelting: ingen horisontal scrolling, ingen
 avkuttede eller små knapper) og en automatisk gjennomspilling av alle fire rundene til resultatet på mobil og PC.
 
+
+## B-217 Døgnproduksjonen teller emnene valseverket ikke rekker, og Verket på PC åpner ikke Konsern (2026-09-27)
+Status: gjelder
+Brukeren: «Det virker som om at direktøren har sluttet å signere nye avtaler, kun nye ordere», «Det er også en bug på pc
+der om man er på konsernsiden, trykker på marked også kjapt trykker på verket så går man tilbake til konsern?» og
+«[Grane] mistet sin plass på hall of fame, det skulle han ikke».
+- **Funnet (salgsdirektøren):** `dailyProductT` ble kuttet til det valseverket rekker (min(støping, valsing) × 0,96).
+  På et storverk med tre valseverk rekker valsingen ca. 8 300 t armering i døgnet, mens verkene støper 30 000 t – resten
+  blir emner og selges. Salgsdirektøren trodde derfor verket laget en firedel av det det gjør, og en ny rammeavtale
+  (0,2–0,4 av en ukes «produksjon») sprengte grensen på 50/70 % av uka. Sett på ekte lagringer: New Guy (2 aktive +
+  1 tilbud, 0,84 av uka mot 0,5), Figen (1 aktiv, 0,56 mot 0,5), Tuster (emneavtalen på 21 250 t). Feilen har vært der
+  siden valseverket kom, men merkes først når støpingen blir mye større enn valsingen (stormodellene i B-154 og flere
+  strenger).
+- **Rettet:** `dailyProductT` er nå alt verket lager (emner og armering): støpingen minus valsetapet på det som valses.
+  Ny `rolledDailyT` er armeringen valseverket rekker, og `productCapT(stats, vare)` gir kapasiteten per vare. Armering
+  sjekkes i tillegg mot valseverket: `assessOffer` (Salg og salgsdirektøren) bruker det største av «hele verket» og
+  «valseverket» (`rollingNeedDays`), salgsdirektøren tar ikke armeringsavtaler over sin andel av valsingen, og
+  forespørsler og rammeavtaler på armering får størrelse og frist etter valseverket. Emner er ikke begrenset av
+  valsingen, for emner som kontraktene venter på, valses ikke (`updateRolling`).
+- Verk der støpingen er mindre enn valsingen, er uendret (samme tall som før). Testspilleren: alle nivådager OK, exit 0.
+  Ny test i `game/tests.ts`. På New Guys lagring signerer salgsdirektøren nå den ventende avtalen.
+- **PC-feilen:** Verket husket underfanen Konsern. Fra en annen fane åpnet Verket derfor Konsern igjen. På PC er Konsern
+  et eget punkt i sidemenyen, så Verket åpner nå Oversikt når underfanen var Konsern. På mobil er Konsern en underfane
+  i Verket og huskes som før.
+- **Grane og Hall of Fame:** den gamle kontoen ble slettet med «Slett konto», og en ny konto med samme brukernavn ble
+  laget kl. 22.05 (UTC). Rekordene, tidslinja og sikkerhetskopiene følger kontoen og ble slettet med den; den nye kontoen
+  har bare rekordene fra dag 2 273. (Rettelse: i svaret til brukeren kl. 22.17 sto det at Granes enhet hadde hentet det
+  rettede spillet; det var den nye kontoen som lastet opp spillet.) Å legge de gamle rekordene inn igjen på den nye
+  kontoen er endring av ekte spillerdata og venter på eierens godkjenning. Dry-run: konsernverdi 162,2 → 8 562,6 mrd.
+  (dag 2 190), kasse 11,29 → 8 285,9 mrd. (dag 2 190), storverk og ferdig dag 2 273 → 610. «Koblet til på dag» regnes
+  fra tidslinja og står på 2 273.

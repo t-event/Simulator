@@ -72,6 +72,7 @@ import {
   POWER_BINDING_DAYS,
   productPrice,
   rollingActive,
+  productCapT,
   rollingTph,
   ROLLING_YIELD,
   satisfies,
@@ -1603,10 +1604,10 @@ function complains(g: GameState, a: Analysis, grade: GradeId): boolean {
 export const CONTRACT_MARGIN = 0.8;
 
 /** Ukeleveranser fra rammeavtalene som legges i ordrekøen før en gitt dag, til anslaget på Salg (B-062) */
-export function agreementLoadUntil(g: GameState, untilDay: number): number {
+export function agreementLoadUntil(g: GameState, untilDay: number, product?: ProductId): number {
   let t = 0;
   for (const a of g.agreements) {
-    if (a.status !== "aktiv") continue;
+    if (a.status !== "aktiv" || (product && a.product !== product)) continue;
     for (let w = a.weeksSent, d = a.nextDay; w < a.weeks && d < untilDay; w++, d += 7) t += a.weeklyT;
   }
   return t;
@@ -1629,9 +1630,27 @@ export function lateContracts(g: GameState, stats: PlantStats, lostT = 0): Contr
   return late;
 }
 
-/** Tonn som gjenstår i ordrekøen */
-export function committedT(g: GameState): number {
-  return orderQueue(g).reduce((a, c) => a + c.tonnes - c.delivered, 0);
+/** Tonn som gjenstår i ordrekøen (bare én vare hvis «product» er gitt) */
+export function committedT(g: GameState, product?: ProductId): number {
+  return orderQueue(g)
+    .filter((c) => !product || c.product === product)
+    .reduce((a, c) => a + c.tonnes - c.delivered, 0);
+}
+
+/**
+ * Døgn armeringen i køen, rammeavtalene og en ny ordre trenger fra valseverket (B-217). Valseverket rekker bare en del
+ * av det som støpes, så armering kan være for mye selv om verket har tonn nok. 0 for andre varer.
+ */
+export function rollingNeedDays(
+  g: GameState,
+  stats: PlantStats,
+  product: ProductId,
+  tonnes: number,
+  until: number,
+): number {
+  if (product !== "armering" || stats.rolledDailyT <= 0) return 0;
+  const perDay = Math.min(productCapT(stats, "armering"), realisticDailyT(g, stats));
+  return (committedT(g, "armering") + agreementLoadUntil(g, until, "armering") + tonnes) / perDay;
 }
 
 export interface OfferCheck {
@@ -1672,7 +1691,13 @@ export function assessOffer(g: GameState, stats: PlantStats, c: Contract, commit
     g.workers.some((w) => w.role === "klasser") &&
     !!suggestRecipe(g, c.grade, stats, "sikker");
   const perDay = stats.dailyProductT > 0 ? realisticDailyT(g, stats) : 0;
-  const needDays = perDay > 0 ? (committed + agreementLoadUntil(g, c.deadlineDay) + c.tonnes) / perDay : Infinity;
+  const needDays =
+    perDay > 0
+      ? Math.max(
+          (committed + agreementLoadUntil(g, c.deadlineDay) + c.tonnes) / perDay,
+          rollingNeedDays(g, stats, c.product, c.tonnes, c.deadlineDay),
+        )
+      : Infinity;
   const days = c.deadlineDay - day(g) + 1;
   const tight = needDays > days;
   const narrow = !tight && needDays > days * CONTRACT_MARGIN;
@@ -1899,7 +1924,7 @@ function makeOffer(g: GameState, stats: PlantStats): Contract | null {
   const picked = pickCustomer(g, stats);
   if (!picked) return null;
   const { customer, product, grade } = picked;
-  const capacity = Math.max(0.1, stats.dailyProductT);
+  const capacity = Math.max(0.1, productCapT(stats, product));
   // En kontrakt skal være et lite prosjekt: 1,5–4 døgns produksjon, ikke noe som er ferdig på sekunder
   // De første kontraktene i garasjen er små, så starten går fort og man ser at det virker (B-033)
   const firstOrders =
@@ -2007,7 +2032,7 @@ function makeAgreement(g: GameState, stats: PlantStats): Agreement | null {
   if (!picked) return null;
   const { customer, product, grade } = picked;
   // En fast del av det verket faktisk lager: en femdel til to femdeler av en ukes produksjon
-  const weekly = Math.min(stats.dailyProductT, realisticDailyT(g, stats)) * 7;
+  const weekly = Math.min(productCapT(stats, product), realisticDailyT(g, stats)) * 7;
   const weeklyT = roundTonnes(weekly * uniform(g, 0.2, 0.4));
   const weeks = randInt(g, 4, 10);
   const pricePerT = Math.round(productPrice(g, product, grade) * (1 + stats.priceBonus) * uniform(g, 0.97, 1.04));
