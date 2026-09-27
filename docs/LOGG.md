@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 135 – 2026-09-27: UI-2c – Marked
+
+**Brukeren ba om:** «Fortsett» etter «Merge» av UI-2b (PR #142).
+
+**Gjort:** B-197. «Kjøp skrap» som tabell på PC (fra 1 000 px) og kort på mobil med de samme delene; trend og lås med
+ikoner; de andre fanene på Marked høyst 960 px brede på PC. Endringsloggen, UI.md.
+
+**Testet:** tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter på 4 størrelser (alle fire fanene) og
+7 for vannrett scrolling.
+
+**Gjenstår:** eierens svar på skjermbildene og varsellinja på mobil (FORSLAG). Deretter UI-2d (Salg).
+
+---
+
 ## Økt 134 – 2026-09-27: UI-2b – Anlegg
 
 **Brukeren ba om:** «Fortsett» etter UI-2a (tolket som klarsignal: PR #141 merget), så neste steg.

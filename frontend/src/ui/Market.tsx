@@ -28,6 +28,8 @@ import { worldFactor } from "../game/world";
 import { RecipeCard } from "./Recipe";
 import { AutoToggle } from "./AutoToggle";
 import { fmtKr, fmtNum, fmtPct, fmtT } from "./format";
+import { Icon } from "./icons";
+import { StatusLine } from "./ds";
 
 interface Props {
   g: GameState;
@@ -44,6 +46,53 @@ const BUY_AMOUNTS = [
 ];
 
 type MarketTab = "skrap" | "resept" | "strom" | "priser";
+
+/** Navnet på skrapet; trykk for å lese om det og selge det du har (B-051) */
+function ScrapAbout({ g, act, id, stock }: Omit<Props, "stats"> & { id: ScrapId; stock?: boolean }) {
+  const type = SCRAP_TYPES[id];
+  return (
+    <details className="g-scrap-about">
+      <summary className="g-scrap-head">
+        <strong>
+          {type.name} <Icon name="info" className="g-scrap-info" />
+        </strong>
+        {stock && <span className="g-scrap-stock">{fmtT(g.scrap[id].t)} på lager</span>}
+      </summary>
+      <p className="g-muted">{type.description}</p>
+      {g.scrap[id].t >= 1 && (
+        <button className="g-small" onClick={() => act((gg) => sellScrap(gg, id, gg.scrap[id].t))}>
+          Selg alt ({fmtT(g.scrap[id].t)}) for {fmtKr(g.scrap[id].t * scrapSellPrice(g, id))}
+        </button>
+      )}
+    </details>
+  );
+}
+
+/** Pil når prisen er over eller under det normale; ordet står for skjermlesere */
+function Trend({ g, id }: { g: GameState; id: ScrapId }) {
+  const type = SCRAP_TYPES[id];
+  if (!type.buyable) return null;
+  const trend = scrapPrice(g, id) / type.price;
+  if (trend > 1.05) return <Icon name="trend-up" className="g-trend up" label="dyrere enn vanlig" />;
+  if (trend < 0.95) return <Icon name="trend-down" className="g-trend down" label="billigere enn vanlig" />;
+  return null;
+}
+
+function BuyButtons({ g, act, id, amounts }: Omit<Props, "stats"> & { id: ScrapId; amounts: number[] }) {
+  const type = SCRAP_TYPES[id];
+  if (!type.buyable) return <div className="g-scrap-actions" />;
+  const price = scrapPrice(g, id);
+  return (
+    <div className="g-scrap-actions">
+      {amounts.map((t) => (
+        <button key={t} className="g-buy" onClick={() => act((gg) => buyScrap(gg, id, t))}>
+          +{fmtT(t)}
+          <small>{fmtKr(price * t)}</small>
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export function Market({ g, stats, act, openTab }: Props & { openTab?: string }) {
   const [tab, setTab] = useState<MarketTab>(() =>
@@ -79,7 +128,7 @@ export function Market({ g, stats, act, openTab }: Props & { openTab?: string })
     { id: "priser", label: "Priser" },
   ];
   return (
-    <div className="g-grid">
+    <div className={`g-grid g-market is-${tab}`}>
       <div className="g-col-wide">
         <SubTabs tabs={tabs} value={tab} onChange={setTab} label="Marked" />
         <EventsNote g={g} />
@@ -96,26 +145,14 @@ export function Market({ g, stats, act, openTab }: Props & { openTab?: string })
             }
           >
             <Bar value={stats.yardUsed / stats.yardT} label="Skraplager" />
+            {/* Mobil: ett kort per skraptype. PC: samme data som tabell (B-197) */}
             <div className="g-scrap-list">
               {open.map((id) => {
                 const type = SCRAP_TYPES[id];
                 const price = scrapPrice(g, id);
-                const trend = price / type.price;
                 return (
                   <div className={`g-scrap${short.includes(id) ? " is-short" : ""}`} key={id}>
-                    {/* Trykk på navnet for å lese om skrapet (B-051) */}
-                    <details className="g-scrap-about">
-                      <summary className="g-scrap-head">
-                        <strong>{type.name} ⓘ</strong>
-                        <span className="g-scrap-stock">{fmtT(g.scrap[id].t)} på lager</span>
-                      </summary>
-                      <p className="g-muted">{type.description}</p>
-                      {g.scrap[id].t >= 1 && (
-                        <button className="g-small" onClick={() => act((gg) => sellScrap(gg, id, gg.scrap[id].t))}>
-                          Selg alt ({fmtT(g.scrap[id].t)}) for {fmtKr(g.scrap[id].t * scrapSellPrice(g, id))}
-                        </button>
-                      )}
-                    </details>
+                    <ScrapAbout g={g} act={act} id={id} stock />
                     {short.includes(id) && (
                       <p className="g-note g-warn">
                         Resepten trenger mer {type.name.toLowerCase()} – ovnen venter på det.
@@ -124,33 +161,72 @@ export function Market({ g, stats, act, openTab }: Props & { openTab?: string })
                     <div className="g-scrap-facts">
                       <span>
                         {type.buyable ? `${fmtKr(price)}/t` : "Gratis"}
-                        {type.buyable && (
-                          <em className={trend > 1.05 ? "up" : trend < 0.95 ? "down" : ""}>
-                            {trend > 1.05 ? " ▲" : trend < 0.95 ? " ▼" : ""}
-                          </em>
-                        )}
+                        <Trend g={g} id={id} />
                       </span>
                       <span title="Fosfor">P {fmtNum(type.p, 3)}</span>
                       <span title="Sporelementer">Spor {fmtNum(type.tramp, 2)}</span>
                       <span title="Karbon">C {fmtNum(type.c, 2)}</span>
                       <span title="Rust, jord og olje">Skitt {fmtPct(type.dirt)}</span>
                     </div>
-                    <div className="g-scrap-actions">
-                      {type.buyable &&
-                        amounts.map((t) => (
-                          <button key={t} className="g-buy" onClick={() => act((gg) => buyScrap(gg, id, t))}>
-                            +{fmtT(t)}
-                            <small>{fmtKr(price * t)}</small>
-                          </button>
-                        ))}
-                    </div>
+                    <BuyButtons g={g} act={act} id={id} amounts={amounts} />
                   </div>
                 );
               })}
             </div>
+            <table className="g-scrap-table">
+              <thead>
+                <tr>
+                  <th scope="col">Skraptype</th>
+                  <th scope="col" className="num">
+                    Pris per tonn
+                  </th>
+                  <th scope="col" className="num" title="Fosfor">
+                    P
+                  </th>
+                  <th scope="col" className="num" title="Sporelementer">
+                    Spor
+                  </th>
+                  <th scope="col" className="num" title="Karbon">
+                    C
+                  </th>
+                  <th scope="col" className="num" title="Rust, jord og olje">
+                    Skitt
+                  </th>
+                  <th scope="col" className="num">
+                    På lager
+                  </th>
+                  <th scope="col">Kjøp</th>
+                </tr>
+              </thead>
+              <tbody>
+                {open.map((id) => {
+                  const type = SCRAP_TYPES[id];
+                  return (
+                    <tr key={id} className={short.includes(id) ? "is-short" : ""}>
+                      <td>
+                        <ScrapAbout g={g} act={act} id={id} />
+                        {short.includes(id) && <StatusLine status="tomt" label="Resepten venter på dette" />}
+                      </td>
+                      <td className="num">
+                        {type.buyable ? fmtKr(scrapPrice(g, id)) : "Gratis"}
+                        <Trend g={g} id={id} />
+                      </td>
+                      <td className="num">{fmtNum(type.p, 3)}</td>
+                      <td className="num">{fmtNum(type.tramp, 2)}</td>
+                      <td className="num">{fmtNum(type.c, 2)}</td>
+                      <td className="num">{fmtPct(type.dirt)}</td>
+                      <td className="num">{fmtT(g.scrap[id].t)}</td>
+                      <td>
+                        <BuyButtons g={g} act={act} id={id} amounts={amounts} />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
             {[...locked].map(([name, ids]) => (
               <p key={name} className="g-note g-locked-scrap">
-                🔒 {ids.map((id) => SCRAP_TYPES[id].name).join(" · ")} – forsk fram «{name}».
+                <Icon name="lock" /> {ids.map((id) => SCRAP_TYPES[id].name).join(" · ")} – forsk fram «{name}».
               </p>
             ))}
             {plannerOrders(g) ? (
