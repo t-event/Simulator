@@ -3560,3 +3560,23 @@ Konto (B-149): ingen ny funksjon.
 Testet: tsc, lint, `npm test`, balanse (exit 0), build; Playwright (390 og 1 366 px): tomt skraplager uten planlegger og
 lav trivsel gir «!» på Marked og Folk, og trykk åpner Marked → Skrap og Folk → Ansatte; med planleggeren som bestiller
 får Marked ikke «!»; varsellinja viser teksten i det nyeste usette varselet.
+
+## B-203 UI-3a: Økonomi – resultatet øverst, graf per døgn og hvor pengene gikk (2026-09-27)
+Status: gjelder (UI.md 6; bygger på B-156, B-191, B-200)
+Beslutning:
+- **Resultatet øverst:** «Resultat i går» som stort tall i visningsskriften, grønt med + eller rødt med −. Ved siden av:
+  snittet for 7 døgn (alt med) og i dag hittil (inn og ut).
+- **Graf:** resultat per døgn for de siste inntil 30 døgnene (én serie, stolper over og under en nullinje). Grønt over
+  null, rødt under, og fortegnet står i teksten, så farge aldri er alene. Verktøytips per stolpe med dag og beløp, og en
+  tekst for skjermlesere med beste og dårligste dag. En dag med et stort kjøp kappes med et bruddmerke, så de vanlige
+  dagene ikke blir flate (beløpet står i verktøytipset). Vises først når det finnes minst to døgn.
+- **Hvor pengene kom fra og gikk:** «Inntekter i går» og «Kostnader i går» per post, sortert etter størrelse, med en
+  tynn stolpe for andelen. Postene har vanlige navn (`ui/financeNames.ts`). To kolonner fra 600 px.
+- Nøkkeltallene (verket i drift, datterverkene, produsert, lønn, faste kostnader, lån, reserve) står som før under
+  grafen. «Strøm og effekt i går» er tatt ut som eget tall; det står nå som to poster under kostnadene.
+- **PC:** Økonomi står under anleggsbildet, banken og loggen i høyrekolonnen (B-200). Mobil: resultatet først, så
+  banken og loggen.
+- Ingen endring i spillet.
+Konto (B-149): ingen ny funksjon.
+Testet: tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter på de 7 størrelsene (stålverk og storverk)
+uten vannrett scrolling eller avkortede knapper.

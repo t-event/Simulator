@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 203,
+    date: "2026-09-27",
+    title: "Tydeligere økonomi",
+    items: [
+      "Verket → Økonomi viser gårsdagens resultat stort øverst, og en graf over resultatet de siste 30 døgnene.",
+      "Du ser hva pengene kom fra og gikk til i går, post for post: skrap, strøm, lønn og resten.",
+    ],
+  },
+  {
     b: 202,
     date: "2026-09-27",
     title: "Tydeligere varsler",
