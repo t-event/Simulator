@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 150 – 2026-09-27: Rettingen av Granes spill
+
+**Brukeren ba om:** «Gjør rettingen» (økonomireformen for Grane, dry-run i B-211).
+
+**Gjort:** B-213. Fersk dry-run (8 541,13 mrd. → 11,29 mrd.), deretter `036_retting_grane.sql`: kasse, reserve,
+`serverEdit` 1, tidslinja etter reformen merket, rekorden for konsernverdi tilbake til før reformen. Sikkerhetskopi.
+
+**Testet:** kontrollen i blokka; spørring etterpå (kasse 11,29 mrd., reserve null, `serverEdit` 1, 0 umerkede tall).
+
+**Gjenstår:** se økt 149.
+
+---
+
 ## Økt 149 – 2026-09-27: Gjestekonto, «Det går du glipp av», flagget spiller og emojier
 
 **Brukeren ba om:** emojier i Dagens oppdrag; flaggede spillere / noen mangler på topplista; automatisk gjestekonto
