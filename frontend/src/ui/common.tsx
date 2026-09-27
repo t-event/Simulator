@@ -120,7 +120,8 @@ export function SubTabs<T extends string>({
   onChange,
   label,
 }: {
-  tabs: { id: T; label: string; alert?: boolean }[];
+  /** count: antall, vises under navnet på mobil og etter navnet på PC (B-198). badge: merke som «Ny» */
+  tabs: { id: T; label: string; alert?: boolean; count?: number; badge?: string }[];
   value: T;
   onChange: (id: T) => void;
   label: string;
@@ -135,7 +136,9 @@ export function SubTabs<T extends string>({
           className={`${value === t.id ? "is-active" : ""}${t.alert ? " is-alert" : ""}`}
           onClick={() => onChange(t.id)}
         >
-          {t.label}
+          <span className="g-tab-label">{t.label}</span>
+          {!!t.count && <span className="g-tab-count">{t.count}</span>}
+          {t.badge && <span className="g-badge g-badge-new">{t.badge}</span>}
         </button>
       ))}
     </div>

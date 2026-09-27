@@ -3430,3 +3430,181 @@ button {
     }
   }
 }
+
+/* Underfaner (B-198): navnet brytes aldri midt i ordet; antallet står under navnet på mobil, etter navnet fra 600 px */
+.g-subtabs button {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.15;
+}
+
+.g-tab-label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.g-tab-count {
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+}
+
+@media (max-width: 400px) {
+  .g-subtabs button {
+    font-size: var(--fs-meta);
+    padding: 0 2px;
+  }
+}
+
+@media (min-width: 600px) {
+  .g-subtabs button {
+    flex-direction: row;
+    gap: var(--sp-2);
+  }
+
+  .g-tab-count {
+    font-size: inherit;
+    opacity: 0.7;
+  }
+}
+
+/* Salg (B-198): kunde og verdi først, så tonn/kvalitet/frist; forespørslene som liste + detaljer på PC */
+.g-offer-customer {
+  font-size: var(--fs-title);
+}
+
+.g-offer .g-contract-value,
+.g-offer-row .g-contract-value {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--fs-section);
+}
+
+.g-offer-meta {
+  margin: var(--sp-1) 0;
+  font-size: var(--fs-meta);
+  color: var(--text-2);
+}
+
+.g-answer-by .ds-icon {
+  width: 1em;
+  height: 1em;
+  margin-right: 4px;
+  vertical-align: -0.15em;
+}
+
+.g-offers-md {
+  display: none;
+}
+
+/* Signer er hovedhandlingen på Salg: minst 44 px høy (B-198) */
+.g-offer-actions button {
+  min-height: 44px;
+  min-width: 96px;
+}
+
+.g-contract > .ds-status {
+  margin: 2px 0 4px;
+}
+
+.g-queue-foot {
+  align-items: center;
+}
+
+.g-queue-foot > .g-muted {
+  min-width: 0;
+}
+
+.g-queue-btns {
+  flex: none;
+  flex-wrap: nowrap;
+}
+
+.g-queue-btns .ds-icon {
+  width: 18px;
+  height: 18px;
+}
+
+@media (min-width: 1000px) {
+  .g-sales > .g-col-wide {
+    grid-column: 1 / -1;
+  }
+
+  .g-sales:not(.is-tilbud) > .g-col-wide > .g-card {
+    max-width: 960px;
+  }
+
+  .g-offers-cards {
+    display: none;
+  }
+
+  .g-offers-md {
+    display: grid;
+    grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+    gap: var(--sp-4);
+    align-items: start;
+    margin-top: var(--sp-3);
+  }
+
+  .g-offers-md > .g-offer {
+    margin: 0;
+    padding: var(--sp-4);
+  }
+
+  .g-offer-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+
+  .g-offer-row {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    padding: var(--sp-2) var(--sp-3);
+    text-align: left;
+    font-weight: 400;
+    background: var(--surface-2);
+    border: 1px solid transparent;
+    border-radius: var(--r-md);
+  }
+
+  .g-offer-row.is-selected {
+    background: var(--accent-tint);
+    border-color: var(--accent-border);
+  }
+
+  .g-offer-row-head,
+  .g-offer-row-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--sp-2);
+  }
+
+  .g-offer-row-meta,
+  .g-offer-row-foot {
+    font-size: var(--fs-meta);
+    color: var(--text-2);
+  }
+
+  .g-offer-row .g-answer-by {
+    margin: 0;
+  }
+
+  @media (hover: hover) {
+    .g-offer-row:not(.is-selected):hover {
+      background: var(--surface-hover);
+    }
+  }
+}
