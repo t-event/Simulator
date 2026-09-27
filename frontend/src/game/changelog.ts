@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 208,
+    date: "2026-09-27",
+    title: "Returskrapet brukes opp",
+    items: [
+      "Skrapklasseren smelter om verkets eget returskrap (kapp fra støping og valsing) i stedet for kjøpt skrap, inntil en fjerdedel av chargen. Returen hoper seg ikke lenger opp på lageret.",
+      "Planleggeren holder av plass på skraplageret: blir det over 90 % fullt, selger den det ingen resept trenger. Da rekker innkjøpet, og ovnene står ikke og venter på skrap.",
+    ],
+  },
+  {
     b: 207,
     date: "2026-09-27",
     title: "Plass til flere på storverket",

@@ -3651,3 +3651,28 @@ Beslutning:
 Konto (B-149): ingen ny funksjon.
 Testet: tsc, lint, `npm test` (den nye testen feiler med 220 og går med 240), balanse (exit 0), build.
 
+## B-208 Skrapklasseren smelter om eget returskrap, og planleggeren holder av plass på skraplageret (2026-09-27)
+Status: gjelder (bygger på B-048, B-171)
+Brukeren: «Planleggeren er dårlig å planlegge inn på resept, får stadig varsler om at jeg er tom for skrap, og at
+returproduktene samler seg opp på lageret.»
+Funnet: verket lager selv returskrap (kapp fra støping og valsing, overgangsemner og omsmeltet sekunda). På et fullt
+utbygd storverk er det ca. 950 t i døgnet. Reseptene brukte 0–10 % retur, så det hopet seg opp: brukerens lager hadde
+73 000 t retur. Planleggeren solgte bare 150–400 t om gangen – akkurat nok til neste kjøp – så lageret sto alltid
+fullt, innkjøpet kom for sent, og ovnene sto med «mangler skrap til resepten». Gjenskapt i en simulering av et verk
+som brukerens: returen vokste hvert døgn, og lageret var 97 % fullt etter ti døgn.
+Beslutning:
+- **Skrapklasseren bytter inn eget returskrap** for kjøpt skrap, inntil en fjerdedel av chargen (`RETURN_MAX_SHARE`),
+  bare for skrap som er minst like skittent (fosfor og sporelementer). Returen har kjent analyse. I lysbueovnen brennes
+  karbonet av; i induksjonsovnen (som ikke kan det) byttes retur bare inn der den ikke gir mer karbon – ellers ble
+  nybegynneren mye tregere (median storverk dag 171 i stedet for 138, fordi stålet fikk for mye karbon).
+- Det reseptene som skal ha retur (f.eks. premium med 10 %), trenger til to charger per ovn, blir liggende.
+- **Planleggeren holder av plass:** er skraplageret over 90 % fullt, selger den skrap ingen resept i ordrekøen trenger,
+  ned til 80 %, i én omgang. Returskrap skrapklasseren skal bruke i innkjøpsperioden, beholdes.
+- I simuleringen av brukerens verk går returen ned med ca. 6 000 t i døgnet (73 000 t er brukt opp på ca. 12 døgn), og
+  deretter brukes den omtrent like fort som den lages (lageret 11–15 % fullt).
+- **Testfila:** oppsummeringen som setter exit-koden, sto midt i `game/tests.ts`, så testene etter den (B-207 og denne)
+  talte ikke med i `npm test`. Den står nå sist.
+Konto (B-149): ingen ny funksjon.
+Testet: `npm test` (ny test for innbytte, skittent retur, induksjonsovn, reserve og plass på lageret; den feiler uten
+plassregelen), balanse (exit 0, nybegynner median 136), simulering av brukerens oppsett, tsc, lint, build.
+

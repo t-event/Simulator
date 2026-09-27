@@ -261,6 +261,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - Tall til tidslinja (`snapshots`) leses i **samme øyeblikk** som dagen, før første `await` i `uploadSave` (B-162).
   Spillet går videre mens lagringen venter på svar; ble tallene lest etterpå, fikk én dag flere døgns tonn, og en
   ærlig spiller ble flagget.
+- Nye tester i `game/tests.ts` skal stå **over** oppsummeringen nederst (`if (failed) … process.exitCode = 1`). Tester
+  etter den skriver «FEIL», men `npm test` gir likevel exit 0 (skjedde med B-207, rettet i B-208).
 - Se på **exit-koden** til `balance.ts`, ikke bare median-linjene: sjekken av kontrollrommet står helt nederst
   og kan være «AVVIK» selv om nivådagene er OK (publiseringen av #39 feilet slik).
 - **Bare én fane spiller** (B-176): åpnes spillet i en ny fane, lagrer den gamle og står stille. To sider i samme
