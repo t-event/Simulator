@@ -81,7 +81,8 @@ GitHub Pages: https://t-event.github.io/Simulator/
 - **Git:** Utvikle på en egen gren og push dit. `main` publiseres automatisk,
   så endringer dit går via PR. Aldri force-push til `main`.
 - **PR og merge (brukerens stående beskjed):** Når en endring er ferdig og alle sjekker er grønne
-  lokalt, oppretter Claude selv PR til `main` og merger den, uten å spørre. Deretter sjekkes at
+  lokalt, oppretter Claude selv PR til `main` og merger den, uten å spørre – også UI-faser (B-204: skjermbildene
+  sendes, men det ventes ikke på svar). Deretter sjekkes at
   publiseringen i Actions («Publiser til GitHub Pages») går grønt. Er den rød, rettes feilen
   med én gang (se B-017).
 

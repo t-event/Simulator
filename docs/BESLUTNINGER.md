@@ -3580,3 +3580,22 @@ Beslutning:
 Konto (B-149): ingen ny funksjon.
 Testet: tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter på de 7 størrelsene (stålverk og storverk)
 uten vannrett scrolling eller avkortede knapper.
+
+## B-204 UI-3b: Folk – bemanningen synlig på PC, faner med antall, større knapper (2026-09-27)
+Status: gjelder (UI.md 6; bygger på B-198, B-202)
+Brukeren: «Merge. Bare merge uten å spørre fremover. Fortsett» – også UI-faser merges nå når sjekkene er grønne,
+uten å vente på svar (skjermbildene sendes likevel).
+Beslutning:
+- **Underfanene** på Folk bruker samme komponent som Salg (antall under navnet på mobil, etter på PC). Fravær-fanen
+  blir oransje når fravær koster skift, som før.
+- **PC, Skift:** to kolonner. Til venstre skiftene, anbefalte roller og skiftplanen; til høyre «Bemanning» med
+  bemanningstabellen alltid synlig. Mobil: tabellen bak «Se hvem som står hvor» som før.
+- **Bemanningstabellen** har fått kolonnen **Ferdighet** (snittet til egne folk i rollen, rundet ned), fra 600 px. Den
+  viser hvor et kurs eller en flink søker gir mest. På 320 px er tabellen tettere, så den ikke gir sideveis scrolling
+  (den var 365 px bred før).
+- **PC, Ansatte:** rollegruppene står i to kolonner. Ansett og Fravær høyst 960 px brede.
+- Handlingene på Folk (ansett, vikarer, bonus) er minst 44 px høye.
+- Ingen endring i spillet.
+Konto (B-149): ingen ny funksjon.
+Testet: tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter på 320, 390, 1 366 og 1 920 px og alle fire
+fanene på de 7 størrelsene: ingen vannrett scrolling, ingen avkortet tekst, ingen hovedknapper under 40 px.

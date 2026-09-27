@@ -3819,3 +3819,85 @@ button {
     height: 120px;
   }
 }
+
+/* Folk (UI-3b, B-204): bemanningstabellen alltid synlig på PC, rollegruppene i to kolonner */
+.g-folk-cols,
+.g-folk-main,
+.g-folk-side {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* Etter regelen over, så «bare PC» vinner på mobil */
+.g-folk-side.g-pc-only {
+  display: none;
+}
+
+/* Handlingene på Folk (ansett, vikarer, bonus) er hovedknapper: minst 44 px høye */
+.g-folk .g-card button:not(.g-small):not(.g-link) {
+  min-height: 44px;
+}
+
+/* Bemanningstabellen skal få plass på 320 px uten sideveis scrolling */
+@media (max-width: 400px) {
+  .g-crew-table {
+    font-size: var(--fs-caption);
+  }
+
+  .g-crew-table th,
+  .g-crew-table td {
+    padding-left: 3px;
+    padding-right: 3px;
+  }
+
+  .g-crew-table td:first-child {
+    overflow-wrap: anywhere;
+  }
+}
+
+.g-col-skill {
+  display: none;
+}
+
+@media (min-width: 600px) {
+  .g-crew-table .g-col-skill {
+    display: table-cell;
+  }
+}
+
+@media (min-width: 1000px) {
+  .g-folk > .g-col-wide {
+    grid-column: 1 / -1;
+  }
+
+  .g-folk.is-ansett > .g-col-wide > .g-card,
+  .g-folk.is-fravaer > .g-col-wide > .g-card {
+    max-width: 960px;
+  }
+
+  .g-folk-cols {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--sp-4);
+  }
+
+  .g-folk-side.g-pc-only {
+    display: flex;
+  }
+
+  .g-folk .g-mobile-only {
+    display: none;
+  }
+
+  .g-role-groups {
+    columns: 2;
+    column-gap: var(--sp-6);
+  }
+
+  .g-role-groups > details {
+    break-inside: avoid;
+  }
+}
