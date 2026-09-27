@@ -412,6 +412,7 @@ function TopBar({
   onSettings,
   onInbox,
   onBoard,
+  notice,
 }: {
   g: GameState;
   api: GameApi;
@@ -419,10 +420,11 @@ function TopBar({
   onSettings: () => void;
   onInbox: () => void;
   onBoard: () => void;
+  /** Varsellinja i toppfeltet (PC). På mobil står den over menyen nederst (B-201) */
+  notice: boolean;
 }) {
   const stats = computePlantStats(g);
   const unread = g.knowledge.filter((k) => !g.readChapters.includes(k)).length;
-  const unseen = unseenCount(g);
   return (
     <header className="g-top">
       <div className="g-top-row">
@@ -502,15 +504,47 @@ function TopBar({
           </Kpi>
         )}
       </div>
-      {/* 🏆 står ved varsellinja, ikke i toppraden: der er det ikke plass på en smal mobil (B-134) */}
-      <div className="g-notice-row">
-        <NoticeLine api={api} unseen={unseen} onOpen={onInbox} />
-        <button className="g-book g-board-btn" onClick={onBoard} aria-label="Toppliste">
-          <Icon name="trophy" />
-        </button>
-      </div>
+      {notice && <NoticeRow g={g} api={api} onInbox={onInbox} onBoard={onBoard} />}
     </header>
   );
+}
+
+/** Varsellinja med 🏆 ved siden av (B-134): i toppfeltet på PC, rett over menyen nederst på mobil (B-201) */
+function NoticeRow({
+  g,
+  api,
+  onInbox,
+  onBoard,
+  className = "",
+}: {
+  g: GameState;
+  api: GameApi;
+  onInbox: () => void;
+  onBoard: () => void;
+  className?: string;
+}) {
+  return (
+    <div className={`g-notice-row ${className}`.trim()}>
+      <NoticeLine api={api} unseen={unseenCount(g)} onOpen={onInbox} />
+      <button className="g-book g-board-btn" onClick={onBoard} aria-label="Toppliste">
+        <Icon name="trophy" />
+      </button>
+    </div>
+  );
+}
+
+/** Er skjermen bred nok til PC-skallet (B-192)? Følger med når vinduet endrer størrelse */
+function useIsPc(): boolean {
+  const query = "(min-width: 900px)";
+  const [pc, setPc] = useState(() => window.matchMedia?.(query).matches ?? false);
+  useEffect(() => {
+    const mq = window.matchMedia?.(query);
+    if (!mq) return;
+    const on = () => setPc(mq.matches);
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  return pc;
 }
 
 function Kpi({
@@ -662,6 +696,22 @@ export function GameApp() {
     };
   }, [api.game]);
 
+  // Varsellinja står over menyen nederst på mobil (B-201). Høyden følges, så veiledningen legger seg over den
+  const isPc = useIsPc();
+  const appRef = useRef<HTMLDivElement>(null);
+  const hasGame = !!g;
+  useEffect(() => {
+    const app = appRef.current;
+    const bar = app?.querySelector<HTMLElement>(".g-notice-bar");
+    if (!app || !bar || typeof ResizeObserver === "undefined") {
+      app?.style.removeProperty("--notice-h");
+      return;
+    }
+    const ro = new ResizeObserver(() => app.style.setProperty("--notice-h", `${bar.offsetHeight}px`));
+    ro.observe(bar);
+    return () => ro.disconnect();
+  }, [isPc, hasGame]);
+
   if (!g)
     return (
       <>
@@ -682,6 +732,10 @@ export function GameApp() {
     // Åpner en bestemt underfane, f.eks. lageret under Salg (B-048)
     setSubTab((prev) => ({ tab: sub, n: prev.n + 1 }));
     if (!g.seenViews.includes(v)) act((gg) => void gg.seenViews.push(v));
+  };
+  const openInbox = () => {
+    api.clearToasts();
+    setInboxOpen(true);
   };
   /** Åpner fagboka på et kapittel (eller det første uleste) og merker det som lest */
   const openBook = (chapter?: string) => {
@@ -709,19 +763,17 @@ export function GameApp() {
     (g.won && !winSeen);
 
   return (
-    <div className={`g-app${g.tutorial !== null || g.recipeGuide ? " has-coach" : ""}`}>
+    <div className={`g-app${g.tutorial !== null || g.recipeGuide ? " has-coach" : ""}`} ref={appRef}>
       <div className="g-behind" inert={modalOpen}>
         <div className="g-head">
           <TopBar
             g={g}
             api={api}
+            notice={isPc}
             onBook={() => openBook()}
             onSettings={() => setSettingsOpen(true)}
             onBoard={() => setBoardOpen(true)}
-            onInbox={() => {
-              api.clearToasts();
-              setInboxOpen(true);
-            }}
+            onInbox={openInbox}
           />
 
           <nav className="g-nav" aria-label="Hovedmeny">
@@ -783,6 +835,15 @@ export function GameApp() {
               </button>
             )}
           </nav>
+          {!isPc && (
+            <NoticeRow
+              className="g-notice-bar"
+              g={g}
+              api={api}
+              onInbox={openInbox}
+              onBoard={() => setBoardOpen(true)}
+            />
+          )}
         </div>
 
         <main className="g-main">

@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 138 – 2026-09-27: Varsellinja nederst på mobil
+
+**Brukeren ba om:** «Ja til varsellinja og merge» (PR #145 med B-199/B-200).
+
+**Gjort:** PR #145 merget. B-201: på mobil står varsellinja med 🏆 som en fast rad rett over menyen nederst; toppfeltet
+71 px på iPhone (fra 117). PC uendret. Veiledningen legger seg over raden (`--notice-h`). FORSLAG, UI.md, B-116, CLAUDE.md.
+
+**Testet:** tsc, lint, `npm test`, balanse (exit 0), build; Playwright på 7 størrelser (før/etter), varsellista og
+topplista fra raden nederst, veiledningen over raden.
+
+**Gjenstår:** eierens svar på skjermbildene. Deretter UI-3a (Økonomi).
+
+---
+
 ## Økt 137 – 2026-09-27: Resepten flyttes til Verket, og tomrommet på PC
 
 **Brukeren ba om:** «Merge» av UI-2d (PR #144), og: «Resept bør ikke ligge under marked.»
