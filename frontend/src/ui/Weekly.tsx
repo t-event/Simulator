@@ -25,6 +25,7 @@ import { Card } from "./common";
 import { fmtNum } from "./format";
 import { buzz } from "./haptics";
 import { Portal } from "./Portal";
+import { Icon } from "./icons";
 
 function useSession() {
   return useSyncExternalStore(onSessionChange, getSession, getSession);
@@ -72,7 +73,7 @@ export function WeeklyCard({ act }: { act: GameApi["act"] }) {
       if (fp > 0)
         act((gg) => {
           awardPoints(gg, fp);
-          log(gg, `🎁 Ukekista er åpnet: +${fp} fagpoeng.`, "good");
+          log(gg, `Ukekista er åpnet: +${fp} fagpoeng.`, "good");
         });
       buzz(40);
       setWeeklyStatus({ ...status, chest: null });
@@ -85,14 +86,14 @@ export function WeeklyCard({ act }: { act: GameApi["act"] }) {
       title="Ukens utfordring"
       right={
         <button className="g-small" onClick={() => setBoard(true)}>
-          🏅 Lista
+          <Icon name="medal" /> Lista
         </button>
       }
     >
       {status.chest && (
         <div className="g-note g-week-chest">
           <span>
-            🎁 <strong>Ukekiste!</strong>{" "}
+            <Icon name="gift" /> <strong>Ukekiste!</strong>{" "}
             {status.chest.count > 1
               ? `${status.chest.count} kister venter`
               : `Du ble nr. ${status.chest.best} på ukelista forrige uke`}{" "}
@@ -117,7 +118,7 @@ export function WeeklyCard({ act }: { act: GameApi["act"] }) {
       </p>
       {m.gold + m.silver + m.bronze > 0 && (
         <p className="g-muted">
-          Dine medaljer: 🥇 {m.gold} · 🥈 {m.silver} · 🥉 {m.bronze}
+          Dine medaljer: {m.gold} gull · {m.silver} sølv · {m.bronze} bronse
         </p>
       )}
       {board && <WeeklyBoard kind={status.kind} onClose={() => setBoard(false)} />}
@@ -145,9 +146,11 @@ function WeeklyBoard({ kind, onClose }: { kind: WeekKind; onClose: () => void })
       <div className="g-modal" role="dialog" aria-modal="true" aria-label="Ukens utfordring" onClick={onClose}>
         <div className="g-modal-card" onClick={(e) => e.stopPropagation()}>
           <header className="g-card-head">
-            <h2>🏅 {WEEK_KINDS[kind].title}</h2>
+            <h2>
+              <Icon name="medal" /> {WEEK_KINDS[kind].title}
+            </h2>
             <button onClick={onClose} aria-label="Lukk">
-              ✕
+              <Icon name="close" />
             </button>
           </header>
           {error ? (
@@ -167,7 +170,7 @@ function WeeklyBoard({ kind, onClose }: { kind: WeekKind; onClose: () => void })
                     </span>
                     {r.gold > 0 && (
                       <span className="g-board-honor">
-                        🥇 vunnet {r.gold} {r.gold === 1 ? "uke" : "uker"}
+                        <Icon name="medal" /> vunnet {r.gold} {r.gold === 1 ? "uke" : "uker"}
                       </span>
                     )}
                   </span>

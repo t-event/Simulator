@@ -354,6 +354,31 @@ export async function signOut(): Promise<void> {
   }
 }
 
+/**
+ * Gjestekonto (B-212): en anonym konto i bakgrunnen. Økta lagres ikke som innlogging – den tas vare på av net/guest.ts,
+ * så spillet ellers ser spilleren som «uten konto». Feiler hvis anonyme kontoer er slått av i Supabase.
+ */
+export async function signInAnonymously(): Promise<Session> {
+  const res = await call(`${cloud.url}/auth/v1/signup`, {
+    method: "POST",
+    headers: headers(),
+    body: JSON.stringify({ data: {} }),
+  });
+  if (!res.ok) throw await readError(res);
+  return toSession((await res.json()) as Record<string, unknown>);
+}
+
+/** Fornyer en økt som ikke er innloggingen (gjesten). Kaster NetError; status 400/401 betyr at økta er død. */
+export async function refreshSession(refreshToken: string): Promise<Session> {
+  const res = await call(`${cloud.url}/auth/v1/token?grant_type=refresh_token`, {
+    method: "POST",
+    headers: headers(),
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  });
+  if (!res.ok) throw await readError(res);
+  return toSession((await res.json()) as Record<string, unknown>);
+}
+
 /** Sender e-post med lenke for å sette nytt passord */
 export async function recover(email: string): Promise<void> {
   const res = await call(`${cloud.url}/auth/v1/recover${redirectQuery()}`, {
@@ -487,14 +512,18 @@ export function consumeAuthHash(hash = typeof location !== "undefined" ? locatio
 /** Grensen for keepalive i nettleserne er 64 KiB; litt margin for tegn som tar mer enn én byte */
 export const KEEPALIVE_MAX = 60_000;
 
-export async function rest<T>(
-  path: string,
-  init: { method?: string; body?: unknown; prefer?: string; keepalive?: boolean } = {},
-): Promise<T> {
+type RestInit = { method?: string; body?: unknown; prefer?: string; keepalive?: boolean };
+
+export async function rest<T>(path: string, init: RestInit = {}): Promise<T> {
   const hadSession = getSession() !== null;
   const token = await getToken();
   // Døde økta underveis (avvist av tjenesten), skal ikke kallet gå videre uten innlogging (B-145)
   if (hadSession && !getSession()) throw new NetError("Du er ikke logget inn.", 401);
+  return restAs<T>(token, path, init);
+}
+
+/** Som `rest`, men med en bestemt nøkkel – gjestekontoen bruker sin egen (B-212) */
+export async function restAs<T>(token: string | null, path: string, init: RestInit = {}): Promise<T> {
   const body = init.body === undefined ? undefined : JSON.stringify(init.body);
   const res = await call(`${cloud.url}/rest/v1/${path}`, {
     method: init.method ?? "GET",

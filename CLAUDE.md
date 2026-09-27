@@ -149,6 +149,7 @@ frontend/src/
     treasury.ts  Konsernkassa på serveren: status og overføring (B-183)
     world.ts     Strategiske selskaper: status, anbud og bud (B-189)
     scrapIncome.ts Skraplagerets inntekt i ekte tid – speiler SQL-en i 029 (B-188); scrapTests.ts viser at fart ikke hjelper
+    guest.ts     Gjestekonto i bakgrunnen: lagrer spillet, overtas av kontoen ved innlogging (B-212)
     tests.ts     Tester uten nett (falsk tjeneste)
   ui/          Spillets skjermer (mobil først) og kontrollrommet
     Overview.tsx Verket med underfanene Oversikt, Anlegg, Resept, Økonomi (og Konsern; valget i verketTabs.ts/GameApp)
@@ -167,6 +168,7 @@ frontend/src/
     Weekly.tsx   Kortet «Ukens utfordring» på Mål og ukelista   Portal.tsx  Ark fra Verket legges i <body>
     SeasonTrack.tsx Kortet «Sesongstigen» på Mål (B-173)   Landmarks.tsx  Kortet «Landemerker» på Verket (B-174)
     Changelog.tsx «Hva er nytt» etter en oppdatering og under ⚙️ (B-179)
+    MissingOut.tsx «Det går du glipp av» på Mål for spillere uten konto (B-212)
     Goals.tsx    Mål-siden (pokalen ved varslene): daglig, uke og sesong, prestasjoner, toppliste (B-211)
     tokens.css   Designsystemet (B-191): alle farger, skriftstørrelser, radier, avstander – nye stiler bruker disse
     icons.tsx    Ikoner fra Lucide, kopiert inn (lisens i icons-LICENSE.txt)   ds.tsx  StatusBadge, Callout, Button
@@ -294,3 +296,7 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Serveren endrer et lagret spill** (B-211): øk alltid `state.serverEdit` (og sett `device` til `'server'`). `save_game()`
   avviser da kopier med lavere `serverEdit`, og appen henter serverens spill. Uten det kan en enhet med det gamle spillet
   laste det opp igjen (skjedde med økonomireformen).
+- **Gjester** (B-212) er anonyme kontoer, men appen ser dem som «uten konto» (`getSession()` er null; gjestens økt ligger i
+  `net/guest.ts`). Serveren slipper gjester bare til det som står i `guest_gate` (035). Skal gjester få noe nytt, må det
+  legges i lista der – ellers får de 403. `pgrst.db_pre_request` står på rollen `authenticator`; sjekk med
+  `select rolconfig from pg_roles where rolname = 'authenticator'`.

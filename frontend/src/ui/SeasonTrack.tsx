@@ -11,6 +11,7 @@ import { getSession, onSessionChange } from "../net/supabase";
 import { isReconciled, onCloudStatus } from "../net/sync";
 import { Bar, Card } from "./common";
 import { buzz } from "./haptics";
+import { Icon } from "./icons";
 
 function useSession() {
   return useSyncExternalStore(onSessionChange, getSession, getSession);
@@ -58,7 +59,7 @@ export function SeasonTrackCard({ act }: { act: GameApi["act"] }) {
           for (const c of got) grantCosmetic(gg, c.id);
           log(
             gg,
-            `🪜 Sesongstigen: ${r.tiers.length === 1 ? `trinn ${r.tiers[0]}` : `${r.tiers.length} trinn`} – +${r.fp} fagpoeng${got.length ? ` og ${got.map((c) => `${c.icon} ${c.name}`).join(", ")}` : ""}.`,
+            `Sesongstigen: ${r.tiers.length === 1 ? `trinn ${r.tiers[0]}` : `${r.tiers.length} trinn`} – +${r.fp} fagpoeng${got.length ? ` og ${got.map((c) => `${c.icon} ${c.name}`).join(", ")}` : ""}.`,
             "good",
           );
         });
@@ -87,7 +88,7 @@ export function SeasonTrackCard({ act }: { act: GameApi["act"] }) {
       {unclaimed.length > 0 && (
         <div className="g-note g-week-chest">
           <span>
-            🪜{" "}
+            <Icon name="star" />{" "}
             <strong>
               {unclaimed.length === 1 ? `Trinn ${unclaimed[0]} er nådd!` : `${unclaimed.length} trinn er nådd!`}
             </strong>{" "}
@@ -99,7 +100,7 @@ export function SeasonTrackCard({ act }: { act: GameApi["act"] }) {
         </div>
       )}
       {top ? (
-        <p>Du er på toppen av stigen denne sesongen. 🏆</p>
+        <p>Du er på toppen av stigen denne sesongen.</p>
       ) : (
         <>
           <Bar value={inTier / track.perTier} tone="ok" label={`Trinn ${track.tier + 1}`} />

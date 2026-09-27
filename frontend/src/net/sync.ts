@@ -14,6 +14,7 @@ import { migrate, saveGame } from "../game/save";
 import { SAVE_VERSION } from "../game/engine";
 import type { GameState } from "../game/types";
 import { APP_VERSION, cloudConfigured } from "./config";
+import { adoptGuest, onGuestSave } from "./guest";
 import { getSession, NetError, onSessionChange, rest, userId } from "./supabase";
 
 export type CloudStatus =
@@ -242,7 +243,12 @@ export async function uploadSave(g: GameState, keepalive = false): Promise<void>
  * nettopp har gjort noe – da er det med når man bytter til en annen enhet (B-141).
  */
 export function onLocalSave(g: GameState, soon = false): void {
-  if (!cloudConfigured() || !getSession()) return;
+  if (!cloudConfigured()) return;
+  // Uten konto: lagres som gjest (B-212)
+  if (!getSession()) {
+    void onGuestSave(g);
+    return;
+  }
   // Ingenting lastes opp før spillet her er avklart mot kontoen (B-138)
   if (!reconciled) return;
   // Et spill som tilhører en annen konto, skal ikke overskrive kontoens spill (B-125)
@@ -266,6 +272,7 @@ export function onLocalSave(g: GameState, soon = false): void {
  * også om siden alt er skjult, så den andre enheten får det (B-143).
  */
 export function leaving(g: GameState, keepalive = true): Promise<void> {
+  if (cloudConfigured() && !getSession()) return onGuestSave(g, true);
   if (cloudConfigured() && getSession() && reconciled && !(g.owner && g.owner !== userId()) && changedSinceSync(g))
     dirty = g;
   return flush(keepalive);
@@ -356,6 +363,8 @@ export async function linkOnLogin(local: GameState | null): Promise<LinkDecision
   reconciled = false;
   knownRev = null;
   if (!id) return { kind: "none" };
+  // Spilte man som gjest, tar kontoen over gjesten først (B-212)
+  await adoptGuest();
   const row = await fetchCloudRow();
   const stored = storedRev(id);
   const cloud = row?.game ?? null;

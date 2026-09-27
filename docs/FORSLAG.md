@@ -6,18 +6,15 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
-- **Mange lager ikke konto (B-210).** Anbefaling i tre steg – eieren velger:
-  1. **Automatisk gjestekonto** (Supabase «anonymous sign-ins»): alle får en konto i bakgrunnen første gang spillet åpnes,
-     med lagring på nett, kallenavn og toppliste. «Sikre kontoen» med e-post og passord kan gjøres når som helst, og da
-     beholdes spillet. Fjerner hele terskelen. Krever at eieren slår på «Allow anonymous sign-ins» under Authentication i
-     dashbordet (connectoren kan ikke), og at KONTO.md og B-149 skiller mellom gjestekonto og sikret konto (f.eks. at
-     konsernkassa og anbud krever sikret konto).
-  2. **Vis hva man går glipp av i riktig øyeblikk** (gradvis synlighet): «Du ville vært nr. 3 på topplista», «Daglig
-     belønning venter» – ett kort med én knapp når det faktisk betyr noe, ikke en tekstvegg på startskjermen.
-  3. **Logg inn med Google/Apple** senere, hvis gjestekonto ikke er nok. Krever oppsett i dashbordet og hos Google/Apple.
-
+- **Slå på gjestekontoer (B-212):** eieren må slå på «Allow anonymous sign-ins» under Authentication → Sign In /
+  Providers i dashbordet (connectoren kan ikke). Til det er gjort, prøver appen én gang i døgnet og gjør ellers ingenting.
+  Supabase anbefaler også CAPTCHA mot misbruk; grensen er 30 nye gjester i timen per IP.
 
 ## Venter
+
+- **Logg inn med Google og Apple** (eieren: «senere», B-212). Krever oppsett i dashbordet og hos Google/Apple.
+- **Rydde gamle gjester** (B-212): gjester som aldri oppretter konto, blir liggende. Når det blir mange:
+  `delete from auth.users where is_anonymous and created_at < now() - interval '60 days'` (spillene følger med).
 
 - **Bunden konsernreserve (B-193)** er midlertidig. Når økonomien i sluttspillet er rebalansert: bestem hva reserven blir
   (konverteres etter ny modell, blir en funksjon, eller utbetales gradvis) og fjern eller juster grensen på 100 mrd.
@@ -48,6 +45,9 @@ til «Avgjort» nederst).
   Krever konto. Brukeren: «Ingen varsel på mobilen enda» (B-149).
 
 ## Avgjort
+
+- **Mange lager ikke konto:** automatisk gjestekonto som ikke får gjøre noe mer før man oppretter konto, og vis hva
+  man går glipp av. Google og Apple senere (B-212).
 
 - **Varsellinja på mobil** (spørsmål fra UI-1b): eieren valgte å flytte den ned over menyen – B-201.
 
