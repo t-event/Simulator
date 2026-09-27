@@ -137,6 +137,7 @@ frontend/src/
     achievements.ts Prestasjoner (merker)   cosmetics.ts  Pynt i anleggsbildet for fagpoeng (B-151)
     landmarks.ts Landemerker: store byggeprosjekter som forespørsler, ett per virkelig dag (B-174)
     changelog.ts Endringsloggen «Hva er nytt» (B-179) – ny oppføring ved hver endring
+    clock.ts     Ekte tid (realNow/setRealClock): byggeprosjekter i konsernet og pausen mellom like kort (B-209, B-210)
     tabLock.ts   Bare én fane spiller om gangen (B-176)
     balance.ts   Automatisk testspiller
   net/         Konto og lagring på nett (B-125) – Supabase over fetch, uten bibliotek

@@ -24,6 +24,7 @@ import { auto, hasResearch } from "./research";
 import { masteryFactor } from "./mastery";
 import { chance, randInt } from "./random";
 import { reserveTotal } from "./reserve";
+import { realNow, setRealClock } from "./clock";
 import type { GameState, SisterPlant, SisterProject, SisterType } from "./types";
 
 export interface SisterSpec {
@@ -200,14 +201,8 @@ export const UPGRADE_HOURS = 6;
 export const MODERNIZE_HOURS = 4;
 const HOUR_MS = 3_600_000;
 
-let clock: () => number = () => Date.now();
-/** Ekte tid i ms. Testspilleren og testene setter sin egen klokke med setRealClock */
-export function realNow(): number {
-  return clock();
-}
-export function setRealClock(fn: () => number): void {
-  clock = fn;
-}
+// Klokka ligger i clock.ts, så også hendelseskortene kan bruke den (B-210)
+export { realNow, setRealClock };
 
 /** Et nytt verk som ikke er ferdig bygget: det tjener ingenting og har ingen ledelse ennå */
 export function underConstruction(p: SisterPlant): boolean {

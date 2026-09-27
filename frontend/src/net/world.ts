@@ -13,6 +13,8 @@ export interface Tender {
   maxBid: number;
   /** Eget bud, eller null. Andres bud er skjult til anbudet stenger. */
   myBid: number | null;
+  /** Kallenavnene til alle som har bydd, sortert alfabetisk – uten beløp (B-210) */
+  bidders: string[];
 }
 
 export interface TenderResult {
@@ -64,6 +66,7 @@ function parseTender(t: Row | null | undefined): Tender | null {
     minBid: num(t.min_bid),
     maxBid: num(t.max_bid),
     myBid: numOrNull(t.my_bid),
+    bidders: Array.isArray(t.bidders) ? t.bidders.filter((x): x is string => typeof x === "string") : [],
   };
 }
 

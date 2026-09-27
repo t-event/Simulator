@@ -29,6 +29,7 @@ import {
 import { computePlantStats, day, isAbsent, productPrice, satisfiedGrades } from "./plant";
 import { chance, pick, rand, uniform } from "./random";
 import { knowledgeCard } from "./knowledge";
+import { realNow } from "./clock";
 import type { Contract, Decision, GameState, RepCause, Worker } from "./types";
 
 const DAILY_CHANCE = 0.25;
@@ -301,6 +302,8 @@ const MORE_MAKERS: Record<string, Maker> = {
   kobbertyveri: (g) => {
     // Ikke før støperiet: på verkstedet kunne tyveriet ta hele kassa (B-174)
     if (g.stage < 2) return null;
+    // Kameraene er oppe på dette verket (B-210): tyvene holder seg unna til du flytter
+    if ((g.decisionFixed?.kobbertyveri ?? -1) >= g.stage) return null;
     const cost = 15_000 * (1 + g.stage) ** 2;
     return {
       id: "kobbertyveri",
@@ -398,6 +401,12 @@ const COOLDOWN_DAYS = 25;
 const CARD_COOLDOWN: Record<string, number> = { utkobling: 50, naboklage: 60, messe: 50, avis: 40, tilsyn: 40 };
 /** Minst så mange døgn mellom to kort */
 const MIN_GAP_DAYS = 2;
+/**
+ * Samme kort kommer ikke igjen før det har gått 20 minutter i ekte tid (B-210). Pausen i spilldøgn (25) var bare fem
+ * minutter på 10×, så noen spillere fikk det samme kortet mange ganger på rad. På 10× er 20 minutter 100 spilldøgn;
+ * på 1× og 3× endrer det nesten ingenting.
+ */
+export const SAME_CARD_REAL_MS = 20 * 60_000;
 
 /** Kalles én gang per døgn. Lager av og til et nytt kort og pauser spillet. */
 export function maybeCreateDecision(g: GameState): void {
@@ -408,8 +417,11 @@ export function maybeCreateDecision(g: GameState): void {
   if (!chance(g, DAILY_CHANCE)) return;
   const all = { ...MAKERS, ...MORE_MAKERS };
   // Kort som ikke har vært vist på lenge, først de som aldri er vist
+  const now = realNow();
   const ids = Object.keys(all).filter(
-    (id) => today - (g.decisionSeen[id] ?? -999) >= (CARD_COOLDOWN[id] ?? COOLDOWN_DAYS),
+    (id) =>
+      today - (g.decisionSeen[id] ?? -999) >= (CARD_COOLDOWN[id] ?? COOLDOWN_DAYS) &&
+      now - (g.decisionSeenAt?.[id] ?? -Infinity) >= SAME_CARD_REAL_MS,
   );
   for (let tries = 0; tries < 6 && ids.length; tries++) {
     const id = pick(g, ids);
@@ -419,6 +431,7 @@ export function maybeCreateDecision(g: GameState): void {
       continue;
     }
     g.decisionSeen[id] = today;
+    g.decisionSeenAt = { ...g.decisionSeenAt, [id]: now };
     g.pendingDecision = { ...d, resumeSpeed: g.speed > 0 ? g.speed : 1 };
     g.speed = 0;
     return;
@@ -691,7 +704,8 @@ export function resolveDecision(g: GameState, option: number): void {
     case "kobbertyveri":
       if (yes) {
         addCost(g, "annet", n("cost"));
-        log(g, "Kameraene er oppe. Tyvene holder seg unna.", "good");
+        g.decisionFixed = { ...(g.decisionFixed ?? {}), kobbertyveri: g.stage };
+        log(g, "Kameraene er oppe. Tyvene holder seg unna så lenge verket står her.", "good");
       } else if (chance(g, 0.4)) {
         addCost(g, "vedlikehold", n("cost") * 2);
         log(g, `Tyver stjal kobberkabler i natt. Reparasjonen kostet ${fmtKr(n("cost") * 2)}.`, "bad");

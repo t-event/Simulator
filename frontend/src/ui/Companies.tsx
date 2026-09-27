@@ -143,8 +143,18 @@ export function StrategicCompanies({ g, act }: { g: GameState; act: GameApi["act
             Anbud – stenger om {timeLeft(t.closesAt)} <span className="g-muted">({fmtWhen(t.closesAt)})</span>
           </h3>
           <p className="g-small-text">
-            Skjulte bud: ingen ser budene før anbudet stenger. Høyeste bud vinner og driver lageret i 14 dager. Likt bud
-            avgjøres ved trekning. De som ikke vinner, får budet tilbake.
+            Alle ser hvem som har bydd, men ingen ser beløpene før anbudet stenger. Høyeste bud vinner og driver lageret
+            i 14 dager. Likt bud avgjøres ved trekning. De som ikke vinner, får budet tilbake.
+          </p>
+          {/* Hvem som har bydd, uten beløp (B-210) */}
+          <p className="g-small-text g-tender-bidders">
+            {t.bidders.length === 0 ? (
+              "Ingen har bydd ennå."
+            ) : (
+              <>
+                Har bydd ({t.bidders.length}): <strong>{t.bidders.join(", ")}</strong>
+              </>
+            )}
           </p>
           <p className="g-small-text">
             Bud mellom {fmtKr(t.minBid)} og {fmtKr(t.maxBid)}.{" "}

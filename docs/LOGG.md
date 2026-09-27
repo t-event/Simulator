@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 147 – 2026-09-27: Tilbakemeldinger fra spillerne (åtte punkter)
+
+**Brukeren ba om:** anbudet for skjult (vis hvem som har bydd), operatør til skiftleder via lederutvikling,
+salgsdirektøren vanskelig å finne, «Følg ordrekøen» forvirrer, anbefalt skiftleder kommer ikke opp, samme kort mange
+ganger (kobbertyveri), økonomireformen og én spiller, og hva vi gjør med spillere uten konto.
+
+**Gjort:** B-210. Migrasjon 033 (budgivere i `world_status`), lederutvikling (60 døgn, dyr), salgsdirektør på Salg og
+Folk → Ansett, forklaring og «Velg selv» ved kvalitetsvalget, søkere til anbefalte roller og «Ansett»-knapp i
+anbefalingen, 20 minutter ekte tid mellom like kort og kameraer som varig løsning, `game/clock.ts`. Økonomireformen: sjekket
+– spilleren var under gulvet da den ble kjørt, ingen data endret. Kontoer: anbefaling i FORSLAG.md.
+
+**Testet:** `npm test` (ny spilltest og nettest), balanse exit 0 (nybegynner ca. 7–10 døgn senere, innenfor målet),
+tsc, lint, build, Playwright på Folk og Salg (7 størrelser), rådgiverne i Supabase etter migrasjonen.
+
+**Gjenstår:** eierens valg om kontoer (FORSLAG.md); reserven og kassegrensen; UI-4a–d.
+
+---
+
 ## Økt 146 – 2026-09-27: Utbyttet – byggetid i ekte tid, trim og flaggskip
 
 **Brukeren ba om:** «Gå for din anbefaling» (om utbyttet, økt 144).

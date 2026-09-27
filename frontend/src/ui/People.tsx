@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { DirectorOffer } from "./Konsern";
 import {
   BONUS_COOLDOWN_DAYS,
   bonusCost,
@@ -10,6 +11,10 @@ import {
   giveBonus,
   hire,
   hireForMissing,
+  LEADER_COURSE_DAYS,
+  leaderCourseBlock,
+  leaderCourseCost,
+  sendOnLeaderCourse,
   hireForWildcards,
   hireTemps,
   hireTempCrew,
@@ -128,6 +133,11 @@ function roleEffect(g: GameState, stats: PlantStats, role: RoleId): string | nul
   }
 }
 
+/** Hvorfor den ansatte er borte, med vanlige ord */
+function absenceName(w: Worker): string {
+  return w.absentReason === "syk" ? "Syk" : w.absentReason === "lederkurs" ? "Lederutvikling" : "Ferie";
+}
+
 /** Anbefalte støtteroller når skiftene er fulle (B-096) */
 function SupportCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
   const advice = supportAdvice(g);
@@ -157,6 +167,22 @@ function SupportCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
             </strong>
             <span className="g-muted">{a.why}</span>
             {a.note && <span className="g-muted g-support-note">{a.note}</span>}
+            {/* Ansett rett fra anbefalingen (B-210): den flinkeste søkeren i rollen */}
+            {a.role !== "allround" && a.have < a.want && (
+              <span className="g-support-action">
+                {(() => {
+                  const best = g.candidates.filter((c) => c.role === a.role).sort((x, y) => y.skill - x.skill)[0];
+                  if (room <= 0) return <span className="g-muted">Det er ikke plass til flere ansatte.</span>;
+                  if (!best)
+                    return <span className="g-muted">Ingen søkere i rollen i dag. Nye kommer hver morgen.</span>;
+                  return (
+                    <button onClick={() => act((gg) => hire(gg, best.id))}>
+                      Ansett {ROLES[a.role].name.toLowerCase()} ({fmtNum(best.skill, 1)} av 5)
+                    </button>
+                  );
+                })()}
+              </span>
+            )}
             {a.role === "allround" && wild.tied > 0 && (
               <span className="g-support-action">
                 {fits > 0 && room > 0 ? (
@@ -349,7 +375,7 @@ function Absence({ g, stats, act }: Props) {
             <li key={w.id}>
               <strong>{w.name}</strong> <span className="g-muted">· {ROLES[w.role].name}</span>
               <span className={w.absentReason === "syk" ? "g-badge-bad" : "g-badge-ok"}>
-                {w.absentReason === "syk" ? "Syk" : "Ferie"} til dag {day(g, (w.absentUntil ?? 0) - 1)}
+                {absenceName(w)} til dag {day(g, (w.absentUntil ?? 0) - 1)}
               </span>
             </li>
           ))}
@@ -491,6 +517,7 @@ export function People({ g, stats, act, openTab }: Props & { openTab?: string })
     openTab === "ansett" || openTab === "ansatte" || openTab === "fravaer" ? openTab : "skift",
   );
   const [confirmFire, setConfirmFire] = useState<number | null>(null);
+  const [confirmLeader, setConfirmLeader] = useState<number | null>(null);
   const cap = STAGES[g.stage].staffCap;
   // På storverket finnes det ikke noe større sted å flytte til (B-171)
   const topStage = g.stage >= STAGES.length - 1;
@@ -713,6 +740,18 @@ export function People({ g, stats, act, openTab }: Props & { openTab?: string })
                 </ul>
               </>
             )}
+            {/* Salgsdirektøren ansettes også her (B-210), der man ansetter folk */}
+            {g.konsern?.unlocked && (
+              <div className="g-hire-director">
+                <h3 className="g-subhead">Ledelse</h3>
+                <DirectorOffer g={g} act={act} />
+                {g.konsern.director && (
+                  <p className="g-muted g-small-text">
+                    Salgsdirektøren er ansatt. Oppgraderinger og oppsigelse finner du under Konsern.
+                  </p>
+                )}
+              </div>
+            )}
             <details className="g-details">
               <summary>Hva gjør de ulike rollene?</summary>
               <dl className="g-roles">
@@ -758,7 +797,7 @@ export function People({ g, stats, act, openTab }: Props & { openTab?: string })
                             sick={sickSpells(g, w)}
                             away={
                               isAbsent(g, w)
-                                ? `${w.absentReason === "syk" ? "Syk" : "Ferie"} til dag ${day(g, (w.absentUntil ?? 0) - 1)}`
+                                ? `${absenceName(w)} til dag ${day(g, (w.absentUntil ?? 0) - 1)}`
                                 : undefined
                             }
                             action={
@@ -778,8 +817,38 @@ export function People({ g, stats, act, openTab }: Props & { openTab?: string })
                                     Avbryt
                                   </button>
                                 </span>
+                              ) : confirmLeader === w.id ? (
+                                <span className="g-row g-fire-confirm">
+                                  <span className="g-muted g-small-text">
+                                    Lederutvikling: {w.name} er borte fra skiftet i {LEADER_COURSE_DAYS} døgn med full
+                                    lønn, og blir skiftleder etterpå.
+                                  </span>
+                                  <button
+                                    className="g-primary g-small"
+                                    disabled={g.cash < leaderCourseCost(g)}
+                                    onClick={() => {
+                                      act((gg) => sendOnLeaderCourse(gg, w.id));
+                                      setConfirmLeader(null);
+                                    }}
+                                  >
+                                    Send på kurs ({fmtKr(leaderCourseCost(g))})
+                                  </button>
+                                  <button className="g-small" onClick={() => setConfirmLeader(null)}>
+                                    Avbryt
+                                  </button>
+                                </span>
                               ) : (
                                 <span className="g-row">
+                                  {/* En flink operatør kan bli skiftleder (B-210) */}
+                                  {!leaderCourseBlock(g, w) && (
+                                    <button
+                                      className="g-small"
+                                      title="Lederutvikling: blir skiftleder"
+                                      onClick={() => setConfirmLeader(w.id)}
+                                    >
+                                      Gjør til skiftleder
+                                    </button>
+                                  )}
                                   <button
                                     className="g-small"
                                     disabled={

@@ -4112,3 +4112,39 @@ button {
   vertical-align: -0.12em;
   color: var(--accent);
 }
+
+/* Når ordrekøen styrer kvaliteten (B-210): forklaring og en knapp for å velge selv */
+.g-queue-lock {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2) var(--sp-3);
+}
+
+.g-queue-lock span {
+  flex: 1 1 220px;
+}
+
+.g-queue-lock button {
+  min-height: 40px;
+}
+
+/* Salgsdirektøren der man signerer og ansetter (B-210) */
+.g-director-offer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2) var(--sp-3);
+}
+
+.g-director-offer > span:first-child {
+  flex: 1 1 240px;
+}
+
+.g-director-offer button {
+  min-height: 40px;
+}
+
+.g-hire-director {
+  margin: var(--sp-4) 0 var(--sp-2);
+}

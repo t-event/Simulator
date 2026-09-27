@@ -150,6 +150,34 @@ export function DirectorSwitch({ g, act }: { g: GameState; act: Act }) {
   );
 }
 
+/**
+ * Tilbud om salgsdirektør der man signerer forespørsler (B-210): før fantes den bare under Konsern, og mange fant den
+ * ikke. Vises når konsernet er åpnet og ingen salgsdirektør er ansatt.
+ */
+export function DirectorOffer({ g, act }: { g: GameState; act: Act }) {
+  if (!g.konsern?.unlocked || g.konsern.director) return null;
+  const missing = DIRECTOR_HIRE - Math.max(0, g.cash);
+  return (
+    <div className="g-note g-director-offer">
+      <span>
+        <strong>Slipp å signere selv:</strong> en salgsdirektør signerer forespørslene verket trygt rekker.{" "}
+        {fmtKr(DIRECTOR_HIRE)} + {fmtKr(directorPerDay(g))} per døgn.
+      </span>
+      <button
+        className="g-small"
+        disabled={missing > 0}
+        onClick={() => {
+          act((gg) => hireDirector(gg));
+          buzz(20);
+        }}
+      >
+        Ansett salgsdirektør
+      </button>
+      {missing > 0 && <span className="g-konsern-why g-small-text">Du mangler {fmtKr(Math.ceil(missing))}.</span>}
+    </div>
+  );
+}
+
 /** Oppgradering av salgsdirektøren (B-172): hva den har, og neste steg med pris */
 function DirectorUpgrade({ g, act }: { g: GameState; act: Act }) {
   const level = directorLevel(g);
@@ -187,7 +215,7 @@ function DirectorUpgrade({ g, act }: { g: GameState; act: Act }) {
 }
 
 /** Salgsdirektøren (B-117): signerer kontrakter og rammeavtaler selv – meget dyrt. Kort, med resten foldet bort (B-123) */
-function DirectorCard({ g, act }: { g: GameState; act: Act }) {
+export function DirectorCard({ g, act }: { g: GameState; act: Act }) {
   const d = g.konsern.director;
   const [confirm, setConfirm] = useState(false);
   const days = daysToAfford(g, DIRECTOR_HIRE);

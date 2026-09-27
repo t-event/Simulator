@@ -199,7 +199,8 @@ export interface Worker {
   /** Fravær (B-031): fra og til spillminutt, og hvorfor */
   absentFrom?: number;
   absentUntil?: number;
-  absentReason?: "syk" | "ferie";
+  /** «lederkurs»: på lederutvikling for å bli skiftleder (B-210) */
+  absentReason?: "syk" | "ferie" | "lederkurs";
   /** Døgnet neste ferie starter (varsles tre døgn før) */
   nextVacationDay?: number;
   /** Dagene sykefraværene startet, de siste tolv (B-101) */
@@ -551,9 +552,12 @@ export interface GameState {
   pendingDecision: Decision | null;
   /** Dagen hvert hendelseskort sist ble vist, så de ikke gjentas for ofte */
   decisionSeen: Record<string, number>;
+  /** Ekte tid (ms) da hvert kort sist ble vist (B-210): samme kort kommer ikke igjen på 20 minutter, uansett spillfart */
+  decisionSeenAt?: Record<string, number>;
   /** Landemerker (B-174): levert, dagen det siste kom (mobilens dato) og kontrakten som pågår */
   landmarks?: { done: string[]; date: string | null; contractId: number | null };
-  /** Hendelser som er ordnet for dette nivået, f.eks. støyskjerm mot naboklager (B-171): nivået det ble gjort på */
+  /** Hendelser som er ordnet for dette nivået, f.eks. støyskjerm mot naboklager (B-171) og kameraer mot kobbertyver
+   * (B-210): nivået det ble gjort på */
   decisionFixed?: Record<string, number>;
   /** Utgått (B-031): erstattet av fravær per ansatt. Beholdes for gamle lagringer. */
   sickUntilMin: number;

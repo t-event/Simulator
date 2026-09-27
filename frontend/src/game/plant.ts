@@ -883,7 +883,9 @@ export function supportAdvice(g: GameState): SupportAdvice[] {
     "skiftleder",
     g.stage >= 4 ? 2 : g.stage >= 3 ? 1 : 0,
     "Følger opp fraværet av seg selv: advarsel til dem som misbruker egenmelding (ikke til dem som var syke), og færre syke." +
-      (g.stage >= 4 ? " To, så den ene dekker når den andre har ferie." : ""),
+      (g.stage >= 4 ? " To, så den ene dekker når den andre har ferie." : "") +
+      // Lederutvikling (B-210)
+      " En flink operatør (ferdighet 4) kan også bli skiftleder etter lederutvikling under Ansatte.",
   );
   // Avløsere fyller hull i alle roller på skiftet. Ekstra skiftlag dekker mye fravær, men ikke når flere er borte
   // i samme rolle (B-111)
