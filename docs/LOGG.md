@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 134 – 2026-09-27: UI-2b – Anlegg
+
+**Brukeren ba om:** «Fortsett» etter UI-2a (tolket som klarsignal: PR #141 merget), så neste steg.
+
+**Gjort:** B-196. Statusmerker (`StatusBadge`) på hvert sted i «Produksjonen», og produksjonsflyten over hele bredden
+på PC. Endringsloggen, UI.md.
+
+**Testet:** tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter på 4 størrelser og 7 for vannrett
+scrolling.
+
+**Gjenstår:** eierens svar på skjermbildene og varsellinja på mobil (FORSLAG). Deretter UI-2c (Marked).
+
+---
+
 ## Økt 133 – 2026-09-27: UI-2a – Oversikt
 
 **Brukeren ba om:** «Fortsett» (neste steg i UI-planen).

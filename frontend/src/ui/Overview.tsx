@@ -64,7 +64,7 @@ import { VERKET_TABS, type VerketTab } from "./verketTabs";
 import type { View } from "./views";
 import { Icon } from "./icons";
 import { CASH_RESERVE } from "../game/reserve";
-import { Callout, StatusLine, type Status } from "./ds";
+import { Callout, StatusBadge, StatusLine, type Status } from "./ds";
 
 interface Props {
   g: GameState;
@@ -590,7 +590,7 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
   const recent = g.log.slice(-8).reverse();
 
   return (
-    <div className="g-grid">
+    <div className={`g-grid${tab === "anlegg" ? " is-anlegg" : ""}`}>
       {pynt && <PyntModal g={g} stats={stats} act={act} onClose={() => setPynt(false)} />}
       {/* Underfanene står øverst (B-192), over bildet og rådene, og over begge kolonnene på PC */}
       <div
@@ -821,11 +821,18 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
 
       {tab === "anlegg" && (
         <>
-          <div className="g-col-wide">
+          {/* Produksjonsflyten (B-196): over begge kolonnene på PC, med status for hvert sted */}
+          <div className="g-col-wide g-anlegg-flow">
             <Card title="Produksjonen">
               <div className="g-chain">
                 <div className="g-chain-step">
-                  <h3>Skraplager</h3>
+                  <div className="g-chain-head">
+                    <h3>Skraplager</h3>
+                    {/* Lagrene får merke bare når noe er galt: tomt, mangler eller fullt */}
+                    {(missingNow || stats.yardUsed <= 0) && (
+                      <StatusBadge status="tomt" label={missingNow ? "Mangler skrap" : undefined} />
+                    )}
+                  </div>
                   <Bar
                     value={stats.yardUsed / stats.yardT}
                     tone={stats.yardUsed < stats.sizeT ? "critical" : "accent"}
@@ -857,10 +864,16 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
                   const st = furnaceState(g, i);
                   return (
                     <div className="g-chain-step" key={i}>
-                      <h3>
-                        {unitType(g, i).name}
-                        {g.furnaces.length > 1 ? ` nr. ${i + 1}` : ""}
-                      </h3>
+                      <div className="g-chain-head">
+                        <h3>
+                          {unitType(g, i).name}
+                          {g.furnaces.length > 1 ? ` nr. ${i + 1}` : ""}
+                        </h3>
+                        <StatusBadge
+                          status={f.heat ? "kjorer" : statusOf(st.text)}
+                          label={f.heat ? "Smelter" : undefined}
+                        />
+                      </div>
                       {st.progress !== null ? (
                         <Bar value={st.progress} tone="warning" label="Smelting" />
                       ) : (
@@ -874,7 +887,13 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
                 })}
 
                 <div className="g-chain-step">
-                  <h3>{casting.name}</h3>
+                  <div className="g-chain-head">
+                    <h3>{casting.name}</h3>
+                    <StatusBadge
+                      status={g.castWait ? statusOf(g.castWait) : castHead ? "kjorer" : "venter"}
+                      label={g.castWait ? undefined : castHead ? "Støper" : "Venter"}
+                    />
+                  </div>
                   {castHead ? (
                     <Bar value={g.castProgressT / castHead.t} tone="ok" label="Støping" />
                   ) : (
@@ -894,13 +913,23 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
 
                 {rollingActive(g) && (
                   <div className="g-chain-step">
-                    <h3>Valseverk</h3>
+                    <div className="g-chain-head">
+                      <h3>Valseverk</h3>
+                      <StatusBadge status="kjorer" label="I drift" />
+                    </div>
                     <p>Valser emner til armeringsstål</p>
                   </div>
                 )}
 
                 <div className="g-chain-step">
-                  <h3>Ferdigvarelager</h3>
+                  <div className="g-chain-head">
+                    <h3>Ferdigvarelager</h3>
+                    {stats.storeUsed >= stats.storeT * 0.999 ? (
+                      <StatusBadge status="fullt" />
+                    ) : stats.storeUsed > stats.storeT * 0.9 ? (
+                      <StatusBadge status="fullt" label="Nesten fullt" />
+                    ) : null}
+                  </div>
                   <Bar
                     value={stats.storeUsed / stats.storeT}
                     tone={stats.storeUsed > stats.storeT * 0.9 ? "critical" : "accent"}
@@ -918,6 +947,8 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
                 </div>
               </div>
             </Card>
+          </div>
+          <div className="g-col-wide">
             <Maintenance
               id="vedlikehold"
               g={g}
