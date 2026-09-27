@@ -102,6 +102,7 @@ import type {
   ScrapStock,
   Worker,
 } from "./types";
+import { applyCashCap, reserveDayLog, reserveTotal } from "./reserve";
 
 export const SAVE_VERSION = 1;
 const STEP_MIN = 10;
@@ -266,6 +267,7 @@ export function newGame(seed = Date.now()): GameState {
     controlBest: 0,
     boostMin: 0,
     treasuryOut: 0,
+    lockedReserve: null,
     sickUntilMin: 0,
     tempsUntilMin: 0,
     tempCrew: null,
@@ -2708,6 +2710,7 @@ function onDay(g: GameState, stats: PlantStats): void {
   g.history.push(g.today);
   if (g.history.length > HISTORY_MAX) g.history.splice(0, g.history.length - HISTORY_MAX);
   g.today = newDay(today, g.cash);
+  reserveDayLog(g);
 
   updatePowerDeal(g, today);
   if (g.gridCut && g.minute >= g.gridCut.untilMin) g.gridCut = null;
@@ -2840,8 +2843,9 @@ function onDay(g: GameState, stats: PlantStats): void {
     }
   } else g.stuckDays = 0;
 
-  // Banken
-  if (g.cash < -creditLimit(g)) {
+  // Banken. Den bundne reserven (B-193) kan ikke brukes, men banken ser den som sikkerhet: et verk med reserve
+  // større enn underskuddet går ikke konkurs
+  if (g.cash < -creditLimit(g) && reserveTotal(g) < -g.cash) {
     g.negativeDays += 1;
     if (g.negativeDays === 1 || g.negativeDays >= BANKRUPTCY_DAYS - 2) {
       log(g, `Banken er bekymret: du er over kredittgrensen (dag ${g.negativeDays} av ${BANKRUPTCY_DAYS}).`, "bad");
@@ -2893,6 +2897,8 @@ function step(g: GameState, dt: number): void {
   if (Math.floor(g.minute / MIN_PER_DAY) !== Math.floor(before / MIN_PER_DAY)) {
     onDay(g, computePlantStats(g));
   }
+  // Myk grense for kassa: overskuddet går til den bundne reserven (B-193, midlertidig)
+  applyCashCap(g);
 }
 
 /** Flytter spillet fram et antall spillminutter. */

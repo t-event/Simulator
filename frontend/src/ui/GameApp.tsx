@@ -1,11 +1,11 @@
 import { RecipeGuideCoach } from "./RecipeGuide";
-import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import "./game.css";
 import { isElsewhere, onTabChange, playHere } from "../game/tabLock";
 import { markChangelogSeen, unseenChangelog } from "../game/changelog";
 import { ChangelogSheet } from "./Changelog";
 import { STAGES, WIN_CASH } from "../game/data";
-import { LEGENDS, WIN_TITLE } from "../game/konsern";
+import { konsernReady, LEGENDS, WIN_TITLE } from "../game/konsern";
 import { InstallTip } from "./InstallTip";
 import { completeManual, unlock } from "../game/engine";
 import { computePlantStats, day, energyPrice, idleOutsideHours, staffing } from "../game/plant";
@@ -36,7 +36,16 @@ import { InboxSheet } from "./Inbox";
 import { markAllSeen, unseenCount } from "../game/inbox";
 import { Sales } from "./Sales";
 import { VIEWS, viewUnlocked, type View } from "./views";
-import { Icon } from "./icons";
+import { Icon, type IconName } from "./icons";
+import { isVerketTab, type VerketTab } from "./verketTabs";
+
+const NAV_ICON: Record<View, IconName> = {
+  verket: "verket",
+  marked: "market",
+  salg: "sales",
+  folk: "people",
+  forskning: "research",
+};
 
 // Kontrollrommet (spillet i fire runder) lastes først når det trengs
 const ControlRoom = lazy(() => import("./control/ControlRoom").then((m) => ({ default: m.ControlRoom })));
@@ -459,29 +468,38 @@ function TopBar({
             );
           })}
         </div>
-        <button className="g-book" onClick={onBook} aria-label="Fagboka">
+        <button className="g-book g-top-book" onClick={onBook} aria-label="Fagboka">
           <Icon name="book" />
           <span className="hide-narrow"> Fagbok</span>
           {unread > 0 && <span className="g-badge">{unread}</span>}
         </button>
-        <button className="g-book" onClick={onSettings} aria-label="Innstillinger">
+        <button className="g-book g-top-settings" onClick={onSettings} aria-label="Innstillinger">
           <Icon name="settings" />
         </button>
       </div>
+      {/* Nøkkeltallene (B-192): ikon + tall på mobil, ord i tillegg når det er plass. Skjermlesere får alltid ordet */}
       <div className="g-top-row g-kpis">
-        <span className={g.cash < 0 ? "tone-critical" : ""}>
-          <em>Kasse</em> {fmtKr(Math.floor(g.cash))}
-        </span>
-        <span>
-          <em>Omdømme</em> {fmtRep(g.reputation)}
-        </span>
-        <span>
-          <em>{stats.furnace.fuel === "gass" ? "Gass" : "Strøm"}</em> {fmtNum(energyPrice(g), 2)} kr/kWh
-        </span>
+        <Kpi icon="money" label="Kasse" className={`g-kpi-cash${g.cash < 0 ? " tone-critical" : ""}`}>
+          {fmtKr(Math.floor(g.cash))}
+          {/* Kassa står ved den myke grensen; overskuddet går til den bundne reserven (B-193) */}
+          {g.lockedReserve && (
+            <Icon
+              name="lock"
+              className="g-kpi-lock"
+              label={`Kassa er ved grensen – overskuddet settes av i den bundne konsernreserven (${fmtKr(Math.floor(g.lockedReserve.total))})`}
+            />
+          )}
+        </Kpi>
+        <Kpi icon="star" label="Omdømme">
+          {fmtRep(g.reputation)}
+        </Kpi>
+        <Kpi icon="power" label={stats.furnace.fuel === "gass" ? "Gass" : "Strøm"}>
+          {fmtNum(energyPrice(g), 2)} kr/kWh
+        </Kpi>
         {(g.researchPoints > 0 || g.researched.length > 0) && (
-          <span>
-            <em>Fagpoeng</em> {Math.floor(g.researchPoints)}
-          </span>
+          <Kpi icon="research" label="Fagpoeng">
+            {Math.floor(g.researchPoints)}
+          </Kpi>
         )}
       </div>
       {/* 🏆 står ved varsellinja, ikke i toppraden: der er det ikke plass på en smal mobil (B-134) */}
@@ -492,6 +510,26 @@ function TopBar({
         </button>
       </div>
     </header>
+  );
+}
+
+function Kpi({
+  icon,
+  label,
+  className = "",
+  children,
+}: {
+  icon: IconName;
+  label: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <span className={`g-kpi ${className}`} title={label}>
+      <Icon name={icon} />
+      <em className="g-kpi-label">{label}</em>
+      <strong>{children}</strong>
+    </span>
   );
 }
 
@@ -575,6 +613,8 @@ export function GameApp() {
   const [news, setNews] = useState(() => unseenChangelog(api.hasSave));
   const [view, setView] = useState<View>("verket");
   const [subTab, setSubTab] = useState<{ tab?: string; n: number }>({ n: 0 });
+  // Underfanen i Verket står her, så sidemenyen på PC kan åpne Konsern direkte (B-192)
+  const [verketTab, setVerketTab] = useState<VerketTab>("oversikt");
   const [bookOpen, setBookOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [boardOpen, setBoardOpen] = useState(false);
@@ -634,8 +674,11 @@ export function GameApp() {
 
   const stats = computePlantStats(g);
   const shown: View = viewUnlocked(g, view) ? view : "verket";
+  const konsernOpen = shown === "verket" && verketTab === "konsern" && g.konsern.unlocked;
+  const konsernCanBuy = g.konsern.unlocked ? konsernReady(g) : 0;
   const go = (v: View, sub?: string) => {
     setView(v);
+    if (v === "verket" && isVerketTab(sub)) setVerketTab(sub);
     // Åpner en bestemt underfane, f.eks. lageret under Salg (B-048)
     setSubTab((prev) => ({ tab: sub, n: prev.n + 1 }));
     if (!g.seenViews.includes(v)) act((gg) => void gg.seenViews.push(v));
@@ -683,6 +726,8 @@ export function GameApp() {
 
           <nav className="g-nav" aria-label="Hovedmeny">
             {VIEWS.filter((v) => viewUnlocked(g, v.id)).map((v) => {
+              // På PC er Konsern et eget punkt i sidemenyen; da er ikke Verket valgt samtidig (B-192)
+              const active = shown === v.id && !(v.id === "verket" && konsernOpen);
               const isNew = !g.seenViews.includes(v.id);
               const hint = g.tutorial !== null && TUTORIAL[g.tutorial]?.view === v.id && shown !== v.id;
               // Folk: «!» når verket står eller går færre skift enn det kunne, fordi folk mangler (B-071)
@@ -704,11 +749,12 @@ export function GameApp() {
               return (
                 <button
                   key={v.id}
-                  className={`${shown === v.id ? "is-active" : ""}${hint ? " is-hint" : ""}`}
-                  aria-current={shown === v.id ? "page" : undefined}
-                  onClick={() => go(v.id)}
+                  className={`${active ? "is-active" : ""}${hint ? " is-hint" : ""}${v.id === "verket" && konsernOpen ? " is-verket-konsern" : ""}`}
+                  aria-current={active ? "page" : undefined}
+                  onClick={() => (v.id === "verket" && konsernOpen ? go("verket", "oversikt") : go(v.id))}
                 >
-                  {v.label}
+                  <Icon name={NAV_ICON[v.id]} className="g-nav-icon" />
+                  <span className="g-nav-label">{v.label}</span>
                   {isNew ? (
                     <span className="g-badge g-badge-new">Ny</span>
                   ) : folkAlert ? (
@@ -721,6 +767,21 @@ export function GameApp() {
                 </button>
               );
             })}
+            {g.konsern.unlocked && (
+              <button
+                className={`g-nav-pc${konsernOpen ? " is-active" : ""}`}
+                aria-current={konsernOpen ? "page" : undefined}
+                onClick={() => go("verket", "konsern")}
+              >
+                <Icon name="konsern" className="g-nav-icon" />
+                <span className="g-nav-label">Konsern</span>
+                {konsernCanBuy > 0 && (
+                  <span className="g-badge" aria-label={`${konsernCanBuy} kjøp du har råd til`}>
+                    {konsernCanBuy}
+                  </span>
+                )}
+              </button>
+            )}
           </nav>
         </div>
 
@@ -733,6 +794,8 @@ export function GameApp() {
               go={go}
               openBook={openBook}
               onOpenSettings={() => setSettingsOpen(true)}
+              tab={verketTab}
+              setTab={setVerketTab}
             />
           )}
           {shown === "marked" && (

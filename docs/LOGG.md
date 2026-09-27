@@ -5,6 +5,43 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 131 – 2026-09-27: midlertidig sikkerhetsventil for kassa
+
+**Brukeren ba om:** før rebalanseringen av sluttspillet: en myk grense på 100 mrd. for disponibel kasse, der
+overskuddet flyttes til en bunden konsernreserve (ikke brukbar, ikke til konsernkassa, ikke i PvP/anbud/Kontroll/
+Industrimakt, ikke på «mest penger på bok», lagres, kan migreres senere); grensen i config; vises først når det skjer;
+og en sjekk av lagringsformat, konsernverdi, topplister, konkurs og andre beregninger først.
+
+**Gjort:** B-193. Sjekken (se beslutningen): ingen SQL-endring trengs; reserven teller i konsernverdien så titler,
+sluttmål, liga og juksesperre regner som før; banken ser reserven som sikkerhet. `game/reserve.ts`, feltet
+`lockedReserve` (null i `migrate()` og nye spill), motoren og `act` flytter overskuddet, varsel første gang og én linje
+per døgn, visning på Økonomi, Konsern og en lås ved kassa. Simulatoren (`--konsern`) bruker grensen. Endringslogg: nei
+etter eierens beskjed.
+
+**Testet:** `npm test` (ny reservetest), tsc, lint, balanse (exit 0), `--konsern`, Playwright med kasse 100,5 mrd.
+
+**Gjenstår:** bygger på grenen med UI-1b (PR #139, venter på eieren). Reserven skal migreres når sluttspillet er
+rebalansert (FORSLAG).
+
+---
+
+## Økt 130 – 2026-09-27: UI-1b – app-skallet
+
+**Brukeren ba om:** «Merge» for UI-1a (PR #138, publiseringen grønn), så «Fortsett» – neste steg i planen, UI-1b.
+
+**Gjort:** B-192. PC-skall fra 900 px med sidemeny (Konsern som eget punkt når det er åpnet) og topplinje på én rad;
+innholdet scroller i `.g-main` på alle størrelser. Underfanene i Verket øverst, styrt fra `GameApp`
+(`ui/verketTabs.ts`). Mobilmenyen med ikoner; nøkkeltallene som ikon + tall (133 → 117 px). Fagbok, varsler,
+toppliste og innstillinger som ark fra høyre på PC. Varsellinja står etter B-116; spørsmålet om toast er lagt i
+FORSLAG. Endringsloggen, UI.md, CLAUDE.md.
+
+**Testet:** tsc, lint, `npm test`, balanse (exit 0), build; Playwright på 7 størrelser før/etter, Konsern-navigasjon,
+ark fra høyre, nytt spill med veiledningen (320 og 1 366).
+
+**Gjenstår:** eierens svar på skjermbildene og om varsellinja på mobil (FORSLAG). Deretter UI-2a (Oversikt).
+
+---
+
 ## Økt 129 – 2026-09-27: UI-1a – tokens, skrift, ikoner og ett kontokort
 
 **Brukeren ba om:** UI-fase 1-valgene (egen liten skrift for overskrifter og tall, Lucide, ett samlet kontokort,
@@ -22,7 +59,7 @@ ett (`AccountFeaturesCard`), KONTO-regel 6 justert. UI.md, KONTO.md, CLAUDE.md, 
 (Verket, kontokortet, Anlegg, Økonomi, Marked) – ingen vannrett scrolling, ingen feil i konsollen; 412/820/2 560 for
 vannrett scrolling.
 
-**Gjenstår:** eierens klarsignal, så merge. Deretter UI-1b (app-skallet: kompakt mobiltoppfelt, sidemeny på PC med
+**Gjenstår:** eieren så skjermbildene og sa «Merge» – PR #138 er merget. Neste er UI-1b (app-skallet: kompakt mobiltoppfelt, sidemeny på PC med
 Konsern). Tegningene (anleggsbildet, kontrollrommet) får tokens i UI-2a/UI-4a.
 
 ---

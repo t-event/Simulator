@@ -3332,3 +3332,68 @@ Konto (B-149): ingen ny funksjon; kontokortet er samme funksjoner som før, bare
 Testet: tsc, lint, `npm test`, balanse (exit-kode), build; Playwright før/etter på 320×568, 390×844, 1 366×768 og
 1 920×1 080 (Verket → Oversikt, kontokortet, Anlegg, Økonomi, Marked), uten vannrett scrolling; og
 412/820/2 560 for vannrett scrolling.
+
+## B-192 UI-1b: app-skallet – sidemeny på PC med Konsern, underfaner øverst, kompakt toppfelt (2026-09-27)
+Status: gjelder (bygger på B-187 og B-191; B-116 og B-134 står)
+Bakgrunn: UI.md 5 og 10.2. Eieren valgte Konsern som eget punkt i sidemenyen på PC og underfane på mobil (B-191).
+Beslutning:
+- **To skall, samme React-tre:** under 900 px mobilskallet (toppfelt, innhold, meny nederst), fra 900 px PC-skallet
+  (topplinje, sidemeny til venstre, innhold). Innholdet scroller nå alltid i `.g-main` (også på PC), så topplinja og
+  sidemenyen står fast. Innholdet får flere kolonner fra 760 px som før; brede skjermer får innholdet midtstilt med
+  maks ca. 1 600 px (var 1 248).
+- **Sidemeny på PC:** ikon og navn (smal, ikon over navn, 900–1 279 px; full, ikon ved siden av navn, fra 1 280 px).
+  Bare områder som er låst opp. **Konsern** er eget punkt når konsernet er åpnet, med samme merke som før; da vises
+  ikke Verkets underfaner. På mobil er Konsern fortsatt underfane i Verket, og Verket står som valgt i menyen.
+  Underfanen i Verket styres nå fra `GameApp` (`ui/verketTabs.ts`), så også råd kan åpne en bestemt underfane.
+- **Menyen nederst på mobil** har ikon over navnet og merket oppe til høyre (Forskning + «Ny» brytes ikke lenger).
+- **Underfanene i Verket øverst**, over anleggsbildet og rådene, og over begge kolonnene på PC.
+- **Topplinja på PC** er én rad når det er plass: dag · fart · nøkkeltall · varsellinja · toppliste · fagbok ·
+  innstillinger (57 px på 1 366 og bredere; to rader under ca. 1 250 px).
+- **Toppfeltet på mobil:** nøkkeltallene er ikon + tall på én linje (ordet vises fra 600 px, og skjermlesere får det
+  alltid). Kassa står i visningsskriften. 133 → 117 px på 390–412 px; 320 px får to linjer nøkkeltall som før.
+- **Varsellinja står som før (B-116):** en fast linje som aldri ligger oppå siden. Planen i UI.md (≤ 88 px med varsler
+  som toast) ville gjøre om B-116; det er eierens valg og er lagt i FORSLAG.md.
+- **Ark fra høyre på PC:** fagbok, varsler, toppliste og innstillinger (spillet synes bak). På mobil som før.
+Konto (B-149): ingen ny funksjon.
+Testet: tsc, lint, `npm test`, balanse (exit 0), build. Playwright på de 7 størrelsene (Verket, kontokortet, Anlegg,
+Økonomi, Marked), uten vannrett scrolling; Konsern i sidemenyen og tilbake til Verket (1 000, 1 366, 1 920) og som
+underfane på 390; fagboka som ark fra høyre; nytt spill med veiledningen på 320 og 1 366.
+
+## B-193 Midlertidig sikkerhetsventil: myk grense for kassa og bunden konsernreserve (2026-09-27)
+Status: gjelder – **midlertidig**, til rebalanseringen av økonomien i sluttspillet. Ikke en erstatning for den.
+Bakgrunn: eieren vil hindre at kassene eksploderer igjen før sluttspillet er rebalansert. Ingen hard grense der
+inntekt slettes. På serveren nå: H4WK3N5 80,4 mrd., Tuster 46,4 mrd. (fra 8,3 mrd. etter reformen i morges).
+Beslutning:
+- **Myk grense for disponibel kasse: 100 mrd. kr** (`CASH_RESERVE.softCap` i `game/reserve.ts`; `null` slår den av).
+  Det kassa ellers ville hatt over grensen, flyttes til **den bundne konsernreserven** (`g.lockedReserve`).
+  Flyttingen skjer i hvert tidssteg i motoren og etter hver handling (også belønninger mens spillet står på pause).
+  Står kassa over grensen når oppdateringen kommer, flyttes overskuddet første gang spillet lastes.
+- **Reserven:** kan ikke brukes (alle kjøp sjekker `cash`); kan ikke flyttes til konsernkassa (serveren leser bare
+  `cash − loan` i `deposit_to_treasury`, og appen likeså); påvirker ikke anbud, Kontroll eller Industrimakt (B-190);
+  teller ikke på «Mest penger på bok» (tidslinja sender `cash`); lagres i spilltilstanden (lokalt og på nett i
+  `saves.state`), så den kan migreres eller få en funksjon senere.
+- **Den teller i konsernverdien** (`konsernEquity`). Grunner fra sjekken:
+  - titlene går til 5 000 mrd. (Stålgigant) og regnes av konsernverdien – uten reserven ville de stoppet ved ca.
+    100 mrd. kasse + verkene;
+  - juksesperrens vekstkontroll (`check_snapshot`) og ligaen bruker `equity`; med reserven i er tallene som før
+    (en brå nedgang ville ikke flagget, men ligaen ville falt, og en senere frigjøring ville sett ut som et hopp);
+  - konsernverdi er en karriereliste som ikke brukes i fellesverdenen (B-190).
+  Eieren kan be om at den tas ut; da endres bare `konsernEquity`.
+- **Konkurs:** banken ser reserven som sikkerhet – et verk med reserve større enn underskuddet går ikke konkurs.
+  (I praksis umulig uansett: ingen kjøp koster over 6 mrd., så man må bruke nesten 100 mrd. først.)
+- **Vises først når det skjer (B-180):** første gang et varsel under «Kasse og bank» med en kort forklaring; deretter
+  én linje per døgn om hva som ble satt av; «Bunden konsernreserve» og en kort tekst på Verket → Økonomi, «Herav
+  bunden reserve» på Konsern, og en liten lås ved kassa i toppfeltet. Ingenting vises før grensen er nådd.
+- **Sjekket, ingen endring trengs:** lagringsformatet (nytt felt, `null` i `migrate()` og nye spill; eldre utgaver av
+  appen beholder feltet); serverens konsernkasse og vakta på `treasuryOut`; topplistene («mest penger på bok» flater
+  ut ved 100 mrd. for dem som når grensen – det er meningen); kjøp (dyreste er 6 mrd.); konsernåpningen (1 mrd.);
+  sluttmålet (10 mrd., konsernverdi); «Mens du var borte», daglige belønninger og oppdrag (går gjennom grensen).
+  Ingen SQL-endring.
+- **Når sluttspillet er rebalansert:** reserven skal migreres (f.eks. konverteres etter en ny modell) eller få en
+  ordentlig funksjon, og grensen fjernes eller justeres. Står i FORSLAG.md og RETNING.md.
+Konto (B-149): nei – regel 1, eget spill (lagres på nett med resten av spillet for dem som har konto).
+Endringslogg: nei (eierens beskjed: ikke introduser reserven for spilleren før det skjer – forklaringen kommer i
+spillet i det øyeblikket kassa når grensen)
+Testet: `npm test` (ny test: flytting, konsernverdi uendret, én forklaring, døgnlinje, motoren, ikke brukbar,
+konkurs, slått av, gamle lagringer og lagring), balanse (exit 0), `--konsern` (dag 240: kasse 100 mrd. + 339 mrd.
+bundet, samme konsernverdi 715,75 mrd. som uten ventil), Playwright med kasse 100,5 mrd. (390, 320, 1 366).

@@ -1309,49 +1309,8 @@ button {
 }
 
 /* ---------------------------------------------------------------- Bredere skjermer */
+/* Innholdet får flere kolonner fra 760 px; skallet (sidemeny, topplinje) byttes først fra 900 px (B-192) */
 @media (min-width: 760px) {
-  /* Bred skjerm: vanlig side som scroller, med toppfeltet og menyen klistret øverst */
-  .g-app {
-    position: static;
-    display: block;
-    min-height: 100vh;
-    padding-bottom: 16px;
-  }
-
-  .g-behind {
-    display: block;
-  }
-
-  .g-head {
-    display: block;
-    position: sticky;
-    top: 0;
-    z-index: 20;
-  }
-
-  .g-main {
-    overflow: visible;
-    min-height: 0;
-  }
-
-  .g-nav {
-    position: static;
-    justify-content: center;
-    border-top: 0;
-    border-bottom: 1px solid var(--panel-border);
-    padding-bottom: 0;
-  }
-
-  .g-nav button {
-    flex: 0 1 140px;
-    height: 44px;
-    font-size: var(--fs-body);
-  }
-
-  .g-nav button.is-active {
-    box-shadow: inset 0 -3px 0 var(--accent);
-  }
-
   .g-chain {
     grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   }
@@ -1854,7 +1813,7 @@ button {
   }
 }
 
-@media (min-width: 760px) {
+@media (min-width: 900px) {
   .g-coach {
     bottom: 16px;
   }
@@ -2989,4 +2948,277 @@ button {
 
 .g-needs-account .ds-icon {
   color: var(--text-3);
+}
+
+/* ================================================================ App-skallet (UI-1b, B-192) */
+
+/* Nøkkeltallene: ikon + tall på mobil; ordet vises når det er plass, og skjermlesere får det alltid */
+.g-kpis {
+  gap: 2px 12px;
+  align-items: center;
+}
+
+.g-kpi {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  white-space: nowrap;
+}
+
+.g-kpi .ds-icon {
+  color: var(--text-3);
+  width: 15px;
+  height: 15px;
+}
+
+.g-kpi strong {
+  font-weight: 600;
+}
+
+.g-kpi-cash strong {
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  letter-spacing: 0.01em;
+}
+
+.g-kpi.tone-critical strong,
+.g-kpi.tone-critical .ds-icon {
+  color: var(--critical);
+}
+
+.g-kpis em.g-kpi-label {
+  margin: 0;
+}
+
+@media (max-width: 599px) {
+  .g-kpis em.g-kpi-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* Menyen nederst på mobil: ikon over navnet, merket oppe til høyre */
+.g-nav button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px 2px;
+}
+
+.g-nav-icon.ds-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.g-nav-label {
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.g-nav button > .g-badge {
+  position: absolute;
+  top: 4px;
+  left: calc(50% + 6px);
+  margin: 0;
+}
+
+/* På mobil er Konsern en underfane i Verket, så Verket er fortsatt valgt i menyen */
+.g-nav button.is-verket-konsern {
+  color: var(--accent);
+  box-shadow: inset 0 3px 0 var(--accent);
+  font-weight: 700;
+}
+
+/* Konsern står i sidemenyen bare på PC; på mobil er det en underfane i Verket */
+.g-nav-pc {
+  display: none !important;
+}
+
+/* Underfanene i Verket øverst, over begge kolonnene */
+.g-verket-tabs {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 900px) {
+  /* PC: topplinje over alt, sidemeny til venstre, innholdet scroller for seg (samme React-tre som på mobil) */
+  .g-app {
+    --side-w: 92px;
+  }
+
+  .g-behind {
+    display: grid;
+    grid-template-columns: var(--side-w) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+      "top top"
+      "nav main";
+  }
+
+  .g-head > .g-top {
+    grid-area: top;
+  }
+
+  .g-nav {
+    grid-area: nav;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--sp-3) var(--sp-2);
+    border-top: 0;
+    border-right: 1px solid var(--line-strong);
+    overflow-y: auto;
+  }
+
+  .g-nav button {
+    flex: none;
+    height: auto;
+    min-height: 60px;
+    border-radius: var(--r-md);
+    font-size: var(--fs-caption);
+  }
+
+  .g-nav button.is-active {
+    background: var(--accent-soft);
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+
+  @media (hover: hover) {
+    .g-nav button:hover:not(.is-active) {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+  }
+
+  .g-nav-pc {
+    display: flex !important;
+  }
+
+  .g-nav button.is-verket-konsern {
+    color: var(--text-dim);
+    box-shadow: none;
+    font-weight: 400;
+  }
+
+  .g-nav button.is-hint {
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+
+  .g-main {
+    grid-area: main;
+    max-width: none;
+    margin: 0;
+    padding: var(--sp-5) max(var(--sp-5), calc((100% - 1600px) / 2));
+  }
+
+  /* Topplinja: én rad når det er plass, ellers bryter varsellinja og knappene til en rad nummer to */
+  .g-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-3) var(--sp-4);
+    padding: var(--sp-3) var(--sp-5);
+  }
+
+  .g-top-row:first-child,
+  .g-notice-row {
+    display: contents;
+  }
+
+  .g-when {
+    order: 1;
+    margin-right: 0;
+  }
+
+  .g-speed {
+    order: 2;
+  }
+
+  .g-kpis {
+    order: 3;
+    margin-top: 0;
+    gap: 2px 18px;
+  }
+
+  .g-notice-row .g-notice {
+    order: 4;
+    flex: 1 1 180px;
+    min-width: 180px;
+    max-width: 640px;
+    margin-top: 0;
+  }
+
+  /* Knappene står helt til høyre, også når varsellinja ikke fyller raden */
+  .g-board-btn {
+    order: 5;
+    margin-top: 0;
+    margin-left: auto;
+  }
+
+  .g-top-book {
+    order: 6;
+  }
+
+  .g-top-settings {
+    order: 7;
+  }
+
+  /* Konsern har eget punkt i sidemenyen, så underfanen og fanelinja trengs ikke der */
+  .g-verket-tabs .is-konsern,
+  .g-verket-tabs.on-konsern {
+    display: none;
+  }
+
+  /* Ark (fagbok, varsler, toppliste, innstillinger) kommer fra høyre, så spillet synes bak */
+  .g-modal.g-side-sheet {
+    justify-content: flex-end;
+    padding: 0;
+  }
+
+  .g-side-sheet > .g-modal-card {
+    height: 100%;
+    max-height: none;
+    max-width: 520px;
+    border-radius: 0;
+    border-width: 0 0 0 1px;
+    padding: var(--sp-6) var(--sp-5) calc(var(--sp-6) + env(safe-area-inset-bottom));
+    box-shadow: var(--shadow-overlay);
+  }
+}
+
+@media (min-width: 1280px) {
+  /* Full sidemeny: ikon og navn på én linje */
+  .g-app {
+    --side-w: 200px;
+  }
+
+  .g-nav button {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: var(--sp-4);
+    min-height: var(--touch);
+    padding: 0 var(--sp-4);
+    font-size: var(--fs-body);
+  }
+
+  .g-nav button > .g-badge {
+    position: static;
+    margin-left: auto;
+  }
+}
+
+/* Den bundne konsernreserven (B-193) */
+.g-reserve-note .ds-icon {
+  color: var(--text-3);
+}
+
+.g-kpi .g-kpi-lock.ds-icon {
+  width: 12px;
+  height: 12px;
+  margin-left: 2px;
+  vertical-align: -1px;
 }

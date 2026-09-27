@@ -130,6 +130,7 @@ frontend/src/
     recipeGuide.ts Reseptguide for nye kvaliteter (vises av ui/RecipeGuide.tsx)
     konsern.ts   Datterverk og sluttmålet 10 mrd. (vises av ui/Konsern.tsx)
     world.ts     Felles hendelser i motoren og sesongfordel (B-129)
+    reserve.ts   Midlertidig myk grense for kassa (100 mrd.) og bunden konsernreserve (B-193) – grensen står her
     daily.ts     Daglig belønning, dagens oppdrag og mens du var borte (B-149)
     mastery.ts   Mesterskap: forskning som tas om og om igjen etter all forskning (B-150)
     achievements.ts Prestasjoner (merker)   cosmetics.ts  Pynt i anleggsbildet for fagpoeng (B-151)
@@ -148,7 +149,8 @@ frontend/src/
     scrapIncome.ts Skraplagerets inntekt i ekte tid – speiler SQL-en i 029 (B-188); scrapTests.ts viser at fart ikke hjelper
     tests.ts     Tester uten nett (falsk tjeneste)
   ui/          Spillets skjermer (mobil først) og kontrollrommet
-    Overview.tsx Verket med underfanene Oversikt, Anlegg, Økonomi (og Konsern)   Recipe.tsx  Resepten på Marked
+    Overview.tsx Verket med underfanene Oversikt, Anlegg, Økonomi (og Konsern; valget i verketTabs.ts/GameApp)
+    Recipe.tsx  Resepten på Marked
     Agreements.tsx Rammeavtaler under Salg   AutoToggle.tsx  Brytere for automatikk (låst til den er forsket fram)
     views.ts     Fanene og når de låses opp   Upgrades.tsx, stations.ts  Utstyr per sted i anlegget
     ResearchPage.tsx  Forskning-fanen   Settings.tsx  ⚙️ innstillinger og banken (på Verket → Økonomi)
@@ -194,8 +196,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - «Ingen horisontal scrolling» er ikke nok i toppfeltet: sjekk også at knapper og tekst ikke avkortes
   (`scrollWidth > clientWidth`) eller havner utenfor skjermen, på 320 px bredde. Safari på iPhone har bredere
   skrift enn Chromium, så la det være litt luft (B-134).
-- På mobil (under 760 px) scroller bare `.g-main`, ikke vinduet (B-137). I Playwright: scroll med
+- Bare `.g-main` scroller, ikke vinduet – på mobil (B-137) og nå også på PC (B-192). I Playwright: scroll med
   `document.querySelector(".g-main").scrollBy(...)`. Fingersveip (`synthesizeScrollGesture`) virker ikke uten skjerm.
+- **To skall** (B-192): under 900 px mobil (meny nederst), fra 900 px PC (sidemeny, topplinje). Konsern er eget punkt i
+  sidemenyen på PC (`.g-nav-pc`) og underfane på mobil. Underfanen i Verket står i `GameApp` (`ui/verketTabs.ts`).
 - Ark (`.g-modal`) som åpnes fra innhold inne i `.g-main`, må pakkes i `<Portal>` (B-152). Ellers klipper Safari på
   iPhone arket til innholdet, og det kan ikke scrolles (skjedde med «Pynt verket»).
 - Skjermbilder med `fullPage: true` viser faste menyer midt på siden; det er
@@ -268,6 +272,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Skraplagerets inntekt** (B-188) regnes på serveren (`029_produksjonsmaler.sql`) og speiles i `net/scrapIncome.ts`.
   Endres regelen, må begge endres, og `npm test` (scrapTests.ts) og SQL-scenariene i B-188 kjøres på nytt. Farten måles
   med spillminuttene (`game_min`), aldri med hele spilldager (det ga 10× opptil 37 % for mye).
+- **Bunden konsernreserve** (B-193, midlertidig): kassa over `CASH_RESERVE.softCap` flyttes til `g.lockedReserve` i
+  hvert tidssteg og etter hver handling. Reserven er med i `konsernEquity`, men ikke i `cash` – så den kan ikke brukes,
+  ikke flyttes til konsernkassa og teller ikke som penger på bok. Skal migreres når sluttspillet er rebalansert.
 - **Anbud og inntekt** (B-189) avgjøres «lat» av `world_status()` → `world_tick()`. Test livsløpet med midlertidige
   testkontoer i en DO-blokk som ender med `raise exception`; sett `closes_at` bakover for å avgjøre et anbud.
 

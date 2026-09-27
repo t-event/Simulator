@@ -6,10 +6,17 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
-- **UI-1a** (B-191) er bygget, og PR-en venter på eierens klarsignal før merge (skjermbilder er vist). Spørsmålene fra
-  UI-fase 0 er besvart i B-191.
+- **UI-1b (B-192) – varsellinja på mobil:** toppfeltet er 117 px (fra 133). Målet i UI.md var ≤ 88 px, men det krever
+  at varsellinja slutter å være en fast rad og varsler kommer som en kort toast under toppfeltet (samles i bjella).
+  Det gjør om B-116 (varsler skal aldri ligge oppå noe). Alternativ: flytte hele varsellinja ned over menyen nederst
+  (toppfeltet ca. 76 px, like mye plass totalt). Eierens valg – til da står B-116.
+- UI-1b er bygget og vises med skjermbilder før merge.
 
 ## Venter
+
+- **Bunden konsernreserve (B-193)** er midlertidig. Når økonomien i sluttspillet er rebalansert: bestem hva reserven blir
+  (konverteres etter ny modell, blir en funksjon, eller utbetales gradvis) og fjern eller juster grensen på 100 mrd.
+  Avgjør også om reserven fortsatt skal telle i konsernverdien.
 
 - **Vern mot lekkede passord:** brukeren sa det var skrudd på, men sikkerhetsrådene i Supabase melder det fortsatt av
   (2026-09-26, økt 108). Sjekk under Authentication → «Leaked password protection» at det er lagret.

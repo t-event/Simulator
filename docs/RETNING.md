@@ -348,6 +348,11 @@ endrer lite i spillet hjemme. Eieren avgjør om den kjøres.
 11,17 mrd., Tuster 3 664 → 8,29 mrd., Figen 1 562 → 6,07 mrd. Små spill er urørt. Kopi av alle endrede spill ligger i
 `save_backups` og for alltid i `economy_reform_log`.
 
+**Midlertidig sikkerhetsventil (B-193):** kassa ble tjent inn igjen fort (Tuster 8,3 → 46 mrd. og H4WK3N5 80 mrd. samme
+dag). Til rebalanseringen av sluttspillet er ferdig, har disponibel kasse en myk grense på 100 mrd.; overskuddet går til
+en bunden konsernreserve som teller i konsernverdien, men ikke kan brukes eller flyttes til verden. Rebalanseringen
+må bestemme hva reserven blir, og om grensen skal bort. Ventilen er ikke løsningen.
+
 ## 10. Gamle beslutninger – hva gjelder
 
 Ingen historikk slettes. Statuslinjene i `BESLUTNINGER.md` er oppdatert der det står «justeres» eller «revurderes».

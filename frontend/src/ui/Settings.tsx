@@ -129,7 +129,7 @@ export function SettingsSheet({
   const season = useSeasonStatus()?.current ?? null;
   const act = api.act;
   return (
-    <div className="g-modal" role="dialog" aria-modal="true" aria-label="Innstillinger" onClick={onClose}>
+    <div className="g-modal g-side-sheet" role="dialog" aria-modal="true" aria-label="Innstillinger" onClick={onClose}>
       <div className="g-modal-card" onClick={(e) => e.stopPropagation()}>
         <header className="g-card-head">
           <h2>Innstillinger</h2>

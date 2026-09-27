@@ -32,7 +32,7 @@ export function InboxSheet({ g, act, onClose }: { g: GameState; act: GameApi["ac
     .slice(-60)
     .reverse();
   return (
-    <div className="g-modal" role="dialog" aria-modal="true" aria-label="Varsler" onClick={onClose}>
+    <div className="g-modal g-side-sheet" role="dialog" aria-modal="true" aria-label="Varsler" onClick={onClose}>
       <div className="g-modal-card g-inbox" onClick={(e) => e.stopPropagation()}>
         <header className="g-card-head">
           <h2>Varsler</h2>

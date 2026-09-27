@@ -23,6 +23,7 @@ import { computePlantStats, day, gradeRecipe } from "./plant";
 import { auto, hasResearch } from "./research";
 import { masteryFactor } from "./mastery";
 import { chance, randInt } from "./random";
+import { reserveTotal } from "./reserve";
 import type { GameState, SisterPlant, SisterType } from "./types";
 
 export interface SisterSpec {
@@ -280,9 +281,9 @@ export function konsernValue(g: GameState): number {
   return (g.konsern?.plants ?? []).reduce((a, p) => a + sisterValue(g, p), 0);
 }
 
-/** Egenkapital (kasse minus lån) pluss datterverkene */
+/** Egenkapital (kasse minus lån) pluss datterverkene og den bundne reserven (B-193) */
 export function konsernEquity(g: GameState): number {
-  return g.cash - g.loan + konsernValue(g);
+  return g.cash - g.loan + konsernValue(g) + reserveTotal(g);
 }
 
 export function modernizeCost(p: SisterPlant, g?: GameState): number {

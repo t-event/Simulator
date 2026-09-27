@@ -85,7 +85,7 @@ export function LeaderboardSheet({
   onOpenSettings: () => void;
 }) {
   return (
-    <div className="g-modal" role="dialog" aria-modal="true" aria-label="Toppliste" onClick={onClose}>
+    <div className="g-modal g-side-sheet" role="dialog" aria-modal="true" aria-label="Toppliste" onClick={onClose}>
       <div className="g-modal-card" onClick={(e) => e.stopPropagation()}>
         <header className="g-card-head">
           <h2>Toppliste</h2>

@@ -60,7 +60,10 @@ import { LandmarksCard } from "./Landmarks";
 import { BankCard } from "./Settings";
 import { KonsernTab } from "./Konsern";
 import { readyUpgrades, stationOptions, stationReady, type Station } from "./stations";
+import { VERKET_TABS, type VerketTab } from "./verketTabs";
 import type { View } from "./views";
+import { Icon } from "./icons";
+import { CASH_RESERVE } from "../game/reserve";
 
 interface Props {
   g: GameState;
@@ -70,6 +73,9 @@ interface Props {
   openBook: (chapter?: string) => void;
   /** Åpner ⚙️ (innloggingen), fra kortet med dagens oppdrag */
   onOpenSettings?: () => void;
+  /** Underfanen står i GameApp (B-192) */
+  tab: VerketTab;
+  setTab: (t: VerketTab) => void;
 }
 
 type Anchor = "vedlikehold" | "mal";
@@ -321,13 +327,7 @@ function Quality({
   );
 }
 
-type SubTab = "oversikt" | "anlegg" | "okonomi" | "konsern";
-const SUBTABS: { id: SubTab; label: string }[] = [
-  { id: "oversikt", label: "Oversikt" },
-  { id: "anlegg", label: "Anlegg" },
-  { id: "okonomi", label: "Økonomi" },
-  { id: "konsern", label: "Konsern" },
-];
+type SubTab = VerketTab;
 
 /** Hele produksjonslinja på én rad, med varsel og knapp når foringen må byttes (B-035) */
 function CompactChain({
@@ -504,9 +504,8 @@ function avgPlantResult(g: GameState): number {
   return days.length ? days.reduce((a, d) => a + plantResult(d), 0) / days.length : 0;
 }
 
-export function Overview({ g, stats, act, go, openBook, onOpenSettings }: Props) {
+export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: chosenTab, setTab }: Props) {
   const [sheet, setSheet] = useState<Station | null>(null);
-  const [chosenTab, setTab] = useState<SubTab>("oversikt");
   const [pynt, setPynt] = useState(false);
   // Konsern-fanen finnes bare når konsernet er åpnet; lastes et annet spill, faller valget tilbake til Oversikt
   const tab: SubTab = chosenTab === "konsern" && !g.konsern.unlocked ? "oversikt" : chosenTab;
@@ -541,6 +540,34 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings }: Props)
   return (
     <div className="g-grid">
       {pynt && <PyntModal g={g} stats={stats} act={act} onClose={() => setPynt(false)} />}
+      {/* Underfanene står øverst (B-192), over bildet og rådene, og over begge kolonnene på PC */}
+      <div
+        className={`g-subtabs g-verket-tabs${tab === "konsern" ? " on-konsern" : ""}`}
+        role="tablist"
+        aria-label="Verket"
+      >
+        {VERKET_TABS.filter((t) => t.id !== "konsern" || g.konsern.unlocked).map((t) => (
+          <button
+            key={t.id}
+            role="tab"
+            aria-selected={tab === t.id}
+            className={`${tab === t.id ? "is-active" : ""}${t.id === "konsern" ? " is-konsern" : ""}`}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+            {t.id === "anlegg" && upgradesReady > 0 && (
+              <span className="g-badge" aria-label={`${upgradesReady} utstyr du har råd til`}>
+                {upgradesReady}
+              </span>
+            )}
+            {t.id === "konsern" && konsernCanBuy > 0 && (
+              <span className="g-badge" aria-label={`${konsernCanBuy} kjøp du har råd til`}>
+                {konsernCanBuy}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
       <div className="g-col-wide">
         <div className="g-scene-wrap">
           <PlantScene g={g} stats={stats} />
@@ -586,30 +613,6 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings }: Props)
             )}
           </div>
         )}
-
-        <div className="g-subtabs" role="tablist" aria-label="Verket">
-          {SUBTABS.filter((t) => t.id !== "konsern" || g.konsern.unlocked).map((t) => (
-            <button
-              key={t.id}
-              role="tab"
-              aria-selected={tab === t.id}
-              className={tab === t.id ? "is-active" : ""}
-              onClick={() => setTab(t.id)}
-            >
-              {t.label}
-              {t.id === "anlegg" && upgradesReady > 0 && (
-                <span className="g-badge" aria-label={`${upgradesReady} utstyr du har råd til`}>
-                  {upgradesReady}
-                </span>
-              )}
-              {t.id === "konsern" && konsernCanBuy > 0 && (
-                <span className="g-badge" aria-label={`${konsernCanBuy} kjøp du har råd til`}>
-                  {konsernCanBuy}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
       </div>
 
       {tab === "oversikt" && (
@@ -929,7 +932,19 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings }: Props)
                 {stats.salaryPerDay > 0 && <Stat label="Lønn per døgn" value={fmtKr(stats.salaryPerDay)} />}
                 <Stat label="Faste kostnader per døgn" value={fmtKr(STAGES[g.stage].fixedPerDay)} />
                 {g.loan > 0 && <Stat label="Lån" value={fmtKr(g.loan)} tone="warning" />}
+                {g.lockedReserve && (
+                  <Stat label="Bunden konsernreserve" value={fmtKr(Math.floor(g.lockedReserve.total))} />
+                )}
               </div>
+              {/* Den bundne reserven (B-193) vises først når kassa har nådd grensen */}
+              {g.lockedReserve && (
+                <p className="g-muted g-small-text g-reserve-note">
+                  <Icon name="lock" /> Kassa kan ha høyst {fmtKr(CASH_RESERVE.softCap ?? 0)}. Det du tjener utover,
+                  settes av i den bundne konsernreserven: pengene er dine og teller i konsernverdien, men kan ikke
+                  brukes eller flyttes til konsernkassa ennå. Dette er midlertidig til økonomien i sluttspillet er
+                  justert.
+                </p>
+              )}
               {y && (g.konsern.unlocked || (y.costs.investering ?? 0) > 0) && (
                 <p className="g-muted g-small-text">
                   «Resultat i går» tar med alt:{" "}

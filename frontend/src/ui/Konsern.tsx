@@ -353,6 +353,7 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
         <Card title="Konsernet">
           <div className="g-stats">
             <Stat label="Konsernverdi" value={fmtKr(Math.floor(equity))} />
+            {g.lockedReserve && <Stat label="Herav bunden reserve" value={fmtKr(Math.floor(g.lockedReserve.total))} />}
             <Stat label="Netto fra verkene" value={`${fmtKr(dividend - costs)}/døgn`} />
           </div>
           {k.plants.length > 0 && (
@@ -393,8 +394,9 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
               </li>
             </ol>
             <p className="g-muted g-small-text">
-              Konsernverdi = kassa minus lån, pluss det verkene er verdt. Under Forskning finnes egne prosjekter for
-              konsernet ({konsernResearch.done} av {konsernResearch.total} forsket fram).
+              Konsernverdi = kassa minus lån, pluss det verkene er verdt
+              {g.lockedReserve ? " og den bundne reserven" : ""}. Under Forskning finnes egne prosjekter for konsernet (
+              {konsernResearch.done} av {konsernResearch.total} forsket fram).
             </p>
           </details>
         </Card>
