@@ -3633,3 +3633,21 @@ Konto (B-149): ingen ny funksjon.
 Testet: tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter på 320, 390, 1 366 og 1 920 px, et konsern uten
 verk, «Mer»-raden med salg, og de 7 størrelsene: ingen vannrett scrolling, ingen avkortet tekst, ingen små knapper.
 
+## B-207 Plass til 240 ansatte på storverket, så fem skiftlag og alle anbefalte roller får plass (2026-09-27)
+Status: gjelder (justerer taket fra STAGES; bygger på B-073, B-111, B-171, B-178)
+Brukeren: «Jeg har akkurat nok ansatte til 5 skift. Men får ikke lov til å ansette nok til å dekke anbefalte stillinger.
+Vi må justere slik at det går.»
+Funnet: et fullt utbygd storverk (tre av de største ovnene, den største støpingen, to ekstra strenger og tre valseverk)
+trenger 40 per skift, altså 200 til fem skiftlag. De anbefalte støtterollene er 21 (5 reparatører, 4 selgere, 6 murere,
+2 planleggere, 2 skrapklassere, 2 skiftledere), og med fem lag anbefales én ledig avløser: 222 i alt. Taket var 220. Alle
+fire spillerne som har bygd ut alt, sto på 220.
+Beslutning:
+- Storverket har plass til **240** ansatte (var 220). Da får fem skiftlag og alt som anbefales plass, med 18 til overs til
+  ekstra avløsere.
+- En test i `npm test` bygger det største mulige storverket og sjekker at fem skiftlag pluss de anbefalte rollene får
+  plass under taket. Kommer det nytt utstyr med mannskap eller en ny anbefalt rolle, stopper testen bygget til taket er
+  justert. Med det gamle taket feilet den («trenger 222, plass til 220»).
+- Lønna for 20 flere er ca. 50 000 kr per døgn – ingenting for et storverk. Balansen er uendret (exit 0).
+Konto (B-149): ingen ny funksjon.
+Testet: tsc, lint, `npm test` (den nye testen feiler med 220 og går med 240), balanse (exit 0), build.
+

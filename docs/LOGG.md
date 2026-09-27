@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 144 – 2026-09-27: Plass til de anbefalte rollene på storverket
+
+**Brukeren ba om:** 1) «Utbyttet er vel kanskje litt for ekstremt? Skal vi balansere inntektene litt?» 2) Med fem skiftlag
+var det ikke plass til å ansette de anbefalte rollene.
+
+**Gjort:** 1) Undersøkt og svart med tall og anbefaling (fart i ekte tid for bygging og modernisering, trim av utbyttet,
+hjemmeverket som flaggskip) – venter på brukerens valg, ingenting endret. 2) B-207: taket på storverket 220 → 240, og en
+test som sjekker at fem skiftlag og alle anbefalte roller får plass på det største mulige storverket.
+
+**Testet:** tsc, lint, `npm test` (ny test feiler med 220), balanse (exit 0), build. Publiseringen av #148–#151 er grønn.
+
+**Gjenstår:** brukerens valg om utbyttet; UI-4a–d.
+
+---
+
 ## Økt 143 – 2026-09-27: UI-3d – Konsern
 
 **Brukeren ba om:** «Fortsett» (neste steg i UI-planen).
