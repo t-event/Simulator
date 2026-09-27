@@ -63,6 +63,10 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Landemerker tas manuelt (ikke av salgsdirektøren) | Nei | Regel 1 | B-177 |
 | Skiftleder som følger opp fraværet | Nei | Regel 1 | B-178 |
 | «Hva er nytt» (endringslogg) | Nei | Regel 1 | B-179 |
+| Ny konsernøkonomi: utbytte og konsernkostnader | Nei | Regel 1: ditt eget spill | B-181 |
+| Grunnleggeræraen, Hall of Fame, ingen automatisk sesong 2 | Ja (lista og sesongen krever konto; æranavnet kan leses uten) | Regel 3 | B-182 |
+| Aktive dager (registrert av serveren ved lagring) | Ja | Regel 2: bare lagring på nett teller | B-182 |
+| Konsernkassa på serveren (flytte penger inn i verden, grense per ekte døgn) – skjult til fase 1B | Ja | Regel 2 og 7 | B-183 |
 | Ventetid i konsernet (fase 4) | Nei (serverklokke med konto) | Regel 5 | PLAN-NETT |
 | Anbud og skrapauksjoner (fase 5) | Ja | Regel 3 og 7 | PLAN-NETT |
 | Varsel på mobilen (senere) | Ja | Varselet knyttes til kontoen | – |
@@ -85,10 +89,10 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | --- | --- | --- | --- |
 | Økonomireformen (engangs) | Gjelder spill på nett | Endrer lagringen på nett | planlagt, B-180 |
 | Strategiske bedrifter (eie, investere, inntekt fra andres aktivitet) | Ja | Regel 3 og 7: deles med andre, avgjøres på serveren | planlagt, B-180 |
-| Konsernkassen (penger flyttet inn i verdenen) | Ja | Regel 2 og 7 | planlagt, B-180 |
+| Konsernkassen (penger flyttet inn i verdenen) | Ja | Regel 2 og 7 | bygget på serveren, B-183 (vises i fase 1B) |
 | Kontroll og overtakelser | Ja | Regel 3 og 7 | planlagt, B-180 |
 | Industrimakt på profilen og topplista | Ja | Regel 3 | planlagt, B-180 |
 | Verksjefer, mandat og «Verksjefen ringer» i datterverkene | Nei | Regel 1: ditt eget spill | planlagt, B-180 |
 | Rekonstruksjon ved konkurs | Nei | Regel 1 | planlagt, B-180 |
-| Æraer og Hall of Fame | Ja | Regel 3 | planlagt, B-180 |
+| Æraer og Hall of Fame | Ja | Regel 3 | Grunnleggeræraen og navnet «Hall of Fame»: B-182. Neste æra: ikke bestemt |
 

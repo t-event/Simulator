@@ -92,6 +92,7 @@ export function migrate(g: GameState): GameState {
   if (g.controlBest === undefined) g.controlBest = 0;
   // Spilltid som er spolt fram om natta, til fartskontrollen på nett (B-176)
   if (g.boostMin === undefined) g.boostMin = 0;
+  if (g.treasuryOut === undefined) g.treasuryOut = 0;
   if (loose.gradeRecipes === undefined) loose.gradeRecipes = {};
   if (g.settings.powerDeal === undefined) {
     g.settings.powerDeal = "spot";

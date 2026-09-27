@@ -231,6 +231,7 @@ export type CostCategory =
   | "bot"
   | "faste"
   | "nett"
+  | "konsern"
   | "annet";
 export type IncomeCategory = "kontrakt" | "spot" | "annet" | "konsern";
 
@@ -475,6 +476,11 @@ export interface GameState {
   controlBest?: number;
   /** Spillminutter som er spolt fram om natta (6×), så juksesperren kan regne ut hvor lang tid dagene minst tar (B-176) */
   boostMin?: number;
+  /**
+   * Kroner flyttet fra spillet til konsernkassa på serveren (B-183). Går aldri ned: serveren trekker kassa hvis et
+   * spill med lavere tall lagres (en annen nettleser, en tilbakerulling), så pengene ikke kan dobles.
+   */
+  treasuryOut?: number;
   /** Fagpoeng til forskning */
   researchPoints: number;
   /** Dagen spilleren sist kjøpte fagpoeng gjennom et forskningssamarbeid (B-064), −1 hvis aldri */

@@ -2,6 +2,9 @@ import { useState } from "react";
 import { WIN_CASH } from "../game/data";
 import {
   daysToAfford,
+  dividends,
+  KONSERN_ECONOMY,
+  konsernCosts,
   DIRECTOR_AGREEMENT_SHARE,
   DIRECTOR_HIRE,
   DIRECTOR_UPGRADES,
@@ -254,8 +257,21 @@ function DirectorCard({ g, act }: { g: GameState; act: Act }) {
   );
 }
 
-/** Ett datterverk: hva det tjener, den viktigste knappen, og resten (modernisering, salg) foldet bort (B-123) */
-function PlantRow({ g, act, p, options }: { g: GameState; act: Act; p: SisterPlant; options: KonsernOption[] }) {
+/** Ett datterverk: utbyttet og hva det tjener, den viktigste knappen, og resten (modernisering, salg) foldet bort (B-123) */
+function PlantRow({
+  g,
+  act,
+  p,
+  dividend,
+  options,
+}: {
+  g: GameState;
+  act: Act;
+  p: SisterPlant;
+  /** Utbyttet verket gir konsernet per døgn (B-181) */
+  dividend: number;
+  options: KonsernOption[];
+}) {
   const [selling, setSelling] = useState(false);
   const down = p.downUntilDay > day(g);
   const upgrade = options.find((o) => o.key === `bygg-${p.id}`);
@@ -269,11 +285,12 @@ function PlantRow({ g, act, p, options }: { g: GameState; act: Act; p: SisterPla
       <div className="g-contract-head">
         <strong>🏭 {p.name}</strong>
         <span className={down ? "g-badge-bad" : "g-muted"}>
-          {down ? `Står til dag ${p.downUntilDay}` : `${fmtKr(sisterProfit(g, p))}/døgn`}
+          {down ? `Står til dag ${p.downUntilDay}` : `+${fmtKr(dividend)}/døgn`}
         </span>
       </div>
       <p className="g-muted g-small-text">
-        {SISTER_TYPES[p.type].name} · modernisert {p.level} av {modernizeMax(g)} · verdt {fmtKr(sisterValue(g, p))}
+        {SISTER_TYPES[p.type].name} · modernisert {p.level} av {modernizeMax(g)} · tjener {fmtKr(sisterProfit(g, p))}
+        /døgn · verdt {fmtKr(sisterValue(g, p))}
       </p>
       {main && <BuyButton g={g} act={act} o={main} label={upgrade ? "Bygg ut til storverk" : "Moderniser"} />}
       <details className="g-details" onToggle={(e) => !(e.target as HTMLDetailsElement).open && setSelling(false)}>
@@ -311,7 +328,12 @@ function PlantRow({ g, act, p, options }: { g: GameState; act: Act; p: SisterPla
 export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
   const k = g.konsern;
   const today = day(g);
-  const perDay = k.plants.filter((p) => p.downUntilDay <= today).reduce((a, p) => a + sisterProfit(g, p), 0);
+  // Driftsresultatet i verkene, utbyttet til konsernet og konsernkostnadene (B-181)
+  const running = (p: SisterPlant) => p.downUntilDay <= today;
+  const div = dividends(g, k.plants);
+  const drift = k.plants.filter(running).reduce((a, p) => a + sisterProfit(g, p), 0);
+  const dividend = div.reduce((a, d, i) => a + (running(k.plants[i]) ? d : 0), 0);
+  const costs = konsernCosts(k.plants);
   const equity = konsernEquity(g);
   const options = konsernOptions(g);
   const byKey = (key: string) => options.find((o) => o.key === key);
@@ -330,8 +352,14 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
         <Card title="Konsernet">
           <div className="g-stats">
             <Stat label="Konsernverdi" value={fmtKr(Math.floor(equity))} />
-            <Stat label="Datterverkene tjener" value={`${fmtKr(perDay)}/døgn`} />
+            <Stat label="Netto fra verkene" value={`${fmtKr(dividend - costs)}/døgn`} />
           </div>
+          {k.plants.length > 0 && (
+            <p className="g-muted g-small-text">
+              Verkene tjener {fmtKr(drift)}/døgn. De beholder {fmtKr(drift - dividend)} til vedlikehold, ledelse og
+              reserve, og konsernledelsen koster {fmtKr(costs)}/døgn.
+            </p>
+          )}
           {!g.won && (
             <>
               <Bar value={Math.max(0, equity) / WIN_CASH} tone="ok" label={`Mot sluttmålet ${fmtKr(WIN_CASH)}`} />
@@ -352,6 +380,11 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
               <li>
                 <strong>Felles innkjøp og salg</strong> gjør alle verkene bedre, også hjemmeverket.{" "}
                 <strong>Modernisering</strong> gir {Math.round(MODERNIZE_GAIN * 100)} % mer per trinn.
+              </li>
+              <li>
+                <strong>Utbytte:</strong> hvert verk beholder {Math.round(KONSERN_ECONOMY.keepShare * 100)} % til
+                vedlikehold og reserve, og resten går til deg. Jo flere verk, jo mindre gir hvert nytt verk, og
+                konsernledelsen koster mer. Flere verk gir fortsatt mer – men ikke dobbelt så mye.
               </li>
               <li>
                 <strong>Du taper ikke på å kjøpe:</strong> et verk er verdt ca. {VALUE_DAYS} døgns overskudd og teller
@@ -380,8 +413,8 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
         )}
         {k.plants.length > 0 && (
           <Card title={`Dine verk (${k.plants.length} av ${maxSisters(g)} datterverk)`}>
-            {k.plants.map((p) => (
-              <PlantRow key={p.id} g={g} act={act} p={p} options={options} />
+            {k.plants.map((p, i) => (
+              <PlantRow key={p.id} g={g} act={act} p={p} dividend={div[i]} options={options} />
             ))}
           </Card>
         )}

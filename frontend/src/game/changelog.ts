@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 182,
+    date: "2026-09-27",
+    title: "Konsernet gir utbytte, og Grunnleggeræraen",
+    items: [
+      "Datterverkene tjener like godt som før, men beholder en del til vedlikehold og reserve. Resten går til deg som utbytte.",
+      "Et stort konsern koster: ledelse, reiser og koordinering. Flere verk gir fortsatt mer, men hvert nytt verk gir litt mindre enn det forrige.",
+      "Konsern-fanen viser hva verkene tjener, hva de beholder, og hva konsernledelsen koster.",
+      "Vi er i Grunnleggeræraen. «Alle tider» på topplista heter nå Hall of Fame.",
+    ],
+  },
+  {
     b: 179,
     date: "2026-09-26",
     title: "Skiftledere, rettferdig spill og «Hva er nytt»",

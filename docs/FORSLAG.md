@@ -6,19 +6,12 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
-Fra den nye hovedretningen (B-180, `RETNING.md` avsnitt 13):
-
-1. **Økonomireformen:** modell A (k = 0,35) eller B (k = 0,45), og hva gjøres med datterverkene (12–14 komplekser på
-   trinn 5 tjener 5–6 mrd. per spilldøgn)? Se dry-run i `RETNING.md` avsnitt 9.
-2. **Konsernkassen:** er det greit at penger fra eget spill bare kan flyttes inn i verdenen mellom spillerne i et
-   begrenset tempo per virkelige døgn?
-3. **Sesongene:** skal automatisk Sesong 2 (2027-03-25) skrus av nå, og skal tida fram til reformen hete
-   «Grunnleggeræraen»?
-4. **Varsler ved overtakelser:** holder varsel inne i appen (72 timer), eller trengs e-post (krever egen
-   e-postleverandør)?
-5. **Første tildeling** av en strategisk bedrift: anbud med tak på budet, eller noe annet?
-6. **Aktiv spiller:** er «minst 2 av de siste 14 dagene» greit i starten?
-7. **Nytt navn på «Alle tider»** når Hall of Fame kommer?
+1. **Økonomireformen – «go»?** Utføringen (modell B) er klar og prøvekjørt, men ikke kjørt (B-184). Merk funnet: med
+   den nye konsernøkonomien er kassa tjent inn igjen på timer i spillet hjemme; det som skiller spilltid fra verden, er
+   grensen på konsernkassa. Reformen gjør topplista sammenlignbar og markerer æraen, men endrer lite i spillet.
+2. **Grensen på konsernkassa:** 100 mill. per ekte døgn ved 1 mrd. i egenkapital, 150 mill. ved 10 mrd., 250 mill. ved
+   1 000 mrd. (B-183). Kan stilles i `config.world` uten ny kode.
+3. **Pilotkonsesjonen:** 7 eller 14 ekte dager?
 
 ## Venter
 
@@ -47,6 +40,10 @@ Fra den nye hovedretningen (B-180, `RETNING.md` avsnitt 13):
   Krever konto. Brukeren: «Ingen varsel på mobilen enda» (B-149).
 
 ## Avgjort
+
+- Eierens svar på de sju spørsmålene fra B-180 (B-181): modell B; utbytte og konsernkostnader i datterverkene;
+  konsernkasse på serveren; Sesong 2 av og Grunnleggeræraen; varsel i appen i testene og push før full lansering;
+  skjult anbud i 48 timer med pilotkonsesjon; aktiv = 2 av 14 dager; «Hall of Fame»; Industrimakt skjult inntil videre.
 
 - Sesong 2 starter av seg selv når Sesong 1 er over, og alle spillene blir med videre (B-167).
 

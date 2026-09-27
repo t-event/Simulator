@@ -1446,7 +1446,7 @@ Beslutning:
 - Varselet kommer når lageret *blir* fullt, og høyst hver 12. time (`storeFullLogMin`), så det ikke gjentas hele tida.
 
 ## B-119 Konsernet: neste steg, grunner på knappene, utbygging og milepæler (2026-09-25)
-Status: gjelder (utvider B-106). Datterverkene justeres av B-180
+Status: gjelder (utvider B-106). Datterverkene gir utbytte og har konsernkostnader fra B-181
 Brukeren: med bare stålverk fikk man ikke kjøpt storverk, felles innkjøp eller salgskontor. Konsernet skulle bli mer
 intuitivt, morsomt og bedre forklart.
 Årsak: knappene ble grå uten forklaring når kassa var for liten (typisk etter noen stålverk). Med seks stålverk var
@@ -1504,7 +1504,7 @@ gruppen «Kommer når konsernet åpnes» under Forskning.
 
 
 ## B-121 Konsernet: det skal lønne seg å investere (2026-09-25)
-Status: gjelder. Overskuddet i datterverkene justeres i fase 1 av B-180 (avtagende overskudd og lederkostnader)
+Status: gjelder – verdien regnes fortsatt av driftsresultatet; det som går til morselskapet, er utbytte etter B-181
 Brukeren:
 - Har man bare kjøpt stålverk, bør man kunne gå over til storverk.
 - Det tar så lang tid å tjene inn et storverk at noen heller vil spare til 10 mrd.
@@ -2664,7 +2664,7 @@ sesong.»
 - **Konto (KONTO.md):** som før – sesongen krever konto (regel 3).
 
 ## B-167 Neste sesong starter av seg selv, og alle blir med videre (2026-09-26)
-Status: gjelder inntil videre – automatisk neste sesong bør skrus av, se B-180 (erstatter «alle starter i garasjen når en ny sesong starter» i B-129, og valget for spill fra en
+Status: gjelder inntil videre – automatisk neste sesong er skrudd av med en bryter (B-182); koden står (erstatter «alle starter i garasjen når en ny sesong starter» i B-129, og valget for spill fra en
 tidligere sesong i B-166)
 Brukeren: «Når sesong 1 er ferdig går vi over til sesong 2 automatisk. Alle blir med over.»
 
@@ -3032,3 +3032,138 @@ regel 6. De planlagte funksjonene står i tabellen med «planlagt».
 **Endringsloggen:** beslutninger som ikke endrer noe spillerne merker, merkes «Endringslogg: nei» og hoppes over av
 `scripts/sjekk-endringslogg.mjs`.
 
+
+## B-181 Fase 1: eierens valg, og ny økonomi i datterverkene (2026-09-27)
+Status: gjelder (svarer på de sju spørsmålene i B-180; justerer B-119 og B-121)
+Bakgrunn: Eieren godkjente fase 0 (B-180) og svarte på spørsmålene i `RETNING.md` avsnitt 13.
+
+**Eierens valg (fase 1):**
+1. Økonomireformen: **modell B** (k = 0,45 over 50 mill.). Ingen ekte data endres før 1) fersk dry-run, 2) sikkerhetskopi
+   og 3) kontroll av resultatet – og eierens endelige «go».
+2. Datterverkene: et verk blir **ikke** mindre lønnsomt fordi eieren har mange. Driftsresultatet står. Det som går opp
+   til konsernet, er det som er igjen etter vedlikehold, ledelse, arbeidskapital/reserve – og andelen oppover avtar når
+   konsernet vokser, mens konsernkostnadene (ledelse, koordinering, reiser, finansiering) øker. Stilles inn med en
+   simulator for 3, 6, 10 og 14 moderniserte verk, ikke etter magefølelse.
+3. **Konsernkasse på serveren: ja.** Vanlige kroner. Lokal fart (pause–10×) påvirker aldri verdenstida. Overføring fra
+   spillet er begrenset per ekte døgn, og grensen skal ikke skalere lineært med rikdom (høyst mild, sterkt avtagende).
+   Før skraplageret gir ekte inntekt: analyse av hvordan inntekt fra aktivitet normaliseres til ekte tid (B-185).
+4. **Automatisk Sesong 2 skrus av** (ikke slett kode eller historikk). Perioden nå heter **Grunnleggeræraen**. Navnet
+   på neste æra og hva som nullstilles, er ikke bestemt.
+5. Overtakelser: i interne tester holder varsel i appen (tydelig ved innlogging, minst 72 ekte timer). Før full
+   lansering: minst ett varsel utenfor spillet – helst push/web-push, ikke e-post. Ingen immunitet for dem som er borte.
+6. Første eier av et strategisk selskap: **skjult anbud i 48 ekte timer** på serveren, bud fra konsernkassa, tak på
+   budet knyttet til selskapets anslåtte verdi (ikke spillerens rikdom), trekning ved likt bud (regelen vises tydelig).
+   **Pilotkonsesjon** (7 eller 14 ekte dager, så nytt anbud) – ikke fast eierskap før overtakelser finnes.
+7. **Aktiv spiller:** aktiv minst 2 forskjellige dager av de siste 14, kan stilles inn, registrert av serveren, ikke
+   etter antall kontoer.
+8. «Alle tider» → **«Hall of Fame»**.
+9. **Industrimakt:** datamodellen kan komme, men ingen offentlig liste før strategisk eierskap og Kontroll finnes.
+   Skjult til spilleren har kommet dit.
+Leveranseplan: **Fase 1A** (dry-run, ny konsernøkonomi, konsernkasse, Sesong 2 av, Grunnleggeræraen), **fase 1B**
+(ett skraplager, 48-timers skjult anbud, pilotkonsesjon, ekte inntekt fra andres skrapbruk normalisert til ekte tid).
+Senere: Kontroll, fast eierskap, overtakelser, flere selskapstyper, ekte ledelse. Viktigst: vis ingenting av dette
+til spillere som ikke har kommet dit.
+
+**Ny økonomi i datterverkene (1A):** `KONSERN_ECONOMY` i `konsern.ts`.
+- Driftsresultatet per verk er som før (`sisterProfit`), og verdien av et verk (60 døgns drift, B-121) er uendret.
+- **Utbytte** (`dividends`): hvert verk beholder 20 % til vedlikehold, lokal ledelse og reserve. Verkene stilles i rekke
+  etter driftsresultat; det beste gir full andel av resten, det neste 1/(1 + 0,05) osv. («ledelsen strekker seg
+  tynnere»). Et nytt verk trekker aldri ned utbyttet fra verkene man har – det kommer nederst i rekka.
+- **Konsernkostnader** (egen post «konsern» under Økonomi): ledelse per verk (stålverk 0,75, storverk 3, kompleks
+  10 mill. per døgn) × koordinering som øker 8 % per verk utover det første. Går også når et verk står.
+- «Neste steg», knappene og testspilleren regner alle kjøp på netto (utbytte minus kostnader).
+
+**Simulatoren** (`balance.ts --konsern`, kompleks trinn 5, som de som har kommet lengst):
+
+| Verk | Drift | Netto til konsernet | Netto/drift | Neste verk (kjøpt og modernisert) betalt på |
+| --- | --- | --- | --- | --- |
+| 1 | 0,41 mrd. | 0,32 mrd. | 78 % | 50 døgn |
+| 3 | 1,22 mrd. | 0,90 mrd. | 73 % | 56 døgn |
+| 6 | 2,45 mrd. | 1,67 mrd. | 68 % | 65 døgn |
+| 10 | 4,08 mrd. | 2,53 mrd. | 62 % | 78 døgn |
+| 14 | 5,71 mrd. | 3,25 mrd. | 57 % | 94 døgn |
+
+Netto øker for hvert verk helt til 14 (større konsern er sterkere, flere verk lønner seg), men mindre og mindre.
+Vekst fra 3 nye komplekser og 20 mrd.: før 14 verk på dag 30 og 988 mrd. på dag 240; nå 14 verk på dag 60, fullt
+modernisert på dag 120, 400 mrd. på dag 240 – lineært, ikke eksplosivt, og et kompleks er igjen en stor investering.
+Hos de tre største blir inntekten 57–59 % av i dag (Grane 5,86 → 3,34 mrd. per spilldøgn).
+Valgt bort: lik andel for alle verk som avtar med antallet – da trakk et nytt verk ned utbyttet fra alle de andre, et
+nytt kompleks ga minus til det var modernisert, og testspilleren stoppet på 11–13 verk. Høyere ledelseskostnad
+(15 mill. per kompleks) gjorde bytte av stålverk mot kompleks dårligere enn modernisering (brøt B-170).
+Fagboka (konsernkapitlet) forklarer utbytte og stordriftsulemper. Balansen er uendret (konsernet kommer etter
+storverket).
+
+## B-182 Grunnleggeræraen, ingen automatisk sesong 2, Hall of Fame og aktive dager (2026-09-27)
+Status: gjelder (slår av det automatiske i B-167; koden står)
+Bakgrunn: Eierens valg 4, 7 og 8 i B-181.
+Beslutning (migrasjon `026_grunnleggeraeraen.sql`):
+- `config` får raden `world` med `auto_next_season: false`, `active_min_days: 2`, `active_window_days: 14`.
+  `season_status()` starter neste sesong bare når bryteren er på. Sesong 1 avsluttes som før (resultater, 🏆/🎖).
+- Tabellen `eras` med **Grunnleggeræraen** fra starten av Sesong 1, uten slutt. `season_status()` gir også `era`, og
+  sesonglinja viser «Grunnleggeræraen · Sesong 1 · N dager igjen». Når Sesong 1 er over: «Grunnleggeræraen · ingen
+  sesong pågår. Hall of Fame står.»
+- Feil funnet og rettet før den kunne skje: `season_status()` krasjet når ingen sesong pågikk (en tom post ble lest).
+  Det skjedde aldri før fordi en ny sesong alltid startet – med bryteren av ville det skjedd 2027-03-25. Testet ved å
+  sette slutten på Sesong 1 til i går i en transaksjon som ble rullet tilbake: ingen ny sesong, resultatene lages,
+  æraen står.
+- `activity_days` (en rad per spiller og UTC-dag) fylles av en trigger på `saves` – serverens klokke, bare lagring på
+  nett teller. Fylt bakover fra tidslinja. `active_players()` gir dem som er aktive etter innstillingene (3 av 5 nå).
+  Bare for serverfunksjoner (anbud og overtakelser senere).
+- «Alle tider» heter **Hall of Fame** på topplista.
+Konto: sesong og liste krever konto som før (regel 3); aktive dager bare med lagring på nett (regel 2).
+
+## B-183 Konsernkassa på serveren (2026-09-27)
+Status: gjelder (skjult i spillet til fase 1B)
+Endringslogg: nei (ingenting vises i spillet ennå)
+Bakgrunn: Eierens valg 3 i B-181, og de to klokkene i `RETNING.md` 5.2.
+Beslutning (migrasjon `027_konsernkasse.sql`, `net/treasury.ts`):
+- `treasury` (saldo og alt som er flyttet inn) og `treasury_ledger` (posteringer: innskudd, anbud, refusjon, inntekt,
+  utbetaling, justering). Spilleren leser bare sine egne; bare serverfunksjoner skriver.
+- `deposit_to_treasury(beløp, versjon)`: krever konto, konsern (nivå 4 og konsernet åpnet), at spilleren ikke er
+  flagget, at versjonen på nett er den appen sist lagret, og egne penger (kasse minus lån). Grense per rullerende 24
+  timer: grunnbeløp × (1 + trinn × log10(egenkapital / 1 mrd.)) – 100 mill. og 0,5 i `config.world`: 1 mrd. → 100 mill.,
+  10 mrd. → 150 mill., 100 mrd. → 200 mill., 1 000 mrd. → 250 mill. Sterkt avtagende, som eieren ba om.
+- Overføringen gjøres helt på serveren i én transaksjon: kassa i spillet på nett trekkes, `treasuryOut` (nytt felt i
+  spillet, standard 0 i `migrate()`) øker, konsernkassa øker, og versjonen øker. Appen lagrer først, gjør det samme med
+  spillet sitt og bygger videre på den nye versjonen (`adoptServerRev`).
+- Sperre mot å doble pengene: en trigger på `saves` sørger for at `treasuryOut` aldri går ned. Lagres et eldre spill
+  (en annen nettleser, en tilbakerulling, direkte skriving), trekkes det som alt er flyttet, fra kassa.
+- `treasury_status()`: saldo, grense, brukt og når mer blir ledig.
+- Testet i databasen med en midlertidig testkonto i en transaksjon som ble rullet tilbake: overføring, gammel versjon
+  avvist, grensen holder, eldre spill skrevet over gir ikke pengene tilbake. Nettestene har en falsk tjeneste for kassa.
+Konto: krever konto (regel 2 og 7), står i `ACCOUNT_FEATURES` som «Konsernkassa».
+Valgt bort: at appen trekker kassa selv og melder fra etterpå (penger kunne gå tapt eller dobles ved nettfeil), og en
+grense som øker med kassa (da ville 10× og de rikeste få forsprang i verden).
+
+## B-184 Økonomireformen: klar, ikke kjørt – og hva den faktisk gjør (2026-09-27)
+Status: venter på eierens «go»
+Endringslogg: nei (ingen data er endret)
+Bakgrunn: Eierens valg 1 i B-181: modell B, og fersk dry-run, sikkerhetskopi og kontroll før ekte data endres.
+Fersk dry-run (bare lesing, 2026-09-27): Grane 8 286 → 11,16 mrd., Tuster 3 651 → 7,72 mrd., Figen 1 562 → 5,27 mrd.,
+H4WK3N5 79 → 62 mill. (har passert 50 mill. siden sist), Sjæfen uendret. Alle har sikkerhetskopier.
+Utføringen ligger i `supabase/utkast/okonomireform_utforing.sql`: sikkerhetskopi (grunn «okonomireform»), logg
+`economy_reform_log`, endring med ny versjon og `device = 'server'`, kontroll (ny kasse, kopi finnes, samme rekkefølge),
+alt i én transaksjon. Prøvekjørt i én DO-blokk som alltid feiler og rulles tilbake: kontrollene gikk gjennom, og
+etterpå var ingenting endret (0 kopier, ingen logg, kassene som før).
+**Funn eieren må vite før «go»:** med den nye konsernøkonomien tjener Grane 3,34 mrd. per spilldøgn. Den nye kassa
+(11 mrd.) tilsvarer 3 spilldøgn, og hele den gamle kassa er tjent inn igjen på ca. 8 timer på 10× (Tuster 4, Figen 2).
+Reformen av kassa alene endrer derfor lite i det lokale spillet – det som skiller spilltid fra verden, er grensen på
+konsernkassa (B-183), som gjør kassas størrelse nesten uten betydning i verden. Reformen gjør topplista «Mest penger på
+bok» og konsernverdien sammenlignbar igjen, og kan være et tydelig skille for Grunnleggeræraen. Hall of Fame (rekordene)
+endres ikke av reformen.
+
+## B-185 Inntekt fra andres aktivitet normaliseres til ekte tid (analyse før skraplageret) (2026-09-27)
+Status: gjelder som plan for fase 1B
+Endringslogg: nei (ren planlegging)
+Bakgrunn: Eierens valg 3 i B-181: før skraplageret gir ekte inntekt, må det være klart hvordan inntekt fra andres
+aktivitet regnes, så 10× ikke gir fordel. Hele analysen står i `RETNING.md` avsnitt 14.
+Beslutning (anbefalt modell): **aktivitetsdøgn med tak per kunde.** For hver kunde og hver ekte (UTC-)dag teller
+skraplageret høyst én normal dags skrapbruk for den kunden: min(skrap brukt den dagen, kundens normale forbruk per
+spilldøgn). Skrapbruken regnes av tonnene kunden har laget (`produced_t` i tidslinja, allerede sjekket av juksesperren og
+fartskontrollen) × ca. 1,1 t skrap per tonn stål – ikke av kjøp, så kjøp-og-salg ikke kan pumpe opp inntekten. Eierens
+egne tonn, flaggede spillere og spill uten lagring på nett teller ikke. Inntekten regnes og betales inn i konsernkassa
+på serveren én gang per ekte dag (idempotent, merket med datoen i `treasury_ledger`).
+Da gir fart og spilletimer ingen fordel: 10 minutter på 10× og 10 timer på 1× gir det samme når begge har spilt en
+normal dag. Det som teller, er at kunden spilte den dagen og hvor stort verket er.
+Valgt bort: tonn per ekte time (10× gir 10 ganger så mye), bare tak per kunde per time (belønner lange økter),
+rapporterte kjøp (kan pumpes med kjøp og salg).

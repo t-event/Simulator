@@ -15,10 +15,19 @@ export interface Season {
   twist?: SeasonTwist | null;
 }
 
+/** Perioden spillet er i (B-182): nå Grunnleggeræraen */
+export interface Era {
+  id: number;
+  name: string;
+  starts_at: string;
+}
+
 export interface SeasonStatus {
   current: Season | null;
   /** Spilleren var med i forrige sesong og får en pitteliten fordel i den nye */
   played_previous: boolean;
+  /** Æraen, eller null (eldre server) */
+  era?: Era | null;
 }
 
 export async function fetchSeasonStatus(): Promise<SeasonStatus> {
@@ -28,7 +37,7 @@ export async function fetchSeasonStatus(): Promise<SeasonStatus> {
   const twist = t
     ? { ...t, scrap: Number(t.scrap) || 1, steel: Number(t.steel) || 1, power: Number(t.power) || 1 }
     : null;
-  return { current: cur ? { ...cur, twist } : null, played_previous: !!s?.played_previous };
+  return { current: cur ? { ...cur, twist } : null, played_previous: !!s?.played_previous, era: s?.era ?? null };
 }
 
 /** Et sesongresultat for spilleren selv (B-143) */

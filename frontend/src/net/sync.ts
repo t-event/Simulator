@@ -103,6 +103,20 @@ function setKnownRev(user: string, rev: number): void {
   }
 }
 
+/** Versjonen spillet her bygger på, eller null hvis den ikke er avklart */
+export function currentRev(): number | null {
+  return knownRev;
+}
+
+/**
+ * Serveren har endret spillet på nett etter en handling herfra (konsernkassa, B-183), og appen har gjort det samme med
+ * spillet sitt. Da bygger spillet her på den nye versjonen, så neste lagring ikke avvises.
+ */
+export function adoptServerRev(rev: number): void {
+  const id = userId();
+  if (id) setKnownRev(id, rev);
+}
+
 /** Lagringen ble avvist fordi spillet på nett er nyere (B-140) */
 export class SaveConflictError extends Error {
   constructor() {
