@@ -150,6 +150,7 @@ frontend/src/
     tests.ts     Tester uten nett (falsk tjeneste)
   ui/          Spillets skjermer (mobil først) og kontrollrommet
     Overview.tsx Verket med underfanene Oversikt, Anlegg, Resept, Økonomi (og Konsern; valget i verketTabs.ts/GameApp)
+    hints.ts     Rådene på Verket; gir også «!» på Marked og Folk i menyen (B-202)
     Recipe.tsx  Resepten (Verket → Resept, B-199)
     Agreements.tsx Rammeavtaler under Salg   AutoToggle.tsx  Brytere for automatikk (låst til den er forsket fram)
     views.ts     Fanene og når de låses opp   Upgrades.tsx, stations.ts  Utstyr per sted i anlegget

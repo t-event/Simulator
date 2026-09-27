@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 202,
+    date: "2026-09-27",
+    title: "Tydeligere varsler",
+    items: [
+      "Marked og Folk får et utropstegn i menyen når noe der trenger deg – for eksempel når skrapet er tomt eller trivselen er lav. Trykk, så kommer du rett dit.",
+      "Varsellinja viser det nyeste varselet du ikke har sett, ikke bare at det finnes et.",
+    ],
+  },
+  {
     b: 201,
     date: "2026-09-27",
     title: "Varslene nederst på mobil",

@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 139 – 2026-09-27: Varsel på Marked og Folk, og hva varsellinja viser
+
+**Brukeren ba om:** «Merge» av PR #146 (varsellinja nederst), og: varsel på Marked når skrap mangler o.l., varsel på Folk
+når noe må tas tak i, og at varsellinja viser varselet, ikke bare at det finnes et.
+
+**Gjort:** PR #145 publisert (grønt), #146 merget. B-202: rådene flyttet til `ui/hints.ts`; «!» på Marked/Folk når et råd
+peker dit (ikke når planleggeren ordner det), trykk åpner riktig underfane; varsellinja viser det nyeste usette varselet.
+(Underveis ble GameApp.tsx tømt av et skript som åpnet fila for skriving før den ble lest – hentet tilbake fra forrige
+commit og endringene lagt inn på nytt.)
+
+**Testet:** tsc, lint, `npm test`, balanse (exit 0), build; Playwright på 390 og 1 366 px.
+
+**Gjenstår:** UI-3a (Økonomi).
+
+---
+
 ## Økt 138 – 2026-09-27: Varsellinja nederst på mobil
 
 **Brukeren ba om:** «Ja til varsellinja og merge» (PR #145 med B-199/B-200).
