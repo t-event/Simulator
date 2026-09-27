@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 128 – 2026-09-27: felles klokke
+
+**Brukeren ba om:** lik innskuddsgrense for alle (`treasury_log_step` = 0) i hvert fall gjennom pilotperioden; rette
+tidslinjetall fra før reformen så de aldri påvirker serverberegninger; sjekke om noen hadde brukt den gamle grensen i
+første anbud; «dager» i ukens utfordring i ekte aktive dager; fast regel om at Industrimakt, Kontroll, eierskap og
+overtakelser aldri avgjøres av lokal kasse, egenkapital eller fart. Deretter UI-1a (se neste økt).
+
+**Gjort:** B-190 og migrasjon 031 (i to deler). Ingen hadde flyttet penger inn eller budt, så anbudet fortsetter.
+Regelen står i RETNING.md og CLAUDE.md. Appen: teksten for «dager» og visningen «N dager». Endringsloggen.
+
+**Testet:** grensen 100 mill.; 2 384 gamle tall merket; sesonglista og ukens vekst uten dem; «dager» og delt plass i en
+transaksjon som ble rullet tilbake; `npm test`.
+
+**Gjenstår:** ingenting for fellesverdenen nå.
+
+---
+
 ## Økt 127 – 2026-09-27: testcaser for skraplagerinntekten og fase 1B
 
 **Brukeren ba om:** før fase 1B, automatiske testcaser som viser at lokal fart ikke kan øke serverinntekten (1×, 3×, 10×,

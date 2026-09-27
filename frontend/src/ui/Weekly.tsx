@@ -41,7 +41,7 @@ function useWeekly() {
 function fmtValue(kind: WeekKind, v: number): string {
   if (kind === "vekst") return `+${fmtNum(v, 1)} %`;
   if (kind === "tonn") return `${fmtNum(v, 0)} %`;
-  return `${fmtNum(v, 0)} døgn`;
+  return `${fmtNum(v, 0)} ${v === 1 ? "dag" : "dager"}`;
 }
 
 export function WeeklyCard({ g, act, onLogin }: { g: GameState; act: GameApi["act"]; onLogin?: () => void }) {
