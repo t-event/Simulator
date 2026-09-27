@@ -280,8 +280,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Konsernøkonomien** (B-181): datterverkene har driftsresultat (`sisterProfit`, også verdien), men morselskapet får
   utbytte (`dividends`, i rekke etter resultat) minus konsernkostnader (`konsernCosts`, egen kostnadspost «konsern»).
   Kjøp og råd regnes på netto (`konsernNetFor`). Endres tallene i `KONSERN_ECONOMY`: kjør `balance.ts --konsern`.
-- **Neste sesong starter ikke av seg selv** (B-182): `config.world.auto_next_season = false`. `season_status()` må tåle at
-  ingen sesong pågår (den krasjet på en tom post før B-182).
+- **Sesonger uten sluttdato** (B-221): `seasons.ends_at` er tom mens sesongen pågår; den avsluttes med `end_season()` og en
+  ny startes med `start_season(navn, vri)` – bare manuelt. SQL som leser `ends_at`, må tåle null. `season_status()` må tåle
+  at ingen sesong pågår (den krasjet på en tom post før B-182).
 - **Konsernkassa** (B-183): `treasuryOut` i spillet går aldri ned – en trigger på `saves` trekker kassa hvis et spill med
   lavere tall lagres. Overføringen gjøres av serveren (`deposit_to_treasury`), og appen bygger videre på versjonen den
   gir (`adoptServerRev`). Test SQL mot ekte tabeller bare i én DO-blokk som ender med `raise exception` (rulles tilbake).

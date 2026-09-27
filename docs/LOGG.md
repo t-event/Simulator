@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 158 – 2026-09-27: Sesonger uten sluttdato
+
+**Brukeren ba om:** ingen sluttdato noen plass; ny sesong skal gjøres manuelt.
+
+**Gjort:** B-221. Migrasjon 039: `ends_at` tom mens sesongen pågår (Sesong 1 har ingen sluttdato lenger), ingen
+automatisk neste sesong, `end_season()` og `start_season(navn, vri)` for administrator, sesongstigen teller ukepremiene
+uten sluttdato. Appen: `ends_at` kan være null, `daysLeft` fjernet. PLAN-NETT og CLAUDE.md oppdatert.
+
+**Testet:** `season_status()` og `current_season_id()` mot databasen, `end_season`/`start_season` i en transaksjon som
+ble rullet tilbake, `get_advisors` (ingen nye råd), tsc, lint, `npm test`.
+
+**Gjenstår:** UI-4b, UI-4c, UI-4d; reserven og kassegrensen; Google/Apple senere.
+
+---
+
 ## Økt 157 – 2026-09-27: Storverk-kortet og sesongnedtellingen
 
 **Brukeren ba om:** Storverk-kortet med sluttmål på Verket gir ikke mening lenger; topplista viser dager igjen av
@@ -17,7 +32,7 @@ kort (sluttmålet står på Konsern). Sesonglinja, startskjermen og «bli med»-
 horisontal scrolling, «Grunnleggeræraen · Sesong 1 pågår»).
 
 **Gjenstår:** UI-4b, UI-4c, UI-4d; reserven og kassegrensen; Google/Apple senere; om Sesong 1 skal beholde sluttdatoen
-2027-03-25 i databasen.
+2027-03-25 i databasen (avgjort i B-221: nei).
 
 ---
 

@@ -260,11 +260,10 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
 - Hva som krever konto, nå og i fase 4 og 5: `docs/KONTO.md` (B-149).
 - Flere enheter samtidig: bare enheten som spilles på, lagrer; den andre settes på pause med «Spill her» (B-143).
 - Merker ved sesongslutt (fase 3) er bygget som 🎖 med beste plassering ved kallenavnet (B-143).
-- **Neste sesong starter ikke av seg selv lenger** (B-182): `config.world.auto_next_season` er `false`. Koden fra B-167
-  står; slå den på igjen med `update public.config set value = value || '{"auto_next_season": true}' where id = 'world';`.
-  Vil du starte en sesong for hånd eller med en vri:
-  i SQL Editor: `select public.start_season('Sesong 2', 26);` (navn, antall uker; 26 = seks måneder, B-130).
-  Med en vri (B-152): `select public.start_season('Sesong 2', 26, 'skrapmangel');` – vriene står i tabellen
-  `season_twists` (skrapmangel, eksportboom, energikrise, gronnstrom).
+- **Sesongene har ingen sluttdato** (B-221): en sesong varer til administrator avslutter den, og ny sesong startes
+  manuelt (den automatiske fra B-167 er fjernet; bryteren `auto_next_season` brukes ikke lenger). I SQL Editor:
+  `select public.end_season();` avslutter sesongen som pågår (resultatene lages), `select public.start_season('Sesong 2');`
+  avslutter den som pågår og starter en ny, og `select public.start_season('Sesong 2', 'skrapmangel');` gir en vri –
+  vriene står i tabellen `season_twists` (skrapmangel, eksportboom, energikrise, gronnstrom).
   **Slik legger du ut en hendelse:** `select public.add_event('skrapmangel', 7);` (skrapmangel, stromkrise,
   eksportboom, importpress, transportstreik; antall dager). Claude kan gjøre begge deler gjennom connectoren.
