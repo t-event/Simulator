@@ -255,6 +255,24 @@ const ICONS = {
     ["rect", { x: "9", y: "9", width: "6", height: "6", rx: "1" }],
   ],
   thermometer: [["path", { d: "M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z" }]],
+  wind: [
+    ["path", { d: "M12.8 19.6A2 2 0 1 0 14 16H2" }],
+    ["path", { d: "M17.5 8a2.5 2.5 0 1 1 2 4H2" }],
+    ["path", { d: "M9.8 4.4A2 2 0 1 1 11 8H2" }],
+  ],
+  droplet: [
+    [
+      "path",
+      { d: "M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z" },
+    ],
+  ],
+  // Rake for slaggen (egen tegning i samme strek som Lucide, B-216)
+  rake: [
+    ["path", { d: "M4 20 13.5 10.5" }],
+    ["path", { d: "M11 8l5 5" }],
+    ["path", { d: "M13 6l5 5" }],
+    ["path", { d: "M15 4l5 5" }],
+  ],
   target: [
     ["circle", { cx: "12", cy: "12", r: "10" }],
     ["circle", { cx: "12", cy: "12", r: "6" }],

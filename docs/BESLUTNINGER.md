@@ -3878,3 +3878,21 @@ Beslutning:
 Konto (B-149): ingen ny funksjon.
 Testet: tsc, lint, `npm test`, Playwright på Verket → Økonomi (320, 390 og PC) med et døgn i minus.
 
+## B-216 UI-4a: Kontrollrommet i designsystemet – ikoner, knappen ved tommelen og bredden på PC (2026-09-27)
+Status: gjelder (UI-plan fase 5, `docs/UI.md`; spillet i kontrollrommet er uendret, B-175)
+Brukeren: «Fortsett» (neste steg på lista etter B-215).
+Kontrollrommet brukte alt fargene i designsystemet, men hadde emoji i knapper og runder, og på PC sto en smal
+mobilkolonne midt på skjermen.
+- **Ikoner i stedet for emoji:** rundene (flamme, vind, rake, dråpe), holdeknappene (strøm, oksygen, helle), «Ferdig»,
+  lukk, varselet om skrapkurver og «Ny rekord» (pokal). Tre nye ikoner fra Lucide (`wind`, `droplet`) og ett tegnet i
+  samme strek (`rake`).
+- **Mobil:** knappen man holder inne står nederst, der tommelen er (før midt på skjermen med tomrom under). På høye
+  mobiler får ovnen mer plass.
+- **PC (fra 900 px):** en runde er bildet til venstre (ovnen, badet eller øsa, større) og målere, råd og knapper til
+  høyre, midt i høyden. Rundekortet står sentrert. Resultatet står i to kolonner: stjerner, poeng og knappene til
+  venstre, rundene med «Hvorfor?» til høyre.
+- Seiersskjermen (10 mrd.) legger seg ikke lenger over kontrollrommet midt i en charge; den kommer når chargen er ferdig.
+Konto (B-149): ingen ny funksjon.
+Testet: tsc, lint, `npm test`, Playwright på 7 størrelser (rundekort og smelting: ingen horisontal scrolling, ingen
+avkuttede eller små knapper) og en automatisk gjennomspilling av alle fire rundene til resultatet på mobil og PC.
+
