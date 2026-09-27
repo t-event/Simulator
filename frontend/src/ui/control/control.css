@@ -8,6 +8,14 @@
     calc(12px + env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left), calc((100vw - 520px) / 2));
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Ingen tekstmarkering eller «Kopier» ved langt trykk, heller ikke på teksten inne i knappene (B-219) */
+.control-room.cg * {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .cg-head {

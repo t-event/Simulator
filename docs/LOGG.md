@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 156 – 2026-09-27: Holdeknappen, skrapvarselet og Granes Hall of Fame
+
+**Brukeren ba om:** mobilen skal ikke prøve å kopiere tekst når man holder knappen i kontrollrommet; Granes Hall of Fame
+skal være ca. 8 500 mrd. (ikke i sesongen); «skrap mangler» kommer ofte selv med planlegger.
+
+**Gjort:** B-219. Langt trykk i kontrollrommet stoppes (touchstart/selectstart/contextmenu + CSS på alt). Nytt
+`scrapAlert`: varsel bare når neste charge står fast, eller uten planlegger for typer som kan kjøpes. Granes
+rekordrad lagt tilbake (038), spillet ikke rørt.
+
+**Testet:** tsc, lint, `npm test` (ny test for skrapvarselet), `balance.ts` (exit 0), Playwright iPhone 320/390
+(touchstart og selectstart stoppes, knappen virker), `leaderboard('verdi')`: Grane nr. 1 med 8 563 mrd.
+
+**Gjenstår:** UI-4b, UI-4c, UI-4d; reserven og kassegrensen; Google/Apple senere.
+
+---
+
 ## Økt 155 – 2026-09-27: Landemerker på Mål, og de går ikke ut
 
 **Brukeren ba om:** landemerkekortet sammen med dagens oppdrag; landemerkekontrakten skal ikke kunne gå ut.
@@ -34,7 +50,7 @@ ny laget 22.05; rekordene kan legges tilbake (dry-run i B-217), men venter på e
 **Testet:** tsc, lint, `npm test` (ny test for valseverket), `balance.ts` (exit 0), directorHour på en ekte lagring
 (New Guy: avtalen signeres), Playwright på 1 366 px før/etter (Konsern → Marked → Verket gir Oversikt).
 
-**Gjenstår:** eierens godkjenning av Granes rekorder; UI-4b (toppliste/Hall of Fame), UI-4c, UI-4d; reserven og
+**Gjenstår:** eierens godkjenning av Granes rekorder (gjort i B-219); UI-4b (toppliste/Hall of Fame), UI-4c, UI-4d; reserven og
 kassegrensen; Google/Apple senere.
 
 ---

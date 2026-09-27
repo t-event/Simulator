@@ -69,7 +69,9 @@ import {
   autoBuy,
   ensureCandidates,
   RETURN_MAX_SHARE,
+  scrapAlert,
   scrapPrice,
+  scrapShort,
   scrapSellPrice,
   sellScrap,
   spotQuota,
@@ -1741,6 +1743,21 @@ test("Landemerker går ikke ut (B-218): ingen svarfrist og ingen leveringsfrist"
   assert(c.status !== "misligholdt", "landemerket ble misligholdt etter fristen");
   assert((g.today.costs.bot ?? 0) === 0 || (g.today.costs.bot ?? 0) === bot, "bot for et landemerke");
   assert(!assessOffer(g, computePlantStats(g), { ...c, status: "tilbud" }).tight, "landemerket vurderes som for sent");
+});
+
+test("Skrapvarselet (B-219): ikke når ovnen fyller opp med annet skrap, men når neste charge står fast", () => {
+  const g = newGame(219);
+  g.stage = 1;
+  const stats = computePlantStats(g);
+  g.recipe = { rent: 0, spon: 0, retur: 50, tungt: 50, rajern: 0, blandet: 0, shredder: 0 };
+  for (const id of Object.keys(g.scrap) as (keyof typeof g.scrap)[]) g.scrap[id].t = 0;
+  g.scrap.tungt.t = 1000;
+  // Returskrapet er tomt og kan ikke kjøpes, men ovnen fyller opp med tungt skrap: ingen varsel
+  assert(scrapShort(g, stats).includes("retur"), "returskrapet regnes ikke som tomt");
+  assert(scrapAlert(g, stats).length === 0, "varslet selv om ovnen kan fylle opp med annet skrap");
+  // Ingenting å fylle med: varsel
+  g.scrap.tungt.t = 0.1;
+  assert(scrapAlert(g, stats).includes("tungt"), "varslet ikke når neste charge står fast");
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden
