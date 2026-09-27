@@ -3599,3 +3599,17 @@ Beslutning:
 Konto (B-149): ingen ny funksjon.
 Testet: tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter på 320, 390, 1 366 og 1 920 px og alle fire
 fanene på de 7 størrelsene: ingen vannrett scrolling, ingen avkortet tekst, ingen hovedknapper under 40 px.
+
+## B-205 UI-3c: Forskning – fagpoengene i egen kolonne, fremdrift mot prisen, to kolonner på PC (2026-09-27)
+Status: gjelder (UI.md 6; bygger på B-191, B-204)
+Brukeren: «Fortsett» – neste fase i UI-planen.
+Beslutning:
+- **Fagpoengene** står i et eget kort: tallet stort øverst, «Slik får du fagpoeng», forskningssamarbeidet, hva som kommer
+  senere og det som er forsket fram. På PC står kortet i høyrekolonnen; på mobil under forskningen.
+- **Klar til å forske** står som kort i et rutenett (tre i bredden på stor skjerm, ett på mobil).
+- **Trenger mer fagpoeng eller lesing:** hver forskning har en fremdriftslinje mot prisen og sier hvor mange fagpoeng som
+  mangler. Knappen for å lese et kapittel først har bok-ikonet i stedet for emoji.
+- Ingen endring i spillet.
+Konto (B-149): ingen ny funksjon.
+Testet: tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter på 320, 390, 1 366 og 1 920 px og de 7
+størrelsene: ingen vannrett scrolling, ingen avkortet tekst, ingen hovedknapper under 40 px.

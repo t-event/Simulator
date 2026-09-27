@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 205,
+    date: "2026-09-27",
+    title: "Ryddigere forskning",
+    items: [
+      "Forskning du ikke har råd til ennå, har en linje som viser hvor nær du er og hvor mange fagpoeng som mangler.",
+      "Fagpoengene, hvordan du får flere og forskningssamarbeidet står samlet i ett kort.",
+      "På PC står forskningen i to kolonner, med fagpoengene til høyre.",
+    ],
+  },
+  {
     b: 204,
     date: "2026-09-27",
     title: "Ryddigere Folk",

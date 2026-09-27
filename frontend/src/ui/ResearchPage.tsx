@@ -13,10 +13,8 @@ export function ResearchPage({
   openBook: (chapter?: string) => void;
 }) {
   return (
-    <div className="g-grid">
-      <div className="g-col-wide">
-        <Research g={g} act={act} openBook={openBook} />
-      </div>
+    <div className="g-grid g-research-page">
+      <Research g={g} act={act} openBook={openBook} />
     </div>
   );
 }

@@ -5,7 +5,8 @@ import { knowledgeCard } from "../game/knowledge";
 import { researchOptions } from "../game/research";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
-import { Card } from "./common";
+import { Bar, Card } from "./common";
+import { Icon } from "./icons";
 import { fmtKr } from "./format";
 import { buzz } from "./haptics";
 
@@ -140,7 +141,7 @@ export function Research({
           </button>
         ) : r.reads && !g.readChapters.includes(r.reads) ? (
           <button className="g-small" onClick={() => openBook(r.reads)}>
-            📖 Les «{knowledgeCard(r.reads)?.title ?? "kapitlet"}» først
+            <Icon name="book" /> Les «{knowledgeCard(r.reads)?.title ?? "kapitlet"}» først
           </button>
         ) : (
           r.reason && <span className="g-muted">{r.reason}</span>
@@ -149,106 +150,118 @@ export function Research({
     </div>
   );
   return (
-    <Card
-      title="Forskning"
-      right={
-        <span className="g-fp" title="Fagpoeng">
-          {Math.floor(g.researchPoints)} fagpoeng
-        </span>
-      }
-      className="g-research"
-    >
-      <details className="g-role-group">
-        <summary>Slik får du fagpoeng</summary>
-        <ul className="g-closed">
-          <li>Hver charge ovnen smelter (større charger gir mer)</li>
-          <li>Hver kontrakt du leverer ferdig, og rammeavtaler som holdes</li>
-          <li>Quizene og oppdragene i fagboka 📖</li>
-          <li>
-            Charger du kjører selv i kontrollrommet («Ta styringen» på Verket, med lysbueovn): opptil 21 for en perfekt
-            charge
-          </li>
-          <li>Forskningssamarbeid (under): kjøp fagpoeng én gang i uka</li>
-        </ul>
-        <p className="g-muted">Les kapitlet i fagboka før du forsker.</p>
-      </details>
-      <div className="g-upgrades">
-        <FpDeal g={g} act={act} />
+    <>
+      {/* UI-3c (B-205): det du kan forske på i hovedkolonnen; fagpoeng, samarbeid og oversikt i sidekolonnen på PC */}
+      <div className="g-col-wide g-research-main">
+        <Card title="Forskning" className="g-research">
+          {ready.length > 0 && (
+            <>
+              <h3 className="g-subhead">Klar til å forske ({ready.length})</h3>
+              <div className="g-upgrades">{ready.map(card)}</div>
+            </>
+          )}
+          {later.length > 0 && (
+            <>
+              <h3 className="g-subhead">Trenger mer fagpoeng eller lesing ({later.length})</h3>
+              <ul className="g-research-later">
+                {later.map((r) => (
+                  <li key={r.id}>
+                    <div className="g-contract-head">
+                      <strong>{r.name}</strong>
+                      <span className="g-fp-cost">{r.cost} FP</span>
+                    </div>
+                    <span className="g-muted g-small-text">{r.effect}</span>
+                    {/* Hvor nær du er (B-205): fagpoeng du har mot prisen */}
+                    <Bar
+                      value={Math.min(1, g.researchPoints / r.cost)}
+                      tone="accent"
+                      label={`Fagpoeng mot ${r.name}`}
+                    />
+                    {r.reads && !g.readChapters.includes(r.reads) ? (
+                      <button className="g-small" onClick={() => openBook(r.reads)}>
+                        <Icon name="book" /> Les «{knowledgeCard(r.reads)?.title ?? "kapitlet"}» først
+                      </button>
+                    ) : (
+                      r.reason && <span className="g-muted g-small-text">{r.reason}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          {ready.length === 0 && later.length === 0 && konsernLater.length === 0 && !masteryOpen(g) && (
+            <p className="g-muted">Alt som finnes på dette nivået, er forsket fram.</p>
+          )}
+          <Mastery g={g} act={act} />
+        </Card>
       </div>
-      {ready.length > 0 && (
-        <>
-          <h3 className="g-subhead">Klar til å forske ({ready.length})</h3>
-          <div className="g-upgrades">{ready.map(card)}</div>
-        </>
-      )}
-      {later.length > 0 && (
-        <>
-          <h3 className="g-subhead">Trenger mer fagpoeng eller lesing ({later.length})</h3>
-          <ul className="g-research-later">
-            {later.map((r) => (
-              <li key={r.id}>
-                <div className="g-contract-head">
-                  <strong>{r.name}</strong>
-                  <span className="g-fp-cost">{r.cost} FP</span>
-                </div>
-                <span className="g-muted g-small-text">{r.effect}</span>
-                {r.reads && !g.readChapters.includes(r.reads) ? (
-                  <button className="g-small" onClick={() => openBook(r.reads)}>
-                    📖 Les «{knowledgeCard(r.reads)?.title ?? "kapitlet"}» først
-                  </button>
-                ) : (
-                  r.reason && <span className="g-muted g-small-text"> · {r.reason.toLowerCase()}</span>
-                )}
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-      {ready.length === 0 && later.length === 0 && konsernLater.length === 0 && !masteryOpen(g) && (
-        <p className="g-muted">Alt som finnes på dette nivået, er forsket fram.</p>
-      )}
-      <Mastery g={g} act={act} />
-      {konsernLater.length > 0 && (
-        <details className="g-role-group">
-          <summary>Kommer når konsernet åpnes ({konsernLater.length})</summary>
-          <p className="g-muted g-small-text">
-            Konsernet åpnes når alt utstyret på storverket er kjøpt, eller egenkapitalen når 1 mrd. kr.
+      <div className="g-col g-research-side">
+        <Card title="Fagpoeng">
+          <p className="g-fp-hero">
+            <Icon name="research" />
+            <strong>{Math.floor(g.researchPoints)}</strong>
+            <span>fagpoeng</span>
           </p>
-          <ul className="g-closed">
-            {konsernLater.map((r) => (
-              <li key={r.id}>
-                {r.name} – {r.effect.toLowerCase()}
+          <details className="g-role-group">
+            <summary>Slik får du fagpoeng</summary>
+            <ul className="g-closed">
+              <li>Hver charge ovnen smelter (større charger gir mer)</li>
+              <li>Hver kontrakt du leverer ferdig, og rammeavtaler som holdes</li>
+              <li>Quizene og oppdragene i fagboka</li>
+              <li>
+                Charger du kjører selv i kontrollrommet («Ta styringen» på Verket, med lysbueovn): opptil 21 for en
+                perfekt charge
               </li>
-            ))}
-          </ul>
-        </details>
-      )}
-      {nextStage.length > 0 && (
-        <details className="g-role-group">
-          <summary>
-            Kommer i {stageRef(Math.min(STAGES.length - 1, g.stage + 1), g.stage)} ({nextStage.length})
-          </summary>
-          <ul className="g-closed">
-            {nextStage.map((r) => (
-              <li key={r.id}>
-                {r.name} – {r.effect.toLowerCase()}
-              </li>
-            ))}
-          </ul>
-        </details>
-      )}
-      {done.length > 0 && (
-        <details className="g-role-group g-research-done">
-          <summary>Forsket fram ({done.length})</summary>
-          <ul className="g-closed">
-            {done.map((r) => (
-              <li key={r.id} className="ok">
-                {r.name} – {r.effect.toLowerCase()}
-              </li>
-            ))}
-          </ul>
-        </details>
-      )}
-    </Card>
+              <li>Forskningssamarbeid (under): kjøp fagpoeng én gang i uka</li>
+            </ul>
+            <p className="g-muted">Les kapitlet i fagboka før du forsker.</p>
+          </details>
+          <div className="g-upgrades g-upgrades-single">
+            <FpDeal g={g} act={act} />
+          </div>
+          {konsernLater.length > 0 && (
+            <details className="g-role-group">
+              <summary>Kommer når konsernet åpnes ({konsernLater.length})</summary>
+              <p className="g-muted g-small-text">
+                Konsernet åpnes når alt utstyret på storverket er kjøpt, eller egenkapitalen når 1 mrd. kr.
+              </p>
+              <ul className="g-closed">
+                {konsernLater.map((r) => (
+                  <li key={r.id}>
+                    {r.name} – {r.effect.toLowerCase()}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+          {nextStage.length > 0 && (
+            <details className="g-role-group">
+              <summary>
+                Kommer i {stageRef(Math.min(STAGES.length - 1, g.stage + 1), g.stage)} ({nextStage.length})
+              </summary>
+              <ul className="g-closed">
+                {nextStage.map((r) => (
+                  <li key={r.id}>
+                    {r.name} – {r.effect.toLowerCase()}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+          {done.length > 0 && (
+            <details className="g-role-group g-research-done">
+              <summary>Forsket fram ({done.length})</summary>
+              <ul className="g-closed">
+                {done.map((r) => (
+                  <li key={r.id} className="ok">
+                    {r.name} – {r.effect.toLowerCase()}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+        </Card>
+      </div>
+    </>
   );
 }
