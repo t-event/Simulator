@@ -119,7 +119,15 @@ import {
   realNow,
   setRealClock,
 } from "./konsern";
-import { bonusGap, computePlantStats, liftMorale, moraleNormal, supportAdvice } from "./plant";
+import {
+  bonusGap,
+  computePlantStats,
+  gradeRecipe,
+  liftMorale,
+  moraleNormal,
+  productCapT,
+  supportAdvice,
+} from "./plant";
 import { RESEARCH, researchOptions } from "./research";
 import { parseSave } from "./save";
 import { makeDecision, maybeCreateDecision, resolveDecision, SAME_CARD_REAL_MS } from "./decisions";
@@ -131,6 +139,7 @@ import {
   EXAM_RETRY_DAYS,
   normalSalary,
   rateDelivery,
+  recipeEstimate,
   ratingFactor,
 } from "./engine";
 import {
@@ -1648,6 +1657,66 @@ test("Landemerket går først i køen, og skiftlederen kan leie vikarer for alle
   g.pendingDecision = null;
   advance(g, 60);
   assert(tempsActive(g), "skiftlederen leide ikke vikarer");
+});
+
+test("Valseverket rekker mindre enn støpingen (B-217): emnene teller med, og salgsdirektøren signerer avtaler igjen", () => {
+  const g = newGame(217);
+  g.stage = 4;
+  g.owned.push("valseverk", "ovn2", "ovn3", "streng2", "streng3");
+  g.furnaceCount = 3;
+  g.furnaceType = "likestrom420";
+  g.castingType = "streng8";
+  g.settings.rolling = true;
+  g.workers = [];
+  for (const [role, n] of Object.entries(crewPerShift(g)) as [RoleId, number][])
+    for (let i = 0; i < n * 5; i++) g.workers.push(makeCandidate(g, role));
+  g.agreements = [];
+  g.contracts = [];
+  const stats = computePlantStats(g);
+  assert(stats.products.includes("emne") && stats.products.includes("armering"), "verket lager ikke begge varene");
+  assert(
+    stats.rolledDailyT > 0 && stats.dailyProductT > stats.rolledDailyT * 2,
+    "støpingen er ikke større enn valsingen",
+  );
+  assert(productCapT(stats, "armering") === stats.rolledDailyT, "armeringen er ikke begrenset av valseverket");
+  assert(productCapT(stats, "emne") === stats.dailyProductT, "emnene er begrenset av valseverket");
+  // Sju døgn med full drift, så salgsdirektøren regner med det verket faktisk lager
+  for (let d = 0; d < 7; d++) g.history.push({ ...structuredClone(g.today), day: d, producedT: stats.dailyProductT });
+  const grade = recipeEstimate(g, "standard", stats, gradeRecipe(g, "standard")).grades.at(-1)!;
+  const week = stats.dailyProductT * 7;
+  const agreement = (id: number, product: "emne" | "armering", weeklyT: number, status: "aktiv" | "tilbud") =>
+    ({
+      id,
+      customer: "Test",
+      product,
+      grade,
+      weeklyT,
+      pricePerT: 1,
+      weeks: 5,
+      weeksSent: 1,
+      weeksDone: 0,
+      weeksMissed: 0,
+      nextDay: 999,
+      bonusKr: 0,
+      bonusRep: 0,
+      status,
+      offerExpiresMin: g.minute + 2880,
+      closedDay: null,
+    }) as Agreement;
+  g.cash = 1_000_000_000;
+  g.konsern.unlocked = true;
+  assert(hireDirector(g).ok, "kunne ikke ansette");
+  // Før: døgnproduksjonen ble kuttet til valseverket, og to avtaler på til sammen en tredel av uka ble for mye
+  g.agreements.push(
+    agreement(1, "emne", Math.round(week * 0.18), "aktiv"),
+    agreement(2, "emne", Math.round(week * 0.18), "tilbud"),
+  );
+  directorHour(g);
+  assert(g.agreements.find((a) => a.id === 2)?.status === "aktiv", "salgsdirektøren signerte ikke emneavtalen");
+  // Armering over det valseverket rekker, tas ikke, selv om verket har tonn nok
+  g.agreements.push(agreement(3, "armering", Math.round(stats.rolledDailyT * 7 * 0.6), "tilbud"));
+  directorHour(g);
+  assert(g.agreements.find((a) => a.id === 3)?.status === "tilbud", "signerte mer armering enn valseverket rekker");
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

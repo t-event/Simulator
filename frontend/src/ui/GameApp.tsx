@@ -857,7 +857,10 @@ export function GameApp() {
                   className={`${active ? "is-active" : ""}${hint ? " is-hint" : ""}${v.id === "verket" && konsernOpen ? " is-verket-konsern" : ""}`}
                   aria-current={active ? "page" : undefined}
                   onClick={() =>
-                    v.id === "verket" && konsernOpen ? go("verket", "oversikt") : go(v.id, alertHint?.sub)
+                    // På PC er Konsern et eget punkt: Verket åpner da aldri Konsern, heller ikke via en annen fane (B-217)
+                    v.id === "verket" && (konsernOpen || (isPc && verketTab === "konsern"))
+                      ? go("verket", "oversikt")
+                      : go(v.id, alertHint?.sub)
                   }
                 >
                   <Icon name={NAV_ICON[v.id]} className="g-nav-icon" />
