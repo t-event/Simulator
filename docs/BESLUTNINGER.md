@@ -672,7 +672,7 @@ Beslutning:
   roller verket ikke bruker nå (f.eks. øseovnsoperatører uten øseovn) som tar plass blant de ansatte.
 
 ## B-051 Marked og Forskning med underfaner (2026-09-24)
-Status: gjelder
+Status: gjelder, men Resept er flyttet fra Marked til Verket (B-199)
 Brukeren syntes Marked- og Forskning-sidene var for lange.
 Beslutning:
 - Marked har underfanene Skrap, Resept, Strøm/Energi og Priser. Skrap er standard. Fanen blir oransje når
@@ -3487,3 +3487,37 @@ Konto (B-149): ingen ny funksjon.
 Testet: tsc, lint, `npm test`, balanse (exit 0), build; Playwright før/etter på 320, 390, 1 366 og 1 920 px (stålverk og
 storverk, alle fire fanene), de 7 størrelsene uten vannrett scrolling eller avkortet tekst og med knapper minst 40 px,
 Marked-fanene på nytt (nye underfaner), og valg + «Signer» i lista på PC.
+
+## B-199 Resepten flyttes fra Marked til Verket (2026-09-27)
+Status: gjelder (erstatter delen av B-051 om Resept under Marked)
+Brukeren: «Resept bør ikke ligge under marked.»
+Beslutning:
+- Resepten er en del av produksjonen – hva som går i ovnen og hva som blir i stålet – ikke av markedet. Den er nå
+  en egen underfane på Verket: **Oversikt · Anlegg · Resept · Økonomi** (· Konsern). Kvaliteten velges fortsatt under
+  Oversikt («Produksjon nå»), så begge delene av «hva lager vi» ligger på Verket.
+- Marked har underfanene Skrap, Strøm/Energi og Priser. Skrap resepten venter på, er fortsatt merket under Skrap.
+- Resept-fanen blir oransje når resepten ikke holder kravet til en kvalitet som lages nå (som før på Marked).
+- Alle råd, varsler, hendelseskort og reseptguiden som viste til «Marked → Resept», viser nå til «Verket → Resept»
+  og åpner den fanen.
+- På PC står resepten ved siden av anleggsbildet og rådene. På de smaleste telefonene (≤ 360 px) er Verket-fanene
+  tettere, så alle fem navnene får plass når Konsern er åpnet.
+- Ingen endring i spillet eller i lagrede spill (underfanen lagres ikke).
+Konto (B-149): ingen ny funksjon.
+Testet: tsc, lint, `npm test`, balanse (exit 0), build; Playwright på de 7 størrelsene (stålverk og storverk med
+konsern): ingen vannrett scrolling og ingen avkortede fanenavn; en resept som ikke holder, gir oransje fane, og rådet
+åpner Verket → Resept; Marked har tre faner.
+
+## B-200 PC: ikke tomrom under anleggsbildet på Verket (2026-09-27)
+Status: gjelder (UI.md 5; bygger på B-192)
+Brukeren: «På pc er det et stort åpent rom mellom grafikken av verket og «mål»-ruta.»
+Årsak: på PC (fra 1 000 px) er Verket et rutenett med to kolonner. Anleggsbildet og høyrekolonnen (produksjonslinja,
+dagens oppdrag, «Produksjon nå» …) lå på samme rad, så kortene under bildet (Mål, Fagboka …) begynte først under
+den høye høyrekolonnen – opptil 300–600 px tomt. Det samme skjedde på Anlegg (Vedlikehold til høyre) og Økonomi.
+Beslutning:
+- Høyrekolonnen (`g-side`) går over to rader i rutenettet, og den siste raden tar resten av høyden
+  (`grid-template-rows: … 1fr`). Kortene til venstre følger da rett under bildet og rådene, og høyrekolonnen står ved
+  siden av så langt den rekker. Gjelder Oversikt, Anlegg og Økonomi.
+- Mobil og skjermer under 1 000 px er uendret (én kolonne i samme rekkefølge).
+Konto (B-149): ingen ny funksjon.
+Testet: Playwright på 1 000, 1 366, 1 920 og 2 560 px (stålverk og storverk): største loddrette avstand mellom to kort i
+venstre kolonne er 12 px (før: opptil 636 px) på alle fire Verket-fanene.

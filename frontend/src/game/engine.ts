@@ -1504,7 +1504,11 @@ function ensureRecipe(g: GameState, grade: GradeId, stats: PlantStats): void {
   const who = hasGrader(g) ? "Skrapklasseren" : null;
   const name = GRADES[grade].name.toLowerCase();
   if (!who) {
-    log(g, `Resepten holder ikke kravet til ${name}. Juster den under Marked – eller ansett en skrapklasser.`, "event");
+    log(
+      g,
+      `Resepten holder ikke kravet til ${name}. Juster den under Verket → Resept – eller ansett en skrapklasser.`,
+      "event",
+    );
     return;
   }
   const next = suggestRecipe(g, grade, stats, "sikker");

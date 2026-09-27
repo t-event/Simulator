@@ -1,23 +1,7 @@
 import { useState } from "react";
 import { PRODUCTS, SCRAP_IDS, SCRAP_TYPES, stageRef } from "../game/data";
-import {
-  buyScrap,
-  recipeEstimate,
-  SCRAP_SELL_SHARE,
-  scrapPrice,
-  scrapSellPrice,
-  scrapShort,
-  sellScrap,
-} from "../game/engine";
-import {
-  energyPrice,
-  gradeRecipe,
-  gradesInUse,
-  hasPlanner,
-  plannerOrders,
-  productPrice,
-  type PlantStats,
-} from "../game/plant";
+import { buyScrap, SCRAP_SELL_SHARE, scrapPrice, scrapSellPrice, scrapShort, sellScrap } from "../game/engine";
+import { energyPrice, hasPlanner, plannerOrders, productPrice, type PlantStats } from "../game/plant";
 import { PowerCard } from "./Power";
 import { auto, automationUnlocked, researchForScrap, scrapUnlocked } from "../game/research";
 import type { GameState, ProductId, ScrapId } from "../game/types";
@@ -25,7 +9,6 @@ import type { GameApi } from "../game/useGame";
 import { Bar, Card, SubTabs } from "./common";
 import { EventsNote } from "./Season";
 import { worldFactor } from "../game/world";
-import { RecipeCard } from "./Recipe";
 import { AutoToggle } from "./AutoToggle";
 import { fmtKr, fmtNum, fmtPct, fmtT } from "./format";
 import { Icon } from "./icons";
@@ -45,7 +28,7 @@ const BUY_AMOUNTS = [
   [1000, 2500, 5000],
 ];
 
-type MarketTab = "skrap" | "resept" | "strom" | "priser";
+type MarketTab = "skrap" | "strom" | "priser";
 
 /** Navnet på skrapet; trykk for å lese om det og selge det du har (B-051) */
 function ScrapAbout({ g, act, id, stock }: Omit<Props, "stats"> & { id: ScrapId; stock?: boolean }) {
@@ -96,7 +79,7 @@ function BuyButtons({ g, act, id, amounts }: Omit<Props, "stats"> & { id: ScrapI
 
 export function Market({ g, stats, act, openTab }: Props & { openTab?: string }) {
   const [tab, setTab] = useState<MarketTab>(() =>
-    openTab && ["skrap", "resept", "strom", "priser"].includes(openTab) ? (openTab as MarketTab) : "skrap",
+    openTab && ["skrap", "strom", "priser"].includes(openTab) ? (openTab as MarketTab) : "skrap",
   );
   const amounts = BUY_AMOUNTS[g.stage];
   // Stålprisen mot normalt, med felles hendelser som eksportboom og importpress (B-129)
@@ -118,12 +101,8 @@ export function Market({ g, stats, act, openTab }: Props & { openTab?: string })
   const capOptions = [...new Set([1, 2, 5, 10].map((m) => m * capBase).concat(g.settings.autoBuyMaxPerDay ?? []))].sort(
     (a, b) => a - b,
   );
-  const recipeBad = gradesInUse(g).some(
-    (grade) => !recipeEstimate(g, grade, stats, gradeRecipe(g, grade)).grades.includes(grade),
-  );
   const tabs: { id: MarketTab; label: string; alert?: boolean }[] = [
     { id: "skrap", label: "Skrap", alert: short.length > 0 },
-    { id: "resept", label: "Resept", alert: recipeBad },
     { id: "strom", label: stats.furnace.fuel === "strøm" ? "Strøm" : "Energi" },
     { id: "priser", label: "Priser" },
   ];
@@ -132,8 +111,6 @@ export function Market({ g, stats, act, openTab }: Props & { openTab?: string })
       <div className="g-col-wide">
         <SubTabs tabs={tabs} value={tab} onChange={setTab} label="Marked" />
         <EventsNote g={g} />
-
-        {tab === "resept" && <RecipeCard g={g} stats={stats} act={act} />}
 
         {tab === "skrap" && (
           <Card

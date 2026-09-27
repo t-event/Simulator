@@ -10,6 +10,7 @@ import {
   upgradeOptions,
 } from "../game/actions";
 import { Maintenance } from "./Maintenance";
+import { RecipeCard } from "./Recipe";
 import { auto, missingResearchFor, researchOptions } from "../game/research";
 import { scrapResearchFor, scrapResearchHint } from "../game/recipe";
 import { GRADE_IDS, GRADES, PRODUCTS, ROLES, SCRAP_TYPES, STAGES } from "../game/data";
@@ -162,8 +163,8 @@ function hints(g: GameState, stats: PlantStats): Hint[] {
     if (missing) out.push({ text: scrapResearchHint(g, grade, missing), view: "forskning" });
     else if (inUse.includes(grade))
       out.push({
-        text: `Resepten din holder ikke kravet til ${GRADES[grade].name.toLowerCase()}. Juster resepten under Marked.`,
-        view: "marked",
+        text: `Resepten din holder ikke kravet til ${GRADES[grade].name.toLowerCase()}. Juster den under Verket → Resept.`,
+        view: "verket",
         sub: "resept",
       });
   }
@@ -346,7 +347,7 @@ function Quality({
             {fmtPct(second / total)} fikk støpefeil. Stål som bommer, kan ikke leveres på kontrakten og selges billig.
           </p>
           {off / total > 0.05 && (
-            <button className="g-small" onClick={() => go("marked", "resept")}>
+            <button className="g-small" onClick={() => go("verket", "resept")}>
               Se på resepten
             </button>
           )}
@@ -571,6 +572,10 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
   // På Oversikt står målkortet øverst når du kan flytte, så hintet om det trengs bare på de andre underfanene (B-068)
   const tips = hints(g, stats).filter((t) => !(t.anchor === "mal" && tab === "oversikt"));
   const upgradesReady = readyUpgrades(g);
+  // Resept-fanen blir oransje når resepten ikke holder kravet til en kvalitet som lages nå (B-051, B-199)
+  const recipeBad = gradesInUse(g).some(
+    (grade) => !recipeEstimate(g, grade, stats, gradeRecipe(g, grade)).grades.includes(grade),
+  );
   const konsernCanBuy = konsernReady(g);
   const missingNow = missingScrap(g, stats);
   // Varsel om foringen åpner Anlegg og ruller ned til vedlikeholdskortet
@@ -590,7 +595,7 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
   const recent = g.log.slice(-8).reverse();
 
   return (
-    <div className={`g-grid${tab === "anlegg" ? " is-anlegg" : ""}`}>
+    <div className={`g-grid is-${tab}`}>
       {pynt && <PyntModal g={g} stats={stats} act={act} onClose={() => setPynt(false)} />}
       {/* Underfanene står øverst (B-192), over bildet og rådene, og over begge kolonnene på PC */}
       <div
@@ -603,7 +608,9 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
             key={t.id}
             role="tab"
             aria-selected={tab === t.id}
-            className={`${tab === t.id ? "is-active" : ""}${t.id === "konsern" ? " is-konsern" : ""}`}
+            className={`${tab === t.id ? "is-active" : ""}${t.id === "konsern" ? " is-konsern" : ""}${
+              t.id === "resept" && recipeBad ? " is-alert" : ""
+            }`}
             onClick={() => setTab(t.id)}
           >
             {t.label}
@@ -658,7 +665,7 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
 
       {tab === "oversikt" && (
         <>
-          <div className="g-col-wide">
+          <div className="g-col-wide g-side">
             {canMove && <StageCard g={g} act={act} />}
             <CompactChain
               g={g}
@@ -948,7 +955,7 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
               </div>
             </Card>
           </div>
-          <div className="g-col-wide">
+          <div className="g-col-wide g-side">
             <Maintenance
               id="vedlikehold"
               g={g}
@@ -963,9 +970,15 @@ export function Overview({ g, stats, act, go, openBook, onOpenSettings, tab: cho
         </>
       )}
 
+      {tab === "resept" && (
+        <div className="g-col-wide g-recipe-col">
+          <RecipeCard g={g} stats={stats} act={act} />
+        </div>
+      )}
+
       {tab === "okonomi" && (
         <>
-          <div className="g-col-wide">
+          <div className="g-col-wide g-side">
             <Card title="Økonomi">
               <div className="g-stats">
                 <Stat label="Inntekter i dag" value={fmtKr(sum(g.today.income))} />

@@ -67,7 +67,7 @@ function offerChecks(g: GameState, stats: PlantStats, c: Contract, committed: nu
         tone: following ? "ok" : "warn",
         text: following
           ? `Resepten din gir ${failures.join(", ")} nå, men skrapklasseren legger den om når ordren skal lages, så den holder kravet.`
-          : `Resepten gir ${failures.join(", ")}. Skrapklasseren kan legge den om hvis ovnen følger ordrekøen (Verket) – ellers juster den selv under Marked.`,
+          : `Resepten gir ${failures.join(", ")}. Skrapklasseren kan legge den om hvis ovnen følger ordrekøen (Verket) – ellers juster den selv under Verket → Resept.`,
       });
     } else {
       checks.push({
@@ -75,7 +75,7 @@ function offerChecks(g: GameState, stats: PlantStats, c: Contract, committed: nu
         text: `Resepten gir ${failures.join(", ")}. ${
           hasKlasser
             ? "Heller ikke skrapklasseren finner en blanding av skrapet du har tilgang til som holder."
-            : "Juster den under Marked – eller ansett en skrapklasser som legger den om for deg."
+            : "Juster den under Verket → Resept – eller ansett en skrapklasser som legger den om for deg."
         }`,
       });
     }

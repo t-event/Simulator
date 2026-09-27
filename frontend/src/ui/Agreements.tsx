@@ -47,7 +47,9 @@ function AgreementOffer({ g, stats, a, act }: Props & { a: Agreement }) {
         {!canMake && <li className="bad">Du lager ikke {PRODUCTS[a.product].name.toLowerCase()}</li>}
         {canMake && (
           <li className={recipeOk ? "ok" : "bad"}>
-            {recipeOk ? "Resepten holder kravet" : "Resepten holder ikke kravet ennå – juster den under Marked"}
+            {recipeOk
+              ? "Resepten holder kravet"
+              : "Resepten holder ikke kravet ennå – juster den under Verket → Resept"}
           </li>
         )}
         {canMake && (

@@ -22,7 +22,7 @@ https://t-event.github.io/Simulator/
 
 1. **Salg** – signer kontrakter. Hver kontrakt har mengde, kvalitet, pris og frist. Spillet viser om resepten din
    holder kravet og om du rekker det.
-2. **Marked** – kjøp skrap og sett sammen resepten. Anslaget viser hvilke kvaliteter resepten gir i ovnen du har.
+2. **Marked** – kjøp skrap, velg strømavtale og følg prisene. Resepten setter du sammen under **Verket → Resept**; anslaget viser hvilke kvaliteter den gir i ovnen du har.
 3. **Verket** – ovnen smelter automatisk etter resepten og kvaliteten du kjører mot. Stålet støpes og legges på
    lager, og partier som holder kravet leveres automatisk til aktive kontrakter.
 4. **Folk** – fra verkstedet og oppover trenger du ansatte. Hvert anlegg har et fast mannskap per skift; flere skift

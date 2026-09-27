@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 137 – 2026-09-27: Resepten flyttes til Verket, og tomrommet på PC
+
+**Brukeren ba om:** «Merge» av UI-2d (PR #144), og: «Resept bør ikke ligge under marked.»
+
+**Gjort:** PR #144 merget og publisert (grønt). B-199: Resept er en egen underfane på Verket (Oversikt · Anlegg · Resept
+· Økonomi · Konsern), oransje når resepten ikke holder. Marked har Skrap, Strøm og Priser. Alle tekster og lenker som
+viste til «Marked → Resept», viser til «Verket → Resept». Tettere Verket-faner på ≤ 360 px. README, UI.md, B-051.
+
+**Testet:** tsc, lint, `npm test`, balanse (exit 0), build; Playwright på 7 størrelser (fanene får plass, ingen
+vannrett scrolling), oransje fane og rådet som åpner resepten.
+
+Deretter, etter brukerens melding om tomrom på PC: B-200 – høyrekolonnen på Verket går over to rader, så Mål og de
+andre kortene følger rett under anleggsbildet (Oversikt, Anlegg, Økonomi). Målt på 4 PC-bredder: største hull 12 px.
+
+**Gjenstår:** eierens svar på skjermbildene og på prøven av varsellinja. Deretter UI-3a (Økonomi).
+
+---
+
 ## Økt 136 – 2026-09-27: UI-2d – Salg
 
 **Brukeren ba om:** «Merge» av UI-2c (PR #143) og en anbefaling for varsellinja på mobil; deretter «Fortsett».
