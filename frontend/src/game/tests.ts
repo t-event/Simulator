@@ -1760,6 +1760,67 @@ test("Skrapvarselet (B-219): ikke når ovnen fyller opp med annet skrap, men nå
   assert(scrapAlert(g, stats).includes("tungt"), "varslet ikke når neste charge står fast");
 });
 
+test("Valseverket får emner til armeringsordren øverst i køen (B-223), selv med en stor emneordre bak", () => {
+  const setup = (rebarFirst: boolean) => {
+    const g = newGame(223);
+    g.stage = 4;
+    g.owned.push("valseverk", "ovn2", "ovn3", "streng2", "streng3");
+    g.furnaceCount = 3;
+    g.furnaceType = "likestrom420";
+    g.castingType = "streng8";
+    g.settings.rolling = true;
+    g.workers = [];
+    for (const [role, n] of Object.entries(crewPerShift(g)) as [RoleId, number][])
+      for (let i = 0; i < n * 5; i++) g.workers.push(makeCandidate(g, role));
+    g.pendingDecision = null;
+    g.contracts = [];
+    g.agreements = [];
+    const a = { c: 0.1, p: 0.01, tramp: 0.1 };
+    g.lots = [
+      {
+        id: 1,
+        product: "emne",
+        t: 3000,
+        analysis: a,
+        known: a,
+        measured: { c: true, p: true, tramp: true },
+        second: false,
+        madeDay: day(g),
+      },
+    ];
+    const base = { delivered: 0, pricePerT: 1, deadlineDay: day(g) + 5, offerExpiresMin: 0, repGain: 0, repLoss: 0 };
+    const more = { penaltyPerT: 0, status: "aktiv" as const, closedDay: null, acceptedDay: day(g) };
+    g.contracts.push({
+      ...base,
+      ...more,
+      id: 1,
+      customer: "Emner",
+      product: "emne",
+      grade: "enkel",
+      tonnes: 50_000,
+      priority: 2,
+    });
+    if (rebarFirst)
+      g.contracts.push({
+        ...base,
+        ...more,
+        id: 2,
+        customer: "Armering",
+        product: "armering",
+        grade: "enkel",
+        tonnes: 1_000,
+        priority: 1,
+      });
+    advance(g, 30);
+    return (
+      g.lots.filter((l) => l.product === "armering").reduce((t, l) => t + l.t, 0) +
+      (g.contracts.find((c) => c.id === 2)?.delivered ?? 0)
+    );
+  };
+  assert(setup(true) > 0, "valseverket valset ingenting selv om armeringsordren står øverst");
+  assert(setup(false) === 0, "valseverket tok emner en emneordre venter på (uten armeringsordre foran)");
+});
+
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden
 if (failed) {
   console.log(`\n${failed} test(er) feilet`);

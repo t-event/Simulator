@@ -1398,9 +1398,13 @@ function lotsTonnage(g: GameState): number {
 function updateRolling(g: GameState, stats: PlantStats, dt: number): void {
   if (!rollingActive(g) || !isOpen(g, stats.hours) || stats.shifts === 0) return;
   let capacity = rollingTph(g) * (dt / 60);
-  // Emner som aktive emnekontrakter venter på, blir liggende
-  const reserved = g.contracts
-    .filter((c) => c.status === "aktiv" && c.product === "emne")
+  // Emner som aktive emnekontrakter venter på, blir liggende – men bare for emneordrene som står foran den første
+  // armeringsordren i køen (B-223). Før ble emnene holdt av for alle emneordrene, og med en stor emneavtale fikk
+  // valseverket ingenting å valse: armeringsordrene øverst i køen ble for sene.
+  const queue = orderQueue(g);
+  const firstRebar = queue.findIndex((c) => c.product === "armering" && c.tonnes - c.delivered > 1e-6);
+  const reserved = (firstRebar < 0 ? queue : queue.slice(0, firstRebar))
+    .filter((c) => c.product === "emne")
     .map((c) => ({ grade: c.grade, left: c.tonnes - c.delivered }));
   for (const lot of g.lots) {
     if (capacity <= 1e-9) break;
