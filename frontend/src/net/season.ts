@@ -10,7 +10,8 @@ export interface Season {
   id: number;
   name: string;
   starts_at: string;
-  ends_at: string;
+  /** Sesongen har ingen sluttdato (B-221): den avsluttes manuelt. Bare avsluttede sesonger har en */
+  ends_at: string | null;
   /** Sesongens vri (B-152), eller null */
   twist?: SeasonTwist | null;
 }
@@ -118,11 +119,6 @@ export async function fetchActiveEvents(): Promise<WorldEvent[]> {
     power: Number(r.power),
     until: r.ends_at,
   }));
-}
-
-/** Dager igjen av sesongen, rundet opp; 0 når den er over */
-export function daysLeft(s: Season, now = Date.now()): number {
-  return Math.max(0, Math.ceil((new Date(s.ends_at).getTime() - now) / 86_400_000));
 }
 
 // ------------------------------------------------------------------ butikk

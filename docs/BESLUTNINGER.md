@@ -3979,3 +3979,19 @@ fjern det» og «I topplista står det antall dager igjen av sesong. Men vi har 
   administrator (B-182), så en nedtelling ga feil inntrykk. Sesong 1 har fortsatt sluttdatoen 2027-03-25 i databasen
   (resultatene lages da); den er ikke endret.
 - Konto: nei (bare tekst og plassering).
+
+## B-221 Sesongene har ingen sluttdato – ny sesong startes manuelt (2026-09-27)
+Status: gjelder (erstatter sluttdatoen i B-130 og den automatiske neste sesongen i B-167; bygger på B-182 og B-220)
+Eieren: «Det skal ikke være sluttdato noen plass. Ny sesong skal gjøres manuelt».
+- **Databasen** (`supabase/039_sesong_uten_sluttdato.sql`): `seasons.ends_at` kan være tom og er det mens en sesong pågår;
+  den settes bare når sesongen avsluttes. Sesong 1 hadde 2027-03-25 og har nå ingen sluttdato. `current_season_id()` og
+  `season_status()` regner en sesong uten sluttdato som pågående. Den automatiske neste sesongen er fjernet fra
+  `season_status()` (bryteren `auto_next_season` brukes ikke lenger). Sesongstigen (`season_track_points`) teller
+  ukepremiene også når sesongen ikke har noen slutt – ellers ville de falt bort.
+- **Manuelt:** `end_season()` avslutter sesongen som pågår (resultatene lages som før), og `start_season(navn, vri)`
+  avslutter den som pågår og starter en ny uten sluttdato. Begge kan bare kjøres av administrator (SQL Editor eller
+  connectoren), ikke fra appen. Testet i en transaksjon som ble rullet tilbake: Sesong 1 avsluttet med 10 resultater, ny
+  sesong uten sluttdato, ingenting lagret.
+- **Appen:** `Season.ends_at` er `string | null`, og `daysLeft` er fjernet (nedtellingen ble tatt bort i B-220).
+- Ingen nye sikkerhetsråd (`get_advisors`). Konto: ingen endring.
+Endringslogg: nei

@@ -37,7 +37,6 @@ import {
 import { claimAway, fetchDailyStatus } from "./daily";
 import { chestFp, claimWeekChest, fetchWeeklyBoard, fetchWeeklyStatus, weekDaysLeft } from "./weekly";
 import {
-  daysLeft,
   fetchActiveEvents,
   fetchSeasonHistory,
   fetchSeasonStatus,
@@ -409,7 +408,7 @@ function makeFake(): Fake {
           id: 1,
           name: "Sesong 1",
           starts_at: "2026-09-25T00:00:00Z",
-          ends_at: "2026-10-23T00:00:00Z",
+          ends_at: null,
           twist: {
             id: "skrapmangel",
             title: "Skrapmangel",
@@ -1038,7 +1037,6 @@ const main = async () => {
     const s = await fetchSeasonStatus();
     assert(s.current?.id === 1 && s.played_previous, `status ${JSON.stringify(s)}`);
     assert(s.era?.name === "Grunnleggeræraen", `æraen mangler (B-182): ${JSON.stringify(s.era)}`);
-    assert(daysLeft(s.current!, Date.parse("2026-10-20T12:00:00Z")) === 3, "dager igjen");
     const ev = await fetchActiveEvents();
     assert(
       ev.length === 1 && ev[0].power === 1.5 && ev[0].until === "2026-10-01T00:00:00Z",
