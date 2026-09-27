@@ -155,7 +155,7 @@ frontend/src/
     views.ts     Fanene og når de låses opp   Upgrades.tsx, stations.ts  Utstyr per sted i anlegget
     ResearchPage.tsx  Forskning-fanen   Settings.tsx  ⚙️ innstillinger og banken (på Verket → Økonomi)
     InstallTip.tsx    Tips om hjemskjerm på startskjermen   Power.tsx  Strøm og skiftplan
-    Handbook.tsx Fagboka med quiz og oppdrag   Inbox.tsx  Varsellista (åpnes fra varsellinja øverst)
+    Handbook.tsx Fagboka med quiz og oppdrag   Inbox.tsx  Varsellista (åpnes fra varsellinja)
     Account.tsx  Konto: logg inn, opprett, glemt passord, velg spill ved konflikt (på startskjermen og i ⚙️)
     Leaderboard.tsx Topplista (arket bak 🏆 ved varsellinja)   Season.tsx  Sesongspørsmål, hendelser på Marked, sesonglinje
     Daily.tsx    Velkommen tilbake, daglig belønning og kortet «Dagens oppdrag» på Verket
@@ -198,7 +198,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   skrift enn Chromium, så la det være litt luft (B-134).
 - Bare `.g-main` scroller, ikke vinduet – på mobil (B-137) og nå også på PC (B-192). I Playwright: scroll med
   `document.querySelector(".g-main").scrollBy(...)`. Fingersveip (`synthesizeScrollGesture`) virker ikke uten skjerm.
-- **To skall** (B-192): under 900 px mobil (meny nederst), fra 900 px PC (sidemeny, topplinje). Konsern er eget punkt i
+- **To skall** (B-192): under 900 px mobil (meny nederst), fra 900 px PC (sidemeny, topplinje). Varsellinja står over
+  menyen nederst på mobil og i topplinja på PC (B-201); `useIsPc` i `GameApp` velger plassen, så det er bare én. Konsern er eget punkt i
   sidemenyen på PC (`.g-nav-pc`) og underfane på mobil. Underfanen i Verket står i `GameApp` (`ui/verketTabs.ts`).
 - Ark (`.g-modal`) som åpnes fra innhold inne i `.g-main`, må pakkes i `<Portal>` (B-152). Ellers klipper Safari på
   iPhone arket til innholdet, og det kan ikke scrolles (skjedde med «Pynt verket»).

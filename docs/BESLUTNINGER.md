@@ -1400,7 +1400,7 @@ Beslutning:
 - Varsellista bak 🔔 viser fortsatt alt.
 
 ## B-116 Varsellinja: en fast plass for varslene øverst (2026-09-25)
-Status: gjelder (erstatter plasseringen i B-114)
+Status: gjelder (erstatter plasseringen i B-114); på mobil står den nå over menyen nederst (B-201)
 Brukeren: varslene kom fortsatt i veien for å signere kontrakter og kjøpe ting. Man måtte pause spillet og krysse ut
 varslene først. Et varsel som legger seg oppå siden, vil alltid kunne dekke en knapp.
 Beslutning:
@@ -3521,3 +3521,20 @@ Beslutning:
 Konto (B-149): ingen ny funksjon.
 Testet: Playwright på 1 000, 1 366, 1 920 og 2 560 px (stålverk og storverk): største loddrette avstand mellom to kort i
 venstre kolonne er 12 px (før: opptil 636 px) på alle fire Verket-fanene.
+
+## B-201 Varsellinja over menyen nederst på mobil (2026-09-27)
+Status: gjelder (erstatter plasseringen «øverst» i B-116 på mobil; prinsippet i B-116 står)
+Brukeren valgte alternativ 3 av tre (beholde, toast under toppfeltet, flytte ned): «Ja til varsellinja».
+Beslutning:
+- Under 900 px står varsellinja med 🏆 (B-134) som en egen fast rad **rett over menyen nederst**, ikke nederst i
+  toppfeltet. Den er fortsatt en fast rad med fast høyde som aldri legger seg over innholdet (B-116), og varselet står
+  der tommelen er.
+- Toppfeltet blir lavere: 71 px på iPhone (fra 117) og 88–97 px på 320 px (fra 134–143). Plassen til innholdet er den
+  samme (raden er flyttet, ikke fjernet), men anleggsbildet og det viktigste rådet kommer høyere opp.
+- PC (fra 900 px) er uendret: varsellinja står i topplinja. Bare én varsellinje finnes om gangen (`useIsPc` i
+  `GameApp` velger plassen), så skjermlesere hører varslene én gang.
+- Veiledningen (`.g-coach`) legger seg over varsellinja: høyden måles (`--notice-h`) og legges til avstanden fra menyen.
+Konto (B-149): ingen ny funksjon.
+Testet: tsc, lint, `npm test`, balanse (exit 0), build; Playwright på de 7 størrelsene (stålverk og storverk): ingen
+vannrett scrolling og ingen avkortede knapper; toppfeltet 71 px på 390–820 px, PC uendret (57 px); varsellista og
+topplista åpnes fra raden nederst; veiledningen slutter over raden.

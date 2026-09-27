@@ -6,10 +6,6 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
-- **UI-1b (B-192) – varsellinja på mobil:** toppfeltet er 117 px (fra 133). Målet i UI.md var ≤ 88 px, men det krever
-  at varsellinja slutter å være en fast rad og varsler kommer som en kort toast under toppfeltet (samles i bjella).
-  Det gjør om B-116 (varsler skal aldri ligge oppå noe). Alternativ: flytte hele varsellinja ned over menyen nederst
-  (toppfeltet ca. 76 px, like mye plass totalt). Eierens valg – til da står B-116.
 
 ## Venter
 
@@ -42,6 +38,8 @@ til «Avgjort» nederst).
   Krever konto. Brukeren: «Ingen varsel på mobilen enda» (B-149).
 
 ## Avgjort
+
+- **Varsellinja på mobil** (spørsmål fra UI-1b): eieren valgte å flytte den ned over menyen – B-201.
 
 - Økonomireformen er gjennomført med urørt gulv på 250 mill.; konsernkassa godkjent som utgangspunkt (grensene kan
   justeres); pilotkonsesjonen er 14 dager (B-186).

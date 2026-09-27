@@ -183,8 +183,8 @@ Ett `AppShell` med CSS grid-områder: `header`, `nav`, `main`, `aside`. Samme Re
 - **Toppfelt i to rader, mål ≤ 88 px** (fra 133):
   1. Nivå/dag/klokke (kompakt) · fartsvelger · varsel-ikon med tall · meny-ikon.
   2. Nøkkeltallstripe: **Kasse** (størst) · Omdømme · Fagpoeng · Strøm – med små ikoner, forkortes på XS.
-- Varsellinja er ikke lenger en fast rad: nye varsler kommer som toast under toppfeltet og samles i bjella. Fagbok,
-  toppliste, innstillinger og konto ligger i menyen (fagboka også som snarvei når veiledningen peker dit).
+- Varsellinja er fortsatt en fast rad (B-116), men står **over menyen nederst** på mobil (B-201, eierens valg i stedet
+  for toast). Toppfeltet er da 71 px på iPhone (fra 117). 🏆 står ved varsellinja som før.
 - Menyen nederst som i dag. Underfanene i Verket flyttes **øverst** i Verket.
 
 ### 5.2 PC

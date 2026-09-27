@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 201,
+    date: "2026-09-27",
+    title: "Varslene nederst på mobil",
+    items: [
+      "På mobil står varsellinja og topplista nå rett over menyen nederst, der tommelen er.",
+      "Toppfeltet er mye lavere, så verket og rådene kommer høyere opp på skjermen.",
+    ],
+  },
+  {
     b: 200,
     date: "2026-09-27",
     title: "Ikke lenger tomrom på Verket på PC",

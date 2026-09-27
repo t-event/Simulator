@@ -137,7 +137,7 @@
 
 /* ---------------------------------------------------------------- Navigasjon */
 .g-nav {
-  order: 3;
+  order: 4;
   flex: none;
   z-index: 20;
   display: flex;
@@ -1806,7 +1806,7 @@ button {
   position: fixed;
   left: 10px;
   right: 10px;
-  bottom: calc(var(--nav-h) + env(safe-area-inset-bottom) + 8px);
+  bottom: calc(var(--nav-h) + var(--notice-h, 0px) + env(safe-area-inset-bottom) + 8px);
   z-index: 25;
   max-width: 520px;
   margin: 0 auto;
@@ -3644,4 +3644,25 @@ button {
     font-size: var(--fs-caption);
     padding: 0 1px;
   }
+}
+
+/* Varsellinja over menyen nederst på mobil (B-201): toppfeltet blir lavere, og varselet er der tommelen er. Den er
+   fortsatt en fast rad som aldri legger seg over innholdet (B-116). På PC står den i topplinja som før. */
+.g-notice-bar {
+  order: 3;
+  flex: none;
+  z-index: 20;
+  background: var(--surface-chrome);
+  border-top: 1px solid var(--panel-border);
+  padding: 4px max(12px, env(safe-area-inset-right)) 4px max(12px, env(safe-area-inset-left));
+}
+
+.g-notice-bar .g-notice,
+.g-notice-bar .g-board-btn {
+  margin-top: 0;
+}
+
+.g-notice-bar .ds-icon {
+  width: 18px;
+  height: 18px;
 }
