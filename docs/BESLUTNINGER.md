@@ -3414,3 +3414,22 @@ Testet i databasen (DO-blokk som ble rullet tilbake) med H4WK3N5s ekte tall dag 
 flagger ikke, og et juksehopp til 500 mrd. flagges fortsatt. Etterpå: 0 flaggede kontoer, H4WK3N5 er nr. 1 på
 konsernverdi-lista, sikkerhetsrådene som før.
 Konto (B-149): ingen ny funksjon.
+
+## B-195 UI-2a: Oversikt – det viktigste nå, statusspråk og boblene (2026-09-27)
+Status: gjelder (UI.md 6.1, 6.2 og 7; bygger på B-191/B-192)
+Beslutning:
+- **Det viktigste akkurat nå:** det første rådet under anleggsbildet er en rolig flate med aksentkant, ikon og pil
+  (ikke lenger en stor blå knapp med fet tekst). Råd uten handling vises som melding (`Callout`). Etter det første
+  vises høyst to råd til; resten ligger bak «Flere råd (N)», så det ikke blir en tekstvegg.
+- **Statusspråket i produksjonslinja:** rutene for skrap, ovner, støping og lager viser status med ikon + ord i
+  statusfargen (`StatusLine` i `ui/ds.tsx`): kjører (grønt ikon), venter (blått), stopp (grått), vedlikehold,
+  mangler folk, tomt og fullt (oransje), feil/havari (rødt). Teksten fra motoren står som før, så ingenting går tapt.
+  På de smaleste skjermene (≤ 380 px) står bare ordet i rutene.
+- **Boblene:** høyst 3 i faste baner, levetid 1,6 s; alt innen samme vindu (1 s, 1,4 s på 3×, 2 s på 10×) slås
+  sammen til én boble («+1,14 mill. kr · +134 t · +1 fagpoeng»); er banene opptatt, venter tallene og kommer med i
+  neste boble. Med redusert bevegelse: en stille linje nederst i bildet. (Før: opptil 8 bobler samtidig på 10×.)
+- Pynt-knappen på anleggsbildet har ikon i stedet for emoji.
+Konto (B-149): ingen ny funksjon.
+Testet: tsc, lint, `npm test`, balanse (exit 0), build. Playwright før/etter på 320, 390, 1 366 og 1 920 px (stålverk og
+storverk med konsern), og de 7 størrelsene uten vannrett scrolling; boblene målt på 10× (maks 1 samtidig, sammenslått)
+og med redusert bevegelse (stille linje).

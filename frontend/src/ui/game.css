@@ -1363,7 +1363,7 @@ button {
   font-size: var(--fs-meta);
   font-weight: 700;
   white-space: nowrap;
-  animation: g-bubble 2.2s ease-out forwards;
+  animation: g-bubble 1.6s ease-out forwards;
   box-shadow: var(--shadow-sm);
 }
 
@@ -1497,13 +1497,39 @@ button {
   gap: 6px;
 }
 
+/* Det viktigste akkurat nå (B-195): rolig flate med aksentkant, ikon og pil – ikke en stor blå knapp */
 .g-cta {
   width: 100%;
   min-height: 52px;
-  padding: 12px 14px;
-  font-size: var(--fs-title);
-  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-4) var(--sp-4) var(--sp-5);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  line-height: 1.4;
   text-align: left;
+  color: var(--text);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--r-md);
+}
+
+.g-cta > span {
+  flex: 1;
+}
+
+.g-cta > .ds-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--accent);
+}
+
+@media (hover: hover) {
+  .g-cta:hover:not(:disabled) {
+    background: var(--surface-hover);
+  }
 }
 
 .g-more-hints {
@@ -1512,6 +1538,31 @@ button {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.g-more-hints-rest summary {
+  cursor: pointer;
+  color: var(--text-2);
+  font-size: var(--fs-meta);
+  padding: var(--sp-2) 0;
+  min-height: 32px;
+}
+
+/* Statuslinja i rutene i produksjonslinja (B-195): vanlig vekt, samme størrelse som før */
+.g-mini .ds-status-line,
+.g-mini .ds-status-line span {
+  display: inline;
+  font-weight: 400;
+  font-size: inherit;
+}
+
+/* I de smale rutene brytes ordet rundt ikonet i stedet for å kuttes */
+.g-mini .ds-status-line > .ds-icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  margin: 0 2px 0 0;
+  vertical-align: -0.12em;
 }
 
 .g-app {
@@ -3221,4 +3272,33 @@ button {
   height: 12px;
   margin-left: 2px;
   vertical-align: -1px;
+}
+
+/* Boblene (B-195): med redusert bevegelse en stille linje nederst i bildet i stedet */
+.g-bubble-line {
+  position: absolute;
+  left: var(--sp-3);
+  bottom: var(--sp-3);
+  max-width: calc(100% - 64px);
+  padding: 2px var(--sp-3);
+  border-radius: var(--r-sm);
+  background: var(--scrim-soft);
+  color: var(--text);
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.g-scene-pynt .ds-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* På de smaleste skjermene får ordet plassen i rutene; fargen og ordet sier fortsatt statusen */
+@media (max-width: 380px) {
+  .g-mini .ds-status-line > .ds-icon {
+    display: none;
+  }
 }

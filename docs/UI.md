@@ -281,7 +281,7 @@ Hver PR er liten, går gjennom alle sjekker, Playwright på **7 størrelser** (3
    endringer).
 2. **UI-1b App-skall** (ferdig, B-192, PR #139 – varsellinja står etter B-116, se FORSLAG): kompakt mobiltoppfelt, underfaner øverst i Verket, PC-toppfelt, sidemeny, `Sheet` for
    toppliste/fagbok/innstillinger, brytepunktene.
-3. **UI-2a Oversikt** (inkl. boblereglene og første runde av anleggsbildet) · **UI-2b Anlegg** (statusspråk,
+3. **UI-2a Oversikt** (bygget, B-195) (inkl. boblereglene og første runde av anleggsbildet) · **UI-2b Anlegg** (statusspråk,
    driftsdashbord) · **UI-2c Marked** (`DataTable`) · **UI-2d Salg** (`MasterDetail`).
 4. **UI-3a Økonomi** · **UI-3b Folk** · **UI-3c Forskning** · **UI-3d Konsern** (hovedkontoret).
 5. **UI-4a Kontrollrommet** · **UI-4b Toppliste/Hall of Fame** · **UI-4c øvrige ark og små skjermer** ·

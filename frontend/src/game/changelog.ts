@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 195,
+    date: "2026-09-27",
+    title: "Roligere oversikt",
+    items: [
+      "Rådet under anleggsbildet er roligere, og flere råd samles under «Flere råd».",
+      "Rutene i produksjonslinja viser status med ikon og farge: kjører, venter, står, mangler skrap, lager fullt.",
+      "Boblene over verket samles til én om gangen, så det ikke blir kaos på 10×.",
+    ],
+  },
+  {
     b: 194,
     date: "2026-09-27",
     title: "Topplista tåler store kjøp",
