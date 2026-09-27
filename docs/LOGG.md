@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 132 – 2026-09-27: H4WK3N5 borte fra topplista
+
+**Brukeren spurte:** hvorfor H4WK3N5 ble borte fra topplista. Etter svaret: «Begge deler» – rett sperren og fjern flagget.
+
+**Funnet:** juksesperren flagget kontoen kl. 12.20 for vekst i konsernverdien (+30,3 mrd. på ett døgn) da flere verk ble
+kjøpt og modernisert: kjøp kan øke verdien mer enn de koster (60 døgns overskudd). Over tre døgn var veksten godt
+innenfor. Ikke juks, og ingenting med dagens oppdateringer å gjøre.
+
+**Gjort:** B-194 og migrasjon 032: vekstsperren flagger bare hvis også veksten fra minst tre døgn tilbake er for høy.
+Flagget er fjernet. Endringsloggen, PLAN-NETT, CLAUDE.md.
+
+**Testet:** DO-blokk med de ekte tallene (gammel regel flagger, ny ikke, juks flagges fortsatt), rullet tilbake. Etterpå:
+ingen flaggede kontoer, H4WK3N5 nr. 1 på konsernverdi, sikkerhetsrådene uendret. `npm test`.
+
+**Gjenstår:** Grane og Figen står ikke på sesonglista før de har lagret etter reformen (som før).
+
+---
+
 ## Økt 131 – 2026-09-27: midlertidig sikkerhetsventil for kassa
 
 **Brukeren ba om:** før rebalanseringen av sluttspillet: en myk grense på 100 mrd. for disponibel kasse, der
@@ -20,8 +38,8 @@ etter eierens beskjed.
 
 **Testet:** `npm test` (ny reservetest), tsc, lint, balanse (exit 0), `--konsern`, Playwright med kasse 100,5 mrd.
 
-**Gjenstår:** bygger på grenen med UI-1b (PR #139, venter på eieren). Reserven skal migreres når sluttspillet er
-rebalansert (FORSLAG).
+**Gjenstår:** eieren sa «Merge» – PR #139 (UI-1b + ventilen) er merget, og publiseringen gikk grønt. Reserven skal
+migreres når sluttspillet er rebalansert (FORSLAG).
 
 ---
 
@@ -38,7 +56,8 @@ FORSLAG. Endringsloggen, UI.md, CLAUDE.md.
 **Testet:** tsc, lint, `npm test`, balanse (exit 0), build; Playwright på 7 størrelser før/etter, Konsern-navigasjon,
 ark fra høyre, nytt spill med veiledningen (320 og 1 366).
 
-**Gjenstår:** eierens svar på skjermbildene og om varsellinja på mobil (FORSLAG). Deretter UI-2a (Oversikt).
+**Gjenstår:** merget i PR #139 sammen med B-193. Eierens svar om varsellinja på mobil (FORSLAG). Deretter UI-2a
+(Oversikt).
 
 ---
 

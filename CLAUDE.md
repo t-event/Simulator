@@ -249,6 +249,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   nickname = '…') order by taken_at desc;` og kjør `select restore_save(<id>);`. Appen henter spillet selv.
 - Grensene i juksesperren (`check_snapshot`) må sjekkes mot det største utstyret **med alt utstyr og flinke folk**,
   ikke mot grunntallene. Tonnsperren på 30 000 t flagget en ærlig spiller med 420-tonnere (B-158).
+- Kjøp av datterverk og modernisering kan øke konsernverdien mer enn de koster (verdien er 60 døgns overskudd). Både
+  vekst- og tonnsperren flagger derfor bare hvis også tallet fra minst tre døgn tilbake er for høyt (B-162, B-194).
+  Test endringer i sperren mot ekte tall i en DO-blokk som ender med `raise exception`.
 - Alle kall til tjenesten har en tidsgrense på 30 s (`call` i `net/supabase.ts`, B-165). Uten den kunne ett kall som hang
   på mobilnettet stoppe lagringen på nett i over 20 minutter. Tester kan korte den ned med `setRequestTimeout`.
 - Tall til tidslinja (`snapshots`) leses i **samme øyeblikk** som dagen, før første `await` i `uploadSave` (B-162).
