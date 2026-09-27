@@ -16,6 +16,15 @@ konkurranse med ekte spillere. Starten beskyttes. Overgangsplanen står i `RETNI
 Spillet blir aldri helt ferdig: topplista, felles hendelser og (i dag) sesonger på et halvt år gir en ny grunn til å
 spille (se `PLAN-NETT.md`). Sesongene skal revurderes mot langsiktige æraer (B-180). Nytt spill+ er fjernet (B-141).
 
+## Plattformer: mobil og PC (B-187)
+
+Stålverket er både mobilspill og PC-/nettleserspill. **Mobil** er perfekt til korte økter: sjekke driften, kjøpe skrap,
+signere ordre, reagere på varsler, små investeringer. **PC** er perfekt til lange økter: planlegging,
+produksjonsoversikt, økonomi, ansatte, sammenligning, konsernstyring og store beslutninger. Samme spill – forskjellig
+mengde informasjon synlig samtidig. UI-et skal vokse med spilleren: enkelt og nesten koselig i garasjen, et ordentlig
+stålverk i midtspillet, profesjonell industriledelse sent, og kontrollsenteret til et industriimperium til slutt – uten at
+spilleren noen gang føler seg kastet inn i et regneark. Designsystem, brytepunkter og plan: `docs/UI.md`.
+
 ## Designpilarer (B-180)
 
 Gjelder for alt nytt:

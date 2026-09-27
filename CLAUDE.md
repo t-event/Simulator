@@ -12,6 +12,7 @@ Claudes langtidsminne sammen med `docs/`. Hold den kort og oppdatert.
 3. Les **`docs/DESIGN.md`** hvis oppgaven gjelder spillmekanikk eller grensesnitt, og **`docs/RETNING.md`** hvis den
    gjelder sluttspillet, konsernet, økonomien eller konkurranse mellom spillere (hovedretningen, B-180).
 4. Les **`docs/PLAN-NETT.md`** hvis oppgaven gjelder konto, lagring på nett, toppliste, sesonger eller konkurranse.
+   Les **`docs/UI.md`** hvis oppgaven gjelder utseende, layout, PC-versjonen eller designsystemet (B-187).
 5. Se **`docs/FORSLAG.md`** – åpne spørsmål til brukeren og forslag. Når noe avgjøres: ny beslutning, og oppdater lista.
 6. Skal du lage noe nytt, avgjør om det **krever konto** etter reglene i **`docs/KONTO.md`** (se «Faste regler»).
 
@@ -63,8 +64,10 @@ GitHub Pages: https://t-event.github.io/Simulator/
 - **Serveren avgjør alt mellom spillere (B-180):** eierskap, overtakelser, frister i ekte tid, inntekt fra andres
   aktivitet og økonomireformen regnes på serveren. Penger fra eget spill (spilltid, opptil 10×) kan bare flyttes inn i
   verdenen (ekte tid) i et begrenset tempo. Ekte spillerdata endres aldri uten dry-run og eierens godkjenning først.
-- **Mobil først:** Test alltid på iPhone-størrelse (390 px bred). Ingen
-  horisontal scrolling, knapper minst ca. 40 px høye.
+- **Mobil og PC (B-187):** mobil = rask drift, PC = kontrollrom/hovedkontor med mer oversikt. Samme spill og
+  komponenter; ingen viktig funksjon bare på PC. Test alltid på iPhone-størrelse (390 px) og 320 px – ingen horisontal
+  scrolling, knapper minst ca. 44 px høye – og, når layout endres, på de 7 størrelsene i `docs/UI.md` (opp til
+  2 560×1 080). Nye stiler bruker tokens og komponentene i designsystemet (`docs/UI.md`), ikke nye faste farger.
 - **Balanse:** Endringer i økonomi eller progresjon skal gjennom
   `npx tsx src/game/balance.ts` (kjøres også i CI). Justeres målene, skriv hvorfor
   i `docs/BESLUTNINGER.md`.
@@ -159,7 +162,8 @@ frontend/public/  PWA: manifest, ikoner, service worker
 supabase/      SQL-migrasjonene, nummerert. Kjøres i prosjektet med Supabase-connectoren (apply_migration) og
                legges her samtidig, så repoet speiler databasen. Sjekk get_advisors (security) etter hver DDL-endring.
 supabase/utkast/ Spørringer som bare leser (f.eks. dry-run av økonomireformen) – ikke migrasjoner
-docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretningen for sluttspillet, B-180),
+docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretningen for sluttspillet, B-180), UI.md
+               (designsystem, mobil + PC, plan for redesignet, B-187),
                PLAN-NETT.md (det som er bygget på nett), FORSLAG.md, KONTO.md (hva som krever konto)
 ```
 
