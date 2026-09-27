@@ -108,4 +108,5 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Rekonstruksjon ved konkurs | Nei | Regel 1 | planlagt, B-180 |
 | Myk grense for kassa og bunden konsernreserve (midlertidig) | Nei | Regel 1: eget spill | B-193 |
 | Æraer og Hall of Fame | Ja | Regel 3 | Grunnleggeræraen og navnet «Hall of Fame»: B-182. Neste æra: ikke bestemt |
+| Pause på Salg (innstilling) | Nei | Regel 1: ditt eget spill | B-222 |
 

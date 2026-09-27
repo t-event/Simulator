@@ -24,7 +24,7 @@ import { DirectorOffer, DirectorSwitch } from "./Konsern";
 import { AutoLocked, AutoToggle } from "./AutoToggle";
 import { auto, automationUnlocked } from "../game/research";
 import { AnalysisLine, Bar, Card, GradeChips, GradeSpec, SubTabs } from "./common";
-import { StatusBadge } from "./ds";
+import { Callout, StatusBadge } from "./ds";
 import { Icon, type IconName } from "./icons";
 import { fmtKr, fmtNum, fmtT } from "./format";
 
@@ -224,7 +224,7 @@ const LOTS_SHOWN = 6;
 
 type SalesTab = "tilbud" | "ko" | "lager" | "avtaler";
 
-export function Sales({ g, stats, act, openTab }: Props & { openTab?: string }) {
+export function Sales({ g, stats, act, openTab, paused }: Props & { openTab?: string; paused?: boolean }) {
   const [showAll, setShowAll] = useState(false);
   const [confirmCancel, setConfirmCancel] = useState<number | null>(null);
   const [tab, setTab] = useState<SalesTab>(() =>
@@ -286,6 +286,12 @@ export function Sales({ g, stats, act, openTab }: Props & { openTab?: string }) 
     <div className={`g-grid g-sales is-${tab}`}>
       <div className="g-col-wide">
         <SubTabs tabs={tabs} value={tab} onChange={setTab} label="Salg" />
+        {/* Spillet står stille mens Salg er åpen (B-222) */}
+        {paused && (
+          <Callout>
+            Spillet står på pause mens du er på Salg. Det går videre når du går ut – eller start tida selv øverst.
+          </Callout>
+        )}
 
         {tab === "tilbud" && (
           <Card title={`Forespørsler (${offers.length})`}>

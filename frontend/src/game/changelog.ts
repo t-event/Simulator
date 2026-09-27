@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 222,
+    date: "2026-09-27",
+    title: "Pause på Salg",
+    items: [
+      "Spillet står på pause mens du er på Salg, så du rekker å lese forespørslene. Når du går ut, fortsetter det i samme fart – eller start tida selv mens du er der.",
+      "Vil du ikke ha det slik, kan du slå det av under ⚙️ Innstillinger.",
+    ],
+  },
+  {
     b: 220,
     date: "2026-09-27",
     title: "Ryddigere Verket og topplista",

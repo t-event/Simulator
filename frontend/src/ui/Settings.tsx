@@ -148,6 +148,14 @@ export function SettingsSheet({
             <span>Fortsett i samme fart (3× eller 10×) etter et hendelseskort, i stedet for å gå ned til 1×</span>
           </label>
         )}
+        <label className="g-toggle">
+          <input
+            type="checkbox"
+            checked={g.settings.pauseOnSales}
+            onChange={(e) => act((gg) => void (gg.settings.pauseOnSales = e.target.checked))}
+          />
+          <span>Sett spillet på pause mens du er på Salg (det går videre i samme fart når du går ut)</span>
+        </label>
         {stats.furnace.arc && (
           <label className="g-toggle">
             <input
