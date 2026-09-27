@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 223,
+    date: "2026-09-27",
+    title: "Armeringen kommer i tide igjen",
+    items: [
+      "Valseverket sto av og til stille fordi alle emnene var holdt av til emneordrer lenger nede i køen, så armeringsordrene ble for sene. Nå får armeringsordrene øverst i køen emnene de trenger.",
+      "Rådgiveren tilbyr ikke lenger en innleid planlegger når du alt har planleggere.",
+    ],
+  },
+  {
     b: 222,
     date: "2026-09-27",
     title: "Pause på Salg",

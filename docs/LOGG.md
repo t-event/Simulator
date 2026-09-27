@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 160 – 2026-09-27: «Hva skjedde med planleggerne mine?»
+
+**Brukeren ba om:** forklaring på rådgiverkortet som tilbød en innleid planlegger.
+
+**Gjort:** B-223. Planleggerne var der; armeringsordrene ble for sene fordi alle emnene var holdt av for emneordrene
+(følge av B-217), så valseverket sto. Emner holdes nå bare av for emneordrene foran den første armeringsordren.
+Rådgiveren tilbyr ikke innleid planlegger når verket har egne.
+
+**Testet:** lagringen spilt seks døgn fram (armering leveres igjen), ny test, tsc, lint, `npm test`, `balance.ts` (exit 0).
+
+**Gjenstår:** UI-4b, UI-4c, UI-4d; reserven og kassegrensen; Google/Apple senere.
+
+---
+
 ## Økt 159 – 2026-09-27: Pause på Salg
 
 **Brukeren ba om (fra en spiller):** spillet skal stå på pause mens Salg er åpen, til man går ut eller starter tida selv.

@@ -483,16 +483,23 @@ export function maybeAdvisor(g: GameState): void {
     const a = ADVICE[cause];
     const cost = specialistCost(g);
     g.advisorSeen[cause] = today;
+    // Har verket egne planleggere, hjelper ikke en innleid (B-223): da er det for mange ordrer, ikke feil rekkefølge
+    const noHire = cause === "sen" && g.workers.some((w) => w.role === "planlegger");
+    const book = { label: "Les om det i fagboka", hint: knowledgeCard(a.chapter)?.title, chapter: a.chapter };
     g.pendingDecision = {
       id: "radgiver",
       title: a.title,
-      text: a.text,
-      options: [
-        { label: `Lei inn ${a.specialist.toLowerCase()} (${fmtKr(cost)})`, hint: a.effect },
-        { label: "Les om det i fagboka", hint: knowledgeCard(a.chapter)?.title, chapter: a.chapter },
-        { label: "Jeg ordner det selv" },
-      ],
-      data: { cause, cost },
+      text: noHire
+        ? "Flere kontrakter har gått over fristen. Planleggerne dine setter allerede kortest frist øverst, så verket har tatt på seg mer enn det rekker. Si nei til forespørsler du ikke rekker – og har du salgsdirektør, kan du slå av at den tar rammeavtaler (under Konsern)."
+        : a.text,
+      options: noHire
+        ? [book, { label: "Jeg ordner det selv" }]
+        : [
+            { label: `Lei inn ${a.specialist.toLowerCase()} (${fmtKr(cost)})`, hint: a.effect },
+            book,
+            { label: "Jeg ordner det selv" },
+          ],
+      data: { cause, cost, noHire: noHire ? 1 : 0 },
       resumeSpeed: g.speed > 0 ? g.speed : 1,
     };
     g.speed = 0;
@@ -791,7 +798,7 @@ export function resolveDecision(g: GameState, option: number): void {
       }
       return;
     case "radgiver": {
-      if (!yes) return;
+      if (!yes || n("noHire")) return;
       const cause = d.data.cause as RepCause;
       addCost(g, "annet", n("cost"));
       g.specialists[cause] = g.minute + SPECIALIST_DAYS * 1440;

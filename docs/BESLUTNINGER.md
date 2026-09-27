@@ -4010,3 +4010,21 @@ starter tiden igjen manuelt mens man er inne i salg vinduet».
 - Logikken står i `GameApp` (effekter på `onSales` og farten), ikke i spillmotoren: det er bare et valg i grensesnittet,
   så testspilleren og juksesperren påvirkes ikke (tida står bare stille).
 - Konto: nei (regel 1, ditt eget spill). Lagt i KONTO.md.
+
+## B-223 Valseverket får emner til armeringsordrene først i køen, og rådgiveren tilbyr ikke planlegger når du har (2026-09-27)
+Status: gjelder (retter en følge av B-217)
+Brukeren (skjermbilde av «Rådgiveren: leveransene kommer for sent» med tilbud om innleid planlegger): «Hva skjedde med
+planleggerne mine?»
+- **Planleggerne var der** (to, til stede). Rådgiveren kommer når tre leveranser er for sene innen ti døgn, uansett.
+- **Funnet:** tre armeringsordrer (4 000 t hver) fikk nesten ingenting levert. Valseverket valser bare emner som ingen
+  emneordre venter på (`updateRolling`), og emnene ble holdt av for **alle** aktive emneordrer. Etter B-217 signerte
+  salgsdirektøren langt mer emner (bl.a. en rammeavtale på 46 250 t emner i armeringskvalitet), så alle emnene ble holdt
+  av og valseverket sto uten noe å valse – selv om armeringsordrene sto øverst i køen.
+- **Rettet:** emnene holdes bare av for emneordrene som står **foran** den første armeringsordren i køen. Uten
+  armeringsordre i køen holdes de av for alle emneordrene som før. Valseverket tar uansett bare det det rekker, så
+  emneordrene bak får resten av støpingen.
+- Kjørt på den ekte lagringen (seks døgn): armeringsordrene leveres igjen (to fullført); én ordre på 15 000 t med to døgn
+  igjen ble fortsatt for sen, den var alt for stor for tida som var igjen. Ny test i `game/tests.ts`. Testspilleren: OK.
+- **Rådgiveren:** har verket egne planleggere, tilbyr kortet ikke en innleid planlegger (den sorterer bare køen, som
+  planleggerne alt gjør). Teksten sier i stedet at verket har tatt på seg mer enn det rekker, og at man kan si nei eller
+  slå av rammeavtalene til salgsdirektøren.
