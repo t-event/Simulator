@@ -1,6 +1,7 @@
 /**
  * Prestasjoner og pynt (B-151): merkene på Verket og arket der pynten til anleggsbildet kjøpes for fagpoeng.
  */
+import { SheetHead } from "./ds";
 import { useState } from "react";
 import {
   ACHIEVEMENT_BY_ID,
@@ -101,14 +102,7 @@ export function PyntModal({
     <Portal>
       <div className="g-modal" role="dialog" aria-modal="true" aria-label="Pynt verket" onClick={onClose}>
         <div className="g-modal-card" onClick={(e) => e.stopPropagation()}>
-          <header className="g-card-head">
-            <h2>
-              <Icon name="palette" /> Pynt verket
-            </h2>
-            <button onClick={onClose} aria-label="Lukk">
-              <Icon name="close" />
-            </button>
-          </header>
+          <SheetHead title="Pynt verket" icon="palette" onClose={onClose} />
           <div className="g-scene-wrap g-pynt-preview">
             <PlantScene g={g} stats={stats} />
           </div>

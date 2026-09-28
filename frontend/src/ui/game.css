@@ -1002,15 +1002,42 @@ button {
   margin-bottom: 8px;
 }
 
-/* Utstyrsmenyen (B-112): kassa står fast øverst, og det som er i drift er lagt sammen */
-.g-sheet-head {
+/* Toppen på arkene (UI-4c, B-225): står fast øverst når arket rulles, lukk er alltid 44 px og innen rekkevidde.
+   Marginene går ut til kanten av kortet, så innholdet ikke skimter gjennom over toppen. */
+.ds-sheet-head {
   position: sticky;
-  top: -16px;
-  z-index: 1;
+  top: calc(-1 * var(--sheet-pad));
+  z-index: 2;
+  margin: calc(-1 * var(--sheet-pad)) calc(-1 * var(--sheet-pad)) var(--sp-3);
+  padding: var(--sp-3) var(--sheet-pad);
   background: var(--panel-bg);
-  padding-top: 4px;
+  border-bottom: 1px solid var(--line);
+  gap: var(--sp-2);
+}
+
+.ds-sheet-head h2 {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  overflow-wrap: anywhere;
+}
+
+.ds-sheet-head h2 .ds-icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+}
+
+.ds-sheet-head .g-icon-btn {
+  flex-shrink: 0;
+}
+
+/* Utstyrsmenyen (B-112): kassa står i toppen, og det som er i drift er lagt sammen */
+.g-sheet-head {
   flex-wrap: wrap;
-  gap: 4px 10px;
 }
 
 .g-sheet-cash {
@@ -1178,10 +1205,11 @@ button {
 
 .g-modal-card,
 .g-intro-card {
+  --sheet-pad: 16px;
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
   border-radius: var(--r-md);
-  padding: 16px;
+  padding: var(--sheet-pad);
   width: 100%;
   max-width: 560px;
   max-height: 100%;
@@ -2625,10 +2653,6 @@ button {
 }
 
 /* Topplista bak 🏆 (B-133), formen fra UI-4b (B-224) */
-.g-board-head-actions {
-  display: flex;
-  gap: var(--sp-2);
-}
 
 .g-icon-btn {
   display: inline-flex;
@@ -3325,12 +3349,13 @@ button {
   }
 
   .g-side-sheet > .g-modal-card {
+    --sheet-pad: var(--sp-5);
     height: 100%;
     max-height: none;
     max-width: 520px;
     border-radius: 0;
     border-width: 0 0 0 1px;
-    padding: var(--sp-6) var(--sp-5) calc(var(--sp-6) + env(safe-area-inset-bottom));
+    padding: var(--sheet-pad) var(--sheet-pad) calc(var(--sp-6) + env(safe-area-inset-bottom));
     box-shadow: var(--shadow-overlay);
   }
 }
@@ -4298,4 +4323,15 @@ button {
   border-radius: 50%;
   background: var(--warning);
   box-shadow: 0 0 0 2px var(--surface-chrome);
+}
+
+/* Varsellista på de minste skjermene (UI-4c, B-225): fire faner i to rader heller enn avkortede navn */
+@media (max-width: 360px) {
+  .g-inbox-tabs {
+    flex-wrap: wrap;
+  }
+
+  .g-inbox-tabs button {
+    flex: 1 1 45%;
+  }
 }

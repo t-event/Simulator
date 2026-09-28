@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SheetHead } from "./ds";
 import {
   buyUpgrade,
   keyUpgrade,
@@ -199,13 +200,9 @@ export function UpgradeSheet({
     <Portal>
       <div className="g-modal" role="dialog" aria-modal="true" aria-label={STATION_NAMES[station]} onClick={onClose}>
         <div className="g-modal-card" onClick={(e) => e.stopPropagation()}>
-          <header className="g-card-head g-sheet-head">
-            <h2>{STATION_NAMES[station]}</h2>
+          <SheetHead title={STATION_NAMES[station]} onClose={onClose} className="g-sheet-head">
             <span className="g-sheet-cash">Du har {fmtKr(Math.floor(Math.max(0, g.cash)))}</span>
-            <button onClick={onClose} aria-label="Lukk">
-              ✕
-            </button>
-          </header>
+          </SheetHead>
           {units ? (
             <>
               <div className="g-subtabs" role="tablist" aria-label="Ovner">

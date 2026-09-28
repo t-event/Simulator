@@ -2,6 +2,7 @@
  * Ukens utfordring (B-152): kortet på Verket med ukas oppgave, plassen din i ligaen, medaljene og ukekista, og lista
  * for uka. Krever konto for å være med (docs/KONTO.md); lista kan leses uten.
  */
+import { SheetHead } from "./ds";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { awardPoints, log } from "../game/engine";
 import type { GameApi } from "../game/useGame";
@@ -145,14 +146,7 @@ function WeeklyBoard({ kind, onClose }: { kind: WeekKind; onClose: () => void })
     <Portal>
       <div className="g-modal" role="dialog" aria-modal="true" aria-label="Ukens utfordring" onClick={onClose}>
         <div className="g-modal-card" onClick={(e) => e.stopPropagation()}>
-          <header className="g-card-head">
-            <h2>
-              <Icon name="medal" /> {WEEK_KINDS[kind].title}
-            </h2>
-            <button onClick={onClose} aria-label="Lukk">
-              <Icon name="close" />
-            </button>
-          </header>
+          <SheetHead title={WEEK_KINDS[kind].title} icon="medal" onClose={onClose} />
           {error ? (
             <p className="g-muted">Fikk ikke hentet lista. Prøv igjen senere.</p>
           ) : !rows ? (

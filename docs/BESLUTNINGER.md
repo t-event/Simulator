@@ -4044,3 +4044,17 @@ Brukeren: «Fortsett» (neste steg i planen etter UI-4a).
 - Testet i Playwright på de 7 størrelsene (uten konto) og på 320, 390 og 1 920 px med konto: ingen horisontal
   scrolling, ingen avkortede knapper, verdiene innenfor arket, din plass riktig i sesong og Hall of Fame.
 - Konto: nei (samme funksjon, ny form).
+
+## B-225 UI-4c: Felles arktopp som står fast, og de minste skjermene (2026-09-28)
+Status: gjelder (fase UI-4c i docs/UI.md)
+Brukeren: «Fortsett» (neste steg i planen etter UI-4b).
+- **`SheetHead`** i `ui/ds.tsx`: tittel (med valgfritt ikon), valgfrie handlinger og lukk som ikonknapp på 44 px. Den står
+  fast øverst når arket rulles (sticky, med marginer ut til kanten av kortet og en tynn linje under), så lukk alltid er
+  innen rekkevidde. Polstringen i arket er en variabel (`--sheet-pad`: 16 px på mobil, `--sp-5` i sidearket på PC).
+- Brukt i Innstillinger, Fagboka, Varsler, «Hva er nytt», Topplista, utstyrsmenyen (med kassa i toppen), «Pynt verket» og
+  ukelista. Ingen «✕» som tekst igjen.
+- **Små skjermer:** fanene i Varsler (Alle, Problemer, Hendelser, Gode nyheter) går i to rader under 360 px i stedet for å
+  kortes av.
+- Testet i Playwright på de 7 størrelsene: alle fem ark som ble åpnet (innstillinger, fagbok, varsler, «Hva er nytt»,
+  utstyr) har fast topp når de rulles, lukk er 44 px, ingen horisontal scrolling og ingen avkortede knapper.
+- Konto: nei.
