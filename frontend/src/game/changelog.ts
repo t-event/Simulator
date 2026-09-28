@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 231,
+    date: "2026-09-28",
+    title: "Produksjonslinja i én rad",
+    items: [
+      "På Oversikt står produksjonen i én rad: Skrap › Ovner › Støping › Lager.",
+      "Ovnene er samlet i én rute med en stripe for hver ovn, og viser hvor mange som smelter – eller hva som stopper.",
+    ],
+  },
+  {
     b: 230,
     date: "2026-09-28",
     title: "Kortere «Produksjon nå»",

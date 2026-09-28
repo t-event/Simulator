@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 168 – 2026-09-28: Produksjonslinja i én rad
+
+**Brukeren ba om:** at anleggskortet på Oversikt ikke har en rute alene på egen rad, og blir mer intuitivt.
+
+**Gjort:** B-231. Fire ruter i én rad (Skrap › Ovner › Støping › Lager); ovnene samlet i én rute med en stripe per
+ovn og én status. 249 → 145 px på mobil.
+
+**Testet:** tsc, lint, `npm test`, Playwright på 7 størrelser og verksted-nivå.
+
+**Gjenstår:** UI-4d; reserven og kassegrensen; fase 2 videre.
+
+---
+
 ## Økt 167 – 2026-09-28: «Produksjon nå» kortere
 
 **Brukeren ba om:** at kortet «Produksjon nå» blir kort og intuitivt.

@@ -2111,10 +2111,43 @@ button {
   color: var(--accent-fg);
 }
 
+/* Produksjonslinja på Oversikt (B-231): alltid én rad – Skrap → Ovner → Støping → Lager – med piler i mellomrommet */
 .g-mini-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
-  gap: 6px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.g-mini-row > .g-mini {
+  position: relative;
+  min-width: 0;
+}
+
+.g-mini-row > .g-mini:not(:last-child)::after {
+  content: "›";
+  position: absolute;
+  top: 50%;
+  right: -10px;
+  transform: translateY(-50%);
+  color: var(--text-3);
+  font-size: var(--fs-meta);
+  pointer-events: none;
+}
+
+.g-mini-bars {
+  display: flex;
+  gap: 3px;
+  margin: 4px 0;
+}
+
+.g-mini-bars > .g-bar {
+  flex: 1;
+  margin: 0;
+}
+
+/* Rutene har samme farge som sporet i stripene; et mørkere spor viser hvor mye som er igjen, også i en ovn som står */
+.g-mini .g-bar {
+  background: var(--surface-1);
 }
 
 .g-mini {
@@ -3464,6 +3497,25 @@ button {
 @media (max-width: 380px) {
   .g-mini .ds-status-line > .ds-icon {
     display: none;
+  }
+}
+
+/* De smaleste telefonene (B-231): fire ruter i én rad, så titlene og mellomrommene krymper litt */
+@media (max-width: 360px) {
+  .g-mini-row {
+    gap: 10px;
+  }
+
+  .g-mini-row > .g-mini {
+    padding: 6px 4px;
+  }
+
+  .g-mini-row > .g-mini > span {
+    font-size: var(--fs-caption);
+  }
+
+  .g-mini-row > .g-mini:not(:last-child)::after {
+    right: -8px;
   }
 }
 
