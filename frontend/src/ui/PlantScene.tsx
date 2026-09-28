@@ -56,10 +56,13 @@ function Hit({
   );
 }
 
-/** Skraptrucken som kjører forbi når verket går (B-242). «end» er hvor veien slutter (havna på storverket) */
-function Truck({ end }: { end: number }) {
+/**
+ * Skraptrucken som kjører forbi når verket går (B-242). På storverket slutter veien ved kaia: der stopper den, snur og
+ * kjører tilbake (B-245), i stedet for å kjøre utfor.
+ */
+function Truck({ turn }: { turn: boolean }) {
   return (
-    <g className="scene-truck" style={{ ["--truck-end" as string]: `${end}px` }}>
+    <g className={turn ? "scene-truck is-turning" : "scene-truck"}>
       <rect x={0} y={183} width={22} height={9} rx={1} fill="#c9892e" />
       <path d="M2 183 L6 178 L18 178 L21 183 Z" fill="#7a6250" />
       <rect x={22} y={185} width={9} height={7} rx={1} fill="#d8a13a" />
@@ -601,7 +604,7 @@ export function PlantScene({ g, stats, onStation }: Props) {
       {!open && <rect className="scene-idle" x={0} y={0} width={480} height={210} />}
 
       {/* Skraptrucken kjører når verket går (B-242) */}
-      {open && stage >= 1 && <Truck end={stage >= 4 ? 380 : 480} />}
+      {open && stage >= 1 && <Truck turn={stage >= 4} />}
 
       {/* Stedene kan trykkes (B-242): skrapgården, ovnshallen, støpehallen og ferdigvarelageret */}
       {stage === 0 && (
