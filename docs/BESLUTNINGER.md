@@ -4615,3 +4615,15 @@ bruker samme kjede og slås derfor på først når skraplageret har betalt ut in
   et eldre på et annet ble regnet som sett uten varsel. Ny test i `net/tests.ts`.
 - Konto: ja (samme som skraplageret, regel 3 og 7).
 Endringslogg: nei
+
+## B-254 Rettinger etter imperiebelastningen og markedsmetningen (2026-09-28)
+Status: gjelder (retter B-251, B-252)
+Brukeren: «Fortsett». Gjennomgang av steder som regner inntekt på egen hånd etter B-251 og B-252.
+- **Felles innkjøp og salg** (Konsern → Utvid): gevinsten var 5 % av utbyttet før belastning og konsernkostnader. For et
+  stort konsern ble den vist mange ganger for høy. Nå er den forskjellen i netto etter imperiebelastningen.
+- **Mesterskapet «Konsernledelse»:** verdien av neste nivå var regnet av driftsresultatet i verkene (før utbytte og
+  belastning). Nå er den forskjellen i netto etter imperiebelastningen. Prisen i fagpoeng er uendret – den er fast.
+- **Hasteordre, stor ordre fra utlandet og landemerkene** satte pris uten markedsmetningen. Nå er «vanlig pris» det
+  markedet gir (B-252); påslaget (35 %, 15 %, 25 %) kommer på toppen.
+- Ny test: verdien av «Konsernledelse» med 12 komplekser er under 5 % av nettoen. Testspilleren er uendret og grønn.
+- Konto: nei.

@@ -553,10 +553,14 @@ export function konsernOptions(g: GameState): KonsernOption[] {
       hours: BUILD_HOURS.kompleks,
       run: (gg) => buySister(gg, "kompleks"),
     });
-  // Felles funksjoner: 5 % mer i alle datterverkene, og litt hjemme
+  // Felles funksjoner: 5 % mer i alle datterverkene, og litt hjemme. Netto etter imperiebelastningen (B-251)
   const sisters = dividends(g, k.plants).reduce((a, b) => a + b, 0);
   const sharedNow = 1 + (hasShared(g, "innkjop") ? 0.05 : 0) + (hasShared(g, "salg") ? 0.05 : 0);
-  const sisterGain = (sisters / sharedNow) * 0.05;
+  const leadCosts = konsernCosts(k.plants);
+  const sisterGain = Math.max(
+    0,
+    afterEmpireLoad((sisters * (sharedNow + 0.05)) / sharedNow - leadCosts) - afterEmpireLoad(sisters - leadCosts),
+  );
   const scrapPerDay = recentPerDay(g, (d) => d.costs.skrap ?? 0);
   const salesPerDay = recentPerDay(g, (d) => (d.income.kontrakt ?? 0) + (d.income.spot ?? 0));
   for (const id of Object.keys(KONSERN_SHARED) as SharedId[]) {

@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 254,
+    date: "2026-09-28",
+    title: "Riktigere tall for store konsern",
+    items: [
+      "Felles innkjøp og salg og mesterskapet «Konsernledelse» viser nå det du faktisk får, etter at et stort konsern er tungt å styre.",
+      "Hasteordrer, store utlandsordrer og landemerker betaler over den prisen markedet gir nå, også når markedet er mettet.",
+    ],
+  },
+  {
     b: 252,
     date: "2026-09-28",
     title: "Markedet tar ikke unna alt",

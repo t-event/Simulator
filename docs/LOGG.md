@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 191 – 2026-09-28: Rettinger etter bremsene på toppen
+
+**Brukeren ba om:** «Fortsett».
+
+**Gjort:** B-254. Felles innkjøp/salg og mesterskapet «Konsernledelse» regner gevinsten etter imperiebelastningen;
+hasteordre, utlandsordre og landemerker får markedsmetningen i prisen.
+
+**Testet:** tsc, lint, `npm test` (ny test), `balance.ts` (exit 0).
+
+**Gjenstår:** slå på slagghåndteringen når skraplageret har betalt ut inntekt noen dager (B-253); mekanisk verksted;
+eventuelt grense per ekte dag på topplista (FORSLAG).
+
+---
+
 ## Økt 190 – 2026-09-28: Slagghåndteringen, bygget skjult
 
 **Brukeren ba om:** «Fortsett» (fase 2). Valgte å bygge slagghåndteringen skjult, siden skraplageret ennå ikke har fått

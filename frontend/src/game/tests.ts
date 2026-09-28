@@ -2130,6 +2130,19 @@ test("Mesterskap (B-237): prisen følger hvor mye prosjektet er verdt, og verdie
   assert(Math.abs(v("strom") - 10e6 * 0.015) < 1, `feil verdi for strøm: ${v("strom")}`);
   assert(v("datterverk") === 0, "datterverk uten verk skulle gi 0");
   for (const id of MASTERY_IDS) assert(Number.isFinite(v(id)) && v(id) >= 0, `ugyldig verdi: ${id}`);
+  // Med et stort konsern (B-251): verdien følger nettoen etter imperiebelastningen, ikke driftsresultatet i verkene
+  g.stage = 4;
+  g.konsern.unlocked = true;
+  g.konsern.plants = Array.from({ length: 12 }, (_, i) => ({
+    id: i + 1,
+    type: "kompleks" as const,
+    name: `V${i}`,
+    level: 5,
+    boughtDay: 0,
+    downUntilDay: 0,
+  }));
+  const net = konsernNetFor(g, g.konsern.plants);
+  assert(v("datterverk") > 0 && v("datterverk") < net * 0.05, `datterverk ${v("datterverk")} mot netto ${net}`);
 });
 
 test("Sene leveranser (B-240): en ny kontrakt med kort frist som skyver en annen for sent, er ikke trygg", () => {
