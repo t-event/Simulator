@@ -274,6 +274,8 @@ export function migrate(g: GameState): GameState {
   if (loose.snowUntilMin === undefined) loose.snowUntilMin = 0;
   // Forespørsler som passet, men gikk ut uten svar (B-292)
   if (loose.missedOffers === undefined) loose.missedOffers = [];
+  // Merker fra serveren (B-296)
+  if (loose.serverBadges === undefined) loose.serverBadges = [];
   if (loose.seasonLoginPromptSeen === undefined) loose.seasonLoginPromptSeen = null;
   if (loose.world === undefined) loose.world = { events: [], seenEventIds: [] };
   for (const c of g.contracts) {

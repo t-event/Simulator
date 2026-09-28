@@ -38,6 +38,8 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Automatisk oppdatering av appen | Nei | Gjelder alle | B-148 |
 | Lagring på nett, flere enheter | Ja | Regel 2 | B-125, B-140 |
 | Stå på topplista, kallenavn | Ja | Regel 3 | B-127 |
+| Toppliste for kontrollrommet (beste charge) | Ja for å stå på den, nei for å se den | Regel 3 | B-295 |
+| Æresmerker fra serveren (Reformveteran) | Ja | Regel 2: serveren vet det | B-296 |
 | Sesonger, sesongresultat, 🎖 ved kallenavnet | Ja | Regel 3 | B-129, B-143 |
 | Daglig belønning (sju dager) | Ja | Regel 4 | B-149 |
 | Dagens oppdrag | Ja | Regel 4 (bonusen én gang per virkelig dag) | B-149 |

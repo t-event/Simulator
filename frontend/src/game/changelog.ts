@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 296,
+    date: "2026-09-28",
+    title: "Toppliste for kontrollrommet",
+    items: [
+      "Ny fane på topplista: Kontrollrom – den beste chargen hver spiller har kjørt.",
+      "Fra resultatet i kontrollrommet kommer du rett til lista med «Se topplista for kontrollrommet».",
+      "De som var med da økonomireformen kom, får æresmerket «Reformveteran».",
+    ],
+  },
+  {
     b: 294,
     date: "2026-09-28",
     title: "Forskningssjef",

@@ -28,12 +28,15 @@ import { ResearchPage } from "./ResearchPage";
 import { CloudDot, CloudFollow, IntroAccount, LoggedOutNotice } from "./Account";
 import { SeasonPrompt, SeasonResultNotice, SeasonSync, SeasonTeaser } from "./Season";
 import { DailySync } from "./Daily";
+import { BadgeSync } from "./BadgeSync";
 import { GoalsPage, GoalsSheet } from "./Goals";
 import { LeaderboardSheet } from "./Leaderboard";
 import { useDailyStatus } from "./useDaily";
 import { missionBonusReady } from "../game/daily";
 import { useSeasonStatus } from "./useSeason";
 import { SettingsSheet } from "./Settings";
+import { cloudConfigured } from "../net/config";
+import type { BoardKind } from "../net/leaderboard";
 import { getSession } from "../net/supabase";
 import { flush, leaving, onLocalSave } from "../net/sync";
 import { newVersionAvailable, shouldReloadFor, UPDATE_CHECK_MS } from "../net/update";
@@ -798,6 +801,8 @@ export function GameApp() {
   const [goalsOpen, setGoalsOpen] = useState(false);
   // Topplista er et eget ark bak pokalen igjen (B-214); Mål er en egen side
   const [boardOpen, setBoardOpen] = useState(false);
+  // Lista topplista åpner på: kontrollrommet når den åpnes fra resultatet der (B-295)
+  const [boardKind, setBoardKind] = useState<BoardKind>("verdi");
   const [bookChapter, setBookChapter] = useState<string | null>(null);
   // Beskjeden om at en sesong er over, vises før spørsmålet om neste sesong (B-143)
   const [resultOpen, setResultOpen] = useState(false);
@@ -1173,9 +1178,13 @@ export function GameApp() {
       )}
       {boardOpen && (
         <LeaderboardSheet
+          initialKind={boardKind}
           api={api}
           g={g}
-          onClose={() => setBoardOpen(false)}
+          onClose={() => {
+            setBoardOpen(false);
+            setBoardKind("verdi");
+          }}
           onOpenSettings={() => setSettingsOpen(true)}
         />
       )}
@@ -1227,11 +1236,21 @@ export function GameApp() {
               // Fra resultatet kan man gå rett til kapitlet som forklarer det som gikk dårlig (B-088)
               if (chapter) openBook(chapter);
             }}
+            onBoard={
+              cloudConfigured()
+                ? (result) => {
+                    act((gg) => completeManual(gg, result));
+                    setBoardKind("kontroll");
+                    setBoardOpen(true);
+                  }
+                : undefined
+            }
           />
         </Suspense>
       )}
 
       <SeasonSync api={api} />
+      <BadgeSync api={api} />
       <AutoUpdate api={api} />
       <CloudFollow api={api} />
       <OtherTab />

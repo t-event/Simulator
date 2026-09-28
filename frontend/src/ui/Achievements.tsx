@@ -5,15 +5,15 @@ import { SheetHead } from "./ds";
 import { useState, useSyncExternalStore } from "react";
 import {
   ACHIEVEMENT_BY_ID,
-  ACHIEVEMENT_FAMILIES,
   ACHIEVEMENT_GROUPS,
-  ACHIEVEMENTS,
   achievementShare,
   achievementsDone,
   familyAchievements,
   fmtGoal,
   hasAchievement,
   nextInFamily,
+  visibleAchievements,
+  visibleFamilies,
   type Achievement,
 } from "../game/achievements";
 import {
@@ -46,7 +46,11 @@ import { getSession, onSessionChange } from "../net/supabase";
 export function AchievementsCard({ g, onOpenPynt }: { g: GameState; onOpenPynt: () => void }) {
   const [picked, setPicked] = useState<string | null>(null);
   const done = achievementsDone(g);
-  const next = ACHIEVEMENT_FAMILIES.map((f) => nextInFamily(g, f.id))
+  // Skjulte merker (B-296) telles og vises bare for dem som har dem
+  const shown = visibleAchievements(g);
+  const families = visibleFamilies(g);
+  const next = families
+    .map((f) => nextInFamily(g, f.id))
     .filter((a): a is Achievement => !!a)
     .sort((a, b) => achievementShare(g, b) - achievementShare(g, a))
     .slice(0, 3);
@@ -60,9 +64,9 @@ export function AchievementsCard({ g, onOpenPynt }: { g: GameState; onOpenPynt: 
       }
     >
       <div className="g-ach-total">
-        <Bar value={done / ACHIEVEMENTS.length} tone="ok" label="Prestasjoner" />
+        <Bar value={done / shown.length} tone="ok" label="Prestasjoner" />
         <span className="g-muted g-small-text">
-          {done} av {ACHIEVEMENTS.length} merker
+          {done} av {shown.length} merker
         </span>
       </div>
       {next.length > 0 && (
@@ -87,7 +91,8 @@ export function AchievementsCard({ g, onOpenPynt }: { g: GameState; onOpenPynt: 
         </>
       )}
       {ACHIEVEMENT_GROUPS.map((group) => {
-        const fams = ACHIEVEMENT_FAMILIES.filter((f) => f.group === group);
+        const fams = families.filter((f) => f.group === group);
+        if (!fams.length) return null;
         const all = fams.flatMap((f) => familyAchievements(f.id));
         const got = all.filter((a) => hasAchievement(g, a.id)).length;
         const open = fams.find((f) => f.id === picked);

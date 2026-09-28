@@ -29,6 +29,8 @@ interface Props {
   best: number;
   /** again: spilleren vil ta neste charge også */
   onDone: (result: ManualResult | null, chapter?: string, again?: boolean) => void;
+  /** Avslutter og åpner topplista for kontrollrommet (B-295). Mangler uten tjeneste på nett */
+  onBoard?: (result: ManualResult) => void;
 }
 
 /** Ikonet for hver runde (B-216: ikoner i stedet for emoji) */
@@ -217,7 +219,7 @@ function Play({ stage, children }: { stage: ReactNode; children: ReactNode }) {
   );
 }
 
-export function ControlRoom({ request, best, onDone }: Props) {
+export function ControlRoom({ request, best, onDone, onBoard }: Props) {
   const [game] = useState(() => new ChargeGame(request));
   const [, setFrame] = useState(0);
   const [confirm, setConfirm] = useState(false);
@@ -557,7 +559,7 @@ export function ControlRoom({ request, best, onDone }: Props) {
       }
     }
   } else if (game.score) {
-    body = <Result score={game.score} best={best} onDone={onDone} />;
+    body = <Result score={game.score} best={best} onDone={onDone} onBoard={onBoard} />;
   }
 
   return (
@@ -616,7 +618,17 @@ export function ControlRoom({ request, best, onDone }: Props) {
   );
 }
 
-function Result({ score, best, onDone }: { score: Score; best: number; onDone: Props["onDone"] }) {
+function Result({
+  score,
+  best,
+  onDone,
+  onBoard,
+}: {
+  score: Score;
+  best: number;
+  onDone: Props["onDone"];
+  onBoard?: Props["onBoard"];
+}) {
   const record = score.points > best;
   const fp = 1 + score.rating + (score.rating >= 5 ? 15 : score.rating >= 4 ? 8 : 0);
   return (
@@ -668,6 +680,12 @@ function Result({ score, best, onDone }: { score: Score; best: number; onDone: P
           Tilbake til verket
         </button>
       </div>
+      {/* Topplista for kontrollrommet (B-295): hvor står rekorden din mot de andre? */}
+      {onBoard && (
+        <button className="cg-link cg-board-link" onClick={() => onBoard(score.result)}>
+          <Icon name="trophy" /> Se topplista for kontrollrommet
+        </button>
+      )}
     </div>
   );
 }

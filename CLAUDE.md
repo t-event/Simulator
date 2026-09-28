@@ -149,7 +149,8 @@ frontend/src/
     balance.ts   Automatisk testspiller
   net/         Konto og lagring på nett (B-125) – Supabase over fetch, uten bibliotek
     config.ts    URL og nøkkel fra miljøet (aldri i repoet)   supabase.ts  Innlogging, økt, spørringer   sync.ts  Lagring på nett
-    leaderboard.ts Toppliste og kallenavn   season.ts  Sesong og hendelser (butikk)
+    leaderboard.ts Toppliste og kallenavn (også kontrollrommet, B-295)   season.ts  Sesong og hendelser (butikk)
+    badges.ts    Merker bare serveren vet om (B-296); hentes av ui/BadgeSync.tsx og gis som skjulte prestasjoner
     daily.ts     Daglig på serveren (status, henting)   features.ts  Hva som krever konto   update.ts  Automatisk oppdatering
     weekly.ts    Ukens utfordring: status, ukelista og ukekista (B-152)
     seasonTrack.ts Sesongstigen: poeng, trinn og henting (B-173)
@@ -355,6 +356,11 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Sesongpynt** (B-287): pynt med `season: N` kan bare skaffes i sesong N. Når en ny sesong startes (`start_season`), må
   pynten for den legges inn i `COSMETICS` (butikk og stigetrinn 10–50) – ellers har sesongen ingen egen pynt.
 - **Knappene ved varsellinja åpner ark** (B-286): hjelp, Mål og topplista. På mobil åpner `go("mal")` arket; på PC er Mål en side.
+- **Kontrollromsrekorden på topplista** (B-295) tas fra `state.controlBest` av triggeren `note_control` på `saves` inn i
+  `records.best_control` – bare for kontoer som alt har en rekordrad, og bare opptil 5 000 poeng. Endres poengene i
+  kontrollrommet mye, må grensen følge med.
+- **Skjulte prestasjoner** (B-296): `hidden` på en serie gjør at den bare vises og telles for dem som har den. Bruk
+  `visibleAchievements`/`visibleFamilies` i grensesnittet, ikke `ACHIEVEMENTS` direkte.
 - **Tilbakespoling** (B-261): et lavere dagtall flytter tidslinja etter dagen til `snapshots_rewound`; den legges tilbake
   når samme spill kommer tilbake. Legg tall tilbake med `set_config('stalverk.restore','on',true)` – da hopper
   `check_snapshot`, `guard_pre_reform` og `meter_snapshot` over dem. Nye triggere på `snapshots` må gjøre det samme.

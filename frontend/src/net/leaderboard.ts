@@ -4,14 +4,16 @@
  */
 import { rest, rpc, userId } from "./supabase";
 
-export type BoardKind = "verdi" | "kasse" | "omdomme" | "storverk" | "ferdig";
+export type BoardKind = "verdi" | "kasse" | "omdomme" | "storverk" | "ferdig" | "kontroll";
 
-export const BOARDS: { id: BoardKind; label: string; unit: "kr" | "rep" | "dager" }[] = [
+export const BOARDS: { id: BoardKind; label: string; unit: "kr" | "rep" | "dager" | "poeng" }[] = [
   { id: "verdi", label: "Konsernverdi", unit: "kr" },
   // Kassa slik den står i tidslinja (B-144)
   { id: "kasse", label: "Mest penger på bok", unit: "kr" },
   { id: "storverk", label: "Raskest til storverk", unit: "dager" },
   { id: "ferdig", label: "Raskest til 10 mrd.", unit: "dager" },
+  // Beste charge i kontrollrommet (B-295): samme liste i sesongen og i Hall of Fame
+  { id: "kontroll", label: "Kontrollrom", unit: "poeng" },
   // «Omdømme» er tatt bort (B-171): nesten alle står på 100, så lista sa ingenting. Serveren kan fortsatt regne den ut
 ];
 
