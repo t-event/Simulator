@@ -132,6 +132,7 @@ frontend/src/
     recipeGuide.ts Reseptguide for nye kvaliteter (vises av ui/RecipeGuide.tsx)
     konsern.ts   Datterverk, byggeprosjekter i ekte tid og flaggskipet (B-209); vises av ui/Konsern.tsx
     world.ts     Felles hendelser i motoren og sesongfordel (B-129)
+    environment.ts Utslipp, renseanlegg i trinn, havari og bøter (B-263); panelet står i ui/Upgrades.tsx (CleanerPanel)
     trends.ts    Trender i markedet: én kvalitet eller vare ettertraktet eller lite etterspurt i noen døgn (B-255); vises av ui/Trend.tsx
     reserve.ts   Midlertidig myk grense for kassa (100 mrd.) og bunden konsernreserve (B-193) – grensen står her
     daily.ts     Daglig belønning, dagens oppdrag og mens du var borte (B-149)
@@ -317,6 +318,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Bunden konsernreserve** (B-193, midlertidig): kassa over `CASH_RESERVE.softCap` flyttes til `g.lockedReserve` i
   hvert tidssteg og etter hver handling. Reserven er med i `konsernEquity`, men ikke i `cash` – så den kan ikke brukes,
   ikke flyttes til konsernkassa og teller ikke som penger på bok. Skal migreres når sluttspillet er rebalansert.
+- **Utslipp** (B-263): røyken regnes i hvert tidssteg (`updateEmissions`) mot renseanlegget; boten kommer i `onDay`.
+  Nye, større ovner må ha et renseanlegg som holder (`CLEANERS` i `environment.ts`), ellers får testspilleren bot.
+  Gamle lagringer får anleggene de trenger i første tidssteg (`env.grant`) – ikke flytt det til `onHour`.
 - **Markedet metter seg** (B-252): prisen på nye kontrakter og avtaler ganges med `marketSaturation(stats.dailyProductT)`
   (full pris til 10 000 t i døgnet, halv pris over). Nye prisveier for kontrakter må ta den med.
 - **Døgnproduksjon og valseverket** (B-217): `stats.dailyProductT` er alt verket lager (emner og armering). Armering er

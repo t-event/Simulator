@@ -303,6 +303,24 @@ export interface DayFinance {
 }
 
 /** Hvorfor omdømmet falt: reklamasjon, sen levering eller havari */
+/** Utslipp fra ovnene (B-263): renseanlegget kan være for lite eller havarere, og da blir det bot */
+export interface EnvState {
+  /** Renseanlegget står etter et havari til dette spillminuttet (0 = i drift) */
+  downUntilMin: number;
+  /** Hva ovnene gjør når renseanlegget havarerer: stoppe eller kjøre videre. null = ikke valgt (kortet spør første gang) */
+  onBreakdown: "stopp" | "kjor" | null;
+  /** Tonn smeltet i dag uten at røyken ble renset */
+  excessT: number;
+  /** Av dem: tonn mens renseanlegget sto (havari) */
+  downT: number;
+  /** Alle bøter for utslipp til nå */
+  finesKr: number;
+  /** Siste bot: døgnet, tonnene og beløpet */
+  lastFine: { day: number; t: number; kr: number } | null;
+  /** Eldre lagringer: får renseanlegg som holder for ovnene de har, én gang (B-263) */
+  grant?: boolean;
+}
+
 export type RepCause = "reklamasjon" | "sen" | "havari";
 
 export type PowerDeal = "spot" | "fast" | "natt";
@@ -563,6 +581,8 @@ export interface GameState {
   tenderSeen: number;
   /** Per selskap (id): den siste UTC-dagen eieren har fått beskjed om inntekten for (B-258) */
   companyIncomeSeen: Record<string, string>;
+  /** Utslipp, renseanlegget og bøter (B-263) */
+  env: EnvState;
   /** Sesongen en spiller uten konto sist fikk beskjed om at man må logge inn for å være med (B-131) */
   seasonLoginPromptSeen: number | null;
   /** Felles hendelser fra serveren som pågår nå, og hvilke spilleren alt har fått beskjed om (B-129) */

@@ -176,6 +176,15 @@ import { answerQuizQuestion, QUIZ, quizAvailable, quizReward } from "./quiz";
 import { GRADES } from "./data";
 import type { Agreement, Analysis, Contract, GameState, ManualRequest, MasteryId, RoleId } from "./types";
 import { masteryGainPerDay } from "./masteryValue";
+import {
+  CLEANERS,
+  DOWN_FINE_FACTOR,
+  envBreakdown,
+  envDay,
+  envStartBlocked,
+  FINE_PER_T,
+  updateEmissions,
+} from "./environment";
 import { autoPlay, ChargeGame } from "../ui/control/chargeGame";
 import { applyCashCap, CASH_RESERVE, reserveDayLog, reserveTotal } from "./reserve";
 
@@ -2345,6 +2354,75 @@ test("Vedlikehold i alt (B-256): bare vedlikehold og havarier telles, og gamle l
   const old = JSON.parse(JSON.stringify(g));
   delete old.totals.maintKr;
   assert(parseSave(JSON.stringify(old))?.totals.maintKr === 0, "gammel lagring");
+});
+
+test("Utslipp (B-263): for lite renseanlegg og havari gir bot; stopp gir ingen bot; to linjer renser halvparten", () => {
+  const g = newGame(263);
+  g.stage = 3;
+  g.reputation = 50;
+  const base = computePlantStats(g);
+  // Én ovn på 90 t og 60 min: 83,7 t i timen mot 1 000 t i døgnet (41,7 t i timen)
+  const stats = { ...base, units: [{ ...base.units[0], sizeT: 90, cycleMin: 60 }], meltTph: 83.7 };
+  const heat = () => (g.furnaces[0].heat = { sizeT: 90 } as unknown as GameState["furnaces"][0]["heat"]);
+  heat();
+  // Uten renseanlegg (små ovner): ingen utslippsregnskap
+  updateEmissions(g, stats, 60);
+  assert(g.env.excessT === 0, "utslipp talt uten renseanlegg");
+  g.owned.push("renseanlegg");
+  updateEmissions(g, stats, 60);
+  const over = 83.7 - 1000 / 24;
+  assert(Math.abs(g.env.excessT - over) < 0.01, `for lite anlegg: ${g.env.excessT}`);
+  const cash = g.cash;
+  g.minute += 1440;
+  envDay(g);
+  const fine = Math.round(over * FINE_PER_T + 25_000);
+  assert(Math.abs(cash - g.cash - fine) <= 1, `bot ${cash - g.cash}, ventet ${fine}`);
+  assert(g.reputation === 49 && g.env.lastFine?.kr === fine && g.env.excessT === 0, "omdømme og siste bot");
+  // Havari første gang: kortet spør, og ovnene stopper mens det står (ingen bot)
+  envBreakdown(g, stats);
+  assert(g.pendingDecision?.id === "rensehavari", "kortet kom ikke");
+  resolveDecision(g, 0);
+  assert(g.env.onBreakdown === "stopp", "valget ble ikke lagret");
+  g.furnaces[0].heat = null;
+  assert(envStartBlocked(g, stats, 0) !== null, "ovnen startet mens renseanlegget sto");
+  heat();
+  updateEmissions(g, stats, 60);
+  assert(g.env.excessT === 0, "bot selv om ovnene stoppet");
+  // Kjør videre: alt går urenset ut, dobbel bot
+  g.env.onBreakdown = "kjor";
+  assert(envStartBlocked(g, stats, 0) === null, "ovnen ble stoppet selv om spilleren valgte å kjøre");
+  updateEmissions(g, stats, 60);
+  assert(Math.abs(g.env.downT - 83.7) < 0.01, `utslipp under havari ${g.env.downT}`);
+  const cash2 = g.cash;
+  g.minute += 1440;
+  envDay(g);
+  assert(Math.abs(cash2 - g.cash - (83.7 * FINE_PER_T * DOWN_FINE_FACTOR + 25_000)) <= 1, "dobbel bot");
+  // Neste havari: ikke noe kort, valget gjelder
+  g.env.downUntilMin = 0;
+  envBreakdown(g, stats);
+  assert(!g.pendingDecision && g.env.downUntilMin > g.minute, "kortet kom igjen");
+  // To linjer: halvparten renses mens den ene står
+  g.owned.push("rense2", "rense3");
+  g.env.onBreakdown = "stopp";
+  const big = { ...stats, meltTph: 83.7 };
+  g.furnaces[0].heat = null;
+  const half = CLEANERS.find((c) => c.id === "rense3")!.tpd / 48;
+  assert(half > 83.7 && envStartBlocked(g, big, 0) === null, "ovnen fikk ikke gå på den andre linjen");
+});
+
+test("Utslipp (B-263): gamle lagringer får renseanlegg som holder for ovnene de har", () => {
+  const g = newGame(2631);
+  g.stage = 4;
+  g.owned.push("renseanlegg");
+  const old = JSON.parse(JSON.stringify(g));
+  delete old.env;
+  const m = parseSave(JSON.stringify(old))!;
+  assert(m.env.grant === true && m.env.onBreakdown === null, "standardverdi");
+  const base = computePlantStats(m);
+  const stats = { ...base, units: [{ ...base.units[0], sizeT: 90, cycleMin: 60 }], meltTph: 250 };
+  updateEmissions(m, stats, 1);
+  assert(["rense2", "rense3"].every((id) => m.owned.includes(id)) && !m.owned.includes("rense4"), `fikk ${m.owned}`);
+  assert(!m.env.grant && m.env.excessT === 0, "overgangen ga bot");
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

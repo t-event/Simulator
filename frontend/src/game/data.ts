@@ -773,7 +773,44 @@ export const ADDONS: Addon[] = [
     name: "Røykgassrensing",
     stage: 3,
     price: 1_500_000,
-    description: "Filteranlegg for avgass og støv. Påbudt for lysbueovn.",
+    description:
+      "Filteranlegg for røyk og støv fra ovnene. Renser 1 000 t smeltet stål i døgnet. Påbudt for lysbueovn – smelter ovnene mer, blir det bot.",
+  },
+  // Større renseanlegg (B-263): rensingen må følge ovnene, ellers blir det bot for utslipp
+  {
+    id: "rense2",
+    name: "Større filteranlegg",
+    stage: 3,
+    price: 5_000_000,
+    requires: ["renseanlegg"],
+    description: "Flere filterposer og en sterkere vifte. Renser 3 000 t smeltet stål i døgnet.",
+  },
+  {
+    id: "rense3",
+    name: "Filteranlegg med to linjer",
+    stage: 4,
+    price: 25_000_000,
+    requires: ["rense2"],
+    description:
+      "Renser 10 000 t i døgnet. To linjer: havarerer den ene, renser den andre halvparten, så ikke alle ovnene må stoppe.",
+  },
+  {
+    id: "rense4",
+    name: "Stort renseanlegg",
+    stage: 4,
+    price: 120_000_000,
+    requires: ["rense3"],
+    gate: "konsern",
+    description: "Renser 25 000 t i døgnet, med to linjer. For de store lysbueovnene.",
+  },
+  {
+    id: "rense5",
+    name: "Renseanlegg for storverk",
+    stage: 4,
+    price: 400_000_000,
+    requires: ["rense4"],
+    gate: "magnat",
+    description: "Renser 45 000 t i døgnet, med to linjer. Holder for tre av de største ovnene.",
   },
   {
     id: "oseovn",

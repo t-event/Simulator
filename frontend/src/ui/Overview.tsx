@@ -375,6 +375,12 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
     if (scrollTo) document.getElementById(scrollTo.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [scrollTo]);
   const openAnchor = (id: Anchor) => {
+    // Renseanlegget (B-263): åpner arket for ovnene på Anlegg, der rensingen står øverst
+    if (id === "rensing") {
+      setTab("anlegg");
+      setSheet("ovn");
+      return;
+    }
     setTab(id === "vedlikehold" ? "anlegg" : "oversikt");
     setScrollTo((prev) => ({ id, n: (prev?.n ?? 0) + 1 }));
   };

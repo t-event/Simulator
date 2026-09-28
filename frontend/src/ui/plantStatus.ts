@@ -20,7 +20,7 @@ export function furnaceState(g: GameState, index: number): { text: string; progr
 
 /** Statusspråket (UI.md 6.2, B-195): hva teksten fra motoren betyr, så ruta får riktig ikon og farge */
 export function statusOf(text: string): Status {
-  if (/^Havari/.test(text)) return "feil";
+  if (/^Havari|renseanlegget/.test(text)) return "feil";
   if (/^Planlagt stans|[Ff]oringen skal byttes/.test(text)) return "vedlikehold";
   if (/Mangler skrap/.test(text)) return "tomt";
   if (/fullt/.test(text)) return "fullt";

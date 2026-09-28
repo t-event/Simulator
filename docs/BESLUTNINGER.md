@@ -4812,3 +4812,33 @@ Brukeren: «En som spiller på iPhone 16 pro har problemer med at han må klikke
 - Testet i Playwright på 402×874 (iPhone 16 Pro), 390, 320 og 1366: vinduet blir stående på 0, innholdet scroller i
   `.g-main` og på startskjermen, knappene treffes der de er tegnet, og siden går tilbake til toppen når et felt slippes.
   Selve feilen kan ikke gjenskapes i Chromium; spilleren må bekrefte på telefonen.
+
+## B-263 Utslipp, renseanlegg og bøter (2026-09-28)
+Status: gjelder
+Brukeren: «Man bør få kunne få bøter om man har miljøutslipp. Da må man kunne kjøpe renseanlegg og lignende. Det bør
+være mulig å få havari på renseanlegg. Om renseanlegget står eller ikke er tilstrekkelig bør man få bot.»
+- **Når det gjelder:** fra verket har renseanlegg (røykgassrensingen, påbudt for lysbueovnen på stålverket). Før det er
+  ovnene små, og systemet vises ikke (gradvis synlighet, B-180).
+- **Kapasitet:** renseanleggene kjøpes i trinn under Anlegg → Ovn (`game/environment.ts`, `CLEANERS`):
+  røykgassrensing 1 000 t smeltet stål i døgnet (1,5 mill.), større filteranlegg 3 000 t (5 mill., stålverk),
+  filteranlegg med to linjer 10 000 t (25 mill., storverk), stort renseanlegg 25 000 t (120 mill., konsern) og
+  renseanlegg for storverk 45 000 t (400 mill., magnat). Hvert trinn krever det forrige.
+- **Utslipp:** i hvert tidssteg regnes hvor mye ovnene som går, smelter i timen, mot det anlegget renser. Det som går
+  over, telles som tonn urenset (`g.env.excessT`).
+- **Bot:** neste morgen: 1 000 kr per tonn urenset (dobbelt mens anlegget sto og ovnene gikk videre), pluss en fast del
+  (10 000 kr på støperiet, 25 000 kr på stålverket og 50 000 kr på storverket), og −1 i omdømme (−2 ved mye eller ved
+  havari). Boten føres under «Bøter».
+- **Havari:** i snitt én gang per 30 døgn med ovnene i gang, ganget med vedlikeholdsfaktoren. Reparasjonen tar ca. 10
+  timer (ganget med reparasjonsfaktoren) og koster 2 % av prisen på anlegget. Med to linjer renser den andre halvparten.
+- **Valget ved havari:** første gang kommer et kort: stopp ovnene (ingen bot; chargene som er i gang, kjøres ferdig)
+  eller kjør videre (dobbel bot). Valget gjelder senere havarier og kan endres under Anlegg → Ovn. Med «stopp» starter
+  en ovn bare hvis det som er igjen av rensingen, holder.
+- **Råd:** Verket sier fra når anlegget står, og når det er for lite, med neste anlegg å kjøpe. Rådet åpner arket for
+  ovnene. Testspilleren (flink og nybegynner) følger rådet og velger «stopp» på kortet.
+- **Eldre lagringer** (`env.grant`): et verk som alt har ovner større enn anlegget, får anleggene som trengs, gratis, i
+  første tidssteg, så ingen får bot for noe de ikke kunne vite om.
+- **Fagboka:** nytt kapittel «Røyk, støv og renseanlegget» (`miljo`) med quiz, låses opp ved første havari eller bot.
+- **Konto (KONTO.md):** nei – det er en del av selve spillet og lagres lokalt.
+- **Balanse:** alle mål OK. Bøtene til testspilleren er små når den følger rådene (80–240 000 kr per kjøring for den
+  flinke, ca. 1 mill. for nybegynneren). Nybegynneren når storverket senere (median dag 172,5 mot 143), fordi den kjøper
+  større renseanlegg og stopper ved havari. Det er innenfor målet (240).

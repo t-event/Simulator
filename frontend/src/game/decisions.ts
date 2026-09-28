@@ -30,6 +30,7 @@ import { computePlantStats, day, isAbsent, marketSaturation, productPrice, satis
 import { chance, pick, rand, uniform } from "./random";
 import { knowledgeCard } from "./knowledge";
 import { realNow } from "./clock";
+import { chooseBreakdownPolicy } from "./environment";
 import type { Contract, Decision, GameState, RepCause, Worker } from "./types";
 
 const DAILY_CHANCE = 0.25;
@@ -526,6 +527,9 @@ export function resolveDecision(g: GameState, option: number): void {
   const yes = option === 0;
   const n = (k: string) => Number(d.data[k] ?? 0);
   switch (d.id) {
+    case "rensehavari":
+      chooseBreakdownPolicy(g, option);
+      return;
     case "billigparti":
       if (!yes) return;
       addCost(g, "skrap", n("price"));
