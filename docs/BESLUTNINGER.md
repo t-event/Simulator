@@ -5135,3 +5135,15 @@ Brukeren valgte en hjelpeknapp etter spørsmålene om fagpoeng og havari (B-281,
   - «Ord i spillet» (kan trykkes opp): fagpoeng, charge, foring, omdømme, ordrekø, C/P/Spor.
 - Arket er et vanlig ark på øverste nivå (som varsellista), så det teller med i `modalOpen`.
 - Konto: nei (regel 1, ditt eget spill).
+
+## B-284 Minst tre minutter ekte tid mellom to hendelseskort (2026-09-28)
+Status: gjelder
+Brukeren sa «Fortsett»; neste punkt på lista var færre popups på høy fart. Målingen i B-277 viste ca. 9 hendelseskort per
+30 spilldøgn om vinteren på storverket. På 10× er 30 spilldøgn ca. 6 minutter, så et kort kunne komme omtrent hvert
+40. sekund og stoppe spillet hver gang. Samme kort hadde alt en pause i ekte tid (20 min, B-210), men ikke kort i det hele
+tatt.
+- Nytt: `ANY_CARD_REAL_MS` = 3 minutter ekte tid mellom to kort, uansett hvilke (`maybeCreateDecision`). På 1× er
+  minstepausen på to spilldøgn fire minutter, så der endrer det ingenting; på 3× og 10× blir det roligere.
+- Tips (engangskort) og havarikortet for renseanlegget (B-263) går ikke gjennom denne regelen – de kommer når noe skjer.
+- Testspilleren: alle nivådager innenfor målene, 0 konkurs (exit 0). Ny test i `tests.ts`.
+- Konto: nei (regel 1, ditt eget spill).
