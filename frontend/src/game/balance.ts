@@ -284,6 +284,8 @@ function botHour(g: GameState): void {
       utlandsordre: 1,
       // Havari på renseanlegget (B-263): stopp ovnene, som rådet sier
       rensehavari: 0,
+      // Dødsulykke (B-265): bare ett valg
+      dodsulykke: 0,
     };
     // Messa bare når det er god råd
     const affordable = g.cash > Number(d.data.cost ?? 0) * 4;
@@ -1206,6 +1208,8 @@ for (const seed of seeds) {
       `charger ${t.heats}  produsert ${Math.round(t.producedT)} t  kontrakter ${t.contractsDone}  reklamasjoner ${t.complaints}` +
       // Bøter for utslipp (B-263)
       `  miljøbøter ${Math.round(r.final.env.finesKr).toLocaleString("nb-NO")}` +
+      // Eksplosjoner og dødsulykker (B-265)
+      `  eksplosjoner ${r.final.counters?.eksplosjon ?? 0}  dødsulykker ${r.final.counters?.dodsulykke ?? 0}` +
       (r.bankrupt ? "  KONKURS" : ""),
   );
 }

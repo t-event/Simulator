@@ -31,6 +31,7 @@ import { chance, pick, rand, uniform } from "./random";
 import { knowledgeCard } from "./knowledge";
 import { realNow } from "./clock";
 import { chooseBreakdownPolicy } from "./environment";
+import { riskFactor } from "./calendar";
 import type { Contract, Decision, GameState, RepCause, Worker } from "./types";
 
 const DAILY_CHANCE = 0.25;
@@ -416,7 +417,8 @@ export function maybeCreateDecision(g: GameState): void {
   const today = day(g);
   const lastAny = Math.max(0, ...Object.values(g.decisionSeen));
   if (today - lastAny < MIN_GAP_DAYS) return;
-  if (!chance(g, DAILY_CHANCE)) return;
+  // Om vinteren skjer det mer uforutsett (B-265)
+  if (!chance(g, DAILY_CHANCE * riskFactor(g))) return;
   const all = { ...MAKERS, ...MORE_MAKERS };
   // Kort som ikke har vært vist på lenge, først de som aldri er vist
   const now = realNow();

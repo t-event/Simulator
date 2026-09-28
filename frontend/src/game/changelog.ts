@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 265,
+    date: "2026-09-28",
+    title: "Vinter og eksplosjoner",
+    items: [
+      "Spillet har årstider. Om vinteren (snøfnugg øverst) gir is og snø i skrapet flere eksplosjoner i ovnen, og havarier og uforutsette hendelser skjer oftere.",
+      "Skrap under tak (skrapterminal), sortering og sikkerhetskultur gir færre eksplosjoner.",
+      "Svært sjelden kan en ansatt omkomme. Da stenges verket i tre døgn, og det blir stor bot og store tap av omdømme og trivsel.",
+      "Nytt kapittel i fagboka om vann i skrapet og sikkerhet. Quizspørsmålet om karbon er skrevet tydeligere.",
+    ],
+  },
+  {
     b: 264,
     date: "2026-09-28",
     title: "Menyen nederst på plass igjen",

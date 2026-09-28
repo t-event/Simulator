@@ -4854,3 +4854,29 @@ Brukeren (med skjermbilde): «Menyen nederst har kommet lengre opp enn tidligere
   vindu som likevel flyttes, settes fortsatt tilbake av `main.tsx`.
 - Testet i Playwright på 320, 390, 402 og 1366: laget går fra 0 til bunnen av skjermen, menyen står nederst, siden er
   ikke høyere enn vinduet, og vinduet står på 0. Chromium viser ikke iPhone-feilen, så brukeren må bekrefte på telefonen.
+
+## B-265 Vinter, eksplosjoner og svært sjeldne dødsulykker; quizspørsmålet om karbon (2026-09-28)
+Status: gjelder
+Brukeren: «Vi bør legge inn dødsfall en ekstremt sjelden gang. Dette skal ha store konsekvenser», «Hva gir mer karbon i
+stålet. Spørsmålet gir ikke mening. Fiks det» og «Om vinteren må det være større sjans for at det skjer eksplosjoner og
+uforutsette ting».
+- **Quiz:** «Hva gir mer karbon i stålet?» (leses som «hva tilsetter karbon») er nå «Hva skjer med stålet når det får
+  mer karbon?». Svarene er de samme.
+- **Kalender** (`game/calendar.ts`): tolv måneder à 30 døgn, dag 1 = 1. april, så den første vinteren (desember–februar,
+  dag 241–330) kommer når verket er etablert. Et snøfnugg ved nivånavnet i toppfeltet viser vinteren, og varsellista
+  sier fra når den kommer og går.
+- **Om vinteren** (`WINTER_RISK` = 1,5): havarier i ovnene (overslag, elektrodebrudd, lekkasjer), havari på
+  renseanlegget og hendelseskort skjer halvannen gang så ofte. Frost kan fryse kjølevannet til støpemaskinen (støpingen
+  står 3–6 timer), fra støperiet.
+- **Eksplosjoner** (`game/accidents.ts`): vann, is og snø i skrapet blir til damp i det flytende stålet. I snitt én per
+  90 døgn per ovn i drift om sommeren, tre ganger så ofte om vinteren. Skrapterminal (tak over skrapet) halverer, sortering
+  (×0,7) og forskningen Sikkerhetskultur (×0,7) gir færre. Ingen i garasjen. Følger: ovnen står 4–10 timer, reparasjon,
+  omdømme −2, trivsel −3, og 25 % sjanse for at en ansatt blir skadet (sykmeldt 7–21 døgn).
+- **Dødsulykke:** 2 % av eksplosjonene (1 % med Sikkerhetskultur), bare når noen er på jobb. Med alle tiltak blir det
+  omtrent én per 8 000 døgn på et storverk, uten tiltak omtrent én per 1 000 døgn. Følger: den ansatte omkommer
+  (fjernes), hele verket og støpingen stenges i tre døgn mens politiet og Arbeidstilsynet gransker, bot (0,5 / 3 / 20 /
+  100 mill. kr fra verksted til storverk), omdømme −25 og trivsel −35. Et kort pauser spillet og forklarer.
+- **Fagboka:** nytt kapittel «Vann i skrapet og sikkerhet» med quiz, låses opp ved første eksplosjon.
+- **Konto:** nei – en del av selve spillet.
+- **Balanse:** alle mål OK. Testspilleren fikk 0–3 eksplosjoner og ingen dødsulykker på 240 døgn; nybegynneren når
+  storverket på median dag 147.

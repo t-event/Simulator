@@ -111,4 +111,5 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Æraer og Hall of Fame | Ja | Regel 3 | Grunnleggeræraen og navnet «Hall of Fame»: B-182. Neste æra: ikke bestemt |
 | Pause på Salg (innstilling) | Nei | Regel 1: ditt eget spill | B-222 |
 | Utslipp, renseanlegg og bøter | Nei | Regel 1: ditt eget spill | B-263 |
+| Vinter, eksplosjoner og dødsulykker | Nei | Regel 1: ditt eget spill | B-265 |
 

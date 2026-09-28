@@ -1,4 +1,5 @@
 import { RecipeGuideCoach } from "./RecipeGuide";
+import { isWinter } from "../game/calendar";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import "./game.css";
 import { isElsewhere, onTabChange, playHere } from "../game/tabLock";
@@ -457,6 +458,12 @@ function TopBar({
             {g.speed > 0 && idleOutsideHours(g, stats) && (
               <em className="g-ff" title="Verket står om natta – tida går fortere til arbeidsdagen starter">
                 <Icon name="fast-forward" /> natt
+              </em>
+            )}
+            {/* Vinter (B-265): flere uhell og eksplosjoner */}
+            {isWinter(g) && (
+              <em className="g-ff g-winter" title="Vinter: is og kulde gir flere uhell og eksplosjoner">
+                <Icon name="snowflake" label="Vinter" />
               </em>
             )}
           </div>

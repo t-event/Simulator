@@ -57,7 +57,7 @@ export const QUIZ: Record<string, QuizQuestion[]> = {
       why: "Induksjonsovnen har verken oksygen eller slagg som kan brenne av karbon.",
     },
     {
-      q: "Hva gir mer karbon i stålet?",
+      q: "Hva skjer med stålet når det får mer karbon?",
       options: ["Hardere og sterkere stål", "Mykere stål", "Stål som ruster mindre"],
       correct: 0,
       why: "Karbon gjør stålet hardere og sterkere, men vanskeligere å sveise og forme.",
@@ -163,6 +163,24 @@ export const QUIZ: Record<string, QuizQuestion[]> = {
       options: ["At renseanlegget rekker like mye som ovnene smelter", "Ingenting", "At strømmen er billig om natta"],
       correct: 0,
       why: "Smelter ovnene mer enn anlegget renser, går resten urenset ut, og det blir bot.",
+    },
+  ],
+  vannskrap: [
+    {
+      q: "Hvorfor er vann i skrapet farlig?",
+      options: [
+        "Det gir rust i stålet",
+        "Det blir til damp i det flytende stålet og kan eksplodere",
+        "Det kjøler ovnen for mye",
+      ],
+      correct: 1,
+      why: "Vann blir til damp på et øyeblikk og tar mye større plass – det kan kaste flytende stål ut av ovnen.",
+    },
+    {
+      q: "Hva gir færre eksplosjoner om vinteren?",
+      options: ["Å smelte fortere", "Skrap under tak og sortering av lukkede beholdere", "Mer strøm i ovnen"],
+      correct: 1,
+      why: "Tørt skrap uten is og lukkede beholdere er det viktigste vernet.",
     },
   ],
   strom: [

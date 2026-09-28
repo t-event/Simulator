@@ -185,6 +185,8 @@ import {
   FINE_PER_T,
   updateEmissions,
 } from "./environment";
+import { isWinter, monthOf, riskFactor, WINTER_RISK } from "./calendar";
+import { explosionChance, FATAL_DOWN_DAYS, fatalAccident, WINTER_EXPLOSION } from "./accidents";
 import { autoPlay, ChargeGame } from "../ui/control/chargeGame";
 import { applyCashCap, CASH_RESERVE, reserveDayLog, reserveTotal } from "./reserve";
 
@@ -2423,6 +2425,49 @@ test("Utslipp (B-263): gamle lagringer får renseanlegg som holder for ovnene de
   updateEmissions(m, stats, 1);
   assert(["rense2", "rense3"].every((id) => m.owned.includes(id)) && !m.owned.includes("rense4"), `fikk ${m.owned}`);
   assert(!m.env.grant && m.env.excessT === 0, "overgangen ga bot");
+});
+
+test("Vinter (B-265): dag 1 er april, desember–februar er vinter, og da skjer uhell oftere", () => {
+  const g = newGame(265);
+  assert(monthOf(1) === 3 && monthOf(240) === 10 && monthOf(241) === 11, "månedene");
+  assert(!isWinter(g, 240) && isWinter(g, 241) && isWinter(g, 330) && !isWinter(g, 331), "vinteren");
+  assert(isWinter(g, 241 + 360), "neste vinter");
+  g.stage = 3;
+  g.minute = 100 * 1440;
+  const summer = explosionChance(g, 60);
+  assert(riskFactor(g) === 1 && summer > 0, "sommer");
+  g.minute = 250 * 1440;
+  assert(riskFactor(g) === WINTER_RISK, "risikoen om vinteren");
+  assert(Math.abs(explosionChance(g, 60) - summer * WINTER_EXPLOSION) < 1e-12, "eksplosjoner om vinteren");
+  g.owned.push("skrapterminal");
+  assert(explosionChance(g, 60) < summer * WINTER_EXPLOSION, "skrap under tak hjelper ikke");
+  g.stage = 0;
+  assert(explosionChance(g, 60) === 0, "eksplosjon i garasjen");
+});
+
+test("Dødsulykke (B-265): en ansatt omkommer, verket stenges i tre døgn, stor bot og tap", () => {
+  const g = newGame(2651);
+  g.stage = 3;
+  g.reputation = 60;
+  g.morale = 80;
+  for (let i = 0; i < 4; i++) g.workers.push(makeCandidate(g, "ovn"));
+  const before = g.workers.length;
+  const cash = g.cash;
+  fatalAccident(g, "en eksplosjon i ovn 1");
+  assert(g.workers.length === before - 1, "ingen omkom");
+  assert(
+    g.furnaces.every((f) => f.downUntilMin >= g.minute + FATAL_DOWN_DAYS * 1440),
+    "verket ble ikke stengt",
+  );
+  assert(g.castDownUntilMin >= g.minute + FATAL_DOWN_DAYS * 1440, "støpingen ble ikke stengt");
+  assert(g.cash <= cash - 20_000_000 && g.reputation === 35 && g.morale === 45, "følgene");
+  assert(g.pendingDecision?.id === "dodsulykke", "kortet kom ikke");
+  resolveDecision(g, 0);
+  // Uten ansatte skjer ingenting (eieren alene i garasjen)
+  const alone = newGame(2652);
+  alone.workers = [];
+  fatalAccident(alone, "test");
+  assert(!alone.pendingDecision && alone.furnaces[0].downUntilMin === 0, "ulykke uten ansatte");
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden
