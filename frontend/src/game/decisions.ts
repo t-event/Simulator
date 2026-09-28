@@ -26,7 +26,7 @@ import {
   unlock,
   workerLabel,
 } from "./engine";
-import { computePlantStats, day, isAbsent, productPrice, satisfiedGrades } from "./plant";
+import { computePlantStats, day, isAbsent, marketSaturation, productPrice, satisfiedGrades } from "./plant";
 import { chance, pick, rand, uniform } from "./random";
 import { knowledgeCard } from "./knowledge";
 import { realNow } from "./clock";
@@ -61,7 +61,8 @@ const MAKERS: Record<string, Maker> = {
     const product = stats.mainProduct;
     const t = Math.max(0.1, Math.round(stats.dailyProductT * uniform(g, 0.6, 1) * 10) / 10);
     if (stats.dailyProductT <= 0) return null;
-    const pricePerT = Math.round(productPrice(g, product, "standard") * 1.35);
+    // «Vanlig pris» er det markedet gir nå, også når det er mettet (B-252)
+    const pricePerT = Math.round(productPrice(g, product, "standard") * marketSaturation(stats.dailyProductT) * 1.35);
     return {
       id: "hasteordre",
       title: "Hasteordre",
@@ -345,7 +346,7 @@ const MORE_MAKERS: Record<string, Maker> = {
     if (g.stage < 3 || stats.dailyProductT <= 0) return null;
     const product = stats.mainProduct;
     const t = Math.max(1, Math.round(stats.dailyProductT * uniform(g, 2.5, 4)));
-    const pricePerT = Math.round(productPrice(g, product, "standard") * 1.15);
+    const pricePerT = Math.round(productPrice(g, product, "standard") * marketSaturation(stats.dailyProductT) * 1.15);
     return {
       id: "utlandsordre",
       title: "Stor ordre fra utlandet",

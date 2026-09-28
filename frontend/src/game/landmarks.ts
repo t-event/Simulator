@@ -5,7 +5,7 @@
  * Ingen fordel mot andre spillere utover vanlig kontraktspris, så ingen konto trengs (KONTO.md, regel 1).
  */
 import { adjustReputation, awardPoints, fmtT, log, realisticDailyT } from "./engine";
-import { computePlantStats, day, productCapT, productPrice } from "./plant";
+import { computePlantStats, day, marketSaturation, productCapT, productPrice } from "./plant";
 import type { Contract, GameState } from "./types";
 import type { IconName } from "../ui/icons";
 
@@ -327,7 +327,8 @@ export function landmarkHour(g: GameState, today = todayKey()): void {
     grade: "standard",
     tonnes,
     delivered: 0,
-    pricePerT: Math.round(productPrice(g, product, "standard") * 1.25),
+    // Også landemerkene får lavere pris når markedet er mettet (B-252)
+    pricePerT: Math.round(productPrice(g, product, "standard") * marketSaturation(stats.dailyProductT) * 1.25),
     deadlineDay: day(g) + Math.ceil(next.days * 1.8) + 3,
     // Står til du svarer, og har ingen frist når det er signert (B-218). deadlineDay brukes bare som anslag
     offerExpiresMin: g.minute + 1440 * 365,
