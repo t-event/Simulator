@@ -71,6 +71,7 @@ import {
   potSwapHours,
   POWER_BINDING_DAYS,
   productPrice,
+  marketSaturation,
   rollingActive,
   productCapT,
   rollingTph,
@@ -2194,7 +2195,13 @@ function makeOffer(g: GameState, stats: PlantStats): Contract | null {
     g.stage === 0 && g.totals.contractsDone + g.contracts.filter((c) => c.status === "aktiv").length < 2;
   const workDays = firstOrders ? uniform(g, 0.4, 0.8) : uniform(g, CONTRACT_DAYS[0], CONTRACT_DAYS[1]);
   const tonnes = roundTonnes(Math.max(customer.minT, Math.min(customer.maxT, capacity * workDays)));
-  const pricePerT = Math.round(productPrice(g, product, grade) * (1 + stats.priceBonus) * uniform(g, 0.95, 1.1));
+  // Lager verket mer enn markedet tar unna, blir prisen lavere (B-252)
+  const pricePerT = Math.round(
+    productPrice(g, product, grade) *
+      (1 + stats.priceBonus) *
+      marketSaturation(stats.dailyProductT) *
+      uniform(g, 0.95, 1.1),
+  );
   const days = Math.min(
     30,
     Math.ceil(tonnes / (Math.min(capacity, realisticDailyT(g, stats)) * 0.6)) + randInt(g, 2, 4),
@@ -2300,7 +2307,12 @@ function makeAgreement(g: GameState, stats: PlantStats): Agreement | null {
   const weekly = Math.min(productCapT(stats, product), realisticDailyT(g, stats)) * 7;
   const weeklyT = roundTonnes(weekly * uniform(g, 0.2, 0.4));
   const weeks = randInt(g, 4, 10);
-  const pricePerT = Math.round(productPrice(g, product, grade) * (1 + stats.priceBonus) * uniform(g, 0.97, 1.04));
+  const pricePerT = Math.round(
+    productPrice(g, product, grade) *
+      (1 + stats.priceBonus) *
+      marketSaturation(stats.dailyProductT) *
+      uniform(g, 0.97, 1.04),
+  );
   return {
     id: g.nextAgreementId++,
     customer: customer.name,

@@ -21,7 +21,15 @@ import {
 } from "../game/engine";
 import { moveInQueue, toggleOfferGrade } from "../game/actions";
 import { scrapResearchHint } from "../game/recipe";
-import { day, gradeRecipe, nearLimit, satisfiedGrades, type PlantStats } from "../game/plant";
+import {
+  day,
+  gradeRecipe,
+  MARKET_SATURATION,
+  marketSaturation,
+  nearLimit,
+  satisfiedGrades,
+  type PlantStats,
+} from "../game/plant";
 import type { Contract, GameState, Settings } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Agreements } from "./Agreements";
@@ -311,6 +319,14 @@ function OffersTab({ g, stats, act }: Props) {
           </span>
         </label>
         <DirectorSwitch g={g} act={act} compact />
+        {/* Markedet metter seg (B-252): vises bare når verket lager mer enn kundene tar unna til full pris */}
+        {marketSaturation(stats.dailyProductT) < 1 && (
+          <p className="g-muted g-small-text">
+            Verket lager {fmtT(stats.dailyProductT)} i døgnet, mer enn kundene tar unna til full pris (
+            {fmtT(MARKET_SATURATION.fromT)}). Nye forespørsler er derfor{" "}
+            {Math.round((1 - marketSaturation(stats.dailyProductT)) * 100)} % billigere.
+          </p>
+        )}
         {!g.settings.pauseOffers && (openGrades.length > 1 || offers.length > 1) && (
           <details className="g-details">
             <summary>

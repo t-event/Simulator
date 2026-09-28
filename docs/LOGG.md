@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 189 – 2026-09-28: Markedet metter seg
+
+**Brukeren ba om:** «Fortsett». Valgte at markedet metter seg for hjemmeverket, og at den bundne reserven beholdes.
+
+**Gjort:** B-252. Nye forespørsler og rammeavtaler får lavere snittpris når verket lager over 10 000 t i døgnet
+(tonnene over får halv pris). Forklart under Salg når det gjelder. Reserven er uendret (FORSLAG oppdatert).
+
+**Testet:** tsc, lint, `npm test` (ny test), `balance.ts` (exit 0), `--storovn 330` før og etter, Salg på 320 og 390 px.
+
+**Gjenstår:** eventuelt grense per ekte dag på topplista (FORSLAG); fase 2 (slagghåndtering, mekanisk verksted).
+
+---
+
 ## Økt 188 – 2026-09-28: Veksten på toppen – imperiebelastning
 
 **Brukeren ba om:** «Fortsett». Fikk analysen av veksten på toppen og valgte avtagende utbytte, og at det spillerne har

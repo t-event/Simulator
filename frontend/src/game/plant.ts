@@ -729,6 +729,20 @@ export function gradeFailures(a: Analysis, grade: GradeId): string[] {
   return out;
 }
 
+/**
+ * Markedet metter seg (B-252): kundene tar unna ca. 10 000 t i døgnet til full pris. Lager verket mer, får tonnene over
+ * grensen bare `overShare` av prisen, så snittprisen på nye kontrakter og rammeavtaler faller. Bare de største ovnene
+ * helt på slutten kommer over grensen (et storverk starter på ca. 700 t i døgnet).
+ */
+export const MARKET_SATURATION = { fromT: 10_000, overShare: 0.5 };
+
+/** Gangefaktor for prisen på nye kontrakter når verket lager så mange tonn i døgnet (1 = full pris) */
+export function marketSaturation(dailyT: number): number {
+  const { fromT, overShare } = MARKET_SATURATION;
+  if (!(dailyT > fromT)) return 1;
+  return (fromT + (dailyT - fromT) * overShare) / dailyT;
+}
+
 export function productPrice(g: GameState, product: ProductId, grade: GradeId | null): number {
   // Felles hendelser (eksportboom, importpress) ganger stålprisen (B-129)
   // Mesterskapet «Bedre priser» (B-150)

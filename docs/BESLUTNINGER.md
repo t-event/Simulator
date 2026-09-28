@@ -4571,3 +4571,20 @@ før, beholdes**.
   som spiller mange timer på 10× vokser fortsatt ca. 300 mrd. per ekte døgn (før ca. 1 100). Står i FORSLAG.
 - **Ingen lagrede spill endres.** Reserven og titlene spillerne har, beholdes; regelen gjelder det som tjenes fra nå.
 - Testspilleren (alle nivåmål, nybegynner, kontrollrommet) er uendret og grønn. Konto: nei (regnes i spillet).
+
+## B-252 Markedet metter seg: lavere pris når hjemmeverket lager over 10 000 t i døgnet (2026-09-28)
+Status: gjelder (andre del av rebalanseringen av sluttspillet etter B-251; bygger på B-154)
+Brukeren: valgte «Markedet metter seg» for hjemmeverket, og at den bundne reserven (kassa over 100 mrd., B-193)
+**beholdes som den er** – grensen, reserven og at den teller i konsernverdien er uendret.
+- **Regelen** (`MARKET_SATURATION` og `marketSaturation` i `plant.ts`): kundene tar unna 10 000 t i døgnet til full pris.
+  Tonnene over får halv pris, så snittprisen på nye forespørsler og rammeavtaler blir
+  (10 000 + (døgntonn − 10 000) × 0,5) / døgntonn. Mer produksjon gir alltid mer omsetning, bare mindre per tonn.
+  Kontrakter som alt er tatt, beholder prisen. Spot hadde metning fra før.
+- **Hvem merker det:** et storverk starter på ca. 700 t i døgnet; bare stormodellene helt på slutten kommer over
+  (et lagret storverk med tre 420-tonnere: ca. 35 000 t, 36 % lavere pris). `balance.ts --storovn 330`: 250 t-ovner
+  59 → 47 mill. per døgn, 420 t-ovner 38 → 21 mill. (underbemannet); større ovner lønner seg fortsatt.
+- **Vist til spilleren** under Salg → Forespørsler, bare når markedet er mettet: hvor mye verket lager, grensen og hvor
+  mye billigere nye forespørsler er.
+- **Samlet med B-251:** de største går fra ca. 1,6 til ca. 0,35 mrd. per spilldøgn (konsernet ca. 0,26, hjemmeverket
+  ca. 0,1). Den som spiller mange timer på 10× vokser fortsatt ca. 250 mrd. per ekte døgn; resten er spilletid.
+- Ingen lagrede spill endres. Testspilleren (alle nivåmål, nybegynner, kontrollrommet) er uendret og grønn. Konto: nei.

@@ -16,13 +16,11 @@ til «Avgjort» nederst).
 - **Rydde gamle gjester** (B-212): gjester som aldri oppretter konto, blir liggende. Når det blir mange:
   `delete from auth.users where is_anonymous and created_at < now() - interval '60 days'` (spillene følger med).
 
-- **Bunden konsernreserve (B-193)** er midlertidig. Når økonomien i sluttspillet er rebalansert: bestem hva reserven blir
-  (konverteres etter ny modell, blir en funksjon, eller utbetales gradvis) og fjern eller juster grensen på 100 mrd.
-  Avgjør også om reserven fortsatt skal telle i konsernverdien.
-- **Veksten på toppen (B-238, delvis løst i B-251):** datterverkene gir nå avtagende netto (imperiebelastning), så de
-  største tjener ca. 0,26 mrd. per spilldøgn fra konsernet i stedet for 1,4. Hjemmeverket (ca. 0,2 mrd. per døgn) er
-  nå omtrent halve veksten, og den som spiller mange timer på 10× vokser fortsatt ca. 300 mrd. per ekte døgn. Neste
-  valg for eieren: bremse hjemmeverket på toppen, eller la konsernverdien vokse med en grense per ekte dag (B-190).
+- ~~Bunden konsernreserve (B-193)~~ **Avgjort (B-252):** beholdes som den er – grensen på 100 mrd., reserven og at den
+  teller i konsernverdien.
+- **Veksten på toppen (B-238):** bremset i B-251 (imperiebelastning) og B-252 (markedet metter seg): de største går fra
+  ca. 1,6 til ca. 0,35 mrd. per spilldøgn. Den som spiller mange timer på 10× vokser fortsatt ca. 250 mrd. per ekte
+  døgn – det er spilletid. Vil eieren ha mer: en grense per ekte dag for konsernverdien på topplista (B-190).
 
 - **Vern mot lekkede passord:** brukeren sa det var skrudd på, men sikkerhetsrådene i Supabase melder det fortsatt av
   (2026-09-26, økt 108). Sjekk under Authentication → «Leaked password protection» at det er lagret.
