@@ -53,6 +53,7 @@ import { buzz } from "./haptics";
 import { Bar, Card, SubTabs } from "./common";
 import { Button, Callout } from "./ds";
 import type { OpenTender } from "./openTender";
+import { EARNS_FROM } from "../net/world";
 import { IndustryPanel } from "./Companies";
 import { fmtKr } from "./format";
 import { Icon } from "./icons";
@@ -687,8 +688,8 @@ export function KonsernPage({
       {tab === "oversikt" && tender && (
         <div className="g-col-wide g-konsern-tender-col">
           <Callout tone="heat">
-            <strong>Anbud på skraplageret er åpent</strong> til {fmtWhen(tender.closesAt)}. Eieren tjener på skrapet de
-            andre spillerne bruker.{" "}
+            <strong>Anbud på {tender.name.toLowerCase()} er åpent</strong> til {fmtWhen(tender.closesAt)}. Eieren tjener
+            på {EARNS_FROM[tender.type]}.{" "}
             <button className="g-link" onClick={() => setTab("industri")}>
               Se anbudet
             </button>

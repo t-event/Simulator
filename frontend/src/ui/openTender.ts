@@ -1,29 +1,30 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { fetchWorldStatus, type TenderResult } from "../net/world";
+import { fetchWorldStatus, type Company } from "../net/world";
 import { getSession, onSessionChange } from "../net/supabase";
 
-export type OpenTender = { closesAt: string };
+/** Et åpent anbud spilleren ikke har bydd på: når det stenger, og hvilket selskap det gjelder (B-253) */
+export type OpenTender = { closesAt: string; name: string; type: Company["type"] };
 
-// Kortet «Skraplageret» sier fra når et bud er lagt inn eller trukket, så merket i menyen følger med med én gang
+// Selskapskortene sier fra når et bud er lagt inn eller trukket, så merket i menyen følger med med én gang
 const listeners = new Set<() => void>();
 export function tenderChanged() {
   for (const l of listeners) l();
 }
 
 /**
- * Åpent anbud på skraplageret som spilleren ikke har bydd på (B-226): gir «!» på Konsern i menyen, merke på underfanen
+ * Åpent anbud på et selskap (skraplageret, slagghåndteringen) som spilleren ikke har bydd på (B-226, B-253): gir «!» på Konsern i menyen, merke på underfanen
  * og en beskjed på Oversikt, så anbudet ikke ligger skjult. Hentes fra serveren bare med konto og åpnet konsern.
  */
 export function useOpenTender(
   enabled: boolean,
-  /** Siste avgjorte anbud per selskap (B-237): GameApp gir varsel til den som bydde */
-  onResult?: (company: string, result: TenderResult) => void,
+  /** Siste avgjorte anbud for alle selskapene (B-237, B-253): GameApp gir varsel til den som bydde */
+  onResults?: (companies: Company[]) => void,
 ): OpenTender | null {
   const session = useSyncExternalStore(onSessionChange, getSession, getSession);
   const [open, setOpen] = useState<OpenTender | null>(null);
-  const resultRef = useRef(onResult);
+  const resultRef = useRef(onResults);
   useEffect(() => {
-    resultRef.current = onResult;
+    resultRef.current = onResults;
   });
   useEffect(() => {
     if (!session || !enabled) return;
@@ -31,12 +32,13 @@ export function useOpenTender(
     const load = () =>
       fetchWorldStatus().then(
         (w) => {
-          const t = w.companies
-            .map((c) => c.tender)
-            .find((x) => x && x.myBid === null && Date.parse(x.closesAt) > Date.now());
+          // Det som stenger først, av anbudene spilleren ikke har bydd på
+          const c = w.companies
+            .filter((x) => x.tender && x.tender.myBid === null && Date.parse(x.tender.closesAt) > Date.now())
+            .sort((a, b) => Date.parse(a.tender!.closesAt) - Date.parse(b.tender!.closesAt))[0];
           if (!alive) return;
-          setOpen(t ? { closesAt: t.closesAt } : null);
-          for (const c of w.companies) if (c.lastResult) resultRef.current?.(c.name, c.lastResult);
+          setOpen(c?.tender ? { closesAt: c.tender.closesAt, name: c.name, type: c.type } : null);
+          resultRef.current?.(w.companies);
         },
         () => {},
       );

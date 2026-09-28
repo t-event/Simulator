@@ -41,7 +41,7 @@ import { importantLog, markAllSeen, unseenCount } from "../game/inbox";
 import { Sales } from "./Sales";
 import { KonsernPage } from "./Konsern";
 import { useOpenTender } from "./openTender";
-import { applyTenderResult } from "../net/world";
+import { applyTenderResults } from "../net/world";
 import { VIEWS, viewUnlocked, type View } from "./views";
 import { Icon, type IconName } from "./icons";
 import { isVerketTab } from "./verketTabs";
@@ -809,9 +809,10 @@ export function GameApp() {
 
   // Varsellinja står over menyen nederst på mobil (B-201). Høyden følges, så veiledningen legger seg over den
   const isPc = useIsPc();
-  // Varsel om avgjort anbud til den som bydde (B-237); act er stabil, og applyTenderResult gir hvert anbud én gang
-  const tender = useOpenTender(!!g?.konsern?.unlocked, (company, r) => {
-    if (r.id > (g?.tenderSeen ?? 0)) act((gg) => void applyTenderResult(gg, company, r));
+  // Varsel om avgjort anbud til den som bydde (B-237); act er stabil, og hvert anbud gir én gang, i rekkefølge (B-253)
+  const tender = useOpenTender(!!g?.konsern?.unlocked, (companies) => {
+    if (companies.some((c) => (c.lastResult?.id ?? 0) > (g?.tenderSeen ?? 0)))
+      act((gg) => void applyTenderResults(gg, companies));
   });
   const appRef = useRef<HTMLDivElement>(null);
   const hasGame = !!g;
@@ -913,12 +914,16 @@ export function GameApp() {
               // tar selv (B-177)
               const director = !!g.konsern?.director?.active;
               // Marked og Folk: «!» når et råd på Verket peker dit – samme regler som rådene (B-202)
-              // Konsern: «!» når anbudet på skraplageret er åpent og du ikke har bydd (B-226)
+              // Konsern: «!» når et anbud er åpent og du ikke har bydd (B-226, B-253)
               const alertHint =
                 v.id === "marked" || v.id === "folk"
                   ? navAlerts.get(v.id)
                   : v.id === "konsern" && tender
-                    ? { text: "Anbud på skraplageret er åpent", view: "konsern" as View, sub: "industri" }
+                    ? {
+                        text: `Anbud på ${tender.name.toLowerCase()} er åpent`,
+                        view: "konsern" as View,
+                        sub: "industri",
+                      }
                     : undefined;
               const badge =
                 v.id === "salg"

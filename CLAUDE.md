@@ -321,6 +321,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   hva som haster (`headFurnaces`). Mål endringer i produksjonen med flere frø på et fullt storverk, ikke én kjøring.
 - **Skrapvarsel** (B-219): varsler i grensesnittet bruker `scrapAlert` (neste charge står fast), ikke `scrapShort` (en
   type i resepten er under én charge – ovnen fyller da opp med annet). Ellers varsles det om returskrap som ikke kan kjøpes.
+- **Flere selskaper** (B-253): tonn, gebyr og anslag regnes per type (`company_counted_t`, `company_fee`, `company_estimate`
+  i 042). Et selskap med `companies.active = false` får ikke anbud, inntekt eller plass i `world_status`. Varsler om avgjorte
+  anbud gis med `applyTenderResults` (i rekkefølge etter anbudet), ikke ett og ett selskap.
 - **Anbud og inntekt** (B-189) avgjøres «lat» av `world_status()` → `world_tick()`. Test livsløpet med midlertidige
   testkontoer i en DO-blokk som ender med `raise exception`; sett `closes_at` bakover for å avgjøre et anbud.
 - **Serveren endrer et lagret spill** (B-211): øk alltid `state.serverEdit` (og sett `device` til `'server'`). `save_game()`

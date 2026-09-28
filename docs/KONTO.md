@@ -100,7 +100,7 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Funksjon | Krever konto | Hvorfor | Beslutning |
 | --- | --- | --- | --- |
 | Økonomireformen (engangs) | Gjelder spill på nett | Endrer lagringen på nett | gjennomført 2026-09-27, B-186 |
-| Strategiske bedrifter (eie, investere, inntekt fra andres aktivitet) | Ja | Regel 3 og 7: deles med andre, avgjøres på serveren | skraplageret bygget (B-189); flere planlagt |
+| Strategiske bedrifter (eie, investere, inntekt fra andres aktivitet) | Ja | Regel 3 og 7: deles med andre, avgjøres på serveren | skraplageret bygget (B-189); slagghåndteringen bygget, slått av (B-253); mekanisk verksted planlagt |
 | Konsernkassen (penger flyttet inn i verdenen) | Ja | Regel 2 og 7 | bygget, B-183; vises på skraplagerkortet (B-189) |
 | Varsel om åpent anbud på skraplageret («!» på Konsern, merke på fanen Industrien, beskjed på Oversikt) | Ja | Regel 3 og 7: del av skraplageret | B-226, B-227 |
 | Kontroll og overtakelser | Ja | Regel 3 og 7 | planlagt, B-180 |

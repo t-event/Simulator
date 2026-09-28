@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 190 – 2026-09-28: Slagghåndteringen, bygget skjult
+
+**Brukeren ba om:** «Fortsett» (fase 2). Valgte å bygge slagghåndteringen skjult, siden skraplageret ennå ikke har fått
+sin første eier eller betalt ut inntekt.
+
+**Gjort:** B-253. Migrasjon 042 (kjørt): `companies.active`, typen `slagg`, tonn/gebyr/anslag per type, og
+«Slagghåndteringen» med `active = false`. Appen kjenner typen, beskjeden om åpent anbud bruker navnet på selskapet, og
+varsler om avgjorte anbud gis i riktig rekkefølge når det er flere selskaper.
+
+**Testet:** migrasjonen og et testløp i én transaksjon som ble rullet tilbake (forhold 0,545 mot skraplageret, begge i
+`world_status` når slagg er på), tilbakerullingen sjekket, sikkerhetsrådene; tsc, lint, `npm test` (ny test).
+
+**Gjenstår:** når skraplageret har betalt ut inntekt noen dager uten feil (anbudet stenger 29.9. 01:33 UTC): slå på
+slagghåndteringen (kommandoen står i B-253) og se kortet i appen; mekanisk verksted; eventuelt grense per ekte dag på
+topplista (FORSLAG).
+
+---
+
 ## Økt 189 – 2026-09-28: Markedet metter seg
 
 **Brukeren ba om:** «Fortsett». Valgte at markedet metter seg for hjemmeverket, og at den bundne reserven beholdes.

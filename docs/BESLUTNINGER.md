@@ -4588,3 +4588,30 @@ Brukeren: valgte «Markedet metter seg» for hjemmeverket, og at den bundne rese
 - **Samlet med B-251:** de største går fra ca. 1,6 til ca. 0,35 mrd. per spilldøgn (konsernet ca. 0,26, hjemmeverket
   ca. 0,1). Den som spiller mange timer på 10× vokser fortsatt ca. 250 mrd. per ekte døgn; resten er spilletid.
 - Ingen lagrede spill endres. Testspilleren (alle nivåmål, nybegynner, kontrollrommet) er uendret og grønn. Konto: nei.
+
+## B-253 Fase 2: slagghåndteringen bygget, men slått av (2026-09-28)
+Status: gjelder (fase 2 i docs/RETNING.md; bygger på B-188, B-189, B-210, B-226)
+Brukeren: «Fortsett», så «Bygg slagghåndtering skjult». Skraplageret har ennå ikke fått sin første eier (anbudet stenger
+29.9. kl. 01:33 UTC) og har aldri betalt ut inntekt, så kjeden aktivitet → server → eier er ikke vist. Slagghåndteringen
+bruker samme kjede og slås derfor på først når skraplageret har betalt ut inntekt i noen dager uten feil.
+- **Server (`supabase/042_slagghandtering.sql`, kjørt som «slagghandtering»):** `companies.active` (standard på) og
+  typen `slagg`. Selskapet «Slagghåndteringen» finnes med `active = false`: det får ikke anbud, betaler ikke inntekt og
+  sendes ikke i `world_status()`. Skraplageret er uendret.
+  - Tonn og gebyr per type: `company_counted_t(type, spiller, dag)` og `company_fee(type)`. Slagg = stålet som teller for
+    skraplageret (B-188: høyst én normal spilldag per spiller per ekte dag) × 0,12 t slagg per tonn stål, × 5 000 kr per
+    tonn slagg (`config.world`: `slag_per_steel`, `slag_fee_per_t`) – ca. 600 kr per tonn stål, 55 % av skraplageret.
+  - `company_estimate(selskap)` gir anslaget og taket i anbudet per type; `open_tender`, `pay_company_income`,
+    `world_tick` og `world_status` bruker det og hopper over selskaper som er slått av.
+  - Slås på med `update public.companies set active = true where type = 'slagg'; select public.world_tick();` – da
+    åpner det første anbudet (48 timer).
+- **Testet før den ble kjørt:** hele migrasjonen og et testløp i én transaksjon som ble rullet tilbake. Anslaget for
+  skraplageret var likt det gamle; ingen anbud og ett selskap i `world_status` mens slagg var av; slått på: anbud med tak
+  1,327 mrd., og med en midlertidig eier i fire dager betalte slagghåndteringen 59,9 mill. mot skraplagerets 109,7 mill.
+  for de samme dagene (forhold 0,545); `world_status` viste begge. Tilbakerullingen ble sjekket. Sikkerhetsrådene er
+  uendret, og de nye funksjonene kan ikke kalles utenfra.
+- **Appen:** typen `slagg` (`CompanyType`, `EARNS_FROM` i `net/world.ts`) med egen forklaring på kortet under Industrien.
+  Beskjeden om åpent anbud (Oversikt, «!» i menyen) bruker navnet på selskapet i stedet for «skraplageret». Varsler om
+  avgjort anbud gis i rekkefølge etter anbudet (`applyTenderResults`): før kunne et nyere anbud på ett selskap gjøre at
+  et eldre på et annet ble regnet som sett uten varsel. Ny test i `net/tests.ts`.
+- Konto: ja (samme som skraplageret, regel 3 og 7).
+Endringslogg: nei
