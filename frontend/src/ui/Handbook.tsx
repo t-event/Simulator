@@ -317,17 +317,17 @@ function Contents({ g, onOpen }: { g: GameState; onOpen: (id: string) => void })
       <div className="g-book-progress">
         <div className="g-book-progress-top">
           <strong>{total ? Math.floor((done / total) * 100) : 0} % av boka</strong>
+          {/* Ordene står ved tallene (B-241): ikonene alene – bok, spørsmålstegn og blink – var ikke til å forstå */}
           <span className="g-muted g-small-text g-book-counts">
-            <span title="Lest">
-              <Icon name="book" label="Lest" /> {read}/{cards.length}
+            <span>
+              <Icon name="book" /> Lest {read}/{cards.length}
             </span>
-            <span title="Quiz tatt">
-              <Icon name="circle-help" label="Quiz tatt" /> {quizzes.filter((x) => x.quiz).length}/{quizzes.length}
+            <span>
+              <Icon name="circle-help" /> Quiz {quizzes.filter((x) => x.quiz).length}/{quizzes.length}
             </span>
             {missions.length > 0 && (
-              <span title="Oppdrag løst">
-                <Icon name="target" label="Oppdrag løst" /> {missions.filter((x) => x.missionDone).length}/
-                {missions.length}
+              <span>
+                <Icon name="target" /> Oppdrag {missions.filter((x) => x.missionDone).length}/{missions.length}
               </span>
             )}
           </span>
@@ -381,13 +381,16 @@ function Contents({ g, onOpen }: { g: GameState; onOpen: (id: string) => void })
                                 : "Ferdig"}
                         </span>
                       </span>
+                      {/* Linja under tittelen sier hva som gjenstår; til høyre bare «Ny», stegene eller en hake (B-241) */}
                       {!s.read ? (
                         <span className="g-badge g-badge-new">Ny</span>
+                      ) : complete ? (
+                        <span className="g-book-row-done" aria-label="Ferdig">
+                          <Icon name="check" />
+                        </span>
                       ) : (
-                        <span className="g-book-row-steps" aria-label={`${s.done} av ${s.total} steg`}>
-                          <Icon name="book" className={s.read ? "is-done" : ""} />
-                          {s.hasQuiz && <Icon name="circle-help" className={s.quiz ? "is-done" : ""} />}
-                          {s.mission && <Icon name="target" className={s.missionDone ? "is-done" : ""} />}
+                        <span className="g-book-row-steps">
+                          {s.done} av {s.total}
                         </span>
                       )}
                     </button>

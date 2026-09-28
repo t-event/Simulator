@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 178 – 2026-09-28: Salg-sidene og ikonene i fagboka
+
+**Brukeren ba om:** hva de tre ikonene i fagboka betyr, og bedre og mer intuitive Salg-sider.
+
+**Gjort:** B-241. Fagboka: ord ved tallene (lest, quiz, oppdrag), «2 av 3» eller hake per kapittel. Salg: forespørsler med
+dommen først og avslå som forslag når verket ikke rekker det; ordrekø med status øverst, piler bare uten planlegger;
+lager med tall og forklaring; avtaler uten tekstvegg. Forespørsler med passert frist trekkes.
+
+**Testet:** tsc, lint, `npm test`, Playwright på 7 størrelser (storverk og garasje): ingen horisontal scrolling, knapper
+minst 44 px.
+
+**Gjenstår:** veksten på toppen i sluttspillet; tom tonn-liste denne uka (B-235); UI-4d; reserven og kassegrensen; fase 2.
+
+---
+
 ## Økt 177 – 2026-09-28: Færre sene leveranser
 
 **Brukeren ba om:** «Får enda denne» – rådgiveren om sene leveranser (dag 1874).

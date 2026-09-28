@@ -2258,7 +2258,8 @@ function expireOffers(g: GameState, stats: PlantStats): void {
         `${c.customer} trakk forespørselen på ${PRODUCTS[c.product].name.toLowerCase()} – verket lager ikke det lenger.`,
         "info",
       );
-    } else if (c.offerExpiresMin <= g.minute) {
+    } else if (c.offerExpiresMin <= g.minute || c.deadlineDay < day(g)) {
+      // En forespørsel med frist som alt er passert, kan ikke signeres (B-241: Salg viste «leveres innen −1 døgn»)
       c.status = "misligholdt";
       c.closedDay = -1;
       log(g, `Forespørselen fra ${c.customer} gikk ut uten svar.`, "info");

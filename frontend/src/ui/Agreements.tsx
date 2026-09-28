@@ -16,6 +16,7 @@ import type { GameApi } from "../game/useGame";
 import { useState } from "react";
 import { Bar, Card, GradeSpec } from "./common";
 import { fmtKr, fmtPct, fmtT } from "./format";
+import { Icon } from "./icons";
 
 interface Props {
   g: GameState;
@@ -23,6 +24,7 @@ interface Props {
   act: GameApi["act"];
 }
 
+/** Tilbud om rammeavtale (B-241): om det passer først, så tallene, samme mønster som forespørslene */
 function AgreementOffer({ g, stats, a, act }: Props & { a: Agreement }) {
   const canMake = stats.products.includes(a.product);
   const recipeOk = recipeEstimate(g, a.grade, stats, gradeRecipe(g, a.grade)).grades.includes(a.grade);
@@ -32,50 +34,71 @@ function AgreementOffer({ g, stats, a, act }: Props & { a: Agreement }) {
   const usedT = g.agreements.filter((x) => x.status === "aktiv").reduce((t, x) => t + x.weeklyT, 0);
   const totalShare = perWeek > 0 ? (usedT + a.weeklyT) / perWeek : Infinity;
   const hours = Math.max(0, (a.offerExpiresMin - g.minute) / 60);
+  const tone: "ok" | "warn" | "bad" =
+    !canMake || !recipeOk || totalShare > 0.7 ? "bad" : totalShare > 0.5 ? "warn" : "ok";
+  const reason = !canMake
+    ? `Du lager ikke ${PRODUCTS[a.product].name.toLowerCase()}`
+    : !recipeOk
+      ? "Resepten holder ikke kravet ennå – juster den under Verket → Resept"
+      : Number.isFinite(share)
+        ? `Tar ca. ${fmtPct(share)} av det verket lager i en uke${usedT > 0 ? ` – med avtalene du har, ${fmtPct(totalShare)}` : ""}`
+        : "Verket står – ingen produksjon nå";
+  const verdict = { ok: ["ok", "Passer"], warn: ["warning", "Trangt"], bad: ["error", "Passer ikke"] } as const;
   return (
-    <div className="g-contract">
+    <article className={`g-contract g-offer is-${tone}`}>
       <div className="g-contract-head">
-        <strong>{a.customer}</strong>
+        <strong className="g-offer-customer">{a.customer}</strong>
         <span className="g-contract-value">{fmtKr(a.weeklyT * a.weeks * a.pricePerT)}</span>
       </div>
-      <p className="g-answer-by">Svar innen {Math.floor(hours)} timer</p>
-      <p>
-        {fmtT(a.weeklyT)} {PRODUCTS[a.product].name.toLowerCase()} i uka i <strong>{a.weeks} uker</strong>, kvalitet{" "}
-        <strong>{GRADES[a.grade].name}</strong> · fast pris {fmtKr(a.pricePerT)}/t
+      <p className="g-offer-what">
+        {fmtT(a.weeklyT)} {PRODUCTS[a.product].name.toLowerCase()} i uka · <strong>{GRADES[a.grade].name}</strong>
       </p>
-      <p>
-        <GradeSpec id={a.grade} />
-      </p>
-      <ul className="g-checks">
-        {!canMake && <li className="bad">Du lager ikke {PRODUCTS[a.product].name.toLowerCase()}</li>}
-        {canMake && (
-          <li className={recipeOk ? "ok" : "bad"}>
-            {recipeOk
-              ? "Resepten holder kravet"
-              : "Resepten holder ikke kravet ennå – juster den under Verket → Resept"}
-          </li>
-        )}
-        {canMake && (
-          <li className={totalShare > 0.7 ? "bad" : totalShare > 0.5 ? "warn" : "ok"}>
-            {Number.isFinite(share)
-              ? `Tar ca. ${fmtPct(share)} av det verket lager i en uke${
-                  usedT > 0 ? ` – sammen med avtalene du har, ${fmtPct(totalShare)}` : ""
-                }`
-              : "Verket står – ingen produksjon nå"}
-          </li>
-        )}
-        <li className="g-muted">
-          Alle uker i tide: bonus {fmtKr(a.bonusKr)} og omdømme +{a.bonusRep.toFixed(1).replace(".", ",")}.{" "}
-          {AGREEMENT_MAX_MISSED} uker for sent: kunden sier opp, omdømme −{a.bonusRep.toFixed(1).replace(".", ",")}.
-        </li>
-      </ul>
-      <div className="g-row">
-        <button className="g-primary" onClick={() => act((gg) => acceptAgreement(gg, a.id))}>
-          Signer avtalen
-        </button>
-        <button onClick={() => act((gg) => declineAgreement(gg, a.id))}>Avslå</button>
+      <div className="g-offer-verdict">
+        <span className={`ds-status-line ${tone === "ok" ? "is-ok" : tone === "warn" ? "is-heat" : "is-critical"}`}>
+          <Icon name={verdict[tone][0]} />
+          <span>{verdict[tone][1]}</span>
+        </span>
+        <span className="g-offer-reason">{reason}</span>
       </div>
-    </div>
+      <dl className="g-offer-facts">
+        <div>
+          <dt>Varighet</dt>
+          <dd>{a.weeks} uker</dd>
+        </div>
+        <div>
+          <dt>Fast pris</dt>
+          <dd>{fmtKr(a.pricePerT)}/t</dd>
+        </div>
+        <div className={hours <= 3 ? "is-urgent" : undefined}>
+          <dt>Svar innen</dt>
+          <dd>{hours < 1 ? "under en time" : hours < 2 ? "1 time" : `${Math.floor(hours)} timer`}</dd>
+        </div>
+      </dl>
+      <p className="g-muted g-small-text">
+        Alle uker i tide: bonus {fmtKr(a.bonusKr)} og omdømme +{a.bonusRep.toFixed(1).replace(".", ",")}.{" "}
+        {AGREEMENT_MAX_MISSED} uker for sent: kunden sier opp, omdømme −{a.bonusRep.toFixed(1).replace(".", ",")}.
+      </p>
+      <details className="g-details">
+        <summary>Krav til stålet</summary>
+        <p>
+          <GradeSpec id={a.grade} />
+        </p>
+      </details>
+      <div className="g-row g-offer-actions">
+        <button
+          className={tone === "bad" ? undefined : "g-primary"}
+          onClick={() => act((gg) => acceptAgreement(gg, a.id))}
+        >
+          {tone === "bad" ? "Signer likevel" : "Signer avtalen"}
+        </button>
+        <button
+          className={tone === "bad" ? "g-primary" : undefined}
+          onClick={() => act((gg) => declineAgreement(gg, a.id))}
+        >
+          Avslå
+        </button>
+      </div>
+    </article>
   );
 }
 
@@ -89,7 +112,7 @@ function AgreementRow({ a, act }: { a: Agreement; act: GameApi["act"] }) {
         : "Siste uke er i ordrekøen"
       : a.status === "fullfort"
         ? a.weeksMissed === 0
-          ? `Fullført dag ${a.closedDay} med bonus ✓`
+          ? `Fullført dag ${a.closedDay} med bonus`
           : `Fullført dag ${a.closedDay}, uten bonus`
         : `Sagt opp dag ${a.closedDay}`;
   return (
@@ -152,10 +175,9 @@ function Capacity({ g, stats }: { g: GameState; stats: PlantStats }) {
         />
         <span>{fmtPct(share)}</span>
       </div>
-      <p className="g-muted">
-        Avtalene tar {fmtT(usedT)} av ca. {fmtT(perWeek)} verket lager i uka. Ledig til vanlige kontrakter:{" "}
-        {fmtT(Math.max(0, perWeek - usedT))} i uka. Du kan ha {max} avtaler samtidig ({active.length} nå). Over ca. 50 %
-        blir det trangt når noe stopper.
+      <p className="g-muted g-small-text">
+        {fmtT(usedT)} av ca. {fmtT(perWeek)} i uka · {active.length} av {max} avtaler
+        {share > 0.5 ? " · over halve uka er bundet, og det blir trangt når noe stopper" : ""}
       </p>
     </div>
   );
@@ -165,23 +187,42 @@ function Capacity({ g, stats }: { g: GameState; stats: PlantStats }) {
 export function Agreements({ g, stats, act }: Props) {
   if (g.stage < AGREEMENT_STAGE && !g.agreements.length) return null;
   const offers = g.agreements.filter((a) => a.status === "tilbud");
-  const others = g.agreements.filter((a) => a.status !== "tilbud");
+  const active = g.agreements.filter((a) => a.status === "aktiv");
+  const closed = g.agreements.filter((a) => a.status === "fullfort" || a.status === "brutt");
   return (
-    <Card title={`Rammeavtaler (${g.agreements.filter((a) => a.status === "aktiv").length})`}>
-      <p className="g-muted">
-        En rammeavtale er en fast avtale over flere uker: kunden bestiller like mye hver uke til fast pris, uansett hva
-        markedet gjør. Hver ukes leveranse legges i ordrekøen med sju døgns frist. Leverer du alle ukene i tide, får du
-        bonus.
+    <Card title="Rammeavtaler" right={<span className="g-muted g-small-text">{active.length} aktive</span>}>
+      {/* Én linje om hva en rammeavtale er, resten bak «Slik virker det» (B-241): før var det en tekstvegg øverst */}
+      <p className="g-muted g-small-text">
+        Fast mengde hver uke til fast pris i flere uker – bonus hvis alle ukene er i tide.
       </p>
+      <details className="g-details">
+        <summary>Slik virker rammeavtaler</summary>
+        <p className="g-muted g-small-text">
+          Kunden bestiller like mye hver uke til fast pris, uansett hva markedet gjør. Hver ukes leveranse legges i
+          ordrekøen med sju døgns frist. Leverer du alle ukene i tide, får du bonus og omdømme. Kommer{" "}
+          {AGREEMENT_MAX_MISSED} uker for sent, sier kunden opp.
+        </p>
+      </details>
       <Capacity g={g} stats={stats} />
+      {offers.length > 0 && <h3 className="g-subhead">Tilbud</h3>}
       {offers.map((a) => (
         <AgreementOffer key={a.id} g={g} stats={stats} act={act} a={a} />
       ))}
-      {others.map((a) => (
+      {active.length > 0 && <h3 className="g-subhead">Dine avtaler</h3>}
+      {active.map((a) => (
         <AgreementRow key={a.id} a={a} act={act} />
       ))}
-      {!offers.length && !others.length && (
-        <p className="g-muted">
+      {closed.length > 0 && (
+        <details className="g-details">
+          <summary>Avsluttet ({closed.length})</summary>
+          {closed.map((a) => (
+            <AgreementRow key={a.id} a={a} act={act} />
+          ))}
+        </details>
+      )}
+      {!offers.length && !active.length && (
+        <p className="g-empty">
+          <Icon name="calendar-check" />
           {g.settings.pauseOffers
             ? "Du tar ikke imot nye forespørsler nå, så ingen tilbyr rammeavtaler."
             : "Ingen tilbud akkurat nå. Store kunder spør av og til – du får beskjed."}
