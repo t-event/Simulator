@@ -2114,6 +2114,13 @@ button {
   border-radius: var(--r-md);
 }
 
+/* Underfanene øverst på en side har ingen luft over seg (B-239): da starter alle sider like høyt, også sider uten
+   underfaner (Forskning, Folk før de første ansatte), og kolonnen ved siden av på PC står på linje med fanene */
+.g-main > .g-grid > .g-subtabs:first-child,
+.g-main > .g-grid > .g-col-wide:first-child > .g-subtabs:first-child {
+  margin-top: 0;
+}
+
 .g-subtabs button {
   flex: 1;
   min-width: 0;

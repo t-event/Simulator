@@ -4374,3 +4374,14 @@ fra datterverkene går til kassa i spillet.
 - Tester: titlene (stigende, 25 mrd. til 5 000 mrd., sammenligning, Stållegende ved 450 mrd.), Stålgigant ved
   1 000 mrd.; `npm test`, tsc, lint, balance og `--konsern` (exit 0), Playwright på 7 størrelser: posisjonen til Mål,
   Produksjon nå, rådene og produksjonsradene målt i 8 s med spillet i gang – ingen flytting.
+
+## B-239 Alle sider starter like høyt (2026-09-28)
+Status: gjelder (bygger på B-192)
+Brukeren: «Forskningskortet er høyere opp på siden enn andre ting på andre sider.»
+- Årsak: underfanene øverst på en side hadde 10 px luft over seg. Forskning har ingen underfaner, så kortet der startet
+  10 px høyere enn fanene på Verket, Marked, Salg, Folk, Konsern og Mål. På PC sto også kolonnen ved siden av fanene
+  10 px høyere enn fanene.
+- Nå har underfanene øverst på en side ingen luft over seg (`.g-main > .g-grid > .g-subtabs:first-child` og samme i
+  første kolonne). Alle sider starter like langt under toppfeltet (10 px på mobil, 14 på nettbrett, 16 på PC), også Folk
+  før de første ansatte. Underfaner inne i sider og ark (Resept, ovnene, topplista) har luften som før.
+- Konto: nei. Testet: posisjonen til det første på hver side ved 320, 390, 820 og 1 920 px – likt overalt.
