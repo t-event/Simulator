@@ -48,8 +48,10 @@ import {
   onLocalSave,
   pullIfNewer,
   resetCloud,
+  SaveConflictError,
   setClock,
   SOON_MS,
+  staleCopy,
   UPLOAD_INTERVAL_MS,
   uploadSave,
 } from "./sync";
@@ -876,6 +878,46 @@ const main = async () => {
       d.kind === "uploaded" && f.saves.get("u-a@test")!.minute === Math.floor(season.minute),
       `fikk ${d.kind}, minutt ${f.saves.get("u-a@test")!.minute}`,
     );
+  });
+
+  await test("Gammel kopi (B-259): et spill fra dag 471 lastes ikke opp over dag 2 169 ved ny innlogging", async () => {
+    const f = fresh();
+    await login(f);
+    store.set("stalverk-enhet-v1", "mobil");
+    const g = newGame(259);
+    g.minute = 1440 * 470;
+    await linkOnLogin(g);
+    // En kopi av spillet blir liggende (en annen fane eller en gammel utgave i minnet)
+    const old = JSON.parse(JSON.stringify(g)) as GameState;
+    // Spilleren spiller videre til dag 2 169 på samme enhet
+    g.minute = 1440 * 2168;
+    await uploadSave(g);
+    const saved = f.saves.get("u-a@test")!;
+    assert(saved.minute === 1440 * 2168 && saved.device === "mobil", "dag 2 169 ble ikke lagret");
+    // Logget ut og inn igjen der den gamle kopien står: samme enhet og samme husket versjon som spillet på nett
+    resetCloud();
+    const d = await linkOnLogin(old);
+    assert(d.kind === "cloud" && d.cloud.minute === 1440 * 2168, `skulle hente dag 2 169, fikk ${d.kind}`);
+    assert(f.saves.get("u-a@test")!.minute === 1440 * 2168, "den gamle kopien ble lastet opp");
+    // Heller ikke en vanlig lagring slipper den gamle kopien gjennom
+    let refused = false;
+    try {
+      await uploadSave(old);
+    } catch (e) {
+      refused = e instanceof SaveConflictError;
+    }
+    assert(refused && f.saves.get("u-a@test")!.minute === 1440 * 2168, "vanlig lagring av gammel kopi");
+    // Et nytt spill (ny id) kan fortsatt erstatte spillet på nett, som før
+    const fresh2 = newGame(260);
+    fresh2.owner = "u-a@test";
+    assert(!staleCopy(fresh2, g), "et nytt spill regnet som gammel kopi");
+    // Eldre spill uten id: samme sesong = samme spill
+    const a = { minute: 1440 * 10, season: 1 } as GameState;
+    const b = { minute: 1440 * 100, season: 1 } as GameState;
+    assert(staleCopy(a, b) && !staleCopy(a, { ...b, season: 2 }), "eldre spill uten id");
+    // Spilleren kan likevel velge den gamle kopien selv
+    await keepLocal(old);
+    assert(f.saves.get("u-a@test")!.minute === 1440 * 470, "valget «herfra» ble stoppet");
   });
 
   await test("Serveren har endret spillet (B-211): det gamle spillet på enheten kan ikke velges eller lastes opp", async () => {

@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 259,
+    date: "2026-09-28",
+    title: "Et gammelt spill tar ikke over",
+    items: [
+      "Logger du inn på en enhet som har en eldre kopi av spillet ditt, hentes spillet fra nettet. Kopien lastes ikke lenger opp over det du har spilt andre steder.",
+      "Velger du selv et spill som er eldre enn det på nett, spør spillet én gang til.",
+    ],
+  },
+  {
     b: 258,
     date: "2026-09-28",
     title: "Når skraplageret får eier",

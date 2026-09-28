@@ -5,6 +5,25 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 196 – 2026-09-28: Et gammelt spill tok over etter innlogging
+
+**Brukeren ba om:** «Hvorfor mistet jeg masse progresjon? … vil bare ha svar», så «Jeg hadde blitt logget ut», så
+«Fortsett».
+
+**Funnet:** fallene i konsernverdien 27.9. var økonomireformen og B-209 (begge med vilje). I dag 16:14 ble et spill fra
+dag 471 lastet opp over dag 2 169 rett etter en innlogging; dag 2 169 kom tilbake 15 s senere, men tidslinja for
+dag 472–2 168 ble slettet. Ingen data er endret av meg.
+
+**Gjort:** B-259. Appen laster aldri opp en gammel kopi av samme spill over spillet på nett (`staleCopy`, `gameId` for nye
+spill); valget «Herfra» spør én gang til når spillet her er eldre. Publiseringen av #203 (B-258) var grønn.
+
+**Testet:** ny nettest som gjenskaper hendelsen (feiler uten rettingen), tsc, lint, `npm test`, Playwright av valget.
+
+**Gjenstår:** hvorfor Tuster ble logget ut er ikke funnet. Vurder om tilbakespoling skal slette tidslinja på serveren
+(`check_snapshot`) – her gikk 1 700 tall tapt på 15 sekunder.
+
+---
+
 ## Økt 195 – 2026-09-28: Når skraplageret får eier
 
 **Brukeren ba om:** «Fortsett», så «Anbudet avgjort i natt».

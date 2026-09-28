@@ -161,6 +161,8 @@ export function newGame(seed = Date.now()): GameState {
   const scrap = Object.fromEntries(SCRAP_IDS.map((id) => [id, emptyStock()])) as Record<ScrapId, ScrapStock>;
   const g: GameState = {
     version: SAVE_VERSION,
+    // Hvilket spill dette er (B-259) – ikke fra frøet, så to nye spill aldri får samme
+    gameId: Math.random().toString(36).slice(2, 10) + Date.now().toString(36),
     rng: seed >>> 0,
     // Første dag starter kl. 06 når du låser opp garasjen
     minute: 6 * 60,
