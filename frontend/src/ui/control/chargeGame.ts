@@ -17,31 +17,27 @@ export type RoundId = "smelt" | "rens" | "slagg" | "tapp";
 export type Phase = "klar" | "spill" | "ferdig";
 export type GameEvent = "kurv" | "kok" | "runde" | "ferdig" | "over" | "tappet";
 
-export const ROUNDS: { id: RoundId; icon: string; title: string; what: string; how: string }[] = [
+export const ROUNDS: { id: RoundId; title: string; what: string; how: string }[] = [
   {
     id: "smelt",
-    icon: "🔥",
     title: "Smelt skrapet",
     what: "Lysbuen smelter skrapet. For kaldt, og smeltingen går tregt. For varmt, og foringen slites.",
     how: "Hold inne for strøm, slipp for å kjøle. Følg med på skrapkurvene: en tung kurv kjøler badet, en lett varmer.",
   },
   {
     id: "rens",
-    icon: "💨",
     title: "Blås ut karbonet",
     what: "Oksygen brenner karbonet til gass. Da skummer slaggen – koker den over, går stål tapt.",
     how: "Hold inne for oksygen. Slipp når skummet nærmer seg kanten. Trykk «Ferdig» når karbonet er i det grønne.",
   },
   {
     id: "slagg",
-    icon: "🪣",
     title: "Rak ut slaggen",
     what: "Fosforet ligger i slaggen. Blir slaggen liggende, går fosforet tilbake i stålet.",
     how: "Trykk på de grå slaggklumpene før de synker. Ikke ta det blanke stålet!",
   },
   {
     id: "tapp",
-    icon: "🫗",
     title: "Tapp i øsa",
     what: "Stålet må være akkurat varmt nok, og øsa rommer bare så mye.",
     how: "Trykk «Tapp!» når temperaturen er i det grønne. Hold så inne for å helle – strålen renner litt etter at du slipper.",

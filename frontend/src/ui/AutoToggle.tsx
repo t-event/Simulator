@@ -1,5 +1,6 @@
 import { AUTOMATION, automationUnlocked, RESEARCH, type AutomationKey } from "../game/research";
 import type { GameState } from "../game/types";
+import { Icon } from "./icons";
 import type { GameApi } from "../game/useGame";
 
 type BoolKey = Exclude<AutomationKey, "secondsAction">;
@@ -13,7 +14,7 @@ function lockName(k: AutomationKey): string {
 export function AutoLocked({ k, label }: { k: AutomationKey; label: string }) {
   return (
     <p className="g-locked-auto">
-      🔒 {label} – forsk fram «{lockName(k)}».
+      <Icon name="lock" /> {label} – forsk fram «{lockName(k)}».
     </p>
   );
 }

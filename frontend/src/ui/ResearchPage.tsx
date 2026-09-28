@@ -2,7 +2,7 @@ import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Research } from "./Research";
 
-/** Forskning-fanen. Bank og innstillinger har flyttet til Verket → Økonomi og ⚙️ i toppen (B-072). */
+/** Forskning-fanen. Bank og innstillinger har flyttet til Verket → Økonomi og tannhjulet i toppen (B-072). */
 export function ResearchPage({
   g,
   act,

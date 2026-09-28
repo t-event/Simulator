@@ -64,7 +64,9 @@ export function InboxSheet({ g, act, onClose }: { g: GameState; act: GameApi["ac
         ) : (
           <p className="g-muted">Ingen varsler her ennå.</p>
         )}
-        <p className="g-muted">Under ⚙️ Innstillinger kan du velge hvilke varsler som dukker opp på skjermen.</p>
+        <p className="g-muted">
+          Under Innstillinger (tannhjulet) kan du velge hvilke varsler som dukker opp på skjermen.
+        </p>
       </div>
     </div>
   );

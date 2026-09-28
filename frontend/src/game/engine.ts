@@ -259,6 +259,7 @@ export function newGame(seed = Date.now()): GameState {
     owner: null,
     season: null,
     seasonPromptSeen: null,
+    tenderSeen: 0,
     seasonLoginPromptSeen: null,
     world: { events: [], seenEventIds: [] },
     fpDealDay: -1,
@@ -2410,7 +2411,7 @@ export function apprenticeExams(g: GameState): void {
       countEvent(g, "fagbrev");
       log(
         g,
-        `🎓 ${name} har bestått fagprøven og fått fagbrev! Nå er ${name} fagarbeider med vanlig lønn (${fmtKr(w.salary)} per døgn). +2 fagpoeng.`,
+        `${name} har bestått fagprøven og fått fagbrev! Nå er ${name} fagarbeider med vanlig lønn (${fmtKr(w.salary)} per døgn). +2 fagpoeng.`,
         "good",
       );
     } else {
@@ -3190,7 +3191,7 @@ export function completeManual(g: GameState, result: ManualResult | null): void 
     if ((g.controlBest ?? 0) > 0)
       log(
         g,
-        `🏆 Ny rekord i kontrollrommet: ${nf0.format(result.points)} poeng (før ${nf0.format(g.controlBest ?? 0)}).`,
+        `Ny rekord i kontrollrommet: ${nf0.format(result.points)} poeng (før ${nf0.format(g.controlBest ?? 0)}).`,
         "good",
       );
     g.controlBest = result.points;

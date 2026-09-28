@@ -1,8 +1,9 @@
 /**
- * Topplista (B-127). Arket bak 🏆 ved varsellinja (B-133). Fire lister, hentet fra serveren og oppdatert mens den er
+ * Topplista (B-127). Arket bak pokalen ved varsellinja (B-133). Fire lister, hentet fra serveren og oppdatert mens den er
  * åpen (B-144). Uten konto vises lista likevel, med en oppfordring om å logge inn. Formen fra UI-4b (B-224).
  */
 import { useEffect, useState } from "react";
+import { Place } from "./Place";
 import { cloudConfigured } from "../net/config";
 import {
   BOARDS,
@@ -11,7 +12,6 @@ import {
   fetchProfile,
   levelLabel,
   LINKED_SHOWN_FROM,
-  placeLabel,
   type BoardKind,
   type BoardRow,
 } from "../net/leaderboard";
@@ -47,8 +47,7 @@ function SeasonHistory() {
         {results.map((r) => (
           <li key={r.seasonId}>
             <strong>
-              {r.name}: {r.plass <= 3 ? `${placeLabel(r.plass)} ` : ""}
-              {r.plass}. plass
+              {r.name}: {r.plass <= 3 && <Place plass={r.plass} />} {r.plass}. plass
             </strong>{" "}
             av {r.players} · {fmtKr(r.equity)} · {levelLabel({ stage: r.stage, league: resultLeague(r) })}
           </li>
@@ -74,7 +73,7 @@ function fmtValue(kind: BoardKind, v: number): string {
 }
 
 /**
- * Topplista som eget ark bak 🏆 (B-133, B-214). UI-4b (B-224): ikoner i toppen (oppdater, lukk), sesong eller Hall of
+ * Topplista som eget ark bak pokalen (B-133, B-214). UI-4b (B-224): ikoner i toppen (oppdater, lukk), sesong eller Hall of
  * Fame som valg, din plass for seg øverst, lasteskisse mens lista hentes, og forklaringen bak «Slik virker lista».
  */
 export function LeaderboardSheet({
@@ -237,7 +236,7 @@ function Leaderboard({
       )}
       {session && nickname === null && (
         <Callout tone="heat">
-          Velg et brukernavn under ⚙️ Innstillinger → Konto, så kommer du med på lista.{" "}
+          Velg et brukernavn under Innstillinger (tannhjulet) → Konto, så kommer du med på lista.{" "}
           <button className="g-link" onClick={onOpenSettings}>
             Velg brukernavn
           </button>
@@ -247,7 +246,9 @@ function Leaderboard({
       {/* Din plass for seg øverst (B-224), også når du står lenger ned enn lista viser */}
       {session && nickname && (me || myRank !== null) && (
         <div className="g-board-me" aria-label="Din plass">
-          <span className="g-board-me-rank">{placeLabel(me?.plass ?? myRank!)}</span>
+          <span className="g-board-me-rank">
+            <Place plass={me?.plass ?? myRank!} />
+          </span>
           <span className="g-board-me-name">
             <strong>{nickname}</strong>
             <span className="g-muted g-small-text">Din plass</span>
@@ -270,14 +271,20 @@ function Leaderboard({
         <ol className="g-board">
           {rows.map((r) => (
             <li key={r.plass} className={`${r.is_me ? "is-me" : ""}${r.plass <= 3 ? " is-top" : ""}`}>
-              <span className={`g-board-rank${r.plass <= 3 ? " is-medal" : ""}`}>{placeLabel(r.plass)}</span>
+              <span className={`g-board-rank${r.plass <= 3 ? " is-medal" : ""}`}>
+                <Place plass={r.plass} />
+              </span>
               <span className="g-board-name">
                 <span className="g-board-line">
                   <span className="g-board-nick">{r.nickname}</span>
                   <em className="g-league">{levelLabel(r)}</em>
                 </span>
                 {/* Beste plassering i en sesong som er over (B-143) */}
-                {r.honor && <span className="g-board-honor">{r.honor}</span>}
+                {r.honor && (
+                  <span className="g-board-honor">
+                    {r.honorIcon && <Icon name={r.honorIcon} />} {r.honor}
+                  </span>
+                )}
                 {/* Spilt uten konto før innloggingen (B-170): forklarer en rask vekst på lista */}
                 {r.linked_day !== null && r.linked_day >= LINKED_SHOWN_FROM && (
                   <span className="g-board-honor">Koblet til på dag {r.linked_day}</span>
@@ -302,9 +309,9 @@ function Leaderboard({
           spiller. I sesongen gjelder spillet du har nå; i «Hall of Fame» står ditt beste resultat. Merket ved navnet
           viser hvor langt spilleren har kommet: fra Garasje til Storverk, Konsern når konsernverdien passerer 1 mrd.,
           og en tittel fra 10 mrd. (Stålbaron, Stålmagnat, Stålfyrste, Stålkonge, Stålkeiser, Stållegende og videre til
-          Stålikon). Ved navnet står også den beste plasseringen i en sesong som er over: 🏆 for vinneren og 🎖 for topp
-          10. «Koblet til på dag N» betyr at spillet ble spilt uten konto før det: da kan det ha vokst fort på lista.
-          Kontoer med urimelig vekst holdes utenfor.
+          Stålikon). Ved navnet står også den beste plasseringen i en sesong som er over: en pokal for vinneren og en
+          medalje for topp 10. «Koblet til på dag N» betyr at spillet ble spilt uten konto før det: da kan det ha vokst
+          fort på lista. Kontoer med urimelig vekst holdes utenfor.
         </p>
       </details>
     </>

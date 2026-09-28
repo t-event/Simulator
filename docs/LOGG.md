@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 174 – 2026-09-28: Anbudsvarsel, mesterskapspriser og ikoner overalt
+
+**Brukeren ba om:** svar på om budgivere får vite hvem som vant, fagpoengpris etter verdi i mesterskapet, og Lucide-ikoner
+i stedet for alle emojier.
+
+**Gjort:** B-237. Varsel om anbudsresultat til den som bydde; mesterskapet priset etter verdi og viser kroner per døgn;
+alle emojier byttet med ikoner, gamle lagringer ryddet, og en sjekk i `npm test`/CI mot nye.
+
+**Testet:** `npm test` (nye tester i spillmotoren og nettlaget), tsc, lint, balance (exit 0), Playwright på 7 størrelser.
+
+**Gjenstår:** tom tonn-liste denne uka (B-235); UI-4d; reserven og kassegrensen; fase 2.
+
+---
+
 ## Økt 173 – 2026-09-28: Ikoner i fagboka
 
 **Brukeren ba om:** færre emojier i fagboka.

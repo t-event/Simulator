@@ -6,6 +6,7 @@
  * - SeasonLine er tekstlinja «Æra · Sesong … pågår» på topplista (uten nedtelling, B-220)
  */
 import { useEffect, useSyncExternalStore } from "react";
+import { Icon } from "./icons";
 import { useState } from "react";
 import { log, unlock } from "../game/engine";
 import type { GameState } from "../game/types";
@@ -20,7 +21,8 @@ import {
   seasonStatus,
   type SeasonResult,
 } from "../net/season";
-import { levelLabel, placeLabel } from "../net/leaderboard";
+import { levelLabel } from "../net/leaderboard";
+import { Place } from "./Place";
 import { fmtKr } from "./format";
 import { useSeasonStatus, useWorldEvents } from "./useSeason";
 import { getSession, onSessionChange } from "../net/supabase";
@@ -83,8 +85,9 @@ export function SeasonSync({ api }: { api: GameApi }) {
         unlock(gg, "sesong");
         // En ny sesong har startet, og spillet blir med videre (B-167)
         if (carried)
-          log(gg, `🏆 ${cur.name} har startet. Spillet ditt er med videre og står på den nye sesonglista.`, "good");
-        else if (!fresh) log(gg, `🏆 Spillet ditt er nå med i ${cur.name} og står på sesonglista under 🏆.`, "good");
+          log(gg, `${cur.name} har startet. Spillet ditt er med videre og står på den nye sesonglista.`, "good");
+        else if (!fresh)
+          log(gg, `Spillet ditt er nå med i ${cur.name} og står på sesonglista under Toppliste.`, "good");
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [g, session, cur?.id, reconciled, g?.owner]);
@@ -112,7 +115,7 @@ export function SeasonPrompt({ api, g, onOpenSettings }: { api: GameApi; g: Game
           </p>
           <p className="g-muted">
             Spillet ditt blir med i sesongen med en gang du logger inn, uansett hvor langt du har kommet. Du finner
-            dette igjen under 🏆 Toppliste øverst.
+            dette igjen under Toppliste (pokalen) øverst.
           </p>
           <div className="g-row">
             <button
@@ -201,7 +204,7 @@ export function SeasonResultNotice({ onOpen }: { onOpen: (open: boolean) => void
     <div className="g-modal" role="dialog" aria-modal="true" aria-label="Sesongen er over">
       <div className="g-modal-card g-celebrate">
         <div className="g-celebrate-burst" aria-hidden="true">
-          {result.plass <= 3 ? placeLabel(result.plass) : "🏁"}
+          {result.plass <= 3 ? <Place plass={result.plass} /> : <Icon name="flag-triangle-right" />}
         </div>
         <h2>{result.name} er over!</h2>
         <p>
@@ -210,13 +213,13 @@ export function SeasonResultNotice({ onOpen }: { onOpen: (open: boolean) => void
         {result.plass <= 10 && (
           <p>
             <strong>
-              {result.plass === 1 ? `🏆 Du vant ${result.name}!` : `🎖 Du er blant de ti beste i ${result.name}!`}
+              {result.plass === 1 ? `Du vant ${result.name}!` : `Du er blant de ti beste i ${result.name}!`}
             </strong>{" "}
             Det står ved kallenavnet ditt på topplista for alltid.
           </p>
         )}
         <p className="g-muted">
-          Plasseringen står ved kallenavnet ditt på topplista, og i «Dine sesonger» bak 🏆.
+          Plasseringen står ved kallenavnet ditt på topplista, og i «Dine sesonger» under Toppliste.
           {cur ? ` ${cur.name} er i gang – der starter alle i garasjen igjen.` : ""}
         </p>
         <button className="g-primary" onClick={close}>
@@ -259,7 +262,7 @@ export function SeasonTeaser() {
   // Ingen nedtelling (B-220): neste sesong starter ikke av seg selv, og æraen avsluttes av administrator (B-182)
   return (
     <p className="g-season-teaser">
-      🏆 <strong>{cur.name}</strong> pågår
+      <Icon name="trophy" /> <strong>{cur.name}</strong> pågår
     </p>
   );
 }

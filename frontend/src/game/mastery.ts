@@ -15,7 +15,11 @@ export interface MasteryDef {
   effect: string;
   /** Den største gevinsten man kan nærme seg (andel) */
   max: number;
-  /** Pris for nivå 1 i fagpoeng */
+  /**
+   * Pris for nivå 1 i fagpoeng. B-237: etter hvor mye det er verdt. Nivå 1 gir omtrent (storverk med konsern):
+   * konsernledelse 50–90 mill. kr/døgn, priser ca. 3 mill., skrapkjøp 1–1,5 mill., ovnspotter ca. 0,5 mill. og strøm under
+   * 0,1 mill. Før kostet alle 100 (konsernledelse 150).
+   */
   base: number;
 }
 
@@ -25,21 +29,21 @@ export const MASTERY: Record<MasteryId, MasteryDef> = {
     description: "Salgsavdelingen blir flinkere til å forhandle, og kundene betaler litt mer for stålet.",
     effect: "høyere pris for stålet",
     max: 0.1,
-    base: 100,
+    base: 200,
   },
   strom: {
     name: "Energieffektivisering",
     description: "Bedre isolasjon, varmegjenvinning og smartere styring av ovnene.",
     effect: "lavere strømkostnad",
     max: 0.15,
-    base: 100,
+    base: 60,
   },
   skrap: {
     name: "Smartere skrapkjøp",
     description: "Bedre sortering og lengre avtaler med skraphandlerne.",
     effect: "lavere skrappris",
     max: 0.1,
-    base: 100,
+    base: 150,
   },
   // Brukeren (B-165): fagpoeng til at ovnspottene holder lenger
   foring: {
@@ -55,7 +59,7 @@ export const MASTERY: Record<MasteryId, MasteryDef> = {
     description: "Erfaringene fra hjemmeverket deles med datterverkene.",
     effect: "mer overskudd i datterverkene",
     max: 0.3,
-    base: 150,
+    base: 300,
   },
 };
 

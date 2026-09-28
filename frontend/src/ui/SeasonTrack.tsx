@@ -59,7 +59,7 @@ export function SeasonTrackCard({ act }: { act: GameApi["act"] }) {
           for (const c of got) grantCosmetic(gg, c.id);
           log(
             gg,
-            `Sesongstigen: ${r.tiers.length === 1 ? `trinn ${r.tiers[0]}` : `${r.tiers.length} trinn`} – +${r.fp} fagpoeng${got.length ? ` og ${got.map((c) => `${c.icon} ${c.name}`).join(", ")}` : ""}.`,
+            `Sesongstigen: ${r.tiers.length === 1 ? `trinn ${r.tiers[0]}` : `${r.tiers.length} trinn`} – +${r.fp} fagpoeng${got.length ? ` og ${got.map((c) => c.name).join(", ")}` : ""}.`,
             "good",
           );
         });
@@ -92,7 +92,7 @@ export function SeasonTrackCard({ act }: { act: GameApi["act"] }) {
             <strong>
               {unclaimed.length === 1 ? `Trinn ${unclaimed[0]} er nådd!` : `${unclaimed.length} trinn er nådd!`}
             </strong>{" "}
-            +{fp} fagpoeng{gifts.length ? ` og ${gifts.map((c) => `${c.icon} ${c.name}`).join(", ")}` : ""}.
+            +{fp} fagpoeng{gifts.length ? ` og ${gifts.map((c) => c.name).join(", ")}` : ""}.
           </span>
           <button className="g-primary" disabled={busy} onClick={() => void claim()}>
             Hent
@@ -115,7 +115,7 @@ export function SeasonTrackCard({ act }: { act: GameApi["act"] }) {
       </p>
       {nextCosmetic && (
         <p className="g-muted g-small-text">
-          Neste pynt: {nextCosmetic.icon} {nextCosmetic.name} på trinn {nextGift}. Hvert trinn gir fagpoeng.
+          Neste pynt: {nextCosmetic.name} på trinn {nextGift}. Hvert trinn gir fagpoeng.
         </p>
       )}
     </Card>

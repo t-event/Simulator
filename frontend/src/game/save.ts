@@ -73,6 +73,10 @@ export function clearSave(): void {
  * Fyller inn felt som mangler i lagringer fra eldre versjoner av spillet.
  * Nye felt i GameState må få en standardverdi her (se B-013).
  */
+/** Emojier i gamle loggtekster og landemerkenavn (B-237): appen bruker ikoner nå */
+const EMOJI = /[\p{Extended_Pictographic}\u{FE0F}\u{200D}]\s?/gu;
+const HAS_EMOJI = /\p{Extended_Pictographic}/u;
+
 export function migrate(g: GameState): GameState {
   const loose = g as Partial<GameState> & GameState;
   // Forskningslista må finnes før blokkene under som leser den (gamle lagringer fra før forskningen fantes)
@@ -251,6 +255,11 @@ export function migrate(g: GameState): GameState {
   if (loose.owner === undefined) loose.owner = null;
   if (loose.season === undefined) loose.season = null;
   if (loose.seasonPromptSeen === undefined) loose.seasonPromptSeen = null;
+  // Ikoner i stedet for emoji (B-237): gamle linjer i loggen og landemerker i kontraktene («\u{1F5FC} Fyrlykt …»)
+  for (const l of g.log ?? []) if (HAS_EMOJI.test(l.text)) l.text = l.text.replace(EMOJI, "");
+  for (const c of g.contracts ?? []) if (HAS_EMOJI.test(c.customer)) c.customer = c.customer.replace(EMOJI, "").trim();
+  // Varsel om anbudsresultatet (B-237)
+  if (loose.tenderSeen === undefined) loose.tenderSeen = 0;
   if (loose.seasonLoginPromptSeen === undefined) loose.seasonLoginPromptSeen = null;
   if (loose.world === undefined) loose.world = { events: [], seenEventIds: [] };
   for (const c of g.contracts) {

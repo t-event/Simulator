@@ -7,10 +7,11 @@
 import { adjustReputation, awardPoints, fmtT, log, realisticDailyT } from "./engine";
 import { computePlantStats, day, productCapT, productPrice } from "./plant";
 import type { Contract, GameState } from "./types";
+import type { IconName } from "../ui/icons";
 
 export interface Landmark {
   id: string;
-  icon: string;
+  icon: IconName;
   name: string;
   /** Laveste nivå landemerket kan komme på */
   stage: number;
@@ -24,7 +25,7 @@ export interface Landmark {
 export const LANDMARKS: Landmark[] = [
   {
     id: "benker",
-    icon: "🪑",
+    icon: "armchair",
     name: "Parkbenker til byparken",
     stage: 0,
     days: 1,
@@ -33,7 +34,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "kumlokk",
-    icon: "🕳️",
+    icon: "circle-dot",
     name: "Kumlokk til hovedgata",
     stage: 1,
     days: 1.5,
@@ -42,7 +43,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "gjerde",
-    icon: "⛓️",
+    icon: "fence",
     name: "Gjerde rundt kirkegården",
     stage: 1,
     days: 2,
@@ -51,7 +52,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "fyrlykt",
-    icon: "🗼",
+    icon: "lighthouse",
     name: "Fyrlykt på skjæret",
     stage: 2,
     days: 2,
@@ -60,7 +61,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "gangbru",
-    icon: "🌉",
+    icon: "footprints",
     name: "Gangbru over elva",
     stage: 2,
     days: 2.5,
@@ -69,7 +70,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "kai",
-    icon: "⚓",
+    icon: "anchor",
     name: "Ny kai i havna",
     stage: 2,
     days: 3,
@@ -78,7 +79,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "skole",
-    icon: "🏫",
+    icon: "school",
     name: "Ny skole i bygda",
     stage: 3,
     days: 2.5,
@@ -87,7 +88,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "idrettshall",
-    icon: "🏐",
+    icon: "volleyball",
     name: "Idrettshall",
     stage: 3,
     days: 3,
@@ -96,7 +97,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "sykehus",
-    icon: "🏥",
+    icon: "hospital",
     name: "Nytt sykehus",
     stage: 3,
     days: 3.5,
@@ -105,7 +106,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "tunnel",
-    icon: "🚇",
+    icon: "tram-front",
     name: "T-banetunnel",
     stage: 3,
     days: 4,
@@ -114,7 +115,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "jernbanebru",
-    icon: "🚆",
+    icon: "train-front",
     name: "Jernbanebru",
     stage: 3,
     days: 4,
@@ -123,7 +124,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "stadion",
-    icon: "⚽",
+    icon: "goal",
     name: "Fotballstadion",
     stage: 4,
     days: 3,
@@ -132,7 +133,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "vindpark",
-    icon: "🌬️",
+    icon: "wind",
     name: "Vindpark til havs",
     stage: 4,
     days: 3.5,
@@ -141,7 +142,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "hengebru",
-    icon: "🌁",
+    icon: "cable-car",
     name: "Hengebru over fjorden",
     stage: 4,
     days: 4,
@@ -150,7 +151,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "opera",
-    icon: "🎭",
+    icon: "drama",
     name: "Operahus",
     stage: 4,
     days: 4,
@@ -159,7 +160,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "skyskraper",
-    icon: "🏙️",
+    icon: "building-2",
     name: "Skyskraper",
     stage: 4,
     days: 4.5,
@@ -168,7 +169,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "flyplass",
-    icon: "✈️",
+    icon: "plane",
     name: "Ny flyplassterminal",
     stage: 4,
     days: 5,
@@ -177,7 +178,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "kraftverk",
-    icon: "💧",
+    icon: "waves",
     name: "Kraftverk i dammen",
     stage: 4,
     days: 5,
@@ -186,7 +187,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "cruiseskip",
-    icon: "🚢",
+    icon: "ship",
     name: "Cruiseskip",
     stage: 4,
     days: 5.5,
@@ -195,7 +196,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "plattform",
-    icon: "🛢️",
+    icon: "drill",
     name: "Plattform til havs",
     stage: 4,
     days: 6,
@@ -204,7 +205,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "torrdokk",
-    icon: "🏗️",
+    icon: "ship-wheel",
     name: "Tørrdokk til verftet",
     stage: 4,
     days: 6,
@@ -213,7 +214,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "motorvei",
-    icon: "🛣️",
+    icon: "route",
     name: "Motorvei med bruer",
     stage: 4,
     days: 6.5,
@@ -222,7 +223,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "rampe",
-    icon: "🚀",
+    icon: "rocket",
     name: "Oppskytningsrampe",
     stage: 4,
     days: 7,
@@ -231,7 +232,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "arena",
-    icon: "🏟️",
+    icon: "trophy",
     name: "Olympisk arena",
     stage: 4,
     days: 7,
@@ -240,7 +241,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "hurtigtog",
-    icon: "🚄",
+    icon: "train-track",
     name: "Høyhastighetsbane",
     stage: 4,
     days: 8,
@@ -249,7 +250,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "romstasjon",
-    icon: "🛰️",
+    icon: "satellite",
     name: "Modul til romstasjon",
     stage: 4,
     days: 8,
@@ -258,7 +259,7 @@ export const LANDMARKS: Landmark[] = [
   },
   {
     id: "verdensbru",
-    icon: "🌐",
+    icon: "bridge",
     name: "Verdens lengste bru",
     stage: 4,
     days: 10,
@@ -300,7 +301,7 @@ export function landmarkHour(g: GameState, today = todayKey()): void {
       adjustReputation(g, 2);
       log(
         g,
-        `🏛️ Landemerke levert: ${l.icon} ${l.name}! +${l.fp} fagpoeng og omdømme +2. ${l.text} Neste landemerke kommer i morgen.`,
+        `Landemerke levert: ${l.name}! +${l.fp} fagpoeng og omdømme +2. ${l.text} Neste landemerke kommer i morgen.`,
         "good",
       );
     } else if (!c || c.status === "misligholdt") {
@@ -321,7 +322,7 @@ export function landmarkHour(g: GameState, today = todayKey()): void {
   const tonnes = Math.max(0.5, Math.round(perDay * next.days * 10) / 10);
   const c: Contract = {
     id: g.nextContractId++,
-    customer: `${next.icon} ${next.name}`,
+    customer: next.name,
     product,
     grade: "standard",
     tonnes,
@@ -343,7 +344,7 @@ export function landmarkHour(g: GameState, today = todayKey()): void {
   lm.contractId = c.id;
   log(
     g,
-    `🏛️ Nytt landemerke: ${next.icon} ${next.name} trenger ${fmtT(tonnes)} stål i standardkvalitet. God pris, fagpoeng og omdømme – se Salg.`,
+    `Nytt landemerke: ${next.name} trenger ${fmtT(tonnes)} stål i standardkvalitet. God pris, fagpoeng og omdømme – se Salg.`,
     "event",
   );
 }

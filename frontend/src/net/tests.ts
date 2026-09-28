@@ -36,13 +36,7 @@ import {
 } from "./leaderboard";
 import { claimAway, fetchDailyStatus } from "./daily";
 import { chestFp, claimWeekChest, fetchWeeklyBoard, fetchWeeklyStatus, weekDaysLeft } from "./weekly";
-import {
-  fetchActiveEvents,
-  fetchSeasonHistory,
-  fetchSeasonStatus,
-  markResultSeen,
-  resultSeen,
-} from "./season";
+import { fetchActiveEvents, fetchSeasonHistory, fetchSeasonStatus, markResultSeen, resultSeen } from "./season";
 import {
   cloudStatus,
   flush,
@@ -61,7 +55,7 @@ import {
 } from "./sync";
 import { forgetGuest, isGuest, onGuestSave, setGuestClock } from "./guest";
 import { DEPOSIT_REFUSAL_TEXT, depositToTreasury, fetchTreasury } from "./treasury";
-import { BID_REFUSAL_TEXT, fetchWorldStatus, placeBid, timeLeft } from "./world";
+import { applyTenderResult, BID_REFUSAL_TEXT, fetchWorldStatus, placeBid, timeLeft } from "./world";
 
 declare const process: { exitCode?: number };
 
@@ -1375,6 +1369,35 @@ const main = async () => {
       err = e;
     }
     assert(err instanceof NetError && err.offline, "skulle være offline-feil");
+  });
+
+  await test("Varsel om avgjort anbud (B-237): til den som bydde, én gang per anbud", async () => {
+    const g = newGame(237);
+    const now = Date.parse("2026-10-01T12:00:00Z");
+    const base = {
+      closedAt: "2026-09-30T09:00:00Z",
+      status: "avgjort" as const,
+      winningBid: 400e6,
+      bidders: 3,
+      tie: false,
+    };
+    const lost = { ...base, id: 5, winner: "Grane", won: false, myBid: 120e6 };
+    const before = g.log.length;
+    assert(applyTenderResult(g, "Skraplageret", lost, now), "ga ikke varsel til den som tapte");
+    assert(g.log.length === before + 1 && /Grane vant/.test(g.log.at(-1)!.text), "feil tekst til den som tapte");
+    assert(/tilbake i konsernkassa/.test(g.log.at(-1)!.text), "sa ikke at budet er tilbake");
+    assert(!applyTenderResult(g, "Skraplageret", lost, now), "ga samme varsel to ganger");
+    const won = { ...base, id: 6, winner: "Tuster", won: true, myBid: 400e6 };
+    assert(
+      applyTenderResult(g, "Skraplageret", won, now) && /Du vant/.test(g.log.at(-1)!.text),
+      "vinneren fikk ikke varsel",
+    );
+    // Den som ikke bydde, får ikke varsel, men anbudet merkes som sett
+    const notMine = { ...base, id: 7, winner: "Grane", won: false, myBid: null };
+    assert(!applyTenderResult(g, "Skraplageret", notMine, now) && g.tenderSeen === 7, "varsel uten bud");
+    // Et gammelt anbud (over 14 dager) gir ikke varsel
+    const old = { ...lost, id: 8, closedAt: "2026-09-01T09:00:00Z" };
+    assert(!applyTenderResult(g, "Skraplageret", old, now), "varsel om gammelt anbud");
   });
 
   setSaveListener(null);

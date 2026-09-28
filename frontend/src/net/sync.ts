@@ -338,7 +338,7 @@ export function resetCloud(): void {
 }
 
 // Logges spilleren ut av seg selv (økta avvist, eller utlogget i en annen fane), slås lagringen på nett av, så
-// ☁ ikke står igjen i toppfeltet (B-145)
+// skyen ikke står igjen i toppfeltet (B-145)
 onSessionChange(() => {
   if (!getSession() && status.kind !== "off") resetCloud();
 });

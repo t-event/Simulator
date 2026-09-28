@@ -1,5 +1,5 @@
 /**
- * Endringsloggen i spillet (B-179): «Hva er nytt» vises én gang etter en oppdatering, og hele lista ligger under ⚙️.
+ * Endringsloggen i spillet (B-179): «Hva er nytt» vises én gang etter en oppdatering, og hele lista ligger under Innstillinger.
  *
  * Nyeste først. Hver oppføring har det høyeste beslutningsnummeret (B-xxx) den dekker. `npm test` sjekker at den
  * nyeste oppføringen dekker den nyeste beslutningen i docs/BESLUTNINGER.md, så den ikke blir glemt.
@@ -14,6 +14,16 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    b: 237,
+    date: "2026-09-28",
+    title: "Anbudsvarsel, mesterskap og ikoner",
+    items: [
+      "Har du bydd på skraplageret, får du beskjed når anbudet er avgjort – hvem som vant, og at budet ditt er tilbake.",
+      "Mesterskapet: prosjektene koster etter hvor mye de er verdt, og viser hva neste nivå gir i kroner per døgn.",
+      "Alle emojier er byttet med ikoner i samme stil, også medaljene på topplistene og stjernene.",
+    ],
+  },
   {
     b: 236,
     date: "2026-09-28",
@@ -154,7 +164,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     title: "Pause på Salg",
     items: [
       "Spillet står på pause mens du er på Salg, så du rekker å lese forespørslene. Når du går ut, fortsetter det i samme fart – eller start tida selv mens du er der.",
-      "Vil du ikke ha det slik, kan du slå det av under ⚙️ Innstillinger.",
+      "Vil du ikke ha det slik, kan du slå det av under Innstillinger.",
     ],
   },
   {
@@ -470,7 +480,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       "Landemerkene tar du selv. Salgsdirektøren lar dem stå, og Salg viser dem med tall selv når direktøren er på.",
       "Bare én fane eller ett vindu spiller om gangen. Åpner du spillet et annet sted, lagrer det gamle vinduet og står stille.",
       "Topplistene sjekker at spilldøgnene går i vanlig fart. Utvidelser som får tida til å gå fortere, gir ingen fordel.",
-      "Denne lista: etter en oppdatering ser du hva som er nytt. Hele lista ligger under ⚙️.",
+      "Denne lista: etter en oppdatering ser du hva som er nytt. Hele lista ligger under Innstillinger.",
     ],
   },
   {

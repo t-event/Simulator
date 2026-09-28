@@ -1005,13 +1005,20 @@ button {
 }
 
 .g-stars {
-  color: var(--warning);
-  letter-spacing: 1px;
-  font-size: var(--fs-meta);
+  display: inline-flex;
+  gap: 1px;
+  vertical-align: -2px;
+  color: var(--line-strong);
 }
 
-.g-stars-off {
-  color: var(--line-strong);
+.g-stars .ds-icon {
+  width: 13px;
+  height: 13px;
+}
+
+.g-stars .is-on {
+  color: var(--warning);
+  fill: currentColor;
 }
 
 .g-roles {
@@ -1516,7 +1523,7 @@ button {
 }
 
 .g-celebrate-burst {
-  font-size: var(--fs-display);
+  color: var(--heat);
   animation: g-burst 0.6s ease-out;
 }
 
@@ -1699,9 +1706,10 @@ button {
   opacity: 0.5;
 }
 
-.g-speed button.is-locked::after {
-  content: "🔒";
-  font-size: var(--fs-badge);
+/* Låst fart: låseikon (B-237, før et låsetegn i CSS) */
+.g-speed-lock {
+  width: 10px;
+  height: 10px;
   margin-left: 1px;
 }
 
@@ -2289,7 +2297,7 @@ button {
   margin-bottom: 8px;
 }
 
-/* Smale telefoner (iPhone SE): topplinja med fart, fagbok og ⚙️ må få plass uten å overlappe (B-072) */
+/* Smale telefoner (iPhone SE): topplinja med fart, fagbok og tannhjulet må få plass uten å overlappe (B-072) */
 .g-when span {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2346,9 +2354,14 @@ button {
 .g-landmarks {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  font-size: var(--fs-page);
+  gap: var(--sp-2);
   margin: 4px 0;
+  color: var(--ok);
+}
+
+.g-landmarks .ds-icon {
+  width: 22px;
+  height: 22px;
 }
 
 /* «Ansett til plassene» avløserne står på (B-170) */
@@ -2664,7 +2677,7 @@ button {
   margin-top: 6px;
 }
 
-/* Topplista bak 🏆 (B-133), formen fra UI-4b (B-224) */
+/* Topplista bak pokalen (B-133), formen fra UI-4b (B-224) */
 
 .g-icon-btn {
   display: inline-flex;
@@ -2766,7 +2779,7 @@ button {
   margin-top: 10px;
 }
 
-/* Varsellinja med 🏆 ved siden av (B-134) */
+/* Varsellinja med pokalen ved siden av (B-134) */
 .g-notice-row {
   display: flex;
   gap: 6px;
@@ -3137,10 +3150,27 @@ button {
 }
 
 .g-pynt-icon {
-  font-size: var(--fs-page);
-  width: 28px;
-  text-align: center;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
   flex: none;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  color: var(--accent);
+}
+
+.g-pynt-icon .ds-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Fasadene vises med fargen de gir verket (B-237) */
+.g-pynt-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-strong);
 }
 
 .g-pynt-text {
@@ -5348,4 +5378,50 @@ button.g-prod-row:hover {
 .g-treasury {
   display: flex;
   flex-direction: column;
+}
+
+/* Mesterskap (B-237): hva neste nivå gir per døgn */
+.g-mastery-gain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2) var(--sp-3);
+  margin: var(--sp-1) 0;
+}
+
+.g-celebrate-burst .ds-icon {
+  width: 48px;
+  height: 48px;
+}
+
+/* Medaljer på topplistene (B-237): ikon i gull, sølv eller bronse */
+.g-place {
+  display: inline-flex;
+  vertical-align: -3px;
+}
+
+.g-place .ds-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.g-place.is-gull {
+  color: var(--medal-gold);
+}
+
+.g-place.is-solv {
+  color: var(--medal-silver);
+}
+
+.g-place.is-bronse {
+  color: var(--medal-bronze);
+}
+
+/* Ikonet foran et varsel i varsellinja (B-237, før varseltegn og prikk) */
+.g-notice-kind {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  margin-right: var(--sp-1);
+  vertical-align: -2px;
 }

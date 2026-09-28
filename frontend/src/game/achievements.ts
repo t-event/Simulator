@@ -316,8 +316,8 @@ export function checkAchievements(g: GameState): void {
     fp += a.fp;
   }
   awardPoints(g, fp);
-  if (fresh.length <= 2) for (const a of fresh) log(g, `🏅 Prestasjon: ${a.name}! +${a.fp} fagpoeng.`, "good");
-  else log(g, `🏅 ${fresh.length} nye prestasjoner! +${fp} fagpoeng. Se merkene under Mål → Merker.`, "good");
+  if (fresh.length <= 2) for (const a of fresh) log(g, `Prestasjon: ${a.name}! +${a.fp} fagpoeng.`, "good");
+  else log(g, `${fresh.length} nye prestasjoner! +${fp} fagpoeng. Se merkene under Mål → Merker.`, "good");
 }
 
 /** Tall til beskrivelser (brukes av kortet) */

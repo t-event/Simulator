@@ -1,5 +1,5 @@
 /**
- * «Hva er nytt» (B-179): vises én gang etter en oppdatering, og hele endringsloggen kan åpnes under ⚙️.
+ * «Hva er nytt» (B-179): vises én gang etter en oppdatering, og hele endringsloggen kan åpnes under Innstillinger.
  */
 import { SheetHead } from "./ds";
 import { CHANGELOG, type ChangelogEntry } from "../game/changelog";
@@ -23,7 +23,7 @@ export function ChangelogSheet({
     <Portal>
       <div className="g-modal" role="dialog" aria-modal="true" aria-label={title} onClick={onClose}>
         <div className="g-modal-card g-changelog" onClick={(e) => e.stopPropagation()}>
-          <SheetHead title={`🆕 ${title}`} onClose={onClose} />
+          <SheetHead title={title} icon="sparkles" onClose={onClose} />
           {entries.map((e) => (
             <section key={e.b}>
               <h3>

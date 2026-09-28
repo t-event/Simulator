@@ -524,8 +524,19 @@
 
 /* Resultatet */
 .cg-stars {
+  display: inline-flex;
+  gap: 2px;
+  vertical-align: -3px;
   color: var(--warning);
-  letter-spacing: 2px;
+}
+
+.cg-stars .ds-icon {
+  width: 1em;
+  height: 1em;
+}
+
+.cg-stars .is-on {
+  fill: currentColor;
 }
 
 .cg-stars .off {
@@ -539,6 +550,7 @@
 
 .cg-rating .cg-stars {
   font-size: var(--fs-hero);
+  justify-content: center;
 }
 
 .cg-rating h2 {

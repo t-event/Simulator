@@ -93,7 +93,7 @@ npm install
 npm run dev                      # utviklingsserver på http://localhost:5173
 npx tsc -b                       # typesjekk
 npm run lint                     # oxlint
-npm test                         # raske tester av spillmotoren og nettlaget, og at endringsloggen er oppdatert (også i CI)
+npm test                         # raske tester av spillmotoren og nettlaget, endringsloggen er oppdatert, ingen emoji (også i CI)
 npx tsx src/sim/validate.ts      # prosessmodellen gir forventede nøkkeltall
 npx tsx src/game/balance.ts      # testspilleren: progresjon, ingen konkurs, kontrollrommet
 npx tsx src/game/balance.ts --verbose --finance --seed 3   # feilsøking av balansen
@@ -133,7 +133,8 @@ frontend/src/
     world.ts     Felles hendelser i motoren og sesongfordel (B-129)
     reserve.ts   Midlertidig myk grense for kassa (100 mrd.) og bunden konsernreserve (B-193) – grensen står her
     daily.ts     Daglig belønning, dagens oppdrag og mens du var borte (B-149)
-    mastery.ts   Mesterskap: forskning som tas om og om igjen etter all forskning (B-150)
+    mastery.ts   Mesterskap: forskning som tas om og om igjen etter all forskning (B-150); priset etter verdi (B-237)
+    masteryValue.ts Hva neste nivå i mesterskapet gir i kr per døgn (B-237)
     achievements.ts Prestasjoner, serier i trinn (B-232; gamle id-er beholdt)   cosmetics.ts  Pynt for fagpoeng (B-151)
     landmarks.ts Landemerker: store byggeprosjekter som forespørsler, ett per virkelig dag (B-174)
     changelog.ts Endringsloggen «Hva er nytt» (B-179) – ny oppføring ved hver endring
@@ -167,7 +168,7 @@ frontend/src/
     InstallTip.tsx    Tips om hjemskjerm på startskjermen   Power.tsx  Strøm og skiftplan
     Handbook.tsx Fagboka: innhold, kapitler som sider, quiz ett spørsmål om gangen (B-234)   Inbox.tsx  Varsellista (åpnes fra varsellinja)
     Account.tsx  Konto: logg inn, opprett, glemt passord, velg spill ved konflikt (på startskjermen og i ⚙️)
-    Leaderboard.tsx Topplista (arket bak 🏆, B-214)   Season.tsx  Sesongspørsmål, hendelser på Marked, sesonglinje (uten nedtelling, B-220)
+    Leaderboard.tsx Topplista (arket bak pokalen, B-214)   Place.tsx  Plassering med medaljeikon (B-237)   Season.tsx  Sesongspørsmål, hendelser på Marked, sesonglinje (uten nedtelling, B-220)
     Daily.tsx    Velkommen tilbake, daglig belønning og kortet «Dagens oppdrag» på Mål
     Achievements.tsx Prestasjonskortet på Mål og arket «Pynt verket» (🎨 på anleggsbildet)
     Weekly.tsx   Kortet «Ukens utfordring» på Mål og ukelista   Portal.tsx  Ark fra Verket legges i <body>
@@ -181,7 +182,7 @@ frontend/src/
     Companies.tsx Konsern → Industrien: ett kort per selskap (skraplageret nå) og konsernkassa (B-189, B-227)
     control/     Kontrollrommet: spillet i fire runder (chargeGame.ts: logikk og testspiller, ControlRoom.tsx, B-175)
   sim/         Prosessmodell for lysbueovnen (brukes ikke av spillet lenger, sjekkes av sim/validate.ts)
-frontend/scripts/ sjekk-endringslogg.mjs: endringsloggen dekker nyeste beslutning (npm test og CI)
+frontend/scripts/ sjekk-endringslogg.mjs: endringsloggen dekker nyeste beslutning; sjekk-emoji.mjs: ingen emoji (B-237)
 frontend/public/  PWA: manifest, ikoner, service worker
 supabase/      SQL-migrasjonene, nummerert. Kjøres i prosjektet med Supabase-connectoren (apply_migration) og
                legges her samtidig, så repoet speiler databasen. Sjekk get_advisors (security) etter hver DDL-endring.
@@ -273,6 +274,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Byggetid i ekte tid i konsernet** (B-209): prosjektene bruker `realNow()` i `game/konsern.ts`. Tester og
   testspilleren setter klokka med `setRealClock` (testene: `finishProjects(g)`, testspilleren: `simClock(g)` = 3×). Kjøp
   i konsernet virker derfor ikke med én gang – ikke skriv tester som venter det.
+- **Ingen emoji** (B-237): bruk ikoner fra `ui/icons.tsx`. `npm test` og CI stopper emoji i `src`, `public` og `index.html`
+  (`scripts/sjekk-emoji.mjs`). Tekst fra serveren med tegn (plasseringen på topplista) gjøres om til ikon i appen.
 - **Ikoner i spillmotoren** (B-235): utfordringer og prestasjoner har `icon: IconName` (type-import fra `ui/icons.tsx`), og
   grensesnittet tegner dem med `<Icon>`. Ikke skriv `icon` inn i tekst (logg, varsler) – det er et navn, ikke en emoji.
   Nye Lucide-ikoner: kopier fra `lucide-static` og ta med alle attributter (også `x1`, `y2` …).
