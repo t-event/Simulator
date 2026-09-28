@@ -186,20 +186,76 @@ export function applyTenderResults(
 export function applyTenderResult(g: GameState, company: string, r: TenderResult, now = Date.now()): boolean {
   if (r.id <= (g.tenderSeen ?? 0)) return false;
   g.tenderSeen = r.id;
-  if (r.myBid === null && !r.won) return false;
   if (now - Date.parse(r.closedAt) > 14 * 86_400_000) return false;
   const name = company.toLowerCase();
+  const tie = r.tie ? " (likt bud – avgjort ved trekning)" : "";
   if (r.won)
     log(
       g,
-      `Du vant anbudet på ${name} med ${fmtKr(r.winningBid ?? r.myBid ?? 0)}${r.tie ? " (likt bud – avgjort ved trekning)" : ""}! Du driver det de neste 14 dagene, og inntekten går til konsernkassa.`,
+      `Du vant anbudet på ${name} med ${fmtKr(r.winningBid ?? r.myBid ?? 0)}${tie}! Du driver det de neste 14 dagene. Inntekten går til konsernkassa én gang i døgnet – den første ${firstPayout(now)}.`,
       "good",
     );
-  else
+  else if (r.myBid !== null)
     log(
       g,
-      `Anbudet på ${name} er avgjort: ${r.winner ?? "en annen"} vant med ${fmtKr(r.winningBid ?? 0)}${r.tie ? " (likt bud – avgjort ved trekning)" : ""}. Budet ditt på ${fmtKr(r.myBid ?? 0)} er tilbake i konsernkassa.`,
+      `Anbudet på ${name} er avgjort: ${r.winner ?? "en annen"} vant med ${fmtKr(r.winningBid ?? 0)}${tie}. Budet ditt på ${fmtKr(r.myBid)} er tilbake i konsernkassa.`,
       "event",
     );
+  // De som ikke bød, får vite hvem som eier selskapet nå (B-258) – uten beløp
+  else if (r.status === "avgjort" && r.winner)
+    log(g, `${company} har fått ny eier: ${r.winner} driver det de neste 14 dagene.`, "event");
+  else return false;
   return true;
+}
+
+/** Neste UTC-midnatt – da betaler serveren inntekten for dagen som gikk (B-258) */
+export function nextPayout(now = Date.now()): number {
+  const d = new Date(now);
+  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 1);
+}
+
+/** «i natt kl. 02:00» – når neste inntekt kommer, i spillerens egen tid (klokka i Norge: 01:00 om vinteren) */
+export function firstPayout(now = Date.now()): string {
+  const at = new Date(nextPayout(now));
+  const time = at.toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" });
+  const h = at.getHours();
+  const word = h < 6 || h >= 22 ? "i natt" : new Date(now).toDateString() === at.toDateString() ? "i dag" : "i morgen";
+  return `${word} kl. ${time}`;
+}
+
+/** UTC-datoen for i går, «2026-09-28» – dagen `income_yesterday` gjelder */
+export function yesterdayUtc(now = Date.now()): string {
+  return new Date(nextPayout(now) - 2 * 86_400_000).toISOString().slice(0, 10);
+}
+
+/**
+ * Beskjed til eieren når selskapet har betalt ut gårsdagens inntekt (B-258), én gang per selskap og dag. Gir hvor
+ * mange beskjeder som ble gitt.
+ */
+export function applyCompanyIncome(
+  g: GameState,
+  companies: Pick<Company, "id" | "name" | "mine" | "incomeYesterday">[],
+  now = Date.now(),
+): number {
+  const day = yesterdayUtc(now);
+  g.companyIncomeSeen ??= {};
+  let n = 0;
+  for (const c of companies) {
+    if (!c.mine || !c.incomeYesterday || c.incomeYesterday <= 0) continue;
+    if (g.companyIncomeSeen[String(c.id)] === day) continue;
+    g.companyIncomeSeen[String(c.id)] = day;
+    log(g, `${c.name} tjente ${fmtKr(c.incomeYesterday)} i går. Pengene står i konsernkassa.`, "good");
+    n++;
+  }
+  return n;
+}
+
+/** Er det noe nytt å si fra om (anbud eller inntekt)? Så appen bare endrer spillet når det trengs */
+export function worldNews(g: GameState, companies: Company[], now = Date.now()): boolean {
+  const day = yesterdayUtc(now);
+  return companies.some(
+    (c) =>
+      (c.lastResult?.id ?? 0) > (g.tenderSeen ?? 0) ||
+      (c.mine && (c.incomeYesterday ?? 0) > 0 && g.companyIncomeSeen?.[String(c.id)] !== day),
+  );
 }

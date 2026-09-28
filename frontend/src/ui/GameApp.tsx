@@ -41,7 +41,7 @@ import { importantLog, markAllSeen, unseenCount } from "../game/inbox";
 import { Sales } from "./Sales";
 import { KonsernPage } from "./Konsern";
 import { useOpenTender } from "./openTender";
-import { applyTenderResults } from "../net/world";
+import { applyCompanyIncome, applyTenderResults, worldNews } from "../net/world";
 import { VIEWS, viewUnlocked, type View } from "./views";
 import { Icon, type IconName } from "./icons";
 import { isVerketTab } from "./verketTabs";
@@ -809,10 +809,14 @@ export function GameApp() {
 
   // Varsellinja står over menyen nederst på mobil (B-201). Høyden følges, så veiledningen legger seg over den
   const isPc = useIsPc();
-  // Varsel om avgjort anbud til den som bydde (B-237); act er stabil, og hvert anbud gir én gang, i rekkefølge (B-253)
+  // Varsel om avgjort anbud (B-237, B-258: også til dem som ikke bød) og om inntekten til eieren én gang i døgnet;
+  // act er stabil, og hvert anbud gir én gang, i rekkefølge (B-253)
   const tender = useOpenTender(!!g?.konsern?.unlocked, (companies) => {
-    if (companies.some((c) => (c.lastResult?.id ?? 0) > (g?.tenderSeen ?? 0)))
-      act((gg) => void applyTenderResults(gg, companies));
+    if (g && worldNews(g, companies))
+      act((gg) => {
+        applyTenderResults(gg, companies);
+        applyCompanyIncome(gg, companies);
+      });
   });
   const appRef = useRef<HTMLDivElement>(null);
   const hasGame = !!g;

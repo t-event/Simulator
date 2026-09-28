@@ -5,7 +5,7 @@
 import type { GameState } from "../game/types";
 import { addCost, newGame } from "../game/engine";
 import { setCloudConfig } from "./config";
-import { setSaveListener } from "../game/save";
+import { migrate, setSaveListener } from "../game/save";
 import {
   consumeAuthHash,
   getSession,
@@ -56,14 +56,18 @@ import {
 import { forgetGuest, isGuest, onGuestSave, setGuestClock } from "./guest";
 import { DEPOSIT_REFUSAL_TEXT, depositToTreasury, fetchTreasury } from "./treasury";
 import {
+  applyCompanyIncome,
   applyTenderResult,
   applyTenderResults,
   BID_REFUSAL_TEXT,
   companyType,
   EARNS_FROM,
   fetchWorldStatus,
+  firstPayout,
+  nextPayout,
   placeBid,
   timeLeft,
+  yesterdayUtc,
 } from "./world";
 
 declare const process: { exitCode?: number };
@@ -1410,12 +1414,55 @@ const main = async () => {
       applyTenderResult(g, "Skraplageret", won, now) && /Du vant/.test(g.log.at(-1)!.text),
       "vinneren fikk ikke varsel",
     );
-    // Den som ikke bydde, får ikke varsel, men anbudet merkes som sett
+    // Den som ikke bydde, får vite hvem som eier selskapet nå – uten beløp (B-258)
     const notMine = { ...base, id: 7, winner: "Grane", won: false, myBid: null };
-    assert(!applyTenderResult(g, "Skraplageret", notMine, now) && g.tenderSeen === 7, "varsel uten bud");
+    assert(applyTenderResult(g, "Skraplageret", notMine, now) && g.tenderSeen === 7, "ingen nyhet uten bud");
+    assert(/Skraplageret har fått ny eier: Grane/.test(g.log.at(-1)!.text), `nyheten: ${g.log.at(-1)!.text}`);
+    assert(!/\bkr\b|mill\.|mrd\./.test(g.log.at(-1)!.text), "beløp i nyheten til dem som ikke bød");
+    // Et anbud uten bud gir ingen nyhet
+    const none = {
+      ...base,
+      id: 9,
+      status: "ingen bud" as const,
+      winner: null,
+      won: false,
+      winningBid: null,
+      myBid: null,
+    };
+    assert(!applyTenderResult(g, "Skraplageret", none, now) && g.tenderSeen === 9, "nyhet om anbud uten bud");
+    g.tenderSeen = 7;
     // Et gammelt anbud (over 14 dager) gir ikke varsel
     const old = { ...lost, id: 8, closedAt: "2026-09-01T09:00:00Z" };
     assert(!applyTenderResult(g, "Skraplageret", old, now), "varsel om gammelt anbud");
+  });
+
+  await test("Inntekt fra selskapet (B-258): beskjed til eieren én gang per dag, og når første inntekt kommer", async () => {
+    const g = newGame(258);
+    const now = Date.parse("2026-09-30T08:00:00Z");
+    assert(yesterdayUtc(now) === "2026-09-29", `i går: ${yesterdayUtc(now)}`);
+    assert(nextPayout(Date.parse("2026-09-29T01:40:00Z")) === Date.parse("2026-09-30T00:00:00Z"), "neste utbetaling");
+    const mine = { id: 4, name: "Skraplageret", mine: true, incomeYesterday: 42e6 };
+    assert(applyCompanyIncome(g, [mine], now) === 1 && /tjente 42 mill/.test(g.log.at(-1)!.text), g.log.at(-1)!.text);
+    assert(applyCompanyIncome(g, [mine], now) === 0, "samme beskjed to ganger");
+    assert(applyCompanyIncome(g, [mine], now + 86_400_000) === 1, "ny dag ga ikke beskjed");
+    // Ikke eier, eller ingen inntekt: ingen beskjed
+    assert(
+      applyCompanyIncome(
+        g,
+        [
+          { ...mine, mine: false },
+          { ...mine, id: 6, incomeYesterday: 0 },
+        ],
+        now,
+      ) === 0,
+      "feil",
+    );
+    // Gamle lagringer får et tomt minne
+    const old = JSON.parse(JSON.stringify(g));
+    delete old.companyIncomeSeen;
+    assert(JSON.stringify(migrate(old).companyIncomeSeen) === "{}", "migrate");
+    // Første utbetaling vises i spillerens egen tid, uten «+0 kr i går»
+    assert(/kl\. \d\d:\d\d$/.test(firstPayout(now)), firstPayout(now));
   });
 
   await test("To selskaper (B-253): slagghåndteringen tolkes, og begge anbudene gir varsel uansett rekkefølge", async () => {

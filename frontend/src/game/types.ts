@@ -555,6 +555,8 @@ export interface GameState {
   seasonPromptSeen: number | null;
   /** Det siste anbudsresultatet spilleren har fått varsel om (B-237), 0 hvis ingen */
   tenderSeen: number;
+  /** Per selskap (id): den siste UTC-dagen eieren har fått beskjed om inntekten for (B-258) */
+  companyIncomeSeen: Record<string, string>;
   /** Sesongen en spiller uten konto sist fikk beskjed om at man må logge inn for å være med (B-131) */
   seasonLoginPromptSeen: number | null;
   /** Felles hendelser fra serveren som pågår nå, og hvilke spilleren alt har fått beskjed om (B-129) */

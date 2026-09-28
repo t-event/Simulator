@@ -265,6 +265,8 @@ export function migrate(g: GameState): GameState {
   for (const c of g.contracts ?? []) if (HAS_EMOJI.test(c.customer)) c.customer = c.customer.replace(EMOJI, "").trim();
   // Varsel om anbudsresultatet (B-237)
   if (loose.tenderSeen === undefined) loose.tenderSeen = 0;
+  // Beskjed om inntekten fra selskapene (B-258)
+  if (loose.companyIncomeSeen === undefined) loose.companyIncomeSeen = {};
   if (loose.seasonLoginPromptSeen === undefined) loose.seasonLoginPromptSeen = null;
   if (loose.world === undefined) loose.world = { events: [], seenEventIds: [] };
   for (const c of g.contracts) {

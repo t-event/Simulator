@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 195 – 2026-09-28: Når skraplageret får eier
+
+**Brukeren ba om:** «Fortsett», så «Anbudet avgjort i natt».
+
+**Gjort:** B-258. Prøvde avgjørelsen av skraplageranbudet i en transaksjon som ble rullet tilbake (virker). Appen:
+vinneren ser når første inntekt kommer (ikke «+0 kr i går»), eieren får beskjed om inntekten hver dag, og alle med
+konsern får vite hvem som eier skraplageret. Publiseringen av #202 (B-257) var grønn.
+
+**Testet:** tsc, lint, `npm test`, Playwright med falsk server (vinner, taper, tilskuer, eier dag 2) på 320 og 390 px.
+
+**Gjenstår:** i morgen: sjekk at anbudet ble avgjort og at første inntekt ble betalt 30.9. (`company_income`); slå så på
+slagghåndteringen og verkstedet etter noen dager (B-253, B-256).
+
+---
+
 ## Økt 194 – 2026-09-28: Juksesperren sjekker første opplasting
 
 **Brukeren ba om:** «Fortsett», så «Sjekk første opplasting».
