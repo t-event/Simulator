@@ -14,7 +14,7 @@ import { gradeRecipe, type PlantStats } from "../game/plant";
 import type { Agreement, GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { useState } from "react";
-import { Bar, Card, GradeSpec } from "./common";
+import { ANALYSIS_KEY, Bar, Card, GradeSpec } from "./common";
 import { fmtKr, fmtPct, fmtT } from "./format";
 import { Icon } from "./icons";
 
@@ -67,7 +67,7 @@ function AgreementOffer({ g, stats, a, act }: Props & { a: Agreement }) {
         </div>
         <div>
           <dt>Fast pris</dt>
-          <dd>{fmtKr(a.pricePerT)}/t</dd>
+          <dd>{fmtKr(a.pricePerT)}/tonn</dd>
         </div>
         <div className={hours <= 3 ? "is-urgent" : undefined}>
           <dt>Svar innen</dt>
@@ -83,6 +83,7 @@ function AgreementOffer({ g, stats, a, act }: Props & { a: Agreement }) {
         <p>
           <GradeSpec id={a.grade} />
         </p>
+        <p className="g-muted g-small-text">{ANALYSIS_KEY}</p>
       </details>
       <div className="g-row g-offer-actions">
         <button
@@ -124,7 +125,7 @@ function AgreementRow({ a, act }: { a: Agreement; act: GameApi["act"] }) {
         </span>
       </div>
       <p>
-        {fmtT(a.weeklyT)} {GRADES[a.grade].name.toLowerCase()} i uka · {fmtKr(a.pricePerT)}/t
+        {fmtT(a.weeklyT)} {GRADES[a.grade].name.toLowerCase()} i uka · {fmtKr(a.pricePerT)}/tonn
       </p>
       <Bar value={a.weeksDone / a.weeks} tone={a.weeksMissed > 0 ? "warning" : "ok"} label="Uker levert" />
       <p className="g-muted">

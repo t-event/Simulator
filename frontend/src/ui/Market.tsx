@@ -7,7 +7,7 @@ import { PowerCard } from "./Power";
 import { auto, automationUnlocked, researchForScrap, scrapUnlocked } from "../game/research";
 import type { GameState, ProductId, ScrapId } from "../game/types";
 import type { GameApi } from "../game/useGame";
-import { Bar, Card, SubTabs } from "./common";
+import { AnalysisLegend, Bar, Card, SubTabs } from "./common";
 import { EventsNote } from "./Season";
 import { worldFactor } from "../game/world";
 import { AutoToggle } from "./AutoToggle";
@@ -156,7 +156,7 @@ export function Market({ g, stats, act, openTab, onTab }: Props & { openTab?: st
                     )}
                     <div className="g-scrap-facts">
                       <span>
-                        {type.buyable ? `${fmtKr(price)}/t` : "Gratis"}
+                        {type.buyable ? `${fmtKr(price)}/tonn` : "Gratis"}
                         <Trend g={g} id={id} />
                       </span>
                       <span title="Fosfor">P {fmtNum(type.p, 3)}</span>
@@ -220,6 +220,7 @@ export function Market({ g, stats, act, openTab, onTab }: Props & { openTab?: st
                 })}
               </tbody>
             </table>
+            <AnalysisLegend dirt />
             {[...locked].map(([name, ids]) => (
               <p key={name} className="g-note g-locked-scrap">
                 <Icon name="lock" /> {ids.map((id) => SCRAP_TYPES[id].name).join(" · ")} – forsk fram «{name}».
@@ -344,7 +345,7 @@ export function Market({ g, stats, act, openTab, onTab }: Props & { openTab?: st
                 {(["stopegods", "blokk", "emne", "armering"] as ProductId[]).map((p) => (
                   <tr key={p} className={stats.products.includes(p) ? "" : "g-dim"}>
                     <td>{PRODUCTS[p].name}</td>
-                    <td className="num">{fmtKr(productPrice(g, p, "standard"))}/t</td>
+                    <td className="num">{fmtKr(productPrice(g, p, "standard"))}/tonn</td>
                   </tr>
                 ))}
               </tbody>
@@ -361,7 +362,7 @@ export function Market({ g, stats, act, openTab, onTab }: Props & { openTab?: st
                   .map((id) => (
                     <tr key={id}>
                       <td>{SCRAP_TYPES[id].name}</td>
-                      <td className="num">{fmtKr(scrapPrice(g, id))}/t</td>
+                      <td className="num">{fmtKr(scrapPrice(g, id))}/tonn</td>
                     </tr>
                   ))}
               </tbody>

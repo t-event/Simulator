@@ -5104,3 +5104,19 @@ eksempel mursteinene (foringen) i ovnen.
     «Bytt foring» neste gang er mye billigere.
   - Rådet om slitt foring sier «Trykk her og så «Bytt foring»».
 - Konto: nei (regel 1, ditt eget spill).
+
+## B-282 Nybegynner-gjennomgang: forkortelser forklart der de står (2026-09-28)
+Status: gjelder
+Brukeren valgte «Nybegynner-gjennomgang» etter spørsmålene om «fp» og havari (B-281). All tekst på hver fane og
+underfane ble hentet ut på nivå 1–3 (390 px) og gått gjennom for forkortelser og ord som ikke forklares.
+- **C, P og Spor** (og Skitt) sto bare forklart i `title`, som ikke vises på mobil. Nå:
+  - «Hva betyr C, P og Spor?» kan trykkes opp på Marked → Skrap (med Skitt) og på Verket → Resept (`AnalysisLegend`).
+  - Under «Krav til stålet» på forespørsler og rammeavtaler står en kort linje: «C = karbon · P = fosfor · Spor = kobber,
+    tinn og andre stoffer som ikke kan tas ut av stålet» (`ANALYSIS_KEY`).
+- **«Cu+Sn»** i resepten het det samme som «Spor» andre steder – nå «Spor» overalt.
+- **«kr/t»** kan leses som kroner per time. Prisene per tonn står nå som «kr/tonn» (skrap, stål, kontrakter, avtaler,
+  resept, bot).
+- **«charge»** ble brukt overalt uten å bli forklart. Veiledningen sier nå «én ovnsfylling kalles en charge».
+- Ellers funnet uten endring: kWh, MW og effekttariff forklares der de står; fagord som foring og omforing forklares i
+  vedlikeholdskortet og fagboka.
+- Konto: nei (regel 1, ditt eget spill).

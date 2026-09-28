@@ -39,7 +39,7 @@ import { TrendNote } from "./Trend";
 import { DirectorOffer, DirectorSwitch } from "./Konsern";
 import { AutoLocked, AutoToggle } from "./AutoToggle";
 import { auto, automationUnlocked } from "../game/research";
-import { AnalysisLine, Bar, Card, GradeChips, GradeSpec, SubTabs } from "./common";
+import { ANALYSIS_KEY, AnalysisLine, Bar, Card, GradeChips, GradeSpec, SubTabs } from "./common";
 import { Callout, StatusBadge } from "./ds";
 import { Icon, type IconName } from "./icons";
 import { fmtKr, fmtNum, fmtT } from "./format";
@@ -190,7 +190,7 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
         </div>
         <div>
           <dt>Pris</dt>
-          <dd>{fmtKr(c.pricePerT)}/t</dd>
+          <dd>{fmtKr(c.pricePerT)}/tonn</dd>
         </div>
         <div className={!c.landmark && hours <= 3 ? "is-urgent" : undefined}>
           <dt>Svar innen</dt>
@@ -211,10 +211,11 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
         <p>
           <GradeSpec id={c.grade} />
         </p>
+        <p className="g-muted g-small-text">{ANALYSIS_KEY}</p>
         <p className="g-muted">
           {c.landmark
             ? `Omdømme +${fmtNum(c.repGain, 1)} ved levering. Ingen frist og ingen bot.`
-            : `Omdømme +${fmtNum(c.repGain, 1)} ved levering, −${fmtNum(c.repLoss, 1)} og bot ${fmtKr(c.penaltyPerT)}/t hvis for sent.`}
+            : `Omdømme +${fmtNum(c.repGain, 1)} ved levering, −${fmtNum(c.repLoss, 1)} og bot ${fmtKr(c.penaltyPerT)}/tonn hvis for sent.`}
         </p>
       </details>
       {/* Rekker verket det ikke, er avslag det foreslåtte valget (B-241) */}
@@ -510,7 +511,7 @@ function QueueTab({ g, stats, act }: Props) {
                 <details className="g-details g-queue-more">
                   <summary>Mer</summary>
                   <p className="g-muted g-small-text">
-                    {fmtKr(c.pricePerT)}/t · verdi {fmtKr(c.tonnes * c.pricePerT)}
+                    {fmtKr(c.pricePerT)}/tonn · verdi {fmtKr(c.tonnes * c.pricePerT)}
                     {c.landmark ? "" : ` · frist dag ${c.deadlineDay}`}
                   </p>
                   {confirmCancel === c.id ? (

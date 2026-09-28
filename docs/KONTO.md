@@ -117,4 +117,5 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Det nye i anleggsbildet (tak, renseanlegg, ferdiglager, vinter) | Nei | Regel 1: ditt eget spill | B-276 |
 | Dyrere strøm og snøstorm om vinteren | Nei | Regel 1: ditt eget spill | B-279 |
 | Fagpoeng forklart og havari som repareres av seg selv | Nei | Regel 1: ditt eget spill | B-281 |
+| Forklaring av C, P og Spor, «kr/tonn» og «charge» | Nei | Regel 1: ditt eget spill | B-282 |
 

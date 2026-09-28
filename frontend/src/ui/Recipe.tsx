@@ -8,7 +8,7 @@ import { gradeChecks, scrapResearchFor, scrapResearchHint, suggestRecipe, worstC
 import { scrapUnlocked } from "../game/research";
 import type { GameState, GradeId } from "../game/types";
 import type { GameApi } from "../game/useGame";
-import { Card, GradeChips } from "./common";
+import { AnalysisLegend, Card, GradeChips } from "./common";
 import { fmtKr, fmtNum, fmtPct } from "./format";
 
 /**
@@ -66,10 +66,10 @@ export function RecipeCard({ g, stats, act }: { g: GameState; stats: PlantStats;
           disabled={!cheap}
           onClick={() => act((gg) => cheap && applyRecipe(gg, cheap.recipe, grade))}
         >
-          Billigst{cheap ? ` · ${fmtKr(cheap.costPerT)}/t` : ""}
+          Billigst{cheap ? ` · ${fmtKr(cheap.costPerT)}/tonn` : ""}
         </button>
         <button disabled={!safe} onClick={() => act((gg) => safe && applyRecipe(gg, safe.recipe, grade))}>
-          Sikrest{safe ? ` · ${fmtKr(safe.costPerT)}/t` : ""}
+          Sikrest{safe ? ` · ${fmtKr(safe.costPerT)}/tonn` : ""}
         </button>
       </div>
       <p className="g-muted g-small-text">
@@ -89,7 +89,7 @@ export function RecipeCard({ g, stats, act }: { g: GameState; stats: PlantStats;
               <div className="g-recipe-name">
                 <strong>{type.name}</strong>
                 <span className="g-muted">
-                  P {fmtNum(type.p, 3)} · Cu+Sn {fmtNum(type.tramp, 2)}
+                  P {fmtNum(type.p, 3)} · Spor {fmtNum(type.tramp, 2)}
                 </span>
               </div>
               <div className="g-stepper">
@@ -123,6 +123,7 @@ export function RecipeCard({ g, stats, act }: { g: GameState; stats: PlantStats;
           </li>
         ))}
       </ul>
+      <AnalysisLegend />
       <div className="g-estimate">
         <span>Holder kravet til:</span>
         <GradeChips grades={est.grades.filter((id) => GRADES[id].minStage <= g.stage)} highlight={grade} />
@@ -143,7 +144,7 @@ export function RecipeCard({ g, stats, act }: { g: GameState; stats: PlantStats;
       ) : (
         <p className={worstOk ? "g-muted" : "g-note g-warn"}>
           Uten skrapklasser blir blandingen omtrentlig (±25 % per skraptype). En dårlig charge kan gi P{" "}
-          {fmtNum(worst.p, 3)} og Cu+Sn {fmtNum(worst.tramp, 2)}
+          {fmtNum(worst.p, 3)} og Spor {fmtNum(worst.tramp, 2)}
           {worstOk
             ? " – det holder fortsatt."
             : " – det holder ikke kravet. Velg «Sikrest», eller ansett en skrapklasser."}
