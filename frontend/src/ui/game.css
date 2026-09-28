@@ -7,7 +7,13 @@
 .g-app {
   --nav-h: 58px;
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* Hele skjermen også på iPhone lagt på hjemskjermen: inset: 0 ble der kortere enn skjermen, så menyen nederst havnet
+     over skjermkanten (B-267). dvh = det synlige området; vh er reserve for eldre nettlesere. */
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
 }
@@ -1388,7 +1394,11 @@ button {
 .g-modal,
 .g-intro {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  height: 100dvh;
   z-index: 60;
   background: var(--scrim);
   display: flex;
@@ -1565,7 +1575,11 @@ button {
 /* Kontrollrommet legger seg over hele spillet */
 .control-room {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  height: 100dvh;
   z-index: 50;
   background: var(--bg);
   overflow-y: auto;

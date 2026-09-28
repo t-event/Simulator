@@ -15,6 +15,12 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 267,
+    date: "2026-09-28",
+    title: "Menyen nederst helt nede",
+    items: ["Spillet fyller nå hele skjermen på iPhone, så menyen nederst står helt nede ved kanten."],
+  },
+  {
     b: 266,
     date: "2026-09-28",
     title: "Færre nestenulykker",
