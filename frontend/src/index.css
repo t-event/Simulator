@@ -26,12 +26,12 @@ button {
   user-select: none;
 }
 
-/* Siden selv har ingen høyde: alt ligger i faste lag (.g-app, .g-intro) og scroller inni dem (B-137, B-192). Med
-   min-height: 100vh var siden høyere enn det synlige på iPhone og kunne scrolles litt, og da traff trykket et annet
-   sted enn knappen (B-262). height: 100% + overflow: hidden på html/body løftet i stedet menyen nederst opp fra
-   skjermkanten på iPhone (B-264) – ikke sett høyde eller overflow på html, body eller #root. */
+/* Siden er like høy som skjermen, slik den var før B-262: på iPhone med spillet på hjemskjermen tegnes bare det som er
+   innenfor siden, så uten denne høyden sluttet spillet og menyen over bunnen (B-264, B-267, B-268 prøvde andre veier,
+   B-269). Siden kan da scrolles litt på iPhone; main.tsx setter den straks tilbake til toppen, ellers treffer trykk
+   over knappene (B-262). */
 #root {
-  min-height: 0;
+  min-height: 100vh;
 }
 
 button {

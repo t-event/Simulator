@@ -227,12 +227,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Ingen hopping** (B-238): tekst som endrer seg mens spillet går (status, tall, råd, merker), skal ikke endre høyden
   på det som står over annet innhold. Bruk faste rader (`nowrap` + «…»), reserver plass (stolper, rådsraden) og legg
   merker oppå hjørnet. Test ved å måle posisjonen til kortene i 8 s med spillet i gang, på 320 og 390 px.
-- **Siden scroller aldri** (B-262, B-264): `#root` har ingen høyde (alt ligger i faste lag), og `main.tsx` setter vinduet
-  tilbake til toppen. Ikke bruk `100vh` på rota (siden kunne scrolles, og trykk traff over knappene på iPhone), og ikke
-  `height: 100 %` + `overflow: hidden` på `html`/`body` (menyen nederst havnet et stykke over skjermkanten på iPhone).
-  De faste lagene (`.g-app`, `.g-modal`, `.g-intro`, `.control-room`) bruker `height: 100dvh`, ikke `inset: 0` (B-267),
-  og fra hjemskjermen på iPhone skjermens høyde (`is-standalone`, `--app-h` fra `main.tsx`, B-268).
-  Chromium viser ingen av feilene – spør brukeren om å sjekke på telefonen.
+- **Sidehøyden på iPhone** (B-262, B-269): `#root { min-height: 100vh }` og faste lag med `inset: 0` må stå. Uten
+  den sluttet spillet over bunnen på iPhone-hjemskjermen (B-264, B-267), og med skjermhøyden satt direkte forsvant
+  navnene i menyen (B-268). Siden kan scrolles litt, så `main.tsx` setter vinduet straks tilbake til toppen – ellers
+  treffer trykk over knappene. Chromium viser ingen av feilene; spør brukeren om å sjekke på telefonen.
 - Skjermbilder med `fullPage: true` viser faste menyer midt på siden; det er
   bare et artefakt av skjermbildet.
 - Prosessmodellen er kalibrert med steg på maks 1 s – del opp større steg.
