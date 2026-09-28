@@ -5147,3 +5147,12 @@ tatt.
 - Tips (engangskort) og havarikortet for renseanlegget (B-263) går ikke gjennom denne regelen – de kommer når noe skjer.
 - Testspilleren: alle nivådager innenfor målene, 0 konkurs (exit 0). Ny test i `tests.ts`.
 - Konto: nei (regel 1, ditt eget spill).
+
+## B-285 «Hva gjør jeg nå?» står stille (2026-09-28)
+Status: gjelder
+Brukeren: «Linjene flytter seg i hva gjør jeg nå». Arket (B-283) ble regnet ut på nytt i hvert tidssteg: rådene byttet
+rekkefølge, og tekster som «klar om 7 t» og tonn på lager endret lengde, så linjene hoppet (brudd på B-238).
+- Arket tar nå et øyeblikksbilde når det åpnes (ren tekst) og står stille mens spillet går.
+- Øverst står «Slik var det kl. HH:MM. Oppdater» – knappen (44 px) henter ny status.
+- Testet på 320 og 390 px på 10×: ingen linjer flyttet seg på 8 sekunder, og «Oppdater» gir ny tekst.
+- Konto: nei (regel 1, ditt eget spill).

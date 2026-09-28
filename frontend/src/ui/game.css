@@ -6374,3 +6374,11 @@ button.g-prod-row:hover {
     color: var(--info);
   }
 }
+
+.g-help-at {
+  margin: 0 0 var(--sp-2);
+}
+
+.g-help-at .g-link {
+  min-height: 44px;
+}
