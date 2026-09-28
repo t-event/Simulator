@@ -230,7 +230,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Siden scroller aldri** (B-262, B-264): `#root` har ingen høyde (alt ligger i faste lag), og `main.tsx` setter vinduet
   tilbake til toppen. Ikke bruk `100vh` på rota (siden kunne scrolles, og trykk traff over knappene på iPhone), og ikke
   `height: 100 %` + `overflow: hidden` på `html`/`body` (menyen nederst havnet et stykke over skjermkanten på iPhone).
-  De faste lagene (`.g-app`, `.g-modal`, `.g-intro`, `.control-room`) bruker `height: 100dvh`, ikke `inset: 0` (B-267).
+  De faste lagene (`.g-app`, `.g-modal`, `.g-intro`, `.control-room`) bruker `height: 100dvh`, ikke `inset: 0` (B-267),
+  og fra hjemskjermen på iPhone skjermens høyde (`is-standalone`, `--app-h` fra `main.tsx`, B-268).
   Chromium viser ingen av feilene – spør brukeren om å sjekke på telefonen.
 - Skjermbilder med `fullPage: true` viser faste menyer midt på siden; det er
   bare et artefakt av skjermbildet.

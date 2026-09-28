@@ -18,6 +18,14 @@
   flex-direction: column;
 }
 
+/* Hjemskjermen på iPhone (B-268): hele skjermens høyde, satt av main.tsx */
+.is-standalone .g-app,
+.is-standalone .g-modal,
+.is-standalone .g-intro,
+.is-standalone .control-room {
+  height: var(--app-h, 100dvh);
+}
+
 .g-behind {
   flex: 1;
   min-height: 0;

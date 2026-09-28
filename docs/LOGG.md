@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 205 – 2026-09-28: Menyen nederst, tredje forsøk
+
+**Brukeren ba om:** «Menyen nederst er ikke fikset» og «Den er fortsatt for langt opp».
+
+**Gjort:** B-268. Fra hjemskjermen på iPhone får de faste lagene skjermens høyde (`screen`) i stedet for det Safari
+kaller det synlige området. Publiseringen av #212 og #213 var grønn. Stoppet tre ventende bakgrunnsjobber som aldri
+ville blitt ferdige.
+
+**Testet:** Playwright med vindu 758 / skjerm 844 (hjemskjerm og Safari) og de 8 vanlige størrelsene, tsc, lint, npm
+test, build.
+
+**Gjenstår:** brukeren bekrefter på iPhone. Virker det ikke: sett `#root { min-height: 100vh }` tilbake (slik det var før
+B-262) og la `main.tsx` holde siden øverst.
+
+---
+
 ## Økt 204 – 2026-09-28: Menyen nederst fortsatt for høyt
 
 **Brukeren ba om:** «Menyen nederst ble ikke bra etter oppdateringen. Den er for langt opp» (skjermbilde 19:37).
