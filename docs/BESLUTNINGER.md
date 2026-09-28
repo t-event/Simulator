@@ -5211,3 +5211,16 @@ Brukeren valgte «Nybegynner: nivå 4 og konsern». Gjennomgang på 390 og 320 p
 - Testspilleren (`--vansker`): nybegynneren bruker ca. 530 døgn på storverket mot 326 for den flinke. Det kommer av at
   den bare handler hver tredje time, som er meningen, og ble ikke endret.
 - Konto: nei (regel 1).
+
+## B-289 Gjennomgang av de siste endringene: snøstorm i hendelseskort og hjelpen (2026-09-28)
+Status: gjelder (justerer B-279 og B-283)
+Brukeren sa «Fortsett»; neste punkt var en gjennomgang av koden som er endret de siste dagene (vinter, snøstorm, hjelp,
+Mål-arket, sesongpynt og konsernet). Funn:
+- **Billig skrapparti under snøstorm:** hendelseskortet «Billig skrapparti» kunne komme mens veien var stengt, og skrapet
+  kom fram likevel. Kortet kommer ikke lenger når `scrapBlocked(g)` (test i `tests.ts`).
+- **«Hva gjør jeg nå?» og snøstormen:** raden Skrap sa bare «1 456 t på lager» mens veien var stengt. Nå står det også at
+  veien er stengt, når skrapbilene kommer fram, og at ovnene bruker lageret så lenge.
+- Ellers ingen feil: strømprisene om vinteren, kjøpsstoppen, Mål-arket, sesongpynten og byggetiden i konsernet ble lest
+  gjennom og stemmer med beslutningene.
+- Testspilleren: alle nivådager innenfor målene, 0 konkurs (exit 0).
+- Konto: nei (regel 1).

@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 225 – 2026-09-28: Gjennomgang av de siste endringene
+
+**Brukeren ba om:** «Fortsett».
+
+**Gjort:** B-289. Gjennomgang av vinter, snøstorm, hjelp, Mål-arket, sesongpynt og konsernet. Rettet: «Billig skrapparti»
+kom under snøstorm, og hjelpen sier nå fra om stengt vei. Publiseringen av #234 (B-288) var grønn.
+
+**Testet:** tsc, lint, npm test (ny sjekk), balance (exit 0), build.
+
+**Gjenstår:** pynt for sesong 2 før den startes. I morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 224 – 2026-09-28: Nybegynner på storverket og i konsernet
 
 **Brukeren ba om:** «Fortsett» → valgte «Nybegynner: nivå 4 og konsern».

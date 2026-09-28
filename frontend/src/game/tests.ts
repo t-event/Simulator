@@ -2636,6 +2636,8 @@ test("Vinter (B-279): dyrere strøm, og snøstorm stenger veien for skrapbilene 
   const t = g.scrap.tungt.t;
   const r = buyScrap(g, "tungt", 5);
   assert(!r.ok && r.message.includes("snøstorm") && g.scrap.tungt.t === t, `kjøpte under snøstorm: ${r.message}`);
+  // Heller ingen skraphandler med et billig parti mens veien er stengt (B-289)
+  assert(makeDecision(g, "billigparti") === null, "billig skrapparti under snøstorm");
   g.owned.push("skrapterminal");
   assert(!scrapBlocked(g) && buyScrap(g, "tungt", 5).ok, "skrapterminalen får ikke skrap under snøstorm");
   g.owned = g.owned.filter((id) => id !== "skrapterminal");
