@@ -6,6 +6,7 @@ import {
   dividends,
   KONSERN_ECONOMY,
   konsernCosts,
+  empireLoad,
   DIRECTOR_AGREEMENT_SHARE,
   BUILD_HOURS,
   flagshipBonus,
@@ -749,6 +750,10 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
   const drift = k.plants.filter(running).reduce((a, p) => a + sisterProfit(g, p), 0);
   const dividend = div.reduce((a, d, i) => a + (running(k.plants[i]) ? d : 0), 0);
   const costs = konsernCosts(k.plants);
+  // Imperiebelastningen (B-251): det som går bort fordi konsernet er stort
+  const load = empireLoad(dividend, costs);
+  // Det hvert verk gir deg etter imperiebelastningen, så tallene per verk stemmer med nettoen
+  const shown = div.map((d) => (dividend > 0 ? d * (1 - load / dividend) : d));
   const equity = konsernEquity(g);
   const options = konsernOptions(g);
   const advice = konsernAdvice(g);
@@ -770,7 +775,7 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
             </div>
             <div className="g-finance-side">
               <span>
-                Netto fra verkene <strong>{fmtKr(dividend - costs)}/døgn</strong>
+                Netto fra verkene <strong>{fmtKr(dividend - costs - load)}/døgn</strong>
               </span>
               {k.plants.length > 0 && (
                 <span title="Utbyttet øker når hjemmeverket har godt omdømme og lager stål som holder kvaliteten">
@@ -794,6 +799,8 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
             <p className="g-muted g-small-text">
               Verkene tjener {fmtKr(drift)}/døgn. De beholder {fmtKr(drift - dividend)} til vedlikehold, ledelse og
               reserve, og konsernledelsen koster {fmtKr(costs)}/døgn.
+              {load > 0 &&
+                ` Et så stort konsern er tungt å styre: ${fmtKr(load)}/døgn går bort i ekstra ledelse, kapital og koordinering, og hvert nytt verk gir mindre enn det forrige.`}
             </p>
           )}
           {!g.won && (
@@ -859,13 +866,13 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
                   g={g}
                   act={act}
                   p={p}
-                  dividend={div[i]}
+                  dividend={shown[i]}
                   options={options}
                   advised={!!advice && advice.key.endsWith(`-${p.id}`)}
                 />
               ))}
             </div>
-            <PlantTable g={g} act={act} div={div} options={options} adviceKey={advice?.key} />
+            <PlantTable g={g} act={act} div={shown} options={options} adviceKey={advice?.key} />
           </Card>
         </div>
       )}

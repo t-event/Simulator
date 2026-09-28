@@ -4548,3 +4548,26 @@ Brukeren: «Fiks pipeplasseringa i appikonet og tittelbildet.»
   støpehallen. Nå står begge pipene på høyre takflate på smeltehallen og går ned i hallen, som i anleggsbildet (B-246).
 - PNG-ene er laget på nytt fra `public/icon.svg`.
 - Konto: nei.
+
+## B-251 Imperiebelastning: avtagende netto fra datterverkene (2026-09-28)
+Status: gjelder (bygger på B-181; første del av rebalanseringen av sluttspillet i B-193/B-238, FORSLAG)
+Brukeren: «Fortsett». Fikk analysen av veksten på toppen og valgte **avtagende utbytte** og at **det spillerne har fra
+før, beholdes**.
+- **Analysen (bare lest):** de største konsernene vokste 400–740 mrd. per ekte døgn. Nesten alt var utbytte fra 11–12
+  fullt moderniserte komplekser (ca. 1,6 mrd. per spilldøgn mot 0,23 mrd. i konsernkostnader); hjemmeverket ga ca.
+  0,2 mrd. Kassa står på 100 mrd., så resten gikk til den bundne reserven (Tuster 943 mrd.). På 10× er et spilldøgn
+  ca. 12 s, og de ivrigste spilte 500–730 spilldøgn på én ekte dag.
+- **Regelen:** netto fra verkene (utbytte minus konsernkostnader) er uendret opp til 50 mill. per døgn. Over det vokser
+  den med kvadratroten (`KONSERN_ECONOMY.loadFrom` og `loadPower`, `afterEmpireLoad` i `konsern.ts`). Forskjellen
+  bokføres som konsernkostnad og står forklart under Konsern → Oversikt («Et så stort konsern er tungt å styre …»).
+  Tallene per verk i tabellen vises etter belastningen, så de stemmer med nettoen.
+- **Virkning** (balance.ts --konsern, per spilldøgn):
+  - 1 storverk trinn 3: uendret (0,04 mrd.). 3 storverk trinn 3: 0,10 → 0,07 mrd.
+  - 1 kompleks trinn 5: 0,15 → 0,09 mrd. 14 komplekser trinn 5: 1,12 → 0,24 mrd. Et lagret spill med 12 komplekser og
+    alt forsket: ca. 1,37 → 0,26 mrd.
+  - Hvert nytt verk gir alltid litt, men mindre og mindre: det 15. komplekset betaler seg på ca. 2 600 døgn (før 277).
+    Utvid merker det «Lønner seg dårlig».
+- **Hva som gjenstår:** med konsernet bremset er hjemmeverket (ca. 0,2 mrd. per døgn) nå omtrent halve veksten. En
+  som spiller mange timer på 10× vokser fortsatt ca. 300 mrd. per ekte døgn (før ca. 1 100). Står i FORSLAG.
+- **Ingen lagrede spill endres.** Reserven og titlene spillerne har, beholdes; regelen gjelder det som tjenes fra nå.
+- Testspilleren (alle nivåmål, nybegynner, kontrollrommet) er uendret og grønn. Konto: nei (regnes i spillet).

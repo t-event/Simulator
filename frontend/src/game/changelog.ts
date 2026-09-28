@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 251,
+    date: "2026-09-28",
+    title: "Store konsern er tunge å styre",
+    items: [
+      "Jo mer datterverkene gir til sammen, desto mer går bort i ekstra ledelse, kapital og koordinering. Hvert nytt verk gir fortsatt litt, men mindre enn det forrige.",
+      "Konsern → Oversikt viser hvor mye som går bort, og tallet ved hvert verk er det du faktisk får.",
+      "Det du har tjent og titlene du har fått, beholder du.",
+    ],
+  },
+  {
     b: 250,
     date: "2026-09-28",
     title: "Pipene på plass",

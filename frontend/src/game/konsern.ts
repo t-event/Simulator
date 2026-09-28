@@ -367,7 +367,21 @@ export const KONSERN_ECONOMY = {
   leadCost: { stalverk: 750_000, storverk: 3_000_000, kompleks: 10_000_000 } as Record<SisterType, number>,
   /** Koordinering, reise og finansiering: ledelseskostnaden per verk øker med så mye per verk utover det første */
   coordGrowth: 0.08,
+  /**
+   * Imperiebelastning (B-251): netto fra verkene over `loadFrom` per døgn vokser bare med potensen `loadPower` av det
+   * verkene gir (0,5 = kvadratroten). 14 fullt moderniserte komplekser gir da ca. 0,24 mrd. per døgn i stedet for over
+   * 1 mrd., og hvert nytt verk gir mindre enn det forrige – men alltid litt.
+   */
+  loadFrom: 50_000_000,
+  loadPower: 0.5,
 };
+
+/** Netto fra verkene etter imperiebelastningen (B-251): uendret opp til grensen, så avtagende mot et tak */
+export function afterEmpireLoad(net: number): number {
+  const { loadFrom, loadPower } = KONSERN_ECONOMY;
+  if (!(net > loadFrom) || loadFrom <= 0) return net;
+  return loadFrom * (net / loadFrom) ** loadPower;
+}
 
 /**
  * Andelen av det verket har igjen, som kan løftes opp til morselskapet. Verkene stilles i rekke etter overskudd:
@@ -417,9 +431,15 @@ export function konsernCosts(plants: SisterPlant[]): number {
   return running.reduce((a, p) => a + KONSERN_ECONOMY.leadCost[p.type], 0) * coord;
 }
 
-/** Netto til morselskapet per døgn med disse verkene i drift: utbytte minus konsernkostnader */
+/** Netto til morselskapet per døgn med disse verkene i drift: utbytte minus konsernkostnader og imperiebelastning */
 export function konsernNetFor(g: GameState, plants: SisterPlant[]): number {
-  return dividends(g, plants).reduce((a, b) => a + b, 0) - konsernCosts(plants);
+  return afterEmpireLoad(dividends(g, plants).reduce((a, b) => a + b, 0) - konsernCosts(plants));
+}
+
+/** Imperiebelastningen per døgn (B-251): det som går bort fordi konsernet er stort, gitt utbytte og kostnader */
+export function empireLoad(dividend: number, costs: number): number {
+  const net = dividend - costs;
+  return net - afterEmpireLoad(net);
 }
 
 /** Verdien av datterverkene til sammen */
@@ -941,6 +961,7 @@ export function konsernDay(g: GameState): void {
   if (costs > 0) addCost(g, "konsern", costs);
   const today = day(g);
   const div = dividends(g, g.konsern.plants);
+  let paid = 0;
   g.konsern.plants.forEach((p, i) => {
     if (p.downUntilDay > today || underConstruction(p)) return;
     const maintained = hasResearch(g, "fellesvedlikehold");
@@ -954,8 +975,12 @@ export function konsernDay(g: GameState): void {
     const record = chance(g, 0.015);
     // Utbytte til morselskapet (B-181): verket beholder vedlikehold, ledelse og reserve, og andelen avtar nedover i rekken
     addIncome(g, "konsern", div[i] * (record ? 2 : 1));
+    paid += div[i] * (record ? 2 : 1);
     // Kunnskapsdeling: hjemmeverket lærer av datterverkene som går (B-120)
     if (hasResearch(g, "kunnskapsdeling")) awardPoints(g, 1);
     if (record) log(g, `${p.name} satte produksjonsrekord og ga dobbelt utbytte i dag: ${fmtKr(div[i] * 2)}.`, "good");
   });
+  // Imperiebelastningen (B-251) bokføres sammen med konsernkostnadene
+  const load = empireLoad(paid, costs);
+  if (load > 0) addCost(g, "konsern", load);
 }

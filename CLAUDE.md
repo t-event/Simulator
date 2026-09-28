@@ -294,7 +294,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   ellers flagges ærlige spillere.
 - **Konsernøkonomien** (B-181): datterverkene har driftsresultat (`sisterProfit`, også verdien), men morselskapet får
   utbytte (`dividends`, i rekke etter resultat) minus konsernkostnader (`konsernCosts`, egen kostnadspost «konsern»).
-  Kjøp og råd regnes på netto (`konsernNetFor`). Endres tallene i `KONSERN_ECONOMY`: kjør `balance.ts --konsern`.
+  Kjøp og råd regnes på netto (`konsernNetFor`), som også trekker imperiebelastningen (B-251, `afterEmpireLoad`: over
+  `loadFrom` vokser netto med `loadPower`). Endres tallene i `KONSERN_ECONOMY`: kjør `balance.ts --konsern`.
 - **Sesonger uten sluttdato** (B-221): `seasons.ends_at` er tom mens sesongen pågår; den avsluttes med `end_season()` og en
   ny startes med `start_season(navn, vri)` – bare manuelt. SQL som leser `ends_at`, må tåle null. `season_status()` må tåle
   at ingen sesong pågår (den krasjet på en tom post før B-182).
