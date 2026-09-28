@@ -5087,3 +5087,20 @@ hendelseskort midt i quizen), men gjennomgangen fant to svake punkter:
 - Spilleren bør si hvilken telefon det gjelder og hva som skjer (står alt stille, eller svarer ikke knappene?), hvis det
   skjer igjen.
 - Konto: nei (regel 1, ditt eget spill).
+
+## B-281 «fp» skrives ut, fagpoengene kan trykkes, og havari sier at det repareres av seg selv (2026-09-28)
+Status: gjelder
+En spiller skjønte ikke hva «fp» er og hvor man finner det, og heller ikke hva man skal trykke når noe ryker, for
+eksempel mursteinene (foringen) i ovnen.
+- **fp → fagpoeng:** forkortelsen «fp»/«FP» er borte fra spillet (prestasjoner, pynt, mål, forskning). I den trange
+  rekka for daglig belønning står kolbe-ikonet (fagpoeng), med forklaring under.
+- **Fagpoengene i toppfeltet kan trykkes** (kolben og tallet, stiplet understrek): det åpner Forskning, der det står hvor
+  mange du har, hva de brukes til og «Slik får du fagpoeng». Trykkflaten er 45 px høy uten at toppfeltet blir høyere.
+- **Havari:** reparasjonen skjer av seg selv, men det sto ingen steder. Nå:
+  - Ovnens status viser hvor lenge det er igjen: «Havari: gjennombrent foring · klar om 7 t».
+  - Et råd på Verket: «Ovnen repareres etter havari og er i gang igjen om ca. 7 t. Det skjer av seg selv – du trenger ikke
+    trykke på noe.» (gir ikke «!» i menyen).
+  - Meldingen om gjennombrenning forklarer at foringen er mursteinene inni ovnen, at reparasjonen skjer av seg selv, og at
+    «Bytt foring» neste gang er mye billigere.
+  - Rådet om slitt foring sier «Trykk her og så «Bytt foring»».
+- Konto: nei (regel 1, ditt eget spill).

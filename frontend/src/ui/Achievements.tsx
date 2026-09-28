@@ -65,7 +65,7 @@ export function AchievementsCard({ g, onOpenPynt }: { g: GameState; onOpenPynt: 
                   <strong>{a.name}</strong>
                   <Bar value={achievementShare(g, a)} tone="ok" label="Fremdrift" />
                   <span className="g-muted g-small-text">
-                    {progressText(g, a)} · +{a.fp} fp
+                    {progressText(g, a)} · +{a.fp} fagpoeng
                   </span>
                 </div>
               </li>
@@ -140,7 +140,7 @@ function FamilyDetail({ g, family }: { g: GameState; family: string }) {
                 {got ? "✓ " : ""}
                 {a.name}
               </strong>
-              <span className="g-muted g-small-text">{got ? `dag ${g.achievements[a.id]}` : `+${a.fp} fp`}</span>
+              <span className="g-muted g-small-text">{got ? `dag ${g.achievements[a.id]}` : `+${a.fp} fagpoeng`}</span>
             </div>
             {a.id === next?.id && a.progress(g)[1] > 1 && (
               <Bar value={achievementShare(g, a)} tone="ok" label="Fremdrift" />
@@ -221,7 +221,7 @@ export function PyntModal({
                       disabled={blocked === "fp"}
                       onClick={() => act((gg) => buyCosmetic(gg, c.id))}
                     >
-                      {c.fp} fp
+                      {c.fp} fagpoeng
                     </button>
                   )}
                 </li>

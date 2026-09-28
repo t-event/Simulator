@@ -92,7 +92,7 @@ function ChallengeRow({ g, c }: { g: GameState; c: Challenge }) {
       ? `Beste døgn: ${fmt(p)}${unit} · mål ${fmt(c.goal)}${unit}`
       : `Mål: under ${fmt(c.goal)}${unit}`
     : `${fmt(p)} av ${fmt(c.goal)}${unit}`;
-  const reward = [c.fp ? `+${c.fp} fp` : "", c.cash ? fmtKr(c.cash) : "", c.rep ? `omdømme +${c.rep}` : ""]
+  const reward = [c.fp ? `+${c.fp} fagpoeng` : "", c.cash ? fmtKr(c.cash) : "", c.rep ? `omdømme +${c.rep}` : ""]
     .filter(Boolean)
     .join(" · ");
   return (

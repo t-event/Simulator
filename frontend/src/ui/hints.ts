@@ -131,9 +131,20 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
     });
   if (g.furnaces.some((f) => f.wear > 0.8 && !f.relineRequested))
     out.push({
-      text: "Foringen er nesten slitt gjennom. Trykk her og bytt den under Vedlikehold før den brenner gjennom.",
+      text: "Foringen (mursteinene inni ovnen) er nesten slitt gjennom. Trykk her og så «Bytt foring» før den brenner gjennom.",
       anchor: "vedlikehold",
     });
+  // Havari (B-281): reparasjonen skjer av seg selv, men spillerne trodde de måtte trykke på noe
+  const broken = g.furnaces.findIndex((f) => g.minute < f.downUntilMin && /^Havari/.test(f.downReason ?? ""));
+  if (broken >= 0) {
+    const f = g.furnaces[broken];
+    const h = Math.max(1, Math.ceil((f.downUntilMin - g.minute) / 60));
+    out.push({
+      text: `${g.furnaces.length > 1 ? `Ovn ${broken + 1}` : "Ovnen"} repareres etter havari og er i gang igjen om ca. ${h} t. Det skjer av seg selv – du trenger ikke trykke på noe.`,
+      anchor: "vedlikehold",
+      handled: true,
+    });
+  }
   // Uten ordreplanlegging bytter ikke ovnen kvalitet selv (B-054)
   const first = currentOrder(g);
   if (

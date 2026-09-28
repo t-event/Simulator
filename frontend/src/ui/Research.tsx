@@ -19,7 +19,7 @@ function FpDeal({ g, act }: { g: GameState; act: GameApi["act"] }) {
     <div className="g-upgrade">
       <div className="g-contract-head">
         <strong>Forskningssamarbeid</strong>
-        <span className="g-fp-cost">+{deal.fp} FP</span>
+        <span className="g-fp-cost">+{deal.fp} fagpoeng</span>
       </div>
       <p className="g-muted g-small-text">
         Leie inn forskere fra høyskolen. Kan brukes én gang i uka. Lønner seg når forskningen står fast og du har penger
@@ -84,7 +84,7 @@ function Mastery({ g, act }: { g: GameState; act: GameApi["act"] }) {
                 <strong>
                   {m.name} {level > 0 && <span className="g-muted">nivå {level}</span>}
                 </strong>
-                <span className="g-fp-cost">{cost} FP</span>
+                <span className="g-fp-cost">{cost} fagpoeng</span>
               </div>
               {gain > 0 && (
                 <p className="g-mastery-gain">
@@ -143,7 +143,7 @@ export function Research({
     <div key={r.id} className="g-upgrade">
       <div className="g-contract-head">
         <strong>{r.name}</strong>
-        <span className="g-fp-cost">{r.cost} FP</span>
+        <span className="g-fp-cost">{r.cost} fagpoeng</span>
       </div>
       <p className="g-effect">{r.effect}</p>
       <p className="g-muted g-small-text">{r.description}</p>
@@ -187,7 +187,7 @@ export function Research({
                   <li key={r.id}>
                     <div className="g-contract-head">
                       <strong>{r.name}</strong>
-                      <span className="g-fp-cost">{r.cost} FP</span>
+                      <span className="g-fp-cost">{r.cost} fagpoeng</span>
                     </div>
                     <span className="g-muted g-small-text">{r.effect}</span>
                     {/* Hvor nær du er (B-205): fagpoeng du har mot prisen */}

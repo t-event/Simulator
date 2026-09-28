@@ -996,7 +996,7 @@ function finishHeat(g: GameState, index: number, plant: PlantStats): void {
     awardPoints(g, 3);
     log(
       g,
-      `HAVARI: gjennombrenning i ovn ${index + 1}! Flytende stål gikk gjennom foringen. Reparasjon ${fmtKr(cost)}, ${hours.toFixed(0)} timer, omdømme −5. En planlagt omforing hadde kostet ${fmtKr(stats.furnace.relineCost)} og ${stats.furnace.relineHours} timer.`,
+      `HAVARI: gjennombrenning i ovn ${index + 1}! Flytende stål gikk gjennom foringen (mursteinene inni ovnen). Ovnen repareres av seg selv og er i gang igjen om ca. ${hours.toFixed(0)} timer – du trenger ikke trykke på noe. Reparasjon ${fmtKr(cost)}, omdømme −5. Neste gang: trykk «Bytt foring» når foringen er nesten slitt – det koster bare ${fmtKr(stats.furnace.relineCost)} og ${stats.furnace.relineHours} timer.`,
       "bad",
     );
     unlock(g, "ildfast");
@@ -1103,7 +1103,9 @@ function updateFurnaces(g: GameState, stats: PlantStats): void {
       continue;
     }
     if (g.minute < f.downUntilMin) {
-      f.waitReason = f.downReason;
+      // Hvor lenge det er igjen (B-281): spillerne trodde de måtte trykke på noe for å reparere
+      const h = Math.max(1, Math.ceil((f.downUntilMin - g.minute) / 60));
+      f.waitReason = f.downReason ? `${f.downReason} · klar om ${h} t` : f.downReason;
       continue;
     }
     if (f.downReason) {

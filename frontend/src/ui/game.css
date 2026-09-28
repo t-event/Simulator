@@ -3782,6 +3782,23 @@ button {
   font-weight: 600;
 }
 
+/* Fagpoengene kan trykkes (B-281): ser ut som de andre tallene, men treffflaten er minst 44 px høy */
+.g-kpi-btn {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 15px 4px;
+  margin: -15px -4px;
+  min-height: 0;
+  cursor: pointer;
+}
+
+.g-kpi-btn strong {
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
 .g-kpi-cash strong {
   font-family: var(--font-display);
   font-size: var(--fs-title);
