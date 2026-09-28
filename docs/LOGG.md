@@ -14,7 +14,9 @@ Publiseringen av #214 (B-268) var grønn.
 
 **Testet:** Playwright på 8 størrelser, tsc, lint, npm test, build.
 
-**Gjenstår:** brukeren bekrefter menyen, og spilleren med iPhone 16 Pro om trykkene treffer.
+**Bekreftet:** brukeren: «Det ble bra» – menyen står nederst med navnene synlige (skjermbilde 20:13).
+
+**Gjenstår:** spilleren med iPhone 16 Pro sier om trykkene treffer.
 
 ---
 
