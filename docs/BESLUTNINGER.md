@@ -5192,3 +5192,22 @@ valgte «ny pynt hver sesong».
 - Konto: **ja** for å kjøpe sesongpynt (regel 3: sesongen kommer fra serveren og er felles for alle). Uten konto vises
   pynten med «Krever konto» og `NeedsAccount` (regel 6). Pynt man har, virker uten konto. Ny rad i KONTO.md og
   `sesongpynt` i `ACCOUNT_FEATURES`.
+
+## B-288 Nybegynner på storverket og i konsernet: byggetid, riktige tall og kortere tekst (2026-09-28)
+Status: gjelder (justerer B-209 og B-226)
+Brukeren valgte «Nybegynner: nivå 4 og konsern». Gjennomgang på 390 og 320 px med et storverk der konsernet akkurat var
+åpnet, rett etter første kjøp og med ett ferdig og ett verk under bygging. Funn og rettelser:
+- **Byggetiden synes ikke i lista:** et verk som ble bygget, sto bare som «Bygges». Nå står «Klar om 1 t 20 min» (mobil
+  og PC-tabellen); hele timer skrives «2 t».
+- **Feil tall mens verket bygges:** rett etter kjøpet sto det «Verkene tjener 4,68 mill. kr/døgn. De beholder
+  4,68 mill. kr …» – verket ble regnet som i drift. Et verk under bygging teller ikke lenger med, og i stedet står
+  «Elveverket bygges – ferdig om 2 t. Så begynner det å tjene penger til deg.»
+- **Tekstvegg ved første besøk:** «Slik fungerer konsernet» (sju punkter) var åpen til første kjøp. Nå står én linje
+  («Et konsern er flere verk som tjener penger av seg selv. Start med ett stålverk …»), og forklaringen er lukket.
+- **Tallet per verk stemte ikke med nettoen:** raden viste utbyttet (3,71 mill.), toppen netto etter konsernledelsen
+  (2,96 mill.). Forklaringen over lista sier nå at tallet er før konsernledelsen, med beløpet.
+- **Ni like knapper i Forskning:** alle konsernprosjektene hadde «Les «Konsern og datterselskap» først». Knappen står nå
+  bare på det første; de andre har «Krever også …».
+- Testspilleren (`--vansker`): nybegynneren bruker ca. 530 døgn på storverket mot 326 for den flinke. Det kommer av at
+  den bare handler hver tredje time, som er meningen, og ble ikke endret.
+- Konto: nei (regel 1).
