@@ -371,7 +371,8 @@ const MORE_MAKERS: Record<string, Maker> = {
     };
   },
   nestenulykke: (g) => {
-    if (g.stage < 1) return null;
+    // Er verneutstyr og skjermer kjøpt på dette nivået, kommer det ikke igjen før verket blir større (B-266)
+    if (g.stage < 1 || (g.decisionFixed?.nestenulykke ?? -1) >= g.stage) return null;
     const cost = 10_000 * (1 + g.stage) ** 2;
     return {
       id: "nestenulykke",
@@ -401,7 +402,17 @@ export function makeDecision(g: GameState, id: string): Omit<Decision, "resumeSp
 /** Samme kort kommer ikke igjen før det har gått så mange døgn */
 const COOLDOWN_DAYS = 25;
 /** Noen kort kom for ofte (B-171): nettselskapet, naboene og messa får lengre pause */
-const CARD_COOLDOWN: Record<string, number> = { utkobling: 50, naboklage: 60, messe: 50, avis: 40, tilsyn: 40 };
+const CARD_COOLDOWN: Record<string, number> = {
+  utkobling: 50,
+  naboklage: 60,
+  messe: 50,
+  avis: 40,
+  tilsyn: 40,
+  // Nestenulykken kom for ofte (B-266)
+  nestenulykke: 90,
+};
+/** Noen kort har lengre pause i ekte tid enn SAME_CARD_REAL_MS (B-266): nestenulykken høyst én gang i timen */
+const CARD_REAL_MS: Record<string, number> = { nestenulykke: 60 * 60_000 };
 /** Minst så mange døgn mellom to kort */
 const MIN_GAP_DAYS = 2;
 /**
@@ -425,7 +436,7 @@ export function maybeCreateDecision(g: GameState): void {
   const ids = Object.keys(all).filter(
     (id) =>
       today - (g.decisionSeen[id] ?? -999) >= (CARD_COOLDOWN[id] ?? COOLDOWN_DAYS) &&
-      now - (g.decisionSeenAt?.[id] ?? -Infinity) >= SAME_CARD_REAL_MS,
+      now - (g.decisionSeenAt?.[id] ?? -Infinity) >= (CARD_REAL_MS[id] ?? SAME_CARD_REAL_MS),
   );
   for (let tries = 0; tries < 6 && ids.length; tries++) {
     const id = pick(g, ids);
@@ -782,6 +793,7 @@ export function resolveDecision(g: GameState, option: number): void {
         addCost(g, "annet", n("cost"));
         adjustMorale(g, 5);
         adjustReputation(g, 1);
+        g.decisionFixed = { ...(g.decisionFixed ?? {}), nestenulykke: g.stage };
         log(
           g,
           "Nytt verneutstyr og sprutskjermer er på plass. De ansatte er fornøyde (trivsel +5), omdømme +1.",

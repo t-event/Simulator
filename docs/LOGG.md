@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 203 – 2026-09-28: Nestenulykke for ofte
+
+**Brukeren ba om:** «Det er for ofte nestenulykke popup».
+
+**Gjort:** B-266. Verneutstyret stopper kortet på nivået, 90 døgn og én time i ekte tid mellom hver gang ellers.
+
+**Testet:** tsc, lint, npm test (ny test), balance (exit 0), build.
+
+**Gjenstår:** –
+
+---
+
 ## Økt 202 – 2026-09-28: Vinter, eksplosjoner, dødsulykker og quizspørsmål
 
 **Brukeren ba om:** dødsfall en ekstremt sjelden gang med store konsekvenser, å fikse quizspørsmålet «Hva gir mer karbon

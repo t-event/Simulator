@@ -4880,3 +4880,11 @@ uforutsette ting».
 - **Konto:** nei – en del av selve spillet.
 - **Balanse:** alle mål OK. Testspilleren fikk 0–3 eksplosjoner og ingen dødsulykker på 240 døgn; nybegynneren når
   storverket på median dag 147.
+
+## B-266 Nestenulykken sjeldnere (2026-09-28)
+Status: gjelder (bygger på B-171, B-210)
+Brukeren: «Det er for ofte nestenulykke popup».
+- Kjøper spilleren verneutstyr og skjermer, kommer kortet ikke igjen før verket flytter til et større nivå (som
+  naboklagen og kobbertyveriet, `decisionFixed`).
+- Ellers minst 90 spilldøgn (før 25) og minst én time i ekte tid (før 20 minutter) mellom to nestenulykker. På 10× var
+  20 minutter bare 100 spilldøgn, og vinteren (B-265) gjorde alle kort halvannen gang så vanlige.
