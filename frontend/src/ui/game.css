@@ -706,26 +706,6 @@ button {
   border-color: var(--info-border);
 }
 
-.g-chain {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
-}
-
-.g-chain-step {
-  background: var(--surface-2);
-  border-radius: var(--r-md);
-  padding: 8px 10px;
-}
-
-.g-chain-step p {
-  font-size: var(--fs-meta);
-}
-
-.g-chain-step .g-small {
-  margin-left: 6px;
-}
-
 .g-goal {
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -1377,10 +1357,6 @@ button {
 /* ---------------------------------------------------------------- Bredere skjermer */
 /* Innholdet får flere kolonner fra 760 px; skallet (sidemeny, topplinje) byttes først fra 900 px (B-192) */
 @media (min-width: 760px) {
-  .g-chain {
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  }
-
   .g-scrap-list,
   .g-upgrades {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -2297,9 +2273,6 @@ button {
 }
 
 /* Tilstanden til ovnen under Anlegg: fast høyde, så kortet ikke hopper (B-066) */
-.g-chain-state {
-  min-height: 2.6em;
-}
 
 /* Tips om å legge spillet til på hjemskjermen (B-071) */
 .g-install {
@@ -2936,12 +2909,23 @@ button {
   align-items: flex-start;
 }
 
-.g-challenge-icon {
-  font-size: 22px;
-  line-height: 1.2;
-  width: 28px;
+/* Ikon i en rute (B-235): Lucide i stedet for emoji, som designsystemet sier */
+.g-challenge-icon,
+.g-ach-next-icon {
   flex: none;
-  text-align: center;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  color: var(--accent);
+}
+
+.g-challenge-icon .ds-icon,
+.g-ach-next-icon .ds-icon {
+  width: 20px;
+  height: 20px;
 }
 
 .g-challenge-body {
@@ -3028,13 +3012,6 @@ button {
   flex-direction: column;
 }
 
-.g-ach-next-icon {
-  font-size: 22px;
-  width: 28px;
-  text-align: center;
-  flex: none;
-}
-
 .g-ach-group {
   margin-top: var(--sp-4);
 }
@@ -3061,14 +3038,22 @@ button {
 }
 
 .g-ach-tile-icon {
-  font-size: 22px;
-  filter: grayscale(1);
-  opacity: 0.45;
+  display: grid;
+  place-items: center;
+  color: var(--text-3);
+}
+
+.g-ach-tile-icon .ds-icon {
+  width: 22px;
+  height: 22px;
 }
 
 .g-ach-tile.is-got .g-ach-tile-icon {
-  filter: none;
-  opacity: 1;
+  color: var(--accent);
+}
+
+.g-ach-tile.is-full .g-ach-tile-icon {
+  color: var(--ok);
 }
 
 .g-ach-tile-name {
@@ -3651,23 +3636,6 @@ button {
 }
 
 /* Anlegg (B-196): tittel og statusmerke på samme linje i hvert sted */
-.g-chain-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--sp-2) var(--sp-3);
-  margin-bottom: var(--sp-3);
-}
-
-.g-chain-head .ds-status {
-  max-width: 100%;
-  white-space: normal;
-}
-
-.g-chain-head h3 {
-  margin: 0;
-}
 
 /* PC, Oversikt, Anlegg og Økonomi (B-200): høyrekolonnen går over to rader, så kortene til venstre (Mål, Fagboka …) følger rett under
    anleggsbildet i stedet for å vente til høyrekolonnen er ferdig. Den siste raden tar resten av høyden. */
@@ -5090,4 +5058,249 @@ button {
 
 .g-book-mission-icon {
   font-size: 22px;
+}
+
+/* Produksjonen på Anlegg (B-235): én rad per sted, trykk for utstyret */
+.g-prod-list {
+  list-style: none;
+  margin: 0 0 var(--sp-4);
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+  gap: var(--sp-2);
+}
+
+.g-prod-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 60px;
+  padding: var(--sp-3) var(--sp-4);
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface-1);
+  color: var(--text);
+  font: inherit;
+}
+
+button.g-prod-row:hover {
+  background: var(--surface-2);
+}
+
+.g-prod-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+
+.g-prod-icon .ds-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.g-prod-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.g-prod-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0 var(--sp-3);
+}
+
+.g-prod-detail {
+  font-size: var(--fs-meta);
+  color: var(--text-2);
+}
+
+.g-prod-main .g-bar {
+  height: 4px;
+  margin-top: var(--sp-1);
+}
+
+.g-prod-end {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--text-3);
+}
+
+.g-prod-actions {
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-2);
+}
+
+.g-prod-actions > button {
+  min-height: 44px;
+}
+
+/* Kjøp i konsernet (B-235): vurdering, tre tall og én knapp per kjøp */
+.g-buy-opts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.g-buy-opt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface-1);
+}
+
+.g-buy-opt.is-best {
+  border-color: var(--accent-border);
+  background: var(--accent-tint);
+}
+
+.g-buy-opt p {
+  margin: 0;
+}
+
+.g-buy-opt-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-3);
+}
+
+.g-buy-opt-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3) var(--sp-6);
+  margin: 0;
+}
+
+.g-buy-opt-stats dt {
+  font-size: var(--fs-caption);
+  color: var(--text-3);
+}
+
+.g-buy-opt-stats dd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-section);
+  font-variant-numeric: tabular-nums;
+}
+
+.g-buy-opt-stats dd small {
+  font-family: var(--font-ui);
+  font-size: var(--fs-caption);
+  color: var(--text-2);
+}
+
+.g-buy-opt > button {
+  min-height: 44px;
+}
+
+.g-konsern-next .g-buy-opt {
+  margin-top: var(--sp-2);
+}
+
+/* Industrien (B-235): nøkkeltall, anbudet i egen boks, konsernkassa med stort tall */
+.g-company-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(160px, 100%), 1fr));
+  gap: var(--sp-3) var(--sp-5);
+  margin: var(--sp-2) 0 var(--sp-4);
+}
+
+.g-company-facts dt,
+.g-treasury-balance .g-muted {
+  font-size: var(--fs-caption);
+  color: var(--text-3);
+}
+
+.g-company-facts dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.g-company-facts dd small {
+  font-weight: 400;
+  color: var(--text-2);
+}
+
+.g-tender {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border: 1px solid var(--heat-border);
+  border-radius: var(--r-lg);
+  background: var(--heat-tint);
+}
+
+.g-tender p {
+  margin: 0;
+}
+
+.g-tender-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+}
+
+.g-company .g-tender-head h3 {
+  margin: 0;
+  font-size: var(--fs-section);
+  color: var(--text);
+}
+
+.g-tender .g-details {
+  margin: 0;
+}
+
+.g-tender-mine {
+  font-size: var(--fs-title);
+}
+
+.g-tender-bidders .g-chip {
+  margin: 0 var(--sp-2) var(--sp-2) 0;
+}
+
+.g-tender-withdraw,
+.g-treasury-max {
+  align-self: flex-start;
+  min-height: 44px;
+}
+
+.g-treasury-balance {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-3);
+}
+
+.g-treasury-sum {
+  font-family: var(--font-display);
+  font-size: var(--fs-hero);
+  font-variant-numeric: tabular-nums;
+}
+
+.g-treasury {
+  display: flex;
+  flex-direction: column;
 }

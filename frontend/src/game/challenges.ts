@@ -11,6 +11,7 @@ import { addIncome, adjustReputation, awardPoints, fmtKr, log } from "./engine";
 import { staffing } from "./plant";
 import { RESEARCH } from "./research";
 import type { DayFinance, GameState } from "./types";
+import type { IconName } from "../ui/icons";
 
 export interface Challenge {
   id: string;
@@ -18,7 +19,7 @@ export interface Challenge {
   family: string;
   /** Trinn i serien, fra 1 */
   tier: number;
-  icon: string;
+  icon: IconName;
   title: string;
   /** Kort forklaring på hvordan man klarer den */
   how: string;
@@ -38,7 +39,7 @@ export interface Challenge {
 
 export interface ChallengeFamily {
   id: string;
-  icon: string;
+  icon: IconName;
   name: string;
   how: string;
   /** Målene for hvert trinn */
@@ -83,7 +84,7 @@ const tonnes = (n: number) => (n >= 1e6 ? `${nf(n / 1e6, n % 1e6 ? 1 : 0)} mill.
 export const CHALLENGE_FAMILIES: ChallengeFamily[] = [
   {
     id: "u-rekord",
-    icon: "📈",
+    icon: "trend-up",
     name: "Rekorddøgn",
     how: "Alle ovnene i gang døgnet rundt, nok støping og fulle skift.",
     goals: [4500, 10_000, 20_000, 30_000, 40_000],
@@ -96,7 +97,7 @@ export const CHALLENGE_FAMILIES: ChallengeFamily[] = [
   },
   {
     id: "u-strom",
-    icon: "⚡",
+    icon: "zap",
     name: "Strømgjerrig",
     how: "Conveyor, transformator, varmegjenvinning, skumslagg – og god kjøring i kontrollrommet.",
     goals: [420, 380, 340, 300, 270, 250],
@@ -110,7 +111,7 @@ export const CHALLENGE_FAMILIES: ChallengeFamily[] = [
   },
   {
     id: "u-rene",
-    icon: "✨",
+    icon: "sparkles",
     name: "Rent stål",
     how: "Døgn der alt stålet holder kvaliteten: riktig resept, måling av skrapet og godt folk.",
     goals: [30, 60, 120, 250, 500],
@@ -122,7 +123,7 @@ export const CHALLENGE_FAMILIES: ChallengeFamily[] = [
   },
   {
     id: "u-perfekt",
-    icon: "⭐",
+    icon: "award",
     name: "Perfekt kjøring",
     how: "Ta styringen selv i kontrollrommet og få 5 stjerner.",
     goals: [3, 10, 25, 60],
@@ -134,7 +135,7 @@ export const CHALLENGE_FAMILIES: ChallengeFamily[] = [
   },
   {
     id: "u-avtaler",
-    icon: "📑",
+    icon: "scroll-text",
     name: "Pålitelig partner",
     how: "Lever hver uke i en rammeavtale i tide, så får du bonusen.",
     goals: [3, 8, 20, 50],
@@ -146,7 +147,7 @@ export const CHALLENGE_FAMILIES: ChallengeFamily[] = [
   },
   {
     id: "u-omdomme",
-    icon: "🌟",
+    icon: "star",
     name: "Best i bransjen",
     how: "Lever i tide, uten reklamasjoner, og fullfør rammeavtaler.",
     goals: [100],
@@ -158,7 +159,7 @@ export const CHALLENGE_FAMILIES: ChallengeFamily[] = [
   },
   {
     id: "u-skift",
-    icon: "👷",
+    icon: "hard-hat",
     name: "Døgnet rundt",
     how: "Ansett til fem fulle skiftlag under Folk.",
     goals: [5],
@@ -171,7 +172,7 @@ export const CHALLENGE_FAMILIES: ChallengeFamily[] = [
   },
   {
     id: "u-forskning",
-    icon: "🔬",
+    icon: "microscope",
     name: "Forskningssjef",
     how: "Alle prosjektene under Forskning.",
     goals: [RESEARCH.length],
@@ -185,7 +186,7 @@ export const CHALLENGE_FAMILIES: ChallengeFamily[] = [
   },
   {
     id: "u-lever",
-    icon: "🤝",
+    icon: "sales",
     name: "Leveransemaskin",
     how: "Lever kontrakter – egne og dem salgsdirektøren signerer.",
     goals: [50, 150, 400, 1000, 2500],
@@ -197,7 +198,7 @@ export const CHALLENGE_FAMILIES: ChallengeFamily[] = [
   },
   {
     id: "u-tiavti",
-    icon: "💯",
+    icon: "badge-check",
     name: "Fornøyde kunder",
     how: "Lever god kvalitet med god margin til kravene, og lever i tide.",
     goals: [10, 50, 200, 750],
@@ -209,7 +210,7 @@ export const CHALLENGE_FAMILIES: ChallengeFamily[] = [
   },
   {
     id: "u-vurdering",
-    icon: "🏅",
+    icon: "medal",
     name: "Kundenes førstevalg",
     how: "Snittet av de siste 20 kundevurderingene. Lever i tide og med god margin til kravene.",
     goals: [8, 8.5, 9, 9.5, 9.8],
@@ -223,7 +224,7 @@ export const CHALLENGE_FAMILIES: ChallengeFamily[] = [
   },
   {
     id: "u-stope",
-    icon: "🧊",
+    icon: "shield-check",
     name: "Feilfri støping",
     how: "Døgn med under 3 % støpefeil: godt vedlikehold, flinke støpere og riktig temperatur.",
     goals: [30, 100, 250, 500],
@@ -235,7 +236,7 @@ export const CHALLENGE_FAMILIES: ChallengeFamily[] = [
   },
   {
     id: "u-billig",
-    icon: "💡",
+    icon: "lightbulb",
     name: "Strømsmart",
     how: "Døgn med snittpris under 0,70 kr/kWh: kjør når strømmen er billig, og velg riktig strømavtale.",
     goals: [20, 60, 150, 300],
@@ -247,7 +248,7 @@ export const CHALLENGE_FAMILIES: ChallengeFamily[] = [
   },
   {
     id: "u-tonn",
-    icon: "⚖️",
+    icon: "weight",
     name: "Tonnasje",
     how: "Alt stålet verket lager, teller.",
     goals: [250_000, 1_000_000, 3_000_000, 10_000_000, 25_000_000],
@@ -259,7 +260,7 @@ export const CHALLENGE_FAMILIES: ChallengeFamily[] = [
   },
   {
     id: "u-charger",
-    icon: "🔥",
+    icon: "flame",
     name: "Smelteverk",
     how: "Alle chargene i alle ovnene teller.",
     goals: [2000, 10_000, 30_000, 75_000],
@@ -271,7 +272,7 @@ export const CHALLENGE_FAMILIES: ChallengeFamily[] = [
   },
   {
     id: "u-kontroll",
-    icon: "🎮",
+    icon: "gamepad-2",
     name: "Mesterkjører",
     how: "Beste poengsum i kontrollrommet: strøm og oksygen i riktig rekkefølge, og rask tapping.",
     goals: [3500, 4000, 4300, 4500],
@@ -284,7 +285,7 @@ export const CHALLENGE_FAMILIES: ChallengeFamily[] = [
   },
   {
     id: "u-gode",
-    icon: "🎛️",
+    icon: "sliders-horizontal",
     name: "Stødig hånd",
     how: "Charger du kjører selv med minst 4 stjerner.",
     goals: [5, 20, 60, 150],
@@ -296,7 +297,7 @@ export const CHALLENGE_FAMILIES: ChallengeFamily[] = [
   },
   {
     id: "u-overskudd",
-    icon: "💹",
+    icon: "coins",
     name: "Gullgruve",
     how: "Beste døgn: inntekter minus kostnader (kjøp av utstyr teller ikke).",
     goals: [50_000_000, 250_000_000, 1_000_000_000, 3_000_000_000, 6_000_000_000],
@@ -309,7 +310,7 @@ export const CHALLENGE_FAMILIES: ChallengeFamily[] = [
   },
   {
     id: "u-fagbrev",
-    icon: "🎓",
+    icon: "graduation-cap",
     name: "Lærebedrift",
     how: "Folk som tar fagbrev: gi dem kurs og la dem jobbe lenge nok.",
     goals: [5, 15, 40],

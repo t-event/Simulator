@@ -14,7 +14,8 @@ import { applyTreasuryDeposit, DEPOSIT_REFUSAL_TEXT, depositToTreasury } from ".
 import { tenderChanged } from "./openTender";
 import { BID_REFUSAL_TEXT, fetchWorldStatus, placeBid, timeLeft, type Company, type WorldStatus } from "../net/world";
 import { AccountFeaturesCard } from "./Account";
-import { Card } from "./common";
+import { Bar, Card } from "./common";
+import { Icon } from "./icons";
 import { fmtKr } from "./format";
 import { buzz } from "./haptics";
 
@@ -133,66 +134,91 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
       </p>
     );
 
+  const maxDeposit = Math.max(0, Math.min(tr.left, Math.floor(g.cash - g.loan)));
+
   const companyCard = (c: Company) => {
     const t = c.tender;
     const last = c.lastResult;
     const bid = bids[c.id] ?? "";
+    const until = c.concessionUntil ? fmtWhen(c.concessionUntil) : "–";
+    // Hva som gjelder nå, i ett ord øverst (B-235)
+    const state = c.mine
+      ? { tone: "ok", text: "Du eier det" }
+      : t
+        ? { tone: "heat", text: "Anbud åpent" }
+        : { tone: "neutral", text: c.owner ? "Eid av en annen" : "Ingen eier" };
+    // Et bud kan ikke være større enn det som står i konsernkassa (pluss budet du alt har lagt inn)
+    const canBid = t ? Math.min(t.maxBid, tr.balance + (t.myBid ?? 0)) : 0;
     return (
-      <Card key={c.id} title={c.name} className="g-company">
+      <Card
+        key={c.id}
+        title={c.name}
+        className="g-company"
+        right={<span className={`ds-status is-${state.tone}`}>{state.text}</span>}
+      >
         <p className="g-muted g-small-text">{COMPANY_INTRO[c.type] ?? ""}</p>
-        <p>
-          {c.mine ? (
-            <>
-              <strong>Du eier skraplageret</strong> til {c.concessionUntil ? fmtWhen(c.concessionUntil) : "–"}.
-            </>
-          ) : c.owner ? (
-            <>
-              Eier: <strong>{c.owner}</strong> til {c.concessionUntil ? fmtWhen(c.concessionUntil) : "–"}.
-            </>
-          ) : (
-            "Ingen eier ennå – den som vinner anbudet, får det."
+        <dl className="g-company-facts">
+          <div>
+            <dt>Eier</dt>
+            <dd>
+              {c.mine ? "Du" : (c.owner ?? "Ingen")}
+              {c.owner && <small> til {until}</small>}
+            </dd>
+          </div>
+          <div>
+            <dt>Tjener nå</dt>
+            <dd>
+              ca. {fmtKr(c.estimatePerDay)}
+              <small> /døgn</small>
+            </dd>
+          </div>
+          {c.mine && (
+            <div>
+              <dt>Du har fått</dt>
+              <dd>
+                +{fmtKr(c.incomeYesterday ?? 0)}
+                <small> i går · {fmtKr(c.incomeMine)} i alt</small>
+              </dd>
+            </div>
           )}
           {c.nextOwner && (
-            <>
-              {" "}
-              Neste eier: <strong>{c.nextMine ? "deg" : c.nextOwner}</strong>.
-            </>
+            <div>
+              <dt>Neste eier</dt>
+              <dd>{c.nextMine ? "Du" : c.nextOwner}</dd>
+            </div>
           )}
-        </p>
-        {c.mine && (
-          <p className="g-small-text">
-            I går: <strong>+{fmtKr(c.incomeYesterday ?? 0)}</strong> til konsernkassa · i alt {fmtKr(c.incomeMine)}
-          </p>
-        )}
-        <p className="g-muted g-small-text">Anslått inntekt nå: ca. {fmtKr(c.estimatePerDay)} per døgn.</p>
+        </dl>
 
         {t && (
-          <div className="g-company-tender">
-            <h3>
-              Anbud – stenger om {timeLeft(t.closesAt)} <span className="g-muted">({fmtWhen(t.closesAt)})</span>
-            </h3>
-            <p className="g-small-text">
-              Alle ser hvem som har bydd, men ingen ser beløpene før anbudet stenger. Høyeste bud vinner og driver
-              lageret i 14 dager. Likt bud avgjøres ved trekning. De som ikke vinner, får budet tilbake.
-            </p>
-            {/* Hvem som har bydd, uten beløp (B-210) */}
-            <p className="g-small-text g-tender-bidders">
-              {t.bidders.length === 0 ? (
-                "Ingen har bydd ennå."
-              ) : (
-                <>
-                  Har bydd ({t.bidders.length}): <strong>{t.bidders.join(", ")}</strong>
-                </>
-              )}
-            </p>
-            <p className="g-small-text">
-              Bud mellom {fmtKr(t.minBid)} og {fmtKr(t.maxBid)}.{" "}
+          <section className="g-tender">
+            <header className="g-tender-head">
+              <h3>Anbud</h3>
+              <span className="ds-status is-heat">
+                <Icon name="clock" /> stenger om {timeLeft(t.closesAt)}
+              </span>
+            </header>
+            <p className="g-tender-mine">
               {t.myBid ? (
                 <>
                   Ditt bud: <strong>{fmtKr(t.myBid)}</strong>
                 </>
               ) : (
-                "Du har ikke budt."
+                "Du har ikke bydd."
+              )}
+            </p>
+            {/* Hvem som har bydd, uten beløp (B-210) */}
+            <p className="g-small-text g-tender-bidders">
+              {t.bidders.length === 0 ? (
+                <span className="g-muted">Ingen har bydd ennå.</span>
+              ) : (
+                <>
+                  <span className="g-muted">Har bydd:</span>{" "}
+                  {t.bidders.map((n) => (
+                    <span key={n} className="g-chip">
+                      {n}
+                    </span>
+                  ))}
+                </>
               )}
             </p>
             <div className="g-row g-amount-row">
@@ -201,8 +227,8 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
                   type="number"
                   inputMode="decimal"
                   min={t.minBid / 1e6}
-                  max={t.maxBid / 1e6}
-                  placeholder={String(Math.round(t.minBid / 1e6))}
+                  max={canBid / 1e6}
+                  placeholder={t.myBid ? String(Math.round(t.myBid / 1e6)) : String(Math.round(t.minBid / 1e6))}
                   value={bid}
                   onChange={(e) => setBids((b) => ({ ...b, [c.id]: e.target.value }))}
                   aria-label="Bud i millioner kroner"
@@ -217,12 +243,24 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
                 {t.myBid ? "Endre bud" : "Legg inn bud"}
               </button>
             </div>
+            <p className="g-muted g-small-text">
+              Fra {fmtKr(t.minBid)} til {fmtKr(t.maxBid)}. Budet betales fra konsernkassa ({fmtKr(tr.balance)} nå
+              {t.myBid ? ", pluss budet ditt" : ""}), så du kan by opptil {fmtKr(canBid)}.
+            </p>
             {t.myBid && (
-              <button className="g-link" disabled={busy} onClick={() => void doBid(c, 0)}>
+              <button className="g-link g-tender-withdraw" disabled={busy} onClick={() => void doBid(c, 0)}>
                 Trekk budet
               </button>
             )}
-          </div>
+            <details className="g-details">
+              <summary>Slik virker anbudet</summary>
+              <p className="g-small-text">
+                Alle ser hvem som har bydd, men ingen ser beløpene før anbudet stenger ({fmtWhen(t.closesAt)}). Høyeste
+                bud vinner og driver lageret i 14 dager. Likt bud avgjøres ved trekning. De som ikke vinner, får budet
+                tilbake i konsernkassa.
+              </p>
+            </details>
+          </section>
         )}
 
         {last && (
@@ -244,11 +282,18 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
       {intro}
       <div className="g-col g-industry-col">{world.companies.map(companyCard)}</div>
       <div className="g-col g-industry-side">
-        <Card title={`Konsernkassa: ${fmtKr(tr.balance)}`} className="g-company g-treasury">
-          <p className="g-small-text g-muted">
-            Kapitalen til selskapene: bud betales herfra, og inntekten fra selskapene du eier, kommer hit. Du kan flytte{" "}
-            {fmtKr(tr.left)} til fra kassa i spillet de neste 24 timene
-            {tr.freedAt && tr.left < tr.limit ? ` (mer blir ledig ${fmtWhen(tr.freedAt)})` : ""}.
+        <Card title="Konsernkassa" className="g-company g-treasury">
+          <div className="g-treasury-balance">
+            <span className="g-treasury-sum">{fmtKr(tr.balance)}</span>
+            <span className="g-muted g-small-text">
+              Bud betales herfra, og inntekten fra selskapene du eier, kommer hit.
+            </span>
+          </div>
+          <h3 className="g-subhead">Flytt penger fra verket</h3>
+          <Bar value={tr.limit > 0 ? (tr.limit - tr.left) / tr.limit : 0} tone="accent" label="Brukt av grensen" />
+          <p className="g-small-text">
+            Du kan flytte <strong>{fmtKr(tr.left)}</strong> til de neste 24 timene (grensen er {fmtKr(tr.limit)}, lik
+            for alle){tr.freedAt && tr.left < tr.limit ? `. Mer blir ledig ${fmtWhen(tr.freedAt)}` : ""}.
           </p>
           <div className="g-row g-amount-row">
             <label className="g-amount">
@@ -256,17 +301,30 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
                 type="number"
                 inputMode="decimal"
                 min={0}
-                placeholder={String(Math.floor(Math.min(tr.left, Math.max(0, g.cash - g.loan)) / 1e6))}
+                placeholder={String(Math.floor(maxDeposit / 1e6))}
                 value={deposit}
                 onChange={(e) => setDeposit(e.target.value)}
                 aria-label="Beløp i millioner kroner"
               />
               <span>mill. kr</span>
             </label>
-            <button disabled={busy || tr.left <= 0 || millions(deposit) <= 0} onClick={() => void doDeposit()}>
-              Flytt fra kassa
+            <button
+              className="g-primary"
+              disabled={busy || tr.left <= 0 || millions(deposit) <= 0}
+              onClick={() => void doDeposit()}
+            >
+              Flytt
             </button>
           </div>
+          {maxDeposit > 0 && (
+            <button
+              className="g-link g-treasury-max"
+              disabled={busy}
+              onClick={() => setDeposit(String(Math.floor(maxDeposit / 1e6)))}
+            >
+              Fyll inn det meste ({fmtKr(Math.floor(maxDeposit / 1e6) * 1e6)})
+            </button>
+          )}
           {note("kasse")}
         </Card>
       </div>

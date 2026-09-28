@@ -12,11 +12,11 @@ export type League = "bronse" | "solv" | "gull";
 export const WEEK_KINDS: Record<WeekKind, { title: string; how: string }> = {
   vekst: {
     title: "Størst vekst i konsernverdi",
-    how: "Få konsernverdien til å vokse mest mulig i prosent denne uka (regnet fra minst 50 mill.).",
+    how: "Få konsernverdien til å vokse mest mulig i prosent denne uka (regnet fra minst 50 mill.). Du er med når spillet har vært lagret på nett minst to dager før uka.",
   },
   tonn: {
     title: "Mer stål enn før",
-    how: "Lag mest mulig stål per spilldøgn denne uka, i prosent av det verket laget per døgn før uka.",
+    how: "Lag mer stål per spilldøgn enn du gjorde uka før – tallet er farten denne uka i prosent av farten da. Du er med når spillet har vært lagret på nett minst to dager før uka.",
   },
   // Ekte dager, ikke spilldøgn (B-190): farten i spillet skal ikke avgjøre en konkurranse mellom spillere
   dager: {

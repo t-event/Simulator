@@ -1,21 +1,12 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { requestManual, requestReline, setFurnaceGrade, setTargetGrade, upgradeOptions } from "../game/actions";
 import { Maintenance } from "./Maintenance";
+import { ProductionCard } from "./ProductionCard";
 import { RecipeCard } from "./Recipe";
 import { auto, automationUnlocked } from "../game/research";
-import { GRADE_IDS, GRADES, PRODUCTS, SCRAP_TYPES, STAGES } from "../game/data";
+import { GRADE_IDS, GRADES, SCRAP_TYPES, STAGES } from "../game/data";
 import { currentOrder, furnaceOrder, recipeEstimate, scrapAlert, SEQUENCE_WAIT_MIN } from "../game/engine";
-import {
-  castingType,
-  furnaceGrade,
-  gradeRecipe,
-  gradesInUse,
-  hasGrader,
-  rollingActive,
-  shiftStart,
-  unitType,
-  type PlantStats,
-} from "../game/plant";
+import { castingType, furnaceGrade, gradeRecipe, gradesInUse, shiftStart, type PlantStats } from "../game/plant";
 import type { Contract, CostCategory, DayFinance, GameState, GradeId, IncomeCategory } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { AnalysisLine, Bar, Card, GradeChips, Stat } from "./common";
@@ -32,7 +23,7 @@ import { VERKET_TABS, type VerketTab } from "./verketTabs";
 import type { View } from "./views";
 import { Icon } from "./icons";
 import { CASH_RESERVE } from "../game/reserve";
-import { Callout, StatusBadge, StatusLine, type Status } from "./ds";
+import { Callout, StatusLine, type Status } from "./ds";
 import { hints, type Anchor, type Hint } from "./hints";
 import { furnaceState, statusOf } from "./plantStatus";
 import { Breakdown, ResultChart } from "./Finance";
@@ -328,8 +319,6 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
   const [sheet, setSheet] = useState<Station | null>(null);
   const [pynt, setPynt] = useState(false);
   const tab: SubTab = chosenTab;
-  const casting = castingType(g);
-  const castHead = g.castQueue[0];
   const y = g.history[g.history.length - 1];
   const sum = (o: Partial<Record<string, number>>) => Object.values(o).reduce<number>((a, b) => a + (b ?? 0), 0);
   // På Oversikt står målkortet øverst når du kan flytte, så hintet om det trengs bare på de andre underfanene (B-068)
@@ -465,130 +454,7 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
         <>
           {/* Produksjonsflyten (B-196): over begge kolonnene på PC, med status for hvert sted */}
           <div className="g-col-wide g-anlegg-flow">
-            <Card title="Produksjonen">
-              <div className="g-chain">
-                <div className="g-chain-step">
-                  <div className="g-chain-head">
-                    <h3>Skraplager</h3>
-                    {/* Lagrene får merke bare når noe er galt: tomt, mangler eller fullt */}
-                    {(missingNow || stats.yardUsed <= 0) && (
-                      <StatusBadge status="tomt" label={missingNow ? "Mangler skrap" : undefined} />
-                    )}
-                  </div>
-                  <Bar
-                    value={stats.yardUsed / stats.yardT}
-                    tone={stats.yardUsed < stats.sizeT ? "critical" : "accent"}
-                    label="Skraplager"
-                  />
-                  <p>
-                    {fmtT(stats.yardUsed)} av {fmtT(stats.yardT)}
-                  </p>
-                  {missingNow && (
-                    <p className="g-note g-warn">
-                      Resepten mangler {missingNow} til neste charge.{" "}
-                      {hasGrader(g)
-                        ? "Skrapklasseren venter til det kommer, så ovnen står."
-                        : "Uten skrapklasser fylles chargen opp med annet skrap, og analysen kan bomme."}
-                    </p>
-                  )}
-                  <div className="g-row">
-                    <button
-                      className={missingNow ? "g-small g-primary" : "g-small"}
-                      onClick={() => go("marked", "skrap")}
-                    >
-                      Kjøp skrap{missingNow && <span className="g-badge">!</span>}
-                    </button>
-                    <StationButton g={g} station="skrap" onOpen={setSheet} />
-                  </div>
-                </div>
-
-                {g.furnaces.map((f, i) => {
-                  const st = furnaceState(g, i);
-                  return (
-                    <div className="g-chain-step" key={i}>
-                      <div className="g-chain-head">
-                        <h3>
-                          {unitType(g, i).name}
-                          {g.furnaces.length > 1 ? ` nr. ${i + 1}` : ""}
-                        </h3>
-                        <StatusBadge
-                          status={f.heat ? "kjorer" : statusOf(st.text)}
-                          label={f.heat ? "Smelter" : undefined}
-                        />
-                      </div>
-                      {st.progress !== null ? (
-                        <Bar value={st.progress} tone="warning" label="Smelting" />
-                      ) : (
-                        <Bar value={0} />
-                      )}
-                      <p className="g-chain-state">{st.text}</p>
-                      <p className="g-muted">Foring {fmtPct(f.wear)} slitt</p>
-                      <StationButton g={g} station="ovn" onOpen={setSheet} />
-                    </div>
-                  );
-                })}
-
-                <div className="g-chain-step">
-                  <div className="g-chain-head">
-                    <h3>{casting.name}</h3>
-                    <StatusBadge
-                      status={g.castWait ? statusOf(g.castWait) : castHead ? "kjorer" : "venter"}
-                      label={g.castWait ? undefined : castHead ? "Støper" : "Venter"}
-                    />
-                  </div>
-                  {castHead ? (
-                    <Bar value={g.castProgressT / castHead.t} tone="ok" label="Støping" />
-                  ) : (
-                    <Bar value={0} />
-                  )}
-                  <p>
-                    {g.castWait ??
-                      (castHead
-                        ? `Støper ${fmtT(castHead.t)}${g.castQueue.length > 1 ? ` (+${g.castQueue.length - 1} i kø)` : ""}`
-                        : "Venter på stål")}
-                  </p>
-                  <p className="g-muted">
-                    {PRODUCTS[casting.product].name} · utbytte {fmtPct(casting.yield)}
-                  </p>
-                  <StationButton g={g} station="stoping" onOpen={setSheet} />
-                </div>
-
-                {rollingActive(g) && (
-                  <div className="g-chain-step">
-                    <div className="g-chain-head">
-                      <h3>Valseverk</h3>
-                      <StatusBadge status="kjorer" label="I drift" />
-                    </div>
-                    <p>Valser emner til armeringsstål</p>
-                  </div>
-                )}
-
-                <div className="g-chain-step">
-                  <div className="g-chain-head">
-                    <h3>Ferdigvarelager</h3>
-                    {stats.storeUsed >= stats.storeT * 0.999 ? (
-                      <StatusBadge status="fullt" />
-                    ) : stats.storeUsed > stats.storeT * 0.9 ? (
-                      <StatusBadge status="fullt" label="Nesten fullt" />
-                    ) : null}
-                  </div>
-                  <Bar
-                    value={stats.storeUsed / stats.storeT}
-                    tone={stats.storeUsed > stats.storeT * 0.9 ? "critical" : "accent"}
-                    label="Ferdigvarelager"
-                  />
-                  <p>
-                    {fmtT(stats.storeUsed)} av {fmtT(stats.storeT)}
-                  </p>
-                  <div className="g-row">
-                    <button className="g-small" onClick={() => go("salg", "lager")}>
-                      Til salg
-                    </button>
-                    <StationButton g={g} station="lager" onOpen={setSheet} />
-                  </div>
-                </div>
-              </div>
-            </Card>
+            <ProductionCard g={g} stats={stats} missingNow={missingNow} go={go} onStation={setSheet} />
           </div>
           <div className="g-col-wide g-side">
             <Maintenance
