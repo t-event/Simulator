@@ -1,7 +1,8 @@
 /**
  * Mål (B-211, B-214): daglig belønning, dagens oppdrag, landemerker (B-218), ukens utfordring, sesongstigen,
  * utfordringer og prestasjoner samlet på én side. Før lå de nederst på Verket → Oversikt, og mange fant dem ikke.
- * PC: eget punkt i sidemenyen. Mobil: egen knapp ved varsellinja. Topplista er ikke her, men i arket bak pokalen (B-214).
+ * PC: eget punkt i sidemenyen. Mobil: egen knapp ved varsellinja, som åpner et ark (`GoalsSheet`, B-286) – slik som
+ * «Hva gjør jeg nå?» og topplista ved siden av. Topplista er ikke her, men i arket bak pokalen (B-214).
  */
 import { useState } from "react";
 import {
@@ -22,6 +23,7 @@ import type { GameApi } from "../game/useGame";
 import { AchievementsCard, PyntModal } from "./Achievements";
 import { Bar, Card, SubTabs } from "./common";
 import { DailyCard } from "./Daily";
+import { SheetHead } from "./ds";
 import { LandmarksCard } from "./Landmarks";
 import { fmtKr, fmtNum } from "./format";
 import { Icon } from "./icons";
@@ -122,15 +124,7 @@ function ChallengeRow({ g, c }: { g: GameState; c: Challenge }) {
   );
 }
 
-export function GoalsPage({
-  g,
-  stats,
-  api,
-  onOpenSettings,
-  onSales,
-  openTab,
-  onTab,
-}: {
+interface GoalsProps {
   g: GameState;
   stats: PlantStats;
   api: GameApi;
@@ -139,7 +133,24 @@ export function GoalsPage({
   onSales: () => void;
   openTab?: string;
   onTab?: OnTab;
-}) {
+}
+
+/**
+ * Mål som ark på mobil (B-286): knappene ved varsellinja (hjelp, Mål og topplista) skal oppføre seg likt. Før byttet
+ * Mål side og lyste blått, mens de to andre åpnet et ark oppå spillet.
+ */
+export function GoalsSheet({ onClose, ...props }: GoalsProps & { onClose: () => void }) {
+  return (
+    <div className="g-modal g-side-sheet" role="dialog" aria-modal="true" aria-label="Mål" onClick={onClose}>
+      <div className="g-modal-card g-goals-sheet" onClick={(e) => e.stopPropagation()}>
+        <SheetHead title="Mål" icon="target" onClose={onClose} />
+        <GoalsPage {...props} />
+      </div>
+    </div>
+  );
+}
+
+export function GoalsPage({ g, stats, api, onOpenSettings, onSales, openTab, onTab }: GoalsProps) {
   const act = api.act;
   const [tab, setTab] = useState<GoalsTab>(isGoalsTab(openTab) ? openTab : "idag");
   useReportTab(tab, onTab);

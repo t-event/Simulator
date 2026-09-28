@@ -25,6 +25,10 @@ export const ACCOUNT_FEATURES = {
     name: "Skraplageret",
     why: "Anbudet, eierskapet og inntekten avgjøres på serveren i virkelig tid, i konkurranse med de andre spillerne.",
   },
+  sesongpynt: {
+    name: "Sesongpynt",
+    why: "Pynten finnes bare mens sesongen pågår, og sesongen kommer fra serveren.",
+  },
   konsernkasse: {
     name: "Konsernkassa",
     why: "Kassa ligger på serveren og går i virkelig tid, så overføringene og det du kjøper i verden avgjøres der.",

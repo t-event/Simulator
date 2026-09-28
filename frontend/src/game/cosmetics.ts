@@ -1,6 +1,10 @@
 /**
  * Pynt (B-151): ting som bare gjør verket finere i anleggsbildet – flagg, lyslenke, fasadefarge, trær og mer. Kjøpes
  * for fagpoeng og kan slås av og på. Pynten gir ingen fordel i spillet, så ingen konto trengs (KONTO.md, regel 1).
+ *
+ * Sesongpynt (B-287): hver sesong har sin egen pynt, både i butikken og på sesongstigen. Den kan bare skaffes mens
+ * sesongen pågår, og kommer aldri tilbake – men den du har, beholder du. Sesongen kommer fra serveren, så pynten i
+ * butikken krever konto for å kjøpes. **Når en ny sesong startes, legges pynten for den inn her** (`season: N`).
  */
 import { hasAchievement } from "./achievements";
 import type { GameState } from "./types";
@@ -22,7 +26,17 @@ export interface Cosmetic {
   needs?: string;
   /** Bare som belønning på sesongstigen, på dette trinnet (B-173) – kan ikke kjøpes */
   seasonTier?: number;
+  /** Sesongen pynten hører til (B-287): kan bare skaffes mens den pågår */
+  season?: number;
 }
+
+/** Sesongen spilleren er i og om hen har konto – fra serveren (B-287). Uten nett: ingen sesong */
+export interface SeasonCtx {
+  season: number | null;
+  account: boolean;
+}
+
+const NO_SEASON: SeasonCtx = { season: null, account: false };
 
 export const COSMETICS: Cosmetic[] = [
   { id: "flagg", icon: "flag", name: "Flagg på taket", description: "Et rødt flagg vaier på taket.", fp: 10 },
@@ -82,9 +96,36 @@ export const COSMETICS: Cosmetic[] = [
     name: "Gullpipe",
     description: "Pipa blir forgylt.",
     fp: 500,
+    group: "pipe",
     needs: "legende",
   },
-  // Sesongstigen (B-173): bare som belønning, aldri til salgs
+  // Sesong 1 i butikken (B-287): bare mens sesongen pågår, og med konto
+  {
+    id: "nordlys",
+    icon: "sparkles",
+    name: "Nordlys",
+    description: "Grønt nordlys over verket om natta.",
+    fp: 60,
+    season: 1,
+  },
+  {
+    id: "kobberpipe",
+    icon: "factory",
+    name: "Kobberpipe",
+    description: "Pipa blir kledd i blankt kobber.",
+    fp: 120,
+    group: "pipe",
+    season: 1,
+  },
+  {
+    id: "banner1",
+    icon: "flag",
+    name: "Sesong 1-banner",
+    description: "Et langt banner på hallveggen – du var med i den første sesongen.",
+    fp: 200,
+    season: 1,
+  },
+  // Sesongstigen i sesong 1 (B-173, B-287): bare som belønning, aldri til salgs
   {
     id: "sesongflagg",
     icon: "flag-triangle-right",
@@ -92,6 +133,7 @@ export const COSMETICS: Cosmetic[] = [
     description: "Et gyllent flagg på taket – du har klatret ti trinn på sesongstigen.",
     fp: 0,
     seasonTier: 10,
+    season: 1,
   },
   {
     id: "gullfasade",
@@ -101,6 +143,7 @@ export const COSMETICS: Cosmetic[] = [
     fp: 0,
     group: "fasade",
     seasonTier: 20,
+    season: 1,
   },
   {
     id: "nattfasade",
@@ -110,6 +153,7 @@ export const COSMETICS: Cosmetic[] = [
     fp: 0,
     group: "fasade",
     seasonTier: 30,
+    season: 1,
   },
   {
     id: "stjerne",
@@ -118,6 +162,7 @@ export const COSMETICS: Cosmetic[] = [
     description: "En stjerne som lyser over verket.",
     fp: 0,
     seasonTier: 40,
+    season: 1,
   },
   {
     id: "pokal",
@@ -126,12 +171,21 @@ export const COSMETICS: Cosmetic[] = [
     description: "En stor pokal foran verket – toppen av sesongstigen.",
     fp: 0,
     seasonTier: 50,
+    season: 1,
   },
 ];
 
-/** Pynten som gis på et trinn av sesongstigen, eller null */
-export function trackCosmetic(tier: number): Cosmetic | null {
-  return COSMETICS.find((c) => c.seasonTier === tier) ?? null;
+/** Pynten som gis på et trinn av sesongstigen i en sesong, eller null (B-287: hver sesong har sin egen) */
+export function trackCosmetic(tier: number, season: number | null): Cosmetic | null {
+  return COSMETICS.find((c) => c.seasonTier === tier && c.season === season) ?? null;
+}
+
+/**
+ * Skal pynten stå i lista (B-287)? Pynt fra en sesong som er over, står bare hos dem som har den – den kan aldri
+ * skaffes igjen. Pynten for sesongen som pågår, vises for alle, også uten konto (KONTO-regel 6)
+ */
+export function cosmeticListed(g: GameState, c: Cosmetic, ctx: SeasonCtx = NO_SEASON): boolean {
+  return !c.season || ownsCosmetic(g, c.id) || c.season === ctx.season;
 }
 
 /** Gir pynten fra sesongstigen (B-173) og slår den på */
@@ -163,19 +217,22 @@ export function cosmeticOn(g: GameState, id: string): boolean {
 }
 
 /** Hvorfor pynten ikke kan kjøpes nå, eller null */
-export function cosmeticBlocked(g: GameState, id: string): string | null {
+export function cosmeticBlocked(g: GameState, id: string, ctx: SeasonCtx = NO_SEASON): string | null {
   const c = COSMETIC_BY_ID[id];
   if (!c) return "Finnes ikke";
   if (ownsCosmetic(g, id)) return null;
   if (c.seasonTier) return "season";
+  // Sesongpynt (B-287): bare i sin sesong, og bare med konto – sesongen kommer fra serveren
+  if (c.season && c.season !== ctx.season) return "over";
+  if (c.season && !ctx.account) return "account";
   if (c.needs && !hasAchievement(g, c.needs)) return "needs";
   if (g.researchPoints < c.fp) return "fp";
   return null;
 }
 
-export function buyCosmetic(g: GameState, id: string): boolean {
+export function buyCosmetic(g: GameState, id: string, ctx: SeasonCtx = NO_SEASON): boolean {
   const c = COSMETIC_BY_ID[id];
-  if (!c || ownsCosmetic(g, id) || cosmeticBlocked(g, id)) return false;
+  if (!c || ownsCosmetic(g, id) || cosmeticBlocked(g, id, ctx)) return false;
   g.researchPoints -= c.fp;
   g.cosmetics.owned.push(id);
   setCosmetic(g, id, true);

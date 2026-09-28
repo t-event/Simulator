@@ -60,6 +60,7 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Varsellinja (nyeste, ✕ fjerner alle) og oppgraderinger av salgsdirektøren | Nei | Regel 1 | B-172 |
 | Ukelista: én liste for alle, målt i prosent | Ja (som før) | Regel 3 | B-172 |
 | Sesongstigen (poeng for spilte dager, belønning, oppdrag og ukeplassering; fagpoeng og pynt) | Ja | Regel 3 og 5 | B-173 |
+| Sesongpynt (kjøpes bare mens sesongen pågår) | Ja | Regel 3: sesongen kommer fra serveren | B-287 |
 | Flere titler etter Stållegende | Nei (titlen på topplista krever konto som før) | Regel 1 | B-173 |
 | Landemerker (ett per virkelig dag, mobilens dato) | Nei | Regel 1 | B-174 |
 | Kontrollrommet som spill, med rekord (lokal) | Nei | Regel 1 | B-175 |

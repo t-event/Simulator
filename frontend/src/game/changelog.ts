@@ -15,6 +15,21 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 287,
+    date: "2026-09-28",
+    title: "Sesongpynt",
+    items: [
+      "Ny pynt som bare finnes i sesong 1: nordlys, kobberpipe og et eget sesongbanner. Når sesongen er over, kommer den aldri tilbake – men det du har skaffet, beholder du.",
+      "Pynten på sesongstigen hører også til sesongen. Neste sesong får ny pynt.",
+    ],
+  },
+  {
+    b: 286,
+    date: "2026-09-28",
+    title: "Tre like knapper",
+    items: ["Mål åpnes nå oppå spillet, slik som «Hva gjør jeg nå?» og topplista ved siden av."],
+  },
+  {
     b: 285,
     date: "2026-09-28",
     title: "Hjelpen står stille",

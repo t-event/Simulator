@@ -2,7 +2,7 @@
  * Prestasjoner og pynt (B-151): merkene på Verket og arket der pynten til anleggsbildet kjøpes for fagpoeng.
  */
 import { SheetHead } from "./ds";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import {
   ACHIEVEMENT_BY_ID,
   ACHIEVEMENT_FAMILIES,
@@ -16,7 +16,17 @@ import {
   nextInFamily,
   type Achievement,
 } from "../game/achievements";
-import { buyCosmetic, COSMETICS, cosmeticBlocked, FACADE, ownsCosmetic, setCosmetic } from "../game/cosmetics";
+import {
+  buyCosmetic,
+  COSMETICS,
+  cosmeticBlocked,
+  cosmeticListed,
+  FACADE,
+  ownsCosmetic,
+  setCosmetic,
+  type Cosmetic,
+  type SeasonCtx,
+} from "../game/cosmetics";
 import { STAGES } from "../game/data";
 import type { PlantStats } from "../game/plant";
 import type { GameState } from "../game/types";
@@ -25,6 +35,9 @@ import { Bar, Card } from "./common";
 import { PlantScene } from "./PlantScene";
 import { Portal } from "./Portal";
 import { Icon } from "./icons";
+import { NeedsAccount } from "./Account";
+import { useSeasonStatus } from "./useSeason";
+import { getSession, onSessionChange } from "../net/supabase";
 
 /**
  * Prestasjonskortet (B-232): øverst de tre merkene du er nærmest, så alle seriene gruppert (Produksjon, Kunder …) som
@@ -153,6 +166,65 @@ function FamilyDetail({ g, family }: { g: GameState; family: string }) {
   );
 }
 
+/** Én rad i «Pynt verket»: kjøp, på/av eller hvorfor den ikke kan kjøpes */
+function PyntRow({ g, c, ctx, act }: { g: GameState; c: Cosmetic; ctx: SeasonCtx; act: GameApi["act"] }) {
+  const owned = ownsCosmetic(g, c.id);
+  const on = !!g.cosmetics.on.includes(c.id);
+  const blocked = cosmeticBlocked(g, c.id, ctx);
+  const hidden = g.stage < (c.minStage ?? 0);
+  const need = c.needs ? ACHIEVEMENT_BY_ID[c.needs] : null;
+  // Pynt fra en sesong som er over, får sesongen på seg – den finnes ikke lenger (B-287)
+  const past = c.season && c.season !== ctx.season;
+  return (
+    <li className="g-pynt-item">
+      <span className="g-pynt-icon" aria-hidden="true">
+        {FACADE[c.id] ? (
+          <span className="g-pynt-swatch" style={{ background: FACADE[c.id][0] }} />
+        ) : (
+          <Icon name={c.icon} />
+        )}
+      </span>
+      <div className="g-pynt-text">
+        <strong>{c.name}</strong>
+        <span className="g-muted">
+          {c.description}
+          {hidden && ` Synes fra ${STAGES[c.minStage ?? 0].name.toLowerCase()}.`}
+          {past && ` Fra sesong ${c.season}.`}
+        </span>
+      </div>
+      {owned ? (
+        <button
+          className={on ? "g-small is-on" : "g-small"}
+          aria-pressed={on}
+          onClick={() => act((gg) => setCosmetic(gg, c.id, !on))}
+        >
+          {on ? "På" : "Av"}
+        </button>
+      ) : blocked === "season" ? (
+        <span className="g-pynt-lock">
+          <Icon name="lock" /> Sesongstigen, trinn {c.seasonTier}
+        </span>
+      ) : blocked === "needs" && need ? (
+        <span className="g-pynt-lock">
+          <Icon name="lock" /> Krever merket «{need.name}»
+        </span>
+      ) : blocked === "account" ? (
+        <span className="g-pynt-lock">
+          <Icon name="lock" /> Krever konto
+        </span>
+      ) : (
+        <button
+          className="g-small g-primary"
+          disabled={blocked === "fp"}
+          onClick={() => act((gg) => buyCosmetic(gg, c.id, ctx))}
+        >
+          {c.fp} fagpoeng
+        </button>
+      )}
+    </li>
+  );
+}
+
 export function PyntModal({
   g,
   stats,
@@ -164,6 +236,13 @@ export function PyntModal({
   act: GameApi["act"];
   onClose: () => void;
 }) {
+  // Sesongen og kontoen fra serveren (B-287): sesongpynten kan bare kjøpes mens sesongen pågår, og med konto
+  const status = useSeasonStatus();
+  const session = useSyncExternalStore(onSessionChange, getSession, getSession);
+  const current = status?.current ?? null;
+  const ctx: SeasonCtx = { season: current?.id ?? null, account: !!session };
+  const seasonal = COSMETICS.filter((c) => c.season && c.season === ctx.season);
+  const rest = COSMETICS.filter((c) => !(c.season && c.season === ctx.season) && cosmeticListed(g, c, ctx));
   return (
     <Portal>
       <div className="g-modal" role="dialog" aria-modal="true" aria-label="Pynt verket" onClick={onClose}>
@@ -176,57 +255,25 @@ export function PyntModal({
             Pynten gjør bare verket finere – den gir ingen fordel. Du har{" "}
             <strong>{Math.floor(g.researchPoints)}</strong> fagpoeng.
           </p>
+          {current && seasonal.length > 0 && (
+            <>
+              <h3 className="g-subhead">Bare i {current.name.toLowerCase()}</h3>
+              <p className="g-muted g-small-text">
+                Denne pynten forsvinner når sesongen er over, og kommer aldri tilbake. Det du har skaffet, beholder du.
+              </p>
+              {!ctx.account && <NeedsAccount feature="sesongpynt" />}
+              <ul className="g-pynt-list">
+                {seasonal.map((c) => (
+                  <PyntRow key={c.id} g={g} c={c} ctx={ctx} act={act} />
+                ))}
+              </ul>
+              <h3 className="g-subhead">Alltid</h3>
+            </>
+          )}
           <ul className="g-pynt-list">
-            {COSMETICS.map((c) => {
-              const owned = ownsCosmetic(g, c.id);
-              const on = !!g.cosmetics.on.includes(c.id);
-              const blocked = cosmeticBlocked(g, c.id);
-              const hidden = g.stage < (c.minStage ?? 0);
-              const need = c.needs ? ACHIEVEMENT_BY_ID[c.needs] : null;
-              return (
-                <li key={c.id} className="g-pynt-item">
-                  <span className="g-pynt-icon" aria-hidden="true">
-                    {FACADE[c.id] ? (
-                      <span className="g-pynt-swatch" style={{ background: FACADE[c.id][0] }} />
-                    ) : (
-                      <Icon name={c.icon} />
-                    )}
-                  </span>
-                  <div className="g-pynt-text">
-                    <strong>{c.name}</strong>
-                    <span className="g-muted">
-                      {c.description}
-                      {hidden && ` Synes fra ${STAGES[c.minStage ?? 0].name.toLowerCase()}.`}
-                    </span>
-                  </div>
-                  {owned ? (
-                    <button
-                      className={on ? "g-small is-on" : "g-small"}
-                      aria-pressed={on}
-                      onClick={() => act((gg) => setCosmetic(gg, c.id, !on))}
-                    >
-                      {on ? "På" : "Av"}
-                    </button>
-                  ) : blocked === "season" ? (
-                    <span className="g-pynt-lock">
-                      <Icon name="lock" /> Sesongstigen, trinn {c.seasonTier}
-                    </span>
-                  ) : blocked === "needs" && need ? (
-                    <span className="g-pynt-lock">
-                      <Icon name="lock" /> Krever merket «{need.name}»
-                    </span>
-                  ) : (
-                    <button
-                      className="g-small g-primary"
-                      disabled={blocked === "fp"}
-                      onClick={() => act((gg) => buyCosmetic(gg, c.id))}
-                    >
-                      {c.fp} fagpoeng
-                    </button>
-                  )}
-                </li>
-              );
-            })}
+            {rest.map((c) => (
+              <PyntRow key={c.id} g={g} c={c} ctx={ctx} act={act} />
+            ))}
           </ul>
         </div>
       </div>

@@ -12,6 +12,9 @@ til «Avgjort» nederst).
 
 ## Venter
 
+- **Pynt for sesong 2 (B-287):** før `start_season` kjøres for sesong 2, legg inn ny pynt i `COSMETICS` med `season: 2` –
+  både i butikken og på stigen (trinn 10–50). Ellers har sesong 2 ingen egen pynt.
+
 - **Slå på slagghåndteringen (B-253):** når skraplageret har fått sin første eier (anbudet stenger 29.9. 01:33 UTC) og betalt
   ut inntekt i noen dager uten feil: `update public.companies set active = true where type = 'slagg'; select public.world_tick();`
   Sjekk så kortet under Konsern → Industrien.

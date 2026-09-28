@@ -42,11 +42,13 @@ export function SeasonTrackCard({ act }: { act: GameApi["act"] }) {
 
   const unclaimed = Array.from({ length: track.tier }, (_, i) => i + 1).filter((t) => !track.claimed.includes(t));
   const fp = unclaimed.reduce((a, t) => a + tierFp(t), 0);
-  const gifts = unclaimed.map(trackCosmetic).filter((c) => c !== null);
+  // Pynten på stigen hører til sesongen (B-287)
+  const gift = (t: number) => trackCosmetic(t, track.seasonId);
+  const gifts = unclaimed.map(gift).filter((c) => c !== null);
   const top = track.tier >= track.maxTier;
   const inTier = track.points - track.tier * track.perTier;
   const nextGift = TRACK_COSMETIC_TIERS.find((t) => t > track.tier);
-  const nextCosmetic = nextGift ? trackCosmetic(nextGift) : null;
+  const nextCosmetic = nextGift ? gift(nextGift) : null;
 
   const claim = async () => {
     setBusy(true);
@@ -55,7 +57,7 @@ export function SeasonTrackCard({ act }: { act: GameApi["act"] }) {
       if (r.fp > 0 || r.tiers.length)
         act((gg) => {
           awardPoints(gg, r.fp);
-          const got = r.tiers.map(trackCosmetic).filter((c) => c !== null);
+          const got = r.tiers.map(gift).filter((c) => c !== null);
           for (const c of got) grantCosmetic(gg, c.id);
           log(
             gg,
@@ -115,7 +117,7 @@ export function SeasonTrackCard({ act }: { act: GameApi["act"] }) {
       </p>
       {nextCosmetic && (
         <p className="g-muted g-small-text">
-          Neste pynt: {nextCosmetic.name} på trinn {nextGift}. Hvert trinn gir fagpoeng.
+          Neste pynt: {nextCosmetic.name} på trinn {nextGift} – finnes bare denne sesongen. Hvert trinn gir fagpoeng.
         </p>
       )}
     </Card>
