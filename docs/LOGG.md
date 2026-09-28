@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 194 – 2026-09-28: Juksesperren sjekker første opplasting
+
+**Brukeren ba om:** «Fortsett», så «Sjekk første opplasting».
+
+**Gjort:** B-257. Nytt valg `balance.ts --forste 700` lager kurven over det testspilleren klarer per døgn. Migrasjon 044:
+det første tallet en spiller noen gang laster opp, sjekkes mot nivået (tidligst halve testspillerens dag) og en grense
+for konsernverdien (3 × testspilleren eller 1,5 × det ærlige spillere har klart). Publiseringen av #201 (B-256) var grønn.
+
+**Testet:** migrasjonen i en transaksjon som ble rullet tilbake (ærlige sene tilkoblinger passerer, tre juksetilfeller
+flagges, alle ekte tall under grensen), sikkerhetsrådene, tsc, lint, `npm test`.
+
+**Gjenstår:** slå på slagghåndteringen og så verkstedet når skraplageret har betalt ut inntekt noen dager (B-253, B-256);
+eventuelt grense per ekte dag på topplista (FORSLAG).
+
+---
+
 ## Økt 193 – 2026-09-28: Mekanisk verksted (slått av)
 
 **Brukeren ba om:** «Fortsett», så «Mekanisk verksted».

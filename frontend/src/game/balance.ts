@@ -755,6 +755,52 @@ if (process.argv.includes("--opphold")) {
   console.log(flagged ? `AVVIK: ${flagged} opphold ville blitt flagget` : "Ingen opphold ville blitt flagget OK");
   process.exit?.(flagged ? 1 : 0);
 }
+if (process.argv.includes("--forste")) {
+  // Første opplasting (B-257): et spill som kobles til en konto sent, har ingen tidslinje å sjekke veksten mot. Serveren
+  // sammenligner da det første tallet med det testspilleren klarer på like mange spilldøgn. Her lages kurven: høyeste
+  // konsernverdi til og med hvert tiende døgn (flink og nybegynner, uten daglige belønninger – de krever konto) og
+  // tidligste døgn på hvert nivå. Tallene legges i config.first_upload (supabase/044_forste_opplasting.sql)
+  const DAYS_FIRST = Number(process.argv[process.argv.indexOf("--forste") + 1]) || 700;
+  const STEP = 10;
+  const best: number[] = [];
+  const firstStage = [1, Infinity, Infinity, Infinity, Infinity];
+  let endGrowth = 0;
+  const runSeeds = process.argv.includes("--seed")
+    ? [Number(process.argv[process.argv.indexOf("--seed") + 1])]
+    : [1, 2, 3, 4, 5, 6];
+  for (const seed of runSeeds) {
+    for (const novice of [false, true]) {
+      run(seed, DAYS_FIRST, false, novice);
+      for (const p of equitySeries) {
+        const i = Math.ceil(p.day / STEP);
+        best[i] = Math.max(best[i] ?? 0, p.eq);
+        firstStage[p.stage] = Math.min(firstStage[p.stage], p.day);
+      }
+      const tail = equitySeries.slice(-31);
+      if (tail.length > 1) endGrowth = Math.max(endGrowth, (tail.at(-1)!.eq - tail[0].eq) / (tail.length - 1));
+      console.error(
+        `frø ${seed}${novice ? " nybegynner" : ""}: dag ${equitySeries.at(-1)!.day}, ${Math.round(equitySeries.at(-1)!.eq / 1e6)} mill.`,
+      );
+    }
+  }
+  // Kurven stiger aldri: høyeste verdi til og med døgnet
+  const curve: number[] = [];
+  for (let i = 0; i < best.length; i++) curve[i] = Math.max(curve[i - 1] ?? 0, best[i] ?? 0);
+  console.log(`Tidligste døgn per nivå: ${firstStage.join(" / ")}`);
+  console.log(`Vekst per døgn de siste 30 døgnene (høyeste): ${Math.round(endGrowth / 1e6)} mill.`);
+  for (let i = 0; i < curve.length; i += 5)
+    console.log(`dag ${String(i * STEP).padStart(4)}: ${Math.round(curve[i]).toLocaleString("nb-NO").padStart(20)}`);
+  console.log(
+    "JSON " +
+      JSON.stringify({
+        step: STEP,
+        curve: curve.map((v) => Math.round(v)),
+        stage_day: firstStage,
+        end_growth: Math.round(endGrowth),
+      }),
+  );
+  process.exit?.(0);
+}
 if (process.argv.includes("--vurdering")) {
   // Kundevurderingen (B-161): hvilke karakterer flink og nybegynner får på hvert nivå
   for (const novice of [false, true]) {

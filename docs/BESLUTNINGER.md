@@ -4683,3 +4683,28 @@ ferdig, men slått av, som slagghåndteringen.
 - Konto: ja (samme som skraplageret, regel 3 og 7).
 Endringslogg: nei
 
+## B-257 Juksesperren sjekker første opplasting (2026-09-28)
+Status: gjelder (fra FORSLAG «Sjekk av første opplasting»; bygger på B-127, B-170, B-212)
+Brukeren: «Fortsett», så «Sjekk første opplasting». Et spill som kobles til en konto sent (f.eks. på dag 610), har ingen
+tidslinje, så vekstsperren har ingenting å sammenligne med. Før ble det bare sjekket mot taket per nivå, som ikke finnes på
+storverket.
+- **Regel (`supabase/044_forste_opplasting.sql`, kjørt som «forste_opplasting»):** det første tallet en spiller noen gang
+  laster opp (i alle sesonger – ikke ved ny sesong), sjekkes i `check_snapshot` mot:
+  - **Nivået:** tidligst halvparten av dagen testspilleren nådde det (1 / 6 / 20 / 57 / 115 → verkstedet dag 3, støperiet
+    dag 10, stålverket dag 29, storverket dag 58).
+  - **Konsernverdien:** `first_upload_limit(dag)`, en kurve per tiende døgn i `config.first_upload`. Den er den største av
+    3 × det beste testspilleren klarte på dagen og 1,5 × det største ærlige spillere har hatt på samme dag (tidslinja uten
+    `pre_reform`), minst 1 mill. Etter dag 2 400 vokser den med 1,5 mrd. per døgn. Eksempler: 54 mill. på dag 100,
+    28,6 mrd. på dag 300, 76 mrd. på dag 500, 1 018 mrd. på dag 1 000.
+  - Over grensen: spilleren flagges (som før, eieren ser på det). Ingenting slettes.
+- **Testspilleren:** `balance.ts --forste 700` kjører seks frø, flink og nybegynner, i 700 døgn uten daglige belønninger
+  (de krever konto) og skriver kurven, tidligste døgn per nivå og veksten på slutten (118 mill. per døgn). Beste på dag
+  700: 47,6 mrd. Kurven er tatt inn i migrasjonen.
+- **Testet før den ble kjørt**, i én transaksjon som ble rullet tilbake: dagens spillere som koblet til sent (dag 220,
+  379, 506, 848 og 2 273) ville passert; 500 mrd. på dag 300, storverket på dag 40 og 800 mill. på dag 30 ble flagget; en
+  spiller med tidslinje fra før ble ikke sjekket. Ingen ekte første opplasting og ingen ekte tall (uten `pre_reform`) er
+  over grensen. Etter kjøringen: ingen flagget, sikkerhetsrådene uendret.
+- Gjester sjekkes fra første lagring; tidslinja de tar med til en ny konto, sjekkes ikke på nytt (B-212).
+- Konto: ja (juksesperren gjelder bare det som lagres på nett).
+Endringslogg: nei
+
