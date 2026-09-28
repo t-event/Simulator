@@ -29,7 +29,9 @@ import {
 } from "./achievements";
 import {
   buyCosmetic,
+  COSMETIC_BY_ID,
   cosmeticBlocked,
+  cosmeticListed,
   cosmeticOn,
   FACADE,
   facadeColors,
@@ -936,7 +938,7 @@ test("Hendelser (B-171): messe ikke med omdømme på topp, naboene klager ikke i
 test("Sesongstigen og nye titler (B-173): pynt på trinn 10–50, titler etter Stållegende", () => {
   const g = newGame(85);
   assert(
-    trackCosmetic(10)?.id === "sesongflagg" && trackCosmetic(50)?.id === "pokal" && !trackCosmetic(11),
+    trackCosmetic(10, 1)?.id === "sesongflagg" && trackCosmetic(50, 1)?.id === "pokal" && !trackCosmetic(11, 1),
     "pynt på feil trinn",
   );
   assert(cosmeticBlocked(g, "pokal") === "season", "stigepynt kunne kjøpes");
@@ -2663,6 +2665,27 @@ test("Hendelseskort (B-284): minst tre minutter ekte tid mellom to kort, uansett
   now += 2000;
   assert(count(50) === 1, "ingen kort etter pausen");
   setRealClock(() => Date.now());
+});
+
+test("Sesongpynt (B-287): bare i sin sesong og med konto, beholdes etterpå, stigen gir sesongens pynt", () => {
+  const g = newGame(287);
+  g.researchPoints = 1000;
+  const s1 = { season: 1, account: true };
+  const nordlys = COSMETIC_BY_ID.nordlys;
+  assert(cosmeticBlocked(g, "nordlys", { season: 1, account: false }) === "account", "sesongpynt uten konto");
+  assert(cosmeticBlocked(g, "nordlys") === "over" && !buyCosmetic(g, "nordlys"), "sesongpynt uten sesong");
+  assert(!cosmeticListed(g, nordlys, { season: 2, account: true }), "pynt fra en sesong som er over, vises");
+  assert(cosmeticListed(g, nordlys, { season: 1, account: false }), "sesongens pynt vises ikke uten konto");
+  assert(buyCosmetic(g, "nordlys", s1) && g.researchPoints === 940, "kjøp i sesongen virket ikke");
+  // Neste sesong: pynten er din, og står fortsatt i lista
+  assert(cosmeticListed(g, nordlys, { season: 2, account: true }) && cosmeticOn(g, "nordlys"), "pynten forsvant");
+  // Pipa: gull og kobber kan ikke være på samtidig
+  buyCosmetic(g, "kobberpipe", s1);
+  g.cosmetics.owned.push("gullpipe");
+  setCosmetic(g, "gullpipe", true);
+  assert(cosmeticOn(g, "gullpipe") && !cosmeticOn(g, "kobberpipe"), "to piper på samtidig");
+  // Stigen: pynten hører til sesongen; en sesong uten egen pynt gir bare fagpoeng
+  assert(trackCosmetic(10, 1)?.id === "sesongflagg" && trackCosmetic(10, 2) === null, "stigepynt i feil sesong");
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

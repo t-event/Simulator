@@ -141,7 +141,7 @@ frontend/src/
     daily.ts     Daglig belønning, dagens oppdrag og mens du var borte (B-149)
     mastery.ts   Mesterskap: forskning som tas om og om igjen etter all forskning (B-150); priset etter verdi (B-237)
     masteryValue.ts Hva neste nivå i mesterskapet gir i kr per døgn (B-237)
-    achievements.ts Prestasjoner, serier i trinn (B-232; gamle id-er beholdt)   cosmetics.ts  Pynt for fagpoeng (B-151)
+    achievements.ts Prestasjoner, serier i trinn (B-232; gamle id-er beholdt)   cosmetics.ts  Pynt for fagpoeng (B-151), sesongpynt (B-287)
     landmarks.ts Landemerker: store byggeprosjekter som forespørsler, ett per virkelig dag (B-174)
     changelog.ts Endringsloggen «Hva er nytt» (B-179) – ny oppføring ved hver endring
     clock.ts     Ekte tid (realNow/setRealClock): byggeprosjekter i konsernet og pausen mellom like kort (B-209, B-210)
@@ -183,7 +183,7 @@ frontend/src/
     HelpNow.tsx  «Hva gjør jeg nå?»: råd, status per sted og ordliste (B-283), åpnes fra ? ved Mål (i tallraden under 380 px)
     TitleArt.tsx Tittelbildet på startskjermen; samme motiv som app-ikonet public/icon.svg (B-249)
     MissingOut.tsx «Det går du glipp av» på Mål for spillere uten konto (B-212)
-    Goals.tsx    Mål-siden (egen knapp ved varsellinja på mobil, sidemenyen på PC): I dag, Uka, Merker (B-211, B-214)
+    Goals.tsx    Mål: ark fra knappen ved varsellinja på mobil (B-286), side i sidemenyen på PC: I dag, Uka, Merker (B-211, B-214)
     tokens.css   Designsystemet (B-191): alle farger, skriftstørrelser, radier, avstander – nye stiler bruker disse
     icons.tsx    Ikoner fra Lucide, kopiert inn (lisens i icons-LICENSE.txt)   ds.tsx  StatusBadge, Callout, Button
     fonts/       Visningsskriften for overskrifter og store tall (Barlow Semi Condensed 600, OFL)
@@ -352,6 +352,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   anbud gis med `applyTenderResults` (i rekkefølge etter anbudet), ikke ett og ett selskap.
 - **Anbud og inntekt** (B-189) avgjøres «lat» av `world_status()` → `world_tick()`. Test livsløpet med midlertidige
   testkontoer i en DO-blokk som ender med `raise exception`; sett `closes_at` bakover for å avgjøre et anbud.
+- **Sesongpynt** (B-287): pynt med `season: N` kan bare skaffes i sesong N. Når en ny sesong startes (`start_season`), må
+  pynten for den legges inn i `COSMETICS` (butikk og stigetrinn 10–50) – ellers har sesongen ingen egen pynt.
+- **Knappene ved varsellinja åpner ark** (B-286): hjelp, Mål og topplista. På mobil åpner `go("mal")` arket; på PC er Mål en side.
 - **Tilbakespoling** (B-261): et lavere dagtall flytter tidslinja etter dagen til `snapshots_rewound`; den legges tilbake
   når samme spill kommer tilbake. Legg tall tilbake med `set_config('stalverk.restore','on',true)` – da hopper
   `check_snapshot`, `guard_pre_reform` og `meter_snapshot` over dem. Nye triggere på `snapshots` må gjøre det samme.

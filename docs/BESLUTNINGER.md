@@ -5156,3 +5156,39 @@ rekkefølge, og tekster som «klar om 7 t» og tonn på lager endret lengde, så
 - Øverst står «Slik var det kl. HH:MM. Oppdater» – knappen (44 px) henter ny status.
 - Testet på 320 og 390 px på 10×: ingen linjer flyttet seg på 8 sekunder, og «Oppdater» gir ny tekst.
 - Konto: nei (regel 1, ditt eget spill).
+
+## B-286 Mål åpnes som ark på mobil, som hjelpen og topplista (2026-09-28)
+Status: gjelder (justerer B-214 og B-233)
+Brukeren: «De tre knappene oppfører seg forskjellig. Hva gjør jeg nå, oppdrag-knappen og topplista». Spørsmålstegnet og
+pokalen åpnet et ark oppå spillet, mens Mål byttet side og lyste blått. Brukeren valgte «alle tre åpner ark».
+- **Regel:** knappene ved varsellinja åpner ark; menyen nederst bytter side.
+- **Mål på mobil** er et ark (`GoalsSheet` i `ui/Goals.tsx`) med de samme fanene (I dag, Uka, Merker) og samme innhold
+  som siden. `go("mal")` åpner arket på mobil, også fra lenken på Verket → Oversikt. Fanen huskes som før (B-233).
+- **På PC** står Mål som før, som side i sidemenyen. Ble vinduet smalt mens Mål var åpen, vises Verket.
+- Den blå markeringen på Mål-knappen (B-233) er borte – knappen åpner et ark, som de to andre.
+- «Pynt verket» åpnes oppå Mål-arket og lukkes tilbake til det. Landemerket går til Salg, og «Opprett konto» til
+  innstillingene – begge lukker arket.
+- Testet på 320 og 390 px: alle tre knappene åpner et ark, ingen horisontal scrolling, trykk utenfor lukker. På 1 280 px
+  er Mål fortsatt en side.
+- Konto: nei (regel 1). Det på Mål som krevde konto, krever det fortsatt.
+
+## B-287 Sesongpynt: ny pynt hver sesong, bare mens den pågår (2026-09-28)
+Status: gjelder (justerer B-151 og B-173)
+En spiller spurte om pynten bare er for sesong 1, og ønsket at den skulle være det – «som skins i Fortnite som aldri
+kommer tilbake». Da blir den mer ettertraktet, og man vil spille for å skaffe fagpoeng før den forsvinner. Brukeren
+valgte «ny pynt hver sesong».
+- **Hver sesong har egen pynt**, både i butikken (for fagpoeng) og på sesongstigen. Den kan bare skaffes mens sesongen
+  pågår. Det du har skaffet, beholder du for alltid. Den faste pynten (flagg, trær, fasader, gullpipe …) står som før.
+- **Sesong 1 i butikken:** Nordlys (60 fagpoeng, grønt nordlys om natta), Kobberpipe (120, pipa i kobber – kan ikke være
+  på samtidig med gullpipa) og Sesong 1-banner (200, banner på hallveggen).
+- **Sesong 1 på stigen:** pynten som alt fantes (sesongflagg, gullfasade, nattsvart fasade, stjerne, sesongpokal) hører
+  nå til sesong 1. En sesong uten egen pynt gir bare fagpoeng på stigen.
+- **Motoren** (`game/cosmetics.ts`): `season` på pynten, `cosmeticBlocked(g, id, { season, account })` gir `"over"` utenfor
+  sin sesong og `"account"` uten konto, `cosmeticListed` skjuler pynt fra en sesong som er over for dem som ikke har den,
+  og `trackCosmetic(trinn, sesong)`.
+- **Pynt verket** har en egen del øverst: «Bare i sesong N», med én linje om at pynten forsvinner når sesongen er over.
+- **Når en ny sesong startes** (`start_season`), må pynten for den legges inn i `COSMETICS` med `season: N` – ellers har
+  sesongen ingen egen pynt. Står i CLAUDE.md og FORSLAG.md.
+- Konto: **ja** for å kjøpe sesongpynt (regel 3: sesongen kommer fra serveren og er felles for alle). Uten konto vises
+  pynten med «Krever konto» og `NeedsAccount` (regel 6). Pynt man har, virker uten konto. Ny rad i KONTO.md og
+  `sesongpynt` i `ACCOUNT_FEATURES`.

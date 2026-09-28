@@ -218,6 +218,30 @@ function Star({ x, y }: { x: number; y: number }) {
   return <polygon className="scene-star" points={pts} fill="#ffd24a" stroke="#fff3c0" strokeWidth={0.6} />;
 }
 
+/** Nordlys over verket om natta (sesongpynt, B-287) */
+function Aurora() {
+  return (
+    <g className="scene-aurora" fill="none" strokeLinecap="round">
+      <path d="M-10 42 Q 70 12 150 36 T 310 28 T 490 40" stroke="#5dffb0" strokeWidth={9} opacity={0.22} />
+      <path d="M-10 52 Q 90 28 170 48 T 330 40 T 490 54" stroke="#3fe08a" strokeWidth={6} opacity={0.18} />
+      <path d="M40 30 Q 120 6 200 26 T 360 18 T 470 26" stroke="#9affd6" strokeWidth={3} opacity={0.25} />
+    </g>
+  );
+}
+
+/** Banneret på hallveggen (sesongpynt for sesong 1, B-287) */
+function Banner({ x, y, season }: { x: number; y: number; season: number }) {
+  return (
+    <g>
+      <line x1={x - 2} y1={y} x2={x + 12} y2={y} stroke="#d8dde3" strokeWidth={1} />
+      <path d={`M${x} ${y} h 10 v 26 l -5 -4 l -5 4 Z`} fill="#25407a" stroke="#e0b030" strokeWidth={0.8} />
+      <text x={x + 5} y={y + 14} textAnchor="middle" fontSize={9} fontWeight={700} fill="#e0b030">
+        {season}
+      </text>
+    </g>
+  );
+}
+
 /** Sesongpokalen foran verket (sesongstigen, B-173) */
 function Trophy({ x }: { x: number }) {
   return (
@@ -460,7 +484,16 @@ export function PlantScene({ g, stats, onStation }: Props) {
   const facade = facadeColors(g);
   const wallA = (base: string) => facade?.[0] ?? base;
   const wallB = (base: string) => facade?.[1] ?? base;
-  const pipeFill = (base: string) => (cosmeticOn(g, "gullpipe") ? "#d4af37" : base);
+  const pipeFill = (base: string) =>
+    cosmeticOn(g, "gullpipe") ? "#d4af37" : cosmeticOn(g, "kobberpipe") ? "#c47a45" : base;
+  // Der banneret henger: øverst til venstre på hovedhallen, per nivå (B-287)
+  const bannerAt = (
+    [
+      [196, 132],
+      [176, 118],
+      [126, 106],
+    ] as [number, number][]
+  )[stage] ?? [134, 104];
   const groundEnd = stage >= 4 ? 395 : 470;
   // Ovnene som smelter nå, hver med sin pipe på stålverket og storverket (B-242)
   const heats = g.furnaces.map((f) => !!f.heat);
@@ -521,6 +554,7 @@ export function PlantScene({ g, stats, onStation }: Props) {
           <circle cx={450} cy={12} r={0.6} />
         </g>
       )}
+      {night && cosmeticOn(g, "nordlys") && <Aurora />}
       {/* Åsene bak */}
       <path d="M0 150 Q 80 110 170 140 T 330 130 T 480 140 L480 180 L0 180 Z" fill="#23303f" opacity={0.8} />
       {winter && (
@@ -735,6 +769,7 @@ export function PlantScene({ g, stats, onStation }: Props) {
       {cosmeticOn(g, "stjerne") && <Star x={roof.apex[0]} y={Math.max(14, roof.apex[1] - 38)} />}
       {cosmeticOn(g, "pokal") && <Trophy x={stage === 0 ? 180 : 355} />}
       {cosmeticOn(g, "statue") && <Statue x={stage === 0 ? 150 : 385} />}
+      {cosmeticOn(g, "banner1") && <Banner x={bannerAt[0]} y={bannerAt[1]} season={1} />}
 
       {/* Ferdigvarelager */}
       {/* Utbygd ferdiglager (B-276): skur, så lagerhall med traverskran, så terminal med jernbanevogn */}

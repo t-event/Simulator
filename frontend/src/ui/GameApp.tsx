@@ -28,7 +28,7 @@ import { ResearchPage } from "./ResearchPage";
 import { CloudDot, CloudFollow, IntroAccount, LoggedOutNotice } from "./Account";
 import { SeasonPrompt, SeasonResultNotice, SeasonSync, SeasonTeaser } from "./Season";
 import { DailySync } from "./Daily";
-import { GoalsPage } from "./Goals";
+import { GoalsPage, GoalsSheet } from "./Goals";
 import { LeaderboardSheet } from "./Leaderboard";
 import { useDailyStatus } from "./useDaily";
 import { missionBonusReady } from "../game/daily";
@@ -570,7 +570,6 @@ function NoticeRow({
   onBoard,
   onHelp,
   onGoals,
-  goalsActive,
   className = "",
 }: {
   g: GameState;
@@ -579,10 +578,8 @@ function NoticeRow({
   onBoard: () => void;
   /** «Hva gjør jeg nå?» (B-283) */
   onHelp: () => void;
-  /** Mål (B-214): egen knapp på mobil; på PC står Mål i sidemenyen */
+  /** Mål (B-214): egen knapp på mobil som åpner et ark, som de to andre (B-286); på PC står Mål i sidemenyen */
   onGoals?: () => void;
-  /** Mål er siden som vises (B-233): knappen får samme markering som de andre punktene i menyen */
-  goalsActive?: boolean;
   className?: string;
 }) {
   return (
@@ -596,7 +593,7 @@ function NoticeRow({
       >
         <Icon name="circle-help" />
       </button>
-      {onGoals && <GoalsButton g={g} onClick={onGoals} active={goalsActive} />}
+      {onGoals && <GoalsButton g={g} onClick={onGoals} />}
       <button className="g-book g-board-btn" onClick={onBoard} aria-label="Toppliste" title="Toppliste">
         <Icon name="trophy" />
       </button>
@@ -605,14 +602,13 @@ function NoticeRow({
 }
 
 /** Knappen til Mål (B-214), med en prikk når dagens belønning eller oppdragsbonusen kan hentes */
-function GoalsButton({ g, onClick, active }: { g: GameState; onClick: () => void; active?: boolean }) {
+function GoalsButton({ g, onClick }: { g: GameState; onClick: () => void }) {
   const status = useDailyStatus();
   const ready = g.tutorial === null && !!status && (!status.claimed || (!g.daily.claimed && missionBonusReady(g)));
   return (
     <button
-      className={`g-book g-board-btn g-goals-btn${active ? " is-active" : ""}`}
+      className="g-book g-board-btn g-goals-btn"
       onClick={onClick}
-      aria-current={active ? "page" : undefined}
       aria-label={ready ? "Mål – noe venter på deg" : "Mål: dagens oppdrag, uka og merker"}
       title="Mål"
     >
@@ -798,6 +794,8 @@ export function GameApp() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  // Mål er et ark på mobil (B-286), som hjelpen og topplista ved siden av; på PC en side i sidemenyen
+  const [goalsOpen, setGoalsOpen] = useState(false);
   // Topplista er et eget ark bak pokalen igjen (B-214); Mål er en egen side
   const [boardOpen, setBoardOpen] = useState(false);
   const [bookChapter, setBookChapter] = useState<string | null>(null);
@@ -940,9 +938,16 @@ export function GameApp() {
     );
 
   const stats = computePlantStats(g);
-  const shown: View = viewUnlocked(g, view) ? view : "verket";
+  // Mål er ingen side på mobil (B-286): ble vinduet smalt mens Mål var åpen, vises Verket
+  const shown: View = viewUnlocked(g, view) && (isPc || view !== "mal") ? view : "verket";
   const konsernCanBuy = g.konsern.unlocked ? konsernReady(g) : 0;
   const go = (v: View, sub?: string) => {
+    if (v === "mal" && !isPc) {
+      if (sub) setTabs((p) => ({ ...p, mal: sub }));
+      setGoalsOpen(true);
+      return;
+    }
+    setGoalsOpen(false);
     setView(v);
     // Åpner en bestemt underfane, f.eks. lageret under Salg (B-048). Uten den: underfanen du sto på sist – men et nytt
     // trykk på menyen du alt står i, går til første underfane (B-233)
@@ -976,6 +981,7 @@ export function GameApp() {
   const modalOpen =
     bookOpen ||
     helpOpen ||
+    (goalsOpen && !isPc) ||
     settingsOpen ||
     inboxOpen ||
     boardOpen ||
@@ -1077,7 +1083,6 @@ export function GameApp() {
               onBoard={() => setBoardOpen(true)}
               onHelp={() => setHelpOpen(true)}
               onGoals={() => go("mal")}
-              goalsActive={shown === "mal"}
             />
           )}
         </div>
@@ -1151,6 +1156,21 @@ export function GameApp() {
       {bookOpen && <Handbook g={g} act={act} initial={bookChapter} onClose={() => setBookOpen(false)} />}
       {inboxOpen && <InboxSheet g={g} act={act} onClose={() => setInboxOpen(false)} />}
       {helpOpen && <HelpSheet g={g} stats={stats} go={go} onClose={() => setHelpOpen(false)} />}
+      {goalsOpen && !isPc && (
+        <GoalsSheet
+          g={g}
+          stats={stats}
+          api={api}
+          onClose={() => setGoalsOpen(false)}
+          onOpenSettings={() => {
+            setGoalsOpen(false);
+            setSettingsOpen(true);
+          }}
+          onSales={() => go("salg", "tilbud")}
+          openTab={tabs.mal}
+          onTab={onTab.mal}
+        />
+      )}
       {boardOpen && (
         <LeaderboardSheet
           api={api}

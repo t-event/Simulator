@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 223 – 2026-09-28: Tre like knapper og sesongpynt
+
+**Brukeren ba om:** «De tre knappene oppfører seg forskjellig. Hva gjør jeg nå, oppdrag knappen og topplista», og en
+spillers ønske om pynt som bare finnes én sesong. Brukeren valgte «alle tre åpner ark» og «ny pynt hver sesong».
+
+**Gjort:** B-286 (Mål som ark på mobil) og B-287 (sesongpynt: nordlys, kobberpipe og banner i sesong 1; stigepynten
+hører til sesong 1). Publiseringen av #231 (B-284) var grønn.
+
+**Testet:** tsc, lint, npm test (ny test for sesongpynt), build, Playwright på 320 og 390 px (alle tre knappene åpner
+ark, Mål-faner og Pynt-arket, med og uten konto, kjøp av sesongpynt) og anleggsbildet om natta på nivå 0–4.
+
+**Gjenstår:** pynt for sesong 2 før den startes. I morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 222 – 2026-09-28: Hjelpearket står stille
 
 **Brukeren ba om:** «Linjene flytter seg i hva gjør jeg nå».
