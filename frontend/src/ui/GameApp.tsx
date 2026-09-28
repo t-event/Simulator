@@ -749,7 +749,7 @@ export function GameApp() {
   const seasonStatus = useSeasonStatus();
   const seasonActive = !!seasonStatus?.current && g?.season === seasonStatus.current.id;
 
-  // Mobil scroller i .g-main (B-137), bred skjerm i vinduet: begge settes til toppen ved bytte av fane
+  // Innholdet scroller i .g-main (B-137, B-192); vinduet holdes øverst (B-262). Begge settes til toppen ved bytte av fane
   useEffect(() => {
     window.scrollTo({ top: 0 });
     document.querySelector(".g-main")?.scrollTo({ top: 0 });

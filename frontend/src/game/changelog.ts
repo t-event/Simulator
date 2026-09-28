@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 262,
+    date: "2026-09-28",
+    title: "Trykk treffer knappene på iPhone",
+    items: [
+      "På noen iPhoner måtte man trykke litt over en knapp for at den skulle reagere, særlig etter at tastaturet hadde vært oppe. Nå står siden alltid på plass, så trykket treffer der knappen er.",
+    ],
+  },
+  {
     b: 260,
     date: "2026-09-28",
     title: "Veiledningen dekker ikke knappene",

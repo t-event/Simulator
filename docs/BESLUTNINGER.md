@@ -4797,3 +4797,18 @@ Brukeren: «Fortsett», så «Tidslinja ved tilbakespoling» (fra FORSLAG etter 
 - Konto: ja (tidslinja finnes bare med konto).
 Endringslogg: nei
 
+## B-262 Siden står alltid øverst – trykk treffer knappene på iPhone (2026-09-28)
+Status: gjelder (bygger på B-137, B-192)
+Brukeren: «En som spiller på iPhone 16 pro har problemer med at han må klikke over knappene for at de skal reagere».
+- **Årsak (sannsynlig):** spillet ligger i faste lag (`.g-app`, `.g-intro`) og scroller inni dem, men selve siden kunne
+  også scrolles. `#root` hadde `min-height: 100vh`, og på iPhone er 100vh høyere enn det synlige (adresselinja,
+  skjermkanten rundt kameraet). iPhone scroller også vinduet når tastaturet åpnes, og lar det ofte stå slik etter at det
+  lukkes. Når vinduet står litt nede under faste lag, treffer Safari et annet sted enn knappen er tegnet – spilleren må
+  trykke over den.
+- **Nå:** `html`, `body` og `#root` har høyde 100 % og `overflow: hidden` (`index.css`). `main.tsx` setter vinduet tilbake
+  til toppen ved `scroll`, `resize`, snuing, `visibilitychange`, endring av det synlige området (`visualViewport`) og
+  like etter at et tekstfelt slippes (`focusout`). Mens et tekstfelt er i bruk, får iPhone flytte siden, så feltet synes
+  over tastaturet.
+- Testet i Playwright på 402×874 (iPhone 16 Pro), 390, 320 og 1366: vinduet blir stående på 0, innholdet scroller i
+  `.g-main` og på startskjermen, knappene treffes der de er tegnet, og siden går tilbake til toppen når et felt slippes.
+  Selve feilen kan ikke gjenskapes i Chromium; spilleren må bekrefte på telefonen.

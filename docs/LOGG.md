@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 199 – 2026-09-28: Trykk over knappene på iPhone
+
+**Brukeren ba om:** «En som spiller på iPhone 16 pro har problemer med at han må klikke over knappene for at de skal
+reagere».
+
+**Gjort:** B-262. Siden selv kan ikke lenger scrolles (bare lagene inni), og vinduet settes tilbake til toppen hvis
+iPhone flytter det (tastatur, adresselinje, snuing). Publiseringen av #207 (B-261) var grønn.
+
+**Testet:** Playwright på 402×874, 390, 320 og 1366 (vinduet står på 0, innholdet scroller, knappene treffes, tilbake
+til toppen etter tekstfelt), tsc, lint, npm test, balance.
+
+**Gjenstår:** spilleren bekrefter på iPhone. Neste: miljøutslipp, bøter og renseanlegg (brukerens ønske). I morgen:
+sjekk skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 198 – 2026-09-28: Tidslinja ved tilbakespoling
 
 **Brukeren ba om:** «Fortsett», så «Tidslinja ved tilbakespoling».
