@@ -2,7 +2,7 @@
 import type { GameState, LogEntry, LogTopic } from "./types";
 
 /**
- * Temaene spilleren kan slå av og på for varsler på skjermen (B-115). Rekkefølgen er rekkefølgen i ⚙️, og
+ * Temaene spilleren kan slå av og på for varsler på skjermen (B-115). Rekkefølgen er rekkefølgen i tannhjulet, og
  * reglene prøves i rekkefølge: det første temaet som passer, gjelder.
  */
 export const LOG_TOPICS: { id: LogTopic; label: string; hint: string; match: RegExp }[] = [
@@ -58,7 +58,7 @@ export function logTopic(text: string): LogTopic {
   return LOG_TOPICS.find((t) => t.match.test(text))?.id ?? "annet";
 }
 
-/** Skal varselet dukke opp på skjermen, etter valgene under ⚙️ (B-089, B-115)? */
+/** Skal varselet dukke opp på skjermen, etter valgene under tannhjulet (B-089, B-115)? */
 export function showToast(g: GameState, e: Pick<LogEntry, "kind" | "text">): boolean {
   if (e.kind === "info") return false;
   const mode = g.settings.toasts ?? "alle";

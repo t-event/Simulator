@@ -47,6 +47,10 @@ jobs:
         working-directory: frontend
         run: node scripts/sjekk-endringslogg.mjs
 
+      - name: Ingen emoji i appen (ikoner fra designsystemet)
+        working-directory: frontend
+        run: node scripts/sjekk-emoji.mjs
+
       - name: Balansetest av spillet
         working-directory: frontend
         run: npx tsx src/game/balance.ts

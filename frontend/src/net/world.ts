@@ -2,6 +2,8 @@
  * Verden mellom spillerne (B-189): strategiske selskaper, anbud og konsernkassa. Alt avgjøres på serveren i ekte tid
  * (`world_status`, `place_bid` i supabase/030_skraplageret.sql); appen viser bare det serveren sier.
  */
+import { fmtKr, log } from "../game/engine";
+import type { GameState } from "../game/types";
 import { rpc } from "./supabase";
 import type { TreasuryStatus } from "./treasury";
 
@@ -138,4 +140,29 @@ export function timeLeft(iso: string, now = Date.now()): string {
   if (ms <= 0) return "nå";
   const h = Math.floor(ms / 3_600_000);
   return h >= 1 ? `${h} t` : `${Math.max(1, Math.round(ms / 60_000))} min`;
+}
+
+/**
+ * Varsel om et avgjort anbud (B-237) til den som bydde: hvem som vant, med hvor mye, og at budet er tilbake i
+ * konsernkassa. Gis én gang per anbud (`tenderSeen`), og bare for anbud som stengte de siste 14 dagene.
+ */
+export function applyTenderResult(g: GameState, company: string, r: TenderResult, now = Date.now()): boolean {
+  if (r.id <= (g.tenderSeen ?? 0)) return false;
+  g.tenderSeen = r.id;
+  if (r.myBid === null && !r.won) return false;
+  if (now - Date.parse(r.closedAt) > 14 * 86_400_000) return false;
+  const name = company.toLowerCase();
+  if (r.won)
+    log(
+      g,
+      `Du vant anbudet på ${name} med ${fmtKr(r.winningBid ?? r.myBid ?? 0)}${r.tie ? " (likt bud – avgjort ved trekning)" : ""}! Du driver det de neste 14 dagene, og inntekten går til konsernkassa.`,
+      "good",
+    );
+  else
+    log(
+      g,
+      `Anbudet på ${name} er avgjort: ${r.winner ?? "en annen"} vant med ${fmtKr(r.winningBid ?? 0)}${r.tie ? " (likt bud – avgjort ved trekning)" : ""}. Budet ditt på ${fmtKr(r.myBid ?? 0)} er tilbake i konsernkassa.`,
+      "event",
+    );
+  return true;
 }

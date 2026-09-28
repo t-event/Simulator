@@ -4306,3 +4306,27 @@ Brukeren: «Det er for mye bruk av emojier i fagboka.»
 - Klassen `g-book-emoji` heter nå `g-book-icon`.
 - Tester: kapittel-testen sjekker ikon; tsc, lint, `npm test`, Playwright på 7 størrelser uten en eneste emoji i boka.
 - Konto: nei.
+
+## B-237 Varsel om anbudsresultat, mesterskap priset etter verdi, og ikoner i stedet for emoji i hele appen (2026-09-28)
+Status: gjelder (bygger på B-150, B-189, B-236)
+Brukeren: «Får de som har gitt anbud på bedrift varsel om hvem som vant anbudet? Forskning i mesterskapet. De forskjellige
+tingene bør ha forskjellig fagpoengpris ut fra hvor bra de er. Bytt ut alle emojier i hele appen med lucide ikoner.»
+- **Anbudsresultat:** før fikk ingen beskjed; resultatet sto bare som en linje på kortet under Industrien. Nå får den som
+  bydde, et varsel i varsellista (og på skjermen etter valgene): «Du vant anbudet …» eller «… er avgjort: X vant med Y.
+  Budet ditt er tilbake i konsernkassa». Én gang per anbud (`g.tenderSeen`, standard 0 i `migrate()`), bare for anbud som
+  stengte de siste 14 dagene. Appen ser det når den henter status for skraplageret (hvert minutt med konto og konsern).
+  `applyTenderResult` i `net/world.ts`. Konto: ja (anbudet krever konto fra før).
+- **Mesterskap:** prisen for nivå 1 følger verdien: konsernledelse 300 (før 150), bedre priser 200, skrapkjøp 150,
+  ovnspotter 100, energieffektivisering 60 (alle før 100). Nivå 1 er verdt omtrent 50–90 mill. kr/døgn for
+  konsernledelse, ca. 3 mill. for priser, 1–1,5 mill. for skrap, ca. 0,5 mill. for ovnspotter og under 0,1 mill. for strøm
+  på et stort verk. Hvert prosjekt viser nå hva neste nivå gir i kroner per døgn på verket ditt (`game/masteryValue.ts`,
+  snitt av sju døgn), og det som gir mest per fagpoeng, er merket «Best nå». Veksten per nivå (25 %) er uendret.
+- **Ingen emoji i appen:** alle 123 er byttet. Landemerker, pynt, utfordringer og prestasjoner har ikonfelt
+  (`IconName`); fasadene vises som en fargerute. Medaljer på listene er et medaljeikon i gull/sølv/bronse (`ui/Place.tsx`),
+  og plasseringen fra serveren («Vinner av …») får pokal/medalje i appen. Feiring, oppdatering, sky, lås, fagprøve,
+  fullskjerm, nattspoling og varsellinja bruker ikoner; ferdighetsstjernene og stjernene i kontrollrommet er stjerneikoner.
+  Loggtekster er uten emoji, og `migrate()` rydder gamle linjer og landemerkenavn i lagrede spill. Hjelpetekster sier
+  «Innstillinger», «bjella» og «Toppliste» i stedet for tegn. 34 nye Lucide-ikoner.
+  - `scripts/sjekk-emoji.mjs` (i `npm test` og CI) stopper nye emoji i `src`, `public` og `index.html`.
+- Tester: anbudsvarsel (taper, vinner, én gang, uten bud, gammelt), mesterskapsprisene og verdien per døgn; `npm test`,
+  tsc, lint, balance (exit 0), Playwright på 7 størrelser uten en eneste emoji på noen side eller i noe ark.

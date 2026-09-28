@@ -1,5 +1,5 @@
-import { useEffect, useState, useSyncExternalStore } from "react";
-import { fetchWorldStatus } from "../net/world";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { fetchWorldStatus, type TenderResult } from "../net/world";
 import { getSession, onSessionChange } from "../net/supabase";
 
 export type OpenTender = { closesAt: string };
@@ -14,9 +14,17 @@ export function tenderChanged() {
  * Åpent anbud på skraplageret som spilleren ikke har bydd på (B-226): gir «!» på Konsern i menyen, merke på underfanen
  * og en beskjed på Oversikt, så anbudet ikke ligger skjult. Hentes fra serveren bare med konto og åpnet konsern.
  */
-export function useOpenTender(enabled: boolean): OpenTender | null {
+export function useOpenTender(
+  enabled: boolean,
+  /** Siste avgjorte anbud per selskap (B-237): GameApp gir varsel til den som bydde */
+  onResult?: (company: string, result: TenderResult) => void,
+): OpenTender | null {
   const session = useSyncExternalStore(onSessionChange, getSession, getSession);
   const [open, setOpen] = useState<OpenTender | null>(null);
+  const resultRef = useRef(onResult);
+  useEffect(() => {
+    resultRef.current = onResult;
+  });
   useEffect(() => {
     if (!session || !enabled) return;
     let alive = true;
@@ -26,7 +34,9 @@ export function useOpenTender(enabled: boolean): OpenTender | null {
           const t = w.companies
             .map((c) => c.tender)
             .find((x) => x && x.myBid === null && Date.parse(x.closesAt) > Date.now());
-          if (alive) setOpen(t ? { closesAt: t.closesAt } : null);
+          if (!alive) return;
+          setOpen(t ? { closesAt: t.closesAt } : null);
+          for (const c of w.companies) if (c.lastResult) resultRef.current?.(c.name, c.lastResult);
         },
         () => {},
       );

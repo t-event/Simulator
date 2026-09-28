@@ -41,6 +41,7 @@ import { importantLog, markAllSeen, unseenCount } from "../game/inbox";
 import { Sales } from "./Sales";
 import { KonsernPage } from "./Konsern";
 import { useOpenTender } from "./openTender";
+import { applyTenderResult } from "../net/world";
 import { VIEWS, viewUnlocked, type View } from "./views";
 import { Icon, type IconName } from "./icons";
 import { isVerketTab } from "./verketTabs";
@@ -120,7 +121,9 @@ function Intro({ api }: { api: GameApi }) {
         <SeasonTeaser />
         <IntroAccount api={api} />
         <details className="g-details g-intro-more">
-          <summary>📖 Slik spiller du</summary>
+          <summary>
+            <Icon name="book" /> Slik spiller du
+          </summary>
           <p>
             Du har leid en kald garasje, fått tak i en liten, brukt induksjonsovn og har 25 000 kroner på konto. Naboen
             har gitt deg et tonn skrap. En veiledning viser deg de første stegene.
@@ -200,9 +203,10 @@ function AutoUpdate({ api }: { api: GameApi }) {
   return (
     // Et trykk skjuler beskjeden (den kommer igjen ved neste sjekk hvis appen fortsatt er gammel)
     <div className="g-update" role="status" onClick={() => stuck && setFound(null)}>
+      <Icon name="refresh" />{" "}
       {stuck
-        ? "🔄 Ny versjon av spillet er klar – lukk appen og åpne den igjen"
-        : `🔄 Ny versjon av spillet – ${busy ? "oppdaterer når chargen er ferdig" : "oppdaterer …"}`}
+        ? "Ny versjon av spillet er klar – lukk appen og åpne den igjen"
+        : `Ny versjon av spillet – ${busy ? "oppdaterer når chargen er ferdig" : "oppdaterer …"}`}
     </div>
   );
 }
@@ -242,15 +246,15 @@ function EndScreen({
           <p className="g-muted">
             {inSeason
               ? "Du er med i sesongen: spill videre og hold plassen på topplista."
-              : "Spill videre og la konsernet vokse. Vil du konkurrere med andre, kan du bli med i sesongen under 🏆 Toppliste."}{" "}
+              : "Spill videre og la konsernet vokse. Vil du konkurrere med andre, kan du bli med i sesongen under Toppliste (pokalen)."}{" "}
             Utfordringene på storverket står under Verket.
           </p>
         )}
         {won && (
           <p>
-            👑 Du har fått tittelen <strong>{WIN_TITLE}</strong>. Nye titler venter: {LEGENDS[0].title} ved{" "}
-            {fmtKr(LEGENDS[0].equity)} og mer. Når all forskning er gjort, åpner <strong>mesterskapet</strong> under
-            Forskning, så fagpoengene alltid har noe å gå til.
+            <Icon name="crown" /> Du har fått tittelen <strong>{WIN_TITLE}</strong>. Nye titler venter:{" "}
+            {LEGENDS[0].title} ved {fmtKr(LEGENDS[0].equity)} og mer. Når all forskning er gjort, åpner{" "}
+            <strong>mesterskapet</strong> under Forskning, så fagpoengene alltid har noe å gå til.
           </p>
         )}
         <div className="g-row">
@@ -259,7 +263,7 @@ function EndScreen({
               Spill videre
             </button>
           )}
-          {/* Etter en seier ligger «Nytt spill» under ⚙️ med bekreftelse, så ingen sletter spillet ved et uhell */}
+          {/* Etter en seier ligger «Nytt spill» under tannhjulet med bekreftelse, så ingen sletter spillet ved et uhell */}
           {!won && (
             <button className="g-primary" onClick={onRestart}>
               Nytt spill
@@ -329,7 +333,7 @@ function Celebration({ g, onClose }: { g: GameState; onClose: () => void }) {
     <div className="g-modal" role="dialog" aria-modal="true" aria-labelledby="celebrate-title">
       <div className="g-modal-card g-celebrate">
         <div className="g-celebrate-burst" aria-hidden="true">
-          🎉
+          <Icon name="party-popper" />
         </div>
         <h2 id="celebrate-title">Flyttedag: {stage.name}!</h2>
         <p>{stage.description}</p>
@@ -359,7 +363,7 @@ function LegendCelebration({ g, onClose }: { g: GameState; onClose: () => void }
     <div className="g-modal" role="dialog" aria-modal="true" aria-labelledby="legend-title">
       <div className="g-modal-card g-celebrate">
         <div className="g-celebrate-burst" aria-hidden="true">
-          👑
+          <Icon name="crown" />
         </div>
         <h2 id="legend-title">Ny tittel: {l.title}!</h2>
         <p>
@@ -449,7 +453,7 @@ function TopBar({
             {g.speed > 0 && idleOutsideHours(g, stats) && (
               <em className="g-ff" title="Verket står om natta – tida går fortere til arbeidsdagen starter">
                 {" "}
-                ⏩ natt
+                <Icon name="fast-forward" /> natt
               </em>
             )}
           </span>
@@ -475,6 +479,7 @@ function TopBar({
                 }
               >
                 {o.label}
+                {locked && <Icon name="lock" className="g-speed-lock" />}
               </button>
             );
           })}
@@ -518,7 +523,7 @@ function TopBar({
   );
 }
 
-/** Varsellinja med 🏆 ved siden av (B-134): i toppfeltet på PC, rett over menyen nederst på mobil (B-201) */
+/** Varsellinja med pokalen ved siden av (B-134): i toppfeltet på PC, rett over menyen nederst på mobil (B-201) */
 function NoticeRow({
   g,
   api,
@@ -601,7 +606,10 @@ function Kpi({
   );
 }
 
-const TOAST_ICON = { bad: "⚠", event: "•", good: "✓", info: "•" } as const;
+const TOAST_ICON = { bad: "warning", event: "info", good: "check", info: "info" } as const satisfies Record<
+  string,
+  IconName
+>;
 
 /**
  * Varsellinja (B-116): en fast linje nederst i toppfeltet med bjella og det nyeste varselet. Den har alltid samme
@@ -652,11 +660,11 @@ function NoticeLine({
           {unseen > 0 && <span className="g-badge">{unseen > 99 ? "99+" : unseen}</span>}
         </span>
         <span className={`g-notice-msg${kind ? "" : " is-idle"}`}>
-          {kind && <span aria-hidden="true">{TOAST_ICON[kind]} </span>}
+          {kind && <Icon name={TOAST_ICON[kind]} className="g-notice-kind" />}
           {text}
         </span>
       </button>
-      {/* Krysset fjerner alle varsler og tallet på bjella (B-171). Lista bak 🔔 har dem fortsatt */}
+      {/* Krysset fjerner alle varsler og tallet på bjella (B-171). Lista bak bjella har dem fortsatt */}
       {(t || unseen > 0) && (
         <button
           className="g-toast-close"
@@ -719,7 +727,7 @@ export function GameApp() {
   const [bookOpen, setBookOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(false);
-  // Topplista er et eget ark bak 🏆 igjen (B-214); Mål er en egen side
+  // Topplista er et eget ark bak pokalen igjen (B-214); Mål er en egen side
   const [boardOpen, setBoardOpen] = useState(false);
   const [bookChapter, setBookChapter] = useState<string | null>(null);
   // Beskjeden om at en sesong er over, vises før spørsmålet om neste sesong (B-143)
@@ -796,7 +804,10 @@ export function GameApp() {
 
   // Varsellinja står over menyen nederst på mobil (B-201). Høyden følges, så veiledningen legger seg over den
   const isPc = useIsPc();
-  const tender = useOpenTender(!!g?.konsern?.unlocked);
+  // Varsel om avgjort anbud til den som bydde (B-237); act er stabil, og applyTenderResult gir hvert anbud én gang
+  const tender = useOpenTender(!!g?.konsern?.unlocked, (company, r) => {
+    if (r.id > (g?.tenderSeen ?? 0)) act((gg) => void applyTenderResult(gg, company, r));
+  });
   const appRef = useRef<HTMLDivElement>(null);
   const hasGame = !!g;
   useEffect(() => {

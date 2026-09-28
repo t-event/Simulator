@@ -45,7 +45,7 @@ export const TUTORIAL: TutorialStep[] = [
   },
   {
     title: "Les i fagboka",
-    text: "Trykk på boka 📖 øverst. Der står det hvordan et stålverk virker. Du må lese for å kunne forske, og quizene gir fagpoeng.",
+    text: "Trykk på boka øverst. Der står det hvordan et stålverk virker. Du må lese for å kunne forske, og quizene gir fagpoeng.",
     done: (g) => g.readChapters.length >= 1,
   },
   {

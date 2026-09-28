@@ -53,6 +53,10 @@
 
   /* ---------------------------------------------------------- varme prosesser, vedlikehold, advarsel */
   --heat: #f5a524;
+  /* Medaljer (B-237) */
+  --medal-gold: #e0b030;
+  --medal-silver: #c3cad4;
+  --medal-bronze: #c47f4a;
   --heat-strong: #c0561d;
   --heat-border: #ff8a3d;
   --heat-bg: #3a2a10;

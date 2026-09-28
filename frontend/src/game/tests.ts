@@ -18,7 +18,7 @@ import {
   setPowerDeal,
   upgradeOptions,
 } from "./actions";
-import { MASTERY, masteryCost, masteryEffect, masteryOpen } from "./mastery";
+import { MASTERY, MASTERY_IDS, masteryCost, masteryEffect, masteryOpen } from "./mastery";
 import {
   ACHIEVEMENT_BY_ID,
   ACHIEVEMENTS,
@@ -168,7 +168,8 @@ import {
 } from "./plant";
 import { answerQuizQuestion, QUIZ, quizAvailable, quizReward } from "./quiz";
 import { GRADES } from "./data";
-import type { Agreement, Analysis, Contract, GameState, ManualRequest, RoleId } from "./types";
+import type { Agreement, Analysis, Contract, GameState, ManualRequest, MasteryId, RoleId } from "./types";
+import { masteryGainPerDay } from "./masteryValue";
 import { autoPlay, ChargeGame } from "../ui/control/chargeGame";
 import { applyCashCap, CASH_RESERVE, reserveDayLog, reserveTotal } from "./reserve";
 
@@ -785,7 +786,10 @@ test("Mesterskap (B-150): åpner etter all forskning, stigende pris, avtagende g
   const power = energyPrice(g);
   const fp = g.researchPoints;
   assert(buyMastery(g, "pris").ok && buyMastery(g, "skrap").ok && buyMastery(g, "strom").ok, "kjøpet feilet");
-  assert(g.researchPoints === fp - 3 * masteryCost("pris", 0), "trakk feil antall fagpoeng");
+  assert(
+    g.researchPoints === fp - masteryCost("pris", 0) - masteryCost("skrap", 0) - masteryCost("strom", 0),
+    "trakk feil antall fagpoeng",
+  );
   assert(productPrice(g, "armering", null) > price * 1.009, "stålprisen gikk ikke opp");
   assert(scrapPrice(g, "blandet") < scrap && energyPrice(g) < power, "skrap eller strøm ble ikke billigere");
   // Hvert nivå koster mer og gir mindre, men aldri over maks
@@ -2061,6 +2065,26 @@ test("Quiz ett spørsmål om gangen (B-234): svaret står fast, og quizen kan ik
   const old = JSON.parse(JSON.stringify(g));
   delete old.quizPartial;
   assert(!!parseSave(JSON.stringify(old))?.quizPartial, "gammel lagring fikk ikke quizPartial");
+});
+
+test("Mesterskap (B-237): prisen følger hvor mye prosjektet er verdt, og verdien per døgn kan regnes ut", () => {
+  const b = (id: MasteryId) => MASTERY[id].base;
+  assert(
+    b("datterverk") > b("pris") && b("pris") > b("skrap") && b("skrap") > b("foring") && b("foring") > b("strom"),
+    "prisene følger ikke verdien",
+  );
+  const g = newGame(2371);
+  g.history.push({
+    ...structuredClone(g.today),
+    day: 1,
+    income: { kontrakt: 100e6 },
+    costs: { energi: 10e6, skrap: 50e6, vedlikehold: 5e6 },
+  } as never);
+  const v = (id: MasteryId) => masteryGainPerDay(g, id);
+  assert(Math.abs(v("pris") - 100e6 * 0.01) < 1, `feil verdi for priser: ${v("pris")}`);
+  assert(Math.abs(v("strom") - 10e6 * 0.015) < 1, `feil verdi for strøm: ${v("strom")}`);
+  assert(v("datterverk") === 0, "datterverk uten verk skulle gi 0");
+  for (const id of MASTERY_IDS) assert(Number.isFinite(v(id)) && v(id) >= 0, `ugyldig verdi: ${id}`);
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

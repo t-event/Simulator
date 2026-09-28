@@ -4,10 +4,12 @@
  */
 import { hasAchievement } from "./achievements";
 import type { GameState } from "./types";
+import type { IconName } from "../ui/icons";
 
 export interface Cosmetic {
   id: string;
-  icon: string;
+  /** Ikon fra designsystemet (B-237). Fasadene vises med fargen sin i stedet */
+  icon: IconName;
   name: string;
   description: string;
   /** Pris i fagpoeng */
@@ -23,15 +25,28 @@ export interface Cosmetic {
 }
 
 export const COSMETICS: Cosmetic[] = [
-  { id: "flagg", icon: "🚩", name: "Flagg på taket", description: "Et rødt flagg vaier på taket.", fp: 10 },
-  { id: "lys", icon: "💡", name: "Lyslenke", description: "Fargede lys langs taket. Lyser best om natta.", fp: 20 },
-  { id: "traer", icon: "🌳", name: "Trær", description: "Grønne trær rundt verket.", fp: 25 },
-  { id: "rod", icon: "🟥", name: "Rød fasade", description: "Mal hallene røde.", fp: 30, group: "fasade" },
-  { id: "bla", icon: "🟦", name: "Blå fasade", description: "Mal hallene blå.", fp: 30, group: "fasade" },
-  { id: "gronn", icon: "🟩", name: "Grønn fasade", description: "Mal hallene grønne.", fp: 30, group: "fasade" },
+  { id: "flagg", icon: "flag", name: "Flagg på taket", description: "Et rødt flagg vaier på taket.", fp: 10 },
+  {
+    id: "lys",
+    icon: "lightbulb",
+    name: "Lyslenke",
+    description: "Fargede lys langs taket. Lyser best om natta.",
+    fp: 20,
+  },
+  { id: "traer", icon: "trees", name: "Trær", description: "Grønne trær rundt verket.", fp: 25 },
+  { id: "rod", icon: "paint-roller", name: "Rød fasade", description: "Mal hallene røde.", fp: 30, group: "fasade" },
+  { id: "bla", icon: "paint-roller", name: "Blå fasade", description: "Mal hallene blå.", fp: 30, group: "fasade" },
+  {
+    id: "gronn",
+    icon: "paint-roller",
+    name: "Grønn fasade",
+    description: "Mal hallene grønne.",
+    fp: 30,
+    group: "fasade",
+  },
   {
     id: "sol",
-    icon: "☀️",
+    icon: "sun",
     name: "Solceller",
     description: "Solcellepaneler på taket.",
     fp: 60,
@@ -39,7 +54,7 @@ export const COSMETICS: Cosmetic[] = [
   },
   {
     id: "vind",
-    icon: "🌬️",
+    icon: "wind",
     name: "Vindmølle",
     description: "En vindmølle på åsen bak verket.",
     fp: 100,
@@ -47,7 +62,7 @@ export const COSMETICS: Cosmetic[] = [
   },
   {
     id: "statue",
-    icon: "🗽",
+    icon: "person-standing",
     name: "Statue av grunnleggeren",
     description: "Deg, i stål, foran verket.",
     fp: 150,
@@ -55,7 +70,7 @@ export const COSMETICS: Cosmetic[] = [
   },
   {
     id: "fyrverkeri",
-    icon: "🎆",
+    icon: "sparkles",
     name: "Fyrverkeri",
     description: "Fyrverkeri over verket om natta.",
     fp: 250,
@@ -63,7 +78,7 @@ export const COSMETICS: Cosmetic[] = [
   },
   {
     id: "gullpipe",
-    icon: "✨",
+    icon: "factory",
     name: "Gullpipe",
     description: "Pipa blir forgylt.",
     fp: 500,
@@ -72,7 +87,7 @@ export const COSMETICS: Cosmetic[] = [
   // Sesongstigen (B-173): bare som belønning, aldri til salgs
   {
     id: "sesongflagg",
-    icon: "🏁",
+    icon: "flag-triangle-right",
     name: "Sesongflagg",
     description: "Et gyllent flagg på taket – du har klatret ti trinn på sesongstigen.",
     fp: 0,
@@ -80,7 +95,7 @@ export const COSMETICS: Cosmetic[] = [
   },
   {
     id: "gullfasade",
-    icon: "🟨",
+    icon: "paint-roller",
     name: "Gullfasade",
     description: "Hallene i gull.",
     fp: 0,
@@ -89,7 +104,7 @@ export const COSMETICS: Cosmetic[] = [
   },
   {
     id: "nattfasade",
-    icon: "⬛",
+    icon: "paint-roller",
     name: "Nattsvart fasade",
     description: "Matt svarte haller.",
     fp: 0,
@@ -98,7 +113,7 @@ export const COSMETICS: Cosmetic[] = [
   },
   {
     id: "stjerne",
-    icon: "⭐",
+    icon: "star",
     name: "Stjerne over verket",
     description: "En stjerne som lyser over verket.",
     fp: 0,
@@ -106,7 +121,7 @@ export const COSMETICS: Cosmetic[] = [
   },
   {
     id: "pokal",
-    icon: "🏆",
+    icon: "trophy",
     name: "Sesongpokal",
     description: "En stor pokal foran verket – toppen av sesongstigen.",
     fp: 0,

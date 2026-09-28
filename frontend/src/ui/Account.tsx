@@ -1,5 +1,5 @@
 /**
- * Konto og lagring på nett (B-125). Vises på startskjermen og under ⚙️ Innstillinger.
+ * Konto og lagring på nett (B-125). Vises på startskjermen og under Innstillinger (tannhjulet).
  * Logg inn, opprett konto, glemt passord, nytt passord, logg ut og slett konto – og kobling av det lokale spillet
  * til kontoen ved innlogging.
  */
@@ -115,7 +115,7 @@ export function IntroAccount({ api }: { api: GameApi }) {
         <span>
           {session ? (
             <>
-              ☁ Innlogget som <strong>{session.user.email || "…"}</strong>
+              <Icon name="cloud" /> Innlogget som <strong>{session.user.email || "…"}</strong>
             </>
           ) : (
             <>
@@ -238,11 +238,11 @@ export function CloudDot() {
           : s.kind === "conflict"
             ? "Spillet er lagret fra en annen enhet – henter det nyeste"
             : `Lagring på nett feilet: ${s.message}`;
-  // Samme bredde mens den lagrer (B-171): «☁…» gjorde toppraden bredere, og klokka brøt til to linjer
+  // Samme bredde mens den lagrer (B-171): «…» bak skyen gjorde toppraden bredere, og klokka brøt til to linjer
   return (
     <em className={`g-cloud is-${s.kind}`} title={text} aria-label={text}>
       {" "}
-      ☁{s.kind === "saved" || s.kind === "saving" ? "" : "!"}
+      <Icon name={s.kind === "saved" || s.kind === "saving" ? "cloud" : "cloud-off"} />
     </em>
   );
 }

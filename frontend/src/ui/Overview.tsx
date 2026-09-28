@@ -35,7 +35,7 @@ interface Props {
   act: GameApi["act"];
   go: (view: View, sub?: string) => void;
   openBook: (chapter?: string) => void;
-  /** Åpner ⚙️ (innloggingen), fra kortet med dagens oppdrag */
+  /** Åpner tannhjulet (innloggingen), fra kortet med dagens oppdrag */
   onOpenSettings?: () => void;
   /** Underfanen står i GameApp (B-192) */
   tab: VerketTab;
@@ -270,7 +270,7 @@ function BookCard({ g, openBook }: { g: GameState; openBook: (chapter?: string) 
       title="Fagboka"
       right={
         <button className="g-small" onClick={() => openBook()}>
-          📖 Åpne
+          <Icon name="book" /> Åpne
         </button>
       }
     >
@@ -444,7 +444,7 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
                   </li>
                 ))}
               </ul>
-              <p className="g-muted">Alle viktige hendelser ligger i varsellista bak 🔔 øverst.</p>
+              <p className="g-muted">Alle viktige hendelser ligger i varsellista bak bjella øverst.</p>
             </Card>
           </div>
         </>

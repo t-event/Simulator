@@ -16,7 +16,7 @@ import {
   nextInFamily,
   type Achievement,
 } from "../game/achievements";
-import { buyCosmetic, COSMETICS, cosmeticBlocked, ownsCosmetic, setCosmetic } from "../game/cosmetics";
+import { buyCosmetic, COSMETICS, cosmeticBlocked, FACADE, ownsCosmetic, setCosmetic } from "../game/cosmetics";
 import { STAGES } from "../game/data";
 import type { PlantStats } from "../game/plant";
 import type { GameState } from "../game/types";
@@ -186,7 +186,11 @@ export function PyntModal({
               return (
                 <li key={c.id} className="g-pynt-item">
                   <span className="g-pynt-icon" aria-hidden="true">
-                    {c.icon}
+                    {FACADE[c.id] ? (
+                      <span className="g-pynt-swatch" style={{ background: FACADE[c.id][0] }} />
+                    ) : (
+                      <Icon name={c.icon} />
+                    )}
                   </span>
                   <div className="g-pynt-text">
                     <strong>{c.name}</strong>

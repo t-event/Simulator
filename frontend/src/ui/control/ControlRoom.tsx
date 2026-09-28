@@ -39,8 +39,10 @@ const fmt = (v: number, d: number) => v.toFixed(d).replace(".", ",");
 function Stars({ n, of = 3 }: { n: number; of?: number }) {
   return (
     <span className="cg-stars" aria-label={`${n} av ${of} stjerner`}>
-      {"★".repeat(n)}
-      <span className="off">{"★".repeat(of - n)}</span>
+      {/* Stjerneikoner (B-237) */}
+      {Array.from({ length: of }, (_, i) => (
+        <Icon key={i} name="star" className={i < n ? "is-on" : "off"} />
+      ))}
     </span>
   );
 }

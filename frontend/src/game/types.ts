@@ -530,6 +530,8 @@ export interface GameState {
   season: number | null;
   /** Sesongen spilleren sist svarte på spørsmålet om, så det ikke stilles igjen */
   seasonPromptSeen: number | null;
+  /** Det siste anbudsresultatet spilleren har fått varsel om (B-237), 0 hvis ingen */
+  tenderSeen: number;
   /** Sesongen en spiller uten konto sist fikk beskjed om at man må logge inn for å være med (B-131) */
   seasonLoginPromptSeen: number | null;
   /** Felles hendelser fra serveren som pågår nå, og hvilke spilleren alt har fått beskjed om (B-129) */

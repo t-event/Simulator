@@ -27,6 +27,8 @@ export interface BoardRow {
   stage: number;
   /** Beste plassering i en sesong som er over, f.eks. «Sesong 1: 3. plass» (B-143), eller null */
   honor: string | null;
+  /** Ikonet foran plasseringen (B-237): pokal for vinneren, medalje for topp 10 – serveren sender dem som tegn */
+  honorIcon: "trophy" | "medal" | null;
   /** Tittel etter sluttmålet (Stålbaron … Stållegende, B-150), eller null */
   title: string | null;
   /** Spilldagen spillet ble koblet til kontoen (første dag i tidslinja, B-170), eller null */
@@ -45,9 +47,9 @@ export function levelLabel(r: Pick<BoardRow, "stage" | "league"> & { title?: str
   return STAGE_NAMES[r.stage] ?? "Garasje";
 }
 
-/** 🥇🥈🥉 for de tre første, ellers plassnummeret */
+/** Plassen som tekst («1. plass»); med medalje i grensesnittet: <Place> i ui/Place.tsx (B-237) */
 export function placeLabel(plass: number): string {
-  return plass === 1 ? "🥇" : plass === 2 ? "🥈" : plass === 3 ? "🥉" : `${plass}.`;
+  return `${plass}. plass`;
 }
 
 export interface Profile {
@@ -78,7 +80,7 @@ export async function fetchLeaderboard(kind: BoardKind, season: number | null = 
     value: Number(r.value),
     league: r.league ?? "bronse",
     stage: Number(r.stage ?? 0),
-    honor: r.honor ?? null,
+    ...splitHonor(r.honor ?? null),
     title: r.title ?? null,
     linked_day: r.linked_day ?? null,
   }));
@@ -114,4 +116,14 @@ export async function nicknameAvailable(name: string): Promise<boolean> {
 /** Setter kallenavnet. Serveren sjekker lengde, tegn og at det er ledig; feil kommer som norsk melding. */
 export async function setNickname(name: string): Promise<string> {
   return rpc<string>("set_nickname", { name });
+}
+
+/**
+ * Serveren skriver plasseringen med et tegn foran («\u{1F3C6} Vinner av …», «\u{1F396} Topp 10 i …»). Appen viser et ikon
+ * fra designsystemet i stedet (B-237), så tegnet tas bort og blir til `honorIcon`.
+ */
+export function splitHonor(honor: string | null): { honor: string | null; honorIcon: "trophy" | "medal" | null } {
+  if (!honor) return { honor: null, honorIcon: null };
+  const icon = honor.startsWith("\u{1F3C6}") ? "trophy" : honor.startsWith("\u{1F396}") ? "medal" : null;
+  return { honor: honor.replace(/^[\p{Extended_Pictographic}\u{FE0F}\s]+/u, ""), honorIcon: icon };
 }

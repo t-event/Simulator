@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Icon } from "./icons";
 import { useReportTab, type OnTab } from "./tabMemory";
 import { DirectorCard, DirectorOffer } from "./Konsern";
 import {
@@ -215,8 +216,10 @@ function Stars({ skill }: { skill: number }) {
       title={`Ferdighet ${fmtNum(skill, 1)} av 5`}
       aria-label={`Ferdighet ${fmtNum(skill, 1)} av 5`}
     >
-      {"★".repeat(full)}
-      <span className="g-stars-off">{"★".repeat(5 - full)}</span>
+      {/* Stjerneikoner (B-237), fylte for ferdigheten den ansatte har */}
+      {Array.from({ length: 5 }, (_, i) => (
+        <Icon key={i} name="star" className={i < full ? "is-on" : ""} />
+      ))}
     </span>
   );
 }
@@ -236,7 +239,10 @@ function FireImpact({ g, id }: { g: GameState; id: number }) {
 /** Når lærlingen tar fagprøven (B-163) */
 function ApprenticeBadge({ left }: { left: number }) {
   return (
-    <span className="g-muted g-worker-exam"> · 🎓 {left <= 0 ? "Fagprøve i dag" : `Fagprøve om ${left} døgn`}</span>
+    <span className="g-muted g-worker-exam">
+      {" "}
+      · <Icon name="graduation-cap" /> {left <= 0 ? "Fagprøve i dag" : `Fagprøve om ${left} døgn`}
+    </span>
   );
 }
 

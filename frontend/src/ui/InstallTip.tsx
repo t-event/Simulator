@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Icon } from "./icons";
 
 /**
  * Legg til på hjemskjermen (B-071): da åpner spillet i fullskjerm uten nettleserlinjer.
@@ -82,11 +83,19 @@ export function InstallTip() {
     <div className="g-install">
       {deferred && (
         <button className="g-primary g-small" onClick={install}>
-          📱 Legg til på hjemskjermen
+          <Icon name="smartphone" /> Legg til på hjemskjermen
         </button>
       )}
       <details open={open} onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}>
-        <summary>{deferred ? "Eller gjør det selv" : "📱 Spill i fullskjerm: legg spillet på hjemskjermen"}</summary>
+        <summary>
+          {deferred ? (
+            "Eller gjør det selv"
+          ) : (
+            <>
+              <Icon name="smartphone" /> Spill i fullskjerm: legg spillet på hjemskjermen
+            </>
+          )}
+        </summary>
         <p>Da åpner det som en app uten nettleserlinjer – og virker uten nett.</p>
         <ul className="g-closed">
           {steps}

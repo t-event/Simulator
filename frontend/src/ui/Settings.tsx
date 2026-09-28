@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { SheetHead } from "./ds";
+import { Icon } from "./icons";
 import { CHANGELOG } from "../game/changelog";
 import { ChangelogSheet } from "./Changelog";
 import { borrow, repay } from "../game/actions";
@@ -43,7 +44,7 @@ export function BankCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
 }
 
 /**
- * Varsler på skjermen (B-115): hvor mye, hvilke temaer og hvor lenge. Alt havner uansett i varsellista bak 🔔.
+ * Varsler på skjermen (B-115): hvor mye, hvilke temaer og hvor lenge. Alt havner uansett i varsellista bak bjella.
  */
 function ToastSettings({ g, act }: { g: GameState; act: GameApi["act"] }) {
   const mode = g.settings.toasts ?? "alle";
@@ -111,7 +112,7 @@ function ToastSettings({ g, act }: { g: GameState; act: GameApi["act"] }) {
   );
 }
 
-/** Innstillinger bak ⚙️ i toppen: konto, nytt spill, valsing og nattspoling (B-072). Sikkerhetskopi er fjernet (B-135). */
+/** Innstillinger bak tannhjulet i toppen: konto, nytt spill, valsing og nattspoling (B-072). Sikkerhetskopi er fjernet (B-135). */
 export function SettingsSheet({
   g,
   stats,
@@ -175,7 +176,9 @@ export function SettingsSheet({
         <p className="g-muted">
           Siste oppdatering: {CHANGELOG[0].title.toLowerCase()} ({CHANGELOG[0].date.split("-").reverse().join(".")}).
         </p>
-        <button onClick={() => setNews(true)}>🆕 Se hva som er nytt</button>
+        <button onClick={() => setNews(true)}>
+          <Icon name="sparkles" /> Se hva som er nytt
+        </button>
         {news && <ChangelogSheet onClose={() => setNews(false)} />}
         <h3 className="g-subhead">Spill på mobilen</h3>
         <InstallTip />

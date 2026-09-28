@@ -20,7 +20,7 @@ const AUTOSAVE_MS = 5000;
  * Ett varsel om gangen på én linje, så det ikke dekker knappene (B-114). Står det flere i kø, går hvert raskere,
  * så køen ikke henger etter spillet (B-098).
  */
-/** Står flere i kø, går hvert varsel på litt over halve tida (B-115: tida velges under ⚙️) */
+/** Står flere i kø, går hvert varsel på litt over halve tida (B-115: tida velges under tannhjulet) */
 const TOAST_BUSY_SHARE = 0.6;
 const MAX_TOASTS = 1;
 const MAX_QUEUE = 12;
@@ -29,7 +29,7 @@ export interface Toast {
   id: number;
   text: string;
   kind: LogEntry["kind"];
-  /** Fra loggen (står i varsellista bak 🔔), eller svar på noe spilleren trykket på */
+  /** Fra loggen (står i varsellista bak bjella), eller svar på noe spilleren trykket på */
   fromLog: boolean;
 }
 
@@ -102,7 +102,7 @@ export function useGame(): GameApi {
   const pushToast = useCallback(
     (text: string, kind: Toast["kind"], fromLog = true) => {
       // Det nyeste vises med en gang (B-171): før sto nye varsler i kø bak de gamle, og det siste som skjedde
-      // kom for sent. Det som skyves bort, står i varsellista bak 🔔.
+      // kom for sent. Det som skyves bort, står i varsellista bak bjella.
       const t: Toast = { id: toastId.current++, text, kind, fromLog };
       // Svar på noe spilleren trykket på, skal ikke skyves bort av et varsel fra loggen
       const keep = visible.current.filter((x) => !x.fromLog && fromLog);
@@ -164,7 +164,7 @@ export function useGame(): GameApi {
     if (!g) return;
     for (const entry of g.log) {
       if (entry.id <= lastLogId.current) continue;
-      // Spilleren velger under ⚙️ hva som skal dukke opp på skjermen; alt står uansett i varsellista (B-089, B-115)
+      // Spilleren velger under tannhjulet hva som skal dukke opp på skjermen; alt står uansett i varsellista (B-089, B-115)
       if (showToast(g, entry)) pushToast(entry.text, entry.kind);
     }
     if (g.log.length) lastLogId.current = g.log[g.log.length - 1].id;

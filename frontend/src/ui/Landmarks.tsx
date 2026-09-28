@@ -3,6 +3,7 @@
  * og når det neste kommer.
  */
 import { LANDMARKS, landmarkContract, nextLandmark, todayKey } from "../game/landmarks";
+import { Icon } from "./icons";
 import type { GameState } from "../game/types";
 import { Card } from "./common";
 import { fmtT } from "./format";
@@ -28,7 +29,7 @@ export function LandmarksCard({ g, onSales }: { g: GameState; onSales: () => voi
         <p className="g-landmarks" aria-label={`Levert: ${done.map((l) => l.name).join(", ")}`}>
           {done.map((l) => (
             <span key={l.id} title={l.name}>
-              {l.icon}
+              <Icon name={l.icon} />
             </span>
           ))}
         </p>
@@ -47,11 +48,10 @@ export function LandmarksCard({ g, onSales }: { g: GameState; onSales: () => voi
         </p>
       ) : next ? (
         <p className="g-muted">
-          {lm.date === todayKey() ? "Neste landemerke kommer i morgen" : "Neste landemerke kommer snart"}: {next.icon}{" "}
-          {next.name}.
+          {lm.date === todayKey() ? "Neste landemerke kommer i morgen" : "Neste landemerke kommer snart"}: {next.name}.
         </p>
       ) : done.length === LANDMARKS.length ? (
-        <p>Alle landemerkene er levert. 🏛️</p>
+        <p>Alle landemerkene er levert.</p>
       ) : (
         <p className="g-muted">Flere landemerker kommer når verket blir større.</p>
       )}

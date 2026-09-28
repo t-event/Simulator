@@ -21,7 +21,7 @@ import {
   type WeekKind,
   type WeeklyRow,
 } from "../net/weekly";
-import { placeLabel } from "../net/leaderboard";
+import { Place } from "./Place";
 import { Card } from "./common";
 import { fmtNum } from "./format";
 import { buzz } from "./haptics";
@@ -159,7 +159,9 @@ function WeeklyBoard({ kind, onClose }: { kind: WeekKind; onClose: () => void })
             <ol className="g-board">
               {rows.map((r) => (
                 <li key={r.plass} className={r.isMe ? "is-me" : ""}>
-                  <span className={`g-board-rank${r.plass <= 3 ? " is-medal" : ""}`}>{placeLabel(r.plass)}</span>
+                  <span className={`g-board-rank${r.plass <= 3 ? " is-medal" : ""}`}>
+                    <Place plass={r.plass} />
+                  </span>
                   <span className="g-board-name">
                     <span className="g-board-line">
                       <span className="g-board-nick">{r.nickname}</span>

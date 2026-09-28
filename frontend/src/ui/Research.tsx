@@ -3,7 +3,8 @@ import { MASTERY, MASTERY_IDS, masteryCost, masteryEffect, masteryLevel, mastery
 import { STAGES, stageRef } from "../game/data";
 import { knowledgeCard } from "../game/knowledge";
 import { researchOptions } from "../game/research";
-import type { GameState } from "../game/types";
+import type { GameState, MasteryId } from "../game/types";
+import { masteryGainPerDay } from "../game/masteryValue";
 import type { GameApi } from "../game/useGame";
 import { Bar, Card } from "./common";
 import { Icon } from "./icons";
@@ -47,17 +48,28 @@ function Mastery({ g, act }: { g: GameState; act: GameApi["act"] }) {
   if (!open)
     return g.stage >= 4 ? (
       <p className="g-muted g-small-text">
-        🏅 <strong>Mesterskap:</strong> når all forskning er gjort (også konsernprosjektene), åpner forskning som kan
-        tas om og om igjen. Da har fagpoengene alltid noe å gå til.
+        <Icon name="medal" /> <strong>Mesterskap:</strong> når all forskning er gjort (også konsernprosjektene), åpner
+        forskning som kan tas om og om igjen. Da har fagpoengene alltid noe å gå til.
       </p>
     ) : null;
   const pct = (v: number) => `${(v * 100).toFixed(1).replace(".", ",")} %`;
+  // Hva neste nivå gir per døgn, og hvilket som gir mest per fagpoeng (B-237)
+  const gains = Object.fromEntries(MASTERY_IDS.map((id) => [id, masteryGainPerDay(g, id)])) as Record<
+    MasteryId,
+    number
+  >;
+  const best = MASTERY_IDS.reduce((a, b) =>
+    gains[b] / masteryCost(b, masteryLevel(g, b)) > gains[a] / masteryCost(a, masteryLevel(g, a)) ? b : a,
+  );
   return (
     <>
-      <h3 className="g-subhead">🏅 Mesterskap</h3>
+      <h3 className="g-subhead">
+        <Icon name="medal" /> Mesterskap
+      </h3>
       <p className="g-muted g-small-text">
         All forskning er gjort. Hvert prosjekt kan tas om og om igjen: hvert nivå koster mer, og gevinsten blir litt
-        mindre for hvert nivå.
+        mindre for hvert nivå. Prisen følger hvor mye prosjektet er verdt, og tallet viser hva neste nivå gir på verket
+        ditt nå.
       </p>
       <div className="g-upgrades">
         {MASTERY_IDS.map((id) => {
@@ -65,6 +77,7 @@ function Mastery({ g, act }: { g: GameState; act: GameApi["act"] }) {
           const level = masteryLevel(g, id);
           const cost = masteryCost(id, level);
           const can = g.researchPoints >= cost;
+          const gain = gains[id];
           return (
             <div key={id} className="g-upgrade">
               <div className="g-contract-head">
@@ -73,6 +86,12 @@ function Mastery({ g, act }: { g: GameState; act: GameApi["act"] }) {
                 </strong>
                 <span className="g-fp-cost">{cost} FP</span>
               </div>
+              {gain > 0 && (
+                <p className="g-mastery-gain">
+                  Neste nivå gir ca. <strong>+{fmtKr(gain)}</strong> per døgn
+                  {id === best && <span className="ds-status is-ok">Best nå</span>}
+                </p>
+              )}
               <p className="g-effect">
                 Nå: {pct(masteryEffect(id, level))} {m.effect} · neste nivå: {pct(masteryEffect(id, level + 1))}
               </p>
