@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 221 – 2026-09-28: Færre hendelseskort på høy fart
+
+**Brukeren ba om:** «Fortsett».
+
+**Gjort:** B-284. Minst tre minutter ekte tid mellom to hendelseskort. Publiseringen av #230 (B-283) var grønn.
+
+**Testet:** tsc, lint, npm test (ny test), balance (exit 0), build.
+
+**Gjenstår:** i morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 220 – 2026-09-28: «Hva gjør jeg nå?»
 
 **Brukeren ba om:** «Fortsett», og valgte hjelpeknappen «Hva gjør jeg nå?».

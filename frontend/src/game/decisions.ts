@@ -421,6 +421,11 @@ const MIN_GAP_DAYS = 2;
  * på 1× og 3× endrer det nesten ingenting.
  */
 export const SAME_CARD_REAL_MS = 20 * 60_000;
+/**
+ * Minst så lang tid i ekte tid mellom to kort, uansett hvilke (B-284). På 10× er to spilldøgn bare 24 sekunder, så et kort
+ * kunne komme omtrent hvert minutt (oftere om vinteren). På 1× er to spilldøgn fire minutter, så der endrer det ingenting.
+ */
+export const ANY_CARD_REAL_MS = 3 * 60_000;
 
 /** Kalles én gang per døgn. Lager av og til et nytt kort og pauser spillet. */
 export function maybeCreateDecision(g: GameState): void {
@@ -428,11 +433,12 @@ export function maybeCreateDecision(g: GameState): void {
   const today = day(g);
   const lastAny = Math.max(0, ...Object.values(g.decisionSeen));
   if (today - lastAny < MIN_GAP_DAYS) return;
+  const now = realNow();
+  if (now - Math.max(-Infinity, ...Object.values(g.decisionSeenAt ?? {})) < ANY_CARD_REAL_MS) return;
   // Om vinteren skjer det mer uforutsett (B-265)
   if (!chance(g, DAILY_CHANCE * riskFactor(g))) return;
   const all = { ...MAKERS, ...MORE_MAKERS };
   // Kort som ikke har vært vist på lenge, først de som aldri er vist
-  const now = realNow();
   const ids = Object.keys(all).filter(
     (id) =>
       today - (g.decisionSeen[id] ?? -999) >= (CARD_COOLDOWN[id] ?? COOLDOWN_DAYS) &&

@@ -148,7 +148,7 @@ import {
 } from "./plant";
 import { RESEARCH, researchOptions } from "./research";
 import { parseSave } from "./save";
-import { makeDecision, maybeCreateDecision, resolveDecision, SAME_CARD_REAL_MS } from "./decisions";
+import { ANY_CARD_REAL_MS, makeDecision, maybeCreateDecision, resolveDecision, SAME_CARD_REAL_MS } from "./decisions";
 import { landmarkContract, landmarkHour } from "./landmarks";
 import {
   addCost,
@@ -2639,6 +2639,30 @@ test("Vinter (B-279): dyrere strøm, og snøstorm stenger veien for skrapbilene 
   g.owned = g.owned.filter((id) => id !== "skrapterminal");
   g.minute = g.snowUntilMin;
   assert(!scrapBlocked(g) && buyScrap(g, "tungt", 5).ok, "veien ble ikke åpnet igjen");
+});
+
+test("Hendelseskort (B-284): minst tre minutter ekte tid mellom to kort, uansett fart", () => {
+  let now = 6_000_000_000_000;
+  setRealClock(() => now);
+  const g = newGame(284);
+  g.stage = 3;
+  const count = (days: number) => {
+    let n = 0;
+    for (let d = 0; d < days; d++) {
+      g.minute += 1440;
+      g.pendingDecision = null;
+      maybeCreateDecision(g);
+      if (g.pendingDecision) n++;
+    }
+    return n;
+  };
+  // Klokka står stille (som mange spilldøgn på kort tid): bare ett kort
+  assert(count(200) === 1, "flere kort uten at ekte tid gikk");
+  now += ANY_CARD_REAL_MS - 1000;
+  assert(count(50) === 0, "kort før pausen var over");
+  now += 2000;
+  assert(count(50) === 1, "ingen kort etter pausen");
+  setRealClock(() => Date.now());
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

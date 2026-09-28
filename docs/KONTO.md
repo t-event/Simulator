@@ -119,4 +119,5 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Fagpoeng forklart og havari som repareres av seg selv | Nei | Regel 1: ditt eget spill | B-281 |
 | Forklaring av C, P og Spor, «kr/tonn» og «charge» | Nei | Regel 1: ditt eget spill | B-282 |
 | «Hva gjør jeg nå?» (hjelpeark) | Nei | Regel 1: ditt eget spill | B-283 |
+| Minst tre minutter mellom hendelseskort | Nei | Regel 1: ditt eget spill | B-284 |
 
