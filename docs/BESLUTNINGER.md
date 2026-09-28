@@ -4513,3 +4513,13 @@ Brukeren: «Om man trykker på ovner og støping. Linjene flytter seg i oppgrade
   lenger foran teksten når én ovn er valgt i fanene (navnet står i fanen).
 - **Kassa** står på egen linje under tittelen i alle utstyrsark.
 - Konto: nei. Testet: ingen flytting i målingen etterpå, på fullt storverk og stålverk, 320 og 390 px.
+
+## B-248 Boblene holder seg inne i anleggsbildet (2026-09-28)
+Status: gjelder (retter B-195)
+Brukeren (skjermbilde): «Den grønne tekstboblen syntes ikke korrekt» – «+7,59 mill. kr · +4 655 t · +5 fagpoeng» var
+kuttet av venstre kant.
+- Boblene ble sentrert på faste baner (28, 50, 72 %). En lang boble i venstre bane stakk da ut av bildet.
+- Nå er banen også forankringspunktet i boblen (`--lane`): venstre bane forankres nær venstre kant av boblen, høyre bane
+  nær høyre kant. Så lenge boblen er smalere enn bildet, står den alltid helt inne, med 8 px luft.
+- Er den bredere (320 px med tre deler), brytes den mellom delene – aldri inne i et tall.
+- Konto: nei. Testet: kantene til alle boblene målt i 9 s på 10× (320, 390 og 1 280 px): ingen utenfor.

@@ -59,7 +59,8 @@ export function SceneBubbles({ g }: { g: GameState }) {
       if (pending.t > 0.001) parts.push(`+${fmtT(pending.t)}`);
       if (pending.fp >= 1) parts.push(`+${Math.floor(pending.fp)} fagpoeng`);
       if (!parts.length) return;
-      const text = parts.join(" · ");
+      // Hver del holdes samlet (hardt mellomrom), så en lang boble brytes mellom delene på smale skjermer (B-248)
+      const text = parts.map((x) => x.replace(/ /g, "\u00a0")).join(" · ");
       if (still) {
         setLine(text);
       } else {
@@ -85,7 +86,7 @@ export function SceneBubbles({ g }: { g: GameState }) {
   return (
     <div className="g-bubbles" aria-hidden="true">
       {bubbles.map((b) => (
-        <span key={b.id} className={`g-bubble bubble-${b.kind}`} style={{ left: `${LANES[b.lane]}%` }}>
+        <span key={b.id} className={`g-bubble bubble-${b.kind}`} style={{ ["--lane" as string]: LANES[b.lane] / 100 }}>
           {b.text}
         </span>
       ))}
