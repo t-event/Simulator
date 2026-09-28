@@ -6,8 +6,10 @@
  * sammenhengene man møter i et ekte stålverk.
  *
  * B-234: hvert kapittel har «Kort fortalt» (`short`) og er delt i korte sider med en overskrift hver, så boka kan
- * leses en bit om gangen. `part` samler kapitlene i temaer i innholdet.
+ * leses en bit om gangen. `part` samler kapitlene i temaer i innholdet. B-236: ikon fra designsystemet, ikke emoji.
  */
+import type { IconName } from "../ui/icons";
+
 export type KnowledgePart = "grunnlag" | "ovn" | "stoping" | "drift" | "verden";
 
 export const KNOWLEDGE_PARTS: { id: KnowledgePart; title: string }[] = [
@@ -26,7 +28,7 @@ export interface KnowledgePage {
 export interface KnowledgeCard {
   id: string;
   title: string;
-  emoji: string;
+  icon: IconName;
   part: KnowledgePart;
   /** Hele kapitlet i én setning eller to */
   short: string;
@@ -37,7 +39,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
   {
     id: "start",
     title: "Fra skrap til stål",
-    emoji: "♻️",
+    icon: "recycle",
     part: "grunnlag",
     short: "Skrap smeltes og støpes til nytt stål. Den tregeste delen av kjeden bestemmer hvor mye du får levert.",
     pages: [
@@ -58,7 +60,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
   {
     id: "skrap",
     title: "Skrapvalg og sporelementer",
-    emoji: "🧲",
+    icon: "magnet",
     part: "grunnlag",
     short: "Kobber og tinn går ikke ut av stålet i ovnen. Du får dem bare ned ved å blande inn renere skrap.",
     pages: [
@@ -83,7 +85,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
   {
     id: "karbon",
     title: "Karbon: lett å legge til, vanskelig å ta ut",
-    emoji: "⚫",
+    icon: "atom",
     part: "grunnlag",
     short: "Karbon gjør stålet hardere. Det er lett å legge til, men bare en ovn med oksygen kan ta det ut igjen.",
     pages: [
@@ -104,7 +106,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
   {
     id: "induksjon",
     title: "Induksjonsovnen",
-    emoji: "⚡",
+    icon: "zap",
     part: "ovn",
     short: "Induksjonsovnen smelter raskt og rent, men renser nesten ikke stålet: du får ut det du putter inn.",
     pages: [
@@ -121,7 +123,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
   {
     id: "analyse",
     title: "Analyse: vet du hva du selger?",
-    emoji: "🔬",
+    icon: "microscope",
     part: "grunnlag",
     short: "Uten analyse gjetter du. Med spektrometer vet du at partiet holder kravet før kunden får det.",
     pages: [
@@ -142,7 +144,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
   {
     id: "stoping",
     title: "Støping og temperatur",
-    emoji: "🌡️",
+    icon: "thermometer",
     part: "stoping",
     short: "Stålet må være passe varmt når det støpes. Det som blir til overs, går tilbake som gratis returskrap.",
     pages: [
@@ -159,7 +161,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
   {
     id: "folk",
     title: "Folk og skift",
-    emoji: "👷",
+    icon: "hard-hat",
     part: "drift",
     short: "Hvert skift trenger fullt mannskap. Flere skift gir mer stål, men lønna går hver dag.",
     pages: [
@@ -184,7 +186,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
   {
     id: "ildfast",
     title: "Ildfast foring",
-    emoji: "🧱",
+    icon: "brick-wall",
     part: "ovn",
     short: "Foringen i ovnen slites for hver charge. Bytt den i tide – et gjennombrudd koster mange ganger mer.",
     pages: [
@@ -205,7 +207,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
   {
     id: "radioaktivitet",
     title: "Radioaktive kilder i skrap",
-    emoji: "☢️",
+    icon: "radiation",
     part: "grunnlag",
     short: "Radioaktive kilder kan gjemme seg i skrapet. En strålingsportal finner dem før de havner i ovnen.",
     pages: [
@@ -222,7 +224,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
   {
     id: "strom",
     title: "Strømpris og effekt",
-    emoji: "💡",
+    icon: "power",
     part: "ovn",
     short: "Strømprisen svinger over døgnet. En prisgrense sparer penger, men koster produksjon.",
     pages: [
@@ -239,7 +241,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
   {
     id: "lysbue",
     title: "Lysbueovnen",
-    emoji: "🔥",
+    icon: "flame",
     part: "ovn",
     short: "Lysbuer smelter skrapet, og skummende slagg holder på varmen. En større ovn lager flere tonn i timen.",
     pages: [
@@ -264,7 +266,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
   {
     id: "fosfor",
     title: "Fosfor og avslagging",
-    emoji: "🧪",
+    icon: "research",
     part: "ovn",
     short: "Fosfor gjør stålet sprøtt. Det går i slaggen ved lav temperatur – så slagg av før du varmer opp.",
     pages: [
@@ -285,7 +287,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
   {
     id: "oseovn",
     title: "Øseovnen",
-    emoji: "🥣",
+    icon: "cooking-pot",
     part: "ovn",
     short: "Øseovnen finjusterer temperatur og analyse, så stålovnen kan smelte og støpingen får riktig stål.",
     pages: [
@@ -306,7 +308,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
   {
     id: "streng",
     title: "Strengstøping",
-    emoji: "🔗",
+    icon: "droplet",
     part: "stoping",
     short: "Stålet størkner i en kald kobberform og trekkes ut som en lang streng. Nesten alt blir produkt.",
     pages: [
@@ -327,7 +329,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
   {
     id: "valsing",
     title: "Valsing",
-    emoji: "🌀",
+    icon: "refresh",
     part: "stoping",
     short: "Emnene varmes opp og presses tynnere i mange stikk, til ferdig armeringsstål.",
     pages: [
@@ -341,7 +343,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
   {
     id: "omdomme",
     title: "Kunder og omdømme",
-    emoji: "⭐",
+    icon: "star",
     part: "drift",
     short: "Lever riktig stål i tide, så stiger omdømmet og større kunder kommer. Reklamasjoner koster mest.",
     pages: [
@@ -362,7 +364,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
   {
     id: "konsern",
     title: "Konsern og datterselskap",
-    emoji: "🏢",
+    icon: "konsern",
     part: "verden",
     short: "Flere verk gir mer utbytte og mindre risiko, men hvert nytt verk gir litt mindre enn det forrige.",
     pages: [
@@ -398,7 +400,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
 export const SEASON_CHAPTER: KnowledgeCard = {
   id: "sesong",
   title: "Konjunkturer og sesonger",
-  emoji: "📈",
+  icon: "trend-up",
   part: "verden",
   short: "Prisene på stål, skrap og strøm svinger. Felles hendelser treffer alle spillerne samtidig – tilpass deg.",
   pages: [

@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 173 – 2026-09-28: Ikoner i fagboka
+
+**Brukeren ba om:** færre emojier i fagboka.
+
+**Gjort:** B-236. Alle emojier i boka byttet med Lucide-ikoner (kapitler, steg, tellere, stjerner, oppdrag).
+
+**Testet:** tsc, lint, `npm test`, Playwright på 7 størrelser (ingen emoji igjen i boka).
+
+**Gjenstår:** tom tonn-liste denne uka (B-235); UI-4d; reserven og kassegrensen; fase 2.
+
+---
+
 ## Økt 172 – 2026-09-28: Ukelista mot forrige uke, og fire kort ryddet
 
 **Brukeren ba om:** anbefalingen for ukelista, bedre Produksjonen (Anlegg), Kjøp og utvid (Utvid), skraplageranbudet og

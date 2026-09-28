@@ -4670,7 +4670,7 @@ button {
   color: var(--text-3);
 }
 
-.g-book-emoji {
+.g-book-icon {
   flex: none;
   display: grid;
   place-items: center;
@@ -4678,8 +4678,12 @@ button {
   height: 40px;
   border-radius: var(--r-md);
   background: var(--surface-2);
-  font-size: 22px;
-  line-height: 1;
+  color: var(--accent);
+}
+
+.g-book-icon .ds-icon {
+  width: 22px;
+  height: 22px;
 }
 
 .g-book-progress {
@@ -4752,8 +4756,9 @@ button {
   background: var(--surface-1);
 }
 
-.g-book-row.is-complete .g-book-emoji {
+.g-book-row.is-complete .g-book-icon {
   background: var(--ok-tint);
+  color: var(--ok);
 }
 
 .g-book-row-text {
@@ -4767,17 +4772,42 @@ button {
   flex: none;
   display: flex;
   gap: var(--sp-2);
-  font-size: 14px;
+  color: var(--text-3);
 }
 
-.g-book-row-steps > span {
-  opacity: 0.3;
-  filter: grayscale(1);
+.g-book-row-steps > .ds-icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.5;
 }
 
-.g-book-row-steps > span.is-done {
+.g-book-row-steps > .ds-icon.is-done {
+  color: var(--ok);
   opacity: 1;
-  filter: none;
+}
+
+/* Tellerne øverst i innholdet: ikon + tall (B-236) */
+.g-book-counts {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-4);
+}
+
+.g-book-counts > span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+
+.g-book-counts .ds-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.g-book-steps .ds-icon {
+  width: 16px;
+  height: 16px;
+  vertical-align: -3px;
 }
 
 .g-book-locked {
@@ -4808,10 +4838,14 @@ button {
   font-size: var(--fs-page);
 }
 
-.g-book-chapter-head .g-book-emoji {
+.g-book-chapter-head .g-book-icon {
   width: 52px;
   height: 52px;
-  font-size: 30px;
+}
+
+.g-book-chapter-head .g-book-icon .ds-icon {
+  width: 28px;
+  height: 28px;
 }
 
 .g-book-steps {
@@ -5025,13 +5059,19 @@ button {
 }
 
 .g-book-stars {
-  font-size: 32px;
-  letter-spacing: 4px;
+  display: flex;
+  gap: var(--sp-2);
   color: var(--surface-3);
+}
+
+.g-book-stars > .ds-icon {
+  width: 32px;
+  height: 32px;
 }
 
 .g-book-stars > .is-on {
   color: var(--heat);
+  fill: currentColor;
 }
 
 .g-book-mission {
@@ -5057,7 +5097,12 @@ button {
 }
 
 .g-book-mission-icon {
-  font-size: 22px;
+  color: var(--accent);
+}
+
+.g-book-mission-icon .ds-icon {
+  width: 22px;
+  height: 22px;
 }
 
 /* Produksjonen på Anlegg (B-235): én rad per sted, trykk for utstyret */

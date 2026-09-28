@@ -1,7 +1,7 @@
 /**
  * Fagboka (B-025, B-234): innholdet med fremdrift og «neste steg», kapitler som korte sider med «Kort fortalt»
  * øverst, og quiz ett spørsmål om gangen med svar med én gang. Mye tekst på én gang skremte folk bort – nå leses
- * boka en bit om gangen, og hvert kapittel har tre steg: les, quiz og oppdrag.
+ * boka en bit om gangen, og hvert kapittel har tre steg: les, quiz og oppdrag. Ikoner fra designsystemet, ikke emoji (B-236).
  */
 import { useState } from "react";
 import { Callout, SheetHead } from "./ds";
@@ -14,6 +14,7 @@ import type { GameApi } from "../game/useGame";
 import { Bar } from "./common";
 import { fmtKr, fmtNum } from "./format";
 import { buzz } from "./haptics";
+import { Icon } from "./icons";
 
 type Act = GameApi["act"];
 
@@ -43,9 +44,7 @@ function Stars({ correct, total }: { correct: number; total: number }) {
   return (
     <span className="g-book-stars" aria-label={`${correct} av ${total} riktige`}>
       {Array.from({ length: total }, (_, i) => (
-        <span key={i} className={i < correct ? "is-on" : ""}>
-          ★
-        </span>
+        <Icon key={i} name="star" className={i < correct ? "is-on" : ""} />
       ))}
     </span>
   );
@@ -162,7 +161,7 @@ function MissionBox({ g, mission }: { g: GameState; mission: Mission }) {
   return (
     <div className={`g-book-mission${done ? " is-done" : ""}`}>
       <span className="g-book-mission-icon" aria-hidden="true">
-        🎯
+        <Icon name="target" />
       </span>
       <div>
         <strong>Oppdrag: {mission.title}</strong>
@@ -200,8 +199,8 @@ function Chapter({ g, card, act, onBack }: { g: GameState; card: KnowledgeCard; 
         ‹ Alle kapitler
       </button>
       <header className="g-book-chapter-head">
-        <span className="g-book-emoji" aria-hidden="true">
-          {card.emoji}
+        <span className="g-book-icon" aria-hidden="true">
+          <Icon name={card.icon} />
         </span>
         <div>
           <h3>{card.title}</h3>
@@ -220,7 +219,7 @@ function Chapter({ g, card, act, onBack }: { g: GameState; card: KnowledgeCard; 
             className={mode === "les" ? "is-active" : ""}
             onClick={() => setMode("les")}
           >
-            📖 Les {steps.read && "✓"}
+            <Icon name="book" /> Les {steps.read && <Icon name="check" />}
           </button>
           <button
             role="tab"
@@ -228,7 +227,7 @@ function Chapter({ g, card, act, onBack }: { g: GameState; card: KnowledgeCard; 
             className={mode === "quiz" ? "is-active" : ""}
             onClick={() => setMode("quiz")}
           >
-            ❓ Quiz {steps.quiz ? "✓" : `+${quizReward(g)}`}
+            <Icon name="circle-help" /> Quiz {steps.quiz ? <Icon name="check" /> : `+${quizReward(g)}`}
           </button>
         </div>
       )}
@@ -318,9 +317,19 @@ function Contents({ g, onOpen }: { g: GameState; onOpen: (id: string) => void })
       <div className="g-book-progress">
         <div className="g-book-progress-top">
           <strong>{total ? Math.floor((done / total) * 100) : 0} % av boka</strong>
-          <span className="g-muted g-small-text">
-            📖 {read}/{cards.length} · ❓ {quizzes.filter((x) => x.quiz).length}/{quizzes.length}
-            {missions.length > 0 && ` · 🎯 ${missions.filter((x) => x.missionDone).length}/${missions.length}`}
+          <span className="g-muted g-small-text g-book-counts">
+            <span title="Lest">
+              <Icon name="book" label="Lest" /> {read}/{cards.length}
+            </span>
+            <span title="Quiz tatt">
+              <Icon name="circle-help" label="Quiz tatt" /> {quizzes.filter((x) => x.quiz).length}/{quizzes.length}
+            </span>
+            {missions.length > 0 && (
+              <span title="Oppdrag løst">
+                <Icon name="target" label="Oppdrag løst" /> {missions.filter((x) => x.missionDone).length}/
+                {missions.length}
+              </span>
+            )}
           </span>
         </div>
         <Bar value={total ? done / total : 0} tone="ok" label="Fagboka" />
@@ -328,8 +337,8 @@ function Contents({ g, onOpen }: { g: GameState; onOpen: (id: string) => void })
 
       {next ? (
         <button className="g-book-next-step" onClick={() => onOpen(next.id)}>
-          <span className="g-book-emoji" aria-hidden="true">
-            {knowledgeCard(next.id)!.emoji}
+          <span className="g-book-icon" aria-hidden="true">
+            <Icon name={knowledgeCard(next.id)!.icon} />
           </span>
           <span className="g-book-next-text">
             <span className="g-book-label">Neste</span>
@@ -357,8 +366,8 @@ function Contents({ g, onOpen }: { g: GameState; onOpen: (id: string) => void })
                 return (
                   <li key={c.id}>
                     <button className={`g-book-row${complete ? " is-complete" : ""}`} onClick={() => onOpen(c.id)}>
-                      <span className="g-book-emoji" aria-hidden="true">
-                        {c.emoji}
+                      <span className="g-book-icon" aria-hidden="true">
+                        <Icon name={c.icon} />
                       </span>
                       <span className="g-book-row-text">
                         <strong>{c.title}</strong>
@@ -376,9 +385,9 @@ function Contents({ g, onOpen }: { g: GameState; onOpen: (id: string) => void })
                         <span className="g-badge g-badge-new">Ny</span>
                       ) : (
                         <span className="g-book-row-steps" aria-label={`${s.done} av ${s.total} steg`}>
-                          <span className={s.read ? "is-done" : ""}>📖</span>
-                          {s.hasQuiz && <span className={s.quiz ? "is-done" : ""}>❓</span>}
-                          {s.mission && <span className={s.missionDone ? "is-done" : ""}>🎯</span>}
+                          <Icon name="book" className={s.read ? "is-done" : ""} />
+                          {s.hasQuiz && <Icon name="circle-help" className={s.quiz ? "is-done" : ""} />}
+                          {s.mission && <Icon name="target" className={s.missionDone ? "is-done" : ""} />}
                         </span>
                       )}
                     </button>
