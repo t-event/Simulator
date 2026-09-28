@@ -216,6 +216,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   i begge menyene (B-226); bare Mål er eget punkt på PC (`.g-nav-pc`). Underfanen i hver hovedmeny huskes i `GameApp` (B-233, `ui/tabMemory.ts`); et nytt trykk på aktiv meny går til første underfane.
 - Ark (`.g-modal`) som åpnes fra innhold inne i `.g-main`, må pakkes i `<Portal>` (B-152). Ellers klipper Safari på
   iPhone arket til innholdet, og det kan ikke scrolles (skjedde med «Pynt verket»).
+- **Ingen hopping** (B-238): tekst som endrer seg mens spillet går (status, tall, råd, merker), skal ikke endre høyden
+  på det som står over annet innhold. Bruk faste rader (`nowrap` + «…»), reserver plass (stolper, rådsraden) og legg
+  merker oppå hjørnet. Test ved å måle posisjonen til kortene i 8 s med spillet i gang, på 320 og 390 px.
 - Skjermbilder med `fullPage: true` viser faste menyer midt på siden; det er
   bare et artefakt av skjermbildet.
 - Prosessmodellen er kalibrert med steg på maks 1 s – del opp større steg.

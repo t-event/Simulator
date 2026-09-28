@@ -39,7 +39,10 @@ function ProdRow({ g, row, onStation }: { g: GameState; row: Row; onStation: (s:
           {row.status && <StatusLine status={row.status.status} label={row.status.label} />}
         </span>
         <span className="g-prod-detail">{row.detail}</span>
-        {row.bar && <Bar value={row.bar.value} tone={row.bar.tone} />}
+        {/* Stolpen har plass også når den ikke vises, så radene er like høye hele tida (B-238) */}
+        <span className={row.bar ? "g-prod-bar" : "g-prod-bar is-empty"} aria-hidden={row.bar ? undefined : true}>
+          <Bar value={row.bar?.value ?? 0} tone={row.bar?.tone ?? "accent"} />
+        </span>
       </span>
       {open && (
         <span className="g-prod-end">
@@ -158,6 +161,12 @@ export function ProductionCard({
 
   return (
     <Card title="Produksjonen">
+      <ol className="g-prod-list">
+        {rows.map((row) => (
+          <ProdRow key={row.key} g={g} row={row} onStation={onStation} />
+        ))}
+      </ol>
+      {/* Under lista, ikke over: da flytter ikke radene seg når varselet kommer og går (B-238) */}
       {missingNow && (
         <Callout tone="heat">
           Resepten mangler {missingNow} til neste charge.{" "}
@@ -166,11 +175,6 @@ export function ProductionCard({
             : "Uten skrapklasser fylles chargen opp med annet skrap, og analysen kan bomme."}
         </Callout>
       )}
-      <ol className="g-prod-list">
-        {rows.map((row) => (
-          <ProdRow key={row.key} g={g} row={row} onStation={onStation} />
-        ))}
-      </ol>
       <div className="g-row g-prod-actions">
         <button className={missingNow ? "g-primary" : undefined} onClick={() => go("marked", "skrap")}>
           Kjøp skrap{missingNow && <span className="g-badge">!</span>}

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { SheetHead } from "./ds";
-import { Icon } from "./icons";
+import { Icon, type IconName } from "./icons";
 import { CHANGELOG } from "../game/changelog";
 import { ChangelogSheet } from "./Changelog";
 import { borrow, repay } from "../game/actions";
@@ -43,43 +43,90 @@ export function BankCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
   );
 }
 
+/** Et valg med få, korte alternativer (B-238): knapper på én rad i stedet for en nedtrekksliste */
+function Segmented<T extends string | number>({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: T;
+  options: readonly (readonly [T, string])[];
+  onChange: (v: T) => void;
+}) {
+  return (
+    <div className="g-set-field">
+      <span className="g-set-label">{label}</span>
+      <div className="g-seg" role="radiogroup" aria-label={label}>
+        {options.map(([v, text]) => (
+          <button
+            key={String(v)}
+            role="radio"
+            aria-checked={value === v}
+            className={value === v ? "is-on" : undefined}
+            onClick={() => onChange(v)}
+          >
+            {text}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** En gruppe i innstillingene: ikon, overskrift og innhold (B-238) */
+function SetGroup({
+  icon,
+  title,
+  danger,
+  children,
+}: {
+  icon: IconName;
+  title: string;
+  danger?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <section className={`g-set-group${danger ? " is-danger" : ""}`}>
+      <h3>
+        <Icon name={icon} /> {title}
+      </h3>
+      {children}
+    </section>
+  );
+}
+
 /**
- * Varsler på skjermen (B-115): hvor mye, hvilke temaer og hvor lenge. Alt havner uansett i varsellista bak bjella.
+ * Varsler på skjermen (B-115, B-238): alle eller bare problemer, temaene bak én linje og hvor lenge de står.
+ * Alt havner uansett i varsellista bak bjella.
  */
 function ToastSettings({ g, act }: { g: GameState; act: GameApi["act"] }) {
   const mode = g.settings.toasts ?? "alle";
   const topics = g.settings.toastTopics ?? {};
+  const on = LOG_TOPICS.filter((t) => topics[t.id] !== false).length;
   return (
     <>
-      <h3 className="g-subhead">Varsler på skjermen</h3>
-      <p className="g-muted">
-        Varslene dukker opp ett om gangen i varsellinja øverst, under kassa. Alt samles uansett i varsellista – trykk på
-        linja.
+      <p className="g-muted g-small-text">
+        Varslene kommer ett om gangen i varsellinja. Alle samles uansett i varsellista – trykk på linja.
       </p>
-      <div className="g-choice" role="radiogroup" aria-label="Hvor mange varsler">
-        {(
-          [
-            ["alle", "Velg selv", "Problemer, hendelser og gode nyheter – i temaene du krysser av under"],
-            ["problemer", "Bare problemer", "Bare det som går galt, uansett tema"],
-          ] as const
-        ).map(([id, label, hint]) => (
-          <label key={id} className="g-toggle">
-            <input
-              type="radio"
-              name="toasts"
-              checked={mode === id}
-              onChange={() => act((gg) => void (gg.settings.toasts = id))}
-            />
-            <span>
-              {label}
-              <small className="g-muted g-toggle-hint">{hint}</small>
-            </span>
-          </label>
-        ))}
-      </div>
+      <Segmented
+        label="Hvilke varsler"
+        value={mode}
+        options={[
+          ["alle", "Velg temaer"],
+          ["problemer", "Bare problemer"],
+        ]}
+        onChange={(v) => act((gg) => void (gg.settings.toasts = v))}
+      />
       {mode === "alle" && (
-        <fieldset className="g-toast-topics">
-          <legend>Temaer</legend>
+        <details className="g-details g-set-topics">
+          <summary>
+            Temaer{" "}
+            <span className="g-muted">
+              · {on === LOG_TOPICS.length ? "alle på" : `${on} av ${LOG_TOPICS.length} på`}
+            </span>
+          </summary>
           {LOG_TOPICS.map((t) => (
             <label key={t.id} className="g-toggle">
               <input
@@ -95,24 +142,26 @@ function ToastSettings({ g, act }: { g: GameState; act: GameApi["act"] }) {
               </span>
             </label>
           ))}
-        </fieldset>
+        </details>
       )}
-      <label className="g-field">
-        <span>Hvor lenge et varsel står</span>
-        <select
-          value={g.settings.toastSeconds ?? 6}
-          onChange={(e) => act((gg) => void (gg.settings.toastSeconds = Number(e.target.value)))}
-        >
-          <option value={3}>Kort (3 sekunder)</option>
-          <option value={6}>Normalt (6 sekunder)</option>
-          <option value={10}>Lenge (10 sekunder)</option>
-        </select>
-      </label>
+      <Segmented
+        label="Hvor lenge et varsel står"
+        value={g.settings.toastSeconds ?? 6}
+        options={[
+          [3, "Kort"],
+          [6, "Normalt"],
+          [10, "Lenge"],
+        ]}
+        onChange={(v) => act((gg) => void (gg.settings.toastSeconds = v))}
+      />
     </>
   );
 }
 
-/** Innstillinger bak tannhjulet i toppen: konto, nytt spill, valsing og nattspoling (B-072). Sikkerhetskopi er fjernet (B-135). */
+/**
+ * Innstillinger bak tannhjulet (B-072, B-238): delt i grupper – konto og lagring, spillet, varsler, om spillet og til
+ * slutt «Start på nytt». Før sto alt i én lang liste med lange setninger, og det viktigste (kontoen) lå midt i.
+ */
 export function SettingsSheet({
   g,
   stats,
@@ -130,73 +179,97 @@ export function SettingsSheet({
   const [news, setNews] = useState(false);
   const season = useSeasonStatus()?.current ?? null;
   const act = api.act;
+  const latest = CHANGELOG[0];
   return (
     <div className="g-modal g-side-sheet" role="dialog" aria-modal="true" aria-label="Innstillinger" onClick={onClose}>
-      <div className="g-modal-card" onClick={(e) => e.stopPropagation()}>
-        <SheetHead title="Innstillinger" onClose={onClose} />
-        <AutoToggle g={g} act={act} k="skipIdleNights" label="Spol fram om natta når verket står og ingenting skjer" />
-        {maxSpeed(g) > 1 && (
-          <label className="g-toggle">
-            <input
-              type="checkbox"
-              checked={g.settings.keepSpeed}
-              onChange={(e) => act((gg) => void (gg.settings.keepSpeed = e.target.checked))}
-            />
-            <span>Fortsett i samme fart (3× eller 10×) etter et hendelseskort, i stedet for å gå ned til 1×</span>
-          </label>
-        )}
-        <label className="g-toggle">
-          <input
-            type="checkbox"
-            checked={g.settings.pauseOnSales}
-            onChange={(e) => act((gg) => void (gg.settings.pauseOnSales = e.target.checked))}
+      <div className="g-modal-card g-settings" onClick={(e) => e.stopPropagation()}>
+        <SheetHead title="Innstillinger" icon="settings" onClose={onClose} />
+        <SetGroup icon="cloud" title="Konto og lagring">
+          <AccountCard api={api} onDone={onClose} />
+          <p className="g-muted g-small-text">
+            Spillet lagres av seg selv i denne nettleseren. Nettleseren kan slette det (privat modus, tømt historikk) –
+            med konto ligger det trygt på nett og kan spilles på flere enheter.
+          </p>
+        </SetGroup>
+        <SetGroup icon="play" title="Spillet">
+          <AutoToggle
+            g={g}
+            act={act}
+            k="skipIdleNights"
+            label="Spol fram natta"
+            hint="Når verket står om natta og ingenting skjer"
           />
-          <span>Sett spillet på pause mens du er på Salg (det går videre i samme fart når du går ut)</span>
-        </label>
-        {stats.furnace.arc && (
+          {maxSpeed(g) > 1 && (
+            <label className="g-toggle">
+              <input
+                type="checkbox"
+                checked={g.settings.keepSpeed}
+                onChange={(e) => act((gg) => void (gg.settings.keepSpeed = e.target.checked))}
+              />
+              <span>
+                Behold farten etter et hendelseskort
+                <small className="g-muted g-toggle-hint">Ellers går spillet ned til 1×</small>
+              </span>
+            </label>
+          )}
           <label className="g-toggle">
             <input
               type="checkbox"
-              checked={g.settings.rolling}
-              disabled={!g.owned.includes("valseverk")}
-              onChange={(e) => act((gg) => void (gg.settings.rolling = e.target.checked))}
+              checked={g.settings.pauseOnSales}
+              onChange={(e) => act((gg) => void (gg.settings.pauseOnSales = e.target.checked))}
             />
-            <span>Valse emner til armeringsstål (emner som kontrakter venter på, blir liggende)</span>
+            <span>
+              Pause mens du er på Salg
+              <small className="g-muted g-toggle-hint">Spillet går videre i samme fart når du går ut</small>
+            </span>
           </label>
-        )}
-        <ToastSettings g={g} act={act} />
-        <AccountCard api={api} onDone={onClose} />
-        <h3 className="g-subhead">Lagring</h3>
-        <p className="g-muted">
-          Spillet lagres automatisk i denne nettleseren, og på nett når du er logget inn. Nettlesere kan slette lagrede
-          data – når du tømmer historikken, bruker privat modus eller ikke har åpnet siden på en stund. Logg inn, så
-          ligger spillet trygt på nett uansett nettleser og enhet.
-        </p>
-        <h3 className="g-subhead">Hva er nytt</h3>
-        <p className="g-muted">
-          Siste oppdatering: {CHANGELOG[0].title.toLowerCase()} ({CHANGELOG[0].date.split("-").reverse().join(".")}).
-        </p>
-        <button onClick={() => setNews(true)}>
-          <Icon name="sparkles" /> Se hva som er nytt
-        </button>
+          {stats.furnace.arc && g.owned.includes("valseverk") && (
+            <label className="g-toggle">
+              <input
+                type="checkbox"
+                checked={g.settings.rolling}
+                onChange={(e) => act((gg) => void (gg.settings.rolling = e.target.checked))}
+              />
+              <span>
+                Valse emner til armeringsstål
+                <small className="g-muted g-toggle-hint">Emner som kontrakter venter på, blir liggende</small>
+              </span>
+            </label>
+          )}
+        </SetGroup>
+        <SetGroup icon="bell" title="Varsler">
+          <ToastSettings g={g} act={act} />
+        </SetGroup>
+        <SetGroup icon="info" title="Om spillet">
+          <button className="g-set-link" onClick={() => setNews(true)}>
+            <Icon name="sparkles" />
+            <span>
+              <strong>Hva er nytt</strong>
+              <small className="g-muted">
+                {latest.title} · {latest.date.split("-").reverse().join(".")}
+              </small>
+            </span>
+            <Icon name="chevron-right" />
+          </button>
+          <InstallTip />
+        </SetGroup>
         {news && <ChangelogSheet onClose={() => setNews(false)} />}
-        <h3 className="g-subhead">Spill på mobilen</h3>
-        <InstallTip />
-        <h3 className="g-subhead">Nytt spill</h3>
-        <p className="g-muted">
-          Et nytt spill starter i garasjen. Spillet du har nå, slettes – også det som er lagret på nett.
-          {season && ` ${season.name} pågår: er du logget inn, blir det nye spillet med i sesongen.`}
-        </p>
-        {confirmQuit ? (
-          <div className="g-row">
-            <button className="g-danger" onClick={onQuit}>
-              Ja, slett og start på nytt
-            </button>
-            <button onClick={() => setConfirmQuit(false)}>Avbryt</button>
-          </div>
-        ) : (
-          <button onClick={() => setConfirmQuit(true)}>Start nytt spill</button>
-        )}
+        <SetGroup icon="refresh" title="Start på nytt" danger>
+          <p className="g-muted g-small-text">
+            Et nytt spill starter i garasjen. Spillet du har nå, slettes – også det som er lagret på nett.
+            {season && ` ${season.name} pågår: er du logget inn, blir det nye spillet med i sesongen.`}
+          </p>
+          {confirmQuit ? (
+            <div className="g-row">
+              <button className="g-danger" onClick={onQuit}>
+                Ja, slett og start på nytt
+              </button>
+              <button onClick={() => setConfirmQuit(false)}>Avbryt</button>
+            </div>
+          ) : (
+            <button onClick={() => setConfirmQuit(true)}>Start nytt spill</button>
+          )}
+        </SetGroup>
       </div>
     </div>
   );

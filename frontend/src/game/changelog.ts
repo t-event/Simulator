@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 238,
+    date: "2026-09-28",
+    title: "Realistiske titler og roligere skjermer",
+    items: [
+      "Titlene følger ekte stålselskaper: Stållegende ved 400 mrd. – like mye som det mest verdifulle stålselskapet i verden – og Stålikon ved 5 000 mrd., omtrent hele stålindustrien.",
+      "Produksjonen, rådene under verket og «Produksjon nå» står stille mens tallene endrer seg.",
+      "Innstillingene er delt i grupper, med korte valg som knapper.",
+      "«Hva er nytt» er samlet per dag, med de eldste oppdateringene lukket.",
+    ],
+  },
+  {
     b: 237,
     date: "2026-09-28",
     title: "Anbudsvarsel, mesterskap og ikoner",

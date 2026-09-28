@@ -216,14 +216,14 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
     ["dag2000", 2000, "Institusjon", "Hold verket i gang i 2 000 døgn.", 80],
     ["dag3650", 3650, "Ti år", "Hold verket i gang i 3 650 døgn.", 150],
   ]),
-  // Konsern
+  // Konsern. Merkene følger titlene (B-238); id-ene er beholdt, så verdi500 gis nå ved 200 mrd.
   family("verdi", "money", "Konsernverdi", "Konsern", (g) => konsernEquity(g), [
     ["milliard", 1e9, "Milliardær", "Få en konsernverdi på 1 milliard.", 20],
     ["baron", 1e10, "Stålbaron", "Nå sluttmålet: 10 milliarder.", 40],
     ["magnat", 2.5e10, "Stålmagnat", "Nå 25 milliarder.", 50],
-    ["verdi100", 1e11, "Stålfyrste", "Nå 100 milliarder.", 70],
-    ["verdi500", 5e11, "Stålkeiser", "Nå 500 milliarder.", 90],
-    ["legende", 1e12, "Stållegende", "Nå 1 billion.", 100],
+    ["verdi100", 1e11, "Stålkonge", "Nå 100 milliarder.", 70],
+    ["verdi500", 2e11, "Stålkeiser", "Nå 200 milliarder.", 90],
+    ["legende", 4e11, "Stållegende", "Nå 400 milliarder.", 100],
   ]),
   family("datter", "konsern", "Datterverk", "Konsern", sisters, [
     ["datter1", 1, "Første datterverk", "Kjøp et datterverk i konsernet.", 10],
@@ -260,7 +260,7 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
 const LEGACY_VALUE: Record<string, (g: GameState) => number> = {
   baron: (g) => (g.won ? 1e10 : konsernEquity(g)),
   magnat: (g) => ((g.konsern?.legends ?? 0) >= 1 ? 2.5e10 : konsernEquity(g)),
-  legende: (g) => ((g.konsern?.legends ?? 0) >= 5 ? 1e12 : konsernEquity(g)),
+  legende: (g) => ((g.konsern?.legends ?? 0) >= 5 ? 4e11 : konsernEquity(g)),
 };
 
 export const ACHIEVEMENTS: Achievement[] = ACHIEVEMENT_FAMILIES.flatMap((f) =>

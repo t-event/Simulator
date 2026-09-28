@@ -367,7 +367,8 @@ function LegendCelebration({ g, onClose }: { g: GameState; onClose: () => void }
         </div>
         <h2 id="legend-title">Ny tittel: {l.title}!</h2>
         <p>
-          Konsernet er verdt over {fmtKr(l.equity)}. Du får {l.fp} fagpoeng til mesterskapet under Forskning.
+          Konsernet er verdt over {fmtKr(l.equity)} – omtrent som {l.like}. Du får {l.fp} fagpoeng til mesterskapet
+          under Forskning.
         </p>
         <p>{l.unlocks}</p>
         {next && (
@@ -442,7 +443,15 @@ function TopBar({
     <header className="g-top">
       <div className="g-top-row">
         <div className="g-when">
-          <strong>{STAGES[g.stage].name}</strong>
+          {/* «natt» står ved navnet, ikke ved klokka: der brøt den linja, og hele siden hoppet ned og opp (B-238) */}
+          <div className="g-when-head">
+            <strong>{STAGES[g.stage].name}</strong>
+            {g.speed > 0 && idleOutsideHours(g, stats) && (
+              <em className="g-ff" title="Verket står om natta – tida går fortere til arbeidsdagen starter">
+                <Icon name="fast-forward" /> natt
+              </em>
+            )}
+          </div>
           <span>
             {/* Dag og klokke brytes heller enn å kuttes når toppraden er trang (B-144) */}
             <span className="g-nw">Dag {day(g)} ·</span>{" "}
@@ -450,12 +459,6 @@ function TopBar({
               {fmtClock(g.minute)}
               <CloudDot />
             </span>
-            {g.speed > 0 && idleOutsideHours(g, stats) && (
-              <em className="g-ff" title="Verket står om natta – tida går fortere til arbeidsdagen starter">
-                {" "}
-                <Icon name="fast-forward" /> natt
-              </em>
-            )}
           </span>
         </div>
         <div className="g-speed" role="group" aria-label="Fart">

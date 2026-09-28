@@ -4330,3 +4330,47 @@ tingene bør ha forskjellig fagpoengpris ut fra hvor bra de er. Bytt ut alle emo
   - `scripts/sjekk-emoji.mjs` (i `npm test` og CI) stopper nye emoji i `src`, `public` og `index.html`.
 - Tester: anbudsvarsel (taper, vinner, én gang, uten bud, gammelt), mesterskapsprisene og verdien per døgn; `npm test`,
   tsc, lint, balance (exit 0), Playwright på 7 størrelser uten en eneste emoji på noen side eller i noe ark.
+
+## B-238 Realistiske titler, kort som står stille, og ryddigere innstillinger og «Hva er nytt» (2026-09-28)
+Status: gjelder (bygger på B-150, B-173, B-179, B-195, B-230, B-235; grensene i B-150/B-173 over Stålkonge er erstattet)
+Brukeren: «Juster titlene man kan få, for eksempel stållegende eller stålgigant til realistiske mål.» «I
+produksjonskortet er det vanskelig å lese teksten da linjene flytter seg opp og ned hele tiden. Det samme gjelder for
+oversiktsbildet når det kommer varsel under bildet av verket og over mål. Det samme skjer i produksjon nå kortet.»
+«Innstillinger fanen er rotete. Gjør den bedre og mer intuitiv. Det samme gjelder se hva som er nytt siden.»
+Spørsmål: «Når man tjener penger på bedriften i konsernet tjener vel man penger til konsernkassa?» Svar: ja –
+inntekten fra selskaper man eier (skraplageret) og bud som kommer tilbake, går til konsernkassa på serveren. Utbyttet
+fra datterverkene går til kassa i spillet.
+- **Titler:** grensene er satt etter ekte stålselskaper. Det mest verdifulle stålselskapet i verden er verdt noen
+  hundre milliarder kroner, og hele stålindustrien noen tusen; før gikk titlene opp til en billiard. Nye grenser:
+  Stålmagnat 25 mrd., Stålfyrste 50, Stålkonge 100 (uendret), Stålkeiser 200 (før 250), Stållegende 400 (før 1 000),
+  Stålgigant 750 (før 5 000), Stålkolosse 1 500 (før 25 000), Stålmyte 3 000 (før 100 000), Stålikon 5 000 (før
+  1 000 000) – omtrent hele stålindustrien i verden. Hver tittel har en sammenligning (`like`), som vises i feiringen,
+  i loggen og under Konsern («omtrent som det mest verdifulle stålselskapet i verden»). Tallene er runde og omtrentlige,
+  uten navn på selskaper. Fagpoeng og det titlene låser opp er uendret.
+  - Serveren: `title_of()` i `041_realistiske_titler.sql` (kjørt), så tittelen på topplista følger de samme grensene.
+  - Merkene «Stålkeiser» (id `verdi500`) og «Stållegende» følger titlene: 200 og 400 mrd. «verdi100» heter Stålkonge.
+  - Ingen lagrede spill endres av serveren. Titler og merker gis i spillet når det kjører (antallet går bare opp), så de
+    som er over de nye grensene, får de nye titlene og fagpoengene neste gang de spiller.
+  - Det urealistiske nå er veksten på toppen (flere hundre mrd. per ekte døgn for de største), ikke titlene. Det hører
+    til rebalanseringen av sluttspillet (B-193), se FORSLAG.
+- **Kort som står stille:** tekst som endrer seg hvert sekund, skal ikke flytte det som står under.
+  - Produksjonen (Anlegg): navn, status og linja under brytes aldri (kortes med «…»), stolpen har alltid plass, tall har
+    lik bredde, og varselet om skrap står under lista i stedet for over.
+  - Rådene under anleggsbildet: én rad med fast høyde (to linjer tekst) som alltid står der – «Ingen råd akkurat nå»
+    når det ikke er noen. Flere råd bak «+N», som viser alle med hele teksten.
+  - Toppfeltet på mobil: «natt» (spoling om natta) sto ved klokka og brøt linja, så hele siden hoppet 11 px ned og opp
+    hver natt. Nå står det ved navnet på verket, på en linje som aldri brytes. Merket på Fagbok-knappen (nye kapitler)
+    ligger oppå hjørnet av knappen: før tok det plass i raden og presset dag og klokke til to linjer.
+  - Produksjon nå: hvem, kvalitet og kunde på faste linjer som ikke brytes. Én linje per ovn når ovnene kan lage hver
+    sin kvalitet (før ble like ovner slått sammen, og antallet linjer skiftet med køen). Resept-varselet står nederst.
+- **Innstillinger:** grupper med ikon – Konto og lagring (først), Spillet, Varsler, Om spillet, Start på nytt (rød).
+  Bryterne har kort navn og en linje forklaring. Varsler: to valg som knapper, temaene bak én linje («alle på»), og
+  varigheten som tre knapper. Valsebryteren vises først når valseverket er kjøpt (gradvis synlighet). Alle knapper
+  minst 44 px.
+- **Hva er nytt:** samlet per dag («I dag», «I går», dato), én flate per oppdatering, de tre nyeste åpne og resten én
+  linje hver, de 12 nyeste før «Vis eldre», og «Fint!» alltid synlig nederst. Etter en oppdatering står alt nytt åpent
+  med «N oppdateringer siden sist du spilte».
+- Konto: nei for alt i spillet (titler, innstillinger, endringslogg); topplista krever konto som før.
+- Tester: titlene (stigende, 25 mrd. til 5 000 mrd., sammenligning, Stållegende ved 450 mrd.), Stålgigant ved
+  1 000 mrd.; `npm test`, tsc, lint, balance og `--konsern` (exit 0), Playwright på 7 størrelser: posisjonen til Mål,
+  Produksjon nå, rådene og produksjonsradene målt i 8 s med spillet i gang – ingen flytting.

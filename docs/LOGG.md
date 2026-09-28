@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 175 – 2026-09-28: Realistiske titler, kort som står stille, innstillinger og «Hva er nytt»
+
+**Brukeren ba om:** svar på om inntekt fra selskaper går til konsernkassa; tekst som ikke hopper i produksjonskortet,
+under anleggsbildet og i «Produksjon nå»; ryddigere innstillinger og «Hva er nytt»; titler med realistiske mål.
+
+**Gjort:** B-238. Titlene fra 25 mrd. til 5 000 mrd. (hele stålindustrien) med sammenligning, også på serveren (041);
+faste rader og plasser i de tre kortene; innstillinger i grupper med knappevalg; endringsloggen per dag, med de eldste
+lukket.
+
+**Testet:** `npm test`, tsc, lint, balance og `--konsern` (exit 0), Playwright på 7 størrelser (ingen flytting over 8 s
+med spillet i gang, ingen horisontal scrolling, knapper minst 44 px).
+
+**Gjenstår:** veksten på toppen i sluttspillet (flere hundre mrd. per ekte døgn); tom tonn-liste denne uka (B-235);
+UI-4d; reserven og kassegrensen; fase 2.
+
+---
+
 ## Økt 174 – 2026-09-28: Anbudsvarsel, mesterskapspriser og ikoner overalt
 
 **Brukeren ba om:** svar på om budgivere får vite hvem som vant, fagpoengpris etter verdi i mesterskapet, og Lucide-ikoner

@@ -76,7 +76,8 @@ function LegendProgress({ g, equity }: { g: GameState; equity: number }) {
             label={`Mot ${next.title}, ${fmtKr(next.equity)}`}
           />
           <p className="g-muted g-small-text">
-            Neste: <strong>{next.title}</strong> ved {fmtKr(next.equity)} – {next.fp} fagpoeng. {next.unlocks}
+            Neste: <strong>{next.title}</strong> ved {fmtKr(next.equity)}, omtrent som {next.like}. Gir {next.fp}{" "}
+            fagpoeng. {next.unlocks}
           </p>
         </>
       ) : (

@@ -20,7 +20,20 @@ export function AutoLocked({ k, label }: { k: AutomationKey; label: string }) {
 }
 
 /** Bryter for automatikk. Er den ikke forsket fram, vises en lås i stedet (B-054) */
-export function AutoToggle({ g, act, k, label }: { g: GameState; act: GameApi["act"]; k: BoolKey; label: string }) {
+export function AutoToggle({
+  g,
+  act,
+  k,
+  label,
+  hint,
+}: {
+  g: GameState;
+  act: GameApi["act"];
+  k: BoolKey;
+  label: string;
+  /** Kort forklaring under bryteren (B-238) */
+  hint?: string;
+}) {
   if (!automationUnlocked(g, k)) return <AutoLocked k={k} label={label} />;
   return (
     <label className="g-toggle">
@@ -29,7 +42,10 @@ export function AutoToggle({ g, act, k, label }: { g: GameState; act: GameApi["a
         checked={!!g.settings[k]}
         onChange={(e) => act((gg) => void (gg.settings[k] = e.target.checked))}
       />
-      <span>{label}</span>
+      <span>
+        {label}
+        {hint && <small className="g-muted g-toggle-hint">{hint}</small>}
+      </span>
     </label>
   );
 }
