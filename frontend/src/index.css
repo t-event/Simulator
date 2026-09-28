@@ -21,13 +21,22 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Siden selv scroller aldri: alt ligger i faste lag (.g-app, .g-intro) og scroller inni dem (B-137, B-192). På iPhone
+   er 100vh høyere enn det synlige, så dokumentet kunne scrolles litt under de faste lagene, og da traff trykket et
+   annet sted enn knappen (B-262). */
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
 button {
   -webkit-user-select: none;
   user-select: none;
 }
 
 #root {
-  min-height: 100vh;
+  height: 100%;
 }
 
 button {
