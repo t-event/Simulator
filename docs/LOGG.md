@@ -34,6 +34,11 @@ spill); valget «Herfra» spør én gang til når spillet her er eldre. Publiser
 
 **Testet:** ny nettest som gjenskaper hendelsen (feiler uten rettingen), tsc, lint, `npm test`, Playwright av valget.
 
+**Etterpå (brukeren: «Fikser du di som er feil flagget?»):** Tuster ble flagget 16:24:40 UTC for «for fort: 1705 døgn på
+10 min» – feil, fordi fartskontrollen sammenlignet med tallet fra den gamle kopien (dag 471, 16:14:35). Flagget er fjernet
+(`update profiles set flagged_at = null, flag_reason = null` for den ene raden). Sjekket at neste lagring sammenlignes
+med et ekte tall (dag 2 216). Ingen andre er flagget.
+
 **Gjenstår:** hvorfor Tuster ble logget ut er ikke funnet. Vurder om tilbakespoling skal slette tidslinja på serveren
 (`check_snapshot`) – her gikk 1 700 tall tapt på 15 sekunder.
 
