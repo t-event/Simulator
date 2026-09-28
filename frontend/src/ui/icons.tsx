@@ -798,6 +798,11 @@ const ICONS = {
     ["path", { d: "M10 16v-2a2 2 0 0 1 2-2h8a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" }],
     ["rect", { width: "4", height: "6", x: "8", y: "16", rx: "1" }],
   ],
+  // To emner – støpingen (B-243)
+  "stretch-horizontal": [
+    ["rect", { width: "20", height: "6", x: "2", y: "4", rx: "2" }],
+    ["rect", { width: "20", height: "6", x: "2", y: "14", rx: "2" }],
+  ],
 } satisfies Record<string, Node>;
 
 export type IconName = keyof typeof ICONS;

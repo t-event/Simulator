@@ -308,7 +308,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
   {
     id: "streng",
     title: "Strengstøping",
-    icon: "droplet",
+    icon: "stretch-horizontal",
     part: "stoping",
     short: "Stålet størkner i en kald kobberform og trekkes ut som en lang streng. Nesten alt blir produkt.",
     pages: [

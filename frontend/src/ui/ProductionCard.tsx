@@ -95,7 +95,7 @@ export function ProductionCard({
     {
       key: "skrap",
       station: "skrap",
-      icon: "rake",
+      icon: "magnet",
       name: "Skraplager",
       detail: `${fmtT(stats.yardUsed)} av ${fmtT(stats.yardT)}`,
       status: missingNow
@@ -121,7 +121,7 @@ export function ProductionCard({
     {
       key: "stoping",
       station: "stoping",
-      icon: "droplet",
+      icon: "stretch-horizontal",
       // Maskintypen står i utstyrsarket; her holder «Støping», så raden ikke blir to linjer
       name: "Støping",
       detail:

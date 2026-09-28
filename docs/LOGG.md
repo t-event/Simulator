@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 180 – 2026-09-28: Ikoner for Skraplager og Støping
+
+**Brukeren ba om:** bedre ikoner for skraplager og støping. Valgte magnet og to emner blant kandidatene.
+
+**Gjort:** B-243. Produksjonen på Anlegg og kapittelet «Strengstøping» bruker de nye ikonene.
+
+**Testet:** tsc, lint, `npm test`.
+
+**Gjenstår:** resten av UI-4d; veksten på toppen i sluttspillet; tom tonn-liste denne uka (B-235); reserven; fase 2.
+
+---
+
 ## Økt 179 – 2026-09-28: UI-4d, første runde – anleggsbildet
 
 **Brukeren ba om:** «Fortsett» (neste steg i UI-planen).
