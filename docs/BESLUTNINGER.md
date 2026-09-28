@@ -5284,3 +5284,15 @@ Brukeren: «En spiller sier det er umulig å få 4300 inne på kontrollrommet».
   og prestasjonene nås i minst hver femte runde. Endres poengene i kontrollrommet, stopper testen umulige mål.
 - Testspilleren: samme nivådager, 0 konkurs (exit 0).
 - Konto: nei (regel 1).
+
+## B-294 Prestasjonen «Forskningssjef» kan nås (2026-09-28)
+Status: gjelder (justerer B-232 for forskning)
+En spiller spurte hvorfor hen bare hadde «48/50 forskninger», og om det hadde med datterverkene å gjøre. Nei: spillet har
+48 forskningsprosjekter (også de ni for konsernet), men prestasjonen «Forskningssjef» krevde 50. Spilleren hadde forsket
+fram alt.
+- «Forskningssjef» krever nå 40 prosjekter (id-en `forsk50` beholdes). «Alt forsket fram» er en egen prestasjon, og
+  utfordringen «Forskningssjef» regner alt med antallet som finnes (`RESEARCH.length`).
+- Den som alt har 40 eller flere, får prestasjonen neste gang spillet sjekker.
+- Ny test: ingen prestasjon for forskning krever flere prosjekter enn det finnes.
+- Testspilleren: samme nivådager, 0 konkurs (exit 0).
+- Konto: nei (regel 1).
