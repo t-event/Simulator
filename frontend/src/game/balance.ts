@@ -825,6 +825,8 @@ if (process.argv.includes("--konsern")) {
     upstreamDecay: 0,
     leadCost: { stalverk: 0, storverk: 0, kompleks: 0 },
     coordGrowth: 0,
+    loadFrom: 0,
+    loadPower: 1,
   };
   const setEco = (e: Eco) => Object.assign(KONSERN_ECONOMY, { ...e, leadCost: { ...e.leadCost } });
   const make = (n: number, type: "storverk" | "kompleks", level: number): GameState => {

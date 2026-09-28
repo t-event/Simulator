@@ -119,6 +119,7 @@ import {
   konsernCosts,
   konsernEquity,
   konsernNetFor,
+  afterEmpireLoad,
   dividends,
   modernizeSister,
   SISTER_TYPES,
@@ -1383,11 +1384,34 @@ test("Konsernøkonomien (B-181): driften står, utbyttet avtar nedover, kostnade
   );
   // Konsernkostnadene per verk øker med antall verk
   assert(konsernCosts(many) / 14 > konsernCosts(one), "konsernkostnaden per verk øker ikke");
+  // Imperiebelastningen (B-251): 14 fullt moderniserte komplekser gir ikke mer enn noen tidels milliard per døgn
+  assert(konsernNetFor(g, many) < 0.35e9, `14 komplekser gir ${konsernNetFor(g, many)} per døgn`);
+  assert(afterEmpireLoad(40e6) === 40e6, "imperiebelastning på et lite konsern");
+  assert(afterEmpireLoad(2e9) < 2e9 && afterEmpireLoad(2e9) > afterEmpireLoad(1e9), "belastningen er ikke avtagende");
   // Døgnet bokfører utbyttet som inntekt og konsernkostnadene som egen post
   g.konsern.plants = many.slice(0, 3).map((p) => ({ ...p }));
   g.market.steelFactor = 1;
   konsernDay(g);
   assert((g.today.costs.konsern ?? 0) > 0, "ingen konsernkostnader bokført");
+  // Med mange verk bokføres imperiebelastningen sammen med konsernkostnadene, så netto følger konsernNetFor
+  {
+    const h = structuredClone(g);
+    h.konsern.plants = many.map((p) => ({ ...p }));
+    h.today.costs = {};
+    h.today.income = {};
+    h.konsern.plants.forEach((p) => (p.downUntilDay = 0));
+    const want = konsernNetFor(h, h.konsern.plants);
+    let got = 0;
+    for (let i = 0; i < 20 && !got; i++) {
+      h.today.costs = {};
+      h.today.income = {};
+      konsernDay(h);
+      // Et døgn uten havari og rekord gir akkurat netto
+      if (h.konsern.plants.every((p) => p.downUntilDay <= day(h)))
+        got = (h.today.income.konsern ?? 0) - (h.today.costs.konsern ?? 0);
+    }
+    assert(got > 0 && got < want * 2.2, `netto ${got}, ventet omtrent ${want}`);
+  }
   const expected = dividends(g, g.konsern.plants).reduce((a, b) => a + b, 0);
   const got = g.today.income.konsern ?? 0;
   assert(got > 0 && got <= expected * 2 + 1, `utbytte ${got}, ventet omtrent ${expected}`);

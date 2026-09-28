@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 188 – 2026-09-28: Veksten på toppen – imperiebelastning
+
+**Brukeren ba om:** «Fortsett». Fikk analysen av veksten på toppen og valgte avtagende utbytte, og at det spillerne har
+fra før, beholdes.
+
+**Gjort:** B-251. Netto fra datterverkene over 50 mill. per døgn vokser med kvadratroten; forklart under Konsern, og
+tallene per verk vises etter belastningen. Første forsøk (et fast tak) gjorde at ingenting lønte seg etter tre
+komplekser, så kurven ble myket opp.
+
+**Testet:** tsc, lint, `npm test` (nye tester for belastningen og bokføringen), `balance.ts` (exit 0), `--konsern`,
+Konsern-siden på 320 og 390 px med et lagret storverk med 12 komplekser.
+
+**Gjenstår:** hjemmeverket på toppen / grense per ekte dag (FORSLAG); tom tonn-liste denne uka løser seg selv fra
+5.10. (B-235); reserven og kassegrensen; fase 2.
+
+---
+
 ## Økt 187 – 2026-09-28: Pipene i ikonet og tittelbildet
 
 **Brukeren ba om:** å fikse plasseringen av pipene i app-ikonet og tittelbildet.
