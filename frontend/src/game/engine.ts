@@ -36,7 +36,7 @@ import { worldFactor } from "./world";
 import { maybeAdvisor, maybeCreateDecision } from "./decisions";
 import { maybeTip, setCreditHint } from "./tips";
 import { envDay, envHour, envStartBlocked, newEnv, updateEmissions } from "./environment";
-import { calendarDay, riskFactor, winterHour } from "./calendar";
+import { calendarDay, riskFactor, roadOpensInH, scrapBlocked, winterHour } from "./calendar";
 import { explosion, explosionChance } from "./accidents";
 import { scrapResearchFor, suggestRecipe } from "./recipe";
 import type { Research } from "./research";
@@ -451,6 +451,12 @@ export function buyScrap(g: GameState, id: ScrapId, t: number, stats = computePl
   const type = SCRAP_TYPES[id];
   if (!type.buyable) return { ok: false, message: `${type.name} kan ikke kjøpes.` };
   if (!scrapUnlocked(g, id)) return { ok: false, message: `${type.name} låses opp med forskning.` };
+  // Snøstorm (B-279): skrapbilene kommer ikke fram før veien er brøytet
+  if (scrapBlocked(g))
+    return {
+      ok: false,
+      message: `Veien er stengt av snøstorm. Skrapbilene kommer fram om ca. ${roadOpensInH(g)} timer.`,
+    };
   const free = stats.yardT - stats.yardUsed;
   const amount = Math.min(t, free);
   if (amount <= 0.001) return { ok: false, message: "Skraplageret er fullt." };
@@ -534,6 +540,9 @@ export function scrapStopHelp(g: GameState): string {
   const what = short.length
     ? `Resepten trenger ${short.map((id) => SCRAP_TYPES[id].name.toLowerCase()).join(" og ")}.`
     : "";
+  // Snøstorm (B-279): ingenting å gjøre før veien er brøytet, men neste gang hjelper et større lager
+  if (scrapBlocked(g))
+    return `${what} Veien er stengt av snøstorm, og skrapbilene kommer fram om ca. ${roadOpensInH(g)} timer. Hold mer skrap på lager om vinteren (planleggerens lagermengde under Marked).`.trim();
   if (!auto(g, "autoBuy") || !plannerOrders(g))
     return `${what} Kjøp det under Marked, eller ansett en planlegger som kjøper inn.`.trim();
   if (g.autoBuyNote && !g.settings.autoBuyCredit && g.autoBuyNote.includes("kassa"))
@@ -3094,6 +3103,9 @@ export function autoBuy(
     if (buyableSum > 0) for (const b of buyableIds) target[b] += (gap * demand[b]) / buyableSum;
   }
   if (!buyableIds.length) return;
+  // Snøstorm (B-279): ingen skrapbiler kommer fram, så planleggeren venter. Ingen «!» på Marked – spilleren kan ikke
+  // gjøre noe med det; det står på Marked → Skrap og i loggen
+  if (scrapBlocked(g)) return;
   // Hvorfor planleggeren ikke fikk kjøpt det resepten trenger, så spilleren kan se det (B-048)
   const note = (text: string, id: ScrapId) =>
     void (g.autoBuyNote = g.autoBuyNote ?? `${SCRAP_TYPES[id].name.toLowerCase()}: ${text}`);

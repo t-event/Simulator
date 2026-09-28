@@ -23,6 +23,7 @@ import {
 import { auto, hasResearch } from "./research";
 import { masteryFactor } from "./mastery";
 import { worldFactor } from "./world";
+import { isWinter, WINTER_FIXED, winterPowerFactor } from "./calendar";
 import type { Analysis, Crew, GameState, GradeId, PowerDeal, ProductId, RoleId, ScrapId, Worker } from "./types";
 
 export const OWNER_SLOTS = 2;
@@ -466,7 +467,14 @@ const HOURLY_PROFILE = [
  * nattariff, men ikke en fastpris man allerede har avtalt (B-141).
  */
 export function spotPowerPrice(g: GameState, minute = g.minute): number {
-  return POWER_BASE * g.market.powerFactor * worldFactor(g, "power") * HOURLY_PROFILE[hourOfDay(g, minute)];
+  // Dyrere om vinteren (B-279)
+  return (
+    POWER_BASE *
+    g.market.powerFactor *
+    worldFactor(g, "power") *
+    HOURLY_PROFILE[hourOfDay(g, minute)] *
+    winterPowerFactor(g, minute)
+  );
 }
 
 /** Nattariff: billig om natta, dyrere på dagen */
@@ -476,7 +484,10 @@ export const POWER_BINDING_DAYS = 30;
 
 /** Fastprisen man får tilbud om i dag: en forsikring som koster litt ekstra. Midt i en strømkrise er tilbudet dyrere. */
 export function fixedPowerOffer(g: GameState): number {
-  return POWER_BASE * (0.7 + 0.3 * g.market.powerFactor * worldFactor(g, "power")) * 1.1;
+  // Om vinteren er også fastprisen litt dyrere, men billigere enn spot (B-279)
+  return (
+    POWER_BASE * (0.7 + 0.3 * g.market.powerFactor * worldFactor(g, "power")) * 1.1 * (isWinter(g) ? WINTER_FIXED : 1)
+  );
 }
 
 /** Strømprisen verket betaler etter avtalen sin (B-024) */
@@ -489,7 +500,7 @@ export function dealPrice(g: GameState, deal: PowerDeal, minute = g.minute): num
   if (deal === "fast") return g.settings.powerDeal === "fast" ? g.settings.powerFixedPrice : fixedPowerOffer(g);
   if (deal === "natt") {
     const f = isNight(hourOfDay(g, minute)) ? NIGHT_TARIFF.night : NIGHT_TARIFF.day;
-    return POWER_BASE * g.market.powerFactor * worldFactor(g, "power") * f;
+    return POWER_BASE * g.market.powerFactor * worldFactor(g, "power") * f * winterPowerFactor(g, minute);
   }
   return spotPowerPrice(g, minute);
 }

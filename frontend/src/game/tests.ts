@@ -185,7 +185,18 @@ import {
   FINE_PER_T,
   updateEmissions,
 } from "./environment";
-import { isWinter, monthOf, riskFactor, WINTER_DAYS, WINTER_RISK } from "./calendar";
+import {
+  isWinter,
+  monthOf,
+  riskFactor,
+  scrapBlocked,
+  WINTER_DAYS,
+  WINTER_FIXED,
+  WINTER_POWER,
+  WINTER_RISK,
+} from "./calendar";
+import { buyScrap } from "./engine";
+import { fixedPowerOffer, spotPowerPrice } from "./plant";
 import { explosionChance, FATAL_DOWN_DAYS, fatalAccident, WINTER_EXPLOSION } from "./accidents";
 import { freeStockT, sellAllFree } from "./engine";
 import { leaderBonus, leaderBonusDue } from "./actions";
@@ -2601,6 +2612,33 @@ test("Tak over skraplageret, større ferdiglager og salg av alt ledig stål (B-2
   const cash = g.cash;
   assert(sellAllFree(g).ok && g.lots.length === 0 && g.cash > cash, "solgte ikke");
   assert(!sellAllFree(g).ok, "solgte fra et tomt lager");
+});
+
+test("Vinter (B-279): dyrere strøm, og snøstorm stenger veien for skrapbilene – ikke for skrapterminalen", () => {
+  const g = newGame(279);
+  g.stage = 2;
+  g.cash = 10_000_000;
+  // Samme klokkeslett sommer og vinter
+  const summerMin = 100 * 1440 + 600;
+  const winterMin = 250 * 1440 + 600;
+  const ratio = spotPowerPrice(g, winterMin) / spotPowerPrice(g, summerMin);
+  assert(Math.abs(ratio - WINTER_POWER) < 1e-9, `spot vinter/sommer ${ratio}`);
+  g.minute = summerMin;
+  const fixedSummer = fixedPowerOffer(g);
+  g.minute = winterMin;
+  assert(Math.abs(fixedPowerOffer(g) / fixedSummer - WINTER_FIXED) < 1e-9, "fastprisen om vinteren");
+  assert(WINTER_FIXED < WINTER_POWER, "fastprisen skal beskytte mot vinterprisen");
+  // Snøstorm: kjøp stoppes, og går igjen når veien er brøytet
+  g.snowUntilMin = g.minute + 300;
+  assert(scrapBlocked(g), "veien er ikke stengt");
+  const t = g.scrap.tungt.t;
+  const r = buyScrap(g, "tungt", 5);
+  assert(!r.ok && r.message.includes("snøstorm") && g.scrap.tungt.t === t, `kjøpte under snøstorm: ${r.message}`);
+  g.owned.push("skrapterminal");
+  assert(!scrapBlocked(g) && buyScrap(g, "tungt", 5).ok, "skrapterminalen får ikke skrap under snøstorm");
+  g.owned = g.owned.filter((id) => id !== "skrapterminal");
+  g.minute = g.snowUntilMin;
+  assert(!scrapBlocked(g) && buyScrap(g, "tungt", 5).ok, "veien ble ikke åpnet igjen");
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

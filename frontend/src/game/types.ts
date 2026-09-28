@@ -670,6 +670,8 @@ export interface GameState {
   gameOverReason?: string;
   /** Døgnet det sist kom en radioaktiv kilde med skrapet */
   lastRadioDay?: number;
+  /** Veien er stengt av snøstorm til dette spillminuttet; skrapbilene kommer ikke fram (B-279) */
+  snowUntilMin?: number;
   /** Kassa er under null, og spilleren har fått varsel om det */
   inCredit?: boolean;
   /** Døgn på rad der verket står fordi det ikke er råd til omforing og lånet er fullt */

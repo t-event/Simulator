@@ -4,7 +4,7 @@
  * uforutsette hendelser.
  */
 import { addCost, fmtKr, log } from "./engine";
-import { day, hourOfDay, type PlantStats } from "./plant";
+import { day, has, hourOfDay, type PlantStats } from "./plant";
 import { chance, uniform } from "./random";
 import type { GameState } from "./types";
 
@@ -55,6 +55,53 @@ export function riskFactor(g: GameState): number {
   return isWinter(g) ? WINTER_RISK : 1;
 }
 
+/** Strømmen er dyrere om vinteren (B-279): spotpris og nattariff ganges med dette */
+export const WINTER_POWER = 1.3;
+/** Fastprisen man får tilbud om midt på vinteren: litt dyrere, men billigere enn spot. Avtal den før vinteren */
+export const WINTER_FIXED = 1.15;
+
+/** Hva strømprisen ganges med i timen `minute` (1 om sommeren) */
+export function winterPowerFactor(g: GameState, minute = g.minute): number {
+  return isWinter(g, day(g, minute)) ? WINTER_POWER : 1;
+}
+
+/** Snøstormer per døgn om vinteren (B-279): veien stenges, og skrapbilene kommer ikke fram */
+export const SNOWSTORMS_PER_DAY = 1 / 15;
+
+/** Er veien stengt av snø? */
+export function roadClosed(g: GameState): boolean {
+  return (g.snowUntilMin ?? 0) > g.minute;
+}
+
+/** Kommer ikke skrapet fram? Skrapterminalen får skrap med båt og tog, så den merker ikke snøstormen */
+export function scrapBlocked(g: GameState): boolean {
+  return roadClosed(g) && !has(g, "skrapterminal");
+}
+
+/** Timer til veien er åpen igjen (rundet opp) */
+export function roadOpensInH(g: GameState): number {
+  return Math.max(1, Math.ceil(((g.snowUntilMin ?? 0) - g.minute) / 60));
+}
+
+/** Hver time om vinteren: snøstorm som stenger veien, og beskjed når den er brøytet (B-279) */
+function snowHour(g: GameState): void {
+  if ((g.snowUntilMin ?? 0) > 0 && g.minute >= (g.snowUntilMin ?? 0)) {
+    g.snowUntilMin = 0;
+    if (!has(g, "skrapterminal")) log(g, "Veien er brøytet: skrapbilene kommer fram igjen.", "info");
+  }
+  if (!isWinter(g) || g.stage < 1 || roadClosed(g)) return;
+  if (!chance(g, SNOWSTORMS_PER_DAY / 24)) return;
+  const hours = uniform(g, 4, 12);
+  g.snowUntilMin = g.minute + hours * 60;
+  log(
+    g,
+    has(g, "skrapterminal")
+      ? "Snøstorm: veiene er stengt, men skrapterminalen får skrap med båt og tog."
+      : `Snøstorm: veien er stengt, og skrapbilene kommer ikke fram på ca. ${hours.toFixed(0)} timer. Ovnene bruker skrapet på lageret. Hold mer skrap på lager om vinteren.`,
+    "event",
+  );
+}
+
 /** Ved nytt døgn: beskjed når vinteren kommer og går */
 export function calendarDay(g: GameState): void {
   const today = day(g);
@@ -63,7 +110,7 @@ export function calendarDay(g: GameState): void {
   if (now && !was)
     log(
       g,
-      "Vinteren er kommet. Is og snø i skrapet kan gi eksplosjoner i ovnen, og kulden gir flere havarier og uhell. Tak over skraplageret og sortering gir færre eksplosjoner.",
+      "Vinteren er kommet. Is og snø i skrapet kan gi eksplosjoner i ovnen, og kulden gir flere havarier og uhell. Strømmen blir ca. 30 % dyrere, og snøstorm kan stenge veien for skrapbilene – hold mer skrap på lager. Tak over skraplageret og sortering gir færre eksplosjoner.",
       "event",
     );
   else if (!now && was) log(g, "Våren er kommet: færre uhell i verket.", "info");
@@ -71,6 +118,7 @@ export function calendarDay(g: GameState): void {
 
 /** Frost om vinteren (B-265): av og til fryser kjølevannet til støpemaskinen, og støpingen står noen timer */
 export function winterHour(g: GameState, stats: PlantStats): void {
+  snowHour(g);
   if (!isWinter(g) || g.stage < 2 || stats.shifts === 0 || g.minute < g.castDownUntilMin) return;
   if (!chance(g, (1 / 30 / 24) * stats.maintFactor)) return;
   const hours = uniform(g, 3, 6) * stats.repairFactor;

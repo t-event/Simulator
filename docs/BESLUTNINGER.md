@@ -5047,3 +5047,26 @@ anbudsboksen, på 320 px allerede etter fire navn.
 - Overskriften viser antallet: «Har bydd (6):». Et svært langt navn kortes av med «…» i stedet for å gå ut av boksen.
 - Testet med 6 og 12 budgivere på 320 og 390 px (ingen horisontal scrolling).
 - Konto: uendret (anbudet krever konto, B-189).
+
+## B-279 Dyrere strøm og snøstorm som stopper skrapbilene om vinteren (2026-09-28)
+Status: gjelder
+Brukeren: «dyrere strøm og tregere skraplevering om vinteren» (forslaget etter målingen i B-277: vinteren merktes i
+uhell, men bare ca. 1 % i økonomien).
+- **Strøm:** spotpris og nattariff er 30 % dyrere om vinteren (`WINTER_POWER` i `calendar.ts`, ganges inn i
+  `spotPowerPrice` og nattariffen). Fastprisen man får tilbud om midt på vinteren er 15 % dyrere (`WINTER_FIXED`), altså
+  billigere enn spot – en fastpris avtalt før vinteren beskytter. Strøm-kortet under Marked sier det om vinteren.
+- **Skraplevering:** skrapet ble levert med én gang, og en egen transportkø ville gitt mye ny logikk (plass på lageret,
+  planleggeren, varsler). I stedet: **snøstorm** stenger veien i 4–12 timer, i snitt én gang per 15 vinterdøgn
+  (`SNOWSTORMS_PER_DAY`), fra nivå 1. Da kommer ingen skrapbiler fram: kjøp avvises med en beskjed om når veien åpner,
+  planleggeren venter (uten «!» på Marked – spilleren kan ikke gjøre noe med det), og ovnene bruker lageret. Marked →
+  Skrap viser en melding, loggen sier når stormen kommer og når veien er brøytet, og rådet når ovnene står uten skrap
+  sier «hold mer skrap på lager om vinteren» (planleggerens lagermengde fra B-271).
+- **Skrapterminalen** (båt og tog) merker ikke snøstormen – en ny grunn til å bygge den.
+- Anleggsbildet: tettere snø under snøstorm, og skraptrucken står.
+- Nytt felt `snowUntilMin` (standard 0 i `migrate()`).
+- **Målt** (`balance.ts --vinter`, som nå også viser strøm per døgn og per tonn og snøstormer): strøm per tonn på
+  storverket 318 → 404 kr om vinteren (flink), 250 → 326 (nybegynner), ca. +0,9–1,2 mill. kr per døgn. Snøstorm ca. 1,6
+  ganger per 30 vinterdøgn (ca. 6 per vinter). Testspilleren står ikke stille av det: planleggeren har lager. På
+  storverket er strømmen bare ca. 3 % av inntekten, så vinteren merkes mest på de mindre nivåene (strøm 7 % av
+  inntekten på støperiet).
+- Konto: nei (regel 1, ditt eget spill).

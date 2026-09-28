@@ -115,4 +115,5 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Autobonus fra skiftlederen og skrap på lager hos planleggeren | Nei | Regel 1: ditt eget spill | B-271 |
 | Tak over skraplageret, større ferdiglager og «Selg alt ledig stål» | Nei | Regel 1: ditt eget spill | B-274 |
 | Det nye i anleggsbildet (tak, renseanlegg, ferdiglager, vinter) | Nei | Regel 1: ditt eget spill | B-276 |
+| Dyrere strøm og snøstorm om vinteren | Nei | Regel 1: ditt eget spill | B-279 |
 

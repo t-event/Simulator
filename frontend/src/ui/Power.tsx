@@ -17,6 +17,7 @@ import type { GameApi } from "../game/useGame";
 import { Card } from "./common";
 import { AutoToggle } from "./AutoToggle";
 import { auto } from "../game/research";
+import { isWinter, WINTER_POWER } from "../game/calendar";
 import { fmtClock, fmtKr, fmtNum, fmtPct } from "./format";
 
 const POWER_LIMITS: (number | null)[] = [null, 0.7, 0.9, 1.1, 1.4, 2];
@@ -105,6 +106,13 @@ export function PowerCard({ g, stats, act }: { g: GameState; stats: PlantStats; 
       </p>
 
       <h3 className="g-subhead">Strømavtale</h3>
+      {/* Vinter (B-279): spot og nattariff er dyrere; en fastpris avtalt før vinteren beskytter */}
+      {isWinter(g) && (
+        <p className="g-note">
+          Vinter: spotpris og nattariff er ca. {Math.round((WINTER_POWER - 1) * 100)} % dyrere. En fastpris låser prisen
+          – best om den avtales før vinteren.
+        </p>
+      )}
       <div className="g-deals">
         {DEALS.map((d) => (
           <button

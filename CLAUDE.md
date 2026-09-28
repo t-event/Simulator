@@ -327,6 +327,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   Gamle lagringer får anleggene de trenger i første tidssteg (`env.grant`) – ikke flytt det til `onHour`.
 - **Vinter** (B-265): `riskFactor(g)` (1,5 om vinteren) ganges inn i havarier, renseanlegget og hendelseskortene. Ny
   risiko som skal øke om vinteren, bruker den – ikke egne datoer. Kalenderen er spilltid, ikke ekte dato.
+- **Vinterøkonomi** (B-279): strømmen ganges med `winterPowerFactor` (spot og nattariff) og fastprisen med
+  `WINTER_FIXED`. Snøstorm (`g.snowUntilMin`) stopper alle kjøp av skrap (`scrapBlocked`) unntatt med skrapterminal – nye
+  veier for å skaffe skrap må sjekke den.
 - **Markedet metter seg** (B-252): prisen på nye kontrakter og avtaler ganges med `marketSaturation(stats.dailyProductT)`
   (full pris til 10 000 t i døgnet, halv pris over). Nye prisveier for kontrakter må ta den med.
 - **Døgnproduksjon og valseverket** (B-217): `stats.dailyProductT` er alt verket lager (emner og armering). Armering er
