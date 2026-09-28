@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 183 – 2026-09-28: Pipene på taket
+
+**Brukeren ba om:** at pipene skal sitte riktig på taket.
+
+**Gjort:** B-246. Pipene står bak bygningene og kommer ut av taket på alle nivåene; på stålverket og storverket står
+alle ovnenes piper samlet på høyre takflate.
+
+**Testet:** tsc, lint, `npm test`, skjermbilder av nivå 0–4 og et storverk med tre ovner.
+
+**Gjenstår:** logo, app-ikon og tittelbilde (siste del av UI-4d); veksten på toppen i sluttspillet; tom tonn-liste denne
+uka (B-235); reserven og kassegrensen; fase 2.
+
+---
+
 ## Økt 182 – 2026-09-28: Trucken kjørte utfor kaia
 
 **Brukeren ba om:** at bilen ikke skal kjøre utfor kaia.

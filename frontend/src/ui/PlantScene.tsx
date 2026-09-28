@@ -346,6 +346,16 @@ export function PlantScene({ g, stats, onStation }: Props) {
   const rolling = rollingActive(g) && open && stage >= 3;
   // Toppen av smeltehallen: høyere på storverket (B-244)
   const top = stage >= 4 ? 56 : 70;
+  // Pipene på smeltehallen (B-246): bunnen skjules av veggen, toppen står et fast stykke over takflaten der pipa står
+  const roofAt = (x: number) => top - 20 + ((x - 190) / 64) * 20;
+  const pipes = [
+    { furnace: 0, x: 238, w: 12, rise: stage >= 4 ? 40 : 51 },
+    { furnace: 1, x: 226, w: 9, rise: 30 },
+    { furnace: 2, x: 215, w: 8, rise: 22 },
+    { furnace: 3, x: 205, w: 7, rise: 16 },
+  ]
+    .slice(0, Math.min(4, Math.max(1, g.furnaceCount, g.furnaces.length)))
+    .map((p) => ({ ...p, y: Math.round(roofAt(p.x + p.w / 2) - p.rise) }));
   // Én glødende streng per støpemaskin (B-244)
   const casters = 1 + (has(g, "streng2") ? 1 : 0) + (has(g, "streng3") ? 1 : 0);
 
@@ -425,19 +435,20 @@ export function PlantScene({ g, stats, onStation }: Props) {
 
       {stage === 0 && (
         <g>
-          {/* Garasjen */}
+          {/* Garasjen. Pipa står bak veggen og taket, så den kommer ut av taket (B-246) */}
+          <rect x={272} y={96} width={6} height={34} fill={pipeFill("#555a61")} />
           <rect x={190} y={128} width={96} height={50} fill={wallA("#8b8f96")} />
           <path d="M184 130 L238 102 L292 130 Z" fill="#5a3f33" />
           <rect x={206} y={142} width={54} height={36} fill="#1a1c20" />
           {melting && <circle className="scene-glow" cx={233} cy={166} r={16} fill="url(#glow)" />}
           <rect x={268} y={140} width={12} height={10} className={open ? "win-lit" : "win-dark"} />
-          <rect x={272} y={96} width={6} height={20} fill={pipeFill("#555a61")} />
           <Smoke x={275} y={92} active={melting} scale={0.7} />
         </g>
       )}
 
       {stage === 1 && (
         <g>
+          <rect x={300} y={78} width={8} height={34} fill={pipeFill("#555a61")} />
           <rect x={170} y={112} width={150} height={66} fill={wallA("#7d8791")} />
           <path
             d="M170 112 L195 96 L195 112 L220 96 L220 112 L245 96 L245 112 L270 96 L270 112 L295 96 L295 112 L320 96 L320 112 Z"
@@ -446,7 +457,6 @@ export function PlantScene({ g, stats, onStation }: Props) {
           <rect x={186} y={140} width={40} height={38} fill="#1a1c20" />
           {melting && <circle className="scene-glow" cx={206} cy={165} r={16} fill="url(#glow)" />}
           <Windows x={240} y={128} cols={6} lit={open} />
-          <rect x={300} y={78} width={8} height={34} fill={pipeFill("#555a61")} />
           <Smoke x={304} y={74} active={melting} scale={0.8} />
         </g>
       )}
@@ -454,6 +464,7 @@ export function PlantScene({ g, stats, onStation }: Props) {
       {stage === 2 && (
         <g>
           {/* Smeltehall og støpehall */}
+          <rect x={226} y={58} width={10} height={42} fill={pipeFill("#555a61")} />
           <rect x={120} y={100} width={130} height={78} fill={wallA("#7a838d")} />
           <path d="M116 100 L185 80 L254 100 Z" fill="#4c5560" />
           <rect x={250} y={118} width={120} height={60} fill={wallB("#6d7680")} />
@@ -463,7 +474,6 @@ export function PlantScene({ g, stats, onStation }: Props) {
           {casting && <circle className="scene-glow" cx={300} cy={168} r={10} fill="url(#glow)" />}
           <Windows x={196} y={118} cols={4} lit={open} />
           <Windows x={262} y={132} cols={8} lit={open} />
-          <rect x={226} y={58} width={10} height={42} fill={pipeFill("#555a61")} />
           <Smoke x={231} y={54} active={melting} />
           {/* Kran over skrapet */}
           <g stroke="#e0b030" strokeWidth={2}>
@@ -478,6 +488,25 @@ export function PlantScene({ g, stats, onStation }: Props) {
       {stage >= 3 && (
         <g>
           {/* Smelteverk */}
+          {/* Pipene står bak smeltehallen og kommer ut av taket: én per ovn, ved siden av hverandre på høyre takflate,
+              unna flagget ved mønet (B-242, B-246) */}
+          {pipes.map((p) => (
+            <g key={p.furnace}>
+              <rect x={p.x} y={p.y} width={p.w} height={top + 2 - p.y} fill={pipeFill("#8c949d")} />
+              {p.furnace === 0 && (
+                <>
+                  <rect x={p.x} y={p.y + 6} width={p.w} height={4} fill="#c0392b" />
+                  <rect x={p.x} y={p.y + 18} width={p.w} height={4} fill="#c0392b" />
+                </>
+              )}
+              <Smoke
+                x={p.x + p.w / 2}
+                y={p.y - 4}
+                active={heats[p.furnace] ?? (p.furnace === 0 && melting)}
+                scale={p.furnace === 0 ? 1.2 : 0.9}
+              />
+            </g>
+          ))}
           {/* Storverket har en høyere smeltehall enn stålverket (B-244) */}
           <rect x={130} y={top} width={120} height={178 - top} fill={wallA("#76808b")} />
           <path d={`M126 ${top} L190 ${top - 20} L254 ${top} Z`} fill="#48515c" />
@@ -486,18 +515,6 @@ export function PlantScene({ g, stats, onStation }: Props) {
           {melting && <circle className="scene-glow" cx={173} cy={158} r={22} fill="url(#glow)" />}
           <Windows x={204} y={90} cols={3} lit={open} />
           <Windows x={204} y={104} cols={3} lit={open} />
-          {/* Pipe */}
-          <rect x={236} y={16} width={12} height={54} fill={pipeFill("#8c949d")} />
-          <rect x={236} y={22} width={12} height={4} fill="#c0392b" />
-          <rect x={236} y={34} width={12} height={4} fill="#c0392b" />
-          <Smoke x={242} y={12} active={heats[0] ?? melting} scale={1.2} />
-          {/* Ovn 3 og 4 får hver sin pipe på smeltehallen (B-242) */}
-          {heats.slice(2, 4).map((on, i) => (
-            <g key={i}>
-              <rect x={214 - i * 20} y={28 + i * 6} width={9} height={42 - i * 6} fill={pipeFill("#8c949d")} />
-              <Smoke x={218 - i * 20} y={24 + i * 6} active={on} scale={0.9} />
-            </g>
-          ))}
           {/* Røykgassrensing */}
           {has(g, "renseanlegg") && (
             <g>
@@ -553,13 +570,6 @@ export function PlantScene({ g, stats, onStation }: Props) {
                   style={{ ["--roll" as string]: `${stage >= 4 ? 22 : 92}px` }}
                 />
               )}
-            </g>
-          )}
-          {/* Ovn nummer to */}
-          {g.furnaceCount > 1 && (
-            <g>
-              <rect x={254} y={36} width={10} height={64} fill="#8c949d" />
-              <Smoke x={259} y={32} active={heats[1] ?? false} />
             </g>
           )}
           {/* Kran i skrapgården */}

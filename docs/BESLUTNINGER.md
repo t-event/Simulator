@@ -4492,3 +4492,13 @@ Brukeren: «Bilen kjører utfor kaia – den må snu og kjøre tilbake eller noe
   snur og kjører tilbake ut til venstre. Nivå 1–3 er som før: der kjører den ut av bildet til høyre.
 - Med «redusert bevegelse» står den parkert ved skrapgården også på storverket.
 - Konto: nei.
+
+## B-246 Pipene står på taket (2026-09-28)
+Status: gjelder (retter B-242, B-244)
+Brukeren: «Pipene sitter ikke korrekt på taket.»
+- Pipene ble tegnet oppå bygningene med fast bunn. I garasjen svevde pipa over taket; på storverket (høyere hall, B-244)
+  gikk de ned over veggen, pipe 4 stakk nesten ikke opp, og pipe 2 sto i lufta mellom smeltehallen og støpehallen.
+- Nå tegnes pipene **bak** veggen og taket, så de alltid kommer ut av takflaten. På stålverket og storverket regnes
+  toppen fra takflaten der pipa står (`roofAt`), og alle pipene (én per ovn, opptil fire) står ved siden av hverandre på
+  høyre takflate, lavere jo lenger opp mot mønet, unna flagget.
+- Konto: nei.
