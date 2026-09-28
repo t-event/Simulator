@@ -217,21 +217,7 @@ function CompactChain({
           />
           <small>{missing ? <StatusLine status="tomt" label="Mangler skrap" /> : fmtT(stats.yardUsed)}</small>
         </button>
-        {g.furnaces.map((f, i) => {
-          const st = furnaceState(g, i);
-          return (
-            <button className="g-mini" key={i} onClick={() => (has("ovn") ? onStation("ovn") : onOpen())}>
-              <span>
-                {g.furnaces.length > 1 ? `Ovn ${i + 1}` : "Ovn"}
-                {badge(ready("ovn"))}
-              </span>
-              <Bar value={st.progress ?? 0} tone="warning" label="Smelting" />
-              <small>
-                <StatusLine status={f.heat ? "kjorer" : statusOf(st.text)} label={f.heat ? "Smelter" : st.text} />
-              </small>
-            </button>
-          );
-        })}
+        <FurnacesTile g={g} badge={badge(ready("ovn"))} onClick={() => (has("ovn") ? onStation("ovn") : onOpen())} />
         <button className="g-mini" onClick={() => (has("stoping") ? onStation("stoping") : onOpen())}>
           <span>Støping{badge(ready("stoping"))}</span>
           <Bar value={castHead ? g.castProgressT / castHead.t : 0} tone="ok" label="Støping" />
@@ -269,9 +255,39 @@ function CompactChain({
         </div>
       ))}
       <button className="g-link" onClick={onOpen}>
-        Se hele anlegget, utstyr, vedlikehold og kvalitet →
+        Hele anlegget: utstyr, vedlikehold og kvalitet →
       </button>
     </section>
+  );
+}
+
+/**
+ * Ovnene som én rute i produksjonslinja (B-231): en stripe per ovn som viser hvor langt smeltingen har kommet, og én
+ * status – «3 smelter», eller hva som stopper. Før fikk hver ovn sin rute, og linja ble to rader på mobil.
+ */
+function FurnacesTile({ g, badge, onClick }: { g: GameState; badge: ReactNode; onClick: () => void }) {
+  const n = g.furnaces.length;
+  const states = g.furnaces.map((_, i) => furnaceState(g, i));
+  const running = g.furnaces.filter((f) => f.heat).length;
+  const stopped = states.find((_, i) => !g.furnaces[i].heat);
+  const status: Status = stopped ? statusOf(stopped.text) : "kjorer";
+  const label = !stopped ? (n > 1 ? `${n} smelter` : "Smelter") : n > 1 ? `${running} av ${n} smelter` : stopped.text;
+  const detail = states.map((st, i) => (n > 1 ? `Ovn ${i + 1}: ${st.text}` : st.text)).join("\n");
+  return (
+    <button className="g-mini" onClick={onClick} title={detail} aria-label={`${n > 1 ? "Ovnene" : "Ovnen"}: ${detail}`}>
+      <span>
+        {n > 1 ? "Ovner" : "Ovn"}
+        {badge}
+      </span>
+      <div className="g-mini-bars">
+        {states.map((st, i) => (
+          <Bar key={i} value={st.progress ?? 0} tone="warning" label={n > 1 ? `Ovn ${i + 1}` : "Smelting"} />
+        ))}
+      </div>
+      <small>
+        <StatusLine status={status} label={label} />
+      </small>
+    </button>
   );
 }
 

@@ -4165,3 +4165,20 @@ Brukeren: «Produksjon nå kortet er veldig langt. Fiks det og lag det intuitivt
 - Testet i Playwright på de 7 størrelsene (storverk med tre ovner), i «Velg selv»-modus og på verksted-nivå: ingen
   horisontal scrolling eller avkortede knapper eller lister.
 - Konto: nei.
+
+## B-231 Produksjonslinja på Oversikt i én rad (2026-09-28)
+Status: gjelder (bygger på B-195 og UI-2a)
+Brukeren (skjermbilde, storverk med tre ovner): «Dette anleggskortet føler jeg det er unødvendig å ha en rute på egen
+rad. Fiks kortet og gjør det bedre og mer intuitivt.»
+- Før fikk hver ovn sin rute. Med tre ovner ble det seks ruter, og Lager havnet alene på en ny rad på mobil.
+- Nå er det alltid fire ruter i én rad: **Skrap › Ovner › Støping › Lager**, med små piler i mellomrommet som viser
+  veien stålet går.
+- **Ovner** er én rute: én stripe per ovn som viser hvor langt smeltingen har kommet, og én status – «3 smelter», eller
+  «2 av 3 smelter» med fargen og ikonet til det som stopper (f.eks. venter på støping). Hver ovns status står i
+  hjelpeteksten (lang trykk/hold musa over). Med én ovn heter ruten «Ovn» som før.
+- Stripene har et mørkere spor, så man ser hvor mye som er igjen – også i en ovn som står.
+- På de smaleste telefonene (≤ 360 px) krymper titlene og mellomrommene litt, så «Støping» ikke kuttes.
+- Lenken under heter «Hele anlegget: utstyr, vedlikehold og kvalitet →».
+- Resultat: 145 px høyt på mobil (før 249 px, to rader). Testet i Playwright på de 7 størrelsene og på verksted-nivå:
+  én rad, ingen avkortede titler, ingen horisontal scrolling.
+- Konto: nei.
