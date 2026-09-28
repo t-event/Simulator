@@ -185,7 +185,7 @@ import {
   FINE_PER_T,
   updateEmissions,
 } from "./environment";
-import { isWinter, monthOf, riskFactor, WINTER_RISK } from "./calendar";
+import { isWinter, monthOf, riskFactor, WINTER_DAYS, WINTER_RISK } from "./calendar";
 import { explosionChance, FATAL_DOWN_DAYS, fatalAccident, WINTER_EXPLOSION } from "./accidents";
 import { leaderBonus, leaderBonusDue } from "./actions";
 import { autoPlay, ChargeGame } from "../ui/control/chargeGame";
@@ -2428,11 +2428,15 @@ test("Utslipp (B-263): gamle lagringer får renseanlegg som holder for ovnene de
   assert(!m.env.grant && m.env.excessT === 0, "overgangen ga bot");
 });
 
-test("Vinter (B-265): dag 1 er april, desember–februar er vinter, og da skjer uhell oftere", () => {
+test("Vinter (B-265, B-272): dag 1 er april, 120 døgn vinter fra midten av november, og da skjer uhell oftere", () => {
   const g = newGame(265);
   assert(monthOf(1) === 3 && monthOf(240) === 10 && monthOf(241) === 11, "månedene");
-  assert(!isWinter(g, 240) && isWinter(g, 241) && isWinter(g, 330) && !isWinter(g, 331), "vinteren");
-  assert(isWinter(g, 241 + 360), "neste vinter");
+  // 15. november er dag 225, 14. mars er dag 344 (B-272)
+  assert(!isWinter(g, 224) && isWinter(g, 225) && isWinter(g, 344) && !isWinter(g, 345), "vinteren");
+  assert(isWinter(g, 225 + 360) && !isWinter(g, 345 + 360), "neste vinter");
+  let n = 0;
+  for (let d = 1; d <= 360; d++) if (isWinter(g, d)) n++;
+  assert(n === 120 && WINTER_DAYS === 120, `vinteren varer ${n} døgn`);
   g.stage = 3;
   g.minute = 100 * 1440;
   const summer = explosionChance(g, 60);

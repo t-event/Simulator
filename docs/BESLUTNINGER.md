@@ -4951,3 +4951,12 @@ en hver tid om man har planlegger».
 - Nye felt: `settings.leaderBonus` og `settings.autoBuyTargetT` (valgfrie; mangler = av/automatisk, så gamle lagringer
   trenger ingen migrering).
 - **Konto:** nei – en del av selve spillet.
+
+## B-272 Vinteren varer 120 døgn (2026-09-28)
+Status: gjelder (erstatter vinterperioden i B-265; alt annet i B-265 og B-270 gjelder)
+Brukeren: «Bør vi for eksempel ha 120 dager med vinter i året?», så «Fortsett» på forslaget.
+- Vinteren går fra 15. november til og med 14. mars, 120 av årets 360 døgn (var desember–februar, 90 døgn). Den ligger
+  midt rundt nyttår.
+- Første vinter i et nytt spill er dag 225–344, og så hvert 360. døgn. På 10× varer den ca. 24 minutter, på 1× ca.
+  4 timer.
+- Det gir omtrent 20 % flere eksplosjoner og 8 % flere havarier i året. Balanse: alle mål OK.

@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 209 – 2026-09-28: Lengre vinter
+
+**Brukeren ba om:** hvordan vinterkalenderen virker, og om vinteren bør være 120 døgn; så «Fortsett».
+
+**Gjort:** B-272. Vinteren varer fra 15. november til 14. mars (120 døgn). Publiseringen av #218 (B-271) var grønn.
+
+**Testet:** tsc, lint, npm test (vintertesten teller 120 døgn), balance (exit 0), build.
+
+**Gjenstår:** i morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 208 – 2026-09-28: Autobonus og skrap på lager
 
 **Brukeren ba om:** knapp for autobonus når man har skiftleder, og valg om hvor mange tonn planleggeren skal holde på lager.

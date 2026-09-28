@@ -1,6 +1,6 @@
 /**
  * Året i spillet (B-265): tolv måneder à 30 døgn. Dag 1 er 1. april, så den første vinteren kommer når verket er
- * etablert. Om vinteren (desember–februar) gir is, snø og kulde flere uhell: eksplosjoner i ovnen, havarier og
+ * etablert. Om vinteren (midten av november til midten av mars, 120 døgn, B-272) gir is, snø og kulde flere uhell: eksplosjoner i ovnen, havarier og
  * uforutsette hendelser.
  */
 import { addCost, fmtKr, log } from "./engine";
@@ -33,9 +33,19 @@ export function monthOf(d: number): number {
   return (START_MONTH + Math.floor((d - 1) / MONTH_DAYS)) % 12;
 }
 
+/** Dag i året (0 = 1. januar, 359 = 30. desember) */
+export function dayOfYear(d: number): number {
+  return (START_MONTH * MONTH_DAYS + d - 1) % YEAR_DAYS;
+}
+
+/** Vinteren varer 120 døgn: fra 15. november til og med 14. mars (B-272; var desember–februar, 90 døgn) */
+const WINTER_FROM = 10 * MONTH_DAYS + 14;
+const WINTER_TO = 2 * MONTH_DAYS + 14;
+export const WINTER_DAYS = YEAR_DAYS - WINTER_FROM + WINTER_TO;
+
 export function isWinter(g: GameState, d = day(g)): boolean {
-  const m = monthOf(d);
-  return m === 11 || m <= 1;
+  const n = dayOfYear(d);
+  return n >= WINTER_FROM || n < WINTER_TO;
 }
 
 /** Hvor mye oftere havarier og uforutsette hendelser skjer: halvannen gang så ofte om vinteren */
