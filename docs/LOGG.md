@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 167 – 2026-09-28: «Produksjon nå» kortere
+
+**Brukeren ba om:** at kortet «Produksjon nå» blir kort og intuitivt.
+
+**Gjort:** B-230. Én linje per ovn (like ovner slått sammen), resepten varsles bare når den ikke holder, én handling
+(«Velg selv» / nedtrekk / «La ordrekøen velge igjen»), kontrollrommet, og resten bak «Innstillinger og forklaring».
+1 077 → 314 px på 320 px.
+
+**Testet:** tsc, lint, `npm test`, Playwright på 7 størrelser, «Velg selv» og tidlig spill.
+
+**Gjenstår:** UI-4d; reserven og kassegrensen; fase 2 videre.
+
+---
+
 ## Økt 166 – 2026-09-28: Salgsdirektøren til Folk
 
 **Brukeren ba om:** salgsdirektøren ut av Konsern, sammen med de andre ansatte.

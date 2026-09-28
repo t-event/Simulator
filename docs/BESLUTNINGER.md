@@ -4145,3 +4145,23 @@ de andre ansatte?»
   migrering). Tekstene er rettet: rådgiveren peker til Folk → Ansatte, og loggen sier «Du har ansatt en salgsdirektør».
 - Testet i Playwright på de 7 størrelsene: kortet står under Ansatte, ingen horisontal scrolling eller avkortede knapper.
 - Konto: nei.
+
+## B-230 «Produksjon nå» kort og tydelig (2026-09-28)
+Status: gjelder (bygger på B-039, B-210 og UI-2a)
+Brukeren: «Produksjon nå kortet er veldig langt. Fiks det og lag det intuitivt.»
+- Før sto alt åpent: hva hver ovn lager, to brytere med lange etiketter, tre nedtrekkslister, forklaringen av
+  ordrekøen, forklaringen av strengstøping og overgangsemner, beskrivelsen av kvaliteten, analyseanslaget og
+  kontrollrommet. På storverket med tre ovner var kortet 1 077 px høyt på 320 px bredde.
+- Nå (`ProductionNow` i `Overview.tsx`), i den rekkefølgen spilleren trenger det:
+  1. **Hva lages nå:** én linje per ovn – ovn, kvalitet, → kunde · tonn igjen (eller «→ lager og spot»). Ovner som
+     lager det samme til samme kunde, står på én linje («Ovn 2–3»).
+  2. **Bare hvis noe er galt:** «Resepten holder ikke kravet til …» med «Juster resepten» (åpner Verket → Resept).
+  3. **Én handling:** styrer ordrekøen, står det «Ordrekøen velger kvaliteten» med «Velg selv». Velger du selv, vises
+     nedtrekkslistene (Ovn 1, Ovn 2 …) og «La ordrekøen velge igjen».
+  4. **Kontrollrommet:** knappen og én linje.
+  5. **«Innstillinger og forklaring»** (lukket): bryterne, beskrivelsen av kvaliteten, analyseanslaget og forklaringen
+     av strengstøpingen.
+- Resultat: 314 px på 320 px bredde (før 1 077), 250 px på PC (før 741). Knapper minst 44 px.
+- Testet i Playwright på de 7 størrelsene (storverk med tre ovner), i «Velg selv»-modus og på verksted-nivå: ingen
+  horisontal scrolling eller avkortede knapper eller lister.
+- Konto: nei.

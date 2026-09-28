@@ -741,7 +741,61 @@ button {
 
 .g-manual button {
   width: 100%;
+  min-height: 44px;
   padding: 10px;
+}
+
+/* «Produksjon nå» (B-230): én linje per ovn – hvem, kvalitet, til hvem – og kort under */
+.g-prod-rows {
+  list-style: none;
+  margin: 0 0 var(--sp-2);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.g-prod-rows li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--sp-2);
+}
+
+.g-prod-who {
+  color: var(--text-3);
+  font-size: var(--fs-caption);
+  min-width: 4.5em;
+}
+
+.g-prod-to {
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.g-prod-pick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--sp-3);
+}
+
+.g-prod-pick .g-field {
+  flex: 1 1 140px;
+}
+
+.g-prod-back {
+  flex-basis: 100%;
+  min-height: 44px;
+  text-align: left;
+}
+
+.g-prod-now .g-manual span {
+  display: block;
+  margin-top: var(--sp-1);
+}
+
+.g-prod-now .g-details {
+  margin-top: var(--sp-2);
 }
 
 .g-log {

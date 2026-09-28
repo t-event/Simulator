@@ -106,7 +106,7 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
     g.furnaces.every((_, i) => furnaceGrade(g, i) !== first.grade)
   )
     out.push({
-      text: `${first.customer} vil ha ${GRADES[first.grade].name.toLowerCase()}, men ovnen lager ${GRADES[g.targetGrade].name.toLowerCase()}. Bytt kvalitet under «Produksjon nå» lenger ned.`,
+      text: `${first.customer} vil ha ${GRADES[first.grade].name.toLowerCase()}, men ovnen lager ${GRADES[g.targetGrade].name.toLowerCase()}. Velg kvalitet under «Produksjon nå» lenger ned.`,
     });
   // Kvaliteter ovnen lager eller har kontrakter på. Trengs det skrap som ikke er forsket fram, sies det (B-067)
   const inUse = gradesInUse(g);
