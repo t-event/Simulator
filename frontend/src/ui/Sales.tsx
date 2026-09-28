@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useReportTab, type OnTab } from "./tabMemory";
 import { GRADE_IDS, GRADES, PRODUCTS } from "../game/data";
 import {
   acceptContract,
@@ -224,7 +225,14 @@ const LOTS_SHOWN = 6;
 
 type SalesTab = "tilbud" | "ko" | "lager" | "avtaler";
 
-export function Sales({ g, stats, act, openTab, paused }: Props & { openTab?: string; paused?: boolean }) {
+export function Sales({
+  g,
+  stats,
+  act,
+  openTab,
+  onTab,
+  paused,
+}: Props & { openTab?: string; onTab?: OnTab; paused?: boolean }) {
   const [showAll, setShowAll] = useState(false);
   const [confirmCancel, setConfirmCancel] = useState<number | null>(null);
   const [tab, setTab] = useState<SalesTab>(() =>
@@ -234,6 +242,7 @@ export function Sales({ g, stats, act, openTab, paused }: Props & { openTab?: st
         ? "tilbud"
         : "ko",
   );
+  useReportTab(tab, onTab);
   const sort = g.settings.offerSort;
   const offers = g.contracts
     .filter((c) => c.status === "tilbud")

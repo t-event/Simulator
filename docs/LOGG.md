@@ -5,6 +5,25 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 170 – 2026-09-28: Vikarer, vedlikehold, navigasjon og avbrutte avtaler
+
+**Brukeren ba om:** ti punkter – vikarer som ikke dekket alle, Marked/Salg/Folk inn i Verket (spørsmål), loggen to
+steder, bedre vedlikeholdskort, «Nå» i utstyrsarkene, Mål-knappen som aktiv, kortere «Dine verk», egen fane for
+konsernkassa (spørsmål), avbryte rammeavtaler, og lik navigasjon i alle hovedmenyene.
+
+**Gjort:** B-233. Skiftlederen forlenger vikarene med én gang; loggen ut av Økonomi; nytt vedlikeholdskort; «Nå»-linje
+i utstyrsarkene; Mål-knappen aktiv; verkene som sammenleggbare rader på mobil; avbryt rammeavtale med bot og omdømme;
+hver hovedmeny husker underfanen, nytt trykk går til første. Svar: Marked/Salg/Folk blir hovedmenyer, ingen egen fane
+for konsernkassa ennå.
+
+**Testet:** tsc, lint, `npm test` (to nye tester), balance (exit 0), Playwright på 7 størrelser (navigasjon, arkene,
+vedlikehold, avtaler, Mål, verkene).
+
+**Gjenstår:** svar fra brukeren på ukens «Mer stål enn før» (forrige ukes fart som grunnlag); UI-4d; reserven og
+kassegrensen; fase 2 videre.
+
+---
+
 ## Økt 169 – 2026-09-28: Mange flere utfordringer og prestasjoner
 
 **Brukeren ba om:** mange flere utfordringer og prestasjoner, og bedre, mer intuitive kort.

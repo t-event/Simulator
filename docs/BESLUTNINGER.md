@@ -4208,3 +4208,35 @@ intuitivt. Det er ganske enkelt å få alle prestasjonene. Lag mange flere og la
 - Balance: exit 0 (storverket median dag 161, nybegynner 144). Tester: trinn i utfordringer (rekord gir flere trinn,
   teller starter på nytt) og at de gamle merkene finnes og en erfaren spiller ikke får alle.
 - Konto: nei (eget spill).
+
+## B-233 Vikarer, vedlikehold, «Nå» i utstyrsarkene, felles navigasjon og avbrutte rammeavtaler (2026-09-28)
+Status: gjelder (bygger på B-192, B-211, B-226)
+Brukeren sendte ti punkter. Svarene og det som ble gjort:
+- **Vikarer:** «Skiftlederen leier ikke inn vikarer til alle som er borte selv om jeg har huket av for det.» Skiftlederen
+  forlenget først når vikarene gikk hjem, så en ny som ble borte lenger, sto udekket imens. Nå forlenges vikarene med
+  én gang når noen er borte lenger enn vikarene er leid for – bare for dagene som mangler (regnes fra slutten av
+  perioden, så det betales ikke dobbelt).
+- **Marked, Salg og Folk inn i Verket?** Svar: nei, de blir hovedmenyer. De brukes flere ganger per økt, Verket har alt
+  fire underfaner, og en meny nederst med én knapp per daglig oppgave er det raskeste på mobil. Konsern er tatt ut av
+  Verket (B-226) fordi det er et annet nivå; Marked, Salg og Folk er daglig drift og står best som egne knapper.
+- **Loggen i Økonomi og Oversikt:** loggen sto først bare i Økonomi, fikk en kort utgave på Oversikt (B-098), og så kom
+  varsellista (B-089). Den lange loggen i Økonomi er fjernet; Oversikt har de siste linjene, og alt ligger i varsellista.
+- **Vedlikeholdskortet:** én linje øverst om hvem som bytter foringen, så én rad per ovn med «% slitt» (farge etter hvor
+  nær grensen), stolpe, dager siden omforing og potta, og én knapp. Valgene (reparatøren, plan) samlet under «Hvem bytter
+  foringen», og forklaringen bak «Slik virker foringen».
+- **Utstyrsarkene:** øverst en «Nå»-linje med det som skjer på stedet: hver ovn (smelter, % ferdig, eller hvorfor den
+  står), støpingen, skraplageret, lageret og foringen. `furnaceState`/`statusOf` er flyttet til `ui/plantStatus.ts`.
+- **Mål-knappen ved varsellinja** viser at den er valgt (blå strek og ramme), som de andre menyknappene.
+- **«Dine verk» på mobil:** én linje per verk (navn, type, moderniseringsprikker og utbytte per døgn); trykk for
+  detaljer og knapper. Det anbefalte verket står åpent. PC beholder tabellen.
+- **Egen fane for konsernkassa?** Svar: ikke nå. Kassa er kapitalen til selskapene og brukes bare til anbud; den står
+  som eget kort ved siden av selskapene i Industrien. Når kassa får flere bruksområder (fase 2–3 i RETNING.md), vurderes
+  det på nytt.
+- **Avbryte rammeavtaler:** «Avbryt avtalen…» på aktive avtaler, med bekreftelse. Bot 30 % av verdien av ukene som
+  gjenstår, og dobbelt så mye omdømme som bonusen ville gitt. Uka i ordrekøen strykes, og avtalen står som brutt.
+- **Felles navigasjon:** hver hovedmeny husker underfanen den sto på (før bare Verket). Et nytt trykk på menyen du alt
+  står i, går til første underfane. En lenke til en bestemt underfane (råd, varsler) åpner den. Minnet står i
+  `GameApp`; sidene melder fra med `useReportTab` (`ui/tabMemory.ts`).
+- Tester: skiftlederen forlenger vikarene (og ikke for lenge), avbrutt avtale (bot, omdømme, køen, ingen nye uker).
+  Balance: exit 0. Playwright på 7 størrelser.
+- Konto: nei (eget spill).

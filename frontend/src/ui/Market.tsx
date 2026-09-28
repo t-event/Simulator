@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useReportTab, type OnTab } from "./tabMemory";
 import { PRODUCTS, SCRAP_IDS, SCRAP_TYPES, stageRef } from "../game/data";
 import { buyScrap, SCRAP_SELL_SHARE, scrapPrice, scrapSellPrice, sellScrap, scrapAlert } from "../game/engine";
 import { energyPrice, hasPlanner, plannerOrders, productPrice, type PlantStats } from "../game/plant";
@@ -77,10 +78,11 @@ function BuyButtons({ g, act, id, amounts }: Omit<Props, "stats"> & { id: ScrapI
   );
 }
 
-export function Market({ g, stats, act, openTab }: Props & { openTab?: string }) {
+export function Market({ g, stats, act, openTab, onTab }: Props & { openTab?: string; onTab?: OnTab }) {
   const [tab, setTab] = useState<MarketTab>(() =>
     openTab && ["skrap", "strom", "priser"].includes(openTab) ? (openTab as MarketTab) : "skrap",
   );
+  useReportTab(tab, onTab);
   const amounts = BUY_AMOUNTS[g.stage];
   // Stålprisen mot normalt, med felles hendelser som eksportboom og importpress (B-129)
   const steelNow = g.market.steelFactor * worldFactor(g, "steel");

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useReportTab, type OnTab } from "./tabMemory";
 import { DirectorCard, DirectorOffer } from "./Konsern";
 import {
   BONUS_COOLDOWN_DAYS,
@@ -528,11 +529,12 @@ function CrewTable({ g, stats, shifts }: { g: GameState; stats: PlantStats; shif
   );
 }
 
-export function People({ g, stats, act, openTab }: Props & { openTab?: string }) {
+export function People({ g, stats, act, openTab, onTab }: Props & { openTab?: string; onTab?: OnTab }) {
   // Et varsel kan åpne en bestemt fane, f.eks. Fravær (B-152)
   const [tab, setTab] = useState<PeopleTab>(() =>
     openTab === "ansett" || openTab === "ansatte" || openTab === "fravaer" ? openTab : "skift",
   );
+  useReportTab(tab, onTab);
   const [confirmFire, setConfirmFire] = useState<number | null>(null);
   const [confirmLeader, setConfirmLeader] = useState<number | null>(null);
   const cap = STAGES[g.stage].staffCap;

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { SheetHead } from "./ds";
+import { SheetHead, StatusLine } from "./ds";
+import { furnaceState, statusOf } from "./plantStatus";
 import {
   buyUpgrade,
   keyUpgrade,
@@ -15,7 +16,7 @@ import { computePlantStats, unitType } from "../game/plant";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Bar, Card } from "./common";
-import { fmtKr, fmtNum, fmtRep } from "./format";
+import { fmtKr, fmtNum, fmtPct, fmtRep, fmtT } from "./format";
 import { buzz } from "./haptics";
 import { Portal } from "./Portal";
 
@@ -203,6 +204,7 @@ export function UpgradeSheet({
           <SheetHead title={STATION_NAMES[station]} onClose={onClose} className="g-sheet-head">
             <span className="g-sheet-cash">Du har {fmtKr(Math.floor(Math.max(0, g.cash)))}</span>
           </SheetHead>
+          <StationNow g={g} station={station} unit={units ? unit : undefined} />
           {units ? (
             <>
               <div className="g-subtabs" role="tablist" aria-label="Ovner">
@@ -350,5 +352,64 @@ export function StageCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
         Flytt inn i {next.name.toLowerCase()}
       </button>
     </Card>
+  );
+}
+
+/**
+ * «Nå» øverst i utstyrsarket (B-233): hva som skjer på stedet akkurat nå – det samme som ruta i produksjonslinja, men
+ * med hele teksten, som ofte blir kuttet i den smale ruta.
+ */
+function StationNow({ g, station, unit }: { g: GameState; station: Station; unit?: number }) {
+  const stats = computePlantStats(g);
+  const lines: { who?: string; text: string; status: ReturnType<typeof statusOf> }[] = [];
+  if (station === "ovn") {
+    const idx = unit !== undefined ? [unit] : g.furnaces.map((_, i) => i);
+    for (const i of idx) {
+      const st = furnaceState(g, i);
+      const extra = st.progress !== null ? ` · ${fmtPct(Math.min(1, st.progress))} ferdig` : "";
+      lines.push({
+        who: g.furnaces.length > 1 ? `Ovn ${i + 1}` : undefined,
+        text: st.text + extra,
+        status: g.furnaces[i].heat ? "kjorer" : statusOf(st.text),
+      });
+    }
+  } else if (station === "stoping") {
+    const head = g.castQueue[0];
+    const text = g.castWait ?? (head ? `Støper ${fmtT(head.t)} – ${g.castQueue.length} øse(r) i kø` : "Venter på stål");
+    lines.push({ text, status: g.castWait ? statusOf(g.castWait) : head ? "kjorer" : "venter" });
+  } else if (station === "skrap") {
+    const low = stats.yardUsed < stats.sizeT;
+    lines.push({
+      text: `${fmtT(stats.yardUsed)} av ${fmtT(stats.yardT)} på skraplageret${low ? " – mindre enn én charge" : ""}`,
+      status: low ? "tomt" : "venter",
+    });
+  } else if (station === "lager") {
+    const full = stats.storeUsed >= stats.storeT * 0.999;
+    lines.push({
+      text: `${fmtT(stats.storeUsed)} av ${fmtT(stats.storeT)} ferdig stål på lager${full ? " – fullt" : ""}`,
+      status: full ? "fullt" : "venter",
+    });
+  } else if (station === "vedlikehold") {
+    g.furnaces.forEach((f, i) =>
+      lines.push({
+        who: g.furnaces.length > 1 ? `Ovn ${i + 1}` : undefined,
+        text: `Foringen er ${fmtPct(f.wear)} slitt`,
+        status: f.wear > 0.85 ? "feil" : f.wear > 0.6 ? "vedlikehold" : "kjorer",
+      }),
+    );
+  }
+  if (!lines.length) return null;
+  return (
+    <div className="g-sheet-now" aria-label="Nå">
+      <span className="g-sheet-now-label">Nå</span>
+      <ul>
+        {lines.map((l, i) => (
+          <li key={i}>
+            {l.who && <strong>{l.who}: </strong>}
+            <StatusLine status={l.status} label={l.text} />
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
