@@ -44,7 +44,7 @@ til «Avgjort» nederst).
 
 ## Forslag – nett og konkurranse
 
-- **Tidslinja ved tilbakespoling (B-259):** `check_snapshot` sletter alle tall etter dagen når et spill med lavere dag
+- ~~Tidslinja ved tilbakespoling (B-259)~~ **Bygget (B-261).** `check_snapshot` sletter alle tall etter dagen når et spill med lavere dag
   lastes opp. Da en gammel kopi tok over i 15 sekunder, forsvant 1 700 tall. Kan heller merke dem eller beholde dem når
   det høyere spillet kommer tilbake. Eieren avgjør.
 

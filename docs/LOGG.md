@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 198 – 2026-09-28: Tidslinja ved tilbakespoling
+
+**Brukeren ba om:** «Fortsett», så «Tidslinja ved tilbakespoling».
+
+**Gjort:** B-261. Migrasjon 045: tallene etter dagen flyttes til `snapshots_rewound` i stedet for å slettes, legges
+tilbake når det samme spillet kommer tilbake, og forkastes når spillet er spilt forbi dem. Fartskontrollen bruker det som
+var spilt lengst for minst 10 minutter siden.
+
+**Testet:** migrasjonen i en transaksjon som ble rullet tilbake (kopi og retur, videre fra lavere dag, pre_reform,
+tidspunkt, måleren, fartskontrollen), sikkerhetsrådene, lagringer etter kjøringen.
+
+**Gjenstår:** i morgen: sjekk at skraplageranbudet ble avgjort og at første inntekt kom 30.9.
+
+---
+
 ## Økt 197 – 2026-09-28: Kjøpeknappene under veiledningen
 
 **Brukeren ba om:** «Early game slet en med å kjøpe 5 tonn skrap når han hadde 8 tonn ledig» – knappen gjorde
