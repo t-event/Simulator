@@ -130,7 +130,7 @@ function BuyButton({
   );
 }
 
-/** Bryter for å skru salgsdirektøren av og på (B-122). Vises på Konsern og under Forespørsler på Salg */
+/** Bryter for å skru salgsdirektøren av og på (B-122). Vises under Folk → Ansatte og under Forespørsler på Salg */
 export function DirectorSwitch({ g, act }: { g: GameState; act: Act }) {
   const d = g.konsern?.director;
   if (!d) return null;
@@ -525,12 +525,13 @@ function PlantTable({
 }
 
 /** Underfanene i Konsern (B-226) */
-export type KonsernTabId = "oversikt" | "utvid" | "industri" | "ledelse";
-const KONSERN_TAB_IDS: KonsernTabId[] = ["oversikt", "utvid", "industri", "ledelse"];
+export type KonsernTabId = "oversikt" | "utvid" | "industri";
+const KONSERN_TAB_IDS: KonsernTabId[] = ["oversikt", "utvid", "industri"];
 
 /**
  * Konsernet som egen hovedside (B-226), med underfaner som Verket: Oversikt (tallene, neste steg og verkene), Utvid
- * (kjøp og felles tjenester), Industrien (selskapene rundt verket og konsernkassa, B-227) og Ledelse (salgsdirektøren).
+ * (kjøp og felles tjenester) og Industrien (selskapene rundt verket og konsernkassa, B-227). Salgsdirektøren er under
+ * Folk (B-229).
  */
 export function KonsernPage({
   g,
@@ -552,8 +553,6 @@ export function KonsernPage({
     { id: "utvid", label: "Utvid", count: canBuy },
     // Industrien rundt verket (B-227): skraplageret nå, flere selskaper, Kontroll og overtakelser senere (RETNING.md)
     { id: "industri", label: "Industrien", badge: tender ? "Anbud" : undefined },
-    // Ledelsen (B-227): salgsdirektøren nå, verksjefene i datterverkene senere (RETNING.md fase 5)
-    { id: "ledelse", label: "Ledelse" },
   ];
   return (
     <div className={`g-grid g-konsern-page is-konsern is-${tab}`}>
@@ -574,11 +573,6 @@ export function KonsernPage({
       {tab === "oversikt" && <KonsernOverview g={g} act={act} onBuy={() => setTab("utvid")} />}
       {tab === "utvid" && <KonsernBuy g={g} act={act} />}
       {tab === "industri" && <IndustryPanel g={g} act={act} />}
-      {tab === "ledelse" && (
-        <div className="g-col-wide g-konsern-single">
-          <DirectorCard g={g} act={act} />
-        </div>
-      )}
     </div>
   );
 }

@@ -4083,7 +4083,8 @@ underside slik som er gjort på verket.»
 - Konto: anbudsvarselet krever konto (det er en del av skraplageret, regel 3 og 7); selve siden gjør det ikke.
 
 ## B-227 Konsern: Industrien og Ledelse i stedet for Skraplager og Direktør (2026-09-28)
-Status: gjelder (erstatter fanenavnene i B-226; følger RETNING.md fase 2–5)
+Status: gjelder (erstatter fanenavnene i B-226; følger RETNING.md fase 2–5). Ledelse-fanen er fjernet i B-229:
+salgsdirektøren er under Folk.
 Brukeren: «Skraplageret bør jo ikke være en helt egen side i konsernet, se på planen vår og sett det opp ut fra hva som er
 planen videre.»
 - **Planen** (RETNING.md): skraplageret er det første av flere strategiske selskaper – slagghåndtering og mekanisk
@@ -4130,3 +4131,17 @@ planleggere og salgsdirektør.
 - Tester: valseverket valser bare kvaliteten armeringsordren trenger; en kontrakt er bare dekket av partiene den selv
   får (begge feiler med den gamle koden).
 - Konto: nei (motoren i eget spill).
+
+## B-229 Salgsdirektøren under Folk, ikke Konsern (2026-09-28)
+Status: gjelder (erstatter Ledelse-fanen i B-227; bygger på B-117 og B-210)
+Brukeren: «Salgsdirektøren har vel egentlig ikke noe å gjøre med konsernet. Flytt den til riktig plass. Kanskje sammen med
+de andre ansatte?»
+- Salgsdirektøren jobber for verket (signerer verkets kontrakter), så den hører til Folk: **ansettes under Folk → Ansett**
+  (som før, B-210) og **styres under Folk → Ansatte** (bryteren, oppgraderinger, «ta også rammeavtaler» og oppsigelse),
+  øverst over lista over de ansatte. Bryteren står fortsatt også under Forespørsler på Salg.
+- Konsern har tre faner: Oversikt · Utvid · Industrien. Ledelse-fanen er borte (gradvis synlighet: ingen tom fane). Når
+  verksjefene i datterverkene kommer (RETNING.md fase 5), hører de til Konsern og kan få en egen fane da.
+- Salgsdirektøren krever fortsatt at konsernet er åpnet, og tilstanden ligger fortsatt i `g.konsern.director` (ingen
+  migrering). Tekstene er rettet: rådgiveren peker til Folk → Ansatte, og loggen sier «Du har ansatt en salgsdirektør».
+- Testet i Playwright på de 7 størrelsene: kortet står under Ansatte, ingen horisontal scrolling eller avkortede knapper.
+- Konto: nei.

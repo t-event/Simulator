@@ -793,7 +793,7 @@ export function hireDirector(g: GameState): { ok: boolean; message: string } {
   g.konsern.director = { hiredDay: day(g), contracts: 0, agreements: 0, agreementsOn: true, active: true, level: 0 };
   log(
     g,
-    `Konsernet har ansatt en salgsdirektør (${fmtKr(DIRECTOR_HIRE)} i rekruttering, ${fmtKr(directorPerDay(g))} per døgn). Kontraktene som verket rekker, signeres nå av seg selv.`,
+    `Du har ansatt en salgsdirektør (${fmtKr(DIRECTOR_HIRE)} i rekruttering, ${fmtKr(directorPerDay(g))} per døgn). Kontraktene som verket rekker, signeres nå av seg selv.`,
     "good",
   );
   return { ok: true, message: "Salgsdirektøren er ansatt." };

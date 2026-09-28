@@ -153,7 +153,8 @@ frontend/src/
     tests.ts     Tester uten nett (falsk tjeneste)
   ui/          Spillets skjermer (mobil først) og kontrollrommet
     Overview.tsx Verket med underfanene Oversikt, Anlegg, Resept, Økonomi (valget i verketTabs.ts/GameApp)
-    Konsern.tsx  Konsern-siden (B-226, B-227): Oversikt, Utvid, Industrien, Ledelse; openTender.ts gir «!» ved åpent anbud
+    Konsern.tsx  Konsern-siden (B-226, B-227): Oversikt, Utvid, Industrien; openTender.ts gir «!» ved åpent anbud.
+                 Salgsdirektørens kort ligger her, men vises under Folk → Ansatte (B-229)
     hints.ts     Rådene på Verket; gir også «!» på Marked og Folk i menyen (B-202)
     Finance.tsx  Resultatgrafen og postene på Verket → Økonomi (B-203); navnene på postene i financeNames.ts
     Recipe.tsx  Resepten (Verket → Resept, B-199)

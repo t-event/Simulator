@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 229,
+    date: "2026-09-28",
+    title: "Salgsdirektøren er under Folk",
+    items: [
+      "Salgsdirektøren er en av de ansatte: du ansetter den under Folk → Ansett og styrer den under Folk → Ansatte.",
+      "Konsern har nå fanene Oversikt, Utvid og Industrien.",
+    ],
+  },
+  {
     b: 228,
     date: "2026-09-28",
     title: "Færre sene leveranser",
