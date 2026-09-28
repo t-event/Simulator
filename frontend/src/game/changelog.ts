@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 276,
+    date: "2026-09-28",
+    title: "Nytt i anleggsbildet",
+    items: [
+      "Taket over skraplageret, de større renseanleggene og det utbygde ferdiglageret synes nå i bildet av verket.",
+      "Renseanlegget gir hvit damp når det renser, brun røyk når noe går urenset ut, og en rød lampe blinker ved havari.",
+      "Om vinteren ligger det snø på bakken og takene, og det snør.",
+    ],
+  },
+  {
     b: 275,
     date: "2026-09-28",
     title: "Små rettelser",

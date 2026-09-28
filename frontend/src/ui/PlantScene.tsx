@@ -10,6 +10,9 @@ import { has, hourOfDay, isOpen, rollingActive, type PlantStats } from "../game/
 import type { GameState } from "../game/types";
 import { cosmeticOn, facadeColors } from "../game/cosmetics";
 import { STATION_NAMES, type Station } from "./stations";
+import { isWinter } from "../game/calendar";
+import { roofed } from "../game/accidents";
+import { CLEANERS, cleaner, envDown, shortfall, stopsOnBreakdown } from "../game/environment";
 
 interface Props {
   g: GameState;
@@ -93,10 +96,23 @@ function skyColors(hour: number): [string, string] {
   return ["#162038", "#39405e"];
 }
 
-function Smoke({ x, y, active, scale = 1 }: { x: number; y: number; active: boolean; scale?: number }) {
+function Smoke({
+  x,
+  y,
+  active,
+  scale = 1,
+  tone,
+}: {
+  x: number;
+  y: number;
+  active: boolean;
+  scale?: number;
+  /** Renseanlegget (B-276): hvit damp, eller brun røyk når noe går urenset ut */
+  tone?: "clean" | "dirty";
+}) {
   if (!active) return null;
   return (
-    <g className="scene-smoke" transform={`translate(${x} ${y}) scale(${scale})`}>
+    <g className={tone ? `scene-smoke is-${tone}` : "scene-smoke"} transform={`translate(${x} ${y}) scale(${scale})`}>
       <circle className="puff puff-1" cx={0} cy={0} r={5} />
       <circle className="puff puff-2" cx={0} cy={0} r={6} />
       <circle className="puff puff-3" cx={0} cy={0} r={7} />
@@ -323,6 +339,111 @@ function Fireworks() {
   );
 }
 
+/** Tak over skraplageret (B-276): saltak over kranen, med snø om vinteren */
+function YardRoof({ x1, x2, y, winter }: { x1: number; x2: number; y: number; winter: boolean }) {
+  const mid = (x1 + x2) / 2;
+  return (
+    <g>
+      <line x1={x1 + 2} y1={y} x2={x1 + 2} y2={178} stroke="#8a929b" strokeWidth={1.4} />
+      <line x1={x2 - 2} y1={y} x2={x2 - 2} y2={178} stroke="#8a929b" strokeWidth={1.4} />
+      <polygon
+        points={`${x1},${y} ${mid},${y - 9} ${x2},${y} ${x2},${y + 3} ${mid},${y - 6} ${x1},${y + 3}`}
+        fill="#5b646e"
+      />
+      {winter && (
+        <polyline
+          className="scene-snow"
+          points={`${x1},${y} ${mid},${y - 9} ${x2},${y} ${x2},${y - 1.6} ${mid},${y - 10.6} ${x1},${y - 1.6}`}
+        />
+      )}
+    </g>
+  );
+}
+
+/**
+ * Renseanlegget (B-276): bygget blir høyere for hvert trinn, har to linjer fra det tredje, og pipa gir hvit damp når
+ * det renser. Står det etter et havari, blinker en rød lampe; går noe urenset ut, blir røyken brun.
+ */
+function Cleaner({
+  level,
+  twoLines,
+  down,
+  smoke,
+}: {
+  level: number;
+  twoLines: boolean;
+  down: boolean;
+  smoke: "clean" | "dirty" | null;
+}) {
+  const top = 112 - 5 * (level - 1);
+  const stacks = twoLines ? [101, 122] : [101];
+  const stackTop = top - 12 - 2 * level;
+  return (
+    <g>
+      {stacks.map((x) => (
+        <g key={x}>
+          <rect x={x} y={stackTop} width={4} height={top - stackTop} fill="#aab2bb" />
+          <Smoke x={x + 2} y={stackTop - 3} active={!!smoke} scale={0.55} tone={smoke ?? undefined} />
+        </g>
+      ))}
+      <rect x={96} y={top} width={34} height={178 - top} fill="#5f6873" />
+      <path d={`M96 ${top} L113 ${top - 12} L130 ${top} Z`} fill="#48515c" />
+      {twoLines && <line x1={113} y1={top + 2} x2={113} y2={178} stroke="#48515c" strokeWidth={1.2} />}
+      {/* Filterposene: én rad luker per linje */}
+      {(twoLines ? [99, 116] : [104]).map((x) => (
+        <g key={x} fill="#4a525c">
+          {Array.from({ length: Math.min(4, 1 + level) }, (_, i) => (
+            <rect key={i} x={x} y={top + 8 + i * 9} width={twoLines ? 11 : 18} height={4} />
+          ))}
+        </g>
+      ))}
+      {down && <circle className="scene-glow scene-alarm" cx={113} cy={top - 3} r={2.4} />}
+    </g>
+  );
+}
+
+/** Jernbanevogn med emner ved ferdigvareterminalen (B-276) */
+function RailWagon({ x }: { x: number }) {
+  return (
+    <g>
+      <rect x={x} y={188} width={46} height={6} fill="#4d3b2e" />
+      {[0, 1, 2].map((r) =>
+        [0, 1, 2, 3].map((c) => (
+          <rect
+            key={`${r}-${c}`}
+            x={x + 3 + c * 10}
+            y={184 - r * 3}
+            width={9}
+            height={3}
+            fill="#9aa3ad"
+            stroke="#5c646d"
+            strokeWidth={0.4}
+          />
+        )),
+      )}
+      {[6, 14, 32, 40].map((dx) => (
+        <circle key={dx} cx={x + dx} cy={196} r={2.2} fill="#1b1d21" />
+      ))}
+    </g>
+  );
+}
+
+/** Litt snø som faller om vinteren (B-276) */
+const SNOW: [number, number, number][] = [
+  [30, 30, 0],
+  [78, 60, 2.1],
+  [140, 22, 4.2],
+  [205, 48, 1.3],
+  [268, 28, 3.4],
+  [322, 64, 0.7],
+  [380, 36, 2.8],
+  [430, 58, 5],
+  [462, 20, 1.8],
+  [110, 90, 3.9],
+  [350, 96, 0.4],
+  [58, 108, 4.6],
+];
+
 export function PlantScene({ g, stats, onStation }: Props) {
   const hour = hourOfDay(g);
   const [skyTop, skyBottom] = skyColors(hour);
@@ -358,6 +479,24 @@ export function PlantScene({ g, stats, onStation }: Props) {
     .map((p) => ({ ...p, y: Math.round(roofAt(p.x + p.w / 2) - p.rise) }));
   // Én glødende streng per støpemaskin (B-244)
   const casters = 1 + (has(g, "streng2") ? 1 : 0) + (has(g, "streng3") ? 1 : 0);
+  // Nytt i bildet (B-276): vinter, tak over skrapet, renseanlegget per trinn og utbygd ferdiglager
+  const winter = isWinter(g);
+  const groundW = stage >= 4 ? 400 : 480;
+  const clean = cleaner(g);
+  const cleanLevel = clean ? CLEANERS.indexOf(clean) + 1 : 0;
+  const cleanDown = envDown(g);
+  const cleanSmoke: "clean" | "dirty" | null = !melting
+    ? null
+    : (cleanDown && !stopsOnBreakdown(g)) || shortfall(g, stats) > 0.02
+      ? "dirty"
+      : cleanDown && !clean?.twoLines
+        ? null
+        : "clean";
+  const storeLevel = ["ferdiglager1", "ferdiglager2", "ferdiglager3"].filter((id) => has(g, id)).length;
+  const storeX = stage >= 3 ? 300 : 330;
+  const storeCols = [4, 5, 6, 6][storeLevel];
+  const storeRows = storeLevel >= 3 ? 3 : 2;
+  const storeW = storeCols * 9;
 
   return (
     <svg className="plant-scene" viewBox="0 0 480 210" role="img" aria-label={`Anlegget: ${stats.stage.name}`}>
@@ -384,6 +523,13 @@ export function PlantScene({ g, stats, onStation }: Props) {
       )}
       {/* Åsene bak */}
       <path d="M0 150 Q 80 110 170 140 T 330 130 T 480 140 L480 180 L0 180 Z" fill="#23303f" opacity={0.8} />
+      {winter && (
+        <path
+          className="scene-snow"
+          d="M0 150 Q 80 110 170 140 T 330 130 T 480 140 L480 146 Q 400 136 330 136 T 170 146 Q 80 116 0 156 Z"
+          opacity={0.55}
+        />
+      )}
       {cosmeticOn(g, "fyrverkeri") && night && <Fireworks />}
       {cosmeticOn(g, "vind") && <WindTurbine x={70} y={128} />}
       {cosmeticOn(g, "traer") && (
@@ -415,7 +561,8 @@ export function PlantScene({ g, stats, onStation }: Props) {
       )}
 
       {/* Bakken */}
-      <rect x={0} y={178} width={stage >= 4 ? 400 : 480} height={32} fill="#2b2f36" />
+      <rect x={0} y={178} width={groundW} height={32} fill="#2b2f36" />
+      {winter && <rect className="scene-snow" x={0} y={178} width={groundW} height={2.5} />}
       {stage >= 3 && (
         <g stroke="#6d6f74" strokeWidth={1.2}>
           <line x1={0} y1={196} x2={stage >= 4 ? 400 : 480} y2={196} />
@@ -482,6 +629,7 @@ export function PlantScene({ g, stats, onStation }: Props) {
             <line x1={16} y1={120} x2={114} y2={120} />
           </g>
           <Trolley x={30} y={120} span={70} moving={open} />
+          {roofed(g) && <YardRoof x1={10} x2={120} y={116} winter={winter} />}
         </g>
       )}
 
@@ -516,12 +664,7 @@ export function PlantScene({ g, stats, onStation }: Props) {
           <Windows x={204} y={90} cols={3} lit={open} />
           <Windows x={204} y={104} cols={3} lit={open} />
           {/* Røykgassrensing */}
-          {has(g, "renseanlegg") && (
-            <g>
-              <rect x={96} y={112} width={34} height={66} fill="#5f6873" />
-              <path d="M96 112 L113 100 L130 112 Z" fill="#48515c" />
-            </g>
-          )}
+          {clean && <Cleaner level={cleanLevel} twoLines={!!clean.twoLines} down={cleanDown} smoke={cleanSmoke} />}
           {/* Transportbånd fra skrapgården inn i smeltehallen; skrapet går når ovnene smelter (B-244) */}
           <g transform="translate(92 158) rotate(-38)">
             <rect x={0} y={-2} width={has(g, "renseanlegg") ? 56 : 52} height={4} fill="#3d434b" />
@@ -579,6 +722,7 @@ export function PlantScene({ g, stats, onStation }: Props) {
             <line x1={10} y1={110} x2={96} y2={110} />
           </g>
           <Trolley x={24} y={110} span={60} moving={open} />
+          {roofed(g) && <YardRoof x1={6} x2={98} y={106} winter={winter} />}
         </g>
       )}
 
@@ -593,19 +737,77 @@ export function PlantScene({ g, stats, onStation }: Props) {
       {cosmeticOn(g, "statue") && <Statue x={stage === 0 ? 150 : 385} />}
 
       {/* Ferdigvarelager */}
+      {/* Utbygd ferdiglager (B-276): skur, så lagerhall med traverskran, så terminal med jernbanevogn */}
+      {storeLevel >= 3 && stage >= 4 && <RailWagon x={244} />}
+      {storeLevel >= 2 && stage >= 3 && (
+        <g>
+          <rect x={storeX - 5} y={158} width={storeW + 9} height={20} fill="#59626c" />
+          <path d={`M${storeX - 7} 158 L${storeX + storeW / 2} 153 L${storeX + storeW + 7} 158 Z`} fill="#454d57" />
+          {winter && (
+            <polyline
+              className="scene-snow"
+              points={`${storeX - 7},158 ${storeX + storeW / 2},153 ${storeX + storeW + 7},158 ${storeX + storeW / 2},151.6`}
+            />
+          )}
+          <line x1={storeX - 3} y1={161} x2={storeX + storeW + 2} y2={161} stroke="#e0b030" strokeWidth={1.4} />
+        </g>
+      )}
+      {storeLevel === 1 || (storeLevel >= 2 && stage < 3) ? (
+        <g>
+          <line
+            x1={storeX - 2}
+            y1={178}
+            x2={storeX - 2}
+            y2={stage >= 3 ? 163 : 156}
+            stroke="#8a929b"
+            strokeWidth={1.2}
+          />
+          <line
+            x1={storeX + storeW + 1}
+            y1={178}
+            x2={storeX + storeW + 1}
+            y2={stage >= 3 ? 161 : 153}
+            stroke="#8a929b"
+            strokeWidth={1.2}
+          />
+          <polygon
+            points={`${storeX - 5},${stage >= 3 ? 163 : 156} ${storeX + storeW + 4},${stage >= 3 ? 160 : 153} ${storeX + storeW + 4},${stage >= 3 ? 162 : 155} ${storeX - 5},${stage >= 3 ? 165 : 158}`}
+            fill="#5b646e"
+          />
+          {winter && (
+            <line
+              className="scene-snow"
+              x1={storeX - 5}
+              y1={stage >= 3 ? 162.4 : 155.4}
+              x2={storeX + storeW + 4}
+              y2={stage >= 3 ? 159.4 : 152.4}
+              stroke="var(--art-snow)"
+              strokeWidth={1.4}
+            />
+          )}
+        </g>
+      ) : null}
       {storeFill > 0.001 && (
         <g>
-          {Array.from({ length: Math.max(1, Math.round(storeFill * 8)) }, (_, i) => (
+          {Array.from({ length: Math.max(1, Math.round(storeFill * storeCols * storeRows)) }, (_, i) => (
             <rect
               key={i}
-              x={(stage >= 3 ? 300 : 330) + (i % 4) * 9}
-              y={172 - Math.floor(i / 4) * 5}
+              x={storeX + (i % storeCols) * 9}
+              y={172 - Math.floor(i / storeCols) * 5}
               width={8}
               height={5}
               fill="#9aa3ad"
               stroke="#5c646d"
               strokeWidth={0.5}
             />
+          ))}
+        </g>
+      )}
+
+      {winter && (
+        <g className="scene-snowfall">
+          {SNOW.map(([x, y, d]) => (
+            <circle key={x} cx={x} cy={y} r={1.1} style={{ animationDelay: `-${d}s` }} />
           ))}
         </g>
       )}
@@ -631,20 +833,27 @@ export function PlantScene({ g, stats, onStation }: Props) {
       )}
       {stage === 2 && (
         <>
-          <Hit station="skrap" x={12} y={116} w={104} h={64} onStation={onStation} />
+          <Hit station="skrap" x={8} y={106} w={116} h={74} onStation={onStation} />
           <Hit station="ovn" x={116} y={56} w={134} h={124} onStation={onStation} />
           <Hit station="stoping" x={250} y={102} w={120} h={78} onStation={onStation} />
         </>
       )}
       {stage >= 3 && (
         <>
-          <Hit station="skrap" x={8} y={106} w={90} h={74} onStation={onStation} />
+          <Hit station="skrap" x={4} y={96} w={94} h={84} onStation={onStation} />
           <Hit station="ovn" x={124} y={12} w={130} h={168} onStation={onStation} />
           <Hit station="stoping" x={250} y={84} w={110} h={96} onStation={onStation} />
         </>
       )}
-      {storeFill > 0.001 && (
-        <Hit station="lager" x={(stage >= 3 ? 300 : 330) - 3} y={160} w={42} h={20} onStation={onStation} />
+      {(storeFill > 0.001 || storeLevel > 0) && (
+        <Hit
+          station="lager"
+          x={storeX - 6}
+          y={storeLevel > 0 ? 150 : 160}
+          w={storeW + 12}
+          h={storeLevel > 0 ? 30 : 20}
+          onStation={onStation}
+        />
       )}
 
       {/* Folk */}

@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 213 – 2026-09-28: Dagens nye ting i anleggsbildet
+
+**Brukeren ba om:** «Lag de nye tingene på anleggsbildet».
+
+**Gjort:** B-276. Anleggsbildet viser taket over skraplageret, renseanlegget i trinn (to linjer, hvit damp, brun røyk
+ved utslipp, rød lampe ved havari), ferdiglageret i tre trinn (skur, lagerhall med traverskran, jernbanevogn med
+emner) og vinter (snø på bakken, åsene og takene, og snø som faller). Publiseringen av #222 (B-275) var grønn.
+
+**Testet:** tsc, lint, npm test, build, Playwright: bildet på nivå 2, 3 og 4 sommer og vinter, med og uten utbygging,
+havari med «kjør videre» (brun røyk og rød lampe), fullt lager; 320, 390, 1 440 og 2 560 px uten horisontal scrolling
+og uten feil i konsollen.
+
+**Gjenstår:** i morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 212 – 2026-09-28: Gjennomgang av dagens nye ting
 
 **Brukeren ba om:** «Fortsett», og valgte en gjennomgang av alt som er lagt til i dag.

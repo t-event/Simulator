@@ -604,6 +604,39 @@ button {
   animation-delay: 2s;
 }
 
+/* Renseanlegget (B-276): hvit damp når det renser, brun røyk når noe går urenset ut */
+.scene-smoke.is-clean .puff {
+  fill: var(--art-steam);
+}
+
+.scene-smoke.is-dirty .puff {
+  fill: var(--art-smoke-dirty);
+}
+
+.scene-alarm {
+  fill: var(--art-alarm);
+}
+
+/* Vinter i anleggsbildet (B-276): snø på bakken, åsene og taket, og snø som faller */
+.scene-snow {
+  fill: var(--art-snow);
+}
+
+.scene-snowfall circle {
+  fill: var(--art-snow);
+  opacity: 0.85;
+  animation: scene-snowfall 6s linear infinite;
+}
+
+@keyframes scene-snowfall {
+  from {
+    transform: translate(0, -24px);
+  }
+  to {
+    transform: translate(6px, 24px);
+  }
+}
+
 @keyframes puff {
   0% {
     opacity: 0.6;
@@ -823,7 +856,8 @@ button {
   .scene-trolley.is-moving,
   .scene-roll,
   .scene-ship,
-  .scene-belt {
+  .scene-belt,
+  .scene-snowfall circle {
     animation: none;
   }
   /* Trucken står parkert ved skrapgården i stedet for å kjøre */
