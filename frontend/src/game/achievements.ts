@@ -175,8 +175,9 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
   family("poeng", "gamepad-2", "Poengrekord", "Kontrollrom", (g) => g.controlBest ?? 0, [
     ["poeng3000", 3000, "God kjøring", "Få 3 000 poeng i kontrollrommet.", 10],
     ["poeng3800", 3800, "Skarp kjøring", "Få 3 800 poeng i kontrollrommet.", 25],
-    ["poeng4200", 4200, "Mesterkjøring", "Få 4 200 poeng i kontrollrommet.", 50],
-    ["poeng4500", 4500, "Rekordkjøring", "Få 4 500 poeng i kontrollrommet.", 100],
+    // Id-ene beholdes (B-232), men grensene er senket (B-293): 4 500 var umulig, også for den flinke testspilleren
+    ["poeng4200", 4100, "Mesterkjøring", "Få 4 100 poeng i kontrollrommet.", 50],
+    ["poeng4500", 4250, "Rekordkjøring", "Få 4 250 poeng i kontrollrommet.", 100],
   ]),
   // Kunnskap
   family("quiz", "book-check", "Quiz", "Kunnskap", quizzesDone, [
