@@ -198,7 +198,8 @@ frontend/public/  PWA: manifest, ikoner (icon.svg er kilden; PNG-ene lages fra d
 supabase/      SQL-migrasjonene, nummerert. Kjøres i prosjektet med Supabase-connectoren (apply_migration) og
                legges her samtidig, så repoet speiler databasen. Sjekk get_advisors (security) etter hver DDL-endring.
 supabase/utkast/ Spørringer som bare leser (f.eks. dry-run av økonomireformen) – ikke migrasjoner
-docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretningen for sluttspillet, B-180), UI.md
+docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretningen for sluttspillet, B-180), UI.md,
+               OKONOMI.md (økonomianalysen og reform 2, B-301),
                (designsystem, mobil + PC, plan for redesignet, B-187),
                PLAN-NETT.md (det som er bygget på nett), FORSLAG.md, KONTO.md (hva som krever konto)
 ```

@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 235 – 2026-09-28: Økonomianalyse for midt- og sluttspillet
+
+**Brukeren ba om:** en grundig analyse av hele økonomien (kostnader, inntekter, virkelige priser, spillerne), hva som
+skal gjøres med den bundne reserven og konsernkassa, og et forslag til økonomireform 2 – med spørsmål før noe endres.
+
+**Gjort:** B-301 og `docs/OKONOMI.md` (bare lesing av spillerdata). Anbudet på skraplageret stenger 29.9 01:33 UTC og
+trenger ingen handling; gebyret bør avgjøres før første utbetaling 30.9.
+
+**Testet:** ingenting endret i spillet.
+
+**Gjenstår:** eierens svar på spørsmålene i OKONOMI.md avsnitt 8, deretter reform 2 i deler (B5 → B2+B6 → B1 → B3).
+Pynt for sesong 3 før den startes.
+
+---
+
 ## Økt 234 – 2026-09-28: En reformveteran til
 
 **Brukeren ba om:** merket for en spiller som også ble truffet av reformen, men manglet det.

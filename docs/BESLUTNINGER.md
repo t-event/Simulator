@@ -5390,3 +5390,23 @@ og merket forsvant, selv om spillet er det samme (det rettede spillet, `serverEd
 - **Merket gitt** til spilleren i `badges` (notat: «kontoen ble laget på nytt, og loggraden forsvant»). Spillet er ikke
   endret; appen gir prestasjonen neste gang den spør (B-296). Topplista viser nå tre reformveteraner.
 - Et nytt merke for hånd: `insert into public.badges (user_id, badge, note) values (…)`, med eierens godkjenning.
+
+## B-301 Økonomianalyse for midt- og sluttspillet – grunnlag for reform 2 (2026-09-28)
+Status: gjelder (analyse; selve reformen kommer i egne beslutninger etter eierens svar)
+Endringslogg: nei
+Brukeren: «Finn alle kostnader, utgifter, inntekter … Sjekk opp virkelige priser. Vi må fikse økonomien i spillet
+mid/late game … Ikke ødelegg early game økonomien … Finn ut hva vi kan gjøre med bunden kontantreserve … Hvordan skal vi
+løse fellesøkonomien i konsernkassa … Late game skal være konkurranse mellom spillere, da må økonomien fungere fra start.»
+- Analysen står i **`docs/OKONOMI.md`**: alle poster per nivå, de tolv storverkenes resultat per spilldøgn (fra
+  lagringene, bare lesing), spilldøgn per ekte dag fra tidslinja, slukene, verden (konsernkassa, skraplageret) og
+  virkelige priser med kilder.
+- **Hovedfunn:** prisene per tonn er nær virkeligheten og starten er balansert; problemet er klokka (2 374 spilldøgn på
+  én ekte dag ganger enhver inntekt per spilldøgn med tusen) og at ingenting kan kjøpes etter ca. 100–130 mrd. En ny
+  kompresjon av kassa alene er virkningsløs (tjent inn igjen på timer). Verden (100 mill. per dag, likt for alle) og
+  verket (opptil 600 mill. per spilldøgn) henger ikke sammen.
+- **Anbefalt reform 2 (pakke B):** datterverkenes utbytte betales i ekte tid av serveren rett til konsernkassa
+  (sterkt avtagende med størrelsen, ingen fordel av 10×); kassa hjemme får tak, og overskuddet over betales ut til
+  eierne som historikk; reserven fjernes og føres som utbetalt; realistiske kostnader på toppen av hjemmeverket;
+  ingen kompresjon; merke til alle som får lagringen endret; skraplagerets gebyr ned (anslaget er nå 191 mill. per dag,
+  ikke 66 som da anbudet åpnet).
+- Ingen spillkode og ingen spillerdata er endret. Spørsmålene til eieren står i OKONOMI.md avsnitt 8.
