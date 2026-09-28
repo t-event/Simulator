@@ -19,7 +19,14 @@ import {
   upgradeOptions,
 } from "./actions";
 import { MASTERY, masteryCost, masteryEffect, masteryOpen } from "./mastery";
-import { achievementsDone, checkAchievements, hasAchievement } from "./achievements";
+import {
+  ACHIEVEMENT_BY_ID,
+  ACHIEVEMENTS,
+  achievementsDone,
+  checkAchievements,
+  hasAchievement,
+  nextInFamily,
+} from "./achievements";
 import {
   buyCosmetic,
   cosmeticBlocked,
@@ -30,7 +37,7 @@ import {
   setCosmetic,
   trackCosmetic,
 } from "./cosmetics";
-import { CHALLENGES, checkChallenges } from "./challenges";
+import { CHALLENGES, checkChallenges, currentChallenge } from "./challenges";
 import { ADDONS, CASTINGS, FURNACES, STAGES, WIN_CASH } from "./data";
 import {
   advance,
@@ -1887,6 +1894,55 @@ test("En kontrakt regnes bare som dekket av partiene den selv får (B-228)", () 
   ];
   const ids = ordersToMake(g).map((c) => c.id);
   assert(ids.length === 1 && ids[0] === 2, `feil ordrer å lage: ${ids.join(",")}`);
+});
+
+test("Utfordringer i trinn (B-232): rekorder gir flere trinn på en gang, tellere starter på nytt per trinn", () => {
+  const g = newGame(232);
+  g.stage = 4;
+  checkChallenges(g);
+  assert(!!g.missions["u-rekord"] && !g.missions["u-rekord-2"], "trinn 2 startet før trinn 1");
+  // En rekord som holder tre trinn, gir alle tre med én gang
+  g.history = [{ ...g.history[0], day: 1, producedT: 21_000, income: {}, costs: {}, heats: 0, cashEnd: 0 }];
+  checkChallenges(g);
+  assert(
+    g.missions["u-rekord"].done && g.missions["u-rekord-2"].done && g.missions["u-rekord-3"].done,
+    "rekorden ga ikke tre trinn",
+  );
+  assert(!g.missions["u-rekord-4"]?.done && currentChallenge(g, "u-rekord")?.tier === 4, "trinn 4 er ikke neste");
+  // En teller: trinn 2 teller fra trinn 1 ble nådd
+  g.counters.rene_dogn = (g.counters.rene_dogn ?? 0) + 30;
+  checkChallenges(g);
+  assert(g.missions["u-rene"].done, "30 rene døgn ga ikke trinn 1");
+  const base = g.missions["u-rene-2"]?.base;
+  assert(base === g.counters.rene_dogn, `trinn 2 starter ikke fra nå: ${base}`);
+  g.counters.rene_dogn += 59;
+  checkChallenges(g);
+  assert(!g.missions["u-rene-2"].done, "trinn 2 ble nådd for tidlig");
+  g.counters.rene_dogn += 1;
+  checkChallenges(g);
+  assert(g.missions["u-rene-2"].done, "trinn 2 ble ikke nådd");
+  assert(
+    CHALLENGES.length >= 60 && new Set(CHALLENGES.map((c) => c.id)).size === CHALLENGES.length,
+    "for få eller like id-er",
+  );
+});
+
+test("Prestasjoner i trinn (B-232): de gamle merkene finnes, og det er mange flere", () => {
+  const old = ["charge1", "kontrakt1", "verksted", "selv1", "charge100", "tonn1k", "stoperi", "quiz5", "forsk10"];
+  const old2 = ["kontrakt50", "stalverk", "omdomme", "tiavti", "charge1000", "tonn100k", "selv25", "quizalle"];
+  const old3 = ["storverk", "milliard", "datter1", "kontrakt250", "alleforsk", "datter10", "baron", "charge10k"];
+  const old4 = ["tonn1m", "mester10", "magnat", "mester50", "legende"];
+  const missing = [...old, ...old2, ...old3, ...old4].filter((id) => !ACHIEVEMENT_BY_ID[id]);
+  assert(missing.length === 0, `mangler gamle merker: ${missing.join(", ")}`);
+  assert(ACHIEVEMENTS.length >= 90, `for få merker: ${ACHIEVEMENTS.length}`);
+  assert(new Set(ACHIEVEMENTS.map((a) => a.id)).size === ACHIEVEMENTS.length, "like id-er");
+  // En erfaren spiller får ikke alle
+  const g = newGame(2321);
+  Object.assign(g.totals, { heats: 100_000, producedT: 27_000_000, contractsDone: 3500 });
+  g.stage = 4;
+  checkAchievements(g);
+  assert(achievementsDone(g) < ACHIEVEMENTS.length * 0.8, `for mange merker på en gang: ${achievementsDone(g)}`);
+  assert(nextInFamily(g, "charger")?.id === "charge150k", "neste charge-merke er feil");
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

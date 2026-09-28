@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 232,
+    date: "2026-09-28",
+    title: "Mange flere utfordringer og merker",
+    items: [
+      "74 utfordringer i 19 serier (før 8). Hver serie har flere trinn – klarer du ett, starter neste med et høyere mål.",
+      "99 merker i 25 serier (før 30), og de øverste er langt unna. Du beholder merkene du alt har.",
+      "Kortene viser først det du er nærmest, med fremdrift og belønning. Trykk på en serie for å se alle trinnene.",
+    ],
+  },
+  {
     b: 231,
     date: "2026-09-28",
     title: "Produksjonslinja i én rad",

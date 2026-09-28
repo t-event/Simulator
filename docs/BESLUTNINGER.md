@@ -4182,3 +4182,29 @@ rad. Fiks kortet og gjør det bedre og mer intuitivt.»
 - Resultat: 145 px høyt på mobil (før 249 px, to rader). Testet i Playwright på de 7 størrelsene og på verksted-nivå:
   én rad, ingen avkortede titler, ingen horisontal scrolling.
 - Konto: nei.
+
+## B-232 Mange flere utfordringer og prestasjoner, i trinn, og ryddigere kort (2026-09-28)
+Status: gjelder (bygger på B-090 og B-151)
+Brukeren: «Det finnes bare 8 utfordringer. Lag dritmange utfordringer og lag utfordringerkortet bedre og mer
+intuitivt. Det er ganske enkelt å få alle prestasjonene. Lag mange flere og lag kortet bedre og mer intuitivt.»
+- **Utfordringer (storverket):** 19 serier med 74 trinn i alt (før 8). Bare trinnet du står på, er aktivt; når det er
+  nådd, kommer belønningen og neste trinn med høyere mål. Nye serier: leveranser, 10 av 10, snittvurdering, feilfri
+  støping, billig strøm, tonnasje, charger, poeng i kontrollrommet, charger med 4 stjerner, beste døgnresultat og
+  fagbrev. De gamle har fått flere trinn (rekorddøgn til 40 000 t, kWh/t ned til 250, rene døgn til 500 …).
+  - Serier som teller hendelser, teller **fra trinnet startet** (hvert trinn krever nytt arbeid). Serier som måler en
+    rekord, måles mot det du har klart – en rekord som alt holder flere trinn, gir alle på en gang.
+  - Fagpoeng stiger med trinnet (+60 % per trinn), kroner dobles. Mange på en gang gir én linje i loggen.
+  - Trinn 1 har den gamle id-en (`u-rekord`), neste `u-rekord-2` osv. – gamle lagringer trenger ingen migrering.
+- **Utfordringskortet:** fremdrift totalt øverst, én kort forklaring, de fire nærmeste med ikon, tittel med trinn,
+  trinnprikker, fremdriftsstolpe, «x av y», belønning og hvordan; resten bak «Alle utfordringer»; ferdige serier samlet.
+- **Prestasjoner:** 25 serier med 99 merker (før 30), gruppert i Produksjon, Kunder, Kontrollrom, Kunnskap, Folk og
+  Konsern. De øverste trinnene er langt unna (300 000 charger, 100 mill. tonn, 6 000 kontrakter, 3 000 × 10 av 10,
+  mesterskap 250, 1 billion). Alle gamle merker har beholdt id-ene sine (pynten som krever Stålbaron m.fl. virker).
+  Baron, magnat og legende gis som før (seier, milepæler) eller når konsernverdien når målet.
+- **Prestasjonskortet:** fremdrift totalt, «Nærmest» (de tre merkene du er nærmest, med stolpe), så seriene som ruter
+  per gruppe (ikon, navn, «3/7»); trykk på en rute viser alle trinnene i serien med dag, fremdrift og fagpoeng.
+- Effekt på et ekte spill (dag 1607): 8 → 21 av 74 utfordringer og 29 → 69 av 99 merker med én gang (belønning for
+  det som alt er klart), resten tar lang tid.
+- Balance: exit 0 (storverket median dag 161, nybegynner 144). Tester: trinn i utfordringer (rekord gir flere trinn,
+  teller starter på nytt) og at de gamle merkene finnes og en erfaren spiller ikke får alle.
+- Konto: nei (eget spill).

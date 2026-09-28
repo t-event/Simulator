@@ -2968,33 +2968,212 @@ button {
   border-radius: var(--r-md);
 }
 
-.g-badges {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
-  gap: 6px;
-  margin: 4px 0 8px;
-}
-
-.g-badge-tile {
-  min-height: 40px;
+/* Utfordringer (B-232): serier i trinn – ikon, tittel med trinnprikker, fremdrift, belønning */
+.g-challenges {
+  list-style: none;
+  margin: var(--sp-3) 0 0;
   padding: 0;
-  font-size: var(--fs-page);
-  border-radius: var(--r-md);
-  filter: grayscale(1);
-  opacity: 0.35;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
 }
 
-.g-badge-tile.is-got {
+.g-challenge {
+  display: flex;
+  gap: var(--sp-3);
+  align-items: flex-start;
+}
+
+.g-challenge-icon {
+  font-size: 22px;
+  line-height: 1.2;
+  width: 28px;
+  flex: none;
+  text-align: center;
+}
+
+.g-challenge-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.g-challenge-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-3);
+}
+
+.g-challenge-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 var(--sp-3);
+  font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
+}
+
+.g-challenge-reward {
+  color: var(--ok);
+  font-weight: 600;
+}
+
+.g-tier-dots {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.g-tier-dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--surface-1);
+  border: 1px solid var(--panel-border);
+}
+
+.g-tier-dots i.is-done {
+  background: var(--ok);
+  border-color: var(--ok);
+}
+
+.g-tier-dots i.is-now {
+  border-color: var(--accent);
+}
+
+/* Prestasjoner (B-232): nærmeste merker, så seriene som ruter gruppert etter tema */
+.g-ach-total {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.g-ach-total .g-bar {
+  flex: 1;
+}
+
+.g-ach-next {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.g-ach-next li {
+  display: flex;
+  gap: var(--sp-3);
+  align-items: flex-start;
+}
+
+.g-ach-next li > div {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.g-ach-next-icon {
+  font-size: 22px;
+  width: 28px;
+  text-align: center;
+  flex: none;
+}
+
+.g-ach-group {
+  margin-top: var(--sp-4);
+}
+
+.g-ach-group .g-subhead .g-muted {
+  font-weight: 400;
+}
+
+.g-ach-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: 6px;
+}
+
+.g-ach-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-height: 76px;
+  padding: 6px 4px;
+  border-radius: var(--r-md);
+  text-align: center;
+}
+
+.g-ach-tile-icon {
+  font-size: 22px;
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+
+.g-ach-tile.is-got .g-ach-tile-icon {
   filter: none;
   opacity: 1;
+}
+
+.g-ach-tile-name {
+  font-size: var(--fs-caption);
+  line-height: 1.2;
+}
+
+.g-ach-tile-tier {
+  font-size: var(--fs-caption);
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.g-ach-tile.is-full {
   background: var(--ok-bg);
   border-color: var(--ok-border);
 }
 
-.g-badge-tile.is-picked {
+.g-ach-tile.is-full .g-ach-tile-tier {
+  color: var(--ok);
+}
+
+.g-ach-tile.is-picked {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
+}
+
+.g-ach-detail {
+  list-style: none;
+  margin: var(--sp-3) 0 0;
+  padding: var(--sp-3);
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.g-ach-detail li {
+  display: flex;
+  flex-direction: column;
+  opacity: 0.6;
+}
+
+.g-ach-detail li.is-done,
+.g-ach-detail li.is-now {
   opacity: 1;
+}
+
+.g-ach-detail li.is-done strong {
+  color: var(--ok);
+}
+
+.g-ach-detail-head {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-3);
 }
 
 .g-mission.is-done strong {
