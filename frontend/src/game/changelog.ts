@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 252,
+    date: "2026-09-28",
+    title: "Markedet tar ikke unna alt",
+    items: [
+      "Lager verket mer enn ca. 10 000 tonn i døgnet, betaler kundene mindre for det som er over. Nye forespørsler blir da billigere.",
+      "Salg viser hvor mye billigere, bare når det gjelder deg. Kontrakter du alt har tatt, beholder prisen.",
+    ],
+  },
+  {
     b: 251,
     date: "2026-09-28",
     title: "Store konsern er tunge å styre",

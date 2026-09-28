@@ -74,7 +74,7 @@ import {
   streakReward,
 } from "./daily";
 import { applyWorldEvents, canJoinDirectly, joinSeason, SEASON_BONUS_FP, worldFactor, applySeasonTwist } from "./world";
-import { dealPrice, energyPrice, productPrice } from "./plant";
+import { dealPrice, energyPrice, marketSaturation, productPrice } from "./plant";
 import {
   acceptContract,
   orderQueue,
@@ -2258,6 +2258,15 @@ test("Ovnene fordeles etter hva som haster (B-240): alle lager kvaliteten som el
     calm.slice(1).some((x) => x === "standard"),
     `ingen ovn tok neste kvalitet når det var tid nok: ${calm}`,
   );
+});
+
+test("Markedet metter seg (B-252): full pris opp til 10 000 t i døgnet, lavere snittpris over", () => {
+  assert(marketSaturation(733) === 1 && marketSaturation(10_000) === 1, "små verk får lavere pris");
+  const big = marketSaturation(34_721);
+  assert(big > 0.6 && big < 0.7, `faktor ${big} for 35 000 t i døgnet`);
+  // Mer produksjon gir fortsatt mer omsetning totalt, bare mindre per tonn
+  assert(34_721 * big > 20_000 * marketSaturation(20_000), "mer produksjon gir mindre omsetning");
+  assert(marketSaturation(20_000) > big, "prisen faller ikke med mengden");
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

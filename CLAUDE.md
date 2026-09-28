@@ -308,6 +308,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Bunden konsernreserve** (B-193, midlertidig): kassa over `CASH_RESERVE.softCap` flyttes til `g.lockedReserve` i
   hvert tidssteg og etter hver handling. Reserven er med i `konsernEquity`, men ikke i `cash` – så den kan ikke brukes,
   ikke flyttes til konsernkassa og teller ikke som penger på bok. Skal migreres når sluttspillet er rebalansert.
+- **Markedet metter seg** (B-252): prisen på nye kontrakter og avtaler ganges med `marketSaturation(stats.dailyProductT)`
+  (full pris til 10 000 t i døgnet, halv pris over). Nye prisveier for kontrakter må ta den med.
 - **Døgnproduksjon og valseverket** (B-217): `stats.dailyProductT` er alt verket lager (emner og armering). Armering er
   begrenset av valseverket (`stats.rolledDailyT`); bruk `productCapT(stats, vare)` når noe gjelder én vare.
 - **Lagerplanen** (B-228): `planLots` i `engine.ts` fordeler partiene på kontraktene i køens rekkefølge (også emner som
