@@ -39,14 +39,15 @@ export function TitleArt() {
       <path d="M0 118 Q 90 84 190 108 T 360 100 T 480 110 L480 150 L0 150 Z" fill="#241c22" />
       {/* Røyk fra pipene */}
       <g className="title-smoke" fill="#c9d1da">
-        <circle className="puff puff-1" cx={276} cy={34} r={7} />
-        <circle className="puff puff-2" cx={276} cy={34} r={9} />
-        <circle className="puff puff-3" cx={238} cy={48} r={6} />
+        <circle className="puff puff-1" cx={234} cy={26} r={7} />
+        <circle className="puff puff-2" cx={234} cy={26} r={9} />
+        <circle className="puff puff-3" cx={213} cy={40} r={6} />
       </g>
       {/* Verket i silhuett */}
       <g fill="#0e141c">
-        <rect x={266} y={38} width={20} height={80} />
-        <rect x={232} y={52} width={13} height={66} />
+        {/* Begge pipene står på smeltehallens tak og går ned i hallen (B-250) */}
+        <rect x={226} y={30} width={16} height={66} />
+        <rect x={208} y={44} width={10} height={52} />
         <path d="M150 92 L200 66 L250 92 Z" />
         <rect x={150} y={91} width={100} height={59} />
         <path d="M250 108 L292 94 L334 108 Z" />
@@ -59,8 +60,8 @@ export function TitleArt() {
         <rect x={36} y={102} width={63} height={4} />
         <rect x={0} y={140} width={480} height={10} />
       </g>
-      <rect x={270} y={48} width={12} height={5} fill="#c0392b" />
-      <rect x={270} y={60} width={12} height={5} fill="#c0392b" />
+      <rect x={226} y={38} width={16} height={5} fill="#c0392b" />
+      <rect x={226} y={50} width={16} height={5} fill="#c0392b" />
       {/* Porten til ovnshallen gløder */}
       <circle className="title-glow" cx={186} cy={134} r={40} fill="url(#title-glow)" />
       <rect x={172} y={112} width={30} height={28} fill="url(#title-melt)" />
