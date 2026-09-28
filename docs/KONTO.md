@@ -126,3 +126,4 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 
 | Krig i verden (dyrere strøm, flere forespørsler) i konsernet | Nei | Regel 1: ditt eget spill | B-297 |
 | Fellesferie, sjeldnere egen ferie og juleferie | Nei | Regel 1: ditt eget spill | B-298 |
+| Æresmerker på topplista | Nei (for å se lista) | Regel 2: serveren vet hvem som har merket | B-299 |

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Place } from "./Place";
 import { cloudConfigured } from "../net/config";
 import {
+  BADGE_NAMES,
   BOARDS,
   fetchLeaderboard,
   fetchMyRank,
@@ -289,6 +290,12 @@ function Leaderboard({
                   <span className="g-board-nick">{r.nickname}</span>
                   <em className="g-league">{levelLabel(r)}</em>
                 </span>
+                {/* Æresmerker fra serveren (B-299), f.eks. for dem som var med da økonomireformen kom */}
+                {r.badges.map((b) => (
+                  <span key={b} className="g-board-honor">
+                    <Icon name="scroll-text" /> {BADGE_NAMES[b]}
+                  </span>
+                ))}
                 {/* Beste plassering i en sesong som er over (B-143) */}
                 {r.honor && (
                   <span className="g-board-honor">
