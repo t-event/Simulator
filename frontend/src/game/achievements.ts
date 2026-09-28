@@ -268,6 +268,25 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
     ]),
     hidden: true,
   },
+  {
+    ...family(
+      "reform2",
+      "scroll-text",
+      "Reformveteran II",
+      "Æresmerker",
+      (g) => +!!g.serverBadges?.includes("reform2"),
+      [
+        [
+          "reform2",
+          1,
+          "Reformveteran II",
+          "Hadde en bunden konsernreserve da reform 2 kom. Den ble betalt ut til eierne, og konsernet gikk videre.",
+          25,
+        ],
+      ],
+    ),
+    hidden: true,
+  },
 ];
 
 // Merker som ble gitt med andre regler før B-232 beholdes, men nye gis etter tabellen over

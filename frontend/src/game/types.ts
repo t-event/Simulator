@@ -546,6 +546,11 @@ export interface GameState {
    * flyttes til konsernkassa, teller ikke som penger på bok, men i konsernverdien. null til første gang det skjer.
    */
   lockedReserve?: { total: number; firstDay: number; movedToday: number } | null;
+  /**
+   * Utbetalt til eierne (B-303): det kassa ville hatt over taket. Historikk som ikke teller i konsernverdien og ikke
+   * kan brukes. Den gamle reserven regnes som utbetalt (`paidOutTotal`). null til første gang det skjer.
+   */
+  paidOut?: { total: number; firstDay: number; today: number } | null;
   /** Øker når serveren endrer spillet (B-211), f.eks. økonomireformen. En enhet med et eldre spill (lavere tall) får
    * ikke lagre over det; appen henter spillet fra nett i stedet. Mangler i eldre lagringer (= 0) */
   serverEdit?: number;

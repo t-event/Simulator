@@ -101,6 +101,8 @@ export function migrate(g: GameState): GameState {
   if (g.treasuryOut === undefined) g.treasuryOut = 0;
   // Bunden konsernreserve (B-193): finnes ikke før kassa første gang går over grensen
   if (g.lockedReserve === undefined) g.lockedReserve = null;
+  // Utbetalt til eierne (B-303): finnes ikke før kassa første gang når taket
+  if (g.paidOut === undefined) g.paidOut = null;
   if (loose.gradeRecipes === undefined) loose.gradeRecipes = {};
   if (g.settings.powerDeal === undefined) {
     g.settings.powerDeal = "spot";

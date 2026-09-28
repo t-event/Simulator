@@ -22,7 +22,7 @@ import { readyUpgrades, stationOptions, stationReady, type Station } from "./sta
 import { VERKET_TABS, type VerketTab } from "./verketTabs";
 import type { View } from "./views";
 import { Icon } from "./icons";
-import { CASH_RESERVE } from "../game/reserve";
+import { CASH_RESERVE, hasPaidOut, paidOutTotal } from "../game/reserve";
 import { Callout, StatusLine, type Status } from "./ds";
 import { hints, type Anchor, type Hint } from "./hints";
 import { furnaceState, statusOf } from "./plantStatus";
@@ -578,9 +578,7 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
                 {stats.salaryPerDay > 0 && <Stat label="Lønn per døgn" value={fmtKr(stats.salaryPerDay)} />}
                 <Stat label="Faste kostnader per døgn" value={fmtKr(STAGES[g.stage].fixedPerDay)} />
                 {g.loan > 0 && <Stat label="Lån" value={fmtKr(g.loan)} tone="warning" />}
-                {g.lockedReserve && (
-                  <Stat label="Bunden konsernreserve" value={fmtKr(Math.floor(g.lockedReserve.total))} />
-                )}
+                {hasPaidOut(g) && <Stat label="Utbetalt til eierne" value={fmtKr(Math.floor(paidOutTotal(g)))} />}
               </div>
               {y && (
                 <div className="g-breakdowns">
@@ -600,13 +598,13 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
                   />
                 </div>
               )}
-              {/* Den bundne reserven (B-193) vises først når kassa har nådd grensen */}
-              {g.lockedReserve && (
+              {/* Utbetalingen til eierne (B-303) vises først når kassa har nådd taket */}
+              {hasPaidOut(g) && (
                 <p className="g-muted g-small-text g-reserve-note">
-                  <Icon name="lock" /> Kassa kan ha høyst {fmtKr(CASH_RESERVE.softCap ?? 0)}. Det du tjener utover,
-                  settes av i den bundne konsernreserven: pengene er dine og teller i konsernverdien, men kan ikke
-                  brukes eller flyttes til konsernkassa ennå. Dette er midlertidig til økonomien i sluttspillet er
-                  justert.
+                  <Icon name="lock" /> Kassa kan ha høyst {fmtKr(CASH_RESERVE.softCap ?? 0)} – mer enn alt som kan
+                  kjøpes. Det du tjener utover, betales ut til eierne. Det teller ikke i konsernverdien og kan ikke
+                  brukes, men står i Hall of Fame som «Utbetalt til eierne». Datterverkene betaler utbytte til
+                  konsernkassa – det er der konkurransen med de andre foregår.
                 </p>
               )}
               {y && plantResult(y) < 0 && avgPlantResult(g) >= 0 && (

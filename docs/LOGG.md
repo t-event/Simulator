@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 236 – 2026-09-29: Reform 2, del 1 – taket for kassa og utbetaling til eierne
+
+**Brukeren ba om:** (svar på B-301) pakke B, reserven som «utbetalt til eierne», gebyr 500 kr/t, realistiske
+kostnader på toppen som siste del.
+
+**Gjort:** B-302 (vedtaket) og B-303 (del 1): `paidOut` i stedet for reserven, konsernverdi uten den, lista «Utbetalt
+til eierne», merket «Reformveteran II» til de fire (migrasjon 050 etter tørrkjøring). Påminnelse satt for gebyret
+etter at anbudet er stengt.
+
+**Testet:** tørrkjøring (lista 1 251 / 635 / 475 / 21 mrd., fire merker, andre lister urørt), tsc, lint, npm test
+(testen for taket skrevet om), balance (exit 0), build, Playwright på 320 og 390 px (Økonomi, Konsern, topplista).
+
+**Gjenstår:** gebyret (01:38 UTC), B-304 (utbytte i ekte tid til konsernkassa), B-305 (hjemmeverket). Pynt for sesong 3.
+
+---
+
 ## Økt 235 – 2026-09-28: Økonomianalyse for midt- og sluttspillet
 
 **Brukeren ba om:** en grundig analyse av hele økonomien (kostnader, inntekter, virkelige priser, spillerne), hva som

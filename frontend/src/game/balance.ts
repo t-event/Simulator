@@ -82,7 +82,7 @@ import { computePlantStats, day, fixedPriceAdvice, hasPlanner, satisfies } from 
 declare const process: { argv: string[]; exitCode?: number; exit?: (code: number) => void };
 
 import type { Crew, GameState, GradeId, ManualRequest, RoleId, ScrapId } from "./types";
-import { applyCashCap, reserveTotal } from "./reserve";
+import { applyCashCap, paidOutTotal } from "./reserve";
 
 type Recipe = Partial<Record<ScrapId, number>>;
 
@@ -1044,7 +1044,7 @@ if (process.argv.includes("--konsern")) {
       g.minute += 1440;
       finishKonsernProjects(g);
       konsernDay(g);
-      // Myk grense for kassa (B-193): overskuddet går til den bundne reserven, som i spillet
+      // Taket for kassa (B-303): overskuddet betales ut til eierne, som i spillet
       applyCashCap(g);
       for (let k = 0; k < 20; k++) {
         const o = konsernAdvice(g);
@@ -1054,7 +1054,7 @@ if (process.argv.includes("--konsern")) {
       }
       if ([30, 60, 120, 240].includes(d))
         marks.push(
-          `dag ${d}: ${g.konsern.plants.length} verk (snitt trinn ${(g.konsern.plants.reduce((a, p) => a + p.level, 0) / g.konsern.plants.length).toFixed(1)}), netto ${mrd(konsernNetFor(g, g.konsern.plants))}/døgn, kasse ${mrd(g.cash)}${reserveTotal(g) ? ` (+ ${mrd(reserveTotal(g))} bundet)` : ""}, konsernverdi ${mrd(konsernEquity(g))}`,
+          `dag ${d}: ${g.konsern.plants.length} verk (snitt trinn ${(g.konsern.plants.reduce((a, p) => a + p.level, 0) / g.konsern.plants.length).toFixed(1)}), netto ${mrd(konsernNetFor(g, g.konsern.plants))}/døgn, kasse ${mrd(g.cash)}${paidOutTotal(g) ? ` (+ ${mrd(paidOutTotal(g))} utbetalt)` : ""}, konsernverdi ${mrd(konsernEquity(g))}`,
         );
     }
     console.log(`${name}:\n  ${marks.join("\n  ")}`);

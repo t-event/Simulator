@@ -215,7 +215,7 @@ import { freeStockT, sellAllFree } from "./engine";
 import { leaderBonus, leaderBonusDue } from "./actions";
 import { autoPlay, ChargeGame } from "../ui/control/chargeGame";
 import { hints } from "../ui/hints";
-import { applyCashCap, CASH_RESERVE, reserveDayLog, reserveTotal } from "./reserve";
+import { applyCashCap, CASH_RESERVE, hasPaidOut, paidOutDayLog, paidOutTotal } from "./reserve";
 
 declare const process: { exitCode?: number };
 
@@ -1469,61 +1469,68 @@ test("Mesterskap «Holdbare ovnspotter» (B-165): foringen slites mindre for hve
   assert(MASTERY.foring.max <= 0.3, "for stor gevinst");
 });
 
-test("Bunden konsernreserve (B-193): kassa over grensen flyttes, ikke slettes, og kan ikke brukes", () => {
+test("Taket for kassa (B-303): overskuddet betales ut til eierne, teller ikke i konsernverdien og kan ikke brukes", () => {
   const cap = CASH_RESERVE.softCap!;
   const g = newGame(193);
   g.stage = 4;
   g.konsern.unlocked = true;
-  // Under grensen skjer ingenting, og reserven finnes ikke (vises ikke før den trengs)
+  g.tutorial = null;
+  g.pendingDecision = null;
+  // Under taket skjer ingenting, og utbetalingen finnes ikke (vises ikke før den trengs)
   g.cash = cap - 1;
-  assert(applyCashCap(g) === 0 && g.lockedReserve === null, "reserve før grensen");
-  // Over grensen: overskuddet flyttes, konsernverdien er den samme
+  assert(applyCashCap(g) === 0 && g.paidOut === null && !hasPaidOut(g), "utbetaling før taket");
+  // Over taket: overskuddet betales ut, konsernverdien er kassa pluss verkene
   g.cash = cap + 5e9;
-  const eqBefore = konsernEquity(g);
   const logBefore = g.log.length;
-  assert(applyCashCap(g) === 5e9, "feil beløp flyttet");
-  assert(g.cash === cap && reserveTotal(g) === 5e9, `kasse ${g.cash}, reserve ${reserveTotal(g)}`);
-  assert(Math.abs(konsernEquity(g) - eqBefore) < 1, "konsernverdien endret seg");
+  assert(applyCashCap(g) === 5e9, "feil beløp betalt ut");
+  assert(g.cash === cap && paidOutTotal(g) === 5e9, `kasse ${g.cash}, utbetalt ${paidOutTotal(g)}`);
+  assert(Math.abs(konsernEquity(g) - cap) < 1, `utbetalingen teller i konsernverdien: ${konsernEquity(g)}`);
   assert(
-    g.log.length === logBefore + 1 && /bunden konsernreserve/.test(g.log[g.log.length - 1].text),
+    g.log.length === logBefore + 1 && /betales nå ut til eierne/.test(g.log[g.log.length - 1].text),
     "ingen forklaring",
   );
   // Neste gang: ingen ny forklaring, beløpet legges til
   g.cash = cap + 1e9;
   applyCashCap(g);
-  assert(reserveTotal(g) === 6e9 && g.log.length === logBefore + 1, "forklaringen kom to ganger");
-  // Reserven kan ikke brukes: kjøp og konsernkassa ser bare kassa
+  assert(paidOutTotal(g) === 6e9 && g.log.length === logBefore + 1, "forklaringen kom to ganger");
+  // Kan ikke brukes: kjøp og konsernkassa ser bare kassa
   g.cash = 0;
-  assert(!buySister(g, "stalverk").ok, "kjøpte med reserven");
-  assert(Math.max(0, g.cash - g.loan) === 0, "reserven regnes som disponibel");
+  assert(!buySister(g, "stalverk").ok, "kjøpte med det utbetalte");
   // Døgnlinja oppsummerer og nullstiller
-  g.lockedReserve!.movedToday = 2e9;
-  reserveDayLog(g);
-  assert(g.lockedReserve!.movedToday === 0 && /satt av/.test(g.log[g.log.length - 1].text), "ingen døgnlinje");
-  // Motoren flytter overskuddet av seg selv
+  g.paidOut!.today = 2e9;
+  paidOutDayLog(g);
+  assert(g.paidOut!.today === 0 && /betalt ut til eierne i går/.test(g.log[g.log.length - 1].text), "ingen døgnlinje");
+  // Motoren betaler ut av seg selv
   g.cash = cap + 3e9;
   advance(g, 1);
-  assert(g.cash <= cap && reserveTotal(g) >= 9e9, `motoren flyttet ikke: kasse ${g.cash}`);
-  // Konkurs: banken ser reserven som sikkerhet
+  assert(g.cash <= cap && paidOutTotal(g) >= 9e9, `motoren betalte ikke ut: kasse ${g.cash}`);
+  // Den gamle bundne reserven (B-193) regnes som utbetalt, og teller ikke i konsernverdien
+  g.lockedReserve = { total: 2e12, firstDay: 1, movedToday: 0 };
+  assert(paidOutTotal(g) === 2e12 + 9e9, "den gamle reserven teller ikke som utbetalt");
+  assert(Math.abs(konsernEquity(g) - cap) < 1, "den gamle reserven teller i konsernverdien");
+  // Konkurs: det utbetalte er ikke sikkerhet
   g.cash = -1e12;
-  g.lockedReserve!.total = 2e12;
   g.negativeDays = 0;
-  for (let d = 0; d < 9; d++) advance(g, 1440);
-  assert(!g.gameOver, "konkurs med reserve som dekker underskuddet");
-  // Grensen kan slås av
+  for (let d = 0; d < 9 && !g.gameOver; d++) {
+    g.pendingDecision = null;
+    advance(g, 1440);
+  }
+  assert(g.gameOver, `ingen konkurs med det utbetalte som sikkerhet (${g.negativeDays} døgn over grensen)`);
+  // Taket kan slås av
+  const g2 = newGame(194);
   const saved = CASH_RESERVE.softCap;
   CASH_RESERVE.softCap = null;
-  g.cash = cap * 3;
-  assert(applyCashCap(g) === 0 && g.cash === cap * 3, "grensen virker når den er slått av");
+  g2.cash = cap * 3;
+  assert(applyCashCap(g2) === 0 && g2.cash === cap * 3, "taket virker når det er slått av");
   CASH_RESERVE.softCap = saved;
-  // Gamle lagringer får reserven som null, og den overlever lagring
+  // Gamle lagringer får feltet som null, og det overlever lagring
   const old = JSON.parse(JSON.stringify(g));
-  delete old.lockedReserve;
-  assert(parseSave(JSON.stringify(old))!.lockedReserve === null, "gammel lagring uten standardverdi");
-  assert(
-    parseSave(JSON.stringify(g))!.lockedReserve!.total === g.lockedReserve!.total,
-    "reserven forsvant ved lagring",
-  );
+  delete old.paidOut;
+  assert(parseSave(JSON.stringify(old))!.paidOut === null, "gammel lagring uten standardverdi");
+  assert(parseSave(JSON.stringify(g))!.paidOut!.total === g.paidOut!.total, "utbetalingen forsvant ved lagring");
+  // Merket for reform 2 gis fra serveren og vises bare for dem som har det
+  assert(!visibleFamilies(g).some((f) => f.id === "reform2"), "serien vises for en som ikke har den");
+  assert(applyServerBadges(g, ["reform2"]) && hasAchievement(g, "reform2"), "merket ble ikke gitt");
 });
 
 test("Plass til fem skiftlag og alle anbefalte støtteroller på et fullt utbygd storverk (B-207)", () => {

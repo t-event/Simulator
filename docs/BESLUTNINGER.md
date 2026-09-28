@@ -3361,7 +3361,7 @@ Testet: tsc, lint, `npm test`, balanse (exit 0), build. Playwright på de 7 stø
 underfane på 390; fagboka som ark fra høyre; nytt spill med veiledningen på 320 og 1 366.
 
 ## B-193 Midlertidig sikkerhetsventil: myk grense for kassa og bunden konsernreserve (2026-09-27)
-Status: gjelder – **midlertidig**, til rebalanseringen av økonomien i sluttspillet. Ikke en erstatning for den.
+Status: **erstattet av B-303** (reform 2): taket står, men reserven er avviklet og ført som «utbetalt til eierne».
 Bakgrunn: eieren vil hindre at kassene eksploderer igjen før sluttspillet er rebalansert. Ingen hard grense der
 inntekt slettes. På serveren nå: H4WK3N5 80,4 mrd., Tuster 46,4 mrd. (fra 8,3 mrd. etter reformen i morges).
 Beslutning:
@@ -5410,3 +5410,39 @@ løse fellesøkonomien i konsernkassa … Late game skal være konkurranse mello
   ingen kompresjon; merke til alle som får lagringen endret; skraplagerets gebyr ned (anslaget er nå 191 mill. per dag,
   ikke 66 som da anbudet åpnet).
 - Ingen spillkode og ingen spillerdata er endret. Spørsmålene til eieren står i OKONOMI.md avsnitt 8.
+
+## B-302 Økonomireform 2 vedtatt: verket driver verden, i ekte tid (2026-09-29)
+Status: gjelder (eierens svar på spørsmålene i B-301 / `docs/OKONOMI.md`; delene bygges i B-303–B-305)
+Endringslogg: nei (hver del får sin egen oppføring)
+Eieren valgte alle fire anbefalinger i `docs/OKONOMI.md` avsnitt 8:
+1. **Pakke B – verket driver verden:** datterverkenes utbytte betales i ekte tid av serveren rett til konsernkassa,
+   sterkt avtagende med størrelsen (ny konserneier 100 mill. per dag, 14 komplekser ca. 360), ingen fordel av 10×.
+   B-190 står i ånden (serverautoritativt, ekte tid); «lik grense for alle» blir «samme regel for alle». → B-304.
+2. **Reserven** føres som «utbetalt til eierne»: historikk med egen liste i Hall of Fame, teller ikke i konsernverdi;
+   titlene beholdes; de fire som hadde reserve, får et merke. → B-303.
+3. **Skraplagerets gebyr: 500 kr/t** før første utbetaling 30.9 (bare `config.world`, rører ikke anbudet). Settes
+   etter at anbudet er stengt 29.9 kl. 01:33 UTC, så regelen ikke endres mens det er åpent. → noteres her når det er gjort.
+4. **Realistiske kostnader på toppen av hjemmeverket** som siste del. → B-305.
+Ingen kompresjon av kassa (B4 i analysen): virkningsløs med tak, og bare irriterende.
+
+## B-303 Reform 2, del 1: tak for kassa med utbetaling til eierne, reserven avviklet, merke (2026-09-29)
+Status: gjelder (erstatter B-193; del 1 av B-302)
+- **Taket** for kassa står på 100 mrd. (`CASH_RESERVE.softCap` i `game/reserve.ts`) – mer enn alt som kan kjøpes. Det
+  verket tjener utover, **betales ut til eierne** (`g.paidOut`, standard `null` i `migrate()`): historikk som ikke teller
+  i konsernverdien, ikke kan brukes og ikke er sikkerhet mot konkurs. Forklares første gang det skjer, og én linje per
+  døgn (som reserven før).
+- **Reserven er avviklet:** `konsernEquity` = kasse − lån + verkene. Det som sto i `lockedReserve` (21, 475, 635 og
+  1 250 mrd. hos fire spillere), regnes som utbetalt fra før (`paidOutTotal` teller begge). Feltet står urørt i
+  lagringene (eldre apper skriver fortsatt til det), så ingen migrering og ingen dobbelttelling. Titlene de fire har,
+  beholdes i spillet (`legends` går aldri ned); på sesonglista regnes tittelen av konsernverdien i tidslinja, så der
+  blir den lavere, mens Hall of Fame (rekordene) står.
+- **Server** (`supabase/050_utbetalt_til_eierne.sql`, etter tørrkjøring som ble rullet tilbake): `records.best_paid_out`
+  fra en trigger på `saves` (som kontrollromsrekorden, bare oppover), fylt fra lagringene; topplista har lista
+  **«Utbetalt til eierne»** (`utbetalt`, samme liste i sesongen og i Hall of Fame); merket **«Reformveteran II»**
+  (`reform2`, skjult serie i «Æresmerker», 25 fagpoeng) til de fire, via `badges` (B-300). Serveren endrer ikke lagringene.
+- Juksesperren flagger ikke fall i konsernverdi (bare vekst), og ligaen følger med ned.
+- Endret: `reserve.ts`, `types.ts`, `save.ts`, `konsern.ts`, `engine.ts` (konkurs uten reserve som sikkerhet),
+  `balance.ts`, `achievements.ts`, `net/leaderboard.ts`, `ui/Overview.tsx`, `ui/Konsern.tsx`, `ui/GameApp.tsx`,
+  `ui/Leaderboard.tsx`. Testen for B-193 er skrevet om (den gamle konkurstesten sto stille fordi veiledningen holdt
+  klokka – nå går klokka og konkursen kommer).
+- Konto: nei for taket og utbetalingen (eget spill); lista og merket krever konto som før (B-127, B-296).
