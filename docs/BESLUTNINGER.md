@@ -4960,3 +4960,17 @@ Brukeren: «Bør vi for eksempel ha 120 dager med vinter i året?», så «Forts
 - Første vinter i et nytt spill er dag 225–344, og så hvert 360. døgn. På 10× varer den ca. 24 minutter, på 1× ca.
   4 timer.
 - Det gir omtrent 20 % flere eksplosjoner og 8 % flere havarier i året. Balanse: alle mål OK.
+
+## B-273 Støpingen venter ikke når køen er full (2026-09-28)
+Status: gjelder (endrer regelen for sekvenser i B-046)
+Brukeren valgte «Støpingen som venter» etter skjermbildet med «0 av 3 smelter» og «Venter med …».
+- **Før:** strengstøpingen ventet med en øse av annen kvalitet til sekvensen var slutt (30 min uten stål), høyst 90 min.
+  Ofte var køen full av den nye kvaliteten mens bare én ovn smeltet den gamle – da sto de to andre ovnene med fulle
+  øser. På et fullt storverk (3 × 420 t) ventet støpingen slik i ca. 70 av 480 timer (15 %).
+- **Nå:** støpingen venter bare når en ovn holder en øse med samme kvalitet eller er ferdig med en slik charge innen
+  20 minutter (`SEQUENCE_SOON_MIN`), og køen har plass. Ellers byttes kvaliteten med én gang, og overgangsemnene blir
+  skrap som før (ca. 5 % av en times støping, smeltes om).
+- **Målt** på et fullt storverk i 20 døgn, tre frø: ventetida 70 → 18–29 timer, produksjonen +10–22 %, overgangsemnene
+  +2 000–4 000 t, kontraktinntekten +7–25 %, ingen flere sene leveranser. Mindre verk (2 × 30 t) er uendret.
+- Tonngrensen i juksesperren (100 000 t per døgn) tåler det: ca. 31 000 t per døgn på det største verket.
+- Balanse: alle mål OK.

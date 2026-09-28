@@ -773,7 +773,7 @@ function ProductionNow({
           <p className="g-muted g-small-text">
             Hver ovn bruker resepten for sin kvalitet. Stålet går til samme støpemaskin, én øse av gangen.
             {casting.continuous &&
-              ` Strengstøpingen støper én kvalitet om gangen. Øsa med den andre kvaliteten venter til støpingen har stått en halvtime (sekvensen er slutt), men høyst ${fmtNum(SEQUENCE_WAIT_MIN / 60, 1)} timer. Byttes kvaliteten midt i en sekvens, blir overgangsemnene skrap (ca. ${fmtT(casting.tph * 0.05)}).`}
+              ` Strengstøpingen støper én kvalitet om gangen. Kommer det snart mer av samme kvalitet, venter øsa med den andre kvaliteten litt (høyst ${fmtNum(SEQUENCE_WAIT_MIN / 60, 1)} timer). Ellers byttes kvaliteten med én gang, og overgangsemnene blir skrap (ca. ${fmtT(casting.tph * 0.05)}) – det koster mindre enn at ovnene står og venter.`}
           </p>
         )}
         {!stats.furnace.arc && g.stage >= 2 && (
