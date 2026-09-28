@@ -123,6 +123,7 @@ export const COSMETICS: Cosmetic[] = [
     name: "Sesong 1-banner",
     description: "Et langt banner på hallveggen – du var med i den første sesongen.",
     fp: 200,
+    group: "banner",
     season: 1,
   },
   // Sesongstigen i sesong 1 (B-173, B-287): bare som belønning, aldri til salgs
@@ -173,6 +174,79 @@ export const COSMETICS: Cosmetic[] = [
     seasonTier: 50,
     season: 1,
   },
+  // Sesong 2 (B-291): klar før sesongen startes. Vises først når serveren sier at sesong 2 pågår
+  {
+    id: "regnbue",
+    icon: "rainbow",
+    name: "Regnbue",
+    description: "En regnbue over verket om dagen.",
+    fp: 60,
+    season: 2,
+  },
+  {
+    id: "fullmane",
+    icon: "moon",
+    name: "Fullmåne",
+    description: "En stor fullmåne over verket om natta.",
+    fp: 120,
+    season: 2,
+  },
+  {
+    id: "banner2",
+    icon: "flag",
+    name: "Sesong 2-banner",
+    description: "Et rødt banner på hallveggen – du var med i sesong 2.",
+    fp: 200,
+    group: "banner",
+    season: 2,
+  },
+  {
+    id: "vimpler",
+    icon: "flag-triangle-right",
+    name: "Vimpelrekke",
+    description: "Fargerike vimpler langs taket – ti trinn på sesongstigen.",
+    fp: 0,
+    seasonTier: 10,
+    season: 2,
+  },
+  {
+    id: "kobberfasade",
+    icon: "paint-roller",
+    name: "Kobberfasade",
+    description: "Hallene i kobber.",
+    fp: 0,
+    group: "fasade",
+    seasonTier: 20,
+    season: 2,
+  },
+  {
+    id: "hvitfasade",
+    icon: "paint-roller",
+    name: "Hvit fasade",
+    description: "Kritthvite haller.",
+    fp: 0,
+    group: "fasade",
+    seasonTier: 30,
+    season: 2,
+  },
+  {
+    id: "lyskastere",
+    icon: "lightbulb",
+    name: "Lyskastere",
+    description: "Lyskastere som sveiper over himmelen om natta.",
+    fp: 0,
+    seasonTier: 40,
+    season: 2,
+  },
+  {
+    id: "tannhjul",
+    icon: "cog",
+    name: "Tannhjul i stål",
+    description: "Et stort tannhjul i stål foran verket – toppen av stigen i sesong 2.",
+    fp: 0,
+    seasonTier: 50,
+    season: 2,
+  },
 ];
 
 /** Pynten som gis på et trinn av sesongstigen i en sesong, eller null (B-287: hver sesong har sin egen) */
@@ -204,6 +278,8 @@ export const FACADE: Record<string, [string, string]> = {
   gronn: ["#4f7a55", "#436a48"],
   gullfasade: ["#b8962e", "#a3842a"],
   nattfasade: ["#2b2f36", "#23272d"],
+  kobberfasade: ["#a8643a", "#935733"],
+  hvitfasade: ["#d9dde2", "#c6ccd3"],
 };
 
 export function ownsCosmetic(g: GameState, id: string): boolean {

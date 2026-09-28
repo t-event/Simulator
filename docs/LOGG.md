@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 227 – 2026-09-28: Pynt for sesong 2
+
+**Brukeren ba om:** «Fortsett».
+
+**Gjort:** B-291. Pynten for sesong 2 i butikken (regnbue, fullmåne, rødt banner) og på stigen (vimpler, kobber- og hvit
+fasade, lyskastere, tannhjul). Vises først når sesong 2 pågår. Publiseringen av #235 og #236 var grønn.
+
+**Testet:** tsc, lint, npm test (ny sjekk), build, anleggsbildet dag og natt på nivå 0–4, «Pynt verket» med sesong 2 fra en
+falsk server.
+
+**Gjenstår:** pynt for sesong 3 før den startes. I morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 226 – 2026-09-28: Hva er sesongstigen?
 
 **Brukeren ba om:** «En spiller lurer på hva sesongstigen er».

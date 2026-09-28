@@ -696,6 +696,20 @@ button {
   }
 }
 
+/* Lyskasterne (sesongpynt, B-291) sveiper fram og tilbake */
+.scene-beam {
+  animation: scene-beam 5s ease-in-out infinite alternate;
+}
+
+@keyframes scene-beam {
+  from {
+    transform: rotate(-18deg);
+  }
+  to {
+    transform: rotate(18deg);
+  }
+}
+
 /* Nordlyset (sesongpynt, B-287) bølger sakte */
 .scene-aurora {
   animation: scene-aurora 6s ease-in-out infinite alternate;
@@ -868,6 +882,7 @@ button {
   .scene-rotor,
   .scene-firework,
   .scene-aurora,
+  .scene-beam,
   .scene-truck,
   .scene-truck.is-turning,
   .scene-trolley.is-moving,
