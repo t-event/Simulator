@@ -15,6 +15,12 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 272,
+    date: "2026-09-28",
+    title: "Lengre vinter",
+    items: ["Vinteren varer nå fra midten av november til midten av mars – 120 av årets 360 døgn."],
+  },
+  {
     b: 271,
     date: "2026-09-28",
     title: "Autobonus og skrap på lager",
