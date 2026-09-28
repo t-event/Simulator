@@ -153,7 +153,7 @@ frontend/src/
     tests.ts     Tester uten nett (falsk tjeneste)
   ui/          Spillets skjermer (mobil først) og kontrollrommet
     Overview.tsx Verket med underfanene Oversikt, Anlegg, Resept, Økonomi (valget i verketTabs.ts/GameApp)
-    Konsern.tsx  Konsern-siden (B-226): Oversikt, Utvid, Skraplager, Direktør; openTender.ts gir «!» ved åpent anbud
+    Konsern.tsx  Konsern-siden (B-226, B-227): Oversikt, Utvid, Industrien, Ledelse; openTender.ts gir «!» ved åpent anbud
     hints.ts     Rådene på Verket; gir også «!» på Marked og Folk i menyen (B-202)
     Finance.tsx  Resultatgrafen og postene på Verket → Økonomi (B-203); navnene på postene i financeNames.ts
     Recipe.tsx  Resepten (Verket → Resept, B-199)
@@ -174,7 +174,7 @@ frontend/src/
     tokens.css   Designsystemet (B-191): alle farger, skriftstørrelser, radier, avstander – nye stiler bruker disse
     icons.tsx    Ikoner fra Lucide, kopiert inn (lisens i icons-LICENSE.txt)   ds.tsx  StatusBadge, Callout, Button
     fonts/       Visningsskriften for overskrifter og store tall (Barlow Semi Condensed 600, OFL)
-    Companies.tsx Kortet «Skraplageret» under Konsern → Skraplager: anbud, konsernkassa, eier (B-189)
+    Companies.tsx Konsern → Industrien: ett kort per selskap (skraplageret nå) og konsernkassa (B-189, B-227)
     control/     Kontrollrommet: spillet i fire runder (chargeGame.ts: logikk og testspiller, ControlRoom.tsx, B-175)
   sim/         Prosessmodell for lysbueovnen (brukes ikke av spillet lenger, sjekkes av sim/validate.ts)
 frontend/scripts/ sjekk-endringslogg.mjs: endringsloggen dekker nyeste beslutning (npm test og CI)

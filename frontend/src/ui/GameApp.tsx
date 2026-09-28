@@ -881,7 +881,7 @@ export function GameApp() {
                 v.id === "marked" || v.id === "folk"
                   ? navAlerts.get(v.id)
                   : v.id === "konsern" && tender
-                    ? { text: "Anbud på skraplageret er åpent", view: "konsern" as View, sub: "skraplager" }
+                    ? { text: "Anbud på skraplageret er åpent", view: "konsern" as View, sub: "industri" }
                     : undefined;
               const badge =
                 v.id === "salg"

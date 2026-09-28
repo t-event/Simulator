@@ -4061,7 +4061,8 @@ Brukeren: «Fortsett» (neste steg i planen etter UI-4b).
 - Konto: nei.
 
 ## B-226 Konsern blir egen hovedside med underfaner, og anbudet på skraplageret synes (2026-09-28)
-Status: gjelder (erstatter delen av B-192 om Konsern som underfane i Verket på mobil; bygger på B-189 og B-206)
+Status: gjelder (erstatter delen av B-192 om Konsern som underfane i Verket på mobil; bygger på B-189 og B-206).
+Underfanene Skraplager og Direktør er erstattet av Industrien og Ledelse i B-227.
 Brukeren: «Konsernet bør egentlig være en egen hovedside. Ikke under verket. Også nevnte jeg tidligere at skraplageret
 anbudet ligger for skjult. Og det gjorde du ikke noe med. Men når konsernet blir en egen hovedside så kan jo den ha flere
 underside slik som er gjort på verket.»
@@ -4080,3 +4081,22 @@ underside slik som er gjort på verket.»
 - Testet i Playwright på de 7 størrelsene med falsk tjeneste (med og uten konto): seks menyknapper uten avkorting,
   fanene, beskjeden og «!» med åpent anbud, ingen horisontal scrolling.
 - Konto: anbudsvarselet krever konto (det er en del av skraplageret, regel 3 og 7); selve siden gjør det ikke.
+
+## B-227 Konsern: Industrien og Ledelse i stedet for Skraplager og Direktør (2026-09-28)
+Status: gjelder (erstatter fanenavnene i B-226; følger RETNING.md fase 2–5)
+Brukeren: «Skraplageret bør jo ikke være en helt egen side i konsernet, se på planen vår og sett det opp ut fra hva som er
+planen videre.»
+- **Planen** (RETNING.md): skraplageret er det første av flere strategiske selskaper – slagghåndtering og mekanisk
+  verksted kommer etter (fase 2), så Kontroll per selskap (fase 3) og overtakelser (fase 4). Alt samles i «Industrien
+  rundt verket» på Konsern. Verksjefer i datterverkene (fase 5) hører til ledelsen, sammen med salgsdirektøren.
+- **Fanene i Konsern:** Oversikt · Utvid · **Industrien** · **Ledelse**.
+  - **Industrien:** en kort innledning («Industrien rundt verket»), ett kort per selskap serveren sender (i dag bare
+    skraplageret; nye selskaper dukker opp av seg selv, med én linje om hva eieren tjener på i `COMPANY_INTRO`), og
+    **konsernkassa som eget kort** – den er kapitalen til alle selskapene (bud herfra, inntekt hit), ikke en del av
+    skraplageret. PC: selskapene til venstre, kassa til høyre. Budfeltet er per selskap.
+  - **Ledelse:** salgsdirektøren nå; verksjefene kommer her i fase 5.
+- Merket «Anbud», «!» på Konsern i menyen og beskjeden på Oversikt (B-226) står; trykk går nå til Industrien.
+- Uten konto: innledningen og ett samlet kontokort for skraplageret og konsernkassa (B-191), ikke skjult.
+- Testet i Playwright på de 7 størrelsene med falsk tjeneste (med og uten konto): ingen horisontal scrolling, ingen
+  avkortede knapper, begge kortene på Industrien.
+- Konto: som før (skraplageret og konsernkassa krever konto, regel 3 og 7).
