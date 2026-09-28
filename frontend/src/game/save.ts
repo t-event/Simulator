@@ -272,6 +272,8 @@ export function migrate(g: GameState): GameState {
   if (loose.env === undefined) loose.env = { ...newEnv(), grant: true };
   // Snøstorm som stenger veien for skrapbilene (B-279)
   if (loose.snowUntilMin === undefined) loose.snowUntilMin = 0;
+  // Forespørsler som passet, men gikk ut uten svar (B-292)
+  if (loose.missedOffers === undefined) loose.missedOffers = [];
   if (loose.seasonLoginPromptSeen === undefined) loose.seasonLoginPromptSeen = null;
   if (loose.world === undefined) loose.world = { events: [], seenEventIds: [] };
   for (const c of g.contracts) {

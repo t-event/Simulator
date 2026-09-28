@@ -55,6 +55,14 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
   const waits = g.furnaces.map((f) => f.waitReason);
   if (!active.length && offers.length)
     out.push({ text: "Du har ingen kontrakter. Se på tilbudene under Salg.", view: "salg" });
+  // Forespørsler som passet verket, gikk ut uten svar (B-292): i en gjennomgang gikk fire ut på ett døgn uten et ord
+  const missed = (g.missedOffers ?? []).filter((m) => m > g.minute - 24 * 60).length;
+  if (missed >= 2 && !g.konsern?.director?.active)
+    out.push({
+      text: `${missed} forespørsler som passet verket, gikk ut uten svar det siste døgnet. Svar på dem under Salg – tallet på Salg-knappen viser hvor mange som venter.${g.konsern?.unlocked ? " Salgsdirektøren i konsernet kan svare for deg." : ""}`,
+      view: "salg",
+      sub: "tilbud",
+    });
   const plannerBuys = auto(g, "autoBuy") && plannerOrders(g) && !g.autoBuyNote;
   if (waits.includes("Mangler skrap til resepten"))
     out.push({
