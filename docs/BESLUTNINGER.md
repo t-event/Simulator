@@ -4502,3 +4502,14 @@ Brukeren: «Pipene sitter ikke korrekt på taket.»
   toppen fra takflaten der pipa står (`roofAt`), og alle pipene (én per ovn, opptil fire) står ved siden av hverandre på
   høyre takflate, lavere jo lenger opp mot mønet, unna flagget.
 - Konto: nei.
+
+## B-247 Utstyrsarkene står stille mens spillet går (2026-09-28)
+Status: gjelder (bygger på B-238 «ingen hopping»)
+Brukeren: «Om man trykker på ovner og støping. Linjene flytter seg i oppgraderingsbildene.»
+- Målt i Playwright (plasseringen av alt i arket i 8 s på 10×, 320 og 390 px): «Nå»-raden øverst skiftet mellom én, to og
+  tre linjer («Smelter 420 t lavkarbon · 49 % ferdig», «Venter med armering til sekvensen er ferdig»), og på 320 px
+  byttet toppen mellom én og to linjer når kassa gikk fra «100 mrd.» til «99,99 mrd.». Alt under flyttet seg.
+- **«Nå» for ovn og støping** har fast plass til to linjer per rad og kuttes aldri lenger enn to. «Ovn 1:» står ikke
+  lenger foran teksten når én ovn er valgt i fanene (navnet står i fanen).
+- **Kassa** står på egen linje under tittelen i alle utstyrsark.
+- Konto: nei. Testet: ingen flytting i målingen etterpå, på fullt storverk og stålverk, 320 og 390 px.
