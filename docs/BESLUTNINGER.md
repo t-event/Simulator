@@ -4842,3 +4842,15 @@ være mulig å få havari på renseanlegg. Om renseanlegget står eller ikke er 
 - **Balanse:** alle mål OK. Bøtene til testspilleren er små når den følger rådene (80–240 000 kr per kjøring for den
   flinke, ca. 1 mill. for nybegynneren). Nybegynneren når storverket senere (median dag 172,5 mot 143), fordi den kjøper
   større renseanlegg og stopper ved havari. Det er innenfor målet (240).
+
+## B-264 Menyen nederst tilbake mot skjermkanten på iPhone (2026-09-28)
+Status: gjelder (erstatter CSS-delen av B-262; lytteren i `main.tsx` fra B-262 gjelder fortsatt)
+Brukeren (med skjermbilde): «Menyen nederst har kommet lengre opp enn tidligere».
+- **Årsak:** B-262 satte `height: 100%` og `overflow: hidden` på `html` og `body`. På iPhone, med spillet på
+  hjemskjermen, ble de faste lagene da like høye som det iPhone regner som sidens høyde (uten statuslinja og
+  hjemstreken), og menyen nederst ble liggende ca. 85 pt over skjermkanten.
+- **Nå:** `html` og `body` er som før B-262. `#root` har ingen høyde i stedet for `min-height: 100vh`, så siden er ikke
+  høyere enn skjermen og kan ikke scrolles – det var den egentlige grunnen til at trykk traff over knappene (B-262). Et
+  vindu som likevel flyttes, settes fortsatt tilbake av `main.tsx`.
+- Testet i Playwright på 320, 390, 402 og 1366: laget går fra 0 til bunnen av skjermen, menyen står nederst, siden er
+  ikke høyere enn vinduet, og vinduet står på 0. Chromium viser ikke iPhone-feilen, så brukeren må bekrefte på telefonen.
