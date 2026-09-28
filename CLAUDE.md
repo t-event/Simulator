@@ -110,6 +110,7 @@ npx tsx src/game/balance.ts --daglig 15                    # som over/vanlig kj�
 npx tsx src/game/balance.ts --storovn 330                  # samme konsernspill med ulike ovner: tonn og overskudd (B-154)
 npx tsx src/game/balance.ts --vurdering                    # kundevurderingene 1–10 per nivå, flink og nybegynner (B-161)
 npx tsx src/game/balance.ts --konsern                      # konsernøkonomien med 1–14 verk og vekst over tid (B-181)
+npx tsx src/game/balance.ts --forste 700                   # kurven for første opplasting i juksesperren (B-257, ca. 40 min)
 npm run build
 ```
 
@@ -268,6 +269,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   nickname = '…') order by taken_at desc;` og kjør `select restore_save(<id>);`. Appen henter spillet selv.
 - Grensene i juksesperren (`check_snapshot`) må sjekkes mot det største utstyret **med alt utstyr og flinke folk**,
   ikke mot grunntallene. Tonnsperren på 30 000 t flagget en ærlig spiller med 420-tonnere (B-158).
+- **Første opplasting** (B-257): `check_snapshot` sjekker det første tallet en spiller noen gang laster opp mot
+  `config.first_upload` (fra `balance.ts --forste 700` og ærlige spilleres tall). Endres økonomien mye, lag kurven på nytt.
 - Kjøp av datterverk og modernisering kan øke konsernverdien mer enn de koster (verdien er 60 døgns overskudd). Både
   vekst- og tonnsperren flagger derfor bare hvis også tallet fra minst tre døgn tilbake er for høyt (B-162, B-194).
   Test endringer i sperren mot ekte tall i en DO-blokk som ender med `raise exception`.
