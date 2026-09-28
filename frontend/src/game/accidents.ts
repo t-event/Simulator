@@ -2,7 +2,7 @@
  * Eksplosjoner i ovnen og dødsulykker (B-265).
  *
  * Vann, is og snø som kommer med skrapet ned i flytende stål, blir til damp på et øyeblikk og kan gi en eksplosjon.
- * Det skjer oftere om vinteren. Skrap under tak (skrapterminal), sortering og sikkerhetskultur gir færre. En
+ * Det skjer oftere om vinteren. Tak over skraplageret, sortering og sikkerhetskultur gir færre (B-274). En
  * dødsulykke er ekstremt sjelden, men har store følger: verket stenges i tre døgn, stor bot og tap av omdømme og trivsel.
  */
 import { isWinter } from "./calendar";
@@ -25,12 +25,18 @@ export const FATAL_DOWN_DAYS = 3;
 /** Bot etter en dødsulykke, per nivå (garasje … storverk) */
 const FATAL_FINE = [0, 500_000, 3_000_000, 20_000_000, 100_000_000];
 
+/** Ligger skrapet under tak? Taket over skraplageret, eller skrapterminalen (B-274) */
+export function roofed(g: GameState): boolean {
+  return has(g, "skraptak") || has(g, "skrapterminal");
+}
+
 /** Sjansen for en eksplosjon i en charge som tar så mange minutter */
 export function explosionChance(g: GameState, cycleMin: number): number {
   if (g.stage < 1) return 0;
   let p = EXPLOSIONS_PER_DAY * (cycleMin / 1440);
   if (isWinter(g)) p *= WINTER_EXPLOSION;
-  if (has(g, "skrapterminal")) p *= 0.5;
+  // Skrap under tak: taket over skraplageret, eller skrapterminalen (også under tak) (B-274)
+  if (roofed(g)) p *= 0.4;
   if (has(g, "sortering")) p *= 0.7;
   if (hasResearch(g, "sikkerhet")) p *= 0.7;
   return p;
@@ -68,7 +74,7 @@ export function explosion(g: GameState, index: number, repairFactor: number): nu
   log(
     g,
     `EKSPLOSJON i ovn ${index + 1}! ${why} ble til damp i det flytende stålet. Ovnen står i ${hours.toFixed(0)} timer, reparasjon ${fmtKr(cost)}, omdømme −2.${hurt}${
-      winter && !has(g, "skrapterminal") ? " Skrap under tak (skrapterminal) gir færre eksplosjoner om vinteren." : ""
+      !roofed(g) ? " Tak over skraplageret (under Anlegg → Skraplager) gir færre eksplosjoner." : ""
     }`,
     "bad",
   );
@@ -101,7 +107,7 @@ export function fatalAccident(g: GameState, what: string): void {
     g.pendingDecision = {
       id: "dodsulykke",
       title: "Dødsulykke på verket",
-      text: `${text} Ingen jobb er verdt et liv: sikkerhetskultur, skrap under tak og sortering gjør slike ulykker sjeldnere.`,
+      text: `${text} Ingen jobb er verdt et liv: sikkerhetskultur, tak over skraplageret og sortering gjør slike ulykker sjeldnere.`,
       options: [{ label: "Stans verket og støtt de pårørende" }],
       data: {},
       resumeSpeed: g.speed > 0 ? g.speed : 1,

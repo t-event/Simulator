@@ -187,6 +187,7 @@ import {
 } from "./environment";
 import { isWinter, monthOf, riskFactor, WINTER_DAYS, WINTER_RISK } from "./calendar";
 import { explosionChance, FATAL_DOWN_DAYS, fatalAccident, WINTER_EXPLOSION } from "./accidents";
+import { freeStockT, sellAllFree } from "./engine";
 import { leaderBonus, leaderBonusDue } from "./actions";
 import { autoPlay, ChargeGame } from "../ui/control/chargeGame";
 import { applyCashCap, CASH_RESERVE, reserveDayLog, reserveTotal } from "./reserve";
@@ -2571,6 +2572,35 @@ test("Støpingen (B-273): bytter kvalitet med én gang når køen er full eller 
   } as unknown as GameState["furnaces"][0]["heat"];
   advance(h, 1);
   assert(!!h.castWait?.startsWith("Venter med"), `ventet ikke på chargen som snart er ferdig: ${h.castWait}`);
+});
+
+test("Tak over skraplageret, større ferdiglager og salg av alt ledig stål (B-274)", () => {
+  const g = newGame(274);
+  g.stage = 3;
+  const bare = explosionChance(g, 60);
+  g.owned.push("skraptak");
+  assert(Math.abs(explosionChance(g, 60) - bare * 0.4) < 1e-12, "taket gir ikke færre eksplosjoner");
+  const store = computePlantStats(g).storeT;
+  g.owned.push("ferdiglager1", "ferdiglager2");
+  assert(Math.abs(computePlantStats(g).storeT - store * 2.25) < 1e-6, "ferdiglageret ble ikke større");
+  // Salg: bare det ingen kontrakt venter på
+  g.contracts = g.contracts.filter((c) => c.status !== "aktiv");
+  g.lots = [
+    {
+      id: 1,
+      product: "emne",
+      t: 120,
+      grade: "standard",
+      known: { c: 0.2, p: 0.01, tramp: 0.1 },
+      analysis: { c: 0.2, p: 0.01, tramp: 0.1 },
+      measured: true,
+      madeDay: 1,
+    } as unknown as GameState["lots"][0],
+  ];
+  assert(Math.abs(freeStockT(g) - 120) < 1e-6, `ledig ${freeStockT(g)}`);
+  const cash = g.cash;
+  assert(sellAllFree(g).ok && g.lots.length === 0 && g.cash > cash, "solgte ikke");
+  assert(!sellAllFree(g).ok, "solgte fra et tomt lager");
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

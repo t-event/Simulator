@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 211 – 2026-09-28: Tak over skraplageret, større ferdiglager og salgsknapp
+
+**Brukeren ba om:** tak over skraplageret, utvidelse av ferdiglageret og en salgsknapp for ferdig stål.
+
+**Gjort:** B-274. Ny oppgradering «Tak over skraplageret» (færre eksplosjoner), tre trinn med større ferdiglager, og
+knappen «Selg alt ledig stål» på Salg → Lager og i lagerarket. Publiseringen av #220 (B-273) var grønn.
+
+**Testet:** tsc, lint, npm test (ny test), balance (exit 0), build, Playwright på 320 og 390 (knappen selger og
+forsvinner, 44 px høy, taket står i skraplagerarket, ingen horisontal scrolling).
+
+**Gjenstår:** i morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 210 – 2026-09-28: Støpingen som venter
 
 **Brukeren ba om:** «Fortsett», og valgte «Støpingen som venter».

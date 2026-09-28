@@ -17,6 +17,8 @@ import {
   realisticDailyT,
   recipeEstimate,
   sellLot,
+  sellAllFree,
+  freeStockT,
   spotPrice,
 } from "../game/engine";
 import { moveInQueue, toggleOfferGrade } from "../game/actions";
@@ -572,6 +574,17 @@ function QueueTab({ g, stats, act }: Props) {
   );
 }
 
+/** Selg alt stål ingen kontrakt venter på, med ett trykk (B-274) */
+export function SellAllButton({ g, act }: { g: GameState; act: GameApi["act"] }) {
+  const free = freeStockT(g);
+  if (free <= 0.05) return null;
+  return (
+    <button className="g-primary g-sell-all" onClick={() => act((gg) => sellAllFree(gg))}>
+      Selg alt ledig stål ({fmtT(free)}) på spot
+    </button>
+  );
+}
+
 /** Ferdigvarelageret (B-241): hvor fullt, hva som er holdt av til kontraktene, og partiene med det du kan selge */
 function StockTab({ g, stats, act }: Props) {
   const [showAll, setShowAll] = useState(false);
@@ -594,6 +607,7 @@ function StockTab({ g, stats, act }: Props) {
         tone={stats.storeUsed > stats.storeT * 0.9 ? "critical" : "accent"}
         label="Ferdigvarelager"
       />
+      <SellAllButton g={g} act={act} />
       {g.lots.length === 0 ? (
         <p className="g-empty">
           <Icon name="package" />

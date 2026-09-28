@@ -4974,3 +4974,19 @@ Brukeren valgte «Støpingen som venter» etter skjermbildet med «0 av 3 smelte
   +2 000–4 000 t, kontraktinntekten +7–25 %, ingen flere sene leveranser. Mindre verk (2 × 30 t) er uendret.
 - Tonngrensen i juksesperren (100 000 t per døgn) tåler det: ca. 31 000 t per døgn på det største verket.
 - Balanse: alle mål OK.
+
+## B-274 Tak over skraplageret, større ferdiglager og «Selg alt ledig stål» (2026-09-28)
+Status: gjelder (endrer tiltaket mot eksplosjoner i B-265/B-270)
+Brukeren: «Du må få ordna sånn at det er mulig å få kjøpt tak til skraplageret og sånt, og at det er mulighet for
+utvidelse på ferdiglageret, og evt. lagt inn en salgsknapp så det går an å selge det.»
+- **Tak over skraplageret** (`skraptak`, Anlegg → Skraplager, fra støperiet, 300 000 kr): skrap under tak gir 60 %
+  færre eksplosjoner (×0,4). Skrapterminalen regnes også som skrap under tak (`roofed` i `accidents.ts`; før ga den
+  ×0,5). Tekstene om eksplosjoner og vinter peker nå på taket.
+- **Større ferdiglager** (Anlegg → Lager og salg), tre trinn som hvert gir halvparten mer plass (×1,5):
+  «Større ferdiglager» (støperiet, 250 000 kr), «Ny lagerhall for ferdigvare» (stålverket, 4 mill.) og
+  «Ferdigvareterminal» (storverket, 30 mill.). Hvert trinn krever det forrige. Kommer i tillegg til lagerhallen (×2) og
+  havnekaien (×1,5).
+- **«Selg alt ledig stål (X t) på spot»:** knapp på Salg → Lager og i arket for ferdiglageret. Selger alt ingen
+  kontrakt venter på, også støpefeil (`sellAllFree`, `freeStockT` i `engine.ts`). Vises bare når noe er ledig.
+- **Konto:** nei. Balanse: alle mål OK; nybegynneren kjøper de billige oppgraderingene og når storverket på median
+  dag 160 (mål 240).

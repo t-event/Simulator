@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 274,
+    date: "2026-09-28",
+    title: "Tak over skraplageret, større ferdiglager og salgsknapp",
+    items: [
+      "Tak over skraplageret (Anlegg → Skraplager) holder snø og is unna skrapet og gir langt færre eksplosjoner.",
+      "Ferdiglageret kan bygges ut i tre trinn under Anlegg → Lager og salg.",
+      "Ny knapp «Selg alt ledig stål» på Salg → Lager og i lagerarket: selger alt ingen kontrakt venter på, med ett trykk.",
+    ],
+  },
+  {
     b: 273,
     date: "2026-09-28",
     title: "Støpingen står ikke og venter",
