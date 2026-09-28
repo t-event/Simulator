@@ -1528,6 +1528,24 @@ function planLots(g: GameState): LotPlan {
   const queue = orderQueue(g);
   const roll = (c: Contract, billets: number) =>
     take(c, "emne", billets, (lot, t) => toRoll.set(lot.id, (toRoll.get(lot.id) ?? 0) + t)) * ROLLING_YIELD;
+  // Valseverket får emner til de neste timene først (B-240). Før fikk armeringsordrene emner først når alle emneordrene
+  // foran i køen var dekket – de tok også emnene som ble støpt til armeringen – så valseverket sto store deler av døgnet
+  // og armeringen kom for sent, selv med ledig kapasitet. Resten av armeringen får emner i køens rekkefølge som før.
+  if (rolling) {
+    let buffer = rollingTph(g) * ROLLING_BUFFER_H;
+    for (const c of queue) {
+      if (buffer <= 1e-6) break;
+      if (c.product !== "armering") continue;
+      let got = take(c, "armering", c.tonnes - c.delivered, () => {});
+      const billets = Math.min(buffer, (c.tonnes - c.delivered - got) / ROLLING_YIELD);
+      if (billets > 1e-6) {
+        const rolled = roll(c, billets);
+        buffer -= rolled / ROLLING_YIELD;
+        got += rolled;
+      }
+      covered.set(c.id, got);
+    }
+  }
   for (const c of queue) {
     const left = c.tonnes - c.delivered;
     let got = covered.get(c.id) ?? 0;
@@ -1620,9 +1638,35 @@ function followQueue(g: GameState, stats: PlantStats): void {
       ? feed
       : orders.find((c) => c.grade !== g.targetGrade)
     : undefined;
-  const before = g.furnaces[1]?.grade ?? null;
-  for (let i = 1; i < g.furnaces.length; i++) g.furnaces[i].grade = other?.grade ?? null;
-  if (other && other.grade !== before) ensureRecipe(g, other.grade, stats);
+  // Så mange ovner som trengs for at kvaliteten først i køen rekker fristen, lager den; resten tar neste kvalitet (B-240).
+  // Før tok ovn 2 og 3 alltid neste kvalitet, så med tre ovner fikk ordren som hastet mest bare en tredjedel av verket
+  const head = order && other ? headFurnaces(g, stats, orders, order) : 1;
+  const before = g.furnaces.map((f) => f.grade);
+  for (let i = 1; i < g.furnaces.length; i++) g.furnaces[i].grade = i >= head ? (other?.grade ?? null) : null;
+  if (other && g.furnaces.some((f, i) => f.grade === other.grade && before[i] !== other.grade))
+    ensureRecipe(g, other.grade, stats);
+}
+
+/**
+ * Ovner kvaliteten først i køen trenger for å rekke fristene sine med litt å gå på (B-240): tonnene i den kvaliteten
+ * som skal være ferdig innen hver frist, mot det så mange ovner lager til da. Minst én ovn, og alle hvis det trengs.
+ */
+function headFurnaces(g: GameState, stats: PlantStats, orders: Contract[], order: Contract): number {
+  const n = g.furnaces.length;
+  const perFurnace = realisticDailyT(g, stats) / n;
+  if (perFurnace <= 0) return n;
+  const { covered } = planLots(g);
+  const today = day(g);
+  let need = 1;
+  let cum = 0;
+  for (const c of orders) {
+    if (c.grade !== order.grade) continue;
+    cum += c.tonnes - c.delivered - (covered.get(c.id) ?? 0);
+    if (c.landmark) continue;
+    const days = Math.max(0.5, c.deadlineDay - today + 1 - (g.minute % 1440) / 1440);
+    need = Math.max(need, Math.ceil(cum / (perFurnace * days * CONTRACT_MARGIN)));
+  }
+  return Math.min(n, need);
 }
 
 /** Timer valsing emnene som venter på valseverket skal rekke til, før ovnene lager mer til armeringsordrene (B-228) */
@@ -1644,8 +1688,7 @@ function rollingFeed(g: GameState, orders: Contract[]): Contract | undefined {
 /** Planleggeren sorterer køen etter frist. */
 function plannerSort(g: GameState): void {
   // Den innleide planleggeren fra rådgiveren sorterer uansett forskning (B-059)
-  const specialist = (g.specialists?.sen ?? 0) > g.minute;
-  if (!hasPlanner(g) || (!auto(g, "plannerSorts") && !specialist)) return;
+  if (!plannerSortsQueue(g)) return;
   // Landemerker først (B-211), så etter frist
   orderQueue(g)
     .sort((a, b) => (a.landmark ? 0 : 1) - (b.landmark ? 0 : 1) || a.deadlineDay - b.deadlineDay)
@@ -1721,6 +1764,139 @@ export function rollingNeedDays(
   return (committedT(g, "armering") + agreementLoadUntil(g, until, "armering") + tonnes) / perDay;
 }
 
+/** En jobb i planen over køen (B-240): tonn som gjenstår, fristen og hvor den står i køen */
+interface PlanItem {
+  id: number | string;
+  t: number;
+  deadline: number;
+  landmark: boolean;
+  /** Rekkefølgen uten planlegger: køens prioritet, en ny kontrakt og ukeleveranser som kommer, bakerst */
+  order: number;
+  product: ProductId;
+  customer: string;
+}
+
+/** Sorterer planleggeren køen etter frist nå (samme vilkår som i plannerSort) */
+export function plannerSortsQueue(g: GameState): boolean {
+  const specialist = (g.specialists?.sen ?? 0) > g.minute;
+  return hasPlanner(g) && (auto(g, "plannerSorts") || specialist);
+}
+
+/** Ny jobb som vurderes: en forespørsel eller ukene i en rammeavtale */
+export type PlanExtra = { t: number; deadline: number; product: ProductId; customer: string; landmark?: boolean };
+
+/** Ukeleveransene i en rammeavtale som ennå ikke er lagt i køen, som jobber med frist */
+export function agreementWeeks(a: Agreement, first = a.nextDay): PlanExtra[] {
+  const out: PlanExtra[] = [];
+  for (let w = a.weeksSent, d = first; w < a.weeks; w++, d += 7)
+    out.push({ t: a.weeklyT, deadline: d + 6, product: a.product, customer: a.customer });
+  return out;
+}
+
+export interface QueueFit {
+  /** Verste forhold mellom tonn som må være ferdig innen en frist og det verket lager til da (1 = akkurat) */
+  worst: number;
+  /** En kontrakt i køen som rakk før, men ikke med den nye (den nye går foran den) */
+  pushesLate: string | null;
+  /** Samme, men for grensen «knapt» */
+  pushesNarrow: boolean;
+}
+
+/**
+ * Passer en ny jobb i køen (B-240)? Planen tar køen i rekkefølgen verket følger – etter frist når planleggeren sorterer
+ * – med ukeleveransene fra rammeavtalene som kommer, og regner for hver frist ut hvor mye som må være ferdig innen da.
+ * Før regnet salgsdirektøren bare med at den nye kontrakten rakk: med frist-sortering går en ny kontrakt med kort frist
+ * foran de andre, så eldre kontrakter ble for sene selv om hver ny så trygg ut (26 600 t tatt per døgn mot 25 800 laget).
+ * «product» gir planen for én vare (armering med valseverket); «front» er tonn som går først (landemerker som venter).
+ */
+export function queueFit(
+  g: GameState,
+  perDay: number,
+  extras: PlanExtra[],
+  opts: { product?: ProductId; front?: number } = {},
+): QueueFit {
+  const today = day(g);
+  const product = opts.product;
+  const byDeadline = plannerSortsQueue(g);
+  const items: PlanItem[] = [];
+  let order = 0;
+  for (const c of orderQueue(g)) {
+    if (product && c.product !== product) continue;
+    const t = c.tonnes - c.delivered;
+    if (t > 1e-6)
+      items.push({
+        id: c.id,
+        t,
+        deadline: c.deadlineDay,
+        landmark: !!c.landmark,
+        order: order++,
+        product: c.product,
+        customer: c.customer,
+      });
+  }
+  const extraIds = extras.map((_, i) => `ny${i}`);
+  const future: PlanItem[] = [];
+  for (const a of g.agreements) {
+    if (a.status !== "aktiv" || (product && a.product !== product)) continue;
+    agreementWeeks(a).forEach((w, i) =>
+      future.push({
+        id: `a${a.id}-${i}`,
+        t: w.t,
+        deadline: w.deadline,
+        landmark: false,
+        order: 0,
+        product: a.product,
+        customer: a.customer,
+      }),
+    );
+  }
+  const news: PlanItem[] = extras
+    .filter((e) => !product || e.product === product)
+    .map((e, i) => ({
+      id: extraIds[i],
+      t: e.t,
+      deadline: e.deadline,
+      landmark: !!e.landmark,
+      order: 0,
+      product: e.product,
+      customer: e.customer,
+    }));
+  // Uten planlegger: den nye kontrakten bakerst, så ukeleveransene etter hvert som de kommer
+  for (const n of news) n.order = order++;
+  future.sort((a, b) => a.deadline - b.deadline).forEach((f) => (f.order = order++));
+  const sorted = (list: PlanItem[]) =>
+    [...list].sort((a, b) =>
+      byDeadline
+        ? (a.landmark ? 0 : 1) - (b.landmark ? 0 : 1) || a.deadline - b.deadline || a.order - b.order
+        : (a.landmark ? 0 : 1) - (b.landmark ? 0 : 1) || a.order - b.order,
+    );
+  const ratios = (list: PlanItem[]) => {
+    const out = new Map<PlanItem["id"], number>();
+    let cum = opts.front ?? 0;
+    for (const it of sorted(list)) {
+      cum += it.t;
+      // Landemerker har ingen frist (B-218)
+      out.set(it.id, it.landmark ? 0 : cum / (perDay * Math.max(1, it.deadline - today + 1)));
+    }
+    return out;
+  };
+  const without = ratios([...items, ...future]);
+  const all = [...items, ...future, ...news];
+  const withNew = ratios(all);
+  let worst = 0;
+  let pushesLate: string | null = null;
+  let pushesNarrow = false;
+  for (const it of all) {
+    const r = withNew.get(it.id) ?? 0;
+    worst = Math.max(worst, r);
+    if (news.includes(it)) continue;
+    const before = without.get(it.id) ?? 0;
+    if (r > 1 && before <= 1 && !pushesLate) pushesLate = it.customer;
+    if (r > CONTRACT_MARGIN && before <= CONTRACT_MARGIN) pushesNarrow = true;
+  }
+  return { worst, pushesLate, pushesNarrow };
+}
+
 export interface OfferCheck {
   /** Verket lager varen */
   canMake: boolean;
@@ -1740,6 +1916,8 @@ export interface OfferCheck {
   /** Knapt: lite slingringsmonn (B-062) */
   narrow: boolean;
   doneDay: number;
+  /** Kunden som får en for sen kontrakt fordi den nye går foran i køen (B-240), eller null */
+  pushesLate: string | null;
 }
 
 /**
@@ -1767,9 +1945,24 @@ export function assessOffer(g: GameState, stats: PlantStats, c: Contract, commit
         )
       : Infinity;
   const days = c.deadlineDay - day(g) + 1;
+  // Går den nye kontrakten foran en annen i køen (planleggeren sorterer etter frist), kan den gjøre den andre for sen
+  // selv om den selv rekker (B-240). «committed» ut over køen er landemerker som venter på svar, og de går først
+  let pushesLate: string | null = null;
+  let pushesNarrow = false;
+  if (perDay > 0 && !c.landmark) {
+    const extra: PlanExtra[] = [{ t: c.tonnes, deadline: c.deadlineDay, product: c.product, customer: c.customer }];
+    const fit = queueFit(g, perDay, extra, { front: Math.max(0, committed - committedT(g)) });
+    pushesLate = fit.pushesLate;
+    pushesNarrow = fit.pushesNarrow;
+    if (c.product === "armering" && stats.rolledDailyT > 0) {
+      const roll = queueFit(g, Math.min(productCapT(stats, "armering"), perDay), extra, { product: "armering" });
+      pushesLate ??= roll.pushesLate;
+      pushesNarrow ||= roll.pushesNarrow;
+    }
+  }
   // Et landemerke har ingen frist (B-218), så det kan ikke bli for sent
-  const tight = !c.landmark && needDays > days;
-  const narrow = !c.landmark && !tight && needDays > days * CONTRACT_MARGIN;
+  const tight = !c.landmark && (needDays > days || !!pushesLate);
+  const narrow = !c.landmark && !tight && (needDays > days * CONTRACT_MARGIN || pushesNarrow);
   return {
     canMake,
     recipeOk,
@@ -1781,6 +1974,7 @@ export function assessOffer(g: GameState, stats: PlantStats, c: Contract, commit
     tight,
     narrow,
     doneDay: day(g) + Math.ceil(needDays) - 1,
+    pushesLate,
   };
 }
 

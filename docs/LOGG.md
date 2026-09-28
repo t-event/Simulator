@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 177 – 2026-09-28: Færre sene leveranser
+
+**Brukeren ba om:** «Får enda denne» – rådgiveren om sene leveranser (dag 1874).
+
+**Gjort:** B-240. Kjørte spillet fra en kopi med samme motor og fant tre grunner: salgsdirektøren sjekket bare den nye
+kontrakten (ikke dem den skjøv bakover), valseverket sto fordi emneordrene tok emnene, og ovn 2 og 3 lagde alltid neste
+kvalitet. Ny køsjekk (sammen med den gamle), valseverket får emner først, ovnene fordeles etter hva som haster.
+
+**Testet:** seks forløp à 30 døgn på spillet: 4,2 → 1,7 sene, 19 800 → 3 700 t ulevert, salg 336 → 346 mill./døgn.
+`npm test` (tre nye tester), tsc, lint, balance og `--konsern` (exit 0).
+
+**Gjenstår:** veksten på toppen i sluttspillet; tom tonn-liste denne uka (B-235); UI-4d; reserven og kassegrensen; fase 2.
+
+---
+
 ## Økt 176 – 2026-09-28: Alle sider starter like høyt
 
 **Brukeren ba om:** at Forskningskortet ikke står høyere enn det som står øverst på de andre sidene.

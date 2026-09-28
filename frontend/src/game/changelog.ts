@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 240,
+    date: "2026-09-28",
+    title: "Færre sene leveranser",
+    items: [
+      "Salgsdirektøren tar ikke lenger en kontrakt med kort frist som skyver andre kontrakter i køen for sent.",
+      "Valseverket får emner hele tida, så armeringen ikke venter til alle emneordrene er ferdige.",
+      "Ovnene lager det som haster: trengs det, lager alle ovnene samme kvalitet til fristen er nådd.",
+      "Salg sier fra når en forespørsel går foran en annen kontrakt i køen og gjør den for sen.",
+    ],
+  },
+  {
     b: 239,
     date: "2026-09-28",
     title: "Sidene starter like høyt",

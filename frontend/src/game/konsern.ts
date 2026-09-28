@@ -7,6 +7,7 @@ import {
   acceptAgreement,
   acceptContract,
   addCost,
+  agreementWeeks,
   agreementLoadUntil,
   addIncome,
   assessOffer,
@@ -15,6 +16,7 @@ import {
   extraOffer,
   fmtKr,
   log,
+  queueFit,
   realisticDailyT,
   recipeEstimate,
   unlock,
@@ -790,6 +792,11 @@ export function directorDailyT(g: GameState, stats: ReturnType<typeof computePla
     : stats.dailyProductT * 0.6;
   return Math.min(realisticDailyT(g, stats), typical);
 }
+/**
+ * Andelen av valseverkets kapasitet salgsdirektøren regner med (B-240). Valseverket får emnene sammen med emneordrene og
+ * står av og til, så det valser ikke alt det kan: på et fullt storverk ble det 60–70 % av kapasiteten.
+ */
+export const ROLLING_PLAN_SHARE = 0.7;
 /** Hvor mye av tida til fristen salgsdirektøren bruker, per oppgradering (B-172; 0,85 → 0,75 i B-228) */
 const DIRECTOR_MARGINS = [DIRECTOR_MARGIN, 0.75, 0.75, 0.75];
 
@@ -877,6 +884,7 @@ export function directorHour(g: GameState): void {
     .sort((a, b) => b.tonnes * b.pricePerT - a.tonnes * a.pricePerT);
   // Et landemerke som venter på svar, går først i køen når du tar det (B-211): salgsdirektøren holder av plass til det
   const landmarkT = g.contracts.filter((c) => c.status === "tilbud" && c.landmark).reduce((a, c) => a + c.tonnes, 0);
+  const margin = DIRECTOR_MARGINS[level] ?? DIRECTOR_MARGIN;
   for (const c of offers) {
     const check = assessOffer(g, stats, c, committedT(g) + landmarkT);
     const recipeOk = check.recipeOk || (check.graderFix && following);
@@ -888,7 +896,16 @@ export function directorHour(g: GameState): void {
       const load = committedT(g, "armering") + agreementLoadUntil(g, c.deadlineDay, "armering") + c.tonnes;
       needDays = Math.max(needDays, load / Math.min(perDay, productCapT(stats, "armering")));
     }
-    if (needDays > check.days * (DIRECTOR_MARGINS[level] ?? DIRECTOR_MARGIN)) continue;
+    if (needDays > check.days * margin) continue;
+    // …og ingen kontrakt i køen skal bli for sen (B-240): med frist-sortering går en kontrakt med kort frist foran de
+    // andre, og da ble eldre kontrakter for sene selv om den nye rakk
+    const extra = [{ t: c.tonnes, deadline: c.deadlineDay, product: c.product, customer: c.customer }];
+    if (queueFit(g, perDay, extra, { front: landmarkT }).worst > margin) continue;
+    // Valseverket får emnene sammen med emneordrene, så direktøren regner med ROLLING_PLAN_SHARE av kapasiteten der
+    if (c.product === "armering" && stats.rolledDailyT > 0) {
+      const rollPerDay = Math.min(perDay, productCapT(stats, "armering")) * ROLLING_PLAN_SHARE;
+      if (queueFit(g, rollPerDay, extra, { product: "armering" }).worst > margin) continue;
+    }
     // Eksportkontoret forhandler bedre pris (B-172)
     if (level >= 3) c.pricePerT = Math.round(c.pricePerT * 1.05);
     if (acceptContract(g, c.id, "Salgsdirektøren").ok) d.contracts += 1;
@@ -902,10 +919,15 @@ export function directorHour(g: GameState): void {
     const canMake = stats.products.includes(a.product);
     const recipeOk = recipeEstimate(g, a.grade, stats, gradeRecipe(g, a.grade)).grades.includes(a.grade);
     if (!canMake || !recipeOk || perWeek <= 0 || (used + a.weeklyT) / perWeek > share) continue;
+    // Første uke legges i køen med én gang, med frist om seks døgn: den må passe med kontraktene som alt er der (B-240)
+    const weeks = agreementWeeks(a, day(g));
+    if (queueFit(g, perDay, weeks).worst > margin) continue;
     // Armering: samme andel av det valseverket rekker (B-217)
     if (a.product === "armering" && stats.rolledDailyT > 0) {
       const usedArm = active.filter((x) => x.product === "armering").reduce((t, x) => t + x.weeklyT, 0);
-      if ((usedArm + a.weeklyT) / (Math.min(perDay, productCapT(stats, "armering")) * 7) > share) continue;
+      const rollPerDay = Math.min(perDay, productCapT(stats, "armering")) * ROLLING_PLAN_SHARE;
+      if ((usedArm + a.weeklyT) / (rollPerDay * 7) > share) continue;
+      if (queueFit(g, rollPerDay, weeks, { product: "armering" }).worst > margin) continue;
     }
     if (acceptAgreement(g, a.id, "Salgsdirektøren").ok) d.agreements += 1;
   }

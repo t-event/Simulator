@@ -43,8 +43,19 @@ type Tone = "ok" | "warn" | "bad";
 
 /** Vurderingen av en forespørsel (B-117): samme som salgsdirektøren bruker – resept, ordrekø og avtaler før fristen */
 function offerChecks(g: GameState, stats: PlantStats, c: Contract, committed: number) {
-  const { canMake, recipeOk, failures, missingResearch, graderFix, needDays, days, tight, narrow, doneDay } =
-    assessOffer(g, stats, c, committed);
+  const {
+    canMake,
+    recipeOk,
+    failures,
+    missingResearch,
+    graderFix,
+    needDays,
+    days,
+    tight,
+    narrow,
+    doneDay,
+    pushesLate,
+  } = assessOffer(g, stats, c, committed);
   const est = recipeEstimate(g, c.grade, stats, gradeRecipe(g, c.grade));
   const hasKlasser = g.workers.some((w) => w.role === "klasser");
   const following = auto(g, "followQueue");
@@ -85,11 +96,13 @@ function offerChecks(g: GameState, stats: PlantStats, c: Contract, committed: nu
       text: Number.isFinite(needDays)
         ? c.landmark
           ? `Ingen frist – landemerket står først i ordrekøen og blir ferdig ca. dag ${doneDay}`
-          : tight
-            ? `Rekker det neppe: med ordrekøen du har, blir den ferdig ca. dag ${doneDay}, fristen er dag ${c.deadlineDay}`
-            : narrow
-              ? `Knapt: blir ferdig ca. dag ${doneDay}, fristen er dag ${c.deadlineDay}. En stans eller fravær kan gjøre den for sen.`
-              : `Blir ferdig ca. dag ${doneDay} med ordrekøen du har (frist dag ${c.deadlineDay})`
+          : tight && pushesLate && needDays <= days
+            ? `Rekker det neppe: den har kortere frist og går foran ${pushesLate} i ordrekøen, som da blir for sen`
+            : tight
+              ? `Rekker det neppe: med ordrekøen du har, blir den ferdig ca. dag ${doneDay}, fristen er dag ${c.deadlineDay}`
+              : narrow
+                ? `Knapt: blir ferdig ca. dag ${doneDay}, fristen er dag ${c.deadlineDay}. En stans eller fravær kan gjøre den for sen.`
+                : `Blir ferdig ca. dag ${doneDay} med ordrekøen du har (frist dag ${c.deadlineDay})`
         : "Verket står – ingen produksjon nå",
     });
   }
