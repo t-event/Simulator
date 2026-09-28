@@ -4,6 +4,7 @@
  */
 import { log } from "./engine";
 import type { GameState, SeasonTwist, WorldEvent } from "./types";
+import { warFactor } from "./war";
 
 /** Startkapital og fagpoeng for den som var med i forrige sesong: med vilje lite (brukerens beskjed) */
 export const SEASON_BONUS_CASH = 1.05;
@@ -13,7 +14,8 @@ export const SEASON_BONUS_FP = 10;
 export function worldFactor(g: GameState, key: "scrap" | "steel" | "power"): number {
   const events = g.world?.events;
   // Sesongens vri (B-152) regnes med som en hendelse som varer hele sesongen
-  let f = g.world?.twist?.[key] ?? 1;
+  // Krig i verden (B-297) regnes med her, så alle prisene følger den
+  let f = (g.world?.twist?.[key] ?? 1) * warFactor(g, key);
   if (!events || events.length === 0) return f;
   for (const e of events) f *= e[key];
   return f;

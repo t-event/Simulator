@@ -25,6 +25,8 @@ interface Props {
 /** Hva spilleren skal gjøre når en ovn venter, med vanlige ord. Null når det ikke er noe å gjøre */
 function furnaceHelp(g: GameState, text: string): string | null {
   if (/^Havari/.test(text)) return "Repareres av seg selv – du trenger ikke trykke på noe.";
+  if (/sommerstans/.test(text))
+    return "Fellesferie: alle har ferie, og ovnene får vedlikehold. Starter igjen av seg selv etter tre uker.";
   if (/^Planlagt stans/.test(text)) return "Vedlikehold som er satt i gang. Blir ferdig av seg selv.";
   if (/mangler penger til omforing/.test(text))
     return "Foringen må byttes, men kassa er tom. Selg stål under Salg, eller ta opp lån under Verket → Økonomi.";

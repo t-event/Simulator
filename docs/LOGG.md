@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 232 – 2026-09-28: Krig i verden, fellesferie og juleferie
+
+**Brukeren ba om:** krig i verden som påvirker strømpris og etterspørsel, bare i konsernet og høyst én gang i året;
+fellesferie med sommerstans i tre uker med vedlikehold og sommervikarer; egen ferie 40 % sjeldnere; juleferie i teksten.
+
+**Gjort:** B-297 (`game/war.ts`, virker gjennom `worldFactor` og `offersPerDay`, linje under «Nå i markedet») og B-298
+(fellesferie i `calendar.ts` med kort, sommerstans eller vikarer, flyttede frister; egen ferie 167–233 døgn; juleferie).
+Publiseringen av #241 var grønn.
+
+**Testet:** tsc, lint, npm test (fire nye tester), balance med vikarer og med `--sommerstans` (exit 0), build,
+Playwright på 320 og 390 px (kortet og krigen på Marked).
+
+**Gjenstår:** pynt for sesong 3 før den startes. I morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 231 – 2026-09-28: Topplista for kontrollrommet og æresmerke for reformen
 
 **Brukeren ba om:** «Gå videre med tørrkjøringen og deretter selve migrasjonen og knappen i appen» og «Gi ett merke til de

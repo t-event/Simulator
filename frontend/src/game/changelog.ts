@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 298,
+    date: "2026-09-28",
+    title: "Fellesferie og krig i verden",
+    items: [
+      "Fellesferie i juli: velg sommerstans med vedlikehold (ovnene står i tre uker, men får ny foring, og du betaler ikke lønn) eller sommervikarer (full drift, dyrere lønn og litt flere uhell).",
+      "De ansatte tar egen ferie sjeldnere, og aldri i fellesferien. Ferie over jula heter juleferie.",
+      "I konsernet kan det bli krig i verden, høyst én gang i året: strømmen blir dyrere, men det kommer flere forespørsler og bedre pris på stål.",
+    ],
+  },
+  {
     b: 296,
     date: "2026-09-28",
     title: "Toppliste for kontrollrommet",

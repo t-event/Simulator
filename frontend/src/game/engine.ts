@@ -36,7 +36,19 @@ import { worldFactor } from "./world";
 import { maybeAdvisor, maybeCreateDecision } from "./decisions";
 import { maybeTip, setCreditHint } from "./tips";
 import { envDay, envHour, envStartBlocked, newEnv, updateEmissions } from "./environment";
-import { calendarDay, riskFactor, roadOpensInH, scrapBlocked, winterHour } from "./calendar";
+import {
+  calendarDay,
+  inSummerBreak,
+  isChristmas,
+  riskFactor,
+  roadOpensInH,
+  scrapBlocked,
+  SUMMER,
+  summerStart,
+  summerStop,
+  winterHour,
+} from "./calendar";
+import { warDay } from "./war";
 import { explosion, explosionChance } from "./accidents";
 import { scrapResearchFor, suggestRecipe } from "./recipe";
 import type { Research } from "./research";
@@ -1105,7 +1117,9 @@ function updateFurnaces(g: GameState, stats: PlantStats): void {
     if (g.minute < f.downUntilMin) {
       // Hvor lenge det er igjen (B-281): spillerne trodde de måtte trykke på noe for å reparere
       const h = Math.max(1, Math.ceil((f.downUntilMin - g.minute) / 60));
-      f.waitReason = f.downReason ? `${f.downReason} · klar om ${h} t` : f.downReason;
+      // Lange stanser (sommerstans, B-298) i døgn
+      const left = h > 48 ? `${Math.ceil(h / 24)} døgn` : `${h} t`;
+      f.waitReason = f.downReason ? `${f.downReason} · klar om ${left}` : f.downReason;
       continue;
     }
     if (f.downReason) {
@@ -2337,7 +2351,8 @@ function trickleOffers(g: GameState, stats: PlantStats): void {
     g.bonusOffer = false;
     return;
   }
-  if (g.settings.pauseOffers) return;
+  // Under sommerstansen (B-298) er salgskontoret også på ferie
+  if (g.settings.pauseOffers || summerStop(g)) return;
   if (chance(g, (stats.offersPerDay * 0.6) / 24)) generateOffers(g, stats, 1);
 }
 
@@ -2534,7 +2549,8 @@ function updateAgreements(g: GameState, stats: PlantStats): void {
     // Er et bytte av støping planlagt, kommer det ikke nye ukeleveranser på det gamle produktet (B-163). Ellers ble
     // byttet aldri gjort mens avtalen varte; avtalen avsluttes uten straff ved byttet (endStaleAgreements, B-040)
     const leaving = g.pendingCastingSwitch ? castingType(g).product : null;
-    if (a.status === "aktiv" && a.weeksSent < a.weeks && a.nextDay <= today && a.product !== leaving)
+    // Ingen ukeleveranser under sommerstansen (B-298): de kommer når verket er i gang igjen
+    if (a.status === "aktiv" && a.weeksSent < a.weeks && a.nextDay <= today && a.product !== leaving && !summerStop(g))
       sendAgreementWeek(g, a);
   }
   g.agreements = g.agreements.filter(
@@ -2543,7 +2559,7 @@ function updateAgreements(g: GameState, stats: PlantStats): void {
   const max = MAX_AGREEMENTS[g.stage] ?? 0;
   const active = g.agreements.filter((a) => a.status === "aktiv").length;
   const open = g.agreements.some((a) => a.status === "tilbud");
-  if (max > 0 && !open && active < max && !g.settings.pauseOffers && chance(g, 0.2)) {
+  if (max > 0 && !open && active < max && !g.settings.pauseOffers && !summerStop(g) && chance(g, 0.2)) {
     const a = makeAgreement(g, stats);
     if (!a) return;
     g.agreements.push(a);
@@ -2892,14 +2908,19 @@ function updateAbsence(g: GameState, stats: PlantStats): void {
       w.absentFrom = w.absentUntil = w.absentReason = undefined;
     }
   }
+  // Juleferie (B-298): ferie som går over jula, heter det
+  const holiday = (from: number, until: number) => {
+    for (let d = day(g, from); d <= day(g, until - 1); d++) if (isChristmas(d)) return "juleferie";
+    return "ferie";
+  };
   for (const w of g.workers) {
     if (w.absentReason === "ferie" && w.absentFrom !== undefined && Math.abs(w.absentFrom - g.minute) < 60)
       log(
         g,
-        `${w.name} (${ROLES[w.role].name.toLowerCase()}) har ferie fra i dag til dag ${day(g, w.absentUntil! - 1)}.`,
+        `${w.name} (${ROLES[w.role].name.toLowerCase()}) har ${holiday(w.absentFrom, w.absentUntil!)} fra i dag til dag ${day(g, w.absentUntil! - 1)}.`,
         kind(staffing(g).crews >= 3),
       );
-    if (w.nextVacationDay === undefined) w.nextVacationDay = today + randInt(g, 10, 110);
+    if (w.nextVacationDay === undefined) w.nextVacationDay = today + randInt(g, 17, 183);
     const busy = w.absentUntil !== undefined;
     // Ferie: varsles tre døgn før, maks en tidel av de ansatte samtidig
     if (!busy && today >= w.nextVacationDay - 3) {
@@ -2910,13 +2931,20 @@ function updateAbsence(g: GameState, stats: PlantStats): void {
         w.nextVacationDay += 3;
         continue;
       }
+      // Fellesferien (B-298) er ferien om sommeren: ingen egen ferie i de tre ukene
+      const breakDay = [day(g, from), day(g, until - 1)].find((d) => inSummerBreak(d));
+      if (g.stage >= SUMMER.fromStage && breakDay !== undefined) {
+        w.nextVacationDay = summerStart(breakDay) + SUMMER.days + randInt(g, 1, 10);
+        continue;
+      }
       w.absentFrom = from;
       w.absentUntil = until;
       w.absentReason = "ferie";
-      w.nextVacationDay = day(g, until) + randInt(g, 100, 140);
+      // Egen ferie 40 % sjeldnere etter fellesferien (B-298; var 100–140 døgn)
+      w.nextVacationDay = day(g, until) + randInt(g, 167, 233);
       log(
         g,
-        `${w.name} (${ROLES[w.role].name.toLowerCase()}) får ferie dag ${day(g, from)}–${day(g, until - 1)}.`,
+        `${w.name} (${ROLES[w.role].name.toLowerCase()}) får ${holiday(from, until)} dag ${day(g, from)}–${day(g, until - 1)}.`,
         // Forhåndsvarsel: med ekstra lag bare i loggen; mister verket et skift, varsles det på selve dagen
         kind(true),
       );
@@ -3219,10 +3247,14 @@ function onDay(g: GameState, stats: PlantStats): void {
 
   // Bot for gårsdagens utslipp (B-263)
   envDay(g);
-  // Vinteren kommer og går (B-265)
-  calendarDay(g);
+  // Vinteren kommer og går (B-265), og fellesferien (B-298)
+  calendarDay(g, stats);
+  // Krig i verden (B-297): bare i konsernet
+  const war = warDay(g);
+  if (war) log(g, war.text, war.kind);
   // Faste kostnader
-  addCost(g, "lonn", stats.salaryPerDay);
+  // Under sommerstansen (B-298) har alle ferie med feriepenger som er opptjent gjennom året: ingen lønn de tre ukene
+  if (!summerStop(g)) addCost(g, "lonn", stats.salaryPerDay);
   addCost(g, "faste", STAGES[g.stage].fixedPerDay);
   if (g.loan > 0) addCost(g, "renter", g.loan * LOAN_INTEREST_PER_DAY);
 

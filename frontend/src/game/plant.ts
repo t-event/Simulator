@@ -23,6 +23,7 @@ import {
 import { auto, hasResearch } from "./research";
 import { masteryFactor } from "./mastery";
 import { worldFactor } from "./world";
+import { warFactor } from "./war";
 import { isWinter, WINTER_FIXED, winterPowerFactor } from "./calendar";
 import type { Analysis, Crew, GameState, GradeId, PowerDeal, ProductId, RoleId, ScrapId, Worker } from "./types";
 
@@ -592,13 +593,15 @@ export function computePlantStats(g: GameState): PlantStats {
   const sellers = presentWorkers(g).filter((w) => w.role === "salg").length;
   // Garasjen og verkstedet får flere forespørsler, så det finnes noe å velge mellom (B-056)
   const offersPerDay =
-    (g.stage === 0 ? 2.2 : g.stage === 1 ? 2.6 : 1.2 + 0.6 * g.stage) +
-    (has(g, "salgskontor") ? 1 : 0) +
-    Math.min(3, sellers) * 0.8 +
-    (hasResearch(g, "kundepleie") ? 0.6 : 0) +
-    (hasResearch(g, "eksport") ? 1 : 0) +
-    (hasResearch(g, "gronnstal") ? 0.8 : 0) +
-    (has(g, "havn") ? 1.5 : 0);
+    ((g.stage === 0 ? 2.2 : g.stage === 1 ? 2.6 : 1.2 + 0.6 * g.stage) +
+      (has(g, "salgskontor") ? 1 : 0) +
+      Math.min(3, sellers) * 0.8 +
+      (hasResearch(g, "kundepleie") ? 0.6 : 0) +
+      (hasResearch(g, "eksport") ? 1 : 0) +
+      (hasResearch(g, "gronnstal") ? 0.8 : 0) +
+      (has(g, "havn") ? 1.5 : 0)) *
+    // Krig i verden (B-297): flere kunder trenger stål
+    warFactor(g, "demand");
   const priceBonus =
     (has(g, "salgskontor") ? 0.03 : 0) +
     Math.min(4, sellers) * 0.02 +

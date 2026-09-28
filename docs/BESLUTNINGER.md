@@ -5329,3 +5329,40 @@ Brukeren: «Gi ett merke til de som ble berørt av økonomireformen». To kontoe
 - Ny tilstand: `serverBadges` (standard `[]` i `migrate()`). Ny test i `tests.ts`; testet i nettleseren med en falsk
   server (merket gis og lagres).
 - Konto: ja (regel 2, serveren vet det). Ingen `NeedsAccount` – merket kan ikke tjenes.
+
+## B-297 Krig i verden – bare i konsernet (2026-09-28)
+Status: gjelder
+Brukeren: «Krig i verdn bør vær nåkka som påvirk strømprisan og etterspørsel, men bære for dem over konsern. Og maks
+1 gang i året/sesongen avhengig av korr stor påvirkning d ska ha».
+- **Ny modul** `game/war.ts`. Bare når konsernet er åpnet (`g.konsern.unlocked`) – før det finnes den ikke (gradvis
+  synlighet, B-180). Høyst én krig per år i spillet, og ikke hvert år: sjansen er 1/520 per døgn (omtrent annethvert
+  år), og minst 60 døgn og nytt år etter forrige krig.
+- **Virkning** med styrke 0,5–1: strømmen +40–80 % (spot, nattariff og fastpristilbud via `worldFactor`), stålprisen
+  +8–15 % og forespørslene +25–50 % (`offersPerDay`). Jo sterkere, jo lenger: 40–60 døgn. Middels sterk og ofte
+  heller enn svært sterk og sjelden, fordi den både koster (strøm) og gir (salg) – den lærer spilleren å ta fastpris.
+- **Beskjeder:** «Krig i verden: …» når den starter (med råd om fastpris), «Krigen er over» når den slutter, og en linje
+  under «Nå i markedet» på Marked mens den varer.
+- **Lokal, ikke serveren:** krigen påvirker bare spillerens eget verk og priser, ikke noe mellom spillere, så den
+  regnes i spillet (B-190 gjelder ikke). Om den senere skal være felles for alle, blir den en serverhendelse (B-129).
+- Ny tilstand: `war` (standard `null` i `migrate()`). Test i `tests.ts`. Konto: nei (selve spillet).
+
+## B-298 Fellesferie i juli, sjeldnere egen ferie og juleferie (2026-09-28)
+Status: gjelder
+Brukeren: «Legg til fellesferie der det er sommerstans i 3 uker med vedlikehold og sommervikarer», «bør d og bi sånn
+40% mindre sannsynlig for at 15% av ansatte ferier mett i året» og «Da bør d stå om d e mett i jula».
+- **Fellesferien** (`calendar.ts`) er 7.–27. juli (21 døgn), fra støperiet når det er ansatte. Et kort en uke før gir to
+  valg:
+  - **Sommerstans med vedlikehold:** ovnene står i tre uker («Planlagt stans: sommerstans»), får ny foring (og ferdig
+    reservepotte) for prisen av én foring per ovn, og trivselen går opp 5. Ingen lønn i stansen (feriepengene er
+    opptjent gjennom året), ingen nye forespørsler eller ukeleveranser, og kundene flytter fristene tre uker. Uten
+    flyttede frister gikk testspilleren konkurs i halvparten av kjøringene (bøter for kontrakter med frist i ferien).
+  - **Sommervikarer:** full drift, men lønnen er 25 % høyere og uhell 25 % oftere (`riskFactor`).
+  - Ubesvart kort gir vikarer. Testspilleren velger vikarer; `balance.ts --sommerstans` kjører med stans.
+- **Egen ferie 40 % sjeldnere:** 167–233 døgn mellom hver (var 100–140), første gang 17–183 døgn. Ingen egen ferie i
+  fellesferien; den flyttes til etter.
+- **Juleferie:** ferie som går over jula (23.12.–1.1.) heter «juleferie» i loggen.
+- Lange stanser vises i døgn («klar om 18 døgn»), ikke timer. «Hva gjør jeg nå?» forklarer sommerstansen.
+- Balanse (6 frø): storverket median 151 med vikarer (160 før), nybegynner 180 (154 før); med stans 175 og 170,5.
+  Ingen konkurs. Med 16 frø er nybegynneren ca. to uker tregere med fellesferie og vikarer (median 182) enn uten
+  fellesferie (168, med sjeldnere egen ferie). Det er prisen for ferien, og godt innenfor målet (høyst 240).
+- Ny tilstand: `summer` (standard `null` i `migrate()`). Tre tester i `tests.ts`. Konto: nei (selve spillet).

@@ -676,6 +676,10 @@ export interface GameState {
   missedOffers?: number[];
   /** Merker bare serveren vet om (B-296), f.eks. «reform» for dem som ble berørt av økonomireformen */
   serverBadges?: string[];
+  /** Krig i verden (B-297): den siste krigen (også når den er over), så det blir høyst én per år. null = ingen ennå */
+  war?: { year: number; fromDay: number; untilDay: number; strength: number } | null;
+  /** Fellesferien (B-298): året det gjelder og valget – sommerstans eller sommervikarer. null = ikke valgt ennå */
+  summer?: { year: number; choice: "stans" | "vikarer" } | null;
   /** Kassa er under null, og spilleren har fått varsel om det */
   inCredit?: boolean;
   /** Døgn på rad der verket står fordi det ikke er råd til omforing og lånet er fullt */

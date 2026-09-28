@@ -276,6 +276,9 @@ export function migrate(g: GameState): GameState {
   if (loose.missedOffers === undefined) loose.missedOffers = [];
   // Merker fra serveren (B-296)
   if (loose.serverBadges === undefined) loose.serverBadges = [];
+  // Krig i verden (B-297) og fellesferien (B-298)
+  if (loose.war === undefined) loose.war = null;
+  if (loose.summer === undefined) loose.summer = null;
   if (loose.seasonLoginPromptSeen === undefined) loose.seasonLoginPromptSeen = null;
   if (loose.world === undefined) loose.world = { events: [], seenEventIds: [] };
   for (const c of g.contracts) {
