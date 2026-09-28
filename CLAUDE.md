@@ -333,6 +333,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   anbud gis med `applyTenderResults` (i rekkefølge etter anbudet), ikke ett og ett selskap.
 - **Anbud og inntekt** (B-189) avgjøres «lat» av `world_status()` → `world_tick()`. Test livsløpet med midlertidige
   testkontoer i en DO-blokk som ender med `raise exception`; sett `closes_at` bakover for å avgjøre et anbud.
+- **Tilbakespoling** (B-261): et lavere dagtall flytter tidslinja etter dagen til `snapshots_rewound`; den legges tilbake
+  når samme spill kommer tilbake. Legg tall tilbake med `set_config('stalverk.restore','on',true)` – da hopper
+  `check_snapshot`, `guard_pre_reform` og `meter_snapshot` over dem. Nye triggere på `snapshots` må gjøre det samme.
 - **Gammel kopi** (B-259): `uploadSave` nekter å laste opp samme spill mer enn et døgn bak det på nett (`staleCopy`), og
   innloggingen henter da spillet fra nett. Bare `keepLocal` (valget «Herfra») kan. Nye spill har `gameId`; lag den aldri
   i `migrate()`.

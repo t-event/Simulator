@@ -4773,3 +4773,27 @@ garasjen.
   signerer, og veiledningen går videre.
 - Konto: nei.
 
+## B-261 Tidslinja ved tilbakespoling flyttes til side, ikke slettes (2026-09-28)
+Status: gjelder (erstatter slettingen i `check_snapshot` fra 003/004; bygger på B-176, B-259)
+Brukeren: «Fortsett», så «Tidslinja ved tilbakespoling» (fra FORSLAG etter B-259).
+- **Før:** lastes et spill med lavere dag opp, slettet serveren alle tall etter dagen. Da en gammel kopi tok over i 15
+  sekunder (B-259), forsvant 1 700 tall. Fartskontrollen brukte det nyeste tallet minst 10 minutter gammelt – tallet fra
+  kopien – og flagget spilleren feil.
+- **Nå (`supabase/045_tidslinje_tilbakespoling.sql`, kjørt som «tidslinje_tilbakespoling»):**
+  - Tallene etter dagen flyttes til `snapshots_rewound` (bare serveren leser den). Alt som leser tidslinja
+    (toppliste, ukens utfordring, juksesperren, grafer), ser det samme som før.
+  - Kommer det samme spillet tilbake – høyere dag, minst like langt spilt (spillminutter) som tallene som ble flyttet,
+    og ingenting spilt i mellomtiden – legges tallene tilbake med sitt eget tidspunkt og merke (`pre_reform`), uten ny
+    sjekk og uten produksjonsmåleren (`stalverk.restore`, som `guard_pre_reform` og `meter_snapshot` også hopper over).
+  - Spilles det videre fra den lavere dagen, forkastes tallene når spillet er forbi dem.
+  - Fartskontrollen sammenligner med det som var spilt lengst for minst 10 minutter siden (`order by game_min desc`),
+    ikke det nyeste tallet.
+- **Testet før den ble kjørt**, i én transaksjon som ble rullet tilbake: dag 1–10, en kopi på dag 3 (7 tall til side),
+  så dag 10 igjen: alle 10 tall tilbake, `pre_reform` og tidspunkt beholdt, ikke flagget (den gamle rekkefølgen ville
+  krevd 140 min mot 20). Spilt videre fra dag 3: tallene ble ikke lagt tilbake, og ble forkastet ved dag 11.
+  Produksjonsmåleren ble ikke rørt av tallene som ble lagt tilbake. Etter kjøringen: lagringene går som før (11 nye tall
+  på 3 min), ingen flagget. Sikkerhetsrådene: bare den nye tabellen uten regler (som de andre serverens tabeller).
+- Tallene som forsvant i dag (dag 472–2 168 for én spiller), kan ikke hentes tilbake – de ble slettet før dette.
+- Konto: ja (tidslinja finnes bare med konto).
+Endringslogg: nei
+
