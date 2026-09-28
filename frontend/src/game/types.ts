@@ -674,6 +674,8 @@ export interface GameState {
   snowUntilMin?: number;
   /** Spillminuttene da en forespørsel som passet verket, gikk ut uten svar (B-292). Tømmes når du signerer en kontrakt */
   missedOffers?: number[];
+  /** Merker bare serveren vet om (B-296), f.eks. «reform» for dem som ble berørt av økonomireformen */
+  serverBadges?: string[];
   /** Kassa er under null, og spilleren har fått varsel om det */
   inCredit?: boolean;
   /** Døgn på rad der verket står fordi det ikke er råd til omforing og lånet er fullt */

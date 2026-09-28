@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 231 – 2026-09-28: Topplista for kontrollrommet og æresmerke for reformen
+
+**Brukeren ba om:** «Gå videre med tørrkjøringen og deretter selve migrasjonen og knappen i appen» og «Gi ett merke til de
+som ble berørt av økonomireformen».
+
+**Gjort:** B-295 (migrasjon 046 etter tørrkjøring: 7 rekorder, 4 292 øverst; fanen «Kontrollrom» og lenken fra resultatet)
+og B-296 (migrasjon 047 `my_badges`, skjult prestasjon «Reformveteran» for de to berørte). Publiseringen av #240 var grønn.
+
+**Testet:** tørrkjøring i en transaksjon som ble rullet tilbake, sikkerhetsråd, tsc, lint, npm test (ny test), build,
+Playwright på 7 størrelser og hele kontrollrommet til topplista på 320 og 390 px mot en falsk server.
+
+**Gjenstår:** pynt for sesong 3 før den startes. I morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 230 – 2026-09-28: 48 av 50 forskninger
 
 **Brukeren ba om:** en spiller lurte på hvorfor hen bare hadde 48/50 forskninger, og om det var datterverkene. Før det:

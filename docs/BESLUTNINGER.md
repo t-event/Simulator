@@ -5296,3 +5296,36 @@ fram alt.
 - Ny test: ingen prestasjon for forskning krever flere prosjekter enn det finnes.
 - Testspilleren: samme nivådager, 0 konkurs (exit 0).
 - Konto: nei (regel 1).
+
+## B-295 Toppliste for kontrollrommet (2026-09-28)
+Status: gjelder (avgjør forslaget fra B-143)
+Brukeren: «Mulig å lage leaderboard i kontrollrommet?», så «Gå videre med tørrkjøringen og deretter selve migrasjonen og
+knappen i appen».
+- **Server** (`supabase/046_toppliste_kontrollrom.sql`): `records` får `best_control` og `best_control_at`. En trigger på
+  `saves` (`note_control`) tar inn `state.controlBest` når et spill lagres, og rekorden blir bare bedre. Bare kontoer som
+  alt har en rekordrad (fra tidslinja) oppdateres – ellers ville de stått med 0 på de andre listene. `leaderboard()` har
+  lista «kontroll»: beste charge noensinne, samme liste i sesongen og i Hall of Fame (rekorden følger kontoen).
+- **Juks:** poengsummen regnes ut i appen og kan ikke sjekkes på serveren. Den flinke testspilleren får høyst ca. 4 350
+  (B-293), så alt over 5 000 tas ikke med. Flaggede og utestengte står ikke på lista, som før.
+- **Tørrkjøring** (i én transaksjon som ble rullet tilbake): 7 rekorder ble fylt inn (4 292 øverst), og lista over
+  konsernverdi var uendret (15 rader). Deretter kjørt som migrasjon; samme tall. Sikkerhetsrådene: ingenting nytt ut over
+  det kjente (funksjonene er `security definer` med vilje).
+- **App:** ny fane «Kontrollrom» på topplista (`BoardKind` «kontroll», poeng). Resultatet i kontrollrommet har lenken
+  «Se topplista for kontrollrommet», som lagrer chargen og åpner topplista på den fanen (bare med tjeneste på nett).
+- Testet på 320, 390, 412, 820, 1 366, 1 920 og 2 560 px (ingen avkutting), og hele kontrollrommet til resultatet og
+  topplista på 320 og 390 px mot en falsk server.
+- Konto: å stå på lista krever konto (regel 3); lista kan ses uten, som de andre.
+
+## B-296 Æresmerke for dem som ble berørt av økonomireformen (2026-09-28)
+Status: gjelder
+Brukeren: «Gi ett merke til de som ble berørt av økonomireformen». To kontoer står i `economy_reform_log` (B-186).
+- **Server** (`supabase/047_merker.sql`): `my_badges()` gir merkene serveren vet om for den innloggede kontoen – nå «reform».
+  Tatt fra `anon`; gjester kommer ikke gjennom `guest_gate` og er uansett ikke berørt. Det lagrede spillet endres **ikke**
+  fra serveren; appen spør og gir merket selv.
+- **App:** `BadgeSync` spør én gang når spillet er avklart mot kontoen (B-138), og `applyServerBadges` legger merket i
+  `g.serverBadges` og deler ut prestasjonen «Reformveteran» (25 fagpoeng) i en ny gruppe, «Æresmerker».
+- **Skjult for andre:** prestasjoner kan være `hidden` – de vises og telles bare for dem som har dem
+  (`visibleAchievements`, `visibleFamilies`), så ingen andre ser et merke de aldri kan få (gradvis synlighet, B-180).
+- Ny tilstand: `serverBadges` (standard `[]` i `migrate()`). Ny test i `tests.ts`; testet i nettleseren med en falsk
+  server (merket gis og lagres).
+- Konto: ja (regel 2, serveren vet det). Ingen `NeedsAccount` – merket kan ikke tjenes.

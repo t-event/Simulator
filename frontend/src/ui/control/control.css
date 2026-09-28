@@ -627,6 +627,17 @@
   min-height: 40px;
 }
 
+/* Lenken til topplista under resultatet (B-295) */
+.cg-board-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  width: 100%;
+  min-height: 44px;
+  margin-top: var(--sp-2);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cg-bath-live,
   .cg-arc,

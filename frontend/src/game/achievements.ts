@@ -25,6 +25,8 @@ export interface Achievement {
   tier: number;
   /** Hvor langt man er kommet: [nå, mål] */
   progress: (g: GameState) => [number, number];
+  /** Vises bare når merket er tatt (B-296) */
+  hidden?: boolean;
 }
 
 export interface AchievementFamily {
@@ -35,9 +37,11 @@ export interface AchievementFamily {
   group: AchievementGroup;
   value: (g: GameState) => number;
   tiers: { id: string; goal: number; name: string; description: string; fp: number }[];
+  /** Vises bare for dem som har merket (B-296): kan ikke tjenes, bare gis */
+  hidden?: boolean;
 }
 
-export type AchievementGroup = "Produksjon" | "Kunder" | "Kunnskap" | "Kontrollrom" | "Folk" | "Konsern";
+export type AchievementGroup = "Produksjon" | "Kunder" | "Kunnskap" | "Kontrollrom" | "Folk" | "Konsern" | "Æresmerker";
 
 export const ACHIEVEMENT_GROUPS: AchievementGroup[] = [
   "Produksjon",
@@ -46,6 +50,7 @@ export const ACHIEVEMENT_GROUPS: AchievementGroup[] = [
   "Kunnskap",
   "Folk",
   "Konsern",
+  "Æresmerker",
 ];
 
 // Sesongkapitlet krever konto (sesong), så det teller ikke med i «Fagekspert» (B-161, KONTO.md regel 1)
@@ -256,6 +261,13 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
       ["modern5", 5, "Toppmoderne", "Moderniser et datterverk helt, til trinn 5.", 40],
     ],
   ),
+  // Æresmerker (B-296): gis av serveren, vises bare for dem som har dem
+  {
+    ...family("reform", "scroll-text", "Reformveteran", "Æresmerker", (g) => +!!g.serverBadges?.includes("reform"), [
+      ["reform", 1, "Reformveteran", "Var med da økonomireformen kom, og bygde videre etter den.", 25],
+    ]),
+    hidden: true,
+  },
 ];
 
 // Merker som ble gitt med andre regler før B-232 beholdes, men nye gis etter tabellen over
@@ -276,6 +288,7 @@ export const ACHIEVEMENTS: Achievement[] = ACHIEVEMENT_FAMILIES.flatMap((f) =>
       fp: t.fp,
       family: f.id,
       tier: i + 1,
+      hidden: f.hidden,
       progress: (g: GameState) => [value(g), t.goal] as [number, number],
     };
   }),
@@ -289,6 +302,25 @@ export function hasAchievement(g: GameState, id: string): boolean {
 
 export function achievementsDone(g: GameState): number {
   return ACHIEVEMENTS.filter((a) => hasAchievement(g, a.id)).length;
+}
+
+/** Merkene spilleren ser (B-296): skjulte merker bare når de er tatt */
+export function visibleAchievements(g: GameState): Achievement[] {
+  return ACHIEVEMENTS.filter((a) => !a.hidden || hasAchievement(g, a.id));
+}
+
+/** Seriene spilleren ser (B-296) */
+export function visibleFamilies(g: GameState): AchievementFamily[] {
+  return ACHIEVEMENT_FAMILIES.filter((f) => !f.hidden || f.tiers.some((t) => hasAchievement(g, t.id)));
+}
+
+/** Tar inn merkene serveren gir (B-296) og deler dem ut med én gang. Gir true hvis noe var nytt */
+export function applyServerBadges(g: GameState, badges: string[]): boolean {
+  const fresh = badges.filter((b) => !(g.serverBadges ?? []).includes(b));
+  if (!fresh.length) return false;
+  g.serverBadges = [...(g.serverBadges ?? []), ...fresh];
+  checkAchievements(g);
+  return true;
 }
 
 /** Andel av målet (0–1) */

@@ -24,7 +24,7 @@ import { getSession, onSessionChange } from "../net/supabase";
 import { cloudStatus, onCloudStatus } from "../net/sync";
 import { useSyncExternalStore } from "react";
 import { Callout, SheetHead } from "./ds";
-import { fmtKr, fmtRep } from "./format";
+import { fmtKr, fmtNum, fmtRep } from "./format";
 import { Icon } from "./icons";
 
 /** Spillerens egne resultater fra sesonger som er over (B-143) */
@@ -69,6 +69,7 @@ function fmtValue(kind: BoardKind, v: number): string {
   const unit = BOARDS.find((b) => b.id === kind)?.unit;
   if (unit === "kr") return fmtKr(v);
   if (unit === "rep") return fmtRep(v);
+  if (unit === "poeng") return `${fmtNum(Math.floor(v))} poeng`;
   return `dag ${Math.round(v)}`;
 }
 
@@ -81,11 +82,14 @@ export function LeaderboardSheet({
   g,
   onClose,
   onOpenSettings,
+  initialKind = "verdi",
 }: {
   api: GameApi;
   g: GameState;
   onClose: () => void;
   onOpenSettings: () => void;
+  /** Lista som vises først, f.eks. kontrollrommet fra resultatet der (B-295) */
+  initialKind?: BoardKind;
 }) {
   if (!cloudConfigured()) return null;
   return (
@@ -94,6 +98,7 @@ export function LeaderboardSheet({
         <Leaderboard
           api={api}
           g={g}
+          initialKind={initialKind}
           onClose={onClose}
           onOpenSettings={() => {
             onClose();
@@ -110,19 +115,22 @@ function Leaderboard({
   onClose,
   api,
   g,
+  initialKind,
 }: {
   onOpenSettings: () => void;
   onClose: () => void;
   api: GameApi;
   g: GameState;
+  initialKind: BoardKind;
 }) {
   const session = useSyncExternalStore(onSessionChange, getSession, getSession);
-  const [kind, setKind] = useState<BoardKind>("verdi");
+  const [kind, setKind] = useState<BoardKind>(initialKind);
   // Denne sesongen eller Hall of Fame (B-129, B-182)
   const [scope, setScope] = useState<"sesong" | "alle">("sesong");
   const status = useSeasonStatus();
   const current = status?.current ?? null;
-  const seasonId = scope === "sesong" ? (current?.id ?? null) : null;
+  // Kontrollrommet har én liste for alle tider (B-295): rekorden følger kontoen, ikke sesongen
+  const seasonId = scope === "sesong" && kind !== "kontroll" ? (current?.id ?? null) : null;
   const hallOfFame = seasonId === null;
   // Radene huskes sammen med lista de hører til (B-171): bytter man liste, vises ikke tallene fra den forrige
   const key = `${kind}:${seasonId ?? "alle"}`;
@@ -175,7 +183,7 @@ function Leaderboard({
   const board = BOARDS.find((b) => b.id === kind)!;
   return (
     <>
-      <SheetHead title={hallOfFame && current ? "Hall of Fame" : "Toppliste"} onClose={onClose}>
+      <SheetHead title={scope === "alle" && current ? "Hall of Fame" : "Toppliste"} onClose={onClose}>
         {/* Knappen viser at den henter, og når lista sist ble hentet (B-171) */}
         <button
           className={`g-icon-btn g-board-reload${loading ? " is-loading" : ""}`}
@@ -222,9 +230,11 @@ function Leaderboard({
         ))}
       </div>
       <p className="g-muted g-small-text g-board-scope-note">
-        {hallOfFame
-          ? `Beste resultat noensinne${status?.era ? ` i ${status.era.name}` : ""}: ${board.label.toLowerCase()}.`
-          : `Spillet slik det står nå: ${board.label.toLowerCase()}.`}
+        {kind === "kontroll"
+          ? "Beste charge noensinne i kontrollrommet – samme liste i sesongen og i Hall of Fame."
+          : hallOfFame
+            ? `Beste resultat noensinne${status?.era ? ` i ${status.era.name}` : ""}: ${board.label.toLowerCase()}.`
+            : `Spillet slik det står nå: ${board.label.toLowerCase()}.`}
       </p>
       {!session && (
         <Callout>

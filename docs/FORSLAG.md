@@ -35,8 +35,7 @@ til «Avgjort» nederst).
 - **Vern mot lekkede passord:** brukeren sa det var skrudd på, men sikkerhetsrådene i Supabase melder det fortsatt av
   (2026-09-26, økt 108). Sjekk under Authentication → «Leaked password protection» at det er lagret.
 
-- **Toppliste for kontrollrommet** («beste kontrollrom-charge»): brukeren liker idéen, men den skal vente til
-  kontrollrommet er ferdig utviklet (B-143).
+- ~~Toppliste for kontrollrommet~~ **Bygget (B-295).**
 - **Glemt passord** er ikke testet med ekte e-post ennå (brukeren, 2026-09-26). Ekte innlogging virker. Test det
   neste gang: «Glemt passord?» på kontokortet → koden i e-posten → nytt passord. Husk grensen på ca. 2 e-poster i timen.
 

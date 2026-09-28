@@ -22,6 +22,9 @@ import { MASTERY, MASTERY_IDS, masteryCost, masteryEffect, masteryOpen } from ".
 import {
   ACHIEVEMENT_BY_ID,
   ACHIEVEMENTS,
+  applyServerBadges,
+  visibleAchievements,
+  visibleFamilies,
   achievementsDone,
   checkAchievements,
   hasAchievement,
@@ -2757,6 +2760,24 @@ test("Prestasjonene for forskning kan nås (B-294): ingen krever flere prosjekte
   const g = newGame(294);
   const most = Math.max(...ACHIEVEMENTS.filter((a) => a.family === "forsk").map((a) => a.progress(g)[1]));
   assert(most <= RESEARCH.length, `prestasjonen krever ${most}, men det finnes bare ${RESEARCH.length} prosjekter`);
+});
+
+test("Æresmerket for økonomireformen (B-296): gis fra serveren, skjult for alle andre", () => {
+  const g = newGame(296);
+  assert(!visibleAchievements(g).some((a) => a.id === "reform"), "merket vises for en som ikke har det");
+  assert(!visibleFamilies(g).some((f) => f.id === "reform"), "serien vises for en som ikke har den");
+  const fp = g.researchPoints;
+  assert(applyServerBadges(g, ["reform"]) && hasAchievement(g, "reform"), "merket ble ikke gitt");
+  assert(g.researchPoints === fp + 25, "fagpoengene for merket ble ikke gitt");
+  assert(
+    visibleAchievements(g).some((a) => a.id === "reform"),
+    "merket vises ikke for den som har det",
+  );
+  assert(!applyServerBadges(g, ["reform"]), "samme merke ble gitt to ganger");
+  // Et gammelt spill uten feltet
+  const old = newGame(297) as unknown as Record<string, unknown>;
+  delete old.serverBadges;
+  assert(Array.isArray(parseSave(JSON.stringify(old))!.serverBadges), "migrate ga ikke serverBadges");
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden
