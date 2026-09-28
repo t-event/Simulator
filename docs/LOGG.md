@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 171 – 2026-09-28: Fagboka en bit om gangen
+
+**Brukeren ba om:** at fagboka blir mindre tekstvegg, mer intuitiv og morsommere.
+
+**Gjort:** B-234. Innhold med fremdrift, «Neste»-knapp og temaer; kapitler med «Kort fortalt» og én side om gangen;
+quiz ett spørsmål om gangen med svar med én gang og stjerner. Svarene lagres underveis (`quizPartial`), så det er fortsatt
+ett forsøk. Sesongkapitlet rettet.
+
+**Testet:** tsc, lint, `npm test` (to nye tester), balance (exit 0), Playwright på 7 størrelser (les → quiz → resultat
+→ innhold).
+
+**Gjenstår:** svar fra brukeren på ukens «Mer stål enn før»; UI-4d; reserven og kassegrensen; fase 2 videre.
+
+---
+
 ## Økt 170 – 2026-09-28: Vikarer, vedlikehold, navigasjon og avbrutte avtaler
 
 **Brukeren ba om:** ti punkter – vikarer som ikke dekket alle, Marked/Salg/Folk inn i Verket (spørsmål), loggen to

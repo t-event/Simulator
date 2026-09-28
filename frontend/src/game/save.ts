@@ -166,6 +166,8 @@ export function migrate(g: GameState): GameState {
     loose.quizScores = Object.fromEntries((g.quizDone ?? []).map((c) => [c, 2]));
     delete (loose as { quizFailedDay?: unknown }).quizFailedDay;
   }
+  // Quiz ett spørsmål om gangen (B-234)
+  if (loose.quizPartial === undefined) loose.quizPartial = {};
   if (g.settings.autoBuyCredit === undefined) {
     // Før B-027 handlet planleggeren alltid på kreditt; nå må spilleren tillate det
     g.settings.autoBuyCredit = false;

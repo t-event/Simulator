@@ -54,7 +54,7 @@ import {
   ordersToMake,
 } from "./engine";
 import { logTopic, showToast, unseenCount } from "./inbox";
-import { KNOWLEDGE } from "./knowledge";
+import { KNOWLEDGE, KNOWLEDGE_PARTS, readSeconds } from "./knowledge";
 import {
   applyMissionBonus,
   applyStreakReward,
@@ -166,7 +166,7 @@ import {
   staffing,
   wildcardUse,
 } from "./plant";
-import { QUIZ } from "./quiz";
+import { answerQuizQuestion, QUIZ, quizAvailable, quizReward } from "./quiz";
 import { GRADES } from "./data";
 import type { Agreement, Analysis, Contract, GameState, ManualRequest, RoleId } from "./types";
 import { autoPlay, ChargeGame } from "../ui/control/chargeGame";
@@ -2018,6 +2018,49 @@ test("Avbryte en rammeavtale (B-233): stor bot, omdømme ned, og uka i køen str
   assert(!cancelAgreement(g, 7).ok, "kunne avbryte samme avtale to ganger");
   advance(g, 7 * 1440);
   assert(!g.contracts.some((c) => c.agreementId === 7), "avbrutt avtale sendte en ny uke");
+});
+
+test("Fagboka (B-234): kort fortalt, korte sider med overskrift, og hvert kapittel i et tema", () => {
+  const parts = KNOWLEDGE_PARTS.map((p) => p.id);
+  for (const k of KNOWLEDGE) {
+    assert(k.short.length > 20 && k.short.length < 160, `«Kort fortalt» mangler eller er for lang: ${k.id}`);
+    assert(k.pages.length >= 2 && k.pages.every((p) => p.head && p.text), `sidene mangler overskrift: ${k.id}`);
+    assert(
+      k.pages.every((p) => p.text.split(/\s+/).length <= 90),
+      `en side er for lang: ${k.id}`,
+    );
+    assert(parts.includes(k.part), `ukjent tema: ${k.id}`);
+    assert(!!k.emoji, `mangler emoji: ${k.id}`);
+    assert(readSeconds(k) <= 90, `kapitlet tar for lang tid å lese: ${k.id}`);
+  }
+});
+
+test("Quiz ett spørsmål om gangen (B-234): svaret står fast, og quizen kan ikke tas om", () => {
+  const g = newGame(234);
+  const q = QUIZ.start;
+  const wrong = (i: number) => (q[i].correct + 1) % q[i].options.length;
+  const fp = g.researchPoints;
+  // Første svar feil: lagres med én gang
+  assert(!answerQuizQuestion(g, "start", 0, wrong(0)).right, "feil svar ble regnet som riktig");
+  assert(g.quizPartial.start?.length === 1, "svaret ble ikke lagret");
+  // Kan ikke svare på nytt på samme spørsmål, eller hoppe over
+  answerQuizQuestion(g, "start", 0, q[0].correct);
+  answerQuizQuestion(g, "start", 5, 0);
+  assert(g.quizPartial.start.length === 1 && g.quizPartial.start[0] === wrong(0), "svaret kunne endres");
+  // Lagres og lastes på nytt midt i quizen (som å lukke boka)
+  const loaded = parseSave(JSON.stringify(g))!;
+  assert(loaded.quizPartial.start?.[0] === wrong(0), "påbegynt quiz ble ikke lagret");
+  let r = answerQuizQuestion(loaded, "start", 1, q[1].correct);
+  for (let i = 2; i < q.length; i++) r = answerQuizQuestion(loaded, "start", i, q[i].correct);
+  assert(r.right && r.done !== null, "quizen ble ikke rettet etter siste svar");
+  assert(r.done!.correct === q.length - 1, `feil antall riktige: ${r.done!.correct}`);
+  assert(r.done!.reward === Math.floor((quizReward(loaded) * (q.length - 1)) / q.length), "feil fagpoeng");
+  assert(loaded.researchPoints === fp + r.done!.reward, "fagpoengene ble ikke gitt");
+  assert(!quizAvailable(loaded, "start") && !loaded.quizPartial.start, "quizen kan tas om igjen");
+  // En gammel lagring uten feltet får en tom liste
+  const old = JSON.parse(JSON.stringify(g));
+  delete old.quizPartial;
+  assert(!!parseSave(JSON.stringify(old))?.quizPartial, "gammel lagring fikk ikke quizPartial");
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

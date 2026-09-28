@@ -284,6 +284,7 @@ export function newGame(seed = Date.now()): GameState {
     readChapters: [],
     quizDone: [],
     quizScores: {},
+    quizPartial: {},
     missions: {},
     counters: {},
     ratings: [],
