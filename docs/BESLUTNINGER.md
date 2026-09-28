@@ -4385,3 +4385,37 @@ Brukeren: «Forskningskortet er høyere opp på siden enn andre ting på andre s
   første kolonne). Alle sider starter like langt under toppfeltet (10 px på mobil, 14 på nettbrett, 16 på PC), også Folk
   før de første ansatte. Underfaner inne i sider og ark (Resept, ovnene, topplista) har luften som før.
 - Konto: nei. Testet: posisjonen til det første på hver side ved 320, 390, 820 og 1 920 px – likt overalt.
+
+## B-240 Færre sene leveranser: hele køen må rekke fristen, valseverket får emner først, ovnene etter hva som haster (2026-09-28)
+Status: gjelder (bygger på B-117, B-172, B-217, B-223, B-228)
+Brukeren (skjermbilde av «Rådgiveren: leveransene kommer for sent», dag 1874): «Får enda denne.»
+- **Funnet** (spillet til brukeren kjørt videre med samme motor, seks tilfeldige forløp à 30 døgn): 4,2 sene kontrakter
+  per 30 døgn og ca. 20 000 t ulevert. Tre grunner:
+  1. **Salgsdirektøren sjekket bare den nye kontrakten.** Planleggerne sorterer køen etter frist, så en ny kontrakt med
+     kort frist går foran de andre. Den rakk selv, men eldre kontrakter ble for sene.
+  2. **Valseverket sto.** Emnene ble fordelt i køens rekkefølge, og emneordrene foran tok alle emner som holdt kvaliteten
+     – også dem som ble støpt til armeringen. Valseverket valset 3 000–7 000 av 8 300 t per døgn, og armeringen kom
+     for sent selv med ledig kapasitet.
+  3. **Ovn 2 og 3 lagde alltid neste kvalitet** (to kvaliteter samtidig), så med tre ovner fikk ordren som hastet mest
+     bare en tredjedel av verket.
+- **Rettet:**
+  - `queueFit` (engine.ts) legger den nye jobben inn i køen i den rekkefølgen verket følger (etter frist med planlegger,
+    ellers bakerst) med ukeleveransene fra rammeavtalene som kommer, og regner for hver frist ut hvor mye som må være
+    ferdig til da. Salgsdirektøren tar en kontrakt eller rammeavtale bare hvis ingen jobb i køen går over marginen
+    (0,70/0,75), i tillegg til den gamle sjekken. For armering regner den med 70 % av valseverket (`ROLLING_PLAN_SHARE`).
+  - Salg: en forespørsel som skyver en annen kontrakt for sent, er «Rekker det neppe: den har kortere frist og går foran
+    X i ordrekøen, som da blir for sen». Samme regel gir «Knapt».
+  - `planLots`: armeringsordrene får emner til de neste 12 timene med valsing først (`ROLLING_BUFFER_H`), resten i køens
+    rekkefølge som før.
+  - `followQueue`: så mange ovner som trengs for at kvaliteten først i køen rekker fristene (med 20 % luft), lager den;
+    resten tar neste kvalitet (`headFurnaces`).
+- Den nye køsjekken alene slapp inn **mer** (den teller bare jobber med tidligere frist), så den brukes sammen med den
+  gamle, ikke i stedet for. Målt, snitt av seks forløp på 30 døgn:
+  | | Sene | Ulevert | Salg per døgn |
+  |---|---|---|---|
+  | Før | 4,2 | 19 800 t | 336 mill. kr |
+  | Bare ny køsjekk | 13,5 | 50 800 t | 331 mill. kr |
+  | Gammel + ny sjekk, valseverket først og ovnene etter hva som haster | 1,7 | 3 700 t | 346 mill. kr |
+- Rådgiveren kommer fortsatt ved tre sene på ti døgn; nå mye sjeldnere. Konto: nei.
+- Tester: køsjekken (skyver en eldre kontrakt for sent bare med planlegger), Salg sier «rekker det neppe», valseverket
+  får emner med en stor emneordre foran, ovnene fordeles etter hva som haster. `npm test`, balance og `--konsern` (exit 0).

@@ -42,6 +42,8 @@ import { ADDONS, CASTINGS, FURNACES, STAGES, WIN_CASH } from "./data";
 import {
   advance,
   assessOffer,
+  queueFit,
+  realisticDailyT,
   agreementCancelCost,
   cancelAgreement,
   checkWin,
@@ -2104,6 +2106,134 @@ test("Mesterskap (B-237): prisen følger hvor mye prosjektet er verdt, og verdie
   assert(Math.abs(v("strom") - 10e6 * 0.015) < 1, `feil verdi for strøm: ${v("strom")}`);
   assert(v("datterverk") === 0, "datterverk uten verk skulle gi 0");
   for (const id of MASTERY_IDS) assert(Number.isFinite(v(id)) && v(id) >= 0, `ugyldig verdi: ${id}`);
+});
+
+test("Sene leveranser (B-240): en ny kontrakt med kort frist som skyver en annen for sent, er ikke trygg", () => {
+  const g = newGame(240);
+  g.pendingDecision = null;
+  g.agreements = [];
+  const base = { delivered: 0, pricePerT: 1, offerExpiresMin: 0, repGain: 0, repLoss: 0, penaltyPerT: 0 };
+  const more = { status: "aktiv" as const, closedDay: null, acceptedDay: day(g), product: "emne" as const };
+  g.contracts = [
+    { ...base, ...more, id: 1, customer: "Eldre", grade: "enkel", tonnes: 4000, deadlineDay: day(g) + 4, priority: 1 },
+  ];
+  const extra = [{ t: 2000, deadline: day(g) + 1, product: "emne" as const, customer: "Ny" }];
+  // Uten planlegger går den nye bakerst i køen og skyver ingen
+  assert(queueFit(g, 1000, extra).pushesLate === null, "skjøv en kontrakt uten planlegger");
+  // Med planlegger som sorterer etter frist går den nye foran, og den eldre rekker ikke lenger
+  g.specialists = { ...g.specialists, sen: g.minute + 100_000 };
+  const fit = queueFit(g, 1000, extra);
+  assert(fit.pushesLate === "Eldre" && fit.worst > 1, `ble ikke oppdaget: ${fit.pushesLate}, ${fit.worst}`);
+  assert(queueFit(g, 1000, [{ ...extra[0], t: 500 }]).pushesLate === null, "en liten kontrakt regnes som for mye");
+  const stats = computePlantStats(g);
+  const offer = {
+    ...g.contracts[0],
+    id: 2,
+    customer: "Ny",
+    tonnes: 2000,
+    deadlineDay: day(g) + 1,
+    status: "tilbud" as const,
+  };
+  g.history = [0, 1, 2].map((d) => ({ ...structuredClone(g.today), day: d, producedT: 1000 }));
+  g.contracts[0].tonnes = Math.round(realisticDailyT(g, stats) * 4.5);
+  const check = assessOffer(g, stats, offer);
+  assert(check.tight && check.pushesLate === "Eldre", `Salg sa trygg: tight ${check.tight}, ${check.pushesLate}`);
+});
+
+test("Valseverket får emner først (B-240), også når en stor emneordre står foran armeringen i køen", () => {
+  const g = newGame(2401);
+  g.stage = 4;
+  g.owned.push("valseverk", "ovn2", "ovn3", "streng2", "streng3");
+  g.furnaceCount = 3;
+  g.furnaceType = "likestrom420";
+  g.castingType = "streng8";
+  g.settings.rolling = true;
+  g.workers = [];
+  for (const [role, n] of Object.entries(crewPerShift(g)) as [RoleId, number][])
+    for (let i = 0; i < n * 5; i++) g.workers.push(makeCandidate(g, role));
+  g.pendingDecision = null;
+  g.agreements = [];
+  const a = { c: 0.1, p: 0.01, tramp: 0.1 };
+  g.lots = [
+    {
+      id: 1,
+      product: "emne",
+      t: 3000,
+      analysis: a,
+      known: a,
+      measured: { c: true, p: true, tramp: true },
+      second: false,
+      madeDay: day(g),
+    },
+  ];
+  const base = { delivered: 0, pricePerT: 1, deadlineDay: day(g) + 5, offerExpiresMin: 0, repGain: 0, repLoss: 0 };
+  const more = { penaltyPerT: 0, status: "aktiv" as const, closedDay: null, acceptedDay: day(g) };
+  g.contracts = [
+    { ...base, ...more, id: 1, customer: "Emner", product: "emne", grade: "enkel", tonnes: 50_000, priority: 1 },
+    { ...base, ...more, id: 2, customer: "Armering", product: "armering", grade: "enkel", tonnes: 1_000, priority: 2 },
+  ];
+  advance(g, 30);
+  const rebar = g.lots.filter((l) => l.product === "armering").reduce((t, l) => t + l.t, 0) + g.contracts[1].delivered;
+  assert(rebar > 0, "valseverket sto fordi emneordren foran tok alle emnene");
+});
+
+test("Ovnene fordeles etter hva som haster (B-240): alle lager kvaliteten som ellers kommer for sent", () => {
+  const g = newGame(2402);
+  g.stage = 4;
+  g.owned.push("ovn2", "ovn3", "streng2", "streng3");
+  g.furnaceCount = 3;
+  while (g.furnaces.length < 3) g.furnaces.push(structuredClone(g.furnaces[0]));
+  g.researched.push("ordreplan");
+  g.settings.followQueue = true;
+  g.settings.splitGrades = true;
+  g.workers = [];
+  for (const [role, n] of Object.entries(crewPerShift(g)) as [RoleId, number][])
+    for (let i = 0; i < n * 5; i++) g.workers.push(makeCandidate(g, role));
+  g.pendingDecision = null;
+  g.agreements = [];
+  g.lots = [];
+  const perDay = realisticDailyT(g, computePlantStats(g));
+  const base = { delivered: 0, pricePerT: 1, offerExpiresMin: 0, repGain: 0, repLoss: 0, penaltyPerT: 0 };
+  const more = { status: "aktiv" as const, closedDay: null, acceptedDay: day(g), product: "emne" as const };
+  const setQueue = (urgentT: number, days: number) => {
+    // Partiene fra forrige runde skal ikke dekke den nye køen, og et hendelseskort skal ikke stoppe tida
+    g.lots = [];
+    g.pendingDecision = null;
+    g.contracts = [
+      {
+        ...base,
+        ...more,
+        id: 1,
+        customer: "Haster",
+        grade: "enkel",
+        tonnes: urgentT,
+        deadlineDay: day(g) + days,
+        priority: 1,
+      },
+      {
+        ...base,
+        ...more,
+        id: 2,
+        customer: "Senere",
+        grade: "standard",
+        tonnes: 500,
+        deadlineDay: day(g) + 10,
+        priority: 2,
+      },
+    ];
+    advance(g, 60);
+    return g.furnaces.map((f) => f.grade);
+  };
+  const urgent = setQueue(Math.round(perDay * 1.5), 1);
+  assert(
+    urgent.slice(1).every((x) => x === null),
+    `ovn 2 og 3 lagde neste kvalitet selv om den første haster: ${urgent}`,
+  );
+  const calm = setQueue(Math.round(perDay * 1.5), 9);
+  assert(
+    calm.slice(1).some((x) => x === "standard"),
+    `ingen ovn tok neste kvalitet når det var tid nok: ${calm}`,
+  );
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

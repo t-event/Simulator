@@ -311,6 +311,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Lagerplanen** (B-228): `planLots` i `engine.ts` fordeler partiene på kontraktene i køens rekkefølge (også emner som
   skal valses til armering). Leveranser, valseverket og `ordersToMake` bygger på den – ikke lag egne reservasjoner.
   Test endringer i produksjonen på et ekte, stort spill med flere frø (sene kontrakter og levert tonn), ikke bare balance.
+- **Køsjekken** (B-240): salgsdirektøren og Salg bruker både den gamle sjekken (hele køen mot den nye fristen) og
+  `queueFit` (ingen jobb i køen blir for sen når den nye går foran). `queueFit` alene slipper inn mer – ikke bruk den i
+  stedet for den gamle. Valseverket får emner til `ROLLING_BUFFER_H` timer først (`planLots`), og ovnene fordeles etter
+  hva som haster (`headFurnaces`). Mål endringer i produksjonen med flere frø på et fullt storverk, ikke én kjøring.
 - **Skrapvarsel** (B-219): varsler i grensesnittet bruker `scrapAlert` (neste charge står fast), ikke `scrapShort` (en
   type i resepten er under én charge – ovnen fyller da opp med annet). Ellers varsles det om returskrap som ikke kan kjøpes.
 - **Anbud og inntekt** (B-189) avgjøres «lat» av `world_status()` → `world_tick()`. Test livsløpet med midlertidige
