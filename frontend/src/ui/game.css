@@ -94,6 +94,15 @@
   flex-wrap: nowrap;
 }
 
+/* Merket på Fagbok ligger oppå hjørnet (B-238): tok det plass i raden, ble dag og klokke presset til to linjer, og
+   hele siden hoppet ned hver gang det kom et nytt kapittel */
+.g-top-book > .g-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  margin: 0;
+}
+
 .g-when {
   min-width: 0;
 }
@@ -735,17 +744,28 @@ button {
   gap: var(--sp-1);
 }
 
+/* Fast rutenett (B-238): hvem til venstre, kvaliteten og kunden på hver sin linje som aldri brytes. Før brøt raden når
+   kundenavnet eller tonnene ble lengre, og kortet hoppet */
 .g-prod-rows li {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 5.5em minmax(0, 1fr);
   align-items: baseline;
   gap: 0 var(--sp-2);
 }
 
 .g-prod-who {
+  grid-row: span 2;
   color: var(--text-3);
   font-size: var(--fs-caption);
-  min-width: 4.5em;
+  white-space: nowrap;
+}
+
+.g-prod-grade,
+.g-prod-to {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .g-prod-to {
@@ -1569,6 +1589,50 @@ button {
   flex: 1;
 }
 
+/* Fast høyde (B-238): to linjer tekst, også når det bare er én eller ingen – så innholdet under står stille */
+.g-cta-row {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.g-cta-row > .g-cta {
+  flex: 1;
+  min-width: 0;
+  height: calc(2.8em + 2 * var(--sp-3) + 2px);
+  min-height: 0;
+  padding-block: var(--sp-3);
+}
+
+.g-cta-text {
+  min-width: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.g-cta.is-calm {
+  font-weight: 400;
+  color: var(--text-2);
+  background: var(--surface-1);
+  border-color: var(--line);
+  border-left-color: var(--ok);
+}
+
+.g-cta.is-calm > .ds-icon {
+  color: var(--ok);
+}
+
+.g-cta-more {
+  flex: none;
+  min-width: 48px;
+  padding: 0 var(--sp-3);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  border-radius: var(--r-md);
+}
+
 .g-cta > .ds-icon {
   width: 20px;
   height: 20px;
@@ -1940,6 +2004,24 @@ button {
   color: var(--accent);
   font-style: normal;
   font-weight: 600;
+}
+
+/* Navnet og «natt» på én linje som aldri brytes (B-238) */
+.g-when-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.g-when-head > strong {
+  min-width: 0;
+}
+
+.g-when-head > .g-ff {
+  flex: none;
+  font-size: var(--fs-caption);
 }
 
 /* Resepten (B-035) */
@@ -3209,27 +3291,88 @@ button {
 }
 
 /* «Hva er nytt» (B-179) */
-.g-changelog section + section {
-  border-top: 1px solid var(--panel-border);
-  margin-top: 8px;
-  padding-top: 4px;
+/* «Hva er nytt» (B-238): dager som overskrifter, én flate per oppdatering, eldre lukket, og knappen alltid synlig */
+.g-news-day {
+  margin-top: var(--sp-4);
 }
-.g-changelog h3 {
-  font-size: var(--fs-title);
-  margin: 8px 0 4px;
+
+.g-news-date {
+  margin: 0 0 var(--sp-2);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-3);
 }
-.g-changelog ul {
-  margin: 0 0 8px;
-  padding-left: 20px;
+
+.g-news-entry {
+  margin-bottom: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface-2);
 }
-.g-changelog li {
-  margin: 4px 0;
-  line-height: 1.4;
+
+.g-news-entry h4 {
+  margin: 0 0 var(--sp-2);
+  font-size: var(--fs-body);
 }
-.g-changelog > .g-primary {
+
+.g-news-entry ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.g-news-entry li {
+  margin: var(--sp-2) 0;
+  line-height: 1.45;
+  font-size: var(--fs-meta);
+  color: var(--text-2);
+}
+
+.g-news-entry li::marker {
+  color: var(--accent);
+}
+
+.g-news-entry.is-closed {
+  padding-block: 0;
+}
+
+.g-news-entry summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  min-height: 44px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: var(--fs-meta);
+}
+
+.g-news-entry[open] summary {
+  margin-bottom: var(--sp-1);
+}
+
+.g-news-entry[open] ul {
+  padding-bottom: var(--sp-3);
+}
+
+.g-news-more {
   width: 100%;
   min-height: 44px;
-  margin-top: 6px;
+}
+
+.g-news-foot {
+  position: sticky;
+  bottom: calc(-1 * var(--sheet-pad));
+  margin: var(--sp-2) calc(-1 * var(--sheet-pad)) calc(-1 * var(--sheet-pad));
+  padding: var(--sp-3) var(--sheet-pad) var(--sheet-pad);
+  background: linear-gradient(transparent, var(--panel-bg) 30%);
+}
+
+.g-news-foot > .g-primary {
+  width: 100%;
+  min-height: 44px;
 }
 
 /* «Spill her» når spillet er åpent i en annen fane (B-176) */
@@ -5188,22 +5331,46 @@ button.g-prod-row:hover {
   gap: var(--sp-1);
 }
 
+/* Radene har fast høyde (B-238): navn, status og linja under brytes aldri, og stolpen har alltid plass, så teksten
+   står stille mens tallene endrer seg */
 .g-prod-top {
   display: flex;
-  flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 0 var(--sp-3);
+  gap: var(--sp-3);
+  min-width: 0;
+}
+
+.g-prod-top > strong,
+.g-prod-detail {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.g-prod-top > .ds-status-line {
+  flex: none;
+  white-space: nowrap;
 }
 
 .g-prod-detail {
   font-size: var(--fs-meta);
   color: var(--text-2);
+  font-variant-numeric: tabular-nums;
 }
 
 .g-prod-main .g-bar {
   height: 4px;
   margin-top: var(--sp-1);
+}
+
+.g-prod-bar {
+  display: block;
+}
+
+.g-prod-bar.is-empty {
+  visibility: hidden;
 }
 
 .g-prod-end {
@@ -5424,4 +5591,122 @@ button.g-prod-row:hover {
   flex: none;
   margin-right: var(--sp-1);
   vertical-align: -2px;
+}
+
+/* Innstillingene (B-238): grupper med ikon og overskrift, korte brytere med forklaring under, og valg som knapper */
+.g-settings .g-set-group {
+  margin-top: var(--sp-5);
+  padding: var(--sp-4);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface-2);
+}
+
+.g-set-group > h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin: 0 0 var(--sp-2);
+  font-size: var(--fs-body);
+  color: var(--text);
+}
+
+.g-set-group > h3 > .ds-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--text-2);
+}
+
+.g-set-group.is-danger > h3 > .ds-icon {
+  color: var(--critical);
+}
+
+.g-set-group > p,
+.g-modal-card .g-set-group > p.g-small-text {
+  margin: var(--sp-2) 0;
+  font-size: var(--fs-meta);
+}
+
+.g-set-group .g-toggle {
+  min-height: 44px;
+  margin-top: var(--sp-2);
+  align-items: center;
+  font-size: var(--fs-body);
+}
+
+.g-set-group button,
+.g-set-group summary {
+  min-height: 44px;
+}
+
+.g-set-group .g-account .g-subhead:first-child {
+  margin-top: 0;
+}
+
+.g-set-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin-top: var(--sp-4);
+}
+
+.g-set-label {
+  font-size: var(--fs-meta);
+  color: var(--text-2);
+}
+
+.g-seg {
+  display: flex;
+  padding: 3px;
+  gap: 3px;
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+}
+
+.g-seg > button {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 var(--sp-3);
+  border: 0;
+  border-radius: calc(var(--r-md) - 2px);
+  background: transparent;
+  color: var(--text-2);
+  font-size: var(--fs-meta);
+}
+
+.g-seg > button.is-on {
+  background: var(--accent-soft);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.g-set-topics summary .g-muted {
+  margin-left: 0.3em;
+  font-weight: 400;
+}
+
+.g-set-link {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 52px;
+  margin-top: var(--sp-2);
+  text-align: left;
+}
+
+.g-set-link > span {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.g-set-link small {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--fs-caption);
 }

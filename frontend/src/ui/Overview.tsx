@@ -48,28 +48,67 @@ function missingScrap(g: GameState, stats: PlantStats): string | null {
 }
 
 /** Rådene etter det første: to synlige, resten bak «Flere råd» så det ikke blir en tekstvegg (B-195) */
-function HintList({ tips, run }: { tips: Hint[]; run: (t: Hint) => void }) {
-  const item = (t: Hint) => (
-    <li key={t.text}>
-      {t.view || t.anchor ? (
-        <button className="g-link" onClick={() => run(t)}>
-          {t.text}
-        </button>
-      ) : (
-        t.text
-      )}
-    </li>
+/**
+ * Rådene under anleggsbildet (B-195, B-238): én rad med fast høyde, som alltid står der – også når det ikke er noe
+ * råd. Før kom og gikk rådene med hver endring i verket, og alt under hoppet opp og ned. Teksten kortes til to linjer;
+ * «+N» åpner alle rådene med hele teksten.
+ */
+function HintSlot({ tips, run }: { tips: Hint[]; run: (t: Hint) => void }) {
+  const [open, setOpen] = useState(false);
+  const first = tips[0];
+  const more = tips.length - 1;
+  const text = (t: string) => (
+    <span className="g-cta-text" title={t}>
+      {t}
+    </span>
   );
   return (
-    <>
-      <ul className="g-more-hints">{tips.slice(0, 2).map(item)}</ul>
-      {tips.length > 2 && (
-        <details className="g-more-hints-rest">
-          <summary>Flere råd ({tips.length - 2})</summary>
-          <ul className="g-more-hints">{tips.slice(2).map(item)}</ul>
-        </details>
+    <div className="g-cta-wrap">
+      <div className="g-cta-row">
+        {!first ? (
+          <div className="g-cta is-calm">
+            <Icon name="ok" />
+            {text("Ingen råd akkurat nå. Verket går av seg selv.")}
+          </div>
+        ) : first.view || first.anchor ? (
+          <button className="g-cta" onClick={() => run(first)}>
+            <Icon name="info" />
+            {text(first.text)}
+            <Icon name="chevron-right" className="g-cta-go" />
+          </button>
+        ) : (
+          <div className="g-cta">
+            <Icon name="info" />
+            {text(first.text)}
+          </div>
+        )}
+        {more > 0 && (
+          <button
+            className="g-cta-more"
+            aria-expanded={open}
+            aria-label={open ? "Skjul rådene" : `Vis alle råd (${more} til)`}
+            onClick={() => setOpen(!open)}
+          >
+            {open ? <Icon name="chevron-up" /> : `+${more}`}
+          </button>
+        )}
+      </div>
+      {open && more > 0 && (
+        <ul className="g-more-hints">
+          {tips.map((t) => (
+            <li key={t.text}>
+              {t.view || t.anchor ? (
+                <button className="g-link" onClick={() => run(t)}>
+                  {t.text}
+                </button>
+              ) : (
+                t.text
+              )}
+            </li>
+          ))}
+        </ul>
       )}
-    </>
+    </div>
   );
 }
 
@@ -386,21 +425,8 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
           </div>
         </div>
 
-        {/* Det viktigste akkurat nå (UI.md 6.1, B-195): én linje med handling, så noen få råd til */}
-        {tips.length > 0 && (
-          <div className="g-cta-wrap">
-            {tips[0].view || tips[0].anchor ? (
-              <button className="g-cta" onClick={() => runHint(tips[0])}>
-                <Icon name="info" />
-                <span>{tips[0].text}</span>
-                <Icon name="chevron-right" className="g-cta-go" />
-              </button>
-            ) : (
-              <Callout>{tips[0].text}</Callout>
-            )}
-            {tips.length > 1 && <HintList tips={tips.slice(1)} run={runHint} />}
-          </div>
-        )}
+        {/* Det viktigste akkurat nå (UI.md 6.1, B-195): én rad med fast høyde, så innholdet under står stille (B-238) */}
+        <HintSlot tips={tips} run={runHint} />
       </div>
 
       {tab === "oversikt" && (
@@ -621,19 +647,12 @@ function ProductionNow({
   const casting = castingType(g);
   const many = g.furnaces.length > 1;
   const queueRules = auto(g, "followQueue") && !!order;
-  // Ovner som lager det samme til samme kunde, står på én linje («Ovn 2–3»)
-  const rows: { who: string; grade: GradeId; o: Contract | null }[] = [];
-  if (split) {
-    let from = 0;
-    g.furnaces.forEach((_, i) => {
-      const grade = furnaceGrade(g, i);
-      const o = furnaceOrder(g, i);
-      const next = i + 1 < g.furnaces.length ? { grade: furnaceGrade(g, i + 1), o: furnaceOrder(g, i + 1) } : null;
-      if (next && next.grade === grade && next.o?.id === o?.id) return;
-      rows.push({ who: from === i ? `Ovn ${i + 1}` : `Ovn ${from + 1}–${i + 1}`, grade, o });
-      from = i + 1;
-    });
-  } else rows.push({ who: many ? "Alle ovner" : "Ovnen", grade: g.targetGrade, o: order });
+  // Én linje per ovn når ovnene kan lage hver sin kvalitet (B-238). Før ble like ovner slått sammen («Ovn 2–3»), men
+  // da endret antallet linjer seg hver gang køen skiftet, og kortet hoppet opp og ned
+  const rows: { who: string; grade: GradeId; o: Contract | null }[] =
+    split || (many && auto(g, "splitGrades"))
+      ? g.furnaces.map((_, i) => ({ who: `Ovn ${i + 1}`, grade: furnaceGrade(g, i), o: furnaceOrder(g, i) }))
+      : [{ who: many ? "Alle ovner" : "Ovnen", grade: g.targetGrade, o: order }];
   const gradeOptions = (current: GradeId | null, skip?: GradeId) =>
     GRADE_IDS.filter((id) => id !== skip && (GRADES[id].minStage <= g.stage || id === current)).map((id) => (
       <option key={id} value={id}>
@@ -647,27 +666,13 @@ function ProductionNow({
           <li key={r.who}>
             <span className="g-prod-who">{r.who}</span>
             <strong className="g-prod-grade">{GRADES[r.grade].name}</strong>
-            <span className="g-prod-to">
-              {r.o ? (
-                <>
-                  → {r.o.customer} · {fmtT(r.o.tonnes - r.o.delivered)} igjen
-                </>
-              ) : (
-                "→ lager og spot"
-              )}
+            {/* Alltid én linje (B-238): kundenavnet kortes heller enn at raden brytes */}
+            <span className="g-prod-to" title={r.o ? r.o.customer : undefined}>
+              {r.o ? `→ ${r.o.customer} · ${fmtT(r.o.tonnes - r.o.delivered)} igjen` : "→ lager og spot"}
             </span>
           </li>
         ))}
       </ul>
-      {/* Resepten som ikke holder, er det eneste som må ordnes her; ellers står analysen bak «Innstillinger» */}
-      {!est.grades.includes(g.targetGrade) && (
-        <Callout tone="critical">
-          Resepten holder ikke kravet til {GRADES[g.targetGrade].name.toLowerCase()}.{" "}
-          <button className="g-link" onClick={onRecipe}>
-            Juster resepten
-          </button>
-        </Callout>
-      )}
       {queueRules ? (
         <div className="g-queue-lock">
           <span className="g-muted g-small-text">Ordrekøen velger kvaliteten.</span>
@@ -717,6 +722,16 @@ function ProductionNow({
             {(g.controlBest ?? 0) > 0 && ` · rekord ${fmtNum(g.controlBest ?? 0)}`}
           </span>
         </div>
+      )}
+      {/* Resepten som ikke holder, er det eneste som må ordnes her; ellers står analysen bak «Innstillinger». Nederst, så
+          linjene over ikke flytter seg når varselet kommer og går (B-238) */}
+      {!est.grades.includes(g.targetGrade) && (
+        <Callout tone="critical">
+          Resepten holder ikke kravet til {GRADES[g.targetGrade].name.toLowerCase()}.{" "}
+          <button className="g-link" onClick={onRecipe}>
+            Juster resepten
+          </button>
+        </Callout>
       )}
       <details className="g-details">
         <summary>Innstillinger og forklaring</summary>

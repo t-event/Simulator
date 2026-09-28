@@ -916,9 +916,28 @@ test("Sesongstigen og nye titler (B-173): pynt på trinn 10–50, titler etter S
   g.konsern.unlocked = true;
   g.won = true;
   const before = maxSisters(g);
-  g.cash = 6_000_000_000_000;
+  g.cash = 1_000_000_000_000;
   checkLegends(g);
   assert(titleOf(g) === "Stålgigant" && maxSisters(g) === before + 6, `tittel ${titleOf(g)}, plass ${maxSisters(g)}`);
+});
+
+test("Realistiske titler (B-238): stigende grenser, fra 25 mrd. til hele stålindustrien (5 000 mrd.)", () => {
+  assert(
+    LEGENDS.every((l, i) => i === 0 || l.equity > LEGENDS[i - 1].equity),
+    "grensene stiger ikke",
+  );
+  assert(LEGENDS[0].equity === 25e9 && LEGENDS[LEGENDS.length - 1].equity === 5e12, "første eller siste grense");
+  assert(
+    LEGENDS.every((l) => l.like.length > 0),
+    "mangler sammenligning",
+  );
+  const g = newGame(86);
+  g.stage = 4;
+  g.konsern.unlocked = true;
+  g.won = true;
+  g.cash = 450_000_000_000;
+  checkLegends(g);
+  assert(titleOf(g) === "Stållegende" && g.konsern.legends === 5, `fikk ${titleOf(g)}`);
 });
 
 test("Landemerker (B-174): ett nytt per dag, belønning når det er levert", () => {

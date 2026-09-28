@@ -61,30 +61,78 @@ export const SISTER_TYPES: Record<SisterType, SisterSpec> = {
 /**
  * Stålmilepæler etter sluttmålet (B-150): konsernet kan alltid vokse videre. Hver milepæl gir en tittel ved
  * kallenavnet, fagpoeng (til mesterskapet) og mer å bruke pengene på. Sluttmålet 10 mrd. gir tittelen Stålbaron.
+ * Grensene er satt etter ekte stålselskaper (B-238): det mest verdifulle stålselskapet i verden er verdt noen hundre
+ * milliarder kroner, og hele stålindustrien noen tusen. Før gikk titlene opp til en billiard – tusen ganger mer enn
+ * all stålindustri i verden. `like` sier hva verdien kan sammenlignes med; tallene er runde og omtrentlige.
+ * Samme grenser står i title_of() på serveren (041_realistiske_titler.sql).
  */
 export const WIN_TITLE = "Stålbaron";
-export const LEGENDS: { equity: number; title: string; fp: number; unlocks: string }[] = [
-  { equity: 25_000_000_000, title: "Stålmagnat", fp: 150, unlocks: "Datterverkene kan moderniseres til trinn 4." },
+export const LEGENDS: { equity: number; title: string; fp: number; unlocks: string; like: string }[] = [
+  {
+    equity: 25_000_000_000,
+    title: "Stålmagnat",
+    fp: 150,
+    unlocks: "Datterverkene kan moderniseres til trinn 4.",
+    like: "et stort stålkonsern i ett land",
+  },
   {
     equity: 50_000_000_000,
     title: "Stålfyrste",
     fp: 250,
     unlocks:
       "Stålkomplekser kan kjøpes, og det er plass til to datterverk til. Et kompleks tjener like mye som tre storverk – bytt ut de små verkene etter hvert.",
+    like: "et av de store stålkonsernene i Europa",
   },
-  { equity: 100_000_000_000, title: "Stålkonge", fp: 400, unlocks: "Datterverkene kan moderniseres til trinn 5." },
-  { equity: 250_000_000_000, title: "Stålkeiser", fp: 700, unlocks: "Plass til to datterverk til." },
-  { equity: 1_000_000_000_000, title: "Stållegende", fp: 1500, unlocks: "Du er en legende i stålverdenen." },
-  // Flere titler etter Stållegende (B-173): de beste spillerne var der etter få dager
-  { equity: 5_000_000_000_000, title: "Stålgigant", fp: 2500, unlocks: "Plass til to datterverk til." },
   {
-    equity: 25_000_000_000_000,
+    equity: 100_000_000_000,
+    title: "Stålkonge",
+    fp: 400,
+    unlocks: "Datterverkene kan moderniseres til trinn 5.",
+    like: "et av de største stålkonsernene i Europa",
+  },
+  {
+    equity: 200_000_000_000,
+    title: "Stålkeiser",
+    fp: 700,
+    unlocks: "Plass til to datterverk til.",
+    like: "et av de ti største stålselskapene i verden",
+  },
+  {
+    equity: 400_000_000_000,
+    title: "Stållegende",
+    fp: 1500,
+    unlocks: "Du er en legende i stålverdenen.",
+    like: "det mest verdifulle stålselskapet i verden",
+  },
+  // Flere titler etter Stållegende (B-173), grensene satt ned i B-238
+  {
+    equity: 750_000_000_000,
+    title: "Stålgigant",
+    fp: 2500,
+    unlocks: "Plass til to datterverk til.",
+    like: "nesten dobbelt så mye som noe stålselskap i verden",
+  },
+  {
+    equity: 1_500_000_000_000,
     title: "Stålkolosse",
     fp: 4000,
     unlocks: "Datterverkene kan moderniseres til trinn 6.",
+    like: "de fem største stålselskapene i verden til sammen",
   },
-  { equity: 100_000_000_000_000, title: "Stålmyte", fp: 6000, unlocks: "Du er en myte i stålverdenen." },
-  { equity: 1_000_000_000_000_000, title: "Stålikon", fp: 10000, unlocks: "Ingen har kommet lenger." },
+  {
+    equity: 3_000_000_000_000,
+    title: "Stålmyte",
+    fp: 6000,
+    unlocks: "Du er en myte i stålverdenen.",
+    like: "over halvparten av all stålindustri i verden",
+  },
+  {
+    equity: 5_000_000_000_000,
+    title: "Stålikon",
+    fp: 10000,
+    unlocks: "Ingen har kommet lenger.",
+    like: "hele stålindustrien i verden",
+  },
 ];
 
 /** Tittelen spilleren har (den høyeste milepælen), eller null før sluttmålet */
@@ -116,7 +164,7 @@ export function checkLegends(g: GameState): void {
     g.legendCelebrate = k.legends - 1;
     log(
       g,
-      `Ny tittel: ${l.title}! Konsernet er verdt over ${fmtKr(l.equity)}. +${l.fp} fagpoeng. ${l.unlocks}`,
+      `Ny tittel: ${l.title}! Konsernet er verdt over ${fmtKr(l.equity)}, omtrent som ${l.like}. +${l.fp} fagpoeng. ${l.unlocks}`,
       "good",
     );
   }
