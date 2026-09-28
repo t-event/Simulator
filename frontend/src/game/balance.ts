@@ -32,6 +32,7 @@ import {
 } from "./actions";
 import { MASTERY_IDS, masteryCost, masteryLevel } from "./mastery";
 import { resolveDecision } from "./decisions";
+import { envActive, nextCleaner, shortfall } from "./environment";
 import {
   applyAwayReward,
   applyMissionBonus,
@@ -281,6 +282,8 @@ function botHour(g: GameState): void {
       studenter: 0,
       video: 0,
       utlandsordre: 1,
+      // Havari på renseanlegget (B-263): stopp ovnene, som rådet sier
+      rensehavari: 0,
     };
     // Messa bare når det er god råd
     const affordable = g.cash > Number(d.data.cost ?? 0) * 4;
@@ -516,7 +519,10 @@ function botHour(g: GameState): void {
   ];
   // Ovnstyper og ovnsutstyr kjøpes per ovn (B-074): ovn 1 først, så de andre
   const perUnit = new Set([...FURNACES.map((f) => f.id), ...ADDONS.filter((a) => a.perFurnace).map((a) => a.id)]);
+  // Renseanlegget er for lite for ovnene (B-263): begge følger rådet på Verket og kjøper det neste først
+  const cleanerNeed = envActive(g) && shortfall(g, stats) > 0.02 ? nextCleaner(g)?.id : undefined;
   const order = [
+    ...(cleanerNeed ? [cleanerNeed] : []),
     ...(g.lastRadioDay !== undefined ? ["portal"] : []),
     ...perStage[g.stage],
     `stage${g.stage + 1}`,
@@ -548,8 +554,12 @@ function botHour(g: GameState): void {
     // …og kjøper ikke annet mens et bytte av støping er planlagt, så pengene til byttet er der (B-171)
     const saving =
       !!g.pendingCastingSwitch || (!!key && (key.reason === "For lite penger" || (key.available && !keyBuy)));
+    const cleanerBuy = cleanerNeed
+      ? options.find((o) => o.id === cleanerNeed && o.available && g.cash - o.price > reserve / 2)
+      : undefined;
     const buy =
       move ??
+      cleanerBuy ??
       keyBuy ??
       (saving ? [] : options)
         .filter(
@@ -1194,6 +1204,8 @@ for (const seed of seeds) {
     `seed ${seed}: nivådager ${r.stageDays.map((d) => d ?? "-").join(" / ")}  ` +
       `kasse ${Math.round(r.final.cash).toLocaleString("nb-NO")}  omdømme ${r.final.reputation.toFixed(0)}  ` +
       `charger ${t.heats}  produsert ${Math.round(t.producedT)} t  kontrakter ${t.contractsDone}  reklamasjoner ${t.complaints}` +
+      // Bøter for utslipp (B-263)
+      `  miljøbøter ${Math.round(r.final.env.finesKr).toLocaleString("nb-NO")}` +
       (r.bankrupt ? "  KONKURS" : ""),
   );
 }
@@ -1221,7 +1233,7 @@ if (!process.argv.includes("--seed") && !process.argv.includes("--nybegynner")) 
   const ok = broke === 0 && median <= NOVICE_MAX_DAY;
   if (!ok) failed = true;
   console.log(
-    `Nybegynner: storverket dag ${novice.map((r) => r.stageDays[4] ?? "-").join(" / ")} (median ${Number.isFinite(median) ? median : "ikke nådd"}, mål høyst ${NOVICE_MAX_DAY}), ${broke} konkurs ${ok ? "OK" : "AVVIK"}`,
+    `Nybegynner: storverket dag ${novice.map((r) => r.stageDays[4] ?? "-").join(" / ")} (median ${Number.isFinite(median) ? median : "ikke nådd"}, mål høyst ${NOVICE_MAX_DAY}), ${broke} konkurs, miljøbøter ${novice.map((r) => `${Math.round(r.final.env.finesKr / 1e6)} mill.`).join(" / ")} ${ok ? "OK" : "AVVIK"}`,
   );
 }
 // Kontrollrommet (B-175): en flink spiller skal få minst 4★ på under ett minutt, en slurvete høyst 2★

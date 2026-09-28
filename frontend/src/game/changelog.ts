@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 263,
+    date: "2026-09-28",
+    title: "Utslipp og renseanlegg",
+    items: [
+      "Renseanlegget renser bare en viss mengde i døgnet. Smelter ovnene mer, går resten urenset ut, og verket får bot neste morgen.",
+      "Fire nye, større renseanlegg under Anlegg → Ovn. Har du alt store ovner, har du fått anlegg som holder.",
+      "Renseanlegget kan havarere. Da velger du: stoppe ovnene til det er reparert, eller kjøre videre og ta en dobbel bot.",
+      "Nytt kapittel i fagboka: «Røyk, støv og renseanlegget».",
+    ],
+  },
+  {
     b: 262,
     date: "2026-09-28",
     title: "Trykk treffer knappene på iPhone",

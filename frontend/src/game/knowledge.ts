@@ -264,6 +264,27 @@ export const KNOWLEDGE: KnowledgeCard[] = [
     ],
   },
   {
+    id: "miljo",
+    title: "Røyk, støv og renseanlegget",
+    icon: "wind",
+    part: "ovn",
+    short: "Ovnene gir røyk og støv. Renseanlegget må rekke like mye som ovnene smelter, ellers blir det bot.",
+    pages: [
+      {
+        head: "Røyk og støv fra ovnen",
+        text: "Når skrap smeltes, kommer det røyk og støv med metaller som sink og bly. Røyken suges ut over ovnen og blåses gjennom et filteranlegg med tusenvis av filterposer, som holder støvet igjen.",
+      },
+      {
+        head: "Rensingen må følge ovnene",
+        text: "Renseanlegget klarer en viss mengde i døgnet. Bygger du flere eller større ovner, må rensingen bli større også. Det som ikke blir renset, måles og rapporteres, og myndighetene gir bot per tonn.",
+      },
+      {
+        head: "Når renseanlegget stopper",
+        text: "Viften eller filteret kan havarere. Da må du velge: stoppe ovnene og tape produksjon, eller kjøre videre og slippe ut røyken – det gir dobbel bot og dårlig omdømme. Et anlegg med to linjer renser halvparten når den ene står.",
+      },
+    ],
+  },
+  {
     id: "fosfor",
     title: "Fosfor og avslagging",
     icon: "research",

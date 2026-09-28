@@ -4955,6 +4955,29 @@ button {
   background: var(--surface-1);
 }
 
+/* Renseanlegget i arket for ovnene (B-263) */
+.g-cleaner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin: var(--sp-3) 0;
+  padding: var(--sp-3);
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+}
+
+.g-cleaner-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--sp-2);
+  align-items: baseline;
+}
+
+.g-cleaner .g-muted {
+  margin: 0;
+  font-size: var(--fs-meta);
+}
+
 .g-sheet-now-label {
   font-size: var(--fs-caption);
   font-weight: 700;

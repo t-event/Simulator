@@ -35,6 +35,7 @@ import { finishKonsernProjects, konsernDay, konsernEquity } from "./konsern";
 import { worldFactor } from "./world";
 import { maybeAdvisor, maybeCreateDecision } from "./decisions";
 import { maybeTip, setCreditHint } from "./tips";
+import { envDay, envHour, envStartBlocked, newEnv, updateEmissions } from "./environment";
 import { scrapResearchFor, suggestRecipe } from "./recipe";
 import type { Research } from "./research";
 import {
@@ -268,6 +269,7 @@ export function newGame(seed = Date.now()): GameState {
     seasonPromptSeen: null,
     tenderSeen: 0,
     companyIncomeSeen: {},
+    env: newEnv(),
     seasonLoginPromptSeen: null,
     world: { events: [], seenEventIds: [] },
     fpDealDay: -1,
@@ -1115,6 +1117,12 @@ function updateFurnaces(g: GameState, stats: PlantStats): void {
     }
     if (g.gridCut && g.minute >= g.gridCut.fromMin && g.minute < g.gridCut.untilMin) {
       f.waitReason = "Utkoblet av nettselskapet";
+      continue;
+    }
+    // Renseanlegget står, og spilleren har valgt å stoppe ovnene (B-263)
+    const envWait = envStartBlocked(g, stats, i);
+    if (envWait) {
+      f.waitReason = envWait;
       continue;
     }
     if (g.settings.onePeak && g.furnaces.some((o, j) => j !== i && o.heat)) {
@@ -2958,6 +2966,8 @@ function onHour(g: GameState, stats: PlantStats): void {
   } else if (g.cash >= 0) g.inCredit = false;
   maybeTip(g, stats);
   checkTemps(g);
+  // Havari på renseanlegget (B-263)
+  envHour(g, stats);
   // Kapitlene forskningen krever, kommer i fagboka når forskningen blir synlig (B-025)
   for (const r of RESEARCH)
     if (r.reads && r.stage <= g.stage && (!r.konsern || g.konsern?.unlocked)) unlock(g, r.reads);
@@ -3134,6 +3144,8 @@ function onDay(g: GameState, stats: PlantStats): void {
   updatePowerDeal(g, today);
   if (g.gridCut && g.minute >= g.gridCut.untilMin) g.gridCut = null;
 
+  // Bot for gårsdagens utslipp (B-263)
+  envDay(g);
   // Faste kostnader
   addCost(g, "lonn", stats.salaryPerDay);
   addCost(g, "faste", STAGES[g.stage].fixedPerDay);
@@ -3307,6 +3319,8 @@ function step(g: GameState, dt: number): void {
   g.minute += dt;
   let stats = computePlantStats(g);
   updateFurnaces(g, stats);
+  // Røyk og støv fra ovnene som går: det renseanlegget ikke tar, gir bot neste døgn (B-263)
+  updateEmissions(g, stats, dt);
   updatePots(g, stats, dt);
   // Effekttoppen: effekten til ovnene som smelter samtidig (B-074: hver ovn sin effekt)
   const mw = g.furnaces.reduce((a, f, i) => a + (f.heat ? (stats.units[i]?.furnaceMW ?? stats.furnaceMW) : 0), 0);

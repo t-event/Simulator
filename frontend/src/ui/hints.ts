@@ -21,12 +21,21 @@ import { fmtNum, fmtT } from "./format";
 import { canWarn } from "../game/actions";
 import { avgRating, shiftLeaderAtWork, sickSpells } from "../game/engine";
 import type { View } from "./views";
+import {
+  cleaner,
+  cleanerName,
+  envActive,
+  envDown,
+  nextCleaner,
+  shortfall,
+  stopsOnBreakdown,
+} from "../game/environment";
 
 /**
  * Rådene på Verket (B-064): det viktigste spilleren bør gjøre nå, med fanen rådet peker til. Brukes også til «!» på
  * Marked og Folk i menyen (B-202), så menyen og rådene alltid sier det samme.
  */
-export type Anchor = "vedlikehold" | "mal";
+export type Anchor = "vedlikehold" | "mal" | "rensing";
 
 export interface Hint {
   text: string;
@@ -84,6 +93,29 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
     out.push({
       text: `Ovnene smelter ca. ${fmtT(stats.meltTph)} i timen, men støpingen tar bare ${fmtT(stats.castTph)}, så ovnene venter på støping.${more ? ` Mer støpekapasitet: ${more.name}${more.reason && more.reason !== "For lite penger" ? ` (${more.reason.toLowerCase()})` : " under Anlegg → Støping og valsing"}.` : ""}`,
     });
+  }
+  // Utslipp (B-263): renseanlegget står, eller det er for lite for ovnene
+  if (envActive(g)) {
+    if (envDown(g))
+      out.push({
+        text: stopsOnBreakdown(g)
+          ? "Renseanlegget står etter et havari. Ovnene som ikke får plass, venter til det er reparert."
+          : "Renseanlegget står etter et havari, men ovnene går videre. Det blir dobbel bot i morgen.",
+        anchor: "rensing",
+      });
+    else if (shortfall(g, stats) > 0.02) {
+      const next = nextCleaner(g);
+      const opt = next ? upgradeOptions(g).find((o) => o.id === next.id) : undefined;
+      const buy = !next
+        ? ""
+        : opt?.available || opt?.reason === "For lite penger"
+          ? ` Kjøp ${cleanerName(next.id).toLowerCase()} under Anlegg → Ovn.`
+          : ` Neste: ${cleanerName(next.id).toLowerCase()}${opt?.reason ? ` (${opt.reason.toLowerCase()})` : ""}.`;
+      out.push({
+        text: `Renseanlegget renser ${fmtT(cleaner(g)!.tpd)} i døgnet, men ovnene smelter opptil ${fmtT(stats.meltTph * 24)}. Når ovnene smelter mer enn det, går resten urenset ut og gir bot.${buy}`,
+        anchor: "rensing",
+      });
+    }
   }
   if (g.castWait === "Ferdigvarelageret er fullt")
     out.push({ text: "Ferdigvarelageret er fullt. Selg partier på spot under Salg.", view: "salg", sub: "lager" });

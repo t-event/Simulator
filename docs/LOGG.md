@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 200 – 2026-09-28: Utslipp, renseanlegg og bøter
+
+**Brukeren ba om:** bøter for miljøutslipp, renseanlegg som kan kjøpes, havari på renseanlegget, og bot når det står
+eller er for lite.
+
+**Gjort:** B-263. Ny `game/environment.ts`: fem trinn med renseanlegg (nytt: fire større), utslipp regnet i hvert
+tidssteg, bot neste morgen, havari med valgkort første gang (stopp/kjør videre), panel under Anlegg → Ovn, råd på
+Verket, fagbokkapittel med quiz, og overgang for gamle lagringer (får anlegg som holder). Testspilleren kjøper
+renseanlegg når rådet sier det. Balansen viser miljøbøter per kjøring.
+
+**Testet:** tsc, lint, npm test (to nye tester), balance (exit 0), 30 døgn på fire ekte lagringer (ingen feil bot etter
+overgangen – en feil der ble rettet), Playwright på 320, 390 og 1366 (råd, panel, valget lagres, 44 px knapper, ingen
+horisontal scrolling).
+
+**Gjenstår:** se om spillerne synes bøtene er for strenge eller for snille; justeres i `environment.ts`.
+
+---
+
 ## Økt 199 – 2026-09-28: Trykk over knappene på iPhone
 
 **Brukeren ba om:** «En som spiller på iPhone 16 pro har problemer med at han må klikke over knappene for at de skal

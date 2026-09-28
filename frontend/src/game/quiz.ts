@@ -151,6 +151,20 @@ export const QUIZ: Record<string, QuizQuestion[]> = {
       why: "En strålingsportal koster lite sammenlignet med en opprydding.",
     },
   ],
+  miljo: [
+    {
+      q: "Hva gjør renseanlegget?",
+      options: ["Kjøler stålet", "Holder igjen støvet i røyken fra ovnene", "Sorterer skrapet"],
+      correct: 1,
+      why: "Røyken suges gjennom filterposer som holder støvet igjen før lufta slippes ut.",
+    },
+    {
+      q: "Du bygger en ovn til. Hva må du passe på?",
+      options: ["At renseanlegget rekker like mye som ovnene smelter", "Ingenting", "At strømmen er billig om natta"],
+      correct: 0,
+      why: "Smelter ovnene mer enn anlegget renser, går resten urenset ut, og det blir bot.",
+    },
+  ],
   strom: [
     {
       q: "Når er strømmen vanligvis billigst?",

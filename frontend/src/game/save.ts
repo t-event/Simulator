@@ -7,6 +7,7 @@ import { grantResearchForOwned } from "./actions";
 import { checkAchievements } from "./achievements";
 import { RESEARCH } from "./research";
 import { ADDONS } from "./data";
+import { newEnv } from "./environment";
 
 /** Forskning som ble lagt til med B-054; de andre automatikk-forskningene fantes fra før */
 const NEW_AUTOMATION = ["salgsrutiner", "ordreplan", "innkjop", "bemanning"];
@@ -267,6 +268,8 @@ export function migrate(g: GameState): GameState {
   if (loose.tenderSeen === undefined) loose.tenderSeen = 0;
   // Beskjed om inntekten fra selskapene (B-258)
   if (loose.companyIncomeSeen === undefined) loose.companyIncomeSeen = {};
+  // Utslipp og bøter (B-263): verk som alt har store ovner, får renseanlegg som holder, i første time (envHour)
+  if (loose.env === undefined) loose.env = { ...newEnv(), grant: true };
   if (loose.seasonLoginPromptSeen === undefined) loose.seasonLoginPromptSeen = null;
   if (loose.world === undefined) loose.world = { events: [], seenEventIds: [] };
   for (const c of g.contracts) {

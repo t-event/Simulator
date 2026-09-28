@@ -13,6 +13,7 @@ import { STATION_NAMES, stationOptions, type Station } from "./stations";
 import { STAGES, stageRef } from "../game/data";
 import { KONSERN_UNLOCK_EQUITY } from "../game/konsern";
 import { computePlantStats, unitType } from "../game/plant";
+import { cleaner, envActive, envDown, shortfall, stopsOnBreakdown } from "../game/environment";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Bar, Card } from "./common";
@@ -197,6 +198,8 @@ export function UpgradeSheet({
     const i = units.findIndex((u) => buyable(u) > 0);
     return units[i >= 0 ? i : 1];
   });
+  // Renseanlegget står sammen med utstyret for hele verket, der de større anleggene kjøpes (B-263)
+  const cleaner = station === "ovn" && envActive(g) ? <CleanerPanel g={g} act={act} /> : null;
   return (
     <Portal>
       <div className="g-modal" role="dialog" aria-modal="true" aria-label={STATION_NAMES[station]} onClick={onClose}>
@@ -228,6 +231,7 @@ export function UpgradeSheet({
                   ? "Utstyr for hele verket."
                   : `Ovn ${unit + 1} – ${unitType(g, unit).name}. Hver ovn får utstyr for seg.`}
               </p>
+              {unit === undefined && cleaner}
               <OptionList
                 g={g}
                 options={unitList(unit).map((o) => ({ ...o, name: o.name.replace(/ – ovn \d+$/, "") }))}
@@ -235,11 +239,68 @@ export function UpgradeSheet({
               />
             </>
           ) : (
-            <OptionList g={g} options={options} act={act} />
+            <>
+              {cleaner}
+              <OptionList g={g} options={options} act={act} />
+            </>
           )}
         </div>
       </div>
     </Portal>
+  );
+}
+
+/**
+ * Renseanlegget (B-263): hvor mye det renser mot hvor mye ovnene smelter, havari, og hva ovnene gjør når det står.
+ * Står i arket for ovnene, der de større renseanleggene kjøpes.
+ */
+function CleanerPanel({ g, act }: { g: GameState; act: GameApi["act"] }) {
+  const stats = computePlantStats(g);
+  const c = cleaner(g);
+  if (!c) return null;
+  const down = envDown(g);
+  const short = shortfall(g, stats);
+  const hoursLeft = Math.max(1, Math.ceil((g.env.downUntilMin - g.minute) / 60));
+  const status = down ? "feil" : short > 0.02 ? "stopp" : "kjorer";
+  const label = down
+    ? `Havari – reparert om ca. ${hoursLeft} t${c.twoLines ? " (den andre linjen renser halvparten)" : ""}`
+    : short > 0.02
+      ? `For lite: ${fmtPct(short)} av røyken går urenset ut når alle ovnene går`
+      : "Renser alt ovnene slipper ut";
+  const stop = stopsOnBreakdown(g);
+  const fine = g.env.lastFine;
+  return (
+    <div className="g-cleaner" aria-label="Renseanlegget">
+      <div className="g-cleaner-head">
+        <strong>Renseanlegget</strong>
+        <span className="g-muted">
+          renser {fmtT(c.tpd)}/døgn · ovnene smelter opptil {fmtT(stats.meltTph * 24)}/døgn
+        </span>
+      </div>
+      <StatusLine status={status} label={label} />
+      <span className="g-set-label">Når renseanlegget havarerer:</span>
+      <div className="g-seg" role="group" aria-label="Når renseanlegget havarerer">
+        <button
+          className={stop ? "is-on" : ""}
+          aria-pressed={stop}
+          onClick={() => act((gg) => void (gg.env.onBreakdown = "stopp"))}
+        >
+          Stopp ovnene
+        </button>
+        <button
+          className={!stop ? "is-on" : ""}
+          aria-pressed={!stop}
+          onClick={() => act((gg) => void (gg.env.onBreakdown = "kjor"))}
+        >
+          Kjør videre (bot)
+        </button>
+      </div>
+      {fine && (
+        <p className="g-muted">
+          Siste bot: {fmtKr(fine.kr)} for {fmtT(fine.t)} urenset (dag {fine.day}). Bøter i alt: {fmtKr(g.env.finesKr)}.
+        </p>
+      )}
+    </div>
   );
 }
 
