@@ -31,7 +31,7 @@ import { chance, pick, rand, uniform } from "./random";
 import { knowledgeCard } from "./knowledge";
 import { realNow } from "./clock";
 import { chooseBreakdownPolicy } from "./environment";
-import { riskFactor } from "./calendar";
+import { riskFactor, scrapBlocked } from "./calendar";
 import type { Contract, Decision, GameState, RepCause, Worker } from "./types";
 
 const DAILY_CHANCE = 0.25;
@@ -40,6 +40,8 @@ type Maker = (g: GameState) => Omit<Decision, "resumeSpeed"> | null;
 
 const MAKERS: Record<string, Maker> = {
   billigparti: (g) => {
+    // Veien er stengt av snøstorm (B-279): ingen skraphandler kommer fram (B-289)
+    if (scrapBlocked(g)) return null;
     const stats = computePlantStats(g);
     const t = Math.max(0.5, Math.round(stats.sizeT * 3 * 10) / 10);
     if (stats.yardT - stats.yardUsed < t) return null;

@@ -4,6 +4,7 @@
  * ordliste. Spillerne spurte hva «fp» var og hva de skulle trykke når noe røk (B-281); her står svaret samlet.
  */
 import { useState } from "react";
+import { roadOpensInH, scrapBlocked } from "../game/calendar";
 import { scrapAlert, scrapStopHelp } from "../game/engine";
 import { computePlantStats, type PlantStats } from "../game/plant";
 import type { GameState } from "../game/types";
@@ -68,7 +69,12 @@ function snapshot(g: GameState, stats: PlantStats): { tips: Hint[]; rows: Row[];
     {
       name: "Skrap",
       text: short.length ? "Mangler skrap" : `${fmtT(stats.yardUsed)} på lager`,
-      help: short.length ? scrapStopHelp(g) : null,
+      // Snøstorm (B-279, B-289): si det også når lageret ennå holder, så spilleren vet hvorfor ingenting kjøpes
+      help: short.length
+        ? scrapStopHelp(g)
+        : scrapBlocked(g)
+          ? `Veien er stengt av snøstorm – skrapbilene kommer fram om ca. ${roadOpensInH(g)} timer. Ovnene bruker lageret så lenge.`
+          : null,
       to: short.length ? ["marked", "skrap"] : undefined,
     },
     ...g.furnaces.map((_, i) => {
