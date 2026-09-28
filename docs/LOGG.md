@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 207 – 2026-09-28: Sjekk av de nye systemene hos ekte spillere
+
+**Brukeren ba om:** «Fortsett».
+
+**Gjort:** Leste lagringene fra de siste seks timene. Utslippsbøtene ser rimelige ut (størst ca. 430 000 kr på et
+stålverk), og gamle storverk har fått renseanleggene de trengte. Men én spiller med alle sikkerhetstiltak fikk 3
+eksplosjoner og en dødsulykke på en halvtime på 10×. B-270: eksplosjoner tre ganger sjeldnere, dødsrisikoen halvert.
+Publiseringen av #215 og #216 var grønn.
+
+**Testet:** tsc, lint, npm test, balance (exit 0), build.
+
+**Gjenstår:** i morgen: skraplageranbudet (stenger 29.9. 01:33 UTC) og første inntekt 30.9.
+
+---
+
 ## Økt 206 – 2026-09-28: Menyen nederst – tilbake til det som virket
 
 **Brukeren ba om:** skjermbilde etter B-268: menyen gikk lenger ned, men navnene under ikonene var borte.

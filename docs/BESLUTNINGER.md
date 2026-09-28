@@ -4922,3 +4922,16 @@ Brukeren (skjermbilde etter B-268): menyen gikk lenger ned, men navnene under ik
   straks tilbake til toppen.
 - Testet i Playwright på de 8 størrelsene. Brukeren må bekrefte på iPhone, og spilleren med iPhone 16 Pro må si om
   trykkene treffer.
+
+## B-270 Eksplosjoner og dødsulykker sjeldnere (2026-09-28)
+Status: gjelder (erstatter tallene for eksplosjoner og dødsulykker i B-265)
+Brukeren: «Fortsett». Sjekk av ekte spill en halvtime etter B-265: én spiller på storverket med alle tiltakene
+(skrapterminal, sortering, sikkerhetskultur) hadde fått 3 eksplosjoner og 1 dødsulykke på ca. 30 minutter på 10× (ca.
+150 spilldøgn). Brukeren ba om dødsfall «en ekstremt sjelden gang».
+- Eksplosjoner: 1 per 300 døgn per ovn i drift om sommeren (var 1 per 90), tre ganger så ofte om vinteren som før.
+- Dødsulykke: 1 % av eksplosjonene, 0,5 % med sikkerhetskultur (var 2 % og 1 %).
+- Et storverk med tre ovner og alle tiltak får da omtrent én eksplosjon per 270 døgn (ca. én time på 10×) og én
+  dødsulykke per ca. 54 000 døgn. Uten tiltak: én eksplosjon per ca. 67 døgn og én dødsulykke per ca. 6 700 døgn
+  (ca. 22 timer på 10×).
+- Følgene er de samme. Spillerne som alt har hatt en ulykke, får ingen endring.
+- Balanse: alle mål OK.

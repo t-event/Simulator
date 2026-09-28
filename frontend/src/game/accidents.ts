@@ -12,14 +12,14 @@ import { chance, pick, uniform } from "./random";
 import { hasResearch } from "./research";
 import type { GameState } from "./types";
 
-/** Eksplosjoner per ovn per døgn i drift, uten tiltak (sommer) */
-const EXPLOSIONS_PER_DAY = 1 / 90;
+/** Eksplosjoner per ovn per døgn i drift, uten tiltak (sommer). Var 1/90, men på 10× ble det for ofte (B-270). */
+const EXPLOSIONS_PER_DAY = 1 / 300;
 /** Om vinteren: tre ganger så mange (is og snø i skrapet) */
 export const WINTER_EXPLOSION = 3;
 /** Sjansen for at en eksplosjon skader noen */
 const INJURY = 0.25;
-/** Sjansen for at en eksplosjon tar livet av noen (halvparten med sikkerhetskultur) */
-export const FATAL_PER_EXPLOSION = 0.02;
+/** Sjansen for at en eksplosjon tar livet av noen (halvparten med sikkerhetskultur). Var 2 % (B-270). */
+export const FATAL_PER_EXPLOSION = 0.01;
 /** Døgn verket står mens politiet og tilsynet gransker en dødsulykke */
 export const FATAL_DOWN_DAYS = 3;
 /** Bot etter en dødsulykke, per nivå (garasje … storverk) */
