@@ -4898,3 +4898,15 @@ Brukeren (skjermbilde 19:37): «Menyen nederst ble ikke bra etter oppdateringen.
   reserve) i stedet for `inset: 0`. På hjemskjermen er 100dvh hele skjermen; i Safari er det det synlige området.
 - Testet i Playwright på 320, 390, 402, 768, 1024, 1366, 1920 og 2560: laget og menyen går helt ned, siden er ikke
   høyere enn vinduet, og vinduet står på 0. Brukeren må bekrefte på iPhone.
+
+## B-268 Hele skjermhøyden på iPhone-hjemskjermen (2026-09-28)
+Status: gjelder (bygger på B-264, B-267)
+Brukeren: «Den er fortsatt for langt opp» (menyen nederst, etter B-267).
+- På iPhone med spillet på hjemskjermen regner Safari det synlige området (og dermed `inset: 0` og `100dvh`) som ca.
+  85 pt kortere enn skjermen, så de faste lagene sluttet over bunnen. Før B-262 skjulte `min-height: 100vh` på `#root`
+  dette, fordi siden da var høyere enn det synlige – men det var også det som ga trykkfeilen.
+- **Nå:** `main.tsx` ser om spillet kjører fra hjemskjermen (`navigator.standalone`) og fyller hele skjermen i bredden.
+  Da settes klassen `is-standalone` og `--app-h` = skjermens høyde (`screen`), og `.g-app`, `.g-modal`, `.g-intro` og
+  `.control-room` får den høyden. I Safari og på PC brukes `100dvh` som før (B-267). Oppdateres ved resize og snuing.
+- Testet i Playwright med et vindu på 758 px og en skjerm på 844 px: fra hjemskjermen går menyen til 844, i Safari til
+  758. De 8 vanlige størrelsene er uendret. Brukeren må bekrefte på iPhone (⚙ → Om spillet viser nyeste endring).
