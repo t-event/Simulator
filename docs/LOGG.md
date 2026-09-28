@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 217 – 2026-09-28: Quizen fryser
+
+**Brukeren ba om:** «Fortsett», og: en spiller sa at spillet fryser når han holder på med quizen.
+
+**Gjort:** B-280. Påbegynte quizer telles ikke dobbelt lenger, spørsmålsnummeret holdes innenfor quizen, og fagboka har
+en egen feilgrense, så en feil ikke tar med seg hele spillet. Feilen kom ikke fram i Chromium. Publiseringen av #226
+(B-279) var grønn.
+
+**Testet:** tsc, lint, npm test, build, Playwright: ny og påbegynt quiz, fart 0–10×, hendelseskort midt i quizen.
+
+**Gjenstår:** spør spilleren om telefon og hva som skjer hvis det skjer igjen. I morgen: skraplageranbudet og første
+inntekt 30.9.
+
+---
+
 ## Økt 216 – 2026-09-28: Dyrere strøm og snøstorm om vinteren
 
 **Brukeren ba om:** «dyrere strøm og tregere skraplevering om vinteren».

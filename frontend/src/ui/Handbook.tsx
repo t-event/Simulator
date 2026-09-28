@@ -3,7 +3,7 @@
  * øverst, og quiz ett spørsmål om gangen med svar med én gang. Mye tekst på én gang skremte folk bort – nå leses
  * boka en bit om gangen, og hvert kapittel har tre steg: les, quiz og oppdrag. Ikoner fra designsystemet, ikke emoji (B-236).
  */
-import { useState } from "react";
+import { Component, useState, type ReactNode } from "react";
 import { Callout, SheetHead } from "./ds";
 import { KNOWLEDGE, KNOWLEDGE_PARTS, knowledgeCard, readSeconds, type KnowledgeCard } from "../game/knowledge";
 import { missionFor, missionProgress, type Mission } from "../game/missions";
@@ -58,9 +58,13 @@ function Quiz({ g, chapter, act, onDone }: { g: GameState; chapter: string; act:
   // Spørsmålet som viser svaret akkurat nå (etter at det er besvart)
   const [showing, setShowing] = useState<number | null>(null);
   const [result, setResult] = useState<{ correct: number; reward: number } | null>(null);
-  // Svarene så langt: fra spillet (en påbegynt quiz), og lokalt, så det siste svaret vises etter at quizen er rettet
-  const [answers, setAnswers] = useState<number[]>(() => g.quizPartial[chapter] ?? []);
+  // Svarene så langt: fra spillet (en påbegynt quiz), og lokalt, så det siste svaret vises etter at quizen er rettet.
+  // En kopi (B-280): før var det samme liste som spillet la svarene i, så et svar i en påbegynt quiz ble talt to ganger
+  const [local, setAnswers] = useState<number[]>(() => [...(g.quizPartial[chapter] ?? [])]);
   if (!questions) return null;
+  // Har spillet flere svar enn her (f.eks. fra en annen enhet), gjelder spillets
+  const saved = g.quizPartial[chapter] ?? [];
+  const answers = saved.length > local.length ? [...saved] : local;
 
   // Quizen er tatt (nå eller før): resultatet
   if (showing === null && (result || !quizAvailable(g, chapter))) {
@@ -83,7 +87,7 @@ function Quiz({ g, chapter, act, onDone }: { g: GameState; chapter: string; act:
     );
   }
 
-  const i = showing ?? answers.length;
+  const i = Math.min(showing ?? answers.length, questions.length - 1);
   const q = questions[i];
   const picked = answers[i];
   const answered = picked !== undefined;
@@ -411,6 +415,37 @@ function Contents({ g, onOpen }: { g: GameState; onOpen: (id: string) => void })
   );
 }
 
+/**
+ * Går noe galt i boka, vises en beskjed i stedet for at hele spillet stopper (B-280). Uten den tok en feil i quizen med
+ * seg hele skjermen, og spillet så ut til å fryse.
+ */
+class BookGuard extends Component<{ onReset: () => void; children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch(error: unknown) {
+    console.error("Fagboka:", error);
+  }
+  render() {
+    if (!this.state.failed) return this.props.children;
+    return (
+      <Callout tone="heat">
+        Noe gikk galt i fagboka. Spillet går som før.{" "}
+        <button
+          className="g-link"
+          onClick={() => {
+            this.setState({ failed: false });
+            this.props.onReset();
+          }}
+        >
+          Tilbake til innholdet
+        </button>
+      </Callout>
+    );
+  }
+}
+
 export function Handbook({
   g,
   act,
@@ -434,11 +469,13 @@ export function Handbook({
     <div className="g-modal g-side-sheet" role="dialog" aria-modal="true" aria-label="Fagboka" onClick={onClose}>
       <div className="g-modal-card g-book-sheet" onClick={(e) => e.stopPropagation()}>
         <SheetHead title="Fagboka" icon="book" onClose={onClose} />
-        {card ? (
-          <Chapter key={card.id} g={g} card={card} act={act} onBack={() => setOpen(null)} />
-        ) : (
-          <Contents g={g} onOpen={openChapter} />
-        )}
+        <BookGuard onReset={() => setOpen(null)}>
+          {card ? (
+            <Chapter key={card.id} g={g} card={card} act={act} onBack={() => setOpen(null)} />
+          ) : (
+            <Contents g={g} onOpen={openChapter} />
+          )}
+        </BookGuard>
       </div>
     </div>
   );

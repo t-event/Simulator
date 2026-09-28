@@ -5070,3 +5070,20 @@ uhell, men bare ca. 1 % i økonomien).
   storverket er strømmen bare ca. 3 % av inntekten, så vinteren merkes mest på de mindre nivåene (strøm 7 % av
   inntekten på støperiet).
 - Konto: nei (regel 1, ditt eget spill).
+
+## B-280 Quizen: påbegynte svar telles ikke to ganger, og en feil i fagboka stopper ikke spillet (2026-09-28)
+Status: gjelder
+En spiller skrev: «av en eller annen grunn fryser spillet når jeg holder på med quizen». Spillet på nett viste en påbegynt
+quiz (ett svar av to). Feilen kom ikke fram i Chromium (sommer, vinter, fart 0–10×, med og uten påbegynt quiz, med
+hendelseskort midt i quizen), men gjennomgangen fant to svake punkter:
+- **Påbegynt quiz:** quizen startet med *samme* liste som spillet lagrer svarene i. Når spilleren svarte, la spillet svaret
+  inn i lista, og quizen la det inn én gang til. Med to spørsmål gikk det bra, men med flere ville et spørsmål blitt hoppet
+  over, og siste spørsmål ville ikke finnes – da krasjet skjermen. Nå får quizen en kopi, og har spillet flere svar (f.eks.
+  fra en annen enhet), brukes spillets.
+- **Feil i boka tok med seg hele spillet:** React uten feilgrense fjerner hele skjermen ved en feil, og spillet ser frosset
+  ut. Nå har fagboka en egen feilgrense (`BookGuard`): går noe galt, står det «Noe gikk galt i fagboka. Spillet går som
+  før.» med en knapp tilbake til innholdet.
+- Spørsmålsnummeret holdes innenfor quizen, så et feil tall aldri kan gi et spørsmål som ikke finnes.
+- Spilleren bør si hvilken telefon det gjelder og hva som skjer (står alt stille, eller svarer ikke knappene?), hvis det
+  skjer igjen.
+- Konto: nei (regel 1, ditt eget spill).
