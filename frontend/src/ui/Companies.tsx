@@ -228,21 +228,21 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
                 "Du har ikke bydd."
               )}
             </p>
-            {/* Hvem som har bydd, uten beløp (B-210) */}
-            <p className="g-small-text g-tender-bidders">
-              {t.bidders.length === 0 ? (
-                <span className="g-muted">Ingen har bydd ennå.</span>
-              ) : (
-                <>
-                  <span className="g-muted">Har bydd:</span>{" "}
+            {/* Hvem som har bydd, uten beløp (B-210). Navnene brytes til nye linjer (B-278) */}
+            {t.bidders.length === 0 ? (
+              <p className="g-small-text g-muted">Ingen har bydd ennå.</p>
+            ) : (
+              <div className="g-tender-bidders">
+                <span className="g-small-text g-muted">Har bydd ({t.bidders.length}):</span>
+                <ul>
                   {t.bidders.map((n) => (
-                    <span key={n} className="g-chip">
+                    <li key={n} className="g-chip">
                       {n}
-                    </span>
+                    </li>
                   ))}
-                </>
-              )}
-            </p>
+                </ul>
+              </div>
+            )}
             <div className="g-row g-amount-row">
               <label className="g-amount">
                 <input

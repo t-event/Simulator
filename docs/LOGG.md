@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 215 – 2026-09-28: Budgiverne på anbudet
+
+**Brukeren ba om:** «Fortsett», og: «Linjene over hvem som har bydd på anbudet ser ikke bra ut».
+
+**Gjort:** B-278. Navnene på budgiverne brytes nå til nye linjer i stedet for å gå ut over kanten på anbudsboksen, og
+overskriften viser antallet. Publiseringen av #224 (B-277) var grønn.
+
+**Testet:** tsc, lint, npm test, build, Playwright med falsk tjeneste: 6 og 12 budgivere på 320 og 390 px.
+
+**Gjenstår:** i morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 214 – 2026-09-28: En hel vinter målt
 
 **Brukeren ba om:** «Fortsett», og valgte «Test en hel vinter».
