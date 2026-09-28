@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 244,
+    date: "2026-09-28",
+    title: "Anleggsbildet viser mer",
+    items: [
+      "Storverket har fått en høyere smeltehall, så det ser annerledes ut enn stålverket.",
+      "Et transportbånd fører skrapet opp til ovnene, og hver støpemaskin har sin egen glødende streng.",
+      "Når verket står, blir bildet mørkere.",
+    ],
+  },
+  {
     b: 243,
     date: "2026-09-28",
     title: "Nye ikoner",

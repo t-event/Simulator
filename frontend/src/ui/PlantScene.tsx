@@ -166,6 +166,18 @@ const ROOF: { apex: [number, number]; line: [number, number][] }[] = [
       [360, 100],
     ],
   },
+  // Storverket: høyere smeltehall (B-244)
+  {
+    apex: [190, 36],
+    line: [
+      [126, 56],
+      [190, 36],
+      [254, 56],
+      [250, 100],
+      [305, 86],
+      [360, 100],
+    ],
+  },
 ];
 
 function Flag({ x, y, color = "#d23b3b" }: { x: number; y: number; color?: string }) {
@@ -320,7 +332,7 @@ export function PlantScene({ g, stats, onStation }: Props) {
   const people = Math.min(14, g.workers.length + (stats.ownerWorks ? 1 : 0));
   const night = hour < 6 || hour >= 20;
   // Pynten (B-151)
-  const roof = ROOF[Math.min(stage, 3)];
+  const roof = ROOF[Math.min(stage, 4)];
   const facade = facadeColors(g);
   const wallA = (base: string) => facade?.[0] ?? base;
   const wallB = (base: string) => facade?.[1] ?? base;
@@ -329,6 +341,10 @@ export function PlantScene({ g, stats, onStation }: Props) {
   // Ovnene som smelter nå, hver med sin pipe på stålverket og storverket (B-242)
   const heats = g.furnaces.map((f) => !!f.heat);
   const rolling = rollingActive(g) && open && stage >= 3;
+  // Toppen av smeltehallen: høyere på storverket (B-244)
+  const top = stage >= 4 ? 56 : 70;
+  // Én glødende streng per støpemaskin (B-244)
+  const casters = 1 + (has(g, "streng2") ? 1 : 0) + (has(g, "streng3") ? 1 : 0);
 
   return (
     <svg className="plant-scene" viewBox="0 0 480 210" role="img" aria-label={`Anlegget: ${stats.stage.name}`}>
@@ -459,8 +475,10 @@ export function PlantScene({ g, stats, onStation }: Props) {
       {stage >= 3 && (
         <g>
           {/* Smelteverk */}
-          <rect x={130} y={70} width={120} height={108} fill={wallA("#76808b")} />
-          <path d="M126 70 L190 50 L254 70 Z" fill="#48515c" />
+          {/* Storverket har en høyere smeltehall enn stålverket (B-244) */}
+          <rect x={130} y={top} width={120} height={178 - top} fill={wallA("#76808b")} />
+          <path d={`M126 ${top} L190 ${top - 20} L254 ${top} Z`} fill="#48515c" />
+          {stage >= 4 && <Windows x={140} y={74} cols={8} lit={open} />}
           <rect x={150} y={132} width={46} height={46} fill="#1a1c20" />
           {melting && <circle className="scene-glow" cx={173} cy={158} r={22} fill="url(#glow)" />}
           <Windows x={204} y={90} cols={3} lit={open} />
@@ -484,10 +502,34 @@ export function PlantScene({ g, stats, onStation }: Props) {
               <path d="M96 112 L113 100 L130 112 Z" fill="#48515c" />
             </g>
           )}
+          {/* Transportbånd fra skrapgården inn i smeltehallen; skrapet går når ovnene smelter (B-244) */}
+          <g transform="translate(92 158) rotate(-38)">
+            <rect x={0} y={-2} width={has(g, "renseanlegg") ? 56 : 52} height={4} fill="#3d434b" />
+            {open && melting && (
+              <g className="scene-belt">
+                {[0, 14, 28, 42].map((x) => (
+                  <rect key={x} x={x} y={-5} width={6} height={3} fill="#8a735a" />
+                ))}
+              </g>
+            )}
+          </g>
           {/* Støpehall */}
           <rect x={250} y={100} width={110} height={78} fill={wallB("#6a737d")} />
           <path d="M250 100 L305 86 L360 100 Z" fill="#454d57" />
-          {casting && <rect className="scene-glow" x={275} y={150} width={60} height={4} fill="#ff8a1e" />}
+          {casting &&
+            Array.from({ length: casters }, (_, i) => (
+              <rect
+                key={i}
+                className="scene-glow"
+                style={{ animationDelay: `${i * 0.4}s` }}
+                x={272 + i * 4}
+                y={144 + i * 7}
+                width={62}
+                height={3}
+                rx={1}
+                fill="#ff8a1e"
+              />
+            ))}
           <Windows x={262} y={118} cols={8} lit={open} />
           {/* Valseverk */}
           {has(g, "valseverk") && (
@@ -554,6 +596,9 @@ export function PlantScene({ g, stats, onStation }: Props) {
           ))}
         </g>
       )}
+
+      {/* Står verket (utenfor skift eller uten folk), blir bildet mørkere (B-244) */}
+      {!open && <rect className="scene-idle" x={0} y={0} width={480} height={210} />}
 
       {/* Skraptrucken kjører når verket går (B-242) */}
       {open && stage >= 1 && <Truck end={stage >= 4 ? 380 : 480} />}
