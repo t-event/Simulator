@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 242,
+    date: "2026-09-28",
+    title: "Levende anleggsbilde",
+    items: [
+      "Trykk på skrapgården, ovnen, støpingen eller lageret i bildet for å åpne utstyret der.",
+      "Skraptrucken kjører, kranen går over skrapgården, og det glødende stålet løper gjennom valseverket.",
+      "Hver ovn har sin egen pipe, som bare ryker når den ovnen smelter.",
+    ],
+  },
+  {
     b: 241,
     date: "2026-09-28",
     title: "Ryddigere Salg",

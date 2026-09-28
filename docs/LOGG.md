@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 179 – 2026-09-28: UI-4d, første runde – anleggsbildet
+
+**Brukeren ba om:** «Fortsett» (neste steg i UI-planen).
+
+**Gjort:** B-242. Skraptruck, kranløper, valseverk med glødende stål, skip og kaikran; én pipe per ovn med egen røyk;
+stedene i bildet kan trykkes og åpner utstyret. Alt av med redusert bevegelse.
+
+**Testet:** tsc, lint, `npm test`, skjermbilder av nivå 0–4 og et fullt storverk, trykk på ovnshallen.
+
+**Gjenstår:** resten av UI-4d (egne bygninger per nivå, tilstand når verket står); veksten på toppen i sluttspillet;
+tom tonn-liste denne uka (B-235); reserven og kassegrensen; fase 2.
+
+---
+
 ## Økt 178 – 2026-09-28: Salg-sidene og ikonene i fagboka
 
 **Brukeren ba om:** hva de tre ikonene i fagboka betyr, og bedre og mer intuitive Salg-sider.

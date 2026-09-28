@@ -686,14 +686,100 @@ button {
   }
 }
 
+/* UI-4d (B-242): bare trykkflatene tar imot trykk, så folk og kjøretøy ikke står i veien */
+.plant-scene * {
+  pointer-events: none;
+}
+
+.plant-scene .scene-hit,
+.plant-scene .scene-hit rect {
+  pointer-events: all;
+  cursor: pointer;
+}
+
+.scene-hit rect {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 1.5;
+  transition:
+    fill 120ms,
+    stroke 120ms;
+}
+
+.scene-hit:hover rect,
+.scene-hit:focus-visible rect {
+  fill: rgba(255, 255, 255, 0.08);
+  stroke: var(--accent);
+}
+
+.scene-hit:focus {
+  outline: none;
+}
+
+.scene-truck {
+  animation: scene-truck 16s linear infinite;
+}
+
+@keyframes scene-truck {
+  from {
+    transform: translateX(-40px);
+  }
+  to {
+    transform: translateX(var(--truck-end));
+  }
+}
+
+.scene-trolley.is-moving {
+  animation: scene-trolley 5s ease-in-out infinite alternate;
+}
+
+@keyframes scene-trolley {
+  to {
+    transform: translateX(var(--span));
+  }
+}
+
+.scene-roll {
+  animation: scene-roll 1.8s linear infinite;
+}
+
+@keyframes scene-roll {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(var(--roll));
+    opacity: 0.4;
+  }
+}
+
+.scene-ship {
+  animation: scene-ship 3.2s ease-in-out infinite alternate;
+}
+
+@keyframes scene-ship {
+  to {
+    transform: translateY(1.5px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .scene-glow,
   .scene-smoke .puff,
   .scene-flag,
   .scene-lights.is-night circle,
   .scene-rotor,
-  .scene-firework {
+  .scene-firework,
+  .scene-truck,
+  .scene-trolley.is-moving,
+  .scene-roll,
+  .scene-ship {
     animation: none;
+  }
+  /* Trucken står parkert ved skrapgården i stedet for å kjøre */
+  .scene-truck {
+    transform: translateX(60px);
   }
   .scene-smoke .puff-1 {
     opacity: 0.4;

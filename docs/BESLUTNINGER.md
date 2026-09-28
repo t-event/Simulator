@@ -4443,3 +4443,21 @@ Brukeren: «Hva betyr de 3 ikonene i fagboka? Gjør alle salgs sidene bedre og m
 - **Rettet:** en forespørsel med frist som alt er passert, trekkes (før sto den med «leveres innen −1 døgn»). «1 timer»
   heter «1 time».
 - Konto: nei. Testet: Playwright på 7 størrelser (storverk og garasje): ingen horisontal scrolling, knapper minst 44 px.
+
+## B-242 UI-4d, første runde: anleggsbildet beveger seg og kan trykkes (2026-09-28)
+Status: gjelder (fase UI-4d i docs/UI.md, bygger på B-151, B-195)
+Brukeren: «Fortsett» (neste steg i planen: UI-4d polering og animasjon, inkl. anleggsbildet per nivå).
+- **Bevegelse som leser spillet** (bare `transform`/`opacity`, av med «redusert bevegelse»):
+  - Skraptrucken kjører forbi når verket er i drift (fra verkstedet). På storverket stopper veien ved havna.
+  - Kranløperen med magneten går fram og tilbake over skrapgården når verket går (fra støperiet); står stille ellers.
+  - Valseverket: glødende stål løper gjennom når det valser.
+  - Storverket: skipet i havna vugger, og en kaikran står ved kaia.
+  - Én pipe per ovn på smeltehallen (opptil fire), hver med røyk bare når den ovnen smelter. Før fulgte røyken bare om
+    noen ovn smeltet, og ovn 3 og 4 hadde ingen pipe.
+- **Stedene kan trykkes** (Verket → Oversikt): skrapgården, ovnshallen, støpehallen og ferdigvarelageret åpner utstyret
+  der, eller Anlegg når det ikke er noe å kjøpe. Ramme ved pek og tastaturfokus; Enter/mellomrom virker. Folk og
+  kjøretøy tar ikke imot trykk. Bildet i «Pynt verket» er bare et bilde.
+- Med «redusert bevegelse» står trucken parkert ved skrapgården, og alt annet står stille.
+- Gjenstår i UI-4d: egne bygninger per nivå helt fram til storverket (storverket ligner fortsatt stålverket) og en
+  mørkere tilstand når verket står.
+- Konto: nei. Testet: skjermbilder av alle fem nivåene og et fullt storverk, trykk på ovnshallen åpner ovnsutstyret.

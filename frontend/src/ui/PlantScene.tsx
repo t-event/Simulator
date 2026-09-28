@@ -5,13 +5,81 @@
  * bygger ut, skrapdungen og ferdigvarelageret følger beholdningen, ovnene
  * gløder når de smelter, og himmelen følger klokka.
  */
-import { has, hourOfDay, isOpen, type PlantStats } from "../game/plant";
+import type { KeyboardEvent } from "react";
+import { has, hourOfDay, isOpen, rollingActive, type PlantStats } from "../game/plant";
 import type { GameState } from "../game/types";
 import { cosmeticOn, facadeColors } from "../game/cosmetics";
+import { STATION_NAMES, type Station } from "./stations";
 
 interface Props {
   g: GameState;
   stats: PlantStats;
+  /** Stedene i bildet kan trykkes og åpner utstyret der (UI-4d, B-242). Uten den er bildet bare et bilde */
+  onStation?: (s: Station) => void;
+}
+
+/** Område i bildet som åpner et sted (B-242): usynlig flate med ramme ved pek og fokus */
+function Hit({
+  station,
+  x,
+  y,
+  w,
+  h,
+  onStation,
+}: {
+  station: Station;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  onStation?: (s: Station) => void;
+}) {
+  if (!onStation) return null;
+  const open = () => onStation(station);
+  const key = (e: KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      open();
+    }
+  };
+  return (
+    <g
+      className="scene-hit"
+      role="button"
+      tabIndex={0}
+      aria-label={`${STATION_NAMES[station]} – åpne utstyret`}
+      onClick={open}
+      onKeyDown={key}
+    >
+      <rect x={x} y={y} width={w} height={h} rx={3} />
+    </g>
+  );
+}
+
+/** Skraptrucken som kjører forbi når verket går (B-242). «end» er hvor veien slutter (havna på storverket) */
+function Truck({ end }: { end: number }) {
+  return (
+    <g className="scene-truck" style={{ ["--truck-end" as string]: `${end}px` }}>
+      <rect x={0} y={183} width={22} height={9} rx={1} fill="#c9892e" />
+      <path d="M2 183 L6 178 L18 178 L21 183 Z" fill="#7a6250" />
+      <rect x={22} y={185} width={9} height={7} rx={1} fill="#d8a13a" />
+      <rect x={25} y={186} width={4} height={3} fill="#9fc3e0" />
+      <circle cx={6} cy={193} r={2.4} fill="#1b1d21" />
+      <circle cx={17} cy={193} r={2.4} fill="#1b1d21" />
+      <circle cx={27} cy={193} r={2.4} fill="#1b1d21" />
+    </g>
+  );
+}
+
+/** Kranløperen med magneten som går fram og tilbake over skrapgården når verket går (B-242) */
+function Trolley({ x, y, span, moving }: { x: number; y: number; span: number; moving: boolean }) {
+  return (
+    <g className={moving ? "scene-trolley is-moving" : "scene-trolley"} style={{ ["--span" as string]: `${span}px` }}>
+      <rect x={x - 4} y={y - 2} width={8} height={4} fill="#c79a22" />
+      <line x1={x} y1={y + 2} x2={x} y2={y + 20} stroke="#999" />
+      <rect x={x - 4} y={y + 20} width={8} height={3} rx={1} fill="#50565e" />
+    </g>
+  );
 }
 
 function skyColors(hour: number): [string, string] {
@@ -240,7 +308,7 @@ function Fireworks() {
   );
 }
 
-export function PlantScene({ g, stats }: Props) {
+export function PlantScene({ g, stats, onStation }: Props) {
   const hour = hourOfDay(g);
   const [skyTop, skyBottom] = skyColors(hour);
   const open = isOpen(g, stats.hours);
@@ -258,6 +326,9 @@ export function PlantScene({ g, stats }: Props) {
   const wallB = (base: string) => facade?.[1] ?? base;
   const pipeFill = (base: string) => (cosmeticOn(g, "gullpipe") ? "#d4af37" : base);
   const groundEnd = stage >= 4 ? 395 : 470;
+  // Ovnene som smelter nå, hver med sin pipe på stålverket og storverket (B-242)
+  const heats = g.furnaces.map((f) => !!f.heat);
+  const rolling = rollingActive(g) && open && stage >= 3;
 
   return (
     <svg className="plant-scene" viewBox="0 0 480 210" role="img" aria-label={`Anlegget: ${stats.stage.name}`}>
@@ -300,9 +371,17 @@ export function PlantScene({ g, stats }: Props) {
       {stage >= 4 && (
         <g>
           <rect x={400} y={176} width={80} height={34} fill="#1d4466" />
-          <path d="M410 170 L470 170 L462 180 L416 180 Z" fill="#6b3a2a" />
-          <rect x={425} y={160} width={22} height={10} fill="#cfd6de" />
-          <rect x={440} y={150} width={4} height={10} fill="#8a939e" />
+          <g className="scene-ship">
+            <path d="M410 170 L470 170 L462 180 L416 180 Z" fill="#6b3a2a" />
+            <rect x={425} y={160} width={22} height={10} fill="#cfd6de" />
+            <rect x={440} y={150} width={4} height={10} fill="#8a939e" />
+          </g>
+          {/* Kaikran som laster skipet (B-242) */}
+          <g stroke="#e0b030" strokeWidth={1.6}>
+            <line x1={404} y1={178} x2={404} y2={128} />
+            <line x1={398} y1={130} x2={452} y2={130} />
+          </g>
+          <line x1={432} y1={130} x2={432} y2={152} stroke="#999" />
         </g>
       )}
 
@@ -373,7 +452,7 @@ export function PlantScene({ g, stats }: Props) {
             <line x1={110} y1={120} x2={110} y2={178} />
             <line x1={16} y1={120} x2={114} y2={120} />
           </g>
-          <line x1={60} y1={120} x2={60} y2={140} stroke="#999" />
+          <Trolley x={30} y={120} span={70} moving={open} />
         </g>
       )}
 
@@ -390,7 +469,14 @@ export function PlantScene({ g, stats }: Props) {
           <rect x={236} y={16} width={12} height={54} fill={pipeFill("#8c949d")} />
           <rect x={236} y={22} width={12} height={4} fill="#c0392b" />
           <rect x={236} y={34} width={12} height={4} fill="#c0392b" />
-          <Smoke x={242} y={12} active={melting} scale={1.2} />
+          <Smoke x={242} y={12} active={heats[0] ?? melting} scale={1.2} />
+          {/* Ovn 3 og 4 får hver sin pipe på smeltehallen (B-242) */}
+          {heats.slice(2, 4).map((on, i) => (
+            <g key={i}>
+              <rect x={214 - i * 20} y={28 + i * 6} width={9} height={42 - i * 6} fill={pipeFill("#8c949d")} />
+              <Smoke x={218 - i * 20} y={24 + i * 6} active={on} scale={0.9} />
+            </g>
+          ))}
           {/* Røykgassrensing */}
           {has(g, "renseanlegg") && (
             <g>
@@ -408,13 +494,27 @@ export function PlantScene({ g, stats }: Props) {
             <g>
               <rect x={360} y={128} width={stage >= 4 ? 40 : 110} height={50} fill="#5c656f" />
               <Windows x={366} y={140} cols={stage >= 4 ? 3 : 8} lit={open} />
+              {/* Glødende stål som løper gjennom valseverket når det valser (B-242) */}
+              <rect x={362} y={166} width={stage >= 4 ? 36 : 106} height={2} fill="#3a3f46" />
+              {rolling && (
+                <rect
+                  className="scene-roll"
+                  x={362}
+                  y={164}
+                  width={14}
+                  height={4}
+                  rx={1}
+                  fill="#ff8a1e"
+                  style={{ ["--roll" as string]: `${stage >= 4 ? 22 : 92}px` }}
+                />
+              )}
             </g>
           )}
           {/* Ovn nummer to */}
           {g.furnaceCount > 1 && (
             <g>
               <rect x={254} y={36} width={10} height={64} fill="#8c949d" />
-              <Smoke x={259} y={32} active={g.furnaces[1]?.heat != null} />
+              <Smoke x={259} y={32} active={heats[1] ?? false} />
             </g>
           )}
           {/* Kran i skrapgården */}
@@ -423,7 +523,7 @@ export function PlantScene({ g, stats }: Props) {
             <line x1={92} y1={110} x2={92} y2={178} />
             <line x1={10} y1={110} x2={96} y2={110} />
           </g>
-          <line x1={52} y1={110} x2={52} y2={130} stroke="#999" />
+          <Trolley x={24} y={110} span={60} moving={open} />
         </g>
       )}
 
@@ -453,6 +553,40 @@ export function PlantScene({ g, stats }: Props) {
             />
           ))}
         </g>
+      )}
+
+      {/* Skraptrucken kjører når verket går (B-242) */}
+      {open && stage >= 1 && <Truck end={stage >= 4 ? 380 : 480} />}
+
+      {/* Stedene kan trykkes (B-242): skrapgården, ovnshallen, støpehallen og ferdigvarelageret */}
+      {stage === 0 && (
+        <>
+          <Hit station="skrap" x={118} y={146} w={70} h={34} onStation={onStation} />
+          <Hit station="ovn" x={186} y={96} w={104} h={84} onStation={onStation} />
+        </>
+      )}
+      {stage === 1 && (
+        <>
+          <Hit station="skrap" x={118} y={146} w={50} h={34} onStation={onStation} />
+          <Hit station="ovn" x={170} y={74} w={150} h={106} onStation={onStation} />
+        </>
+      )}
+      {stage === 2 && (
+        <>
+          <Hit station="skrap" x={12} y={116} w={104} h={64} onStation={onStation} />
+          <Hit station="ovn" x={116} y={56} w={134} h={124} onStation={onStation} />
+          <Hit station="stoping" x={250} y={102} w={120} h={78} onStation={onStation} />
+        </>
+      )}
+      {stage >= 3 && (
+        <>
+          <Hit station="skrap" x={8} y={106} w={90} h={74} onStation={onStation} />
+          <Hit station="ovn" x={124} y={12} w={130} h={168} onStation={onStation} />
+          <Hit station="stoping" x={250} y={84} w={110} h={96} onStation={onStation} />
+        </>
+      )}
+      {storeFill > 0.001 && (
+        <Hit station="lager" x={(stage >= 3 ? 300 : 330) - 3} y={160} w={42} h={20} onStation={onStation} />
       )}
 
       {/* Folk */}

@@ -285,7 +285,7 @@ Hver PR er liten, går gjennom alle sjekker, Playwright på **7 størrelser** (3
    driftsdashbord) · **UI-2c Marked** (bygget, B-197; skraptabell på PC, kort på mobil) · **UI-2d Salg** (bygget, B-198; liste + detaljer for forespørsler på PC, kort på mobil).
 4. **UI-3a Økonomi** (bygget, B-203; resultat øverst, graf per døgn, poster) · **UI-3b Folk** (bygget, B-204; bemanning synlig på PC, Ferdighet-kolonne) · **UI-3c Forskning** (bygget, B-205; fagpoeng i egen kolonne, fremdrift mot prisen) · **UI-3d Konsern** (bygget, B-206; hovedkontor uten anleggsbildet på PC, verkene som tabell).
 5. **UI-4a Kontrollrommet** (bygget, B-216; ikoner, knappen nederst på mobil, ovn + styring side om side på PC) · **UI-4b Toppliste/Hall of Fame** (bygget, B-224; ikoner i toppen, sesong/Hall of Fame som valg, din plass øverst, lasteskisse, forklaringen bak en lenke) · **UI-4c øvrige ark og små skjermer** (bygget, B-225; felles arktopp `SheetHead` som står fast, lukk 44 px, varselfanene i to rader på 320 px) ·
-   **UI-4d polering og animasjon** (inkl. anleggsbildet per nivå).
+   **UI-4d polering og animasjon** (inkl. anleggsbildet per nivå; første runde bygget, B-242: kjøretøy, kran, valseverk, skip, pipe per ovn, trykkbare steder).
 6. Etterpå: logo, app-ikon og tittelbilde (bevisst sist, B-187).
 
 Fase 1B (skraplager, anbud) bygges parallelt med samme komponenter så snart UI-1a er inne, så nye sider ikke må
