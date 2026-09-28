@@ -123,7 +123,7 @@ frontend/src/
     actions.ts   Spillerhandlinger          research.ts  Forskning, fagpoeng, låste skraptyper og fart
     recipe.ts    Reseptsjekk og forslag til billigste resept
     quiz.ts      Quiz per kapittel         missions.ts  Oppdrag fra fagboka
-    challenges.ts Utfordringer på storverket   inbox.ts   Varsellista (hva som er viktig og nytt)
+    challenges.ts Utfordringer på storverket, serier i trinn (B-232)   inbox.ts   Varsellista (hva som er viktig og nytt)
     tests.ts     Raske tester av motoren (npm test)
     decisions.ts Hendelseskort med valg     knowledge.ts Fagboka
     save.ts      Lagring + migrering        useGame.ts   Spilløkka for React
@@ -134,7 +134,7 @@ frontend/src/
     reserve.ts   Midlertidig myk grense for kassa (100 mrd.) og bunden konsernreserve (B-193) – grensen står her
     daily.ts     Daglig belønning, dagens oppdrag og mens du var borte (B-149)
     mastery.ts   Mesterskap: forskning som tas om og om igjen etter all forskning (B-150)
-    achievements.ts Prestasjoner (merker)   cosmetics.ts  Pynt i anleggsbildet for fagpoeng (B-151)
+    achievements.ts Prestasjoner, serier i trinn (B-232; gamle id-er beholdt)   cosmetics.ts  Pynt for fagpoeng (B-151)
     landmarks.ts Landemerker: store byggeprosjekter som forespørsler, ett per virkelig dag (B-174)
     changelog.ts Endringsloggen «Hva er nytt» (B-179) – ny oppføring ved hver endring
     clock.ts     Ekte tid (realNow/setRealClock): byggeprosjekter i konsernet og pausen mellom like kort (B-209, B-210)

@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 169 – 2026-09-28: Mange flere utfordringer og prestasjoner
+
+**Brukeren ba om:** mange flere utfordringer og prestasjoner, og bedre, mer intuitive kort.
+
+**Gjort:** B-232. Utfordringer i 19 serier med 74 trinn, prestasjoner i 25 serier med 99 merker. Nye kort:
+nærmeste først med fremdrift og belønning, trinnprikker, seriene som ruter per gruppe med detaljer ved trykk.
+
+**Testet:** tsc, lint, `npm test` (to nye tester), balance (exit-kode), Playwright på 7 størrelser, effekten på et
+ekte spill.
+
+**Gjenstår:** UI-4d; reserven og kassegrensen; fase 2 videre.
+
+---
+
 ## Økt 168 – 2026-09-28: Produksjonslinja i én rad
 
 **Brukeren ba om:** at anleggskortet på Oversikt ikke har en rute alene på egen rad, og blir mer intuitivt.

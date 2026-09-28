@@ -5,10 +5,15 @@ import { SheetHead } from "./ds";
 import { useState } from "react";
 import {
   ACHIEVEMENT_BY_ID,
+  ACHIEVEMENT_FAMILIES,
+  ACHIEVEMENT_GROUPS,
   ACHIEVEMENTS,
   achievementShare,
   achievementsDone,
+  familyAchievements,
+  fmtGoal,
   hasAchievement,
+  nextInFamily,
   type Achievement,
 } from "../game/achievements";
 import { buyCosmetic, COSMETICS, cosmeticBlocked, ownsCosmetic, setCosmetic } from "../game/cosmetics";
@@ -17,73 +22,134 @@ import type { PlantStats } from "../game/plant";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Bar, Card } from "./common";
-import { fmtNum } from "./format";
 import { PlantScene } from "./PlantScene";
 import { Portal } from "./Portal";
 import { Icon } from "./icons";
 
-/** Den som er nærmest å bli nådd – vises først */
-function nextUp(g: GameState): Achievement | undefined {
-  return ACHIEVEMENTS.filter((a) => !hasAchievement(g, a.id)).sort(
-    (a, b) => achievementShare(g, b) - achievementShare(g, a),
-  )[0];
-}
-
-function progressText(g: GameState, a: Achievement): string {
-  const [now, goal] = a.progress(g);
-  if (goal <= 1) return a.description;
-  return `${a.description} ${fmtNum(Math.min(Math.floor(now), goal), 0)} av ${fmtNum(goal, 0)}.`;
-}
-
+/**
+ * Prestasjonskortet (B-232): øverst de tre merkene du er nærmest, så alle seriene gruppert (Produksjon, Kunder …) som
+ * ruter med ikon, navn og trinn. Trykk på en serie for å se alle trinnene i den.
+ */
 export function AchievementsCard({ g, onOpenPynt }: { g: GameState; onOpenPynt: () => void }) {
   const [picked, setPicked] = useState<string | null>(null);
   const done = achievementsDone(g);
-  const shown = (picked && ACHIEVEMENT_BY_ID[picked]) || nextUp(g);
-  const shownDone = shown ? hasAchievement(g, shown.id) : false;
+  const next = ACHIEVEMENT_FAMILIES.map((f) => nextInFamily(g, f.id))
+    .filter((a): a is Achievement => !!a)
+    .sort((a, b) => achievementShare(g, b) - achievementShare(g, a))
+    .slice(0, 3);
   return (
     <Card
-      title={`Prestasjoner (${done} av ${ACHIEVEMENTS.length})`}
+      title="Prestasjoner"
       right={
         <button className="g-small" onClick={onOpenPynt}>
           <Icon name="palette" /> Pynt
         </button>
       }
     >
-      <div className="g-badges" role="list">
-        {ACHIEVEMENTS.map((a) => {
-          const got = hasAchievement(g, a.id);
-          return (
-            <button
-              key={a.id}
-              role="listitem"
-              className={`g-badge-tile${got ? " is-got" : ""}${shown?.id === a.id ? " is-picked" : ""}`}
-              aria-label={`${a.name}${got ? " (klart)" : ""}`}
-              aria-pressed={shown?.id === a.id}
-              onClick={() => setPicked(a.id)}
-            >
-              <span aria-hidden="true">{a.icon}</span>
-            </button>
-          );
-        })}
+      <div className="g-ach-total">
+        <Bar value={done / ACHIEVEMENTS.length} tone="ok" label="Prestasjoner" />
+        <span className="g-muted g-small-text">
+          {done} av {ACHIEVEMENTS.length} merker
+        </span>
       </div>
-      {shown && (
-        <div className={`g-mission${shownDone ? " is-done" : ""}`}>
-          <strong>
-            {shown.icon} {shown.name}
-            {shownDone ? ` ✓ (dag ${g.achievements[shown.id]})` : ""}
-          </strong>
-          {!shownDone && shown.progress(g)[1] > 1 && (
-            <Bar value={achievementShare(g, shown)} tone="ok" label="Fremdrift" />
-          )}
-          <span className="g-muted">
-            {shownDone ? shown.description : progressText(g, shown)} · {shown.fp} fagpoeng
-          </span>
-        </div>
+      {next.length > 0 && (
+        <>
+          <h3 className="g-subhead">Nærmest</h3>
+          <ul className="g-ach-next">
+            {next.map((a) => (
+              <li key={a.id}>
+                <span className="g-ach-next-icon" aria-hidden="true">
+                  {a.icon}
+                </span>
+                <div>
+                  <strong>{a.name}</strong>
+                  <Bar value={achievementShare(g, a)} tone="ok" label="Fremdrift" />
+                  <span className="g-muted g-small-text">
+                    {progressText(g, a)} · +{a.fp} fp
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
-      <p className="g-muted">
-        Trykk på et merke for å se hva som skal til. Fagpoeng kan også brukes på pynt til verket.
-      </p>
+      {ACHIEVEMENT_GROUPS.map((group) => {
+        const fams = ACHIEVEMENT_FAMILIES.filter((f) => f.group === group);
+        const all = fams.flatMap((f) => familyAchievements(f.id));
+        const got = all.filter((a) => hasAchievement(g, a.id)).length;
+        const open = fams.find((f) => f.id === picked);
+        return (
+          <section key={group} className="g-ach-group">
+            <h3 className="g-subhead">
+              {group}{" "}
+              <span className="g-muted">
+                {got}/{all.length}
+              </span>
+            </h3>
+            <div className="g-ach-tiles" role="list">
+              {fams.map((f) => {
+                const tiers = familyAchievements(f.id);
+                const n = tiers.filter((a) => hasAchievement(g, a.id)).length;
+                return (
+                  <button
+                    key={f.id}
+                    role="listitem"
+                    className={`g-ach-tile${n > 0 ? " is-got" : ""}${n === tiers.length ? " is-full" : ""}${picked === f.id ? " is-picked" : ""}`}
+                    aria-pressed={picked === f.id}
+                    aria-label={`${f.name}: ${n} av ${tiers.length}`}
+                    onClick={() => setPicked(picked === f.id ? null : f.id)}
+                  >
+                    <span className="g-ach-tile-icon" aria-hidden="true">
+                      {f.icon}
+                    </span>
+                    <span className="g-ach-tile-name">{f.name}</span>
+                    <span className="g-ach-tile-tier">
+                      {n}/{tiers.length}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            {open && <FamilyDetail g={g} family={open.id} />}
+          </section>
+        );
+      })}
+      <p className="g-muted g-small-text">Merkene gir fagpoeng. Fagpoeng kan også brukes på pynt til verket.</p>
     </Card>
+  );
+}
+
+function progressText(g: GameState, a: Achievement): string {
+  const [now, goal] = a.progress(g);
+  if (goal <= 1) return a.description;
+  return `${a.description} ${fmtGoal(Math.min(now, goal))} av ${fmtGoal(goal)}.`;
+}
+
+/** Alle trinnene i en serie: klart (med dagen), neste (med fremdrift) og de som kommer */
+function FamilyDetail({ g, family }: { g: GameState; family: string }) {
+  const tiers = familyAchievements(family);
+  const next = nextInFamily(g, family);
+  return (
+    <ol className="g-ach-detail">
+      {tiers.map((a) => {
+        const got = hasAchievement(g, a.id);
+        return (
+          <li key={a.id} className={got ? "is-done" : a.id === next?.id ? "is-now" : ""}>
+            <div className="g-ach-detail-head">
+              <strong>
+                {got ? "✓ " : ""}
+                {a.name}
+              </strong>
+              <span className="g-muted g-small-text">{got ? `dag ${g.achievements[a.id]}` : `+${a.fp} fp`}</span>
+            </div>
+            {a.id === next?.id && a.progress(g)[1] > 1 && (
+              <Bar value={achievementShare(g, a)} tone="ok" label="Fremdrift" />
+            )}
+            <span className="g-muted g-small-text">{a.id === next?.id ? progressText(g, a) : a.description}</span>
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 
