@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 186 – 2026-09-28: Logo, app-ikon og tittelbilde
+
+**Brukeren ba om:** «Fortsett» (siste punkt i UI-planen). Valgte «verket i kveldslys» blant fire forslag.
+
+**Gjort:** B-249. Nytt app-ikon (SVG og PNG), tittelbilde øverst på startskjermen med stigende røyk og glødende port.
+
+**Testet:** tsc, lint, `npm test`; startskjermen på de 7 størrelsene; ikonene i 16–512 px.
+
+**Gjenstår:** UI-planen er ferdig. Videre: veksten på toppen i sluttspillet; tom tonn-liste denne uka (B-235); reserven og
+kassegrensen; fase 2.
+
+---
+
 ## Økt 185 – 2026-09-28: Boblen ble kuttet
 
 **Brukeren ba om:** at den grønne boblen over anleggsbildet skal vises riktig (den var kuttet til venstre).

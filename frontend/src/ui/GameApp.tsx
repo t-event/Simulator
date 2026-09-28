@@ -46,6 +46,7 @@ import { VIEWS, viewUnlocked, type View } from "./views";
 import { Icon, type IconName } from "./icons";
 import { isVerketTab } from "./verketTabs";
 import type { OnTab } from "./tabMemory";
+import { TitleArt } from "./TitleArt";
 
 const NAV_ICON: Record<View, IconName> = {
   verket: "verket",
@@ -81,6 +82,7 @@ function Intro({ api }: { api: GameApi }) {
   return (
     <div className="g-intro">
       <div className="g-intro-card">
+        <TitleArt />
         <h1>Stålverket</h1>
         <p className="g-intro-lead">Fra garasje til storverk.</p>
         <p className="g-intro-short">
