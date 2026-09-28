@@ -38,6 +38,7 @@ import {
   trackCosmetic,
 } from "./cosmetics";
 import { CHALLENGES, checkChallenges, currentChallenge } from "./challenges";
+import { TREND, trendPriceFactor, updateTrend } from "./trends";
 import { ADDONS, CASTINGS, FURNACES, STAGES, WIN_CASH } from "./data";
 import {
   advance,
@@ -47,6 +48,7 @@ import {
   agreementCancelCost,
   cancelAgreement,
   checkWin,
+  extraOffer,
   completeManual,
   fmtKr,
   log,
@@ -2280,6 +2282,55 @@ test("Markedet metter seg (B-252): full pris opp til 10 000 t i døgnet, lavere 
   // Mer produksjon gir fortsatt mer omsetning totalt, bare mindre per tonn
   assert(34_721 * big > 20_000 * marketSaturation(20_000), "mer produksjon gir mindre omsetning");
   assert(marketSaturation(20_000) > big, "prisen faller ikke med mengden");
+});
+
+test("Trender i markedet (B-255): starter og slutter, drar forespørsler mot det som er ettertraktet, og gir bedre pris", () => {
+  // Ingen trender i garasjen
+  const g0 = newGame(255);
+  assert(
+    updateTrend(g0, 50, ["emne", "armering"], ["enkel", "standard"]) === null && !g0.market.trend,
+    "trend i garasjen",
+  );
+  // Fra verkstedet: starter når pausen er over, varer noen døgn, og slutter med en beskjed
+  const g = newGame(2551);
+  g.stage = 1;
+  g.market.nextTrendDay = 10;
+  assert(updateTrend(g, 9, ["blokk"], ["enkel", "standard"]) === null, "startet før pausen var over");
+  const start = updateTrend(g, 10, ["blokk"], ["enkel", "standard"]);
+  const t = g.market.trend!;
+  assert(start && t && t.untilDay >= 16 && t.untilDay <= 22, `start: ${start}, ${JSON.stringify(t)}`);
+  assert(t.kind === "kvalitet", "trend på en vare verket bare lager én av");
+  assert(/Etterspørselen etter/.test(start!), start!);
+  const end = updateTrend(g, t.untilDay, ["blokk"], ["enkel", "standard"]);
+  assert(end && !g.market.trend && (g.market.nextTrendDay ?? 0) > t.untilDay, `slutt: ${end}`);
+  // Prisen: 12 % mer når det er ettertraktet, 10 % mindre når det er lite etterspurt, ellers uendret
+  g.market.trend = { kind: "kvalitet", id: "standard", up: true, fromDay: 0, untilDay: 999 };
+  assert(trendPriceFactor(g, "blokk", "standard") === TREND.priceUp, "pris opp");
+  assert(trendPriceFactor(g, "blokk", "enkel") === 1, "pris på en annen kvalitet");
+  // Forespørslene dras mot det som er ettertraktet (sammenlignet med uten trend, samme frø)
+  const share = (trend: boolean) => {
+    const h = newGame(2552);
+    h.pendingDecision = null;
+    h.market.trend = trend ? { kind: "kvalitet", id: "enkel", up: true, fromDay: 0, untilDay: 999 } : null;
+    const stats = computePlantStats(h);
+    let hit = 0;
+    let n = 0;
+    let tagged = 0;
+    for (let i = 0; i < 200; i++) {
+      h.contracts = [];
+      extraOffer(h, stats);
+      const c = h.contracts[0];
+      if (!c) continue;
+      n++;
+      if (c.grade === "enkel") hit++;
+      if (c.trend) tagged++;
+    }
+    return { share: hit / Math.max(1, n), tagged, n };
+  };
+  const without = share(false);
+  const withTrend = share(true);
+  assert(withTrend.share > without.share + 0.1, `andel ${without.share} uten, ${withTrend.share} med trend`);
+  assert(without.tagged === 0 && withTrend.tagged > 0, `merket: ${without.tagged} / ${withTrend.tagged}`);
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

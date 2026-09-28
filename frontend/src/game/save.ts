@@ -138,6 +138,9 @@ export function migrate(g: GameState): GameState {
   if (g.switchWaitNoted === undefined) g.switchWaitNoted = false;
   if (g.switchWaitDay === undefined) g.switchWaitDay = null;
   if (g.market.powerDryDays === undefined) g.market.powerDryDays = 0;
+  // Trender i markedet (B-255)
+  if (g.market.trend === undefined) g.market.trend = null;
+  if (g.market.nextTrendDay === undefined) g.market.nextTrendDay = 0;
   if (g.konsern === undefined)
     g.konsern = { unlocked: false, plants: [], shared: [], nextId: 1, director: null, milestones: 0, legends: 0 };
   if (g.konsern.director === undefined) g.konsern.director = null;

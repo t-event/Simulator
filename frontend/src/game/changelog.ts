@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 255,
+    date: "2026-09-28",
+    title: "Trender i markedet",
+    items: [
+      "Fra verkstedet skifter etterspørselen: i noen døgn er én kvalitet eller vare ettertraktet (flere forespørsler og bedre pris) eller lite etterspurt.",
+      "Loggen forteller hvorfor, og Salg og Marked viser trenden og hvor lenge den varer. Forespørsler som betaler ekstra, er merket «Ettertraktet».",
+    ],
+  },
+  {
     b: 254,
     date: "2026-09-28",
     title: "Riktigere tall for store konsern",

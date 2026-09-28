@@ -799,6 +799,15 @@ const ICONS = {
     ["rect", { width: "4", height: "6", x: "8", y: "16", rx: "1" }],
   ],
   // To emner – støpingen (B-243)
+  // Trender i markedet (B-255)
+  "trending-up": [
+    ["path", { d: "M16 7h6v6" }],
+    ["path", { d: "m22 7-8.5 8.5-5-5L2 17" }],
+  ],
+  "trending-down": [
+    ["path", { d: "M16 17h6v-6" }],
+    ["path", { d: "m22 17-8.5-8.5-5 5L2 7" }],
+  ],
   "stretch-horizontal": [
     ["rect", { width: "20", height: "6", x: "2", y: "4", rx: "2" }],
     ["rect", { width: "20", height: "6", x: "2", y: "14", rx: "2" }],

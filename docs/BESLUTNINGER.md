@@ -4627,3 +4627,24 @@ Brukeren: «Fortsett». Gjennomgang av steder som regner inntekt på egen hånd 
   markedet gir (B-252); påslaget (35 %, 15 %, 25 %) kommer på toppen.
 - Ny test: verdien av «Konsernledelse» med 12 komplekser er under 5 % av nettoen. Testspilleren er uendret og grønn.
 - Konto: nei.
+
+## B-255 Trender i markedet (2026-09-28)
+Status: gjelder (fra FORSLAG og DESIGN.md: «etterspørselen etter armering øker»)
+Brukeren: «Fortsett». Fase 2 venter på at skraplageret får en eier (B-253), så neste punkt på lista ble trender.
+- **Hva:** én trend om gangen fra verkstedet: etterspørselen etter én kvalitet eller én vare (bare hvis verket lager
+  flere varer) går opp eller ned i 6–12 spilldøgn, med 4–10 døgn pause mellom. Like ofte opp som ned. `game/trends.ts`
+  (`TREND`, `updateTrend`, `trendPriceFactor`, `trendHits`); tilstanden i `g.market.trend` og `g.market.nextTrendDay`
+  (standard i `migrate()`).
+- **Virkning:** opp: forespørsler og avtaler på det som er ettertraktet får ca. 12 % bedre pris, og halvparten av de andre
+  forespørslene verket kan lage, dras over dit. Ned: ca. 10 % lavere pris, og halvparten av forespørslene på det dras
+  bort. Bare forespørsler verket alt kunne laget, flyttes – så antallet det kan ta imot, er det samme.
+- **Lærerikt:** hver trend har en grunn med vanlige ord i loggen (byggebransjen går for fullt, bilindustrien trenger
+  stål som er lett å forme, valseverkene har fulle lagre …).
+- **Vist:** linja «Ettertraktet: …» / «Lite etterspurt: …» med ikon og døgn igjen under Salg → Forespørsler og Marked →
+  Stålpriser, bare mens en trend varer (gradvis synlighet); merket «Ettertraktet» på forespørsler som kom under trenden
+  (`Contract.trend`). Nye Lucide-ikoner `trending-up`/`trending-down`.
+- **Balanse:** trendene trekker tilfeldige tall, så hele testspilleren går annerledes: med trendene uten virkning
+  (bare nye tilfeldigheter) ble storverket nådd dag 145 i median (før 159); med trendene dag 137 – ca. 5 % raskere,
+  fordi den som følger med kan velge de godt betalte. Alle mål OK, nybegynneren dag 143. En versjon med oftere opp
+  enn ned (65 %) ga dag 132 og ble forkastet.
+- Konto: nei (eget spill).
