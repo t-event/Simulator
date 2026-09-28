@@ -15,6 +15,12 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 248,
+    date: "2026-09-28",
+    title: "Boblene får plass",
+    items: ["Boblene med penger, tonn og fagpoeng over anleggsbildet blir ikke lenger kuttet i kanten."],
+  },
+  {
     b: 247,
     date: "2026-09-28",
     title: "Utstyret står stille",

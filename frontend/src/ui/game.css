@@ -1560,15 +1560,24 @@ button {
   overflow: hidden;
 }
 
+/*
+ * Banen (--lane, 0–1) er både hvor boblen står og hvilket punkt i boblen som står der (B-248): en boble i venstre bane
+ * forankres nær venstre kant av seg selv. Da holder den seg alltid inne i bildet, også når teksten er lang – før ble
+ * den sentrert på banen og kuttet av kanten.
+ */
 .g-bubble {
   position: absolute;
   bottom: 30%;
-  transform: translateX(-50%);
+  left: calc(var(--sp-3) + (100% - 2 * var(--sp-3)) * var(--lane, 0.5));
+  transform: translateX(calc(-100% * var(--lane, 0.5)));
+  width: max-content;
+  max-width: calc(100% - 2 * var(--sp-3));
   padding: 3px 9px;
   border-radius: var(--r-lg);
   font-size: var(--fs-meta);
   font-weight: 700;
-  white-space: nowrap;
+  text-align: center;
+  text-wrap: balance;
   animation: g-bubble 1.6s ease-out forwards;
   box-shadow: var(--shadow-sm);
 }
@@ -1591,15 +1600,15 @@ button {
 @keyframes g-bubble {
   0% {
     opacity: 0;
-    transform: translate(-50%, 10px) scale(0.7);
+    transform: translate(calc(-100% * var(--lane, 0.5)), 10px) scale(0.7);
   }
   15% {
     opacity: 1;
-    transform: translate(-50%, 0) scale(1);
+    transform: translate(calc(-100% * var(--lane, 0.5)), 0) scale(1);
   }
   100% {
     opacity: 0;
-    transform: translate(-50%, -90px) scale(1);
+    transform: translate(calc(-100% * var(--lane, 0.5)), -90px) scale(1);
   }
 }
 

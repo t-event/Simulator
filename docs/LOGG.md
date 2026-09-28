@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 185 – 2026-09-28: Boblen ble kuttet
+
+**Brukeren ba om:** at den grønne boblen over anleggsbildet skal vises riktig (den var kuttet til venstre).
+
+**Gjort:** B-248. Boblene forankres etter banen og holder seg inne i bildet; lange bobler brytes mellom delene.
+
+**Testet:** tsc, lint, `npm test`; kantene til boblene målt på 320, 390 og 1 280 px.
+
+**Gjenstår:** logo, app-ikon og tittelbilde (siste del av UI-4d); veksten på toppen i sluttspillet; tom tonn-liste denne
+uka (B-235); reserven og kassegrensen; fase 2.
+
+---
+
 ## Økt 184 – 2026-09-28: Utstyrsarkene hoppet
 
 **Brukeren ba om:** at linjene ikke skal flytte seg i utstyrsarkene for ovner og støping.
