@@ -295,6 +295,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   ikke flyttes til konsernkassa og teller ikke som penger på bok. Skal migreres når sluttspillet er rebalansert.
 - **Døgnproduksjon og valseverket** (B-217): `stats.dailyProductT` er alt verket lager (emner og armering). Armering er
   begrenset av valseverket (`stats.rolledDailyT`); bruk `productCapT(stats, vare)` når noe gjelder én vare.
+- **Lagerplanen** (B-228): `planLots` i `engine.ts` fordeler partiene på kontraktene i køens rekkefølge (også emner som
+  skal valses til armering). Leveranser, valseverket og `ordersToMake` bygger på den – ikke lag egne reservasjoner.
+  Test endringer i produksjonen på et ekte, stort spill med flere frø (sene kontrakter og levert tonn), ikke bare balance.
 - **Skrapvarsel** (B-219): varsler i grensesnittet bruker `scrapAlert` (neste charge står fast), ikke `scrapShort` (en
   type i resepten er under én charge – ovnen fyller da opp med annet). Ellers varsles det om returskrap som ikke kan kjøpes.
 - **Anbud og inntekt** (B-189) avgjøres «lat» av `world_status()` → `world_tick()`. Test livsløpet med midlertidige

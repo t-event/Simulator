@@ -742,8 +742,8 @@ export function directorDailyT(g: GameState, stats: ReturnType<typeof computePla
     : stats.dailyProductT * 0.6;
   return Math.min(realisticDailyT(g, stats), typical);
 }
-/** Hvor mye av tida til fristen salgsdirektøren bruker, per oppgradering (B-172) */
-const DIRECTOR_MARGINS = [DIRECTOR_MARGIN, 0.85, 0.85, 0.85];
+/** Hvor mye av tida til fristen salgsdirektøren bruker, per oppgradering (B-172; 0,85 → 0,75 i B-228) */
+const DIRECTOR_MARGINS = [DIRECTOR_MARGIN, 0.75, 0.75, 0.75];
 
 /** Oppgraderinger av salgsdirektøren (B-172): brukeren så at den av og til ikke hadde noen ordrer */
 export const DIRECTOR_UPGRADES: { name: string; price: number; text: string }[] = [

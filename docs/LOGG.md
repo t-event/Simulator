@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 165 – 2026-09-28: Leveransene kom fortsatt for sent
+
+**Brukeren ba om:** skjermbilde av rådgiveren «leveransene kommer for sent» igjen, dag 1588.
+
+**Gjort:** B-228. Hentet spillet fra serveren og kjørte det videre i motoren. Valseverket valset feil kvalitet og tok
+emner emneordrene ventet på; ovnene fôret ikke valseverket jevnt; kontrakter ble regnet som dekket av andres partier.
+Ny lagerplan, jevn fôring av valseverket og strammere margin for salgsdirektøren. Sene kontrakter 10,8 → 3,4 per 30
+døgn i samme spill.
+
+**Testet:** tsc, lint, `npm test` (to nye tester som feiler med gammel kode), balance (exit-kode), simulering av spillet
+med 6–8 frø.
+
+**Gjenstår:** kvalitetsbyttene i støpingen koster fortsatt tid (sekvenser); UI-4d; reserven og kassegrensen.
+
+---
+
 ## Økt 164 – 2026-09-28: Industrien rundt verket
 
 **Brukeren ba om:** at skraplageret ikke skal være en egen side i Konsern, men settes opp etter planen videre.

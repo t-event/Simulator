@@ -42,6 +42,7 @@ import {
   makeCandidate,
   newGame,
   oftenSick,
+  ordersToMake,
 } from "./engine";
 import { logTopic, showToast, unseenCount } from "./inbox";
 import { KNOWLEDGE } from "./knowledge";
@@ -1819,6 +1820,73 @@ test("Valseverket får emner til armeringsordren øverst i køen (B-223), selv m
   };
   assert(setup(true) > 0, "valseverket valset ingenting selv om armeringsordren står øverst");
   assert(setup(false) === 0, "valseverket tok emner en emneordre venter på (uten armeringsordre foran)");
+});
+
+test("Valseverket valser bare kvaliteten armeringsordren trenger, og lar emneordrenes emner ligge (B-228)", () => {
+  const g = newGame(228);
+  g.stage = 4;
+  g.owned.push("valseverk", "ovn2", "ovn3", "streng2", "streng3");
+  g.furnaceCount = 3;
+  g.furnaceType = "likestrom420";
+  g.castingType = "streng8";
+  g.settings.rolling = true;
+  g.workers = [];
+  for (const [role, n] of Object.entries(crewPerShift(g)) as [RoleId, number][])
+    for (let i = 0; i < n * 5; i++) g.workers.push(makeCandidate(g, role));
+  g.pendingDecision = null;
+  g.agreements = [];
+  const lav = { c: 0.03, p: 0.01, tramp: 0.1 };
+  const arm = { c: 0.22, p: 0.02, tramp: 0.2 };
+  const lot = (id: number, a: typeof lav) => ({
+    id,
+    product: "emne" as const,
+    t: 3000,
+    analysis: a,
+    known: a,
+    measured: { c: true, p: true, tramp: true },
+    second: false,
+    madeDay: day(g),
+  });
+  g.lots = [lot(1, lav), lot(2, arm)];
+  const base = { delivered: 0, pricePerT: 1, deadlineDay: day(g) + 5, offerExpiresMin: 0, repGain: 0, repLoss: 0 };
+  const more = { penaltyPerT: 0, status: "aktiv" as const, closedDay: null, acceptedDay: day(g) };
+  g.contracts = [
+    { ...base, ...more, id: 1, customer: "A", product: "armering", grade: "armering", tonnes: 1_000, priority: 1 },
+    { ...base, ...more, id: 2, customer: "E", product: "emne", grade: "lavkarbon", tonnes: 50_000, priority: 2 },
+  ];
+  advance(g, 30);
+  const lavLeft = g.lots.filter((l) => l.product === "emne" && l.known.c < 0.1).reduce((t, l) => t + l.t, 0);
+  const emneGot = g.contracts.find((c) => c.id === 2)!.delivered;
+  assert(Math.abs(lavLeft + emneGot - 3000) < 1, `lavkarbon-emner ble valset: ${lavLeft} + ${emneGot} av 3000`);
+  const rebar = g.lots.filter((l) => l.product === "armering").reduce((t, l) => t + l.t, 0) + g.contracts[0].delivered;
+  assert(rebar > 0, "valseverket valset ikke armeringsemnene");
+});
+
+test("En kontrakt regnes bare som dekket av partiene den selv får (B-228)", () => {
+  const g = newGame(2281);
+  g.pendingDecision = null;
+  g.agreements = [];
+  const a = { c: 0.1, p: 0.01, tramp: 0.1 };
+  g.lots = [
+    {
+      id: 1,
+      product: "emne",
+      t: 100,
+      analysis: a,
+      known: a,
+      measured: { c: true, p: true, tramp: true },
+      second: false,
+      madeDay: day(g),
+    },
+  ];
+  const base = { delivered: 0, pricePerT: 1, deadlineDay: day(g) + 5, offerExpiresMin: 0, repGain: 0, repLoss: 0 };
+  const more = { penaltyPerT: 0, status: "aktiv" as const, closedDay: null, acceptedDay: day(g) };
+  g.contracts = [
+    { ...base, ...more, id: 1, customer: "A", product: "emne", grade: "enkel", tonnes: 100, priority: 1 },
+    { ...base, ...more, id: 2, customer: "B", product: "emne", grade: "enkel", tonnes: 100, priority: 2 },
+  ];
+  const ids = ordersToMake(g).map((c) => c.id);
+  assert(ids.length === 1 && ids[0] === 2, `feil ordrer å lage: ${ids.join(",")}`);
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

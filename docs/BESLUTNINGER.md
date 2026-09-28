@@ -4100,3 +4100,33 @@ planen videre.»
 - Testet i Playwright på de 7 størrelsene med falsk tjeneste (med og uten konto): ingen horisontal scrolling, ingen
   avkortede knapper, begge kortene på Industrien.
 - Konto: som før (skraplageret og konsernkassa krever konto, regel 3 og 7).
+
+## B-228 Leveransene kom fortsatt for sent: valseverket valset feil stål (2026-09-28)
+Status: gjelder (bygger på B-217 og B-223; erstatter reservasjonsregelen i B-223)
+Brukeren (skjermbilde av rådgiveren, dag 1588): «Får enda denne». Spillet til [Tuster] ble hentet fra serveren
+(dag 1607) og kjørt videre i motoren: 10,8 sene kontrakter per 30 døgn i snitt over seks frø, selv med to
+planleggere og salgsdirektør.
+- **Årsak 1 – valseverket valset feil kvalitet.** Det tok alle ledige emner, også kvaliteter ingen armeringsordre
+  trengte, og emner som emneordrene bak den første armeringsordren ventet på (B-223 holdt bare av for emneordrene
+  foran). Premium-armeringen ble liggende, og emneordrene manglet emner.
+- **Årsak 2 – ovnene laget for mye til armeringen og for lite i tide.** En armeringsordre regnet ikke emnene som lå
+  klare til valsing som dekket, så ovnene fortsatte å lage dem; og emnene til armeringen kom først når emneordrene
+  foran var ferdige, så valseverket (8 300 t/døgn) sto og måtte ta igjen alt til slutt.
+- **Årsak 3 – en kontrakt ble regnet som dekket av partier en tidligere kontrakt allerede hadde fått.**
+- **Rettet:**
+  - Én lagerplan (`planLots`) i køens rekkefølge: hver kontrakt får partiene som holder kvaliteten; en armeringsordre
+    får armering på lager og ellers emner av riktig kvalitet, som valseverket gjør om. Valseverket valser først disse
+    emnene, og ellers bare emner ingen ordre trenger.
+  - `ordersToMake` bruker det kontrakten selv har fått på lager.
+  - Når emnene som venter på valsing rekker kortere enn 12 timer (`ROLLING_BUFFER_H`), lager ovn 2 og 3 emner til den
+    første armeringsordren, så valseverket går hele tida.
+  - Salgsdirektøren (med salgsteam og oppover) bruker 75 % av tida til fristen, ikke 85 %.
+- **Prøvd og forkastet:** at en øse med annen kvalitet som har ventet 90 minutter alltid går foran i strengstøpingen
+  (flere kvalitetsbytter ga mindre stål og flere sene), og å holde av emner til armeringen foran emneordrene (armering
+  godtar lavkarbon, så emneordrene mistet sine).
+- **Resultat** (samme spill, 30 døgn, 6–8 frø): sene kontrakter 10,8 → 3,4, levert 674 kt → ca. 750 kt, kassa like
+  god eller bedre. Resten skyldes mest at verket står når strømprisen er over grensen spilleren har satt (8 % av tida)
+  og kvalitetsbytter i støpingen.
+- Tester: valseverket valser bare kvaliteten armeringsordren trenger; en kontrakt er bare dekket av partiene den selv
+  får (begge feiler med den gamle koden).
+- Konto: nei (motoren i eget spill).

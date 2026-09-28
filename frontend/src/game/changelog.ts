@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 228,
+    date: "2026-09-28",
+    title: "Færre sene leveranser",
+    items: [
+      "Valseverket valser bare stålet armeringsordrene trenger, og tar ikke lenger emnene emneordrene venter på.",
+      "Ovnene lager emner til valseverket jevnt, så armeringen ikke hoper seg opp mot fristen.",
+      "Salgsdirektøren lar det være litt mer luft til fristene.",
+    ],
+  },
+  {
     b: 227,
     date: "2026-09-28",
     title: "Industrien rundt verket",
