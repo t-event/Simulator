@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 204 – 2026-09-28: Menyen nederst fortsatt for høyt
+
+**Brukeren ba om:** «Menyen nederst ble ikke bra etter oppdateringen. Den er for langt opp» (skjermbilde 19:37).
+
+**Gjort:** B-267. Skjermbildet var fra før B-264 kom ut, men de faste lagene har nå høyde `100dvh` i stedet for
+`inset: 0`, så de ikke avhenger av sidehøyden på iPhone. Publiseringen av #211 (B-265) var grønn.
+
+**Testet:** Playwright på 8 størrelser (320–2 560), tsc, lint, npm test, build.
+
+**Gjenstår:** brukeren bekrefter på iPhone (lukk og åpne appen for å få den nye versjonen).
+
+---
+
 ## Økt 203 – 2026-09-28: Nestenulykke for ofte
 
 **Brukeren ba om:** «Det er for ofte nestenulykke popup».

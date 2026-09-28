@@ -4888,3 +4888,13 @@ Brukeren: «Det er for ofte nestenulykke popup».
   naboklagen og kobbertyveriet, `decisionFixed`).
 - Ellers minst 90 spilldøgn (før 25) og minst én time i ekte tid (før 20 minutter) mellom to nestenulykker. På 10× var
   20 minutter bare 100 spilldøgn, og vinteren (B-265) gjorde alle kort halvannen gang så vanlige.
+
+## B-267 Faste lag like høye som skjermen (dvh) (2026-09-28)
+Status: gjelder (bygger på B-264)
+Brukeren (skjermbilde 19:37): «Menyen nederst ble ikke bra etter oppdateringen. Den er for langt opp».
+- Skjermbildet ble tatt før B-264 var ute (publisert 19:37:40, og appen ser etter nye versjoner hvert 5. minutt), men
+  vi kan ikke teste iPhone på hjemskjermen her. Derfor er de faste lagene gjort uavhengige av hvor høy iPhone mener siden
+  er: `.g-app`, `.g-modal`/`.g-intro` og `.control-room` har `top/left/right: 0` og `height: 100dvh` (med `100vh` som
+  reserve) i stedet for `inset: 0`. På hjemskjermen er 100dvh hele skjermen; i Safari er det det synlige området.
+- Testet i Playwright på 320, 390, 402, 768, 1024, 1366, 1920 og 2560: laget og menyen går helt ned, siden er ikke
+  høyere enn vinduet, og vinduet står på 0. Brukeren må bekrefte på iPhone.
