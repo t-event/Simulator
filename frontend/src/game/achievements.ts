@@ -187,7 +187,8 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
   family("forsk", "microscope", "Forskning", "Kunnskap", (g) => g.researched.length, [
     ["forsk10", 10, "Forsker", "Forsk fram ti ting.", 5],
     ["forsk25", 25, "Utviklingsleder", "Forsk fram 25 ting.", 15],
-    ["forsk50", 50, "Forskningssjef", "Forsk fram 50 ting.", 30],
+    // Id-en beholdes (B-232). Det finnes 48 prosjekter, så 50 var umulig (B-294); «Alt forsket fram» er egen prestasjon
+    ["forsk50", 40, "Forskningssjef", "Forsk fram 40 ting.", 30],
   ]),
   family("alleforsk", "research", "Alt forsket fram", "Kunnskap", (g) => +masteryOpen(g), [
     ["alleforsk", 1, "Alt forsket fram", "Forsk fram alt, så mesterskapet åpner.", 30],

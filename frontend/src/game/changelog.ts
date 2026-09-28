@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 294,
+    date: "2026-09-28",
+    title: "Forskningssjef",
+    items: [
+      "Prestasjonen «Forskningssjef» krevde 50 forskninger, men det finnes bare 48. Nå krever den 40 – har du forsket fram alt, får du den med én gang.",
+    ],
+  },
+  {
     b: 293,
     date: "2026-09-28",
     title: "Kontrollrommet: mål du kan nå",

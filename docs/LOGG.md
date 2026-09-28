@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 230 – 2026-09-28: 48 av 50 forskninger
+
+**Brukeren ba om:** en spiller lurte på hvorfor hen bare hadde 48/50 forskninger, og om det var datterverkene. Før det:
+«Mulig å lage leaderboard i kontrollrommet?» – planen er lagt fram, og migrasjonen (`supabase/046_toppliste_kontrollrom.sql`,
+ikke committet) venter på eierens godkjenning og en dry-run.
+
+**Gjort:** B-294. Det finnes 48 prosjekter; prestasjonen krevde 50. Nå 40, med en test som hindrer umulige mål.
+Publiseringen av #239 (B-293) var grønn.
+
+**Testet:** tsc, lint, npm test (ny test), balance (exit 0), build.
+
+**Gjenstår:** svar fra eieren om topplista for kontrollrommet. Pynt for sesong 3 før den startes. I morgen:
+skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 229 – 2026-09-28: 4300 i kontrollrommet var umulig
 
 **Brukeren ba om:** «En spiller sier det er umulig å få 4300 inne på kontrollrommet».

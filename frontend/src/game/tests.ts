@@ -2753,6 +2753,12 @@ test("Poengmålene i kontrollrommet kan nås (B-293): den flinke testspilleren k
   assert(share(ach) >= 0.2, `prestasjonen ${ach} nås i bare ${Math.round(share(ach) * 100)} % av rundene`);
 });
 
+test("Prestasjonene for forskning kan nås (B-294): ingen krever flere prosjekter enn det finnes", () => {
+  const g = newGame(294);
+  const most = Math.max(...ACHIEVEMENTS.filter((a) => a.family === "forsk").map((a) => a.progress(g)[1]));
+  assert(most <= RESEARCH.length, `prestasjonen krever ${most}, men det finnes bare ${RESEARCH.length} prosjekter`);
+});
+
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden
 if (failed) {
   console.log(`\n${failed} test(er) feilet`);
