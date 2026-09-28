@@ -408,7 +408,12 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
       </div>
       <div className="g-col-wide g-verket-top">
         <div className="g-scene-wrap">
-          <PlantScene g={g} stats={stats} />
+          {/* Stedene i bildet åpner utstyret der, eller Anlegg når det ikke er noe å kjøpe (B-242) */}
+          <PlantScene
+            g={g}
+            stats={stats}
+            onStation={(s) => (stationOptions(g, s).some((o) => !o.locked) ? setSheet(s) : setTab("anlegg"))}
+          />
           <SceneBubbles g={g} />
           <button className="g-scene-pynt" onClick={() => setPynt(true)} aria-label="Pynt verket">
             <Icon name="palette" />
