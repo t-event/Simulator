@@ -15,6 +15,12 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 236,
+    date: "2026-09-28",
+    title: "Roligere fagbok",
+    items: ["Fagboka bruker egne ikoner i stedet for emoji, i samme stil som resten av spillet."],
+  },
+  {
     b: 235,
     date: "2026-09-28",
     title: "Ryddigere produksjon, konsern og merker",

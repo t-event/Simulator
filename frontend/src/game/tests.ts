@@ -2030,7 +2030,7 @@ test("Fagboka (B-234): kort fortalt, korte sider med overskrift, og hvert kapitt
       `en side er for lang: ${k.id}`,
     );
     assert(parts.includes(k.part), `ukjent tema: ${k.id}`);
-    assert(!!k.emoji, `mangler emoji: ${k.id}`);
+    assert(!!k.icon, `mangler ikon: ${k.id}`);
     assert(readSeconds(k) <= 90, `kapitlet tar for lang tid å lese: ${k.id}`);
   }
 });

@@ -4294,3 +4294,15 @@ Merker bruker mange emojier, som ikke er i henhold til designplanen.
 - Tester: `npm test`, tsc, lint, balance (exit 0), Playwright på 7 størrelser (rader, utstyr fra rad, Utvid, Merker uten
   emoji, Industrien med falsk server).
 - Konto: nei for grensesnittet; ukelista krever konto som før.
+
+## B-236 Ikoner i stedet for emoji i fagboka (2026-09-28)
+Status: gjelder (endrer utseendet fra B-234)
+Brukeren: «Det er for mye bruk av emojier i fagboka.»
+- Hvert kapittel har et Lucide-ikon (`icon: IconName` i `knowledge.ts`, før `emoji`), i samme rute og farge som ellers i
+  designsystemet: blått, grønt når kapitlet er ferdig. Seks nye ikoner (gjenvinning, magnet, atom, stråling, gryte,
+  spørsmålstegn).
+- Stegene (les, quiz, oppdrag) i lista, i tellerne øverst og i fanene i kapitlet bruker ikoner; ikke gjort = dempet,
+  gjort = grønt. Stjernene i quizresultatet er ikonstjerner (fylt oransje for riktige svar). Oppdraget har mål-ikonet.
+- Klassen `g-book-emoji` heter nå `g-book-icon`.
+- Tester: kapittel-testen sjekker ikon; tsc, lint, `npm test`, Playwright på 7 størrelser uten en eneste emoji i boka.
+- Konto: nei.
