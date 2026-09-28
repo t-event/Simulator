@@ -125,7 +125,7 @@ frontend/src/
     quiz.ts      Quiz per kapittel         missions.ts  Oppdrag fra fagboka
     challenges.ts Utfordringer på storverket, serier i trinn (B-232)   inbox.ts   Varsellista (hva som er viktig og nytt)
     tests.ts     Raske tester av motoren (npm test)
-    decisions.ts Hendelseskort med valg     knowledge.ts Fagboka
+    decisions.ts Hendelseskort med valg     knowledge.ts Fagboka: tema, «Kort fortalt» og sider (B-234)
     save.ts      Lagring + migrering        useGame.ts   Spilløkka for React
     tutorial.ts  Veiledet start          tips.ts      Engangstips
     recipeGuide.ts Reseptguide for nye kvaliteter (vises av ui/RecipeGuide.tsx)
@@ -164,7 +164,7 @@ frontend/src/
     views.ts     Fanene og når de låses opp   Upgrades.tsx, stations.ts  Utstyr per sted i anlegget
     ResearchPage.tsx  Forskning-fanen   Settings.tsx  ⚙️ innstillinger og banken (på Verket → Økonomi)
     InstallTip.tsx    Tips om hjemskjerm på startskjermen   Power.tsx  Strøm og skiftplan
-    Handbook.tsx Fagboka med quiz og oppdrag   Inbox.tsx  Varsellista (åpnes fra varsellinja)
+    Handbook.tsx Fagboka: innhold, kapitler som sider, quiz ett spørsmål om gangen (B-234)   Inbox.tsx  Varsellista (åpnes fra varsellinja)
     Account.tsx  Konto: logg inn, opprett, glemt passord, velg spill ved konflikt (på startskjermen og i ⚙️)
     Leaderboard.tsx Topplista (arket bak 🏆, B-214)   Season.tsx  Sesongspørsmål, hendelser på Marked, sesonglinje (uten nedtelling, B-220)
     Daily.tsx    Velkommen tilbake, daglig belønning og kortet «Dagens oppdrag» på Mål

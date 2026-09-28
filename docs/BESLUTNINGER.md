@@ -4240,3 +4240,26 @@ Brukeren sendte ti punkter. Svarene og det som ble gjort:
 - Tester: skiftlederen forlenger vikarene (og ikke for lenge), avbrutt avtale (bot, omdømme, køen, ingen nye uker).
   Balance: exit 0. Playwright på 7 størrelser.
 - Konto: nei (eget spill).
+
+## B-234 Fagboka en bit om gangen, og morsommere å være i (2026-09-28)
+Status: gjelder (bygger på B-025 og B-029)
+Brukeren: «Fagboka er lang med mye tekst. Tror folk bare ser på den og tenker wow her var det mye info. Gjør den mer
+intuitiv og mer morsom å være i.»
+- **Innholdet:** øverst hvor langt du har kommet i boka (prosent, med 📖 lest, ❓ quiz og 🎯 oppdrag), så én knapp
+  «Neste» med det lureste å gjøre (nytt kapittel, ellers en quiz som gir fagpoeng). Kapitlene står i fem temaer
+  (Grunnlaget, Ovnene, Støping og valsing, Folk og kunder, Konsernet og verden) som rader med emoji, tittel, hvor lang
+  tid det tar å lese («30 sek å lese») eller hva som gjenstår, og tre små merker for stegene.
+- **Kapitlene:** «Kort fortalt» øverst – hele kapitlet i én setning eller to – og så én side om gangen med overskrift,
+  prikker og «Neste». Siste side leder til quizen. Samme fagtekst som før, bare delt opp; hvert kapittel tar 20–80 sekunder.
+  Oppdraget står under, med fremdrift.
+- **Quizen:** ett spørsmål om gangen, store svarknapper, og svaret med én gang (riktig/feil og hvorfor). Til slutt
+  stjerner og fagpoeng. Svaret lagres i spillet med én gang (`g.quizPartial`, `answerQuizQuestion` i `quiz.ts`), så den
+  som lukker boka etter å ha sett riktig svar, kan ikke prøve igjen – fortsatt ett forsøk (B-029). Reglene for fagpoeng er
+  uendret.
+- Utdatert tekst i sesongkapitlet rettet: sesongene har ikke fast lengde (B-221), og sesongstigen står på Mål.
+- Boka åpnes som før på et nytt kapittel hvis det finnes (veiledningen «Les i fagboka» virker som før), ellers på
+  innholdet.
+- Tester: alle kapitler har «Kort fortalt», sider med overskrift og tema og tar under 90 s; quizen ett spørsmål om gangen
+  (svaret står fast, lagres, rettes og gir poeng, kan ikke tas om, gamle lagringer får feltet). Balance: exit 0.
+  Playwright på 7 størrelser.
+- Konto: nei (eget spill).

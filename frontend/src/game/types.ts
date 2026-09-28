@@ -585,6 +585,8 @@ export interface GameState {
   quizDone: string[];
   /** Antall riktige svar på hver quiz som er tatt (B-029) */
   quizScores: Record<string, number>;
+  /** Svar på en quiz som er påbegynt (B-234): ett spørsmål om gangen, og svaret står fast når det er gitt */
+  quizPartial: Record<string, number[]>;
   /** Oppdrag fra fagboka: telleren da oppdraget startet, og om det er fullført */
   missions: Record<string, { base: number; done: boolean }>;
   /** Tellere for oppdrag (planlagte omforinger, rene døgn …) */

@@ -1,5 +1,6 @@
 /**
  * Quiz i fagboka (B-025, B-029): to spørsmål per kapittel og bare ett forsøk.
+ * Ett spørsmål om gangen med svar med én gang (B-234): svaret lagres i spillet, så quizen kan ikke tas om ved å lukke boka.
  * Fagpoengene står i forhold til antall riktige svar.
  */
 import { awardPoints, log } from "./engine";
@@ -306,4 +307,26 @@ export function answerQuiz(g: GameState, chapter: string, answers: number[]): { 
     correct === quiz.length ? "good" : "info",
   );
   return { correct, reward };
+}
+
+/**
+ * Svarer på ett spørsmål (B-234). Svaret står fast; er det siste spørsmålet besvart, rettes quizen med `answerQuiz`.
+ * Gir om svaret var riktig, og resultatet når quizen er ferdig.
+ */
+export function answerQuizQuestion(
+  g: GameState,
+  chapter: string,
+  index: number,
+  choice: number,
+): { right: boolean; done: { correct: number; reward: number } | null } {
+  const quiz = QUIZ[chapter];
+  if (!quiz || !quizAvailable(g, chapter) || index < 0 || index >= quiz.length) return { right: false, done: null };
+  const answers = (g.quizPartial[chapter] ??= []);
+  // Bare neste ubesvarte spørsmål kan besvares, og et svar kan ikke endres
+  if (index !== answers.length) return { right: answers[index] === quiz[index].correct, done: null };
+  answers.push(choice);
+  const right = choice === quiz[index].correct;
+  if (answers.length < quiz.length) return { right, done: null };
+  delete g.quizPartial[chapter];
+  return { right, done: answerQuiz(g, chapter, answers) };
 }

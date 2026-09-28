@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 234,
+    date: "2026-09-28",
+    title: "Ny fagbok",
+    items: [
+      "Fagboka viser hvor langt du har kommet, og en «Neste»-knapp med det lureste å lese eller gjøre.",
+      "Hvert kapittel starter med «Kort fortalt», og resten leses én kort side om gangen.",
+      "Quizen tar ett spørsmål om gangen, og du ser med én gang om du svarte riktig – og hvorfor.",
+    ],
+  },
+  {
     b: 233,
     date: "2026-09-28",
     title: "Vikarer, vedlikehold og lik navigasjon",
