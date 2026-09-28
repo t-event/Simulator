@@ -1,8 +1,10 @@
 import { GRADES, PRODUCTS } from "../game/data";
 import {
   acceptAgreement,
+  agreementCancelCost,
   AGREEMENT_MAX_MISSED,
   AGREEMENT_STAGE,
+  cancelAgreement,
   declineAgreement,
   MAX_AGREEMENTS,
   realisticDailyT,
@@ -11,6 +13,7 @@ import {
 import { gradeRecipe, type PlantStats } from "../game/plant";
 import type { Agreement, GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
+import { useState } from "react";
 import { Bar, Card, GradeSpec } from "./common";
 import { fmtKr, fmtPct, fmtT } from "./format";
 
@@ -76,7 +79,9 @@ function AgreementOffer({ g, stats, a, act }: Props & { a: Agreement }) {
   );
 }
 
-function AgreementRow({ a }: { a: Agreement }) {
+function AgreementRow({ a, act }: { a: Agreement; act: GameApi["act"] }) {
+  const [confirm, setConfirm] = useState(false);
+  const cost = agreementCancelCost(a);
   const status =
     a.status === "aktiv"
       ? a.weeksSent < a.weeks
@@ -104,6 +109,27 @@ function AgreementRow({ a }: { a: Agreement }) {
         {a.weeksMissed > 0 ? `, ${a.weeksMissed} for sent (${AGREEMENT_MAX_MISSED} betyr oppsigelse)` : ""} · {status}
         {a.status === "aktiv" && a.weeksMissed === 0 ? ` · bonus ${fmtKr(a.bonusKr)} til slutt` : ""}
       </p>
+      {/* Avbryt med stor straff (B-233): 30 % av ukene som gjenstår, og dobbelt omdømme */}
+      {a.status === "aktiv" &&
+        cost.weeks > 0 &&
+        (confirm ? (
+          <div className="g-note g-warn g-agreement-cancel">
+            <span>
+              Avbryte avtalen med {a.customer}? Du betaler {fmtKr(cost.kr)} i bot og mister{" "}
+              {cost.rep.toFixed(1).replace(".", ",")} i omdømme. Uka i ordrekøen strykes.
+            </span>
+            <div className="g-row">
+              <button className="g-danger" onClick={() => act((gg) => void cancelAgreement(gg, a.id))}>
+                Ja, avbryt ({fmtKr(cost.kr)})
+              </button>
+              <button onClick={() => setConfirm(false)}>Behold avtalen</button>
+            </div>
+          </div>
+        ) : (
+          <button className="g-link" onClick={() => setConfirm(true)}>
+            Avbryt avtalen…
+          </button>
+        ))}
     </div>
   );
 }
@@ -152,7 +178,7 @@ export function Agreements({ g, stats, act }: Props) {
         <AgreementOffer key={a.id} g={g} stats={stats} act={act} a={a} />
       ))}
       {others.map((a) => (
-        <AgreementRow key={a.id} a={a} />
+        <AgreementRow key={a.id} a={a} act={act} />
       ))}
       {!offers.length && !others.length && (
         <p className="g-muted">

@@ -1681,16 +1681,58 @@ button {
   min-height: 36px;
 }
 
+/* Vedlikehold (B-233): én kompakt rad per ovn – navn og slitasje, stolpe, status og knapp */
+.g-maint-list {
+  list-style: none;
+  margin: var(--sp-3) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .g-maint {
   background: var(--surface-2);
   border-radius: var(--r-md);
   padding: 8px 10px;
-  margin: 8px 0;
 }
 
-.g-maint button {
-  width: 100%;
-  margin-top: 4px;
+.g-maint-head,
+.g-maint-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+.g-maint-foot {
+  flex-wrap: wrap;
+}
+
+.g-maint-foot .g-small-text {
+  flex: 1 1 140px;
+}
+
+.g-maint-foot button {
+  min-height: 40px;
+}
+
+.g-maint-wear {
+  font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
+}
+
+.g-maint-wear.is-warning {
+  color: var(--heat);
+}
+
+.g-maint-wear.is-critical {
+  color: var(--critical);
+  font-weight: 700;
+}
+
+.g-maint-who {
+  margin-top: var(--sp-4);
 }
 
 /* Gradvis opplåsing (B-023) */
@@ -4608,6 +4650,13 @@ button {
   position: relative;
 }
 
+/* Mål er åpen (B-233): samme markering som menyen – blå strek øverst og blått ikon */
+.g-goals-btn.is-active {
+  color: var(--accent);
+  border-color: var(--accent);
+  box-shadow: inset 0 3px 0 var(--accent);
+}
+
 .g-goals-dot {
   position: absolute;
   top: 6px;
@@ -4628,4 +4677,107 @@ button {
   .g-inbox-tabs button {
     flex: 1 1 45%;
   }
+}
+
+/* «Nå» øverst i utstyrsarket (B-233): hva som skjer på stedet, med hele teksten */
+.g-sheet-now {
+  display: flex;
+  gap: var(--sp-3);
+  align-items: flex-start;
+  margin: var(--sp-3) 0;
+  padding: var(--sp-3);
+  border-radius: var(--r-md);
+  background: var(--surface-1);
+}
+
+.g-sheet-now-label {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding-top: 2px;
+}
+
+.g-sheet-now ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--fs-meta);
+}
+
+/* Datterverkene som rader på mobil (B-233): én linje per verk, trykk for knappene */
+.g-plant-cards {
+  gap: 0;
+}
+
+.g-plant-row {
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.g-plant-row:last-child {
+  border-bottom: 0;
+}
+
+.g-plant-row > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  min-height: 48px;
+  padding: 6px 0;
+  cursor: pointer;
+  list-style: none;
+}
+
+.g-plant-row > summary::-webkit-details-marker {
+  display: none;
+}
+
+.g-plant-row > summary::after {
+  content: "›";
+  color: var(--text-3);
+  transition: transform 0.15s;
+}
+
+.g-plant-row[open] > summary::after {
+  transform: rotate(90deg);
+}
+
+.g-plant-row.is-advised > summary strong {
+  color: var(--accent);
+}
+
+.g-plant-row-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.g-plant-row-value {
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fs-meta);
+  white-space: nowrap;
+}
+
+.g-plant-row-body {
+  padding: 0 0 var(--sp-4);
+}
+
+/* Avbryt en rammeavtale (B-233): spørsmålet over knappene, knappene brytes på smal skjerm */
+.g-agreement-cancel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.g-agreement-cancel .g-row {
+  flex-wrap: wrap;
+}
+
+.g-plant-rows-hint {
+  margin: 0 0 var(--sp-1);
 }

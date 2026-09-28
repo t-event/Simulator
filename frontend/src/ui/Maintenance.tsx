@@ -17,6 +17,7 @@ import { AutoToggle } from "./AutoToggle";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Bar, Card } from "./common";
+import { Callout } from "./ds";
 import { fmtKr, fmtNum, fmtPct } from "./format";
 
 /** Valg for planlagt omforing: fra halvveis til nesten slitt, ut fra hvor lenge foringen holder nå (B-028) */
@@ -63,87 +64,75 @@ export function Maintenance({
           : null;
   // Slitasjen etter et gitt antall døgn, med dagens drift
   const wearAfter = (d: number) => Math.min(1, (d / life) * 0.85);
+  const who = whoRelines
+    ? repairersAway && repairerOn
+      ? `${whoRelines} Men reparatøren er borte nå – bytt selv, eller følg med.`
+      : whoRelines
+    : "Ingen bytter foringen for deg. Trykk «Bytt» før den er 85 % slitt.";
   return (
     <Card id={id} title="Vedlikehold" right={right}>
-      <p className="g-muted">
-        Foringen slites for hver charge. Planlagt stans koster {fmtKr(f0.relineCost)} og {relineHours} timer. Brenner
-        den gjennom, blir det havari: {fmtKr(f0.relineCost * 3)}, {relineHours * 3} timer og tapt omdømme.
-      </p>
-      {f0.arc && (
-        <p className="g-muted">
-          {g.furnaces.length > 1 ? "Hver lysbueovn har sine egne to potter." : "Lysbueovnen har to potter."} Mens den
-          ene er i bruk, murer murerne opp den andre med ny foring (ca. {POT_REBUILD_DAYS} døgn med {MASONS_PER_POT}{" "}
-          murere per potte; murerne jobber dagtid 07–15). Står reservepotta klar, tar et bytte bare {swapHours} timer i
-          stedet for {relineHours}.
-        </p>
-      )}
-      <p className={whoRelines ? "g-note" : "g-note g-warn"}>
-        {whoRelines ?? "Ingen bytter foringen for deg. Trykk «Bytt foring» før den er 85 % slitt."}
-      </p>
-      {g.furnaces.map((f, i) => {
-        // Hver ovn har sin egen type (B-074)
-        const u = unitType(g, i);
-        const tone = f.wear > 0.85 ? "critical" : f.wear > 0.6 ? "warning" : "ok";
-        const busy = !!f.heat || !!f.holding;
-        const down = g.minute < f.downUntilMin;
-        return (
-          <div className="g-maint" key={i}>
-            <div className="g-contract-head">
-              <strong>
-                {u.name}
-                {g.furnaces.length > 1 ? ` nr. ${i + 1}` : ""}
-              </strong>
-              <span className="g-muted">Byttet dag {f.lastRelineDay}</span>
-            </div>
-            <Bar value={f.wear} tone={tone} label="Slitasje på foringen" />
-            <p className="g-muted">
-              {fmtPct(f.wear)} slitt · {day(g) - f.lastRelineDay} døgn siden omforing
-              {down && f.downReason ? ` · ${f.downReason}` : ""}
-            </p>
-            {u.arc && (
-              <p className={f.spareProgress >= 1 ? "g-muted" : "g-note"}>
-                {f.spareProgress >= 1
-                  ? "Reservepotte: klar ✓ – neste bytte tar bare noen timer."
-                  : potRate > 0
-                    ? `Reservepotte: murerne har kommet ${fmtPct(f.spareProgress)} – ca. ${fmtNum((1 - f.spareProgress) / potRate, 1)} døgn igjen.`
-                    : `Reservepotte: venter på murere (${fmtPct(f.spareProgress)} ferdig). Ansett murere under Folk.`}
-              </p>
-            )}
-            <button
-              className={f.relineRequested ? "g-primary is-on" : ""}
-              disabled={down || (f.wear < 0.1 && !f.relineRequested)}
-              onClick={() => act((gg) => requestReline(gg, i))}
-            >
-              {f.relineRequested
-                ? "Byttes når chargen er ferdig ✓"
-                : f.wear < 0.1
-                  ? "Foringen er ny"
-                  : busy
-                    ? u.arc && f.spareProgress >= 1
-                      ? "Bytt potte etter denne chargen"
-                      : "Bytt foring etter denne chargen"
-                    : u.arc && f.spareProgress >= 1
-                      ? `Bytt potte nå (${swapHours} timer)`
-                      : `${u.arc ? "Mur om i ovnen" : "Bytt foring nå"} (${fmtKr(u.relineCost)})`}
-            </button>
-          </div>
-        );
-      })}
+      {/* B-233: først hvem som bytter foringen, så én rad per ovn, så valgene – forklaringen bak «Slik virker foringen» */}
+      <Callout tone={whoRelines && !(repairersAway && repairerOn) ? "ok" : "heat"}>{who}</Callout>
+      <ul className="g-maint-list">
+        {g.furnaces.map((f, i) => {
+          // Hver ovn har sin egen type (B-074)
+          const u = unitType(g, i);
+          const tone = f.wear > 0.85 ? "critical" : f.wear > 0.6 ? "warning" : "ok";
+          const busy = !!f.heat || !!f.holding;
+          const down = g.minute < f.downUntilMin;
+          const pot = !u.arc
+            ? null
+            : f.spareProgress >= 1
+              ? "potte klar ✓"
+              : potRate > 0
+                ? `ny potte om ca. ${fmtNum((1 - f.spareProgress) / potRate, 1)} døgn`
+                : "potte venter på murere";
+          return (
+            <li className="g-maint" key={i}>
+              <div className="g-maint-head">
+                <strong>{g.furnaces.length > 1 ? `Ovn ${i + 1}` : u.name}</strong>
+                <span className={`g-maint-wear is-${tone}`}>{fmtPct(f.wear)} slitt</span>
+              </div>
+              <Bar value={f.wear} tone={tone} label="Slitasje på foringen" />
+              <div className="g-maint-foot">
+                <span className="g-muted g-small-text">
+                  {down && f.downReason
+                    ? f.downReason
+                    : [`${day(g) - f.lastRelineDay} døgn siden omforing`, pot].filter(Boolean).join(" · ")}
+                </span>
+                <button
+                  className={`g-small${f.relineRequested ? " g-primary is-on" : ""}`}
+                  disabled={down || (f.wear < 0.1 && !f.relineRequested)}
+                  onClick={() => act((gg) => requestReline(gg, i))}
+                >
+                  {f.relineRequested
+                    ? "Byttes etter chargen ✓"
+                    : f.wear < 0.1
+                      ? "Ny foring"
+                      : busy
+                        ? "Bytt etter chargen"
+                        : u.arc && f.spareProgress >= 1
+                          ? `Bytt potte (${swapHours} t)`
+                          : `Bytt (${fmtKr(u.relineCost)})`}
+                </button>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
 
-      {g.stage >= 1 && (
-        <>
-          {repairerOn ? (
-            <p className="g-note">
-              Reparatøren bytter foringen når den er {fmtPct(g.settings.relineAt)} slitt, så du trenger ingen plan.
-              {repairersAway &&
-                " Men reparatøren er borte nå – foringen blir ikke byttet før hen er tilbake. Følg med, eller bytt selv."}
-            </p>
-          ) : !canPlan ? (
-            <div className="g-locked-box">
-              <strong>🔒 Planlagt omforing</strong>
-              <span>Forsk fram «Vedlikeholdsplan» for å la foringen byttes på faste dager.</span>
-            </div>
-          ) : (
+      {g.stage >= 1 && (hasRepairer || canPlan) && (
+        <div className="g-maint-who">
+          <h3 className="g-subhead">Hvem bytter foringen</h3>
+          {hasRepairer && (
+            <AutoToggle
+              g={g}
+              act={act}
+              k="autoReline"
+              label={`Reparatøren bytter den ved ${fmtPct(g.settings.relineAt)} slitasje`}
+            />
+          )}
+          {canPlan && !repairerOn && (
             <>
               <label className="g-field">
                 <span>Planlagt omforing</span>
@@ -163,28 +152,37 @@ export function Maintenance({
                   ))}
                 </select>
               </label>
-              <p className="g-muted">
-                Med dagens drift (
-                {stats.hours > 0 && stats.hours < 24 ? `${stats.hours} timer i døgnet` : "døgnet rundt"}) er foringen 85
-                % slitt etter ca. {fmtNum(life, 0)} døgn.
-                {plan !== null && wearAfter(plan) > 0.85 && " Planen er lengre enn foringen holder – velg færre døgn."}
-                {` Planen bytter uansett hvis foringen blir ${fmtPct(PLAN_SAFETY_WEAR)} slitt før dagen.`}
-              </p>
+              {plan !== null && wearAfter(plan) > 0.85 && (
+                <p className="g-note g-warn">Planen er lengre enn foringen holder – velg færre døgn.</p>
+              )}
             </>
           )}
-
-          {!hasRepairer ? (
-            <p className="g-muted">Med en reparatør kan foringen byttes automatisk når den er slitt.</p>
-          ) : (
-            <AutoToggle
-              g={g}
-              act={act}
-              k="autoReline"
-              label={`La reparatøren bytte foringen ved ${fmtPct(g.settings.relineAt)} slitasje`}
-            />
-          )}
-        </>
+        </div>
       )}
+
+      <details className="g-details">
+        <summary>Slik virker foringen</summary>
+        <p className="g-muted">
+          Foringen slites for hver charge. Planlagt stans koster {fmtKr(f0.relineCost)} og {relineHours} timer. Brenner
+          den gjennom, blir det havari: {fmtKr(f0.relineCost * 3)}, {relineHours * 3} timer og tapt omdømme.
+        </p>
+        <p className="g-muted">
+          Med dagens drift ({stats.hours > 0 && stats.hours < 24 ? `${stats.hours} timer i døgnet` : "døgnet rundt"}) er
+          foringen 85 % slitt etter ca. {fmtNum(life, 0)} døgn.
+          {canPlan && ` En plan bytter uansett hvis foringen blir ${fmtPct(PLAN_SAFETY_WEAR)} slitt før dagen.`}
+        </p>
+        {f0.arc && (
+          <p className="g-muted">
+            {g.furnaces.length > 1 ? "Hver lysbueovn har sine egne to potter." : "Lysbueovnen har to potter."} Mens den
+            ene er i bruk, murer murerne opp den andre med ny foring (ca. {POT_REBUILD_DAYS} døgn med {MASONS_PER_POT}{" "}
+            murere per potte; murerne jobber dagtid 07–15). Står reservepotta klar, tar et bytte bare {swapHours} timer
+            i stedet for {relineHours}.
+          </p>
+        )}
+        {g.stage >= 1 && !hasRepairer && (
+          <p className="g-muted">Med en reparatør kan foringen byttes automatisk når den er slitt.</p>
+        )}
+      </details>
     </Card>
   );
 }

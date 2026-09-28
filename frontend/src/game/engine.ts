@@ -2258,6 +2258,36 @@ export function acceptAgreement(g: GameState, id: number, by = "Du"): PurchaseRe
   return { ok: true, message: "Rammeavtale signert." };
 }
 
+/** Andel av verdien av ukene som gjenstår, som betales i bot når du avbryter en rammeavtale (B-233) */
+export const AGREEMENT_CANCEL_SHARE = 0.3;
+
+/** Hva det koster å avbryte en rammeavtale nå: bot og omdømme (B-233) */
+export function agreementCancelCost(a: Agreement): { kr: number; rep: number; weeks: number } {
+  const weeks = Math.max(0, a.weeks - a.weeksDone - a.weeksMissed);
+  return { kr: Math.round(weeks * a.weeklyT * a.pricePerT * AGREEMENT_CANCEL_SHARE), rep: a.bonusRep * 2, weeks };
+}
+
+/**
+ * Avbryt en rammeavtale (B-233): kunden får ikke resten av ukene, og ukeleveransen i køen strykes. Det koster en stor
+ * bot – 30 % av verdien av ukene som gjenstår – og dobbelt så mye omdømme som bonusen ville gitt.
+ */
+export function cancelAgreement(g: GameState, id: number): PurchaseResult {
+  const a = g.agreements.find((x) => x.id === id);
+  if (!a || a.status !== "aktiv") return { ok: false, message: "Avtalen er ikke aktiv." };
+  const cost = agreementCancelCost(a);
+  a.status = "brutt";
+  a.closedDay = day(g);
+  g.contracts = g.contracts.filter((c) => !(c.agreementId === a.id && c.status === "aktiv"));
+  addCost(g, "bot", cost.kr);
+  adjustReputation(g, -cost.rep);
+  log(
+    g,
+    `Du avbrøt rammeavtalen med ${a.customer}. Bot ${fmtKr(cost.kr)} og omdømme −${cost.rep.toFixed(1).replace(".", ",")}.`,
+    "bad",
+  );
+  return { ok: true, message: "Avtalen er avbrutt." };
+}
+
 export function declineAgreement(g: GameState, id: number): void {
   g.agreements = g.agreements.filter((a) => !(a.id === id && a.status === "tilbud"));
 }
@@ -2469,14 +2499,17 @@ function checkTemps(g: GameState): void {
       "event",
     );
   }
-  if (tempsActive(g)) return;
   const absent = g.workers.filter((w) => isAbsent(g, w));
   if (!absent.length) return;
-  // Skiftlederen dekker alt fravær med vikarer når spilleren har valgt det (B-211), også når skiftene går likevel
+  // Skiftlederen dekker alt fravær med vikarer når spilleren har valgt det (B-211), også når skiftene går likevel.
+  // Blir noen borte lenger enn vikarene er leid for, forlenger skiftlederen med én gang (B-233): før skjedde det først
+  // når vikarene gikk hjem, og Folk viste imens at fraværet ikke var dekket
   if (g.settings.leaderTemps && shiftLeaderAtWork(g)) {
-    bookTemps(g, daysUntilAllBack(g), true);
+    const lastBack = Math.max(...absent.map((w) => w.absentUntil ?? 0));
+    if (!tempsActive(g) || (g.tempsUntilMin ?? 0) < lastBack) bookTemps(g, daysUntilAllBack(g), true);
     return;
   }
+  if (tempsActive(g)) return;
   const full = staffing(g, true).shifts;
   const now = staffing(g).shifts;
   if (now >= full) return;

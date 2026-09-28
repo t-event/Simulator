@@ -42,6 +42,8 @@ import { ADDONS, CASTINGS, FURNACES, STAGES, WIN_CASH } from "./data";
 import {
   advance,
   assessOffer,
+  agreementCancelCost,
+  cancelAgreement,
   checkWin,
   completeManual,
   fmtKr,
@@ -1943,6 +1945,79 @@ test("Prestasjoner i trinn (B-232): de gamle merkene finnes, og det er mange fle
   checkAchievements(g);
   assert(achievementsDone(g) < ACHIEVEMENTS.length * 0.8, `for mange merker på en gang: ${achievementsDone(g)}`);
   assert(nextInFamily(g, "charger")?.id === "charge150k", "neste charge-merke er feil");
+});
+
+test("Skiftlederen forlenger vikarene med én gang når noen blir borte lenger (B-233)", () => {
+  const g = newGame(233);
+  g.stage = 3;
+  g.castingType = "streng1";
+  g.workers = [];
+  for (const [role, n] of Object.entries(crewPerShift(g)) as [RoleId, number][])
+    for (let i = 0; i < n * 4; i++) g.workers.push(makeCandidate(g, role));
+  g.workers.push(makeCandidate(g, "skiftleder"));
+  g.settings.leaderTemps = true;
+  const [a, b] = g.workers;
+  a.absentFrom = g.minute;
+  a.absentUntil = g.minute + 2 * 1440;
+  a.absentReason = "syk";
+  g.pendingDecision = null;
+  advance(g, 60);
+  assert(tempsActive(g), "skiftlederen leide ikke vikarer");
+  const first = g.tempsUntilMin ?? 0;
+  assert(first >= a.absentUntil, "vikarene dekker ikke hele fraværet");
+  // En ny blir borte lenger enn vikarene er leid for: forlenges nå, ikke først når vikarene går hjem
+  b.absentFrom = g.minute;
+  b.absentUntil = g.minute + 5 * 1440;
+  b.absentReason = "syk";
+  g.pendingDecision = null;
+  advance(g, 60);
+  assert((g.tempsUntilMin ?? 0) >= b.absentUntil, "skiftlederen forlenget ikke vikarene");
+  assert((g.tempsUntilMin ?? 0) < b.absentUntil + 1440, "skiftlederen leide vikarer for lenge");
+});
+
+test("Avbryte en rammeavtale (B-233): stor bot, omdømme ned, og uka i køen strykes", () => {
+  const g = newGame(2331);
+  g.stage = 2;
+  const product = computePlantStats(g).casting.product;
+  g.agreements.push({
+    id: 7,
+    customer: "Test",
+    product,
+    grade: "standard",
+    weeklyT: 100,
+    pricePerT: 8000,
+    weeks: 10,
+    weeksSent: 3,
+    weeksDone: 2,
+    weeksMissed: 0,
+    nextDay: 30,
+    bonusKr: 0,
+    bonusRep: 3,
+    status: "aktiv",
+    offerExpiresMin: 0,
+    closedDay: null,
+  } as Agreement);
+  const week = {
+    ...structuredClone(g.contracts[0] ?? ({} as Contract)),
+    id: g.nextContractId++,
+    agreementId: 7,
+    status: "aktiv",
+  } as Contract;
+  g.contracts.push(week);
+  const cost = agreementCancelCost(g.agreements.at(-1)!);
+  assert(cost.weeks === 8 && cost.kr === Math.round(8 * 100 * 8000 * 0.3), `feil bot: ${cost.kr}`);
+  assert(cost.rep === 6, "omdømmestraffen er ikke dobbelt bonus");
+  const cash = g.cash;
+  g.reputation = 50;
+  const rep = g.reputation;
+  assert(cancelAgreement(g, 7).ok, "avtalen ble ikke avbrutt");
+  assert(g.agreements.find((x) => x.id === 7)?.status === "brutt", "avtalen står ikke som brutt");
+  assert(!g.contracts.some((c) => c.agreementId === 7 && c.status === "aktiv"), "uka står fortsatt i køen");
+  assert(cash - g.cash === cost.kr, "bota ble ikke trukket");
+  assert(g.reputation < rep, "omdømmet gikk ikke ned");
+  assert(!cancelAgreement(g, 7).ok, "kunne avbryte samme avtale to ganger");
+  advance(g, 7 * 1440);
+  assert(!g.contracts.some((c) => c.agreementId === 7), "avbrutt avtale sendte en ny uke");
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

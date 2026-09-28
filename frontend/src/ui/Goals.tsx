@@ -27,6 +27,7 @@ import { fmtKr, fmtNum } from "./format";
 import { MissingOutCard } from "./MissingOut";
 import { SeasonTrackCard } from "./SeasonTrack";
 import { WeeklyCard } from "./Weekly";
+import { useReportTab, type OnTab } from "./tabMemory";
 
 export type GoalsTab = "idag" | "uke" | "prestasjoner";
 
@@ -127,6 +128,7 @@ export function GoalsPage({
   onOpenSettings,
   onSales,
   openTab,
+  onTab,
 }: {
   g: GameState;
   stats: PlantStats;
@@ -135,9 +137,11 @@ export function GoalsPage({
   /** Landemerket tas på Salg (B-174) */
   onSales: () => void;
   openTab?: string;
+  onTab?: OnTab;
 }) {
   const act = api.act;
   const [tab, setTab] = useState<GoalsTab>(isGoalsTab(openTab) ? openTab : "idag");
+  useReportTab(tab, onTab);
   const [pynt, setPynt] = useState(false);
   // Ukens utfordring og sesongstigen først etter garasjen (gradvis synlighet, B-180). Korte navn, så alle fire får
   // plass på 320 px (B-212)

@@ -15,6 +15,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 233,
+    date: "2026-09-28",
+    title: "Vikarer, vedlikehold og lik navigasjon",
+    items: [
+      "Skiftlederen leier vikarer for alle som er borte – også når noen blir syke mens vikarene alt er leid.",
+      "Alle hovedmenyene husker underfanen du var på. Trykk på menyen igjen for å komme til første underfane.",
+      "Nytt vedlikeholdskort: én rad per ovn med slitasje og én knapp. Utstyrsarkene viser hva som skjer på stedet nå.",
+      "Du kan avbryte en rammeavtale under Salg → Avtaler – men det koster en stor bot og omdømme.",
+      "Verkene i konsernet står som korte rader på mobil; trykk på et verk for knappene. Mål-knappen viser når den er valgt.",
+    ],
+  },
+  {
     b: 232,
     date: "2026-09-28",
     title: "Mange flere utfordringer og merker",

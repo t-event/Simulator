@@ -34,6 +34,7 @@ import { Icon } from "./icons";
 import { CASH_RESERVE } from "../game/reserve";
 import { Callout, StatusBadge, StatusLine, type Status } from "./ds";
 import { hints, type Anchor, type Hint } from "./hints";
+import { furnaceState, statusOf } from "./plantStatus";
 import { Breakdown, ResultChart } from "./Finance";
 import { COST_NAMES, dayResult, INCOME_NAMES } from "./financeNames";
 
@@ -53,17 +54,6 @@ interface Props {
 function missingScrap(g: GameState, stats: PlantStats): string | null {
   const short = scrapAlert(g, stats);
   return short.length ? short.map((id) => SCRAP_TYPES[id].name.toLowerCase()).join(" og ") : null;
-}
-
-function furnaceState(g: GameState, index: number): { text: string; progress: number | null } {
-  const f = g.furnaces[index];
-  if (f.heat) {
-    const p = (g.minute - f.heat.startMin) / (f.heat.endMin - f.heat.startMin);
-    const who = f.heat.manual ? " (kjørt av deg)" : "";
-    return { text: `Smelter ${fmtT(f.heat.sizeT)} ${GRADES[f.heat.grade].name.toLowerCase()}${who}`, progress: p };
-  }
-  if (g.pendingManual?.furnace === index) return { text: "Venter på deg i kontrollrommet", progress: null };
-  return { text: f.waitReason ?? "Klar", progress: null };
 }
 
 /** Rådene etter det første: to synlige, resten bak «Flere råd» så det ikke blir en tekstvegg (B-195) */
@@ -90,18 +80,6 @@ function HintList({ tips, run }: { tips: Hint[]; run: (t: Hint) => void }) {
       )}
     </>
   );
-}
-
-/** Statusspråket (UI.md 6.2, B-195): hva teksten fra motoren betyr, så ruta får riktig ikon og farge */
-function statusOf(text: string): Status {
-  if (/^Havari/.test(text)) return "feil";
-  if (/^Planlagt stans|[Ff]oringen skal byttes/.test(text)) return "vedlikehold";
-  if (/Mangler skrap/.test(text)) return "tomt";
-  if (/fullt/.test(text)) return "fullt";
-  if (/Mangler folk/.test(text)) return "folk";
-  if (/Utenfor arbeidstid|Strømprisen|Utkoblet|står/.test(text)) return "stopp";
-  if (/^Smelter|^Støper/.test(text)) return "kjorer";
-  return "venter";
 }
 
 /** Kvalitet de siste sju døgnene: holdt stålet kvaliteten det ble laget for? */
@@ -465,7 +443,7 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
             {!canMove && <StageCard g={g} act={act} />}
 
             <BookCard g={g} openBook={openBook} />
-            {/* Loggen synlig på Oversikt, ikke bare under Økonomi (B-098) */}
+            {/* Loggen på Oversikt (B-098); ikke lenger også under Økonomi (B-233) */}
             <Card title="Siste hendelser">
               <ul className="g-log">
                 {recent.slice(0, 5).map((e) => (
@@ -746,18 +724,7 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
           </div>
           <div className="g-col g-side">
             <BankCard g={g} act={act} />
-            <Card title="Logg">
-              <ul className="g-log">
-                {recent.map((e) => (
-                  <li key={e.id} className={`log-${e.kind}`}>
-                    <span className="g-log-time">
-                      Dag {Math.floor(e.min / 1440) + 1} {fmtClock(e.min)}
-                    </span>
-                    {e.text}
-                  </li>
-                ))}
-              </ul>
-            </Card>
+            {/* Loggen står bare på Oversikt og i varsellista (B-233): den har ingenting med økonomien å gjøre */}
           </div>
         </>
       )}

@@ -1,4 +1,5 @@
 import { Fragment, useState } from "react";
+import { useReportTab, type OnTab } from "./tabMemory";
 import { WIN_CASH } from "../game/data";
 import {
   daysToAfford,
@@ -360,7 +361,10 @@ function mainOption(p: SisterPlant, options: KonsernOption[]) {
   return { main: upgrade ?? options.find((o) => o.key === `mod-${p.id}`), isUpgrade: !!upgrade };
 }
 
-/** Ett datterverk som kort (mobil): utbyttet og hva det tjener, den viktigste knappen, og resten foldet bort (B-123) */
+/**
+ * Ett datterverk som rad (mobil, B-233): navn, type, moderniseringsprikker og utbyttet på én linje. Trykk for å åpne
+ * knappene. Verket «Neste steg» gjelder, står åpent. Før var hvert verk et helt kort, og tolv verk ble en lang side.
+ */
 function PlantRow({
   g,
   act,
@@ -381,36 +385,53 @@ function PlantRow({
   const [open, setOpen] = useState(0);
   const down = p.downUntilDay > day(g);
   const { main, isUpgrade } = mainOption(p, options);
+  const max = modernizeMax(g);
   return (
-    <div className="g-upgrade">
-      <div className="g-contract-head">
-        <strong className="g-plant-name">
-          <Icon name="factory" /> {p.name}
-        </strong>
-        <span className={down ? "g-badge-bad" : "g-muted"}>
-          {underConstruction(p) ? "Bygges" : down ? `Står til dag ${p.downUntilDay}` : `+${fmtKr(dividend)}/døgn`}
+    <details className={`g-plant-row${advised ? " is-advised" : ""}`} open={advised || undefined}>
+      <summary>
+        <span className="g-plant-row-name">
+          <strong>{p.name}</strong>
+          <span className="g-muted g-small-text">
+            {SISTER_TYPES[p.type].name}{" "}
+            <span className="g-tier-dots" aria-label={`Modernisert ${p.level} av ${max}`}>
+              {Array.from({ length: max }, (_, i) => (
+                <i key={i} className={i < p.level ? "is-done" : ""} />
+              ))}
+            </span>
+          </span>
         </span>
+        <span className={`g-plant-row-value${down ? " g-badge-bad" : ""}`}>
+          {p.project ? "Bygges" : down ? `Står til dag ${p.downUntilDay}` : `+${fmtKr(dividend)}`}
+        </span>
+      </summary>
+      <div className="g-plant-row-body">
+        <p className="g-muted g-small-text">
+          Modernisert {p.level} av {max}
+          {underConstruction(p)
+            ? ""
+            : ` · tjener ${fmtKr(sisterProfit(g, p))}/døgn · gir deg ${fmtKr(dividend)}/døgn`}{" "}
+          · verdt {fmtKr(sisterValue(g, p))}
+        </p>
+        <ProjectStatus p={p} />
+        {main && (
+          <BuyButton
+            g={g}
+            act={act}
+            o={main}
+            primary={advised}
+            label={isUpgrade ? "Bygg ut til storverk" : "Moderniser"}
+          />
+        )}
+        {/* Nøkkelen nullstiller salgsbekreftelsen når feltet lukkes */}
+        <details
+          className="g-details"
+          onToggle={(e) => !(e.target as HTMLDetailsElement).open && setOpen((n) => n + 1)}
+        >
+          <summary>{isUpgrade && !p.project ? "Moderniser eller selg" : "Selg verket"}</summary>
+          <PlantMore key={open} g={g} act={act} p={p} options={options} />
+        </details>
       </div>
-      <p className="g-muted g-small-text">
-        {SISTER_TYPES[p.type].name} · modernisert {p.level} av {modernizeMax(g)}
-        {underConstruction(p) ? "" : ` · tjener ${fmtKr(sisterProfit(g, p))}/døgn`} · verdt {fmtKr(sisterValue(g, p))}
-      </p>
-      <ProjectStatus p={p} />
-      {main && (
-        <BuyButton
-          g={g}
-          act={act}
-          o={main}
-          primary={advised}
-          label={isUpgrade ? "Bygg ut til storverk" : "Moderniser"}
-        />
-      )}
-      {/* Nøkkelen nullstiller salgsbekreftelsen når feltet lukkes */}
-      <details className="g-details" onToggle={(e) => !(e.target as HTMLDetailsElement).open && setOpen((n) => n + 1)}>
-        <summary>{isUpgrade && !p.project ? "Moderniser eller selg" : "Selg verket"}</summary>
-        <PlantMore key={open} g={g} act={act} p={p} options={options} />
-      </details>
-    </div>
+    </details>
   );
 }
 
@@ -537,16 +558,19 @@ export function KonsernPage({
   g,
   act,
   openTab,
+  onTab,
   tender,
 }: {
   g: GameState;
   act: Act;
   openTab?: string;
+  onTab?: OnTab;
   tender: OpenTender | null;
 }) {
   const [tab, setTab] = useState<KonsernTabId>(
     KONSERN_TAB_IDS.includes(openTab as KonsernTabId) ? (openTab as KonsernTabId) : "oversikt",
   );
+  useReportTab(tab, onTab);
   const canBuy = konsernReady(g);
   const tabs: { id: KonsernTabId; label: string; count?: number; badge?: string; alert?: boolean }[] = [
     { id: "oversikt", label: "Oversikt" },
@@ -722,6 +746,9 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
         <div className="g-col-wide g-konsern-plants">
           <Card title={`Dine verk (${k.plants.length} av ${maxSisters(g)} datterverk)`}>
             <div className="g-plant-cards">
+              <p className="g-muted g-small-text g-plant-rows-hint">
+                Tallet til høyre er det verket gir deg per døgn. Trykk på et verk for å modernisere eller selge.
+              </p>
               {k.plants.map((p, i) => (
                 <PlantRow
                   key={p.id}

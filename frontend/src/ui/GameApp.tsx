@@ -1,5 +1,5 @@
 import { RecipeGuideCoach } from "./RecipeGuide";
-import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import "./game.css";
 import { isElsewhere, onTabChange, playHere } from "../game/tabLock";
 import { markChangelogSeen, unseenChangelog } from "../game/changelog";
@@ -43,7 +43,8 @@ import { KonsernPage } from "./Konsern";
 import { useOpenTender } from "./openTender";
 import { VIEWS, viewUnlocked, type View } from "./views";
 import { Icon, type IconName } from "./icons";
-import { isVerketTab, type VerketTab } from "./verketTabs";
+import { isVerketTab } from "./verketTabs";
+import type { OnTab } from "./tabMemory";
 
 const NAV_ICON: Record<View, IconName> = {
   verket: "verket",
@@ -524,6 +525,7 @@ function NoticeRow({
   onInbox,
   onBoard,
   onGoals,
+  goalsActive,
   className = "",
 }: {
   g: GameState;
@@ -532,12 +534,14 @@ function NoticeRow({
   onBoard: () => void;
   /** Mål (B-214): egen knapp på mobil; på PC står Mål i sidemenyen */
   onGoals?: () => void;
+  /** Mål er siden som vises (B-233): knappen får samme markering som de andre punktene i menyen */
+  goalsActive?: boolean;
   className?: string;
 }) {
   return (
     <div className={`g-notice-row ${className}`.trim()}>
       <NoticeLine api={api} unseen={unseenCount(g)} latest={latestUnseen(g)} onOpen={onInbox} />
-      {onGoals && <GoalsButton g={g} onClick={onGoals} />}
+      {onGoals && <GoalsButton g={g} onClick={onGoals} active={goalsActive} />}
       <button className="g-book g-board-btn" onClick={onBoard} aria-label="Toppliste" title="Toppliste">
         <Icon name="trophy" />
       </button>
@@ -546,13 +550,14 @@ function NoticeRow({
 }
 
 /** Knappen til Mål (B-214), med en prikk når dagens belønning eller oppdragsbonusen kan hentes */
-function GoalsButton({ g, onClick }: { g: GameState; onClick: () => void }) {
+function GoalsButton({ g, onClick, active }: { g: GameState; onClick: () => void; active?: boolean }) {
   const status = useDailyStatus();
   const ready = g.tutorial === null && !!status && (!status.claimed || (!g.daily.claimed && missionBonusReady(g)));
   return (
     <button
-      className="g-book g-board-btn g-goals-btn"
+      className={`g-book g-board-btn g-goals-btn${active ? " is-active" : ""}`}
       onClick={onClick}
+      aria-current={active ? "page" : undefined}
       aria-label={ready ? "Mål – noe venter på deg" : "Mål: dagens oppdrag, uka og merker"}
       title="Mål"
     >
@@ -695,8 +700,22 @@ export function GameApp() {
   const [news, setNews] = useState(() => unseenChangelog(api.hasSave));
   const [view, setView] = useState<View>("verket");
   const [subTab, setSubTab] = useState<{ tab?: string; n: number }>({ n: 0 });
-  // Underfanen i Verket står her, så en annen side kan åpne en bestemt underfane (B-192)
-  const [verketTab, setVerketTab] = useState<VerketTab>("oversikt");
+  // Underfanen hver hovedmeny sto på, så alle menyene husker den på samme måte (B-192, B-233)
+  const [tabs, setTabs] = useState<Partial<Record<View, string>>>({});
+  const onTab = useMemo(() => {
+    const report =
+      (v: View): OnTab =>
+      (t) =>
+        setTabs((p) => (p[v] === t ? p : { ...p, [v]: t }));
+    return {
+      verket: report("verket"),
+      marked: report("marked"),
+      salg: report("salg"),
+      folk: report("folk"),
+      konsern: report("konsern"),
+      mal: report("mal"),
+    };
+  }, []);
   const [bookOpen, setBookOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(false);
@@ -807,9 +826,11 @@ export function GameApp() {
   const konsernCanBuy = g.konsern.unlocked ? konsernReady(g) : 0;
   const go = (v: View, sub?: string) => {
     setView(v);
-    if (v === "verket" && isVerketTab(sub)) setVerketTab(sub);
-    // Åpner en bestemt underfane, f.eks. lageret under Salg (B-048)
-    setSubTab((prev) => ({ tab: sub, n: prev.n + 1 }));
+    // Åpner en bestemt underfane, f.eks. lageret under Salg (B-048). Uten den: underfanen du sto på sist – men et nytt
+    // trykk på menyen du alt står i, går til første underfane (B-233)
+    const tab = sub ?? (v === shown ? undefined : tabs[v]);
+    setTabs((p) => ({ ...p, [v]: tab }));
+    setSubTab((prev) => ({ tab, n: prev.n + 1 }));
     if (!g.seenViews.includes(v)) act((gg) => void gg.seenViews.push(v));
   };
   // Rådene som peker til Marked eller Folk (det første per fane), og planleggeren som ikke får kjøpt skrap (B-202)
@@ -930,6 +951,7 @@ export function GameApp() {
               onInbox={openInbox}
               onBoard={() => setBoardOpen(true)}
               onGoals={() => go("mal")}
+              goalsActive={shown === "mal"}
             />
           )}
         </div>
@@ -943,51 +965,55 @@ export function GameApp() {
               go={go}
               openBook={openBook}
               onOpenSettings={() => setSettingsOpen(true)}
-              tab={verketTab}
-              setTab={setVerketTab}
+              tab={isVerketTab(tabs.verket) ? tabs.verket : "oversikt"}
+              setTab={onTab.verket}
             />
           )}
           {shown === "marked" && (
             <Market
-              key={subTab.tab ? `marked-${subTab.n}` : "marked"}
+              key={`marked-${subTab.n}`}
               g={g}
               stats={stats}
               act={act}
               openTab={subTab.tab}
+              onTab={onTab.marked}
             />
           )}
           {shown === "salg" && (
             <Sales
-              key={subTab.tab ? `salg-${subTab.n}` : "salg"}
+              key={`salg-${subTab.n}`}
               g={g}
               stats={stats}
               act={act}
               openTab={subTab.tab}
+              onTab={onTab.salg}
               paused={salesPaused}
             />
           )}
           {shown === "folk" && (
-            <People key={subTab.tab ? `folk-${subTab.n}` : "folk"} g={g} stats={stats} act={act} openTab={subTab.tab} />
+            <People key={`folk-${subTab.n}`} g={g} stats={stats} act={act} openTab={subTab.tab} onTab={onTab.folk} />
           )}
           {shown === "forskning" && <ResearchPage g={g} act={act} openBook={openBook} />}
           {shown === "konsern" && (
             <KonsernPage
-              key={subTab.tab ? `konsern-${subTab.n}` : "konsern"}
+              key={`konsern-${subTab.n}`}
               g={g}
               act={act}
               openTab={subTab.tab}
+              onTab={onTab.konsern}
               tender={tender}
             />
           )}
           {shown === "mal" && (
             <GoalsPage
-              key={subTab.tab ? `mal-${subTab.n}` : "mal"}
+              key={`mal-${subTab.n}`}
               g={g}
               stats={stats}
               api={api}
               onOpenSettings={() => setSettingsOpen(true)}
               onSales={() => go("salg", "tilbud")}
               openTab={subTab.tab}
+              onTab={onTab.mal}
             />
           )}
         </main>
