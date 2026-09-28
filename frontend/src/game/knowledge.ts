@@ -468,7 +468,7 @@ export const SEASON_CHAPTER: KnowledgeCard = {
     },
     {
       head: "Sesongstigen",
-      text: "Sesongstigen på Mål varer hele sesongen: hver dag du spiller, henter dagens belønning og fullfører dagens oppdrag, gir poeng, og det samme gjør topp 3 på ukelista. Hvert trinn gir fagpoeng, og trinn 10, 20, 30, 40 og 50 gir pynt som bare finnes der. Den som spiller litt hver dag, kommer lengst.",
+      text: "Sesongstigen på Mål varer hele sesongen: hver dag du spiller, henter dagens belønning og fullfører dagens oppdrag, gir poeng, og det samme gjør topp 3 på ukelista. Hvert trinn gir fagpoeng, og trinn 10, 20, 30, 40 og 50 gir pynt som bare finnes der – og bare denne sesongen. Den som spiller litt hver dag, kommer lengst.",
     },
   ],
 };
