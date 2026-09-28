@@ -229,15 +229,109 @@ function Aurora() {
   );
 }
 
-/** Banneret på hallveggen (sesongpynt for sesong 1, B-287) */
+/** Banneret på hallveggen (sesongpynt, B-287): blått i sesong 1, rødt i sesong 2 (B-291) */
 function Banner({ x, y, season }: { x: number; y: number; season: number }) {
   return (
     <g>
       <line x1={x - 2} y1={y} x2={x + 12} y2={y} stroke="#d8dde3" strokeWidth={1} />
-      <path d={`M${x} ${y} h 10 v 26 l -5 -4 l -5 4 Z`} fill="#25407a" stroke="#e0b030" strokeWidth={0.8} />
+      <path
+        d={`M${x} ${y} h 10 v 26 l -5 -4 l -5 4 Z`}
+        fill={season === 2 ? "#8a2630" : "#25407a"}
+        stroke="#e0b030"
+        strokeWidth={0.8}
+      />
       <text x={x + 5} y={y + 14} textAnchor="middle" fontSize={9} fontWeight={700} fill="#e0b030">
         {season}
       </text>
+    </g>
+  );
+}
+
+/** Regnbue over verket om dagen (sesongpynt for sesong 2, B-291) */
+function Rainbow() {
+  const colors = ["#e05a5a", "#e8a33c", "#e8d84a", "#5cc46a", "#4a8fe0", "#8a5ad8"];
+  return (
+    <g fill="none" opacity={0.45}>
+      {colors.map((c, i) => (
+        <path
+          key={c}
+          d={`M${20 + i * 5} 150 A ${190 - i * 5} ${120 - i * 5} 0 0 1 ${460 - i * 5} 150`}
+          stroke={c}
+          strokeWidth={5}
+        />
+      ))}
+    </g>
+  );
+}
+
+/** Fullmånen om natta (sesongpynt for sesong 2, B-291) */
+function Moon() {
+  return (
+    <g>
+      <circle cx={420} cy={34} r={16} fill="#f4efd8" opacity={0.95} />
+      <circle cx={414} cy={30} r={3} fill="#dcd5b8" />
+      <circle cx={425} cy={40} r={2.2} fill="#dcd5b8" />
+      <circle cx={426} cy={27} r={1.5} fill="#dcd5b8" />
+    </g>
+  );
+}
+
+/** Lyskastere som sveiper over himmelen om natta (sesongstigen i sesong 2, B-291) */
+function Searchlights() {
+  return (
+    <g className="scene-searchlights">
+      {[140, 340].map((x, i) => (
+        <path
+          key={x}
+          className="scene-beam"
+          style={{ animationDelay: `${i * 2}s`, transformOrigin: `${x}px 178px` }}
+          d={`M${x - 2} 178 L${x - 26} 0 L${x + 26} 0 L${x + 2} 178 Z`}
+          fill="#fff6c8"
+          opacity={0.13}
+        />
+      ))}
+    </g>
+  );
+}
+
+/** Vimpler langs taket (sesongstigen i sesong 2, B-291) */
+function Bunting({ line }: { line: [number, number][] }) {
+  const colors = ["#e05a5a", "#e8d84a", "#4a8fe0", "#5cc46a"];
+  const flags: [number, number, number, number][] = [];
+  for (let i = 0; i < line.length - 1; i++) {
+    const [x1, y1] = line[i];
+    const [x2, y2] = line[i + 1];
+    const n = Math.max(2, Math.round(Math.hypot(x2 - x1, y2 - y1) / 8));
+    for (let k = 0; k < n; k++) {
+      const t = k / n;
+      const u = (k + 1) / n;
+      flags.push([x1 + (x2 - x1) * t, y1 + (y2 - y1) * t, x1 + (x2 - x1) * u, y1 + (y2 - y1) * u]);
+    }
+  }
+  return (
+    <g>
+      {flags.map(([ax, ay, bx, by], i) => (
+        <path
+          key={i}
+          d={`M${ax} ${ay - 1} L${bx} ${by - 1} L${(ax + bx) / 2} ${(ay + by) / 2 + 5} Z`}
+          fill={colors[i % colors.length]}
+        />
+      ))}
+    </g>
+  );
+}
+
+/** Et stort tannhjul i stål foran verket (toppen av sesongstigen i sesong 2, B-291) */
+function Gear({ x }: { x: number }) {
+  const teeth = Array.from({ length: 10 }, (_, i) => (i / 10) * 360);
+  return (
+    <g transform={`translate(${x} 164)`}>
+      <rect x={-7} y={10} width={14} height={4} fill="#5b636c" />
+      {teeth.map((a) => (
+        <rect key={a} x={-2} y={-12} width={4} height={5} fill="#aeb6bf" transform={`rotate(${a})`} />
+      ))}
+      <circle r={9} fill="#aeb6bf" />
+      <circle r={3.5} fill="#5b636c" />
     </g>
   );
 }
@@ -555,6 +649,9 @@ export function PlantScene({ g, stats, onStation }: Props) {
         </g>
       )}
       {night && cosmeticOn(g, "nordlys") && <Aurora />}
+      {!night && cosmeticOn(g, "regnbue") && <Rainbow />}
+      {night && cosmeticOn(g, "fullmane") && <Moon />}
+      {night && cosmeticOn(g, "lyskastere") && <Searchlights />}
       {/* Åsene bak */}
       <path d="M0 150 Q 80 110 170 140 T 330 130 T 480 140 L480 180 L0 180 Z" fill="#23303f" opacity={0.8} />
       {winter && (
@@ -770,6 +867,9 @@ export function PlantScene({ g, stats, onStation }: Props) {
       {cosmeticOn(g, "pokal") && <Trophy x={stage === 0 ? 180 : 355} />}
       {cosmeticOn(g, "statue") && <Statue x={stage === 0 ? 150 : 385} />}
       {cosmeticOn(g, "banner1") && <Banner x={bannerAt[0]} y={bannerAt[1]} season={1} />}
+      {cosmeticOn(g, "banner2") && <Banner x={bannerAt[0]} y={bannerAt[1]} season={2} />}
+      {cosmeticOn(g, "vimpler") && <Bunting line={roof.line} />}
+      {cosmeticOn(g, "tannhjul") && <Gear x={stage === 0 ? 120 : 318} />}
 
       {/* Ferdigvarelager */}
       {/* Utbygd ferdiglager (B-276): skur, så lagerhall med traverskran, så terminal med jernbanevogn */}

@@ -30,6 +30,7 @@ import {
 import {
   buyCosmetic,
   COSMETIC_BY_ID,
+  COSMETICS,
   cosmeticBlocked,
   cosmeticListed,
   cosmeticOn,
@@ -2687,7 +2688,18 @@ test("Sesongpynt (B-287): bare i sin sesong og med konto, beholdes etterpå, sti
   setCosmetic(g, "gullpipe", true);
   assert(cosmeticOn(g, "gullpipe") && !cosmeticOn(g, "kobberpipe"), "to piper på samtidig");
   // Stigen: pynten hører til sesongen; en sesong uten egen pynt gir bare fagpoeng
-  assert(trackCosmetic(10, 1)?.id === "sesongflagg" && trackCosmetic(10, 2) === null, "stigepynt i feil sesong");
+  assert(trackCosmetic(10, 1)?.id === "sesongflagg" && trackCosmetic(10, 3) === null, "stigepynt i feil sesong");
+  // Sesong 2 har sin egen pynt (B-291): fem trinn på stigen og tre i butikken, som ikke vises i sesong 1
+  assert(
+    [10, 20, 30, 40, 50].every((t) => trackCosmetic(t, 2)?.season === 2) && trackCosmetic(10, 2)?.id !== "sesongflagg",
+    "sesong 2 mangler stigepynt",
+  );
+  const s2 = COSMETICS.filter((c) => c.season === 2 && !c.seasonTier);
+  assert(s2.length === 3 && s2.every((c) => !cosmeticListed(g, c, s1)), "sesong 2-pynt vises i sesong 1");
+  assert(
+    COSMETICS.every((c) => !c.season || c.icon),
+    "sesongpynt uten ikon",
+  );
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

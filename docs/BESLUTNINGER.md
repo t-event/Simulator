@@ -5236,3 +5236,19 @@ forklaringen sto bare i fagboka, og i kontokortet sto det bare hvorfor den kreve
 - **Fagboka** sier at pynten på stigen bare finnes denne sesongen.
 - Testet på 320 og 390 px, med og uten konto.
 - Konto: stigen krever konto som før (B-173); forklaringen vises for alle.
+
+## B-291 Pynt for sesong 2 er klar (2026-09-28)
+Status: gjelder (følger B-287)
+Endringslogg: nei
+Brukeren sa «Fortsett»; neste punkt var pynten for sesong 2, så den er klar når sesongen startes (B-287: en sesong uten
+egen pynt gir bare fagpoeng på stigen). Den vises først når serveren sier at sesong 2 pågår, så spillerne merker ingenting
+nå – derfor ingen oppføring i endringsloggen.
+- **Butikken (fagpoeng, med konto):** Regnbue (60, over verket om dagen), Fullmåne (120, om natta) og Sesong 2-banner (200,
+  rødt banner på hallveggen). Bannerne for sesong 1 og 2 er i samme gruppe – ett om gangen.
+- **Sesongstigen:** trinn 10 Vimpelrekke (langs taket), 20 Kobberfasade, 30 Hvit fasade, 40 Lyskastere (sveiper over himmelen
+  om natta), 50 Tannhjul i stål (foran verket).
+- Nye ikoner fra Lucide: `rainbow`, `moon`, `cog`. Lyskasterne står stille med «reduser bevegelse».
+- Testet: anleggsbildet dag og natt på nivå 0–4, og «Pynt verket» med sesong 2 fra en falsk server (sesong 1-pynten man
+  har, står under «Alltid»; den man ikke har, vises ikke). Ny sjekk i `tests.ts`.
+- Neste gang: pynt for sesong 3 før den startes (FORSLAG.md).
+- Konto: som B-287.
