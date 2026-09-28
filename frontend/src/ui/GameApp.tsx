@@ -386,6 +386,12 @@ function LegendCelebration({ g, onClose }: { g: GameState; onClose: () => void }
   );
 }
 
+/** Knappen veiledningen ber om på hver side, som skal stå over boksen (B-260) */
+const COACH_TARGET: Partial<Record<View, string>> = {
+  marked: "button.g-buy",
+  salg: ".g-offer-actions button",
+};
+
 /** Veiledet start: ett steg om gangen nederst på skjermen, og kan hoppes over (B-027) */
 function Coach({ g, act }: { g: GameState; act: GameApi["act"] }) {
   const i = g.tutorial;
@@ -831,6 +837,37 @@ export function GameApp() {
     ro.observe(bar);
     return () => ro.disconnect();
   }, [isPc, hasGame]);
+
+  // Veiledningen skal ikke dekke knappen den ber om (B-260). På en liten mobil lå boksen over alle kjøpeknappene i
+  // steget «Kjøp skrap», så et trykk traff boksen og ingenting skjedde. Høyden måles, så siden alltid kan rulles fri,
+  // og står spilleren på siden steget gjelder, rulles knappen opp over boksen
+  const coachStep = g?.tutorial ?? null;
+  const coachView = coachStep !== null ? TUTORIAL[coachStep]?.view : undefined;
+  const pageNow = g && viewUnlocked(g, view) ? view : "verket";
+  useEffect(() => {
+    const app = appRef.current;
+    const coach = app?.querySelector<HTMLElement>(".g-coach");
+    if (!app || !coach || typeof ResizeObserver === "undefined") {
+      app?.style.removeProperty("--coach-h");
+      return;
+    }
+    const ro = new ResizeObserver(() => app.style.setProperty("--coach-h", `${coach.offsetHeight}px`));
+    ro.observe(coach);
+    const target = coachView === pageNow ? COACH_TARGET[pageNow] : undefined;
+    const frame = requestAnimationFrame(() => {
+      const main = app.querySelector<HTMLElement>(".g-main");
+      const el = target
+        ? [...(main?.querySelectorAll<HTMLElement>(target) ?? [])].find((e) => e.offsetParent !== null)
+        : undefined;
+      if (!main || !el) return;
+      const covered = el.getBoundingClientRect().bottom - (coach.getBoundingClientRect().top - 12);
+      if (covered > 0) main.scrollBy({ top: covered, behavior: "smooth" });
+    });
+    return () => {
+      ro.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }, [coachStep, coachView, pageNow, hasGame]);
 
   if (!g)
     return (

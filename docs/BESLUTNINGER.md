@@ -4757,3 +4757,19 @@ dag 472–2 168 er borte (grafer, ukens utfordring); spillet, rekordene og title
   valget på 320 og 390 px (første trykk lagrer ingenting, advarselen vises).
 - Konto: ja (lagring på nett).
 
+## B-260 Veiledningen dekker ikke knappen den ber om (2026-09-28)
+Status: gjelder (retter B-027; B-201 plasserte boksen over varsellinja)
+Brukeren: «Early game slet en med å kjøpe 5 tonn skrap når han hadde 8 tonn ledig» – knappen gjorde ingenting, i
+garasjen.
+- **Funnet:** på en liten mobil (320 × 568) lå veiledningsboksen i steget «Kjøp skrap» over alle kjøpeknappene på Marked.
+  Et trykk traff boksen, og ingenting skjedde – ingen melding, ingenting kjøpt. Det samme gjaldt «Signer» på Salg i
+  steget «Ta en kontrakt». Siden hadde fast 190 px luft under innholdet, men boksen er høyere på smale skjermer, og en ny
+  spiller vet ikke at siden kan rulles. På 390 og 412 px var knappene fri. Selve kjøpet (motoren) var riktig: 5 t med
+  8 t ledig kjøpes, også i nettleseren.
+- **Rettingen (`ui/GameApp.tsx`, `game.css`):** høyden på boksen måles (`--coach-h`), og siden får så mye luft under
+  innholdet. Står spilleren på siden steget gjelder, rulles knappen steget ber om (`COACH_TARGET`: kjøpeknappene på
+  Marked, «Signer» på Salg) opp over boksen.
+- Testet: Playwright på 320, 390, 412 og 1366 px for begge stegene – knappen er fri, og et trykk kjøper skrap og
+  signerer, og veiledningen går videre.
+- Konto: nei.
+

@@ -2133,7 +2133,8 @@ button {
 }
 
 .g-app.has-coach .g-main {
-  padding-bottom: 190px;
+  /* Så mye plass under innholdet som boksen tar (B-260), så alt kan rulles opp over den */
+  padding-bottom: calc(var(--coach-h, 190px) + 24px);
 }
 
 .g-nav button.is-hint {

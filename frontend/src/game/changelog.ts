@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 260,
+    date: "2026-09-28",
+    title: "Veiledningen dekker ikke knappene",
+    items: [
+      "På små mobiler lå veiledningen over kjøpeknappene for skrap (og «Signer» på Salg), så et trykk gjorde ingenting. Nå ruller siden knappen opp over boksen, og alt kan rulles fram.",
+    ],
+  },
+  {
     b: 259,
     date: "2026-09-28",
     title: "Et gammelt spill tar ikke over",

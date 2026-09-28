@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 197 – 2026-09-28: Kjøpeknappene under veiledningen
+
+**Brukeren ba om:** «Early game slet en med å kjøpe 5 tonn skrap når han hadde 8 tonn ledig» – knappen gjorde
+ingenting, i garasjen.
+
+**Gjort:** B-260. Fant at veiledningsboksen dekket alle kjøpeknappene (og «Signer») på en liten mobil. Boksen måles nå,
+siden får like mye luft, og knappen steget ber om rulles opp over boksen. Publiseringen av #204 (B-259) var grønn.
+
+**Testet:** kjøpet i motoren og i nettleseren (virket), veiledningssteget på 320/390/412/1366 px før og etter rettingen,
+tsc, lint, `npm test`.
+
+**Gjenstår:** –
+
+---
+
 ## Økt 196 – 2026-09-28: Et gammelt spill tok over etter innlogging
 
 **Brukeren ba om:** «Hvorfor mistet jeg masse progresjon? … vil bare ha svar», så «Jeg hadde blitt logget ut», så
