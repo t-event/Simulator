@@ -4470,3 +4470,15 @@ Brukeren: «Skraplager og støping ikonene syntes jeg ikke passer så godt.» Va
   lager. Kapittelet «Strengstøping» i fagboka får samme ikon.
 - Rive og dråpe beholdes i kontrollrommet, der de betyr avslagging og tapping.
 - Konto: nei.
+
+## B-244 UI-4d, andre runde: storverket får sitt eget bilde, og bildet dempes når verket står (2026-09-28)
+Status: gjelder (fase UI-4d i docs/UI.md, bygger på B-242)
+Brukeren: «Fortsett» (resten av UI-4d: egne bygninger per nivå og en tilstand når verket står).
+- **Storverket skiller seg fra stålverket:** høyere smeltehall med eget tak og en ekstra rad vinduer. Nivå 0–3 er som før.
+- **Transportbånd** fra skrapgården opp til ovnshallen på stålverket og storverket. Skrapet går på båndet bare når verket
+  er i drift og en ovn smelter.
+- **Én glødende streng per støpemaskin** (opptil tre) ved støpehallen, så en ny støpemaskin synes i bildet.
+- **Når verket står** (utenfor skiftene) legges et mørkt, halvgjennomsiktig lag over bildet. Det sier det samme som
+  statusen, uten tekst.
+- Alt nytt bruker bare `transform`/`opacity` og står stille med «redusert bevegelse».
+- Konto: nei. Testet: skjermbilder av nivå 1, 3 og et fullt storverk, verkstedet om natta.

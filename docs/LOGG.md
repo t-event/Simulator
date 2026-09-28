@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 181 – 2026-09-28: UI-4d, andre runde – bilde per nivå og når verket står
+
+**Brukeren ba om:** «Fortsett».
+
+**Gjort:** B-244. Storverket har høyere smeltehall og eget tak; transportbånd fra skrapgården; én glødende streng per
+støpemaskin; bildet dempes når verket står.
+
+**Testet:** tsc, lint, `npm test`, skjermbilder av nivå 1, 3 og et fullt storverk.
+
+**Gjenstår:** logo, app-ikon og tittelbilde (siste del av UI-4d); veksten på toppen i sluttspillet; tom tonn-liste denne
+uka (B-235); reserven og kassegrensen; fase 2.
+
+---
+
 ## Økt 180 – 2026-09-28: Ikoner for Skraplager og Støping
 
 **Brukeren ba om:** bedre ikoner for skraplager og støping. Valgte magnet og to emner blant kandidatene.

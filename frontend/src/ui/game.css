@@ -758,6 +758,26 @@ button {
   animation: scene-ship 3.2s ease-in-out infinite alternate;
 }
 
+/* Skrap på transportbåndet (B-244): løper oppover mot smeltehallen */
+.scene-belt {
+  animation: scene-belt 2.4s linear infinite;
+}
+
+@keyframes scene-belt {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(14px);
+  }
+}
+
+/* Verket står: bildet dempes, så det synes med én gang (B-244) */
+.scene-idle {
+  fill: #0b1324;
+  opacity: 0.35;
+}
+
 @keyframes scene-ship {
   to {
     transform: translateY(1.5px);
@@ -774,7 +794,8 @@ button {
   .scene-truck,
   .scene-trolley.is-moving,
   .scene-roll,
-  .scene-ship {
+  .scene-ship,
+  .scene-belt {
     animation: none;
   }
   /* Trucken står parkert ved skrapgården i stedet for å kjøre */
