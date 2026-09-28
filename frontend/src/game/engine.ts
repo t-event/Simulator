@@ -244,7 +244,7 @@ export function newGame(seed = Date.now()): GameState {
     nextLogId: 1,
     today: newDay(1, START_CASH),
     history: [],
-    totals: { producedT: 0, heats: 0, manualHeats: 0, contractsDone: 0, complaints: 0 },
+    totals: { producedT: 0, heats: 0, manualHeats: 0, contractsDone: 0, complaints: 0, maintKr: 0 },
     negativeDays: 0,
     gameOver: false,
     won: false,
@@ -331,6 +331,7 @@ export function addCost(g: GameState, category: CostCategory, amount: number): v
   if (amount <= 0) return;
   g.cash -= amount;
   g.today.costs[category] = (g.today.costs[category] ?? 0) + amount;
+  if (category === "vedlikehold") g.totals.maintKr += amount;
 }
 
 export function addIncome(g: GameState, category: IncomeCategory, amount: number): void {

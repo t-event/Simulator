@@ -141,6 +141,8 @@ export function migrate(g: GameState): GameState {
   // Trender i markedet (B-255)
   if (g.market.trend === undefined) g.market.trend = null;
   if (g.market.nextTrendDay === undefined) g.market.nextTrendDay = 0;
+  // Vedlikehold i alt (B-256): teller fra nå, historien er ikke lagret
+  if (g.totals.maintKr === undefined) g.totals.maintKr = 0;
   if (g.konsern === undefined)
     g.konsern = { unlocked: false, plants: [], shared: [], nextId: 1, director: null, milestones: 0, legends: 0 };
   if (g.konsern.director === undefined) g.konsern.director = null;

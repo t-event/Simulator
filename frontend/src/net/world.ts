@@ -32,13 +32,26 @@ export interface TenderResult {
   myBid: number | null;
 }
 
-/** Selskapstypene serveren kjenner (B-189, B-253). Et selskap som er slått av, sendes ikke. */
-export type CompanyType = "skraplager" | "slagg";
+/** Selskapstypene serveren kjenner (B-189, B-253, B-256). Et selskap som er slått av, sendes ikke. */
+export type CompanyType = "skraplager" | "slagg" | "verksted";
+
+/** Navnet serveren bruker når det mangler */
+const COMPANY_NAME: Record<CompanyType, string> = {
+  skraplager: "Skraplageret",
+  slagg: "Slagghåndteringen",
+  verksted: "Mekanisk verksted",
+};
+
+/** Typen fra serveren; ukjente typer vises som skraplageret (eldste regel) */
+export function companyType(v: unknown): CompanyType {
+  return v === "slagg" || v === "verksted" ? v : "skraplager";
+}
 
 /** Hva eieren tjener på, med vanlige ord – brukt i beskjeden om åpent anbud */
 export const EARNS_FROM: Record<CompanyType, string> = {
   skraplager: "skrapet de andre spillerne bruker",
   slagg: "slaggen de andre spillerne lager",
+  verksted: "vedlikeholdet og reparasjonene hos de andre spillerne",
 };
 
 export interface Company {
@@ -102,8 +115,8 @@ export async function fetchWorldStatus(): Promise<WorldStatus> {
   return {
     companies: (r?.companies ?? []).map((c) => ({
       id: num(c.id),
-      type: c.type === "slagg" ? "slagg" : "skraplager",
-      name: String(c.name ?? (c.type === "slagg" ? "Slagghåndteringen" : "Skraplageret")),
+      type: companyType(c.type),
+      name: String(c.name ?? COMPANY_NAME[companyType(c.type)]),
       owner: str(c.owner),
       mine: c.mine === true,
       concessionUntil: str(c.concession_until),

@@ -3,7 +3,7 @@
  * Kjøres med `npx tsx src/net/tests.ts` og i `npm test`.
  */
 import type { GameState } from "../game/types";
-import { newGame } from "../game/engine";
+import { addCost, newGame } from "../game/engine";
 import { setCloudConfig } from "./config";
 import { setSaveListener } from "../game/save";
 import {
@@ -55,7 +55,16 @@ import {
 } from "./sync";
 import { forgetGuest, isGuest, onGuestSave, setGuestClock } from "./guest";
 import { DEPOSIT_REFUSAL_TEXT, depositToTreasury, fetchTreasury } from "./treasury";
-import { applyTenderResult, applyTenderResults, BID_REFUSAL_TEXT, fetchWorldStatus, placeBid, timeLeft } from "./world";
+import {
+  applyTenderResult,
+  applyTenderResults,
+  BID_REFUSAL_TEXT,
+  companyType,
+  EARNS_FROM,
+  fetchWorldStatus,
+  placeBid,
+  timeLeft,
+} from "./world";
 
 declare const process: { exitCode?: number };
 
@@ -98,7 +107,15 @@ interface Fake {
   chestFp: number;
   snapshots: Map<
     string,
-    { day: number; equity: number; stage: number; reputation: number; season_id?: number | null; produced_t?: number }[]
+    {
+      day: number;
+      equity: number;
+      stage: number;
+      reputation: number;
+      season_id?: number | null;
+      produced_t?: number;
+      maint_kr?: number;
+    }[]
   >;
   nicknames: Map<string, string>;
   calls: string[];
@@ -361,6 +378,7 @@ function makeFake(): Fake {
         reputation: Number(body.reputation),
         season_id: body.season_id as number | null,
         produced_t: body.produced_t as number | undefined,
+        maint_kr: body.maint_kr as number | undefined,
       });
       f.snapshots.set(id, list);
       return new Response(null, { status: 201 });
@@ -1419,6 +1437,20 @@ const main = async () => {
     assert(g.tenderSeen === 12, `sist sett ${g.tenderSeen}`);
     assert(/slagghåndteringen/.test(g.log.at(-1)!.text), "feil selskap i varselet");
     assert(applyTenderResults(g, companies, now) === 0, "samme varsler to ganger");
+  });
+
+  await test("Mekanisk verksted (B-256): typen tolkes, og spillet sender vedlikeholdet til tidslinja", async () => {
+    assert(companyType("verksted") === "verksted" && companyType("slagg") === "slagg", "kjente typer");
+    assert(companyType("noe nytt") === "skraplager", "ukjent type");
+    assert(/vedlikeholdet/.test(EARNS_FROM.verksted), "hva verkstedet tjener på");
+    const f = fresh();
+    await login(f);
+    const g = newGame(256);
+    addCost(g, "vedlikehold", 12_345.4);
+    addCost(g, "lonn", 50_000);
+    await linkOnLogin(g);
+    const s = f.snapshots.get("u-a@test")?.[0];
+    assert(s?.maint_kr === 12_345, `vedlikehold i tidslinja ${JSON.stringify(s)}`);
   });
 
   setSaveListener(null);

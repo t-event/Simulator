@@ -151,6 +151,7 @@ import { parseSave } from "./save";
 import { makeDecision, maybeCreateDecision, resolveDecision, SAME_CARD_REAL_MS } from "./decisions";
 import { landmarkContract, landmarkHour } from "./landmarks";
 import {
+  addCost,
   apprenticeExams,
   APPRENTICE_DAYS,
   avgRating,
@@ -2331,6 +2332,19 @@ test("Trender i markedet (B-255): starter og slutter, drar forespørsler mot det
   const withTrend = share(true);
   assert(withTrend.share > without.share + 0.1, `andel ${without.share} uten, ${withTrend.share} med trend`);
   assert(without.tagged === 0 && withTrend.tagged > 0, `merket: ${without.tagged} / ${withTrend.tagged}`);
+});
+
+test("Vedlikehold i alt (B-256): bare vedlikehold og havarier telles, og gamle lagringer starter på 0", () => {
+  const g = newGame(256);
+  const cash = g.cash;
+  addCost(g, "vedlikehold", 40_000);
+  addCost(g, "skrap", 90_000);
+  addCost(g, "vedlikehold", -5);
+  assert(g.totals.maintKr === 40_000, `vedlikehold ${g.totals.maintKr}`);
+  assert(g.cash === cash - 130_000, "kassa");
+  const old = JSON.parse(JSON.stringify(g));
+  delete old.totals.maintKr;
+  assert(parseSave(JSON.stringify(old))?.totals.maintKr === 0, "gammel lagring");
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

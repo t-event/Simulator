@@ -497,7 +497,15 @@ export interface GameState {
   nextLogId: number;
   today: DayFinance;
   history: DayFinance[];
-  totals: { producedT: number; heats: number; manualHeats: number; contractsDone: number; complaints: number };
+  totals: {
+    producedT: number;
+    heats: number;
+    manualHeats: number;
+    contractsDone: number;
+    complaints: number;
+    /** Kroner brukt på vedlikehold og havarier i alt – til det mekaniske verkstedet på serveren (B-256) */
+    maintKr: number;
+  };
   negativeDays: number;
   gameOver: boolean;
   won: boolean;
