@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 176 – 2026-09-28: Alle sider starter like høyt
+
+**Brukeren ba om:** at Forskningskortet ikke står høyere enn det som står øverst på de andre sidene.
+
+**Gjort:** B-239. Underfanene øverst på en side har ingen luft over seg lenger, så alle sider starter på samme høyde.
+
+**Testet:** målt posisjonen til det første på hver side ved 320, 390, 820 og 1 920 px; tsc, lint, `npm test`.
+
+**Gjenstår:** veksten på toppen i sluttspillet; tom tonn-liste denne uka (B-235); UI-4d; reserven og kassegrensen; fase 2.
+
+---
+
 ## Økt 175 – 2026-09-28: Realistiske titler, kort som står stille, innstillinger og «Hva er nytt»
 
 **Brukeren ba om:** svar på om inntekt fra selskaper går til konsernkassa; tekst som ikke hopper i produksjonskortet,
