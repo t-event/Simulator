@@ -5020,3 +5020,20 @@ Brukeren ba: «Lag de nye tingene på anleggsbildet». Tegnet i `ui/PlantScene.t
   bevegelse).
 - Nye farger som tokens: `--art-steam`, `--art-smoke-dirty`, `--art-snow`, `--art-alarm`.
 - Konto: nei (regel 1, ditt eget spill).
+
+## B-277 En hel vinter målt: ingen justering, frost-meldingen retter seg etter klokka (2026-09-28)
+Status: gjelder
+Brukeren valgte «Test en hel vinter». Ny måling i testspilleren: `balance.ts --vinter` kjører flink spiller og
+nybegynner, fire frø, 720 døgn (to vintre), og skriver per nivå og årstid produksjon, inntekt, vedlikehold og bøter per
+døgn og uhell per 30 døgn. Tok ca. 11 minutter.
+- **Testspilleren er på storverket før den første vinteren** (dag 225), så alle vinterdøgn i målingen er på nivå 4.
+  Nivå 2 og 3 ble målt for seg med lagrede spill (90 døgn sommer mot vinter): havarier ca. dobbelt så ofte, frost ca.
+  0,3 ganger per 30 døgn, en sjelden eksplosjon. Tallene der er små og usikre.
+- **Storverket, flink spiller, sommer → vinter (per 30 døgn):** elektrodebrudd 3,3 → 5,3, overslag 6,5 → 9,6, havari
+  på renseanlegget 0,4 → 0,8, frost 0 → 0,4, hendelseskort 6,5 → 9,2. Eksplosjoner 0,0 → 0,1: den flinke spilleren har
+  tak, sortering og sikkerhetskultur. Ingen dødsulykker i 16 vintre. Vedlikehold +19 % per døgn, bøter og
+  kontraktstrekk +45 %. Nybegynneren: omtrent det samme, eksplosjoner 0,2 per 30 døgn.
+- **Vurdering:** vinteren merkes i hendelsene (40–100 % flere uhell og kort), men tar bare ca. 1 % av inntekten. Det er
+  meningen: vinteren skal gi mer å håndtere, ikke sende noen i konkurs. Tiltakene (tak, sortering, sikkerhet) virker
+  som de skal. Ingen tall endres.
+- **Rettet:** frost-meldingen sa alltid «frøs i natt», også midt på dagen. Nå «i natt» bare om natta, ellers «i kulda».

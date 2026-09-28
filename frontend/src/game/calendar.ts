@@ -4,7 +4,7 @@
  * uforutsette hendelser.
  */
 import { addCost, fmtKr, log } from "./engine";
-import { day, type PlantStats } from "./plant";
+import { day, hourOfDay, type PlantStats } from "./plant";
 import { chance, uniform } from "./random";
 import type { GameState } from "./types";
 
@@ -77,9 +77,12 @@ export function winterHour(g: GameState, stats: PlantStats): void {
   const cost = 10_000 * (1 + g.stage) ** 2;
   g.castDownUntilMin = g.minute + hours * 60;
   addCost(g, "vedlikehold", cost);
+  // «I natt» bare om natta (B-277)
+  const hour = hourOfDay(g);
+  const when = hour < 7 || hour >= 22 ? "i natt" : "i kulda";
   log(
     g,
-    `Frost: kjølevannsrørene til støpemaskinen frøs i natt. Støpingen står i ${hours.toFixed(0)} timer (reparasjon ${fmtKr(cost)}).`,
+    `Frost: kjølevannsrørene til støpemaskinen frøs ${when}. Støpingen står i ${hours.toFixed(0)} timer (reparasjon ${fmtKr(cost)}).`,
     "bad",
   );
 }

@@ -32,6 +32,7 @@ import {
 } from "./actions";
 import { MASTERY_IDS, masteryCost, masteryLevel } from "./mastery";
 import { resolveDecision } from "./decisions";
+import { isWinter } from "./calendar";
 import { envActive, nextCleaner, shortfall } from "./environment";
 import {
   applyAwayReward,
@@ -638,6 +639,9 @@ const dailyEvery = process.argv.includes("--daglig")
 /** Kundevurderingene per nivå fra siste run() (B-161), for --vurdering */
 let ratingLog: { stage: number; score: number }[] = [];
 
+/** Kalles etter hver time i run() med id-en til siste logglinje før timen (for --vinter, B-277) */
+let hourHook: ((g: GameState, logBefore: number) => void) | null = null;
+
 function run(seed: number, days: number, verbose: boolean, novice = process.argv.includes("--nybegynner")): RunSummary {
   ratingLog = [];
   const g = newGame(seed);
@@ -655,6 +659,7 @@ function run(seed: number, days: number, verbose: boolean, novice = process.argv
     const logBefore = g.log.at(-1)?.id ?? 0;
     const doneBefore = g.totals.contractsDone;
     advance(g, 60);
+    hourHook?.(g, logBefore);
     const newRatings = g.totals.contractsDone - doneBefore;
     if (newRatings > 0) for (const score of g.ratings.slice(-newRatings)) ratingLog.push({ stage: g.stage, score });
     if (day(g) !== growthDay) {
@@ -813,6 +818,79 @@ if (process.argv.includes("--forste")) {
   );
   process.exit?.(0);
 }
+/**
+ * «--vinter»: uhell, stans og tap om vinteren mot sommeren, per nivå (B-277). Flink og nybegynner, fire frø, 720 døgn
+ * (to vintre). Hendelser per 30 døgn, produksjon og kostnader per døgn.
+ */
+if (process.argv.includes("--vinter")) {
+  const KINDS: [string, RegExp][] = [
+    ["eksplosjon", /^EKSPLOSJON/],
+    ["død", /^DØDSULYKKE/],
+    ["frost", /^Frost:/],
+    ["rensehavari", /^Havari på (renseanlegget|den ene linjen)/],
+    ["utslippsbot", /^Bot for utslipp/],
+    ["elektrode", /^Elektrodebrudd/],
+    ["overslag", /[Oo]verslag/],
+    ["havari", /[Hh]avari|brudd|lekk/],
+  ];
+  type Cell = { days: number; prodT: number; income: number; maint: number; fine: number; ev: Record<string, number> };
+  const cell = (): Cell => ({ days: 0, prodT: 0, income: 0, maint: 0, fine: 0, ev: {} });
+  for (const novice of [false, true]) {
+    const table = new Map<string, Cell>();
+    for (const seed of [1, 2, 3, 4]) {
+      let lastDecision: unknown = null;
+      let lastDay = 1;
+      hourHook = (g, logBefore) => {
+        const key = `${g.stage}-${isWinter(g) ? "vinter" : "sommer"}`;
+        const c = table.get(key) ?? cell();
+        table.set(key, c);
+        for (const e of g.log.filter((l) => l.id > logBefore)) {
+          const kind = KINDS.find(([, re]) => re.test(e.text));
+          if (kind && (e.kind === "bad" || e.kind === "event")) c.ev[kind[0]] = (c.ev[kind[0]] ?? 0) + 1;
+        }
+        if (g.pendingDecision && g.pendingDecision !== lastDecision) {
+          lastDecision = g.pendingDecision;
+          c.ev["kort"] = (c.ev["kort"] ?? 0) + 1;
+        }
+        if (day(g) !== lastDay) {
+          lastDay = day(g);
+          const y = g.history.at(-1);
+          // Døgnet som nettopp er over, telles på årstiden det var
+          const k = `${g.stage}-${isWinter(g, day(g) - 1) ? "vinter" : "sommer"}`;
+          const d = table.get(k) ?? cell();
+          table.set(k, d);
+          d.days++;
+          if (y) {
+            d.prodT += y.producedT;
+            d.income += Object.values(y.income).reduce((a, b) => a + (b ?? 0), 0);
+            d.maint += y.costs.vedlikehold ?? 0;
+            d.fine += y.costs.bot ?? 0;
+          }
+        }
+      };
+      run(seed, 720, false, novice);
+      hourHook = null;
+    }
+    console.log(novice ? "\nNYBEGYNNER" : "FLINK");
+    console.log(
+      "nivå årstid  døgn  prod t/d  inntekt/d  vedlikehold/d  bot/d  | per 30 døgn: " +
+        [...KINDS.map(([k]) => k), "kort"].join(" "),
+    );
+    for (const stage of [1, 2, 3, 4])
+      for (const season of ["sommer", "vinter"]) {
+        const c = table.get(`${stage}-${season}`);
+        if (!c || c.days === 0) continue;
+        const per = (n: number) => ((n / c.days) * 30).toFixed(1);
+        const kr = (n: number) => `${(n / c.days / 1e6).toFixed(2)} mill.`;
+        console.log(
+          `${stage}    ${season.padEnd(6)} ${String(c.days).padStart(5)} ${(c.prodT / c.days).toFixed(0).padStart(9)} ${kr(c.income).padStart(11)} ${kr(c.maint).padStart(14)} ${kr(c.fine).padStart(6)}  | ` +
+            [...KINDS.map(([k]) => k), "kort"].map((k) => `${k} ${per(c.ev[k] ?? 0)}`).join("  "),
+        );
+      }
+  }
+  process.exit?.(0);
+}
+
 if (process.argv.includes("--vurdering")) {
   // Kundevurderingen (B-161): hvilke karakterer flink og nybegynner får på hvert nivå
   for (const novice of [false, true]) {

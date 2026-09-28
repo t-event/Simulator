@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 214 – 2026-09-28: En hel vinter målt
+
+**Brukeren ba om:** «Fortsett», og valgte «Test en hel vinter».
+
+**Gjort:** B-277. Ny måling `balance.ts --vinter` (uhell, kort, kostnader og produksjon per nivå og årstid). Vinteren
+gir 40–100 % flere uhell og kort på storverket, men bare ca. 1 % av inntekten; ingen tall endret. Frost-meldingen sier
+«i natt» bare om natta. Publiseringen av #223 (B-276) var grønn.
+
+**Testet:** tsc, lint, npm test, balance (exit 0), `--vinter` (ca. 11 min), og en egen kjøring av lagrede spill på
+nivå 2 og 3 med sommer mot vinter.
+
+**Gjenstår:** i morgen: skraplageranbudet og første inntekt 30.9. Testspilleren når storverket før første vinter, så
+vinteren på nivå 1–3 er bare målt med lagrede spill.
+
+---
+
 ## Økt 213 – 2026-09-28: Dagens nye ting i anleggsbildet
 
 **Brukeren ba om:** «Lag de nye tingene på anleggsbildet».
