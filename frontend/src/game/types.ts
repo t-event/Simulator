@@ -672,6 +672,8 @@ export interface GameState {
   lastRadioDay?: number;
   /** Veien er stengt av snøstorm til dette spillminuttet; skrapbilene kommer ikke fram (B-279) */
   snowUntilMin?: number;
+  /** Spillminuttene da en forespørsel som passet verket, gikk ut uten svar (B-292). Tømmes når du signerer en kontrakt */
+  missedOffers?: number[];
   /** Kassa er under null, og spilleren har fått varsel om det */
   inCredit?: boolean;
   /** Døgn på rad der verket står fordi det ikke er råd til omforing og lånet er fullt */

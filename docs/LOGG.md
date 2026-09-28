@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 228 – 2026-09-28: Råd når forespørsler går ut
+
+**Brukeren ba om:** «Fortsett» → valgte «Råd når forespørsler går ut».
+
+**Gjort:** B-292. Forespørsler som passet verket og gikk ut, telles; fra to på et døgn kommer et råd som peker til Salg.
+Publiseringen av #237 var grønn.
+
+**Testet:** tsc, lint, npm test (ny test), balance (exit 0), build, måling av hvor ofte rådet vises.
+
+**Gjenstår:** pynt for sesong 3 før den startes. I morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 227 – 2026-09-28: Pynt for sesong 2
 
 **Brukeren ba om:** «Fortsett».

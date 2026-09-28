@@ -2358,7 +2358,15 @@ function expireOffers(g: GameState, stats: PlantStats): void {
       // En forespørsel med frist som alt er passert, kan ikke signeres (B-241: Salg viste «leveres innen −1 døgn»)
       c.status = "misligholdt";
       c.closedDay = -1;
-      log(g, `Forespørselen fra ${c.customer} gikk ut uten svar.`, "info");
+      // Passet den verket (grønn på Salg)? Da får spilleren et råd hvis flere går ut (B-292)
+      const a = assessOffer(g, stats, c);
+      const fitted = a.canMake && a.recipeOk && !a.tight && !a.narrow;
+      if (fitted) g.missedOffers = [...(g.missedOffers ?? []).filter((m) => m > g.minute - MIN_PER_DAY), g.minute];
+      log(
+        g,
+        `Forespørselen fra ${c.customer} gikk ut uten svar${fitted ? ", selv om den passet verket" : ""}.`,
+        "info",
+      );
     }
   }
   g.contracts = g.contracts.filter((c) => c.closedDay !== -1);
@@ -2596,6 +2604,8 @@ export function acceptContract(g: GameState, id: number, by = "Du"): PurchaseRes
   if (!c || c.status !== "tilbud") return { ok: false, message: "Tilbudet finnes ikke lenger." };
   c.status = "aktiv";
   c.acceptedDay = day(g);
+  // Spilleren svarer på forespørsler igjen: rådet om forespørsler som gikk ut, forsvinner (B-292)
+  g.missedOffers = [];
   const others = g.contracts.filter((x) => x.status === "aktiv" && x.id !== c.id).map((x) => x.priority);
   // Et landemerke går først i køen (B-211): med salgsdirektøren var køen alltid full, og landemerket kom for sent
   c.priority = c.landmark ? Math.min(1, ...others) - 1 : Math.max(0, ...others) + 1;

@@ -5252,3 +5252,20 @@ nå – derfor ingen oppføring i endringsloggen.
   har, står under «Alltid»; den man ikke har, vises ikke). Ny sjekk i `tests.ts`.
 - Neste gang: pynt for sesong 3 før den startes (FORSLAG.md).
 - Konto: som B-287.
+
+## B-292 Råd når forespørsler som passet, går ut uten svar (2026-09-28)
+Status: gjelder
+Brukeren valgte «Råd når forespørsler går ut». I gjennomgangen av storverket (B-288) gikk fire forespørsler ut uten svar
+på ett døgn, og spilleren fikk bare fire linjer i loggen.
+- Når en forespørsel går ut, sjekkes den som på Salg (`assessOffer`): kan verket lage den, holder resepten, og rekker den
+  fristen med god margin. Bare de som passet, telles (`g.missedOffers`, spillminuttene, siste døgn). Loggen sier også
+  «…gikk ut uten svar, selv om den passet verket».
+- **Rådet** (Verket og «Hva gjør jeg nå?»): «N forespørsler som passet verket, gikk ut uten svar det siste døgnet. Svar på
+  dem under Salg – tallet på Salg-knappen viser hvor mange som venter.» Med konsern står det også at salgsdirektøren kan
+  svare. Vises fra to i løpet av et døgn, ikke med salgsdirektøren på, og knappen går til Salg → Forespørsler.
+- Rådet forsvinner når du signerer en kontrakt (lista tømmes) eller etter et døgn.
+- Forespørsler som ikke passet (for store, feil kvalitet, for kort frist), gir ikke råd – det er riktig å la dem gå.
+- Nybegynneren i testspilleren tar alt som er grønt på Salg fra før, så den følger rådet uten endring. Testspilleren:
+  samme nivådager og 0 konkurs (exit 0). En spiller som aldri svarer, ser rådet ca. en tredel av tida i garasjen.
+- Ny tilstand: `missedOffers` (standard `[]` i `migrate()`). Ny test i `tests.ts`.
+- Konto: nei (regel 1).

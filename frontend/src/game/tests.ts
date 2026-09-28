@@ -204,6 +204,7 @@ import { explosionChance, FATAL_DOWN_DAYS, fatalAccident, WINTER_EXPLOSION } fro
 import { freeStockT, sellAllFree } from "./engine";
 import { leaderBonus, leaderBonusDue } from "./actions";
 import { autoPlay, ChargeGame } from "../ui/control/chargeGame";
+import { hints } from "../ui/hints";
 import { applyCashCap, CASH_RESERVE, reserveDayLog, reserveTotal } from "./reserve";
 
 declare const process: { exitCode?: number };
@@ -2700,6 +2701,25 @@ test("Sesongpynt (B-287): bare i sin sesong og med konto, beholdes etterpå, sti
     COSMETICS.every((c) => !c.season || c.icon),
     "sesongpynt uten ikon",
   );
+});
+
+test("Forespørsler som passet, men gikk ut (B-292): råd etter to, borte når du signerer", () => {
+  const g = newGame(292);
+  g.tutorial = null;
+  g.pendingDecision = null;
+  g.settings.pauseOffers = true;
+  const offers = g.contracts.filter((c) => c.status === "tilbud");
+  assert(offers.length >= 2, `for få forespørsler (${offers.length})`);
+  const tips = () => hints(g, computePlantStats(g)).filter((t) => t.text.includes("gikk ut uten svar"));
+  // Små og med god tid: de passer verket
+  for (const c of offers) Object.assign(c, { tonnes: 0.1, deadlineDay: day(g) + 20, offerExpiresMin: g.minute + 30 });
+  const keep = { ...offers[0], id: 99_292, offerExpiresMin: g.minute + 5000 };
+  g.contracts.push(keep);
+  advance(g, 60);
+  assert((g.missedOffers ?? []).length === offers.length, `talte ${g.missedOffers?.length} av ${offers.length}`);
+  assert(tips().length === 1 && tips()[0].view === "salg", "ingen råd om forespørsler som gikk ut");
+  acceptContract(g, keep.id);
+  assert(!(g.missedOffers ?? []).length && tips().length === 0, "rådet ble stående etter en signert kontrakt");
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden
