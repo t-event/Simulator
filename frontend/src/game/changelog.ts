@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 258,
+    date: "2026-09-28",
+    title: "Når skraplageret får eier",
+    items: [
+      "Alle med konsern får beskjed når skraplageret har fått ny eier – også de som ikke bød.",
+      "Eieren ser når første inntekt kommer, og får beskjed hver dag inntekten er kommet til konsernkassa.",
+    ],
+  },
+  {
     b: 255,
     date: "2026-09-28",
     title: "Trender i markedet",

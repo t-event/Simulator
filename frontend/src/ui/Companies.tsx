@@ -12,7 +12,15 @@ import { getSession, onSessionChange } from "../net/supabase";
 import { isReconciled, onCloudStatus } from "../net/sync";
 import { applyTreasuryDeposit, DEPOSIT_REFUSAL_TEXT, depositToTreasury } from "../net/treasury";
 import { tenderChanged } from "./openTender";
-import { BID_REFUSAL_TEXT, fetchWorldStatus, placeBid, timeLeft, type Company, type WorldStatus } from "../net/world";
+import {
+  BID_REFUSAL_TEXT,
+  fetchWorldStatus,
+  firstPayout,
+  placeBid,
+  timeLeft,
+  type Company,
+  type WorldStatus,
+} from "../net/world";
 import { AccountFeaturesCard } from "./Account";
 import { Bar, Card } from "./common";
 import { Icon } from "./icons";
@@ -181,10 +189,18 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
           {c.mine && (
             <div>
               <dt>Du har fått</dt>
-              <dd>
-                +{fmtKr(c.incomeYesterday ?? 0)}
-                <small> i går · {fmtKr(c.incomeMine)} i alt</small>
-              </dd>
+              {/* Før første utbetaling: når den kommer, ikke «+0 kr i går» (B-258) */}
+              {c.incomeMine > 0 || (c.incomeYesterday ?? 0) > 0 ? (
+                <dd>
+                  +{fmtKr(c.incomeYesterday ?? 0)}
+                  <small> i går · {fmtKr(c.incomeMine)} i alt</small>
+                </dd>
+              ) : (
+                <dd>
+                  Ingenting ennå
+                  <small> · første inntekt {firstPayout()}</small>
+                </dd>
+              )}
             </div>
           )}
           {c.nextOwner && (

@@ -4708,3 +4708,22 @@ storverket.
 - Konto: ja (juksesperren gjelder bare det som lagres på nett).
 Endringslogg: nei
 
+## B-258 Når anbudet avgjøres: beskjed til alle, og inntekten til eieren (2026-09-28)
+Status: gjelder (bygger på B-189, B-237, B-253)
+Brukeren: «Fortsett», så «Anbudet avgjort i natt». Skraplageranbudet stenger 29.9. kl. 01:33 UTC med fire bud. Løpet
+ble prøvd i en transaksjon som ble rullet tilbake: anbudet ble avgjort (ingen trekning), taperne fikk budene tilbake i
+konsernkassa, eieren ble satt i 14 dager, og det ble ikke åpnet noe nytt anbud. `world_status` ga vinneren `mine` og
+`last_result.won`, og taperne `won = false`. Serveren virker; tre ting i appen var uklare:
+- **Vinneren så «+0 kr i går»** til første utbetaling. Nå: «Ingenting ennå · første inntekt i natt kl. 02:00» (neste
+  UTC-midnatt i spillerens egen tid, `firstPayout` i `net/world.ts`). Beskjeden om seieren sier det samme.
+- **Eieren fikk ingen beskjed om inntekten.** Nå: «Skraplageret tjente X i går. Pengene står i konsernkassa.» én gang
+  per selskap og UTC-dag (`applyCompanyIncome`, minnet i `g.companyIncomeSeen`, standard `{}` i `migrate()`).
+- **De som ikke bød, fikk ikke vite noe.** Nå får alle med åpnet konsern én linje: «Skraplageret har fått ny eier: X
+  driver det de neste 14 dagene.» – uten beløp. Et anbud uten bud gir ingen beskjed.
+- `worldNews()` sier om det er noe nytt, så appen bare endrer spillet når det trengs (hvert minutt hentes
+  `world_status` som før).
+- Testet: nettestene (endret test for B-237: den som ikke bød, får nå nyheten; ny test for inntekten, dagen og
+  `migrate`), og skjermbilder av vinner, taper, tilskuer og eier dag 2 på 320 og 390 px (også med norsk tidssone:
+  «kl. 02:00»).
+- Konto: ja (samme som skraplageret).
+

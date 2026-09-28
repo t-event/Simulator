@@ -265,6 +265,7 @@ export function newGame(seed = Date.now()): GameState {
     season: null,
     seasonPromptSeen: null,
     tenderSeen: 0,
+    companyIncomeSeen: {},
     seasonLoginPromptSeen: null,
     world: { events: [], seenEventIds: [] },
     fpDealDay: -1,
