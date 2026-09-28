@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 218 – 2026-09-28: fp og havari forklart
+
+**Brukeren ba om:** en spiller skjønner ikke hva fp er og hvor man finner det, og ikke hva man skal trykke når noe ryker
+(murstein i ovnen).
+
+**Gjort:** B-281. «fp» er skrevet ut som fagpoeng, fagpoengene i toppfeltet åpner Forskning, og havari viser «klar om
+X t» og et råd om at reparasjonen skjer av seg selv. Publiseringen av #227 (B-280) var grønn.
+
+**Testet:** tsc, lint, npm test, balance (exit 0), build, Playwright på 320, 390 og 1 366 px (trykkflaten 45 px, ingen
+horisontal scrolling, rådet vises, trykk på fagpoengene åpner Forskning).
+
+**Gjenstår:** i morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 217 – 2026-09-28: Quizen fryser
 
 **Brukeren ba om:** «Fortsett», og: en spiller sa at spillet fryser når han holder på med quizen.

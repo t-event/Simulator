@@ -164,7 +164,11 @@ export function DailySync({ api, blocked }: { api: GameApi; blocked: boolean }) 
                   <li key={n} className={`${state}${n === 7 ? " is-chest" : ""}`}>
                     <span className="g-streak-day">{n === 7 ? <Icon name="gift" label="Kiste" /> : `Dag ${n}`}</span>
                     <span className="g-streak-what">
-                      {r.fp > 0 && `${r.fp} fp`}
+                      {r.fp > 0 && (
+                        <>
+                          {r.fp} <Icon name="research" label="fagpoeng" />
+                        </>
+                      )}
                       {r.fp > 0 && r.days > 0 && " + "}
                       {r.days > 0 &&
                         (r.days < 1 ? `${Math.round(r.days * 24)} t` : `${fmtNum(r.days, r.days % 1 ? 1 : 0)} d`)}
@@ -173,7 +177,9 @@ export function DailySync({ api, blocked }: { api: GameApi; blocked: boolean }) 
                 );
               })}
             </ol>
-            <p className="g-muted g-small-text">fp = fagpoeng · t og d = timer og døgn med drift (det verket tjener)</p>
+            <p className="g-muted g-small-text">
+              <Icon name="research" /> = fagpoeng (til forskning) · t og d = timer og døgn med drift (det verket tjener)
+            </p>
             {claimed ? (
               <p>
                 Dag {claimed.streak} av 7: <strong>{rewardText(claimed.reward)}</strong>.{" "}

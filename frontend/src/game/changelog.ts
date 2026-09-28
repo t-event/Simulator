@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 281,
+    date: "2026-09-28",
+    title: "Enklere å forstå",
+    items: [
+      "«fp» står nå som fagpoeng. Trykk på kolben øverst for å se hva fagpoeng er og hva du kan forske på.",
+      "Ved havari står det hvor lenge ovnen er ute. Reparasjonen skjer av seg selv – du trenger ikke trykke på noe.",
+    ],
+  },
+  {
     b: 280,
     date: "2026-09-28",
     title: "Tryggere quiz",

@@ -435,10 +435,13 @@ function TopBar({
   onSettings,
   onInbox,
   onBoard,
+  onResearch,
   notice,
 }: {
   g: GameState;
   api: GameApi;
+  /** Fagpoengene i toppfeltet åpner Forskning (B-281) */
+  onResearch: () => void;
   onBook: () => void;
   onSettings: () => void;
   onInbox: () => void;
@@ -531,7 +534,12 @@ function TopBar({
           {fmtNum(energyPrice(g), 2)} kr/kWh
         </Kpi>
         {(g.researchPoints > 0 || g.researched.length > 0) && (
-          <Kpi icon="research" label="Fagpoeng">
+          <Kpi
+            icon="research"
+            label="Fagpoeng"
+            hint={`${Math.floor(g.researchPoints)} fagpoeng – brukes til forskning. Trykk for å se hva du kan forske på`}
+            onClick={onResearch}
+          >
             {Math.floor(g.researchPoints)}
           </Kpi>
         )}
@@ -609,17 +617,37 @@ function Kpi({
   label,
   className = "",
   children,
+  onClick,
+  hint,
 }: {
   icon: IconName;
   label: string;
   className?: string;
   children: ReactNode;
+  /** Kan trykkes (B-281): fagpoengene åpner Forskning, der det står hva de er og hvordan man får dem */
+  onClick?: () => void;
+  hint?: string;
 }) {
-  return (
-    <span className={`g-kpi ${className}`} title={label}>
+  const body = (
+    <>
       <Icon name={icon} />
       <em className="g-kpi-label">{label}</em>
       <strong>{children}</strong>
+    </>
+  );
+  return onClick ? (
+    <button
+      type="button"
+      className={`g-kpi g-kpi-btn ${className}`}
+      title={hint ?? label}
+      aria-label={hint}
+      onClick={onClick}
+    >
+      {body}
+    </button>
+  ) : (
+    <span className={`g-kpi ${className}`} title={label}>
+      {body}
     </span>
   );
 }
@@ -941,6 +969,7 @@ export function GameApp() {
             api={api}
             notice={isPc}
             onBook={() => openBook()}
+            onResearch={() => go("forskning")}
             onSettings={() => setSettingsOpen(true)}
             onBoard={() => setBoardOpen(true)}
             onInbox={openInbox}
