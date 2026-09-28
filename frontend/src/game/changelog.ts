@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 225,
+    date: "2026-09-28",
+    title: "Ryddigere ark",
+    items: [
+      "Alle ark (innstillinger, fagboka, varsler, utstyr og flere) har samme topp, og den blir stående når du ruller – så lukk-knappen alltid er der.",
+      "På de minste telefonene går fanene i varsellista i to rader i stedet for å kuttes.",
+    ],
+  },
+  {
     b: 224,
     date: "2026-09-27",
     title: "Ny toppliste",

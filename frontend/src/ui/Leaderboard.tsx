@@ -23,7 +23,7 @@ import { useSeasonStatus } from "./useSeason";
 import { getSession, onSessionChange } from "../net/supabase";
 import { cloudStatus, onCloudStatus } from "../net/sync";
 import { useSyncExternalStore } from "react";
-import { Callout } from "./ds";
+import { Callout, SheetHead } from "./ds";
 import { fmtKr, fmtRep } from "./format";
 import { Icon } from "./icons";
 
@@ -176,23 +176,17 @@ function Leaderboard({
   const board = BOARDS.find((b) => b.id === kind)!;
   return (
     <>
-      <header className="g-card-head g-board-head">
-        <h2>{hallOfFame && current ? "Hall of Fame" : "Toppliste"}</h2>
-        <span className="g-board-head-actions">
-          {/* Knappen viser at den henter, og når lista sist ble hentet (B-171) */}
-          <button
-            className={`g-icon-btn g-board-reload${loading ? " is-loading" : ""}`}
-            onClick={() => setTick((t) => t + 1)}
-            aria-label="Oppdater topplista"
-            aria-busy={loading}
-          >
-            <Icon name="refresh" />
-          </button>
-          <button className="g-icon-btn" onClick={onClose} aria-label="Lukk">
-            <Icon name="close" />
-          </button>
-        </span>
-      </header>
+      <SheetHead title={hallOfFame && current ? "Hall of Fame" : "Toppliste"} onClose={onClose}>
+        {/* Knappen viser at den henter, og når lista sist ble hentet (B-171) */}
+        <button
+          className={`g-icon-btn g-board-reload${loading ? " is-loading" : ""}`}
+          onClick={() => setTick((t) => t + 1)}
+          aria-label="Oppdater topplista"
+          aria-busy={loading}
+        >
+          <Icon name="refresh" />
+        </button>
+      </SheetHead>
       <SeasonLine />
       <SeasonJoin api={api} g={g} onOpenSettings={onOpenSettings} />
       {current && (

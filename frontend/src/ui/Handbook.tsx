@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SheetHead } from "./ds";
 import { KNOWLEDGE, knowledgeCard } from "../game/knowledge";
 import { missionFor, missionProgress } from "../game/missions";
 import { answerQuiz, QUIZ, quizAvailable, quizReward } from "../game/quiz";
@@ -145,12 +146,7 @@ export function Handbook({
   return (
     <div className="g-modal g-side-sheet" role="dialog" aria-modal="true" aria-label="Fagboka" onClick={onClose}>
       <div className="g-modal-card" onClick={(e) => e.stopPropagation()}>
-        <header className="g-card-head">
-          <h2>Fagboka</h2>
-          <button onClick={onClose} aria-label="Lukk">
-            ✕
-          </button>
-        </header>
+        <SheetHead title="Fagboka" icon="book" onClose={onClose} />
         <p className="g-muted">
           Les kapitlene for å kunne forske, ta quizen for fagpoeng, og løs oppdragene for belønning.
           {locked > 0 && ` ${locked} kapitler gjenstår.`}

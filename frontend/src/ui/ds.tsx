@@ -85,3 +85,34 @@ export function Button({
     </button>
   );
 }
+
+/**
+ * Toppen på et ark (UI-4c, B-225): tittel, valgfrie handlinger og lukk som ikonknapp (44 px). Blir stående øverst når
+ * arket rulles, så lukk alltid er innen rekkevidde.
+ */
+export function SheetHead({
+  title,
+  icon,
+  onClose,
+  className = "",
+  children,
+}: {
+  title: ReactNode;
+  icon?: IconName;
+  onClose: () => void;
+  className?: string;
+  /** Mer i toppen, mellom tittelen og lukk (f.eks. kassa eller oppdater) */
+  children?: ReactNode;
+}) {
+  return (
+    <header className={`g-card-head ds-sheet-head ${className}`}>
+      <h2>
+        {icon && <Icon name={icon} />} {title}
+      </h2>
+      {children}
+      <button className="g-icon-btn ds-sheet-close" onClick={onClose} aria-label="Lukk">
+        <Icon name="close" />
+      </button>
+    </header>
+  );
+}

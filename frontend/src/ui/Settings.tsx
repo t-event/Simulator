@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SheetHead } from "./ds";
 import { CHANGELOG } from "../game/changelog";
 import { ChangelogSheet } from "./Changelog";
 import { borrow, repay } from "../game/actions";
@@ -131,12 +132,7 @@ export function SettingsSheet({
   return (
     <div className="g-modal g-side-sheet" role="dialog" aria-modal="true" aria-label="Innstillinger" onClick={onClose}>
       <div className="g-modal-card" onClick={(e) => e.stopPropagation()}>
-        <header className="g-card-head">
-          <h2>Innstillinger</h2>
-          <button onClick={onClose} aria-label="Lukk">
-            ✕
-          </button>
-        </header>
+        <SheetHead title="Innstillinger" onClose={onClose} />
         <AutoToggle g={g} act={act} k="skipIdleNights" label="Spol fram om natta når verket står og ingenting skjer" />
         {maxSpeed(g) > 1 && (
           <label className="g-toggle">

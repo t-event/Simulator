@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 162 – 2026-09-28: UI-4c Arkene og de minste skjermene
+
+**Brukeren ba om:** «Fortsett».
+
+**Gjort:** B-225. Felles `SheetHead` (fast topp, lukk 44 px) i alle ark; varselfanene i to rader på 320 px. UI.md:
+UI-4c bygget.
+
+**Testet:** tsc, lint, `npm test`, Playwright på 7 størrelser (fem ark: fast topp, lukk 44 px, ingen scrolling eller
+avkorting).
+
+**Gjenstår:** UI-4d (polering og animasjon, anleggsbildet per nivå); reserven og kassegrensen; Google/Apple senere.
+
+---
+
 ## Økt 161 – 2026-09-27: UI-4b Topplista og Hall of Fame
 
 **Brukeren ba om:** «Fortsett».

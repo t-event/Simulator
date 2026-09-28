@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { SheetHead } from "./ds";
 import { importantLog } from "../game/inbox";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
@@ -34,13 +35,8 @@ export function InboxSheet({ g, act, onClose }: { g: GameState; act: GameApi["ac
   return (
     <div className="g-modal g-side-sheet" role="dialog" aria-modal="true" aria-label="Varsler" onClick={onClose}>
       <div className="g-modal-card g-inbox" onClick={(e) => e.stopPropagation()}>
-        <header className="g-card-head">
-          <h2>Varsler</h2>
-          <button onClick={onClose} aria-label="Lukk">
-            ✕
-          </button>
-        </header>
-        <div className="g-subtabs" role="tablist" aria-label="Vis">
+        <SheetHead title="Varsler" icon="bell" onClose={onClose} />
+        <div className="g-subtabs g-inbox-tabs" role="tablist" aria-label="Vis">
           {FILTERS.map((f) => (
             <button
               key={f.id}

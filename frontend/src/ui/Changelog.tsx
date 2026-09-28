@@ -1,6 +1,7 @@
 /**
  * «Hva er nytt» (B-179): vises én gang etter en oppdatering, og hele endringsloggen kan åpnes under ⚙️.
  */
+import { SheetHead } from "./ds";
 import { CHANGELOG, type ChangelogEntry } from "../game/changelog";
 import { Portal } from "./Portal";
 
@@ -22,12 +23,7 @@ export function ChangelogSheet({
     <Portal>
       <div className="g-modal" role="dialog" aria-modal="true" aria-label={title} onClick={onClose}>
         <div className="g-modal-card g-changelog" onClick={(e) => e.stopPropagation()}>
-          <header className="g-card-head">
-            <h2>🆕 {title}</h2>
-            <button onClick={onClose} aria-label="Lukk">
-              ✕
-            </button>
-          </header>
+          <SheetHead title={`🆕 ${title}`} onClose={onClose} />
           {entries.map((e) => (
             <section key={e.b}>
               <h3>
