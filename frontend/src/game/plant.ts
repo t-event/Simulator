@@ -659,7 +659,12 @@ export function computePlantStats(g: GameState): PlantStats {
     staffCount: g.workers.length,
     staffCap: stage.staffCap,
     yardT: stage.yardT * storeMult * (has(g, "skrapterminal") ? 2 : 1),
-    storeT: stage.storeT * storeMult * (has(g, "havn") ? 1.5 : 1),
+    // Hvert trinn av ferdiglageret gir halvparten mer plass (B-274)
+    storeT:
+      stage.storeT *
+      storeMult *
+      (has(g, "havn") ? 1.5 : 1) *
+      1.5 ** ["ferdiglager1", "ferdiglager2", "ferdiglager3"].filter((id) => has(g, id)).length,
     yardUsed,
     storeUsed,
     salaryPerDay,

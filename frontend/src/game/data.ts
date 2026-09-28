@@ -746,6 +746,38 @@ export const ADDONS: Addon[] = [
     price: 450_000,
     description: "Gnistspektrometer i eget laboratorium: full analyse av hver charge, også karbon og fosfor.",
   },
+  // Tak over skraplageret og større ferdiglager (B-274)
+  {
+    id: "skraptak",
+    name: "Tak over skraplageret",
+    stage: 2,
+    price: 300_000,
+    description:
+      "Holder regn, snø og is unna skrapet. Vått skrap kan eksplodere i ovnen – taket gir mer enn halvparten så mange eksplosjoner, særlig om vinteren.",
+  },
+  {
+    id: "ferdiglager1",
+    name: "Større ferdiglager",
+    stage: 2,
+    price: 250_000,
+    description: "Utvider ferdiglageret med halvparten, så støpingen ikke stopper når salget går tregt.",
+  },
+  {
+    id: "ferdiglager2",
+    name: "Ny lagerhall for ferdigvare",
+    stage: 3,
+    price: 4_000_000,
+    requires: ["ferdiglager1"],
+    description: "Enda halvparten mer plass til ferdig stål, med traverskran og lasteramper.",
+  },
+  {
+    id: "ferdiglager3",
+    name: "Ferdigvareterminal",
+    stage: 4,
+    price: 30_000_000,
+    requires: ["ferdiglager2"],
+    description: "Stor terminal for emner og armering, med jernbanespor. Enda halvparten mer plass.",
+  },
   {
     id: "sortering",
     name: "Skrapsortering",

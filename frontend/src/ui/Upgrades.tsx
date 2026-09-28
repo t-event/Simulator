@@ -14,6 +14,7 @@ import { STAGES, stageRef } from "../game/data";
 import { KONSERN_UNLOCK_EQUITY } from "../game/konsern";
 import { computePlantStats, unitType } from "../game/plant";
 import { cleaner, envActive, envDown, shortfall, stopsOnBreakdown } from "../game/environment";
+import { SellAllButton } from "./Sales";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Bar, Card } from "./common";
@@ -198,6 +199,8 @@ export function UpgradeSheet({
     const i = units.findIndex((u) => buyable(u) > 0);
     return units[i >= 0 ? i : 1];
   });
+  // Ferdiglageret: selg det som ligger ledig, rett fra arket (B-274)
+  const sellAll = station === "lager" ? <SellAllButton g={g} act={act} /> : null;
   // Renseanlegget står sammen med utstyret for hele verket, der de større anleggene kjøpes (B-263)
   const cleaner = station === "ovn" && envActive(g) ? <CleanerPanel g={g} act={act} /> : null;
   return (
@@ -240,6 +243,7 @@ export function UpgradeSheet({
             </>
           ) : (
             <>
+              {sellAll}
               {cleaner}
               <OptionList g={g} options={options} act={act} />
             </>

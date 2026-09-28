@@ -234,7 +234,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
       },
       {
         head: "Farligst om vinteren",
-        text: "Om vinteren kommer skrapet inn med is og snø, og lukkede beholdere kan være fulle av vann. Skrap under tak, sortering som tar ut lukkede beholdere, og faste rutiner gir færre eksplosjoner.",
+        text: "Om vinteren kommer skrapet inn med is og snø, og lukkede beholdere kan være fulle av vann. Tak over skraplageret, sortering som tar ut lukkede beholdere, og faste rutiner gir færre eksplosjoner.",
       },
       {
         head: "Ingen jobb er verdt et liv",

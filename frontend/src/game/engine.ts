@@ -1520,6 +1520,27 @@ export function sellLot(g: GameState, lotId: number, t?: number): PurchaseResult
   return { ok: true, message: `Solgte ${fmtT(sold)} på spot for ${fmtKr(income)}.` };
 }
 
+/** Tonn på ferdiglageret som ingen kontrakt venter på – det som kan selges nå (B-274) */
+export function freeStockT(g: GameState): number {
+  const reserved = lotReservations(g);
+  return g.lots.reduce((a, l) => a + Math.max(0, l.t - (reserved.get(l.id) ?? 0)), 0);
+}
+
+/** Selger alt stål ingen kontrakt venter på, også støpefeil, på spot (B-274) */
+export function sellAllFree(g: GameState): PurchaseResult {
+  const reserved = lotReservations(g);
+  const before = g.cash;
+  let sold = 0;
+  for (const lot of [...g.lots]) {
+    const free = lot.t - (reserved.get(lot.id) ?? 0);
+    if (free <= 1e-6) continue;
+    sellLot(g, lot.id, free);
+    sold += free;
+  }
+  if (sold <= 1e-6) return { ok: false, message: "Alt på lageret er holdt av til kontraktene." };
+  return { ok: true, message: `Solgte ${fmtT(sold)} på spot for ${fmtKr(g.cash - before)}.` };
+}
+
 /** Selger partier ingen kontrakt venter på, til lageret er under målet. */
 export function sellExcess(g: GameState, stats: PlantStats, targetFraction: number): void {
   // Støpefeil selges først, men bare hvis spilleren har valgt at de skal selges (ikke omsmelting eller beholde)

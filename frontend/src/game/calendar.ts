@@ -63,7 +63,7 @@ export function calendarDay(g: GameState): void {
   if (now && !was)
     log(
       g,
-      "Vinteren er kommet. Is og snø i skrapet kan gi eksplosjoner i ovnen, og kulden gir flere havarier og uhell. Skrap under tak (skrapterminal) og sortering gir færre eksplosjoner.",
+      "Vinteren er kommet. Is og snø i skrapet kan gi eksplosjoner i ovnen, og kulden gir flere havarier og uhell. Tak over skraplageret og sortering gir færre eksplosjoner.",
       "event",
     );
   else if (!now && was) log(g, "Våren er kommet: færre uhell i verket.", "info");

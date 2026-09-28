@@ -4959,6 +4959,13 @@ button {
   background: var(--surface-1);
 }
 
+/* Selg alt ledig stål (B-274) */
+.g-sell-all {
+  width: 100%;
+  min-height: 44px;
+  margin: var(--sp-2) 0;
+}
+
 /* Renseanlegget i arket for ovnene (B-263) */
 .g-cleaner {
   display: flex;
