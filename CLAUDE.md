@@ -152,7 +152,8 @@ frontend/src/
     guest.ts     Gjestekonto i bakgrunnen: lagrer spillet, overtas av kontoen ved innlogging (B-212)
     tests.ts     Tester uten nett (falsk tjeneste)
   ui/          Spillets skjermer (mobil først) og kontrollrommet
-    Overview.tsx Verket med underfanene Oversikt, Anlegg, Resept, Økonomi (og Konsern; valget i verketTabs.ts/GameApp)
+    Overview.tsx Verket med underfanene Oversikt, Anlegg, Resept, Økonomi (valget i verketTabs.ts/GameApp)
+    Konsern.tsx  Konsern-siden (B-226): Oversikt, Utvid, Skraplager, Direktør; openTender.ts gir «!» ved åpent anbud
     hints.ts     Rådene på Verket; gir også «!» på Marked og Folk i menyen (B-202)
     Finance.tsx  Resultatgrafen og postene på Verket → Økonomi (B-203); navnene på postene i financeNames.ts
     Recipe.tsx  Resepten (Verket → Resept, B-199)
@@ -173,7 +174,7 @@ frontend/src/
     tokens.css   Designsystemet (B-191): alle farger, skriftstørrelser, radier, avstander – nye stiler bruker disse
     icons.tsx    Ikoner fra Lucide, kopiert inn (lisens i icons-LICENSE.txt)   ds.tsx  StatusBadge, Callout, Button
     fonts/       Visningsskriften for overskrifter og store tall (Barlow Semi Condensed 600, OFL)
-    Companies.tsx Kortet «Skraplageret» på Konsern-fanen: anbud, konsernkassa, eier (B-189)
+    Companies.tsx Kortet «Skraplageret» under Konsern → Skraplager: anbud, konsernkassa, eier (B-189)
     control/     Kontrollrommet: spillet i fire runder (chargeGame.ts: logikk og testspiller, ControlRoom.tsx, B-175)
   sim/         Prosessmodell for lysbueovnen (brukes ikke av spillet lenger, sjekkes av sim/validate.ts)
 frontend/scripts/ sjekk-endringslogg.mjs: endringsloggen dekker nyeste beslutning (npm test og CI)
@@ -206,8 +207,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - Bare `.g-main` scroller, ikke vinduet – på mobil (B-137) og nå også på PC (B-192). I Playwright: scroll med
   `document.querySelector(".g-main").scrollBy(...)`. Fingersveip (`synthesizeScrollGesture`) virker ikke uten skjerm.
 - **To skall** (B-192): under 900 px mobil (meny nederst), fra 900 px PC (sidemeny, topplinje). Varsellinja står over
-  menyen nederst på mobil og i topplinja på PC (B-201); `useIsPc` i `GameApp` velger plassen, så det er bare én. Konsern er eget punkt i
-  sidemenyen på PC (`.g-nav-pc`) og underfane på mobil. Underfanen i Verket står i `GameApp` (`ui/verketTabs.ts`).
+  menyen nederst på mobil og i topplinja på PC (B-201); `useIsPc` i `GameApp` velger plassen, så det er bare én. Konsern er egen hovedside
+  i begge menyene (B-226); bare Mål er eget punkt på PC (`.g-nav-pc`). Underfanen i Verket står i `GameApp` (`ui/verketTabs.ts`).
 - Ark (`.g-modal`) som åpnes fra innhold inne i `.g-main`, må pakkes i `<Portal>` (B-152). Ellers klipper Safari på
   iPhone arket til innholdet, og det kan ikke scrolles (skjedde med «Pynt verket»).
 - Skjermbilder med `fullPage: true` viser faste menyer midt på siden; det er

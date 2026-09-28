@@ -549,7 +549,7 @@ export function konsernOptions(g: GameState): KonsernOption[] {
   return out;
 }
 
-/** Kjøp i konsernet som ikke er sperret og som kassa rekker til nå – tallet på Konsern-fanen (B-144) */
+/** Kjøp i konsernet som ikke er sperret og som kassa rekker til nå – tallet på Konsern i menyen og på Utvid (B-144, B-226) */
 export function konsernReady(g: GameState): number {
   if (!g.konsern.unlocked) return 0;
   return konsernOptions(g).filter((o) => !o.blocked && g.cash >= o.price).length;
@@ -589,8 +589,8 @@ export function checkKonsernUnlock(g: GameState, remaining: number): void {
   log(
     g,
     remaining === 0
-      ? "Storverket er ferdig bygget! Nå kan du bygge et konsern med flere verk – se Verket → Konsern."
-      : `Egenkapitalen har passert ${fmtKr(KONSERN_UNLOCK_EQUITY)}! Nå kan du bygge et konsern med flere verk – se Verket → Konsern. Nye prosjekter venter under Forskning.`,
+      ? "Storverket er ferdig bygget! Nå kan du bygge et konsern med flere verk – se Konsern i menyen."
+      : `Egenkapitalen har passert ${fmtKr(KONSERN_UNLOCK_EQUITY)}! Nå kan du bygge et konsern med flere verk – se Konsern i menyen. Nye prosjekter venter under Forskning.`,
     "good",
   );
 }

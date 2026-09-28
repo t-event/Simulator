@@ -39,6 +39,8 @@ import { loadGame, saveGame, setSaveListener } from "../game/save";
 import { InboxSheet } from "./Inbox";
 import { importantLog, markAllSeen, unseenCount } from "../game/inbox";
 import { Sales } from "./Sales";
+import { KonsernPage } from "./Konsern";
+import { useOpenTender } from "./openTender";
 import { VIEWS, viewUnlocked, type View } from "./views";
 import { Icon, type IconName } from "./icons";
 import { isVerketTab, type VerketTab } from "./verketTabs";
@@ -49,6 +51,7 @@ const NAV_ICON: Record<View, IconName> = {
   salg: "sales",
   folk: "people",
   forskning: "research",
+  konsern: "konsern",
   mal: "target",
 };
 
@@ -692,7 +695,7 @@ export function GameApp() {
   const [news, setNews] = useState(() => unseenChangelog(api.hasSave));
   const [view, setView] = useState<View>("verket");
   const [subTab, setSubTab] = useState<{ tab?: string; n: number }>({ n: 0 });
-  // Underfanen i Verket står her, så sidemenyen på PC kan åpne Konsern direkte (B-192)
+  // Underfanen i Verket står her, så en annen side kan åpne en bestemt underfane (B-192)
   const [verketTab, setVerketTab] = useState<VerketTab>("oversikt");
   const [bookOpen, setBookOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -774,6 +777,7 @@ export function GameApp() {
 
   // Varsellinja står over menyen nederst på mobil (B-201). Høyden følges, så veiledningen legger seg over den
   const isPc = useIsPc();
+  const tender = useOpenTender(!!g?.konsern?.unlocked);
   const appRef = useRef<HTMLDivElement>(null);
   const hasGame = !!g;
   useEffect(() => {
@@ -800,7 +804,6 @@ export function GameApp() {
 
   const stats = computePlantStats(g);
   const shown: View = viewUnlocked(g, view) ? view : "verket";
-  const konsernOpen = shown === "verket" && verketTab === "konsern" && g.konsern.unlocked;
   const konsernCanBuy = g.konsern.unlocked ? konsernReady(g) : 0;
   const go = (v: View, sub?: string) => {
     setView(v);
@@ -859,8 +862,7 @@ export function GameApp() {
 
           <nav className="g-nav" aria-label="Hovedmeny">
             {VIEWS.filter((v) => viewUnlocked(g, v.id)).map((v) => {
-              // På PC er Konsern et eget punkt i sidemenyen; da er ikke Verket valgt samtidig (B-192)
-              const active = shown === v.id && !(v.id === "verket" && konsernOpen);
+              const active = shown === v.id;
               const isNew = !g.seenViews.includes(v.id);
               const hint = g.tutorial !== null && TUTORIAL[g.tutorial]?.view === v.id && shown !== v.id;
               // Folk: «!» når verket står eller går færre skift enn det kunne, fordi folk mangler (B-071)
@@ -874,24 +876,27 @@ export function GameApp() {
               // tar selv (B-177)
               const director = !!g.konsern?.director?.active;
               // Marked og Folk: «!» når et råd på Verket peker dit – samme regler som rådene (B-202)
-              const alertHint = v.id === "marked" || v.id === "folk" ? navAlerts.get(v.id) : undefined;
+              // Konsern: «!» når anbudet på skraplageret er åpent og du ikke har bydd (B-226)
+              const alertHint =
+                v.id === "marked" || v.id === "folk"
+                  ? navAlerts.get(v.id)
+                  : v.id === "konsern" && tender
+                    ? { text: "Anbud på skraplageret er åpent", view: "konsern" as View, sub: "skraplager" }
+                    : undefined;
               const badge =
                 v.id === "salg"
                   ? g.contracts.filter((c) => c.status === "tilbud" && (!director || c.landmark)).length
                   : v.id === "forskning"
                     ? researchOptions(g).filter((r) => r.available).length + masteryReady(g)
-                    : 0;
+                    : v.id === "konsern"
+                      ? konsernCanBuy
+                      : 0;
               return (
                 <button
                   key={v.id}
-                  className={`${active ? "is-active" : ""}${hint ? " is-hint" : ""}${v.id === "verket" && konsernOpen ? " is-verket-konsern" : ""}`}
+                  className={`${active ? "is-active" : ""}${hint ? " is-hint" : ""}`}
                   aria-current={active ? "page" : undefined}
-                  onClick={() =>
-                    // På PC er Konsern et eget punkt: Verket åpner da aldri Konsern, heller ikke via en annen fane (B-217)
-                    v.id === "verket" && (konsernOpen || (isPc && verketTab === "konsern"))
-                      ? go("verket", "oversikt")
-                      : go(v.id, alertHint?.sub)
-                  }
+                  onClick={() => go(v.id, alertHint?.sub)}
                 >
                   <Icon name={NAV_ICON[v.id]} className="g-nav-icon" />
                   <span className="g-nav-label">{v.label}</span>
@@ -907,21 +912,6 @@ export function GameApp() {
                 </button>
               );
             })}
-            {g.konsern.unlocked && (
-              <button
-                className={`g-nav-pc${konsernOpen ? " is-active" : ""}`}
-                aria-current={konsernOpen ? "page" : undefined}
-                onClick={() => go("verket", "konsern")}
-              >
-                <Icon name="konsern" className="g-nav-icon" />
-                <span className="g-nav-label">Konsern</span>
-                {konsernCanBuy > 0 && (
-                  <span className="g-badge" aria-label={`${konsernCanBuy} kjøp du har råd til`}>
-                    {konsernCanBuy}
-                  </span>
-                )}
-              </button>
-            )}
             {/* Mål (B-211): eget punkt i sidemenyen på PC; på mobil pokalen ved varsellinja */}
             <button
               className={`g-nav-pc${shown === "mal" ? " is-active" : ""}`}
@@ -980,6 +970,15 @@ export function GameApp() {
             <People key={subTab.tab ? `folk-${subTab.n}` : "folk"} g={g} stats={stats} act={act} openTab={subTab.tab} />
           )}
           {shown === "forskning" && <ResearchPage g={g} act={act} openBook={openBook} />}
+          {shown === "konsern" && (
+            <KonsernPage
+              key={subTab.tab ? `konsern-${subTab.n}` : "konsern"}
+              g={g}
+              act={act}
+              openTab={subTab.tab}
+              tender={tender}
+            />
+          )}
           {shown === "mal" && (
             <GoalsPage
               key={subTab.tab ? `mal-${subTab.n}` : "mal"}

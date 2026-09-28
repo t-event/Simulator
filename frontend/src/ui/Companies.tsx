@@ -1,6 +1,6 @@
 /**
- * Strategiske selskaper (B-189): kortet «Skraplageret» på Konsern-fanen. Vises først når konsernet er åpnet
- * (gradvis synlighet), krever konto. Alt – anbud, eierskap, inntekt og konsernkassa – avgjøres på serveren i ekte tid;
+ * Strategiske selskaper (B-189): kortet «Skraplageret» under Konsern → Skraplager (B-226). Vises først når konsernet
+ * er åpnet (gradvis synlighet), krever konto. Alt – anbud, eierskap, inntekt og konsernkassa – avgjøres på serveren i ekte tid;
  * kortet viser bare det serveren sier.
  */
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
@@ -9,6 +9,7 @@ import type { GameApi } from "../game/useGame";
 import { getSession, onSessionChange } from "../net/supabase";
 import { isReconciled, onCloudStatus } from "../net/sync";
 import { applyTreasuryDeposit, DEPOSIT_REFUSAL_TEXT, depositToTreasury } from "../net/treasury";
+import { tenderChanged } from "./openTender";
 import { BID_REFUSAL_TEXT, fetchWorldStatus, placeBid, timeLeft, type Company, type WorldStatus } from "../net/world";
 import { NeedsAccount } from "./Account";
 import { Card } from "./common";
@@ -101,6 +102,7 @@ export function StrategicCompanies({ g, act }: { g: GameState; act: GameApi["act
       if (!t) return BID_REFUSAL_TEXT.stengt;
       const r = await placeBid(t.id, amount);
       if (!r.ok) return BID_REFUSAL_TEXT[r.reason];
+      tenderChanged();
       setBid("");
       return amount === 0
         ? "Budet er trukket, og pengene er tilbake i konsernkassa."

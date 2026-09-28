@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 163 – 2026-09-28: Konsern som egen hovedside
+
+**Brukeren ba om:** Konsern som egen hovedside med underfaner som Verket, og at anbudet på skraplageret ikke skal ligge
+skjult.
+
+**Gjort:** B-226. Konsern i menyen (mobil og PC) med underfanene Oversikt, Utvid, Skraplager og Direktør. Åpent anbud
+gir «!» på Konsern i menyen, merket «Anbud» på fanen og en beskjed på Oversikt. Verket har fire underfaner igjen.
+
+**Testet:** tsc, lint, `npm test`, balance (exit-kode), Playwright på 7 størrelser med falsk tjeneste (med og uten
+konto).
+
+**Gjenstår:** UI-4d (polering og animasjon, anleggsbildet per nivå); reserven og kassegrensen; Google/Apple senere.
+
+---
+
 ## Økt 162 – 2026-09-28: UI-4c Arkene og de minste skjermene
 
 **Brukeren ba om:** «Fortsett».

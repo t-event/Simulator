@@ -3334,7 +3334,8 @@ Testet: tsc, lint, `npm test`, balanse (exit-kode), build; Playwright før/etter
 412/820/2 560 for vannrett scrolling.
 
 ## B-192 UI-1b: app-skallet – sidemeny på PC med Konsern, underfaner øverst, kompakt toppfelt (2026-09-27)
-Status: gjelder (bygger på B-187 og B-191; B-116 og B-134 står)
+Status: gjelder (bygger på B-187 og B-191; B-116 og B-134 står). Delen om Konsern som underfane i Verket på mobil og eget
+punkt bare på PC er erstattet av B-226: Konsern er egen hovedside på begge.
 Bakgrunn: UI.md 5 og 10.2. Eieren valgte Konsern som eget punkt i sidemenyen på PC og underfane på mobil (B-191).
 Beslutning:
 - **To skall, samme React-tre:** under 900 px mobilskallet (toppfelt, innhold, meny nederst), fra 900 px PC-skallet
@@ -4058,3 +4059,24 @@ Brukeren: «Fortsett» (neste steg i planen etter UI-4b).
 - Testet i Playwright på de 7 størrelsene: alle fem ark som ble åpnet (innstillinger, fagbok, varsler, «Hva er nytt»,
   utstyr) har fast topp når de rulles, lukk er 44 px, ingen horisontal scrolling og ingen avkortede knapper.
 - Konto: nei.
+
+## B-226 Konsern blir egen hovedside med underfaner, og anbudet på skraplageret synes (2026-09-28)
+Status: gjelder (erstatter delen av B-192 om Konsern som underfane i Verket på mobil; bygger på B-189 og B-206)
+Brukeren: «Konsernet bør egentlig være en egen hovedside. Ikke under verket. Også nevnte jeg tidligere at skraplageret
+anbudet ligger for skjult. Og det gjorde du ikke noe med. Men når konsernet blir en egen hovedside så kan jo den ha flere
+underside slik som er gjort på verket.»
+- **Egen hovedside:** Konsern står i menyen nederst på mobil og i sidemenyen på PC (samme knapp, ikke to), rett etter
+  Forskning, når konsernet er åpnet (gradvis synlighet: ikke før). Verket har igjen fire underfaner (Oversikt, Anlegg,
+  Resept, Økonomi). Menyen nederst har da seks knapper; testet på 320 px uten avkorting.
+- **Underfaner som i Verket:** Oversikt (konsernverdi, netto, målet, neste steg og verkene), Utvid (neste steg, nye verk
+  og felles tjenester – tallet på fanen er kjøp du har råd til), Skraplager (anbudet og konsernkassa) og Direktør
+  (salgsdirektøren).
+- **Anbudet synes:** når et anbud på skraplageret er åpent og du ikke har bydd, får Konsern «!» i menyen (trykk åpner
+  Skraplager direkte), fanen Skraplager får merket «Anbud», og Oversikt viser en beskjed med fristen og «Se anbudet».
+  Merket forsvinner når du har bydd. Statusen hentes fra serveren hvert minutt (`ui/openTender.ts`), bare med konto og
+  åpnet konsern. Uten konto vises Skraplager-fanen med kontokortet som før.
+- Tallet for kjøp (B-144) står nå på Konsern i menyen og på Utvid.
+- På PC går fanene og beskjeden over begge kolonnene; Skraplager og Direktør er ett kort i venstre kolonne.
+- Testet i Playwright på de 7 størrelsene med falsk tjeneste (med og uten konto): seks menyknapper uten avkorting,
+  fanene, beskjeden og «!» med åpent anbud, ingen horisontal scrolling.
+- Konto: anbudsvarselet krever konto (det er en del av skraplageret, regel 3 og 7); selve siden gjør det ikke.

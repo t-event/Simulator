@@ -28,6 +28,7 @@ import {
   LEGENDS,
   titleOf,
   konsernAdvice,
+  konsernReady,
   konsernEquity,
   konsernOptions,
   maxSisters,
@@ -47,7 +48,9 @@ import { RESEARCH } from "../game/research";
 import type { GameState, SisterPlant, SisterType } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { buzz } from "./haptics";
-import { Bar, Card } from "./common";
+import { Bar, Card, SubTabs } from "./common";
+import { Button, Callout } from "./ds";
+import type { OpenTender } from "./openTender";
 import { StrategicCompanies } from "./Companies";
 import { fmtKr } from "./format";
 import { Icon } from "./icons";
@@ -521,11 +524,103 @@ function PlantTable({
   );
 }
 
+/** Underfanene i Konsern (B-226) */
+export type KonsernTabId = "oversikt" | "utvid" | "skraplager" | "direktor";
+const KONSERN_TAB_IDS: KonsernTabId[] = ["oversikt", "utvid", "skraplager", "direktor"];
+
 /**
- * Verket → Konsern (B-106, B-119, B-123): tallene og målet øverst, neste steg, verkene dine, så kjøp.
+ * Konsernet som egen hovedside (B-226), med underfaner som Verket: Oversikt (tallene, neste steg og verkene), Utvid
+ * (kjøp og felles tjenester), Skraplager (anbud og konsernkassa) og Direktør (salgsdirektøren).
+ */
+export function KonsernPage({
+  g,
+  act,
+  openTab,
+  tender,
+}: {
+  g: GameState;
+  act: Act;
+  openTab?: string;
+  tender: OpenTender | null;
+}) {
+  const [tab, setTab] = useState<KonsernTabId>(
+    KONSERN_TAB_IDS.includes(openTab as KonsernTabId) ? (openTab as KonsernTabId) : "oversikt",
+  );
+  const canBuy = konsernReady(g);
+  const tabs: { id: KonsernTabId; label: string; count?: number; badge?: string; alert?: boolean }[] = [
+    { id: "oversikt", label: "Oversikt" },
+    { id: "utvid", label: "Utvid", count: canBuy },
+    { id: "skraplager", label: "Skraplager", badge: tender ? "Anbud" : undefined },
+    { id: "direktor", label: "Direktør" },
+  ];
+  return (
+    <div className={`g-grid g-konsern-page is-konsern is-${tab}`}>
+      <div className="g-col-wide g-konsern-tabs-col">
+        <SubTabs tabs={tabs} value={tab} onChange={setTab} label="Konsern" />
+      </div>
+      {tab === "oversikt" && tender && (
+        <div className="g-col-wide g-konsern-tender-col">
+          <Callout tone="heat">
+            <strong>Anbud på skraplageret er åpent</strong> til {fmtWhen(tender.closesAt)}. Eieren tjener på skrapet de
+            andre spillerne bruker.{" "}
+            <button className="g-link" onClick={() => setTab("skraplager")}>
+              Se anbudet
+            </button>
+          </Callout>
+        </div>
+      )}
+      {tab === "oversikt" && <KonsernOverview g={g} act={act} onBuy={() => setTab("utvid")} />}
+      {tab === "utvid" && <KonsernBuy g={g} act={act} />}
+      {tab === "skraplager" && (
+        <div className="g-col-wide g-konsern-single">
+          <StrategicCompanies g={g} act={act} />
+        </div>
+      )}
+      {tab === "direktor" && (
+        <div className="g-col-wide g-konsern-single">
+          <DirectorCard g={g} act={act} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function fmtWhen(iso: string): string {
+  return new Date(iso).toLocaleString("nb-NO", {
+    weekday: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+/** Neste steg: kjøpet som betaler seg raskest (B-119) */
+function NextStep({ g, act }: { g: GameState; act: Act }) {
+  const advice = konsernAdvice(g);
+  if (!advice) return null;
+  return (
+    <div className="g-col g-konsern-next-col">
+      <Card title="Neste steg" className="g-konsern-next">
+        <p>
+          <strong>{advice.title}</strong> – det som betaler seg raskest nå.
+        </p>
+        {advice.key.startsWith("bytt-") && (
+          <p className="g-muted g-small-text">
+            Et stålkompleks tjener omtrent like mye som tre storverk, men tar bare én plass. Verket selges for det det
+            er verdt, og pengene går til komplekset.
+          </p>
+        )}
+        <BuyButton g={g} act={act} o={advice} label="Gjør det" />
+      </Card>
+    </div>
+  );
+}
+
+/**
+ * Konsern → Oversikt (B-106, B-119, B-123, B-226): tallene og målet øverst, neste steg og verkene dine.
  * Forklaringen er foldet sammen når man har kommet i gang, så siden blir kort.
  */
-export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
+function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () => void }) {
   const k = g.konsern;
   const today = day(g);
   // Driftsresultatet i verkene, utbyttet til konsernet og konsernkostnadene (B-181)
@@ -536,16 +631,12 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
   const costs = konsernCosts(k.plants);
   const equity = konsernEquity(g);
   const options = konsernOptions(g);
-  const byKey = (key: string) => options.find((o) => o.key === key);
   const advice = konsernAdvice(g);
   const next = KONSERN_MILESTONES[k.milestones];
   const konsernResearch = {
     total: RESEARCH.filter((r) => r.konsern).length,
     done: RESEARCH.filter((r) => r.konsern && g.researched.includes(r.id)).length,
   };
-  const sharedIds = Object.keys(KONSERN_SHARED) as SharedId[];
-  const owned = sharedIds.filter((id) => !byKey(`felles-${id}`));
-  const hasStalverk = k.plants.some((p) => p.type === "stalverk");
   return (
     <>
       {/* UI-3d (B-206): hovedkontoret. PC: nøkkeltallene og neste steg side om side, verkene som tabell over hele
@@ -634,22 +725,7 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
           </details>
         </Card>
       </div>
-      {advice && (
-        <div className="g-col g-konsern-next-col">
-          <Card title="Neste steg" className="g-konsern-next">
-            <p>
-              <strong>{advice.title}</strong> – det som betaler seg raskest nå.
-            </p>
-            {advice.key.startsWith("bytt-") && (
-              <p className="g-muted g-small-text">
-                Et stålkompleks tjener omtrent like mye som tre storverk, men tar bare én plass. Verket selges for det
-                det er verdt, og pengene går til komplekset.
-              </p>
-            )}
-            <BuyButton g={g} act={act} o={advice} label="Gjør det" />
-          </Card>
-        </div>
-      )}
+      <NextStep g={g} act={act} />
       {k.plants.length > 0 && (
         <div className="g-col-wide g-konsern-plants">
           <Card title={`Dine verk (${k.plants.length} av ${maxSisters(g)} datterverk)`}>
@@ -670,6 +746,27 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
           </Card>
         </div>
       )}
+      {k.plants.length === 0 && (
+        <div className="g-col-wide g-konsern-single">
+          <Button variant="primary" icon="chevron-right" onClick={onBuy}>
+            Kjøp det første verket under Utvid
+          </Button>
+        </div>
+      )}
+    </>
+  );
+}
+
+/** Utvid (B-226): neste steg, nye verk og felles tjenester */
+function KonsernBuy({ g, act }: { g: GameState; act: Act }) {
+  const options = konsernOptions(g);
+  const byKey = (key: string) => options.find((o) => o.key === key);
+  const sharedIds = Object.keys(KONSERN_SHARED) as SharedId[];
+  const owned = sharedIds.filter((id) => !byKey(`felles-${id}`));
+  const hasStalverk = g.konsern.plants.some((p) => p.type === "stalverk");
+  return (
+    <>
+      <NextStep g={g} act={act} />
       <div className="g-col-wide g-konsern-buy-col">
         <Card title="Kjøp og utvid">
           {(Object.keys(SISTER_TYPES) as SisterType[])
@@ -703,10 +800,6 @@ export function KonsernTab({ g, act }: { g: GameState; act: Act }) {
             <p className="g-muted g-small-text">✓ I drift: {owned.map((id) => KONSERN_SHARED[id].name).join(", ")}.</p>
           )}
         </Card>
-      </div>
-      <div className="g-col g-konsern-side">
-        <StrategicCompanies g={g} act={act} />
-        <DirectorCard g={g} act={act} />
       </div>
     </>
   );

@@ -25,10 +25,8 @@ import { PlantScene } from "./PlantScene";
 import { SceneBubbles } from "./SceneBubbles";
 import { StageCard, StationButton, UpgradeSheet } from "./Upgrades";
 import { AutoToggle } from "./AutoToggle";
-import { konsernReady } from "../game/konsern";
 import { PyntModal } from "./Achievements";
 import { BankCard } from "./Settings";
-import { KonsernTab } from "./Konsern";
 import { readyUpgrades, stationOptions, stationReady, type Station } from "./stations";
 import { VERKET_TABS, type VerketTab } from "./verketTabs";
 import type { View } from "./views";
@@ -335,8 +333,7 @@ function avgPlantResult(g: GameState): number {
 export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }: Props) {
   const [sheet, setSheet] = useState<Station | null>(null);
   const [pynt, setPynt] = useState(false);
-  // Konsern-fanen finnes bare når konsernet er åpnet; lastes et annet spill, faller valget tilbake til Oversikt
-  const tab: SubTab = chosenTab === "konsern" && !g.konsern.unlocked ? "oversikt" : chosenTab;
+  const tab: SubTab = chosenTab;
   const est = recipeEstimate(g, g.targetGrade, stats);
   const order = currentOrder(g);
   const split = gradesInUse(g).length > 1;
@@ -351,7 +348,6 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
   const recipeBad = gradesInUse(g).some(
     (grade) => !recipeEstimate(g, grade, stats, gradeRecipe(g, grade)).grades.includes(grade),
   );
-  const konsernCanBuy = konsernReady(g);
   const missingNow = missingScrap(g, stats);
   // Varsel om foringen åpner Anlegg og ruller ned til vedlikeholdskortet
   // …og «Du kan flytte inn» åpner Oversikt og ruller til målkortet (B-064)
@@ -373,19 +369,13 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
     <div className={`g-grid is-${tab}`}>
       {pynt && <PyntModal g={g} stats={stats} act={act} onClose={() => setPynt(false)} />}
       {/* Underfanene står øverst (B-192), over bildet og rådene, og over begge kolonnene på PC */}
-      <div
-        className={`g-subtabs g-verket-tabs${tab === "konsern" ? " on-konsern" : ""}`}
-        role="tablist"
-        aria-label="Verket"
-      >
-        {VERKET_TABS.filter((t) => t.id !== "konsern" || g.konsern.unlocked).map((t) => (
+      <div className="g-subtabs g-verket-tabs" role="tablist" aria-label="Verket">
+        {VERKET_TABS.map((t) => (
           <button
             key={t.id}
             role="tab"
             aria-selected={tab === t.id}
-            className={`${tab === t.id ? "is-active" : ""}${t.id === "konsern" ? " is-konsern" : ""}${
-              t.id === "resept" && recipeBad ? " is-alert" : ""
-            }`}
+            className={`${tab === t.id ? "is-active" : ""}${t.id === "resept" && recipeBad ? " is-alert" : ""}`}
             onClick={() => setTab(t.id)}
           >
             {t.label}
@@ -394,15 +384,9 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
                 {upgradesReady}
               </span>
             )}
-            {t.id === "konsern" && konsernCanBuy > 0 && (
-              <span className="g-badge" aria-label={`${konsernCanBuy} kjøp du har råd til`}>
-                {konsernCanBuy}
-              </span>
-            )}
           </button>
         ))}
       </div>
-      {/* På PC er Konsern en egen side i sidemenyen (B-192), så anleggsbildet og rådene for verket står ikke der (B-206) */}
       <div className="g-col-wide g-verket-top">
         <div className="g-scene-wrap">
           <PlantScene g={g} stats={stats} />
@@ -886,7 +870,6 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
           </div>
         </>
       )}
-      {tab === "konsern" && g.konsern.unlocked && <KonsernTab g={g} act={act} />}
       {sheet && <UpgradeSheet g={g} station={sheet} act={act} onClose={() => setSheet(null)} />}
     </div>
   );
