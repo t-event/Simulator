@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 216 – 2026-09-28: Dyrere strøm og snøstorm om vinteren
+
+**Brukeren ba om:** «dyrere strøm og tregere skraplevering om vinteren».
+
+**Gjort:** B-279. Strømmen (spot og nattariff) er 30 % dyrere om vinteren, fastprisen 15 %. Snøstorm stenger veien for
+skrapbilene i 4–12 timer (ca. hver 15. vinterdag); skrapterminalen merker det ikke. Melding på Marked, i loggen, i rådet
+og i anleggsbildet. Publiseringen av #225 (B-278) var grønn.
+
+**Testet:** tsc, lint, npm test (ny test), balance (exit 0), `--vinter`, Playwright på 320 og 390 px (meldingen om
+snøstorm og vinterprisen vises, ingen horisontal scrolling).
+
+**Gjenstår:** i morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 215 – 2026-09-28: Budgiverne på anbudet
 
 **Brukeren ba om:** «Fortsett», og: «Linjene over hvem som har bydd på anbudet ser ikke bra ut».

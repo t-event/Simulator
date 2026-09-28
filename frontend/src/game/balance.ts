@@ -832,9 +832,18 @@ if (process.argv.includes("--vinter")) {
     ["elektrode", /^Elektrodebrudd/],
     ["overslag", /[Oo]verslag/],
     ["havari", /[Hh]avari|brudd|lekk/],
+    ["snøstorm", /^Snøstorm/],
   ];
-  type Cell = { days: number; prodT: number; income: number; maint: number; fine: number; ev: Record<string, number> };
-  const cell = (): Cell => ({ days: 0, prodT: 0, income: 0, maint: 0, fine: 0, ev: {} });
+  type Cell = {
+    days: number;
+    prodT: number;
+    income: number;
+    maint: number;
+    fine: number;
+    power: number;
+    ev: Record<string, number>;
+  };
+  const cell = (): Cell => ({ days: 0, prodT: 0, income: 0, maint: 0, fine: 0, power: 0, ev: {} });
   for (const novice of [false, true]) {
     const table = new Map<string, Cell>();
     for (const seed of [1, 2, 3, 4]) {
@@ -865,6 +874,7 @@ if (process.argv.includes("--vinter")) {
             d.income += Object.values(y.income).reduce((a, b) => a + (b ?? 0), 0);
             d.maint += y.costs.vedlikehold ?? 0;
             d.fine += y.costs.bot ?? 0;
+            d.power += y.costs.energi ?? 0;
           }
         }
       };
@@ -873,7 +883,7 @@ if (process.argv.includes("--vinter")) {
     }
     console.log(novice ? "\nNYBEGYNNER" : "FLINK");
     console.log(
-      "nivå årstid  døgn  prod t/d  inntekt/d  vedlikehold/d  bot/d  | per 30 døgn: " +
+      "nivå årstid  døgn  prod t/d  inntekt/d  vedlikehold/d  bot/d  strøm/d  strøm kr/t | per 30 døgn: " +
         [...KINDS.map(([k]) => k), "kort"].join(" "),
     );
     for (const stage of [1, 2, 3, 4])
@@ -883,7 +893,7 @@ if (process.argv.includes("--vinter")) {
         const per = (n: number) => ((n / c.days) * 30).toFixed(1);
         const kr = (n: number) => `${(n / c.days / 1e6).toFixed(2)} mill.`;
         console.log(
-          `${stage}    ${season.padEnd(6)} ${String(c.days).padStart(5)} ${(c.prodT / c.days).toFixed(0).padStart(9)} ${kr(c.income).padStart(11)} ${kr(c.maint).padStart(14)} ${kr(c.fine).padStart(6)}  | ` +
+          `${stage}    ${season.padEnd(6)} ${String(c.days).padStart(5)} ${(c.prodT / c.days).toFixed(0).padStart(9)} ${kr(c.income).padStart(11)} ${kr(c.maint).padStart(14)} ${kr(c.fine).padStart(6)} ${kr(c.power).padStart(8)} ${(c.power / Math.max(1, c.prodT)).toFixed(0).padStart(6)}  | ` +
             [...KINDS.map(([k]) => k), "kort"].map((k) => `${k} ${per(c.ev[k] ?? 0)}`).join("  "),
         );
       }

@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 279,
+    date: "2026-09-28",
+    title: "Vinteren koster",
+    items: [
+      "Om vinteren er strømmen ca. 30 % dyrere. En fastpris avtalt før vinteren beskytter deg.",
+      "Snøstorm kan stenge veien i noen timer, og da kommer ingen skrapbiler. Hold mer skrap på lager om vinteren.",
+      "Skrapterminalen får skrap med båt og tog og merker ikke snøstormen.",
+    ],
+  },
+  {
     b: 278,
     date: "2026-09-28",
     title: "Ryddigere liste over budgivere",

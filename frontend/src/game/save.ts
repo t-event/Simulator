@@ -270,6 +270,8 @@ export function migrate(g: GameState): GameState {
   if (loose.companyIncomeSeen === undefined) loose.companyIncomeSeen = {};
   // Utslipp og bøter (B-263): verk som alt har store ovner, får renseanlegg som holder, i første time (envHour)
   if (loose.env === undefined) loose.env = { ...newEnv(), grant: true };
+  // Snøstorm som stenger veien for skrapbilene (B-279)
+  if (loose.snowUntilMin === undefined) loose.snowUntilMin = 0;
   if (loose.seasonLoginPromptSeen === undefined) loose.seasonLoginPromptSeen = null;
   if (loose.world === undefined) loose.world = { events: [], seenEventIds: [] };
   for (const c of g.contracts) {

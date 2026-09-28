@@ -10,7 +10,7 @@ import { has, hourOfDay, isOpen, rollingActive, type PlantStats } from "../game/
 import type { GameState } from "../game/types";
 import { cosmeticOn, facadeColors } from "../game/cosmetics";
 import { STATION_NAMES, type Station } from "./stations";
-import { isWinter } from "../game/calendar";
+import { isWinter, roadClosed, scrapBlocked } from "../game/calendar";
 import { roofed } from "../game/accidents";
 import { CLEANERS, cleaner, envDown, shortfall, stopsOnBreakdown } from "../game/environment";
 
@@ -804,11 +804,22 @@ export function PlantScene({ g, stats, onStation }: Props) {
         </g>
       )}
 
-      {winter && (
+      {(winter || roadClosed(g)) && (
         <g className="scene-snowfall">
           {SNOW.map(([x, y, d]) => (
             <circle key={x} cx={x} cy={y} r={1.1} style={{ animationDelay: `-${d}s` }} />
           ))}
+          {/* Snøstorm (B-279): tettere snø */}
+          {roadClosed(g) &&
+            SNOW.map(([x, y, d]) => (
+              <circle
+                key={`s${x}`}
+                cx={(x + 37) % 480}
+                cy={y + 40}
+                r={1.3}
+                style={{ animationDelay: `-${d + 1.5}s` }}
+              />
+            ))}
         </g>
       )}
 
@@ -816,7 +827,8 @@ export function PlantScene({ g, stats, onStation }: Props) {
       {!open && <rect className="scene-idle" x={0} y={0} width={480} height={210} />}
 
       {/* Skraptrucken kjører når verket går (B-242) */}
-      {open && stage >= 1 && <Truck turn={stage >= 4} />}
+      {/* Under snøstorm kommer ikke skrapbilen fram (B-279) */}
+      {open && stage >= 1 && !scrapBlocked(g) && <Truck turn={stage >= 4} />}
 
       {/* Stedene kan trykkes (B-242): skrapgården, ovnshallen, støpehallen og ferdigvarelageret */}
       {stage === 0 && (

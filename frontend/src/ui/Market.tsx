@@ -13,7 +13,8 @@ import { worldFactor } from "../game/world";
 import { AutoToggle } from "./AutoToggle";
 import { fmtKr, fmtNum, fmtPct, fmtT } from "./format";
 import { Icon } from "./icons";
-import { StatusLine } from "./ds";
+import { Callout, StatusLine } from "./ds";
+import { roadOpensInH, scrapBlocked } from "../game/calendar";
 import { TrendNote } from "./Trend";
 
 interface Props {
@@ -133,6 +134,13 @@ export function Market({ g, stats, act, openTab, onTab }: Props & { openTab?: st
             }
           >
             <Bar value={stats.yardUsed / stats.yardT} label="Skraplager" />
+            {/* Snøstorm (B-279): ingen skrapbiler kommer fram */}
+            {scrapBlocked(g) && (
+              <Callout tone="heat">
+                Snøstorm: veien er stengt, og skrapbilene kommer fram om ca. {roadOpensInH(g)} timer. Ovnene bruker
+                skrapet på lageret.
+              </Callout>
+            )}
             {/* Mobil: ett kort per skraptype. PC: samme data som tabell (B-197) */}
             <div className="g-scrap-list">
               {open.map((id) => {
