@@ -205,7 +205,7 @@ Prinsipp: **samme data og handlinger, forskjellig mengde synlig samtidig.** Grad
 | Verket → Oversikt | Bilde, status, neste steg | Stort anleggsbilde + høyrekolonne (status, neste steg, produksjon nå) | Ja |
 | Verket → Anlegg | Vertikal liste per sted, tydelig status | Driftsdashbord: produksjonsflyt i midten, sidepanel med skraplager, ovner, støping, valsing, lager, vedlikehold, hendelser | Ja |
 | Verket → Økonomi | Resultat øverst, så inntekt/kostnad | Dashbord med hierarki: resultat → inntekt/kostnad → hovedverk/datterverk → produksjon/strøm/lønn; små grafer bare der de forteller noe (resultat 7/30 døgn) | Ja |
-| Verket → Konsern | Verdi, netto, neste steg, verk | Hovedkontor: nøkkeltall øverst, verkene som tabell/kart, beslutninger og varsler fra verk i egen sone (plass til verksjefer og strategiske bedrifter senere, uten tomme plassholdere) | Ja |
+| Konsern (egen hovedside, B-226: Oversikt · Utvid · Skraplager · Direktør) | Verdi, netto, neste steg, verk | Hovedkontor: nøkkeltall øverst, verkene som tabell/kart, beslutninger og varsler fra verk i egen sone (plass til verksjefer og strategiske bedrifter senere, uten tomme plassholdere) | Ja |
 | Marked | Kort per skraptype, strøm (resepten er flyttet til Verket, B-199) | Skraptabell (Type · Pris · P · Spor · C · Skitt · Eget lager · Handling) + detaljpanel; resept og strøm ved siden av | Ja |
 | Salg | Kort per forespørsel | Master/detail: forespørsler · ordrekø · lager · avtaler til venstre, valgt ordre til høyre (kunde, verdi, tonn, kvalitet, frist, forventet levering, reseptstatus, kapasitet, mulig bot, handling) | Ja |
 | Folk | Enkel liste og anbefaling | Bemanningstabell (Område · Behov · Bemannet · Ferdighet · Fravær), utvidbar med verksjefer/ledelse | Ja |
@@ -305,6 +305,7 @@ bygges om.
   Krever en justering av regel 6 – eierens valg (12.3). **Avgjort (B-191):** ett samlet kort, regel 6 er justert.
 - **Konsern på mobil vs PC:** eieren vil ha Konsern i sidemenyen på PC; på mobil er det en underfane i Verket (fem
   faner i menyen er det som får plass). Forslag: samme visning, ulik plassering – sidemeny på PC, underfane på mobil.
+  **Endret (B-226):** Konsern er egen hovedside på begge, med egne underfaner; seks knapper i menyen nederst får plass.
 - **Safari-fellene** (bare `.g-main` scroller, ark i Portal, bredere skrift, B-134/B-137/B-152) gjelder fortsatt; nytt
   skall må testes i WebKit, ikke bare Chromium.
 - **Parallelt med 1B** blir det konflikter i de samme filene. Tiltak: UI-1a først (liten), så 1B med nye komponenter.

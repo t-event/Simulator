@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 226,
+    date: "2026-09-28",
+    title: "Konsernet får sin egen side",
+    items: [
+      "Konsern er nå en egen knapp i menyen, ikke en fane under Verket.",
+      "Konsernet har egne faner: Oversikt, Utvid (kjøp nye verk), Skraplager og Direktør.",
+      "Er anbudet på skraplageret åpent og du ikke har bydd, får Konsern et utropstegn i menyen – trykk, så kommer du rett til anbudet.",
+    ],
+  },
+  {
     b: 225,
     date: "2026-09-28",
     title: "Ryddigere ark",

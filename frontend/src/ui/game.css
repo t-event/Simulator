@@ -3005,7 +3005,7 @@ button {
   min-height: 44px;
 }
 
-/* Strategiske selskaper (B-189): skraplageret på Konsern-fanen */
+/* Strategiske selskaper (B-189): skraplageret under Konsern → Skraplager (B-226) */
 .g-company h3 {
   font-size: var(--fs-title);
   margin: 12px 0 4px;
@@ -3197,14 +3197,7 @@ button {
   margin: 0;
 }
 
-/* På mobil er Konsern en underfane i Verket, så Verket er fortsatt valgt i menyen */
-.g-nav button.is-verket-konsern {
-  color: var(--accent);
-  box-shadow: inset 0 3px 0 var(--accent);
-  font-weight: 700;
-}
-
-/* Konsern står i sidemenyen bare på PC; på mobil er det en underfane i Verket */
+/* Mål står i sidemenyen bare på PC; på mobil er det en knapp ved varsellinja */
 .g-nav-pc {
   display: none !important;
 }
@@ -3265,12 +3258,6 @@ button {
 
   .g-nav-pc {
     display: flex !important;
-  }
-
-  .g-nav button.is-verket-konsern {
-    color: var(--text-dim);
-    box-shadow: none;
-    font-weight: 400;
   }
 
   .g-nav button.is-hint {
@@ -3334,12 +3321,6 @@ button {
 
   .g-top-settings {
     order: 7;
-  }
-
-  /* Konsern har eget punkt i sidemenyen, så underfanen og fanelinja trengs ikke der */
-  .g-verket-tabs .is-konsern,
-  .g-verket-tabs.on-konsern {
-    display: none;
   }
 
   /* Ark (fagbok, varsler, toppliste, innstillinger) kommer fra høyre, så spillet synes bak */
@@ -3751,7 +3732,7 @@ button {
   }
 }
 
-/* Verket har fem underfaner når Konsern er åpnet (B-199): tettere på de smaleste telefonene, så navnene får plass */
+/* Underfanene i Verket og Konsern (B-199, B-226): tettere på de smaleste telefonene, så navnene får plass */
 @media (max-width: 360px) {
   .g-verket-tabs {
     gap: 0;
@@ -4059,7 +4040,13 @@ button {
   vertical-align: -0.15em;
 }
 
-/* Verket → Konsern (UI-3d, B-206): hovedkontoret. Verkene som kort på mobil og som tabell på PC */
+/* Konsern (UI-3d, B-206; egen hovedside B-226): hovedkontoret. Verkene som kort på mobil og som tabell på PC */
+/* Underfanene og beskjeden om anbudet går over begge kolonnene (B-226) */
+.g-konsern-page > .g-konsern-tabs-col,
+.g-konsern-page > .g-konsern-tender-col {
+  grid-column: 1 / -1;
+}
+
 .g-plant-name {
   display: inline-flex;
   align-items: center;
@@ -4089,26 +4076,28 @@ button {
   gap: var(--sp-2);
 }
 
-@media (min-width: 900px) {
-  /* PC: Konsern er eget punkt i sidemenyen, ikke en del av verket */
-  .g-grid.is-konsern > .g-verket-top {
-    display: none;
-  }
-}
-
 @media (min-width: 1000px) {
   .g-grid.is-konsern > .g-konsern-head-col,
   .g-grid.is-konsern > .g-konsern-buy-col {
     grid-column: 1;
   }
 
-  .g-grid.is-konsern > .g-konsern-next-col,
-  .g-grid.is-konsern > .g-konsern-side {
+  /* Neste steg står først på mobil, men ved siden av kjøpene på PC (Utvid) */
+  .g-grid.is-konsern {
+    grid-auto-flow: row dense;
+  }
+
+  .g-grid.is-konsern > .g-konsern-next-col {
     grid-column: 2;
   }
 
   .g-grid.is-konsern > .g-konsern-plants {
     grid-column: 1 / -1;
+  }
+
+  /* Skraplager og Direktør er ett kort: i venstre kolonne, med lesbar bredde */
+  .g-grid.is-konsern > .g-konsern-single {
+    grid-column: 1;
   }
 
   /* Neste steg fyller høyden ved siden av nøkkeltallene */
