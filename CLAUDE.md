@@ -174,6 +174,7 @@ frontend/src/
     Weekly.tsx   Kortet «Ukens utfordring» på Mål og ukelista   Portal.tsx  Ark fra Verket legges i <body>
     SeasonTrack.tsx Kortet «Sesongstigen» på Mål (B-173)   Landmarks.tsx  Kortet «Landemerker» på Mål → I dag (B-218)
     Changelog.tsx «Hva er nytt» etter en oppdatering og under ⚙️ (B-179)
+    TitleArt.tsx Tittelbildet på startskjermen; samme motiv som app-ikonet public/icon.svg (B-249)
     MissingOut.tsx «Det går du glipp av» på Mål for spillere uten konto (B-212)
     Goals.tsx    Mål-siden (egen knapp ved varsellinja på mobil, sidemenyen på PC): I dag, Uka, Merker (B-211, B-214)
     tokens.css   Designsystemet (B-191): alle farger, skriftstørrelser, radier, avstander – nye stiler bruker disse
@@ -183,7 +184,7 @@ frontend/src/
     control/     Kontrollrommet: spillet i fire runder (chargeGame.ts: logikk og testspiller, ControlRoom.tsx, B-175)
   sim/         Prosessmodell for lysbueovnen (brukes ikke av spillet lenger, sjekkes av sim/validate.ts)
 frontend/scripts/ sjekk-endringslogg.mjs: endringsloggen dekker nyeste beslutning; sjekk-emoji.mjs: ingen emoji (B-237)
-frontend/public/  PWA: manifest, ikoner, service worker
+frontend/public/  PWA: manifest, ikoner (icon.svg er kilden; PNG-ene lages fra den med Chromium, B-249), service worker
 supabase/      SQL-migrasjonene, nummerert. Kjøres i prosjektet med Supabase-connectoren (apply_migration) og
                legges her samtidig, så repoet speiler databasen. Sjekk get_advisors (security) etter hver DDL-endring.
 supabase/utkast/ Spørringer som bare leser (f.eks. dry-run av økonomireformen) – ikke migrasjoner

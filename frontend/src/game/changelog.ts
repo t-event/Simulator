@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 249,
+    date: "2026-09-28",
+    title: "Nytt ikon og tittelbilde",
+    items: [
+      "Spillet har fått nytt ikon: verket i kveldslys med glødende port.",
+      "Startskjermen har fått et tittelbilde der røyken stiger fra pipene.",
+      "På iPhone byttes ikonet på hjemskjermen når du legger spillet til på nytt.",
+    ],
+  },
+  {
     b: 248,
     date: "2026-09-28",
     title: "Boblene får plass",

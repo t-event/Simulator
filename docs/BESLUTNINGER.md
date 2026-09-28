@@ -4523,3 +4523,20 @@ kuttet av venstre kant.
   nær høyre kant. Så lenge boblen er smalere enn bildet, står den alltid helt inne, med 8 px luft.
 - Er den bredere (320 px med tre deler), brytes den mellom delene – aldri inne i et tall.
 - Konto: nei. Testet: kantene til alle boblene målt i 9 s på 10× (320, 390 og 1 280 px): ingen utenfor.
+
+## B-249 Logo, app-ikon og tittelbilde: verket i kveldslys (2026-09-28)
+Status: gjelder (siste punkt i UI-planen, docs/UI.md 10.6, B-187)
+Brukeren: «Fortsett». Fikk fire forslag (øse som heller, lysbueovn, S av glødende stål, verket i kveldslys) og valgte
+**verket i kveldslys**.
+- **App-ikonet** (`public/icon.svg`, og PNG i 180, 192 og 512 px): silhuetten av verket – smeltehall, støpehall og to
+  piper med røyk – mot en kveldshimmel som går over i glød, med den glødende porten til ovnshallen. Samme motiv som
+  anleggsbildet i spillet, så ikonet og spillet henger sammen. Det maskerte ikonet (Android) har motivet krympet inn i
+  den sikre sirkelen.
+- **Tittelbildet** (`ui/TitleArt.tsx`) står øverst i kortet på startskjermen, helt ut til kantene: samme motiv i bredt
+  format med skrapkran, stjerner og åser. Røyken stiger og porten gløder; med «redusert bevegelse» står alt stille.
+- **Logoen** er bildet sammen med navnet «Stålverket» i visningsskriften. Spillet har ingen egen logo i menyen – der er
+  plassen brukt til drift.
+- PNG-ene lages fra SVG-en med Chromium (Playwright). En ny tegning krever nye PNG-er.
+- Ikonet på hjemskjermen til en iPhone byttes først når spillet legges til på nytt.
+- Konto: nei. Testet: startskjermen på de 7 størrelsene (ingen horisontal scrolling, kortet får plass), ikonene i
+  16–512 px.
