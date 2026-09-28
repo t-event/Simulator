@@ -4461,3 +4461,12 @@ Brukeren: «Fortsett» (neste steg i planen: UI-4d polering og animasjon, inkl. 
 - Gjenstår i UI-4d: egne bygninger per nivå helt fram til storverket (storverket ligner fortsatt stålverket) og en
   mørkere tilstand når verket står.
 - Konto: nei. Testet: skjermbilder av alle fem nivåene og et fullt storverk, trykk på ovnshallen åpner ovnsutstyret.
+
+## B-243 Nye ikoner for Skraplager og Støping (2026-09-28)
+Status: gjelder (bygger på B-235, B-237)
+Brukeren: «Skraplager og støping ikonene syntes jeg ikke passer så godt.» Valgte selv blant kandidatene.
+- **Skraplager:** magneten på skrapkranen (Lucide `magnet`) i stedet for riven.
+- **Støping:** to stablede emner (Lucide `stretch-horizontal`, nytt i `ui/icons.tsx`) i stedet for dråpen – det støpingen
+  lager. Kapittelet «Strengstøping» i fagboka får samme ikon.
+- Rive og dråpe beholdes i kontrollrommet, der de betyr avslagging og tapping.
+- Konto: nei.
