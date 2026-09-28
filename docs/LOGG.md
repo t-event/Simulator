@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 193 – 2026-09-28: Mekanisk verksted (slått av)
+
+**Brukeren ba om:** «Fortsett», så «Mekanisk verksted».
+
+**Gjort:** B-256. Appen sender vedlikehold og havarier i alt (`maint_kr`) til tidslinja. Serveren teller nye kroner per ekte
+dag (høyeste tall, som tonnene), ganger vedlikehold per tonn (tak 1 000 kr/t) med stålet som teller for skraplageret, og
+eieren får halvparten. Migrasjon 043 kjørt; «Mekanisk verksted» finnes, men er slått av. Appen kjenner typen.
+
+**Testet:** migrasjonen i en transaksjon som ble rullet tilbake (startpunkt, gammel lagring, taket, eldre app, av/på),
+sikkerhetsrådene, tsc, lint, `npm test` (to nye tester), `balance.ts` (exit 0).
+
+**Gjenstår:** slå på slagghåndteringen og så verkstedet når skraplageret har betalt ut inntekt noen dager (B-253, B-256);
+eventuelt grense per ekte dag på topplista (FORSLAG).
+
+---
+
 ## Økt 192 – 2026-09-28: Trender i markedet
 
 **Brukeren ba om:** «Fortsett».

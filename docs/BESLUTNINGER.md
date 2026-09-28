@@ -4648,3 +4648,38 @@ Brukeren: «Fortsett». Fase 2 venter på at skraplageret får en eier (B-253), 
   fordi den som følger med kan velge de godt betalte. Alle mål OK, nybegynneren dag 143. En versjon med oftere opp
   enn ned (65 %) ga dag 132 og ble forkastet.
 - Konto: nei (eget spill).
+
+## B-256 Fase 2: mekanisk verksted bygget, men slått av (2026-09-28)
+Status: gjelder (fase 2 i docs/RETNING.md; bygger på B-188, B-253)
+Brukeren: «Fortsett», så «Mekanisk verksted»: appen rapporterer vedlikehold og havarier til serveren, og selskapet bygges
+ferdig, men slått av, som slagghåndteringen.
+- **Appen rapporterer:** `g.totals.maintKr` er kroner brukt på vedlikehold og havarier i alt (alt som bokføres som
+  «vedlikehold» i `addCost`: omforing, gjennombrenning, overslag, elektrodebrudd, spolelekkasje, reparasjoner). Standard
+  0 i `migrate()` – historien fra før er ikke lagret. Sendes som `snapshots.maint_kr` sammen med tonnene.
+- **Server (`supabase/043_mekanisk_verksted.sql`, kjørt som «mekanisk_verksted»):**
+  - Produksjonsmåleren (B-188) får `maint_hwm`: bare kroner over det høyeste spilleren har hatt, teller. Nye kroner samles
+    per ekte UTC-dag i `production_days.gained_maint`, ved siden av de nye tonnene. Første tall er startpunktet, og eldre
+    apper uten tallet endrer ingenting.
+  - Det som teller en ekte dag (`maint_counted_kr`): stålet som teller for skraplageret samme dag (høyst én normal
+    spilldag) × vedlikehold per tonn den dagen, høyst 1 000 kr/t (`maint_cap_per_t`). Et storverk bruker ca. 100–130 kr/t
+    (målt i lagrede spill), et verk på nivå 2–3 300–550. Lokal fart gir ikke mer, og et stort tall etter en tilbakerulling
+    eller juks kan ikke gi mer enn taket per tonn.
+  - Eieren får halvparten (`workshop_share` 0,5) – ca. 60 kr per tonn stål, en tidel av slagghåndteringen. Verkstedet er
+    det minste selskapet og blir det billigste å by på: anslaget nå er ca. 9,7 mill. kr per dag (skraplageret 178 mill.).
+  - Anslaget (`maint_rate_estimate`) er snittet hos de andre de siste 7 ekte dagene med taket per spiller og dag, så ett
+    havari ikke drar det opp; 120 kr/t (`maint_typical_per_t`) til det finnes tall. De første dagene etter at appen er
+    ute blir snittet for lavt (dager før rapporteringen), men selskapet er slått av så lenge.
+  - Typen `verksted` i `company_counted_t`, `company_fee` og `company_estimate`; selskapet «Mekanisk verksted» med
+    `active = false`. Slås på med `update public.companies set active = true where type = 'verksted'; select
+    public.world_tick();`.
+- **Testet før den ble kjørt:** hele migrasjonen og et testløp med to midlertidige kontoer i én transaksjon som ble
+  rullet tilbake: 100 t og 12 000 kr ga 12 000 kr som teller; en gammel lagring ga ingenting nytt; 500 000 kr på 10 t
+  ble tatt av taket (1 000 kr/t × stålet som teller); en eldre app uten tallet ga startpunkt uten telling. Verkstedet
+  fikk ikke anbud og var ikke i `world_status` mens det var av; slått på fikk det anbud. Etter kjøringen: selskapet
+  finnes, er av og har ingen anbud. Sikkerhetsrådene er uendret.
+- **Appen:** `CompanyType` har `verksted`, `companyType()` tolker typen, og kortet under Industrien har en forklaring.
+  Nye tester i `game/tests.ts` (bare vedlikehold telles, gamle lagringer starter på 0) og `net/tests.ts` (tallet sendes
+  til tidslinja).
+- Konto: ja (samme som skraplageret, regel 3 og 7).
+Endringslogg: nei
+

@@ -1,6 +1,6 @@
 /**
  * Industrien rundt verket (B-189, B-227): de strategiske selskapene og konsernkassa under Konsern → Industrien.
- * Skraplageret er det første selskapet; slagghåndtering og mekanisk verksted kommer etter (RETNING.md fase 2), og
+ * Skraplageret er det første selskapet; slagghåndtering og mekanisk verksted er bygget, men slått av (B-253, B-256), og
  * Kontroll og overtakelser senere (fase 3–4). Hvert selskap serveren sender, får sitt eget kort, og konsernkassa – kapitalen
  * til alle selskapene – har sitt eget. Vises først når konsernet er åpnet (gradvis synlighet), krever konto. Alt avgjøres
  * på serveren i ekte tid; kortene viser bare det serveren sier.
@@ -49,6 +49,9 @@ const COMPANY_INTRO: Record<Company["type"], string> = {
   // B-253: bygget, men slått av på serveren til skraplageret har vist at kjeden virker
   slagg:
     "Eieren tjener på slaggen de andre spillerne lager – omtrent 0,12 tonn slagg per tonn stål, høyst én vanlig dags produksjon per spiller per dag, så farten i spillet betyr ikke noe.",
+  // B-256: bygget, men slått av som slagghåndteringen
+  verksted:
+    "Eieren får halvparten av det de andre spillerne bruker på vedlikehold og reparasjoner – regnet per tonn stål de lager, høyst én vanlig dag per spiller per dag, så farten i spillet betyr ikke noe.",
 };
 
 const INDUSTRY_INTRO =
