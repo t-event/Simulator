@@ -174,7 +174,7 @@ import {
 } from "./plant";
 import { answerQuizQuestion, QUIZ, quizAvailable, quizReward } from "./quiz";
 import { GRADES } from "./data";
-import type { Agreement, Analysis, Contract, GameState, ManualRequest, MasteryId, RoleId } from "./types";
+import type { Agreement, Analysis, Contract, GameState, GradeId, ManualRequest, MasteryId, RoleId } from "./types";
 import { masteryGainPerDay } from "./masteryValue";
 import {
   CLEANERS,
@@ -2522,6 +2522,55 @@ test("Planleggeren holder valgt mengde skrap på lager (B-271)", () => {
   autoBuy(g, stats, { credit: false, cap: null });
   const total = Object.values(g.scrap).reduce((a, x) => a + x.t, 0);
   assert(Math.abs(total - g.settings.autoBuyTargetT) <= g.settings.autoBuyTargetT * 0.05, `på lager ${total}`);
+});
+
+test("Støpingen (B-273): bytter kvalitet med én gang når køen er full eller ingen ovn lager den gamle snart", () => {
+  const g = newGame(273);
+  g.stage = 4;
+  g.owned.push("streng1", "oseovn", "ovn2", "ovn3");
+  g.castingType = CASTINGS.find((c) => c.continuous && c.stage <= 4)!.id;
+  const ladle = (grade: GradeId) => ({
+    t: 30,
+    grade,
+    analysis: { c: 0.1, p: 0.01, tramp: 0.1 },
+    expected: { c: 0.1, p: 0.01, tramp: 0.1 },
+    tempOff: false,
+    manual: false,
+    queuedMin: g.minute,
+  });
+  g.minute = 10 * 1440;
+  g.lastCast = { grade: "standard", min: g.minute - 5 };
+  for (const f of g.furnaces) {
+    f.heat = null;
+    f.holding = null;
+  }
+  // Ingen ovn lager standard: bytt nå, med overgang
+  g.castQueue = [ladle("armering")];
+  g.castProgressT = 0;
+  advance(g, 1);
+  assert(!g.castWait?.startsWith("Venter med"), `ventet uten grunn: ${g.castWait}`);
+  // En ovn blir ferdig med standard om 10 minutter og køen har plass: vent
+  const h = newGame(2731);
+  Object.assign(h, { stage: 4, castingType: g.castingType, owned: [...g.owned] });
+  h.minute = 10 * 1440;
+  h.lastCast = { grade: "standard", min: h.minute - 5 };
+  h.castQueue = [ladle("armering")];
+  h.castProgressT = 0;
+  for (const f of h.furnaces) {
+    f.heat = null;
+    f.holding = null;
+  }
+  h.furnaces[0].heat = {
+    ...ladle("standard"),
+    startMin: h.minute - 40,
+    endMin: h.minute + 10,
+    sizeT: 30,
+    liquidT: 28,
+    radioactive: false,
+    energyKwh: 0,
+  } as unknown as GameState["furnaces"][0]["heat"];
+  advance(h, 1);
+  assert(!!h.castWait?.startsWith("Venter med"), `ventet ikke på chargen som snart er ferdig: ${h.castWait}`);
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

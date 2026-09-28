@@ -1380,6 +1380,8 @@ function updateCasting(g: GameState, stats: PlantStats, dt: number): void {
 export const SEQUENCE_GAP_MIN = 30;
 /** Lenger enn dette venter ikke en øse med annen kvalitet; da byttes det midt i sekvensen (B-046) */
 export const SEQUENCE_WAIT_MIN = 90;
+/** Så nær slutten må en charge med samme kvalitet være for at støpingen skal vente på den (B-273) */
+export const SEQUENCE_SOON_MIN = 20;
 
 /**
  * Strengstøpingen støper én kvalitet om gangen (B-046). Står det en øse med samme kvalitet som sist i
@@ -1398,7 +1400,16 @@ function pickNextLadle(g: GameState): boolean {
     return true;
   }
   if (g.minute - last.min >= SEQUENCE_GAP_MIN) return true;
-  if (g.minute - (head.queuedMin ?? g.minute) < SEQUENCE_WAIT_MIN) return false;
+  // Vent bare når det kommer mer av samme kvalitet snart og køen har plass (B-273). Var køen full av en annen kvalitet,
+  // sto de andre ovnene med fulle øser mens støpingen ventet på én charge – opptil 15 % av tida på et fullt storverk.
+  // Overgangsemnene ved et bytte koster mye mindre enn den ventetida
+  const soon = g.furnaces.some(
+    (f) =>
+      f.holding?.grade === last.grade ||
+      (f.heat?.grade === last.grade && f.heat.endMin - g.minute <= SEQUENCE_SOON_MIN),
+  );
+  const full = g.castQueue.length >= maxLadlesWaiting(g);
+  if (soon && !full && g.minute - (head.queuedMin ?? g.minute) < SEQUENCE_WAIT_MIN) return false;
   head.transition = true;
   return true;
 }

@@ -337,6 +337,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `queueFit` (ingen jobb i køen blir for sen når den nye går foran). `queueFit` alene slipper inn mer – ikke bruk den i
   stedet for den gamle. Valseverket får emner til `ROLLING_BUFFER_H` timer først (`planLots`), og ovnene fordeles etter
   hva som haster (`headFurnaces`). Mål endringer i produksjonen med flere frø på et fullt storverk, ikke én kjøring.
+- **Sekvenser i strengstøpingen** (B-046, B-273): `pickNextLadle` venter bare når samme kvalitet kommer innen
+  `SEQUENCE_SOON_MIN` og køen har plass. Endres regelen, mål produksjon og ventetid på et fullt storverk med flere frø.
 - **Skrapvarsel** (B-219): varsler i grensesnittet bruker `scrapAlert` (neste charge står fast), ikke `scrapShort` (en
   type i resepten er under én charge – ovnen fyller da opp med annet). Ellers varsles det om returskrap som ikke kan kjøpes.
 - **Flere selskaper** (B-253, B-256): tonn, gebyr og anslag regnes per type (`company_counted_t`, `company_fee`,

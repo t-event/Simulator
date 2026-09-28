@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 210 – 2026-09-28: Støpingen som venter
+
+**Brukeren ba om:** «Fortsett», og valgte «Støpingen som venter».
+
+**Gjort:** B-273. Støpingen venter bare på samme kvalitet når den kommer innen 20 minutter og køen har plass. Målt på
+ekte lagringer med tre frø før og etter. Publiseringen av #219 (B-272) ble sjekket.
+
+**Testet:** tsc, lint, npm test (ny test), balance (exit 0), build, 20-døgns kjøringer på tre ekte lagringer.
+
+**Gjenstår:** i morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 209 – 2026-09-28: Lengre vinter
 
 **Brukeren ba om:** hvordan vinterkalenderen virker, og om vinteren bør være 120 døgn; så «Fortsett».
