@@ -213,9 +213,28 @@ function OptionCard({
 }
 
 /** Bryter for å skru salgsdirektøren av og på (B-122). Vises under Folk → Ansatte og under Forespørsler på Salg */
-export function DirectorSwitch({ g, act }: { g: GameState; act: Act }) {
+export function DirectorSwitch({ g, act, compact }: { g: GameState; act: Act; compact?: boolean }) {
   const d = g.konsern?.director;
   if (!d) return null;
+  // Kort variant på Salg (B-241): forklaringen som én linje under bryteren, ikke en egen boks
+  if (compact)
+    return (
+      <label className="g-toggle">
+        <input
+          type="checkbox"
+          checked={d.active}
+          onChange={(e) => act((gg) => void (gg.konsern.director && (gg.konsern.director.active = e.target.checked)))}
+        />
+        <span>
+          Salgsdirektøren signerer for meg
+          <small className="g-muted g-toggle-hint">
+            {d.active
+              ? "Tar det verket trygt rekker. Resten står her, så du kan ta dem selv"
+              : "Av: du signerer alt selv"}
+          </small>
+        </span>
+      </label>
+    );
   return (
     <>
       <label className="g-toggle">

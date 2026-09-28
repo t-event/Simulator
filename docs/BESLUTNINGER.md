@@ -4419,3 +4419,27 @@ Brukeren (skjermbilde av «Rådgiveren: leveransene kommer for sent», dag 1874)
 - Rådgiveren kommer fortsatt ved tre sene på ti døgn; nå mye sjeldnere. Konto: nei.
 - Tester: køsjekken (skyver en eldre kontrakt for sent bare med planlegger), Salg sier «rekker det neppe», valseverket
   får emner med en stor emneordre foran, ovnene fordeles etter hva som haster. `npm test`, balance og `--konsern` (exit 0).
+
+## B-241 Salg: dommen først, ordrekø med status, tydelige tomme faner, og ord ved tallene i fagboka (2026-09-28)
+Status: gjelder (bygger på B-198, B-233, B-236; ordrekøens piler fra B-039 vises bare uten frist-sortering)
+Brukeren: «Hva betyr de 3 ikonene i fagboka? Gjør alle salgs sidene bedre og mer intuitiv.»
+- **Fagboka:** ikonene var bok = lest, spørsmålstegn = quiz tatt og blink = oppdrag løst, men de sto uten ord. Nå står
+  ordene ved tallene øverst («Lest 18/18 · Quiz 18/18 · Oppdrag 11/11»). I kapittellista står «Ny», «2 av 3» eller en
+  hake i stedet for tre ikoner; linja under tittelen sier fortsatt hva som gjenstår.
+- **Forespørsler:** hvert kort har kunde og verdi, så mengde og kvalitet, så dommen («Rekker det» / «Usikkert» /
+  «Rekker det ikke») med grunnen rett under, og tre tall på én linje (frist, pris, svar innen). Rekker verket det ikke,
+  er «Avslå» den blå knappen og signering heter «Signer likevel». Fargekant til venstre etter dommen. Innstillingene øverst
+  er to brytere med én linje forklaring (salgsdirektøren kort, `DirectorSwitch compact`) og «Kvaliteter og rekkefølge»
+  bak én linje. Kortet sier «X av Y rekker du».
+- **Ordrekø:** øverst «Alt rekker fristen» eller «N kontrakter rekker ikke fristen» (`lateContracts`), hvor mye som er
+  igjen i døgn, og om planleggeren sorterer. Hver kontrakt er en nummerert rad med status, hva den er, stolpe og levert;
+  kontrakter som ikke rekker fristen, er røde. Pilene vises bare når du styrer køen selv – planleggeren sorterer den
+  hver time, så pilene gjorde ingenting. Pris, verdi, frist og «Avbryt ordren» ligger bak «Mer». «Nylig avsluttet» med
+  kundenes snitt ligger bak én linje. Fanen får «!» når noe ikke rekker fristen.
+- **Lager:** tomt lager forklares («alt verket lager, går rett til kontraktene»). Med partier: tre tall (til
+  kontrakter, ledig, støpefeil), og hvert parti viser hvor mye som er holdt av; «Selg på spot» selger bare det ledige.
+- **Avtaler:** én linje om hva en rammeavtale er, resten bak «Slik virker rammeavtaler». Kapasiteten på én linje. Tilbud
+  med samme mønster som forespørslene («Passer» / «Trangt» / «Passer ikke»), så «Dine avtaler», og avsluttede bak én linje.
+- **Rettet:** en forespørsel med frist som alt er passert, trekkes (før sto den med «leveres innen −1 døgn»). «1 timer»
+  heter «1 time».
+- Konto: nei. Testet: Playwright på 7 størrelser (storverk og garasje): ingen horisontal scrolling, knapper minst 44 px.

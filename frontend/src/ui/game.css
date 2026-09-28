@@ -4950,20 +4950,22 @@ button {
 
 .g-book-row-steps {
   flex: none;
-  display: flex;
-  gap: var(--sp-2);
+  font-size: var(--fs-caption);
   color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
-.g-book-row-steps > .ds-icon {
-  width: 16px;
-  height: 16px;
-  opacity: 0.5;
-}
-
-.g-book-row-steps > .ds-icon.is-done {
+.g-book-row-done {
+  flex: none;
+  display: grid;
+  place-items: center;
   color: var(--ok);
-  opacity: 1;
+}
+
+.g-book-row-done > .ds-icon {
+  width: 18px;
+  height: 18px;
 }
 
 /* Tellerne øverst i innholdet: ikon + tall (B-236) */
@@ -5716,4 +5718,191 @@ button.g-prod-row:hover {
   white-space: nowrap;
   text-overflow: ellipsis;
   font-size: var(--fs-caption);
+}
+
+/* Salg (B-241): dommen og grunnen øverst på hver forespørsel, tre tall på én linje, og avslå som forslag når verket
+   ikke rekker det. Ordrekøen som nummerert liste med status øverst, og tomme faner med en forklaring */
+.g-offer.is-bad {
+  border-left: 3px solid var(--critical-border);
+}
+
+.g-offer.is-warn {
+  border-left: 3px solid var(--heat-border);
+}
+
+.g-offer.is-ok {
+  border-left: 3px solid var(--ok);
+}
+
+.g-offer-what {
+  margin: var(--sp-1) 0 var(--sp-3);
+  font-size: var(--fs-meta);
+  color: var(--text-2);
+}
+
+.g-offer-verdict {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-3);
+}
+
+.g-offer-verdict > .ds-status-line {
+  font-weight: 600;
+}
+
+.g-offer-reason {
+  font-size: var(--fs-meta);
+  line-height: 1.4;
+}
+
+.g-offer-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-3);
+  margin: 0 0 var(--sp-3);
+  padding: var(--sp-3) 0;
+  border-block: 1px solid var(--line);
+}
+
+.g-offer-facts > div {
+  min-width: 0;
+}
+
+.g-offer-facts dt {
+  font-size: var(--fs-caption);
+  color: var(--text-3);
+}
+
+.g-offer-facts dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.g-offer-facts > .is-urgent dd {
+  color: var(--heat);
+}
+
+.g-stock-facts {
+  margin-top: var(--sp-3);
+}
+
+.g-empty {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  margin: var(--sp-3) 0;
+  color: var(--text-2);
+  font-size: var(--fs-meta);
+  line-height: 1.45;
+}
+
+.g-empty > .ds-icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  color: var(--text-3);
+}
+
+.g-sales-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-3);
+}
+
+.g-sales-controls .g-toggle {
+  min-height: 44px;
+  margin-top: 0;
+  align-items: center;
+  font-size: var(--fs-body);
+}
+
+.g-chip-btn .ds-icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 2px;
+  vertical-align: -2px;
+}
+
+.g-queue-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2) var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.g-queue {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.g-queue-item {
+  display: flex;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface-2);
+}
+
+.g-queue-item.is-producing {
+  border-left: 3px solid var(--ok);
+}
+
+.g-queue-item.is-late {
+  border-left: 3px solid var(--critical-border);
+}
+
+.g-queue-pos {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--surface-1);
+  color: var(--text-2);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.g-queue-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.g-queue-what {
+  font-size: var(--fs-meta);
+  color: var(--text-2);
+}
+
+.g-queue-more summary {
+  min-height: 36px;
+  font-size: var(--fs-meta);
+}
+
+.g-details summary > .g-muted {
+  margin-left: 0.35em;
+  font-weight: 400;
+}
+
+.g-offer-verdict > .ds-status-line.is-ok {
+  color: var(--ok);
+}
+
+.g-queue-more button {
+  min-height: 44px;
 }
