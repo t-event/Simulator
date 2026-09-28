@@ -3029,9 +3029,11 @@ export function autoBuy(
     cap: g.settings.autoBuyMaxPerDay,
   },
 ): void {
+  // Spilleren kan velge hvor mange tonn planleggeren skal holde på lager (B-271); ellers et par døgns forbruk
+  const stockT = g.settings.autoBuyTargetT;
   const need = Math.max(
     stats.units.reduce((a, u) => a + u.sizeT, 0) * 2,
-    (stats.dailyProductT / stats.castYield) * 1.1 * g.settings.autoBuyDays,
+    stockT ? Math.min(stockT, stats.yardT) : (stats.dailyProductT / stats.castYield) * 1.1 * g.settings.autoBuyDays,
   );
   // Hvor mye av hver skraptype de neste døgnene trenger (B-171): kvalitetene i ordrekøen, i rekkefølge, til
   // innkjøpet er dekket. Er køen kort, fylles resten med det ovnene kjører nå (med flere kvaliteter samtidig, B-039)

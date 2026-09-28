@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 271,
+    date: "2026-09-28",
+    title: "Autobonus og skrap på lager",
+    items: [
+      "Har du skiftleder, kan han gi alle bonus når det trengs (bryter under Folk → Ansatte).",
+      "Har du planlegger, kan du velge hvor mange tonn skrap den skal holde på lager (Marked → Skrap).",
+    ],
+  },
+  {
     b: 270,
     date: "2026-09-28",
     title: "Færre eksplosjoner",

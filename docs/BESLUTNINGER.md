@@ -4935,3 +4935,19 @@ Brukeren: «Fortsett». Sjekk av ekte spill en halvtime etter B-265: én spiller
   (ca. 22 timer på 10×).
 - Følgene er de samme. Spillerne som alt har hatt en ulykke, får ingen endring.
 - Balanse: alle mål OK.
+
+## B-271 Skiftlederen gir bonus, og planleggeren holder valgt mengde skrap (2026-09-28)
+Status: gjelder
+Brukeren: «Om man har skiftleder bør man kunne ha en knapp for autobonus» og «Valg om å ha så mange tonn på lager til
+en hver tid om man har planlegger».
+- **Autobonus:** under Folk → Ansatte (kortet med trivsel og bonus) står en bryter «Skiftlederen gir alle bonus når det
+  trengs», bare når verket har en skiftleder. Er den på og skiftlederen er på jobb, gis bonus (samme pris og virkning
+  som knappen) når rådet på Verket ville bedt om det: lenge siden bonus og trivselen under 70, eller trivselen under 40.
+  Bare når kassa har minst tre ganger bonusen, og høyst én gang i uka. Rådet om bonus vises ikke når skiftlederen gjør
+  det. Standard: av.
+- **Skrap på lager:** hos planleggeren (Marked → Skrap) står valget «Planleggeren holder på lager»: automatisk (ca. 1,5
+  døgns forbruk, som før) eller et antall tonn (10, 25, 50, 75 eller 100 % av skraplageret, avrundet). Planleggeren
+  kjøper da inn til den mengden etter resepten, men aldri mer enn lageret tar og minst to charger. Standard: automatisk.
+- Nye felt: `settings.leaderBonus` og `settings.autoBuyTargetT` (valgfrie; mangler = av/automatisk, så gamle lagringer
+  trenger ingen migrering).
+- **Konto:** nei – en del av selve spillet.

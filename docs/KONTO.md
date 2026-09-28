@@ -112,4 +112,5 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Pause på Salg (innstilling) | Nei | Regel 1: ditt eget spill | B-222 |
 | Utslipp, renseanlegg og bøter | Nei | Regel 1: ditt eget spill | B-263 |
 | Vinter, eksplosjoner og dødsulykker | Nei | Regel 1: ditt eget spill | B-265 |
+| Autobonus fra skiftlederen og skrap på lager hos planleggeren | Nei | Regel 1: ditt eget spill | B-271 |
 

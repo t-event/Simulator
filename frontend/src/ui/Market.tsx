@@ -104,6 +104,14 @@ export function Market({ g, stats, act, openTab, onTab }: Props & { openTab?: st
   const capOptions = [...new Set([1, 2, 5, 10].map((m) => m * capBase).concat(g.settings.autoBuyMaxPerDay ?? []))].sort(
     (a, b) => a - b,
   );
+  // Valg for hvor mye skrap planleggeren holder på lager (B-271): andeler av skraplageret, avrundet
+  const roundT = (t: number) => {
+    const step = 10 ** Math.max(0, Math.floor(Math.log10(Math.max(1, t))) - 1);
+    return Math.max(1, Math.round(t / step) * step);
+  };
+  const stockOptions = [
+    ...new Set([0.1, 0.25, 0.5, 0.75, 1].map((f) => roundT(stats.yardT * f)).concat(g.settings.autoBuyTargetT ?? [])),
+  ].sort((a, b) => a - b);
   const tabs: { id: MarketTab; label: string; alert?: boolean }[] = [
     { id: "skrap", label: "Skrap", alert: short.length > 0 },
     { id: "strom", label: stats.furnace.fuel === "strøm" ? "Strøm" : "Energi" },
@@ -223,6 +231,26 @@ export function Market({ g, stats, act, openTab, onTab }: Props & { openTab?: st
                 />
                 {auto(g, "autoBuy") && (
                   <>
+                    {/* Hvor mye skrap planleggeren holder på lager (B-271) */}
+                    <label className="g-field">
+                      <span>Planleggeren holder på lager</span>
+                      <select
+                        value={g.settings.autoBuyTargetT ?? ""}
+                        onChange={(e) =>
+                          act(
+                            (gg) =>
+                              void (gg.settings.autoBuyTargetT = e.target.value === "" ? null : Number(e.target.value)),
+                          )
+                        }
+                      >
+                        <option value="">Automatisk (ca. {fmtNum(g.settings.autoBuyDays, 1)} døgns forbruk)</option>
+                        {stockOptions.map((t) => (
+                          <option key={t} value={t}>
+                            {fmtT(t)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
                     <label className="g-field">
                       <span>Planleggeren kan bruke per døgn</span>
                       <select

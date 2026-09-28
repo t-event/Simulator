@@ -357,6 +357,8 @@ export interface Settings {
   autoTemps: boolean;
   /** Skiftlederen leier inn vikarer for alle som er borte, også når skiftene går likevel (B-211). Mangler = av */
   leaderTemps?: boolean;
+  /** Skiftlederen gir alle bonus når det er lenge siden eller trivselen er lav (B-271). Mangler = av */
+  leaderBonus?: boolean;
   /** Klokketimen skiftene starter (6, 14 eller 22) */
   shiftStart: number;
   /** Start ikke ny charge når strømprisen er over dette (kr/kWh). null = ingen grense */
@@ -364,6 +366,8 @@ export interface Settings {
   autoBuy: boolean;
   /** Hvor mange dagers forbruk automatisk innkjøp skal holde på lager */
   autoBuyDays: number;
+  /** Planleggeren holder så mange tonn skrap på lager i stedet for døgnforbruket (B-271). Mangler/null = automatisk */
+  autoBuyTargetT?: number | null;
   /** Planleggeren kan handle på kassekreditten (B-027) */
   autoBuyCredit: boolean;
   /** Planleggeren selger skrap ingen resept i ordrekøen bruker, når lageret er for fullt til det som trengs (B-171) */
