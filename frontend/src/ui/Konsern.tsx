@@ -407,7 +407,7 @@ function fmtLeft(ms: number): string {
   const min = Math.ceil(ms / 60_000);
   if (min <= 1) return "under ett minutt";
   const h = Math.floor(min / 60);
-  return h > 0 ? `${h} t ${min % 60} min` : `${min} min`;
+  return h > 0 ? (min % 60 ? `${h} t ${min % 60} min` : `${h} t`) : `${min} min`;
 }
 
 /** Et byggeprosjekt som pågår (B-209): hva som skjer, når det er ferdig, og hvor langt det er kommet */
@@ -503,7 +503,11 @@ function PlantRow({
           </span>
         </span>
         <span className={`g-plant-row-value${down ? " g-badge-bad" : ""}`}>
-          {p.project ? "Bygges" : down ? `Står til dag ${p.downUntilDay}` : `+${fmtKr(dividend)}`}
+          {p.project
+            ? `Klar om ${fmtLeft(Math.max(0, p.project.readyAt - realNow()))}`
+            : down
+              ? `Står til dag ${p.downUntilDay}`
+              : `+${fmtKr(dividend)}`}
         </span>
       </summary>
       <div className="g-plant-row-body">
@@ -598,7 +602,7 @@ function PlantTable({
                 <td className="num">{underConstruction(p) ? "–" : `${fmtKr(sisterProfit(g, p))}/døgn`}</td>
                 <td className="num">
                   {underConstruction(p) ? (
-                    <span className="g-muted">Bygges</span>
+                    <span className="g-muted">Klar om {fmtLeft(Math.max(0, p.project!.readyAt - realNow()))}</span>
                   ) : down ? (
                     <span className="g-badge-bad">Står til dag {p.downUntilDay}</span>
                   ) : (
@@ -746,7 +750,9 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
   const k = g.konsern;
   const today = day(g);
   // Driftsresultatet i verkene, utbyttet til konsernet og konsernkostnadene (B-181)
-  const running = (p: SisterPlant) => p.downUntilDay <= today;
+  // Et verk som bygges, tjener ingenting ennå (B-288): før sto det at det tjente, men beholdt alt selv
+  const running = (p: SisterPlant) => p.downUntilDay <= today && !underConstruction(p);
+  const building = k.plants.filter(underConstruction);
   const div = dividends(g, k.plants);
   const drift = k.plants.filter(running).reduce((a, p) => a + sisterProfit(g, p), 0);
   const dividend = div.reduce((a, d, i) => a + (running(k.plants[i]) ? d : 0), 0);
@@ -796,7 +802,14 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
               )}
             </div>
           </div>
-          {k.plants.length > 0 && (
+          {building.length > 0 && drift === 0 && (
+            <p className="g-muted g-small-text">
+              {building.length === 1 ? `${building[0].name} bygges` : `${building.length} verk bygges`} – ferdig om{" "}
+              {fmtLeft(Math.max(0, Math.min(...building.map((p) => p.project!.readyAt)) - realNow()))}. Så begynner det
+              å tjene penger til deg.
+            </p>
+          )}
+          {drift > 0 && (
             <p className="g-muted g-small-text">
               Verkene tjener {fmtKr(drift)}/døgn. De beholder {fmtKr(drift - dividend)} til vedlikehold, ledelse og
               reserve, og konsernledelsen koster {fmtKr(costs)}/døgn.
@@ -811,7 +824,14 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
             </>
           )}
           {g.won && <LegendProgress g={g} equity={equity} />}
-          <details className="g-details" open={k.plants.length === 0}>
+          {/* Én linje i stedet for sju punkter åpne (B-288): resten står bak «Slik fungerer konsernet» */}
+          {k.plants.length === 0 && (
+            <p className="g-small-text">
+              Et konsern er flere verk som tjener penger av seg selv. Start med ett stålverk – knappen står under «Neste
+              steg».
+            </p>
+          )}
+          <details className="g-details">
             <summary>Slik fungerer konsernet</summary>
             <ol className="g-konsern-steps">
               <li>
@@ -859,7 +879,9 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
           <Card title={`Dine verk (${k.plants.length} av ${maxSisters(g)} datterverk)`}>
             <div className="g-plant-cards">
               <p className="g-muted g-small-text g-plant-rows-hint">
-                Tallet til høyre er det verket gir deg per døgn. Trykk på et verk for å modernisere eller selge.
+                Tallet til høyre er utbyttet fra verket per døgn
+                {costs > 0 ? `, før konsernledelsen (${fmtKr(costs)}/døgn) er trukket fra` : ""}. Trykk på et verk for å
+                modernisere eller selge.
               </p>
               {k.plants.map((p, i) => (
                 <PlantRow

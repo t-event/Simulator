@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 224 – 2026-09-28: Nybegynner på storverket og i konsernet
+
+**Brukeren ba om:** «Fortsett» → valgte «Nybegynner: nivå 4 og konsern».
+
+**Gjort:** B-288. Byggetid i lista over verk, riktige tall mens et verk bygges, én linje i stedet for tekstvegg ved første
+besøk i konsernet, forklaring av tallet per verk og én «Les»-knapp i Forskning. Publiseringen av #233 var grønn.
+
+**Testet:** tsc, lint, npm test, build, `balance.ts --vansker` (0 konkurs), Playwright på 390 og 320 px (ferskt konsern,
+rett etter kjøp, ett ferdig og ett verk under bygging; ingen horisontal scrolling).
+
+**Gjenstår:** pynt for sesong 2 før den startes. I morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 223 – 2026-09-28: Tre like knapper og sesongpynt
 
 **Brukeren ba om:** «De tre knappene oppfører seg forskjellig. Hva gjør jeg nå, oppdrag knappen og topplista», og en

@@ -183,7 +183,7 @@ export function Research({
             <>
               <h3 className="g-subhead">Trenger mer fagpoeng eller lesing ({later.length})</h3>
               <ul className="g-research-later">
-                {later.map((r) => (
+                {later.map((r, i) => (
                   <li key={r.id}>
                     <div className="g-contract-head">
                       <strong>{r.name}</strong>
@@ -197,9 +197,17 @@ export function Research({
                       label={`Fagpoeng mot ${r.name}`}
                     />
                     {r.reads && !g.readChapters.includes(r.reads) ? (
-                      <button className="g-small" onClick={() => openBook(r.reads)}>
-                        <Icon name="book" /> Les «{knowledgeCard(r.reads)?.title ?? "kapitlet"}» først
-                      </button>
+                      // Mange prosjekter kan vente på samme kapittel (konsernet: ni). Knappen står bare på det første,
+                      // så lista ikke blir ni like knapper (B-288)
+                      later.findIndex((x) => x.reads === r.reads) === i ? (
+                        <button className="g-small" onClick={() => openBook(r.reads)}>
+                          <Icon name="book" /> Les «{knowledgeCard(r.reads)?.title ?? "kapitlet"}» først
+                        </button>
+                      ) : (
+                        <span className="g-muted g-small-text">
+                          Krever også «{knowledgeCard(r.reads)?.title ?? "kapitlet"}»
+                        </span>
+                      )
                     ) : (
                       r.reason && <span className="g-muted g-small-text">{r.reason}</span>
                     )}
