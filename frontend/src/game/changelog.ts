@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 282,
+    date: "2026-09-28",
+    title: "Færre rare forkortelser",
+    items: [
+      "Trykk «Hva betyr C, P og Spor?» på Marked og Resept for å se hva tallene i skrapet og stålet betyr.",
+      "Priser per tonn står nå som «kr/tonn», så de ikke forveksles med kroner per time.",
+      "Veiledningen forklarer hva en charge er: én ovnsfylling.",
+    ],
+  },
+  {
     b: 281,
     date: "2026-09-28",
     title: "Enklere å forstå",

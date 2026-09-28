@@ -113,6 +113,37 @@ export function GradeSpec({ id }: { id: GradeId }) {
   );
 }
 
+/** Kort forklaring av forkortelsene i en analyse (B-282). På mobil vises ikke `title`, så den må stå i klartekst */
+export const ANALYSIS_KEY =
+  "C = karbon · P = fosfor · Spor = kobber, tinn og andre stoffer som ikke kan tas ut av stålet. Alt i prosent av vekten.";
+
+/** «Hva betyr C, P og Spor?» – kan trykkes opp der analysene står (B-282) */
+export function AnalysisLegend({ dirt = false }: { dirt?: boolean }) {
+  return (
+    <details className="g-details g-analysis-legend">
+      <summary>Hva betyr C, P og Spor?</summary>
+      <ul className="g-closed">
+        <li>
+          <strong>C</strong> = karbon. Litt gjør stålet sterkere, for mye gjør det sprøtt. Hver kvalitet har et område.
+        </li>
+        <li>
+          <strong>P</strong> = fosfor. Gjør stålet sprøtt, så det må være under grensen.
+        </li>
+        <li>
+          <strong>Spor</strong> = kobber, tinn og andre stoffer som følger med skrapet og ikke kan tas ut igjen. Må være
+          under grensen.
+        </li>
+        {dirt && (
+          <li>
+            <strong>Skitt</strong> = rust, jord og olje på skrapet. Jo mer skitt, jo mindre stål får du per tonn skrap.
+          </li>
+        )}
+      </ul>
+      <p className="g-muted g-small-text">Tallene er prosent av vekten. Mer om dette i fagboka.</p>
+    </details>
+  );
+}
+
 /** Underfaner øverst på en side, så sidene blir korte (B-044, B-051) */
 export function SubTabs<T extends string>({
   tabs,

@@ -33,7 +33,7 @@ export const TUTORIAL: TutorialStep[] = [
   },
   {
     title: "Se ovnen jobbe",
-    text: "På Verket ser du hele kjeden: skraplager → ovn → støping → lager. Ovnen smelter av seg selv i arbeidstida. Står spillet på pause, trykk 1× øverst.",
+    text: "På Verket ser du hele kjeden: skraplager → ovn → støping → lager. Ovnen smelter av seg selv i arbeidstida – én ovnsfylling kalles en charge. Står spillet på pause, trykk 1× øverst.",
     view: "verket",
     done: (g) => g.totals.heats >= 1,
   },

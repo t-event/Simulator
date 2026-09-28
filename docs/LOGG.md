@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 219 – 2026-09-28: Nybegynner-gjennomgang
+
+**Brukeren ba om:** «Fortsett», og valgte nybegynner-gjennomgangen.
+
+**Gjort:** B-282. All tekst på fanene ble hentet ut på nivå 1–3 og gått gjennom. C, P, Spor og Skitt forklares nå på
+mobil (trykk «Hva betyr C, P og Spor?» på Marked og Resept, og en linje under kravene på forespørsler og avtaler),
+«Cu+Sn» heter «Spor», «kr/t» er «kr/tonn», og veiledningen forklarer «charge». Publiseringen av #228 (B-281) var grønn.
+
+**Testet:** tsc, lint, npm test, build, Playwright på 320 og 390 px (forklaringen åpnes, knappene i resepten er ikke
+avkortet, ingen horisontal scrolling).
+
+**Gjenstår:** i morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 218 – 2026-09-28: fp og havari forklart
 
 **Brukeren ba om:** en spiller skjønner ikke hva fp er og hvor man finner det, og ikke hva man skal trykke når noe ryker
