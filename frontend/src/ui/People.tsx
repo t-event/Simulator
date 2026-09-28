@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { DirectorOffer } from "./Konsern";
+import { DirectorCard, DirectorOffer } from "./Konsern";
 import {
   BONUS_COOLDOWN_DAYS,
   bonusCost,
@@ -764,7 +764,7 @@ export function People({ g, stats, act, openTab }: Props & { openTab?: string })
                 <DirectorOffer g={g} act={act} />
                 {g.konsern.director && (
                   <p className="g-muted g-small-text">
-                    Salgsdirektøren er ansatt. Oppgraderinger og oppsigelse finner du under Konsern.
+                    Salgsdirektøren er ansatt. Oppgraderinger og oppsigelse finner du under Ansatte.
                   </p>
                 )}
               </div>
@@ -786,6 +786,8 @@ export function People({ g, stats, act, openTab }: Props & { openTab?: string })
         {shown === "ansatte" && (
           <>
             <Morale g={g} stats={stats} act={act} />
+            {/* Salgsdirektøren er en ansatt i verket, ikke en del av konsernet (B-229): styres her sammen med de andre */}
+            {g.konsern?.director && <DirectorCard g={g} act={act} />}
             <Card title={`Ansatte (${g.workers.length})`}>
               {g.workers.length === 0 && <p className="g-muted">Ingen ansatte ennå.</p>}
               {g.workers.length > 0 && (

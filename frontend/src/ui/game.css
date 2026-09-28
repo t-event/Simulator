@@ -4115,7 +4115,7 @@ button {
     grid-column: 2;
   }
 
-  /* Ledelse er ett kort: i venstre kolonne, med lesbar bredde */
+  /* Ett enkelt kort (f.eks. «kjøp det første verket») står i venstre kolonne, med lesbar bredde */
   .g-grid.is-konsern > .g-konsern-single {
     grid-column: 1;
   }

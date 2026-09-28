@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 166 – 2026-09-28: Salgsdirektøren til Folk
+
+**Brukeren ba om:** salgsdirektøren ut av Konsern, sammen med de andre ansatte.
+
+**Gjort:** B-229. Salgsdirektøren ansettes under Folk → Ansett og styres under Folk → Ansatte. Konsern har tre faner
+(Oversikt, Utvid, Industrien).
+
+**Testet:** tsc, lint, `npm test`, Playwright på 7 størrelser.
+
+**Gjenstår:** UI-4d; reserven og kassegrensen; fase 2 videre (slagghåndtering, mekanisk verksted).
+
+---
+
 ## Økt 165 – 2026-09-28: Leveransene kom fortsatt for sent
 
 **Brukeren ba om:** skjermbilde av rådgiveren «leveransene kommer for sent» igjen, dag 1588.

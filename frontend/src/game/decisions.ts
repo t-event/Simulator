@@ -490,7 +490,7 @@ export function maybeAdvisor(g: GameState): void {
       id: "radgiver",
       title: a.title,
       text: noHire
-        ? "Flere kontrakter har gått over fristen. Planleggerne dine setter allerede kortest frist øverst, så verket har tatt på seg mer enn det rekker. Si nei til forespørsler du ikke rekker – og har du salgsdirektør, kan du slå av at den tar rammeavtaler (under Konsern)."
+        ? "Flere kontrakter har gått over fristen. Planleggerne dine setter allerede kortest frist øverst, så verket har tatt på seg mer enn det rekker. Si nei til forespørsler du ikke rekker – og har du salgsdirektør, kan du slå av at den tar rammeavtaler (under Folk → Ansatte)."
         : a.text,
       options: noHire
         ? [book, { label: "Jeg ordner det selv" }]
