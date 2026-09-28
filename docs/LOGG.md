@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 182 – 2026-09-28: Trucken kjørte utfor kaia
+
+**Brukeren ba om:** at bilen ikke skal kjøre utfor kaia.
+
+**Gjort:** B-245. På storverket stopper trucken ved kaia, snur og kjører tilbake.
+
+**Testet:** tsc, lint, `npm test`; posisjonen til trucken målt og fotografert på 30, 42, 55 og 75 % av runden.
+
+**Gjenstår:** logo, app-ikon og tittelbilde (siste del av UI-4d); veksten på toppen i sluttspillet; tom tonn-liste denne
+uka (B-235); reserven og kassegrensen; fase 2.
+
+---
+
 ## Økt 181 – 2026-09-28: UI-4d, andre runde – bilde per nivå og når verket står
 
 **Brukeren ba om:** «Fortsett».

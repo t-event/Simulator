@@ -4482,3 +4482,13 @@ Brukeren: «Fortsett» (resten av UI-4d: egne bygninger per nivå og en tilstand
   statusen, uten tekst.
 - Alt nytt bruker bare `transform`/`opacity` og står stille med «redusert bevegelse».
 - Konto: nei. Testet: skjermbilder av nivå 1, 3 og et fullt storverk, verkstedet om natta.
+
+## B-245 Skraptrucken snur ved kaia på storverket (2026-09-28)
+Status: gjelder (retter B-242)
+Brukeren: «Bilen kjører utfor kaia – den må snu og kjøre tilbake eller noe annet isteden.»
+- På storverket kjørte trucken til x 380, men den er 31 px lang og kaikanten står ved x 400, så den kjørte ut i vannet
+  før den hoppet tilbake til start.
+- Nå (egen animasjon `scene-truck-turn`, 20 s): kjører fram til kaia og stopper før kanten, står en stund (lastes),
+  snur og kjører tilbake ut til venstre. Nivå 1–3 er som før: der kjører den ut av bildet til høyre.
+- Med «redusert bevegelse» står den parkert ved skrapgården også på storverket.
+- Konto: nei.

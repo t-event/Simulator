@@ -725,7 +725,34 @@ button {
     transform: translateX(-40px);
   }
   to {
-    transform: translateX(var(--truck-end));
+    transform: translateX(480px);
+  }
+}
+
+/* Storverket: kjører bort til kaia (kanten er ved x 400), står, snur og kjører tilbake (B-245) */
+.scene-truck.is-turning {
+  animation: scene-truck-turn 20s linear infinite;
+}
+
+@keyframes scene-truck-turn {
+  0% {
+    transform: translateX(-40px) scaleX(1);
+  }
+  35% {
+    transform: translateX(355px) scaleX(1);
+  }
+  48% {
+    transform: translateX(355px) scaleX(1);
+  }
+  48.5% {
+    transform: translateX(386px) scaleX(-1);
+  }
+  60% {
+    transform: translateX(386px) scaleX(-1);
+  }
+  95%,
+  100% {
+    transform: translateX(-10px) scaleX(-1);
   }
 }
 
@@ -792,6 +819,7 @@ button {
   .scene-rotor,
   .scene-firework,
   .scene-truck,
+  .scene-truck.is-turning,
   .scene-trolley.is-moving,
   .scene-roll,
   .scene-ship,
