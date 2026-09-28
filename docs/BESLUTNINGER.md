@@ -5037,3 +5037,13 @@ døgn og uhell per 30 døgn. Tok ca. 11 minutter.
   meningen: vinteren skal gi mer å håndtere, ikke sende noen i konkurs. Tiltakene (tak, sortering, sikkerhet) virker
   som de skal. Ingen tall endres.
 - **Rettet:** frost-meldingen sa alltid «frøs i natt», også midt på dagen. Nå «i natt» bare om natta, ellers «i kulda».
+
+## B-278 Budgiverne på anbudet brytes til nye linjer (2026-09-28)
+Status: gjelder
+Brukeren: «Linjene over hvem som har bydd på anbudet ser ikke bra ut». Navnene (B-210) sto som små merker i ett avsnitt
+uten mellomrom mellom seg, så nettleseren kunne ikke bryte linja: med seks budgivere gikk navnene ut over kanten på
+anbudsboksen, på 320 px allerede etter fire navn.
+- Lista er nå en egen liste med `flex-wrap` og fast avstand: navnene brytes til nye linjer og står jevnt.
+- Overskriften viser antallet: «Har bydd (6):». Et svært langt navn kortes av med «…» i stedet for å gå ut av boksen.
+- Testet med 6 og 12 budgivere på 320 og 390 px (ingen horisontal scrolling).
+- Konto: uendret (anbudet krever konto, B-189).

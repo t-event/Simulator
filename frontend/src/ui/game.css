@@ -5836,8 +5836,27 @@ button.g-prod-row:hover {
   font-size: var(--fs-title);
 }
 
+/* Budgiverne (B-278): navnene brytes til nye linjer i stedet for å gå ut over kanten */
+.g-tender-bidders {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+
+.g-tender-bidders ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 .g-tender-bidders .g-chip {
-  margin: 0 var(--sp-2) var(--sp-2) 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .g-tender-withdraw,
