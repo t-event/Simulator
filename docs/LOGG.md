@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 229 – 2026-09-28: 4300 i kontrollrommet var umulig
+
+**Brukeren ba om:** «En spiller sier det er umulig å få 4300 inne på kontrollrommet».
+
+**Gjort:** B-293. Målt den flinke testspilleren (maks 4 354, 4 300 i 16 % av rundene, 4 500 aldri) og ekte spillere
+(beste 4 292). Nye mål 3 500/3 900/4 100/4 250 og prestasjoner 4 100/4 250, med en test som hindrer umulige mål.
+Publiseringen av #238 var grønn.
+
+**Testet:** tsc, lint, npm test (ny test), balance (exit 0), build.
+
+**Gjenstår:** pynt for sesong 3 før den startes. I morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 228 – 2026-09-28: Råd når forespørsler går ut
 
 **Brukeren ba om:** «Fortsett» → valgte «Råd når forespørsler går ut».

@@ -275,7 +275,9 @@ export const CHALLENGE_FAMILIES: ChallengeFamily[] = [
     icon: "gamepad-2",
     name: "Mesterkjører",
     how: "Beste poengsum i kontrollrommet: strøm og oksygen i riktig rekkefølge, og rask tapping.",
-    goals: [3500, 4000, 4300, 4500],
+    // Kalibrert mot den flinke testspilleren (B-293): 4 300 klarte den i 16 % av rundene og 4 500 aldri (maks 4 354).
+    // Nå klarer den toppen i ca. en tredel av rundene – vanskelig, men mulig
+    goals: [3500, 3900, 4100, 4250],
     goalText: (n) => `${nf(n)} poeng i kontrollrommet`,
     value: (g) => g.controlBest ?? 0,
     absolute: true,

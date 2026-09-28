@@ -5269,3 +5269,18 @@ på ett døgn, og spilleren fikk bare fire linjer i loggen.
   samme nivådager og 0 konkurs (exit 0). En spiller som aldri svarer, ser rådet ca. en tredel av tida i garasjen.
 - Ny tilstand: `missedOffers` (standard `[]` i `migrate()`). Ny test i `tests.ts`.
 - Konto: nei (regel 1).
+
+## B-293 Poengmålene i kontrollrommet kan nås (2026-09-28)
+Status: gjelder (justerer B-232 for kontrollrommet)
+Brukeren: «En spiller sier det er umulig å få 4300 inne på kontrollrommet». Utfordringen «Mesterkjører» hadde trinnene
+3 500, 4 000, 4 300 og 4 500, og prestasjonene «Mesterkjøring» og «Rekordkjøring» 4 200 og 4 500.
+- **Målt:** den flinke testspilleren (reagerer på 0,2 s og gjør alt riktig) fikk i 400 runder median 4 148, 90 % under
+  4 315 og høyst 4 354. Den nådde 4 300 i 16 % av rundene og 4 500 aldri. Blant ekte spillere (lest fra `saves`, bare
+  lesing) er beste resultat 4 292, og ingen har nådd 4 300.
+- **Nye mål:** utfordringen 3 500, 3 900, 4 100, 4 250 (testspilleren: 95, 84, 53 og 36 % av rundene). Prestasjonene
+  «Mesterkjøring» 4 100 og «Rekordkjøring» 4 250; id-ene (`poeng4200`, `poeng4500`) beholdes. De som alt har nådd de nye
+  grensene, får belønningen neste gang spillet sjekker.
+- **Vern:** ny test i `tests.ts` spiller 48 runder med den flinke testspilleren og krever at toppen av både utfordringen
+  og prestasjonene nås i minst hver femte runde. Endres poengene i kontrollrommet, stopper testen umulige mål.
+- Testspilleren: samme nivådager, 0 konkurs (exit 0).
+- Konto: nei (regel 1).

@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 293,
+    date: "2026-09-28",
+    title: "Kontrollrommet: mål du kan nå",
+    items: [
+      "Poengmålene i kontrollrommet var for høye – 4 500 var umulig. Nå er utfordringen «Mesterkjører» 3 500, 3 900, 4 100 og 4 250 poeng, og prestasjonene 4 100 og 4 250.",
+      "Har du alt nådd de nye målene, får du belønningen med én gang.",
+    ],
+  },
+  {
     b: 292,
     date: "2026-09-28",
     title: "Forespørsler som gikk ut",

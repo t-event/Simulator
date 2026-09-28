@@ -2722,6 +2722,37 @@ test("Forespørsler som passet, men gikk ut (B-292): råd etter to, borte når d
   assert(!(g.missedOffers ?? []).length && tips().length === 0, "rådet ble stående etter en signert kontrakt");
 });
 
+test("Poengmålene i kontrollrommet kan nås (B-293): den flinke testspilleren klarer toppen i minst hver femte runde", () => {
+  const mix = { c: 0.3, p: 0.03, tramp: 0.2 };
+  const scores: number[] = [];
+  for (const grade of ["standard", "lavkarbon", "premium", "hoykarbon"] as const)
+    for (let n = 1; n <= 12; n++) {
+      let x = n * 9301 + grade.length * 49297;
+      const rnd = () => (x = (x * 9301 + 49297) % 233280) / 233280;
+      const req = {
+        furnace: 0,
+        sizeT: 40,
+        grade,
+        mix,
+        expectedMix: mix,
+        energyFactor: 1,
+        metallicYield: 0.92,
+        radioactive: false,
+        resumeSpeed: 1,
+        dephos: 0.62,
+        kwhPerT: 420,
+        cycleMin: 60,
+      };
+      scores.push(autoPlay(new ChargeGame(req, rnd), "flink").score.points);
+    }
+  const share = (t: number) => scores.filter((v) => v >= t).length / scores.length;
+  const top = Math.max(...CHALLENGES.filter((c) => c.family === "u-kontroll").map((c) => c.goal));
+  const g = newGame(293);
+  const ach = Math.max(...ACHIEVEMENTS.filter((a) => a.family === "poeng").map((a) => a.progress(g)[1]));
+  assert(share(top) >= 0.2, `utfordringen ${top} nås i bare ${Math.round(share(top) * 100)} % av rundene`);
+  assert(share(ach) >= 0.2, `prestasjonen ${ach} nås i bare ${Math.round(share(ach) * 100)} % av rundene`);
+});
+
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden
 if (failed) {
   console.log(`\n${failed} test(er) feilet`);
