@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 184 – 2026-09-28: Utstyrsarkene hoppet
+
+**Brukeren ba om:** at linjene ikke skal flytte seg i utstyrsarkene for ovner og støping.
+
+**Gjort:** B-247. «Nå»-raden har fast plass til to linjer, og kassa står på egen linje i toppen.
+
+**Testet:** tsc, lint, `npm test`; plasseringen målt i 8 s på 10× (320 og 390 px, storverk og stålverk) før og etter.
+
+**Gjenstår:** logo, app-ikon og tittelbilde (siste del av UI-4d); veksten på toppen i sluttspillet; tom tonn-liste denne
+uka (B-235); reserven og kassegrensen; fase 2.
+
+---
+
 ## Økt 183 – 2026-09-28: Pipene på taket
 
 **Brukeren ba om:** at pipene skal sitte riktig på taket.

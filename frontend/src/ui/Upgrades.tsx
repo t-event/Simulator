@@ -368,7 +368,8 @@ function StationNow({ g, station, unit }: { g: GameState; station: Station; unit
       const st = furnaceState(g, i);
       const extra = st.progress !== null ? ` · ${fmtPct(Math.min(1, st.progress))} ferdig` : "";
       lines.push({
-        who: g.furnaces.length > 1 ? `Ovn ${i + 1}` : undefined,
+        // Er én ovn valgt i fanene, står navnet der allerede (B-247)
+        who: g.furnaces.length > 1 && unit === undefined ? `Ovn ${i + 1}` : undefined,
         text: st.text + extra,
         status: g.furnaces[i].heat ? "kjorer" : statusOf(st.text),
       });
@@ -399,8 +400,10 @@ function StationNow({ g, station, unit }: { g: GameState; station: Station; unit
     );
   }
   if (!lines.length) return null;
+  // Ovnene og støpingen skifter tekst hele tiden: hver rad har fast plass til to linjer, så listen under står stille (B-247)
+  const live = station === "ovn" || station === "stoping";
   return (
-    <div className="g-sheet-now" aria-label="Nå">
+    <div className={live ? "g-sheet-now is-live" : "g-sheet-now"} aria-label="Nå">
       <span className="g-sheet-now-label">Nå</span>
       <ul>
         {lines.map((l, i) => (
