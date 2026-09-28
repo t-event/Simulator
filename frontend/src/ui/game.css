@@ -7,23 +7,9 @@
 .g-app {
   --nav-h: 58px;
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  /* Hele skjermen også på iPhone lagt på hjemskjermen: inset: 0 ble der kortere enn skjermen, så menyen nederst havnet
-     over skjermkanten (B-267). dvh = det synlige området; vh er reserve for eldre nettlesere. */
-  height: 100vh;
-  height: 100dvh;
+  inset: 0;
   display: flex;
   flex-direction: column;
-}
-
-/* Hjemskjermen på iPhone (B-268): hele skjermens høyde, satt av main.tsx */
-.is-standalone .g-app,
-.is-standalone .g-modal,
-.is-standalone .g-intro,
-.is-standalone .control-room {
-  height: var(--app-h, 100dvh);
 }
 
 .g-behind {
@@ -1402,11 +1388,7 @@ button {
 .g-modal,
 .g-intro {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 100vh;
-  height: 100dvh;
+  inset: 0;
   z-index: 60;
   background: var(--scrim);
   display: flex;
@@ -1583,11 +1565,7 @@ button {
 /* Kontrollrommet legger seg over hele spillet */
 .control-room {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 100vh;
-  height: 100dvh;
+  inset: 0;
   z-index: 50;
   background: var(--bg);
   overflow-y: auto;

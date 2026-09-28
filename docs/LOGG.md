@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 206 – 2026-09-28: Menyen nederst – tilbake til det som virket
+
+**Brukeren ba om:** skjermbilde etter B-268: menyen gikk lenger ned, men navnene under ikonene var borte.
+
+**Gjort:** B-269. CSS-en er satt tilbake til slik den var før B-262. Bare lytteren som holder siden øverst, er beholdt.
+Publiseringen av #214 (B-268) var grønn.
+
+**Testet:** Playwright på 8 størrelser, tsc, lint, npm test, build.
+
+**Gjenstår:** brukeren bekrefter menyen, og spilleren med iPhone 16 Pro om trykkene treffer.
+
+---
+
 ## Økt 205 – 2026-09-28: Menyen nederst, tredje forsøk
 
 **Brukeren ba om:** «Menyen nederst er ikke fikset» og «Den er fortsatt for langt opp».

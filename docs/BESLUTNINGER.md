@@ -4910,3 +4910,15 @@ Brukeren: «Den er fortsatt for langt opp» (menyen nederst, etter B-267).
   `.control-room` får den høyden. I Safari og på PC brukes `100dvh` som før (B-267). Oppdateres ved resize og snuing.
 - Testet i Playwright med et vindu på 758 px og en skjerm på 844 px: fra hjemskjermen går menyen til 844, i Safari til
   758. De 8 vanlige størrelsene er uendret. Brukeren må bekrefte på iPhone (⚙ → Om spillet viser nyeste endring).
+
+## B-269 Tilbake til sidehøyden fra før B-262 (2026-09-28)
+Status: gjelder (erstatter CSS-delen av B-264, B-267 og B-268; lytteren i `main.tsx` fra B-262 gjelder fortsatt)
+Brukeren (skjermbilde etter B-268): menyen gikk lenger ned, men navnene under ikonene var borte.
+- iPhone med spillet på hjemskjermen tegnet ikke det som lå under den høyden den regnet siden for å ha. Uten
+  `min-height: 100vh` på `#root` sluttet spillet over bunnen (B-264, B-267), og med skjermhøyden satt direkte (B-268)
+  forsvant navnene i menyen.
+- **Nå:** CSS-en er som før B-262 (`#root { min-height: 100vh }`, faste lag med `inset: 0`), som brukeren bekreftet
+  virket. Siden kan da scrolles litt på iPhone – det som ga trykkfeilen – men lytteren i `main.tsx` (B-262) setter den
+  straks tilbake til toppen.
+- Testet i Playwright på de 8 størrelsene. Brukeren må bekrefte på iPhone, og spilleren med iPhone 16 Pro må si om
+  trykkene treffer.

@@ -27,23 +27,6 @@ document.addEventListener("visibilitychange", pinTop);
 document.addEventListener("focusout", () => setTimeout(pinTop, 100));
 window.visualViewport?.addEventListener("resize", pinTop);
 
-// iPhone med spillet på hjemskjermen (B-268): der regner Safari det synlige området som kortere enn skjermen, så de
-// faste lagene sluttet et stykke over bunnen (også med 100dvh). Da får de hele skjermens høyde direkte.
-const standalone = (navigator as Navigator & { standalone?: boolean }).standalone === true;
-function fitScreen() {
-  if (!standalone) return;
-  const portrait = window.matchMedia("(orientation: portrait)").matches;
-  const w = portrait ? Math.min(screen.width, screen.height) : Math.max(screen.width, screen.height);
-  const h = portrait ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
-  // Bare når appen fyller hele skjermen i bredden (ikke delt skjerm på iPad)
-  const full = Math.abs(window.innerWidth - w) < 2;
-  document.documentElement.classList.toggle("is-standalone", full);
-  if (full) document.documentElement.style.setProperty("--app-h", `${h}px`);
-}
-fitScreen();
-window.addEventListener("resize", fitScreen);
-window.addEventListener("orientationchange", () => setTimeout(fitScreen, 100));
-
 // Offline og installasjon på hjemskjermen (bare i det publiserte bygget)
 if (import.meta.env.PROD && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
