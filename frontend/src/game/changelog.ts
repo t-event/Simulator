@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 283,
+    date: "2026-09-28",
+    title: "«Hva gjør jeg nå?»",
+    items: [
+      "Nytt spørsmålstegn ved Mål: viser det viktigste å gjøre akkurat nå, hva som skjer i verket og hva du skal trykke på.",
+      "Der står også en kort ordliste: fagpoeng, charge, foring og mer.",
+    ],
+  },
+  {
     b: 282,
     date: "2026-09-28",
     title: "Færre rare forkortelser",

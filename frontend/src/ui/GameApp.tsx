@@ -19,6 +19,7 @@ import { nextTutorialStep, skipTutorial, TUTORIAL } from "../game/tutorial";
 import type { GameState, LogEntry } from "../game/types";
 import { fmtClock, fmtKr, fmtNum, fmtRep, fmtT } from "./format";
 import { Handbook } from "./Handbook";
+import { HelpSheet } from "./HelpNow";
 import { Market } from "./Market";
 import { Overview } from "./Overview";
 import { hints, type Hint } from "./hints";
@@ -436,10 +437,13 @@ function TopBar({
   onInbox,
   onBoard,
   onResearch,
+  onHelp,
   notice,
 }: {
   g: GameState;
   api: GameApi;
+  /** «Hva gjør jeg nå?» i varsellinja på PC (B-283) */
+  onHelp: () => void;
   /** Fagpoengene i toppfeltet åpner Forskning (B-281) */
   onResearch: () => void;
   onBook: () => void;
@@ -543,8 +547,17 @@ function TopBar({
             {Math.floor(g.researchPoints)}
           </Kpi>
         )}
+        {/* «Hva gjør jeg nå?» på smale mobiler (B-283): i varsellinja nederst ble det for trangt under 380 px */}
+        <button
+          className="g-kpi g-kpi-btn g-help-kpi"
+          onClick={onHelp}
+          aria-label="Hva gjør jeg nå?"
+          title="Hva gjør jeg nå?"
+        >
+          <Icon name="circle-help" />
+        </button>
       </div>
-      {notice && <NoticeRow g={g} api={api} onInbox={onInbox} onBoard={onBoard} />}
+      {notice && <NoticeRow g={g} api={api} onInbox={onInbox} onBoard={onBoard} onHelp={onHelp} />}
     </header>
   );
 }
@@ -555,6 +568,7 @@ function NoticeRow({
   api,
   onInbox,
   onBoard,
+  onHelp,
   onGoals,
   goalsActive,
   className = "",
@@ -563,6 +577,8 @@ function NoticeRow({
   api: GameApi;
   onInbox: () => void;
   onBoard: () => void;
+  /** «Hva gjør jeg nå?» (B-283) */
+  onHelp: () => void;
   /** Mål (B-214): egen knapp på mobil; på PC står Mål i sidemenyen */
   onGoals?: () => void;
   /** Mål er siden som vises (B-233): knappen får samme markering som de andre punktene i menyen */
@@ -572,6 +588,14 @@ function NoticeRow({
   return (
     <div className={`g-notice-row ${className}`.trim()}>
       <NoticeLine api={api} unseen={unseenCount(g)} latest={latestUnseen(g)} onOpen={onInbox} />
+      <button
+        className="g-book g-board-btn g-help-btn"
+        onClick={onHelp}
+        aria-label="Hva gjør jeg nå?"
+        title="Hva gjør jeg nå?"
+      >
+        <Icon name="circle-help" />
+      </button>
       {onGoals && <GoalsButton g={g} onClick={onGoals} active={goalsActive} />}
       <button className="g-book g-board-btn" onClick={onBoard} aria-label="Toppliste" title="Toppliste">
         <Icon name="trophy" />
@@ -773,6 +797,7 @@ export function GameApp() {
   const [bookOpen, setBookOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   // Topplista er et eget ark bak pokalen igjen (B-214); Mål er en egen side
   const [boardOpen, setBoardOpen] = useState(false);
   const [bookChapter, setBookChapter] = useState<string | null>(null);
@@ -950,6 +975,7 @@ export function GameApp() {
 
   const modalOpen =
     bookOpen ||
+    helpOpen ||
     settingsOpen ||
     inboxOpen ||
     boardOpen ||
@@ -970,6 +996,7 @@ export function GameApp() {
             notice={isPc}
             onBook={() => openBook()}
             onResearch={() => go("forskning")}
+            onHelp={() => setHelpOpen(true)}
             onSettings={() => setSettingsOpen(true)}
             onBoard={() => setBoardOpen(true)}
             onInbox={openInbox}
@@ -1048,6 +1075,7 @@ export function GameApp() {
               api={api}
               onInbox={openInbox}
               onBoard={() => setBoardOpen(true)}
+              onHelp={() => setHelpOpen(true)}
               onGoals={() => go("mal")}
               goalsActive={shown === "mal"}
             />
@@ -1122,6 +1150,7 @@ export function GameApp() {
 
       {bookOpen && <Handbook g={g} act={act} initial={bookChapter} onClose={() => setBookOpen(false)} />}
       {inboxOpen && <InboxSheet g={g} act={act} onClose={() => setInboxOpen(false)} />}
+      {helpOpen && <HelpSheet g={g} stats={stats} go={go} onClose={() => setHelpOpen(false)} />}
       {boardOpen && (
         <LeaderboardSheet
           api={api}
