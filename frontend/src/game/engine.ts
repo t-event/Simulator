@@ -1398,25 +1398,18 @@ function lotsTonnage(g: GameState): number {
 function updateRolling(g: GameState, stats: PlantStats, dt: number): void {
   if (!rollingActive(g) || !isOpen(g, stats.hours) || stats.shifts === 0) return;
   let capacity = rollingTph(g) * (dt / 60);
-  // Emner som aktive emnekontrakter venter på, blir liggende – men bare for emneordrene som står foran den første
-  // armeringsordren i køen (B-223). Før ble emnene holdt av for alle emneordrene, og med en stor emneavtale fikk
-  // valseverket ingenting å valse: armeringsordrene øverst i køen ble for sene.
-  const queue = orderQueue(g);
-  const firstRebar = queue.findIndex((c) => c.product === "armering" && c.tonnes - c.delivered > 1e-6);
-  const reserved = (firstRebar < 0 ? queue : queue.slice(0, firstRebar))
-    .filter((c) => c.product === "emne")
-    .map((c) => ({ grade: c.grade, left: c.tonnes - c.delivered }));
-  for (const lot of g.lots) {
+  // Valseverket valser emnene armeringsordrene venter på, i køens rekkefølge, og ellers bare emner ingen ordre
+  // trenger (B-228). Emneordrene beholder sine emner, og armeringsordrene får riktig kvalitet (B-223 gjorde halve
+  // jobben: den holdt ikke av emner til emneordrene bak den første armeringsordren, og valset feil kvalitet)
+  const { reserved, toRoll } = planLots(g);
+  const planned = g.lots.filter((l) => (toRoll.get(l.id) ?? 0) > 1e-9);
+  const spare = g.lots.filter((l) => l.product === "emne" && !l.second && l.t - (reserved.get(l.id) ?? 0) > 1e-9);
+  for (const [lot, room] of [
+    ...planned.map((l) => [l, toRoll.get(l.id) ?? 0] as const),
+    ...spare.map((l) => [l, l.t - (reserved.get(l.id) ?? 0)] as const),
+  ]) {
     if (capacity <= 1e-9) break;
-    if (lot.product !== "emne" || lot.second) continue;
-    let free = lot.t;
-    for (const r of reserved) {
-      if (r.left <= 0 || !satisfies(lot.known, r.grade)) continue;
-      const hold = Math.min(free, r.left);
-      r.left -= hold;
-      free -= hold;
-    }
-    const take = Math.min(free, capacity);
+    const take = Math.min(room, lot.t, capacity);
     if (take <= 1e-9) continue;
     lot.t -= take;
     capacity -= take;
@@ -1497,23 +1490,55 @@ export function sellExcess(g: GameState, stats: PlantStats, targetFraction: numb
   }
 }
 
-/** Hvor mye av hvert parti aktive kontrakter vil få, i samme rekkefølge som leveransene. */
-export function lotReservations(g: GameState): Map<number, number> {
+interface LotPlan {
+  /** Tonn av hvert parti som en aktiv kontrakt venter på (også emner som skal valses til en armeringsordre) */
+  reserved: Map<number, number>;
+  /** Tonn emner i hvert parti som skal valses til armeringsordrene (B-228) */
+  toRoll: Map<number, number>;
+  /** Tonn hver kontrakt har dekket på lager: ferdig vare, og for armering emner som venter på valsing */
+  covered: Map<number, number>;
+}
+
+/**
+ * Lagerplanen, i ordrekøens rekkefølge: hver kontrakt får partiene som holder kvaliteten. En armeringsordre som ikke
+ * dekkes av armering på lager, får emner av riktig kvalitet som valseverket gjør om (B-228). Før valset valseverket
+ * alle emner som var ledige, også kvaliteter ingen armeringsordre trengte, mens emnene ordren ventet på ble liggende,
+ * og ovnene laget mer emner til armeringsordren enn valseverket rakk.
+ */
+function planLots(g: GameState): LotPlan {
   const reserved = new Map<number, number>();
-  const active = orderQueue(g);
-  for (const c of active) {
-    let left = c.tonnes - c.delivered;
+  const toRoll = new Map<number, number>();
+  const covered = new Map<number, number>();
+  const rolling = rollingActive(g);
+  const take = (c: Contract, product: ProductId, need: number, onTake: (lot: Lot, t: number) => void): number => {
+    let left = need;
     for (const lot of g.lots) {
       if (left <= 1e-9) break;
-      if (lot.product !== c.product || lot.second || !satisfies(lot.known, c.grade)) continue;
-      const free = lot.t - (reserved.get(lot.id) ?? 0);
-      const take = Math.min(free, left);
-      if (take <= 0) continue;
-      reserved.set(lot.id, (reserved.get(lot.id) ?? 0) + take);
-      left -= take;
+      if (lot.product !== product || lot.second || !satisfies(lot.known, c.grade)) continue;
+      const t = Math.min(lot.t - (reserved.get(lot.id) ?? 0), left);
+      if (t <= 1e-9) continue;
+      reserved.set(lot.id, (reserved.get(lot.id) ?? 0) + t);
+      onTake(lot, t);
+      left -= t;
     }
+    return need - left;
+  };
+  const queue = orderQueue(g);
+  const roll = (c: Contract, billets: number) =>
+    take(c, "emne", billets, (lot, t) => toRoll.set(lot.id, (toRoll.get(lot.id) ?? 0) + t)) * ROLLING_YIELD;
+  for (const c of queue) {
+    const left = c.tonnes - c.delivered;
+    let got = covered.get(c.id) ?? 0;
+    got += take(c, c.product, left - got, () => {});
+    if (c.product === "armering" && rolling && left - got > 1e-6) got += roll(c, (left - got) / ROLLING_YIELD);
+    covered.set(c.id, got);
   }
-  return reserved;
+  return { reserved, toRoll, covered };
+}
+
+/** Hvor mye av hvert parti aktive kontrakter vil få, i samme rekkefølge som leveransene. */
+export function lotReservations(g: GameState): Map<number, number> {
+  return planLots(g).reserved;
 }
 
 /** Aktive kontrakter i ordrekøens rekkefølge. */
@@ -1531,14 +1556,9 @@ export function currentOrder(g: GameState): Contract | null {
 
 /** Kontraktene i køen som fortsatt må produseres for, i køens rekkefølge */
 export function ordersToMake(g: GameState): Contract[] {
-  const reserved = lotReservations(g);
-  return orderQueue(g).filter((c) => {
-    const left = c.tonnes - c.delivered;
-    const inStock = g.lots
-      .filter((l) => l.product === c.product && !l.second && satisfies(l.known, c.grade))
-      .reduce((a, l) => a + Math.min(l.t, reserved.get(l.id) ?? 0), 0);
-    return left - inStock > 1e-6;
-  });
+  // Det kontrakten selv har fått på lager (B-228). Før telte en senere kontrakt med partier en tidligere hadde tatt
+  const { covered } = planLots(g);
+  return orderQueue(g).filter((c) => c.tonnes - c.delivered - (covered.get(c.id) ?? 0) > 1e-6);
 }
 
 /** Kontrakten en ovn produserer for: ovn 1 den første i køen, de andre kan ta neste kvalitet (B-039) */
@@ -1590,11 +1610,33 @@ function followQueue(g: GameState, stats: PlantStats): void {
     // Skrapklasseren retter også resepten til kvaliteten som alt kjøres, når en ny ordre krever det (B-099)
     ensureRecipe(g, order.grade, stats);
   }
-  // Ovn 2 (og 3 …) tar neste kvalitet i køen, hvis det er en annen (B-039)
-  const other = auto(g, "splitGrades") ? orders.find((c) => c.grade !== g.targetGrade) : undefined;
+  // Ovn 2 (og 3 …) tar neste kvalitet i køen, hvis det er en annen (B-039) – men har valseverket lite å gå på, lager
+  // de emner til den første armeringsordren (B-228), så valseverket går hele tida og ikke må ta igjen alt til slutt
+  const feed = rollingFeed(g, orders);
+  const other = auto(g, "splitGrades")
+    ? feed && feed.grade !== g.targetGrade
+      ? feed
+      : orders.find((c) => c.grade !== g.targetGrade)
+    : undefined;
   const before = g.furnaces[1]?.grade ?? null;
   for (let i = 1; i < g.furnaces.length; i++) g.furnaces[i].grade = other?.grade ?? null;
   if (other && other.grade !== before) ensureRecipe(g, other.grade, stats);
+}
+
+/** Timer valsing emnene som venter på valseverket skal rekke til, før ovnene lager mer til armeringsordrene (B-228) */
+export const ROLLING_BUFFER_H = 12;
+
+/**
+ * Armeringsordren ovnene bør lage emner til nå, så valseverket ikke går tomt (B-228): den første i køen som trenger
+ * mer stål, når emnene som venter på valsing rekker kortere enn ROLLING_BUFFER_H.
+ */
+function rollingFeed(g: GameState, orders: Contract[]): Contract | undefined {
+  if (!rollingActive(g) || g.furnaces.length < 2) return undefined;
+  const rebar = orders.find((c) => c.product === "armering");
+  if (!rebar) return undefined;
+  let waiting = 0;
+  for (const t of planLots(g).toRoll.values()) waiting += t;
+  return waiting < rollingTph(g) * ROLLING_BUFFER_H ? rebar : undefined;
 }
 
 /** Planleggeren sorterer køen etter frist. */
