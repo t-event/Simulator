@@ -59,7 +59,10 @@ export function MissingOutCard({ g, onLogin }: { g: GameState; onLogin: () => vo
   items.push(["Daglig belønning", `En uke på rad gir nå ${rewardText(weekSum)}.`]);
   items.push(["Dagens oppdrag", `Tre små oppdrag hver dag, med bonus: ${rewardText(missionBonus(g))}.`]);
   if (g.stage >= 1)
-    items.push(["Ukens utfordring og sesongstigen", "Medaljer, ukekiste og pynt til verket for å spille jevnt."]);
+    items.push([
+      "Ukens utfordring og sesongstigen",
+      "Medaljer og ukekiste, og en stige du klatrer ved å spille litt hver dag – med fagpoeng og pynt som bare finnes denne sesongen.",
+    ]);
   if (g.konsern?.unlocked)
     items.push(["Skraplageret og konsernkassa", "By på skraplageret og tjen på de andre spillernes skrapkjøp."]);
   items.push([

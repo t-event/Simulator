@@ -52,6 +52,10 @@ const WORDS: [string, string][] = [
   ["Foring", "Mursteinene inni ovnen. Slites for hver charge og må byttes i tide."],
   ["Omdømme", "Hva kundene synes om verket. Stiger når du leverer i tide."],
   ["Ordrekø", "Kontraktene du har signert, i den rekkefølgen de lages."],
+  [
+    "Sesongstigen",
+    "Under Mål → Uka (med konto). Du klatrer ved å spille litt hver dag; hvert trinn gir fagpoeng, og noen gir pynt.",
+  ],
   ["C, P og Spor", "Karbon, fosfor og andre stoffer i stålet. Hver kvalitet har grenser (se Resept)."],
 ];
 

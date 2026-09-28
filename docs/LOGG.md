@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 226 – 2026-09-28: Hva er sesongstigen?
+
+**Brukeren ba om:** «En spiller lurer på hva sesongstigen er».
+
+**Gjort:** B-290. Én linje på kortet, bedre tekst i kontokortene, i ordlista i «Hva gjør jeg nå?» og i fagboka.
+
+**Testet:** tsc, lint, npm test, build, Playwright på 320 og 390 px med og uten konto.
+
+**Gjenstår:** pynt for sesong 2 før den startes. I morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 225 – 2026-09-28: Gjennomgang av de siste endringene
 
 **Brukeren ba om:** «Fortsett».

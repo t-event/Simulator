@@ -19,7 +19,7 @@ export const ACCOUNT_FEATURES = {
   },
   stigen: {
     name: "Sesongstigen",
-    why: "Serveren teller dagene du spiller, belønningene og ukeplasseringene, så stigen følger virkelig tid.",
+    why: "En stige du klatrer ved å spille litt hver dag, med fagpoeng og pynt. Serveren teller dagene, så den følger virkelig tid.",
   },
   skraplager: {
     name: "Skraplageret",

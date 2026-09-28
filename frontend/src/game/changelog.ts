@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 290,
+    date: "2026-09-28",
+    title: "Hva er sesongstigen?",
+    items: [
+      "Sesongstigen under Mål → Uka forklarer seg selv: du klatrer ved å spille litt hver dag, hvert trinn gir fagpoeng, og hvert tiende gir pynt som bare finnes denne sesongen.",
+    ],
+  },
+  {
     b: 289,
     date: "2026-09-28",
     title: "Snøstorm",

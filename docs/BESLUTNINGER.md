@@ -5224,3 +5224,15 @@ Mål-arket, sesongpynt og konsernet). Funn:
   gjennom og stemmer med beslutningene.
 - Testspilleren: alle nivådager innenfor målene, 0 konkurs (exit 0).
 - Konto: nei (regel 1).
+
+## B-290 Sesongstigen forklart der den står (2026-09-28)
+Status: gjelder (justerer B-173)
+Brukeren: «En spiller lurer på hva sesongstigen er». Kortet viste trinn, poeng og «I dag: …», men ikke hva stigen er;
+forklaringen sto bare i fagboka, og i kontokortet sto det bare hvorfor den krever konto.
+- **Kortet** (Mål → Uka) har én linje øverst: du klatrer ved å spille litt hver dag (spille, hente dagens belønning, ta
+  dagens oppdrag); hvert trinn gir fagpoeng, og hvert tiende gir pynt som bare finnes denne sesongen (B-287).
+- **Uten konto:** «Med konto»-kortet og «Det går du glipp av» sier nå hva stigen er, ikke bare at serveren teller.
+- **«Hva gjør jeg nå?»** har «Sesongstigen» i ordlista, med hvor den står.
+- **Fagboka** sier at pynten på stigen bare finnes denne sesongen.
+- Testet på 320 og 390 px, med og uten konto.
+- Konto: stigen krever konto som før (B-173); forklaringen vises for alle.

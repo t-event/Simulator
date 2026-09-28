@@ -87,6 +87,11 @@ export function SeasonTrackCard({ act }: { act: GameApi["act"] }) {
         </span>
       }
     >
+      {/* Hva stigen er, i én linje (B-290): en spiller lurte på det. Mer står i fagboka */}
+      <p className="g-muted g-small-text">
+        Du klatrer ved å spille litt hver dag: poeng for å spille, hente dagens belønning og ta dagens oppdrag. Hvert
+        trinn gir fagpoeng, og hvert tiende gir pynt som bare finnes denne sesongen.
+      </p>
       {unclaimed.length > 0 && (
         <div className="g-note g-week-chest">
           <span>
