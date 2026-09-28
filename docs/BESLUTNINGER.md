@@ -2801,7 +2801,7 @@ rettede sesongspillet: ikke flagget, 27,6 mill. og storverk dag 179 i sesongen.
 **Konto (KONTO.md):** nei, regel 1.
 
 ## B-172 Varsellinja, ukelista for alle og salgsdirektøren som kan oppgraderes (2026-09-26)
-Status: gjelder. Erstatter ligadelen av B-152 (ukelista per liga).
+Status: gjelder. Erstatter ligadelen av B-152 (ukelista per liga). Hvordan «Mer stål enn før» måles, er erstattet av B-235.
 Brukeren: «Syntes varslingslinja fungerer dårlig. Får ikke med meg det siste … Varslene på linja stemmer heller ikke.
 Kryss ut bør bety fjern alle varsler og antallet varsler.» «Ligaene gir ikke mening i dag. Fiks.» «Salgsdirektøren bør
 kunne oppgraderes. Ser jeg av og til ikke har noen ordre.»
@@ -4263,3 +4263,34 @@ intuitiv og mer morsom å være i.»
   (svaret står fast, lagres, rettes og gir poeng, kan ikke tas om, gamle lagringer får feltet). Balance: exit 0.
   Playwright på 7 størrelser.
 - Konto: nei (eget spill).
+
+## B-235 Ukelista mot forrige uke, og ryddigere Produksjonen, Utvid, Industrien og Merker (2026-09-28)
+Status: gjelder (erstatter delen om «Mer stål enn før» i B-172; bygger på B-196, B-189, B-227, B-232)
+Brukeren: «Vi går for dine anbefalinger» (ukelista, og svarene i B-233), og: gjør Produksjonen under Anlegg, Kjøp og
+utvid under Utvid og skraplageranbudet og konsernkassa bedre og mer intuitive; utfordrings- og prestasjonskortet under
+Merker bruker mange emojier, som ikke er i henhold til designplanen.
+- **Ukelista (migrasjon 040):** «Mer stål enn før» er nå farten denne uka (tonn per spilldøgn) i prosent av farten
+  uka før – ikke av snittet over hele spillet. Et verk som var en garasje for en uke siden, fikk før flere tusen prosent.
+  Tonn og vekst krever at spillet er lagret på nett minst to ekte dager før uka (ikke `pre_reform`, fast regel B-190),
+  så grunnlaget er et verk som har gått en stund. «Flest aktive dager» er som før. Testet i en DO-blokk mot ekte tall
+  (rullet tilbake) før den ble lagt inn; sikkerhetsrådene er uendret.
+  - Følge: tidslinja startet på nytt 27.9. (B-190), så denne uka (28.9.–5.10., tonn) har ingen to dager før uka, og
+    lista blir tom. Fra neste uke virker regelen for alle som spiller. Appen sier hvorfor man ikke er på lista.
+- **Produksjonen (Anlegg):** én rad per sted – skrap, hver ovn, støping, valseverk, lager – med ikon, status, én linje
+  og en tynn stolpe. Trykk på raden for utstyret (merket viser hva som kan kjøpes). Foringen står ikke her lenger (den
+  står i Vedlikehold ved siden av). «Kjøp skrap» og «Til salg» under lista. På PC ligger radene i et rutenett.
+  `ui/ProductionCard.tsx`; de gamle `g-chain`-stilene er fjernet.
+- **Utvid (Konsern):** hvert kjøp er et kort med vurdering («Lønner seg godt» ≤ 150 døgn, «Lønner seg» ≤ 500, ellers
+  «Lønner seg dårlig»), tre tall (gir per døgn, betaler seg, byggetid) og én knapp. Neste steg bruker samme kort,
+  merket «Anbefalt». Ny del «Bygg ut verkene dine» med de tre utbyggingene som betaler seg raskest, så alt som kan
+  kjøpes står på Utvid. Felles tjenester i egen del.
+- **Industrien:** selskapskortet har status øverst (Du eier det / Anbud åpent / Eid av en annen), nøkkeltall (eier,
+  tjener nå, hva du har fått), og anbudet i en egen boks: frist, ditt bud, hvem som har bydd, feltet, og hvor mye du kan
+  by (konsernkassa pluss budet ditt). Reglene står bak «Slik virker anbudet». Konsernkassa viser saldoen stort, en stolpe
+  for hvor mye av grensen som er brukt, og «Fyll inn det meste».
+- **Merker:** utfordringer og prestasjoner bruker Lucide-ikoner i stedet for emoji (19 nye ikoner i `ui/icons.tsx`).
+  Ikonet er blått når merket er tatt, grønt når serien er fullført. Emoji fjernet fra loggen og fra «Krever»-teksten i
+  pynt. Pynten selv (bildene i anlegget) beholder sine tegn.
+- Tester: `npm test`, tsc, lint, balance (exit 0), Playwright på 7 størrelser (rader, utstyr fra rad, Utvid, Merker uten
+  emoji, Industrien med falsk server).
+- Konto: nei for grensesnittet; ukelista krever konto som før.

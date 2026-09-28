@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 172 – 2026-09-28: Ukelista mot forrige uke, og fire kort ryddet
+
+**Brukeren ba om:** anbefalingen for ukelista, bedre Produksjonen (Anlegg), Kjøp og utvid (Utvid), skraplageranbudet og
+konsernkassa, og ikoner i stedet for emoji i utfordringer og prestasjoner.
+
+**Gjort:** B-235. Migrasjon 040 (farten mot uka før, to ekte dager med lagring før uka). Produksjonen som rader,
+Utvid med kjøpskort og vurdering, Industrien med status, anbudsboks og tydelig konsernkasse, Lucide-ikoner i Merker.
+
+**Testet:** DO-blokk mot ekte tall (rullet tilbake), sikkerhetsråd, tsc, lint, `npm test`, balance (exit 0), Playwright
+på 7 størrelser.
+
+**Gjenstår:** tonn-uka 28.9.–5.10. får tom liste (ingen har to dager før uka); UI-4d; reserven og kassegrensen; fase 2.
+
+---
+
 ## Økt 171 – 2026-09-28: Fagboka en bit om gangen
 
 **Brukeren ba om:** at fagboka blir mindre tekstvegg, mer intuitiv og morsommere.

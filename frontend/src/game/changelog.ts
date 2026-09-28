@@ -15,6 +15,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 235,
+    date: "2026-09-28",
+    title: "Ryddigere produksjon, konsern og merker",
+    items: [
+      "Ukens «Mer stål enn før» måles nå mot hva du laget uka før, ikke mot hele spillet.",
+      "Produksjonen på Anlegg: én kort rad per sted. Trykk på raden for utstyret.",
+      "Utvid i konsernet viser hvor godt hvert kjøp lønner seg, og de beste utbyggingene av verkene dine.",
+      "Skraplageret viser tydelig om anbudet er åpent, ditt bud og hvor mye du kan by. Konsernkassa er lettere å fylle.",
+      "Utfordringer og merker har fått egne ikoner.",
+    ],
+  },
+  {
     b: 234,
     date: "2026-09-28",
     title: "Ny fagbok",

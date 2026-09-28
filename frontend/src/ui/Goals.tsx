@@ -24,6 +24,7 @@ import { Bar, Card, SubTabs } from "./common";
 import { DailyCard } from "./Daily";
 import { LandmarksCard } from "./Landmarks";
 import { fmtKr, fmtNum } from "./format";
+import { Icon } from "./icons";
 import { MissingOutCard } from "./MissingOut";
 import { SeasonTrackCard } from "./SeasonTrack";
 import { WeeklyCard } from "./Weekly";
@@ -73,7 +74,7 @@ export function ChallengesCard({ g }: { g: GameState }) {
         </details>
       )}
       {finished.length > 0 && (
-        <p className="g-muted g-small-text">Helt ferdig: {finished.map((f) => `${f.icon} ${f.name}`).join(", ")}</p>
+        <p className="g-muted g-small-text">Helt ferdig: {finished.map((f) => f.name).join(", ")}</p>
       )}
     </Card>
   );
@@ -97,7 +98,7 @@ function ChallengeRow({ g, c }: { g: GameState; c: Challenge }) {
   return (
     <li className="g-challenge">
       <span className="g-challenge-icon" aria-hidden="true">
-        {c.icon}
+        <Icon name={c.icon} />
       </span>
       <div className="g-challenge-body">
         <div className="g-challenge-head">

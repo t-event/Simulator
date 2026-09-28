@@ -11,10 +11,11 @@ import { MASTERY_IDS, masteryLevel, masteryOpen } from "./mastery";
 import { QUIZ } from "./quiz";
 import { LANDMARKS } from "./landmarks";
 import type { GameState } from "./types";
+import type { IconName } from "../ui/icons";
 
 export interface Achievement {
   id: string;
-  icon: string;
+  icon: IconName;
   name: string;
   description: string;
   fp: number;
@@ -28,7 +29,7 @@ export interface Achievement {
 
 export interface AchievementFamily {
   id: string;
-  icon: string;
+  icon: IconName;
   name: string;
   /** Gruppen på kortet */
   group: AchievementGroup;
@@ -61,7 +62,7 @@ const nf = (n: number) => n.toLocaleString("nb-NO").replace(/ /g, " ");
 type T = [string, number, string, string, number];
 function family(
   id: string,
-  icon: string,
+  icon: IconName,
   name: string,
   group: AchievementGroup,
   value: (g: GameState) => number,
@@ -79,13 +80,13 @@ function family(
 
 export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
   // Produksjon
-  family("nivå", "🏭", "Fra garasje til storverk", "Produksjon", (g) => g.stage, [
+  family("nivå", "factory", "Fra garasje til storverk", "Produksjon", (g) => g.stage, [
     ["verksted", 1, "Ut av garasjen", "Flytt til et verksted.", 3],
     ["stoperi", 2, "Eget støperi", "Flytt til et støperi.", 5],
     ["stalverk", 3, "Ekte stålverk", "Flytt til et stålverk.", 10],
     ["storverk", 4, "Storverket", "Bygg ut til et storverk.", 20],
   ]),
-  family("charger", "🔥", "Charger", "Produksjon", (g) => g.totals.heats, [
+  family("charger", "flame", "Charger", "Produksjon", (g) => g.totals.heats, [
     ["charge1", 1, "Første smelte", "Smelt den første chargen.", 2],
     ["charge100", 100, "Hundre charger", "Smelt 100 charger.", 5],
     ["charge1000", 1000, "Tusen charger", "Smelt 1 000 charger.", 15],
@@ -94,7 +95,7 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
     ["charge150k", 150_000, "Evig glød", "Smelt 150 000 charger.", 90],
     ["charge300k", 300_000, "Ovnen som aldri sover", "Smelt 300 000 charger.", 150],
   ]),
-  family("tonn", "⚖️", "Tonn stål", "Produksjon", (g) => g.totals.producedT, [
+  family("tonn", "weight", "Tonn stål", "Produksjon", (g) => g.totals.producedT, [
     ["tonn1k", 1000, "Tusen tonn", "Produser 1 000 tonn stål.", 5],
     ["tonn100k", 100_000, "Hundre tusen tonn", "Produser 100 000 tonn stål.", 15],
     ["tonn1m", 1_000_000, "En million tonn", "Produser 1 000 000 tonn stål.", 40],
@@ -102,27 +103,27 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
     ["tonn50m", 50_000_000, "Stålfjellet", "Produser 50 millioner tonn stål.", 100],
     ["tonn100m", 100_000_000, "Hundre millioner tonn", "Produser 100 millioner tonn stål.", 150],
   ]),
-  family("rekord", "📈", "Rekorddøgn", "Produksjon", bestDay, [
+  family("rekord", "trend-up", "Rekorddøgn", "Produksjon", bestDay, [
     ["rekord100", 100, "Hundre tonn", "Lag 100 tonn stål på ett døgn.", 3],
     ["rekord1k", 1000, "Tusen tonn på et døgn", "Lag 1 000 tonn stål på ett døgn.", 10],
     ["rekord10k", 10_000, "Ti tusen tonn på et døgn", "Lag 10 000 tonn stål på ett døgn.", 30],
     ["rekord25k", 25_000, "Døgnrekord", "Lag 25 000 tonn stål på ett døgn.", 60],
     ["rekord40k", 40_000, "Uslåelig døgn", "Lag 40 000 tonn stål på ett døgn.", 120],
   ]),
-  family("rene", "✨", "Rene døgn", "Produksjon", counter("rene_dogn"), [
+  family("rene", "sparkles", "Rene døgn", "Produksjon", counter("rene_dogn"), [
     ["rene30", 30, "Ren måned", "30 døgn der alt stålet holder kvaliteten.", 10],
     ["rene365", 365, "Rent år", "365 døgn der alt stålet holder kvaliteten.", 30],
     ["rene1000", 1000, "Tusen rene døgn", "1 000 døgn der alt stålet holder kvaliteten.", 60],
     ["rene2500", 2500, "Plettfri", "2 500 døgn der alt stålet holder kvaliteten.", 120],
   ]),
-  family("foring", "🧱", "Omforinger", "Produksjon", counter("omforinger"), [
+  family("foring", "brick-wall", "Omforinger", "Produksjon", counter("omforinger"), [
     ["foring10", 10, "Murerlaget", "Bytt foringen 10 ganger.", 5],
     ["foring100", 100, "Ildfast", "Bytt foringen 100 ganger.", 20],
     ["foring500", 500, "Tusen murstein", "Bytt foringen 500 ganger.", 50],
     ["foring1500", 1500, "Ovnens beste venn", "Bytt foringen 1 500 ganger.", 100],
   ]),
   // Kunder
-  family("kontrakter", "🤝", "Kontrakter", "Kunder", (g) => g.totals.contractsDone, [
+  family("kontrakter", "sales", "Kontrakter", "Kunder", (g) => g.totals.contractsDone, [
     ["kontrakt1", 1, "Første kontrakt", "Lever en hel kontrakt.", 2],
     ["kontrakt50", 50, "Femti kontrakter", "Lever 50 kontrakter.", 10],
     ["kontrakt250", 250, "Fast leverandør", "Lever 250 kontrakter.", 30],
@@ -130,24 +131,24 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
     ["kontrakt3000", 3000, "Hele landets leverandør", "Lever 3 000 kontrakter.", 80],
     ["kontrakt6000", 6000, "Leverandør i verdensklasse", "Lever 6 000 kontrakter.", 150],
   ]),
-  family("tiavti", "💯", "Ti av ti", "Kunder", counter("tiavti"), [
+  family("tiavti", "badge-check", "Ti av ti", "Kunder", counter("tiavti"), [
     ["tiavti", 1, "Ti av ti", "Få 10 av 10 fra en kunde.", 5],
     ["tiavti10", 10, "Kundefavoritt", "Få 10 av 10 fra ti kunder.", 10],
     ["tiavti100", 100, "Hundre fornøyde", "Få 10 av 10 fra 100 kunder.", 30],
     ["tiavti1000", 1000, "Tusen fornøyde", "Få 10 av 10 fra 1 000 kunder.", 80],
     ["tiavti3000", 3000, "Alle elsker verket", "Få 10 av 10 fra 3 000 kunder.", 150],
   ]),
-  family("omdomme", "🌟", "Omdømme", "Kunder", (g) => Math.floor(g.reputation), [
+  family("omdomme", "star", "Omdømme", "Kunder", (g) => Math.floor(g.reputation), [
     ["omdomme", 95, "Kundenes favoritt", "Nå omdømme 95.", 10],
     ["omdomme100", 100, "Best i bransjen", "Nå omdømme 100.", 20],
   ]),
-  family("avtaler", "📑", "Rammeavtaler", "Kunder", counter("avtaler_bonus"), [
+  family("avtaler", "scroll-text", "Rammeavtaler", "Kunder", counter("avtaler_bonus"), [
     ["avtale1", 1, "Holdt ord", "Fullfør en rammeavtale med bonus.", 5],
     ["avtale10", 10, "Pålitelig", "Fullfør 10 rammeavtaler med bonus.", 20],
     ["avtale50", 50, "Langsiktig partner", "Fullfør 50 rammeavtaler med bonus.", 60],
     ["avtale150", 150, "Kundene kommer tilbake", "Fullfør 150 rammeavtaler med bonus.", 120],
   ]),
-  family("landemerker", "🏛️", "Landemerker", "Kunder", (g) => g.landmarks?.done.length ?? 0, [
+  family("landemerker", "landmark", "Landemerker", "Kunder", (g) => g.landmarks?.done.length ?? 0, [
     ["landemerke1", 1, "Byggmester", "Lever stål til et landemerke.", 10],
     ["landemerke5", 5, "Byens stål", "Lever stål til fem landemerker.", 30],
     ["landemerke15", 15, "Landets stål", "Lever stål til 15 landemerker.", 60],
@@ -160,55 +161,55 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
     ],
   ]),
   // Kontrollrom
-  family("selv", "🎛️", "Kjørt selv", "Kontrollrom", (g) => g.totals.manualHeats, [
+  family("selv", "sliders-horizontal", "Kjørt selv", "Kontrollrom", (g) => g.totals.manualHeats, [
     ["selv1", 1, "Ved spakene", "Kjør en charge selv i kontrollrommet.", 3],
     ["selv25", 25, "Erfaren smelter", "Kjør 25 charger selv.", 15],
     ["selv100", 100, "Smelteformann", "Kjør 100 charger selv.", 40],
     ["selv250", 250, "Kontrollromslegende", "Kjør 250 charger selv.", 80],
   ]),
-  family("perfekt", "⭐", "Perfekte charger", "Kontrollrom", counter("perfekte_charger"), [
+  family("perfekt", "award", "Perfekte charger", "Kontrollrom", counter("perfekte_charger"), [
     ["perfekt1", 1, "Fem stjerner", "Få 5 stjerner i kontrollrommet.", 10],
     ["perfekt10", 10, "Stjernesmelter", "Få 5 stjerner ti ganger.", 30],
     ["perfekt50", 50, "Fullkommen", "Få 5 stjerner 50 ganger.", 80],
   ]),
-  family("poeng", "🎮", "Poengrekord", "Kontrollrom", (g) => g.controlBest ?? 0, [
+  family("poeng", "gamepad-2", "Poengrekord", "Kontrollrom", (g) => g.controlBest ?? 0, [
     ["poeng3000", 3000, "God kjøring", "Få 3 000 poeng i kontrollrommet.", 10],
     ["poeng3800", 3800, "Skarp kjøring", "Få 3 800 poeng i kontrollrommet.", 25],
     ["poeng4200", 4200, "Mesterkjøring", "Få 4 200 poeng i kontrollrommet.", 50],
     ["poeng4500", 4500, "Rekordkjøring", "Få 4 500 poeng i kontrollrommet.", 100],
   ]),
   // Kunnskap
-  family("quiz", "📖", "Quiz", "Kunnskap", quizzesDone, [
+  family("quiz", "book-check", "Quiz", "Kunnskap", quizzesDone, [
     ["quiz5", 5, "Skoleflink", "Bestå fem quizer i fagboka.", 5],
     ["quizalle", QUIZ_COUNT, "Fagekspert", "Bestå alle quizene i fagboka.", 20],
   ]),
-  family("forsk", "🔬", "Forskning", "Kunnskap", (g) => g.researched.length, [
+  family("forsk", "microscope", "Forskning", "Kunnskap", (g) => g.researched.length, [
     ["forsk10", 10, "Forsker", "Forsk fram ti ting.", 5],
     ["forsk25", 25, "Utviklingsleder", "Forsk fram 25 ting.", 15],
     ["forsk50", 50, "Forskningssjef", "Forsk fram 50 ting.", 30],
   ]),
-  family("alleforsk", "🧪", "Alt forsket fram", "Kunnskap", (g) => +masteryOpen(g), [
+  family("alleforsk", "research", "Alt forsket fram", "Kunnskap", (g) => +masteryOpen(g), [
     ["alleforsk", 1, "Alt forsket fram", "Forsk fram alt, så mesterskapet åpner.", 30],
   ]),
-  family("mester", "🥋", "Mesterskap", "Kunnskap", masterySum, [
+  family("mester", "crown", "Mesterskap", "Kunnskap", masterySum, [
     ["mester10", 10, "Mester", "Ta ti nivåer i mesterskapet.", 25],
     ["mester50", 50, "Stormester", "Ta 50 nivåer i mesterskapet.", 60],
     ["mester100", 100, "Grandmester", "Ta 100 nivåer i mesterskapet.", 100],
     ["mester250", 250, "Evig student", "Ta 250 nivåer i mesterskapet.", 200],
   ]),
   // Folk
-  family("folk", "👷", "Ansatte", "Folk", (g) => g.workers.length, [
+  family("folk", "hard-hat", "Ansatte", "Folk", (g) => g.workers.length, [
     ["folk5", 5, "Et lite lag", "Ha 5 ansatte.", 3],
     ["folk25", 25, "En hel arbeidsplass", "Ha 25 ansatte.", 10],
     ["folk100", 100, "Hjørnesteinsbedrift", "Ha 100 ansatte.", 25],
     ["folk250", 250, "Byens største arbeidsgiver", "Ha 250 ansatte.", 60],
   ]),
-  family("fagbrev", "🎓", "Fagbrev", "Folk", counter("fagbrev"), [
+  family("fagbrev", "graduation-cap", "Fagbrev", "Folk", counter("fagbrev"), [
     ["fagbrev1", 1, "Første fagbrev", "En ansatt tar fagbrev.", 5],
     ["fagbrev10", 10, "Lærebedrift", "Ti ansatte tar fagbrev.", 20],
     ["fagbrev50", 50, "Fagskolen", "50 ansatte tar fagbrev.", 60],
   ]),
-  family("dager", "📅", "Dager i drift", "Folk", today, [
+  family("dager", "calendar-check", "Dager i drift", "Folk", today, [
     ["dag100", 100, "Hundre dager", "Hold verket i gang i 100 døgn.", 5],
     ["dag365", 365, "Et år i drift", "Hold verket i gang i 365 døgn.", 15],
     ["dag1000", 1000, "Tusen døgn", "Hold verket i gang i 1 000 døgn.", 40],
@@ -216,7 +217,7 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
     ["dag3650", 3650, "Ti år", "Hold verket i gang i 3 650 døgn.", 150],
   ]),
   // Konsern
-  family("verdi", "💰", "Konsernverdi", "Konsern", (g) => konsernEquity(g), [
+  family("verdi", "money", "Konsernverdi", "Konsern", (g) => konsernEquity(g), [
     ["milliard", 1e9, "Milliardær", "Få en konsernverdi på 1 milliard.", 20],
     ["baron", 1e10, "Stålbaron", "Nå sluttmålet: 10 milliarder.", 40],
     ["magnat", 2.5e10, "Stålmagnat", "Nå 25 milliarder.", 50],
@@ -224,7 +225,7 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
     ["verdi500", 5e11, "Stålkeiser", "Nå 500 milliarder.", 90],
     ["legende", 1e12, "Stållegende", "Nå 1 billion.", 100],
   ]),
-  family("datter", "🏢", "Datterverk", "Konsern", sisters, [
+  family("datter", "konsern", "Datterverk", "Konsern", sisters, [
     ["datter1", 1, "Første datterverk", "Kjøp et datterverk i konsernet.", 10],
     ["datter3", 3, "Lite konsern", "Eie tre datterverk.", 15],
     ["datter5", 5, "Voksende konsern", "Eie fem datterverk.", 20],
@@ -232,7 +233,7 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
   ]),
   family(
     "kompleks",
-    "🏗️",
+    "warehouse",
     "Stålkomplekser",
     "Konsern",
     (g) => g.konsern?.plants.filter((p) => p.type === "kompleks").length ?? 0,
@@ -244,7 +245,7 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
   ),
   family(
     "modern",
-    "🔧",
+    "wrench",
     "Modernisering",
     "Konsern",
     (g) => Math.max(0, ...(g.konsern?.plants.map((p) => p.level) ?? [0])),
@@ -315,8 +316,7 @@ export function checkAchievements(g: GameState): void {
     fp += a.fp;
   }
   awardPoints(g, fp);
-  if (fresh.length <= 2)
-    for (const a of fresh) log(g, `🏅 Prestasjon: ${a.icon} ${a.name}! +${a.fp} fagpoeng.`, "good");
+  if (fresh.length <= 2) for (const a of fresh) log(g, `🏅 Prestasjon: ${a.name}! +${a.fp} fagpoeng.`, "good");
   else log(g, `🏅 ${fresh.length} nye prestasjoner! +${fp} fagpoeng. Se merkene under Mål → Merker.`, "good");
 }
 

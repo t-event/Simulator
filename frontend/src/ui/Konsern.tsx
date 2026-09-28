@@ -131,6 +131,86 @@ function BuyButton({
   );
 }
 
+/** Hvor godt et kjøp lønner seg, i ord (B-235): færre døgn før det har betalt seg er bedre */
+function payRating(days: number): { tone: "ok" | "info" | "heat"; label: string } {
+  if (!Number.isFinite(days)) return { tone: "heat", label: "Gir lite nå" };
+  if (days <= 150) return { tone: "ok", label: "Lønner seg godt" };
+  if (days <= 500) return { tone: "info", label: "Lønner seg" };
+  return { tone: "heat", label: "Lønner seg dårlig" };
+}
+
+/**
+ * Ett kjøp i konsernet (B-235): navn og vurdering øverst, tre tall (gir per døgn, betaler seg, byggetid) og én knapp.
+ * Før sto alt i en liten grå linje, og et kjøp som betalte seg på 5 000 døgn så like bra ut som ett på 90.
+ */
+function OptionCard({
+  g,
+  act,
+  o,
+  name,
+  desc,
+  best = false,
+  label = "Kjøp",
+}: {
+  g: GameState;
+  act: Act;
+  o: KonsernOption;
+  name: string;
+  desc?: string;
+  best?: boolean;
+  label?: string;
+}) {
+  const reason = whyNot(g, o);
+  const rating = payRating(o.payback);
+  return (
+    <div className={`g-buy-opt${best ? " is-best" : ""}`}>
+      <div className="g-buy-opt-head">
+        <strong>{name}</strong>
+        {best ? (
+          <span className="ds-status is-ok">Anbefalt</span>
+        ) : (
+          o.gain > 0 && <span className={`ds-status is-${rating.tone}`}>{rating.label}</span>
+        )}
+      </div>
+      {desc && <p className="g-muted g-small-text">{desc}</p>}
+      <dl className="g-buy-opt-stats">
+        {o.gain > 0 && (
+          <div>
+            <dt>Gir deg</dt>
+            <dd>
+              +{fmtKr(o.gain)}
+              <small> /døgn</small>
+            </dd>
+          </div>
+        )}
+        {o.gain > 0 && (
+          <div>
+            <dt>Betaler seg</dt>
+            <dd>{Math.ceil(o.payback).toLocaleString("nb-NO")} døgn</dd>
+          </div>
+        )}
+        {o.hours > 0 && (
+          <div>
+            <dt>Bygges</dt>
+            <dd>{o.hours} t</dd>
+          </div>
+        )}
+      </dl>
+      <button
+        className={best ? "g-primary" : undefined}
+        disabled={!!reason}
+        onClick={() => {
+          act((gg) => o.run(gg));
+          buzz(20);
+        }}
+      >
+        {label} · {fmtKr(o.price)}
+      </button>
+      {reason && <p className="g-konsern-why g-small-text">{reason}</p>}
+    </div>
+  );
+}
+
 /** Bryter for å skru salgsdirektøren av og på (B-122). Vises under Folk → Ansatte og under Forespørsler på Salg */
 export function DirectorSwitch({ g, act }: { g: GameState; act: Act }) {
   const d = g.konsern?.director;
@@ -610,23 +690,27 @@ function fmtWhen(iso: string): string {
   });
 }
 
-/** Neste steg: kjøpet som betaler seg raskest (B-119) */
+/** Neste steg: kjøpet som betaler seg raskest (B-119, B-235) */
 function NextStep({ g, act }: { g: GameState; act: Act }) {
   const advice = konsernAdvice(g);
   if (!advice) return null;
   return (
     <div className="g-col g-konsern-next-col">
       <Card title="Neste steg" className="g-konsern-next">
-        <p>
-          <strong>{advice.title}</strong> – det som betaler seg raskest nå.
-        </p>
-        {advice.key.startsWith("bytt-") && (
-          <p className="g-muted g-small-text">
-            Et stålkompleks tjener omtrent like mye som tre storverk, men tar bare én plass. Verket selges for det det
-            er verdt, og pengene går til komplekset.
-          </p>
-        )}
-        <BuyButton g={g} act={act} o={advice} label="Gjør det" />
+        <p className="g-muted g-small-text">Det som betaler seg raskest nå:</p>
+        <OptionCard
+          g={g}
+          act={act}
+          o={advice}
+          name={advice.title}
+          best
+          label="Gjør det"
+          desc={
+            advice.key.startsWith("bytt-")
+              ? "Et stålkompleks tjener omtrent like mye som tre storverk, men tar bare én plass. Verket selges for det det er verdt, og pengene går til komplekset."
+              : undefined
+          }
+        />
       </Card>
     </div>
   );
@@ -779,44 +863,75 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
 /** Utvid (B-226): neste steg, nye verk og felles tjenester */
 function KonsernBuy({ g, act }: { g: GameState; act: Act }) {
   const options = konsernOptions(g);
+  const advice = konsernAdvice(g);
   const byKey = (key: string) => options.find((o) => o.key === key);
   const sharedIds = Object.keys(KONSERN_SHARED) as SharedId[];
   const owned = sharedIds.filter((id) => !byKey(`felles-${id}`));
   const hasStalverk = g.konsern.plants.some((p) => p.type === "stalverk");
+  // Utbygging av verkene du har: de tre som betaler seg raskest (alle står under Oversikt → Dine verk)
+  const grow = options
+    .filter((o) => /^(mod|bygg|bytt)-/.test(o.key) && !o.blocked && o.key !== advice?.key)
+    .sort((x, y) => x.payback - y.payback)
+    .slice(0, 3);
+  const types = (Object.keys(SISTER_TYPES) as SisterType[]).filter((t) => t !== "kompleks" || kompleksOpen(g));
+  const shared = sharedIds.filter((id) => !owned.includes(id));
   return (
     <>
       <NextStep g={g} act={act} />
       <div className="g-col-wide g-konsern-buy-col">
         <Card title="Kjøp og utvid">
-          {(Object.keys(SISTER_TYPES) as SisterType[])
-            .filter((t) => t !== "kompleks" || kompleksOpen(g))
-            .map((t) => {
+          <p className="g-muted g-small-text">
+            Jo færre døgn før et kjøp har betalt seg, jo bedre. Verkene teller med i konsernverdien, så du taper ikke på
+            å kjøpe.
+          </p>
+          <h3 className="g-subhead">Nye verk</h3>
+          <div className="g-buy-opts">
+            {types.map((t) => {
               const spec = SISTER_TYPES[t];
               return (
-                <div key={t} className="g-upgrade">
-                  <strong>Nytt {spec.name.toLowerCase()}</strong>
-                  <span className="g-muted g-small-text">
-                    {spec.description}
-                    {t === "storverk" && hasStalverk ? ` Billigere: bygg ut et av stålverkene dine.` : ""}
-                  </span>
-                  <BuyButton g={g} act={act} o={byKey(`kjop-${t}`)!} primary={false} />
-                </div>
+                <OptionCard
+                  key={t}
+                  g={g}
+                  act={act}
+                  o={byKey(`kjop-${t}`)!}
+                  name={`Nytt ${spec.name.toLowerCase()}`}
+                  desc={`${spec.description}${t === "storverk" && hasStalverk ? " Billigere: bygg ut et av stålverkene dine." : ""}`}
+                />
               );
             })}
-          {sharedIds
-            .filter((id) => !owned.includes(id))
-            .map((id) => {
-              const spec = KONSERN_SHARED[id];
-              return (
-                <div key={id} className="g-upgrade">
-                  <strong>{spec.name}</strong>
-                  <span className="g-muted g-small-text">{spec.description}</span>
-                  <BuyButton g={g} act={act} o={byKey(`felles-${id}`)!} primary={false} />
-                </div>
-              );
-            })}
+          </div>
+          {grow.length > 0 && (
+            <>
+              <h3 className="g-subhead">Bygg ut verkene dine</h3>
+              <div className="g-buy-opts">
+                {grow.map((o) => (
+                  <OptionCard key={o.key} g={g} act={act} o={o} name={o.title} label="Gjør det" />
+                ))}
+              </div>
+              <p className="g-muted g-small-text">Alle verkene dine står under Oversikt.</p>
+            </>
+          )}
+          {shared.length > 0 && (
+            <>
+              <h3 className="g-subhead">Felles for konsernet</h3>
+              <div className="g-buy-opts">
+                {shared.map((id) => (
+                  <OptionCard
+                    key={id}
+                    g={g}
+                    act={act}
+                    o={byKey(`felles-${id}`)!}
+                    name={KONSERN_SHARED[id].name}
+                    desc={KONSERN_SHARED[id].description}
+                  />
+                ))}
+              </div>
+            </>
+          )}
           {owned.length > 0 && (
-            <p className="g-muted g-small-text">✓ I drift: {owned.map((id) => KONSERN_SHARED[id].name).join(", ")}.</p>
+            <p className="g-muted g-small-text">
+              <Icon name="check" /> I drift: {owned.map((id) => KONSERN_SHARED[id].name).join(", ")}.
+            </p>
           )}
         </Card>
       </div>

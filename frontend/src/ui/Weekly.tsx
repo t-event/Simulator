@@ -111,7 +111,9 @@ export function WeeklyCard({ act }: { act: GameApi["act"] }) {
       <p>
         {status.plass
           ? `Du er nr. ${status.plass} av ${status.players} (${fmtValue(status.kind, status.value ?? 0)}).`
-          : "Du er ikke på lista ennå – den fylles når spillet lagres på nett."}{" "}
+          : status.kind === "dager"
+            ? "Du er ikke på lista ennå – den fylles når spillet lagres på nett."
+            : "Du er ikke på lista denne uka: spillet må ha vært lagret på nett minst to dager før uka startet."}{" "}
         <span className="g-muted">
           {left <= 1 ? "Siste dag!" : `${left} dager igjen.`} Topp 3 får medalje og ukekiste ({chestFp(3)}–{chestFp(1)}{" "}
           fagpoeng).

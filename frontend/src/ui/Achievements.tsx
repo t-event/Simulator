@@ -59,7 +59,7 @@ export function AchievementsCard({ g, onOpenPynt }: { g: GameState; onOpenPynt: 
             {next.map((a) => (
               <li key={a.id}>
                 <span className="g-ach-next-icon" aria-hidden="true">
-                  {a.icon}
+                  <Icon name={a.icon} />
                 </span>
                 <div>
                   <strong>{a.name}</strong>
@@ -100,7 +100,7 @@ export function AchievementsCard({ g, onOpenPynt }: { g: GameState; onOpenPynt: 
                     onClick={() => setPicked(picked === f.id ? null : f.id)}
                   >
                     <span className="g-ach-tile-icon" aria-hidden="true">
-                      {f.icon}
+                      <Icon name={f.icon} />
                     </span>
                     <span className="g-ach-tile-name">{f.name}</span>
                     <span className="g-ach-tile-tier">
@@ -209,7 +209,7 @@ export function PyntModal({
                     </span>
                   ) : blocked === "needs" && need ? (
                     <span className="g-pynt-lock">
-                      <Icon name="lock" /> Krever {need.icon} {need.name}
+                      <Icon name="lock" /> Krever merket «{need.name}»
                     </span>
                   ) : (
                     <button

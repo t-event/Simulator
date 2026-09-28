@@ -153,6 +153,7 @@ frontend/src/
     tests.ts     Tester uten nett (falsk tjeneste)
   ui/          Spillets skjermer (mobil først) og kontrollrommet
     Overview.tsx Verket med underfanene Oversikt, Anlegg, Resept, Økonomi (valget i verketTabs.ts/GameApp)
+    ProductionCard.tsx «Produksjonen» på Anlegg: én rad per sted, trykk for utstyret (B-235)
     Konsern.tsx  Konsern-siden (B-226, B-227): Oversikt, Utvid, Industrien; openTender.ts gir «!» ved åpent anbud.
                  Salgsdirektørens kort ligger her, men vises under Folk → Ansatte (B-229)
     hints.ts     Rådene på Verket; gir også «!» på Marked og Folk i menyen (B-202)
@@ -272,6 +273,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Byggetid i ekte tid i konsernet** (B-209): prosjektene bruker `realNow()` i `game/konsern.ts`. Tester og
   testspilleren setter klokka med `setRealClock` (testene: `finishProjects(g)`, testspilleren: `simClock(g)` = 3×). Kjøp
   i konsernet virker derfor ikke med én gang – ikke skriv tester som venter det.
+- **Ikoner i spillmotoren** (B-235): utfordringer og prestasjoner har `icon: IconName` (type-import fra `ui/icons.tsx`), og
+  grensesnittet tegner dem med `<Icon>`. Ikke skriv `icon` inn i tekst (logg, varsler) – det er et navn, ikke en emoji.
+  Nye Lucide-ikoner: kopier fra `lucide-static` og ta med alle attributter (også `x1`, `y2` …).
 - Nye tester i `game/tests.ts` skal stå **over** oppsummeringen nederst (`if (failed) … process.exitCode = 1`). Tester
   etter den skriver «FEIL», men `npm test` gir likevel exit 0 (skjedde med B-207, rettet i B-208).
 - Se på **exit-koden** til `balance.ts`, ikke bare median-linjene: sjekken av kontrollrommet står helt nederst
