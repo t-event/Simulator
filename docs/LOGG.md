@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 234 – 2026-09-28: En reformveteran til
+
+**Brukeren ba om:** merket for en spiller som også ble truffet av reformen, men manglet det.
+
+**Gjort:** B-300. Kontoen var slettet og laget på nytt, så raden i reformloggen var borte. Migrasjon 049 (etter
+tørrkjøring): tabellen `badges` for merker gitt for hånd og `badges_of`, brukt av `my_badges` og `leaderboard`. Merket
+er gitt. Publiseringen av #243 (B-299) var grønn.
+
+**Testet:** tørrkjøring i en transaksjon som ble rullet tilbake (tre reformveteraner, tabellen stengt for `anon`),
+spørring etterpå, sikkerhetsråd (bare den nye tabellen uten regler, som ventet), npm test.
+
+**Gjenstår:** pynt for sesong 3 før den startes. I morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 233 – 2026-09-28: Æresmerket på topplista
 
 **Brukeren ba om:** at merket for dem som var med på økonomireformen også vises på topplista.

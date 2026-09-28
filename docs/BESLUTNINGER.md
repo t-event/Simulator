@@ -5377,3 +5377,16 @@ Brukeren: «Merket til de som var med på økonomireformen skal vises på toppli
 - **App:** `BoardRow.badges` (tom liste fra en eldre server; ukjente merker vises ikke). Topplista viser
   «Reformveteran» med ikon under navnet, som sesongplasseringen. Navnene står i `BADGE_NAMES` (`net/leaderboard.ts`).
 - Test i `net/tests.ts` (falsk server). Konto: nei for å se lista (som før, B-127).
+
+## B-300 Æresmerker kan gis for hånd (2026-09-28)
+Status: gjelder
+Endringslogg: nei
+Brukeren sa at en tredje spiller også er reformveteran. Reformen traff spilleren (B-186, rettet i B-213), men kontoen
+ble senere slettet og laget på nytt. `economy_reform_log` slettes sammen med kontoen (`on delete cascade`), så raden
+og merket forsvant, selv om spillet er det samme (det rettede spillet, `serverEdit` 1).
+- **Server** (`supabase/049_merker_for_haand.sql`, etter tørrkjøring som ble rullet tilbake): ny tabell `badges`
+  (konto, merke, notat) uten regler for `anon`/`authenticated`, og `badges_of(uid)` som samler reformloggen og tabellen.
+  `my_badges` og `leaderboard` bruker den. Returtypen er uendret.
+- **Merket gitt** til spilleren i `badges` (notat: «kontoen ble laget på nytt, og loggraden forsvant»). Spillet er ikke
+  endret; appen gir prestasjonen neste gang den spør (B-296). Topplista viser nå tre reformveteraner.
+- Et nytt merke for hånd: `insert into public.badges (user_id, badge, note) values (…)`, med eierens godkjenning.

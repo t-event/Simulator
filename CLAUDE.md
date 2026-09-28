@@ -364,8 +364,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Kontrollromsrekorden på topplista** (B-295) tas fra `state.controlBest` av triggeren `note_control` på `saves` inn i
   `records.best_control` – bare for kontoer som alt har en rekordrad, og bare opptil 5 000 poeng. Endres poengene i
   kontrollrommet mye, må grensen følge med.
-- **Æresmerker på topplista** (B-299): `leaderboard()` gir `badges`; et nytt merke må legges både i SQL-en (048) og i
-  `BADGE_NAMES` (`net/leaderboard.ts`) – ukjente merker vises ikke. Endres returtypen igjen: `drop function` først.
+- **Æresmerker på topplista** (B-299, B-300): `leaderboard()` og `my_badges()` får merkene fra `badges_of(uid)` –
+  reformloggen og tabellen `badges` (merker gitt for hånd, med eierens godkjenning). Et nytt slags merke må også i
+  `BADGE_NAMES` (`net/leaderboard.ts`) og i prestasjonene – ukjente merker vises ikke. Endres returtypen: `drop function` først.
 - **Skjulte prestasjoner** (B-296): `hidden` på en serie gjør at den bare vises og telles for dem som har den. Bruk
   `visibleAchievements`/`visibleFamilies` i grensesnittet, ikke `ACHIEVEMENTS` direkte.
 - **Tilbakespoling** (B-261): et lavere dagtall flytter tidslinja etter dagen til `snapshots_rewound`; den legges tilbake
