@@ -31,12 +31,14 @@ import {
   newFurnaceUnit,
   oftenSick,
   setScheduledSwitch,
+  shiftLeaderAtWork,
   sickSpells,
   unlock,
   WARNING_DAYS,
   type PurchaseResult,
 } from "./engine";
 import {
+  bonusGap,
   castingType,
   day,
   daysUntilAllBack,
@@ -856,6 +858,27 @@ export function giveBonus(g: GameState): PurchaseResult {
 }
 
 /**
+ * Skiftlederen gir bonus (B-271): når spilleren har slått det på og en skiftleder er på jobb, gis bonus når rådet på
+ * Verket ville bedt om det (lenge siden bonus og trivselen under 70, eller trivselen under 40) – og bare når kassa har
+ * minst tre ganger så mye som bonusen koster.
+ */
+export function leaderBonusDue(g: GameState): boolean {
+  if (!g.settings.leaderBonus || !shiftLeaderAtWork(g) || !g.workers.length) return false;
+  if (day(g) - g.lastBonusDay < BONUS_COOLDOWN_DAYS) return false;
+  const needed = (g.morale < 70 && bonusGap(g) >= 10) || g.morale < 40;
+  return needed && g.cash >= bonusCost(g) * 3;
+}
+
+export function leaderBonus(g: GameState): void {
+  if (!leaderBonusDue(g)) return;
+  const cost = bonusCost(g);
+  addCost(g, "lonn", cost);
+  g.lastBonusDay = day(g);
+  adjustMorale(g, 15);
+  log(g, `Skiftlederen ga alle ansatte bonus (${fmtKr(cost)}). Trivselen stiger.`, "good");
+}
+
+/**
  * Advarsel om fravær (B-101): mulig når en ansatt har vært syk tre ganger eller mer på 60 døgn. Virker på dem som
  * misbruker egenmelding. Var den ansatte faktisk syk, går trivselen ned.
  */
@@ -987,6 +1010,8 @@ export function hireTemps(g: GameState, days: number | null): PurchaseResult {
 /** Hver time: planlagt bytte av støping (B-102) og om konsernet kan åpnes (B-106) */
 function hourlyActions(g: GameState): void {
   runScheduledSwitch(g);
+  // Skiftlederen gir bonus når det trengs (B-271)
+  leaderBonus(g);
   landmarkHour(g);
   directorHour(g);
   checkKonsernMilestones(g);

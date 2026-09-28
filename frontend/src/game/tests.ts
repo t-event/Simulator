@@ -187,6 +187,7 @@ import {
 } from "./environment";
 import { isWinter, monthOf, riskFactor, WINTER_RISK } from "./calendar";
 import { explosionChance, FATAL_DOWN_DAYS, fatalAccident, WINTER_EXPLOSION } from "./accidents";
+import { leaderBonus, leaderBonusDue } from "./actions";
 import { autoPlay, ChargeGame } from "../ui/control/chargeGame";
 import { applyCashCap, CASH_RESERVE, reserveDayLog, reserveTotal } from "./reserve";
 
@@ -2480,6 +2481,43 @@ test("Nestenulykke (B-266): kommer ikke igjen på samme nivå når verneutstyret
   assert(makeDecision(g, "nestenulykke") === null, "kortet kom igjen på samme nivå");
   g.stage = 3;
   assert(makeDecision(g, "nestenulykke") !== null, "kortet kommer aldri igjen, heller ikke på et større verk");
+});
+
+test("Skiftlederen gir bonus (B-271): bare når valget er på, en skiftleder er på jobb og kassa har god råd", () => {
+  const g = newGame(271);
+  g.stage = 3;
+  for (let i = 0; i < 3; i++) g.workers.push(makeCandidate(g, "ovn"));
+  g.minute = 60 * 1440;
+  g.lastBonusDay = 1;
+  g.morale = 55;
+  g.cash = 1e9;
+  assert(!leaderBonusDue(g), "bonus uten skiftleder");
+  g.workers.push(makeCandidate(g, "skiftleder"));
+  assert(!leaderBonusDue(g), "bonus uten at valget er på");
+  g.settings.leaderBonus = true;
+  assert(leaderBonusDue(g), "ingen bonus når det er lenge siden og trivselen synker");
+  leaderBonus(g);
+  assert(g.morale === 70 && g.lastBonusDay === day(g), "bonusen ble ikke gitt");
+  assert(!leaderBonusDue(g), "bonus to ganger samme uke");
+  g.minute += 8 * 1440;
+  g.morale = 90;
+  assert(!leaderBonusDue(g), "bonus når trivselen er høy");
+  g.morale = 30;
+  g.cash = 0;
+  assert(!leaderBonusDue(g), "bonus uten penger");
+});
+
+test("Planleggeren holder valgt mengde skrap på lager (B-271)", () => {
+  const g = newGame(2711);
+  g.stage = 3;
+  g.contracts = g.contracts.filter((c) => c.status !== "aktiv");
+  for (const id of Object.keys(g.scrap) as (keyof typeof g.scrap)[]) g.scrap[id].t = 0;
+  g.cash = 1e9;
+  const stats = computePlantStats(g);
+  g.settings.autoBuyTargetT = Math.round(stats.yardT * 0.5);
+  autoBuy(g, stats, { credit: false, cap: null });
+  const total = Object.values(g.scrap).reduce((a, x) => a + x.t, 0);
+  assert(Math.abs(total - g.settings.autoBuyTargetT) <= g.settings.autoBuyTargetT * 0.05, `på lager ${total}`);
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

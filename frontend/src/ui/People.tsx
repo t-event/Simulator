@@ -312,6 +312,23 @@ function Morale({ g, stats, act }: Props) {
       <button className="g-primary" disabled={day(g) < nextBonus} onClick={() => act((gg) => giveBonus(gg))}>
         {day(g) < nextBonus ? `Bonus igjen dag ${nextBonus}` : `Gi alle bonus (${fmtKr(bonusCost(g))})`}
       </button>
+      {/* Skiftlederen gir bonus (B-271): valget vises når du har en skiftleder */}
+      {g.workers.some((w) => w.role === "skiftleder") && (
+        <label className="g-toggle">
+          <input
+            type="checkbox"
+            checked={!!g.settings.leaderBonus}
+            onChange={(e) => act((gg) => void (gg.settings.leaderBonus = e.target.checked))}
+          />
+          <span>
+            Skiftlederen gir alle bonus når det trengs
+            <span className="g-toggle-hint g-muted">
+              Når det er lenge siden forrige bonus og trivselen synker, eller trivselen er lav – og bare når kassa har
+              god råd.
+            </span>
+          </span>
+        </label>
+      )}
     </Card>
   );
 }

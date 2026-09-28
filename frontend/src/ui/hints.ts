@@ -186,7 +186,10 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
       });
   }
   // Lenge siden bonus (B-159): trivselen synker, si fra før folk begynner å slutte
+  // Gir skiftlederen bonus (B-271), trengs ikke rådet
+  const leaderGives = !!g.settings.leaderBonus && shiftLeaderAtWork(g);
   if (
+    !leaderGives &&
     g.workers.length &&
     g.morale >= 40 &&
     g.morale < 70 &&

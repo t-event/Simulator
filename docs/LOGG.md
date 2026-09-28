@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 208 – 2026-09-28: Autobonus og skrap på lager
+
+**Brukeren ba om:** knapp for autobonus når man har skiftleder, og valg om hvor mange tonn planleggeren skal holde på lager.
+
+**Gjort:** B-271. Bryter under Folk → Ansatte (skiftlederen gir bonus når det trengs) og valget «Planleggeren holder på
+lager» på Marked. Publiseringen av #217 (B-270) var grønn.
+
+**Testet:** tsc, lint, npm test (to nye tester), balance, build, Playwright på 320 og 390 (valgene vises, lagres, ingen
+horisontal scrolling).
+
+**Gjenstår:** i morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 207 – 2026-09-28: Sjekk av de nye systemene hos ekte spillere
 
 **Brukeren ba om:** «Fortsett».
