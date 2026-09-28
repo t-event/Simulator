@@ -2231,6 +2231,10 @@ button {
   font-size: var(--fs-caption);
 }
 
+.g-when-head > .g-winter {
+  color: var(--info);
+}
+
 /* Resepten (B-035) */
 .g-recipe-suggest {
   display: flex;

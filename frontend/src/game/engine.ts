@@ -36,6 +36,8 @@ import { worldFactor } from "./world";
 import { maybeAdvisor, maybeCreateDecision } from "./decisions";
 import { maybeTip, setCreditHint } from "./tips";
 import { envDay, envHour, envStartBlocked, newEnv, updateEmissions } from "./environment";
+import { calendarDay, riskFactor, winterHour } from "./calendar";
+import { explosion, explosionChance } from "./accidents";
 import { scrapResearchFor, suggestRecipe } from "./recipe";
 import type { Research } from "./research";
 import {
@@ -869,9 +871,20 @@ function startHeat(g: GameState, index: number, plant: PlantStats): boolean {
 function heatEvents(g: GameState, index: number, plant: PlantStats): number {
   const stats = unitView(plant, index);
   const f = g.furnaces[index];
-  const m = stats.maintFactor;
+  // Om vinteren skjer havarier oftere (B-265)
+  const m = stats.maintFactor * riskFactor(g);
   const furnace = stats.furnace;
   let extra = 0;
+  // Eksplosjon: vann eller is i skrapet blir til damp i det flytende stålet (B-265)
+  if (chance(g, explosionChance(g, stats.cycleMin))) {
+    const hours = explosion(g, index, stats.repairFactor);
+    const until = g.minute + stats.cycleMin + hours * 60;
+    if (until > f.downUntilMin) {
+      f.downUntilMin = until;
+      f.downReason = "Havari: eksplosjon i ovnen";
+    }
+    extra += 30;
+  }
   if (furnace.arc) {
     // Utstyr mot havarier per ovn (B-094)
     const regulated = unitHas(g, index, "elektroderegulering");
@@ -2968,6 +2981,8 @@ function onHour(g: GameState, stats: PlantStats): void {
   checkTemps(g);
   // Havari på renseanlegget (B-263)
   envHour(g, stats);
+  // Frost om vinteren (B-265)
+  winterHour(g, stats);
   // Kapitlene forskningen krever, kommer i fagboka når forskningen blir synlig (B-025)
   for (const r of RESEARCH)
     if (r.reads && r.stage <= g.stage && (!r.konsern || g.konsern?.unlocked)) unlock(g, r.reads);
@@ -3146,6 +3161,8 @@ function onDay(g: GameState, stats: PlantStats): void {
 
   // Bot for gårsdagens utslipp (B-263)
   envDay(g);
+  // Vinteren kommer og går (B-265)
+  calendarDay(g);
   // Faste kostnader
   addCost(g, "lonn", stats.salaryPerDay);
   addCost(g, "faste", STAGES[g.stage].fixedPerDay);

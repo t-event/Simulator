@@ -9,6 +9,7 @@ import { ADDONS } from "./data";
 import { addCost, adjustReputation, fmtKr, fmtT, log, unlock } from "./engine";
 import { day, has, type PlantStats } from "./plant";
 import { chance, uniform } from "./random";
+import { riskFactor } from "./calendar";
 import type { EnvState, GameState } from "./types";
 
 /** Renseanleggene i rekkefølge: tonn smeltet stål de renser i døgnet, og om de har to linjer */
@@ -155,7 +156,8 @@ export function envHour(g: GameState, stats: PlantStats): void {
   }
   const running = g.furnaces.some((f) => f.heat);
   if (!running || envDown(g)) return;
-  if (chance(g, (BREAKDOWN_PER_DAY / 24) * stats.maintFactor)) envBreakdown(g, stats);
+  // Oftere om vinteren (B-265)
+  if (chance(g, (BREAKDOWN_PER_DAY / 24) * stats.maintFactor * riskFactor(g))) envBreakdown(g, stats);
 }
 
 /** Pris for å reparere renseanlegget: litt av prisen på anlegget */

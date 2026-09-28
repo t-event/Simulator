@@ -222,6 +222,27 @@ export const KNOWLEDGE: KnowledgeCard[] = [
     ],
   },
   {
+    id: "vannskrap",
+    title: "Vann i skrapet og sikkerhet",
+    icon: "hard-hat",
+    part: "grunnlag",
+    short: "Vann og is i skrapet blir til damp i flytende stål og kan eksplodere. Tørt skrap og orden redder liv.",
+    pages: [
+      {
+        head: "Damp som eksploderer",
+        text: "Vann som kommer ned i flytende stål, blir til damp på et øyeblikk. Dampen tar over tusen ganger så stor plass som vannet, og kan kaste flytende stål og slagg ut av ovnen.",
+      },
+      {
+        head: "Farligst om vinteren",
+        text: "Om vinteren kommer skrapet inn med is og snø, og lukkede beholdere kan være fulle av vann. Skrap under tak, sortering som tar ut lukkede beholdere, og faste rutiner gir færre eksplosjoner.",
+      },
+      {
+        head: "Ingen jobb er verdt et liv",
+        text: "Et stålverk er en farlig arbeidsplass. En dødsulykke stenger verket mens politiet og Arbeidstilsynet gransker, og den preger alle som jobber der i lang tid. God sikkerhetskultur betyr at alle kan si stopp.",
+      },
+    ],
+  },
+  {
     id: "strom",
     title: "Strømpris og effekt",
     icon: "power",

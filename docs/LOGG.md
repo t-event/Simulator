@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 202 – 2026-09-28: Vinter, eksplosjoner, dødsulykker og quizspørsmål
+
+**Brukeren ba om:** dødsfall en ekstremt sjelden gang med store konsekvenser, å fikse quizspørsmålet «Hva gir mer karbon
+i stålet», og større sjanse for eksplosjoner og uforutsette ting om vinteren.
+
+**Gjort:** B-265. Nye `game/calendar.ts` (året, vinter, frost) og `game/accidents.ts` (eksplosjoner og dødsulykker).
+Vinteren gjør havarier, renseanlegg-havarier og hendelseskort 1,5 ganger så vanlige. Snøfnugg i toppfeltet om vinteren.
+Nytt fagbokkapittel med quiz. Quizspørsmålet er skrevet om. Publiseringen av #210 (B-264) ble sjekket.
+
+**Testet:** tsc, lint, npm test (to nye tester), balance (exit 0, eksplosjoner telles per kjøring), Playwright på 320,
+390 og 1366 med et spill om vinteren (snøfnugget, ingen kutt eller horisontal scrolling).
+
+**Gjenstår:** se om spillerne synes eksplosjonene er for sjeldne eller for vanlige (tallene står i `accidents.ts`).
+
+---
+
 ## Økt 201 – 2026-09-28: Ferdiglageret og menyen nederst
 
 **Brukeren ba om:** «Ferdiglageret mitt er fullt, hvorfor det?», så et skjermbilde: «Menyen nederst har kommet lengre
