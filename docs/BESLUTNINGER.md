@@ -5366,3 +5366,14 @@ Brukeren: «Legg til fellesferie der det er sommerstans i 3 uker med vedlikehold
   Ingen konkurs. Med 16 frø er nybegynneren ca. to uker tregere med fellesferie og vikarer (median 182) enn uten
   fellesferie (168, med sjeldnere egen ferie). Det er prisen for ferien, og godt innenfor målet (høyst 240).
 - Ny tilstand: `summer` (standard `null` i `migrate()`). Tre tester i `tests.ts`. Konto: nei (selve spillet).
+
+## B-299 Æresmerket vises på topplista (2026-09-28)
+Status: gjelder
+Brukeren: «Merket til de som var med på økonomireformen skal vises på topplista også».
+- **Server** (`supabase/048_merker_toppliste.sql`, etter tørrkjøring som ble rullet tilbake: 15 rader, de to berørte
+  fikk merket): `leaderboard()` gir en ny kolonne `badges` (nå «reform» fra `economy_reform_log`, som `my_badges`,
+  B-296). Returtypen endres, så funksjonen slettes og lages på nytt med samme rettigheter; `my_rank` bruker bare
+  `plass` og `is_me` og er uendret. Ingen spillerdata endres.
+- **App:** `BoardRow.badges` (tom liste fra en eldre server; ukjente merker vises ikke). Topplista viser
+  «Reformveteran» med ikon under navnet, som sesongplasseringen. Navnene står i `BADGE_NAMES` (`net/leaderboard.ts`).
+- Test i `net/tests.ts` (falsk server). Konto: nei for å se lista (som før, B-127).

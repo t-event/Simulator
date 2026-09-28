@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 233 – 2026-09-28: Æresmerket på topplista
+
+**Brukeren ba om:** at merket for dem som var med på økonomireformen også vises på topplista.
+
+**Gjort:** B-299. Migrasjon 048 (etter tørrkjøring): `leaderboard()` sender `badges`. Topplista viser «Reformveteran»
+under navnet. Publiseringen av #242 (B-297, B-298) var grønn.
+
+**Testet:** tørrkjøring i en transaksjon som ble rullet tilbake, sikkerhetsråd (uendret), tsc, lint, npm test (ny
+nett-test), build, Playwright på 320 og 390 px med en falsk server.
+
+**Gjenstår:** pynt for sesong 3 før den startes. I morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 232 – 2026-09-28: Krig i verden, fellesferie og juleferie
 
 **Brukeren ba om:** krig i verden som påvirker strømpris og etterspørsel, bare i konsernet og høyst én gang i året;

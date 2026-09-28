@@ -35,7 +35,12 @@ export interface BoardRow {
   title: string | null;
   /** Spilldagen spillet ble koblet til kontoen (første dag i tidslinja, B-170), eller null */
   linked_day: number | null;
+  /** Æresmerker bare serveren vet om, f.eks. «reform» (B-296), vist ved navnet (B-299) */
+  badges: string[];
 }
+
+/** Navnet på æresmerkene på topplista (samme navn som prestasjonen, B-296) */
+export const BADGE_NAMES: Record<string, string> = { reform: "Reformveteran" };
 
 /** Fra hvilken dag et spill må være koblet til for at det vises på lista: de første dagene er ingen forskjell */
 export const LINKED_SHOWN_FROM = 6;
@@ -75,6 +80,7 @@ export async function fetchLeaderboard(kind: BoardKind, season: number | null = 
       honor?: string | null;
       title?: string | null;
       linked_day?: number | null;
+      badges?: string[] | null;
     }[]
   >("leaderboard", { kind, lim, season });
   return rows.map((r) => ({
@@ -85,6 +91,8 @@ export async function fetchLeaderboard(kind: BoardKind, season: number | null = 
     ...splitHonor(r.honor ?? null),
     title: r.title ?? null,
     linked_day: r.linked_day ?? null,
+    // Eldre server uten merker: tom liste. Ukjente merker vises ikke
+    badges: (r.badges ?? []).filter((b) => b in BADGE_NAMES),
   }));
 }
 
