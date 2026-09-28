@@ -4540,3 +4540,11 @@ Brukeren: «Fortsett». Fikk fire forslag (øse som heller, lysbueovn, S av glø
 - Ikonet på hjemskjermen til en iPhone byttes først når spillet legges til på nytt.
 - Konto: nei. Testet: startskjermen på de 7 størrelsene (ingen horisontal scrolling, kortet får plass), ikonene i
   16–512 px.
+
+## B-250 Pipene står på smeltehallen i app-ikonet og tittelbildet (2026-09-28)
+Status: gjelder (retter B-249, samme regel som B-246 i anleggsbildet)
+Brukeren: «Fiks pipeplasseringa i appikonet og tittelbildet.»
+- I ikonet sto den store pipa i lufta over støpehallen (bunnen sluttet over taket), og i tittelbildet sto den på
+  støpehallen. Nå står begge pipene på høyre takflate på smeltehallen og går ned i hallen, som i anleggsbildet (B-246).
+- PNG-ene er laget på nytt fra `public/icon.svg`.
+- Konto: nei.

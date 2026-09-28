@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 187 – 2026-09-28: Pipene i ikonet og tittelbildet
+
+**Brukeren ba om:** å fikse plasseringen av pipene i app-ikonet og tittelbildet.
+
+**Gjort:** B-250. Begge pipene står på smeltehallens tak i ikonet og tittelbildet; PNG-ene laget på nytt.
+
+**Testet:** tsc, `npm test`; ikonet og tittelbildet sett på, startskjermen på 320–2 560 px.
+
+**Gjenstår:** veksten på toppen i sluttspillet; tom tonn-liste denne uka (B-235); reserven og kassegrensen; fase 2.
+
+---
+
 ## Økt 186 – 2026-09-28: Logo, app-ikon og tittelbilde
 
 **Brukeren ba om:** «Fortsett» (siste punkt i UI-planen). Valgte «verket i kveldslys» blant fire forslag.
