@@ -5120,3 +5120,18 @@ underfane ble hentet ut på nivå 1–3 (390 px) og gått gjennom for forkortels
 - Ellers funnet uten endring: kWh, MW og effekttariff forklares der de står; fagord som foring og omforing forklares i
   vedlikeholdskortet og fagboka.
 - Konto: nei (regel 1, ditt eget spill).
+
+## B-283 «Hva gjør jeg nå?» – en fast hjelpeknapp (2026-09-28)
+Status: gjelder
+Brukeren valgte en hjelpeknapp etter spørsmålene om fagpoeng og havari (B-281, B-282).
+- **Knappen** (spørsmålstegn) står i raden nederst ved Mål og pokalen på mobil, og i varsellinja i toppfeltet på PC.
+  Under 380 px er den raden for trang (varsellinja ville bare vist «…»), så der står knappen ytterst i tallraden øverst.
+  Trykkflaten er 44 px.
+- **Arket** (`ui/HelpNow.tsx`) viser:
+  - «Det viktigste nå»: de fire første rådene fra `hints()` med en knapp dit («Gå til Marked», «Vis på Verket» …). Er det
+    ingen råd: «Ingenting du må gjøre akkurat nå – verket går av seg selv.»
+  - «Slik står det til i verket»: skrap, hver ovn, støping, lager og kontrakter med status og, når noe står, hva det
+    betyr og hva du skal trykke (havari: «Repareres av seg selv», mangler folk: «Ansett under Folk» osv.).
+  - «Ord i spillet» (kan trykkes opp): fagpoeng, charge, foring, omdømme, ordrekø, C/P/Spor.
+- Arket er et vanlig ark på øverste nivå (som varsellista), så det teller med i `modalOpen`.
+- Konto: nei (regel 1, ditt eget spill).

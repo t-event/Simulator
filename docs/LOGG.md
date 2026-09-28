@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 220 – 2026-09-28: «Hva gjør jeg nå?»
+
+**Brukeren ba om:** «Fortsett», og valgte hjelpeknappen «Hva gjør jeg nå?».
+
+**Gjort:** B-283. Et spørsmålstegn ved Mål nederst (i tallraden øverst under 380 px, i toppfeltet på PC) åpner et ark
+med det viktigste å gjøre, status for hvert sted i verket med forklaring, og en kort ordliste. Publiseringen av #229
+(B-282) var grønn.
+
+**Testet:** tsc, lint, npm test, build, Playwright på de sju størrelsene (320–2 560 px): knappen 44 px, ingen horisontal
+scrolling, arket åpnes, knappene i arket tar deg dit og lukker arket.
+
+**Gjenstår:** i morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 219 – 2026-09-28: Nybegynner-gjennomgang
 
 **Brukeren ba om:** «Fortsett», og valgte nybegynner-gjennomgangen.

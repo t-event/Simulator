@@ -6291,3 +6291,86 @@ button.g-prod-row:hover {
   width: 1em;
   height: 1em;
 }
+
+/* «Hva gjør jeg nå?» (B-283) */
+.g-help-todo,
+.g-help-status {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin: 0 0 var(--sp-4);
+  padding: 0;
+  list-style: none;
+}
+
+.g-help-todo li,
+.g-help-status li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+}
+
+.g-help-todo p,
+.g-help-status p {
+  margin: 0;
+}
+
+.g-help-todo button,
+.g-help-status button {
+  min-height: 44px;
+}
+
+.g-help-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-2) var(--sp-3);
+  width: 100%;
+}
+
+.g-help-row strong {
+  min-width: 5.5em;
+}
+
+.g-help-words {
+  display: grid;
+  gap: var(--sp-2);
+  margin: var(--sp-2) 0 0;
+}
+
+.g-help-words dt {
+  font-weight: 700;
+}
+
+.g-help-words dd {
+  margin: 0;
+  color: var(--text-2);
+}
+
+/* Hjelpeknappen står i varsellinja, men under 380 px i tallraden øverst, der det er plass (B-283) */
+.g-help-kpi {
+  display: none;
+}
+
+@media (max-width: 379px) {
+  .g-notice-row .g-help-btn {
+    display: none;
+  }
+
+  .g-help-kpi {
+    display: inline-flex;
+    padding: 13px 12px;
+    margin: -13px -12px -13px auto;
+  }
+
+  .g-help-kpi .ds-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--info);
+  }
+}
