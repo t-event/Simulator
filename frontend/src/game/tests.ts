@@ -2470,6 +2470,18 @@ test("Dødsulykke (B-265): en ansatt omkommer, verket stenges i tre døgn, stor 
   assert(!alone.pendingDecision && alone.furnaces[0].downUntilMin === 0, "ulykke uten ansatte");
 });
 
+test("Nestenulykke (B-266): kommer ikke igjen på samme nivå når verneutstyret er kjøpt", () => {
+  const g = newGame(266);
+  g.stage = 2;
+  const d = makeDecision(g, "nestenulykke")!;
+  assert(!!d, "kortet kom ikke");
+  g.pendingDecision = { ...d, resumeSpeed: 1 };
+  resolveDecision(g, 0);
+  assert(makeDecision(g, "nestenulykke") === null, "kortet kom igjen på samme nivå");
+  g.stage = 3;
+  assert(makeDecision(g, "nestenulykke") !== null, "kortet kommer aldri igjen, heller ikke på et større verk");
+});
+
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden
 if (failed) {
   console.log(`\n${failed} test(er) feilet`);
