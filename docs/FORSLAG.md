@@ -12,6 +12,10 @@ til «Avgjort» nederst).
 
 ## Venter
 
+- **Slå på slagghåndteringen (B-253):** når skraplageret har fått sin første eier (anbudet stenger 29.9. 01:33 UTC) og betalt
+  ut inntekt i noen dager uten feil: `update public.companies set active = true where type = 'slagg'; select public.world_tick();`
+  Sjekk så kortet under Konsern → Industrien.
+
 - **Logg inn med Google og Apple** (eieren: «senere», B-212). Krever oppsett i dashbordet og hos Google/Apple.
 - **Rydde gamle gjester** (B-212): gjester som aldri oppretter konto, blir liggende. Når det blir mange:
   `delete from auth.users where is_anonymous and created_at < now() - interval '60 days'` (spillene følger med).

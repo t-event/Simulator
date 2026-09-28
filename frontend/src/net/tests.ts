@@ -55,7 +55,7 @@ import {
 } from "./sync";
 import { forgetGuest, isGuest, onGuestSave, setGuestClock } from "./guest";
 import { DEPOSIT_REFUSAL_TEXT, depositToTreasury, fetchTreasury } from "./treasury";
-import { applyTenderResult, BID_REFUSAL_TEXT, fetchWorldStatus, placeBid, timeLeft } from "./world";
+import { applyTenderResult, applyTenderResults, BID_REFUSAL_TEXT, fetchWorldStatus, placeBid, timeLeft } from "./world";
 
 declare const process: { exitCode?: number };
 
@@ -1398,6 +1398,27 @@ const main = async () => {
     // Et gammelt anbud (over 14 dager) gir ikke varsel
     const old = { ...lost, id: 8, closedAt: "2026-09-01T09:00:00Z" };
     assert(!applyTenderResult(g, "Skraplageret", old, now), "varsel om gammelt anbud");
+  });
+
+  await test("To selskaper (B-253): slagghåndteringen tolkes, og begge anbudene gir varsel uansett rekkefølge", async () => {
+    const g = newGame(253);
+    const now = Date.parse("2026-10-20T12:00:00Z");
+    const base = { closedAt: "2026-10-19T09:00:00Z", status: "avgjort" as const, bidders: 2, tie: false };
+    // Slagghåndteringen har det nyeste anbudet (id 12), men står først i lista
+    const companies = [
+      {
+        name: "Slagghåndteringen",
+        lastResult: { ...base, id: 12, winner: "Grane", won: false, winningBid: 90e6, myBid: 50e6 },
+      },
+      {
+        name: "Skraplageret",
+        lastResult: { ...base, id: 11, winner: "Tuster", won: true, winningBid: 200e6, myBid: 200e6 },
+      },
+    ];
+    assert(applyTenderResults(g, companies, now) === 2, "fikk ikke varsel om begge anbudene");
+    assert(g.tenderSeen === 12, `sist sett ${g.tenderSeen}`);
+    assert(/slagghåndteringen/.test(g.log.at(-1)!.text), "feil selskap i varselet");
+    assert(applyTenderResults(g, companies, now) === 0, "samme varsler to ganger");
   });
 
   setSaveListener(null);

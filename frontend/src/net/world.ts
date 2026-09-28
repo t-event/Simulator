@@ -32,9 +32,18 @@ export interface TenderResult {
   myBid: number | null;
 }
 
+/** Selskapstypene serveren kjenner (B-189, B-253). Et selskap som er slått av, sendes ikke. */
+export type CompanyType = "skraplager" | "slagg";
+
+/** Hva eieren tjener på, med vanlige ord – brukt i beskjeden om åpent anbud */
+export const EARNS_FROM: Record<CompanyType, string> = {
+  skraplager: "skrapet de andre spillerne bruker",
+  slagg: "slaggen de andre spillerne lager",
+};
+
 export interface Company {
   id: number;
-  type: "skraplager";
+  type: CompanyType;
   name: string;
   owner: string | null;
   mine: boolean;
@@ -93,8 +102,8 @@ export async function fetchWorldStatus(): Promise<WorldStatus> {
   return {
     companies: (r?.companies ?? []).map((c) => ({
       id: num(c.id),
-      type: "skraplager",
-      name: String(c.name ?? "Skraplageret"),
+      type: c.type === "slagg" ? "slagg" : "skraplager",
+      name: String(c.name ?? (c.type === "slagg" ? "Slagghåndteringen" : "Skraplageret")),
       owner: str(c.owner),
       mine: c.mine === true,
       concessionUntil: str(c.concession_until),
@@ -146,6 +155,21 @@ export function timeLeft(iso: string, now = Date.now()): string {
  * Varsel om et avgjort anbud (B-237) til den som bydde: hvem som vant, med hvor mye, og at budet er tilbake i
  * konsernkassa. Gis én gang per anbud (`tenderSeen`), og bare for anbud som stengte de siste 14 dagene.
  */
+/**
+ * Resultatene for alle selskapene (B-253): i rekkefølge etter anbudet, så et nyere anbud på ett selskap ikke gjør at
+ * et eldre på et annet regnes som sett før det har gitt varsel. Gir hvor mange varsler som ble gitt.
+ */
+export function applyTenderResults(
+  g: GameState,
+  companies: Pick<Company, "name" | "lastResult">[],
+  now = Date.now(),
+): number {
+  let n = 0;
+  for (const c of [...companies].sort((a, b) => (a.lastResult?.id ?? 0) - (b.lastResult?.id ?? 0)))
+    if (c.lastResult && applyTenderResult(g, c.name, c.lastResult, now)) n++;
+  return n;
+}
+
 export function applyTenderResult(g: GameState, company: string, r: TenderResult, now = Date.now()): boolean {
   if (r.id <= (g.tenderSeen ?? 0)) return false;
   g.tenderSeen = r.id;

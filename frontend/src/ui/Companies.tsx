@@ -46,6 +46,9 @@ function millions(v: string): number {
 const COMPANY_INTRO: Record<Company["type"], string> = {
   skraplager:
     "Eieren tjener på skrapet de andre spillerne kjøper – høyst én vanlig dags bruk per spiller per dag, så farten i spillet betyr ikke noe.",
+  // B-253: bygget, men slått av på serveren til skraplageret har vist at kjeden virker
+  slagg:
+    "Eieren tjener på slaggen de andre spillerne lager – omtrent 0,12 tonn slagg per tonn stål, høyst én vanlig dags produksjon per spiller per dag, så farten i spillet betyr ikke noe.",
 };
 
 const INDUSTRY_INTRO =

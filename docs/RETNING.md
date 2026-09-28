@@ -254,6 +254,9 @@ pilotkonsesjon på 14 ekte dager (B-186), ekte inntekt fra andres skrapbruk ette
   én kort introduksjon og én handling.
 - Industrimakt vises på profilen (topplista) når spilleren har sett industrien.
 
+**Status fase 2 (2026-09-28, B-253):** slagghåndteringen er bygget på serveren og i appen, men slått av til
+skraplageret har fått sin første eier og betalt ut inntekt i noen dager uten feil. Mekanisk verksted gjenstår.
+
 ### Fase 3 – eierskap og Kontroll
 
 Kontroll per bedrift (lønnsomhet, gjeld, likviditet, ledelse, investeringer, markedsposisjon, konsernets støtte og hvor
