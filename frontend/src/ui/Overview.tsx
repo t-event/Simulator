@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { requestManual, requestReline, setFurnaceGrade, setTargetGrade, upgradeOptions } from "../game/actions";
 import { Maintenance } from "./Maintenance";
 import { RecipeCard } from "./Recipe";
-import { auto } from "../game/research";
+import { auto, automationUnlocked } from "../game/research";
 import { GRADE_IDS, GRADES, PRODUCTS, SCRAP_TYPES, STAGES } from "../game/data";
 import { currentOrder, furnaceOrder, recipeEstimate, scrapAlert, SEQUENCE_WAIT_MIN } from "../game/engine";
 import {
@@ -16,7 +16,7 @@ import {
   unitType,
   type PlantStats,
 } from "../game/plant";
-import type { CostCategory, DayFinance, GameState, GradeId, IncomeCategory } from "../game/types";
+import type { Contract, CostCategory, DayFinance, GameState, GradeId, IncomeCategory } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { AnalysisLine, Bar, Card, GradeChips, Stat } from "./common";
 import { fmtClock, fmtKr, fmtNum, fmtPct, fmtT } from "./format";
@@ -334,9 +334,6 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
   const [sheet, setSheet] = useState<Station | null>(null);
   const [pynt, setPynt] = useState(false);
   const tab: SubTab = chosenTab;
-  const est = recipeEstimate(g, g.targetGrade, stats);
-  const order = currentOrder(g);
-  const split = gradesInUse(g).length > 1;
   const casting = castingType(g);
   const castHead = g.castQueue[0];
   const y = g.history[g.history.length - 1];
@@ -446,129 +443,7 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
                 <Icon name="chevron-right" />
               </button>
             )}
-            <Card title="Produksjon nå">
-              {split ? (
-                <ul className="g-furnace-grades">
-                  {g.furnaces.map((_, i) => {
-                    const o = furnaceOrder(g, i);
-                    return (
-                      <li key={i}>
-                        Ovn {i + 1}: <strong>{GRADES[furnaceGrade(g, i)].name}</strong>
-                        {o ? ` til ${o.customer} (${fmtT(o.tonnes - o.delivered)} igjen)` : " for lager og spot"}
-                      </li>
-                    );
-                  })}
-                </ul>
-              ) : order ? (
-                <p>
-                  Produserer <strong>{GRADES[order.grade].name}</strong> til {order.customer} (
-                  {fmtT(order.tonnes - order.delivered)} igjen).
-                </p>
-              ) : (
-                <p className="g-muted">
-                  Ingen kontrakt venter på produksjon. Verket lager {GRADES[g.targetGrade].name.toLowerCase()} for lager
-                  og spot.
-                </p>
-              )}
-              {(g.stage >= 1 || g.contracts.filter((c) => c.status === "aktiv").length > 1) && (
-                <AutoToggle
-                  g={g}
-                  act={act}
-                  k="followQueue"
-                  label="Følg ordrekøen (kvalitet og resept skifter etter kontrakten som står først)"
-                />
-              )}
-              {g.furnaces.length > 1 && auto(g, "followQueue") && (
-                <AutoToggle
-                  g={g}
-                  act={act}
-                  k="splitGrades"
-                  label="To kvaliteter samtidig: ovn 2 lager neste kvalitet i køen når den er en annen enn ovn 1 sin"
-                />
-              )}
-              <label className="g-field">
-                <span>{g.furnaces.length > 1 ? "Ovn 1 kjører mot" : "Kjør mot kvalitet"}</span>
-                <select
-                  value={g.targetGrade}
-                  disabled={auto(g, "followQueue") && !!order}
-                  onChange={(e) => act((gg) => setTargetGrade(gg, e.target.value as GradeId))}
-                >
-                  {GRADE_IDS.filter((id) => GRADES[id].minStage <= g.stage || id === g.targetGrade).map((id) => (
-                    <option key={id} value={id}>
-                      {GRADES[id].name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              {/* Valget er grått når ordrekøen styrer (B-210): mange skjønte ikke hvorfor de ikke kunne velge selv */}
-              {auto(g, "followQueue") && !!order && (
-                <div className="g-note g-queue-lock">
-                  <span>
-                    Ordrekøen styrer kvaliteten nå: ovnen lager det kontrakten øverst i køen trenger. Vil du velge selv,
-                    slå av «Følg ordrekøen».
-                  </span>
-                  <button className="g-small" onClick={() => act((gg) => void (gg.settings.followQueue = false))}>
-                    Velg selv
-                  </button>
-                </div>
-              )}
-              {g.furnaces.slice(1).map((f, j) => (
-                <label className="g-field" key={j}>
-                  <span>Ovn {j + 2} kjører mot</span>
-                  <select
-                    value={f.grade ?? ""}
-                    disabled={auto(g, "followQueue") && !!order}
-                    onChange={(e) =>
-                      act((gg) =>
-                        setFurnaceGrade(gg, j + 1, e.target.value === "" ? null : (e.target.value as GradeId)),
-                      )
-                    }
-                  >
-                    <option value="">Samme som ovn 1</option>
-                    {GRADE_IDS.filter(
-                      (id) => id !== g.targetGrade && (GRADES[id].minStage <= g.stage || id === f.grade),
-                    ).map((id) => (
-                      <option key={id} value={id}>
-                        {GRADES[id].name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              ))}
-              {split && (
-                <p className="g-muted">
-                  Hver ovn bruker resepten for sin kvalitet. Stålet går til samme støpemaskin, én øse av gangen.
-                  {casting.continuous &&
-                    ` Strengstøpingen støper én kvalitet om gangen. Øsa med den andre kvaliteten venter til støpingen har stått en halvtime (sekvensen er slutt), men høyst ${fmtNum(SEQUENCE_WAIT_MIN / 60, 1)} timer. Byttes kvaliteten midt i en sekvens, blir overgangsemnene skrap (ca. ${fmtT(casting.tph * 0.05)}).`}
-                </p>
-              )}
-              <p className="g-muted">{GRADES[g.targetGrade].description}</p>
-              <div className="g-estimate">
-                <span>Anslag med resepten:</span>
-                <AnalysisLine a={est.analysis} />
-                <span>Holder:</span>
-                <GradeChips
-                  grades={est.grades.filter((id) => GRADES[id].minStage <= g.stage)}
-                  highlight={g.targetGrade}
-                />
-              </div>
-              {stats.furnace.arc ? (
-                <div className="g-manual">
-                  <button
-                    className={g.settings.manualNext ? "g-primary is-on" : "g-primary"}
-                    onClick={() => act((gg) => requestManual(gg, !gg.settings.manualNext))}
-                  >
-                    {g.settings.manualNext ? "Du tar neste charge ✓" : "Ta styringen på neste charge"}
-                  </button>
-                  <p className="g-muted">
-                    Kjør chargen selv: fire korte runder, under ett minutt. God kjøring gir fagpoeng, lavere fosfor og
-                    bedre betalt stål{(g.controlBest ?? 0) > 0 && ` · rekord ${fmtNum(g.controlBest ?? 0)} poeng`}.
-                  </p>
-                </div>
-              ) : (
-                g.stage >= 2 && <p className="g-muted">Med en lysbueovn kan du ta styringen og kjøre chargene selv.</p>
-              )}
-            </Card>
+            <ProductionNow g={g} stats={stats} act={act} onRecipe={() => setTab("resept")} />
           </div>
           <div className="g-col">
             {!canMove && <StageCard g={g} act={act} />}
@@ -872,5 +747,164 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
       )}
       {sheet && <UpgradeSheet g={g} station={sheet} act={act} onClose={() => setSheet(null)} />}
     </div>
+  );
+}
+
+/**
+ * «Produksjon nå» (B-230): kort og tydelig. Øverst hva hver ovn lager og til hvem, så én handling (velg kvalitet, eller
+ * «Velg selv» når ordrekøen styrer), og kontrollrommet. Bryterne og forklaringene ligger bak «Innstillinger og
+ * forklaring» – før sto alt åpent, og kortet ble svært langt på storverket.
+ */
+function ProductionNow({
+  g,
+  stats,
+  act,
+  onRecipe,
+}: {
+  g: GameState;
+  stats: PlantStats;
+  act: GameApi["act"];
+  onRecipe: () => void;
+}) {
+  const est = recipeEstimate(g, g.targetGrade, stats);
+  const order = currentOrder(g);
+  const split = gradesInUse(g).length > 1;
+  const casting = castingType(g);
+  const many = g.furnaces.length > 1;
+  const queueRules = auto(g, "followQueue") && !!order;
+  // Ovner som lager det samme til samme kunde, står på én linje («Ovn 2–3»)
+  const rows: { who: string; grade: GradeId; o: Contract | null }[] = [];
+  if (split) {
+    let from = 0;
+    g.furnaces.forEach((_, i) => {
+      const grade = furnaceGrade(g, i);
+      const o = furnaceOrder(g, i);
+      const next = i + 1 < g.furnaces.length ? { grade: furnaceGrade(g, i + 1), o: furnaceOrder(g, i + 1) } : null;
+      if (next && next.grade === grade && next.o?.id === o?.id) return;
+      rows.push({ who: from === i ? `Ovn ${i + 1}` : `Ovn ${from + 1}–${i + 1}`, grade, o });
+      from = i + 1;
+    });
+  } else rows.push({ who: many ? "Alle ovner" : "Ovnen", grade: g.targetGrade, o: order });
+  const gradeOptions = (current: GradeId | null, skip?: GradeId) =>
+    GRADE_IDS.filter((id) => id !== skip && (GRADES[id].minStage <= g.stage || id === current)).map((id) => (
+      <option key={id} value={id}>
+        {GRADES[id].name}
+      </option>
+    ));
+  return (
+    <Card title="Produksjon nå" className="g-prod-now">
+      <ul className="g-prod-rows">
+        {rows.map((r) => (
+          <li key={r.who}>
+            <span className="g-prod-who">{r.who}</span>
+            <strong className="g-prod-grade">{GRADES[r.grade].name}</strong>
+            <span className="g-prod-to">
+              {r.o ? (
+                <>
+                  → {r.o.customer} · {fmtT(r.o.tonnes - r.o.delivered)} igjen
+                </>
+              ) : (
+                "→ lager og spot"
+              )}
+            </span>
+          </li>
+        ))}
+      </ul>
+      {/* Resepten som ikke holder, er det eneste som må ordnes her; ellers står analysen bak «Innstillinger» */}
+      {!est.grades.includes(g.targetGrade) && (
+        <Callout tone="critical">
+          Resepten holder ikke kravet til {GRADES[g.targetGrade].name.toLowerCase()}.{" "}
+          <button className="g-link" onClick={onRecipe}>
+            Juster resepten
+          </button>
+        </Callout>
+      )}
+      {queueRules ? (
+        <div className="g-queue-lock">
+          <span className="g-muted g-small-text">Ordrekøen velger kvaliteten.</span>
+          <button className="g-small" onClick={() => act((gg) => void (gg.settings.followQueue = false))}>
+            Velg selv
+          </button>
+        </div>
+      ) : (
+        <div className="g-prod-pick">
+          <label className="g-field">
+            <span>{many ? "Ovn 1" : "Kvalitet"}</span>
+            <select value={g.targetGrade} onChange={(e) => act((gg) => setTargetGrade(gg, e.target.value as GradeId))}>
+              {gradeOptions(g.targetGrade)}
+            </select>
+          </label>
+          {g.furnaces.slice(1).map((f, j) => (
+            <label className="g-field" key={j}>
+              <span>Ovn {j + 2}</span>
+              <select
+                value={f.grade ?? ""}
+                onChange={(e) =>
+                  act((gg) => setFurnaceGrade(gg, j + 1, e.target.value === "" ? null : (e.target.value as GradeId)))
+                }
+              >
+                <option value="">Samme som ovn 1</option>
+                {gradeOptions(f.grade, g.targetGrade)}
+              </select>
+            </label>
+          ))}
+          {automationUnlocked(g, "followQueue") && !g.settings.followQueue && !!order && (
+            <button className="g-link g-prod-back" onClick={() => act((gg) => void (gg.settings.followQueue = true))}>
+              La ordrekøen velge igjen
+            </button>
+          )}
+        </div>
+      )}
+      {stats.furnace.arc && (
+        <div className="g-manual">
+          <button
+            className={g.settings.manualNext ? "g-primary is-on" : "g-primary"}
+            onClick={() => act((gg) => requestManual(gg, !gg.settings.manualNext))}
+          >
+            {g.settings.manualNext ? "Du tar neste charge ✓" : "Ta styringen på neste charge"}
+          </button>
+          <span className="g-muted g-small-text">
+            Fire korte runder – gir fagpoeng og bedre betalt stål
+            {(g.controlBest ?? 0) > 0 && ` · rekord ${fmtNum(g.controlBest ?? 0)}`}
+          </span>
+        </div>
+      )}
+      <details className="g-details">
+        <summary>Innstillinger og forklaring</summary>
+        {(g.stage >= 1 || g.contracts.filter((c) => c.status === "aktiv").length > 1) && (
+          <AutoToggle
+            g={g}
+            act={act}
+            k="followQueue"
+            label="Følg ordrekøen (kvalitet og resept skifter etter kontrakten som står først)"
+          />
+        )}
+        {many && auto(g, "followQueue") && (
+          <AutoToggle
+            g={g}
+            act={act}
+            k="splitGrades"
+            label="To kvaliteter samtidig: ovn 2 lager neste kvalitet i køen når den er en annen enn ovn 1 sin"
+          />
+        )}
+        <p className="g-muted">{GRADES[g.targetGrade].description}</p>
+        <div className="g-estimate">
+          <span>Anslag med resepten:</span>
+          <AnalysisLine a={est.analysis} />
+          <span>Holder:</span>
+          <GradeChips grades={est.grades.filter((id) => GRADES[id].minStage <= g.stage)} highlight={g.targetGrade} />
+        </div>
+        {split && (
+          <p className="g-muted g-small-text">
+            Hver ovn bruker resepten for sin kvalitet. Stålet går til samme støpemaskin, én øse av gangen.
+            {casting.continuous &&
+              ` Strengstøpingen støper én kvalitet om gangen. Øsa med den andre kvaliteten venter til støpingen har stått en halvtime (sekvensen er slutt), men høyst ${fmtNum(SEQUENCE_WAIT_MIN / 60, 1)} timer. Byttes kvaliteten midt i en sekvens, blir overgangsemnene skrap (ca. ${fmtT(casting.tph * 0.05)}).`}
+          </p>
+        )}
+        {!stats.furnace.arc && g.stage >= 2 && (
+          <p className="g-muted g-small-text">Med en lysbueovn kan du ta styringen og kjøre chargene selv.</p>
+        )}
+      </details>
+    </Card>
   );
 }

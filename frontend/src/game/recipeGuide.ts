@@ -65,7 +65,7 @@ export function guideSteps(g: GameState, grade: GradeId): GuideStep[] {
     },
     {
       title: `Kjør mot ${name}`,
-      text: `Velg ${name} i «Kjør mot kvalitet» under «Produksjon nå» på Verket. Følger verket ordrekøen, skjer det av seg selv når du signerer en forespørsel på ${name}.`,
+      text: `Velg ${name} under «Produksjon nå» på Verket. Følger verket ordrekøen, skjer det av seg selv når du signerer en forespørsel på ${name}.`,
       view: "verket",
       done: (gg) => gg.targetGrade === grade || gg.furnaces.some((_, i) => furnaceGrade(gg, i) === grade),
     },
