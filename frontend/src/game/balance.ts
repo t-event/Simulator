@@ -287,6 +287,8 @@ function botHour(g: GameState): void {
       rensehavari: 0,
       // Dødsulykke (B-265): bare ett valg
       dodsulykke: 0,
+      // Fellesferien (B-298): sommervikarer, så verket går videre
+      fellesferie: process.argv.includes("--sommerstans") ? 0 : 1,
     };
     // Messa bare når det er god råd
     const affordable = g.cash > Number(d.data.cost ?? 0) * 4;

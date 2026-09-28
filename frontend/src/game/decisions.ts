@@ -31,7 +31,7 @@ import { chance, pick, rand, uniform } from "./random";
 import { knowledgeCard } from "./knowledge";
 import { realNow } from "./clock";
 import { chooseBreakdownPolicy } from "./environment";
-import { riskFactor, scrapBlocked } from "./calendar";
+import { chooseSummer, riskFactor, scrapBlocked } from "./calendar";
 import type { Contract, Decision, GameState, RepCause, Worker } from "./types";
 
 const DAILY_CHANCE = 0.25;
@@ -550,6 +550,9 @@ export function resolveDecision(g: GameState, option: number): void {
   switch (d.id) {
     case "rensehavari":
       chooseBreakdownPolicy(g, option);
+      return;
+    case "fellesferie":
+      chooseSummer(g, yes ? "stans" : "vikarer");
       return;
     case "billigparti":
       if (!yes) return;

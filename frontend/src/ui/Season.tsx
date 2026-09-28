@@ -11,6 +11,8 @@ import { useState } from "react";
 import { log, unlock } from "../game/engine";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
+import { activeWar, warPct } from "../game/war";
+import { day } from "../game/plant";
 import { applySeasonTwist, applyWorldEvents, canJoinDirectly, joinSeason } from "../game/world";
 import { cloudConfigured } from "../net/config";
 import {
@@ -234,7 +236,9 @@ export function SeasonResultNotice({ onOpen }: { onOpen: (open: boolean) => void
 export function EventsNote({ g }: { g: GameState }) {
   const events = g.world?.events ?? [];
   const twist = g.world?.twist ?? null;
-  if (events.length === 0 && !twist) return null;
+  // Krig i verden (B-297): bare i konsernet, og bare mens den varer
+  const war = activeWar(g);
+  if (events.length === 0 && !twist && !war) return null;
   return (
     <div className="g-note g-events">
       <strong>Nå i markedet</strong>
@@ -242,6 +246,13 @@ export function EventsNote({ g }: { g: GameState }) {
         {twist && (
           <li>
             <strong>Sesongens vri – {twist.title}:</strong> {twist.text}
+          </li>
+        )}
+        {war && (
+          <li>
+            <strong>Krig i verden:</strong> strømmen er ca. {warPct(g, "power")} % dyrere, men det kommer ca.{" "}
+            {warPct(g, "demand")} % flere forespørsler og {warPct(g, "steel")} % bedre pris på stål. Varer i{" "}
+            {Math.max(1, war.untilDay - day(g) + 1)} døgn til.
           </li>
         )}
         {events.map((e) => (

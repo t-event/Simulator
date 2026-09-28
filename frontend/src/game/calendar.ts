@@ -3,7 +3,8 @@
  * etablert. Om vinteren (midten av november til midten av mars, 120 døgn, B-272) gir is, snø og kulde flere uhell: eksplosjoner i ovnen, havarier og
  * uforutsette hendelser.
  */
-import { addCost, fmtKr, log } from "./engine";
+import { MIN_PER_DAY } from "./data";
+import { addCost, adjustMorale, fmtKr, log } from "./engine";
 import { day, has, hourOfDay, type PlantStats } from "./plant";
 import { chance, uniform } from "./random";
 import type { GameState } from "./types";
@@ -52,7 +53,157 @@ export function isWinter(g: GameState, d = day(g)): boolean {
 export const WINTER_RISK = 1.5;
 
 export function riskFactor(g: GameState): number {
-  return isWinter(g) ? WINTER_RISK : 1;
+  return (isWinter(g) ? WINTER_RISK : 1) * (summerTemps(g) ? SUMMER.tempRisk : 1);
+}
+
+/** Året i spillet (0 = det første), med år fra 1. januar */
+export function yearOf(d: number): number {
+  return Math.floor((START_MONTH * MONTH_DAYS + d - 1) / YEAR_DAYS);
+}
+
+/** Jula (B-298): fra 23. desember til og med 1. januar. Ferie da heter juleferie */
+export function isChristmas(d: number): boolean {
+  const n = dayOfYear(d);
+  return n >= 11 * MONTH_DAYS + 22 || n === 0;
+}
+
+/**
+ * Fellesferien (B-298): tre uker i juli (7.–27. juli). Et kort en uke før spør om verket skal ha sommerstans med
+ * vedlikehold (ovnene står, men får ny foring og alle får ferie samtidig) eller gå videre med sommervikarer (dyrere
+ * lønn og litt flere uhell). Fra støperiet, når det er ansatte.
+ */
+export const SUMMER = {
+  /** Første dag (dag i året, 0 = 1. januar): 7. juli */
+  from: 6 * MONTH_DAYS + 6,
+  days: 21,
+  /** Kortet kommer så mange døgn før */
+  notice: 7,
+  fromStage: 2,
+  /** Sommervikarene: lønnen øker med denne andelen, og uhell skjer så mye oftere */
+  tempExtra: 0.25,
+  tempRisk: 1.25,
+  /** Trivselen etter en sommerstans der alle fikk ferie samtidig */
+  stansMorale: 5,
+};
+
+/** Er dagen i fellesferien? */
+export function inSummerBreak(d: number): boolean {
+  const n = dayOfYear(d);
+  return n >= SUMMER.from && n < SUMMER.from + SUMMER.days;
+}
+
+/** Første dag i fellesferien i året dagen `d` ligger i */
+export function summerStart(d: number): number {
+  return d - dayOfYear(d) + SUMMER.from;
+}
+
+/** Går verket med sommervikarer akkurat nå? */
+export function summerTemps(g: GameState, d = day(g)): boolean {
+  return g.summer?.choice === "vikarer" && g.summer.year === yearOf(d) && inSummerBreak(d);
+}
+
+/** Har verket sommerstans akkurat nå? */
+export function summerStop(g: GameState, d = day(g)): boolean {
+  return g.summer?.choice === "stans" && g.summer.year === yearOf(d) && inSummerBreak(d);
+}
+
+/** Får verket fellesferie (nivå og folk)? */
+function hasSummerBreak(g: GameState): boolean {
+  return g.stage >= SUMMER.fromStage && g.workers.length > 0;
+}
+
+/** Datoen som tekst, f.eks. «7. juli» */
+export function dateText(d: number): string {
+  return `${(dayOfYear(d) % MONTH_DAYS) + 1}. ${MONTHS[monthOf(d)]}`;
+}
+
+/** Valget på kortet (eller av seg selv når kortet ikke ble besvart): gjelder fellesferien i år */
+export function chooseSummer(g: GameState, choice: "stans" | "vikarer"): void {
+  const today = day(g);
+  const start = today <= summerStart(today) ? summerStart(today) : summerStart(today + YEAR_DAYS);
+  g.summer = { year: yearOf(start), choice };
+  const end = start + SUMMER.days - 1;
+  log(
+    g,
+    choice === "stans"
+      ? `Sommerstans i fellesferien: ovnene står fra ${dateText(start)} til og med ${dateText(end)} (dag ${start}–${end}). Alle får ferie samtidig, og ovnene får ny foring.`
+      : `Sommervikarer i fellesferien: verket går som vanlig fra ${dateText(start)} til og med ${dateText(end)} (dag ${start}–${end}). Lønnen øker ca. ${Math.round(SUMMER.tempExtra * 100)} %, og det blir litt flere uhell.`,
+    "info",
+  );
+}
+
+/** Kontrakter med frist i fellesferien, til kortet */
+function dueInBreak(g: GameState, start: number): number {
+  return g.contracts.filter(
+    (c) => c.status === "aktiv" && !c.landmark && c.deadlineDay >= start && c.deadlineDay < start + SUMMER.days,
+  ).length;
+}
+
+/** Ved nytt døgn: kortet før fellesferien, stansen når den begynner, og vikarlønna hver dag (B-298) */
+function summerDay(g: GameState, stats: PlantStats): void {
+  const today = day(g);
+  const start = summerStart(today);
+  const chosen = g.summer?.year === yearOf(today);
+  // Kortet en uke før, eller neste dag hvis et annet kort står
+  if (hasSummerBreak(g) && !chosen && today >= start - SUMMER.notice && today < start) {
+    if (g.pendingDecision || g.pendingManual) return;
+    const due = dueInBreak(g, start);
+    g.pendingDecision = {
+      id: "fellesferie",
+      title: "Fellesferie i juli",
+      text: `Fra ${dateText(start)} har de fleste tre ukers fellesferie. Sommerstans: ovnene står i tre uker, men får ny foring og vedlikehold, og alle får ferie samtidig (feriepengene er alt opptjent, så du betaler ikke lønn). Sommervikarer: verket går som vanlig, men lønnen øker ca. ${Math.round(SUMMER.tempExtra * 100)} %, og vikarene gjør flere feil.${due ? ` Ved stans får ${due === 1 ? "kontrakten" : `de ${due} kontraktene`} med frist i ferien tre uker lenger frist.` : ""}`,
+      options: [
+        {
+          label: "Sommerstans med vedlikehold",
+          hint: "Ingen produksjon og ingen lønn i tre uker. Ny foring og bedre trivsel.",
+        },
+        { label: "Sommervikarer", hint: "Full drift, men dyrere lønn og litt flere uhell." },
+      ],
+      data: {},
+      resumeSpeed: g.speed > 0 ? g.speed : 1,
+    };
+    g.speed = 0;
+    return;
+  }
+  if (!inSummerBreak(today) || !hasSummerBreak(g)) return;
+  // Ble kortet aldri besvart, går verket med vikarer
+  if (!chosen) chooseSummer(g, "vikarer");
+  if (today === start && g.summer?.choice === "stans") {
+    const until = (start + SUMMER.days - 1) * MIN_PER_DAY;
+    for (const f of g.furnaces) {
+      f.downUntilMin = Math.max(f.downUntilMin, until);
+      f.downReason = "Planlagt stans: sommerstans";
+      f.wear = 0;
+      f.heatsOnLining = 0;
+      f.lastRelineDay = today;
+      if (stats.furnace.arc) f.spareProgress = 1;
+    }
+    // Kundene vet om fellesferien: fristene som ikke er gått ut, flyttes tre uker
+    let moved = 0;
+    for (const c of g.contracts)
+      if (c.status === "aktiv" && !c.landmark && c.deadlineDay >= start) {
+        c.deadlineDay += SUMMER.days;
+        moved++;
+      }
+    const cost = stats.furnace.relineCost * g.furnaces.length;
+    addCost(g, "vedlikehold", cost);
+    adjustMorale(g, SUMMER.stansMorale);
+    log(
+      g,
+      `Fellesferie: sommerstans i tre uker. Ovnene får ny foring og vedlikehold (${fmtKr(cost)}), og alle har ferie samtidig. Støpingen tar stålet som er smeltet.${moved ? ` Kundene vet om ferien: ${moved === 1 ? "én kontrakt har" : `${moved} kontrakter har`} fått frist tre uker senere.` : ""}`,
+      "event",
+    );
+  }
+  if (g.summer?.choice === "vikarer") {
+    addCost(g, "lonn", stats.salaryPerDay * SUMMER.tempExtra);
+    if (today === start)
+      log(
+        g,
+        "Fellesferie: sommervikarene har tatt over. Verket går som vanlig, men lønnen er høyere og det blir litt flere uhell.",
+        "event",
+      );
+  }
+  if (today === start + SUMMER.days - 1) log(g, "Siste dag i fellesferien: i morgen er de faste tilbake.", "info");
 }
 
 /** Strømmen er dyrere om vinteren (B-279): spotpris og nattariff ganges med dette */
@@ -102,8 +253,9 @@ function snowHour(g: GameState): void {
   );
 }
 
-/** Ved nytt døgn: beskjed når vinteren kommer og går */
-export function calendarDay(g: GameState): void {
+/** Ved nytt døgn: beskjed når vinteren kommer og går, og fellesferien (B-298) */
+export function calendarDay(g: GameState, stats: PlantStats): void {
+  summerDay(g, stats);
   const today = day(g);
   const now = isWinter(g, today);
   const was = isWinter(g, today - 1);

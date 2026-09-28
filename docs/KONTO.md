@@ -124,3 +124,5 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | «Hva gjør jeg nå?» (hjelpeark) | Nei | Regel 1: ditt eget spill | B-283 |
 | Minst tre minutter mellom hendelseskort | Nei | Regel 1: ditt eget spill | B-284 |
 
+| Krig i verden (dyrere strøm, flere forespørsler) i konsernet | Nei | Regel 1: ditt eget spill | B-297 |
+| Fellesferie, sjeldnere egen ferie og juleferie | Nei | Regel 1: ditt eget spill | B-298 |

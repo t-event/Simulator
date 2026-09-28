@@ -200,7 +200,14 @@ import {
   WINTER_FIXED,
   WINTER_POWER,
   WINTER_RISK,
+  inSummerBreak,
+  isChristmas,
+  SUMMER,
+  yearOf,
+  YEAR_DAYS,
 } from "./calendar";
+import { MIN_PER_DAY } from "./data";
+import { activeWar, WAR, warDay, warFactor } from "./war";
 import { buyScrap } from "./engine";
 import { fixedPowerOffer, spotPowerPrice } from "./plant";
 import { explosionChance, FATAL_DOWN_DAYS, fatalAccident, WINTER_EXPLOSION } from "./accidents";
@@ -2778,6 +2785,139 @@ test("Æresmerket for økonomireformen (B-296): gis fra serveren, skjult for all
   const old = newGame(297) as unknown as Record<string, unknown>;
   delete old.serverBadges;
   assert(Array.isArray(parseSave(JSON.stringify(old))!.serverBadges), "migrate ga ikke serverBadges");
+});
+
+test("Fellesferie (B-298): kort en uke før, sommerstans med vedlikehold og flyttede frister", () => {
+  const g = newGame(298);
+  g.tutorial = null;
+  g.stage = 2;
+  g.cash = 1e8;
+  g.settings.pauseOffers = true;
+  for (let i = 0; i < 6; i++) g.workers.push({ ...makeCandidate(g, "ovn"), hiredDay: 1 });
+  // Dag 97 er 7. juli
+  assert(inSummerBreak(97) && !inSummerBreak(96) && inSummerBreak(117) && !inSummerBreak(118), "feil dager for ferien");
+  const toDay = (d: number) => {
+    g.minute = (d - 1) * MIN_PER_DAY - 1;
+    advance(g, 2);
+  };
+  const card = (): string | undefined => g.pendingDecision?.id;
+  toDay(89);
+  assert(card() !== "fellesferie", "kortet kom for tidlig");
+  g.pendingDecision = null;
+  toDay(90);
+  assert(card() === "fellesferie", `ingen kort en uke før (${card()})`);
+  resolveDecision(g, 0);
+  assert(g.summer?.choice === "stans" && g.summer.year === yearOf(97), "valget ble ikke lagret");
+  g.furnaces[0].wear = 0.7;
+  const c = { ...g.contracts[0], id: 99_298, status: "aktiv" as const, deadlineDay: 100, tonnes: 5, delivered: 0 };
+  g.contracts.push(c);
+  g.pendingDecision = null;
+  toDay(97);
+  const f = g.furnaces[0];
+  assert(f.downReason?.includes("sommerstans") === true && f.downUntilMin === 117 * MIN_PER_DAY, "ovnene står ikke");
+  assert(f.wear === 0, "ovnen fikk ikke ny foring");
+  assert(g.contracts.find((x) => x.id === 99_298)!.deadlineDay === 100 + SUMMER.days, "fristen ble ikke flyttet");
+  assert(!(g.today.costs.lonn ?? 0), "lønn under sommerstansen");
+  g.pendingDecision = null;
+  toDay(118);
+  assert(g.furnaces[0].downUntilMin <= g.minute, "ovnene står etter ferien");
+  assert((g.today.costs.lonn ?? 0) > 0, "ingen lønn etter ferien");
+});
+
+test("Fellesferie (B-298): sommervikarer gir dyrere lønn og flere uhell; ubesvart kort gir vikarer", () => {
+  const g = newGame(2981);
+  g.tutorial = null;
+  g.stage = 2;
+  g.cash = 1e8;
+  g.settings.pauseOffers = true;
+  for (let i = 0; i < 6; i++) g.workers.push({ ...makeCandidate(g, "ovn"), hiredDay: 1 });
+  g.minute = 96 * MIN_PER_DAY - 1;
+  g.pendingDecision = null;
+  advance(g, 2);
+  assert(g.summer?.choice === "vikarer", "ubesvart kort ga ikke vikarer");
+  const stats = computePlantStats(g);
+  assert(
+    Math.abs((g.today.costs.lonn ?? 0) - stats.salaryPerDay * (1 + SUMMER.tempExtra)) < 1,
+    "vikarlønna stemmer ikke",
+  );
+  assert(Math.abs(riskFactor(g) - SUMMER.tempRisk) < 1e-9, "vikarene gir ikke flere uhell");
+  assert(
+    g.furnaces.every((f) => !f.downReason?.includes("sommerstans")),
+    "ovnene står med vikarer",
+  );
+});
+
+test("Ferie (B-298): 40 % sjeldnere, ikke i fellesferien, og juleferie heter juleferie", () => {
+  assert(isChristmas(266) && isChristmas(271) && !isChristmas(260) && !isChristmas(272), "jula er feil");
+  const g = newGame(2982);
+  g.tutorial = null;
+  g.stage = 2;
+  g.settings.pauseOffers = true;
+  for (let i = 0; i < 12; i++) g.workers.push({ ...makeCandidate(g, "ovn"), hiredDay: 1 });
+  for (const w of g.workers) w.nextVacationDay = 999;
+  const w = g.workers[0];
+  w.nextVacationDay = 267;
+  g.minute = 263 * MIN_PER_DAY - 1;
+  g.pendingDecision = null;
+  advance(g, 2);
+  assert(w.absentReason === "ferie", "fikk ikke ferie");
+  assert(
+    g.log.some((l) => l.text.includes(w.name) && l.text.includes("juleferie")),
+    "står ikke juleferie",
+  );
+  assert(w.nextVacationDay! - 267 >= 167, `neste ferie for tidlig (${w.nextVacationDay})`);
+  // Egen ferie i fellesferien flyttes til etter den
+  const v = g.workers[1];
+  v.nextVacationDay = 100 + YEAR_DAYS;
+  g.minute = (97 + YEAR_DAYS - 1) * MIN_PER_DAY - 1;
+  g.pendingDecision = null;
+  advance(g, 2);
+  assert(v.absentReason !== "ferie" && v.nextVacationDay! >= 118 + YEAR_DAYS, "egen ferie i fellesferien");
+});
+
+test("Krig i verden (B-297): bare i konsernet, høyst én per år, dyrere strøm og flere forespørsler", () => {
+  const g = newGame(297);
+  g.tutorial = null;
+  const run = (days: number) => {
+    const starts: number[] = [];
+    for (let d = 1; d <= days; d++) {
+      g.minute = (d - 1) * MIN_PER_DAY;
+      const before = g.war?.fromDay;
+      warDay(g);
+      if (g.war && g.war.fromDay !== before) starts.push(d);
+    }
+    return starts;
+  };
+  assert(run(3600).length === 0, "krig uten konsern");
+  g.konsern.unlocked = true;
+  const starts = run(3600);
+  const years = starts.map(yearOf);
+  assert(starts.length >= 2 && starts.length <= 10, `${starts.length} kriger på ti år`);
+  assert(new Set(years).size === years.length, `to kriger samme år (${starts.join(", ")})`);
+  const d = starts[0];
+  g.minute = (d - 1) * MIN_PER_DAY;
+  g.war = { year: yearOf(d), fromDay: d, untilDay: d + 29, strength: 1 };
+  const base = computePlantStats({ ...g, war: null }).offersPerDay;
+  assert(activeWar(g) !== null, "krigen er ikke i gang");
+  assert(Math.abs(warFactor(g, "power") - (1 + WAR.power)) < 1e-9, "strømmen følger ikke krigen");
+  assert(
+    Math.abs(worldFactor(g, "power") / worldFactor({ ...g, war: null }, "power") - (1 + WAR.power)) < 1e-9,
+    "worldFactor uten krig",
+  );
+  assert(
+    Math.abs(computePlantStats(g).offersPerDay / base - (1 + WAR.demand)) < 1e-9,
+    "forespørslene følger ikke krigen",
+  );
+  g.minute = (d + 30 - 1) * MIN_PER_DAY;
+  assert(activeWar(g) === null && warFactor(g, "power") === 1, "krigen varte for lenge");
+  const end = warDay(g);
+  assert(end?.text.startsWith("Krigen er over") === true, "ingen beskjed når krigen er over");
+  // Et gammelt spill uten feltene
+  const old = newGame(2983) as unknown as Record<string, unknown>;
+  delete old.war;
+  delete old.summer;
+  const back = parseSave(JSON.stringify(old))!;
+  assert(back.war === null && back.summer === null, "migrate ga ikke war og summer");
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

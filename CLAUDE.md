@@ -112,6 +112,7 @@ npx tsx src/game/balance.ts --vurdering                    # kundevurderingene 1
 npx tsx src/game/balance.ts --konsern                      # konsernøkonomien med 1–14 verk og vekst over tid (B-181)
 npx tsx src/game/balance.ts --forste 700                   # kurven for første opplasting i juksesperren (B-257, ca. 40 min)
 npx tsx src/game/balance.ts --vinter                       # uhell, kort og kostnader om vinteren mot sommeren, per nivå (B-277, ca. 11 min)
+npx tsx src/game/balance.ts --sommerstans                  # testspilleren velger sommerstans i fellesferien (B-298)
 npm run build
 ```
 
@@ -134,7 +135,8 @@ frontend/src/
     konsern.ts   Datterverk, byggeprosjekter i ekte tid og flaggskipet (B-209); vises av ui/Konsern.tsx
     world.ts     Felles hendelser i motoren og sesongfordel (B-129)
     environment.ts Utslipp, renseanlegg i trinn, havari og bøter (B-263); panelet står i ui/Upgrades.tsx (CleanerPanel)
-    calendar.ts  Året i spillet (360 døgn, dag 1 = 1. april), vinter 15.11.–14.3. og frost (B-265, B-272)
+    calendar.ts  Året i spillet (360 døgn, dag 1 = 1. april), vinter 15.11.–14.3. og frost (B-265, B-272), fellesferie (B-298)
+    war.ts       Krig i verden, bare i konsernet: dyrere strøm, flere forespørsler, høyst én per år (B-297)
     accidents.ts Eksplosjoner i ovnen og svært sjeldne dødsulykker (B-265)
     trends.ts    Trender i markedet: én kvalitet eller vare ettertraktet eller lite etterspurt i noen døgn (B-255); vises av ui/Trend.tsx
     reserve.ts   Midlertidig myk grense for kassa (100 mrd.) og bunden konsernreserve (B-193) – grensen står her
@@ -329,6 +331,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   Gamle lagringer får anleggene de trenger i første tidssteg (`env.grant`) – ikke flytt det til `onHour`.
 - **Vinter** (B-265): `riskFactor(g)` (1,5 om vinteren) ganges inn i havarier, renseanlegget og hendelseskortene. Ny
   risiko som skal øke om vinteren, bruker den – ikke egne datoer. Kalenderen er spilltid, ikke ekte dato.
+- **Fellesferien** (B-298): 7.–27. juli (dag 97, 457 …). Ved sommerstans står ovnene, lønn, forespørsler og ukeleveranser
+  stopper (`summerStop`), og frister flyttes tre uker. Nye kostnader eller leveranser som ikke gir mening i stansen, må
+  sjekke `summerStop`. Testspilleren velger vikarer; `balance.ts --sommerstans` prøver stansen.
 - **Vinterøkonomi** (B-279): strømmen ganges med `winterPowerFactor` (spot og nattariff) og fastprisen med
   `WINTER_FIXED`. Snøstorm (`g.snowUntilMin`) stopper alle kjøp av skrap (`scrapBlocked`) unntatt med skrapterminal – nye
   veier for å skaffe skrap må sjekke den.
