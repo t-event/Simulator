@@ -5003,3 +5003,20 @@ og ferdiglager, B-263–B-274).
 - Resten er gått gjennom uten funn: bøter, havarikort, overgang for gamle lagringer, vinterkalenderen, frost,
   eksplosjoner og dødsulykker (stengning, bot, kort), autobonus, planleggerens lagermengde, støpingens sekvenser,
   taket, ferdiglageret og salgsknappen.
+
+## B-276 Dagens nye ting i anleggsbildet (2026-09-28)
+Status: gjelder
+Brukeren ba: «Lag de nye tingene på anleggsbildet». Tegnet i `ui/PlantScene.tsx`; ingen endring i spillmotoren.
+- **Tak over skraplageret** (`roofed(g)`: taket eller skrapterminalen): saltak over skrapkranen med to stolper, fra
+  nivå 2. Om vinteren ligger det snø på taket.
+- **Renseanlegget** (fra nivå 3): bygget blir litt høyere for hvert trinn, har to linjer (skillevegg og to piper) fra
+  «rense3», og flere rader med filterluker. Pipa gir hvit damp når ovnene smelter og alt renses, og **brun røyk** når
+  noe går urenset ut (anlegget for lite, eller havari og spilleren har valgt å kjøre videre). Står anlegget etter et
+  havari, blinker en **rød lampe** på taket.
+- **Ferdiglageret:** trinn 1 er et skur over stablene, trinn 2 en lav lagerhall med traverskran (fra nivå 3), trinn 3
+  en jernbanevogn med emner på sporet (storverket). Stablene blir bredere (4 → 5 → 6 kolonner, 3 rader med terminalen),
+  og lagerstedet kan trykkes også når lageret er tomt, så lenge det er bygd ut.
+- **Vinter** (`isWinter`): snø på bakken, på åsene og på lagerhallen, og snø som faller (står stille med redusert
+  bevegelse).
+- Nye farger som tokens: `--art-steam`, `--art-smoke-dirty`, `--art-snow`, `--art-alarm`.
+- Konto: nei (regel 1, ditt eget spill).
