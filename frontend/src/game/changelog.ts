@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 275,
+    date: "2026-09-28",
+    title: "Små rettelser",
+    items: [
+      "Rådet om renseanlegget åpner nå rett fane, der de større anleggene kan kjøpes.",
+      "Rådet om fullt ferdiglager viser til knappen «Selg alt ledig stål» og utbyggingen av lageret.",
+    ],
+  },
+  {
     b: 274,
     date: "2026-09-28",
     title: "Tak over skraplageret, større ferdiglager og salgsknapp",

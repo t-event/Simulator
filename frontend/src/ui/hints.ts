@@ -118,7 +118,12 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
     }
   }
   if (g.castWait === "Ferdigvarelageret er fullt")
-    out.push({ text: "Ferdigvarelageret er fullt. Selg partier på spot under Salg.", view: "salg", sub: "lager" });
+    out.push({
+      // Knappen og utbyggingen fra B-274 (B-275)
+      text: "Ferdigvarelageret er fullt. Trykk «Selg alt ledig stål» under Salg → Lager, eller bygg ut lageret under Anlegg → Lager og salg.",
+      view: "salg",
+      sub: "lager",
+    });
   if (stats.furnace.arc && g.furnaces.some((f) => f.spareProgress < 1) && !g.workers.some((w) => w.role === "murer"))
     out.push({
       text: "Reservepottene til lysbueovnene blir ikke murt opp. Ansett murere (to per ovn), ellers må foringen mures om inne i ovnen.",

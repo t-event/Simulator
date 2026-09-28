@@ -196,6 +196,9 @@ export function UpgradeSheet({
   // Én fane per ovn (B-112): start på den første som har noe du kan kjøpe
   const [unit, setUnit] = useState<number | undefined>(() => {
     if (!units) return undefined;
+    // Står renseanlegget, eller er det for lite, starter arket på «Verket», der rensingen står (B-275)
+    if (station === "ovn" && envActive(g) && (envDown(g) || shortfall(g, computePlantStats(g)) > 0.02))
+      return undefined;
     const i = units.findIndex((u) => buyable(u) > 0);
     return units[i >= 0 ? i : 1];
   });

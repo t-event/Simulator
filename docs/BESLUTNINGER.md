@@ -4990,3 +4990,16 @@ utvidelse på ferdiglageret, og evt. lagt inn en salgsknapp så det går an å s
   kontrakt venter på, også støpefeil (`sellAllFree`, `freeStockT` i `engine.ts`). Vises bare når noe er ledig.
 - **Konto:** nei. Balanse: alle mål OK; nybegynneren kjøper de billige oppgraderingene og når storverket på median
   dag 160 (mål 240).
+
+## B-275 Gjennomgang av dagens nye systemer (2026-09-28)
+Status: gjelder
+Brukeren valgte «Gjennomgang av dagens nye ting» (utslipp, vinter, eksplosjoner, autobonus, lagermengde, støping, tak
+og ferdiglager, B-263–B-274).
+- **Rådet om renseanlegget** åpnet ovnsarket på fanen «Ovn 1» når verket har flere ovner. Panelet for renseanlegget
+  og de større anleggene står under «Verket», så spilleren så ikke det rådet ba om. Arket starter nå på «Verket» når
+  renseanlegget står eller er for lite.
+- **Fullt ferdiglager:** rådet og varselet sier nå «Trykk «Selg alt ledig stål» under Salg → Lager, eller bygg ut
+  lageret under Anlegg → Lager og salg» (knappen og utbyggingen fra B-274).
+- Resten er gått gjennom uten funn: bøter, havarikort, overgang for gamle lagringer, vinterkalenderen, frost,
+  eksplosjoner og dødsulykker (stengning, bot, kort), autobonus, planleggerens lagermengde, støpingens sekvenser,
+  taket, ferdiglageret og salgsknappen.
