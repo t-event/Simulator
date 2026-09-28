@@ -44,6 +44,10 @@ til «Avgjort» nederst).
 
 ## Forslag – nett og konkurranse
 
+- **Tidslinja ved tilbakespoling (B-259):** `check_snapshot` sletter alle tall etter dagen når et spill med lavere dag
+  lastes opp. Da en gammel kopi tok over i 15 sekunder, forsvant 1 700 tall. Kan heller merke dem eller beholde dem når
+  det høyere spillet kommer tilbake. Eieren avgjør.
+
 - **Fase 4 og 5** i `PLAN-NETT.md` (ventetid, anbud og auksjoner) står på vent og vurderes inn i `RETNING.md` (B-180).
 - **Egen e-postleverandør** for kodene (glemt passord), så grensen på ca. 2 e-poster i timen forsvinner. Brukeren
   sa «en annen gang».

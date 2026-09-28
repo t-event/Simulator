@@ -404,6 +404,8 @@ export function AccountCard({
   // sier at det er her man spiller (B-128)
   const [fromLink, setFromLink] = useState(authEvent === "signup");
   const [choose, setChoose] = useState<{ cloud: GameState; local: GameState } | null>(null);
+  // «Herfra» trykket én gang når spillet her er eldre enn det på nett (B-259)
+  const [confirmLocal, setConfirmLocal] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [cloudOn, setCloudOn] = useState(cloudConfigured());
   // Kallenavnet på topplista (B-127): undefined = ikke hentet ennå
@@ -509,7 +511,8 @@ export function AccountCard({
       </div>
     );
 
-  if (choose)
+  if (choose) {
+    const behind = dayOf(choose.cloud) - dayOf(choose.local);
     return (
       <div className="g-account">
         <h3 className="g-subhead">Hvilket spill vil du fortsette?</h3>
@@ -536,21 +539,30 @@ export function AccountCard({
           </button>
           <button
             disabled={busy}
-            onClick={() =>
+            onClick={() => {
+              // Er spillet her mye eldre, spør vi én gang til (B-259): det på nett blir borte
+              if (behind > 0 && !confirmLocal) return setConfirmLocal(true);
               void run(async () => {
                 await keepLocal(choose.local);
                 saveGame(choose.local);
                 setChoose(null);
+                setConfirmLocal(false);
                 setInfo("Spillet herfra er lagret på nett.");
-              })
-            }
+              });
+            }}
           >
-            Herfra (dag {dayOf(choose.local)})
+            {confirmLocal ? `Ja, bruk dag ${dayOf(choose.local)}` : `Herfra (dag ${dayOf(choose.local)})`}
           </button>
         </div>
+        {confirmLocal && (
+          <p className="g-account-error">
+            Spillet her er {behind} døgn bak spillet på nett. Velger du det, blir dag {dayOf(choose.cloud)} borte.
+          </p>
+        )}
         {error && <p className="g-account-error">{error}</p>}
       </div>
     );
+  }
 
   if (session && fromLink && mode !== "reset")
     return (

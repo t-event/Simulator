@@ -549,6 +549,12 @@ export interface GameState {
   storeFullLogMin: number;
   /** Kontoen spillet er koblet til (konto-id fra innloggingen), eller null uten konto (B-125) */
   owner: string | null;
+  /**
+   * Hvilket spill dette er (B-259), tilfeldig ved nytt spill. Skiller en eldre kopi av samme spill fra et nytt spill,
+   * så en gammel kopi på en enhet ikke kan lastes opp over spillet på nett. Eldre spill har ingen (sammenlignes da på
+   * sesong) – den lages aldri i ettertid, for da ville to kopier av samme spill fått hver sin.
+   */
+  gameId?: string;
   /** Sesongen spillet er med i (B-129), eller null */
   season: number | null;
   /** Sesongen spilleren sist svarte på spørsmålet om, så det ikke stilles igjen */

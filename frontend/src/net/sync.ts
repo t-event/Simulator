@@ -66,6 +66,31 @@ function changedSinceSync(g: GameState): boolean {
 let clock: () => number = () => Date.now();
 /** Versjonen av spillet på nett som spillet her bygger på (0: ingen lagring på nett ennå). null: ikke avklart. */
 let knownRev: number | null = null;
+/** Det vi vet om spillet som ligger på nett (B-259): hvilket spill og hvor langt det har kommet */
+let cloudRef: Pick<GameState, "gameId" | "season" | "minute"> | null = null;
+/** Så mye (spillminutter) en kopi av samme spill kan ligge bak spillet på nett før den regnes som gammel */
+export const STALE_COPY_MIN = 1440;
+
+/** Er to spill det samme spillet? Med id: lik id. Eldre spill uten id: samme sesong (B-259) */
+function sameGame(a: Pick<GameState, "gameId" | "season">, b: Pick<GameState, "gameId" | "season">): boolean {
+  if (a.gameId || b.gameId) return a.gameId === b.gameId;
+  return (a.season ?? null) === (b.season ?? null);
+}
+
+/**
+ * Er `g` en gammel kopi av spillet på nett (B-259)? Samme spill, men mer enn et spilldøgn bak. Da skal det aldri lastes
+ * opp over spillet på nett uten at spilleren har valgt det: det skjedde da en enhet med et spill fra dag 471 ble logget
+ * inn igjen og lastet opp over dag 2 169. Et nytt spill (ny id eller ny sesong) er ikke en gammel kopi.
+ */
+export function staleCopy(
+  g: Pick<GameState, "gameId" | "season" | "minute">,
+  cloud: Pick<GameState, "gameId" | "season" | "minute"> | null = cloudRef,
+): boolean {
+  return !!cloud && sameGame(g, cloud) && Math.floor(g.minute) + STALE_COPY_MIN < Math.floor(cloud.minute);
+}
+function knowCloud(g: Pick<GameState, "gameId" | "season" | "minute">): void {
+  cloudRef = { gameId: g.gameId, season: g.season, minute: Math.floor(g.minute) };
+}
 
 const DEVICE_KEY = "stalverk-enhet-v1";
 const REV_KEY = "stalverk-sky-v1";
@@ -187,9 +212,12 @@ export async function fetchCloudSave(): Promise<GameState | null> {
  * Laster opp spillet nå og merker det med kontoen. Lagrer bare over versjonen spillet her bygger på (B-140).
  * Kaster NetError, eller SaveConflictError hvis spillet på nett er lagret fra en annen nettleser i mellomtiden.
  */
-export async function uploadSave(g: GameState, keepalive = false): Promise<void> {
+export async function uploadSave(g: GameState, keepalive = false, chosen = false): Promise<void> {
   const id = userId();
   if (!id) return;
+  // En gammel kopi av spillet på nett lastes ikke opp (B-259) – bare når spilleren har valgt den (`chosen`). Appen
+  // henter da spillet fra nett (`pullIfNewer` ser at lagringen ble avvist)
+  if (!chosen && g.owner === id && staleCopy(g)) throw new SaveConflictError();
   g.owner = id;
   const day = dayOf(g);
   // Sesongen leses før første await, så lagringen og tidslinja får samme verdi
@@ -229,6 +257,7 @@ export async function uploadSave(g: GameState, keepalive = false): Promise<void>
   if (rev === null || rev === undefined) throw new SaveConflictError();
   setKnownRev(id, Number(rev));
   synced(g);
+  knowCloud(g);
   if (day !== lastSnapshotDay) {
     await rest("snapshots", {
       method: "POST",
@@ -336,6 +365,7 @@ export function resetCloud(): void {
   lastUpload = 0;
   lastSavedAt = null;
   lastSnapshotDay = -1;
+  cloudRef = null;
   setStatus({ kind: "off" });
 }
 
@@ -371,6 +401,8 @@ export async function linkOnLogin(local: GameState | null): Promise<LinkDecision
   const stored = storedRev(id);
   const cloud = row?.game ?? null;
   knownRev = row ? row.rev : 0;
+  cloudRef = null;
+  if (cloud) knowCloud(cloud);
   const mine = local && (local.owner === null || local.owner === id) ? local : null;
   if (!cloud || !row) {
     if (!mine) {
@@ -405,7 +437,8 @@ export async function linkOnLogin(local: GameState | null): Promise<LinkDecision
     // Spilt videre både her (f.eks. mens man var logget ut) og på en annen enhet, og spillet her har kommet lengst:
     // spilleren velger, så framgangen her ikke forsvinner uten at man vet det (B-148)
     if (cloudNewer && stored !== null && mine.minute > cloud.minute) return { kind: "choose", cloud, local: mine };
-    if (cloudNewer) {
+    // En gammel kopi av det samme spillet (B-259): spillet på nett gjelder, selv om ingen andre har lagret siden
+    if (cloudNewer || staleCopy(mine, cloud)) {
       setKnownRev(id, row.rev);
       synced(cloud);
       setStatus({ kind: "saved", at: clock() });
@@ -425,7 +458,7 @@ export async function linkOnLogin(local: GameState | null): Promise<LinkDecision
 
 /** Spilleren valgte å fortsette med det lokale spillet: det overskriver spillet på nett */
 export async function keepLocal(local: GameState): Promise<void> {
-  await uploadSave(local);
+  await uploadSave(local, false, true);
   lastSavedAt = clock();
   lastUpload = lastSavedAt;
   setStatus({ kind: "saved", at: lastSavedAt });
@@ -457,6 +490,7 @@ export async function pullIfNewer(): Promise<GameState | null> {
   if (!full) return null;
   setKnownRev(id, full.rev);
   synced(full.game);
+  knowCloud(full.game);
   dirty = null;
   lastSavedAt = clock();
   setStatus({ kind: "saved", at: lastSavedAt });

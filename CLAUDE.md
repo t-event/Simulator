@@ -331,6 +331,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   anbud gis med `applyTenderResults` (i rekkefølge etter anbudet), ikke ett og ett selskap.
 - **Anbud og inntekt** (B-189) avgjøres «lat» av `world_status()` → `world_tick()`. Test livsløpet med midlertidige
   testkontoer i en DO-blokk som ender med `raise exception`; sett `closes_at` bakover for å avgjøre et anbud.
+- **Gammel kopi** (B-259): `uploadSave` nekter å laste opp samme spill mer enn et døgn bak det på nett (`staleCopy`), og
+  innloggingen henter da spillet fra nett. Bare `keepLocal` (valget «Herfra») kan. Nye spill har `gameId`; lag den aldri
+  i `migrate()`.
 - **Serveren endrer et lagret spill** (B-211): øk alltid `state.serverEdit` (og sett `device` til `'server'`). `save_game()`
   avviser da kopier med lavere `serverEdit`, og appen henter serverens spill. Uten det kan en enhet med det gamle spillet
   laste det opp igjen (skjedde med økonomireformen).

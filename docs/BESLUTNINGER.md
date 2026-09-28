@@ -4727,3 +4727,33 @@ konsernkassa, eieren ble satt i 14 dager, og det ble ikke åpnet noe nytt anbud.
   «kl. 02:00»).
 - Konto: ja (samme som skraplageret).
 
+## B-259 En gammel kopi av spillet lastes aldri opp over spillet på nett (2026-09-28)
+Status: gjelder (retter B-140, B-148)
+Brukeren (Tuster): «Hvorfor mistet jeg masse progresjon?» – «Jeg hadde blitt logget ut». Så «Fortsett».
+Hva som skjedde 28.9. (UTC): siste vanlige lagring 16:09:50 (dag 2 169). 16:14:34 logget kontoen inn med passord, og
+16:14:35 ble et spill på dag 471 (38 mrd., en kopi fra 25.9.) lastet opp over dag 2 169. Serveren tok sikkerhetskopi
+(«lavere dag») og slettet tidslinja etter dag 471 (regelen for tilbakespoling). 16:14:37 og 16:14:50 ble dag 2 169
+lastet opp igjen, så spillet på nett var helt igjen etter 15 sekunder, og spilleren spilte videre derfra. Tidslinja for
+dag 472–2 168 er borte (grafer, ukens utfordring); spillet, rekordene og titlene er ikke berørt.
+- **Feilen:** ved innlogging lastet appen opp spillet på enheten uten å spørre når enheten selv hadde lagret sist
+  (samme merkelapp eller samme husket versjon som spillet på nett), selv om spillet her var mye eldre. Det er riktig for
+  et nytt spill (ny sesong), men ikke for en gammel kopi av det samme spillet – f.eks. en fane eller app som har stått
+  med et gammelt spill i minnet. Serveren (`save_game`) godtar alt som bygger på riktig versjon.
+- **Rettingen (`net/sync.ts`):** `staleCopy(g, sky)` – samme spill, men mer enn ett spilldøgn (`STALE_COPY_MIN`) bak
+  spillet på nett.
+  - Ved innlogging hentes da spillet fra nett i stedet for å laste opp.
+  - `uploadSave` nekter å laste opp en gammel kopi (som om lagringen ble avvist); appen henter spillet fra nett innen
+    20 s (`pullIfNewer`). Bare «Herfra» i valget (`keepLocal`) kan laste opp en eldre kopi.
+  - «Samme spill»: nye spill får `gameId` (tilfeldig, i `newGame`). Eldre spill har ingen – de sammenlignes på sesong.
+    Id-en lages aldri i ettertid (`migrate()` lar den være tom), for da ville to kopier av samme gamle spill fått hver
+    sin og sett ut som to forskjellige spill.
+  - Et nytt spill (ny id eller ny sesong) kan fortsatt erstatte spillet på nett, som før.
+- **Valget «Hvilket spill vil du fortsette?»:** er spillet her eldre enn det på nett, må «Herfra» trykkes to ganger, og
+  det står hvor mange døgn som blir borte.
+- Hvorfor spilleren ble logget ut, er ikke funnet: økta ble fornyet vanlig 16:03, og neste innlogging var med passord
+  16:14. Det kan være en fane eller app som ikke var åpnet på lenge.
+- Testet: ny nettest som gjenskaper hendelsen (samme enhet, samme versjon, dag 471 mot 2 169) – den feiler uten
+  rettingen og går igjennom med den; et nytt spill regnes ikke som gammel kopi; «Herfra» virker fortsatt. Playwright:
+  valget på 320 og 390 px (første trykk lagrer ingenting, advarselen vises).
+- Konto: ja (lagring på nett).
+
