@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 201 – 2026-09-28: Ferdiglageret og menyen nederst
+
+**Brukeren ba om:** «Ferdiglageret mitt er fullt, hvorfor det?», så et skjermbilde: «Menyen nederst har kommet lengre
+opp enn tidligere».
+
+**Gjort:** Så på lagringen på nett flere ganger (bare lesing): lageret var tomt eller nesten tomt (under 1 000 av
+60 000 t), og ingen varsler om fullt lager. Skjermbildet viser 9 047 t. Menyen: B-264 – CSS-en fra B-262 er tatt bort,
+og rota har ingen høyde. Publiseringen av #209 (B-263) var grønn.
+
+**Testet:** Playwright (320, 390, 402, 1366, startskjerm og spill), tsc, lint, npm test, build.
+
+**Gjenstår:** brukeren bekrefter at menyen står nederst og at trykkene treffer på iPhone.
+
+---
+
 ## Økt 200 – 2026-09-28: Utslipp, renseanlegg og bøter
 
 **Brukeren ba om:** bøter for miljøutslipp, renseanlegg som kan kjøpes, havari på renseanlegget, og bot når det står

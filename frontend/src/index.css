@@ -21,22 +21,17 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Siden selv scroller aldri: alt ligger i faste lag (.g-app, .g-intro) og scroller inni dem (B-137, B-192). På iPhone
-   er 100vh høyere enn det synlige, så dokumentet kunne scrolles litt under de faste lagene, og da traff trykket et
-   annet sted enn knappen (B-262). */
-html,
-body {
-  height: 100%;
-  overflow: hidden;
-}
-
 button {
   -webkit-user-select: none;
   user-select: none;
 }
 
+/* Siden selv har ingen høyde: alt ligger i faste lag (.g-app, .g-intro) og scroller inni dem (B-137, B-192). Med
+   min-height: 100vh var siden høyere enn det synlige på iPhone og kunne scrolles litt, og da traff trykket et annet
+   sted enn knappen (B-262). height: 100% + overflow: hidden på html/body løftet i stedet menyen nederst opp fra
+   skjermkanten på iPhone (B-264) – ikke sett høyde eller overflow på html, body eller #root. */
 #root {
-  height: 100%;
+  min-height: 0;
 }
 
 button {

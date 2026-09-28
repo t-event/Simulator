@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 264,
+    date: "2026-09-28",
+    title: "Menyen nederst på plass igjen",
+    items: [
+      "På iPhone havnet menyen nederst et stykke over skjermkanten etter forrige oppdatering. Nå står den nederst igjen.",
+    ],
+  },
+  {
     b: 263,
     date: "2026-09-28",
     title: "Utslipp og renseanlegg",
