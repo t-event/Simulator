@@ -145,6 +145,8 @@ export interface Contract {
   ratingNote?: string;
   /** Landemerket kontrakten gjelder (B-174) */
   landmark?: string;
+  /** Forespørselen kom mens etterspørselen etter kvaliteten eller varen var høy (B-255) */
+  trend?: boolean;
 }
 
 /**
@@ -424,6 +426,15 @@ export interface SeasonTwist {
   power: number;
 }
 
+/** En trend i markedet (B-255): etterspørselen etter én kvalitet eller vare går opp eller ned i noen døgn */
+export interface MarketTrend {
+  kind: "kvalitet" | "vare";
+  id: GradeId | ProductId;
+  up: boolean;
+  fromDay: number;
+  untilDay: number;
+}
+
 export interface Market {
   steelFactor: number;
   scrapFactor: Record<ScrapId, number>;
@@ -432,6 +443,10 @@ export interface Market {
   /** Tørr periode: strømprisen ligger høyt i flere uker (B-105) */
   powerDryDays: number;
   spotSoldToday: Partial<Record<ProductId, number>>;
+  /** Trenden nå, eller null (B-255) */
+  trend?: MarketTrend | null;
+  /** Første døgn en ny trend kan starte */
+  nextTrendDay?: number;
 }
 
 export interface GameState {

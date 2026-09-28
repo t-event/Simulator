@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 192 – 2026-09-28: Trender i markedet
+
+**Brukeren ba om:** «Fortsett».
+
+**Gjort:** B-255. Én trend om gangen fra verkstedet (kvalitet eller vare, opp eller ned, 6–12 døgn): pris ±, forespørsler
+dras mot/bort fra det, grunn med vanlige ord i loggen, linje under Salg og Marked, merket «Ettertraktet».
+
+**Testet:** tsc, lint, `npm test` (ny test), `balance.ts` (exit 0; målt med og uten virkning av trendene), Salg og Marked
+på 320 og 390 px.
+
+**Gjenstår:** slå på slagghåndteringen når skraplageret har betalt ut inntekt noen dager (B-253); mekanisk verksted;
+eventuelt grense per ekte dag på topplista (FORSLAG).
+
+---
+
 ## Økt 191 – 2026-09-28: Rettinger etter bremsene på toppen
 
 **Brukeren ba om:** «Fortsett».

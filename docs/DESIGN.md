@@ -150,7 +150,7 @@ Kundevurdering 1–10 per levert kontrakt er bygget (B-161), og prestasjoner fin
 
 Ideer som ikke er bestemt:
 
-- Trender i markedet («etterspørselen etter armering øker») som styrer hvilke kontrakter som dukker opp.
+- Trender i markedet («etterspørselen etter armering øker») som styrer hvilke kontrakter som dukker opp. **Bygget (B-255).**
 - Lyd ved viktige hendelser.
 - Flere produkter (tråd, profiler, plater) og ulike markeder.
 - App Store / Google Play via Capacitor, hvis ønsket (se B-009).

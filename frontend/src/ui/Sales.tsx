@@ -33,6 +33,7 @@ import {
 import type { Contract, GameState, Settings } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { Agreements } from "./Agreements";
+import { TrendNote } from "./Trend";
 import { DirectorOffer, DirectorSwitch } from "./Konsern";
 import { AutoLocked, AutoToggle } from "./AutoToggle";
 import { auto, automationUnlocked } from "../game/research";
@@ -170,6 +171,11 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
       </div>
       <p className="g-offer-what">
         {fmtT(c.tonnes)} {PRODUCTS[c.product].name.toLowerCase()} · <strong>{GRADES[c.grade].name}</strong>
+        {c.trend && (
+          <span className="g-offer-hot">
+            <Icon name="trending-up" /> Ettertraktet
+          </span>
+        )}
       </p>
       <div className="g-offer-verdict">
         <Verdict tone={tone} />
@@ -319,6 +325,7 @@ function OffersTab({ g, stats, act }: Props) {
           </span>
         </label>
         <DirectorSwitch g={g} act={act} compact />
+        <TrendNote g={g} />
         {/* Markedet metter seg (B-252): vises bare når verket lager mer enn kundene tar unna til full pris */}
         {marketSaturation(stats.dailyProductT) < 1 && (
           <p className="g-muted g-small-text">

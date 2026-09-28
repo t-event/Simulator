@@ -14,6 +14,7 @@ import { AutoToggle } from "./AutoToggle";
 import { fmtKr, fmtNum, fmtPct, fmtT } from "./format";
 import { Icon } from "./icons";
 import { StatusLine } from "./ds";
+import { TrendNote } from "./Trend";
 
 interface Props {
   g: GameState;
@@ -301,6 +302,7 @@ export function Market({ g, stats, act, openTab, onTab }: Props & { openTab?: st
 
         {tab === "priser" && (
           <Card title="Stålpriser">
+            <TrendNote g={g} />
             <table className="g-table">
               <tbody>
                 {(["stopegods", "blokk", "emne", "armering"] as ProductId[]).map((p) => (

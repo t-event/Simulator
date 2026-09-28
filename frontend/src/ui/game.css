@@ -6145,3 +6145,44 @@ button.g-prod-row:hover {
 .g-queue-more button {
   min-height: 44px;
 }
+
+/* Trender i markedet (B-255): én linje med ikon, grønn når noe er ettertraktet, gul når det er lite etterspurt */
+.g-trend {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  margin: 0 0 var(--sp-3);
+  font-size: var(--fs-meta);
+  line-height: 1.4;
+}
+
+.g-trend > .ds-icon {
+  flex: none;
+  width: 1.2em;
+  height: 1.2em;
+  margin-top: 0.05em;
+}
+
+.g-trend.is-up > .ds-icon {
+  color: var(--ok);
+}
+
+.g-trend.is-down > .ds-icon {
+  color: var(--heat);
+}
+
+.g-offer-hot {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  margin-left: var(--sp-2);
+  color: var(--ok);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.g-offer-hot > .ds-icon {
+  width: 1em;
+  height: 1em;
+}

@@ -36,7 +36,7 @@ til «Avgjort» nederst).
 
 ## Forslag – spillet
 
-- **Trender i markedet** («etterspørselen etter armering øker») som styrer hvilke kontrakter som dukker opp (se
+- ~~Trender i markedet~~ **Bygget (B-255).** («etterspørselen etter armering øker») som styrer hvilke kontrakter som dukker opp (se
   `DESIGN.md`).
 
 ## Forslag – nett og konkurranse

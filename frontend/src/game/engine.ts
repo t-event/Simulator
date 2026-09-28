@@ -11,6 +11,7 @@ import {
   FIRST_NAMES,
   FURNACES,
   GRADES,
+  GRADE_IDS,
   LAST_NAMES,
   LOAN_INTEREST_PER_DAY,
   MIN_PER_DAY,
@@ -106,6 +107,7 @@ import type {
   Worker,
 } from "./types";
 import { applyCashCap, reserveDayLog, reserveTotal } from "./reserve";
+import { TREND, trendHits, trendPriceFactor, updateTrend } from "./trends";
 
 export const SAVE_VERSION = 1;
 const STEP_MIN = 10;
@@ -200,6 +202,8 @@ export function newGame(seed = Date.now()): GameState {
       powerSpikeDays: 0,
       powerDryDays: 0,
       spotSoldToday: {},
+      trend: null,
+      nextTrendDay: 0,
     },
     settings: {
       autoReline: false,
@@ -2181,6 +2185,20 @@ function pickCustomer(
     const makeable = gradesFor(customer).filter(canMake);
     if (makeable.length) grade = pick(g, makeable);
   }
+  // Trender (B-255): når etterspørselen er høy, dras noen forespørsler mot det som er ettertraktet; når den er lav,
+  // bort fra det. Bare det verket kan lage med skrapet som er åpent.
+  // Bare forespørsler verket kan lage flyttes, så antallet det kan ta imot er det samme med og uten trend
+  const t = g.market.trend;
+  if (t && trendHits(t, product, grade) !== t.up && canMake(grade) && chance(g, TREND.bias)) {
+    const options = eligible
+      .flatMap((c) =>
+        c.products
+          .filter((p) => products.includes(p))
+          .flatMap((p) => gradesFor(c).map((gr) => ({ customer: c, product: p, grade: gr }))),
+      )
+      .filter((o) => trendHits(t, o.product, o.grade) === t.up && canMake(o.grade));
+    if (options.length) return pick(g, options);
+  }
   return { customer, product, grade };
 }
 
@@ -2195,13 +2213,15 @@ function makeOffer(g: GameState, stats: PlantStats): Contract | null {
     g.stage === 0 && g.totals.contractsDone + g.contracts.filter((c) => c.status === "aktiv").length < 2;
   const workDays = firstOrders ? uniform(g, 0.4, 0.8) : uniform(g, CONTRACT_DAYS[0], CONTRACT_DAYS[1]);
   const tonnes = roundTonnes(Math.max(customer.minT, Math.min(customer.maxT, capacity * workDays)));
-  // Lager verket mer enn markedet tar unna, blir prisen lavere (B-252)
+  // Lager verket mer enn markedet tar unna, blir prisen lavere (B-252); trenden i markedet gir mer eller mindre (B-255)
   const pricePerT = Math.round(
     productPrice(g, product, grade) *
       (1 + stats.priceBonus) *
       marketSaturation(stats.dailyProductT) *
+      trendPriceFactor(g, product, grade) *
       uniform(g, 0.95, 1.1),
   );
+  const hot = !!g.market.trend?.up && trendHits(g.market.trend, product, grade);
   const days = Math.min(
     30,
     Math.ceil(tonnes / (Math.min(capacity, realisticDailyT(g, stats)) * 0.6)) + randInt(g, 2, 4),
@@ -2229,6 +2249,7 @@ function makeOffer(g: GameState, stats: PlantStats): Contract | null {
     status: "tilbud",
     closedDay: null,
     priority: 0,
+    ...(hot ? { trend: true } : {}),
   };
 }
 
@@ -2311,6 +2332,7 @@ function makeAgreement(g: GameState, stats: PlantStats): Agreement | null {
     productPrice(g, product, grade) *
       (1 + stats.priceBonus) *
       marketSaturation(stats.dailyProductT) *
+      trendPriceFactor(g, product, grade) *
       uniform(g, 0.97, 1.04),
   );
   return {
@@ -3127,6 +3149,13 @@ function onDay(g: GameState, stats: PlantStats): void {
       "event",
     );
   }
+  // Trender i markedet (B-255): bare kvaliteter og varer spilleren kan få forespørsler på
+  const wantedGrades = g.settings.offerGrades ?? [];
+  const trendGrades = GRADE_IDS.filter(
+    (id) => GRADES[id].minStage <= g.stage && (!wantedGrades.length || wantedGrades.includes(id)),
+  );
+  const trendMsg = updateTrend(g, today, stats.products, trendGrades);
+  if (trendMsg) log(g, trendMsg, "event");
   for (const id of SCRAP_IDS) {
     // Skrapprisen følger stålprisen, med egen støy per type
     const mean = 0.4 + 0.6 * m.steelFactor;
