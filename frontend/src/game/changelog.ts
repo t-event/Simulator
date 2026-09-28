@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 227,
+    date: "2026-09-28",
+    title: "Industrien rundt verket",
+    items: [
+      "Fanene i Konsern heter nå Oversikt, Utvid, Industrien og Ledelse.",
+      "Under Industrien finner du skraplageret og konsernkassa. Flere selskaper kommer der etter hvert.",
+      "Salgsdirektøren ligger under Ledelse.",
+    ],
+  },
+  {
     b: 226,
     date: "2026-09-28",
     title: "Konsernet får sin egen side",

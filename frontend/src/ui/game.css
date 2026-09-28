@@ -3005,7 +3005,17 @@ button {
   min-height: 44px;
 }
 
-/* Strategiske selskaper (B-189): skraplageret under Konsern → Skraplager (B-226) */
+/* Industrien rundt verket (B-189, B-227): selskapene og konsernkassa under Konsern → Industrien */
+.g-industry-intro h2 {
+  font-family: var(--font-display);
+  font-size: var(--fs-title);
+  margin: 0;
+}
+
+.g-industry-intro p {
+  margin: 0;
+}
+
 .g-company h3 {
   font-size: var(--fs-title);
   margin: 12px 0 4px;
@@ -4041,9 +4051,10 @@ button {
 }
 
 /* Konsern (UI-3d, B-206; egen hovedside B-226): hovedkontoret. Verkene som kort på mobil og som tabell på PC */
-/* Underfanene og beskjeden om anbudet går over begge kolonnene (B-226) */
+/* Underfanene, beskjeden om anbudet og innledningen til industrien går over begge kolonnene (B-226, B-227) */
 .g-konsern-page > .g-konsern-tabs-col,
-.g-konsern-page > .g-konsern-tender-col {
+.g-konsern-page > .g-konsern-tender-col,
+.g-konsern-page > .g-industry-intro {
   grid-column: 1 / -1;
 }
 
@@ -4095,7 +4106,16 @@ button {
     grid-column: 1 / -1;
   }
 
-  /* Skraplager og Direktør er ett kort: i venstre kolonne, med lesbar bredde */
+  /* Industrien: selskapene til venstre, konsernkassa til høyre */
+  .g-grid.is-konsern > .g-industry-col {
+    grid-column: 1;
+  }
+
+  .g-grid.is-konsern > .g-industry-side {
+    grid-column: 2;
+  }
+
+  /* Ledelse er ett kort: i venstre kolonne, med lesbar bredde */
   .g-grid.is-konsern > .g-konsern-single {
     grid-column: 1;
   }

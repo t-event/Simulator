@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 164 – 2026-09-28: Industrien rundt verket
+
+**Brukeren ba om:** at skraplageret ikke skal være en egen side i Konsern, men settes opp etter planen videre.
+
+**Gjort:** B-227. Konsern-fanene er Oversikt, Utvid, Industrien og Ledelse. Industrien har skraplageret som første
+selskap og konsernkassa som eget kort (plass til slagghåndtering, mekanisk verksted, Kontroll og overtakelser). Ledelse
+har salgsdirektøren (verksjefene kommer der i fase 5).
+
+**Testet:** tsc, lint, `npm test`, balance (exit-kode), Playwright på 7 størrelser med falsk tjeneste (med og uten konto).
+
+**Gjenstår:** fase 2 videre (slagghåndtering, mekanisk verksted) og Industrimakt; UI-4d; reserven og kassegrensen.
+
+---
+
 ## Økt 163 – 2026-09-28: Konsern som egen hovedside
 
 **Brukeren ba om:** Konsern som egen hovedside med underfaner som Verket, og at anbudet på skraplageret ikke skal ligge

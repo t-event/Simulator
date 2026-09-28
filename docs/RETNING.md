@@ -250,7 +250,7 @@ pilotkonsesjon på 14 ekte dager (B-186), ekte inntekt fra andres skrapbruk ette
 - Enkel drift: faste kostnader, kapasitet, noen få investeringer. Ingen tycoon i tycoonen.
 - Første eier: et anbud i ekte tid (48 timer) blant dem som har kommet langt nok, med tak på budet (f.eks. 2 × verdien)
   og kapital fra konsernkassen. Bare første tildeling – overtakelser kommer i fase 4.
-- Synlig først for spillere med konto som har åpnet konsernet: kortet «Industrien rundt verket» på Konsern-fanen, med
+- Synlig først for spillere med konto som har åpnet konsernet: fanen «Industrien» på Konsern-siden (B-227), med
   én kort introduksjon og én handling.
 - Industrimakt vises på profilen (topplista) når spilleren har sett industrien.
 

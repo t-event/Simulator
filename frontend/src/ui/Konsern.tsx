@@ -51,7 +51,7 @@ import { buzz } from "./haptics";
 import { Bar, Card, SubTabs } from "./common";
 import { Button, Callout } from "./ds";
 import type { OpenTender } from "./openTender";
-import { StrategicCompanies } from "./Companies";
+import { IndustryPanel } from "./Companies";
 import { fmtKr } from "./format";
 import { Icon } from "./icons";
 
@@ -525,12 +525,12 @@ function PlantTable({
 }
 
 /** Underfanene i Konsern (B-226) */
-export type KonsernTabId = "oversikt" | "utvid" | "skraplager" | "direktor";
-const KONSERN_TAB_IDS: KonsernTabId[] = ["oversikt", "utvid", "skraplager", "direktor"];
+export type KonsernTabId = "oversikt" | "utvid" | "industri" | "ledelse";
+const KONSERN_TAB_IDS: KonsernTabId[] = ["oversikt", "utvid", "industri", "ledelse"];
 
 /**
  * Konsernet som egen hovedside (B-226), med underfaner som Verket: Oversikt (tallene, neste steg og verkene), Utvid
- * (kjøp og felles tjenester), Skraplager (anbud og konsernkassa) og Direktør (salgsdirektøren).
+ * (kjøp og felles tjenester), Industrien (selskapene rundt verket og konsernkassa, B-227) og Ledelse (salgsdirektøren).
  */
 export function KonsernPage({
   g,
@@ -550,8 +550,10 @@ export function KonsernPage({
   const tabs: { id: KonsernTabId; label: string; count?: number; badge?: string; alert?: boolean }[] = [
     { id: "oversikt", label: "Oversikt" },
     { id: "utvid", label: "Utvid", count: canBuy },
-    { id: "skraplager", label: "Skraplager", badge: tender ? "Anbud" : undefined },
-    { id: "direktor", label: "Direktør" },
+    // Industrien rundt verket (B-227): skraplageret nå, flere selskaper, Kontroll og overtakelser senere (RETNING.md)
+    { id: "industri", label: "Industrien", badge: tender ? "Anbud" : undefined },
+    // Ledelsen (B-227): salgsdirektøren nå, verksjefene i datterverkene senere (RETNING.md fase 5)
+    { id: "ledelse", label: "Ledelse" },
   ];
   return (
     <div className={`g-grid g-konsern-page is-konsern is-${tab}`}>
@@ -563,7 +565,7 @@ export function KonsernPage({
           <Callout tone="heat">
             <strong>Anbud på skraplageret er åpent</strong> til {fmtWhen(tender.closesAt)}. Eieren tjener på skrapet de
             andre spillerne bruker.{" "}
-            <button className="g-link" onClick={() => setTab("skraplager")}>
+            <button className="g-link" onClick={() => setTab("industri")}>
               Se anbudet
             </button>
           </Callout>
@@ -571,12 +573,8 @@ export function KonsernPage({
       )}
       {tab === "oversikt" && <KonsernOverview g={g} act={act} onBuy={() => setTab("utvid")} />}
       {tab === "utvid" && <KonsernBuy g={g} act={act} />}
-      {tab === "skraplager" && (
-        <div className="g-col-wide g-konsern-single">
-          <StrategicCompanies g={g} act={act} />
-        </div>
-      )}
-      {tab === "direktor" && (
+      {tab === "industri" && <IndustryPanel g={g} act={act} />}
+      {tab === "ledelse" && (
         <div className="g-col-wide g-konsern-single">
           <DirectorCard g={g} act={act} />
         </div>
