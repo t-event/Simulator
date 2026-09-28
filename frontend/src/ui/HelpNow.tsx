@@ -3,11 +3,12 @@
  * viktigste å gjøre med en knapp dit, hva hvert sted i verket gjør akkurat nå forklart med vanlige ord, og en kort
  * ordliste. Spillerne spurte hva «fp» var og hva de skulle trykke når noe røk (B-281); her står svaret samlet.
  */
+import { useState } from "react";
 import { scrapAlert, scrapStopHelp } from "../game/engine";
-import type { PlantStats } from "../game/plant";
+import { computePlantStats, type PlantStats } from "../game/plant";
 import type { GameState } from "../game/types";
 import { Callout, SheetHead, StatusLine } from "./ds";
-import { fmtT } from "./format";
+import { fmtClock, fmtT } from "./format";
 import type { Hint } from "./hints";
 import { hints } from "./hints";
 import { furnaceState, statusOf } from "./plantStatus";
@@ -53,19 +54,17 @@ const WORDS: [string, string][] = [
   ["C, P og Spor", "Karbon, fosfor og andre stoffer i stålet. Hver kvalitet har grenser (se Resept)."],
 ];
 
-export function HelpSheet({ g, stats, go, onClose }: Props) {
-  const tips = hints(g, stats);
-  const run = (t: Hint) => {
-    if (t.anchor) go("verket", t.anchor === "mal" ? "oversikt" : "anlegg");
-    else if (t.view) go(t.view, t.sub);
-    onClose();
-  };
+type Row = { name: string; text: string; help: string | null; to?: [View, string?] };
+
+/** Rådene og statusen i øyeblikket arket åpnes (B-285): ren tekst, så arket står stille mens spillet går */
+function snapshot(g: GameState, stats: PlantStats): { tips: Hint[]; rows: Row[]; at: string } {
+  const tips = hints(g, stats).slice(0, 4);
   const short = scrapAlert(g, stats);
   const active = g.contracts.filter((c) => c.status === "aktiv").length;
   const castText = g.castWait ?? (g.castQueue.length ? "Støper" : "Venter på stål");
   const storeFull = stats.storeUsed >= stats.storeT * 0.999;
 
-  const rows: { name: string; text: string; help: string | null; to?: [View, string?] }[] = [
+  const rows: Row[] = [
     {
       name: "Skrap",
       text: short.length ? "Mangler skrap" : `${fmtT(stats.yardUsed)} på lager`,
@@ -96,6 +95,19 @@ export function HelpSheet({ g, stats, go, onClose }: Props) {
       to: active ? undefined : ["salg"],
     },
   ];
+  return { tips, rows, at: fmtClock(g.minute % 1440) };
+}
+
+export function HelpSheet({ g, stats, go, onClose }: Props) {
+  // Før ble arket regnet ut på nytt i hvert tidssteg, og linjene hoppet (B-285). Nå står det som det var da det ble
+  // åpnet, til spilleren trykker «Oppdater»
+  const [snap, setSnap] = useState(() => snapshot(g, stats));
+  const { tips, rows } = snap;
+  const run = (t: Hint) => {
+    if (t.anchor) go("verket", t.anchor === "mal" ? "oversikt" : "anlegg");
+    else if (t.view) go(t.view, t.sub);
+    onClose();
+  };
 
   return (
     <div
@@ -107,11 +119,17 @@ export function HelpSheet({ g, stats, go, onClose }: Props) {
     >
       <div className="g-modal-card g-help-sheet" onClick={(e) => e.stopPropagation()}>
         <SheetHead title="Hva gjør jeg nå?" icon="circle-help" onClose={onClose} />
+        <p className="g-muted g-small-text g-help-at">
+          Slik var det kl. {snap.at}.{" "}
+          <button className="g-link" onClick={() => setSnap(snapshot(g, computePlantStats(g)))}>
+            Oppdater
+          </button>
+        </p>
 
         <h3 className="g-subhead">Det viktigste nå</h3>
         {tips.length ? (
           <ol className="g-help-todo">
-            {tips.slice(0, 4).map((t) => (
+            {tips.map((t) => (
               <li key={t.text}>
                 <p>{t.text}</p>
                 {(t.view || t.anchor) && (

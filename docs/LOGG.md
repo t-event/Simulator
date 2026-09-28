@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 222 – 2026-09-28: Hjelpearket står stille
+
+**Brukeren ba om:** «Linjene flytter seg i hva gjør jeg nå».
+
+**Gjort:** B-285. «Hva gjør jeg nå?» viser et øyeblikksbilde fra da det ble åpnet, med «Oppdater»-knapp. Publiseringen
+av #231 (B-284) var grønn.
+
+**Testet:** tsc, lint, npm test, build, Playwright på 320 og 390 px på 10× (ingen linjer flyttet seg på 8 s).
+
+**Gjenstår:** i morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 221 – 2026-09-28: Færre hendelseskort på høy fart
 
 **Brukeren ba om:** «Fortsett».
