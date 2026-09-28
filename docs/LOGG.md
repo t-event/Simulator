@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 212 – 2026-09-28: Gjennomgang av dagens nye ting
+
+**Brukeren ba om:** «Fortsett», og valgte en gjennomgang av alt som er lagt til i dag.
+
+**Gjort:** B-275. Rådet om renseanlegget åpner arket på riktig fane, og rådet om fullt ferdiglager nevner den nye
+knappen og utbyggingen. Ellers ingen feil funnet. Publiseringen av #221 (B-274) var grønn.
+
+**Testet:** tsc, lint, npm test, build, Playwright (rådet åpner «Verket» med panelet og «Større filteranlegg»).
+
+**Gjenstår:** i morgen: skraplageranbudet og første inntekt 30.9.
+
+---
+
 ## Økt 211 – 2026-09-28: Tak over skraplageret, større ferdiglager og salgsknapp
 
 **Brukeren ba om:** tak over skraplageret, utvidelse av ferdiglageret og en salgsknapp for ferdig stål.

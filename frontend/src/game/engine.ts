@@ -1333,7 +1333,7 @@ function storeFull(g: GameState, wasFull: boolean): void {
     `${STORE_FULL}: støpingen står, og ovnene stopper når øsene er fulle. ${
       auto(g, "autoSpot")
         ? "Automatisk salg er på, men lageret er fullt av stål som kontraktene venter på. Lever eller avbryt ordrer, eller bygg ut lageret."
-        : "Selg på spot under Salg → Lager, slå på automatisk salg der, eller bygg ut lageret."
+        : "Trykk «Selg alt ledig stål» under Salg → Lager, slå på automatisk salg der, eller bygg ut lageret under Anlegg → Lager og salg."
     }`,
     "bad",
   );
