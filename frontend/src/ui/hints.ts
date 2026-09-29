@@ -11,6 +11,7 @@ import {
   gradesInUse,
   isAbsent,
   staffing,
+  plantRestartMin,
   tempsActive,
   fixedPriceAdvice,
   plannerOrders,
@@ -210,7 +211,8 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
   {
     const away = g.workers.filter((w) => isAbsent(g, w)).length;
     const full = staffing(g, true).shifts;
-    if (away && !tempsActive(g) && stats.shifts < full)
+    // Står hele verket, trengs ingen vikarer ennå (B-346)
+    if (away && !tempsActive(g) && stats.shifts < full && plantRestartMin(g) === null)
       out.push({
         text: `${away} ${away === 1 ? "ansatt er" : "ansatte er"} borte, og verket går ${stats.shifts} skift i stedet for ${full}. Lei inn vikarer under Folk, eller vent til de er tilbake.`,
         view: "folk",

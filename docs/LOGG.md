@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 274 – 2026-09-29: Ingen vikarer når verket står (B-346)
+
+**Brukeren ba om:** «Koffer bi d leid inn vikara når d e stopp i drifta? (Skiftleder)»
+
+**Funnet:** skiftlederen leide vikarer for alt fravær uansett. I sommerstansen ble folk fortsatt syke, og han betalte
+vikarer til halvannen lønn mens ovnene sto (og ingen andre fikk lønn).
+
+**Gjort:** ingen vikarer mens alle ovnene står (`plantRestartMin`), først timen før de starter; ingen sykdom i
+sommerstansen; Folk → Fravær og rådene sier at verket står i stedet for å be om vikarer.
+
+**Testet:** ny motortest, `npm test`, lint, typesjekk, balanse (vanlig og `--sommerstans`), Playwright 320/390 px.
+
+---
+
 ## Økt 273 – 2026-09-29: Daglig eksport av tabellene (B-345)
 
 **Brukeren ba om:** «Lag eksport av de viktigste tabellene» (gratisplanen har ingen sikkerhetskopier).
