@@ -795,6 +795,8 @@ export interface DailyMission {
   /** Tallet ved dagens start */
   base: number;
   target: number;
+  /** 2: «verdi» måler verdien med utbetalt til eierne (B-352). Mangler i oppdrag startet før det */
+  v?: number;
 }
 export interface DailyState {
   date: string | null;

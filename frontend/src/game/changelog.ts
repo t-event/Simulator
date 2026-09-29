@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 352,
+    date: "2026-09-29",
+    title: "Dagens oppdrag «Øk konsernverdien» går an igjen",
+    items: [
+      "Med kassa på 10 mrd. betales overskuddet ut til eierne, så konsernverdien sto stille, og oppdraget kunne ikke gjøres. Nå teller det som betales ut til eierne med, som i sluttmålet.",
+    ],
+  },
+  {
     b: 351,
     date: "2026-09-29",
     title: "Kokillene i strengstøpingen",

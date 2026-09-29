@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 278 – 2026-09-29: Dagens oppdrag «Øk konsernverdien» umulig (B-352)
+
+**Brukeren ba om:** «Dagens oppdrag, øk konsernverdien med 1 mrd er ikke mulig».
+
+**Funnet:** oppdraget målte `konsernEquity`; med kassa på taket (10 mrd.) betales overskuddet ut, så verdien sto stille.
+
+**Gjort:** oppdraget måler `valueCreated` (utbetalt teller med, som sluttmålet i B-341). Oppdrag startet før endringen får
+utbetalingen lagt til startverdien i `migrate()` (`v: 2` på nye oppdrag), så de ikke blir gjort av seg selv.
+
+**Testet:** motortest (gjort med kassa på taket; gammelt oppdrag ikke gjort av seg selv), `npm test`, lint, typesjekk.
+
+---
+
 ## Økt 277 – 2026-09-29: Kokillene (B-351)
 
 **Brukeren ba om:** «Få kokiller inn i spillet (strengstøpeanlegg)».

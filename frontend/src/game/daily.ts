@@ -7,7 +7,7 @@
  * som på storverket. Juksesperren på serveren (check_snapshot) gir plass til de samme døgnene (bonus_days).
  */
 import { log } from "./engine";
-import { konsernEquity, konsernOptions, konsernProfitPerDay } from "./konsern";
+import { konsernOptions, konsernProfitPerDay, valueCreated } from "./konsern";
 import { MASTERY_IDS, masteryLevel, masteryOpen } from "./mastery";
 import { computePlantStats } from "./plant";
 import { QUIZ } from "./quiz";
@@ -128,7 +128,8 @@ const TEMPLATES: Record<MissionId, MissionTemplate> = {
     target: () => 1,
   },
   verdi: {
-    value: (g) => konsernEquity(g),
+    // Utbetalt til eierne teller med (B-352), som i sluttmålet (B-341): med kassa på taket står konsernverdien stille
+    value: (g) => valueCreated(g),
     eligible: (g) => !!g.konsern?.unlocked,
     // Omtrent tre døgns overskudd i hele konsernet
     target: (g) => roundNice(3 * dayOfDrift(g)),
@@ -205,6 +206,7 @@ export function startMissionDay(g: GameState, date: string, claimed: boolean): v
       id,
       base: TEMPLATES[id].value(g),
       target: TEMPLATES[id].target(g),
+      v: 2,
     })),
   };
 }
