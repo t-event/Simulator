@@ -7,7 +7,8 @@ til «Avgjort» nederst).
 ## Spørsmål til brukeren
 
 - **Slå på gjestekontoer (B-212):** eieren må slå på «Allow anonymous sign-ins» under Authentication → Sign In /
-  Providers i dashbordet (connectoren kan ikke). Til det er gjort, prøver appen én gang i døgnet og gjør ellers ingenting.
+  Providers i dashbordet (connectoren kan ikke). **29.9: eieren slår det på** – sjekk etterpå at det kommer gjester
+  (`select count(*) from auth.users where is_anonymous`). Til det er gjort, prøver appen én gang i døgnet og gjør ellers ingenting.
   Supabase anbefaler også CAPTCHA mot misbruk; grensen er 30 nye gjester i timen per IP.
 
 ## Venter
@@ -32,7 +33,8 @@ til «Avgjort» nederst).
   etter anbudet.
 
 - **Vern mot lekkede passord:** brukeren sa det var skrudd på, men sikkerhetsrådene i Supabase melder det fortsatt av
-  (2026-09-26, økt 108). Sjekk under Authentication → «Leaked password protection» at det er lagret.
+  (2026-09-26, økt 108; fortsatt 29.9). Sjekk under Authentication → «Leaked password protection» at det er lagret.
+  Funksjonen finnes trolig bare på betalt plan (Pro). **29.9: eieren sjekker dashbordet.**
 
 - ~~Toppliste for kontrollrommet~~ **Bygget (B-295).**
 - **Glemt passord** er ikke testet med ekte e-post ennå (brukeren, 2026-09-26). Ekte innlogging virker. Test det
