@@ -53,7 +53,9 @@ export function MoneyGuide({ g, onClose }: { g: GameState; onClose: () => void }
                 Brukes til utstyr, folk, skrap og forskning hjemme.
               </p>
               {cap > 0 && (
-                <p className="g-small-text g-muted">Tak: {fmtKr(cap)}. Det du tjener over, betales ut til eierne.</p>
+                <p className="g-small-text g-muted">
+                  Tak: {fmtKr(cap)}. Det du tjener over, flyttes til din private formue.
+                </p>
               )}
             </div>
             {konsern && (
@@ -79,10 +81,10 @@ export function MoneyGuide({ g, onClose }: { g: GameState; onClose: () => void }
           {hasPaidOut(g) && (
             <Question q={`Kassa står på ${fmtKr(cap)} – hvor blir resten av?`}>
               <p>
-                Det betales ut til eierne ({fmtKr(Math.floor(paidOutTotal(g)))} så langt). Det kan ikke brukes – alt som
-                kan kjøpes hjemme, koster mindre – men det er ikke borte: det teller med i verdien din, altså
-                sluttmålet, de største ovnene ({fmtKr(STORMODEL_EQUITY)}) og dagens oppdrag, og står i Hall of Fame som
-                «Utbetalt til eierne».
+                Det flyttes til din private formue ({fmtKr(Math.floor(paidOutTotal(g)))} så langt). Den kan ikke brukes
+                i spillet – alt som kan kjøpes hjemme, koster mindre – men den er ikke borte: den teller med i verdien
+                din, altså sluttmålet, de største ovnene ({fmtKr(STORMODEL_EQUITY)}) og dagens oppdrag, og står i Hall
+                of Fame som «Privat formue».
               </p>
             </Question>
           )}
@@ -116,7 +118,7 @@ export function MoneyGuide({ g, onClose }: { g: GameState; onClose: () => void }
                 <p>
                   <strong>Konsernverdi:</strong> konsernkassa pluss 60 dagers utbytte og bidrag, minus lån – regnet av
                   serveren i ekte tid. <strong>Verdi i spillet:</strong> kassa hjemme minus lån, pluss det verkene er
-                  verdt. <strong>Utbetalt til eierne</strong> har sin egen liste.
+                  verdt. <strong>Privat formue</strong> har sin egen liste.
                 </p>
               </Question>
             </>

@@ -533,12 +533,12 @@ function TopBar({
       <div className="g-top-row g-kpis">
         <Kpi icon="money" label="Kasse" className={`g-kpi-cash${g.cash < 0 ? " tone-critical" : ""}`}>
           {fmtKr(Math.floor(g.cash))}
-          {/* Kassa står ved taket; overskuddet betales ut til eierne (B-303) */}
+          {/* Kassa står ved taket; overskuddet går til den private formuen (B-303, B-359) */}
           {hasPaidOut(g) && (
             <Icon
               name="lock"
               className="g-kpi-lock"
-              label={`Kassa er ved taket – overskuddet betales ut til eierne (${fmtKr(Math.floor(paidOutTotal(g)))} i alt)`}
+              label={`Kassa er ved taket – overskuddet går til din private formue (${fmtKr(Math.floor(paidOutTotal(g)))} i alt)`}
             />
           )}
         </Kpi>

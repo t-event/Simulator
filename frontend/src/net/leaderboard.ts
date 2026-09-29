@@ -17,8 +17,8 @@ export const BOARDS: { id: BoardKind; label: string; unit: "kr" | "rep" | "dager
   { id: "ferdig", label: "Raskest til 10 mrd.", unit: "dager" },
   // Beste charge i kontrollrommet (B-295): samme liste i sesongen og i Hall of Fame
   { id: "kontroll", label: "Kontrollrom", unit: "poeng" },
-  // Utbetalt til eierne (B-303): det kassa har tjent over taket, samme liste i sesongen og i Hall of Fame
-  { id: "utbetalt", label: "Utbetalt til eierne", unit: "kr" },
+  // Privat formue (B-303, navnet fra B-359): det kassa har tjent over taket, samme liste i sesongen og i Hall of Fame
+  { id: "utbetalt", label: "Privat formue", unit: "kr" },
   // «Omdømme» er tatt bort (B-171): nesten alle står på 100, så lista sa ingenting. Serveren kan fortsatt regne den ut
 ];
 

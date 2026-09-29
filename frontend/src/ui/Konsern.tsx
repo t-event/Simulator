@@ -925,7 +925,7 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
               </span>
               {hasPaidOut(g) && (
                 <span title="Det kassa har tjent over taket. Teller med i sluttmålet og for de største ovnene, ikke i konsernverdien på topplista">
-                  Utbetalt til eierne <strong>{fmtKr(Math.floor(paidOutTotal(g)))}</strong>
+                  Privat formue <strong>{fmtKr(Math.floor(paidOutTotal(g)))}</strong>
                 </span>
               )}
             </div>

@@ -598,7 +598,7 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
                 {stats.salaryPerDay > 0 && <Stat label="Lønn per døgn" value={fmtKr(stats.salaryPerDay)} />}
                 <Stat label="Faste kostnader per døgn" value={fmtKr(STAGES[g.stage].fixedPerDay)} />
                 {g.loan > 0 && <Stat label="Lån" value={fmtKr(g.loan)} tone="warning" />}
-                {hasPaidOut(g) && <Stat label="Utbetalt til eierne" value={fmtKr(Math.floor(paidOutTotal(g)))} />}
+                {hasPaidOut(g) && <Stat label="Privat formue" value={fmtKr(Math.floor(paidOutTotal(g)))} />}
               </div>
               {y && (
                 <div className="g-breakdowns">
@@ -618,13 +618,13 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
                   />
                 </div>
               )}
-              {/* Utbetalingen til eierne (B-303) vises først når kassa har nådd taket */}
+              {/* Den private formuen (B-303, B-359) vises først når kassa har nådd taket */}
               {hasPaidOut(g) && (
                 <p className="g-muted g-small-text g-reserve-note">
                   <Icon name="lock" /> Kassa kan ha høyst {fmtKr(CASH_RESERVE.softCap ?? 0)} – mer enn alt som kan
-                  kjøpes. Det du tjener utover, betales ut til eierne. Det kan ikke brukes, men teller med i verdien
-                  (sluttmålet, de største ovnene, dagens oppdrag). Konkurransen med de andre foregår i konsernkassa, i
-                  ekte tid. <MoneyGuideLink g={g} label="Slik henger pengene sammen" />
+                  kjøpes. Det du tjener utover, flyttes til din private formue. Den kan ikke brukes i spillet, men
+                  teller med i verdien (sluttmålet, de største ovnene, dagens oppdrag). Konkurransen med de andre
+                  foregår i konsernkassa, i ekte tid. <MoneyGuideLink g={g} label="Slik henger pengene sammen" />
                 </p>
               )}
               {y && plantResult(y) < 0 && avgPlantResult(g) >= 0 && (

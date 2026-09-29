@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 359,
+    date: "2026-09-29",
+    title: "Privat formue",
+    items: [
+      "Det kassa tjener over taket på 10 mrd., heter nå «Privat formue» – det er du som eier verket, så pengene går til deg. Lista på topplista har samme navn. Ellers er alt som før.",
+    ],
+  },
+  {
     b: 357,
     date: "2026-09-29",
     title: "Lærlinger, alder og pensjon",

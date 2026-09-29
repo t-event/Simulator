@@ -236,7 +236,7 @@ function Leaderboard({
         {kind === "konsern"
           ? "Konsernkassa pluss 60 dagers utbytte og bidrag, minus lån – regnet av serveren i ekte tid, uansett spillfart."
           : kind === "utbetalt"
-            ? "Det verket har tjent over taket for kassa og betalt ut til eierne – samme liste i sesongen og i Hall of Fame."
+            ? "Det verket har tjent over taket for kassa, flyttet over til eierens private formue – samme liste i sesongen og i Hall of Fame."
             : kind === "kontroll"
               ? "Beste charge noensinne i kontrollrommet – samme liste i sesongen og i Hall of Fame."
               : hallOfFame

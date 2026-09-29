@@ -1668,7 +1668,7 @@ test("Taket for kassa (B-303): overskuddet betales ut til eierne, teller ikke i 
   assert(g.cash === cap && paidOutTotal(g) === 5e9, `kasse ${g.cash}, utbetalt ${paidOutTotal(g)}`);
   assert(Math.abs(konsernEquity(g) - cap) < 1, `utbetalingen teller i konsernverdien: ${konsernEquity(g)}`);
   assert(
-    g.log.length === logBefore + 1 && /betales nå ut til eierne/.test(g.log[g.log.length - 1].text),
+    g.log.length === logBefore + 1 && /flyttes nå til din private formue/.test(g.log[g.log.length - 1].text),
     "ingen forklaring",
   );
   // Neste gang: ingen ny forklaring, beløpet legges til
@@ -1682,7 +1682,7 @@ test("Taket for kassa (B-303): overskuddet betales ut til eierne, teller ikke i 
   // Døgnlinja oppsummerer og nullstiller
   g.paidOut!.today = 2e9;
   paidOutDayLog(g);
-  assert(g.paidOut!.today === 0 && /betalt ut til eierne i går/.test(g.log[g.log.length - 1].text), "ingen døgnlinje");
+  assert(g.paidOut!.today === 0 && /flyttet til din private formue i går/.test(g.log[g.log.length - 1].text), "ingen døgnlinje");
   // Motoren betaler ut av seg selv
   g.cash = cap + 3e9;
   advance(g, 1);
