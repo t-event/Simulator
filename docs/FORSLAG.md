@@ -9,6 +9,7 @@ til «Avgjort» nederst).
 - **Slå på gjestekontoer (B-212):** eieren må slå på «Allow anonymous sign-ins» under Authentication → Sign In /
   Providers i dashbordet (connectoren kan ikke). **29.9: eieren slår det på** – sjekk etterpå at det kommer gjester
   (`select count(*) from auth.users where is_anonymous`). Til det er gjort, prøver appen én gang i døgnet og gjør ellers ingenting.
+  **29.9 ca. 23:07: slått på av eieren.** Sjekk 30.9 at det kommer gjester og at de lagrer (påminnelse satt).
   Supabase anbefaler også CAPTCHA mot misbruk; grensen er 30 nye gjester i timen per IP.
 
 ## Venter
@@ -32,9 +33,6 @@ til «Avgjort» nederst).
   konsernkassa (B-304) og realistiske kostnader på toppen (B-305) er bygget. Gebyret på skraplageret (500 kr/t) settes
   etter anbudet.
 
-- **Vern mot lekkede passord:** brukeren sa det var skrudd på, men sikkerhetsrådene i Supabase melder det fortsatt av
-  (2026-09-26, økt 108; fortsatt 29.9). Sjekk under Authentication → «Leaked password protection» at det er lagret.
-  Funksjonen finnes trolig bare på betalt plan (Pro). **29.9: eieren sjekker dashbordet.**
 
 - ~~Toppliste for kontrollrommet~~ **Bygget (B-295).**
 - **Glemt passord** er ikke testet med ekte e-post ennå (brukeren, 2026-09-26). Ekte innlogging virker. Test det
@@ -61,6 +59,9 @@ til «Avgjort» nederst).
   Krever konto. Brukeren: «Ingen varsel på mobilen enda» (B-149).
 
 ## Avgjort
+
+- **Vern mot lekkede passord (B-363):** finnes bare på Supabase Pro. Eieren 29.9: «Vi dropper det». Rådet
+  `auth_leaked_password_protection` i `get_advisors` står derfor, og er kjent.
 
 - **Fast regel om spilltid og ekte tid (B-323):** eieren sa ja 29.9; står i CLAUDE.md og RETNING.md.
 

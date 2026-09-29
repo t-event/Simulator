@@ -6566,3 +6566,13 @@ fortsatt utbyttet nå, så et nytt verk vises med én gang. Migrasjon `078_utbyt
 Endringslogg: nei – tallet i appen er som før, betalingen blir jevnere.
 Konto (B-149): ja, som utbyttet (B-304) – regnes på serveren i ekte tid.
 
+## B-363 Vern mot lekkede passord droppes (2026-09-29)
+Status: gjelder
+Bakgrunn: sikkerhetsrådene i Supabase har meldt «Leaked password protection disabled» siden 26.9. Eieren sjekket
+dashbordet: funksjonen finnes bare på Supabase Pro.
+Beslutning: eieren 29.9: «Prevent use of leaked passwords er kun for supabase pro. Vi dropper det.» Rådet
+`auth_leaked_password_protection` blir stående i `get_advisors` og regnes som kjent. Minstelengden på passord (6 tegn)
+er som før. Vurderes på nytt hvis prosjektet går over til Pro.
+Endringslogg: nei – ingen endring i spillet.
+Konto (B-149): – ingen ny funksjon.
+

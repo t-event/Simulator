@@ -5,6 +5,16 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 289 – 2026-09-29: Gjestekontoer på, lekkede passord droppes (B-363)
+
+**Brukeren sa:** «Allow anonymous sign-ins enabled» og «Prevent use of leaked passwords er kun for supabase pro. Vi dropper
+det».
+
+**Gjort:** FORSLAG.md: gjestekontoene er slått på (sjekk 30.9, påminnelse satt), vernet mot lekkede passord flyttet til
+«Avgjort». B-363.
+
+**Gjenstår:** sjekk gjestene 30.9 og første bidrag 1.10 (påminnelser satt).
+
 ## Økt 288 – 2026-09-29: «Vi har postgres errors», og utbyttet som snitt (B-362)
 
 **Brukeren ba om:** «Vi har postgres errors. Fortsett».
