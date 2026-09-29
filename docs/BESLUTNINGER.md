@@ -6740,3 +6740,30 @@ Beslutning:
   samme region som et selskap gir Kontroll. Lenke til alle verkene (Oversikt).
 - Spørsmålet om investering er besvart (se LOGG økt 298); endring av regelen er lagt fram som forslag i FORSLAG.md.
 Konto (B-149): – ingen ny funksjon.
+
+## B-373 Datterverk til en firedel, ingen pause etter avverget oppkjøp, og ingen hopping (2026-09-30)
+Status: gjelder (erstatter prisene i B-325 og pausen i B-335/B-372)
+Bakgrunn: brukeren (eier): «Om nåværende eier klarer å beholde bedriften etter noen har prøvd på oppkjøp blir det ikke mye
+3 dagers vern. 3 dagers vern skal kun være når noen overtar bedriften. I toppbaren er det linjer som flytter på seg. Det
+er også mange linjer som flytter på seg i oversikt siden. Fiks at kjøp og oppgradering av datterverk ikke tar flere
+hundre dager. Om du justerer pris ned må du gi tilbake penger til konsernkassa til de som har kjøpt eller oppgradert noe
+etter 00:00 idag.»
+Beslutning:
+- Prisene i konsernet (`config.world.konsern.price` og `WORLD_KONSERN.price`): stålverk 20 → **5**, storverk 80 → **20**,
+  kompleks 250 → **60 mill.** Modernisering (30 %), utbygging (forskjellen, 15 mill.) og salg (60 % med trinn) følger.
+  Målt med dagens utbytteregel (`konsernOptions`, tilbakebetaling per kjøp): før 32 dager (første verk) til 200–480 dager
+  (store konsern); nå 8 dager til 50–126 dager. Store konsern tar fortsatt lengst, fordi hvert nytt verk gir mindre
+  (imperiebelastningen) – det er med vilje. Simuleringen i KONSERN-FORSLAG.md (ett år til fullt konsern) gjelder ikke
+  lenger; det går omtrent fire ganger raskere, begrenset av byggekøen (ett prosjekt om gangen).
+- Tilbakebetaling (`085_priser_ned_og_vern.sql`): bestillinger fra 00:00 norsk tid 30.9 fikk mellomlegget tilbake
+  (`treasury_ledger` kind `refusjon`, ref `prisfall:<id>`), og prisen i køen ble satt til den nye. Dry-run først (fire
+  bestillinger): Big Boss 13,5 mill., 2bajjas 13,5 mill., Grane 2 × 12,75 mill. – 52,5 mill. i alt.
+- Oppkjøp: `config.world.takeover.cooldown_days` = 0. Ingen pause etter et avverget oppkjøp; vernet på 3 dager gjelder
+  bare når selskapet får ny eier (oppkjøp eller anbud).
+- Hopping (B-238): tallene i toppfeltet har fast minstebredde (kasse, omdømme, fagpoeng, konsernkassa), merket på bjella
+  ligger oppå hjørnet, og plassen til ikonet i varsellinja står også uten varsel. «Siste hendelser» på Oversikt: hver
+  hendelse tar alltid to linjer (klippes med «…»). Konsern → Oversikt: raden rådet gjelder, åpnes bare når siden åpnes –
+  før åpnet og lukket radene seg hver gang rådet byttet verk, og lista hoppet opptil 900 px. Målt i Playwright på 320,
+  390 og 1366 px i 8 s på 10×: ingenting over kortene flytter seg lenger.
+- Testspilleren (`balance.ts`): OK, exit 0.
+Konto (B-149): – ingen ny funksjon.

@@ -17,7 +17,7 @@ import { defaultRegion, isRegion } from "./regions";
 import type { KonsernOrder, PolicyId, RegionId, SisterPlant, SisterProject, SisterType } from "./types";
 
 export const WORLD_KONSERN = {
-  price: { stalverk: 20_000_000, storverk: 80_000_000, kompleks: 250_000_000 } as Record<SisterType, number>,
+  price: { stalverk: 5_000_000, storverk: 20_000_000, kompleks: 60_000_000 } as Record<SisterType, number>,
   modShare: 0.3,
   sellShare: 0.6,
   buildHours: { stalverk: 2, storverk: 6, kompleks: 12 } as Record<SisterType, number>,

@@ -542,7 +542,7 @@ function TopBar({
             />
           )}
         </Kpi>
-        <Kpi icon="star" label="Omdømme">
+        <Kpi icon="star" label="Omdømme" className="g-kpi-rep">
           {fmtRep(g.reputation)}
         </Kpi>
         <Kpi icon="power" label={stats.furnace.fuel === "gass" ? "Gass" : "Strøm"}>
@@ -565,6 +565,7 @@ function TopBar({
           <Kpi
             icon="research"
             label="Fagpoeng"
+            className="g-kpi-fp"
             hint={`${Math.floor(g.researchPoints)} fagpoeng – brukes til forskning. Trykk for å se hva du kan forske på`}
             onClick={onResearch}
           >
@@ -755,7 +756,12 @@ function NoticeLine({
           {unseen > 0 && <span className="g-badge">{unseen > 99 ? "99+" : unseen}</span>}
         </span>
         <span className={`g-notice-msg${kind ? "" : " is-idle"}`}>
-          {kind && <Icon name={TOAST_ICON[kind]} className="g-notice-kind" />}
+          {/* Plassen til ikonet står også uten varsel (B-373), så teksten ikke skyves når et varsel kommer */}
+          {kind ? (
+            <Icon name={TOAST_ICON[kind]} className="g-notice-kind" />
+          ) : (
+            <span className="g-notice-kind is-empty" />
+          )}
           {text}
         </span>
       </button>

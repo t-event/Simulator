@@ -253,7 +253,7 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   iPhone arket til innholdet, og det kan ikke scrolles (skjedde med «Pynt verket»).
 - **Veiledningsboksen** (B-260) ligger fast nederst og kan dekke knapper på små mobiler. Et nytt steg som ber spilleren
   trykke på noe, skal ha knappen i `COACH_TARGET` (`ui/GameApp.tsx`), og testes på 320 × 568 med `elementFromPoint`.
-- **Ingen hopping** (B-238): tekst som endrer seg mens spillet går (status, tall, råd, merker), skal ikke endre høyden
+- **Ingen hopping** (B-238, B-373: tallene i toppfeltet har fast minstebredde, `<details>` åpnes aldri av seg selv mens spillet går): tekst som endrer seg mens spillet går (status, tall, råd, merker), skal ikke endre høyden
   på det som står over annet innhold. Bruk faste rader (`nowrap` + «…»), reserver plass (stolper, rådsraden) og legg
   merker oppå hjørnet. Test ved å måle posisjonen til kortene i 8 s med spillet i gang, på 320 og 390 px.
 - **Sidehøyden på iPhone** (B-262, B-269): `#root { min-height: 100vh }` og faste lag med `inset: 0` må stå. Uten
@@ -405,8 +405,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   kunne miste selskapet (B-337): budet teller inntil 10 × V, forsvaret høyst 3 × V – endres vektene eller Kontrollens
   maks, må det sterkeste forsvaret fortsatt kunne slås (testen «alltid mulig»). Ingen fordel i fornyelsesanbudet. Bryteren
   `config.world.takeover.enabled` – på fra 29.9.2026 (B-339). Test med bryteren på i en DO-blokk som rulles tilbake (flytt
-  `company_owners.from_at` bakover for vernet, `closes_at` bakover for utfallet). Kjøperen får 14 dager fra kjøpet og 3 dagers vern; pausen
-  på 14 dager gjelder bare etter «avverget» (B-372). Til når ingen kan by, regnes av `company_protected_until`. Et nytt selskapsbytte må ende eierens
+  `company_owners.from_at` bakover for vernet, `closes_at` bakover for utfallet). Kjøperen får 14 dager fra kjøpet og 3 dagers vern; ingen
+  pause etter «avverget» (`cooldown_days` = 0, B-373). Til når ingen kan by, regnes av `company_protected_until`. Et nytt selskapsbytte må ende eierens
   rad i `company_owners` (`until_at = now()`), ellers regner `pay_company_income` feil eier.
 - **Byggetid hjemme** (B-336): kjøp fra 50 mill. (ikke flytting) installeres ikke i `buyUpgrade`, men i `finishBigBuild`
   når `g.bigBuild.readyMin` er nådd (fra `hourlyActions`). Tester og kode som kjøper stort utstyr og venter det med én
