@@ -5,6 +5,7 @@
  * Produksjonen følger stålet gjennom kjeden skraplager → ovn → øse →
  * støping → (valseverk) → lager → kunde, og hver del kan bli flaskehals.
  */
+import { hasNeighbor, reputationFloor } from "./building";
 import {
   BANKRUPTCY_DAYS,
   CUSTOMERS,
@@ -295,6 +296,8 @@ export function newGame(seed = Date.now()): GameState {
     seasonPromptSeen: null,
     tenderSeen: 0,
     takeoverSeen: "",
+    bigBuild: null,
+    neighborhood: { built: [], building: null },
     companyIncomeSeen: {},
     env: newEnv(),
     seasonLoginPromptSeen: null,
@@ -407,7 +410,9 @@ export function awardPoints(g: GameState, points: number): void {
 }
 
 export function adjustReputation(g: GameState, delta: number): void {
-  g.reputation = Math.max(0, Math.min(100, g.reputation + delta));
+  // Konserthuset (B-336): omdømmet synker ikke under 70 (når det først er der)
+  const floor = g.reputation >= reputationFloor(g) ? reputationFloor(g) : 0;
+  g.reputation = Math.max(floor, Math.min(100, g.reputation + delta));
 }
 
 function addScrap(
@@ -2740,7 +2745,14 @@ export function makeCandidate(g: GameState, role?: RoleId): Worker {
         .filter((x) => x !== "murer" || g.stage >= 3)
         .filter((x) => x !== "skiftleder" || g.stage >= 3),
     );
-  const skill = Math.min(5, Math.max(1, Math.round((uniform(g, 0.6, 3.6) + (g.stage >= 3 ? 0.5 : 0)) * 10) / 10));
+  // Den nye skolen (B-336): søkerne er flinkere fra første dag
+  const skill = Math.min(
+    5,
+    Math.max(
+      1,
+      Math.round((uniform(g, 0.6, 3.6) + (g.stage >= 3 ? 0.5 : 0) + (hasNeighbor(g, "skole") ? 0.4 : 0)) * 10) / 10,
+    ),
+  );
   return {
     id: g.nextWorkerId++,
     name: `${pick(g, FIRST_NAMES)} ${pick(g, LAST_NAMES)}`,
@@ -3006,6 +3018,8 @@ function updateAbsence(g: GameState, stats: PlantStats): void {
       (hasResearch(g, "ledelse") ? 0.7 : 1) *
       // Tett oppfølging fra en skiftleder på jobb (B-178)
       (shiftLeaderAtWork(g) ? SHIFT_LEADER_SICK : 1) *
+      // Sykehuset (B-336): færre sykemeldinger
+      (hasNeighbor(g, "sykehus") ? 0.8 : 1) *
       // Noen er oftere borte; en advarsel virker på dem (B-101)
       (oftenSick(w) && (w.warnedDay === undefined || today - w.warnedDay >= WARNING_DAYS) ? 2.0 : 0.75);
     if (!busy && chance(g, risk)) {

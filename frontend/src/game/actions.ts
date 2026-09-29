@@ -9,6 +9,7 @@ import {
   CASTINGS,
   FURNACES,
   GRADES,
+  MIN_PER_DAY,
   PRODUCTS,
   ROLES,
   SCRAP_IDS,
@@ -54,6 +55,7 @@ import {
   wildcardUse,
 } from "./plant";
 import { newGradesAt, startRecipeGuide } from "./recipeGuide";
+import { BIG_BUILD, bigBuildDaysLeft, buildDays, isBigPurchase, NEIGHBOR_PROJECTS, nextNeighbor } from "./building";
 import { landmarkHour } from "./landmarks";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
 import type { GameState, GradeId, MasteryId, PowerDeal, RoleId, ScrapId, Worker } from "./types";
@@ -85,6 +87,8 @@ export interface UpgradeOption {
   confirm?: string;
   /** Kjøpet kan planlegges til ordrene på det gamle produktet er levert (B-102) */
   canSchedule?: boolean;
+  /** Bygges nå (B-336) */
+  building?: boolean;
 }
 
 const fail = (message: string): PurchaseResult => ({ ok: false, message });
@@ -291,6 +295,24 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
       locked: a.stage > g.stage || (!owned && !!gated),
     });
   }
+  // Store kjøp (B-336): byggetid, ett om gangen, og det som bygges nå
+  const build = g.bigBuild;
+  for (const o of out) {
+    if (o.owned || !isBigPurchase(o)) continue;
+    if (build?.id === o.id) {
+      o.available = false;
+      o.building = true;
+      o.reason = `Bygges – ferdig om ${bigBuildDaysLeft(g)} døgn`;
+      continue;
+    }
+    const days = buildDays(o.price);
+    const note = `Tar ${days} døgn å bygge${o.kind === "furnace" ? ", og ovnen står mens den bygges om" : ""}. Kjøres inn over ${BIG_BUILD.rampDays} døgn.`;
+    o.warning = o.warning ? `${note} ${o.warning}` : note;
+    if (build && o.available) {
+      o.available = false;
+      o.reason = `Bygger ${build.name.toLowerCase()} nå – ett stort prosjekt om gangen (ferdig om ${bigBuildDaysLeft(g)} døgn)`;
+    }
+  }
   // Et kjøp som tømmer kassa, stopper skrapinnkjøpet og dermed verket (B-062)
   const dailyCost = dailyRunningCost(g);
   // Bare for det som kan kjøpes nå: mangler forskning eller penger, er det det som står på kortet (B-144)
@@ -351,7 +373,64 @@ export function buyUpgrade(g: GameState, id: string): PurchaseResult {
   if (option.locked) return fail(`Krever at du har flyttet til ${stageRef(option.stage, g.stage)}.`);
   if (!option.available) return fail(option.reason ?? "Kan ikke kjøpes nå.");
   addCost(g, "investering", option.price);
+  // Store kjøp bygges i spilltid, ett om gangen (B-336)
+  if (isBigPurchase(option) && option.kind !== "stage") {
+    const days = buildDays(option.price);
+    g.bigBuild = {
+      id: option.id,
+      baseId: option.baseId,
+      unit: option.unit,
+      kind: option.kind,
+      name: option.name,
+      price: option.price,
+      stage: option.stage,
+      startMin: g.minute,
+      readyMin: g.minute + days * MIN_PER_DAY,
+    };
+    // En ovn som bygges om, står til den er ferdig
+    if (option.kind === "furnace") {
+      const f = g.furnaces[option.unit ?? 0];
+      f.downUntilMin = Math.max(f.downUntilMin, g.bigBuild.readyMin);
+      f.downReason = `Ombygging: ${option.name}`;
+    }
+    log(g, `Byggingen av ${option.name.toLowerCase()} har startet – ferdig om ${days} døgn.`, "info");
+    return { ok: true, message: `${option.name} bestilt for ${fmtKr(option.price)} – ferdig om ${days} døgn.` };
+  }
+  installUpgrade(g, option);
+  return { ok: true, message: `${option.name} kjøpt for ${fmtKr(option.price)}.` };
+}
 
+/** Et stort kjøp som er ferdig bygget, settes i drift og kjøres inn (B-336) */
+export function finishBigBuild(g: GameState): boolean {
+  const b = g.bigBuild;
+  if (!b || g.minute < b.readyMin) return false;
+  g.bigBuild = null;
+  installUpgrade(g, b);
+  if (b.kind === "furnace") {
+    const f = g.furnaces[b.unit ?? 0];
+    if (f) {
+      f.rampFromDay = day(g);
+      if (f.downReason?.startsWith("Ombygging")) {
+        f.downUntilMin = Math.min(f.downUntilMin, g.minute);
+      }
+    }
+  }
+  if (b.kind === "casting") g.castingRampFromDay = day(g);
+  if (b.id === "ovn2" || b.id === "ovn3") {
+    const f = g.furnaces[g.furnaces.length - 1];
+    if (f) f.rampFromDay = day(g);
+  }
+  if (b.kind !== "addon" || b.id === "ovn2" || b.id === "ovn3")
+    log(g, `${b.name} er ferdig bygget og kjøres inn: full fart om ${BIG_BUILD.rampDays} døgn.`, "good");
+  return true;
+}
+
+/** Selve installasjonen av et kjøp: med én gang for små kjøp, når byggingen er ferdig for store (B-336) */
+function installUpgrade(
+  g: GameState,
+  option: Pick<UpgradeOption, "id" | "baseId" | "unit" | "kind" | "name" | "stage">,
+): void {
+  const id = option.id;
   switch (option.kind) {
     case "stage": {
       g.stage = option.stage;
@@ -428,7 +507,6 @@ export function buyUpgrade(g: GameState, id: string): PurchaseResult {
       break;
     }
   }
-  return { ok: true, message: `${option.name} kjøpt for ${fmtKr(option.price)}.` };
 }
 
 // ------------------------------------------------------------------ //
@@ -1014,6 +1092,9 @@ export function hireTemps(g: GameState, days: number | null): PurchaseResult {
 /** Hver time: planlagt bytte av støping (B-102) og om konsernet kan åpnes (B-106) */
 function hourlyActions(g: GameState): void {
   runScheduledSwitch(g);
+  // Store kjøp og nabolagsprosjekter som er ferdig bygget (B-336)
+  finishBigBuild(g);
+  finishNeighbor(g);
   // Skiftlederen gir bonus når det trengs (B-271)
   leaderBonus(g);
   landmarkHour(g);
@@ -1028,3 +1109,30 @@ function hourlyActions(g: GameState): void {
 }
 
 setScheduledSwitch(hourlyActions);
+
+// ------------------------------------------------------------------ //
+// Nabolagsprosjekter (B-336)
+// ------------------------------------------------------------------ //
+/** Bygg det neste prosjektet i byen: storverket, penger hjemme, ett om gangen */
+export function buildNeighbor(g: GameState): PurchaseResult {
+  if (g.stage < 4) return fail("Nabolagsprosjektene kommer på storverket.");
+  if (g.neighborhood.building) return fail("Et prosjekt bygges allerede.");
+  const p = nextNeighbor(g);
+  if (!p) return fail("Alt er bygget.");
+  if (g.cash < p.price) return fail("For lite penger.");
+  addCost(g, "investering", p.price);
+  g.neighborhood.building = { id: p.id, readyMin: g.minute + p.days * MIN_PER_DAY };
+  log(g, `Byggingen av ${p.name.toLowerCase()} har startet – ferdig om ${p.days} døgn.`, "info");
+  return { ok: true, message: `${p.name} er bestilt – ferdig om ${p.days} døgn.` };
+}
+
+/** Et nabolagsprosjekt som er ferdig bygget */
+export function finishNeighbor(g: GameState): boolean {
+  const b = g.neighborhood?.building;
+  if (!b || g.minute < b.readyMin) return false;
+  g.neighborhood.building = null;
+  if (!g.neighborhood.built.includes(b.id)) g.neighborhood.built.push(b.id);
+  const p = NEIGHBOR_PROJECTS.find((x) => x.id === b.id);
+  if (p) log(g, `${p.name} er ferdig! ${p.gives}`, "good");
+  return true;
+}

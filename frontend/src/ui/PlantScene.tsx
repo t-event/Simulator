@@ -687,6 +687,68 @@ function LadleAnnex({ x, glow }: { x: number; glow: boolean }) {
   );
 }
 
+/** Nabolaget (B-336): små bygg på åsene rundt storverket, ett for hvert prosjekt som er bygget */
+function Neighborhood({ built, lit }: { built: readonly string[]; lit: boolean }) {
+  const on = (id: string) => built.includes(id);
+  const fill = "#3a4b5e";
+  const win = lit ? "#f3d27a" : "#566779";
+  return (
+    <g aria-hidden="true">
+      {on("bro") && <path d="M6 141 Q 38 122 70 141 M6 141 L70 141" fill="none" stroke="#8a97a6" strokeWidth={1.4} />}
+      {on("konserthus") && (
+        <g>
+          <path d="M24 134 Q 34 120 46 134 Z" fill="#b9c4cf" />
+          <rect x={24} y={133} width={22} height={3} fill={fill} />
+        </g>
+      )}
+      {on("sykehus") && (
+        <g>
+          <rect x={70} y={120} width={14} height={14} fill={fill} />
+          <rect x={75.5} y={122} width={3} height={8} fill="#c9463d" />
+          <rect x={73} y={124.5} width={8} height={3} fill="#c9463d" />
+        </g>
+      )}
+      {on("idrettshall") && (
+        <g>
+          <path d="M404 138 Q 415 128 426 138 Z" fill={fill} />
+          <rect x={408} y={134} width={3} height={2} fill={win} />
+          <rect x={419} y={134} width={3} height={2} fill={win} />
+        </g>
+      )}
+      {on("kulturhus") && (
+        <g>
+          <path d="M432 138 L432 128 L448 124 L448 138 Z" fill={fill} />
+          <rect x={436} y={131} width={8} height={2} fill={win} />
+        </g>
+      )}
+      {on("skole") && (
+        <g>
+          <rect x={454} y={129} width={18} height={9} fill={fill} />
+          <rect x={461} y={123} width={4} height={6} fill={fill} />
+          <rect x={457} y={132} width={3} height={2} fill={win} />
+          <rect x={466} y={132} width={3} height={2} fill={win} />
+        </g>
+      )}
+    </g>
+  );
+}
+
+/** Byggekran (B-336): står der mens et stort kjøp eller et nabolagsprosjekt bygges */
+function TowerCrane({ x }: { x: number }) {
+  return (
+    <g aria-hidden="true" className="scene-crane">
+      <rect x={x} y={44} width={4} height={134} fill="#e0b030" />
+      {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+        <line key={i} x1={x} y1={50 + i * 14} x2={x + 4} y2={57 + i * 14} stroke="#8a6d1a" strokeWidth={0.6} />
+      ))}
+      <rect x={x - 30} y={42} width={52} height={3} fill="#e0b030" />
+      <rect x={x - 30} y={45} width={8} height={5} fill="#6b6f75" />
+      <line x1={x + 16} y1={45} x2={x + 16} y2={76} stroke="#3a3f46" strokeWidth={0.8} />
+      <rect x={x + 13} y={76} width={6} height={4} fill="#6b6f75" />
+    </g>
+  );
+}
+
 /** Litt snø som faller om vinteren (B-276) */
 const SNOW: [number, number, number][] = [
   [30, 30, 0],
@@ -816,6 +878,9 @@ export function PlantScene({ g, stats, onStation }: Props) {
             ))}
         </g>
       )}
+
+      {/* Nabolaget på åsene (B-336) */}
+      {stage >= 4 && g.neighborhood?.built.length > 0 && <Neighborhood built={g.neighborhood.built} lit={night} />}
 
       {/* Større transformator (B-330): kraftledning fra masta på åsen inn til smeltehallen */}
       {stage >= 3 && has(g, "trafo") && <PowerLine x={stage >= 4 ? 382 : 462} y={96} toX={250} toY={top + 16} />}
@@ -1034,6 +1099,8 @@ export function PlantScene({ g, stats, onStation }: Props) {
 
       {/* Skrapsortering og strålingsportal (B-330) */}
       {stage >= 2 && has(g, "sortering") && <SortBins x={33} />}
+      {/* Byggekrana (B-336): mens et stort kjøp eller et nabolagsprosjekt bygges */}
+      {stage >= 4 && (g.bigBuild || g.neighborhood?.building) && <TowerCrane x={352} />}
       {stage >= 1 && has(g, "portal") && <Portal x={2} />}
 
       {/* Pynt på taket og foran verket (B-151) */}

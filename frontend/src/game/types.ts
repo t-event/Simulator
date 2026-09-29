@@ -95,6 +95,8 @@ export interface FurnaceUnit {
   type?: string;
   /** Utstyr på akkurat denne ovnen, f.eks. transformator og conveyor (B-074) */
   addons?: string[];
+  /** Døgnet ovnen ble ferdig bygget om, så den kjøres inn (B-336); mangler når den går for fullt */
+  rampFromDay?: number;
 }
 
 /** Ferdigvare på lager. Like partier slås sammen. */
@@ -272,6 +274,21 @@ export interface SisterPlant {
   /** Flyttet til en annen region – hvert verk kan flyttes én gang (B-333) */
   moved?: boolean;
 }
+
+/** Et stort kjøp under bygging (B-336): nok til å fullføre kjøpet når det er ferdig */
+export interface BigBuild {
+  id: string;
+  baseId: string;
+  unit?: number;
+  kind: "furnace" | "casting" | "addon";
+  name: string;
+  price: number;
+  stage: number;
+  startMin: number;
+  readyMin: number;
+}
+
+export type NeighborId = "idrettshall" | "kulturhus" | "bro" | "skole" | "sykehus" | "konserthus";
 
 /** Utbyttepolitikken (B-334): hvor mye datterverkene holder igjen – 30, 50 eller 70 % */
 export type PolicyId = "ut" | "balansert" | "forsvar";
@@ -620,6 +637,15 @@ export interface GameState {
   seasonPromptSeen: number | null;
   /** Det siste anbudsresultatet spilleren har fått varsel om (B-237), 0 hvis ingen */
   tenderSeen: number;
+  /**
+   * Et stort kjøp som bygges i spilltid (B-336): hva det er, og når det er ferdig (spillminutt). Null uten bygg.
+   * Bare ett om gangen
+   */
+  bigBuild: BigBuild | null;
+  /** Døgnet en ny støpemaskin ble ferdig, så den kjøres inn (B-336) */
+  castingRampFromDay?: number;
+  /** Nabolagsprosjektene (B-336): det som er bygget, og det som bygges nå */
+  neighborhood: { built: NeighborId[]; building: { id: NeighborId; readyMin: number } | null };
   /** Siste avgjorte overtakelse spilleren har fått beskjed om (B-335), tidspunktet fra serveren; tom før første */
   takeoverSeen: string;
   /** Per selskap (id): den siste UTC-dagen eieren har fått beskjed om inntekten for (B-258) */

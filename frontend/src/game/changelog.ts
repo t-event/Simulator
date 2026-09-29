@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 336,
+    date: "2026-09-29",
+    title: "Byggetid og nabolaget",
+    items: [
+      "Store kjøp (fra 50 mill.) tar nå noen døgn å bygge, ett om gangen. En ovn som bygges om, står så lenge.",
+      "Nye ovner og støpemaskiner kjøres inn: 70 % fart det første døgnet, full fart etter fem døgn.",
+      "På storverket kan du bygge i byen rundt verket: idrettshall, kulturhus, bro, skole, sykehus og konserthus. Hvert gir en liten fordel for alltid og står i bildet av verket.",
+    ],
+  },
+  {
     b: 334,
     date: "2026-09-29",
     title: "Kontroll og utbyttepolitikk",
