@@ -6010,3 +6010,25 @@ Beslutning: tre spor, i denne rekkefølgen:
 3. Et eget forslag for pengene i hovedverket (byggetid og innkjøring i spilltid, krav om folk og fagpoeng, slitasje og
    fornyelse) – i samme dokument, men som eget spor, siden det gjelder spilltid og ikke verden. Bygges ikke før ja.
 Konto (B-149): avgjøres i forslaget.
+
+## B-332 Eierens svar på KONTROLL-FORSLAG: bygges i rekkefølge, og 10× beholdes (2026-09-29)
+Status: gjelder (planlegging)
+Endringslogg: nei – planlegging
+Bakgrunn: eieren svarte på spørsmålene i `docs/KONTROLL-FORSLAG.md` (avsnitt 10) og spurte om å nekte 3× og 10× når alt
+er kjøpt hjemme.
+Beslutning:
+1. **Bare strategiske selskaper kan overtas**, aldri datterverk eller hovedverket.
+2. **72 timer forsvarstid** med varsel i appen holder i starten. E-post vurderes når flere spiller.
+3. **Den som passer på selskapet, beholder det – men høyst i konsesjonen (14 dager), som nå.** Konsesjonen og det nye
+   anbudet 48 timer før slutt (B-189) står. Overtakelser skjer *inne i* konsesjonen: ny eier er beskyttet de 3 første
+   dagene, og et bud må legges senest 5 dager før konsesjonen går ut (72 timer forsvar + 48 timer anbud), så det alltid
+   er avgjort før fornyelsesanbudet åpner. Den som tar over, får resten av konsesjonen og investeringene. Kontrollen gir
+   den sittende eieren en fordel i fornyelsesanbudet: budet teller Kontroll/5 % mer (inntil +20 %). Da lønner det seg å
+   passe på, uten at noen eier et selskap for alltid.
+4. **Regionnavnene godtas:** Nordkysten, Jernåsen, Sørsletta, Vestbukta, Østskogen og Øyene.
+5. **Hjemme: både byggetid/innkjøring (B1) og nabolagsprosjekter (B2)**; slitasje (B3) senere.
+6. **3× og 10× beholdes**, også når alt er kjøpt. Pengene kommer fortsatt samme dag på 1×, farten gir ingen fordel mot
+   andre (B-323), og å bremse dem som har kommet lengst føles som straff. Byggetid (B1) gir farten en mening i stedet.
+Rekkefølge: K5 kartet, K6 utbyttepolitikken og fondet, K7 Kontroll og investeringer, K8 overtakelser (bryter av til de er
+testet), så B1 og B2 hjemme. Hvert steg er en egen PR.
+Konto (B-149): kartet, utbyttepolitikken, Kontroll og overtakelser krever konto; B1 og B2 gjør det ikke.

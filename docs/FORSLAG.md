@@ -13,10 +13,6 @@ til «Avgjort» nederst).
 
 ## Venter
 
-- **Verdenskart, Kontroll, overtakelser og utbyttepolitikk – og pengene hjemme (B-331):** forslaget med tall står i
-  `docs/KONTROLL-FORSLAG.md` og venter på eierens ja. Spørsmålene står i avsnitt 10 der (bare selskaper kan overtas?
-  72 timer nok? kan den som passer på, alltid beholde? regionnavn? spor B: B1 og B2 først?).
-
 - **Pynt for sesong 3 (B-287, B-291):** pynten for sesong 2 er klar. Før `start_season` kjøres for sesong 3, legg inn ny
   pynt i `COSMETICS` med `season: 3` – både i butikken og på stigen (trinn 10–50). Ellers har sesong 3 ingen egen pynt.
 
