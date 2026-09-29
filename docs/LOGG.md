@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 290 – 2026-09-29: Verden hvert 5. minutt (B-364)
+
+**Brukeren ba om:** «Fortsett».
+
+**Funnet:** `world_tick` kjørte bare når en app spurte. Uten spillere om natta: ingen målinger til snittet (B-361/B-362),
+og frister for overtakelser og anbud ble liggende.
+
+**Gjort:** B-364 – pg_cron-jobbene `verden-tick` (hvert 5. minutt) og `cron-rydding` (daglig). Gjester: fortsatt 0 kl.
+23:17 (ingen nye besøkende ennå); ingen 4xx/5xx siden gjestene ble slått på.
+
+**Testet:** jobbene står i `cron.job`, og første kjøringer i `cron.job_run_details` gikk uten feil.
+
+**Gjenstår:** påminnelsene 30.9 (gjester) og 1.10 (første bidrag).
+
 ## Økt 289 – 2026-09-29: Gjestekontoer på, lekkede passord droppes (B-363)
 
 **Brukeren sa:** «Allow anonymous sign-ins enabled» og «Prevent use of leaked passwords er kun for supabase pro. Vi dropper
