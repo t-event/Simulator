@@ -84,6 +84,8 @@ import {
   DRIFT_FLOOR,
   MISSION_BONUS,
   missionBonusReady,
+  missionDone,
+  missionProgress,
   pickMissions,
   missionBonus,
   startMissionDay,
@@ -184,7 +186,7 @@ import {
   supportAdvice,
 } from "./plant";
 import { RESEARCH, researchOptions } from "./research";
-import { parseSave } from "./save";
+import { migrate, parseSave } from "./save";
 import { afterEmpireLoad, DIVIDEND, dividendParts, dividendPerDay, dividendToTreasury } from "./dividend";
 import { ANY_CARD_REAL_MS, makeDecision, maybeCreateDecision, resolveDecision, SAME_CARD_REAL_MS } from "./decisions";
 import { landmarkContract, landmarkHour } from "./landmarks";
@@ -3619,6 +3621,27 @@ test("Kokillene (B-351): slites av støpingen, gir flere gjennombrudd, byttes fo
   const b = newGame(3511);
   wearMoulds(b, 100, computePlantStats(b));
   assert(!hasMoulds(b) && mouldWear(b) === 0, "blokkstøping fikk kokillesslitasje");
+});
+
+test("Dagens oppdrag «verdi» (B-352): utbetalt til eierne teller, så det kan gjøres med kassa på taket", () => {
+  const g = newGame(352);
+  g.stage = 4;
+  g.konsern.unlocked = true;
+  g.paidOut = { total: 5_000_000_000, firstDay: 1, today: 0 };
+  g.daily = { date: "2026-09-29", claimed: false, missions: [] };
+  startMissionDay(g, "2026-09-30", false);
+  g.daily.missions = [{ id: "verdi", base: valueCreated(g), target: 1_000_000_000, v: 2 }];
+  const m = g.daily.missions[0];
+  // Kassa står på taket: overskuddet betales ut, og konsernverdien står stille
+  g.paidOut.total += 1_000_000_000;
+  assert(missionDone(g, m), `oppdraget ble ikke gjort (${missionProgress(g, m)})`);
+  // Et oppdrag startet før endringen får utbetalingen lagt til startverdien, så det ikke blir gjort av seg selv
+  g.daily.missions = [{ id: "verdi", base: konsernEquity(g), target: 1_000_000_000 }];
+  migrate(g);
+  assert(
+    missionProgress(g, g.daily.missions[0]) === 0,
+    `gammelt oppdrag gjort av seg selv (${missionProgress(g, g.daily.missions[0])})`,
+  );
 });
 
 if (failed) {

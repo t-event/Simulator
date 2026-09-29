@@ -8,6 +8,7 @@ import { checkAchievements } from "./achievements";
 import { RESEARCH } from "./research";
 import { ADDONS } from "./data";
 import { newEnv } from "./environment";
+import { paidOutTotal } from "./reserve";
 
 /** Forskning som ble lagt til med B-054; de andre automatikk-forskningene fantes fra før */
 const NEW_AUTOMATION = ["salgsrutiner", "ordreplan", "innkjop", "bemanning"];
@@ -317,5 +318,12 @@ export function migrate(g: GameState): GameState {
       w.apprenticeUntil = Math.max(nowDay + 3, (w.hiredDay ?? 0) + 30);
   // Prestasjoner (B-151) man alt har klart, vises med én gang, ikke først etter en spilltime
   checkAchievements(g);
+  // Dagens oppdrag «verdi» (B-352) måler nå verdien med utbetalt til eierne. Et oppdrag startet før det får utbetalingen
+  // lagt til startverdien, ellers ble det gjort av seg selv
+  for (const m of g.daily?.missions ?? [])
+    if (m.id === "verdi" && m.v !== 2) {
+      m.base += paidOutTotal(g);
+      m.v = 2;
+    }
   return g;
 }

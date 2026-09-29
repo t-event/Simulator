@@ -6387,3 +6387,15 @@ Beslutning:
 Testet: ny motortest, `balance.ts` (alle mål OK; snittomdømmet de siste 41 radene i verbose-kjøringen 65 mot 68 før, frø
 2 og 4 ned 7–9 – kokillene gjør storverket litt krevende), Playwright 320/390/1366 (raden, knappen, bytte).
 Konto (B-149): nei – eget spill.
+
+## B-352 Dagens oppdrag «Øk konsernverdien» teller utbetalt til eierne (2026-09-29)
+Status: gjelder
+Bakgrunn: eieren: «Dagens oppdrag, øk konsernverdien med 1 mrd er ikke mulig». Oppdraget «verdi» målte `konsernEquity`.
+Med kassa på taket (B-303/B-306) betales alt overskudd ut til eierne, og konsernverdien står stille – samme feil som
+sluttmålet hadde (B-341).
+Beslutning: oppdraget måler `valueCreated` (konsernverdi + utbetalt til eierne). Målet (ca. tre døgns overskudd) er
+uendret. Nye oppdrag får `v: 2`; et «verdi»-oppdrag uten den får `paidOutTotal` lagt til startverdien i `migrate()`, så
+dagens oppdrag ikke blir gjort av seg selv ved oppdateringen. Teksten sier «(utbetalt til eierne teller med)».
+Oppdragene sjekkes bare i appen; bonusen på serveren er uendret.
+Testet: ny motortest.
+Konto (B-149): uendret (dagens oppdrag krever konto for bonusen).

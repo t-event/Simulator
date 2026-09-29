@@ -222,7 +222,7 @@ function missionText(m: DailyMission): string {
     case "mester":
       return "Ta et nivå i mesterskapet (Forskning)";
     case "verdi":
-      return `Øk konsernverdien med ${fmtKr(m.target)}`;
+      return `Øk konsernverdien med ${fmtKr(m.target)} (utbetalt til eierne teller med)`;
     case "datter":
       return "Kjøp eller moderniser et datterverk";
     case "forsk":
