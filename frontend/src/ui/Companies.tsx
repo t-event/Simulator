@@ -18,6 +18,8 @@ import {
   firstPayout,
   INVEST_REFUSAL_TEXT,
   investInCompany,
+  bidTakeover,
+  defendTakeover,
   placeBid,
   timeLeft,
   type Company,
@@ -32,6 +34,8 @@ import {
   policyOf,
   policySplit,
   renewalBonus,
+  TAKEOVER,
+  TAKEOVER_REASON,
 } from "../game/control";
 import { regionName } from "../game/regions";
 import type { PolicyId } from "../game/types";
@@ -183,6 +187,23 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
       return `Utbyttepolitikken er nå «${policyOf(kind).name}».`;
     });
 
+  const doTakeoverBid = (c: Company, amount: number) =>
+    run(`selskap-${c.id}`, async () => {
+      const r = await bidTakeover(c.id, amount);
+      if (!r.ok) return TAKEOVER_REASON[r.reason] ?? TAKEOVER_REASON.nett;
+      tenderChanged();
+      return `Budet på ${fmtKr(amount)} er lagt inn. Alle kan se det, og eieren har ${TAKEOVER.defenseHours} timer på seg.`;
+    });
+
+  const doDefend = (c: Company, amount: number, from: "kasse" | "fond") =>
+    run(`selskap-${c.id}`, async () => {
+      if (!c.takeover) return TAKEOVER_REASON.eier;
+      const r = await defendTakeover(c.takeover.id, amount, from);
+      if (!r.ok) return TAKEOVER_REASON[r.reason] ?? TAKEOVER_REASON.nett;
+      tenderChanged();
+      return `${fmtKr(amount)} er satt inn i forsvaret. Du får 95 % tilbake når forsøket er avgjort.`;
+    });
+
   const note = (at: string) =>
     msg?.at === at && (
       <p className="g-note" role="status">
@@ -254,6 +275,16 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
         </dl>
 
         {c.control && <ControlSection c={c} />}
+        {world.takeoversOn && (
+          <TakeoverSection
+            c={c}
+            busy={busy}
+            fund={fund}
+            balance={tr.balance}
+            onBid={(a) => void doTakeoverBid(c, a)}
+            onDefend={(a, from) => void doDefend(c, a, from)}
+          />
+        )}
         {c.mine && c.control && (
           <div className="g-invest">
             <div className="g-row g-amount-row">
@@ -563,6 +594,134 @@ function PolicySection({
           ? `Kan endres igjen ${new Date(locked).toLocaleDateString("nb-NO", { weekday: "short", day: "numeric", month: "short" })}.`
           : "Kan endres én gang per uke."}
       </p>
+    </section>
+  );
+}
+
+/** Overtakelser (B-335): forsøk som pågår, forsvaret for eieren, bud for de andre og forrige utfall */
+function TakeoverSection({
+  c,
+  busy,
+  fund,
+  balance,
+  onBid,
+  onDefend,
+}: {
+  c: Company;
+  busy: boolean;
+  fund: number;
+  balance: number;
+  onBid: (amount: number) => void;
+  onDefend: (amount: number, from: "kasse" | "fond") => void;
+}) {
+  const [amount, setAmount] = useState("");
+  const [from, setFrom] = useState<"kasse" | "fond">("kasse");
+  const t = c.takeover;
+  const w = c.takeoverWindow;
+  const last = c.takeoverLast;
+  const score = (a: number, d: number) => `angrep ${Math.round(a)} mot forsvar ${Math.round(d)}`;
+  const amountRow = (label: string, onGo: () => void, placeholder: number) => (
+    <div className="g-row g-amount-row">
+      <label className="g-amount">
+        <input
+          type="number"
+          inputMode="decimal"
+          min={1}
+          placeholder={String(Math.ceil(placeholder / 1e6))}
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          aria-label="Beløp i millioner kroner"
+        />
+        <span>mill. kr</span>
+      </label>
+      <button className="g-primary" disabled={busy || millions(amount) <= 0} onClick={onGo}>
+        {label}
+      </button>
+    </div>
+  );
+  return (
+    <section className="g-takeover">
+      {t ? (
+        <div className={`g-takeover-box${c.mine ? " is-mine" : ""}`}>
+          <p className="g-small-text">
+            <strong>{t.mineAttack ? "Du prøver å overta selskapet" : `${t.attacker} prøver å overta selskapet`}</strong>{" "}
+            med {fmtKr(t.bid)}. Avgjøres {timeLeft(t.closesAt)} fra nå. Nå: {score(t.attack, t.defenseScore)}.
+          </p>
+          {c.mine && (
+            <>
+              {amountRow(
+                "Forsvar",
+                () => {
+                  onDefend(millions(amount), from);
+                  setAmount("");
+                },
+                c.control?.value ?? 1e8,
+              )}
+              {fund > 0 && (
+                <label className="g-field">
+                  <span className="g-small-text">Betal fra</span>
+                  <select value={from} onChange={(e) => setFrom(e.target.value === "fond" ? "fond" : "kasse")}>
+                    <option value="kasse">Konsernkassa ({fmtKr(balance)})</option>
+                    <option value="fond">Forsvarsfondet ({fmtKr(fund)})</option>
+                  </select>
+                </label>
+              )}
+              <p className="g-muted g-small-text">
+                Kapitalen du setter inn, styrker forsvaret{t.defense ? ` (${fmtKr(t.defense)} nå)` : ""}. Du får 95 %
+                tilbake når forsøket er avgjort. Forsvarsfondet teller av seg selv.
+              </p>
+            </>
+          )}
+          {t.mineAttack && (
+            <>
+              {amountRow(
+                "Øk budet",
+                () => {
+                  onBid(millions(amount));
+                  setAmount("");
+                },
+                t.bid * 1.2,
+              )}
+              <p className="g-muted g-small-text">
+                Skriv hele det nye budet. Vinner du, får eieren 85 %. Taper du, får du 90 % tilbake.
+              </p>
+            </>
+          )}
+        </div>
+      ) : (
+        w &&
+        (w.open ? (
+          <details className="g-details">
+            <summary>Overta selskapet</summary>
+            <p className="g-small-text">
+              Budet må være minst verdien, {fmtKr(w.minBid)}, og betales fra konsernkassa med én gang. Alle ser budet,
+              og eieren har {TAKEOVER.defenseHours} timer på seg til å forsvare seg. Med minstebudet:{" "}
+              {score(w.attackMin, w.defenseNow)} før eieren gjør noe. Større bud, aktivitet og egne verk i regionen gir
+              sterkere angrep.
+            </p>
+            {amountRow(
+              "Legg inn bud",
+              () => {
+                onBid(millions(amount));
+                setAmount("");
+              },
+              w.minBid,
+            )}
+            <p className="g-muted g-small-text">
+              Vinner du, får eieren 85 % av budet og du overtar resten av konsesjonen. Taper du, får du 90 % tilbake.
+            </p>
+          </details>
+        ) : (
+          w.reason &&
+          w.reason !== "pagar" && <p className="g-muted g-small-text">Overtakelse: {TAKEOVER_REASON[w.reason] ?? ""}</p>
+        ))
+      )}
+      {last && (
+        <p className="g-muted g-small-text">
+          Forrige forsøk: {last.attacker} {last.status === "overtatt" ? "overtok" : "ble avverget"} (
+          {score(last.attack, last.defense)}).
+        </p>
+      )}
     </section>
   );
 }

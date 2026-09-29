@@ -47,7 +47,7 @@ import { importantLog, markAllSeen, unseenCount } from "../game/inbox";
 import { Sales } from "./Sales";
 import { KonsernPage } from "./Konsern";
 import { useOpenTender } from "./openTender";
-import { applyCompanyIncome, applyDividendNews, applyTenderResults, worldNews } from "../net/world";
+import { applyCompanyIncome, applyDividendNews, applyTakeoverNews, applyTenderResults, worldNews } from "../net/world";
 import { applyKonsern, konsernDiffers } from "../net/konsern";
 import { VIEWS, viewUnlocked, type View } from "./views";
 import { Icon, type IconName } from "./icons";
@@ -894,6 +894,7 @@ export function GameApp() {
     if (g && worldNews(g, w.companies, Date.now(), yesterday + contribution))
       act((gg) => {
         applyTenderResults(gg, w.companies);
+        applyTakeoverNews(gg, w.companies);
         applyCompanyIncome(gg, w.companies);
         applyDividendNews(gg, yesterday, Date.now(), contribution);
       });

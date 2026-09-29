@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 263 – 2026-09-29: Overtakelser, bygget med bryteren av (B-335, K8)
+
+**Brukeren ba om:** fortsette i rekkefølgen fra B-332.
+
+**Gjort:** `068_overtakelser.sql` (tabellen `takeovers`, `takeover_bid`, `takeover_defend`, `resolve_takeovers` i
+`world_tick`, `takeover_window`, formlene, `world_status` med forsøk, vindu, forrige utfall og bryteren). App: formlene i
+`game/control.ts`, nettlaget og loggbeskjeden i `net/world.ts`, `TakeoverSection` på selskapskortet, beskjed og merket
+«Angrep» på Konsern (`openTender.ts`). Nytt felt `g.takeoverSeen` (standard i `migrate()`).
+
+**Testet:** `npm test` (formlene mot SQL-tallene, tolkning, loggbeskjed én gang), lint, typesjekk; hele gangen i SQL med
+bryteren på i en DO-blokk som rulles tilbake (avverget og overtatt, beløp og eierrader); Playwright med falsk server på
+320, 390 og 1 366 px (forsvar og bud sender riktige kall, ingen horisontal scrolling).
+
+**Gjenstår:** eierens ja til å slå på overtakelser (FORSLAG), så byggetid og nabolagsprosjekter hjemme.
+
+---
+
 ## Økt 262 – 2026-09-29: Utbyttepolitikk, forsvarsfond, Kontroll og investeringer (B-334, K6 og K7)
 
 **Brukeren ba om:** fortsette i rekkefølgen fra B-332 (etter kartet).

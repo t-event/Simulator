@@ -620,6 +620,8 @@ export interface GameState {
   seasonPromptSeen: number | null;
   /** Det siste anbudsresultatet spilleren har fått varsel om (B-237), 0 hvis ingen */
   tenderSeen: number;
+  /** Siste avgjorte overtakelse spilleren har fått beskjed om (B-335), tidspunktet fra serveren; tom før første */
+  takeoverSeen: string;
   /** Per selskap (id): den siste UTC-dagen eieren har fått beskjed om inntekten for (B-258) */
   companyIncomeSeen: Record<string, string>;
   /** Den siste UTC-dagen spilleren har fått beskjed om utbyttet fra datterverkene for (B-304), eller null */
