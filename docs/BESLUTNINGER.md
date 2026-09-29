@@ -6623,3 +6623,17 @@ Beslutning: ingen endring. Det eneste som står igjen, er at forlatte gjester bl
 daglig jobb.
 Endringslogg: nei – ingen endring i spillet.
 Konto (B-149): – ingen ny funksjon.
+
+## B-367 Konsernet forklarer hvordan det får flere plasser (2026-09-29)
+Status: gjelder (utfyller B-150, B-173, B-325)
+Bakgrunn: brukeren: «Noen kan ha bare 12 datterselskap men andre kan ha 14. Kan du sjekke opp?» Sjekket på serveren:
+alle med konsern har «Større konsern». Plassene er `slotsAt`/`konsern_slots`: 8 med forskningen (6 uten), +2 ved
+Stålfyrste, Stålkeiser og Stålgigant (nivå 2, 4 og 6) – 14 i alt. De med 14 plasser har nivå 6 eller mer (Stålgigant:
+8 stålkomplekser på trinn 5, eller gulvet fra reformen); de med 12 er Stålkeiser eller Stållegende. Regelen virker likt i
+appen og på serveren. Men spillet sa bare «Konsernet er fullt – bygg ut, moderniser eller bytt i stedet», og forskningen
+lovet «Plass til 8 datterverk i stedet for 6», som ikke stemmer når titlene har gitt flere.
+Beslutning: ingen endring i reglene. `moreSlotsText` (`game/konsern.ts`) sier hva som gir neste plasser: forskningen hvis
+den mangler, ellers neste tittel med kravet («Blir du Stålgigant (8 stålkomplekser på trinn 5), får du plass til 2 til»),
+eller at 14 er det meste. Teksten står under «Dine verk» når konsernet er fullt eller har én plass igjen, og i sperren på
+kjøpene. Forskningen sier «Plass til 2 datterverk til».
+Konto (B-149): – ingen ny funksjon (konsernet krever konto fra før).

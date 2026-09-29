@@ -192,6 +192,22 @@ export function maxSisters(g: GameState): number {
   return slotsAt(g.konsern?.legends ?? 0, hasResearch(g, "storkonsern"));
 }
 
+/** Hvordan konsernet får plass til flere datterverk: forskningen, neste tittel som gir plasser, eller ingen (B-367) */
+export function moreSlotsText(g: GameState): string {
+  const lvl = g.konsern?.legends ?? 0;
+  const big = hasResearch(g, "storkonsern");
+  if (!big) {
+    const more = slotsAt(lvl, true) - slotsAt(lvl, false);
+    return `Forskningen «Større konsern» gir plass til ${more} til.`;
+  }
+  const now = slotsAt(lvl, big);
+  for (let l = lvl + 1; l <= LEGENDS.length; l++) {
+    if (slotsAt(l, big) > now)
+      return `Blir du ${LEGENDS[l - 1].title} (${LEGENDS[l - 1].need}), får du plass til ${slotsAt(l, big) - now} til.`;
+  }
+  return `${now} datterverk er det meste et konsern kan ha. Bytt små verk til stålkomplekser og moderniser.`;
+}
+
 /** Pris på et nytt datterverk fra konsernkassa, med oppkjøpsavdelingen (B-120, B-326) */
 export function sisterPrice(g: GameState, type: SisterType): number {
   return buildCost(type, g.researched);
@@ -545,7 +561,7 @@ export function konsernOptions(g: GameState): KonsernOption[] {
     const blocked =
       noAccount ??
       (refused === "fullt"
-        ? `Konsernet er fullt (${maxSisters(g)} datterverk) – bygg ut, moderniser eller bytt i stedet`
+        ? `Konsernet er fullt (${maxSisters(g)} datterverk). ${moreSlotsText(g)}`
         : refused
           ? ORDER_REFUSAL_TEXT[refused]
           : null);

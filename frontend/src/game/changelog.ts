@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 367,
+    date: "2026-09-29",
+    title: "Hvor mange datterverk du kan ha",
+    items: [
+      "Konsernet har plass til 8 datterverk med forskningen «Større konsern», og to til når du blir Stålfyrste, Stålkeiser og Stålgigant – 14 i alt. Under «Dine verk» står det nå hva som gir de neste plassene, og hva som er det meste.",
+    ],
+  },
+  {
     b: 361,
     date: "2026-09-29",
     title: "Jevnere bidrag fra hovedverket",
