@@ -140,3 +140,4 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Neste rammeavtale, ledig tid og køen i «Produksjon nå» | Nei | Regel 1: ditt eget spill | B-316 |
 | Hovedverkets konsernbidrag i ekte tid til konsernkassa | Ja (som konsernkassa) | Regel 2 og 7: serveren, ekte tid | B-318 |
 | Innskuddet i konsernkassa tatt bort | – | Ingen ny funksjon | B-319 |
+| Liste «Konsernverdi» regnet av serveren | Ja (som topplista) | Regel 3: sammenlignes med andre | B-320 |

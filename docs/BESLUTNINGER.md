@@ -5838,3 +5838,20 @@ Konto (B-149): ingen ny funksjon (konsernkassa krever konto som før).
 Testet: tsc, lint, `npm test`, Playwright på 320 og 390 px med grense 0 (innskuddet borte, linja om driftskapital,
 ingen overflyt) og med grense over 0 (som før, B-318-testen).
 
+## B-320 Ny liste «Konsernverdi» på topplista, regnet av serveren (steg 4) (2026-09-29)
+Status: gjelder
+Bakgrunn: eierens svar i B-318: konsernverdien mellom spillere skal være serverkjent, ikke lokal kasse. Spurt om
+hvordan (29.9): «Ny liste ved siden av» – den gamle «Verdi» står som før, og ligaer og titler røres ikke.
+Beslutning (`supabase/063_toppliste_konsernverdi.sql`):
+- `konsern_value(uid)` = konsernkassa + 60 × (utbytte fra datterverkene + hovedverkets bidrag for en full dag) − lån.
+  60 dagers inntekt i ekte tid er samme målestokk som verdien av et datterverk i spillet (60 døgns overskudd).
+- `leaderboard('konsern')` regner den når lista vises (ikke lagret), for alle med åpnet konsern, og samme liste i
+  sesongen og i Hall of Fame (som kontrollrommet). `my_rank` følger med.
+- Appen: ny fane «Konsernverdi» først på topplista; den gamle heter nå «Verdi i spillet». Linja under fanene forklarer
+  tallet. Standardfanen er fortsatt den gamle.
+- Tall 29.9: toppen 3–4 mrd. (god drift og utbytte), mot 15–120 mrd. på den gamle lista; rekkefølgen er en annen.
+- Innskuddet ble slått av på serveren samtidig (062, B-319), etter at appen var publisert.
+Konto (B-149): ja – som topplista (regel 3: sammenlignes med andre).
+Testet: migrasjonen i en blokk som ble rullet tilbake (11 konsern på lista, egen plass, de gamle listene uendret),
+`npm test`, tsc, lint, Playwright på 320 og 390 px med falsk tjeneste (fanene brytes pent, ingen overflyt, riktig kall).
+

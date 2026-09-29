@@ -2,7 +2,7 @@
 
 > **Status 29.9:** eieren har svart på avsnitt 14 (se B-318). Steg 1 er bygget: bidraget betales av serveren fra
 > 30.9, fast 50 %, gulv 30 %, dempet over 30 mill. per dag. Kassa i spillet røres ikke. Steg 2 (B-319): innskuddet
-> er borte. Igjen: serverkjent konsernverdi på topplista. Valg av utbyttepolitikk er utsatt.
+> er borte. Steg 4 (B-320): ny liste «Konsernverdi» regnet av serveren; den gamle heter «Verdi i spillet». Valg av utbyttepolitikk er utsatt.
 
 Bestilt av eieren 2026-09-29, etter B-311: «Hovedverket har driftsøkonomi i simulert spilltid. Konsernet har
 kapitaløkonomi i ekte tid.» Dette er en analyse, ikke en reform. Ingen tall på kontoer endres, ingen kode er bygget.

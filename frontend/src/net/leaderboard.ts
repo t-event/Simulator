@@ -4,10 +4,13 @@
  */
 import { rest, rpc, userId } from "./supabase";
 
-export type BoardKind = "verdi" | "omdomme" | "storverk" | "ferdig" | "kontroll" | "utbetalt";
+export type BoardKind = "verdi" | "konsern" | "omdomme" | "storverk" | "ferdig" | "kontroll" | "utbetalt";
 
 export const BOARDS: { id: BoardKind; label: string; unit: "kr" | "rep" | "dager" | "poeng" }[] = [
-  { id: "verdi", label: "Konsernverdi", unit: "kr" },
+  // Konsernverdien regnet av serveren (B-320): konsernkassa + 60 dagers utbytte og bidrag − lån, i ekte tid
+  { id: "konsern", label: "Konsernverdi", unit: "kr" },
+  // Den gamle lista (kasse − lån + verkenes verdi i spillet) står som før, med ligaer og titler (B-320)
+  { id: "verdi", label: "Verdi i spillet", unit: "kr" },
   // «Mest penger på bok» (B-144) er tatt bort (B-306): kassa har et tak på 10 mrd., så lista sa ingenting.
   // Serveren kan fortsatt regne den ut («kasse»); «Utbetalt til eierne» har tatt over
   { id: "storverk", label: "Raskest til storverk", unit: "dager" },

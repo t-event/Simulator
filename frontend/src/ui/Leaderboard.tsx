@@ -131,7 +131,10 @@ function Leaderboard({
   const status = useSeasonStatus();
   const current = status?.current ?? null;
   // Kontrollrommet har én liste for alle tider (B-295): rekorden følger kontoen, ikke sesongen
-  const seasonId = scope === "sesong" && kind !== "kontroll" && kind !== "utbetalt" ? (current?.id ?? null) : null;
+  const seasonId =
+    scope === "sesong" && kind !== "kontroll" && kind !== "utbetalt" && kind !== "konsern"
+      ? (current?.id ?? null)
+      : null;
   const hallOfFame = seasonId === null;
   // Radene huskes sammen med lista de hører til (B-171): bytter man liste, vises ikke tallene fra den forrige
   const key = `${kind}:${seasonId ?? "alle"}`;
@@ -231,13 +234,15 @@ function Leaderboard({
         ))}
       </div>
       <p className="g-muted g-small-text g-board-scope-note">
-        {kind === "utbetalt"
-          ? "Det verket har tjent over taket for kassa og betalt ut til eierne – samme liste i sesongen og i Hall of Fame."
-          : kind === "kontroll"
-            ? "Beste charge noensinne i kontrollrommet – samme liste i sesongen og i Hall of Fame."
-            : hallOfFame
-              ? `Beste resultat noensinne${status?.era ? ` i ${status.era.name}` : ""}: ${board.label.toLowerCase()}.`
-              : `Spillet slik det står nå: ${board.label.toLowerCase()}.`}
+        {kind === "konsern"
+          ? "Konsernkassa pluss 60 dagers utbytte og bidrag, minus lån – regnet av serveren i ekte tid, uansett spillfart."
+          : kind === "utbetalt"
+            ? "Det verket har tjent over taket for kassa og betalt ut til eierne – samme liste i sesongen og i Hall of Fame."
+            : kind === "kontroll"
+              ? "Beste charge noensinne i kontrollrommet – samme liste i sesongen og i Hall of Fame."
+              : hallOfFame
+                ? `Beste resultat noensinne${status?.era ? ` i ${status.era.name}` : ""}: ${board.label.toLowerCase()}.`
+                : `Spillet slik det står nå: ${board.label.toLowerCase()}.`}
       </p>
       {!session && (
         <Callout>
