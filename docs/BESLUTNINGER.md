@@ -6696,3 +6696,19 @@ Beslutning (bare framstillingen; formlene på serveren er de samme):
   «Slik henger pengene sammen».
 - Formlene er speilet i `game/control.ts` med faste tall i testen (Figens tall).
 Konto (B-149): – ingen ny funksjon (selskapene krever konto fra før).
+
+## B-371 Oppkjøp og motbud i stedet for angrep og forsvar (2026-09-30)
+Status: gjelder (utfyller B-335, B-370; reglene er uendret)
+Bakgrunn: brukeren: «Forsvar og angrep høres ikke rett ut. Er det det man bruker i virkeligheten?» I virkeligheten heter
+det oppkjøp, oppkjøpsbud og fiendtlig oppkjøp; eieren/styret svarer med forsvarstiltak, typisk et motbud eller en «hvit
+ridder». «Angrep» brukes ikke. «Kontroll» er et ekte begrep og beholdes. Eieren svarte «Ja» på forslaget.
+Beslutning (bare tekst, i appen og i skiftrapporten):
+- «X prøver å overta selskapet» → «X har lagt inn et oppkjøpsbud»; «angrep» → oppkjøpsbudet; pengene eieren setter inn
+  → **motbud** («Legg inn motbud», 95 % tilbake); «Overta selskapet» → «Kjøp selskapet» / «Legg inn oppkjøpsbud».
+- Forsvarsfondet → **beredskapsfondet** (valgt av Claude; brukeren fikk valget mellom det og «fond mot oppkjøp»).
+  Politikken «Bygg forsvar» → «Bygg beredskap» (id-en `forsvar` er den samme i data og på serveren).
+- Poengene «angrep 60 mot forsvar 57» er borte for spillerne: «oppkjøpsbudet står sterkest» / «eieren står sterkest».
+- Beskjedene: «Du kjøpte …», «X kjøpte … fra deg», «Du beholdt … – oppkjøpsbudet fra X holdt ikke».
+- `083_oppkjop_ord.sql`: `chat_on_takeover` skriver de nye ordene i skiftrapporten. Gamle meldinger står som de var.
+- Kodenavnene (`takeover`, `attack`, `defense`, `takeover_defend`, status `overtatt`/`avverget`) er uendret.
+Konto (B-149): – ingen ny funksjon.

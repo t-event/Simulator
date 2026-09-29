@@ -1873,7 +1873,7 @@ const main = async () => {
     const companies = [{ name: "Skraplageret", takeoverLast: last }];
     const before = g.log.length;
     assert(applyTakeoverNews(g, companies) === 1 && g.log.length === before + 1, "beskjeden");
-    assert(g.log.at(-1)!.text.includes("Tom har overtatt skraplageret"), g.log.at(-1)!.text);
+    assert(g.log.at(-1)!.text.includes("Tom kjøpte skraplageret fra deg"), g.log.at(-1)!.text);
     assert(applyTakeoverNews(g, companies) === 0, "to ganger");
     assert(applyTakeoverNews(g, [{ name: "X", takeoverLast: { ...last, mineOwner: false } }]) === 0, "ikke med");
   });

@@ -274,21 +274,20 @@ export function applyTakeoverNews(g: GameState, companies: Pick<Company, "name" 
     if (!r || !(r.mineAttack || r.mineOwner) || r.resolvedAt <= (g.takeoverSeen ?? "")) continue;
     g.takeoverSeen = r.resolvedAt;
     const name = c.name.toLowerCase();
-    const score = `(angrep ${Math.round(r.attack)} mot forsvar ${Math.round(r.defense)})`;
     if (r.mineAttack)
       log(
         g,
         r.status === "overtatt"
-          ? `Du har overtatt ${name} ${score}! Du eier det resten av konsesjonen.`
-          : `Forsøket på å overta ${name} ble avverget ${score}. ${fmtKr(Math.round(r.bid * 0.9))} er tilbake i konsernkassa.`,
+          ? `Du kjøpte ${name}! Du eier det resten av konsesjonen.`
+          : `Oppkjøpsbudet ditt på ${name} holdt ikke – eieren sto sterkest. ${fmtKr(Math.round(r.bid * 0.9))} er tilbake i konsernkassa.`,
         r.status === "overtatt" ? "good" : "event",
       );
     else
       log(
         g,
         r.status === "overtatt"
-          ? `${r.attacker} har overtatt ${name} ${score}. Du fikk ${fmtKr(Math.round(r.bid * 0.85))} i konsernkassa.`
-          : `Du avverget forsøket fra ${r.attacker} på å overta ${name} ${score}.`,
+          ? `${r.attacker} kjøpte ${name} fra deg. Du fikk ${fmtKr(Math.round(r.bid * 0.85))} i konsernkassa.`
+          : `Du beholdt ${name} – oppkjøpsbudet fra ${r.attacker} holdt ikke.`,
         r.status === "overtatt" ? "bad" : "good",
       );
     n++;

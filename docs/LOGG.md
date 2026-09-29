@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 297 – 2026-09-30: Oppkjøp og motbud (B-371)
+
+**Brukeren spurte:** «Forsvar og angrep høres ikke rett ut. Er det det man bruker i virkeligheten…?» – så «Ja» til forslaget.
+
+**Gjort:** B-371 – oppkjøpsbud/motbud/beredskapsfondet/«Bygg beredskap» i kortene, beskjedene, pengeguiden, politikken og
+varselet på Konsern; ingen poeng for spillerne, bare hvem som står sterkest. `083_oppkjop_ord.sql` for skiftrapporten.
+
+**Testet:** tsc, lint, `npm test` (nettesten for beskjeden oppdatert); Playwright 320/390/1366 px med og uten oppkjøpsbud –
+ingen horisontal scrolling eller avkortede knapper («Legg inn oppkjøpsbud»). Skiftrapportens tekst sjekket med `format`.
+
+**Gjenstår:** –
+
 ## Økt 296 – 2026-09-30: Selskapene enklere å forstå (B-370)
 
 **Brukeren ba om:** «Figen forstår ikke hvorfor firmaet hans er presset, han forstår heller ikke seg på forsvar og

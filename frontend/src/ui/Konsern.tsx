@@ -784,7 +784,7 @@ export function KonsernPage({
     // Verdenskartet (B-333): alle konsernene i en oppdiktet verden
     { id: "kart", label: "Kart" },
     // Industrien rundt verket (B-227): skraplageret nå, flere selskaper, Kontroll og overtakelser senere (RETNING.md)
-    { id: "industri", label: "Industrien", badge: tender ? (tender.attacker ? "Angrep" : "Anbud") : undefined },
+    { id: "industri", label: "Industrien", badge: tender ? (tender.attacker ? "Oppkjøp" : "Anbud") : undefined },
   ];
   return (
     <div className={`g-grid g-konsern-page is-konsern is-${tab}`}>
@@ -796,11 +796,11 @@ export function KonsernPage({
           {tender.attacker ? (
             <Callout tone="heat">
               <strong>
-                {tender.attacker} prøver å overta {tender.name.toLowerCase()}
+                {tender.attacker} har lagt inn et oppkjøpsbud på {tender.name.toLowerCase()}
               </strong>{" "}
-              – avgjøres {fmtWhen(tender.closesAt)}. Du kan forsvare deg med kapital fra kassa eller fondet.{" "}
+              – avgjøres {fmtWhen(tender.closesAt)}. Du kan legge inn et motbud fra kassa eller beredskapsfondet.{" "}
               <button className="g-link" onClick={() => setTab("industri")}>
-                Forsvar selskapet
+                Legg inn motbud
               </button>
             </Callout>
           ) : (

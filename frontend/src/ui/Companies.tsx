@@ -205,7 +205,7 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
       const r = await defendTakeover(c.takeover.id, amount, from);
       if (!r.ok) return TAKEOVER_REASON[r.reason] ?? TAKEOVER_REASON.nett;
       tenderChanged();
-      return `${fmtKr(amount)} er satt inn i forsvaret. Du får 95 % tilbake når forsøket er avgjort.`;
+      return `Motbudet ditt er økt med ${fmtKr(amount)}. Du får 95 % tilbake når oppkjøpet er avgjort.`;
     });
 
   const note = (at: string) =>
@@ -319,7 +319,7 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
                 <span className="g-small-text">Betal fra</span>
                 <select value={source} onChange={(e) => setSource(e.target.value === "fond" ? "fond" : "kasse")}>
                   <option value="kasse">Konsernkassa ({fmtKr(tr.balance)})</option>
-                  <option value="fond">Forsvarsfondet ({fmtKr(fund)})</option>
+                  <option value="fond">Beredskapsfondet ({fmtKr(fund)})</option>
                 </select>
               </label>
             )}
@@ -565,14 +565,14 @@ function ControlSection({
         <p className="g-small-text g-control-now">
           {vern ? (
             <>
-              <Icon name="shield-check" /> Ingen kan prøve å ta selskapet før {fmtWhen(new Date(vern).toISOString())} –
-              nye eiere er vernet de første {TAKEOVER.protectDays} dagene.{" "}
+              <Icon name="shield-check" /> Ingen kan by på selskapet før {fmtWhen(new Date(vern).toISOString())} – nye
+              eiere er vernet de første {TAKEOVER.protectDays} dagene.{" "}
             </>
           ) : (
-            <>Ingen prøver å ta selskapet nå. </>
+            <>Ingen har lagt inn oppkjøpsbud nå. </>
           )}
-          {vern ? "Etter det kan" : "Slik det står, kan"} en aktiv spiller ta det med et bud på ca.{" "}
-          <strong>{fmtKr(take)}</strong> hvis du ikke forsvarer deg.
+          {vern ? "Etter det kan" : "Slik det står, kan"} en aktiv spiller kjøpe det med et bud på ca.{" "}
+          <strong>{fmtKr(take)}</strong> hvis du ikke legger inn et motbud.
         </p>
       )}
       {steps.length > 0 && (
@@ -602,25 +602,25 @@ function ControlSection({
           ))}
         </ul>
         <p className="g-muted g-small-text">
-          Forsvarsfondet gir lite Kontroll før det er stort i forhold til selskapet ({fmtKr(ctl.value)}), men blir du
-          angrepet, teller det med i forsvaret av seg selv.
+          Beredskapsfondet gir lite Kontroll før det er stort i forhold til selskapet ({fmtKr(ctl.value)}), men får du
+          et oppkjøpsbud, teller det med i motbudet ditt av seg selv.
         </p>
       </details>
       {takeoversOn && (
         <details className="g-details">
-          <summary>Hvis noen prøver å ta selskapet</summary>
+          <summary>Hvis noen vil kjøpe selskapet</summary>
           <ol className="g-small-text g-control-how">
             <li>
-              En annen spiller legger inn et bud på minst verdien av selskapet. Du får beskjed, og har{" "}
+              En annen spiller legger inn et oppkjøpsbud på minst verdien av selskapet. Du får beskjed, og har{" "}
               {TAKEOVER.defenseHours} timer på deg.
             </li>
             <li>
-              Du kan sette inn penger i forsvaret, fra konsernkassa eller forsvarsfondet. Du får 95 % tilbake etterpå,
-              uansett utfall.
+              Du kan legge inn et motbud med penger fra konsernkassa eller beredskapsfondet. Du får 95 % tilbake
+              etterpå, uansett utfall.
             </li>
             <li>
-              Budet måles mot Kontrollen din pluss forsvaret. Er budet sterkest, overtar den andre selskapet, og du får
-              85 % av budet. Ellers beholder du det.
+              Oppkjøpsbudet måles mot Kontrollen din pluss motbudet. Er oppkjøpsbudet sterkest, kjøper den andre
+              selskapet, og du får 85 % av budet. Ellers beholder du det.
             </li>
           </ol>
           <p className="g-muted g-small-text">
@@ -666,13 +666,13 @@ function PolicySection({
       <h3 className="g-subhead">Utbyttepolitikk</h3>
       <p className="g-small-text">
         Du bestemmer hvor mye av utbyttet fra datterverkene som går til konsernkassa, og hvor mye som settes av i
-        forsvarsfondet. Fondet kan bare brukes til å gjøre selskapene dine tryggere: investere i dem, eller forsvare dem
-        hvis noen prøver å ta dem. Ikke til nye verk.
+        beredskapsfondet. Fondet kan bare brukes til å gjøre selskapene dine tryggere: investere i dem, eller legge inn
+        motbud hvis noen vil kjøpe dem. Ikke til nye verk.
       </p>
       <p className="g-small-text">
-        Forsvarsfondet nå: <strong>{fmtKr(p.fund)}</strong>.{" "}
+        Beredskapsfondet nå: <strong>{fmtKr(p.fund)}</strong>.{" "}
         {ownsCompany
-          ? "Blir et selskap angrepet, teller fondet med i forsvaret av seg selv."
+          ? "Får et selskap et oppkjøpsbud, teller fondet med i motbudet ditt av seg selv."
           : "Du eier ikke noe selskap nå, så «Ta ut» gir mest."}
       </p>
       <div className="g-policy-opts" role="radiogroup" aria-label="Utbyttepolitikk">
@@ -727,7 +727,8 @@ function TakeoverSection({
   const t = c.takeover;
   const w = c.takeoverWindow;
   const last = c.takeoverLast;
-  const score = (a: number, d: number) => `angrep ${Math.round(a)} mot forsvar ${Math.round(d)}`;
+  // Hvem som står sterkest, uten poeng (B-371)
+  const lead = (a: number, d: number) => (a > d ? "oppkjøpsbudet står sterkest" : "eieren står sterkest");
   const amountRow = (label: string, onGo: () => void, placeholder: number) => (
     <div className="g-row g-amount-row">
       <label className="g-amount">
@@ -752,14 +753,17 @@ function TakeoverSection({
       {t ? (
         <div className={`g-takeover-box${c.mine ? " is-mine" : ""}`}>
           <p className="g-small-text">
-            <strong>{t.mineAttack ? "Du prøver å overta selskapet" : `${t.attacker} prøver å overta selskapet`}</strong>{" "}
-            med {fmtKr(t.bid)}. Avgjøres {timeLeft(t.closesAt)} fra nå. Nå: {score(t.attack, t.defenseScore)}.
+            <strong>
+              {t.mineAttack ? "Du har lagt inn et oppkjøpsbud" : `${t.attacker} har lagt inn et oppkjøpsbud`}
+            </strong>{" "}
+            på {fmtKr(t.bid)}. Avgjøres {timeLeft(t.closesAt)} fra nå.
+            {c.mine ? "" : ` Slik det står nå: ${lead(t.attack, t.defenseScore)}.`}
           </p>
           {c.mine && <DefenseVerdict c={c} fund={fund} />}
           {c.mine && (
             <>
               {amountRow(
-                "Forsvar",
+                "Legg inn motbud",
                 () => {
                   onDefend(millions(amount), from);
                   setAmount("");
@@ -771,13 +775,13 @@ function TakeoverSection({
                   <span className="g-small-text">Betal fra</span>
                   <select value={from} onChange={(e) => setFrom(e.target.value === "fond" ? "fond" : "kasse")}>
                     <option value="kasse">Konsernkassa ({fmtKr(balance)})</option>
-                    <option value="fond">Forsvarsfondet ({fmtKr(fund)})</option>
+                    <option value="fond">Beredskapsfondet ({fmtKr(fund)})</option>
                   </select>
                 </label>
               )}
               <p className="g-muted g-small-text">
-                Kapitalen du setter inn, styrker forsvaret{t.defense ? ` (${fmtKr(t.defense)} nå)` : ""}. Du får 95 %
-                tilbake når forsøket er avgjort. Forsvarsfondet teller av seg selv.
+                Pengene du legger inn, gjør motbudet sterkere{t.defense ? ` (${fmtKr(t.defense)} nå)` : ""}. Du får 95 %
+                tilbake når oppkjøpet er avgjort. Beredskapsfondet teller med av seg selv.
               </p>
             </>
           )}
@@ -792,7 +796,7 @@ function TakeoverSection({
                 t.bid * 1.2,
               )}
               <p className="g-muted g-small-text">
-                Skriv hele det nye budet. Vinner du, får eieren 85 %. Taper du, får du 90 % tilbake.
+                Skriv hele det nye budet. Står budet sterkest til slutt, får eieren 85 %. Ellers får du 90 % tilbake.
               </p>
             </>
           )}
@@ -801,15 +805,15 @@ function TakeoverSection({
         w &&
         (w.open ? (
           <details className="g-details">
-            <summary>Overta selskapet</summary>
+            <summary>Kjøp selskapet</summary>
             <p className="g-small-text">
-              Budet må være minst verdien, {fmtKr(w.minBid)}, og betales fra konsernkassa med én gang. Alle ser budet,
-              og eieren har {TAKEOVER.defenseHours} timer på seg til å forsvare seg. Med minstebudet:{" "}
-              {score(w.attackMin, w.defenseNow)} før eieren gjør noe. Større bud, aktivitet og egne verk i regionen gir
-              sterkere angrep – med stort nok bud kan alle selskaper tas.
+              Et oppkjøpsbud må være minst verdien, {fmtKr(w.minBid)}, og betales fra konsernkassa med én gang. Alle ser
+              budet, og eieren har {TAKEOVER.defenseHours} timer på seg til å legge inn et motbud. Med minstebudet:{" "}
+              {lead(w.attackMin, w.defenseNow)} før eieren gjør noe. Større bud, at du spiller hver uke og egne verk i
+              regionen gjør budet sterkere – med stort nok bud kan alle selskaper kjøpes.
             </p>
             {amountRow(
-              "Legg inn bud",
+              "Legg inn oppkjøpsbud",
               () => {
                 onBid(millions(amount));
                 setAmount("");
@@ -817,25 +821,26 @@ function TakeoverSection({
               w.minBid,
             )}
             <p className="g-muted g-small-text">
-              Vinner du, får eieren 85 % av budet og du overtar resten av konsesjonen. Taper du, får du 90 % tilbake.
+              Står budet sterkest, får eieren 85 % av det, og du eier selskapet resten av konsesjonen. Ellers får du 90
+              % tilbake.
             </p>
           </details>
         ) : (
           w.reason &&
-          w.reason !== "pagar" && <p className="g-muted g-small-text">Overtakelse: {TAKEOVER_REASON[w.reason] ?? ""}</p>
+          w.reason !== "pagar" && <p className="g-muted g-small-text">Oppkjøp: {TAKEOVER_REASON[w.reason] ?? ""}</p>
         ))
       )}
       {last && (
         <p className="g-muted g-small-text">
-          Forrige forsøk: {last.attacker} {last.status === "overtatt" ? "overtok" : "ble avverget"} (
-          {score(last.attack, last.defense)}).
+          Forrige oppkjøpsforsøk:{" "}
+          {last.status === "overtatt" ? `${last.attacker} kjøpte selskapet.` : `budet fra ${last.attacker} holdt ikke.`}
         </p>
       )}
     </section>
   );
 }
 
-/** Eieren under angrep (B-370): med vanlige ord, taper eller beholder du selskapet slik det står, og hva som trengs */
+/** Eieren med et oppkjøpsbud (B-370, ord fra B-371): beholder eller mister du selskapet slik det står, og hva som trengs */
 function DefenseVerdict({ c, fund }: { c: Company; fund: number }) {
   const t = c.takeover!;
   const ctl = c.control;
@@ -844,15 +849,15 @@ function DefenseVerdict({ c, fund }: { c: Company; fund: number }) {
   if (need === 0)
     return (
       <p className="g-small-text g-defense-verdict is-ok">
-        <Icon name="shield-check" /> Slik det står nå, beholder du selskapet. Budet kan økes, så følg med.
+        <Icon name="shield-check" /> Slik det står nå, beholder du selskapet. Oppkjøpsbudet kan økes, så følg med.
       </p>
     );
   return (
     <p className="g-small-text g-defense-verdict is-bad">
       <Icon name="warning" /> Slik det står nå, mister du selskapet.{" "}
       {need === null
-        ? "Budet er så stort at forsvaret ikke kan stå imot. Du får 85 % av budet."
-        : `Sett inn ca. ${fmtKr(need)} i forsvaret for å stå imot – du får 95 % tilbake etterpå.`}
+        ? "Budet er så stort at et motbud ikke kan stå imot. Du får 85 % av budet."
+        : `Legg inn et motbud på ca. ${fmtKr(need)}${t.defense ? " til" : ""} for å beholde det – du får 95 % tilbake etterpå.`}
     </p>
   );
 }

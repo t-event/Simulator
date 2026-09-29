@@ -69,7 +69,7 @@ export function MoneyGuide({ g, onClose }: { g: GameState; onClose: () => void }
                   </h3>
                   <p className="g-small-text">
                     <strong>Ekte tid</strong> – like fort for alle, uansett spillfart. Får bidraget fra hovedverket og
-                    utbyttet fra datterverkene. Brukes til å kjøpe og modernisere datterverk, anbud og overtakelser.
+                    utbyttet fra datterverkene. Brukes til å kjøpe og modernisere datterverk, anbud og oppkjøp.
                   </p>
                   {perDay > 0 && <p className="g-small-text g-muted">Nå ca. {fmtKr(perDay)} per ekte dag.</p>}
                 </div>
@@ -103,8 +103,8 @@ export function MoneyGuide({ g, onClose }: { g: GameState; onClose: () => void }
                   Datterverkene tjener penger hver ekte dag og sender utbytte til konsernkassa. Politikken (Konsern →
                   Industrien) bestemmer hvor mye verkene holder igjen:{" "}
                   {POLICIES.map((p) => `${p.name} (${Math.round(p.keep * 100)} %)`).join(", ")}. Det som holdes igjen
-                  utover 30 %, går til forsvarsfondet, som beskytter selskapene dine mot overtakelser. Utbyttet er fullt
-                  i 7 dager etter at du sist spilte, så synker det.
+                  utover 30 %, går til beredskapsfondet, som beskytter selskapene dine mot oppkjøp. Utbyttet er fullt i
+                  7 dager etter at du sist spilte, så synker det.
                 </p>
               </Question>
               <Question q="Når kommer utbyttet og bidraget inn i konsernkassa?">
@@ -113,14 +113,14 @@ export function MoneyGuide({ g, onClose }: { g: GameState; onClose: () => void }
                   annen tidssone. Det kan gå noen minutter før pengene står i kassa.
                 </p>
               </Question>
-              <Question q="Hva er Kontroll – og kan noen ta selskapet mitt?">
+              <Question q="Hva er Kontroll – og kan noen kjøpe selskapet mitt?">
                 <p>
-                  Kontroll er hvor vanskelig det er for andre å ta et selskap du eier: sterk, god, middels eller svak.
-                  Den øker når du spiller hver uke, investerer i selskapet, har datterverk i samme region og har eid det
-                  lenge. Nye eiere er vernet de første 3 dagene. Etter det kan en annen spiller by på selskapet. Du får
-                  beskjed og har 72 timer på deg til å sette inn penger i forsvaret (du får 95 % tilbake). Mister du
-                  det, får du 85 % av budet. Under Konsern → Industrien står det hvor stort bud som trengs for å ta
-                  ditt.
+                  Kontroll er hvor vanskelig det er for andre å kjøpe et selskap du eier: sterk, god, middels eller
+                  svak. Den øker når du spiller hver uke, investerer i selskapet, har datterverk i samme region og har
+                  eid det lenge. Nye eiere er vernet de første 3 dagene. Etter det kan en annen spiller legge inn et
+                  oppkjøpsbud. Du får beskjed og har 72 timer på deg til å legge inn et motbud (du får 95 % tilbake).
+                  Selger du, får du 85 % av budet. Under Konsern → Industrien står det hvor stort bud som trengs for å
+                  kjøpe ditt.
                 </p>
               </Question>
               <Question q="Hvorfor tar det lengre tid å bygge og modernisere enn før?">
