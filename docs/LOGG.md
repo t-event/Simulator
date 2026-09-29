@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 294 – 2026-09-30: Pengene kom ikke kl. 00:00 (B-368)
+
+**Brukeren spurte:** «Fikk ikke dagens penger inn på konsernkassa klokken 00:00. Hva skjer?»
+
+**Funnet:** ingen feil. Serverens dag går i UTC; 29.9 betales kl. ca. 02:00 norsk tid (første utbyttedag). Bidraget
+starter med 30.9 og betales natt til 1.10. Målingene for 29.9 finnes (15 spillere, utbytte ca. 213 mill. i snitt i alt).
+
+**Gjort:** B-368 – klokkeslettet for utbetalingen i appen (`payoutClock`). Påminnelse satt for å sjekke betalingen etter
+kl. 02:00.
+
+**Testet:** tsc, lint, `npm test`; Playwright 320/390 px med norsk tidssone: «ca. kl. 02:00» i «Slik henger pengene
+sammen» og hjelpeteksten, ingen horisontal scrolling, ingen feil.
+
+**Gjenstår:** sjekk at utbyttet for 29.9 er betalt (påminnelse).
+
 ## Økt 293 – 2026-09-29: 12 eller 14 datterverk (B-367)
 
 **Brukeren spurte:** «Noen kan ha bare 12 datterselskap men andre kan ha 14. Kan du sjekke opp?»

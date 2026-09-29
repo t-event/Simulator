@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 368,
+    date: "2026-09-30",
+    title: "Når pengene kommer inn i konsernkassa",
+    items: [
+      "Utbyttet og bidraget kommer inn i konsernkassa hver natt ca. kl. 02:00 norsk sommertid (kl. 01:00 om vinteren), for dagen før – ikke ved midnatt. Serveren regner dagene likt for alle spillere. Klokkeslettet står nå under Konsern → Industrien og i «Slik henger pengene sammen».",
+    ],
+  },
+  {
     b: 367,
     date: "2026-09-29",
     title: "Hvor mange datterverk du kan ha",

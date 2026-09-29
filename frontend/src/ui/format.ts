@@ -7,6 +7,13 @@ export function fmtClock(minute: number): string {
   return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 }
 
+/** Klokka (telefonens tid) når serverens dag skifter, midnatt UTC: da betales utbyttet og bidraget for dagen før (B-368) */
+export function payoutClock(now: number): string {
+  const d = new Date(now);
+  const next = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 1));
+  return next.toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" });
+}
+
 export function fmtPct(v: number, digits = 0): string {
   return `${(v * 100).toFixed(digits).replace(".", ",")} %`;
 }
