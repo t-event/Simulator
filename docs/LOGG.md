@@ -21,6 +21,10 @@ og ingen fikk lagret i ca. ti minutter (eieren meldte det). Rettet på serveren 
 **Testet:** guard_projects med fem tilfeller i SQL, npm test (serverklokka), tsc, lint, save_game som spilleren i en
 transaksjon som rulles tilbake.
 
+**Etterpå:** vernet rettet en spiller til alt kl. 03:49: to komplekser med byggetid til 14:17/14:32 sto ferdige, og to
+nye komplekser kom uten byggeprosjekt. Serveren satte dem tilbake i bygging (ferdige 14:17–15:49), appen hentet
+serverens spill. Ingen ærlige spillere rettet så langt.
+
 **Gjenstår:** se i `project_guard_log` etter et døgn at ingen ærlige spillere blir rettet (bare klokker som går litt
 feil). Eierens svar på KONSERNBIDRAG.md. Pynt for sesong 3.
 
