@@ -51,7 +51,8 @@ import {
 } from "../game/konsern";
 import { computePlantStats, day } from "../game/plant";
 import { RESEARCH } from "../game/research";
-import type { GameState, SisterPlant, SisterType } from "../game/types";
+import { defaultRegion, isRegion, REGIONS, regionName } from "../game/regions";
+import type { GameState, RegionId, SisterPlant, SisterType } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { buzz } from "./haptics";
 import { Bar, Card, SubTabs } from "./common";
@@ -59,8 +60,9 @@ import { Button, Callout } from "./ds";
 import { useLastWorld, type OpenTender } from "./openTender";
 import { EARNS_FROM, konsernValueOf } from "../net/world";
 import { IndustryPanel } from "./Companies";
+import { WorldMapPanel } from "./WorldMap";
 import { NeedsAccount } from "./Account";
-import { cancelOrderUi, runOption, sellPlantUi } from "./konsernRun";
+import { cancelOrderUi, getBuildRegion, movePlantUi, runOption, sellPlantUi, setBuildRegion } from "./konsernRun";
 import { fmtKr, fmtT } from "./format";
 import { Icon } from "./icons";
 
@@ -466,6 +468,7 @@ function PlantMore({ g, act, p, options }: { g: GameState; act: Act; p: SisterPl
     <>
       {extra && <BuyButton g={g} act={act} o={extra} primary={false} label="Moderniser" />}
       {swap && <BuyButton g={g} act={act} o={swap} primary={false} label="Bytt til stålkompleks" />}
+      <MovePlant g={g} act={act} p={p} />
       {locked ? (
         <p className="g-muted g-small-text">Verket kan selges når prosjektet og køen for det er ferdig.</p>
       ) : selling ? (
@@ -560,6 +563,7 @@ function PlantRow({
             ? ""
             : ` · tjener ${fmtKr(sisterProfit(g, p))}/døgn · gir ${fmtKr(dividend)} per ekte dag til konsernkassa`}{" "}
           · verdt {fmtKr(sisterValue(g, p))}
+          {p.region && ` · står i ${regionName(p.region)}`}
         </p>
         <ProjectStatus p={p} />
         {main && (
@@ -576,7 +580,7 @@ function PlantRow({
           className="g-details"
           onToggle={(e) => !(e.target as HTMLDetailsElement).open && setOpen((n) => n + 1)}
         >
-          <summary>{isUpgrade && !p.project ? "Moderniser eller selg" : "Selg verket"}</summary>
+          <summary>{isUpgrade && !p.project ? "Moderniser, flytt eller selg" : "Flytt eller selg"}</summary>
           <PlantMore key={open} g={g} act={act} p={p} options={options} />
         </details>
       </div>
@@ -744,8 +748,8 @@ function KonsernQueue({ g, act }: { g: GameState; act: Act }) {
 }
 
 /** Underfanene i Konsern (B-226) */
-export type KonsernTabId = "oversikt" | "utvid" | "industri";
-const KONSERN_TAB_IDS: KonsernTabId[] = ["oversikt", "utvid", "industri"];
+export type KonsernTabId = "oversikt" | "utvid" | "kart" | "industri";
+const KONSERN_TAB_IDS: KonsernTabId[] = ["oversikt", "utvid", "kart", "industri"];
 
 /**
  * Konsernet som egen hovedside (B-226), med underfaner som Verket: Oversikt (tallene, neste steg og verkene), Utvid
@@ -773,6 +777,8 @@ export function KonsernPage({
   const tabs: { id: KonsernTabId; label: string; count?: number; badge?: string; alert?: boolean }[] = [
     { id: "oversikt", label: "Oversikt" },
     { id: "utvid", label: "Utvid", count: canBuy },
+    // Verdenskartet (B-333): alle konsernene i en oppdiktet verden
+    { id: "kart", label: "Kart" },
     // Industrien rundt verket (B-227): skraplageret nå, flere selskaper, Kontroll og overtakelser senere (RETNING.md)
     { id: "industri", label: "Industrien", badge: tender ? "Anbud" : undefined },
   ];
@@ -794,6 +800,7 @@ export function KonsernPage({
       )}
       {tab === "oversikt" && <KonsernOverview g={g} act={act} onBuy={() => setTab("utvid")} />}
       {tab === "utvid" && <KonsernBuy g={g} act={act} />}
+      {tab === "kart" && <WorldMapPanel g={g} />}
       {tab === "industri" && <IndustryPanel g={g} act={act} />}
     </div>
   );
@@ -1023,6 +1030,71 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
 }
 
 /** Utvid (B-226): neste steg, nye verk og felles tjenester */
+/** Hvor nye verk bygges (B-333): valgt region, eller der du har færrest verk */
+function BuildRegionPicker({ g }: { g: GameState }) {
+  const [region, setRegion] = useState<RegionId | "">(getBuildRegion() ?? "");
+  const auto = defaultRegion(g.konsern.plants, g.konsern.orders ?? []);
+  return (
+    <label className="g-field g-region-pick">
+      <span className="g-small-text">Nye verk bygges i</span>
+      <select
+        value={region}
+        onChange={(e) => {
+          const v = isRegion(e.target.value) ? e.target.value : "";
+          setRegion(v);
+          setBuildRegion(v || null);
+        }}
+      >
+        <option value="">Der du har færrest verk ({regionName(auto)})</option>
+        {REGIONS.map((r) => (
+          <option key={r.id} value={r.id}>
+            {r.name}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+/** Flytt et verk til en annen region, én gang (B-333) */
+function MovePlant({ g, act, p }: { g: GameState; act: Act; p: SisterPlant }) {
+  const [to, setTo] = useState<RegionId | "">("");
+  const [busy, setBusy] = useState(false);
+  if (!g.konsern.treasury) return null;
+  if (p.moved)
+    return (
+      <p className="g-muted g-small-text">Står i {regionName(p.region)} (flyttet én gang, kan ikke flyttes igjen).</p>
+    );
+  return (
+    <div className="g-konsern-buy g-region-move">
+      <label className="g-field">
+        <span className="g-small-text">Står i {regionName(p.region)}. Kan flyttes én gang, gratis:</span>
+        <select value={to} onChange={(e) => setTo(isRegion(e.target.value) ? e.target.value : "")}>
+          <option value="">Velg region</option>
+          {REGIONS.filter((r) => r.id !== p.region).map((r) => (
+            <option key={r.id} value={r.id}>
+              {r.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <button
+        disabled={!to || busy}
+        onClick={() => {
+          if (!to) return;
+          setBusy(true);
+          void movePlantUi(act, p.id, p.name, to).finally(() => {
+            setBusy(false);
+            setTo("");
+          });
+        }}
+      >
+        Flytt
+      </button>
+    </div>
+  );
+}
+
 function KonsernBuy({ g, act }: { g: GameState; act: Act }) {
   const options = konsernOptions(g);
   const advice = konsernAdvice(g);
@@ -1049,6 +1121,7 @@ function KonsernBuy({ g, act }: { g: GameState; act: Act }) {
             Jo færre dager før et kjøp har betalt seg, jo bedre.
           </p>
           <h3 className="g-subhead">Nye verk</h3>
+          {g.konsern.treasury && <BuildRegionPicker g={g} />}
           <div className="g-buy-opts">
             {types.map((t) => {
               const spec = SISTER_TYPES[t];

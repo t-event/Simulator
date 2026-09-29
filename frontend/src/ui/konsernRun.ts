@@ -5,7 +5,16 @@
 import type { KonsernOption } from "../game/konsern";
 import { ORDER_REFUSAL_TEXT } from "../game/konsernWorld";
 import type { GameApi } from "../game/useGame";
-import { applyKonsern, cancelKonsern, orderKonsern, sellKonsern, type KonsernResult } from "../net/konsern";
+import { regionName } from "../game/regions";
+import type { RegionId } from "../game/types";
+import {
+  applyKonsern,
+  cancelKonsern,
+  moveKonsern,
+  orderKonsern,
+  sellKonsern,
+  type KonsernResult,
+} from "../net/konsern";
 import { tenderChanged } from "./openTender";
 
 type Act = GameApi["act"];
@@ -25,11 +34,26 @@ function done(act: Act, r: KonsernResult, okText: string): boolean {
   return true;
 }
 
+/** Regionen nye verk bygges i (B-333), valgt under Konsern → Utvid. Null: der du har færrest verk (serveren velger) */
+let buildRegion: RegionId | null = null;
+export function setBuildRegion(r: RegionId | null): void {
+  buildRegion = r;
+}
+export function getBuildRegion(): RegionId | null {
+  return buildRegion;
+}
+
 /** Kjør et kjøp fra Konsern: bestilling på serveren eller kjøp fra kassa i spillet */
 export async function runOption(act: Act, o: KonsernOption): Promise<boolean> {
   if (o.run) return act((gg) => o.run!(gg)).ok;
   if (!o.request) return false;
-  return done(act, await orderKonsern(o.request), `${o.title}: bestilt.`);
+  const req = o.request.kind === "bygg" && buildRegion ? { ...o.request, region: buildRegion } : o.request;
+  return done(act, await orderKonsern(req), `${o.title}: bestilt.`);
+}
+
+/** Flytt et verk til en annen region, én gang (B-333) */
+export async function movePlantUi(act: Act, id: number, name: string, region: RegionId): Promise<boolean> {
+  return done(act, await moveKonsern(id, region), `${name} står nå i ${regionName(region)}.`);
 }
 
 export async function cancelOrderUi(act: Act, id: number): Promise<boolean> {

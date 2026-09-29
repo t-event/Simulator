@@ -5,6 +5,31 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 261 – 2026-09-29: Svarene på forslaget (B-332) og verdenskartet (B-333, K5)
+
+**Brukeren ba om:** svar på spørsmålene i KONTROLL-FORSLAG: 1 ja (bare selskaper kan overtas), 2 72 timer holder i
+starten, 3 ja, men høyst i konsesjonen på 14 dager som nå, 4 ja (regionnavnene), 5 ta begge (byggetid og
+nabolagsprosjekter). 3× og 10× beholdes, etter anbefalingen.
+
+**Gjort:**
+- B-332: svarene, med tidslinjen for overtakelser inne i konsesjonen (3 dagers vern, bud senest 5 dager før slutt,
+  fordel i fornyelsesanbudet på Kontroll/5 %, inntil +20 %). KONTROLL-FORSLAG markert godkjent.
+- K5 (B-333): `066_verdenskartet.sql` (regioner, `konsern_legacy_region`, `konsern_default_region`, `konsern_order` med
+  `p_region`, `konsern_move`, `world_map`, region på selskapene). Verkene som fantes, fikk region etter en tørrkjøring
+  (bare feltet lagt til). App: `game/regions.ts`, speilet i `konsernWorld.ts` (`placeOrder` med region, `movePlant`),
+  `net/worldMap.ts`, `ui/WorldMap.tsx` (Konsern → Kart), regionvalg på Utvid, flytting under «Flytt eller selg»,
+  regionen i raden og i køen.
+
+**Testet:** `npm test` (ny motortest og nettest), lint, typesjekk; SQL som spiller i DO-blokker som rulles tilbake
+(kartet, flytt én gang, ugyldig region, bestilling med valgt, standard og ugyldig region, flytt i køen); Supabase-rådene
+(to nye `search_path`-varsler rettet); Playwright med falsk server på de sju størrelsene: ingen horisontal scrolling,
+ingen avkortet tekst, knapper 44 px, kjøp sender `p_region`, flytting virker på mobil og PC.
+
+**Gjenstår:** K6 utbyttepolitikken og forsvarsfondet, K7 Kontroll, K8 overtakelser, så byggetid og nabolagsprosjekter
+hjemme.
+
+---
+
 ## Økt 260 – 2026-09-29: Anleggsbildet viser mer av det man kjøper (B-330, B-331)
 
 **Brukeren ba om:** «Kjør dine anbefalinger»: 1) anleggsbildet skal følge kjøpene mer, 2) forslag til verdenskart

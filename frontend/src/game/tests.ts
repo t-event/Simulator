@@ -153,6 +153,7 @@ import {
   localCancel,
   localOrder,
   localSell,
+  localMove,
   raiseLevel,
   nextLevelProgress,
   realNow,
@@ -3328,6 +3329,42 @@ test("Konsernet i ekte tid (B-326): priser, køen i rekkefølge, rabatt, bytte o
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden
+test("Verdenskartet (B-333): nye verk står der spilleren har færrest, kan velge region, bytte beholder, flytt én gang", () => {
+  const g = newGame(333);
+  g.stage = 4;
+  g.konsern.unlocked = true;
+  fund(g);
+  // Første verk: ingen verk ennå, så første region i rekkefølgen
+  assert(buySister(g, "stalverk").ok, "kjøpet");
+  assert(g.konsern.orders[0].region === "nord", `standard ${g.konsern.orders[0].region}`);
+  // Valgt region
+  assert(localOrder(g, { kind: "bygg", type: "stalverk", region: "oy" }).ok, "kjøp med region");
+  assert(g.konsern.orders[1].region === "oy", "valgt region");
+  // Neste uten valg: der det er færrest (nord og øyene har ett hver i køen)
+  assert(buySister(g, "stalverk").ok, "tredje kjøp");
+  assert(g.konsern.orders[2].region === "jern", `tredje ${g.konsern.orders[2].region}`);
+  finishProjects(g);
+  const first = g.konsern.plants.find((p) => p.region === "nord")!;
+  assert(!!first && g.konsern.plants.some((p) => p.region === "oy"), "verket fikk ikke regionen fra bestillingen");
+  // Flytt én gang, ikke to
+  assert(localMove(g, first.id, "sor").ok, "første flytt");
+  assert(plantById(g, first.id).region === "sor" && plantById(g, first.id).moved === true, "flyttet");
+  assert(!localMove(g, first.id, "vest").ok && plantById(g, first.id).region === "sor", "flyttet to ganger");
+  // Et verk som byttes til kompleks, står der det sto
+  g.konsern.legends = 3;
+  const oy = g.konsern.plants.find((p) => p.region === "oy")!;
+  assert(localOrder(g, { kind: "bytt", plant: oy.id }).ok, "bytte");
+  const swap = g.konsern.orders.at(-1)!;
+  assert(swap.type === "kompleks" && swap.region === "oy", `kompleks i ${swap.region}`);
+  // Komplekset bygges nå (køen var tom): flyttes som et verk, én gang
+  assert(localMove(g, swap.plantId, "vest").ok && plantById(g, swap.plantId).region === "vest", "flytt under bygging");
+  // Står i køen: regionen kan velges fritt til det starter, også flere ganger
+  assert(buySister(g, "stalverk").ok && g.konsern.orders.at(-1)!.status === "kø", "i køen");
+  const queued = g.konsern.orders.at(-1)!.plantId;
+  assert(localMove(g, queued, "ost").ok && localMove(g, queued, "sor").ok, "flytt i køen");
+  assert(g.konsern.orders.at(-1)!.region === "sor", "regionen i køen");
+});
+
 if (failed) {
   console.log(`\n${failed} test(er) feilet`);
   process.exitCode = 1;

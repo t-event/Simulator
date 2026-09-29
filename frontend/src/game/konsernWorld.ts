@@ -13,7 +13,8 @@
  *   spilleren hadde ved byttet (gulvet).
  * Ingen import av motoren, så fila kan brukes av tester og av testspilleren uten sirkler.
  */
-import type { KonsernOrder, SisterPlant, SisterProject, SisterType } from "./types";
+import { defaultRegion, isRegion } from "./regions";
+import type { KonsernOrder, RegionId, SisterPlant, SisterProject, SisterType } from "./types";
 
 export const WORLD_KONSERN = {
   price: { stalverk: 20_000_000, storverk: 80_000_000, kompleks: 250_000_000 } as Record<SisterType, number>,
@@ -148,7 +149,7 @@ export interface KonsernWorld {
 }
 
 export type OrderRequest =
-  | { kind: "bygg"; type: SisterType }
+  | { kind: "bygg"; type: SisterType; region?: RegionId }
   | { kind: "modernisering"; plant: number }
   | { kind: "utbygging"; plant: number }
   | { kind: "bytt"; plant: number };
@@ -165,6 +166,7 @@ export type OrderRefusal =
   | "sperret"
   | "konsern"
   | "startet"
+  | "flyttet"
   | "nett";
 
 /** Forklaringen på et nei, med vanlige ord */
@@ -180,8 +182,12 @@ export const ORDER_REFUSAL_TEXT: Record<OrderRefusal, string> = {
   sperret: "Kontoen er sperret mens topplista sjekker den.",
   konsern: "Konsernet er ikke åpnet ennå.",
   startet: "Bare det siste i køen kan avbestilles, før det har startet.",
+  flyttet: "Hvert verk kan flyttes én gang, og dette er alt flyttet.",
   nett: "Fikk ikke kontakt med serveren. Prøv igjen om litt.",
 };
+
+/** Hvorfor et verk ikke kan flyttes (B-333) */
+export const MOVE_REFUSAL = ORDER_REFUSAL_TEXT.flyttet;
 
 /** Verkene slik de blir når alt i køen er ferdig */
 export function plannedPlants(w: Pick<KonsernWorld, "plants" | "orders">): SisterPlant[] {
@@ -264,6 +270,15 @@ export function placeOrder(
   if ("refusal" in q) return { ok: false, reason: q.refusal };
   if (q.cost > w.balance + q.sale) return { ok: false, reason: "kasse" };
   let planned = plannedPlants(w);
+  // Regionen (B-333): valgt eller der spilleren har færrest verk; et kompleks står der verket sto
+  const region: RegionId | null =
+    req.kind === "bytt"
+      ? (w.plants.find((p) => p.id === req.plant)?.region ?? defaultRegion(w.plants, w.orders))
+      : req.kind === "bygg"
+        ? isRegion(req.region)
+          ? req.region
+          : defaultRegion(w.plants, w.orders)
+        : null;
   if (req.kind === "bytt") {
     w.plants = w.plants.filter((p) => p.id !== req.plant);
     w.balance += q.sale;
@@ -285,6 +300,7 @@ export function placeOrder(
     readyAt: last + q.hours * HOUR_MS,
     status: "kø",
     boughtDay: day,
+    region,
   };
   w.balance -= q.cost;
   w.orders.push(order);
@@ -312,6 +328,25 @@ export function sellPlant(w: KonsernWorld, id: number, now: number): { ok: true;
   w.plants = w.plants.filter((x) => x !== p);
   w.balance += sale;
   return { ok: true, sale };
+}
+
+/**
+ * Flytt et verk til en annen region, én gang per verk (som `konsern_move`). Et verk som står i køen, kan få en ny region
+ * fritt til det starter.
+ */
+export function movePlant(w: KonsernWorld, id: number, region: RegionId, now: number): boolean {
+  settleWorld(w, now);
+  if (!isRegion(region)) return false;
+  const p = w.plants.find((x) => x.id === id);
+  if (p) {
+    if (p.moved) return false;
+    w.plants = w.plants.map((x) => (x === p ? { ...x, region, moved: true } : x));
+    return true;
+  }
+  const o = w.orders.find((x) => x.status === "kø" && x.kind === "bygg" && x.plantId === id);
+  if (!o) return false;
+  o.region = region;
+  return true;
 }
 
 export interface SettleEvent {
@@ -346,6 +381,7 @@ export function settleWorld(w: KonsernWorld, now: number): SettleEvent[] {
           level: 0,
           boughtDay: o.boughtDay ?? 0,
           downUntilDay: 0,
+          ...(o.region ? { region: o.region } : {}),
           project,
         };
         w.plants = [...w.plants, plant];

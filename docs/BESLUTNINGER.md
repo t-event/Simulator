@@ -6032,3 +6032,26 @@ Beslutning:
 Rekkefølge: K5 kartet, K6 utbyttepolitikken og fondet, K7 Kontroll og investeringer, K8 overtakelser (bryter av til de er
 testet), så B1 og B2 hjemme. Hvert steg er en egen PR.
 Konto (B-149): kartet, utbyttepolitikken, Kontroll og overtakelser krever konto; B1 og B2 gjør det ikke.
+
+## B-333 Verdenskartet: seks regioner, verk og selskaper for alle (K5) (2026-09-29)
+Status: gjelder
+Bakgrunn: første steg i B-331/B-332: et «anleggsbilde» for konsernet, der man ser hvor mange og hvilke verk og selskaper
+de andre har. En oppdiktet verden, ikke et ekte land; flyplass kommer senere.
+Beslutning (migrasjon `066_verdenskartet.sql`, `game/regions.ts`, `net/worldMap.ts`, `ui/WorldMap.tsx`):
+- **Seks regioner:** Nordkysten, Jernåsen, Østskogen, Sørsletta, Vestbukta og Øyene (`konsern_regions`). Hvert datterverk
+  har `region` i `konsern.plants`; hvert selskap har `companies.region` (skraplageret i Vestbukta, slagghåndteringen i
+  Jernåsen, verkstedet på Nordkysten).
+- **Verkene som fantes** fikk en region jevnt fordelt (`konsern_legacy_region`, rekkefølgen er ulik fra spiller til
+  spiller). Tørrkjørt først: bare feltet `region` ble lagt til, ingenting annet endret.
+- **Nye verk** bygges i regionen spilleren velger under Konsern → Utvid, ellers der spilleren har færrest verk
+  (`konsern_default_region`). Et verk som byttes til kompleks, står der det sto.
+- **Flytting:** hvert verk kan flyttes én gang, gratis (`konsern_move`; `moved` på verket). Et verk i køen kan få ny region
+  fritt til det starter. (Forslaget sa «de første 14 dagene»; én gratis flytt uten frist er enklere og like harmløst.)
+- **Kartet** er en ny underfane, Konsern → Kart: SVG med de seks regionene rundt et hav, merker for dine verk (aksentfarge),
+  andres verk (grå, kompleks større) og selskaper (rombe). Under kartet en liste med regionene (knapper, 44 px) som også er
+  veien inn på små skjermer; ved siden av (PC) eller under (mobil) står regionen: selskapene med eier, spillerne med
+  kallenavn, tittel og antall verk per type. `world_map()` gir bare det topplista alt viser, og ikke sperrede kontoer.
+- Regionen har ingen virkning i økonomien ennå; Kontroll (K7) bruker den.
+- Speilet: `game/regions.ts` (navn, standardregion) og `konsernWorld.ts` (`placeOrder` med region, `movePlant`).
+Konto (B-149): krever konto – kartet viser andre spillere (regel 3). Står i `ACCOUNT_FEATURES` som «Verdenskartet»;
+uten konto vises `AccountFeaturesCard`.

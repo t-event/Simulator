@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 333,
+    date: "2026-09-29",
+    title: "Verdenskartet",
+    items: [
+      "Ny fane Konsern → Kart: en verden med seks regioner, der du ser dine og de andres datterverk og hvem som eier selskapene. Trykk på en region for å se hvem som har hva der.",
+      "Verkene du har, er fordelt på regionene. Nye verk bygges der du velger under Utvid, ellers der du har færrest.",
+      "Hvert verk kan flyttes én gang, gratis – åpne verket under Oversikt.",
+    ],
+  },
+  {
     b: 330,
     date: "2026-09-29",
     title: "Se det du kjøper",

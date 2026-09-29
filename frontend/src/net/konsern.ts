@@ -5,7 +5,8 @@
  */
 import { applyWorld, finishKonsernProjects } from "../game/konsern";
 import type { KonsernWorld, OrderRefusal, OrderRequest } from "../game/konsernWorld";
-import type { GameState, KonsernOrder, SisterPlant, SisterType } from "../game/types";
+import { isRegion } from "../game/regions";
+import type { GameState, KonsernOrder, RegionId, SisterPlant, SisterType } from "../game/types";
 import { rpc } from "./supabase";
 
 type Row = Record<string, unknown>;
@@ -23,6 +24,8 @@ function parsePlant(p: Row): SisterPlant {
     level: num(p.level),
     boughtDay: num(p.boughtDay),
     downUntilDay: num(p.downUntilDay),
+    ...(isRegion(p.region) ? { region: p.region } : {}),
+    ...(p.moved === true ? { moved: true } : {}),
     ...(pr && (kind === "bygg" || kind === "utbygging" || kind === "modernisering")
       ? { project: { kind, startedAt: num(pr.startedAt), readyAt: num(pr.readyAt) } }
       : {}),
@@ -41,6 +44,7 @@ function parseOrder(o: Row): KonsernOrder {
     startsAt: num(o.starts_at),
     readyAt: num(o.ready_at),
     status: o.status === "i gang" ? "i gang" : "kø",
+    region: isRegion(o.region) ? o.region : null,
   };
 }
 
@@ -61,11 +65,22 @@ export function parseKonsern(r: Row | null | undefined): KonsernWorld | null {
 export function konsernDiffers(g: GameState, w: KonsernWorld, perDay: number): boolean {
   const k = g.konsern;
   const plants = (ps: SisterPlant[]) =>
-    JSON.stringify(ps.map((p) => [p.id, p.type, p.level, p.name, p.project?.kind ?? "", p.project?.readyAt ?? 0]));
+    JSON.stringify(
+      ps.map((p) => [
+        p.id,
+        p.type,
+        p.level,
+        p.name,
+        p.project?.kind ?? "",
+        p.project?.readyAt ?? 0,
+        p.region ?? "",
+        p.moved === true,
+      ]),
+    );
   return (
     plants(k.plants) !== plants(w.plants) ||
-    JSON.stringify((k.orders ?? []).map((o) => [o.id, o.status])) !==
-      JSON.stringify(w.orders.map((o) => [o.id, o.status])) ||
+    JSON.stringify((k.orders ?? []).map((o) => [o.id, o.status, o.region ?? null])) !==
+      JSON.stringify(w.orders.map((o) => [o.id, o.status, o.region ?? null])) ||
     Math.max(w.level, w.floor) > k.legends ||
     k.treasury?.balance !== w.balance ||
     k.treasury?.perDay !== perDay
@@ -101,12 +116,18 @@ export function orderKonsern(req: OrderRequest): Promise<KonsernResult> {
     p_kind: req.kind,
     p_plant: req.kind === "bygg" ? null : req.plant,
     p_type: req.kind === "bygg" ? req.type : null,
+    p_region: req.kind === "bygg" ? (req.region ?? null) : null,
   });
 }
 
 /** Avbestill det siste i køen før det har startet (full refusjon) */
 export function cancelKonsern(order: number): Promise<KonsernResult> {
   return call("konsern_cancel", { p_order: order });
+}
+
+/** Flytt et verk til en annen region, én gang per verk (B-333) */
+export function moveKonsern(plant: number, region: RegionId): Promise<KonsernResult> {
+  return call("konsern_move", { p_plant: plant, p_region: region });
 }
 
 /** Selg et verk uten prosjekt: 60 % av pris med trinn, til konsernkassa */

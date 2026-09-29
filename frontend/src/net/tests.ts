@@ -60,6 +60,7 @@ import { DEPOSIT_REFUSAL_TEXT, depositToTreasury, fetchTreasury } from "./treasu
 import { resetServerClock, serverClockOffset, syncServerClock } from "./clock";
 import { realNow } from "../game/clock";
 import { applyKonsern, konsernDiffers, parseKonsern } from "./konsern";
+import { parseWorldMap } from "./worldMap";
 import { konsernOptions, konsernReady } from "../game/konsern";
 import {
   applyCompanyIncome,
@@ -1689,6 +1690,40 @@ const main = async () => {
       konsernReady(g) ===
         konsernOptions(g).filter((o) => !o.blocked && (o.pay === "kasse" ? g.cash : 12_345_678) >= o.price).length,
       "tallet på Utvid",
+    );
+  });
+
+  await test("Verdenskartet (B-333): regionen på verk og bestillinger tolkes, og kartet har alltid seks regioner", () => {
+    const w = parseKonsern({
+      plants: [
+        { id: 1, type: "stalverk", name: "A", level: 0, region: "jern", moved: true },
+        { id: 2, region: "mars" },
+      ],
+      orders: [{ id: 3, kind: "bygg", plant_id: 5, type: "storverk", region: "oy", status: "kø" }],
+    })!;
+    assert(w.plants[0].region === "jern" && w.plants[0].moved === true, "regionen på verket");
+    assert(w.plants[1].region === undefined, "ukjent region ble godtatt");
+    assert(w.orders[0].region === "oy", "regionen på bestillingen");
+    const m = parseWorldMap({
+      regions: [
+        {
+          id: "vest",
+          players: [
+            { nick: "Deg", title: "Stålmagnat", mine: true, stalverk: 1, storverk: 2, kompleks: 0, building: 1 },
+            { nick: "Tom", stalverk: 0, storverk: 0, kompleks: 0 },
+          ],
+          companies: [{ id: 4, type: "skraplager", name: "Skraplageret", owner: "Noen", mine: false }],
+        },
+        { id: "mars", players: [{ nick: "X", stalverk: 5 }] },
+      ],
+    });
+    assert(m.length === 6 && m.map((r) => r.id).join() === "nord,jern,ost,sor,vest,oy", "regionene");
+    const vest = m.find((r) => r.id === "vest")!;
+    assert(vest.players.length === 1 && vest.players[0].storverk === 2 && vest.players[0].mine, "spillerne");
+    assert(vest.companies[0].owner === "Noen" && vest.companies[0].type === "skraplager", "selskapet");
+    assert(
+      parseWorldMap(null).every((r) => r.players.length === 0),
+      "tomt svar",
     );
   });
 
