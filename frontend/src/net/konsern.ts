@@ -6,7 +6,7 @@
 import { applyWorld, finishKonsernProjects } from "../game/konsern";
 import type { KonsernWorld, OrderRefusal, OrderRequest } from "../game/konsernWorld";
 import { isRegion } from "../game/regions";
-import type { GameState, KonsernOrder, RegionId, SisterPlant, SisterType } from "../game/types";
+import type { GameState, KonsernOrder, PolicyId, RegionId, SisterPlant, SisterType } from "../game/types";
 import { rpc } from "./supabase";
 
 type Row = Record<string, unknown>;
@@ -58,6 +58,15 @@ export function parseKonsern(r: Row | null | undefined): KonsernWorld | null {
     level: num(r.level),
     floor: num(r.floor),
     balance: num(r.balance),
+    ...(typeof r.policy === "string"
+      ? {
+          policy: {
+            kind: r.policy === "balansert" || r.policy === "forsvar" ? r.policy : "ut",
+            changedAt: r.policy_at === null || r.policy_at === undefined ? null : num(r.policy_at),
+            fund: num(r.fund),
+          },
+        }
+      : {}),
   };
 }
 
@@ -83,7 +92,8 @@ export function konsernDiffers(g: GameState, w: KonsernWorld, perDay: number): b
       JSON.stringify(w.orders.map((o) => [o.id, o.status, o.region ?? null])) ||
     Math.max(w.level, w.floor) > k.legends ||
     k.treasury?.balance !== w.balance ||
-    k.treasury?.perDay !== perDay
+    k.treasury?.perDay !== perDay ||
+    (!!w.policy && JSON.stringify(k.policy ?? null) !== JSON.stringify(w.policy))
   );
 }
 
@@ -94,6 +104,7 @@ export function konsernDiffers(g: GameState, w: KonsernWorld, perDay: number): b
 export function applyKonsern(g: GameState, w: KonsernWorld, perDay: number): void {
   finishKonsernProjects(g);
   g.konsern.treasury = { balance: w.balance, perDay };
+  if (w.policy) g.konsern.policy = { ...w.policy };
   applyWorld(g, w);
 }
 
@@ -123,6 +134,11 @@ export function orderKonsern(req: OrderRequest): Promise<KonsernResult> {
 /** Avbestill det siste i køen før det har startet (full refusjon) */
 export function cancelKonsern(order: number): Promise<KonsernResult> {
   return call("konsern_cancel", { p_order: order });
+}
+
+/** Velg utbyttepolitikk (B-334), én gang per ekte uke */
+export function setPolicy(kind: PolicyId): Promise<KonsernResult> {
+  return call("konsern_policy", { p_policy: kind });
 }
 
 /** Flytt et verk til en annen region, én gang per verk (B-333) */

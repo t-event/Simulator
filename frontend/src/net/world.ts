@@ -8,6 +8,8 @@ import { rpc } from "./supabase";
 import type { TreasuryStatus } from "./treasury";
 import type { KonsernWorld } from "../game/konsernWorld";
 import { parseKonsern } from "./konsern";
+import { isRegion } from "../game/regions";
+import type { RegionId } from "../game/types";
 
 export interface Tender {
   id: number;
@@ -71,13 +73,24 @@ export interface Company {
   estimatePerDay: number;
   tender: Tender | null;
   lastResult: TenderResult | null;
+  /** Regionen på verdenskartet (B-333) */
+  region: RegionId | null;
+  /** Eierens Kontroll (B-334): summen 0–100, delene, selskapets verdi og investert i alt. Null uten eier */
+  control: CompanyControl | null;
+}
+
+export interface CompanyControl {
+  score: number;
+  parts: Record<string, number>;
+  value: number;
+  invested: number;
 }
 
 export interface WorldStatus {
   companies: Company[];
   treasury: TreasuryStatus;
   /** Utbyttet fra datterverkene (B-304): anslag per ekte dag nå, betalt for i går, og i alt */
-  dividend: { perDay: number; yesterday: number | null; total: number };
+  dividend: { perDay: number; fullPerDay: number; yesterday: number | null; total: number };
   /**
    * Hovedverkets konsernbidrag (B-318): en full dag nå (dempet), margin per tonn, tonn i en normal spilldag, siste
    * aktivitet (0,3–1), betalt for i går og i alt
@@ -127,6 +140,49 @@ function parseResult(r: Row | null | undefined): TenderResult | null {
   };
 }
 
+/** Kontrollen fra `company_control` (B-334) */
+export function parseControl(r: Row | null | undefined): CompanyControl | null {
+  if (!r || typeof r !== "object") return null;
+  const parts: Record<string, number> = {};
+  if (r.parts && typeof r.parts === "object")
+    for (const [k, v] of Object.entries(r.parts as Row)) parts[k] = Number(v) || 0;
+  return {
+    score: Math.max(0, Math.min(100, num(r.score))),
+    parts,
+    value: num(r.value),
+    invested: num(r.invested),
+  };
+}
+
+export type InvestRefusal = "belop" | "eier" | "kasse" | "sperret" | "nett";
+
+export const INVEST_REFUSAL_TEXT: Record<InvestRefusal, string> = {
+  belop: "Investeringen må være minst 1 mill.",
+  eier: "Du kan bare investere i selskaper du eier.",
+  kasse: "Det er ikke nok penger der.",
+  sperret: "Kontoen er sperret mens topplista sjekker den.",
+  nett: "Fikk ikke kontakt med serveren. Prøv igjen om litt.",
+};
+
+/** Invester i et selskap du eier (B-334): pengene blir i selskapet og gir Kontroll og mer inntekt */
+export async function investInCompany(
+  company: number,
+  amount: number,
+  source: "kasse" | "fond",
+): Promise<{ ok: true; control: CompanyControl | null } | { ok: false; reason: InvestRefusal }> {
+  let r: Row | null;
+  try {
+    r = await rpc<Row>("company_invest", { p_company: company, p_amount: Math.round(amount), p_source: source });
+  } catch {
+    return { ok: false, reason: "nett" };
+  }
+  if (r?.ok !== true) {
+    const reason = r?.reason as InvestRefusal;
+    return { ok: false, reason: reason in INVEST_REFUSAL_TEXT ? reason : "nett" };
+  }
+  return { ok: true, control: parseControl(r.control as Row | null) };
+}
+
 export async function fetchWorldStatus(): Promise<WorldStatus> {
   const r = await rpc<{ companies?: Row[]; treasury?: Row; dividend?: Row; contribution?: Row; konsern?: Row }>(
     "world_status",
@@ -150,6 +206,8 @@ export async function fetchWorldStatus(): Promise<WorldStatus> {
       estimatePerDay: num(c.estimate_per_day),
       tender: parseTender(c.tender as Row | null),
       lastResult: parseResult(c.last_result as Row | null),
+      region: isRegion(c.region) ? c.region : null,
+      control: parseControl(c.control as Row | null),
     })),
     treasury: {
       balance: num(t.balance),
@@ -158,7 +216,12 @@ export async function fetchWorldStatus(): Promise<WorldStatus> {
       left: num(t.left),
       freedAt: str(t.freed_at),
     },
-    dividend: { perDay: num(d.per_day), yesterday: numOrNull(d.yesterday), total: num(d.total) },
+    dividend: {
+      perDay: num(d.per_day),
+      fullPerDay: d.full_per_day === undefined ? num(d.per_day) : num(d.full_per_day),
+      yesterday: numOrNull(d.yesterday),
+      total: num(d.total),
+    },
     contribution: {
       perDay: num(c.per_day),
       margin: num(c.margin),
@@ -176,7 +239,8 @@ export async function fetchWorldStatus(): Promise<WorldStatus> {
  * bidrag for en full dag) − lån. Tallene kommer fra serveren; lånet er det i spillet (det samme som lagres).
  */
 export function konsernValueOf(w: WorldStatus, loan: number): number {
-  return w.treasury.balance + 60 * (w.dividend.perDay + w.contribution.perDay) - Math.max(0, loan);
+  // Hele utbyttet, uansett utbyttepolitikk (B-334): det som holdes igjen, er fortsatt konsernets
+  return w.treasury.balance + 60 * (w.dividend.fullPerDay + w.contribution.perDay) - Math.max(0, loan);
 }
 
 /**

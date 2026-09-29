@@ -79,6 +79,8 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Datterverk fra konsernkassa: kjøp, kø, salg og konsernnivået (titlene) | Ja (verk og titler fra før beholdes uten konto) | Regel 2 og 7 | B-325, B-326 |
 | Aktivitetskrav på utbytte og bidrag | Ja (del av konsernkassa) | Regel 2 | B-327 |
 | Verdenskartet: regioner for verkene, andres verk og selskaper, flytt én gang | Ja | Regel 3: viser andre spillere | B-333 |
+| Utbyttepolitikk og forsvarsfond | Ja | Regel 2 og 7: konsernkassa på serveren | B-334 |
+| Kontroll over selskaper, investeringer, fordel i fornyelsesanbudet | Ja | Regel 3 og 7 | B-334 |
 | Produksjonsmåleren (tonn per ekte dag fra tidslinja) | Ja (bare lagring på nett teller) | Regel 2 | B-188 |
 | Skraplageret: anbud (hvem som har bydd er synlig, beløpene skjult), pilotkonsesjon og inntekt fra andres skrapbruk | Ja | Regel 3 og 7 | B-189, B-210 |
 | Ukens utfordring «dager» i ekte aktive dager, delt plass ved likt | Ja (lista kan leses uten) | Regel 3 | B-190 |

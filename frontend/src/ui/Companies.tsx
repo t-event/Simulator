@@ -1,7 +1,7 @@
 /**
  * Industrien rundt verket (B-189, B-227): de strategiske selskapene og konsernkassa under Konsern → Industrien.
- * Skraplageret er det første selskapet; slagghåndtering og mekanisk verksted er bygget, men slått av (B-253, B-256), og
- * Kontroll og overtakelser senere (fase 3–4). Hvert selskap serveren sender, får sitt eget kort, og konsernkassa – kapitalen
+ * Skraplageret er det første selskapet; slagghåndtering og mekanisk verksted er bygget, men slått av (B-253, B-256).
+ * Eieren ser Kontrollen og kan investere; utbyttepolitikken og forsvarsfondet står ved konsernkassa (B-334). Hvert selskap serveren sender, får sitt eget kort, og konsernkassa – kapitalen
  * til alle selskapene – har sitt eget. Vises først når konsernet er åpnet (gradvis synlighet), krever konto. Alt avgjøres
  * på serveren i ekte tid; kortene viser bare det serveren sier.
  */
@@ -16,11 +16,28 @@ import {
   BID_REFUSAL_TEXT,
   fetchWorldStatus,
   firstPayout,
+  INVEST_REFUSAL_TEXT,
+  investInCompany,
   placeBid,
   timeLeft,
   type Company,
   type WorldStatus,
 } from "../net/world";
+import {
+  CONTROL_PARTS,
+  controlAdvice,
+  controlWord,
+  POLICIES,
+  policyLockedUntil,
+  policyOf,
+  policySplit,
+  renewalBonus,
+} from "../game/control";
+import { regionName } from "../game/regions";
+import type { PolicyId } from "../game/types";
+import { ORDER_REFUSAL_TEXT } from "../game/konsernWorld";
+import { applyKonsern, setPolicy } from "../net/konsern";
+import { realNow } from "../game/clock";
 import { AccountFeaturesCard } from "./Account";
 import { Bar, Card } from "./common";
 import { Icon } from "./icons";
@@ -76,6 +93,9 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
   // Budfeltet per selskap, så flere anbud samtidig ikke deler tall
   const [bids, setBids] = useState<Record<number, string>>({});
   const [deposit, setDeposit] = useState("");
+  // Investering per selskap (B-334): beløp og kilde
+  const [invest, setInvest] = useState<Record<number, string>>({});
+  const [source, setSource] = useState<"kasse" | "fond">("kasse");
   const user = session?.user.id ?? null;
 
   const load = useCallback(() => fetchWorldStatus().then(setWorld, () => {}), []);
@@ -139,6 +159,28 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
       return amount === 0
         ? "Budet er trukket, og pengene er tilbake i konsernkassa."
         : `Budet ditt er ${fmtKr(r.bid)}.`;
+    });
+
+  const fund = g.konsern.policy?.fund ?? 0;
+
+  const doInvest = (c: Company, amount: number) =>
+    run(`selskap-${c.id}`, async () => {
+      const r = await investInCompany(c.id, amount, source);
+      if (!r.ok) return INVEST_REFUSAL_TEXT[r.reason];
+      setInvest((b) => ({ ...b, [c.id]: "" }));
+      return `${fmtKr(amount)} er investert i ${c.name.toLowerCase()}. Kontrollen er nå ${controlWord(r.control?.score ?? 0).word.toLowerCase()}.`;
+    });
+
+  const doPolicy = (kind: PolicyId) =>
+    run("politikk", async () => {
+      const r = await setPolicy(kind);
+      if (!r.ok) return ORDER_REFUSAL_TEXT[r.reason] ?? ORDER_REFUSAL_TEXT.nett;
+      const w = r.konsern;
+      act((gg) => {
+        if (w) applyKonsern(gg, w, gg.konsern.treasury?.perDay ?? 0);
+        return { ok: true, message: "" };
+      });
+      return `Utbyttepolitikken er nå «${policyOf(kind).name}».`;
     });
 
   const note = (at: string) =>
@@ -211,6 +253,46 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
           )}
         </dl>
 
+        {c.control && <ControlSection c={c} />}
+        {c.mine && c.control && (
+          <div className="g-invest">
+            <div className="g-row g-amount-row">
+              <label className="g-amount">
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  min={1}
+                  placeholder="100"
+                  value={invest[c.id] ?? ""}
+                  onChange={(e) => setInvest((b) => ({ ...b, [c.id]: e.target.value }))}
+                  aria-label="Investering i millioner kroner"
+                />
+                <span>mill. kr</span>
+              </label>
+              <button
+                className="g-primary"
+                disabled={busy || millions(invest[c.id] ?? "") <= 0}
+                onClick={() => void doInvest(c, millions(invest[c.id] ?? ""))}
+              >
+                Invester
+              </button>
+            </div>
+            {fund > 0 && (
+              <label className="g-field">
+                <span className="g-small-text">Betal fra</span>
+                <select value={source} onChange={(e) => setSource(e.target.value === "fond" ? "fond" : "kasse")}>
+                  <option value="kasse">Konsernkassa ({fmtKr(tr.balance)})</option>
+                  <option value="fond">Forsvarsfondet ({fmtKr(fund)})</option>
+                </select>
+              </label>
+            )}
+            <p className="g-muted g-small-text">
+              Pengene blir i selskapet: de gir mer Kontroll og inntil 25 % mer inntekt, og følger selskapet til neste
+              eier. Halve effekten ved ca. {fmtKr(Math.round((c.control.value * 0.7) / 1e6) * 1e6)}.
+            </p>
+          </div>
+        )}
+
         {t && (
           <section className="g-tender">
             <header className="g-tender-head">
@@ -280,6 +362,9 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
                 Alle ser hvem som har bydd, men ingen ser beløpene før anbudet stenger ({fmtWhen(t.closesAt)}). Høyeste
                 bud vinner og driver lageret i 14 dager. Likt bud avgjøres ved trekning. De som ikke vinner, får budet
                 tilbake i konsernkassa.
+                {c.owner && c.control
+                  ? ` Eieren nå har en fordel av Kontrollen: budet teller ${Math.round(renewalBonus(c.control.score) * 100)} % mer.`
+                  : ""}
               </p>
             </details>
           </section>
@@ -312,6 +397,11 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
               eier, kommer hit.
             </span>
           </div>
+          {/* Utbyttepolitikken og forsvarsfondet (B-334): vises når fondet betyr noe – du eier et selskap, eller har et fond */}
+          {g.konsern.policy && (world.companies.some((c) => c.mine) || fund > 0 || g.konsern.policy.kind !== "ut") && (
+            <PolicySection g={g} full={world.dividend.fullPerDay} busy={busy} onPick={(k) => void doPolicy(k)} />
+          )}
+          {note("politikk")}
           {/* Utbyttet fra datterverkene i ekte tid (B-304): regnes av serveren én gang per dag */}
           {(world.dividend.perDay > 0 || world.dividend.total > 0) && (
             <p className="g-small-text g-treasury-dividend">
@@ -383,5 +473,96 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
         </Card>
       </div>
     </>
+  );
+}
+
+/** Kontrollen over et selskap (B-334): ordet for alle, delene og rådet for eieren */
+function ControlSection({ c }: { c: Company }) {
+  const ctl = c.control!;
+  const w = controlWord(ctl.score);
+  const advice = c.mine ? controlAdvice(ctl.parts) : null;
+  return (
+    <section className="g-control">
+      <p className="g-control-head">
+        <span>Kontroll</span>
+        <span className={`ds-status is-${w.tone === "bad" ? "critical" : w.tone}`}>{w.word}</span>
+        {c.region && <span className="g-muted g-small-text">{regionName(c.region)}</span>}
+      </p>
+      {c.mine && (
+        <>
+          {advice && <p className="g-small-text">{advice}</p>}
+          <details className="g-details">
+            <summary>Hva Kontrollen består av ({ctl.score} av 100)</summary>
+            <ul className="g-control-parts">
+              {CONTROL_PARTS.filter((p) => p.key !== "belastning" || (ctl.parts.belastning ?? 0) < 0).map((p) => (
+                <li key={p.key}>
+                  <span>{p.name}</span>
+                  <span>
+                    {Math.round(ctl.parts[p.key] ?? 0)}
+                    {p.max > 0 ? ` av ${p.max}` : ""}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p className="g-muted g-small-text">
+              Med god Kontroll teller budet ditt mer når konsesjonen skal fornyes (nå +
+              {Math.round(renewalBonus(ctl.score) * 100)} %).
+            </p>
+          </details>
+        </>
+      )}
+    </section>
+  );
+}
+
+/** Utbyttepolitikken (B-334): tre valg, hva de gir per dag, fondet og når valget kan endres igjen */
+function PolicySection({
+  g,
+  full,
+  busy,
+  onPick,
+}: {
+  g: GameState;
+  full: number;
+  busy: boolean;
+  onPick: (k: PolicyId) => void;
+}) {
+  const p = g.konsern.policy!;
+  const locked = policyLockedUntil(p.changedAt, realNow());
+  return (
+    <section className="g-policy">
+      <h3 className="g-subhead">Utbyttepolitikk</h3>
+      <p className="g-small-text">
+        Forsvarsfondet: <strong>{fmtKr(p.fund)}</strong>. Det som holdes igjen i datterverkene, går hit. Fondet kan
+        brukes til investeringer i selskapene dine og gir mer Kontroll – ikke til nye verk.
+      </p>
+      <div className="g-policy-opts" role="radiogroup" aria-label="Utbyttepolitikk">
+        {POLICIES.map((o) => {
+          const split = policySplit(full, o.id);
+          const on = p.kind === o.id;
+          return (
+            <button
+              key={o.id}
+              role="radio"
+              aria-checked={on}
+              className={on ? "is-on" : undefined}
+              disabled={busy || (!on && locked !== null)}
+              onClick={() => !on && onPick(o.id)}
+            >
+              <strong>{o.name}</strong>
+              <span className="g-small-text">{o.about}</span>
+              <span className="g-small-text g-muted">
+                {fmtKr(split.kasse)} til kassa{split.fond > 0 ? ` · ${fmtKr(split.fond)} til fondet` : ""} per dag
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      <p className="g-muted g-small-text">
+        {locked
+          ? `Kan endres igjen ${new Date(locked).toLocaleDateString("nb-NO", { weekday: "short", day: "numeric", month: "short" })}.`
+          : "Kan endres én gang per uke."}
+      </p>
+    </section>
   );
 }

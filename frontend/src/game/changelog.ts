@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 334,
+    date: "2026-09-29",
+    title: "Kontroll og utbyttepolitikk",
+    items: [
+      "Selskapene har nå Kontroll: sterk, stabil, presset eller svak. Den kommer av at du spiller, investerer, har verk i samme region og har eid selskapet lenge.",
+      "Eieren kan investere i selskapet. Pengene blir i selskapet og gir mer Kontroll og inntil 25 % mer inntekt.",
+      "God Kontroll gir en fordel når konsesjonen skal fornyes: budet ditt teller opptil 20 % mer.",
+      "Utbyttepolitikk: velg hvor mye datterverkene holder igjen. Det som holdes igjen, bygger et forsvarsfond du kan investere fra. Kan endres én gang i uka.",
+    ],
+  },
+  {
     b: 333,
     date: "2026-09-29",
     title: "Verdenskartet",

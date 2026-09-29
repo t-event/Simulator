@@ -61,6 +61,7 @@ import { resetServerClock, serverClockOffset, syncServerClock } from "./clock";
 import { realNow } from "../game/clock";
 import { applyKonsern, konsernDiffers, parseKonsern } from "./konsern";
 import { parseWorldMap } from "./worldMap";
+import { parseControl } from "./world";
 import { konsernOptions, konsernReady } from "../game/konsern";
 import {
   applyCompanyIncome,
@@ -1725,6 +1726,25 @@ const main = async () => {
       parseWorldMap(null).every((r) => r.players.length === 0),
       "tomt svar",
     );
+  });
+
+  await test("Utbyttepolitikken og Kontroll (B-334): politikk og fond fra serveren, Kontrollen tolkes", () => {
+    const g = newGame(334);
+    g.stage = 4;
+    g.konsern.unlocked = true;
+    const w = parseKonsern({ plants: [], orders: [], policy: "forsvar", policy_at: 1_700_000_000_000, fund: 12e6 })!;
+    assert(
+      w.policy?.kind === "forsvar" && w.policy.fund === 12e6 && w.policy.changedAt === 1_700_000_000_000,
+      "tolket",
+    );
+    assert(konsernDiffers(g, w, 0), "så ikke fondet");
+    applyKonsern(g, w, 0);
+    assert(g.konsern.policy?.kind === "forsvar" && g.konsern.policy.fund === 12e6, "lagt inn");
+    assert(!konsernDiffers(g, w, 0), "forskjell etter at alt er lagt inn");
+    assert(parseKonsern({ plants: [] })!.policy === undefined, "eldre server uten politikk");
+    const c = parseControl({ score: 130, parts: { eier: 30, aktivitet: "20" }, value: 4e8, invested: 0 })!;
+    assert(c.score === 100 && c.parts.aktivitet === 20 && c.value === 4e8, "Kontrollen");
+    assert(parseControl(null) === null, "uten eier");
   });
 
   setSaveListener(null);

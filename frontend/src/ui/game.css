@@ -6704,3 +6704,61 @@ button.g-prod-row:hover {
 .g-region-move select {
   min-height: 44px;
 }
+
+/* Kontroll og utbyttepolitikk (B-334) */
+.g-control {
+  margin: var(--sp-2) 0;
+}
+
+.g-control-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: 0 0 var(--sp-1);
+  font-weight: 600;
+}
+
+.g-control-parts {
+  margin: var(--sp-2) 0;
+  padding: 0;
+  list-style: none;
+}
+
+.g-control-parts li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: 4px 0;
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-meta);
+}
+
+.g-invest {
+  margin: var(--sp-2) 0;
+}
+
+.g-invest select {
+  min-height: 44px;
+}
+
+.g-policy-opts {
+  display: grid;
+  gap: var(--sp-2);
+  margin: var(--sp-2) 0;
+}
+
+.g-policy-opts button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-height: 44px;
+  text-align: left;
+  white-space: normal;
+}
+
+.g-policy-opts button.is-on {
+  border-color: var(--accent);
+  background: var(--accent-tint);
+}
