@@ -974,6 +974,83 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
+/* Kalenderen på Oversikt (B-321): stripe over de neste 60 døgnene og faste rader, så kortet ikke hopper (B-238) */
+.g-cal-strip {
+  position: relative;
+  height: 10px;
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.g-cal-seg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.g-cal-seg.is-ferie {
+  background: var(--warning);
+}
+
+.g-cal-seg.is-vinter {
+  background: var(--info);
+}
+
+.g-cal-scale {
+  display: flex;
+  justify-content: space-between;
+  margin: var(--sp-1) 0 var(--sp-2);
+  font-size: var(--fs-caption);
+}
+
+.g-cal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.g-cal-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0 var(--sp-2);
+}
+
+.g-cal-list li > .ds-icon {
+  grid-row: span 2;
+  align-self: center;
+}
+
+.g-cal-list li.is-ferie > .ds-icon {
+  color: var(--warning);
+}
+
+.g-cal-list li.is-vinter > .ds-icon {
+  color: var(--info);
+}
+
+.g-cal-main,
+.g-cal-note {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.g-cal-when {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.g-cal-note {
+  grid-column: 2 / 4;
+  font-size: var(--fs-caption);
+}
+
 .g-prod-pick {
   display: flex;
   flex-wrap: wrap;

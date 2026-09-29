@@ -46,6 +46,7 @@ import {
   SUMMER,
   summerStart,
   summerStop,
+  summerStopDaysLeft,
   winterHour,
 } from "./calendar";
 import { warDay } from "./war";
@@ -2056,7 +2057,8 @@ export function assessOffer(g: GameState, stats: PlantStats, c: Contract, commit
           rollingNeedDays(g, stats, c.product, c.tonnes, c.deadlineDay),
         )
       : Infinity;
-  const days = c.deadlineDay - day(g) + 1;
+  // I sommerstansen står ovnene resten av ferien (B-321): de døgnene kan ikke brukes
+  const days = c.deadlineDay - day(g) + 1 - Math.min(summerStopDaysLeft(g), Math.max(0, c.deadlineDay - day(g) + 1));
   // Går den nye kontrakten foran en annen i køen (planleggeren sorterer etter frist), kan den gjøre den andre for sen
   // selv om den selv rekker (B-240). «committed» ut over køen er landemerker som venter på svar, og de går først
   let pushesLate: string | null = null;
@@ -2608,7 +2610,10 @@ export function acceptAgreement(g: GameState, id: number, by = "Du"): PurchaseRe
   if (!a || a.status !== "tilbud") return { ok: false, message: "Tilbudet finnes ikke lenger." };
   a.status = "aktiv";
   log(g, `${by} signerte en rammeavtale med ${a.customer}: ${fmtT(a.weeklyT)} i uka i ${a.weeks} uker.`, "info");
-  sendAgreementWeek(g, a);
+  // Signert i sommerstansen (B-321): første uke kommer når ovnene går igjen, ikke med frist midt i ferien
+  const stopLeft = summerStopDaysLeft(g);
+  if (stopLeft > 0) a.nextDay = day(g) + stopLeft;
+  else sendAgreementWeek(g, a);
   return { ok: true, message: "Rammeavtale signert." };
 }
 

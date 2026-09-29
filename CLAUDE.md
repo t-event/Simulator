@@ -136,7 +136,8 @@ frontend/src/
     konsern.ts   Datterverk, byggeprosjekter i ekte tid og flaggskipet (B-209); vises av ui/Konsern.tsx
     world.ts     Felles hendelser i motoren og sesongfordel (B-129)
     environment.ts Utslipp, renseanlegg i trinn, havari og bøter (B-263); panelet står i ui/Upgrades.tsx (CleanerPanel)
-    calendar.ts  Året i spillet (360 døgn, dag 1 = 1. april), vinter 15.11.–14.3. og frost (B-265, B-272), fellesferie (B-298)
+    calendar.ts  Året i spillet (360 døgn, dag 1 = 1. april), vinter 15.11.–14.3. og frost (B-265, B-272), fellesferie (B-298);
+                 `calendarAhead` til kalenderkortet på Oversikt (ui/CalendarCard.tsx, B-321)
     war.ts       Krig i verden, bare i konsernet: dyrere strøm, flere forespørsler, høyst én per år (B-297)
     accidents.ts Eksplosjoner i ovnen og svært sjeldne dødsulykker (B-265)
     trends.ts    Trender i markedet: én kvalitet eller vare ettertraktet eller lite etterspurt i noen døgn (B-255); vises av ui/Trend.tsx
@@ -367,7 +368,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Vinter** (B-265): `riskFactor(g)` (1,5 om vinteren) ganges inn i havarier, renseanlegget og hendelseskortene. Ny
   risiko som skal øke om vinteren, bruker den – ikke egne datoer. Kalenderen er spilltid, ikke ekte dato.
 - **Fellesferien** (B-298): 7.–27. juli (dag 97, 457 …). Ved sommerstans står ovnene, lønn, forespørsler og ukeleveranser
-  stopper (`summerStop`), og frister flyttes tre uker. Nye kostnader eller leveranser som ikke gir mening i stansen, må
+  stopper (`summerStop`), og frister flyttes tre uker (også for forespørsler som venter, B-321). Salgsdirektøren står i
+  stansen, og Salg trekker fra døgnene som er igjen (`summerStopDaysLeft`). Nye kostnader eller leveranser som ikke gir mening i stansen, må
   sjekke `summerStop`. Testspilleren velger vikarer; `balance.ts --sommerstans` prøver stansen.
 - **Vinterøkonomi** (B-279): strømmen ganges med `winterPowerFactor` (spot og nattariff) og fastprisen med
   `WINTER_FIXED`. Snøstorm (`g.snowUntilMin`) stopper alle kjøp av skrap (`scrapBlocked`) unntatt med skrapterminal – nye

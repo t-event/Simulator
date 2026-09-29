@@ -164,6 +164,14 @@ export async function fetchWorldStatus(): Promise<WorldStatus> {
 }
 
 /**
+ * Konsernverdien slik topplista regner den (B-320, speiler `konsern_value` i 063): konsernkassa + 60 × (utbytte +
+ * bidrag for en full dag) − lån. Tallene kommer fra serveren; lånet er det i spillet (det samme som lagres).
+ */
+export function konsernValueOf(w: WorldStatus, loan: number): number {
+  return w.treasury.balance + 60 * (w.dividend.perDay + w.contribution.perDay) - Math.max(0, loan);
+}
+
+/**
  * Beskjeden om utbyttet fra datterverkene (B-304) og hovedverkets konsernbidrag (B-318): én gang per ekte dag, når
  * serveren har betalt for i går. Gir 1 hvis det ble skrevet noe.
  */

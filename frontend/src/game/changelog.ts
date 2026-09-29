@@ -15,6 +15,23 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 322,
+    date: "2026-09-29",
+    title: "Samme konsernverdi overalt",
+    items: [
+      "Konsern → Oversikt viser nå samme konsernverdi som topplista: konsernkassa pluss 60 dagers utbytte og bidrag, minus lån. Den gamle verdien (kassa, lån og verkene) står under som «Verdi i spillet».",
+    ],
+  },
+  {
+    b: 321,
+    date: "2026-09-29",
+    title: "Kalender, og ferie for salgsdirektøren",
+    items: [
+      "Nytt kort «Kalender» på Oversikt: når fellesferien og vinteren kommer, hvor lenge det er til, og hva du har valgt for ferien – så du kan planlegge ordrene fram til sommerstans.",
+      "Salgsdirektøren tar ikke ordrer i sommerstansen lenger. Forespørsler som venter, får tre uker lenger frist når stansen begynner, og en rammeavtale du signerer i stansen, starter når ovnene går igjen.",
+    ],
+  },
+  {
     b: 320,
     date: "2026-09-29",
     title: "Ny liste på topplista: Konsernverdi",

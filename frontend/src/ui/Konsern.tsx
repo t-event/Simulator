@@ -53,8 +53,8 @@ import type { GameApi } from "../game/useGame";
 import { buzz } from "./haptics";
 import { Bar, Card, SubTabs } from "./common";
 import { Button, Callout } from "./ds";
-import type { OpenTender } from "./openTender";
-import { EARNS_FROM } from "../net/world";
+import { useLastWorld, type OpenTender } from "./openTender";
+import { EARNS_FROM, konsernValueOf } from "../net/world";
 import { IndustryPanel } from "./Companies";
 import { fmtKr, fmtT } from "./format";
 import { Icon } from "./icons";
@@ -775,6 +775,7 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
   const drift = k.plants.filter(running).reduce((a, p) => a + sisterProfit(g, p), 0);
   const dividend = shown.reduce((a, b) => a + b, 0);
   const equity = konsernEquity(g);
+  const world = useLastWorld();
   const options = konsernOptions(g);
   const advice = konsernAdvice(g);
   const next = KONSERN_MILESTONES[k.milestones];
@@ -789,10 +790,22 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
       <div className="g-col-wide g-konsern-head-col">
         <Card title="Konsernet">
           <div className="g-finance-head">
-            <div className="g-finance-result">
-              <span>Konsernverdi</span>
-              <strong>{fmtKr(Math.floor(equity))}</strong>
-            </div>
+            {/* Konsernverdien er den samme som på topplista (B-320, B-322): regnet av serverens tall. Uten dem (uten
+                konto) vises verdien i spillet */}
+            {world ? (
+              <div
+                className="g-finance-result"
+                title="Samme tall som på topplista: konsernkassa pluss 60 dagers utbytte og bidrag, minus lån"
+              >
+                <span>Konsernverdi</span>
+                <strong>{fmtKr(Math.floor(konsernValueOf(world, g.loan)))}</strong>
+              </div>
+            ) : (
+              <div className="g-finance-result">
+                <span>Verdi i spillet</span>
+                <strong>{fmtKr(Math.floor(equity))}</strong>
+              </div>
+            )}
             <div className="g-finance-side">
               <span title="Betales av serveren én gang per ekte dag rett til konsernkassa – spillfarten betyr ingenting">
                 Utbytte til konsernkassa <strong>{fmtKr(dividend)} per ekte dag</strong>
@@ -800,6 +813,11 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
               {k.plants.length > 0 && (
                 <span title="Utbyttet øker når hjemmeverket har godt omdømme og lager stål som holder kvaliteten">
                   Flaggskipet <strong>+{Math.round(flagshipBonus(g) * 100)} %</strong> utbytte
+                </span>
+              )}
+              {world && (
+                <span title="Kassa minus lån, pluss det verkene er verdt – sluttmålet på 10 mrd. og lista «Verdi i spillet»">
+                  Verdi i spillet <strong>{fmtKr(Math.floor(equity))}</strong>
                 </span>
               )}
               <span>
@@ -880,8 +898,9 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
               </li>
             </ol>
             <p className="g-muted g-small-text">
-              Konsernverdi = kassa minus lån, pluss det verkene er verdt. Under Forskning finnes egne prosjekter for
-              konsernet ({konsernResearch.done} av {konsernResearch.total} forsket fram).
+              Konsernverdi (topplista) = konsernkassa pluss 60 dagers utbytte og bidrag, minus lån. Verdi i spillet =
+              kassa minus lån, pluss det verkene er verdt. Under Forskning finnes egne prosjekter for konsernet (
+              {konsernResearch.done} av {konsernResearch.total} forsket fram).
             </p>
           </details>
         </Card>

@@ -5,6 +5,34 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 254 – 2026-09-29: Konsernverdien på Konsern → Oversikt (B-322)
+
+**Brukeren ba om:** «Konsernverdi i oversikt konsern stemmer ikke».
+
+**Gjort:** Oversikten viser nå serverens konsernverdi (samme som topplista), med den gamle verdien under som «Verdi i
+spillet».
+
+**Testet:** `npm test`, tsc, lint, Playwright 320/390.
+
+**Gjenstår:** som økt 253.
+
+---
+
+## Økt 253 – 2026-09-29: Sommerstans stopper salgsdirektøren, kalender på Oversikt (B-321)
+
+**Brukeren ba om:** at salgsdirektøren ikke tar ordrer i planlagt sommerstans, og en kalender på Oversikt for å
+planlegge fram til sommerstans.
+
+**Gjort:** salgsdirektøren står i stansen; ventende forespørsler får tre uker lenger frist når stansen begynner; en
+rammeavtale signert i stansen starter etter ferien; Salg regner uten stansdøgnene. Nytt kort «Kalender» på Oversikt
+med stripe over 60 døgn og raden for fellesferien og vinteren.
+
+**Testet:** `npm test`, tsc, lint, balansetesten og `--sommerstans`, Playwright 320/390/1366/2560.
+
+**Gjenstår:** se etter første betaling av konsernbidraget 30.9. Følg med på `project_guard_log`.
+
+---
+
 ## Økt 252 – 2026-09-29: Konsernverdi regnet av serveren på topplista (B-320)
 
 **Brukeren ba om:** steg 4 av konsernbidraget; valgte «ny liste ved siden av».
