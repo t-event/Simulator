@@ -10,7 +10,8 @@ ble testet, og hva som gjenstår.
 **Brukeren ba om:** «Jeg tjener jo fortsatt i snitt over 100 millioner per dag. Er ikke det drøyt mye? Vi må få til
 å få økonomien til å være mye bedre.»
 
-**Gjort:** 052 kjørt (åtte spillere justert av serveren, to av appen; ett merke for hånd). B-308: metningen fra
+**Gjort:** 052 kjørt (åtte spillere justert av serveren, to av appen; ett merke for hånd); 053: sesonglista
+«Konsernverdi» rettet med ferske tidslinjetall (de tre største hadde ikke lastet opp etter reformen). B-308: metningen fra
 3 000 t (45 %, 40 % over 20 000), administrasjon 500 kr/t over 5 000 t. Toppen fra ca. 95 til ca. 36 mill. per døgn.
 
 **Testet:** tsc, lint, npm test, balance (exit 0), `--storovn` før/etter fra samme utgangspunkt.
