@@ -154,3 +154,4 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Konsernverdien på Konsern → Oversikt som på topplista | – | Ingen ny funksjon | B-322 |
 | Kokillene i strengstøpingen slites og byttes | Nei | Regel 1: ditt eget spill | B-351 |
 | Lærlinger utenfor drifta, alder og pensjon for ansatte | Nei | Regel 1: ditt eget spill | B-357 |
+| Konsernbidraget som snitt over den ekte dagen | Ja (som bidraget) | Regel 3: serveren, ekte tid | B-361 |

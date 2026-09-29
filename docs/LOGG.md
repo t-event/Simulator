@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 287 – 2026-09-29: Konsernbidraget hoppet (B-361)
+
+**Brukeren ba om:** fem skjermbilder fra en spiller: «Bidrag fra hovedverket e buggy» (16 → 20 → 24 → 12 → 7 mill. kr per
+dag på 20 minutter).
+
+**Funnet:** bidraget regnes av de siste 30 spilldøgnene – ca. 6 ekte minutter på 10× – og betales med tallet i det
+øyeblikket betalingen kjøres. Spilleren var i fellesferien (dag 1906), så tonn og margin falt. Ingen bidrag var betalt ennå.
+
+**Gjort:** `077_bidrag_snitt.sql` (kjørt i to deler, 077 og 077b): målinger hvert kvarter, betaling og visning som snitt.
+Teksten under Konsern → Industrien forklarer det.
+
+**Testet:** DO-blokk som spiller: målinger, snitt, konsernverdi og `world_status`; `tsc -b`, `npm test`.
+
+**Gjenstår:** se etter første betaling (1.10. etter midnatt UTC) at bidraget for 30.9 er snittet (`contributions.full_day`
+mot `contribution_samples`). Vurder samme løsning for utbyttet.
+
 ## Økt 286 – 2026-09-29: Dashbordet etter stansen, og ytelsesrådene (B-360)
 
 **Brukeren ba om:** skjermbilder av Data API (76 feil, koder 503/521/522/525), så «Fortsett».

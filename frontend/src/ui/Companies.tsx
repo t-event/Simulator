@@ -442,7 +442,7 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
               uansett spillfart.
             </p>
           )}
-          {/* Hovedverkets konsernbidrag (B-318): halvparten av driftsresultatet i én normal spilldag per ekte dag */}
+          {/* Hovedverkets konsernbidrag (B-318): halvparten av driftsresultatet i én normal spilldag per ekte dag, snittet over dagen (B-361) */}
           {(world.contribution.perDay > 0 || world.contribution.total > 0) && (
             <p className="g-small-text g-treasury-dividend">
               Bidrag fra hovedverket: <strong>ca. {fmtKr(world.contribution.perDay)} per dag</strong>
@@ -452,7 +452,8 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
               {world.contribution.total > 0 ? ` · ${fmtKr(world.contribution.total)} i alt` : ""}. Halvparten av det
               verket tjener på en vanlig spilldag{" "}
               {`(${fmtT(world.contribution.normalT)} à ${fmtKr(world.contribution.margin)} per tonn)`}, uansett
-              spillfart. Dager uten spill gir mindre, aldri under 30 %.
+              spillfart. Serveren måler verket hvert kvarter og betaler snittet for dagen, så en dårlig eller god time
+              ikke avgjør alt. Dager uten spill gir mindre, aldri under 30 %.
             </p>
           )}
           {/* Innskuddet fra verket (B-311) forsvinner når serveren setter grensen til 0 (B-319): bidraget gjør jobben */}

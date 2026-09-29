@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 361,
+    date: "2026-09-29",
+    title: "Jevnere bidrag fra hovedverket",
+    items: [
+      "Bidraget fra hovedverket til konsernkassa hoppet opp og ned fra minutt til minutt, fordi det fulgte de siste spilldøgnene (på 10× bare noen minutter). Nå måler serveren verket hvert kvarter og betaler snittet for hele dagen – en dårlig time, som fellesferien, avgjør ikke alt.",
+    ],
+  },
+  {
     b: 359,
     date: "2026-09-29",
     title: "Privat formue",
