@@ -243,7 +243,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `document.querySelector(".g-main").scrollBy(...)`. Fingersveip (`synthesizeScrollGesture`) virker ikke uten skjerm.
 - **To skall** (B-192): under 900 px mobil (meny nederst), fra 900 px PC (sidemeny, topplinje). Varsellinja står over
   menyen nederst på mobil og i topplinja på PC (B-201); `useIsPc` i `GameApp` velger plassen, så det er bare én. Konsern er egen hovedside
-  i begge menyene (B-226); bare Mål er eget punkt på PC (`.g-nav-pc`). Underfanen i hver hovedmeny huskes i `GameApp` (B-233, `ui/tabMemory.ts`); et nytt trykk på aktiv meny går til første underfane.
+  i begge menyene (B-226); bare Mål er eget punkt på PC (`.g-nav-pc`). I toppfeltet på PC er varsellinja og knappene ved
+  den én blokk (`.g-top > .g-notice-row`, B-340) – ikke gjør den til `display: contents` igjen, da sprer knappene seg. Underfanen i hver hovedmeny huskes i `GameApp` (B-233, `ui/tabMemory.ts`); et nytt trykk på aktiv meny går til første underfane.
 - Ark (`.g-modal`) som åpnes fra innhold inne i `.g-main`, må pakkes i `<Portal>` (B-152). Ellers klipper Safari på
   iPhone arket til innholdet, og det kan ikke scrolles (skjedde med «Pynt verket»).
 - **Veiledningsboksen** (B-260) ligger fast nederst og kan dekke knapper på små mobiler. Et nytt steg som ber spilleren

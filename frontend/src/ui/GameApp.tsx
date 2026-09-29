@@ -444,10 +444,13 @@ function TopBar({
   onResearch,
   onHelp,
   onChat,
+  onKonsern,
   notice,
 }: {
   g: GameState;
   api: GameApi;
+  /** Konsernkassa i toppfeltet åpner Konsern → Industrien, der den brukes (B-340) */
+  onKonsern: () => void;
   /** «Hva gjør jeg nå?» i varsellinja på PC (B-283) */
   onHelp: () => void;
   /** Skiftrapporten (B-338) */
@@ -545,6 +548,19 @@ function TopBar({
         <Kpi icon="power" label={stats.furnace.fuel === "gass" ? "Gass" : "Strøm"}>
           {fmtNum(energyPrice(g), 2)} kr/kWh
         </Kpi>
+        {/* Konsernkassa (B-340): pengene på serveren som kjøper verk, byr i anbud og overtar selskaper. Bare med konto og
+            konsern – ellers finnes den ikke ennå */}
+        {g.konsern.treasury && (
+          <Kpi
+            icon="konsern"
+            label="Konsernkassa"
+            className="g-kpi-treasury"
+            hint={`Konsernkassa: ${fmtKr(Math.floor(g.konsern.treasury.balance))}. Trykk for å se hva den brukes til`}
+            onClick={onKonsern}
+          >
+            {fmtKr(Math.floor(g.konsern.treasury.balance))}
+          </Kpi>
+        )}
         {(g.researchPoints > 0 || g.researched.length > 0) && (
           <Kpi
             icon="research"
@@ -1030,6 +1046,7 @@ export function GameApp() {
             notice={isPc}
             onBook={() => openBook()}
             onResearch={() => go("forskning")}
+            onKonsern={() => go("konsern", "industri")}
             onHelp={() => setHelpOpen(true)}
             onChat={() => setChatOpen(true)}
             onSettings={() => setSettingsOpen(true)}

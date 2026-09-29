@@ -6186,3 +6186,18 @@ Beslutning (migrasjon `071_skiftrapporten_hendelser.sql`):
 Testet: DO-blokk som ble rullet tilbake: anbud åpnet og avgjort, forsøk avverget og overtatt, ny tittel – alle sju
 meldingene riktige i `chat_list`. `npm test` (hendelse i nettesten), Playwright på 320, 390 og 1 366 px.
 Konto (B-149): som Skiftrapporten og overtakelser – krever konto.
+
+## B-340 Konsernkassa i toppfeltet (2026-09-29)
+Status: gjelder
+Bakgrunn: eieren: «Konsernkasseverdien bør stå i toppfeltet.»
+Beslutning (`TopBar` i `ui/GameApp.tsx`, `game.css`):
+- Konsernkassa står som et eget nøkkeltall i toppfeltet, etter strømprisen: konsernikonet og beløpet, med ordet
+  «Konsernkassa» der det er god plass (under 600 px og fra 1 600 px; ellers bare ikon og beløp, ordet i verktøytipset og
+  for skjermlesere). Trykk åpner Konsern → Industrien, der kassa brukes (anbud, overtakelser, investeringer).
+- Vises bare når spillet har konsernkassa fra serveren (`g.konsern.treasury`, konto og konsern) – før det finnes den ikke
+  (gradvis synlighet). Beløpet følger `world_status`, som appen alt henter jevnlig.
+- Toppfeltet på PC: varsellinja og knappene ved den (hjelp, Skiftrapporten, topplista) er nå én blokk som brytes samlet
+  til neste rad når det er for trangt. Før spredte knappene seg utover raden (hver hadde `margin-left: auto`).
+Testet: Playwright på de 7 størrelsene med 123,45 mrd. kr i kassa (ingen avkorting, ingen horisontal scrolling, trykk
+åpner Industrien) og uten konsernkassa (320 og 1 366 px).
+Konto (B-149): konsernkassa krever konto fra før (B-326); uten konto vises tallet ikke.
