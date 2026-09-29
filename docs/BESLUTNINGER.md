@@ -6221,3 +6221,17 @@ Beslutning (`valueCreated` i `game/konsern.ts`):
 Testet: ny test i `npm test` (9 999,5 mill. + 530 mill. utbetalt → sluttmålet; 10 mrd. + 15,1 mrd. utbetalt → de største
 ovnene), `balance.ts`.
 Konto (B-149): krever ikke konto (eget spill).
+
+## B-342 Tallet på Konsern teller bare kjøp som er verdt å gjøre (2026-09-29)
+Status: gjelder
+Bakgrunn: eieren: «Jeg har 3 varsler i konsernet men det er ingenting jeg kan kjøpe.» Kontoen hadde 30 mill. i
+konsernkassa, fullt konsern og tre stålverk. Tallet på Konsern (`konsernReady`) talte moderniseringen av de tre
+stålverkene (5 mill. hver) – de eneste kjøpene kassa rakk til. Men de sto ikke der spilleren så: hovedknappen for et
+stålverk er utbyggingen (51 mill.), og Utvid viser bare de tre som betaler seg raskest. Og de er bortkastet: moderniseringen
+starter på nytt når stålverket bygges ut til storverk (B-119).
+Beslutning (`worthwhileOptions` i `game/konsern.ts`):
+- Modernisering av et verk som kan bygges ut, teller ikke i tallet på Konsern, foreslås ikke som «Neste steg» og står ikke
+  under «Bygg ut verkene dine» på Utvid. Den kan fortsatt velges under verket selv.
+- Alt annet teller som før: det som ikke er sperret og som konsernkassa (eller kassa, for de felles funksjonene) rekker til.
+Testet: kontoens konsern kjørt lokalt (3 → 0), ny test i `npm test`, `balance.ts`.
+Konto (B-149): uendret (datterverk krever konto).

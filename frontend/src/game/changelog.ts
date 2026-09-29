@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 342,
+    date: "2026-09-29",
+    title: "Riktig tall på Konsern",
+    items: [
+      "Tallet på Konsern teller ikke lenger modernisering av stålverk som kan bygges ut til storverk – den er bortkastet, fordi moderniseringen starter på nytt ved utbyggingen. Nå betyr tallet at det er noe verdt å kjøpe.",
+    ],
+  },
+  {
     b: 341,
     date: "2026-09-29",
     title: "Kassetaket stenger ikke lenger for de største ovnene",

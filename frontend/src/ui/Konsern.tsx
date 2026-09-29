@@ -35,6 +35,7 @@ import {
   titleOf,
   konsernAdvice,
   konsernReady,
+  worthwhileOptions,
   konsernEquity,
   valueCreated,
   konsernOptions,
@@ -1120,7 +1121,7 @@ function KonsernBuy({ g, act }: { g: GameState; act: Act }) {
   const owned = sharedIds.filter((id) => !byKey(`felles-${id}`));
   const hasStalverk = g.konsern.plants.some((p) => p.type === "stalverk");
   // Utbygging av verkene du har: de tre som betaler seg raskest (alle står under Oversikt → Dine verk)
-  const grow = options
+  const grow = worthwhileOptions(options)
     .filter((o) => /^(mod|bygg|bytt)-/.test(o.key) && !o.blocked && o.key !== advice?.key)
     .sort((x, y) => x.payback - y.payback)
     .slice(0, 3);
