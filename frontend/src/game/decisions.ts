@@ -5,6 +5,7 @@
  * Hvert kort har en fristelse og en risiko, og lærer bort noe om hvordan et
  * stålverk drives.
  */
+import { hasNeighbor } from "./building";
 import { ROLES, SCRAP_TYPES, STAGES } from "./data";
 import {
   acceptContract,
@@ -231,6 +232,8 @@ const MORE_MAKERS: Record<string, Maker> = {
   naboklage: (g) => {
     // Er støyskjerm og filter satt opp på dette nivået, klager ikke naboene igjen før verket blir større (B-171)
     if (g.stage < 1 || (g.decisionFixed?.naboklage ?? -1) >= g.stage) return null;
+    // Kulturhuset (B-336): naboene er fornøyde med verket
+    if (hasNeighbor(g, "kulturhus")) return null;
     const cost = 20_000 * (1 + g.stage) ** 2;
     return {
       id: "naboklage",

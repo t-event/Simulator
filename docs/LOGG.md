@@ -5,6 +5,26 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 264 – 2026-09-29: Byggetid, innkjøring og nabolagsprosjekter hjemme (B-336, B1 og B2)
+
+**Brukeren ba om:** «5. ta begge» – byggetid/innkjøring og nabolagsprosjekter, uten å nekte 3× og 10×.
+
+**Gjort:** `game/building.ts` (tallene, byggetid, innkjøring, nabolaget, når kortet vises). `buyUpgrade` starter store
+kjøp som byggeprosjekt (`g.bigBuild`), `finishBigBuild` setter dem i drift fra `hourlyActions`; `installUpgrade` er den
+gamle installasjonen. Innkjøringen i `plant.ts` (syklustid per ovn, støpefart). Nabolaget: `buildNeighbor`/`finishNeighbor`,
+fordelene i `plant.ts` (trivsel, forespørsler), `engine.ts` (omdømmegulv, sykemeldinger, søkere) og `decisions.ts`
+(naboklagen). Kortet «Byggeprosjekter» på Anlegg (`ui/Neighborhood.tsx`), byggene og tårnkranen i anleggsbildet.
+
+**Testet:** `npm test` (to nye tester: store kjøp ett om gangen, ovnen står, ferdig og innkjøring; nabolaget i
+rekkefølge med alle fordelene og omdømmegulvet), lint, typesjekk, `balance.ts` (exit 0, nivådagene innenfor målene);
+Playwright på de 7 størrelsene (kran i bildet, kortet, «Bygg» starter kulturhuset og lagres, ingen horisontal
+scrolling, knapp 44 px).
+
+**Gjenstår:** eierens ja til å slå på overtakelser (FORSLAG). `balance.ts --storovn 330` ble ikke kjørt på nytt
+(nabolaget er valgfritt og testspilleren bygger det ikke).
+
+---
+
 ## Økt 263 – 2026-09-29: Overtakelser, bygget med bryteren av (B-335, K8)
 
 **Brukeren ba om:** fortsette i rekkefølgen fra B-332.

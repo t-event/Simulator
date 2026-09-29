@@ -140,6 +140,7 @@ frontend/src/
     konsern.ts   Datterverk, byggeprosjekter i ekte tid og flaggskipet (B-209); vises av ui/Konsern.tsx
     konsernWorld.ts Konsernet på serveren speilet: priser, køen, nivåstigen, settleWorld (B-325, B-326; SQL i 064)
     regions.ts   Verdenskartets seks regioner og standardregionen for nye verk (B-333; SQL i 066)
+    building.ts  Byggetid og innkjøring for store kjøp, og nabolaget på storverket (B-336); kortet i ui/Neighborhood.tsx
     control.ts   Utbyttepolitikken, forsvarsfondet og Kontroll: tall og ord appen viser (B-334; SQL i 067)
     world.ts     Felles hendelser i motoren og sesongfordel (B-129)
     environment.ts Utslipp, renseanlegg i trinn, havari og bøter (B-263); panelet står i ui/Upgrades.tsx (CleanerPanel)
@@ -375,6 +376,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `config.world.takeover.enabled` – av til eieren sier ja. Test med bryteren på i en DO-blokk som rulles tilbake (flytt
   `company_owners.from_at` bakover for vernet, `closes_at` bakover for utfallet). Et nytt selskapsbytte må ende eierens
   rad i `company_owners` (`until_at = now()`), ellers regner `pay_company_income` feil eier.
+- **Byggetid hjemme** (B-336): kjøp fra 50 mill. (ikke flytting) installeres ikke i `buyUpgrade`, men i `finishBigBuild`
+  når `g.bigBuild.readyMin` er nådd (fra `hourlyActions`). Tester og kode som kjøper stort utstyr og venter det med én
+  gang, må sette `g.minute = g.bigBuild.readyMin` og kalle `finishBigBuild`. Ny effekt av utstyr legges i
+  `installUpgrade`, ikke i `buyUpgrade`. Innkjøringen (`rampFactor`) ganges inn i syklustiden og støpefarten i `plant.ts`.
 - **Aktivitetskravet** (B-327): `activity_factor(uid, dag)` (064) ganges inn i utbyttet og i gulvet i bidraget. Ny inntekt
   i ekte tid som ikke skal gå til forlatte kontoer, bruker den. Tallene i `config.world.activity`.
 - **Mesterskapet «Konsernledelse»** (B-328) gir lavere administrasjon hjemme (`masteryFactor(g, "datterverk")` i posten

@@ -4,6 +4,7 @@
  * Alt her regnes ut fra spilltilstanden hver gang det trengs, så tilstanden
  * aldri kan komme i utakt med utstyret spilleren faktisk har.
  */
+import { hasNeighbor, rampFactor } from "./building";
 import {
   ADDONS,
   CASTINGS,
@@ -571,6 +572,8 @@ export function computePlantStats(g: GameState): PlantStats {
     if (t.arc && hasResearch(g, "elektrodestyring")) kwh *= 0.95;
     if (t.arc && has(g, "varmegjenvinning")) kwh *= 0.92;
     if (t.arc && hasResearch(g, "skumslagg")) kwh *= 0.94;
+    // Innkjøring etter ombygging (B-336): lavere fart de første døgnene
+    cyc /= rampFactor(g.furnaces[i]?.rampFromDay, day(g));
     const mw = t.fuel === "strøm" ? (t.sizeT * kwh) / (cyc / 60) / 1000 : 0;
     return { furnace: t, sizeT: t.sizeT, cycleMin: cyc, kwhPerT: kwh, furnaceMW: mw };
   };
@@ -599,7 +602,9 @@ export function computePlantStats(g: GameState): PlantStats {
       (hasResearch(g, "kundepleie") ? 0.6 : 0) +
       (hasResearch(g, "eksport") ? 1 : 0) +
       (hasResearch(g, "gronnstal") ? 0.8 : 0) +
-      (has(g, "havn") ? 1.5 : 0)) *
+      (has(g, "havn") ? 1.5 : 0) +
+      // Broen over fjorden (B-336): flere kunder finner fram
+      (hasNeighbor(g, "bro") ? 0.5 : 0)) *
     // Krig i verden (B-297): flere kunder trenger stål
     warFactor(g, "demand");
   // Salgsbonusene legges sammen, men stopper på PRICE_BONUS_MAX (B-305): kundene betaler ikke mer enn markedet tåler
@@ -637,6 +642,8 @@ export function computePlantStats(g: GameState): PlantStats {
   // Strengstøpemaskin nr. 2 dobler kapasiteten, så tre ovner ikke venter på støpingen (B-095)
   const castTph =
     casting.tph *
+    // Innkjøring av en ny støpemaskin (B-336)
+    rampFactor(g.castingRampFromDay, day(g)) *
     (casting.continuous && hasResearch(g, "hoyhastighet") ? 1.15 : 1) *
     (casting.continuous ? (has(g, "streng3") ? 3 : has(g, "streng2") ? 2 : 1) : 1);
   let productPerDay = Math.min(liquidPerDay, castTph * 24) * casting.yield;
@@ -805,7 +812,8 @@ export function bonusGap(g: GameState): number {
 
 /** Normalnivået trivselen driver mot: 60, 70 med ledelse, lavere når det er lenge siden bonus (B-159) */
 export function moraleNormal(g: GameState): number {
-  return (hasResearch(g, "ledelse") ? 70 : 60) - bonusGap(g);
+  // Idrettshallen (B-336) gir bedre trivsel
+  return (hasResearch(g, "ledelse") ? 70 : 60) + (hasNeighbor(g, "idrettshall") ? 5 : 0) - bonusGap(g);
 }
 
 /**

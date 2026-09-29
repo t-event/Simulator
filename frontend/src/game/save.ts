@@ -282,6 +282,8 @@ export function migrate(g: GameState): GameState {
   // Varsel om anbudsresultatet (B-237)
   if (loose.tenderSeen === undefined) loose.tenderSeen = 0;
   if (loose.takeoverSeen === undefined) loose.takeoverSeen = "";
+  if (loose.bigBuild === undefined) loose.bigBuild = null;
+  if (!loose.neighborhood) loose.neighborhood = { built: [], building: null };
   // Beskjed om inntekten fra selskapene (B-258)
   if (loose.companyIncomeSeen === undefined) loose.companyIncomeSeen = {};
   // Utbytte fra datterverkene i ekte tid (B-304)

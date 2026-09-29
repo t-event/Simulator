@@ -82,6 +82,7 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Utbyttepolitikk og forsvarsfond | Ja | Regel 2 og 7: konsernkassa på serveren | B-334 |
 | Kontroll over selskaper, investeringer, fordel i fornyelsesanbudet | Ja | Regel 3 og 7 | B-334 |
 | Overtakelser av strategiske selskaper (bud, forsvar, utfall; bryteren av til den slås på) | Ja | Regel 3 og 7 | B-335 |
+| Byggetid og innkjøring for store kjøp, nabolagsprosjekter hjemme | Nei | Regel 1: eget spill i spilltid | B-336 |
 | Produksjonsmåleren (tonn per ekte dag fra tidslinja) | Ja (bare lagring på nett teller) | Regel 2 | B-188 |
 | Skraplageret: anbud (hvem som har bydd er synlig, beløpene skjult), pilotkonsesjon og inntekt fra andres skrapbruk | Ja | Regel 3 og 7 | B-189, B-210 |
 | Ukens utfordring «dager» i ekte aktive dager, delt plass ved likt | Ja (lista kan leses uten) | Regel 3 | B-190 |

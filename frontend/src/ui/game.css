@@ -6783,3 +6783,24 @@ button.g-prod-row:hover {
 .g-takeover select {
   min-height: 44px;
 }
+
+/* Byggeprosjekter og nabolaget (B-336) */
+.g-build-now,
+.g-build-next {
+  margin: var(--sp-2) 0;
+}
+
+.g-build-next button {
+  min-height: 44px;
+}
+
+.g-build-list {
+  margin: var(--sp-2) 0;
+  padding: 0;
+  list-style: none;
+}
+
+.g-build-list li {
+  padding: 4px 0;
+  font-size: var(--fs-meta);
+}

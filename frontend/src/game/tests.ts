@@ -3,8 +3,12 @@
  * Hver test bygger sin egen tilstand, så de ikke er avhengige av lagrede filer.
  */
 import {
+  buildNeighbor,
   buyMastery,
+  buyUpgrade,
   doResearch,
+  finishBigBuild,
+  finishNeighbor,
   giveBonus,
   hireForWildcards,
   LEADER_COURSE_DAYS,
@@ -116,7 +120,9 @@ import {
   sellScrap,
   spotQuota,
   takeScrap,
+  adjustReputation,
 } from "./engine";
+import { buildDays, hasNeighbor, isBigPurchase, nextNeighbor, rampFactor } from "./building";
 import {
   checkKonsernMilestones,
   kompleksOpen,
@@ -3413,6 +3419,68 @@ test("Overtakelser (B-335): angrep og forsvar som på serveren, med tak", () => 
   assert(near(takeoverDefense(50, 0, 10 * V, V), 90), "tak på fondet");
   // En passiv angriper har halv styrke
   assert(near(takeoverAttack(V, V, 0, 0), 30), "passiv angriper");
+});
+
+test("Byggetid og innkjøring (B-336): store kjøp bygges i spilltid, ett om gangen, og kjøres inn", () => {
+  assert(buildDays(60e6) === 3 && buildDays(220e6) === 4 && buildDays(700e6) === 9 && buildDays(5e9) === 10, "døgnene");
+  assert(rampFactor(undefined, 10) === 1 && rampFactor(10, 10) === 0.7 && rampFactor(10, 15) === 1, "innkjøringen");
+  assert(
+    !isBigPurchase({ kind: "stage", price: 1e9 }) && isBigPurchase({ kind: "addon", price: 5e7 }),
+    "hva som er stort",
+  );
+  const g = newGame(336);
+  g.stage = 4;
+  g.cash = 50e9;
+  g.researched = RESEARCH.map((r) => r.id);
+  g.konsern.unlocked = true;
+  g.won = true;
+  // Kjøp alt det små først (røykgassrensing o.l.), så de store kjøpene åpner seg
+  for (let i = 0; i < 60; i++) {
+    const small = upgradeOptions(g).find((o) => o.available && o.kind !== "stage" && !isBigPurchase(o));
+    if (!small || !buyUpgrade(g, small.id).ok) break;
+  }
+  const big = upgradeOptions(g).filter((o) => o.available && isBigPurchase(o));
+  assert(big.length >= 2, `store kjøp: ${big.length}`);
+  const first = big.find((o) => o.kind === "furnace") ?? big[0];
+  assert(buyUpgrade(g, first.id).ok && g.bigBuild?.id === first.id, "bygget startet");
+  if (first.kind === "furnace") assert(g.furnaces[first.unit ?? 0].downUntilMin >= g.bigBuild!.readyMin, "ovnen står");
+  const second = upgradeOptions(g).find((o) => o.id !== first.id && isBigPurchase(o) && !o.owned)!;
+  assert(!second.available && (second.reason ?? "").includes("ett stort prosjekt om gangen"), "ett om gangen");
+  assert(upgradeOptions(g).find((o) => o.id === first.id)?.building === true, "vises som bygges");
+  // Ikke ferdig før tida er ute
+  assert(!finishBigBuild(g) && g.bigBuild, "for tidlig");
+  g.minute = g.bigBuild!.readyMin;
+  assert(finishBigBuild(g) && g.bigBuild === null, "ferdig");
+  if (first.kind === "furnace") {
+    const f = g.furnaces[first.unit ?? 0];
+    assert(f.type === first.baseId && f.rampFromDay !== undefined && f.downUntilMin <= g.minute, "ovnen i drift");
+  }
+});
+
+test("Nabolaget (B-336): bygges ett om gangen, i rekkefølge, og gir sine fordeler", () => {
+  const g = newGame(3361);
+  g.cash = 50e9;
+  assert(!buildNeighbor(g).ok, "bare på storverket");
+  g.stage = 4;
+  const normal = moraleNormal(g);
+  assert(buildNeighbor(g).ok && g.neighborhood.building?.id === "idrettshall", "første prosjekt");
+  assert(!buildNeighbor(g).ok, "ett om gangen");
+  g.minute = g.neighborhood.building!.readyMin;
+  assert(finishNeighbor(g) && hasNeighbor(g, "idrettshall") && moraleNormal(g) === normal + 5, "idrettshallen");
+  // Resten, så konserthuset
+  for (let i = 0; i < 5; i++) {
+    g.cash = 50e9;
+    assert(buildNeighbor(g).ok, `prosjekt ${i + 2}`);
+    g.minute = g.neighborhood.building!.readyMin;
+    finishNeighbor(g);
+  }
+  assert(nextNeighbor(g) === null && g.neighborhood.built.length === 6, "alt bygget");
+  g.reputation = 72;
+  adjustReputation(g, -20);
+  assert(g.reputation === 70, `gulvet: ${g.reputation}`);
+  g.reputation = 50;
+  adjustReputation(g, -10);
+  assert(g.reputation === 40, "under gulvet fra før");
 });
 
 if (failed) {

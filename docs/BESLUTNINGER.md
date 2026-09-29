@@ -6104,3 +6104,24 @@ Beslutning (migrasjon `068_overtakelser.sql`, `TAKEOVER`/`takeoverAttack`/`takeo
   viser ingenting. Testet hele gangen i en DO-blokk med bryteren på (rullet tilbake): avverget 75,3 mot 94,6 og overtatt
   91,2 mot 54,0, med riktige beløp og eierrader.
 Konto (B-149): krever konto (regel 3 og 7).
+
+## B-336 Byggetid og innkjøring for store kjøp, og nabolagsprosjekter hjemme (spor B1 og B2) (2026-09-29)
+Status: gjelder
+Bakgrunn: steg 5 i B-332 («5. ta begge»): pengene i hovedverket skal gi mer å gjøre og se på, uten nye valutaer og
+uten å nekte 3× og 10× (brukeren fulgte anbefalingen).
+Beslutning (`game/building.ts`, `buyUpgrade`/`finishBigBuild`/`buildNeighbor`/`finishNeighbor` i `game/actions.ts`,
+`ui/Neighborhood.tsx`, kran og bygg i `ui/PlantScene.tsx`):
+- Store kjøp (fra 50 mill., ikke flytting til nytt sted) bygges i spilltid: 2 døgn + 1 per 100 mill., høyst 10
+  (`buildDays`). Pengene trekkes med én gang. Bare ett stort prosjekt om gangen; de andre store kjøpene viser «ett stort
+  prosjekt om gangen». En ovn som bygges om, står til den er ferdig («Ombygging: …»).
+- Innkjøring: en ny ovn eller støpemaskin går 70 % det første døgnet og når full fart etter 5 døgn (`rampFactor`, i
+  syklustiden per ovn og i støpefarten).
+- Nabolaget (storverket): seks store bygg i byen, i rekkefølge, ett om gangen, betalt med pengene hjemme – idrettshall
+  1 mrd. (trivsel +5), kulturhus 2 mrd. (ingen naboklager), bro 3,5 mrd. (flere forespørsler), skole 5 mrd. (flinkere
+  søkere), sykehus 7 mrd. (20 % færre sykemeldinger) og konserthus 9,5 mrd. (omdømmet synker ikke under 70 når det er
+  over). Byggetid 3–8 døgn. Byggene og en tårnkran står i anleggsbildet.
+- Kortet «Byggeprosjekter» på Verket → Anlegg vises først når noe bygges, noe er bygget, eller kassa er halvveis til
+  neste prosjekt (gradvis synlighet, B-180).
+- Alt er spilltid og eget verk (B-323): ingenting teller mellom spillere. Nye felt `g.bigBuild`, `g.neighborhood`,
+  `FurnaceUnit.rampFromDay` og `g.castingRampFromDay` har standardverdier i `migrate()`.
+Konto (B-149): krever ikke konto (regel 1: eget spill).

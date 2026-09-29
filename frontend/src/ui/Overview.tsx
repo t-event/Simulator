@@ -2,6 +2,8 @@ import { useEffect, useState, type ReactNode } from "react";
 import { requestManual, requestReline, setFurnaceGrade, setTargetGrade, upgradeOptions } from "../game/actions";
 import { Maintenance } from "./Maintenance";
 import { ProductionCard } from "./ProductionCard";
+import { BuildCard } from "./Neighborhood";
+import { showBuildCard } from "../game/building";
 import { CalendarCard } from "./CalendarCard";
 import { RecipeCard } from "./Recipe";
 import { auto, automationUnlocked } from "../game/research";
@@ -516,6 +518,12 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
           <div className="g-col">
             <Quality g={g} stats={stats} go={go} right={<StationButton g={g} station="kvalitet" onOpen={setSheet} />} />
           </div>
+          {/* Byggetid og nabolaget (B-336) */}
+          {showBuildCard(g) && (
+            <div className="g-col">
+              <BuildCard g={g} act={act} />
+            </div>
+          )}
         </>
       )}
 
