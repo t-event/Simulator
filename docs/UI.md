@@ -310,8 +310,8 @@ bygges om.
 - **Safari-fellene** (bare `.g-main` scroller, ark i Portal, bredere skrift, B-134/B-137/B-152) gjelder fortsatt; nytt
   skall må testes i WebKit, ikke bare Chromium.
 - **Parallelt med 1B** blir det konflikter i de samme filene. Tiltak: UI-1a først (liten), så 1B med nye komponenter.
-- **Emoji som personlighet:** prestasjoner, titler og hendelser mister noe hvis alt blir strektegninger – derfor
-  beholdes de der.
+- **Emoji som personlighet:** prestasjoner, titler og hendelser mister noe hvis alt blir strektegninger. **Endret (B-237):**
+  ingen emoji i appen; alt er ikoner fra `icons.tsx` (sjekket av `scripts/sjekk-emoji.mjs`).
 - **Ytelse** på eldre telefoner hvis anleggsbildet får mer bevegelse: bare transform/opacity, pause når fanen er skjult,
   redusert bevegelse respekteres.
 

@@ -145,7 +145,7 @@ frontend/src/
     war.ts       Krig i verden, bare i konsernet: dyrere strøm, flere forespørsler, høyst én per år (B-297)
     accidents.ts Eksplosjoner i ovnen og svært sjeldne dødsulykker (B-265)
     trends.ts    Trender i markedet: én kvalitet eller vare ettertraktet eller lite etterspurt i noen døgn (B-255); vises av ui/Trend.tsx
-    reserve.ts   Taket for kassa (100 mrd.) og utbetalingen til eierne (B-303) – taket står her
+    reserve.ts   Taket for kassa (10 mrd., B-306) og utbetalingen til eierne (B-303) – taket står her
     daily.ts     Daglig belønning, dagens oppdrag og mens du var borte (B-149)
     mastery.ts   Mesterskap: forskning som tas om og om igjen etter all forskning (B-150); priset etter verdi (B-237)
     masteryValue.ts Hva neste nivå i mesterskapet gir i kr per døgn (B-237)
@@ -162,7 +162,7 @@ frontend/src/
     daily.ts     Daglig på serveren (status, henting)   features.ts  Hva som krever konto   update.ts  Automatisk oppdatering
     weekly.ts    Ukens utfordring: status, ukelista og ukekista (B-152)
     seasonTrack.ts Sesongstigen: poeng, trinn og henting (B-173)
-    treasury.ts  Konsernkassa på serveren: status og overføring (B-183)
+    treasury.ts  Konsernkassa på serveren: status (overføringen er slått av, B-319)
     world.ts     Strategiske selskaper: status, anbud og bud (B-189)
     scrapIncome.ts Skraplagerets inntekt i ekte tid – speiler SQL-en i 029 (B-188); scrapTests.ts viser at fart ikke hjelper
     guest.ts     Gjestekonto i bakgrunnen: lagrer spillet, overtas av kontoen ved innlogging (B-212)
@@ -341,8 +341,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   spillet én gang per ekte dag (`dividend_from_state` i 051, `pay_dividends` fra `world_tick`) rett inn i konsernkassa.
   `game/dividend.ts` speiler SQL-en (`DIVIDEND` = `config.world.dividend`; grunntallene er en tidel av `profitPerDay`,
   fullt konsern ca. 30 mill. per ekte dag): endres regelen, endres begge, og de faste tallene i testen kjøres mot
-  SQL-en (`select dividend_from_state('{…}')`). Verden går i menneskelig tempo (B-311): innskudd 10 mill. per ekte
-  døgn, gebyr 50 kr/t – alt som teller mellom spillere, skal skaleres sammen, ikke ett tall alene.
+  SQL-en (`select dividend_from_state('{…}')`). Verden går i menneskelig tempo (B-311): gebyr 50 kr/t, innskuddet er
+  erstattet av bidraget (B-318, B-319) – alt som teller mellom spillere, skal skaleres sammen, ikke ett tall alene.
 - **Ett byggeprosjekt om gangen i konsernet** (B-311): `projectBlock(g)` sperrer kjøp, utbygging og modernisering
   mens et prosjekt pågår, også i `konsernOptions` (alle valg med `hours > 0`). Tester som kjøper flere verk, må kalle
   `finishProjects(g)` mellom kjøpene. Verkene i spillet har fortsatt

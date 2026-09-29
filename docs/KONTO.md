@@ -13,8 +13,9 @@ skriv svaret i beslutningen (B-xxx) og legg funksjonen inn i tabellen her. Kreve
    kallenavnet, anbud, auksjoner, venner og klubber.
 4. **Det som belønner virkelig tid, krever konto.** Daglig belønning, dagens oppdrag, «mens du var borte» og alt
    annet som gir noe for dager eller timer i virkeligheten. Klokka på mobilen kan stilles, så serveren må telle.
-5. **Ventetid (fase 4) krever ikke konto.** Med konto kommer tida fra serveren. Uten konto brukes klokka på mobilen.
-   Da kan man bare jukse i sitt eget spill, og det er ikke med i konkurransen (PLAN-NETT, fase 4).
+5. **Ventetid (fase 4) krever ikke konto.** Med konto kommer tida fra serveren, og lagringen sjekkes mot serverens
+   klokke (B-314). Uten konto brukes klokka på mobilen. Da kan man bare jukse i sitt eget spill, og det er ikke med i
+   konkurransen.
 6. **Uten konto skjules ikke funksjonen** – når spilleren har kommet dit den hører hjemme. Da vises den med en kort
    forklaring om at den krever konto, og en knapp for å logge inn. Før det vises den ikke i det hele tatt, verken for
    spillere med eller uten konto (gradvis synlighet, B-180). Kontoen er frivillig, men det skal være tydelig hva man
@@ -47,7 +48,7 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Mesterskap (forskning som tas om og om igjen) | Nei | Regel 1 | B-150 |
 | Stålmilepæler og titler i spillet | Nei | Regel 1 | B-150 |
 | Tittel ved kallenavnet på topplista | Ja | Regel 3 | B-150 |
-| Prestasjoner (merker på Verket) | Nei | Regel 1 | B-151 |
+| Prestasjoner (merker under Mål) | Nei | Regel 1 | B-151 |
 | Pynt i anleggsbildet (for fagpoeng) | Nei | Regel 1, gir ingen fordel | B-151 |
 | Merker eller pynt vist for andre spillere (senere) | Ja | Regel 3 | B-151 |
 | Fortsett i samme fart etter et hendelseskort | Nei | Regel 1 | B-160 |

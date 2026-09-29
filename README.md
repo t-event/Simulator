@@ -50,10 +50,14 @@ noe å gå til. Stormodeller av ovner opp til en likestrømsovn på 420 tonn åp
 
 - **Konto** (e-post og passord) lagrer spillet på nett, så du kan fortsette på en annen mobil eller i en annen
   nettleser. Bytter du mellom to nettlesere, henter spillet det nyeste.
-- **Topplista** (🏆 øverst) viser konsernverdi, mest penger på bok, raskest til storverk, raskest til 10 mrd. og
-  omdømme – for sesongen som pågår og for alle tider. Den oppdaterer seg mens du spiller.
-- **Sesonger** varer et halvt år. Alle spill med konto er med i sesongen som pågår, og neste sesong starter av seg selv
-  (B-166, B-167). Sesongene skal revurderes mot langsiktige æraer (B-180).
+- **Topplista** (pokalen øverst) viser konsernverdi (regnet av serveren i ekte tid, B-320), verdi i spillet, raskest
+  til storverk, raskest til 10 mrd., kontrollrommet og utbetalt til eierne – for sesongen som pågår og i Hall of Fame.
+  Den oppdaterer seg mens du spiller.
+- **Sesonger** har ingen fast sluttdato: en sesong varer til den avsluttes, og en ny startes for hånd (B-221). Alle spill
+  med konto er med i sesongen som pågår. Sesongene skal revurderes mot langsiktige æraer (B-180).
+- **Konsernet i verden:** konsernkassa ligger på serveren og fylles i ekte tid av bidraget fra hovedverket, utbyttet
+  fra datterverkene og selskapene du eier (B-304, B-318). Under Konsern → Industrien kan du by på selskaper rundt
+  verkene, som skraplageret (B-189).
 - **Felles hendelser** (skrapmangel, strømkrise, eksportboom …) treffer alle spillerne samtidig.
 - **Hver dag:** en daglig belønning som vokser gjennom uka (hopper du over en dag, starter den på nytt), tre av dagens
   oppdrag med en bonus, og verket tjener litt mens du er borte. Dette krever konto, fordi serveren teller dagene.
@@ -100,6 +104,8 @@ de beskriver ikke noe bestemt anlegg.
 - `docs/PLAN-NETT.md` – konto, lagring på nett, toppliste, sesonger og konkurranse
 - `docs/FORSLAG.md` – åpne spørsmål og forslag til videre utvikling
 - `docs/KONTO.md` – hva som krever konto, og reglene for nye funksjoner
+- `docs/UI.md` – designsystemet og oppsettet for mobil og PC (B-187)
+- `docs/OKONOMI.md` og `docs/KONSERNBIDRAG.md` – økonomianalysene bak reform 2 og konsernbidraget (B-301, B-313)
 
 ## Arkitektur
 
