@@ -5,7 +5,9 @@
 -- i save_backups (reform2-tak) og for alltid i economy_reform_log.old_state. serverEdit + 1 og device = 'server' (B-211),
 -- så eldre kopier avvises og appen henter serverens spill. Merket «Reformveteran II» til dem som ble truffet.
 -- Rekorden «Utbetalt til eierne» følger av triggeren note_paid_out. Kjørt ETTER at appen med det nye taket var
--- publisert. Tørrkjørt først med `raise exception` (ti spillere, 564 mrd. flyttet, seks nye merker).
+-- publisert (01:14 UTC). Tørrkjørt først med `raise exception` (ti spillere, 564 mrd. flyttet, seks nye merker). Da den
+-- ble kjørt, hadde to av de ti alt fått den nye appen, som betalte ut selv – åtte ble justert her, og den ene av de to
+-- fikk merket for hånd i `badges` etterpå.
 
 do $$
 declare

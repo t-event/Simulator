@@ -5531,7 +5531,9 @@ Beslutning:
   «Reformveteran II» (`badges`) til alle som ble truffet og ikke hadde det. Rekorden «Utbetalt til eierne» følger av
   triggeren `note_paid_out`. Verk, forskning, fagpoeng, titler (`legends` går aldri ned), lån og konsernkassa er urørt.
   Tørrkjøringen: ti spillere, 100 → 10 (×4), 92 → 10, 50 → 10, 42 → 10, 42 → 10, 25 → 10, 13 → 10; 564 mrd. ført som
-  utbetalt; seks nye merker.
+  utbetalt; seks nye merker. Kjørt 01:14 UTC, etter publiseringen: åtte spillere ble justert av serveren; to (den med
+  100 og den med 92 mrd.) hadde alt fått den nye appen, som betalte ut selv før serveren rakk det – den ene av dem fikk
+  merket for hånd (`badges`), siden reformen traff ham like fullt.
 - **«Mest penger på bok» er tatt bort** fra topplista (appen; serveren kan fortsatt regne `kasse`): med et tak sa den
   ingenting, og Hall of Fame-tallene der var fra før reform 1 (8 286 / 3 663 / 1 562 mrd.). «Utbetalt til eierne» tar over.
 - Rekkefølge: appen publiseres først (nytt tak), så kjøres serverendringen – ellers ville en eldre app fylt kassa opp
@@ -5558,3 +5560,27 @@ Beslutning:
 Konto (B-149): nei – regel 1, eget spill.
 Testet: tsc, lint, `npm test` (ny del av B-209-testen: salgssummen er 60 % av byggekostnaden som modernisert, lavere enn
 kjøpsprisen og verdien, upåvirket av bonusene, og salget gir riktig sum), balanse (exit 0).
+
+## B-308 Reform 2, del 5: markedet metter seg fra 3 000 t, og administrasjonen dobles (2026-09-29)
+Status: gjelder (justerer B-305; eieren: «Jeg tjener jo fortsatt i snitt over 100 millioner per dag. Er ikke det drøyt
+mye?»)
+Bakgrunn: etter B-305 tjente det største hjemmeverket ca. 95 mill. per spilldøgn (30 500 t: salg 240, kostnader 150
+mill.; 3 100 kr/t). Ved full pris er marginen 7 000 kr/t (12 400 − 4 650 med kvalitetspremie og bonuser), mot ca.
+4 000 kr/t på et nytt storverk – toppen tjener mer per tonn enn de små, ikke mindre. Det som må gi etter, er prisen på
+store volumer: ingen regional kunde tar unna 30 000 t i døgnet til full pris.
+Beslutning:
+- **Markedet metter seg fra 3 000 t** i døgnet (`MARKET_SATURATION.fromT`, før 10 000): tonnene over gir 45 % av
+  prisen (`overShare`, før 50 %), og over 20 000 t 40 % som før. Faktoren: 8 700 t 0,64, 13 300 t 0,57, 30 000 t 0,505.
+  Tonnene over grensen dekker fortsatt de variable kostnadene (45 % × 12 400 = 5 580 kr/t mot ca. 5 150), så det
+  lønner seg å produsere – bare lite per tonn. Et nytt storverk (700 t) og 3 × 90 t (2 600 t) merker ingenting.
+- **Administrasjonen dobles** til 500 kr per tonn døgnkapasitet over 5 000 t (`ADMIN_PER_CAP_T`): 30 000 t betaler
+  12,5 mill. per døgn.
+- Regnet med toppspillerens egne tall per tonn (salg 12 400 før metning, kostnader 4 650): 2 600 t 20 mill., 8 700 t
+  27, 13 300 t 29, 22 500 t 31, 30 000 t 36 mill. per døgn (1 200 kr/t). Større verk er fortsatt litt bedre, men
+  markedet er grensen – veksten skal komme fra konsernet og utbyttet i ekte tid. Toppen går fra ca. 95 til ca. 36.
+- Testspilleren (`--storovn --storovn-base`, samme utgangspunkt, underbemannede varianter): 8 690 t 23,2 → 6,8 mill.,
+  13 300 t 32,6 → 13,7, 22 500 t 14,2 → −6,2 per døgn. Et stort verk som drives dårlig, taper penger – det er meningen;
+  et som drives som toppspillerne, tjener 30–36 mill. Nivåmålene i `balance.ts` står.
+Konto (B-149): nei – regel 1, eget spill.
+Testet: tsc, lint, `npm test` (metningstesten: 1 til 3 000 t, 0,615 ved 10 000, 0,5325 ved 20 000, 0,476 ved 35 000;
+administrasjonen 13 mill. på 31 000 t), balanse (exit 0), `--storovn` før/etter.

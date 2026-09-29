@@ -2379,12 +2379,14 @@ test("Ovnene fordeles etter hva som haster (B-240): alle lager kvaliteten som el
   );
 });
 
-test("Markedet metter seg (B-252, B-305): full pris opp til 10 000 t i døgnet, lavere snittpris over, enda lavere over 20 000", () => {
-  assert(marketSaturation(733) === 1 && marketSaturation(10_000) === 1, "små verk får lavere pris");
-  assert(Math.abs(marketSaturation(20_000) - 0.75) < 1e-9, `faktor ${marketSaturation(20_000)} for 20 000 t`);
+test("Markedet metter seg (B-252, B-305, B-308): full pris opp til 3 000 t i døgnet, lavere snittpris over, enda lavere over 20 000", () => {
+  assert(marketSaturation(733) === 1 && marketSaturation(3_000) === 1, "små verk får lavere pris");
+  // (3 000 + 7 000 × 0,45) / 10 000 = 0,615; (3 000 + 17 000 × 0,45) / 20 000 = 0,5325
+  assert(Math.abs(marketSaturation(10_000) - 0.615) < 1e-9, `faktor ${marketSaturation(10_000)} for 10 000 t`);
+  assert(Math.abs(marketSaturation(20_000) - 0.5325) < 1e-9, `faktor ${marketSaturation(20_000)} for 20 000 t`);
   const big = marketSaturation(34_721);
-  // (10 000 + 10 000 × 0,5 + 14 721 × 0,4) / 34 721 = 0,602
-  assert(big > 0.59 && big < 0.61, `faktor ${big} for 35 000 t i døgnet`);
+  // (3 000 + 17 000 × 0,45 + 14 721 × 0,4) / 34 721 = 0,476
+  assert(big > 0.47 && big < 0.485, `faktor ${big} for 35 000 t i døgnet`);
   // Mer produksjon gir fortsatt mer omsetning totalt, bare mindre per tonn
   assert(34_721 * big > 20_000 * marketSaturation(20_000), "mer produksjon gir mindre omsetning");
   assert(marketSaturation(20_000) > big, "prisen faller ikke med mengden");
@@ -2405,10 +2407,10 @@ test("Toppen av hjemmeverket (B-305): salgsbonusene stopper på +25 %, og admini
     `administrasjon på et nytt storverk: ${adminPerDay(st)}`,
   );
   assert(adminPerDay({ stage: STAGES[3], dailyProductT: 20_000 }) === 0, "administrasjon før storverket");
-  assert(adminPerDay({ stage: STAGES[4], dailyProductT: 31_000 }) === 6_500_000, "6,5 mill. på 31 000 t");
+  assert(adminPerDay({ stage: STAGES[4], dailyProductT: 31_000 }) === 13_000_000, "13 mill. på 31 000 t");
   assert(
     Math.abs(adminPerDay({ stage: STAGES[4], dailyProductT: 8_300 }) - ADMIN_PER_CAP_T * 3_300) < 1e-6,
-    "0,8 mill. på 8 300 t",
+    "1,65 mill. på 8 300 t",
   );
   // Stormodellene har dyrere forbruk (elektroder, ildfast, legeringer) enn 90-tonneren
   const cons = (id: string) => FURNACES.find((f) => f.id === id)!.consumablesPerT;

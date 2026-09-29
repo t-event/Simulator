@@ -752,18 +752,19 @@ export function gradeFailures(a: Analysis, grade: GradeId): string[] {
 }
 
 /**
- * Markedet metter seg (B-252): kundene tar unna ca. 10 000 t i døgnet til full pris. Lager verket mer, får tonnene over
- * grensen bare `overShare` av prisen, og over `farT` bare `farShare` (B-305), så snittprisen på nye kontrakter og
- * rammeavtaler faller. Bare de største ovnene helt på slutten kommer over grensen (et storverk starter på ca. 700 t i
- * døgnet).
+ * Markedet metter seg (B-252, B-308): kundene tar unna ca. 3 000 t i døgnet til full pris – et stort storverk. Lager
+ * verket mer, får tonnene over grensen bare `overShare` av prisen, og over `farT` bare `farShare` (B-305), så
+ * snittprisen på nye kontrakter og rammeavtaler faller. Et nytt storverk (ca. 700 t i døgnet) merker ingenting.
+ * Tonnene over grensen dekker fortsatt de variable kostnadene (skrap, strøm, forbruk, administrasjon), så det lønner
+ * seg å produsere – bare mye mindre per tonn.
  */
-export const MARKET_SATURATION = { fromT: 10_000, overShare: 0.5, farT: 20_000, farShare: 0.4 };
+export const MARKET_SATURATION = { fromT: 3_000, overShare: 0.45, farT: 20_000, farShare: 0.4 };
 
 /** Salgsbonusene til sammen kan høyst gi så mye mer enn listeprisen (B-305) */
 export const PRICE_BONUS_MAX = 0.25;
 
-/** Administrasjon på storverket (B-305): kr per tonn døgnkapasitet over `ADMIN_FREE_T` – et stort verk koster å styre */
-export const ADMIN_PER_CAP_T = 250;
+/** Administrasjon på storverket (B-305, B-308): kr per tonn døgnkapasitet over `ADMIN_FREE_T` – et stort verk koster å styre */
+export const ADMIN_PER_CAP_T = 500;
 export const ADMIN_FREE_T = 5_000;
 
 /** Gangefaktor for prisen på nye kontrakter når verket lager så mange tonn i døgnet (1 = full pris) */
