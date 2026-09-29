@@ -273,6 +273,9 @@ export interface SisterPlant {
   moved?: boolean;
 }
 
+/** Utbyttepolitikken (B-334): hvor mye datterverkene holder igjen – 30, 50 eller 70 % */
+export type PolicyId = "ut" | "balansert" | "forsvar";
+
 /** Regionene i den oppdiktede verdenen (B-331, B-333); navnene står i `game/regions.ts` */
 export type RegionId = "nord" | "jern" | "ost" | "sor" | "vest" | "oy";
 
@@ -649,6 +652,11 @@ export interface GameState {
      * Bare til knappene og rådene; null uten konto
      */
     treasury: { balance: number; perDay: number } | null;
+    /**
+     * Utbyttepolitikken og forsvarsfondet (B-334), fra serveren: valget, når det sist ble endret (ekte tid, ms) og
+     * fondet. Mangler uten konto og i eldre lagringer
+     */
+    policy?: { kind: PolicyId; changedAt: number | null; fund: number };
   };
   /** Mesterskap (B-150): nivå per prosjekt */
   mastery: Partial<Record<MasteryId, number>>;

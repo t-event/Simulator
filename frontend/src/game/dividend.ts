@@ -96,6 +96,19 @@ export function afterEmpireLoad(net: number): number {
   return loadFrom * (net / loadFrom) ** loadPower;
 }
 
+/**
+ * Utbyttet til konsernkassa når verkene holder igjen en annen andel enn 30 % (utbyttepolitikken, B-334; speiler
+ * `dividend_to_treasury` i 067): fullt utbytte tilbake til før imperiebelastningen, skalert med (1 − andel) / 0,7, og
+ * belastningen på nytt. Det kassa får mindre, går til forsvarsfondet.
+ */
+export function dividendToTreasury(full: number, keep: number): number {
+  const { loadFrom, loadPower, keep: baseKeep } = DIVIDEND;
+  if (!(full > 0)) return 0;
+  if (keep <= baseKeep) return full;
+  const raw = full > loadFrom && loadFrom > 0 ? loadFrom * (full / loadFrom) ** (1 / loadPower) : full;
+  return afterEmpireLoad((raw * (1 - keep)) / (1 - baseKeep));
+}
+
 /** Det hvert verk gir før imperiebelastningen, i samme rekkefølge som `plants` */
 export function dividendParts(input: DividendInput): number[] {
   const profits = input.plants.map((p) => plantProfit(p, input));

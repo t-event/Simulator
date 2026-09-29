@@ -14,7 +14,7 @@
  * Ingen import av motoren, så fila kan brukes av tester og av testspilleren uten sirkler.
  */
 import { defaultRegion, isRegion } from "./regions";
-import type { KonsernOrder, RegionId, SisterPlant, SisterProject, SisterType } from "./types";
+import type { KonsernOrder, PolicyId, RegionId, SisterPlant, SisterProject, SisterType } from "./types";
 
 export const WORLD_KONSERN = {
   price: { stalverk: 20_000_000, storverk: 80_000_000, kompleks: 250_000_000 } as Record<SisterType, number>,
@@ -146,6 +146,8 @@ export interface KonsernWorld {
   floor: number;
   /** Konsernkassa */
   balance: number;
+  /** Utbyttepolitikken og forsvarsfondet (B-334), når serveren sender dem */
+  policy?: { kind: PolicyId; changedAt: number | null; fund: number };
 }
 
 export type OrderRequest =
@@ -167,6 +169,7 @@ export type OrderRefusal =
   | "konsern"
   | "startet"
   | "flyttet"
+  | "uke"
   | "nett";
 
 /** Forklaringen på et nei, med vanlige ord */
@@ -183,6 +186,7 @@ export const ORDER_REFUSAL_TEXT: Record<OrderRefusal, string> = {
   konsern: "Konsernet er ikke åpnet ennå.",
   startet: "Bare det siste i køen kan avbestilles, før det har startet.",
   flyttet: "Hvert verk kan flyttes én gang, og dette er alt flyttet.",
+  uke: "Utbyttepolitikken kan endres én gang per uke.",
   nett: "Fikk ikke kontakt med serveren. Prøv igjen om litt.",
 };
 

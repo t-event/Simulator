@@ -19,6 +19,7 @@ import {
   upgradeOptions,
 } from "./actions";
 import { MASTERY, MASTERY_IDS, masteryCost, masteryEffect, masteryOpen } from "./mastery";
+import { controlAdvice, controlWord, policyLockedUntil, policySplit, renewalBonus } from "./control";
 import {
   ACHIEVEMENT_BY_ID,
   ACHIEVEMENTS,
@@ -172,7 +173,7 @@ import {
 } from "./plant";
 import { RESEARCH, researchOptions } from "./research";
 import { parseSave } from "./save";
-import { afterEmpireLoad, DIVIDEND, dividendParts, dividendPerDay } from "./dividend";
+import { afterEmpireLoad, DIVIDEND, dividendParts, dividendPerDay, dividendToTreasury } from "./dividend";
 import { ANY_CARD_REAL_MS, makeDecision, maybeCreateDecision, resolveDecision, SAME_CARD_REAL_MS } from "./decisions";
 import { landmarkContract, landmarkHour } from "./landmarks";
 import {
@@ -3363,6 +3364,32 @@ test("Verdenskartet (B-333): nye verk står der spilleren har færrest, kan velg
   const queued = g.konsern.orders.at(-1)!.plantId;
   assert(localMove(g, queued, "ost").ok && localMove(g, queued, "sor").ok, "flytt i køen");
   assert(g.konsern.orders.at(-1)!.region === "sor", "regionen i køen");
+});
+
+test("Utbyttepolitikken og Kontroll (B-334): samme tall som serveren, fondet er det kassa får mindre", () => {
+  // Faste tall fra dividend_to_treasury i 067 (kjørt mot databasen)
+  const near = (a: number, b: number) => Math.abs(a - b) <= 1;
+  assert(dividendToTreasury(37e6, 0.3) === 37e6, "30 % endrer ingenting");
+  assert(near(dividendToTreasury(37e6, 0.5), 31_270_707), `50 %: ${dividendToTreasury(37e6, 0.5)}`);
+  assert(near(dividendToTreasury(37e6, 0.7), 24_222_186), `70 %: ${dividendToTreasury(37e6, 0.7)}`);
+  assert(near(dividendToTreasury(8e6, 0.5), 5_714_286), `under belastningen: ${dividendToTreasury(8e6, 0.5)}`);
+  const s = policySplit(37e6, "forsvar");
+  assert(near(s.kasse + s.fond, 37e6) && s.fond > s.kasse * 0.4, "fondet er det kassa får mindre");
+  assert(policySplit(37e6, "ut").fond === 0, "ta ut gir ikke fond");
+  // Ordene og fordelen i fornyelsesanbudet
+  assert(controlWord(80).word === "Sterk" && controlWord(79).word === "Stabil", "sterk/stabil");
+  assert(controlWord(40).word === "Presset" && controlWord(39).word === "Svak", "presset/svak");
+  assert(renewalBonus(53) === 0.106 && renewalBonus(100) === 0.2 && renewalBonus(150) === 0.2, "fordelen");
+  // Rådet peker på delen som mangler mest (investering, 25 poeng)
+  assert(
+    controlAdvice({ eier: 30, aktivitet: 20, investering: 0, region: 2.5, eiertid: 0, fond: 0 }) ===
+      "Invester i selskapet.",
+    "rådet",
+  );
+  // Valget kan endres én gang per uke
+  const now = Date.now();
+  assert(policyLockedUntil(null, now) === null && policyLockedUntil(now - 8 * 86_400_000, now) === null, "fritt");
+  assert(policyLockedUntil(now - 86_400_000, now) === now + 6 * 86_400_000, "låst i en uke");
 });
 
 if (failed) {

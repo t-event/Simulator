@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 262 – 2026-09-29: Utbyttepolitikk, forsvarsfond, Kontroll og investeringer (B-334, K6 og K7)
+
+**Brukeren ba om:** fortsette i rekkefølgen fra B-332 (etter kartet).
+
+**Gjort:** `067_kontroll.sql` (politikk og fond i `konsern`, `dividend_to_treasury`, `company_value`, `company_control`,
+`control_bonus`, `konsern_policy`, `company_invest`, investeringsbonus i `pay_company_income`, eierens fordel i
+`resolve_tenders`, `world_status` med Kontroll og fullt utbytte). App: `game/control.ts`, `dividendToTreasury`,
+politikk og fond i `net/konsern.ts`, Kontroll og investering i `net/world.ts`, Kontroll-delen, investeringen og
+utbyttepolitikken på Industrien (`ui/Companies.tsx`). Konsernverdien bruker fortsatt hele utbyttet.
+
+**Testet:** `npm test` (nye tester med de faste tallene fra SQL-en), lint, typesjekk; SQL som spiller i DO-blokker som
+rulles tilbake; Playwright med falsk server på 320, 390 og 1 366 px (velg politikk → låst i en uke, invester 450 mill.,
+ingen horisontal scrolling, knapper ≥ 44 px).
+
+**Gjenstår:** K8 overtakelser (bryter av), så byggetid og nabolagsprosjekter hjemme.
+
+---
+
 ## Økt 261 – 2026-09-29: Svarene på forslaget (B-332) og verdenskartet (B-333, K5)
 
 **Brukeren ba om:** svar på spørsmålene i KONTROLL-FORSLAG: 1 ja (bare selskaper kan overtas), 2 72 timer holder i

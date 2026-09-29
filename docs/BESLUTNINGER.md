@@ -6055,3 +6055,29 @@ Beslutning (migrasjon `066_verdenskartet.sql`, `game/regions.ts`, `net/worldMap.
 - Speilet: `game/regions.ts` (navn, standardregion) og `konsernWorld.ts` (`placeOrder` med region, `movePlant`).
 Konto (B-149): krever konto – kartet viser andre spillere (regel 3). Står i `ACCOUNT_FEATURES` som «Verdenskartet»;
 uten konto vises `AccountFeaturesCard`.
+
+## B-334 Utbyttepolitikk, forsvarsfond, Kontroll og investeringer (K6 og K7) (2026-09-29)
+Status: gjelder
+Bakgrunn: steg 2 og 3 i B-331/B-332. De som er ferdige med konsernet, samler 60–80 mill. per ekte dag uten noe å bruke
+dem på; Kontroll skal gjøre det lønnsomt å passe på selskapene sine, og gi fordel når konsesjonen fornyes.
+Beslutning (migrasjon `067_kontroll.sql`, `game/control.ts`, `dividendToTreasury` i `dividend.ts`, `ui/Companies.tsx`):
+- **Utbyttepolitikk:** Ta ut (30 % igjen i verkene, som før), Balansert (50 %) eller Bygg forsvar (70 %). Det som holdes
+  igjen utover 30 %, går til **forsvarsfondet** (`konsern.fund`), etter samme imperiebelastning – fondet er akkurat det
+  kassa får mindre (37 mill. fullt utbytte gir 31,3 mill. til kassa ved Balansert og 24,2 mill. ved Bygg forsvar).
+  Valget endres én gang per ekte uke (`konsern_policy`). `dividends.to_fund` viser hva som gikk til fondet.
+- **Fondet** kan bare brukes til investeringer i egne selskaper (og forsvar mot overtakelser, K8) – aldri til nye verk,
+  angrep eller hovedverket (B-323). Konsernverdien på topplista regnes fortsatt med hele utbyttet (`fullPerDay`).
+- **Kontroll** per selskap for eieren (`company_control`), 0–100 og som ord (sterk ≥ 80, stabil ≥ 60, presset ≥ 40, svak):
+  eier 30, aktivitet 0–20 (`activity_factor`), investeringer 0–25 (1 − e^(−investert/verdi)), egne verk i regionen 2,5
+  hver (høyst 10), eiertid 1 per uke (høyst 10), fondet 0–10, −5 per selskap utover det første. Verdien er 30 dagers
+  inntekt, men minst forrige vinnerbud (skraplageret i dag ca. 443 mill.; eieren har Kontroll 53, «presset»).
+- **Investeringer** (`company_invest`, minst 1 mill., fra kassa eller fondet) blir i selskapet, gir Kontroll og inntil
+  +25 % inntekt (samme kurve, i `pay_company_income`), og følger selskapet til neste eier.
+- **Fornyelsesanbudet** (B-332): den sittende eierens bud teller Kontroll × 0,2 % mer, inntil 20 % (`resolve_tenders`);
+  beløpet som betales, er budet.
+- Vises: Kontrollen (ordet) på alle selskapskort; delene, rådet og investeringen bare for eieren. Utbyttepolitikken står
+  ved konsernkassa på Industrien, og bare når den betyr noe (du eier et selskap, har et fond eller har valgt noe annet
+  enn Ta ut – gradvis synlighet).
+- Testet som spiller i DO-blokker som rulles tilbake (Kontroll 53 → 68 etter 450 mill., avvisninger, uke-sperren,
+  ikke-eier), og de faste tallene for splitten i `game/tests.ts`.
+Konto (B-149): krever konto – konsernkassa og selskapene er på serveren (regel 2, 3 og 7).

@@ -140,6 +140,7 @@ frontend/src/
     konsern.ts   Datterverk, byggeprosjekter i ekte tid og flaggskipet (B-209); vises av ui/Konsern.tsx
     konsernWorld.ts Konsernet på serveren speilet: priser, køen, nivåstigen, settleWorld (B-325, B-326; SQL i 064)
     regions.ts   Verdenskartets seks regioner og standardregionen for nye verk (B-333; SQL i 066)
+    control.ts   Utbyttepolitikken, forsvarsfondet og Kontroll: tall og ord appen viser (B-334; SQL i 067)
     world.ts     Felles hendelser i motoren og sesongfordel (B-129)
     environment.ts Utslipp, renseanlegg i trinn, havari og bøter (B-263); panelet står i ui/Upgrades.tsx (CleanerPanel)
     calendar.ts  Året i spillet (360 døgn, dag 1 = 1. april), vinter 15.11.–14.3. og frost (B-265, B-272), fellesferie (B-298);
@@ -364,6 +365,11 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Regionene** (B-333): verkene har `region` (og `moved` etter én flytt), bestillinger av nye verk har `region`.
   Regionlista står i `konsern_regions()` og `game/regions.ts` – endres den, endres begge (og kartformene i
   `ui/WorldMap.tsx`). `konsern_order` har fått `p_region`; endres signaturen igjen, `drop function` den gamle først.
+- **Utbyttepolitikk og Kontroll** (B-334, 067): `pay_dividends` betaler `dividend_to_treasury(fullt, policy_keep)` til
+  kassa og resten til `konsern.fund`; `dividendToTreasury` i `dividend.ts` speiler den (faste tall i testen).
+  `world_status.dividend.per_day` er etter politikken, `full_per_day` før – konsernverdien bruker det fulle. Kontrollen
+  regnes av `company_control` hver gang (ikke lagret); investeringer står i `companies.invested` og følger selskapet.
+  Tallene i `config.world.control` og `config.world.policy`. Fondet skal aldri kunne brukes til nye verk eller angrep.
 - **Aktivitetskravet** (B-327): `activity_factor(uid, dag)` (064) ganges inn i utbyttet og i gulvet i bidraget. Ny inntekt
   i ekte tid som ikke skal gå til forlatte kontoer, bruker den. Tallene i `config.world.activity`.
 - **Mesterskapet «Konsernledelse»** (B-328) gir lavere administrasjon hjemme (`masteryFactor(g, "datterverk")` i posten
