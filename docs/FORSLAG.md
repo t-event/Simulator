@@ -27,8 +27,9 @@ til «Avgjort» nederst).
   `delete from auth.users where is_anonymous and created_at < now() - interval '60 days'` (spillene følger med).
 
 - ~~Bunden konsernreserve (B-193)~~ **Avgjort (B-303):** avviklet og ført som «utbetalt til eierne»; taket står.
-- **Veksten på toppen (B-238):** løses av reform 2 (B-302, `docs/OKONOMI.md`): taket for kassa (B-303, gjort), utbytte i
-  ekte tid til konsernkassa (B-304, gjort) og realistiske kostnader på toppen (B-305).
+- ~~Veksten på toppen (B-238)~~ **Avgjort (reform 2, B-302):** taket for kassa (B-303), utbytte i ekte tid til
+  konsernkassa (B-304) og realistiske kostnader på toppen (B-305) er bygget. Gebyret på skraplageret (500 kr/t) settes
+  etter anbudet.
 
 - **Vern mot lekkede passord:** brukeren sa det var skrudd på, men sikkerhetsrådene i Supabase melder det fortsatt av
   (2026-09-26, økt 108). Sjekk under Authentication → «Leaked password protection» at det er lagret.

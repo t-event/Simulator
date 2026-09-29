@@ -602,17 +602,20 @@ export function computePlantStats(g: GameState): PlantStats {
       (has(g, "havn") ? 1.5 : 0)) *
     // Krig i verden (B-297): flere kunder trenger stål
     warFactor(g, "demand");
-  const priceBonus =
+  // Salgsbonusene legges sammen, men stopper på PRICE_BONUS_MAX (B-305): kundene betaler ikke mer enn markedet tåler
+  const priceBonus = Math.min(
+    PRICE_BONUS_MAX,
     (has(g, "salgskontor") ? 0.03 : 0) +
-    Math.min(4, sellers) * 0.02 +
-    g.reputation * 0.0008 +
-    (hasResearch(g, "kundepleie") ? 0.02 : 0) +
-    (hasResearch(g, "eksport") ? 0.03 : 0) +
-    (hasResearch(g, "produktutvikling") ? 0.04 : 0) +
-    (g.konsern?.shared.includes("salg") ? 0.03 : 0) +
-    (hasResearch(g, "gronnstal") ? 0.05 : 0) +
-    (has(g, "havn") ? 0.02 : 0) +
-    (has(g, "vakuum") ? 0.05 : 0);
+      Math.min(4, sellers) * 0.02 +
+      g.reputation * 0.0008 +
+      (hasResearch(g, "kundepleie") ? 0.02 : 0) +
+      (hasResearch(g, "eksport") ? 0.03 : 0) +
+      (hasResearch(g, "produktutvikling") ? 0.04 : 0) +
+      (g.konsern?.shared.includes("salg") ? 0.03 : 0) +
+      (hasResearch(g, "gronnstal") ? 0.05 : 0) +
+      (has(g, "havn") ? 0.02 : 0) +
+      (has(g, "vakuum") ? 0.05 : 0),
+  );
 
   const storeMult = has(g, "lager") ? 2 : 1;
   const yardUsed = Object.values(g.scrap).reduce((a, s) => a + s.t, 0);
@@ -750,16 +753,31 @@ export function gradeFailures(a: Analysis, grade: GradeId): string[] {
 
 /**
  * Markedet metter seg (B-252): kundene tar unna ca. 10 000 t i døgnet til full pris. Lager verket mer, får tonnene over
- * grensen bare `overShare` av prisen, så snittprisen på nye kontrakter og rammeavtaler faller. Bare de største ovnene
- * helt på slutten kommer over grensen (et storverk starter på ca. 700 t i døgnet).
+ * grensen bare `overShare` av prisen, og over `farT` bare `farShare` (B-305), så snittprisen på nye kontrakter og
+ * rammeavtaler faller. Bare de største ovnene helt på slutten kommer over grensen (et storverk starter på ca. 700 t i
+ * døgnet).
  */
-export const MARKET_SATURATION = { fromT: 10_000, overShare: 0.5 };
+export const MARKET_SATURATION = { fromT: 10_000, overShare: 0.5, farT: 20_000, farShare: 0.4 };
+
+/** Salgsbonusene til sammen kan høyst gi så mye mer enn listeprisen (B-305) */
+export const PRICE_BONUS_MAX = 0.25;
+
+/** Administrasjon på storverket (B-305): kr per tonn døgnkapasitet over `ADMIN_FREE_T` – et stort verk koster å styre */
+export const ADMIN_PER_CAP_T = 250;
+export const ADMIN_FREE_T = 5_000;
 
 /** Gangefaktor for prisen på nye kontrakter når verket lager så mange tonn i døgnet (1 = full pris) */
 export function marketSaturation(dailyT: number): number {
-  const { fromT, overShare } = MARKET_SATURATION;
+  const { fromT, overShare, farT, farShare } = MARKET_SATURATION;
   if (!(dailyT > fromT)) return 1;
-  return (fromT + (dailyT - fromT) * overShare) / dailyT;
+  const mid = Math.min(dailyT, farT) - fromT;
+  const far = Math.max(0, dailyT - farT);
+  return (fromT + mid * overShare + far * farShare) / dailyT;
+}
+
+/** Administrasjonskostnaden per døgn (B-305): bare fra storverket, etter det verket kan lage i døgnet over 5 000 t */
+export function adminPerDay(stats: Pick<PlantStats, "stage" | "dailyProductT">): number {
+  return stats.stage.id >= 4 ? ADMIN_PER_CAP_T * Math.max(0, stats.dailyProductT - ADMIN_FREE_T) : 0;
 }
 
 export function productPrice(g: GameState, product: ProductId, grade: GradeId | null): number {
