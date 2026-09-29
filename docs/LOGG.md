@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 285 – 2026-09-29: «Privat formue» i stedet for «Utbetalt til eierne» (B-359)
+
+**Brukeren ba om:** «Det du tjener over, betales til eierne. Blir litt feil da man selv er eier av konsern. Kall det for
+noe annet.»
+
+**Gjort:** alle tekster spillerne ser, sier nå «Privat formue» / «flyttes til din private formue» (topplista, Økonomi,
+Konsern, pengeforklaringen, dagens oppdrag, toppfeltet, loggen, en prestasjon). Kode, felt og serverens liste `utbetalt`
+er urørt.
+
+**Testet:** `tsc -b`, lint, `npm test`, Playwright 320/390 på Verket → Økonomi og Konsern → Oversikt.
+
+**Gjenstår:** ingenting.
+
 ## Økt 284 – 2026-09-29: Databasen etter stansen, og mindre lagringer (B-358)
 
 **Brukeren ba om:** skjermbilder av Supabase-dashbordet (Database 35,9 % feil, Auth 7,2 %), så «Fortsett».

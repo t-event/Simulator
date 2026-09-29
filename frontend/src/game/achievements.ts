@@ -280,7 +280,7 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
           "reform2",
           1,
           "Reformveteran II",
-          "Hadde en bunden konsernreserve da reform 2 kom. Den ble betalt ut til eierne, og konsernet gikk videre.",
+          "Hadde en bunden konsernreserve da reform 2 kom. Den ble flyttet til din private formue, og konsernet gikk videre.",
           25,
         ],
       ],

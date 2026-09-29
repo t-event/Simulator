@@ -1,7 +1,7 @@
 /**
  * Kassetaket og utbetalingen til eierne (B-303, reform 2; taket senket til 10 mrd. i B-306). Det dyreste som kan
  * kjøpes, er et stålkompleks til 3,6 mrd., og sluttmålet er 10 mrd. Over taket er kassa bare et tall, så det verket
- * tjener utover, betales ut til eierne: en historikk («Utbetalt til eierne», egen liste i Hall of Fame) som ikke
+ * tjener utover, betales ut til eierne: en historikk (i spillet «Privat formue», B-359; egen liste i Hall of Fame) som ikke
  * teller i konsernverdien og ikke kan brukes. Kassa er en buffer til neste kjøp, ikke en poengsum.
  *
  * Den bundne konsernreserven (B-193) er avviklet: det som sto der, regnes som utbetalt til eierne fra før. Feltet
@@ -41,7 +41,7 @@ export function applyCashCap(g: GameState): number {
   if (first)
     log(
       g,
-      `Kassa har nådd ${fmtKr(cap)} – mer enn alt som kan kjøpes. Det verket tjener utover, betales nå ut til eierne. Pengene teller ikke i konsernverdien, men står i Hall of Fame som «Utbetalt til eierne». Se Verket → Økonomi.`,
+      `Kassa har nådd ${fmtKr(cap)} – mer enn alt som kan kjøpes. Det verket tjener utover, flyttes nå til din private formue. Den teller ikke i konsernverdien, men står i Hall of Fame som «Privat formue». Se Verket → Økonomi.`,
       "info",
     );
   return moved;
@@ -53,7 +53,7 @@ export function paidOutDayLog(g: GameState): void {
   if (!p || p.today <= 0) return;
   log(
     g,
-    `Over taket for kassa: ${fmtKr(p.today)} ble betalt ut til eierne i går (${fmtKr(paidOutTotal(g))} i alt).`,
+    `Over taket for kassa: ${fmtKr(p.today)} ble flyttet til din private formue i går (${fmtKr(paidOutTotal(g))} i alt).`,
     "info",
   );
   p.today = 0;

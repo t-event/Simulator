@@ -6512,3 +6512,13 @@ Målt på lagrede spill: tuster2 142 → 127 kB tekst (34 → 27 kB komprimert),
 Endringslogg: nei – spillerne merker ingenting.
 Konto (B-149): nei – ingen ny funksjon.
 
+## B-359 «Utbetalt til eierne» heter «Privat formue» (2026-09-29)
+Status: gjelder
+Bakgrunn: eieren: «Det du tjener over, betales til eierne. Blir litt feil da man selv er eier av konsern. Kall det for
+noe annet.» Spilleren eier konsernet, så «betales ut til eierne» høres ut som om pengene går til noen andre.
+Beslutning: det kassa tjener over taket (B-303), heter nå **Privat formue** i spillet: «Det du tjener over, flyttes til
+din private formue». Endret i topplista og Hall of Fame (lista «Privat formue»), Verket → Økonomi, Konsern → Oversikt,
+«Slik henger pengene sammen», dagens oppdrag, toppfeltet, loggen og prestasjonen «Reformveteran II». Bare navnet er
+endret: regnestykket, `paidOut`/`paidOutTotal` og lista `utbetalt` på serveren er som før.
+Konto (B-149): nei – ingen ny funksjon.
+
