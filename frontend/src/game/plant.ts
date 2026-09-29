@@ -207,6 +207,15 @@ export function tempsActive(g: GameState): boolean {
   return (g.tempsUntilMin ?? 0) > g.minute;
 }
 
+/**
+ * Står hele verket (alle ovnene) lenger enn den neste timen – sommerstans, dødsulykke, ombygging av den eneste ovnen?
+ * Da venter vikarene til ovnene skal i gang igjen (B-346): gir minuttet de starter, ellers null.
+ */
+export function plantRestartMin(g: GameState): number | null {
+  if (!g.furnaces.length || !g.furnaces.every((f) => f.downUntilMin > g.minute + 60)) return null;
+  return Math.min(...g.furnaces.map((f) => f.downUntilMin));
+}
+
 /** Døgn vikarer må leies inn (etter dem som alt er leid) til alle som er borte nå, er tilbake */
 export function daysUntilAllBack(g: GameState): number {
   const end = Math.max(0, ...g.workers.filter((w) => isAbsent(g, w)).map((w) => w.absentUntil ?? 0));

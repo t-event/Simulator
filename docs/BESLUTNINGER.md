@@ -6291,3 +6291,21 @@ Beslutning:
 Testet: kjørt for hånd – 200, 37 tabeller, 2 195 607 byte; kall nummer to samme dag hoppes over; cron-jobben er aktiv;
 get_advisors (security) uten nye funn.
 Konto (B-149): ingen funksjon i spillet.
+
+## B-346 Ingen vikarer mens hele verket står (2026-09-29)
+Status: gjelder
+Bakgrunn: eieren: «Koffer bi d leid inn vikara når d e stopp i drifta? (Skiftleder)». Skiftlederen (B-211) dekket alt
+fravær med vikarer til halvannen gang lønna uansett. I sommerstansen (B-298) betales ingen lønn og ovnene står i tre
+uker, men sykdom ble fortsatt trukket – og skiftlederen leide vikarer for dem. Det samme skjedde ved andre stans av hele
+verket (dødsulykke, ombygging av den eneste ovnen).
+Beslutning:
+- `plantRestartMin(g)` (`plant.ts`): står alle ovnene lenger enn den neste timen, gir den minuttet de starter.
+  `checkTemps` leier da ingen vikarer – verken skiftlederen eller automatikken – og gir ikke varselet om at vikarene gikk
+  hjem. Timen før ovnene starter, leies de inn som før for dem som fortsatt er borte. Står bare noen av ovnene, går
+  verket, og alt er som før.
+- I sommerstansen blir ingen syke (alle har ferie).
+- Folk → Fravær sier «Verket står til dag N, så ingen vikarer trengs nå» i stedet for knappene og varselet, og rådet på
+  Verket og merket på Folk vises ikke mens verket står. Knappene kommer tilbake når ovnene går.
+- Vikarer som alt var leid inn før stansen, betales ikke tilbake.
+Testet: ny test i `game/tests.ts`; `balance.ts` og `balance.ts --sommerstans`.
+Konto (B-149): nei – vanlig spillmekanikk.

@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 346,
+    date: "2026-09-29",
+    title: "Ingen vikarer når verket står",
+    items: [
+      "Skiftlederen leier ikke lenger inn vikarer mens hele verket står, for eksempel i sommerstansen. Er noen fortsatt borte når ovnene skal i gang igjen, leies vikarene inn da.",
+      "I sommerstansen har alle ferie, så ingen blir sykmeldt.",
+    ],
+  },
+  {
     b: 343,
     date: "2026-09-29",
     title: "Raskere Industrien og toppliste",

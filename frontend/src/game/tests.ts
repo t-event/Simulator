@@ -203,6 +203,7 @@ import {
   fireImpact,
   isAbsent,
   liningWearPerHeat,
+  plantRestartMin,
   tempsActive,
   MAX_CREWS,
   specMargin,
@@ -3522,6 +3523,33 @@ test("Konsern-merket (B-342): modernisering av et stålverk som kan bygges ut, t
     `merket: ${ready}`,
   );
   assert(!konsernAdvice(g)?.key.startsWith("mod-"), "rådet foreslår ikke moderniseringen");
+});
+
+test("Skiftlederen leier ikke vikarer når hele verket står (B-346), men timen før ovnene starter", () => {
+  const g = newGame(346);
+  g.stage = 3;
+  g.workers = [];
+  for (const [role, n] of Object.entries(crewPerShift(g)) as [RoleId, number][])
+    for (let i = 0; i < n * 3; i++) g.workers.push(makeCandidate(g, role));
+  g.workers.push(makeCandidate(g, "skiftleder"));
+  g.settings.leaderTemps = true;
+  const w = g.workers[0];
+  w.absentFrom = g.minute;
+  w.absentUntil = g.minute + 5 * 1440;
+  w.absentReason = "syk";
+  // Alle ovnene står i to døgn (som i sommerstansen eller etter en dødsulykke)
+  for (const f of g.furnaces) f.downUntilMin = g.minute + 2 * 1440;
+  g.pendingDecision = null;
+  advance(g, 60);
+  assert(plantRestartMin(g) !== null, "verket står ikke");
+  assert(!tempsActive(g), "skiftlederen leide vikarer mens verket sto");
+  const cash = g.cash;
+  // Ovnene starter om en halvtime: nå leies vikarene inn
+  for (const f of g.furnaces) f.downUntilMin = g.minute + 30;
+  g.pendingDecision = null;
+  advance(g, 60);
+  assert(tempsActive(g), "skiftlederen leide ikke vikarer da ovnene skulle i gang");
+  assert(g.cash < cash, "vikarene kostet ingenting");
 });
 
 if (failed) {

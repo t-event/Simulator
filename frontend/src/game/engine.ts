@@ -81,6 +81,7 @@ import {
   isAbsent,
   staffing,
   supportAdvice,
+  plantRestartMin,
   tempsActive,
   tempsCost,
   MASON_HOURS,
@@ -2885,6 +2886,9 @@ function checkTemps(g: GameState): void {
   }
   const absent = g.workers.filter((w) => isAbsent(g, w));
   if (!absent.length) return;
+  // Står hele verket, trengs ingen vikarer før ovnene skal i gang igjen (B-346). Timen før de starter, leies de inn
+  // for dem som fortsatt er borte – av skiftlederen eller automatikken, som ellers
+  if (plantRestartMin(g) !== null) return;
   // Skiftlederen dekker alt fravær med vikarer når spilleren har valgt det (B-211), også når skiftene går likevel.
   // Blir noen borte lenger enn vikarene er leid for, forlenger skiftlederen med én gang (B-233): før skjedde det først
   // når vikarene gikk hjem, og Folk viste imens at fraværet ikke var dekket
@@ -3022,7 +3026,8 @@ function updateAbsence(g: GameState, stats: PlantStats): void {
       (hasNeighbor(g, "sykehus") ? 0.8 : 1) *
       // Noen er oftere borte; en advarsel virker på dem (B-101)
       (oftenSick(w) && (w.warnedDay === undefined || today - w.warnedDay >= WARNING_DAYS) ? 2.0 : 0.75);
-    if (!busy && chance(g, risk)) {
+    // I sommerstansen har alle ferie (B-298), så ingen blir sykmeldt fra jobben (B-346)
+    if (!busy && !summerStop(g) && chance(g, risk)) {
       const len = randInt(g, 1, 3);
       w.absentFrom = g.minute;
       w.absentUntil = g.minute + len * MIN_PER_DAY;

@@ -48,6 +48,7 @@ import {
   rollingActive,
   staffing,
   supportAdvice,
+  plantRestartMin,
   tempsActive,
   tempsCost,
   type PlantStats,
@@ -385,6 +386,9 @@ function Absence({ g, stats, act }: Props) {
   // Går vikarene hjem før alle er tilbake? (B-039)
   const lastBack = Math.max(0, ...now.map((w) => w.absentUntil ?? 0));
   const tempsShort = temps && g.tempsUntilMin < lastBack;
+  // Står hele verket, trengs ingen vikarer før ovnene starter igjen (B-346)
+  const restart = plantRestartMin(g);
+  const leader = !!g.settings.leaderTemps && g.workers.some((w) => w.role === "skiftleder");
   return (
     <Card title="Fravær">
       {now.length === 0 && upcoming.length === 0 && (
@@ -406,7 +410,14 @@ function Absence({ g, stats, act }: Props) {
         </ul>
       )}
       {now.length > 0 &&
-        (temps ? (
+        (restart !== null && !temps ? (
+          <p className="g-note">
+            Verket står til dag {day(g, restart)}, så ingen vikarer trengs nå.{" "}
+            {leader || auto(g, "autoTemps")
+              ? "Er noen fortsatt borte når ovnene skal i gang, leies vikarer inn da."
+              : "Er noen fortsatt borte når ovnene skal i gang, kan du leie inn vikarer da."}
+          </p>
+        ) : temps ? (
           <p className={tempsShort ? "g-note g-warn" : "g-note"}>
             Vikarer dekker fraværet til dag {day(g, g.tempsUntilMin - 1)}.
             {tempsShort &&
@@ -420,7 +431,7 @@ function Absence({ g, stats, act }: Props) {
         ) : (
           <p className="g-muted">Avløsere dekker plassene til dem som er borte, så verket går som normalt.</p>
         ))}
-      {now.length > 0 && (!temps || tempsShort) && (
+      {now.length > 0 && (!temps || tempsShort) && restart === null && (
         <div className="g-row">
           <button className="g-primary" onClick={() => act((gg) => hireTemps(gg, null))}>
             Vikarer til alle er tilbake ({backDays} døgn, {fmtKr(tempsCost(g, backDays))})
@@ -447,8 +458,8 @@ function Absence({ g, stats, act }: Props) {
           <span>
             Skiftlederen leier inn vikarer for alle som er borte
             <span className="g-toggle-hint g-muted">
-              Også når skiftene går likevel. Vikarer koster halvannen gang lønna, men verket mister verken folk eller
-              ferdighet.
+              Også når skiftene går likevel, men ikke mens hele verket står. Vikarer koster halvannen gang lønna, men
+              verket mister verken folk eller ferdighet.
             </span>
           </span>
         </label>
@@ -577,7 +588,7 @@ export function People({ g, stats, act, openTab, onTab }: Props & { openTab?: st
   const missing = Object.entries(permanent.missing).filter(([, n]) => (n ?? 0) > 0) as [RoleId, number][];
   const away = g.workers.filter((w) => isAbsent(g, w));
   const fullShifts = staffing(g, true).shifts;
-  const absenceCosts = away.length > 0 && !tempsActive(g) && stats.shifts < fullShifts;
+  const absenceCosts = away.length > 0 && !tempsActive(g) && stats.shifts < fullShifts && plantRestartMin(g) === null;
   const full = cap > 0 && g.workers.length >= cap;
   const hiredActive = !!g.tempCrew && g.tempCrew.untilMin > g.minute;
   const tabs: { id: PeopleTab; label: string; count?: number; alert?: boolean }[] = [
