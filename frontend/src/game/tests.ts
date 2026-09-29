@@ -273,7 +273,7 @@ import {
 import { MIN_PER_DAY } from "./data";
 import { fmtDuration } from "../ui/format";
 import { activeWar, WAR, warDay, warFactor } from "./war";
-import { acceptAgreement, buyScrap } from "./engine";
+import { acceptAgreement, buyScrap, roundDay } from "./engine";
 import { fixedPowerOffer, spotPowerPrice } from "./plant";
 import { explosionChance, FATAL_DOWN_DAYS, fatalAccident, WINTER_EXPLOSION } from "./accidents";
 import { freeStockT, sellAllFree } from "./engine";
@@ -3772,6 +3772,25 @@ test("Alder og pensjon (B-357): søkere 20–59, lærlinger unge, beskjed en må
   assert(
     again.workers.every((x, i) => x.born === m.workers[i].born),
     "alderen endret seg ved ny lasting",
+  );
+});
+
+test("Døgnregnskapet i hele tall (B-358): nye døgn og eldre lagringer", () => {
+  const r = roundDay({
+    day: 3,
+    kwh: 8783932.647,
+    peakMW: 98.5234,
+    costs: { nett: 1594093.52 },
+    list: [0.123456, 1234.5],
+  });
+  assert(r.kwh === 8783933 && r.peakMW === 98.52 && r.costs.nett === 1594094, `rundet ${JSON.stringify(r)}`);
+  assert(r.list[0] === 0.12 && r.list[1] === 1235 && r.day === 3, "lister og små tall");
+  const g = newGame(83);
+  g.history = [{ ...structuredClone(g.today), day: 1, kwh: 1234.567, cashEnd: 99.999 }];
+  const m = parseSave(JSON.stringify(g))!;
+  assert(
+    m.history[0].kwh === 1235 && m.history[0].cashEnd === 100,
+    `migrert ${m.history[0].kwh} ${m.history[0].cashEnd}`,
   );
 });
 

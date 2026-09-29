@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 284 – 2026-09-29: Databasen etter stansen, og mindre lagringer (B-358)
+
+**Brukeren ba om:** skjermbilder av Supabase-dashbordet (Database 35,9 % feil, Auth 7,2 %), så «Fortsett».
+
+**Funnet:** prosentene i dashbordet gjelder hele perioden grafen viser, med stansen. Fra omstarten kl. 21:27 til 22:10:
+ca. 1 150 kall uten én feil, 82 lagringer, ingen feil i databasen eller innloggingen. Sjekkpunktene tar fortsatt 10–20 s
+for noen hundre sider (disken er treg, kvoten er lav). `save_game` står for 1,9 GB av skrivingen siden 25.9. (59 kB per
+kall). Partiene er slått sammen for dem som har lagret etter B-353; fem spill med 200–1 200 partier er ikke lagret siden
+og krymper neste gang. Historikken (120 døgn med lange desimaltall) var så den største delen.
+
+**Gjort:** B-358 – `roundDay` runder døgnregnskapet i historikken; `migrate()` runder de gamle døgnene.
+
+**Testet:** `tsc -b`, `npm test`, `balance.ts`, målt størrelse før og etter på tre lagrede spill.
+
+**Gjenstår:** `world_status` bruker i snitt 292 ms per kall (7 100 kall siden 25.9., 35 min CPU) – kan være verdt å se på
+hvor ofte appen henter det, og å mellomlagre svaret. Følg med på diskkvoten.
+
 ## Økt 283 – 2026-09-29: Lærlinger utenfor drifta, alder og pensjon (B-357)
 
 **Brukeren ba om:** «Lærlinger bør ikke telle i drifta før de har tatt fagbrev. Vil også at ansatte skal kunne gå av med

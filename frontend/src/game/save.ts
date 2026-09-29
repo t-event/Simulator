@@ -13,7 +13,7 @@ import { giveAge } from "./pension";
 
 /** Forskning som ble lagt til med B-054; de andre automatikk-forskningene fantes fra før */
 const NEW_AUTOMATION = ["salgsrutiner", "ordreplan", "innkjop", "bemanning"];
-import { compactLots, SAVE_VERSION } from "./engine";
+import { compactLots, roundDay, SAVE_VERSION } from "./engine";
 import type { GameState } from "./types";
 
 const KEY = "stalverk-spill-v1";
@@ -321,6 +321,8 @@ export function migrate(g: GameState): GameState {
   for (const w of [...g.workers, ...(g.candidates ?? [])]) giveAge(w, nowDay);
   // Tusenvis av partier på lageret (B-353) slås sammen med én gang
   compactLots(g);
+  // Døgnregnskapet i hele tall (B-358), også for døgnene fra før
+  g.history = (g.history ?? []).map(roundDay);
   // Prestasjoner (B-151) man alt har klart, vises med én gang, ikke først etter en spilltime
   checkAchievements(g);
   // Dagens oppdrag «verdi» (B-352) måler nå verdien med utbetalt til eierne. Et oppdrag startet før det får utbetalingen
