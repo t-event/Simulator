@@ -546,6 +546,147 @@ function RailWagon({ x }: { x: number }) {
   );
 }
 
+/** Kraftledningen til den større transformatoren (B-330): mast på åsen og ledning inn til smeltehallen */
+function PowerLine({ x, y, toX, toY }: { x: number; y: number; toX: number; toY: number }) {
+  return (
+    <g stroke="#8d96a0" fill="none">
+      <path d={`M${x - 7} ${y + 44} L${x} ${y} L${x + 7} ${y + 44}`} strokeWidth={1.3} />
+      <path d={`M${x - 5} ${y + 30} L${x + 5} ${y + 16} M${x + 5} ${y + 30} L${x - 5} ${y + 16}`} strokeWidth={0.8} />
+      <line x1={x - 9} y1={y + 6} x2={x + 9} y2={y + 6} strokeWidth={1.4} />
+      <path d={`M${x - 9} ${y + 6} Q ${(x + toX) / 2} ${y + 26} ${toX} ${toY}`} strokeWidth={0.7} />
+      <path d={`M${x + 9} ${y + 6} Q ${(x + toX) / 2} ${y + 30} ${toX} ${toY + 4}`} strokeWidth={0.7} />
+    </g>
+  );
+}
+
+/** Lagerhall på verkstedet (B-330) */
+function Shed({ x, winter }: { x: number; winter: boolean }) {
+  return (
+    <g>
+      <rect x={x} y={154} width={40} height={24} fill="#6f7780" />
+      <path d={`M${x - 3} 154 L${x + 20} 145 L${x + 43} 154 Z`} fill="#4c5560" />
+      {winter && <polyline className="scene-snow" points={`${x - 3},154 ${x + 20},145 ${x + 43},154`} />}
+      <rect x={x + 8} y={162} width={16} height={16} fill="#3d434b" />
+    </g>
+  );
+}
+
+/** Salgskontoret (B-330): lite kontorbygg med skilt */
+function Office({ x, lit }: { x: number; lit: boolean }) {
+  return (
+    <g>
+      <rect x={x} y={150} width={30} height={28} fill="#8a939c" />
+      <rect x={x - 1} y={147} width={32} height={4} fill="#5b646e" />
+      <rect x={x + 4} y={139} width={22} height={8} rx={1} fill="#25407a" />
+      <text x={x + 15} y={145.4} textAnchor="middle" fontSize={5.6} fontWeight={700} fill="#e8eef6">
+        SALG
+      </text>
+      <Windows x={x + 3} y={155} cols={2} lit={lit} />
+      <rect x={x + 11} y={166} width={8} height={12} fill="#3d434b" />
+    </g>
+  );
+}
+
+/** Laboratoriet med spektrometeret (B-330): lite bygg med skorsteinshette */
+function Lab({ x, lit }: { x: number; lit: boolean }) {
+  return (
+    <g>
+      <rect x={x} y={156} width={26} height={22} fill="#b9c0c8" />
+      <rect x={x - 1} y={153} width={28} height={4} fill="#7d868f" />
+      <rect x={x + 18} y={145} width={3} height={8} fill="#7d868f" />
+      <rect x={x + 16} y={144} width={7} height={2} fill="#7d868f" />
+      <Windows x={x + 3} y={161} cols={2} lit={lit} />
+    </g>
+  );
+}
+
+/** Vedlikeholdsverkstedet (B-330): port med striper og et tannhjul på skiltet */
+function Workshop({ x, w = 36 }: { x: number; w?: number }) {
+  return (
+    <g>
+      <rect x={x} y={158} width={w} height={20} fill="#7a6f5e" />
+      <path d={`M${x - 2} 158 L${x + w / 2} 151 L${x + w + 2} 158 Z`} fill="#5a5145" />
+      <rect x={x + 4} y={163} width={16} height={15} fill="#3a3a3a" />
+      {[0, 1, 2, 3].map((i) => (
+        <line key={i} x1={x + 4} y1={166 + i * 3} x2={x + 20} y2={166 + i * 3} stroke="#555" strokeWidth={0.8} />
+      ))}
+      <circle cx={x + w - 8} cy={165} r={3.4} fill="none" stroke="#e0b030" strokeWidth={1.6} strokeDasharray="1.4 1" />
+    </g>
+  );
+}
+
+/** Skrapsortering (B-330): tre containere i hver sin farge */
+function SortBins({ x }: { x: number }) {
+  return (
+    <g>
+      {["#2f6db3", "#3c8a4a", "#c47a2c"].map((c, i) => (
+        <g key={c}>
+          <path
+            d={`M${x + i * 14} 170 L${x + i * 14 + 12} 170 L${x + i * 14 + 11} 178 L${x + i * 14 + 1} 178 Z`}
+            fill={c}
+          />
+          <rect x={x + i * 14 + 1} y={168} width={10} height={2} fill="#6b5b4b" />
+        </g>
+      ))}
+    </g>
+  );
+}
+
+/** Strålingsportalen (B-330): gul og svart ramme over veien der skrapbilene kjører inn */
+function Portal({ x }: { x: number }) {
+  return (
+    <g>
+      <rect x={x} y={170} width={3} height={26} fill="#e0b030" />
+      <rect x={x + 26} y={170} width={3} height={26} fill="#e0b030" />
+      <rect x={x} y={168} width={29} height={3} fill="#e0b030" />
+      {[3, 9, 15, 21].map((dx) => (
+        <rect key={dx} x={x + dx} y={168} width={3} height={3} fill="#1b1d21" />
+      ))}
+      <circle cx={x + 14.5} cy={173} r={1.2} fill="#5cc46a" />
+    </g>
+  );
+}
+
+/** Skrapsaksa i skrapterminalen (B-330) */
+function Shear({ x, working }: { x: number; working: boolean }) {
+  return (
+    <g>
+      <rect x={x} y={164} width={26} height={14} fill="#b8452f" />
+      <rect x={x + 18} y={156} width={8} height={8} fill="#8e3524" />
+      <path
+        className={working ? "scene-shear is-working" : "scene-shear"}
+        d={`M${x + 18} 164 l -7 -5 l 0 4 Z`}
+        fill="#d8dde3"
+      />
+      <rect x={x + 2} y={167} width={12} height={2} fill="#e0b030" />
+    </g>
+  );
+}
+
+/** Vakuumavgassingen (B-330): høyt tårn med tank og plattform bak støpehallen */
+function VacuumTower({ x }: { x: number }) {
+  return (
+    <g>
+      <rect x={x} y={56} width={12} height={46} fill="#7d868f" />
+      <rect x={x - 3} y={68} width={18} height={2} fill="#5b646e" />
+      <rect x={x + 2} y={72} width={8} height={16} rx={3} fill="#a7b0ba" />
+      <rect x={x + 4} y={48} width={4} height={8} fill="#5b646e" />
+    </g>
+  );
+}
+
+/** Øseovnen (B-330): tilbygg på smeltehallen med glød når stålet varmes */
+function LadleAnnex({ x, glow }: { x: number; glow: boolean }) {
+  return (
+    <g>
+      <rect x={x} y={154} width={32} height={24} fill="#6a737d" />
+      <path d={`M${x - 2} 154 L${x + 34} 150 L${x + 34} 154 Z`} fill="#48515c" />
+      <rect x={x + 8} y={163} width={16} height={15} fill="#1a1c20" />
+      {glow && <circle className="scene-glow" cx={x + 16} cy={172} r={8} fill="url(#glow)" />}
+    </g>
+  );
+}
+
 /** Litt snø som faller om vinteren (B-276) */
 const SNOW: [number, number, number][] = [
   [30, 30, 0],
@@ -624,6 +765,9 @@ export function PlantScene({ g, stats, onStation }: Props) {
   const storeCols = [4, 5, 6, 6][storeLevel];
   const storeRows = storeLevel >= 3 ? 3 : 2;
   const storeW = storeCols * 9;
+  // Valseverk nr. 2 og 3 (B-330): høyere hall og én glødende linje per valseverk
+  const rollLines = 1 + (has(g, "valseverk2") ? 1 : 0) + (has(g, "valseverk3") ? 1 : 0);
+  const rollTop = 128 - (stage >= 4 ? 12 * (rollLines - 1) : 0);
 
   return (
     <svg className="plant-scene" viewBox="0 0 480 210" role="img" aria-label={`Anlegget: ${stats.stage.name}`}>
@@ -673,21 +817,29 @@ export function PlantScene({ g, stats, onStation }: Props) {
         </g>
       )}
 
+      {/* Større transformator (B-330): kraftledning fra masta på åsen inn til smeltehallen */}
+      {stage >= 3 && has(g, "trafo") && <PowerLine x={stage >= 4 ? 382 : 462} y={96} toX={250} toY={top + 16} />}
+
       {/* Havn på storverket */}
       {stage >= 4 && (
         <g>
           <rect x={400} y={176} width={80} height={34} fill="#1d4466" />
-          <g className="scene-ship">
-            <path d="M410 170 L470 170 L462 180 L416 180 Z" fill="#6b3a2a" />
-            <rect x={425} y={160} width={22} height={10} fill="#cfd6de" />
-            <rect x={440} y={150} width={4} height={10} fill="#8a939e" />
-          </g>
-          {/* Kaikran som laster skipet (B-242) */}
-          <g stroke="#e0b030" strokeWidth={1.6}>
-            <line x1={404} y1={178} x2={404} y2={128} />
-            <line x1={398} y1={130} x2={452} y2={130} />
-          </g>
-          <line x1={432} y1={130} x2={432} y2={152} stroke="#999" />
+          {/* Havnekaia (B-330): skipet og kaikrana kommer når kaia er bygget */}
+          {has(g, "havn") && (
+            <g>
+              <g className="scene-ship">
+                <path d="M410 170 L470 170 L462 180 L416 180 Z" fill="#6b3a2a" />
+                <rect x={425} y={160} width={22} height={10} fill="#cfd6de" />
+                <rect x={440} y={150} width={4} height={10} fill="#8a939e" />
+              </g>
+              {/* Kaikran som laster skipet (B-242) */}
+              <g stroke="#e0b030" strokeWidth={1.6}>
+                <line x1={404} y1={178} x2={404} y2={128} />
+                <line x1={398} y1={130} x2={452} y2={130} />
+              </g>
+              <line x1={432} y1={130} x2={432} y2={152} stroke="#999" />
+            </g>
+          )}
         </g>
       )}
 
@@ -736,6 +888,9 @@ export function PlantScene({ g, stats, onStation }: Props) {
           {melting && <circle className="scene-glow" cx={206} cy={165} r={16} fill="url(#glow)" />}
           <Windows x={240} y={128} cols={6} lit={open} />
           <Smoke x={304} y={74} active={melting} scale={0.8} />
+          {/* Kjøpt utstyr (B-330) */}
+          {has(g, "lager") && <Shed x={332} winter={winter} />}
+          {has(g, "salgskontor") && <Office x={60} lit={open} />}
         </g>
       )}
 
@@ -743,6 +898,8 @@ export function PlantScene({ g, stats, onStation }: Props) {
         <g>
           {/* Smeltehall og støpehall */}
           <rect x={226} y={58} width={10} height={42} fill={pipeFill("#555a61")} />
+          {/* Ovn nr. 2 (B-330): egen pipe */}
+          {g.furnaceCount >= 2 && <rect x={212} y={70} width={8} height={30} fill={pipeFill("#555a61")} />}
           <rect x={120} y={100} width={130} height={78} fill={wallA("#7a838d")} />
           <path d="M116 100 L185 80 L254 100 Z" fill="#4c5560" />
           <rect x={250} y={118} width={120} height={60} fill={wallB("#6d7680")} />
@@ -753,6 +910,11 @@ export function PlantScene({ g, stats, onStation }: Props) {
           <Windows x={196} y={118} cols={4} lit={open} />
           <Windows x={262} y={132} cols={8} lit={open} />
           <Smoke x={231} y={54} active={melting} />
+          {g.furnaceCount >= 2 && <Smoke x={216} y={66} active={!!heats[1]} scale={0.8} />}
+          {/* Kjøpt utstyr (B-330) */}
+          {has(g, "oes") && <Lab x={385} lit={open} />}
+          {has(g, "verksted") && <Workshop x={414} w={32} />}
+          {has(g, "salgskontor") && <Office x={449} lit={open} />}
           {/* Kran over skrapet */}
           <g stroke="#e0b030" strokeWidth={2}>
             <line x1={20} y1={120} x2={20} y2={178} />
@@ -796,17 +958,22 @@ export function PlantScene({ g, stats, onStation }: Props) {
           <Windows x={204} y={104} cols={3} lit={open} />
           {/* Røykgassrensing */}
           {clean && <Cleaner level={cleanLevel} twoLines={!!clean.twoLines} down={cleanDown} smoke={cleanSmoke} />}
-          {/* Transportbånd fra skrapgården inn i smeltehallen; skrapet går når ovnene smelter (B-244) */}
-          <g transform="translate(92 158) rotate(-38)">
-            <rect x={0} y={-2} width={has(g, "renseanlegg") ? 56 : 52} height={4} fill="#3d434b" />
-            {open && melting && (
-              <g className="scene-belt">
-                {[0, 14, 28, 42].map((x) => (
-                  <rect key={x} x={x} y={-5} width={6} height={3} fill="#8a735a" />
-                ))}
-              </g>
-            )}
-          </g>
+          {/* Transportbånd fra skrapgården inn i smeltehallen; skrapet går når ovnene smelter (B-244). Bare med
+              conveyoren kjøpt (B-330) */}
+          {has(g, "conveyor") && (
+            <g transform="translate(92 158) rotate(-38)">
+              <rect x={0} y={-2} width={has(g, "renseanlegg") ? 56 : 52} height={4} fill="#3d434b" />
+              {open && melting && (
+                <g className="scene-belt">
+                  {[0, 14, 28, 42].map((x) => (
+                    <rect key={x} x={x} y={-5} width={6} height={3} fill="#8a735a" />
+                  ))}
+                </g>
+              )}
+            </g>
+          )}
+          {/* Vakuumavgassing (B-330): tårnet står bak støpehallen */}
+          {has(g, "vakuum") && <VacuumTower x={336} />}
           {/* Støpehall */}
           <rect x={250} y={100} width={110} height={78} fill={wallB("#6a737d")} />
           <path d="M250 100 L305 86 L360 100 Z" fill="#454d57" />
@@ -828,22 +995,26 @@ export function PlantScene({ g, stats, onStation }: Props) {
           {/* Valseverk */}
           {has(g, "valseverk") && (
             <g>
-              <rect x={360} y={128} width={stage >= 4 ? 40 : 110} height={50} fill="#5c656f" />
-              <Windows x={366} y={140} cols={stage >= 4 ? 3 : 8} lit={open} />
-              {/* Glødende stål som løper gjennom valseverket når det valser (B-242) */}
-              <rect x={362} y={166} width={stage >= 4 ? 36 : 106} height={2} fill="#3a3f46" />
-              {rolling && (
-                <rect
-                  className="scene-roll"
-                  x={362}
-                  y={164}
-                  width={14}
-                  height={4}
-                  rx={1}
-                  fill="#ff8a1e"
-                  style={{ ["--roll" as string]: `${stage >= 4 ? 22 : 92}px` }}
-                />
-              )}
+              <rect x={360} y={rollTop} width={stage >= 4 ? 40 : 110} height={178 - rollTop} fill="#5c656f" />
+              <Windows x={366} y={rollTop + 12} cols={stage >= 4 ? 3 : 8} lit={open} />
+              {/* Glødende stål som løper gjennom valseverket når det valser (B-242); én linje per valseverk (B-330) */}
+              {Array.from({ length: stage >= 4 ? rollLines : 1 }, (_, i) => (
+                <g key={i}>
+                  <rect x={362} y={166 - i * 9} width={stage >= 4 ? 36 : 106} height={2} fill="#3a3f46" />
+                  {rolling && (
+                    <rect
+                      className="scene-roll"
+                      x={362}
+                      y={164 - i * 9}
+                      width={14}
+                      height={4}
+                      rx={1}
+                      fill="#ff8a1e"
+                      style={{ ["--roll" as string]: `${stage >= 4 ? 22 : 92}px`, animationDelay: `${i * 0.5}s` }}
+                    />
+                  )}
+                </g>
+              ))}
             </g>
           )}
           {/* Kran i skrapgården */}
@@ -854,8 +1025,16 @@ export function PlantScene({ g, stats, onStation }: Props) {
           </g>
           <Trolley x={24} y={110} span={60} moving={open} />
           {roofed(g) && <YardRoof x1={6} x2={98} y={106} winter={winter} />}
+          {/* Kjøpt utstyr (B-330) */}
+          {has(g, "oseovn") && <LadleAnnex x={212} glow={casting || melting} />}
+          {has(g, "verksted") && <Workshop x={256} />}
+          {has(g, "skrapterminal") && <Shear x={74} working={open} />}
         </g>
       )}
+
+      {/* Skrapsortering og strålingsportal (B-330) */}
+      {stage >= 2 && has(g, "sortering") && <SortBins x={33} />}
+      {stage >= 1 && has(g, "portal") && <Portal x={2} />}
 
       {/* Pynt på taket og foran verket (B-151) */}
       {cosmeticOn(g, "sol") && <SolarPanels from={roof.line[0]} to={roof.apex} />}

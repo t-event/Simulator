@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 330,
+    date: "2026-09-29",
+    title: "Se det du kjøper",
+    items: [
+      "Anleggsbildet viser nå mye mer av det du har kjøpt: lager, salgskontor, laboratorium, verksted, skrapsortering, strålingsportal, øseovn, kraftlinje fra transformatoren, vakuumtårn, skrapsaks og en ny valselinje for hvert valseverk.",
+      "Med to ovner på nivå 2 får verket to piper. Havna og transportbåndet står i bildet når du har kjøpt dem.",
+    ],
+  },
+  {
     b: 328,
     date: "2026-09-29",
     title: "Konsernet bygges fra konsernkassa, og titlene kommer av verkene",
