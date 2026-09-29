@@ -106,6 +106,7 @@ import {
   unitView,
 } from "./plant";
 import { chance, noise, pick, rand, randInt, uniform } from "./random";
+import { bornAt, pensionMorning, PENSION } from "./pension";
 import type {
   Analysis,
   Contract,
@@ -2806,6 +2807,7 @@ export function makeCandidate(g: GameState, role?: RoleId): Worker {
     skill,
     salary: normalSalary(g, r, skill),
     hiredDay: 0,
+    born: bornAt(g, PENSION.candidateAge),
   };
 }
 
@@ -3479,6 +3481,7 @@ function onDay(g: GameState, stats: PlantStats): void {
     if (stats.ownerWorks) g.ownerSkill = Math.min(4.5, g.ownerSkill + 0.04);
   }
   apprenticeExams(g);
+  pensionMorning(g);
   updateMorale(g, stats);
   updateAbsence(g, stats);
   shiftLeaderFollowUp(g);

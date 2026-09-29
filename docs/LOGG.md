@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 283 – 2026-09-29: Lærlinger utenfor drifta, alder og pensjon (B-357)
+
+**Brukeren ba om:** «Lærlinger bør ikke telle i drifta før de har tatt fagbrev. Vil også at ansatte skal kunne gå av med
+pensjon. Legg til alder på alle ansatte slik at det fungerer.»
+
+**Gjort:**
+- `plant.ts`: `isApprentice`, `dutyWorkers`; `presentWorkers` og tellingen av roller tar ikke med lærlinger.
+- `game/pension.ts` (ny): alder (`born`), pensjonsalder (62–67, pensjonisten fra kortet 70), beskjed 30 døgn før og pensjon
+  på dagen (`pensionMorning`, fra `onDay` etter fagprøvene). `makeCandidate` gir alder 20–59, lærlingen 17–19.
+- `save.ts`: ansatte og søkere i eldre lagringer får en fast alder fra id-en (22–59).
+- Folk: alder på ansatte og søkere, «Pensjon om N døgn», lærlingen «ikke på skift ennå». Råd på Verket når skiftene faller
+  uten den som går av. Varsellista: pensjon under «Ansatte og trivsel».
+
+**Testet:** `tsc -b`, lint, `npm test` (to nye tester: lærlingen teller ikke før fagbrevet; alder og pensjon, også for
+eldre lagringer), `balance.ts` (exit 0), Playwright 320/390/1366 på Folk → Ansatte og Ansett (ingen horisontal scrolling).
+
+**Gjenstår:** ingenting kjent. Kan vurderes senere: at eldre ansatte er litt flinkere, eller en avskjedsfest som valgkort.
+
 ## Økt 282 – 2026-09-29: Driftsstans i databasen, og lagring som ikke kom i gang igjen (B-356)
 
 **Brukeren ba om:** skjermbilder av Supabase med «Unhealthy», så «Er alt slettet?», «Har restartet» og «Sjekk databasen

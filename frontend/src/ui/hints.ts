@@ -5,9 +5,11 @@ import { BANKRUPTCY_DAYS, GRADES, ROLES } from "../game/data";
 import { CREDIT_HELP, creditLimit, currentOrder, recipeEstimate, scrapStopHelp } from "../game/engine";
 import { summerStart, summerStop, yearOf } from "../game/calendar";
 import { hasMoulds, MOULD, mouldCost, mouldWear } from "../game/mould";
+import { pensionSoon } from "../game/pension";
 import {
   bonusGap,
   day,
+  fireImpact,
   furnaceGrade,
   gradeRecipe,
   gradesInUse,
@@ -248,6 +250,21 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
         view: "folk",
         sub: "fravaer",
       });
+  }
+  {
+    // Pensjon snart (B-357): si fra når skiftene faller uten den som går av, så det er tid til å ansette en ny
+    const today = day(g);
+    const leaving = g.workers
+      .filter((w) => pensionSoon(w, today) !== null)
+      .find((w) => fireImpact(g, w.id).after < fireImpact(g, w.id).before);
+    if (leaving) {
+      const left = pensionSoon(leaving, today) ?? 0;
+      out.push({
+        text: `${leaving.name} går av med pensjon ${left <= 0 ? "i dag" : `om ${left} døgn`}, og da mangler det en ${ROLES[leaving.role].name.toLowerCase()} på skiftene. Ansett en ny under Folk.`,
+        view: "folk",
+        sub: "ansett",
+      });
+    }
   }
   // Lenge siden bonus (B-159): trivselen synker, si fra før folk begynner å slutte
   // Gir skiftlederen bonus (B-271), trengs ikke rådet

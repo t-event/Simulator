@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 357,
+    date: "2026-09-29",
+    title: "Lærlinger, alder og pensjon",
+    items: [
+      "Lærlinger står ikke på skiftene før de har tatt fagbrev. De får halv lønn og lærer som før, og med fagbrevet blir de vanlige fagarbeidere.",
+      "Alle ansatte har nå en alder, og den øker med ett år per spillår. Du ser den under Folk → Ansatte og på søkerne.",
+      "De ansatte går av med pensjon, de fleste ved 67, noen litt tidligere. Du får beskjed en måned før, så du rekker å ansette en ny.",
+    ],
+  },
+  {
     b: 356,
     date: "2026-09-29",
     title: "Lagring på nett etter driftsstans",

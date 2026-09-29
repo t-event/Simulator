@@ -145,6 +145,7 @@ frontend/src/
     world.ts     Felles hendelser i motoren og sesongfordel (B-129)
     environment.ts Utslipp, renseanlegg i trinn, havari og bøter (B-263); panelet står i ui/Upgrades.tsx (CleanerPanel)
     mould.ts     Kokillene i strengstøpingen: slitasje per tonn, risiko for gjennombrudd, bytte (B-351); raden i ui/Maintenance.tsx
+    pension.ts   Alder og pensjon for de ansatte (B-357): `born`, pensjonsalder 62–67, beskjed en måned før
     calendar.ts  Året i spillet (360 døgn, dag 1 = 1. april), vinter 15.11.–14.3. og frost (B-265, B-272), fellesferie (B-298);
                  `calendarAhead` til kalenderkortet på Oversikt (ui/CalendarCard.tsx, B-321)
     war.ts       Krig i verden, bare i konsernet: dyrere strøm, flere forespørsler, høyst én per år (B-297)
@@ -266,6 +267,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   hver gang). Nye felt i spilltilstanden som vokser med tida (lister, logger) må ha et tak eller slås sammen (som
   `compactLots`), ellers blir lagringene hundrevis av kB og alt blir tregt. Serverfunksjoner som tar `for update` på en
   spillers rad, skal sjekke uten lås først om det er noe å gjøre (`konsern_settle`, 075).
+- **Lærlinger og bemanning** (B-357): lærlinger teller ikke i drifta før fagbrevet. Alt som regner bemanning, skift eller
+  hvem som står i produksjonen, bruker `dutyWorkers`/`presentWorkers` (`plant.ts`), ikke `g.workers` (som også har
+  lærlingene; de får lønn og tar plass i staben). Nye ansatte lages med `makeCandidate`, som gir dem en alder (`born`).
 - **Koblingen mot kontoen** (B-356): uten den (`reconciled`) laster appen verken opp eller henter. Feiler den fordi
   tjenesten er nede (`isTransient`), prøver `CloudFollow` igjen hvert 20. sekund (`needsRelink`). Nye kall som skal
   prøves igjen etter en driftsstans, bruker `isTransient`, ikke bare `offline`.

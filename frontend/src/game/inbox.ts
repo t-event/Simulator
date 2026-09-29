@@ -47,9 +47,9 @@ export const LOG_TOPICS: { id: LogTopic; label: string; hint: string; match: Reg
   {
     id: "folk",
     label: "Ansatte og trivsel",
-    hint: "Oppsigelser, lønn, trivsel, lærlinger og hendelser med de ansatte",
+    hint: "Oppsigelser, lønn, trivsel, lærlinger, pensjon og hendelser med de ansatte",
     match:
-      /[Ss]agt opp|[Aa]nsatt|[Tt]rivsel|[Ll]ønn|[Ll]ærling|[Kk]urs|[Aa]dvarsel|[Ss]kadet|[Ss]ikkerhet|[Tt]ilsyn|[Nn]abo/,
+      /[Ss]agt opp|[Aa]nsatt|[Tt]rivsel|[Ll]ønn|[Ll]ærling|[Kk]urs|[Aa]dvarsel|[Ss]kadet|[Ss]ikkerhet|[Tt]ilsyn|[Nn]abo|[Pp]ensjon/,
   },
 ];
 

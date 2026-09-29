@@ -29,6 +29,7 @@ import {
 } from "./engine";
 import { computePlantStats, day, isAbsent, marketSaturation, productPrice, satisfiedGrades } from "./plant";
 import { chance, pick, rand, uniform } from "./random";
+import { bornAt, PENSION } from "./pension";
 import { knowledgeCard } from "./knowledge";
 import { realNow } from "./clock";
 import { chooseBreakdownPolicy } from "./environment";
@@ -123,8 +124,11 @@ const MAKERS: Record<string, Maker> = {
     return {
       id: "laerling",
       title: "Lærling",
-      text: `Yrkesskolen spør om du kan ta inn en lærling. Lærlingen koster lite, men kan ikke så mye ennå. Etter ${APPRENTICE_DAYS} døgn går lærlingen opp til fagprøven og får fagbrev.`,
-      options: [{ label: "Ta inn lærlingen", hint: "Billig arbeidskraft som blir flinkere." }, { label: "Ikke nå" }],
+      text: `Yrkesskolen spør om du kan ta inn en lærling. Lærlingen får halv lønn og går i opplæring: den står ikke på skiftene før fagbrevet. Etter ${APPRENTICE_DAYS} døgn går lærlingen opp til fagprøven, og med fagbrev blir den en fagarbeider på verket.`,
+      options: [
+        { label: "Ta inn lærlingen", hint: "Koster litt nå, gir en ung fagarbeider senere." },
+        { label: "Ikke nå" },
+      ],
       data: {},
     };
   },
@@ -646,6 +650,7 @@ export function resolveDecision(g: GameState, option: number): void {
         w.salary = Math.round(w.salary * 0.5);
         w.hiredDay = day(g);
         w.name = `${w.name} (lærling)`;
+        w.born = bornAt(g, PENSION.apprenticeAge);
         // Etter læretida går lærlingen opp til fagprøven og får fagbrev (B-163)
         w.apprenticeUntil = day(g) + APPRENTICE_DAYS;
         g.workers.push(w);
@@ -736,6 +741,9 @@ export function resolveDecision(g: GameState, option: number): void {
       w.skill = 4.5;
       w.salary = n("salary");
       w.hiredDay = day(g);
+      // Pensjonisten går av igjen ved 70 (B-357)
+      w.born = bornAt(g, PENSION.returneeAge);
+      w.retireAge = PENSION.returneeRetire;
       g.workers.push(w);
       log(g, `${w.name} er tilbake i arbeid og deler gjerne av 30 års erfaring.`, "good");
       return;

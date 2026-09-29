@@ -27,6 +27,7 @@ import {
 import { SHIFT_LEADER_SICK, sickSpells, WARNING_DAYS } from "../game/engine";
 import { CREW_ROLES, ROLE_IDS, ROLES, STAGES, stageRef } from "../game/data";
 import { auto } from "../game/research";
+import { ageOf, pensionSoon } from "../game/pension";
 import {
   bonusGap,
   crewBenefits,
@@ -237,12 +238,22 @@ function FireImpact({ g, id }: { g: GameState; id: number }) {
   );
 }
 
-/** Når lærlingen tar fagprøven (B-163) */
+/** Når lærlingen tar fagprøven (B-163). Til da står lærlingen ikke på skiftene (B-357) */
 function ApprenticeBadge({ left }: { left: number }) {
   return (
     <span className="g-muted g-worker-exam">
       {" "}
-      · <Icon name="graduation-cap" /> {left <= 0 ? "Fagprøve i dag" : `Fagprøve om ${left} døgn`}
+      · <Icon name="graduation-cap" /> {left <= 0 ? "Fagprøve i dag" : `Fagprøve om ${left} døgn`}, ikke på skift ennå
+    </span>
+  );
+}
+
+/** Pensjon innen en måned (B-357) */
+function PensionBadge({ left }: { left: number }) {
+  return (
+    <span className="g-muted g-worker-exam">
+      {" "}
+      · {left <= 0 ? "Går av med pensjon i dag" : `Pensjon om ${left} døgn`}
     </span>
   );
 }
@@ -253,21 +264,32 @@ function WorkerRow({
   away,
   sick,
   today,
+  candidate,
 }: {
   w: Worker;
   action: React.ReactNode;
   away?: string;
   sick?: number;
   today?: number;
+  /** Søker, ikke ansatt: ingen pensjonsmerke */
+  candidate?: boolean;
 }) {
+  const hiredWorker = !candidate;
   return (
     <li className="g-worker">
       <div>
         <strong>{w.name}</strong>
-        <span className="g-muted"> · {ROLES[w.role].name}</span>
+        <span className="g-muted">
+          {" "}
+          · {ROLES[w.role].name}
+          {today !== undefined && w.born !== undefined && ` · ${ageOf(w, today)} år`}
+        </span>
         {away && <span className="g-badge-bad g-worker-away"> {away}</span>}
         {!!sick && sick >= 3 && <span className="g-badge-bad g-worker-away"> Syk {sick}× på 60 døgn</span>}
         {w.apprenticeUntil !== undefined && today !== undefined && <ApprenticeBadge left={w.apprenticeUntil - today} />}
+        {hiredWorker && today !== undefined && pensionSoon(w, today) !== null && (
+          <PensionBadge left={pensionSoon(w, today) ?? 0} />
+        )}
       </div>
       <Stars skill={w.skill} />
       <span className="g-muted">{fmtKr(w.salary)}/dag</span>
@@ -779,6 +801,8 @@ export function People({ g, stats, act, openTab, onTab }: Props & { openTab?: st
                     <WorkerRow
                       key={w.id}
                       w={w}
+                      today={day(g)}
+                      candidate
                       action={
                         <button
                           className="g-primary g-small"
