@@ -5,6 +5,25 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 256 – 2026-09-29: Gjennomgang av alle .md-filer
+
+**Brukeren ba om:** se gjennom alle .md-filer, sjekke at ingenting er glemt, og spørre om det som er uklart.
+
+**Gjort:** oppdatert det som var utdatert:
+- README: topplistene, sesonger uten sluttdato, konsernkassa og Industrien, flere docs;
+- DESIGN: pilar 8, konsern- og industriraden, mesterskap med fem prosjekter, Mål i stedet for Verket, nytt avsnitt
+  «Året i spillet», veikart med status;
+- PLAN-NETT: listene, fase 4 bygget, anbudet brukt til skraplageret, migrasjonene 041–063, lekkede passord;
+- RETNING: konsernkassa uten innskudd og med bidrag, lista «Konsernverdi»;
+- OKONOMI: bidraget er bygget. UI: ingen emoji (B-237). KONTO: serverens klokke, prestasjoner under Mål;
+- CLAUDE.md: kassetaket er 10 mrd., overføringen er av;
+- BESLUTNINGER: B-183, B-190 og B-311 merket med at innskuddet er erstattet av bidraget (B-319).
+Beslutningsnumrene er hele (B-000–B-323), og ingen konfidensielle navn står i repoet.
+
+**Gjenstår:** eierens svar om lekkede passord, gjestekontoer og glemt passord (spurt i økta).
+
+---
+
 ## Økt 255 – 2026-09-29: Fast regel om spilltid og ekte tid (B-323)
 
 **Brukeren ba om:** «Ja, legg den inn som fast regel» (kandidaten fra B-313).

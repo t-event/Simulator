@@ -135,8 +135,9 @@ skysymbol i toppen viser om spillet er lagret på nett.
 Spilleren ser: fanen «Toppliste» (under Verket, eller bak 🏆 i toppen) med kallenavn og plassering.
 
 - Kallenavn velges ved opprettelse (ikke e-post, ikke krav om ekte navn).
-- Lister: konsernverdi, mest penger på bok (B-144), raskest til storverk (spilldøgn), raskest til 10 mrd., høyeste
-  omdømme. «Alle» og «denne sesongen». Beste kontrollrom-parti venter til kontrollrommet er ferdig (B-143).
+- Lister nå: konsernverdi regnet av serveren (B-320), verdi i spillet, raskest til storverk, raskest til 10 mrd.,
+  kontrollrommet (B-295) og utbetalt til eierne (B-303). «Mest penger på bok» (B-306) og «omdømme» (B-171) er tatt bort.
+  «Hall of Fame» og «denne sesongen».
 - En åpen toppliste henter på nytt hvert 15. sekund, så den følger med mens man spiller (B-144).
 - Serveren regner listene fra `snapshots`, appen sender ikke inn poeng selv.
 - Juksesperre (under). Brukeren kan sperre en konto fra Supabase.
@@ -154,7 +155,10 @@ Spilleren ser: «Sesong 1 – 18 dager igjen» øverst på topplista, ligaen sin
   streik i transporten. Ligger i `events`, appen leser dem og legger dem på markedet. Uten nett: ingen hendelse.
 - Fagboka: kapittel om konjunkturer og hvorfor stålprisen svinger.
 
-### Fase 4 – ventetid i konsernet (1–2 økter) – på vent (B-180)
+### Fase 4 – ventetid i konsernet – bygget (B-209, B-311, B-314)
+
+> Bygget annerledes enn planen under: bygging 2/6/12 t (stålverk/storverk/kompleks), utbygging 6 t, modernisering 4 t,
+> ett prosjekt om gangen (B-311), og tida går etter serverens klokke med vern mot klokkejuks (B-314, B-315, B-317).
 
 Spilleren ser: «Bygges – ferdig om 3 t 40 min» på verket i konsernet, med et varsel når det er ferdig.
 
@@ -163,7 +167,7 @@ Spilleren ser: «Bygges – ferdig om 3 t 40 min» på verket i konsernet, med e
 - Testspilleren: klokka følger spilltiden, så balansen kan måles som før. Målet er at kampanjen til storverk går
   som i dag, og at konsernfasen strekker seg over noen virkelige dager.
 
-### Fase 5 – anbud og skrapauksjoner (3–4 økter) – på vent (B-180; anbud kan gjenbrukes til første tildeling av strategiske bedrifter)
+### Fase 5 – anbud og skrapauksjoner – på vent (B-180); anbudet er bygget for strategiske selskaper (skraplageret, B-189)
 
 Spilleren ser: fanen «Anbud» under Salg og «Auksjon» under Marked, fra nivået Stålverk.
 
@@ -244,9 +248,10 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
   konsernet, definisjon av aktiv spiller, `world_config` og `company_types`). Dry-run-spørringen ligger i
   `supabase/utkast/` (ikke en migrasjon).
 - Fase 0 og 1 er bygget (B-125, B-126). Fase 2 (toppliste) er bygget (B-127). Fase 3 (sesonger, ligaer og felles
-  hendelser) er bygget (B-129). Alle spill blir med i sesongen som pågår, og alle spill blir med videre (B-166, B-167); neste sesong starter ikke av seg selv (B-182). Fase 4 er neste, men brukeren vil vente med den (2026-09-26).
+  hendelser) er bygget (B-129). Alle spill blir med i sesongen som pågår, og alle spill blir med videre (B-166, B-167); neste sesong starter ikke av seg selv (B-182). Fase 4 (byggetid i ekte tid) er bygget (B-209).
 - Også bygget: daglig belønning og dagens oppdrag (B-149), mesterskap og titler (B-150), ukens utfordring og sesonger
-  med vri (B-152). Vern mot lekkede passord er på. Glemt passord er ikke testet med ekte e-post ennå.
+  med vri (B-152). Vern mot lekkede passord: sikkerhetsrådene melder det fortsatt av (se FORSLAG). Glemt passord er ikke
+  testet med ekte e-post ennå.
 - Etterpå: topplista viser nivå og medaljer (B-139); to nettlesere på samme konto og nytt spill+ (B-140); hyppigere
   lagring, nytt spill+ fjernet, ny start i sesongen og beste resultat på «Alle tider» (B-141).
 - Migrasjonene i `supabase/`: 001 grunnlag, 002 sikkerhet, 003 toppliste, 004 sesonger, 005 sesong på seks
@@ -257,6 +262,10 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
   kallenavnet på topplista (`title_of()`, B-150), 015 juksesperren tillater 50 % vekst per døgn etter
   sluttmålet (B-150), 016 ukens utfordring, sesonger med vri og utmerkelse for topp 10 (B-152), 017 ukekiste bare til topp 3 (B-155), 018 romsligere
   tonnsperre (B-158), 019 tonnsperren tåler tall fra et senere døgn i eldre apper (B-162), 020 neste sesong starter av seg selv (B-167), 021 sikkerhetskopi av spillene (B-169), 022 «koblet til på dag N» på topplista (B-170), 023 én ukeliste for alle, målt i prosent (B-172), 024 sesongstigen og titler etter Stållegende (B-173), 025 fartskontroll (B-176), 026 Grunnleggeræraen, bryter for neste sesong og aktive dager (B-182), 027 konsernkassa (B-183), 028 økonomireformen (gulv 250 mill., B-186), 029 produksjonsmåleren (B-188), 030 skraplageret med anbud (B-189), 031 felles klokke: lik grense i konsernkassa, gamle tidslinjetall ut, «dager» i ekte dager (B-190), 032 vekstsperren ser over tre døgn (B-194), 040 ukelista: «Mer stål enn før» måles mot uka før, og tonn/vekst krever to ekte dager med lagring før uka (B-235).
+  Senere (041–063): slagghåndtering og verksted (042–043), første opplasting (044), tilbakespoling (045), kontrollromsrekord
+  (046), merker (047–049, 056), utbetalt til eierne (050), utbytte i ekte tid (051), reform 2 (052–054), verden 10× ned
+  (055), byggetid etter serverens klokke (057–060), konsernbidraget (061), innskuddet av (062) og konsernverdi på
+  topplista (063). Hver fil forklarer seg selv øverst.
 - Hva som krever konto, nå og i fase 4 og 5: `docs/KONTO.md` (B-149).
 - Flere enheter samtidig: bare enheten som spilles på, lagrer; den andre settes på pause med «Spill her» (B-143).
 - Merker ved sesongslutt (fase 3) er bygget som 🎖 med beste plassering ved kallenavnet (B-143).

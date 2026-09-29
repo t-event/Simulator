@@ -13,8 +13,8 @@ konkurranse med ekte spillere. Starten beskyttes. Overgangsplanen står i `RETNI
 
 > Jeg bygde ikke bare det største stålverket. Jeg bygde et industriimperium – og nå prøver de andre å ta det fra meg.
 
-Spillet blir aldri helt ferdig: topplista, felles hendelser og (i dag) sesonger på et halvt år gir en ny grunn til å
-spille (se `PLAN-NETT.md`). Sesongene skal revurderes mot langsiktige æraer (B-180). Nytt spill+ er fjernet (B-141).
+Spillet blir aldri helt ferdig: topplista, felles hendelser og sesonger (uten fast sluttdato, B-221) gir en ny grunn
+til å spille (se `PLAN-NETT.md`). Sesongene skal revurderes mot langsiktige æraer (B-180). Nytt spill+ er fjernet (B-141).
 
 ## Plattformer: mobil og PC (B-187)
 
@@ -42,6 +42,8 @@ Gjelder for alt nytt:
    spillere.
 6. **Serveren avgjør alt mellom spillere**, og utfallet skal kunne forklares.
 7. **Ikke avhengig av å sjekke mobilen.** Det som skjer i ekte tid mellom spillere, varer døgn, ikke minutter.
+8. **Spilltid og ekte tid (B-323).** Spilltid gir kunnskap, optimalisering og lokal progresjon. Ekte tid styrer
+   akkumulering av kapital og makt som påvirker andre spillere.
 
 ## Hva vi lærer av Game Dev Tycoon
 
@@ -80,8 +82,8 @@ enkelt i presentasjonen, lett å spille i korte økter og vanskelig å legge fra
 | Støperi | Skiftarbeid; du blir leder | Induksjonsovn 5 t, blokkstøping, spektrometer, planlegger |
 | Stålverk | Tungindustri | Lysbueovn, strengstøping, øseovn, valseverk, rammeavtaler, ta styringen |
 | Storverk | Hundrevis av ansatte | Store ovner, fire eller seks strenger, eksport, utfordringer |
-| Konsern | Du eier flere verk | Datterverk, felles innkjøp og salg, salgsdirektør, milepæler mot 10 mrd. (etter B-180: verksjefer med mandat) |
-| Industrien (planlagt, B-180) | Du konkurrerer om kontrollen | Strategiske bedrifter rundt verkene, Kontroll, overtakelser, Industrimakt – se `RETNING.md` |
+| Konsern | Du eier flere verk | Datterverk bygget i ekte tid (ett prosjekt om gangen), felles innkjøp og salg, salgsdirektør, konsernkassa med utbytte og bidrag fra hovedverket i ekte tid, milepæler mot 10 mrd. (planlagt: verksjefer med mandat) |
+| Industrien (B-180) | Du konkurrerer om kontrollen | Skraplageret er bygget (anbud, eierskap og inntekt i ekte tid); slagghåndtering og mekanisk verksted er klare, men slått av. Planlagt: Kontroll, overtakelser, Industrimakt – se `RETNING.md` |
 
 Konsernet åpner seg på storverket når alt utstyret der er kjøpt, eller egenkapitalen når 1 mrd. (B-106).
 
@@ -89,8 +91,8 @@ Etter 10 mrd. (tittelen Stålbaron) fortsetter spillet (B-150). Pengemilepælene
 historikk, men det lages ingen nye pengemål (B-180):
 - Stålmilepæler ved 25, 50, 100 og 250 mrd. og 1 billion gir nye titler (Stålmagnat … Stållegende), fagpoeng og mer å
   bruke pengene på: modernisering til trinn 5, stålkomplekser og flere datterverk.
-- Når all forskning er gjort, åpner mesterskapet: fire prosjekter som kan tas om og om igjen, så fagpoengene alltid
-  har noe å gå til.
+- Når all forskning er gjort, åpner mesterskapet: fem prosjekter som kan tas om og om igjen (pris, strøm, skrap,
+  datterverk, foring), så fagpoengene alltid har noe å gå til.
 
 Stormodeller (B-154): lysbueovn 150 t og strengstøping med 8 strenger når konsernet åpner, 250 t og valseverk nr. 3
 ved sluttmålet, og en likestrømsovn på 420 t ved Stålmagnat. Jo større ovn, jo lengre charge (55–70 min), men flere
@@ -101,15 +103,25 @@ datterverk (B-153).
 
 Ukens utfordring og sesonger med vri (B-152):
 - Hver uke en toppliste per liga (bronse, sølv, gull) med en oppgave som går på omgang: mest vekst i konsernverdi,
-  flest tonn og flest spilldøgn. Topp 3 får medalje og ukekiste med 50–100 fagpoeng (B-155). Kortet står på Verket.
+  flest tonn og flest spilldøgn. Topp 3 får medalje og ukekiste med 50–100 fagpoeng (B-155). Kortet står under Mål.
 - En sesong kan ha en vri som gjelder hele sesongen (skrapmangel, eksportboom, energikrise, grønn strøm). Den står
-  under «Nå i markedet» og på topplista. Topp 10 i en sesong får 🎖, vinneren 🏆, ved kallenavnet.
+  under «Nå i markedet» og på topplista. Topp 10 i en sesong får medalje, vinneren pokal, ved kallenavnet (ikoner, B-237).
 
 Prestasjoner og pynt (B-151):
-- 29 prestasjoner fra første charge til Stållegende gir merker på Verket og litt fagpoeng. Trykk på et merke for å se
-  hva som skal til.
+- Prestasjoner i serier med trinn (B-232), fra første charge til Stållegende, gir merker under Mål → Merker og litt
+  fagpoeng. Trykk på et merke for å se hva som skal til.
 - Pynt til anleggsbildet kjøpes for fagpoeng (🎨): flagg, lyslenke, trær, fasadefarge, solceller, vindmølle, statue,
   fyrverkeri og gullpipe. Pynten gir ingen fordel, og de dyreste krever en prestasjon.
+
+## Året i spillet
+
+Spillåret har 360 døgn (dag 1 er 1. april) og gir planlegging utover neste ordre (`calendar.ts`, B-265):
+- **Vinter** 15. november–14. mars: flere uhell, dyrere strøm, frost og snøstorm som stopper skrapkjøp (B-272, B-279).
+- **Fellesferie** 7.–27. juli: sommerstans med vedlikehold (ovnene står, frister flyttes tre uker, salgsdirektøren tar
+  ikke ordrer) eller sommervikarer (full drift, dyrere lønn) – valgt på et kort en uke før (B-298, B-321).
+- **Kalenderen** på Verket → Oversikt viser når ferien og vinteren kommer, så ordrene kan planlegges (B-321).
+- **Trender** i markedet (én kvalitet eller vare ettertraktet i noen døgn, B-255) og **krig** i verden i konsernet
+  (dyrere strøm og flere forespørsler, høyst én per år, B-297).
 
 ## Kontrollrommet – et spill i fire runder (B-175)
 
@@ -141,8 +153,9 @@ engangstips (`tips.ts`) og rådgiveren når omdømmet faller flere ganger av sam
 ## Veikart
 
 Konto, lagring på nett, toppliste og sesonger er bygget, og det samme er daglig belønning, dagens oppdrag og «mens du
-var borte» (B-149). **Neste store steg er hovedretningen i `RETNING.md` (B-180):** økonomireform, strategiske
-bedrifter, Kontroll, overtakelser, verksjefer og æraer, i faser. Fase 4 og 5 i `PLAN-NETT.md` (ventetid, anbud og
+var borte» (B-149). **Hovedretningen i `RETNING.md` (B-180)** bygges i faser: økonomireformen (B-186, reform 2 B-302),
+konsernkassa og det første strategiske selskapet (skraplageret, B-189) og konsernbidraget i ekte tid (B-318) er
+bygget. Neste er slagghåndtering og mekanisk verksted (klare, slått av), så Kontroll, overtakelser, verksjefer og æraer. Fase 4 og 5 i `PLAN-NETT.md` (ventetid, anbud og
 auksjoner) står på vent og vurderes inn i den. Hva som krever konto, står i `KONTO.md`. Åpne spørsmål og mindre
 forslag står i `FORSLAG.md`.
 

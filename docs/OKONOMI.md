@@ -240,5 +240,6 @@ eller budene – bare hva eieren får per dag. Taket på 923 mill. for dette anb
 
 Analysen av koblingen mellom hovedverket (spilltid) og konsernet (ekte tid) står i **`KONSERNBIDRAG.md`**: forslag om
 et automatisk, normalisert konsernbidrag fra hovedverket i stedet for det manuelle innskuddet, kassa som
-driftskapital, utbyttepolitikk og simulering 30/60/90 dager. Ingen reform 3; ingenting bygges før eieren har svart.
+driftskapital, utbyttepolitikk og simulering 30/60/90 dager. Ingen reform 3. **Bygget etter eierens svar:** bidraget
+(B-318), innskuddet bort (B-319) og lista «Konsernverdi» regnet av serveren (B-320).
 

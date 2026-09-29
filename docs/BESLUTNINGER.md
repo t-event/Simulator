@@ -3113,7 +3113,7 @@ Beslutning (migrasjon `026_grunnleggeraeraen.sql`):
 Konto: sesong og liste krever konto som før (regel 3); aktive dager bare med lagring på nett (regel 2).
 
 ## B-183 Konsernkassa på serveren (2026-09-27)
-Status: gjelder (skjult i spillet til fase 1B)
+Status: gjelder (skjult i spillet til fase 1B; innskuddet er erstattet av bidraget, B-318/B-319)
 Endringslogg: nei (ingenting vises i spillet ennå)
 Bakgrunn: Eierens valg 3 i B-181, og de to klokkene i `RETNING.md` 5.2.
 Beslutning (migrasjon `027_konsernkasse.sql`, `net/treasury.ts`):
@@ -3272,7 +3272,7 @@ Beslutning (migrasjon `030_skraplageret.sql`, `net/world.ts`, `ui/Companies.tsx`
 Konto: krever konto (regel 3 og 7), står i `ACCOUNT_FEATURES` som «Skraplageret».
 
 ## B-190 Felles klokke: samme mulighet for alle i fellesverdenen (2026-09-27)
-Status: gjelder (justerer B-183 og B-152/B-172 for uka «dager»)
+Status: gjelder (justerer B-183 og B-152/B-172 for uka «dager»; den like innskuddsgrensen er erstattet av bidraget, B-319)
 Bakgrunn: Eieren kontrollerte modellen: hva i fellesverdenen blir større hvis en spiller grinder 10× i fem timer og
 bygger opp tusenvis av milliarder igjen? Svaret var bare én økonomisk kobling – grensen på konsernkassa steg
 logaritmisk med egenkapitalen (223 → 285 mill. per døgn) – pluss en feil: Granes grense var 297 mill., fordi et
@@ -5631,7 +5631,7 @@ Testet: tsc, lint, `npm test` (metningstesten: 0,65 ved 10 000 t, 0,575 ved 20 0
 
 ## B-311 Rettferdig kamp: verdensøkonomien 10× ned, og ett byggeprosjekt om gangen i konsernet (2026-09-29)
 Status: gjelder (justerer B-183, B-189, B-209, B-302 pkt. 3 og B-304; eieren: «Jeg vil ha det slik at spillet blir en
-rettferdig kamp mellom spillerne. Nå er det for enkelt å tjene en milliard»)
+rettferdig kamp mellom spillerne. Nå er det for enkelt å tjene en milliard»; innskuddet er erstattet av bidraget, B-319)
 Bakgrunn: det som gjorde det lett, var tempoet i verden, ikke hjemmeverket. Et fullt konsern fikk 250–370 mill. per
 ekte dag i utbytte pluss 100 mill. i innskudd – én milliard i konsernkassa på 2–3 dager – og et fullt konsern kunne
 bygges på et par ekte dager på 10× (alle prosjekter samtidig). Da ender alle på toppen med samme maks etter en uke, og
