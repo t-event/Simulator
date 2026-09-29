@@ -66,6 +66,7 @@ import { WorldMapPanel } from "./WorldMap";
 import { NeedsAccount } from "./Account";
 import { cancelOrderUi, getBuildRegion, movePlantUi, runOption, sellPlantUi, setBuildRegion } from "./konsernRun";
 import { fmtKr, fmtT } from "./format";
+import { MoneyGuideLink } from "./MoneyGuide";
 import { Icon } from "./icons";
 
 type Act = GameApi["act"];
@@ -923,7 +924,7 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
                 </strong>
               </span>
               {hasPaidOut(g) && (
-                <span title="Det kassa har tjent over taket. Teller ikke i konsernverdien">
+                <span title="Det kassa har tjent over taket. Teller med i sluttmålet og for de største ovnene, ikke i konsernverdien på topplista">
                   Utbetalt til eierne <strong>{fmtKr(Math.floor(paidOutTotal(g)))}</strong>
                 </span>
               )}
@@ -961,6 +962,7 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
               steg».
             </p>
           )}
+          <MoneyGuideLink g={g} />
           <details className="g-details">
             <summary>Slik fungerer konsernet</summary>
             <ol className="g-konsern-steps">

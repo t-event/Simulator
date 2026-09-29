@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 281 – 2026-09-29: Gjøre økonomien enklere å forstå (B-355)
+
+**Brukeren ba om:** «Spillere forstår ikke økonomien helt. Kan du gjøre det enklere å forstå» (Skiftrapporten: hvor blir
+pengene over 9,99 mrd. av, hvorfor kan jeg ikke sette penger inn i konsernet, hva er utbytte, hvorfor er modernisering
+tregere nå).
+
+**Gjort:** `ui/MoneyGuide.tsx`: arket «Slik henger pengene sammen» – to bokser (kassa hjemme i spilltid → bidrag →
+konsernkassa i ekte tid) og fem spørsmål med svar. Lenke på Konsern → Oversikt, Industrien (konsernkassa) og Økonomi.
+Teksten på Økonomi og i Konsern sa at utbetalingen «ikke teller» – rettet (den teller mot sluttmålet, B-341). Prøvde å
+gjøre kassa i toppfeltet trykkbar, men knappen ødela tallraden på 320/390 px – droppet.
+
+**Testet:** Playwright 320/390/1366 (lenke 44 px, arket scroller, ingen horisontal scrolling), typesjekk, lint, `npm test`.
+
+---
+
 ## Økt 280 – 2026-09-29: «Koblet til på dag N» bort fra topplista (B-354)
 
 **Brukeren ba om:** «Når folk koblet til har ikke noe å si for folk som ser på topplista».

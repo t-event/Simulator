@@ -6432,3 +6432,23 @@ vekst utenfor uansett.
 Beslutning: merket og setningen om det under «Slik virker lista» er fjernet, sammen med `LINKED_SHOWN_FROM`.
 `leaderboard()` sender fortsatt `linked_day` (ingen SQL-endring), og appen tolker det, men viser det ikke.
 Konto (B-149): uendret.
+
+## B-355 «Slik henger pengene sammen» (2026-09-29)
+Status: gjelder
+Bakgrunn: eieren: «Spillere forstår ikke økonomien helt. Kan du gjøre det enklere å forstå». I Skiftrapporten spurte
+spillerne hvor pengene over 9,99 mrd. blir av («Røde Kors?»), hvorfor de ikke kan sette penger inn i konsernet, hva
+utbyttet er, og hvorfor modernisering er tregere enn før. Forklaringene fantes, men spredt (Økonomi, «Slik fungerer
+konsernet», Industrien) og uten det viktigste: det er to økonomier – hjemme i spilltid, konsernet i ekte tid.
+Beslutning:
+- `ui/MoneyGuide.tsx`: ett ark med to bokser – kassa hjemme (spilltid, tak 10 mrd., overskuddet til eierne) → bidrag hver
+  ekte dag → konsernkassa (ekte tid, lik for alle; bidrag + utbytte; brukes til verk, anbud og overtakelser) – og fem
+  spørsmål med korte svar (hvor blir pengene over taket av, hvorfor ikke flytte penger, utbytte og politikken, hvorfor
+  bygging tar ekte tid, hva topplista måler). Tallene hentes fra spillet (tak, politikkene, 25 mrd., konsernkassa per dag).
+- Gradvis synlighet: arket og lenken vises når konsernet er åpent eller kassa har nådd taket; konserndelen bare med
+  konsern, taket bare når det er nådd.
+- Lenke «Slik henger pengene sammen» på Konsern → Oversikt, Konsern → Industrien (konsernkassa) og Verket → Økonomi.
+- Tekstene som sa at utbetalingen til eierne «ikke teller», sier nå at den teller mot sluttmålet og de største ovnene (B-341),
+  men ikke i konsernverdien på topplista.
+- Kassa i toppfeltet ble prøvd som knapp til arket, men en knapp er høyere enn tallene og dyttet tallraden ut av stilling på
+  320 og 390 px. Droppet.
+Konto (B-149): nei – forklaring.

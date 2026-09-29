@@ -6986,3 +6986,58 @@ button.g-prod-row:hover {
     font-size: max(16px, 1em);
   }
 }
+
+/* «Slik henger pengene sammen» (B-355): de to kassene og spørsmålene */
+.g-money-flow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-4);
+}
+
+.g-money-box {
+  padding: var(--sp-3);
+  background: var(--surface-2);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-md);
+}
+
+.g-money-box.is-konsern {
+  border-color: var(--accent);
+}
+
+.g-money-box h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: 0 0 var(--sp-1);
+  font-size: var(--fs-title);
+}
+
+.g-money-box p {
+  margin: var(--sp-1) 0 0;
+}
+
+.g-money-arrow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: 0;
+  padding-left: var(--sp-3);
+  color: var(--text-dim);
+}
+
+.g-money-q summary {
+  font-weight: 600;
+}
+
+.g-money-q p {
+  margin: var(--sp-2) 0 0;
+}
+
+.g-money-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  min-height: 44px;
+}

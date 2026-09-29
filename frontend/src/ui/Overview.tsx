@@ -32,6 +32,7 @@ import { BankCard } from "./Settings";
 import { readyUpgrades, stationOptions, stationReady, type Station } from "./stations";
 import { VERKET_TABS, type VerketTab } from "./verketTabs";
 import type { View } from "./views";
+import { MoneyGuideLink } from "./MoneyGuide";
 import { Icon } from "./icons";
 import { CASH_RESERVE, hasPaidOut, paidOutTotal } from "../game/reserve";
 import { Callout, StatusLine, type Status } from "./ds";
@@ -621,9 +622,9 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
               {hasPaidOut(g) && (
                 <p className="g-muted g-small-text g-reserve-note">
                   <Icon name="lock" /> Kassa kan ha høyst {fmtKr(CASH_RESERVE.softCap ?? 0)} – mer enn alt som kan
-                  kjøpes. Det du tjener utover, betales ut til eierne. Det teller ikke i konsernverdien og kan ikke
-                  brukes, men står i Hall of Fame som «Utbetalt til eierne». Datterverkene betaler utbytte til
-                  konsernkassa – det er der konkurransen med de andre foregår.
+                  kjøpes. Det du tjener utover, betales ut til eierne. Det kan ikke brukes, men teller med i verdien
+                  (sluttmålet, de største ovnene, dagens oppdrag). Konkurransen med de andre foregår i konsernkassa, i
+                  ekte tid. <MoneyGuideLink g={g} label="Slik henger pengene sammen" />
                 </p>
               )}
               {y && plantResult(y) < 0 && avgPlantResult(g) >= 0 && (

@@ -197,6 +197,7 @@ frontend/src/
     Weekly.tsx   Kortet «Ukens utfordring» på Mål og ukelista   Portal.tsx  Ark fra Verket legges i <body>
     SeasonTrack.tsx Kortet «Sesongstigen» på Mål (B-173)   Landmarks.tsx  Kortet «Landemerker» på Mål → I dag (B-218)
     Changelog.tsx «Hva er nytt» etter en oppdatering og under ⚙️ (B-179)
+    MoneyGuide.tsx «Slik henger pengene sammen»: kassa hjemme mot konsernkassa, og spillernes spørsmål (B-355)
     HelpNow.tsx  «Hva gjør jeg nå?»: råd, status per sted og ordliste (B-283), åpnes fra ? ved Mål (i tallraden under 380 px)
     TitleArt.tsx Tittelbildet på startskjermen; samme motiv som app-ikonet public/icon.svg (B-249)
     MissingOut.tsx «Det går du glipp av» på Mål for spillere uten konto (B-212)
