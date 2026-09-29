@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 355,
+    date: "2026-09-29",
+    title: "Slik henger pengene sammen",
+    items: [
+      "Ny forklaring av pengene: kassa hjemme (spilltid) og konsernkassa (ekte tid, lik for alle), med svar på det mange lurer på – hvor blir pengene over 10 mrd. av, hvorfor kan jeg ikke flytte penger til konsernet, hva er utbytte, og hvorfor bygges verkene i ekte tid.",
+      "Du finner den under Konsern → Oversikt, Konsern → Industrien og Verket → Økonomi.",
+    ],
+  },
+  {
     b: 354,
     date: "2026-09-29",
     title: "Ryddigere toppliste",

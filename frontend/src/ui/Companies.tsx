@@ -43,6 +43,7 @@ import { applyKonsern, setPolicy } from "../net/konsern";
 import { realNow } from "../game/clock";
 import { AccountFeaturesCard } from "./Account";
 import { Bar, Card } from "./common";
+import { MoneyGuideLink } from "./MoneyGuide";
 import { Icon } from "./icons";
 import { fmtKr, fmtT } from "./format";
 import { buzz } from "./haptics";
@@ -424,6 +425,7 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
               eier, kommer hit.
             </span>
           </div>
+          <MoneyGuideLink g={g} />
           {/* Utbyttepolitikken og forsvarsfondet (B-334): vises når fondet betyr noe – du eier et selskap, eller har et fond */}
           {g.konsern.policy && (world.companies.some((c) => c.mine) || fund > 0 || g.konsern.policy.kind !== "ut") && (
             <PolicySection g={g} full={world.dividend.fullPerDay} busy={busy} onPick={(k) => void doPolicy(k)} />
