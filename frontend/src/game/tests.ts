@@ -50,6 +50,8 @@ import {
   advance,
   assessOffer,
   queueFit,
+  queueMinutes,
+  nextAgreementWeek,
   realisticDailyT,
   agreementCancelCost,
   cancelAgreement,
@@ -159,6 +161,7 @@ import {
 import {
   bonusGap,
   day,
+  castingType,
   computePlantStats,
   gradeRecipe,
   liftMorale,
@@ -222,6 +225,7 @@ import {
   YEAR_DAYS,
 } from "./calendar";
 import { MIN_PER_DAY } from "./data";
+import { fmtDuration } from "../ui/format";
 import { activeWar, WAR, warDay, warFactor } from "./war";
 import { buyScrap } from "./engine";
 import { fixedPowerOffer, spotPowerPrice } from "./plant";
@@ -3067,6 +3071,48 @@ test("Krig i verden (B-297): bare i konsernet, høyst én per år, dyrere strøm
   delete old.summer;
   const back = parseSave(JSON.stringify(old))!;
   assert(back.war === null && back.summer === null, "migrate ga ikke war og summer");
+});
+
+test("Neste rammeavtale i «Produksjon nå» (B-316): tid til neste uke, kø og ledig tid", () => {
+  const g = newGame(3160);
+  g.minute = 10 * MIN_PER_DAY + 600; // dag 11 kl. 10
+  assert(nextAgreementWeek(g) === null, "ingen avtale skal gi null");
+  const a = (id: number, nextDay: number, product: Agreement["product"] = "emne") =>
+    ({
+      id,
+      customer: "Test",
+      product,
+      grade: "standard",
+      weeklyT: 100,
+      pricePerT: 1,
+      weeks: 5,
+      weeksSent: 1,
+      weeksDone: 0,
+      weeksMissed: 0,
+      nextDay,
+      bonusKr: 0,
+      bonusRep: 0,
+      status: "aktiv",
+      offerExpiresMin: 0,
+      closedDay: null,
+    }) as Agreement;
+  g.agreements = [a(1, 14), a(2, 12), { ...a(3, 11), status: "tilbud" }, { ...a(4, 11), weeksSent: 5 }];
+  const next = nextAgreementWeek(g)!;
+  assert(next.agreement.id === 2, "valgte ikke den nærmeste aktive avtalen med uker igjen");
+  assert(next.inMin === 11 * MIN_PER_DAY - g.minute, `feil tid til neste uke: ${next.inMin}`);
+  g.agreements.push(a(5, 10));
+  assert(nextAgreementWeek(g)!.inMin === 0, "en uke som venter (sommerstans), skal gi 0");
+  // Et produkt verket skal slutte med, gir ingen nye uker (B-163)
+  g.agreements = [a(6, 12, castingType(g).product)];
+  g.pendingCastingSwitch = "annen";
+  assert(nextAgreementWeek(g) === null, "avtale på produktet verket slutter med, ble telt");
+  g.pendingCastingSwitch = null;
+  const stats = computePlantStats(g);
+  g.contracts = [];
+  assert(queueMinutes(g, { ...stats, dailyProductT: 0 }) === Infinity, "verk som står, skal gi uendelig kø");
+  assert(fmtDuration(30) === "under 1 t" && fmtDuration(14 * 60) === "14 t", "fmtDuration under et døgn");
+  assert(fmtDuration(29 * 60) === "1 døgn 5 t" && fmtDuration(48 * 60) === "2 døgn", "fmtDuration over et døgn");
+  assert(fmtDuration(Infinity) === "–", "fmtDuration uendelig");
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 248 – 2026-09-29: Neste rammeavtale i «Produksjon nå» (B-316)
+
+**Brukeren ba om:** at spillerne kan se i «Produksjon nå» hvor lenge det er til neste rammeavtale starter produksjon,
+så de ser om det er tid til en ordre imellom.
+
+**Gjort:** ny rad «Avtale» i kortet: tid til neste ukeleveranse, ledig tid og hvor lenge køen varer (med det verket
+faktisk lager). Vises bare med en aktiv avtale som har uker igjen.
+
+**Testet:** `npm test` (ny test), tsc, lint, Playwright på 320 og 390 px.
+
+**Gjenstår:** som før – `project_guard_log`, eierens svar på KONSERNBIDRAG.md, pynt for sesong 3.
+
+---
+
 ## Økt 247 – 2026-09-29: Vernet mot klokkejuks tåler spilling uten nett (B-315)
 
 **Brukeren ba om:** «Fortsett» etter B-314.

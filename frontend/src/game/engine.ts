@@ -1882,6 +1882,29 @@ export function agreementWeeks(a: Agreement, first = a.nextDay): PlanExtra[] {
   return out;
 }
 
+/**
+ * Neste ukeleveranse fra en rammeavtale (B-316): hvilken avtale, og hvor mange spillminutter til den legges i
+ * ordrekøen. Ukene legges inn ved starten av døgnet `nextDay` (onDay). 0 betyr at den skulle vært lagt inn, men venter
+ * (sommerstans). Avtaler på et produkt verket skal slutte med, gir ingen nye uker (B-163) og telles ikke. null når
+ * ingen aktiv avtale har uker igjen.
+ */
+export function nextAgreementWeek(g: GameState): { agreement: Agreement; inMin: number } | null {
+  const leaving = g.pendingCastingSwitch ? castingType(g).product : null;
+  let best: { agreement: Agreement; inMin: number } | null = null;
+  for (const a of g.agreements) {
+    if (a.status !== "aktiv" || a.weeksSent >= a.weeks || a.product === leaving) continue;
+    const inMin = Math.max(0, (a.nextDay - 1) * MIN_PER_DAY - g.minute);
+    if (!best || inMin < best.inMin) best = { agreement: a, inMin };
+  }
+  return best;
+}
+
+/** Spillminutter verket bruker på ordrekøen slik den står, med det det faktisk har laget de siste døgnene */
+export function queueMinutes(g: GameState, stats: PlantStats): number {
+  const perDay = stats.dailyProductT > 0 ? realisticDailyT(g, stats) : 0;
+  return perDay > 0 ? (committedT(g) / perDay) * MIN_PER_DAY : Infinity;
+}
+
 export interface QueueFit {
   /** Verste forhold mellom tonn som må være ferdig innen en frist og det verket lager til da (1 = akkurat) */
   worst: number;

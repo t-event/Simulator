@@ -28,3 +28,14 @@ export function fmtRep(v: number): string {
 export function driftText(days: number): string {
   return days < 1 ? `${Math.round(days * 24)} timers drift` : `${fmtNum(days, days % 1 ? 1 : 0)} døgns drift`;
 }
+
+/** Spillminutter som kort tid: «under 1 t», «14 t», «1 døgn 5 t» (B-316) */
+export function fmtDuration(minutes: number): string {
+  if (!Number.isFinite(minutes)) return "–";
+  const h = Math.floor(minutes / 60);
+  if (h < 1) return "under 1 t";
+  if (h < 24) return `${h} t`;
+  const d = Math.floor(h / 24);
+  const rest = h % 24;
+  return rest ? `${d} døgn ${rest} t` : `${d} døgn`;
+}
