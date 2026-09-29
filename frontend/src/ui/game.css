@@ -4088,9 +4088,19 @@ button {
     padding: var(--sp-3) var(--sp-5);
   }
 
-  .g-top-row:first-child,
-  .g-notice-row {
+  .g-top-row:first-child {
     display: contents;
+  }
+
+  /* Varsellinja og knappene ved den er én blokk (B-340): blir det for trangt, går de sammen til neste rad og fyller den */
+  .g-top > .g-notice-row {
+    order: 4;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    flex: 1 1 360px;
+    min-width: 0;
+    margin-top: 0;
   }
 
   .g-when {
@@ -4109,18 +4119,20 @@ button {
   }
 
   .g-notice-row .g-notice {
-    order: 4;
     flex: 1 1 180px;
     min-width: 180px;
     max-width: 640px;
     margin-top: 0;
   }
 
-  /* Knappene står helt til høyre, også når varsellinja ikke fyller raden */
+  /* Knappene står helt til høyre i blokken, også når varsellinja ikke fyller den – samlet: bare den første skyves */
   .g-board-btn {
-    order: 5;
     margin-top: 0;
     margin-left: auto;
+  }
+
+  .g-board-btn ~ .g-board-btn {
+    margin-left: 0;
   }
 
   .g-top-book {
@@ -6923,6 +6935,18 @@ button.g-prod-row:hover {
 @media (min-width: 900px) {
   .g-side-sheet > .g-modal-card.g-chat-sheet {
     height: 100%;
+  }
+}
+
+/* Konsernkassa i toppfeltet (B-340): ordet bare når det er god plass; ikonet og verdien står alltid */
+@media (min-width: 600px) and (max-width: 1599px) {
+  .g-kpis .g-kpi-treasury em.g-kpi-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }
 

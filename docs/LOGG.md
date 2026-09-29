@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 268 – 2026-09-29: Konsernkassa i toppfeltet (B-340)
+
+**Brukeren ba om:** «Konsernkasseverdien bør stå i toppfeltet.»
+
+**Gjort:** nøkkeltallet «Konsernkassa» i `TopBar` (bare med `g.konsern.treasury`), trykk går til Konsern → Industrien.
+Ordet skjules mellom 600 og 1 599 px. Toppfeltet på PC: varsellinja og knappene er én blokk som brytes samlet.
+
+**Testet:** typesjekk, lint, `npm test`, bygg; Playwright på de 7 størrelsene med og uten konsernkassa.
+
+**Gjenstår:** ingenting nytt.
+
+---
+
 ## Økt 267 – 2026-09-29: Overtakelser på, og hendelser i Skiftrapporten (B-339)
 
 **Brukeren ba om:** hendelser fra spillet i Skiftrapporten, og «Åpne for overtakelser nå».
