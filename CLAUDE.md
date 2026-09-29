@@ -374,7 +374,7 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   bruker salgssummen.
 - **Utbytte i ekte tid** (B-304, B-311): datterverkene betaler ingenting i spilltid. Serveren regner utbyttet av det lagrede
   spillet én gang per ekte dag (`dividend_from_state` i 051, `pay_dividends` fra `world_tick`) rett inn i konsernkassa.
-  `game/dividend.ts` speiler SQL-en (`DIVIDEND` = `config.world.dividend`; grunntallene er en tidel av `profitPerDay`,
+  Betalingen bruker snittet av målingene hvert kvarter (`dividend_avg`, 078, B-362). `game/dividend.ts` speiler SQL-en (`DIVIDEND` = `config.world.dividend`; grunntallene er en tidel av `profitPerDay`,
   fullt konsern ca. 30 mill. per ekte dag): endres regelen, endres begge, og de faste tallene i testen kjøres mot
   SQL-en (`select dividend_from_state('{…}')`). Verden går i menneskelig tempo (B-311): gebyr 50 kr/t, innskuddet er
   erstattet av bidraget (B-318, B-319) – alt som teller mellom spillere, skal skaleres sammen, ikke ett tall alene.

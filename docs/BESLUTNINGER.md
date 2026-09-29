@@ -6555,3 +6555,14 @@ Utbyttet (B-304) regnes fortsatt av spillet i betalingsøyeblikket; kvaliteten o
 løsning kan brukes der om det blir et problem.
 Konto (B-149): ja, som bidraget (B-318) – regnes på serveren i ekte tid.
 
+## B-362 Utbyttet betales som snittet over den ekte dagen (2026-09-29)
+Status: gjelder (utfyller B-304 og B-361)
+Bakgrunn: utbyttet regnes av det lagrede spillet i betalingsøyeblikket. Verkene er serverens og står fast, men
+flaggskipbonusen (inntil +20 %) følger omdømmet og kvaliteten de siste 7 spilldøgnene – ca. 1,5 ekte minutt på 10×. Samme
+svakhet som bidraget (B-361), bare mindre: et øyeblikksbilde som kan treffe en dårlig eller god time.
+Beslutning: målingene hvert kvarter (077) tar også med utbyttet (`sum_div`/`n_div` i `contribution_samples`), og
+`pay_dividends` bruker snittet for dagen (`dividend_avg`; dager uten målinger: utbyttet nå). Tallet appen viser, er
+fortsatt utbyttet nå, så et nytt verk vises med én gang. Migrasjon `078_utbytte_snitt.sql`. Testet i en DO-blokk.
+Endringslogg: nei – tallet i appen er som før, betalingen blir jevnere.
+Konto (B-149): ja, som utbyttet (B-304) – regnes på serveren i ekte tid.
+
