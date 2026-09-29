@@ -6,7 +6,7 @@
  * alltid er noe å jobbe mot. De gamle merkene har beholdt id-ene sine (lagrede merker og pynten som krever dem, virker).
  */
 import { awardPoints, log } from "./engine";
-import { konsernEquity } from "./konsern";
+import { konsernEquity, valueCreated } from "./konsern";
 import { MASTERY_IDS, masteryLevel, masteryOpen } from "./mastery";
 import { QUIZ } from "./quiz";
 import { LANDMARKS } from "./landmarks";
@@ -291,9 +291,9 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
 
 // Merker som ble gitt med andre regler før B-232 beholdes, men nye gis etter tabellen over
 const LEGACY_VALUE: Record<string, (g: GameState) => number> = {
-  baron: (g) => (g.won ? 1e10 : konsernEquity(g)),
-  magnat: (g) => ((g.konsern?.legends ?? 0) >= 1 ? 2.5e10 : konsernEquity(g)),
-  legende: (g) => ((g.konsern?.legends ?? 0) >= 5 ? 4e11 : konsernEquity(g)),
+  baron: (g) => (g.won ? 1e10 : valueCreated(g)),
+  magnat: (g) => ((g.konsern?.legends ?? 0) >= 1 ? 2.5e10 : valueCreated(g)),
+  legende: (g) => ((g.konsern?.legends ?? 0) >= 5 ? 4e11 : valueCreated(g)),
 };
 
 export const ACHIEVEMENTS: Achievement[] = ACHIEVEMENT_FAMILIES.flatMap((f) =>

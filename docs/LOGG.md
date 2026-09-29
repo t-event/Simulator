@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 269 – 2026-09-29: Utbetalt til eierne teller mot sluttmålet og de største ovnene (B-341)
+
+**Brukeren ba om:** «Noen får ikke råd til de største ovnene fordi vi har cap på 10 mrd i lokalkassa.»
+
+**Funnet:** ingen utstyrskjøp koster over 700 mill., men sperrene gjorde det: sluttmålet (10 mrd.) ble aldri nådd når kassa
+stoppet på taket (én spiller med 9 999,5 mill. og 530 mill. utbetalt), og de største ovnene krevde 25 mrd. i verdi.
+
+**Gjort:** `valueCreated(g)` = konsernverdi + utbetalt til eierne, brukt i `checkWin`, `gateBlocker("magnat")`,
+prestasjonene og linja mot sluttmålet. Konsernverdien (topplister, server) er uendret.
+
+**Testet:** `npm test` (ny test), lint, typesjekk, bygg, `balance.ts`.
+
+**Gjenstår:** ingenting; spillerne som står fast, får sluttmålet neste gang de spiller.
+
+---
+
 ## Økt 268 – 2026-09-29: Konsernkassa i toppfeltet (B-340)
 
 **Brukeren ba om:** «Konsernkasseverdien bør stå i toppfeltet.»

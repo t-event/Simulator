@@ -32,7 +32,7 @@ import { auto, hasResearch, RESEARCH, scrapUnlocked, secondsAction } from "./res
 import { masteryFactor } from "./mastery";
 import { checkMissions } from "./missions";
 import { checkChallenges } from "./challenges";
-import { directorDailyT, finishKonsernProjects, konsernDay, konsernEquity } from "./konsern";
+import { directorDailyT, finishKonsernProjects, konsernDay, valueCreated } from "./konsern";
 import { worldFactor } from "./world";
 import { maybeAdvisor, maybeCreateDecision } from "./decisions";
 import { maybeTip, setCreditHint } from "./tips";
@@ -3474,7 +3474,8 @@ function onDay(g: GameState, stats: PlantStats): void {
  * Seier: konsernverdi (egenkapital + datterverk) på 10 mrd. Sjekkes hver time, ikke bare ved midnatt (B-091, B-106)
  */
 export function checkWin(g: GameState): void {
-  if (!g.won && !g.gameOver && g.stage === STAGES.length - 1 && konsernEquity(g) >= WIN_CASH) {
+  // Det som er betalt ut over kassetaket, teller med (B-341): taket er like høyt som sluttmålet
+  if (!g.won && !g.gameOver && g.stage === STAGES.length - 1 && valueCreated(g) >= WIN_CASH) {
     g.won = true;
     log(g, "Du har bygget et av landets største stålkonsern. Gratulerer!", "good");
   }

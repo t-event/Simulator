@@ -2,7 +2,7 @@
  * Det spilleren kan gjøre: bygge ut, kjøpe utstyr, ansette, låne og styre produksjonen.
  */
 import { MASTERY, MASTERY_IDS, masteryCost, masteryEffect, masteryLevel, masteryOpen } from "./mastery";
-import { checkKonsernMilestones, checkKonsernUnlock, directorHour, konsernEquity } from "./konsern";
+import { checkKonsernMilestones, checkKonsernUnlock, directorHour, valueCreated } from "./konsern";
 import { checkAchievements } from "./achievements";
 import {
   ADDONS,
@@ -132,8 +132,11 @@ export function gateBlocker(g: GameState, gate?: Gate): string | null {
   if (!gate) return null;
   if (gate === "konsern") return g.konsern?.unlocked ? null : "Åpner når konsernet åpner (1 mrd.)";
   if (gate === "baron") return g.won ? null : "Åpner ved sluttmålet (10 mrd., Stålbaron)";
-  // Før B-325 åpnet de ved tittelen Stålmagnat (25 mrd.); titlene kommer nå av datterverkene, så grensen er verdien selv
-  return (g.konsern?.legends ?? 0) >= 1 || konsernEquity(g) >= STORMODEL_EQUITY ? null : "Åpner ved 25 mrd. i verdi";
+  // Før B-325 åpnet de ved tittelen Stålmagnat (25 mrd.); titlene kommer nå av datterverkene, så grensen er verdien selv.
+  // Det som er betalt ut til eierne over kassetaket, teller med (B-341) – ellers kunne verket alene aldri nå dit
+  return (g.konsern?.legends ?? 0) >= 1 || valueCreated(g) >= STORMODEL_EQUITY
+    ? null
+    : "Åpner ved 25 mrd. i verdi (utbetalt til eierne teller med)";
 }
 
 export function upgradeOptions(g: GameState): UpgradeOption[] {
