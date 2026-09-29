@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 260 – 2026-09-29: Anleggsbildet viser mer av det man kjøper (B-330, B-331)
+
+**Brukeren ba om:** «Kjør dine anbefalinger»: 1) anleggsbildet skal følge kjøpene mer, 2) forslag til verdenskart
+(en oppdiktet verden, flyplass senere), Kontroll, overtakelser og utbyttepolitikk, 3) forslag til pengene hjemme.
+
+**Gjort:** `ui/PlantScene.tsx` tegner skur, portal, salgskontor, laboratorium, containere, verksted, pipe nr. 2,
+øseovnstilbygg, kraftlinje, vakuumtårn, skrapsaks (animert i `game.css`, stille med redusert bevegelse) og én
+valselinje per valseverk; havna og transportbåndet bare når kjøpt. `TitleArt.tsx`: `stopColor` i stedet for
+`stop-color` (advarsel i konsollen). B-330 (bildet), B-331 (planen for spor 2 og 3).
+
+**Testet:** alle nivåer tegnet uten og med alle kjøp (midlertidig skript, slettet) – ingen overlapp; Playwright med et
+lagret storverk på 320 px, iPhone 13 og 1440 px: ingen horisontal scrolling, ingen feil i konsollen; `npm test`, lint,
+typesjekk.
+
+**Gjenstår:** forslagene i spor 2 og 3 (`docs/KONTROLL-FORSLAG.md`).
+
+---
+
 ## Økt 259 – 2026-09-29: Konsernet i ekte tid bygget (B-325–B-329)
 
 **Brukeren ba om:** «Ja» til forslaget i `docs/KONSERN-FORSLAG.md`: nivåer etter verkene, kjøp fra konsernkassa med nye

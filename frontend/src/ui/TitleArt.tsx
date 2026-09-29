@@ -7,18 +7,18 @@ export function TitleArt() {
     <svg className="g-title-art" viewBox="0 0 480 150" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
       <defs>
         <linearGradient id="title-sky" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#16233a" />
-          <stop offset="0.6" stop-color="#3a2a2a" />
-          <stop offset="1" stop-color="#8a4214" />
+          <stop offset="0" stopColor="#16233a" />
+          <stop offset="0.6" stopColor="#3a2a2a" />
+          <stop offset="1" stopColor="#8a4214" />
         </linearGradient>
         <linearGradient id="title-melt" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#fff2a8" />
-          <stop offset="0.45" stop-color="#ffb02e" />
-          <stop offset="1" stop-color="#ff5a00" />
+          <stop offset="0" stopColor="#fff2a8" />
+          <stop offset="0.45" stopColor="#ffb02e" />
+          <stop offset="1" stopColor="#ff5a00" />
         </linearGradient>
         <radialGradient id="title-glow" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0" stop-color="#ff8a1e" stop-opacity="0.8" />
-          <stop offset="1" stop-color="#ff5a00" stop-opacity="0" />
+          <stop offset="0" stopColor="#ff8a1e" stopOpacity="0.8" />
+          <stop offset="1" stopColor="#ff5a00" stopOpacity="0" />
         </radialGradient>
       </defs>
       <rect width="480" height="150" fill="url(#title-sky)" />

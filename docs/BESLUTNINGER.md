@@ -5978,3 +5978,35 @@ liten 7,4/13,0/16,6 mill., middels 18,5/25,7/30,6, ny stor 53,9/63,1/67,7, dagen
 Forholdet stor/liten går fra 7,3× til 4,1×, og ny stor mot dagens største fra 0,74 til 0,88 – dagens toppspillere
 når fullt konsern på ca. 90 dager med de nye prisene. Neste steg (Kontroll og overtakelser) kan bygge på dette.
 Konto (B-149): ingen ny funksjon.
+
+## B-330 Anleggsbildet viser mer av det man kjøper (2026-09-29)
+Status: gjelder
+Bakgrunn: spillerne syns det er kult å se det de kjøper, og ønsket at anleggsbildet følger kjøpene enda mer. En
+gjennomgang viste at mange kjøp ikke syntes: lager, strålingsportal, salgskontor, spektrometer, skrapsortering,
+verksted, ovn 2 (på nivå 2), øseovn, transformator, vakuumavgassing, skrapterminal og valseverk 2 og 3. Havna og
+transportbåndet ble tegnet enten de var kjøpt eller ikke.
+Beslutning: `ui/PlantScene.tsx` tegner nå et lite bygg eller en ting for hvert av disse kjøpene: skur (lager), gul og
+svart portal ved innkjøringen, salgskontor med skilt, laboratorium (spektrometer), tre containere i hver sin farge
+(sortering), verksted med tannhjul, pipe nr. 2 med røyk (ovn 2 på nivå 2), tilbygg med glød (øseovn), kraftlinje fra
+masta (transformator), høyt tårn bak støpehallen (vakuum), rød skrapsaks som klipper når verket går (skrapterminal) og
+én valselinje til per valseverk (hallen blir høyere på storverket). Havna (skip og kran) og transportbåndet vises bare
+når de er kjøpt. Kjøp som sitter inni ovnen eller i styringen (XRF, elektroderegulering, varsling, varmegjenvinning),
+tegnes ikke – de ville bare gjort bildet rotete. Skrapsaksa står stille med «redusert bevegelse».
+Konto (B-149): ingen ny funksjon – det er bare tegning av det spilleren eier.
+
+## B-331 Neste steg for konsernet: verdenskart, Kontroll, overtakelser og utbyttepolitikk – og pengene hjemme (2026-09-29)
+Status: gjelder (planlegging)
+Endringslogg: nei – planlegging
+Bakgrunn: eieren godtok anbefalingen: utbyttepolitikken bygges sammen med Kontroll og overtakelser, og den delen som
+holdes tilbake, styrker datterverkene og Kontroll, ikke hovedverket (B-323). Eieren pekte også på at kassa hjemme vokser
+uten ende (mange har 10 mrd. og er tilbake der på minutter, så alt nytt kjøpes med én gang), og ønsket et «anleggsbilde»
+for konsernet: et kart der man ser hvor mange og hvilke verk og selskaper andre har. «Det trenger ikke å være et land.
+Det kan være en verden. Dette passer senere når vi skal ha flyplass.»
+Beslutning: tre spor, i denne rekkefølgen:
+1. Anleggsbildet viser mer av det man kjøper (B-330, bygget).
+2. Et samlet forslag med tall og simulering for verdenskartet (en oppdiktet verden med regioner, ikke et ekte land;
+   flyplass senere), Kontroll, overtakelser og utbyttepolitikken – i `docs/KONTROLL-FORSLAG.md`. Bygges ikke før eieren
+   sier ja.
+3. Et eget forslag for pengene i hovedverket (byggetid og innkjøring i spilltid, krav om folk og fagpoeng, slitasje og
+   fornyelse) – i samme dokument, men som eget spor, siden det gjelder spilltid og ikke verden. Bygges ikke før ja.
+Konto (B-149): avgjøres i forslaget.

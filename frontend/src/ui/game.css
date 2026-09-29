@@ -590,6 +590,24 @@ button {
   }
 }
 
+/* Skrapsaksa klipper når verket går (B-330) */
+.scene-shear.is-working {
+  transform-box: fill-box;
+  transform-origin: 100% 100%;
+  animation: scene-shear 1.8s ease-in-out infinite;
+}
+
+@keyframes scene-shear {
+  0%,
+  60%,
+  100% {
+    transform: rotate(0deg);
+  }
+  75% {
+    transform: rotate(18deg);
+  }
+}
+
 .scene-smoke .puff {
   fill: var(--art-smoke);
   opacity: 0;
@@ -876,6 +894,7 @@ button {
 
 @media (prefers-reduced-motion: reduce) {
   .scene-glow,
+  .scene-shear.is-working,
   .scene-smoke .puff,
   .scene-flag,
   .scene-lights.is-night circle,
