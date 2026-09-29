@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 288 – 2026-09-29: «Vi har postgres errors», og utbyttet som snitt (B-362)
+
+**Brukeren ba om:** «Vi har postgres errors. Fortsett».
+
+**Funnet:** alle 7 feil i postgres-loggen etter omstarten kom fra `mgmt-api` (verktøyet mitt): 4 tester som med vilje
+avsluttes med en feil (så ingenting lagres), og 3 spørringer med feil kolonnenavn. Ingen feil fra spillet (PostgREST).
+
+**Gjort:** B-362 – `078_utbytte_snitt.sql`: utbyttet med i målingene hvert kvarter, og betalingen bruker dagens snitt.
+
+**Testet:** DO-blokk (snitt, fallback uten målinger).
+
+**Gjenstår:** som før: sjekk første bidrag 1.10. (påminnelse satt).
+
 ## Økt 287 – 2026-09-29: Konsernbidraget hoppet (B-361)
 
 **Brukeren ba om:** fem skjermbilder fra en spiller: «Bidrag fra hovedverket e buggy» (16 → 20 → 24 → 12 → 7 mill. kr per
