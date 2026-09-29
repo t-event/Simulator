@@ -5,6 +5,17 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 280 – 2026-09-29: «Koblet til på dag N» bort fra topplista (B-354)
+
+**Brukeren ba om:** «Når folk koblet til har ikke noe å si for folk som ser på topplista».
+
+**Gjort:** merket og forklaringen under «Slik virker lista» er fjernet (`ui/Leaderboard.tsx`, `LINKED_SHOWN_FROM` ut).
+Serveren sender fortsatt `linked_day`; ingen SQL-endring.
+
+**Testet:** typesjekk, lint, `npm test`.
+
+---
+
 ## Økt 279 – 2026-09-29: Industrien, kart, toppliste og chat laster tregt (B-353)
 
 **Brukeren ba om:** «Det tar lang tid før data lastes inn her enda» (skjermbilder av topplista, Skiftrapporten, Industrien

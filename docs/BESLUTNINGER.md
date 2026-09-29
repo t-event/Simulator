@@ -6423,3 +6423,12 @@ Neste steg hvis det ikke holder: større maskin i Supabase (betalt plan), eller 
 Testet: motortest (300 partier → 3, samme tonn og kvaliteter), nettester, `balance.ts`; `konsern_settle` for alle konsern
 i en DO-blokk som ble rullet tilbake.
 Konto (B-149): uendret.
+
+## B-354 «Koblet til på dag N» vises ikke på topplista (2026-09-29)
+Status: gjelder – erstatter delen av B-170 som viste merket
+Bakgrunn: eieren: «Når folk koblet til har ikke noe å si for folk som ser på topplista». Merket (B-170) skulle forklare
+rask vekst hos spill som var spilt uten konto først, men sier lite for den som leser lista; juksesperren holder urimelig
+vekst utenfor uansett.
+Beslutning: merket og setningen om det under «Slik virker lista» er fjernet, sammen med `LINKED_SHOWN_FROM`.
+`leaderboard()` sender fortsatt `linked_day` (ingen SQL-endring), og appen tolker det, men viser det ikke.
+Konto (B-149): uendret.

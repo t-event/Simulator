@@ -12,7 +12,6 @@ import {
   fetchMyRank,
   fetchProfile,
   levelLabel,
-  LINKED_SHOWN_FROM,
   type BoardKind,
   type BoardRow,
 } from "../net/leaderboard";
@@ -309,10 +308,6 @@ function Leaderboard({
                     {r.honorIcon && <Icon name={r.honorIcon} />} {r.honor}
                   </span>
                 )}
-                {/* Spilt uten konto før innloggingen (B-170): forklarer en rask vekst på lista */}
-                {r.linked_day !== null && r.linked_day >= LINKED_SHOWN_FROM && (
-                  <span className="g-board-honor">Koblet til på dag {r.linked_day}</span>
-                )}
               </span>
               <span className="g-board-value">{fmtValue(kind, r.value)}</span>
             </li>
@@ -334,9 +329,8 @@ function Leaderboard({
           viser hvor langt spilleren har kommet: fra Garasje til Storverk, Konsern når konsernverdien passerer 1 mrd.,
           og en tittel fra 10 mrd. (Stålbaron, Stålmagnat, Stålfyrste, Stålkonge, Stålkeiser, Stållegende ved 400 mrd.
           og videre til Stålikon ved 5 000 mrd. – omtrent hele stålindustrien i verden). Ved navnet står også den beste
-          plasseringen i en sesong som er over: en pokal for vinneren og en medalje for topp 10. «Koblet til på dag N»
-          betyr at spillet ble spilt uten konto før det: da kan det ha vokst fort på lista. Kontoer med urimelig vekst
-          holdes utenfor.
+          plasseringen i en sesong som er over: en pokal for vinneren og en medalje for topp 10. Kontoer med urimelig
+          vekst holdes utenfor.
         </p>
       </details>
     </>
