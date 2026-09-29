@@ -193,6 +193,12 @@ Spilleren ser: fanen «Anbud» under Salg og «Auksjon» under Marked, fra nivå
   tempo, like meldinger og lenker. 30 dager. Eieren skjuler meldinger med `hidden = true`.
 - Senere: hendelser fra spillet i rapporten (anbud avgjort, overtakelser), og en «rapporter»-knapp hvis det trengs.
 
+### Eksport av tabellene – bygget (B-345)
+
+- Hver natt (02:17 UTC) legger `eksport` (edge-funksjon, kalt av pg_cron) alle tabellene i `public` unntatt
+  `save_backups` i den private mappa `eksport` i Storage som `stalverk-ÅÅÅÅ-MM-DD.json.gz`, 14 dager bakover.
+  Innloggingsdata er ikke med. Lastes ned fra dashbordet (Storage → eksport). Gjenoppretting: se CLAUDE.md.
+
 ### Senere (ikke bestemt)
 
 - Felles prismarked: spotprisen påvirkes av hva alle spillerne selger denne uka.

@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 273 – 2026-09-29: Daglig eksport av tabellene (B-345)
+
+**Brukeren ba om:** «Lag eksport av de viktigste tabellene» (gratisplanen har ingen sikkerhetskopier).
+
+**Gjort:** `073_eksport.sql` (kjørt): `backup_export()`, den private mappa `eksport`, pg_cron-jobben `eksport-daglig`
+(02:17 UTC). Edge-funksjonen `eksport` (utplassert) pakker og lagrer én fil per dag, 14 dager. Adressen i Vault.
+Den første versjonen stoppet på tidsgrensen (jsonb bit for bit, 14 s); nå `json_agg` som tekst (0,5 s).
+
+**Testet:** kjørt for hånd: 37 tabeller, 2,1 MB; andre kall samme dag hoppes over; get_advisors uten nye funn (pg_net
+flyttet til `extensions`).
+
+**Gjenstår:** se at nattens kjøring kom (`select * from net._http_response` eller Storage → eksport i morgen).
+Eieren bør laste ned en fil nå og da og legge den utenfor Supabase.
+
+---
+
 ## Økt 272 – 2026-09-29: Færre kall til databasen (B-344)
 
 **Brukeren ba om:** «Log query på supabase er ganske stor.»

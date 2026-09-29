@@ -212,6 +212,7 @@ frontend/scripts/ sjekk-endringslogg.mjs: endringsloggen dekker nyeste beslutnin
 frontend/public/  PWA: manifest, ikoner (icon.svg er kilden; PNG-ene lages fra den med Chromium, B-249), service worker
 supabase/      SQL-migrasjonene, nummerert. Kjøres i prosjektet med Supabase-connectoren (apply_migration) og
                legges her samtidig, så repoet speiler databasen. Sjekk get_advisors (security) etter hver DDL-endring.
+supabase/functions/ Edge-funksjoner (eksport, B-345)
 supabase/utkast/ Spørringer som bare leser (f.eks. dry-run av økonomireformen) – ikke migrasjoner
 docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretningen for sluttspillet, B-180), UI.md,
                OKONOMI.md (økonomianalysen og reform 2, B-301), KONSERNBIDRAG.md (hovedverkets bidrag i ekte tid, B-313),
@@ -481,6 +482,12 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   varsellinja og (under 380 px) i tallraden – begge er `ChatButton`, så en endring gjelder begge. Hendelser fra spillet
   (B-339, 071) skrives av triggerne `chat_on_tender`/`chat_on_takeover`/`chat_on_konsern` med `chat_event` (kind
   `hendelse`, uten avsender). Ny hendelse: ny trigger eller et kall til `chat_event`, aldri beløp som er hemmelige.
+- **Eksporten** (B-345, 073): hver natt legger edge-funksjonen `eksport` (`supabase/functions/eksport`) alle tabellene i
+  `public` (unntatt `save_backups`) i Storage-mappa `eksport` som `stalverk-ÅÅÅÅ-MM-DD.json.gz`, 14 dager. Kjør for hånd med
+  `select net.http_post(url := (select decrypted_secret from vault.decrypted_secrets where name = 'eksport_url'), body := '{}')`
+  og se svaret i `net._http_response`. Gjenopprett én tabell (aldri over ekte data uten dry-run og eierens godkjenning):
+  `select * from json_populate_recordset(null::public.<tabell>, '<fil>'::json -> 'tabeller' -> '<tabell>')`.
+  `backup_export()` må holde seg under tidsgrensen på 8 s (bygg tekst med `json_agg`, ikke jsonb bit for bit).
 - **Gjester** (B-212) er anonyme kontoer, men appen ser dem som «uten konto» (`getSession()` er null; gjestens økt ligger i
   `net/guest.ts`). Serveren slipper gjester bare til det som står i `guest_gate` (035). Skal gjester få noe nytt, må det
   legges i lista der – ellers får de 403. `pgrst.db_pre_request` står på rollen `authenticator`; sjekk med

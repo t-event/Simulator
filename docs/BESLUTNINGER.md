@@ -6270,3 +6270,24 @@ Beslutning:
 Testet: `npm test`, lint, typesjekk, bygg; Playwright med falsk tjeneste (beskjeden vises og lukkes, lista hentes én gang
 selv med topplista åpnet tre ganger).
 Konto (B-149): uendret.
+
+## B-345 Daglig eksport av spilltabellene (2026-09-29)
+Status: gjelder
+Endringslogg: nei – teknisk; spillerne merker ingenting
+Bakgrunn: eieren: «Lag eksport av de viktigste tabellene». Gratisplanen i Supabase tar ingen sikkerhetskopier av
+databasen («No backups»). `save_backups` dekker bare spillene, ikke konsernet, selskapene, anbudene, kassa eller topplista.
+Beslutning:
+- `073_eksport.sql`: `backup_export()` samler alle tabellene i `public` (unntatt `save_backups`) til én JSON
+  `{ laget, versjon, tabeller: { navn: [rader] } }`. Bare `service_role` kan kjøre den. Bygges som tekst med `json_agg` per
+  tabell (0,5 s); jsonb satt sammen bit for bit tok 14 s og stoppet på tidsgrensen (8 s) – den første versjonen.
+- Edge-funksjonen `eksport` (`supabase/functions/eksport`, uten JWT-sjekk) pakker den med gzip og legger den i den
+  private mappa `eksport` i Storage som `stalverk-ÅÅÅÅ-MM-DD.json.gz` (ca. 2,1 MB i dag, 13 MB utpakket). Høyst én fil per
+  dag: et nytt kall samme dag hoppes over, så det er ufarlig at hvem som helst kan kalle adressen. Filer eldre enn
+  14 dager slettes. Nøkkelen (service_role) settes av Supabase i funksjonens miljø – den står ikke i repoet.
+- pg_cron-jobben `eksport-daglig` kaller funksjonen kl. 02:17 UTC med pg_net. Adressen ligger i Vault (`eksport_url`),
+  lagt inn for seg. pg_net står i schemaet `extensions` (i `public` ga det et varsel i get_advisors).
+- Innloggingsdata (`auth.users`: e-post og passordhash) er ikke med. Eieren laster ned filene i dashbordet:
+  Storage → eksport → fila → Download, og kan legge dem et trygt sted.
+Testet: kjørt for hånd – 200, 37 tabeller, 2 195 607 byte; kall nummer to samme dag hoppes over; cron-jobben er aktiv;
+get_advisors (security) uten nye funn.
+Konto (B-149): ingen funksjon i spillet.
