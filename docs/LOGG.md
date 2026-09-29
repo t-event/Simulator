@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 291 – 2026-09-29: Gjester og tilgangsreglene (B-365)
+
+**Brukeren sendte:** Supabase-varselet «Anonymous users will use the authenticated role … review your RLS policies».
+
+**Funnet:** RLS gir bare egne rader, og `guest_gate` stenger alt gjester ikke skal ha (testet som gjest). Men
+`meter_snapshot` hadde mistet sjekken for gjester, og bidraget og målingene tok med gjester.
+
+**Gjort:** `080_gjester_utenfor.sql` (B-365). Regel i CLAUDE.md.
+
+**Testet:** `guest_gate` med gjeste-JWT i en DO-blokk (åpne og stengte kall), måleren for vanlige spillere etterpå.
+
+**Gjenstår:** sjekk gjestene 30.9 (påminnelse satt).
+
 ## Økt 290 – 2026-09-29: Verden hvert 5. minutt (B-364)
 
 **Brukeren ba om:** «Fortsett».
