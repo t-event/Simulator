@@ -187,6 +187,12 @@ Spilleren ser: fanen «Anbud» under Salg og «Auksjon» under Marked, fra nivå
 - Budene sjekkes mot spillerens kasse og kapasitet i siste snapshot.
 - Fagboka: kapittel om anbud, og veiledning ved første anbud.
 
+### Skiftrapporten – bygget (B-338)
+
+- Felles chat for alle med konto (`070_skiftrapporten.sql`, `net/chat.ts`, `ui/Chat.tsx`). Grenser på serveren: lengde,
+  tempo, like meldinger og lenker. 30 dager. Eieren skjuler meldinger med `hidden = true`.
+- Senere: hendelser fra spillet i rapporten (anbud avgjort, overtakelser), og en «rapporter»-knapp hvis det trengs.
+
 ### Senere (ikke bestemt)
 
 - Felles prismarked: spotprisen påvirkes av hva alle spillerne selger denne uka.

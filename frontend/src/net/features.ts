@@ -37,6 +37,10 @@ export const ACCOUNT_FEATURES = {
     name: "Verdenskartet",
     why: "Kartet viser verkene og selskapene til de andre spillerne, og regionene står på serveren.",
   },
+  skiftrapporten: {
+    name: "Skiftrapporten",
+    why: "Chatten er felles for alle spillerne, og de andre ser brukernavnet ditt ved meldingene.",
+  },
   konsernkasse: {
     name: "Konsernkassa",
     why: "Kassa ligger på serveren og går i virkelig tid, så overføringene og det du kjøper i verden avgjøres der.",

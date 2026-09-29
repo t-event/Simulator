@@ -61,6 +61,16 @@ import { resetServerClock, serverClockOffset, syncServerClock } from "./clock";
 import { realNow } from "../game/clock";
 import { applyKonsern, konsernDiffers, parseKonsern } from "./konsern";
 import { parseWorldMap } from "./worldMap";
+import {
+  CHAT_REFUSAL_TEXT,
+  chatSeen,
+  deleteChat,
+  fetchChat,
+  fetchChatLatest,
+  markChatSeen,
+  mergeChat,
+  sendChat,
+} from "./chat";
 import { applyTakeoverNews, parseControl, parseTakeover, parseTakeoverLast, parseWindow } from "./world";
 import { konsernOptions, konsernReady } from "../game/konsern";
 import {
@@ -150,6 +160,8 @@ interface Fake {
   /** Gjestekontoer (B-212) og om anonyme kontoer er slått av i Supabase */
   guests: Set<string>;
   guestsOff: boolean;
+  /** Skiftrapporten (B-338) */
+  chat: { id: number; user: string; body: string; at: number; hidden: boolean }[];
 }
 function makeFake(): Fake {
   const f: Fake = {
@@ -168,6 +180,7 @@ function makeFake(): Fake {
     bids: new Map(),
     guests: new Set(),
     guestsOff: false,
+    chat: [],
   };
   const json = (status: number, body: unknown) =>
     new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
@@ -384,6 +397,38 @@ function makeFake(): Fake {
       if (amt === 0) f.bids.delete(id);
       else f.bids.set(id, amt);
       return json(200, { ok: true, bid: amt, balance: t.balance });
+    }
+    // Skiftrapporten (B-338), som 070: brukernavn, 1–300 tegn, ingen lenker, ikke to meldinger på 5 s
+    if (path.startsWith("/rest/v1/rpc/chat_send")) {
+      if (!id) return json(200, { ok: false, reason: "konto" });
+      if (!f.nicknames.get(id)) return json(200, { ok: false, reason: "navn" });
+      const b = String(body.p_body ?? "")
+        .replace(/\s+/g, " ")
+        .trim();
+      if (!b) return json(200, { ok: false, reason: "tom" });
+      if (b.length > 300) return json(200, { ok: false, reason: "lang" });
+      if (/https?:\/\/|www\./i.test(b)) return json(200, { ok: false, reason: "lenke" });
+      const now = Date.now();
+      if (f.chat.some((m) => m.user === id && now - m.at < 5000)) return json(200, { ok: false, reason: "fort" });
+      const mid = f.chat.length + 1;
+      f.chat.push({ id: mid, user: id, body: b, at: now, hidden: false });
+      return json(200, { ok: true, id: mid });
+    }
+    if (path.startsWith("/rest/v1/rpc/chat_list")) {
+      const after = Number(body.p_after ?? 0);
+      const rows = f.chat
+        .filter((m) => !m.hidden && m.id > after)
+        .slice(-Number(body.p_limit ?? 60))
+        .map((m) => ({ id: m.id, nick: f.nicknames.get(m.user) ?? "?", mine: m.user === id, body: m.body, at: m.at }));
+      return json(200, rows);
+    }
+    if (path.startsWith("/rest/v1/rpc/chat_latest")) {
+      return json(200, Math.max(0, ...f.chat.filter((m) => !m.hidden).map((m) => m.id)));
+    }
+    if (path.startsWith("/rest/v1/rpc/chat_delete")) {
+      const m = f.chat.find((x) => x.id === Number(body.p_id) && x.user === id);
+      if (m) m.hidden = true;
+      return json(200, { ok: !!m });
     }
     if (path.startsWith("/rest/v1/rpc/treasury_status")) {
       const t = f.treasury.get(id) ?? { balance: 0, used: 0 };
@@ -1785,6 +1830,36 @@ const main = async () => {
     assert(g.log.at(-1)!.text.includes("Tom har overtatt skraplageret"), g.log.at(-1)!.text);
     assert(applyTakeoverNews(g, companies) === 0, "to ganger");
     assert(applyTakeoverNews(g, [{ name: "X", takeoverLast: { ...last, mineOwner: false } }]) === 0, "ikke med");
+  });
+
+  await test("Skiftrapporten (B-338): skriv, les nye, slett egne, og serverens grenser forklares", async () => {
+    const f = fresh();
+    await login(f);
+    const first = await sendChat("Hei");
+    assert(!first.ok && first.reason === "navn" && CHAT_REFUSAL_TEXT.navn.length > 0, "uten brukernavn");
+    f.nicknames.set("u-a@test", "Smelteren");
+    f.nicknames.set("u-b", "Grane");
+    f.chat.push({ id: 1, user: "u-b", body: "God morgen", at: Date.now() - 60_000, hidden: false });
+    const sent = await sendChat("  Hei   alle  ");
+    assert(sent.ok && sent.id === 2, `sendt ${JSON.stringify(sent)}`);
+    const again = await sendChat("En til");
+    assert(!again.ok && again.reason === "fort", "for fort");
+    const link = await sendChat("se www.x.no");
+    assert(!link.ok && link.reason === "lenke", "lenke");
+    const all = await fetchChat();
+    assert(all.length === 2 && all[0].nick === "Grane" && !all[0].mine && all[1].mine, JSON.stringify(all));
+    assert(all[1].body === "Hei alle", "mellomrommene");
+    assert((await fetchChat(1)).length === 1 && (await fetchChatLatest()) === 2, "bare nye");
+    assert((await deleteChat(2)) && !(await deleteChat(1)), "bare egne kan slettes");
+    assert((await fetchChat()).length === 1, "slettet");
+    // Sammenslåing uten dubletter, i rekkefølge, med tak
+    const m = (id: number) => ({ id, nick: "x", mine: false, body: "b", at: 0 });
+    const merged = mergeChat([m(1), m(3)], [m(3), m(2), m(4)], 3);
+    assert(merged.map((x) => x.id).join() === "2,3,4", merged.map((x) => x.id).join());
+    // Sist lest huskes per konto
+    markChatSeen(4);
+    markChatSeen(2);
+    assert(chatSeen() === 4, "sist lest");
   });
 
   setSaveListener(null);

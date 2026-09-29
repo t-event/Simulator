@@ -6146,3 +6146,24 @@ Beslutning (migrasjon `069_overtakelse_alltid_mulig.sql`, `TAKEOVER.attackCap` i
 Testet: SQL (`takeover_attack_of(10 V) = 189,74` mot `takeover_defense_of(100, 3 V) = 169,28`, ingen selskap med fordel i
 anbudet), `npm test` med de samme tallene. Tabellen i `docs/KONTROLL-FORSLAG.md` avsnitt 5 er regnet på nytt.
 Konto (B-149): uendret – overtakelser og anbud krever konto.
+
+## B-338 Skiftrapporten: én felles chat for alle spillere med konto (2026-09-29)
+Status: gjelder
+Bakgrunn: eieren: «Lag en globalchat. Den må heita "Skiftrapporten".»
+Beslutning (migrasjon `070_skiftrapporten.sql`, `net/chat.ts`, `ui/Chat.tsx`):
+- **Serveren:** tabellen `chat_messages` (RLS uten policyer) og funksjonene `chat_send`, `chat_list`, `chat_latest` og
+  `chat_delete`, bare for innloggede (ikke `anon`, og gjester stoppes av `guest_gate`). Meldingene vises med brukernavnet
+  fra topplista; uten brukernavn kan man lese, men ikke skrive. Sperrede kontoer (juksesperren eller `banned`) kan lese,
+  men ikke skrive; meldingene fra en `banned` konto skjules.
+- **Grenser mot bråk:** 1–300 tegn på én linje, én melding per 5 sekunder og høyst 20 per 10 minutter, ikke samme tekst to
+  ganger på 2 minutter, ingen lenker. Meldingene står i 30 dager. Egne meldinger kan slettes; eieren skjuler andres med
+  `update public.chat_messages set hidden = true where id = …`.
+- **Appen:** knapp med snakkeboble ved varsellinja (under 380 px i tallraden øverst, ved «?», som B-283), med prikk når
+  det har kommet nye meldinger (ser etter hvert minutt). Arket henter nye meldinger hvert 5. sekund mens det er åpent,
+  egne meldinger står til høyre. Sist leste melding huskes per konto på enheten (bare for prikken).
+- **Gradvis synlighet:** knappen vises med konto, eller uten konto fra verkstedet (nivå 1), aldri under veiledningen.
+  Uten konto viser arket hva Skiftrapporten er, med `NeedsAccount` og knapp til innlogging.
+- Ingen hendelser fra spillet skrives inn automatisk ennå (f.eks. «X vant anbudet») – kan komme senere.
+Testet: SQL som spiller i en DO-blokk som ble rullet tilbake (lagret, for fort, lik tekst, lenke, for lang, slettet, lista),
+`npm test` (ny nettest mot falsk tjeneste), Playwright på de 7 størrelsene med og uten konto.
+Konto (B-149): krever konto (regel 3: viser andre spillere og brukernavnet ditt).

@@ -32,6 +32,7 @@ import { DailySync } from "./Daily";
 import { BadgeSync } from "./BadgeSync";
 import { GoalsPage, GoalsSheet } from "./Goals";
 import { LeaderboardSheet } from "./Leaderboard";
+import { ChatButton, ChatSheet } from "./Chat";
 import { useDailyStatus } from "./useDaily";
 import { missionBonusReady } from "../game/daily";
 import { useSeasonStatus } from "./useSeason";
@@ -442,12 +443,15 @@ function TopBar({
   onBoard,
   onResearch,
   onHelp,
+  onChat,
   notice,
 }: {
   g: GameState;
   api: GameApi;
   /** «Hva gjør jeg nå?» i varsellinja på PC (B-283) */
   onHelp: () => void;
+  /** Skiftrapporten (B-338) */
+  onChat: () => void;
   /** Fagpoengene i toppfeltet åpner Forskning (B-281) */
   onResearch: () => void;
   onBook: () => void;
@@ -551,7 +555,8 @@ function TopBar({
             {Math.floor(g.researchPoints)}
           </Kpi>
         )}
-        {/* «Hva gjør jeg nå?» på smale mobiler (B-283): i varsellinja nederst ble det for trangt under 380 px */}
+        {/* Skiftrapporten (B-338) og «Hva gjør jeg nå?» (B-283) på smale mobiler: i varsellinja ble det for trangt under 380 px */}
+        <ChatButton g={g} onClick={onChat} className="g-kpi g-kpi-btn g-chat-kpi" />
         <button
           className="g-kpi g-kpi-btn g-help-kpi"
           onClick={onHelp}
@@ -561,7 +566,7 @@ function TopBar({
           <Icon name="circle-help" />
         </button>
       </div>
-      {notice && <NoticeRow g={g} api={api} onInbox={onInbox} onBoard={onBoard} onHelp={onHelp} />}
+      {notice && <NoticeRow g={g} api={api} onInbox={onInbox} onBoard={onBoard} onHelp={onHelp} onChat={onChat} />}
     </header>
   );
 }
@@ -574,6 +579,7 @@ function NoticeRow({
   onBoard,
   onHelp,
   onGoals,
+  onChat,
   className = "",
 }: {
   g: GameState;
@@ -584,6 +590,8 @@ function NoticeRow({
   onHelp: () => void;
   /** Mål (B-214): egen knapp på mobil som åpner et ark, som de to andre (B-286); på PC står Mål i sidemenyen */
   onGoals?: () => void;
+  /** Skiftrapporten (B-338) */
+  onChat: () => void;
   className?: string;
 }) {
   return (
@@ -598,6 +606,7 @@ function NoticeRow({
         <Icon name="circle-help" />
       </button>
       {onGoals && <GoalsButton g={g} onClick={onGoals} />}
+      <ChatButton g={g} onClick={onChat} />
       <button className="g-book g-board-btn" onClick={onBoard} aria-label="Toppliste" title="Toppliste">
         <Icon name="trophy" />
       </button>
@@ -802,6 +811,7 @@ export function GameApp() {
   const [goalsOpen, setGoalsOpen] = useState(false);
   // Topplista er et eget ark bak pokalen igjen (B-214); Mål er en egen side
   const [boardOpen, setBoardOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   // Lista topplista åpner på: kontrollrommet når den åpnes fra resultatet der (B-295)
   const [boardKind, setBoardKind] = useState<BoardKind>("verdi");
   const [bookChapter, setBookChapter] = useState<string | null>(null);
@@ -1002,6 +1012,7 @@ export function GameApp() {
     settingsOpen ||
     inboxOpen ||
     boardOpen ||
+    chatOpen ||
     !!g.pendingManual ||
     !!g.pendingDecision ||
     g.celebrate !== null ||
@@ -1020,6 +1031,7 @@ export function GameApp() {
             onBook={() => openBook()}
             onResearch={() => go("forskning")}
             onHelp={() => setHelpOpen(true)}
+            onChat={() => setChatOpen(true)}
             onSettings={() => setSettingsOpen(true)}
             onBoard={() => setBoardOpen(true)}
             onInbox={openInbox}
@@ -1100,6 +1112,7 @@ export function GameApp() {
               onBoard={() => setBoardOpen(true)}
               onHelp={() => setHelpOpen(true)}
               onGoals={() => go("mal")}
+              onChat={() => setChatOpen(true)}
             />
           )}
         </div>
@@ -1198,6 +1211,15 @@ export function GameApp() {
             setBoardKind("verdi");
           }}
           onOpenSettings={() => setSettingsOpen(true)}
+        />
+      )}
+      {chatOpen && (
+        <ChatSheet
+          onClose={() => setChatOpen(false)}
+          onOpenSettings={() => {
+            setChatOpen(false);
+            setSettingsOpen(true);
+          }}
         />
       )}
       {settingsOpen && (
