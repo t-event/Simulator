@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 307,
+    date: "2026-09-29",
+    title: "Datterverk selges for 60 % av byggekostnaden",
+    items: [
+      "Selger du et datterverk, får du 60 % av det det ville kostet å bygge det på nytt – ikke lenger verdien med alle bonuser. Å kjøpe og selge igjen taper alltid penger.",
+      "Verdien av verket (det det tjener) teller som før i konsernverdien og titlene.",
+    ],
+  },
+  {
     b: 306,
     date: "2026-09-29",
     title: "Reform 2: taket for kassa er 10 mrd. – resten er betalt ut til eierne",

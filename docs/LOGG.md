@@ -12,10 +12,12 @@ folk på topplista og fiks.» Valgte 10 mrd. og kjøring nå, og at «Mest penge
 
 **Gjort:** B-306: taket 10 mrd. i appen, lista «Mest penger på bok» tatt bort, migrasjon 052 (kasse over 10 mrd. →
 10 mrd., resten utbetalt til eierne, sikkerhetskopi, reformlogg, serverEdit, merke) kjørt etter at appen var publisert.
+B-307 (brukeren: kjøp og salg av datterverk ga enorme penger): salgssummen er 60 % av byggekostnaden, ikke verdien.
 
 **Testet:** tørrkjøring (ti spillere, 564 mrd. flyttet, seks nye merker, kontroll OK), tsc, lint, npm test, balance.
 
-**Gjenstår:** gebyret (01:38 UTC, påminnelse satt). Pynt for sesong 3.
+**Gjenstår:** prisgjennomgang av alt som kjøpes for fagpoeng og penger på toppen (brukerens neste spørsmål), gebyret
+(01:38 UTC, påminnelse satt). Pynt for sesong 3.
 
 ---
 

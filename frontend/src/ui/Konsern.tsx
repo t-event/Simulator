@@ -38,6 +38,7 @@ import {
   SISTER_TYPES,
   sisterProfit,
   sellSister,
+  sisterSalePrice,
   sisterValue,
   upgradeCost,
   VALUE_DAYS,
@@ -443,14 +444,16 @@ function PlantMore({ g, act, p, options }: { g: GameState; act: Act; p: SisterPl
               setSelling(false);
             }}
           >
-            Ja, selg for {fmtKr(sisterValue(g, p))}
+            Ja, selg for {fmtKr(sisterSalePrice(g, p))}
           </button>
           <button onClick={() => setSelling(false)}>Avbryt</button>
         </div>
       ) : (
         <div className="g-konsern-buy">
-          <button onClick={() => setSelling(true)}>Selg for {fmtKr(sisterValue(g, p))}…</button>
-          <span className="g-muted g-small-text">Pengene går i kassa, f.eks. til et storverk.</span>
+          <button onClick={() => setSelling(true)}>Selg for {fmtKr(sisterSalePrice(g, p))}…</button>
+          <span className="g-muted g-small-text">
+            60 % av byggekostnaden. Pengene går i kassa, f.eks. til et storverk.
+          </span>
         </div>
       )}
     </>

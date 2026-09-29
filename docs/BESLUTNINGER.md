@@ -5541,3 +5541,20 @@ Beslutning:
   leser `cash − loan` og virker som før.
 Konto (B-149): nei – regel 1, eget spill (lista på topplista krever konto som før).
 Testet: tsc, lint, `npm test` (taket-testen bruker `CASH_RESERVE.softCap`), balanse (exit 0), tørrkjøring i databasen.
+
+## B-307 Datterverk selges for 60 % av byggekostnaden, ikke for verdien (2026-09-29)
+Status: gjelder (erstatter salgsregelen i B-121)
+Bakgrunn: eieren: «Om man kjøper et stålverk eller storverk på Utvid og selger det igjen i oversikten på Konsern, så
+tjener man enorme penger.» Salget ga verdien (60 døgns overskudd, B-121) med alle bonuser: et stålverk til 255 mill.
+(med oppkjøpsavdeling) kunne selges for inntil 400 mill. i samme øyeblikk, også mens det ble bygget – og et storverk til
+1,02 mrd. for 1,6 mrd. Uendelig penger uten risiko.
+Beslutning:
+- **Salgssummen er 60 % av det det ville kostet å bygge verket på nytt** (`sisterSalePrice`: listepris × (1 + 0,3 ×
+  trinn) × `SELL_SHARE`), uansett hvor mye det tjener og uansett bonuser. Et verk som bygges eller moderniseres, selges
+  som ferdig (pengene er betalt). Kjøp og salg taper alltid penger (255 → 180 mill.). Byttet til stålkompleks
+  (`swapForKompleks`) bruker samme sum.
+- **Verdien** (`sisterValue`, 60 døgns overskudd) står som før i konsernverdien og titlene – den er ikke penger.
+- Knappen sier «Selg for X…» med forklaringen «60 % av byggekostnaden».
+Konto (B-149): nei – regel 1, eget spill.
+Testet: tsc, lint, `npm test` (ny del av B-209-testen: salgssummen er 60 % av byggekostnaden som modernisert, lavere enn
+kjøpsprisen og verdien, upåvirket av bonusene, og salget gir riktig sum), balanse (exit 0).
