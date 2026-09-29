@@ -133,3 +133,4 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Realistiske kostnader på toppen av hjemmeverket | Nei | Regel 1: ditt eget spill | B-305 |
 | Taket for kassa 10 mrd., kjørt på serveren | Nei | Regel 1: ditt eget spill | B-306 |
 | Datterverk selges for 60 % av byggekostnaden | Nei | Regel 1: ditt eget spill | B-307 |
+| Markedet metter seg fra 3 000 t, administrasjon 500 kr/t | Nei | Regel 1: ditt eget spill | B-308 |

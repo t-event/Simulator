@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 308,
+    date: "2026-09-29",
+    title: "Reform 2: markedet tar unna 3 000 tonn i døgnet til full pris",
+    items: [
+      "Kundene tar unna ca. 3 000 tonn i døgnet til full pris. Det verket lager utover, selges for 45 % av prisen (40 % over 20 000 tonn). Et nytt storverk merker ingenting.",
+      "Administrasjonen på storverket er doblet: 500 kr per tonn døgnkapasitet over 5 000 tonn.",
+      "Det største verket går fra ca. 95 til ca. 36 mill. per døgn. Større verk lønner seg fortsatt litt, men markedet er grensen – veksten kommer fra konsernet og utbyttet i ekte tid.",
+    ],
+  },
+  {
     b: 307,
     date: "2026-09-29",
     title: "Datterverk selges for 60 % av byggekostnaden",

@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 240 – 2026-09-29: Reform 2, del 5 – markedet metter seg fra 3 000 t
+
+**Brukeren ba om:** «Jeg tjener jo fortsatt i snitt over 100 millioner per dag. Er ikke det drøyt mye? Vi må få til
+å få økonomien til å være mye bedre.»
+
+**Gjort:** 052 kjørt (åtte spillere justert av serveren, to av appen; ett merke for hånd). B-308: metningen fra
+3 000 t (45 %, 40 % over 20 000), administrasjon 500 kr/t over 5 000 t. Toppen fra ca. 95 til ca. 36 mill. per døgn.
+
+**Testet:** tsc, lint, npm test, balance (exit 0), `--storovn` før/etter fra samme utgangspunkt.
+
+**Gjenstår:** gebyret (01:38 UTC, påminnelse satt). Pynt for sesong 3. Følg med på om toppspillerne ligger på
+30–40 mill. per døgn etter noen døgn.
+
+---
+
 ## Økt 239 – 2026-09-29: Reform 2, del 4 – taket senket til 10 mrd. og kjørt på serveren
 
 **Brukeren ba om:** «Jeg har jo enda 100 mrd. på kontoen. Jeg syntes du var for snill med reform 2. Sjekk pengene til
