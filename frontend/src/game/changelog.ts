@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 347,
+    date: "2026-09-29",
+    title: "Ingen zoom når du skriver",
+    items: [
+      "Mobilen zoomer ikke lenger inn når du trykker i Skiftrapporten eller andre felt du skriver i, som innlogging og beløp.",
+    ],
+  },
+  {
     b: 346,
     date: "2026-09-29",
     title: "Ingen vikarer når verket står",

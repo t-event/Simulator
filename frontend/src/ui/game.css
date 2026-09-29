@@ -6976,3 +6976,13 @@ button.g-prod-row:hover {
     color: var(--info);
   }
 }
+
+/* iPhone zoomer inn på tekstfelt med mindre skrift enn 16 px, og zoomer ikke ut igjen (B-347). Gjelder alle felt man
+   skriver i på berøringsskjerm: chatten, konto, kallenavn, beløp */
+@media (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: max(16px, 1em);
+  }
+}

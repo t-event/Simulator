@@ -6309,3 +6309,17 @@ Beslutning:
 - Vikarer som alt var leid inn før stansen, betales ikke tilbake.
 Testet: ny test i `game/tests.ts`; `balance.ts` og `balance.ts --sommerstans`.
 Konto (B-149): nei – vanlig spillmekanikk.
+
+## B-347 Ingen zoom i tekstfelt på mobil (2026-09-29)
+Status: gjelder
+Bakgrunn: eieren: «Mobilen zoomer inn når jeg skal skrive i chatten..» Safari på iPhone zoomer inn på et tekstfelt med
+skrift under 16 px når man trykker i det, og zoomer ikke ut igjen. Da ble Skiftrapporten kuttet i høyre kant. Chatfeltet
+arvet 14 px (`--fs-body`), feltene i kontoen 13 px (`.g-field`).
+Beslutning:
+- `@media (pointer: coarse)`: alle `input` (unntatt avkrysning, radio og glidebryter), `select` og `textarea` får
+  `font-size: max(16px, 1em)`. Gjelder chatten, innlogging, kallenavn og beløpsfeltene i Industrien (17 → 16 px).
+- Ikke `maximum-scale=1` i viewport: det stenger for å zoome med fingrene, som noen trenger for å lese.
+- PC (mus) er uendret.
+Testet: Playwright, iPhone SE og 13: 16 px; PC 1366: 13/14/17 px som før. Chromium zoomer ikke, så eieren sjekker på
+telefonen.
+Konto (B-149): nei.

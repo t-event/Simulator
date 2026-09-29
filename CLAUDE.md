@@ -257,6 +257,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   den sluttet spillet over bunnen på iPhone-hjemskjermen (B-264, B-267), og med skjermhøyden satt direkte forsvant
   navnene i menyen (B-268). Siden kan scrolles litt, så `main.tsx` setter vinduet straks tilbake til toppen – ellers
   treffer trykk over knappene. Chromium viser ingen av feilene; spør brukeren om å sjekke på telefonen.
+- **Tekstfelt på iPhone** (B-347): Safari zoomer inn på felt med skrift under 16 px og zoomer ikke ut igjen. Regelen
+  nederst i `game.css` gir alle felt man skriver i minst 16 px på berøringsskjerm – ikke overstyr den med mindre skrift.
 - Skjermbilder med `fullPage: true` viser faste menyer midt på siden; det er
   bare et artefakt av skjermbildet.
 - Prosessmodellen er kalibrert med steg på maks 1 s – del opp større steg.
