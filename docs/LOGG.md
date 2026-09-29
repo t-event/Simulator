@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 271 – 2026-09-29: Databasen treg – verdensoppdateringen uten kø (B-343)
+
+**Brukeren ba om:** Industrien og topplista bruker lang tid på å vises.
+
+**Funnet:** `world_status` opptil 7,7 s (snitt 0,24 s) fordi hvert kall kjørte `world_tick` bak en lås; kallene sto i kø.
+Stegene alene tar 13–94 ms. Konsernverdi-lista 0,25–0,4 s.
+
+**Gjort:** `072_world_tick_uten_ko.sql` (kjørt): høyst én gang per 30 s, hopper over i stedet for å vente.
+**Testet:** som spiller i en DO-blokk: 65, 28, 26, 26 ms; tidspunktet for siste kjøring settes.
+
+**Gjenstår:** se på `pg_stat_statements` for `world_status` om et døgn; eventuelt mellomlagre Konsernverdi-lista.
+
+---
+
 ## Økt 270 – 2026-09-29: «3» på Konsern uten noe å kjøpe (B-342)
 
 **Brukeren ba om:** «Jeg har 3 varsler i konsernet men det er ingenting jeg kan kjøpe.»
