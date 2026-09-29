@@ -37,6 +37,7 @@ import { worldFactor } from "./world";
 import { maybeAdvisor, maybeCreateDecision } from "./decisions";
 import { maybeTip, setCreditHint } from "./tips";
 import { envDay, envHour, envStartBlocked, newEnv, updateEmissions } from "./environment";
+import { mouldHour, mouldRisk, wearMoulds } from "./mould";
 import {
   calendarDay,
   inSummerBreak,
@@ -1295,9 +1296,11 @@ function castBatch(g: GameState, batch: LiquidBatch, stats: PlantStats): void {
     }
     g.lastCast = { grade: batch.grade, min: g.minute };
   }
+  // Kokillene slites av hvert tonn, og slitte kokiller gir flere gjennombrudd (B-351)
+  wearMoulds(g, batch.t, stats);
   if (
     casting.continuous &&
-    chance(g, 0.01 * stats.maintFactor * (batch.tempOff ? 2.5 : 1) * (has(g, "bruddvarsling") ? 0.4 : 1))
+    chance(g, 0.01 * stats.maintFactor * (batch.tempOff ? 2.5 : 1) * (has(g, "bruddvarsling") ? 0.4 : 1) * mouldRisk(g))
   ) {
     const hours = 4 * stats.repairFactor;
     g.castDownUntilMin = g.minute + hours * 60;
@@ -3132,6 +3135,8 @@ function onHour(g: GameState, stats: PlantStats): void {
   checkTemps(g);
   // Havari på renseanlegget (B-263)
   envHour(g, stats);
+  // Reparatøren bytter slitte kokiller (B-351)
+  mouldHour(g, stats);
   // Frost om vinteren (B-265)
   winterHour(g, stats);
   // Kapitlene forskningen krever, kommer i fagboka når forskningen blir synlig (B-025)

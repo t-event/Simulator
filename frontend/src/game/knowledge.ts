@@ -359,6 +359,10 @@ export const KNOWLEDGE: KnowledgeCard[] = [
         text: "Stålet renner fra øsa ned i en fordeler og videre ned i en vannkjølt kobberkokille. Et tynt skall størkner mot veggen og trekkes ut nedover mens kjernen fortsatt er flytende.",
       },
       {
+        head: "Kokillen slites",
+        text: "Kobberet i kokillen slites av stålet som glir forbi. En slitt kokille kjøler ujevnt, skallet blir tynt noen steder, og strengen bryter lettere gjennom. Kokillene byttes derfor jevnlig – det tar et par timer, men er billig mot et gjennombrudd.",
+      },
+      {
         head: "Kjøling og kapping",
         text: "Strengen kjøles med vannspray til den er gjennomstørknet, og kappes til emner. Går skallet i stykker, renner stålet ut – et strenggjennombrudd.",
       },

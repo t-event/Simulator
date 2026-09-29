@@ -144,6 +144,7 @@ frontend/src/
     control.ts   Utbyttepolitikken, forsvarsfondet og Kontroll: tall og ord appen viser (B-334; SQL i 067)
     world.ts     Felles hendelser i motoren og sesongfordel (B-129)
     environment.ts Utslipp, renseanlegg i trinn, havari og bøter (B-263); panelet står i ui/Upgrades.tsx (CleanerPanel)
+    mould.ts     Kokillene i strengstøpingen: slitasje per tonn, risiko for gjennombrudd, bytte (B-351); raden i ui/Maintenance.tsx
     calendar.ts  Året i spillet (360 døgn, dag 1 = 1. april), vinter 15.11.–14.3. og frost (B-265, B-272), fellesferie (B-298);
                  `calendarAhead` til kalenderkortet på Oversikt (ui/CalendarCard.tsx, B-321)
     war.ts       Krig i verden, bare i konsernet: dyrere strøm, flere forespørsler, høyst én per år (B-297)
@@ -257,6 +258,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   den sluttet spillet over bunnen på iPhone-hjemskjermen (B-264, B-267), og med skjermhøyden satt direkte forsvant
   navnene i menyen (B-268). Siden kan scrolles litt, så `main.tsx` setter vinduet straks tilbake til toppen – ellers
   treffer trykk over knappene. Chromium viser ingen av feilene; spør brukeren om å sjekke på telefonen.
+- **Kokillene** (B-351): slites i `castBatch` (`wearMoulds`, tonn / (støpekapasitet × 24 × 20)) og ganges inn i faren for
+  strenggjennombrudd (`mouldRisk`). Reparatøren bytter dem i `mouldHour` med samme bryter som foringen (`autoReline`).
+  `g.mould` mangler i eldre lagringer = nye kokiller. Ny risiko i støpingen ganges inn der, ikke i egne tilfeldigheter.
 - **Tekstfelt på iPhone** (B-347): Safari zoomer inn på felt med skrift under 16 px og zoomer ikke ut igjen. Regelen
   nederst i `game.css` gir alle felt man skriver i minst 16 px på berøringsskjerm – ikke overstyr den med mindre skrift.
 - Skjermbilder med `fullPage: true` viser faste menyer midt på siden; det er

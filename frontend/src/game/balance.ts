@@ -6,6 +6,7 @@
  * rekker, ansetter folk og bygger ut når det er råd. Skriptet sjekker at
  * progresjonen havner innenfor målene, og feiler ellers (brukes i CI).
  */
+import { MOULD, mouldWear, replaceMoulds } from "./mould";
 import {
   bonusCost,
   buyFpDeal,
@@ -372,6 +373,8 @@ function botHour(g: GameState): void {
   g.furnaces.forEach((f, i) => {
     if (f.wear >= (novice ? 0.8 : 0.88) && !f.relineRequested && g.minute >= f.downUntilMin) requestReline(g, i);
   });
+  // Kokillene (B-351): nybegynneren følger rådet (85 %), den flinke ved 90 %
+  if (mouldWear(g) >= (novice ? MOULD.warnAt : 0.9) && g.minute >= g.castDownUntilMin) replaceMoulds(g, stats);
 
   // Kontrakter: ta de som kan lages og rekkes
   const active = g.contracts.filter((c) => c.status === "aktiv");

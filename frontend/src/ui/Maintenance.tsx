@@ -1,7 +1,17 @@
 import type { ReactNode } from "react";
 import { requestReline } from "../game/actions";
 import { PLAN_SAFETY_WEAR } from "../game/engine";
-import { unitType } from "../game/plant";
+import { computePlantStats, unitType } from "../game/plant";
+import {
+  hasMoulds,
+  MOULD,
+  mouldCost,
+  mouldDaysLeft,
+  mouldRisk,
+  mouldSwapHours,
+  mouldWear,
+  replaceMoulds,
+} from "../game/mould";
 import {
   day,
   liningDays,
@@ -58,7 +68,7 @@ export function Maintenance({
     specialistUntil > g.minute
       ? `Den innleide vedlikeholdsspesialisten bytter foringen ved 80 % slitasje til dag ${Math.floor(specialistUntil / 1440) + 1}. Etter det må du, en plan eller en reparatør gjøre det.`
       : repairerOn && !repairersAway
-        ? `Reparatøren bytter foringen ved ${fmtPct(g.settings.relineAt)} slitasje.`
+        ? `Reparatøren bytter foringen ved ${fmtPct(g.settings.relineAt)} slitasje${hasMoulds(g) ? ` og kokillene ved ${fmtPct(MOULD.autoAt)}` : ""}.`
         : canPlan && plan !== null
           ? `Vedlikeholdsplanen bytter foringen hvert ${plan === 1 ? "" : `${plan}. `}døgn.`
           : null;
@@ -119,6 +129,7 @@ export function Maintenance({
             </li>
           );
         })}
+        {hasMoulds(g) && <MouldRow g={g} act={act} />}
       </ul>
 
       {g.stage >= 1 && (hasRepairer || canPlan) && (
@@ -179,10 +190,48 @@ export function Maintenance({
             i stedet for {relineHours}.
           </p>
         )}
+        {hasMoulds(g) && (
+          <p className="g-muted">
+            Kokillene er kobberformene stålet størkner i. De slites av hvert tonn som støpes (ca. {MOULD.lifeDays} døgn
+            med full støping). Over {fmtPct(MOULD.riskFrom)} slitasje revner skallet lettere, og strengen bryter oftere
+            gjennom. Et bytte koster {fmtKr(mouldCost(g))} og stopper støpingen i {fmtNum(mouldSwapHours(stats), 1)}{" "}
+            timer.
+          </p>
+        )}
         {g.stage >= 1 && !hasRepairer && (
           <p className="g-muted">Med en reparatør kan foringen byttes automatisk når den er slitt.</p>
         )}
       </details>
     </Card>
+  );
+}
+
+/** Kokillene i strengstøpingen (B-351): én rad under ovnene */
+function MouldRow({ g, act }: { g: GameState; act: GameApi["act"] }) {
+  const wear = mouldWear(g);
+  const tone = wear >= MOULD.warnAt ? "critical" : wear > MOULD.riskFrom ? "warning" : "ok";
+  const down = g.minute < g.castDownUntilMin;
+  return (
+    <li className="g-maint">
+      <div className="g-maint-head">
+        <strong>Kokillene</strong>
+        <span className={`g-maint-wear is-${tone}`}>{fmtPct(wear)} slitt</span>
+      </div>
+      <Bar value={Math.min(1, wear)} tone={tone} label="Slitasje på kokillene" />
+      <div className="g-maint-foot">
+        <span className="g-muted g-small-text">
+          {wear > MOULD.riskFrom
+            ? `${fmtNum(mouldRisk(g), 1)} ganger så mange gjennombrudd`
+            : `Ca. ${fmtNum(mouldDaysLeft(g), 0)} døgn med full støping igjen`}
+        </span>
+        <button
+          className="g-small"
+          disabled={down || wear < 0.05}
+          onClick={() => act((gg) => replaceMoulds(gg, computePlantStats(gg)))}
+        >
+          {wear < 0.05 ? "Nye kokiller" : `Bytt kokiller (${fmtKr(mouldCost(g))})`}
+        </button>
+      </div>
+    </li>
   );
 }
