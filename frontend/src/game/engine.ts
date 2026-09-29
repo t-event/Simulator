@@ -135,6 +135,18 @@ const STEP_MIN = 10;
 const LOG_MAX = 150;
 const HISTORY_MAX = 120;
 
+/**
+ * Døgnregnskapet rundes før det legges i historikken (B-358): hele kroner, tonn og kWh holder, og tall som
+ * 1594093.5234782605 gjorde historikken til den største delen av det lagrede spillet (ca. 70 kB av 165). Små tall
+ * (under 100) beholder to desimaler.
+ */
+export function roundDay<T>(v: T): T {
+  if (typeof v === "number") return (Math.abs(v) >= 100 ? Math.round(v) : Math.round(v * 100) / 100) as T;
+  if (Array.isArray(v)) return v.map(roundDay) as T;
+  if (v && typeof v === "object") return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, roundDay(x)])) as T;
+  return v;
+}
+
 /** Karbonet ovnen sikter på for hver kvalitet */
 export const TARGET_C: Record<GradeId, number> = {
   enkel: 0.2,
@@ -3354,7 +3366,7 @@ function onDay(g: GameState, stats: PlantStats): void {
     if ((t.kwh ?? 0) > 0 && (t.costs.energi ?? 0) / t.kwh! < 0.7) countEvent(g, "billig_strom");
   }
   g.today.cashEnd = g.cash;
-  g.history.push(g.today);
+  g.history.push(roundDay(g.today));
   if (g.history.length > HISTORY_MAX) g.history.splice(0, g.history.length - HISTORY_MAX);
   g.today = newDay(today, g.cash);
   paidOutDayLog(g);

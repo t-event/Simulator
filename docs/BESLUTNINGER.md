@@ -6500,3 +6500,15 @@ Balanse: `balance.ts` OK (nivådagene innenfor målene, nybegynneren median 180 
 av i testspillerens løp (søkerne er høyst 59, og det tar minst tre spillår før de første går av).
 Konto (B-149): nei – ditt eget spill.
 
+## B-358 Døgnregnskapet i hele tall (2026-09-29)
+Status: gjelder
+Bakgrunn: etter driftsstansen (B-356) sto `save_game` fortsatt for nesten all skriving til disken, ca. 59 kB per
+lagring. Partiene (B-353) er slått sammen for dem som har lagret siden (10–25 partier, 3–8 kB), og da var historikken den
+største delen av det lagrede spillet: 120 døgn med tall som `1594093.5234782605` (ca. 70 kB av 165 kB tekst).
+Beslutning: `roundDay` (`engine.ts`) runder døgnregnskapet når døgnet legges i `g.history`: tall fra 100 og oppover til
+hele tall, mindre tall til to desimaler. `migrate()` runder historikken i eldre lagringer. Serveren bruker bare summer
+over 7 og 30 døgn (`contribution_margin`, `dividend_from_state`), og der betyr ikke øre noe.
+Målt på lagrede spill: tuster2 142 → 127 kB tekst (34 → 27 kB komprimert), et spill på nivå 3 67 → 54 kB (19 → 13 kB).
+Endringslogg: nei – spillerne merker ingenting.
+Konto (B-149): nei – ingen ny funksjon.
+
