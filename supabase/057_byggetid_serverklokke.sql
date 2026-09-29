@@ -125,6 +125,7 @@ create or replace function public.save_game(p_state jsonb, p_minute integer, p_d
   p_season_id integer, p_device text, p_base_rev bigint)
  returns bigint
  language plpgsql
+ security definer
  set search_path to 'public'
 as $function$
 declare
@@ -132,6 +133,8 @@ declare
   old_state jsonb;
   fixed jsonb;
 begin
+  -- security definer (rettelsen «byggetid_serverklokke_rettelse», 03:52 UTC): uten den kjørte save_game som spilleren og
+  -- fikk «permission denied for function guard_projects» – ingen fikk lagret i ca. 10 minutter
   if auth.uid() is null then
     raise exception 'ikke logget inn';
   end if;

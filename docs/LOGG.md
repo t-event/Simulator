@@ -15,7 +15,11 @@ kjøp). B-314: appen bruker serverens klokke (`net/clock.ts`, Date-headeren), og
 tilbake med `guard_projects` (057), logget i `project_guard_log`. Spilleren satt tilbake (058): 8 storverk til trinn 0,
 det åttende bygges ferdig kl. 08:03 UTC; ingen refusjon, ingen sperre (eierens svar).
 
-**Testet:** guard_projects med fem tilfeller i SQL, npm test (serverklokka), tsc, lint.
+**Feil underveis:** `save_game` var ikke `security definer`, så den fikk «permission denied for function guard_projects»
+og ingen fikk lagret i ca. ti minutter (eieren meldte det). Rettet på serveren 03:52 UTC (security definer, 057 oppdatert).
+
+**Testet:** guard_projects med fem tilfeller i SQL, npm test (serverklokka), tsc, lint, save_game som spilleren i en
+transaksjon som rulles tilbake.
 
 **Gjenstår:** se i `project_guard_log` etter et døgn at ingen ærlige spillere blir rettet (bare klokker som går litt
 feil). Eierens svar på KONSERNBIDRAG.md. Pynt for sesong 3.

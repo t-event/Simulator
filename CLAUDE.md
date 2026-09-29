@@ -304,6 +304,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `net/supabase.ts`). Telefonens klokke kan stilles fram, så `save_game()` setter prosjekter tilbake med
   `guard_projects` (057; ren funksjon, test med `select`) og logger i `project_guard_log`. Ny mekanikk i ekte tid
   (frister, pauser, prosjekter) skal bruke `realNow()` og sjekkes på serveren på samme måte – aldri `Date.now()`.
+  `save_game` er `security definer`; en serverfunksjon som kaller noe som er tatt fra `authenticated`, må være det,
+  ellers stopper lagringen for alle (skjedde i ti minutter med B-314). Test nye serverfunksjoner som spilleren:
+  `set_config('request.jwt.claims', …)` + `set_config('role','authenticated', true)` i en DO-blokk som rulles tilbake.
 - **Ingen emoji** (B-237): bruk ikoner fra `ui/icons.tsx`. `npm test` og CI stopper emoji i `src`, `public` og `index.html`
   (`scripts/sjekk-emoji.mjs`). Tekst fra serveren med tegn (plasseringen på topplista) gjøres om til ikon i appen.
 - **Ikoner i spillmotoren** (B-235): utfordringer og prestasjoner har `icon: IconName` (type-import fra `ui/icons.tsx`), og
