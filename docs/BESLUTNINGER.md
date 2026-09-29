@@ -6588,3 +6588,21 @@ sekund, én om gangen, 072) står, så appene og jobben kan kalle samtidig. Jobb
 Endringslogg: nei – spillerne merker bare at ting skjer i tide.
 Konto (B-149): – ingen ny funksjon.
 
+## B-365 Gjester holdes utenfor det som teller mellom spillere, igjen (2026-09-29)
+Status: gjelder (utfyller B-212)
+Bakgrunn: gjestekontoene ble slått på 29.9, og Supabase minnet om at gjester bruker rollen `authenticated`, så alle regler
+for innloggede gjelder dem. Gjennomgang:
+- Tilgangsreglene (RLS) på `saves`, `snapshots`, `profiles`, `records` og `daily` gir bare egne rader – også for gjester.
+- `guest_gate` (035, kjøres av PostgREST før hvert kall) slipper gjester bare til eget spill, tidslinja, overleveringen,
+  å slette seg selv og det alle kan lese. Testet som gjest: `save_game`, `saves`, `snapshots` og `leaderboard` åpne;
+  `chat_send`, `chat_list`, `konsern_order`, `world_status`, `place_bid`, `takeover_bid`, `claim_daily_reward`,
+  `profiles` og `set_nickname` stengt.
+- Feil: `meter_snapshot` (skrevet om i 043/061) hoppet ikke lenger over gjester, så produksjonen deres ville telt i
+  `production_days` og gitt eieren av skraplageret inntekt. B-212 sa at gjester ikke skal gjøre det.
+- `pay_contributions` og `sample_contributions` (077/078) tok med gjester med konsern (0 kr, men rader).
+Beslutning: `080_gjester_utenfor.sql`: `meter_snapshot` hopper over gjester igjen, og bidraget og målingene hopper over
+gjester. Datterverk, utbytte og verdenskartet krever en rad i `konsern`, som bare `konsern_order` lager (stengt for gjester).
+Regel: ny serverfunksjon som gir penger, inntekt eller plass mellom spillere, skal hoppe over gjester (`user_is_guest`).
+Endringslogg: nei – spillerne merker ingenting.
+Konto (B-149): – ingen ny funksjon.
+

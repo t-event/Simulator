@@ -510,5 +510,6 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `backup_export()` må holde seg under tidsgrensen på 8 s (bygg tekst med `json_agg`, ikke jsonb bit for bit).
 - **Gjester** (B-212) er anonyme kontoer, men appen ser dem som «uten konto» (`getSession()` er null; gjestens økt ligger i
   `net/guest.ts`). Serveren slipper gjester bare til det som står i `guest_gate` (035). Skal gjester få noe nytt, må det
-  legges i lista der – ellers får de 403. `pgrst.db_pre_request` står på rollen `authenticator`; sjekk med
+  legges i lista der – ellers får de 403. Serverfunksjoner og triggere som gir penger, inntekt eller plass mellom
+  spillere (måleren, bidraget, målingene), skal hoppe over gjester med `user_is_guest` (B-365). `pgrst.db_pre_request` står på rollen `authenticator`; sjekk med
   `select rolconfig from pg_roles where rolname = 'authenticator'`.
