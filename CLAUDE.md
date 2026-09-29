@@ -314,6 +314,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Fartskontrollen** (B-176) i `check_snapshot` regner med 120 spillminutter per sekund (10×) og 720 når verket står om
   natta (`g.boostMin`, telles i `useGame`). Kommer en ny fart eller en ny måte tida hopper på, må sjekken følge med,
   ellers flagges ærlige spillere.
+- **Salg av datterverk** (B-307): `sisterSalePrice` (60 % av byggekostnaden), aldri `sisterValue` (60 døgns overskudd med
+  bonuser) – verdien er større enn prisen, så salg til verdi ga uendelig penger. Nye måter å kvitte seg med et verk på,
+  bruker salgssummen.
 - **Utbytte i ekte tid** (B-304): datterverkene betaler ingenting i spilltid. Serveren regner utbyttet av det lagrede
   spillet én gang per ekte dag (`dividend_from_state` i 051, `pay_dividends` fra `world_tick`) rett inn i konsernkassa.
   `game/dividend.ts` speiler SQL-en (`DIVIDEND` = `config.world.dividend`): endres regelen, endres begge, og de faste
@@ -329,11 +332,12 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Skraplagerets inntekt** (B-188) regnes på serveren (`029_produksjonsmaler.sql`; `meter_register` står nå i 043) og speiles i `net/scrapIncome.ts`.
   Endres regelen, må begge endres, og `npm test` (scrapTests.ts) og SQL-scenariene i B-188 kjøres på nytt. Farten måles
   med spillminuttene (`game_min`), aldri med hele spilldager (det ga 10× opptil 37 % for mye).
-- **Taket for kassa** (B-303, reform 2): kassa over `CASH_RESERVE.softCap` (100 mrd.) betales ut til eierne (`g.paidOut`)
+- **Taket for kassa** (B-303, reform 2; 10 mrd. fra B-306): kassa over `CASH_RESERVE.softCap` betales ut til eierne (`g.paidOut`)
   i hvert tidssteg og etter hver handling. Det teller ikke i `konsernEquity`, kan ikke brukes og er ikke sikkerhet mot
   konkurs. Den gamle reserven (`lockedReserve`, B-193) står urørt i lagringene og regnes som utbetalt (`paidOutTotal`)
   – ikke migrer den, og ikke legg den inn i konsernverdien igjen. Lista «Utbetalt til eierne» leses av `note_paid_out`
-  på `saves` (050). Reform 2 som helhet: `docs/OKONOMI.md` og B-302.
+  på `saves` (050). Reform 2 som helhet: `docs/OKONOMI.md` og B-302. Skal taket endres igjen: publiser appen først,
+  så serverendringen (052 som mal), ellers fyller eldre apper kassa opp igjen.
 - **Utslipp** (B-263): røyken regnes i hvert tidssteg (`updateEmissions`) mot renseanlegget; boten kommer i `onDay`.
   Nye, større ovner må ha et renseanlegg som holder (`CLEANERS` i `environment.ts`), ellers får testspilleren bot.
   Gamle lagringer får anleggene de trenger i første tidssteg (`env.grant`) – ikke flytt det til `onHour`.

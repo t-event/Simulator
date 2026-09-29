@@ -118,6 +118,9 @@ import {
   directorPerDay,
   maxSisters,
   sisterPrice,
+  sisterSalePrice,
+  sellSister,
+  SELL_SHARE,
   checkKonsernUnlock,
   konsernAdvice,
   directorLevel,
@@ -141,6 +144,7 @@ import {
   MODERNIZE_GAIN,
   modernizeSister,
   SISTER_TYPES,
+  MODERNIZE_SHARE,
   sisterProfit,
   BUILD_HOURS,
   sisterValue,
@@ -1698,6 +1702,24 @@ test("Konsernet bygger i ekte tid, verdien faller ikke imens, og flaggskipet gir
   assert(modernizeSister(g, p.id).ok, "moderniseringen startet ikke");
   assert(sisterProfit(g, p) === before && p.level === 0, "moderniseringen virket med én gang");
   assert(sisterValue(g, p) > value, "verdien regnes ikke som ferdig modernisert");
+  // Salg (B-307): 60 % av byggekostnaden (som modernisert), aldri verdien – kjøp og salg skal tape penger
+  {
+    const price = sisterPrice(g, "stalverk");
+    const sale = sisterSalePrice(g, p);
+    assert(Math.abs(sale - SISTER_TYPES.stalverk.price * (1 + MODERNIZE_SHARE) * SELL_SHARE) < 1, `salgssum ${sale}`);
+    assert(sale < price && sale < sisterValue(g, p), `salg ${sale} lønner seg mot kjøp ${price}`);
+    // Bonusene endrer verdien, men ikke salgssummen
+    g.researched.push("konsernstyring", "gronnkonsern");
+    g.konsern.shared.push("innkjop", "salg");
+    assert(sisterSalePrice(g, p) === sale, "salgssummen fulgte bonusene");
+    const cash = g.cash;
+    const q = { id: 77, type: "stalverk" as const, name: "Test", level: 0, boughtDay: 0, downUntilDay: 0 };
+    g.konsern.plants.push(q);
+    assert(
+      sellSister(g, 77).ok && Math.abs(g.cash - cash - SISTER_TYPES.stalverk.price * SELL_SHARE) < 1,
+      "salget ga feil sum",
+    );
+  }
   assert(!modernizeSister(g, p.id).ok, "to prosjekter på samme verk");
   now += MODERNIZE_HOURS * 3_600_000;
   finishKonsernProjects(g);

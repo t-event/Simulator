@@ -5515,3 +5515,46 @@ Konto (B-149): nei – regel 1, eget spill.
 Testet: tsc, lint, `npm test` (ny test: bonusene stopper på 25 %, administrasjonen 0 på et nytt storverk og 6,5 mill.
 på 31 000 t, forbruket på stormodellene; metningen 0,75 ved 20 000 t og 0,60 ved 35 000 t), balanse (exit 0),
 `--storovn 330`.
+
+## B-306 Reform 2, del 4: taket for kassa senket til 10 mrd. og kjørt på serveren (2026-09-29)
+Status: gjelder (justerer B-303 og opphever «B4: ingen kompresjon» i B-302; eierens beskjed: «du var for snill»)
+Bakgrunn: etter del 1–3 sto fire spillere fortsatt på taket (100 mrd.) og seks til hadde 12–92 mrd. – mer enn de noen
+gang får brukt (dyreste kjøp: kompleks 3,6 mrd.). Eieren ba om å sjekke pengene på topplista og fikse det.
+Beslutning:
+- **Taket er 10 mrd.** (`CASH_RESERVE.softCap`), lik sluttmålet. Alt over betales ut til eierne som før (B-303).
+  Kassa er en buffer til neste kjøp, ikke en poengsum: på 10× fyller toppverket den igjen på et kvarter, og det er
+  meningen – det som teller mellom spillere, er konsernkassa (innskudd 100 mill. per ekte døgn) og utbyttet i ekte tid.
+- **Kjørt på serveren** (`supabase/052_reform2_tak.sql`, etter tørrkjøring rullet tilbake): alle lagringer med kasse
+  over 10 mrd. settes til 10 mrd.; resten legges i `paidOut.total` (`firstDay` beholdes eller settes til dagen,
+  `today` 0). Sikkerhetskopi i `save_backups` (`reform2-tak`) og for alltid i `economy_reform_log.old_state`;
+  `serverEdit` + 1 og `device = 'server'` (B-211), så eldre kopier avvises og appen henter serverens spill. Merket
+  «Reformveteran II» (`badges`) til alle som ble truffet og ikke hadde det. Rekorden «Utbetalt til eierne» følger av
+  triggeren `note_paid_out`. Verk, forskning, fagpoeng, titler (`legends` går aldri ned), lån og konsernkassa er urørt.
+  Tørrkjøringen: ti spillere, 100 → 10 (×4), 92 → 10, 50 → 10, 42 → 10, 42 → 10, 25 → 10, 13 → 10; 564 mrd. ført som
+  utbetalt; seks nye merker.
+- **«Mest penger på bok» er tatt bort** fra topplista (appen; serveren kan fortsatt regne `kasse`): med et tak sa den
+  ingenting, og Hall of Fame-tallene der var fra før reform 1 (8 286 / 3 663 / 1 562 mrd.). «Utbetalt til eierne» tar over.
+- Rekkefølge: appen publiseres først (nytt tak), så kjøres serverendringen – ellers ville en eldre app fylt kassa opp
+  til 100 mrd. igjen til oppdateringen kom.
+- Sjekket: sluttmålet (10 mrd. konsernverdi = kasse + verk) nås fortsatt; titlene regnes av konsernverdien og verkene
+  alene er verdt inntil ca. 170 mrd. for et fullt konsern; juksesperren flagger ikke fall; innskudd til konsernkassa
+  leser `cash − loan` og virker som før.
+Konto (B-149): nei – regel 1, eget spill (lista på topplista krever konto som før).
+Testet: tsc, lint, `npm test` (taket-testen bruker `CASH_RESERVE.softCap`), balanse (exit 0), tørrkjøring i databasen.
+
+## B-307 Datterverk selges for 60 % av byggekostnaden, ikke for verdien (2026-09-29)
+Status: gjelder (erstatter salgsregelen i B-121)
+Bakgrunn: eieren: «Om man kjøper et stålverk eller storverk på Utvid og selger det igjen i oversikten på Konsern, så
+tjener man enorme penger.» Salget ga verdien (60 døgns overskudd, B-121) med alle bonuser: et stålverk til 255 mill.
+(med oppkjøpsavdeling) kunne selges for inntil 400 mill. i samme øyeblikk, også mens det ble bygget – og et storverk til
+1,02 mrd. for 1,6 mrd. Uendelig penger uten risiko.
+Beslutning:
+- **Salgssummen er 60 % av det det ville kostet å bygge verket på nytt** (`sisterSalePrice`: listepris × (1 + 0,3 ×
+  trinn) × `SELL_SHARE`), uansett hvor mye det tjener og uansett bonuser. Et verk som bygges eller moderniseres, selges
+  som ferdig (pengene er betalt). Kjøp og salg taper alltid penger (255 → 180 mill.). Byttet til stålkompleks
+  (`swapForKompleks`) bruker samme sum.
+- **Verdien** (`sisterValue`, 60 døgns overskudd) står som før i konsernverdien og titlene – den er ikke penger.
+- Knappen sier «Selg for X…» med forklaringen «60 % av byggekostnaden».
+Konto (B-149): nei – regel 1, eget spill.
+Testet: tsc, lint, `npm test` (ny del av B-209-testen: salgssummen er 60 % av byggekostnaden som modernisert, lavere enn
+kjøpsprisen og verdien, upåvirket av bonusene, og salget gir riktig sum), balanse (exit 0).

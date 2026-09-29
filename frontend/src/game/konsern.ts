@@ -663,14 +663,32 @@ export function buySister(g: GameState, type: SisterType): { ok: boolean; messag
   return { ok: true, message: `${name} er kjøpt. Ferdig bygget om ${BUILD_HOURS[type]} timer.` };
 }
 
-/** Selger et datterverk for det det er verdt (B-121), f.eks. for å få råd til et storverk */
+/** Andelen av byggekostnaden man får igjen ved salg (B-307) */
+export const SELL_SHARE = 0.6;
+
+/**
+ * Salgssummen for et datterverk (B-307): 60 % av det det ville kostet å bygge det på nytt (listepris pluss
+ * moderniseringene), uansett hvor mye det tjener. Før (B-121) fikk man verdien – 60 døgns overskudd med alle bonuser –
+ * så et verk til 255 mill. kunne selges for opptil 400 mill. i samme øyeblikk. Et verk som bygges, selges som ferdig
+ * (pengene er betalt).
+ */
+export function sisterSalePrice(_g: GameState, p: SisterPlant): number {
+  p = plannedPlant(p);
+  return SISTER_TYPES[p.type].price * (1 + MODERNIZE_SHARE * p.level) * SELL_SHARE;
+}
+
+/** Selger et datterverk for salgssummen (B-307), f.eks. for å få råd til et storverk */
 export function sellSister(g: GameState, id: number): { ok: boolean; message: string } {
   const p = g.konsern.plants.find((x) => x.id === id);
   if (!p) return { ok: false, message: "Fant ikke verket." };
-  const value = sisterValue(g, p);
+  const sum = sisterSalePrice(g, p);
   g.konsern.plants = g.konsern.plants.filter((x) => x.id !== id);
-  addIncome(g, "konsern", value);
-  log(g, `Konsernet har solgt ${p.name} for ${fmtKr(value)}.`, "info");
+  addIncome(g, "konsern", sum);
+  log(
+    g,
+    `Konsernet har solgt ${p.name} for ${fmtKr(sum)} (${Math.round(SELL_SHARE * 100)} % av byggekostnaden).`,
+    "info",
+  );
   return { ok: true, message: `${p.name} er solgt.` };
 }
 
@@ -679,7 +697,7 @@ export function swapForKompleks(g: GameState, id: number): { ok: boolean; messag
   const p = g.konsern.plants.find((x) => x.id === id);
   if (!p || p.type === "kompleks") return { ok: false, message: "Fant ikke verket." };
   if (!kompleksOpen(g)) return buySister(g, "kompleks");
-  if (g.cash + sisterValue(g, p) < sisterPrice(g, "kompleks")) return { ok: false, message: "For lite penger" };
+  if (g.cash + sisterSalePrice(g, p) < sisterPrice(g, "kompleks")) return { ok: false, message: "For lite penger" };
   sellSister(g, id);
   return buySister(g, "kompleks");
 }
