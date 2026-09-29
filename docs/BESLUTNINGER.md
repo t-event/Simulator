@@ -5877,3 +5877,18 @@ Testet: `npm test` (salgsdirektøren står i stansen, ventende forespørsel får
 rammeavtale starter etter ferien), tsc, lint, balansetesten og `--sommerstans`, Playwright på 320, 390, 1 366 og
 2 560 px (ingen overflyt, ingen avkortet tekst).
 
+## B-322 Konsernverdien på Konsern → Oversikt er den samme som på topplista (2026-09-29)
+Status: gjelder (følger B-320)
+Bakgrunn: brukeren: «Konsernverdi i oversikt konsern stemmer ikke». Oversikten viste fortsatt den gamle verdien
+(kassa − lån + verkene) under navnet «Konsernverdi», mens lista «Konsernverdi» på topplista bruker serverens tall.
+Beslutning:
+- Konsern → Oversikt viser «Konsernverdi» som på topplista: konsernkassa + 60 × (utbytte + bidrag for en full dag) −
+  lån, regnet av tallene fra `world_status` (`konsernValueOf` i `net/world.ts`, speiler `konsern_value` i 063).
+  Verdensstatusen hentes allerede hvert minutt av `useOpenTender`; `useLastWorld` gir den siste.
+- Den gamle verdien står under som «Verdi i spillet» (sluttmålet på 10 mrd. og lista med samme navn). Uten konto (ingen
+  tall fra serveren) er «Verdi i spillet» hovedtallet.
+- Forklaringen nederst sier hva begge tallene er.
+Konto (B-149): nei – ingen ny funksjon (samme tall som topplista).
+Testet: `npm test` (konsernverdien av world_status), tsc, lint, Playwright på 320 og 390 px med falsk tjeneste (riktig
+tall, ingen overflyt).
+

@@ -62,6 +62,7 @@ import { realNow } from "../game/clock";
 import {
   applyCompanyIncome,
   applyDividendNews,
+  konsernValueOf,
   applyTenderResult,
   applyTenderResults,
   BID_REFUSAL_TEXT,
@@ -1347,6 +1348,11 @@ const main = async () => {
     assert(c.name === "Skraplageret" && c.tender?.id === 7 && c.tender.maxBid === 923_000_000, JSON.stringify(c));
     assert(c.tender?.bidders.length === 1 && c.tender.bidders[0] === "Grane", "budgiverne før eget bud");
     assert(w.treasury.balance === 50_000_000 && c.estimatePerDay === 65_902_630, JSON.stringify(w.treasury));
+    // Konsernverdien som på topplista (B-320, B-322): kassa + 60 × (utbytte + bidrag) − lån
+    assert(
+      Math.abs(konsernValueOf(w, 1e8) - (50_000_000 + 60 * (41_465_454.55 + 38_441_575) - 1e8)) < 1,
+      `konsernverdi ${konsernValueOf(w, 1e8)}`,
+    );
     // Konsernbidraget følger med i world_status (B-318)
     assert(
       w.contribution.perDay === 38_441_575 &&

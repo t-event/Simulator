@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 322,
+    date: "2026-09-29",
+    title: "Samme konsernverdi overalt",
+    items: [
+      "Konsern → Oversikt viser nå samme konsernverdi som topplista: konsernkassa pluss 60 dagers utbytte og bidrag, minus lån. Den gamle verdien (kassa, lån og verkene) står under som «Verdi i spillet».",
+    ],
+  },
+  {
     b: 321,
     date: "2026-09-29",
     title: "Kalender, og ferie for salgsdirektøren",

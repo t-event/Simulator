@@ -7,6 +7,22 @@ export type OpenTender = { closesAt: string; name: string; type: Company["type"]
 
 // Selskapskortene sier fra når et bud er lagt inn eller trukket, så merket i menyen følger med med én gang
 const listeners = new Set<() => void>();
+
+// Siste verdensstatus fra serveren (B-322): Konsern → Oversikt viser konsernverdien fra den, som topplista
+let lastWorld: WorldStatus | null = null;
+const worldListeners = new Set<() => void>();
+function subscribeWorld(fn: () => void) {
+  worldListeners.add(fn);
+  return () => void worldListeners.delete(fn);
+}
+/** Den siste verdensstatusen som er hentet (hentes av GameApp hvert minutt med konto og åpnet konsern), eller null */
+export function useLastWorld(): WorldStatus | null {
+  return useSyncExternalStore(
+    subscribeWorld,
+    () => lastWorld,
+    () => lastWorld,
+  );
+}
 export function tenderChanged() {
   for (const l of listeners) l();
 }
@@ -37,6 +53,8 @@ export function useOpenTender(
             .filter((x) => x.tender && x.tender.myBid === null && Date.parse(x.tender.closesAt) > Date.now())
             .sort((a, b) => Date.parse(a.tender!.closesAt) - Date.parse(b.tender!.closesAt))[0];
           if (!alive) return;
+          lastWorld = w;
+          for (const l of worldListeners) l();
           setOpen(c?.tender ? { closesAt: c.tender.closesAt, name: c.name, type: c.type } : null);
           resultRef.current?.(w);
         },
