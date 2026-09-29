@@ -5,6 +5,7 @@
 import { fmtKr, log } from "../game/engine";
 import type { GameState } from "../game/types";
 import { rpc } from "./supabase";
+import { nextWorldMidnight, worldDay } from "../game/clock";
 import type { TreasuryStatus } from "./treasury";
 import type { KonsernWorld } from "../game/konsernWorld";
 import { parseKonsern } from "./konsern";
@@ -394,7 +395,7 @@ export function konsernValueOf(w: WorldStatus, loan: number): number {
  * serveren har betalt for i går. Gir 1 hvis det ble skrevet noe.
  */
 export function applyDividendNews(g: GameState, yesterday: number | null, now = Date.now(), contribution = 0): number {
-  const day = yesterdayUtc(now);
+  const day = yesterdayWorld(now);
   const div = yesterday && yesterday > 0 ? yesterday : 0;
   const bid = contribution > 0 ? contribution : 0;
   if (div + bid <= 0 || g.dividendSeen === day) return 0;
@@ -479,13 +480,12 @@ export function applyTenderResult(g: GameState, company: string, r: TenderResult
   return true;
 }
 
-/** Neste UTC-midnatt – da betaler serveren inntekten for dagen som gikk (B-258) */
+/** Neste midnatt norsk tid – da betaler serveren inntekten for dagen som gikk (B-258, B-369) */
 export function nextPayout(now = Date.now()): number {
-  const d = new Date(now);
-  return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + 1);
+  return nextWorldMidnight(now);
 }
 
-/** «i natt kl. 02:00» – når neste inntekt kommer, i spillerens egen tid (klokka i Norge: 01:00 om vinteren) */
+/** «i natt kl. 00:00» – når neste inntekt kommer, i spillerens egen tid */
 export function firstPayout(now = Date.now()): string {
   const at = new Date(nextPayout(now));
   const time = at.toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" });
@@ -494,9 +494,9 @@ export function firstPayout(now = Date.now()): string {
   return `${word} kl. ${time}`;
 }
 
-/** UTC-datoen for i går, «2026-09-28» – dagen `income_yesterday` gjelder */
-export function yesterdayUtc(now = Date.now()): string {
-  return new Date(nextPayout(now) - 2 * 86_400_000).toISOString().slice(0, 10);
+/** Serverens dato for i går (norsk tid), «2026-09-28» – dagen `income_yesterday` gjelder */
+export function yesterdayWorld(now = Date.now()): string {
+  return worldDay(nextPayout(now) - 36 * 3_600_000);
 }
 
 /**
@@ -508,7 +508,7 @@ export function applyCompanyIncome(
   companies: Pick<Company, "id" | "name" | "mine" | "incomeYesterday">[],
   now = Date.now(),
 ): number {
-  const day = yesterdayUtc(now);
+  const day = yesterdayWorld(now);
   g.companyIncomeSeen ??= {};
   let n = 0;
   for (const c of companies) {
@@ -523,7 +523,7 @@ export function applyCompanyIncome(
 
 /** Er det noe nytt å si fra om (anbud, inntekt eller utbytte)? Så appen bare endrer spillet når det trengs */
 export function worldNews(g: GameState, companies: Company[], now = Date.now(), dividendYesterday = 0): boolean {
-  const day = yesterdayUtc(now);
+  const day = yesterdayWorld(now);
   if (dividendYesterday > 0 && g.dividendSeen !== day) return true;
   return companies.some(
     (c) =>
