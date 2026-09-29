@@ -317,10 +317,15 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Salg av datterverk** (B-307): `sisterSalePrice` (60 % av byggekostnaden), aldri `sisterValue` (60 døgns overskudd med
   bonuser) – verdien er større enn prisen, så salg til verdi ga uendelig penger. Nye måter å kvitte seg med et verk på,
   bruker salgssummen.
-- **Utbytte i ekte tid** (B-304): datterverkene betaler ingenting i spilltid. Serveren regner utbyttet av det lagrede
+- **Utbytte i ekte tid** (B-304, B-311): datterverkene betaler ingenting i spilltid. Serveren regner utbyttet av det lagrede
   spillet én gang per ekte dag (`dividend_from_state` i 051, `pay_dividends` fra `world_tick`) rett inn i konsernkassa.
-  `game/dividend.ts` speiler SQL-en (`DIVIDEND` = `config.world.dividend`): endres regelen, endres begge, og de faste
-  tallene i testen kjøres mot SQL-en (`select dividend_from_state('{…}')`). Verkene i spillet har fortsatt
+  `game/dividend.ts` speiler SQL-en (`DIVIDEND` = `config.world.dividend`; grunntallene er en tidel av `profitPerDay`,
+  fullt konsern ca. 30 mill. per ekte dag): endres regelen, endres begge, og de faste tallene i testen kjøres mot
+  SQL-en (`select dividend_from_state('{…}')`). Verden går i menneskelig tempo (B-311): innskudd 10 mill. per ekte
+  døgn, gebyr 50 kr/t – alt som teller mellom spillere, skal skaleres sammen, ikke ett tall alene.
+- **Ett byggeprosjekt om gangen i konsernet** (B-311): `projectBlock(g)` sperrer kjøp, utbygging og modernisering
+  mens et prosjekt pågår, også i `konsernOptions` (alle valg med `hours > 0`). Tester som kjøper flere verk, må kalle
+  `finishProjects(g)` mellom kjøpene. Verkene i spillet har fortsatt
   `sisterProfit` (verdien); kjøp, råd og mesterskap regnes på `konsernNetFor` (per ekte dag). `konsernDay` bokfører
   ingenting. Endres tallene: kjør `balance.ts --konsern`.
 - **Sesonger uten sluttdato** (B-221): `seasons.ends_at` er tom mens sesongen pågår; den avsluttes med `end_season()` og en

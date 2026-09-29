@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 311,
+    date: "2026-09-29",
+    title: "Rettferdig kamp: verden går i menneskelig tempo, og ett byggeprosjekt om gangen",
+    items: [
+      "Alt som teller mellom spillere, er skalert ned til en tidel: utbyttet fra datterverkene (et fullt konsern ca. 30 mill. per ekte dag), innskuddet i konsernkassa (10 mill. per døgn), gebyret på skraplageret (50 kr per tonn) og minste bud. Konsernkassene er delt på 10.",
+      "Konsernet kan bare ha ett byggeprosjekt om gangen – kjøp, utbygging eller modernisering. Et fullt konsern tar uker uansett hvor fort du spiller.",
+      "Én milliard i konsernkassa tar nå det største konsernet omtrent en måned, som et ekte europeisk stålkonsern. Den som starter i dag, kan ta igjen forspranget.",
+    ],
+  },
+  {
     b: 310,
     date: "2026-09-29",
     title: "Litt bedre pris på store volumer, og snittet siste 7 døgn i resultatgrafen",

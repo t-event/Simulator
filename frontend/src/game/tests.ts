@@ -347,9 +347,19 @@ test("Konsernet: neste steg, utbygging til storverk, milepæler og fullt konsern
   assert(!!storverk.blocked, "storverk kunne kjøpes før et stålverk");
   buySister(g, "stalverk");
   assert(g.konsern.plants[0].name === SISTER_NAMES[0], "datterverket fikk ikke navn");
+  // Ett byggeprosjekt om gangen (B-311): alt er sperret til stålverket står
+  assert(
+    /Ett byggeprosjekt om gangen/.test(konsernOptions(g).find((o) => o.key === "kjop-storverk")!.blocked ?? ""),
+    "storverk åpent mens stålverket bygges",
+  );
+  assert(!buySister(g, "stalverk").ok, "to prosjekter samtidig");
+  finishProjects(g);
   assert(!konsernOptions(g).find((o) => o.key === "kjop-storverk")!.blocked, "storverk sperret etter stålverk");
   // Seks stålverk: fullt, men et stålverk kan bygges ut til storverk
-  for (let i = 0; i < 5; i++) buySister(g, "stalverk");
+  for (let i = 0; i < 5; i++) {
+    buySister(g, "stalverk");
+    finishProjects(g);
+  }
   assert(!!konsernOptions(g).find((o) => o.key === "kjop-storverk")!.blocked, "kunne kjøpe et sjuende verk");
   finishProjects(g);
   const p = g.konsern.plants[0];
@@ -1056,7 +1066,12 @@ test("Stålkompleks i stedet for et lite verk når konsernet er fullt (B-170)", 
   g.won = true;
   g.konsern.legends = 2;
   g.cash = 100_000_000_000;
-  while (g.konsern.plants.length < maxSisters(g)) assert(buySister(g, "stalverk").ok, "kjøp av stålverk");
+  while (g.konsern.plants.length < maxSisters(g)) {
+    assert(buySister(g, "stalverk").ok, "kjøp av stålverk");
+    // Ett byggeprosjekt om gangen (B-311)
+    assert(!buySister(g, "stalverk").ok || g.konsern.plants.length >= maxSisters(g), "to prosjekter samtidig");
+    finishProjects(g);
+  }
   finishProjects(g);
   assert(!!konsernOptions(g).find((o) => o.key === "kjop-kompleks")!.blocked, "kompleks ikke sperret når fullt");
   // Med trimmen i B-209 kan modernisering av et stålverk betale seg litt raskere enn byttet, så rådet kan være begge
@@ -1419,7 +1434,7 @@ test("Utbytte i ekte tid (B-304): samme regel som serveren, avtagende med størr
   g.pendingDecision = null;
   // Tallene i speilet er de samme som i spillet
   for (const t of ["stalverk", "storverk", "kompleks"] as const)
-    assert(DIVIDEND.base[t] === SISTER_TYPES[t].profitPerDay, `grunntallet for ${t} i speilet`);
+    assert(DIVIDEND.base[t] * 10 === SISTER_TYPES[t].profitPerDay, `grunntallet for ${t} i speilet (en tidel, B-311)`);
   assert(
     DIVIDEND.levelGain === MODERNIZE_GAIN && DIVIDEND.flagship === FLAGSHIP_MAX,
     "trinn eller flaggskip i speilet",
@@ -1451,8 +1466,8 @@ test("Utbytte i ekte tid (B-304): samme regel som serveren, avtagende med størr
     "et nytt verk senket utbyttet fra de gamle",
   );
   // Belastningen: uendret opp til grensen, så kvadratroten
-  assert(afterEmpireLoad(40e6) === 40e6, "belastning på et lite konsern");
-  assert(Math.abs(afterEmpireLoad(400e6) - 200e6) < 1, `kvadratroten over grensen: ${afterEmpireLoad(400e6)}`);
+  assert(afterEmpireLoad(4e6) === 4e6, "belastning på et lite konsern");
+  assert(Math.abs(afterEmpireLoad(40e6) - 20e6) < 1, `kvadratroten over grensen: ${afterEmpireLoad(40e6)}`);
   // Faste tall (de samme kjøres mot SQL-en i supabase/051): fullt konsern, nytt konsern, og et som bygger
   const full = dividendPerDay({
     plants: Array.from({ length: 14 }, () => ({ type: "kompleks", level: 5, building: false })),
@@ -1462,7 +1477,7 @@ test("Utbytte i ekte tid (B-304): samme regel som serveren, avtagende med størr
     reputation: 100,
     quality: 1,
   });
-  assert(Math.abs(full - 417_139_891.48) < 1, `fullt konsern: ${full.toFixed(2)}`);
+  assert(Math.abs(full - 41_713_989.148) < 0.1, `fullt konsern: ${full.toFixed(3)}`);
   const small = dividendPerDay({
     plants: Array.from({ length: 3 }, () => ({ type: "storverk", level: 0, building: false })),
     shared: 0,
@@ -1471,7 +1486,7 @@ test("Utbytte i ekte tid (B-304): samme regel som serveren, avtagende med størr
     reputation: 50,
     quality: 0.8,
   });
-  assert(Math.abs(small - 41_465_454.55) < 1, `nytt konsern: ${small.toFixed(2)}`);
+  assert(Math.abs(small - 4_146_545.455) < 0.1, `nytt konsern: ${small.toFixed(3)}`);
   const mixed = dividendPerDay({
     plants: [
       { type: "stalverk", level: 0, building: true },
@@ -1483,7 +1498,7 @@ test("Utbytte i ekte tid (B-304): samme regel som serveren, avtagende med størr
     reputation: 100,
     quality: 0,
   });
-  assert(Math.abs(mixed - 74_276_725.95) < 1, `konsern som bygger: ${mixed.toFixed(2)}`);
+  assert(Math.abs(mixed - 7_427_672.595) < 0.1, `konsern som bygger: ${mixed.toFixed(3)}`);
   assert(dividendPerDay({ plants: [], shared: 2, research: 2, mastery: 9, reputation: 100, quality: 1 }) === 0, "tomt");
   // Spillfarten og spilltida betyr ingenting: samme utbytte etter et spilldøgn på 10×
   g.konsern.plants = many.slice(0, 3).map((p) => ({ ...p }));

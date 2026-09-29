@@ -10,15 +10,20 @@
  * - verket beholder 30 % til vedlikehold, lokal ledelse og reserve
  * - verkene stilles i rekke etter driftsresultat: det beste gir full andel, det neste 1/(1 + 0,1) osv.
  * - hjemmeverket er flaggskipet: inntil +20 % med omdømme 100 og bare stål som holdt kvaliteten de siste sju døgnene
- * - imperiebelastningen: over 100 mill. per dag vokser utbyttet bare med kvadratroten (14 komplekser gir ca. 3 ganger
+ * - imperiebelastningen: over 10 mill. per dag vokser utbyttet bare med kvadratroten (14 komplekser gir ca. 3 ganger
  *   så mye som 3, ikke 5 ganger)
+ * Tallene er en tidel av driftsresultatet per spilldøgn (B-311): fullt konsern ca. 30 mill. per ekte dag.
  * Ingen import av motoren, så tallene kan brukes av tester og av grensesnittet uten sirkler.
  */
 import type { SisterType } from "./types";
 
 export const DIVIDEND = {
-  /** Driftsresultat per døgn ved normalt marked, uten modernisering (= SISTER_TYPES.profitPerDay) */
-  base: { stalverk: 5_000_000, storverk: 20_000_000, kompleks: 60_000_000 } as Record<SisterType, number>,
+  /**
+   * Utbytte per ekte dag ved normalt marked, uten modernisering: en tidel av driftsresultatet per spilldøgn
+   * (SISTER_TYPES.profitPerDay), så verden går i et menneskelig tempo (B-311: én milliard tar et fullt konsern ca. en
+   * måned, som et ekte europeisk konsern)
+   */
+  base: { stalverk: 500_000, storverk: 2_000_000, kompleks: 6_000_000 } as Record<SisterType, number>,
   /** Mer per trinn modernisering (= MODERNIZE_GAIN) */
   levelGain: 0.25,
   /** Per felles funksjon (innkjøp, salg) */
@@ -34,8 +39,8 @@ export const DIVIDEND = {
   decay: 0.1,
   /** Flaggskipet: inntil så mye mer med omdømme 100 og bare stål som holder kvaliteten */
   flagship: 0.2,
-  /** Imperiebelastningen: over dette per dag vokser utbyttet med potensen `loadPower` */
-  loadFrom: 100_000_000,
+  /** Imperiebelastningen: over dette per dag vokser utbyttet med potensen `loadPower` (B-311: 10 mill.) */
+  loadFrom: 10_000_000,
   loadPower: 0.5,
   /** Utbytte samles opp i høyst så mange ekte dager for den som ikke åpner spillet (serveren) */
   maxDays: 14,

@@ -267,6 +267,17 @@ export function plannedPlant(p: SisterPlant): SisterPlant {
   return p;
 }
 
+/** Verket som bygges, bygges ut eller moderniseres nå – konsernet har høyst ett prosjekt om gangen (B-311) */
+export function activeProject(g: GameState): SisterPlant | null {
+  return g.konsern.plants.find((p) => p.project) ?? null;
+}
+
+/** Sperren for nye prosjekter mens ett pågår (B-311), eller null */
+export function projectBlock(g: GameState): string | null {
+  const p = activeProject(g);
+  return p ? `Ett byggeprosjekt om gangen: ${projectLabel(p)}.` : null;
+}
+
 /** Hva som pågår, med vanlige ord */
 export function projectLabel(p: SisterPlant): string {
   const k = p.project?.kind;
@@ -487,6 +498,8 @@ export function konsernOptions(g: GameState): KonsernOption[] {
     out.push({ ...o, payback: o.gain > 0 ? o.price / o.gain : Infinity });
   const full = k.plants.length >= maxSisters(g);
   const hasStalverk = k.plants.some((p) => p.type === "stalverk");
+  // Ett byggeprosjekt om gangen (B-311): alt som starter et prosjekt, er sperret mens ett pågår
+  const busy = projectBlock(g);
   add({
     key: "kjop-stalverk",
     title: "Kjøp et stålverk",
@@ -584,6 +597,7 @@ export function konsernOptions(g: GameState): KonsernOption[] {
         run: (gg) => modernizeSister(gg, p.id),
       });
   }
+  if (busy) for (const o of out) if (o.hours > 0 && !o.blocked) o.blocked = busy;
   return out;
 }
 
@@ -641,6 +655,8 @@ export function buySister(g: GameState, type: SisterType): { ok: boolean; messag
     return { ok: false, message: "Stålkomplekser åpnes med tittelen Stålfyrste (konsernverdi 50 mrd.)." };
   if (type === "storverk" && !g.konsern.plants.some((p) => p.type === "stalverk"))
     return { ok: false, message: "Kjøp et stålverk først – konsernet må lære å drive et verk til." };
+  const busy = projectBlock(g);
+  if (busy) return { ok: false, message: busy };
   const price = sisterPrice(g, type);
   if (g.cash < price) return { ok: false, message: "For lite penger" };
   addCost(g, "investering", price);
@@ -707,6 +723,8 @@ export function upgradeSister(g: GameState, id: number): { ok: boolean; message:
   const p = g.konsern.plants.find((x) => x.id === id);
   if (!p || p.type !== "stalverk") return { ok: false, message: "Bare et stålverk kan bygges ut til storverk." };
   if (p.project) return { ok: false, message: `${projectLabel(p)} – vent til det er ferdig.` };
+  const busy = projectBlock(g);
+  if (busy) return { ok: false, message: busy };
   const cost = upgradeCost(g);
   if (g.cash < cost) return { ok: false, message: "For lite penger" };
   addCost(g, "investering", cost);
@@ -740,6 +758,8 @@ export function modernizeSister(g: GameState, id: number): { ok: boolean; messag
   if (!p) return { ok: false, message: "Fant ikke verket." };
   if (p.level >= modernizeMax(g)) return { ok: false, message: "Verket er fullt modernisert." };
   if (p.project) return { ok: false, message: `${projectLabel(p)} – vent til det er ferdig.` };
+  const busy = projectBlock(g);
+  if (busy) return { ok: false, message: busy };
   const cost = modernizeCost(p, g);
   if (g.cash < cost) return { ok: false, message: "For lite penger" };
   addCost(g, "investering", cost);

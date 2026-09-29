@@ -5628,3 +5628,29 @@ Beslutning:
 Konto (B-149): nei – regel 1, eget spill.
 Testet: tsc, lint, `npm test` (metningstesten: 0,65 ved 10 000 t, 0,575 ved 20 000, 0,522 ved 35 000), balanse (exit 0),
 `--storovn` fra samme utgangspunkt, Playwright på 320 og 390 px (grafen med snittet).
+
+## B-311 Rettferdig kamp: verdensøkonomien 10× ned, og ett byggeprosjekt om gangen i konsernet (2026-09-29)
+Status: gjelder (justerer B-183, B-189, B-209, B-302 pkt. 3 og B-304; eieren: «Jeg vil ha det slik at spillet blir en
+rettferdig kamp mellom spillerne. Nå er det for enkelt å tjene en milliard»)
+Bakgrunn: det som gjorde det lett, var tempoet i verden, ikke hjemmeverket. Et fullt konsern fikk 250–370 mill. per
+ekte dag i utbytte pluss 100 mill. i innskudd – én milliard i konsernkassa på 2–3 dager – og et fullt konsern kunne
+bygges på et par ekte dager på 10× (alle prosjekter samtidig). Da ender alle på toppen med samme maks etter en uke, og
+det er ingen kamp igjen. Et ekte europeisk konsern bruker 9–15 dager på 100 mill. i overskudd.
+Beslutning:
+- **Verdensøkonomien 10× ned** (`supabase/055_verden_ti_ned.sql`, etter tørrkjøring): utbytte per verk 0,5/2/6 mill.
+  (`config.world.dividend.base`, speilet i `DIVIDEND.base` = en tidel av `profitPerDay`), imperiebelastningen fra
+  10 mill. (`load_from`), innskudd 10 mill. per ekte døgn (`treasury_base_per_day`), skraplagerets gebyr 50 kr/t
+  (`scrap_fee_per_t`, speilet i `scrapIncome.ts`), slagg 500 kr/t, verkstedet 100 kr/t, minste bud 100 000. Et fullt
+  konsern får ca. 30 mill. per dag, tre stålverk ca. 1 mill.; én milliard tar toppen ca. en måned, og en som starter i
+  dag, kan ta igjen forspranget. Konsernkassene i dag (100–200 mill.) deles på 10, med en post «justering» i boka.
+  Det avgjorte anbudet (200 mill.) står som historie.
+- **Ett byggeprosjekt om gangen i konsernet** (`projectBlock` i `konsern.ts`): kjøp, utbygging og modernisering
+  starter ikke mens et annet prosjekt pågår. Alle valg på Utvid er sperret med «Ett byggeprosjekt om gangen: …» imens.
+  Byggetidene står (stålverk/storverk/kompleks i timer som før, utbygging 6 t, modernisering 4 t), så et fullt konsern
+  tar uker uansett spillfart – det er det som gjør kampen rettferdig mellom 1×- og 10×-spillere. Testspilleren bruker
+  `konsernOptions` og følger sperren.
+- Hjemmeverket (lokalt spill) er urørt: det er sandkassen. Det som teller mellom spillere, går i ekte tid.
+Konto (B-149): ingen ny funksjon (konsernkassa og konsernet som før).
+Testet: tsc, lint, `npm test` (speilet: `DIVIDEND.base × 10 = profitPerDay`; de faste tallene en tidel; ett prosjekt
+om gangen i B-119- og B-170-testene), balanse (exit 0), tørrkjøring av 055 (ti kasser, config, estimatet og utbyttet
+regnet på nytt).
