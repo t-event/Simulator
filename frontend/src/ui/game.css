@@ -1417,6 +1417,31 @@ button {
   border-color: var(--accent);
 }
 
+/* Byggekøen i konsernet (B-326): ett prosjekt per rad, avbestilling til høyre */
+.g-konsern-queue {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.g-konsern-queue li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: 6px 0;
+  border-top: 1px solid var(--line);
+}
+
+.g-konsern-queue li > span {
+  min-width: 0;
+}
+
+.g-konsern-queue li button {
+  flex: none;
+  min-height: 44px;
+}
+
 /* Varselinnstillinger (B-115) */
 .g-toggle-hint {
   display: block;
@@ -4858,7 +4883,8 @@ button {
     grid-column: 2;
   }
 
-  .g-grid.is-konsern > .g-konsern-plants {
+  .g-grid.is-konsern > .g-konsern-plants,
+  .g-grid.is-konsern > .g-konsern-queue-col {
     grid-column: 1 / -1;
   }
 

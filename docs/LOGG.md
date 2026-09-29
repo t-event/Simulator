@@ -5,6 +5,31 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 259 – 2026-09-29: Konsernet i ekte tid bygget (B-325–B-329)
+
+**Brukeren ba om:** «Ja» til forslaget i `docs/KONSERN-FORSLAG.md`: nivåer etter verkene, kjøp fra konsernkassa med nye
+priser og kø, aktivitetskrav (7/21/42), mesterskapet valg A og konto for datterverk – og så verdenssimuleringen på nytt.
+
+**Gjort:**
+- Server: `064_konsern_i_ekte_tid.sql` (tabellene `konsern` og `konsern_orders`, stigen, `konsern_order`/`cancel`/`sell`,
+  `konsern_settle`, `title_for`, `activity_factor`) og `065_konsern_byttet.sql` (radene med titlene som gulv, `save_game`
+  med serverens verk, utbyttet av serverens verk uten mesterskap og med aktivitetskrav, bidragsgulvet, `world_status`
+  med konsernet, topplistetitlene).
+- App: `game/konsernWorld.ts` (speilet), `net/konsern.ts`, `ui/konsernRun.ts`; `konsern.ts` uten lokale kjøp, titler fra
+  nivåstigen (`raiseLevel`), byggekø på Konsern, kjøpeknapper «fra konsernkassa», `NeedsAccount` («Datterverk») uten konto;
+  stormodellene ved 25 mrd. i verdi; mesterskapet på administrasjonen hjemme.
+- Docs: B-325–B-329, KONSERN-FORSLAG (status og simuleringen etter byttet), KONTO, PLAN-NETT, FORSLAG, CLAUDE.md.
+
+**Testet:** `npm test` (nye tester for stigen, køen, prisene, bytte, salg og svaret fra serveren), lint, typesjekk,
+`balance.ts` (OK), `--storovn 330`; SQL i DO-blokker som rulles tilbake (kø, modernisering to trinn, avbestilling, salg,
+gulv, titler, utbytte uten mesterskap, kopien i lagringen); Playwright på 320/390/1280 px (kø, kjøp via serveren, ingen
+horisontal scrolling, knapper 44 px).
+
+**Gjenstår:** utbyttepolitikken (punkt 4), så Kontroll og overtakelser. Sjekk etter byttet: `select * from konsern` mot
+lagringene, at utbyttet betales 30.9., og at ingen får `project_guard_log` på konsernet.
+
+---
+
 ## Økt 258 – 2026-09-29: Forslag til konsernet i ekte tid (punkt 1, 2, 3 og 5)
 
 **Brukeren ba om:** punkt 1–3 fra OKONOMI-KONTROLL avsnitt 16 i rekkefølge (nivåer etter eiendeler, kjøp fra

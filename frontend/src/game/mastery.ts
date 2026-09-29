@@ -54,12 +54,15 @@ export const MASTERY: Record<MasteryId, MasteryDef> = {
     max: 0.3,
     base: 100,
   },
+  // B-328: før mer utbytte fra datterverkene (inntil +30 %); nå lavere administrasjon på storverket, samme kurve.
+  // Nøkkelen står som før, så nivåene spillerne har kjøpt, beholdes
   datterverk: {
     name: "Konsernledelse",
-    description: "Erfaringene fra hjemmeverket deles med datterverkene.",
-    effect: "mer overskudd i datterverkene",
+    description:
+      "En slankere ledelse i konsernet: færre rapporter, raskere beslutninger og mindre administrasjon hjemme.",
+    effect: "lavere administrasjon på storverket",
     max: 0.3,
-    base: 300,
+    base: 60,
   },
 };
 
@@ -89,8 +92,8 @@ export function masteryOpen(g: GameState): boolean {
   return RESEARCH.every((r) => hasResearch(g, r.id));
 }
 
-/** Gangefaktoren for prisen/kostnaden i spillet: 1 + gevinst for pris og datterverk, 1 − gevinst for kostnader */
+/** Gangefaktoren for prisen/kostnaden i spillet: 1 + gevinst for pris, 1 − gevinst for kostnader (også administrasjon) */
 export function masteryFactor(g: GameState, id: MasteryId): number {
   const e = masteryEffect(id, masteryLevel(g, id));
-  return id === "pris" || id === "datterverk" ? 1 + e : 1 - e;
+  return id === "pris" ? 1 + e : 1 - e;
 }

@@ -1,10 +1,9 @@
 /**
  * Hva neste nivå i mesterskapet er verdt for akkurat dette verket (B-237), i kroner per døgn, regnet fra snittet av de
  * siste sju døgnene. Vises ved hvert prosjekt, så spilleren ser hvilket som lønner seg – prisene er satt etter det samme.
- * Eget modul fordi mastery.ts ikke kan importere konsern.ts (konsern.ts bruker faktorene derfra).
  */
-import { konsernNetFor } from "./konsern";
 import { masteryEffect, masteryLevel } from "./mastery";
+import { adminPerDay, computePlantStats } from "./plant";
 import type { GameState, MasteryId } from "./types";
 
 function perDay(g: GameState, pick: (d: GameState["history"][number]) => number): number {
@@ -28,10 +27,8 @@ export function masteryGainPerDay(g: GameState, id: MasteryId): number {
       return down(perDay(g, (d) => d.costs?.skrap ?? 0));
     case "foring":
       return down(perDay(g, (d) => d.costs?.vedlikehold ?? 0));
-    case "datterverk": {
-      // Utbyttet til konsernkassa per ekte dag (B-304), etter imperiebelastningen – ikke hele driftsresultatet
-      const level = masteryLevel(g, id);
-      return Math.max(0, konsernNetFor(g, g.konsern.plants, level + 1) - konsernNetFor(g, g.konsern.plants, level));
-    }
+    case "datterverk":
+      // Administrasjonen på storverket (B-328), som står i posten «faste»: full administrasjon × det neste nivået gir
+      return adminPerDay(computePlantStats(g)) * (next - now);
   }
 }

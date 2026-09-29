@@ -15,6 +15,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 328,
+    date: "2026-09-29",
+    title: "Konsernet bygges fra konsernkassa, og titlene kommer av verkene",
+    items: [
+      "Datterverk kjøpes, bygges ut, moderniseres og selges nå med konsernkassa, ikke kassa hjemme. Prisene er satt ned: stålverk 20 mill., storverk 80 mill., stålkompleks 250 mill., modernisering 30 % av prisen per trinn.",
+      "Byggekø: du kan bestille inntil tre prosjekter, og de bygges ett om gangen i ekte tid. Pengene trekkes når du bestiller. Det siste i køen kan avbestilles før det starter.",
+      "Titlene kommer av verkene dine, ikke av pengene: Stålmagnat med 3 storverk på trinn 3, Stålfyrste med 6 på trinn 4, og så videre til Stålikon med 14 komplekser på trinn 6. Titlene du har, beholder du.",
+      "Utbyttet er fullt så lenge du har spilt den siste uka. Etter det går det gradvis ned, og etter seks uker uten spilling stopper det til du spiller igjen.",
+      "Mesterskapet «Konsernledelse» gir nå lavere administrasjon på storverket i stedet for mer utbytte. Nivåene du har, beholdes.",
+    ],
+  },
+  {
     b: 322,
     date: "2026-09-29",
     title: "Samme konsernverdi overalt",

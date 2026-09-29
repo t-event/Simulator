@@ -2,7 +2,7 @@
  * Det spilleren kan gjøre: bygge ut, kjøpe utstyr, ansette, låne og styre produksjonen.
  */
 import { MASTERY, MASTERY_IDS, masteryCost, masteryEffect, masteryLevel, masteryOpen } from "./mastery";
-import { checkKonsernMilestones, checkKonsernUnlock, checkLegends, directorHour } from "./konsern";
+import { checkKonsernMilestones, checkKonsernUnlock, directorHour, konsernEquity } from "./konsern";
 import { checkAchievements } from "./achievements";
 import {
   ADDONS,
@@ -120,12 +120,16 @@ function researchBlocker(g: GameState, id: string): string | null {
   return r ? `Forsk fram: ${r.name}` : null;
 }
 
+/** Verdien i spillet som åpner stormodellene (B-154, B-325) */
+export const STORMODEL_EQUITY = 25_000_000_000;
+
 /** Stormodellene (B-154) åpner når konsernet åpner, ved sluttmålet eller ved Stålmagnat. Null når de er åpne. */
 export function gateBlocker(g: GameState, gate?: Gate): string | null {
   if (!gate) return null;
   if (gate === "konsern") return g.konsern?.unlocked ? null : "Åpner når konsernet åpner (1 mrd.)";
   if (gate === "baron") return g.won ? null : "Åpner ved sluttmålet (10 mrd., Stålbaron)";
-  return (g.konsern?.legends ?? 0) >= 1 ? null : "Åpner ved Stålmagnat (25 mrd.)";
+  // Før B-325 åpnet de ved tittelen Stålmagnat (25 mrd.); titlene kommer nå av datterverkene, så grensen er verdien selv
+  return (g.konsern?.legends ?? 0) >= 1 || konsernEquity(g) >= STORMODEL_EQUITY ? null : "Åpner ved 25 mrd. i verdi";
 }
 
 export function upgradeOptions(g: GameState): UpgradeOption[] {
@@ -1015,7 +1019,7 @@ function hourlyActions(g: GameState): void {
   landmarkHour(g);
   directorHour(g);
   checkKonsernMilestones(g);
-  checkLegends(g);
+  // Titlene kommer fra serveren etter verkene (B-325), ikke av verdien
   checkAchievements(g);
   if (g.stage >= 4 && !g.konsern.unlocked) {
     const remaining = upgradeOptions(g).filter((o) => o.stage === 4 && !o.owned && o.kind !== "stage").length;

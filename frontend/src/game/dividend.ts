@@ -6,7 +6,7 @@
  *
  * Regelen for én spiller én ekte dag:
  * - hvert verk som er ferdig bygget, har et driftsresultat: grunntall etter type × (1 + 0,25 per trinn modernisering)
- *   × felles funksjoner (+5 % hver) × konsernforskning (+10 % hver) × mesterskapet «Konsernledelse»
+ *   × felles funksjoner (+5 % hver) × konsernforskning (+10 % hver)
  * - verket beholder 30 % til vedlikehold, lokal ledelse og reserve
  * - verkene stilles i rekke etter driftsresultat: det beste gir full andel, det neste 1/(1 + 0,1) osv.
  * - hjemmeverket er flaggskipet: inntil +20 % med omdømme 100 og bare stål som holdt kvaliteten de siste sju døgnene
@@ -30,8 +30,11 @@ export const DIVIDEND = {
   shared: 0.05,
   /** Per konsernprosjekt i forskningen (konsernstyring, gronnkonsern) */
   research: 0.1,
-  /** Mesterskapet «Konsernledelse» (= MASTERY.datterverk.max og STEP) */
-  masteryMax: 0.3,
+  /**
+   * Mesterskapet «Konsernledelse» teller ikke lenger (B-328, valg A): fagpoeng er spilltid, og spilltid skal ikke gi
+   * makt i ekte tid (B-323). Fordelen er flyttet til hjemmeverket (lavere administrasjon). Står som 0 for eldre tester
+   */
+  masteryMax: 0,
   masteryStep: 0.9,
   /** Del av driftsresultatet som blir igjen i verket */
   keep: 0.3,

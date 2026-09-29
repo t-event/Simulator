@@ -138,6 +138,7 @@ frontend/src/
     tutorial.ts  Veiledet start          tips.ts      Engangstips
     recipeGuide.ts Reseptguide for nye kvaliteter (vises av ui/RecipeGuide.tsx)
     konsern.ts   Datterverk, byggeprosjekter i ekte tid og flaggskipet (B-209); vises av ui/Konsern.tsx
+    konsernWorld.ts Konsernet på serveren speilet: priser, køen, nivåstigen, settleWorld (B-325, B-326; SQL i 064)
     world.ts     Felles hendelser i motoren og sesongfordel (B-129)
     environment.ts Utslipp, renseanlegg i trinn, havari og bøter (B-263); panelet står i ui/Upgrades.tsx (CleanerPanel)
     calendar.ts  Året i spillet (360 døgn, dag 1 = 1. april), vinter 15.11.–14.3. og frost (B-265, B-272), fellesferie (B-298);
@@ -163,6 +164,7 @@ frontend/src/
     weekly.ts    Ukens utfordring: status, ukelista og ukekista (B-152)
     seasonTrack.ts Sesongstigen: poeng, trinn og henting (B-173)
     treasury.ts  Konsernkassa på serveren: status (overføringen er slått av, B-319)
+    konsern.ts   Konsernet på serveren: kjøp, avbestilling og salg, og svaret lagt inn i spillet (B-326)
     world.ts     Strategiske selskaper: status, anbud og bud (B-189)
     scrapIncome.ts Skraplagerets inntekt i ekte tid – speiler SQL-en i 029 (B-188); scrapTests.ts viser at fart ikke hjelper
     guest.ts     Gjestekonto i bakgrunnen: lagrer spillet, overtas av kontoen ved innlogging (B-212)
@@ -207,7 +209,7 @@ supabase/utkast/ Spørringer som bare leser (f.eks. dry-run av økonomireformen)
 docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretningen for sluttspillet, B-180), UI.md,
                OKONOMI.md (økonomianalysen og reform 2, B-301), KONSERNBIDRAG.md (hovedverkets bidrag i ekte tid, B-313),
                OKONOMI-KONTROLL.md (kontrollen av modellen med tall og svakheter, B-324),
-               KONSERN-FORSLAG.md (forslaget til nivåer, priser fra konsernkassa og aktivitetskrav – venter på eieren),
+               KONSERN-FORSLAG.md (nivåer, priser fra konsernkassa og aktivitetskrav, bygget B-325–B-328, og simuleringen B-329),
                (designsystem, mobil + PC, plan for redesignet, B-187),
                PLAN-NETT.md (det som er bygget på nett), FORSLAG.md, KONTO.md (hva som krever konto)
 ```
@@ -306,7 +308,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   ærlig spiller ble flagget.
 - **Byggetid i ekte tid i konsernet** (B-209): prosjektene bruker `realNow()` i `game/konsern.ts`. Tester og
   testspilleren setter klokka med `setRealClock` (testene: `finishProjects(g)`, testspilleren: `simClock(g)` = 3×). Kjøp
-  i konsernet virker derfor ikke med én gang – ikke skriv tester som venter det.
+  i konsernet virker derfor ikke med én gang – ikke skriv tester som venter det. `applyWorld` lager nye objekter for
+  verkene: hent verket på nytt med id (`plantById` i testene) etter et kjøp eller `finishProjects`.
 - **Serverens klokke** (B-314): `realNow()` er servertid – `net/clock.ts` leser Date-headeren i hvert svar (`call` i
   `net/supabase.ts`). Telefonens klokke kan stilles fram, så `save_game()` setter prosjekter tilbake med
   `guard_projects` (057/059/060; ren funksjon, test med `select`) og logger i `project_guard_log`. Den godtar det som kan
@@ -345,11 +348,19 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   fullt konsern ca. 30 mill. per ekte dag): endres regelen, endres begge, og de faste tallene i testen kjøres mot
   SQL-en (`select dividend_from_state('{…}')`). Verden går i menneskelig tempo (B-311): gebyr 50 kr/t, innskuddet er
   erstattet av bidraget (B-318, B-319) – alt som teller mellom spillere, skal skaleres sammen, ikke ett tall alene.
-- **Ett byggeprosjekt om gangen i konsernet** (B-311): `projectBlock(g)` sperrer kjøp, utbygging og modernisering
-  mens et prosjekt pågår, også i `konsernOptions` (alle valg med `hours > 0`). Tester som kjøper flere verk, må kalle
-  `finishProjects(g)` mellom kjøpene. Verkene i spillet har fortsatt
-  `sisterProfit` (verdien); kjøp, råd og mesterskap regnes på `konsernNetFor` (per ekte dag). `konsernDay` bokfører
-  ingenting. Endres tallene: kjør `balance.ts --konsern`.
+- **Konsernet er serverens** (B-325, B-326): verkene, køen og nivået (titlene) ligger i tabellene `konsern` og
+  `konsern_orders` (064/065). Kjøp går via `konsern_order`/`konsern_cancel`/`konsern_sell` fra konsernkassa; `save_game`
+  skriver serverens verk inn i det lagrede spillet hver gang (`konsern_into_state`), så en endring i `g.konsern.plants` i
+  appen blir borte ved neste lagring. Regelen er speilet i `game/konsernWorld.ts` (priser, kø, stigen, `settleWorld`) –
+  endres den, endres begge. Appen legger serverens svar inn med `applyKonsern` (`net/konsern.ts`); testene og
+  testspilleren bruker `localOrder`/`localSell`/`localCancel` mot `g.konsern.treasury`. Ett prosjekt bygges om gangen,
+  inntil 3 i køen (B-311 gjelder fortsatt). Verkene i spillet har fortsatt `sisterProfit` (verdien); råd regnes på
+  `konsernNetFor` (per ekte dag). Nye ting som låser opp etter nivå, bruker `g.konsern.legends` (fra serveren), aldri
+  verdien. Endres tallene: kjør `balance.ts --konsern` og verdenssimuleringen (KONSERN-FORSLAG.md).
+- **Aktivitetskravet** (B-327): `activity_factor(uid, dag)` (064) ganges inn i utbyttet og i gulvet i bidraget. Ny inntekt
+  i ekte tid som ikke skal gå til forlatte kontoer, bruker den. Tallene i `config.world.activity`.
+- **Mesterskapet «Konsernledelse»** (B-328) gir lavere administrasjon hjemme (`masteryFactor(g, "datterverk")` i posten
+  «faste»), ikke utbytte. Fagpoeng (spilltid) skal ikke gi makt i ekte tid (B-323).
 - **Sesonger uten sluttdato** (B-221): `seasons.ends_at` er tom mens sesongen pågår; den avsluttes med `end_season()` og en
   ny startes med `start_season(navn, vri)` – bare manuelt. SQL som leser `ends_at`, må tåle null. `season_status()` må tåle
   at ingen sesong pågår (den krasjet på en tom post før B-182).

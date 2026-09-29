@@ -6,15 +6,16 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
-- **Konsernet i ekte tid (økt 258):** forslaget står i `docs/KONSERN-FORSLAG.md` – nivåstigen, prisene fra konsernkassa,
-  aktivitetskravet og valget for mesterskapsbonusen (A/B/C). Venter på eierens ja før noe bygges.
-
 - **Slå på gjestekontoer (B-212):** eieren må slå på «Allow anonymous sign-ins» under Authentication → Sign In /
   Providers i dashbordet (connectoren kan ikke). **29.9: eieren slår det på** – sjekk etterpå at det kommer gjester
   (`select count(*) from auth.users where is_anonymous`). Til det er gjort, prøver appen én gang i døgnet og gjør ellers ingenting.
   Supabase anbefaler også CAPTCHA mot misbruk; grensen er 30 nye gjester i timen per IP.
 
 ## Venter
+
+- **Utbyttepolitikk (punkt 4 i OKONOMI-KONTROLL avsnitt 16):** venter på eieren. Simuleringen etter byttet (B-329) viser at
+  de som er ferdige med konsernet, samler ca. 77 mill. per dag uten noe å bruke det på – et sluk trengs før eller med
+  Kontroll og overtakelser.
 
 - **Pynt for sesong 3 (B-287, B-291):** pynten for sesong 2 er klar. Før `start_season` kjøres for sesong 3, legg inn ny
   pynt i `COSMETICS` med `season: 3` – både i butikken og på stigen (trinn 10–50). Ellers har sesong 3 ingen egen pynt.

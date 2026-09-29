@@ -46,6 +46,7 @@ import {
 } from "./daily";
 import {
   konsernAdvice,
+  localOrder,
   konsernEquity,
   konsernNetFor,
   konsernOptions,
@@ -53,6 +54,7 @@ import {
   modernizeCost,
   sisterPrice,
   sisterProfit,
+  realNow,
   setRealClock,
 } from "./konsern";
 import { answerQuiz, QUIZ, quizAvailable } from "./quiz";
@@ -605,10 +607,28 @@ function botHour(g: GameState): void {
   }
 }
 
+/**
+ * Konsernkassa for testspilleren (B-326): serveren finnes ikke her, så kassa fylles i ekte tid (simClock) med omtrent
+ * det serveren gir – bidraget fra hovedverket (halve tonnet × 1 000 kr) og utbyttet fra verkene.
+ */
+const botTreasuryAt = new WeakMap<GameState, number>();
+function botTreasury(g: GameState): void {
+  const now = realNow();
+  const perDay = 0.5 * computePlantStats(g).dailyProductT * 1000 + konsernNetFor(g, g.konsern.plants);
+  const last = botTreasuryAt.get(g) ?? now;
+  botTreasuryAt.set(g, now);
+  const balance = (g.konsern.treasury?.balance ?? 0) + (perDay * (now - last)) / 86_400_000;
+  g.konsern.treasury = { balance, perDay };
+}
+
 /** Testspillerens konsernkjøp: følger «Neste steg» på Konsern-fanen, som en spiller ville gjort (B-119) */
 function konsernBuy(g: GameState, reserve: number): void {
+  botTreasury(g);
   const next = konsernAdvice(g);
-  if (next && g.cash - reserve >= next.price) next.run(g);
+  if (!next) return;
+  if (next.run) {
+    if (g.cash - reserve >= next.price) next.run(g);
+  } else if (next.request && (g.konsern.treasury?.balance ?? 0) >= next.price) localOrder(g, next.request);
 }
 
 interface RunSummary {

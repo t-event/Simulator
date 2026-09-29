@@ -1,6 +1,7 @@
 # Forslag: konsernet i ekte tid (punkt 1, 2, 3 og 5 fra OKONOMI-KONTROLL avsnitt 16)
 
-Status 29.9.2026: **forslag til eieren, ikke bygget.** Ingenting her er låst før eieren har sagt ja. Tallene er regnet med
+Status 29.9.2026: **eieren sa ja; bygget** som B-325 (nivåene), B-326 (kjøp fra konsernkassa), B-327 (aktivitetskravet)
+og B-328 (mesterskapet, valg A). Simuleringen etter byttet står nederst (B-329). Tallene er regnet med
 `konsern_forslag.py` (kladd, ikke i repoet) med de samme formlene som serveren bruker i dag (utbyttet i 051, bidraget i
 061) og eksisterende byggetider (2/6/12 t, modernisering 4 t, utbygging 6 t).
 
@@ -205,3 +206,37 @@ Nedgangen er en reduksjon av inntekt, ikke av eiendeler; verkene og nivåene st�
 3. Aktivitetskravet i `pay_dividends` og gulvet i `pay_contributions`.
 4. Mesterskapet etter valget i del 5.
 5. Ny verdenssimulering: liten/middels/stor etter 30, 60 og 90 dager, før Kontroll og overtakelser.
+
+---
+
+## Etter byttet: verdenssimulering 30, 60 og 90 dager (B-329)
+
+Samme simulering som over, med de endelige reglene: priser 20/80/250 mill., kø med 3, aktivitetskravet og utbyttet uten
+mesterskapet. «Dagens største» er Grane slik verkene står (7 kompleks trinn 5 og 1 på trinn 2, nivå 6 som gulv), som
+kjøper videre med de nye prisene.
+
+| Flyt inn i konsernkassa per ekte dag | Dag 30 | Dag 60 | Dag 90 |
+|---|---|---|---|
+| Liten (ny) | 7,4 mill. (1 verk) | 13,0 (3 verk) | 16,6 (5 verk, Stålmagnat) |
+| Middels (ny) | 18,5 (2 verk) | 25,7 (6 verk, Stålmagnat) | 30,6 (8 verk, 2 kompleks, Stålfyrste) |
+| Stor (ny) | 53,9 (7 verk, Stålfyrste) | 63,1 (10 verk, 3 kompleks, Stålkonge) | 67,7 (11 verk, 6 kompleks, Stållegende) |
+| Dagens største | 72,8 (10 kompleks, Stålkolosse) | 76,4 (13 kompleks, Stålmyte) | 77,4 (fullt, Stålikon) |
+
+| Forhold | Dag 30 | Dag 60 | Dag 90 |
+|---|---|---|---|
+| Stor / liten | 7,3× | 4,9× | 4,1× |
+| Stor / middels | 2,9× | 2,5× | 2,2× |
+| Middels / liten | 2,5× | 2,0× | 1,8× |
+| Dagens største / ny stor | 1,35× | 1,21× | 1,14× |
+
+Hva det betyr før Kontroll og overtakelser:
+
+- **Hovedverket avgjør hvor godt du driver industri:** bidraget (margin og tonn) er det meste av flyten de første månedene,
+  og det er det som skiller liten fra stor.
+- **Konsernkassa avgjør hvor raskt du bygger imperiet:** en ny stor spiller når Stålfyrste på 4 uker og Stållegende på
+  3 måneder; en liten spiller Stålmagnat på 2 måneder.
+- **Ekte tid styrer makten:** avstanden krymper over tid fordi utbyttet dempes (imperiebelastningen), men den som spiller
+  lenge og ofte, er foran. Dagens største blir ferdige (fullt konsern) på ca. 90 dager med de nye prisene – deres forsprang
+  er 14–35 % i flyt, ikke flere ganger.
+- Konsernkassa fylles av dem som er ferdige (ca. 77 mill. per dag uten noe å bruke det på). Det er det punkt 4
+  (utbyttepolitikk) og Kontroll/overtakelser må gi et sluk for.

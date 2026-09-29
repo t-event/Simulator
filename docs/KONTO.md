@@ -76,6 +76,8 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Grunnleggeræraen, Hall of Fame, ingen automatisk sesong 2 | Ja (lista og sesongen krever konto; æranavnet kan leses uten) | Regel 3 | B-182 |
 | Aktive dager (registrert av serveren ved lagring) | Ja | Regel 2: bare lagring på nett teller | B-182 |
 | Konsernkassa på serveren (flytte penger inn i verden, grense per ekte døgn) | Ja | Regel 2 og 7 | B-183 |
+| Datterverk fra konsernkassa: kjøp, kø, salg og konsernnivået (titlene) | Ja (verk og titler fra før beholdes uten konto) | Regel 2 og 7 | B-325, B-326 |
+| Aktivitetskrav på utbytte og bidrag | Ja (del av konsernkassa) | Regel 2 | B-327 |
 | Produksjonsmåleren (tonn per ekte dag fra tidslinja) | Ja (bare lagring på nett teller) | Regel 2 | B-188 |
 | Skraplageret: anbud (hvem som har bydd er synlig, beløpene skjult), pilotkonsesjon og inntekt fra andres skrapbruk | Ja | Regel 3 og 7 | B-189, B-210 |
 | Ukens utfordring «dager» i ekte aktive dager, delt plass ved likt | Ja (lista kan leses uten) | Regel 3 | B-190 |
