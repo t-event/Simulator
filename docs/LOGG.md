@@ -12,12 +12,12 @@ ble testet, og hva som gjenstår.
 **Gjort:** så i `project_guard_log`. Én ærlig spiller ble rettet ved en feil kl. 04:08: tre ferdige utbygginger til
 storverk som appen ennå ikke hadde fullført, ble lest som «trinn uten prosjekt». B-317 (060): et verk som står slik
 det var, rettes aldri. Spilleren fikk storverk trinn 0 (riktig) pluss en modernisering som blir ferdig 08:08 (tre
-gratis trinn), men kan ikke starte nye prosjekter i konsernet før da (ett om gangen, B-311). Ikke endret – venter på
-eierens svar.
+gratis trinn), men kan ikke starte nye prosjekter i konsernet før da (ett om gangen, B-311). Eierens svar: la det
+stå – ingen endring i spillerens data.
 
 **Testet:** ni tilfeller i SQL (rullet tilbake), lagringen etter endringen, sikkerhetsrådene.
 
-**Gjenstår:** eierens svar om spilleren som ble feilrettet. Følg med på `project_guard_log`. Eierens svar på
+**Gjenstår:** følg med på `project_guard_log`. Eierens svar på
 KONSERNBIDRAG.md. Pynt for sesong 3.
 
 ---
