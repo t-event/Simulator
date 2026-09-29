@@ -33,7 +33,6 @@ import {
   policyLockedUntil,
   policyOf,
   policySplit,
-  renewalBonus,
   TAKEOVER,
   TAKEOVER_REASON,
 } from "../game/control";
@@ -392,10 +391,7 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
               <p className="g-small-text">
                 Alle ser hvem som har bydd, men ingen ser beløpene før anbudet stenger ({fmtWhen(t.closesAt)}). Høyeste
                 bud vinner og driver lageret i 14 dager. Likt bud avgjøres ved trekning. De som ikke vinner, får budet
-                tilbake i konsernkassa.
-                {c.owner && c.control
-                  ? ` Eieren nå har en fordel av Kontrollen: budet teller ${Math.round(renewalBonus(c.control.score) * 100)} % mer.`
-                  : ""}
+                tilbake i konsernkassa. Alle stiller likt, også den som eier selskapet nå.
               </p>
             </details>
           </section>
@@ -536,8 +532,8 @@ function ControlSection({ c }: { c: Company }) {
               ))}
             </ul>
             <p className="g-muted g-small-text">
-              Med god Kontroll teller budet ditt mer når konsesjonen skal fornyes (nå +
-              {Math.round(renewalBonus(ctl.score) * 100)} %).
+              God Kontroll gjør det dyrere for andre å overta selskapet fra deg. Når konsesjonen går ut, stiller alle
+              likt i det nye anbudet.
             </p>
           </details>
         </>
@@ -697,7 +693,7 @@ function TakeoverSection({
               Budet må være minst verdien, {fmtKr(w.minBid)}, og betales fra konsernkassa med én gang. Alle ser budet,
               og eieren har {TAKEOVER.defenseHours} timer på seg til å forsvare seg. Med minstebudet:{" "}
               {score(w.attackMin, w.defenseNow)} før eieren gjør noe. Større bud, aktivitet og egne verk i regionen gir
-              sterkere angrep.
+              sterkere angrep – med stort nok bud kan alle selskaper tas.
             </p>
             {amountRow(
               "Legg inn bud",

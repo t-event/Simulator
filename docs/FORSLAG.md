@@ -13,9 +13,9 @@ til «Avgjort» nederst).
 
 ## Venter
 
-- **Slå på overtakelser (B-335):** bygget og testet med bryteren av (`config.world.takeover.enabled`). Anbefaling: slå
-  på når skraplagerets nye konsesjon har startet (etter 13.10.), så første eier får fornyelsen med Kontroll-fordelen
-  først. Slås på med `update config set value = jsonb_set(value, '{takeover,enabled}', '1') where id = 'world';` og en
+- **Slå på overtakelser (B-335, rettet i B-337):** bygget og testet med bryteren av (`config.world.takeover.enabled`).
+  Eieren kan alltid miste selskapet til et stort nok bud. Anbefaling: slå på når skraplagerets nye konsesjon har
+  startet (etter 13.10.), så første eier får noen dager med ro først. Slås på med `update config set value = jsonb_set(value, '{takeover,enabled}', '1') where id = 'world';` og en
   endringslogg-oppføring.
 
 - **Pynt for sesong 3 (B-287, B-291):** pynten for sesong 2 er klar. Før `start_season` kjøres for sesong 3, legg inn ny

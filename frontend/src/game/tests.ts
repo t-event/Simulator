@@ -23,15 +23,7 @@ import {
   upgradeOptions,
 } from "./actions";
 import { MASTERY, MASTERY_IDS, masteryCost, masteryEffect, masteryOpen } from "./mastery";
-import {
-  controlAdvice,
-  controlWord,
-  policyLockedUntil,
-  policySplit,
-  renewalBonus,
-  takeoverAttack,
-  takeoverDefense,
-} from "./control";
+import { controlAdvice, controlWord, policyLockedUntil, policySplit, takeoverAttack, takeoverDefense } from "./control";
 import {
   ACHIEVEMENT_BY_ID,
   ACHIEVEMENTS,
@@ -3390,10 +3382,9 @@ test("Utbyttepolitikken og Kontroll (B-334): samme tall som serveren, fondet er 
   const s = policySplit(37e6, "forsvar");
   assert(near(s.kasse + s.fond, 37e6) && s.fond > s.kasse * 0.4, "fondet er det kassa får mindre");
   assert(policySplit(37e6, "ut").fond === 0, "ta ut gir ikke fond");
-  // Ordene og fordelen i fornyelsesanbudet
+  // Ordene
   assert(controlWord(80).word === "Sterk" && controlWord(79).word === "Stabil", "sterk/stabil");
   assert(controlWord(40).word === "Presset" && controlWord(39).word === "Svak", "presset/svak");
-  assert(renewalBonus(53) === 0.106 && renewalBonus(100) === 0.2 && renewalBonus(150) === 0.2, "fordelen");
   // Rådet peker på delen som mangler mest (investering, 25 poeng)
   assert(
     controlAdvice({ eier: 30, aktivitet: 20, investering: 0, region: 2.5, eiertid: 0, fond: 0 }) ===
@@ -3413,8 +3404,11 @@ test("Overtakelser (B-335): angrep og forsvar som på serveren, med tak", () => 
   assert(near(takeoverAttack(600e6, V, 1, 2), 75.35), `angrep ${takeoverAttack(600e6, V, 1, 2)}`);
   assert(near(takeoverDefense(54, 450e6, 0, V), 94.62), `forsvar ${takeoverDefense(54, 450e6, 0, V)}`);
   assert(near(takeoverAttack(V, V, 1, 2), 65), "minstebudet");
-  // Taket: budet teller høyst 3 × V, regionen høyst 10, fondet høyst V
-  assert(near(takeoverAttack(100 * V, V, 1, 0), 60 * Math.sqrt(3)), "tak på budet");
+  // Taket: budet teller høyst 10 × V (B-337), forsvaret høyst 3 × V, regionen høyst 10, fondet høyst V
+  assert(near(takeoverAttack(100 * V, V, 1, 0), 60 * Math.sqrt(10)), "tak på budet");
+  assert(near(takeoverDefense(100, 100 * V, 100 * V, V), 100 + 40 * Math.sqrt(3)), "tak på forsvaret");
+  // B-337: eieren kan alltid miste selskapet – en aktiv angriper med 10 × V slår det sterkeste forsvaret (SQL: 189,74 mot 169,28)
+  assert(takeoverAttack(10 * V, V, 1, 0) > takeoverDefense(100, 100 * V, 100 * V, V), "alltid mulig");
   assert(near(takeoverAttack(V, V, 1, 20) - takeoverAttack(V, V, 1, 0), 10), "tak på regionen");
   assert(near(takeoverDefense(50, 0, 10 * V, V), 90), "tak på fondet");
   // En passiv angriper har halv styrke

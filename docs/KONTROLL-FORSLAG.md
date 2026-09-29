@@ -1,7 +1,7 @@
 # Forslag: verdenskartet, Kontroll, overtakelser og utbyttepolitikken – og pengene hjemme (B-331)
 
-**Status:** godkjent 29.9.2026 med svarene i B-332 (overtakelser inne i konsesjonen på 14 dager, fordel i
-fornyelsesanbudet, 3× og 10× beholdes). Bygges i rekkefølgen i avsnitt 8. Tallene er regnet med `game/dividend.ts` (samme regel som
+**Status:** godkjent 29.9.2026 med svarene i B-332 (overtakelser inne i konsesjonen på 14 dager, 3× og 10× beholdes).
+Svar 3 rettet i B-337: eieren kan alltid miste selskapet ved overtakelse, og fordelen i fornyelsesanbudet er tatt bort. Bygges i rekkefølgen i avsnitt 8. Tallene er regnet med `game/dividend.ts` (samme regel som
 serveren), flyten fra verdenssimuleringen i B-329 og ekte tall fra serveren 29.9.2026. Simuleringen står nederst.
 
 To spor:
@@ -149,7 +149,7 @@ hardt i et spill med fem venner.
 4. **Utfallet** regnes når fristen er ute, uten tilfeldighet, og forklares for begge:
    - angrep = 60 × √(bud / V) × (0,5 + 0,5 × aktivitet) + 2,5 per egne verk i regionen (høyst 10)
    - forsvar = Kontroll + 40 × √(forsvarskapital / V)
-   - bud og forsvar teller høyst 3 × V (kapital er sterkt avtagende, RETNING)
+   - budet teller høyst 10 × V og forsvaret høyst 3 × V (kapital er sterkt avtagende, RETNING; B-337)
    - angriperen vinner hvis angrep > forsvar.
 
 **Pengene (sluk):**
@@ -162,25 +162,30 @@ hardt i et spill med fem venner.
 **Regler mot plaging (B-332):** ett aktivt angrep per spiller; samme selskap kan ikke angripes igjen på 14 dager etter et
 forsøk. Overtakelser skjer inne i konsesjonen på 14 dager: ny eier er beskyttet de 3 første dagene, og budet må legges
 senest 5 dager før konsesjonen går ut, så forsøket er avgjort før fornyelsesanbudet åpner. Den som tar over, får resten
-av konsesjonen. I fornyelsesanbudet teller den sittende eierens bud Kontroll/5 % mer (inntil +20 %). Bryter i `config`,
+av konsesjonen. (Fordelen i fornyelsesanbudet fra B-332 er tatt bort i B-337: alle stiller likt.) Bryter i `config`,
 som RETNING sier: testes med få spillere før den slås på.
 
 **Hva det koster å ta skraplageret (V = 450 mill.)** – og hvor mange dagers flyt det er for en angriper (dag 90):
 
-| Eieren | Kontroll | Forsvarer ikke | Forsvarer med 1 × V |
-|---|---|---|---|
-| Passiv (borte 3 uker, ingen investering) | 43 (svak) | 450 mill. (minstebudet): 27 / 15 / 7 / 6 dager | 760 mill.: 46 / 25 / 11 / 10 dager |
-| Ny, aktiv, 2 verk i regionen | 56 (presset) | 450 mill.: 27 / 15 / 7 / 6 | 1 035 mill.: 62 / 34 / 15 / 13 |
-| Aktiv, investert 1 × V, 4 verk, 10 uker | 86 (sterk) | 816 mill.: 49 / 27 / 12 / 11 | ikke mulig |
-| Som over + fond 1 mrd. | 93 (sterk) | ikke mulig | ikke mulig |
-| Aktiv, investert, men eier 3 selskaper | 71 (stabil) | 541 mill.: 33 / 18 / 8 / 7 | ikke mulig |
+| Eieren | Kontroll | Forsvarer ikke | Forsvarer med 1 × V | Forsvarer med 3 × V (mest) |
+|---|---|---|---|---|
+| Passiv (borte 3 uker, ingen investering) | 43 (svak) | 450 mill. (minstebudet): 27 / 15 / 7 / 6 dager | 760 mill.: 46 / 25 / 11 / 10 dager | 1,44 mrd.: 87 / 47 / 21 / 19 |
+| Ny, aktiv, 2 verk i regionen | 56 (presset) | 450 mill.: 27 / 15 / 7 / 6 | 1 035 mill.: 62 / 34 / 15 / 13 | 1,81 mrd.: 109 / 59 / 27 / 23 |
+| Aktiv, investert 1 × V, 4 verk, 10 uker | 86 (sterk) | 820 mill.: 49 / 27 / 12 / 11 | 1,83 mrd.: 110 / 60 / 27 / 24 | 2,82 mrd.: 170 / 92 / 42 / 36 |
+| Som over + fond 1 mrd. | 93 (sterk) | 2,05 mrd.: 123 / 67 / 30 / 26 | 2,61 mrd.: 157 / 85 / 39 / 34 | 3,09 mrd.: 186 / 101 / 46 / 40 |
+| Aktiv, investert, men eier 3 selskaper | 71 (stabil) | 545 mill.: 33 / 18 / 8 / 7 | 1,40 mrd.: 85 / 46 / 21 / 18 | 2,29 mrd.: 138 / 75 / 34 / 30 |
+
+Angriperen spiller (aktivitet 1) og har 2 verk i regionen. Budet teller inntil 10 × V, forsvaret høyst 3 × V (B-337), så
+selv det sterkeste forsvaret (Kontroll 100 og 3 × V: 169) kan slås: med 7,5 × V, ca. 3,4 mrd.
 
 (Dager: liten / middels / stor / størst.)
 
 Det betyr:
 
-- Den som **passer på** selskapet sitt (spiller, investerer, har verk i regionen og svarer på et angrep), beholder det,
-  også mot den rikeste. Den som er borte eller har tatt for mye, mister det.
+- Den som **passer på** selskapet sitt (spiller, investerer, har verk i regionen og svarer på et angrep), gjør det mye
+  dyrere å ta – men kan alltid miste det til en aktiv angriper med stort nok bud (B-337). Den som er borte eller har
+  tatt for mye, mister det billig. Klarer ingen å ta det, gjelder 14-dagersregelen: konsesjonen går ut, og alle stiller
+  likt i det nye anbudet.
 - Et bud koster alltid minst verdien, så ingen kan kjøpe for en slikk. Den gamle eieren får 85 % – å bli overtatt er et
   tap av makt, ikke en katastrofe.
 - De små kan også vinne: et passivt selskap kan tas av en liten spiller med en måneds flyt.
