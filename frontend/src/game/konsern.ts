@@ -624,7 +624,18 @@ export function konsernOptions(g: GameState): KonsernOption[] {
 /** Kjøp i konsernet som ikke er sperret og som pengene rekker til nå – tallet på Konsern i menyen og på Utvid (B-144, B-226) */
 export function konsernReady(g: GameState): number {
   if (!g.konsern.unlocked) return 0;
-  return konsernOptions(g).filter((o) => !o.blocked && moneyFor(g, o) >= o.price).length;
+  const options = worthwhileOptions(konsernOptions(g));
+  return options.filter((o) => !o.blocked && moneyFor(g, o) >= o.price).length;
+}
+
+/**
+ * Kjøpene som er verdt å foreslå (B-342): modernisering av et verk som kan bygges ut, er bortkastet – moderniseringen
+ * starter på nytt når stålverket blir storverk (B-119). Den står fortsatt under verket, men teller ikke i tallet på
+ * Konsern og foreslås ikke under Utvid. Før ga tre stålverk «3» på Konsern uten at noe kunne kjøpes der.
+ */
+export function worthwhileOptions(options: KonsernOption[]): KonsernOption[] {
+  const canExpand = new Set(options.filter((o) => o.key.startsWith("bygg-")).map((o) => o.key.slice(5)));
+  return options.filter((o) => !(o.key.startsWith("mod-") && canExpand.has(o.key.slice(4))));
 }
 
 /**
@@ -634,7 +645,7 @@ export function konsernReady(g: GameState): number {
 export function konsernAdvice(g: GameState): KonsernOption | null {
   const score = (o: KonsernOption) => (daysToAfford(g, o.price, o.pay) ?? o.payback * 2) + o.payback;
   return (
-    konsernOptions(g)
+    worthwhileOptions(konsernOptions(g))
       .filter((o) => !o.blocked && o.gain > 0)
       .sort((a, b) => score(a) - score(b))[0] ?? null
   );

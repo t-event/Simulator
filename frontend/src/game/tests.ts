@@ -145,6 +145,8 @@ import {
   konsernEquity,
   konsernNetFor,
   konsernValue,
+  worthwhileOptions,
+  konsernReady,
   valueCreated,
   dividendInput,
   dividends,
@@ -3497,6 +3499,29 @@ test("Kassetaket (B-341): det som er betalt ut til eierne, teller mot sluttmåle
   assert(gateBlocker(g, "magnat") === null, "15,1 mrd. utbetalt + 10 mrd. i kassa åpner de største ovnene");
   // Konsernverdien selv (topplistene) er uendret
   assert(konsernEquity(g) === g.cash - g.loan + konsernValue(g), "konsernverdien uten utbetalinger");
+});
+
+test("Konsern-merket (B-342): modernisering av et stålverk som kan bygges ut, teller ikke", () => {
+  const g = newGame(342);
+  g.stage = 4;
+  g.konsern.unlocked = true;
+  g.konsern.treasury = { balance: 30_000_000, perDay: 40_000_000 };
+  g.konsern.plants = [
+    { id: 1, name: "A", type: "stalverk", level: 0, boughtDay: 1, downUntilDay: 0, region: "nord" },
+    { id: 2, name: "B", type: "stalverk", level: 0, boughtDay: 1, downUntilDay: 0, region: "vest" },
+  ];
+  const all = konsernOptions(g);
+  assert(
+    all.some((o) => o.key === "mod-1" && !o.blocked && o.price <= 30_000_000),
+    "moderniseringen finnes og er billig",
+  );
+  assert(!worthwhileOptions(all).some((o) => o.key.startsWith("mod-")), "men foreslås ikke før utbyggingen");
+  const ready = konsernReady(g);
+  assert(
+    ready === all.filter((o) => o.key.startsWith("kjop-") && !o.blocked && o.price <= 30_000_000).length,
+    `merket: ${ready}`,
+  );
+  assert(!konsernAdvice(g)?.key.startsWith("mod-"), "rådet foreslår ikke moderniseringen");
 });
 
 if (failed) {

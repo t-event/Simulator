@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 270 – 2026-09-29: «3» på Konsern uten noe å kjøpe (B-342)
+
+**Brukeren ba om:** «Jeg har 3 varsler i konsernet men det er ingenting jeg kan kjøpe.»
+
+**Funnet:** konsernet til kontoen kjørt lokalt: tallet var moderniseringen av tre stålverk (5 mill. hver), som ikke vises
+som hovedvalg og er bortkastet før utbyggingen til storverk.
+
+**Gjort:** `worthwhileOptions` tar dem ut av tallet, rådet og Utvid. **Testet:** `npm test` (ny test), lint, typesjekk,
+bygg, `balance.ts`.
+
+**Gjenstår:** ingenting.
+
+---
+
 ## Økt 269 – 2026-09-29: Utbetalt til eierne teller mot sluttmålet og de største ovnene (B-341)
 
 **Brukeren ba om:** «Noen får ikke råd til de største ovnene fordi vi har cap på 10 mrd i lokalkassa.»
