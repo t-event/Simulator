@@ -6,6 +6,9 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
+- **Konsernet i ekte tid (økt 258):** forslaget står i `docs/KONSERN-FORSLAG.md` – nivåstigen, prisene fra konsernkassa,
+  aktivitetskravet og valget for mesterskapsbonusen (A/B/C). Venter på eierens ja før noe bygges.
+
 - **Slå på gjestekontoer (B-212):** eieren må slå på «Allow anonymous sign-ins» under Authentication → Sign In /
   Providers i dashbordet (connectoren kan ikke). **29.9: eieren slår det på** – sjekk etterpå at det kommer gjester
   (`select count(*) from auth.users where is_anonymous`). Til det er gjort, prøver appen én gang i døgnet og gjør ellers ingenting.
