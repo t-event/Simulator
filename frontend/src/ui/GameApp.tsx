@@ -48,6 +48,7 @@ import { Sales } from "./Sales";
 import { KonsernPage } from "./Konsern";
 import { useOpenTender } from "./openTender";
 import { applyCompanyIncome, applyDividendNews, applyTenderResults, worldNews } from "../net/world";
+import { applyKonsern, konsernDiffers } from "../net/konsern";
 import { VIEWS, viewUnlocked, type View } from "./views";
 import { Icon, type IconName } from "./icons";
 import { isVerketTab } from "./verketTabs";
@@ -261,8 +262,8 @@ function EndScreen({
         {won && (
           <p>
             <Icon name="crown" /> Du har fått tittelen <strong>{WIN_TITLE}</strong>. Nye titler venter:{" "}
-            {LEGENDS[0].title} ved {fmtKr(LEGENDS[0].equity)} og mer. Når all forskning er gjort, åpner{" "}
-            <strong>mesterskapet</strong> under Forskning, så fagpoengene alltid har noe å gå til.
+            {LEGENDS[0].title} når konsernet har {LEGENDS[0].need}, og flere etter det. Når all forskning er gjort,
+            åpner <strong>mesterskapet</strong> under Forskning, så fagpoengene alltid har noe å gå til.
           </p>
         )}
         <div className="g-row">
@@ -363,7 +364,7 @@ function Celebration({ g, onClose }: { g: GameState; onClose: () => void }) {
   );
 }
 
-/** Ny tittel etter sluttmålet (B-150): Stålmagnat, Stålfyrste … med det den låser opp */
+/** Ny tittel i konsernet (B-150, B-325): Stålmagnat, Stålfyrste … med det den låser opp */
 function LegendCelebration({ g, onClose }: { g: GameState; onClose: () => void }) {
   const l = LEGENDS[g.legendCelebrate ?? 0];
   const next = LEGENDS[(g.legendCelebrate ?? 0) + 1];
@@ -375,13 +376,12 @@ function LegendCelebration({ g, onClose }: { g: GameState; onClose: () => void }
         </div>
         <h2 id="legend-title">Ny tittel: {l.title}!</h2>
         <p>
-          Konsernet er verdt over {fmtKr(l.equity)} – omtrent som {l.like}. Du får {l.fp} fagpoeng til mesterskapet
-          under Forskning.
+          Konsernet har {l.need} – omtrent som {l.like}. Du får {l.fp} fagpoeng til mesterskapet under Forskning.
         </p>
         <p>{l.unlocks}</p>
         {next && (
           <p className="g-muted">
-            Neste: {next.title} ved {fmtKr(next.equity)}.
+            Neste: {next.title} med {next.need}.
           </p>
         )}
         <button className="g-primary" onClick={onClose}>
@@ -884,6 +884,13 @@ export function GameApp() {
   const tender = useOpenTender(!!g?.konsern?.unlocked, (w) => {
     const yesterday = w.dividend.yesterday ?? 0;
     const contribution = w.contribution.yesterday ?? 0;
+    // Konsernet på serveren (B-326): verkene, køen, nivået og kassa. Det som kommer inn per ekte dag, er utbyttet og
+    // bidraget for en full dag – til «ca. N dager» ved knappene
+    const perDay = w.dividend.perDay + w.contribution.perDay;
+    if (g && w.konsern && konsernDiffers(g, w.konsern, perDay)) {
+      const k = w.konsern;
+      act((gg) => applyKonsern(gg, k, perDay));
+    }
     if (g && worldNews(g, w.companies, Date.now(), yesterday + contribution))
       act((gg) => {
         applyTenderResults(gg, w.companies);

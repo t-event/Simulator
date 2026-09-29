@@ -59,6 +59,8 @@ import { forgetGuest, isGuest, onGuestSave, setGuestClock } from "./guest";
 import { DEPOSIT_REFUSAL_TEXT, depositToTreasury, fetchTreasury } from "./treasury";
 import { resetServerClock, serverClockOffset, syncServerClock } from "./clock";
 import { realNow } from "../game/clock";
+import { applyKonsern, konsernDiffers, parseKonsern } from "./konsern";
+import { konsernOptions, konsernReady } from "../game/konsern";
 import {
   applyCompanyIncome,
   applyDividendNews,
@@ -1618,6 +1620,76 @@ const main = async () => {
     assert(Math.abs(serverClockOffset() + 5 * 3_600_000) < 2000, "ugyldig header endret forskyvningen");
     resetServerClock();
     assert(Math.abs(realNow() - Date.now()) < 1000, "klokka ble ikke satt tilbake");
+  });
+
+  await test("Konsernet fra serveren (B-326): verk, kø, nivå og kassa legges inn i spillet", () => {
+    const g = newGame(326);
+    g.stage = 4;
+    g.konsern.unlocked = true;
+    g.konsern.plants = [{ id: 4, type: "storverk", name: "Fjordverket", level: 2, boughtDay: 3, downUntilDay: 40 }];
+    const now = Date.now();
+    const row = {
+      level: 1,
+      floor: 3,
+      next_id: 12,
+      plants: [
+        { id: 4, type: "storverk", name: "Fjordverket", level: 3, boughtDay: 3, downUntilDay: 0 },
+        {
+          id: 11,
+          type: "kompleks",
+          name: "Nesverket",
+          level: 0,
+          boughtDay: 90,
+          downUntilDay: 0,
+          project: { kind: "bygg", startedAt: now - 3_600_000, readyAt: now + 3_600_000 },
+        },
+      ],
+      orders: [
+        {
+          id: 7,
+          kind: "bygg",
+          plant_id: 11,
+          type: "kompleks",
+          name: "Nesverket",
+          cost: 250e6,
+          starts_at: now - 3_600_000,
+          ready_at: now + 3_600_000,
+          status: "i gang",
+        },
+        {
+          id: 8,
+          kind: "modernisering",
+          plant_id: 4,
+          type: null,
+          name: null,
+          cost: 24e6,
+          starts_at: now + 3_600_000,
+          ready_at: now + 5 * 3_600_000,
+          status: "kø",
+        },
+      ],
+      bound: 274e6,
+      balance: 12_345_678,
+    };
+    const w = parseKonsern(row)!;
+    assert(w.plants.length === 2 && w.orders[1].kind === "modernisering" && w.orders[1].plantId === 4, "tolkningen");
+    assert(konsernDiffers(g, w, 10e6), "så ikke forskjellen");
+    const fp = g.researchPoints;
+    applyKonsern(g, w, 10e6);
+    assert(g.konsern.plants.length === 2 && g.konsern.orders.length === 2 && g.konsern.nextId === 12, "verk og kø");
+    // Nivået er gulvet (tre titler); stans etter havari beholdes fra spillet
+    assert(g.konsern.legends === 3 && g.researchPoints > fp, `nivå ${g.konsern.legends}`);
+    assert(g.konsern.plants[0].downUntilDay === 40 && g.konsern.plants[0].level === 3, "stansen forsvant");
+    assert(g.konsern.treasury?.balance === 12_345_678 && g.konsern.treasury.perDay === 10e6, "kassa");
+    assert(!konsernDiffers(g, w, 10e6), "forskjell etter at alt er lagt inn");
+    // Knappene ser konsernkassa: modernisering av Fjordverket er i køen (trinn 4 neste), kjøp regnes mot kassa
+    const mod = konsernOptions(g).find((o) => o.key === "mod-4");
+    assert(!!mod && mod.pay === "konsernkasse" && !!mod.request, "moderniseringen går ikke via serveren");
+    assert(
+      konsernReady(g) ===
+        konsernOptions(g).filter((o) => !o.blocked && (o.pay === "kasse" ? g.cash : 12_345_678) >= o.price).length,
+      "tallet på Utvid",
+    );
   });
 
   setSaveListener(null);

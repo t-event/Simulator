@@ -2,6 +2,7 @@ import { hasPaidOut, paidOutTotal } from "../game/reserve";
 import { Fragment, useState } from "react";
 import { useReportTab, type OnTab } from "./tabMemory";
 import { WIN_CASH } from "../game/data";
+import { WORLD_KONSERN } from "../game/konsernWorld";
 import {
   daysToAfford,
   dividends,
@@ -28,6 +29,9 @@ import {
   KONSERN_SHARED,
   kompleksOpen,
   LEGENDS,
+  moneyFor,
+  nextLevelProgress,
+  orderLabel,
   titleOf,
   konsernAdvice,
   konsernReady,
@@ -38,7 +42,6 @@ import {
   modernizeMax,
   SISTER_TYPES,
   sisterProfit,
-  sellSister,
   sisterSalePrice,
   sisterValue,
   upgradeCost,
@@ -56,47 +59,65 @@ import { Button, Callout } from "./ds";
 import { useLastWorld, type OpenTender } from "./openTender";
 import { EARNS_FROM, konsernValueOf } from "../net/world";
 import { IndustryPanel } from "./Companies";
+import { NeedsAccount } from "./Account";
+import { cancelOrderUi, runOption, sellPlantUi } from "./konsernRun";
 import { fmtKr, fmtT } from "./format";
 import { Icon } from "./icons";
 
 type Act = GameApi["act"];
 
-/** Etter sluttmålet (B-150): tittelen og veien mot neste stålmilepæl */
-function LegendProgress({ g, equity }: { g: GameState; equity: number }) {
+/** Konsernnivået (B-150, B-325): tittelen og hvor langt verkene er kommet mot neste */
+function LegendProgress({ g }: { g: GameState }) {
   const n = g.konsern.legends;
   const next = LEGENDS[n];
-  const from = n > 0 ? LEGENDS[n - 1].equity : WIN_CASH;
+  const progress = nextLevelProgress(g);
   return (
     <>
-      <p className="g-legend-title">
-        <Icon name="trophy" /> Tittel: <strong>{titleOf(g)}</strong>
-      </p>
-      {next ? (
+      {titleOf(g) && (
+        <p className="g-legend-title">
+          <Icon name="trophy" /> Tittel: <strong>{titleOf(g)}</strong>
+        </p>
+      )}
+      {next && progress ? (
         <>
           <Bar
-            value={(Math.max(0, equity) - from) / (next.equity - from)}
+            value={progress.have / progress.need}
             tone="ok"
-            label={`Mot ${next.title}, ${fmtKr(next.equity)}`}
+            label={`Mot ${next.title}: ${progress.have} av ${progress.need}`}
           />
           <p className="g-muted g-small-text">
-            Neste: <strong>{next.title}</strong> ved {fmtKr(next.equity)}, omtrent som {next.like}. Gir {next.fp}{" "}
-            fagpoeng. {next.unlocks}
+            Neste: <strong>{next.title}</strong> når konsernet har {next.need}. Gir {next.fp} fagpoeng. {next.unlocks}
           </p>
         </>
       ) : (
-        <p className="g-muted g-small-text">Alle stålmilepælene er nådd. Konsernet kan fortsatt vokse.</p>
+        <p className="g-muted g-small-text">Alle titlene er nådd. Konsernet kan fortsatt vokse.</p>
       )}
     </>
   );
 }
 
-/** Hvorfor en knapp ikke kan trykkes: sperret, eller hvor mye som mangler og omtrent når det er råd (B-119) */
+/** Hvorfor en knapp ikke kan trykkes: sperret, eller hvor mye som mangler og omtrent når det er råd (B-119, B-326) */
 function whyNot(g: GameState, o: KonsernOption): string | null {
   if (o.blocked) return o.blocked;
-  if (g.cash >= o.price) return null;
-  const missing = fmtKr(Math.ceil(o.price - Math.max(0, g.cash)));
-  const days = daysToAfford(g, o.price);
-  return `Du mangler ${missing}${days ? ` – ca. ${days} døgn med dagens overskudd` : ""}.`;
+  const have = moneyFor(g, o);
+  if (have >= o.price) return null;
+  const missing = fmtKr(Math.ceil(o.price - Math.max(0, have)));
+  const days = daysToAfford(g, o.price, o.pay);
+  return o.pay === "kasse"
+    ? `Du mangler ${missing}${days ? ` – ca. ${days} døgn med dagens overskudd` : ""}.`
+    : `Konsernkassa mangler ${missing}${days ? ` – ca. ${days} ekte ${days === 1 ? "dag" : "dager"}` : ""}.`;
+}
+
+/** Knappen som kjøper: venter på serveren for verkene, så den ikke trykkes to ganger */
+function useRunner(act: Act) {
+  const [busy, setBusy] = useState(false);
+  const run = (o: KonsernOption) => {
+    if (busy) return;
+    setBusy(true);
+    buzz(20);
+    void runOption(act, o).finally(() => setBusy(false));
+  };
+  return { busy, run };
 }
 
 /** Kjøpsknapp med pris, hva det gir og hvorfor den eventuelt er grå */
@@ -114,21 +135,17 @@ function BuyButton({
   label?: string;
 }) {
   const reason = whyNot(g, o);
+  const { busy, run } = useRunner(act);
   return (
     <div className="g-konsern-buy">
-      <button
-        className={primary ? "g-primary" : undefined}
-        disabled={!!reason}
-        onClick={() => {
-          act((gg) => o.run(gg));
-          buzz(20);
-        }}
-      >
+      <button className={primary ? "g-primary" : undefined} disabled={!!reason || busy} onClick={() => run(o)}>
         {label ?? "Kjøp"} ({fmtKr(o.price)})
       </button>
       <span className="g-muted g-small-text">
         {o.gain > 0 &&
-          `+${fmtKr(o.gain)} per ekte dag til konsernkassa · betaler seg på ca. ${Math.ceil(o.payback)} dager`}
+          (o.pay === "kasse"
+            ? `+${fmtKr(o.gain)} per døgn · betaler seg på ca. ${Math.ceil(o.payback)} døgn`
+            : `+${fmtKr(o.gain)} per ekte dag til konsernkassa · betaler seg på ca. ${Math.ceil(o.payback)} dager`)}
         {o.hours > 0 && ` · tar ${o.hours} t å bygge`}
         {reason && <span className="g-konsern-why">{reason}</span>}
       </span>
@@ -167,6 +184,7 @@ function OptionCard({
 }) {
   const reason = whyNot(g, o);
   const rating = payRating(o.payback);
+  const { busy, run } = useRunner(act);
   return (
     <div className={`g-buy-opt${best ? " is-best" : ""}`}>
       <div className="g-buy-opt-head">
@@ -181,17 +199,19 @@ function OptionCard({
       <dl className="g-buy-opt-stats">
         {o.gain > 0 && (
           <div>
-            <dt>Gir konsernkassa</dt>
+            <dt>{o.pay === "kasse" ? "Gir" : "Gir konsernkassa"}</dt>
             <dd>
               +{fmtKr(o.gain)}
-              <small> /ekte dag</small>
+              <small>{o.pay === "kasse" ? " /døgn" : " /ekte dag"}</small>
             </dd>
           </div>
         )}
         {o.gain > 0 && (
           <div>
             <dt>Betaler seg</dt>
-            <dd>{Math.ceil(o.payback).toLocaleString("nb-NO")} ekte dager</dd>
+            <dd>
+              {Math.ceil(o.payback).toLocaleString("nb-NO")} {o.pay === "kasse" ? "døgn" : "ekte dager"}
+            </dd>
           </div>
         )}
         {o.hours > 0 && (
@@ -201,15 +221,9 @@ function OptionCard({
           </div>
         )}
       </dl>
-      <button
-        className={best ? "g-primary" : undefined}
-        disabled={!!reason}
-        onClick={() => {
-          act((gg) => o.run(gg));
-          buzz(20);
-        }}
-      >
+      <button className={best ? "g-primary" : undefined} disabled={!!reason || busy} onClick={() => run(o)}>
         {label} · {fmtKr(o.price)}
+        {o.pay === "konsernkasse" ? " fra konsernkassa" : ""}
       </button>
       {reason && <p className="g-konsern-why g-small-text">{reason}</p>}
     </div>
@@ -442,6 +456,9 @@ function ProjectStatus({ p }: { p: SisterPlant }) {
 /** Knappene for et verk som ikke er hovedknappen: modernisere (for stålverk), bytte til kompleks og selge (B-123) */
 function PlantMore({ g, act, p, options }: { g: GameState; act: Act; p: SisterPlant; options: KonsernOption[] }) {
   const [selling, setSelling] = useState(false);
+  const [busy, setBusy] = useState(false);
+  // Et verk med et prosjekt eller noe i køen kan ikke selges før det er ferdig (serveren sier det samme)
+  const locked = !!p.project || g.konsern.orders.some((o) => o.status === "kø" && o.plantId === p.id);
   const upgrade = options.find((o) => o.key === `bygg-${p.id}`);
   const extra = upgrade ? options.find((o) => o.key === `mod-${p.id}`) : undefined;
   const swap = options.find((o) => o.key === `bytt-${p.id}`);
@@ -449,13 +466,19 @@ function PlantMore({ g, act, p, options }: { g: GameState; act: Act; p: SisterPl
     <>
       {extra && <BuyButton g={g} act={act} o={extra} primary={false} label="Moderniser" />}
       {swap && <BuyButton g={g} act={act} o={swap} primary={false} label="Bytt til stålkompleks" />}
-      {selling ? (
+      {locked ? (
+        <p className="g-muted g-small-text">Verket kan selges når prosjektet og køen for det er ferdig.</p>
+      ) : selling ? (
         <div className="g-row g-konsern-buy">
           <button
             className="g-danger"
+            disabled={busy || !g.konsern.treasury}
             onClick={() => {
-              act((gg) => sellSister(gg, p.id));
-              setSelling(false);
+              setBusy(true);
+              void sellPlantUi(act, p.id, p.name).finally(() => {
+                setBusy(false);
+                setSelling(false);
+              });
             }}
           >
             Ja, selg for {fmtKr(sisterSalePrice(g, p))}
@@ -464,9 +487,12 @@ function PlantMore({ g, act, p, options }: { g: GameState; act: Act; p: SisterPl
         </div>
       ) : (
         <div className="g-konsern-buy">
-          <button onClick={() => setSelling(true)}>Selg for {fmtKr(sisterSalePrice(g, p))}…</button>
+          <button disabled={!g.konsern.treasury} onClick={() => setSelling(true)}>
+            Selg for {fmtKr(sisterSalePrice(g, p))}…
+          </button>
           <span className="g-muted g-small-text">
-            60 % av byggekostnaden. Pengene går i kassa, f.eks. til et storverk.
+            {Math.round(WORLD_KONSERN.sellShare * 100)} % av byggekostnaden. Pengene går i konsernkassa, f.eks. til et
+            storverk.
           </span>
         </div>
       )}
@@ -668,6 +694,55 @@ function PlantTable({
   );
 }
 
+/**
+ * Køen på serveren (B-326): prosjektene som er betalt og venter, i rekkefølge. Pengene er alt trukket fra
+ * konsernkassa, så de kan ikke brukes til bud. Det siste kan avbestilles før det starter.
+ */
+function KonsernQueue({ g, act }: { g: GameState; act: Act }) {
+  const [busy, setBusy] = useState(false);
+  const orders = g.konsern.orders ?? [];
+  if (!orders.length) return null;
+  const now = realNow();
+  const bound = orders.reduce((a, o) => a + o.cost, 0);
+  const last = orders.filter((o) => o.status === "kø").at(-1);
+  return (
+    <div className="g-col-wide g-konsern-queue-col">
+      <Card title={`Byggekøen (${orders.length} av ${WORLD_KONSERN.queueMax})`}>
+        <p className="g-muted g-small-text">
+          Betalt fra konsernkassa: {fmtKr(bound)} er bundet i prosjektene. Ett bygges om gangen, i ekte tid.
+        </p>
+        <ol className="g-konsern-queue">
+          {orders.map((o) => (
+            <li key={o.id}>
+              <span>
+                <strong>{orderLabel(g, o)}</strong>
+                <span className="g-muted g-small-text">
+                  {o.startsAt > now
+                    ? ` · starter om ${fmtLeft(o.startsAt - now)}`
+                    : ` · ferdig om ${fmtLeft(Math.max(0, o.readyAt - now))}`}{" "}
+                  · {fmtKr(o.cost)}
+                </span>
+              </span>
+              {o === last && o.startsAt > now && (
+                <button
+                  className="g-small"
+                  disabled={busy}
+                  onClick={() => {
+                    setBusy(true);
+                    void cancelOrderUi(act, o.id).finally(() => setBusy(false));
+                  }}
+                >
+                  Avbestill
+                </button>
+              )}
+            </li>
+          ))}
+        </ol>
+      </Card>
+    </div>
+  );
+}
+
 /** Underfanene i Konsern (B-226) */
 export type KonsernTabId = "oversikt" | "utvid" | "industri";
 const KONSERN_TAB_IDS: KonsernTabId[] = ["oversikt", "utvid", "industri"];
@@ -853,7 +928,7 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
               {next && <p className="g-muted g-small-text">Neste milepæl: {fmtKr(next)} (gir fagpoeng).</p>}
             </>
           )}
-          {g.won && <LegendProgress g={g} equity={equity} />}
+          <LegendProgress g={g} />
           {/* Én linje i stedet for sju punkter åpne (B-288): resten står bak «Slik fungerer konsernet» */}
           {k.plants.length === 0 && (
             <p className="g-small-text">
@@ -865,8 +940,9 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
             <summary>Slik fungerer konsernet</summary>
             <ol className="g-konsern-steps">
               <li>
-                <strong>Kjøp et stålverk</strong> ({fmtKr(SISTER_TYPES.stalverk.price)}). Det har egne folk og tjener
-                ca. {fmtKr(SISTER_TYPES.stalverk.profitPerDay)} per døgn av seg selv.
+                <strong>Kjøp et stålverk</strong> ({fmtKr(SISTER_TYPES.stalverk.price)}) fra{" "}
+                <strong>konsernkassa</strong> – pengene fra hovedverkets bidrag og utbyttet, ikke kassa hjemme. Det har
+                egne folk og tjener ca. {fmtKr(SISTER_TYPES.stalverk.profitPerDay)} per døgn av seg selv.
               </li>
               <li>
                 <strong>Bygg det ut til storverk</strong> ({fmtKr(upgradeCost(g))}). Da tjener det fire ganger så mye.
@@ -885,16 +961,20 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
               <li>
                 <strong>Bygging tar tid – ekte tid,</strong> uansett spillfart: et stålverk {BUILD_HOURS.stalverk}{" "}
                 timer, et storverk {BUILD_HOURS.storverk}, et stålkompleks {BUILD_HOURS.kompleks}, og hvert trinn
-                modernisering {MODERNIZE_HOURS}. Verket går som før mens det moderniseres. Ett prosjekt om gangen per
-                verk.
+                modernisering {MODERNIZE_HOURS}. Verket går som før mens det moderniseres. Inntil{" "}
+                {WORLD_KONSERN.queueMax} prosjekter i køen; ett bygges om gangen.
               </li>
               <li>
                 <strong>Hjemmeverket er flaggskipet:</strong> godt omdømme og stål som holder kvaliteten gir inntil +
                 {Math.round(FLAGSHIP_MAX * 100)} % utbytte fra alle datterverkene.
               </li>
               <li>
+                <strong>Titlene kommer av verkene:</strong> Stålmagnat med 3 storverk på trinn 3, Stålfyrste med 6 på
+                trinn 4 og så videre. Hver tittel åpner mer: høyere trinn, stålkomplekser og flere plasser.
+              </li>
+              <li>
                 <strong>Du taper ikke på å kjøpe:</strong> et verk er verdt ca. {VALUE_DAYS} døgns overskudd og teller
-                med i konsernverdien. Å bare spare er den tregeste veien til målet.
+                med i verdien i spillet. Å bare spare er den tregeste veien.
               </li>
             </ol>
             <p className="g-muted g-small-text">
@@ -906,6 +986,7 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
         </Card>
       </div>
       <NextStep g={g} act={act} />
+      <KonsernQueue g={g} act={act} />
       {k.plants.length > 0 && (
         <div className="g-col-wide g-konsern-plants">
           <Card title={`Dine verk (${k.plants.length} av ${maxSisters(g)} datterverk)`}>
@@ -959,11 +1040,13 @@ function KonsernBuy({ g, act }: { g: GameState; act: Act }) {
   return (
     <>
       <NextStep g={g} act={act} />
+      <KonsernQueue g={g} act={act} />
       <div className="g-col-wide g-konsern-buy-col">
         <Card title="Kjøp og utvid">
+          {!g.konsern.treasury && <NeedsAccount feature="datterverk" />}
           <p className="g-muted g-small-text">
-            Jo færre døgn før et kjøp har betalt seg, jo bedre. Verkene teller med i konsernverdien, så du taper ikke på
-            å kjøpe.
+            {`Verkene kjøpes fra konsernkassa${g.konsern.treasury ? ` (${fmtKr(Math.floor(g.konsern.treasury.balance))} nå)` : ""}, og bestillingen betales med én gang.`}{" "}
+            Jo færre dager før et kjøp har betalt seg, jo bedre.
           </p>
           <h3 className="g-subhead">Nye verk</h3>
           <div className="g-buy-opts">

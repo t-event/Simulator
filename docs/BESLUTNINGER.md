@@ -5914,3 +5914,67 @@ fordel i utbytte; (2) datterverk og modernisering betales fortsatt av spilltidsp
 ingen aktivitetskrav på utbyttet. Ingenting er endret; eieren avgjør rekkefølgen (forslag i avsnitt 16).
 Konto (B-149): ingen ny funksjon.
 
+
+## B-325 Konsernnivåer etter verkene, ikke kassa (2026-09-29)
+Status: gjelder
+Bakgrunn: kontrollen (B-324) viste at titlene (25–5 000 mrd «Verdi i spillet») ble avgjort av den lokale kassa og var
+uoppnåelige for nye spillere med kassetaket (høyst ca. 35 mrd). Eieren (punkt 1 i OKONOMI-KONTROLL avsnitt 16, «Ja» til
+forslaget i `docs/KONSERN-FORSLAG.md`): serverkjente eiendeler skal låse opp nivåene, ikke nye kontantgrenser.
+Beslutning: serveren regner konsernnivået av verkene den har solgt spilleren (`konsern_ladder_level` i
+`supabase/064_konsern_i_ekte_tid.sql`, speilet i `game/konsernWorld.ts`): 1 Stålmagnat 3 storverk trinn 3, 2 Stålfyrste
+6 storverk/kompleks trinn 4, 3 Stålkonge 2 kompleks trinn 3, 4 Stålkeiser 4 kompleks trinn 5, 5 Stållegende 6, 6
+Stålgigant 8, 7 Stålkolosse 10 kompleks trinn 5, 8 Stålmyte 12 og 9 Stålikon 14 kompleks trinn 6. Nivåene tas i
+rekkefølge, verk som bygges teller ikke, og nivået går aldri ned. Opplåsingene er de samme som før (trinn 4/5/6,
+kompleks, plasser 8→10→12→14). Kassa og konsernverdien teller ikke (da kunne man spare seg til et nivå). Titlene
+spilleren hadde ved byttet, er et gulv (`konsern.floor`): ingen mister noe; Tuster får Stålkolosse av verkene sine.
+Topplista viser tittelen fra nivået (`title_for`). Stormodellene på hovedverket åpnes ved 25 mrd. i verdi i spillet
+eller Stålmagnat, som før. Fagpoengene per tittel er de samme.
+Konto (B-149): nivået krever konto (serveren regner det); uten konto står titlene man har.
+
+## B-326 Datterverk kjøpes fra konsernkassa, med kø og nye priser (2026-09-29)
+Status: gjelder
+Bakgrunn: datterverk ble betalt med spilltidspenger (lokal kasse opptil 10 mrd.), mot B-323. Eieren (punkt 2): flytt
+bygging og modernisering til konsernkassa med nye, balanserte priser, og bind pengene når prosjektet bestilles.
+Beslutning: priser fra konsernkassa stålverk 20 mill., storverk 80 mill., kompleks 250 mill., modernisering 30 % per
+trinn, utbygging forskjellen (oppkjøp −15 %, standardverk −25 % som før). Simulert (KONSERN-FORSLAG.md): første verk
+3 dager, første storverk 11, Stålmagnat 34, første kompleks 70, fullt konsern ca. 300 dager for en middels spiller.
+Et prosjekt betales når det bestilles (`konsern_order`, ny post `prosjekt` i `treasury_ledger`), så pengene ikke kan brukes
+til bud. Inntil 3 i køen, ett bygges om gangen (B-311). Det siste i køen kan avbestilles før det starter (`konsern_cancel`,
+full refusjon). Salg gir 60 % av den nye prisen med trinn til konsernkassa (`konsern_sell`), også for verk kjøpt før. Bytte
+av et lite verk mot kompleks er ett kall (`bytt`). Serveren holder verkene (`konsern`) og køen (`konsern_orders`);
+`save_game` legger dem inn i det lagrede spillet (065), og utbyttet regnes av serverens verk. Verkene fra før beholdes med
+trinn og prosjekter. Den lokale kassa gjøres ikke om (B-190). Appen: `net/konsern.ts`, `ui/konsernRun.ts`, byggekøen på
+Konsern.
+Konto (B-149): krever konto (serveren, konsernkassa); uten konto `NeedsAccount` («Datterverk») på Utvid. Gjester har ikke
+konsernkassa (ikke i `guest_gate`). I `ACCOUNT_FEATURES` som `datterverk`.
+
+## B-327 Aktivitetskrav på utbyttet og bidragsgulvet (2026-09-29)
+Status: gjelder
+Bakgrunn: utbyttet og gulvet i bidraget (30 %) ble betalt uansett om kontoen var forlatt (B-324). Eieren (punkt 3): myk
+modell som tåler jobb, helg og ferie, men stenger gradvis ved lang inaktivitet.
+Beslutning: en aktiv dag er en ekte dag der hovedverket produserte minst 5 % av en normal dag (`production_days`). Faktoren
+(`activity_factor`, `config.world.activity`): 100 % i 7 dager etter siste aktive dag, jevnt ned til 50 % ved dag 21 og 0
+ved dag 42. Første aktive dag gir 100 % igjen. Utbyttet ganges med faktoren per dag (`pay_dividends`), og gulvet i
+bidraget ganges med den (`pay_contributions`). Tre ukers ferie gir 82 % av utbyttet, seks uker 53 %. Alle med konsern var
+aktive ved innføringen.
+Konto (B-149): ingen ny funksjon (del av konsernkassa).
+
+## B-328 Mesterskapet «Konsernledelse» flyttes til hjemmeverket (2026-09-29)
+Status: gjelder
+Bakgrunn: mesterskapet (fagpoeng = spilltid) ga opptil +30 % utbytte i ekte tid, mot B-323. Eieren valgte A: flytt
+fordelen til hjemmeverket.
+Beslutning: utbyttet regnes uten mesterskapet (`DIVIDEND.masteryMax` og `config.world.dividend.mastery_max` = 0). Nivåene
+beholdes; «Konsernledelse» gir nå opptil −30 % på administrasjonen på storverket (500 kr per tonn over 5 000 t, B-305),
+samme kurve. Grunnprisen er 60 fagpoeng (som energi), etter verdien (B-237). Utbyttet går ned 6–15 % for dem som hadde
+nivåer (Grane 33,7 → 29,8 mill., Tuster 36,9 → 33,0). Verk og nivåer er urørt.
+Konto (B-149): ingen ny funksjon.
+
+## B-329 Verdenssimulering etter byttet: liten, middels og stor etter 30, 60 og 90 dager (2026-09-29)
+Status: gjelder (analyse)
+Endringslogg: nei – analyse
+Bakgrunn: eieren ba om en ny simulering etter punkt 1–3 og mesterskapet, før Kontroll og overtakelser.
+Beslutning: resultatet står i `docs/KONSERN-FORSLAG.md` (avsnitt «Etter byttet»). Flyt inn i konsernkassa dag 30/60/90:
+liten 7,4/13,0/16,6 mill., middels 18,5/25,7/30,6, ny stor 53,9/63,1/67,7, dagens største (Grane) 72,8/76,4/77,4.
+Forholdet stor/liten går fra 7,3× til 4,1×, og ny stor mot dagens største fra 0,74 til 0,88 – dagens toppspillere
+når fullt konsern på ca. 90 dager med de nye prisene. Neste steg (Kontroll og overtakelser) kan bygge på dette.
+Konto (B-149): ingen ny funksjon.

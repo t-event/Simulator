@@ -273,7 +273,17 @@ export function newGame(seed = Date.now()): GameState {
     winSeen: false,
     courseSeats: null,
     pendingCastingSwitch: null,
-    konsern: { unlocked: false, plants: [], shared: [], nextId: 1, director: null, milestones: 0, legends: 0 },
+    konsern: {
+      unlocked: false,
+      plants: [],
+      shared: [],
+      nextId: 1,
+      director: null,
+      milestones: 0,
+      legends: 0,
+      orders: [],
+      treasury: null,
+    },
     mastery: {},
     legendCelebrate: null,
     achievements: {},
@@ -3292,7 +3302,8 @@ function onDay(g: GameState, stats: PlantStats): void {
   // Under sommerstansen (B-298) har alle ferie med feriepenger som er opptjent gjennom året: ingen lønn de tre ukene
   if (!summerStop(g)) addCost(g, "lonn", stats.salaryPerDay);
   // Administrasjonen på storverket vokser med kapasiteten (B-305): 250 kr per tonn døgnkapasitet over 5 000 t
-  addCost(g, "faste", STAGES[g.stage].fixedPerDay + adminPerDay(stats));
+  // Mesterskapet «Konsernledelse» gir lavere administrasjon (B-328)
+  addCost(g, "faste", STAGES[g.stage].fixedPerDay + adminPerDay(stats) * masteryFactor(g, "datterverk"));
   if (g.loan > 0) addCost(g, "renter", g.loan * LOAN_INTEREST_PER_DAY);
 
   // Markedet

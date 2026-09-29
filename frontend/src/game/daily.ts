@@ -136,7 +136,8 @@ const TEMPLATES: Record<MissionId, MissionTemplate> = {
   datter: {
     // Et nytt datterverk eller et trinn modernisering teller
     value: (g) => (g.konsern?.plants ?? []).reduce((a, p) => a + 1 + p.level, 0),
-    eligible: (g) => !!g.konsern?.unlocked && konsernOptions(g).some((o) => !o.blocked),
+    // Verkene kjøpes fra konsernkassa (B-326): bare med konto, og bare når noe kan bestilles
+    eligible: (g) => !!g.konsern?.unlocked && konsernOptions(g).some((o) => o.pay === "konsernkasse" && !o.blocked),
     target: () => 1,
   },
   forsk: {

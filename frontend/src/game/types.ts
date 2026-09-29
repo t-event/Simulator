@@ -277,6 +277,26 @@ export interface SisterProject {
   readyAt: number;
 }
 
+/**
+ * Et prosjekt i konsernkøen på serveren (B-326): betalt fra konsernkassa når det ble bestilt, bygges i rekkefølge.
+ * Kopi av det serveren sier (`konsern_status`); appen viser den og starter prosjektene i takt med serveren.
+ */
+export interface KonsernOrder {
+  id: number;
+  kind: SisterProject["kind"];
+  plantId: number;
+  /** Typen for et nytt verk (bygg), ellers null */
+  type: SisterType | null;
+  /** Navnet på et nytt verk, ellers null */
+  name: string | null;
+  cost: number;
+  /** Ekte tid (ms) da prosjektet starter og blir ferdig */
+  startsAt: number;
+  readyAt: number;
+  status: "kø" | "i gang";
+  boughtDay?: number;
+}
+
 export interface DayFinance {
   day: number;
   income: Partial<Record<IncomeCategory, number>>;
@@ -608,8 +628,18 @@ export interface GameState {
     director: SalesDirector | null;
     /** Antall milepæler for konsernverdien som er nådd (B-119) */
     milestones: number;
-    /** Antall stålmilepæler etter sluttmålet som er nådd (25 mrd … 1 billion, B-150) */
+    /**
+     * Konsernnivået (titlene): før B-325 etter verdien, nå fra serveren etter verkene (nivåstigen i konsernWorld.ts).
+     * Går aldri ned.
+     */
     legends: number;
+    /** Køen av prosjekter på serveren (B-326), kopi av det serveren sier */
+    orders: KonsernOrder[];
+    /**
+     * Konsernkassa sist serveren svarte (B-326): saldo og omtrent hva som kommer inn per ekte dag (bidrag og utbytte).
+     * Bare til knappene og rådene; null uten konto
+     */
+    treasury: { balance: number; perDay: number } | null;
   };
   /** Mesterskap (B-150): nivå per prosjekt */
   mastery: Partial<Record<MasteryId, number>>;

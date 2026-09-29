@@ -6,6 +6,8 @@ import { fmtKr, log } from "../game/engine";
 import type { GameState } from "../game/types";
 import { rpc } from "./supabase";
 import type { TreasuryStatus } from "./treasury";
+import type { KonsernWorld } from "../game/konsernWorld";
+import { parseKonsern } from "./konsern";
 
 export interface Tender {
   id: number;
@@ -88,6 +90,8 @@ export interface WorldStatus {
     yesterday: number | null;
     total: number;
   };
+  /** Konsernet på serveren (B-326): verkene, køen, nivået og kassa – null før serveren sender det */
+  konsern: KonsernWorld | null;
 }
 
 type Row = Record<string, unknown>;
@@ -124,7 +128,10 @@ function parseResult(r: Row | null | undefined): TenderResult | null {
 }
 
 export async function fetchWorldStatus(): Promise<WorldStatus> {
-  const r = await rpc<{ companies?: Row[]; treasury?: Row; dividend?: Row; contribution?: Row }>("world_status", {});
+  const r = await rpc<{ companies?: Row[]; treasury?: Row; dividend?: Row; contribution?: Row; konsern?: Row }>(
+    "world_status",
+    {},
+  );
   const t = r?.treasury ?? {};
   const d = r?.dividend ?? {};
   const c = r?.contribution ?? {};
@@ -160,6 +167,7 @@ export async function fetchWorldStatus(): Promise<WorldStatus> {
       yesterday: numOrNull(c.yesterday),
       total: num(c.total),
     },
+    konsern: parseKonsern(r?.konsern),
   };
 }
 

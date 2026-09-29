@@ -167,6 +167,13 @@ Spilleren ser: «Bygges – ferdig om 3 t 40 min» på verket i konsernet, med e
 - Testspilleren: klokka følger spilltiden, så balansen kan måles som før. Målet er at kampanjen til storverk går
   som i dag, og at konsernfasen strekker seg over noen virkelige dager.
 
+### Konsernet i ekte tid – bygget (B-325–B-328)
+
+Verkene, køen og konsernnivået ligger på serveren (`konsern`, `konsern_orders`, 064/065). Kjøp, modernisering,
+utbygging og salg går fra konsernkassa (`konsern_order`, `konsern_cancel`, `konsern_sell`); `world_status` sender
+konsernet, og `save_game` skriver det inn i det lagrede spillet. Titlene kommer av verkene (nivåstigen), med titlene
+fra før som gulv. Utbyttet har aktivitetskrav (7/21/42 dager) og regnes uten mesterskapet. Se `docs/KONSERN-FORSLAG.md`.
+
 ### Fase 5 – anbud og skrapauksjoner – på vent (B-180); anbudet er bygget for strategiske selskaper (skraplageret, B-189)
 
 Spilleren ser: fanen «Anbud» under Salg og «Auksjon» under Marked, fra nivået Stålverk.

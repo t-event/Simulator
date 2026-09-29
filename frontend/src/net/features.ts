@@ -29,6 +29,10 @@ export const ACCOUNT_FEATURES = {
     name: "Sesongpynt",
     why: "Pynten finnes bare mens sesongen pågår, og sesongen kommer fra serveren.",
   },
+  datterverk: {
+    name: "Datterverk",
+    why: "Verkene kjøpes fra konsernkassa på serveren og bygges i ekte tid, så titlene og utbyttet regnes der.",
+  },
   konsernkasse: {
     name: "Konsernkassa",
     why: "Kassa ligger på serveren og går i virkelig tid, så overføringene og det du kjøper i verden avgjøres der.",
