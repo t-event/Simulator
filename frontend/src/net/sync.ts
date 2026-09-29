@@ -15,7 +15,7 @@ import { SAVE_VERSION } from "../game/engine";
 import type { GameState } from "../game/types";
 import { APP_VERSION, cloudConfigured } from "./config";
 import { adoptGuest, onGuestSave } from "./guest";
-import { getSession, NetError, onSessionChange, rest, userId } from "./supabase";
+import { getSession, isTransient, NetError, onSessionChange, rest, userId } from "./supabase";
 
 export type CloudStatus =
   | { kind: "off" }
@@ -45,6 +45,11 @@ let status: CloudStatus = { kind: "off" };
  * mellom spillet her og spillet på nett – lastes ingenting opp, og spillet kobles ikke til en sesong.
  */
 let reconciled = false;
+/**
+ * Koblingen ved innlogging feilet fordi tjenesten var nede eller nettet borte (B-356). Den prøves da igjen
+ * (`CloudFollow`); før B-356 ble den aldri prøvd igjen før siden ble lastet på nytt, og ingenting ble lagret på nett.
+ */
+let relinkNeeded = false;
 const listeners = new Set<() => void>();
 let dirty: GameState | null = null;
 let lastUpload = 0;
@@ -168,7 +173,13 @@ export function isReconciled(): boolean {
   return reconciled;
 }
 /** Spillet her er avklart mot kontoen: opplasting og sesong kan gå som normalt */
+/** Skal koblingen mot kontoen prøves igjen (B-356)? */
+export function needsRelink(): boolean {
+  return relinkNeeded && !reconciled && !!getSession();
+}
+
 export function markReconciled(): void {
+  relinkNeeded = false;
   reconciled = true;
   for (const fn of listeners) fn();
 }
@@ -367,6 +378,7 @@ export function resetCloud(): void {
   if (soonTimer) clearTimeout(soonTimer);
   soonTimer = null;
   reconciled = false;
+  relinkNeeded = false;
   knownRev = null;
   syncedMinute = -1;
   actionPending = false;
@@ -400,6 +412,24 @@ export type LinkDecision =
  * - begge, det lokale uten konto → spilleren velger
  */
 export async function linkOnLogin(local: GameState | null): Promise<LinkDecision> {
+  try {
+    const d = await link(local);
+    relinkNeeded = false;
+    return d;
+  } catch (e) {
+    // Tjenesten nede eller uten nett: prøves igjen, og skyen i toppfeltet viser at spillet ikke er lagret (B-356)
+    relinkNeeded = isTransient(e);
+    if (relinkNeeded)
+      setStatus(
+        e instanceof NetError && e.offline
+          ? { kind: "offline", at: lastSavedAt }
+          : { kind: "error", message: e instanceof Error ? e.message : String(e), at: lastSavedAt },
+      );
+    throw e;
+  }
+}
+
+async function link(local: GameState | null): Promise<LinkDecision> {
   const id = userId();
   reconciled = false;
   knownRev = null;

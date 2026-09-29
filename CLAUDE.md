@@ -266,6 +266,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   hver gang). Nye felt i spilltilstanden som vokser med tida (lister, logger) må ha et tak eller slås sammen (som
   `compactLots`), ellers blir lagringene hundrevis av kB og alt blir tregt. Serverfunksjoner som tar `for update` på en
   spillers rad, skal sjekke uten lås først om det er noe å gjøre (`konsern_settle`, 075).
+- **Koblingen mot kontoen** (B-356): uten den (`reconciled`) laster appen verken opp eller henter. Feiler den fordi
+  tjenesten er nede (`isTransient`), prøver `CloudFollow` igjen hvert 20. sekund (`needsRelink`). Nye kall som skal
+  prøves igjen etter en driftsstans, bruker `isTransient`, ikke bare `offline`.
 - **Tekstfelt på iPhone** (B-347): Safari zoomer inn på felt med skrift under 16 px og zoomer ikke ut igjen. Regelen
   nederst i `game.css` gir alle felt man skriver i minst 16 px på berøringsskjerm – ikke overstyr den med mindre skrift.
 - Skjermbilder med `fullPage: true` viser faste menyer midt på siden; det er

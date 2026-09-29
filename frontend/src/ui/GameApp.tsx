@@ -1303,7 +1303,7 @@ export function GameApp() {
       <SeasonSync api={api} />
       <BadgeSync api={api} />
       <AutoUpdate api={api} />
-      <CloudFollow api={api} />
+      <CloudFollow api={api} onOpenSettings={() => setSettingsOpen(true)} />
       <OtherTab />
       {/* Velkommen tilbake og daglig belønning (B-149): ikke oppå andre vinduer eller veiledningen */}
       {news.length > 0 && !modalOpen && !resultOpen && g.tutorial === null && (

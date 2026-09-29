@@ -22,6 +22,7 @@ import {
   signIn,
   signOut,
   signUp,
+  isTransient,
   updatePassword,
   verifyCode,
 } from "../net/supabase";
@@ -38,6 +39,7 @@ import {
   keepLocal,
   linkOnLogin,
   markReconciled,
+  needsRelink,
   claim,
   onCloudStatus,
   PULL_INTERVAL_MS,
@@ -48,8 +50,10 @@ import {
 
 /** Lenkene fra e-posten (bekreftelse, nytt passord) leses inn før første tegning */
 const authEvent = consumeAuthHash();
-/** Kobling mot kontoen gjøres én gang per sidelasting */
+/** Kobling mot kontoen gjøres én gang per sidelasting – feilet den fordi tjenesten var nede, prøver CloudFollow igjen */
 let linkedThisLoad = false;
+/** Så ofte koblingen prøves igjen etter at tjenesten var nede (B-356) */
+const RELINK_MS = 20_000;
 
 /**
  * Beskjed når spilleren er logget ut av seg selv (økta ble avvist, f.eks. etter utlogging et annet sted før B-145).
@@ -251,10 +255,12 @@ export function CloudDot() {
  * To nettlesere på samme konto (B-140): når appen vises igjen, eller en lagring ble avvist, hentes spillet fra nettet
  * hvis det er spilt videre et annet sted. Spilleren får beskjed, og spillet står på pause til man trykker videre.
  */
-export function CloudFollow({ api }: { api: GameApi }) {
+export function CloudFollow({ api, onOpenSettings }: { api: GameApi; onOpenSettings?: () => void }) {
   const session = useSession();
   const reconciled = useSyncExternalStore(onCloudStatus, isReconciled, isReconciled);
   const [pulled, setPulled] = useState<{ day: number; speed: number; wasRunning: boolean } | null>(null);
+  // Koblingen som ble prøvd igjen, fant to ulike spill: spilleren velger under Konto (B-356)
+  const [mustChoose, setMustChoose] = useState(false);
   const apiRef = useRef(api);
   useEffect(() => {
     apiRef.current = api;
@@ -278,6 +284,47 @@ export function CloudFollow({ api }: { api: GameApi }) {
     apiRef.current.setSpeed(speed > 0 ? speed : 1);
     setPulled(null);
   };
+
+  // Tjenesten var nede da siden ble lastet (B-356): koblingen mot kontoen prøves igjen til den lykkes. Før dette ble
+  // ingenting lagret på nett før appen ble lastet på nytt – etter en driftsstans lagret ingen.
+  useEffect(() => {
+    if (!session || reconciled) return;
+    let alive = true;
+    const retry = async () => {
+      if (!needsRelink() || busyRef.current || document.visibilityState !== "visible") return;
+      busyRef.current = true;
+      try {
+        const g = apiRef.current.game;
+        const d = await linkOnLogin(g ?? loadGame());
+        linkedThisLoad = true;
+        if (!alive) return;
+        if (d.kind === "cloud") {
+          apiRef.current.adopt(d.cloud);
+          setPulled({ day: dayOf(d.cloud), speed: d.cloud.speed, wasRunning: false });
+        } else if (d.kind === "choose") {
+          // Kontokortet viser valget når det åpnes
+          linkedThisLoad = false;
+          setMustChoose(true);
+        }
+      } catch {
+        // Fortsatt nede: prøver igjen om litt
+      } finally {
+        busyRef.current = false;
+      }
+    };
+    const timer = setInterval(() => void retry(), RELINK_MS);
+    const onVisible = () => void retry();
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+    window.addEventListener("online", onVisible);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
+      window.removeEventListener("online", onVisible);
+    };
+  }, [session, reconciled]);
 
   useEffect(() => {
     if (!session || !reconciled) return;
@@ -325,6 +372,32 @@ export function CloudFollow({ api }: { api: GameApi }) {
     };
   }, [session, reconciled]);
 
+  if (mustChoose && !reconciled)
+    return (
+      <div className="g-modal" role="dialog" aria-modal="true" aria-label="Velg spill">
+        <div className="g-modal-card">
+          <h2>Hvilket spill vil du fortsette med?</h2>
+          <p>
+            Kontakten med serveren er tilbake, men spillet her og spillet på kontoen er forskjellige. Velg hvilket du
+            vil fortsette med. Til da lagres spillet bare her.
+          </p>
+          <div className="g-row">
+            {onOpenSettings && (
+              <button
+                className="g-primary"
+                onClick={() => {
+                  setMustChoose(false);
+                  onOpenSettings();
+                }}
+              >
+                Velg under Konto
+              </button>
+            )}
+            <button onClick={() => setMustChoose(false)}>Senere</button>
+          </div>
+        </div>
+      </div>
+    );
   if (!pulled) return null;
   return (
     <div className="g-modal" role="dialog" aria-modal="true" aria-label="Hentet fra nettet">
@@ -474,7 +547,13 @@ export function AccountCard({
     try {
       apply(await linkOnLogin(api.game ?? loadGame()));
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(
+        isTransient(e)
+          ? "Fikk ikke kontakt med serveren. Spillet lagres her, og det prøves igjen av seg selv."
+          : e instanceof Error
+            ? e.message
+            : String(e),
+      );
     }
   };
 
