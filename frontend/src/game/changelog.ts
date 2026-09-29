@@ -15,6 +15,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 305,
+    date: "2026-09-29",
+    title: "Reform 2: toppen av verket koster mer, som i virkeligheten",
+    items: [
+      "Salgsbonusene (salgskontor, selgere, omdømme, eksport, grønt stål, havn, vakuum …) legges fortsatt sammen, men stopper på +25 %. Et vanlig storverk merker ingenting.",
+      "De største ovnene (150, 250 og 420 t) bruker mer elektroder, ildfast og legeringer per tonn – som ekte stormodeller.",
+      "Et storverk som kan lage mer enn 5 000 tonn i døgnet, betaler administrasjon for kapasiteten over det (250 kr per tonn, under Faste kostnader).",
+      "Kundene tar unna 10 000 tonn i døgnet til full pris, halv pris til 20 000 tonn, og 40 % over det. Den største ovnen kjøpes for tonn og rekorder, ikke for overskuddet.",
+      "Ingenting er endret fra garasjen til og med et nytt storverk. Dette er siste del av økonomireform 2.",
+    ],
+  },
+  {
     b: 304,
     date: "2026-09-29",
     title: "Reform 2: datterverkene betaler utbytte i ekte tid, rett til konsernkassa",

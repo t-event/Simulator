@@ -82,7 +82,16 @@ import {
   streakReward,
 } from "./daily";
 import { applyWorldEvents, canJoinDirectly, joinSeason, SEASON_BONUS_FP, worldFactor, applySeasonTwist } from "./world";
-import { dealPrice, energyPrice, marketSaturation, productPrice } from "./plant";
+import {
+  ADMIN_FREE_T,
+  ADMIN_PER_CAP_T,
+  adminPerDay,
+  dealPrice,
+  energyPrice,
+  marketSaturation,
+  PRICE_BONUS_MAX,
+  productPrice,
+} from "./plant";
 import {
   acceptContract,
   orderQueue,
@@ -2348,13 +2357,40 @@ test("Ovnene fordeles etter hva som haster (B-240): alle lager kvaliteten som el
   );
 });
 
-test("Markedet metter seg (B-252): full pris opp til 10 000 t i døgnet, lavere snittpris over", () => {
+test("Markedet metter seg (B-252, B-305): full pris opp til 10 000 t i døgnet, lavere snittpris over, enda lavere over 20 000", () => {
   assert(marketSaturation(733) === 1 && marketSaturation(10_000) === 1, "små verk får lavere pris");
+  assert(Math.abs(marketSaturation(20_000) - 0.75) < 1e-9, `faktor ${marketSaturation(20_000)} for 20 000 t`);
   const big = marketSaturation(34_721);
-  assert(big > 0.6 && big < 0.7, `faktor ${big} for 35 000 t i døgnet`);
+  // (10 000 + 10 000 × 0,5 + 14 721 × 0,4) / 34 721 = 0,602
+  assert(big > 0.59 && big < 0.61, `faktor ${big} for 35 000 t i døgnet`);
   // Mer produksjon gir fortsatt mer omsetning totalt, bare mindre per tonn
   assert(34_721 * big > 20_000 * marketSaturation(20_000), "mer produksjon gir mindre omsetning");
   assert(marketSaturation(20_000) > big, "prisen faller ikke med mengden");
+});
+
+test("Toppen av hjemmeverket (B-305): salgsbonusene stopper på +25 %, og administrasjonen følger kapasiteten fra storverket", () => {
+  const g = newGame(305);
+  g.stage = 4;
+  g.reputation = 100;
+  g.owned.push("salgskontor", "havn", "vakuum");
+  g.researched.push("kundepleie", "eksport", "produktutvikling", "gronnstal");
+  for (let i = 0; i < 4; i++) g.workers.push({ ...g.workers[0], id: 900 + i, role: "selger" as never });
+  const st = computePlantStats(g);
+  assert(Math.abs(st.priceBonus - PRICE_BONUS_MAX) < 1e-9, `prisbonus ${st.priceBonus}`);
+  // Administrasjonen: 250 kr per tonn døgnkapasitet over 5 000 t, bare på storverket – et nytt storverk merker ingenting
+  assert(
+    st.dailyProductT < ADMIN_FREE_T && adminPerDay(st) === 0,
+    `administrasjon på et nytt storverk: ${adminPerDay(st)}`,
+  );
+  assert(adminPerDay({ stage: STAGES[3], dailyProductT: 20_000 }) === 0, "administrasjon før storverket");
+  assert(adminPerDay({ stage: STAGES[4], dailyProductT: 31_000 }) === 6_500_000, "6,5 mill. på 31 000 t");
+  assert(
+    Math.abs(adminPerDay({ stage: STAGES[4], dailyProductT: 8_300 }) - ADMIN_PER_CAP_T * 3_300) < 1e-6,
+    "0,8 mill. på 8 300 t",
+  );
+  // Stormodellene har dyrere forbruk (elektroder, ildfast, legeringer) enn 90-tonneren
+  const cons = (id: string) => FURNACES.find((f) => f.id === id)!.consumablesPerT;
+  assert(cons("lysbue90") === 180 && cons("lysbue150") >= 350 && cons("likestrom420") >= 400, "forbruk på toppen");
 });
 
 test("Trender i markedet (B-255): starter og slutter, drar forespørsler mot det som er ettertraktet, og gir bedre pris", () => {

@@ -5486,3 +5486,32 @@ B-183); ingen ny funksjon uten konto.
 Testet: tsc, lint, `npm test` (ny test: samme regel som serveren med faste tall, avtagende, farten betyr ingenting,
 `konsernDay` bokfører ingenting; nettlaget: varselet én gang per dag, `world_status` leses), balanse (exit 0),
 `--konsern`, Playwright på 320 og 390 px (Konsern → Oversikt og Industrien).
+
+## B-305 Reform 2, del 3: realistiske kostnader på toppen av hjemmeverket (2026-09-29)
+Status: gjelder (del 3 av B-302; justerer B-252 og salgsbonusene fra B-014/B-088/B-109; siste del av reformen)
+Bakgrunn: de største hjemmeverkene tjente 115–230 mill. per spilldøgn (7 000 kr/t, 4–5 ganger virkeligheten) fordi
+salgsbonusene la seg oppå hverandre til +43 %, forbruket per tonn var lavere på stormodellene enn på 90-tonneren, og
+et verk på 31 000 t hadde nesten ingen kostnader som vokste med størrelsen (B-301). Alt fra garasjen til og med et
+nytt storverk skal stå urørt.
+Beslutning (bare det som virker over ca. 5 000 t i døgnet):
+- **Salgsbonusene stopper på +25 %** (`PRICE_BONUS_MAX` i `plant.ts`; før: inntil +43 %). Alle bonusene finnes som før,
+  men kundene betaler ikke mer enn markedet tåler. Et storverk med omdømme 80, salgskontor og to selgere ligger på
+  ca. +14 % og merker ingenting.
+- **Forbruk per tonn på stormodellene** (elektroder, ildfast, legeringer): 150 t 170 → 350, 250 t 165 → 375,
+  420 t 140 → 400 kr/t. 30- og 90-tonneren står (200 og 180).
+- **Administrasjon** (`adminPerDay`, i posten «Faste kostnader»): 250 kr per tonn døgnkapasitet **over 5 000 t**
+  (`ADMIN_PER_CAP_T`, `ADMIN_FREE_T`), bare på storverket. 8 300 t: 0,8 mill.; 31 000 t: 6,5 mill. per døgn. Et nytt
+  storverk (700 t) betaler ingenting.
+- **Markedet metter seg i to trinn** (`MARKET_SATURATION`): full pris til 10 000 t, 50 % fra 10 000 til 20 000 t og
+  **40 % over 20 000 t** (analysen foreslo 25 %, men da tapte verket penger på hvert tonn over 20 000, og 420-tonneren
+  ble en dårlig handel; med 40 % går den største ovnen omtrent i null på tonnene over 20 000 – den kjøpes for tonn og
+  rekorder, ikke for overskuddet). 31 000 t: faktor 0,57 (før 0,64).
+- Toppen (31 000 t, alle bonuser) går fra ca. 230 til ca. 140 mill. per spilldøgn etter analysens tall (4 500 kr/t,
+  fortsatt 2–3 ganger virkeligheten). Kundene, kontraktene, kvalitetspremiene og alt før storverket er som før.
+- Testspilleren (`--storovn 330`, samme utgangspunkt dag 331 med `--storovn-dump`/`--storovn-base`, nytt i B-305;
+  variantene er underbemannet): 3 × 150 t (8 690 t) 28,6 → 23,2 mill. per døgn, 250 t (13 300 t) 42,0 → 32,6,
+  420 t (22 500 t) 31,7 → 14,2. Ingen variant taper penger. Nivåmålene i `balance.ts` står (exit 0).
+Konto (B-149): nei – regel 1, eget spill.
+Testet: tsc, lint, `npm test` (ny test: bonusene stopper på 25 %, administrasjonen 0 på et nytt storverk og 6,5 mill.
+på 31 000 t, forbruket på stormodellene; metningen 0,75 ved 20 000 t og 0,60 ved 35 000 t), balanse (exit 0),
+`--storovn 330`.

@@ -30,6 +30,7 @@ import {
   buyMastery,
   masteryReady,
 } from "./actions";
+import { readFileSync, writeFileSync } from "node:fs";
 import { MASTERY_IDS, masteryCost, masteryLevel } from "./mastery";
 import { resolveDecision } from "./decisions";
 import { isWinter } from "./calendar";
@@ -920,8 +921,16 @@ if (process.argv.includes("--vurdering")) {
 }
 
 if (process.argv.includes("--storovn")) {
-  // Stormodellene (B-154): samme konsernspill med ulike ovner. Viser tonn og overskudd hjemme per døgn over ti døgn
-  const base = run(1, Number(process.argv[process.argv.indexOf("--storovn") + 1]) || 330, false, false).final;
+  // Stormodellene (B-154): samme konsernspill med ulike ovner. Viser tonn og overskudd hjemme per døgn over ti døgn.
+  // `--storovn-dump fil` lagrer utgangspunktet, og `--storovn-base fil` bruker det igjen – så to versjoner av
+  // økonomien kan sammenlignes fra samme spill (B-305)
+  const baseArg = process.argv.indexOf("--storovn-base");
+  const base =
+    baseArg > 0
+      ? (JSON.parse(readFileSync(process.argv[baseArg + 1], "utf8")) as GameState)
+      : run(1, Number(process.argv[process.argv.indexOf("--storovn") + 1]) || 330, false, false).final;
+  const dumpArg = process.argv.indexOf("--storovn-dump");
+  if (dumpArg > 0) writeFileSync(process.argv[dumpArg + 1], JSON.stringify(base));
   const variants: [string, string | null, string | null, string[]][] = [
     ["som nå (90 t)", null, null, []],
     ["150 t + 8 strenger", "lysbue150", "streng8", []],

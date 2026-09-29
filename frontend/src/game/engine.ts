@@ -87,6 +87,7 @@ import {
   potSwapHours,
   POWER_BINDING_DAYS,
   productPrice,
+  adminPerDay,
   marketSaturation,
   rollingActive,
   productCapT,
@@ -3256,7 +3257,8 @@ function onDay(g: GameState, stats: PlantStats): void {
   // Faste kostnader
   // Under sommerstansen (B-298) har alle ferie med feriepenger som er opptjent gjennom året: ingen lønn de tre ukene
   if (!summerStop(g)) addCost(g, "lonn", stats.salaryPerDay);
-  addCost(g, "faste", STAGES[g.stage].fixedPerDay);
+  // Administrasjonen på storverket vokser med kapasiteten (B-305): 250 kr per tonn døgnkapasitet over 5 000 t
+  addCost(g, "faste", STAGES[g.stage].fixedPerDay + adminPerDay(stats));
   if (g.loan > 0) addCost(g, "renter", g.loan * LOAN_INTEREST_PER_DAY);
 
   // Markedet

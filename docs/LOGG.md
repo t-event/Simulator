@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 238 – 2026-09-29: Reform 2, del 3 – realistiske kostnader på toppen av hjemmeverket
+
+**Brukeren ba om:** (fortsettelse av B-302) del 3, som siste del: realistiske kostnader på toppen.
+
+**Gjort:** B-305: salgsbonusene stopper på +25 %, dyrere forbruk på stormodellene, administrasjon 250 kr per tonn
+døgnkapasitet over 5 000 t, markedsmetningen i to trinn (50 % over 10 000 t, 40 % over 20 000 t – 25 % ga tap per tonn
+over 20 000 og gjorde 420-tonneren til en dårlig handel). Alt før storverket er urørt.
+
+**Testet:** tsc, lint, npm test (ny test), balance (exit 0), `--storovn` før/etter fra samme utgangspunkt (nye valg
+`--storovn-dump`/`--storovn-base`): 8 690 t 28,6 → 23,2 mill., 13 300 t 42,0 → 32,6, 22 500 t 31,7 → 14,2 per døgn.
+
+**Gjenstår:** gebyret (01:38 UTC, påminnelse satt). Pynt for sesong 3.
+
+---
+
 ## Økt 237 – 2026-09-29: Reform 2, del 2 – utbytte i ekte tid til konsernkassa
 
 **Brukeren ba om:** (fortsettelse av B-302) del 2: datterverkenes utbytte i ekte tid rett til konsernkassa.

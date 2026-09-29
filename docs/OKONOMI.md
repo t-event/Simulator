@@ -1,7 +1,8 @@
 # Økonomien i midt- og sluttspillet – analyse og forslag til reform 2
 
 Skrevet 2026-09-28 (økt 235, B-301). **Eieren valgte pakke B med alle anbefalingene (B-302).** Status: B2+B6 bygget
-(B-303), B1 bygget (B-304: utbytte i ekte tid til konsernkassa), gebyret settes etter anbudet, B3 (B-305) kommer. Analysen under står som den ble skrevet. Tallene er hentet fra
+(B-303), B1 bygget (B-304: utbytte i ekte tid til konsernkassa), B3 bygget (B-305: andre knekk 40 %, ikke 25 %, og
+administrasjon bare over 5 000 t), gebyret settes etter anbudet. Analysen under står som den ble skrevet. Tallene er hentet fra
 koden (`data.ts`, `plant.ts`, `konsern.ts`), fra spillernes lagrede spill og tidslinje (bare lesing), og fra
 virkelige priser (kilder nederst). Spillerne omtales uten navn.
 
