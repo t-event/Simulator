@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 252 – 2026-09-29: Konsernverdi regnet av serveren på topplista (B-320)
+
+**Brukeren ba om:** steg 4 av konsernbidraget; valgte «ny liste ved siden av».
+
+**Gjort:** `konsern_value` og `leaderboard('konsern')` (063); ny fane «Konsernverdi», den gamle heter «Verdi i
+spillet». Innskuddet slått av på serveren (062) etter at appen fra B-319 var publisert.
+
+**Testet:** SQL i en blokk som ble rullet tilbake, `npm test`, tsc, lint, Playwright 320/390.
+
+**Gjenstår:** se etter første betaling av bidraget 30.9 (`contributions`). Valg av utbyttepolitikk (utsatt). Følg med
+på `project_guard_log`.
+
+---
+
 ## Økt 251 – 2026-09-29: Innskuddet i konsernkassa bort (B-319)
 
 **Brukeren ba om:** steg 2 av konsernbidraget (eierens svar i B-318).

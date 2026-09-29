@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 320,
+    date: "2026-09-29",
+    title: "Ny liste på topplista: Konsernverdi",
+    items: [
+      "Topplista har fått en ny liste, «Konsernverdi»: konsernkassa pluss 60 dagers utbytte og bidrag, minus lån. Serveren regner den ut i ekte tid, så spillfarten og kassa i verket betyr ingenting – god drift gjør det. Den gamle lista heter nå «Verdi i spillet» og står som før.",
+    ],
+  },
+  {
     b: 319,
     date: "2026-09-29",
     title: "Ingen innskudd i konsernkassa lenger",
