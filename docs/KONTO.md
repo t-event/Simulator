@@ -138,3 +138,4 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Snitt siste 7 døgn i resultatgrafen, metningen 50/45 % | Nei | Regel 1: ditt eget spill | B-310 |
 | Verden 10× ned og ett byggeprosjekt om gangen | – (konsernkassa som før) | Ingen ny funksjon | B-311 |
 | Neste rammeavtale, ledig tid og køen i «Produksjon nå» | Nei | Regel 1: ditt eget spill | B-316 |
+| Hovedverkets konsernbidrag i ekte tid til konsernkassa | Ja (som konsernkassa) | Regel 2 og 7: serveren, ekte tid | B-318 |

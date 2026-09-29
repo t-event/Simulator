@@ -324,6 +324,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Fartskontrollen** (B-176) i `check_snapshot` regner med 120 spillminutter per sekund (10×) og 720 når verket står om
   natta (`g.boostMin`, telles i `useGame`). Kommer en ny fart eller en ny måte tida hopper på, må sjekken følge med,
   ellers flagges ærlige spillere.
+- **Konsernbidraget** (B-318): hovedverkets bidrag til konsernkassa regnes bare på serveren (`pay_contributions` i 061,
+  fra `world_tick`), av `meter_normal_rate` og marginen i `state.history` – ikke speilet i appen. Nye inntekts- eller
+  kostnadsposter i døgnregnskapet må vurderes i `contribution_margin` (drift eller ikke). Tallene i
+  `config.world.contribution`.
 - **Salg av datterverk** (B-307): `sisterSalePrice` (60 % av byggekostnaden), aldri `sisterValue` (60 døgns overskudd med
   bonuser) – verdien er større enn prisen, så salg til verdi ga uendelig penger. Nye måter å kvitte seg med et verk på,
   bruker salgssummen.

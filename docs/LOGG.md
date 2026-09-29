@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 250 – 2026-09-29: Hovedverkets konsernbidrag, steg 1 (B-318)
+
+**Brukeren ba om:** «Fortsett». Svarte på spørsmålene i KONSERNBIDRAG.md: automatisk bidrag, gulv 30 %, fast 50 %,
+demp toppen, serverkjent konsernverdi på topplista; usikker på lokal kasse (taket på 10 mrd. holder den nede).
+
+**Gjort:** B-318 (061): serveren betaler hovedverkets bidrag til konsernkassa hver ekte dag fra 30.9, regnet av tonn
+i en normal spilldag og driftsresultat per tonn, med aktivitet og demping. Kortet «Konsernkassa» viser bidraget, og
+beskjeden om utbyttet tar det med.
+
+**Testet:** migrasjonen på ekte data i en blokk som ble rullet tilbake, `npm test`, tsc, lint, Playwright 320/390.
+
+**Gjenstår:** steg 2 – innskuddsknappen bort (app først, så `treasury_base_per_day` = 0); steg 4 – serverkjent
+konsernverdi på topplista. Se etter første betaling 30.9 i `contributions`. Følg med på `project_guard_log`.
+
+---
+
 ## Økt 249 – 2026-09-29: Feilretting i vernet mot klokkejuks (B-317)
 
 **Brukeren ba om:** «Fortsett».

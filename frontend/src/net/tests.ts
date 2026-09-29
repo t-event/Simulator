@@ -324,6 +324,15 @@ function makeFake(): Fake {
       return json(200, {
         // Utbyttet fra datterverkene i ekte tid (B-304)
         dividend: { per_day: "41465454.55", yesterday: "41465455", total: "82930910" },
+        // Hovedverkets konsernbidrag (B-318)
+        contribution: {
+          per_day: "38441575",
+          margin: "3000",
+          normal_t: "32839",
+          activity: "1.0000",
+          yesterday: "38441575",
+          total: "67996669",
+        },
         companies: [
           {
             id: 1,
@@ -1338,6 +1347,15 @@ const main = async () => {
     assert(c.name === "Skraplageret" && c.tender?.id === 7 && c.tender.maxBid === 923_000_000, JSON.stringify(c));
     assert(c.tender?.bidders.length === 1 && c.tender.bidders[0] === "Grane", "budgiverne før eget bud");
     assert(w.treasury.balance === 50_000_000 && c.estimatePerDay === 65_902_630, JSON.stringify(w.treasury));
+    // Konsernbidraget følger med i world_status (B-318)
+    assert(
+      w.contribution.perDay === 38_441_575 &&
+        w.contribution.margin === 3000 &&
+        w.contribution.normalT === 32_839 &&
+        w.contribution.activity === 1 &&
+        w.contribution.yesterday === 38_441_575,
+      JSON.stringify(w.contribution),
+    );
     // Utbyttet fra datterverkene følger med i world_status (B-304)
     assert(
       Math.abs(w.dividend.perDay - 41_465_454.55) < 1 &&
@@ -1529,6 +1547,18 @@ const main = async () => {
     assert(applyDividendNews(h, 41_465_455, now) === 0 && !worldNews(h, [], now, 5e6), "samme beskjed to ganger");
     assert(applyDividendNews(h, 41_465_455, now + 86_400_000) === 1, "ny dag ga ikke beskjed");
     assert(applyDividendNews(h, 0, now + 2 * 86_400_000) === 0, "beskjed uten utbytte");
+    // Konsernbidraget (B-318): alene eller sammen med utbyttet, fortsatt én beskjed per dag
+    assert(
+      applyDividendNews(h, 0, now + 3 * 86_400_000, 38_441_575) === 1 &&
+        /^Hovedverket betalte .* i konsernbidrag til konsernkassa i går\.$/.test(h.log.at(-1)!.text),
+      h.log.at(-1)!.text,
+    );
+    assert(
+      applyDividendNews(h, 5e6, now + 4 * 86_400_000, 1e7) === 1 &&
+        /konsernbidrag og datterverkene .* i utbytte/.test(h.log.at(-1)!.text),
+      h.log.at(-1)!.text,
+    );
+    assert(applyDividendNews(h, 5e6, now + 4 * 86_400_000, 1e7) === 0, "bidraget ga to beskjeder samme dag");
     delete (old as Record<string, unknown>).dividendSeen;
     assert(migrate(old).dividendSeen === null, "migrate dividendSeen");
     // Første utbetaling vises i spillerens egen tid, uten «+0 kr i går»

@@ -76,6 +76,18 @@ export interface WorldStatus {
   treasury: TreasuryStatus;
   /** Utbyttet fra datterverkene (B-304): anslag per ekte dag nå, betalt for i går, og i alt */
   dividend: { perDay: number; yesterday: number | null; total: number };
+  /**
+   * Hovedverkets konsernbidrag (B-318): en full dag nå (dempet), margin per tonn, tonn i en normal spilldag, siste
+   * aktivitet (0,3–1), betalt for i går og i alt
+   */
+  contribution: {
+    perDay: number;
+    margin: number;
+    normalT: number;
+    activity: number | null;
+    yesterday: number | null;
+    total: number;
+  };
 }
 
 type Row = Record<string, unknown>;
@@ -112,9 +124,10 @@ function parseResult(r: Row | null | undefined): TenderResult | null {
 }
 
 export async function fetchWorldStatus(): Promise<WorldStatus> {
-  const r = await rpc<{ companies?: Row[]; treasury?: Row; dividend?: Row }>("world_status", {});
+  const r = await rpc<{ companies?: Row[]; treasury?: Row; dividend?: Row; contribution?: Row }>("world_status", {});
   const t = r?.treasury ?? {};
   const d = r?.dividend ?? {};
+  const c = r?.contribution ?? {};
   return {
     companies: (r?.companies ?? []).map((c) => ({
       id: num(c.id),
@@ -139,18 +152,34 @@ export async function fetchWorldStatus(): Promise<WorldStatus> {
       freedAt: str(t.freed_at),
     },
     dividend: { perDay: num(d.per_day), yesterday: numOrNull(d.yesterday), total: num(d.total) },
+    contribution: {
+      perDay: num(c.per_day),
+      margin: num(c.margin),
+      normalT: num(c.normal_t),
+      activity: numOrNull(c.activity),
+      yesterday: numOrNull(c.yesterday),
+      total: num(c.total),
+    },
   };
 }
 
 /**
- * Beskjeden om utbyttet fra datterverkene (B-304): én gang per ekte dag, når serveren har betalt for i går.
- * Gir 1 hvis det ble skrevet noe.
+ * Beskjeden om utbyttet fra datterverkene (B-304) og hovedverkets konsernbidrag (B-318): én gang per ekte dag, når
+ * serveren har betalt for i går. Gir 1 hvis det ble skrevet noe.
  */
-export function applyDividendNews(g: GameState, yesterday: number | null, now = Date.now()): number {
+export function applyDividendNews(g: GameState, yesterday: number | null, now = Date.now(), contribution = 0): number {
   const day = yesterdayUtc(now);
-  if (!yesterday || yesterday <= 0 || g.dividendSeen === day) return 0;
+  const div = yesterday && yesterday > 0 ? yesterday : 0;
+  const bid = contribution > 0 ? contribution : 0;
+  if (div + bid <= 0 || g.dividendSeen === day) return 0;
   g.dividendSeen = day;
-  log(g, `Datterverkene betalte ${fmtKr(yesterday)} i utbytte til konsernkassa i går.`, "good");
+  const text =
+    bid > 0 && div > 0
+      ? `Hovedverket betalte ${fmtKr(bid)} i konsernbidrag og datterverkene ${fmtKr(div)} i utbytte`
+      : bid > 0
+        ? `Hovedverket betalte ${fmtKr(bid)} i konsernbidrag`
+        : `Datterverkene betalte ${fmtKr(div)} i utbytte`;
+  log(g, `${text} til konsernkassa i går.`, "good");
   return 1;
 }
 
