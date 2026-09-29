@@ -2841,6 +2841,37 @@ test("Forespørsler som passet, men gikk ut (B-292): råd etter to, borte når d
   assert(!(g.missedOffers ?? []).length && tips().length === 0, "rådet ble stående etter en signert kontrakt");
 });
 
+test("Salgsdirektøren lot den gå (B-312): ikke «passet verket» og ikke rådet når direktøren er på", () => {
+  const g = newGame(312);
+  g.tutorial = null;
+  g.pendingDecision = null;
+  g.settings.pauseOffers = true;
+  g.konsern.unlocked = true;
+  g.konsern.director = { hiredDay: day(g), contracts: 0, agreements: 0, agreementsOn: false, active: true, level: 0 };
+  const stats = computePlantStats(g);
+  const offers = g.contracts.filter((c) => c.status === "tilbud");
+  assert(offers.length >= 2, `for få forespørsler (${offers.length})`);
+  // Passer «grønn» på Salg (60 % av tida med 0,8 × kapasiteten), men ikke direktøren (0,6 × kapasiteten, 70 % av tida)
+  const days = 21;
+  const t = 0.6 * days * 0.8 * stats.dailyProductT;
+  for (const c of offers)
+    Object.assign(c, { tonnes: t / offers.length, deadlineDay: day(g) + days - 1, offerExpiresMin: g.minute + 30 });
+  const before = g.log.length;
+  advance(g, 60);
+  assert(!(g.missedOffers ?? []).length, `forespørslene ble talt som forsømt (${g.missedOffers?.length})`);
+  const texts = g.log.slice(before).map((l) => l.text);
+  assert(
+    texts.some((x) => x.startsWith("Salgsdirektøren lot forespørselen")),
+    `ingen forklaring fra direktøren: ${texts.join(" | ")}`,
+  );
+  assert(!texts.some((x) => x.includes("selv om den passet verket")), "sa fortsatt «selv om den passet verket»");
+  assert(!hints(g, computePlantStats(g)).some((h) => h.text.includes("gikk ut uten svar")), "rådet vises med direktør");
+  // Én ovn om gangen på et verk med flere ovner gir et råd (B-312)
+  g.furnaces.push({ ...g.furnaces[0], heat: null, waitReason: "Venter: bare én ovn smelter om gangen" });
+  const tip = hints(g, computePlantStats(g)).find((h) => h.text.startsWith("Bare én ovn smelter om gangen"));
+  assert(tip && tip.view === "marked" && tip.sub === "strom", "ingen råd om én ovn om gangen");
+});
+
 test("Poengmålene i kontrollrommet kan nås (B-293): den flinke testspilleren klarer toppen i minst hver femte runde", () => {
   const mix = { c: 0.3, p: 0.03, tramp: 0.2 };
   const scores: number[] = [];
@@ -2890,6 +2921,15 @@ test("Æresmerket for økonomireformen (B-296): gis fra serveren, skjult for all
     "merket vises ikke for den som har det",
   );
   assert(!applyServerBadges(g, ["reform"]), "samme merke ble gitt to ganger");
+  // Serveren er fasit (B-312): et merke den har trukket, tas bort igjen med prestasjonen – fagpoengene står
+  assert(applyServerBadges(g, ["reform2"]), "endringen ble ikke meldt");
+  assert(!hasAchievement(g, "reform") && hasAchievement(g, "reform2"), "feil merke ble ikke tatt bort");
+  assert(!(g.serverBadges ?? []).includes("reform"), "serverBadges beholdt det trukne merket");
+  assert(g.researchPoints === fp + 50, "fagpoengene skulle stå");
+  assert(!visibleFamilies(g).some((f) => f.id === "reform"), "serien vises fortsatt etter at merket er trukket");
+  // Tom liste fra serveren tar bort alt
+  assert(applyServerBadges(g, []) && !hasAchievement(g, "reform2"), "tom liste tok ikke bort merket");
+  assert(!applyServerBadges(g, []), "ingen endring skal gi false");
   // Et gammelt spill uten feltet
   const old = newGame(297) as unknown as Record<string, unknown>;
   delete old.serverBadges;

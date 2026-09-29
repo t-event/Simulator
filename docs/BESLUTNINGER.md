@@ -5654,3 +5654,35 @@ Konto (B-149): ingen ny funksjon (konsernkassa og konsernet som før).
 Testet: tsc, lint, `npm test` (speilet: `DIVIDEND.base × 10 = profitPerDay`; de faste tallene en tidel; ett prosjekt
 om gangen i B-119- og B-170-testene), balanse (exit 0), tørrkjøring av 055 (ti kasser, config, estimatet og utbyttet
 regnet på nytt).
+
+## B-312 Reformveteran I bare for reform 1, og salgsdirektøren forklarer seg (2026-09-29)
+Status: gjelder (retter B-296/B-299/B-306; brukeren: «Det var mange som fikk reformveteran 1-merket når de bare skulle ha
+reformveteran 2», og «Sjekk at salgsdirektøren fungerer for alle spillerne. Noen har slått han av fordi han ikke fungerer»)
+Bakgrunn:
+- `badges_of` (049) ga merket `reform` til alle med en rad i `economy_reform_log`. Reform 2 (052 og 054) skrev også rader
+  der, så alle ni som ble truffet av reform 2, fikk «Reformveteran» i tillegg til «Reformveteran II». Fire hadde alt fått
+  merket i spillet (i `serverBadges` og som prestasjon); resten ville fått det ved neste innlogging.
+- Salgsdirektøren: alle elleve aktive spillere med direktør har omdømme 96–100, køer på 3–4 døgn og 2–4 forespørsler
+  liggende (de som ikke rekkes). Direktøren virker. Én spiller har ham av, og det verket lager 11 000 t i døgnet av
+  35 000 fordi «Bare én ovn smelter om gangen» (Strøm) er på: to av tre 420-tonnere står. Direktøren regner med det
+  verket faktisk lager, så han sier nei til det meste – samtidig som loggen sa «Forespørselen … gikk ut uten svar, selv
+  om den passet verket» (B-292, regnet med Salgs løsere sjekk). Det ser ut som om direktøren ikke gjør jobben.
+Beslutning:
+- **Server** (`supabase/056_reformveteran_riktig.sql`): `badges_of` gir `reform` bare for rader som ikke er reform 2
+  (`model not like 'reform 2%'`). Merker gitt for hånd (`badges`, B-300) står.
+- **Serveren er fasit for merkene**: `applyServerBadges` tar bort merker serveren ikke gir lenger, og prestasjonen for
+  dem (skjulte serier med andel under 1). Fagpoengene spillerne fikk, står. `BadgeSync` kaller den også med tom liste.
+  De fire som fikk feil merke, mister det neste gang spillet åpnes – ingen serverendring av lagringene.
+- **Salgsdirektøren forklarer seg**: går en forespørsel ut som «passet verket» på Salg mens direktøren er på, sier loggen
+  «Salgsdirektøren lot forespørselen fra … gå: for lite luft til fristen med det verket faktisk lager (N t per døgn). Vil
+  du ha den likevel, ta den selv under Salg», og den telles ikke som forsømt (rådet i B-292 gjelder bare uten direktør).
+  Kortet under Folk → Ansatte viser hva han regner med («Regner med N t per døgn – det verket har laget den siste uka»),
+  og når det er under 60 % av kapasiteten, også hva verket kan lage og hvor spilleren ser hva ovnene venter på.
+- **Råd om én ovn om gangen**: står en ovn med «Venter: bare én ovn smelter om gangen» på et verk med flere ovner, sier
+  Verket at verket lager en halvpart/tredel og hvor bryteren står (Marked → Strøm).
+- Direktørens regel (verste/typiske døgn siste uke, 70–75 % av fristen) står: den er grunnen til at omdømmet holder seg.
+Konto (B-149): nei – ingen ny funksjon.
+Testet: tsc, lint, `npm test` (merket trekkes med prestasjonen, fagpoengene står; direktøren forklarer seg og rådet
+uteblir; rådet om én ovn), diagnosen kjørt på en anonymisert kopi av det berørte spillet (20 og 30 døgn: 0 tomme timer
+med direktør på, omdømmefallet skyldes sene leveranser med 1/3 av kapasiteten), 056 kjørt på serveren.
+

@@ -85,6 +85,14 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
       handled: plannerBuys,
     });
   }
+  // «Bare én ovn smelter om gangen» (Strøm) på et verk med flere ovner: verket lager en brøkdel (B-312: en spiller med
+  // tre 420-tonnere fikk 11 000 t i døgnet av 35 000 og trodde salgsdirektøren ikke virket)
+  if (waits.includes("Venter: bare én ovn smelter om gangen") && g.furnaces.length > 1)
+    out.push({
+      text: `Bare én ovn smelter om gangen (valgt under Strøm), så verket lager omtrent ${g.furnaces.length === 2 ? "halvparten" : g.furnaces.length === 3 ? "en tredel" : g.furnaces.length === 4 ? "en firedel" : `1/${g.furnaces.length}`} av det det kan. Effekttariffen blir lavere, men produksjonen mye mindre – slå det av under Marked → Strøm hvis ordrene venter.`,
+      view: "marked",
+      sub: "strom",
+    });
   if (waits.includes("Mangler folk")) {
     const missing = Object.entries(stats.missing)
       .map(

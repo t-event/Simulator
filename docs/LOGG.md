@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 244 – 2026-09-29: Reformmerket rettet, salgsdirektøren sjekket for alle
+
+**Brukeren ba om:** (etter B-311) sjekk at salgsdirektøren virker for alle – noen har slått ham av fordi han ikke
+fungerer; mange fikk «Reformveteran» I når de bare skulle ha II. Dessuten en stor arkitektur- og økonomianalyse av
+koblingen hovedverk–konsern (egen økt).
+
+**Gjort:** B-312. Merket: `badges_of` ga `reform` for alle rader i reformloggen, også reform 2-radene (056 retter det;
+appen tar bort merker serveren ikke gir lenger). Direktøren: alle elleve aktive har omdømme 96–100 – han virker. Den ene
+som har ham av, har «bare én ovn smelter om gangen» på og får en tredel av kapasiteten; loggen sa dessuten «passet
+verket» om forespørsler direktøren bevisst lot gå. Nå forklarer direktøren seg, kortet viser hva han regner med, og
+Verket gir råd om én ovn om gangen.
+
+**Testet:** tsc, lint, npm test, diagnose på en anonymisert kopi av det berørte spillet (scratchpad, ikke i repoet).
+
+**Gjenstår:** analysen (økt 245). Pynt for sesong 3.
+
+---
+
 ## Økt 243 – 2026-09-29: Rettferdig kamp – verden 10× ned, ett prosjekt om gangen
 
 **Brukeren ba om:** hvor lang tid et ekte konsern bruker på 100 mill. (svar: 9–15 dager for et europeisk konsern),

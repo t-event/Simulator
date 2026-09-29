@@ -333,11 +333,21 @@ export function visibleFamilies(g: GameState): AchievementFamily[] {
   return ACHIEVEMENT_FAMILIES.filter((f) => !f.hidden || f.tiers.some((t) => hasAchievement(g, t.id)));
 }
 
-/** Tar inn merkene serveren gir (B-296) og deler dem ut med én gang. Gir true hvis noe var nytt */
+/**
+ * Tar inn merkene serveren gir (B-296) og deler dem ut med én gang. Serveren er fasit (B-312): et merke den ikke gir
+ * lenger, tas bort igjen sammen med prestasjonen for det (fagpoengene står). Gir true hvis noe ble endret.
+ */
 export function applyServerBadges(g: GameState, badges: string[]): boolean {
-  const fresh = badges.filter((b) => !(g.serverBadges ?? []).includes(b));
-  if (!fresh.length) return false;
-  g.serverBadges = [...(g.serverBadges ?? []), ...fresh];
+  const had = g.serverBadges ?? [];
+  const fresh = badges.filter((b) => !had.includes(b));
+  const gone = had.filter((b) => !badges.includes(b));
+  if (!fresh.length && !gone.length) return false;
+  g.serverBadges = [...had.filter((b) => badges.includes(b)), ...fresh];
+  if (gone.length) {
+    const hidden = new Set(ACHIEVEMENT_FAMILIES.filter((f) => f.hidden).map((f) => f.id));
+    for (const a of ACHIEVEMENTS)
+      if (hidden.has(a.family) && hasAchievement(g, a.id) && achievementShare(g, a) < 1) delete g.achievements[a.id];
+  }
   checkAchievements(g);
   return true;
 }

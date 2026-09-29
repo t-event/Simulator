@@ -17,6 +17,7 @@ import {
   underConstruction,
   DIRECTOR_HIRE,
   DIRECTOR_UPGRADES,
+  directorDailyT,
   directorLevel,
   directorPerDay,
   nextDirectorUpgrade,
@@ -45,7 +46,7 @@ import {
   type KonsernOption,
   type SharedId,
 } from "../game/konsern";
-import { day } from "../game/plant";
+import { computePlantStats, day } from "../game/plant";
 import { RESEARCH } from "../game/research";
 import type { GameState, SisterPlant, SisterType } from "../game/types";
 import type { GameApi } from "../game/useGame";
@@ -55,7 +56,7 @@ import { Button, Callout } from "./ds";
 import type { OpenTender } from "./openTender";
 import { EARNS_FROM } from "../net/world";
 import { IndustryPanel } from "./Companies";
-import { fmtKr } from "./format";
+import { fmtKr, fmtT } from "./format";
 import { Icon } from "./icons";
 
 type Act = GameApi["act"];
@@ -326,6 +327,11 @@ export function DirectorCard({ g, act }: { g: GameState; act: Act }) {
   const d = g.konsern.director;
   const [confirm, setConfirm] = useState(false);
   const days = daysToAfford(g, DIRECTOR_HIRE);
+  // Hva direktøren regner med (B-312): det verket faktisk har laget, ikke det det kan lage – så det er forståelig
+  // hvorfor forespørsler blir liggende når ovnene står
+  const stats = computePlantStats(g);
+  const perDay = d ? directorDailyT(g, stats) : 0;
+  const farBelow = d && stats.dailyProductT > 0 && perDay < stats.dailyProductT * 0.6;
   const about = (
     <details className="g-details">
       <summary>Hva gjør salgsdirektøren?</summary>
@@ -347,6 +353,14 @@ export function DirectorCard({ g, act }: { g: GameState; act: Act }) {
             døgn
           </p>
           <DirectorSwitch g={g} act={act} />
+          {d.active && (
+            <p className={farBelow ? "g-note" : "g-muted"}>
+              Regner med {fmtT(perDay)} per døgn – det verket har laget den siste uka
+              {farBelow
+                ? `. Verket kan lage ${fmtT(stats.dailyProductT)}; se hva ovnene venter på under Verket → Anlegg.`
+                : "."}
+            </p>
+          )}
           <DirectorUpgrade g={g} act={act} />
           <details className="g-details">
             <summary>Innstillinger og oppsigelse</summary>

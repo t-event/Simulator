@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 312,
+    date: "2026-09-29",
+    title: "Riktig reformmerke, og salgsdirektøren sier hvorfor han lar en forespørsel gå",
+    items: [
+      "Merket «Reformveteran» ble gitt ved en feil til alle som ble truffet av reform 2. Nå får bare de som var med på den første reformen det; «Reformveteran II» står som før. Fikk du det feil, forsvinner det neste gang spillet åpnes – fagpoengene beholder du.",
+      "Når salgsdirektøren lar en forespørsel gå som ser grønn ut på Salg, sier loggen hvorfor: han regner med det verket faktisk har laget den siste uka og vil ha mer luft til fristen. Kortet hans under Folk → Ansatte viser tallet han regner med.",
+      "Står ovnene fordi «bare én ovn smelter om gangen» er på under Strøm, sier Verket fra: verket lager da bare en halvpart eller tredel av det det kan.",
+    ],
+  },
+  {
     b: 311,
     date: "2026-09-29",
     title: "Rettferdig kamp: verden går i menneskelig tempo, og ett byggeprosjekt om gangen",
