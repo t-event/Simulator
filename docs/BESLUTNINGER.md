@@ -5704,3 +5704,31 @@ Beslutning:
 Konto (B-149): ingen funksjon.
 Testet: simuleringen (formlene i dokumentet), tallene fra lagringene og tidslinja 29.9.
 
+## B-314 Byggetida i konsernet går etter serverens klokke (2026-09-29)
+Status: gjelder (retter B-209; eieren: «det går an å jukse ferdig byggingen med datterselskapene ved å endre tidssona på
+telefonen … en luring fikk bygget ferdig 8 storverk momentant, og oppgradert dem»)
+Bakgrunn: prosjektene i konsernet gikk etter telefonens klokke (`realNow()` = `Date.now()`). Én spiller stilte klokka
+fram: sju storverk kjøpt kl. 21 var ærlig ferdige kl. 03, men det åttende (kjøpt 02:03, seks timer) sto ferdig 03:32,
+og fem verk fikk trinn 3 og ett trinn 2 – 17 moderniseringstrinn à fire timer, ett om gangen, på under to timer.
+En annen spiller ligger ti minutter foran serveren (tre stålverk ferdige ti minutter før tida) – trolig klokka på
+telefonen, ikke juks.
+Beslutning:
+- **Appen bruker serverens klokke** (`net/clock.ts`): hvert svar fra tjenesten har en Date-header; forskyvningen mot
+  telefonen lagres, og `realNow()` gir servertid pluss det som har gått siden svaret. Uten nett brukes den siste
+  forskyvningen. Tester og testspilleren setter klokka som før (`setRealClock`).
+- **Serveren setter prosjekter tilbake** (`supabase/057_byggetid_serverklokke.sql`): `save_game()` sammenligner hvert
+  lagret spill med det forrige (`guard_projects`, ren funksjon som kan testes med `select`): et prosjekt som ikke kan
+  være ferdig ennå, settes tilbake med typen og trinnet verket hadde; et trinn eller en type som har kommet uten
+  prosjekt, settes tilbake og jobben startes nå (4 t modernisering, 6 t utbygging); et nytt verk uten byggeprosjekt
+  bygges nå (2/6/12 t); et prosjekt som «startet» i framtida, starter nå. Rettes noe, lagres den rettede tilstanden
+  med `device = 'server'` og `serverEdit + 1` (B-211), `save_game` gir null, og appen henter serverens spill. Alt
+  skrives til `project_guard_log`. Ærlige spillere merker ingenting (ett minutts slingringsmonn).
+- **Spilleren som jukset, settes tilbake** etter tørrkjøring og eierens godkjenning: alle åtte storverk til trinn 0,
+  de sju som var ærlig kjøpt står ferdige, det åttende bygges ferdig kl. 08:03 (seks timer fra det ble kjøpt).
+  Moderniseringene ble betalt med lokal kasse; eieren avgjør om pengene refunderes. Sikkerhetskopi i `save_backups`
+  (`byggetid`), rad i `economy_reform_log` (`model` = 'B-314: byggetid'), `serverEdit + 1`.
+Konto (B-149): ingen ny funksjon.
+Testet: `guard_projects` med fem tilfeller i SQL (for tidlig ferdig, trinn uten prosjekt, nytt verk uten bygging,
+prosjekt startet i framtida; lovlig ferdig og uendret gir null), `npm test` (serverklokka: fem timer foran gir riktig
+`realNow`), tsc, lint.
+

@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 246 – 2026-09-29: Juks med telefonens klokke i konsernet (B-314)
+
+**Brukeren ba om:** finne den som fikk åtte storverk ferdig og modernisert momentant ved å stille tidssonen på
+telefonen, sette dem tilbake, og tette hullet.
+
+**Gjort:** funnet via sikkerhetskopiene og tidslinja (17 trinn på to timer, det åttende verket ferdig 1,5 time etter
+kjøp). B-314: appen bruker serverens klokke (`net/clock.ts`, Date-headeren), og `save_game()` setter prosjekter
+tilbake med `guard_projects` (057), logget i `project_guard_log`. Tilbakestillingen av spilleren etter eierens svar.
+
+**Testet:** guard_projects med fem tilfeller i SQL, npm test (serverklokka), tsc, lint.
+
+**Gjenstår:** se i `project_guard_log` etter et døgn at ingen ærlige spillere blir rettet (bare klokker som går litt
+feil). Eierens svar på KONSERNBIDRAG.md. Pynt for sesong 3.
+
+---
+
 ## Økt 245 – 2026-09-29: Analyse av koblingen hovedverk–konsern (B-313)
 
 **Brukeren ba om:** en arkitektur- og økonomianalyse (12 punkter) før noe bygges videre: hovedverket med

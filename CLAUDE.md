@@ -300,6 +300,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Byggetid i ekte tid i konsernet** (B-209): prosjektene bruker `realNow()` i `game/konsern.ts`. Tester og
   testspilleren setter klokka med `setRealClock` (testene: `finishProjects(g)`, testspilleren: `simClock(g)` = 3×). Kjøp
   i konsernet virker derfor ikke med én gang – ikke skriv tester som venter det.
+- **Serverens klokke** (B-314): `realNow()` er servertid – `net/clock.ts` leser Date-headeren i hvert svar (`call` i
+  `net/supabase.ts`). Telefonens klokke kan stilles fram, så `save_game()` setter prosjekter tilbake med
+  `guard_projects` (057; ren funksjon, test med `select`) og logger i `project_guard_log`. Ny mekanikk i ekte tid
+  (frister, pauser, prosjekter) skal bruke `realNow()` og sjekkes på serveren på samme måte – aldri `Date.now()`.
 - **Ingen emoji** (B-237): bruk ikoner fra `ui/icons.tsx`. `npm test` og CI stopper emoji i `src`, `public` og `index.html`
   (`scripts/sjekk-emoji.mjs`). Tekst fra serveren med tegn (plasseringen på topplista) gjøres om til ikon i appen.
 - **Ikoner i spillmotoren** (B-235): utfordringer og prestasjoner har `icon: IconName` (type-import fra `ui/icons.tsx`), og

@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 314,
+    date: "2026-09-29",
+    title: "Byggetida i konsernet går etter serverens klokke",
+    items: [
+      "Bygging, utbygging og modernisering i konsernet følger nå klokka på serveren, ikke på telefonen. Å stille klokka eller tidssonen fram gjør ingenting lenger – og serveren setter tilbake prosjekter som ikke kan være ferdige ennå.",
+    ],
+  },
+  {
     b: 312,
     date: "2026-09-29",
     title: "Riktig reformmerke, og salgsdirektøren sier hvorfor han lar en forespørsel gå",
