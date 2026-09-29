@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 319,
+    date: "2026-09-29",
+    title: "Ingen innskudd i konsernkassa lenger",
+    items: [
+      "Du trenger ikke lenger flytte penger fra verket til konsernkassa. Hovedverket betaler et bidrag av seg selv hver dag, og kassa i verket blir i verket. Det du alt har flyttet, står.",
+    ],
+  },
+  {
     b: 318,
     date: "2026-09-29",
     title: "Hovedverket betaler til konsernkassa",

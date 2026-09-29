@@ -348,6 +348,7 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Konsernkassa** (B-183): `treasuryOut` i spillet går aldri ned – en trigger på `saves` trekker kassa hvis et spill med
   lavere tall lagres. Overføringen gjøres av serveren (`deposit_to_treasury`), og appen bygger videre på versjonen den
   gir (`adoptServerRev`). Test SQL mot ekte tabeller bare i én DO-blokk som ender med `raise exception` (rulles tilbake).
+  Innskuddet er slått av (B-319: `treasury_base_per_day` = 0, appen skjuler det ved grense 0); koden står for eldre lagringer.
 - **Skraplagerets inntekt** (B-188) regnes på serveren (`029_produksjonsmaler.sql`; `meter_register` står nå i 043) og speiles i `net/scrapIncome.ts`.
   Endres regelen, må begge endres, og `npm test` (scrapTests.ts) og SQL-scenariene i B-188 kjøres på nytt. Farten måles
   med spillminuttene (`game_min`), aldri med hele spilldager (det ga 10× opptil 37 % for mye).

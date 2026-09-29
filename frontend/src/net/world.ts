@@ -191,7 +191,7 @@ export const BID_REFUSAL_TEXT: Record<BidRefusal, string> = {
   konsern: "Du må ha et konsern for å by.",
   stengt: "Anbudet er stengt.",
   utenfor: "Budet må være mellom minste og høyeste bud.",
-  kasse: "Det er ikke nok i konsernkassa. Flytt penger inn først.",
+  kasse: "Det er ikke nok i konsernkassa.",
 };
 
 /** Legg inn, endre eller trekk (0) et bud. Pengene holdes av i konsernkassa til anbudet er avgjort. */

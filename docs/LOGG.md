@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 251 – 2026-09-29: Innskuddet i konsernkassa bort (B-319)
+
+**Brukeren ba om:** steg 2 av konsernbidraget (eierens svar i B-318).
+
+**Gjort:** appen skjuler innskuddet når serveren gir grensen 0; `062_innskudd_bort.sql` setter grensen til 0 etter at
+appen er publisert.
+
+**Testet:** tsc, lint, `npm test`, Playwright 320/390 med og uten grense.
+
+**Gjenstår:** steg 4 – serverkjent konsernverdi på topplista. Se etter første betaling 30.9 i `contributions`.
+
+---
+
 ## Økt 250 – 2026-09-29: Hovedverkets konsernbidrag, steg 1 (B-318)
 
 **Brukeren ba om:** «Fortsett». Svarte på spørsmålene i KONSERNBIDRAG.md: automatisk bidrag, gulv 30 %, fast 50 %,
