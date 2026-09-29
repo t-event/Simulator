@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { fetchWorldStatus, type Company } from "../net/world";
+import { fetchWorldStatus, type Company, type WorldStatus } from "../net/world";
 import { getSession, onSessionChange } from "../net/supabase";
 
 /** Et åpent anbud spilleren ikke har bydd på: når det stenger, og hvilket selskap det gjelder (B-253) */
@@ -17,8 +17,8 @@ export function tenderChanged() {
  */
 export function useOpenTender(
   enabled: boolean,
-  /** Siste avgjorte anbud for alle selskapene (B-237, B-253): GameApp gir varsel til den som bydde */
-  onResults?: (companies: Company[]) => void,
+  /** Hele verdensstatusen: avgjorte anbud (B-237, B-253) og utbyttet fra datterverkene (B-304); GameApp gir varsel */
+  onResults?: (world: WorldStatus) => void,
 ): OpenTender | null {
   const session = useSyncExternalStore(onSessionChange, getSession, getSession);
   const [open, setOpen] = useState<OpenTender | null>(null);
@@ -38,7 +38,7 @@ export function useOpenTender(
             .sort((a, b) => Date.parse(a.tender!.closesAt) - Date.parse(b.tender!.closesAt))[0];
           if (!alive) return;
           setOpen(c?.tender ? { closesAt: c.tender.closesAt, name: c.name, type: c.type } : null);
-          resultRef.current?.(w.companies);
+          resultRef.current?.(w);
         },
         () => {},
       );

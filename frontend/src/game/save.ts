@@ -270,6 +270,8 @@ export function migrate(g: GameState): GameState {
   if (loose.tenderSeen === undefined) loose.tenderSeen = 0;
   // Beskjed om inntekten fra selskapene (B-258)
   if (loose.companyIncomeSeen === undefined) loose.companyIncomeSeen = {};
+  // Utbytte fra datterverkene i ekte tid (B-304)
+  if (loose.dividendSeen === undefined) loose.dividendSeen = null;
   // Utslipp og bøter (B-263): verk som alt har store ovner, får renseanlegg som holder, i første time (envHour)
   if (loose.env === undefined) loose.env = { ...newEnv(), grant: true };
   // Snøstorm som stenger veien for skrapbilene (B-279)

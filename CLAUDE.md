@@ -66,7 +66,7 @@ GitHub Pages: https://t-event.github.io/Simulator/
   verdenen (ekte tid) i et begrenset tempo. Ekte spillerdata endres aldri uten dry-run og eierens godkjenning først.
 - **Felles klokke (B-190, fast regel):** Industrimakt, Kontroll, strategisk eierskap og overtakelser skal baseres på
   serverautoritative verdier og ekte tid. Lokal kasse, lokal egenkapital og lokal spillfart skal aldri direkte avgjøre
-  disse systemene. Konsernkassa har lik grense for alle. Konkurranser mellom spillere måles i ekte tid (f.eks. ekte aktive
+  disse systemene. Konsernkassa har samme regel for alle (B-304). Konkurranser mellom spillere måles i ekte tid (f.eks. ekte aktive
   dager), ikke i spilldøgn. Tidslinjetall merket `pre_reform` brukes aldri i serverberegninger.
 - **Mobil og PC (B-187):** mobil = rask drift, PC = kontrollrom/hovedkontor med mer oversikt. Samme spill og
   komponenter; ingen viktig funksjon bare på PC. Test alltid på iPhone-størrelse (390 px) og 320 px – ingen horisontal
@@ -109,7 +109,7 @@ npx tsx src/game/balance.ts --opphold                      # juksesperren med la
 npx tsx src/game/balance.ts --daglig 15                    # som over/vanlig kjøring, men henter daglige belønninger (B-149)
 npx tsx src/game/balance.ts --storovn 330                  # samme konsernspill med ulike ovner: tonn og overskudd (B-154)
 npx tsx src/game/balance.ts --vurdering                    # kundevurderingene 1–10 per nivå, flink og nybegynner (B-161)
-npx tsx src/game/balance.ts --konsern                      # konsernøkonomien med 1–14 verk og vekst over tid (B-181)
+npx tsx src/game/balance.ts --konsern                      # utbyttet per ekte dag med 1–14 verk (B-304)
 npx tsx src/game/balance.ts --forste 700                   # kurven for første opplasting i juksesperren (B-257, ca. 40 min)
 npx tsx src/game/balance.ts --vinter                       # uhell, kort og kostnader om vinteren mot sommeren, per nivå (B-277, ca. 11 min)
 npx tsx src/game/balance.ts --sommerstans                  # testspilleren velger sommerstans i fellesferien (B-298)
@@ -250,8 +250,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - Testspilleren har en **nybegynner** (B-062) som følger rådene i spillet. Ny mekanikk som krever at spilleren
   gjør noe, må også gis et råd i spillet (hint, advarsel, «Neste store steg») – og nybegynneren må følge det,
   ellers feiler CI.
-- Playwright-tester av kontoen trenger `frontend/.env.local` med en URL (verdien spiller ingen rolle, `page.route`
-  fanger kallene) – uten den vises ikke kontokortet. Fjern fila før commit-sjekken; den er ignorert av git uansett.
+- Playwright-tester av kontoen trenger `frontend/.env.local` med **både** `VITE_SUPABASE_URL` og `VITE_SUPABASE_KEY`
+  (verdiene spiller ingen rolle, `page.route` fanger kallene) – uten begge er `cloudConfigured()` usann, kontokortet
+  vises ikke og spillet blir aldri avklart mot kontoen (Industrien står tom, B-304). Fjern fila før commit-sjekken;
+  den er ignorert av git uansett.
 - Sandkassen når ikke supabase.co direkte, men **Supabase-connectoren** (MCP) gir SQL, migrasjoner, tabeller, råd,
   logger og nøkler for prosjektet `qzdwiamiangrjpmglpwy`. Den kan ikke endre Auth-innstillinger (Site URL) eller lage
   nøkler – det gjør brukeren i dashbordet. Nettlaget testes med en falsk tjeneste (`src/net/tests.ts`) og `page.route`
@@ -311,10 +313,12 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Fartskontrollen** (B-176) i `check_snapshot` regner med 120 spillminutter per sekund (10×) og 720 når verket står om
   natta (`g.boostMin`, telles i `useGame`). Kommer en ny fart eller en ny måte tida hopper på, må sjekken følge med,
   ellers flagges ærlige spillere.
-- **Konsernøkonomien** (B-181): datterverkene har driftsresultat (`sisterProfit`, også verdien), men morselskapet får
-  utbytte (`dividends`, i rekke etter resultat) minus konsernkostnader (`konsernCosts`, egen kostnadspost «konsern»).
-  Kjøp og råd regnes på netto (`konsernNetFor`), som også trekker imperiebelastningen (B-251, `afterEmpireLoad`: over
-  `loadFrom` vokser netto med `loadPower`). Endres tallene i `KONSERN_ECONOMY`: kjør `balance.ts --konsern`.
+- **Utbytte i ekte tid** (B-304): datterverkene betaler ingenting i spilltid. Serveren regner utbyttet av det lagrede
+  spillet én gang per ekte dag (`dividend_from_state` i 051, `pay_dividends` fra `world_tick`) rett inn i konsernkassa.
+  `game/dividend.ts` speiler SQL-en (`DIVIDEND` = `config.world.dividend`): endres regelen, endres begge, og de faste
+  tallene i testen kjøres mot SQL-en (`select dividend_from_state('{…}')`). Verkene i spillet har fortsatt
+  `sisterProfit` (verdien); kjøp, råd og mesterskap regnes på `konsernNetFor` (per ekte dag). `konsernDay` bokfører
+  ingenting. Endres tallene: kjør `balance.ts --konsern`.
 - **Sesonger uten sluttdato** (B-221): `seasons.ends_at` er tom mens sesongen pågår; den avsluttes med `end_season()` og en
   ny startes med `start_season(navn, vri)` – bare manuelt. SQL som leser `ends_at`, må tåle null. `season_status()` må tåle
   at ingen sesong pågår (den krasjet på en tom post før B-182).

@@ -74,6 +74,8 @@ export interface Company {
 export interface WorldStatus {
   companies: Company[];
   treasury: TreasuryStatus;
+  /** Utbyttet fra datterverkene (B-304): anslag per ekte dag nå, betalt for i går, og i alt */
+  dividend: { perDay: number; yesterday: number | null; total: number };
 }
 
 type Row = Record<string, unknown>;
@@ -110,8 +112,9 @@ function parseResult(r: Row | null | undefined): TenderResult | null {
 }
 
 export async function fetchWorldStatus(): Promise<WorldStatus> {
-  const r = await rpc<{ companies?: Row[]; treasury?: Row }>("world_status", {});
+  const r = await rpc<{ companies?: Row[]; treasury?: Row; dividend?: Row }>("world_status", {});
   const t = r?.treasury ?? {};
+  const d = r?.dividend ?? {};
   return {
     companies: (r?.companies ?? []).map((c) => ({
       id: num(c.id),
@@ -135,7 +138,20 @@ export async function fetchWorldStatus(): Promise<WorldStatus> {
       left: num(t.left),
       freedAt: str(t.freed_at),
     },
+    dividend: { perDay: num(d.per_day), yesterday: numOrNull(d.yesterday), total: num(d.total) },
   };
+}
+
+/**
+ * Beskjeden om utbyttet fra datterverkene (B-304): én gang per ekte dag, når serveren har betalt for i går.
+ * Gir 1 hvis det ble skrevet noe.
+ */
+export function applyDividendNews(g: GameState, yesterday: number | null, now = Date.now()): number {
+  const day = yesterdayUtc(now);
+  if (!yesterday || yesterday <= 0 || g.dividendSeen === day) return 0;
+  g.dividendSeen = day;
+  log(g, `Datterverkene betalte ${fmtKr(yesterday)} i utbytte til konsernkassa i går.`, "good");
+  return 1;
 }
 
 export type BidRefusal = "sperret" | "konsern" | "stengt" | "utenfor" | "kasse";
@@ -250,9 +266,10 @@ export function applyCompanyIncome(
   return n;
 }
 
-/** Er det noe nytt å si fra om (anbud eller inntekt)? Så appen bare endrer spillet når det trengs */
-export function worldNews(g: GameState, companies: Company[], now = Date.now()): boolean {
+/** Er det noe nytt å si fra om (anbud, inntekt eller utbytte)? Så appen bare endrer spillet når det trengs */
+export function worldNews(g: GameState, companies: Company[], now = Date.now(), dividendYesterday = 0): boolean {
   const day = yesterdayUtc(now);
+  if (dividendYesterday > 0 && g.dividendSeen !== day) return true;
   return companies.some(
     (c) =>
       (c.lastResult?.id ?? 0) > (g.tenderSeen ?? 0) ||

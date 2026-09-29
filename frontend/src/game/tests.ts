@@ -124,11 +124,12 @@ import {
   hireDirector,
   KONSERN_UNLOCK_EQUITY,
   konsernDay,
-  konsernCosts,
   konsernEquity,
   konsernNetFor,
-  afterEmpireLoad,
+  dividendInput,
   dividends,
+  sisterDividend,
+  MODERNIZE_GAIN,
   modernizeSister,
   SISTER_TYPES,
   sisterProfit,
@@ -154,6 +155,7 @@ import {
 } from "./plant";
 import { RESEARCH, researchOptions } from "./research";
 import { parseSave } from "./save";
+import { afterEmpireLoad, DIVIDEND, dividendParts, dividendPerDay } from "./dividend";
 import { ANY_CARD_REAL_MS, makeDecision, maybeCreateDecision, resolveDecision, SAME_CARD_REAL_MS } from "./decisions";
 import { landmarkContract, landmarkHour } from "./landmarks";
 import {
@@ -283,10 +285,11 @@ test("Konsernet: åpner seg på storverket, datterverk gir overskudd og teller m
   assert(modernizeSister(g, p.id).ok && sisterProfit(g, p) === before, "moderniseringen virket før den var ferdig");
   finishProjects(g);
   assert(sisterProfit(g, p) > before, "moderniseringen ga ikke mer overskudd");
-  const income = g.today.income.konsern ?? 0;
+  // Utbyttet går til konsernkassa på serveren (B-304), ikke inn i kassa hjemme
   p.downUntilDay = 0;
   for (let i = 0; i < 20; i++) konsernDay(g);
-  assert((g.today.income.konsern ?? 0) > income, "datterverket ga ikke overskudd");
+  assert(!(g.today.income.konsern ?? 0), "datterverket ga overskudd i kassa hjemme");
+  assert(sisterDividend(g, p) > 0, "verket gir ikke utbytte til konsernkassa");
 });
 
 test("Salgsdirektøren: meget dyr, signerer bare trygge forespørsler, og lønna trekkes hvert døgn", () => {
@@ -1395,67 +1398,91 @@ test("Avløsere (B-164): de som står fast på plasser, teller ikke som ledige, 
   assert(!hireForWildcards(g).ok, "ansatte uten at noen avløser står fast");
 });
 
-test("Konsernøkonomien (B-181): driften står, utbyttet avtar nedover, kostnadene øker, og flere verk gir mer", () => {
+test("Utbytte i ekte tid (B-304): samme regel som serveren, avtagende med størrelsen, og farten betyr ingenting", () => {
   const g = newGame(81);
   g.stage = 4;
   g.konsern.unlocked = true;
+  g.tutorial = null;
+  g.pendingDecision = null;
+  // Tallene i speilet er de samme som i spillet
+  for (const t of ["stalverk", "storverk", "kompleks"] as const)
+    assert(DIVIDEND.base[t] === SISTER_TYPES[t].profitPerDay, `grunntallet for ${t} i speilet`);
+  assert(
+    DIVIDEND.levelGain === MODERNIZE_GAIN && DIVIDEND.flagship === FLAGSHIP_MAX,
+    "trinn eller flaggskip i speilet",
+  );
+  assert(DIVIDEND.masteryMax === MASTERY.datterverk.max, "mesterskapet i speilet");
   const plant = (id: number, level = 5) =>
     ({ id, type: "kompleks", name: `Verk ${id}`, level, boughtDay: 0, downUntilDay: 0 }) as const;
-  // Et verk tjener like mye uansett hvor mange verk eieren har
   const one = [plant(1)];
   const many = Array.from({ length: 14 }, (_, i) => plant(i + 1));
+  // Driftsresultatet i et verk avhenger ikke av antall verk
   assert(sisterProfit(g, one[0]) === sisterProfit(g, many[0]), "driftsresultatet avhenger av antall verk");
-  // Netto til morselskapet øker for hvert verk, men mindre og mindre (ikke lineært)
+  // Utbyttet øker for hvert verk, men mindre og mindre
   let prev = 0;
   let prevStep = Infinity;
   for (let n = 1; n <= 14; n++) {
     const net = konsernNetFor(g, many.slice(0, n));
-    assert(net > prev, `netto går ned ved ${n} verk`);
+    assert(net > prev, `utbyttet går ned ved ${n} verk`);
     assert(net - prev < prevStep + 1, `verk ${n} gir mer enn verket før`);
     prevStep = net - prev;
     prev = net;
   }
-  assert(prev < 14 * konsernNetFor(g, one) * 0.75, "14 verk gir nesten 14 ganger så mye som ett");
-  // Et nytt (umodernisert) verk trekker aldri ned utbyttet fra verkene man har
-  const before = dividends(g, many.slice(0, 10));
-  const after = dividends(g, [...many.slice(0, 10), plant(11, 0)]);
+  assert(prev < 14 * konsernNetFor(g, one) * 0.5, "14 verk gir nesten 14 ganger så mye som ett");
+  assert(prev > 3 * konsernNetFor(g, one), "14 verk gir ikke mer enn tre");
+  // Et nytt (umodernisert) verk trekker aldri ned det de gamle gir før belastningen
+  const before = dividendParts(dividendInput(g, many.slice(0, 10)));
+  const after = dividendParts(dividendInput(g, [...many.slice(0, 10), plant(11, 0)]));
   assert(
     before.every((d, i) => Math.abs(after[i] - d) < 1),
     "et nytt verk senket utbyttet fra de gamle",
   );
-  // Konsernkostnadene per verk øker med antall verk
-  assert(konsernCosts(many) / 14 > konsernCosts(one), "konsernkostnaden per verk øker ikke");
-  // Imperiebelastningen (B-251): 14 fullt moderniserte komplekser gir ikke mer enn noen tidels milliard per døgn
-  assert(konsernNetFor(g, many) < 0.35e9, `14 komplekser gir ${konsernNetFor(g, many)} per døgn`);
-  assert(afterEmpireLoad(40e6) === 40e6, "imperiebelastning på et lite konsern");
-  assert(afterEmpireLoad(2e9) < 2e9 && afterEmpireLoad(2e9) > afterEmpireLoad(1e9), "belastningen er ikke avtagende");
-  // Døgnet bokfører utbyttet som inntekt og konsernkostnadene som egen post
+  // Belastningen: uendret opp til grensen, så kvadratroten
+  assert(afterEmpireLoad(40e6) === 40e6, "belastning på et lite konsern");
+  assert(Math.abs(afterEmpireLoad(400e6) - 200e6) < 1, `kvadratroten over grensen: ${afterEmpireLoad(400e6)}`);
+  // Faste tall (de samme kjøres mot SQL-en i supabase/051): fullt konsern, nytt konsern, og et som bygger
+  const full = dividendPerDay({
+    plants: Array.from({ length: 14 }, () => ({ type: "kompleks", level: 5, building: false })),
+    shared: 2,
+    research: 2,
+    mastery: 23,
+    reputation: 100,
+    quality: 1,
+  });
+  assert(Math.abs(full - 417_139_891.48) < 1, `fullt konsern: ${full.toFixed(2)}`);
+  const small = dividendPerDay({
+    plants: Array.from({ length: 3 }, () => ({ type: "storverk", level: 0, building: false })),
+    shared: 0,
+    research: 0,
+    mastery: 0,
+    reputation: 50,
+    quality: 0.8,
+  });
+  assert(Math.abs(small - 41_465_454.55) < 1, `nytt konsern: ${small.toFixed(2)}`);
+  const mixed = dividendPerDay({
+    plants: [
+      { type: "stalverk", level: 0, building: true },
+      { type: "kompleks", level: 2, building: false },
+    ],
+    shared: 1,
+    research: 0,
+    mastery: 5,
+    reputation: 100,
+    quality: 0,
+  });
+  assert(Math.abs(mixed - 74_276_725.95) < 1, `konsern som bygger: ${mixed.toFixed(2)}`);
+  assert(dividendPerDay({ plants: [], shared: 2, research: 2, mastery: 9, reputation: 100, quality: 1 }) === 0, "tomt");
+  // Spillfarten og spilltida betyr ingenting: samme utbytte etter et spilldøgn på 10×
   g.konsern.plants = many.slice(0, 3).map((p) => ({ ...p }));
-  g.market.steelFactor = 1;
+  const want = konsernNetFor(g, g.konsern.plants);
+  g.speed = 3;
+  advance(g, 1440);
+  assert(Math.abs(konsernNetFor(g, g.konsern.plants) - want) < want * 0.01, "utbyttet fulgte spilltida");
+  // Døgnet hjemme bokfører verken utbytte eller konsernkostnader lenger (B-304)
+  g.today.costs = {};
+  g.today.income = {};
   konsernDay(g);
-  assert((g.today.costs.konsern ?? 0) > 0, "ingen konsernkostnader bokført");
-  // Med mange verk bokføres imperiebelastningen sammen med konsernkostnadene, så netto følger konsernNetFor
-  {
-    const h = structuredClone(g);
-    h.konsern.plants = many.map((p) => ({ ...p }));
-    h.today.costs = {};
-    h.today.income = {};
-    h.konsern.plants.forEach((p) => (p.downUntilDay = 0));
-    const want = konsernNetFor(h, h.konsern.plants);
-    let got = 0;
-    for (let i = 0; i < 20 && !got; i++) {
-      h.today.costs = {};
-      h.today.income = {};
-      konsernDay(h);
-      // Et døgn uten havari og rekord gir akkurat netto
-      if (h.konsern.plants.every((p) => p.downUntilDay <= day(h)))
-        got = (h.today.income.konsern ?? 0) - (h.today.costs.konsern ?? 0);
-    }
-    assert(got > 0 && got < want * 2.2, `netto ${got}, ventet omtrent ${want}`);
-  }
-  const expected = dividends(g, g.konsern.plants).reduce((a, b) => a + b, 0);
-  const got = g.today.income.konsern ?? 0;
-  assert(got > 0 && got <= expected * 2 + 1, `utbytte ${got}, ventet omtrent ${expected}`);
+  assert(!(g.today.income.konsern ?? 0) && !(g.today.costs.konsern ?? 0), "konsernet gikk inn i kassa hjemme");
 });
 
 test("Mesterskap «Holdbare ovnspotter» (B-165): foringen slites mindre for hvert nivå", () => {
@@ -1645,7 +1672,7 @@ test("Konsernet bygger i ekte tid, verdien faller ikke imens, og flaggskipet gir
   const p = g.konsern.plants[0];
   // Under bygging: ikke noe utbytte, ingen konsernkostnader, men verdien teller (konsernverdien står stille)
   assert(p.project?.kind === "bygg" && underConstruction(p), "verket bygges ikke");
-  assert(dividends(g, g.konsern.plants)[0] === 0 && konsernCosts(g.konsern.plants) === 0, "bygget verk tjener");
+  assert(dividends(g, g.konsern.plants)[0] === 0, "bygget verk tjener");
   assert(Math.abs(konsernEquity(g) - equity) < 1, "konsernverdien falt ved kjøpet");
   assert(!konsernOptions(g).some((o) => o.key === `mod-${p.id}`), "kunne modernisere et verk som bygges");
   // Spillfarten betyr ingenting: ett spilldøgn går, men ingen ekte tid

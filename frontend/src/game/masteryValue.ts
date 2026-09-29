@@ -3,7 +3,7 @@
  * siste sju døgnene. Vises ved hvert prosjekt, så spilleren ser hvilket som lønner seg – prisene er satt etter det samme.
  * Eget modul fordi mastery.ts ikke kan importere konsern.ts (konsern.ts bruker faktorene derfra).
  */
-import { afterEmpireLoad, dividends, konsernCosts } from "./konsern";
+import { konsernNetFor } from "./konsern";
 import { masteryEffect, masteryLevel } from "./mastery";
 import type { GameState, MasteryId } from "./types";
 
@@ -29,11 +29,9 @@ export function masteryGainPerDay(g: GameState, id: MasteryId): number {
     case "foring":
       return down(perDay(g, (d) => d.costs?.vedlikehold ?? 0));
     case "datterverk": {
-      // Det morselskapet får (B-251): utbyttet øker med overskuddet i verkene, men etter kostnader og
-      // imperiebelastningen – ikke hele driftsresultatet i verkene
-      const div = dividends(g, g.konsern.plants).reduce((s, d) => s + d, 0);
-      const costs = konsernCosts(g.konsern.plants);
-      return Math.max(0, afterEmpireLoad((div * (1 + next)) / (1 + now) - costs) - afterEmpireLoad(div - costs));
+      // Utbyttet til konsernkassa per ekte dag (B-304), etter imperiebelastningen – ikke hele driftsresultatet
+      const level = masteryLevel(g, id);
+      return Math.max(0, konsernNetFor(g, g.konsern.plants, level + 1) - konsernNetFor(g, g.konsern.plants, level));
     }
   }
 }

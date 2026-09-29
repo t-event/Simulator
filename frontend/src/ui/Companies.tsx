@@ -308,9 +308,20 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
           <div className="g-treasury-balance">
             <span className="g-treasury-sum">{fmtKr(tr.balance)}</span>
             <span className="g-muted g-small-text">
-              Bud betales herfra, og inntekten fra selskapene du eier, kommer hit.
+              Bud betales herfra. Utbyttet fra datterverkene og inntekten fra selskapene du eier, kommer hit.
             </span>
           </div>
+          {/* Utbyttet fra datterverkene i ekte tid (B-304): regnes av serveren én gang per dag */}
+          {(world.dividend.perDay > 0 || world.dividend.total > 0) && (
+            <p className="g-small-text g-treasury-dividend">
+              Utbytte fra datterverkene: <strong>ca. {fmtKr(world.dividend.perDay)} per dag</strong>
+              {world.dividend.yesterday !== null && world.dividend.yesterday > 0
+                ? ` · ${fmtKr(world.dividend.yesterday)} i går`
+                : ""}
+              {world.dividend.total > 0 ? ` · ${fmtKr(world.dividend.total)} i alt` : ""}. Betales hver ekte dag,
+              uansett spillfart.
+            </p>
+          )}
           <h3 className="g-subhead">Flytt penger fra verket</h3>
           <Bar value={tr.limit > 0 ? (tr.limit - tr.left) / tr.limit : 0} tone="accent" label="Brukt av grensen" />
           <p className="g-small-text">

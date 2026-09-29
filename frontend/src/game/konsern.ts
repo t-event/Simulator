@@ -23,8 +23,9 @@ import {
 } from "./engine";
 import { computePlantStats, day, gradeRecipe, productCapT } from "./plant";
 import { auto, hasResearch } from "./research";
-import { masteryFactor } from "./mastery";
-import { chance, randInt } from "./random";
+import { masteryFactor, masteryLevel } from "./mastery";
+import { DIVIDEND, dividendPerDay, dividendShares, flagshipOf, type DividendInput } from "./dividend";
+import { chance } from "./random";
 import { realNow, setRealClock } from "./clock";
 import type { GameState, SisterPlant, SisterProject, SisterType } from "./types";
 
@@ -348,97 +349,66 @@ export function sisterValue(g: GameState, p: SisterPlant): number {
 // Utbytte og konsernkostnader (B-181)
 // ------------------------------------------------------------------ //
 /**
- * Et datterverk beholder driftsresultatet sitt – et godt drevet verk tjener like godt uansett hvor mange verk eieren
- * har. Men ikke alt kan løftes opp til morselskapet:
- * - en fast del blir igjen i verket til vedlikehold, lokal ledelse og arbeidskapital/reinvestering
- * - andelen av resten som kan løftes opp som utbytte, avtar når konsernet vokser
- * - konsernet har egne kostnader: ledelse per verk, og koordinering, reise og finansiering som øker med antall verk
- * Da er 14 verk fortsatt mye bedre enn 2, men overskuddet til morselskapet vokser ikke lineært.
- * Tallene er målt med `balance.ts --konsern` (3, 6, 10 og 14 moderniserte verk). Samlet i ett objekt så simulatoren
- * kan prøve andre tall.
+ * Utbytte og imperiebelastning (B-181, B-251) – siden reform 2 (B-304) regnes utbyttet i ekte tid av serveren og
+ * betales rett til konsernkassa. Regelen ligger i `game/dividend.ts` (speilet i SQL); her bygges bare inngangen fra
+ * spilltilstanden, så «Neste steg», knappene, mesterskapet og testspilleren ser det samme som serveren. Ingenting av
+ * dette går inn i den lokale kassa lenger.
  */
 export const KONSERN_ECONOMY = {
   /** Del av driftsresultatet som blir igjen i verket (vedlikehold, lokal ledelse, arbeidskapital) */
-  keepShare: 0.3,
+  keepShare: DIVIDEND.keep,
   /** Hvor mye mindre av overskuddet som kan løftes opp for hvert verk nedover i rekken (sortert etter overskudd) */
-  upstreamDecay: 0.1,
-  /** Konsernledelse per verk og døgn, etter type */
-  leadCost: { stalverk: 750_000, storverk: 3_000_000, kompleks: 10_000_000 } as Record<SisterType, number>,
-  /** Koordinering, reise og finansiering: ledelseskostnaden per verk øker med så mye per verk utover det første */
-  coordGrowth: 0.08,
-  /**
-   * Imperiebelastning (B-251): netto fra verkene over `loadFrom` per døgn vokser bare med potensen `loadPower` av det
-   * verkene gir (0,5 = kvadratroten). 14 fullt moderniserte komplekser gir da ca. 0,24 mrd. per døgn i stedet for over
-   * 1 mrd., og hvert nytt verk gir mindre enn det forrige – men alltid litt.
-   */
-  loadFrom: 50_000_000,
-  loadPower: 0.5,
+  upstreamDecay: DIVIDEND.decay,
 };
 
-/** Netto fra verkene etter imperiebelastningen (B-251): uendret opp til grensen, så avtagende mot et tak */
-export function afterEmpireLoad(net: number): number {
-  const { loadFrom, loadPower } = KONSERN_ECONOMY;
-  if (!(net > loadFrom) || loadFrom <= 0) return net;
-  return loadFrom * (net / loadFrom) ** loadPower;
+/** Andel av stålet hjemme som holdt kvaliteten de siste sju døgnene (0 uten produksjon) */
+function recentQuality(g: GameState): number {
+  const days = g.history.slice(-7);
+  const good = days.reduce((a, d) => a + (d.onGradeT ?? 0), 0);
+  const all = days.reduce((a, d) => a + (d.onGradeT ?? 0) + (d.offGradeT ?? 0) + (d.secondT ?? 0), 0);
+  return all > 0 ? good / all : 0;
 }
 
-/**
- * Andelen av det verket har igjen, som kan løftes opp til morselskapet. Verkene stilles i rekke etter overskudd:
- * det beste gir full andel, det neste litt mindre, og så videre (rank 1 = best). Ledelsen strekker seg tynnere jo
- * flere verk den har, men et nytt verk trekker aldri ned utbyttet fra dem man har fra før.
- */
+/** Inngangen til utbytteregelen fra spilltilstanden, slik serveren leser det lagrede spillet */
+export function dividendInput(g: GameState, plants = g.konsern.plants, masteryAt?: number): DividendInput {
+  return {
+    plants: plants.map((p) => ({ type: p.type, level: p.level, building: underConstruction(p) })),
+    shared: (["innkjop", "salg"] as SharedId[]).filter((id) => hasShared(g, id)).length,
+    research: ["konsernstyring", "gronnkonsern"].filter((id) => hasResearch(g, id)).length,
+    mastery: masteryAt ?? masteryLevel(g, "datterverk"),
+    reputation: g.reputation,
+    quality: recentQuality(g),
+  };
+}
+
+/** Andelen av det verket har igjen, som kan løftes opp: det beste verket gir full andel, det neste litt mindre */
 export function upstreamShare(rank: number): number {
-  return 1 / (1 + KONSERN_ECONOMY.upstreamDecay * Math.max(0, rank - 1));
+  return 1 / (1 + DIVIDEND.decay * Math.max(0, rank - 1));
 }
 
-/** Utbytte til morselskapet per døgn fra hvert verk, i samme rekkefølge som `plants` (uten havari og rekorder) */
+/** Utbytte til konsernkassa per ekte dag fra hvert verk, i samme rekkefølge som `plants` (etter imperiebelastningen) */
 export function dividends(g: GameState, plants: SisterPlant[]): number[] {
-  // Et verk som bygges, tjener ingenting ennå (B-209)
-  const profits = plants.map((p) => (underConstruction(p) ? 0 : sisterProfit(g, p)));
-  const order = profits.map((_, i) => i).sort((a, b) => profits[b] - profits[a] || a - b);
-  const out = new Array<number>(plants.length);
-  const flagship = 1 + flagshipBonus(g);
-  order.forEach((i, r) => (out[i] = profits[i] * (1 - KONSERN_ECONOMY.keepShare) * upstreamShare(r + 1) * flagship));
-  return out;
+  return dividendShares(dividendInput(g, plants));
 }
 
 /**
  * Flaggskipet (B-209): går hjemmeverket godt, får datterverkene bedre ledelse og mer utbytte – inntil +20 % med
  * omdømme 100 og bare stål som holder kvaliteten de siste sju døgnene. Da lønner det seg fortsatt å drive verket godt.
  */
-export const FLAGSHIP_MAX = 0.2;
+export const FLAGSHIP_MAX = DIVIDEND.flagship;
 export function flagshipBonus(g: GameState): number {
-  const days = g.history.slice(-7);
-  const good = days.reduce((a, d) => a + (d.onGradeT ?? 0), 0);
-  const all = days.reduce((a, d) => a + (d.onGradeT ?? 0) + (d.offGradeT ?? 0) + (d.secondT ?? 0), 0);
-  const quality = all > 0 ? good / all : 0;
-  return FLAGSHIP_MAX * Math.min(1, Math.max(0, g.reputation / 100)) * quality;
+  return flagshipOf(g.reputation, recentQuality(g));
 }
 
-/** Utbytte til morselskapet per døgn fra ett verk i konsernet */
+/** Utbytte til konsernkassa per ekte dag fra ett verk i konsernet */
 export function sisterDividend(g: GameState, p: SisterPlant, plants = g.konsern.plants): number {
   const i = plants.indexOf(p);
   return i < 0 ? 0 : dividends(g, plants)[i];
 }
 
-/** Konsernkostnader per døgn: ledelse per verk ganger koordinering som øker med antall verk */
-export function konsernCosts(plants: SisterPlant[]): number {
-  // Verk som bygges, har ingen ledelse ennå (B-209)
-  const running = plants.filter((p) => !underConstruction(p));
-  if (!running.length) return 0;
-  const coord = 1 + KONSERN_ECONOMY.coordGrowth * (running.length - 1);
-  return running.reduce((a, p) => a + KONSERN_ECONOMY.leadCost[p.type], 0) * coord;
-}
-
-/** Netto til morselskapet per døgn med disse verkene i drift: utbytte minus konsernkostnader og imperiebelastning */
-export function konsernNetFor(g: GameState, plants: SisterPlant[]): number {
-  return afterEmpireLoad(dividends(g, plants).reduce((a, b) => a + b, 0) - konsernCosts(plants));
-}
-
-/** Imperiebelastningen per døgn (B-251): det som går bort fordi konsernet er stort, gitt utbytte og kostnader */
-export function empireLoad(dividend: number, costs: number): number {
-  const net = dividend - costs;
-  return net - afterEmpireLoad(net);
+/** Utbytte til konsernkassa per ekte dag med disse verkene (etter imperiebelastningen) */
+export function konsernNetFor(g: GameState, plants: SisterPlant[], masteryAt?: number): number {
+  return dividendPerDay(dividendInput(g, plants, masteryAt));
 }
 
 /** Verdien av datterverkene til sammen */
@@ -552,14 +522,9 @@ export function konsernOptions(g: GameState): KonsernOption[] {
       hours: BUILD_HOURS.kompleks,
       run: (gg) => buySister(gg, "kompleks"),
     });
-  // Felles funksjoner: 5 % mer i alle datterverkene, og litt hjemme. Netto etter imperiebelastningen (B-251)
-  const sisters = dividends(g, k.plants).reduce((a, b) => a + b, 0);
-  const sharedNow = 1 + (hasShared(g, "innkjop") ? 0.05 : 0) + (hasShared(g, "salg") ? 0.05 : 0);
-  const leadCosts = konsernCosts(k.plants);
-  const sisterGain = Math.max(
-    0,
-    afterEmpireLoad((sisters * (sharedNow + 0.05)) / sharedNow - leadCosts) - afterEmpireLoad(sisters - leadCosts),
-  );
+  // Felles funksjoner: 5 % mer i alle datterverkene, og litt hjemme. Utbyttet etter imperiebelastningen (B-251)
+  const input = dividendInput(g, k.plants);
+  const sisterGain = Math.max(0, dividendPerDay({ ...input, shared: input.shared + 1 }) - dividendPerDay(input));
   const scrapPerDay = recentPerDay(g, (d) => d.costs.skrap ?? 0);
   const salesPerDay = recentPerDay(g, (d) => (d.income.kontrakt ?? 0) + (d.income.spot ?? 0));
   for (const id of Object.keys(KONSERN_SHARED) as SharedId[]) {
@@ -956,34 +921,12 @@ export function directorHour(g: GameState): void {
   }
 }
 
-/** Hvert døgn: lønna til salgsdirektøren, overskuddet fra datterverkene og av og til en stans (B-106, B-117) */
+/**
+ * Hvert døgn: lønna til salgsdirektøren, og kunnskapsdeling fra verkene som går (B-117, B-120). Utbyttet betales ikke
+ * her lenger: serveren regner det i ekte tid og setter det inn i konsernkassa (B-304).
+ */
 export function konsernDay(g: GameState): void {
   if (g.konsern.director) addCost(g, "lonn", directorPerDay(g));
-  // Konsernledelse, koordinering, reise og finansiering (B-181) – også for verk som står etter et havari
-  const costs = konsernCosts(g.konsern.plants);
-  if (costs > 0) addCost(g, "konsern", costs);
-  const today = day(g);
-  const div = dividends(g, g.konsern.plants);
-  let paid = 0;
-  g.konsern.plants.forEach((p, i) => {
-    if (p.downUntilDay > today || underConstruction(p)) return;
-    const maintained = hasResearch(g, "fellesvedlikehold");
-    if (chance(g, 0.012 * (maintained ? 0.5 : 1))) {
-      const days = maintained ? randInt(g, 1, 3) : randInt(g, 2, 5);
-      p.downUntilDay = today + days;
-      log(g, `${p.name} står i ${days} døgn etter et havari. Ingen overskudd derfra imens.`, "event");
-      return;
-    }
-    // Av og til går det ekstra godt: dobbelt overskudd det døgnet (B-119)
-    const record = chance(g, 0.015);
-    // Utbytte til morselskapet (B-181): verket beholder vedlikehold, ledelse og reserve, og andelen avtar nedover i rekken
-    addIncome(g, "konsern", div[i] * (record ? 2 : 1));
-    paid += div[i] * (record ? 2 : 1);
-    // Kunnskapsdeling: hjemmeverket lærer av datterverkene som går (B-120)
-    if (hasResearch(g, "kunnskapsdeling")) awardPoints(g, 1);
-    if (record) log(g, `${p.name} satte produksjonsrekord og ga dobbelt utbytte i dag: ${fmtKr(div[i] * 2)}.`, "good");
-  });
-  // Imperiebelastningen (B-251) bokføres sammen med konsernkostnadene
-  const load = empireLoad(paid, costs);
-  if (load > 0) addCost(g, "konsern", load);
+  if (!hasResearch(g, "kunnskapsdeling")) return;
+  for (const p of g.konsern.plants) if (!underConstruction(p)) awardPoints(g, 1);
 }

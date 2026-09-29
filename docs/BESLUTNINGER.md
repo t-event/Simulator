@@ -5446,3 +5446,43 @@ Status: gjelder (erstatter B-193; del 1 av B-302)
   `ui/Leaderboard.tsx`. Testen for B-193 er skrevet om (den gamle konkurstesten sto stille fordi veiledningen holdt
   klokka – nå går klokka og konkursen kommer).
 - Konto: nei for taket og utbetalingen (eget spill); lista og merket krever konto som før (B-127, B-296).
+
+## B-304 Reform 2, del 2: datterverkenes utbytte i ekte tid rett til konsernkassa (2026-09-29)
+Status: gjelder (erstatter utbyttet i spilltid fra B-181 og konsernkostnadene fra B-181/B-251; del 2 av B-302)
+Bakgrunn: med 10× rakk spillerne opptil 2 374 spilldøgn per ekte dag, og datterverkene betalte utbytte hvert
+spilldøgn – derfor løp kassene løpsk (B-301). Eieren valgte pakke B: verket driver verden, i ekte tid.
+Beslutning:
+- **Datterverkene betaler utbytte én gang per ekte (UTC-)dag, rett til konsernkassa på serveren** – ikke til kassa i
+  spillet. Serveren (`supabase/051_utbytte_i_ekte_tid.sql`) regner beløpet av det lagrede spillet (verkene slik de
+  står, sjekket av juksesperren) med `dividend_from_state`, og `pay_dividends()` betaler for hver hel dag som er over,
+  «lat» fra `world_tick()` (som skraplageret, B-189): én rad per spiller og dag i `dividends`, kassa og `treasury_ledger`
+  (`kind = 'utbytte'`). Fra 2026-09-29; den som er borte lenge, får høyst 14 dager samlet opp. Lokal spillfart betyr
+  ingenting: 10× gir like mye som 1×.
+- **Regelen** (`game/dividend.ts` speiler SQL-en; tallene står i `config.world.dividend`, så de kan stilles uten ny kode):
+  drift per ferdig verk = grunntall (5/20/60 mill. for stålverk/storverk/kompleks) × (1 + 0,25 × trinn) × felles
+  funksjoner (+5 % hver) × konsernprosjekter (+10 % hver) × mesterskapet «Konsernledelse» (inntil +30 %); verket
+  beholder 30 %; verkene stilles i rekke etter drift (1/(1 + 0,1 × plass)); flaggskipet gir inntil +20 % med omdømme 100
+  og bare stål som holdt kvaliteten de siste sju døgnene; **imperiebelastningen**: over 100 mill. per dag vokser
+  utbyttet med kvadratroten. Per ekte dag: 3 nye stålverk 10,6 mill., 3 storverk 41,5 mill., 3 komplekser trinn 5
+  226 mill., 12 komplekser 392 mill., toppen (14 komplekser trinn 5, mesterskap 23) 417 mill. Spillerne i dag:
+  417 / 401 / 391 / 389 / 205 / 100 / 55 / 40 / 29 / 28 / 6 mill. per dag (11 konserneiere).
+- **Konsernkostnadene er borte** (`konsernCosts`, kostnadsposten «konsern»): belastningen ligger i utbytteregelen.
+  `konsernDay` bokfører ingenting lenger (bare direktørlønn og kunnskapsdeling). Kjøp, råd og mesterskapet
+  (`masteryValue`) regnes på utbyttet per ekte dag (`konsernNetFor`). Verdien av et verk (60 døgns drift) står.
+- **Tekstene** på Konsern sier «per ekte dag»; Konsern → Industrien viser på konsernkassa-kortet utbyttet per dag, det
+  som ble betalt i går og i alt; én linje i loggen per ekte dag («Datterverkene betalte X i utbytte til konsernkassa i
+  går», `g.dividendSeen`, `null` i `migrate()`), hentet sammen med anbudene (`useOpenTender` → `world_status`).
+  Fagboka (Konsern → «Utbytte») er oppdatert.
+- **B-190 justert:** «Konsernkassa har lik grense for alle» → «samme regel for alle»: innskuddet fra eget spill har
+  fortsatt 100 mill. per ekte døgn for alle, og utbyttet følger samme regel for alle (bare verkene teller).
+- **Tørrkjøring** (rullet tilbake): de tre faste tallene i testen stemte på øret med SQL-en (417 139 891,48 /
+  41 465 454,55 / 74 276 725,95); ingen betaling i dag (reformen starter i dag); med reformen satt to dager tilbake fikk
+  11 spillere 22 rader og kassene økte med summen (4 122 mill.); to kjøringer ga ingen dobbeltbetaling.
+- Endret: `game/dividend.ts` (ny), `konsern.ts`, `masteryValue.ts`, `balance.ts` (`--konsern` viser utbyttet per ekte
+  dag for 1–14 verk), `tests.ts`, `types.ts`, `save.ts`, `knowledge.ts`, `net/world.ts`, `net/tests.ts`,
+  `ui/Konsern.tsx`, `ui/Companies.tsx`, `ui/GameApp.tsx`, `ui/openTender.ts`, migrasjon 051.
+Konto (B-149): ja for utbyttet (regel 2 og 7: serveren og ekte tid – uten konto finnes ingen konsernkasse, som før,
+B-183); ingen ny funksjon uten konto.
+Testet: tsc, lint, `npm test` (ny test: samme regel som serveren med faste tall, avtagende, farten betyr ingenting,
+`konsernDay` bokfører ingenting; nettlaget: varselet én gang per dag, `world_status` leses), balanse (exit 0),
+`--konsern`, Playwright på 320 og 390 px (Konsern → Oversikt og Industrien).

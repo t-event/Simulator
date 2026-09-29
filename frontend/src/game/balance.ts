@@ -45,18 +45,13 @@ import {
 } from "./daily";
 import {
   konsernAdvice,
-  konsernCosts,
-  konsernDay,
-  KONSERN_ECONOMY,
   konsernEquity,
   konsernNetFor,
   konsernOptions,
   maxSisters,
   modernizeCost,
-  sisterDividend,
   sisterPrice,
   sisterProfit,
-  finishKonsernProjects,
   setRealClock,
 } from "./konsern";
 import { answerQuiz, QUIZ, quizAvailable } from "./quiz";
@@ -82,7 +77,6 @@ import { computePlantStats, day, fixedPriceAdvice, hasPlanner, satisfies } from 
 declare const process: { argv: string[]; exitCode?: number; exit?: (code: number) => void };
 
 import type { Crew, GameState, GradeId, ManualRequest, RoleId, ScrapId } from "./types";
-import { applyCashCap, paidOutTotal } from "./reserve";
 
 type Recipe = Partial<Record<ScrapId, number>>;
 
@@ -963,28 +957,19 @@ if (process.argv.includes("--storovn")) {
   process.exit?.(0);
 }
 if (process.argv.includes("--konsern")) {
-  // B-181: konsernøkonomien med 3, 6, 10 og 14 moderniserte datterverk – før (alt driftsresultat til morselskapet) og
-  // nå (utbytte etter vedlikehold, ledelse og reserve, avtagende andel, og konsernkostnader). Som hos spillerne som har
+  // B-304: utbyttet til konsernkassa per ekte dag med 1–14 datterverk, og hva neste verk gir. Som hos spillerne som har
   // kommet lengst: felles innkjøp og salg, konsernforskningen og mesterskapet «Konsernledelse» på nivå 15.
-  type Eco = typeof KONSERN_ECONOMY;
-  const NOW: Eco = { ...KONSERN_ECONOMY, leadCost: { ...KONSERN_ECONOMY.leadCost } };
-  const OLD: Eco = {
-    keepShare: 0,
-    upstreamDecay: 0,
-    leadCost: { stalverk: 0, storverk: 0, kompleks: 0 },
-    coordGrowth: 0,
-    loadFrom: 0,
-    loadPower: 1,
-  };
-  const setEco = (e: Eco) => Object.assign(KONSERN_ECONOMY, { ...e, leadCost: { ...e.leadCost } });
-  const make = (n: number, type: "storverk" | "kompleks", level: number): GameState => {
+  const make = (n: number, type: "storverk" | "kompleks", level: number, extras = true): GameState => {
     const g = newGame(1);
     g.stage = 4;
     g.konsern.unlocked = true;
-    g.konsern.shared = ["innkjop", "salg"];
+    g.reputation = 100;
+    if (extras) {
+      g.konsern.shared = ["innkjop", "salg"];
+      g.researched.push("konsernstyring", "gronnkonsern", "storkonsern");
+      g.mastery = { datterverk: 15 };
+    }
     g.konsern.legends = 6;
-    g.researched.push("konsernstyring", "gronnkonsern", "storkonsern");
-    g.mastery = { datterverk: 15 };
     g.konsern.plants = Array.from({ length: n }, (_, i) => ({
       id: i + 1,
       type,
@@ -996,72 +981,28 @@ if (process.argv.includes("--konsern")) {
     g.konsern.nextId = n + 1;
     return g;
   };
-  const mrd = (v: number) => `${(v / 1e9).toFixed(2).replace(".", ",")} mrd.`;
-  for (const [type, level] of [
-    ["storverk", 3],
-    ["kompleks", 5],
+  const mill = (v: number) => `${(v / 1e6).toFixed(1).replace(".", ",")} mill.`;
+  for (const [type, level, extras, label] of [
+    ["stalverk", 0, false, "Stålverk, nye (uten forskning og mesterskap)"],
+    ["storverk", 3, false, "Storverk, trinn 3 (uten forskning og mesterskap)"],
+    ["kompleks", 5, true, "Stålkomplekser, trinn 5 (alt forsket, mesterskap 15)"],
   ] as const) {
-    console.log(`\n${type === "kompleks" ? "Stålkomplekser, trinn 5" : "Storverk, trinn 3"} (per spilldøgn):`);
-    console.log(
-      "verk  drift i verkene   før: til mor   nå: utbytte   konsernkostn.   nå: netto   nå/før   neste verk (samme trinn): +/døgn  betalt på",
-    );
+    console.log(`\n${label} – utbytte til konsernkassa per ekte dag (uten flaggskipet):`);
+    console.log("verk   drift i verkene    utbytte/dag   neste verk (samme trinn): +/dag   betalt på (ekte dager)");
     for (const n of [1, 3, 6, 10, 14]) {
-      const g = make(n, type, level);
-      setEco(NOW);
+      const g = make(n, type as "storverk" | "kompleks", level, extras);
       const drift = g.konsern.plants.reduce((a, p) => a + sisterProfit(g, p), 0);
-      const div = g.konsern.plants.reduce((a, p) => a + sisterDividend(g, p), 0);
-      const costs = konsernCosts(g.konsern.plants);
       const net = konsernNetFor(g, g.konsern.plants);
-      // Neste verk kjøpt og modernisert til samme trinn: hva det gir per døgn, og hvor lang tid hele investeringen tar
       const next = [...g.konsern.plants, { id: 99, type, name: "", level, boughtDay: 0, downUntilDay: 0 }];
       const gain = konsernNetFor(g, next) - net;
       const price = sisterPrice(g, type) + level * modernizeCost(next[n], g);
       console.log(
-        `${String(n).padStart(4)}  ${mrd(drift).padStart(15)}  ${mrd(drift).padStart(13)}  ${mrd(div).padStart(12)}  ${mrd(costs).padStart(14)}  ${mrd(net).padStart(10)}  ${((net / drift) * 100).toFixed(0).padStart(5)} %  ${mrd(gain).padStart(28)}  ${gain > 0 ? `${Math.round(price / gain)} døgn` : "aldri"}`,
+        `${String(n).padStart(4)}  ${mill(drift).padStart(16)}  ${mill(net).padStart(13)}  ${mill(gain).padStart(30)}   ${gain > 0 ? `${Math.round(price / gain)} dager` : "aldri"}`,
       );
     }
   }
-  // Vekst over tid: starter med 3 nye stålkomplekser og 20 mrd., kjøper det som lønner seg best (som testspilleren),
-  // bare med det konsernet tjener. Viser om pengene vokser lineært eller eksplosivt.
   console.log(
-    "\nVekst over tid (3 nye komplekser og 20 mrd. i kassa, reinvesterer det som lønner seg best; «nå» med byggetid i ekte tid, spilt på 3× hele tida):",
-  );
-  for (const [name, eco] of [
-    ["før", OLD],
-    ["nå", NOW],
-  ] as const) {
-    setEco(eco);
-    const g = make(3, "kompleks", 0);
-    g.cash = 20e9;
-    // Før B-209 var alt ferdig med én gang; nå går byggingen i ekte tid
-    // (klokka hopper 1 000 timer fram for hvert kall, så alt er ferdig ved neste sjekk)
-    let jump = 0;
-    if (name === "før") setRealClock(() => (jump += 1000 * 3_600_000));
-    else simClock(g);
-    finishKonsernProjects(g);
-    const marks: string[] = [];
-    for (let d = 1; d <= 240; d++) {
-      g.minute += 1440;
-      finishKonsernProjects(g);
-      konsernDay(g);
-      // Taket for kassa (B-303): overskuddet betales ut til eierne, som i spillet
-      applyCashCap(g);
-      for (let k = 0; k < 20; k++) {
-        const o = konsernAdvice(g);
-        if (!o || o.price > g.cash - 1e9) break;
-        o.run(g);
-        if (name === "før") finishKonsernProjects(g);
-      }
-      if ([30, 60, 120, 240].includes(d))
-        marks.push(
-          `dag ${d}: ${g.konsern.plants.length} verk (snitt trinn ${(g.konsern.plants.reduce((a, p) => a + p.level, 0) / g.konsern.plants.length).toFixed(1)}), netto ${mrd(konsernNetFor(g, g.konsern.plants))}/døgn, kasse ${mrd(g.cash)}${paidOutTotal(g) ? ` (+ ${mrd(paidOutTotal(g))} utbetalt)` : ""}, konsernverdi ${mrd(konsernEquity(g))}`,
-        );
-    }
-    console.log(`${name}:\n  ${marks.join("\n  ")}`);
-  }
-  setEco(NOW);
-  console.log(
-    `\nPlass til ${maxSisters(make(0, "kompleks", 0))} datterverk. Neste kjøp tilbys av konsernOptions (${konsernOptions(make(3, "kompleks", 5)).length} valg).`,
+    `\nPlass til ${maxSisters(make(0, "kompleks", 0))} datterverk. Neste kjøp tilbys av konsernOptions (${konsernOptions(make(3, "kompleks", 5)).length} valg). Utbyttet betales av serveren én gang per ekte dag (B-304); spillfarten betyr ingenting.`,
   );
   process.exit?.(0);
 }

@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 304,
+    date: "2026-09-29",
+    title: "Reform 2: datterverkene betaler utbytte i ekte tid, rett til konsernkassa",
+    items: [
+      "Datterverkene betaler ikke lenger utbytte hvert spilldøgn til kassa. I stedet betaler de én gang per ekte dag rett til konsernkassa – der anbudene og konkurransen med de andre foregår.",
+      "Beløpet regnes av verkene dine slik de står: type, modernisering, felles funksjoner, konsernforskning, mesterskapet og flaggskipet. Hvor fort du spiller, betyr ingenting.",
+      "Store konsern får mer, men avtagende: 3 storverk gir ca. 40 mill. per dag, 14 fullt moderniserte komplekser ca. 420 mill.",
+      "Konsernkostnadene er borte. Konsern → Industrien viser utbyttet per dag, det som kom i går og i alt, og du får én linje i loggen per dag.",
+    ],
+  },
+  {
     b: 303,
     date: "2026-09-29",
     title: "Reform 2: kassa har et tak, og overskuddet betales ut til eierne",

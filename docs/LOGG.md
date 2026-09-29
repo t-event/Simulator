@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 237 – 2026-09-29: Reform 2, del 2 – utbytte i ekte tid til konsernkassa
+
+**Brukeren ba om:** (fortsettelse av B-302) del 2: datterverkenes utbytte i ekte tid rett til konsernkassa.
+
+**Gjort:** B-304: `game/dividend.ts` (ren regel, speiler SQL-en), konsernøkonomien i spillet skrevet om (ingen
+konsernkostnader, ingen utbytte i spilltid), `--konsern` i balance.ts, tekster og konsernkassa-kortet, varsel én gang
+per ekte dag, migrasjon 051 (`dividends`, `dividend_from_state`, `pay_dividends` i `world_tick`, `world_status` med
+`dividend`) etter tørrkjøring. B-190 justert: «samme regel for alle».
+
+**Testet:** tørrkjøring (tre faste tall like på øret, ingen betaling i dag, to dager tilbake: 11 spillere, 22 rader,
+ingen dobbeltbetaling), tsc, lint, npm test, balance (exit 0), Playwright på 320 og 390 px (Konsern).
+
+**Gjenstår:** gebyret (01:38 UTC, påminnelse satt), B-305 (hjemmeverket). Pynt for sesong 3.
+
+---
+
 ## Økt 236 – 2026-09-29: Reform 2, del 1 – taket for kassa og utbetaling til eierne
 
 **Brukeren ba om:** (svar på B-301) pakke B, reserven som «utbetalt til eierne», gebyr 500 kr/t, realistiske
