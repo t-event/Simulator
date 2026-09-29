@@ -43,7 +43,8 @@ De 15 prinsippene fra eieren (behold disse hvis alt annet glemmes):
 **Fast regel (B-190): Industrimakt, Kontroll, strategisk eierskap og overtakelser skal baseres på serverautoritative
 verdier og ekte tid. Lokal kasse, lokal egenkapital og lokal spillfart skal aldri direkte avgjøre disse systemene.**
 Lokalt spill: spill så mye og så fort du vil. Fellesverden: samme klokke og samme grunnleggende mulighet for alle. Det
-eneste som flytter verdi fra eget spill inn i verden, er konsernkassa – med lik grense for alle (100 mill. per ekte døgn).
+eneste som flytter verdi fra eget spill inn i verden, er konsernkassa – med samme regel for alle: innskudd høyst
+100 mill. per ekte døgn, og datterverkenes utbytte regnet av serveren én gang per ekte dag (B-304).
 Karrierelistene (konsernverdi, kasse) kan påvirkes av 10×, men brukes aldri som grunnlag for fordeler i verden.
 
 ## 2. Rollen gjennom spillet

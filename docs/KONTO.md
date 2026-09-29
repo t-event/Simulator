@@ -129,3 +129,4 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Æresmerker på topplista | Nei (for å se lista) | Regel 2: serveren vet hvem som har merket | B-299 |
 | Tak for kassa og utbetaling til eierne | Nei | Regel 1: ditt eget spill | B-303 |
 | Lista «Utbetalt til eierne» og merket «Reformveteran II» | Ja (som topplista og merker) | Regel 2 | B-303 |
+| Datterverkenes utbytte i ekte tid til konsernkassa | Ja (som konsernkassa) | Regel 2 og 7: serveren, ekte tid | B-304 |

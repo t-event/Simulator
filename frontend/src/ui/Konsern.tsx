@@ -6,8 +6,6 @@ import {
   daysToAfford,
   dividends,
   KONSERN_ECONOMY,
-  konsernCosts,
-  empireLoad,
   DIRECTOR_AGREEMENT_SHARE,
   BUILD_HOURS,
   flagshipBonus,
@@ -127,7 +125,8 @@ function BuyButton({
         {label ?? "Kjøp"} ({fmtKr(o.price)})
       </button>
       <span className="g-muted g-small-text">
-        {o.gain > 0 && `+${fmtKr(o.gain)} per døgn · betaler seg på ca. ${Math.ceil(o.payback)} døgn`}
+        {o.gain > 0 &&
+          `+${fmtKr(o.gain)} per ekte dag til konsernkassa · betaler seg på ca. ${Math.ceil(o.payback)} dager`}
         {o.hours > 0 && ` · tar ${o.hours} t å bygge`}
         {reason && <span className="g-konsern-why">{reason}</span>}
       </span>
@@ -180,17 +179,17 @@ function OptionCard({
       <dl className="g-buy-opt-stats">
         {o.gain > 0 && (
           <div>
-            <dt>Gir deg</dt>
+            <dt>Gir konsernkassa</dt>
             <dd>
               +{fmtKr(o.gain)}
-              <small> /døgn</small>
+              <small> /ekte dag</small>
             </dd>
           </div>
         )}
         {o.gain > 0 && (
           <div>
             <dt>Betaler seg</dt>
-            <dd>{Math.ceil(o.payback).toLocaleString("nb-NO")} døgn</dd>
+            <dd>{Math.ceil(o.payback).toLocaleString("nb-NO")} ekte dager</dd>
           </div>
         )}
         {o.hours > 0 && (
@@ -516,7 +515,7 @@ function PlantRow({
           Modernisert {p.level} av {max}
           {underConstruction(p)
             ? ""
-            : ` · tjener ${fmtKr(sisterProfit(g, p))}/døgn · gir deg ${fmtKr(dividend)}/døgn`}{" "}
+            : ` · tjener ${fmtKr(sisterProfit(g, p))}/døgn · gir ${fmtKr(dividend)} per ekte dag til konsernkassa`}{" "}
           · verdt {fmtKr(sisterValue(g, p))}
         </p>
         <ProjectStatus p={p} />
@@ -569,7 +568,7 @@ function PlantTable({
           <th>Verk</th>
           <th>Modernisert</th>
           <th className="num">Driftsresultat</th>
-          <th className="num">Utbytte til deg</th>
+          <th className="num">Utbytte per ekte dag</th>
           <th className="num">Verdi</th>
           <th>Neste steg for verket</th>
           <th aria-label="Flere valg" />
@@ -607,7 +606,7 @@ function PlantTable({
                   ) : down ? (
                     <span className="g-badge-bad">Står til dag {p.downUntilDay}</span>
                   ) : (
-                    <strong>+{fmtKr(div[i])}/døgn</strong>
+                    <strong>+{fmtKr(div[i])}/dag</strong>
                   )}
                 </td>
                 <td className="num">{fmtKr(sisterValue(g, p))}</td>
@@ -750,18 +749,14 @@ function NextStep({ g, act }: { g: GameState; act: Act }) {
 function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () => void }) {
   const k = g.konsern;
   const today = day(g);
-  // Driftsresultatet i verkene, utbyttet til konsernet og konsernkostnadene (B-181)
+  // Driftsresultatet i verkene og utbyttet til konsernkassa per ekte dag (B-181, B-304)
   // Et verk som bygges, tjener ingenting ennå (B-288): før sto det at det tjente, men beholdt alt selv
   const running = (p: SisterPlant) => p.downUntilDay <= today && !underConstruction(p);
   const building = k.plants.filter(underConstruction);
-  const div = dividends(g, k.plants);
+  // Per verk etter imperiebelastningen, så tallene per verk stemmer med summen
+  const shown = dividends(g, k.plants);
   const drift = k.plants.filter(running).reduce((a, p) => a + sisterProfit(g, p), 0);
-  const dividend = div.reduce((a, d, i) => a + (running(k.plants[i]) ? d : 0), 0);
-  const costs = konsernCosts(k.plants);
-  // Imperiebelastningen (B-251): det som går bort fordi konsernet er stort
-  const load = empireLoad(dividend, costs);
-  // Det hvert verk gir deg etter imperiebelastningen, så tallene per verk stemmer med nettoen
-  const shown = div.map((d) => (dividend > 0 ? d * (1 - load / dividend) : d));
+  const dividend = shown.reduce((a, b) => a + b, 0);
   const equity = konsernEquity(g);
   const options = konsernOptions(g);
   const advice = konsernAdvice(g);
@@ -782,8 +777,8 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
               <strong>{fmtKr(Math.floor(equity))}</strong>
             </div>
             <div className="g-finance-side">
-              <span>
-                Netto fra verkene <strong>{fmtKr(dividend - costs - load)}/døgn</strong>
+              <span title="Betales av serveren én gang per ekte dag rett til konsernkassa – spillfarten betyr ingenting">
+                Utbytte til konsernkassa <strong>{fmtKr(dividend)} per ekte dag</strong>
               </span>
               {k.plants.length > 0 && (
                 <span title="Utbyttet øker når hjemmeverket har godt omdømme og lager stål som holder kvaliteten">
@@ -812,10 +807,9 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
           )}
           {drift > 0 && (
             <p className="g-muted g-small-text">
-              Verkene tjener {fmtKr(drift)}/døgn. De beholder {fmtKr(drift - dividend)} til vedlikehold, ledelse og
-              reserve, og konsernledelsen koster {fmtKr(costs)}/døgn.
-              {load > 0 &&
-                ` Et så stort konsern er tungt å styre: ${fmtKr(load)}/døgn går bort i ekstra ledelse, kapital og koordinering, og hvert nytt verk gir mindre enn det forrige.`}
+              Verkene tjener {fmtKr(drift)} per døgn. Det som kan løftes opp som utbytte, betales hver ekte dag rett til
+              konsernkassa – der konkurransen med de andre spillerne foregår – uansett hvor fort du spiller. Jo flere
+              verk, jo mindre gir hvert nytt verk: et stort konsern er tungt å styre.
             </p>
           )}
           {!g.won && (
@@ -848,8 +842,10 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
               </li>
               <li>
                 <strong>Utbytte:</strong> hvert verk beholder {Math.round(KONSERN_ECONOMY.keepShare * 100)} % til
-                vedlikehold og reserve, og resten går til deg. Jo flere verk, jo mindre gir hvert nytt verk, og
-                konsernledelsen koster mer. Flere verk gir fortsatt mer – men ikke dobbelt så mye.
+                vedlikehold og reserve. Resten betales som utbytte{" "}
+                <strong>én gang per ekte dag rett til konsernkassa</strong> (Industrien), ikke til kassa hjemme – og
+                spillfarten betyr ingenting. Jo flere verk, jo mindre gir hvert nytt verk: flere verk gir fortsatt mer,
+                men ikke dobbelt så mye.
               </li>
               <li>
                 <strong>Bygging tar tid – ekte tid,</strong> uansett spillfart: et stålverk {BUILD_HOURS.stalverk}{" "}
@@ -879,8 +875,7 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
           <Card title={`Dine verk (${k.plants.length} av ${maxSisters(g)} datterverk)`}>
             <div className="g-plant-cards">
               <p className="g-muted g-small-text g-plant-rows-hint">
-                Tallet til høyre er utbyttet fra verket per døgn
-                {costs > 0 ? `, før konsernledelsen (${fmtKr(costs)}/døgn) er trukket fra` : ""}. Trykk på et verk for å
+                Tallet til høyre er utbyttet fra verket til konsernkassa per ekte dag. Trykk på et verk for å
                 modernisere eller selge.
               </p>
               {k.plants.map((p, i) => (

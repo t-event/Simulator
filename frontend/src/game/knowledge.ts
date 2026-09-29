@@ -416,7 +416,7 @@ export const KNOWLEDGE: KnowledgeCard[] = [
       },
       {
         head: "Utbytte",
-        text: "Datterverkene har egen ledelse og egne ansatte. Morselskapet bestemmer hvor pengene skal investeres, og får utbytte: det verket har igjen etter vedlikehold, lokal ledelse og en reserve til dårlige tider.",
+        text: "Datterverkene har egen ledelse og egne ansatte. Morselskapet bestemmer hvor pengene skal investeres, og får utbytte: det verket har igjen etter vedlikehold, lokal ledelse og en reserve til dårlige tider. Utbyttet betales én gang per ekte dag rett til konsernkassa – der konkurransen med de andre spillerne foregår – uansett hvor fort du spiller.",
       },
       {
         head: "Stordriftsfordeler",

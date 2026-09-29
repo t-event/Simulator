@@ -590,6 +590,8 @@ export interface GameState {
   tenderSeen: number;
   /** Per selskap (id): den siste UTC-dagen eieren har fått beskjed om inntekten for (B-258) */
   companyIncomeSeen: Record<string, string>;
+  /** Den siste UTC-dagen spilleren har fått beskjed om utbyttet fra datterverkene for (B-304), eller null */
+  dividendSeen?: string | null;
   /** Utslipp, renseanlegget og bøter (B-263) */
   env: EnvState;
   /** Sesongen en spiller uten konto sist fikk beskjed om at man må logge inn for å være med (B-131) */

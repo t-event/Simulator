@@ -47,7 +47,7 @@ import { importantLog, markAllSeen, unseenCount } from "../game/inbox";
 import { Sales } from "./Sales";
 import { KonsernPage } from "./Konsern";
 import { useOpenTender } from "./openTender";
-import { applyCompanyIncome, applyTenderResults, worldNews } from "../net/world";
+import { applyCompanyIncome, applyDividendNews, applyTenderResults, worldNews } from "../net/world";
 import { VIEWS, viewUnlocked, type View } from "./views";
 import { Icon, type IconName } from "./icons";
 import { isVerketTab } from "./verketTabs";
@@ -879,13 +879,15 @@ export function GameApp() {
 
   // Varsellinja står over menyen nederst på mobil (B-201). Høyden følges, så veiledningen legger seg over den
   const isPc = useIsPc();
-  // Varsel om avgjort anbud (B-237, B-258: også til dem som ikke bød) og om inntekten til eieren én gang i døgnet;
-  // act er stabil, og hvert anbud gir én gang, i rekkefølge (B-253)
-  const tender = useOpenTender(!!g?.konsern?.unlocked, (companies) => {
-    if (g && worldNews(g, companies))
+  // Varsel om avgjort anbud (B-237, B-258: også til dem som ikke bød), om inntekten til eieren og om utbyttet fra
+  // datterverkene (B-304) én gang i døgnet; act er stabil, og hvert anbud gir én gang, i rekkefølge (B-253)
+  const tender = useOpenTender(!!g?.konsern?.unlocked, (w) => {
+    const yesterday = w.dividend.yesterday ?? 0;
+    if (g && worldNews(g, w.companies, Date.now(), yesterday))
       act((gg) => {
-        applyTenderResults(gg, companies);
-        applyCompanyIncome(gg, companies);
+        applyTenderResults(gg, w.companies);
+        applyCompanyIncome(gg, w.companies);
+        applyDividendNews(gg, yesterday);
       });
   });
   const appRef = useRef<HTMLDivElement>(null);
