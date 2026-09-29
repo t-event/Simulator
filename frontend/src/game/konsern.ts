@@ -22,6 +22,7 @@ import {
   unlock,
 } from "./engine";
 import { computePlantStats, day, gradeRecipe, productCapT } from "./plant";
+import { summerStop } from "./calendar";
 import { auto, hasResearch } from "./research";
 import { masteryFactor, masteryLevel } from "./mastery";
 import { DIVIDEND, dividendPerDay, dividendShares, flagshipOf, type DividendInput } from "./dividend";
@@ -896,6 +897,8 @@ export function fireDirector(g: GameState): { ok: boolean; message: string } {
 export function directorHour(g: GameState): void {
   const d = g.konsern?.director;
   if (!d || !d.active) return;
+  // Sommerstans (B-321): alle har ferie, ovnene står, og det som signeres nå, rekkes ikke
+  if (summerStop(g)) return;
   const stats = computePlantStats(g);
   if (stats.dailyProductT <= 0) return;
   const following = auto(g, "followQueue");

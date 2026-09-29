@@ -5855,3 +5855,25 @@ Konto (B-149): ja – som topplista (regel 3: sammenlignes med andre).
 Testet: migrasjonen i en blokk som ble rullet tilbake (11 konsern på lista, egen plass, de gamle listene uendret),
 `npm test`, tsc, lint, Playwright på 320 og 390 px med falsk tjeneste (fanene brytes pent, ingen overflyt, riktig kall).
 
+## B-321 Sommerstans stopper salgsdirektøren, og kalender på Oversikt (2026-09-29)
+Status: gjelder (utvider B-298)
+Bakgrunn: brukeren: «Salgsdirektøren kan jo ikke ta ordrer når det er planlagt sommerstans» og «Lag kalenderen på
+oversiktsbildet så man kan planlegge fram til sommerstans og lignende». I stansen fortsatte salgsdirektøren å signere
+forespørsler som lå inne fra før. Fristene deres var ikke flyttet (bare aktive kontrakter fikk tre uker ekstra), og en
+rammeavtale fikk første ukeleveranse med frist midt i ferien. Salg regnet også som om ovnene gikk.
+Beslutning:
+- Salgsdirektøren gjør ingenting i sommerstansen (`directorHour` avbryter når `summerStop`).
+- Når stansen begynner, flyttes også fristen på forespørsler som venter på svar, tre uker (kundene vet om ferien).
+- En rammeavtale som signeres i stansen, får første uke dagen etter ferien (`nextDay`), ikke i køen med en gang.
+- Salg (`assessOffer`) trekker fra døgnene som er igjen av stansen når den regner tida til fristen
+  (`summerStopDaysLeft` i `calendar.ts`).
+- Før stansen trengs ingen ny regel: kontrakter med frist i eller etter ferien får fristen flyttet tre uker når
+  stansen begynner, så regnestykket går opp.
+- Kalender på Verket → Oversikt (`ui/CalendarCard.tsx`, `calendarAhead` i `calendar.ts`): dagens dato, en stripe over
+  de neste 60 døgnene og to faste rader – fellesferien (datoer, «om N døgn» eller «nå · N døgn igjen», valget eller når
+  kortet kommer, kontrakter med frist i ferien) og vinteren. Vises fra verket har fellesferie (nivå 2 og folk).
+Konto (B-149): nei – ditt eget spill.
+Testet: `npm test` (salgsdirektøren står i stansen, ventende forespørsel får ny frist, Salg regner uten stansdøgnene,
+rammeavtale starter etter ferien), tsc, lint, balansetesten og `--sommerstans`, Playwright på 320, 390, 1 366 og
+2 560 px (ingen overflyt, ingen avkortet tekst).
+

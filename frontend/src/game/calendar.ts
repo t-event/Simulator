@@ -107,8 +107,13 @@ export function summerStop(g: GameState, d = day(g)): boolean {
   return g.summer?.choice === "stans" && g.summer.year === yearOf(d) && inSummerBreak(d);
 }
 
+/** Døgn igjen av sommerstansen, i dag medregnet (0 når verket ikke har stans), B-321 */
+export function summerStopDaysLeft(g: GameState, d = day(g)): number {
+  return summerStop(g, d) ? summerStart(d) + SUMMER.days - d : 0;
+}
+
 /** Får verket fellesferie (nivå og folk)? */
-function hasSummerBreak(g: GameState): boolean {
+export function hasSummerBreak(g: GameState): boolean {
   return g.stage >= SUMMER.fromStage && g.workers.length > 0;
 }
 
@@ -178,12 +183,13 @@ function summerDay(g: GameState, stats: PlantStats): void {
       f.lastRelineDay = today;
       if (stats.furnace.arc) f.spareProgress = 1;
     }
-    // Kundene vet om fellesferien: fristene som ikke er gått ut, flyttes tre uker
+    // Kundene vet om fellesferien: fristene som ikke er gått ut, flyttes tre uker – også for forespørsler som venter på
+    // svar (B-321), ellers kunne de tas i stansen med en frist verket ikke rakk
     let moved = 0;
     for (const c of g.contracts)
-      if (c.status === "aktiv" && !c.landmark && c.deadlineDay >= start) {
+      if ((c.status === "aktiv" || c.status === "tilbud") && !c.landmark && c.deadlineDay >= start) {
         c.deadlineDay += SUMMER.days;
-        moved++;
+        if (c.status === "aktiv") moved++;
       }
     const cost = stats.furnace.relineCost * g.furnaces.length;
     addCost(g, "vedlikehold", cost);
@@ -285,4 +291,62 @@ export function winterHour(g: GameState, stats: PlantStats): void {
     `Frost: kjølevannsrørene til støpemaskinen frøs ${when}. Støpingen står i ${hours.toFixed(0)} timer (reparasjon ${fmtKr(cost)}).`,
     "bad",
   );
+}
+
+/** Noe som kommer i kalenderen (B-321): fellesferien og vinteren, med første og siste dag */
+export interface CalendarItem {
+  kind: "ferie" | "vinter";
+  from: number;
+  to: number;
+  /** Hva som gjelder: valget for ferien, eller at kortet ikke er besvart ennå */
+  note: string;
+  /** Kontrakter med frist i perioden (bare ferien) */
+  dueContracts: number;
+}
+
+/**
+ * Det som kommer de neste `horizon` døgnene (standard: neste gang hver), eller pågår nå (B-321): så spilleren kan planlegge fram til
+ * fellesferien og vinteren. Sortert etter når det begynner.
+ */
+export function calendarAhead(g: GameState, horizon = YEAR_DAYS): CalendarItem[] {
+  const today = day(g);
+  const items: CalendarItem[] = [];
+  if (hasSummerBreak(g)) {
+    let start = summerStart(today);
+    if (start + SUMMER.days - 1 < today) start = summerStart(today + YEAR_DAYS);
+    if (start <= today + horizon) {
+      const chosen = g.summer?.year === yearOf(start) ? g.summer.choice : null;
+      const due = g.contracts.filter(
+        (c) => c.status === "aktiv" && !c.landmark && c.deadlineDay >= start && c.deadlineDay < start + SUMMER.days,
+      ).length;
+      items.push({
+        kind: "ferie",
+        from: start,
+        to: start + SUMMER.days - 1,
+        note:
+          chosen === "stans"
+            ? "Sommerstans: ovnene står, fristene flyttes tre uker"
+            : chosen === "vikarer"
+              ? "Sommervikarer: full drift, dyrere lønn"
+              : today >= start
+                ? "Sommervikarer: full drift, dyrere lønn"
+                : `Velg stans eller vikarer ${today >= start - SUMMER.notice ? "nå" : `fra ${dateText(start - SUMMER.notice)}`}`,
+        dueContracts: chosen === "stans" ? 0 : due,
+      });
+    }
+  }
+  // Vinteren: nå eller neste
+  const n = dayOfYear(today);
+  const winterStart = isWinter(g, today)
+    ? today - (n >= WINTER_FROM ? n - WINTER_FROM : n + YEAR_DAYS - WINTER_FROM)
+    : today + ((WINTER_FROM - n + YEAR_DAYS) % YEAR_DAYS);
+  if (winterStart <= today + horizon)
+    items.push({
+      kind: "vinter",
+      from: winterStart,
+      to: winterStart + WINTER_DAYS - 1,
+      note: "Is og kulde: flere uhell, dyrere strøm",
+      dueContracts: 0,
+    });
+  return items.sort((a, b) => a.from - b.from);
 }

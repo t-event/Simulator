@@ -221,13 +221,15 @@ import {
   inSummerBreak,
   isChristmas,
   SUMMER,
+  chooseSummer,
+  summerStopDaysLeft,
   yearOf,
   YEAR_DAYS,
 } from "./calendar";
 import { MIN_PER_DAY } from "./data";
 import { fmtDuration } from "../ui/format";
 import { activeWar, WAR, warDay, warFactor } from "./war";
-import { buyScrap } from "./engine";
+import { acceptAgreement, buyScrap } from "./engine";
 import { fixedPowerOffer, spotPowerPrice } from "./plant";
 import { explosionChance, FATAL_DOWN_DAYS, fatalAccident, WINTER_EXPLOSION } from "./accidents";
 import { freeStockT, sellAllFree } from "./engine";
@@ -3113,6 +3115,59 @@ test("Neste rammeavtale i «Produksjon nå» (B-316): tid til neste uke, kø og 
   assert(fmtDuration(30) === "under 1 t" && fmtDuration(14 * 60) === "14 t", "fmtDuration under et døgn");
   assert(fmtDuration(29 * 60) === "1 døgn 5 t" && fmtDuration(48 * 60) === "2 døgn", "fmtDuration over et døgn");
   assert(fmtDuration(Infinity) === "–", "fmtDuration uendelig");
+});
+
+test("Sommerstans (B-321): salgsdirektøren står, ventende forespørsler får ny frist, avtaler starter etter ferien", () => {
+  const g = newGame(321);
+  g.tutorial = null;
+  g.stage = 2;
+  g.cash = 1e8;
+  g.settings.pauseOffers = true;
+  for (let i = 0; i < 6; i++) g.workers.push({ ...makeCandidate(g, "ovn"), hiredDay: 1 });
+  g.minute = 91 * MIN_PER_DAY;
+  chooseSummer(g, "stans");
+  g.pendingDecision = null;
+  const offer = { ...g.contracts[0], id: 99_321, status: "tilbud" as const, deadlineDay: 100, tonnes: 5, delivered: 0 };
+  offer.offerExpiresMin = 200 * MIN_PER_DAY;
+  g.contracts.push(offer);
+  g.minute = 96 * MIN_PER_DAY - 1;
+  advance(g, 2);
+  assert(summerStopDaysLeft(g) === SUMMER.days, `feil antall døgn igjen: ${summerStopDaysLeft(g)}`);
+  const o = g.contracts.find((x) => x.id === 99_321)!;
+  assert(
+    o.status === "tilbud" && o.deadlineDay === 100 + SUMMER.days,
+    `forespørselen fikk ikke ny frist (${o.deadlineDay})`,
+  );
+  // Salg regner med at ovnene står resten av ferien
+  const check = assessOffer(g, computePlantStats(g), o);
+  assert(check.days === o.deadlineDay - 97 + 1 - SUMMER.days, `feil antall døgn til fristen (${check.days})`);
+  // Salgsdirektøren gjør ingenting i stansen
+  g.konsern.director = { hiredDay: 1, contracts: 0, agreements: 0, agreementsOn: true, active: true };
+  directorHour(g);
+  assert(o.status === "tilbud" && g.konsern.director.contracts === 0, "salgsdirektøren tok en ordre i sommerstansen");
+  // En rammeavtale signert i stansen får første uke når ovnene går igjen
+  const a = {
+    id: 321,
+    customer: "Test",
+    product: "emne",
+    grade: "standard",
+    weeklyT: 100,
+    pricePerT: 1,
+    weeks: 4,
+    weeksSent: 0,
+    weeksDone: 0,
+    weeksMissed: 0,
+    nextDay: 0,
+    bonusKr: 0,
+    bonusRep: 0,
+    status: "tilbud",
+    offerExpiresMin: g.minute + 2880,
+    closedDay: null,
+  } as Agreement;
+  g.agreements.push(a);
+  assert(acceptAgreement(g, 321).ok, "kunne ikke signere");
+  assert(a.weeksSent === 0 && a.nextDay === 97 + SUMMER.days, `første uke kom i ferien (nextDay ${a.nextDay})`);
+  assert(!g.contracts.some((c) => c.agreementId === 321), "ukeleveranse i køen midt i ferien");
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

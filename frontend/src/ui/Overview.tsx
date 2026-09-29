@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { requestManual, requestReline, setFurnaceGrade, setTargetGrade, upgradeOptions } from "../game/actions";
 import { Maintenance } from "./Maintenance";
 import { ProductionCard } from "./ProductionCard";
+import { CalendarCard } from "./CalendarCard";
 import { RecipeCard } from "./Recipe";
 import { auto, automationUnlocked } from "../game/research";
 import { GRADE_IDS, GRADES, SCRAP_TYPES, STAGES } from "../game/data";
@@ -475,6 +476,8 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
           </div>
           <div className="g-col">
             {!canMove && <StageCard g={g} act={act} />}
+            {/* Fellesferien og vinteren fram i tid, så ordrene kan planlegges (B-321) */}
+            <CalendarCard g={g} />
 
             <BookCard g={g} openBook={openBook} />
             {/* Loggen på Oversikt (B-098); ikke lenger også under Økonomi (B-233) */}
