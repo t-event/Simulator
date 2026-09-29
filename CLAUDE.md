@@ -337,7 +337,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   konkurs. Den gamle reserven (`lockedReserve`, B-193) står urørt i lagringene og regnes som utbetalt (`paidOutTotal`)
   – ikke migrer den, og ikke legg den inn i konsernverdien igjen. Lista «Utbetalt til eierne» leses av `note_paid_out`
   på `saves` (050). Reform 2 som helhet: `docs/OKONOMI.md` og B-302. Skal taket endres igjen: publiser appen først,
-  så serverendringen (052 som mal), ellers fyller eldre apper kassa opp igjen.
+  så serverendringen (052 som mal), ellers fyller eldre apper kassa opp igjen. Sesonglista bruker det siste
+  tidslinjetallet per spiller – etter en serverendring av kassa må den få ferske tall (053 som mal), ellers står de
+  som ikke har logget inn, med gamle verdier.
 - **Utslipp** (B-263): røyken regnes i hvert tidssteg (`updateEmissions`) mot renseanlegget; boten kommer i `onDay`.
   Nye, større ovner må ha et renseanlegg som holder (`CLEANERS` i `environment.ts`), ellers får testspilleren bot.
   Gamle lagringer får anleggene de trenger i første tidssteg (`env.grant`) – ikke flytt det til `onHour`.

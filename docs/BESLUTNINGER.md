@@ -5534,6 +5534,10 @@ Beslutning:
   utbetalt; seks nye merker. Kjørt 01:14 UTC, etter publiseringen: åtte spillere ble justert av serveren; to (den med
   100 og den med 92 mrd.) hadde alt fått den nye appen, som betalte ut selv før serveren rakk det – den ene av dem fikk
   merket for hånd (`badges`), siden reformen traff ham like fullt.
+- **Sesonglista rettet** (053, eierens beskjed: «Hvorfor har de tre over meg etter reform 2?»): lista bruker det siste
+  tidslinjetallet, og de tre hadde ikke åpnet spillet etter reformen (704–874 mrd. med gammel reserve). Ett ferskt
+  tidslinjetall per konserneier ble regnet av det lagrede spillet på serveren med appens regel (kasse − lån + verkene);
+  tørrkjøringen stemte på øret med dem som alt hadde lastet opp med den nye appen. Hall of Fame («alle tider») står.
 - **«Mest penger på bok» er tatt bort** fra topplista (appen; serveren kan fortsatt regne `kasse`): med et tak sa den
   ingenting, og Hall of Fame-tallene der var fra før reform 1 (8 286 / 3 663 / 1 562 mrd.). «Utbetalt til eierne» tar over.
 - Rekkefølge: appen publiseres først (nytt tak), så kjøres serverendringen – ellers ville en eldre app fylt kassa opp
