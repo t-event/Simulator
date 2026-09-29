@@ -5,6 +5,28 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 279 – 2026-09-29: Industrien, kart, toppliste og chat laster tregt (B-353)
+
+**Brukeren ba om:** «Det tar lang tid før data lastes inn her enda» (skjermbilder av topplista, Skiftrapporten, Industrien
+og kartet, alle 19:47–19:48).
+
+**Funnet:** tidsavbrudd 17:45–17:47 UTC som ventet på raden i `konsern` (`konsern_settle` tok `for update` hver gang, også
+fra `save_game`, som holdt låsen til lagringen var ferdig). Under det: maskinen var overbelastet – et checkpoint brukte
+6,7 s på 13 blokker, et tomt kall tok 375 ms, PostgREST-forbindelser sto «idle in transaction» i opptil 13 s.
+`save_game` sto for nesten all skriving (1,8 GB WAL, 57 kB per kall); de største spillene var 400–520 kB, mest fordi
+over 1 000 partier armering aldri ble slått sammen (bare med forrige parti samme døgn).
+
+**Gjort:** `compactLots` (like partier slås sammen hvert døgn og ved lasting), opplasting hvert 60. s og minst 15 s etter
+en handling, `075_konsern_uten_lås.sql` (kjørt: `konsern_settle` låser bare når noe skal gjøres).
+
+**Testet:** motortest (partier), nettester, `npm test`, lint, typesjekk, `balance.ts`; `konsern_settle` for alle 12
+konsern i en DO-blokk (ett ferdig prosjekt ble fullført som før).
+
+**Gjenstår:** følge med på Disk IO og minne i Supabase-dashbordet (Reports → Database). Holder ikke gratisplanen, er
+neste steg en større maskin (betalt plan).
+
+---
+
 ## Økt 278 – 2026-09-29: Dagens oppdrag «Øk konsernverdien» umulig (B-352)
 
 **Brukeren ba om:** «Dagens oppdrag, øk konsernverdien med 1 mrd er ikke mulig».

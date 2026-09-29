@@ -6399,3 +6399,27 @@ dagens oppdrag ikke blir gjort av seg selv ved oppdateringen. Teksten sier «(ut
 Oppdragene sjekkes bare i appen; bonusen på serveren er uendret.
 Testet: ny motortest.
 Konto (B-149): uendret (dagens oppdrag krever konto for bonusen).
+
+## B-353 Mindre og sjeldnere lagring, partier slås sammen, konsernet låses bare ved behov (2026-09-29)
+Status: gjelder
+Endringslogg: ja (spillerne merker raskere lasting og færre partier)
+Bakgrunn: eieren: «Det tar lang tid før data lastes inn her enda» (topplista, Skiftrapporten, Industrien og kartet sto og
+lastet samtidig, 19:47). Loggene: tidsavbrudd 17:45–17:47 UTC som ventet på raden i `konsern` (`konsern_settle` tok
+`for update` hver gang – også i `save_game`, som holdt låsen til hele lagringen var ferdig). Og maskinen var overbelastet:
+et checkpoint brukte 6,7 s på 13 blokker, et tomt kall tok 375 ms, PostgREST sto «idle in transaction» i opptil 13 s.
+`save_game` sto for 1,8 GB av skrivingen (WAL, 57 kB per kall); alt annet til sammen under 50 MB. De største spillene var
+400–520 kB, mest fordi ferdigvarelageret hadde over 1 000 partier (armering fra flere hundre døgn tilbake): `addLot` slo
+bare sammen med forrige parti samme døgn.
+Beslutning:
+- `compactLots` (`engine.ts`): partier med samme `lotKey` (vare, annenrangs, kvalitetene analysen og det kjente holder,
+  det som er målt) slås sammen hvert døgn og ved lasting (`migrate`). Analysene vektes med tonn (6 desimaler), det eldste
+  døgnet beholdes. Partier fra i dag og i går står for seg. Snittet av partier som holder de samme kvalitetene, holder dem
+  også, så leveranser og reklamasjoner virker som før.
+- Opplasting: hvert 60. sekund (var 30), og etter en handling tidligst 15 s etter forrige (`SOON_MIN_GAP_MS`; før kunne
+  mange trykk gi en lagring hvert andre sekund). Når appen legges bort og ved bytte av enhet lagres det som før med én gang.
+- `075_konsern_uten_lås.sql` (kjørt): `konsern_settle` sjekker først uten lås om et prosjekt skal starte eller er ferdig,
+  eller om nivået endres; ellers returnerer den straks. Arbeidet når det er noe å gjøre, er uendret.
+Neste steg hvis det ikke holder: større maskin i Supabase (betalt plan), eller et tak på `history`/`log` i lagringen.
+Testet: motortest (300 partier → 3, samme tonn og kvaliteter), nettester, `balance.ts`; `konsern_settle` for alle konsern
+i en DO-blokk som ble rullet tilbake.
+Konto (B-149): uendret.

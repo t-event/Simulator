@@ -28,12 +28,14 @@ export type CloudStatus =
 
 /**
  * Minst så lenge mellom to vanlige lagringer på nett (B-141: var ett minutt, for sjeldent ved bytte av enhet; 15 s ga
- * nesten 8 000 lagringer à 200 kB i døgnet, B-344). Etter en handling, når appen legges bort og ved bytte av enhet lagres
- * det uansett med én gang.
+ * nesten 8 000 lagringer à 200 kB i døgnet, B-344). B-353: 60 s – lagringene sto for nesten all skriving til disken, og
+ * gratisplanens diskkvote gikk tom, så alt ble tregt. Når appen legges bort og ved bytte av enhet lagres det med én gang.
  */
-export const UPLOAD_INTERVAL_MS = 30_000;
+export const UPLOAD_INTERVAL_MS = 60_000;
 /** Etter en handling fra spilleren lastes spillet opp etter så lang tid (flere handlinger samles) */
 export const SOON_MS = 2_000;
+/** Men aldri oftere enn dette etter en handling (B-353): mange trykk på rad ga en lagring annethvert sekund */
+export const SOON_MIN_GAP_MS = 15_000;
 /** Så ofte appen sjekker om spillet er lagret fra en annen enhet, mens den vises */
 export const PULL_INTERVAL_MS = 20_000;
 
@@ -293,10 +295,13 @@ export function onLocalSave(g: GameState, soon = false): void {
   if (!actionPending && !(Math.floor(g.minute) !== syncedMinute && pageVisible())) return;
   dirty = g;
   if (soon) {
-    soonTimer ??= setTimeout(() => {
-      soonTimer = null;
-      void flush();
-    }, SOON_MS);
+    soonTimer ??= setTimeout(
+      () => {
+        soonTimer = null;
+        void flush();
+      },
+      Math.max(SOON_MS, SOON_MIN_GAP_MS - (clock() - lastUpload)),
+    );
     return;
   }
   if (clock() - lastUpload >= UPLOAD_INTERVAL_MS) void flush();

@@ -261,6 +261,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Kokillene** (B-351): slites i `castBatch` (`wearMoulds`, tonn / (støpekapasitet × 24 × 20)) og ganges inn i faren for
   strenggjennombrudd (`mouldRisk`). Reparatøren bytter dem i `mouldHour` med samme bryter som foringen (`autoReline`).
   `g.mould` mangler i eldre lagringer = nye kokiller. Ny risiko i støpingen ganges inn der, ikke i egne tilfeldigheter.
+- **Diskkvoten** (B-353): gratisplanen har lite disk-IO og minne. Nesten all skriving kommer fra `save_game` (hele spillet
+  hver gang). Nye felt i spilltilstanden som vokser med tida (lister, logger) må ha et tak eller slås sammen (som
+  `compactLots`), ellers blir lagringene hundrevis av kB og alt blir tregt. Serverfunksjoner som tar `for update` på en
+  spillers rad, skal sjekke uten lås først om det er noe å gjøre (`konsern_settle`, 075).
 - **Tekstfelt på iPhone** (B-347): Safari zoomer inn på felt med skrift under 16 px og zoomer ikke ut igjen. Regelen
   nederst i `game.css` gir alle felt man skriver i minst 16 px på berøringsskjerm – ikke overstyr den med mindre skrift.
 - Skjermbilder med `fullPage: true` viser faste menyer midt på siden; det er
@@ -288,7 +292,7 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   lagringer – ikke bygg ny mekanikk på det.
 - `fetch` med `keepalive` avvises over 64 kB, og et stort spill er større. `rest()` i `net/supabase.ts` dropper
   keepalive over `KEEPALIVE_MAX` (B-141) – ikke send store kropper med keepalive andre steder.
-- Lagring på nett skjer ca. 3 s etter en handling (`saveGame(g, true)` → `SOON_MS`), hvert 30. sekund ellers (B-344), og ved
+- Lagring på nett skjer ca. 2 s etter en handling, men aldri oftere enn hvert 15. s (`SOON_MIN_GAP_MS`), hvert 60. sekund ellers (B-353), og ved
   `blur`/`pagehide`. Appen sjekker hvert 20. sekund om en annen enhet har lagret (B-141). I Playwright: vent minst
   3 s etter en handling før du ser etter opplastingen.
 - Bare enheten som spilles på, laster opp (B-143): `onLocalSave` laster ikke opp når spillminuttet er det samme som
