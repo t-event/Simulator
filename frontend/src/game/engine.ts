@@ -294,6 +294,7 @@ export function newGame(seed = Date.now()): GameState {
     season: null,
     seasonPromptSeen: null,
     tenderSeen: 0,
+    takeoverSeen: "",
     companyIncomeSeen: {},
     env: newEnv(),
     seasonLoginPromptSeen: null,

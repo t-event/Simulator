@@ -77,6 +77,46 @@ export interface Company {
   region: RegionId | null;
   /** Eierens Kontroll (B-334): summen 0–100, delene, selskapets verdi og investert i alt. Null uten eier */
   control: CompanyControl | null;
+  /** Pågående forsøk på å overta selskapet (B-335), offentlig; forsvaret i kroner bare for eieren */
+  takeover: Takeover | null;
+  /** Om spilleren kan by på selskapet nå, og hva som skal til (null: ikke aktuelt – eier, uten eier, slått av) */
+  takeoverWindow: TakeoverWindow | null;
+  /** Forrige avgjorte forsøk */
+  takeoverLast: TakeoverLast | null;
+}
+
+export interface Takeover {
+  id: number;
+  attacker: string;
+  mineAttack: boolean;
+  bid: number;
+  /** Forsvarskapitalen – bare for eieren */
+  defense: number | null;
+  closesAt: string;
+  attack: number;
+  defenseScore: number;
+}
+
+export interface TakeoverWindow {
+  open: boolean;
+  reason: string | null;
+  minBid: number;
+  value: number;
+  /** Når vernet for ny eier slutter */
+  from: string | null;
+  defenseNow: number;
+  attackMin: number;
+}
+
+export interface TakeoverLast {
+  status: "overtatt" | "avverget";
+  attacker: string;
+  bid: number;
+  attack: number;
+  defense: number;
+  resolvedAt: string;
+  mineAttack: boolean;
+  mineOwner: boolean;
 }
 
 export interface CompanyControl {
@@ -88,6 +128,8 @@ export interface CompanyControl {
 
 export interface WorldStatus {
   companies: Company[];
+  /** Bryteren for overtakelser (B-335) */
+  takeoversOn: boolean;
   treasury: TreasuryStatus;
   /** Utbyttet fra datterverkene (B-304): anslag per ekte dag nå, betalt for i går, og i alt */
   dividend: { perDay: number; fullPerDay: number; yesterday: number | null; total: number };
@@ -154,6 +196,102 @@ export function parseControl(r: Row | null | undefined): CompanyControl | null {
   };
 }
 
+export function parseTakeover(r: Row | null | undefined): Takeover | null {
+  if (!r || typeof r !== "object") return null;
+  return {
+    id: num(r.id),
+    attacker: str(r.attacker) ?? "Ukjent",
+    mineAttack: r.mine_attack === true,
+    bid: num(r.bid),
+    defense: numOrNull(r.defense),
+    closesAt: String(r.closes_at),
+    attack: num(r.attack),
+    defenseScore: num(r.defense_score),
+  };
+}
+
+export function parseWindow(r: Row | null | undefined): TakeoverWindow | null {
+  if (!r || typeof r !== "object") return null;
+  return {
+    open: r.open === true,
+    reason: str(r.reason),
+    minBid: num(r.min_bid),
+    value: num(r.value),
+    from: str(r.from),
+    defenseNow: num(r.defense_now),
+    attackMin: num(r.attack_min),
+  };
+}
+
+export function parseTakeoverLast(r: Row | null | undefined): TakeoverLast | null {
+  if (!r || typeof r !== "object") return null;
+  return {
+    status: r.status === "overtatt" ? "overtatt" : "avverget",
+    attacker: str(r.attacker) ?? "Ukjent",
+    bid: num(r.bid),
+    attack: num(r.attack),
+    defense: num(r.defense),
+    resolvedAt: String(r.resolved_at),
+    mineAttack: r.mine_attack === true,
+    mineOwner: r.mine_owner === true,
+  };
+}
+
+type TakeoverResult = { ok: true } | { ok: false; reason: string };
+
+async function takeoverCall(fn: string, args: Record<string, unknown>): Promise<TakeoverResult> {
+  let r: Row | null;
+  try {
+    r = await rpc<Row>(fn, args);
+  } catch {
+    return { ok: false, reason: "nett" };
+  }
+  return r?.ok === true ? { ok: true } : { ok: false, reason: typeof r?.reason === "string" ? r.reason : "nett" };
+}
+
+/** Legg inn eller øk et bud på et selskap (B-335): betales fra konsernkassa med én gang */
+export function bidTakeover(company: number, amount: number): Promise<TakeoverResult> {
+  return takeoverCall("takeover_bid", { p_company: company, p_amount: Math.round(amount) });
+}
+
+/** Forsvar selskapet ditt med kapital fra kassa eller fondet (B-335) */
+export function defendTakeover(takeover: number, amount: number, source: "kasse" | "fond"): Promise<TakeoverResult> {
+  return takeoverCall("takeover_defend", { p_takeover: takeover, p_amount: Math.round(amount), p_source: source });
+}
+
+/**
+ * Beskjed i loggen når et forsøk der spilleren var angriper eller eier, er avgjort (B-335). Husker det siste den har
+ * skrevet om i `g.takeoverSeen` (tidspunktet).
+ */
+export function applyTakeoverNews(g: GameState, companies: Pick<Company, "name" | "takeoverLast">[]): number {
+  let n = 0;
+  for (const c of companies) {
+    const r = c.takeoverLast;
+    if (!r || !(r.mineAttack || r.mineOwner) || r.resolvedAt <= (g.takeoverSeen ?? "")) continue;
+    g.takeoverSeen = r.resolvedAt;
+    const name = c.name.toLowerCase();
+    const score = `(angrep ${Math.round(r.attack)} mot forsvar ${Math.round(r.defense)})`;
+    if (r.mineAttack)
+      log(
+        g,
+        r.status === "overtatt"
+          ? `Du har overtatt ${name} ${score}! Du eier det resten av konsesjonen.`
+          : `Forsøket på å overta ${name} ble avverget ${score}. ${fmtKr(Math.round(r.bid * 0.9))} er tilbake i konsernkassa.`,
+        r.status === "overtatt" ? "good" : "event",
+      );
+    else
+      log(
+        g,
+        r.status === "overtatt"
+          ? `${r.attacker} har overtatt ${name} ${score}. Du fikk ${fmtKr(Math.round(r.bid * 0.85))} i konsernkassa.`
+          : `Du avverget forsøket fra ${r.attacker} på å overta ${name} ${score}.`,
+        r.status === "overtatt" ? "bad" : "good",
+      );
+    n++;
+  }
+  return n;
+}
+
 export type InvestRefusal = "belop" | "eier" | "kasse" | "sperret" | "nett";
 
 export const INVEST_REFUSAL_TEXT: Record<InvestRefusal, string> = {
@@ -184,10 +322,14 @@ export async function investInCompany(
 }
 
 export async function fetchWorldStatus(): Promise<WorldStatus> {
-  const r = await rpc<{ companies?: Row[]; treasury?: Row; dividend?: Row; contribution?: Row; konsern?: Row }>(
-    "world_status",
-    {},
-  );
+  const r = await rpc<{
+    companies?: Row[];
+    treasury?: Row;
+    dividend?: Row;
+    contribution?: Row;
+    konsern?: Row;
+    takeovers_on?: boolean;
+  }>("world_status", {});
   const t = r?.treasury ?? {};
   const d = r?.dividend ?? {};
   const c = r?.contribution ?? {};
@@ -208,7 +350,11 @@ export async function fetchWorldStatus(): Promise<WorldStatus> {
       lastResult: parseResult(c.last_result as Row | null),
       region: isRegion(c.region) ? c.region : null,
       control: parseControl(c.control as Row | null),
+      takeover: parseTakeover(c.takeover as Row | null),
+      takeoverWindow: parseWindow(c.takeover_window as Row | null),
+      takeoverLast: parseTakeoverLast(c.takeover_last as Row | null),
     })),
+    takeoversOn: r?.takeovers_on === true,
     treasury: {
       balance: num(t.balance),
       limit: num(t.limit),
@@ -382,6 +528,10 @@ export function worldNews(g: GameState, companies: Company[], now = Date.now(), 
   return companies.some(
     (c) =>
       (c.lastResult?.id ?? 0) > (g.tenderSeen ?? 0) ||
-      (c.mine && (c.incomeYesterday ?? 0) > 0 && g.companyIncomeSeen?.[String(c.id)] !== day),
+      (c.mine && (c.incomeYesterday ?? 0) > 0 && g.companyIncomeSeen?.[String(c.id)] !== day) ||
+      // Et avgjort forsøk på å overta der spilleren var med (B-335)
+      (!!c.takeoverLast &&
+        (c.takeoverLast.mineAttack || c.takeoverLast.mineOwner) &&
+        c.takeoverLast.resolvedAt > (g.takeoverSeen ?? "")),
   );
 }

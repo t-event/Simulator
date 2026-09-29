@@ -61,7 +61,7 @@ import { resetServerClock, serverClockOffset, syncServerClock } from "./clock";
 import { realNow } from "../game/clock";
 import { applyKonsern, konsernDiffers, parseKonsern } from "./konsern";
 import { parseWorldMap } from "./worldMap";
-import { parseControl } from "./world";
+import { applyTakeoverNews, parseControl, parseTakeover, parseTakeoverLast, parseWindow } from "./world";
 import { konsernOptions, konsernReady } from "../game/konsern";
 import {
   applyCompanyIncome,
@@ -1745,6 +1745,46 @@ const main = async () => {
     const c = parseControl({ score: 130, parts: { eier: 30, aktivitet: "20" }, value: 4e8, invested: 0 })!;
     assert(c.score === 100 && c.parts.aktivitet === 20 && c.value === 4e8, "Kontrollen");
     assert(parseControl(null) === null, "uten eier");
+  });
+
+  await test("Overtakelser (B-335): forsøk, vindu og utfall tolkes, og loggen får beskjed én gang", () => {
+    const g = newGame(335);
+    const t = parseTakeover({
+      id: 7,
+      attacker: "Tom",
+      mine_attack: false,
+      bid: "6e8",
+      defense: null,
+      closes_at: "x",
+      attack: 75.3,
+      defense_score: 94.6,
+    })!;
+    assert(t.bid === 6e8 && t.attacker === "Tom" && t.defense === null && t.defenseScore === 94.6, "forsøket");
+    const w = parseWindow({
+      open: false,
+      reason: "vern",
+      min_bid: 4e8,
+      value: 4e8,
+      from: "2026-10-02",
+      defense_now: 54,
+      attack_min: 65,
+    })!;
+    assert(!w.open && w.reason === "vern" && w.minBid === 4e8 && w.attackMin === 65, "vinduet");
+    const last = parseTakeoverLast({
+      status: "overtatt",
+      attacker: "Tom",
+      bid: 9e8,
+      attack: 91.2,
+      defense: 54,
+      resolved_at: "2026-10-01T10:00:00Z",
+      mine_owner: true,
+    })!;
+    const companies = [{ name: "Skraplageret", takeoverLast: last }];
+    const before = g.log.length;
+    assert(applyTakeoverNews(g, companies) === 1 && g.log.length === before + 1, "beskjeden");
+    assert(g.log.at(-1)!.text.includes("Tom har overtatt skraplageret"), g.log.at(-1)!.text);
+    assert(applyTakeoverNews(g, companies) === 0, "to ganger");
+    assert(applyTakeoverNews(g, [{ name: "X", takeoverLast: { ...last, mineOwner: false } }]) === 0, "ikke med");
   });
 
   setSaveListener(null);

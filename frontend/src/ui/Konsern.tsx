@@ -780,7 +780,7 @@ export function KonsernPage({
     // Verdenskartet (B-333): alle konsernene i en oppdiktet verden
     { id: "kart", label: "Kart" },
     // Industrien rundt verket (B-227): skraplageret nå, flere selskaper, Kontroll og overtakelser senere (RETNING.md)
-    { id: "industri", label: "Industrien", badge: tender ? "Anbud" : undefined },
+    { id: "industri", label: "Industrien", badge: tender ? (tender.attacker ? "Angrep" : "Anbud") : undefined },
   ];
   return (
     <div className={`g-grid g-konsern-page is-konsern is-${tab}`}>
@@ -789,13 +789,25 @@ export function KonsernPage({
       </div>
       {tab === "oversikt" && tender && (
         <div className="g-col-wide g-konsern-tender-col">
-          <Callout tone="heat">
-            <strong>Anbud på {tender.name.toLowerCase()} er åpent</strong> til {fmtWhen(tender.closesAt)}. Eieren tjener
-            på {EARNS_FROM[tender.type]}.{" "}
-            <button className="g-link" onClick={() => setTab("industri")}>
-              Se anbudet
-            </button>
-          </Callout>
+          {tender.attacker ? (
+            <Callout tone="heat">
+              <strong>
+                {tender.attacker} prøver å overta {tender.name.toLowerCase()}
+              </strong>{" "}
+              – avgjøres {fmtWhen(tender.closesAt)}. Du kan forsvare deg med kapital fra kassa eller fondet.{" "}
+              <button className="g-link" onClick={() => setTab("industri")}>
+                Forsvar selskapet
+              </button>
+            </Callout>
+          ) : (
+            <Callout tone="heat">
+              <strong>Anbud på {tender.name.toLowerCase()} er åpent</strong> til {fmtWhen(tender.closesAt)}. Eieren
+              tjener på {EARNS_FROM[tender.type]}.{" "}
+              <button className="g-link" onClick={() => setTab("industri")}>
+                Se anbudet
+              </button>
+            </Callout>
+          )}
         </div>
       )}
       {tab === "oversikt" && <KonsernOverview g={g} act={act} onBuy={() => setTab("utvid")} />}

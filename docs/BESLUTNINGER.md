@@ -6081,3 +6081,26 @@ Beslutning (migrasjon `067_kontroll.sql`, `game/control.ts`, `dividendToTreasury
 - Testet som spiller i DO-blokker som rulles tilbake (Kontroll 53 → 68 etter 450 mill., avvisninger, uke-sperren,
   ikke-eier), og de faste tallene for splitten i `game/tests.ts`.
 Konto (B-149): krever konto – konsernkassa og selskapene er på serveren (regel 2, 3 og 7).
+
+## B-335 Overtakelser av strategiske selskaper, med bryteren av (K8) (2026-09-29)
+Status: gjelder (bygget, slått av)
+Endringslogg: nei – bryteren er av; oppføringen skrives når overtakelser slås på
+Bakgrunn: steg 4 i B-331/B-332. RETNING fase 4: testes grundig med få aktører før det slås på.
+Beslutning (migrasjon `068_overtakelser.sql`, `TAKEOVER`/`takeoverAttack`/`takeoverDefense` i `game/control.ts`,
+`bidTakeover`/`defendTakeover`/`applyTakeoverNews` i `net/world.ts`, `TakeoverSection` i `ui/Companies.tsx`):
+- Bare strategiske selskaper kan overtas (B-332). Tabellen `takeovers`; bud (`takeover_bid`) minst verdien, betalt fra
+  konsernkassa med én gang, offentlig; angriperen kan øke. Eieren forsvarer seg i 72 timer (`takeover_defend`) med
+  kapital fra kassa eller fondet; fondet teller av seg selv inntil verdien.
+- Utfallet (`resolve_takeovers`, fra `world_tick`), uten tilfeldighet: angrep = 60 × √(bud/V) × (0,5 + 0,5 × aktivitet)
+  + 2,5 per egne verk i regionen (høyst 10); forsvar = Kontroll + 40 × √((forsvar + fond, høyst V)/V); alt høyst 3 × V.
+  Overtatt: gammel eier får 85 % av budet, ny eier får resten av konsesjonen og investeringene. Avverget: angriperen
+  får 90 % tilbake. Forsvaret får 95 % tilbake, dit det kom fra. Mister eieren selskapet på annen måte, avbrytes
+  forsøket og alle får alt tilbake.
+- Vinduet (`takeover_window`): ny eier beskyttet 3 dager, bud senest 5 dager før konsesjonen går ut, 14 dagers pause
+  etter et forsøk, ett forsøk per angriper om gangen.
+- Appen: forsøket vises på selskapskortet for alle (angrep mot forsvar nå); eieren får forsvarsfeltet, beskjed på
+  Konsern → Oversikt og merket «Angrep» på Industrien, og beskjed i loggen om utfallet (`g.takeoverSeen`).
+- Bryteren `config.world.takeover.enabled` = 0: da returnerer `takeover_window` null, `takeover_bid` sier «av», og appen
+  viser ingenting. Testet hele gangen i en DO-blokk med bryteren på (rullet tilbake): avverget 75,3 mot 94,6 og overtatt
+  91,2 mot 54,0, med riktige beløp og eierrader.
+Konto (B-149): krever konto (regel 3 og 7).

@@ -370,6 +370,11 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `world_status.dividend.per_day` er etter politikken, `full_per_day` før – konsernverdien bruker det fulle. Kontrollen
   regnes av `company_control` hver gang (ikke lagret); investeringer står i `companies.invested` og følger selskapet.
   Tallene i `config.world.control` og `config.world.policy`. Fondet skal aldri kunne brukes til nye verk eller angrep.
+- **Overtakelser** (B-335, 068): `takeovers`, avgjort «lat» av `resolve_takeovers` i `world_tick`. Formlene står i
+  `takeover_attack_of`/`takeover_defense_of` og speiles i `game/control.ts` (faste tall i testen). Bryteren
+  `config.world.takeover.enabled` – av til eieren sier ja. Test med bryteren på i en DO-blokk som rulles tilbake (flytt
+  `company_owners.from_at` bakover for vernet, `closes_at` bakover for utfallet). Et nytt selskapsbytte må ende eierens
+  rad i `company_owners` (`until_at = now()`), ellers regner `pay_company_income` feil eier.
 - **Aktivitetskravet** (B-327): `activity_factor(uid, dag)` (064) ganges inn i utbyttet og i gulvet i bidraget. Ny inntekt
   i ekte tid som ikke skal gå til forlatte kontoer, bruker den. Tallene i `config.world.activity`.
 - **Mesterskapet «Konsernledelse»** (B-328) gir lavere administrasjon hjemme (`masteryFactor(g, "datterverk")` i posten

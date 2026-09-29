@@ -19,7 +19,15 @@ import {
   upgradeOptions,
 } from "./actions";
 import { MASTERY, MASTERY_IDS, masteryCost, masteryEffect, masteryOpen } from "./mastery";
-import { controlAdvice, controlWord, policyLockedUntil, policySplit, renewalBonus } from "./control";
+import {
+  controlAdvice,
+  controlWord,
+  policyLockedUntil,
+  policySplit,
+  renewalBonus,
+  takeoverAttack,
+  takeoverDefense,
+} from "./control";
 import {
   ACHIEVEMENT_BY_ID,
   ACHIEVEMENTS,
@@ -3390,6 +3398,21 @@ test("Utbyttepolitikken og Kontroll (B-334): samme tall som serveren, fondet er 
   const now = Date.now();
   assert(policyLockedUntil(null, now) === null && policyLockedUntil(now - 8 * 86_400_000, now) === null, "fritt");
   assert(policyLockedUntil(now - 86_400_000, now) === now + 6 * 86_400_000, "låst i en uke");
+});
+
+test("Overtakelser (B-335): angrep og forsvar som på serveren, med tak", () => {
+  const V = 436_459_811;
+  const near = (a: number, b: number) => Math.abs(a - b) < 0.1;
+  // Tallene fra SQL-testen: bud 600 mill., full aktivitet, 2 verk i regionen mot Kontroll 54 og 450 mill. i forsvar
+  assert(near(takeoverAttack(600e6, V, 1, 2), 75.35), `angrep ${takeoverAttack(600e6, V, 1, 2)}`);
+  assert(near(takeoverDefense(54, 450e6, 0, V), 94.62), `forsvar ${takeoverDefense(54, 450e6, 0, V)}`);
+  assert(near(takeoverAttack(V, V, 1, 2), 65), "minstebudet");
+  // Taket: budet teller høyst 3 × V, regionen høyst 10, fondet høyst V
+  assert(near(takeoverAttack(100 * V, V, 1, 0), 60 * Math.sqrt(3)), "tak på budet");
+  assert(near(takeoverAttack(V, V, 1, 20) - takeoverAttack(V, V, 1, 0), 10), "tak på regionen");
+  assert(near(takeoverDefense(50, 0, 10 * V, V), 90), "tak på fondet");
+  // En passiv angriper har halv styrke
+  assert(near(takeoverAttack(V, V, 0, 0), 30), "passiv angriper");
 });
 
 if (failed) {

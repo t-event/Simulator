@@ -6762,3 +6762,24 @@ button.g-prod-row:hover {
   border-color: var(--accent);
   background: var(--accent-tint);
 }
+
+/* Overtakelser (B-335) */
+.g-takeover {
+  margin: var(--sp-2) 0;
+}
+
+.g-takeover-box {
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--heat-border);
+  border-radius: var(--r-md);
+  background: var(--heat-tint);
+}
+
+.g-takeover-box.is-mine {
+  border-color: var(--critical-border);
+  background: var(--critical-tint);
+}
+
+.g-takeover select {
+  min-height: 44px;
+}

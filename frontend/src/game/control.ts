@@ -81,3 +81,55 @@ export function controlAdvice(parts: Record<string, number>): string | null {
 export function renewalBonus(score: number): number {
   return Math.min(0.2, Math.max(0, score) * 0.002);
 }
+
+/**
+ * Overtakelser (B-335, `068_overtakelser.sql`): bare strategiske selskaper, bud minst verdien, 72 timer forsvar, uten
+ * tilfeldighet. Formlene speiler `takeover_attack_of` og `takeover_defense_of`.
+ */
+export const TAKEOVER = {
+  attackW: 60,
+  defenseW: 40,
+  cap: 3,
+  fundCap: 1,
+  regionPer: 2.5,
+  regionMax: 10,
+  toOwner: 0.85,
+  failRefund: 0.9,
+  defenseRefund: 0.95,
+  defenseHours: 72,
+};
+
+/** Angrepet: 60 × √(bud / V) × (0,5 + 0,5 × aktivitet) + 2,5 per egne verk i regionen (høyst 10); budet høyst 3 × V */
+export function takeoverAttack(bid: number, value: number, activity: number, regionPlants: number): number {
+  const t = TAKEOVER;
+  const v = Math.max(1, value);
+  const a = Math.min(1, Math.max(0, activity));
+  return (
+    t.attackW * Math.sqrt(Math.min(bid, t.cap * v) / v) * (0.5 + 0.5 * a) +
+    Math.min(t.regionMax, t.regionPer * regionPlants)
+  );
+}
+
+/** Forsvaret: Kontroll + 40 × √((forsvar + fond, fondet høyst V) / V); alt høyst 3 × V */
+export function takeoverDefense(control: number, defense: number, fund: number, value: number): number {
+  const t = TAKEOVER;
+  const v = Math.max(1, value);
+  return (
+    control + t.defenseW * Math.sqrt(Math.min(t.cap * v, defense + Math.min(Math.max(0, fund), t.fundCap * v)) / v)
+  );
+}
+
+/** Hvorfor et bud ikke kan legges inn nå, med vanlige ord */
+export const TAKEOVER_REASON: Record<string, string> = {
+  pagar: "Noen prøver allerede å overta selskapet.",
+  ett: "Du har allerede et forsøk på gang – ett om gangen.",
+  vern: "Ny eier er beskyttet de 3 første dagene.",
+  sent: "Konsesjonen går snart ut – vent på det nye anbudet.",
+  pause: "Selskapet ble forsøkt overtatt nylig – 14 dagers pause.",
+  belop: "Budet må være minst verdien av selskapet.",
+  kasse: "Det er ikke nok i konsernkassa.",
+  eier: "Det går ikke med dette selskapet.",
+  av: "Overtakelser er ikke slått på ennå.",
+  sperret: "Kontoen er sperret mens topplista sjekker den.",
+  nett: "Fikk ikke kontakt med serveren. Prøv igjen om litt.",
+};

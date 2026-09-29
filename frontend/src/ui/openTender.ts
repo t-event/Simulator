@@ -3,7 +3,13 @@ import { fetchWorldStatus, type Company, type WorldStatus } from "../net/world";
 import { getSession, onSessionChange } from "../net/supabase";
 
 /** Et åpent anbud spilleren ikke har bydd på: når det stenger, og hvilket selskap det gjelder (B-253) */
-export type OpenTender = { closesAt: string; name: string; type: Company["type"] };
+export type OpenTender = {
+  closesAt: string;
+  name: string;
+  type: Company["type"];
+  /** Noen prøver å overta et selskap du eier (B-335): angriperens kallenavn. Går foran anbudene */
+  attacker?: string;
+};
 
 // Selskapskortene sier fra når et bud er lagt inn eller trukket, så merket i menyen følger med med én gang
 const listeners = new Set<() => void>();
@@ -52,10 +58,18 @@ export function useOpenTender(
           const c = w.companies
             .filter((x) => x.tender && x.tender.myBid === null && Date.parse(x.tender.closesAt) > Date.now())
             .sort((a, b) => Date.parse(a.tender!.closesAt) - Date.parse(b.tender!.closesAt))[0];
+          // Et forsøk på å overta et selskap du eier, går foran (B-335)
+          const hit = w.companies.find((x) => x.mine && x.takeover && !x.takeover.mineAttack);
           if (!alive) return;
           lastWorld = w;
           for (const l of worldListeners) l();
-          setOpen(c?.tender ? { closesAt: c.tender.closesAt, name: c.name, type: c.type } : null);
+          setOpen(
+            hit?.takeover
+              ? { closesAt: hit.takeover.closesAt, name: hit.name, type: hit.type, attacker: hit.takeover.attacker }
+              : c?.tender
+                ? { closesAt: c.tender.closesAt, name: c.name, type: c.type }
+                : null,
+          );
           resultRef.current?.(w);
         },
         () => {},
