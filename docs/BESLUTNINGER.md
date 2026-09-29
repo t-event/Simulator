@@ -5752,3 +5752,22 @@ Testet: ti tilfeller i SQL mot en kopi av funksjonen (juks med 12 min, 2 t og 10
 kompleks eller tre trinn godtas; kjent prosjekt for tidlig fanges selv etter 18 t; ærlige tilfeller gir null; uten
 tidspunkt streng som før), `save_game` som spilleren i en transaksjon som rulles tilbake, sikkerhetsrådene uendret.
 
+## B-316 Neste rammeavtale i «Produksjon nå» (2026-09-29)
+Status: gjelder
+Bakgrunn: en spiller ville se i kortet «Produksjon nå» hvor lenge det er til neste rammeavtale starter produksjon, så
+man ser om det er tid til en ordre imellom. Ukeleveransen legges i ordrekøen ved starten av døgnet `nextDay` (B-163),
+men det sto ingen steder når det skjer.
+Beslutning:
+- En egen rad «Avtale» nederst i «Produksjon nå», bare når en aktiv rammeavtale har uker igjen (gradvis synlighet):
+  «om 5 døgn 17 t» (tid til neste ukeleveranse legges i køen), og under «4 døgn 2 t ledig · køen 1 døgn 15 t».
+  Ledig tid er tida til neste uke minus tida køen tar; er køen lengre, står det «ingen ledig tid». Står verket, står
+  det «verket står». Kunden, tonnene og kvaliteten står i `title`.
+- Køen regnes med det verket faktisk har laget de siste døgnene (`realisticDailyT`, som køsjekken i B-240), ikke
+  kapasiteten. Avtaler på et produkt verket skal slutte med, gir ingen nye uker og telles ikke.
+- `nextAgreementWeek` og `queueMinutes` i `engine.ts`, `fmtDuration` i `ui/format.ts`. Raden bruker det faste
+  rutenettet i lista (B-238): to linjer som aldri brytes, så kortet ikke hopper; ledig tid står først, så det er køen
+  som kortes på smale skjermer.
+Konto (B-149): nei – det er en visning i eget spill.
+Testet: `npm test` (nærmeste aktive avtale, uker som venter gir 0, produktet verket slutter med telles ikke, verk som
+står gir uendelig kø, `fmtDuration`), tsc, lint, Playwright på 320 og 390 px (ingen overflyt, raden brytes ikke).
+

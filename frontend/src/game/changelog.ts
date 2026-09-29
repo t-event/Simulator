@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 316,
+    date: "2026-09-29",
+    title: "Se når neste rammeavtale starter",
+    items: [
+      "«Produksjon nå» viser hvor lenge det er til neste uke fra en rammeavtale kommer i ordrekøen, hvor lenge køen varer og hvor mye ledig tid det er imellom – så du ser om du rekker en ordre til før avtalen.",
+    ],
+  },
+  {
     b: 314,
     date: "2026-09-29",
     title: "Byggetida i konsernet går etter serverens klokke",

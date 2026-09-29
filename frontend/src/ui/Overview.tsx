@@ -5,12 +5,20 @@ import { ProductionCard } from "./ProductionCard";
 import { RecipeCard } from "./Recipe";
 import { auto, automationUnlocked } from "../game/research";
 import { GRADE_IDS, GRADES, SCRAP_TYPES, STAGES } from "../game/data";
-import { currentOrder, furnaceOrder, recipeEstimate, scrapAlert, SEQUENCE_WAIT_MIN } from "../game/engine";
+import {
+  currentOrder,
+  furnaceOrder,
+  nextAgreementWeek,
+  queueMinutes,
+  recipeEstimate,
+  scrapAlert,
+  SEQUENCE_WAIT_MIN,
+} from "../game/engine";
 import { castingType, furnaceGrade, gradeRecipe, gradesInUse, shiftStart, type PlantStats } from "../game/plant";
 import type { Contract, CostCategory, DayFinance, GameState, GradeId, IncomeCategory } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { AnalysisLine, Bar, Card, GradeChips, Stat } from "./common";
-import { fmtClock, fmtKr, fmtNum, fmtPct, fmtT } from "./format";
+import { fmtClock, fmtDuration, fmtKr, fmtNum, fmtPct, fmtT } from "./format";
 import { activeMissions, missionProgress } from "../game/missions";
 import { PlantScene } from "./PlantScene";
 import { SceneBubbles } from "./SceneBubbles";
@@ -662,6 +670,10 @@ function ProductionNow({
     split || (many && auto(g, "splitGrades"))
       ? g.furnaces.map((_, i) => ({ who: `Ovn ${i + 1}`, grade: furnaceGrade(g, i), o: furnaceOrder(g, i) }))
       : [{ who: many ? "Alle ovner" : "Ovnen", grade: g.targetGrade, o: order }];
+  // Neste ukeleveranse fra en rammeavtale og hvor lenge køen varer (B-316): så spilleren ser om det er tid til en
+  // ordre imellom. Vises bare når en avtale har uker igjen (gradvis synlighet)
+  const nextWeek = nextAgreementWeek(g);
+  const queueMin = nextWeek ? queueMinutes(g, stats) : 0;
   const gradeOptions = (current: GradeId | null, skip?: GradeId) =>
     GRADE_IDS.filter((id) => id !== skip && (GRADES[id].minStage <= g.stage || id === current)).map((id) => (
       <option key={id} value={id}>
@@ -681,6 +693,24 @@ function ProductionNow({
             </span>
           </li>
         ))}
+        {nextWeek && (
+          <li
+            title={`${nextWeek.agreement.customer}: ${fmtT(nextWeek.agreement.weeklyT)} ${GRADES[nextWeek.agreement.grade].name.toLowerCase()}`}
+          >
+            <span className="g-prod-who">Avtale</span>
+            <strong className="g-prod-grade">
+              {nextWeek.inMin > 0 ? `om ${fmtDuration(nextWeek.inMin)}` : "venter på oppstart"}
+            </strong>
+            {/* Ledig tid først: kortes linja, er det køen som forsvinner (B-238) */}
+            <span className="g-prod-to">
+              {!Number.isFinite(queueMin)
+                ? "verket står"
+                : nextWeek.inMin > queueMin
+                  ? `${fmtDuration(nextWeek.inMin - queueMin)} ledig · køen ${fmtDuration(queueMin)}`
+                  : `ingen ledig tid · køen ${fmtDuration(queueMin)}`}
+            </span>
+          </li>
+        )}
       </ul>
       {queueRules ? (
         <div className="g-queue-lock">
