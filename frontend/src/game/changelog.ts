@@ -15,6 +15,12 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 343,
+    date: "2026-09-29",
+    title: "Raskere Industrien og toppliste",
+    items: ["Industrien og topplista laster raskere. Før kunne de bruke flere sekunder når mange spilte samtidig."],
+  },
+  {
     b: 342,
     date: "2026-09-29",
     title: "Riktig tall på Konsern",

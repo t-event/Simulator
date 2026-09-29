@@ -6235,3 +6235,19 @@ Beslutning (`worthwhileOptions` i `game/konsern.ts`):
 - Alt annet teller som før: det som ikke er sperret og som konsernkassa (eller kassa, for de felles funksjonene) rekker til.
 Testet: kontoens konsern kjørt lokalt (3 → 0), ny test i `npm test`, `balance.ts`.
 Konto (B-149): uendret (datterverk krever konto).
+
+## B-343 Verdensoppdateringen uten kø: høyst én gang per 30 s, aldri vente (2026-09-29)
+Status: gjelder
+Bakgrunn: eieren: «Tror databasen begynner å bli treg. Må vente iblandt før industrien siden vises. Det samme skjer med
+topplista.» Målt: `world_status` hadde 6 414 kall med snitt 0,24 s, men opptil 7,7 s; lagringen hadde topper på 7,4 s.
+Hvert kall kjørte `world_tick()` (anbud, overtakelser, inntekt, utbytte, bidrag), som ventet på en lås
+(`pg_advisory_xact_lock`). Med flere apper åpne sto kallene i kø bak hverandre. Hvert steg alene tok bare 13–94 ms.
+Beslutning (migrasjon `072_world_tick_uten_ko.sql`):
+- `world_tick` kjøres høyst én gang per 30 sekunder (`world_tick_state.last_at`, `config.world.tick_seconds`), og bruker
+  `pg_try_advisory_xact_lock`: holder en annen app på, hopper kallet over i stedet for å vente. Arbeidet er uendret.
+- Fristene i verden er i timer og dager, så et anbud eller en overtakelse avgjøres høyst 30 s senere enn før.
+- Målt etterpå som spiller: `world_status` 26–65 ms.
+- Topplista «Konsernverdi» tar 0,25–0,4 s (den regner konsernverdien for hver spiller); det står som det er til det
+  trengs – den ventet mest på den samme køen.
+Endringslogg: ja (raskere Industrien og toppliste).
+Konto (B-149): uendret.

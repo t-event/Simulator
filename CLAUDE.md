@@ -445,7 +445,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `company_estimate` i 042/043). Verkstedet teller kroner vedlikehold (`snapshots.maint_kr` → `production_days.gained_maint`),
   ikke tonn, og `company_fee` er da en andel. Et selskap med `companies.active = false` får ikke anbud, inntekt eller plass i `world_status`. Varsler om avgjorte
   anbud gis med `applyTenderResults` (i rekkefølge etter anbudet), ikke ett og ett selskap.
-- **Anbud og inntekt** (B-189) avgjøres «lat» av `world_status()` → `world_tick()`. Test livsløpet med midlertidige
+- **Anbud og inntekt** (B-189) avgjøres «lat» av `world_status()` → `world_tick()`. `world_tick` kjøres høyst én gang
+  per 30 s og hopper over når en annen holder på (B-343, 072) – ikke gjør låsen ventende igjen, da står appene i kø.
+  I tester som skal avgjøre noe: `update world_tick_state set last_at = 'epoch'` først. Test livsløpet med midlertidige
   testkontoer i en DO-blokk som ender med `raise exception`; sett `closes_at` bakover for å avgjøre et anbud.
 - **Sesongpynt** (B-287): pynt med `season: N` kan bare skaffes i sesong N. Når en ny sesong startes (`start_season`), må
   pynten for den legges inn i `COSMETICS` (butikk og stigetrinn 10–50) – ellers har sesongen ingen egen pynt.
