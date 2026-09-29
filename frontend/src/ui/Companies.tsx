@@ -24,7 +24,7 @@ import {
 import { AccountFeaturesCard } from "./Account";
 import { Bar, Card } from "./common";
 import { Icon } from "./icons";
-import { fmtKr } from "./format";
+import { fmtKr, fmtT } from "./format";
 import { buzz } from "./haptics";
 
 function useSession() {
@@ -308,7 +308,8 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
           <div className="g-treasury-balance">
             <span className="g-treasury-sum">{fmtKr(tr.balance)}</span>
             <span className="g-muted g-small-text">
-              Bud betales herfra. Utbyttet fra datterverkene og inntekten fra selskapene du eier, kommer hit.
+              Bud betales herfra. Bidraget fra hovedverket, utbyttet fra datterverkene og inntekten fra selskapene du
+              eier, kommer hit.
             </span>
           </div>
           {/* Utbyttet fra datterverkene i ekte tid (B-304): regnes av serveren én gang per dag */}
@@ -320,6 +321,19 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
                 : ""}
               {world.dividend.total > 0 ? ` · ${fmtKr(world.dividend.total)} i alt` : ""}. Betales hver ekte dag,
               uansett spillfart.
+            </p>
+          )}
+          {/* Hovedverkets konsernbidrag (B-318): halvparten av driftsresultatet i én normal spilldag per ekte dag */}
+          {(world.contribution.perDay > 0 || world.contribution.total > 0) && (
+            <p className="g-small-text g-treasury-dividend">
+              Bidrag fra hovedverket: <strong>ca. {fmtKr(world.contribution.perDay)} per dag</strong>
+              {world.contribution.yesterday !== null && world.contribution.yesterday > 0
+                ? ` · ${fmtKr(world.contribution.yesterday)} i går`
+                : ""}
+              {world.contribution.total > 0 ? ` · ${fmtKr(world.contribution.total)} i alt` : ""}. Halvparten av det
+              verket tjener på en vanlig spilldag{" "}
+              {`(${fmtT(world.contribution.normalT)} à ${fmtKr(world.contribution.margin)} per tonn)`}, uansett
+              spillfart. Dager uten spill gir mindre, aldri under 30 %.
             </p>
           )}
           <h3 className="g-subhead">Flytt penger fra verket</h3>

@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 318,
+    date: "2026-09-29",
+    title: "Hovedverket betaler til konsernkassa",
+    items: [
+      "Hovedverket betaler nå et bidrag til konsernkassa hver dag, av seg selv: halvparten av det verket tjener på en vanlig spilldag. Et godt drevet verk gir mye mer enn et dårlig drevet, men spillfarten betyr ingenting. Dager uten spill gir mindre, aldri under 30 %. Du ser bidraget på kortet «Konsernkassa» under Konsern → Industrien.",
+    ],
+  },
+  {
     b: 316,
     date: "2026-09-29",
     title: "Se når neste rammeavtale starter",

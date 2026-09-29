@@ -883,11 +883,12 @@ export function GameApp() {
   // datterverkene (B-304) én gang i døgnet; act er stabil, og hvert anbud gir én gang, i rekkefølge (B-253)
   const tender = useOpenTender(!!g?.konsern?.unlocked, (w) => {
     const yesterday = w.dividend.yesterday ?? 0;
-    if (g && worldNews(g, w.companies, Date.now(), yesterday))
+    const contribution = w.contribution.yesterday ?? 0;
+    if (g && worldNews(g, w.companies, Date.now(), yesterday + contribution))
       act((gg) => {
         applyTenderResults(gg, w.companies);
         applyCompanyIncome(gg, w.companies);
-        applyDividendNews(gg, yesterday);
+        applyDividendNews(gg, yesterday, Date.now(), contribution);
       });
   });
   const appRef = useRef<HTMLDivElement>(null);

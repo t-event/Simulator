@@ -5791,3 +5791,35 @@ feilrettet gir nå null (059 ga tre rettinger); juks med trinn, med utbygging og
 fanges; et kjent prosjekt fjernet for tidlig fanges etter 20 t; ferdig utbygging og ventende modernisering gir null;
 13 t uten nett med tre trinn godtas. Lagringen går som før etter endringen, sikkerhetsrådene uendret.
 
+## B-318 Hovedverkets konsernbidrag i ekte tid, steg 1 (2026-09-29)
+Status: gjelder (bygger på analysen i B-313, `docs/KONSERNBIDRAG.md`)
+Bakgrunn: hovedverket tjener i spilltid, konsernet lever i ekte tid, og eneste sluse var innskuddet på 10 mill. per
+ekte døgn. Eierens svar på spørsmålene i KONSERNBIDRAG.md avsnitt 14 (29.9):
+1. Bidraget skal være **automatisk**, og innskuddsknappen skal bort (steg 2, når denne appen er ute).
+2. **Gulv på 30 %** på dager uten spill.
+3. **Fast 50 %** nå; valg av utbyttepolitikk kan komme senere.
+4. **Demp toppen:** kvadratrot over 30 mill. per dag.
+5. Konsernverdien på topplista skal bli **serverkjent** (verk + konsernkasse − lån) – eget steg.
+6. Lokal kasse: eieren var usikker («noen har ingenting å bruke penger på»). Taket på 10 mrd. (B-306) betaler alt over
+   ut til eierne, så kassa kan ikke vokse evig. Kassa røres derfor ikke; den er driftskapital.
+Beslutning (`supabase/061_konsernbidrag.sql`):
+- Serveren betaler hovedverkets bidrag inn i konsernkassa én gang per ekte (UTC-)dag, fra og med 30.9, «lat» fra
+  `world_tick` som utbyttet (høyst 14 dager tilbake). Bare med åpnet konsern, ikke for flaggede kontoer.
+- Full dag = 50 % × tonn i en normal spilldag (`meter_normal_rate`, samme måler som skraplageret) × driftsresultat per
+  tonn over de siste 30 spilldøgn i lagringen (kontrakt + spot − skrap, energi, forbruk, lønn, vedlikehold, bøter,
+  faste, nett; mellom 0 og 3 000 kr/t). Investering, konsern, renter og «annet» er ikke med.
+- Aktivitet = andelen av en normal spilldag som ble spilt (`production_days`), aldri under 0,9 × gårsdagens og aldri
+  under 0,3. Bidrag = full dag × aktivitet, dempet over 30 mill.: 30 mill. × (x / 30 mill.)^0,5.
+- Tabell `contributions`, post `bidrag` i boka for konsernkassa, tallene i `config.world.contribution`.
+- `world_status` gir `contribution` (en full dag nå, margin, normal dag, siste aktivitet, i går, i alt). Appen viser
+  det på kortet «Konsernkassa» under Konsern → Industrien, og beskjeden om utbyttet sier også hva hovedverket betalte.
+  Ingen speiling i appen: tallet kommer bare fra serveren.
+- Tall på ekte spill (tørrkjøring 29.9): de fire beste verkene når margintaket og får 37–38 mill. per dag etter
+  dempingen, et middels verk 16–23 mill., et verk med negativ margin 0. Et fullt konsern med godt drevet hovedverk får
+  da ca. 75 mill. per dag (bidrag + utbytte); én milliard tar ca. to uker på toppen (B-311 siktet på en måned).
+Konto (B-149): ja – som konsernkassa (regel 2 og 7: serveren, ekte tid).
+Testet: migrasjonen i en blokk som ble rullet tilbake (tre dager betalt for 11 konsern, 30 poster i boka, nytt kall
+betaler ikke igjen, `world_status` som spiller gir tallene), `npm test` (lesing av world_status, beskjeden alene og
+sammen med utbyttet, én per dag), tsc, lint, Playwright på 320 og 390 px med falsk tjeneste (kortet, beskjeden, ingen
+overflyt). Sikkerhetsrådene uendret.
+
