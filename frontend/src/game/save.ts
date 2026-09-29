@@ -12,7 +12,7 @@ import { paidOutTotal } from "./reserve";
 
 /** Forskning som ble lagt til med B-054; de andre automatikk-forskningene fantes fra før */
 const NEW_AUTOMATION = ["salgsrutiner", "ordreplan", "innkjop", "bemanning"];
-import { SAVE_VERSION } from "./engine";
+import { compactLots, SAVE_VERSION } from "./engine";
 import type { GameState } from "./types";
 
 const KEY = "stalverk-spill-v1";
@@ -316,6 +316,8 @@ export function migrate(g: GameState): GameState {
   for (const w of g.workers)
     if (w.apprenticeUntil === undefined && w.name.endsWith(" (lærling)"))
       w.apprenticeUntil = Math.max(nowDay + 3, (w.hiredDay ?? 0) + 30);
+  // Tusenvis av partier på lageret (B-353) slås sammen med én gang
+  compactLots(g);
   // Prestasjoner (B-151) man alt har klart, vises med én gang, ikke først etter en spilltime
   checkAchievements(g);
   // Dagens oppdrag «verdi» (B-352) måler nå verdien med utbetalt til eierne. Et oppdrag startet før det får utbetalingen

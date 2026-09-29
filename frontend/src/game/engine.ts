@@ -1267,6 +1267,44 @@ export function addLot(g: GameState, lot: Omit<Lot, "id">): void {
   g.lots.push({ ...lot, id: g.nextLotId++ });
 }
 
+/**
+ * Slår sammen like partier på lageret (B-353): samme vare, samme kvaliteter de holder og det samme som er målt
+ * (`lotKey`). Før ble bare partier fra samme døgn slått sammen, og noen hadde over 1 000 partier armering liggende –
+ * 300 kB i hver lagring på nett. Snittet av partier som holder de samme kvalitetene, holder dem også. Partier fra i går
+ * og i dag står for seg, så salget etter ett døgn (autoSpot) virker som før. Det eldste døgnet beholdes.
+ */
+export function compactLots(g: GameState): void {
+  if (g.lots.length < 20) return;
+  const today = day(g);
+  const first = new Map<string, Lot>();
+  const out: Lot[] = [];
+  const r6 = (v: number) => Math.round(v * 1e6) / 1e6;
+  for (const lot of g.lots) {
+    if (lot.madeDay >= today - 1) {
+      out.push(lot);
+      continue;
+    }
+    const key = lotKey(lot);
+    const into = first.get(key);
+    if (!into) {
+      first.set(key, lot);
+      out.push(lot);
+      continue;
+    }
+    const total = into.t + lot.t;
+    const mix = (a: Analysis, b: Analysis): Analysis => ({
+      c: r6((a.c * into.t + b.c * lot.t) / total),
+      p: r6((a.p * into.t + b.p * lot.t) / total),
+      tramp: r6((a.tramp * into.t + b.tramp * lot.t) / total),
+    });
+    into.analysis = mix(into.analysis, lot.analysis);
+    into.known = mix(into.known, lot.known);
+    into.t = total;
+    into.madeDay = Math.min(into.madeDay, lot.madeDay);
+  }
+  g.lots = out;
+}
+
 function addReturnScrap(g: GameState, t: number, analysis: Analysis, stats: PlantStats): void {
   const free = Math.max(0, stats.yardT - stats.yardUsed);
   const amount = Math.min(free, t);
@@ -3299,6 +3337,8 @@ function walk(g: GameState, value: number, mean: number, pull: number, sd: numbe
 }
 
 function onDay(g: GameState, stats: PlantStats): void {
+  // Like partier på lageret slås sammen (B-353)
+  compactLots(g);
   const today = day(g);
   // Effekttariff for døgnet som er slutt: betales for den høyeste effekten verket trakk
   if (g.today.peakMW) addCost(g, "nett", g.today.peakMW * PEAK_RATE_PER_MW);

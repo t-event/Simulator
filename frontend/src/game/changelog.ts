@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 353,
+    date: "2026-09-29",
+    title: "Raskere Industrien, kart, toppliste og Skiftrapport",
+    items: [
+      "Spillet lagrer mindre og sjeldnere på nett. Databasen ble overbelastet av store lagringer, og da tok Industrien, kartet, topplista og Skiftrapporten lang tid.",
+      "Like partier på ferdigvarelageret slås sammen, så lageret er ryddigere. Tonn og kvaliteter er de samme.",
+    ],
+  },
+  {
     b: 352,
     date: "2026-09-29",
     title: "Dagens oppdrag «Øk konsernverdien» går an igjen",

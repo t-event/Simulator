@@ -70,6 +70,7 @@ import {
   newGame,
   oftenSick,
   creditLimit,
+  compactLots,
   ordersToMake,
 } from "./engine";
 import { logTopic, showToast, unseenCount } from "./inbox";
@@ -179,6 +180,7 @@ import {
   day,
   castingType,
   computePlantStats,
+  satisfiedGrades,
   gradeRecipe,
   liftMorale,
   moraleNormal,
@@ -3641,6 +3643,41 @@ test("Dagens oppdrag «verdi» (B-352): utbetalt til eierne teller, så det kan 
   assert(
     missionProgress(g, g.daily.missions[0]) === 0,
     `gammelt oppdrag gjort av seg selv (${missionProgress(g, g.daily.missions[0])})`,
+  );
+});
+
+test("Like partier på lageret slås sammen (B-353): færre partier, samme tonn og samme kvaliteter", () => {
+  const g = newGame(353);
+  g.minute = 400 * MIN_PER_DAY;
+  g.lots = [];
+  const a = { c: 0.2, p: 0.01, tramp: 0.1 };
+  const measured = { c: true, p: true, tramp: true };
+  for (let i = 0; i < 300; i++) {
+    const x = { c: a.c + (i % 7) * 0.001, p: a.p, tramp: a.tramp };
+    g.lots.push({
+      id: i + 1,
+      product: "armering",
+      t: 10,
+      analysis: x,
+      known: x,
+      measured,
+      second: false,
+      madeDay: 100 + i,
+    });
+  }
+  // Et parti fra i dag og et annenrangs parti skal stå for seg
+  g.lots.push({ id: 900, product: "armering", t: 5, analysis: a, known: a, measured, second: false, madeDay: 401 });
+  g.lots.push({ id: 901, product: "armering", t: 5, analysis: a, known: a, measured, second: true, madeDay: 150 });
+  const before = g.lots.reduce((s, l) => s + l.t, 0);
+  const grades = satisfiedGrades(g.lots[0].known).join(",");
+  compactLots(g);
+  const after = g.lots.reduce((s, l) => s + l.t, 0);
+  assert(g.lots.length === 3, `partier etter sammenslåing: ${g.lots.length}`);
+  assert(Math.abs(before - after) < 1e-6, "tonn forsvant");
+  assert(satisfiedGrades(g.lots[0].known).join(",") === grades, "kvalitetene endret seg");
+  assert(
+    g.lots[0].madeDay === 100 && g.lots.some((l) => l.id === 900) && g.lots.some((l) => l.second),
+    "feil parti slått sammen",
   );
 });
 
