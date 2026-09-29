@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 265 – 2026-09-29: Svar 3 rettet – eieren kan alltid miste selskapet (B-337)
+
+**Brukeren ba om:** «Du tolker svar 3 feil. Den som forvalter selskapet skal kunne miste det ved overtakelse. Men om
+ingen greier å ta over gjelder 14 dagers regelen.»
+
+**Gjort:** `069_overtakelse_alltid_mulig.sql` (kjørt): angriperens bud teller inntil 10 × verdien, forsvaret fortsatt
+3 × verdien, og fordelen i fornyelsesanbudet er satt til 0. Appen: `TAKEOVER.attackCap`, `renewalBonus` fjernet, tekstene
+om fordelen i anbudet byttet ut («alle stiller likt»), og budfeltet sier at alle selskaper kan tas med stort nok bud.
+B-337, statuslinjer på B-332/B-334/B-335, tabellen i KONTROLL-FORSLAG regnet på nytt, FORSLAG og CLAUDE.md oppdatert.
+
+**Testet:** SQL (10 × V gir 189,74 mot sterkeste forsvar 169,28; ingen selskap får fordel i anbudet), advisors (ingen
+nye), `npm test` (ny test «alltid mulig»), lint, typesjekk, bygg.
+
+**Gjenstår:** eierens ja til å slå på overtakelser (FORSLAG).
+
+---
+
 ## Økt 264 – 2026-09-29: Byggetid, innkjøring og nabolagsprosjekter hjemme (B-336, B1 og B2)
 
 **Brukeren ba om:** «5. ta begge» – byggetid/innkjøring og nabolagsprosjekter, uten å nekte 3× og 10×.

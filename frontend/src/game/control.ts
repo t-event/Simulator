@@ -1,7 +1,7 @@
 /**
  * Utbyttepolitikken og Kontroll (B-334, K6 og K7). Regelen står på serveren (`supabase/067_kontroll.sql`): politikken i
- * `pay_dividends`, Kontrollen i `company_control`, fordelen i fornyelsesanbudet i `resolve_tenders`. Her står tallene
- * og ordene appen viser. Endres regelen, endres begge.
+ * `pay_dividends`, Kontrollen i `company_control`. Her står tallene og ordene appen viser. Endres regelen, endres begge.
+ * Fordelen i fornyelsesanbudet (B-334) er tatt bort i B-337: når konsesjonen går ut, stiller alle likt.
  */
 import { dividendToTreasury } from "./dividend";
 import type { PolicyId } from "./types";
@@ -77,19 +77,18 @@ export function controlAdvice(parts: Record<string, number>): string | null {
   return best?.how ?? null;
 }
 
-/** Fordelen i fornyelsesanbudet: budet teller Kontroll × 0,2 % mer, inntil 20 % */
-export function renewalBonus(score: number): number {
-  return Math.min(0.2, Math.max(0, score) * 0.002);
-}
-
 /**
  * Overtakelser (B-335, `068_overtakelser.sql`): bare strategiske selskaper, bud minst verdien, 72 timer forsvar, uten
- * tilfeldighet. Formlene speiler `takeover_attack_of` og `takeover_defense_of`.
+ * tilfeldighet. Formlene speiler `takeover_attack_of` og `takeover_defense_of`. Budet teller inntil 10 × verdien, forsvaret
+ * høyst 3 × verdien (B-337, `069`): eieren kan alltid miste selskapet til en aktiv angriper med stort nok bud.
  */
 export const TAKEOVER = {
   attackW: 60,
   defenseW: 40,
+  /** Forsvaret teller høyst 3 × verdien */
   cap: 3,
+  /** Angriperens bud teller høyst 10 × verdien (B-337) */
+  attackCap: 10,
   fundCap: 1,
   regionPer: 2.5,
   regionMax: 10,
@@ -99,13 +98,13 @@ export const TAKEOVER = {
   defenseHours: 72,
 };
 
-/** Angrepet: 60 × √(bud / V) × (0,5 + 0,5 × aktivitet) + 2,5 per egne verk i regionen (høyst 10); budet høyst 3 × V */
+/** Angrepet: 60 × √(bud / V) × (0,5 + 0,5 × aktivitet) + 2,5 per egne verk i regionen (høyst 10); budet høyst 10 × V */
 export function takeoverAttack(bid: number, value: number, activity: number, regionPlants: number): number {
   const t = TAKEOVER;
   const v = Math.max(1, value);
   const a = Math.min(1, Math.max(0, activity));
   return (
-    t.attackW * Math.sqrt(Math.min(bid, t.cap * v) / v) * (0.5 + 0.5 * a) +
+    t.attackW * Math.sqrt(Math.min(bid, t.attackCap * v) / v) * (0.5 + 0.5 * a) +
     Math.min(t.regionMax, t.regionPer * regionPlants)
   );
 }

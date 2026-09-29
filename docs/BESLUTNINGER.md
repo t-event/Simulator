@@ -6012,7 +6012,7 @@ Beslutning: tre spor, i denne rekkefølgen:
 Konto (B-149): avgjøres i forslaget.
 
 ## B-332 Eierens svar på KONTROLL-FORSLAG: bygges i rekkefølge, og 10× beholdes (2026-09-29)
-Status: gjelder (planlegging)
+Status: gjelder (planlegging) – punkt 3 er rettet i B-337
 Endringslogg: nei – planlegging
 Bakgrunn: eieren svarte på spørsmålene i `docs/KONTROLL-FORSLAG.md` (avsnitt 10) og spurte om å nekte 3× og 10× når alt
 er kjøpt hjemme.
@@ -6057,7 +6057,7 @@ Konto (B-149): krever konto – kartet viser andre spillere (regel 3). Står i `
 uten konto vises `AccountFeaturesCard`.
 
 ## B-334 Utbyttepolitikk, forsvarsfond, Kontroll og investeringer (K6 og K7) (2026-09-29)
-Status: gjelder
+Status: gjelder – fordelen i fornyelsesanbudet er tatt bort i B-337
 Bakgrunn: steg 2 og 3 i B-331/B-332. De som er ferdige med konsernet, samler 60–80 mill. per ekte dag uten noe å bruke
 dem på; Kontroll skal gjøre det lønnsomt å passe på selskapene sine, og gi fordel når konsesjonen fornyes.
 Beslutning (migrasjon `067_kontroll.sql`, `game/control.ts`, `dividendToTreasury` i `dividend.ts`, `ui/Companies.tsx`):
@@ -6083,7 +6083,7 @@ Beslutning (migrasjon `067_kontroll.sql`, `game/control.ts`, `dividendToTreasury
 Konto (B-149): krever konto – konsernkassa og selskapene er på serveren (regel 2, 3 og 7).
 
 ## B-335 Overtakelser av strategiske selskaper, med bryteren av (K8) (2026-09-29)
-Status: gjelder (bygget, slått av)
+Status: gjelder (bygget, slått av) – taket på budet er hevet i B-337
 Endringslogg: nei – bryteren er av; oppføringen skrives når overtakelser slås på
 Bakgrunn: steg 4 i B-331/B-332. RETNING fase 4: testes grundig med få aktører før det slås på.
 Beslutning (migrasjon `068_overtakelser.sql`, `TAKEOVER`/`takeoverAttack`/`takeoverDefense` i `game/control.ts`,
@@ -6125,3 +6125,24 @@ Beslutning (`game/building.ts`, `buyUpgrade`/`finishBigBuild`/`buildNeighbor`/`f
 - Alt er spilltid og eget verk (B-323): ingenting teller mellom spillere. Nye felt `g.bigBuild`, `g.neighborhood`,
   `FurnaceUnit.rampFromDay` og `g.castingRampFromDay` har standardverdier i `migrate()`.
 Konto (B-149): krever ikke konto (regel 1: eget spill).
+
+## B-337 Svar 3 rettet: eieren kan alltid miste selskapet, ellers gjelder 14-dagersregelen (2026-09-29)
+Status: gjelder
+Erstatter: punkt 3 i B-332, fordelen i fornyelsesanbudet i B-334 og taket på budet i B-335.
+Bakgrunn: eieren: «Du tolker svar 3 feil. Den som forvalter selskapet skal kunne miste det ved overtakelse. Men om ingen
+greier å ta over gjelder 14 dagers regelen.» B-332 leste svaret som at den som passer på, beholder selskapet mot hvem som
+helst, og B-335 gjorde det slik: med sterk Kontroll og forsvar kunne ingen bud vinne («ikke mulig» i tabellen), og
+Kontrollen ga i tillegg inntil 20 % fordel når konsesjonen skulle fornyes.
+Beslutning (migrasjon `069_overtakelse_alltid_mulig.sql`, `TAKEOVER.attackCap` i `game/control.ts`):
+- **Eieren kan alltid miste selskapet.** Angriperens bud teller nå inntil 10 × verdien (`attack_cap`); forsvaret teller
+  fortsatt høyst 3 × verdien. Det sterkeste forsvaret (Kontroll 100 og 3 × V) er 169; en aktiv angriper med 10 × V har 190.
+  Å passe på gjør selskapet dyrere å ta – for skraplageret fra 450 mill. (passiv eier) til ca. 3,4 mrd. (alt på topp) –
+  men aldri umulig. Den gamle eieren får fortsatt 85 % av budet.
+- **Klarer ingen å ta det, gjelder 14-dagersregelen som før:** konsesjonen går ut, og alle stiller likt i det nye anbudet.
+  Fordelen for sittende eier i fornyelsesanbudet er tatt bort (`control.renewal_max` = 0; `control_bonus` står, men gir 0).
+- Alt annet i B-335 står: bare strategiske selskaper, 72 timer forsvar, vern de 3 første dagene, bud senest 5 dager før
+  konsesjonen går ut, 14 dagers pause etter et forsøk, bryteren av til eieren slår den på.
+- Kontroll gir fortsatt inntil 25 % mer inntekt av investeringer (B-334) og gjør overtakelser dyrere.
+Testet: SQL (`takeover_attack_of(10 V) = 189,74` mot `takeover_defense_of(100, 3 V) = 169,28`, ingen selskap med fordel i
+anbudet), `npm test` med de samme tallene. Tabellen i `docs/KONTROLL-FORSLAG.md` avsnitt 5 er regnet på nytt.
+Konto (B-149): uendret – overtakelser og anbud krever konto.

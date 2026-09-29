@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 337,
+    date: "2026-09-29",
+    title: "Likt for alle i anbudet",
+    items: [
+      "Når konsesjonen på et selskap går ut, stiller alle likt i det nye anbudet. Eieren får ikke lenger ekstra vekt på budet sitt.",
+      "Kontroll gjør det fortsatt dyrere for andre å ta selskapet ditt, og gir mer inntekt av investeringene.",
+    ],
+  },
+  {
     b: 336,
     date: "2026-09-29",
     title: "Byggetid og nabolaget",
