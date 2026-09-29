@@ -6,6 +6,12 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
+- **Hovedverkets konsernbidrag i ekte tid (B-313, `docs/KONSERNBIDRAG.md`):** seks spørsmål i avsnitt 14 – automatisk
+  bidrag og innskuddsknappen bort, aktivitetsgulv 30 % eller 0, utbyttepolitikk nå eller fast 50 %, avstanden
+  10–20 : 1 mellom best drevne og nytt konsern, konsernverdi på topplista uten lokal kasse, og om utbyttet skal betales
+  lokalt hvert spilldøgn. **Kandidat til fast regel:** «Spilltid gir kunnskap, optimalisering og lokal progresjon. Ekte
+  tid styrer akkumulering av kapital og makt som påvirker andre spillere.» Avgjøres den, inn i CLAUDE.md og RETNING.md.
+
 - **Slå på gjestekontoer (B-212):** eieren må slå på «Allow anonymous sign-ins» under Authentication → Sign In /
   Providers i dashbordet (connectoren kan ikke). Til det er gjort, prøver appen én gang i døgnet og gjør ellers ingenting.
   Supabase anbefaler også CAPTCHA mot misbruk; grensen er 30 nye gjester i timen per IP.

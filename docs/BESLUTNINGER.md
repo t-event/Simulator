@@ -5686,3 +5686,21 @@ Testet: tsc, lint, `npm test` (merket trekkes med prestasjonen, fagpoengene stå
 uteblir; rådet om én ovn), diagnosen kjørt på en anonymisert kopi av det berørte spillet (20 og 30 døgn: 0 tomme timer
 med direktør på, omdømmefallet skyldes sene leveranser med 1/3 av kapasiteten), 056 kjørt på serveren.
 
+## B-313 Analyse: hovedverkets konsernbidrag i ekte tid (2026-09-29)
+Status: gjelder som analyse og kandidat til regel; ingen endring i spillet (eieren: «Ikke gjør en ny økonomireform nå»)
+Endringslogg: nei
+Bakgrunn: eieren mener to økonomier er for kunstig skilt: 10 mrd. lokalt, men bare 10 mill. per ekte døgn kan flyttes
+til det som betyr noe i sluttspillet. Ønsket retning: hovedverket har driftsøkonomi i spilltid, konsernet
+kapitaløkonomi i ekte tid, og hovedverket gir et normalisert, driftsavhengig bidrag til konsernkassa i ekte tid.
+Beslutning:
+- Analysen står i **`docs/KONSERNBIDRAG.md`** (pengestrømmene i dag, systemene som antar at lokal kasse er formue,
+  forslag til bidragsregel med vern mot 10×/pause/save-load/offline, driftskapital, innskuddet, utbyttepolitikk,
+  migrering, forholdet til B-311, eksempler, simulering 30/60/90 dager, exploits, spørsmål).
+- Anbefalingen: bidrag = politikk × tonn som teller (én normal spilldag per ekte dag, produksjonsmåleren) × margin
+  (30 spilldøgn, tak 3 000 kr/t) × aktivitet; innskuddsknappen bort; kassa hjemme kalles driftskapital; taket står som
+  sikkerhetsnett; utbyttepolitikk som steg 3. Ingenting bygges før eieren har svart på de seks spørsmålene i avsnitt 14.
+- Kandidat til fast regel registrert i `docs/FORSLAG.md`: «Spilltid gir kunnskap, optimalisering og lokal progresjon;
+  ekte tid styrer kapital og makt som påvirker andre spillere.»
+Konto (B-149): ingen funksjon.
+Testet: simuleringen (formlene i dokumentet), tallene fra lagringene og tidslinja 29.9.
+
