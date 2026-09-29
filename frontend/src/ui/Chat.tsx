@@ -1,5 +1,6 @@
 /**
- * Skiftrapporten (B-338): felles chat for alle spillere med konto. Knappen står ved varsellinja (prikk når noe nytt har
+ * Skiftrapporten (B-338): felles chat for alle spillere med konto. Hendelser fra spillet (anbud, overtakelser, nye
+ * titler) står i samme liste, skrevet av serveren (B-339). Knappen står ved varsellinja (prikk når noe nytt har
  * kommet), og arket henter nye meldinger hvert 5. sekund mens det er åpent. Uten konto vises hva den er, med knapp til
  * innlogging (B-149).
  */
@@ -207,20 +208,28 @@ export function ChatSheet({ onClose, onOpenSettings }: { onClose: () => void; on
               {loaded && messages.length === 0 && (
                 <li className="g-muted g-small-text">Ingen har skrevet ennå. Si hei!</li>
               )}
-              {messages.map((m) => (
-                <li key={m.id} className={`g-chat-msg${m.mine ? " is-mine" : ""}`}>
-                  <div className="g-chat-meta">
-                    <strong>{m.mine ? "Deg" : m.nick}</strong>
-                    <span className="g-muted">{when(m.at)}</span>
-                    {m.mine && (
-                      <button className="g-link g-chat-del" onClick={() => void remove(m.id)}>
-                        Slett
-                      </button>
-                    )}
-                  </div>
-                  <p>{m.body}</p>
-                </li>
-              ))}
+              {messages.map((m) =>
+                m.event ? (
+                  <li key={m.id} className="g-chat-msg is-event">
+                    <p>
+                      <Icon name="factory" /> {m.body} <span className="g-muted">{when(m.at)}</span>
+                    </p>
+                  </li>
+                ) : (
+                  <li key={m.id} className={`g-chat-msg${m.mine ? " is-mine" : ""}`}>
+                    <div className="g-chat-meta">
+                      <strong>{m.mine ? "Deg" : m.nick}</strong>
+                      <span className="g-muted">{when(m.at)}</span>
+                      {m.mine && (
+                        <button className="g-link g-chat-del" onClick={() => void remove(m.id)}>
+                          Slett
+                        </button>
+                      )}
+                    </div>
+                    <p>{m.body}</p>
+                  </li>
+                ),
+              )}
             </ol>
             {nickname === null ? (
               <Callout tone="heat">

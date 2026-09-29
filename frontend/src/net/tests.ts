@@ -161,7 +161,7 @@ interface Fake {
   guests: Set<string>;
   guestsOff: boolean;
   /** Skiftrapporten (B-338) */
-  chat: { id: number; user: string; body: string; at: number; hidden: boolean }[];
+  chat: { id: number; user: string | null; body: string; at: number; hidden: boolean }[];
 }
 function makeFake(): Fake {
   const f: Fake = {
@@ -419,7 +419,14 @@ function makeFake(): Fake {
       const rows = f.chat
         .filter((m) => !m.hidden && m.id > after)
         .slice(-Number(body.p_limit ?? 60))
-        .map((m) => ({ id: m.id, nick: f.nicknames.get(m.user) ?? "?", mine: m.user === id, body: m.body, at: m.at }));
+        .map((m) => ({
+          id: m.id,
+          nick: m.user ? (f.nicknames.get(m.user) ?? "?") : "Skiftrapporten",
+          mine: m.user === id,
+          event: m.user === null,
+          body: m.body,
+          at: m.at,
+        }));
       return json(200, rows);
     }
     if (path.startsWith("/rest/v1/rpc/chat_latest")) {
@@ -1853,7 +1860,18 @@ const main = async () => {
     assert((await deleteChat(2)) && !(await deleteChat(1)), "bare egne kan slettes");
     assert((await fetchChat()).length === 1, "slettet");
     // Sammenslåing uten dubletter, i rekkefølge, med tak
-    const m = (id: number) => ({ id, nick: "x", mine: false, body: "b", at: 0 });
+    // Hendelser fra spillet (B-339) kommer uten avsender og kan ikke slettes
+    f.chat.push({
+      id: 3,
+      user: null,
+      body: "Grane vant anbudet på skraplageret (2 bud).",
+      at: Date.now(),
+      hidden: false,
+    });
+    const withEvent = await fetchChat(2);
+    assert(withEvent.length === 1 && withEvent[0].event && !withEvent[0].mine, JSON.stringify(withEvent));
+    assert(!(await deleteChat(3)), "hendelser kan ikke slettes");
+    const m = (id: number) => ({ id, nick: "x", mine: false, event: false, body: "b", at: 0 });
     const merged = mergeChat([m(1), m(3)], [m(3), m(2), m(4)], 3);
     assert(merged.map((x) => x.id).join() === "2,3,4", merged.map((x) => x.id).join());
     // Sist lest huskes per konto

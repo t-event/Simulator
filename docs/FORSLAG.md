@@ -13,11 +13,6 @@ til «Avgjort» nederst).
 
 ## Venter
 
-- **Slå på overtakelser (B-335, rettet i B-337):** bygget og testet med bryteren av (`config.world.takeover.enabled`).
-  Eieren kan alltid miste selskapet til et stort nok bud. Anbefaling: slå på når skraplagerets nye konsesjon har
-  startet (etter 13.10.), så første eier får noen dager med ro først. Slås på med `update config set value = jsonb_set(value, '{takeover,enabled}', '1') where id = 'world';` og en
-  endringslogg-oppføring.
-
 - **Pynt for sesong 3 (B-287, B-291):** pynten for sesong 2 er klar. Før `start_season` kjøres for sesong 3, legg inn ny
   pynt i `COSMETICS` med `season: 3` – både i butikken og på stigen (trinn 10–50). Ellers har sesong 3 ingen egen pynt.
 

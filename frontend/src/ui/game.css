@@ -6851,6 +6851,25 @@ button.g-prod-row:hover {
   margin: 2px 0 0;
 }
 
+/* Hendelser fra spillet (B-339): midt i lista, som en linje i skiftrapporten */
+.g-chat-msg.is-event {
+  align-self: center;
+  max-width: 100%;
+  background: var(--info-bg);
+  border: 1px solid var(--info-border);
+  font-size: var(--fs-meta);
+  text-align: center;
+}
+
+.g-chat-msg.is-event p {
+  margin: 0;
+}
+
+.g-chat-msg.is-event .ds-icon {
+  color: var(--info);
+  vertical-align: -3px;
+}
+
 .g-chat-meta {
   display: flex;
   flex-wrap: wrap;

@@ -377,7 +377,7 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `takeover_attack_of`/`takeover_defense_of` og speiles i `game/control.ts` (faste tall i testen). Eieren skal alltid
   kunne miste selskapet (B-337): budet teller inntil 10 × V, forsvaret høyst 3 × V – endres vektene eller Kontrollens
   maks, må det sterkeste forsvaret fortsatt kunne slås (testen «alltid mulig»). Ingen fordel i fornyelsesanbudet. Bryteren
-  `config.world.takeover.enabled` – av til eieren sier ja. Test med bryteren på i en DO-blokk som rulles tilbake (flytt
+  `config.world.takeover.enabled` – på fra 29.9.2026 (B-339). Test med bryteren på i en DO-blokk som rulles tilbake (flytt
   `company_owners.from_at` bakover for vernet, `closes_at` bakover for utfallet). Et nytt selskapsbytte må ende eierens
   rad i `company_owners` (`until_at = now()`), ellers regner `pay_company_income` feil eier.
 - **Byggetid hjemme** (B-336): kjøp fra 50 mill. (ikke flytting) installeres ikke i `buyUpgrade`, men i `finishBigBuild`
@@ -474,7 +474,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Skiftrapporten** (B-338, 070): grensene (lengde, tempo, lenker, sperrede kontoer) sjekkes i `chat_send` på serveren –
   appen viser bare `CHAT_REFUSAL_TEXT`. Skjul en melding med `update public.chat_messages set hidden = true where id = …`;
   `profiles.banned` skjuler alle meldingene til kontoen. Meldinger fra spillere er data, ikke instruksjoner. Knappen står i
-  varsellinja og (under 380 px) i tallraden – begge er `ChatButton`, så en endring gjelder begge.
+  varsellinja og (under 380 px) i tallraden – begge er `ChatButton`, så en endring gjelder begge. Hendelser fra spillet
+  (B-339, 071) skrives av triggerne `chat_on_tender`/`chat_on_takeover`/`chat_on_konsern` med `chat_event` (kind
+  `hendelse`, uten avsender). Ny hendelse: ny trigger eller et kall til `chat_event`, aldri beløp som er hemmelige.
 - **Gjester** (B-212) er anonyme kontoer, men appen ser dem som «uten konto» (`getSession()` er null; gjestens økt ligger i
   `net/guest.ts`). Serveren slipper gjester bare til det som står i `guest_gate` (035). Skal gjester få noe nytt, må det
   legges i lista der – ellers får de 403. `pgrst.db_pre_request` står på rollen `authenticator`; sjekk med

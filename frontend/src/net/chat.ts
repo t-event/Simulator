@@ -9,6 +9,8 @@ export interface ChatMessage {
   id: number;
   nick: string;
   mine: boolean;
+  /** Hendelse fra spillet (anbud, overtakelse, ny tittel), skrevet av serveren (B-339) */
+  event: boolean;
   body: string;
   /** Tidspunkt i ms (servertid) */
   at: number;
@@ -41,6 +43,7 @@ function parseMessage(r: Row): ChatMessage | null {
     id,
     nick: typeof r.nick === "string" ? r.nick : "?",
     mine: r.mine === true,
+    event: r.event === true,
     body,
     at: Number(r.at) || 0,
   };

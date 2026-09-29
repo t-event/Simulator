@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 267 – 2026-09-29: Overtakelser på, og hendelser i Skiftrapporten (B-339)
+
+**Brukeren ba om:** hendelser fra spillet i Skiftrapporten, og «Åpne for overtakelser nå».
+
+**Gjort:** bryteren `takeover.enabled` = 1 (først for seg, så i 071). `071_skiftrapporten_hendelser.sql`:
+`chat_messages.kind` og `user_id` valgfri for hendelser, `chat_event`, `chat_nick`, `chat_kr`, `chat_when`, triggerne
+`chat_on_tender`, `chat_on_takeover` og `chat_on_konsern`, `chat_list`/`chat_latest` med hendelser. App: `event` i
+`net/chat.ts`, egen stil i `ui/Chat.tsx`. FORSLAG: overtakelser ute av «Venter». Endringslogg for overtakelser og
+hendelsene.
+
+**Testet:** `takeover_window` for skraplageret (vern til 2.10.), triggerne i en DO-blokk som ble rullet tilbake,
+`npm test`, lint, typesjekk, bygg, Playwright på 320, 390 og 1 366 px.
+
+**Gjenstår:** følge med på første overtakelsesforsøk (fra 2.10.) og at anbudet på skraplageret 11.10. gir melding.
+
+---
+
 ## Økt 266 – 2026-09-29: Skiftrapporten – felles chat (B-338)
 
 **Brukeren ba om:** «Lag en globalchat. Den må heita "Skiftrapporten"», og spurte hvorfor jeg anbefaler å slå på

@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 339,
+    date: "2026-09-29",
+    title: "Overtakelser og nytt i Skiftrapporten",
+    items: [
+      "Strategiske selskaper kan nå overtas. Legg inn et bud fra konsernkassa under Konsern → Industrien. Eieren har 72 timer til å forsvare seg, og Kontroll gjør det dyrere å ta selskapet – men med stort nok bud kan alle selskaper tas.",
+      "En ny eier kan ikke angripes de første tre dagene, og bud må legges senest fem dager før konsesjonen går ut.",
+      "Skiftrapporten forteller selv når et anbud åpner og avgjøres, når noen prøver å overta et selskap og hvordan det gikk, og når noen får en ny konserntittel.",
+    ],
+  },
+  {
     b: 338,
     date: "2026-09-29",
     title: "Skiftrapporten",
