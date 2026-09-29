@@ -19,7 +19,14 @@ valselinje per valseverk; havna og transportbåndet bare når kjøpt. `TitleArt.
 lagret storverk på 320 px, iPhone 13 og 1440 px: ingen horisontal scrolling, ingen feil i konsollen; `npm test`, lint,
 typesjekk.
 
-**Gjenstår:** forslagene i spor 2 og 3 (`docs/KONTROLL-FORSLAG.md`).
+Forslaget i spor 2 og 3 er skrevet i `docs/KONTROLL-FORSLAG.md`: en oppdiktet verden med seks regioner (kart på
+Konsern, liste som reserve, konto kreves), utbyttepolitikk med tre valg og et forsvarsfond, Kontroll som ord (eier,
+aktivitet, investeringer, verk i regionen, eiertid, fond, imperiebelastning), overtakelser bare av strategiske selskaper
+(bud minst verdien, 72 timer forsvar, uten tilfeldighet, 15 %/10 %/5 % forsvinner) og, for pengene hjemme, byggetid og
+innkjøring for store kjøp, nabolagsprosjekter i anleggsbildet og slitasje. Simulert mot `game/dividend.ts` og ekte tall
+(12 konsern, overskudd 35–226 mill. per spilldøgn hjemme, 10 mrd. på 9–58 min på 10×).
+
+**Gjenstår:** eierens svar på forslaget (avsnitt 10). Publiseringen av #276 er grønn.
 
 ---
 
