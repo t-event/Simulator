@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 275 – 2026-09-29: Mobilen zoomer inn i chatten (B-347)
+
+**Brukeren ba om:** «Mobilen zoomer inn når jeg skal skrive i chatten..» (skjermbilde fra iPhone).
+
+**Funnet:** Safari på iPhone zoomer inn på tekstfelt med skrift under 16 px og zoomer ikke ut igjen. Chatfeltet arvet
+14 px, feltene i kontoen 13 px.
+
+**Gjort:** på berøringsskjerm (`pointer: coarse`) har alle felt man skriver i minst 16 px (`game.css`, nederst).
+PC-en er uendret.
+
+**Testet:** Playwright (iPhone SE, iPhone 13, PC 1366): 16 px på telefon, 13–17 px som før på PC; `npm test`, lint,
+typesjekk. Brukeren bør sjekke på telefonen – Chromium zoomer aldri.
+
+---
+
 ## Økt 274 – 2026-09-29: Ingen vikarer når verket står (B-346)
 
 **Brukeren ba om:** «Koffer bi d leid inn vikara når d e stopp i drifta? (Skiftleder)»
