@@ -31,7 +31,7 @@ import { auto, hasResearch, RESEARCH, scrapUnlocked, secondsAction } from "./res
 import { masteryFactor } from "./mastery";
 import { checkMissions } from "./missions";
 import { checkChallenges } from "./challenges";
-import { finishKonsernProjects, konsernDay, konsernEquity } from "./konsern";
+import { directorDailyT, finishKonsernProjects, konsernDay, konsernEquity } from "./konsern";
 import { worldFactor } from "./world";
 import { maybeAdvisor, maybeCreateDecision } from "./decisions";
 import { maybeTip, setCreditHint } from "./tips";
@@ -2378,10 +2378,16 @@ function expireOffers(g: GameState, stats: PlantStats): void {
       // Passet den verket (grønn på Salg)? Da får spilleren et råd hvis flere går ut (B-292)
       const a = assessOffer(g, stats, c);
       const fitted = a.canMake && a.recipeOk && !a.tight && !a.narrow;
-      if (fitted) g.missedOffers = [...(g.missedOffers ?? []).filter((m) => m > g.minute - MIN_PER_DAY), g.minute];
+      // Med salgsdirektøren på var det direktøren som lot den gå (B-312): den regner med det verket faktisk har laget
+      // den siste uka og vil ha mer luft til fristen enn «grønn» på Salg. Si det, i stedet for «selv om den passet»
+      const director = g.konsern?.director?.active === true;
+      if (fitted && !director)
+        g.missedOffers = [...(g.missedOffers ?? []).filter((m) => m > g.minute - MIN_PER_DAY), g.minute];
       log(
         g,
-        `Forespørselen fra ${c.customer} gikk ut uten svar${fitted ? ", selv om den passet verket" : ""}.`,
+        fitted && director
+          ? `Salgsdirektøren lot forespørselen fra ${c.customer} gå: for lite luft til fristen med det verket faktisk lager (${fmtT(directorDailyT(g, stats))} per døgn). Vil du ha den likevel, ta den selv under Salg.`
+          : `Forespørselen fra ${c.customer} gikk ut uten svar${fitted ? ", selv om den passet verket" : ""}.`,
         "info",
       );
     }

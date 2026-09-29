@@ -21,7 +21,8 @@ export function BadgeSync({ api }: { api: GameApi }) {
     let alive = true;
     fetchBadges()
       .then((badges) => {
-        if (alive && badges.length) act((gg) => void applyServerBadges(gg, badges));
+        // Også en tom liste: serveren er fasit, og et merke den har trukket, tas bort (B-312)
+        if (alive) act((gg) => void applyServerBadges(gg, badges));
       })
       .catch(() => {});
     return () => {

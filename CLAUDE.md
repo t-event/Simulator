@@ -392,6 +392,12 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Æresmerker på topplista** (B-299, B-300): `leaderboard()` og `my_badges()` får merkene fra `badges_of(uid)` –
   reformloggen og tabellen `badges` (merker gitt for hånd, med eierens godkjenning). Et nytt slags merke må også i
   `BADGE_NAMES` (`net/leaderboard.ts`) og i prestasjonene – ukjente merker vises ikke. Endres returtypen: `drop function` først.
+- **Reformmerkene** (B-312): `badges_of` gir `reform` bare for rader i `economy_reform_log` som ikke er reform 2
+  (`model not like 'reform 2%'`); nye reformer som skriver dit, må ha sin egen regel, ellers får alle «Reformveteran».
+  Serveren er fasit: `applyServerBadges` tar bort merker (og prestasjonen) serveren ikke gir lenger.
+- **Salgsdirektøren regner med det verket faktisk lager** (`directorDailyT`, siste uke), ikke kapasiteten. Står ovner
+  (én ovn om gangen, støping, folk), sier han nei til det Salg viser grønt – loggen forklarer det (B-312). Ikke løsne
+  regelen: den holder omdømmet på 96–100 hos alle med direktør.
 - **Skjulte prestasjoner** (B-296): `hidden` på en serie gjør at den bare vises og telles for dem som har den. Bruk
   `visibleAchievements`/`visibleFamilies` i grensesnittet, ikke `ACHIEVEMENTS` direkte.
 - **Tilbakespoling** (B-261): et lavere dagtall flytter tidslinja etter dagen til `snapshots_rewound`; den legges tilbake
