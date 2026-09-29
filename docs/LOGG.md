@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 241 – 2026-09-29: Reform 2, del 6 – konsernene satt tilbake
+
+**Brukeren ba om:** «Finn ut hva som hadde vært realistisk å ha på konto for de spillerne om de skulle ha jobbet seg
+opp dit nå» og deretter «Fiks dette, sett de tilbake til der de skulle ha vært» (ja på lista).
+
+**Gjort:** B-309: regnet budsjett per spiller med den nye økonomien, migrasjon 054 (verk i kjøpsrekkefølge til
+budsjettet er brukt, kassa = resten, sikkerhetskopi, reformlogg, serverEdit, merke), sesonglista oppdatert (som 053).
+Sju spillere mistet verk; kassene 0,4–10 mrd.
+
+**Testet:** tørrkjøring med raise exception, kontroll på antall sikkerhetskopier, sjekk av alle konserneiere etterpå.
+
+**Gjenstår:** gebyret (01:38 UTC, påminnelse satt). Pynt for sesong 3. Følg med på toppspillerne.
+
+---
+
 ## Økt 240 – 2026-09-29: Reform 2, del 5 – markedet metter seg fra 3 000 t
 
 **Brukeren ba om:** «Jeg tjener jo fortsatt i snitt over 100 millioner per dag. Er ikke det drøyt mye? Vi må få til

@@ -5588,3 +5588,24 @@ Beslutning:
 Konto (B-149): nei – regel 1, eget spill.
 Testet: tsc, lint, `npm test` (metningstesten: 1 til 3 000 t, 0,615 ved 10 000, 0,5325 ved 20 000, 0,476 ved 35 000;
 administrasjonen 13 mill. på 31 000 t), balanse (exit 0), `--storovn` før/etter.
+
+## B-309 Reform 2, del 6: konsernene og kassa satt tilbake til den nye økonomien (2026-09-29)
+Status: gjelder (eierens beskjed: «Fiks dette, sett de tilbake til der de skulle ha vært»; bygger på B-305–B-308)
+Bakgrunn: med den nye økonomien hadde ingen av de fire største hatt råd til konsernet de eide. Regnet på hver spillers
+eget spill (snittproduksjon per døgn over hele spillet, toppspillerens pris og kostnader per tonn, administrasjon) ville
+de tjent 40–95 mrd. i alt, mens 12–14 komplekser på trinn 5 koster 108–126 mrd. Konsernene var bygget for penger som
+ikke lenger finnes.
+Beslutning (`supabase/054_reform2_konsern_tilbakestilt.sql`, etter tørrkjøring og eierens ja på lista):
+- **Budsjett** per spiller = det man kunne tjent med den nye økonomien over hele spillet − utstyret hjemme − innskudd i
+  konsernkassa. **Verkene** beholdes i kjøpsrekkefølge til budsjettet er brukt (det siste med lavere trinn); resten
+  fjernes uten vederlag (de «ble aldri kjøpt»). **Kassa** = resten av budsjettet, høyst 10 mrd. Lik regel for alle på
+  storverket med konsern eller over 1 mrd.
+- Resultat: Tuster 14 → 10 komplekser trinn 5 (kasse 1,7 mrd.), Grane 14 → 7 + 1 trinn 2 (0,4), Figen 12 → 4 + 1
+  trinn 2 (0,5), H4WK3N5 14 → 4 (1,0), GruberMogg67 10 → 7 (0,7), The New Guy 10 → 3 stålverk + 2 komplekser (1,0);
+  Einmo (3,6), enzo, Big Boss, 2bajjas (10) og Lord_Magni (4,5) beholdt verkene. Alt annet står: forskning, fagpoeng,
+  titler, mesterskap, konsernkassa, hjemmeverket, utbetalt til eierne, æresmerker. Sikkerhetskopi i `save_backups`
+  (`reform2-konsern`) og `economy_reform_log` – kan rulles tilbake per spiller med `restore_save`. Sesonglista fikk
+  ferske tidslinjetall (som 053).
+- Anslaget er snilt (alle døgn regnes som toppdrift), så ingen har fått mindre enn de kunne tjent.
+Konto (B-149): ingen ny funksjon.
+Endringslogg: ja (b:309).

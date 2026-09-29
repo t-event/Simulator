@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 309,
+    date: "2026-09-29",
+    title: "Reform 2: konsernene er satt tilbake til det den nye økonomien hadde gitt",
+    items: [
+      "Konsernene på toppen var bygget for penger som ikke lenger finnes. Hver spiller har fått beholde de verkene han kunne tjent til med den nye økonomien over hele spillet, i kjøpsrekkefølge – resten er tatt bort, og kassa er det som var igjen.",
+      "Forskning, fagpoeng, titler, mesterskap, konsernkassa, hjemmeverket og «Utbetalt til eierne» står som før. De som ble truffet, har æresmerket «Reformveteran II».",
+      "Fra nå av gjelder samme regel for alle: det du kjøper, må tjenes med den økonomien som er i spillet i dag.",
+    ],
+  },
+  {
     b: 308,
     date: "2026-09-29",
     title: "Reform 2: markedet tar unna 3 000 tonn i døgnet til full pris",
