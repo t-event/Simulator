@@ -4916,6 +4916,7 @@ button {
   }
 
   .g-grid.is-konsern > .g-konsern-plants,
+  .g-grid.is-konsern > .g-utvid-status-col,
   .g-grid.is-konsern > .g-konsern-queue-col {
     grid-column: 1 / -1;
   }
@@ -5895,8 +5896,8 @@ button.g-prod-row:hover {
 .g-buy-opt {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-3);
-  padding: var(--sp-4);
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   background: var(--surface-1);
@@ -5917,6 +5918,48 @@ button.g-prod-row:hover {
   align-items: center;
   justify-content: space-between;
   gap: var(--sp-2) var(--sp-3);
+}
+
+/* Utvid (B-372): status øverst og tallene på én linje */
+.g-utvid-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-2) var(--sp-3);
+  margin: 0 0 var(--sp-2);
+}
+
+.g-utvid-facts dt {
+  font-size: var(--fs-caption);
+  color: var(--text-3);
+}
+
+.g-utvid-facts dd {
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--fs-section);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.g-utvid-status .ds-callout {
+  margin-top: var(--sp-2);
+}
+
+.g-utvid-all {
+  min-height: 44px;
+}
+
+.g-buy-opt-line {
+  font-size: var(--fs-meta);
+  color: var(--text-2);
+}
+
+.g-buy-opt-line strong {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .g-buy-opt-stats {

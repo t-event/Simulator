@@ -546,8 +546,14 @@ function ControlSection({
       </section>
     );
   const steps = controlSteps(ctl.parts, policy).slice(0, 3);
-  const vern = protectedUntil(ctl.since, realNow());
+  // Serveren vet best (vern, pause og slutten av perioden, B-372); eldre svar har bare `since`
+  const vern = ctl.protectedUntil
+    ? Date.parse(ctl.protectedUntil) > realNow()
+      ? Date.parse(ctl.protectedUntil)
+      : null
+    : protectedUntil(ctl.since, realNow());
   const take = bidToTake(ctl.score, fund, ctl.value);
+  const endsAt = c.concessionUntil ? Date.parse(c.concessionUntil) : null;
   return (
     <section className="g-control">
       <p className="g-control-head">
@@ -563,16 +569,25 @@ function ControlSection({
       />
       {takeoversOn && !c.takeover && (
         <p className="g-small-text g-control-now">
-          {vern ? (
+          {vern && endsAt && vern >= endsAt ? (
             <>
-              <Icon name="shield-check" /> Ingen kan by på selskapet før {fmtWhen(new Date(vern).toISOString())} – nye
-              eiere er vernet de første {TAKEOVER.protectDays} dagene.{" "}
+              <Icon name="shield-check" /> Ingen kan legge inn oppkjøpsbud før perioden din er over (
+              {fmtWhen(new Date(endsAt).toISOString())}). Da kommer et nytt anbud.
             </>
           ) : (
-            <>Ingen har lagt inn oppkjøpsbud nå. </>
+            <>
+              {vern ? (
+                <>
+                  <Icon name="shield-check" /> Ingen kan legge inn oppkjøpsbud før{" "}
+                  {fmtWhen(new Date(vern).toISOString())}.{" "}
+                </>
+              ) : (
+                <>Ingen har lagt inn oppkjøpsbud nå. </>
+              )}
+              {vern ? "Etter det kan" : "Slik det står, kan"} en aktiv spiller kjøpe det med et bud på ca.{" "}
+              <strong>{fmtKr(take)}</strong> hvis du ikke legger inn et motbud.
+            </>
           )}
-          {vern ? "Etter det kan" : "Slik det står, kan"} en aktiv spiller kjøpe det med et bud på ca.{" "}
-          <strong>{fmtKr(take)}</strong> hvis du ikke legger inn et motbud.
         </p>
       )}
       {steps.length > 0 && (
@@ -821,7 +836,7 @@ function TakeoverSection({
               w.minBid,
             )}
             <p className="g-muted g-small-text">
-              Står budet sterkest, får eieren 85 % av det, og du eier selskapet resten av konsesjonen. Ellers får du 90
+              Står budet sterkest, får eieren 85 % av det, og du eier selskapet i 14 dager fra kjøpet. Ellers får du 90
               % tilbake.
             </p>
           </details>

@@ -405,7 +405,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   kunne miste selskapet (B-337): budet teller inntil 10 × V, forsvaret høyst 3 × V – endres vektene eller Kontrollens
   maks, må det sterkeste forsvaret fortsatt kunne slås (testen «alltid mulig»). Ingen fordel i fornyelsesanbudet. Bryteren
   `config.world.takeover.enabled` – på fra 29.9.2026 (B-339). Test med bryteren på i en DO-blokk som rulles tilbake (flytt
-  `company_owners.from_at` bakover for vernet, `closes_at` bakover for utfallet). Et nytt selskapsbytte må ende eierens
+  `company_owners.from_at` bakover for vernet, `closes_at` bakover for utfallet). Kjøperen får 14 dager fra kjøpet og 3 dagers vern; pausen
+  på 14 dager gjelder bare etter «avverget» (B-372). Til når ingen kan by, regnes av `company_protected_until`. Et nytt selskapsbytte må ende eierens
   rad i `company_owners` (`until_at = now()`), ellers regner `pay_company_income` feil eier.
 - **Byggetid hjemme** (B-336): kjøp fra 50 mill. (ikke flytting) installeres ikke i `buyUpgrade`, men i `finishBigBuild`
   når `g.bigBuild.readyMin` er nådd (fra `hourlyActions`). Tester og kode som kjøper stort utstyr og venter det med én

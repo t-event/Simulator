@@ -49,6 +49,12 @@ til «Avgjort» nederst).
 
 ## Forslag – nett og konkurranse
 
+- **Investeringer ved salg og oppkjøp (B-372, spørsmål til eieren):** i dag blir investerte penger i selskapet
+  (`companies.invested`) igjen hos selskapet og går til neste eier. Verdien – og dermed minstebudet – tar ikke med
+  investeringene, så den som mister selskapet, får ingenting igjen for dem (bare 85 % av budet). Forslag: legg
+  investeringene til verdien i `company_value` (f.eks. 100 % eller 50 %), så minstebudet stiger og eieren får det meste
+  tilbake ved et oppkjøp. Ved nytt anbud etter endt periode følger de selskapet som før. Eieren avgjør.
+
 - ~~Tidslinja ved tilbakespoling (B-259)~~ **Bygget (B-261).** `check_snapshot` sletter alle tall etter dagen når et spill med lavere dag
   lastes opp. Da en gammel kopi tok over i 15 sekunder, forsvant 1 700 tall. Kan heller merke dem eller beholde dem når
   det høyere spillet kommer tilbake. Eieren avgjør.

@@ -127,6 +127,8 @@ export interface CompanyControl {
   invested: number;
   /** Når eieren tok over (B-370): vernet de første dagene regnes av dette */
   since: string | null;
+  /** Til når ingen kan legge inn oppkjøpsbud (vern, pause eller slutten av perioden), fra serveren (B-372) */
+  protectedUntil: string | null;
 }
 
 export interface WorldStatus {
@@ -197,6 +199,7 @@ export function parseControl(r: Row | null | undefined): CompanyControl | null {
     value: num(r.value),
     invested: num(r.invested),
     since: typeof r.since === "string" ? r.since : null,
+    protectedUntil: typeof r.protected_until === "string" ? r.protected_until : null,
   };
 }
 
@@ -278,7 +281,7 @@ export function applyTakeoverNews(g: GameState, companies: Pick<Company, "name" 
       log(
         g,
         r.status === "overtatt"
-          ? `Du kjøpte ${name}! Du eier det resten av konsesjonen.`
+          ? `Du kjøpte ${name}! Du eier det i 14 dager fra nå, og de første 3 dagene kan ingen by på det.`
           : `Oppkjøpsbudet ditt på ${name} holdt ikke – eieren sto sterkest. ${fmtKr(Math.round(r.bid * 0.9))} er tilbake i konsernkassa.`,
         r.status === "overtatt" ? "good" : "event",
       );

@@ -178,7 +178,7 @@ function OptionCard({
   name,
   desc,
   best = false,
-  label = "Kjøp",
+  label,
 }: {
   g: GameState;
   act: Act;
@@ -191,6 +191,8 @@ function OptionCard({
   const reason = whyNot(g, o);
   const rating = payRating(o.payback);
   const { busy, run } = useRunner(act);
+  const perDay = o.pay === "kasse" ? "per døgn" : "per dag";
+  const days = o.pay === "kasse" ? "døgn" : "dager";
   return (
     <div className={`g-buy-opt${best ? " is-best" : ""}`}>
       <div className="g-buy-opt-head">
@@ -202,38 +204,40 @@ function OptionCard({
         )}
       </div>
       {desc && <p className="g-muted g-small-text">{desc}</p>}
-      <dl className="g-buy-opt-stats">
-        {o.gain > 0 && (
-          <div>
-            <dt>{o.pay === "kasse" ? "Gir" : "Gir konsernkassa"}</dt>
-            <dd>
-              +{fmtKr(o.gain)}
-              <small>{o.pay === "kasse" ? " /døgn" : " /ekte dag"}</small>
-            </dd>
-          </div>
-        )}
-        {o.gain > 0 && (
-          <div>
-            <dt>Betaler seg</dt>
-            <dd>
-              {Math.ceil(o.payback).toLocaleString("nb-NO")} {o.pay === "kasse" ? "døgn" : "ekte dager"}
-            </dd>
-          </div>
-        )}
-        {o.hours > 0 && (
-          <div>
-            <dt>Bygges</dt>
-            <dd>{o.hours} t</dd>
-          </div>
-        )}
-      </dl>
+      {/* Tallene på én linje (B-372): før tok de tre bokser og halve skjermen på mobil */}
+      {(o.gain > 0 || o.hours > 0) && (
+        <p className="g-buy-opt-line">
+          {o.gain > 0 && (
+            <>
+              <strong>+{fmtKr(o.gain)}</strong> {perDay} · betalt tilbake på{" "}
+              <strong>
+                {Math.ceil(o.payback).toLocaleString("nb-NO")} {days}
+              </strong>
+            </>
+          )}
+          {o.gain > 0 && o.hours > 0 && " · "}
+          {o.hours > 0 && (
+            <>
+              bygges på <strong>{o.hours} t</strong>
+            </>
+          )}
+        </p>
+      )}
       <button className={best ? "g-primary" : undefined} disabled={!!reason || busy} onClick={() => run(o)}>
-        {label} · {fmtKr(o.price)}
-        {o.pay === "konsernkasse" ? " fra konsernkassa" : ""}
+        {label ?? optionVerb(o)} · {fmtKr(o.price)}
+        {o.pay === "kasse" ? " fra kassa hjemme" : ""}
       </button>
       {reason && <p className="g-konsern-why g-small-text">{reason}</p>}
     </div>
   );
+}
+
+/** Ordet på knappen etter hva kjøpet er (B-372): «Gjør det» sa ikke hva som skjer */
+function optionVerb(o: KonsernOption): string {
+  if (o.key.startsWith("mod-")) return "Moderniser";
+  if (o.key.startsWith("bygg-")) return "Bygg ut";
+  if (o.key.startsWith("bytt-")) return "Bytt";
+  return "Kjøp";
 }
 
 /** Bryter for å skru salgsdirektøren av og på (B-122). Vises under Folk → Ansatte og under Forespørsler på Salg */
@@ -815,7 +819,7 @@ export function KonsernPage({
         </div>
       )}
       {tab === "oversikt" && <KonsernOverview g={g} act={act} onBuy={() => setTab("utvid")} />}
-      {tab === "utvid" && <KonsernBuy g={g} act={act} />}
+      {tab === "utvid" && <KonsernBuy g={g} act={act} onShowPlants={() => setTab("oversikt")} />}
       {tab === "kart" && <WorldMapPanel g={g} />}
       {tab === "industri" && <IndustryPanel g={g} act={act} />}
     </div>
@@ -845,7 +849,6 @@ function NextStep({ g, act }: { g: GameState; act: Act }) {
           o={advice}
           name={advice.title}
           best
-          label="Gjør det"
           desc={
             advice.key.startsWith("bytt-")
               ? "Et stålkompleks tjener omtrent like mye som tre storverk, men tar bare én plass. Verket selges for det det er verdt, og pengene går til komplekset."
@@ -1060,7 +1063,7 @@ function BuildRegionPicker({ g }: { g: GameState }) {
   const auto = defaultRegion(g.konsern.plants, g.konsern.orders ?? []);
   return (
     <label className="g-field g-region-pick">
-      <span className="g-small-text">Nye verk bygges i</span>
+      <span className="g-small-text">Hvor skal nye verk bygges?</span>
       <select
         value={region}
         onChange={(e) => {
@@ -1076,6 +1079,7 @@ function BuildRegionPicker({ g }: { g: GameState }) {
           </option>
         ))}
       </select>
+      <small className="g-muted">Verk i samme region som et selskap du eier, gir mer Kontroll over det.</small>
     </label>
   );
 }
@@ -1119,7 +1123,7 @@ function MovePlant({ g, act, p }: { g: GameState; act: Act; p: SisterPlant }) {
   );
 }
 
-function KonsernBuy({ g, act }: { g: GameState; act: Act }) {
+function KonsernBuy({ g, act, onShowPlants }: { g: GameState; act: Act; onShowPlants: () => void }) {
   const options = konsernOptions(g);
   const advice = konsernAdvice(g);
   const byKey = (key: string) => options.find((o) => o.key === key);
@@ -1133,19 +1137,61 @@ function KonsernBuy({ g, act }: { g: GameState; act: Act }) {
     .slice(0, 3);
   const types = (Object.keys(SISTER_TYPES) as SisterType[]).filter((t) => t !== "kompleks" || kompleksOpen(g));
   const shared = sharedIds.filter((id) => !owned.includes(id));
+  const treasury = g.konsern.treasury;
+  const orders = g.konsern.orders ?? [];
+  const pending = orders.filter((o) => o.status === "kø" || o.status === "i gang").length;
+  const planned = g.konsern.plants.length + orders.filter((o) => o.kind === "bygg").length;
+  const slots = maxSisters(g);
+  const queueFull = pending >= WORLD_KONSERN.queueMax;
+  const plantsFull = planned >= slots;
   return (
     <>
+      {/* Status øverst (B-372): det som avgjør hva du kan kjøpe nå, før valgene */}
+      <div className="g-col-wide g-utvid-status-col">
+        <Card className="g-utvid-status">
+          <dl className="g-utvid-facts">
+            <div>
+              <dt>Konsernkassa</dt>
+              <dd>{treasury ? fmtKr(Math.floor(treasury.balance)) : "–"}</dd>
+            </div>
+            <div>
+              <dt>Datterverk</dt>
+              <dd>
+                {planned} av {slots}
+              </dd>
+            </div>
+            <div>
+              <dt>Byggekøen</dt>
+              <dd>
+                {pending} av {WORLD_KONSERN.queueMax}
+              </dd>
+            </div>
+          </dl>
+          <p className="g-muted g-small-text">
+            Alt betales fra konsernkassa med én gang og bygges i ekte tid, ett prosjekt om gangen. Verkene tjener mens
+            de moderniseres.
+          </p>
+          {queueFull && (
+            <Callout tone="heat">Byggekøen er full. Du kan bestille igjen når det neste prosjektet er ferdig.</Callout>
+          )}
+          {!queueFull && plantsFull && (
+            <Callout tone="info">
+              Alle plassene for datterverk er i bruk. {moreSlotsText(g)} Til da kan du modernisere verkene du har.
+            </Callout>
+          )}
+        </Card>
+      </div>
       <NextStep g={g} act={act} />
       <KonsernQueue g={g} act={act} />
       <div className="g-col-wide g-konsern-buy-col">
         <Card title="Kjøp og utvid">
-          {!g.konsern.treasury && <NeedsAccount feature="datterverk" />}
-          <p className="g-muted g-small-text">
-            {`Verkene kjøpes fra konsernkassa${g.konsern.treasury ? ` (${fmtKr(Math.floor(g.konsern.treasury.balance))} nå)` : ""}, og bestillingen betales med én gang.`}{" "}
-            Jo færre dager før et kjøp har betalt seg, jo bedre.
-          </p>
+          {!treasury && <NeedsAccount feature="datterverk" />}
           <h3 className="g-subhead">Nye verk</h3>
-          {g.konsern.treasury && <BuildRegionPicker g={g} />}
+          <p className="g-muted g-small-text">
+            Stålverket er billigst, storverket tjener mer, og stålkomplekset tjener mest per plass. Jo færre dager før
+            et kjøp er betalt tilbake, jo bedre.
+          </p>
+          {treasury && <BuildRegionPicker g={g} />}
           <div className="g-buy-opts">
             {types.map((t) => {
               const spec = SISTER_TYPES[t];
@@ -1163,18 +1209,24 @@ function KonsernBuy({ g, act }: { g: GameState; act: Act }) {
           </div>
           {grow.length > 0 && (
             <>
-              <h3 className="g-subhead">Bygg ut verkene dine</h3>
+              <h3 className="g-subhead">Gjør verkene dine bedre</h3>
+              <p className="g-muted g-small-text">
+                Hvert trinn modernisering gir verket 25 % mer overskudd. Her er de som betaler seg raskest.
+              </p>
               <div className="g-buy-opts">
                 {grow.map((o) => (
-                  <OptionCard key={o.key} g={g} act={act} o={o} name={o.title} label="Gjør det" />
+                  <OptionCard key={o.key} g={g} act={act} o={o} name={o.title} />
                 ))}
               </div>
-              <p className="g-muted g-small-text">Alle verkene dine står under Oversikt.</p>
+              <button className="g-link g-utvid-all" onClick={onShowPlants}>
+                Se alle verkene dine
+              </button>
             </>
           )}
           {shared.length > 0 && (
             <>
               <h3 className="g-subhead">Felles for konsernet</h3>
+              <p className="g-muted g-small-text">Kjøpes én gang og gjelder alle verkene.</p>
               <div className="g-buy-opts">
                 {shared.map((id) => (
                   <OptionCard

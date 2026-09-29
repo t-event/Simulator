@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 298 – 2026-09-30: 14 dager etter oppkjøp, investeringer og Utvid (B-372)
+
+**Brukeren ba om:** 3 dagers vern og 14 dager fra oppkjøpet for ny eier; svar på hva investering gjør og om den følger
+med; bedre og mer intuitiv Utvid-fane.
+
+**Gjort:** `084_oppkjop_14_dager.sql` (+ pausen bare etter avverget, `company_protected_until`). Appen viser tiden fra
+serveren. Utvid: statuslinje, én linje med tall per kjøp, konkrete knappeord, korte forklaringer, beskjed om full kø/fulle
+plasser. Investering: besvart (følger selskapet, eieren får ingenting igjen), forslag i FORSLAG.md.
+
+**Testet:** oppkjøp i DO-blokk (rullet tilbake): 14 d, 3 d vern, åpent igjen etter 4 d. tsc, lint, `npm test`; Playwright
+320/390/1366 px på Utvid (ingen horisontal scrolling eller avkortet tekst; fanen 2 231 → 2 058 px høy på 390).
+
+**Gjenstår:** eieren avgjør forslaget om investeringer i verdien.
+
 ## Økt 297 – 2026-09-30: Oppkjøp og motbud (B-371)
 
 **Brukeren spurte:** «Forsvar og angrep høres ikke rett ut. Er det det man bruker i virkeligheten…?» – så «Ja» til forslaget.
