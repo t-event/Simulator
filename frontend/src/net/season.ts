@@ -53,9 +53,26 @@ export interface SeasonResult {
   stage: number;
 }
 
+/** Resultatene endres bare når en sesong avsluttes, så de hentes høyst hvert femte minutt per konto (B-344) */
+const HISTORY_TTL_MS = 5 * 60_000;
+let historyCache: { user: string; at: number; value: Promise<SeasonResult[]> } | null = null;
+
 /** Spillerens egne sesongresultater, nyeste først. Tom uten innlogging. */
-export async function fetchSeasonHistory(): Promise<SeasonResult[]> {
-  if (!userId()) return [];
+export function fetchSeasonHistory(): Promise<SeasonResult[]> {
+  const user = userId();
+  if (!user) return Promise.resolve([]);
+  if (historyCache && historyCache.user === user && Date.now() - historyCache.at < HISTORY_TTL_MS)
+    return historyCache.value;
+  const value = loadSeasonHistory();
+  historyCache = { user, at: Date.now(), value };
+  // Feiler hentingen, prøves den igjen neste gang
+  value.catch(() => {
+    if (historyCache?.value === value) historyCache = null;
+  });
+  return value;
+}
+
+async function loadSeasonHistory(): Promise<SeasonResult[]> {
   const rows = await rpc<
     {
       season_id: number;

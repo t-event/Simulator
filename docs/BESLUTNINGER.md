@@ -6251,3 +6251,22 @@ Beslutning (migrasjon `072_world_tick_uten_ko.sql`):
   trengs – den ventet mest på den samme køen.
 Endringslogg: ja (raskere Industrien og toppliste).
 Konto (B-149): uendret.
+
+## B-344 Færre kall til databasen: lagring hvert 30. sekund, sesongresultatet én gang (2026-09-29)
+Status: gjelder
+Endringslogg: nei – teknisk; spillerne merker ingenting
+Bakgrunn: eieren: «Log query på supabase er ganske stor.» `pg_stat_statements` over 4 dager: ca. 101 000 kall (25 000 per
+dag) fra 17 aktive spillere. Størst: lagringen (`save_game`) 31 486 kall, i snitt 200 kB JSON hver (ca. 1,5 GB per dag),
+og tidslinjetall (snapshots) 15 000 innsettinger – ett per lagring med ny spilldag. Deretter `world_status` og
+`season_history` med ca. 6 500 hver. `season_history` ble hentet hver gang et ark eller hendelseskort ble lukket:
+beskjeden om sesongresultatet vises bare når ingen ark er åpne (`!modalOpen`), så den ble montert på nytt hver gang.
+Beslutning:
+- `UPLOAD_INTERVAL_MS` 15 s → 30 s (`net/sync.ts`). Lagringen etter en handling (2 s), når appen legges bort, og ved bytte
+  av enhet står som før, så ingenting går tapt ved bytte. Halverer lagringene og tidslinjetallene.
+- `fetchSeasonHistory` (`net/season.ts`) mellomlagres i 5 minutter per konto, og beskjeden om sesongresultatet
+  (`SeasonResultNotice`) husker resultatet per konto og sesong i økta. Målt i Playwright: ett kall i stedet for ett per
+  lukket ark og ett per åpning av topplista.
+- `world_status` er uendret i appen (hvert minutt); køen på serveren ble fjernet i B-343.
+Testet: `npm test`, lint, typesjekk, bygg; Playwright med falsk tjeneste (beskjeden vises og lukkes, lista hentes én gang
+selv med topplista åpnet tre ganger).
+Konto (B-149): uendret.

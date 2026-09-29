@@ -170,25 +170,35 @@ export function SeasonJoin({ g, onOpenSettings }: { api?: GameApi; g: GameState;
  * Beskjed når en sesong spilleren var med i, er over (B-143): plassen, antall spillere og resultatet. Vises én gang
  * per sesong og konto i denne nettleseren. `onOpen` sier fra, så spørsmålet om neste sesong venter til den er lukket.
  */
+/** Sesongresultatet per konto og sesong, hentet én gang i denne økta (B-344); null = ingenting å vise */
+const historyChecked = new Map<string, SeasonResult | null>();
+
 export function SeasonResultNotice({ onOpen }: { onOpen: (open: boolean) => void }) {
   const session = useSession();
   const reconciled = useReconciled();
   const status = useSeasonStatus();
-  const [result, setResult] = useState<SeasonResult | null>(null);
+  // Tegnes på nytt når lista er hentet eller beskjeden er lukket; resultatet selv ligger i historyChecked
+  const [, redraw] = useState(0);
   const user = session?.user.id ?? null;
+  const key = user ? `${user}:${status?.current?.id ?? "-"}` : null;
+  const known = key ? historyChecked.get(key) : undefined;
+  const result = known && user && known.seasonId > resultSeen(user) ? known : null;
   useEffect(() => {
-    if (!user || !reconciled) return;
+    // Én gang per konto og sesong (B-344): beskjeden vises bare når ingen ark er åpne, så den ble montert på nytt – og
+    // hentet lista – hver gang et ark eller et hendelseskort ble lukket
+    if (!key || !reconciled || historyChecked.has(key)) return;
+    historyChecked.set(key, null);
     let alive = true;
     void fetchSeasonHistory()
       .then((h) => {
-        const newest = h[0];
-        if (alive && newest && newest.seasonId > resultSeen(user)) setResult(newest);
+        historyChecked.set(key, h[0] ?? null);
+        if (alive) redraw((n) => n + 1);
       })
-      .catch(() => {});
+      .catch(() => historyChecked.delete(key));
     return () => {
       alive = false;
     };
-  }, [user, reconciled, status?.current?.id]);
+  }, [key, reconciled]);
   useEffect(() => {
     onOpen(!!result);
   }, [result, onOpen]);
@@ -200,7 +210,7 @@ export function SeasonResultNotice({ onOpen }: { onOpen: (open: boolean) => void
   });
   const close = () => {
     markResultSeen(user, result.seasonId);
-    setResult(null);
+    redraw((n) => n + 1);
   };
   return (
     <div className="g-modal" role="dialog" aria-modal="true" aria-label="Sesongen er over">

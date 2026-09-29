@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 272 – 2026-09-29: Færre kall til databasen (B-344)
+
+**Brukeren ba om:** «Log query på supabase er ganske stor.»
+
+**Funnet:** 25 000 kall per dag; lagringen hvert 15. s (200 kB hver) er størst, og `season_history` ble hentet hver gang
+et ark ble lukket.
+
+**Gjort:** lagring hvert 30. s; sesongresultatet mellomlagres (5 min i nettlaget, per sesong i beskjeden).
+**Testet:** `npm test`, lint, typesjekk, bygg, Playwright (ett `season_history`-kall).
+
+**Gjenstår:** se på `pg_stat_statements` om noen dager. Neste steg hvis det trengs: mindre spilltilstand per lagring
+(historikk og logg er ca. halvparten av de 200 kB).
+
+---
+
 ## Økt 271 – 2026-09-29: Databasen treg – verdensoppdateringen uten kø (B-343)
 
 **Brukeren ba om:** Industrien og topplista bruker lang tid på å vises.

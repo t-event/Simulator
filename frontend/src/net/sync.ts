@@ -26,8 +26,12 @@ export type CloudStatus =
   /** Spillet på nett er lagret fra en annen nettleser siden sist: lagringen herfra ble avvist (B-140) */
   | { kind: "conflict" };
 
-/** Minst så lenge mellom to vanlige lagringer på nett (B-141: var ett minutt, for sjeldent ved bytte av enhet) */
-export const UPLOAD_INTERVAL_MS = 15_000;
+/**
+ * Minst så lenge mellom to vanlige lagringer på nett (B-141: var ett minutt, for sjeldent ved bytte av enhet; 15 s ga
+ * nesten 8 000 lagringer à 200 kB i døgnet, B-344). Etter en handling, når appen legges bort og ved bytte av enhet lagres
+ * det uansett med én gang.
+ */
+export const UPLOAD_INTERVAL_MS = 30_000;
 /** Etter en handling fra spilleren lastes spillet opp etter så lang tid (flere handlinger samles) */
 export const SOON_MS = 2_000;
 /** Så ofte appen sjekker om spillet er lagret fra en annen enhet, mens den vises */
