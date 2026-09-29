@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 371,
+    date: "2026-09-30",
+    title: "Oppkjøp og motbud",
+    items: [
+      "Selskapene bruker nå ordene fra virkeligheten: en annen spiller legger inn et oppkjøpsbud, og eieren kan svare med et motbud. «Angrep» og «forsvar» er borte.",
+      "Forsvarsfondet heter nå beredskapsfondet, og politikken «Bygg forsvar» heter «Bygg beredskap». Det virker som før.",
+      "Poengene «angrep mot forsvar» er byttet ut med hvem som står sterkest: oppkjøpsbudet eller eieren.",
+    ],
+  },
+  {
     b: 370,
     date: "2026-09-30",
     title: "Selskapene er lettere å forstå",

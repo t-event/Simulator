@@ -400,7 +400,7 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   Tallene i `config.world.control` og `config.world.policy`. Fondet skal aldri kunne brukes til nye verk eller angrep.
   Eieren ser Kontrollen som kroner (B-370): `bidToTake`, `controlAfterInvest` og `defenseNeeded` i `control.ts` speiler
   formlene – endres vektene i `company_control` eller overtakelsene, endres de også.
-- **Overtakelser** (B-335, 068): `takeovers`, avgjort «lat» av `resolve_takeovers` i `world_tick`. Formlene står i
+- **Overtakelser** (B-335, 068; spillerne ser «oppkjøpsbud» og «motbud», B-371 – aldri «angrep»/«forsvar» i tekst): `takeovers`, avgjort «lat» av `resolve_takeovers` i `world_tick`. Formlene står i
   `takeover_attack_of`/`takeover_defense_of` og speiles i `game/control.ts` (faste tall i testen). Eieren skal alltid
   kunne miste selskapet (B-337): budet teller inntil 10 × V, forsvaret høyst 3 × V – endres vektene eller Kontrollens
   maks, må det sterkeste forsvaret fortsatt kunne slås (testen «alltid mulig»). Ingen fordel i fornyelsesanbudet. Bryteren

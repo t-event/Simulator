@@ -20,9 +20,9 @@ export const POLICIES: Policy[] = [
     id: "balansert",
     name: "Balansert",
     keep: 0.5,
-    about: "Litt mindre til kassa. Resten går til forsvarsfondet.",
+    about: "Litt mindre til kassa. Resten går til beredskapsfondet.",
   },
-  { id: "forsvar", name: "Bygg forsvar", keep: 0.7, about: "Minst til kassa. Fondet vokser raskt." },
+  { id: "forsvar", name: "Bygg beredskap", keep: 0.7, about: "Minst til kassa. Beredskapsfondet vokser raskt." },
 ];
 
 /** Valget kan endres én gang per ekte uke */
@@ -62,7 +62,12 @@ export const CONTROL_PARTS: { key: string; name: string; max: number; how: strin
     max: 10,
     how: "Kommer av seg selv: +1 for hver uke du eier det.",
   },
-  { key: "fond", name: "Forsvarsfondet", max: 10, how: "Velg «Balansert» eller «Bygg forsvar» i utbyttepolitikken." },
+  {
+    key: "fond",
+    name: "Beredskapsfondet",
+    max: 10,
+    how: "Velg «Balansert» eller «Bygg beredskap» i utbyttepolitikken.",
+  },
   { key: "belastning", name: "Mange selskaper å holde", max: 0, how: "" },
 ];
 
@@ -197,15 +202,15 @@ export function protectedUntil(since: string | null | undefined, now: number): n
 
 /** Hvorfor et bud ikke kan legges inn nå, med vanlige ord */
 export const TAKEOVER_REASON: Record<string, string> = {
-  pagar: "Noen prøver allerede å overta selskapet.",
-  ett: "Du har allerede et forsøk på gang – ett om gangen.",
-  vern: "Ny eier er beskyttet de 3 første dagene.",
+  pagar: "Noen har allerede lagt inn et oppkjøpsbud på selskapet.",
+  ett: "Du har allerede et oppkjøpsbud på gang – ett om gangen.",
+  vern: "Ny eier er vernet de 3 første dagene.",
   sent: "Konsesjonen går snart ut – vent på det nye anbudet.",
-  pause: "Selskapet ble forsøkt overtatt nylig – 14 dagers pause.",
+  pause: "Det var et oppkjøpsforsøk på selskapet nylig – 14 dagers pause.",
   belop: "Budet må være minst verdien av selskapet.",
   kasse: "Det er ikke nok i konsernkassa.",
   eier: "Det går ikke med dette selskapet.",
-  av: "Overtakelser er ikke slått på ennå.",
+  av: "Oppkjøp er ikke slått på ennå.",
   sperret: "Kontoen er sperret mens topplista sjekker den.",
   nett: "Fikk ikke kontakt med serveren. Prøv igjen om litt.",
 };
