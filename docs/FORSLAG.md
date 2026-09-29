@@ -6,11 +6,9 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
-- **Hovedverkets konsernbidrag i ekte tid (B-313, `docs/KONSERNBIDRAG.md`):** seks spørsmål i avsnitt 14 – automatisk
-  bidrag og innskuddsknappen bort, aktivitetsgulv 30 % eller 0, utbyttepolitikk nå eller fast 50 %, avstanden
-  10–20 : 1 mellom best drevne og nytt konsern, konsernverdi på topplista uten lokal kasse, og om utbyttet skal betales
-  lokalt hvert spilldøgn. **Kandidat til fast regel:** «Spilltid gir kunnskap, optimalisering og lokal progresjon. Ekte
-  tid styrer akkumulering av kapital og makt som påvirker andre spillere.» Avgjøres den, inn i CLAUDE.md og RETNING.md.
+- **Kandidat til fast regel (fra B-313):** «Spilltid gir kunnskap, optimalisering og lokal progresjon. Ekte tid styrer
+  akkumulering av kapital og makt som påvirker andre spillere.» Bidraget (B-318–B-320) følger den alt. Sier eieren ja,
+  inn i CLAUDE.md og RETNING.md.
 
 - **Slå på gjestekontoer (B-212):** eieren må slå på «Allow anonymous sign-ins» under Authentication → Sign In /
   Providers i dashbordet (connectoren kan ikke). Til det er gjort, prøver appen én gang i døgnet og gjør ellers ingenting.
@@ -21,8 +19,8 @@ til «Avgjort» nederst).
 - **Pynt for sesong 3 (B-287, B-291):** pynten for sesong 2 er klar. Før `start_season` kjøres for sesong 3, legg inn ny
   pynt i `COSMETICS` med `season: 3` – både i butikken og på stigen (trinn 10–50). Ellers har sesong 3 ingen egen pynt.
 
-- **Slå på slagghåndteringen (B-253):** når skraplageret har fått sin første eier (anbudet stenger 29.9. 01:33 UTC) og betalt
-  ut inntekt i noen dager uten feil: `update public.companies set active = true where type = 'slagg'; select public.world_tick();`
+- **Slå på slagghåndteringen (B-253):** skraplageret fikk sin første eier 29.9. 01:33 UTC; første inntekt betales for 30.9
+  (når dagen er over). Når det har betalt ut i noen dager uten feil: `update public.companies set active = true where type = 'slagg'; select public.world_tick();`
   Sjekk så kortet under Konsern → Industrien.
 - **Slå på mekanisk verksted (B-256):** etter slagghåndteringen, og tidligst en uke etter at appen med vedlikeholdstallet er
   ute (så anslaget bygger på ekte tall): `update public.companies set active = true where type = 'verksted'; select
@@ -65,6 +63,10 @@ til «Avgjort» nederst).
   Krever konto. Brukeren: «Ingen varsel på mobilen enda» (B-149).
 
 ## Avgjort
+
+- **Hovedverkets konsernbidrag (B-313):** eieren svarte 29.9: automatisk bidrag (B-318), innskuddet bort (B-319), gulv
+  30 %, fast 50 % (valg av utbyttepolitikk utsatt), dempet over 30 mill., ny liste «Konsernverdi» regnet av serveren ved
+  siden av den gamle (B-320). Kassa i spillet røres ikke (taket på 10 mrd. holder den nede).
 
 - **Mange lager ikke konto:** automatisk gjestekonto som ikke får gjøre noe mer før man oppretter konto, og vis hva
   man går glipp av. Google og Apple senere (B-212).
