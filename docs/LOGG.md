@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 243 – 2026-09-29: Rettferdig kamp – verden 10× ned, ett prosjekt om gangen
+
+**Brukeren ba om:** hvor lang tid et ekte konsern bruker på 100 mill. (svar: 9–15 dager for et europeisk konsern),
+og «spillet skal bli en rettferdig kamp mellom spillerne – nå er det for enkelt å tjene en milliard». Valgte 10× ned
+og ett byggeprosjekt om gangen.
+
+**Gjort:** B-311: config.world (utbytte, innskudd, gebyrer, minste bud) og konsernkassene delt på 10 (055), speilene i
+`dividend.ts` og `scrapIncome.ts`, `projectBlock` i konsernet.
+
+**Testet:** tsc, lint, npm test, balance, tørrkjøring av 055.
+
+**Gjenstår:** pynt for sesong 3. Følg med på at anbudene (skraplageret ved ny konsesjon) får rimelige bud med de nye
+tallene.
+
+---
+
 ## Økt 242 – 2026-09-29: Metningen løftet litt, snitt siste 7 døgn i grafen
 
 **Brukeren ba om:** «Nå går mange i minus hver dag. Hvordan fikser vi det?»

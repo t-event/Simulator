@@ -3,7 +3,9 @@
 Skrevet 2026-09-28 (økt 235, B-301). **Eieren valgte pakke B med alle anbefalingene (B-302).** Status: B2+B6 bygget
 (B-303), B1 bygget (B-304: utbytte i ekte tid til konsernkassa), B3 bygget (B-305: andre knekk 40 %, ikke 25 %, og
 administrasjon bare over 5 000 t), og taket for kassa er senket til 10 mrd. og kjørt på serveren (B-306 – eieren
-mente B4 «ingen kompresjon» var for snilt). Gebyret settes etter anbudet. Analysen under står som den ble skrevet. Tallene er hentet fra
+mente B4 «ingen kompresjon» var for snilt). Gebyret ble satt til 500 etter anbudet, og så, med resten av verden, til
+50 kr/t (B-311: verden 10× ned, ett byggeprosjekt om gangen). Konsernene ble satt tilbake til det den nye økonomien
+hadde gitt (B-309), og metningen justert (B-308, B-310). Analysen under står som den ble skrevet. Tallene er hentet fra
 koden (`data.ts`, `plant.ts`, `konsern.ts`), fra spillernes lagrede spill og tidslinje (bare lesing), og fra
 virkelige priser (kilder nederst). Spillerne omtales uten navn.
 

@@ -20,7 +20,7 @@ export const SCRAP_INCOME = {
   /** Så mange tall fra tidslinja farten regnes over (ca. 7–9 spilldøgn) */
   rateWindow: 8,
   /** Kroner til skraplageret per tonn skrap som teller (standard; serveren leser config.world) */
-  feePerT: 500,
+  feePerT: 50,
 };
 
 /** Ekte UTC-dag som tekst, som `(at at time zone 'utc')::date` i SQL */
