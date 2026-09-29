@@ -5783,7 +5783,8 @@ Beslutning (`supabase/060_byggetid_uendret.sql`):
   være nå. Et verk som står slik det var, er aldri juks. Tida som kreves, regnes fra det av de to verket bygger på.
 - Resten av regelen er som i 059 (kjente prosjekter kan ikke bli ferdige før `readyAt`, nye verk må bygges, slakk for
   spilling uten nett).
-- Spilleren som ble rettet ved en feil, røres ikke uten eierens svar (se LOGG).
+- Spilleren som ble rettet ved en feil, får stå som det er (eierens svar): storverkene er riktige, og moderniseringen
+  som ble startet, gir tre gratis trinn mot at nye prosjekter venter til den er ferdig (08:08).
 Konto (B-149): ingen ny funksjon.
 Testet: ni tilfeller i SQL mot en kopi av funksjonen, i en blokk som ble rullet tilbake: den ekte lagringen som ble
 feilrettet gir nå null (059 ga tre rettinger); juks med trinn, med utbygging og med trinn etter en ferdig utbygging
