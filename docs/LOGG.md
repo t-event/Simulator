@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 247 – 2026-09-29: Vernet mot klokkejuks tåler spilling uten nett (B-315)
+
+**Brukeren ba om:** «Fortsett» etter B-314.
+
+**Gjort:** sjekket at publiseringene var grønne og at vernet bare har rettet de to som jukset. Fant en svakhet: en spiller
+som spiller uten nett lenger enn byggetida, ville fått et ærlig ferdig verk satt tilbake. B-315 (059): `guard_projects`
+får tidspunktet for forrige lagring og godtar det som kan ha skjedd på den tida. Kjente prosjekter sjekkes som før.
+
+**Testet:** ti tilfeller i SQL, `save_game` som spilleren (rullet tilbake), sikkerhetsrådene.
+
+**Gjenstår:** se i `project_guard_log` etter et døgn. Eierens svar på KONSERNBIDRAG.md. Pynt for sesong 3.
+
+---
+
 ## Økt 246 – 2026-09-29: Juks med telefonens klokke i konsernet (B-314)
 
 **Brukeren ba om:** finne den som fikk åtte storverk ferdig og modernisert momentant ved å stille tidssonen på

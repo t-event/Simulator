@@ -5733,3 +5733,22 @@ Testet: `guard_projects` med fem tilfeller i SQL (for tidlig ferdig, trinn uten 
 prosjekt startet i framtida; lovlig ferdig og uendret gir null), `npm test` (serverklokka: fem timer foran gir riktig
 `realNow`), tsc, lint.
 
+## B-315 Vernet mot klokkejuks godtar lang spilling uten nett (2026-09-29)
+Status: gjelder (justerer B-314)
+Endringslogg: nei – ærlige spillere merker ingenting; det hindrer bare at vernet slår feil
+Bakgrunn: `guard_projects` (057) satte tilbake et nytt verk uten byggeprosjekt og trinn som kom uten prosjekt. Men
+spillet virker uten nett, og `realNow()` bruker den siste kjente forskyvningen mot serveren. En spiller som kjøper et
+verk og spiller frakoblet i mange timer, kan derfor lovlig ha verket ferdig før neste lagring når serveren – og ville
+fått det satt tilbake i bygging.
+Beslutning (`supabase/059_byggetid_frakoblet.sql`):
+- `guard_projects` får tidspunktet for forrige lagring (`saves.updated_at`, serverens klokke) og godtar et nytt verk
+  uten prosjekt når det har gått minst byggetida (2/6/12 t) siden da, og trinn eller utbygging uten prosjekt når det
+  har gått minst 4 t per trinn (6 t for utbygging) – ett prosjekt om gangen (B-311).
+- Et prosjekt serveren alt kjenner (readyAt i forrige lagring), sjekkes som før: det kan ikke bli ferdig før readyAt,
+  uansett hvor lenge det er siden. Et nytt verk som kommer med trinn over 0, rettes alltid.
+- Loggen i `project_guard_log` får minutter siden forrige lagring (`since_last_min`).
+Konto (B-149): ingen ny funksjon.
+Testet: ti tilfeller i SQL mot en kopi av funksjonen (juks med 12 min, 2 t og 10 min fanges; 13 t uten nett med nytt
+kompleks eller tre trinn godtas; kjent prosjekt for tidlig fanges selv etter 18 t; ærlige tilfeller gir null; uten
+tidspunkt streng som før), `save_game` som spilleren i en transaksjon som rulles tilbake, sikkerhetsrådene uendret.
+
