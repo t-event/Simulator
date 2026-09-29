@@ -6606,3 +6606,20 @@ Regel: ny serverfunksjon som gir penger, inntekt eller plass mellom spillere, sk
 Endringslogg: nei – spillerne merker ingenting.
 Konto (B-149): – ingen ny funksjon.
 
+## B-366 Gjennomgang av serveren for gjester: ingen flere hull (2026-09-29)
+Status: gjelder (utfyller B-365)
+Bakgrunn: etter B-365 ble alle serverfunksjoner som går over alle spillere, gått gjennom for gjester:
+- Topplistene (`leaderboard`), ukelista (`weekly_scores`/`weekly_board`) og sesongresultatene (`close_season`) tar bare
+  med kontoer med kallenavn. Gjester kan ikke sette kallenavn (`profiles` og `set_nickname` er stengt i `guest_gate`).
+  Rekordene (`update_records`) lages også for gjester, men vises ikke, og følger med når gjesten oppretter konto.
+- Skraplageret (`pay_company_income`, `company_counted_t`, `scrap_counted_t`) leser `production_days`, som gjester ikke
+  kommer i (B-365). Anslaget (`scrap_yard_estimate`) bruker `active_players`, som leser `activity_days`, der
+  `note_activity` hopper over gjester.
+- Datterverk, utbytte, verdenskartet og konsernverdien krever en rad i `konsern` (bare `konsern_order`, stengt for
+  gjester). Kjøp, bud, overtakelser, kassa, chat og daglige belønninger er stengt i `guest_gate`.
+- Ingen gjester har rader i noen av tabellene ennå (0 gjester kl. 23:40).
+Beslutning: ingen endring. Det eneste som står igjen, er at forlatte gjester blir liggende (ca. 1 MB hver). Spørringen for
+å rydde dem er rettet i `FORSLAG.md` (etter siste lagring, ikke når gjesten ble laget) – eieren avgjør om det skal bli en
+daglig jobb.
+Endringslogg: nei – ingen endring i spillet.
+Konto (B-149): – ingen ny funksjon.

@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 292 – 2026-09-29: Gjestene, resten av serveren (B-366)
+
+**Brukeren ba om:** «Fortsett».
+
+**Gjort:** gikk gjennom alle serverfunksjoner som går over alle spillere (topplister, ukelista, sesongene, skraplageret,
+anslaget, konsernet, triggerne på `saves` og `snapshots`). Ingen flere hull – se B-366. Rettet spørringen for å rydde
+forlatte gjester i `FORSLAG.md` (etter siste lagring).
+
+**Testet:** ingen gjester har rader i `production_days`, `contribution_samples`, `activity_days`, `treasury`, `konsern`,
+`snapshots`, `records`, ukeresultater eller sesongpoeng (0 gjester ennå).
+
+**Gjenstår:** sjekk gjestene 30.9 (påminnelse satt); eieren avgjør om forlatte gjester skal ryddes automatisk.
+
 ## Økt 291 – 2026-09-29: Gjester og tilgangsreglene (B-365)
 
 **Brukeren sendte:** Supabase-varselet «Anonymous users will use the authenticated role … review your RLS policies».
