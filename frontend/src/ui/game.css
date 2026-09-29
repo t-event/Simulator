@@ -6804,3 +6804,132 @@ button.g-prod-row:hover {
   padding: 4px 0;
   font-size: var(--fs-meta);
 }
+
+/* Skiftrapporten (B-338): lista ruller, skrivefeltet står fast nederst */
+.g-modal-card.g-chat-sheet {
+  display: flex;
+  flex-direction: column;
+  height: min(680px, 100%);
+  overflow: hidden;
+}
+
+.g-chat-intro {
+  margin: 0 0 var(--sp-2);
+}
+
+.g-chat-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0 0 var(--sp-3);
+  padding: var(--sp-2);
+  list-style: none;
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.g-chat-msg {
+  max-width: 88%;
+  align-self: flex-start;
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--surface-2);
+  border-radius: var(--r-md);
+  overflow-wrap: anywhere;
+}
+
+.g-chat-msg.is-mine {
+  align-self: flex-end;
+  background: var(--accent-soft);
+}
+
+.g-chat-msg p {
+  margin: 2px 0 0;
+}
+
+.g-chat-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--sp-2);
+  font-size: var(--fs-meta);
+}
+
+.g-chat-meta strong {
+  overflow-wrap: anywhere;
+}
+
+.g-chat-del {
+  margin-left: auto;
+  font-size: var(--fs-meta);
+}
+
+.g-chat-form {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.g-chat-form input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 6px 10px;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface-2);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-md);
+}
+
+.g-chat-form button {
+  min-width: 48px;
+  min-height: 44px;
+}
+
+.g-chat-error {
+  color: var(--critical-fg);
+  margin: var(--sp-2) 0 0;
+}
+
+.g-chat-btn,
+.g-chat-kpi {
+  position: relative;
+}
+
+/* På PC er arket like høyt som skjermen, som de andre arkene fra høyre */
+@media (min-width: 900px) {
+  .g-side-sheet > .g-modal-card.g-chat-sheet {
+    height: 100%;
+  }
+}
+
+/* Under 380 px står chatknappen i tallraden øverst, ved hjelpeknappen (B-283) */
+.g-chat-kpi {
+  display: none;
+}
+
+@media (max-width: 379px) {
+  .g-notice-row .g-chat-btn {
+    display: none;
+  }
+
+  .g-chat-kpi {
+    display: inline-flex;
+    padding: 13px 12px;
+    margin: -13px 0 -13px auto;
+  }
+
+  .g-chat-kpi + .g-help-kpi {
+    margin-left: 0;
+  }
+
+  .g-chat-kpi .ds-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--info);
+  }
+}

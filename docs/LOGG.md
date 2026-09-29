@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 266 – 2026-09-29: Skiftrapporten – felles chat (B-338)
+
+**Brukeren ba om:** «Lag en globalchat. Den må heita "Skiftrapporten"», og spurte hvorfor jeg anbefaler å slå på
+overtakelser først etter 13.10.
+
+**Gjort:** `070_skiftrapporten.sql` (kjørt): `chat_messages` og `chat_send`/`chat_list`/`chat_latest`/`chat_delete` med
+grenser (lengde, tempo, like meldinger, lenker, 30 dager, sperrede kontoer). App: `net/chat.ts`, `ui/Chat.tsx` (knapp med
+prikk og ark), knappen i varsellinja og under 380 px i tallraden, ikonene `message` og `send`, `skiftrapporten` i
+`ACCOUNT_FEATURES`. Svaret om 13.10 ble gitt i samtalen (skraplagerets eier vant en konsesjon uten overtakelser).
+
+**Testet:** SQL som spiller i DO-blokk (rullet tilbake), advisors (bare de vanlige funnene), `npm test` (ny nettest), lint,
+typesjekk, bygg; Playwright på de 7 størrelsene med konto (sende, lenke avvist, slette, prikken borte etter lesing) og
+uten konto (320 og 1 366 px), ingen horisontal scrolling, knapper 44 px.
+
+**Gjenstår:** eierens ja til overtakelser; ev. hendelser fra spillet i Skiftrapporten.
+
+---
+
 ## Økt 265 – 2026-09-29: Svar 3 rettet – eieren kan alltid miste selskapet (B-337)
 
 **Brukeren ba om:** «Du tolker svar 3 feil. Den som forvalter selskapet skal kunne miste det ved overtakelse. Men om

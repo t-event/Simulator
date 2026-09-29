@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 338,
+    date: "2026-09-29",
+    title: "Skiftrapporten",
+    items: [
+      "Ny felles chat for alle spillerne: trykk på snakkeboblen ved varsellinja. En prikk viser at det har kommet nye meldinger.",
+      "Du skriver med brukernavnet ditt og kan slette dine egne meldinger. Lenker er ikke lov, og meldingene står i 30 dager.",
+    ],
+  },
+  {
     b: 337,
     date: "2026-09-29",
     title: "Likt for alle i anbudet",
