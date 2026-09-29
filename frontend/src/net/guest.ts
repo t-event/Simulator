@@ -11,7 +11,16 @@
  */
 import type { GameState } from "../game/types";
 import { APP_VERSION, cloudConfigured } from "./config";
-import { getSession, NetError, refreshSession, restAs, rpc, signInAnonymously, type Session } from "./supabase";
+import {
+  getSession,
+  isTransient,
+  NetError,
+  refreshSession,
+  restAs,
+  rpc,
+  signInAnonymously,
+  type Session,
+} from "./supabase";
 
 const GUEST_KEY = "stalverk-gjest-v1";
 /** Når anonyme kontoer var slått av (ms), så appen ikke prøver ved hver lagring */
@@ -185,7 +194,7 @@ export async function adoptGuest(): Promise<void> {
     await rpc("adopt_guest", { p_code: code });
     forgetGuest();
   } catch (e) {
-    // Uten nett prøves det igjen ved neste innlogging; ellers er gjesten ikke til å redde
-    if (!(e instanceof NetError && e.offline)) forgetGuest();
+    // Uten nett eller med tjenesten nede prøves det igjen ved neste kobling (B-356); ellers er gjesten ikke til å redde
+    if (!isTransient(e)) forgetGuest();
   }
 }

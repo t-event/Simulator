@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 356,
+    date: "2026-09-29",
+    title: "Lagring på nett etter driftsstans",
+    items: [
+      "Var serveren nede da du åpnet spillet, ble spillet før bare lagret på telefonen til du startet appen på nytt. Nå prøver appen igjen av seg selv, og spillet lagres på nett så snart serveren er tilbake.",
+    ],
+  },
+  {
     b: 355,
     date: "2026-09-29",
     title: "Slik henger pengene sammen",

@@ -206,6 +206,14 @@ export class NetError extends Error {
   }
 }
 
+/**
+ * Feil som går over av seg selv (B-356): uten nett, tidsgrensen, eller tjenesten nede eller overbelastet (503/504 da
+ * databasen var strupet). Det som feiler slik, prøves igjen; andre feil (avvist, ikke logget inn) gjør ikke det.
+ */
+export function isTransient(e: unknown): boolean {
+  return e instanceof NetError && (e.offline || e.status === 408 || e.status === 429 || e.status >= 500);
+}
+
 /** Oversetter feilmeldingene fra tjenesten til noe spilleren forstår */
 export function translateError(status: number, raw: string): string {
   const t = raw.toLowerCase();

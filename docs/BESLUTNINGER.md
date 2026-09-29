@@ -6452,3 +6452,27 @@ Beslutning:
 - Kassa i toppfeltet ble prøvd som knapp til arket, men en knapp er høyere enn tallene og dyttet tallraden ut av stilling på
   320 og 390 px. Droppet.
 Konto (B-149): nei – forklaring.
+
+## B-356 Koblingen mot kontoen prøves igjen etter en driftsstans (2026-09-29)
+Status: gjelder
+Bakgrunn: 29.9. kl. 20:10–21:27 var databasen strupet (gratisplanens diskkvote brukt opp; se B-353). PostgREST fikk ikke
+lest skjemaet og svarte 503/504 på nesten alt; innloggingen gikk ut på tid. Eieren restartet prosjektet kl. 21:27, og
+kallene gikk gjennom igjen – men ingen spill ble lagret på nett. Grunnen: appen kobler spillet mot kontoen én gang per
+sidelasting (`linkOnLogin`, B-138). Feilet koblingen, ble den aldri prøvd igjen; `reconciled` sto usann, og da lastet
+appen verken opp eller hentet (`onLocalSave`, `CloudFollow`). Alle som åpnet spillet under stansen, lagret bare lokalt til
+de lastet appen på nytt.
+Beslutning:
+- `isTransient(e)` (`net/supabase.ts`): uten nett, tidsgrensen (408), for mange kall (429) og 5xx er feil som går over.
+- `linkOnLogin` husker en slik feil (`needsRelink()`), og skyen i toppfeltet viser at spillet ikke er lagret på nett.
+- `CloudFollow` (spillskjermen) prøver koblingen igjen hvert 20. sekund mens appen vises, og når den vises igjen, får
+  fokus eller får nett. Svaret behandles som ved innlogging: spillet på nett hentes (med arket «Hentet det nyeste spillet»)
+  hvis det er nyere, ellers lastes spillet her opp. Er de to spillene forskjellige, får spilleren et ark som åpner Konto,
+  der valget står som før.
+- Kontokortet sier «Fikk ikke kontakt med serveren. Spillet lagres her, og det prøves igjen av seg selv.» i stedet for
+  feilmeldingen.
+- En gjest som logger inn mens tjenesten er nede, beholdes til neste kobling (før: bare uten nett).
+Testet: nettesten «Kobling mens tjenesten er nede» (503 → ingen opplasting → oppe → lastet opp), og i Playwright på 320 og
+390 px med 503 på alt: kontokortet viser beskjeden, skyen viser feilen, og spillet ble lagret 16 s etter at tjenesten var
+oppe igjen, uten omlasting.
+Konto (B-149): nei – gjelder lagringen for dem som har konto.
+

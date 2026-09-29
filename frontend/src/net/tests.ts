@@ -45,6 +45,7 @@ import {
   leaving,
   linkOnLogin,
   markReconciled,
+  needsRelink,
   onLocalSave,
   pullIfNewer,
   resetCloud,
@@ -147,6 +148,8 @@ interface Fake {
   /** keepalive per kall, samme rekkefølge som `calls` */
   keepalive: boolean[];
   offline: boolean;
+  /** Tjenesten svarer 503 på alt under /rest/ (databasen strupet, B-356) */
+  down: boolean;
   /** Kalles når appen fornyer økta – en annen fane kan fornye samtidig */
   onRefresh: (() => void) | null;
   /** Kalles mens save_game behandles, som om spillet går videre mens klienten venter på svar (B-162) */
@@ -173,6 +176,7 @@ function makeFake(): Fake {
     calls: [],
     keepalive: [],
     offline: false,
+    down: false,
     onRefresh: null,
     onSaveGame: null,
     hangSave: false,
@@ -199,6 +203,8 @@ function makeFake(): Fake {
     f.calls.push(`${init?.method ?? "GET"} ${path}`);
     f.keepalive.push(!!init?.keepalive);
     if (f.offline) throw new TypeError("Failed to fetch");
+    if (f.down && path.startsWith("/rest/"))
+      return json(503, { code: "PGRST002", message: "Could not query the database for the schema cache. Retrying." });
     const body = init?.body ? (JSON.parse(String(init.body)) as Record<string, unknown>) : {};
     // Gjest (B-212): anonym innlogging uten e-post
     if (path.startsWith("/auth/v1/signup") && body.email === undefined) {
@@ -787,6 +793,32 @@ const main = async () => {
     await linkOnLogin(cloud);
     const d = await linkOnLogin(null);
     assert(d.kind === "cloud" && d.cloud.minute === 1440 * 40, `fikk ${d.kind}`);
+  });
+
+  await test("Kobling mens tjenesten er nede (B-356): prøves igjen, og lagrer når den er oppe", async () => {
+    const f = fresh();
+    await login(f);
+    const local = newGame(4);
+    f.down = true;
+    let err: unknown = null;
+    await linkOnLogin(local).catch((e) => (err = e));
+    assert(err instanceof NetError && err.status === 503, "skulle feile med 503");
+    assert(!isReconciled() && needsRelink(), "skulle prøves igjen");
+    assert(cloudStatus().kind === "error", `status ${cloudStatus().kind}`);
+    // Ingenting lastes opp før koblingen er gjort
+    local.minute += 60;
+    onLocalSave(local, true);
+    assert(!f.calls.some((c) => c.includes("save_game")), "lastet opp uten kobling");
+    f.down = false;
+    const d = await linkOnLogin(local);
+    assert(d.kind === "uploaded" && f.saves.has("u-a@test"), `fikk ${d.kind}`);
+    assert(isReconciled() && !needsRelink(), "skulle være koblet");
+    // Avvist (ikke nede): prøves ikke igjen
+    resetCloud();
+    setSession(null);
+    let err2: unknown = null;
+    await linkOnLogin(local).catch((e) => (err2 = e));
+    assert(err2 === null && !needsRelink(), "uten økt skal ingenting prøves igjen");
   });
 
   await test("Kobling uten husket versjon (eldre app): begge på samme konto → det som har kommet lengst vinner", async () => {

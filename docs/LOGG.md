@@ -5,6 +5,32 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 282 – 2026-09-29: Driftsstans i databasen, og lagring som ikke kom i gang igjen (B-356)
+
+**Brukeren ba om:** skjermbilder av Supabase med «Unhealthy», så «Er alt slettet?», «Har restartet» og «Sjekk databasen
+grundig nå».
+
+**Funnet:**
+- 20:10–21:27 (norsk tid): nesten alle kall fikk 503/504. PostgREST fikk ikke lest skjemaet (PGRST002), innloggingen gikk ut
+  på tid, og sjekkpunktene tok 11–39 s for noen få sider. Databasen var strupet – gratisplanens diskkvote (NANO) var
+  brukt opp. Trafikken var liten, så det var ikke spillerne som presset den.
+- Ingenting slettet: 19 spill, 19 kontoer, 61 sikkerhetskopier, 54 meldinger i Skiftrapporten, 12 verk i konsernet, og
+  eksporten `stalverk-2026-09-29.json.gz` i Storage. Databasen er 27 MB.
+- Eieren restartet kl. 21:27. Etterpå gikk kallene gjennom, `world_tick` går og chatten virker, men ingen `save_game` på
+  8 minutter: appen prøvde aldri koblingen mot kontoen igjen etter at den feilet (se B-356).
+- Noen spill har fortsatt over 1 000 partier (opptil 107 kB) – de har ikke fått B-353 ennå; partiene slås sammen når de
+  åpner den nye versjonen.
+- Rådene fra `get_advisors` er de kjente (RLS uten regler på tabeller som bare brukes av serverfunksjoner, `security
+  definer`-funksjoner som er ment for innloggede).
+
+**Gjort:** B-356 – koblingen prøves igjen hvert 20. sekund og når appen vises; se beslutningen.
+
+**Testet:** `tsc -b`, lint, `npm test` (ny nettest), Playwright 320/390 med falsk tjeneste som svarer 503 og så kommer tilbake.
+
+**Gjenstår:** følg med på diskkvoten (Database → Reports i Supabase). Den varige løsningen er Pro-planen eller at B-353
+når alle spillerne. Spillere som åpnet appen under stansen med den gamle versjonen, må laste den på nytt (skjer av seg selv
+når den nye versjonen publiseres, B-148).
+
 ## Økt 281 – 2026-09-29: Gjøre økonomien enklere å forstå (B-355)
 
 **Brukeren ba om:** «Spillere forstår ikke økonomien helt. Kan du gjøre det enklere å forstå» (Skiftrapporten: hvor blir
