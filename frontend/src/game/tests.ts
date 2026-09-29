@@ -24,7 +24,20 @@ import {
   upgradeOptions,
 } from "./actions";
 import { MASTERY, MASTERY_IDS, masteryCost, masteryEffect, masteryOpen } from "./mastery";
-import { controlAdvice, controlWord, policyLockedUntil, policySplit, takeoverAttack, takeoverDefense } from "./control";
+import {
+  bidToTake,
+  controlAdvice,
+  controlAfterInvest,
+  controlSteps,
+  controlWord,
+  defenseNeeded,
+  investPart,
+  policyLockedUntil,
+  policySplit,
+  protectedUntil,
+  takeoverAttack,
+  takeoverDefense,
+} from "./control";
 import {
   ACHIEVEMENT_BY_ID,
   ACHIEVEMENTS,
@@ -3414,12 +3427,12 @@ test("Utbyttepolitikken og Kontroll (B-334): samme tall som serveren, fondet er 
   assert(near(s.kasse + s.fond, 37e6) && s.fond > s.kasse * 0.4, "fondet er det kassa får mindre");
   assert(policySplit(37e6, "ut").fond === 0, "ta ut gir ikke fond");
   // Ordene
-  assert(controlWord(80).word === "Sterk" && controlWord(79).word === "Stabil", "sterk/stabil");
-  assert(controlWord(40).word === "Presset" && controlWord(39).word === "Svak", "presset/svak");
+  assert(controlWord(80).word === "Sterk" && controlWord(79).word === "God", "sterk/god");
+  assert(controlWord(40).word === "Middels" && controlWord(39).word === "Svak", "middels/svak (B-370)");
   // Rådet peker på delen som mangler mest (investering, 25 poeng)
   assert(
     controlAdvice({ eier: 30, aktivitet: 20, investering: 0, region: 2.5, eiertid: 0, fond: 0 }) ===
-      "Invester i selskapet.",
+      "Invester i selskapet (feltet under).",
     "rådet",
   );
   // Valget kan endres én gang per uke
@@ -3444,6 +3457,39 @@ test("Overtakelser (B-335): angrep og forsvar som på serveren, med tak", () => 
   assert(near(takeoverDefense(50, 0, 10 * V, V), 90), "tak på fondet");
   // En passiv angriper har halv styrke
   assert(near(takeoverAttack(V, V, 0, 0), 30), "passiv angriper");
+});
+
+test("Kontrollen med vanlige ord (B-370): hva som skal til for å ta selskapet, investering og forsvar", () => {
+  // Skraplageret 30.9: verdi 471,5 mill., 34,74 mill. investert (serveren: investering 1,8), fond 3,8 mill.
+  const V = 471_485_385;
+  assert(Math.abs(investPart(34.74e6, V) - 1.78) < 0.01, `investering ${investPart(34.74e6, V)}`);
+  // Kontroll 54 og nesten ikke fond: minstebudet (verdien) er nok for en aktiv spiller
+  assert(bidToTake(54, 3.8e6, V) === V, `bud ${bidToTake(54, 3.8e6, V)}`);
+  // Kontroll 80 uten fond: (80 / 60)² × V
+  assert(Math.abs(bidToTake(80, 0, V) - V * (80 / 60) ** 2) < 1, "bud ved 80");
+  // Taket: høyst 10 × V
+  assert(bidToTake(100, 100 * V, V) <= 10 * V, "tak");
+  const ctl = { score: 54, parts: { investering: 1.8 }, invested: 34.74e6, value: V };
+  assert(controlAfterInvest(ctl, 0) === 54, "uten investering");
+  const after = controlAfterInvest(ctl, 300e6);
+  assert(after === Math.round(54 - 1.8 + Math.round(investPart(334.74e6, V) * 10) / 10), `etter ${after}`);
+  assert(after >= 64 && after <= 66, `etter 300 mill.: ${after}`);
+  // Stegene: det som mangler mest først, fulle deler er ikke med
+  const steps = controlSteps({ eier: 30, aktivitet: 20, investering: 1.8, region: 2.5, eiertid: 0, fond: 0 });
+  assert(steps[0].key === "investering" && !steps.some((p) => p.key === "aktivitet"), steps.map((p) => p.key).join());
+  assert(steps.at(-1)!.key === "eiertid" && steps.some((p) => p.key === "fond"), "eiertid sist, fondet med «Ta ut»");
+  const parts = { eier: 30, aktivitet: 20, investering: 1.8, region: 2.5, eiertid: 0, fond: 0 };
+  assert(!controlSteps(parts, "balansert").some((p) => p.key === "fond"), "fondet vokser alt");
+  // Forsvaret: holder det alt, trengs 0; ellers et beløp som snur det; for sterkt angrep gir null
+  assert(defenseNeeded(50, 54, 0, 0, V) === 0, "holder");
+  const need = defenseNeeded(70, 54, 0, 0, V)!;
+  assert(need > 0 && takeoverDefense(54, need, 0, V) > 70, `forsvar ${need}`);
+  assert(defenseNeeded(189, 54, 0, 0, V) === null, "for sterkt");
+  // Vernet: tre dager etter at eieren tok over
+  const since = "2026-09-29T01:33:03Z";
+  const t0 = Date.parse(since);
+  assert(protectedUntil(since, t0 + 86_400_000) === t0 + 3 * 86_400_000, "vernet");
+  assert(protectedUntil(since, t0 + 4 * 86_400_000) === null && protectedUntil(null, t0) === null, "over");
 });
 
 test("Byggetid og innkjøring (B-336): store kjøp bygges i spilltid, ett om gangen, og kjøres inn", () => {

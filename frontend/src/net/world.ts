@@ -125,6 +125,8 @@ export interface CompanyControl {
   parts: Record<string, number>;
   value: number;
   invested: number;
+  /** Når eieren tok over (B-370): vernet de første dagene regnes av dette */
+  since: string | null;
 }
 
 export interface WorldStatus {
@@ -194,6 +196,7 @@ export function parseControl(r: Row | null | undefined): CompanyControl | null {
     parts,
     value: num(r.value),
     invested: num(r.invested),
+    since: typeof r.since === "string" ? r.since : null,
   };
 }
 

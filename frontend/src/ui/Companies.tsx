@@ -26,13 +26,17 @@ import {
   type WorldStatus,
 } from "../net/world";
 import {
+  bidToTake,
   CONTROL_PARTS,
-  controlAdvice,
+  controlAfterInvest,
+  controlSteps,
   controlWord,
+  defenseNeeded,
   POLICIES,
   policyLockedUntil,
   policyOf,
   policySplit,
+  protectedUntil,
   TAKEOVER,
   TAKEOVER_REASON,
 } from "../game/control";
@@ -274,7 +278,9 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
           )}
         </dl>
 
-        {c.control && <ControlSection c={c} />}
+        {c.control && (
+          <ControlSection c={c} fund={fund} policy={g.konsern.policy?.kind ?? "ut"} takeoversOn={world.takeoversOn} />
+        )}
         {world.takeoversOn && (
           <TakeoverSection
             c={c}
@@ -317,9 +323,10 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
                 </select>
               </label>
             )}
+            <InvestPreview c={c} fund={fund} amount={millions(invest[c.id] ?? "")} />
             <p className="g-muted g-small-text">
-              Pengene blir i selskapet: de gir mer Kontroll og inntil 25 % mer inntekt, og følger selskapet til neste
-              eier. Halve effekten ved ca. {fmtKr(Math.round((c.control.value * 0.7) / 1e6) * 1e6)}.
+              Pengene blir i selskapet og kommer ikke tilbake. De gir mer Kontroll og inntil 25 % mer inntekt. Mister du
+              selskapet, følger de med til den nye eieren.
             </p>
           </div>
         )}
@@ -428,7 +435,13 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
           <MoneyGuideLink g={g} />
           {/* Utbyttepolitikken og forsvarsfondet (B-334): vises når fondet betyr noe – du eier et selskap, eller har et fond */}
           {g.konsern.policy && (world.companies.some((c) => c.mine) || fund > 0 || g.konsern.policy.kind !== "ut") && (
-            <PolicySection g={g} full={world.dividend.fullPerDay} busy={busy} onPick={(k) => void doPolicy(k)} />
+            <PolicySection
+              g={g}
+              full={world.dividend.fullPerDay}
+              busy={busy}
+              ownsCompany={world.companies.some((c) => c.mine)}
+              onPick={(k) => void doPolicy(k)}
+            />
           )}
           {note("politikk")}
           {/* Utbyttet fra datterverkene i ekte tid (B-304): regnes av serveren én gang per dag */}
@@ -507,42 +520,128 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
   );
 }
 
-/** Kontrollen over et selskap (B-334): ordet for alle, delene og rådet for eieren */
-function ControlSection({ c }: { c: Company }) {
+/** Kontrollen over et selskap (B-334), med vanlige ord for eieren (B-370): hvor trygt det er, og hva som gjør det tryggere */
+function ControlSection({
+  c,
+  fund,
+  policy,
+  takeoversOn,
+}: {
+  c: Company;
+  fund: number;
+  policy: PolicyId;
+  takeoversOn: boolean;
+}) {
   const ctl = c.control!;
   const w = controlWord(ctl.score);
-  const advice = c.mine ? controlAdvice(ctl.parts) : null;
+  const tone = w.tone === "bad" ? "critical" : w.tone;
+  if (!c.mine)
+    return (
+      <section className="g-control">
+        <p className="g-control-head">
+          <span>Kontroll</span>
+          <span className={`ds-status is-${tone}`}>{w.word}</span>
+          {c.region && <span className="g-muted g-small-text">{regionName(c.region)}</span>}
+        </p>
+      </section>
+    );
+  const steps = controlSteps(ctl.parts, policy).slice(0, 3);
+  const vern = protectedUntil(ctl.since, realNow());
+  const take = bidToTake(ctl.score, fund, ctl.value);
   return (
     <section className="g-control">
       <p className="g-control-head">
         <span>Kontroll</span>
-        <span className={`ds-status is-${w.tone === "bad" ? "critical" : w.tone}`}>{w.word}</span>
+        <span className={`ds-status is-${tone}`}>{w.word}</span>
         {c.region && <span className="g-muted g-small-text">{regionName(c.region)}</span>}
       </p>
-      {c.mine && (
+      <p className="g-muted g-small-text">Hvor vanskelig det er for andre spillere å ta selskapet fra deg.</p>
+      <Bar
+        value={ctl.score / 100}
+        tone={tone === "critical" ? "critical" : tone === "heat" ? "warning" : "ok"}
+        label={`Kontroll ${ctl.score} av 100`}
+      />
+      {takeoversOn && !c.takeover && (
+        <p className="g-small-text g-control-now">
+          {vern ? (
+            <>
+              <Icon name="shield-check" /> Ingen kan prøve å ta selskapet før {fmtWhen(new Date(vern).toISOString())} –
+              nye eiere er vernet de første {TAKEOVER.protectDays} dagene.{" "}
+            </>
+          ) : (
+            <>Ingen prøver å ta selskapet nå. </>
+          )}
+          {vern ? "Etter det kan" : "Slik det står, kan"} en aktiv spiller ta det med et bud på ca.{" "}
+          <strong>{fmtKr(take)}</strong> hvis du ikke forsvarer deg.
+        </p>
+      )}
+      {steps.length > 0 && (
         <>
-          {advice && <p className="g-small-text">{advice}</p>}
-          <details className="g-details">
-            <summary>Hva Kontrollen består av ({ctl.score} av 100)</summary>
-            <ul className="g-control-parts">
-              {CONTROL_PARTS.filter((p) => p.key !== "belastning" || (ctl.parts.belastning ?? 0) < 0).map((p) => (
-                <li key={p.key}>
-                  <span>{p.name}</span>
-                  <span>
-                    {Math.round(ctl.parts[p.key] ?? 0)}
-                    {p.max > 0 ? ` av ${p.max}` : ""}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <p className="g-muted g-small-text">
-              God Kontroll gjør det dyrere for andre å overta selskapet fra deg. Når konsesjonen går ut, stiller alle
-              likt i det nye anbudet.
-            </p>
-          </details>
+          <h4 className="g-control-sub">Slik blir det tryggere</h4>
+          <ul className="g-control-steps">
+            {steps.map((p) => (
+              <li key={p.key}>
+                <span>{p.how}</span>
+                <span className="g-muted">+{Math.round(p.gap)}</span>
+              </li>
+            ))}
+          </ul>
         </>
       )}
+      <details className="g-details">
+        <summary>Hva Kontrollen består av ({ctl.score} av 100)</summary>
+        <ul className="g-control-parts">
+          {CONTROL_PARTS.filter((p) => p.key !== "belastning" || (ctl.parts.belastning ?? 0) < 0).map((p) => (
+            <li key={p.key}>
+              <span>{p.name}</span>
+              <span>
+                {Math.round(ctl.parts[p.key] ?? 0)}
+                {p.max > 0 ? ` av ${p.max}` : ""}
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p className="g-muted g-small-text">
+          Forsvarsfondet gir lite Kontroll før det er stort i forhold til selskapet ({fmtKr(ctl.value)}), men blir du
+          angrepet, teller det med i forsvaret av seg selv.
+        </p>
+      </details>
+      {takeoversOn && (
+        <details className="g-details">
+          <summary>Hvis noen prøver å ta selskapet</summary>
+          <ol className="g-small-text g-control-how">
+            <li>
+              En annen spiller legger inn et bud på minst verdien av selskapet. Du får beskjed, og har{" "}
+              {TAKEOVER.defenseHours} timer på deg.
+            </li>
+            <li>
+              Du kan sette inn penger i forsvaret, fra konsernkassa eller forsvarsfondet. Du får 95 % tilbake etterpå,
+              uansett utfall.
+            </li>
+            <li>
+              Budet måles mot Kontrollen din pluss forsvaret. Er budet sterkest, overtar den andre selskapet, og du får
+              85 % av budet. Ellers beholder du det.
+            </li>
+          </ol>
+          <p className="g-muted g-small-text">
+            Når konsesjonen går ut, kommer et nytt anbud, og da stiller alle likt – også du.
+          </p>
+        </details>
+      )}
     </section>
+  );
+}
+
+/** Hva en investering gir, før den gjøres (B-370): ny Kontroll og budet som trengs for å ta selskapet */
+function InvestPreview({ c, fund, amount }: { c: Company; fund: number; amount: number }) {
+  const ctl = c.control!;
+  if (amount <= 0) return null;
+  const after = controlAfterInvest(ctl, amount);
+  return (
+    <p className="g-small-text g-invest-preview">
+      Med {fmtKr(amount)} til: Kontroll <strong>{after}</strong> ({controlWord(after).word.toLowerCase()}), og et bud må
+      være ca. <strong>{fmtKr(bidToTake(after, fund, ctl.value))}</strong> for å ta selskapet.
+    </p>
   );
 }
 
@@ -551,11 +650,13 @@ function PolicySection({
   g,
   full,
   busy,
+  ownsCompany,
   onPick,
 }: {
   g: GameState;
   full: number;
   busy: boolean;
+  ownsCompany: boolean;
   onPick: (k: PolicyId) => void;
 }) {
   const p = g.konsern.policy!;
@@ -564,8 +665,15 @@ function PolicySection({
     <section className="g-policy">
       <h3 className="g-subhead">Utbyttepolitikk</h3>
       <p className="g-small-text">
-        Forsvarsfondet: <strong>{fmtKr(p.fund)}</strong>. Det som holdes igjen i datterverkene, går hit. Fondet kan
-        brukes til investeringer i selskapene dine og gir mer Kontroll – ikke til nye verk.
+        Du bestemmer hvor mye av utbyttet fra datterverkene som går til konsernkassa, og hvor mye som settes av i
+        forsvarsfondet. Fondet kan bare brukes til å gjøre selskapene dine tryggere: investere i dem, eller forsvare dem
+        hvis noen prøver å ta dem. Ikke til nye verk.
+      </p>
+      <p className="g-small-text">
+        Forsvarsfondet nå: <strong>{fmtKr(p.fund)}</strong>.{" "}
+        {ownsCompany
+          ? "Blir et selskap angrepet, teller fondet med i forsvaret av seg selv."
+          : "Du eier ikke noe selskap nå, så «Ta ut» gir mest."}
       </p>
       <div className="g-policy-opts" role="radiogroup" aria-label="Utbyttepolitikk">
         {POLICIES.map((o) => {
@@ -647,6 +755,7 @@ function TakeoverSection({
             <strong>{t.mineAttack ? "Du prøver å overta selskapet" : `${t.attacker} prøver å overta selskapet`}</strong>{" "}
             med {fmtKr(t.bid)}. Avgjøres {timeLeft(t.closesAt)} fra nå. Nå: {score(t.attack, t.defenseScore)}.
           </p>
+          {c.mine && <DefenseVerdict c={c} fund={fund} />}
           {c.mine && (
             <>
               {amountRow(
@@ -723,5 +832,27 @@ function TakeoverSection({
         </p>
       )}
     </section>
+  );
+}
+
+/** Eieren under angrep (B-370): med vanlige ord, taper eller beholder du selskapet slik det står, og hva som trengs */
+function DefenseVerdict({ c, fund }: { c: Company; fund: number }) {
+  const t = c.takeover!;
+  const ctl = c.control;
+  if (!ctl) return null;
+  const need = defenseNeeded(t.attack, ctl.score, t.defense ?? 0, fund, ctl.value);
+  if (need === 0)
+    return (
+      <p className="g-small-text g-defense-verdict is-ok">
+        <Icon name="shield-check" /> Slik det står nå, beholder du selskapet. Budet kan økes, så følg med.
+      </p>
+    );
+  return (
+    <p className="g-small-text g-defense-verdict is-bad">
+      <Icon name="warning" /> Slik det står nå, mister du selskapet.{" "}
+      {need === null
+        ? "Budet er så stort at forsvaret ikke kan stå imot. Du får 85 % av budet."
+        : `Sett inn ca. ${fmtKr(need)} i forsvaret for å stå imot – du får 95 % tilbake etterpå.`}
+    </p>
   );
 }

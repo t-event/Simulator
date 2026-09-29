@@ -15,6 +15,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 370,
+    date: "2026-09-30",
+    title: "Selskapene er lettere å forstå",
+    items: [
+      "Eier du et selskap, står det nå hvor trygt det er med vanlige ord: hvor stort bud en annen spiller trenger for å ta det fra deg, om det er vernet (de første 3 dagene), og hva som gjør det tryggere.",
+      "Skriver du inn et beløp å investere, ser du med én gang hva Kontrollen blir, og hvor stort bud som da trengs.",
+      "Prøver noen å ta selskapet, står det om du beholder det slik det står, og hvor mye du må sette inn i forsvaret.",
+      "Kontrollen heter nå sterk, god, middels eller svak. «Presset» ble lest som at noen angrep selskapet.",
+      "Nytt spørsmål i «Slik henger pengene sammen»: Hva er Kontroll – og kan noen ta selskapet mitt?",
+    ],
+  },
+  {
     b: 369,
     date: "2026-09-30",
     title: "Pengene til konsernkassa kommer ved midnatt",

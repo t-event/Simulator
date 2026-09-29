@@ -6671,3 +6671,28 @@ Beslutning:
 Regel: en ekte dag på serveren regnes med `world_today()`/`world_day()` og i appen med `worldDay` – aldri
 `at time zone 'utc'` eller `toISOString().slice(0, 10)`.
 Konto (B-149): – ingen ny funksjon.
+
+## B-370 Selskapene med vanlige ord: hvor trygt, hva som trengs, og hva du kan gjøre (2026-09-30)
+Status: gjelder (utfyller B-334, B-335, B-337; reglene er uendret)
+Bakgrunn: brukeren: «Figen forstår ikke hvorfor firmaet hans er presset, han forstår heller ikke seg på forsvar og
+lignende. Du må gjøre bedrifter enklere og mer intuitiv å forstå seg på.» Figen eier skraplageret: Kontroll 54
+(eier 30, aktivitet 20, investering 1,8 av 25, region 2,5 av 10, eiertid 0, fond 0 – fondet på 3,8 mill. er lite mot
+verdien på 471 mill.). «Presset» (40–59) ble lest som at noen angrep selskapet; kortet viste poeng, ikke hva de betyr.
+Med Kontroll 54 kan en aktiv spiller ta selskapet med minstebudet når vernet (3 dager) er over, hvis eieren ikke forsvarer seg.
+Beslutning (bare framstillingen; formlene på serveren er de samme):
+- Ordene: sterk (80+), god (60–79), middels (40–59), svak. «Presset» og «stabil» er borte.
+- Eieren ser Kontrollen som en stolpe med én setning: «Hvor vanskelig det er for andre spillere å ta selskapet fra
+  deg», om selskapet er vernet og til når (`082_kontroll_siden.sql`: `company_control` gir `since`), og **budet som
+  trengs** for å ta det (`bidToTake`: en aktiv spiller uten verk i regionen, mot Kontroll + fondet uten forsvar, minst
+  verdien). Et kronebeløp er lettere å forstå enn poeng.
+- «Slik blir det tryggere»: de tre delene som mangler mest, med hva man gjør (`controlSteps`); eiertiden (kommer av seg
+  selv) sist, og fondet bare foreslått med «Ta ut» – med en annen politikk vokser det alt.
+- Investering: forhåndsvisning mens man skriver beløpet (`controlAfterInvest`: ny Kontroll og nytt bud som trengs), og
+  at pengene ikke kommer tilbake og følger selskapet.
+- Under angrep: «Slik det står nå, mister du / beholder du selskapet» og hvor mye forsvar som trengs (`defenseNeeded`),
+  eller at budet er for stort til å stå imot.
+- «Hvis noen prøver å ta selskapet»: tre steg (bud → 72 timer til forsvar, 95 % tilbake → sterkest vinner, 85 % av budet
+  til eieren som mister det). Utbyttepolitikken forklart på nytt, med råd om «Ta ut» uten selskap. Nytt spørsmål i
+  «Slik henger pengene sammen».
+- Formlene er speilet i `game/control.ts` med faste tall i testen (Figens tall).
+Konto (B-149): – ingen ny funksjon (selskapene krever konto fra før).
