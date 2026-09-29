@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 257 – 2026-09-29: Kontroll av økonomimodellen (B-324)
+
+**Brukeren ba om:** 16 konkrete spørsmål om dagens økonomi (spilltid mot ekte tid, konsernkassa, datterverk,
+simulering, svakheter), uten nye endringer.
+
+**Gjort:** `docs/OKONOMI-KONTROLL.md` med tall fra koden, `config.world` og lagringene, simulering 30/60/90 dager for
+liten, middels, stor og ny toppspiller, og vurdering mot B-323. Funn: titlene er uoppnåelige med kassetaket (nye
+spillere låst til 8 storverk trinn 4), datterverk kjøpes for spilltidspenger, konsernkassa mangler sluk og
+aktivitetskrav.
+
+**Testet:** simuleringen mot formlene i 051/061 (utbyttet for Grane 33,7 på serveren mot 32,9–37 i modellen).
+
+**Gjenstår:** eierens valg av rekkefølge (avsnitt 16). Første konsernbidrag 30.9.
+
+---
+
 ## Økt 256 – 2026-09-29: Gjennomgang av alle .md-filer
 
 **Brukeren ba om:** se gjennom alle .md-filer, sjekke at ingenting er glemt, og spørre om det som er uklart.

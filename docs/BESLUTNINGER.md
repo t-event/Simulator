@@ -5902,3 +5902,15 @@ klokke): alt som samler penger eller makt mot andre – konsernkassa, eierskap, 
 (som bidraget, B-318, og utbyttet, B-304); det som bare hjelper eget verk, kan gå i spillfarten.
 Konto (B-149): ingen ny funksjon.
 
+## B-324 Kontroll av økonomimodellen: tall og svakheter (2026-09-29)
+Status: gjelder (analyse; ingen endring i spillet)
+Endringslogg: nei – analyse
+Bakgrunn: eieren ba om en kontroll av om modellen etter reform 2, B-311 og konsernbidraget er på riktig spor, med
+konkrete tall og dagens logikk, uten nye store endringer.
+Beslutning: analysen står i `docs/OKONOMI-KONTROLL.md` (16 spørsmål, simulering 30/60/90 dager, vurdering mot B-323).
+Hovedfunn: (1) titlene (25–400 mrd «Verdi i spillet») er uoppnåelige med kassetaket – høyeste mulige verdi for en ny
+spiller er ca. 35 mrd, så komplekser, 10–14 verk og trinn 5 er låst for alle nye, og de etablerte har en permanent 2×
+fordel i utbytte; (2) datterverk og modernisering betales fortsatt av spilltidspenger; (3) konsernkassa har ett sluk og
+ingen aktivitetskrav på utbyttet. Ingenting er endret; eieren avgjør rekkefølgen (forslag i avsnitt 16).
+Konto (B-149): ingen ny funksjon.
+
