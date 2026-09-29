@@ -235,3 +235,10 @@ eller budene – bare hva eieren får per dag. Taket på 923 mill. for dette anb
 2. Reserven: føres som «utbetalt til eierne» (historikk, teller ikke i konsernverdi), beholdes, eller noe annet?
 3. Skraplagerets gebyr før første utbetaling: 1 000 (som nå), 500 (anbefalt) eller 300 kr/t?
 4. B3 (realistiske kostnader på toppen): nå, senere, eller ikke?
+
+## 9. Neste steg: hovedverkets konsernbidrag (B-313)
+
+Analysen av koblingen mellom hovedverket (spilltid) og konsernet (ekte tid) står i **`KONSERNBIDRAG.md`**: forslag om
+et automatisk, normalisert konsernbidrag fra hovedverket i stedet for det manuelle innskuddet, kassa som
+driftskapital, utbyttepolitikk og simulering 30/60/90 dager. Ingen reform 3; ingenting bygges før eieren har svart.
+

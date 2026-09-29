@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 245 – 2026-09-29: Analyse av koblingen hovedverk–konsern (B-313)
+
+**Brukeren ba om:** en arkitektur- og økonomianalyse (12 punkter) før noe bygges videre: hovedverket med
+driftsøkonomi i spilltid, konsernet med kapitaløkonomi i ekte tid, et normalisert konsernbidrag fra hovedverket,
+ingen reform 3.
+
+**Gjort:** `docs/KONSERNBIDRAG.md`: pengestrømmene i dag (drift 27–150 mill. per spilldøgn, 600–6 000 spilldøgn per
+ekte dag, 10 mill. innskudd, utbytte 0–37 mill., skraplageret ca. 15), hva som antar lokal kasse = formue, forslaget
+(bidrag = politikk × tonn som teller × margin × aktivitet, bygget på produksjonsmåleren), vern, driftskapital,
+innskuddet bort, utbyttepolitikk, migrering, forholdet til B-311, eksempler, simulering 30/60/90 dager, exploits og
+seks spørsmål. B-313 og kandidatregel i FORSLAG.
+
+**Testet:** simuleringen (skript i økta), tall fra lagringene og tidslinja.
+
+**Gjenstår:** eierens svar på spørsmålene i KONSERNBIDRAG.md avsnitt 14. Pynt for sesong 3.
+
+---
+
 ## Økt 244 – 2026-09-29: Reformmerket rettet, salgsdirektøren sjekket for alle
 
 **Brukeren ba om:** (etter B-311) sjekk at salgsdirektøren virker for alle – noen har slått ham av fordi han ikke

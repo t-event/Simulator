@@ -200,7 +200,7 @@ supabase/      SQL-migrasjonene, nummerert. Kjøres i prosjektet med Supabase-co
                legges her samtidig, så repoet speiler databasen. Sjekk get_advisors (security) etter hver DDL-endring.
 supabase/utkast/ Spørringer som bare leser (f.eks. dry-run av økonomireformen) – ikke migrasjoner
 docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretningen for sluttspillet, B-180), UI.md,
-               OKONOMI.md (økonomianalysen og reform 2, B-301),
+               OKONOMI.md (økonomianalysen og reform 2, B-301), KONSERNBIDRAG.md (hovedverkets bidrag i ekte tid, B-313),
                (designsystem, mobil + PC, plan for redesignet, B-187),
                PLAN-NETT.md (det som er bygget på nett), FORSLAG.md, KONTO.md (hva som krever konto)
 ```
