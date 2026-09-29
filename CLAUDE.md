@@ -302,9 +302,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   i konsernet virker derfor ikke med én gang – ikke skriv tester som venter det.
 - **Serverens klokke** (B-314): `realNow()` er servertid – `net/clock.ts` leser Date-headeren i hvert svar (`call` i
   `net/supabase.ts`). Telefonens klokke kan stilles fram, så `save_game()` setter prosjekter tilbake med
-  `guard_projects` (057/059; ren funksjon, test med `select`) og logger i `project_guard_log`. Den godtar det som kan
+  `guard_projects` (057/059/060; ren funksjon, test med `select`) og logger i `project_guard_log`. Den godtar det som kan
   ha skjedd siden forrige lagring på serveren (spilling uten nett, B-315), men aldri at et kjent prosjekt blir ferdig
-  før `readyAt`. Ny mekanikk i ekte tid
+  før `readyAt`. Et verk som står slik det var, rettes aldri – appen fullfører ferdige prosjekter først i neste
+  tidssteg (B-317). Se i loggen etter endringer i regelen. Ny mekanikk i ekte tid
   (frister, pauser, prosjekter) skal bruke `realNow()` og sjekkes på serveren på samme måte – aldri `Date.now()`.
   `save_game` er `security definer`; en serverfunksjon som kaller noe som er tatt fra `authenticated`, må være det,
   ellers stopper lagringen for alle (skjedde i ti minutter med B-314). Test nye serverfunksjoner som spilleren:

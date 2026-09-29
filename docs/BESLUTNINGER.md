@@ -5771,3 +5771,22 @@ Konto (B-149): nei – det er en visning i eget spill.
 Testet: `npm test` (nærmeste aktive avtale, uker som venter gir 0, produktet verket slutter med telles ikke, verk som
 står gir uendelig kø, `fmtDuration`), tsc, lint, Playwright på 320 og 390 px (ingen overflyt, raden brytes ikke).
 
+## B-317 Vernet mot klokkejuks retter ikke et verk som står slik det var (2026-09-29)
+Status: gjelder (retter B-314/B-315)
+Endringslogg: nei – ærlige spillere skal ikke merke vernet; dette fjerner en feilretting
+Bakgrunn: `project_guard_log` viste en retting av en ærlig spiller kl. 04:08: tre stålverk med utbygging til storverk
+(startet før B-311, ferdige 03:37 på serveren) ble lagret uendret 92 minutter senere, før appen hadde fullført
+utbyggingen. `guard_projects` regnet «det verket lovlig kan være» som storverk trinn 0, og stålverkets gamle trinn
+(1–2) ble lest som «trinn uten prosjekt». Verkene ble satt til storverk trinn 0 med en ny modernisering på 4 timer.
+Beslutning (`supabase/060_byggetid_uendret.sql`):
+- Et verk er bare mistenkelig når det er kommet lenger enn både det det var i forrige lagring og det det lovlig kan
+  være nå. Et verk som står slik det var, er aldri juks. Tida som kreves, regnes fra det av de to verket bygger på.
+- Resten av regelen er som i 059 (kjente prosjekter kan ikke bli ferdige før `readyAt`, nye verk må bygges, slakk for
+  spilling uten nett).
+- Spilleren som ble rettet ved en feil, røres ikke uten eierens svar (se LOGG).
+Konto (B-149): ingen ny funksjon.
+Testet: ni tilfeller i SQL mot en kopi av funksjonen, i en blokk som ble rullet tilbake: den ekte lagringen som ble
+feilrettet gir nå null (059 ga tre rettinger); juks med trinn, med utbygging og med trinn etter en ferdig utbygging
+fanges; et kjent prosjekt fjernet for tidlig fanges etter 20 t; ferdig utbygging og ventende modernisering gir null;
+13 t uten nett med tre trinn godtas. Lagringen går som før etter endringen, sikkerhetsrådene uendret.
+

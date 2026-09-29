@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 249 – 2026-09-29: Feilretting i vernet mot klokkejuks (B-317)
+
+**Brukeren ba om:** «Fortsett».
+
+**Gjort:** så i `project_guard_log`. Én ærlig spiller ble rettet ved en feil kl. 04:08: tre ferdige utbygginger til
+storverk som appen ennå ikke hadde fullført, ble lest som «trinn uten prosjekt». B-317 (060): et verk som står slik
+det var, rettes aldri. Spilleren fikk storverk trinn 0 (riktig) pluss en modernisering som blir ferdig 08:08 (tre
+gratis trinn), men kan ikke starte nye prosjekter i konsernet før da (ett om gangen, B-311). Ikke endret – venter på
+eierens svar.
+
+**Testet:** ni tilfeller i SQL (rullet tilbake), lagringen etter endringen, sikkerhetsrådene.
+
+**Gjenstår:** eierens svar om spilleren som ble feilrettet. Følg med på `project_guard_log`. Eierens svar på
+KONSERNBIDRAG.md. Pynt for sesong 3.
+
+---
+
 ## Økt 248 – 2026-09-29: Neste rammeavtale i «Produksjon nå» (B-316)
 
 **Brukeren ba om:** at spillerne kan se i «Produksjon nå» hvor lenge det er til neste rammeavtale starter produksjon,
