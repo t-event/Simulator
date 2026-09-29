@@ -38,7 +38,7 @@ export interface BoardRow {
   honorIcon: "trophy" | "medal" | null;
   /** Tittel etter sluttmålet (Stålbaron … Stållegende, B-150), eller null */
   title: string | null;
-  /** Spilldagen spillet ble koblet til kontoen (første dag i tidslinja, B-170), eller null */
+  /** Spilldagen spillet ble koblet til kontoen (første dag i tidslinja, B-170), eller null. Vises ikke lenger (B-354) */
   linked_day: number | null;
   /** Æresmerker bare serveren vet om, f.eks. «reform» (B-296), vist ved navnet (B-299) */
   badges: string[];
@@ -46,9 +46,6 @@ export interface BoardRow {
 
 /** Navnet på æresmerkene på topplista (samme navn som prestasjonen, B-296) */
 export const BADGE_NAMES: Record<string, string> = { reform: "Reformveteran", reform2: "Reformveteran II" };
-
-/** Fra hvilken dag et spill må være koblet til for at det vises på lista: de første dagene er ingen forskjell */
-export const LINKED_SHOWN_FROM = 6;
 
 const STAGE_NAMES = ["Garasje", "Verksted", "Støperi", "Stålverk", "Storverk"];
 
