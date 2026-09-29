@@ -5611,3 +5611,20 @@ Beslutning (`supabase/054_reform2_konsern_tilbakestilt.sql`, etter tørrkjøring
 - Anslaget er snilt (alle døgn regnes som toppdrift), så ingen har fått mindre enn de kunne tjent.
 Konto (B-149): ingen ny funksjon.
 Endringslogg: ja (b:309).
+
+## B-310 Metningen løftet litt, og snittet siste 7 døgn i resultatgrafen (2026-09-29)
+Status: gjelder (justerer B-308; eieren: «Nå går mange i minus hver dag»)
+Bakgrunn: etter B-308 lå toppspilleren på +22 mill. per døgn i snitt, men med svingninger på ±120 mill. fra døgn
+til døgn: skrap kjøpes i store partier (72, 73, 154, 99 mill. fire døgn på rad) og kontrakter betales ved levering
+(171, 263, 82, 158 mill.). Ett døgn viste −115 selv om uka var i pluss. Snittet var også tynnere enn siktet (36 mill.):
+den faktiske prisen før metning er ca. 10 500 kr/t (emner og lavere kvaliteter i miksen), ikke 12 400.
+Beslutning:
+- **Metningen**: 50 % av prisen over 3 000 t (før 45 %) og 45 % over 20 000 t (før 40 %). 30 000 t: faktor 0,55 (før
+  0,505). Med den faktiske prisen gir det ca. 35–40 mill. per døgn på toppen – der B-308 siktet.
+- **Resultatgrafen** (Verket → Økonomi) viser snittet per døgn de siste 7 døgnene i overskriften, så én rød dag ikke
+  leses som «går i minus». Snittet er tallet å styre etter; enkeltdøgn svinger med skrapkjøp og leveranser.
+- Ikke gjort (kan komme): jevnere skrapkjøp fra planleggeren (mindre partier hver dag) ville dempet svingningene, men
+  det er en endring i produksjonen som må måles på et fullt storverk med flere frø (B-228).
+Konto (B-149): nei – regel 1, eget spill.
+Testet: tsc, lint, `npm test` (metningstesten: 0,65 ved 10 000 t, 0,575 ved 20 000, 0,522 ved 35 000), balanse (exit 0),
+`--storovn` fra samme utgangspunkt, Playwright på 320 og 390 px (grafen med snittet).

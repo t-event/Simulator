@@ -135,3 +135,4 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Datterverk selges for 60 % av byggekostnaden | Nei | Regel 1: ditt eget spill | B-307 |
 | Markedet metter seg fra 3 000 t, administrasjon 500 kr/t | Nei | Regel 1: ditt eget spill | B-308 |
 | Konsernene satt tilbake til den nye økonomien (serverendring) | – | Ingen ny funksjon | B-309 |
+| Snitt siste 7 døgn i resultatgrafen, metningen 50/45 % | Nei | Regel 1: ditt eget spill | B-310 |
