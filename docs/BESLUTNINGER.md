@@ -6533,3 +6533,25 @@ er borte (bortsett fra «ubrukt indeks» for de nye); sikkerhetsrådene er de sa
 Endringslogg: nei – spillerne merker ingenting.
 Konto (B-149): nei – ingen ny funksjon.
 
+## B-361 Konsernbidraget er snittet over den ekte dagen (2026-09-29)
+Status: gjelder (utfyller B-318)
+Bakgrunn: en spiller (GruberMogg67): «Bidrag fra hovedverket e buggy». På 20 minutter viste Konsern → Industrien 16, 20,
+24, 12 og 7 mill. kr per dag. Bidraget regnes av marginen over de siste 30 spilldøgnene og målerens tonn per spilldøgn.
+På 10× er 30 spilldøgn ca. 6 ekte minutter, så tallet fulgte det siste som skjedde i spillet (her fellesferien: 30 000 →
+14 000 t, margin 1 532 → 778 kr/t). Og betalingen (én gang per ekte dag) brukte tallet i det øyeblikket den ble kjørt –
+et tilfeldig øyeblikksbilde, som i verste fall kunne styres. Ingen bidrag var betalt ennå (første dag er 30.9).
+Beslutning:
+- Serveren måler alle med konsern hvert 15. minutt (`sample_contributions` fra `world_tick`, tabellen
+  `contribution_samples`, `config.world.contribution.sample_minutes`). Også de som ikke spiller, måles, så snittet gjelder
+  hele dagen.
+- Betalingen for en dag bruker snittet av dagens målinger (`contribution_avg`; dager uten målinger: forrige dag med
+  målinger, ellers et øyeblikksbilde).
+- Tallet i appen og konsernverdien (topplista) bruker dagens snitt (`contribution_now`), de første to timene av dagen
+  (under 8 målinger) sammen med gårsdagens. Tonn og kr per tonn i teksten er også snitt.
+- Regelen for selve bidraget (50 %, tak 3 000 kr/t, aktivitet, demping over 30 mill.) er uendret.
+- Teksten under Konsern → Industrien sier at serveren måler hvert kvarter og betaler snittet for dagen.
+Migrasjon `077_bidrag_snitt.sql`. Testet i en DO-blokk: målingene lagres, snittet og `world_status` gir samme tall.
+Utbyttet (B-304) regnes fortsatt av spillet i betalingsøyeblikket; kvaliteten over 7 spilldøgn svinger mindre, men samme
+løsning kan brukes der om det blir et problem.
+Konto (B-149): ja, som bidraget (B-318) – regnes på serveren i ekte tid.
+

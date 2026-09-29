@@ -363,7 +363,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   natta (`g.boostMin`, telles i `useGame`). Kommer en ny fart eller en ny måte tida hopper på, må sjekken følge med,
   ellers flagges ærlige spillere.
 - **Konsernbidraget** (B-318): hovedverkets bidrag til konsernkassa regnes bare på serveren (`pay_contributions` i 061,
-  fra `world_tick`), av `meter_normal_rate` og marginen i `state.history` – ikke speilet i appen. Nye inntekts- eller
+  fra `world_tick`), av `meter_normal_rate` og marginen i `state.history` – ikke speilet i appen. Det er snittet av målinger
+  hvert kvarter (B-361, 077): betal med `contribution_avg`, vis med `contribution_now` – aldri `contribution_full` rett i
+  en betaling eller liste, da blir det et øyeblikksbilde av noen spillminutter. Nye inntekts- eller
   kostnadsposter i døgnregnskapet må vurderes i `contribution_margin` (drift eller ikke). Tallene i
   `config.world.contribution`. Lista «Konsernverdi» (`leaderboard('konsern')`, 063, B-320) regnes av `konsern_value` når
   den vises – kassa i spillet er ikke med; den gamle «verdi» (snapshots.equity) står for ligaer og titler.
