@@ -207,6 +207,7 @@ supabase/utkast/ Spørringer som bare leser (f.eks. dry-run av økonomireformen)
 docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretningen for sluttspillet, B-180), UI.md,
                OKONOMI.md (økonomianalysen og reform 2, B-301), KONSERNBIDRAG.md (hovedverkets bidrag i ekte tid, B-313),
                OKONOMI-KONTROLL.md (kontrollen av modellen med tall og svakheter, B-324),
+               KONSERN-FORSLAG.md (forslaget til nivåer, priser fra konsernkassa og aktivitetskrav – venter på eieren),
                (designsystem, mobil + PC, plan for redesignet, B-187),
                PLAN-NETT.md (det som er bygget på nett), FORSLAG.md, KONTO.md (hva som krever konto)
 ```

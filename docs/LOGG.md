@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 258 – 2026-09-29: Forslag til konsernet i ekte tid (punkt 1, 2, 3 og 5)
+
+**Brukeren ba om:** punkt 1–3 fra OKONOMI-KONTROLL avsnitt 16 i rekkefølge (nivåer etter eiendeler, kjøp fra
+konsernkassa med nye priser og reservasjon, aktivitetskrav på utbyttet) og en vurdering av mesterskapets +30 % – men
+først et konkret forslag med tall før noe bygges.
+
+**Gjort:** `docs/KONSERN-FORSLAG.md`: nivåstige 0–9 etter antall, type og trinn (samme opplåsinger og titler som i dag,
+dagens titler fryses som gulv), priser 20/80/250 mill. + 30 % per trinn fra konsernkassa, kø med 3 prosjekter betalt ved
+bestilling, aktivitetsfaktor 100 % i 7 dager → 50 % ved dag 21 → 0 ved dag 42 (også på gulvet i bidraget), og tre valg for
+mesterskapsbonusen med utslaget per spiller.
+
+**Testet:** simulering av liten/middels/stor fra null i ekte dager (milepæler, flyt 30–365 dager, fem spillemønstre),
+nivået av verkene for alle med konsern i dag (spørring mot `saves`).
+
+**Gjenstår:** eierens svar på forslaget. Deretter bygges 1 → 2 → 3 (+ mesterskapet) og verdenssimuleringen kjøres på nytt.
+
+---
+
 ## Økt 257 – 2026-09-29: Kontroll av økonomimodellen (B-324)
 
 **Brukeren ba om:** 16 konkrete spørsmål om dagens økonomi (spilltid mot ekte tid, konsernkassa, datterverk,
