@@ -5421,7 +5421,9 @@ Eieren valgte alle fire anbefalinger i `docs/OKONOMI.md` avsnitt 8:
 2. **Reserven** føres som «utbetalt til eierne»: historikk med egen liste i Hall of Fame, teller ikke i konsernverdi;
    titlene beholdes; de fire som hadde reserve, får et merke. → B-303.
 3. **Skraplagerets gebyr: 500 kr/t** før første utbetaling 30.9 (bare `config.world`, rører ikke anbudet). Settes
-   etter at anbudet er stengt 29.9 kl. 01:33 UTC, så regelen ikke endres mens det er åpent. → noteres her når det er gjort.
+   etter at anbudet er stengt 29.9 kl. 01:33 UTC, så regelen ikke endres mens det er åpent. → **Gjort 01:40 UTC:**
+   anbudet ble avgjort 01:33 (ni budgivere, vunnet med 200 mill.), `scrap_fee_per_t` satt til 500 og speilet i
+   `net/scrapIncome.ts`. Første utbetaling til eieren kommer for 29.9 etter midnatt UTC.
 4. **Realistiske kostnader på toppen av hjemmeverket** som siste del. → B-305.
 Ingen kompresjon av kassa (B4 i analysen): virkningsløs med tak, og bare irriterende.
 

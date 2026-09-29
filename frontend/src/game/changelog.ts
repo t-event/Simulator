@@ -22,6 +22,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       "Konsernene på toppen var bygget for penger som ikke lenger finnes. Hver spiller har fått beholde de verkene han kunne tjent til med den nye økonomien over hele spillet, i kjøpsrekkefølge – resten er tatt bort, og kassa er det som var igjen.",
       "Forskning, fagpoeng, titler, mesterskap, konsernkassa, hjemmeverket og «Utbetalt til eierne» står som før. De som ble truffet, har æresmerket «Reformveteran II».",
       "Fra nå av gjelder samme regel for alle: det du kjøper, må tjenes med den økonomien som er i spillet i dag.",
+      "Skraplageret er solgt (ni bud), og gebyret eieren tjener på andres skrapkjøp er 500 kr per tonn (før 1 000).",
     ],
   },
   {

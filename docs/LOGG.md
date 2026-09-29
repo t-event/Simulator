@@ -16,7 +16,9 @@ Sju spillere mistet verk; kassene 0,4–10 mrd.
 
 **Testet:** tørrkjøring med raise exception, kontroll på antall sikkerhetskopier, sjekk av alle konserneiere etterpå.
 
-**Gjenstår:** gebyret (01:38 UTC, påminnelse satt). Pynt for sesong 3. Følg med på toppspillerne.
+Gebyret på skraplageret satt til 500 kr/t etter at anbudet var avgjort (B-302 pkt. 3).
+
+**Gjenstår:** pynt for sesong 3. Følg med på toppspillerne og skraplagerets første utbetaling 30.9.
 
 ---
 
