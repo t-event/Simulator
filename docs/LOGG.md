@@ -12,7 +12,8 @@ telefonen, sette dem tilbake, og tette hullet.
 
 **Gjort:** funnet via sikkerhetskopiene og tidslinja (17 trinn på to timer, det åttende verket ferdig 1,5 time etter
 kjøp). B-314: appen bruker serverens klokke (`net/clock.ts`, Date-headeren), og `save_game()` setter prosjekter
-tilbake med `guard_projects` (057), logget i `project_guard_log`. Tilbakestillingen av spilleren etter eierens svar.
+tilbake med `guard_projects` (057), logget i `project_guard_log`. Spilleren satt tilbake (058): 8 storverk til trinn 0,
+det åttende bygges ferdig kl. 08:03 UTC; ingen refusjon, ingen sperre (eierens svar).
 
 **Testet:** guard_projects med fem tilfeller i SQL, npm test (serverklokka), tsc, lint.
 

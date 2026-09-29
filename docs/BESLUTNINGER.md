@@ -5725,8 +5725,9 @@ Beslutning:
   skrives til `project_guard_log`. Ærlige spillere merker ingenting (ett minutts slingringsmonn).
 - **Spilleren som jukset, settes tilbake** etter tørrkjøring og eierens godkjenning: alle åtte storverk til trinn 0,
   de sju som var ærlig kjøpt står ferdige, det åttende bygges ferdig kl. 08:03 (seks timer fra det ble kjøpt).
-  Moderniseringene ble betalt med lokal kasse; eieren avgjør om pengene refunderes. Sikkerhetskopi i `save_backups`
-  (`byggetid`), rad i `economy_reform_log` (`model` = 'B-314: byggetid'), `serverEdit + 1`.
+  Eierens svar: ingen refusjon av de 4,6 mrd. trinnene kostet, ingen sperre av kontoen. Kjørt som 058
+  (`byggetid_tilbakestilt`): sikkerhetskopi i `save_backups` (`byggetid`), rad i `project_guard_log`, `serverEdit + 1`
+  og `device = 'server'`. Ingen rad i `economy_reform_log` – den ville gitt merket «Reformveteran» (056).
 Konto (B-149): ingen ny funksjon.
 Testet: `guard_projects` med fem tilfeller i SQL (for tidlig ferdig, trinn uten prosjekt, nytt verk uten bygging,
 prosjekt startet i framtida; lovlig ferdig og uendret gir null), `npm test` (serverklokka: fem timer foran gir riktig
