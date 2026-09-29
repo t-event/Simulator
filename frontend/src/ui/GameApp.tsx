@@ -7,6 +7,7 @@ import { markChangelogSeen, unseenChangelog } from "../game/changelog";
 import { ChangelogSheet } from "./Changelog";
 import { STAGES, WIN_CASH } from "../game/data";
 import { konsernReady, LEGENDS, WIN_TITLE } from "../game/konsern";
+import { hasPaidOut, paidOutTotal } from "../game/reserve";
 import { InstallTip } from "./InstallTip";
 import { completeManual, unlock } from "../game/engine";
 import { computePlantStats, day, energyPrice, idleOutsideHours, staffing } from "../game/plant";
@@ -525,12 +526,12 @@ function TopBar({
       <div className="g-top-row g-kpis">
         <Kpi icon="money" label="Kasse" className={`g-kpi-cash${g.cash < 0 ? " tone-critical" : ""}`}>
           {fmtKr(Math.floor(g.cash))}
-          {/* Kassa står ved den myke grensen; overskuddet går til den bundne reserven (B-193) */}
-          {g.lockedReserve && (
+          {/* Kassa står ved taket; overskuddet betales ut til eierne (B-303) */}
+          {hasPaidOut(g) && (
             <Icon
               name="lock"
               className="g-kpi-lock"
-              label={`Kassa er ved grensen – overskuddet settes av i den bundne konsernreserven (${fmtKr(Math.floor(g.lockedReserve.total))})`}
+              label={`Kassa er ved taket – overskuddet betales ut til eierne (${fmtKr(Math.floor(paidOutTotal(g)))} i alt)`}
             />
           )}
         </Kpi>

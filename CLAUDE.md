@@ -139,7 +139,7 @@ frontend/src/
     war.ts       Krig i verden, bare i konsernet: dyrere strøm, flere forespørsler, høyst én per år (B-297)
     accidents.ts Eksplosjoner i ovnen og svært sjeldne dødsulykker (B-265)
     trends.ts    Trender i markedet: én kvalitet eller vare ettertraktet eller lite etterspurt i noen døgn (B-255); vises av ui/Trend.tsx
-    reserve.ts   Midlertidig myk grense for kassa (100 mrd.) og bunden konsernreserve (B-193) – grensen står her
+    reserve.ts   Taket for kassa (100 mrd.) og utbetalingen til eierne (B-303) – taket står her
     daily.ts     Daglig belønning, dagens oppdrag og mens du var borte (B-149)
     mastery.ts   Mesterskap: forskning som tas om og om igjen etter all forskning (B-150); priset etter verdi (B-237)
     masteryValue.ts Hva neste nivå i mesterskapet gir i kr per døgn (B-237)
@@ -198,7 +198,8 @@ frontend/public/  PWA: manifest, ikoner (icon.svg er kilden; PNG-ene lages fra d
 supabase/      SQL-migrasjonene, nummerert. Kjøres i prosjektet med Supabase-connectoren (apply_migration) og
                legges her samtidig, så repoet speiler databasen. Sjekk get_advisors (security) etter hver DDL-endring.
 supabase/utkast/ Spørringer som bare leser (f.eks. dry-run av økonomireformen) – ikke migrasjoner
-docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretningen for sluttspillet, B-180), UI.md
+docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretningen for sluttspillet, B-180), UI.md,
+               OKONOMI.md (økonomianalysen og reform 2, B-301),
                (designsystem, mobil + PC, plan for redesignet, B-187),
                PLAN-NETT.md (det som er bygget på nett), FORSLAG.md, KONTO.md (hva som krever konto)
 ```
@@ -323,9 +324,11 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Skraplagerets inntekt** (B-188) regnes på serveren (`029_produksjonsmaler.sql`; `meter_register` står nå i 043) og speiles i `net/scrapIncome.ts`.
   Endres regelen, må begge endres, og `npm test` (scrapTests.ts) og SQL-scenariene i B-188 kjøres på nytt. Farten måles
   med spillminuttene (`game_min`), aldri med hele spilldager (det ga 10× opptil 37 % for mye).
-- **Bunden konsernreserve** (B-193, midlertidig): kassa over `CASH_RESERVE.softCap` flyttes til `g.lockedReserve` i
-  hvert tidssteg og etter hver handling. Reserven er med i `konsernEquity`, men ikke i `cash` – så den kan ikke brukes,
-  ikke flyttes til konsernkassa og teller ikke som penger på bok. Skal migreres når sluttspillet er rebalansert.
+- **Taket for kassa** (B-303, reform 2): kassa over `CASH_RESERVE.softCap` (100 mrd.) betales ut til eierne (`g.paidOut`)
+  i hvert tidssteg og etter hver handling. Det teller ikke i `konsernEquity`, kan ikke brukes og er ikke sikkerhet mot
+  konkurs. Den gamle reserven (`lockedReserve`, B-193) står urørt i lagringene og regnes som utbetalt (`paidOutTotal`)
+  – ikke migrer den, og ikke legg den inn i konsernverdien igjen. Lista «Utbetalt til eierne» leses av `note_paid_out`
+  på `saves` (050). Reform 2 som helhet: `docs/OKONOMI.md` og B-302.
 - **Utslipp** (B-263): røyken regnes i hvert tidssteg (`updateEmissions`) mot renseanlegget; boten kommer i `onDay`.
   Nye, større ovner må ha et renseanlegg som holder (`CLEANERS` i `environment.ts`), ellers får testspilleren bot.
   Gamle lagringer får anleggene de trenger i første tidssteg (`env.grant`) – ikke flytt det til `onHour`.

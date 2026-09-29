@@ -25,7 +25,6 @@ import { computePlantStats, day, gradeRecipe, productCapT } from "./plant";
 import { auto, hasResearch } from "./research";
 import { masteryFactor } from "./mastery";
 import { chance, randInt } from "./random";
-import { reserveTotal } from "./reserve";
 import { realNow, setRealClock } from "./clock";
 import type { GameState, SisterPlant, SisterProject, SisterType } from "./types";
 
@@ -447,9 +446,9 @@ export function konsernValue(g: GameState): number {
   return (g.konsern?.plants ?? []).reduce((a, p) => a + sisterValue(g, p), 0);
 }
 
-/** Egenkapital (kasse minus lån) pluss datterverkene og den bundne reserven (B-193) */
+/** Egenkapital (kasse minus lån) pluss datterverkene. Det som er betalt ut til eierne (B-303), teller ikke */
 export function konsernEquity(g: GameState): number {
-  return g.cash - g.loan + konsernValue(g) + reserveTotal(g);
+  return g.cash - g.loan + konsernValue(g);
 }
 
 export function modernizeCost(p: SisterPlant, g?: GameState): number {

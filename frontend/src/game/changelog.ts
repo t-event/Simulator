@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 303,
+    date: "2026-09-29",
+    title: "Reform 2: kassa har et tak, og overskuddet betales ut til eierne",
+    items: [
+      "Kassa kan ha høyst 100 mrd. – mer enn alt som kan kjøpes. Det verket tjener utover, betales ut til eierne og står i Hall of Fame som «Utbetalt til eierne».",
+      "Den bundne konsernreserven er borte: det som sto der, regnes som utbetalt til eierne. Konsernverdien er nå kassa og verkene. Titlene du har, beholder du.",
+      "De fire som hadde en reserve, får æresmerket «Reformveteran II».",
+      "Neste del av reformen: datterverkene skal betale utbytte i ekte tid rett til konsernkassa – der konkurransen med de andre foregår.",
+    ],
+  },
+  {
     b: 299,
     date: "2026-09-28",
     title: "Æresmerket på topplista",

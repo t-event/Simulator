@@ -1,3 +1,4 @@
+import { hasPaidOut, paidOutTotal } from "../game/reserve";
 import { Fragment, useState } from "react";
 import { useReportTab, type OnTab } from "./tabMemory";
 import { WIN_CASH } from "../game/data";
@@ -795,9 +796,9 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
                   {k.plants.length} av {maxSisters(g)}
                 </strong>
               </span>
-              {g.lockedReserve && (
-                <span>
-                  Herav bunden reserve <strong>{fmtKr(Math.floor(g.lockedReserve.total))}</strong>
+              {hasPaidOut(g) && (
+                <span title="Det kassa har tjent over taket. Teller ikke i konsernverdien">
+                  Utbetalt til eierne <strong>{fmtKr(Math.floor(paidOutTotal(g)))}</strong>
                 </span>
               )}
             </div>
@@ -866,9 +867,8 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
               </li>
             </ol>
             <p className="g-muted g-small-text">
-              Konsernverdi = kassa minus lån, pluss det verkene er verdt
-              {g.lockedReserve ? " og den bundne reserven" : ""}. Under Forskning finnes egne prosjekter for konsernet (
-              {konsernResearch.done} av {konsernResearch.total} forsket fram).
+              Konsernverdi = kassa minus lån, pluss det verkene er verdt. Under Forskning finnes egne prosjekter for
+              konsernet ({konsernResearch.done} av {konsernResearch.total} forsket fram).
             </p>
           </details>
         </Card>
