@@ -57,6 +57,8 @@ import {
 } from "./sync";
 import { forgetGuest, isGuest, onGuestSave, setGuestClock } from "./guest";
 import { DEPOSIT_REFUSAL_TEXT, depositToTreasury, fetchTreasury } from "./treasury";
+import { resetServerClock, serverClockOffset, syncServerClock } from "./clock";
+import { realNow } from "../game/clock";
 import {
   applyCompanyIncome,
   applyDividendNews,
@@ -1566,6 +1568,20 @@ const main = async () => {
     await linkOnLogin(g);
     const s = f.snapshots.get("u-a@test")?.[0];
     assert(s?.maint_kr === 12_345, `vedlikehold i tidslinja ${JSON.stringify(s)}`);
+  });
+
+  await test("Serverens klokke styrer byggetida (B-314): Date-headeren gir realNow, telefonens klokke teller ikke", () => {
+    resetServerClock();
+    const local = Date.now();
+    // Telefonen står fem timer foran serveren
+    const server = new Date(local - 5 * 3_600_000).toUTCString();
+    assert(syncServerClock(server, local), "gyldig Date-header ble avvist");
+    assert(Math.abs(serverClockOffset() + 5 * 3_600_000) < 2000, `forskyvningen ble ${serverClockOffset()}`);
+    assert(Math.abs(realNow() - (Date.now() - 5 * 3_600_000)) < 2000, "realNow følger ikke serveren");
+    assert(!syncServerClock("tull", local) && !syncServerClock(null, local), "ugyldig header skulle ikke telle");
+    assert(Math.abs(serverClockOffset() + 5 * 3_600_000) < 2000, "ugyldig header endret forskyvningen");
+    resetServerClock();
+    assert(Math.abs(realNow() - Date.now()) < 1000, "klokka ble ikke satt tilbake");
   });
 
   setSaveListener(null);

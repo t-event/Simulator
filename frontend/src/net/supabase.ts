@@ -5,6 +5,7 @@
  * `fetch` kan byttes ut i tester (setFetch), så ingenting her trenger nett for å testes.
  */
 import { cloud } from "./config";
+import { syncServerClock } from "./clock";
 
 export interface Session {
   access_token: string;
@@ -264,7 +265,10 @@ async function call(url: string, init: RequestInit): Promise<Response> {
     }, requestTimeoutMs);
   });
   try {
-    return await Promise.race([fetchImpl(url, { ...init, signal: abort.signal }), timeout]);
+    const res = await Promise.race([fetchImpl(url, { ...init, signal: abort.signal }), timeout]);
+    // Serverens klokke styrer byggetida i konsernet (B-314)
+    syncServerClock(res.headers?.get?.("date"));
+    return res;
   } catch (e) {
     if (e instanceof NetError) throw e;
     throw new NetError("Ingen kontakt med nettet.", 0, true);
