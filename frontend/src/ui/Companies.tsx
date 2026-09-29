@@ -45,7 +45,7 @@ import { AccountFeaturesCard } from "./Account";
 import { Bar, Card } from "./common";
 import { MoneyGuideLink } from "./MoneyGuide";
 import { Icon } from "./icons";
-import { fmtKr, fmtT } from "./format";
+import { fmtKr, fmtT, payoutClock } from "./format";
 import { buzz } from "./haptics";
 
 function useSession() {
@@ -438,8 +438,8 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
               {world.dividend.yesterday !== null && world.dividend.yesterday > 0
                 ? ` · ${fmtKr(world.dividend.yesterday)} i går`
                 : ""}
-              {world.dividend.total > 0 ? ` · ${fmtKr(world.dividend.total)} i alt` : ""}. Betales hver ekte dag,
-              uansett spillfart.
+              {world.dividend.total > 0 ? ` · ${fmtKr(world.dividend.total)} i alt` : ""}. Betales hver natt ca. kl.{" "}
+              {payoutClock(realNow())} for dagen før, uansett spillfart.
             </p>
           )}
           {/* Hovedverkets konsernbidrag (B-318): halvparten av driftsresultatet i én normal spilldag per ekte dag, snittet over dagen (B-361) */}
@@ -453,7 +453,8 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
               verket tjener på en vanlig spilldag{" "}
               {`(${fmtT(world.contribution.normalT)} à ${fmtKr(world.contribution.margin)} per tonn)`}, uansett
               spillfart. Serveren måler verket hvert kvarter og betaler snittet for dagen, så en dårlig eller god time
-              ikke avgjør alt. Dager uten spill gir mindre, aldri under 30 %.
+              ikke avgjør alt. Dager uten spill gir mindre, aldri under 30 %. Betales hver natt ca. kl.{" "}
+              {payoutClock(realNow())} for dagen før.
             </p>
           )}
           {/* Innskuddet fra verket (B-311) forsvinner når serveren setter grensen til 0 (B-319): bidraget gjør jobben */}

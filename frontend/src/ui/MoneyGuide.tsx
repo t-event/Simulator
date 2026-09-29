@@ -10,7 +10,8 @@ import { hasPaidOut, paidOutTotal, CASH_RESERVE } from "../game/reserve";
 import { POLICIES } from "../game/control";
 import type { GameState } from "../game/types";
 import { SheetHead } from "./ds";
-import { fmtKr } from "./format";
+import { fmtKr, payoutClock } from "./format";
+import { realNow } from "../game/clock";
 import { Icon } from "./icons";
 import { Portal } from "./Portal";
 
@@ -105,6 +106,13 @@ export function MoneyGuide({ g, onClose }: { g: GameState; onClose: () => void }
                   {POLICIES.map((p) => `${p.name} (${Math.round(p.keep * 100)} %)`).join(", ")}. Det som holdes igjen
                   utover 30 %, går til forsvarsfondet, som beskytter selskapene dine mot overtakelser. Utbyttet er fullt
                   i 7 dager etter at du sist spilte, så synker det.
+                </p>
+              </Question>
+              <Question q="Når kommer utbyttet og bidraget inn i konsernkassa?">
+                <p>
+                  Hver natt ca. kl. {payoutClock(realNow())}, for dagen før. Serveren regner dagene likt for alle
+                  spillere i verden, så dagen skifter ikke ved midnatt hos deg. Det kan gå noen minutter før pengene
+                  står i kassa.
                 </p>
               </Question>
               <Question q="Hvorfor tar det lengre tid å bygge og modernisere enn før?">

@@ -6637,3 +6637,16 @@ den mangler, ellers neste tittel med kravet («Blir du Stålgigant (8 stålkompl
 eller at 14 er det meste. Teksten står under «Dine verk» når konsernet er fullt eller har én plass igjen, og i sperren på
 kjøpene. Forskningen sier «Plass til 2 datterverk til».
 Konto (B-149): – ingen ny funksjon (konsernet krever konto fra før).
+
+## B-368 Spillet sier når utbyttet og bidraget betales (2026-09-30)
+Status: gjelder (utfyller B-304, B-318)
+Bakgrunn: brukeren: «Fikk ikke dagens penger inn på konsernkassa klokken 00:00. Hva skjer?» Serveren regner den ekte
+dagen i UTC (`pay_dividends`/`pay_contributions`: `d < (now() at time zone 'utc')::date`). En dag betales derfor først når
+den er over i UTC – kl. 02:00 norsk sommertid, 01:00 om vinteren – av neste `world_tick` (pg_cron hvert 5. minutt,
+B-364). Kl. 00:09 norsk tid 30.9 var ingenting betalt, og det var riktig: den første utbyttedagen (`dividend.from` =
+29.9) betales kl. ca. 02:00; bidraget begynner med 30.9 (`contribution.from`) og betales første gang natt til 1.10.
+Spillet sa bare «betales hver ekte dag».
+Beslutning: ingen endring på serveren (samme dag for alle spillere, uansett hvor de bor). `payoutClock` (`ui/format.ts`)
+gir klokkeslettet på telefonen for midnatt UTC. Det står i linjene om utbytte og bidrag under Konsern → Industrien, i
+hjelpeteksten på utbyttet på Konsern → Oversikt og som et nytt spørsmål i «Slik henger pengene sammen».
+Konto (B-149): – ingen ny funksjon.
