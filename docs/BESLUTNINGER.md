@@ -6323,3 +6323,46 @@ Beslutning:
 Testet: Playwright, iPhone SE og 13: 16 px; PC 1366: 13/14/17 px som før. Chromium zoomer ikke, så eieren sjekker på
 telefonen.
 Konto (B-149): nei.
+
+## B-348 Skiftrapporten raskere og sikrere varsel (2026-09-29)
+Status: gjelder
+Bakgrunn: eieren: «Tar lang tid å hente meldingene i chatten av og til. Og får ikke alltids varsel om at det er nye
+meldinger i chat.» Spørringene tar under 1 ms, men den første i hver databaseforbindelse 85 ms, og enkelte kall har tatt
+opptil 6 s. Arket viste ingenting før svaret kom, og feilet kallet, sto det «Ingen har skrevet ennå». Knappen så etter nye
+meldinger bare hvert 60. sekund – og mobilen stopper tidtakere i bakgrunnen. Begge knappene (varsellinja og tallraden,
+den ene skjult med CSS) spurte hver for seg. `chat_latest` talte meldinger fra spillere uten kallenavn, som lista ikke viser.
+Beslutning:
+- De siste 60 meldingene lagres på enheten per konto (`stalverk-skiftrapport-cache`, `net/chat.ts`). Arket viser dem med
+  én gang; serverens liste erstatter dem ved første svar (så skjulte meldinger forsvinner), så hentes bare nye.
+- Feil: «Får ikke kontakt med serveren. Prøver igjen …» (tom liste) eller en linje under lista.
+- Knappene deler én sjekk (`subscribeLatest` i `ui/Chat.tsx`): hvert 20. sekund, når appen vises igjen
+  (`visibilitychange`/`focus`) og når arket lukkes.
+- `074_skiftrapporten_nyeste.sql` (kjørt): `chat_latest` teller bare det lista viser.
+Testet: Playwright med falsk tjeneste (treg og feilende `chat_list`): lagrede meldinger vises straks, feilmeldingene,
+prikken ved `visibilitychange`, ett kall i stedet for to.
+Konto (B-149): uendret (Skiftrapporten krever konto).
+
+## B-349 Vern mot konkurs i sommerstansen, og råd når kassa er under kredittgrensen (2026-09-29)
+Status: gjelder
+Bakgrunn: eieren: «En spiller gikk konkurs av å handle for mye skrap før en sommerstans. Har vi bra nok opplæring?» Nei:
+skrap kan kjøpes helt ned til kredittgrensen; i sommerstansen selges ingenting i tre uker mens faste kostnader og renter
+går, så kassa gikk over grensen, og etter sju døgn var det konkurs – mens verket sto. Varselet sto bare i loggen, uten
+hva man kan gjøre. (Spillet finnes ikke lenger på serveren; spilleren begynte trolig på nytt.)
+Beslutning:
+- Banken teller ikke døgn over kredittgrensen i sommerstansen (`summerStop`); tellingen fortsetter der den var når ovnene
+  går igjen. En loggmelding hver uke i stansen sier det.
+- `CREDIT_HELP` (`engine.ts`): selg skrap under Marked, ta opp lån under Verket → Økonomi, eller selg ferdigvarer. Står i
+  loggmeldingene og i et nytt råd øverst på Verket når kassa er under grensen (med døgn igjen til konkurs).
+- Uka før sommerstansen: råd hvis kassa er i minus. Fellesferiekortet sier at ingenting selges og faste kostnader går.
+Testet: ny motortest (ingen telling i stansen, telling etter), `balance.ts` og `--sommerstans` (0 konkurs).
+Konto (B-149): nei.
+
+## B-350 De største ovnene: begge veiene står på knappen (2026-09-29)
+Status: gjelder
+Bakgrunn: eieren: «Hvordan skal spillerne få til å kjøpe di største 420 ovnene?» De koster 700 mill. (under kassetaket), og
+åpner med tittelen Stålmagnat i konsernet (tre storverk modernisert til trinn 3, `LADDER[0]`) eller ved 25 mrd. i verdi
+(B-341). Knappen nevnte bare 25 mrd. Eksempel: en spiller med åtte storverk på trinn 0 og ca. 29 mill. per ekte dag i
+konsernkassa trenger ni moderniseringer à 24 mill. (ca. 216 mill., 4 t hver) – ca. en ukes ekte tid.
+Beslutning: `gateBlocker` sier «Åpner med tittelen Stålmagnat i konsernet (3 storverk modernisert til trinn 3) eller ved
+25 mrd. i verdi» – tallene hentes fra `LADDER`, så teksten følger stigen.
+Konto (B-149): nei.

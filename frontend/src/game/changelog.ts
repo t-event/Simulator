@@ -15,6 +15,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 350,
+    date: "2026-09-29",
+    title: "Raskere Skiftrapport og vern mot konkurs i sommerstansen",
+    items: [
+      "Skiftrapporten viser de siste meldingene med én gang og henter bare det nye. Får den ikke kontakt, står det – ikke «Ingen har skrevet ennå».",
+      "Prikken på Skiftrapporten kommer raskere, også når du åpner appen igjen.",
+      "Banken venter med å telle døgn over kredittgrensen til sommerstansen er over. Da har du en uke på å rette opp.",
+      "Er kassa under kredittgrensen, sier rådet på Verket hva du kan gjøre: selge skrap, ta opp lån eller selge fra lageret. Uka før sommerstansen får du et råd hvis kassa er i minus.",
+      "De største ovnene sier nå begge veiene dit: tittelen Stålmagnat (tre storverk modernisert til trinn 3) eller 25 mrd. i verdi.",
+    ],
+  },
+  {
     b: 347,
     date: "2026-09-29",
     title: "Ingen zoom når du skriver",

@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 276 – 2026-09-29: Chatten, konkurs i sommerstansen, 420-ovnene (B-348–B-350)
+
+**Brukeren ba om:** chatten er treg av og til og varsler ikke alltid; en spiller gikk konkurs av skrapkjøp før
+sommerstansen («Har vi bra nok opplæring?»); backup til GitHub?; kokiller i strengstøpingen; hvordan kjøper spillerne
+420-ovnene?
+
+**Gjort:** B-348 (meldinger lagret på enheten, feiltekst, felles sjekk hvert 20. s og ved `visibilitychange`, 074),
+B-349 (banken teller ikke i sommerstansen, råd med hva man kan gjøre, råd uka før stansen, fellesferiekortet),
+B-350 (knappen for de største ovnene nevner Stålmagnat). Svar om backup: ikke koble til GitHub – repoet er offentlig.
+
+**Testet:** motortester, `npm test`, lint, typesjekk, `balance.ts` og `--sommerstans`, Playwright (chat med falsk tjeneste).
+
+**Gjenstår:** kokillene (neste økt/PR).
+
+---
+
 ## Økt 275 – 2026-09-29: Mobilen zoomer inn i chatten (B-347)
 
 **Brukeren ba om:** «Mobilen zoomer inn når jeg skal skrive i chatten..» (skjermbilde fra iPhone).

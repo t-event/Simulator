@@ -156,7 +156,7 @@ function summerDay(g: GameState, stats: PlantStats): void {
     g.pendingDecision = {
       id: "fellesferie",
       title: "Fellesferie i juli",
-      text: `Fra ${dateText(start)} har de fleste tre ukers fellesferie. Sommerstans: ovnene står i tre uker, men får ny foring og vedlikehold, og alle får ferie samtidig (feriepengene er alt opptjent, så du betaler ikke lønn). Sommervikarer: verket går som vanlig, men lønnen øker ca. ${Math.round(SUMMER.tempExtra * 100)} %, og vikarene gjør flere feil.${due ? ` Ved stans får ${due === 1 ? "kontrakten" : `de ${due} kontraktene`} med frist i ferien tre uker lenger frist.` : ""}`,
+      text: `Fra ${dateText(start)} har de fleste tre ukers fellesferie. Sommerstans: ovnene står i tre uker, men får ny foring og vedlikehold, og alle får ferie samtidig (feriepengene er alt opptjent, så du betaler ikke lønn). Men ingenting selges, og faste kostnader og renter går – ha penger på bok, og kjøp ikke mer skrap enn du trenger. Sommervikarer: verket går som vanlig, men lønnen øker ca. ${Math.round(SUMMER.tempExtra * 100)} %, og vikarene gjør flere feil.${due ? ` Ved stans får ${due === 1 ? "kontrakten" : `de ${due} kontraktene`} med frist i ferien tre uker lenger frist.` : ""}`,
       options: [
         {
           label: "Sommerstans med vedlikehold",
