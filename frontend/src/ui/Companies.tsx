@@ -336,41 +336,48 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
               spillfart. Dager uten spill gir mindre, aldri under 30 %.
             </p>
           )}
-          <h3 className="g-subhead">Flytt penger fra verket</h3>
-          <Bar value={tr.limit > 0 ? (tr.limit - tr.left) / tr.limit : 0} tone="accent" label="Brukt av grensen" />
-          <p className="g-small-text">
-            Du kan flytte <strong>{fmtKr(tr.left)}</strong> til de neste 24 timene (grensen er {fmtKr(tr.limit)}, lik
-            for alle){tr.freedAt && tr.left < tr.limit ? `. Mer blir ledig ${fmtWhen(tr.freedAt)}` : ""}.
-          </p>
-          <div className="g-row g-amount-row">
-            <label className="g-amount">
-              <input
-                type="number"
-                inputMode="decimal"
-                min={0}
-                placeholder={String(Math.floor(maxDeposit / 1e6))}
-                value={deposit}
-                onChange={(e) => setDeposit(e.target.value)}
-                aria-label="Beløp i millioner kroner"
-              />
-              <span>mill. kr</span>
-            </label>
-            <button
-              className="g-primary"
-              disabled={busy || tr.left <= 0 || millions(deposit) <= 0}
-              onClick={() => void doDeposit()}
-            >
-              Flytt
-            </button>
-          </div>
-          {maxDeposit > 0 && (
-            <button
-              className="g-link g-treasury-max"
-              disabled={busy}
-              onClick={() => setDeposit(String(Math.floor(maxDeposit / 1e6)))}
-            >
-              Fyll inn det meste ({fmtKr(Math.floor(maxDeposit / 1e6) * 1e6)})
-            </button>
+          {/* Innskuddet fra verket (B-311) forsvinner når serveren setter grensen til 0 (B-319): bidraget gjør jobben */}
+          {tr.limit > 0 ? (
+            <>
+              <h3 className="g-subhead">Flytt penger fra verket</h3>
+              <Bar value={tr.limit > 0 ? (tr.limit - tr.left) / tr.limit : 0} tone="accent" label="Brukt av grensen" />
+              <p className="g-small-text">
+                Du kan flytte <strong>{fmtKr(tr.left)}</strong> til de neste 24 timene (grensen er {fmtKr(tr.limit)},
+                lik for alle){tr.freedAt && tr.left < tr.limit ? `. Mer blir ledig ${fmtWhen(tr.freedAt)}` : ""}.
+              </p>
+              <div className="g-row g-amount-row">
+                <label className="g-amount">
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    min={0}
+                    placeholder={String(Math.floor(maxDeposit / 1e6))}
+                    value={deposit}
+                    onChange={(e) => setDeposit(e.target.value)}
+                    aria-label="Beløp i millioner kroner"
+                  />
+                  <span>mill. kr</span>
+                </label>
+                <button
+                  className="g-primary"
+                  disabled={busy || tr.left <= 0 || millions(deposit) <= 0}
+                  onClick={() => void doDeposit()}
+                >
+                  Flytt
+                </button>
+              </div>
+              {maxDeposit > 0 && (
+                <button
+                  className="g-link g-treasury-max"
+                  disabled={busy}
+                  onClick={() => setDeposit(String(Math.floor(maxDeposit / 1e6)))}
+                >
+                  Fyll inn det meste ({fmtKr(Math.floor(maxDeposit / 1e6) * 1e6)})
+                </button>
+              )}
+            </>
+          ) : (
+            <p className="g-muted g-small-text">Kassa i verket er driftskapital og blir i verket.</p>
           )}
           {note("kasse")}
         </Card>

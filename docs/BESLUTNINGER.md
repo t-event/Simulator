@@ -5823,3 +5823,18 @@ betaler ikke igjen, `world_status` som spiller gir tallene), `npm test` (lesing 
 sammen med utbyttet, én per dag), tsc, lint, Playwright på 320 og 390 px med falsk tjeneste (kortet, beskjeden, ingen
 overflyt). Sikkerhetsrådene uendret.
 
+## B-319 Innskuddet i konsernkassa tas bort (steg 2) (2026-09-29)
+Status: gjelder (erstatter innskuddet fra B-183/B-311)
+Bakgrunn: eierens svar i B-318: bidraget skal være automatisk, og innskuddsknappen skal bort. Bidraget fyller
+konsernkassa hver ekte dag, så den manuelle slusa på 10 mill. per døgn er overflødig og bare forvirrende.
+Beslutning:
+- Appen skjuler «Flytt penger fra verket» når serveren gir grensen 0, og skriver i stedet «Kassa i verket er
+  driftskapital og blir i verket». Så lenge serveren har en grense, vises innskuddet som før – appen virker både før
+  og etter serverendringen.
+- Serveren (`supabase/062_innskudd_bort.sql`): `treasury_base_per_day` = 0, kjørt etter at appen er publisert
+  (B-303-regelen). `deposit_to_treasury` avviser da med «grense» i eldre apper. Det som alt er skutt inn, står.
+- Beskjeden når et bud er større enn kassa, sier ikke lenger «flytt penger inn først».
+Konto (B-149): ingen ny funksjon (konsernkassa krever konto som før).
+Testet: tsc, lint, `npm test`, Playwright på 320 og 390 px med grense 0 (innskuddet borte, linja om driftskapital,
+ingen overflyt) og med grense over 0 (som før, B-318-testen).
+
