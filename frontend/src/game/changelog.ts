@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 351,
+    date: "2026-09-29",
+    title: "Kokillene i strengstøpingen",
+    items: [
+      "Kokillene – kobberformene stålet størkner i – slites nå av hvert tonn som støpes, ca. 20 døgn med full støping. Slitte kokiller gir flere strenggjennombrudd.",
+      "Bytt dem under Verket → Anlegg → Vedlikehold. Det koster en hundredel av støpemaskinen og stopper støpingen et par timer. Reparatøren bytter dem selv, som foringen.",
+      "Ny side i fagboka: «Kokillen slites».",
+    ],
+  },
+  {
     b: 350,
     date: "2026-09-29",
     title: "Raskere Skiftrapport og vern mot konkurs i sommerstansen",

@@ -6366,3 +6366,24 @@ konsernkassa trenger ni moderniseringer à 24 mill. (ca. 216 mill., 4 t hver) �
 Beslutning: `gateBlocker` sier «Åpner med tittelen Stålmagnat i konsernet (3 storverk modernisert til trinn 3) eller ved
 25 mrd. i verdi» – tallene hentes fra `LADDER`, så teksten følger stigen.
 Konto (B-149): nei.
+
+## B-351 Kokillene i strengstøpingen (2026-09-29)
+Status: gjelder
+Bakgrunn: eieren: «Få kokiller inn i spillet (strengstøpeanlegg)». Kokillen fantes bare i tekst (fagboka, bruddvarsling).
+Beslutning:
+- `game/mould.ts`: `g.mould = { wear, lastDay }`. Hvert tonn som støpes, sliter kokillene med tonn / (støpekapasitet ×
+  24 × 20): ca. 20 døgn med full støping. Slitasjen kan gå til 150 %.
+- Over 75 % slitasje øker faren for strenggjennombrudd: × (1 + 3 × (slitasje − 0,75)), dvs. 1,75 ganger så ofte ved
+  100 %. Ganges inn i den gamle sjansen i `castBatch`. Først prøvd fra 60 % med 5: storverket (mange øser, 4 t stans per
+  gjennombrudd) mistet for mye omdømme (to frø endte på 2–4).
+- Bytte: 1 % av støpemaskinens pris per maskin (minst 20 000 kr), støpingen står 2 timer (ganget med reparasjonsfarten).
+  For et fullt storverk med tre 8-strengs maskiner: 3,6 mill. hvert ca. 20. døgn – lite mot 35 mill. om dagen, men nok til
+  å merkes tidlig (strengstøpemaskin 1: 55 000 kr).
+- Reparatøren bytter ved 90 % når «Reparatøren bytter foringen» er på (samme bryter, ingen ny innstilling). Ellers råd ved
+  85 % («Trykk her og så Bytt kokiller»), og en melding i loggen første gang.
+- Raden «Kokillene» på Verket → Anlegg → Vedlikehold, under ovnene; forklaring under «Slik virker foringen». Ny side i
+  fagboka (Strengstøping): «Kokillen slites». Vises bare med strengstøping (gradvis synlighet).
+- Testspilleren: nybegynneren følger rådet (85 %), den flinke bytter ved 90 %.
+Testet: ny motortest, `balance.ts` (alle mål OK; snittomdømmet de siste 41 radene i verbose-kjøringen 65 mot 68 før, frø
+2 og 4 ned 7–9 – kokillene gjør storverket litt krevende), Playwright 320/390/1366 (raden, knappen, bytte).
+Konto (B-149): nei – eget spill.

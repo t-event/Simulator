@@ -274,6 +274,7 @@ import { freeStockT, sellAllFree } from "./engine";
 import { leaderBonus, leaderBonusDue } from "./actions";
 import { autoPlay, ChargeGame } from "../ui/control/chargeGame";
 import { hints } from "../ui/hints";
+import { hasMoulds, MOULD, mouldCost, mouldHour, mouldRisk, mouldWear, replaceMoulds, wearMoulds } from "./mould";
 import { applyCashCap, CASH_RESERVE, hasPaidOut, paidOutDayLog, paidOutTotal } from "./reserve";
 
 declare const process: { exitCode?: number };
@@ -3581,6 +3582,43 @@ test("Banken venter i sommerstansen (B-349): ingen konkurs mens verket står, te
   g.pendingDecision = null;
   advance(g, MIN_PER_DAY);
   assert(g.negativeDays === 3, `banken teller ikke etter ferien (${g.negativeDays})`);
+});
+
+test("Kokillene (B-351): slites av støpingen, gir flere gjennombrudd, byttes for hånd og av reparatøren", () => {
+  const g = newGame(351);
+  g.stage = 3;
+  g.owned.push("streng1");
+  g.castingType = "streng1";
+  let stats = computePlantStats(g);
+  assert(hasMoulds(g), "strengstøping uten kokiller");
+  assert(mouldWear(g) === 0 && mouldRisk(g) === 1, "nye kokiller skal ikke gi ekstra risiko");
+  // Et døgns full støping sliter en tjuedel
+  wearMoulds(g, stats.castTph * 24, stats);
+  assert(Math.abs(mouldWear(g) - 1 / MOULD.lifeDays) < 1e-9, `slitasje etter ett døgn: ${mouldWear(g)}`);
+  g.mould = { wear: 1, lastDay: 1 };
+  assert(Math.abs(mouldRisk(g) - 1.75) < 1e-9, `risiko ved 100 %: ${mouldRisk(g)}`);
+  assert(
+    hints(g, stats).some((h) => h.text.includes("Kokillene")),
+    "rådet om kokillene mangler",
+  );
+  const cash = g.cash;
+  const r = replaceMoulds(g, stats);
+  assert(r.ok && mouldWear(g) === 0, "byttet ikke kokillene");
+  assert(g.cash === cash - mouldCost(g), "feil pris");
+  assert(g.castDownUntilMin > g.minute, "støpingen sto ikke under byttet");
+  // Reparatøren bytter når han bytter foringen
+  g.mould = { wear: MOULD.autoAt + 0.01, lastDay: 1 };
+  g.castDownUntilMin = 0;
+  g.settings.autoReline = true;
+  g.researched.push("vedlikeholdsplan");
+  g.workers.push(makeCandidate(g, "vedlikehold"));
+  stats = computePlantStats(g);
+  mouldHour(g, stats);
+  assert(mouldWear(g) === 0, "reparatøren byttet ikke kokillene");
+  // Blokkstøping har ingen kokiller å slite på her
+  const b = newGame(3511);
+  wearMoulds(b, 100, computePlantStats(b));
+  assert(!hasMoulds(b) && mouldWear(b) === 0, "blokkstøping fikk kokillesslitasje");
 });
 
 if (failed) {

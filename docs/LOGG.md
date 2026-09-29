@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 277 – 2026-09-29: Kokillene (B-351)
+
+**Brukeren ba om:** «Få kokiller inn i spillet (strengstøpeanlegg)».
+
+**Gjort:** `game/mould.ts`: kokillene slites per tonn (ca. 20 døgn full støping), gir flere strenggjennombrudd over
+75 %, byttes for 1 % av støpemaskinen og 2 t stans; reparatøren bytter dem med foringsbryteren. Rad under Vedlikehold,
+råd ved 85 %, side i fagboka, testspilleren bytter.
+
+**Testet:** motortest, `npm test`, lint, typesjekk, `balance.ts`, Playwright 320/390/1366.
+
+---
+
 ## Økt 276 – 2026-09-29: Chatten, konkurs i sommerstansen, 420-ovnene (B-348–B-350)
 
 **Brukeren ba om:** chatten er treg av og til og varsler ikke alltid; en spiller gikk konkurs av skrapkjøp før

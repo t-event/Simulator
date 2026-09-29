@@ -4,6 +4,7 @@ import { scrapResearchFor, scrapResearchHint } from "../game/recipe";
 import { BANKRUPTCY_DAYS, GRADES, ROLES } from "../game/data";
 import { CREDIT_HELP, creditLimit, currentOrder, recipeEstimate, scrapStopHelp } from "../game/engine";
 import { summerStart, summerStop, yearOf } from "../game/calendar";
+import { hasMoulds, MOULD, mouldCost, mouldWear } from "../game/mould";
 import {
   bonusGap,
   day,
@@ -13,13 +14,14 @@ import {
   isAbsent,
   staffing,
   plantRestartMin,
+  presentWorkers,
   tempsActive,
   fixedPriceAdvice,
   plannerOrders,
   type PlantStats,
 } from "../game/plant";
 import type { GameState, RoleId } from "../game/types";
-import { fmtNum, fmtT } from "./format";
+import { fmtNum, fmtT, fmtKr } from "./format";
 import { canWarn } from "../game/actions";
 import { avgRating, shiftLeaderAtWork, sickSpells } from "../game/engine";
 import type { View } from "./views";
@@ -170,6 +172,13 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
   if (g.furnaces.some((f) => f.wear > 0.8 && !f.relineRequested))
     out.push({
       text: "Foringen (mursteinene inni ovnen) er nesten slitt gjennom. Trykk her og så «Bytt foring» før den brenner gjennom.",
+      anchor: "vedlikehold",
+    });
+  // Kokillene (B-351): reparatøren bytter dem hvis han bytter foringen; ellers må spilleren
+  const repairerSwaps = auto(g, "autoReline") && presentWorkers(g).some((w) => w.role === "vedlikehold");
+  if (hasMoulds(g) && mouldWear(g) >= MOULD.warnAt && !repairerSwaps)
+    out.push({
+      text: `Kokillene i strengstøpingen er ${Math.floor(mouldWear(g) * 100)} % slitt, og strengen bryter lettere gjennom. Trykk her og så «Bytt kokiller» (${fmtKr(mouldCost(g))}).`,
       anchor: "vedlikehold",
     });
   // Havari (B-281): reparasjonen skjer av seg selv, men spillerne trodde de måtte trykke på noe

@@ -544,6 +544,8 @@ export interface GameState {
   castProgressT: number;
   castDownUntilMin: number;
   castWait: string | null;
+  /** Kokillene i strengstøpingen: slitasje 0–1,5 og dagen de sist ble byttet (B-351). Mangler i eldre lagringer = nye */
+  mould?: { wear: number; lastDay: number };
   rollProgressT: number;
   scrap: Record<ScrapId, ScrapStock>;
   recipe: Record<ScrapId, number>;

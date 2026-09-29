@@ -152,3 +152,4 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Liste «Konsernverdi» regnet av serveren | Ja (som topplista) | Regel 3: sammenlignes med andre | B-320 |
 | Kalender på Oversikt; salgsdirektøren står i sommerstansen | Nei | Regel 1: ditt eget spill | B-321 |
 | Konsernverdien på Konsern → Oversikt som på topplista | – | Ingen ny funksjon | B-322 |
+| Kokillene i strengstøpingen slites og byttes | Nei | Regel 1: ditt eget spill | B-351 |
