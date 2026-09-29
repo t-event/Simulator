@@ -281,7 +281,7 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   lagringer – ikke bygg ny mekanikk på det.
 - `fetch` med `keepalive` avvises over 64 kB, og et stort spill er større. `rest()` i `net/supabase.ts` dropper
   keepalive over `KEEPALIVE_MAX` (B-141) – ikke send store kropper med keepalive andre steder.
-- Lagring på nett skjer ca. 3 s etter en handling (`saveGame(g, true)` → `SOON_MS`), hvert 15. sekund ellers, og ved
+- Lagring på nett skjer ca. 3 s etter en handling (`saveGame(g, true)` → `SOON_MS`), hvert 30. sekund ellers (B-344), og ved
   `blur`/`pagehide`. Appen sjekker hvert 20. sekund om en annen enhet har lagret (B-141). I Playwright: vent minst
   3 s etter en handling før du ser etter opplastingen.
 - Bare enheten som spilles på, laster opp (B-143): `onLocalSave` laster ikke opp når spillminuttet er det samme som
