@@ -6083,7 +6083,7 @@ Beslutning (migrasjon `067_kontroll.sql`, `game/control.ts`, `dividendToTreasury
 Konto (B-149): krever konto – konsernkassa og selskapene er på serveren (regel 2, 3 og 7).
 
 ## B-335 Overtakelser av strategiske selskaper, med bryteren av (K8) (2026-09-29)
-Status: gjelder (bygget, slått av) – taket på budet er hevet i B-337
+Status: gjelder – taket på budet er hevet i B-337, slått på 29.9.2026 (B-339)
 Endringslogg: nei – bryteren er av; oppføringen skrives når overtakelser slås på
 Bakgrunn: steg 4 i B-331/B-332. RETNING fase 4: testes grundig med få aktører før det slås på.
 Beslutning (migrasjon `068_overtakelser.sql`, `TAKEOVER`/`takeoverAttack`/`takeoverDefense` i `game/control.ts`,
@@ -6167,3 +6167,22 @@ Beslutning (migrasjon `070_skiftrapporten.sql`, `net/chat.ts`, `ui/Chat.tsx`):
 Testet: SQL som spiller i en DO-blokk som ble rullet tilbake (lagret, for fort, lik tekst, lenke, for lang, slettet, lista),
 `npm test` (ny nettest mot falsk tjeneste), Playwright på de 7 størrelsene med og uten konto.
 Konto (B-149): krever konto (regel 3: viser andre spillere og brukernavnet ditt).
+
+## B-339 Hendelser fra spillet i Skiftrapporten, og overtakelser slått på (2026-09-29)
+Status: gjelder
+Bakgrunn: eieren sa ja til hendelser i Skiftrapporten («Ja jeg vil ha det») og «Åpne for overtakelser nå» – før 13.10.,
+som jeg hadde anbefalt å vente til (se svaret i økt 266).
+Beslutning (migrasjon `071_skiftrapporten_hendelser.sql`):
+- **Overtakelser er på:** `config.world.takeover.enabled` = 1. Skraplageret kan få bud fra vernet går ut (2.10. kl. 03:33
+  norsk tid, tre dager etter at konsesjonen startet) til fem dager før den går ut (8.10.).
+- **Hendelser:** serveren skriver selv i Skiftrapporten (`chat_messages.kind = 'hendelse'`, uten avsender) når
+  - et anbud åpner («Anbudet på skraplageret er åpent til …»), avgjøres («X vant anbudet på … (n bud)») eller ingen byr,
+  - noen prøver å overta et selskap (med budet, som alt er offentlig) og hvordan det gikk (overtatt / slo tilbake),
+  - en spiller når en ny konserntittel («X er blitt Stålkonge!»).
+  Hemmelige anbudsbud nevnes aldri. Triggere på `tenders`, `takeovers` og `konsern` (`chat_on_*`), så de store
+  funksjonene står urørt; en melding som feiler, stopper aldri spillet (`exception when others`).
+- **Appen:** hendelsene står midt i lista med fabrikkikon og egen farge, uten avsender, og kan ikke slettes. De gir prikken
+  på knappen som andre meldinger.
+Testet: DO-blokk som ble rullet tilbake: anbud åpnet og avgjort, forsøk avverget og overtatt, ny tittel – alle sju
+meldingene riktige i `chat_list`. `npm test` (hendelse i nettesten), Playwright på 320, 390 og 1 366 px.
+Konto (B-149): som Skiftrapporten og overtakelser – krever konto.
