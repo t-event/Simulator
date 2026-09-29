@@ -6639,7 +6639,7 @@ kjøpene. Forskningen sier «Plass til 2 datterverk til».
 Konto (B-149): – ingen ny funksjon (konsernet krever konto fra før).
 
 ## B-368 Spillet sier når utbyttet og bidraget betales (2026-09-30)
-Status: gjelder (utfyller B-304, B-318)
+Status: erstattet av B-369 (dagen skifter nå ved midnatt norsk tid; `payoutClock` er fjernet)
 Bakgrunn: brukeren: «Fikk ikke dagens penger inn på konsernkassa klokken 00:00. Hva skjer?» Serveren regner den ekte
 dagen i UTC (`pay_dividends`/`pay_contributions`: `d < (now() at time zone 'utc')::date`). En dag betales derfor først når
 den er over i UTC – kl. 02:00 norsk sommertid, 01:00 om vinteren – av neste `world_tick` (pg_cron hvert 5. minutt,
@@ -6649,4 +6649,25 @@ Spillet sa bare «betales hver ekte dag».
 Beslutning: ingen endring på serveren (samme dag for alle spillere, uansett hvor de bor). `payoutClock` (`ui/format.ts`)
 gir klokkeslettet på telefonen for midnatt UTC. Det står i linjene om utbytte og bidrag under Konsern → Industrien, i
 hjelpeteksten på utbyttet på Konsern → Oversikt og som et nytt spørsmål i «Slik henger pengene sammen».
+Konto (B-149): – ingen ny funksjon.
+
+## B-369 Den ekte dagen skifter ved midnatt norsk tid (2026-09-30)
+Status: gjelder (erstatter B-368 og UTC-dagen i B-188, B-304, B-318, B-361)
+Bakgrunn: brukeren (eier), rett etter B-368: «Kan du endre det til å bli 00:00 i norsk tid? Og betale ut for idag siden
+klokka er over 00:00». Serveren regnet den ekte dagen i UTC, så pengene for en dag kom kl. 02:00 norsk sommertid.
+Beslutning:
+- `081_norsk_dag.sql`: `world_today()` og `world_day(tidspunkt)` gir datoen i Europe/Oslo. De 13 funksjonene som regnet
+  dagen i UTC (`pay_dividends`, `pay_contributions`, `pay_company_income`, `sample_contributions`, `contribution_now`,
+  `meter_register` (produksjonsdagene), `note_activity` (aktive dager), `active_players`, `maint_rate_estimate`,
+  `company_control`, `takeover_attack`, `takeover_window`, `world_status`) bruker dem nå. Byttet gjøres med
+  tekst-erstatning i definisjonene – ingen annen logikk er endret. Ingen funksjon i `public` har `time zone 'utc'` igjen.
+- Overgangen: dagsradene fra 29.9 (UTC) står; alt fra 00:00 norsk tid 30.9 går inn på 30.9. Rett etter byttet ble
+  `world_tick` kjørt, og 29.9 ble betalt med én gang (eierens ønske): utbytte til 12 spillere, 209,2 mill. i alt
+  (3,8 mill. av det til forsvarsfond etter politikken), regnet av dagens målinger (dry-run først, samme tall), og
+  skraplagerets første inntekt, 13,8 mill. (276 503 t). Bidraget begynner fortsatt med 30.9 (B-318) og betales natt til 1.10.
+- Appen speiler dagen: `worldDay`/`nextWorldMidnight` i `game/clock.ts` (Intl med Europe/Oslo). `net/scrapIncome.ts`
+  (måleren), `nextPayout`/`firstPayout`/`yesterdayWorld` i `net/world.ts` bruker dem. Tekstene sier «rett etter midnatt
+  (norsk tid)». Tester for sommer, vinter og overgangen til vintertid i `net/tests.ts`.
+Regel: en ekte dag på serveren regnes med `world_today()`/`world_day()` og i appen med `worldDay` – aldri
+`at time zone 'utc'` eller `toISOString().slice(0, 10)`.
 Konto (B-149): – ingen ny funksjon.

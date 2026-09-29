@@ -89,7 +89,7 @@ import {
   placeBid,
   timeLeft,
   worldNews,
-  yesterdayUtc,
+  yesterdayWorld,
 } from "./world";
 
 declare const process: { exitCode?: number };
@@ -1609,8 +1609,15 @@ const main = async () => {
   await test("Inntekt fra selskapet (B-258): beskjed til eieren én gang per dag, og når første inntekt kommer", async () => {
     const g = newGame(258);
     const now = Date.parse("2026-09-30T08:00:00Z");
-    assert(yesterdayUtc(now) === "2026-09-29", `i går: ${yesterdayUtc(now)}`);
-    assert(nextPayout(Date.parse("2026-09-29T01:40:00Z")) === Date.parse("2026-09-30T00:00:00Z"), "neste utbetaling");
+    assert(yesterdayWorld(now) === "2026-09-29", `i går: ${yesterdayWorld(now)}`);
+    // Dagen skifter ved midnatt norsk tid (B-369): 22:00 UTC om sommeren, 23:00 om vinteren
+    assert(yesterdayWorld(Date.parse("2026-09-29T22:30:00Z")) === "2026-09-29", "i går rett etter midnatt");
+    assert(nextPayout(Date.parse("2026-09-29T01:40:00Z")) === Date.parse("2026-09-29T22:00:00Z"), "neste utbetaling");
+    assert(nextPayout(Date.parse("2026-12-01T12:00:00Z")) === Date.parse("2026-12-01T23:00:00Z"), "vinter");
+    assert(
+      nextPayout(Date.parse("2026-10-24T23:30:00Z")) === Date.parse("2026-10-25T23:00:00Z"),
+      "overgang til vintertid",
+    );
     const mine = { id: 4, name: "Skraplageret", mine: true, incomeYesterday: 42e6 };
     assert(applyCompanyIncome(g, [mine], now) === 1 && /tjente 42 mill/.test(g.log.at(-1)!.text), g.log.at(-1)!.text);
     assert(applyCompanyIncome(g, [mine], now) === 0, "samme beskjed to ganger");

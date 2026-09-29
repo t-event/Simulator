@@ -3,7 +3,7 @@
  * `supabase/029_produksjonsmaler.sql`. Brukes av testene (som viser at lokal fart ikke gir mer inntekt) og til å vise et
  * anslag i spillet. Endres regelen, må SQL-en og denne fila endres sammen.
  *
- * Regelen for én spiller én ekte (UTC-)dag:
+ * Regelen for én spiller én ekte dag (norsk dato, B-369):
  *   teller = min(nye tonn den dagen, normal fart × takdøgn) × skrap per tonn stål
  * - Nye tonn: bare tonn over det høyeste spilleren har hatt (en gammel lagring gir ikke de samme tonnene to ganger).
  * - Normal fart: tonn per spilldøgn over de siste tallene i tidslinja (flere hele spilldøgn) – verkets størrelse, ikke
@@ -11,6 +11,7 @@
  *   hele dager ble farten målt opptil 37 % for høy på 10×. Medianen av enkeltintervaller var for ujevn med skiftdrift
  *   (12 % forskjell). Begge deler ble funnet av testene i scrapTests.ts.
  */
+import { worldDay } from "../game/clock";
 
 export const SCRAP_INCOME = {
   /** Tonn skrap per tonn stål */
@@ -22,11 +23,6 @@ export const SCRAP_INCOME = {
   /** Kroner til skraplageret per tonn skrap som teller (standard; serveren leser config.world) */
   feePerT: 50,
 };
-
-/** Ekte UTC-dag som tekst, som `(at at time zone 'utc')::date` i SQL */
-export function utcDay(atMs: number): string {
-  return new Date(atMs).toISOString().slice(0, 10);
-}
 
 /** Produksjonsmåleren for én spiller, slik serveren fører den */
 export class ProductionMeter {
@@ -49,7 +45,7 @@ export class ProductionMeter {
     }
     const gained = Math.max(0, produced - this.hwm);
     if (gained > 0) {
-      const key = utcDay(atMs);
+      const key = worldDay(atMs);
       this.days.set(key, (this.days.get(key) ?? 0) + gained);
     }
     const last = this.points[this.points.length - 1];

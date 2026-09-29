@@ -10,8 +10,7 @@ import { hasPaidOut, paidOutTotal, CASH_RESERVE } from "../game/reserve";
 import { POLICIES } from "../game/control";
 import type { GameState } from "../game/types";
 import { SheetHead } from "./ds";
-import { fmtKr, payoutClock } from "./format";
-import { realNow } from "../game/clock";
+import { fmtKr } from "./format";
 import { Icon } from "./icons";
 import { Portal } from "./Portal";
 
@@ -110,9 +109,8 @@ export function MoneyGuide({ g, onClose }: { g: GameState; onClose: () => void }
               </Question>
               <Question q="Når kommer utbyttet og bidraget inn i konsernkassa?">
                 <p>
-                  Hver natt ca. kl. {payoutClock(realNow())}, for dagen før. Serveren regner dagene likt for alle
-                  spillere i verden, så dagen skifter ikke ved midnatt hos deg. Det kan gå noen minutter før pengene
-                  står i kassa.
+                  Rett etter midnatt norsk tid, for dagen før. Dagen skifter likt for alle spillere, også om du bor i en
+                  annen tidssone. Det kan gå noen minutter før pengene står i kassa.
                 </p>
               </Question>
               <Question q="Hvorfor tar det lengre tid å bygge og modernisere enn før?">

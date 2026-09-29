@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 295 – 2026-09-30: Dagen skifter ved midnatt norsk tid (B-369)
+
+**Brukeren ba om:** «Kan du endre det til å bli 00:00 i norsk tid? Og betale ut for idag siden klokka er over 00:00»
+
+**Gjort:** `081_norsk_dag.sql` – `world_today()`/`world_day()` (Europe/Oslo) i alle 13 funksjonene som regnet dagen i UTC.
+Dry-run av utbyttet for 29.9, så `world_tick`: 12 spillere fikk 209,2 mill. i utbytte, og eieren av skraplageret 13,8
+mill. (første inntekt). Appen: `worldDay`/`nextWorldMidnight` (`game/clock.ts`), skraplagerets måler og beskjedene om
+inntekt følger norsk dag; tekstene sier «rett etter midnatt (norsk tid)». B-368 erstattet.
+
+**Testet:** ingen `time zone 'utc'` igjen i `public`; nye dagsrader går på 30.9; advisors uendret; tsc, lint, `npm test`
+(nye tester for sommer/vinter/overgang).
+
+**Gjenstår:** bidraget betales første gang natt til 1.10 (påminnelse satt fra før, flyttes til 22:15 UTC 30.9).
+
 ## Økt 294 – 2026-09-30: Pengene kom ikke kl. 00:00 (B-368)
 
 **Brukeren spurte:** «Fikk ikke dagens penger inn på konsernkassa klokken 00:00. Hva skjer?»

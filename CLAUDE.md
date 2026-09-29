@@ -378,6 +378,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   fullt konsern ca. 30 mill. per ekte dag): endres regelen, endres begge, og de faste tallene i testen kjøres mot
   SQL-en (`select dividend_from_state('{…}')`). Verden går i menneskelig tempo (B-311): gebyr 50 kr/t, innskuddet er
   erstattet av bidraget (B-318, B-319) – alt som teller mellom spillere, skal skaleres sammen, ikke ett tall alene.
+- **Den ekte dagen** (B-369): serveren regner dagen i norsk tid med `world_today()`/`world_day(tidspunkt)` (081), appen
+  med `worldDay`/`nextWorldMidnight` (`game/clock.ts`). Utbytte, bidrag, selskapsinntekt, målinger, aktive dager og
+  produksjonsdager bruker dem. Aldri `at time zone 'utc'` eller `toISOString().slice(0, 10)` for en ekte dag.
 - **Konsernet er serverens** (B-325, B-326): verkene, køen og nivået (titlene) ligger i tabellene `konsern` og
   `konsern_orders` (064/065). Kjøp går via `konsern_order`/`konsern_cancel`/`konsern_sell` fra konsernkassa; `save_game`
   skriver serverens verk inn i det lagrede spillet hver gang (`konsern_into_state`), så en endring i `g.konsern.plants` i

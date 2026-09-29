@@ -7,7 +7,8 @@
  * 1 time og 8 timer per ekte dag, med pause, uten nett og med en gammel lagring. Tabellen som skrives ut viser hvorfor
  * resultatet blir likt: taket er én normal spilldag per ekte dag, og en normal spilldag er like stor i alle farter.
  */
-import { ProductionMeter, SCRAP_INCOME, scrapYardIncome, utcDay } from "./scrapIncome";
+import { ProductionMeter, SCRAP_INCOME, scrapYardIncome } from "./scrapIncome";
+import { worldDay } from "../game/clock";
 
 declare const process: { exitCode?: number };
 
@@ -99,7 +100,7 @@ function assert(ok: unknown, msg: string): void {
   if (!ok) throw new Error(msg);
 }
 const fmt = (n: number) => Math.round(n).toLocaleString("nb-NO");
-const dayKey = (i: number) => utcDay(START + i * DAY_MS);
+const dayKey = (i: number) => worldDay(START + i * DAY_MS);
 /** Én normal spilldag i tonn skrap – taket per ekte dag */
 const CAP = TONS_PER_GAME_DAY * SCRAP_INCOME.capGameDays * SCRAP_INCOME.scrapPerSteel;
 

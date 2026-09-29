@@ -15,11 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    b: 368,
+    b: 369,
     date: "2026-09-30",
-    title: "Når pengene kommer inn i konsernkassa",
+    title: "Pengene til konsernkassa kommer ved midnatt",
     items: [
-      "Utbyttet og bidraget kommer inn i konsernkassa hver natt ca. kl. 02:00 norsk sommertid (kl. 01:00 om vinteren), for dagen før – ikke ved midnatt. Serveren regner dagene likt for alle spillere. Klokkeslettet står nå under Konsern → Industrien og i «Slik henger pengene sammen».",
+      "Utbyttet, bidraget og inntekten fra selskapene kommer nå inn i konsernkassa rett etter midnatt norsk tid, for dagen før. Før skiftet dagen kl. 02:00. Det står under Konsern → Industrien og i «Slik henger pengene sammen».",
     ],
   },
   {

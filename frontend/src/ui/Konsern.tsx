@@ -66,7 +66,7 @@ import { IndustryPanel } from "./Companies";
 import { WorldMapPanel } from "./WorldMap";
 import { NeedsAccount } from "./Account";
 import { cancelOrderUi, getBuildRegion, movePlantUi, runOption, sellPlantUi, setBuildRegion } from "./konsernRun";
-import { fmtKr, fmtT, payoutClock } from "./format";
+import { fmtKr, fmtT } from "./format";
 import { MoneyGuideLink } from "./MoneyGuide";
 import { Icon } from "./icons";
 
@@ -905,9 +905,7 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
               </div>
             )}
             <div className="g-finance-side">
-              <span
-                title={`Betales av serveren hver natt ca. kl. ${payoutClock(realNow())} rett til konsernkassa – spillfarten betyr ingenting`}
-              >
+              <span title="Betales av serveren rett etter midnatt (norsk tid) til konsernkassa – spillfarten betyr ingenting">
                 Utbytte til konsernkassa <strong>{fmtKr(dividend)} per ekte dag</strong>
               </span>
               {k.plants.length > 0 && (
