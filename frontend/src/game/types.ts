@@ -213,6 +213,12 @@ export interface Worker {
   warnedDay?: number;
   /** Lærling (B-163): døgnet lærlingen går opp til fagprøven. Mangler for dem som ikke er lærlinger */
   apprenticeUntil?: number;
+  /** Fødselsdøgnet i spillet (B-357); alderen øker med ett år per spillår. Settes i `migrate()` for eldre lagringer */
+  born?: number;
+  /** Pensjonsalder hvis den ikke er den vanlige (den erfarne pensjonisten jobber til 70) */
+  retireAge?: number;
+  /** Har fått beskjed om pensjonen */
+  pensionNotice?: boolean;
 }
 
 /** Tema for varsler, så spilleren kan velge hva som dukker opp på skjermen (B-115) */

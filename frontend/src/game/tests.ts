@@ -189,6 +189,8 @@ import {
 } from "./plant";
 import { RESEARCH, researchOptions } from "./research";
 import { migrate, parseSave } from "./save";
+import { ageOf, PENSION, pensionDay, pensionMorning, pensionSoon, retireAgeOf } from "./pension";
+import { dutyWorkers, presentWorkers as presentNow, wildcardUse as wildUse } from "./plant";
 import { afterEmpireLoad, DIVIDEND, dividendParts, dividendPerDay, dividendToTreasury } from "./dividend";
 import { ANY_CARD_REAL_MS, makeDecision, maybeCreateDecision, resolveDecision, SAME_CARD_REAL_MS } from "./decisions";
 import { landmarkContract, landmarkHour } from "./landmarks";
@@ -3678,6 +3680,98 @@ test("Like partier på lageret slås sammen (B-353): færre partier, samme tonn 
   assert(
     g.lots[0].madeDay === 100 && g.lots.some((l) => l.id === 900) && g.lots.some((l) => l.second),
     "feil parti slått sammen",
+  );
+});
+
+test("Lærlinger teller ikke i drifta før fagbrevet (B-357)", () => {
+  const g = newGame(81);
+  g.stage = 2;
+  for (let i = 0; i < 4; i++) g.workers.push({ ...makeCandidate(g, "allround"), hiredDay: 1 });
+  const before = wildUse(g).total;
+  const crewsBefore = staffing(g, true).crews;
+  g.pendingDecision = { id: "laerling", title: "", text: "", options: [{ label: "Ja" }], data: {}, resumeSpeed: 1 };
+  resolveDecision(g, 0);
+  const a = g.workers.find((x) => x.apprenticeUntil !== undefined)!;
+  assert(a && a.role === "allround", "ingen lærling");
+  assert(wildUse(g).total === before, `lærlingen telte som avløser: ${before} → ${wildUse(g).total}`);
+  assert(staffing(g, true).crews === crewsBefore, "lærlingen ga flere skiftlag");
+  assert(!presentNow(g).includes(a) && !dutyWorkers(g).includes(a), "lærlingen står på skiftet");
+  // Med fagbrev teller den som vanlig
+  g.minute = APPRENTICE_DAYS * 1440;
+  a.skill = 2;
+  apprenticeExams(g);
+  assert(a.apprenticeUntil === undefined && wildUse(g).total === before + 1, "fagarbeideren teller ikke");
+});
+
+test("Alder og pensjon (B-357): søkere 20–59, lærlinger unge, beskjed en måned før, pensjon på dagen", () => {
+  const g = newGame(82);
+  g.stage = 2;
+  const today = day(g);
+  for (let i = 0; i < 200; i++) {
+    const c = makeCandidate(g);
+    const age = ageOf(c, today);
+    assert(age >= PENSION.candidateAge[0] && age < PENSION.candidateAge[1], `søker ${age} år`);
+    const r = retireAgeOf(c);
+    assert(r >= PENSION.earliest && r <= PENSION.age, `pensjonsalder ${r}`);
+  }
+  g.pendingDecision = { id: "laerling", title: "", text: "", options: [{ label: "Ja" }], data: {}, resumeSpeed: 1 };
+  resolveDecision(g, 0);
+  const a = g.workers.find((x) => x.apprenticeUntil !== undefined)!;
+  assert(ageOf(a, today) >= 17 && ageOf(a, today) <= 19, `lærling ${ageOf(a, today)} år`);
+  // En ovnsoperatør som går av om 30 døgn
+  const w = { ...makeCandidate(g, "ovn"), hiredDay: 1, retireAge: 67 };
+  w.born = today + 30 - 67 * YEAR_DAYS;
+  g.workers.push(w);
+  pensionMorning(g);
+  assert(w.pensionNotice && g.workers.includes(w), "ingen beskjed en måned før");
+  assert(
+    g.log.some((l) => l.text.includes("pensjon om 30 døgn")),
+    "beskjeden står ikke i loggen",
+  );
+  assert(pensionSoon(w, today) === 30, `pensjon om ${pensionSoon(w, today)}`);
+  g.minute += 29 * 1440;
+  pensionMorning(g);
+  assert(g.workers.includes(w), "gikk av for tidlig");
+  g.minute += 1440;
+  pensionMorning(g);
+  assert(!g.workers.includes(w), "gikk ikke av med pensjon");
+  assert(
+    g.log.some((l) => l.text.includes("går av med pensjon, 67 år")),
+    "ingen avskjed i loggen",
+  );
+  // Den erfarne pensjonisten jobber til 70
+  const d = makeDecision(g, "pensjonist");
+  if (d) {
+    g.pendingDecision = { ...d, resumeSpeed: 1 };
+    resolveDecision(g, 0);
+    const back = g.workers.find((x) => x.retireAge === PENSION.returneeRetire);
+    assert(back && ageOf(back, day(g)) >= 63 && ageOf(back, day(g)) <= 66, "pensjonisten har feil alder");
+  }
+  // Lagrede spill fra før: alle får en alder, og ingen går av det første året
+  const old = JSON.parse(JSON.stringify(g));
+  for (const x of old.workers) delete x.born;
+  for (const x of old.candidates) delete x.born;
+  old.workers.push({
+    ...old.workers[0],
+    id: 4242,
+    name: "Gammel Lærling (lærling)",
+    apprenticeUntil: 90,
+    born: undefined,
+  });
+  const m = parseSave(JSON.stringify(old))!;
+  const now = day(m);
+  for (const x of [...m.workers, ...m.candidates]) {
+    assert(x.born !== undefined, `${x.name} fikk ingen alder`);
+    if (x.retireAge) continue;
+    const age = ageOf(x, now);
+    assert(age >= (x.apprenticeUntil !== undefined ? 17 : 22) && age <= 59, `${x.name} er ${age} år`);
+    assert(pensionDay(x) - now > YEAR_DAYS, `${x.name} går av det første året`);
+  }
+  // Samme alder hver gang spillet lastes
+  const again = parseSave(JSON.stringify(old))!;
+  assert(
+    again.workers.every((x, i) => x.born === m.workers[i].born),
+    "alderen endret seg ved ny lasting",
   );
 });
 

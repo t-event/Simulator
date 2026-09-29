@@ -153,3 +153,4 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Kalender på Oversikt; salgsdirektøren står i sommerstansen | Nei | Regel 1: ditt eget spill | B-321 |
 | Konsernverdien på Konsern → Oversikt som på topplista | – | Ingen ny funksjon | B-322 |
 | Kokillene i strengstøpingen slites og byttes | Nei | Regel 1: ditt eget spill | B-351 |
+| Lærlinger utenfor drifta, alder og pensjon for ansatte | Nei | Regel 1: ditt eget spill | B-357 |

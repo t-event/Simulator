@@ -9,6 +9,7 @@ import { RESEARCH } from "./research";
 import { ADDONS } from "./data";
 import { newEnv } from "./environment";
 import { paidOutTotal } from "./reserve";
+import { giveAge } from "./pension";
 
 /** Forskning som ble lagt til med B-054; de andre automatikk-forskningene fantes fra før */
 const NEW_AUTOMATION = ["salgsrutiner", "ordreplan", "innkjop", "bemanning"];
@@ -316,6 +317,8 @@ export function migrate(g: GameState): GameState {
   for (const w of g.workers)
     if (w.apprenticeUntil === undefined && w.name.endsWith(" (lærling)"))
       w.apprenticeUntil = Math.max(nowDay + 3, (w.hiredDay ?? 0) + 30);
+  // Alder (B-357): ansatte og søkere fra før får en fast alder, 22–59 (lærlinger 17–19), så ingen går av det første året
+  for (const w of [...g.workers, ...(g.candidates ?? [])]) giveAge(w, nowDay);
   // Tusenvis av partier på lageret (B-353) slås sammen med én gang
   compactLots(g);
   // Prestasjoner (B-151) man alt har klart, vises med én gang, ikke først etter en spilltime

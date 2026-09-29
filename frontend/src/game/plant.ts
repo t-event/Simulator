@@ -234,13 +234,26 @@ export function tempsCost(g: GameState, days: number): number {
   return Math.round(sum);
 }
 
-/** De som er på jobb: alle som ikke er borte, eller alle hvis vikarer dekker fraværet (B-031) */
+/**
+ * Lærlinger (B-357) er i opplæring og teller ikke i drifta før de har fagbrev: de fyller ingen plasser på skiftene, er
+ * ikke avløsere og regnes ikke med i ferdigheten til dem som står i produksjonen. De får lønn og lærer som før.
+ */
+export function isApprentice(w: Worker): boolean {
+  return w.apprenticeUntil !== undefined;
+}
+
+/** De ansatte som teller i drifta: alle unntatt lærlingene */
+export function dutyWorkers(g: GameState): Worker[] {
+  return g.workers.filter((w) => !isApprentice(w));
+}
+
+/** De som er på jobb: alle som ikke er borte, eller alle hvis vikarer dekker fraværet (B-031). Ikke lærlinger (B-357) */
 export function presentWorkers(g: GameState): Worker[] {
-  return tempsActive(g) ? g.workers : g.workers.filter((w) => !isAbsent(g, w));
+  return tempsActive(g) ? dutyWorkers(g) : dutyWorkers(g).filter((w) => !isAbsent(g, w));
 }
 
 function countRoles(g: GameState, ignoreAbsence = false): Record<RoleId, number> {
-  const counts = countList(ignoreAbsence ? g.workers : presentWorkers(g));
+  const counts = countList(ignoreAbsence ? dutyWorkers(g) : presentWorkers(g));
   // Innleide vikarer står på skiftene i tillegg til de ansatte (B-050)
   const hired = hiredCrew(g);
   for (const role of CREW_ROLES) counts[role] += hired[role] ?? 0;
@@ -326,7 +339,7 @@ export function crewCoverage(
     const own = Math.min(need, counts[role]);
     const filled = Math.min(need - own, spare);
     spare -= filled;
-    const away = g.workers.filter((w) => w.role === role && isAbsent(g, w)).length;
+    const away = dutyWorkers(g).filter((w) => w.role === role && isAbsent(g, w)).length;
     rows.push({
       role,
       perShift,

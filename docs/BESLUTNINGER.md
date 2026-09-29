@@ -6476,3 +6476,27 @@ Testet: nettesten «Kobling mens tjenesten er nede» (503 → ingen opplasting �
 oppe igjen, uten omlasting.
 Konto (B-149): nei – gjelder lagringen for dem som har konto.
 
+## B-357 Lærlinger teller ikke i drifta før fagbrevet; alder og pensjon for alle ansatte (2026-09-29)
+Status: gjelder
+Bakgrunn: eieren: «Lærlinger bør ikke telle i drifta før de har tatt fagbrev. Vil også at ansatte skal kunne gå av med
+pensjon. Legg til alder på alle ansatte slik at det fungerer.» Før talte en lærling (B-163) som en vanlig avløser på
+skiftene fra første dag, for halv lønn. Ingen ansatte hadde alder, og ingen gikk av.
+Beslutning:
+- Lærlinger (`apprenticeUntil` satt) står utenfor drifta til de har fagbrev: `dutyWorkers`/`presentWorkers` (`plant.ts`)
+  tar dem ikke med, så de fyller ingen plasser, er ikke ledige avløsere og trekker ikke ned ferdigheten til dem som står i
+  produksjonen. De får lønn (halv), plass i staben, lærer som før (ferdigheten øker hver dag) og tar fagprøven. Med
+  fagbrev teller de som vanlig. Kortet fra yrkesskolen og raden under Ansatte sier det («ikke på skift ennå»).
+- Alder (`game/pension.ts`): alle ansatte har `born` (fødselsdøgnet i spillet); alderen øker med ett år per spillår (360
+  døgn, samme kalender som B-265). Søkere er 20–59 år, lærlinger 17–19. Den erfarne pensjonisten fra hendelseskortet er
+  63–66 og jobber til 70 (`retireAge`).
+- Pensjon: halvparten går av ved 67, resten mellom 62 og 66 (som med AFP), fast ut fra id-en. En måned (30 døgn) før
+  kommer en beskjed i varsellista (tema «Ansatte og trivsel»), og raden under Ansatte viser «Pensjon om N døgn». På dagen
+  går den ansatte av (trivsel +1, telles som «pensjon»). Faller skiftene uten den som går av, kommer et råd på Verket om å
+  ansette en ny (Folk → Ansett).
+- Alderen vises under Ansatte og på søkerne under Ansett.
+- Eldre lagringer: ansatte og søkere får en fast alder fra id-en, 22–59 (lærlinger 17–19), så ingen går av det første
+  spillåret og alderen er den samme hver gang spillet lastes.
+Balanse: `balance.ts` OK (nivådagene innenfor målene, nybegynneren median 180 døgn til storverket, ingen konkurs). Få går
+av i testspillerens løp (søkerne er høyst 59, og det tar minst tre spillår før de første går av).
+Konto (B-149): nei – ditt eget spill.
+
