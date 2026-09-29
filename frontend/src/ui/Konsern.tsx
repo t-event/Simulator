@@ -539,11 +539,14 @@ function PlantRow({
   advised: boolean;
 }) {
   const [open, setOpen] = useState(0);
+  // Åpen fra start hvis rådet gjelder verket – men bare når siden åpnes (B-373). Før åpnet og lukket radene seg mens
+  // spillet gikk, hver gang rådet byttet verk, og hele lista hoppet
+  const [startOpen] = useState(advised);
   const down = p.downUntilDay > day(g);
   const { main, isUpgrade } = mainOption(p, options);
   const max = modernizeMax(g);
   return (
-    <details className={`g-plant-row${advised ? " is-advised" : ""}`} open={advised || undefined}>
+    <details className={`g-plant-row${advised ? " is-advised" : ""}`} open={startOpen || undefined}>
       <summary>
         <span className="g-plant-row-name">
           <strong>{p.name}</strong>

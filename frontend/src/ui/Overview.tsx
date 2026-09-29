@@ -485,13 +485,14 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
             <BookCard g={g} openBook={openBook} />
             {/* Loggen på Oversikt (B-098); ikke lenger også under Økonomi (B-233) */}
             <Card title="Siste hendelser">
-              <ul className="g-log">
+              {/* Fast høyde (B-373): hver hendelse tar alltid to linjer, så kortet ikke hopper når nye kommer */}
+              <ul className="g-log g-log-fixed">
                 {recent.slice(0, 5).map((e) => (
                   <li key={e.id} className={`log-${e.kind}`}>
                     <span className="g-log-time">
                       Dag {Math.floor(e.min / 1440) + 1} {fmtClock(e.min)}
                     </span>
-                    {e.text}
+                    <span className="g-log-text">{e.text}</span>
                   </li>
                 ))}
               </ul>

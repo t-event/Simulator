@@ -15,6 +15,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 373,
+    date: "2026-09-30",
+    title: "Datterverk koster en firedel, og ingenting hopper",
+    items: [
+      "Datterverkene koster nå en firedel: stålverk 5 mill., storverk 20 mill. og stålkompleks 60 mill. Modernisering og utbygging er like mye billigere. Et kjøp er betalt tilbake på uker, ikke hundrevis av dager.",
+      "Har du kjøpt eller modernisert noe etter midnatt i natt, har du fått mellomlegget tilbake i konsernkassa.",
+      "Beholder eieren et selskap etter et oppkjøpsbud, kan andre by igjen med én gang. Vernet på 3 dager gjelder bare når selskapet får ny eier.",
+      "Tallene øverst flytter seg ikke lenger når ett av dem endrer seg, og tallet på bjella ligger oppå hjørnet.",
+      "«Siste hendelser» på Oversikt har fast høyde, og verkene under Konsern → Oversikt åpner og lukker seg ikke av seg selv mens spillet går.",
+    ],
+  },
+  {
     b: 372,
     date: "2026-09-30",
     title: "Oppkjøp gir 14 dager, og Utvid er enklere",

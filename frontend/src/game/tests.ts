@@ -3323,11 +3323,11 @@ test("Konsernet i ekte tid (B-326): priser, køen i rekkefølge, rabatt, bytte o
   const H = 3_600_000;
   const t0 = 1_000_000_000_000;
   const w: KonsernWorld = { plants: [], orders: [], nextId: 1, level: 0, floor: 0, balance: 200_000_000 };
-  // Storverk krever et verk først; stålverk koster 20 mill.
+  // Storverk krever et verk først; stålverk koster 5 mill. (B-373)
   assert(!placeOrder(w, { kind: "bygg", type: "storverk" }, [], t0).ok, "storverk før første verk");
   const a = placeOrder(w, { kind: "bygg", type: "stalverk" }, [], t0);
   assert(
-    a.ok && w.balance === 180_000_000 && w.plants.length === 1 && w.plants[0].project?.kind === "bygg",
+    a.ok && w.balance === 195_000_000 && w.plants.length === 1 && w.plants[0].project?.kind === "bygg",
     "første kjøp",
   );
   // Neste i køen starter når det forrige er ferdig
@@ -3335,16 +3335,16 @@ test("Konsernet i ekte tid (B-326): priser, køen i rekkefølge, rabatt, bytte o
   assert(b.ok && b.order.startsAt === t0 + 2 * H && b.order.readyAt === t0 + 8 * H, "tidene i køen");
   const c = placeOrder(w, { kind: "modernisering", plant: 1 }, ["standardverk"], t0);
   assert(
-    c.ok && c.order.cost === 4_500_000 && c.order.startsAt === t0 + 8 * H,
+    c.ok && c.order.cost === 1_125_000 && c.order.startsAt === t0 + 8 * H,
     `modernisering ${c.ok && c.order.cost}`,
   );
   const d = placeOrder(w, { kind: "bygg", type: "stalverk" }, [], t0);
   assert(!d.ok && d.reason === "ko_full", "køen tok mer enn tre");
   // Pengene er borte fra kassa med én gang (kan ikke brukes til bud)
-  assert(w.balance === 200_000_000 - 20_000_000 - 80_000_000 - 4_500_000, `kassa ${w.balance}`);
+  assert(w.balance === 200_000_000 - 5_000_000 - 20_000_000 - 1_125_000, `kassa ${w.balance}`);
   // Bare det siste kan avbestilles, og bare før det har startet
   assert(!cancelOrder(w, b.ok ? b.order.id : 0, t0).ok, "avbestilte et prosjekt midt i køen");
-  assert(cancelOrder(w, c.ok ? c.order.id : 0, t0).ok && w.balance === 100_000_000, "avbestilling");
+  assert(cancelOrder(w, c.ok ? c.order.id : 0, t0).ok && w.balance === 175_000_000, "avbestilling");
   // Ekte tid: stålverket ferdig etter 2 t, storverket etter 8 t
   const e1 = settleWorld(w, t0 + 3 * H);
   assert(e1.some((e) => e.kind === "ferdig" && e.plant.id === 1) && w.plants.length === 2, "første ble ikke ferdig");
@@ -3355,10 +3355,10 @@ test("Konsernet i ekte tid (B-326): priser, køen i rekkefølge, rabatt, bytte o
   placeOrder(w, { kind: "modernisering", plant: 2 }, [], t0 + 9 * H);
   assert(!sellPlant(w, 2, t0 + 9 * H).ok, "solgte et verk som moderniseres");
   const sold = sellPlant(w, 1, t0 + 9 * H);
-  assert(sold.ok && sold.sale === 12_000_000, `salg ${sold.ok && sold.sale}`);
+  assert(sold.ok && sold.sale === 3_000_000, `salg ${sold.ok && sold.sale}`);
   settleWorld(w, t0 + 20 * H);
   // Oppkjøpsavdelingen: −15 % på kjøp og utbygging
-  assert(buildCost("kompleks", ["oppkjop"]) === 212_500_000 && upgradeCostWorld(["oppkjop"]) === 51_000_000, "rabatt");
+  assert(buildCost("kompleks", ["oppkjop"]) === 51_000_000 && upgradeCostWorld(["oppkjop"]) === 12_750_000, "rabatt");
   // Bytte til kompleks krever Stålfyrste; prisen er komplekset minus salget
   const x: KonsernWorld = { plants: [], orders: [], nextId: 1, level: 2, floor: 0, balance: 250_000_000 };
   for (let i = 1; i <= 10; i++)
@@ -3366,11 +3366,9 @@ test("Konsernet i ekte tid (B-326): priser, køen i rekkefølge, rabatt, bytte o
   x.nextId = 11;
   assert(!placeOrder(x, { kind: "bygg", type: "kompleks" }, ["storkonsern"], t0).ok, "kjøpte et ellevte verk");
   const swap = placeOrder(x, { kind: "bytt", plant: 3 }, ["storkonsern"], t0);
-  assert(swap.ok && swap.sale === Math.round(80_000_000 * 2.2 * 0.6), "byttet");
+  assert(swap.ok && swap.sale === Math.round(20_000_000 * 2.2 * 0.6), "byttet");
   assert(
-    x.plants.length === 10 &&
-      !x.plants.some((p) => p.id === 3) &&
-      x.balance === 250_000_000 + 105_600_000 - 250_000_000,
+    x.plants.length === 10 && !x.plants.some((p) => p.id === 3) && x.balance === 250_000_000 + 26_400_000 - 60_000_000,
     `kassa ${x.balance}`,
   );
   // Nivået går aldri under gulvet (titlene ved byttet)
@@ -3590,7 +3588,8 @@ test("Konsern-merket (B-342): modernisering av et stålverk som kan bygges ut, t
   assert(!worthwhileOptions(all).some((o) => o.key.startsWith("mod-")), "men foreslås ikke før utbyggingen");
   const ready = konsernReady(g);
   assert(
-    ready === all.filter((o) => o.key.startsWith("kjop-") && !o.blocked && o.price <= 30_000_000).length,
+    // Med prisene fra B-373 er også utbyggingen (15 mill.) innen rekkevidde; moderniseringen teller fortsatt ikke
+    ready === all.filter((o) => /^(kjop|bygg)-/.test(o.key) && !o.blocked && o.price <= 30_000_000).length,
     `merket: ${ready}`,
   );
   assert(!konsernAdvice(g)?.key.startsWith("mod-"), "rådet foreslår ikke moderniseringen");

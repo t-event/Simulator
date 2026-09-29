@@ -2927,8 +2927,30 @@ button {
   position: relative;
 }
 
+/* Merket ligger oppå hjørnet av bjella (B-373), og plassen står fast, så teksten ved siden av ikke skyves */
+.g-notice-bell {
+  padding-right: 14px;
+}
+
 .g-notice-bell .g-badge {
-  margin-left: 2px;
+  position: absolute;
+  top: -7px;
+  left: 12px;
+  margin: 0;
+}
+
+.g-notice-kind.is-empty {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+}
+
+.g-log-fixed .g-log-text {
+  display: -webkit-box;
+  min-height: calc(2em * 1.35);
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .g-notice-msg {
@@ -3965,6 +3987,23 @@ button {
 
 .g-kpis em.g-kpi-label {
   margin: 0;
+}
+
+/* Fast plass til tallene i toppfeltet (B-373): når ett tall ble bredere, flyttet alle etter det seg */
+.g-kpi-cash strong {
+  min-width: 5.8em;
+}
+
+.g-kpi-rep strong {
+  min-width: 2.4em;
+}
+
+.g-kpi-fp strong {
+  min-width: 2.8em;
+}
+
+.g-kpi-treasury strong {
+  min-width: 7.6em;
 }
 
 @media (max-width: 599px) {

@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 299 – 2026-09-30: Billigere datterverk, vern bare ved ny eier, ingen hopping (B-373)
+
+**Brukeren ba om:** 3 dagers vern bare når selskapet får ny eier; fiks linjer som flytter seg i toppbaren og på Oversikt;
+kjøp og oppgradering av datterverk skal ikke ta hundrevis av dager å betale seg, og refusjon for kjøp etter 00:00.
+
+**Gjort:** B-373 – priser 5/20/60 mill. (server og app), refusjon 52,5 mill. til fire bestillinger (dry-run først), pausen
+etter avverget oppkjøp fjernet. Faste bredder i toppfeltet, merket på bjella oppå hjørnet, fast høyde i «Siste
+hendelser», og verksradene i konsernet åpnes bare ved start.
+
+**Testet:** tilbakebetaling per konto sjekket i `treasury_ledger`; `npm test` (tallene i konserntesten oppdatert); `balance.ts`
+exit 0; tilbakebetalingstid målt for 1–12 verk; Playwright-måling av posisjoner i 8 s (320/390/1366, Verket og Konsern)
+og toppfeltet (samme høyde som før, ingen horisontal scrolling).
+
+**Gjenstår:** forslaget om investeringer i verdien (FORSLAG.md).
+
 ## Økt 298 – 2026-09-30: 14 dager etter oppkjøp, investeringer og Utvid (B-372)
 
 **Brukeren ba om:** 3 dagers vern og 14 dager fra oppkjøpet for ny eier; svar på hva investering gjør og om den følger
