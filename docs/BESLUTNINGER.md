@@ -6576,3 +6576,15 @@ er som før. Vurderes på nytt hvis prosjektet går over til Pro.
 Endringslogg: nei – ingen endring i spillet.
 Konto (B-149): – ingen ny funksjon.
 
+## B-364 Verden oppdateres hvert 5. minutt, også når ingen spiller (2026-09-29)
+Status: gjelder
+Bakgrunn: `world_tick` (anbud, overtakelser, inntekt fra selskapene, utbytte, bidrag og målingene hvert kvarter fra B-361
+og B-362) ble bare kjørt når en app spurte etter `world_status`. Om natta ble det derfor ingen målinger, så snittet for
+dagen bygde bare på timene noen var inne, og frister for overtakelser og anbud ble liggende til noen åpnet spillet.
+RETNING.md (avsnitt 5) sa at pg_cron burde slås på før overtakelsene (fase 4), og overtakelsene er på fra 29.9 (B-339).
+Beslutning: pg_cron-jobben `verden-tick` kjører `world_tick()` hvert 5. minutt. Sperren i `world_tick` (høyst hvert 30.
+sekund, én om gangen, 072) står, så appene og jobben kan kalle samtidig. Jobben `cron-rydding` sletter kjøringsloggen i
+`cron.job_run_details` som er eldre enn 3 dager (daglig 03:41 UTC). Migrasjon `079_verden_hvert_5_min.sql`.
+Endringslogg: nei – spillerne merker bare at ting skjer i tide.
+Konto (B-149): – ingen ny funksjon.
+
