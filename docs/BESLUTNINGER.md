@@ -6522,3 +6522,14 @@ din private formue». Endret i topplista og Hall of Fame (lista «Privat formue�
 endret: regnestykket, `paidOut`/`paidOutTotal` og lista `utbetalt` på serveren er som før.
 Konto (B-149): nei – ingen ny funksjon.
 
+## B-360 Tilgangsreglene regner ut innloggingen én gang, og fremmednøkler får indeks (2026-09-29)
+Status: gjelder
+Bakgrunn: ytelsesrådene fra Supabase etter driftsstansen: sju tilgangsregler (RLS) på `saves`, `snapshots`, `profiles`,
+`records` og `daily` regnet ut `auth.uid()` for hver rad (`auth_rls_initplan`), og åtte fremmednøkler manglet indeks.
+`world_status` så treg ut (291 ms i snitt), men målt nå tar den 29–70 ms – snittet var dratt opp av stansen.
+Beslutning: `076_rls_og_indekser.sql` skriver reglene om til `(select auth.uid())` (samme regler, regnet én gang per
+spørring) og lager indeksene. Testet som spiller: ser bare sitt eget spill, sin profil og sin tidslinje. Rådene for ytelse
+er borte (bortsett fra «ubrukt indeks» for de nye); sikkerhetsrådene er de samme som før.
+Endringslogg: nei – spillerne merker ingenting.
+Konto (B-149): nei – ingen ny funksjon.
+

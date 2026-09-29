@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 286 – 2026-09-29: Dashbordet etter stansen, og ytelsesrådene (B-360)
+
+**Brukeren ba om:** skjermbilder av Data API (76 feil, koder 503/521/522/525), så «Fortsett».
+
+**Funnet:** alle feilene var fra stansen før omstarten kl. 21:27 (grafene i dashbordet er i UTC). Etter 21:30: ingen feil
+i ca. 1 900 kall, svartid 153 ms i snitt. `world_status` tar 29–70 ms når den måles nå.
+
+**Gjort:** B-360 – `076_rls_og_indekser.sql`: tilgangsreglene med `(select auth.uid())` og indekser på åtte fremmednøkler.
+
+**Testet:** som spiller i en DO-blokk som rulles tilbake (ser bare egne rader), `get_advisors` for ytelse og sikkerhet.
+
+**Gjenstår:** følg med på diskkvoten.
+
 ## Økt 285 – 2026-09-29: «Privat formue» i stedet for «Utbetalt til eierne» (B-359)
 
 **Brukeren ba om:** «Det du tjener over, betales til eierne. Blir litt feil da man selv er eier av konsern. Kall det for
