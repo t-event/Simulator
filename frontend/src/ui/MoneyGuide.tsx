@@ -113,6 +113,16 @@ export function MoneyGuide({ g, onClose }: { g: GameState; onClose: () => void }
                   annen tidssone. Det kan gå noen minutter før pengene står i kassa.
                 </p>
               </Question>
+              <Question q="Hva er Kontroll – og kan noen ta selskapet mitt?">
+                <p>
+                  Kontroll er hvor vanskelig det er for andre å ta et selskap du eier: sterk, god, middels eller svak.
+                  Den øker når du spiller hver uke, investerer i selskapet, har datterverk i samme region og har eid det
+                  lenge. Nye eiere er vernet de første 3 dagene. Etter det kan en annen spiller by på selskapet. Du får
+                  beskjed og har 72 timer på deg til å sette inn penger i forsvaret (du får 95 % tilbake). Mister du
+                  det, får du 85 % av budet. Under Konsern → Industrien står det hvor stort bud som trengs for å ta
+                  ditt.
+                </p>
+              </Question>
               <Question q="Hvorfor tar det lengre tid å bygge og modernisere enn før?">
                 <p>
                   Før ble datterverkene kjøpt med kassa hjemme, og den vokser ti ganger så fort på 10×. Nå kjøpes de fra

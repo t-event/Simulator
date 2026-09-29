@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 296 – 2026-09-30: Selskapene enklere å forstå (B-370)
+
+**Brukeren ba om:** «Figen forstår ikke hvorfor firmaet hans er presset, han forstår heller ikke seg på forsvar og
+lignende. Du må gjøre bedrifter enklere og mer intuitiv å forstå seg på.»
+
+**Funnet:** Figens Kontroll er 54 («presset»): lite investert (1,8 av 25), ett verk i regionen, eiertid 0, fondet for lite
+til å telle. Etter vernet kan en aktiv spiller ta skraplageret med minstebudet (471 mill.) hvis Figen ikke forsvarer seg.
+
+**Gjort:** B-370 – nye ord (sterk/god/middels/svak), stolpe, «budet som trengs», vernet, «Slik blir det tryggere»,
+forhåndsvisning av investering, dom og beløp under angrep, tre steg om overtakelser, ny tekst for utbyttepolitikken og et
+spørsmål i pengeguiden. `082_kontroll_siden.sql` (`since` i `company_control`). Tester med Figens tall.
+
+**Testet:** tsc, lint, `npm test`; Playwright 320/390/1366 px med falsk server (eier uten angrep, med vern og investering
+300 mill.: Kontroll 65, bud 616 mill.; under angrep: «mister du selskapet – sett inn ca. 52 mill.»). Ingen horisontal
+scrolling eller avkortet tekst.
+
+**Gjenstår:** –
+
 ## Økt 295 – 2026-09-30: Dagen skifter ved midnatt norsk tid (B-369)
 
 **Brukeren ba om:** «Kan du endre det til å bli 00:00 i norsk tid? Og betale ut for idag siden klokka er over 00:00»

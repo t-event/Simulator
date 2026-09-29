@@ -6746,6 +6746,54 @@ button.g-prod-row:hover {
   font-size: var(--fs-meta);
 }
 
+/* Kontrollen for eieren med vanlige ord (B-370) */
+.g-control-now {
+  margin: var(--sp-2) 0;
+}
+
+.g-control-now .ds-icon,
+.g-defense-verdict .ds-icon {
+  vertical-align: -2px;
+}
+
+.g-control-sub {
+  margin: var(--sp-2) 0 var(--sp-1);
+  font-size: var(--fs-meta);
+}
+
+.g-control-steps {
+  margin: 0 0 var(--sp-2);
+  padding: 0;
+  list-style: none;
+}
+
+.g-control-steps li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: 4px 0;
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-meta);
+}
+
+.g-control-how {
+  margin: var(--sp-2) 0;
+  padding-left: 1.2em;
+}
+
+.g-control-how li + li {
+  margin-top: var(--sp-1);
+}
+
+.g-invest-preview {
+  margin: var(--sp-1) 0;
+}
+
+.g-defense-verdict {
+  margin: var(--sp-2) 0;
+  font-weight: 600;
+}
+
 .g-invest {
   margin: var(--sp-2) 0;
 }

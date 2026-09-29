@@ -15,12 +15,12 @@ export interface Policy {
 }
 
 export const POLICIES: Policy[] = [
-  { id: "ut", name: "Ta ut", keep: 0.3, about: "Mest til konsernkassa. Som før." },
+  { id: "ut", name: "Ta ut", keep: 0.3, about: "Alt til konsernkassa, ingenting til fondet." },
   {
     id: "balansert",
     name: "Balansert",
     keep: 0.5,
-    about: "Litt mindre til kassa. Resten bygger et forsvarsfond.",
+    about: "Litt mindre til kassa. Resten går til forsvarsfondet.",
   },
   { id: "forsvar", name: "Bygg forsvar", keep: 0.7, about: "Minst til kassa. Fondet vokser raskt." },
 ];
@@ -49,32 +49,69 @@ export function policyLockedUntil(changedAt: number | null | undefined, now: num
 export const CONTROL_PARTS: { key: string; name: string; max: number; how: string }[] = [
   { key: "eier", name: "Du eier selskapet", max: 30, how: "" },
   { key: "aktivitet", name: "Du har spilt den siste uka", max: 20, how: "Spill litt hver uke." },
-  { key: "investering", name: "Investeringer i selskapet", max: 25, how: "Invester i selskapet." },
-  { key: "region", name: "Egne verk i samme region", max: 10, how: "Bygg eller flytt verk til regionen." },
-  { key: "eiertid", name: "Hvor lenge du har eid det", max: 10, how: "Kommer av seg selv, én per uke." },
-  { key: "fond", name: "Forsvarsfondet", max: 10, how: "Hold igjen mer av utbyttet." },
+  { key: "investering", name: "Investeringer i selskapet", max: 25, how: "Invester i selskapet (feltet under)." },
+  {
+    key: "region",
+    name: "Egne verk i samme region",
+    max: 10,
+    how: "Ha flere datterverk i samme region som selskapet.",
+  },
+  {
+    key: "eiertid",
+    name: "Hvor lenge du har eid det",
+    max: 10,
+    how: "Kommer av seg selv: +1 for hver uke du eier det.",
+  },
+  { key: "fond", name: "Forsvarsfondet", max: 10, how: "Velg «Balansert» eller «Bygg forsvar» i utbyttepolitikken." },
   { key: "belastning", name: "Mange selskaper å holde", max: 0, how: "" },
 ];
 
 export type ControlTone = "ok" | "info" | "heat" | "bad";
 
-/** Kontrollen som ord: sterk (80+), stabil (60–79), presset (40–59), svak (under 40) */
+/**
+ * Kontrollen som ord: sterk (80+), god (60–79), middels (40–59), svak (under 40). «Presset» og «stabil» ble byttet ut
+ * (B-370): «presset» ble lest som at noen prøvde å ta selskapet.
+ */
 export function controlWord(score: number): { word: string; tone: ControlTone } {
   if (score >= 80) return { word: "Sterk", tone: "ok" };
-  if (score >= 60) return { word: "Stabil", tone: "info" };
-  if (score >= 40) return { word: "Presset", tone: "heat" };
+  if (score >= 60) return { word: "God", tone: "info" };
+  if (score >= 40) return { word: "Middels", tone: "heat" };
   return { word: "Svak", tone: "bad" };
 }
 
 /** Én setning om hvor mer Kontroll er å hente: den delen som mangler mest */
 export function controlAdvice(parts: Record<string, number>): string | null {
-  let best: { gap: number; how: string } | null = null;
-  for (const p of CONTROL_PARTS) {
-    if (!p.how || p.max <= 0) continue;
-    const gap = p.max - (parts[p.key] ?? 0);
-    if (gap >= 2 && (!best || gap > best.gap)) best = { gap, how: p.how };
-  }
-  return best?.how ?? null;
+  return controlSteps(parts)[0]?.how ?? null;
+}
+
+/**
+ * Det som kan gi mer Kontroll, med det som mangler mest først (B-370). Deler som nesten er fulle, er ikke med, og det
+ * som kommer av seg selv (eiertiden), står sist. Fondet foreslås bare når politikken er «Ta ut»: med en annen politikk
+ * vokser det alt, og det gir lite før det er stort i forhold til selskapet.
+ */
+export function controlSteps(
+  parts: Record<string, number>,
+  policy: PolicyId = "ut",
+): { key: string; name: string; gap: number; how: string }[] {
+  return CONTROL_PARTS.filter((p) => p.how && p.max > 0 && (p.key !== "fond" || policy === "ut"))
+    .map((p) => ({ key: p.key, name: p.name, gap: p.max - (parts[p.key] ?? 0), how: p.how }))
+    .filter((p) => p.gap >= 2)
+    .sort((a, b) => +(a.key === "eiertid") - +(b.key === "eiertid") || b.gap - a.gap);
+}
+
+/** Delen «investeringer» som på serveren (`company_control`): 25 × (1 − e^(−investert / verdien)) */
+export function investPart(invested: number, value: number): number {
+  return 25 * (1 - Math.exp(-Math.max(0, invested) / Math.max(1, value)));
+}
+
+/** Kontrollen hvis eieren investerer `extra` til (forhåndsvisning i appen, B-370) */
+export function controlAfterInvest(
+  ctl: { score: number; parts: Record<string, number>; invested: number; value: number },
+  extra: number,
+): number {
+  const before = ctl.parts.investering ?? 0;
+  const after = Math.round(investPart(ctl.invested + extra, ctl.value) * 10) / 10;
+  return Math.max(0, Math.min(100, Math.round(ctl.score - before + after)));
 }
 
 /**
@@ -96,6 +133,8 @@ export const TAKEOVER = {
   failRefund: 0.9,
   defenseRefund: 0.95,
   defenseHours: 72,
+  /** Ny eier er vernet de første dagene (`protect_days`) */
+  protectDays: 3,
 };
 
 /** Angrepet: 60 × √(bud / V) × (0,5 + 0,5 × aktivitet) + 2,5 per egne verk i regionen (høyst 10); budet høyst 10 × V */
@@ -116,6 +155,44 @@ export function takeoverDefense(control: number, defense: number, fund: number, 
   return (
     control + t.defenseW * Math.sqrt(Math.min(t.cap * v, defense + Math.min(Math.max(0, fund), t.fundCap * v)) / v)
   );
+}
+
+/**
+ * Hvor stort bud en aktiv spiller uten egne verk i regionen trenger for å ta selskapet hvis eieren ikke setter inn noe
+ * forsvar (B-370). Minst verdien (minstebudet), høyst 10 × verdien. Et tall eieren forstår bedre enn poengene.
+ */
+export function bidToTake(control: number, fund: number, value: number): number {
+  const v = Math.max(1, value);
+  const d = takeoverDefense(control, 0, fund, v);
+  const need = v * (d / TAKEOVER.attackW) ** 2;
+  return Math.max(v, Math.min(need, TAKEOVER.attackCap * v));
+}
+
+/**
+ * Hvor mye mer forsvar (kroner) eieren må sette inn for å stå imot et angrep som står nå (B-370): 0 hvis forsvaret alt
+ * holder, null hvis det ikke går (angrepet er sterkere enn det største forsvaret). Litt over, så likt ikke er nok.
+ */
+export function defenseNeeded(
+  attack: number,
+  control: number,
+  defense: number,
+  fund: number,
+  value: number,
+): number | null {
+  const t = TAKEOVER;
+  const v = Math.max(1, value);
+  if (takeoverDefense(control, defense, fund, v) > attack) return 0;
+  const total = v * ((attack - control) / t.defenseW) ** 2 * 1.01;
+  if (total > t.cap * v) return null;
+  const f = Math.min(Math.max(0, fund), t.fundCap * v);
+  return Math.max(0, Math.ceil(total - defense - f));
+}
+
+/** Når vernet for en ny eier slutter (ms), eller null hvis det er over. `since` er når eieren tok over */
+export function protectedUntil(since: string | null | undefined, now: number): number | null {
+  if (!since) return null;
+  const until = Date.parse(since) + TAKEOVER.protectDays * 86_400_000;
+  return Number.isFinite(until) && until > now ? until : null;
 }
 
 /** Hvorfor et bud ikke kan legges inn nå, med vanlige ord */
