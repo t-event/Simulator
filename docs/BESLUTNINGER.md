@@ -6712,3 +6712,31 @@ Beslutning (bare tekst, i appen og i skiftrapporten):
 - `083_oppkjop_ord.sql`: `chat_on_takeover` skriver de nye ordene i skiftrapporten. Gamle meldinger står som de var.
 - Kodenavnene (`takeover`, `attack`, `defense`, `takeover_defend`, status `overtatt`/`avverget`) er uendret.
 Konto (B-149): – ingen ny funksjon.
+
+## B-372 Oppkjøp gir 14 dager fra kjøpet, 3 dagers vern, og Utvid-fanen er enklere (2026-09-30)
+Status: gjelder (endrer B-335: eierperioden og pausen etter et oppkjøp)
+Bakgrunn: brukeren (eier): «Om noen tar over bedriften før de 14 dagene har gått bør den nye eieren få 3 dager vern og
+14 dager fra hen overtar. Hva skjer når man investerer i bedriften sin. Og blir det med over til neste eier? Gjør kjøp og
+utvid i utvid fanen bedre og mer intuitiv.»
+Før: den som kjøpte ved oppkjøp, fikk bare resten av den forrige eierens periode, og pausen på 14 dager etter hvert
+oppkjøpsforsøk (også et vellykket) vernet den nye eieren resten av perioden.
+Beslutning:
+- `084_oppkjop_14_dager.sql`: `resolve_takeovers` gir kjøperen perioden fra nå til nå + `concession_days` (14), aldri
+  kortere enn den gamle (`greatest`). Har noen alt vunnet neste anbud, eller er et anbud åpent, står datoen (skjer ikke
+  i praksis: oppkjøp stenger 5 dager før slutten, og avgjøres før anbudet åpner 48 t før).
+- Vernet for ny eier (3 dager) gjelder også ved oppkjøp (ny rad i `company_owners`). Pausen på 14 dager gjelder nå bare
+  etter `avverget` (eieren beholdt det) – `takeover_window` og `company_protected_until`. Etter et oppkjøp er det derfor
+  3 dagers vern, så kan andre by igjen (eierens ønske).
+- `company_protected_until` (ny) og `protected_until` i `company_control`: serveren sier til når ingen kan by (vern,
+  pause, eller slutten av perioden når den er under 5 dager unna). Appen viser det på kortet («perioden din er over … Da
+  kommer et nytt anbud» når det gjelder resten).
+- Testet i en DO-blokk som ble rullet tilbake: oppkjøp av skraplageret → ny eier til nå + 14 d, vern i 3 d; 4 dager
+  senere er vinduet åpent igjen.
+- Utvid-fanen: status øverst (konsernkassa, datterverk X av Y, byggekøen X av 3) med én setning om hvordan kjøp virker,
+  og beskjed når køen eller plassene er fulle (med `moreSlotsText`). Kjøpskortene har tallene på én linje (gir per dag ·
+  betalt tilbake på · bygges på) i stedet for tre bokser – fanen ble ca. 25 % kortere på mobil. Knappene sier Kjøp /
+  Moderniser / Bygg ut / Bytt (ikke «Gjør det»). Korte forklaringer per del (hva verkstypene er gode for, hva
+  modernisering gir, at felles kjøp gjelder alle verk), regionvalget spør «Hvor skal nye verk bygges?» og sier at verk i
+  samme region som et selskap gir Kontroll. Lenke til alle verkene (Oversikt).
+- Spørsmålet om investering er besvart (se LOGG økt 298); endring av regelen er lagt fram som forslag i FORSLAG.md.
+Konto (B-149): – ingen ny funksjon.

@@ -15,6 +15,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 372,
+    date: "2026-09-30",
+    title: "Oppkjøp gir 14 dager, og Utvid er enklere",
+    items: [
+      "Kjøper du et selskap ved oppkjøp, eier du det i 14 dager fra kjøpet – ikke bare resten av perioden til den forrige eieren. De første 3 dagene kan ingen by på det.",
+      "Pausen på 14 dager gjelder nå bare når eieren beholdt selskapet etter et oppkjøpsbud.",
+      "Kortet for selskapet ditt viser riktig tid for når andre kan by igjen.",
+      "Konsern → Utvid: konsernkassa, antall datterverk og byggekøen står øverst, og hvert kjøp har tallene på én linje. Knappene sier hva som skjer: Kjøp, Moderniser, Bygg ut eller Bytt.",
+      "Er køen eller plassene fulle, står det øverst hva du kan gjøre.",
+    ],
+  },
+  {
     b: 371,
     date: "2026-09-30",
     title: "Oppkjøp og motbud",
