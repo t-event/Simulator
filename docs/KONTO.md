@@ -131,3 +131,4 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Lista «Utbetalt til eierne» og merket «Reformveteran II» | Ja (som topplista og merker) | Regel 2 | B-303 |
 | Datterverkenes utbytte i ekte tid til konsernkassa | Ja (som konsernkassa) | Regel 2 og 7: serveren, ekte tid | B-304 |
 | Realistiske kostnader på toppen av hjemmeverket | Nei | Regel 1: ditt eget spill | B-305 |
+| Taket for kassa 10 mrd., kjørt på serveren | Nei | Regel 1: ditt eget spill | B-306 |

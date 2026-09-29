@@ -1,7 +1,8 @@
 /**
- * Kassetaket og utbetalingen til eierne (B-303, reform 2). Alt som kan kjøpes i spillet, koster til sammen rundt
- * 100–130 mrd. Over taket er kassa bare et tall, så det verket tjener utover, betales ut til eierne: en historikk
- * («Utbetalt til eierne», egen liste i Hall of Fame) som ikke teller i konsernverdien og ikke kan brukes.
+ * Kassetaket og utbetalingen til eierne (B-303, reform 2; taket senket til 10 mrd. i B-306). Det dyreste som kan
+ * kjøpes, er et stålkompleks til 3,6 mrd., og sluttmålet er 10 mrd. Over taket er kassa bare et tall, så det verket
+ * tjener utover, betales ut til eierne: en historikk («Utbetalt til eierne», egen liste i Hall of Fame) som ikke
+ * teller i konsernverdien og ikke kan brukes. Kassa er en buffer til neste kjøp, ikke en poengsum.
  *
  * Den bundne konsernreserven (B-193) er avviklet: det som sto der, regnes som utbetalt til eierne fra før. Feltet
  * `lockedReserve` beholdes urørt i lagringen (eldre utgaver av appen skriver fortsatt til det), og `paidOutTotal`
@@ -12,8 +13,8 @@ import { day } from "./plant";
 import type { GameState } from "./types";
 
 export const CASH_RESERVE: { softCap: number | null } = {
-  /** Taket for kassa i kroner; null slår det av */
-  softCap: 100_000_000_000,
+  /** Taket for kassa i kroner (B-306: 10 mrd., lik sluttmålet); null slår det av */
+  softCap: 10_000_000_000,
 };
 
 /** Kroner betalt ut til eierne i alt, medregnet den gamle bundne reserven (B-193) */

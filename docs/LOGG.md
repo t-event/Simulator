@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 239 – 2026-09-29: Reform 2, del 4 – taket senket til 10 mrd. og kjørt på serveren
+
+**Brukeren ba om:** «Jeg har jo enda 100 mrd. på kontoen. Jeg syntes du var for snill med reform 2. Sjekk pengene til
+folk på topplista og fiks.» Valgte 10 mrd. og kjøring nå, og at «Mest penger på bok» fjernes.
+
+**Gjort:** B-306: taket 10 mrd. i appen, lista «Mest penger på bok» tatt bort, migrasjon 052 (kasse over 10 mrd. →
+10 mrd., resten utbetalt til eierne, sikkerhetskopi, reformlogg, serverEdit, merke) kjørt etter at appen var publisert.
+
+**Testet:** tørrkjøring (ti spillere, 564 mrd. flyttet, seks nye merker, kontroll OK), tsc, lint, npm test, balance.
+
+**Gjenstår:** gebyret (01:38 UTC, påminnelse satt). Pynt for sesong 3.
+
+---
+
 ## Økt 238 – 2026-09-29: Reform 2, del 3 – realistiske kostnader på toppen av hjemmeverket
 
 **Brukeren ba om:** (fortsettelse av B-302) del 3, som siste del: realistiske kostnader på toppen.
