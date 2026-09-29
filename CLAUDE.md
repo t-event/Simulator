@@ -139,6 +139,7 @@ frontend/src/
     recipeGuide.ts Reseptguide for nye kvaliteter (vises av ui/RecipeGuide.tsx)
     konsern.ts   Datterverk, byggeprosjekter i ekte tid og flaggskipet (B-209); vises av ui/Konsern.tsx
     konsernWorld.ts Konsernet på serveren speilet: priser, køen, nivåstigen, settleWorld (B-325, B-326; SQL i 064)
+    regions.ts   Verdenskartets seks regioner og standardregionen for nye verk (B-333; SQL i 066)
     world.ts     Felles hendelser i motoren og sesongfordel (B-129)
     environment.ts Utslipp, renseanlegg i trinn, havari og bøter (B-263); panelet står i ui/Upgrades.tsx (CleanerPanel)
     calendar.ts  Året i spillet (360 døgn, dag 1 = 1. april), vinter 15.11.–14.3. og frost (B-265, B-272), fellesferie (B-298);
@@ -164,7 +165,8 @@ frontend/src/
     weekly.ts    Ukens utfordring: status, ukelista og ukekista (B-152)
     seasonTrack.ts Sesongstigen: poeng, trinn og henting (B-173)
     treasury.ts  Konsernkassa på serveren: status (overføringen er slått av, B-319)
-    konsern.ts   Konsernet på serveren: kjøp, avbestilling og salg, og svaret lagt inn i spillet (B-326)
+    konsern.ts   Konsernet på serveren: kjøp, avbestilling, salg og flytting, og svaret lagt inn i spillet (B-326, B-333)
+    worldMap.ts  Verdenskartet: alle spilleres verk per region og selskapene (`world_map`, B-333)
     world.ts     Strategiske selskaper: status, anbud og bud (B-189)
     scrapIncome.ts Skraplagerets inntekt i ekte tid – speiler SQL-en i 029 (B-188); scrapTests.ts viser at fart ikke hjelper
     guest.ts     Gjestekonto i bakgrunnen: lagrer spillet, overtas av kontoen ved innlogging (B-212)
@@ -198,6 +200,7 @@ frontend/src/
     tokens.css   Designsystemet (B-191): alle farger, skriftstørrelser, radier, avstander – nye stiler bruker disse
     icons.tsx    Ikoner fra Lucide, kopiert inn (lisens i icons-LICENSE.txt)   ds.tsx  StatusBadge, Callout, Button
     fonts/       Visningsskriften for overskrifter og store tall (Barlow Semi Condensed 600, OFL)
+    WorldMap.tsx Konsern → Kart: verdenskartet med regionene, andres verk og selskapene (B-333)
     Companies.tsx Konsern → Industrien: ett kort per selskap (skraplageret nå) og konsernkassa (B-189, B-227)
     control/     Kontrollrommet: spillet i fire runder (chargeGame.ts: logikk og testspiller, ControlRoom.tsx, B-175)
   sim/         Prosessmodell for lysbueovnen (brukes ikke av spillet lenger, sjekkes av sim/validate.ts)
@@ -210,7 +213,7 @@ docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretn
                OKONOMI.md (økonomianalysen og reform 2, B-301), KONSERNBIDRAG.md (hovedverkets bidrag i ekte tid, B-313),
                OKONOMI-KONTROLL.md (kontrollen av modellen med tall og svakheter, B-324),
                KONSERN-FORSLAG.md (nivåer, priser fra konsernkassa og aktivitetskrav, bygget B-325–B-328, og simuleringen B-329),
-               KONTROLL-FORSLAG.md (verdenskart, utbyttepolitikk, Kontroll, overtakelser og pengene hjemme, B-331),
+               KONTROLL-FORSLAG.md (verdenskart, utbyttepolitikk, Kontroll, overtakelser og pengene hjemme, B-331, godkjent B-332),
                (designsystem, mobil + PC, plan for redesignet, B-187),
                PLAN-NETT.md (det som er bygget på nett), FORSLAG.md, KONTO.md (hva som krever konto)
 ```
@@ -358,6 +361,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   inntil 3 i køen (B-311 gjelder fortsatt). Verkene i spillet har fortsatt `sisterProfit` (verdien); råd regnes på
   `konsernNetFor` (per ekte dag). Nye ting som låser opp etter nivå, bruker `g.konsern.legends` (fra serveren), aldri
   verdien. Endres tallene: kjør `balance.ts --konsern` og verdenssimuleringen (KONSERN-FORSLAG.md).
+- **Regionene** (B-333): verkene har `region` (og `moved` etter én flytt), bestillinger av nye verk har `region`.
+  Regionlista står i `konsern_regions()` og `game/regions.ts` – endres den, endres begge (og kartformene i
+  `ui/WorldMap.tsx`). `konsern_order` har fått `p_region`; endres signaturen igjen, `drop function` den gamle først.
 - **Aktivitetskravet** (B-327): `activity_factor(uid, dag)` (064) ganges inn i utbyttet og i gulvet i bidraget. Ny inntekt
   i ekte tid som ikke skal gå til forlatte kontoer, bruker den. Tallene i `config.world.activity`.
 - **Mesterskapet «Konsernledelse»** (B-328) gir lavere administrasjon hjemme (`masteryFactor(g, "datterverk")` i posten

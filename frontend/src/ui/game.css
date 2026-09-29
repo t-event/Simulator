@@ -4854,7 +4854,8 @@ button {
 /* Underfanene, beskjeden om anbudet og innledningen til industrien går over begge kolonnene (B-226, B-227) */
 .g-konsern-page > .g-konsern-tabs-col,
 .g-konsern-page > .g-konsern-tender-col,
-.g-konsern-page > .g-industry-intro {
+.g-konsern-page > .g-industry-intro,
+.g-konsern-page > .g-worldmap-col {
   grid-column: 1 / -1;
 }
 
@@ -6527,5 +6528,179 @@ button.g-prod-row:hover {
 }
 
 .g-help-at .g-link {
+  min-height: 44px;
+}
+
+/* Verdenskartet (B-333): kart og regionliste; to kolonner på PC */
+.g-worldmap {
+  display: grid;
+  gap: var(--sp-4);
+}
+
+@media (min-width: 900px) {
+  .g-worldmap {
+    grid-template-columns: minmax(0, 760px) minmax(280px, 1fr);
+    align-items: start;
+  }
+}
+
+.g-worldmap-map svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.g-map-sea {
+  fill: var(--info-bg);
+  stroke: var(--line);
+}
+
+.g-map-region {
+  cursor: pointer;
+  outline: none;
+}
+
+.g-map-land {
+  fill: var(--surface-3);
+  stroke: var(--line-strong);
+  stroke-width: 1;
+  transition: fill var(--t-fast);
+}
+
+.g-map-region:hover .g-map-land,
+.g-map-region:focus-visible .g-map-land {
+  fill: var(--surface-hover);
+}
+
+.g-map-region.is-on .g-map-land {
+  fill: var(--accent-tint);
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.g-map-label {
+  fill: var(--text);
+  font: 600 11px var(--font-ui);
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.g-map-mine {
+  fill: var(--accent);
+}
+
+.g-map-other {
+  fill: var(--text-3);
+}
+
+.g-map-company {
+  fill: var(--heat);
+}
+
+.g-map-more {
+  fill: var(--text-2);
+  font: 600 9px var(--font-ui);
+}
+
+.g-map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  margin: var(--sp-2) 0;
+}
+
+.g-map-key {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
+.g-map-key.is-mine {
+  background: var(--accent);
+}
+
+.g-map-key.is-other {
+  background: var(--text-3);
+}
+
+.g-map-key.is-company {
+  background: var(--heat);
+  transform: rotate(45deg) scale(0.85);
+}
+
+.g-map-regions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-2);
+}
+
+.g-map-regions button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 44px;
+  min-width: 0;
+  text-align: left;
+}
+
+.g-map-regions button span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.g-map-regions button.is-on {
+  border-color: var(--accent);
+  background: var(--accent-tint);
+}
+
+.g-map-list {
+  margin: var(--sp-2) 0;
+  padding: 0;
+  list-style: none;
+}
+
+.g-map-list li {
+  display: flex;
+  gap: var(--sp-2);
+  align-items: flex-start;
+  padding: 6px 0;
+  border-top: 1px solid var(--line);
+  min-width: 0;
+}
+
+.g-map-list li > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.g-map-list li.is-mine strong {
+  color: var(--accent-strong);
+}
+
+.g-map-count {
+  display: block;
+  font-size: var(--fs-meta);
+  color: var(--text-2);
+}
+
+.g-region-move {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--sp-2);
+}
+
+.g-region-move .g-field {
+  flex: 1 1 180px;
+  margin: 0;
+}
+
+.g-region-move button,
+.g-region-pick select,
+.g-region-move select {
   min-height: 44px;
 }

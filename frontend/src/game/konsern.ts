@@ -34,6 +34,8 @@ import {
   ladderCount,
   modCost,
   modMaxAt,
+  MOVE_REFUSAL,
+  movePlant,
   ORDER_REFUSAL_TEXT,
   orderQuote,
   placeOrder,
@@ -50,7 +52,8 @@ import {
   type OrderRequest,
   type SettleEvent,
 } from "./konsernWorld";
-import type { GameState, KonsernOrder, SisterPlant, SisterType } from "./types";
+import { regionName } from "./regions";
+import type { GameState, KonsernOrder, RegionId, SisterPlant, SisterType } from "./types";
 
 export interface SisterSpec {
   name: string;
@@ -266,7 +269,8 @@ export function projectLabel(p: SisterPlant): string {
 
 /** Et prosjekt i køen, med vanlige ord: «Nytt storverk (Dalverket)», «Modernisering av Elveverket» */
 export function orderLabel(g: GameState, o: KonsernOrder): string {
-  if (o.kind === "bygg") return `Nytt ${SISTER_TYPES[o.type ?? "stalverk"].name.toLowerCase()} (${o.name ?? ""})`;
+  if (o.kind === "bygg")
+    return `Nytt ${SISTER_TYPES[o.type ?? "stalverk"].name.toLowerCase()} (${o.name ?? ""}${o.region ? `, ${regionName(o.region)}` : ""})`;
   const name = g.konsern.plants.find((p) => p.id === o.plantId)?.name ?? "verket";
   return o.kind === "utbygging" ? `Utbygging av ${name} til storverk` : `Modernisering av ${name}`;
 }
@@ -697,6 +701,15 @@ export function localSell(g: GameState, id: number): { ok: boolean; message: str
   applyWorld(g, w);
   log(g, `Konsernet har solgt ${name} for ${fmtKr(r.sale)}. Pengene står i konsernkassa.`, "info");
   return { ok: true, message: `${name} er solgt.` };
+}
+
+/** Flytt et verk til en annen region, én gang (B-333, som `konsern_move`) */
+export function localMove(g: GameState, id: number, region: RegionId): { ok: boolean; message: string } {
+  const w = worldOf(g);
+  const name = g.konsern.plants.find((p) => p.id === id)?.name ?? g.konsern.orders?.find((o) => o.plantId === id)?.name;
+  if (!movePlant(w, id, region, realNow())) return { ok: false, message: MOVE_REFUSAL };
+  applyWorld(g, w);
+  return { ok: true, message: `${name ?? "Verket"} står nå i ${regionName(region)}.` };
 }
 
 /** Milepæler for konsernverdien (B-119): fagpoeng og en god nyhet på veien mot 10 mrd. */

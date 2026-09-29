@@ -33,6 +33,10 @@ export const ACCOUNT_FEATURES = {
     name: "Datterverk",
     why: "Verkene kjøpes fra konsernkassa på serveren og bygges i ekte tid, så titlene og utbyttet regnes der.",
   },
+  verdenskart: {
+    name: "Verdenskartet",
+    why: "Kartet viser verkene og selskapene til de andre spillerne, og regionene står på serveren.",
+  },
   konsernkasse: {
     name: "Konsernkassa",
     why: "Kassa ligger på serveren og går i virkelig tid, så overføringene og det du kjøper i verden avgjøres der.",

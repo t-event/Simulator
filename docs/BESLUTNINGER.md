@@ -6010,3 +6010,48 @@ Beslutning: tre spor, i denne rekkefølgen:
 3. Et eget forslag for pengene i hovedverket (byggetid og innkjøring i spilltid, krav om folk og fagpoeng, slitasje og
    fornyelse) – i samme dokument, men som eget spor, siden det gjelder spilltid og ikke verden. Bygges ikke før ja.
 Konto (B-149): avgjøres i forslaget.
+
+## B-332 Eierens svar på KONTROLL-FORSLAG: bygges i rekkefølge, og 10× beholdes (2026-09-29)
+Status: gjelder (planlegging)
+Endringslogg: nei – planlegging
+Bakgrunn: eieren svarte på spørsmålene i `docs/KONTROLL-FORSLAG.md` (avsnitt 10) og spurte om å nekte 3× og 10× når alt
+er kjøpt hjemme.
+Beslutning:
+1. **Bare strategiske selskaper kan overtas**, aldri datterverk eller hovedverket.
+2. **72 timer forsvarstid** med varsel i appen holder i starten. E-post vurderes når flere spiller.
+3. **Den som passer på selskapet, beholder det – men høyst i konsesjonen (14 dager), som nå.** Konsesjonen og det nye
+   anbudet 48 timer før slutt (B-189) står. Overtakelser skjer *inne i* konsesjonen: ny eier er beskyttet de 3 første
+   dagene, og et bud må legges senest 5 dager før konsesjonen går ut (72 timer forsvar + 48 timer anbud), så det alltid
+   er avgjort før fornyelsesanbudet åpner. Den som tar over, får resten av konsesjonen og investeringene. Kontrollen gir
+   den sittende eieren en fordel i fornyelsesanbudet: budet teller Kontroll/5 % mer (inntil +20 %). Da lønner det seg å
+   passe på, uten at noen eier et selskap for alltid.
+4. **Regionnavnene godtas:** Nordkysten, Jernåsen, Sørsletta, Vestbukta, Østskogen og Øyene.
+5. **Hjemme: både byggetid/innkjøring (B1) og nabolagsprosjekter (B2)**; slitasje (B3) senere.
+6. **3× og 10× beholdes**, også når alt er kjøpt. Pengene kommer fortsatt samme dag på 1×, farten gir ingen fordel mot
+   andre (B-323), og å bremse dem som har kommet lengst føles som straff. Byggetid (B1) gir farten en mening i stedet.
+Rekkefølge: K5 kartet, K6 utbyttepolitikken og fondet, K7 Kontroll og investeringer, K8 overtakelser (bryter av til de er
+testet), så B1 og B2 hjemme. Hvert steg er en egen PR.
+Konto (B-149): kartet, utbyttepolitikken, Kontroll og overtakelser krever konto; B1 og B2 gjør det ikke.
+
+## B-333 Verdenskartet: seks regioner, verk og selskaper for alle (K5) (2026-09-29)
+Status: gjelder
+Bakgrunn: første steg i B-331/B-332: et «anleggsbilde» for konsernet, der man ser hvor mange og hvilke verk og selskaper
+de andre har. En oppdiktet verden, ikke et ekte land; flyplass kommer senere.
+Beslutning (migrasjon `066_verdenskartet.sql`, `game/regions.ts`, `net/worldMap.ts`, `ui/WorldMap.tsx`):
+- **Seks regioner:** Nordkysten, Jernåsen, Østskogen, Sørsletta, Vestbukta og Øyene (`konsern_regions`). Hvert datterverk
+  har `region` i `konsern.plants`; hvert selskap har `companies.region` (skraplageret i Vestbukta, slagghåndteringen i
+  Jernåsen, verkstedet på Nordkysten).
+- **Verkene som fantes** fikk en region jevnt fordelt (`konsern_legacy_region`, rekkefølgen er ulik fra spiller til
+  spiller). Tørrkjørt først: bare feltet `region` ble lagt til, ingenting annet endret.
+- **Nye verk** bygges i regionen spilleren velger under Konsern → Utvid, ellers der spilleren har færrest verk
+  (`konsern_default_region`). Et verk som byttes til kompleks, står der det sto.
+- **Flytting:** hvert verk kan flyttes én gang, gratis (`konsern_move`; `moved` på verket). Et verk i køen kan få ny region
+  fritt til det starter. (Forslaget sa «de første 14 dagene»; én gratis flytt uten frist er enklere og like harmløst.)
+- **Kartet** er en ny underfane, Konsern → Kart: SVG med de seks regionene rundt et hav, merker for dine verk (aksentfarge),
+  andres verk (grå, kompleks større) og selskaper (rombe). Under kartet en liste med regionene (knapper, 44 px) som også er
+  veien inn på små skjermer; ved siden av (PC) eller under (mobil) står regionen: selskapene med eier, spillerne med
+  kallenavn, tittel og antall verk per type. `world_map()` gir bare det topplista alt viser, og ikke sperrede kontoer.
+- Regionen har ingen virkning i økonomien ennå; Kontroll (K7) bruker den.
+- Speilet: `game/regions.ts` (navn, standardregion) og `konsernWorld.ts` (`placeOrder` med region, `movePlant`).
+Konto (B-149): krever konto – kartet viser andre spillere (regel 3). Står i `ACCOUNT_FEATURES` som «Verdenskartet»;
+uten konto vises `AccountFeaturesCard`.

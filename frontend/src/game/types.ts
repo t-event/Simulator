@@ -267,7 +267,14 @@ export interface SisterPlant {
   downUntilDay: number;
   /** Bygging, utbygging eller modernisering som pågår, i ekte tid (B-209). Mangler i eldre lagringer */
   project?: SisterProject;
+  /** Regionen på verdenskartet (B-333), satt av serveren. Mangler i eldre lagringer */
+  region?: RegionId;
+  /** Flyttet til en annen region – hvert verk kan flyttes én gang (B-333) */
+  moved?: boolean;
 }
+
+/** Regionene i den oppdiktede verdenen (B-331, B-333); navnene står i `game/regions.ts` */
+export type RegionId = "nord" | "jern" | "ost" | "sor" | "vest" | "oy";
 
 /** Et byggeprosjekt i konsernet (B-209): tar ekte timer, uansett spillfart */
 export interface SisterProject {
@@ -295,6 +302,8 @@ export interface KonsernOrder {
   readyAt: number;
   status: "kø" | "i gang";
   boughtDay?: number;
+  /** Regionen et nytt verk bygges i (B-333), ellers null eller mangler */
+  region?: RegionId | null;
 }
 
 export interface DayFinance {

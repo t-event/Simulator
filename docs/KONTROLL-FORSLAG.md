@@ -1,6 +1,7 @@
 # Forslag: verdenskartet, Kontroll, overtakelser og utbyttepolitikken – og pengene hjemme (B-331)
 
-**Status:** forslag. Ingenting her bygges før eieren sier ja. Tallene er regnet med `game/dividend.ts` (samme regel som
+**Status:** godkjent 29.9.2026 med svarene i B-332 (overtakelser inne i konsesjonen på 14 dager, fordel i
+fornyelsesanbudet, 3× og 10× beholdes). Bygges i rekkefølgen i avsnitt 8. Tallene er regnet med `game/dividend.ts` (samme regel som
 serveren), flyten fra verdenssimuleringen i B-329 og ekte tall fra serveren 29.9.2026. Simuleringen står nederst.
 
 To spor:
@@ -158,9 +159,11 @@ hardt i et spill med fem venner.
 | Overtatt | Budet er betalt; 85 % går til den gamle eieren, 15 % forsvinner (rådgivere, gebyrer) | Får 85 % av budet og mister selskapet |
 | Avverget | Får 90 % av budet tilbake | Får 95 % av forsvarskapitalen tilbake |
 
-**Regler mot plaging:** ett aktivt angrep per spiller; samme selskap kan ikke angripes igjen på 14 dager etter et forsøk,
-og en ny eier er beskyttet i 7 dager; konsesjonen fra anbudet (14 dager) gjelder først. Bryter i `config`, som RETNING
-sier: testes med få spillere før den slås på.
+**Regler mot plaging (B-332):** ett aktivt angrep per spiller; samme selskap kan ikke angripes igjen på 14 dager etter et
+forsøk. Overtakelser skjer inne i konsesjonen på 14 dager: ny eier er beskyttet de 3 første dagene, og budet må legges
+senest 5 dager før konsesjonen går ut, så forsøket er avgjort før fornyelsesanbudet åpner. Den som tar over, får resten
+av konsesjonen. I fornyelsesanbudet teller den sittende eierens bud Kontroll/5 % mer (inntil +20 %). Bryter i `config`,
+som RETNING sier: testes med få spillere før den slås på.
 
 **Hva det koster å ta skraplageret (V = 450 mill.)** – og hvor mange dagers flyt det er for en angriper (dag 90):
 
@@ -263,7 +266,7 @@ nivåene tregere – den gjelder bare kjøp over 50 mill. (storverket).
 
 ---
 
-## 10. Spørsmål til eieren
+## 10. Spørsmål til eieren (besvart i B-332)
 
 1. Er det riktig at **bare strategiske selskaper** kan overtas (ikke datterverk)?
 2. Er **72 timer** forsvarstid og varsel bare i appen godt nok, eller trengs e-post først?
