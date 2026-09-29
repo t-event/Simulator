@@ -6,10 +6,6 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
-- **Kandidat til fast regel (fra B-313):** «Spilltid gir kunnskap, optimalisering og lokal progresjon. Ekte tid styrer
-  akkumulering av kapital og makt som påvirker andre spillere.» Bidraget (B-318–B-320) følger den alt. Sier eieren ja,
-  inn i CLAUDE.md og RETNING.md.
-
 - **Slå på gjestekontoer (B-212):** eieren må slå på «Allow anonymous sign-ins» under Authentication → Sign In /
   Providers i dashbordet (connectoren kan ikke). Til det er gjort, prøver appen én gang i døgnet og gjør ellers ingenting.
   Supabase anbefaler også CAPTCHA mot misbruk; grensen er 30 nye gjester i timen per IP.
@@ -63,6 +59,8 @@ til «Avgjort» nederst).
   Krever konto. Brukeren: «Ingen varsel på mobilen enda» (B-149).
 
 ## Avgjort
+
+- **Fast regel om spilltid og ekte tid (B-323):** eieren sa ja 29.9; står i CLAUDE.md og RETNING.md.
 
 - **Hovedverkets konsernbidrag (B-313):** eieren svarte 29.9: automatisk bidrag (B-318), innskuddet bort (B-319), gulv
   30 %, fast 50 % (valg av utbyttepolitikk utsatt), dempet over 30 mill., ny liste «Konsernverdi» regnet av serveren ved

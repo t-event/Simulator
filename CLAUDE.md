@@ -68,6 +68,10 @@ GitHub Pages: https://t-event.github.io/Simulator/
   serverautoritative verdier og ekte tid. Lokal kasse, lokal egenkapital og lokal spillfart skal aldri direkte avgjøre
   disse systemene. Konsernkassa har samme regel for alle (B-304). Konkurranser mellom spillere måles i ekte tid (f.eks. ekte aktive
   dager), ikke i spilldøgn. Tidslinjetall merket `pre_reform` brukes aldri i serverberegninger.
+- **Spilltid og ekte tid (B-323, fast regel):** Spilltid gir kunnskap, optimalisering og lokal progresjon. Ekte tid styrer
+  akkumulering av kapital og makt som påvirker andre spillere. Alt nytt vurderes mot dette: det som hjelper eget verk,
+  kan gå i spillfarten; det som samler penger eller makt mot andre (konsernkassa, eierskap, topplista), regnes av serveren
+  i ekte tid (som bidraget, B-318, og utbyttet, B-304).
 - **Mobil og PC (B-187):** mobil = rask drift, PC = kontrollrom/hovedkontor med mer oversikt. Samme spill og
   komponenter; ingen viktig funksjon bare på PC. Test alltid på iPhone-størrelse (390 px) og 320 px – ingen horisontal
   scrolling, knapper minst ca. 44 px høye – og, når layout endres, på de 7 størrelsene i `docs/UI.md` (opp til

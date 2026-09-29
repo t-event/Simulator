@@ -5892,3 +5892,13 @@ Konto (B-149): nei – ingen ny funksjon (samme tall som topplista).
 Testet: `npm test` (konsernverdien av world_status), tsc, lint, Playwright på 320 og 390 px med falsk tjeneste (riktig
 tall, ingen overflyt).
 
+## B-323 Fast regel: spilltid og ekte tid (2026-09-29)
+Status: gjelder
+Endringslogg: nei – en designregel, ikke en endring i spillet
+Bakgrunn: kandidat fra analysen i B-313 (`docs/KONSERNBIDRAG.md` avsnitt 13). Eieren: «Ja, legg den inn som fast regel».
+Beslutning: «Spilltid gir kunnskap, optimalisering og lokal progresjon. Ekte tid styrer akkumulering av kapital og makt
+som påvirker andre spillere.» Står i CLAUDE.md (Faste regler) og RETNING.md (designpilar 9). Utfyller B-190 (felles
+klokke): alt som samler penger eller makt mot andre – konsernkassa, eierskap, topplista – regnes av serveren i ekte tid
+(som bidraget, B-318, og utbyttet, B-304); det som bare hjelper eget verk, kan gå i spillfarten.
+Konto (B-149): ingen ny funksjon.
+
