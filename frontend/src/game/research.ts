@@ -476,7 +476,7 @@ export const RESEARCH: Research[] = [
     konsern: true,
     requires: ["oppkjop"],
     description: "En konsernledelse som kan styre mange verk samtidig.",
-    effect: "Plass til 8 datterverk i stedet for 6",
+    effect: "Plass til 2 datterverk til",
   },
   {
     id: "gronnkonsern",

@@ -40,6 +40,7 @@ import {
   valueCreated,
   konsernOptions,
   maxSisters,
+  moreSlotsText,
   MODERNIZE_GAIN,
   modernizeMax,
   SISTER_TYPES,
@@ -1022,6 +1023,9 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
                 Tallet til høyre er utbyttet fra verket til konsernkassa per ekte dag. Trykk på et verk for å
                 modernisere eller selge.
               </p>
+              {k.plants.length >= maxSisters(g) - 1 && (
+                <p className="g-muted g-small-text g-plant-rows-hint">{moreSlotsText(g)}</p>
+              )}
               {k.plants.map((p, i) => (
                 <PlantRow
                   key={p.id}

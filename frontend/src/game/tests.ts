@@ -129,6 +129,7 @@ import {
   WIN_TITLE,
   directorPerDay,
   maxSisters,
+  moreSlotsText,
   sisterPrice,
   sisterSalePrice,
   SELL_SHARE,
@@ -1134,6 +1135,19 @@ test("Nivåstigen (B-325): ni titler i rekkefølge, og plasser og trinn følger 
   assert(modMaxAt(0) === 3 && modMaxAt(1) === 4 && modMaxAt(3) === 5 && modMaxAt(7) === 6, "trinnene");
 });
 
+test("Flere plasser for datterverk (B-367): forskningen, neste tittel, eller toppen", () => {
+  const g = newGame(7);
+  g.stage = 4;
+  g.konsern.unlocked = true;
+  g.konsern.legends = 4;
+  assert(/Større konsern.+2 til/.test(moreSlotsText(g)), moreSlotsText(g));
+  g.researched.push("storkonsern");
+  assert(maxSisters(g) === 12, `plass ${maxSisters(g)}`);
+  assert(/Stålgigant \(8 stålkomplekser på trinn 5\).+2 til/.test(moreSlotsText(g)), moreSlotsText(g));
+  g.konsern.legends = 6;
+  assert(maxSisters(g) === 14 && /14 datterverk er det meste/.test(moreSlotsText(g)), moreSlotsText(g));
+});
+
 test("Landemerker (B-174): ett nytt per dag, belønning når det er levert", () => {
   // Garasjen: eieren står i produksjonen, så verket lager stål
   const g = newGame(86);
@@ -1682,7 +1696,10 @@ test("Taket for kassa (B-303): overskuddet betales ut til eierne, teller ikke i 
   // Døgnlinja oppsummerer og nullstiller
   g.paidOut!.today = 2e9;
   paidOutDayLog(g);
-  assert(g.paidOut!.today === 0 && /flyttet til din private formue i går/.test(g.log[g.log.length - 1].text), "ingen døgnlinje");
+  assert(
+    g.paidOut!.today === 0 && /flyttet til din private formue i går/.test(g.log[g.log.length - 1].text),
+    "ingen døgnlinje",
+  );
   // Motoren betaler ut av seg selv
   g.cash = cap + 3e9;
   advance(g, 1);

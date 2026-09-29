@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 293 – 2026-09-29: 12 eller 14 datterverk (B-367)
+
+**Brukeren spurte:** «Noen kan ha bare 12 datterselskap men andre kan ha 14. Kan du sjekke opp?»
+
+**Funnet:** ingen feil. Alle har «Større konsern» (8 plasser); titlene Stålfyrste, Stålkeiser og Stålgigant gir 2 til hver.
+De med 14 plasser er Stålgigant eller mer (eller har gulvet 6 fra reformen); de med 12 er Stålkeiser/Stållegende.
+Spillet forklarte ikke hvordan man får flere.
+
+**Gjort:** B-367 – `moreSlotsText` under «Dine verk» og i sperren på kjøpene; riktig tekst på forskningen. Test i
+`game/tests.ts`.
+
+**Testet:** `npm test`, tsc, lint; Playwright 320/390 px med et konsern på 12 av 12 (Stållegende): teksten om
+Stålgigant vises, ingen horisontal scrolling, ingen feil.
+
+**Gjenstår:** –
+
 ## Økt 292 – 2026-09-29: Gjestene, resten av serveren (B-366)
 
 **Brukeren ba om:** «Fortsett».
