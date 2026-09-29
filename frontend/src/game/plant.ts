@@ -758,7 +758,7 @@ export function gradeFailures(a: Analysis, grade: GradeId): string[] {
  * Tonnene over grensen dekker fortsatt de variable kostnadene (skrap, strøm, forbruk, administrasjon), så det lønner
  * seg å produsere – bare mye mindre per tonn.
  */
-export const MARKET_SATURATION = { fromT: 3_000, overShare: 0.45, farT: 20_000, farShare: 0.4 };
+export const MARKET_SATURATION = { fromT: 3_000, overShare: 0.5, farT: 20_000, farShare: 0.45 };
 
 /** Salgsbonusene til sammen kan høyst gi så mye mer enn listeprisen (B-305) */
 export const PRICE_BONUS_MAX = 0.25;

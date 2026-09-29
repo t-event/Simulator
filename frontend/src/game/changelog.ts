@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 310,
+    date: "2026-09-29",
+    title: "Litt bedre pris på store volumer, og snittet siste 7 døgn i resultatgrafen",
+    items: [
+      "Kundene betaler 50 % av prisen for tonnene over 3 000 i døgnet (før 45 %), og 45 % over 20 000. De største verkene lander på ca. 35–40 mill. per døgn.",
+      "Resultatgrafen på Verket → Økonomi viser snittet per døgn de siste 7 døgnene. Skrap kjøpes i partier og kontrakter betales ved levering, så ett døgn kan stå i minus selv om uka er i pluss – styr etter snittet.",
+    ],
+  },
+  {
     b: 309,
     date: "2026-09-29",
     title: "Reform 2: konsernene er satt tilbake til det den nye økonomien hadde gitt",

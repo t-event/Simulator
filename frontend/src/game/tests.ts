@@ -2381,12 +2381,12 @@ test("Ovnene fordeles etter hva som haster (B-240): alle lager kvaliteten som el
 
 test("Markedet metter seg (B-252, B-305, B-308): full pris opp til 3 000 t i døgnet, lavere snittpris over, enda lavere over 20 000", () => {
   assert(marketSaturation(733) === 1 && marketSaturation(3_000) === 1, "små verk får lavere pris");
-  // (3 000 + 7 000 × 0,45) / 10 000 = 0,615; (3 000 + 17 000 × 0,45) / 20 000 = 0,5325
-  assert(Math.abs(marketSaturation(10_000) - 0.615) < 1e-9, `faktor ${marketSaturation(10_000)} for 10 000 t`);
-  assert(Math.abs(marketSaturation(20_000) - 0.5325) < 1e-9, `faktor ${marketSaturation(20_000)} for 20 000 t`);
+  // (3 000 + 7 000 × 0,5) / 10 000 = 0,65; (3 000 + 17 000 × 0,5) / 20 000 = 0,575 (B-310)
+  assert(Math.abs(marketSaturation(10_000) - 0.65) < 1e-9, `faktor ${marketSaturation(10_000)} for 10 000 t`);
+  assert(Math.abs(marketSaturation(20_000) - 0.575) < 1e-9, `faktor ${marketSaturation(20_000)} for 20 000 t`);
   const big = marketSaturation(34_721);
-  // (3 000 + 17 000 × 0,45 + 14 721 × 0,4) / 34 721 = 0,476
-  assert(big > 0.47 && big < 0.485, `faktor ${big} for 35 000 t i døgnet`);
+  // (3 000 + 17 000 × 0,5 + 14 721 × 0,45) / 34 721 = 0,522
+  assert(big > 0.515 && big < 0.53, `faktor ${big} for 35 000 t i døgnet`);
   // Mer produksjon gir fortsatt mer omsetning totalt, bare mindre per tonn
   assert(34_721 * big > 20_000 * marketSaturation(20_000), "mer produksjon gir mindre omsetning");
   assert(marketSaturation(20_000) > big, "prisen faller ikke med mengden");

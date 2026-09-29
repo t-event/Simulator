@@ -352,8 +352,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `WINTER_FIXED`. Snøstorm (`g.snowUntilMin`) stopper alle kjøp av skrap (`scrapBlocked`) unntatt med skrapterminal – nye
   veier for å skaffe skrap må sjekke den.
 - **Markedet metter seg** (B-252, B-305, B-308): prisen på nye kontrakter og avtaler ganges med `marketSaturation(stats.dailyProductT)`
-  (full pris til 3 000 t i døgnet, 45 % til 20 000 t, 40 % over). Nye prisveier for kontrakter må ta den med. Toppen
-  skal ligge på ca. 30–40 mill. per døgn (ca. 1 200 kr/t); sjekk toppspillernes `history` i `saves` etter endringer.
+  (full pris til 3 000 t i døgnet, 50 % til 20 000 t, 45 % over; B-310). Nye prisveier for kontrakter må ta den med.
+  Toppen skal ligge på ca. 35–40 mill. per døgn i snitt; sjekk toppspillernes `history` i `saves` etter endringer, og
+  regn snitt over flere døgn – skrapkjøp og leveranser er klumpete (±120 mill. fra døgn til døgn).
 - **Toppen av hjemmeverket** (B-305): salgsbonusene stopper på `PRICE_BONUS_MAX` (+25 %), stormodellene har dyrt forbruk
   per tonn, og storverket betaler administrasjon 500 kr per tonn døgnkapasitet over 5 000 t (`adminPerDay`, i posten «faste»).
   Nye salgsbonuser må legges inn i summen i `computePlantStats` (ikke utenfor taket), og ny inntekt på toppen skal

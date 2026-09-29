@@ -27,10 +27,19 @@ export function ResultChart({ days }: { days: DayFinance[] }) {
   const best = values.indexOf(Math.max(...values));
   const worst = values.indexOf(Math.min(...values));
   const plus = values.filter((v) => v >= 0).length;
+  // Snittet over de siste sju døgnene (B-310): skrap kjøpes i partier og kontrakter betales ved levering, så ett døgn
+  // kan stå i minus selv om uka er i pluss. Snittet er tallet å styre etter
+  const last7 = values.slice(-7);
+  const avg7 = last7.reduce((a, v) => a + v, 0) / last7.length;
   return (
     <figure className="g-result-chart">
       <figcaption>
-        Resultat per døgn, siste {days.length} døgn · {plus} i pluss, {days.length - plus} i minus
+        Resultat per døgn, siste {days.length} døgn · {plus} i pluss, {days.length - plus} i minus ·{" "}
+        <strong>
+          snitt {avg7 >= 0 ? "+" : ""}
+          {fmtKr(avg7)} per døgn
+        </strong>{" "}
+        (siste {last7.length})
       </figcaption>
       <svg
         viewBox={`0 0 100 ${CHART_H}`}

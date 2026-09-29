@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 242 – 2026-09-29: Metningen løftet litt, snitt siste 7 døgn i grafen
+
+**Brukeren ba om:** «Nå går mange i minus hver dag. Hvordan fikser vi det?»
+
+**Gjort:** B-310: diagnosen er klumpete skrapkjøp og leveranser (±120 mill. fra døgn til døgn) pluss et tynnere snitt
+enn siktet (22 mill.; faktisk pris før metning 10 500, ikke 12 400). Metningen 50 %/45 %, snittet siste 7 døgn i
+resultatgrafen.
+
+**Testet:** tsc, lint, npm test, balance, `--storovn`, Playwright 320/390.
+
+**Gjenstår:** pynt for sesong 3. Vurder jevnere skrapkjøp fra planleggeren (B-228-måling). Følg toppen i morgen.
+
+---
+
 ## Økt 241 – 2026-09-29: Reform 2, del 6 – konsernene satt tilbake
 
 **Brukeren ba om:** «Finn ut hva som hadde vært realistisk å ha på konto for de spillerne om de skulle ha jobbet seg
