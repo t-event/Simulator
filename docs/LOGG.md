@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 255 – 2026-09-29: Fast regel om spilltid og ekte tid (B-323)
+
+**Brukeren ba om:** «Ja, legg den inn som fast regel» (kandidaten fra B-313).
+
+**Gjort:** regelen står i CLAUDE.md (Faste regler) og RETNING.md (designpilar 9); B-323; FORSLAG oppdatert.
+
+**Testet:** endringsloggsjekken (beslutningen er merket «Endringslogg: nei»).
+
+**Gjenstår:** se etter første betaling av konsernbidraget 30.9; slå på slagghåndteringen når skraplageret har betalt
+ut noen dager.
+
+---
+
 ## Økt 254 – 2026-09-29: Konsernverdien på Konsern → Oversikt (B-322)
 
 **Brukeren ba om:** «Konsernverdi i oversikt konsern stemmer ikke».

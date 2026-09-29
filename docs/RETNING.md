@@ -85,6 +85,9 @@ Disse gjelder fra nå for alt nytt (står også i `DESIGN.md` og `CLAUDE.md`):
    terningkast som hovedavgjørelse er det ikke.
 8. **Ikke avhengig av å sjekke mobilen.** Alt i ekte tid mellom spillere varer lenge nok (døgn, ikke minutter) til
    at skiftarbeidere og folk som sover rekker å svare.
+9. **Spilltid og ekte tid (B-323, fast regel).** Spilltid gir kunnskap, optimalisering og lokal progresjon. Ekte tid
+   styrer akkumulering av kapital og makt som påvirker andre spillere. Spillfarten (opptil 10×) kan gjøre eget verk
+   bedre og raskere lært, men aldri gi mer penger eller makt i verdenen enn menneskelig tempo tillater.
 
 ## 4. Det vi beholder
 
