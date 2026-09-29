@@ -460,6 +460,10 @@ export function scrapPrice(g: GameState, id: ScrapId): number {
 setCreditHint((g) => creditLimit(g));
 
 /** Kassekreditten følger nivået og omsetningen verket kan ha (to døgns produksjon). */
+/** Hva spilleren kan gjøre når kassa er under kredittgrensen (B-349) */
+export const CREDIT_HELP =
+  "Selg skrap du ikke trenger under Marked, ta opp lån under Verket → Økonomi, eller selg ferdigvarer fra lageret.";
+
 export function creditLimit(g: GameState, stats = computePlantStats(g)): number {
   const turnover = stats.dailyProductT * PRODUCTS[stats.mainProduct].price;
   return Math.round(Math.max(25_000 * 5 ** g.stage, turnover * 2));
@@ -3459,9 +3463,24 @@ function onDay(g: GameState, stats: PlantStats): void {
 
   // Banken
   if (g.cash < -creditLimit(g)) {
-    g.negativeDays += 1;
-    if (g.negativeDays === 1 || g.negativeDays >= BANKRUPTCY_DAYS - 2) {
-      log(g, `Banken er bekymret: du er over kredittgrensen (dag ${g.negativeDays} av ${BANKRUPTCY_DAYS}).`, "bad");
+    // Sommerstansen (B-349): verket kan ikke tjene penger i tre uker, så banken venter med å telle til ovnene går igjen.
+    // Før ble spillere som hadde kjøpt skrap på kreditt rett før ferien, slått konkurs mens verket sto
+    if (summerStop(g)) {
+      if (summerStopDaysLeft(g) % 7 === 0)
+        log(
+          g,
+          `Kassa er under kredittgrensen. Banken venter til sommerstansen er over – da har du ${BANKRUPTCY_DAYS - g.negativeDays} døgn på å komme under grensen. ${CREDIT_HELP}`,
+          "bad",
+        );
+    } else {
+      g.negativeDays += 1;
+      if (g.negativeDays === 1 || g.negativeDays >= BANKRUPTCY_DAYS - 2) {
+        log(
+          g,
+          `Banken er bekymret: du er over kredittgrensen (dag ${g.negativeDays} av ${BANKRUPTCY_DAYS}). ${CREDIT_HELP}`,
+          "bad",
+        );
+      }
     }
     if (g.negativeDays >= BANKRUPTCY_DAYS) {
       g.gameOver = true;

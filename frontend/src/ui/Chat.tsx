@@ -8,12 +8,14 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   CHAT_MAX,
   CHAT_REFUSAL_TEXT,
+  chatCache,
   chatSeen,
   deleteChat,
   fetchChat,
   fetchChatLatest,
   markChatSeen,
   mergeChat,
+  saveChatCache,
   sendChat,
   type ChatMessage,
 } from "../net/chat";
@@ -24,9 +26,9 @@ import { NeedsAccount } from "./Account";
 import { Callout, SheetHead } from "./ds";
 import { Icon } from "./icons";
 
-/** Hvor ofte et åpent ark henter nye meldinger, og hvor ofte knappen ser etter nye */
+/** Hvor ofte et åpent ark henter nye meldinger, og hvor ofte knappen ser etter nye (B-348: var 60 s) */
 const OPEN_POLL_MS = 5_000;
-const BUTTON_POLL_MS = 60_000;
+const BUTTON_POLL_MS = 20_000;
 
 function useSession() {
   return useSyncExternalStore(onSessionChange, getSession, getSession);
@@ -40,6 +42,61 @@ function when(at: number, now = Date.now()): string {
   if (day(d) === day(new Date(now))) return time;
   if (day(d) === day(new Date(now - 86_400_000))) return `i går ${time}`;
   return `${d.toLocaleDateString("nb-NO", { day: "numeric", month: "short" })} ${time}`;
+}
+
+/**
+ * Nyeste melding på serveren, delt av knappene (B-348). Knappen står både i varsellinja og i tallraden (den ene er skjult
+ * med CSS), så de deler én sjekk: hvert 20. sekund, når appen vises igjen, og når arket lukkes.
+ */
+let latestId = 0;
+let latestVer = 0;
+const latestListeners = new Set<() => void>();
+let stopLatest: (() => void) | null = null;
+
+function notifyLatest(): void {
+  latestVer++;
+  for (const l of latestListeners) l();
+}
+
+function checkLatest(): void {
+  if (!getSession() || document.visibilityState !== "visible") return;
+  void fetchChatLatest()
+    .then((id) => {
+      if (id === latestId) return;
+      latestId = id;
+      notifyLatest();
+    })
+    .catch(() => {});
+}
+
+function subscribeLatest(listener: () => void): () => void {
+  latestListeners.add(listener);
+  if (!stopLatest) {
+    checkLatest();
+    const t = window.setInterval(checkLatest, BUTTON_POLL_MS);
+    // Når arket lukkes, er meldingene lest: prikken skal bort med én gang. Og når appen vises igjen, ses det etter nye
+    // meldinger straks – mobilen stopper tidtakerne mens appen ligger i bakgrunnen
+    const onSeen = () => {
+      notifyLatest();
+      checkLatest();
+    };
+    window.addEventListener("skiftrapport-sett", onSeen);
+    document.addEventListener("visibilitychange", checkLatest);
+    window.addEventListener("focus", checkLatest);
+    stopLatest = () => {
+      window.clearInterval(t);
+      window.removeEventListener("skiftrapport-sett", onSeen);
+      document.removeEventListener("visibilitychange", checkLatest);
+      window.removeEventListener("focus", checkLatest);
+    };
+  }
+  return () => {
+    latestListeners.delete(listener);
+    if (!latestListeners.size && stopLatest) {
+      stopLatest();
+      stopLatest = null;
+    }
+  };
 }
 
 /**
@@ -57,28 +114,12 @@ export function ChatButton({
   className?: string;
 }) {
   const session = useSession();
-  const [latest, setLatest] = useState(0);
+  useSyncExternalStore(subscribeLatest, () => latestVer);
+  // Ny innlogging: se etter meldinger med én gang
   useEffect(() => {
-    if (!session) return;
-    let alive = true;
-    const check = () => {
-      if (document.visibilityState !== "visible") return;
-      void fetchChatLatest()
-        .then((id) => alive && setLatest(id))
-        .catch(() => {});
-    };
-    check();
-    const t = window.setInterval(check, BUTTON_POLL_MS);
-    // Når arket lukkes, er meldingene lest: da skal prikken bort med én gang
-    const onSeen = () => check();
-    window.addEventListener("skiftrapport-sett", onSeen);
-    return () => {
-      alive = false;
-      window.clearInterval(t);
-      window.removeEventListener("skiftrapport-sett", onSeen);
-    };
+    if (session) checkLatest();
   }, [session]);
-  const fresh = !!session && latest > chatSeen();
+  const fresh = !!session && latestId > chatSeen();
   if (g.tutorial !== null || (!session && g.stage < 1)) return null;
   return (
     <button
@@ -95,8 +136,10 @@ export function ChatButton({
 
 export function ChatSheet({ onClose, onOpenSettings }: { onClose: () => void; onOpenSettings: () => void }) {
   const session = useSession();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  // Meldingene fra sist vises med én gang (B-348); serverens liste tar over når den kommer
+  const [messages, setMessages] = useState<ChatMessage[]>(chatCache);
+  const [loaded, setLoaded] = useState(() => messages.length > 0);
+  const [failed, setFailed] = useState(false);
   const [nickname, setNickname] = useState<string | null | undefined>(undefined);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
@@ -117,21 +160,27 @@ export function ChatSheet({ onClose, onOpenSettings }: { onClose: () => void; on
     };
   }, [session]);
 
-  // Hent de siste meldingene, og så bare de nye mens arket er åpent
+  // Hent de siste meldingene, og så bare de nye mens arket er åpent. Første svar erstatter det som lå lagret på enheten
   useEffect(() => {
     if (!session) return;
     let alive = true;
     const load = () => {
       if (document.visibilityState !== "visible") return;
+      const full = lastId.current === 0;
       void fetchChat(lastId.current)
         .then((fresh) => {
           if (!alive) return;
           setLoaded(true);
-          if (!fresh.length) return;
+          setFailed(false);
+          if (!fresh.length && !full) return;
           lastId.current = Math.max(lastId.current, ...fresh.map((m) => m.id));
-          setMessages((old) => mergeChat(old, fresh));
+          setMessages((old) => (full ? fresh : mergeChat(old, fresh)));
         })
-        .catch(() => alive && setLoaded(true));
+        .catch(() => {
+          if (!alive) return;
+          setLoaded(true);
+          setFailed(true);
+        });
     };
     load();
     const t = window.setInterval(load, OPEN_POLL_MS);
@@ -146,6 +195,7 @@ export function ChatSheet({ onClose, onOpenSettings }: { onClose: () => void; on
     const el = listRef.current;
     if (el && stick.current) el.scrollTop = el.scrollHeight;
     if (messages.length) markChatSeen(messages[messages.length - 1].id);
+    saveChatCache(messages);
   }, [messages]);
 
   const close = () => {
@@ -206,7 +256,9 @@ export function ChatSheet({ onClose, onOpenSettings }: { onClose: () => void; on
             >
               {!loaded && <li className="g-muted g-small-text">Henter meldingene …</li>}
               {loaded && messages.length === 0 && (
-                <li className="g-muted g-small-text">Ingen har skrevet ennå. Si hei!</li>
+                <li className="g-muted g-small-text">
+                  {failed ? "Får ikke kontakt med serveren. Prøver igjen …" : "Ingen har skrevet ennå. Si hei!"}
+                </li>
               )}
               {messages.map((m) =>
                 m.event ? (
@@ -263,6 +315,9 @@ export function ChatSheet({ onClose, onOpenSettings }: { onClose: () => void; on
                   <Icon name="send" />
                 </button>
               </form>
+            )}
+            {failed && messages.length > 0 && (
+              <p className="g-muted g-small-text">Får ikke hentet nye meldinger akkurat nå. Prøver igjen …</p>
             )}
             {error && <p className="g-small-text g-chat-error">{error}</p>}
             {text.length > CHAT_MAX - 40 && (

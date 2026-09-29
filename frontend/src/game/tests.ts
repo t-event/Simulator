@@ -69,6 +69,7 @@ import {
   makeCandidate,
   newGame,
   oftenSick,
+  creditLimit,
   ordersToMake,
 } from "./engine";
 import { logTopic, showToast, unseenCount } from "./inbox";
@@ -3550,6 +3551,36 @@ test("Skiftlederen leier ikke vikarer når hele verket står (B-346), men timen 
   advance(g, 60);
   assert(tempsActive(g), "skiftlederen leide ikke vikarer da ovnene skulle i gang");
   assert(g.cash < cash, "vikarene kostet ingenting");
+});
+
+test("Banken venter i sommerstansen (B-349): ingen konkurs mens verket står, tellingen starter etter ferien", () => {
+  const g = newGame(349);
+  g.tutorial = null;
+  g.stage = 2;
+  g.settings.pauseOffers = true;
+  for (let i = 0; i < 6; i++) g.workers.push({ ...makeCandidate(g, "ovn"), hiredDay: 1 });
+  g.minute = 91 * MIN_PER_DAY;
+  chooseSummer(g, "stans");
+  g.pendingDecision = null;
+  g.minute = 97 * MIN_PER_DAY;
+  g.cash = -creditLimit(g) * 3;
+  g.negativeDays = 2;
+  for (let d = 0; d < 10; d++) {
+    g.pendingDecision = null;
+    advance(g, MIN_PER_DAY);
+  }
+  assert(!g.gameOver, "konkurs i sommerstansen");
+  assert(g.negativeDays === 2, `banken telte i stansen (${g.negativeDays})`);
+  assert(
+    hints(g, computePlantStats(g)).some((h) => h.text.includes("under kredittgrensen")),
+    "rådet mangler",
+  );
+  // Etter ferien teller banken videre
+  g.minute = (97 + SUMMER.days + 1) * MIN_PER_DAY;
+  g.cash = -creditLimit(g) * 3;
+  g.pendingDecision = null;
+  advance(g, MIN_PER_DAY);
+  assert(g.negativeDays === 3, `banken teller ikke etter ferien (${g.negativeDays})`);
 });
 
 if (failed) {

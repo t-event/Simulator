@@ -56,6 +56,7 @@ import {
 } from "./plant";
 import { newGradesAt, startRecipeGuide } from "./recipeGuide";
 import { BIG_BUILD, bigBuildDaysLeft, buildDays, isBigPurchase, NEIGHBOR_PROJECTS, nextNeighbor } from "./building";
+import { LADDER } from "./konsernWorld";
 import { landmarkHour } from "./landmarks";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
 import type { GameState, GradeId, MasteryId, PowerDeal, RoleId, ScrapId, Worker } from "./types";
@@ -136,7 +137,7 @@ export function gateBlocker(g: GameState, gate?: Gate): string | null {
   // Det som er betalt ut til eierne over kassetaket, teller med (B-341) – ellers kunne verket alene aldri nå dit
   return (g.konsern?.legends ?? 0) >= 1 || valueCreated(g) >= STORMODEL_EQUITY
     ? null
-    : "Åpner ved 25 mrd. i verdi (utbetalt til eierne teller med)";
+    : `Åpner med tittelen ${LADDER[0].title} i konsernet (${LADDER[0].count} storverk modernisert til trinn ${LADDER[0].level}) eller ved 25 mrd. i verdi`;
 }
 
 export function upgradeOptions(g: GameState): UpgradeOption[] {

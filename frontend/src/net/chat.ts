@@ -91,6 +91,33 @@ export function mergeChat(old: ChatMessage[], fresh: ChatMessage[], keep = 200):
   return [...byId.values()].sort((a, b) => a.id - b.id).slice(-keep);
 }
 
+/**
+ * De siste meldingene på denne enheten (B-348), så arket viser dem med én gang og bare henter det nye. Serverens liste
+ * erstatter dem ved første henting hver gang arket åpnes, så skjulte og slettede meldinger forsvinner også her.
+ */
+const CACHE_KEY = "stalverk-skiftrapport-cache";
+const CACHE_MAX = 60;
+
+export function chatCache(): ChatMessage[] {
+  try {
+    const c = JSON.parse(localStorage.getItem(CACHE_KEY) ?? "null") as { uid?: string; msgs?: ChatMessage[] } | null;
+    if (!c || c.uid !== userId() || !Array.isArray(c.msgs)) return [];
+    return c.msgs.filter((m) => Number.isFinite(m?.id) && typeof m.body === "string");
+  } catch {
+    return [];
+  }
+}
+
+export function saveChatCache(msgs: ChatMessage[]): void {
+  const uid = userId();
+  if (!uid) return;
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ uid, msgs: msgs.slice(-CACHE_MAX) }));
+  } catch {
+    // Fullt eller privat modus: arket henter alt fra serveren som før
+  }
+}
+
 /** Sist leste melding på denne enheten, per konto (en bekvemmelighet – ikke viktig om den blir borte) */
 const SEEN_KEY = "stalverk-skiftrapport-sett";
 

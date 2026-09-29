@@ -1,8 +1,9 @@
 import { BONUS_COOLDOWN_DAYS, fpDeal, keyUpgrade, upgradeOptions } from "../game/actions";
 import { auto, missingResearchFor, researchOptions } from "../game/research";
 import { scrapResearchFor, scrapResearchHint } from "../game/recipe";
-import { GRADES, ROLES } from "../game/data";
-import { currentOrder, recipeEstimate, scrapStopHelp } from "../game/engine";
+import { BANKRUPTCY_DAYS, GRADES, ROLES } from "../game/data";
+import { CREDIT_HELP, creditLimit, currentOrder, recipeEstimate, scrapStopHelp } from "../game/engine";
+import { summerStart, summerStop, yearOf } from "../game/calendar";
 import {
   bonusGap,
   day,
@@ -51,6 +52,26 @@ export interface Hint {
 
 export function hints(g: GameState, stats: PlantStats): Hint[] {
   const out: Hint[] = [];
+  // Kassa under kredittgrensen (B-349): det viktigste rådet, med hva man kan gjøre – før sto det bare i loggen
+  if (g.cash < -creditLimit(g, stats)) {
+    const left = BANKRUPTCY_DAYS - g.negativeDays;
+    out.push({
+      text: `Kassa er under kredittgrensen. ${summerStop(g) ? `Banken venter til sommerstansen er over, men da er det konkurs om ${left} døgn` : `Blir den der, er det konkurs om ${left} døgn`}. ${CREDIT_HELP}`,
+      view: "marked",
+      sub: "skrap",
+    });
+  } else {
+    // Før sommerstansen (B-349): tre uker uten salg. Står kassa i minus, er det nå det må ordnes
+    const today = day(g);
+    const start = summerStart(today);
+    const startsIn = start - today;
+    if (g.summer?.choice === "stans" && g.summer.year === yearOf(start) && startsIn > 0 && startsIn <= 7 && g.cash < 0)
+      out.push({
+        text: `Sommerstans om ${startsIn} døgn: ingen salg i tre uker, men faste kostnader og renter går. Kassa er i minus – kjøp ikke mer skrap enn ovnene bruker før ferien, og selg det du ikke trenger.`,
+        view: "marked",
+        sub: "skrap",
+      });
+  }
   const active = g.contracts.filter((c) => c.status === "aktiv");
   const offers = g.contracts.filter((c) => c.status === "tilbud");
   const waits = g.furnaces.map((f) => f.waitReason);
