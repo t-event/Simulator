@@ -6201,3 +6201,23 @@ Beslutning (`TopBar` i `ui/GameApp.tsx`, `game.css`):
 Testet: Playwright på de 7 størrelsene med 123,45 mrd. kr i kassa (ingen avkorting, ingen horisontal scrolling, trykk
 åpner Industrien) og uten konsernkassa (320 og 1 366 px).
 Konto (B-149): konsernkassa krever konto fra før (B-326); uten konto vises tallet ikke.
+
+## B-341 Utbetalt til eierne teller mot sluttmålet og de største ovnene (2026-09-29)
+Status: gjelder
+Bakgrunn: eieren: «Noen får ikke råd til de største ovnene fordi vi har cap på 10 mrd i lokalkassa.» Kassetaket (B-306)
+er like høyt som sluttmålet (10 mrd.), og det som betales ut over taket, teller ikke i konsernverdien (B-303). En spiller
+uten datterverk kunne derfor aldri få verdien over 10 mrd. når den ble sjekket: én spiller sto med 9 999,5 mill. i kassa og
+530 mill. utbetalt, uten sluttmålet – og dermed uten Lysbueovn 250 t og valseverk nr. 3 («Åpner ved sluttmålet»). De
+største ovnene (Likestrømsovn 420 t, renseanlegg for storverk, strengstøpemaskin nr. 3) krevde 25 mrd. i verdi eller
+tittelen Stålmagnat, og uten konto (datterverk) kunne verdien aldri nå 25 mrd.
+Beslutning (`valueCreated` i `game/konsern.ts`):
+- **Verdien spilleren har skapt** = konsernverdien + det som er betalt ut til eierne (`paidOutTotal`). Den brukes til
+  sluttmålet (`checkWin`), grensen på 25 mrd. for de største ovnene (`gateBlocker`, teksten sier nå «utbetalt til eierne
+  teller med»), prestasjonene Stålbaron/Stålmagnat/Stållegende og linja «Mot sluttmålet» på Konsern.
+- **Konsernverdien selv er uendret** (`konsernEquity`): topplistene, tidslinja til serveren, milepælene og juksesperren
+  bruker den som før, og utbetalingene legges ikke inn i den (B-303 står). Alt dette er eget spill (B-323).
+- Tittelen Stålmagnat fra datterverkene åpner fortsatt de største ovnene med én gang.
+- Spillere som står fast, får sluttmålet i neste time de spiller; ingen endring i lagrede spill på serveren trengs.
+Testet: ny test i `npm test` (9 999,5 mill. + 530 mill. utbetalt → sluttmålet; 10 mrd. + 15,1 mrd. utbetalt → de største
+ovnene), `balance.ts`.
+Konto (B-149): krever ikke konto (eget spill).

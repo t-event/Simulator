@@ -53,6 +53,7 @@ import {
   type SettleEvent,
 } from "./konsernWorld";
 import { regionName } from "./regions";
+import { paidOutTotal } from "./reserve";
 import type { GameState, KonsernOrder, RegionId, SisterPlant, SisterType } from "./types";
 
 export interface SisterSpec {
@@ -440,6 +441,15 @@ export function konsernValue(g: GameState): number {
 /** Egenkapital (kasse minus lån) pluss datterverkene. Det som er betalt ut til eierne (B-303), teller ikke */
 export function konsernEquity(g: GameState): number {
   return g.cash - g.loan + konsernValue(g);
+}
+
+/**
+ * Verdien spilleren har skapt (B-341): konsernverdien pluss det som er betalt ut til eierne over kassetaket. Taket er like
+ * høyt som sluttmålet, så uten utbetalingene kunne verdien aldri gå over 10 mrd. når den ble sjekket. Brukes bare til det
+ * som hører til eget spill – sluttmålet, stormodellene og prestasjonene – aldri til topplistene eller serveren (B-303).
+ */
+export function valueCreated(g: GameState): number {
+  return konsernEquity(g) + paidOutTotal(g);
 }
 
 /** Et trinn modernisering fra konsernkassa: 30 % av prisen, −25 % med «Standardverk» (B-120, B-326) */

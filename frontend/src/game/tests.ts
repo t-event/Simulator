@@ -6,6 +6,7 @@ import {
   buildNeighbor,
   buyMastery,
   buyUpgrade,
+  gateBlocker,
   doResearch,
   finishBigBuild,
   finishNeighbor,
@@ -143,6 +144,8 @@ import {
   konsernDay,
   konsernEquity,
   konsernNetFor,
+  konsernValue,
+  valueCreated,
   dividendInput,
   dividends,
   sisterDividend,
@@ -3475,6 +3478,25 @@ test("Nabolaget (B-336): bygges ett om gangen, i rekkefølge, og gir sine fordel
   g.reputation = 50;
   adjustReputation(g, -10);
   assert(g.reputation === 40, "under gulvet fra før");
+});
+
+test("Kassetaket (B-341): det som er betalt ut til eierne, teller mot sluttmålet og stormodellene", () => {
+  const g = newGame(341);
+  g.stage = 4;
+  g.konsern.unlocked = true;
+  g.cash = 9_999_500_000;
+  checkWin(g);
+  assert(!g.won, "uten utbetaling er 9,9995 mrd. ikke nok");
+  g.paidOut = { total: 530_000_000, firstDay: 1, today: 0 };
+  assert(valueCreated(g) === konsernEquity(g) + 530_000_000, "verdien med utbetalingene");
+  checkWin(g);
+  assert(g.won, "med utbetalingene er sluttmålet nådd");
+  assert(gateBlocker(g, "baron") === null, "sluttmålet åpner stormodellene");
+  assert((gateBlocker(g, "magnat") ?? "").includes("25 mrd."), "25 mrd. er ikke nådd");
+  g.paidOut.total = 15_100_000_000;
+  assert(gateBlocker(g, "magnat") === null, "15,1 mrd. utbetalt + 10 mrd. i kassa åpner de største ovnene");
+  // Konsernverdien selv (topplistene) er uendret
+  assert(konsernEquity(g) === g.cash - g.loan + konsernValue(g), "konsernverdien uten utbetalinger");
 });
 
 if (failed) {

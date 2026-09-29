@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 341,
+    date: "2026-09-29",
+    title: "Kassetaket stenger ikke lenger for de største ovnene",
+    items: [
+      "Pengene som er betalt ut til eierne over kassetaket, teller nå med mot sluttmålet på 10 mrd. Står kassa fast på taket, når du sluttmålet neste gang du spiller.",
+      "De største ovnene åpner ved 25 mrd. – og også her teller det som er betalt ut til eierne med. Tittelen Stålmagnat åpner dem som før.",
+    ],
+  },
+  {
     b: 340,
     date: "2026-09-29",
     title: "Konsernkassa i toppfeltet",

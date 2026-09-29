@@ -402,7 +402,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Taket for kassa** (B-303, reform 2; 10 mrd. fra B-306): kassa over `CASH_RESERVE.softCap` betales ut til eierne (`g.paidOut`)
   i hvert tidssteg og etter hver handling. Det teller ikke i `konsernEquity`, kan ikke brukes og er ikke sikkerhet mot
   konkurs. Den gamle reserven (`lockedReserve`, B-193) står urørt i lagringene og regnes som utbetalt (`paidOutTotal`)
-  – ikke migrer den, og ikke legg den inn i konsernverdien igjen. Lista «Utbetalt til eierne» leses av `note_paid_out`
+  – ikke migrer den, og ikke legg den inn i konsernverdien igjen. Sluttmålet og grensen for de største ovnene bruker
+  `valueCreated` (konsernverdi + utbetalt, B-341) – taket er like høyt som sluttmålet, så `konsernEquity` alene låste dem. Lista «Utbetalt til eierne» leses av `note_paid_out`
   på `saves` (050). Reform 2 som helhet: `docs/OKONOMI.md` og B-302. Skal taket endres igjen: publiser appen først,
   så serverendringen (052 som mal), ellers fyller eldre apper kassa opp igjen. Sesonglista bruker det siste
   tidslinjetallet per spiller – etter en serverendring av kassa må den få ferske tall (053 som mal), ellers står de

@@ -36,6 +36,7 @@ import {
   konsernAdvice,
   konsernReady,
   konsernEquity,
+  valueCreated,
   konsernOptions,
   maxSisters,
   MODERNIZE_GAIN,
@@ -943,7 +944,11 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
           )}
           {!g.won && (
             <>
-              <Bar value={Math.max(0, equity) / WIN_CASH} tone="ok" label={`Mot sluttmålet ${fmtKr(WIN_CASH)}`} />
+              <Bar
+                value={Math.max(0, valueCreated(g)) / WIN_CASH}
+                tone="ok"
+                label={`Mot sluttmålet ${fmtKr(WIN_CASH)}`}
+              />
               {next && <p className="g-muted g-small-text">Neste milepæl: {fmtKr(next)} (gir fagpoeng).</p>}
             </>
           )}
