@@ -6825,3 +6825,19 @@ analysene står ellers som de ble godkjent; de har fått en merknad øverst om d
 skrevet om. LOGG, BESLUTNINGER og CLAUDE.md var oppdatert fra før.
 Endringslogg: nei
 Konto (B-149): – ingen ny funksjon.
+
+## B-377 Forlatte gjester ryddes bort hver natt (2026-09-30)
+Status: gjelder
+Bakgrunn: forslaget i FORSLAG.md (B-212, B-366): gjester som aldri oppretter konto, blir liggende med spill, tidslinje og
+kopier (ca. 1 MB hver), og gratisplanen har 500 MB. Brukeren (eier): «Ja det skal de».
+Beslutning (`088_rydd_gjester.sql`):
+- `cleanup_guests()` sletter gjester (`auth.users.is_anonymous`) som ikke har lagret på **60 dager** – regnet fra siste
+  lagring (`saves.updated_at`), ellers siste innlogging eller når gjesten ble laget. En gjest som spiller, slettes aldri.
+- Sperrer: bare anonyme kontoer; aldri en med konsernkasse, konsern eller selskap; høyst 500 per natt; aldri under 30 dager
+  selv om noen kaller den med et lavere tall. Alt som hører til gjesten, følger med (`on delete cascade`).
+- pg_cron-jobben `gjester-rydding` kjører kl. 03:47 UTC hver natt. Antallet skrives i `guest_cleanup_log` (180 dager, bare
+  for serveren).
+- Kommer gjesten tilbake etter å ha blitt slettet, lager appen en ny gjest og laster opp spillet fra mobilen igjen (B-212).
+- Dry-run 30.9: 0 gjester, 0 ville blitt slettet. Testet i en DO-blokk (rullet tilbake) med fem kontoer: bare den gamle
+  gjesten uten lagring ble slettet – ikke den nye, ikke den som lagret nylig, ikke den ekte kontoen, ikke gjesten med kasse.
+Konto (B-149): – ingen ny funksjon (gjelder spill uten konto).

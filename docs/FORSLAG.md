@@ -25,12 +25,6 @@ til «Avgjort» nederst).
   public.world_tick();`
 
 - **Logg inn med Google og Apple** (eieren: «senere», B-212). Krever oppsett i dashbordet og hos Google/Apple.
-- **Rydde gamle gjester** (B-212, B-366): gjester som aldri oppretter konto, blir liggende – ca. 1 MB hver (spillet,
-  tidslinja og kopiene). Når det blir mange (grensen på gratisplanen er 500 MB), rydd dem som ikke har lagret på 60 dager
-  – ikke etter `created_at`, da mister en gjest som spiller fortsatt: `delete from auth.users u where u.is_anonymous and
-  coalesce((select s.updated_at from public.saves s where s.user_id = u.id), u.last_sign_in_at, u.created_at) < now() -
-  interval '60 days'` (spillene følger med). Appen lager en ny gjest og laster opp spillet igjen hvis den kommer tilbake.
-  Kan bli en daglig jobb i pg_cron hvis eieren vil.
 
 - ~~Bunden konsernreserve (B-193)~~ **Avgjort (B-303):** avviklet og ført som «utbetalt til eierne»; taket står.
 - ~~Veksten på toppen (B-238)~~ **Avgjort (reform 2, B-302):** taket for kassa (B-303), utbytte i ekte tid til
@@ -63,6 +57,9 @@ til «Avgjort» nederst).
   Krever konto. Brukeren: «Ingen varsel på mobilen enda» (B-149).
 
 ## Avgjort
+
+- **Forlatte gjester (B-377):** eieren sa ja 30.9. Gjester som ikke har lagret på 60 dager, slettes hver natt av
+  `cleanup_guests()` (pg_cron `gjester-rydding`).
 
 - **Oppkjøp og investeringer (B-375):** eieren sa ja 30.9. Minstebudet er 10 dagers inntekt; eieren som blir kjøpt ut,
   får inntekten for dagene hen mister og 85 % av det hen investerte, høyst 85 % av budet. Investeringene teller ikke i
