@@ -5,6 +5,10 @@ og B-328 (mesterskapet, valg A). Simuleringen etter byttet står nederst (B-329)
 `konsern_forslag.py` (kladd, ikke i repoet) med de samme formlene som serveren bruker i dag (utbyttet i 051, bidraget i
 061) og eksisterende byggetider (2/6/12 t, modernisering 4 t, utbygging 6 t).
 
+**Prisene er endret siden (B-373, 30.9.2026):** stålverk 5 mill., storverk 20 mill., stålkompleks 60 mill. (en firedel
+av forslaget under), fordi et kjøp tok hundrevis av dager å betale tilbake. Tabellene under er forslaget slik det ble
+godkjent.
+
 Målet for fasen: **Hovedverket avgjør hvor godt du driver industri. Konsernkassa avgjør hvor raskt du bygger imperiet.
 Ekte tid styrer makten mellom spillerne.**
 

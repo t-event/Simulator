@@ -17,8 +17,8 @@ til «Avgjort» nederst).
 - **Pynt for sesong 3 (B-287, B-291):** pynten for sesong 2 er klar. Før `start_season` kjøres for sesong 3, legg inn ny
   pynt i `COSMETICS` med `season: 3` – både i butikken og på stigen (trinn 10–50). Ellers har sesong 3 ingen egen pynt.
 
-- **Slå på slagghåndteringen (B-253):** skraplageret fikk sin første eier 29.9. 01:33 UTC; første inntekt betales for 30.9
-  (når dagen er over). Når det har betalt ut i noen dager uten feil: `update public.companies set active = true where type = 'slagg'; select public.world_tick();`
+- **Slå på slagghåndteringen (B-253):** skraplageret fikk sin første eier 29.9. 01:33 UTC og betalte første gang for 29.9
+  (13,8 mill., rett etter midnatt norsk tid, B-369). Når det har betalt ut i noen dager uten feil: `update public.companies set active = true where type = 'slagg'; select public.world_tick();`
   Sjekk så kortet under Konsern → Industrien.
 - **Slå på mekanisk verksted (B-256):** etter slagghåndteringen, og tidligst en uke etter at appen med vedlikeholdstallet er
   ute (så anslaget bygger på ekte tall): `update public.companies set active = true where type = 'verksted'; select
@@ -49,12 +49,6 @@ til «Avgjort» nederst).
 
 ## Forslag – nett og konkurranse
 
-- **Investeringer ved salg og oppkjøp (B-372, spørsmål til eieren):** i dag blir investerte penger i selskapet
-  (`companies.invested`) igjen hos selskapet og går til neste eier. Verdien – og dermed minstebudet – tar ikke med
-  investeringene, så den som mister selskapet, får ingenting igjen for dem (bare 85 % av budet). Forslag: legg
-  investeringene til verdien i `company_value` (f.eks. 100 % eller 50 %), så minstebudet stiger og eieren får det meste
-  tilbake ved et oppkjøp. Ved nytt anbud etter endt periode følger de selskapet som før. Eieren avgjør.
-
 - ~~Tidslinja ved tilbakespoling (B-259)~~ **Bygget (B-261).** `check_snapshot` sletter alle tall etter dagen når et spill med lavere dag
   lastes opp. Da en gammel kopi tok over i 15 sekunder, forsvant 1 700 tall. Kan heller merke dem eller beholde dem når
   det høyere spillet kommer tilbake. Eieren avgjør.
@@ -69,6 +63,13 @@ til «Avgjort» nederst).
   Krever konto. Brukeren: «Ingen varsel på mobilen enda» (B-149).
 
 ## Avgjort
+
+- **Oppkjøp og investeringer (B-375):** eieren sa ja 30.9. Minstebudet er 10 dagers inntekt; eieren som blir kjøpt ut,
+  får inntekten for dagene hen mister og 85 % av det hen investerte, høyst 85 % av budet. Investeringene teller ikke i
+  verdien. (Erstatter forslaget om å legge investeringene til verdien, B-372.)
+
+- **Budet på skraplageret i gamle penger (B-374):** ingen penger tilbake – delingen på 10 kom etter anbudet, så budet
+  kostet 20 mill. i dagens penger. Appen viser gamle bud med dagens verdi.
 
 - **Vern mot lekkede passord (B-363):** finnes bare på Supabase Pro. Eieren 29.9: «Vi dropper det». Rådet
   `auth_leaked_password_protection` i `get_advisors` står derfor, og er kjent.

@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 302 – 2026-09-30: Alle .md-filer oppdatert (B-376)
+
+**Brukeren ba om:** «Oppdater alle .md filer».
+
+**Gjort:** gikk gjennom alle .md-filene mot B-366–B-375. README, DESIGN, RETNING, KONTO, FORSLAG, PLAN-NETT, UI,
+KONSERN-FORSLAG, KONTROLL-FORSLAG og KONSERNBIDRAG oppdatert (priser 5/20/60, verdien 10 dagers inntekt, betalingen ved
+oppkjøp, oppkjøpsbud/motbud/beredskapsfond, norsk dag, migrasjonene 064–087). Forslagene har fått en merknad om det som er
+endret, ikke skrevet om. CLAUDE.md, LOGG og BESLUTNINGER var à jour.
+
+**Testet:** `npm test` (endringsloggen: B-376 er merket «Endringslogg: nei»).
+
+**Gjenstår:** eieren avgjør om forlatte gjester skal ryddes automatisk.
+
 ## Økt 301 – 2026-09-30: Oppkjøp som lønner seg, og betaling for tida eieren mister (B-375)
 
 **Brukeren spurte:** hva Figen får ved oppkjøp før og etter 14 dager, «Hva anbefaler du», så «Ja» og «Kjør på».

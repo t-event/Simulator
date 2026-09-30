@@ -270,12 +270,22 @@ Kontroll per bedrift (lønnsomhet, gjeld, likviditet, ledelse, investeringer, ma
 komplekst imperiet er). Imperiebelastning: jo flere bedrifter og datterverk, desto mer ledelse og kapital kreves for å
 holde Kontrollen oppe. Vises som ord («sterk», «presset») med en kort forklaring, ikke som et tall man jager.
 
+**Bygget (B-334, B-370):** Kontroll regnes av `company_control` (eierskap, aktivitet, investeringer, verk i regionen,
+eiertid, beredskapsfondet og belastningen av mange selskaper). Ordene er Sterk, God, Middels og Svak, og eieren ser i
+kroner hvor stort bud som trengs for å ta selskapet, og hva som gjør det tryggere.
+
 ### Fase 4 – overtakelser
 
 Én angriper mot én eier. Undersøkelse → forberedelse (bundet kapital) → offentlig forsøk (alle ser det) → forsvar
 (48–72 timer). Utfallet avgjøres på serveren av Kontroll, forberedelse, kapital (sterkt avtagende), ledelse, økonomisk
 helse, forsvarerens handlinger og imperiets belastning – og forklares for begge. Den nye eieren overtar investeringene.
 Ingen sabotasje; temaet er selskapskontroll. Testes grundig med få aktører før det slås på (bryter i `config`).
+
+**Bygget (B-335, B-337, B-339, B-371–B-375), på fra 29.9.2026:** oppkjøpsbud (minst verdien = 10 dagers inntekt) og
+motbud i 72 timer, avgjort uten tilfeldighet; eieren kan alltid miste selskapet til et stort nok bud. Kjøperen får 14
+dager fra kjøpet og 3 dagers vern; ingen pause etter et avverget bud. Eieren som blir kjøpt ut, får inntekten for dagene
+hen mister og 85 % av det hen investerte, høyst 85 % av budet – resten forsvinner. Ordene i spillet er «oppkjøpsbud» og
+«motbud», ikke angrep og forsvar (B-371).
 
 ### Fase 5 – datterverksledelse
 
@@ -452,7 +462,7 @@ kundene – og kundene kunne pumpe opp inntekten til en venn.
 | Rapporterte skrapkjøp | Ja | Kan pumpes med kjøp og salg av skrap |
 | **Aktivitetsdøgn med tak per kunde (anbefalt)** | Nei | Krever én dags historikk per kunde |
 
-**Anbefalt: aktivitetsdøgn med tak per kunde.** For hver kunde og hver ekte (UTC-)dag:
+**Anbefalt: aktivitetsdøgn med tak per kunde.** For hver kunde og hver ekte dag (norsk tid fra B-369):
 
 `bidrag = min(skrap brukt i dag, kundens normale skrapbruk per spilldøgn)`
 

@@ -288,6 +288,11 @@ Hver PR er liten, går gjennom alle sjekker, Playwright på **7 størrelser** (3
    **UI-4d polering og animasjon** (inkl. anleggsbildet per nivå; første runde bygget, B-242: kjøretøy, kran, valseverk, skip, pipe per ovn, trykkbare steder; andre runde B-244: eget storverk, transportbånd, streng per støpemaskin, dempet når verket står).
 6. Etterpå: logo, app-ikon og tittelbilde (bevisst sist, B-187). **Bygget (B-249):** verket i kveldslys – `public/icon.svg`
    og `ui/TitleArt.tsx`.
+7. Senere runder (bygget): **Konsern → Industrien** med Kontroll som ord og stolpe, «Slik blir det tryggere», budet som
+   trengs i kroner og hva eieren får ved et oppkjøp (B-370, B-375) · **Konsern → Utvid** med statuslinje (konsernkassa,
+   datterverk X av Y, byggekø X av 3), én linje med tall per kjøp og konkrete knappeord (B-372) · **Ingen hopping**
+   (B-238, B-373): tallene i toppfeltet har fast minstebredde, merket på bjella ligger oppå hjørnet, «Siste hendelser»
+   har fast høyde, og `<details>` åpnes aldri av seg selv mens spillet går.
 
 Fase 1B (skraplager, anbud) bygges parallelt med samme komponenter så snart UI-1a er inne, så nye sider ikke må
 bygges om.

@@ -79,9 +79,9 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Datterverk fra konsernkassa: kjøp, kø, salg og konsernnivået (titlene) | Ja (verk og titler fra før beholdes uten konto) | Regel 2 og 7 | B-325, B-326 |
 | Aktivitetskrav på utbytte og bidrag | Ja (del av konsernkassa) | Regel 2 | B-327 |
 | Verdenskartet: regioner for verkene, andres verk og selskaper, flytt én gang | Ja | Regel 3: viser andre spillere | B-333 |
-| Utbyttepolitikk og forsvarsfond | Ja | Regel 2 og 7: konsernkassa på serveren | B-334 |
-| Kontroll over selskaper, investeringer, fordel i fornyelsesanbudet | Ja | Regel 3 og 7 | B-334 |
-| Overtakelser av strategiske selskaper (bud, forsvar, utfall; bryteren av til den slås på) | Ja | Regel 3 og 7 | B-335 |
+| Utbyttepolitikk og beredskapsfond | Ja | Regel 2 og 7: konsernkassa på serveren | B-334, B-371 |
+| Kontroll over selskaper og investeringer (fordelen i fornyelsesanbudet er tatt bort, B-337) | Ja | Regel 3 og 7 | B-334, B-370 |
+| Oppkjøp av strategiske selskaper (oppkjøpsbud, motbud, utfall; på fra 29.9.2026) og betaling til eieren for dagene hen mister | Ja | Regel 3 og 7 | B-335, B-339, B-371–B-375 |
 | Byggetid og innkjøring for store kjøp, nabolagsprosjekter hjemme | Nei | Regel 1: eget spill i spilltid | B-336 |
 | Skiftrapporten: felles chat for alle spillere | Ja | Regel 3: viser andre spillere og brukernavnet ditt | B-338 |
 | Produksjonsmåleren (tonn per ekte dag fra tidslinja) | Ja (bare lagring på nett teller) | Regel 2 | B-188 |
