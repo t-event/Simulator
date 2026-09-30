@@ -7137,3 +7137,18 @@ Beslutning (eieren):
   ingen av delene skal være universelt best.
 Endringslogg: nei
 Konto (B-149): – ingen ny funksjon.
+
+## B-394 Trinnet på datterverkene vises med ord (2026-09-30)
+Status: gjennomført
+Bakgrunn: en spiller fant ikke hvilket trinn verkene er modernisert til. På mobil viste raden under «Dine verk» bare små
+prikker uten forklaring; «Modernisert 3 av 5» sto først når raden ble åpnet.
+Beslutning:
+- Felles visning av trinnet på mobil og PC (`PlantTier` i `ui/Konsern.tsx`): prikker og «Trinn 3 av 5» med ord. Grønn
+  prikk = trinn verket har, ring = trinn som bygges eller står i køen («Trinn 3 → 4», `plannedLevel` i `game/konsern.ts`).
+- Mobil: trinnet får hele linja under navnet; typen (stålverk/storverk/stålkompleks) står under utbyttet til høyre. Under
+  360 px faller «av 5» bort og prikkene blir mindre, så ingenting kuttes på 320 px.
+- Åpen rad og PC: «Trinn 3 av 5. Hvert trinn gir verket 25 % mer overskudd.» – eller på høyeste trinn hvilken tittel som
+  åpner neste (`nextTierTitle`), i stedet for «Fullt modernisert» når flere trinn kan komme.
+- PC-tabellen har kolonnen «Trinn» med samme prikker. Forklaringen over lista sier hva prikkene betyr.
+Endringslogg: ja
+Konto (B-149): nei – visning av eget spill.

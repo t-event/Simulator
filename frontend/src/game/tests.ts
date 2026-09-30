@@ -140,6 +140,8 @@ import {
   kompleksOpen,
   LEGENDS,
   modernizeMax,
+  nextTierTitle,
+  plannedLevel,
   titleOf,
   WIN_TITLE,
   directorPerDay,
@@ -3997,6 +3999,54 @@ test("K-1: programkostnaden regnes av normalinntekten før hendelsen og trekkes 
   assert(r.calm > 0 && r.calm === r.storm, `rolig ${r.calm}, strømsjokk overalt ${r.storm}`);
   // Høykonjunkturen regnes av fordelingen i config: 50/25/25 ellers, 40/20/40 om vinteren
   assert(Math.abs(k1BoomSize(K1) - 0.3) < 0.01, `høykonjunktur ${k1BoomSize(K1)}`);
+});
+
+test("Trinnet til et datterverk: bestilte moderniseringer og tittelen som åpner neste trinn (B-394)", () => {
+  const g = newGame(394);
+  g.konsern.unlocked = true;
+  givePlants(g, 2, "storverk", 2);
+  const [a, b] = g.konsern.plants;
+  assert(plannedLevel(g, a) === 2, "uten bestilling er planlagt trinn det samme");
+  a.project = { kind: "modernisering", startedAt: 0, readyAt: 1 };
+  assert(plannedLevel(g, a) === 3, "et prosjekt som bygges, gir neste trinn");
+  g.konsern.orders = [
+    {
+      id: 1,
+      kind: "modernisering",
+      plantId: a.id,
+      type: null,
+      name: null,
+      cost: 1,
+      startsAt: 0,
+      readyAt: 1,
+      status: "i gang",
+    },
+    {
+      id: 2,
+      kind: "modernisering",
+      plantId: a.id,
+      type: null,
+      name: null,
+      cost: 1,
+      startsAt: 1,
+      readyAt: 2,
+      status: "kø",
+    },
+  ];
+  assert(plannedLevel(g, a) === 4, `prosjektet og køen telles én gang hver, fikk ${plannedLevel(g, a)}`);
+  assert(plannedLevel(g, b) === 2, "andre verk påvirkes ikke");
+  g.konsern.earned = 0;
+  assert(
+    modernizeMax(g) === 3 && nextTierTitle(g) === LEGENDS[0].title,
+    `neste trinn ved nivå 1, fikk ${nextTierTitle(g)}`,
+  );
+  g.konsern.earned = 3;
+  assert(
+    modernizeMax(g) === 5 && nextTierTitle(g) === LEGENDS[6].title,
+    `trinn 6 ved nivå 7, fikk ${nextTierTitle(g)}`,
+  );
+  g.konsern.earned = 7;
+  assert(modernizeMax(g) === 6 && nextTierTitle(g) === null, "alle trinn åpnet");
 });
 
 test("K-1: programmene prises av datterverksutbyttet, ikke av bidraget fra hovedverket (B-392)", () => {

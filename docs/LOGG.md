@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 317 – 2026-09-30: Trinnet på datterverkene (B-394)
+
+**Brukeren ba om:** en spiller lurte på hvordan man ser hvilket trinn verkene er på – gjør det tydeligere og mer intuitivt.
+
+**Gjort:** `PlantTier` (prikker + «Trinn 3 av 5», ring og pil for bestilt modernisering) på mobilradene og i PC-tabellen,
+typen flyttet under utbyttet på mobil, tekst om hva trinnet gir eller hvilken tittel som åpner neste, forklaring over lista.
+`plannedLevel` og `nextTierTitle` i `game/konsern.ts` med test. Endringslogg B-394.
+
+**Testet:** tsc, lint, `npm test` (ny test), Playwright på 320, 390 (iPhone 13) og 1366 px med seks verk på ulike trinn,
+ett under modernisering og ett i kø: ingen horisontal scrolling, ingenting kuttet (også på 320 px).
+
+**Gjenstår:** –
+
 ## Økt 316 – 2026-09-30: Sjekk av gjestekontoene (planlagt)
 
 **Oppgave:** den planlagte sjekken etter at eieren slo på anonyme kontoer 29.9 ca. 23:07 (B-212).
