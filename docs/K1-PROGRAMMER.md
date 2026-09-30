@@ -1,10 +1,23 @@
-# K-1: konsernprogrammer med modell B – spesifikasjon (B-389, godkjent B-390)
+# K-1: konsernprogrammer med modell B – spesifikasjon (B-389, godkjent B-390, grunnlaget endret B-392)
 
 **Status:** godkjent av eieren 30.9.2026 (B-390) med presiseringene under. Ingenting er bygget, ingen tall i verden er
 endret. Rekkefølgen: rapporten etter 2.10 → V0 i skygge og K-1 bak avslått bryter → skyggedata tilbake til eieren →
 eieren avgjør om det slås på → verksjef V1. Simuleringen: `npx tsx src/game/programSim.ts --k1`, `--k1-skann` og
 `--k1-drift`, `--k1-kost` og `--k1-verdi` (fra `frontend/`). Eierens tre kontrollpunkter før bygging/live (B-391) står i
 avsnitt 4 (vinteren), 4.1 (skyggerapporten), 2 (kostnaden for seg) og 8.2–8.3 (bidrag mot utbytte, Konsernverdi).
+
+**Eierens svar på kontrollpunktene (B-392):**
+1. **Vinteren** godkjent som den står (50/25/25, vinter 40/20/40). Ikke gjør vinteren hardere for programøkonomiens skyld.
+2. **Grunnlaget endres:** Teknologi, Robusthet og Driftsytelse prises av **normalt brutto datterverksutbytte før
+   hendelser og programeffekter** – ikke bidrag + utbytte. Bidraget går som før til konsernkassa og kan finansiere alt,
+   men bestemmer ikke prisen på et program som virker på datterverkene. **Hovedregel (foreløpig):** programbudsjettet
+   skaleres så langt det er naturlig mot den delen av konsernet programmet påvirker. Ingen egne grunnlag ennå – Marked og
+   Arbeidsmiljø vurderes når de bygges. 1/3/8 % beholdes til simuleringene er kjørt på nytt.
+3. **Konsernverdi endres ikke** – heller ikke til «laveste Konsernverdi i perioden». Ikke endre konkurransen for å gjøre
+   programmene attraktive; gjør programmene riktig priset. Taper programspilleren fortsatt i nesten alle verdener, kom
+   tilbake med lavere satser eller sterkere, troverdige effekter (avsnitt 8.3).
+4. Skyggedataene avgjør den endelige kalibreringen; skyggerapporten viser også **kostnad / beskyttet datterverksutbytte**.
+5. Rekkefølgen står.
 
 **Eierens svar (B-390):**
 1. **V0 ja** – regionale hendelser i ekte tid (strømsjokk, driftsuro, høykonjunktur), varslet to dager før, nøytrale i
@@ -19,7 +32,7 @@ avsnitt 4 (vinteren), 4.1 (skyggerapporten), 2 (kostnaden for seg) og 8.2–8.3 
 2. **1 / 3 / 8 %** i config, foreløpig (skyggedataene kan justere). Forventet krone-avkastning kan være litt negativ –
    Teknologi og Robusthet er delvis forsikring – så lenge effekten er tydelig, risikoen reell og man kan stå uten program.
    Spillet skal ikke late som et program er et godt kjøp for alle: vis eksponeringen før valget.
-3. **Trekk fra hver utbetaling:** bidrag + ordinært utbytte, av beløpet før hendelser og programeffekter; ikke
+3. **Trekk fra hver utbetaling** (grunnlaget erstattet av B-392: bare datterverksutbyttet): bidrag + ordinært utbytte, av beløpet før hendelser og programeffekter; ikke
    selskapsinntekt, salg, refusjoner, oppkjøpsoppgjør eller annet engangs. Sju-dagers snittet bare til prognosen.
    Programbudsjettet er en konsernkostnad før fordelingen mellom kassa og fondet. Samme krone trekkes aldri to ganger.
 4. **Driftsytelse:** test «Lav → Høy ved varsel om høykonjunktur» og «Lav → varsel om strømsjokk → bundet». Innfasing av
@@ -74,23 +87,26 @@ lite i dag – det er et valg de kan gjøre annerledes ved å flytte (én gang p
 **Eierens ønske:** normal driftsinntekt = hovedverkets bidrag + vanlig utbytte, uten engangsinntekter, helst stabilt
 (sju dagers snitt), og utbyttet *før* programeffekter.
 
-**Forslag (enklere, samme virkning):** budsjettet trekkes **som andel av hver vanlige utbetaling** når den betales:
+**Regelen (B-390, grunnlaget fra B-392):** budsjettet trekkes **som andel av den vanlige utbyttebetalingen** når den
+betales:
 
-- `pay_contributions` betaler bidraget → programbudsjettet (sum av satsingene) trekkes av beløpet.
+- **Grunnlaget er normalt brutto datterverksutbytte** før hendelser og programeffekter (B-392). Bidraget fra
+  hovedverket (`pay_contributions`) er urørt og går til konsernkassa som før – det bestemmer ikke prisen.
 - `pay_dividends` regner utbyttet slik det gjør i dag (fullt, før politikken) → budsjettet regnes av dette tallet
-  **før** hendelser og programmer, og trekkes før resten går til kassa og fondet.
+  **før** hendelser og programmer, og trekkes før resten går til kassa og fondet. Etableringen (2 dagers utbytte) og
+  Driftsytelses ekstra regnes av samme grunnlag.
 - Rekkefølgen i `pay_dividends` (eieren, B-390): **brutto ordinært utbytte → programkostnad → hendelse og
   programeffekt → vanlig fordeling** mellom konsernkassa og fondet (`dividend_to_treasury`).
 - **Budsjett og hendelse er to størrelser** (eieren, B-391). Dagens betaling er
 
   `bidrag + utbytte × hendelsesfaktor (etter programmene) + Driftsytelse-ekstra − programkostnad`
 
-  der `programkostnad = satsing × (normalt bidrag + normalt utbytte)`, regnet **før** hendelsen. Aldri
+  der `programkostnad = satsing × normalt datterverksutbytte`, regnet **før** hendelsen (B-392). Aldri
   `(utbytte − programkostnad) × hendelsesfaktor` – da ble programmet billigere i dårlige tider. `npm test` sjekker at
-  samme konsern betaler nøyaktig like mye i en rolig verden som med strømsjokk i alle regioner (`k1CostCheck`), og
-  serverfunksjonen skal testes på samme måte.
-- **Aldri to ganger:** bidraget og utbyttet trekkes hver for seg, hver av sin egen utbetaling. Hvert trekk føres i
-  `program_charges` med en unik nøkkel (spiller, ekte dag, kilde `bidrag`/`utbytte`), så en betaling som kjøres på nytt
+  samme konsern betaler nøyaktig like mye i en rolig verden som med strømsjokk i alle regioner (`k1CostCheck`), og at to
+  konsern med samme utbytte betaler det samme uansett bidrag (`k1BaseCheck`). Serverfunksjonen skal testes på samme måte.
+- **Aldri to ganger:** budsjettet trekkes bare av utbyttebetalingen. Hvert trekk føres i `program_charges` med en unik
+  nøkkel (spiller, ekte dag), så en betaling som kjøres på nytt
   (for eksempel etter en feil i `world_tick`), ikke trekker igjen. Utbytte som betales for flere dager på en gang
   (inntil 14), trekkes per dag.
 - Selskapsinntekt, refusjoner, salg, oppkjøpsoppgjør og annet engangs betales av andre funksjoner og er dermed aldri med
@@ -115,12 +131,12 @@ kr/dag». Det faktiske beløpet følger inntekten dag for dag og står i rapport
 - Høyst to aktive; høyest mulig nominelt er 2 × Høy.
 - Før man bekrefter, vises alltid både kroner og andel, ingen skjulte prosenter:
 
-> **Teknologi – Høy** · Ca. 4,2 mill. kr/dag (8 % av normal inntekt)
-> Totalt programbudsjett: ca. 9 % av konsernets normale inntekt
+> **Teknologi – Høy** · Ca. 3,0 mill. kr/dag (8 % av normalt datterverksutbytte)
+> Totalt programbudsjett: ca. 9 % av datterverksutbyttet
 > Demper strømsjokk i alle regioner der du har verk: tapet blir 80 % mindre.
 > **Ditt konsern:** 18 % av datterverksutbyttet kommer fra Nord, der strømsjokk er varslet fra torsdag. Med dagens
-> plassering ville programmet de siste 90 dagene ha spart ca. 12 mill. kr, mot et budsjett på ca. 380 mill. kr.
-> Bundet til 16. oktober. Etablering: 3 dager og ca. 104 mill. kr.
+> plassering ville programmet de siste 90 dagene ha spart ca. 12 mill. kr, mot et budsjett på ca. 270 mill. kr.
+> Bundet til 16. oktober. Etablering: 3 dager og ca. 74 mill. kr.
 
 **Eksponeringen vises før valget** (eieren, B-390): hvor stor del av datterverksutbyttet som kommer fra hver region, og
 fra regionene som er varslet. Tallet «ville ha spart» regnes av serveren fra hendelsene som faktisk skjedde og
@@ -169,7 +185,7 @@ Hendelsene trekkes og lagres som om de var live, men vises ikke og virker ikke p
 |---|---|
 | `world_events` | region, type, størrelse, varslet, start, slutt, `shadow = true` |
 | `world_event_exposure` | per hendelse, spiller og ekte dag: andel av datterverksutbyttet fra regionen, utbyttet før hendelsen, hypotetisk tap/gevinst uten program, og hypotetisk virkning med Teknologi / Robusthet / Driftsytelse på Lav, Middels og Høy (hva programmet ville tatt bort eller lagt til, og budsjettet det ville kostet) |
-| `program_shadow_day` | per spiller og ekte dag (B-391): **vanlig bidrag**, **vanlig utbytte**, hypotetisk **programkostnad** per program og satsing, **potensielt beskyttet inntekt** (utbytte i de rammede regionene × hendelsens størrelse), hypotetisk **spart beløp**, og **programkostnad som andel av datterverksutbyttet** |
+| `program_shadow_day` | per spiller og ekte dag (B-391, B-392): **vanlig bidrag**, **vanlig utbytte**, hypotetisk **programkostnad** per program og satsing (av utbyttet), **potensielt beskyttet inntekt** (utbytte i de rammede regionene × hendelsens størrelse), hypotetisk **spart beløp**, **kostnad / beskyttet datterverksutbytte** (kostnad / hendelsestap programmet verner mot, og kostnad per spart krone) |
 
 Loggen skrives av `pay_dividends` på den samme utbetalingen som i dag, uten å endre beløpet. Det gjør at tallene er
 nøyaktig det spilleren ville fått. Rader for gjester skrives ikke (`user_is_guest`).
@@ -212,7 +228,7 @@ Tre handlinger, ingen mikrostyring:
 
 | Handling | Hvordan | Når |
 |---|---|---|
-| **Start eller bytt program** | Strategisk prosjekt i prosjektlinja (`konsern_orders`, kind `program`): 3 ekte dager, etablering = 2 dagers normal inntekt | Et tomt spor, eller et program som er ute av bindingen. Det gamle stopper når det nye begynner å etableres. |
+| **Start eller bytt program** | Strategisk prosjekt i prosjektlinja (`konsern_orders`, kind `program`): 3 ekte dager, etablering = 2 dagers normalt datterverksutbytte | Et tomt spor, eller et program som er ute av bindingen. Det gamle stopper når det nye begynner å etableres. |
 | **Øk satsingen** | Gjelder fra neste utbetaling. Bindingen starter på nytt (14 dager). | Når som helst |
 | **Senk eller stopp** | Med én gang | Bare når bindingen er ute |
 
@@ -313,6 +329,20 @@ Samme vern koster altså fra 9 til 33 % av det som vernes. Det er i dag en **bie
 design**. Grunnlaget endres ikke nå (eieren); skyggerapporten viser tallene per spiller, og eieren avgjør før live om
 det skal være slik (et rikere konsern har større budsjett) eller om vernprogrammene skal regnes av utbyttet.
 
+**Etter B-392 (grunnlaget er utbyttet):** samme vern koster 8 % av utbyttet for alle – den lille, den store og alle de ekte
+spillerne over – uavhengig av bidraget. Kostnad mot det vernet gjelder (middels spiller, to år):
+
+| Strategi | Kostnad / hendelsestap det verner mot | Kostnad per spart krone | (før: per spart krone) |
+|---|---|---|---|
+| Bare Teknologi høy hele tida | 3,4–3,5 | 4,3–4,4 | 6,0–6,2 |
+| Teknologi + Robusthet middels hele tida | 1,9–2,0 | 4,0–4,2 | 5,7–6,0 |
+| Teknologi + Robusthet lav, høy ved varsel – spredt | 2,2 | 2,8 | 3,9 |
+| … – samlet i to regioner | 1,3 | 1,7 | 2,3 |
+| … – alt i én region | 1,1 | 1,4 | 1,9 |
+
+Kostnad per spart krone over 1 betyr at vernet koster mer enn det sparer i snitt – det er forsikring. Jo mer samlet
+konsernet er og jo mer målrettet programmet brukes, jo nærmere 1.
+
 ### 8.3 Konsernverdi med og uten program (`--k1-verdi`, B-391)
 
 Konsernverdi = konsernkassa + 60 × (normalt utbytte + bidrag) − lån (`konsern_value`). Hendelsene er ikke med i det
@@ -330,11 +360,46 @@ program og B med program, fra konsernet er fullt:
 Liten og stor spiller gir det samme (−1,5 til −6,4 %). Beste tilfelle for B er en liten spiller med alt i én region og
 forsikring ved varsel: −1,5 % etter et år, foran A i 1 av 40 verdener.
 
-**Testen viser et problem:** B havner under A i praktisk talt alle verdener, og selv B sin dårligste verden er lavere enn
-A sin dårligste. Med hendelser av denne størrelsen fjerner programmene mindre variasjon enn de koster, så de forbedrer
-ikke engang det verste utfallet målt i Konsernverdi. Sesongen gjør da «ingen programmer» til optimal strategi, og
-programmenes strategiske verdi fanges ikke opp. Formelen er **ikke** endret (eieren: bare hvis testen viser et problem,
-og da som en beslutning). Spørsmålet går til eieren sammen med skyggedataene før live – mulige retninger står i avsnitt 10.
+**Testen viste et problem** (med det gamle grunnlaget): B havnet under A i praktisk talt alle verdener, og selv B sin
+dårligste verden var lavere enn A sin dårligste. Eieren (B-392): ikke endre Konsernverdi – endre grunnlaget og prøv igjen.
+
+**Etter B-392, satsing 1/3/8 %** (`--k1-verdi`, 40 verdener, middels spiller, 365 dager): gapet er mindre (−0,2 til
+−4,1 %), men nesten alle strategier taper fortsatt i nesten alle verdener. Beste tilfelle: «Bare Teknologi, lav → høy ved
+varsel» med alt i én region, −0,2 % og foran i 14 av 40 – og med bedre dårligste verden (21,5 mot 21,3 mrd.).
+
+**Lavere satser eller sterkere vern** (`--k1-verdi-skann`, 365 dager, forskjell mot A · B foran i · dårligste verden A/B):
+
+| Variant | Konsern | Tek + Rob lav, høy ved varsel | Bare Teknologi lav, høy ved varsel | Tek + Rob middels hele tida |
+|---|---|---|---|---|
+| 1/3/8 %, vern som i dag | spredt | −3,1 % · 0/40 · 21,8/21,1 | −1,5 % · 0/40 · 21,8/21,5 | −3,4 % · 0/40 |
+| | to regioner | −1,4 % · 0/40 · 21,5/21,3 | −0,5 % · 3/40 · 21,5/21,5 | −3,3 % · 0/40 |
+| | én region | −0,9 % · 3/40 · 21,3/21,4 | −0,2 % · 14/40 · 21,3/21,5 | −3,3 % · 0/40 |
+| **0,5/1,5/4 %, vern som i dag** | spredt | −1,1 % · 0/40 · 21,8/21,6 | −0,4 % · 2/40 · 21,8/21,8 | −1,6 % · 0/40 |
+| | to regioner | −0,2 % · 12/40 · 21,5/21,7 | +0,1 % · 22/40 · 21,5/21,7 | −1,5 % · 0/40 |
+| | én region | 0,0 % · 18/40 · 21,3/21,6 | +0,3 % · 22/40 · 21,3/21,7 | −1,5 % · 0/40 |
+| 1/3/8 %, sterkere vern (hele tapet på Høy, Lav 40 %) | spredt | −2,7 % · 0/40 | −1,2 % · 0/40 | −2,9 % · 0/40 |
+| | to regioner | −1,0 % · 1/40 | −0,2 % · 11/40 | −2,9 % · 0/40 |
+| | én region | −0,5 % · 10/40 · 21,3/21,5 | +0,1 % · 21/40 · 21,3/21,7 | −2,9 % · 0/40 |
+| 0,5/1,5/4 %, sterkere vern | spredt | −0,7 % · 0/40 | −0,1 % · 14/40 | −1,1 % · 0/40 |
+| | to regioner | +0,1 % · 23/40 | +0,4 % · 26/40 | −1,1 % · 1/40 |
+| | én region | +0,4 % · 28/40 | +0,6 % · 27/40 | −1,1 % · 3/40 |
+
+**Hva det betyr mot eierens mål:**
+- *Spredt konsern i rolige forhold skal ofte stå uten:* oppfylt i alle varianter uten sterkere vern (0–2 av 40).
+- *Konsentrert konsern skal ha reell grunn:* oppfylles først ved **0,5/1,5/4 %** (12–22 av 40, og bedre dårligste verden).
+- *Riktig program før en vanskelig periode skal noen ganger ende bedre:* samme.
+- *Forsikring skal tydelig redusere dårlige utfall:* ved 0,5/1,5/4 % er B sin dårligste verden bedre enn A sin for
+  samlede konsern (21,6–21,7 mot 21,3–21,5 mrd.); ved 1/3/8 % bare knapt, og bare for alt i én region.
+- *«Ingen programmer» skal ikke være overlegent uansett verden:* ved 1/3/8 % er det fortsatt nesten overlegent; ved
+  0,5/1,5/4 % ikke for samlede konsern.
+- Å betale for vern hele tida (Tek + Rob middels) taper i alle varianter – det er riktig: det er å kjøpe forsikring man
+  ikke trenger.
+- Sterkere vern (hele tapet på Høy) gjør forsikring ved varsel **lønnsom i snitt** for samlede konsern (+0,4–0,6 %,
+  foran i 26–28 av 40). Det går lenger enn eieren ba om (forsikring trenger ikke tjene seg inn).
+
+**Anbefaling (ikke gjennomført – 1/3/8 % står i config til eieren avgjør):** **0,5 / 1,5 / 4 %** med dagens vern (80 % på
+Høy, 25/60/100 %). Det er den minste endringen som oppfyller alle eierens fem mål, uten sterkere effekter og uten å
+endre Konsernverdi. Skyggedataene avgjør den endelige kalibreringen.
 
 **Konsekvensen for pengene som hoper seg opp:** med ærlige satsinger (ca. 1/3/8 %) bremser programmene kassa med
 5–12 % av inntekten, ikke 30–70 %. Det stemmer med eierens punkt 10: programmene er ikke hele løsningen – selskaper,
@@ -346,7 +411,7 @@ oppkjøp og regional makt må være de store valgene for kapitalen.
 
 ```json
 { "enabled": false, "events_enabled": false, "events_shadow": true,
-  "budget": [0.01, 0.03, 0.08], "effect": [0.25, 0.6, 1], "max_active": 2,
+  "budget": [0.01, 0.03, 0.08], "cost_base": "utbytte", "effect": [0.25, 0.6, 1], "max_active": 2,
   "bind_days": 14, "establish_days": 3, "establish_income_days": 2,
   "protect": 0.8, "drift_gain": 1.05, "drift_harder": 0.5,
   "events": { "gap_days": 45, "warn_days": 2, "strom": [0.4, 8, 12], "uro": [0.35, 5, 9], "boom_days": [10, 16],
@@ -377,12 +442,14 @@ Konto (B-149): krever konto (regel 2 og 7 – ekte tid mellom spillere). Serverf
 3. **Grunnlaget:** greit å trekke budsjettet som andel av hver vanlige utbetaling (før hendelser og programmer), og bruke
    sju-dagers snittet bare til visning? Det er enklere og gir samme virkning.
 
-### Åpne spørsmål før live (B-391 – besvares sammen med skyggedataene, ingenting endres nå)
+### Spørsmålene fra B-391 (besvart i B-392)
 
-1. **Grunnlaget for vernprogrammene** (8.2): skal Teknologi og Robusthet fortsatt regnes av bidrag + utbytte (et konsern
-   med stort hovedverk betaler mer for samme vern), eller av utbyttet de verner?
-2. **Konsernverdi og programmene** (8.3): i dag taper et konsern med program i sesongen i praktisk talt alle verdener.
-   Mulige retninger, ingen valgt:
-   - godta det og si det tydelig i spillet (programmene er for dem som vil ha jevnere inntekt, ikke for topplista);
-   - la sesongen måle noe der risiko teller (for eksempel laveste Konsernverdi i perioden i stedet for sluttverdien);
-   - vent på skyggedataene: er de ekte hendelsene større eller mer samlet enn simulatoren, endrer bildet seg.
+1. **Grunnlaget for vernprogrammene:** datterverksutbyttet (B-392).
+2. **Konsernverdi og programmene:** Konsernverdi endres ikke; programmene skal prises riktig i stedet (B-392).
+
+### Åpent spørsmål til eieren (B-392)
+
+**Satsingene:** 1/3/8 % taper fortsatt i nesten alle verdener etter det nye grunnlaget. Forslaget er **0,5 / 1,5 / 4 %**
+med dagens vern (avsnitt 8.3). Skal det inn i config før V0 går i skygge, eller skal 1/3/8 % stå til skyggedataene er
+samlet? Skyggeloggen fører utbyttet og hva hvert program ville spart på hver effekt (Lav/Middels/Høy), så kostnaden kan
+regnes på nytt for andre satser etterpå uten å miste data.

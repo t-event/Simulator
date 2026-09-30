@@ -5,6 +5,26 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 314 – 2026-09-30: Programmene prises av datterverksutbyttet (B-392)
+
+**Brukeren ba om:** behold vinteren; endre grunnlaget for de tre programmene til normalt datterverksutbytte (hovedregel:
+budsjettet skaleres mot den delen av konsernet programmet påvirker); ikke endre Konsernverdi; kjør de 40 verdenene på nytt,
+og taper programmene fortsatt nesten alltid, kom tilbake med lavere satser eller sterkere, troverdige effekter; vis kostnad
+/ beskyttet utbytte i skyggerapporten.
+
+**Gjort:** simulatoren: `costBase` (utbytte som standard, inntekt til sammenligning), etablering og Driftsytelse av samme
+grunnlag, strategien «bare Teknologi ved varsel», 10 % dårligste verden i `--k1-verdi`, `--k1-verdi-skann` (lavere satser og
+sterkere vern), kostnad / hendelsestap og kostnad per spart krone i `--k1-kost`, og `k1BaseCheck` med en test i `npm test`.
+K1-PROGRAMMER.md (avsnitt 2, 3, 4.1, 6, 8.2, 8.3, config og det åpne spørsmålet), B-392 (B-390 markert), STATUS, FORSLAG.
+
+**Funn:** med 1/3/8 % taper programspilleren fortsatt i nesten alle verdener. Ved 0,5/1,5/4 % med dagens vern oppfylles alle
+eierens fem mål (spredt står best uten, samlet har reell grunn og bedre dårligste utfall). Driftsytelse uendret.
+
+**Testet:** tsc, lint, prettier, `npm test` (to K-1-tester), simuleringene.
+
+**Gjenstår:** eierens valg av satsinger (0,5/1,5/4 % nå eller etter skyggedataene). Rapporten 2.10 → V0 i skygge og K-1 bak
+bryter med det nye grunnlaget.
+
 ## Økt 313 – 2026-09-30: Tre kontrollpunkter før K-1 (B-391)
 
 **Brukeren ba om:** ingen endring i retning eller rekkefølge, men tre kontroller før bygging/live: (1) vinterformuleringen

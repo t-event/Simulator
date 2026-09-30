@@ -206,7 +206,7 @@ import {
   supportAdvice,
 } from "./plant";
 import { RESEARCH, researchOptions } from "./research";
-import { K1, k1BoomSize, k1CostCheck } from "./programSim";
+import { K1, k1BaseCheck, k1BoomSize, k1CostCheck } from "./programSim";
 import { migrate, parseSave } from "./save";
 import { ageOf, PENSION, pensionDay, pensionMorning, pensionSoon, retireAgeOf } from "./pension";
 import { dutyWorkers, presentWorkers as presentNow, wildcardUse as wildUse } from "./plant";
@@ -3997,6 +3997,11 @@ test("K-1: programkostnaden regnes av normalinntekten før hendelsen og trekkes 
   assert(r.calm > 0 && r.calm === r.storm, `rolig ${r.calm}, strømsjokk overalt ${r.storm}`);
   // Høykonjunkturen regnes av fordelingen i config: 50/25/25 ellers, 40/20/40 om vinteren
   assert(Math.abs(k1BoomSize(K1) - 0.3) < 0.01, `høykonjunktur ${k1BoomSize(K1)}`);
+});
+
+test("K-1: programmene prises av datterverksutbyttet, ikke av bidraget fra hovedverket (B-392)", () => {
+  const r = k1BaseCheck();
+  assert(r.small > 0 && r.small === r.large, `lite bidrag ${r.small}, stort bidrag ${r.large}`);
 });
 
 if (failed) {

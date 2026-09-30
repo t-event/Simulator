@@ -7050,7 +7050,8 @@ Endringslogg: nei
 Konto (B-149): – ingen ny funksjon ennå (når K-1 bygges: krever konto, regel 2 og 7).
 
 ## B-390 Eieren godkjenner V0, satsingene 1/3/8 % og trekk fra hver utbetaling (2026-09-30)
-Status: besluttet – bygges etter rapporten 2.10, i skygge og bak avslått bryter
+Status: besluttet – bygges etter rapporten 2.10, i skygge og bak avslått bryter. Grunnlaget (bidrag + utbytte) er
+erstattet av B-392 (bare datterverksutbyttet).
 Bakgrunn: svar på de tre spørsmålene i B-389 (`K1-PROGRAMMER.md` avsnitt 10).
 Beslutning:
 - **Verdenshendelser V0:** regionale strømsjokk, driftsuro og høykonjunktur i ekte tid, varslet to dager før. Et eget lag
@@ -7091,5 +7092,29 @@ Beslutning:
   konsern uten, og foran i 0–1 av 40 verdener; også det dårligste utfallet er lavere med program. Testen viser at sesongen
   gjør «ingen programmer» optimal. Formelen er ikke endret; spørsmålet går til eieren med skyggedataene før live.
 - Alt står i `K1-PROGRAMMER.md` (avsnitt 2, 4, 4.1, 8.2, 8.3 og de åpne spørsmålene). Ingen endring i spillet eller databasen.
+Endringslogg: nei
+Konto (B-149): – ingen ny funksjon.
+
+## B-392 Programmene prises av datterverksutbyttet; Konsernverdi og vinteren står (2026-09-30)
+Status: besluttet (grunnlaget) – satsingene venter på eieren; ingenting bygget eller slått på
+Bakgrunn: kontrollpunktene i B-391 viste at samme vern kostet 9–33 % av utbyttet avhengig av bidraget, og at et konsern
+med program tapte i Konsernverdi i nesten alle verdener.
+Beslutning (eieren):
+- **Grunnlaget** for Teknologi, Robusthet og Driftsytelse er normalt brutto datterverksutbytte før hendelser og
+  programeffekter – ikke bidrag + utbytte (erstatter grunnlaget i B-390). Bidraget går urørt til konsernkassa. Etableringen
+  (2 dagers utbytte) og Driftsytelses ekstra regnes av det samme. Budsjettet trekkes bare av utbyttebetalingen, med unik
+  nøkkel (spiller, dag).
+- **Hovedregel (foreløpig):** programbudsjettet skaleres så langt det er naturlig mot den delen av konsernet programmet
+  påvirker. Ingen egne grunnlag nå; Marked og Arbeidsmiljø vurderes når de bygges.
+- **Konsernverdi endres ikke**, heller ikke til «laveste i perioden». Programmene skal prises riktig i stedet.
+- **Vinteren** står (50/25/25, vinter 40/20/40). Ikke hardere for programøkonomiens skyld.
+- Skyggerapporten viser også kostnad / beskyttet datterverksutbytte (kostnad / hendelsestap og kostnad per spart krone).
+Resultat (simulatoren, `--k1-verdi`, `--k1-verdi-skann`, `--k1-kost`; `npm test` sjekker at bidraget ikke påvirker prisen):
+- Med 1/3/8 % og det nye grunnlaget taper programspilleren fortsatt i nesten alle verdener (beste: bare Teknologi ved
+  varsel, alt i én region, foran i 14 av 40).
+- **Forslag til eieren: 0,5 / 1,5 / 4 %** med dagens vern. Da står et spredt konsern best uten (0–2 av 40), et samlet
+  konsern med forsikring ved varsel ligger på omtrent null og foran i 12–22 av 40, og det dårligste utfallet blir bedre
+  med program. Sterkere vern gjør forsikring lønnsom i snitt og anbefales ikke. 1/3/8 % står i config til eieren avgjør.
+- Driftsytelse er uendret: ingen varselstrategi dominerer.
 Endringslogg: nei
 Konto (B-149): – ingen ny funksjon.

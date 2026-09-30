@@ -121,7 +121,7 @@ npx tsx src/game/balance.ts --konsern                      # utbyttet per ekte d
 npx tsx src/game/balance.ts --forste 700                   # kurven for første opplasting i juksesperren (B-257, ca. 40 min)
 npx tsx src/game/balance.ts --vinter                       # uhell, kort og kostnader om vinteren mot sommeren, per nivå (B-277, ca. 11 min)
 npx tsx src/game/balance.ts --sommerstans                  # testspilleren velger sommerstans i fellesferien (B-298)
-npx tsx src/game/programSim.ts                             # konsernprogrammene: A mot B (B-388); --k1, --k1-skann, --k1-drift, --k1-kost, --k1-verdi: K-1 med hendelser i regionene (B-389–B-391)
+npx tsx src/game/programSim.ts                             # konsernprogrammene: A mot B (B-388); --k1, --k1-skann, --k1-drift, --k1-kost, --k1-verdi(-skann): K-1 med hendelser i regionene (B-389–B-392)
 npx tsx src/game/worldSim.ts                               # verdenssimulatoren: konsernkassa for liten/middels/stor/legacy etter 30–730 ekte dager, dager etter fullt konsern, maks bud, andel brukt (B-380, B-385; --dager 180 for kortere)
 npm run build
 ```
