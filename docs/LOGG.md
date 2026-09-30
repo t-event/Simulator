@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 312 – 2026-09-30: Eierens svar om K-1 (B-390)
+
+**Brukeren ba om:** ja til V0 (eget lag i Industriverdenen, nøytralt i forventning uten personlig kompensasjon, skygge
+først med logg og rapport før live), satsinger 1/3/8 %, trekk fra hver utbetaling (brutto → programkostnad → effekt →
+fordeling, aldri to ganger), og test av Driftsytelse med varsler. Rekkefølgen: rapporten 2.10 → V0 i skygge og K-1 bak
+bryter → skyggedata til eieren → live → V1.
+
+**Gjort:** simulatoren: 1/3/8 % som utgangspunkt, høykonjunkturen regnet av config (`k1BoomSize`) i stedet for av de
+trukne hendelsene, nøytralitetssjekk per verden, og `--k1-drift` med strategiene «Lav → Høy ved høykonjunktur» og «Høy →
+ned ved sjokk» (sperret av bindingen), også varianten der Driftsytelse forsterker høykonjunktur. K1-PROGRAMMER.md med
+eierens svar, skyggeloggen (4.1), eksponeringen i visningen, rekkefølgen i utbyttet og nøkkelen mot dobbelt trekk, og
+resultatene (8.1). B-390, STATUS, FORSLAG, CLAUDE.md. Rapporten 2.10 fortsetter med V0 i skygge hvis ingenting er alvorlig.
+
+**Testet:** tsc, lint, prettier; simuleringen er deterministisk.
+
+**Gjenstår:** rapporten 2.10. Deretter V0 i skygge og K-1 bak avslått bryter, skyggedata, og så tilbake til eieren før
+noe slås på.
+
 ## Økt 311 – 2026-09-30: K-1 med modell B – spesifikasjon (B-389)
 
 **Brukeren ba om:** modell B med 4/12/30 % som foreløpig utgangspunkt og ti krav (grunnlag, visning, ekte programmer,

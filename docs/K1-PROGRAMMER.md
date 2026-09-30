@@ -1,9 +1,31 @@
-# K-1: konsernprogrammer med modell B – spesifikasjon (B-389)
+# K-1: konsernprogrammer med modell B – spesifikasjon (B-389, godkjent B-390)
 
-**Status:** spesifikasjon til eieren 30.9.2026. Ingenting er bygget. Ingen tall i verden er endret, og ingenting slås på
-før rapporten etter 2.10 (eierens punkt 9). Bygger på eierens valg av modell B (4/12/30 % som utgangspunkt for testing,
-foreløpige tall i config) og de ti punktene i svaret. Simuleringen: `npx tsx src/game/programSim.ts --k1` og
-`--k1-skann` (fra `frontend/`).
+**Status:** godkjent av eieren 30.9.2026 (B-390) med presiseringene under. Ingenting er bygget, ingen tall i verden er
+endret. Rekkefølgen: rapporten etter 2.10 → V0 i skygge og K-1 bak avslått bryter → skyggedata tilbake til eieren →
+eieren avgjør om det slås på → verksjef V1. Simuleringen: `npx tsx src/game/programSim.ts --k1`, `--k1-skann` og
+`--k1-drift` (fra `frontend/`).
+
+**Eierens svar (B-390):**
+1. **V0 ja** – regionale hendelser i ekte tid (strømsjokk, driftsuro, høykonjunktur), varslet to dager før, nøytrale i
+   forventning over lang tid. V0 er **et eget lag i Industriverdenen**, ikke en mekanikk for programmenes skyld: det skal
+   gi mening også hvis K-1 endres eller fjernes. Samlet i én region = sterk tilstedeværelse, men konsentrert risiko;
+   spredt = mindre dominans, men bedre risikospredning.
+   **Nøytral i snitt** betyr forventningsverdi for verden, ikke at hver spiller eller måned kompenseres: noen perioder er
+   gode, noen dårlige, og noen spillere rammes mer på grunn av hvor de har bygget. Ingen skjult mekanisme som gir tapte
+   penger tilbake til samme spiller; høykonjunktur er en verdenshendelse, ikke personlig kompensasjon.
+   **Skygge først**, og ikke live bare fordi koden virker: før live skal den faktiske hendelsesfordelingen ligne
+   simulatoren og ikke gi rare utslag med dagens plassering av verk.
+2. **1 / 3 / 8 %** i config, foreløpig (skyggedataene kan justere). Forventet krone-avkastning kan være litt negativ –
+   Teknologi og Robusthet er delvis forsikring – så lenge effekten er tydelig, risikoen reell og man kan stå uten program.
+   Spillet skal ikke late som et program er et godt kjøp for alle: vis eksponeringen før valget.
+3. **Trekk fra hver utbetaling:** bidrag + ordinært utbytte, av beløpet før hendelser og programeffekter; ikke
+   selskapsinntekt, salg, refusjoner, oppkjøpsoppgjør eller annet engangs. Sju-dagers snittet bare til prognosen.
+   Programbudsjettet er en konsernkostnad før fordelingen mellom kassa og fondet. Samme krone trekkes aldri to ganger.
+4. **Driftsytelse:** test «Lav → Høy ved varsel om høykonjunktur» og «Lav → varsel om strømsjokk → bundet». Innfasing av
+   økning legges bare inn hvis skygge eller simulering viser at rask økning dominerer (avsnitt 8).
+5. Marked og Arbeidsmiljø åpnes ikke før systemene de skal påvirke finnes.
+
+> **Verdenshendelser skaper situasjoner. Programmer lar spilleren velge hvordan konsernet skal møte dem.** Ikke motsatt.
 
 ## 0. Kort fortalt
 
@@ -27,7 +49,7 @@ foreløpige tall i config) og de ti punktene i svaret. Simuleringen: `npx tsx sr
    man bekrefter. Da kan det aldri mangle penger, og programmet står stille når verket står stille (punkt 7), uten ekstra
    regler.
 
-**Tre spørsmål til eieren** står i avsnitt 10.
+Spørsmålene i avsnitt 10 er besvart (B-390).
 
 ## 1. Hva som finnes i spillet i dag (eierens punkt 4)
 
@@ -56,6 +78,12 @@ lite i dag – det er et valg de kan gjøre annerledes ved å flytte (én gang p
 - `pay_contributions` betaler bidraget → programbudsjettet (sum av satsingene) trekkes av beløpet.
 - `pay_dividends` regner utbyttet slik det gjør i dag (fullt, før politikken) → budsjettet regnes av dette tallet
   **før** hendelser og programmer, og trekkes før resten går til kassa og fondet.
+- Rekkefølgen i `pay_dividends` (eieren, B-390): **brutto ordinært utbytte → programkostnad → hendelse og
+  programeffekt → vanlig fordeling** mellom konsernkassa og fondet (`dividend_to_treasury`).
+- **Aldri to ganger:** bidraget og utbyttet trekkes hver for seg, hver av sin egen utbetaling. Hvert trekk føres i
+  `program_charges` med en unik nøkkel (spiller, ekte dag, kilde `bidrag`/`utbytte`), så en betaling som kjøres på nytt
+  (for eksempel etter en feil i `world_tick`), ikke trekker igjen. Utbytte som betales for flere dager på en gang
+  (inntil 14), trekkes per dag.
 - Selskapsinntekt, refusjoner, salg, oppkjøpsoppgjør og annet engangs betales av andre funksjoner og er dermed aldri med
   i grunnlaget.
 
@@ -78,10 +106,17 @@ kr/dag». Det faktiske beløpet følger inntekten dag for dag og står i rapport
 - Høyst to aktive; høyest mulig nominelt er 2 × Høy.
 - Før man bekrefter, vises alltid både kroner og andel, ingen skjulte prosenter:
 
-> **Teknologi – Høy** · Ca. 18 mill. kr/dag (30 % av normal inntekt)
-> Totalt programbudsjett: ca. 42 % av konsernets normale inntekt
+> **Teknologi – Høy** · Ca. 4,2 mill. kr/dag (8 % av normal inntekt)
+> Totalt programbudsjett: ca. 9 % av konsernets normale inntekt
 > Demper strømsjokk i alle regioner der du har verk: tapet blir 80 % mindre.
-> Bundet til 13. oktober. Etablering: 3 dager og ca. 120 mill. kr.
+> **Ditt konsern:** 18 % av datterverksutbyttet kommer fra Nord, der strømsjokk er varslet fra torsdag. Med dagens
+> plassering ville programmet de siste 90 dagene ha spart ca. 12 mill. kr, mot et budsjett på ca. 380 mill. kr.
+> Bundet til 16. oktober. Etablering: 3 dager og ca. 104 mill. kr.
+
+**Eksponeringen vises før valget** (eieren, B-390): hvor stor del av datterverksutbyttet som kommer fra hver region, og
+fra regionene som er varslet. Tallet «ville ha spart» regnes av serveren fra hendelsene som faktisk skjedde og
+spillerens plassering nå (samme regnestykke som skyggeloggen). For et konsern spredt på seks regioner blir det tydelig at
+Teknologi på Høy sjelden forsvarer 8 % – spillet anbefaler ikke programmer, det viser tallene.
 
 ## 4. Verdenshendelser V0 (forutsetningen)
 
@@ -93,11 +128,18 @@ og i varsellinja for dem med verk i regionen.
 |---|---|---|---|
 | Strømsjokk | −40 % | 8–12 ekte dager | dobbelt så ofte om vinteren (nov.–mars, norsk tid) |
 | Driftsuro | −35 % | 5–9 ekte dager | jevnt |
-| Høykonjunktur | + det som gjør verden nøytral (ca. +35 %) | 10–16 ekte dager | halvparten av hendelsene |
+| Høykonjunktur | ca. +30 % (regnet av config, se under) | 10–16 ekte dager | halvparten av hendelsene |
 
 - Snitt ca. 45 ekte dager mellom to hendelser i samme region; én hendelse per region om gangen.
-- **Nøytral i snitt:** størrelsen på høykonjunkturen regnes av hyppigheten og størrelsen på de dårlige hendelsene
-  (i config), så utbyttet over tid er det samme som i dag. Verdenssimulatoren sjekker det.
+- **Nøytral i forventning, ikke kompensasjon:** størrelsen på høykonjunkturen regnes **én gang av tallene i config**
+  (hyppighet, størrelse og varighet på de dårlige hendelsene, og vinterandelen) – `k1BoomSize` i simulatoren, samme
+  formel på serveren. Den etterregnes aldri av hendelsene som faktisk ble trukket, og ingen spiller får noe tilbake
+  fordi hen ble rammet. I simuleringen havner verdenene fra −0,5 til +0,2 mrd. over to år rundt et snitt som er likt
+  verden uten hendelser – noen er heldige, noen uheldige.
+- **Et eget lag i Industriverdenen:** hendelsene vises på kartet og i Skiftrapporten også for dem uten programmer, og
+  virker på utbyttet uansett. Fjernes K-1, står V0 igjen som det som gjør regionvalget til en avveining (samlet =
+  mer Kontroll i selskapet i regionen, men mer risiko; spredt = mindre dominans, jevnere inntekt). Senere systemer
+  (selskaper, oppkjøp, verksjefer) kan bruke de samme hendelsene.
 - Bare **utbyttet fra datterverkene** påvirkes. Bidraget fra hovedverket og alt hjemme (spilltid) er urørt (B-323).
 - Utbyttet betales én gang per ekte dag (`pay_dividends`); faktoren for dagen ganges inn per verk etter regionen.
   Målingene hvert kvarter (`dividend_avg`) er urørt – faktoren brukes på betalingen, ikke på målingen.
@@ -105,6 +147,23 @@ og i varsellinja for dem med verk i regionen.
 - Uten konsern (bare hovedverk): ingen virkning.
 
 Dette er en endring i verdensbalansen i **spredning**, ikke i snitt, og står derfor bak bryteren sammen med K-1.
+
+### 4.1 Skygge (steg 1) – hva som logges
+
+Hendelsene trekkes og lagres som om de var live, men vises ikke og virker ikke på noe. Loggen:
+
+| Tabell | Innhold |
+|---|---|
+| `world_events` | region, type, størrelse, varslet, start, slutt, `shadow = true` |
+| `world_event_exposure` | per hendelse, spiller og ekte dag: andel av datterverksutbyttet fra regionen, utbyttet før hendelsen, hypotetisk tap/gevinst uten program, og hypotetisk virkning med Teknologi / Robusthet / Driftsytelse på Lav, Middels og Høy (hva programmet ville tatt bort eller lagt til, og budsjettet det ville kostet) |
+
+Loggen skrives av `pay_dividends` på den samme utbetalingen som i dag, uten å endre beløpet. Det gjør at tallene er
+nøyaktig det spilleren ville fått. Rader for gjester skrives ikke (`user_is_guest`).
+
+**Før live kommer rapporten tilbake til eieren** med: antall hendelser per type og region mot simulatoren, hvor mye hver
+spiller ville tapt og tjent (fordelingen, ikke bare snittet), de største utslagene med dagens plassering (for eksempel
+konsernet med alt i én region), og hva hvert program på hver satsing ville gitt mot det det ville kostet. Ingenting slås
+på fordi koden virker teknisk.
 
 ## 5. De tre programmene (eierens punkt 3 og 8)
 
@@ -116,9 +175,13 @@ Effekt på Lav / Middels / Høy = 25 / 60 / 100 % av full effekt (avtagende avka
 | **Robusthet** | Tapet i driftsuro blir 80 % mindre | Varslet uro, samlet konsern | Rolige perioder |
 | **Driftsytelse** | Ekstra inntekt ca. 1,05 × budsjettet i hele perioden, **men alle strømsjokk og all uro rammer 50 % hardere** | Rolige perioder, høykonjunktur | Når hendelser er varslet der man har verk |
 
-Driftsytelse (eierens punkt 8): forventet ren gevinst er omtrent null (i simuleringen −0,5 til −1,2 mrd. over to år inkl.
+Driftsytelse (eierens punkt 8): forventet ren gevinst er omtrent null (i simuleringen −0,4 til −1,2 mrd. over to år inkl.
 etablering), og ulempen er ekte: den som satser høyt og blir truffet, taper mer enn uten program. Det er et veddemål på
 at de neste ukene blir rolige, med varslene som informasjon.
+
+**Driftsytelse forsterker ikke høykonjunkturen** – med vilje. Da ville «Lav hele tida, Høy ved varsel om
+høykonjunktur» vært nesten gratis (se avsnitt 8). Ekstrainntekten er den samme hver dag, så det finnes ingen dag der det
+lønner seg spesielt å skru opp.
 
 **Etter hvert viser programmet hva det gjorde** (eierens punkt 3), fra tabellen `program_log` (per spiller, program og
 dag: budsjett, spart, ekstra, tapt ekstra):
@@ -183,6 +246,22 @@ og forskjellen fra uten programmer:
 - Tallene er plassholdere for å sammenligne satsinger; nøyaktige nivåer settes når V0 har gått en stund med ekte
   hendelser (bak bryteren kan hendelsene gå på serveren uten virkning og bare telles).
 
+### 8.1 Driftsytelse og varslene (`--k1-drift`, eierens spørsmål i B-390)
+
+Middels spiller, satsing 1/3/8 %, snitt av 8 verdener, forskjell i kasse etter to år mot uten programmer:
+
+| Strategi | Spredt | Samlet | Merknad |
+|---|---|---|---|
+| Driftsytelse lav + Teknologi lav, fast | −0,5 mrd. | −0,5 mrd. | utgangspunktet |
+| Driftsytelse lav → **høy ved varsel om høykonjunktur** | −0,6 mrd. | −0,5 mrd. | gir ingenting ekstra: gevinsten er lik hver dag, og bindingen holder den på Høy også når sjokk kommer |
+| Driftsytelse høy → **ned til lav ved varsel om sjokk/uro** | −0,5 mrd. | −0,4 mrd. | bindingen sperret **13** av varslene for et spredt konsern (2 for et samlet) – man kommer seg ikke billig ut |
+| *Variant (ikke foreslått): Driftsytelse forsterker høykonjunktur 50 %* | −0,2 mrd. | −0,1 mrd. | «høy ved varsel om høykonjunktur» blir nesten gratis og best – derfor ikke med |
+
+**Konklusjon:** med forslaget gir ingen av varselstrategiene for Driftsytelse en fordel, og bindingen på 14 dager gjør at
+to dagers varsel ikke gjør sjokkene trivielle. Innfasing av økning trengs ikke nå; skyggedataene viser om det endrer seg.
+Tilsvarende for forsikring: «Teknologi + Robusthet lav, høy ved varsel» tar bort ca. 80 % av hendelsestapet, men koster
+mer enn det sparer (−0,9 til −2,0 mrd. over to år) – det er forsikring, ikke en gratis fasit.
+
 **Konsekvensen for pengene som hoper seg opp:** med ærlige satsinger (ca. 1/3/8 %) bremser programmene kassa med
 5–12 % av inntekten, ikke 30–70 %. Det stemmer med eierens punkt 10: programmene er ikke hele løsningen – selskaper,
 oppkjøp og regional makt må være de store valgene for kapitalen.
@@ -202,16 +281,17 @@ oppkjøp og regional makt må være de store valgene for kapitalen.
 | Steg | Innhold | Når |
 |---|---|---|
 | 0 | Rapporten etter 2.10 (verdensdata) | 2.10 |
-| 1 | V0 i skygge: hendelser trekkes og vises ikke; `program_log` regner hva de *ville* gjort med hver spillers utbytte | etter rapporten, hvis ingenting alvorlig |
-| 2 | K-1 bak bryteren: tabeller, `konsern_order` kind `program`, trekk i `pay_contributions`/`pay_dividends`, app (kort under Konsern → Oversikt, bekreftelse med tallene, rapport) | samtidig med 1 |
-| 3 | Slå på V0 og K-1 med de tre programmene | eierens beslutning |
-| 4 | Observer | noen uker |
-| 5 | Verksjef V1 → Arbeidsmiljø åpnes | etter 4 |
-| 6 | Flere selskaper og oppkjøp etter data → Marked og region åpnes | senere |
+| 1 | V0 i skygge: hendelser trekkes og logges (avsnitt 4.1), ingen virkning og ingen visning | etter rapporten, hvis ingenting alvorlig |
+| 2 | K-1 bak avslått bryter: tabeller, `konsern_order` kind `program`, trekk i `pay_contributions`/`pay_dividends` (bare når bryteren er på), app (kort under Konsern → Oversikt, bekreftelse med tallene og eksponeringen, rapport) | samtidig med 1 |
+| 3 | Samle skyggedata | noen uker |
+| 4 | Tilbake til eieren: faktisk hendelsesfordeling og hypotetiske programresultater | før noe slås på |
+| 5 | Eieren avgjør om V0 og K-1 slås på (tre programmer) | eierens beslutning |
+| 6 | Verksjef V1 → Arbeidsmiljø åpnes | når K-1 har en stabil grunnmur |
+| 7 | Flere selskaper og oppkjøp etter data → Marked og region åpnes | senere |
 
 Konto (B-149): krever konto (regel 2 og 7 – ekte tid mellom spillere). Serverfunksjonene sjekker `auth.uid()`, ikke gjester.
 
-## 10. Spørsmål til eieren
+## 10. Spørsmål til eieren (besvart 30.9., B-390: ja på alle tre, med presiseringene øverst)
 
 1. **Hendelseslaget V0:** greit med regionale hendelser som er nøytrale i snitt (mer ujevn inntekt, samme snitt), varslet
    to dager før? Uten dem har ingen av de tre programmene ekte effekt.

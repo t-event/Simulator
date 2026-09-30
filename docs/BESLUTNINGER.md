@@ -7048,3 +7048,28 @@ Beslutning:
 - Ingen endring i spillet, databasen eller verdensbalansen.
 Endringslogg: nei
 Konto (B-149): – ingen ny funksjon ennå (når K-1 bygges: krever konto, regel 2 og 7).
+
+## B-390 Eieren godkjenner V0, satsingene 1/3/8 % og trekk fra hver utbetaling (2026-09-30)
+Status: besluttet – bygges etter rapporten 2.10, i skygge og bak avslått bryter
+Bakgrunn: svar på de tre spørsmålene i B-389 (`K1-PROGRAMMER.md` avsnitt 10).
+Beslutning:
+- **Verdenshendelser V0:** regionale strømsjokk, driftsuro og høykonjunktur i ekte tid, varslet to dager før. Et eget lag
+  i Industriverdenen som skal gi mening også uten K-1 (regionvalget får en bakside: samlet = tilstedeværelse og
+  konsentrert risiko, spredt = risikospredning). Nøytral betyr forventningsverdi for verden: høykonjunkturen regnes én
+  gang av tallene i config (`k1BoomSize`), aldri etterregnet, og ingen spiller får tapte penger tilbake.
+- **Skygge først:** hendelsene trekkes og logges (`world_events`, `world_event_exposure`: region, type, varsel/start/slutt,
+  berørte spillere og andel av utbyttet, hypotetisk tap/gevinst uten program og med hvert program på Lav/Middels/Høy),
+  uten virkning. Før live: rapport til eieren om fordelingen mot simulatoren og utslag med dagens plassering.
+- **Satsinger 1 / 3 / 8 %** (foreløpig, i config). Forventet krone-avkastning kan være litt negativ; spillet viser
+  eksponeringen (andel av datterverksutbyttet fra de varslede regionene og hva programmet ville spart) før valget.
+- **Budsjettet** trekkes av hver vanlige utbetaling (bidrag + ordinært utbytte, før hendelser og programmer). Rekkefølgen
+  i utbyttet: brutto → programkostnad → hendelse og programeffekt → fordeling mellom kassa og fondet. Hvert trekk har en
+  unik nøkkel (spiller, dag, kilde), så ingenting trekkes to ganger. Sju-dagers snittet bare til prognosen.
+- **Driftsytelse** forsterker ikke høykonjunkturen. `programSim.ts --k1-drift`: «Lav → Høy ved varsel om høykonjunktur»
+  gir ingenting ekstra; «Høy → ned ved varsel om sjokk» sperres av bindingen (13 varsler på to år for et spredt konsern).
+  Varianten der Driftsytelse forsterker høykonjunktur gjør varselstrategien nesten gratis og er derfor forkastet. Ingen
+  innfasing av økning nå.
+- Marked og Arbeidsmiljø åpnes ikke før systemene de påvirker finnes. Verksjef V1 etter at K-1 har en stabil grunnmur.
+- Simulatoren: satsingene 1/3/8 % og høykonjunkturen fra config. Ingen endring i spillet, databasen eller verdensbalansen.
+Endringslogg: nei
+Konto (B-149): – ingen ny funksjon ennå (når K-1 bygges: krever konto, regel 2 og 7; V0 i skygge vises ikke).
