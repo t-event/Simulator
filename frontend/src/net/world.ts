@@ -172,6 +172,24 @@ function parseTender(t: Row | null | undefined): Tender | null {
   };
 }
 
+/**
+ * Anbud avgjort før økonomien ble delt på 10 (B-311, 29.9.2026 kl. 04.44 norsk tid) er i gamle penger (B-374). Speiler
+ * `bid_in_new_money` i `086_gamle_penger.sql`.
+ */
+export const OLD_MONEY_BEFORE = Date.parse("2026-09-29T02:44:52Z");
+
+/** Et bud i dagens penger, og om det var i gamle penger */
+export function bidInNewMoney(amount: number, closedAt: string): { now: number; old: boolean } {
+  const old = Date.parse(closedAt) < OLD_MONEY_BEFORE;
+  return { now: old ? amount / 10 : amount, old };
+}
+
+/** Beløpet slik appen viser det: gamle bud med dagens verdi i parentes */
+export function fmtBid(amount: number, closedAt: string): string {
+  const b = bidInNewMoney(amount, closedAt);
+  return b.old ? `${fmtKr(amount)} (gamle penger, tilsvarer ${fmtKr(b.now)} nå)` : fmtKr(amount);
+}
+
 function parseResult(r: Row | null | undefined): TenderResult | null {
   if (!r) return null;
   return {

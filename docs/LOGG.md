@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 300 – 2026-09-30: Figens bud i gamle penger (B-374)
+
+**Brukeren spurte:** Figen kjøpte skraplageret for 200 mill. før økonomien ble delt på 10 – hva anbefales? Så «Gjør det du
+anbefaler», og hva Figen får ved oppkjøp før og etter de 14 dagene.
+
+**Gjort:** undersøkt `treasury_ledger`: delingen på 10 kom etter anbudet, og Figens kasse var tom, så budet kostet ham
+20 mill. i dagens penger – ingen tilbakebetaling. `086_gamle_penger.sql`: gulvet i verdien av et selskap bruker gamle bud
+delt på 10. Appen viser «200 mill. (gamle penger, tilsvarer 20 mill. nå)» under «Forrige anbud».
+
+**Testet:** `bid_in_new_money` og `company_value(4)` på serveren (20 mill. / 200 mill. / 462 mill.), get_advisors uten nye
+funn; tsc, lint, `npm test` (ny test for gamle bud).
+
+**Gjenstår:** eieren avgjør hvem budet ved oppkjøp skal gå til (A/B/C) og om investeringer skal telle i verdien.
+
 ## Økt 299 – 2026-09-30: Billigere datterverk, vern bare ved ny eier, ingen hopping (B-373)
 
 **Brukeren ba om:** 3 dagers vern bare når selskapet får ny eier; fiks linjer som flytter seg i toppbaren og på Oversikt;

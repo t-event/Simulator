@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 374,
+    date: "2026-09-30",
+    title: "Gamle anbud i dagens penger",
+    items: [
+      "Anbud fra før økonomien ble delt på 10, vises nå med hva de tilsvarer i dag, for eksempel «200 mill. (gamle penger, tilsvarer 20 mill. nå)».",
+    ],
+  },
+  {
     b: 373,
     date: "2026-09-30",
     title: "Datterverk koster en firedel, og ingenting hopper",

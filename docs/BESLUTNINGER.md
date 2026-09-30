@@ -6767,3 +6767,22 @@ Beslutning:
   390 og 1366 px i 8 s på 10×: ingenting over kortene flytter seg lenger.
 - Testspilleren (`balance.ts`): OK, exit 0.
 Konto (B-149): – ingen ny funksjon.
+
+## B-374 Gamle anbud regnes i dagens penger (2026-09-30)
+Status: gjelder
+Bakgrunn: brukeren (eier): «Figen kjøpte skraplageret for 200 millioner. Dette var før vi endret økonomien. Om det hadde
+vært samme bud nå hadde han vunnet skraplageret for 20 mill. Hva anbefaler du» – og så «Gjør det du anbefaler».
+Undersøkt i `treasury_ledger`: anbud 4 ble avgjort 29.9 kl. 01:33 UTC. Konsernkassene ble delt på 10 (B-311) kl. 02:44 UTC.
+De som tapte, fikk budet tilbake og mistet så 90 % av det i delingen (f.eks. 100 → 10 mill.). Vinneren hadde brukt alt
+(200 mill.), så delingen tok 0 fra ham. Uten bud hadde han hatt 20 mill. etter delingen – i dagens penger kostet budet
+20 mill., like mye som det samme budet ville kostet nå.
+Beslutning:
+- Ingen penger tilbake til vinneren. 180 mill. tilbake ville gitt ham det dobbelt opp og langt mer enn de andre budgiverne
+  (10–20 mill. hver etter delingen). Ingen spillerdata er endret; budet står urørt i `tenders` som historie.
+- `086_gamle_penger.sql`: `bid_in_new_money(beløp, avgjort)` gir en tidel for anbud avgjort før 29.9.2026 02:44:52 UTC.
+  `company_value` bruker den i gulvet («minst det det sist ble vunnet for»), så gulvet for skraplageret er 20 mill., ikke
+  200. Verdien i dag (30 dagers inntekt, 462 mill.) er uendret; gulvet ville bare slått inn om inntekten falt under
+  6,7 mill. per dag.
+- Appen viser gamle bud som «200 mill. (gamle penger, tilsvarer 20 mill. nå)» (`fmtBid`/`bidInNewMoney` i `net/world.ts`,
+  speiler SQL-en; test i `net/tests.ts`).
+Konto (B-149): – ingen ny funksjon.
