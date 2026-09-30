@@ -3,6 +3,21 @@
 **Status:** forslag til eieren 30.9.2026. Ingenting er bygget. Svarene blir en beslutning, og så bygges det i
 rekkefølgen i avsnitt 8.
 
+## 0. Eierens svar 30.9.2026 (bygges ikke før stabiliseringen er ferdig, B-380)
+
+1. **Ja** til tre egenskaper (Drift, Økonomi, Folk) og tre mandater (Lønnsomhet, Vekst, Stabilitet).
+2. **Uten verksjef omtrent som i dag.** Men en verksjef skal ikke bare gi +10–15 %: mandatene må ha ekte ulemper.
+   Lønnsomhet: mer utbytte nå, men en reell ulempe eller risiko. Vekst: mindre utbytte nå mot billigere og raskere
+   utvikling. Stabilitet: lavere toppresultat mot mindre risiko og jevnere drift.
+3. **Lønn 3–6 %** som utgangspunkt for simulering – ikke lås det før det er vist at det ikke alltid lønner seg å ansette,
+   uansett kandidat.
+4. **Sjeldnere samtaler:** ca. 2–3 per ekte uke per konsern, høyst én samme dag, **48 timers** frist. Verksjefen velger
+   fortsatt selv etter personligheten hvis eieren ikke svarer.
+5. **Ingen kobling til Kontroll** ennå.
+
+Rekkefølgen (eieren): kassetaket, legacy-gulvet, ny verdenssimulering og STATUS.md først (`docs/STABILISERING.md`),
+så noen ekte dager med data, så slagghåndteringen – deretter verksjefene.
+
 ## 1. Hvor vi står
 
 - Et datterverk er i dag en **passiv investering**: man kjøper, moderniserer og venter. Utbyttet regnes av serveren én

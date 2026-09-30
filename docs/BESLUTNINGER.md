@@ -6866,3 +6866,24 @@ Ellers i planen: slagghåndteringen slås på når skraplageret har betalt ut no
 etter det (B-256). Gjestene er slått på; appen som prøvde før, prøver igjen etter et døgn (B-212).
 Endringslogg: nei
 Konto (B-149): verksjefene krever konto (regel 2 og 7) – føres i KONTO.md når de bygges.
+
+## B-380 Stabilisering før verksjefene: audit, legacy-gulvet og ny verdenssimulator (2026-09-30)
+Status: analyse – venter på eieren
+Bakgrunn: eieren justerte prioriteringen: ikke bygg verksjefene ennå (svarene på forslaget er ført i
+VERKSJEF-FORSLAG.md, avsnitt 0), men først en audit av 10 mrd.-taket, en analyse av legacy-gulvet, en ny
+verdenssimulering med dagens priser og en STATUS.md. Slagghåndteringen skal ikke slås på automatisk 2.10.
+Beslutning:
+- `docs/STABILISERING.md`: lokal kasse kan ikke gi verdensmakt (innskuddet er 0; felles funksjoner og forskning er
+  engangs). Taket kan fjernes uten serverendring og uten migrering; Privat formue blir historikk. Lokale tall brukes
+  fortsatt til topplistene «Verdi»/«Mest penger på bok», sesongresultatet og ukens «Mer verdi enn før» – de blir et
+  kappløp i spillfart uten tak og bør ryddes samtidig. Gulvet gir i dag komplekser, plasser og trinn uten opptjent nivå
+  (sju spillere), men simulatoren viser at det tas igjen på 6–10 ekte dager; forslag om å skille tittel og opptjent nivå.
+- `frontend/src/game/worldSim.ts` (permanent): simulerer konsernkassa, bidrag, utbytte, selskapsinntekt, verk, kø,
+  forbruk og tid til hvert nivå for liten/middels/stor/legacy etter 30/60/90/180 dager med dagens regler. Hovedfunn:
+  konsernet er fullt på 1–3 måneder, og så hoper konsernkassa seg opp (4–11 mrd. på et halvt år) – oppkjøp blir en
+  kassekamp. Ingen nedskalering foreslått før ekte data.
+- Sjekken 2.10 (`trig_012KZ8mFxMw2yYhJp8SH1xDo`) rapporterer og anbefaler, men slår ikke på slagghåndteringen.
+- Sårbarheter: serveren leser forskning, felles funksjoner, omdømme, kvalitet og margin fra lagringen; innskuddet er bare
+  av med et tall i `config` (standard 100 mill.); `konsern.level` er en skralle med gulvet i seg.
+Endringslogg: nei
+Konto (B-149): – ingen ny funksjon.

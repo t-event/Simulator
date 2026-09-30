@@ -38,6 +38,9 @@ til «Avgjort» nederst).
 
 ## Forslag – spillet
 
+- **Stabilisering (B-380, spørsmål til eieren):** se `docs/STABILISERING.md` – kassetaket, legacy-gulvet, sesonglistene og
+  innskuddet (fire spørsmål nederst). Verksjefene venter til dette er avklart.
+
 - **Verksjefer for datterverkene (B-379, spørsmål til eieren):** se `docs/VERKSJEF-FORSLAG.md` – fem spørsmål i avsnitt 9.
 
 - ~~Trender i markedet~~ **Bygget (B-255).** («etterspørselen etter armering øker») som styrer hvilke kontrakter som dukker opp (se
