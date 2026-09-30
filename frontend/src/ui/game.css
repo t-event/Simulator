@@ -3118,6 +3118,13 @@ button {
   flex-shrink: 0;
 }
 
+/* Dagen i eget verk på egen linje under navnet (B-378), så navnet ikke kortes av */
+.g-board-day {
+  font-size: var(--fs-caption);
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
 /* Navn og nivå på én linje, beste sesongplassering under (B-143) */
 .g-board-name {
   flex-direction: column;

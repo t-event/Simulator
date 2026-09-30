@@ -6841,3 +6841,16 @@ Beslutning (`088_rydd_gjester.sql`):
 - Dry-run 30.9: 0 gjester, 0 ville blitt slettet. Testet i en DO-blokk (rullet tilbake) med fem kontoer: bare den gamle
   gjesten uten lagring ble slettet – ikke den nye, ikke den som lagret nylig, ikke den ekte kontoen, ikke gjesten med kasse.
 Konto (B-149): – ingen ny funksjon (gjelder spill uten konto).
+
+## B-378 Topplista viser dagen i eget verk (2026-09-30)
+Status: gjelder
+Bakgrunn: brukeren (eier): «En spiller ønsker å se hvilken dag andre er på i sitt eget verk. Kanskje d kan stå på
+topplista?»
+Beslutning:
+- `leaderboard()` sender `today` = spilldagen i det lagrede spillet (`saves.day`) for hver rad, på alle listene
+  (`089_toppliste_dag.sql`; returtypen endret, så funksjonen ble tatt bort og laget på nytt, og `execute` gitt til `anon`
+  og `authenticated` igjen; `my_rank` bruker bare `plass` og `is_me`).
+- Appen viser «Dag 12 345 i eget verk» på en egen linje under navnet. Først sto dagen ved nivåmerket, men da ble navnene
+  kortet ned til én bokstav på 320 px. «Slik virker lista» forklarer at dagen ikke teller.
+- Dagen er spilltid og bare opplysning: den teller ikke i noen plassering (B-190, B-323).
+Konto (B-149): del av topplista, som krever konto fra før (regel 3) – ingen ny rad i KONTO.md.

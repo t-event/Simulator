@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 378,
+    date: "2026-09-30",
+    title: "Se hvilken dag de andre er på",
+    items: [
+      "Topplista viser hvilken dag hver spiller er på i sitt eget verk, under navnet. Dagen teller ikke på lista.",
+    ],
+  },
+  {
     b: 377,
     date: "2026-09-30",
     title: "Rydding av gamle spill uten konto",

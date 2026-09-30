@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 304 – 2026-09-30: Dagen i eget verk på topplista (B-378)
+
+**Brukeren ba om:** at spillerne kan se hvilken dag de andre er på i sitt eget verk, kanskje på topplista.
+
+**Gjort:** `089_toppliste_dag.sql`: `leaderboard()` gir `today` (spilldagen i det lagrede spillet). Appen viser «Dag N i
+eget verk» under navnet på alle listene, og «Slik virker lista» sier at den ikke teller.
+
+**Testet:** `leaderboard('konsern')` på serveren (Tuster dag 4 096 osv.); `npm test` (ny sjekk i nettlagets test);
+Playwright 320/390/1366: ingen avkortede tall eller horisontal scrolling. Første forsøk med dagen ved nivåmerket kortet
+navnene til én bokstav på 320 px – flyttet til egen linje.
+
+**Gjenstår:** –
+
 ## Økt 303 – 2026-09-30: Forlatte gjester ryddes hver natt (B-377)
 
 **Brukeren svarte:** «Ja det skal de» (om forlatte gjester skal ryddes automatisk).
