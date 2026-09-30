@@ -1,6 +1,7 @@
 # Forslag: konsernkapital etter fullt konsern (B-386)
 
-**Status:** designforslag til eieren 30.9.2026. Ingenting er bygget, og ingen tall i verden er endret.
+**Status:** designforslag til eieren 30.9.2026. Ingenting er bygget, og ingen tall i verden er endret. Eieren valgte
+modell B (avsnitt 9); spesifikasjonen av K-1 står i `K1-PROGRAMMER.md` (B-389).
 
 **Eierens svar (B-387):**
 1. **To aktive programmer av fem** (ikke tre). Navnene vurderes når mekanikken er ferdig («Kapasitet og vekst» passer

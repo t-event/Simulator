@@ -129,7 +129,10 @@ regnes av serveren i ekte tid.
 - `KONSERNKAPITAL-FORSLAG.md` – hva konsernkassa brukes til etter fullt konsern (B-386). Eierens premiss: penger skal
   gi valg, ikke forsvinne. Ingen økonomiske justeringer før eieren har svart.
 - `VERKSJEF-FORSLAG.md` – verksjefer (B-379), del av kapitalforslaget.
-- Programmodell for konsernprogrammene: simulert (B-388, `programSim.ts`), anbefalt B (aktivt budsjett) – venter på eieren.
+- Programmodell for konsernprogrammene: eieren valgte B (aktivt budsjett, B-388/B-389). Spesifikasjonen står i
+  `K1-PROGRAMMER.md` (B-389): serveren har i dag ingen hendelser i konsernverdenen, så K-1 trenger et lite, nøytralt
+  hendelseslag (V0) for at Teknologi, Robusthet og Driftsytelse skal ha ekte effekt. Venter på eierens svar om V0,
+  satsingene og grunnlaget – og på rapporten etter 2.10. Ingenting er slått på.
 
 ## 11. Hvor reglene står
 

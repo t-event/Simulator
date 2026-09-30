@@ -7026,3 +7026,25 @@ Beslutning:
 Endringslogg: nei
 Konto (B-149): – ingen ny funksjon (når K-1 bygges: krever konto, regel 2 og 7).
 
+## B-389 K-1 med modell B: spesifikasjon, hendelseslaget V0 og satsingene – venter på eieren (2026-09-30)
+Status: spesifikasjon – venter på eieren
+Bakgrunn: eieren valgte modell B (4/12/30 % som foreløpig utgangspunkt i config) med ti krav: grunnlag = vanlig bidrag +
+utbytte før programeffekter, synlige kroner og prosenter, ekte programmer med rapport over hva de gjorde, bare programmer
+med ekte effekt, høyst to aktive, 14 dagers binding via prosjektlinja, ingen gratis effekt uten finansiering, Driftsytelse
+med ekte ulempe og nøytral forventet gevinst, ingenting live før rapporten etter 2.10.
+Beslutning:
+- Spesifikasjonen står i `docs/K1-PROGRAMMER.md`. Simuleringen er utvidet: `programSim.ts --k1` og `--k1-skann`
+  (hendelser i seks regioner med fast frø, nøytrale i snitt, strategier for spredt og samlet konsern).
+- Funn 1: serveren har ingen hendelser i konsernverdenen (utbyttet regnes fast av det lagrede spillet). Uten et lite
+  hendelseslag (V0: regionale strømsjokk og uro, høykonjunktur som veier dem opp, varslet to dager før) har ingen av
+  programmene ekte effekt. Med V0: Teknologi, Robusthet og Driftsytelse. Marked venter på S-1/O-1, Arbeidsmiljø på V1.
+- Funn 2: med nøytrale hendelser er hele hendelsestapet ca. 0,9–1,5 mrd. over to år for en middels spiller, mens to
+  programmer på middels med 4/12/30 % koster ca. 8–9 mrd. Programmene blir da en avgift. Forslag: 1/3/8 % – da er et godt
+  valgt program omtrent verdt det det koster, og det jevner ut inntekten.
+- Forslag om grunnlaget: budsjettet trekkes som andel av hver vanlige utbetaling (bidrag og utbytte før hendelser og
+  programmer). Sju-dagers snittet brukes bare til visning. Det utelater engangsinntekter av seg selv og kan aldri mangle
+  penger.
+- Ekte fordeling av verkene (lest, ikke endret): 9 av 11 konsern med minst 3 verk er spredt på alle seks regionene.
+- Ingen endring i spillet, databasen eller verdensbalansen.
+Endringslogg: nei
+Konto (B-149): – ingen ny funksjon ennå (når K-1 bygges: krever konto, regel 2 og 7).
