@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 311 – 2026-09-30: K-1 med modell B – spesifikasjon (B-389)
+
+**Brukeren ba om:** modell B med 4/12/30 % som foreløpig utgangspunkt og ti krav (grunnlag, visning, ekte programmer,
+bare programmer med ekte effekt, to aktive, binding og bytte, ingen gratis effekt, Driftsytelses ulempe, ingenting live
+før 2.10, rekkefølgen). Kom tilbake hvis grunnlaget blir unødvendig komplisert.
+
+**Gjort:** undersøkte dataene (bidrag: ingen rader ennå; utbytte: bare 29.9) og serveren: ingen hendelser i
+konsernverdenen, så tre av programmene har ingenting ekte å virke på. Utvidet `programSim.ts` med `--k1` og `--k1-skann`
+(regionale hendelser, nøytrale i snitt, spredt og samlet konsern). Skrev `docs/K1-PROGRAMMER.md` med hendelseslaget V0, de
+tre programmene, grunnlaget som andel av hver utbetaling, start/økning/senking, pause, rapport, config bak bryter og tre
+spørsmål. Leste fordelingen av verkene på regioner (bare lesing). B-389, STATUS, FORSLAG, KONSERNKAPITAL, CLAUDE.md.
+
+**Testet:** tsc, lint, prettier; simuleringen er deterministisk.
+
+**Gjenstår:** eierens svar på de tre spørsmålene i K1-PROGRAMMER.md avsnitt 10. Rapporten etter 2.10. Deretter V0 i
+skygge og K-1 bak bryteren.
+
 ## Økt 310 – 2026-09-30: Simulering av programmodellene A og B (B-388)
 
 **Brukeren ba om:** før K-1: simuler store permanente trinn (A) mot aktivt programbudsjett (B) og kom tilbake med tall og

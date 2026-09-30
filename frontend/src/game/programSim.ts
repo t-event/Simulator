@@ -21,6 +21,8 @@
  *   npx tsx src/game/programSim.ts            # begge modellene, alle spillertypene, 730 dager
  *   npx tsx src/game/programSim.ts --skann            # B med budsjett som andel av utbyttet
  *   npx tsx src/game/programSim.ts --skann-inntekt    # B med budsjett som andel av hele inntekten (anbefalt)
+ *   npx tsx src/game/programSim.ts --k1               # K-1 slik den foreslås bygget: ekte hendelser i regionene (B-389)
+ *   npx tsx src/game/programSim.ts --k1-skann         # … med større hendelser og lavere satsing
  */
 import { MAX_BID, profiles, simulate } from "./worldSim";
 
@@ -328,6 +330,287 @@ export const MODEL_B: BudgetModel = {
   base: "inntekt",
 };
 
+/* ---------------------------------------------------------------------------------------------------------------
+ * K-1 slik den er foreslått bygget (B-389): modell B med ekte hendelser i regionene, ikke plassholdere.
+ *
+ * Serveren har i dag ingen hendelser i konsernverdenen (utbyttet regnes fast av det lagrede spillet). Programmene
+ * Teknologi, Robusthet og Driftsytelse trenger derfor et lite hendelseslag: strømsjokk og driftsuro i én region om gangen
+ * (utbyttet fra verkene der går ned), og høykonjunktur (det går opp). Høykonjunkturen er satt så verden er nøytral i
+ * snitt: uten programmer får spilleren like mye som uten hendelser, bare mer ujevnt. Hendelsene varsles to dager før.
+ *
+ * Budsjettet trekkes som andel av hver vanlige utbetaling (bidrag + utbytte før hendelser og programmer), så det aldri
+ * kan mangle penger, og står verket stille (ingen utbetaling), står programmet stille også.
+ * --------------------------------------------------------------------------------------------------------------- */
+
+export type EventKind = "strom" | "uro" | "konjunktur";
+export interface RegionEvent {
+  region: number;
+  kind: EventKind;
+  warn: number;
+  start: number;
+  end: number;
+}
+
+export interface K1Model {
+  regions: number;
+  /** Snitt ekte dager mellom to hendelser i samme region */
+  gapDays: number;
+  warnDays: number;
+  /** Andel av utbyttet i regionen som forsvinner, og hvor lenge */
+  strom: { size: number; days: [number, number] };
+  uro: { size: number; days: [number, number] };
+  /** Lav / middels / høy: budsjett som andel av vanlig inntekt, og effekt som andel av full effekt */
+  budget: [number, number, number];
+  effect: [number, number, number];
+  /** Teknologi (strømsjokk) og Robusthet (uro) på full effekt tar bort så stor del av tapet */
+  protect: number;
+  /** Driftsytelse gir så mange ganger budsjettet i ekstra inntekt, og hendelser rammer (1 + dette × effekt) hardere */
+  driftGain: number;
+  driftHarder: number;
+  establishDays: number;
+  /** Etableringen koster så mange dager vanlig inntekt */
+  establishIncomeDays: number;
+  bindDays: number;
+}
+
+export const K1: K1Model = {
+  regions: 6,
+  gapDays: 45,
+  warnDays: 2,
+  strom: { size: 0.4, days: [8, 12] },
+  uro: { size: 0.35, days: [5, 9] },
+  budget: [0.04, 0.12, 0.3],
+  effect: [0.25, 0.6, 1],
+  protect: 0.8,
+  driftGain: 1.05,
+  driftHarder: 0.5,
+  establishDays: 3,
+  establishIncomeDays: 2,
+  bindDays: 14,
+};
+
+function mulberry(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** Dag 1 = 2.10.2026; vinter (nov.–mars) gir dobbelt så mange strømsjokk */
+function winter(d: number): boolean {
+  const m = new Date(Date.UTC(2026, 9, 1 + d)).getUTCMonth();
+  return m >= 10 || m <= 2;
+}
+
+/** Hendelsene i verden i `days` dager, og størrelsen på høykonjunkturen som gjør verden nøytral i snitt */
+export function k1Events(m: K1Model, days: number, seed = 1): { events: RegionEvent[]; boom: number } {
+  const rnd = mulberry(seed);
+  const events: RegionEvent[] = [];
+  let bad = 0;
+  let boomDays = 0;
+  for (let r = 0; r < m.regions; r++) {
+    let d = 1 + Math.floor(rnd() * m.gapDays);
+    while (d < days) {
+      // Halvparten høykonjunktur, resten uro og strømsjokk (strømsjokk dobbelt så ofte om vinteren)
+      const x = rnd() * (winter(d) ? 1.25 : 1);
+      const kind: EventKind = x < 0.5 ? "konjunktur" : x < 0.75 ? "uro" : "strom";
+      const spec =
+        kind === "strom" ? m.strom : kind === "uro" ? m.uro : { size: 0, days: [10, 16] as [number, number] };
+      const len = spec.days[0] + Math.floor(rnd() * (spec.days[1] - spec.days[0] + 1));
+      events.push({ region: r, kind, warn: d - m.warnDays, start: d, end: d + len });
+      if (kind === "konjunktur") boomDays += len;
+      else bad += spec.size * len;
+      d += len + Math.floor(m.gapDays * (0.5 + rnd()));
+    }
+  }
+  return { events, boom: boomDays ? bad / boomDays : 0 };
+}
+
+type K1Program = "drift" | "robust" | "teknologi";
+interface K1Slot {
+  p: K1Program;
+  lvl: Level;
+  /** Satsingen fra i morgen (økning virker fra neste utbetaling) */
+  next: Level;
+  readyDay: number;
+  lockedUntil: number;
+}
+
+export type K1Strategy = "ingen" | "fast" | "forsikring" | "drift" | "drift-hoy";
+export const K1_STRATEGIES: Record<K1Strategy, string> = {
+  ingen: "Uten programmer",
+  fast: "Teknologi + Robusthet, middels hele tida",
+  forsikring: "Teknologi + Robusthet på lav, høy ved varsel",
+  drift: "Driftsytelse middels + Robusthet lav, høy ved varsel",
+  "drift-hoy": "Driftsytelse høy + Teknologi lav, høy ved varsel",
+};
+
+export interface K1Out {
+  cash: Record<number, number>;
+  /** Andel av inntekten som gikk til programmer (etablering og budsjett) */
+  share: number;
+  /** Tapt utbytte i hendelser uten programmer, og det programmene tok bort (negativt for Driftsytelse) */
+  eventLoss: number;
+  saved: number;
+  driftExtra: number;
+  /** Laveste inntekt i 14 dager, som andel av snittet for samme strategi (hvor ujevnt pengene kommer) */
+  worst14: number;
+  changes: number;
+}
+
+export function simulateK1(
+  pl: Player,
+  weights: number[],
+  strategy: K1Strategy,
+  m: K1Model,
+  world: { events: RegionEvent[]; boom: number },
+  days = 730,
+): K1Out {
+  const base = pl.contribution + pl.dividend;
+  let cash = pl.cashAtFull;
+  let spent = 0;
+  let income = 0;
+  let eventLoss = 0;
+  let saved = 0;
+  let driftExtra = 0;
+  let changes = 0;
+  const window: number[] = [];
+  let worst14 = Infinity;
+  let gotSum = 0;
+  let gotDays = 0;
+  const cashAt: Record<number, number> = {};
+  let slots: K1Slot[] = [];
+  const eff = (p: K1Program, d: number) => {
+    const s = slots.find((x) => x.p === p && d >= x.readyDay);
+    return s ? m.effect[s.lvl - 1] : 0;
+  };
+  const start = (p: K1Program, lvl: Level, d: number) => {
+    slots.push({ p, lvl, next: lvl, readyDay: d + m.establishDays, lockedUntil: d + m.bindDays });
+    const cost = m.establishIncomeDays * base;
+    cash -= cost;
+    spent += cost;
+  };
+  const guard = (p: K1Program): K1Program | null =>
+    p === "teknologi" ? "teknologi" : p === "robust" ? "robust" : null;
+  for (let d = 1; d <= days; d++) {
+    if (d < pl.fullDay) {
+      if (CHECK.includes(d)) cashAt[d] = cash;
+      continue;
+    }
+    const active = world.events.filter((e) => weights[e.region] > 0 && d >= e.start && d < e.end);
+    const warned = world.events.filter((e) => weights[e.region] >= 0.15 && d >= e.warn && d < e.end);
+    // Strategiene
+    if (strategy !== "ingen" && slots.length === 0) {
+      const pair: Record<Exclude<K1Strategy, "ingen">, [K1Program, Level, K1Program, Level]> = {
+        fast: ["teknologi", 2, "robust", 2],
+        forsikring: ["teknologi", 1, "robust", 1],
+        drift: ["drift", 2, "robust", 1],
+        "drift-hoy": ["drift", 3, "teknologi", 1],
+      };
+      const [p1, l1, p2, l2] = pair[strategy];
+      start(p1, l1, d);
+      start(p2, l2, d);
+    }
+    if (strategy === "forsikring" || strategy === "drift" || strategy === "drift-hoy") {
+      for (const s of slots) {
+        const g = guard(s.p);
+        if (!g) continue;
+        const kind: EventKind = g === "teknologi" ? "strom" : "uro";
+        const threat = warned.some((e) => e.kind === kind);
+        if (threat && s.next < 3) {
+          s.next = 3;
+          s.lockedUntil = d + m.bindDays;
+          changes++;
+        } else if (!threat && s.next === 3 && d >= s.lockedUntil) {
+          s.next = 1;
+          s.lockedUntil = d + m.bindDays;
+          changes++;
+        }
+      }
+    }
+    // Dagens utbetaling
+    let div = 0;
+    let divNoProg = 0;
+    for (let r = 0; r < m.regions; r++) {
+      if (!weights[r]) continue;
+      const e = active.find((x) => x.region === r);
+      let f = 1;
+      let f0 = 1;
+      if (e?.kind === "konjunktur") f = f0 = 1 + world.boom;
+      else if (e) {
+        const size = e.kind === "strom" ? m.strom.size : m.uro.size;
+        const shield = m.protect * eff(e.kind === "strom" ? "teknologi" : "robust", d);
+        f = 1 - size * (1 - shield) * (1 + m.driftHarder * eff("drift", d));
+        f0 = 1 - size;
+        eventLoss += pl.dividend * weights[r] * size;
+      }
+      div += pl.dividend * weights[r] * Math.max(0, f);
+      divNoProg += pl.dividend * weights[r] * f0;
+    }
+    saved += div - divNoProg;
+    let cost = 0;
+    let extra = 0;
+    for (const s of slots) {
+      if (d < s.readyDay) continue;
+      cost += m.budget[s.lvl - 1] * base;
+      if (s.p === "drift") extra += m.driftGain * m.budget[s.lvl - 1] * base;
+    }
+    driftExtra += extra;
+    const got = pl.contribution + div + extra - cost;
+    cash += got;
+    gotSum += got;
+    gotDays++;
+    spent += cost;
+    income += base;
+    window.push(got);
+    if (window.length > 14) window.shift();
+    if (window.length === 14)
+      worst14 = Math.min(
+        worst14,
+        window.reduce((a, b) => a + b, 0),
+      );
+    for (const s of slots) s.lvl = s.next;
+    slots = slots.filter((s) => s.lvl > 0);
+    if (CHECK.includes(d)) cashAt[d] = cash;
+  }
+  return {
+    cash: cashAt,
+    share: spent / Math.max(1, income),
+    eventLoss,
+    saved,
+    driftExtra,
+    worst14: worst14 / Math.max(1, (14 * gotSum) / Math.max(1, gotDays)),
+    changes,
+  };
+}
+
+export const EXPOSURES: [string, number[]][] = [
+  ["spredt på seks regioner", [1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6]],
+  ["samlet i to regioner", [0.5, 0.5, 0, 0, 0, 0]],
+];
+
+function k1Report(m: K1Model, ps: Player[], seeds: number[]): void {
+  for (const pl of ps) {
+    for (const [ex, w] of EXPOSURES) {
+      console.log(`== ${pl.name}, ${ex} (inntekt ${Math.round((pl.contribution + pl.dividend) / 1e6)} mill./dag)`);
+      const none = seeds.map((sd) => simulateK1(pl, w, "ingen", m, k1Events(m, 730, sd)));
+      const noneCash = none.reduce((a, r) => a + r.cash[730], 0) / seeds.length;
+      for (const st of Object.keys(K1_STRATEGIES) as K1Strategy[]) {
+        const rs = seeds.map((sd) => simulateK1(pl, w, st, m, k1Events(m, 730, sd)));
+        const avg = (f: (r: K1Out) => number) => rs.reduce((a, r) => a + f(r), 0) / rs.length;
+        console.log(
+          `${K1_STRATEGIES[st].padEnd(52)} kasse 365/730 ${mrd(avg((r) => r.cash[365]))}/${mrd(avg((r) => r.cash[730]))} mrd. (${avg((r) => r.cash[730]) >= noneCash ? "+" : ""}${mrd(avg((r) => r.cash[730]) - noneCash)}) · brukt ${Math.round(avg((r) => r.share) * 100)} % · hendelsestap ${mrd(avg((r) => r.eventLoss))}, tatt bort ${mrd(avg((r) => r.saved))}${st.startsWith("drift") ? `, drift +${mrd(avg((r) => r.driftExtra))}` : ""} mrd. · verste 14 dager ${Math.round(avg((r) => r.worst14) * 100)} % · endringer ${Math.round(avg((r) => r.changes))}`,
+        );
+      }
+      console.log("");
+    }
+  }
+}
+
 function mrd(n: number): string {
   return (n / 1e9).toLocaleString("nb-NO", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 }
@@ -341,6 +624,31 @@ function changes(t: string[]): number {
 function main(): void {
   const args = process.argv.slice(2);
   const ps = players();
+  const seeds = [1, 2, 3, 4, 5, 6, 7, 8];
+  if (args.includes("--k1")) {
+    const w = k1Events(K1, 730, 1);
+    const n = (k: EventKind) => w.events.filter((e) => e.kind === k).length;
+    console.log(
+      `K-1: hendelser i seks regioner (frø 1): ${n("strom")} strømsjokk (−${Math.round(K1.strom.size * 100)} %), ${n("uro")} driftsuro (−${Math.round(K1.uro.size * 100)} %), ${n("konjunktur")} høykonjunktur (+${Math.round(w.boom * 100)} %, satt så verden er nøytral). Snitt av ${seeds.length} frø.\n`,
+    );
+    k1Report(K1, ps, seeds);
+    return;
+  }
+  if (args.includes("--k1-skann")) {
+    for (const size of [0.4, 0.7])
+      for (const budget of [
+        [0.04, 0.12, 0.3],
+        [0.01, 0.03, 0.08],
+        [0.005, 0.015, 0.04],
+      ] as [number, number, number][]) {
+        const m = { ...K1, budget, strom: { ...K1.strom, size }, uro: { ...K1.uro, size: size * 0.875 } };
+        console.log(
+          `### hendelser −${Math.round(size * 100)} %, satsing ${budget.map((b) => `${Math.round(b * 100)} %`).join("/")}\n`,
+        );
+        k1Report(m, ps.slice(1, 2), seeds);
+      }
+    return;
+  }
   if (args.includes("--skann-inntekt")) {
     console.log("B med budsjett som andel av hele inntekten (bidrag + utbytte) per program, binding 14 dager:\n");
     for (const budget of [
