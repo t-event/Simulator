@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 315 – 2026-09-30: Satsene 0,5 / 1,5 / 4 % (B-393)
+
+**Brukeren ba om:** 0,5/1,5/4 % som foreløpige satser før skyggen, 80 % vern på Høy, skyggerapport med både 0,5/1,5/4 og
+1/3/8 %, etableringen målt for seg (sjelden mot aktiv bytter), og ingen høyere satser for å ta penger ut av verden.
+
+**Gjort:** simulatoren: satsene 0,5/1,5/4 % som standard, etableringen og programbytter talt for seg, strategien «ett
+program på høy, byttes etter varselet», `--k1-etablering` (begge satssettene), og `--k1-verdi-skann` med faste satser i
+hver variant. K1-PROGRAMMER.md (eierens valg, visningen, skyggen med begge satssett og etableringen, 8.4, tidsaksen i 8.3,
+config). B-393 (B-392 oppdatert), STATUS, FORSLAG, CLAUDE.md, og sjekken 2.10 har fått de nye satsene.
+
+**Funn:** etableringen er 13–28 % av totalen for den som skrur opp og ned, men 56 % for et spredt konsern som bytter
+program ved hvert varsel. Etter 90 dager ligger alle programstrategier bak; vernet lønner seg over tid.
+
+**Testet:** tsc, lint, prettier, `npm test`, simuleringene.
+
+**Gjenstår:** rapporten 2.10 → V0 i skygge og K-1 bak avslått bryter (0,5/1,5/4 %, 80 % vern) → skyggerapport før noe slås på.
+
 ## Økt 314 – 2026-09-30: Programmene prises av datterverksutbyttet (B-392)
 
 **Brukeren ba om:** behold vinteren; endre grunnlaget for de tre programmene til normalt datterverksutbytte (hovedregel:

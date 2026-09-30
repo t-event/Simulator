@@ -1,4 +1,4 @@
-# K-1: konsernprogrammer med modell B – spesifikasjon (B-389, godkjent B-390, grunnlaget endret B-392)
+# K-1: konsernprogrammer med modell B – spesifikasjon (B-389, godkjent B-390, grunnlaget B-392, satsene B-393)
 
 **Status:** godkjent av eieren 30.9.2026 (B-390) med presiseringene under. Ingenting er bygget, ingen tall i verden er
 endret. Rekkefølgen: rapporten etter 2.10 → V0 i skygge og K-1 bak avslått bryter → skyggedata tilbake til eieren →
@@ -18,6 +18,20 @@ avsnitt 4 (vinteren), 4.1 (skyggerapporten), 2 (kostnaden for seg) og 8.2–8.3 
    tilbake med lavere satser eller sterkere, troverdige effekter (avsnitt 8.3).
 4. Skyggedataene avgjør den endelige kalibreringen; skyggerapporten viser også **kostnad / beskyttet datterverksutbytte**.
 5. Rekkefølgen står.
+
+**Eierens valg av satser (B-393):**
+- **0,5 / 1,5 / 4 %** av normalt datterverksutbytte er de foreløpige satsene i config før V0 går i skygge. 1/3/8 % gjorde
+  programmene matematisk dårlige i nesten alle situasjoner.
+- **Vernet står på 80 % på Høy** – ikke 100 %. Fullt vern gjorde forsikringen lønnsom i de fleste verdener; programmene
+  skal være situasjonelle strategivalg, ikke forventet meravkastning.
+- **Skyggerapporten regner både 0,5/1,5/4 og 1/3/8 %** på de samme hendelsene, så ingenting går tapt ved valget.
+- **Programmene skal ikke løse kapitalopphopingen.** De er en pris på risikoprofil og strategi, ikke en avgift for å holde
+  konsernkassa nede. De store kapitalvalgene er selskaper, oppkjøp, regional ekspansjon og senere andre investeringer.
+- **Etableringen** står på 2 dagers normalt datterverksutbytte, men måles for seg (løpende kostnad mot etablering, for
+  en som bytter sjelden og en som reagerer aktivt – avsnitt 8.4).
+
+> **Diversifisering skal være gratis risikospredning. Konsentrasjon skal kunne forsvares med kapital. Ingen av delene
+> skal være universelt best.**
 
 **Eierens svar (B-390):**
 1. **V0 ja** – regionale hendelser i ekte tid (strømsjokk, driftsuro, høykonjunktur), varslet to dager før, nøytrale i
@@ -131,11 +145,11 @@ kr/dag». Det faktiske beløpet følger inntekten dag for dag og står i rapport
 - Høyst to aktive; høyest mulig nominelt er 2 × Høy.
 - Før man bekrefter, vises alltid både kroner og andel, ingen skjulte prosenter:
 
-> **Teknologi – Høy** · Ca. 3,0 mill. kr/dag (8 % av normalt datterverksutbytte)
-> Totalt programbudsjett: ca. 9 % av datterverksutbyttet
+> **Teknologi – Høy** · Ca. 1,5 mill. kr/dag (4 % av normalt datterverksutbytte)
+> Totalt programbudsjett: ca. 4,5 % av datterverksutbyttet
 > Demper strømsjokk i alle regioner der du har verk: tapet blir 80 % mindre.
 > **Ditt konsern:** 18 % av datterverksutbyttet kommer fra Nord, der strømsjokk er varslet fra torsdag. Med dagens
-> plassering ville programmet de siste 90 dagene ha spart ca. 12 mill. kr, mot et budsjett på ca. 270 mill. kr.
+> plassering ville programmet de siste 90 dagene ha spart ca. 12 mill. kr, mot et budsjett på ca. 135 mill. kr.
 > Bundet til 16. oktober. Etablering: 3 dager og ca. 74 mill. kr.
 
 **Eksponeringen vises før valget** (eieren, B-390): hvor stor del av datterverksutbyttet som kommer fra hver region, og
@@ -187,8 +201,18 @@ Hendelsene trekkes og lagres som om de var live, men vises ikke og virker ikke p
 | `world_event_exposure` | per hendelse, spiller og ekte dag: andel av datterverksutbyttet fra regionen, utbyttet før hendelsen, hypotetisk tap/gevinst uten program, og hypotetisk virkning med Teknologi / Robusthet / Driftsytelse på Lav, Middels og Høy (hva programmet ville tatt bort eller lagt til, og budsjettet det ville kostet) |
 | `program_shadow_day` | per spiller og ekte dag (B-391, B-392): **vanlig bidrag**, **vanlig utbytte**, hypotetisk **programkostnad** per program og satsing (av utbyttet), **potensielt beskyttet inntekt** (utbytte i de rammede regionene × hendelsens størrelse), hypotetisk **spart beløp**, **kostnad / beskyttet datterverksutbytte** (kostnad / hendelsestap programmet verner mot, og kostnad per spart krone) |
 
+**Satsene i skyggen (B-393):** hypotetisk kostnad og resultat regnes for **både 0,5/1,5/4 % (config) og 1/3/8 %** på de
+samme faktiske hendelsene. **Etableringen** føres for seg (2 dagers utbytte per start eller bytte), ikke blandet inn i den
+løpende kostnaden.
+
 Loggen skrives av `pay_dividends` på den samme utbetalingen som i dag, uten å endre beløpet. Det gjør at tallene er
 nøyaktig det spilleren ville fått. Rader for gjester skrives ikke (`user_is_guest`).
+
+**Sammenligningen før live** (begge satssettene): kostnad per spart krone; resultat for spredte og for konsentrerte
+konsern; hvor ofte Høy faktisk ville vært rasjonelt (dager der varslet tap i regionen er større enn merkostnaden for Høy);
+hvor mye variasjon programmene fjerner (laveste 14 dager og spredningen i utbyttet med og uten program); og løpende
+kostnad mot etablering for en spiller som bytter sjelden og en som reagerer aktivt. Er de ekte hendelsene svakere enn
+simuleringen, kan satsene gå ned; er de mer samlet eller hardere, litt opp.
 
 **Før live kommer rapporten tilbake til eieren** med bidrag mot utbytte per spiller (sortert etter hvor stor del av
 inntekten som er bidrag, se 8.2), Konsernverdi med og uten program for de samme spillerne (se 8.3), og: antall hendelser per type og region mot simulatoren, hvor mye hver
@@ -397,9 +421,32 @@ varsel» med alt i én region, −0,2 % og foran i 14 av 40 – og med bedre då
 - Sterkere vern (hele tapet på Høy) gjør forsikring ved varsel **lønnsom i snitt** for samlede konsern (+0,4–0,6 %,
   foran i 26–28 av 40). Det går lenger enn eieren ba om (forsikring trenger ikke tjene seg inn).
 
-**Anbefaling (ikke gjennomført – 1/3/8 % står i config til eieren avgjør):** **0,5 / 1,5 / 4 %** med dagens vern (80 % på
-Høy, 25/60/100 %). Det er den minste endringen som oppfyller alle eierens fem mål, uten sterkere effekter og uten å
-endre Konsernverdi. Skyggedataene avgjør den endelige kalibreringen.
+**Anbefaling, valgt av eieren (B-393):** **0,5 / 1,5 / 4 %** med dagens vern (80 % på Høy, 25/60/100 %). Det er den minste
+endringen som oppfyller alle eierens fem mål, uten sterkere effekter og uten å endre Konsernverdi. Skyggedataene avgjør den
+endelige kalibreringen.
+
+Merk tidsaksen: etter **90 dager** ligger selv de målrettede strategiene bak (foran i 0–1 av 40), fordi etableringen
+kommer først og hendelsene ikke har rukket å komme. Etter 180 dager foran i 3–8 av 40, etter 365 dager 12–18 av 40
+(samlede konsern). Vern lønner seg over tid, ikke i en kort sesong.
+
+### 8.4 Løpende kostnad mot etablering (`--k1-etablering`, B-393)
+
+Middels spiller, to år, 0,5/1,5/4 % (1/3/8 % i parentes). Etablering = 2 dagers utbytte per start eller bytte.
+
+| Konsern | Strategi | Løpende | Etablering | Etablering av alt | Programbytter | Spart |
+|---|---|---|---|---|---|---|
+| Spredt | Tek + Rob middels hele tida (bytter aldri) | 0,8 mrd. | 0,1 mrd. | 16 % (9 %) | 0 | 0,4 mrd. |
+| Spredt | Bare Teknologi, lav → høy ved varsel | 0,5 mrd. | 0,1 mrd. | 13 % (7 %) | 0 | 0,5 mrd. |
+| Spredt | **Ett program på høy, byttes etter varselet** | 0,9 mrd. | **1,2 mrd.** | **56 %** (39 %) | 15 | 0,5 mrd. |
+| Samlet (2) | Tek + Rob lav → høy ved varsel | 0,5 mrd. | 0,1 mrd. | 23 % (13 %) | 0 | 0,7 mrd. |
+| Samlet (2) | Ett program, byttes etter varselet | 1,0 mrd. | 0,5 mrd. | 35 % (21 %) | 6 | 0,6 mrd. |
+| Én region | Tek + Rob lav → høy ved varsel | 0,4 mrd. | 0,1 mrd. | 28 % (17 %) | 0 | 0,7 mrd. |
+| Én region | Ett program, byttes etter varselet | 1,0 mrd. | 0,3 mrd. | 22 % (12 %) | 3 | 0,6 mrd. |
+
+- Med de lavere satsene er etableringen en mye større del av totalkostnaden, som eieren ventet.
+- Å bytte program etter hvert varsel er dyrt: for et spredt konsern går over halvparten til etablering, og det sparer ikke
+  mer enn å ha Teknologi på lav og skru opp. Å øke satsingen er det billige svaret på et varsel; å bytte program er et
+  strategisk valg. Det er slik det er ment – men etableringen følges i skyggedataene og endres ikke nå.
 
 **Konsekvensen for pengene som hoper seg opp:** med ærlige satsinger (ca. 1/3/8 %) bremser programmene kassa med
 5–12 % av inntekten, ikke 30–70 %. Det stemmer med eierens punkt 10: programmene er ikke hele løsningen – selskaper,
@@ -411,7 +458,7 @@ oppkjøp og regional makt må være de store valgene for kapitalen.
 
 ```json
 { "enabled": false, "events_enabled": false, "events_shadow": true,
-  "budget": [0.01, 0.03, 0.08], "cost_base": "utbytte", "effect": [0.25, 0.6, 1], "max_active": 2,
+  "budget": [0.005, 0.015, 0.04], "shadow_budgets": [[0.005, 0.015, 0.04], [0.01, 0.03, 0.08]], "cost_base": "utbytte", "effect": [0.25, 0.6, 1], "max_active": 2,
   "bind_days": 14, "establish_days": 3, "establish_income_days": 2,
   "protect": 0.8, "drift_gain": 1.05, "drift_harder": 0.5,
   "events": { "gap_days": 45, "warn_days": 2, "strom": [0.4, 8, 12], "uro": [0.35, 5, 9], "boom_days": [10, 16],
@@ -447,9 +494,8 @@ Konto (B-149): krever konto (regel 2 og 7 – ekte tid mellom spillere). Serverf
 1. **Grunnlaget for vernprogrammene:** datterverksutbyttet (B-392).
 2. **Konsernverdi og programmene:** Konsernverdi endres ikke; programmene skal prises riktig i stedet (B-392).
 
-### Åpent spørsmål til eieren (B-392)
+### Spørsmålet fra B-392 (besvart i B-393)
 
-**Satsingene:** 1/3/8 % taper fortsatt i nesten alle verdener etter det nye grunnlaget. Forslaget er **0,5 / 1,5 / 4 %**
-med dagens vern (avsnitt 8.3). Skal det inn i config før V0 går i skygge, eller skal 1/3/8 % stå til skyggedataene er
-samlet? Skyggeloggen fører utbyttet og hva hvert program ville spart på hver effekt (Lav/Middels/Høy), så kostnaden kan
-regnes på nytt for andre satser etterpå uten å miste data.
+**Satsingene:** 0,5 / 1,5 / 4 % i config før V0 går i skygge; skyggen regner også 1/3/8 %. Skyggeloggen fører utbyttet
+og hva hvert program ville spart på hver effekt (Lav/Middels/Høy), så kostnaden kan regnes på nytt for andre satser
+etterpå uten å miste data.
