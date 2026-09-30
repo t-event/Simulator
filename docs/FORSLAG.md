@@ -6,6 +6,17 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
+- **Ny ukekonkurranse i stedet for «Størst vekst i konsernverdi» (B-384):** den er tatt bort fra 5.10.2026 (verdien i eget
+  verk vokser med spillfarten). Til noe er valgt, veksler «Flest aktive dager» og «Mer stål enn før». Tre forslag som måler
+  ferdighet og effektivitet, ikke fart eller størrelse (alle regnes av serveren fra tidslinja, like for små og store verk):
+  1. **Mest stål per kWh:** strømforbruket per tonn denne uka i prosent av uka før. Belønner resepter, skiftplan og
+     vedlikehold – ikke kapasitet. Trenger at tidslinja får kWh per tonn (nytt tall i `snapshots`).
+  2. **Beste leveringspresisjon:** andelen kontrakter levert i tide (og uten reklamasjon) denne uka, med minst fem
+     leveranser for å være med. Belønner planlegging og køen. Trenger antall leverte og sene kontrakter i tidslinja.
+  3. **Beste charge i kontrollrommet denne uka:** høyeste poeng i kontrollrommet mellom mandag og mandag (rekorden finnes
+     alt, `records.best_control`; det trengs en ukeversjon). Ren ferdighet, uavhengig av verket.
+  Anbefaling: nr. 3 først (minst ny kode, allerede sjekket av serveren), så nr. 1.
+
 - **Slå på gjestekontoer (B-212):** eieren må slå på «Allow anonymous sign-ins» under Authentication → Sign In /
   Providers i dashbordet (connectoren kan ikke). **29.9: eieren slår det på** – sjekk etterpå at det kommer gjester
   (`select count(*) from auth.users where is_anonymous`). Til det er gjort, prøver appen én gang i døgnet og gjør ellers ingenting.

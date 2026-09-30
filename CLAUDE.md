@@ -5,7 +5,9 @@ Claudes langtidsminne sammen med `docs/`. Hold den kort og oppdatert.
 
 ## Før du begynner
 
-1. Les **`docs/LOGG.md`** – siste økt øverst: hva som ble gjort og hva som står igjen.
+1. Les **`docs/STATUS.md`** – fasit for hvordan spillet virker nå (B-385). STATUS = hvordan det virker, BESLUTNINGER =
+   hvorfor, LOGG = historikk. Endrer du en regel, oppdater STATUS i samme økt.
+   Les så **`docs/LOGG.md`** – siste økt øverst: hva som ble gjort og hva som står igjen.
 2. Les **`docs/BESLUTNINGER.md`** – hvorfor ting er som de er. Ikke gjør om en
    beslutning uten at brukeren ber om det; skriv i så fall en ny beslutning som
    erstatter den gamle.
@@ -22,6 +24,7 @@ Claudes langtidsminne sammen med `docs/`. Hold den kort og oppdatert.
   som ble gjort, hva som ble testet, og hva som gjenstår.
 - Legg til nye beslutninger i `docs/BESLUTNINGER.md` (neste nummer, aldri
   slett gamle – marker dem som erstattet).
+- Oppdater `docs/STATUS.md` hvis en regel for hvordan spillet virker, er endret (B-385).
 - **Endringsloggen (B-179, brukerens beskjed: hver eneste gang):** legg til en oppføring øverst i
   `frontend/src/game/changelog.ts` med det spillerne merker, skrevet med vanlige ord, og `b:` lik det nyeste
   beslutningsnummeret. `npm test` og publiseringen stopper hvis den mangler (`scripts/sjekk-endringslogg.mjs`).
@@ -118,7 +121,7 @@ npx tsx src/game/balance.ts --konsern                      # utbyttet per ekte d
 npx tsx src/game/balance.ts --forste 700                   # kurven for første opplasting i juksesperren (B-257, ca. 40 min)
 npx tsx src/game/balance.ts --vinter                       # uhell, kort og kostnader om vinteren mot sommeren, per nivå (B-277, ca. 11 min)
 npx tsx src/game/balance.ts --sommerstans                  # testspilleren velger sommerstans i fellesferien (B-298)
-npx tsx src/game/worldSim.ts                               # verdenssimulatoren: konsernkassa for liten/middels/stor/legacy etter 30–180 ekte dager (B-380)
+npx tsx src/game/worldSim.ts                               # verdenssimulatoren: konsernkassa for liten/middels/stor/legacy etter 30–730 ekte dager, dager etter fullt konsern, maks bud, andel brukt (B-380, B-385; --dager 180 for kortere)
 npm run build
 ```
 
@@ -152,7 +155,7 @@ frontend/src/
     war.ts       Krig i verden, bare i konsernet: dyrere strøm, flere forespørsler, høyst én per år (B-297)
     accidents.ts Eksplosjoner i ovnen og svært sjeldne dødsulykker (B-265)
     trends.ts    Trender i markedet: én kvalitet eller vare ettertraktet eller lite etterspurt i noen døgn (B-255); vises av ui/Trend.tsx
-    reserve.ts   Taket for kassa (10 mrd., B-306) og utbetalingen til eierne (B-303) – taket står her
+    reserve.ts   Privat formue: fryst historikk fra kassetaket (B-303), taket er fjernet (B-381, `softCap = null`)
     daily.ts     Daglig belønning, dagens oppdrag og mens du var borte (B-149)
     mastery.ts   Mesterskap: forskning som tas om og om igjen etter all forskning (B-150); priset etter verdi (B-237)
     masteryValue.ts Hva neste nivå i mesterskapet gir i kr per døgn (B-237)
@@ -224,7 +227,8 @@ docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretn
                KONSERN-FORSLAG.md (nivåer, priser fra konsernkassa og aktivitetskrav, bygget B-325–B-328, og simuleringen B-329),
                KONTROLL-FORSLAG.md (verdenskart, utbyttepolitikk, Kontroll, overtakelser og pengene hjemme, B-331, godkjent B-332),
                VERKSJEF-FORSLAG.md (verksjefer for datterverkene, RETNING fase 5, B-379 – venter på eieren),
-               STABILISERING.md (cash-audit, legacy-gulvet og verdenssimuleringen, B-380 – venter på eieren),
+               STATUS.md (fasit for hvordan spillet virker nå, B-385),
+               STABILISERING.md (cash-audit, legacy-gulvet og verdenssimuleringen, B-380; besluttet B-381–B-385, dry-run i avsnitt 9),
                (designsystem, mobil + PC, plan for redesignet, B-187),
                PLAN-NETT.md (det som er bygget på nett), FORSLAG.md, KONTO.md (hva som krever konto)
 ```
@@ -391,8 +395,13 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   endres den, endres begge. Appen legger serverens svar inn med `applyKonsern` (`net/konsern.ts`); testene og
   testspilleren bruker `localOrder`/`localSell`/`localCancel` mot `g.konsern.treasury`. Ett prosjekt bygges om gangen,
   inntil 3 i køen (B-311 gjelder fortsatt). Verkene i spillet har fortsatt `sisterProfit` (verdien); råd regnes på
-  `konsernNetFor` (per ekte dag). Nye ting som låser opp etter nivå, bruker `g.konsern.legends` (fra serveren), aldri
+  `konsernNetFor` (per ekte dag). Nye ting som låser opp etter tittel, bruker `g.konsern.legends` (fra serveren), aldri
   verdien. Endres tallene: kjør `balance.ts --konsern` og verdenssimuleringen (KONSERN-FORSLAG.md).
+- **Tittel og opptjent nivå** (B-383, 091): `konsern.level`/`legends` er tittelen (med gulvet fra byttet – topplista,
+  titler, pynt, stormodellene). `konsern.earned`/`g.konsern.earned` er det verkene har tjent (stigen, uten gulvet, går
+  aldri ned) og avgjør plasser, høyeste trinn og komplekser i `konsern_order` og appen (`earnedLevel`/`earnedOf`). Nye
+  grenser for kjøp i konsernet bruker opptjent nivå, aldri `legends`. Tester som setter `legends` for å låse opp kjøp,
+  må også sette `earned`. `settleWorld` og `konsern_settle` holder begge oppdatert.
 - **Regionene** (B-333): verkene har `region` (og `moved` etter én flytt), bestillinger av nye verk har `region`.
   Regionlista står i `konsern_regions()` og `game/regions.ts` – endres den, endres begge (og kartformene i
   `ui/WorldMap.tsx`). `konsern_order` har fått `p_region`; endres signaturen igjen, `drop function` den gamle først.
@@ -428,19 +437,21 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Konsernkassa** (B-183): `treasuryOut` i spillet går aldri ned – en trigger på `saves` trekker kassa hvis et spill med
   lavere tall lagres. Overføringen gjøres av serveren (`deposit_to_treasury`), og appen bygger videre på versjonen den
   gir (`adoptServerRev`). Test SQL mot ekte tabeller bare i én DO-blokk som ender med `raise exception` (rulles tilbake).
-  Innskuddet er slått av (B-319: `treasury_base_per_day` = 0, appen skjuler det ved grense 0); koden står for eldre lagringer.
+  Innskuddet er stengt «fail-closed» (B-382, 090): `treasury_limit` gir 0 med mindre `config.world.treasury_deposit_enabled`
+  er `true` og `treasury_base_per_day` positivt – manglende config gir 0. Åpne det aldri uten eierens beslutning.
 - **Skraplagerets inntekt** (B-188) regnes på serveren (`029_produksjonsmaler.sql`; `meter_register` står nå i 043) og speiles i `net/scrapIncome.ts`.
   Endres regelen, må begge endres, og `npm test` (scrapTests.ts) og SQL-scenariene i B-188 kjøres på nytt. Farten måles
   med spillminuttene (`game_min`), aldri med hele spilldager (det ga 10× opptil 37 % for mye).
-- **Taket for kassa** (B-303, reform 2; 10 mrd. fra B-306): kassa over `CASH_RESERVE.softCap` betales ut til eierne (`g.paidOut`)
-  i hvert tidssteg og etter hver handling. Det teller ikke i `konsernEquity`, kan ikke brukes og er ikke sikkerhet mot
-  konkurs. Den gamle reserven (`lockedReserve`, B-193) står urørt i lagringene og regnes som utbetalt (`paidOutTotal`)
-  – ikke migrer den, og ikke legg den inn i konsernverdien igjen. Sluttmålet og grensen for de største ovnene bruker
-  `valueCreated` (konsernverdi + utbetalt, B-341) – taket er like høyt som sluttmålet, så `konsernEquity` alene låste dem. Lista «Utbetalt til eierne» leses av `note_paid_out`
-  på `saves` (050). Reform 2 som helhet: `docs/OKONOMI.md` og B-302. Skal taket endres igjen: publiser appen først,
-  så serverendringen (052 som mal), ellers fyller eldre apper kassa opp igjen. Sesonglista bruker det siste
-  tidslinjetallet per spiller – etter en serverendring av kassa må den få ferske tall (053 som mal), ellers står de
-  som ikke har logget inn, med gamle verdier.
+- **Kassa uten tak og Privat formue** (B-381): `CASH_RESERVE.softCap = null` – kassa i hovedverket kan vokse fritt (lokal
+  kasse gir ingen makt i verden). Det som ble betalt ut mens taket fantes (`g.paidOut` og den gamle `lockedReserve`,
+  `paidOutTotal`), er fryst historikk: ingen refusjon, ingenting nytt, ingen migrering. Det teller ikke i `konsernEquity`,
+  men i `valueCreated` (sluttmålet, stormodellene, prestasjoner, B-341). Lista «Privat formue» leses av `note_paid_out`
+  (050) og står stille. Store beløp: `fmtKrCompact` i toppfeltet (fra 100 mrd.), hele beløpet på Økonomi. Serveren har aldri
+  håndhevet taket løpende (052 var en engangsjustering). Eldre apper betaler ut til de oppdaterer seg selv.
+- **Sesongen og listene** (B-384, 092/093): `close_season` rangerer på `konsern_value` (de uten konsern etter, på verdien i
+  eget verk) og lagrer `konsern_value`/`rank_by`; `season_history` gir dem. Topplista i appen har gruppene «Industriverden»
+  og «Eget verk» (`BOARDS[].group`); nye lister fra spillet på mobilen hører til Eget verk. `week_kind` har ikke `vekst`
+  fra uka 5.10.2026 – endres ukene, må ukene før gi samme type som før (resultatene regnes av samme funksjon).
 - **Utslipp** (B-263): røyken regnes i hvert tidssteg (`updateEmissions`) mot renseanlegget; boten kommer i `onDay`.
   Nye, større ovner må ha et renseanlegg som holder (`CLEANERS` i `environment.ts`), ellers får testspilleren bot.
   Gamle lagringer får anleggene de trenger i første tidssteg (`env.grant`) – ikke flytt det til `onHour`.

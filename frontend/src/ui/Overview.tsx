@@ -34,7 +34,7 @@ import { VERKET_TABS, type VerketTab } from "./verketTabs";
 import type { View } from "./views";
 import { MoneyGuideLink } from "./MoneyGuide";
 import { Icon } from "./icons";
-import { CASH_RESERVE, hasPaidOut, paidOutTotal } from "../game/reserve";
+import { hasPaidOut, paidOutTotal } from "../game/reserve";
 import { Callout, StatusLine, type Status } from "./ds";
 import { hints, type Anchor, type Hint } from "./hints";
 import { furnaceState, statusOf } from "./plantStatus";
@@ -570,6 +570,10 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
               )}
               <ResultChart days={g.history.slice(-30)} />
               <div className="g-stats">
+                {/* Kassa uten tak (B-381): toppfeltet viser store tall i kort form, her står hele beløpet */}
+                {Math.abs(g.cash) >= 100_000_000_000 && (
+                  <Stat label="Kasse" value={`${fmtNum(Math.floor(g.cash))} kr`} />
+                )}
                 {/* Hjemmeverket for seg (B-156): uten datterverkene og uten kjøp, så man ser hva utstyret gir */}
                 {y && (g.konsern.unlocked || (y.costs.investering ?? 0) > 0) && (
                   <>
@@ -599,7 +603,7 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
                 {stats.salaryPerDay > 0 && <Stat label="Lønn per døgn" value={fmtKr(stats.salaryPerDay)} />}
                 <Stat label="Faste kostnader per døgn" value={fmtKr(STAGES[g.stage].fixedPerDay)} />
                 {g.loan > 0 && <Stat label="Lån" value={fmtKr(g.loan)} tone="warning" />}
-                {hasPaidOut(g) && <Stat label="Privat formue" value={fmtKr(Math.floor(paidOutTotal(g)))} />}
+                {hasPaidOut(g) && <Stat label="Privat formue (fryst)" value={fmtKr(Math.floor(paidOutTotal(g)))} />}
               </div>
               {y && (
                 <div className="g-breakdowns">
@@ -619,13 +623,13 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
                   />
                 </div>
               )}
-              {/* Den private formuen (B-303, B-359) vises først når kassa har nådd taket */}
+              {/* Den private formuen (B-303, B-359) er fryst historikk fra B-381: vises bare for dem som har noe der */}
               {hasPaidOut(g) && (
                 <p className="g-muted g-small-text g-reserve-note">
-                  <Icon name="lock" /> Kassa kan ha høyst {fmtKr(CASH_RESERVE.softCap ?? 0)} – mer enn alt som kan
-                  kjøpes. Det du tjener utover, flyttes til din private formue. Den kan ikke brukes i spillet, men
-                  teller med i verdien (sluttmålet, de største ovnene, dagens oppdrag). Konkurransen med de andre
-                  foregår i konsernkassa, i ekte tid. <MoneyGuideLink g={g} label="Slik henger pengene sammen" />
+                  <Icon name="lock" /> Privat formue er det som ble flyttet ut mens kassa hadde et tak. Taket er
+                  fjernet, så nå blir alt du tjener, stående i kassa. Formuen står som historikk og teller med i verdien
+                  (sluttmålet, de største ovnene), men den vokser ikke og kan ikke brukes.{" "}
+                  <MoneyGuideLink g={g} label="Slik henger pengene sammen" />
                 </p>
               )}
               {y && plantResult(y) < 0 && avgPlantResult(g) >= 0 && (

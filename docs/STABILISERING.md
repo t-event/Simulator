@@ -1,6 +1,9 @@
 # Stabilisering før verksjefene: kassetaket, legacy-gulvet og verdensøkonomien (B-380)
 
-**Status:** analyse til eieren 30.9.2026. Ingenting er endret i spillet. Tallene er fra databasen 30.9 og fra
+**Status:** analyse til eieren 30.9.2026. **Eieren har bestemt seg (B-381–B-385, avsnitt 9–10):** taket er fjernet,
+sesongen rangeres på Konsernverdi, opptjent nivå er skilt fra tittelen, innskuddet er stengt «fail-closed», og
+simulatoren går til 730 dager. Hvordan spillet virker nå, står i `docs/STATUS.md`. Resten av dokumentet er analysen
+slik den var før beslutningen. Tallene er fra databasen 30.9 og fra
 simulatoren `frontend/src/game/worldSim.ts` (`npx tsx src/game/worldSim.ts`), som bruker de samme reglene som appen og
 serveren.
 
@@ -201,3 +204,34 @@ faktisk vokser, og hvor fort de største fyller konsernet. Sjekken 2.10 rapporte
 2. Skal «Verdi» og «Mest penger på bok» bli historiske lister, og ukens «Mer verdi enn før» byttes eller tas bort?
 3. Skal gulvet skilles fra opptjent nivå som i punkt 5 (tittel beholdes, nye kjøp etter opptjent nivå)?
 4. Skal innskuddet herdes (standard 0) nå? Det er en liten, trygg serverendring.
+
+## 9. Fersk dry-run før migrasjonen 091 (B-383, 30.9.2026)
+
+Kjørt mot databasen rett før `091_opptjent_niva.sql`. Opptjent = `konsern_ladder_level(plants)` i dag. Samme bokstaver
+som i avsnitt 4.
+
+| Spiller | Tittel (gulv) | Opptjent | Verk nå | Plasser tittel → opptjent | Høyeste trinn tittel → opptjent | Komplekser | Hva som sperres |
+|---|---|---|---|---|---|---|---|
+| A | 6 (6) | 1 | 12 | 14 → 8 | 5 → 4 | 9 | Nye verk (4 over), trinn 5, nye komplekser og bytte |
+| B | 6 (6) | 5 | 11 + 1 i kø | 14 → 12 | 5 → 5 | 8 | Ingenting nå (12 av 12 med køen) |
+| C | 5 (5) | 1 | 5 | 12 → 8 | 5 → 4 | 5 | Trinn 5, nye komplekser og bytte; kan bygge 3 verk til |
+| D | 3 (3) | 0 | 10 | 10 → 8 | 5 → 3 | 7 | Nye verk (2 over), trinn 4–5, nye komplekser og bytte |
+| E | 3 (3) | 0 | 10 | 10 → 8 | 5 → 3 | 10 | Nye verk (2 over), trinn 4–5 (alle kompleksene står på 0 og kan tas til 3) |
+| F | 2 (2) | 0 | 10 | 10 → 8 | 4 → 3 | 1 | Nye verk (2 over), trinn 4, nye komplekser og bytte |
+| G | 2 (2) | 0 | 5 | 10 → 8 | 4 → 3 | 2 | Trinn 4, nye komplekser og bytte; kan bygge 3 verk til |
+| H | 1 (1) | 0 | 8 | 8 → 8 | 4 → 3 | 0 | Trinn 4 (en modernisering til trinn 4 er alt betalt og fullføres) |
+| I | 1 (1) | 0 | 8 | 8 → 8 | 4 → 3 | 0 | Trinn 4 |
+| J | 7 (6) | 7 | 14 | 14 → 14 | 6 → 6 | 11 | Ingenting |
+| To uten gulv | 0 | 0 | 8 og 1 | 8 → 8 | 3 → 3 | 0 | Ingenting |
+
+**Bestillinger i køen (11):** alle er betalt og fullføres – `konsern_settle` sjekker ikke nivået. Én av dem (H, trinn 3 →
+4) er over det opptjente trinnet. Ingen bestillinger siden byttet 29.9 ville vært avvist, utenom den.
+
+**Ingenting tas bort:** verk, komplekser, trinn og titler står. Det som sperres, er bare å legge til: flere verk enn
+plassene, høyere trinn enn det opptjente, og nye komplekser (også bytte) før opptjent nivå 2. Opptjent nivå stiger når
+verkene moderniseres (simulatoren: 6–10 ekte dager for de fleste).
+
+## 10. Simulering 365 og 730 dager (B-385)
+
+Se `docs/STATUS.md` (avsnittet om verdensøkonomien) for tabellene. Kjør på nytt med
+`npx tsx src/game/worldSim.ts --dager 730`.

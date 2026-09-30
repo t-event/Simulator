@@ -1,5 +1,7 @@
 # Økonomien i midt- og sluttspillet – analyse og forslag til reform 2
 
+> **Historisk analyse.** Tallene og reglene her er slik de var da dokumentet ble skrevet; kassetaket (B-303/B-306) ble fjernet i B-381. Slik spillet virker nå: `docs/STATUS.md`.
+
 Skrevet 2026-09-28 (økt 235, B-301). **Eieren valgte pakke B med alle anbefalingene (B-302).** Status: B2+B6 bygget
 (B-303), B1 bygget (B-304: utbytte i ekte tid til konsernkassa), B3 bygget (B-305: andre knekk 40 %, ikke 25 %, og
 administrasjon bare over 5 000 t), og taket for kassa er senket til 10 mrd. og kjørt på serveren (B-306 – eieren

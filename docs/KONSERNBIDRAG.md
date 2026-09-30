@@ -1,5 +1,7 @@
 # Hovedverket og konsernet: analyse av koblingen (B-313)
 
+> **Historisk analyse.** Tallene og reglene her er slik de var da dokumentet ble skrevet; kassetaket ble fjernet i B-381, og innskuddet er stengt «fail-closed» (B-382). Slik spillet virker nå: `docs/STATUS.md`.
+
 > **Status 29.9:** eieren har svart på avsnitt 14 (se B-318). Steg 1 er bygget: bidraget betales av serveren fra
 > 30.9, fast 50 %, gulv 30 %, dempet over 30 mill. per dag. Kassa i spillet røres ikke. Steg 2 (B-319): innskuddet
 > er borte. Steg 4 (B-320): ny liste «Konsernverdi» regnet av serveren; den gamle heter «Verdi i spillet». Valg av utbyttepolitikk er utsatt.

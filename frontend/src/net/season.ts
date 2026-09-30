@@ -48,9 +48,14 @@ export interface SeasonResult {
   plass: number;
   /** Hvor mange som var med på lista i sesongen */
   players: number;
+  /** Verdien i eget verk (fryst ved sesongslutt, B-384) */
   equity: number;
   day: number;
   stage: number;
+  /** Konsernverdien da sesongen ble avsluttet, eller null (uten konsern, eller en sesong fra før B-384) */
+  konsernValue: number | null;
+  /** Hva plassen ble regnet etter: Konsernverdi fra B-384, verdien i eget verk før */
+  rankBy: "konsern" | "verdi";
 }
 
 /** Resultatene endres bare når en sesong avsluttes, så de hentes høyst hvert femte minutt per konto (B-344) */
@@ -82,6 +87,8 @@ async function loadSeasonHistory(): Promise<SeasonResult[]> {
       equity: string | number;
       day: number;
       stage: number;
+      konsern_value?: string | number | null;
+      rank_by?: string | null;
     }[]
   >("season_history", {});
   return (rows ?? []).map((r) => ({
@@ -92,6 +99,8 @@ async function loadSeasonHistory(): Promise<SeasonResult[]> {
     equity: Number(r.equity),
     day: r.day,
     stage: Number(r.stage),
+    konsernValue: r.konsern_value === null || r.konsern_value === undefined ? null : Number(r.konsern_value),
+    rankBy: r.rank_by === "konsern" ? "konsern" : "verdi",
   }));
 }
 

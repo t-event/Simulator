@@ -24,7 +24,7 @@ import { getSession, onSessionChange } from "../net/supabase";
 import { cloudStatus, onCloudStatus } from "../net/sync";
 import { useSyncExternalStore } from "react";
 import { Callout, SheetHead } from "./ds";
-import { fmtKr, fmtNum, fmtRep } from "./format";
+import { fmtKr, fmtNum, fmtRep, fmtT } from "./format";
 import { Icon } from "./icons";
 
 /** Spillerens egne resultater fra sesonger som er over (B-143) */
@@ -49,7 +49,13 @@ function SeasonHistory() {
             <strong>
               {r.name}: {r.plass <= 3 && <Place plass={r.plass} />} {r.plass}. plass
             </strong>{" "}
-            av {r.players} · {fmtKr(r.equity)} · {levelLabel({ stage: r.stage, league: resultLeague(r) })}
+            av {r.players} ·{" "}
+            {r.rankBy === "konsern"
+              ? r.konsernValue !== null
+                ? `Konsernverdi ${fmtKr(r.konsernValue)} · eget verk ${fmtKr(r.equity)}`
+                : `Eget verk ${fmtKr(r.equity)}`
+              : fmtKr(r.equity)}{" "}
+            · {levelLabel({ stage: r.stage, league: resultLeague(r) })}
           </li>
         ))}
       </ul>
@@ -70,6 +76,7 @@ function fmtValue(kind: BoardKind, v: number): string {
   if (unit === "kr") return fmtKr(v);
   if (unit === "rep") return fmtRep(v);
   if (unit === "poeng") return `${fmtNum(Math.floor(v))} poeng`;
+  if (unit === "t") return fmtT(v);
   return `dag ${Math.round(v)}`;
 }
 
@@ -82,7 +89,7 @@ export function LeaderboardSheet({
   g,
   onClose,
   onOpenSettings,
-  initialKind = "verdi",
+  initialKind = "konsern",
 }: {
   api: GameApi;
   g: GameState;
@@ -219,29 +226,49 @@ function Leaderboard({
           </button>
         </div>
       )}
-      <div className="g-subtabs g-board-tabs" role="tablist" aria-label="Liste">
-        {BOARDS.map((b) => (
-          <button
-            key={b.id}
-            role="tab"
-            aria-selected={kind === b.id}
-            className={kind === b.id ? "is-active" : ""}
-            onClick={() => setKind(b.id)}
+      {/* To slags lister (B-384): Industriverden (serveren, ekte tid – sesongens hovedkonkurranse) og Eget verk */}
+      {(["verden", "eget"] as const).map((group) => (
+        <div key={group} className="g-board-group">
+          <p className="g-board-group-label">
+            {group === "verden" ? (
+              <>
+                <Icon name="konsern" /> Industriverden · sesong
+              </>
+            ) : (
+              <>
+                <Icon name="factory" /> Eget verk
+              </>
+            )}
+          </p>
+          <div
+            className="g-subtabs g-board-tabs"
+            role="tablist"
+            aria-label={group === "verden" ? "Industriverden" : "Eget verk"}
           >
-            {b.label}
-          </button>
-        ))}
-      </div>
+            {BOARDS.filter((b) => b.group === group).map((b) => (
+              <button
+                key={b.id}
+                role="tab"
+                aria-selected={kind === b.id}
+                className={kind === b.id ? "is-active" : ""}
+                onClick={() => setKind(b.id)}
+              >
+                {b.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
       <p className="g-muted g-small-text g-board-scope-note">
         {kind === "konsern"
-          ? "Konsernkassa pluss 60 dagers utbytte og bidrag, minus lån – regnet av serveren i ekte tid, uansett spillfart."
+          ? "Sesongens hovedkonkurranse: konsernkassa pluss 60 dagers utbytte og bidrag, minus lån – regnet av serveren i ekte tid, uansett spillfart. Sesongen avgjøres etter denne lista."
           : kind === "utbetalt"
-            ? "Det verket har tjent over taket for kassa, flyttet over til eierens private formue – samme liste i sesongen og i Hall of Fame."
+            ? "Fryst historikk: det som ble flyttet til eierens private formue mens kassa hadde et tak. Taket er fjernet, så tallene vokser ikke lenger."
             : kind === "kontroll"
-              ? "Beste charge noensinne i kontrollrommet – samme liste i sesongen og i Hall of Fame."
+              ? "Eget verk: beste charge noensinne i kontrollrommet – samme liste i sesongen og i Hall of Fame."
               : hallOfFame
-                ? `Beste resultat noensinne${status?.era ? ` i ${status.era.name}` : ""}: ${board.label.toLowerCase()}.`
-                : `Spillet slik det står nå: ${board.label.toLowerCase()}.`}
+                ? `Eget verk, beste resultat noensinne${status?.era ? ` i ${status.era.name}` : ""}: ${board.label.toLowerCase()}. Gir ingen makt i industriverdenen.`
+                : `Eget verk, slik det står nå: ${board.label.toLowerCase()}. Tall fra spillet ditt (spilltid) – gir ingen makt i industriverdenen.`}
       </p>
       {!session && (
         <Callout>
@@ -326,13 +353,16 @@ function Leaderboard({
       <details className="g-details">
         <summary>Slik virker lista</summary>
         <p className="g-muted g-small-text">
-          Lista regnes ut på serveren av det som er lagret på nett, én gang per spilldøgn, og oppdaterer seg mens du
-          spiller. I sesongen gjelder spillet du har nå; i «Hall of Fame» står ditt beste resultat. Merket ved navnet
-          viser hvor langt spilleren har kommet: fra Garasje til Storverk, Konsern når konsernverdien passerer 1 mrd.,
-          og en tittel fra 10 mrd. (Stålbaron, Stålmagnat, Stålfyrste, Stålkonge, Stålkeiser, Stållegende ved 400 mrd.
-          og videre til Stålikon ved 5 000 mrd. – omtrent hele stålindustrien i verden). Ved navnet står også den beste
-          plasseringen i en sesong som er over: en pokal for vinneren og en medalje for topp 10. «Dag» er hvilken dag
-          spilleren er på i sitt eget verk; den teller ikke på lista. Kontoer med urimelig vekst holdes utenfor.
+          Det er to slags lister. «Industriverden» (Konsernverdi) regnes av serveren i ekte tid, likt for alle uansett
+          spillfart – det er sesongens hovedkonkurranse, og sesongen avgjøres etter den. «Eget verk» er tall fra spillet
+          ditt (verdi, kasse, produksjon, rekorder): de går fortere på 10× og gir ingen makt over andre, bare ære.
+          Listene regnes ut av det som er lagret på nett og oppdaterer seg mens du spiller. I sesongen gjelder spillet
+          du har nå; i «Hall of Fame» står ditt beste resultat. Merket ved navnet viser hvor langt spilleren har kommet:
+          fra Garasje til Storverk, Konsern når konsernverdien passerer 1 mrd., og en tittel fra 10 mrd. (Stålbaron,
+          Stålmagnat, Stålfyrste, Stålkonge, Stålkeiser, Stållegende ved 400 mrd. og videre til Stålikon ved 5 000 mrd.
+          – omtrent hele stålindustrien i verden). Ved navnet står også den beste plasseringen i en sesong som er over:
+          en pokal for vinneren og en medalje for topp 10. «Dag» er hvilken dag spilleren er på i sitt eget verk; den
+          teller ikke på lista. Kontoer med urimelig vekst holdes utenfor.
         </p>
       </details>
     </>

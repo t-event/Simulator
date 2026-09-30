@@ -178,8 +178,8 @@ function WeeklyBoard({ kind, onClose }: { kind: WeekKind; onClose: () => void })
             </ol>
           )}
           <p className="g-muted g-small-text">
-            Uka går fra mandag til mandag. Alle er på samme liste, og vekst og stål måles i prosent, så et lite verk kan
-            slå et stort. Når uka er over, får topp 3 medalje og en ukekiste med fagpoeng. {WEEK_KINDS[kind].how}
+            Uka går fra mandag til mandag. Alle er på samme liste, og stålet måles i prosent, så et lite verk kan slå et
+            stort. Når uka er over, får topp 3 medalje og en ukekiste med fagpoeng. {WEEK_KINDS[kind].how}
           </p>
         </div>
       </div>

@@ -142,8 +142,11 @@ export interface KonsernWorld {
   plants: SisterPlant[];
   orders: KonsernOrder[];
   nextId: number;
+  /** Tittelen (historisk): stigen med gulvet fra byttet, går aldri ned */
   level: number;
   floor: number;
+  /** Opptjent nivå (B-383): det høyeste verkene har gitt, uten gulvet. Avgjør plasser, trinn og komplekser */
+  earned?: number;
   /** Konsernkassa */
   balance: number;
   /** Utbyttepolitikken og forsvarsfondet (B-334), når serveren sender dem */
@@ -176,7 +179,7 @@ export type OrderRefusal =
 export const ORDER_REFUSAL_TEXT: Record<OrderRefusal, string> = {
   ko_full: `Køen er full – høyst ${WORLD_KONSERN.queueMax} prosjekter om gangen.`,
   fullt: "Det er ikke plass til flere verk.",
-  niva: "Stålkomplekser åpnes med tittelen Stålfyrste.",
+  niva: `Stålkomplekser åpnes når verkene har gitt nivået ${LADDER[1].title} (${LADDER[1].count} storverk eller komplekser på trinn ${LADDER[1].level}).`,
   forst_stalverk: "Kjøp et stålverk først.",
   verk: "Verket kan ikke endres nå – et prosjekt pågår eller står i køen.",
   trinn: "Verket er modernisert så langt det går nå.",
@@ -208,9 +211,17 @@ export function plannedPlants(w: Pick<KonsernWorld, "plants" | "orders">): Siste
   return plants;
 }
 
-/** Nivået med gulvet */
+/** Tittelen: nivået med gulvet (vises, gir titler og låser opp ting hjemme) */
 export function worldLevel(w: Pick<KonsernWorld, "level" | "floor">): number {
   return Math.max(w.level, w.floor);
+}
+
+/**
+ * Opptjent nivå (B-383, som `konsern.earned` på serveren): det høyeste stigen har stått på, uten gulvet. Nye verk,
+ * trinn og komplekser følger dette, ikke tittelen – ingenting man har, tas bort.
+ */
+export function earnedLevel(w: Pick<KonsernWorld, "plants" | "earned">): number {
+  return Math.max(w.earned ?? 0, ladderLevel(w.plants));
 }
 
 /** Pris og byggetid for en bestilling, eller hvorfor den ikke går (uten å se på kassa) */
@@ -219,7 +230,7 @@ export function orderQuote(
   req: OrderRequest,
   researched: readonly string[],
 ): { cost: number; hours: number; sale: number } | { refusal: OrderRefusal } {
-  const lvl = worldLevel(w);
+  const lvl = earnedLevel(w);
   const big = researched.includes("storkonsern");
   const pending = w.orders.filter((o) => o.status === "kø" || o.status === "i gang").length;
   if (pending >= WORLD_KONSERN.queueMax) return { refusal: "ko_full" };
@@ -237,7 +248,8 @@ export function orderQuote(
   }
   if (req.kind === "bygg" || req.kind === "bytt") {
     if (!type || !(type in WORLD_KONSERN.price)) return { refusal: "type" };
-    if (planned.length >= slotsAt(lvl, big)) return { refusal: "fullt" };
+    // Et bytte legger ikke til et verk, så det sperres ikke av plassene (B-383)
+    if (req.kind !== "bytt" && planned.length >= slotsAt(lvl, big)) return { refusal: "fullt" };
     if (type === "kompleks" && !kompleksOpenAt(lvl)) return { refusal: "niva" };
     if (type === "storverk" && planned.length === 0) return { refusal: "forst_stalverk" };
     return { cost: buildCost(type, researched), hours: WORLD_KONSERN.buildHours[type], sale };
@@ -407,6 +419,7 @@ export function settleWorld(w: KonsernWorld, now: number): SettleEvent[] {
   // Prosjekter uten ordre (fra før byttet) som er ferdige
   for (const p of w.plants) if (p.project && p.project.readyAt <= now) finish(p.id, null);
   w.level = Math.max(w.level, w.floor, ladderLevel(w.plants));
+  w.earned = earnedLevel(w);
   return events;
 }
 

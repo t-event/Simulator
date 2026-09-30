@@ -140,7 +140,9 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Lista «Utbetalt til eierne» og merket «Reformveteran II» | Ja (som topplista og merker) | Regel 2 | B-303 |
 | Datterverkenes utbytte i ekte tid til konsernkassa | Ja (som konsernkassa) | Regel 2 og 7: serveren, ekte tid | B-304 |
 | Realistiske kostnader på toppen av hjemmeverket | Nei | Regel 1: ditt eget spill | B-305 |
-| Taket for kassa 10 mrd., kjørt på serveren | Nei | Regel 1: ditt eget spill | B-306 |
+| Taket for kassa 10 mrd. (fjernet i B-381; Privat formue er fryst historikk) | Nei | Regel 1: ditt eget spill | B-306, B-381 |
+| Topplista «Produksjon» og «Mest penger på bok» (Eget verk) | Ja | Regel 3: sammenlignes med andre | B-384 |
+| Sesongen avgjort på Konsernverdi | Ja | Regel 3 og 7: sammenlignes, ekte tid | B-384 |
 | Datterverk selges for 60 % av byggekostnaden | Nei | Regel 1: ditt eget spill | B-307 |
 | Markedet metter seg fra 3 000 t, administrasjon 500 kr/t | Nei | Regel 1: ditt eget spill | B-308 |
 | Konsernene satt tilbake til den nye økonomien (serverendring) | – | Ingen ny funksjon | B-309 |

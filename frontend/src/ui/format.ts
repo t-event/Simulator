@@ -1,6 +1,6 @@
 import { MIN_PER_DAY } from "../game/data";
 
-export { fmtKr, fmtT } from "../game/engine";
+export { fmtKr, fmtKrCompact, fmtT } from "../game/engine";
 
 export function fmtClock(minute: number): string {
   const m = Math.floor(minute % MIN_PER_DAY);

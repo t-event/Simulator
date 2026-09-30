@@ -4,21 +4,45 @@
  */
 import { rest, rpc, userId } from "./supabase";
 
-export type BoardKind = "verdi" | "konsern" | "omdomme" | "storverk" | "ferdig" | "kontroll" | "utbetalt";
+export type BoardKind =
+  | "verdi"
+  | "konsern"
+  | "omdomme"
+  | "storverk"
+  | "ferdig"
+  | "kontroll"
+  | "utbetalt"
+  | "kasse"
+  | "produksjon";
 
-export const BOARDS: { id: BoardKind; label: string; unit: "kr" | "rep" | "dager" | "poeng" }[] = [
-  // Konsernverdien regnet av serveren (B-320): konsernkassa + 60 dagers utbytte og bidrag − lån, i ekte tid
-  { id: "konsern", label: "Konsernverdi", unit: "kr" },
-  // Den gamle lista (kasse − lån + verkenes verdi i spillet) står som før, med ligaer og titler (B-320)
-  { id: "verdi", label: "Verdi i spillet", unit: "kr" },
-  // «Mest penger på bok» (B-144) er tatt bort (B-306): kassa har et tak på 10 mrd., så lista sa ingenting.
-  // Serveren kan fortsatt regne den ut («kasse»); «Utbetalt til eierne» har tatt over
-  { id: "storverk", label: "Raskest til storverk", unit: "dager" },
-  { id: "ferdig", label: "Raskest til 10 mrd.", unit: "dager" },
+/**
+ * To slags lister (B-384): «Industriverden» regnes av serveren i ekte tid og er sesongens hovedkonkurranse; «Eget verk»
+ * er tall fra spillet på mobilen (spilltid) – prestisje, ikke makt (B-323).
+ */
+export type BoardGroup = "verden" | "eget";
+
+export const BOARDS: {
+  id: BoardKind;
+  label: string;
+  unit: "kr" | "rep" | "dager" | "poeng" | "t";
+  group: BoardGroup;
+}[] = [
+  // Konsernverdien regnet av serveren (B-320): konsernkassa + 60 dagers utbytte og bidrag − lån, i ekte tid.
+  // Sesongens hovedkonkurranse (B-384): sesongen avsluttes etter denne (close_season)
+  { id: "konsern", label: "Konsernverdi", unit: "kr", group: "verden" },
+  // Eget verk (B-384): kasse − lån + verkenes verdi i spillet, med ligaer og titler (B-320)
+  { id: "verdi", label: "Verdi", unit: "kr", group: "eget" },
+  // «Mest penger på bok» (B-144) er tilbake (B-384): kassa har ikke lenger tak (B-381)
+  { id: "kasse", label: "Mest penger på bok", unit: "kr", group: "eget" },
+  // Tonn stål laget i spillet (B-384)
+  { id: "produksjon", label: "Produksjon", unit: "t", group: "eget" },
+  { id: "storverk", label: "Raskest til storverk", unit: "dager", group: "eget" },
+  { id: "ferdig", label: "Raskest til 10 mrd.", unit: "dager", group: "eget" },
   // Beste charge i kontrollrommet (B-295): samme liste i sesongen og i Hall of Fame
-  { id: "kontroll", label: "Kontrollrom", unit: "poeng" },
-  // Privat formue (B-303, navnet fra B-359): det kassa har tjent over taket, samme liste i sesongen og i Hall of Fame
-  { id: "utbetalt", label: "Privat formue", unit: "kr" },
+  { id: "kontroll", label: "Kontrollrom", unit: "poeng", group: "eget" },
+  // Privat formue (B-303, navnet fra B-359): fryst historikk fra da kassa hadde et tak (B-381), samme liste i sesongen
+  // og i Hall of Fame
+  { id: "utbetalt", label: "Privat formue", unit: "kr", group: "eget" },
   // «Omdømme» er tatt bort (B-171): nesten alle står på 100, så lista sa ingenting. Serveren kan fortsatt regne den ut
 ];
 

@@ -1,5 +1,7 @@
 # Forslag: verdenskartet, Kontroll, overtakelser og utbyttepolitikken – og pengene hjemme (B-331)
 
+> **Historisk analyse.** Tallene og reglene her er slik de var da dokumentet ble skrevet; kassetaket ble fjernet i B-381; Privat formue er fryst historikk. Slik spillet virker nå: `docs/STATUS.md`.
+
 **Status:** godkjent 29.9.2026 med svarene i B-332 (overtakelser inne i konsesjonen på 14 dager, 3× og 10× beholdes).
 Svar 3 rettet i B-337: eieren kan alltid miste selskapet ved overtakelse, og fordelen i fornyelsesanbudet er tatt bort. Bygges i rekkefølgen i avsnitt 8.
 

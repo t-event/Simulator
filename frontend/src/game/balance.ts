@@ -1002,6 +1002,7 @@ if (process.argv.includes("--konsern")) {
       g.mastery = { datterverk: 15 };
     }
     g.konsern.legends = 6;
+    g.konsern.earned = 6;
     g.konsern.plants = Array.from({ length: n }, (_, i) => ({
       id: i + 1,
       type,

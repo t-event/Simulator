@@ -1,8 +1,8 @@
 /**
- * Kassetaket og utbetalingen til eierne (B-303, reform 2; taket senket til 10 mrd. i B-306). Det dyreste som kan
- * kjøpes, er et stålkompleks til 3,6 mrd., og sluttmålet er 10 mrd. Over taket er kassa bare et tall, så det verket
- * tjener utover, betales ut til eierne: en historikk (i spillet «Privat formue», B-359; egen liste i Hall of Fame) som ikke
- * teller i konsernverdien og ikke kan brukes. Kassa er en buffer til neste kjøp, ikke en poengsum.
+ * Privat formue (B-303, B-306, B-359) – fryst historikk fra B-381. Fram til B-381 hadde kassa et tak på 10 mrd., og det
+ * verket tjente over taket, ble betalt ut til eierne. Taket er fjernet: kassa i hovedverket kan vokse fritt, fordi lokale
+ * penger ikke gir makt i verden (B-323). Det som alt er betalt ut, står som historikk («Privat formue» på Økonomi og i
+ * Hall of Fame). Ingen får det tilbake, og ingenting nytt legges til.
  *
  * Den bundne konsernreserven (B-193) er avviklet: det som sto der, regnes som utbetalt til eierne fra før. Feltet
  * `lockedReserve` beholdes urørt i lagringen (eldre utgaver av appen skriver fortsatt til det), og `paidOutTotal`
@@ -13,8 +13,8 @@ import { day } from "./plant";
 import type { GameState } from "./types";
 
 export const CASH_RESERVE: { softCap: number | null } = {
-  /** Taket for kassa i kroner (B-306: 10 mrd., lik sluttmålet); null slår det av */
-  softCap: 10_000_000_000,
+  /** Taket for kassa i kroner. null = uten tak (B-381); var 10 mrd. fra B-306 */
+  softCap: null,
 };
 
 /** Kroner betalt ut til eierne i alt, medregnet den gamle bundne reserven (B-193) */
@@ -22,7 +22,7 @@ export function paidOutTotal(g: GameState): number {
   return (g.lockedReserve?.total ?? 0) + (g.paidOut?.total ?? 0);
 }
 
-/** Har kassa noen gang nådd taket? Da vises utbetalingen (gradvis synlighet, B-180) */
+/** Ble noe betalt ut før taket ble fjernet (B-381)? Da vises den fryste formuen (gradvis synlighet, B-180) */
 export function hasPaidOut(g: GameState): boolean {
   return paidOutTotal(g) > 0;
 }
@@ -47,14 +47,15 @@ export function applyCashCap(g: GameState): number {
   return moved;
 }
 
-/** Ved nytt døgn: én linje om hva som ble betalt ut døgnet før */
+/** Ved nytt døgn: én linje om hva som ble betalt ut døgnet før (bare når taket er på) */
 export function paidOutDayLog(g: GameState): void {
   const p = g.paidOut;
   if (!p || p.today <= 0) return;
-  log(
-    g,
-    `Over taket for kassa: ${fmtKr(p.today)} ble flyttet til din private formue i går (${fmtKr(paidOutTotal(g))} i alt).`,
-    "info",
-  );
+  if (CASH_RESERVE.softCap !== null)
+    log(
+      g,
+      `Over taket for kassa: ${fmtKr(p.today)} ble flyttet til din private formue i går (${fmtKr(paidOutTotal(g))} i alt).`,
+      "info",
+    );
   p.today = 0;
 }

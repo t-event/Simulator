@@ -3164,6 +3164,21 @@ button {
   font-size: var(--fs-meta);
 }
 
+/* To slags lister (B-384): Industriverden og Eget verk, hver med en liten overskrift */
+.g-board-group-label {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  margin: var(--sp-3) 0 0;
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.g-board-group .g-board-tabs {
+  margin-top: var(--sp-1);
+}
+
 .g-nick {
   max-width: 360px;
 }
