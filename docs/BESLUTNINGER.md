@@ -6854,3 +6854,15 @@ Beslutning:
   kortet ned til én bokstav på 320 px. «Slik virker lista» forklarer at dagen ikke teller.
 - Dagen er spilltid og bare opplysning: den teller ikke i noen plassering (B-190, B-323).
 Konto (B-149): del av topplista, som krever konto fra før (regel 3) – ingen ny rad i KONTO.md.
+
+## B-379 Forslag om verksjefer for datterverkene (2026-09-30)
+Status: forslag – venter på eieren
+Bakgrunn: brukeren (eier): «Supert! Fortsett med planene». Neste fase i RETNING er fase 5, datterverksledelse. Den endrer
+økonomien i ekte tid og har valg som er eierens, så den skrives som forslag først (som Kontroll, B-331).
+Beslutning: `docs/VERKSJEF-FORSLAG.md` – verksjef med tre egenskaper (Drift, Økonomi, Folk) og ett trekk, mandat
+(Lønnsomhet, Vekst, Stabilitet), lønn fra konsernkassa, «Verksjefen ringer» høyst én gang per ekte dag, lojalitet og
+sluttpakke. Uten verksjef går verket som i dag. Bygges i tre deler (V1–V3) etter eierens svar på fem spørsmål.
+Ellers i planen: slagghåndteringen slås på når skraplageret har betalt ut noen dager uten feil (B-253), og verkstedet
+etter det (B-256). Gjestene er slått på; appen som prøvde før, prøver igjen etter et døgn (B-212).
+Endringslogg: nei
+Konto (B-149): verksjefene krever konto (regel 2 og 7) – føres i KONTO.md når de bygges.

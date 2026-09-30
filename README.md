@@ -115,6 +115,7 @@ de beskriver ikke noe bestemt anlegg.
 - `docs/OKONOMI-KONTROLL.md` – kontrollen av økonomimodellen (B-324)
 - `docs/KONSERN-FORSLAG.md` – konsernet i ekte tid: nivåer, priser og aktivitetskrav (B-325–B-329)
 - `docs/KONTROLL-FORSLAG.md` – verdenskartet, utbyttepolitikken, Kontroll og oppkjøp (B-331, B-332)
+- `docs/VERKSJEF-FORSLAG.md` – forslag om verksjefer for datterverkene (B-379)
 
 ## Arkitektur
 
