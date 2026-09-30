@@ -35,7 +35,18 @@ import {
   setNickname,
 } from "./leaderboard";
 import { claimAway, fetchDailyStatus } from "./daily";
-import { chestFp, claimWeekChest, fetchWeeklyBoard, fetchWeeklyStatus, weekDaysLeft } from "./weekly";
+import {
+  abandonControlAttempt,
+  chestFp,
+  claimWeekChest,
+  fetchWeeklyBoard,
+  fetchWeeklyStatus,
+  flushPendingControl,
+  pendingControl,
+  startControlAttempt,
+  submitControlAttempt,
+  weekDaysLeft,
+} from "./weekly";
 import { fetchActiveEvents, fetchSeasonHistory, fetchSeasonStatus, markResultSeen, resultSeen } from "./season";
 import {
   cloudStatus,
@@ -173,6 +184,9 @@ interface Fake {
   guestsOff: boolean;
   /** Skiftrapporten (B-338) */
   chat: { id: number; user: string | null; body: string; at: number; hidden: boolean }[];
+  /** Ukens kontrollrom (B-387): om uka er en kontrollromsuke, og forsøkene */
+  controlWeek: boolean;
+  control: { id: number; attempt: number; seed: number; points: number | null; abandoned: boolean }[];
 }
 function makeFake(): Fake {
   const f: Fake = {
@@ -193,6 +207,8 @@ function makeFake(): Fake {
     guests: new Set(),
     guestsOff: false,
     chat: [],
+    controlWeek: false,
+    control: [],
   };
   const json = (status: number, body: unknown) =>
     new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
@@ -543,11 +559,52 @@ function makeFake(): Fake {
           ends_at: "2026-10-01T00:00:00Z",
         },
       ]);
+    if (path.startsWith("/rest/v1/rpc/weekly_control_start")) {
+      if (f.control.some((a) => a.points === null && !a.abandoned))
+        return json(200, { ok: false, reason: "apen", attempt_id: f.control.find((a) => a.points === null)!.id });
+      if (f.control.length >= 3) return json(200, { ok: false, reason: "brukt" });
+      const n = f.control.length + 1;
+      const a = { id: 100 + n, attempt: n, seed: [11, 22, 33][n - 1], points: null, abandoned: false };
+      f.control.push(a);
+      return json(200, {
+        ok: true,
+        attempt_id: a.id,
+        attempt: n,
+        seed: a.seed,
+        grade: "premium",
+        left: 3 - n,
+        deadline: new Date(Date.now() + 900_000).toISOString(),
+      });
+    }
+    if (path.startsWith("/rest/v1/rpc/weekly_control_submit")) {
+      const b = JSON.parse(String(init?.body ?? "{}"));
+      const a = f.control.find((x) => x.id === b.p_attempt);
+      if (!a) return json(200, { ok: false, reason: "ukjent" });
+      if (a.abandoned) return json(200, { ok: false, reason: "avbrutt" });
+      if (a.points === null) a.points = b.p_points;
+      const best = Math.max(...f.control.map((x) => x.points ?? 0));
+      return json(200, { ok: true, points: a.points, best, left: 3 - f.control.length });
+    }
+    if (path.startsWith("/rest/v1/rpc/weekly_control_abandon")) {
+      const b = JSON.parse(String(init?.body ?? "{}"));
+      const a = f.control.find((x) => x.id === b.p_attempt && x.points === null);
+      if (a) a.abandoned = true;
+      return json(200, { ok: true });
+    }
     if (path.startsWith("/rest/v1/rpc/weekly_status"))
       return json(200, {
         week_start: "2026-09-21",
         ends_at: "2026-09-27T22:00:00+00:00",
-        kind: "tonn",
+        kind: f.controlWeek ? "kontroll" : "tonn",
+        control: f.controlWeek
+          ? {
+              grade: "premium",
+              attempts: 3,
+              used: f.control.length,
+              best: f.control.some((a) => a.points !== null) ? Math.max(...f.control.map((a) => a.points ?? 0)) : null,
+              open: null,
+            }
+          : null,
         league: "solv",
         plass: 2,
         value: "12345",
@@ -1244,6 +1301,56 @@ const main = async () => {
     assert((await claimWeekChest()) === 75 && (await claimWeekChest()) === 0, "kista ga fagpoeng to ganger");
     // Bare topp 3 får kiste (B-155)
     assert(chestFp(1) === 100 && chestFp(3) === 50 && chestFp(4) === 0, "kiste utenfor topp 3");
+  });
+
+  await test("Ukens kontrollrom (B-387): tre forsøk, levering som tåler nettfeil, og samme svar ved ny innlevering", async () => {
+    const f = fresh();
+    await login(f);
+    f.controlWeek = true;
+    const s = await fetchWeeklyStatus();
+    assert(
+      s?.kind === "kontroll" && s.control?.grade === "premium" && s.control.used === 0,
+      `status ${JSON.stringify(s)}`,
+    );
+    // Første forsøk: frø A fra serveren
+    const r1 = await startControlAttempt();
+    assert(r1.ok && r1.attempt.seed === 11 && r1.attempt.attempt === 1, `start ${JSON.stringify(r1)}`);
+    if (!r1.ok) return;
+    // Et nytt forsøk før det første er levert: nei
+    const again = await startControlAttempt();
+    assert(!again.ok && again.reason === "apen", "startet to forsøk samtidig");
+    // Nettet faller ut ved innsending: resultatet blir liggende
+    f.offline = true;
+    const user = "u-a@test";
+    const p = { user, id: r1.attempt.id, points: 3210, stars: 4, log: [[0, 0, "s", 0]], deadline: r1.attempt.deadline };
+    const o1 = await submitControlAttempt(p);
+    assert(o1.kind === "venter" && pendingControl()?.id === r1.attempt.id, `ved nettfeil ${JSON.stringify(o1)}`);
+    // Nettet er tilbake: samme forsøk leveres
+    f.offline = false;
+    const o2 = await flushPendingControl();
+    assert(o2.kind === "levert" && o2.points === 3210 && pendingControl() === null, `levert ${JSON.stringify(o2)}`);
+    // Ny innlevering av samme forsøk gir samme svar, ikke nye poeng
+    const o3 = await submitControlAttempt({ ...p, points: 4999 });
+    assert(o3.kind === "levert" && o3.points === 3210, `idempotent ${JSON.stringify(o3)}`);
+    // Et forsøk som gis opp, teller 0, og neste får frø B
+    const r2 = await startControlAttempt();
+    assert(r2.ok && r2.attempt.seed === 22, "frø B");
+    if (r2.ok) await abandonControlAttempt(r2.attempt.id);
+    const r3 = await startControlAttempt();
+    assert(r3.ok && r3.attempt.seed === 33, "frø C");
+    if (r3.ok) {
+      const late = await submitControlAttempt({ ...p, id: r3.attempt.id, deadline: "2026-01-01T00:00:00Z" });
+      assert(late.kind === "avvist" && late.reason === "sent" && pendingControl() === null, "for sent ble levert");
+    }
+    // Fristen er ute også på serveren: forsøket teller 0
+    f.control[2].abandoned = true;
+    const r4 = await startControlAttempt();
+    assert(!r4.ok && r4.reason === "brukt", "fjerde forsøk");
+    // Uten nett startes ingenting
+    f.offline = true;
+    const off = await startControlAttempt();
+    assert(!off.ok && off.reason === "nett", "startet uten nett");
+    f.offline = false;
   });
 
   await test("Ingenting lastes opp før spillet er avklart mot kontoen, heller ikke mens man velger (B-138)", async () => {

@@ -7193,3 +7193,23 @@ button.g-prod-row:hover {
   gap: var(--sp-1);
   min-height: 44px;
 }
+
+/* Ukens kontrollrom på kortet «Ukens utfordring» (B-387) */
+.g-week-control {
+  margin-top: var(--sp-3);
+}
+
+.g-week-control-actions {
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+
+.g-week-control-actions button {
+  flex: 1 1 140px;
+  min-height: 44px;
+}
+
+.cg-weekly-label {
+  font-size: var(--fs-meta);
+  font-weight: 400;
+}

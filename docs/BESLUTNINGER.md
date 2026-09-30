@@ -6986,3 +6986,43 @@ Beslutning:
 Endringslogg: nei
 Konto (B-149): – ingen ny funksjon (når den bygges: ukens kontrollrom krever konto, regel 3 og 7).
 
+## B-387 Ukens kontrollrom er bygget (variant A), og eierens svar om konsernkapitalen (2026-09-30)
+Status: gjeldende. Bygger på B-386 og erstatter rotasjonen i B-384.
+Bakgrunn: eieren valgte variant A (ikke edge-funksjon og dobbel spillmotor nå), men endret frøene: ikke ubegrenset
+øving på den tellende charge, men tre tellende frø per uke (A/B/C), like for alle i samme rekkefølge; trening med egne
+frø. Et startet forsøk skal kunne leveres etter en nettfeil. Rotasjon dager → stål → kontrollrom; «Mer stål enn før» er
+midlertidig. For konsernkapitalen: to aktive programmer av fem, men programøkonomien skal simuleres i to modeller før K-1.
+Beslutning:
+- `094_ukens_kontrollrom.sql`: `weekly_control_attempts` (RLS, ingen tilgang for spillerne), hemmelig nøkkel i
+  `weekly_control_keys`, frø `weekly_control_seed(uke, n)`, kvalitet `weekly_control_grade(uke)`,
+  `weekly_control_start` / `_submit` (idempotent) / `_abandon`, `weekly_scores` med grenen `kontroll`, `weekly_status`
+  med `control`, og `week_kind` dager → tonn → kontroll fra 5.10 (første kontrollromsuke 19.10). Grenser i
+  `config.world.weekly_control` (3 forsøk, 20 s–15 min, 0–5 000 poeng, logg ≤ 32 kB).
+- App: `seededRandom` og inndatalogg i `ChargeGame`; ukens charge `weeklyRequest` (samme for alle, ikke eget verk);
+  kortet «Ukens utfordring» får kvaliteten, forsøkene, beste resultat, «Øv på ukens kvalitet» og «Kjør tellende forsøk»
+  (med bekreftelse). Resultatet lagres i nettleseren til serveren har svart og sendes på nytt hvert 20. sekund.
+  Ukens charger blir ikke charger i verket og gir ikke fagpoeng eller rekord.
+- Konsernkapital: eierens svar står øverst i `KONSERNKAPITAL-FORSLAG.md`. Neste steg: simulere programmodell A og B.
+- Teknisk gjeld: serveren stoler fortsatt på enkelte verdier fra mobilen (STATUS avsnitt 9) – må strammes før verden blir
+  større eller mer konkurranseutsatt.
+Endringslogg: ja.
+Konto (B-149): ja – regel 3 og 7 (sammenlignes med andre, avgjøres på serveren). Kortet vises bare med konto; gjester
+slipper ikke til (`guest_gate`).
+
+## B-388 Simulering av programmodellene: anbefaling B (aktivt budsjett) – venter på eieren (2026-09-30)
+Status: analyse – venter på eieren
+Bakgrunn: eieren var skeptisk til store permanente trinn (A) og ba om simulering av A mot et aktivt programbudsjett (B)
+før K-1 bygges: kasse etter 180/365/730 dager, konkurranse med oppkjøp, små og store spillere, og hvor ofte et bytte skjer.
+Beslutning:
+- `frontend/src/game/programSim.ts` (permanent, brukes ikke av spillet): A og B for liten/middels/stor med faste
+  verdenshendelser og oppkjøpsvinduer. Resultatet i `KONSERNKAPITAL-FORSLAG.md` avsnitt 9.
+- Funn: A tømmer kassa første år og hoper så opp i samme tempo som uten programmer; 0 bytter på to år; lik pris gjør det
+  tyngre for små. B med budsjett som andel av inntekten (4/12/30 %) bremser hele tida (to på middels ca. 30–35 %, to på høy
+  ca. 66–71 % av inntekten), gjør tida til et maksbud 64–108 dager med to på høy, gir lik avveining for små og store, og
+  18 bytter på to år (styrt av hendelsene i verden).
+- Anbefaling: B, med etablering i prosjektlinja, binding 14 dager, to aktive, og effekter hovedsakelig utenom penger.
+  Forbehold: B er et sluk hvis effektene ikke merkes i spillet; programmene alene løser ikke opphopingen.
+- Ingen endring i spillet eller verdensbalansen.
+Endringslogg: nei
+Konto (B-149): – ingen ny funksjon (når K-1 bygges: krever konto, regel 2 og 7).
+

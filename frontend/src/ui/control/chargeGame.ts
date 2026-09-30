@@ -121,6 +121,29 @@ export interface Score {
 
 const fmt = (v: number, d: number) => v.toFixed(d).replace(".", ",");
 
+/**
+ * Tilfeldigheter fra et frø (mulberry32, B-387): samme frø gir samme charge – skrapkurvene, karbonet, slaggklumpene og
+ * tappingen. Ukens kontrollrom får frøene fra serveren; trening bruker egne frø.
+ */
+export function seededRandom(seed: number): () => number {
+  let a = seed >>> 0 || 1;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/**
+ * Det spilleren gjorde (B-387): [runde, sekunder inn i runden (ms), handling, verdi]. Handlingene: «s» start, «h» hold
+ * (1/0), «f» ferdig med rensingen, «r» rak klump (id), «t» tapp, «p» rett opp. Lagres med ukens forsøk, så topp 3 kan
+ * etterprøves. Tak på antall, så loggen aldri blir stor.
+ */
+export type InputEntry = [number, number, string, number];
+export const INPUT_LOG_MAX = 1500;
+
 /** Én charge som spill. Alt endres gjennom metodene; grensesnittet leser feltene. */
 export class ChargeGame {
   round = 0;
@@ -132,6 +155,8 @@ export class ChargeGame {
   /** Kombo: poeng ganges med denne (1–5) */
   mult = 1;
   score: Score | null = null;
+  /** Inndataene (B-387), med tak `INPUT_LOG_MAX` */
+  readonly inputs: InputEntry[] = [];
 
   // Smelting
   temp = MELT_START_C;
@@ -198,8 +223,13 @@ export class ChargeGame {
     return r === "smelt" || r === "rens" || (r === "tapp" && this.tapStage === "osa");
   }
 
+  private note(action: string, value = 0): void {
+    if (this.inputs.length < INPUT_LOG_MAX) this.inputs.push([this.round, Math.round(this.t * 1000), action, value]);
+  }
+
   start(): void {
     if (this.phase !== "klar") return;
+    this.note("s");
     this.phase = "spill";
     this.t = 0;
     this.mult = 1;
@@ -208,12 +238,15 @@ export class ChargeGame {
   }
 
   hold(on: boolean): void {
+    const was = this.holding;
     this.holding = on && this.phase === "spill" && this.holdRound && this.lockS <= 0;
+    if (this.holding !== was) this.note("h", this.holding ? 1 : 0);
   }
 
   /** Rensingen er ferdig (spilleren trykker «Ferdig») */
   finishRefining(): void {
     if (this.phase !== "spill" || this.roundId !== "rens") return;
+    this.note("f");
     this.holding = false;
     this.endRound();
   }
@@ -223,6 +256,7 @@ export class ChargeGame {
     if (this.phase !== "spill" || this.roundId !== "slagg") return null;
     const x = this.targets.find((o) => o.id === id && o.state === "oppe");
     if (!x) return null;
+    this.note("r", id);
     x.state = "raket";
     if (x.kind === "slagg") {
       this.raked++;
@@ -240,6 +274,7 @@ export class ChargeGame {
   /** Tapper nå (temperaturen er satt) og går over til å helle i øsa */
   tap(): void {
     if (this.phase !== "spill" || this.roundId !== "tapp" || this.tapStage !== "varm") return;
+    this.note("t");
     this.tapDev = this.tapTemp - this.tapTarget;
     const ad = Math.abs(this.tapDev);
     this.addPts(Math.max(0, 300 - 15 * ad));
@@ -249,6 +284,7 @@ export class ChargeGame {
   /** Retter opp ovnen: ferdig med å helle */
   finishPour(): void {
     if (this.phase !== "spill" || this.roundId !== "tapp" || this.tapStage !== "osa") return;
+    this.note("p");
     this.holding = false;
     this.endRound();
   }

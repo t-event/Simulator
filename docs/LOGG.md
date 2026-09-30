@@ -5,6 +5,40 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 310 – 2026-09-30: Simulering av programmodellene A og B (B-388)
+
+**Brukeren ba om:** før K-1: simuler store permanente trinn (A) mot aktivt programbudsjett (B) og kom tilbake med tall og
+anbefaling.
+
+**Gjort:** `frontend/src/game/programSim.ts` med faste hendelser i verden og oppkjøpsvinduer. Første versjon var en
+spiller som bare regner kroner – den kjøpte aldri noe, fordi programmene med vilje er rundt null i penger – så spillerne
+bruker nå programmene for det de gir utenom penger, og kapitalstrømmene måles. Skannet B med budsjett som andel av
+utbyttet og av hele inntekten. Resultat og anbefaling (B, 4/12/30 % av inntekten, binding 14 dager) i
+KONSERNKAPITAL-FORSLAG.md avsnitt 9 og B-388.
+
+**Testet:** tsc, lint; simuleringen er deterministisk (samme tall hver gang, ca. 6 s).
+
+**Gjenstår:** eierens valg av programmodell. Deretter verksjef V1. Sjekken 2.10.
+
+## Økt 309 – 2026-09-30: Ukens kontrollrom bygget (B-387)
+
+**Brukeren ba om:** variant A med tre felles tellende frø (A/B/C, samme rekkefølge for alle) og egne treningsfrø,
+levering med samme forsøk etter nettfeil, rotasjon dager → stål → kontrollrom; ingen edge-funksjon. Konsernkapital: to
+aktive programmer, men simuler to programøkonomier før K-1. Sjekken 2.10 går som avtalt.
+
+**Gjort:** `094_ukens_kontrollrom.sql` (forsøkstabell, hemmelig nøkkel, frø, kvalitet, start/levering/gi opp, ukelista og
+status, rotasjonen). App: frø og inndatalogg i `ChargeGame`, `ui/control/weekly.ts`, ukemodus i kontrollrommet (tittel,
+bekreftelse ved avbrudd, eget resultat uten fagpoeng), panelet på kortet «Ukens utfordring» og levering som prøver igjen.
+Docs: B-387, STATUS (uker, teknisk gjeld), UKENS-KONTROLLROM, KONSERNKAPITAL (eierens svar), FORSLAG, KONTO, CLAUDE.md.
+
+**Testet:** SQL som spiller i en blokk som ble rullet tilbake: frø A og B like for to spillere og ulike innbyrdes, åpent
+forsøk sperrer nytt, for tidlig / for sent / for mange poeng avvises, ny innlevering gir samme svar, gi opp, fjerde forsøk
+nektes, anon slipper ikke til, ukelista og status. `npm test` (frø gir samme charge, loggen, levering med nettfeil),
+tsc, lint, balansen. Playwright 320/390/1366: kortet, trening, tellende forsøk med avbrudd (gir opp på serveren).
+get_advisors: bare de kjente punktene.
+
+**Gjenstår:** simulere programmodell A og B (neste). Variant B av kontrollrommet senere. Sjekken 2.10.
+
 ## Økt 308 – 2026-09-30: Forslag – Ukens kontrollrom og konsernkapital (B-386)
 
 **Brukeren ba om:** ingen flere økonomiske justeringer. Ukens kontrollrom som ny ukekonkurranse (samme charge for alle,

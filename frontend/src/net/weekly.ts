@@ -5,7 +5,7 @@
  */
 import { rpc, userId } from "./supabase";
 
-export type WeekKind = "vekst" | "tonn" | "dager";
+export type WeekKind = "vekst" | "tonn" | "dager" | "kontroll";
 export type League = "bronse" | "solv" | "gull";
 
 // Én liste for alle, målt i prosent, så små og store verk kan konkurrere (B-172)
@@ -18,6 +18,11 @@ export const WEEK_KINDS: Record<WeekKind, { title: string; how: string }> = {
   tonn: {
     title: "Mer stål enn før",
     how: "Lag mer stål per spilldøgn enn du gjorde uka før – tallet er farten denne uka i prosent av farten da. Du er med når spillet har vært lagret på nett minst to dager før uka.",
+  },
+  // Ukens kontrollrom (B-387): tre tellende forsøk med samme charger for alle, beste teller
+  kontroll: {
+    title: "Ukens kontrollrom",
+    how: "Tre tellende charger i kontrollrommet – de samme for alle, i samme rekkefølge. Den beste teller. Et forsøk er brukt når du starter det. Du kan øve så mye du vil på ukens kvalitet uten at det teller.",
   },
   // Ekte dager, ikke spilldøgn (B-190): farten i spillet skal ikke avgjøre en konkurranse mellom spillere
   dager: {
@@ -43,6 +48,18 @@ export interface WeeklyStatus {
   /** Kister som venter: fagpoeng til sammen, antall og beste plass */
   chest: { fp: number; count: number; best: number } | null;
   medals: { gold: number; silver: number; bronze: number };
+  /** Ukens kontrollrom (B-387), bare i kontrollromsukene */
+  control: WeeklyControl | null;
+}
+
+/** Forsøkene i ukens kontrollrom slik serveren ser dem */
+export interface WeeklyControl {
+  grade: string;
+  attempts: number;
+  used: number;
+  best: number | null;
+  /** Et startet forsøk som ikke er levert (fristen er ikke ute) */
+  open: { id: number; attempt: number; deadline: string } | null;
 }
 
 interface StatusRow {
@@ -57,10 +74,17 @@ interface StatusRow {
   gold: number;
   silver: number;
   bronze: number;
+  control?: {
+    grade: string;
+    attempts: number;
+    used: number;
+    best: number | null;
+    open: { id: number; attempt: number; deadline: string } | null;
+  } | null;
 }
 
 function asKind(k: string): WeekKind {
-  return k === "tonn" || k === "dager" ? k : "vekst";
+  return k === "tonn" || k === "dager" || k === "kontroll" ? k : "vekst";
 }
 function asLeague(l: string): League {
   return l === "solv" || l === "gull" ? l : "bronse";
@@ -79,7 +103,157 @@ export async function fetchWeeklyStatus(): Promise<WeeklyStatus | null> {
     players: Number(r.players) || 0,
     chest: r.chest ? { fp: Number(r.chest.fp), count: Number(r.chest.count), best: Number(r.chest.best) } : null,
     medals: { gold: Number(r.gold) || 0, silver: Number(r.silver) || 0, bronze: Number(r.bronze) || 0 },
+    control: r.control
+      ? {
+          grade: String(r.control.grade),
+          attempts: Number(r.control.attempts) || 3,
+          used: Number(r.control.used) || 0,
+          best: r.control.best === null || r.control.best === undefined ? null : Number(r.control.best),
+          open: r.control.open
+            ? {
+                id: Number(r.control.open.id),
+                attempt: Number(r.control.open.attempt),
+                deadline: r.control.open.deadline,
+              }
+            : null,
+        }
+      : null,
   };
+}
+
+// ------------------------------------------------------------------------------------------------------------------
+// Ukens kontrollrom (B-387, `094_ukens_kontrollrom.sql`)
+// ------------------------------------------------------------------------------------------------------------------
+
+export type ControlRefusal = "konto" | "sperret" | "uke" | "apen" | "brukt" | "nett";
+export type SubmitRefusal = "ukjent" | "avbrutt" | "fort" | "sent" | "ugyldig";
+
+export const CONTROL_REFUSAL_TEXT: Record<ControlRefusal | SubmitRefusal, string> = {
+  konto: "Ukens utfordring krever konto.",
+  sperret: "Kontoen er sperret mens topplista sjekker den.",
+  uke: "Denne uka er det en annen utfordring.",
+  apen: "Du har et forsøk som ikke er levert. Lever det eller gi det opp først.",
+  brukt: "Du har brukt alle forsøkene denne uka.",
+  nett: "Fikk ikke kontakt med serveren. Forsøket er ikke startet.",
+  ukjent: "Forsøket finnes ikke.",
+  avbrutt: "Forsøket ble gitt opp.",
+  fort: "Forsøket ble levert for fort.",
+  sent: "Fristen for forsøket gikk ut (15 minutter).",
+  ugyldig: "Resultatet kunne ikke godtas.",
+};
+
+export interface ControlAttempt {
+  id: number;
+  attempt: number;
+  seed: number;
+  grade: string;
+  left: number;
+  deadline: string;
+}
+
+/** Starter et tellende forsøk. Forsøket er brukt fra nå av (også hvis appen lukkes). */
+export async function startControlAttempt(): Promise<
+  { ok: true; attempt: ControlAttempt } | { ok: false; reason: ControlRefusal; openId?: number }
+> {
+  try {
+    const r = await rpc<Record<string, unknown>>("weekly_control_start", {});
+    if (!r?.ok) {
+      const reason = (typeof r?.reason === "string" ? r.reason : "nett") as ControlRefusal;
+      return { ok: false, reason, openId: r?.attempt_id === undefined ? undefined : Number(r.attempt_id) };
+    }
+    return {
+      ok: true,
+      attempt: {
+        id: Number(r.attempt_id),
+        attempt: Number(r.attempt),
+        seed: Number(r.seed),
+        grade: String(r.grade),
+        left: Number(r.left),
+        deadline: String(r.deadline),
+      },
+    };
+  } catch {
+    return { ok: false, reason: "nett" };
+  }
+}
+
+/** Et resultat som skal leveres (lagres i nettleseren til serveren har svart, B-387) */
+export interface PendingControl {
+  user: string;
+  id: number;
+  points: number;
+  stars: number;
+  log: unknown;
+  deadline: string;
+}
+
+const PENDING_KEY = "stalverk-ukekontroll-v1";
+
+export function pendingControl(): PendingControl | null {
+  try {
+    const raw = localStorage.getItem(PENDING_KEY);
+    const p = raw ? (JSON.parse(raw) as PendingControl) : null;
+    return p && typeof p.id === "number" ? p : null;
+  } catch {
+    return null;
+  }
+}
+
+function setPending(p: PendingControl | null): void {
+  try {
+    if (p) localStorage.setItem(PENDING_KEY, JSON.stringify(p));
+    else localStorage.removeItem(PENDING_KEY);
+  } catch {
+    // Uten lagring i nettleseren prøves innleveringen bare én gang
+  }
+}
+
+export type SubmitOutcome =
+  | { kind: "levert"; points: number; best: number; left: number }
+  | { kind: "venter" }
+  | { kind: "avvist"; reason: SubmitRefusal };
+
+/**
+ * Leverer et forsøk. Resultatet lagres først i nettleseren, så det ikke går tapt ved en nettfeil: da prøves det igjen
+ * (`flushPendingControl`) til fristen er ute. Serveren godtar samme innlevering flere ganger (samme svar).
+ */
+export async function submitControlAttempt(p: PendingControl): Promise<SubmitOutcome> {
+  setPending(p);
+  return flushPendingControl();
+}
+
+/** Prøver å levere et resultat som venter. «venter» betyr at det skal prøves igjen senere. */
+export async function flushPendingControl(now = Date.now()): Promise<SubmitOutcome> {
+  const p = pendingControl();
+  if (!p) return { kind: "venter" };
+  if (userId() !== p.user) return { kind: "venter" };
+  if (Date.parse(p.deadline) + 60_000 < now) {
+    setPending(null);
+    return { kind: "avvist", reason: "sent" };
+  }
+  try {
+    const r = await rpc<Record<string, unknown>>("weekly_control_submit", {
+      p_attempt: p.id,
+      p_points: Math.round(p.points),
+      p_stars: Math.round(p.stars),
+      p_log: p.log ?? null,
+    });
+    if (r?.ok) {
+      setPending(null);
+      return { kind: "levert", points: Number(r.points), best: Number(r.best), left: Number(r.left) };
+    }
+    setPending(null);
+    return { kind: "avvist", reason: (typeof r?.reason === "string" ? r.reason : "ugyldig") as SubmitRefusal };
+  } catch {
+    // Nettfeil eller tjenesten er nede: resultatet blir liggende og prøves igjen
+    return { kind: "venter" };
+  }
+}
+
+/** Gir opp et startet forsøk (teller 0) */
+export async function abandonControlAttempt(id: number): Promise<void> {
+  if (pendingControl()?.id === id) setPending(null);
+  await rpc("weekly_control_abandon", { p_attempt: id });
 }
 
 export interface WeeklyRow {

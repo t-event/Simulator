@@ -1,6 +1,6 @@
 # STATUS – slik virker Stålverket nå
 
-**Fasit for hvordan spillet virker i dag** (sist oppdatert 30.9.2026, B-385). Hvorfor ting er som de er, står i
+**Fasit for hvordan spillet virker i dag** (sist oppdatert 30.9.2026, B-387). Hvorfor ting er som de er, står i
 `BESLUTNINGER.md`; hva som ble gjort når, står i `LOGG.md`. Endrer du en regel, oppdater denne fila i samme økt. Står
 noe annet i et eldre analyse- eller forslagsdokument, gjelder denne fila.
 
@@ -72,9 +72,15 @@ regnes av serveren i ekte tid.
   også (Hall of Fame). Sesonger startes og avsluttes bare manuelt.
 - **Topplista** har to grupper: «Industriverden · sesong» (Konsernverdi) og «Eget verk» (Verdi, Mest penger på bok,
   Produksjon, Raskest til storverk, Raskest til 10 mrd., Kontrollrom, Privat formue – fryst). Eget verk er ære, ikke makt.
-- **Ukens utfordring:** «Flest aktive dager» (ekte dager) og «Mer stål enn før» veksler fra uka 5.10.2026.
-  «Størst vekst i konsernverdi» er tatt bort. Eieren har valgt «Ukens kontrollrom» som neste; forslaget står i
-  `UKENS-KONTROLLROM.md` (ikke bygget).
+- **Ukens utfordring** roterer fra uka 5.10.2026: «Flest aktive dager» (ekte dager) → «Mer stål enn før» → «Ukens
+  kontrollrom» (første gang uka 19.10). «Størst vekst i konsernverdi» er tatt bort. «Mer stål enn før» er midlertidig
+  (kan påvirkes med en svak uke først) og byttes når stål per kWh og leveringspresisjon finnes i tidslinja.
+- **Ukens kontrollrom** (B-387, 094): tre tellende forsøk per uke med tre frø fra serveren (A, B, C) – de samme for alle,
+  i samme rekkefølge – og ukens kvalitet. Et forsøk er brukt når det startes; det kan leveres med samme id til fristen
+  (15 min), også etter en nettfeil (appen lagrer resultatet og prøver igjen). Serveren sjekker tid (20 s–15 min), poeng
+  (0–5 000) og stjerner, og lagrer inndataene (høyst 32 kB). Beste leverte forsøk teller. Trening på ukens kvalitet er
+  fri, med egne frø, og teller ikke. Verifiseringen er som for kontrollromsrekorden: rimelige tall, ikke avspilling
+  (variant B – avspilling på serveren – venter).
 - Juksesperren (`check_snapshot`) sjekker vekst, tonn, fart og første opplasting.
 
 ## 7. Konto og gjester
@@ -109,18 +115,21 @@ regnes av serveren i ekte tid.
 
 ## 9. Kjente svakheter
 
-1. Serveren leser noen verdier fra spillet på mobilen (forskning, felles funksjoner, omdømme, kvalitet, margin). En
-   endret app kunne sette dem (STABILISERING.md avsnitt 7).
+1. **Teknisk gjeld – serverautoritet:** serveren leser noen verdier fra spillet på mobilen (forskning, felles
+   funksjoner, omdømme, kvalitet, margin), og resultatene i kontrollrommet (rekorden og ukens forsøk) sjekkes bare for
+   rimelighet. En endret app kunne sette dem (STABILISERING.md avsnitt 7). Blokkerer ikke nå, men må strammes inn før
+   fellesverdenen blir større eller mer konkurranseutsatt (eierens beskjed, B-387).
 2. Konsernkassa hoper seg opp når konsernet er fullt (avsnitt 8).
 3. Simulatorens kjøper stopper på nivå 7 for nye spillere (bytter ikke de siste storverkene) – det er simulatorens
    tilbakebetalingsgrense, ikke en regel.
 
 ## 10. Forslag som venter (ikke bygget)
 
-- `UKENS-KONTROLLROM.md` – ukekonkurranse i kontrollrommet (B-386).
+- `UKENS-KONTROLLROM.md` – variant A er bygget (B-387); variant B (avspilling på serveren) venter.
 - `KONSERNKAPITAL-FORSLAG.md` – hva konsernkassa brukes til etter fullt konsern (B-386). Eierens premiss: penger skal
   gi valg, ikke forsvinne. Ingen økonomiske justeringer før eieren har svart.
 - `VERKSJEF-FORSLAG.md` – verksjefer (B-379), del av kapitalforslaget.
+- Programmodell for konsernprogrammene: simulert (B-388, `programSim.ts`), anbefalt B (aktivt budsjett) – venter på eieren.
 
 ## 11. Hvor reglene står
 
@@ -132,5 +141,5 @@ regnes av serveren i ekte tid.
 | Kontroll og oppkjøp | `game/control.ts` | `company_control`, `takeover_*` (067, 068, 087) |
 | Innskudd | `net/treasury.ts` | `treasury_limit`, `deposit_to_treasury` (090) |
 | Lister og sesong | `net/leaderboard.ts`, `net/season.ts` | `leaderboard`, `close_season`, `season_history` (092, 093) |
-| Uker | `net/weekly.ts` | `week_kind` (092) |
+| Uker og ukens kontrollrom | `net/weekly.ts`, `ui/Weekly.tsx`, `ui/control/weekly.ts` | `week_kind`, `weekly_scores`, `weekly_control_*` (094) |
 | Privat formue | `game/reserve.ts` | `note_paid_out` (050) |

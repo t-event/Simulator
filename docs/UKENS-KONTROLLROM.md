@@ -1,6 +1,16 @@
 # Forslag: «Ukens kontrollrom» (B-386)
 
-**Status:** forslag til eieren 30.9.2026. Ingenting er bygget. Eieren har valgt kontrollrommet som ny ukekonkurranse
+**Status:** variant A er bygget (B-387, `094_ukens_kontrollrom.sql`) med eierens justeringer:
+- **Tre tellende frø per uke** (A, B, C) – forsøk 1 = A, forsøk 2 = B, forsøk 3 = C, likt for alle og i samme rekkefølge.
+  Ingen kan øve på de tellende frøene; trening bruker egne, tilfeldige frø på ukens kvalitet.
+- Et startet forsøk kan leveres med samme id til fristen, også etter en nettfeil (resultatet lagres i appen og sendes på
+  nytt; innleveringen er idempotent).
+- Rotasjon dager → stål → kontrollrom fra uka 5.10.2026 (første kontrollromsuke 19.10). «Mer stål enn før» er midlertidig.
+- Variant B (avspilling på serveren) venter.
+
+Det som står under, er forslaget slik det ble lagt fram.
+
+**Opprinnelig status:** forslag til eieren 30.9.2026. Eieren har valgt kontrollrommet som ny ukekonkurranse
 (erstatter «Størst vekst i konsernverdi», B-384), men vil ha den rettferdig: samme charge for alle, et begrenset antall
 tellende forsøk, og resultater som serveren kan stole på.
 

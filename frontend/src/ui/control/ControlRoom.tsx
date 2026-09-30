@@ -14,6 +14,8 @@ import {
   BUCKET_WARN_S,
   ChargeGame,
   LADLE_BAND,
+  seededRandom,
+  type InputEntry,
   MELT_BAND,
   ROUNDS,
   SLAG_S,
@@ -31,6 +33,25 @@ interface Props {
   onDone: (result: ManualResult | null, chapter?: string, again?: boolean) => void;
   /** Avslutter og åpner topplista for kontrollrommet (B-295). Mangler uten tjeneste på nett */
   onBoard?: (result: ManualResult) => void;
+  /** Frøet til tilfeldighetene (B-387): ukens tellende charge eller trening; uten frø som før */
+  seed?: number;
+  /** Ukens kontrollrom (B-387): chargen blir ikke en charge i verket, resultatet leveres til ukelista */
+  weekly?: WeeklyMode;
+}
+
+export interface WeeklyMode {
+  /** Tellende forsøk (brukt når det startes) eller trening */
+  counted: boolean;
+  /** «Forsøk 2 av 3» eller «Trening» */
+  label: string;
+  /** Status for innleveringen, vist på resultatet («Leverer …», «Levert – ditt beste: …») */
+  status: string | null;
+  /** Chargen er ferdig: poeng, stjerner og inndata */
+  onScore: (score: Score, inputs: InputEntry[]) => void;
+  /** Lukk. `aborted` når spilleren avslutter før chargen er ferdig */
+  onClose: (aborted: boolean) => void;
+  /** Bare trening: en ny treningscharge */
+  onAgain?: () => void;
 }
 
 /** Ikonet for hver runde (B-216: ikoner i stedet for emoji) */
@@ -219,8 +240,16 @@ function Play({ stage, children }: { stage: ReactNode; children: ReactNode }) {
   );
 }
 
-export function ControlRoom({ request, best, onDone, onBoard }: Props) {
-  const [game] = useState(() => new ChargeGame(request));
+export function ControlRoom({ request, best, onDone, onBoard, seed, weekly }: Props) {
+  const [game] = useState(() => new ChargeGame(request, seed !== undefined ? seededRandom(seed) : undefined));
+  // Ukens kontrollrom: resultatet meldes én gang når chargen er ferdig
+  const reported = useRef(false);
+  useEffect(() => {
+    if (weekly && game.score && !reported.current) {
+      reported.current = true;
+      weekly.onScore(game.score, game.inputs.slice());
+    }
+  });
   const [, setFrame] = useState(0);
   const [confirm, setConfirm] = useState(false);
   const [pop, setPop] = useState<{ text: string; kind: "good" | "bad"; key: number } | null>(null);
@@ -559,13 +588,20 @@ export function ControlRoom({ request, best, onDone, onBoard }: Props) {
       }
     }
   } else if (game.score) {
-    body = <Result score={game.score} best={best} onDone={onDone} onBoard={onBoard} />;
+    body = weekly ? (
+      <WeeklyResult score={game.score} weekly={weekly} />
+    ) : (
+      <Result score={game.score} best={best} onDone={onDone} onBoard={onBoard} />
+    );
   }
 
   return (
     <div ref={rootRef} className="control-room cg" role="dialog" aria-modal="true" aria-label="Kontrollrommet">
       <header className="cg-head">
-        <h1>Kontrollrommet</h1>
+        <h1>
+          {weekly ? "Ukens kontrollrom" : "Kontrollrommet"}
+          {weekly && <span className="cg-muted cg-weekly-label"> · {weekly.label}</span>}
+        </h1>
         {phase !== "ferdig" && (
           <button className="cg-close" onClick={() => setConfirm(true)} aria-label="Gi fra deg styringen">
             <Icon name="close" />
@@ -604,9 +640,15 @@ export function ControlRoom({ request, best, onDone, onBoard }: Props) {
       {confirm && (
         <div className="g-modal" role="alertdialog" aria-modal="true">
           <div className="g-modal-card">
-            <p>Gi fra deg styringen? Automatikken kjører chargen ferdig.</p>
+            <p>
+              {!weekly
+                ? "Gi fra deg styringen? Automatikken kjører chargen ferdig."
+                : weekly.counted
+                  ? "Avslutte? Forsøket er brukt og teller 0 poeng."
+                  : "Avslutte treningen? Den teller ikke."}
+            </p>
             <div className="g-row">
-              <button className="g-primary" onClick={() => onDone(null)}>
+              <button className="g-primary" onClick={() => (weekly ? weekly.onClose(true) : onDone(null))}>
                 Ja
               </button>
               <button onClick={() => setConfirm(false)}>Nei</button>
@@ -686,6 +728,43 @@ function Result({
           <Icon name="trophy" /> Se topplista for kontrollrommet
         </button>
       )}
+    </div>
+  );
+}
+
+/** Resultatet i ukens kontrollrom (B-387): poengene og om de er levert – ingen charge i verket, ingen fagpoeng */
+function WeeklyResult({ score, weekly }: { score: Score; weekly: WeeklyMode }) {
+  return (
+    <div className="cg-result">
+      <div className="cg-rating">
+        <Stars n={score.rating} of={5} />
+        <h2>{score.headline}</h2>
+        <p className="cg-total">{fmtNum(score.points)} poeng</p>
+        <p className="cg-muted" aria-live="polite">
+          {weekly.counted ? (weekly.status ?? "Leverer …") : "Trening – teller ikke på ukelista."}
+        </p>
+      </div>
+      <ul>
+        {score.lines.map((x) => (
+          <li key={x.title}>
+            <div className="cg-result-head">
+              <strong>{x.title}</strong>
+              <Stars n={x.stars} />
+            </div>
+            <p>{x.text}</p>
+          </li>
+        ))}
+      </ul>
+      <div className="cg-result-actions">
+        {weekly.onAgain && (
+          <button className="cg-main is-ready" onClick={weekly.onAgain}>
+            Øv igjen
+          </button>
+        )}
+        <button className={`cg-main ${weekly.onAgain ? "is-quiet" : "is-ready"}`} onClick={() => weekly.onClose(false)}>
+          Lukk
+        </button>
+      </div>
     </div>
   );
 }
