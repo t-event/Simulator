@@ -11,6 +11,7 @@ import type { KonsernWorld } from "../game/konsernWorld";
 import { parseKonsern } from "./konsern";
 import { isRegion } from "../game/regions";
 import type { RegionId } from "../game/types";
+import type { Buyout } from "../game/control";
 
 export interface Tender {
   id: number;
@@ -118,6 +119,8 @@ export interface TakeoverLast {
   resolvedAt: string;
   mineAttack: boolean;
   mineOwner: boolean;
+  /** Hva eieren fikk i konsernkassa da selskapet ble kjøpt (B-375) – bare for eieren */
+  ownerPaid: number | null;
 }
 
 export interface CompanyControl {
@@ -129,6 +132,8 @@ export interface CompanyControl {
   since: string | null;
   /** Til når ingen kan legge inn oppkjøpsbud (vern, pause eller slutten av perioden), fra serveren (B-372) */
   protectedUntil: string | null;
+  /** Eierens periode: hva hen får ved et oppkjøp regnes av dette (B-375). Null fra en eldre server */
+  buyout: Buyout | null;
 }
 
 export interface WorldStatus {
@@ -218,6 +223,15 @@ export function parseControl(r: Row | null | undefined): CompanyControl | null {
     invested: num(r.invested),
     since: typeof r.since === "string" ? r.since : null,
     protectedUntil: typeof r.protected_until === "string" ? r.protected_until : null,
+    buyout:
+      r.buyout && typeof r.buyout === "object"
+        ? {
+            perDay: num((r.buyout as Row).per_day),
+            daysLeft: num((r.buyout as Row).days_left),
+            investedKasse: num((r.buyout as Row).invested_kasse),
+            investedFond: num((r.buyout as Row).invested_fond),
+          }
+        : null,
   };
 }
 
@@ -259,6 +273,7 @@ export function parseTakeoverLast(r: Row | null | undefined): TakeoverLast | nul
     resolvedAt: String(r.resolved_at),
     mineAttack: r.mine_attack === true,
     mineOwner: r.mine_owner === true,
+    ownerPaid: numOrNull(r.owner_paid),
   };
 }
 
@@ -307,7 +322,7 @@ export function applyTakeoverNews(g: GameState, companies: Pick<Company, "name" 
       log(
         g,
         r.status === "overtatt"
-          ? `${r.attacker} kjøpte ${name} fra deg. Du fikk ${fmtKr(Math.round(r.bid * 0.85))} i konsernkassa.`
+          ? `${r.attacker} kjøpte ${name} fra deg. Du fikk ${r.ownerPaid !== null ? fmtKr(r.ownerPaid) : "betalt"} i konsernkassa for dagene du mistet og det du hadde investert.`
           : `Du beholdt ${name} – oppkjøpsbudet fra ${r.attacker} holdt ikke.`,
         r.status === "overtatt" ? "bad" : "good",
       );

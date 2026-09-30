@@ -134,7 +134,10 @@ export const TAKEOVER = {
   fundCap: 1,
   regionPer: 2.5,
   regionMax: 10,
+  /** Eieren får aldri mer enn 85 % av budet (B-375) */
   toOwner: 0.85,
+  /** … men ellers dagene hen mister og 85 % av det hen investerte i sin periode (B-375) */
+  investBack: 0.85,
   failRefund: 0.9,
   defenseRefund: 0.95,
   defenseHours: 72,
@@ -191,6 +194,37 @@ export function defenseNeeded(
   if (total > t.cap * v) return null;
   const f = Math.min(Math.max(0, fund), t.fundCap * v);
   return Math.max(0, Math.ceil(total - defense - f));
+}
+
+/** Det serveren sier om eierens periode (B-375, `company_control` → `buyout`) */
+export interface Buyout {
+  perDay: number;
+  daysLeft: number;
+  investedKasse: number;
+  investedFond: number;
+}
+
+/**
+ * Hva eieren får hvis selskapet blir kjøpt (B-375): inntekten for dagene som er igjen pluss 85 % av det hen investerte
+ * fra kassa, høyst 85 % av budet. Det som ble investert fra beredskapsfondet, går tilbake til fondet (85 %), innenfor
+ * samme tak. Speiler `takeover_payout` i `087_oppkjop_betaling.sql`.
+ */
+export function buyoutPay(bid: number, b: Buyout): { kasse: number; fond: number } {
+  const t = TAKEOVER;
+  const cap = Math.max(0, bid) * t.toOwner;
+  const kasse = Math.min(
+    cap,
+    Math.max(0, b.perDay) * Math.max(0, b.daysLeft) + t.investBack * Math.max(0, b.investedKasse),
+  );
+  const fond = Math.max(0, Math.min(cap - kasse, t.investBack * Math.max(0, b.investedFond)));
+  return { kasse: Math.round(kasse), fond: Math.round(fond) };
+}
+
+/** Det mest eieren kan få i kassa ved et oppkjøp nå, uansett bud (dagene som er igjen og investeringene) */
+export function buyoutMax(b: Buyout): number {
+  return Math.round(
+    Math.max(0, b.perDay) * Math.max(0, b.daysLeft) + TAKEOVER.investBack * Math.max(0, b.investedKasse),
+  );
 }
 
 /** Når vernet for en ny eier slutter (ms), eller null hvis det er over. `since` er når eieren tok over */

@@ -119,8 +119,9 @@ export function MoneyGuide({ g, onClose }: { g: GameState; onClose: () => void }
                   svak. Den øker når du spiller hver uke, investerer i selskapet, har datterverk i samme region og har
                   eid det lenge. Nye eiere er vernet de første 3 dagene. Etter det kan en annen spiller legge inn et
                   oppkjøpsbud. Du får beskjed og har 72 timer på deg til å legge inn et motbud (du får 95 % tilbake).
-                  Selger du, får du 85 % av budet, og kjøperen eier selskapet i 14 dager (vernet de første 3). Under
-                  Konsern → Industrien står det hvor stort bud som trengs for å kjøpe ditt.
+                  Blir selskapet kjøpt, får du inntekten for dagene du mister og 85 % av det du har investert (aldri mer
+                  enn 85 % av budet), og kjøperen eier selskapet i 14 dager (vernet de første 3). Under Konsern →
+                  Industrien står det hvor stort bud som trengs for å kjøpe ditt.
                 </p>
               </Question>
               <Question q="Hvorfor tar det lengre tid å bygge og modernisere enn før?">

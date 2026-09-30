@@ -6786,3 +6786,29 @@ Beslutning:
 - Appen viser gamle bud som «200 mill. (gamle penger, tilsvarer 20 mill. nå)» (`fmtBid`/`bidInNewMoney` i `net/world.ts`,
   speiler SQL-en; test i `net/tests.ts`).
 Konto (B-149): – ingen ny funksjon.
+
+## B-375 Oppkjøp: minstebud 10 dagers inntekt, eieren får betalt for tida hen mister (2026-09-30)
+Status: gjelder (erstatter «85 % av budet til eieren» i B-335 og verdien på 30 dagers inntekt i B-334)
+Bakgrunn: brukeren (eier) spurte hva Figen får ved oppkjøp før og etter de 14 dagene, så «Hva anbefaler du» og «Ja» til
+anbefalingen. To feil ble funnet: minstebudet (verdien, 30 dagers inntekt, ca. 462 mill.) var mer enn kjøperen tjener på
+sine 14 dager (ca. 216 mill.), så ingen som regnet, ville by; og eieren fikk 85 % av hele budet, så to spillere kunne
+flytte store summer mellom seg med et oppkjøp (bryter B-180).
+Beslutning (`087_oppkjop_betaling.sql`):
+- Verdien av et selskap er **10 dagers inntekt** (`config.world.control.value_days` = 10), men minst det sist ble vunnet for
+  (i dagens penger, B-374). Skraplageret: ca. 154 mill. Et oppkjøp til minstebudet lønner seg litt for kjøperen.
+  Kontrollen, motbudet og inntektsøkningen av investeringer regnes fortsatt mot verdien, så en investering teller nå
+  omtrent tre ganger så mye som før (Figens 34,7 mill.: 1,8 → 5,1 av 25) – godtatt: det sterkeste forsvaret kan fortsatt
+  slås (B-337), og økningen i inntekt har samme tak (25 %).
+- Eieren som blir kjøpt ut, får **inntekten for dagene som er igjen av konsesjonen + 85 % av det hen investerte i sin
+  periode**, høyst 85 % av budet (`takeover_payout`, speilet i `buyoutPay` i `game/control.ts`, faste tall i testen).
+  Resten av budet forsvinner. Det som ble investert fra beredskapsfondet, går tilbake til fondet (aldri til kassa).
+- Investeringene føres per eierperiode (`company_owners.invested_kasse`/`invested_fond`, `company_invest`). Tidligere
+  investeringer ble lagt inn fra `treasury_ledger` (dry-run: én rad, Figen 34,74 mill. fra kassa). De teller ikke i
+  verdien.
+- Når konsesjonen går ut, får eieren ingenting (som før): alle stiller likt i det nye anbudet.
+- `company_control` gir `buyout` (inntekt per dag, dager igjen, investert), og appen viser eieren «Blir selskapet kjøpt med
+  det budet, får du ca. X». `takeovers.owner_paid` lagres, og `world_status` gir det til eieren i `takeover_last`, så
+  loggen sier hva hen fikk.
+- Testet i en DO-blokk som ble rullet tilbake: bud på 1 mrd. på skraplageret ga Figen 230,8 mill. (13,03 dager × 15,36
+  mill. + 85 % av 34,74 mill.), ikke 850 mill.; ny eier med 14 dager fra kjøpet.
+Konto (B-149): – ingen ny funksjon (oppkjøp krever konto fra før).
