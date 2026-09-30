@@ -73,7 +73,8 @@ regnes av serveren i ekte tid.
 - **Topplista** har to grupper: «Industriverden · sesong» (Konsernverdi) og «Eget verk» (Verdi, Mest penger på bok,
   Produksjon, Raskest til storverk, Raskest til 10 mrd., Kontrollrom, Privat formue – fryst). Eget verk er ære, ikke makt.
 - **Ukens utfordring:** «Flest aktive dager» (ekte dager) og «Mer stål enn før» veksler fra uka 5.10.2026.
-  «Størst vekst i konsernverdi» er tatt bort. Tre forslag til nye ukekonkurranser står i `FORSLAG.md`.
+  «Størst vekst i konsernverdi» er tatt bort. Eieren har valgt «Ukens kontrollrom» som neste; forslaget står i
+  `UKENS-KONTROLLROM.md` (ikke bygget).
 - Juksesperren (`check_snapshot`) sjekker vekst, tonn, fart og første opplasting.
 
 ## 7. Konto og gjester
@@ -114,7 +115,14 @@ regnes av serveren i ekte tid.
 3. Simulatorens kjøper stopper på nivå 7 for nye spillere (bytter ikke de siste storverkene) – det er simulatorens
    tilbakebetalingsgrense, ikke en regel.
 
-## 10. Hvor reglene står
+## 10. Forslag som venter (ikke bygget)
+
+- `UKENS-KONTROLLROM.md` – ukekonkurranse i kontrollrommet (B-386).
+- `KONSERNKAPITAL-FORSLAG.md` – hva konsernkassa brukes til etter fullt konsern (B-386). Eierens premiss: penger skal
+  gi valg, ikke forsvinne. Ingen økonomiske justeringer før eieren har svart.
+- `VERKSJEF-FORSLAG.md` – verksjefer (B-379), del av kapitalforslaget.
+
+## 11. Hvor reglene står
 
 | Regel | App | Server |
 |---|---|---|

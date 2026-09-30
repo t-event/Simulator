@@ -6966,3 +6966,23 @@ Beslutning:
 - `docs/STATUS.md` er fasit for hvordan spillet virker nå; BESLUTNINGER er hvorfor, LOGG er historikk (CLAUDE.md).
 Endringslogg: nei
 Konto (B-149): – ingen ny funksjon.
+
+## B-386 Ukens kontrollrom og konsernkapitalen: forslag, ikke bygget (2026-09-30)
+Status: forslag – venter på eieren
+Bakgrunn: eieren godkjente B-381–B-385 og sa: ingen flere økonomiske justeringer nå (ikke høyere priser, lavere bidrag
+eller utbytte, tak på konsernkassa eller avgifter). Problemet etter fullt konsern er at konsernspillet går tomt for
+meningsfulle kapitalvalg, ikke at inntekten er for høy. Eieren valgte kontrollrommet som ny ukekonkurranse, men
+rettferdig (samme charge, tre tellende forsøk, serververifisert), og ba om et designforslag for konsernkapitalen.
+Beslutning:
+- `docs/UKENS-KONTROLLROM.md`: variant A (serveren gir ukens frø og kvalitet, tre forsøk som brukes ved start, innlevering
+  med tids- og poenggrense, inndatalogg lagres) er liten; full verifisering (B: serveren spiller chargen av i en
+  edge-funksjon) er ny arkitektur. Etter eierens beskjed bygges ingenting før eieren har valgt variant. Rotasjon dager →
+  stål → kontrollrom foreslått; kWh per tonn og leveringspresisjon senere.
+- `docs/KONSERNKAPITAL-FORSLAG.md`: pengene har ingen alternativkostnad etter fullt konsern. Forslag: fem
+  konsernprogrammer (to aktive, trinn 1–3) i samme prosjektlinje som i dag; verksjefer som ledelse; antall selskaper etter
+  aktive konsern og regioner; oppkjøp avgjort av forberedelse, region, integrasjon og ledelse (ingen formelendring før
+  ekte data); kritikk av frivillig eierutbytte (vent).
+- Uendret: verdensbalansen, oppkjøpsformelen, sjekken 2.10 (bare rapport).
+Endringslogg: nei
+Konto (B-149): – ingen ny funksjon (når den bygges: ukens kontrollrom krever konto, regel 3 og 7).
+
