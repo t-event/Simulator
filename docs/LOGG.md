@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 318 – 2026-10-01: Første konsernbidrag og første natt med norsk dag (planlagt sjekk)
+
+**Oppgave:** den planlagte sjekken kl. 00:15 norsk tid 1.10 av første betaling av konsernbidraget (B-318/B-361) og første
+natt med norsk dag (B-369).
+
+**Funn (bare lesing):** alt ble betalt i samme `world_tick` kl. 00:00:00 norsk tid (22:00:00 UTC 30.9):
+- Bidrag for 30.9: 15 spillere, 178,3 mill. til sammen. `full_day` er lik snittet av målingene (`sum_full/n`, 89 målinger)
+  for alle 15, og beløpet er lik posten `bidrag` i `treasury_ledger`. To inaktive spillere fikk aktivitetsfaktor 0,3.
+- Utbytte for 30.9: 12 spillere, 209,9 mill. til kassa og 3,7 mill. til fondene – lik snittet (`sum_div/n_div`) ganger
+  aktiviteten for alle.
+- Skraplageret: 16,7 mill. for 30.9.
+- Ingen feil fra `world_tick` i postgres-loggen, ingen nye rader i `project_guard_log`.
+
+**Gjenstår:** –
+
 ## Økt 317 – 2026-09-30: Trinnet på datterverkene (B-394)
 
 **Brukeren ba om:** en spiller lurte på hvordan man ser hvilket trinn verkene er på – gjør det tydeligere og mer intuitivt.
