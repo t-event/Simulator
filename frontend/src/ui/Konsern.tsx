@@ -45,6 +45,8 @@ import {
   moreSlotsText,
   MODERNIZE_GAIN,
   modernizeMax,
+  nextTierTitle,
+  plannedLevel,
   SISTER_TYPES,
   sisterProfit,
   sisterSalePrice,
@@ -531,6 +533,39 @@ function mainOption(p: SisterPlant, options: KonsernOption[]) {
 }
 
 /**
+ * Trinnet til et datterverk (B-394), likt på mobil og PC: prikker og «Trinn 3 av 5» med ord. Grønn prikk = trinn verket
+ * har; ring = trinn som bygges eller står i køen («Trinn 3 → 4»); grå = trinn som kan kjøpes. Før viste raden bare små
+ * prikker uten ord, og spillerne fant ikke trinnet.
+ */
+function PlantTier({ g, p, max, short = false }: { g: GameState; p: SisterPlant; max: number; short?: boolean }) {
+  const planned = Math.min(plannedLevel(g, p), Math.max(max, p.level));
+  const dots = Math.max(max, p.level);
+  const label = `Trinn ${p.level} av ${max}${planned > p.level ? `, trinn ${planned} bygges` : ""}`;
+  return (
+    <span className="g-plant-tier" aria-label={label} title={label}>
+      <span className="g-tier-dots g-tier-dots-plant" aria-hidden="true">
+        {Array.from({ length: dots }, (_, i) => (
+          <i key={i} className={i < p.level ? "is-done" : i < planned ? "is-now" : ""} />
+        ))}
+      </span>
+      <span className="g-plant-tier-text" aria-hidden="true">
+        {short ? "" : "Trinn "}
+        {p.level}
+        {planned > p.level && <span className="g-plant-tier-next"> → {planned}</span>}
+        <span className="g-plant-tier-of"> av {max}</span>
+      </span>
+    </span>
+  );
+}
+
+/** Hva trinnet betyr, i den åpne raden (B-394): hva neste trinn gir, eller hvorfor det ikke finnes flere */
+function tierText(g: GameState, p: SisterPlant, max: number): string {
+  if (p.level < max) return `Hvert trinn gir verket ${Math.round(MODERNIZE_GAIN * 100)}\u00a0% mer overskudd.`;
+  const next = nextTierTitle(g);
+  return next ? `Høyeste trinn nå – tittelen ${next} åpner trinn ${max + 1}.` : "Fullt modernisert.";
+}
+
+/**
  * Ett datterverk som rad (mobil, B-233): navn, type, moderniseringsprikker og utbyttet på én linje. Trykk for å åpne
  * knappene. Verket «Neste steg» gjelder, står åpent. Før var hvert verk et helt kort, og tolv verk ble en lang side.
  */
@@ -563,26 +598,30 @@ function PlantRow({
       <summary>
         <span className="g-plant-row-name">
           <strong>{p.name}</strong>
-          <span className="g-muted g-small-text">
-            {SISTER_TYPES[p.type].name}{" "}
-            <span className="g-tier-dots" aria-label={`Modernisert ${p.level} av ${max}`}>
-              {Array.from({ length: max }, (_, i) => (
-                <i key={i} className={i < p.level ? "is-done" : ""} />
-              ))}
-            </span>
+          <span className="g-plant-row-meta g-small-text">
+            <PlantTier g={g} p={p} max={max} />
           </span>
         </span>
-        <span className={`g-plant-row-value${down ? " g-badge-bad" : ""}`}>
-          {p.project
-            ? `Klar om ${fmtLeft(Math.max(0, p.project.readyAt - realNow()))}`
-            : down
-              ? `Står til dag ${p.downUntilDay}`
-              : `+${fmtKr(dividend)}`}
+        <span className="g-plant-row-side">
+          <span className={`g-plant-row-value${down ? " g-badge-bad" : ""}`}>
+            {p.project
+              ? `Klar om ${fmtLeft(Math.max(0, p.project.readyAt - realNow()))}`
+              : down
+                ? `Står til dag ${p.downUntilDay}`
+                : `+${fmtKr(dividend)}`}
+          </span>
+          <span className="g-plant-row-type g-muted g-small-text">{SISTER_TYPES[p.type].name}</span>
         </span>
       </summary>
       <div className="g-plant-row-body">
+        <p className="g-small-text g-plant-tier-about">
+          <strong>
+            Trinn {p.level} av {max}.
+          </strong>{" "}
+          {tierText(g, p, max)}
+        </p>
         <p className="g-muted g-small-text">
-          Modernisert {p.level} av {max}
+          {SISTER_TYPES[p.type].name}
           {underConstruction(p)
             ? ""
             : ` · tjener ${fmtKr(sisterProfit(g, p))}/døgn · gir ${fmtKr(dividend)} per ekte dag til konsernkassa`}{" "}
@@ -637,7 +676,7 @@ function PlantTable({
       <thead>
         <tr>
           <th>Verk</th>
-          <th>Modernisert</th>
+          <th>Trinn</th>
           <th className="num">Driftsresultat</th>
           <th className="num">Utbytte per ekte dag</th>
           <th className="num">Verdi</th>
@@ -661,14 +700,7 @@ function PlantTable({
                   <span className="g-muted g-small-text">{SISTER_TYPES[p.type].name}</span>
                 </td>
                 <td>
-                  <span className="g-plant-level" aria-label={`${p.level} av ${max}`}>
-                    {Array.from({ length: max }, (_, n) => (
-                      <i key={n} className={n < p.level ? "is-on" : undefined} />
-                    ))}
-                  </span>
-                  <span className="g-muted g-small-text">
-                    {p.level} av {max}
-                  </span>
+                  <PlantTier g={g} p={p} max={max} short />
                 </td>
                 <td className="num">{underConstruction(p) ? "–" : `${fmtKr(sisterProfit(g, p))}/døgn`}</td>
                 <td className="num">
@@ -693,7 +725,7 @@ function PlantTable({
                       label={isUpgrade ? "Bygg ut til storverk" : "Moderniser"}
                     />
                   ) : (
-                    <span className="g-muted g-small-text">Fullt modernisert</span>
+                    <span className="g-muted g-small-text">{p.level >= max ? tierText(g, p, max) : ""}</span>
                   )}
                 </td>
                 <td>
@@ -1039,8 +1071,8 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
           <Card title={`Dine verk (${k.plants.length} av ${maxSisters(g)} datterverk)`}>
             <div className="g-plant-cards">
               <p className="g-muted g-small-text g-plant-rows-hint">
-                Tallet til høyre er utbyttet fra verket til konsernkassa per ekte dag. Trykk på et verk for å
-                modernisere eller selge.
+                Prikkene viser trinnet: grønn er modernisert, ring bygges nå. Tallet til høyre er utbyttet til
+                konsernkassa per ekte dag. Trykk på et verk for å modernisere eller selge.
               </p>
               {k.plants.length >= maxSisters(g) - 1 && (
                 <p className="g-muted g-small-text g-plant-rows-hint">{moreSlotsText(g)}</p>

@@ -294,6 +294,23 @@ export function activeProject(g: GameState): SisterPlant | null {
   return g.konsern.plants.find((p) => p.project) ?? null;
 }
 
+/**
+ * Trinnet verket får når det som er bestilt, er ferdig (B-394): trinnet nå + moderniseringer som bygges eller står i
+ * køen. Grensesnittet viser det som «Trinn 3 → 4».
+ */
+export function plannedLevel(g: GameState, p: SisterPlant): number {
+  const ordered = g.konsern.orders.filter((o) => o.kind === "modernisering" && o.plantId === p.id).length;
+  return p.level + (ordered || (p.project?.kind === "modernisering" ? 1 : 0));
+}
+
+/** Tittelen som åpner neste moderniseringstrinn, eller null når alle trinn er åpnet (B-394) */
+export function nextTierTitle(g: GameState): string | null {
+  const now = earnedOf(g);
+  const max = modMaxAt(now);
+  for (let lvl = now + 1; lvl <= LEGENDS.length; lvl++) if (modMaxAt(lvl) > max) return LEGENDS[lvl - 1].title;
+  return null;
+}
+
 /** Hva som pågår, med vanlige ord */
 export function projectLabel(p: SisterPlant): string {
   const k = p.project?.kind;

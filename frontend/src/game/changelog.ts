@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 394,
+    date: "2026-09-30",
+    title: "Trinnet på datterverkene",
+    items: [
+      "Under Konsern → Dine verk står trinnet nå med ord ved hvert verk, for eksempel «Trinn 3 av 5». Grønne prikker er trinnene verket har.",
+      "Er en modernisering bestilt, står det «Trinn 3 → 4», og prikken som bygges har en ring.",
+      "Når verket er på høyeste trinn, står det hvilken tittel som åpner neste trinn.",
+    ],
+  },
+  {
     b: 387,
     date: "2026-09-30",
     title: "Ukens kontrollrom",
