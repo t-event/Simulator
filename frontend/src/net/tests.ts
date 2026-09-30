@@ -72,7 +72,15 @@ import {
   mergeChat,
   sendChat,
 } from "./chat";
-import { applyTakeoverNews, parseControl, parseTakeover, parseTakeoverLast, parseWindow } from "./world";
+import {
+  applyTakeoverNews,
+  bidInNewMoney,
+  fmtBid,
+  parseControl,
+  parseTakeover,
+  parseTakeoverLast,
+  parseWindow,
+} from "./world";
 import { konsernOptions, konsernReady } from "../game/konsern";
 import {
   applyCompanyIncome,
@@ -1917,6 +1925,15 @@ const main = async () => {
     markChatSeen(4);
     markChatSeen(2);
     assert(chatSeen() === 4, "sist lest");
+  });
+
+  await test("gamle bud vises i dagens penger (B-374)", () => {
+    const old = bidInNewMoney(200_000_000, "2026-09-29T01:33:03Z");
+    assert(old.old && old.now === 20_000_000, JSON.stringify(old));
+    const now = bidInNewMoney(200_000_000, "2026-10-13T01:33:03Z");
+    assert(!now.old && now.now === 200_000_000, JSON.stringify(now));
+    assert(fmtBid(200_000_000, "2026-09-29T01:33:03Z").includes("gamle penger"), "tekst for gamle penger");
+    assert(!fmtBid(20_000_000, "2026-10-13T01:33:03Z").includes("gamle"), "nye bud uten merknad");
   });
 
   setSaveListener(null);

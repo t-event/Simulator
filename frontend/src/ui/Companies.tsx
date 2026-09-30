@@ -16,6 +16,7 @@ import {
   BID_REFUSAL_TEXT,
   fetchWorldStatus,
   firstPayout,
+  fmtBid,
   INVEST_REFUSAL_TEXT,
   investInCompany,
   bidTakeover,
@@ -410,7 +411,7 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
             Forrige anbud:{" "}
             {last.status === "ingen bud"
               ? "ingen bud."
-              : `${last.won ? "du vant" : `vunnet av ${last.winner ?? "–"}`} med ${fmtKr(last.winningBid ?? 0)}${last.tie ? " (likt bud – avgjort ved trekning)" : ""}.`}
+              : `${last.won ? "du vant" : `vunnet av ${last.winner ?? "–"}`} med ${fmtBid(last.winningBid ?? 0, last.closedAt)}${last.tie ? " (likt bud – avgjort ved trekning)" : ""}.`}
             {!last.won && last.myBid ? ` Budet ditt (${fmtKr(last.myBid)}) er tilbake i konsernkassa.` : ""}
           </p>
         )}
