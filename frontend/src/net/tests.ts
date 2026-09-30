@@ -1735,6 +1735,8 @@ const main = async () => {
     const row = {
       level: 1,
       floor: 3,
+      // Opptjent nivå (B-383) avgjør trinnene: nivå 3 gir trinn 5, så køen (trinn 4) kan få ett til
+      earned: 3,
       next_id: 12,
       plants: [
         { id: 4, type: "storverk", name: "Fjordverket", level: 3, boughtDay: 3, downUntilDay: 0 },

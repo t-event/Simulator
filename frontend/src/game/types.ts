@@ -681,6 +681,11 @@ export interface GameState {
      * Går aldri ned.
      */
     legends: number;
+    /**
+     * Opptjent nivå (B-383): det høyeste verkene har gitt, uten gulvet fra byttet. Avgjør plasser, trinn og komplekser;
+     * `legends` er tittelen. Fra serveren (`konsern.earned`), går aldri ned. 0 i eldre lagringer.
+     */
+    earned: number;
     /** Køen av prosjekter på serveren (B-326), kopi av det serveren sier */
     orders: KonsernOrder[];
     /**

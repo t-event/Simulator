@@ -7,7 +7,6 @@ import { markChangelogSeen, unseenChangelog } from "../game/changelog";
 import { ChangelogSheet } from "./Changelog";
 import { STAGES, WIN_CASH } from "../game/data";
 import { konsernReady, LEGENDS, WIN_TITLE } from "../game/konsern";
-import { hasPaidOut, paidOutTotal } from "../game/reserve";
 import { InstallTip } from "./InstallTip";
 import { completeManual, unlock } from "../game/engine";
 import { computePlantStats, day, energyPrice, idleOutsideHours, staffing } from "../game/plant";
@@ -18,7 +17,7 @@ import { masteryReady, requestManual, upgradeOptions } from "../game/actions";
 import { buzz } from "./haptics";
 import { nextTutorialStep, skipTutorial, TUTORIAL } from "../game/tutorial";
 import type { GameState, LogEntry } from "../game/types";
-import { fmtClock, fmtKr, fmtNum, fmtRep, fmtT } from "./format";
+import { fmtClock, fmtKr, fmtKrCompact, fmtNum, fmtRep, fmtT } from "./format";
 import { Handbook } from "./Handbook";
 import { HelpSheet } from "./HelpNow";
 import { Market } from "./Market";
@@ -531,16 +530,14 @@ function TopBar({
       </div>
       {/* Nøkkeltallene (B-192): ikon + tall på mobil, ord i tillegg når det er plass. Skjermlesere får alltid ordet */}
       <div className="g-top-row g-kpis">
-        <Kpi icon="money" label="Kasse" className={`g-kpi-cash${g.cash < 0 ? " tone-critical" : ""}`}>
-          {fmtKr(Math.floor(g.cash))}
-          {/* Kassa står ved taket; overskuddet går til den private formuen (B-303, B-359) */}
-          {hasPaidOut(g) && (
-            <Icon
-              name="lock"
-              className="g-kpi-lock"
-              label={`Kassa er ved taket – overskuddet går til din private formue (${fmtKr(Math.floor(paidOutTotal(g)))} i alt)`}
-            />
-          )}
+        <Kpi
+          icon="money"
+          label="Kasse"
+          className={`g-kpi-cash${g.cash < 0 ? " tone-critical" : ""}`}
+          hint={Math.abs(g.cash) >= 100_000_000_000 ? `Kasse: ${fmtKr(Math.floor(g.cash))}` : undefined}
+        >
+          {/* Uten kassetak (B-381) kan tallet bli stort: kort form her, nøyaktig i hjelpeteksten og på Økonomi */}
+          {fmtKrCompact(Math.floor(g.cash))}
         </Kpi>
         <Kpi icon="star" label="Omdømme" className="g-kpi-rep">
           {fmtRep(g.reputation)}
@@ -696,7 +693,7 @@ function Kpi({
       {body}
     </button>
   ) : (
-    <span className={`g-kpi ${className}`} title={label}>
+    <span className={`g-kpi ${className}`} title={hint ?? label}>
       {body}
     </span>
   );
@@ -835,7 +832,7 @@ export function GameApp() {
   const [boardOpen, setBoardOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   // Lista topplista åpner på: kontrollrommet når den åpnes fra resultatet der (B-295)
-  const [boardKind, setBoardKind] = useState<BoardKind>("verdi");
+  const [boardKind, setBoardKind] = useState<BoardKind>("konsern");
   const [bookChapter, setBookChapter] = useState<string | null>(null);
   // Beskjeden om at en sesong er over, vises før spørsmålet om neste sesong (B-143)
   const [resultOpen, setResultOpen] = useState(false);
@@ -1231,7 +1228,7 @@ export function GameApp() {
           g={g}
           onClose={() => {
             setBoardOpen(false);
-            setBoardKind("verdi");
+            setBoardKind("konsern");
           }}
           onOpenSettings={() => setSettingsOpen(true)}
         />

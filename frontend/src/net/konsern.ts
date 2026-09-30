@@ -57,6 +57,7 @@ export function parseKonsern(r: Row | null | undefined): KonsernWorld | null {
     nextId: Math.max(1, num(r.next_id)),
     level: num(r.level),
     floor: num(r.floor),
+    earned: num(r.earned),
     balance: num(r.balance),
     ...(typeof r.policy === "string"
       ? {
@@ -91,6 +92,7 @@ export function konsernDiffers(g: GameState, w: KonsernWorld, perDay: number): b
     JSON.stringify((k.orders ?? []).map((o) => [o.id, o.status, o.region ?? null])) !==
       JSON.stringify(w.orders.map((o) => [o.id, o.status, o.region ?? null])) ||
     Math.max(w.level, w.floor) > k.legends ||
+    (w.earned ?? 0) > (k.earned ?? 0) ||
     k.treasury?.balance !== w.balance ||
     k.treasury?.perDay !== perDay ||
     (!!w.policy && JSON.stringify(k.policy ?? null) !== JSON.stringify(w.policy))

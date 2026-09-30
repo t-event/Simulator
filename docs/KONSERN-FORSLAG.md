@@ -1,5 +1,7 @@
 # Forslag: konsernet i ekte tid (punkt 1, 2, 3 og 5 fra OKONOMI-KONTROLL avsnitt 16)
 
+> **Historisk analyse.** Tallene og reglene her er slik de var da dokumentet ble skrevet; kassetaket ble fjernet i B-381, og gulvet gir bare tittelen – kjøp følger opptjent nivå (B-383). Slik spillet virker nå: `docs/STATUS.md`.
+
 Status 29.9.2026: **eieren sa ja; bygget** som B-325 (nivåene), B-326 (kjøp fra konsernkassa), B-327 (aktivitetskravet)
 og B-328 (mesterskapet, valg A). Simuleringen etter byttet står nederst (B-329). Tallene er regnet med
 `konsern_forslag.py` (kladd, ikke i repoet) med de samme formlene som serveren bruker i dag (utbyttet i 051, bidraget i

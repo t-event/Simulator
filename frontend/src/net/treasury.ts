@@ -37,7 +37,7 @@ export async function fetchTreasury(): Promise<TreasuryStatus> {
 }
 
 /** Hvorfor serveren sa nei */
-export type DepositRefusal = "belop" | "sperret" | "lagre_forst" | "konsern" | "kasse" | "grense";
+export type DepositRefusal = "belop" | "sperret" | "lagre_forst" | "konsern" | "kasse" | "grense" | "av";
 
 export type DepositResult =
   | { ok: true; amount: number; balance: number; left: number }
@@ -60,6 +60,8 @@ export const DEPOSIT_REFUSAL_TEXT: Record<DepositRefusal, string> = {
   konsern: "Konsernkassa åpnes når du har et konsern.",
   kasse: "Så mye har du ikke – lånte penger kan ikke flyttes.",
   grense: "Du har flyttet så mye som kan flyttes dette døgnet.",
+  // B-382: innskuddet er stengt på serveren til en eksplisitt beslutning åpner det
+  av: "Pengene i verket kan ikke flyttes til konsernkassa. Konsernkassa får bidraget og utbyttet i ekte tid.",
 };
 
 /** Det serveren har gjort med spillet på nett, gjøres også med spillet her */

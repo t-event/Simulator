@@ -29,6 +29,7 @@ import { chance } from "./random";
 import { realNow, setRealClock } from "./clock";
 import {
   buildCost,
+  earnedLevel,
   kompleksOpenAt,
   LADDER,
   ladderCount,
@@ -140,19 +141,37 @@ export function titleOf(g: GameState): string | null {
   return g.won ? WIN_TITLE : null;
 }
 
-/** Høyeste moderniseringstrinn: 3, 4 med Stålmagnat, 5 med Stålkonge (B-150), 6 med Stålkolosse (B-173) */
+/**
+ * Opptjent nivå (B-383): det verkene har gitt, uten gulvet fra byttet – som `konsern.earned` på serveren. Nye verk,
+ * trinn og komplekser følger dette. Tittelen (`legends`) kan være høyere for dem som hadde den før byttet.
+ */
+export function earnedOf(g: GameState): number {
+  return earnedLevel({ plants: g.konsern?.plants ?? [], earned: g.konsern?.earned ?? 0 });
+}
+
+/** Er tittelen høyere enn det verkene har gitt? Da forklares det at nye kjøp følger det opptjente nivået */
+export function titleAboveEarned(g: GameState): boolean {
+  return (g.konsern?.legends ?? 0) > earnedOf(g);
+}
+
+/** Høyeste moderniseringstrinn: 3, 4 ved nivå 1, 5 ved nivå 3 (B-150), 6 ved nivå 7 (B-173) – opptjent nivå (B-383) */
 export function modernizeMax(g: GameState): number {
-  return modMaxAt(g.konsern?.legends ?? 0);
+  return modMaxAt(earnedOf(g));
 }
 
-/** Stålkomplekser åpnes med tittelen Stålfyrste */
+/** Stålkomplekser åpnes ved opptjent nivå 2 (Stålfyrste, B-383) */
 export function kompleksOpen(g: GameState): boolean {
-  return kompleksOpenAt(g.konsern?.legends ?? 0);
+  return kompleksOpenAt(earnedOf(g));
 }
 
-/** Hvor langt verkene er kommet mot neste nivå: «4 av 6 storverk eller komplekser på trinn 4», eller null på toppen */
-export function nextLevelProgress(g: GameState): { have: number; need: number; text: string } | null {
-  const n = g.konsern?.legends ?? 0;
+/**
+ * Hvor langt verkene er kommet mot neste nivå: «4 av 6 storverk eller komplekser på trinn 4», eller null på toppen.
+ * Standard er neste tittel; `n` = earnedOf(g) gir neste opptjente nivå (B-383).
+ */
+export function nextLevelProgress(
+  g: GameState,
+  n = g.konsern?.legends ?? 0,
+): { have: number; need: number; text: string } | null {
   const step = LADDER[n];
   if (!step) return null;
   const have = Math.min(step.count, ladderCount(g.konsern?.plants ?? [], step));
@@ -188,13 +207,13 @@ export const MAX_SISTERS = 6;
 export const MAX_SISTERS_BIG = 8;
 
 export function maxSisters(g: GameState): number {
-  // Stålfyrste, Stålkeiser og Stålgigant gir plass til to til hver (B-150, B-173)
-  return slotsAt(g.konsern?.legends ?? 0, hasResearch(g, "storkonsern"));
+  // Stålfyrste, Stålkeiser og Stålgigant gir plass til to til hver (B-150, B-173) – opptjent nivå (B-383)
+  return slotsAt(earnedOf(g), hasResearch(g, "storkonsern"));
 }
 
 /** Hvordan konsernet får plass til flere datterverk: forskningen, neste tittel som gir plasser, eller ingen (B-367) */
 export function moreSlotsText(g: GameState): string {
-  const lvl = g.konsern?.legends ?? 0;
+  const lvl = earnedOf(g);
   const big = hasResearch(g, "storkonsern");
   if (!big) {
     const more = slotsAt(lvl, true) - slotsAt(lvl, false);
@@ -203,7 +222,7 @@ export function moreSlotsText(g: GameState): string {
   const now = slotsAt(lvl, big);
   for (let l = lvl + 1; l <= LEGENDS.length; l++) {
     if (slotsAt(l, big) > now)
-      return `Blir du ${LEGENDS[l - 1].title} (${LEGENDS[l - 1].need}), får du plass til ${slotsAt(l, big) - now} til.`;
+      return `Når verkene har gitt nivået ${LEGENDS[l - 1].title} (${LEGENDS[l - 1].need}), får du plass til ${slotsAt(l, big) - now} til.`;
   }
   return `${now} datterverk er det meste et konsern kan ha. Bytt små verk til stålkomplekser og moderniser.`;
 }
@@ -308,6 +327,7 @@ export function worldOf(g: GameState): KonsernWorld {
     nextId: k.nextId,
     level: k.legends,
     floor: k.legends,
+    earned: k.earned ?? 0,
     balance: k.treasury?.balance ?? 0,
   };
 }
@@ -343,6 +363,7 @@ export function applyWorld(g: GameState, w: KonsernWorld, events: SettleEvent[] 
   k.orders = w.orders.map((o) => ({ ...o }));
   k.nextId = Math.max(k.nextId, w.nextId);
   if (k.treasury) k.treasury = { ...k.treasury, balance: w.balance };
+  k.earned = Math.max(k.earned ?? 0, earnedLevel(w));
   logEvents(g, events);
   raiseLevel(g, Math.max(w.level, w.floor));
 }
@@ -355,7 +376,7 @@ export function finishKonsernProjects(g: GameState): number {
   if (!g.konsern?.plants.some((p) => p.project) && !g.konsern?.orders?.length) return 0;
   const w = worldOf(g);
   const events = settleWorld(w, realNow());
-  if (!events.length && w.level === g.konsern.legends) return 0;
+  if (!events.length && w.level === g.konsern.legends && (w.earned ?? 0) === (g.konsern.earned ?? 0)) return 0;
   applyWorld(g, w, events);
   return events.filter((e) => e.kind === "ferdig").length;
 }
@@ -460,8 +481,8 @@ export function konsernEquity(g: GameState): number {
 }
 
 /**
- * Verdien spilleren har skapt (B-341): konsernverdien pluss det som er betalt ut til eierne over kassetaket. Taket er like
- * høyt som sluttmålet, så uten utbetalingene kunne verdien aldri gå over 10 mrd. når den ble sjekket. Brukes bare til det
+ * Verdien spilleren har skapt (B-341): konsernverdien pluss den fryste private formuen (det som ble betalt ut mens kassa
+ * hadde et tak, fjernet i B-381). Uten formuen ville de som nådde taket, tapt verdi da taket ble fjernet. Brukes bare til det
  * som hører til eget spill – sluttmålet, stormodellene og prestasjonene – aldri til topplistene eller serveren (B-303).
  */
 export function valueCreated(g: GameState): number {

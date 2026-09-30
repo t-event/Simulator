@@ -1,5 +1,7 @@
 # Kontroll av økonomimodellen etter reform 2 og konsernbidraget (B-324, 29.9.2026)
 
+> **Historisk analyse.** Tallene og reglene her er slik de var da dokumentet ble skrevet; kassetaket ble fjernet i B-381, og sesongen avgjøres på Konsernverdi (B-384). Slik spillet virker nå: `docs/STATUS.md`.
+
 Eierens bestilling: «Kontroller om den nye økonomimodellen faktisk er på riktig spor. Ingen nye store endringer først;
 konkrete tall og dagens faktiske logikk.» Tallene er fra koden (`konsern.ts`, `dividend.ts`, `reserve.ts`, `plant.ts`),
 `config.world` på serveren og spillernes lagringer 29.9 (kallenavn). Simuleringen ligger i økta

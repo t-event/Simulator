@@ -6868,7 +6868,7 @@ Endringslogg: nei
 Konto (B-149): verksjefene krever konto (regel 2 og 7) – føres i KONTO.md når de bygges.
 
 ## B-380 Stabilisering før verksjefene: audit, legacy-gulvet og ny verdenssimulator (2026-09-30)
-Status: analyse – venter på eieren
+Status: analysen står; eieren bestemte seg samme dag (B-381–B-385)
 Bakgrunn: eieren justerte prioriteringen: ikke bygg verksjefene ennå (svarene på forslaget er ført i
 VERKSJEF-FORSLAG.md, avsnitt 0), men først en audit av 10 mrd.-taket, en analyse av legacy-gulvet, en ny
 verdenssimulering med dagens priser og en STATUS.md. Slagghåndteringen skal ikke slås på automatisk 2.10.
@@ -6885,5 +6885,84 @@ Beslutning:
 - Sjekken 2.10 (`trig_012KZ8mFxMw2yYhJp8SH1xDo`) rapporterer og anbefaler, men slår ikke på slagghåndteringen.
 - Sårbarheter: serveren leser forskning, felles funksjoner, omdømme, kvalitet og margin fra lagringen; innskuddet er bare
   av med et tall i `config` (standard 100 mill.); `konsern.level` er en skralle med gulvet i seg.
+Endringslogg: nei
+Konto (B-149): – ingen ny funksjon.
+
+## B-381 Kassetaket er fjernet – Privat formue fryses som historikk (2026-09-30)
+Status: gjeldende. Erstatter taket i B-303/B-306 (utbetalingen til eierne over 10 mrd.).
+Bakgrunn: eieren («Jeg har bestemt meg»): lokal kasse er penger i hovedverket, konsernkassa er kapitalen som bygger
+imperiet. Auditen (B-380) viste at lokal kasse ikke kan gi makt i verden, så taket beskytter ingenting lenger.
+Beslutning:
+- `CASH_RESERVE.softCap = null` (`game/reserve.ts`): kassa i hovedverket kan vokse fritt. Mekanikken står (testen slår
+  den på for seg), men brukes ikke.
+- Privat formue (`g.paidOut`, `lockedReserve`) fryses: ingen får noe tilbake, ingenting nytt legges til, ingen reform
+  eller komprimering. Den står som historikk på Økonomi («Privat formue (fryst)»), i Konsern-raden og i Hall of Fame, og
+  teller fortsatt i `valueCreated` – sluttmålet, stormodellene og prestasjonene virker som før.
+- Store tall: toppfeltet viser kort form fra 100 mrd. (`fmtKrCompact`: «1 234 mrd. kr», hele beløpet i hjelpeteksten),
+  og Verket → Økonomi viser hele kronebeløpet. Testet på 320, 390 og 1366 px.
+- Serveren: ingen endring trengs (juksesperren tåler store tall; lista «Utbetalt» leser den fryste formuen).
+Endringslogg: ja (samlet med B-384).
+Konto (B-149): – ingen ny funksjon.
+
+## B-382 Innskuddet til konsernkassa er stengt «fail-closed» (2026-09-30)
+Status: gjeldende. Strammer inn B-319.
+Bakgrunn: `treasury_limit` ga 100 mill. per døgn hvis nøkkelen manglet i config, og ingen grense i det hele tatt hvis
+raden `world` manglet (NULL-feil i `deposit_to_treasury`). Eieren: manglende config = 0, eksplisitt 0 = 0, bare en
+eksplisitt framtidig beslutning kan åpne det.
+Beslutning: `090_innskudd_lukket.sql`. Grensen er 0 med mindre `config.world.treasury_deposit_enabled = true` og
+`treasury_base_per_day` er positivt. `deposit_to_treasury` avviser med `av` før noe annet (og tåler NULL). Bryteren er
+ikke satt. Testet med alle varianter (mangler, 0, tall uten bryter, bryter av/på, ingen rad) i en blokk som ble rullet
+tilbake. Appen har teksten for `av`.
+Endringslogg: nei
+Konto (B-149): – ingen ny funksjon.
+
+## B-383 Tittel og opptjent nivå er skilt (2026-09-30)
+Status: gjeldende. Endrer hva gulvet fra B-326 gir.
+Bakgrunn: eieren: tittelen er historisk og beholdes; nye kjøp, komplekser og modernisering følger det verkene har tjent.
+Ingenting tas bort. Dry-run før migrasjonen: `docs/STABILISERING.md` avsnitt 9.
+Beslutning:
+- `091_opptjent_niva.sql`: ny kolonne `konsern.earned` = det høyeste stigen (`konsern_ladder_level`) har stått på, uten
+  gulvet, og går aldri ned. `konsern_settle` holder den oppdatert, `konsern_status` og `konsern_into_state` sender den
+  (`g.konsern.earned`). `konsern_order` bruker den til plasser, høyeste trinn og komplekser. Et bytte til kompleks
+  sperres ikke av plassene (det legger ikke til et verk), bare av nivå 2.
+- `konsern.level`/`legends` er fortsatt tittelen: topplista, titler, pynt og stormodellene hjemme.
+- Appen speiler regelen (`earnedLevel` i `konsernWorld.ts`, `earnedOf` i `konsern.ts`); Konsern → Oversikt forklarer
+  det når tittelen er høyere enn det opptjente nivået. `migrate()` gir `earned: 0` (stigen regnes alltid med).
+- Dry-run 30.9: ni spillere med gulv; seks sperres for å legge til (nye verk over plassene, trinn over det opptjente,
+  nye komplekser). Verk, trinn, titler og alle 11 betalte bestillinger i køen står. Én betalt modernisering (trinn 3 → 4)
+  er over det opptjente og fullføres.
+Endringslogg: ja (samlet med B-384).
+Konto (B-149): – ingen ny funksjon (konsernet krever konto fra før).
+
+## B-384 Sesongen avgjøres på Konsernverdi; lister fra eget verk merkes; ukens «Mer verdi enn før» tas bort (2026-09-30)
+Status: gjeldende. Endrer B-143 (sesongresultat på verdi), B-306 (lista «kasse» tatt bort) og B-152/B-172 (ukene).
+Bakgrunn: uten kassetak blir lokale tall et kappløp i spillfart. Eieren: sesongens hovedkonkurranse er Konsernverdi
+(serveren, ekte tid); «Verdi» og «Mest penger på bok» blir stående som levende lister, tydelig merket «Eget verk»; Hall of
+Fame kan fryse lokale rekorder ved sesongslutt; «Mer verdi enn før» fjernes, og tre bedre ferdighetskonkurranser foreslås
+før noe erstatter den.
+Beslutning:
+- `092_sesong_konsernverdi.sql` + `093_sesongslutt_raskere.sql`: `close_season` rangerer på `konsern_value` (de uten
+  konsern etter, på verdien i eget verk) og lagrer `konsern_value` og `rank_by`; verdien i eget verk fryses som før.
+  `season_history` gir begge. Avsluttede sesonger står urørt. Dry-run: 0,2 s for 19 spillere.
+- `leaderboard()`: ny liste `produksjon` (tonn stål). Topplista i appen har to grupper: «Industriverden · sesong»
+  (Konsernverdi, åpnes først) og «Eget verk» (Verdi, Mest penger på bok, Produksjon, Raskest til storverk, Raskest til
+  10 mrd., Kontrollrom, Privat formue). Teksten under hver liste sier hva den er.
+- `week_kind`: `vekst` er borte fra uka som starter 5.10.2026; så veksler «Flest aktive dager» og «Mer stål enn før».
+  Ukene før står som de var. Tre forslag til nye ukekonkurranser i `docs/FORSLAG.md`.
+Endringslogg: ja.
+Konto (B-149): ja – topplistene og ukene krevde konto fra før; `produksjon` hører til topplista (KONTO.md).
+
+## B-385 Verdenssimulatoren til 730 dager, og STATUS.md (2026-09-30)
+Status: gjeldende.
+Bakgrunn: eieren ba om 365/730 dager, dager etter fullt konsern til 1/5/10/25 mrd., hvor mange maksimale oppkjøpsbud
+man har råd til, andelen av årets inntekt som går til det som finnes å bruke penger på, og forskjellen liten/middels/stor
+– uten ny balanse. Deretter en STATUS.md som beskriver hvordan spillet virker nå.
+Beslutning:
+- `worldSim.ts`: 30/60/90/180/365/730 dager (standard 730), `fullDay`, `cashDays`, `years`, maks bud = 10 × verdien av
+  skraplageret (171 mill. → 1,7 mrd.). Legacy-profilene følger opptjent nivå (B-383).
+- Funn (ingen endring gjort): konsernet er ferdig utbygd på dag 19–68; etterpå går 93–100 % av inntekten rett i kassa
+  (år 2: 0 % brukt uten selskapsbud). Kassa: 12–22 mrd. etter ett år og 26–47 mrd. etter to (stor ≈ 1,8–1,9 × liten).
+  Etter ett år har en stor spiller råd til 13 maksimale oppkjøpsbud, etter to 27.
+- `docs/STATUS.md` er fasit for hvordan spillet virker nå; BESLUTNINGER er hvorfor, LOGG er historikk (CLAUDE.md).
 Endringslogg: nei
 Konto (B-149): – ingen ny funksjon.

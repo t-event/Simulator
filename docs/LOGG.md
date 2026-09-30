@@ -5,6 +5,35 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 307 – 2026-09-30: Kassa uten tak, sesongen på Konsernverdi, opptjent nivå, innskuddet stengt, 730 dager (B-381–B-385)
+
+**Brukeren ba om:** «Jeg har bestemt meg»: fjern kassetaket og frys Privat formue; sesongens hovedkonkurranse på
+Konsernverdi, lokale lister beholdt og merket «Eget verk», ukens «Mer verdi enn før» bort med tre forslag; skill tittel
+fra opptjent nivå (dry-run først); herd innskuddet til fail-closed; utvid worldSim til 365/730 uten ny balanse; så
+STATUS.md. Ikke verksjefer, ikke nye selskaper, ingen endring i verdensbalansen.
+
+**Gjort:**
+- Appen: `softCap = null`, Privat formue fryst (Økonomi, Konsern, MoneyGuide), `fmtKrCompact` i toppfeltet og hele beløpet
+  på Økonomi. Opptjent nivå speilet (`earnedLevel`, `earnedOf`, `g.konsern.earned` med `migrate()`), forklaring på
+  Konsern → Oversikt. Topplista i to grupper med «Mest penger på bok» og «Produksjon»; sesonghistorikken viser
+  Konsernverdi. Ukene uten «vekst».
+- Serveren: 090 (innskudd fail-closed, NULL-feilen rettet), 091 (`konsern.earned`, `konsern_order` etter opptjent nivå,
+  bytte uten plassjekk), 092 (lista `produksjon`, `close_season` på Konsernverdi, `season_history`, `week_kind`), 093
+  (`close_season` raskere – 092 fikk tidsavbrudd i dry-run fordi Konsernverdien ble regnet per rad i tidslinja).
+- Dry-run før 091 i STABILISERING.md avsnitt 9 (bokstaver). `worldSim.ts` til 730 dager med nye mål.
+- Docs: STATUS.md (ny fasit), B-381–B-385, CLAUDE.md, FORSLAG (tre ukeforslag), KONTO, PLAN-NETT, merknad om historisk
+  analyse øverst i OKONOMI, OKONOMI-KONTROLL, KONSERNBIDRAG, KONSERN-FORSLAG og KONTROLL-FORSLAG.
+
+**Testet:** `npm test` (nye tester for kassa uten tak og opptjent nivå), tsc, lint, `balance.ts` (exit 0). SQL som
+spiller i blokker som ble rullet tilbake: innskudd med alle config-varianter; kjøp for spiller A (sperret: 13. verk,
+kompleks, bytte; tillatt: modernisering under trinnet), H (trinn 3 → 4 sperret) og B (kompleks tillatt);
+`close_season` på dagens sesong (0,2 s). Playwright på 320/390/1366: kort kasse i toppfeltet uten avkorting, hele beløpet
+på Økonomi, forklaringen om opptjent nivå, gruppene på topplista, ingen horisontal scrolling. get_advisors: bare de
+kjente punktene.
+
+**Gjenstår:** eierens valg av ny ukekonkurranse (FORSLAG). Kassa i verden hoper seg opp når konsernet er fullt
+(STATUS avsnitt 8) – ingen endring før eieren bestemmer. Sjekken 2.10 rapporterer bare.
+
 ## Økt 306 – 2026-09-30: Stabilisering – cash-audit, legacy-gulvet og verdenssimulatoren (B-380)
 
 **Brukeren ba om:** ikke bygge verksjefene ennå (svar på forslaget), men først: audit av 10 mrd.-taket, analyse av

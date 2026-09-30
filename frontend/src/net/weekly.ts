@@ -10,6 +10,7 @@ export type League = "bronse" | "solv" | "gull";
 
 // Én liste for alle, målt i prosent, så små og store verk kan konkurrere (B-172)
 export const WEEK_KINDS: Record<WeekKind, { title: string; how: string }> = {
+  // Tatt bort fra uka 5.10.2026 (B-384): verdien i eget verk vokser med spillfarten. Står for resultatene fra før
   vekst: {
     title: "Størst vekst i konsernverdi",
     how: "Få konsernverdien til å vokse mest mulig i prosent denne uka (regnet fra minst 50 mill.). Du er med når spillet har vært lagret på nett minst to dager før uka.",

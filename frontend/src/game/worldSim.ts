@@ -9,8 +9,13 @@
  * (pris delt på økningen i utbyttet), så lenge det betaler seg innen `MAX_PAYBACK_DAYS`. Det som ikke brukes, står i
  * konsernkassa – det er kapitalen som er ledig til anbud og oppkjøp.
  *
- *   npx tsx src/game/worldSim.ts              # alle spillertypene, 30/60/90/180 dager
- *   npx tsx src/game/worldSim.ts --dager 365  # lengre
+ *   npx tsx src/game/worldSim.ts              # alle spillertypene, 30/60/90/180/365/730 dager (B-385)
+ *   npx tsx src/game/worldSim.ts --dager 180  # kortere
+ *
+ * I tillegg (B-385): dagen konsernet er ferdig utbygd (ingenting mer betaler seg), hvor mange dager etter det kassa når
+ * 1/5/10/25 mrd., hvor mange maksimale oppkjøpsbud (10 × verdien av skraplageret) kassa har råd til, og hvor stor del
+ * av årets inntekt som går til det som finnes å bruke penger på (verk, modernisering, selskapsbud). Simulatoren endrer
+ * ingen regler – den måler dem.
  *
  * Ingen tilfeldighet: samme tall hver gang, så endringer i reglene kan sammenlignes.
  */
@@ -35,6 +40,11 @@ const HOUR = 3_600_000;
 const DAY = 24 * HOUR;
 /** Kjøp som ikke betaler seg innen så mange ekte dager, venter (pengene står i kassa) */
 export const MAX_PAYBACK_DAYS = 180;
+/** Verdien av skraplageret 30.9.2026 (company_value: 10 dagers inntekt, B-375); største bud som teller er 10 × V (B-337) */
+export const COMPANY_VALUE = 171_000_000;
+export const MAX_BID = 10 * COMPANY_VALUE;
+/** Kassa-grensene det måles dager til (B-385) */
+export const CASH_MARKS = [1e9, 5e9, 10e9, 25e9];
 
 export interface SimProfile {
   name: string;
@@ -69,6 +79,12 @@ export interface SimResult {
   rows: SimRow[];
   /** Første ekte dag spilleren nådde hvert nivå i stigen (opptjent), eller null */
   levelDays: (number | null)[];
+  /** Første ekte dag konsernet var ferdig utbygd (tom kø og ingenting mer som betaler seg), eller null */
+  fullDay: number | null;
+  /** Første ekte dag kassa nådde hver av CASH_MARKS, eller null */
+  cashDays: (number | null)[];
+  /** Per år (dag 1–365, 366–730): inntekt og det som ble brukt (verk og modernisering, selskapsbud) */
+  years: { income: number; spent: number; bids: number }[];
 }
 
 const FULL_RESEARCH = ["konsernstyring", "gronnkonsern", "oppkjop", "standardverk", "storkonsern"];
@@ -148,18 +164,24 @@ export function simulate(p: SimProfile, days: number, checkpoints: number[]): Si
     nextId: Math.max(0, ...p.plants.map((x) => x.id)) + 1,
     level: p.level,
     floor: p.floor,
+    earned: ladderLevel(p.plants),
     balance: p.balance,
   };
   const rows: SimRow[] = [];
   const levelDays: (number | null)[] = LADDER.map((_, i) => (ladderLevel(w.plants) > i ? 0 : null));
+  const cashDays: (number | null)[] = CASH_MARKS.map(() => null);
+  const years = [0, 1].map(() => ({ income: 0, spent: 0, bids: 0 }));
+  let fullDay: number | null = null;
   let spent = 0;
   let companyToday = 0;
   for (let h = 0; h < days * 24; h++) {
     const now = h * HOUR;
+    const year = years[Math.min(1, Math.floor(h / (365 * 24)))];
     settleWorld(w, now);
     const earned = ladderLevel(w.plants);
     for (let i = 0; i < earned; i++) if (levelDays[i] === null) levelDays[i] = Math.ceil(now / DAY);
     // Fyll køen
+    let bought = false;
     for (;;) {
       if (w.orders.length >= 3) break;
       const req = bestOrder(w, p);
@@ -167,6 +189,13 @@ export function simulate(p: SimProfile, days: number, checkpoints: number[]): Si
       const r = placeOrder(w, req, p.researched, now);
       if (!r.ok) break;
       spent += r.order.cost;
+      year.spent += r.order.cost - r.sale;
+      bought = true;
+    }
+    // Ferdig utbygd: køen er tom og ingenting mer betaler seg – heller ikke med mer penger i kassa
+    if (fullDay === null && !bought && w.orders.length === 0) {
+      const rich = { ...w, balance: 1e15 };
+      if (!bestOrder(rich, p)) fullDay = Math.ceil(now / DAY);
     }
     // Ved midnatt: bidrag, utbytte og selskapsinntekt for dagen som gikk
     if ((h + 1) % 24 === 0) {
@@ -178,9 +207,16 @@ export function simulate(p: SimProfile, days: number, checkpoints: number[]): Si
         const period = 14 / p.company.share;
         const inPeriod = (day - 1) % period < 14;
         if (inPeriod) companyToday = p.company.perDay;
-        if ((day - 1) % period === 0) w.balance -= p.company.bid;
+        if ((day - 1) % period === 0) {
+          w.balance -= p.company.bid;
+          year.bids += p.company.bid;
+        }
       }
       w.balance += p.contribution + dividend + companyToday;
+      year.income += p.contribution + dividend + companyToday;
+      CASH_MARKS.forEach((m, n) => {
+        if (cashDays[n] === null && w.balance >= m) cashDays[n] = day;
+      });
       if (checkpoints.includes(day))
         rows.push({
           day,
@@ -196,7 +232,7 @@ export function simulate(p: SimProfile, days: number, checkpoints: number[]): Si
         });
     }
   }
-  return { rows, levelDays };
+  return { rows, levelDays, fullDay, cashDays, years };
 }
 
 /** Spillertypene (kalibrert mot ekte tall 30.9.2026; navnene er typer, ikke spillere) */
@@ -263,15 +299,9 @@ export function profiles(): SimProfile[] {
       level: 0,
       company: { perDay: 15_000_000, share: 0.5, bid: 100_000_000 },
     },
-    { name: "Etablert legacy (12 verk, gulv 6) – dagens regler", ...legacy, floor: 6, level: 6 },
-    {
-      name: "Etablert legacy – bare opptjent nivå (forslaget)",
-      ...legacy,
-      floor: 0,
-      level: ladderLevel(legacyPlants),
-    },
-    { name: "Legacy med komplekser på trinn 0 (10 stk., gulv 3) – dagens regler", ...cheap, floor: 3, level: 3 },
-    { name: "Legacy med komplekser på trinn 0 – bare opptjent nivå (forslaget)", ...cheap, floor: 0, level: 0 },
+    // Fra B-383 følger kjøpene opptjent nivå for alle; gulvet gir bare tittelen
+    { name: "Etablert legacy (12 verk, gulv 6, opptjent 1)", ...legacy, floor: 6, level: 6 },
+    { name: "Legacy med komplekser på trinn 0 (10 stk., gulv 3, opptjent 0)", ...cheap, floor: 3, level: 3 },
   ];
 }
 
@@ -279,26 +309,56 @@ function mill(n: number): string {
   return (n / 1e6).toLocaleString("nb-NO", { maximumFractionDigits: 0 });
 }
 
+function mrd(n: number): string {
+  return (n / 1e9).toLocaleString("nb-NO", { maximumFractionDigits: 1 });
+}
+
 function main(): void {
   const args = process.argv.slice(2);
   const i = args.indexOf("--dager");
-  const days = i >= 0 ? Number(args[i + 1]) : 180;
-  const checkpoints = [30, 60, 90, 180, 365].filter((d) => d <= days);
+  const days = i >= 0 ? Number(args[i + 1]) : 730;
+  const checkpoints = [30, 60, 90, 180, 365, 730].filter((d) => d <= days);
   console.log(
-    `Priser: stålverk ${mill(5e6)}, storverk ${mill(20e6)}, kompleks ${mill(60e6)} mill. · kø 3 · plasser ${slotsAt(0, false)}/${slotsAt(0, true)}+ · trinn ${modMaxAt(0)}–${modMaxAt(7)} · tilbakebetaling ≤ ${MAX_PAYBACK_DAYS} dager\n`,
+    `Priser: stålverk ${mill(5e6)}, storverk ${mill(20e6)}, kompleks ${mill(60e6)} mill. · kø 3 · plasser ${slotsAt(0, false)}/${slotsAt(0, true)}+ · trinn ${modMaxAt(0)}–${modMaxAt(7)} · tilbakebetaling ≤ ${MAX_PAYBACK_DAYS} dager · maks oppkjøpsbud ${mrd(MAX_BID)} mrd.\n`,
   );
+  const summary: { name: string; r: SimResult }[] = [];
   for (const p of profiles()) {
     const r = simulate(p, days, checkpoints);
+    summary.push({ name: p.name, r });
     console.log(`== ${p.name}`);
-    console.log("dag | kasse | bidrag/d | utbytte/d | selskap/d | verk | kø | brukt | nivå (opptj./med gulv)");
+    console.log("dag | kasse | bidrag/d | utbytte/d | selskap/d | verk | kø | brukt | nivå (opptj./tittel) | maks bud");
     for (const row of r.rows)
       console.log(
-        `${String(row.day).padStart(3)} | ${mill(row.balance).padStart(6)} | ${mill(row.contribution).padStart(3)} | ${mill(row.dividend).padStart(4)} | ${mill(row.company).padStart(3)} | ${row.plants} | ${row.queue} | ${mill(row.spent).padStart(6)} | ${row.earned}/${row.effective}`,
+        `${String(row.day).padStart(3)} | ${mill(row.balance).padStart(6)} | ${mill(row.contribution).padStart(3)} | ${mill(row.dividend).padStart(4)} | ${mill(row.company).padStart(3)} | ${row.plants} | ${row.queue} | ${mill(row.spent).padStart(6)} | ${row.earned}/${row.effective} | ${Math.max(0, Math.floor(row.balance / MAX_BID))}`,
       );
     console.log(
       "Nivå nådd (ekte dag): " +
-        LADDER.map((s, n) => `${s.title} ${r.levelDays[n] === null ? "–" : r.levelDays[n]}`).join(", ") +
-        "\n",
+        LADDER.map((s, n) => `${s.title} ${r.levelDays[n] === null ? "–" : r.levelDays[n]}`).join(", "),
+    );
+    const after = (d: number | null) => (d === null ? "–" : r.fullDay === null ? `dag ${d}` : `+${d - r.fullDay}`);
+    console.log(
+      `Ferdig utbygd: ${r.fullDay === null ? "ikke innen " + days + " dager" : "dag " + r.fullDay} · kassa etter det: ` +
+        CASH_MARKS.map((m, n) => `${mrd(m)} mrd. ${after(r.cashDays[n])}`).join(", "),
+    );
+    r.years.forEach((y, n) => {
+      if (!y.income) return;
+      const used = y.spent + y.bids;
+      console.log(
+        `År ${n + 1}: inntekt ${mrd(y.income)} mrd. · brukt ${mrd(used)} mrd. (${Math.round((100 * used) / y.income)} %; verk ${mrd(y.spent)}, selskapsbud ${mrd(y.bids)}) · ligger i kassa ${Math.round((100 * (y.income - used)) / y.income)} %`,
+      );
+    });
+    console.log("");
+  }
+  // Forskjellen mellom små, middels og store (B-385)
+  const [small, medium, large] = summary;
+  for (const d of [365, 730].filter((x) => x <= days)) {
+    const at = (x: { r: SimResult }) => x.r.rows.find((row) => row.day === d);
+    const a = at(small);
+    const b = at(medium);
+    const c = at(large);
+    if (!a || !b || !c) continue;
+    console.log(
+      `Dag ${d}: kasse liten/middels/stor ${mrd(a.balance)} / ${mrd(b.balance)} / ${mrd(c.balance)} mrd. (stor = ${(c.balance / a.balance).toFixed(1)}× liten, ${(c.balance / b.balance).toFixed(1)}× middels) · utbytte/dag ${mill(a.dividend)} / ${mill(b.dividend)} / ${mill(c.dividend)} mill. · maks bud ${Math.floor(a.balance / MAX_BID)} / ${Math.floor(b.balance / MAX_BID)} / ${Math.floor(c.balance / MAX_BID)}`,
     );
   }
 }

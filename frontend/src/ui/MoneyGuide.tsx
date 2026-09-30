@@ -1,12 +1,12 @@
 /**
  * «Slik henger pengene sammen» (B-355): de to kassene – hjemme i spilltid og konsernkassa i ekte tid – og svar på det
- * spillerne spør om i Skiftrapporten: hvor blir pengene over taket av, hvorfor kan jeg ikke flytte penger til
- * konsernet, hva er utbytte, og hvorfor bygges verkene saktere enn før. Åpnes fra Konsern (Oversikt og Industrien) og
- * fra Verket → Økonomi. Gradvis synlighet: konsernet forklares først når det er åpent, taket først når kassa har nådd det.
+ * spillerne spør om i Skiftrapporten: hva er den private formuen (fryst fra B-381), hvorfor kan jeg ikke flytte penger
+ * til konsernet, hva er utbytte, og hvorfor bygges verkene saktere enn før. Åpnes fra Konsern (Oversikt og Industrien)
+ * og fra Verket → Økonomi. Gradvis synlighet: konsernet forklares først når det er åpent, formuen bare for dem som har en.
  */
 import { useState } from "react";
 import { STORMODEL_EQUITY } from "../game/actions";
-import { hasPaidOut, paidOutTotal, CASH_RESERVE } from "../game/reserve";
+import { hasPaidOut, paidOutTotal } from "../game/reserve";
 import { POLICIES } from "../game/control";
 import type { GameState } from "../game/types";
 import { SheetHead } from "./ds";
@@ -14,7 +14,7 @@ import { fmtKr } from "./format";
 import { Icon } from "./icons";
 import { Portal } from "./Portal";
 
-/** Har spilleren noe å lure på her? (konsernet er åpent, eller kassa har nådd taket) */
+/** Har spilleren noe å lure på her? (konsernet er åpent, eller hen har en privat formue fra før B-381) */
 function moneyGuideRelevant(g: GameState): boolean {
   return !!g.konsern?.unlocked || hasPaidOut(g);
 }
@@ -30,7 +30,6 @@ function Question({ q, children }: { q: string; children: React.ReactNode }) {
 
 export function MoneyGuide({ g, onClose }: { g: GameState; onClose: () => void }) {
   const konsern = !!g.konsern?.unlocked;
-  const cap = CASH_RESERVE.softCap ?? 0;
   const perDay = g.konsern?.treasury?.perDay ?? 0;
   return (
     <Portal>
@@ -50,13 +49,8 @@ export function MoneyGuide({ g, onClose }: { g: GameState; onClose: () => void }
               </h3>
               <p className="g-small-text">
                 <strong>Spilltid</strong> – går fortere på 3× og 10×. Det hjemmeverket tjener på stålet, kommer hit.
-                Brukes til utstyr, folk, skrap og forskning hjemme.
+                Brukes til utstyr, folk, skrap og forskning hjemme. Kassa har ikke noe tak.
               </p>
-              {cap > 0 && (
-                <p className="g-small-text g-muted">
-                  Tak: {fmtKr(cap)}. Det du tjener over, flyttes til din private formue.
-                </p>
-              )}
             </div>
             {konsern && (
               <>
@@ -79,12 +73,12 @@ export function MoneyGuide({ g, onClose }: { g: GameState; onClose: () => void }
 
           <h3 className="g-subhead">Det mange lurer på</h3>
           {hasPaidOut(g) && (
-            <Question q={`Kassa står på ${fmtKr(cap)} – hvor blir resten av?`}>
+            <Question q="Hva er den private formuen?">
               <p>
-                Det flyttes til din private formue ({fmtKr(Math.floor(paidOutTotal(g)))} så langt). Den kan ikke brukes
-                i spillet – alt som kan kjøpes hjemme, koster mindre – men den er ikke borte: den teller med i verdien
-                din, altså sluttmålet, de største ovnene ({fmtKr(STORMODEL_EQUITY)}) og dagens oppdrag, og står i Hall
-                of Fame som «Privat formue».
+                Før hadde kassa et tak, og det du tjente over taket, ble flyttet til din private formue (
+                {fmtKr(Math.floor(paidOutTotal(g)))}). Taket er fjernet, så nå blir alt stående i kassa. Formuen står
+                som historikk: den vokser ikke og kan ikke brukes, men den teller med i verdien din – sluttmålet og de
+                største ovnene ({fmtKr(STORMODEL_EQUITY)}) – og står i Hall of Fame som «Privat formue».
               </p>
             </Question>
           )}

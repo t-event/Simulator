@@ -157,6 +157,7 @@ export function migrate(g: GameState): GameState {
       director: null,
       milestones: 0,
       legends: 0,
+      earned: 0,
       orders: [],
       treasury: null,
     };
@@ -165,6 +166,8 @@ export function migrate(g: GameState): GameState {
   if (g.konsern.director && g.konsern.director.level === undefined) g.konsern.director.level = 0;
   if (g.konsern.milestones === undefined) g.konsern.milestones = 0;
   if (g.konsern.legends === undefined) g.konsern.legends = 0;
+  // Opptjent nivå (B-383): 0 til serveren sender det; stigen verkene gir regnes alltid med (earnedOf i konsern.ts)
+  if (typeof g.konsern.earned !== "number") g.konsern.earned = 0;
   // Køen på serveren (B-326)
   if (g.konsern.orders === undefined) g.konsern.orders = [];
   if (g.konsern.treasury === undefined) g.konsern.treasury = null;

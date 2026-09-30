@@ -28,6 +28,8 @@ import {
   KONSERN_MILESTONES,
   KONSERN_SHARED,
   kompleksOpen,
+  earnedOf,
+  titleAboveEarned,
   LEGENDS,
   moneyFor,
   nextLevelProgress,
@@ -77,6 +79,9 @@ function LegendProgress({ g }: { g: GameState }) {
   const n = g.konsern.legends;
   const next = LEGENDS[n];
   const progress = nextLevelProgress(g);
+  const earned = earnedOf(g);
+  const earnedNext = LEGENDS[earned];
+  const earnedProgress = nextLevelProgress(g, earned);
   return (
     <>
       {titleOf(g) && (
@@ -97,6 +102,14 @@ function LegendProgress({ g }: { g: GameState }) {
         </>
       ) : (
         <p className="g-muted g-small-text">Alle titlene er nådd. Konsernet kan fortsatt vokse.</p>
+      )}
+      {/* Tittel fra før byttet, høyere enn det verkene har gitt (B-383): nye kjøp følger det opptjente nivået */}
+      {titleAboveEarned(g) && earnedNext && earnedProgress && (
+        <p className="g-muted g-small-text g-earned-note">
+          Tittelen har du fra før, og den beholder du. Nye verk, trinn og stålkomplekser følger det verkene dine har
+          gitt: {earned > 0 ? <strong>{LEGENDS[earned - 1].title}</strong> : "ingen tittel ennå"}. Neste:{" "}
+          <strong>{earnedNext.title}</strong> ({earnedProgress.have} av {earnedProgress.need}).
+        </p>
       )}
     </>
   );
@@ -931,7 +944,7 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
                 </strong>
               </span>
               {hasPaidOut(g) && (
-                <span title="Det kassa har tjent over taket. Teller med i sluttmålet og for de største ovnene, ikke i konsernverdien på topplista">
+                <span title="Fryst historikk fra da kassa hadde et tak (B-381). Teller med i sluttmålet og for de største ovnene, ikke i konsernverdien på topplista">
                   Privat formue <strong>{fmtKr(Math.floor(paidOutTotal(g)))}</strong>
                 </span>
               )}

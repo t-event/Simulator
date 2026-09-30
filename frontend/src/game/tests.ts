@@ -144,6 +144,8 @@ import {
   WIN_TITLE,
   directorPerDay,
   maxSisters,
+  earnedOf,
+  titleAboveEarned,
   moreSlotsText,
   sisterPrice,
   sisterSalePrice,
@@ -255,6 +257,10 @@ import {
   placeOrder,
   sellPlant,
   settleWorld,
+  worldLevel,
+  earnedLevel,
+  orderQuote,
+  type OrderRequest,
   slotsAt,
   upgradeCostWorld,
   type KonsernWorld,
@@ -1155,11 +1161,13 @@ test("Flere plasser for datterverk (B-367): forskningen, neste tittel, eller top
   g.stage = 4;
   g.konsern.unlocked = true;
   g.konsern.legends = 4;
+  g.konsern.earned = 4;
   assert(/Større konsern.+2 til/.test(moreSlotsText(g)), moreSlotsText(g));
   g.researched.push("storkonsern");
   assert(maxSisters(g) === 12, `plass ${maxSisters(g)}`);
   assert(/Stålgigant \(8 stålkomplekser på trinn 5\).+2 til/.test(moreSlotsText(g)), moreSlotsText(g));
   g.konsern.legends = 6;
+  g.konsern.earned = 6;
   assert(maxSisters(g) === 14 && /14 datterverk er det meste/.test(moreSlotsText(g)), moreSlotsText(g));
 });
 
@@ -1218,6 +1226,7 @@ test("Stålkompleks i stedet for et lite verk når konsernet er fullt (B-170)", 
   g.konsern.unlocked = true;
   g.won = true;
   g.konsern.legends = 2;
+  g.konsern.earned = 2;
   fund(g);
   while (g.konsern.plants.length < maxSisters(g)) {
     assert(buySister(g, "stalverk").ok, "kjøp av stålverk");
@@ -1680,8 +1689,35 @@ test("Mesterskap «Holdbare ovnspotter» (B-165): foringen slites mindre for hve
   assert(MASTERY.foring.max <= 0.3, "for stor gevinst");
 });
 
-test("Taket for kassa (B-303): overskuddet betales ut til eierne, teller ikke i konsernverdien og kan ikke brukes", () => {
-  const cap = CASH_RESERVE.softCap!;
+test("Kassa uten tak (B-381): store tall blir i kassa, og Privat formue står fryst", () => {
+  assert(CASH_RESERVE.softCap === null, "taket er ikke fjernet");
+  const g = newGame(381);
+  g.stage = 4;
+  g.konsern.unlocked = true;
+  g.tutorial = null;
+  g.pendingDecision = null;
+  // En gammel utbetaling står som historikk
+  g.paidOut = { total: 7e9, firstDay: 900, today: 3e8 };
+  g.cash = 250e9;
+  assert(applyCashCap(g) === 0 && g.cash === 250e9, `kassa ble tatt: ${g.cash}`);
+  advance(g, 60);
+  assert(g.cash > 200e9 && paidOutTotal(g) === 7e9, `formuen er ikke fryst: ${paidOutTotal(g)}`);
+  // Kassa teller i konsernverdien, og sluttmålet regnes med den fryste formuen
+  assert(konsernEquity(g) >= g.cash - 1, "kassa teller ikke i konsernverdien");
+  assert(valueCreated(g) === konsernEquity(g) + 7e9, "sluttmålet mistet den fryste formuen");
+  // Døgnlinja om utbetaling kommer ikke lenger, men dagens tall nullstilles
+  const before = g.log.length;
+  g.paidOut.today = 5e8;
+  paidOutDayLog(g);
+  assert(g.paidOut.today === 0 && g.log.length === before, "døgnlinja om utbetaling kom uten tak");
+  // Store tall i kort form (toppfeltet) og nøyaktig (detaljene)
+  assert(fmtKr(1.234e12).length <= 16, `for lang kort form: ${fmtKr(1.234e12)}`);
+});
+
+test("Taket for kassa (B-303, fjernet i B-381): mekanikken virker fortsatt hvis det slås på", () => {
+  const cap = 10_000_000_000;
+  const savedCap = CASH_RESERVE.softCap;
+  CASH_RESERVE.softCap = cap;
   const g = newGame(193);
   g.stage = 4;
   g.konsern.unlocked = true;
@@ -1731,13 +1767,12 @@ test("Taket for kassa (B-303): overskuddet betales ut til eierne, teller ikke i 
     advance(g, 1440);
   }
   assert(g.gameOver, `ingen konkurs med det utbetalte som sikkerhet (${g.negativeDays} døgn over grensen)`);
-  // Taket kan slås av
+  // Taket kan slås av (standarden fra B-381)
   const g2 = newGame(194);
-  const saved = CASH_RESERVE.softCap;
   CASH_RESERVE.softCap = null;
   g2.cash = cap * 3;
   assert(applyCashCap(g2) === 0 && g2.cash === cap * 3, "taket virker når det er slått av");
-  CASH_RESERVE.softCap = saved;
+  CASH_RESERVE.softCap = savedCap;
   // Gamle lagringer får feltet som null, og det overlever lagring
   const old = JSON.parse(JSON.stringify(g));
   delete old.paidOut;
@@ -3379,6 +3414,59 @@ test("Konsernet i ekte tid (B-326): priser, køen i rekkefølge, rabatt, bytte o
   assert(y.level === 6, "gulvet holdt ikke");
 });
 
+test("Opptjent nivå (B-383): tittelen med gulvet står, men nye verk, trinn og komplekser følger verkene", () => {
+  const t0 = Date.UTC(2026, 9, 1);
+  // Som spiller A i dry-run: gulv 6, 12 verk, men verkene gir bare nivå 1 (3 storverk på trinn 3)
+  const w: KonsernWorld = { plants: [], orders: [], nextId: 13, level: 6, floor: 6, earned: 1, balance: 1e12 };
+  for (let i = 1; i <= 12; i++)
+    w.plants.push({
+      id: i,
+      type: i <= 6 ? "kompleks" : "storverk",
+      name: `V${i}`,
+      level: i >= 7 && i <= 9 ? 3 : 0,
+      boughtDay: 0,
+      downUntilDay: 0,
+    });
+  assert(worldLevel(w) === 6 && earnedLevel(w) === 1, `tittel ${worldLevel(w)}, opptjent ${earnedLevel(w)}`);
+  const big = ["storkonsern"];
+  const q = (req: OrderRequest) => {
+    const r = orderQuote(w, req, big);
+    return "refusal" in r ? r.refusal : "ok";
+  };
+  assert(q({ kind: "bygg", type: "stalverk" }) === "fullt", "13. verk med plass til 8");
+  assert(q({ kind: "bytt", plant: 12 }) === "niva", "bytte til kompleks uten opptjent nivå 2");
+  assert(q({ kind: "modernisering", plant: 1 }) === "ok", "modernisering under opptjent trinn");
+  assert(q({ kind: "modernisering", plant: 7 }) === "ok", "trinn 3 → 4 med opptjent nivå 1");
+  w.plants[6].level = 4;
+  assert(q({ kind: "modernisering", plant: 7 }) === "trinn", "trinn 4 → 5 uten opptjent nivå 3");
+  // Ingenting tas bort: verkene og tittelen står etter et oppgjør
+  settleWorld(w, t0);
+  assert(w.plants.length === 12 && w.level === 6 && w.earned === 1, "noe ble tatt bort");
+  // Opptjent nivå stiger med verkene (6 storverk på trinn 4 = nivå 2) og går aldri ned
+  for (const p of w.plants.slice(6)) p.level = 4;
+  settleWorld(w, t0);
+  assert(w.earned === 2 && earnedLevel(w) === 2, `opptjent ${w.earned}`);
+  // Nå kan de bytte, selv om de er over plassene (et bytte legger ikke til et verk), men ikke bygge nr. 13
+  assert(q({ kind: "bytt", plant: 12 }) === "ok", "bytte over plassene");
+  assert(q({ kind: "bygg", type: "kompleks" }) === "fullt", "13. verk med plass til 10");
+  w.plants.forEach((p) => (p.level = 0));
+  settleWorld(w, t0);
+  assert(w.earned === 2, "opptjent nivå gikk ned");
+  // I spillet: grensene følger opptjent nivå, tittelen følger legends
+  const g = newGame(383);
+  g.stage = 4;
+  g.konsern.unlocked = true;
+  g.konsern.legends = 6;
+  g.konsern.earned = 1;
+  assert(titleOf(g) === LEGENDS[5].title, "tittelen forsvant");
+  assert(earnedOf(g) === 1 && titleAboveEarned(g), "opptjent nivå i spillet");
+  assert(maxSisters(g) === slotsAt(1, false) && modernizeMax(g) === 4 && !kompleksOpen(g), "grensene fulgte tittelen");
+  // Gamle lagringer uten feltet får 0, og stigen verkene gir regnes med
+  const old = JSON.parse(JSON.stringify(g));
+  delete old.konsern.earned;
+  assert(parseSave(JSON.stringify(old))!.konsern.earned === 0, "ingen standardverdi");
+});
+
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden
 test("Verdenskartet (B-333): nye verk står der spilleren har færrest, kan velge region, bytte beholder, flytt én gang", () => {
   const g = newGame(333);
@@ -3403,6 +3491,7 @@ test("Verdenskartet (B-333): nye verk står der spilleren har færrest, kan velg
   assert(!localMove(g, first.id, "vest").ok && plantById(g, first.id).region === "sor", "flyttet to ganger");
   // Et verk som byttes til kompleks, står der det sto
   g.konsern.legends = 3;
+  g.konsern.earned = 3;
   const oy = g.konsern.plants.find((p) => p.region === "oy")!;
   assert(localOrder(g, { kind: "bytt", plant: oy.id }).ok, "bytte");
   const swap = g.konsern.orders.at(-1)!;

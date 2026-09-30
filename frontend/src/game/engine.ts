@@ -297,6 +297,7 @@ export function newGame(seed = Date.now()): GameState {
       director: null,
       milestones: 0,
       legends: 0,
+      earned: 0,
       orders: [],
       treasury: null,
     },
@@ -3757,6 +3758,16 @@ export function fmtKr(v: number): string {
   if (abs >= 1_000_000_000) return `${sign}${nf2.format(down(abs / 1_000_000_000))} mrd. kr`;
   if (abs >= 1_000_000) return `${sign}${nf2.format(down(abs / 1_000_000))} mill. kr`;
   return `${sign}${nf0.format(abs)} kr`;
+}
+
+/**
+ * Kort form til toppfeltet (B-381): uten kassetak kan kassa bli tusenvis av milliarder. Fra 100 mrd. vises hele
+ * milliarder uten desimaler, så tallet får plass på 320 px. Det nøyaktige beløpet står i detaljene (fmtKr).
+ */
+export function fmtKrCompact(v: number): string {
+  const abs = Math.abs(v);
+  if (abs < 100_000_000_000) return fmtKr(v);
+  return `${v < 0 ? "−" : ""}${nf0.format(Math.floor(abs / 1_000_000_000))} mrd. kr`;
 }
 
 export function fmtT(t: number): string {

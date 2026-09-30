@@ -134,7 +134,7 @@ export function gateBlocker(g: GameState, gate?: Gate): string | null {
   if (gate === "konsern") return g.konsern?.unlocked ? null : "Åpner når konsernet åpner (1 mrd.)";
   if (gate === "baron") return g.won ? null : "Åpner ved sluttmålet (10 mrd., Stålbaron)";
   // Før B-325 åpnet de ved tittelen Stålmagnat (25 mrd.); titlene kommer nå av datterverkene, så grensen er verdien selv.
-  // Det som er betalt ut til eierne over kassetaket, teller med (B-341) – ellers kunne verket alene aldri nå dit
+  // Den fryste private formuen (B-341, B-381) teller med
   return (g.konsern?.legends ?? 0) >= 1 || valueCreated(g) >= STORMODEL_EQUITY
     ? null
     : `Åpner med tittelen ${LADDER[0].title} i konsernet (${LADDER[0].count} storverk modernisert til trinn ${LADDER[0].level}) eller ved 25 mrd. i verdi`;

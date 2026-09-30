@@ -135,9 +135,10 @@ skysymbol i toppen viser om spillet er lagret på nett.
 Spilleren ser: fanen «Toppliste» (under Verket, eller bak 🏆 i toppen) med kallenavn og plassering.
 
 - Kallenavn velges ved opprettelse (ikke e-post, ikke krav om ekte navn).
-- Lister nå: konsernverdi regnet av serveren (B-320), verdi i spillet, raskest til storverk, raskest til 10 mrd.,
-  kontrollrommet (B-295) og utbetalt til eierne (B-303). «Mest penger på bok» (B-306) og «omdømme» (B-171) er tatt bort.
-  «Hall of Fame» og «denne sesongen».
+- Lister nå (B-384), i to grupper: «Industriverden · sesong» – Konsernverdi regnet av serveren i ekte tid (B-320),
+  sesongens hovedkonkurranse – og «Eget verk»: Verdi, Mest penger på bok (tilbake, kassa har ikke tak, B-381),
+  Produksjon (tonn), raskest til storverk, raskest til 10 mrd., kontrollrommet (B-295) og Privat formue (fryst, B-303).
+  «Omdømme» (B-171) er tatt bort. «Hall of Fame» og «denne sesongen». Sesongen avsluttes på Konsernverdi (`close_season`).
 - En åpen toppliste henter på nytt hvert 15. sekund, så den følger med mens man spiller (B-144).
 - Serveren regner listene fra `snapshots`, appen sender ikke inn poeng selv.
 - Juksesperre (under). Brukeren kan sperre en konto fra Supabase.
@@ -289,7 +290,8 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
   utbyttepolitikk (067, 082), overtakelser og oppkjøp (068–069, 083–085, 087), skiftrapporten (070–071, 074),
   `world_tick` uten kø og hvert 5. minutt (072, 079), eksporten (073), tilgangsregler og indekser (076), bidrag og
   utbytte som snitt av målinger (077–078), gjester holdt utenfor pengene (080), den ekte dagen i norsk tid (081) og gamle
-  anbud i dagens penger (086) og rydding av forlatte gjester hver natt (088) og dagen i eget verk på topplista (089). Hver fil forklarer seg selv øverst.
+  anbud i dagens penger (086) og rydding av forlatte gjester hver natt (088) og dagen i eget verk på topplista (089). Så innskuddet stengt «fail-closed» (090), opptjent nivå skilt fra tittelen (091)
+  og sesongen på Konsernverdi med listen «Produksjon» og nye uker (092–093). Hver fil forklarer seg selv øverst.
 - Hva som krever konto, nå og i fase 4 og 5: `docs/KONTO.md` (B-149).
 - Flere enheter samtidig: bare enheten som spilles på, lagrer; den andre settes på pause med «Spill her» (B-143).
 - Merker ved sesongslutt (fase 3) er bygget som 🎖 med beste plassering ved kallenavnet (B-143).

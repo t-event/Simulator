@@ -15,6 +15,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 384,
+    date: "2026-09-30",
+    title: "Ingen tak på kassa, og sesongen avgjøres i konsernet",
+    items: [
+      "Kassa i verket har ikke lenger tak. Alt du tjener, blir stående. Store beløp vises kort øverst, og hele beløpet står på Verket → Økonomi.",
+      "Privat formue står fast som historikk. Den vokser ikke lenger, men teller fortsatt mot sluttmålet og de største ovnene.",
+      "Sesongen avgjøres nå på Konsernverdi, som serveren regner i ekte tid. Topplista er delt i «Industriverden» og «Eget verk». Under Eget verk er «Mest penger på bok» tilbake, og det er en ny liste for produksjon.",
+      "Ukens utfordring «Størst vekst i konsernverdi» er tatt bort fra 5. oktober. Nå veksler «Flest aktive dager» og «Mer stål enn før».",
+      "Tittelen i konsernet beholder du. Nye verk, høyere trinn og stålkomplekser følger nå det verkene dine har tjent. Ingenting du har, blir tatt bort.",
+    ],
+  },
+  {
     b: 378,
     date: "2026-09-30",
     title: "Se hvilken dag de andre er på",
