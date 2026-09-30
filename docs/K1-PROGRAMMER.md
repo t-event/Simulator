@@ -3,7 +3,8 @@
 **Status:** godkjent av eieren 30.9.2026 (B-390) med presiseringene under. Ingenting er bygget, ingen tall i verden er
 endret. Rekkefølgen: rapporten etter 2.10 → V0 i skygge og K-1 bak avslått bryter → skyggedata tilbake til eieren →
 eieren avgjør om det slås på → verksjef V1. Simuleringen: `npx tsx src/game/programSim.ts --k1`, `--k1-skann` og
-`--k1-drift` (fra `frontend/`).
+`--k1-drift`, `--k1-kost` og `--k1-verdi` (fra `frontend/`). Eierens tre kontrollpunkter før bygging/live (B-391) står i
+avsnitt 4 (vinteren), 4.1 (skyggerapporten), 2 (kostnaden for seg) og 8.2–8.3 (bidrag mot utbytte, Konsernverdi).
 
 **Eierens svar (B-390):**
 1. **V0 ja** – regionale hendelser i ekte tid (strømsjokk, driftsuro, høykonjunktur), varslet to dager før, nøytrale i
@@ -80,6 +81,14 @@ lite i dag – det er et valg de kan gjøre annerledes ved å flytte (én gang p
   **før** hendelser og programmer, og trekkes før resten går til kassa og fondet.
 - Rekkefølgen i `pay_dividends` (eieren, B-390): **brutto ordinært utbytte → programkostnad → hendelse og
   programeffekt → vanlig fordeling** mellom konsernkassa og fondet (`dividend_to_treasury`).
+- **Budsjett og hendelse er to størrelser** (eieren, B-391). Dagens betaling er
+
+  `bidrag + utbytte × hendelsesfaktor (etter programmene) + Driftsytelse-ekstra − programkostnad`
+
+  der `programkostnad = satsing × (normalt bidrag + normalt utbytte)`, regnet **før** hendelsen. Aldri
+  `(utbytte − programkostnad) × hendelsesfaktor` – da ble programmet billigere i dårlige tider. `npm test` sjekker at
+  samme konsern betaler nøyaktig like mye i en rolig verden som med strømsjokk i alle regioner (`k1CostCheck`), og
+  serverfunksjonen skal testes på samme måte.
 - **Aldri to ganger:** bidraget og utbyttet trekkes hver for seg, hver av sin egen utbetaling. Hvert trekk føres i
   `program_charges` med en unik nøkkel (spiller, ekte dag, kilde `bidrag`/`utbytte`), så en betaling som kjøres på nytt
   (for eksempel etter en feil i `world_tick`), ikke trekker igjen. Utbytte som betales for flere dager på en gang
@@ -126,11 +135,15 @@ og i varsellinja for dem med verk i regionen.
 
 | Type | Virkning på utbyttet fra verkene i regionen | Varighet | Hyppighet |
 |---|---|---|---|
-| Strømsjokk | −40 % | 8–12 ekte dager | dobbelt så ofte om vinteren (nov.–mars, norsk tid) |
-| Driftsuro | −35 % | 5–9 ekte dager | jevnt |
-| Høykonjunktur | ca. +30 % (regnet av config, se under) | 10–16 ekte dager | halvparten av hendelsene |
+| Strømsjokk | −40 % | 8–12 ekte dager | 25 % av hendelsene, **40 % om vinteren** (nov.–mars, norsk tid) |
+| Driftsuro | −35 % | 5–9 ekte dager | 25 % av hendelsene, 20 % om vinteren |
+| Høykonjunktur | ca. +30 % (regnet av config, se under) | 10–16 ekte dager | 50 % av hendelsene, 40 % om vinteren |
 
-- Snitt ca. 45 ekte dager mellom to hendelser i samme region; én hendelse per region om gangen.
+- Snitt ca. 45 ekte dager mellom to hendelser i samme region; én hendelse per region om gangen. Hyppigheten er den samme
+  hele året – vinteren endrer bare hvilken type det blir.
+- **Vinteren (B-391):** fordelingen står eksplisitt i config (`mix`: 50/25/25 ellers, 40/20/40 om vinteren). Strømsjokk
+  er altså **1,6 ganger så vanlig** om vinteren, ikke dobbelt – det var den gamle formuleringen («dobbelt så ofte») som var
+  feil, ikke modellen. Tallene er de samme som før (samme hendelser med samme frø), så nøytraliteten er uendret.
 - **Nøytral i forventning, ikke kompensasjon:** størrelsen på høykonjunkturen regnes **én gang av tallene i config**
   (hyppighet, størrelse og varighet på de dårlige hendelsene, og vinterandelen) – `k1BoomSize` i simulatoren, samme
   formel på serveren. Den etterregnes aldri av hendelsene som faktisk ble trukket, og ingen spiller får noe tilbake
@@ -156,11 +169,13 @@ Hendelsene trekkes og lagres som om de var live, men vises ikke og virker ikke p
 |---|---|
 | `world_events` | region, type, størrelse, varslet, start, slutt, `shadow = true` |
 | `world_event_exposure` | per hendelse, spiller og ekte dag: andel av datterverksutbyttet fra regionen, utbyttet før hendelsen, hypotetisk tap/gevinst uten program, og hypotetisk virkning med Teknologi / Robusthet / Driftsytelse på Lav, Middels og Høy (hva programmet ville tatt bort eller lagt til, og budsjettet det ville kostet) |
+| `program_shadow_day` | per spiller og ekte dag (B-391): **vanlig bidrag**, **vanlig utbytte**, hypotetisk **programkostnad** per program og satsing, **potensielt beskyttet inntekt** (utbytte i de rammede regionene × hendelsens størrelse), hypotetisk **spart beløp**, og **programkostnad som andel av datterverksutbyttet** |
 
 Loggen skrives av `pay_dividends` på den samme utbetalingen som i dag, uten å endre beløpet. Det gjør at tallene er
 nøyaktig det spilleren ville fått. Rader for gjester skrives ikke (`user_is_guest`).
 
-**Før live kommer rapporten tilbake til eieren** med: antall hendelser per type og region mot simulatoren, hvor mye hver
+**Før live kommer rapporten tilbake til eieren** med bidrag mot utbytte per spiller (sortert etter hvor stor del av
+inntekten som er bidrag, se 8.2), Konsernverdi med og uten program for de samme spillerne (se 8.3), og: antall hendelser per type og region mot simulatoren, hvor mye hver
 spiller ville tapt og tjent (fordelingen, ikke bare snittet), de største utslagene med dagens plassering (for eksempel
 konsernet med alt i én region), og hva hvert program på hver satsing ville gitt mot det det ville kostet. Ingenting slås
 på fordi koden virker teknisk.
@@ -262,6 +277,65 @@ to dagers varsel ikke gjør sjokkene trivielle. Innfasing av økning trengs ikke
 Tilsvarende for forsikring: «Teknologi + Robusthet lav, høy ved varsel» tar bort ca. 80 % av hendelsestapet, men koster
 mer enn det sparer (−0,9 til −2,0 mrd. over to år) – det er forsikring, ikke en gratis fasit.
 
+### 8.2 Bidrag mot utbytte (`--k1-kost`, B-391)
+
+Budsjettet regnes av bidrag + utbytte, men Teknologi og Robusthet beskytter bare utbyttet. To spillere med nesten samme
+utbytte betaler derfor ulikt for samme vern:
+
+| Profil | Bidrag / utbytte per dag | Teknologi Høy per dag | = andel av utbyttet | Spart på to år | Brukt på to år |
+|---|---|---|---|---|---|
+| Liten | 5 / 34,6 mill. | 3,2 mill. | 9,2 % | 0,4–0,5 mrd. | 2,2 mrd. |
+| Middels | 15 / 37 mill. | 4,2 mill. | 11,2 % | 0,5 mrd. | 2,9 mrd. |
+| Stor | 30 / 37 mill. | 5,4 mill. | 14,5 % | 0,5 mrd. | 3,9 mrd. |
+
+Den store betaler 1,8 ganger så mye som den lille for å spare det samme. Regnet av bare utbyttet ville begge betalt
+ca. 3 mill. per dag.
+
+**Ekte spillere (lest 30.9., bare lesing, bokstaver):** bidraget er 14–72 % av inntekten. Andelen av utbyttet som
+Teknologi Høy ville kostet = 8 % × (1 + bidrag/utbytte):
+
+| Spiller | Utbytte / bidrag per dag | Teknologi Høy som andel av utbyttet |
+|---|---|---|
+| H | 12,7 / 2,1 mill. | 9 % |
+| E | 21,9 / 9,4 mill. | 11 % |
+| C | 27,4 / 12,4 mill. | 12 % |
+| D | 22,6 / 11,8 mill. | 12 % |
+| A | 33,3 / 18,8 mill. | 13 % |
+| B | 27,4 / 22,5 mill. | 15 % |
+| F | 20,3 / 20,9 mill. | 16 % |
+| K | 4,3 / 7,4 mill. | 22 % |
+| J | 11,7 / 23,9 mill. | 24 % |
+| I | 12,4 / 26,8 mill. | 25 % |
+| G | 14,5 / 37,5 mill. | 29 % |
+| L | 2,2 / 6,8 mill. | 33 % |
+
+Samme vern koster altså fra 9 til 33 % av det som vernes. Det er i dag en **bieffekt av grunnlaget, ikke et valgt
+design**. Grunnlaget endres ikke nå (eieren); skyggerapporten viser tallene per spiller, og eieren avgjør før live om
+det skal være slik (et rikere konsern har større budsjett) eller om vernprogrammene skal regnes av utbyttet.
+
+### 8.3 Konsernverdi med og uten program (`--k1-verdi`, B-391)
+
+Konsernverdi = konsernkassa + 60 × (normalt utbytte + bidrag) − lån (`konsern_value`). Hendelsene er ikke med i det
+normale utbyttet, så to ellers like konsern skilles bare av kassa. Samme konsern og samme hendelser, 40 verdener, A uten
+program og B med program, fra konsernet er fullt:
+
+| Konsern (middels spiller) | B-strategi | 90 d | 180 d | 365 d | B foran A |
+|---|---|---|---|---|---|
+| Spredt | Tek + Rob middels | −5,4 % | −5,2 % | −5,1 % | 0 av 40 |
+| Spredt | Tek + Rob lav, høy ved varsel | −5,6 % | −5,3 % | −5,0 % | 0 av 40 |
+| Alt i én region | Tek + Rob middels | −5,4 % | −5,2 % | −5,1 % | 0 av 40 |
+| Alt i én region | Tek + Rob lav, høy ved varsel | −3,2 % | −2,4 % | −1,9 % | 0 av 40 |
+| Alt i én region | Bare Teknologi høy | −5,2 % | −5,7 % | −6,2 % | 0 av 40 |
+
+Liten og stor spiller gir det samme (−1,5 til −6,4 %). Beste tilfelle for B er en liten spiller med alt i én region og
+forsikring ved varsel: −1,5 % etter et år, foran A i 1 av 40 verdener.
+
+**Testen viser et problem:** B havner under A i praktisk talt alle verdener, og selv B sin dårligste verden er lavere enn
+A sin dårligste. Med hendelser av denne størrelsen fjerner programmene mindre variasjon enn de koster, så de forbedrer
+ikke engang det verste utfallet målt i Konsernverdi. Sesongen gjør da «ingen programmer» til optimal strategi, og
+programmenes strategiske verdi fanges ikke opp. Formelen er **ikke** endret (eieren: bare hvis testen viser et problem,
+og da som en beslutning). Spørsmålet går til eieren sammen med skyggedataene før live – mulige retninger står i avsnitt 10.
+
 **Konsekvensen for pengene som hoper seg opp:** med ærlige satsinger (ca. 1/3/8 %) bremser programmene kassa med
 5–12 % av inntekten, ikke 30–70 %. Det stemmer med eierens punkt 10: programmene er ikke hele løsningen – selskaper,
 oppkjøp og regional makt må være de store valgene for kapitalen.
@@ -275,7 +349,9 @@ oppkjøp og regional makt må være de store valgene for kapitalen.
   "budget": [0.01, 0.03, 0.08], "effect": [0.25, 0.6, 1], "max_active": 2,
   "bind_days": 14, "establish_days": 3, "establish_income_days": 2,
   "protect": 0.8, "drift_gain": 1.05, "drift_harder": 0.5,
-  "events": { "gap_days": 45, "warn_days": 2, "strom": [0.4, 8, 12], "uro": [0.35, 5, 9], "boom_days": [10, 16] } }
+  "events": { "gap_days": 45, "warn_days": 2, "strom": [0.4, 8, 12], "uro": [0.35, 5, 9], "boom_days": [10, 16],
+              "mix": { "normal": { "konjunktur": 0.5, "uro": 0.25, "strom": 0.25 },
+                       "winter": { "konjunktur": 0.4, "uro": 0.2, "strom": 0.4 } } } }
 ```
 
 | Steg | Innhold | Når |
@@ -300,3 +376,13 @@ Konto (B-149): krever konto (regel 2 og 7 – ekte tid mellom spillere). Serverf
    mye større (en langt mer ustabil verden), eller godta at programmene er et sluk.
 3. **Grunnlaget:** greit å trekke budsjettet som andel av hver vanlige utbetaling (før hendelser og programmer), og bruke
    sju-dagers snittet bare til visning? Det er enklere og gir samme virkning.
+
+### Åpne spørsmål før live (B-391 – besvares sammen med skyggedataene, ingenting endres nå)
+
+1. **Grunnlaget for vernprogrammene** (8.2): skal Teknologi og Robusthet fortsatt regnes av bidrag + utbytte (et konsern
+   med stort hovedverk betaler mer for samme vern), eller av utbyttet de verner?
+2. **Konsernverdi og programmene** (8.3): i dag taper et konsern med program i sesongen i praktisk talt alle verdener.
+   Mulige retninger, ingen valgt:
+   - godta det og si det tydelig i spillet (programmene er for dem som vil ha jevnere inntekt, ikke for topplista);
+   - la sesongen måle noe der risiko teller (for eksempel laveste Konsernverdi i perioden i stedet for sluttverdien);
+   - vent på skyggedataene: er de ekte hendelsene større eller mer samlet enn simulatoren, endrer bildet seg.

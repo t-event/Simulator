@@ -206,6 +206,7 @@ import {
   supportAdvice,
 } from "./plant";
 import { RESEARCH, researchOptions } from "./research";
+import { K1, k1BoomSize, k1CostCheck } from "./programSim";
 import { migrate, parseSave } from "./save";
 import { ageOf, PENSION, pensionDay, pensionMorning, pensionSoon, retireAgeOf } from "./pension";
 import { dutyWorkers, presentWorkers as presentNow, wildcardUse as wildUse } from "./plant";
@@ -3988,6 +3989,14 @@ test("Oppkjøp: eieren får dagene hen mister og det hen investerte, høyst 85 %
   assert(buyoutMax(b) === 167_000_000, "mest mulig");
   // Et svært høyt bud gir ikke mer: penger kan ikke flyttes mellom spillere med oppkjøp
   assert(buyoutPay(10e9, b).kasse === buyoutPay(1e9, b).kasse, "budet over erstatningen forsvinner");
+});
+
+test("K-1: programkostnaden regnes av normalinntekten før hendelsen og trekkes for seg (B-391)", () => {
+  // Ikke (utbytte − kostnad) × hendelsesfaktor: da ble programmet billigere i dårlige tider
+  const r = k1CostCheck();
+  assert(r.calm > 0 && r.calm === r.storm, `rolig ${r.calm}, strømsjokk overalt ${r.storm}`);
+  // Høykonjunkturen regnes av fordelingen i config: 50/25/25 ellers, 40/20/40 om vinteren
+  assert(Math.abs(k1BoomSize(K1) - 0.3) < 0.01, `høykonjunktur ${k1BoomSize(K1)}`);
 });
 
 if (failed) {

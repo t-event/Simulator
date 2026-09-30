@@ -7073,3 +7073,23 @@ Beslutning:
 - Simulatoren: satsingene 1/3/8 % og høykonjunkturen fra config. Ingen endring i spillet, databasen eller verdensbalansen.
 Endringslogg: nei
 Konto (B-149): – ingen ny funksjon ennå (når K-1 bygges: krever konto, regel 2 og 7; V0 i skygge vises ikke).
+
+## B-391 Tre kontrollpunkter før K-1 bygges og slås på: vinteren, bidrag mot utbytte og Konsernverdi (2026-09-30)
+Status: målinger og tester på plass – ingen mekanikk endret; to spørsmål til eieren før live
+Bakgrunn: eieren ba om tre kontroller før bygging/live, uten nye mekanikker og uten å endre retning eller rekkefølge.
+Beslutning:
+- **Vinteren:** fordelingen av hendelsene står eksplisitt i config (`mix`): høykonjunktur/uro/strømsjokk 50/25/25 % ellers
+  og 40/20/40 % om vinteren. Strømsjokk er 1,6 ganger så vanlig om vinteren – den gamle teksten («dobbelt så ofte») var
+  feil, modellen beholdes. Samme hendelser med samme frø, samme nøytralitet (høykonjunktur ca. +30 %).
+- **Budsjett og hendelse er to størrelser:** kostnaden = satsing × (normalt bidrag + normalt utbytte), regnet før
+  hendelsen og trukket for seg. `npm test` sjekker at kostnaden er lik i en rolig verden og med strømsjokk overalt.
+- **Bidrag mot utbytte** (`programSim.ts --k1-kost`, ekte spillere lest uten endring): samme vern koster 9–33 % av
+  utbyttet det verner, fordi grunnlaget tar med bidraget. Det er en bieffekt, ikke et valgt design. Grunnlaget endres ikke
+  nå; skyggerapporten får per spiller vanlig bidrag, vanlig utbytte, programkostnad, potensielt beskyttet inntekt, spart
+  beløp og kostnad som andel av utbyttet (`program_shadow_day`).
+- **Konsernverdi** (`--k1-verdi`, 40 verdener, 90/180/365 dager): med program ligger konsernet 1,5–6,4 % under samme
+  konsern uten, og foran i 0–1 av 40 verdener; også det dårligste utfallet er lavere med program. Testen viser at sesongen
+  gjør «ingen programmer» optimal. Formelen er ikke endret; spørsmålet går til eieren med skyggedataene før live.
+- Alt står i `K1-PROGRAMMER.md` (avsnitt 2, 4, 4.1, 8.2, 8.3 og de åpne spørsmålene). Ingen endring i spillet eller databasen.
+Endringslogg: nei
+Konto (B-149): – ingen ny funksjon.

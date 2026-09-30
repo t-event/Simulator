@@ -16,7 +16,9 @@ til «Avgjort» nederst).
 - **K-1 med modell B (B-389, `K1-PROGRAMMER.md`):** besvart (B-390): V0 ja (eget lag, nøytralt i forventning, skygge
   først), satsinger 1/3/8 %, trekk fra hver utbetaling. Bygges etter rapporten 2.10 i skygge og bak avslått bryter. Neste
   spørsmål til eieren: skyggedataene (fordelingen av hendelser, utslag med dagens plassering, hypotetiske programresultater)
-  – før V0 og K-1 får virkning.
+  – før V0 og K-1 får virkning. To spørsmål følger med (B-391): skal vernprogrammene regnes av bidrag + utbytte eller av
+  utbyttet (samme vern koster i dag 9–33 % av utbyttet), og hva med Konsernverdi, der et konsern med program taper i
+  praktisk talt alle verdener?
 
 - **Slå på gjestekontoer (B-212):** eieren må slå på «Allow anonymous sign-ins» under Authentication → Sign In /
   Providers i dashbordet (connectoren kan ikke). **29.9: eieren slår det på** – sjekk etterpå at det kommer gjester

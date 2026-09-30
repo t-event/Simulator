@@ -24,6 +24,8 @@
  *   npx tsx src/game/programSim.ts --k1               # K-1 slik den foreslås bygget: ekte hendelser i regionene (B-389)
  *   npx tsx src/game/programSim.ts --k1-skann         # … med større hendelser og andre satsinger
  *   npx tsx src/game/programSim.ts --k1-drift         # Driftsytelse: opp ved høykonjunktur, ned før sjokk (B-390)
+ *   npx tsx src/game/programSim.ts --k1-kost          # bidrag mot utbytte: hvem betaler hvor mye for å beskytte hva (B-391)
+ *   npx tsx src/game/programSim.ts --k1-verdi         # Konsernverdi med og uten program, 90/180/365 dager (B-391)
  */
 import { MAX_BID, profiles, simulate } from "./worldSim";
 
@@ -372,6 +374,11 @@ export interface K1Model {
   driftBoom: number;
   /** Høykonjunkturen varer så lenge */
   boomDays: [number, number];
+  /**
+   * Andelen av hendelsene som er høykonjunktur / driftsuro / strømsjokk, ellers og om vinteren (nov.–mars). Summen er 1.
+   * Hyppigheten av hendelser er den samme hele året (`gapDays`); vinteren endrer bare hvilken type det blir.
+   */
+  mix: { normal: [number, number, number]; winter: [number, number, number] };
   establishDays: number;
   /** Etableringen koster så mange dager vanlig inntekt */
   establishIncomeDays: number;
@@ -392,6 +399,8 @@ export const K1: K1Model = {
   driftHarder: 0.5,
   driftBoom: 0,
   boomDays: [10, 16],
+  // Strømsjokk er 25 % av hendelsene ellers og 40 % om vinteren: 1,6 ganger så vanlig, ikke dobbelt (B-391)
+  mix: { normal: [0.5, 0.25, 0.25], winter: [0.4, 0.2, 0.4] },
   establishDays: 3,
   establishIncomeDays: 2,
   bindDays: 14,
@@ -408,7 +417,7 @@ function mulberry(seed: number): () => number {
   };
 }
 
-/** Dag 1 = 2.10.2026; vinter (nov.–mars) gir dobbelt så mange strømsjokk */
+/** Dag 1 = 2.10.2026; vinter er nov.–mars (flere strømsjokk, se `K1Model.mix`) */
 function winter(d: number): boolean {
   const m = new Date(Date.UTC(2026, 9, 1 + d)).getUTCMonth();
   return m >= 10 || m <= 2;
@@ -416,8 +425,6 @@ function winter(d: number): boolean {
 
 /** Andelen av året som er vinter (nov.–mars) */
 const WINTER_SHARE = 5 / 12;
-/** Om vinteren trekkes typen med tallet × dette, så strømsjokk blir dobbelt så vanlig */
-const WINTER_PULL = 1.25;
 
 /**
  * Størrelsen på høykonjunkturen regnet av hyppighetene og størrelsene i modellen – forventet verdi for verden, ikke
@@ -428,13 +435,10 @@ export function k1BoomSize(m: K1Model): number {
   const avg = (d: [number, number]) => (d[0] + d[1]) / 2;
   let bad = 0;
   let boom = 0;
-  for (const [share, pull] of [
-    [1 - WINTER_SHARE, 1],
-    [WINTER_SHARE, WINTER_PULL],
-  ]) {
-    const pBoom = 0.5 / pull;
-    const pUro = 0.25 / pull;
-    const pStrom = 1 - 0.75 / pull;
+  for (const [share, [pBoom, pUro, pStrom]] of [
+    [1 - WINTER_SHARE, m.mix.normal],
+    [WINTER_SHARE, m.mix.winter],
+  ] as [number, [number, number, number]][]) {
     bad += share * (pStrom * m.strom.size * avg(m.strom.days) + pUro * m.uro.size * avg(m.uro.days));
     boom += share * pBoom * avg(m.boomDays);
   }
@@ -448,9 +452,10 @@ export function k1Events(m: K1Model, days: number, seed = 1): { events: RegionEv
   for (let r = 0; r < m.regions; r++) {
     let d = 1 + Math.floor(rnd() * m.gapDays);
     while (d < days) {
-      // Halvparten høykonjunktur, resten uro og strømsjokk (strømsjokk dobbelt så ofte om vinteren)
-      const x = rnd() * (winter(d) ? WINTER_PULL : 1);
-      const kind: EventKind = x < 0.5 ? "konjunktur" : x < 0.75 ? "uro" : "strom";
+      // Typen trekkes fra fordelingen i `mix` (ellers 50/25/25, vinter 40/20/40)
+      const [pBoom, pUro] = winter(d) ? m.mix.winter : m.mix.normal;
+      const x = rnd();
+      const kind: EventKind = x < pBoom ? "konjunktur" : x < pBoom + pUro ? "uro" : "strom";
       const span = kind === "strom" ? m.strom.days : kind === "uro" ? m.uro.days : m.boomDays;
       const len = span[0] + Math.floor(rnd() * (span[1] - span[0] + 1));
       events.push({ region: r, kind, warn: d - m.warnDays, start: d, end: d + len });
@@ -478,7 +483,8 @@ export type K1Strategy =
   | "drift-hoy"
   | "drift-lav"
   | "drift-boom"
-  | "drift-flukt";
+  | "drift-flukt"
+  | "tek-hoy";
 export const K1_STRATEGIES: Record<K1Strategy, string> = {
   ingen: "Uten programmer",
   fast: "Teknologi + Robusthet, middels hele tida",
@@ -488,6 +494,7 @@ export const K1_STRATEGIES: Record<K1Strategy, string> = {
   "drift-lav": "Driftsytelse lav + Teknologi lav, fast",
   "drift-boom": "Driftsytelse lav, høy ved varsel om høykonjunktur",
   "drift-flukt": "Driftsytelse høy, ned til lav ved varsel om sjokk/uro",
+  "tek-hoy": "Bare Teknologi, høy hele tida",
 };
 
 export interface K1Out {
@@ -501,6 +508,10 @@ export interface K1Out {
   /** Laveste inntekt i 14 dager, som andel av snittet for samme strategi (hvor ujevnt pengene kommer) */
   worst14: number;
   changes: number;
+  /** Alt som ble brukt på programmer (etablering og budsjett) */
+  spent: number;
+  /** Utbytte som kunne vært tapt i hendelsene programmene dekker (strømsjokk og uro), før programmene */
+  exposed: number;
   /** Ekstra tap fordi Driftsytelse var på da en hendelse traff */
   driftHarm: number;
   /** Varsler om sjokk/uro der spilleren ville ned med Driftsytelse, men var bundet */
@@ -514,6 +525,7 @@ export function simulateK1(
   m: K1Model,
   world: { events: RegionEvent[]; boom: number },
   days = 730,
+  checks: number[] = CHECK,
 ): K1Out {
   const base = pl.contribution + pl.dividend;
   let cash = pl.cashAtFull;
@@ -546,25 +558,45 @@ export function simulateK1(
     p === "teknologi" ? "teknologi" : p === "robust" ? "robust" : null;
   for (let d = 1; d <= days; d++) {
     if (d < pl.fullDay) {
-      if (CHECK.includes(d)) cashAt[d] = cash;
+      if (checks.includes(d)) cashAt[d] = cash;
       continue;
     }
     const active = world.events.filter((e) => weights[e.region] > 0 && d >= e.start && d < e.end);
     const warned = world.events.filter((e) => weights[e.region] >= 0.15 && d >= e.warn && d < e.end);
     // Strategiene
     if (strategy !== "ingen" && slots.length === 0) {
-      const pair: Record<Exclude<K1Strategy, "ingen">, [K1Program, Level, K1Program, Level]> = {
-        fast: ["teknologi", 2, "robust", 2],
-        forsikring: ["teknologi", 1, "robust", 1],
-        drift: ["drift", 2, "robust", 1],
-        "drift-hoy": ["drift", 3, "teknologi", 1],
-        "drift-lav": ["drift", 1, "teknologi", 1],
-        "drift-boom": ["drift", 1, "teknologi", 1],
-        "drift-flukt": ["drift", 3, "teknologi", 1],
+      const plan: Record<Exclude<K1Strategy, "ingen">, [K1Program, Level][]> = {
+        fast: [
+          ["teknologi", 2],
+          ["robust", 2],
+        ],
+        forsikring: [
+          ["teknologi", 1],
+          ["robust", 1],
+        ],
+        drift: [
+          ["drift", 2],
+          ["robust", 1],
+        ],
+        "drift-hoy": [
+          ["drift", 3],
+          ["teknologi", 1],
+        ],
+        "drift-lav": [
+          ["drift", 1],
+          ["teknologi", 1],
+        ],
+        "drift-boom": [
+          ["drift", 1],
+          ["teknologi", 1],
+        ],
+        "drift-flukt": [
+          ["drift", 3],
+          ["teknologi", 1],
+        ],
+        "tek-hoy": [["teknologi", 3]],
       };
-      const [p1, l1, p2, l2] = pair[strategy];
-      start(p1, l1, d);
-      start(p2, l2, d);
+      for (const [p, l] of plan[strategy]) start(p, l, d);
     }
     // Driftsytelse etter varslene: opp ved høykonjunktur, eller ned før sjokk og uro (bindingen kan sperre)
     const drift = slots.find((s) => s.p === "drift");
@@ -663,10 +695,12 @@ export function simulateK1(
       );
     for (const s of slots) s.lvl = s.next;
     slots = slots.filter((s) => s.lvl > 0);
-    if (CHECK.includes(d)) cashAt[d] = cash;
+    if (checks.includes(d)) cashAt[d] = cash;
   }
   return {
     cash: cashAt,
+    spent,
+    exposed: eventLoss,
     share: spent / Math.max(1, income),
     eventLoss,
     saved,
@@ -682,6 +716,76 @@ export const EXPOSURES: [string, number[]][] = [
   ["spredt på seks regioner", [1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6]],
   ["samlet i to regioner", [0.5, 0.5, 0, 0, 0, 0]],
 ];
+const ONE_REGION: [string, number[]] = ["alt i én region", [1, 0, 0, 0, 0, 0]];
+
+/**
+ * Programkostnaden skal regnes av normalinntekten før hendelsen og trekkes for seg (eieren, B-391): samme konsern med
+ * samme programmer skal betale nøyaktig like mye i en rolig verden som i en verden der alle regioner har strømsjokk hele
+ * tida. Brukes av `npm test` (game/tests.ts).
+ */
+export function k1CostCheck(m: K1Model = K1): { calm: number; storm: number } {
+  const pl: Player = { name: "test", fullDay: 1, contribution: 20e6, dividend: 30e6, cashAtFull: 0 };
+  const w = [1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6];
+  const storm: RegionEvent[] = w.map((_, r) => ({ region: r, kind: "strom", warn: -1, start: 1, end: 400 }));
+  const calm = simulateK1(pl, w, "fast", m, { events: [], boom: 0 }, 365).spent;
+  const stormy = simulateK1(pl, w, "fast", m, { events: storm, boom: k1BoomSize(m) }, 365).spent;
+  return { calm, storm: stormy };
+}
+
+function mill(n: number): string {
+  return (n / 1e6).toLocaleString("nb-NO", { maximumFractionDigits: 1 });
+}
+
+/** Bidrag mot utbytte (B-391): hvem betaler hvor mye for å beskytte hvor mye utbytte. Grunnlaget endres ikke. */
+function k1CostReport(m: K1Model, ps: Player[], seeds: number[]): void {
+  console.log(
+    "Budsjettet regnes av bidrag + utbytte, men Teknologi og Robusthet beskytter bare utbyttet. To år, snitt av verdenene:\n",
+  );
+  for (const [ex, w] of [...EXPOSURES, ONE_REGION]) {
+    console.log(`== ${ex}`);
+    for (const pl of ps) {
+      const base = pl.contribution + pl.dividend;
+      for (const st of ["tek-hoy", "fast"] as K1Strategy[]) {
+        const rs = seeds.map((sd) => simulateK1(pl, w, st, m, k1Events(m, 730, sd)));
+        const avg = (f: (r: K1Out) => number) => rs.reduce((a, r) => a + f(r), 0) / rs.length;
+        const perDay = st === "tek-hoy" ? m.budget[2] * base : 2 * m.budget[1] * base;
+        console.log(
+          `${pl.name.padEnd(8)} ${(st === "tek-hoy" ? "Teknologi høy" : "Tek + Rob middels").padEnd(18)} bidrag ${mill(pl.contribution)} + utbytte ${mill(pl.dividend)} mill./dag · kostnad ${mill(perDay)} mill./dag = ${Math.round((perDay / pl.dividend) * 1000) / 10} % av utbyttet (${Math.round((perDay / base) * 100)} % av inntekten) · utsatt for ${mrd(avg((r) => r.exposed))} mrd. · spart ${mrd(avg((r) => r.saved))} mrd. · brukt ${mrd(avg((r) => r.spent))} mrd. · regnet av bare utbyttet: ${mill(perDay * (pl.dividend / base))} mill./dag`,
+        );
+      }
+    }
+    console.log("");
+  }
+}
+
+/**
+ * Konsernverdi med og uten program (B-391): samme konsern, samme hendelser. Konsernverdien er kassa + 60 × (normalt
+ * utbytte + bidrag) − lån (`konsern_value`); hendelsene er ikke med i det normale utbyttet, så bare kassa skiller.
+ */
+function k1ValueReport(m: K1Model, ps: Player[], seeds: number[]): void {
+  const after = [90, 180, 365];
+  console.log(`Konsernverdi etter ${after.join("/")} dager fra konsernet er fullt, ${seeds.length} verdener:\n`);
+  for (const [ex, w] of [...EXPOSURES, ONE_REGION]) {
+    console.log(`== ${ex}`);
+    for (const pl of ps) {
+      const checks = after.map((a) => pl.fullDay + a);
+      const value = (r: K1Out, d: number) => r.cash[d] + 60 * (pl.contribution + pl.dividend);
+      const a = seeds.map((sd) => simulateK1(pl, w, "ingen", m, k1Events(m, 730, sd), 730, checks));
+      for (const st of ["fast", "forsikring", "tek-hoy"] as K1Strategy[]) {
+        const b = seeds.map((sd) => simulateK1(pl, w, st, m, k1Events(m, 730, sd), 730, checks));
+        const cells = checks.map((d, i) => {
+          const va = a.map((r) => value(r, d));
+          const vb = b.map((r) => value(r, d));
+          const mean = (x: number[]) => x.reduce((p, q) => p + q, 0) / x.length;
+          const ahead = vb.filter((v, k) => v > va[k]).length;
+          return `${after[i]} d: A ${mrd(mean(va))} / B ${mrd(mean(vb))} mrd. (${Math.round((mean(vb) / mean(va) - 1) * 1000) / 10} %, B foran i ${ahead}/${seeds.length}, dårligste verden A ${mrd(Math.min(...va))} / B ${mrd(Math.min(...vb))})`;
+        });
+        console.log(`${pl.name.padEnd(8)} ${K1_STRATEGIES[st].padEnd(46)} ${cells.join(" · ")}`);
+      }
+    }
+    console.log("");
+  }
+}
 
 function k1Report(
   m: K1Model,
@@ -732,6 +836,18 @@ function main(): void {
       `K-1: hendelser i seks regioner (frø 1): ${n("strom")} strømsjokk (−${Math.round(K1.strom.size * 100)} %), ${n("uro")} driftsuro (−${Math.round(K1.uro.size * 100)} %), ${n("konjunktur")} høykonjunktur (+${Math.round(w.boom * 100)} %, satt så verden er nøytral). Snitt av ${seeds.length} frø.\n`,
     );
     k1Report(K1, ps, seeds);
+    return;
+  }
+  if (args.includes("--k1-kost")) {
+    k1CostReport(K1, ps, seeds);
+    return;
+  }
+  if (args.includes("--k1-verdi")) {
+    k1ValueReport(
+      K1,
+      ps,
+      Array.from({ length: 40 }, (_, i) => i + 1),
+    );
     return;
   }
   if (args.includes("--k1-drift")) {
