@@ -13,10 +13,10 @@ til «Avgjort» nederst).
   K-1 bygges skal to programøkonomier simuleres (A: store permanente trinn, B: aktivt programbudsjett med binding) og
   sammenlignes. Oppkjøp endres først etter ekte data; forberedelsen skal ikke avsløre kjøperen før budet er lagt inn.
   Selskaper: ca. 1 per 4 aktive konserneiere, serveren foreslår, eieren godkjenner. Eierutbytte venter.
-- **K-1 med modell B (B-389, `K1-PROGRAMMER.md`):** tre spørsmål til eieren: (1) et lite hendelseslag på serveren (regionale
-  strømsjokk, uro og høykonjunktur, nøytralt i snitt, varslet to dager før) – uten det har ingen program ekte effekt;
-  (2) satsingene: 4/12/30 % koster 5–20 ganger mer enn programmene kan spare, forslag 1/3/8 %; (3) budsjettet som andel av
-  hver vanlige utbetaling i stedet for et lagret sju-dagers snitt. Ingenting bygges før rapporten etter 2.10.
+- **K-1 med modell B (B-389, `K1-PROGRAMMER.md`):** besvart (B-390): V0 ja (eget lag, nøytralt i forventning, skygge
+  først), satsinger 1/3/8 %, trekk fra hver utbetaling. Bygges etter rapporten 2.10 i skygge og bak avslått bryter. Neste
+  spørsmål til eieren: skyggedataene (fordelingen av hendelser, utslag med dagens plassering, hypotetiske programresultater)
+  – før V0 og K-1 får virkning.
 
 - **Slå på gjestekontoer (B-212):** eieren må slå på «Allow anonymous sign-ins» under Authentication → Sign In /
   Providers i dashbordet (connectoren kan ikke). **29.9: eieren slår det på** – sjekk etterpå at det kommer gjester

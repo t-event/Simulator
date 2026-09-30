@@ -121,7 +121,7 @@ npx tsx src/game/balance.ts --konsern                      # utbyttet per ekte d
 npx tsx src/game/balance.ts --forste 700                   # kurven for første opplasting i juksesperren (B-257, ca. 40 min)
 npx tsx src/game/balance.ts --vinter                       # uhell, kort og kostnader om vinteren mot sommeren, per nivå (B-277, ca. 11 min)
 npx tsx src/game/balance.ts --sommerstans                  # testspilleren velger sommerstans i fellesferien (B-298)
-npx tsx src/game/programSim.ts                             # konsernprogrammene: A mot B (B-388), --k1 og --k1-skann: K-1 med hendelser i regionene (B-389)
+npx tsx src/game/programSim.ts                             # konsernprogrammene: A mot B (B-388); --k1, --k1-skann, --k1-drift: K-1 med hendelser i regionene (B-389, B-390)
 npx tsx src/game/worldSim.ts                               # verdenssimulatoren: konsernkassa for liten/middels/stor/legacy etter 30–730 ekte dager, dager etter fullt konsern, maks bud, andel brukt (B-380, B-385; --dager 180 for kortere)
 npm run build
 ```
@@ -231,7 +231,7 @@ docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretn
                VERKSJEF-FORSLAG.md (verksjefer for datterverkene, RETNING fase 5, B-379 – venter på eieren),
                STATUS.md (fasit for hvordan spillet virker nå, B-385),
                UKENS-KONTROLLROM.md (variant A bygget, B-387), KONSERNKAPITAL-FORSLAG.md (forslag med eierens svar, B-386/B-387),
-               K1-PROGRAMMER.md (spesifikasjon av konsernprogrammene med modell B og hendelseslaget V0, B-389 – venter på eieren),
+               K1-PROGRAMMER.md (konsernprogrammene og verdenshendelsene V0, godkjent B-390 – bygges i skygge etter 2.10),
                STABILISERING.md (cash-audit, legacy-gulvet og verdenssimuleringen, B-380; besluttet B-381–B-385, dry-run i avsnitt 9),
                (designsystem, mobil + PC, plan for redesignet, B-187),
                PLAN-NETT.md (det som er bygget på nett), FORSLAG.md, KONTO.md (hva som krever konto)

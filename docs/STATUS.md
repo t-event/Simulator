@@ -131,8 +131,9 @@ regnes av serveren i ekte tid.
 - `VERKSJEF-FORSLAG.md` – verksjefer (B-379), del av kapitalforslaget.
 - Programmodell for konsernprogrammene: eieren valgte B (aktivt budsjett, B-388/B-389). Spesifikasjonen står i
   `K1-PROGRAMMER.md` (B-389): serveren har i dag ingen hendelser i konsernverdenen, så K-1 trenger et lite, nøytralt
-  hendelseslag (V0) for at Teknologi, Robusthet og Driftsytelse skal ha ekte effekt. Venter på eierens svar om V0,
-  satsingene og grunnlaget – og på rapporten etter 2.10. Ingenting er slått på.
+  hendelseslag (V0) for at Teknologi, Robusthet og Driftsytelse skal ha ekte effekt. Eieren godkjente V0, satsingene
+  1/3/8 % og trekk fra hver utbetaling (B-390). Bygges etter rapporten 2.10: V0 i skygge (logges, ingen virkning) og K-1
+  bak avslått bryter; skyggedataene går til eieren før noe slås på. Ingenting er slått på.
 
 ## 11. Hvor reglene står
 
