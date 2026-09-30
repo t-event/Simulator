@@ -5,6 +5,16 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 316 – 2026-09-30: Sjekk av gjestekontoene (planlagt)
+
+**Oppgave:** den planlagte sjekken etter at eieren slo på anonyme kontoer 29.9 ca. 23:07 (B-212).
+
+**Funn (bare lesing):** 0 gjester i `auth.users`, 0 lagringer fra gjester, ingen 403 fra `guest_gate`, og ingen nye vanlige
+kontoer. I auth-loggen siste døgn: ett forsøk på å lage en gjest, 29.9 kl. 18:40 norsk tid (før påslåingen), svar 422.
+Appen prøver da igjen etter et døgn. Ingen andre spillere uten konto har nådd spilldøgn 2 siden. FORSLAG.md oppdatert.
+
+**Gjenstår:** se etter gjester etter 30.9 kl. 19, eller test i et privat vindu.
+
 ## Økt 315 – 2026-09-30: Satsene 0,5 / 1,5 / 4 % (B-393)
 
 **Brukeren ba om:** 0,5/1,5/4 % som foreløpige satser før skyggen, 80 % vern på Høy, skyggerapport med både 0,5/1,5/4 og

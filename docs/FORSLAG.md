@@ -22,7 +22,11 @@ til «Avgjort» nederst).
 - **Slå på gjestekontoer (B-212):** eieren må slå på «Allow anonymous sign-ins» under Authentication → Sign In /
   Providers i dashbordet (connectoren kan ikke). **29.9: eieren slår det på** – sjekk etterpå at det kommer gjester
   (`select count(*) from auth.users where is_anonymous`). Til det er gjort, prøver appen én gang i døgnet og gjør ellers ingenting.
-  **29.9 ca. 23:07: slått på av eieren.** Sjekk 30.9 at det kommer gjester og at de lagrer (påminnelse satt).
+  **29.9 ca. 23:07: slått på av eieren.** **Sjekket 30.9 kl. 12 (norsk tid): 0 gjester, 0 lagringer fra gjester, ingen
+  403 fra `guest_gate`.** Det eneste forsøket på å lage en gjest i døgnet før kom 29.9 kl. 18:40 – før påslåingen – og fikk
+  422 (slått av). Den enheten prøver igjen etter et døgn (`OFF_KEY`, ca. 18:40 30.9); ingen andre spillere uten konto har
+  nådd spilldøgn 2 siden. Innstillingen kan ikke leses herfra: sjekk igjen etter 30.9 kl. 19, eller åpne spillet i et
+  privat vindu, spill til døgn 2 og se etter en rad i `auth.users` med `is_anonymous`.
   Supabase anbefaler også CAPTCHA mot misbruk; grensen er 30 nye gjester i timen per IP.
 
 ## Venter
