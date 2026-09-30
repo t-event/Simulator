@@ -520,5 +520,7 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Gjester** (B-212) er anonyme kontoer, men appen ser dem som «uten konto» (`getSession()` er null; gjestens økt ligger i
   `net/guest.ts`). Serveren slipper gjester bare til det som står i `guest_gate` (035). Skal gjester få noe nytt, må det
   legges i lista der – ellers får de 403. Serverfunksjoner og triggere som gir penger, inntekt eller plass mellom
-  spillere (måleren, bidraget, målingene), skal hoppe over gjester med `user_is_guest` (B-365). `pgrst.db_pre_request` står på rollen `authenticator`; sjekk med
+  spillere (måleren, bidraget, målingene), skal hoppe over gjester med `user_is_guest` (B-365). Gjester som ikke har
+  lagret på 60 dager, slettes hver natt (`cleanup_guests`, pg_cron `gjester-rydding`, 088, B-377) – aldri en med kasse,
+  konsern eller selskap. `pgrst.db_pre_request` står på rollen `authenticator`; sjekk med
   `select rolconfig from pg_roles where rolname = 'authenticator'`.

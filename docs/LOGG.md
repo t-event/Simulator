@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 303 – 2026-09-30: Forlatte gjester ryddes hver natt (B-377)
+
+**Brukeren svarte:** «Ja det skal de» (om forlatte gjester skal ryddes automatisk).
+
+**Gjort:** `088_rydd_gjester.sql`: `cleanup_guests()` sletter gjester som ikke har lagret på 60 dager (aldri med kasse,
+konsern eller selskap, høyst 500 per natt), pg_cron `gjester-rydding` kl. 03:47 UTC, logg i `guest_cleanup_log`.
+FORSLAG, CLAUDE.md og endringsloggen oppdatert.
+
+**Testet:** dry-run (0 gjester); DO-blokk med fem testkontoer (rullet tilbake): bare den gamle gjesten uten lagring ble
+slettet. get_advisors: bare den nye loggtabellen uten regler (som de andre interne tabellene). `npm test`.
+
+**Gjenstår:** –
+
 ## Økt 302 – 2026-09-30: Alle .md-filer oppdatert (B-376)
 
 **Brukeren ba om:** «Oppdater alle .md filer».

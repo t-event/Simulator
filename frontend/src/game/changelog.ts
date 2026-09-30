@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 377,
+    date: "2026-09-30",
+    title: "Rydding av gamle spill uten konto",
+    items: [
+      "Spill uten konto som ikke er lagret på 60 dager, slettes fra serveren. Spillet på mobilen din blir liggende og lagres igjen neste gang du spiller. Med konto slettes ingenting.",
+    ],
+  },
+  {
     b: 375,
     date: "2026-09-30",
     title: "Oppkjøp som gir mening",
