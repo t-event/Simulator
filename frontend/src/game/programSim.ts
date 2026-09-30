@@ -27,6 +27,7 @@
  *   npx tsx src/game/programSim.ts --k1-kost          # bidrag mot utbytte: hvem betaler hvor mye for å beskytte hva (B-391)
  *   npx tsx src/game/programSim.ts --k1-verdi         # Konsernverdi med og uten program, 90/180/365 dager (B-391)
  *   npx tsx src/game/programSim.ts --k1-verdi-skann   # … etter et år med lavere satser og sterkere vern (B-392)
+ *   npx tsx src/game/programSim.ts --k1-etablering    # løpende kostnad mot etablering, sjelden og aktiv bytter (B-393)
  */
 import { MAX_BID, profiles, simulate } from "./worldSim";
 
@@ -397,8 +398,8 @@ export const K1: K1Model = {
   warnDays: 2,
   strom: { size: 0.4, days: [8, 12] },
   uro: { size: 0.35, days: [5, 9] },
-  // Eierens valg (B-390): 1 / 3 / 8 % – foreløpig, justeres med skyggedataene fra V0
-  budget: [0.01, 0.03, 0.08],
+  // Eierens valg (B-393): 0,5 / 1,5 / 4 % – foreløpig, justeres med skyggedataene fra V0 (1/3/8 % før, B-390)
+  budget: [0.005, 0.015, 0.04],
   effect: [0.25, 0.6, 1],
   protect: 0.8,
   driftGain: 1.05,
@@ -492,7 +493,8 @@ export type K1Strategy =
   | "drift-boom"
   | "drift-flukt"
   | "tek-hoy"
-  | "tek-varsel";
+  | "tek-varsel"
+  | "bytter";
 export const K1_STRATEGIES: Record<K1Strategy, string> = {
   ingen: "Uten programmer",
   fast: "Teknologi + Robusthet, middels hele tida",
@@ -504,6 +506,7 @@ export const K1_STRATEGIES: Record<K1Strategy, string> = {
   "drift-flukt": "Driftsytelse høy, ned til lav ved varsel om sjokk/uro",
   "tek-hoy": "Bare Teknologi, høy hele tida",
   "tek-varsel": "Bare Teknologi, lav, høy ved varsel",
+  bytter: "Ett program på høy, byttes til det varselet gjelder",
 };
 
 export interface K1Out {
@@ -519,6 +522,10 @@ export interface K1Out {
   changes: number;
   /** Alt som ble brukt på programmer (etablering og budsjett) */
   spent: number;
+  /** … av det til etablering (B-393: måles for seg) */
+  establishSpent: number;
+  /** Antall ganger et program ble byttet ut med et annet */
+  swaps: number;
   /** Utbytte som kunne vært tapt i hendelsene programmene dekker (strømsjokk og uro), før programmene */
   exposed: number;
   /** … av det bare i strømsjokk (det Teknologi dekker) */
@@ -562,11 +569,14 @@ export function simulateK1(
     const s = slots.find((x) => x.p === p && d >= x.readyDay);
     return s ? m.effect[s.lvl - 1] : 0;
   };
+  let establishSpent = 0;
+  let swaps = 0;
   const start = (p: K1Program, lvl: Level, d: number) => {
     slots.push({ p, lvl, next: lvl, readyDay: d + m.establishDays, lockedUntil: d + m.bindDays });
     const cost = m.establishIncomeDays * base;
     cash -= cost;
     spent += cost;
+    establishSpent += cost;
   };
   const guard = (p: K1Program): K1Program | null =>
     p === "teknologi" ? "teknologi" : p === "robust" ? "robust" : null;
@@ -610,6 +620,7 @@ export function simulateK1(
         ],
         "tek-hoy": [["teknologi", 3]],
         "tek-varsel": [["teknologi", 1]],
+        bytter: [["teknologi", 3]],
       };
       for (const [p, l] of plan[strategy]) start(p, l, d);
     }
@@ -643,6 +654,20 @@ export function simulateK1(
       } else if (!bad.length && drift.next === 1 && d >= drift.lockedUntil) {
         drift.next = 3;
         drift.lockedUntil = d + m.bindDays;
+        changes++;
+      }
+    }
+    // Bytte av program: ett program på høy byttes til det som dekker varselet, når bindingen er ute (ny etablering)
+    if (strategy === "bytter" && slots.length === 1 && d >= slots[0].lockedUntil) {
+      const want: K1Program | null = warned.some((e) => e.kind === "strom" && d < e.start)
+        ? "teknologi"
+        : warned.some((e) => e.kind === "uro" && d < e.start)
+          ? "robust"
+          : null;
+      if (want && want !== slots[0].p) {
+        slots = [];
+        start(want, 3, d);
+        swaps++;
         changes++;
       }
     }
@@ -716,6 +741,8 @@ export function simulateK1(
   return {
     cash: cashAt,
     spent,
+    establishSpent,
+    swaps,
     exposed: eventLoss,
     exposedStrom: lossStrom,
     share: spent / Math.max(1, income),
@@ -841,6 +868,33 @@ function k1ValueReport(
   }
 }
 
+/**
+ * Løpende kostnad mot etablering (B-393): for en spiller som bytter sjelden og for en som reagerer aktivt på verden – med
+ * satsene i config og med 1/3/8 % til sammenligning. Bare måling; etableringen (2 dagers utbytte) endres ikke.
+ */
+function k1EstablishReport(ps: Player[], seeds: number[]): void {
+  console.log("Løpende kostnad mot etablering, to år, snitt av verdenene:\n");
+  for (const [label, mm] of [
+    ["0,5/1,5/4 % (config)", K1],
+    ["1/3/8 %", { ...K1, budget: [0.01, 0.03, 0.08] as [number, number, number] }],
+  ] as [string, K1Model][]) {
+    console.log(`### ${label}`);
+    for (const [ex, w] of [...EXPOSURES, ONE_REGION]) {
+      for (const pl of ps)
+        for (const st of ["fast", "forsikring", "tek-varsel", "bytter"] as K1Strategy[]) {
+          const rs = seeds.map((sd) => simulateK1(pl, w, st, mm, k1Events(mm, 730, sd)));
+          const avg = (f: (r: K1Out) => number) => rs.reduce((a, r) => a + f(r), 0) / rs.length;
+          const est = avg((r) => r.establishSpent);
+          const run = avg((r) => r.spent) - est;
+          console.log(
+            `${ex.padEnd(24)} ${K1_STRATEGIES[st].padEnd(52)} løpende ${mrd(run)} mrd. · etablering ${mrd(est)} mrd. (${Math.round((est / Math.max(1, est + run)) * 100)} % av alt) · programbytter ${Math.round(avg((r) => r.swaps))} · nivåendringer ${Math.round(avg((r) => r.changes - r.swaps))} · spart ${mrd(avg((r) => r.saved))} mrd.`,
+          );
+        }
+    }
+    console.log("");
+  }
+}
+
 function k1Report(
   m: K1Model,
   ps: Player[],
@@ -896,12 +950,19 @@ function main(): void {
     k1CostReport(K1, ps, seeds);
     return;
   }
+  if (args.includes("--k1-etablering")) {
+    k1EstablishReport(ps.slice(1, 2), seeds);
+    return;
+  }
   if (args.includes("--k1-verdi-skann")) {
     const worlds = Array.from({ length: 40 }, (_, i) => i + 1);
     const variants: [string, K1Model][] = [
-      ["1/3/8 %, effekt som i dag", K1],
+      ["1/3/8 %, effekt som i dag", { ...K1, budget: [0.01, 0.03, 0.08] }],
       ["0,5/1,5/4 %, effekt som i dag", { ...K1, budget: [0.005, 0.015, 0.04] }],
-      ["1/3/8 %, sterkere vern (tar bort hele tapet på Høy, Lav 40 %)", { ...K1, protect: 1, effect: [0.4, 0.7, 1] }],
+      [
+        "1/3/8 %, sterkere vern (tar bort hele tapet på Høy, Lav 40 %)",
+        { ...K1, budget: [0.01, 0.03, 0.08], protect: 1, effect: [0.4, 0.7, 1] },
+      ],
       ["0,5/1,5/4 %, sterkere vern", { ...K1, budget: [0.005, 0.015, 0.04], protect: 1, effect: [0.4, 0.7, 1] }],
     ];
     for (const [label, mm] of variants) {

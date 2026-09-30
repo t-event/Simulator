@@ -7096,7 +7096,7 @@ Endringslogg: nei
 Konto (B-149): – ingen ny funksjon.
 
 ## B-392 Programmene prises av datterverksutbyttet; Konsernverdi og vinteren står (2026-09-30)
-Status: besluttet (grunnlaget) – satsingene venter på eieren; ingenting bygget eller slått på
+Status: besluttet (grunnlaget) – satsene avgjort i B-393; ingenting bygget eller slått på
 Bakgrunn: kontrollpunktene i B-391 viste at samme vern kostet 9–33 % av utbyttet avhengig av bidraget, og at et konsern
 med program tapte i Konsernverdi i nesten alle verdener.
 Beslutning (eieren):
@@ -7116,5 +7116,24 @@ Resultat (simulatoren, `--k1-verdi`, `--k1-verdi-skann`, `--k1-kost`; `npm test`
   konsern med forsikring ved varsel ligger på omtrent null og foran i 12–22 av 40, og det dårligste utfallet blir bedre
   med program. Sterkere vern gjør forsikring lønnsom i snitt og anbefales ikke. 1/3/8 % står i config til eieren avgjør.
 - Driftsytelse er uendret: ingen varselstrategi dominerer.
+Endringslogg: nei
+Konto (B-149): – ingen ny funksjon.
+
+## B-393 Satsene 0,5 / 1,5 / 4 % og 80 % vern; skyggen regner begge satssettene og etableringen for seg (2026-09-30)
+Status: besluttet – settes i config når K-1 bygges (etter rapporten 2.10), ingenting slått på
+Beslutning (eieren):
+- **Satsene** for Teknologi, Robusthet og Driftsytelse er foreløpig **0,5 / 1,5 / 4 %** av normalt datterverksutbytte
+  (erstatter 1/3/8 % i B-390). Simulatoren bruker dem som standard.
+- **Vernet** står på 80 % på Høy (ikke 100 %): programmene skal være situasjonelle strategivalg, ikke forventet meravkastning.
+- **Skyggerapporten** regner både 0,5/1,5/4 og 1/3/8 % på de samme hendelsene, og sammenligner kostnad per spart krone,
+  spredte mot konsentrerte konsern, hvor ofte Høy ville vært rasjonelt, hvor mye variasjon programmene fjerner, og løpende
+  kostnad mot etablering.
+- **Etableringen** står på 2 dagers normalt datterverksutbytte og måles for seg (`programSim.ts --k1-etablering`): med de
+  lavere satsene er den 13–28 % av totalkostnaden for den som skrur opp og ned, men 56 % for et spredt konsern som bytter
+  program etter hvert varsel (15 bytter på to år) – uten å spare mer. Ikke endret; følges i skyggen.
+- **Programmene skal ikke løse kapitalopphopingen** – de er en pris på risikoprofil og strategi, ikke en avgift. De store
+  kapitalvalgene er selskaper, oppkjøp og regional ekspansjon. Ikke velg høyere satser for å ta ut mer penger.
+- Hovedprinsipp: diversifisering skal være gratis risikospredning, konsentrasjon skal kunne forsvares med kapital, og
+  ingen av delene skal være universelt best.
 Endringslogg: nei
 Konto (B-149): – ingen ny funksjon.
