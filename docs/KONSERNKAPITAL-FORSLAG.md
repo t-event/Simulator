@@ -1,6 +1,29 @@
 # Forslag: konsernkapital etter fullt konsern (B-386)
 
-**Status:** designforslag til eieren 30.9.2026. Ingenting er bygget, og ingen tall i verden er endret. Bygger på
+**Status:** designforslag til eieren 30.9.2026. Ingenting er bygget, og ingen tall i verden er endret.
+
+**Eierens svar (B-387):**
+1. **To aktive programmer av fem** (ikke tre). Navnene vurderes når mekanikken er ferdig («Kapasitet og vekst» passer
+   dårlig for et konsern som alt har 14 verk – f.eks. «Driftsytelse»).
+2. **Skeptisk til 0,5 / 1,5 / 4 mrd. som permanent sunk cost.** Store permanente trinn og tap ved bytte gjør at man finner
+   de to beste programmene og aldri rører dem – et nytt oppgraderingstre. Før K-1 bygges: simuler **A** (dette forslaget)
+   mot **B** (aktivt programbudsjett: etableres i prosjektlinja, løpende budsjett på lav/middels/høy satsing, bundet i
+   f.eks. 14–30 ekte dager, det som er brukt refunderes ikke, men ingen milliarder brennes ved bytte). Sammenlign kasse
+   etter 180/365/730 dager, hvor mye programmene konkurrerer med oppkjøp om kapitalen, om liten spiller kan delta, om stor
+   spiller må velge, og hvor ofte et fornuftig bytte skjer. Finn nivåene i simuleringen.
+3. **Fordelene skal ikke bare være penger.** Programmene flytter hva konsernet er godt på; ingen er riktig for alle hele
+   tiden. Vær særlig forsiktig med et rent «betal → mer utbytte»-program.
+4. **Bytte:** med budsjettmodellen – etableres i prosjektlinja, høyst to aktive, minst 14 dagers binding, endring tar ekte
+   tid, det som er brukt refunderes ikke.
+5. **Oppkjøp:** retningen er riktig, men ingen formelendring før ekte data. Forberedelsen skal **ikke** avsløre kjøper og
+   mål for eieren: undersøkelse/forberedelse → offentlig oppkjøpsbud → 72 timers motbud. Regional styrke skal gjøre kapital
+   mindre avgjørende, ikke være én binær regel.
+6. **Selskaper:** ca. 1 per 4 aktive konserneiere, minst 1, geografisk fordelt, ulik nytte, serveren foreslår og eieren
+   godkjenner manuelt. Ikke automatisk ennå. Sjekken 2.10 gjelder før slagghåndteringen.
+7. **Eierutbytte:** vent (enig i kritikken).
+
+Rekkefølge (eieren): Ukens kontrollrom → sjekken 2.10 → simulering av programmodellene → valg av modell → verksjef V1 →
+flere selskaper etter spillerbasen → oppkjøpsendringer etter ekte data → eierutbytte langt senere. Bygger på
 simulatoren (`worldSim.ts`, STATUS.md avsnitt 8) og eierens premiss:
 
 > **Penger skal gi valg. De skal ikke forsvinne fordi vi trenger å få et tall ned.**
@@ -225,3 +248,62 @@ mer komplisert og kan gi rike spillere påvirkning over andre. Bør ikke bygges 
 4. **Selskaper:** ett aktivt selskap per ca. 4 aktive konserneiere, fordelt på regioner, foreslått av serveren og godkjent
    av deg – greit?
 5. **Eierutbytte:** vente til programmene og flere selskaper finnes (anbefalt), eller forkaste?
+
+## 9. Simulering av programmodellene A og B (B-388)
+
+`npx tsx src/game/programSim.ts` (fra `frontend/`, også `--skann` og `--skann-inntekt`). Inntekten per spillertype fra
+verdenssimulatoren; programmene starter når konsernet er ferdig utbygd. Verden har faste hendelser (tre strømkriser,
+tre urolige perioder, tre nye selskaper, verksjefer fra dag 180) og et oppkjøpsvindu hver 45. dag. Programmenes verdi i
+**penger** er med vilje satt rundt null over tid – hvert program er verdt mye i sin situasjon og lite ellers. Det de gir
+utenom penger, er ikke i kronene. Tallene er plassholdere; det som skal sammenlignes, er kapitalstrømmene og valgene.
+
+**Modellene:**
+- **A:** trinn 0,5 / 1,5 / 4 mrd. (6 mrd. per program), to programmer, kjøpt opp så fort kassa tåler det. Bytte = bygge
+  opp fra trinn 1 igjen.
+- **B:** etablering 150 mill. og 3 dager i prosjektlinja, så et løpende budsjett per ekte dag, **regnet som andel av hele
+  inntekten i konsernkassa** (bidrag + utbytte): lav 4 %, middels 12 %, høy 30 % per program. Binding 14 dager.
+
+**Konsernkassa i mrd. (dag 180 / 365 / 730):**
+
+| | Liten (40 mill./d) | Middels (52 mill./d) | Stor (67 mill./d) |
+|---|---|---|---|
+| Uten programmer | 4,5 / 11,9 / 26,3 | 7,1 / 16,7 / 35,7 | 10,0 / 22,4 / 46,9 |
+| A (permanente trinn) | 1,3 / 2,2 / 19,6 | 0,3 / 7,8 / 30,0 | 3,3 / 13,7 / 41,4 |
+| B, to på middels | 3,8 / 10,3 / 23,2 | 5,9 / 14,3 / 30,8 | 8,2 / 18,7 / 39,4 |
+| B, to på høy | 3,0 / 8,1 / 17,9 | 4,3 / 10,5 / 22,5 | 5,6 / 12,9 / 27,1 |
+| B, satsing etter kassa | 3,4 / 8,5 / 18,3 | 5,1 / 11,3 / 23,3 | 6,7 / 14,1 / 28,2 |
+
+**Svarene på eierens fem spørsmål:**
+
+1. **Kassa etter 180/365/730 dager:** A tømmer kassa det første året (12 mrd. til to programmer på trinn 3) – og **år 2 hoper
+   den seg opp i nøyaktig samme tempo som uten programmer** (+17–28 mrd.). B bremser hele tida: to på middels bruker ca.
+   30–35 % av inntekten, to på høy ca. 66–71 %.
+2. **Konkurransen med oppkjøp:** tid å spare til ett maksbud (1,7 mrd.) etter at konsernet er fullt: uten programmer 26–43
+   dager; B to på middels 34–57 dager; **B to på høy 64–108 dager**. Med A konkurrerer programmene med oppkjøp bare det første
+   året – etterpå ikke i det hele tatt.
+3. **Kan en liten spiller delta?** I A er prisen den samme for alle: 12 mrd. er 46 % av en liten spillers inntekt de første
+   to årene, men 26 % av en stor. I B er budsjettet en andel av inntekten, så avveiningen er lik for alle – en liten spiller
+   kan kjøre de samme programmene på samme satsing.
+4. **Må en stor spiller velge?** I A nei: etter ett år har hen alt og hoper opp igjen. I B ja: to på høy halverer det som
+   blir til overs, og det er et reelt valg mellom programmer, krigskasse og selskaper.
+5. **Hvor ofte skjer et fornuftig bytte?** A: **aldri** (0 bytter på to år – det som er betalt, er for dyrt å kaste). B: **18 programbytter på to år**
+   (ca. hver 5.–6. uke) – ett når en hendelse i verden starter og ett når den slutter (ni hendelser i simuleringen). Et
+   bytte koster bare etableringen og bindingen. Hvor ofte det skjer i spillet, styres av hvor ofte verden endrer seg.
+
+**Anbefaling: modell B**, med disse utgangspunktene (justeres i simuleringen når effektene er bestemt):
+- Budsjett som **andel av inntekten i konsernkassa** (lav 4 %, middels 12 %, høy 30 % per program), ikke faste kroner – da
+  er avveiningen lik for små og store, og den følger med når inntekten endrer seg.
+- **Etablering i prosjektlinja** (én ting om gangen, som i dag), noen dager og en etableringssum (ca. 3 dagers inntekt heller
+  enn en fast sum, så den er lik for alle).
+- **Binding 14 dager**; endring av satsing eller program tar ekte tid; det som er brukt, refunderes ikke.
+- **To aktive** programmer.
+- Effektene hovedsakelig **utenom penger** (tåle hendelser, regional styrke, energi, ledere), og der de gir penger: rundt
+  null over tid, så ingen er riktig for alle. Driftsytelse gir mer utbytte, men med en ekte ulempe (tåler uro dårligere).
+
+**Viktige forbehold:**
+- B virker bare hvis effektene utenom penger merkes i spillet (hendelser som programmene demper, selskaper og regioner som
+  Marked hjelper i, verksjefsaker). Uten det er B et pengesluk med knapper.
+- Selv to på høy lar kassa vokse 9–14 mrd. i året for en stor spiller. Programmene alene løser ikke opphopingen – de gir
+  pengene en pris, men selskaper og oppkjøp må fortsatt være den største eksterne bruken (avsnitt 5).
+- Effektene og hendelsene i simuleringen er plassholdere; tallene over er for å sammenligne modellene, ikke fasit.
+

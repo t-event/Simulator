@@ -300,10 +300,11 @@ import { fixedPowerOffer, spotPowerPrice } from "./plant";
 import { explosionChance, FATAL_DOWN_DAYS, fatalAccident, WINTER_EXPLOSION } from "./accidents";
 import { freeStockT, sellAllFree } from "./engine";
 import { leaderBonus, leaderBonusDue } from "./actions";
-import { autoPlay, ChargeGame } from "../ui/control/chargeGame";
+import { autoPlay, ChargeGame, INPUT_LOG_MAX, seededRandom } from "../ui/control/chargeGame";
 import { hints } from "../ui/hints";
 import { hasMoulds, MOULD, mouldCost, mouldHour, mouldRisk, mouldWear, replaceMoulds, wearMoulds } from "./mould";
 import { applyCashCap, CASH_RESERVE, hasPaidOut, paidOutDayLog, paidOutTotal } from "./reserve";
+import { trainingSeed, weeklyGrade, weeklyRequest } from "../ui/control/weekly";
 
 declare const process: { exitCode?: number };
 
@@ -3465,6 +3466,34 @@ test("Opptjent nivå (B-383): tittelen med gulvet står, men nye verk, trinn og 
   const old = JSON.parse(JSON.stringify(g));
   delete old.konsern.earned;
   assert(parseSave(JSON.stringify(old))!.konsern.earned === 0, "ingen standardverdi");
+});
+
+test("Ukens kontrollrom (B-387): samme frø gir samme charge, treningsfrø er andre, og inndataene logges", () => {
+  const req = weeklyRequest(weeklyGrade("premium"));
+  assert(req.grade === "premium" && weeklyGrade("tull") === "standard", "kvaliteten fra serveren");
+  const play = (seed: number) => autoPlay(new ChargeGame(req, seededRandom(seed)), "flink");
+  const a1 = play(123456);
+  const a2 = play(123456);
+  const b = play(654321);
+  assert(a1.score.points === a2.score.points, `samme frø ga ${a1.score.points} og ${a2.score.points}`);
+  // Ulike frø gir ulike charger (skrapkurvene og slaggklumpene kommer ulikt)
+  const g1 = new ChargeGame(req, seededRandom(123456));
+  const g2 = new ChargeGame(req, seededRandom(654321));
+  assert(g1.carbon !== g2.carbon || g1.tapTemp !== g2.tapTemp, "ulike frø ga samme charge");
+  assert(b.score.points > 0, "charge uten poeng");
+  // Treningsfrø: innenfor området serverens frø ligger i, og tilfeldige
+  const seeds = new Set(Array.from({ length: 50 }, () => trainingSeed()));
+  assert(seeds.size > 45 && [...seeds].every((x) => x >= 1 && x < 2147483647), "treningsfrøene");
+  // Inndataene: start, hold og tapp logges, med runde og tid, og loggen har tak
+  const g = new ChargeGame(req, seededRandom(1));
+  autoPlay(g, "flink");
+  const acts = new Set(g.inputs.map((x) => x[2]));
+  assert(acts.has("s") && acts.has("h") && acts.has("t") && acts.has("r"), `handlinger ${[...acts].join(",")}`);
+  assert(
+    g.inputs.every((x) => x.length === 4 && x[0] >= 0 && x[0] <= 3),
+    "formatet på loggen",
+  );
+  assert(g.inputs.length <= INPUT_LOG_MAX && JSON.stringify(g.inputs).length < 32_000, "loggen er for stor");
 });
 
 // Oppsummeringen står sist, så alle testene over teller med i exit-koden

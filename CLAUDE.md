@@ -121,6 +121,7 @@ npx tsx src/game/balance.ts --konsern                      # utbyttet per ekte d
 npx tsx src/game/balance.ts --forste 700                   # kurven for første opplasting i juksesperren (B-257, ca. 40 min)
 npx tsx src/game/balance.ts --vinter                       # uhell, kort og kostnader om vinteren mot sommeren, per nivå (B-277, ca. 11 min)
 npx tsx src/game/balance.ts --sommerstans                  # testspilleren velger sommerstans i fellesferien (B-298)
+npx tsx src/game/programSim.ts                             # konsernprogrammene: modell A (permanente trinn) mot B (budsjett), også --skann-inntekt (B-388)
 npx tsx src/game/worldSim.ts                               # verdenssimulatoren: konsernkassa for liten/middels/stor/legacy etter 30–730 ekte dager, dager etter fullt konsern, maks bud, andel brukt (B-380, B-385; --dager 180 for kortere)
 npm run build
 ```
@@ -170,7 +171,7 @@ frontend/src/
     leaderboard.ts Toppliste og kallenavn (også kontrollrommet, B-295)   season.ts  Sesong og hendelser (butikk)
     badges.ts    Merker bare serveren vet om (B-296); hentes av ui/BadgeSync.tsx og gis som skjulte prestasjoner
     daily.ts     Daglig på serveren (status, henting)   features.ts  Hva som krever konto   update.ts  Automatisk oppdatering
-    weekly.ts    Ukens utfordring: status, ukelista og ukekista (B-152)
+    weekly.ts    Ukens utfordring: status, ukelista, ukekista (B-152) og forsøkene i ukens kontrollrom (B-387)
     seasonTrack.ts Sesongstigen: poeng, trinn og henting (B-173)
     treasury.ts  Konsernkassa på serveren: status (overføringen er slått av, B-319)
     chat.ts      Skiftrapporten: felles chat – sende, hente, slette, sist lest (B-338; SQL i 070)
@@ -213,7 +214,8 @@ frontend/src/
     WorldMap.tsx Konsern → Kart: verdenskartet med regionene, andres verk og selskapene (B-333)
     Chat.tsx     Skiftrapporten: knappen ved varsellinja (under 380 px i tallraden) og arket (B-338)
     Companies.tsx Konsern → Industrien: ett kort per selskap (skraplageret nå) og konsernkassa (B-189, B-227)
-    control/     Kontrollrommet: spillet i fire runder (chargeGame.ts: logikk og testspiller, ControlRoom.tsx, B-175)
+    control/     Kontrollrommet: spillet i fire runder (chargeGame.ts: logikk, frø og inndatalogg, testspiller; ControlRoom.tsx,
+                 B-175); weekly.ts: ukens charge og treningsfrø (B-387)
   sim/         Prosessmodell for lysbueovnen (brukes ikke av spillet lenger, sjekkes av sim/validate.ts)
 frontend/scripts/ sjekk-endringslogg.mjs: endringsloggen dekker nyeste beslutning; sjekk-emoji.mjs: ingen emoji (B-237)
 frontend/public/  PWA: manifest, ikoner (icon.svg er kilden; PNG-ene lages fra den med Chromium, B-249), service worker
@@ -228,7 +230,7 @@ docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretn
                KONTROLL-FORSLAG.md (verdenskart, utbyttepolitikk, Kontroll, overtakelser og pengene hjemme, B-331, godkjent B-332),
                VERKSJEF-FORSLAG.md (verksjefer for datterverkene, RETNING fase 5, B-379 – venter på eieren),
                STATUS.md (fasit for hvordan spillet virker nå, B-385),
-               UKENS-KONTROLLROM.md og KONSERNKAPITAL-FORSLAG.md (forslag, B-386 – venter på eieren),
+               UKENS-KONTROLLROM.md (variant A bygget, B-387), KONSERNKAPITAL-FORSLAG.md (forslag med eierens svar, B-386/B-387),
                STABILISERING.md (cash-audit, legacy-gulvet og verdenssimuleringen, B-380; besluttet B-381–B-385, dry-run i avsnitt 9),
                (designsystem, mobil + PC, plan for redesignet, B-187),
                PLAN-NETT.md (det som er bygget på nett), FORSLAG.md, KONTO.md (hva som krever konto)
@@ -449,6 +451,13 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   men i `valueCreated` (sluttmålet, stormodellene, prestasjoner, B-341). Lista «Privat formue» leses av `note_paid_out`
   (050) og står stille. Store beløp: `fmtKrCompact` i toppfeltet (fra 100 mrd.), hele beløpet på Økonomi. Serveren har aldri
   håndhevet taket løpende (052 var en engangsjustering). Eldre apper betaler ut til de oppdaterer seg selv.
+- **Ukens kontrollrom** (B-387, 094): tre tellende frø per uke (A/B/C) fra `weekly_control_seed` med hemmelig nøkkel i
+  `weekly_control_keys` – aldri i `config` (den kan leses av alle). Et forsøk er brukt ved `weekly_control_start`;
+  `weekly_control_submit` er idempotent (samme svar ved ny innlevering), og appen lagrer resultatet i localStorage
+  (`stalverk-ukekontroll-v1`) til serveren har svart. Trening bruker `trainingSeed()`, aldri serverens frø. Ukens charge er
+  `weeklyRequest(kvalitet)` (samme for alle) og blir aldri en charge i verket. Endres kontrollromspoengene mye, må
+  `max_points` i `config.world.weekly_control` følge med (som grensen for rekorden, B-295). I tester av ukene i SQL: lag
+  `week_kind` på nytt inne i DO-blokken (rulles tilbake) for å få en kontrollromsuke.
 - **Sesongen og listene** (B-384, 092/093): `close_season` rangerer på `konsern_value` (de uten konsern etter, på verdien i
   eget verk) og lagrer `konsern_value`/`rank_by`; `season_history` gir dem. Topplista i appen har gruppene «Industriverden»
   og «Eget verk» (`BOARDS[].group`); nye lister fra spillet på mobilen hører til Eget verk. `week_kind` har ikke `vekst`

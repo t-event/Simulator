@@ -6,12 +6,13 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
-- **Ukens kontrollrom (B-386):** eieren har valgt kontrollrommet som ny ukekonkurranse (erstatter «Størst vekst»), med
-  samme charge for alle, tre tellende forsøk og serververifisering. Forslaget med to varianter og fire spørsmål står i
-  `docs/UKENS-KONTROLLROM.md`. «Mest stål per kWh» og leveringspresisjon kommer senere, når tidslinja har tallene; ukene
-  skal rotere.
-- **Konsernkapital etter fullt konsern (B-386):** forslag og fem spørsmål i `docs/KONSERNKAPITAL-FORSLAG.md`
-  (konsernprogrammer, verksjefer, flere selskaper, oppkjøp, eierutbytte). Ingen økonomiske justeringer før eieren svarer.
+- **Ukens kontrollrom** er bygget (B-387, variant A). Venter: variant B (avspilling på serveren) og nye ukekonkurranser
+  når tidslinja har tallene – stål per kWh og leveringspresisjon – så rotasjonen blir større og «Mer stål enn før» kan
+  tas bort (den kan påvirkes med en svak uke først).
+- **Konsernkapital etter fullt konsern (B-386, B-387):** eieren har svart (B-387): to aktive programmer av fem, men før
+  K-1 bygges skal to programøkonomier simuleres (A: store permanente trinn, B: aktivt programbudsjett med binding) og
+  sammenlignes. Oppkjøp endres først etter ekte data; forberedelsen skal ikke avsløre kjøperen før budet er lagt inn.
+  Selskaper: ca. 1 per 4 aktive konserneiere, serveren foreslår, eieren godkjenner. Eierutbytte venter.
 
 - **Slå på gjestekontoer (B-212):** eieren må slå på «Allow anonymous sign-ins» under Authentication → Sign In /
   Providers i dashbordet (connectoren kan ikke). **29.9: eieren slår det på** – sjekk etterpå at det kommer gjester

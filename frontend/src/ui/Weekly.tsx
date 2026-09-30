@@ -3,12 +3,21 @@
  * for uka. Krever konto for å være med (docs/KONTO.md); lista kan leses uten.
  */
 import { SheetHead } from "./ds";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { lazy, Suspense, useEffect, useState, useSyncExternalStore } from "react";
 import { awardPoints, log } from "../game/engine";
+import { GRADES } from "../game/data";
 import type { GameApi } from "../game/useGame";
 import { getSession, onSessionChange } from "../net/supabase";
 import { isReconciled, onCloudStatus } from "../net/sync";
 import {
+  abandonControlAttempt,
+  CONTROL_REFUSAL_TEXT,
+  flushPendingControl,
+  pendingControl,
+  startControlAttempt,
+  submitControlAttempt,
+  type ControlAttempt,
+  type SubmitOutcome,
   chestFp,
   claimWeekChest,
   fetchWeeklyBoard,
@@ -27,6 +36,10 @@ import { fmtNum } from "./format";
 import { buzz } from "./haptics";
 import { Portal } from "./Portal";
 import { Icon } from "./icons";
+import { trainingSeed, weeklyGrade, weeklyRequest } from "./control/weekly";
+import type { WeeklyMode } from "./control/ControlRoom";
+
+const ControlRoom = lazy(() => import("./control/ControlRoom").then((m) => ({ default: m.ControlRoom })));
 
 function useSession() {
   return useSyncExternalStore(onSessionChange, getSession, getSession);
@@ -41,6 +54,7 @@ function useWeekly() {
 function fmtValue(kind: WeekKind, v: number): string {
   if (kind === "vekst") return `+${fmtNum(v, 1)} %`;
   if (kind === "tonn") return `${fmtNum(v, 0)} %`;
+  if (kind === "kontroll") return `${fmtNum(v, 0)} poeng`;
   return `${fmtNum(v, 0)} ${v === 1 ? "dag" : "dager"}`;
 }
 
@@ -113,12 +127,15 @@ export function WeeklyCard({ act }: { act: GameApi["act"] }) {
           ? `Du er nr. ${status.plass} av ${status.players} (${fmtValue(status.kind, status.value ?? 0)}).`
           : status.kind === "dager"
             ? "Du er ikke på lista ennå – den fylles når spillet lagres på nett."
-            : "Du er ikke på lista denne uka: spillet må ha vært lagret på nett minst to dager før uka startet."}{" "}
+            : status.kind === "kontroll"
+              ? "Du er ikke på lista ennå – kjør et tellende forsøk."
+              : "Du er ikke på lista denne uka: spillet må ha vært lagret på nett minst to dager før uka startet."}{" "}
         <span className="g-muted">
           {left <= 1 ? "Siste dag!" : `${left} dager igjen.`} Topp 3 får medalje og ukekiste ({chestFp(3)}–{chestFp(1)}{" "}
           fagpoeng).
         </span>
       </p>
+      {status.kind === "kontroll" && status.control && <WeeklyControlPanel act={act} user={user!} />}
       {m.gold + m.silver + m.bronze > 0 && (
         <p className="g-muted">
           Dine medaljer: {m.gold} gull · {m.silver} sølv · {m.bronze} bronse
@@ -178,11 +195,227 @@ function WeeklyBoard({ kind, onClose }: { kind: WeekKind; onClose: () => void })
             </ol>
           )}
           <p className="g-muted g-small-text">
-            Uka går fra mandag til mandag. Alle er på samme liste, og stålet måles i prosent, så et lite verk kan slå et
-            stort. Når uka er over, får topp 3 medalje og en ukekiste med fagpoeng. {WEEK_KINDS[kind].how}
+            Uka går fra mandag til mandag. Alle er på samme liste
+            {kind === "kontroll"
+              ? " og kjører de samme chargene."
+              : ", og stålet måles i prosent, så et lite verk kan slå et stort."}{" "}
+            Når uka er over, får topp 3 medalje og en ukekiste med fagpoeng. {WEEK_KINDS[kind].how}
           </p>
         </div>
       </div>
     </Portal>
+  );
+}
+
+// Farten spillet hadde før ukens kontrollrom ble åpnet (settes tilbake etterpå), og nøkkelen til hver ny charge
+let speedBefore: number | null = null;
+let playKey = 0;
+const nextKey = () => ++playKey;
+function pauseGame(act: GameApi["act"]): void {
+  act((gg) => {
+    speedBefore = gg.speed;
+    gg.speed = 0;
+  });
+}
+function resumeGame(act: GameApi["act"]): void {
+  const sp = speedBefore;
+  speedBefore = null;
+  if (sp !== null && sp > 0) act((gg) => void (gg.speed = sp));
+}
+
+/** Hva spilleren kjører i ukens kontrollrom nå */
+type Play =
+  | { counted: false; seed: number; key: number }
+  | { counted: true; attempt: ControlAttempt; key: number; scored: boolean };
+
+function outcomeText(o: SubmitOutcome, attempts: number): string {
+  if (o.kind === "levert")
+    return `Levert: ${fmtNum(o.points)} poeng. Ditt beste denne uka: ${fmtNum(o.best)}. ${
+      o.left > 0 ? `${o.left} av ${attempts} forsøk igjen.` : "Alle forsøkene er brukt."
+    }`;
+  if (o.kind === "venter")
+    return "Fikk ikke levert ennå. Resultatet er lagret og sendes av seg selv når nettet virker (fristen er 15 minutter).";
+  return CONTROL_REFUSAL_TEXT[o.reason];
+}
+
+/**
+ * Ukens kontrollrom (B-387) på kortet: ukens kvalitet, forsøkene, beste resultat, og knappene for trening og tellende
+ * forsøk. Et tellende forsøk startes på serveren (brukt fra nå av) og spilles med serverens frø; trening bruker egne frø.
+ */
+function WeeklyControlPanel({ act, user }: { act: GameApi["act"]; user: string }) {
+  const status = useWeekly();
+  const c = status?.control ?? null;
+  const [play, setPlay] = useState<Play | null>(null);
+  const [confirm, setConfirm] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [submitText, setSubmitText] = useState<string | null>(null);
+  const [pending, setPendingState] = useState(() => pendingControl());
+
+  const refresh = () => void fetchWeeklyStatus().then(setWeeklyStatus, () => {});
+
+  // Et resultat som ikke ble levert (nettfeil), sendes når kortet vises og deretter hvert 20. sekund
+  useEffect(() => {
+    if (!pendingControl()) return;
+    const tryFlush = () =>
+      void flushPendingControl().then((o) => {
+        setPendingState(pendingControl());
+        if (o.kind !== "venter") {
+          setMessage(outcomeText(o, c?.attempts ?? 3));
+          refresh();
+        }
+      });
+    tryFlush();
+    const t = setInterval(tryFlush, 20_000);
+    return () => clearInterval(t);
+  }, [pending?.id, c?.attempts]);
+
+  if (!c) return null;
+  const grade = weeklyGrade(c.grade);
+  const left = Math.max(0, c.attempts - c.used);
+  const openWithoutResult = c.open && pending?.id !== c.open.id ? c.open : null;
+
+  const pause = () => pauseGame(act);
+  const resume = () => resumeGame(act);
+  const startTraining = () => {
+    pause();
+    setSubmitText(null);
+    setPlay({ counted: false, seed: trainingSeed(), key: nextKey() });
+  };
+  const startCounted = async () => {
+    setConfirm(false);
+    setBusy(true);
+    setMessage(null);
+    try {
+      const r = await startControlAttempt();
+      if (!r.ok) {
+        setMessage(CONTROL_REFUSAL_TEXT[r.reason]);
+        refresh();
+        return;
+      }
+      pause();
+      setSubmitText(null);
+      setPlay({ counted: true, attempt: r.attempt, key: nextKey(), scored: false });
+    } finally {
+      setBusy(false);
+    }
+  };
+  const giveUp = async (id: number) => {
+    setBusy(true);
+    try {
+      await abandonControlAttempt(id);
+      setPendingState(pendingControl());
+      setMessage("Forsøket er gitt opp og teller 0.");
+      refresh();
+    } catch {
+      setMessage(CONTROL_REFUSAL_TEXT.nett);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const mode: WeeklyMode | null = play
+    ? {
+        counted: play.counted,
+        label: play.counted ? `forsøk ${play.attempt.attempt} av ${c.attempts}` : "trening",
+        status: submitText,
+        onScore: (score, inputs) => {
+          if (!play.counted) return;
+          setPlay({ ...play, scored: true });
+          setSubmitText("Leverer …");
+          void submitControlAttempt({
+            user,
+            id: play.attempt.id,
+            points: score.points,
+            stars: score.rating,
+            log: inputs,
+            deadline: play.attempt.deadline,
+          }).then((o) => {
+            setPendingState(pendingControl());
+            setSubmitText(outcomeText(o, c.attempts));
+            refresh();
+          });
+        },
+        onClose: (aborted) => {
+          if (play.counted && aborted && !play.scored) void giveUp(play.attempt.id);
+          setPlay(null);
+          resume();
+          refresh();
+        },
+        onAgain: play.counted ? undefined : () => setPlay({ counted: false, seed: trainingSeed(), key: nextKey() }),
+      }
+    : null;
+
+  return (
+    <div className="g-week-control">
+      <p>
+        Ukens kvalitet: <strong>{GRADES[grade].name}</strong>. Forsøk brukt: {c.used} av {c.attempts}
+        {c.best !== null && (
+          <>
+            {" "}
+            · ditt beste: <strong>{fmtNum(c.best)} poeng</strong>
+          </>
+        )}
+        .
+      </p>
+      {pending && <p className="g-note">Et resultat venter på å bli levert ({fmtNum(pending.points)} poeng) …</p>}
+      {openWithoutResult && (
+        <p className="g-note g-warn">
+          Forsøk {openWithoutResult.attempt} ble startet, men ikke fullført. Det teller 0 når fristen går ut.{" "}
+          <button className="g-link" disabled={busy} onClick={() => void giveUp(openWithoutResult.id)}>
+            Gi opp nå
+          </button>
+        </p>
+      )}
+      {message && (
+        <p className="g-muted" aria-live="polite">
+          {message}
+        </p>
+      )}
+      <div className="g-row g-week-control-actions">
+        <button onClick={startTraining}>
+          <Icon name="gamepad-2" /> Øv på ukens kvalitet
+        </button>
+        <button
+          className="g-primary"
+          disabled={busy || left === 0 || !!c.open || !!pending}
+          onClick={() => setConfirm(true)}
+        >
+          {left === 0 ? "Alle forsøk er brukt" : `Kjør tellende forsøk (${left} igjen)`}
+        </button>
+      </div>
+      {confirm && (
+        <Portal>
+          <div className="g-modal" role="alertdialog" aria-modal="true" onClick={() => setConfirm(false)}>
+            <div className="g-modal-card" onClick={(e) => e.stopPropagation()}>
+              <p>
+                Forsøk {c.used + 1} av {c.attempts} brukes når du starter – også hvis du lukker appen. Alle spillerne
+                kjører den samme chargen. Klar?
+              </p>
+              <div className="g-row">
+                <button className="g-primary" disabled={busy} onClick={() => void startCounted()}>
+                  Start
+                </button>
+                <button onClick={() => setConfirm(false)}>Vent</button>
+              </div>
+            </div>
+          </div>
+        </Portal>
+      )}
+      {play && mode && (
+        <Portal>
+          <Suspense fallback={<div className="control-room g-loading">Åpner kontrollrommet …</div>}>
+            <ControlRoom
+              key={play.key}
+              request={weeklyRequest(grade)}
+              best={c.best ?? 0}
+              seed={play.counted ? play.attempt.seed : play.seed}
+              weekly={mode}
+              onDone={() => mode.onClose(false)}
+            />
+          </Suspense>
+        </Portal>
+      )}
+    </div>
   );
 }

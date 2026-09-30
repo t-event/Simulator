@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 387,
+    date: "2026-09-30",
+    title: "Ukens kontrollrom",
+    items: [
+      "Ny ukeutfordring: tre tellende charger i kontrollrommet. Alle kjører de samme chargene i samme rekkefølge, og den beste teller. Første gang uka som starter 19. oktober.",
+      "Et forsøk er brukt når du starter det. Faller nettet ut når du leverer, blir resultatet sendt av seg selv når nettet er tilbake.",
+      "Du kan øve så mye du vil på ukens kvalitet. Øvingen teller ikke.",
+      "Ukeutfordringene går nå på rundgang: flest aktive dager, mer stål enn før og ukens kontrollrom.",
+    ],
+  },
+  {
     b: 384,
     date: "2026-09-30",
     title: "Ingen tak på kassa, og sesongen avgjøres i konsernet",
