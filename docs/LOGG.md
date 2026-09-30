@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 306 – 2026-09-30: Stabilisering – cash-audit, legacy-gulvet og verdenssimulatoren (B-380)
+
+**Brukeren ba om:** ikke bygge verksjefene ennå (svar på forslaget), men først: audit av 10 mrd.-taket, analyse av
+legacy-gulvet, ny verdenssimulering med dagens priser, STATUS.md; sjekken 2.10 skal bare rapportere.
+
+**Gjort:** sjekken 2.10 endret til rapport. Audit av alle funksjoner som leser kasse/verdi/utbetalt/lån og av appen.
+Ekte tall for gulv mot opptjent nivå, bidrag og utbytte hentet. `worldSim.ts` skrevet (gjenbruker `konsernWorld.ts` og
+`dividend.ts`). Analysen i `docs/STABILISERING.md`; svarene om verksjefer i VERKSJEF-FORSLAG.md.
+
+**Testet:** simulatoren kjører på ca. 3 s med samme tall hver gang; tallene for fullt konsern (ca. 37 mill./dag) stemmer
+med ekte utbytte for en spiller med fullt konsern (33,5 mill.). tsc, lint, `npm test`.
+
+**Gjenstår:** eierens svar på fire spørsmål i STABILISERING.md; så STATUS.md.
+
 ## Økt 305 – 2026-09-30: Forslag om verksjefer, og sjekk av gjestene (B-379)
 
 **Brukeren ba om:** «Fortsett med planene».
