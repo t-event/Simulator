@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 301 – 2026-09-30: Oppkjøp som lønner seg, og betaling for tida eieren mister (B-375)
+
+**Brukeren spurte:** hva Figen får ved oppkjøp før og etter 14 dager, «Hva anbefaler du», så «Ja» og «Kjør på».
+
+**Gjort:** `087_oppkjop_betaling.sql`: verdien (minstebudet) er 10 dagers inntekt; eieren får inntekten for dagene som er
+igjen + 85 % av det hen investerte i sin periode, høyst 85 % av budet, resten forsvinner. Investeringer per eierperiode
+(Figens 34,74 mill. lagt inn fra kassaloggen). `company_control.buyout` og `takeover_last.owner_paid`. Appen: `buyoutPay`
+og `buyoutMax` i `control.ts`, linjen «Blir selskapet kjøpt med det budet, får du ca. X» og nye tekster om hva eieren får.
+
+**Testet:** `takeover_payout` med faste tall på serveren = testen i `game/tests.ts`; helt oppkjøp i DO-blokk (rullet
+tilbake): 1 mrd. bud → 230,8 mill. til Figen, 14 dager til ny eier. get_advisors uten nye funn. tsc, lint, `npm test`,
+Playwright 320/390/1366 på Industrien.
+
+**Gjenstår:** –
+
 ## Økt 300 – 2026-09-30: Figens bud i gamle penger (B-374)
 
 **Brukeren spurte:** Figen kjøpte skraplageret for 200 mill. før økonomien ble delt på 10 – hva anbefales? Så «Gjør det du

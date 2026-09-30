@@ -130,7 +130,7 @@ sterk (≥ 80), stabil (60–79), presset (40–59), svak (< 40).
 viktigste del. De gir også selskapet inntil +25 % inntekt (samme kurve), så de lønner seg sakte for den som beholder det.
 En ny eier overtar investeringene (RETNING fase 4).
 
-Verdien (V) av et selskap er 30 dagers inntekt, men minst det det sist ble solgt for. Skraplageret i dag: ca. 450 mill.
+Verdien (V) av et selskap er 30 dagers inntekt (10 fra B-375), men minst det det sist ble solgt for. Skraplageret i dag: ca. 450 mill.
 
 ---
 

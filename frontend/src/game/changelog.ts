@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 375,
+    date: "2026-09-30",
+    title: "Oppkjøp som gir mening",
+    items: [
+      "Et oppkjøpsbud må nå være minst 10 dagers inntekt fra selskapet, ikke 30. Kjøperen eier selskapet i 14 dager, så et oppkjøp kan lønne seg.",
+      "Blir selskapet ditt kjøpt, får du betalt for dagene du mister og 85 % av det du har investert – aldri mer enn 85 % av budet. Resten av budet går ut av spillet.",
+      "Under Konsern → Industrien ser du hva du får hvis selskapet blir kjøpt.",
+    ],
+  },
+  {
     b: 374,
     date: "2026-09-30",
     title: "Gamle anbud i dagens penger",

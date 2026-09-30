@@ -26,6 +26,8 @@ import {
 import { MASTERY, MASTERY_IDS, masteryCost, masteryEffect, masteryOpen } from "./mastery";
 import {
   bidToTake,
+  buyoutMax,
+  buyoutPay,
   controlAdvice,
   controlAfterInvest,
   controlSteps,
@@ -3854,6 +3856,20 @@ test("Døgnregnskapet i hele tall (B-358): nye døgn og eldre lagringer", () => 
     m.history[0].kwh === 1235 && m.history[0].cashEnd === 100,
     `migrert ${m.history[0].kwh} ${m.history[0].cashEnd}`,
   );
+});
+
+test("Oppkjøp: eieren får dagene hen mister og det hen investerte, høyst 85 % av budet (B-375)", () => {
+  // Samme tall som `select takeover_payout(...)` på serveren (087)
+  const b = { perDay: 15e6, daysLeft: 10, investedKasse: 20e6, investedFond: 0 };
+  let r = buyoutPay(154e6, b);
+  assert(r.kasse === 130_900_000 && r.fond === 0, `taket ${JSON.stringify(r)}`);
+  r = buyoutPay(1e9, { ...b, investedFond: 10e6 });
+  assert(r.kasse === 167_000_000 && r.fond === 8_500_000, `stort bud ${JSON.stringify(r)}`);
+  r = buyoutPay(100e6, { ...b, investedKasse: 0, investedFond: 10e6 });
+  assert(r.kasse === 85_000_000 && r.fond === 0, `fondet innenfor taket ${JSON.stringify(r)}`);
+  assert(buyoutMax(b) === 167_000_000, "mest mulig");
+  // Et svært høyt bud gir ikke mer: penger kan ikke flyttes mellom spillere med oppkjøp
+  assert(buyoutPay(10e9, b).kasse === buyoutPay(1e9, b).kasse, "budet over erstatningen forsvinner");
 });
 
 if (failed) {

@@ -28,6 +28,7 @@ import {
 } from "../net/world";
 import {
   bidToTake,
+  buyoutPay,
   CONTROL_PARTS,
   controlAfterInvest,
   controlSteps,
@@ -591,6 +592,12 @@ function ControlSection({
           )}
         </p>
       )}
+      {takeoversOn && !c.takeover && ctl.buyout && !(vern && endsAt && vern >= endsAt) && (
+        <p className="g-muted g-small-text g-buyout">
+          Blir selskapet kjøpt med det budet, får du ca. {fmtKr(buyoutPay(take, ctl.buyout).kasse)} i konsernkassa:
+          inntekten for dagene som er igjen og 85 % av det du har investert (aldri mer enn 85 % av budet).
+        </p>
+      )}
       {steps.length > 0 && (
         <>
           <h4 className="g-control-sub">Slik blir det tryggere</h4>
@@ -636,7 +643,8 @@ function ControlSection({
             </li>
             <li>
               Oppkjøpsbudet måles mot Kontrollen din pluss motbudet. Er oppkjøpsbudet sterkest, kjøper den andre
-              selskapet, og du får 85 % av budet. Ellers beholder du det.
+              selskapet, og du får betalt for dagene du mister og 85 % av det du har investert (aldri mer enn 85 % av
+              budet). Ellers beholder du det.
             </li>
           </ol>
           <p className="g-muted g-small-text">
@@ -812,7 +820,8 @@ function TakeoverSection({
                 t.bid * 1.2,
               )}
               <p className="g-muted g-small-text">
-                Skriv hele det nye budet. Står budet sterkest til slutt, får eieren 85 %. Ellers får du 90 % tilbake.
+                Skriv hele det nye budet. Står budet sterkest til slutt, får eieren betalt for dagene hen mister, og
+                resten av budet er brukt. Ellers får du 90 % tilbake.
               </p>
             </>
           )}
@@ -823,10 +832,10 @@ function TakeoverSection({
           <details className="g-details">
             <summary>Kjøp selskapet</summary>
             <p className="g-small-text">
-              Et oppkjøpsbud må være minst verdien, {fmtKr(w.minBid)}, og betales fra konsernkassa med én gang. Alle ser
-              budet, og eieren har {TAKEOVER.defenseHours} timer på seg til å legge inn et motbud. Med minstebudet:{" "}
-              {lead(w.attackMin, w.defenseNow)} før eieren gjør noe. Større bud, at du spiller hver uke og egne verk i
-              regionen gjør budet sterkere – med stort nok bud kan alle selskaper kjøpes.
+              Et oppkjøpsbud må være minst verdien (10 dagers inntekt), {fmtKr(w.minBid)}, og betales fra konsernkassa
+              med én gang. Alle ser budet, og eieren har {TAKEOVER.defenseHours} timer på seg til å legge inn et motbud.
+              Med minstebudet: {lead(w.attackMin, w.defenseNow)} før eieren gjør noe. Større bud, at du spiller hver uke
+              og egne verk i regionen gjør budet sterkere – med stort nok bud kan alle selskaper kjøpes.
             </p>
             {amountRow(
               "Legg inn oppkjøpsbud",
@@ -837,8 +846,8 @@ function TakeoverSection({
               w.minBid,
             )}
             <p className="g-muted g-small-text">
-              Står budet sterkest, får eieren 85 % av det, og du eier selskapet i 14 dager fra kjøpet. Ellers får du 90
-              % tilbake.
+              Står budet sterkest, eier du selskapet i 14 dager fra kjøpet. Eieren får betalt for dagene hen mister og
+              det hen har investert; resten av budet går ut av spillet. Ellers får du 90 % tilbake.
             </p>
           </details>
         ) : (
@@ -872,7 +881,7 @@ function DefenseVerdict({ c, fund }: { c: Company; fund: number }) {
     <p className="g-small-text g-defense-verdict is-bad">
       <Icon name="warning" /> Slik det står nå, mister du selskapet.{" "}
       {need === null
-        ? "Budet er så stort at et motbud ikke kan stå imot. Du får 85 % av budet."
+        ? "Budet er så stort at et motbud ikke kan stå imot. Du får betalt for dagene du mister og det du har investert."
         : `Legg inn et motbud på ca. ${fmtKr(need)}${t.defense ? " til" : ""} for å beholde det – du får 95 % tilbake etterpå.`}
     </p>
   );
