@@ -6812,3 +6812,16 @@ Beslutning (`087_oppkjop_betaling.sql`):
 - Testet i en DO-blokk som ble rullet tilbake: bud på 1 mrd. på skraplageret ga Figen 230,8 mill. (13,03 dager × 15,36
   mill. + 85 % av 34,74 mill.), ikke 850 mill.; ny eier med 14 dager fra kjøpet.
 Konto (B-149): – ingen ny funksjon (oppkjøp krever konto fra før).
+
+## B-376 Alle .md-filer oppdatert etter B-366–B-375 (2026-09-30)
+Status: gjelder
+Bakgrunn: brukeren (eier): «Oppdater alle .md filer».
+Beslutning: README (konsernet i verden, Industrien, skiftrapporten, dokumentlista, arkitekturen), DESIGN (nivåtabellen og
+veikartet), RETNING (fase 3 og 4 bygget, norsk dag), KONTO (ord og beslutninger for utbyttepolitikk, Kontroll og oppkjøp),
+FORSLAG (forslaget om investeringer avgjort i B-375, gamle anbud B-374, skraplagerets første utbetaling), PLAN-NETT
+(migrasjonene 064–087, hendelser i skiftrapporten), KONSERN-FORSLAG (prisene fra B-373), KONTROLL-FORSLAG (det som er
+endret etter at det ble bygget), KONSERNBIDRAG (norsk dag) og UI (runder bygget etter UI-4) er oppdatert. Forslagene og
+analysene står ellers som de ble godkjent; de har fått en merknad øverst om det som er endret, i stedet for å bli
+skrevet om. LOGG, BESLUTNINGER og CLAUDE.md var oppdatert fra før.
+Endringslogg: nei
+Konto (B-149): – ingen ny funksjon.

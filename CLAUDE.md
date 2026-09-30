@@ -408,7 +408,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `company_owners.from_at` bakover for vernet, `closes_at` bakover for utfallet). Kjøperen får 14 dager fra kjøpet og 3 dagers vern; ingen
   pause etter «avverget» (`cooldown_days` = 0, B-373). Eieren får `takeover_payout` (dagene som er igjen + 85 % av det
   hen investerte i perioden, høyst 85 % av budet, B-375) – speilet i `buyoutPay`; investeringer føres per eierperiode i
-  `company_owners`. Verdien (minstebudet) er 10 dagers inntekt. Til når ingen kan by, regnes av `company_protected_until`. Et nytt selskapsbytte må ende eierens
+  `company_owners`. Verdien (minstebudet) er 10 dagers inntekt. Anbud fra før økonomien ble delt på 10 (B-311) regnes i
+  dagens penger (`bid_in_new_money`, 086; `bidInNewMoney`/`fmtBid` i `net/world.ts`, B-374). Til når ingen kan by, regnes av `company_protected_until`. Et nytt selskapsbytte må ende eierens
   rad i `company_owners` (`until_at = now()`), ellers regner `pay_company_income` feil eier.
 - **Byggetid hjemme** (B-336): kjøp fra 50 mill. (ikke flytting) installeres ikke i `buyUpgrade`, men i `finishBigBuild`
   når `g.bigBuild.readyMin` er nådd (fra `hourlyActions`). Tester og kode som kjøper stort utstyr og venter det med én

@@ -1,7 +1,16 @@
 # Forslag: verdenskartet, Kontroll, overtakelser og utbyttepolitikken – og pengene hjemme (B-331)
 
 **Status:** godkjent 29.9.2026 med svarene i B-332 (overtakelser inne i konsesjonen på 14 dager, 3× og 10× beholdes).
-Svar 3 rettet i B-337: eieren kan alltid miste selskapet ved overtakelse, og fordelen i fornyelsesanbudet er tatt bort. Bygges i rekkefølgen i avsnitt 8. Tallene er regnet med `game/dividend.ts` (samme regel som
+Svar 3 rettet i B-337: eieren kan alltid miste selskapet ved overtakelse, og fordelen i fornyelsesanbudet er tatt bort. Bygges i rekkefølgen i avsnitt 8.
+
+**Endret etter at det ble bygget** (tallene og tabellene under er forslaget slik det ble godkjent):
+- Ordene i spillet er **oppkjøpsbud**, **motbud** og **beredskapsfondet** (politikken «Bygg beredskap»), ikke angrep og
+  forsvar (B-371). Kontrollen vises som Sterk, God, Middels og Svak, og eieren ser budet som trengs i kroner (B-370).
+- Verdien V er **10 dagers inntekt** (ikke 30), og minstebudet følger (B-375).
+- Eieren som blir kjøpt ut, får **inntekten for dagene hen mister + 85 % av det hen investerte**, høyst 85 % av budet –
+  ikke 85 % av hele budet. Resten forsvinner (B-375).
+- Kjøperen får **14 dager fra kjøpet** og 3 dagers vern (B-372). **Ingen pause** etter et avverget oppkjøpsbud (B-373).
+- Anbud fra før økonomien ble delt på 10, regnes i dagens penger i gulvet for verdien (B-374). Tallene er regnet med `game/dividend.ts` (samme regel som
 serveren), flyten fra verdenssimuleringen i B-329 og ekte tall fra serveren 29.9.2026. Simuleringen står nederst.
 
 To spor:

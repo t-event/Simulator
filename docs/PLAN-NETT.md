@@ -191,7 +191,8 @@ Spilleren ser: fanen «Anbud» under Salg og «Auksjon» under Marked, fra nivå
 
 - Felles chat for alle med konto (`070_skiftrapporten.sql`, `net/chat.ts`, `ui/Chat.tsx`). Grenser på serveren: lengde,
   tempo, like meldinger og lenker. 30 dager. Eieren skjuler meldinger med `hidden = true`.
-- Senere: hendelser fra spillet i rapporten (anbud avgjort, overtakelser), og en «rapporter»-knapp hvis det trengs.
+- Hendelser fra spillet (anbud avgjort, oppkjøp, nye verk) står i rapporten (B-339, 071). Senere: en «rapporter»-knapp
+  hvis det trengs.
 
 ### Eksport av tabellene – bygget (B-345)
 
@@ -284,7 +285,11 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
   Senere (041–063): slagghåndtering og verksted (042–043), første opplasting (044), tilbakespoling (045), kontrollromsrekord
   (046), merker (047–049, 056), utbetalt til eierne (050), utbytte i ekte tid (051), reform 2 (052–054), verden 10× ned
   (055), byggetid etter serverens klokke (057–060), konsernbidraget (061), innskuddet av (062) og konsernverdi på
-  topplista (063). Hver fil forklarer seg selv øverst.
+  topplista (063). Så (064–087): konsernet på serveren (064–065, 075), verdenskartet (066), Kontroll og
+  utbyttepolitikk (067, 082), overtakelser og oppkjøp (068–069, 083–085, 087), skiftrapporten (070–071, 074),
+  `world_tick` uten kø og hvert 5. minutt (072, 079), eksporten (073), tilgangsregler og indekser (076), bidrag og
+  utbytte som snitt av målinger (077–078), gjester holdt utenfor pengene (080), den ekte dagen i norsk tid (081) og gamle
+  anbud i dagens penger (086). Hver fil forklarer seg selv øverst.
 - Hva som krever konto, nå og i fase 4 og 5: `docs/KONTO.md` (B-149).
 - Flere enheter samtidig: bare enheten som spilles på, lagrer; den andre settes på pause med «Spill her» (B-143).
 - Merker ved sesongslutt (fase 3) er bygget som 🎖 med beste plassering ved kallenavnet (B-143).

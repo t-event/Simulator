@@ -82,8 +82,8 @@ enkelt i presentasjonen, lett å spille i korte økter og vanskelig å legge fra
 | Støperi | Skiftarbeid; du blir leder | Induksjonsovn 5 t, blokkstøping, spektrometer, planlegger |
 | Stålverk | Tungindustri | Lysbueovn, strengstøping, øseovn, valseverk, rammeavtaler, ta styringen |
 | Storverk | Hundrevis av ansatte | Store ovner, fire eller seks strenger, eksport, utfordringer |
-| Konsern | Du eier flere verk | Datterverk bygget i ekte tid (ett prosjekt om gangen), felles innkjøp og salg, salgsdirektør, konsernkassa med utbytte og bidrag fra hovedverket i ekte tid, milepæler mot 10 mrd. (planlagt: verksjefer med mandat) |
-| Industrien (B-180) | Du konkurrerer om kontrollen | Skraplageret er bygget (anbud, eierskap og inntekt i ekte tid); slagghåndtering og mekanisk verksted er klare, men slått av. Planlagt: Kontroll, overtakelser, Industrimakt – se `RETNING.md` |
+| Konsern | Du eier flere verk | Datterverk kjøpt fra konsernkassa (5/20/60 mill., B-373) og bygget i ekte tid (ett prosjekt om gangen), regioner på verdenskartet (B-333), felles innkjøp og salg, salgsdirektør, konsernkassa med utbytte og bidrag fra hovedverket i ekte tid, milepæler mot 10 mrd. (planlagt: verksjefer med mandat) |
+| Industrien (B-180) | Du konkurrerer om kontrollen | Skraplageret er bygget (anbud, eierskap og inntekt i ekte tid), med Kontroll, investeringer, utbyttepolitikk og beredskapsfond, oppkjøpsbud og motbud (B-334, B-335, B-370–B-375); slagghåndtering og mekanisk verksted er klare, men slått av. Planlagt: Industrimakt, verksjefer – se `RETNING.md` |
 
 Konsernet åpner seg på storverket når alt utstyret der er kjøpt, eller egenkapitalen når 1 mrd. (B-106).
 
@@ -155,7 +155,9 @@ engangstips (`tips.ts`) og rådgiveren når omdømmet faller flere ganger av sam
 Konto, lagring på nett, toppliste og sesonger er bygget, og det samme er daglig belønning, dagens oppdrag og «mens du
 var borte» (B-149). **Hovedretningen i `RETNING.md` (B-180)** bygges i faser: økonomireformen (B-186, reform 2 B-302),
 konsernkassa og det første strategiske selskapet (skraplageret, B-189) og konsernbidraget i ekte tid (B-318) er
-bygget. Neste er slagghåndtering og mekanisk verksted (klare, slått av), så Kontroll, overtakelser, verksjefer og æraer. Fase 4 og 5 i `PLAN-NETT.md` (ventetid, anbud og
+bygget, og det samme er konsernet på serveren (B-325–B-328), verdenskartet, Kontroll og oppkjøp (B-333–B-335,
+B-370–B-375) og skiftrapporten (B-338). Neste er slagghåndtering og mekanisk verksted (klare, slått av), så verksjefer og
+æraer. Fase 4 og 5 i `PLAN-NETT.md` (ventetid, anbud og
 auksjoner) står på vent og vurderes inn i den. Hva som krever konto, står i `KONTO.md`. Åpne spørsmål og mindre
 forslag står i `FORSLAG.md`.
 

@@ -56,8 +56,14 @@ noe å gå til. Stormodeller av ovner opp til en likestrømsovn på 420 tonn åp
 - **Sesonger** har ingen fast sluttdato: en sesong varer til den avsluttes, og en ny startes for hånd (B-221). Alle spill
   med konto er med i sesongen som pågår. Sesongene skal revurderes mot langsiktige æraer (B-180).
 - **Konsernet i verden:** konsernkassa ligger på serveren og fylles i ekte tid av bidraget fra hovedverket, utbyttet
-  fra datterverkene og selskapene du eier (B-304, B-318). Under Konsern → Industrien kan du by på selskaper rundt
-  verkene, som skraplageret (B-189).
+  fra datterverkene og selskapene du eier – betalt rett etter midnatt norsk tid (B-304, B-318, B-369). Datterverkene
+  kjøpes fra konsernkassa (5, 20 og 60 mill.) og bygges i ekte timer, ett prosjekt om gangen (B-326, B-373). Verkene
+  ligger i regioner på et verdenskart der du ser de andre spillerne (B-333).
+- **Industrien:** under Konsern → Industrien byr du på selskaper rundt verkene, som skraplageret (B-189). Eieren bygger
+  Kontroll (sterk, god, middels, svak) ved å spille, investere og ha verk i regionen. Andre kan legge inn et
+  oppkjøpsbud, og eieren har 72 timer til et motbud. Blir selskapet kjøpt, får eieren betalt for dagene hen mister og
+  det hen har investert (B-370–B-375).
+- **Skiftrapporten** er en felles chat for alle med konto, med hendelser fra verden (B-338, B-339).
 - **Felles hendelser** (skrapmangel, strømkrise, eksportboom …) treffer alle spillerne samtidig.
 - **Hver dag:** en daglig belønning som vokser gjennom uka (hopper du over en dag, starter den på nytt), tre av dagens
   oppdrag med en bonus, og verket tjener litt mens du er borte. Dette krever konto, fordi serveren teller dagene.
@@ -106,6 +112,9 @@ de beskriver ikke noe bestemt anlegg.
 - `docs/KONTO.md` – hva som krever konto, og reglene for nye funksjoner
 - `docs/UI.md` – designsystemet og oppsettet for mobil og PC (B-187)
 - `docs/OKONOMI.md` og `docs/KONSERNBIDRAG.md` – økonomianalysene bak reform 2 og konsernbidraget (B-301, B-313)
+- `docs/OKONOMI-KONTROLL.md` – kontrollen av økonomimodellen (B-324)
+- `docs/KONSERN-FORSLAG.md` – konsernet i ekte tid: nivåer, priser og aktivitetskrav (B-325–B-329)
+- `docs/KONTROLL-FORSLAG.md` – verdenskartet, utbyttepolitikken, Kontroll og oppkjøp (B-331, B-332)
 
 ## Arkitektur
 
@@ -119,6 +128,9 @@ frontend/
     actions.ts               Det spilleren kan gjøre
     research.ts              Forskning og fagpoeng
     konsern.ts               Datterverk og sluttmålet 10 mrd.
+    konsernWorld.ts          Konsernet på serveren speilet: priser, kø og nivåer
+    control.ts               Utbyttepolitikk, Kontroll og oppkjøp (tallene appen viser)
+    regions.ts               Regionene på verdenskartet
     world.ts                 Felles hendelser og sesongfordel
     decisions.ts             Hendelseskort med valg
     knowledge.ts, quiz.ts    Fagboka med quiz

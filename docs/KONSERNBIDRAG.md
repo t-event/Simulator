@@ -70,7 +70,7 @@ begge er serverkjente. Alt lokalt (kjøp, forskning, direktør) bruker kassa som
 
 ## 3. Forslaget: hovedverkets konsernbidrag i ekte tid
 
-Regel, én spiller, én ekte (UTC-)dag – regnet av serveren i `world_tick`, som utbyttet:
+Regel, én spiller, én ekte dag (norsk tid fra B-369) – regnet av serveren i `world_tick`, som utbyttet:
 
 ```
 bidrag = politikk × tonn_som_teller × min(margin, MARGIN_TAK) × aktivitet
