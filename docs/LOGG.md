@@ -5,6 +5,26 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 313 – 2026-09-30: Tre kontrollpunkter før K-1 (B-391)
+
+**Brukeren ba om:** ingen endring i retning eller rekkefølge, men tre kontroller før bygging/live: (1) vinterformuleringen
+for strømsjokk, med eksplisitte sannsynligheter; (2) skyggerapporten skal vise bidrag mot utbytte per spiller; (3)
+Konsernverdi med og uten program på 90/180/365 dager. Programkostnaden skal regnes før hendelsen og trekkes for seg. Ingen
+nye mekanikker.
+
+**Gjort:** simulatoren: `mix` med 50/25/25 og 40/20/40 i stedet for trekkformelen (samme tall som før), strategien «bare
+Teknologi høy», `--k1-kost` og `--k1-verdi`, og `k1CostCheck` med en test i `npm test`. Leste bidrag og utbytte for de
+ekte konsernene (bare lesing). K1-PROGRAMMER.md: vinteren, formelen for kostnaden, `program_shadow_day` i skyggeloggen,
+8.2 og 8.3 og to åpne spørsmål. B-391, STATUS, FORSLAG, CLAUDE.md.
+
+**Funn:** strømsjokk var 1,6 ganger så vanlig om vinteren, ikke dobbelt (teksten rettet). Samme vern koster 9–33 % av
+utbyttet hos de ekte spillerne. Et konsern med program ligger 1,5–6,4 % under i Konsernverdi og foran i 0–1 av 40 verdener.
+
+**Testet:** tsc, lint, prettier, `npm test` (ny test av kostnaden), simuleringene.
+
+**Gjenstår:** rapporten 2.10 → V0 i skygge og K-1 bak bryter → skyggerapporten med de to spørsmålene (grunnlaget for
+vernprogrammene, Konsernverdi og programmene) før noe slås på.
+
 ## Økt 312 – 2026-09-30: Eierens svar om K-1 (B-390)
 
 **Brukeren ba om:** ja til V0 (eget lag i Industriverdenen, nøytralt i forventning uten personlig kompensasjon, skygge
