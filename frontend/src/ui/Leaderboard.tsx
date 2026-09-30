@@ -296,6 +296,8 @@ function Leaderboard({
                   <span className="g-board-nick">{r.nickname}</span>
                   <em className="g-league">{levelLabel(r)}</em>
                 </span>
+                {/* Hvilken dag spilleren er på i sitt eget verk (B-378) – bare opplysning, teller ikke */}
+                {r.today !== null && <span className="g-board-day">Dag {fmtNum(r.today)} i eget verk</span>}
                 {/* Æresmerker fra serveren (B-299), f.eks. for dem som var med da økonomireformen kom */}
                 {r.badges.map((b) => (
                   <span key={b} className="g-board-honor">
@@ -329,8 +331,8 @@ function Leaderboard({
           viser hvor langt spilleren har kommet: fra Garasje til Storverk, Konsern når konsernverdien passerer 1 mrd.,
           og en tittel fra 10 mrd. (Stålbaron, Stålmagnat, Stålfyrste, Stålkonge, Stålkeiser, Stållegende ved 400 mrd.
           og videre til Stålikon ved 5 000 mrd. – omtrent hele stålindustrien i verden). Ved navnet står også den beste
-          plasseringen i en sesong som er over: en pokal for vinneren og en medalje for topp 10. Kontoer med urimelig
-          vekst holdes utenfor.
+          plasseringen i en sesong som er over: en pokal for vinneren og en medalje for topp 10. «Dag» er hvilken dag
+          spilleren er på i sitt eget verk; den teller ikke på lista. Kontoer med urimelig vekst holdes utenfor.
         </p>
       </details>
     </>

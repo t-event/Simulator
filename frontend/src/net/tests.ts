@@ -493,7 +493,9 @@ function makeFake(): Fake {
           const last = snaps[snaps.length - 1];
           // Æresmerker (B-299): ett kjent og ett ukjent for å vise at appen bare viser dem den kjenner
           const badges = nick === "Stålkongen" ? ["reform", "ukjent"] : null;
-          return last ? { nickname: nick, value: String(last.equity), day: last.day, is_me: u === id, badges } : null;
+          return last
+            ? { nickname: nick, value: String(last.equity), day: last.day, is_me: u === id, badges, today: last.day }
+            : null;
         })
         .filter((r): r is NonNullable<typeof r> => r !== null)
         .sort((a, b) => Number(b.value) - Number(a.value))
@@ -1202,6 +1204,7 @@ const main = async () => {
     assert(typeof rows[0].value === "number" && rows[0].value >= 500_000, "verdien er ikke et tall");
     assert((await fetchMyRank("verdi")) === 1, "min plass");
     assert(rows[0].badges.join() === "reform", `merkene på topplista (B-299): ${JSON.stringify(rows[0].badges)}`);
+    assert(rows[0].today === rows[0].day, `dagen i eget verk (B-378): ${rows[0].today}`);
   });
 
   await test("Sesong og hendelser hentes, og tidslinja får sesongen (B-129)", async () => {

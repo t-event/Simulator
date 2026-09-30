@@ -42,6 +42,8 @@ export interface BoardRow {
   linked_day: number | null;
   /** Æresmerker bare serveren vet om, f.eks. «reform» (B-296), vist ved navnet (B-299) */
   badges: string[];
+  /** Dagen spilleren er på i sitt eget verk nå (det lagrede spillet, B-378), eller null fra en eldre server */
+  today: number | null;
 }
 
 /** Navnet på æresmerkene på topplista (samme navn som prestasjonen, B-296) */
@@ -83,6 +85,7 @@ export async function fetchLeaderboard(kind: BoardKind, season: number | null = 
       title?: string | null;
       linked_day?: number | null;
       badges?: string[] | null;
+      today?: number | null;
     }[]
   >("leaderboard", { kind, lim, season });
   return rows.map((r) => ({
@@ -95,6 +98,7 @@ export async function fetchLeaderboard(kind: BoardKind, season: number | null = 
     linked_day: r.linked_day ?? null,
     // Eldre server uten merker: tom liste. Ukjente merker vises ikke
     badges: (r.badges ?? []).filter((b) => b in BADGE_NAMES),
+    today: r.today ?? null,
   }));
 }
 
