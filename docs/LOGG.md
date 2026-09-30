@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 305 – 2026-09-30: Forslag om verksjefer, og sjekk av gjestene (B-379)
+
+**Brukeren ba om:** «Fortsett med planene».
+
+**Gjort:** gjestene sjekket: 0 så langt, fordi den eneste appen som prøvde (16:40), fikk nei før det ble slått på og venter
+et døgn (`OFF_RETRY_MS`). Forslaget om verksjefer (RETNING fase 5) skrevet i `docs/VERKSJEF-FORSLAG.md` med fem spørsmål.
+Slagghåndteringen venter til skraplageret har betalt ut noen dager (sjekk planlagt).
+
+**Testet:** – (bare dokumenter).
+
+**Gjenstår:** eierens svar på forslaget; slå på slagghåndteringen når skraplageret har betalt riktig i noen dager.
+
 ## Økt 304 – 2026-09-30: Dagen i eget verk på topplista (B-378)
 
 **Brukeren ba om:** at spillerne kan se hvilken dag de andre er på i sitt eget verk, kanskje på topplista.

@@ -222,6 +222,7 @@ docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretn
                OKONOMI-KONTROLL.md (kontrollen av modellen med tall og svakheter, B-324),
                KONSERN-FORSLAG.md (nivåer, priser fra konsernkassa og aktivitetskrav, bygget B-325–B-328, og simuleringen B-329),
                KONTROLL-FORSLAG.md (verdenskart, utbyttepolitikk, Kontroll, overtakelser og pengene hjemme, B-331, godkjent B-332),
+               VERKSJEF-FORSLAG.md (verksjefer for datterverkene, RETNING fase 5, B-379 – venter på eieren),
                (designsystem, mobil + PC, plan for redesignet, B-187),
                PLAN-NETT.md (det som er bygget på nett), FORSLAG.md, KONTO.md (hva som krever konto)
 ```

@@ -38,6 +38,8 @@ til «Avgjort» nederst).
 
 ## Forslag – spillet
 
+- **Verksjefer for datterverkene (B-379, spørsmål til eieren):** se `docs/VERKSJEF-FORSLAG.md` – fem spørsmål i avsnitt 9.
+
 - ~~Trender i markedet~~ **Bygget (B-255).** («etterspørselen etter armering øker») som styrer hvilke kontrakter som dukker opp (se
   `DESIGN.md`).
 
