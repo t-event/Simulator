@@ -26,6 +26,7 @@
  *   npx tsx src/game/programSim.ts --k1-drift         # Driftsytelse: opp ved høykonjunktur, ned før sjokk (B-390)
  *   npx tsx src/game/programSim.ts --k1-kost          # bidrag mot utbytte: hvem betaler hvor mye for å beskytte hva (B-391)
  *   npx tsx src/game/programSim.ts --k1-verdi         # Konsernverdi med og uten program, 90/180/365 dager (B-391)
+ *   npx tsx src/game/programSim.ts --k1-verdi-skann   # … etter et år med lavere satser og sterkere vern (B-392)
  */
 import { MAX_BID, profiles, simulate } from "./worldSim";
 
@@ -383,6 +384,11 @@ export interface K1Model {
   /** Etableringen koster så mange dager vanlig inntekt */
   establishIncomeDays: number;
   bindDays: number;
+  /**
+   * Hva programkostnaden (og etableringen og Driftsytelses ekstra) regnes av: normalt datterverksutbytte (eieren, B-392 –
+   * programmene virker på datterverkene), eller bidrag + utbytte som før (bare for sammenligning)
+   */
+  costBase: "utbytte" | "inntekt";
 }
 
 export const K1: K1Model = {
@@ -404,6 +410,7 @@ export const K1: K1Model = {
   establishDays: 3,
   establishIncomeDays: 2,
   bindDays: 14,
+  costBase: "utbytte",
 };
 
 function mulberry(seed: number): () => number {
@@ -484,7 +491,8 @@ export type K1Strategy =
   | "drift-lav"
   | "drift-boom"
   | "drift-flukt"
-  | "tek-hoy";
+  | "tek-hoy"
+  | "tek-varsel";
 export const K1_STRATEGIES: Record<K1Strategy, string> = {
   ingen: "Uten programmer",
   fast: "Teknologi + Robusthet, middels hele tida",
@@ -495,6 +503,7 @@ export const K1_STRATEGIES: Record<K1Strategy, string> = {
   "drift-boom": "Driftsytelse lav, høy ved varsel om høykonjunktur",
   "drift-flukt": "Driftsytelse høy, ned til lav ved varsel om sjokk/uro",
   "tek-hoy": "Bare Teknologi, høy hele tida",
+  "tek-varsel": "Bare Teknologi, lav, høy ved varsel",
 };
 
 export interface K1Out {
@@ -512,6 +521,8 @@ export interface K1Out {
   spent: number;
   /** Utbytte som kunne vært tapt i hendelsene programmene dekker (strømsjokk og uro), før programmene */
   exposed: number;
+  /** … av det bare i strømsjokk (det Teknologi dekker) */
+  exposedStrom: number;
   /** Ekstra tap fordi Driftsytelse var på da en hendelse traff */
   driftHarm: number;
   /** Varsler om sjokk/uro der spilleren ville ned med Driftsytelse, men var bundet */
@@ -527,11 +538,14 @@ export function simulateK1(
   days = 730,
   checks: number[] = CHECK,
 ): K1Out {
-  const base = pl.contribution + pl.dividend;
+  const income0 = pl.contribution + pl.dividend;
+  // Grunnlaget for programkostnaden: normalt datterverksutbytte før hendelser og programmer (B-392)
+  const base = m.costBase === "utbytte" ? pl.dividend : income0;
   let cash = pl.cashAtFull;
   let spent = 0;
   let income = 0;
   let eventLoss = 0;
+  let lossStrom = 0;
   let saved = 0;
   let driftExtra = 0;
   let changes = 0;
@@ -595,6 +609,7 @@ export function simulateK1(
           ["teknologi", 1],
         ],
         "tek-hoy": [["teknologi", 3]],
+        "tek-varsel": [["teknologi", 1]],
       };
       for (const [p, l] of plan[strategy]) start(p, l, d);
     }
@@ -632,7 +647,7 @@ export function simulateK1(
       }
     }
     // Teknologi og Robusthet opp ved varsel (i Driftsytelse-testene står Teknologi fast på lav, så de ikke blandes)
-    if (strategy === "forsikring" || strategy === "drift" || strategy === "drift-hoy") {
+    if (strategy === "forsikring" || strategy === "drift" || strategy === "drift-hoy" || strategy === "tek-varsel") {
       for (const s of slots) {
         const g = guard(s.p);
         if (!g) continue;
@@ -667,6 +682,7 @@ export function simulateK1(
         driftHarm += pl.dividend * weights[r] * size * (1 - shield) * m.driftHarder * eff("drift", d);
         f0 = 1 - size;
         eventLoss += pl.dividend * weights[r] * size;
+        if (e.kind === "strom") lossStrom += pl.dividend * weights[r] * size;
       }
       div += pl.dividend * weights[r] * Math.max(0, f);
       divNoProg += pl.dividend * weights[r] * f0;
@@ -685,7 +701,7 @@ export function simulateK1(
     gotSum += got;
     gotDays++;
     spent += cost;
-    income += base;
+    income += income0;
     window.push(got);
     if (window.length > 14) window.shift();
     if (window.length === 14)
@@ -701,6 +717,7 @@ export function simulateK1(
     cash: cashAt,
     spent,
     exposed: eventLoss,
+    exposedStrom: lossStrom,
     share: spent / Math.max(1, income),
     eventLoss,
     saved,
@@ -732,26 +749,56 @@ export function k1CostCheck(m: K1Model = K1): { calm: number; storm: number } {
   return { calm, storm: stormy };
 }
 
+/**
+ * Programkostnaden regnes av datterverksutbyttet (B-392): to konsern med samme datterverk betaler det samme, uansett hvor
+ * stort bidraget fra hovedverket er. Brukes av `npm test`.
+ */
+export function k1BaseCheck(m: K1Model = K1): { small: number; large: number } {
+  const w = [1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6, 1 / 6];
+  const run = (contribution: number) =>
+    simulateK1(
+      { name: "test", fullDay: 1, contribution, dividend: 30e6, cashAtFull: 0 },
+      w,
+      "fast",
+      m,
+      { events: [], boom: 0 },
+      365,
+    ).spent;
+  return { small: run(2e6), large: run(40e6) };
+}
+
 function mill(n: number): string {
   return (n / 1e6).toLocaleString("nb-NO", { maximumFractionDigits: 1 });
 }
 
-/** Bidrag mot utbytte (B-391): hvem betaler hvor mye for å beskytte hvor mye utbytte. Grunnlaget endres ikke. */
+/**
+ * Bidrag mot utbytte (B-391, B-392): hva programmene koster mot utbyttet de verner. Med det nye grunnlaget (utbyttet) er
+ * prisen lik for samme datterverk, uansett hvor stort bidraget fra hovedverket er; det gamle grunnlaget vises til
+ * sammenligning. «Kostnad per spart krone» og «kostnad / hendelsestap» er tallene skyggerapporten skal vise.
+ */
 function k1CostReport(m: K1Model, ps: Player[], seeds: number[]): void {
-  console.log(
-    "Budsjettet regnes av bidrag + utbytte, men Teknologi og Robusthet beskytter bare utbyttet. To år, snitt av verdenene:\n",
-  );
+  console.log("Programkostnad mot utbyttet det verner. To år, snitt av verdenene:\n");
   for (const [ex, w] of [...EXPOSURES, ONE_REGION]) {
     console.log(`== ${ex}`);
     for (const pl of ps) {
-      const base = pl.contribution + pl.dividend;
-      for (const st of ["tek-hoy", "fast"] as K1Strategy[]) {
-        const rs = seeds.map((sd) => simulateK1(pl, w, st, m, k1Events(m, 730, sd)));
-        const avg = (f: (r: K1Out) => number) => rs.reduce((a, r) => a + f(r), 0) / rs.length;
-        const perDay = st === "tek-hoy" ? m.budget[2] * base : 2 * m.budget[1] * base;
-        console.log(
-          `${pl.name.padEnd(8)} ${(st === "tek-hoy" ? "Teknologi høy" : "Tek + Rob middels").padEnd(18)} bidrag ${mill(pl.contribution)} + utbytte ${mill(pl.dividend)} mill./dag · kostnad ${mill(perDay)} mill./dag = ${Math.round((perDay / pl.dividend) * 1000) / 10} % av utbyttet (${Math.round((perDay / base) * 100)} % av inntekten) · utsatt for ${mrd(avg((r) => r.exposed))} mrd. · spart ${mrd(avg((r) => r.saved))} mrd. · brukt ${mrd(avg((r) => r.spent))} mrd. · regnet av bare utbyttet: ${mill(perDay * (pl.dividend / base))} mill./dag`,
-        );
+      for (const costBase of ["utbytte", "inntekt"] as const) {
+        const mm = { ...m, costBase };
+        const base = costBase === "utbytte" ? pl.dividend : pl.contribution + pl.dividend;
+        for (const st of ["tek-hoy", "fast", "forsikring"] as K1Strategy[]) {
+          const rs = seeds.map((sd) => simulateK1(pl, w, st, mm, k1Events(mm, 730, sd)));
+          const avg = (f: (r: K1Out) => number) => rs.reduce((a, r) => a + f(r), 0) / rs.length;
+          const guarded = st === "tek-hoy" ? avg((r) => r.exposedStrom) : avg((r) => r.exposed);
+          const perDay = st === "tek-hoy" ? mm.budget[2] * base : st === "fast" ? 2 * mm.budget[1] * base : null;
+          console.log(
+            `${pl.name.padEnd(8)} ${costBase === "utbytte" ? "nytt (utbytte)  " : "gammelt (inntekt)"} ${K1_STRATEGIES[st].padEnd(46)} bidrag ${mill(pl.contribution)} / utbytte ${mill(pl.dividend)} mill./dag${perDay === null ? "" : ` · ${mill(perDay)} mill./dag = ${Math.round((perDay / pl.dividend) * 1000) / 10} % av utbyttet`} · hendelsestap det verner mot ${mrd(guarded)} mrd. · spart ${mrd(avg((r) => r.saved))} · brukt ${mrd(avg((r) => r.spent))} mrd. · kostnad / hendelsestap ${(avg((r) => r.spent) / Math.max(1, guarded)).toFixed(1)} · kostnad per spart krone ${(
+              avg((r) => r.spent) /
+              Math.max(
+                1,
+                avg((r) => r.saved),
+              )
+            ).toFixed(1)}`,
+          );
+        }
       }
     }
     console.log("");
@@ -762,8 +809,13 @@ function k1CostReport(m: K1Model, ps: Player[], seeds: number[]): void {
  * Konsernverdi med og uten program (B-391): samme konsern, samme hendelser. Konsernverdien er kassa + 60 × (normalt
  * utbytte + bidrag) − lån (`konsern_value`); hendelsene er ikke med i det normale utbyttet, så bare kassa skiller.
  */
-function k1ValueReport(m: K1Model, ps: Player[], seeds: number[]): void {
-  const after = [90, 180, 365];
+function k1ValueReport(
+  m: K1Model,
+  ps: Player[],
+  seeds: number[],
+  strategies: K1Strategy[] = ["fast", "forsikring", "tek-hoy"],
+  after = [90, 180, 365],
+): void {
   console.log(`Konsernverdi etter ${after.join("/")} dager fra konsernet er fullt, ${seeds.length} verdener:\n`);
   for (const [ex, w] of [...EXPOSURES, ONE_REGION]) {
     console.log(`== ${ex}`);
@@ -771,14 +823,16 @@ function k1ValueReport(m: K1Model, ps: Player[], seeds: number[]): void {
       const checks = after.map((a) => pl.fullDay + a);
       const value = (r: K1Out, d: number) => r.cash[d] + 60 * (pl.contribution + pl.dividend);
       const a = seeds.map((sd) => simulateK1(pl, w, "ingen", m, k1Events(m, 730, sd), 730, checks));
-      for (const st of ["fast", "forsikring", "tek-hoy"] as K1Strategy[]) {
+      for (const st of strategies) {
         const b = seeds.map((sd) => simulateK1(pl, w, st, m, k1Events(m, 730, sd), 730, checks));
         const cells = checks.map((d, i) => {
           const va = a.map((r) => value(r, d));
           const vb = b.map((r) => value(r, d));
           const mean = (x: number[]) => x.reduce((p, q) => p + q, 0) / x.length;
           const ahead = vb.filter((v, k) => v > va[k]).length;
-          return `${after[i]} d: A ${mrd(mean(va))} / B ${mrd(mean(vb))} mrd. (${Math.round((mean(vb) / mean(va) - 1) * 1000) / 10} %, B foran i ${ahead}/${seeds.length}, dårligste verden A ${mrd(Math.min(...va))} / B ${mrd(Math.min(...vb))})`;
+          // 10 % dårligste verden (4. dårligste av 40)
+          const p10 = (x: number[]) => [...x].sort((p, q) => p - q)[Math.floor(x.length / 10)];
+          return `${after[i]} d: ${Math.round((mean(vb) / mean(va) - 1) * 1000) / 10} %, B foran i ${ahead}/${seeds.length}, dårligste A ${mrd(Math.min(...va))} / B ${mrd(Math.min(...vb))}, 10 % dårligste A ${mrd(p10(va))} / B ${mrd(p10(vb))}`;
         });
         console.log(`${pl.name.padEnd(8)} ${K1_STRATEGIES[st].padEnd(46)} ${cells.join(" · ")}`);
       }
@@ -840,6 +894,20 @@ function main(): void {
   }
   if (args.includes("--k1-kost")) {
     k1CostReport(K1, ps, seeds);
+    return;
+  }
+  if (args.includes("--k1-verdi-skann")) {
+    const worlds = Array.from({ length: 40 }, (_, i) => i + 1);
+    const variants: [string, K1Model][] = [
+      ["1/3/8 %, effekt som i dag", K1],
+      ["0,5/1,5/4 %, effekt som i dag", { ...K1, budget: [0.005, 0.015, 0.04] }],
+      ["1/3/8 %, sterkere vern (tar bort hele tapet på Høy, Lav 40 %)", { ...K1, protect: 1, effect: [0.4, 0.7, 1] }],
+      ["0,5/1,5/4 %, sterkere vern", { ...K1, budget: [0.005, 0.015, 0.04], protect: 1, effect: [0.4, 0.7, 1] }],
+    ];
+    for (const [label, mm] of variants) {
+      console.log(`### ${label}`);
+      k1ValueReport(mm, ps.slice(1, 2), worlds, ["fast", "forsikring", "tek-hoy", "tek-varsel"], [365]);
+    }
     return;
   }
   if (args.includes("--k1-verdi")) {
