@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 308 – 2026-09-30: Forslag – Ukens kontrollrom og konsernkapital (B-386)
+
+**Brukeren ba om:** ingen flere økonomiske justeringer. Ukens kontrollrom som ny ukekonkurranse (samme charge for alle,
+tre tellende forsøk, serververifisert) – bygg bare hvis det er lite og trygt, ellers kom tilbake med enkleste robuste
+variant. Designforslag for konsernkapitalen etter fullt konsern (programmer, selskaper, oppkjøp, verksjefer,
+eierutbytte), ikke implementering. Sjekken 2.10 går som avtalt.
+
+**Gjort:** kontrollrommet og dagens rekord undersøkt: `ChargeGame` kan få et frø uten regelendring, men serveren sjekker
+i dag bare at rekorden er rimelig. Tre forsøk er lite; ekte verifisering (avspilling på serveren) er ny arkitektur – derfor
+forslag med variant A og B i `docs/UKENS-KONTROLLROM.md`, ikke bygget. `docs/KONSERNKAPITAL-FORSLAG.md` med regnestykket
+for to rike spillere (maksbud 190 mot beste forsvar 169, ca. 1 mrd. ut av verden per bytte), konsernprogrammer i
+prosjektlinja, selskaper etter aktive konsern og regioner, og kritikk av eierutbytte. B-386, FORSLAG, STATUS, CLAUDE.md.
+
+**Testet:** – (bare dokumenter). Tallene fra `worldSim.ts`, `control.ts` og `config.world` (V = 171 mill.).
+
+**Gjenstår:** eierens svar i begge forslagene. Sjekken 2.10 (rapport).
+
 ## Økt 307 – 2026-09-30: Kassa uten tak, sesongen på Konsernverdi, opptjent nivå, innskuddet stengt, 730 dager (B-381–B-385)
 
 **Brukeren ba om:** «Jeg har bestemt meg»: fjern kassetaket og frys Privat formue; sesongens hovedkonkurranse på

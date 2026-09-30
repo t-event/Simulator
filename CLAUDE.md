@@ -228,6 +228,7 @@ docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretn
                KONTROLL-FORSLAG.md (verdenskart, utbyttepolitikk, Kontroll, overtakelser og pengene hjemme, B-331, godkjent B-332),
                VERKSJEF-FORSLAG.md (verksjefer for datterverkene, RETNING fase 5, B-379 – venter på eieren),
                STATUS.md (fasit for hvordan spillet virker nå, B-385),
+               UKENS-KONTROLLROM.md og KONSERNKAPITAL-FORSLAG.md (forslag, B-386 – venter på eieren),
                STABILISERING.md (cash-audit, legacy-gulvet og verdenssimuleringen, B-380; besluttet B-381–B-385, dry-run i avsnitt 9),
                (designsystem, mobil + PC, plan for redesignet, B-187),
                PLAN-NETT.md (det som er bygget på nett), FORSLAG.md, KONTO.md (hva som krever konto)
