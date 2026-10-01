@@ -7737,7 +7737,7 @@ button.g-prod-row:hover {
   .g-finance-side {
     flex: 1 1 280px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: var(--sp-3);
   }
 
@@ -7816,4 +7816,18 @@ button.g-prod-row:hover {
   button.g-primary:hover:not(:disabled) {
     transform: none;
   }
+}
+
+/* Designgjennomgangen del 4 (B-407): Salg-innstillingene på én rad, og Konsern-kortet med én linje under tallene */
+.g-sales-settings > summary .g-sales-paused {
+  color: var(--heat-fg);
+  font-weight: 600;
+}
+
+.g-sales-settings[open] > summary {
+  margin-bottom: var(--sp-2);
+}
+
+.g-konsern-meta {
+  margin-top: var(--sp-2);
 }

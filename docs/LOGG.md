@@ -5,6 +5,17 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 330 – 2026-10-01: Designgjennomgangen, del 4: mindre tekst på Salg og Konsern (B-407)
+
+**Gjort:** Salg → Forespørsler: ta imot, kvaliteter og rekkefølge bak én rad «Innstillinger» med oppsummering
+(direktøren, trenden og metningen står synlig). Konsern → Oversikt: konsernverdi + tre tall (kassa, utbytte, datterverk)
+og én dempet linje med flaggskip, verdi i spillet og privat formue; kortere avsnitt. FORSLAG.md: resten av
+gjennomgangen som polering.
+
+**Testet:** typesjekk, lint, `npm test`, build; Playwright på de 7 størrelsene.
+
+**Gjenstår:** poleringen i FORSLAG.md; morgenkjøringen 2.10.
+
 ## Økt 329 – 2026-10-01: Designgjennomgangen, del 2 og 3: rådsraden i statusfarge (B-406)
 
 **Gjort:** `Hint.tone` (`critical`/`heat`) i `ui/hints.ts`, de alvorligste rådene først; rådsraden på Verket i

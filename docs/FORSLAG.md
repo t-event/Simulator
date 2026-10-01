@@ -73,6 +73,14 @@ til «Avgjort» nederst).
 
 ## Forslag – spillet
 
+- **Resten av designgjennomgangen 1.10 (B-405–B-407, polering):** de fire PR-ene er bygget. Igjen fra gjennomgangen:
+  trinn som tekst på mobil i «Dine verk», plass på topplista ved konsernverdien, «Slik fungerer konsernet» som kapittel i
+  Fagboka; Folk (filter-chips på søkere, én «Mer»-knapp per ansatt), Forskning (gruppert etter hva det gir), Fagboka
+  («Nytt for deg» øverst), Mål (én «Hent»-knapp), Marked (renhet som stolpe på mobil, egen fane for planleggeren),
+  Økonomi (tre største poster som stolper), ark på PC med én bredde, Skiftrapporten (hendelser som dempede linjer),
+  kontrollrommets resultatskjerm på ds-komponenter, startskjermen med Fortsett som eneste primærknapp, flyttedagen kortere.
+  Ikke tatt: konsernkassa ut av toppfeltet på mobil (B-340), store bokstaver på alle underoverskrifter.
+
 - **Stabilisering (B-380, spørsmål til eieren):** se `docs/STABILISERING.md` – kassetaket, legacy-gulvet, sesonglistene og
   innskuddet (fire spørsmål nederst). Verksjefene venter til dette er avklart.
 

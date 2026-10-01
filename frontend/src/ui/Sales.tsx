@@ -285,6 +285,14 @@ const LOTS_SHOWN = 6;
 type SalesTab = "tilbud" | "ko" | "lager" | "avtaler";
 
 /** Forespørslene (B-241): innstillingene samlet øverst i én linje hver, så kortene */
+/** Rekkefølgen på forespørslene, som ord (valget og oppsummeringen under «Innstillinger») */
+const SORT_LABEL: Record<Settings["offerSort"], string> = {
+  frist: "kortest svarfrist først",
+  verdi: "mest verdt først",
+  pris: "best pris per tonn først",
+  kvalitet: "etter kvalitet",
+};
+
 function OffersTab({ g, stats, act }: Props) {
   const sort = g.settings.offerSort;
   const offers = g.contracts
@@ -315,18 +323,9 @@ function OffersTab({ g, stats, act }: Props) {
         ) : undefined
       }
     >
+      {/* Én rad innstillinger i stedet for fem over første forespørsel (B-407): det som gjelder nå (direktøren, trend,
+          metning) står synlig; ta imot, kvaliteter og rekkefølge bak «Innstillinger» */}
       <div className="g-sales-controls">
-        <label className="g-toggle">
-          <input
-            type="checkbox"
-            checked={!g.settings.pauseOffers}
-            onChange={(e) => act((gg) => void (gg.settings.pauseOffers = !e.target.checked))}
-          />
-          <span>
-            Ta imot nye forespørsler
-            <small className="g-muted g-toggle-hint">Nye kommer i løpet av døgnet og står noen timer</small>
-          </span>
-        </label>
         <DirectorSwitch g={g} act={act} compact />
         <TrendNote g={g} />
         {/* Markedet metter seg (B-252): vises bare når verket lager mer enn kundene tar unna til full pris */}
@@ -337,52 +336,68 @@ function OffersTab({ g, stats, act }: Props) {
             {Math.round((1 - marketSaturation(stats.dailyProductT)) * 100)} % billigere.
           </p>
         )}
-        {!g.settings.pauseOffers && (openGrades.length > 1 || offers.length > 1) && (
-          <details className="g-details">
-            <summary>
-              Kvaliteter og rekkefølge
-              <span className="g-muted">
-                {" "}
-                · {wanted.length ? `${wanted.length} av ${openGrades.length} kvaliteter` : "alle kvaliteter"}
-              </span>
-            </summary>
-            {openGrades.length > 1 && (
-              <div className="g-offer-filter">
-                <span className="g-muted">Kvaliteter du vil ha forespørsler på:</span>
-                <div className="g-chip-row">
-                  {openGrades.map((id) => {
-                    const on = !wanted.length || wanted.includes(id);
-                    return (
-                      <button
-                        key={id}
-                        className={`g-chip-btn${on ? " is-on" : ""}`}
-                        aria-pressed={on}
-                        onClick={() => act((gg) => toggleOfferGrade(gg, id, openGrades))}
-                      >
-                        {on && <Icon name="check" />}
-                        {GRADES[id].name}
-                      </button>
-                    );
-                  })}
-                </div>
+        <details className="g-details g-sales-settings">
+          <summary>
+            Innstillinger
+            <span className={g.settings.pauseOffers ? "g-sales-paused" : "g-muted"}>
+              {" "}
+              ·{" "}
+              {g.settings.pauseOffers
+                ? "tar ikke imot nye"
+                : wanted.length
+                  ? `${wanted.length} av ${openGrades.length} kvaliteter`
+                  : "alle kvaliteter"}
+              {offers.length > 1 && ` · ${SORT_LABEL[sort]}`}
+            </span>
+          </summary>
+          <label className="g-toggle">
+            <input
+              type="checkbox"
+              checked={!g.settings.pauseOffers}
+              onChange={(e) => act((gg) => void (gg.settings.pauseOffers = !e.target.checked))}
+            />
+            <span>
+              Ta imot nye forespørsler
+              <small className="g-muted g-toggle-hint">Nye kommer i løpet av døgnet og står noen timer</small>
+            </span>
+          </label>
+          {!g.settings.pauseOffers && openGrades.length > 1 && (
+            <div className="g-offer-filter">
+              <span className="g-muted">Kvaliteter du vil ha forespørsler på:</span>
+              <div className="g-chip-row">
+                {openGrades.map((id) => {
+                  const on = !wanted.length || wanted.includes(id);
+                  return (
+                    <button
+                      key={id}
+                      className={`g-chip-btn${on ? " is-on" : ""}`}
+                      aria-pressed={on}
+                      onClick={() => act((gg) => toggleOfferGrade(gg, id, openGrades))}
+                    >
+                      {on && <Icon name="check" />}
+                      {GRADES[id].name}
+                    </button>
+                  );
+                })}
               </div>
-            )}
-            {offers.length > 1 && (
-              <label className="g-field">
-                <span>Sorter forespørslene</span>
-                <select
-                  value={sort}
-                  onChange={(e) => act((gg) => void (gg.settings.offerSort = e.target.value as Settings["offerSort"]))}
-                >
-                  <option value="frist">Kortest svarfrist først</option>
-                  <option value="verdi">Mest verdt først</option>
-                  <option value="pris">Best pris per tonn først</option>
-                  <option value="kvalitet">Etter kvalitet</option>
-                </select>
-              </label>
-            )}
-          </details>
-        )}
+            </div>
+          )}
+          {offers.length > 1 && (
+            <label className="g-field">
+              <span>Sorter forespørslene</span>
+              <select
+                value={sort}
+                onChange={(e) => act((gg) => void (gg.settings.offerSort = e.target.value as Settings["offerSort"]))}
+              >
+                {(Object.keys(SORT_LABEL) as Settings["offerSort"][]).map((k) => (
+                  <option key={k} value={k}>
+                    {SORT_LABEL[k][0].toUpperCase() + SORT_LABEL[k].slice(1)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+        </details>
       </div>
       <DirectorOffer g={g} act={act} />
       {offers.length === 0 && (

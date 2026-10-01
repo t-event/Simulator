@@ -959,33 +959,57 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
             ) : (
               <Metric label="Verdi i spillet" value={fmtKr(Math.floor(equity))} />
             )}
+            {/* Tre tall ved siden av (B-407): det som kan brukes, det som kommer inn, og plassene. Resten står som én
+                linje under, så konsernverdien er det man ser først */}
             <div className="g-finance-side">
+              {k.treasury && (
+                <span title="Pengene du kan kjøpe og bygge for – fylles av utbyttet og hovedverkets bidrag">
+                  Konsernkassa <strong>{fmtKr(Math.floor(k.treasury.balance))}</strong>
+                </span>
+              )}
               <span title="Betales av serveren rett etter midnatt (norsk tid) til konsernkassa – spillfarten betyr ingenting">
                 Utbytte til konsernkassa <strong>{fmtKr(dividend)} per ekte dag</strong>
               </span>
-              {k.plants.length > 0 && (
-                <span title="Utbyttet øker når hjemmeverket har godt omdømme og lager stål som holder kvaliteten">
-                  Flaggskipet <strong>+{Math.round(flagshipBonus(g) * 100)} %</strong> utbytte
-                </span>
-              )}
-              {world && (
-                <span title="Kassa minus lån, pluss det verkene er verdt – sluttmålet på 10 mrd. og lista «Verdi i spillet»">
-                  Verdi i spillet <strong>{fmtKr(Math.floor(equity))}</strong>
-                </span>
-              )}
               <span>
                 Datterverk{" "}
                 <strong>
                   {k.plants.length} av {maxSisters(g)}
                 </strong>
               </span>
-              {hasPaidOut(g) && (
-                <span title="Fryst historikk fra da kassa hadde et tak (B-381). Teller med i sluttmålet og for de største ovnene, ikke i konsernverdien på topplista">
-                  Privat formue <strong>{fmtKr(Math.floor(paidOutTotal(g)))}</strong>
-                </span>
-              )}
             </div>
           </div>
+          {(k.plants.length > 0 || world || hasPaidOut(g)) && (
+            <p className="g-muted g-small-text g-konsern-meta">
+              {[
+                k.plants.length > 0 && (
+                  <span
+                    key="f"
+                    title="Utbyttet øker når hjemmeverket har godt omdømme og lager stål som holder kvaliteten"
+                  >
+                    Flaggskipet +{Math.round(flagshipBonus(g) * 100)} % utbytte
+                  </span>
+                ),
+                world && (
+                  <span
+                    key="v"
+                    title="Kassa minus lån, pluss det verkene er verdt – sluttmålet på 10 mrd. og lista «Verdi i spillet»"
+                  >
+                    Verdi i spillet {fmtKr(Math.floor(equity))}
+                  </span>
+                ),
+                hasPaidOut(g) && (
+                  <span
+                    key="p"
+                    title="Fryst historikk fra da kassa hadde et tak (B-381). Teller med i sluttmålet og for de største ovnene, ikke i konsernverdien på topplista"
+                  >
+                    Privat formue {fmtKr(Math.floor(paidOutTotal(g)))}
+                  </span>
+                ),
+              ]
+                .filter(Boolean)
+                .flatMap((el, i) => (i ? [" · ", el] : [el]))}
+            </p>
+          )}
           {building.length > 0 && drift === 0 && (
             <p className="g-muted g-small-text">
               {building.length === 1 ? `${building[0].name} bygges` : `${building.length} verk bygges`} – ferdig om{" "}
@@ -995,9 +1019,8 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
           )}
           {drift > 0 && (
             <p className="g-muted g-small-text">
-              Verkene tjener {fmtKr(drift)} per døgn. Det som kan løftes opp som utbytte, betales hver ekte dag rett til
-              konsernkassa – der konkurransen med de andre spillerne foregår – uansett hvor fort du spiller. Jo flere
-              verk, jo mindre gir hvert nytt verk: et stort konsern er tungt å styre.
+              Verkene tjener {fmtKr(drift)} per døgn. Utbyttet betales hver ekte dag til konsernkassa, uansett hvor fort
+              du spiller.
             </p>
           )}
           {!g.won && (
