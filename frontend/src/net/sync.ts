@@ -252,6 +252,13 @@ export async function uploadSave(g: GameState, keepalive = false, chosen = false
     produced_t: Math.round(g.totals.producedT),
     // Til det mekaniske verkstedet (B-256): vedlikehold og havarier i alt
     maint_kr: Math.round(g.totals.maintKr ?? 0),
+    // Rådata til «Mest stål per kWh» og «Leveringspresisjon» (B-396): tellere i alt, aldri et ferdig forhold –
+    // serveren regner forholdet og sjekker at tallene henger sammen
+    kwh_total: Math.round(g.totals.kwh ?? 0),
+    deliveries: g.totals.contractsDone,
+    missed: g.totals.contractsMissed ?? 0,
+    cancelled: g.totals.contractsCancelled ?? 0,
+    complaints: g.totals.complaints,
     // Til fartskontrollen (B-176): spillminutter i alt og minutter spolt fram om natta
     game_min: Math.floor(g.minute),
     boost_min: Math.floor(g.boostMin ?? 0),

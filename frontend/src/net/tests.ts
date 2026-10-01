@@ -160,6 +160,11 @@ interface Fake {
       season_id?: number | null;
       produced_t?: number;
       maint_kr?: number;
+      kwh_total?: number;
+      deliveries?: number;
+      missed?: number;
+      cancelled?: number;
+      complaints?: number;
     }[]
   >;
   nicknames: Map<string, string>;
@@ -487,6 +492,11 @@ function makeFake(): Fake {
         season_id: body.season_id as number | null,
         produced_t: body.produced_t as number | undefined,
         maint_kr: body.maint_kr as number | undefined,
+        kwh_total: body.kwh_total as number | undefined,
+        deliveries: body.deliveries as number | undefined,
+        missed: body.missed as number | undefined,
+        cancelled: body.cancelled as number | undefined,
+        complaints: body.complaints as number | undefined,
       });
       f.snapshots.set(id, list);
       return new Response(null, { status: 201 });
@@ -1817,6 +1827,23 @@ const main = async () => {
     await linkOnLogin(g);
     const s = f.snapshots.get("u-a@test")?.[0];
     assert(s?.maint_kr === 12_345, `vedlikehold i tidslinja ${JSON.stringify(s)}`);
+  });
+
+  await test("Tidslinjetall (B-396): spillet sender tellere i alt til tidslinja, aldri et ferdig forhold", async () => {
+    const f = fresh();
+    await login(f);
+    const g = newGame(396);
+    g.totals.kwh = 1234.6;
+    g.totals.contractsDone = 7;
+    g.totals.contractsMissed = 2;
+    g.totals.contractsCancelled = 1;
+    g.totals.complaints = 3;
+    await linkOnLogin(g);
+    const s = f.snapshots.get("u-a@test")?.[0];
+    assert(
+      s?.kwh_total === 1235 && s.deliveries === 7 && s.missed === 2 && s.cancelled === 1 && s.complaints === 3,
+      `tellere i tidslinja ${JSON.stringify(s)}`,
+    );
   });
 
   await test("Serverens klokke styrer byggetida (B-314): Date-headeren gir realNow, telefonens klokke teller ikke", () => {

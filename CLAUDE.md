@@ -463,6 +463,14 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   eget verk) og lagrer `konsern_value`/`rank_by`; `season_history` gir dem. Topplista i appen har gruppene «Industriverden»
   og «Eget verk» (`BOARDS[].group`); nye lister fra spillet på mobilen hører til Eget verk. `week_kind` har ikke `vekst`
   fra uka 5.10.2026 – endres ukene, må ukene før gi samme type som før (resultatene regnes av samme funksjon).
+- **Serverautoritet** (B-395, 095): `saves_type_guard` avviser lagringer med feil type i feltene serveren leser for alle
+  (`state_type_problems`) – et nytt felt som leses av serverfunksjoner for alle spillere, må inn der. Felles funksjoner og
+  konsernforskning leses bare gjennom `world_shared`/`world_research` (unike, kjente id-er, forutsetninger) – aldri med
+  `count(*)` rett på lista. `world_input_log` er skygge (hevdet / mulig / brukt) og skal ikke håndheves uten eierens
+  beslutning; `world_claims` har grunnlaget fra 30.9. Fagpoeng og andre tall fra lagringen er ikke bevis for noe.
+- **Tidslinjetall** (B-396, 096): `kwh_total`, `deliveries`, `missed`, `cancelled`, `complaints` er tellere i alt; serveren
+  regner forholdet (`timeline_metrics`). `snapshot_metrics_guard` nuller urimelige tall og avviser aldri. I en
+  BEFORE-trigger på `snapshots` er den genererte `season_key` tom – bruk `coalesce(new.season_id, 0)`.
 - **Utslipp** (B-263): røyken regnes i hvert tidssteg (`updateEmissions`) mot renseanlegget; boten kommer i `onDay`.
   Nye, større ovner må ha et renseanlegg som holder (`CLEANERS` i `environment.ts`), ellers får testspilleren bot.
   Gamle lagringer får anleggene de trenger i første tidssteg (`env.grant`) – ikke flytt det til `onHour`.

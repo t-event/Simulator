@@ -279,7 +279,17 @@ export function newGame(seed = Date.now()): GameState {
     nextLogId: 1,
     today: newDay(1, START_CASH),
     history: [],
-    totals: { producedT: 0, heats: 0, manualHeats: 0, contractsDone: 0, complaints: 0, maintKr: 0 },
+    totals: {
+      producedT: 0,
+      heats: 0,
+      manualHeats: 0,
+      contractsDone: 0,
+      complaints: 0,
+      maintKr: 0,
+      kwh: 0,
+      contractsMissed: 0,
+      contractsCancelled: 0,
+    },
     negativeDays: 0,
     gameOver: false,
     won: false,
@@ -407,6 +417,7 @@ function repLoss(g: GameState, amount: number, cause: RepCause): void {
 /** Strøm brukt, for snittprisen per døgn */
 function chargeEnergy(g: GameState, kwh: number): void {
   addCost(g, "energi", kwh * energyPrice(g));
+  g.totals.kwh = (g.totals.kwh ?? 0) + kwh;
   if (furnaceType(g).fuel === "strøm") {
     g.today.kwh = (g.today.kwh ?? 0) + kwh;
     // Hva den samme strømmen ville kostet med de andre avtalene, så spilleren kan sammenligne (B-105)
@@ -2760,6 +2771,7 @@ export function cancelContract(g: GameState, id: number): PurchaseResult {
   repLoss(g, rep, "sen");
   c.status = "misligholdt";
   c.closedDay = day(g);
+  g.totals.contractsCancelled = (g.totals.contractsCancelled ?? 0) + 1;
   log(
     g,
     `Du avbrøt kontrakten med ${c.customer} (${fmtT(c.tonnes - c.delivered)} ulevert). Bot ${fmtKr(bot)}, omdømme −${rep.toFixed(1).replace(".", ",")}.`,
@@ -3468,6 +3480,7 @@ function onDay(g: GameState, stats: PlantStats): void {
       repLoss(g, c.repLoss, "sen");
       c.status = "misligholdt";
       c.closedDay = today;
+      g.totals.contractsMissed = (g.totals.contractsMissed ?? 0) + 1;
       log(
         g,
         `Fristen til ${c.customer} gikk ut med ${fmtT(remaining)} ulevert. Bot ${fmtKr(penalty)}, omdømme −${c.repLoss.toFixed(1).replace(".", ",")}.`,

@@ -121,6 +121,7 @@ import {
 } from "./plant";
 import {
   acceptContract,
+  cancelContract,
   orderQueue,
   autoBuy,
   ensureCandidates,
@@ -4052,6 +4053,46 @@ test("Trinnet til et datterverk: bestilte moderniseringer og tittelen som åpner
 test("K-1: programmene prises av datterverksutbyttet, ikke av bidraget fra hovedverket (B-392)", () => {
   const r = k1BaseCheck();
   assert(r.small > 0 && r.small === r.large, `lite bidrag ${r.small}, stort bidrag ${r.large}`);
+});
+
+test("Tidslinjetall (B-396): strøm, misligholdte og avbrutte kontrakter telles i alt, og gamle lagringer starter på 0", () => {
+  const g = newGame(396);
+  advance(g, 1440);
+  assert(g.totals.heats > 0 && g.totals.kwh > 0, `strøm i alt ${g.totals.kwh} etter ${g.totals.heats} charger`);
+  const base = {
+    customer: "Test",
+    product: "blokk",
+    grade: "standard",
+    tonnes: 10,
+    delivered: 0,
+    pricePerT: 1,
+    offerExpiresMin: 0,
+    repGain: 1,
+    repLoss: 0,
+    penaltyPerT: 0,
+    priority: 1,
+    status: "aktiv",
+    closedDay: null,
+    acceptedDay: day(g),
+  } as const;
+  g.contracts.push({ ...base, id: 9001, deadlineDay: day(g) - 1 } as Contract);
+  g.contracts.push({ ...base, id: 9002, deadlineDay: day(g) + 30 } as Contract);
+  // Hendelseskort og manuelle charger stopper tida: rydd dem til døgnet har gått
+  const start = day(g);
+  for (let i = 0; i < 50 && day(g) <= start; i++) {
+    g.pendingDecision = null;
+    g.pendingManual = null;
+    advance(g, 120);
+  }
+  assert(g.totals.contractsMissed === 1, `misligholdt ${g.totals.contractsMissed}`);
+  assert(cancelContract(g, 9002).ok && g.totals.contractsCancelled === 1, `avbrutt ${g.totals.contractsCancelled}`);
+  assert(g.totals.contractsDone === 0, "ingen leveranse");
+  const old = JSON.parse(JSON.stringify(g));
+  delete old.totals.kwh;
+  delete old.totals.contractsMissed;
+  delete old.totals.contractsCancelled;
+  const t = parseSave(JSON.stringify(old))?.totals;
+  assert(t?.kwh === 0 && t.contractsMissed === 0 && t.contractsCancelled === 0, `gammel lagring ${JSON.stringify(t)}`);
 });
 
 if (failed) {

@@ -584,6 +584,12 @@ export interface GameState {
     complaints: number;
     /** Kroner brukt på vedlikehold og havarier i alt – til det mekaniske verkstedet på serveren (B-256) */
     maintKr: number;
+    /** Strøm brukt i alt (kWh) – til «Mest stål per kWh» på serveren (B-396). Serveren regner forholdet selv */
+    kwh: number;
+    /** Kontrakter der fristen gikk ut før alt var levert (B-396) – leverte kontrakter er alltid i tide */
+    contractsMissed: number;
+    /** Kontrakter spilleren avbrøt (B-396) */
+    contractsCancelled: number;
   };
   negativeDays: number;
   gameOver: boolean;
