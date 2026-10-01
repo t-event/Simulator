@@ -6702,7 +6702,8 @@ button.g-prod-row:hover {
   min-height: 44px;
 }
 
-/* Verdenskartet (B-333): kart og regionliste; to kolonner på PC */
+/* Verdenskartet (B-333, ny tegning B-405): sjøkart med kystlinjer, tetthet som fyll, merker i rutenett og et sidepanel.
+   Bare tokens; SVG-fargene settes her, ikke i TSX. To kolonner på PC */
 .g-worldmap {
   display: grid;
   gap: var(--sp-4);
@@ -6710,9 +6711,17 @@ button.g-prod-row:hover {
 
 @media (min-width: 900px) {
   .g-worldmap {
-    grid-template-columns: minmax(0, 760px) minmax(280px, 1fr);
+    grid-template-columns: minmax(0, 860px) minmax(300px, 1fr);
     align-items: start;
   }
+}
+
+.g-worldmap-map {
+  position: relative;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--surface-chrome);
 }
 
 .g-worldmap-map svg {
@@ -6721,141 +6730,494 @@ button.g-prod-row:hover {
   height: auto;
 }
 
-.g-map-sea {
-  fill: var(--info-bg);
-  stroke: var(--line);
+/* Havet */
+.g-map-sea-in {
+  stop-color: var(--info-bg);
+}
+.g-map-sea-out {
+  stop-color: var(--bg);
+}
+.g-map-gridline {
+  fill: none;
+  stroke: var(--info);
+  stroke-opacity: 0.07;
+  stroke-width: 0.6;
+}
+.g-map-routes path {
+  fill: none;
+  stroke: var(--info);
+  stroke-opacity: 0.22;
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+.g-map-compass {
+  opacity: 0.7;
+  pointer-events: none;
+}
+.g-map-compass circle {
+  fill: none;
+  stroke: var(--text-3);
+  stroke-width: 0.8;
+}
+.g-map-compass-needle {
+  fill: var(--text-2);
+}
+.g-map-compass-north {
+  fill: var(--accent);
+}
+.g-map-compass text {
+  fill: var(--text-2);
+  font: 700 7px var(--font-ui);
+  text-anchor: middle;
 }
 
+/* Landet: tettheten (antall verk) gir fyllet, valgt region får cyan kant og glød */
 .g-map-region {
   cursor: pointer;
   outline: none;
 }
-
+.g-map-halo {
+  fill: none;
+  stroke: var(--accent);
+  stroke-opacity: 0;
+  stroke-width: 7;
+  stroke-linejoin: round;
+  transition: stroke-opacity var(--t-fast);
+}
 .g-map-land {
-  fill: var(--surface-3);
+  fill: var(--surface-1);
   stroke: var(--line-strong);
-  stroke-width: 1;
+  stroke-width: 0.8;
+  stroke-linejoin: round;
   transition: fill var(--t-fast);
 }
-
-.g-map-region:hover .g-map-land,
-.g-map-region:focus-visible .g-map-land {
+.g-map-region.dens-1 .g-map-land {
+  fill: var(--surface-2);
+}
+.g-map-region.dens-2 .g-map-land {
+  fill: var(--surface-3);
+}
+.g-map-region.dens-3 .g-map-land,
+.g-map-region.dens-4 .g-map-land {
   fill: var(--surface-hover);
 }
-
+.g-map-rim {
+  fill: none;
+  stroke: var(--text);
+  stroke-opacity: 0.06;
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+.g-map-region:hover .g-map-halo,
+.g-map-region:focus-visible .g-map-halo {
+  stroke-opacity: 0.2;
+}
 .g-map-region.is-on .g-map-land {
-  fill: var(--accent-tint);
+  fill: var(--accent-soft);
   stroke: var(--accent);
-  stroke-width: 2;
+  stroke-width: 1.6;
+}
+.g-map-region.is-on .g-map-halo {
+  stroke-opacity: 0.35;
 }
 
 .g-map-label {
-  fill: var(--text);
-  font: 600 11px var(--font-ui);
+  fill: var(--text-2);
+  font-size: 12px;
+  letter-spacing: 0.12em;
   text-anchor: middle;
   pointer-events: none;
 }
+.g-map-region.is-on .g-map-label {
+  fill: var(--text);
+}
+.g-map-sub {
+  fill: var(--text-2);
+  font: 8px var(--font-ui);
+  text-anchor: middle;
+  pointer-events: none;
+}
+/* På smal mobil blir underteksten for liten; regionknappene under kartet sier det samme */
+@media (max-width: 599px) {
+  .g-map-sub {
+    display: none;
+  }
+}
+.g-map-terrain {
+  pointer-events: none;
+}
+.g-map-terrain path {
+  fill: none;
+  stroke: var(--text-3);
+  stroke-opacity: 0.55;
+  stroke-width: 1;
+  stroke-linejoin: round;
+}
+.g-map-terrain circle,
+.g-map-terrain rect {
+  fill: var(--text-3);
+  fill-opacity: 0.6;
+}
 
-.g-map-mine {
+/* Merkene */
+.g-map-plant {
+  fill: var(--text-2);
+  stroke: var(--bg);
+  stroke-width: 0.8;
+}
+.g-map-plant.is-mine {
   fill: var(--accent);
 }
-
-.g-map-other {
-  fill: var(--text-3);
+.g-map-plant.is-building {
+  fill: transparent;
+  stroke: var(--text-2);
+  stroke-dasharray: 1.5 1;
 }
-
+.g-map-plant.is-building.is-mine {
+  stroke: var(--accent);
+}
 .g-map-company {
   fill: var(--heat);
+  stroke: var(--on-heat);
+  stroke-width: 0.8;
 }
-
 .g-map-more {
   fill: var(--text-2);
-  font: 600 9px var(--font-ui);
+  font: 700 8px var(--font-ui);
 }
 
+/* Tegnforklaringen: under kartet på mobil, oppå kartet nede til venstre på PC */
 .g-map-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--sp-3);
-  margin: var(--sp-2) 0;
+  gap: var(--sp-2) var(--sp-4);
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--fs-badge);
 }
-
+@media (min-width: 900px) {
+  .g-map-legend {
+    position: absolute;
+    left: var(--sp-3);
+    bottom: var(--sp-3);
+    border-radius: var(--r-pill);
+    border: 1px solid var(--line);
+    background: var(--surface-chrome);
+  }
+}
+.g-map-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
 .g-map-key {
   display: inline-block;
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   border-radius: 2px;
-  vertical-align: middle;
 }
-
 .g-map-key.is-mine {
   background: var(--accent);
 }
-
 .g-map-key.is-other {
-  background: var(--text-3);
+  background: var(--text-2);
 }
-
 .g-map-key.is-company {
+  width: 7px;
+  height: 7px;
+  border-radius: 0;
   background: var(--heat);
-  transform: rotate(45deg) scale(0.85);
+  transform: rotate(45deg);
+}
+.g-map-key.is-building {
+  border: 1px dashed var(--text-2);
 }
 
-.g-map-regions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+/* Filter (Alle / Dine / Selskaper) i korthodet */
+.g-map-filters {
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--sp-2);
 }
+.g-map-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--touch);
+  padding: 0 var(--sp-4);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-strong);
+  background: var(--surface-1);
+  color: var(--text-2);
+  font-size: var(--fs-meta);
+  font-weight: 600;
+}
+.g-map-filter i {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--text-2);
+}
+.g-map-filter.is-dine i {
+  background: var(--accent);
+}
+.g-map-filter.is-selskap i {
+  background: var(--heat);
+  border-radius: 0;
+  transform: rotate(45deg) scale(0.85);
+}
+.g-map-filter.is-on {
+  border-color: var(--accent);
+  background: var(--accent-tint-strong);
+  color: var(--text);
+}
 
+/* Sidepanelet */
+.g-worldmap-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  min-width: 0;
+}
+.g-map-regions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
 .g-map-regions button {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  min-height: 44px;
+  justify-content: center;
+  gap: 1px;
+  min-height: 48px;
   min-width: 0;
+  padding: 6px 10px;
   text-align: left;
 }
-
 .g-map-regions button span {
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: var(--fs-meta);
+  font-weight: 600;
 }
-
+.g-map-regions button span.g-muted {
+  font-size: var(--fs-badge);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
 .g-map-regions button.is-on {
   border-color: var(--accent);
   background: var(--accent-tint);
 }
-
-.g-map-list {
-  margin: var(--sp-2) 0;
-  padding: 0;
-  list-style: none;
+/* Smal mobil: to kolonner, så navn og antall får plass */
+@media (max-width: 379px) {
+  .g-map-regions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-.g-map-list li {
+/* Detaljene står rett i kortet på mobil (ikke kort i kort); på PC er de et eget panel ved kartet */
+.g-map-detail {
   display: flex;
-  gap: var(--sp-2);
+  flex-direction: column;
+  gap: var(--sp-4);
+  min-width: 0;
+}
+@media (min-width: 900px) {
+  .g-map-detail {
+    padding: var(--sp-5);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    background: var(--surface-1);
+  }
+  .g-map-regions {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+}
+.g-map-detail-head {
+  display: flex;
+  justify-content: space-between;
   align-items: flex-start;
-  padding: 6px 0;
-  border-top: 1px solid var(--line);
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-4);
+}
+.g-map-detail-head .ds-status {
+  flex: none;
+}
+.g-map-detail-title {
+  margin: 0;
+  font-size: var(--fs-page);
+  line-height: 1.1;
+}
+.g-map-detail p {
+  margin: 0;
+}
+
+.g-map-stats {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-3);
+}
+.g-map-stats div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--sp-3);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+}
+.g-map-stats dt {
+  font-size: var(--fs-badge);
+  color: var(--text-3);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.g-map-stats dd {
+  margin: 0;
+  font-size: var(--fs-page);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.g-map-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.g-map-group-head {
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+.g-map-row {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  gap: var(--sp-3);
+  align-items: center;
+  padding: var(--sp-3);
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+}
+.g-map-row.is-mine {
+  border-color: var(--accent-border);
+  background: var(--accent-tint);
+}
+.g-map-row.is-company {
+  background: var(--surface-chrome);
+}
+.g-map-row-main {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
 }
-
-.g-map-list li > span {
+.g-map-row-name {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 6px;
+  align-items: baseline;
   min-width: 0;
-  overflow-wrap: anywhere;
 }
-
-.g-map-list li.is-mine strong {
-  color: var(--accent-strong);
+.g-map-row-name strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-
-.g-map-count {
-  display: block;
-  font-size: var(--fs-meta);
+.g-map-row.is-mine .g-map-row-name strong {
+  color: var(--info);
+}
+.g-map-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--surface-2);
   color: var(--text-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-body);
+}
+.g-map-row.is-mine .g-map-avatar {
+  background: var(--accent-soft);
+  color: var(--info);
+}
+.g-map-avatar.is-company {
+  background: var(--heat-bg);
+  color: var(--heat-fg);
+}
+
+/* Kubene: ett per verk – kompleks størst, «bygges» stiplet. På smal mobil sier teksten det samme */
+.g-map-cubes {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 96px;
+  gap: 3px;
+  align-items: flex-end;
+}
+.g-map-cubes i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--text-2);
+}
+.g-map-cubes i.is-storverk {
+  width: 10px;
+  height: 10px;
+}
+.g-map-cubes i.is-kompleks {
+  width: 12px;
+  height: 12px;
+}
+.g-map-cubes i.is-building {
+  background: transparent;
+  border: 1px dashed var(--text-2);
+  box-sizing: border-box;
+}
+.g-map-row.is-mine .g-map-cubes i {
+  background: var(--accent);
+}
+.g-map-row.is-mine .g-map-cubes i.is-building {
+  background: transparent;
+  border-color: var(--accent);
+}
+@media (max-width: 479px) {
+  .g-map-cubes {
+    display: none;
+  }
+  .g-map-row {
+    grid-template-columns: 28px minmax(0, 1fr);
+  }
+}
+
+.g-map-empty {
+  padding: var(--sp-5) var(--sp-4);
+  border-radius: var(--r-md);
+  border: 1px dashed var(--line-strong);
+  color: var(--text-2);
+  font-size: var(--fs-meta);
+  text-align: center;
+}
+.g-map-actions {
+  display: flex;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--line);
+}
+.g-map-actions button {
+  flex: 1 1 160px;
+  min-height: var(--touch);
 }
 
 .g-region-move {
