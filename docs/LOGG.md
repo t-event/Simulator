@@ -17,7 +17,9 @@ Utkastet 099 retter bare framover (fra 2.10); planlagt sjekk 2.10 kl. 07:45 UTC 
 etterbetalingen. Ukeresultatet i minnet går foran nettleseren.
 
 **Testet:** `claim_away_v2` som spiller i en transaksjon som ble rullet tilbake: 3 t → 30, ny henting → 0, 20 t → 80.
-tsc, lint, `npm test` (nye tester for fagpoeng borte og ukeresultatet), `balance.ts --daglig 15` og `--opphold --daglig 15`.
+tsc, lint, `npm test` (nye tester for fagpoeng borte og ukeresultatet), `balance.ts --opphold --daglig 15` (ingen
+opphold flagget). `balance.ts --daglig 15` gir Støperi på dag 19 (mål 20–50, AVVIK) – det samme på main før endringen, så
+det kommer ikke av fagpoengene; diagnosekjøringen er ikke med i CI.
 
 **Gjenstår:** 2.10: rapporten, så utbytterettingen og dry-run for etterbetaling til eieren.
 
