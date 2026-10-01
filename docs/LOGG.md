@@ -5,6 +5,35 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 319 – 2026-10-01: Serverautoritet trinn 1 og tidslinjetall (B-395, B-396)
+
+**Brukeren ba om:** stram inn serverens tillit til mobilen trinnvis (valider og logg, steng det umulige, ikke straff
+10×-spillere, bevar dagens spillere, marginen spesielt, 2.10 sammenlignbar), og samle tidslinjetall til «Mest stål per
+kWh» og «Leveringspresisjon» uten å slå konkurransene på. Sesong 3-pynt venter. V0/K-1-planen står.
+
+**Gjort:**
+- 095 (i bruk 30.9 kl. 23:07 UTC): typevakt på `saves`, unike og kjente felles funksjoner og konsernforskning,
+  forutsetninger i utbyttet og `konsern_order`, mesterskapet standard 0, grunnlaget i `world_claims` (101 rader) og
+  skyggeloggen `world_input_log` (hvert kvarter fra `sample_contributions`, feiler aldri målingene).
+- 096: fem nye tellere i `snapshots`, vakten `snapshot_metrics_guard` (nuller, avviser aldri) og `timeline_metrics`.
+- Appen: `g.totals.kwh`, `contractsMissed`, `contractsCancelled` (migrate gir 0) og de fem feltene i tidslinja.
+
+**Testet:** dry-run av 095 i en transaksjon som ble rullet tilbake: 0 av 22 utbetalinger endret (utbytte og bidrag),
+typevakten avviser en lagring med tekst som nivå, 3 × samme funksjon gir samme utbytte som 1 ×. Typevakten mot alle 22
+lagringer: 0 avvist. 096 i rullet-tilbake-tester: juks (10 kWh/t, 900 leveranser på et døgn, tellere som synker,
+negative tall, en eldre dag lastet opp igjen) nulles; vanlige rader går rett gjennom; `timeline_metrics` regner 450 kWh/t
+og 95,2 % presisjon av testdataene. Etter at begge var i bruk: lagringer og tidslinja kommer inn som før, målingene går.
+tsc, lint, `npm test` (to nye tester), `balance.ts` (exit 0). Advisors: bare de kjente (nye tabeller uten policy er med
+vilje – bare serveren leser dem).
+
+**Funn hos dagens spillere (17 med konsern):** spiller A melder margin 7 059 kr/t (inntekt 11 487 kr/t) og får taket
+3 000; spillerne C og D flagges for «hopp» (ca. 600 → 1 600–1 800 kr/t) – trolig ærlig, så hopp-regelen er for streng til
+å håndheves; spiller B (nytt konsern) har kjøpt forskning og funksjoner etter grunnlaget, med riktige forutsetninger.
+Ingen duplikater, ingen manglende forutsetninger, ingen feil typer, ingen omdømme utenfor 0–100, ingen umulig tilgang.
+
+**Gjenstår:** etter 2.10: vise eieren skyggeloggen og mellomløsningene for marginen (B-395) – ingenting håndheves før
+eieren har bestemt. Om noen uker: formel og minstekrav for de nye ukekonkurransene (B-396). Sesong 3-pynt før sesong 3.
+
 ## Økt 318 – 2026-10-01: Første konsernbidrag og første natt med norsk dag (planlagt sjekk)
 
 **Oppgave:** den planlagte sjekken kl. 00:15 norsk tid 1.10 av første betaling av konsernbidraget (B-318/B-361) og første

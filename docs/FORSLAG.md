@@ -6,9 +6,12 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
-- **Ukens kontrollrom** er bygget (B-387, variant A). Venter: variant B (avspilling på serveren) og nye ukekonkurranser
-  når tidslinja har tallene – stål per kWh og leveringspresisjon – så rotasjonen blir større og «Mer stål enn før» kan
-  tas bort (den kan påvirkes med en svak uke først).
+- **Ukens kontrollrom** er bygget (B-387, variant A). Venter: variant B (avspilling på serveren). Tidslinja samler nå
+  tallene til stål per kWh og leveringspresisjon (B-396, fra 1.10). Om noen uker: eieren avgjør minstetonn, minste antall
+  leveranser, små verk og forbedring mot absolutt tall – da kan rotasjonen bli større og «Mer stål enn før» tas bort.
+- **Serverautoritet etter 2.10 (B-395):** skyggeloggen `world_input_log` vises eieren etter rapporten. Spørsmål: hvilke
+  flagg skal håndheves, og hvilken mellomløsning for marginen (serverberegnet maksimum per tonn fra prisene, romslig grense
+  for hvor fort marginen kan stige fra serverens egne målinger, kryssjekk av inntekt per tonn)? Bidragsformelen er urørt.
 - **Konsernkapital etter fullt konsern (B-386, B-387):** eieren har svart (B-387): to aktive programmer av fem, men før
   K-1 bygges skal to programøkonomier simuleres (A: store permanente trinn, B: aktivt programbudsjett med binding) og
   sammenlignes. Oppkjøp endres først etter ekte data; forberedelsen skal ikke avsløre kjøperen før budet er lagt inn.
@@ -31,7 +34,8 @@ til «Avgjort» nederst).
 
 ## Venter
 
-- **Pynt for sesong 3 (B-287, B-291):** pynten for sesong 2 er klar. Før `start_season` kjøres for sesong 3, legg inn ny
+- **Pynt for sesong 3 (B-287, B-291) – må gjøres før sesong 3 startes (eieren 1.10: venter til da):** pynten for
+  sesong 2 er klar. Før `start_season` kjøres for sesong 3, legg inn ny
   pynt i `COSMETICS` med `season: 3` – både i butikken og på stigen (trinn 10–50). Ellers har sesong 3 ingen egen pynt.
 
 - **Slå på slagghåndteringen (B-253):** skraplageret fikk sin første eier 29.9. 01:33 UTC og betalte første gang for 29.9

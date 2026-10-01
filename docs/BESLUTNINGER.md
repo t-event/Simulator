@@ -7152,3 +7152,67 @@ Beslutning:
 - PC-tabellen har kolonnen «Trinn» med samme prikker. Forklaringen over lista sier hva prikkene betyr.
 Endringslogg: ja
 Konto (B-149): nei – visning av eget spill.
+
+## B-395 Serverautoritet trinn 1: typevakt, harde regler for forskning og felles funksjoner, skyggelogg (2026-10-01)
+Status: gjennomført (095). Skyggen står til etter rapporten 2.10.
+Bakgrunn: eieren (1.10): verdier som påvirker andre spillere skal ikke kunne settes fritt til maks med én endret
+lagring. Trinnvis: valider og logg først, steng det objektivt umulige med en gang, ikke straff ærlige 10×-spillere, ikke
+bevis én mobilverdi med en annen, bevar det dagens spillere har, og hold 2.10-rapporten sammenlignbar (STATUS 9.1).
+Funn før endringen (alle 22 lagringer):
+- Ingen lagringer med feil type – men `save_game` sjekket ingen typer. Tekst der et tall skulle stå (f.eks. nivået),
+  ville fått målingene, utbetalingene, topplista og konsernverdien til å feile for **alle** spillere.
+- `dividend_from_state` talte felles funksjoner og konsernforskning med `count(*)`: samme id flere ganger ga mer utbytte.
+  Ingen spillere hadde duplikater.
+- Ingen hadde forskning uten forutsetningene. `konsern_order` ga plasser/rabatt for «stort konsern»/«standardverk» uten
+  å sjekke forutsetningen (det gjør appen).
+- Marginen: en endret app kan melde margin 3 000 kr/t (taket) hver dag. Det er ca. 2 × en typisk stor spiller
+  (567–1 872 kr/t). Spiller A melder 7 059 kr/t uten tak (inntekt 11 487 kr/t mot 5 100–7 600 hos de andre) og bruker
+  taket; ett lite verk lå også på taket 30.9.
+Beslutning:
+- **Hardt nå** (åpenbart umulig eller sikkerhetsfeil; endrer ingen utbetaling – målt: 0 av 22 endret):
+  - `saves_type_guard` avviser lagringer med feil type i feltene serveren leser for alle (nivå, omdømme, lån,
+    kontrollromsrekord, mesterskap, forskning, konsern åpnet, felles funksjoner, døgnregnskapet). Appen sender aldri slikt.
+  - Felles funksjoner og konsernforskning telles unike og bare kjente id-er (`world_shared`, `world_research`).
+  - Forskning teller bare med forutsetningene (standardverk ← konsernstyring, stort konsern ← oppkjøp, grønt konsern ←
+    konsernstyring + grønt stål), også i `konsern_order`.
+  - Mesterskapet i utbyttet har standard 0 når config mangler (er 0, B-328).
+- **Grunnlag** (eierens punkt D): `world_claims` har forskning og felles funksjoner hver spiller hadde 30.9 kl. 23:07
+  («grunnlag»). Det som kommer senere, får tidspunktet serveren så det først («ny») – grunnlaget for strengere regler for
+  nye kjøp senere. Ingen mister noe.
+- **Skygge** (`world_input_log`, hvert kvarter med målingene, `world_input_audit_run`; feiler aldri målingene): per spiller
+  og verdi det mobilen hevder, det serveren mener er mulig, og det serveren bruker, med flagg: forskning
+  (`mangler_forutsetning`, `ny_etter_grunnlag`), felles (`duplikat_eller_ukjent`, `ny_etter_grunnlag`), omdømme
+  (`utenfor_grense`), tilgang (`uten_tidslinje`, `umulig_kombinasjon`), margin (`over_tak`, `hopp`, `hoy_inntekt_per_t`,
+  `uten_tonn`), tonn (`over_grense`). Ingen av flaggene gjør noe før eieren har sett tallene etter 2.10.
+- **Hva som er hva** (eierens punkt C): STATUS 9.1. Hardt = det serveren selv eier (konsernet, kassa, køen, tid, aktive
+  dager, unikhet, forutsetninger, typer). Plausibelt = tonn (tidslinja med fartskontrollen), tilgang (mot tidslinja),
+  margingrensene. Klient = om forskningen/funksjonen faktisk er kjøpt, omdømme innen 0–100, kvalitet, margin under taket.
+  Fagpoeng brukes ikke som bevis – de kommer fra samme lagring.
+- **Marginen** (punkt E): bidragsformelen er ikke endret. Mellomløsningene eieren kan velge etter 2.10 (alle målt i skygge
+  først): (1) serverberegnet maksimum per tonn fra prisene i config (høyeste pris med salgsbonusene på taket, +25 %, minus
+  laveste mulige kostnad per tonn) i stedet for et fast tak; (2) at marginen som brukes, bare kan stige et visst stykke
+  per ekte dag fra snittet serveren selv har målt (`contribution_samples`) – skyggen viser at «1,5 × og +500» flagger to
+  ærlige spillere som gikk fra ca. 600 til 1 600–1 800, så grensen må være romsligere eller glattes over flere dager;
+  (3) kryssjekk av inntekt per tonn mot spillernes fordeling. (1) + en romslig (2) er anbefalingen.
+Endringslogg: nei – spillerne merker ingenting.
+Konto (B-149): nei – serverregler, ingen ny funksjon.
+
+## B-396 Tidslinjetall til stål per kWh og leveringspresisjon, med rimelighetsgrenser (2026-10-01)
+Status: gjennomført (096 + app). Konkurransene er ikke slått på.
+Bakgrunn: eieren vil ha nok rådata til å velge formelen senere, og ingen ferdige forholdstall fra mobilen.
+Beslutning:
+- Appen teller i alt (`g.totals`): strøm (`kwh`, alt som belastes i `chargeEnergy`), misligholdte kontrakter
+  (`contractsMissed`, fristen gikk ut) og avbrutte (`contractsCancelled`); leveranser (`contractsDone`) og reklamasjoner
+  (`complaints`) fantes. Leverte kontrakter er alltid i tide – fristen sjekkes ved døgnskiftet. Gamle lagringer starter på 0.
+- Tidslinja får `kwh_total`, `deliveries`, `missed`, `cancelled`, `complaints` (tellere, ikke prosent). Serveren regner
+  kWh/t og presisjon (levert / (levert + misligholdt + avbrutt)) av forskjellen mellom to rader (`timeline_metrics`, ikke
+  åpnet for appen).
+- Vakten `snapshot_metrics_guard` nuller tall som ikke kan stemme og skriver hvorfor i `metric_note`; den avviser aldri en
+  rad og flagger aldri en spiller: negative tellere, tellere som går ned (uten nytt spill), 120–3 000 kWh per tonn når
+  minst 500 t er laget (ellers høyst 1,5 mill. kWh + 3 000 per tonn), høyst 200 kontrakter eller reklamasjoner per
+  spilldøgn, og en eldre dag som lastes opp igjen sjekkes også mot raden etter. Nytt spill (tonnene går ned) blir nytt
+  utgangspunkt (`ny_start`).
+- Når det finnes noen ukers data, avgjør eieren minstetonn, minste antall leveranser, små verk og om forbedring eller
+  absolutt tall er mest rettferdig. Til da påvirker tallene ingenting.
+Endringslogg: nei – ingenting synlig for spillerne ennå.
+Konto (B-149): ja, som tidslinja ellers (lagres på nett); ingen ny funksjon i appen.

@@ -82,6 +82,9 @@ regnes av serveren i ekte tid.
   fri, med egne frø, og teller ikke. Verifiseringen er som for kontrollromsrekorden: rimelige tall, ikke avspilling
   (variant B – avspilling på serveren – venter).
 - Juksesperren (`check_snapshot`) sjekker vekst, tonn, fart og første opplasting.
+- **Tidslinjetall til nye ukekonkurranser** (B-396, ikke slått på): tidslinja samler tellere i alt – strøm (`kwh_total`),
+  leveranser (alltid i tide), misligholdt, avbrutt og reklamasjoner. Serveren regner kWh/t og leveringspresisjon selv
+  (`timeline_metrics`); vakten nuller urimelige tall (`metric_note`) uten å avvise raden eller flagge spilleren.
 
 ## 7. Konto og gjester
 
@@ -115,10 +118,19 @@ regnes av serveren i ekte tid.
 
 ## 9. Kjente svakheter
 
-1. **Teknisk gjeld – serverautoritet:** serveren leser noen verdier fra spillet på mobilen (forskning, felles
-   funksjoner, omdømme, kvalitet, margin), og resultatene i kontrollrommet (rekorden og ukens forsøk) sjekkes bare for
-   rimelighet. En endret app kunne sette dem (STABILISERING.md avsnitt 7). Blokkerer ikke nå, men må strammes inn før
-   fellesverdenen blir større eller mer konkurranseutsatt (eierens beskjed, B-387).
+1. **Serverautoritet (B-395, trinn 1):** serveren leser fortsatt noen verdier fra spillet på mobilen. Slik står det:
+   - **Hardt (serveren eier eller håndhever):** konsernets verk, trinn, typer og regioner, konsernkassa, køen og kjøpene,
+     utbytte og bidrag regnes på serveren, ekte tid og aktive dager, selskaper og bud. Fra 095 også: lagringer med feil
+     type avvises, felles funksjoner og konsernforskning telles unike og bare kjente id-er, og forskning teller bare med
+     forutsetningene (også i `konsern_order`).
+   - **Plausibelt (sjekket, men tallet kommer fra mobilen):** tonn per spilldøgn (tidslinja med fartskontrollen,
+     `meter_normal_rate`), tilgang til konsernet (kryssjekk mot tidslinja), marginen (tak 3 000 kr/t + skyggeflagg),
+     kontrollromsrekorden og ukens forsøk (rimelige tall), tidslinjetallene til kWh/t og leveringspresisjon (B-396).
+   - **Klient (må stoles på):** om en forskning eller felles funksjon faktisk er kjøpt (grunnlaget 30.9 er lagret i
+     `world_claims`, nye får tidspunkt), omdømme innen 0–100, kvalitet (de siste 7 døgnene), marginen under taket.
+   - **Skygge til etter 2.10:** `world_input_log` logger hevdet / mulig / brukt med flagg hvert kvarter. Ingen flagg gjør
+     noe før eieren har sett tallene. Marginen er viktigst: en endret app kan melde taket hver dag (ca. 2 × en typisk stor
+     spiller). Mellomløsningene står i B-395.
 2. Konsernkassa hoper seg opp når konsernet er fullt (avsnitt 8).
 3. Simulatorens kjøper stopper på nivå 7 for nye spillere (bytter ikke de siste storverkene) – det er simulatorens
    tilbakebetalingsgrense, ikke en regel.

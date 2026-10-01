@@ -148,6 +148,10 @@ export function migrate(g: GameState): GameState {
   if (g.market.nextTrendDay === undefined) g.market.nextTrendDay = 0;
   // Vedlikehold i alt (B-256): teller fra nå, historien er ikke lagret
   if (g.totals.maintKr === undefined) g.totals.maintKr = 0;
+  // Rådata til tidslinja (B-396): teller fra nå, historien er ikke lagret
+  if (g.totals.kwh === undefined) g.totals.kwh = 0;
+  if (g.totals.contractsMissed === undefined) g.totals.contractsMissed = 0;
+  if (g.totals.contractsCancelled === undefined) g.totals.contractsCancelled = 0;
   if (g.konsern === undefined)
     g.konsern = {
       unlocked: false,
