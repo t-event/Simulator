@@ -604,11 +604,11 @@ export function scrapStopHelp(g: GameState): string {
     : "";
   // Snøstorm (B-279): ingenting å gjøre før veien er brøytet, men neste gang hjelper et større lager
   if (scrapBlocked(g))
-    return `${what} Veien er stengt av snøstorm, og skrapbilene kommer fram om ca. ${roadOpensInH(g)} timer. Hold mer skrap på lager om vinteren (planleggerens lagermengde under Marked).`.trim();
+    return `${what} Veien er stengt av snøstorm, og skrapbilene kommer fram om ca. ${roadOpensInH(g)} timer. Hold mer skrap på lager om vinteren (planleggerens lagermengde under Marked → Planlegger).`.trim();
   if (!auto(g, "autoBuy") || !plannerOrders(g))
     return `${what} Kjøp det under Marked, eller ansett en planlegger som kjøper inn.`.trim();
   if (g.autoBuyNote && !g.settings.autoBuyCredit && g.autoBuyNote.includes("kassa"))
-    return `Planleggeren får ikke kjøpt ${g.autoBuyNote}. Gi planleggeren lov til å bruke kassekreditten under Marked → Skrap, ta opp lån under Verket → Økonomi, eller selg fra lageret.`;
+    return `Planleggeren får ikke kjøpt ${g.autoBuyNote}. Gi planleggeren lov til å bruke kassekreditten under Marked → Planlegger, ta opp lån under Verket → Økonomi, eller selg fra lageret.`;
   if (g.autoBuyNote) return `Planleggeren får ikke kjøpt ${g.autoBuyNote}.`;
   return `${what} Planleggeren bestiller mer.`.trim();
 }
@@ -3346,7 +3346,7 @@ export function autoBuy(
         note(
           room <= stats.sizeT * 0.1
             ? g.settings.plannerSells === false
-              ? "skraplageret er fullt av annet skrap (la planleggeren selge det under Marked → Skrap)"
+              ? "skraplageret er fullt av annet skrap (la planleggeren selge det under Marked → Planlegger)"
               : "skraplageret er fullt av skrap som trengs i ordrekøen"
             : opts.cap !== null && opts.cap - (g.today.autoBuyKr ?? 0) <= scrapPrice(g, id) * stats.sizeT * 0.1
               ? "døgngrensen for innkjøp er brukt opp"

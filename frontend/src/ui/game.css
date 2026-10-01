@@ -1167,6 +1167,25 @@ button {
   font-style: normal;
 }
 
+/* Renhet som stolpe på mobil (B-414); tallene står bak trykk på navnet */
+.g-scrap-purity {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex: 1 1 140px;
+  min-width: 0;
+}
+
+.g-scrap-purity > span {
+  white-space: nowrap;
+}
+
+.g-scrap-purity > .g-bar {
+  flex: 1;
+  min-width: 32px;
+  margin: 0;
+}
+
 .g-scrap-facts .up,
 .g-trend.up {
   color: var(--heat);
@@ -2903,6 +2922,42 @@ button {
 /* Hva som skjer med skiftene hvis man sier opp noen (B-164): bekreftelsen får hele bredden i raden */
 .g-worker > .g-fire-confirm {
   grid-column: 1 / -1;
+}
+
+/* «Mer» per ansatt (B-414): handlingene får hele bredden i raden når de er åpne */
+.g-worker > .g-worker-actions {
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.g-worker-more {
+  min-width: var(--touch);
+}
+
+.g-candidate-filter {
+  margin: 0 0 var(--sp-3);
+}
+
+/* På mobil én rad som kan sveipes sidelengs, så filteret ikke tar halve skjermen */
+@media (max-width: 899px) {
+  .g-candidate-filter {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    margin-inline: calc(-1 * var(--sp-4));
+    padding-inline: var(--sp-4);
+  }
+
+  .g-candidate-filter::-webkit-scrollbar {
+    display: none;
+  }
+
+  .g-candidate-filter > .g-chip-btn {
+    flex: none;
+    white-space: nowrap;
+  }
 }
 
 .g-fire-confirm > .g-small-text {

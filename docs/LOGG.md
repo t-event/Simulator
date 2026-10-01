@@ -5,6 +5,16 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 337 – 2026-10-02: Polering 5: Folk og Marked (B-414)
+
+**Brukeren ba om:** resten av UI-poleringen i små PR-er (fortsettelse).
+
+**Gjort:** filter på søkere og «Mer» per ansatt under Folk; renhetsstolpe på mobil og egen planleggerfane under Marked. #354 (B-413) merget.
+
+**Testet:** typesjekk, lint, `npm test`, build; Playwright på 320, 390 og 1 366 px.
+
+**Gjenstår:** Mål (én «Hent»-knapp); morgenkjøringen 2.10.
+
 ## Økt 336 – 2026-10-02: Polering 4: Fagboka og Forskning (B-413)
 
 **Brukeren ba om:** resten av UI-poleringen i små PR-er (fortsettelse).
