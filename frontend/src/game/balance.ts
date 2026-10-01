@@ -38,6 +38,7 @@ import { isWinter } from "./calendar";
 import { envActive, nextCleaner, shortfall } from "./environment";
 import {
   applyAwayReward,
+  awayFp,
   applyMissionBonus,
   applyStreakReward,
   AWAY_DAYS_PER_HOUR,
@@ -689,7 +690,7 @@ function run(seed: number, days: number, verbose: boolean, novice = process.argv
         streak = (streak % 7) + 1;
         applyStreakReward(g, streak, fmtKr);
         applyMissionBonus(g, fmtKr);
-        applyAwayReward(g, AWAY_MAX_HOURS * 3600, fmtKr);
+        applyAwayReward(g, AWAY_MAX_HOURS * 3600, awayFp(AWAY_MAX_HOURS * 3600), fmtKr);
         bonus = STREAK_REWARDS[streak - 1].days + MISSION_BONUS.days + AWAY_MAX_HOURS * AWAY_DAYS_PER_HOUR;
       }
       const eq = konsernEquity(g);
@@ -1069,6 +1070,31 @@ if (process.argv.includes("--research")) {
     }
   }
   console.log(`dag 150: ${Math.round(g.researchPoints)} FP ubrukt`);
+  process.exit?.(0);
+}
+if (process.argv.includes("--fagpoeng")) {
+  // Fagpoeng testspilleren tjener per spilldøgn på hvert nivå (B-399: grunnlaget for fagpoeng mens man er borte)
+  const seeds = [1, 2, 3];
+  const earned: number[][] = [[], [], [], [], [], []];
+  for (const seed of seeds) {
+    const g = newGame(seed);
+    const perStage = [0, 0, 0, 0, 0, 0];
+    const daysIn = [0, 0, 0, 0, 0, 0];
+    while (day(g) <= 150) {
+      botHour(g);
+      const before = g.researchPoints;
+      const stage = g.stage;
+      advance(g, 60);
+      perStage[stage] += Math.max(0, g.researchPoints - before);
+      daysIn[stage] += 1 / 24;
+    }
+    for (let st = 0; st < 6; st++) if (daysIn[st] >= 1) earned[st].push(perStage[st] / daysIn[st]);
+  }
+  for (let st = 0; st < 6; st++) {
+    if (!earned[st].length) continue;
+    const avg = earned[st].reduce((a, b) => a + b, 0) / earned[st].length;
+    console.log(`${STAGES[st]?.name ?? st}: ${avg.toFixed(1)} FP per spilldøgn (frø ${seeds.join(", ")})`);
+  }
   process.exit?.(0);
 }
 if (process.argv.includes("--kontrakter")) {

@@ -42,10 +42,14 @@ export async function claimDailyMissions(): Promise<{ already: boolean }> {
   return { already: !!r.already };
 }
 
-/** Sekunder borte siden forrige lagring eller henting (høyst åtte timer); 0 hvis ingenting å hente */
-export async function claimAway(): Promise<number> {
-  if (!userId()) return 0;
-  return Number(await rpc<number>("claim_away", {})) || 0;
+/**
+ * Sekunder borte siden forrige lagring eller henting (høyst åtte timer) og fagpoengene for dem, regnet av serveren
+ * (B-399); 0 hvis ingenting å hente
+ */
+export async function claimAway(): Promise<{ seconds: number; fp: number }> {
+  if (!userId()) return { seconds: 0, fp: 0 };
+  const r = await rpc<{ seconds?: number; fp?: number } | null>("claim_away_v2", {});
+  return { seconds: Number(r?.seconds) || 0, fp: Number(r?.fp) || 0 };
 }
 
 // Siste status fra serveren, så kortet på Verket og vinduet med belønningen viser det samme

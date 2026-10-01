@@ -43,6 +43,19 @@ export const MISSION_BONUS = { fp: 3, days: 1 };
 export const AWAY_DAYS_PER_HOUR = 0.25;
 export const AWAY_MAX_HOURS = 8;
 export const AWAY_MIN_MINUTES = 30;
+/**
+ * Fagpoeng mens du var borte (B-399): ca. 5 % av vanlig takt (testspilleren tjener 5–8 fagpoeng per spilldøgn, og en
+ * time på 1× er 30 spilldøgn), høyst AWAY_MAX_HOURS timer. Serveren regner dem ut (`claim_away_v2` i
+ * supabase/100_fagpoeng_borte.sql) – endres tallene, endres begge.
+ */
+export const AWAY_FP_PER_HOUR = 10;
+export const AWAY_FP_MAX = AWAY_FP_PER_HOUR * AWAY_MAX_HOURS;
+
+/** Fagpoengene for tida borte, som serveren regner dem (til testspilleren og testene) */
+export function awayFp(seconds: number): number {
+  if (seconds < AWAY_MIN_MINUTES * 60) return 0;
+  return Math.min(AWAY_FP_MAX, Math.floor((seconds / 3600) * AWAY_FP_PER_HOUR));
+}
 
 export interface Reward {
   cash: number;
@@ -73,18 +86,24 @@ export function applyStreakReward(g: GameState, streak: number, fmtKr: (v: numbe
   return r;
 }
 
-/** Hva tida borte gir: døgns drift per time, høyst AWAY_MAX_HOURS timer. Under AWAY_MIN_MINUTES gir ingenting. */
-export function awayReward(g: GameState, seconds: number): Reward {
+/**
+ * Hva tida borte gir: døgns drift per time, høyst AWAY_MAX_HOURS timer. Under AWAY_MIN_MINUTES gir ingenting.
+ * Fagpoengene kommer fra serveren (`fp`, B-399); appen legger inn det serveren sier, høyst AWAY_FP_MAX.
+ */
+export function awayReward(g: GameState, seconds: number, fp = 0): Reward {
   if (seconds < AWAY_MIN_MINUTES * 60) return { cash: 0, fp: 0 };
   const hours = Math.min(AWAY_MAX_HOURS, seconds / 3600);
-  return { cash: Math.round(hours * AWAY_DAYS_PER_HOUR * dayOfDrift(g)), fp: 0 };
+  return {
+    cash: Math.round(hours * AWAY_DAYS_PER_HOUR * dayOfDrift(g)),
+    fp: Math.max(0, Math.min(AWAY_FP_MAX, Math.floor(fp))),
+  };
 }
 
-export function applyAwayReward(g: GameState, seconds: number, fmtKr: (v: number) => string): Reward {
-  const r = awayReward(g, seconds);
-  if (r.cash > 0) {
+export function applyAwayReward(g: GameState, seconds: number, fp: number, fmtKr: (v: number) => string): Reward {
+  const r = awayReward(g, seconds, fp);
+  if (r.cash > 0 || r.fp > 0) {
     give(g, r);
-    log(g, `Mens du var borte, holdt verket det gående og tjente ${fmtKr(r.cash)}.`, "good");
+    log(g, `Mens du var borte, holdt verket det gående og tjente ${rewardText(r, fmtKr)}.`, "good");
   }
   return r;
 }

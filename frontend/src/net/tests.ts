@@ -44,6 +44,7 @@ import {
   fetchWeeklyBoard,
   fetchWeeklyStatus,
   flushPendingControl,
+  forgetPendingMemory,
   pendingControl,
   startControlAttempt,
   submitControlAttempt,
@@ -644,6 +645,7 @@ function fresh(): Fake {
   resetCloud();
   store.clear();
   forgetGuest();
+  forgetPendingMemory();
   return makeFake();
 }
 
@@ -881,7 +883,7 @@ const main = async () => {
     const f = fresh();
     setSession(null);
     const before = f.calls.length;
-    assert((await fetchDailyStatus()) === null && (await claimAway()) === 0, "skulle gi tomt uten konto");
+    assert((await fetchDailyStatus()) === null && (await claimAway()).seconds === 0, "skulle gi tomt uten konto");
     assert(f.calls.length === before, "sendte kall uten konto");
   });
 
@@ -1453,6 +1455,35 @@ const main = async () => {
     const o2 = await flushPendingControl();
     ls.setItem = realSet;
     assert(o2.kind === "levert" && o2.points === 2500, `levert fra minnet ${JSON.stringify(o2)}`);
+  });
+
+  await test("Ukeresultat (B-399): et gammelt resultat fra en annen konto skygger ikke for et nytt som ikke ble lagret", async () => {
+    const f = fresh();
+    await login(f);
+    f.controlWeek = true;
+    const r = await startControlAttempt();
+    assert(r.ok, "start");
+    if (!r.ok) return;
+    // Konto A har et resultat i nettleseren fra en tidligere økt
+    store.set(
+      "stalverk-ukekontroll-v1",
+      JSON.stringify({ user: "u-annen", id: 777, points: 1, stars: 1, log: null, deadline: r.attempt.deadline }),
+    );
+    forgetPendingMemory();
+    // Konto B leverer, nettet svikter og nettleseren kan ikke lagre: Bs resultat i minnet gjelder
+    f.offline = true;
+    const ls = globalThis.localStorage as unknown as { setItem: (k: string, v: string) => void };
+    const realSet = ls.setItem;
+    ls.setItem = () => {
+      throw new Error("QuotaExceededError");
+    };
+    const p = { user: "u-a@test", id: r.attempt.id, points: 1800, stars: 2, log: null, deadline: r.attempt.deadline };
+    await submitControlAttempt(p);
+    assert(pendingControl("u-a@test")?.id === r.attempt.id, "Bs resultat ble skygget av As gamle");
+    f.offline = false;
+    const o = await flushPendingControl();
+    ls.setItem = realSet;
+    assert(o.kind === "levert" && o.points === 1800, `Bs resultat ble ikke levert ${JSON.stringify(o)}`);
   });
 
   await test("Ingenting lastes opp før spillet er avklart mot kontoen, heller ikke mens man velger (B-138)", async () => {

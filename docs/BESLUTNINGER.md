@@ -7266,3 +7266,24 @@ Beslutning:
   datadekning, tonn og antall avsluttede kontrakter.
 Endringslogg: nei – spillerne merker ingenting.
 Konto (B-149): nei.
+
+## B-399 Fagpoeng mens du var borte; utbytterettingen etter rapporten; ukeresultat i minnet går først (2026-10-01)
+Status: gjennomført (100 + app), utbytterettingen planlagt til 2.10 etter rapporten.
+Bakgrunn: en spiller spurte hvorfor man ikke får fagpoeng mens man er borte. Eieren valgte ca. 5 % av vanlig takt,
+regnet av serveren. Eieren valgte også tidspunktet for utbytterettingen og etterbetaling med dry-run. En ny gjennomgang
+fant en restfeil i kontrollrommet.
+Beslutning:
+- **Fagpoeng borte:** 10 fagpoeng per time borte, høyst åtte timer (80), ingenting under 30 minutter – lagt inn i «Mens du
+  var borte» ved siden av pengene. Grunnlag: testspilleren tjener 5–8 fagpoeng per spilldøgn på alle nivåer
+  (`balance.ts --fagpoeng`), og en time på 1× er 30 spilldøgn, altså ca. 200 i timen; 5 % = 10. 80 fagpoeng er under
+  én forskning (median 120) og under en halvtime vanlig spilling. Serveren regner dem (`claim_away_v2`, 100) med samme tid
+  borte som pengene, så en endret app kan ikke skru opp tallet; appen tar høyst `AWAY_FP_MAX`. `claim_away()` står for
+  eldre apper. Fagpoeng gir bare framgang i eget verk (B-323).
+- **Utbytterettingen** (B-397, funn 3 og 4) kjøres rett etter 2.10-rapporten, og tidspunktet dokumenteres. Utkastet
+  retter bare framover (fra 2.10); målinger som alt er tatt, og eldre dager for den som solgte sitt siste verk, rettes av
+  en egen etterbetaling: dry-run per spiller og dato (betalt, riktig beløp, differanse, usikkerhet) og eierens
+  godkjenning først. Planlagt sjekk 2.10 kl. 07:45 UTC.
+- **Ukeresultat:** kopien i minnet går foran det som ligger i nettleseren når den er satt i økta – ellers kunne et gammelt
+  resultat fra en annen konto skygge for et nytt som ikke ble lagret.
+Endringslogg: ja
+Konto (B-149): ja – «Mens du var borte» krever konto (regel 4), som før.

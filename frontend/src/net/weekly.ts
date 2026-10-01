@@ -190,20 +190,30 @@ export interface PendingControl {
 }
 
 const PENDING_KEY = "stalverk-ukekontroll-v1";
-/** Kopi i minnet: virker lagringen i nettleseren ikke (full eller sperret), leveres resultatet likevel (B-397) */
-let memPending: PendingControl | null = null;
+/**
+ * Kopi i minnet: virker lagringen i nettleseren ikke (full eller sperret), leveres resultatet likevel (B-397). Er den
+ * satt i denne økta, er den alltid den nyeste og går foran det som ligger i nettleseren – ellers kunne et gammelt
+ * resultat fra en annen konto skygge for et nytt som ikke ble lagret (B-399). `undefined` = ikke satt i denne økta.
+ */
+let memPending: PendingControl | null | undefined = undefined;
 /** Om resultatet som venter, også ligger i nettleseren (overlever at appen lukkes) */
 let durable = true;
 
 function readPending(): PendingControl | null {
+  if (memPending !== undefined) return memPending;
   try {
     const raw = localStorage.getItem(PENDING_KEY);
     const p = raw ? (JSON.parse(raw) as PendingControl) : null;
     if (p && typeof p.id === "number") return p;
   } catch {
-    // Faller tilbake på kopien i minnet
+    // Ingenting å lese
   }
-  return memPending;
+  return null;
+}
+
+/** Glemmer kopien i minnet, som når appen startes på nytt (tester) */
+export function forgetPendingMemory(): void {
+  memPending = undefined;
 }
 
 /** Fristen for å levere er ute (med et minutts slingring for klokka) */

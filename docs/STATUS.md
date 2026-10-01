@@ -90,7 +90,8 @@ regnes av serveren i ekte tid.
 
 ## 7. Konto og gjester
 
-- Selve spillet krever aldri konto (B-149, `KONTO.md`). Lagring på nett, lister, konsern, selskaper og chat krever konto.
+- Selve spillet krever aldri konto (B-149, `KONTO.md`). «Mens du var borte» (konto) gir penger og 10 fagpoeng per time borte, høyst
+  åtte timer (80); serveren regner tida og fagpoengene (`claim_away_v2`, B-399). Lagring på nett, lister, konsern, selskaper og chat krever konto.
 - Gjester er anonyme kontoer (B-212) som slippes til det som står i `guest_gate`; de får ingen penger eller plass mellom
   spillere, og slettes etter 60 dager uten lagring (B-377).
 

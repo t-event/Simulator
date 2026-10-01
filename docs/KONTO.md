@@ -44,7 +44,7 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Sesonger, sesongresultat, 🎖 ved kallenavnet | Ja | Regel 3 | B-129, B-143 |
 | Daglig belønning (sju dager) | Ja | Regel 4 | B-149 |
 | Dagens oppdrag | Ja | Regel 4 (bonusen én gang per virkelig dag) | B-149 |
-| Mens du var borte | Ja | Regel 4 | B-149 |
+| Mens du var borte (penger og fagpoeng) | Ja | Regel 4 | B-149, B-399 |
 | Mesterskap (forskning som tas om og om igjen) | Nei | Regel 1 | B-150 |
 | Stålmilepæler og titler i spillet | Nei | Regel 1 | B-150 |
 | Tittel ved kallenavnet på topplista | Ja | Regel 3 | B-150 |
