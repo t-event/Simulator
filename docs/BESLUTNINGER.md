@@ -7345,3 +7345,23 @@ Ikke endret: datakvalitetsoversikten for tidslinjetallene tas når flere dager e
 venter til stabiliseringen er ferdig; vern mot lekkede passord står fravalgt (krever Supabase Pro, B-363).
 Endringslogg: nei – spillerne merker ingenting.
 Konto (B-149): nei (serverjobber og overvåking for eieren).
+
+## B-402 Slagghåndteringen og V0/K-1 i skygge – først etter morgenkjøringen 2.10 (2026-10-01)
+Status: vedtatt, ikke utført.
+Bakgrunn: eieren sjekket databasen 1.10: alle verdensjobbene står «ok», og skraplageret har to registrerte utbetalinger.
+Å slå på slagghåndteringen åpner et anbud på 48 timer. Selskapet betaler ingen inntekt med én gang, men bud trekkes straks
+fra spillernes konsernkasser – det kunne påvirket grunnlaget for rapporten 2.10 allerede samme dag.
+Beslutning:
+- **Slagghåndteringen** slås på først når nattkontrollen 2.10 er grønn (`world_health()`/`world_health_players()` «ok»)
+  og rapportgrunnlaget er bevart. Ikke slått på 1.10.
+- **V0 og K-1 bygges i skygge** etter at morgenkjøringen 2.10 er fullført og rapportgrunnlaget er bevart:
+  - Satsene 0,5 / 1,5 / 4 % med 80 % vern på Høy (B-393).
+  - V0 logger bare hendelser. K-1-bryteren står av.
+  - Skyggen trekker ingen penger og påvirker verken utbetalinger, konsernverdi eller konkurranser.
+  - Feil i skyggekjøringen isoleres fra de ordinære verdensjobbene (egen deltransaksjon og egen jobb i `world_jobs`, som
+    B-401), så en feil der aldri stopper eller ruller tilbake målinger og betalinger.
+- **Skyggerapporten** sammenligner med både ingen programmer og 1/3/8 %, viser etableringskostnadene for seg og oppgir
+  datamengden (antall dager, spillere og hendelser).
+- Aktivering av V0 og K-1 vurderes først etter rapporten, av eieren.
+Endringslogg: nei – spillerne merker ingenting ennå.
+Konto (B-149): ikke aktuelt (serverside, i skygge).
