@@ -4205,6 +4205,19 @@ test("Endringen under nøkkeltallene: retning, ord og farge (B-404)", () => {
   assert(short.text === "\u221227 t" && short.long === "27 t mindre enn døgnet før", JSON.stringify(short));
 });
 
+test("Rådsraden: det alvorligste først, med tone (B-406)", () => {
+  const g = newGame();
+  g.furnaces[0].wear = 0.9;
+  g.furnaces[0].relineRequested = false;
+  let tips = hints(g, computePlantStats(g));
+  assert(tips[0]?.tone === "heat" && tips[0].text.startsWith("Foringen"), `foringen først: ${tips[0]?.text}`);
+  g.cash = -1e12;
+  tips = hints(g, computePlantStats(g));
+  assert(tips[0]?.tone === "critical" && tips[0].text.includes("kredittgrensen"), `kassa først: ${tips[0]?.text}`);
+  assert(tips[1]?.tone === "heat", `foringen etter kassa: ${tips[1]?.text}`);
+  assert(tips.length <= 3, "høyst tre råd");
+});
+
 if (failed) {
   console.log(`\n${failed} test(er) feilet`);
   process.exitCode = 1;

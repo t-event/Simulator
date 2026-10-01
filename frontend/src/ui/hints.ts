@@ -52,6 +52,11 @@ export interface Hint {
   anchor?: Anchor;
   /** Noe i spillet ordner det selv (planleggeren bestiller skrap): vises på Verket, men gir ikke «!» i menyen (B-202) */
   handled?: boolean;
+  /**
+   * Hvor alvorlig (B-406): `critical` = konkursfare, `heat` = noe står eller går tapt nå (skrap, folk, lager, foring).
+   * Uten er det et råd. Rådsraden på Verket får fargen, og de alvorligste rådene står først.
+   */
+  tone?: "heat" | "critical";
 }
 
 export function hints(g: GameState, stats: PlantStats): Hint[] {
@@ -60,6 +65,7 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
   if (g.cash < -creditLimit(g, stats)) {
     const left = BANKRUPTCY_DAYS - g.negativeDays;
     out.push({
+      tone: "critical",
       text: `Kassa er under kredittgrensen. ${summerStop(g) ? `Banken venter til sommerstansen er over, men da er det konkurs om ${left} døgn` : `Blir den der, er det konkurs om ${left} døgn`}. ${CREDIT_HELP}`,
       view: "marked",
       sub: "skrap",
@@ -71,6 +77,7 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
     const startsIn = start - today;
     if (g.summer?.choice === "stans" && g.summer.year === yearOf(start) && startsIn > 0 && startsIn <= 7 && g.cash < 0)
       out.push({
+        tone: "heat",
         text: `Sommerstans om ${startsIn} døgn: ingen salg i tre uker, men faste kostnader og renter går. Kassa er i minus – kjøp ikke mer skrap enn ovnene bruker før ferien, og selg det du ikke trenger.`,
         view: "marked",
         sub: "skrap",
@@ -96,6 +103,7 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
       view: "marked",
       sub: "skrap",
       handled: plannerBuys,
+      tone: plannerBuys ? undefined : "heat",
     });
   if (waits.includes("Tomt for skrap")) {
     // Med flere ovner: si hvilke som står (B-161)
@@ -109,6 +117,7 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
       view: "marked",
       sub: "skrap",
       handled: plannerBuys,
+      tone: plannerBuys ? undefined : "heat",
     });
   }
   // «Bare én ovn smelter om gangen» (Strøm) på et verk med flere ovner: verket lager en brøkdel (B-312: en spiller med
@@ -125,7 +134,7 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
         ([r, n]) => `${n} ${n === 1 ? ROLES[r as RoleId].name.toLowerCase() : ROLES[r as RoleId].plural.toLowerCase()}`,
       )
       .join(", ");
-    out.push({ text: `Verket mangler folk for å gå: ${missing}.`, view: "folk" });
+    out.push({ text: `Verket mangler folk for å gå: ${missing}.`, view: "folk", tone: "heat" });
   }
   // Ovnene smelter mer enn støpingen tar unna (B-157): si hva som gir mer støpekapasitet
   if (g.stage >= 4 && stats.casting.continuous && stats.hours > 0 && stats.meltTph > stats.castTph * 1.15) {
@@ -144,6 +153,7 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
           ? "Renseanlegget står etter et havari. Ovnene som ikke får plass, venter til det er reparert."
           : "Renseanlegget står etter et havari, men ovnene går videre. Det blir dobbel bot i morgen.",
         anchor: "rensing",
+        tone: "heat",
       });
     else if (shortfall(g, stats) > 0.02) {
       const next = nextCleaner(g);
@@ -165,6 +175,7 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
       text: "Ferdigvarelageret er fullt. Trykk «Selg alt ledig stål» under Salg → Lager, eller bygg ut lageret under Anlegg → Lager og salg.",
       view: "salg",
       sub: "lager",
+      tone: "heat",
     });
   if (stats.furnace.arc && g.furnaces.some((f) => f.spareProgress < 1) && !g.workers.some((w) => w.role === "murer"))
     out.push({
@@ -175,6 +186,7 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
     out.push({
       text: "Foringen (mursteinene inni ovnen) er nesten slitt gjennom. Trykk her og så «Bytt foring» før den brenner gjennom.",
       anchor: "vedlikehold",
+      tone: "heat",
     });
   // Kokillene (B-351): reparatøren bytter dem hvis han bytter foringen; ellers må spilleren
   const repairerSwaps = auto(g, "autoReline") && presentWorkers(g).some((w) => w.role === "vedlikehold");
@@ -218,6 +230,7 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
         text: `Resepten din holder ikke kravet til ${GRADES[grade].name.toLowerCase()}. Juster den under Verket → Resept.`,
         view: "verket",
         sub: "resept",
+        tone: "heat",
       });
   }
   const research = researchOptions(g).filter((r) => r.available);
@@ -283,7 +296,12 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
       sub: "ansatte",
     });
   if (g.workers.length && g.morale < 40)
-    out.push({ text: "Trivselen blant de ansatte er lav, og noen kan si opp. Se Folk.", view: "folk", sub: "ansatte" });
+    out.push({
+      text: "Trivselen blant de ansatte er lav, og noen kan si opp. Se Folk.",
+      view: "folk",
+      sub: "ansatte",
+      tone: "heat",
+    });
   // Lav kundevurdering (B-161): si hva som gir bedre karakter
   const recentRating = g.ratings.length >= 5 ? avgRating(g, 5) : null;
   if (recentRating !== null && recentRating < 6)
@@ -317,7 +335,13 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
   }
   if (g.stage >= 1 && stats.staffCount === 0)
     out.push({ text: "Nå har du plass til ansatte. Med flere folk kan verket gå flere skift.", view: "folk" });
-  return out.slice(0, 3);
+  // Det alvorligste først (B-406); ellers samme rekkefølge som over
+  const rank = (h: Hint) => (h.tone === "critical" ? 0 : h.tone === "heat" ? 1 : 2);
+  return out
+    .map((h, i) => ({ h, i }))
+    .sort((a, b) => rank(a.h) - rank(b.h) || a.i - b.i)
+    .map((x) => x.h)
+    .slice(0, 3);
 }
 
 /** Skraptypene resepten mangler til neste charge, som tekst (B-063) */

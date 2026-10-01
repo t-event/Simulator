@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 406,
+    date: "2026-10-01",
+    title: "Rådet blir oransje når noe står",
+    items: [
+      "Rådet under anleggsbildet blir oransje når noe står eller går tapt, og rødt ved fare for konkurs. Det viktigste står først.",
+      "Pauseknappen har fått et vanlig pause-ikon.",
+      "På hendelseskortene er alle valgene like – spillet sier ikke lenger hvilket svar som er «riktig».",
+    ],
+  },
+  {
     b: 405,
     date: "2026-10-01",
     title: "Nytt verdenskart",

@@ -7444,3 +7444,31 @@ Testet: de 7 størrelsene i UI.md med falske kartdata: ingen horisontal scrollin
 44 px, filtrene teller riktig, «Bygg neste verk i …» velger regionen under Utvid.
 Konto (B-149): uendret – kartet krever konto som før.
 Endringslogg: ja.
+
+## B-406 Designgjennomgangen 1.10, del 2 og 3: rådsraden i statusfarge, pause-ikon, nøytrale valg (2026-10-01)
+Status: gjennomført.
+Bakgrunn: del 2 (typografi) og del 3 («Nå»-linja og farget dom) av eierens designgjennomgang. Forslagene ble sjekket mot
+koden først; flere var alt på plass.
+Gjort:
+- **Rådsraden i statusfarge:** `Hint` har fått `tone` – `critical` for kassa under kredittgrensen, `heat` når noe står
+  eller går tapt nå (skrap tomt eller feil og ingen planlegger som bestiller, mangler folk, renseanlegget står,
+  ferdigvarelageret fullt, foringen nesten slitt, resepten holder ikke kravet, sommerstans med kassa i minus, lav
+  trivsel). Raden på Verket blir oransje eller rød med varsel- eller feilikon i stedet for info. De alvorligste rådene
+  står nå først (før gikk «Du har ingen kontrakter» foran «Ovnen står»). Høyden er den samme (B-238).
+- **Pause-ikon:** fartsvelgeren bruker Lucide-ikonet `pause` i stedet for glyfene «❚❚», som tegnes ulikt på ulike
+  telefoner.
+- **Nøytrale valg på hendelseskort:** første valg var alltid primærknapp, som om spillet hadde ett riktig svar. Nå er
+  alle valg like; primærknapp bare på tips med ett svar.
+- **Små ting:** tallene på topplista i visningsskriften; verdien på en forespørsel verket ikke rekker, dempes.
+Alt på plass fra før (ikke endret): visningsskriften på korttitler, nøkkeltall, kassa og verdien på forespørsler
+(B-191, B-241); farget venstrekant etter dommen på forespørslene; resultat og konsernverdi som store tall (B-404).
+Ikke gjort:
+- **Konsernkassa ut av toppfeltet på mobil:** eieren ba om den i toppfeltet (B-340).
+- **Kapitéler (store bokstaver) på alle underoverskrifter:** mange er spørsmål eller setninger («Hvilket spill vil du
+  fortsette?», «Hva hadde strømmen til ovnene kostet?»); med store bokstaver roper de. Brukt der det passer (kartet).
+- **Kassa 20 px og etiketter over tallene i toppfeltet:** toppfeltet er målt for 320 px med faste minstebredder (B-134,
+  B-238, B-373); et nytt rutenett der må testes på iPhone av eieren og tas for seg.
+Testet: `npm test` (ny test: kassa før foringen, foringen før vanlige råd), typesjekk, lint, build; Playwright på 320,
+390 og 1 366 px med foring og kassa under grensen: riktig farge og ikon, samme høyde, ingen horisontal scrolling.
+Konto (B-149): ikke aktuelt.
+Endringslogg: ja.

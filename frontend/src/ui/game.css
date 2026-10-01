@@ -2017,6 +2017,36 @@ button {
   color: var(--ok);
 }
 
+/* Rådsraden i statusfarge (B-406): oransje når noe står eller går tapt, rød ved konkursfare. Ikonet og ordene bærer
+   meningen; fargen er tillegg */
+.g-cta.is-heat {
+  background: var(--heat-bg);
+  border-color: var(--heat-border);
+  border-left-color: var(--heat);
+}
+
+.g-cta.is-heat > .ds-icon:first-child {
+  color: var(--heat-fg);
+}
+
+.g-cta.is-critical {
+  background: var(--critical-bg);
+  border-color: var(--critical-border);
+  border-left-color: var(--critical);
+}
+
+.g-cta.is-critical > .ds-icon:first-child {
+  color: var(--critical-fg);
+}
+
+.g-cta.is-heat > .g-cta-go {
+  color: var(--heat-fg);
+}
+
+.g-cta.is-critical > .g-cta-go {
+  color: var(--critical-fg);
+}
+
 .g-cta-more {
   flex: none;
   min-width: 48px;
@@ -3152,6 +3182,8 @@ button {
 }
 
 .g-board-value {
+  font-family: var(--font-display);
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
@@ -6387,6 +6419,11 @@ button.g-prod-row:hover {
    ikke rekker det. Ordrekøen som nummerert liste med status øverst, og tomme faner med en forklaring */
 .g-offer.is-bad {
   border-left: 3px solid var(--critical-border);
+}
+
+/* Det verket ikke rekker, trer tilbake (B-406): verdien dempes, dommen står fortsatt i ord */
+.g-offer.is-bad .g-contract-value {
+  color: var(--text-2);
 }
 
 .g-offer.is-warn {
