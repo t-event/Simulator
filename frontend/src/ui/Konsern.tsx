@@ -63,7 +63,7 @@ import type { GameState, RegionId, SisterPlant, SisterType } from "../game/types
 import type { GameApi } from "../game/useGame";
 import { buzz } from "./haptics";
 import { Bar, Card, SubTabs } from "./common";
-import { Button, Callout } from "./ds";
+import { Button, Callout, Metric, type Delta } from "./ds";
 import { useLastWorld, type OpenTender } from "./openTender";
 import { EARNS_FROM, konsernValueOf } from "../net/world";
 import { IndustryPanel } from "./Companies";
@@ -912,6 +912,13 @@ function NextStep({ g, act }: { g: GameState; act: Act }) {
  * Konsern → Oversikt (B-106, B-119, B-123, B-226): tallene og målet øverst, neste steg og verkene dine.
  * Forklaringen er foldet sammen når man har kommet i gang, så siden blir kort.
  */
+/** Det som kommer inn i konsernkassa per ekte dag (utbytte etter politikken og bidrag), som linje under konsernverdien */
+function inflowDelta(perDay: number): Delta {
+  return perDay > 0
+    ? { text: `+${fmtKr(perDay)} inn per ekte dag`, dir: "up", good: true }
+    : { text: "Ingenting inn ennå", dir: "flat" };
+}
+
 function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () => void }) {
   const k = g.konsern;
   const today = day(g);
@@ -942,18 +949,15 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
             {/* Konsernverdien er den samme som på topplista (B-320, B-322): regnet av serverens tall. Uten dem (uten
                 konto) vises verdien i spillet */}
             {world ? (
-              <div
-                className="g-finance-result"
+              /* Under tallet: det som kommer inn i konsernkassa per ekte dag, så tallet vokser med det (B-404) */
+              <Metric
+                label="Konsernverdi"
                 title="Samme tall som på topplista: konsernkassa pluss 60 dagers utbytte og bidrag, minus lån"
-              >
-                <span>Konsernverdi</span>
-                <strong>{fmtKr(Math.floor(konsernValueOf(world, g.loan)))}</strong>
-              </div>
+                value={fmtKr(Math.floor(konsernValueOf(world, g.loan)))}
+                delta={inflowDelta(world.dividend.perDay + world.contribution.perDay)}
+              />
             ) : (
-              <div className="g-finance-result">
-                <span>Verdi i spillet</span>
-                <strong>{fmtKr(Math.floor(equity))}</strong>
-              </div>
+              <Metric label="Verdi i spillet" value={fmtKr(Math.floor(equity))} />
             )}
             <div className="g-finance-side">
               <span title="Betales av serveren rett etter midnatt (norsk tid) til konsernkassa – spillfarten betyr ingenting">

@@ -6,6 +6,9 @@
  */
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { Icon, type IconName } from "./icons";
+import type { Delta } from "./delta";
+
+export type { Delta } from "./delta";
 
 export type Tone = "neutral" | "ok" | "info" | "heat" | "critical";
 
@@ -57,6 +60,43 @@ export function Callout({ tone = "info", children }: { tone?: Tone; children: Re
     <div className={`ds-callout is-${tone}`} role={tone === "critical" ? "alert" : undefined}>
       <Icon name={CALLOUT_ICON[tone]} />
       <div>{children}</div>
+    </div>
+  );
+}
+
+export function DeltaLine({ delta }: { delta: Delta }) {
+  const tone = delta.dir === "flat" || delta.good === undefined ? "neutral" : delta.good ? "ok" : "critical";
+  return (
+    <span className={`ds-delta is-${tone}`} title={delta.long !== delta.text ? delta.long : undefined}>
+      {delta.dir !== "flat" && <Icon name={delta.dir === "up" ? "trending-up" : "trending-down"} />}
+      <span>{delta.text}</span>
+    </span>
+  );
+}
+
+/**
+ * Nøkkeltallet øverst på en side (B-404): ett stort tall med etikett og en valgfri endring under, f.eks. resultatet i
+ * går og hvordan det står seg mot døgnet før. Brukes på Økonomi og Konsern.
+ */
+export function Metric({
+  label,
+  value,
+  tone,
+  delta,
+  title,
+}: {
+  label: string;
+  value: ReactNode;
+  /** Plus/minus farger tallet (resultat); uten er det nøytralt */
+  tone?: "plus" | "minus";
+  delta?: Delta | null;
+  title?: string;
+}) {
+  return (
+    <div className={`g-finance-result ds-metric${tone ? ` is-${tone}` : ""}`} title={title}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+      {delta && <DeltaLine delta={delta} />}
     </div>
   );
 }

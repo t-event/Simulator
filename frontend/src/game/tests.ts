@@ -313,6 +313,7 @@ import { hints } from "../ui/hints";
 import { hasMoulds, MOULD, mouldCost, mouldHour, mouldRisk, mouldWear, replaceMoulds, wearMoulds } from "./mould";
 import { applyCashCap, CASH_RESERVE, hasPaidOut, paidOutDayLog, paidOutTotal } from "./reserve";
 import { trainingSeed, weeklyGrade, weeklyRequest } from "../ui/control/weekly";
+import { changeDelta } from "../ui/delta";
 
 declare const process: { exitCode?: number };
 
@@ -4185,6 +4186,23 @@ test("Den ekte dagen (B-401): midnatt norsk tid som world_day() på serveren, og
     hours.get(23) === 1 && hours.get(25) === 1 && hours.get(24) === 364,
     `døgnlengder ${JSON.stringify([...hours])}`,
   );
+});
+
+test("Endringen under nøkkeltallene: retning, ord og farge (B-404)", () => {
+  const kr = (n: number) => `${n} kr`;
+  const up = changeDelta(150, 100, kr);
+  assert(up.dir === "up" && up.good === true && up.text === "50 kr mer enn døgnet før", JSON.stringify(up));
+  const down = changeDelta(100, 150, kr);
+  assert(
+    down.dir === "down" && down.good === false && down.text === "50 kr mindre enn døgnet før",
+    JSON.stringify(down),
+  );
+  const cost = changeDelta(150, 100, kr, { higherIsGood: false });
+  assert(cost.good === false, "høyere kostnad er ikke bra");
+  const flat = changeDelta(100.2, 100, kr);
+  assert(flat.dir === "flat" && flat.good === undefined && flat.text === "Som døgnet før", JSON.stringify(flat));
+  const short = changeDelta(73, 100, (n) => `${n} t`, { short: true });
+  assert(short.text === "\u221227 t" && short.long === "27 t mindre enn døgnet før", JSON.stringify(short));
 });
 
 if (failed) {

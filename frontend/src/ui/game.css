@@ -7268,3 +7268,153 @@ button.g-prod-row:hover {
   font-size: var(--fs-meta);
   font-weight: 400;
 }
+
+/* ---------------------------------------------------------- nøkkeltall, moduler og bevegelse (B-404)
+   Lånt fra en dashbordmal, tilpasset designsystemet: ett stort tall med endringen under, moduler i lag på PC, og rolig
+   bevegelse bare når noe åpnes eller musa holdes over noe. Ingen nye farger. */
+
+/* Endringen under et nøkkeltall: pil + ord, fargen er tillegg. Én fast linje, så ingenting hopper */
+.ds-delta,
+.g-finance-result .ds-delta,
+.g-stat .ds-delta {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
+  margin-top: var(--sp-1);
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.ds-delta > span,
+.g-finance-result .ds-delta > span,
+.g-stat .ds-delta > span {
+  display: inline;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: inherit;
+  color: inherit;
+}
+
+.ds-delta > .ds-icon {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+
+.ds-delta.is-ok,
+.g-finance-result .ds-delta.is-ok,
+.g-stat .ds-delta.is-ok {
+  color: var(--ok);
+}
+
+.ds-delta.is-critical,
+.g-finance-result .ds-delta.is-critical,
+.g-stat .ds-delta.is-critical {
+  color: var(--critical);
+}
+
+.ds-metric {
+  min-width: 0;
+}
+
+/* Moduler i lag på PC: nøkkeltallet og tallene ved siden av blir innfelte ruter i kortet */
+@media (min-width: 900px) {
+  .g-finance-head {
+    align-items: stretch;
+    gap: var(--sp-3);
+  }
+
+  .g-finance-head > .ds-metric {
+    flex: 0 1 auto;
+    padding: var(--sp-4) var(--sp-5);
+    background: var(--surface-2);
+    border-radius: var(--r-md);
+  }
+
+  .g-finance-side {
+    flex: 1 1 280px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: var(--sp-3);
+  }
+
+  .g-finance-side > span {
+    display: block;
+    line-height: 1.45;
+    padding: var(--sp-3) var(--sp-4);
+    background: var(--surface-2);
+    border-radius: var(--r-md);
+  }
+}
+
+/* Ark og dialoger toner inn når de åpnes (200 ms). Med «redusert bevegelse» er --t-panel 0 og ingenting beveger seg */
+@keyframes ds-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes ds-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes ds-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+}
+
+.g-modal {
+  animation: ds-fade-in var(--t-panel) ease-out;
+}
+
+.g-modal > .g-modal-card {
+  animation: ds-rise-in var(--t-panel) ease-out;
+}
+
+@media (min-width: 900px) {
+  .g-side-sheet > .g-modal-card {
+    animation-name: ds-slide-in;
+  }
+}
+
+/* Knapper og handlingskort løfter seg litt når musa holdes over dem (bare med mus, ikke på berøringsskjerm) */
+@media (hover: hover) and (pointer: fine) {
+  .g-cta,
+  .ds-button,
+  button.g-primary {
+    transition:
+      transform var(--t-fast) ease-out,
+      box-shadow var(--t-fast) ease-out;
+  }
+
+  .g-cta:hover:not(:disabled),
+  .ds-button:hover:not(:disabled),
+  button.g-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .g-cta:active:not(:disabled),
+  .ds-button:active:not(:disabled),
+  button.g-primary:active:not(:disabled) {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .g-cta:hover:not(:disabled),
+  .ds-button:hover:not(:disabled),
+  button.g-primary:hover:not(:disabled) {
+    transform: none;
+  }
+}
