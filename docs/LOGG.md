@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 328 – 2026-10-01: Designgjennomgangen, del 1: nytt verdenskart (B-405)
+
+**Brukeren ba om:** (sendte en designgjennomgang med kartprototype, mockups og kode i fire PR-er.)
+
+**Gjort:** nytt verdenskart fra `patches/WorldMap.tsx`/`worldmap.css`, kontrollert mot koden: verk som bygges telles
+ikke to ganger, feil tekst om Kontroll og død kode for kontrollstolper fjernet, faste farger byttet mot tokens, høyst ti
+merker per region, kartet maks 860 px på PC, ikke kort i kort på mobil. «Bygg neste verk i …» går til Utvid med regionen
+valgt. UI.md, B-405, endringsloggen (b: 405).
+
+**Testet:** typesjekk, lint, `npm test`, build; Playwright på de 7 størrelsene med falske kartdata.
+
+**Gjenstår:** del 2–4 av gjennomgangen (typografi, «Nå»-linja og farget dom, mindre tekst); morgenkjøringen 2.10.
+
 ## Økt 327 – 2026-10-01: Det som er verdt å låne fra dashbordmalen (B-404)
 
 **Brukeren ba om:** se om en designbeskrivelse («Premium SaaS Dashboard») kan gjøre appen finere, og så legge inn det

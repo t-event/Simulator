@@ -868,7 +868,7 @@ export function KonsernPage({
       )}
       {tab === "oversikt" && <KonsernOverview g={g} act={act} onBuy={() => setTab("utvid")} />}
       {tab === "utvid" && <KonsernBuy g={g} act={act} onShowPlants={() => setTab("oversikt")} />}
-      {tab === "kart" && <WorldMapPanel g={g} />}
+      {tab === "kart" && <WorldMapPanel g={g} onBuild={() => setTab("utvid")} />}
       {tab === "industri" && <IndustryPanel g={g} act={act} />}
     </div>
   );

@@ -208,6 +208,12 @@ Ett `AppShell` med CSS grid-områder: `header`, `nav`, `main`, `aside`. Samme Re
 - **Moduler i lag (B-404):** på PC blir nøkkeltallet og tallene ved siden av (`.g-finance-head`, `.g-finance-side`) egne
   innfelte ruter (`--surface-2` i kortet), i et rutenett på minst 180 px. På mobil står de som før, under hverandre.
 
+### 5.3 Verdenskartet (B-405)
+Sjøkart med kystlinjer, tetthet som fyll og merker i fast rutenett (5 × 2, dine først, stiplet = bygges, «+N»). Filter
+Alle / Dine / Selskaper. Sidepanel med regionknapper, tre tall, rader per selskap og konsern, og «Bygg neste verk i …»
+(velger regionen under Utvid). Alle farger er tokens; underteksten i kartet skjules under 600 px (regionknappene sier
+det samme).
+
 ## 6. Side for side
 
 Prinsipp: **samme data og handlinger, forskjellig mengde synlig samtidig.** Gradvis synlighet gjelder like mye på PC.

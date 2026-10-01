@@ -7415,3 +7415,32 @@ avkortet tekst, ingen hopping på 8 s med spillet i gang; animasjonen starter ik
 med redusert bevegelse.
 Konto (B-149): ikke aktuelt.
 Endringslogg: ja.
+
+## B-405 Designgjennomgangen 1.10, del 1: nytt verdenskart (2026-10-01)
+Status: gjennomført.
+Bakgrunn: eieren sendte en designgjennomgang av alle skjermene (`frontend/src/ui` mot UI.md) med en kartprototype,
+mockups og kode å lime inn, og foreslo fire PR-er i rekkefølge: kartet, typografien, «Nå»-linja med farget dom, og
+mindre tekst. Dette er den første. Funnet: kartet var «en illustrasjon, ikke et sted» – seks like flater, 5 px-merker
+(under 5 px på iPhone) og ingenting å gjøre fra kartet.
+Gjort (fra `patches/WorldMap.tsx` og `worldmap.css`, kontrollert mot koden):
+- Kystlinjer med glød, sjøkartrutenett, stiplede skipsleder, kompass og terrengtegn; regionnavn i visningsskriften med
+  undertekst («7 verk · 2 konsern», skjult under 600 px der regionknappene sier det samme). Tettheten (antall verk) gir
+  fyllfargen; valgt region får cyan kant.
+- Merkene i fast rutenett, fem per rad og to rader (dine først, så andres, så selskapene, så «+N»), stiplet for verk
+  som bygges. Filter Alle / Dine / Selskaper i korthodet. Tegnforklaringen under kartet på mobil, oppå på PC.
+- Sidepanel: regionknapper med «7 verk · 4 dine», tre tall (verk, konsern, selskaper), selskapene og konsernene som
+  rader med ett merke per verk, og «Bygg neste verk i …», som velger regionen under Utvid (`setBuildRegion`) og går dit.
+Rettet i forslaget:
+- **Verk som bygges ble telt to ganger:** `world_map` teller et verk som bygges, både i typen og i `building`. Forslaget
+  la til egne merker for dem; nå blir de siste merkene til spilleren stiplet i stedet.
+- **Tekst som ikke stemte:** «første konsern som bygger, får forspranget på Kontroll» er ikke regelen (verk i regionen
+  gir Kontroll bare til eieren av selskapet, og bonus til et oppkjøpsbud). Fjernet.
+- **Kontrollstolper uten data:** `world_map` har ikke Kontroll per selskap; stolpene var død kode og ble fjernet.
+  Kontrollen står under Industrien.
+- **Faste farger** (sju heksverdier og én rgba) er byttet mot tokens (`--info-bg`, `--bg`, `--surface-1…hover`).
+- Høyst ti merker per region, så Jernåsen ikke flyter inn i Østskogen; kartet høyst 860 px bredt på PC; detaljene står
+  rett i kortet på mobil (ikke kort i kort); to kolonner med regionknapper under 380 px.
+Testet: de 7 størrelsene i UI.md med falske kartdata: ingen horisontal scrolling, ingen avkortet tekst, knapper minst
+44 px, filtrene teller riktig, «Bygg neste verk i …» velger regionen under Utvid.
+Konto (B-149): uendret – kartet krever konto som før.
+Endringslogg: ja.

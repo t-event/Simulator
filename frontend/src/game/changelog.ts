@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 405,
+    date: "2026-10-01",
+    title: "Nytt verdenskart",
+    items: [
+      "Verdenskartet under Konsern er tegnet på nytt: kystlinjer, tydeligere merker for dine og andres verk, og verk som bygges, vises stiplet.",
+      "Velg Alle, Dine eller Selskaper for å se det du leter etter.",
+      "Fra en region kan du gå rett til å bygge neste verk der.",
+    ],
+  },
+  {
     b: 404,
     date: "2026-10-01",
     title: "Tydeligere nøkkeltall",
