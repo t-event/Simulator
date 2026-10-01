@@ -7472,3 +7472,28 @@ Testet: `npm test` (ny test: kassa før foringen, foringen før vanlige råd), t
 390 og 1 366 px med foring og kassa under grensen: riktig farge og ikon, samme høyde, ingen horisontal scrolling.
 Konto (B-149): ikke aktuelt.
 Endringslogg: ja.
+
+## B-407 Designgjennomgangen 1.10, del 4: mindre tekst på Salg og Konsern (2026-10-01)
+Status: gjennomført.
+Bakgrunn: siste del av eierens designgjennomgang: «forklaringen står foran handlingen». Salg hadde opptil fem rader
+innstillinger over første forespørsel; Konsern-kortet hadde konsernverdien og fem like store tall ved siden av.
+Gjort:
+- **Salg → Forespørsler:** «Ta imot nye forespørsler», kvalitetene og rekkefølgen står bak én rad «Innstillinger ·
+  alle kvaliteter · kortest svarfrist først» (står det på pause: «tar ikke imot nye» i oransje). Det som gjelder nå,
+  står synlig: bryteren for salgsdirektøren (B-188: lett å finne), trenden og metningen (vises bare når de gjelder).
+  Tipset om å skru av forespørsler sier nå «under Salg → Innstillinger».
+- **Konsern → Oversikt:** konsernverdien som stort tall, så tre tall – konsernkassa, utbytte per ekte dag og datterverk
+  – og flaggskipet, verdi i spillet og privat formue som én dempet linje under. Avsnittet om hva verkene tjener er kortet
+  fra tre setninger til to. På PC står de tre tallene som ruter på én rad.
+Ikke gjort:
+- **Plass på topplista ved konsernverdien:** krever et ekstra kall til topplista hver gang siden vises; tas eventuelt
+  for seg.
+- **«Slik fungerer konsernet» til Fagboka:** står alt lukket bak én rad; å flytte innholdet til et nytt kapittel er
+  større enn denne runden.
+- **Trinn som tekst i stedet for prikker på mobil:** prikkene har tallet ved siden av («4 av 3»); tas med neste runde.
+Resten av gjennomgangen (Folk, Forskning, Fagboka, Mål, Kontrollrommet, ark på PC, startskjermen) er polering, notert
+i FORSLAG.md.
+Testet: typesjekk, lint, `npm test`, build; Playwright på de 7 størrelsene: ingen horisontal scrolling, ingen avkortet
+tekst; «Innstillinger» viser pausen når bryteren slås av.
+Konto (B-149): ikke aktuelt.
+Endringslogg: ja.

@@ -66,7 +66,7 @@ const TIPS: Tip[] = [
       const c = productSwitch(g)!;
       const old = PRODUCTS[castingType(g).product].name.toLowerCase();
       const next = PRODUCTS[c.product].name.toLowerCase();
-      return `Nå kan du kjøpe ${c.name.toLowerCase()}. Den lager ${next}, ikke ${old} – etter byttet kan verket ikke lage ${old} lenger. Lever ordrene på ${old} i ordrekøen først, og ikke ta nye forespørsler på ${old} (skru gjerne av «Ta imot nye forespørsler» under Salg mens du gjør deg ferdig). Byttet er sperret til ordrene er levert. Ubesvarte forespørsler på ${old} trekkes tilbake når du bytter.`;
+      return `Nå kan du kjøpe ${c.name.toLowerCase()}. Den lager ${next}, ikke ${old} – etter byttet kan verket ikke lage ${old} lenger. Lever ordrene på ${old} i ordrekøen først, og ikke ta nye forespørsler på ${old} (skru gjerne av «Ta imot nye forespørsler» under Salg → Innstillinger mens du gjør deg ferdig). Byttet er sperret til ordrene er levert. Ubesvarte forespørsler på ${old} trekkes tilbake når du bytter.`;
     },
     when: (g) => !!productSwitch(g),
   },
