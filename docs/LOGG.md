@@ -5,6 +5,29 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 326 – 2026-10-01: Kodegjennomgang: serverens klokke i varslene, databasen mot repoet, docs (B-403)
+
+**Brukeren ba om:** gå gjennom all kode, finne og rette feil, se etter glemte ting, og oppdatere alle .md-filene.
+
+**Gjort:**
+- Grunnlinje: typesjekk, lint, `npm test`, `balance.ts` (standard, `--daglig 15`, `--sommerstans`, frø 11 og 13,
+  nybegynner frø 5), `programSim`, `worldSim --dager 180`, `sim/validate` – alt grønt unntatt enkeltfrø som når
+  Verksted før dag 7 (observasjon til eieren, ikke endret).
+- Rettet: `Date.now()` → `realNow()` i `net/world.ts` (standardverdiene for «nå»), `ui/GameApp.tsx` (varslene om
+  utbytte, bidrag, inntekt og anbud), `ui/openTender.ts` (om anbudet er åpent) og `ui/Chat.tsx` (tidsstempel). Regelen
+  i B-314: alt i ekte tid bruker serverens klokke.
+- Kontrollert: databasen mot repoet med sjekksum per funksjonskropp (173 funksjoner, ingen avvik når de dynamiske
+  patchene og `create function` etter `drop` regnes med); ingen `at time zone 'utc'` i levende funksjoner; RLS på alle
+  tabeller; cron-jobbene og `world_job_errors`; `migrate()` mot `GameState`; `Math.min(...)`/`Math.max(...)` på lister
+  som kan være tomme (alle sikret); `setInterval`/`clearInterval` i par i alle filer; ingen `as any`/`@ts-ignore`.
+- Docs: README, PLAN-NETT, RETNING 5.5, CLAUDE.md (hvordan databasen sjekkes mot repoet), B-403.
+
+**Testet:** `npm test`, typesjekk, lint, prettier på de endrede filene, `npm run build`.
+
+**Gjenstår:** morgenkjøringen 2.10 (helsesjekk, rapport, 099, slagghåndteringen, V0/K-1 i skygge, B-402).
+
+---
+
 ## Økt 325 – 2026-10-01: Slagghåndteringen og V0/K-1 i skygge etter morgenkjøringen 2.10 (B-402)
 
 **Brukeren ba om:** vente med slagghåndteringen til nattkontrollen er grønn og rapportgrunnlaget er bevart (anbudet trekker

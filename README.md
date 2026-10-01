@@ -116,6 +116,11 @@ de beskriver ikke noe bestemt anlegg.
 - `docs/KONSERN-FORSLAG.md` – konsernet i ekte tid: nivåer, priser og aktivitetskrav (B-325–B-329)
 - `docs/KONTROLL-FORSLAG.md` – verdenskartet, utbyttepolitikken, Kontroll og oppkjøp (B-331, B-332)
 - `docs/VERKSJEF-FORSLAG.md` – forslag om verksjefer for datterverkene (B-379)
+- `docs/STATUS.md` – fasit for hvordan spillet virker nå (B-385); STATUS = hvordan, BESLUTNINGER = hvorfor, LOGG = når
+- `docs/STABILISERING.md` – kassa uten tak, legacy-gulvet og verdenssimuleringen (B-380–B-385)
+- `docs/UKENS-KONTROLLROM.md` og `docs/KONSERNKAPITAL-FORSLAG.md` – ukens kontrollrom (B-387) og hva konsernkassa
+  skal brukes til etter fullt konsern (B-386)
+- `docs/K1-PROGRAMMER.md` – konsernprogrammene og verdenshendelsene V0 (B-389–B-393), bygges i skygge etter 2.10
 
 ## Arkitektur
 

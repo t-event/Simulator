@@ -7365,3 +7365,29 @@ Beslutning:
 - Aktivering av V0 og K-1 vurderes først etter rapporten, av eieren.
 Endringslogg: nei – spillerne merker ingenting ennå.
 Konto (B-149): ikke aktuelt (serverside, i skygge).
+
+## B-403 Kodegjennomgang 1.10: serverens klokke i varslene, og databasen mot repoet (2026-10-01)
+Status: gjennomført.
+Bakgrunn: eieren ba om en gjennomgang av all kode (feil, glemte ting, docs). Grunnlinjen var grønn: typesjekk, lint,
+`npm test`, `balance.ts` (standard og `--daglig 15`, `--sommerstans`), `programSim`, `worldSim` og `sim/validate`.
+Funn og retting:
+- **Serverens klokke i varslene (rettet):** beskjedene om utbytte, bidrag, selskapsinntekt og avgjorte anbud, og
+  sjekken av om et anbud fortsatt er åpent (`openTender`), brukte telefonens klokke (`Date.now()`), mot regelen i B-314.
+  En telefon med feil dato kunne gi beskjeden om gårsdagens utbytte flere ganger eller aldri, og vise et stengt anbud
+  som åpent. Nå bruker `net/world.ts` (standardverdiene), `GameApp`, `openTender` og tidsstempelet i Skiftrapporten
+  `realNow()` (servertid). Testene gir «nå» eksplisitt og er uendret.
+- **Databasen mot repoet (kontrollert, ingen avvik):** sjekksummen av hver funksjonskropp i databasen
+  (`md5(regexp_replace(prosrc, '\s+', ' ', 'g'))`, med `--`-kommentarer fjernet) mot den siste definisjonen i
+  `supabase/`. 173 funksjoner: alle stemmer når en tar med at 081 patcher alle funksjoner med UTC-dato i en løkke, at
+  082/084/087/090/091/095/097 patcher navngitte funksjoner med `replace`, og at `start_season` (039), `season_history`
+  (092) og `backup_export` (073) er laget med `create function` etter `drop`. Ingen levende funksjon bruker
+  `at time zone 'utc'`. Alle 46 tabeller har RLS. Cron-jobbene (eksport, verden-tick, rydding, gjester) går uten feil;
+  `world_job_errors` er tom.
+- **Lagringer:** `migrate()` dekker alle feltene i `GameState`; `settings.maxPowerPrice` kan mangle i svært gamle
+  lagringer, men leses trygt (`undefined` sammenlignes som «ingen grense»).
+- **Balansen (observasjon, ikke endret):** med enkelte frø nås Verksted før målet (nybegynner frø 5: dag 5, flink frø
+  11: dag 6, mål 7–20). Standardkjøringen i CI er innenfor. Målene er eierens; ingen endring.
+- **Docs:** README (STATUS, STABILISERING, UKENS-KONTROLLROM, KONSERNKAPITAL, K1-PROGRAMMER i lista), PLAN-NETT
+  (migrasjonene 095–101), RETNING 5.5 (sesongene starter ikke av seg selv lenger, B-182/B-221).
+Endringslogg: nei – spillerne merker ingenting (bare med feil klokke på telefonen).
+Konto (B-149): ikke aktuelt.

@@ -523,6 +523,15 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `world_job_start`/`world_job_finish`. Nye jobber i `world_tick` følger samme mønster, og en betaling krediterer kassa
   bare når raden ble satt inn (`on conflict do nothing` + `if found`). Sjekk `select * from world_health()` og
   `world_health_players()` når en økt rører verdensjobbene eller pengene på serveren.
+- **Databasen mot repoet** (B-403): sjekk drift med sjekksum per funksjonskropp –
+  `select proname, md5(regexp_replace(regexp_replace(prosrc, '--[^\n]*', '', 'g'), '\s+', ' ', 'g')) from pg_proc where
+  pronamespace = 'public'::regnamespace` mot samme sjekksum av kroppen i siste `create [or replace] function` i
+  `supabase/`. Avvik som er i orden: 081 patcher alle funksjoner med UTC-dato i en løkke, og 082/084/087/090/091/095/097
+  patcher navngitte funksjoner med `replace` – den levende kroppen er da den patchede. Noen funksjoner er laget med
+  `create function` etter `drop` (039, 073, 092), ikke `create or replace`. Sjekket 1.10: ingen avvik.
+- **Serverens klokke også i grensesnittet** (B-403): beskjeder og sjekker som gjelder ekte tid (utbytte for i går, om et
+  anbud er åpent, tidsstempler fra serveren) bruker `realNow()`, ikke `Date.now()`. `Date.now()` er greit bare for
+  lokale mellomrom (hvor lenge appen var skjult, hvor gammel en liste i minnet er).
 - **Supabase-connectoren og `delete`** (B-401): `execute_sql` holder igjen (tidsavbrudd etter 60 s, ingenting når
   databasen) en DO-blokk eller funksjon med flere setninger der én er `delete`. Én setning går. Prøvekjøringer unngår
   `delete` (bruk f.eks. en midlertidig `world_today` = i morgen); opprydding i funksjoner står i én setning.
