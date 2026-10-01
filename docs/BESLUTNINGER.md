@@ -7515,3 +7515,44 @@ Testet: nettest (tallet, ugyldige svar, entall/flertall); som `anon` i databasen
 1 366 px med og uten lagret spill og med feil fra tjenesten: riktig tekst, ingen horisontal scrolling, knappene står
 stille.
 Endringslogg: ja.
+
+## B-409 Klargjøring kvelden før 2.10: V0/K-1 i skygge som utkast, verksjef V1 spesifisert, rekonstruksjonsforslag (2026-10-01)
+Status: gjennomført (bare klargjøring – ingenting i produksjon er endret).
+Bakgrunn: eieren: gjør V0 og K-1 teknisk klare i kveld uten produksjonseffekt – ikke legg inn migrasjoner, ikke start
+cron/jobber, ikke trekk ekte hendelser, ikke skriv skyggedata, ikke slå på brytere, ikke endre `config.world`.
+Databasetester bare i transaksjoner som rulles tilbake. Målet: etter rapporten 2.10 kan PR-en gjennomgås og utkastet
+legges inn uten å begynne utviklingen da. Deretter: rydd verksjefdokumentet og spesifiser V1 ferdig (ikke bygg), og
+skriv et rekonstruksjonsforslag (ikke velg modell, ikke bygg).
+Gjort:
+- **`supabase/utkast/103_v0_k1_skygge.sql` (ikke kjørt):** `config.world.programs` (bryterne av, `events_shadow` på,
+  satsene 0,5/1,5/4 % og skyggesettene 0,5/1,5/4 og 1/3/8 %, 80 % vern, `shadow_from` = dagen det legges inn);
+  tabellene `world_events`, `world_event_draws`, `world_event_exposure`, `program_shadow_day` og de tomme K-1-tabellene
+  `program_slots`, `program_charges`, `program_log`; funksjonene `world_event_boom_size` (samme formel som `k1BoomSize`),
+  `world_is_winter`, `dividend_region_shares` (regionandeler av samme regel som `dividend_from_state`),
+  `world_events_ensure` (trekningen som simulatoren, `random()` på serveren, advisory lock, én trekning per region og dag),
+  `program_shadow_log_day`, `world_shadow_tick` (egen jobb, én spiller om gangen, feil merkes som «skygge» i
+  `world_health()`, kaster aldri feil videre) og `program_shadow_report` (datamengde, hendelser mot forventet, per spiller:
+  utbytte, bidrag og andel bidrag, tap uten program, hvert program og hver satsing for begge satssettene, «lav, høy ved
+  varsel» med binding, laveste 14 dager, dager der Høy var rasjonelt, etablering for seg og Konsernverdi nå; nye satser
+  kan prøves i ettertid med `p_budgets`). `pay_dividends`, `pay_contributions` og `world_tick` er urørt; skyggen leser
+  det som alt er betalt. Cron-linja står som kommentar.
+- **`103_v0_k1_skygge_test.sql`:** kjørt i én transaksjon som ble rullet tilbake: 23 av 23 OK (config med brytere av,
+  høykonjunktur 0,30402 = simulatoren, vinter, regionandeler, trekning med varsel og lengder, logg og eksponering mot ekte
+  utbytte, skyggejobben idempotent og uten feil, ingen penger flyttet, skygge av = ingenting skjer, rapporten og
+  kostnadsregelen, nye satser i ettertid, fordelingen over ti år: 6,67 hendelser per region og år, 44 % høykonjunktur,
+  minst 22 dager mellom). Etterpå sjekket: ingen tabeller, funksjoner, config-nøkkel, jobb eller cron ble liggende.
+- **`npm test`:** høykonjunkturen i simulatoren er låst til samme tall som serverutkastet.
+- **Verksjefer:** `VERKSJEF-FORSLAG.md` avsnitt 9 er eierens svar (ikke lenger spørsmål); 24 timer/én per dag er rettet til
+  2–3 i uka, høyst én samme dag, 48 timer. Avsnitt 10 er V1 ferdig spesifisert: egenskaper med sum 6–10, lønn 3–6 % etter
+  stjernene, mandater med ekte ulemper (Lønnsomhet: dyrere og tregere modernisering, hardere hendelser; Vekst: −5 %
+  utbytte mot billigere og raskere modernisering; Stabilitet: lavere topp mot mildere hendelser), handlinger (ansett,
+  bytt mandat ukentlig, avslutt med sluttpakke og 3 dagers karantene), server, app, bryter og akseptkriterier
+  (ingen automatisk oppgradering, ingen dominerende strategi, uten verksjef som i dag, ingen fisking). Bygges ikke før
+  V0/K-1 er avgjort.
+- **`docs/REKONSTRUKSJON-FORSLAG.md`:** dagens konkurs, eierens fem premisser, det som alltid overlever, fem modeller
+  (A som i dag, B ett nivå ned, C samme nivå nedskalert, D gradert etter hullet, E konsernet redder hovedverket),
+  sperrene mot misbruk (30 døgns tilbakeføring, rekonstruksjonsgjeld, banken selger billigere enn spilleren, høyst én per
+  30 ekte dager, ingenting i ekte tid) og simuleringen før valg. Ingen modell valgt.
+Konto (B-149): uendret (V0/K-1 og verksjefene krever konto når de bygges; rekonstruksjonen ikke).
+Endringslogg: nei – ingenting spillerne merker.
+

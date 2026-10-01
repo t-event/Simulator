@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 332 – 2026-10-01: Klargjøring før 2.10: V0/K-1 i skygge (utkast), verksjef V1, rekonstruksjon (B-409)
+
+**Brukeren ba om:** gjøre V0/K-1 teknisk klart i kveld uten produksjonseffekt (migrasjon, trekning, skyggelogg,
+sammenligning av satssett, rapport, tester – ikke legge inn noe), rydde verksjefdokumentet og spesifisere V1 ferdig
+(ikke bygge), og skrive et rekonstruksjonsforslag (ikke velge modell).
+
+**Gjort:** `supabase/utkast/103_v0_k1_skygge.sql` og testfila; `VERKSJEF-FORSLAG.md` avsnitt 9 (svarene) og 10 (V1);
+`REKONSTRUKSJON-FORSLAG.md`; test i `npm test` (høykonjunkturen); K1-PROGRAMMER, FORSLAG, CLAUDE.md, B-409.
+
+**Testet:** utkastet + 23 databasetester i én transaksjon som ble rullet tilbake (alle OK); sjekket etterpå at ingenting
+ble liggende (tabeller, funksjoner, config, jobber, cron). `npm test`, typesjekk.
+
+**Gjenstår:** morgenkjøringen 2.10; deretter gjennomgang av PR-en og innlegging av 103 når eieren sier fra; V1 etter at
+V0/K-1 er avgjort; eierens valg av rekonstruksjonsmodell.
+
 ## Økt 331 – 2026-10-01: Antall spillere aktive siste 24 timer på startskjermen (B-408)
 
 **Brukeren ba om:** at startskjermen viser antall spillere aktive siste 24 timer.

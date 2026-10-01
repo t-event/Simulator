@@ -1,5 +1,9 @@
 # K-1: konsernprogrammer med modell B – spesifikasjon (B-389, godkjent B-390, grunnlaget B-392, satsene B-393)
 
+**Klargjort 1.10.2026 (B-409):** V0-skyggen og K-1-tabellene ligger som utkast i `supabase/utkast/103_v0_k1_skygge.sql`
+(ikke kjørt), med tester i `103_v0_k1_skygge_test.sql` (kjørt i en transaksjon som ble rullet tilbake, 23 av 23 OK).
+Legges inn etter rapporten 2.10 når eieren har gått gjennom PR-en. Ingen bryter, cron-jobb eller config er endret.
+
 **Status:** godkjent av eieren 30.9.2026 (B-390) med presiseringene under. Ingenting er bygget, ingen tall i verden er
 endret. Rekkefølgen: rapporten etter 2.10 → V0 i skygge og K-1 bak avslått bryter → skyggedata tilbake til eieren →
 eieren avgjør om det slås på → verksjef V1. Simuleringen: `npx tsx src/game/programSim.ts --k1`, `--k1-skann` og

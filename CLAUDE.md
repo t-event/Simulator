@@ -224,13 +224,15 @@ frontend/public/  PWA: manifest, ikoner (icon.svg er kilden; PNG-ene lages fra d
 supabase/      SQL-migrasjonene, nummerert. Kjøres i prosjektet med Supabase-connectoren (apply_migration) og
                legges her samtidig, så repoet speiler databasen. Sjekk get_advisors (security) etter hver DDL-endring.
 supabase/functions/ Edge-funksjoner (eksport, B-345)
-supabase/utkast/ Spørringer som bare leser (f.eks. dry-run av økonomireformen) – ikke migrasjoner
+supabase/utkast/ Spørringer som bare leser (f.eks. dry-run av økonomireformen) og utkast som ikke er kjørt (099, 103 V0/K-1 i
+               skygge med testfil) – ikke migrasjoner. Et utkast testes med `begin; <utkast>; <test>; select … ; rollback;`
 docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretningen for sluttspillet, B-180), UI.md,
                OKONOMI.md (økonomianalysen og reform 2, B-301), KONSERNBIDRAG.md (hovedverkets bidrag i ekte tid, B-313),
                OKONOMI-KONTROLL.md (kontrollen av modellen med tall og svakheter, B-324),
                KONSERN-FORSLAG.md (nivåer, priser fra konsernkassa og aktivitetskrav, bygget B-325–B-328, og simuleringen B-329),
                KONTROLL-FORSLAG.md (verdenskart, utbyttepolitikk, Kontroll, overtakelser og pengene hjemme, B-331, godkjent B-332),
-               VERKSJEF-FORSLAG.md (verksjefer for datterverkene, RETNING fase 5, B-379 – venter på eieren),
+               VERKSJEF-FORSLAG.md (verksjefer, besvart; V1 ferdig spesifisert i avsnitt 10, bygges etter V0/K-1, B-409),
+               REKONSTRUKSJON-FORSLAG.md (rekonstruksjon etter konkurs, modellene A–E – venter på eierens valg, B-409),
                STATUS.md (fasit for hvordan spillet virker nå, B-385),
                UKENS-KONTROLLROM.md (variant A bygget, B-387), KONSERNKAPITAL-FORSLAG.md (forslag med eierens svar, B-386/B-387),
                K1-PROGRAMMER.md (konsernprogrammene og verdenshendelsene V0, godkjent B-390 – bygges i skygge etter 2.10),

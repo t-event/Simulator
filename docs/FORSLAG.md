@@ -84,7 +84,10 @@ til «Avgjort» nederst).
 - **Stabilisering (B-380, spørsmål til eieren):** se `docs/STABILISERING.md` – kassetaket, legacy-gulvet, sesonglistene og
   innskuddet (fire spørsmål nederst). Verksjefene venter til dette er avklart.
 
-- **Verksjefer for datterverkene (B-379, spørsmål til eieren):** se `docs/VERKSJEF-FORSLAG.md` – fem spørsmål i avsnitt 9.
+- **Verksjefer for datterverkene (B-379, besvart, B-409):** `docs/VERKSJEF-FORSLAG.md` – svarene i avsnitt 9 og V1 ferdig
+  spesifisert i avsnitt 10. Bygges etter V0/K-1 (2.10 → skygge → data → eventuelt live → V1).
+- **Rekonstruksjon etter konkurs (B-409, spørsmål til eieren):** `docs/REKONSTRUKSJON-FORSLAG.md` – fem modeller (A–E)
+  sammenlignet, sperrene mot misbruk og hva eieren velger (avsnitt 7). Ingen modell valgt, ikke bygget.
 
 - ~~Trender i markedet~~ **Bygget (B-255).** («etterspørselen etter armering øker») som styrer hvilke kontrakter som dukker opp (se
   `DESIGN.md`).
