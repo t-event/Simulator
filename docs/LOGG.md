@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 322 – 2026-10-01: Fagpoeng borte, utbytterettingen planlagt, restfeil i kontrollrommet (B-399)
+
+**Brukeren ba om:** fagpoeng mens man er borte (ca. 5 % av vanlig takt, høyst åtte timer, regnet av serveren); kjøre
+utbytterettingen rett etter 2.10-rapporten med etterbetaling (dry-run per spiller og dato først); og rette en restfeil
+der et gammelt ukeresultat fra en annen konto gikk foran et nytt i minnet.
+
+**Gjort:** `balance.ts --fagpoeng` (5–8 fagpoeng per spilldøgn på alle nivåer) → 10 per time, høyst 80. 100:
+`claim_away_v2` (tid og fagpoeng, `daily.away_fp_total`); appen henter den og viser fagpoengene i «Velkommen tilbake».
+Utkastet 099 retter bare framover (fra 2.10); planlagt sjekk 2.10 kl. 07:45 UTC kjører det og lager dry-run for
+etterbetalingen. Ukeresultatet i minnet går foran nettleseren.
+
+**Testet:** `claim_away_v2` som spiller i en transaksjon som ble rullet tilbake: 3 t → 30, ny henting → 0, 20 t → 80.
+tsc, lint, `npm test` (nye tester for fagpoeng borte og ukeresultatet), `balance.ts --opphold --daglig 15` (ingen
+opphold flagget). `balance.ts --daglig 15` gir Støperi på dag 19 (mål 20–50, AVVIK) – det samme på main før endringen, så
+det kommer ikke av fagpoengene; diagnosekjøringen er ikke med i CI.
+
+**Gjenstår:** 2.10: rapporten, så utbytterettingen og dry-run for etterbetaling til eieren.
+
 ## Økt 321 – 2026-10-01: Typevakten og energivakten rettet (B-398)
 
 **Brukeren ba om:** rette to nye feil i kontrollene (typevakten slapp gjennom `history: null` og nivå som 4,5 eller

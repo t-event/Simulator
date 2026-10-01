@@ -90,11 +90,11 @@ export function DailySync({ api, blocked }: { api: GameApi; blocked: boolean }) 
         // likevel inn i spillet – ellers var de tapt
         const [st, away] = await Promise.allSettled([fetchDailyStatus(), claimAway()]);
         if (st.status === "fulfilled" && st.value) setDailyStatus(st.value);
-        const seconds = away.status === "fulfilled" ? away.value : 0;
+        const { seconds, fp } = away.status === "fulfilled" ? away.value : { seconds: 0, fp: 0 };
         // Tida borte er hentet på serveren nå, så den legges inn i spillet selv om komponenten er byttet ut
         if (seconds > 0 && apiRef.current.game) {
-          const reward = apiRef.current.act((g) => applyAwayReward(g, seconds, fmtKr));
-          if (reward.cash > 0) showAway?.({ seconds, reward });
+          const reward = apiRef.current.act((g) => applyAwayReward(g, seconds, fp, fmtKr));
+          if (reward.cash > 0 || reward.fp > 0) showAway?.({ seconds, reward });
         }
       } finally {
         checking = false;
@@ -165,7 +165,7 @@ export function DailySync({ api, blocked }: { api: GameApi; blocked: boolean }) 
         {away && (
           <p>
             Du var borte i {formatAway(away.seconds)}. Verket holdt det gående og tjente{" "}
-            <strong>{fmtKr(away.reward.cash)}</strong>.
+            <strong>{rewardText(away.reward)}</strong>.
           </p>
         )}
         {(rewardOpen || claimed) && (

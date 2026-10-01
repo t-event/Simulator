@@ -107,6 +107,7 @@ npx tsx src/game/balance.ts --verbose --finance --seed 3   # feilsøking av bala
 npx tsx src/game/balance.ts --dump 3 > lagret.json         # lagret spill på nivå 3, for testing
 npx tsx src/game/balance.ts --kontrakter 1                 # hvor lang tid kontraktene tar per nivå
 npx tsx src/game/balance.ts --research 1                   # når testspilleren forsker
+npx tsx src/game/balance.ts --fagpoeng                     # fagpoeng per spilldøgn per nivå (grunnlaget for fagpoeng borte, B-399)
 npx tsx src/game/balance.ts --sperrer                      # hva som sperrer neste nivå: penger, omdømme, fagpoeng
 npx tsx src/game/balance.ts --vansker                      # per nivå: hva spilleren venter på, flink og nybegynner
 npx tsx src/game/balance.ts --nybegynner --verbose --seed 2  # kjør som nybegynner (også --replog N --nybegynner)
@@ -321,6 +322,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   server i Playwright må svare på `rpc/save_game` og gi `rev` og `device` på `saves?select=…`. To nettlesere
   simuleres med to `browser.newContext()` mot samme falske tilstand. «Appen vises igjen» utløses med
   `document.dispatchEvent(new Event("visibilitychange"))`, «legges bort» med `pagehide`.
+- Fagpoeng borte (B-399): `AWAY_FP_PER_HOUR`/`AWAY_FP_MAX` i `game/daily.ts` speiler `claim_away_v2` (100). Appen legger inn
+  det serveren svarer; endres tallene, endres begge.
 - Belønninger i «døgns drift» (B-149) må stemme mellom `game/daily.ts` og `supabase/013_daglig.sql` (`streak_days`,
   bonus i `claim_daily_missions`/`claim_away`), ellers kan juksesperren flagge den som henter dem. Endres
   belønningene: kjør `balance.ts --daglig 15` og `--opphold --daglig 15`.

@@ -96,6 +96,9 @@ import {
   AWAY_DAYS_PER_HOUR,
   AWAY_MAX_HOURS,
   awayReward,
+  awayFp,
+  AWAY_FP_MAX,
+  applyAwayReward,
   dayOfDrift,
   DRIFT_FLOOR,
   MISSION_BONUS,
@@ -918,6 +921,13 @@ test("Mens du var borte (B-149): minst en halvtime, høyst åtte timer", () => {
     awayReward(g, 30 * 3600).cash === Math.round(AWAY_MAX_HOURS * AWAY_DAYS_PER_HOUR * unit),
     "skulle stoppe på åtte timer",
   );
+  // Fagpoeng (B-399): det serveren sier, høyst 80; som serveren regner dem
+  assert(awayFp(20 * 60) === 0 && awayFp(3 * 3600) === 30 && awayFp(20 * 3600) === AWAY_FP_MAX, "fagpoeng borte");
+  assert(awayReward(g, 3 * 3600, 30).fp === 30 && awayReward(g, 3 * 3600, 9999).fp === AWAY_FP_MAX, "taket");
+  assert(awayReward(g, 20 * 60, 30).fp === 0, "under en halvtime");
+  const fp0 = g.researchPoints;
+  applyAwayReward(g, 3 * 3600, 30, (v) => String(v));
+  assert(g.researchPoints === fp0 + 30 && /fagpoeng/.test(g.log.at(-1)!.text), "fagpoengene ble ikke lagt inn");
 });
 
 test("Dagens oppdrag (B-149): samme for alle samme dag, fremdrift fra dagens start, bonus én gang", () => {

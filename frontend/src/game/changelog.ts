@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 399,
+    date: "2026-10-01",
+    title: "Fagpoeng mens du er borte",
+    items: [
+      "«Mens du var borte» gir nå også litt fagpoeng: 10 for hver time du har vært borte, høyst 80 (åtte timer). Det krever konto, som pengene.",
+      "Ukens kontrollrom: et resultat som ikke ble levert, blir ikke lenger skygget av et gammelt resultat fra en annen konto på samme enhet.",
+    ],
+  },
+  {
     b: 397,
     date: "2026-10-01",
     title: "Feilrettinger",
