@@ -5,6 +5,43 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 324 – 2026-10-01: Verdensjobbene én spiller om gangen, overvåking, og midnattstestene (B-401)
+
+**Brukeren ba om:** punkt 1 og 2 sammen, med testene i punkt 5: hver spiller behandles atomisk (feil rulles tilbake for
+den spilleren, logges, resten fortsetter), nye forsøk gir aldri dobbel betaling, overvåkingen viser siste vellykkede
+behandling også per spiller, og prøvekjøringen viser uendrede beløp for feilfrie spillere med én spiller som bevisst
+feiler. Historisk etterbetaling følger den separate planen. Datakvalitetsoversikten tas når flere dager er samlet;
+variant B venter; passordvernet står fravalgt.
+
+**Gjort:**
+- Migrasjon 101 (`supabase/101_verdensjobber_robuste.sql`, lagt inn): `pay_dividends`, `pay_contributions`,
+  `pay_company_income` og `sample_contributions` behandler én spiller (ett selskap) per deltransaksjon; `world_tick`
+  kjører hver jobb for seg. Nye tabeller `world_jobs`, `world_job_units`, `world_job_errors` (RLS, ingen tilgang for
+  spillere) og funksjonene `world_health()`, `world_health_players()` og `world_prune()`.
+- Prøvekjøring (rullet tilbake): gammel mot ny versjon for 1.10 med en midlertidig `world_today`, én spiller med bevisst
+  feil. 0 avvik for de feilfrie (utbytte 13, bidrag 15, inntekt 1, kasseposter, målinger); spilleren med feil fikk status
+  «feil», og et nytt forsøk betalte samme beløp én gang (2 kasseposter, fortsatt 2 etter enda en kjøring). Egen prøve:
+  statusen går tilbake til «ok» ved neste vellykkede måling. Første ekte kjøring etter migrasjonen: alle jobber «ok».
+- Funn underveis: Supabase-connectoren holder igjen (60 s tidsavbrudd, ingenting når databasen) en DO-blokk eller
+  funksjon med flere setninger der én er `delete`. Første forsøk på prøvekjøringen slettet gårsdagens betalinger og
+  hang derfor; oppryddingen i 101 står nå i én setning (`world_prune`). Notert i CLAUDE.md.
+- Test i `game/tests.ts`: `worldDay`/`nextWorldMidnight` mot fasit fra `world_day()` i SQL, med sommertiden som slutter
+  25.10.2026 og begynner 28.3.2027, og et helt år uten hoppede eller doble dager. Kjørt med TZ = UTC, New York, Tokyo og
+  Oslo.
+- Utkastet 099 tilpasset 101 (oppgjøret per spiller i spillerens deltransaksjon) og prøvd: tre ekte bestillinger som ble
+  ferdige mens appen var lukket, gjøres ferdige ved målingen, og målingen bruker det nye utbyttet; ingen nye kasseposter.
+  Instruksen til kjøringen 2.10 kl. 07:45 UTC er oppdatert (sjekk `world_health` først, gjenta testen, unngå `delete`).
+- Docs: B-401, STATUS (avsnitt 4 og 11), FORSLAG (datakvalitet, variant B, passordvernet), CLAUDE.md.
+
+**Testet:** prøvekjøringene over i databasen; `get_advisors` (security): ingen nye funn utover RLS uten regler på de nye
+interne tabellene (som de andre); `npm test`, typesjekk, lint, `balance.ts` og `--daglig 15`.
+
+**Gjenstår:** 2.10 – rapporten 07:00 UTC, så kjøringen 07:45 (helsesjekk, 099 med prøvekjøring, dry-run av
+etterbetalingen til eieren). Datakvalitetsoversikten når flere dager er samlet. Variant B etter stabiliseringen. V0/K-1
+etter rapporten. Sesong 3-pynt før sesong 3.
+
+---
+
 ## Økt 323 – 2026-10-01: Egen referanse for belønningsscenarioet, i CI; presisering om fagpoeng (B-400)
 
 **Brukeren ba om:** beholde 20–50 som mål i standardkjøringen, gi belønningsscenarioet en egen referanse og kjøre det i
