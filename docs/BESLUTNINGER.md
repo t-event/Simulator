@@ -7389,5 +7389,8 @@ Funn og retting:
   11: dag 6, mål 7–20). Standardkjøringen i CI er innenfor. Målene er eierens; ingen endring.
 - **Docs:** README (STATUS, STABILISERING, UKENS-KONTROLLROM, KONSERNKAPITAL, K1-PROGRAMMER i lista), PLAN-NETT
   (migrasjonene 095–101), RETNING 5.5 (sesongene starter ikke av seg selv lenger, B-182/B-221).
-Endringslogg: nei – spillerne merker ingenting (bare med feil klokke på telefonen).
+Endringslogg: ja (eieren: merkbart for spillere med feil mobilklokke) – «Varsler om betalinger og anbud viser riktig
+tidspunkt også når klokken på mobilen er feil.»
+Balansen (eieren): målvinduet vurderes ut fra medianen over frøene; Verksted på dag 5–6 i enkelte spill er greit så
+lenge det typiske forløpet ligger innenfor 7–20 dager. Ingen endring.
 Konto (B-149): ikke aktuelt.

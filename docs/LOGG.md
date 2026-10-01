@@ -22,6 +22,9 @@ ble testet, og hva som gjenstår.
   som kan være tomme (alle sikret); `setInterval`/`clearInterval` i par i alle filer; ingen `as any`/`@ts-ignore`.
 - Docs: README, PLAN-NETT, RETNING 5.5, CLAUDE.md (hvordan databasen sjekkes mot repoet), B-403.
 
+- Etter eierens svar: oppføring i endringsloggen (b: 403) – rettingen merkes av spillere med feil mobilklokke. Balansen
+  beholdes; målvinduet vurderes ut fra medianen over frøene.
+
 **Testet:** `npm test`, typesjekk, lint, prettier på de endrede filene, `npm run build`.
 
 **Gjenstår:** morgenkjøringen 2.10 (helsesjekk, rapport, 099, slagghåndteringen, V0/K-1 i skygge, B-402).
