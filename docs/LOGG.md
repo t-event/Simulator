@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 327 – 2026-10-01: Det som er verdt å låne fra dashbordmalen (B-404)
+
+**Brukeren ba om:** se om en designbeskrivelse («Premium SaaS Dashboard») kan gjøre appen finere, og så legge inn det
+som er verdt å låne.
+
+**Gjort:**
+- `ui/delta.ts` (`changeDelta`), `Metric` og `DeltaLine` i `ui/ds.tsx`, `delta` på `Stat` (`ui/common.tsx`).
+- Økonomi: «Resultat i går» med endringen mot døgnet før, «Produsert i går» med endringen i tonn. Konsern: konsernverdien
+  med hva som kommer inn per ekte dag.
+- `game.css`: endringslinja, moduler i lag på PC, arkene toner inn, løft ved musepeker, redusert bevegelse.
+- Test av `changeDelta` i `game/tests.ts`. Docs: UI.md (3.2, 3.5, 5.2), B-404, endringsloggen (b: 404).
+
+**Testet:** `npm test`, typesjekk, lint, prettier, build; Playwright på de 7 størrelsene i UI.md med og uten konsern fra
+serveren (scrolling, avkortet tekst, hopping i 8 s, animasjonen spilles én gang, løft bare med mus, redusert bevegelse).
+
+**Gjenstår:** morgenkjøringen 2.10 (helsesjekk, rapport, 099, slagghåndteringen, V0/K-1 i skygge, B-402).
+
 ## Økt 326 – 2026-10-01: Kodegjennomgang: serverens klokke i varslene, databasen mot repoet, docs (B-403)
 
 **Brukeren ba om:** gå gjennom all kode, finne og rette feil, se etter glemte ting, og oppdatere alle .md-filene.

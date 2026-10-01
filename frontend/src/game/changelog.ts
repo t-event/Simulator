@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 404,
+    date: "2026-10-01",
+    title: "Tydeligere nøkkeltall",
+    items: [
+      "Resultatet og produksjonen i går viser om det gikk bedre eller dårligere enn døgnet før.",
+      "Konsernverdien viser hvor mye som kommer inn per ekte dag.",
+      "Ark og vinduer toner rolig inn, og på PC står nøkkeltallene i egne ruter.",
+    ],
+  },
+  {
     b: 403,
     date: "2026-10-01",
     title: "Riktig tidspunkt i varslene",

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { GRADES } from "../game/data";
 import { fmtNum } from "./format";
+import { DeltaLine, type Delta } from "./ds";
 import type { Analysis, GradeId } from "../game/types";
 
 export function Card({
@@ -57,15 +58,19 @@ export function Stat({
   label,
   value,
   tone,
+  delta,
 }: {
   label: string;
   value: ReactNode;
   tone?: "ok" | "warning" | "critical";
+  /** Endringen mot forrige gang, under tallet (B-404) */
+  delta?: Delta | null;
 }) {
   return (
     <div className={`g-stat${tone ? ` tone-${tone}` : ""}`}>
       <span>{label}</span>
       <strong>{value}</strong>
+      {delta && <DeltaLine delta={delta} />}
     </div>
   );
 }

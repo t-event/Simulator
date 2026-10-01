@@ -35,7 +35,8 @@ import type { View } from "./views";
 import { MoneyGuideLink } from "./MoneyGuide";
 import { Icon } from "./icons";
 import { hasPaidOut, paidOutTotal } from "../game/reserve";
-import { Callout, StatusLine, type Status } from "./ds";
+import { Callout, Metric, StatusLine, type Status } from "./ds";
+import { changeDelta } from "./delta";
 import { hints, type Anchor, type Hint } from "./hints";
 import { furnaceState, statusOf } from "./plantStatus";
 import { Breakdown, ResultChart } from "./Finance";
@@ -371,6 +372,7 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
   const [pynt, setPynt] = useState(false);
   const tab: SubTab = chosenTab;
   const y = g.history[g.history.length - 1];
+  const prev = g.history.length > 1 ? g.history[g.history.length - 2] : undefined;
   const sum = (o: Partial<Record<string, number>>) => Object.values(o).reduce<number>((a, b) => a + (b ?? 0), 0);
   // På Oversikt står målkortet øverst når du kan flytte, så hintet om det trengs bare på de andre underfanene (B-068)
   const tips = hints(g, stats).filter((t) => !(t.anchor === "mal" && tab === "oversikt"));
@@ -542,13 +544,13 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
             <Card title="Økonomi">
               {y && (
                 <div className="g-finance-head">
-                  <div className={`g-finance-result ${dayResult(y) >= 0 ? "is-plus" : "is-minus"}`}>
-                    <span>Resultat i går</span>
-                    <strong>
-                      {dayResult(y) >= 0 ? "+" : ""}
-                      {fmtKr(dayResult(y))}
-                    </strong>
-                  </div>
+                  {/* Nøkkeltallet med endringen mot døgnet før (B-404) */}
+                  <Metric
+                    label="Resultat i går"
+                    tone={dayResult(y) >= 0 ? "plus" : "minus"}
+                    value={`${dayResult(y) >= 0 ? "+" : ""}${fmtKr(dayResult(y))}`}
+                    delta={prev ? changeDelta(dayResult(y), dayResult(prev), fmtKr) : null}
+                  />
                   <div className="g-finance-side">
                     <span>
                       Snitt 7 døgn, alt med <strong>{fmtKr(avgResult(g))}</strong>
@@ -599,7 +601,13 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
                     )}
                   </>
                 )}
-                {y && <Stat label="Produsert i går" value={fmtT(y.producedT)} />}
+                {y && (
+                  <Stat
+                    label="Produsert i går"
+                    value={fmtT(y.producedT)}
+                    delta={prev ? changeDelta(y.producedT, prev.producedT, fmtT, { short: true }) : null}
+                  />
+                )}
                 {stats.salaryPerDay > 0 && <Stat label="Lønn per døgn" value={fmtKr(stats.salaryPerDay)} />}
                 <Stat label="Faste kostnader per døgn" value={fmtKr(STAGES[g.stage].fixedPerDay)} />
                 {g.loan > 0 && <Stat label="Lån" value={fmtKr(g.loan)} tone="warning" />}

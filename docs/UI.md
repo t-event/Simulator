@@ -101,6 +101,10 @@ Ingen status uttrykkes med farge alene: alltid ikon og/eller ord i tillegg.
   varsel).
 - **Bevegelse:** 120 ms (hover/trykk), 200 ms (panel/ark), 400 ms+ bare for belønning. Bare `transform`/`opacity`.
   `prefers-reduced-motion` respekteres overalt.
+  **Bygget (B-404):** ark og dialoger (`.g-modal`) toner inn på 200 ms; kortet stiger 8 px opp (mobil) eller glir inn
+  fra høyre (sidearket på PC). Animasjonen spilles bare når arket monteres, ikke når spillet tegner på nytt. Knapper
+  (`.g-cta`, `.ds-button`, `button.g-primary`) løftes 1 px med `--shadow-sm` når musa holdes over – bare med
+  `(hover: hover) and (pointer: fine)`, aldri på berøringsskjerm. Med redusert bevegelse er alt dette av.
 
 ### 3.3 Typografi
 
@@ -144,6 +148,12 @@ Hver komponent får én fil (eller én gruppe) i `ui/ds/` og én stilblokk:
 - **ProgressBar** (dagens `Bar`) med tone og valgfri verdi/etikett; **Meter** for målere med målområde
   (kontrollrom, lager).
 - **Stat**: `hero` / `normal` / `compact`, med valgfri endring (▲ grønn / ▼ rød + tekst).
+  **Bygget (B-404):** `Metric` (ds.tsx) er nøkkeltallet øverst på en side – etikett, stort tall og en valgfri
+  `DeltaLine` under. `Stat` (common.tsx) tar også `delta`. Endringen lages med `changeDelta` (`ui/delta.ts`): pil + ord
+  bærer meningen, fargen er tillegg (grønn bra, rød dårlig, grå uendret; `higherIsGood: false` for kostnader). Én fast
+  linje (`nowrap` + «…»), så ingenting hopper; i de smale `Stat`-rutene brukes `short` («+27 t», hele setningen som
+  verktøytips). Brukt på Økonomi (resultatet og produsert i går mot døgnet før) og Konsern (konsernverdien og hva som
+  kommer inn per ekte dag).
 - **StatusBadge**: ett statusspråk for utstyr og ordre (se 6.2): ikon + ord + farge.
 - **Callout** (info/ok/advarsel/kritisk) erstatter dagens ulike hint- og varselbokser; **Toast** for flyktige varsler
   med kø og sammenslåing.
@@ -195,6 +205,8 @@ Ett `AppShell` med CSS grid-områder: `header`, `nav`, `main`, `aside`. Samme Re
   som undermeny.
 - **Hovedområde** med sidens egen PC-layout (6) og et valgfritt **sidepanel** til høyre for detaljer/valgt objekt.
 - Ark (toppliste, fagbok, innstillinger) åpnes fra høyre, så spillet synes bak.
+- **Moduler i lag (B-404):** på PC blir nøkkeltallet og tallene ved siden av (`.g-finance-head`, `.g-finance-side`) egne
+  innfelte ruter (`--surface-2` i kortet), i et rutenett på minst 180 px. På mobil står de som før, under hverandre.
 
 ## 6. Side for side
 

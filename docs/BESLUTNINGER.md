@@ -7394,3 +7394,24 @@ tidspunkt også når klokken på mobilen er feil.»
 Balansen (eieren): målvinduet vurderes ut fra medianen over frøene; Verksted på dag 5–6 i enkelte spill er greit så
 lenge det typiske forløpet ligger innenfor 7–20 dager. Ingen endring.
 Konto (B-149): ikke aktuelt.
+
+## B-404 Lånt fra en dashbordmal: nøkkeltall med endring, moduler på PC og rolig bevegelse (2026-10-01)
+Status: gjennomført.
+Bakgrunn: eieren delte en designbeskrivelse av et «premium SaaS-dashbord» og spurte om den kunne gjøre appen finere,
+og ba så om å «legge inn det som er verdt å låne». Malen er lys, rund (kort med 55 px radius), med Inter og
+lilla/grønn – det passer ikke den mørke industristilen (B-187, B-191) og ble ikke tatt. Tre ideer ble lånt, tilpasset
+designsystemet, uten nye farger eller tokens:
+- **Nøkkeltall med endring:** `Metric` (ds.tsx) og `DeltaLine` med `changeDelta` (`ui/delta.ts`). Økonomi viser
+  resultatet i går mot døgnet før, og «Produsert i går» får endringen i tonn. Konsern viser hva som kommer inn per ekte
+  dag (utbytte + bidrag) under konsernverdien. Pil + ord bærer meningen, fargen er tillegg. Én fast linje, så ingenting
+  hopper (B-238); i de smale rutene bare «+27 t» med hele setningen som verktøytips.
+- **Moduler i lag på PC:** nøkkeltallet og tallene ved siden av blir innfelte ruter i kortet fra 900 px. Mobil uendret.
+- **Rolig bevegelse:** ark toner inn (200 ms), kortet stiger inn nedenfra på mobil og glir inn fra høyre på PC;
+  knapper løftes 1 px når musa holdes over – bare med mus, aldri på berøringsskjerm. `prefers-reduced-motion` slår av
+  alt. Animasjonen spilles bare når arket åpnes, ikke når spillet tegner på nytt (målt).
+Ikke tatt: lys modus, ny skrift, store radier, 3D/WebGL-bakgrunner og animasjoner som går hele tida (batteri, ro).
+Testet: 320–2 560 px (de 7 størrelsene i UI.md), med og uten konsern fra serveren: ingen horisontal scrolling, ingen
+avkortet tekst, ingen hopping på 8 s med spillet i gang; animasjonen starter ikke på nytt; løft bare med mus; ingenting
+med redusert bevegelse.
+Konto (B-149): ikke aktuelt.
+Endringslogg: ja.

@@ -210,7 +210,8 @@ frontend/src/
     MissingOut.tsx «Det går du glipp av» på Mål for spillere uten konto (B-212)
     Goals.tsx    Mål: ark fra knappen ved varsellinja på mobil (B-286), side i sidemenyen på PC: I dag, Uka, Merker (B-211, B-214)
     tokens.css   Designsystemet (B-191): alle farger, skriftstørrelser, radier, avstander – nye stiler bruker disse
-    icons.tsx    Ikoner fra Lucide, kopiert inn (lisens i icons-LICENSE.txt)   ds.tsx  StatusBadge, Callout, Button
+    icons.tsx    Ikoner fra Lucide, kopiert inn (lisens i icons-LICENSE.txt)   ds.tsx  StatusBadge, Callout, Button, Metric
+    delta.ts     Endringen under nøkkeltallene (`changeDelta`, tegnes av `DeltaLine`/`Metric`, B-404)
     fonts/       Visningsskriften for overskrifter og store tall (Barlow Semi Condensed 600, OFL)
     WorldMap.tsx Konsern → Kart: verdenskartet med regionene, andres verk og selskapene (B-333)
     Chat.tsx     Skiftrapporten: knappen ved varsellinja (under 380 px i tallraden) og arket (B-338)
