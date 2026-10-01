@@ -15,6 +15,12 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 403,
+    date: "2026-10-01",
+    title: "Riktig tidspunkt i varslene",
+    items: ["Varsler om betalinger og anbud viser riktig tidspunkt også når klokken på mobilen er feil."],
+  },
+  {
     b: 399,
     date: "2026-10-01",
     title: "Fagpoeng mens du er borte",
