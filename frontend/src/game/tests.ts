@@ -4095,6 +4095,41 @@ test("Tidslinjetall (B-396): strøm, misligholdte og avbrutte kontrakter telles 
   assert(t?.kwh === 0 && t.contractsMissed === 0 && t.contractsCancelled === 0, `gammel lagring ${JSON.stringify(t)}`);
 });
 
+test("Skrapklasseren (B-397): lagerets faktiske analyse avgjør om returskrap kan erstatte rent skrap", () => {
+  const setup = (tramp: number) => {
+    const g = newGame(397);
+    g.stage = 2;
+    g.workers.push({ ...makeCandidate(g, "klasser"), hiredDay: 1 });
+    for (const id of Object.keys(g.scrap) as (keyof typeof g.scrap)[]) g.scrap[id].t = 0;
+    g.scrap.retur = { ...g.scrap.retur, t: 50, p: 0.01, tramp, c: 0.06, dirt: 0.01, radioactive: false };
+    return g;
+  };
+  const recipe = { rent: 100, spon: 0, retur: 0, tungt: 0, rajern: 0, blandet: 0, shredder: 0 };
+  // Skitten retur (sporelementer over det rene skrapet): ovnen venter heller enn å ødelegge kvaliteten
+  const dirty = setup(0.125);
+  assert(takeScrap(dirty, 10, false, recipe) === null, "brukte returskrap som var skitnere enn det rene skrapet");
+  // Ren retur (kjent analyse, renere enn standarden for rent skrap): kan fylle inn
+  const clean = setup(0.03);
+  assert(takeScrap(clean, 10, false, recipe) !== null && clean.scrap.retur.t < 50, "brukte ikke ren retur");
+});
+
+test("Verdenshendelser (B-397): en hendelse som er over, teller ikke, også uten ny liste fra serveren", () => {
+  const g = newGame(3971);
+  const ev = { id: 1, kind: "test", title: "Strømkrise", text: "", scrap: 1, steel: 1, power: 2 };
+  applyWorldEvents(g, [{ ...ev, until: new Date(Date.now() + 3_600_000).toISOString() }]);
+  assert(worldFactor(g, "power") === 2, "hendelsen som pågår, teller ikke");
+  g.world!.events = [{ ...ev, until: new Date(Date.now() - 1000).toISOString() }];
+  assert(worldFactor(g, "power") === 1, "hendelsen som er over, teller fortsatt");
+});
+
+test("Dødsulykke (B-397): hele verket stenges, også valseverket", () => {
+  const g = newGame(3972);
+  g.stage = 3;
+  for (let i = 0; i < 4; i++) g.workers.push(makeCandidate(g, "ovn"));
+  fatalAccident(g, "test");
+  assert((g.closedUntilMin ?? 0) >= g.minute + FATAL_DOWN_DAYS * 1440, "verket er ikke stengt");
+});
+
 if (failed) {
   console.log(`\n${failed} test(er) feilet`);
   process.exitCode = 1;

@@ -96,6 +96,8 @@ export function fatalAccident(g: GameState, what: string): void {
     f.downReason = "Stengt: politiet og Arbeidstilsynet gransker dødsulykken";
   }
   g.castDownUntilMin = Math.max(g.castDownUntilMin, until);
+  // Hele verket er stengt, også valseverket (B-397)
+  g.closedUntilMin = Math.max(g.closedUntilMin ?? 0, until);
   const fine = FATAL_FINE[g.stage] ?? FATAL_FINE[FATAL_FINE.length - 1];
   if (fine) addCost(g, "bot", fine);
   adjustReputation(g, -25);

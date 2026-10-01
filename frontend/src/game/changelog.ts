@@ -15,6 +15,21 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 397,
+    date: "2026-10-01",
+    title: "Feilrettinger",
+    items: [
+      "Ukens kontrollrom: en ny versjon av spillet laster ikke lenger siden på nytt midt i et tellende forsøk, og resultatet sendes selv om du går til en annen side eller nettleseren ikke kan lagre det.",
+      "Ukens kontrollrom: de siste 15 minuttene før uka slutter kan du ikke starte et nytt tellende forsøk – det ville ikke rukket å telle.",
+      "Pengene for tida du var borte går ikke lenger tapt hvis nettet svikter halvveis.",
+      "Dagens oppdrag byttes ved midnatt også når du spiller uten pause.",
+      "Skrapklasseren bruker ikke lenger returskrap som er skitnere enn det rene skrapet det skal erstatte.",
+      "En verdenshendelse som er over (for eksempel en strømkrise), virker ikke lenger når du spiller uten nett.",
+      "Etter en dødsulykke står også valseverket mens verket er stengt.",
+      "Innloggingen er sikrere når du logger ut eller bytter konto, og lagringen på nett prøver igjen av seg selv etter et kort brudd.",
+    ],
+  },
+  {
     b: 394,
     date: "2026-09-30",
     title: "Trinnet på datterverkene",

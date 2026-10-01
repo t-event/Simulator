@@ -29,6 +29,7 @@ import { CloudDot, CloudFollow, IntroAccount, LoggedOutNotice } from "./Account"
 import { SeasonPrompt, SeasonResultNotice, SeasonSync, SeasonTeaser } from "./Season";
 import { DailySync } from "./Daily";
 import { BadgeSync } from "./BadgeSync";
+import { PendingControlSync } from "./Weekly";
 import { GoalsPage, GoalsSheet } from "./Goals";
 import { LeaderboardSheet } from "./Leaderboard";
 import { ChatButton, ChatSheet } from "./Chat";
@@ -38,9 +39,10 @@ import { useSeasonStatus } from "./useSeason";
 import { SettingsSheet } from "./Settings";
 import { cloudConfigured } from "../net/config";
 import type { BoardKind } from "../net/leaderboard";
-import { getSession } from "../net/supabase";
+import { getSession, userId } from "../net/supabase";
 import { flush, leaving, onLocalSave } from "../net/sync";
 import { newVersionAvailable, shouldReloadFor, UPDATE_CHECK_MS } from "../net/update";
+import { pendingControl } from "../net/weekly";
 import { loadGame, saveGame, setSaveListener } from "../game/save";
 import { InboxSheet } from "./Inbox";
 import { importantLog, markAllSeen, unseenCount } from "../game/inbox";
@@ -152,8 +154,8 @@ function Intro({ api }: { api: GameApi }) {
 
 /**
  * Automatisk oppdatering (B-148): ser etter en ny versjon hvert 5. minutt og når appen vises igjen. Finnes det en,
- * lagres spillet (også på nett), og siden lastes inn på nytt. Under en charge i kontrollrommet, eller mens man skriver
- * i et felt, venter den.
+ * lagres spillet (også på nett), og siden lastes inn på nytt. Under en charge i kontrollrommet (også ukens), mens et
+ * ukeresultat venter på å bli levert, eller mens man skriver i et felt, venter den.
  */
 function AutoUpdate({ api }: { api: GameApi }) {
   const [found, setFound] = useState<string | null>(null);
@@ -189,7 +191,10 @@ function AutoUpdate({ api }: { api: GameApi }) {
     let timer: ReturnType<typeof setTimeout>;
     const reload = async () => {
       const typing = document.activeElement?.matches("input, textarea, select");
-      if (typing) {
+      // Åpent kontrollrom (også ukens, som ikke stopper spillet) eller et ukeresultat som ikke er levert: vent (B-397).
+      // Et tellende ukeforsøk er brukt når det startes, så en omlasting midt i ville kostet spilleren forsøket
+      const controlOpen = !!document.querySelector(".control-room") || pendingControl(userId()) !== null;
+      if (typing || controlOpen) {
         timer = setTimeout(() => void reload(), 5000);
         return;
       }
@@ -1305,6 +1310,7 @@ export function GameApp() {
 
       <SeasonSync api={api} />
       <BadgeSync api={api} />
+      <PendingControlSync />
       <AutoUpdate api={api} />
       <CloudFollow api={api} onOpenSettings={() => setSettingsOpen(true)} />
       <OtherTab />

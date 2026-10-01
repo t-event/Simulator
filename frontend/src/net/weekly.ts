@@ -125,8 +125,8 @@ export async function fetchWeeklyStatus(): Promise<WeeklyStatus | null> {
 // Ukens kontrollrom (B-387, `094_ukens_kontrollrom.sql`)
 // ------------------------------------------------------------------------------------------------------------------
 
-export type ControlRefusal = "konto" | "sperret" | "uke" | "apen" | "brukt" | "nett";
-export type SubmitRefusal = "ukjent" | "avbrutt" | "fort" | "sent" | "ugyldig";
+export type ControlRefusal = "konto" | "sperret" | "uke" | "apen" | "brukt" | "nett" | "sent_i_uka";
+export type SubmitRefusal = "ukjent" | "avbrutt" | "fort" | "sent" | "ugyldig" | "uke_slutt";
 
 export const CONTROL_REFUSAL_TEXT: Record<ControlRefusal | SubmitRefusal, string> = {
   konto: "Ukens utfordring krever konto.",
@@ -135,11 +135,13 @@ export const CONTROL_REFUSAL_TEXT: Record<ControlRefusal | SubmitRefusal, string
   apen: "Du har et forsøk som ikke er levert. Lever det eller gi det opp først.",
   brukt: "Du har brukt alle forsøkene denne uka.",
   nett: "Fikk ikke kontakt med serveren. Forsøket er ikke startet.",
+  sent_i_uka: "Uka er nesten over: det er ikke tid til et helt forsøk før lista låses ved midnatt.",
   ukjent: "Forsøket finnes ikke.",
   avbrutt: "Forsøket ble gitt opp.",
   fort: "Forsøket ble levert for fort.",
   sent: "Fristen for forsøket gikk ut (15 minutter).",
   ugyldig: "Resultatet kunne ikke godtas.",
+  uke_slutt: "Uka var over før forsøket ble levert, og lista for uka er låst. Forsøket teller ikke.",
 };
 
 export interface ControlAttempt {
@@ -188,23 +190,55 @@ export interface PendingControl {
 }
 
 const PENDING_KEY = "stalverk-ukekontroll-v1";
+/** Kopi i minnet: virker lagringen i nettleseren ikke (full eller sperret), leveres resultatet likevel (B-397) */
+let memPending: PendingControl | null = null;
+/** Om resultatet som venter, også ligger i nettleseren (overlever at appen lukkes) */
+let durable = true;
 
-export function pendingControl(): PendingControl | null {
+function readPending(): PendingControl | null {
   try {
     const raw = localStorage.getItem(PENDING_KEY);
     const p = raw ? (JSON.parse(raw) as PendingControl) : null;
-    return p && typeof p.id === "number" ? p : null;
+    if (p && typeof p.id === "number") return p;
   } catch {
+    // Faller tilbake på kopien i minnet
+  }
+  return memPending;
+}
+
+/** Fristen for å levere er ute (med et minutts slingring for klokka) */
+function expired(p: PendingControl, now: number): boolean {
+  return Date.parse(p.deadline) + 60_000 < now;
+}
+
+/**
+ * Resultatet som venter på å bli levert, for denne kontoen (`user`). Et resultat fra en annen konto på samme enhet
+ * sperrer ingenting, og et resultat der fristen er ute, ryddes bort (B-397).
+ */
+export function pendingControl(user?: string | null, now = Date.now()): PendingControl | null {
+  const p = readPending();
+  if (!p) return null;
+  if (expired(p, now)) {
+    setPending(null);
     return null;
   }
+  if (user !== undefined && p.user !== user) return null;
+  return p;
+}
+
+/** Om resultatet som venter, ligger trygt i nettleseren, eller bare i minnet mens appen er åpen */
+export function pendingIsDurable(): boolean {
+  return durable;
 }
 
 function setPending(p: PendingControl | null): void {
+  memPending = p;
   try {
     if (p) localStorage.setItem(PENDING_KEY, JSON.stringify(p));
     else localStorage.removeItem(PENDING_KEY);
+    durable = true;
   } catch {
-    // Uten lagring i nettleseren prøves innleveringen bare én gang
+    durable = p === null;
   }
 }
 
@@ -214,8 +248,8 @@ export type SubmitOutcome =
   | { kind: "avvist"; reason: SubmitRefusal };
 
 /**
- * Leverer et forsøk. Resultatet lagres først i nettleseren, så det ikke går tapt ved en nettfeil: da prøves det igjen
- * (`flushPendingControl`) til fristen er ute. Serveren godtar samme innlevering flere ganger (samme svar).
+ * Leverer et forsøk. Resultatet lagres først i nettleseren (og i minnet), så det ikke går tapt ved en nettfeil: da
+ * prøves det igjen (`flushPendingControl`) til fristen er ute. Serveren godtar samme innlevering flere ganger.
  */
 export async function submitControlAttempt(p: PendingControl): Promise<SubmitOutcome> {
   setPending(p);
@@ -224,13 +258,13 @@ export async function submitControlAttempt(p: PendingControl): Promise<SubmitOut
 
 /** Prøver å levere et resultat som venter. «venter» betyr at det skal prøves igjen senere. */
 export async function flushPendingControl(now = Date.now()): Promise<SubmitOutcome> {
-  const p = pendingControl();
-  if (!p) return { kind: "venter" };
-  if (userId() !== p.user) return { kind: "venter" };
-  if (Date.parse(p.deadline) + 60_000 < now) {
+  const raw = readPending();
+  if (raw && expired(raw, now)) {
     setPending(null);
-    return { kind: "avvist", reason: "sent" };
+    return raw.user === userId() ? { kind: "avvist", reason: "sent" } : { kind: "venter" };
   }
+  const p = pendingControl(userId(), now);
+  if (!p) return { kind: "venter" };
   try {
     const r = await rpc<Record<string, unknown>>("weekly_control_submit", {
       p_attempt: p.id,
@@ -252,7 +286,7 @@ export async function flushPendingControl(now = Date.now()): Promise<SubmitOutco
 
 /** Gir opp et startet forsøk (teller 0) */
 export async function abandonControlAttempt(id: number): Promise<void> {
-  if (pendingControl()?.id === id) setPending(null);
+  if (readPending()?.id === id) setPending(null);
   await rpc("weekly_control_abandon", { p_attempt: id });
 }
 

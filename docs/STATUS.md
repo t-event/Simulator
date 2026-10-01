@@ -79,7 +79,8 @@ regnes av serveren i ekte tid.
   i samme rekkefølge – og ukens kvalitet. Et forsøk er brukt når det startes; det kan leveres med samme id til fristen
   (15 min), også etter en nettfeil (appen lagrer resultatet og prøver igjen). Serveren sjekker tid (20 s–15 min), poeng
   (0–5 000) og stjerner, og lagrer inndataene (høyst 32 kB). Beste leverte forsøk teller. Trening på ukens kvalitet er
-  fri, med egne frø, og teller ikke. Verifiseringen er som for kontrollromsrekorden: rimelige tall, ikke avspilling
+  fri, med egne frø, og teller ikke. De siste 15 minuttene av uka kan ingen starte et tellende forsøk, og
+  ingenting leveres etter at uka er over (B-397). Verifiseringen er som for kontrollromsrekorden: rimelige tall, ikke avspilling
   (variant B – avspilling på serveren – venter).
 - Juksesperren (`check_snapshot`) sjekker vekst, tonn, fart og første opplasting.
 - **Tidslinjetall til nye ukekonkurranser** (B-396, ikke slått på): tidslinja samler tellere i alt – strøm (`kwh_total`),

@@ -7216,3 +7216,33 @@ Beslutning:
   absolutt tall er mest rettferdig. Til da påvirker tallene ingenting.
 Endringslogg: nei – ingenting synlig for spillerne ennå.
 Konto (B-149): ja, som tidslinja ellers (lagres på nett); ingen ny funksjon i appen.
+
+## B-397 Feilrettinger etter kodegjennomgangen 1.10 (2026-10-01)
+Status: gjennomført, unntatt utbyttet (funn 3 og 4), som venter på eieren.
+Bakgrunn: eieren fikk en statisk kodegjennomgang av main (e38241e) med 13 funn og fire forslag. Alle funnene er sjekket
+mot koden og databasen og stemte.
+Beslutning:
+- Innlogging (funn 1, 2): et sent svar på fornyelsen av økta brukes bare hvis samme økt fortsatt er innlogget (ellers
+  kunne konto A komme tilbake etter utlogging eller bytte til B). Fornyelsen gjelder én bestemt økt (`refreshingFor`).
+  Fikk vi ikke fornyet økta, går kallet ikke uten innlogging; det gir en feil som går over (`isTransient`) og prøves igjen.
+- Ukens kontrollrom (funn 5–8): et resultat som venter, gjelder bare kontoen det hører til, og ryddes når fristen er ute.
+  Det ligger også i minnet, så det leveres selv om nettleseren ikke kan lagre. Det prøves igjen fra hele appen
+  (`PendingControlSync`), ikke bare fra Uka. Den automatiske oppdateringen venter mens et kontrollrom er åpent eller et
+  ukeresultat venter. Serveren (097) godtar ikke innlevering etter at uka er over (`uke_slutt`), og starter ikke et forsøk
+  de siste 15 minuttene av uka (`sent_i_uka`).
+- Daglig (funn 9, 10): status og «mens du var borte» hentes hver for seg, så pengene legges inn selv om statusen feiler.
+  Ved midnatt norsk tid hentes ny status (nye oppdrag); og har dagen skiftet når bonusen hentes, hentes dagens oppdrag i
+  stedet for å bruke opp den nye dagens bonus.
+- Spillmotoren (funn 11–13): skrapklasseren sammenligner med lagerets faktiske analyse når den bytter inn annet skrap.
+  Verdenshendelser som er over, teller ikke (sluttiden sjekkes mot serverens klokke). En dødsulykke stenger hele verket
+  (`g.closedUntilMin`), også valseverket.
+- CI: publiseringen kjører hele `npm test` (også skraplagertestene), og en ny arbeidsflyt (`sjekker.yml`) kjører typesjekk,
+  lint, tester, prosessmodellen, balansen og bygget på hver pull request mot main. Beskyttelse av main (krav om grønne
+  sjekker før merge) må eieren slå på i GitHub (Settings → Branches).
+- **Venter på eieren (funn 3, 4):** utbyttet. Ferdige datterverk ble målt som under bygging resten av dagen for den som
+  var borte (3 spillere 1.10), og den som solgte sitt siste verk før midnatt, fikk ikke utbyttet for dagen. Rettingen står
+  i `supabase/utkast/098_utbytte_ferdige_verk.sql` og er prøvd i en transaksjon som ble rullet tilbake. Den øker
+  utbetalingene litt for de berørte, og eieren ville ikke endre økonomien før 2.10-rapporten (B-395 punkt F) – så den
+  kjøres når eieren sier fra. Etterbetaling for dagene før krever dry-run og eierens godkjenning.
+Endringslogg: ja
+Konto (B-149): nei – feilrettinger.

@@ -436,6 +436,8 @@ export async function deleteAccount(): Promise<void> {
 }
 
 let refreshing: Promise<string | null> | null = null;
+/** Hvilken økt (refresh token) fornyelsen som pågår, gjelder – en annen konto får ikke svaret (B-397) */
+let refreshingFor: string | null = null;
 
 /** Gyldig tilgangsnøkkel, fornyet om nødvendig. Null hvis ingen er logget inn eller økta er død. */
 export async function getToken(): Promise<string | null> {
@@ -448,20 +450,26 @@ export async function getToken(): Promise<string | null> {
     notify();
   }
   if (s.expires_at - Date.now() / 1000 > REFRESH_MARGIN_S) return s.access_token;
-  if (!refreshing) {
+  if (!refreshing || refreshingFor !== s.refresh_token) {
+    const started = s;
+    // Er spilleren logget ut eller har byttet konto mens svaret var underveis, gjelder svaret ikke lenger (B-397):
+    // ellers kunne et sent svar logge inn den gamle kontoen igjen
+    const current = () => getSession()?.refresh_token === started.refresh_token;
+    refreshingFor = started.refresh_token;
     refreshing = (async () => {
       try {
         const res = await call(`${cloud.url}/auth/v1/token?grant_type=refresh_token`, {
           method: "POST",
           headers: headers(),
-          body: JSON.stringify({ refresh_token: s.refresh_token }),
+          body: JSON.stringify({ refresh_token: started.refresh_token }),
         });
+        if (!current()) return null;
         if (!res.ok) {
           // Uten nett eller ved for mange forsøk (429) beholder vi økta og prøver igjen senere
           if (res.status < 400 || res.status >= 500 || res.status === 408 || res.status === 429) return null;
           // En annen fane kan ha fornyet økta i mellomtiden: da er den nye gyldig
           const other = storedSession();
-          if (other && other.refresh_token !== s.refresh_token) {
+          if (other && other.user.id === started.user.id && other.refresh_token !== started.refresh_token) {
             session = other;
             notify();
             return other.access_token;
@@ -472,12 +480,16 @@ export async function getToken(): Promise<string | null> {
           return null;
         }
         const next = toSession((await res.json()) as Record<string, unknown>);
+        if (!current()) return null;
         setSession(next);
         return next.access_token;
       } catch {
         return null;
       } finally {
-        refreshing = null;
+        if (refreshingFor === started.refresh_token) {
+          refreshing = null;
+          refreshingFor = null;
+        }
       }
     })();
   }
@@ -531,6 +543,9 @@ export async function rest<T>(path: string, init: RestInit = {}): Promise<T> {
   const token = await getToken();
   // Døde økta underveis (avvist av tjenesten), skal ikke kallet gå videre uten innlogging (B-145)
   if (hadSession && !getSession()) throw new NetError("Du er ikke logget inn.", 401);
+  // Fikk vi ikke fornyet økta (nettet, tjenesten nede, eller kontoen ble byttet underveis), skal kallet heller ikke gå
+  // uten innlogging: det ville blitt avvist og sett ut som en varig feil. Dette går over og prøves igjen (B-397)
+  if (hadSession && !token) throw new NetError("Fikk ikke fornyet innloggingen. Prøver igjen snart.", 0, true);
   return restAs<T>(token, path, init);
 }
 

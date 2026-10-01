@@ -2,6 +2,7 @@
  * Felles hendelser og sesong i spilltilstanden (B-129). Ren TypeScript: nettlaget henter hendelsene, og
  * `applyWorldEvents` legger dem inn her. Prisene i motoren ganges med faktorene så lenge hendelsene ligger i lista.
  */
+import { realNow } from "./clock";
 import { log } from "./engine";
 import type { GameState, SeasonTwist, WorldEvent } from "./types";
 import { warFactor } from "./war";
@@ -17,7 +18,9 @@ export function worldFactor(g: GameState, key: "scrap" | "steel" | "power"): num
   // Krig i verden (B-297) regnes med her, så alle prisene følger den
   let f = (g.world?.twist?.[key] ?? 1) * warFactor(g, key);
   if (!events || events.length === 0) return f;
-  for (const e of events) f *= e[key];
+  // En hendelse som er over, teller ikke lenger – også når appen er uten nett og ikke får ny liste (B-397)
+  const now = realNow();
+  for (const e of events) if (!(Date.parse(e.until) <= now)) f *= e[key];
   return f;
 }
 

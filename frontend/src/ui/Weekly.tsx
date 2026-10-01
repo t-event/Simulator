@@ -14,6 +14,7 @@ import {
   CONTROL_REFUSAL_TEXT,
   flushPendingControl,
   pendingControl,
+  pendingIsDurable,
   startControlAttempt,
   submitControlAttempt,
   type ControlAttempt,
@@ -135,7 +136,7 @@ export function WeeklyCard({ act }: { act: GameApi["act"] }) {
           fagpoeng).
         </span>
       </p>
-      {status.kind === "kontroll" && status.control && <WeeklyControlPanel act={act} user={user!} />}
+      {status.kind === "kontroll" && status.control && <WeeklyControlPanel key={user} act={act} user={user!} />}
       {m.gold + m.silver + m.bronze > 0 && (
         <p className="g-muted">
           Dine medaljer: {m.gold} gull · {m.silver} sølv · {m.bronze} bronse
@@ -223,6 +224,25 @@ function resumeGame(act: GameApi["act"]): void {
   if (sp !== null && sp > 0) act((gg) => void (gg.speed = sp));
 }
 
+/**
+ * Leverer et ukeresultat som venter (nettfeil), uansett hvilken side spilleren står på (B-397). Kortet på Uka gjør det
+ * samme mens det vises; serveren gir samme svar på samme innlevering.
+ */
+export function PendingControlSync() {
+  useEffect(() => {
+    const t = setInterval(() => {
+      const id = getSession()?.user.id ?? null;
+      if (id && pendingControl(id)) {
+        void flushPendingControl().then((o) => {
+          if (o.kind !== "venter") void fetchWeeklyStatus().then(setWeeklyStatus, () => {});
+        });
+      }
+    }, 20_000);
+    return () => clearInterval(t);
+  }, []);
+  return null;
+}
+
 /** Hva spilleren kjører i ukens kontrollrom nå */
 type Play =
   | { counted: false; seed: number; key: number }
@@ -234,13 +254,17 @@ function outcomeText(o: SubmitOutcome, attempts: number): string {
       o.left > 0 ? `${o.left} av ${attempts} forsøk igjen.` : "Alle forsøkene er brukt."
     }`;
   if (o.kind === "venter")
-    return "Fikk ikke levert ennå. Resultatet er lagret og sendes av seg selv når nettet virker (fristen er 15 minutter).";
+    return pendingIsDurable()
+      ? "Fikk ikke levert ennå. Resultatet er lagret og sendes av seg selv når nettet virker (fristen er 15 minutter)."
+      : "Fikk ikke levert ennå. Resultatet sendes av seg selv når nettet virker – la appen stå åpen, for nettleseren " +
+          "kunne ikke lagre det (fristen er 15 minutter).";
   return CONTROL_REFUSAL_TEXT[o.reason];
 }
 
 /**
  * Ukens kontrollrom (B-387) på kortet: ukens kvalitet, forsøkene, beste resultat, og knappene for trening og tellende
  * forsøk. Et tellende forsøk startes på serveren (brukt fra nå av) og spilles med serverens frø; trening bruker egne frø.
+ * Monteres på nytt når kontoen byttes (`key`), så et resultat som venter, bare gjelder kontoen det hører til (B-397).
  */
 function WeeklyControlPanel({ act, user }: { act: GameApi["act"]; user: string }) {
   const status = useWeekly();
@@ -250,16 +274,16 @@ function WeeklyControlPanel({ act, user }: { act: GameApi["act"]; user: string }
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [submitText, setSubmitText] = useState<string | null>(null);
-  const [pending, setPendingState] = useState(() => pendingControl());
+  const [pending, setPendingState] = useState(() => pendingControl(user));
 
   const refresh = () => void fetchWeeklyStatus().then(setWeeklyStatus, () => {});
 
   // Et resultat som ikke ble levert (nettfeil), sendes når kortet vises og deretter hvert 20. sekund
   useEffect(() => {
-    if (!pendingControl()) return;
+    if (!pendingControl(user)) return;
     const tryFlush = () =>
       void flushPendingControl().then((o) => {
-        setPendingState(pendingControl());
+        setPendingState(pendingControl(user));
         if (o.kind !== "venter") {
           setMessage(outcomeText(o, c?.attempts ?? 3));
           refresh();
@@ -268,7 +292,7 @@ function WeeklyControlPanel({ act, user }: { act: GameApi["act"]; user: string }
     tryFlush();
     const t = setInterval(tryFlush, 20_000);
     return () => clearInterval(t);
-  }, [pending?.id, c?.attempts]);
+  }, [pending?.id, c?.attempts, user]);
 
   if (!c) return null;
   const grade = weeklyGrade(c.grade);
@@ -304,7 +328,7 @@ function WeeklyControlPanel({ act, user }: { act: GameApi["act"]; user: string }
     setBusy(true);
     try {
       await abandonControlAttempt(id);
-      setPendingState(pendingControl());
+      setPendingState(pendingControl(user));
       setMessage("Forsøket er gitt opp og teller 0.");
       refresh();
     } catch {
@@ -331,7 +355,7 @@ function WeeklyControlPanel({ act, user }: { act: GameApi["act"]; user: string }
             log: inputs,
             deadline: play.attempt.deadline,
           }).then((o) => {
-            setPendingState(pendingControl());
+            setPendingState(pendingControl(user));
             setSubmitText(outcomeText(o, c.attempts));
             refresh();
           });
