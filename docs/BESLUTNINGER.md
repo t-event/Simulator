@@ -7599,3 +7599,15 @@ Gjort:
 Testet: typesjekk, lint, `npm test`, build; Playwright på 320, 390 og 1 366 px: Fagboka med uleste kapitler og med alt lest, Forskning på stålverket med tre grupper; ingen avkorting, ingen horisontal scrolling.
 Konto (B-149): ingen endring.
 Endringslogg: ja.
+
+## B-414 Polering 5: Folk med filter og «Mer», Marked med renhet og egen planleggerfane (2026-10-02)
+Status: gjennomført.
+Bakgrunn: neste del av poleringen fra designgjennomgangen 1.10 (FORSLAG.md). Ingen endring i økonomien eller på serveren.
+Gjort:
+- **Folk → Ansett:** filterknapper øverst (Alle, Ovnsoperatør, Støper … med antall), bare for rollene som finnes blant søkerne. Velger man en rolle, står forklaringen av den ene rollen over lista i stedet for «Hva gjør de ulike rollene?» med alle. På mobil er filteret én rad som kan sveipes sidelengs. Filteret slippes når den siste søkeren med rollen er borte.
+- **Folk → Ansatte:** én «Mer»-knapp per ansatt i stedet for tre knapper; den åpner Gjør til skiftleder (når det går), Kurs og Si opp, med et kryss for å lukke. Bekreftelsene for oppsigelse og lederkurs er som før.
+- **Marked → Skrap (mobil):** pris og en **renhetsstolpe** («Renhet: Svært ren / Ren / Middels / Uren») i stedet for fem kjemitall i en grå rad. Renheten er bare for visning: sporelementene veier 70 %, fosfor og skitt 15 % hver, målt mot den verste skraptypen. P, Spor, C og Skitt står bak trykk på navnet. Tabellen på PC er som før.
+- **Marked → Planlegger:** planleggerens innstillinger har egen underfane når det finnes en planlegger, med «!» når planleggeren ikke får kjøpt alt. På Skrap står én linje med status og lenke til fanen. Tekstene i motoren som viste til innstillingene under «Marked → Skrap», viser nå til «Marked → Planlegger».
+Testet: typesjekk, lint, `npm test`, build; Playwright på 320, 390 og 1 366 px: søkere med ni roller (filter, én rolle, forklaring), ansatte med «Mer» åpnet, Marked med renhet og planleggerfanen; ingen avkorting, ingen horisontal scrolling.
+Konto (B-149): ingen endring.
+Endringslogg: ja.

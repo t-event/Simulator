@@ -593,9 +593,15 @@ export function People({ g, stats, act, openTab, onTab }: Props & { openTab?: st
   useReportTab(tab, onTab);
   const [confirmFire, setConfirmFire] = useState<number | null>(null);
   const [confirmLeader, setConfirmLeader] = useState<number | null>(null);
+  // Søkere filtrert på rolle, og én «Mer» per ansatt i stedet for tre knapper (B-414)
+  const [roleFilter, setRoleFilter] = useState<RoleId | null>(null);
+  const [menuFor, setMenuFor] = useState<number | null>(null);
   const cap = STAGES[g.stage].staffCap;
   // På storverket finnes det ikke noe større sted å flytte til (B-171)
   const topStage = g.stage >= STAGES.length - 1;
+  const candidateRoles = ROLE_IDS.filter((r) => g.candidates.some((c) => c.role === r));
+  // Filteret slippes når den siste søkeren med rollen er ansatt eller borte
+  const activeFilter = roleFilter && candidateRoles.includes(roleFilter) ? roleFilter : null;
   const session = courseSession(g);
   const counts = Object.fromEntries(ROLE_IDS.map((r) => [r, g.workers.filter((w) => w.role === r).length])) as Record<
     RoleId,
@@ -796,24 +802,48 @@ export function People({ g, stats, act, openTab, onTab }: Props & { openTab?: st
                       : `Verket er fullt (${cap} ansatte). Flytt til et større sted for flere.`}
                   </p>
                 )}
+                {candidateRoles.length > 1 && (
+                  <div className="g-chip-row g-candidate-filter" role="group" aria-label="Vis søkere">
+                    <button
+                      className={`g-chip-btn${!activeFilter ? " is-on" : ""}`}
+                      aria-pressed={!activeFilter}
+                      onClick={() => setRoleFilter(null)}
+                    >
+                      Alle ({g.candidates.length})
+                    </button>
+                    {candidateRoles.map((r) => (
+                      <button
+                        key={r}
+                        className={`g-chip-btn${activeFilter === r ? " is-on" : ""}`}
+                        aria-pressed={activeFilter === r}
+                        onClick={() => setRoleFilter(activeFilter === r ? null : r)}
+                      >
+                        {ROLES[r].name} ({g.candidates.filter((c) => c.role === r).length})
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {activeFilter && <p className="g-muted g-small-text">{ROLES[activeFilter].description}</p>}
                 <ul className="g-workers">
-                  {g.candidates.map((w) => (
-                    <WorkerRow
-                      key={w.id}
-                      w={w}
-                      today={day(g)}
-                      candidate
-                      action={
-                        <button
-                          className="g-primary g-small"
-                          disabled={g.workers.length >= cap}
-                          onClick={() => act((gg) => hire(gg, w.id))}
-                        >
-                          Ansett
-                        </button>
-                      }
-                    />
-                  ))}
+                  {g.candidates
+                    .filter((w) => !activeFilter || w.role === activeFilter)
+                    .map((w) => (
+                      <WorkerRow
+                        key={w.id}
+                        w={w}
+                        today={day(g)}
+                        candidate
+                        action={
+                          <button
+                            className="g-primary g-small"
+                            disabled={g.workers.length >= cap}
+                            onClick={() => act((gg) => hire(gg, w.id))}
+                          >
+                            Ansett
+                          </button>
+                        }
+                      />
+                    ))}
                 </ul>
               </>
             )}
@@ -829,17 +859,19 @@ export function People({ g, stats, act, openTab, onTab }: Props & { openTab?: st
                 )}
               </div>
             )}
-            <details className="g-details">
-              <summary>Hva gjør de ulike rollene?</summary>
-              <dl className="g-roles">
-                {ROLE_IDS.map((r) => (
-                  <div key={r}>
-                    <dt>{ROLES[r].name}</dt>
-                    <dd>{ROLES[r].description}</dd>
-                  </div>
-                ))}
-              </dl>
-            </details>
+            {!activeFilter && (
+              <details className="g-details">
+                <summary>Hva gjør de ulike rollene?</summary>
+                <dl className="g-roles">
+                  {ROLE_IDS.map((r) => (
+                    <div key={r}>
+                      <dt>{ROLES[r].name}</dt>
+                      <dd>{ROLES[r].description}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </details>
+            )}
           </Card>
         )}
 
@@ -916,8 +948,17 @@ export function People({ g, stats, act, openTab, onTab }: Props & { openTab?: st
                                     Avbryt
                                   </button>
                                 </span>
+                              ) : menuFor !== w.id ? (
+                                <button
+                                  className="g-small g-worker-more"
+                                  aria-expanded={false}
+                                  aria-label={`Mer for ${w.name}`}
+                                  onClick={() => setMenuFor(w.id)}
+                                >
+                                  Mer
+                                </button>
                               ) : (
-                                <span className="g-row">
+                                <span className="g-row g-worker-actions">
                                   {/* En flink operatør kan bli skiftleder (B-210) */}
                                   {!leaderCourseBlock(g, w) && (
                                     <button
@@ -943,6 +984,14 @@ export function People({ g, stats, act, openTab, onTab }: Props & { openTab?: st
                                   </button>
                                   <button className="g-small" onClick={() => setConfirmFire(w.id)}>
                                     Si opp
+                                  </button>
+                                  <button
+                                    className="g-small g-worker-more"
+                                    aria-expanded={true}
+                                    aria-label="Lukk"
+                                    onClick={() => setMenuFor(null)}
+                                  >
+                                    <Icon name="close" />
                                   </button>
                                 </span>
                               )

@@ -31,7 +31,37 @@ const BUY_AMOUNTS = [
   [1000, 2500, 5000],
 ];
 
-type MarketTab = "skrap" | "strom" | "priser";
+type MarketTab = "skrap" | "planlegger" | "strom" | "priser";
+
+/**
+ * Renhet som ett tall fra 0 til 1 (B-414): sporelementene veier mest (de kan bare tynnes ut), så fosfor og skitt.
+ * Bare for visning – resepten regner med de ekte tallene. Målt mot den verste skraptypen i spillet.
+ */
+const WORST = {
+  tramp: Math.max(...SCRAP_IDS.map((id) => SCRAP_TYPES[id].tramp)),
+  p: Math.max(...SCRAP_IDS.map((id) => SCRAP_TYPES[id].p)),
+  dirt: Math.max(...SCRAP_IDS.map((id) => SCRAP_TYPES[id].dirt)),
+};
+
+function scrapPurity(id: ScrapId): number {
+  const t = SCRAP_TYPES[id];
+  return Math.max(0, 1 - (0.7 * t.tramp) / WORST.tramp - (0.15 * t.p) / WORST.p - (0.15 * t.dirt) / WORST.dirt);
+}
+
+function purityWord(v: number): string {
+  return v >= 0.75 ? "Svært ren" : v >= 0.5 ? "Ren" : v >= 0.3 ? "Middels" : "Uren";
+}
+
+/** Renheten som stolpe på mobil; tallene står bak trykk på navnet */
+function Purity({ id }: { id: ScrapId }) {
+  const v = scrapPurity(id);
+  return (
+    <span className="g-scrap-purity">
+      <span>Renhet: {purityWord(v)}</span>
+      <Bar value={v} tone={v >= 0.5 ? "ok" : v >= 0.3 ? "accent" : "warning"} label={`Renhet ${purityWord(v)}`} />
+    </span>
+  );
+}
 
 /** Navnet på skrapet; trykk for å lese om det og selge det du har (B-051) */
 function ScrapAbout({ g, act, id, stock }: Omit<Props, "stats"> & { id: ScrapId; stock?: boolean }) {
@@ -45,6 +75,14 @@ function ScrapAbout({ g, act, id, stock }: Omit<Props, "stats"> & { id: ScrapId;
         {stock && <span className="g-scrap-stock">{fmtT(g.scrap[id].t)} på lager</span>}
       </summary>
       <p className="g-muted">{type.description}</p>
+      {stock && (
+        <p className="g-scrap-facts">
+          <span title="Fosfor">P {fmtNum(type.p, 3)}</span>
+          <span title="Sporelementer">Spor {fmtNum(type.tramp, 2)}</span>
+          <span title="Karbon">C {fmtNum(type.c, 2)}</span>
+          <span title="Rust, jord og olje">Skitt {fmtPct(type.dirt)}</span>
+        </p>
+      )}
       {g.scrap[id].t >= 1 && (
         <button className="g-small" onClick={() => act((gg) => sellScrap(gg, id, gg.scrap[id].t))}>
           Selg alt ({fmtT(g.scrap[id].t)}) for {fmtKr(g.scrap[id].t * scrapSellPrice(g, id))}
@@ -81,9 +119,12 @@ function BuyButtons({ g, act, id, amounts }: Omit<Props, "stats"> & { id: ScrapI
 }
 
 export function Market({ g, stats, act, openTab, onTab }: Props & { openTab?: string; onTab?: OnTab }) {
-  const [tab, setTab] = useState<MarketTab>(() =>
-    openTab && ["skrap", "strom", "priser"].includes(openTab) ? (openTab as MarketTab) : "skrap",
+  const [chosen, setTab] = useState<MarketTab>(() =>
+    openTab && ["skrap", "planlegger", "strom", "priser"].includes(openTab) ? (openTab as MarketTab) : "skrap",
   );
+  // Planleggerens innkjøp har egen fane når det finnes en planlegger (B-414); ellers står fanen ikke der
+  const planner = plannerOrders(g);
+  const tab: MarketTab = chosen === "planlegger" && !planner ? "skrap" : chosen;
   useReportTab(tab, onTab);
   const amounts = BUY_AMOUNTS[g.stage];
   // Stålprisen mot normalt, med felles hendelser som eksportboom og importpress (B-129)
@@ -115,6 +156,7 @@ export function Market({ g, stats, act, openTab, onTab }: Props & { openTab?: st
   ].sort((a, b) => a - b);
   const tabs: { id: MarketTab; label: string; alert?: boolean }[] = [
     { id: "skrap", label: "Skrap", alert: short.length > 0 },
+    ...(planner ? [{ id: "planlegger" as const, label: "Planlegger", alert: !!g.autoBuyNote }] : []),
     { id: "strom", label: stats.furnace.fuel === "strøm" ? "Strøm" : "Energi" },
     { id: "priser", label: "Priser" },
   ];
@@ -159,10 +201,7 @@ export function Market({ g, stats, act, openTab, onTab }: Props & { openTab?: st
                         {type.buyable ? `${fmtKr(price)}/tonn` : "Gratis"}
                         <Trend g={g} id={id} />
                       </span>
-                      <span title="Fosfor">P {fmtNum(type.p, 3)}</span>
-                      <span title="Sporelementer">Spor {fmtNum(type.tramp, 2)}</span>
-                      <span title="Karbon">C {fmtNum(type.c, 2)}</span>
-                      <span title="Rust, jord og olje">Skitt {fmtPct(type.dirt)}</span>
+                      <Purity id={id} />
                     </div>
                     <BuyButtons g={g} act={act} id={id} amounts={amounts} />
                   </div>
@@ -226,92 +265,14 @@ export function Market({ g, stats, act, openTab, onTab }: Props & { openTab?: st
                 <Icon name="lock" /> {ids.map((id) => SCRAP_TYPES[id].name).join(" · ")} – forsk fram «{name}».
               </p>
             ))}
-            {plannerOrders(g) ? (
-              <details className="g-details g-planner" open={!!g.autoBuyNote}>
-                <summary>
-                  Planleggerens innkjøp: {auto(g, "autoBuy") ? "på" : automationUnlocked(g, "autoBuy") ? "av" : "låst"}
-                  {g.autoBuyNote ? " – får ikke kjøpt alt" : ""}
-                </summary>
-                <AutoToggle
-                  g={g}
-                  act={act}
-                  k="autoBuy"
-                  label={`La planleggeren kjøpe inn etter resepten (holder ca. ${fmtNum(g.settings.autoBuyDays, 1)} døgns forbruk)`}
-                />
-                {auto(g, "autoBuy") && (
-                  <>
-                    {/* Hvor mye skrap planleggeren holder på lager (B-271) */}
-                    <label className="g-field">
-                      <span>Planleggeren holder på lager</span>
-                      <select
-                        value={g.settings.autoBuyTargetT ?? ""}
-                        onChange={(e) =>
-                          act(
-                            (gg) =>
-                              void (gg.settings.autoBuyTargetT = e.target.value === "" ? null : Number(e.target.value)),
-                          )
-                        }
-                      >
-                        <option value="">Automatisk (ca. {fmtNum(g.settings.autoBuyDays, 1)} døgns forbruk)</option>
-                        {stockOptions.map((t) => (
-                          <option key={t} value={t}>
-                            {fmtT(t)}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <label className="g-field">
-                      <span>Planleggeren kan bruke per døgn</span>
-                      <select
-                        value={g.settings.autoBuyMaxPerDay ?? ""}
-                        onChange={(e) =>
-                          act(
-                            (gg) =>
-                              void (gg.settings.autoBuyMaxPerDay =
-                                e.target.value === "" ? null : Number(e.target.value)),
-                          )
-                        }
-                      >
-                        <option value="">Ingen grense</option>
-                        {capOptions.map((v) => (
-                          <option key={v} value={v}>
-                            Maks {fmtKr(v)}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <label className="g-toggle">
-                      <input
-                        type="checkbox"
-                        checked={g.settings.autoBuyCredit}
-                        onChange={(e) => act((gg) => void (gg.settings.autoBuyCredit = e.target.checked))}
-                      />
-                      <span>Planleggeren kan handle på kassekreditten når kassa er tom</span>
-                    </label>
-                    <label className="g-toggle">
-                      <input
-                        type="checkbox"
-                        checked={g.settings.plannerSells !== false}
-                        onChange={(e) => act((gg) => void (gg.settings.plannerSells = e.target.checked))}
-                      />
-                      <span>
-                        Planleggeren kan selge skrap ingen resept i ordrekøen trenger, når lageret er fullt (
-                        {Math.round(SCRAP_SELL_SHARE * 100)} % av prisen)
-                      </span>
-                    </label>
-                    {g.autoBuyNote && <p className="g-note g-warn">Planleggeren får ikke kjøpt {g.autoBuyNote}.</p>}
-                    {!hasPlanner(g) && (
-                      <p className="g-muted">Planleggeren er borte, men de faste bestillingene går som vanlig.</p>
-                    )}
-                    <p className="g-muted">
-                      Brukt i dag: {fmtKr(g.today.autoBuyKr ?? 0)}.{" "}
-                      {g.settings.autoBuyCredit
-                        ? "Kassa kan gå i minus – husk at en uke over kredittgrensen er konkurs."
-                        : "Uten kreditt lar planleggeren lønn og faste kostnader for ett døgn ligge igjen i kassa."}
-                    </p>
-                  </>
-                )}
-              </details>
+            {planner ? (
+              <p className="g-note g-planner-line">
+                Planleggerens innkjøp: {auto(g, "autoBuy") ? "på" : automationUnlocked(g, "autoBuy") ? "av" : "låst"}
+                {g.autoBuyNote ? ` – får ikke kjøpt ${g.autoBuyNote}` : ""}.{" "}
+                <button className="g-link" onClick={() => setTab("planlegger")}>
+                  Innstillinger
+                </button>
+              </p>
             ) : (
               <p className="g-note">
                 Du kjøper skrap selv.{" "}
@@ -320,6 +281,89 @@ export function Market({ g, stats, act, openTab, onTab }: Props & { openTab?: st
                   : `Når du har flyttet til ${stageRef(2, g.stage)}, kan du ansette en planlegger`}{" "}
                 som kjøper inn automatisk.
               </p>
+            )}
+          </Card>
+        )}
+
+        {tab === "planlegger" && (
+          <Card title="Planleggerens innkjøp">
+            <AutoToggle
+              g={g}
+              act={act}
+              k="autoBuy"
+              label={`La planleggeren kjøpe inn etter resepten (holder ca. ${fmtNum(g.settings.autoBuyDays, 1)} døgns forbruk)`}
+            />
+            {auto(g, "autoBuy") && (
+              <>
+                {/* Hvor mye skrap planleggeren holder på lager (B-271) */}
+                <label className="g-field">
+                  <span>Planleggeren holder på lager</span>
+                  <select
+                    value={g.settings.autoBuyTargetT ?? ""}
+                    onChange={(e) =>
+                      act(
+                        (gg) =>
+                          void (gg.settings.autoBuyTargetT = e.target.value === "" ? null : Number(e.target.value)),
+                      )
+                    }
+                  >
+                    <option value="">Automatisk (ca. {fmtNum(g.settings.autoBuyDays, 1)} døgns forbruk)</option>
+                    {stockOptions.map((t) => (
+                      <option key={t} value={t}>
+                        {fmtT(t)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="g-field">
+                  <span>Planleggeren kan bruke per døgn</span>
+                  <select
+                    value={g.settings.autoBuyMaxPerDay ?? ""}
+                    onChange={(e) =>
+                      act(
+                        (gg) =>
+                          void (gg.settings.autoBuyMaxPerDay = e.target.value === "" ? null : Number(e.target.value)),
+                      )
+                    }
+                  >
+                    <option value="">Ingen grense</option>
+                    {capOptions.map((v) => (
+                      <option key={v} value={v}>
+                        Maks {fmtKr(v)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="g-toggle">
+                  <input
+                    type="checkbox"
+                    checked={g.settings.autoBuyCredit}
+                    onChange={(e) => act((gg) => void (gg.settings.autoBuyCredit = e.target.checked))}
+                  />
+                  <span>Planleggeren kan handle på kassekreditten når kassa er tom</span>
+                </label>
+                <label className="g-toggle">
+                  <input
+                    type="checkbox"
+                    checked={g.settings.plannerSells !== false}
+                    onChange={(e) => act((gg) => void (gg.settings.plannerSells = e.target.checked))}
+                  />
+                  <span>
+                    Planleggeren kan selge skrap ingen resept i ordrekøen trenger, når lageret er fullt (
+                    {Math.round(SCRAP_SELL_SHARE * 100)} % av prisen)
+                  </span>
+                </label>
+                {g.autoBuyNote && <p className="g-note g-warn">Planleggeren får ikke kjøpt {g.autoBuyNote}.</p>}
+                {!hasPlanner(g) && (
+                  <p className="g-muted">Planleggeren er borte, men de faste bestillingene går som vanlig.</p>
+                )}
+                <p className="g-muted">
+                  Brukt i dag: {fmtKr(g.today.autoBuyKr ?? 0)}.{" "}
+                  {g.settings.autoBuyCredit
+                    ? "Kassa kan gå i minus – husk at en uke over kredittgrensen er konkurs."
+                    : "Uten kreditt lar planleggeren lønn og faste kostnader for ett døgn ligge igjen i kassa."}
+                </p>
+              </>
             )}
           </Card>
         )}

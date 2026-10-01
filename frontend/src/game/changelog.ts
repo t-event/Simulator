@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 414,
+    date: "2026-10-02",
+    title: "Enklere Folk og Marked",
+    items: [
+      "Søkere kan filtreres på rolle, og forklaringen av rollen står rett over lista.",
+      "Hver ansatt har én «Mer»-knapp med kurs, skiftleder og oppsigelse.",
+      "Skraptypene viser renhet som en stolpe på mobil – tallene står når du trykker på navnet.",
+      "Planleggerens innkjøp har fått egen fane under Marked.",
+    ],
+  },
+  {
     b: 413,
     date: "2026-10-02",
     title: "Det nye i Fagboka øverst, forskning i grupper",
