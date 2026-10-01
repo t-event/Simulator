@@ -1,3 +1,4 @@
+import { realNow } from "../game/clock";
 import { RecipeGuideCoach } from "./RecipeGuide";
 import { isWinter } from "../game/calendar";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
@@ -925,12 +926,12 @@ export function GameApp() {
       const k = w.konsern;
       act((gg) => applyKonsern(gg, k, perDay));
     }
-    if (g && worldNews(g, w.companies, Date.now(), yesterday + contribution))
+    if (g && worldNews(g, w.companies, realNow(), yesterday + contribution))
       act((gg) => {
         applyTenderResults(gg, w.companies);
         applyTakeoverNews(gg, w.companies);
         applyCompanyIncome(gg, w.companies);
-        applyDividendNews(gg, yesterday, Date.now(), contribution);
+        applyDividendNews(gg, yesterday, realNow(), contribution);
       });
   });
   const appRef = useRef<HTMLDivElement>(null);

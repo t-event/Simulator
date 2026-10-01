@@ -147,9 +147,10 @@ Sluttmålet 10 mrd. (B-106) og milepælene 25 mrd.–1 billion (B-150) gjør pen
 
 ### 5.5 Sesongene ruller av seg selv
 
-Sesong 1 slutter 2027-03-25, og Sesong 2 starter da av seg selv (B-167). Det passer ikke med æraer. Anbefaling: skru
-av den automatiske neste sesongen med en bryter i `config` god tid før, og la administrator avslutte en æra manuelt.
-Ukelista, sesongstigen og titlene fortsetter uendret inntil videre. Ingen irreversibel omskriving nå.
+*(Slik var det da planen ble skrevet: Sesong 1 skulle slutte 2027-03-25, og Sesong 2 starte av seg selv, B-167.
+Avgjort siden: den automatiske neste sesongen er skrudd av (B-182), og sesongene har ingen sluttdato – administrator
+avslutter en sesong og starter en ny for hånd (B-221). Sesongen avgjøres på Konsernverdi, B-384.)*
+Ukelista, sesongstigen og titlene fortsetter uendret inntil videre.
 
 ### 5.6 Frister i ekte tid og varsler
 

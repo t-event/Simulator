@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { fetchWorldStatus, type Company, type WorldStatus } from "../net/world";
 import { getSession, onSessionChange } from "../net/supabase";
+import { realNow } from "../game/clock";
 
 /** Et åpent anbud spilleren ikke har bydd på: når det stenger, og hvilket selskap det gjelder (B-253) */
 export type OpenTender = {
@@ -56,7 +57,7 @@ export function useOpenTender(
         (w) => {
           // Det som stenger først, av anbudene spilleren ikke har bydd på
           const c = w.companies
-            .filter((x) => x.tender && x.tender.myBid === null && Date.parse(x.tender.closesAt) > Date.now())
+            .filter((x) => x.tender && x.tender.myBid === null && Date.parse(x.tender.closesAt) > realNow())
             .sort((a, b) => Date.parse(a.tender!.closesAt) - Date.parse(b.tender!.closesAt))[0];
           // Et forsøk på å overta et selskap du eier, går foran (B-335)
           const hit = w.companies.find((x) => x.mine && x.takeover && !x.takeover.mineAttack);

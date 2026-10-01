@@ -5,7 +5,7 @@
 import { fmtKr, log } from "../game/engine";
 import type { GameState } from "../game/types";
 import { rpc } from "./supabase";
-import { nextWorldMidnight, worldDay } from "../game/clock";
+import { nextWorldMidnight, realNow, worldDay } from "../game/clock";
 import type { TreasuryStatus } from "./treasury";
 import type { KonsernWorld } from "../game/konsernWorld";
 import { parseKonsern } from "./konsern";
@@ -432,7 +432,7 @@ export function konsernValueOf(w: WorldStatus, loan: number): number {
  * Beskjeden om utbyttet fra datterverkene (B-304) og hovedverkets konsernbidrag (B-318): én gang per ekte dag, når
  * serveren har betalt for i går. Gir 1 hvis det ble skrevet noe.
  */
-export function applyDividendNews(g: GameState, yesterday: number | null, now = Date.now(), contribution = 0): number {
+export function applyDividendNews(g: GameState, yesterday: number | null, now = realNow(), contribution = 0): number {
   const day = yesterdayWorld(now);
   const div = yesterday && yesterday > 0 ? yesterday : 0;
   const bid = contribution > 0 ? contribution : 0;
@@ -467,7 +467,7 @@ export async function placeBid(tender: number, amount: number): Promise<BidResul
 }
 
 /** «31 t» / «45 min» til et tidspunkt */
-export function timeLeft(iso: string, now = Date.now()): string {
+export function timeLeft(iso: string, now = realNow()): string {
   const ms = Date.parse(iso) - now;
   if (ms <= 0) return "nå";
   const h = Math.floor(ms / 3_600_000);
@@ -485,7 +485,7 @@ export function timeLeft(iso: string, now = Date.now()): string {
 export function applyTenderResults(
   g: GameState,
   companies: Pick<Company, "name" | "lastResult">[],
-  now = Date.now(),
+  now = realNow(),
 ): number {
   let n = 0;
   for (const c of [...companies].sort((a, b) => (a.lastResult?.id ?? 0) - (b.lastResult?.id ?? 0)))
@@ -493,7 +493,7 @@ export function applyTenderResults(
   return n;
 }
 
-export function applyTenderResult(g: GameState, company: string, r: TenderResult, now = Date.now()): boolean {
+export function applyTenderResult(g: GameState, company: string, r: TenderResult, now = realNow()): boolean {
   if (r.id <= (g.tenderSeen ?? 0)) return false;
   g.tenderSeen = r.id;
   if (now - Date.parse(r.closedAt) > 14 * 86_400_000) return false;
@@ -519,12 +519,12 @@ export function applyTenderResult(g: GameState, company: string, r: TenderResult
 }
 
 /** Neste midnatt norsk tid – da betaler serveren inntekten for dagen som gikk (B-258, B-369) */
-export function nextPayout(now = Date.now()): number {
+export function nextPayout(now = realNow()): number {
   return nextWorldMidnight(now);
 }
 
 /** «i natt kl. 00:00» – når neste inntekt kommer, i spillerens egen tid */
-export function firstPayout(now = Date.now()): string {
+export function firstPayout(now = realNow()): string {
   const at = new Date(nextPayout(now));
   const time = at.toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" });
   const h = at.getHours();
@@ -533,7 +533,7 @@ export function firstPayout(now = Date.now()): string {
 }
 
 /** Serverens dato for i går (norsk tid), «2026-09-28» – dagen `income_yesterday` gjelder */
-export function yesterdayWorld(now = Date.now()): string {
+export function yesterdayWorld(now = realNow()): string {
   return worldDay(nextPayout(now) - 36 * 3_600_000);
 }
 
@@ -544,7 +544,7 @@ export function yesterdayWorld(now = Date.now()): string {
 export function applyCompanyIncome(
   g: GameState,
   companies: Pick<Company, "id" | "name" | "mine" | "incomeYesterday">[],
-  now = Date.now(),
+  now = realNow(),
 ): number {
   const day = yesterdayWorld(now);
   g.companyIncomeSeen ??= {};
@@ -560,7 +560,7 @@ export function applyCompanyIncome(
 }
 
 /** Er det noe nytt å si fra om (anbud, inntekt eller utbytte)? Så appen bare endrer spillet når det trengs */
-export function worldNews(g: GameState, companies: Company[], now = Date.now(), dividendYesterday = 0): boolean {
+export function worldNews(g: GameState, companies: Company[], now = realNow(), dividendYesterday = 0): boolean {
   const day = yesterdayWorld(now);
   if (dividendYesterday > 0 && g.dividendSeen !== day) return true;
   return companies.some(

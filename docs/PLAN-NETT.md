@@ -291,7 +291,11 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
   `world_tick` uten kø og hvert 5. minutt (072, 079), eksporten (073), tilgangsregler og indekser (076), bidrag og
   utbytte som snitt av målinger (077–078), gjester holdt utenfor pengene (080), den ekte dagen i norsk tid (081) og gamle
   anbud i dagens penger (086) og rydding av forlatte gjester hver natt (088) og dagen i eget verk på topplista (089). Så innskuddet stengt «fail-closed» (090), opptjent nivå skilt fra tittelen (091)
-  og sesongen på Konsernverdi med listen «Produksjon» og nye uker (092–093), og ukens kontrollrom (094). Hver fil forklarer seg selv øverst.
+  og sesongen på Konsernverdi med listen «Produksjon» og nye uker (092–093), og ukens kontrollrom (094). Så
+  serverautoritet trinn 1 med typevakt, unike felles funksjoner og skyggelogg (095), tidslinjetallene til kWh/t og
+  leveringspresisjon (096), ukens kontrollrom ved ukeslutt (097), typevakten og energivakten rettet (098), fagpoeng mens du
+  var borte (100) og verdensjobbene én spiller om gangen med overvåking (`world_health()`, 101). Utkastet 099 (utbyttet
+  for ferdige verk) ligger i `utkast/` til det er prøvekjørt 2.10. Hver fil forklarer seg selv øverst.
 - Hva som krever konto, nå og i fase 4 og 5: `docs/KONTO.md` (B-149).
 - Flere enheter samtidig: bare enheten som spilles på, lagrer; den andre settes på pause med «Spill her» (B-143).
 - Merker ved sesongslutt (fase 3) er bygget som 🎖 med beste plassering ved kallenavnet (B-143).

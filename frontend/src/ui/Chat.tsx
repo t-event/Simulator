@@ -22,6 +22,7 @@ import {
 import { fetchProfile } from "../net/leaderboard";
 import { getSession, onSessionChange } from "../net/supabase";
 import type { GameState } from "../game/types";
+import { realNow } from "../game/clock";
 import { NeedsAccount } from "./Account";
 import { Callout, SheetHead } from "./ds";
 import { Icon } from "./icons";
@@ -35,7 +36,7 @@ function useSession() {
 }
 
 /** «14:02», «i går 14:02» eller «3. okt. 14:02» */
-function when(at: number, now = Date.now()): string {
+function when(at: number, now = realNow()): string {
   const d = new Date(at);
   const time = d.toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" });
   const day = (x: Date) => x.toDateString();
