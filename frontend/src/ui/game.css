@@ -7831,3 +7831,22 @@ button.g-prod-row:hover {
 .g-konsern-meta {
   margin-top: var(--sp-2);
 }
+
+/* Antall spillere aktive siste 24 timer på startskjermen (B-408): fast høyde mens tallet hentes, så ingenting hopper */
+.g-intro-active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 1.5em;
+  margin: var(--sp-3) 0 0;
+  font-size: var(--fs-meta);
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.g-intro-active .ds-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--ok);
+}

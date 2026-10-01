@@ -34,6 +34,8 @@ import {
   fetchProfile,
   nicknameAvailable,
   nicknameProblem,
+  activePlayersText,
+  parseActivePlayers,
   setNickname,
 } from "./leaderboard";
 import { claimAway, fetchDailyStatus } from "./daily";
@@ -2196,6 +2198,14 @@ const main = async () => {
     assert(!now.old && now.now === 200_000_000, JSON.stringify(now));
     assert(fmtBid(200_000_000, "2026-09-29T01:33:03Z").includes("gamle penger"), "tekst for gamle penger");
     assert(!fmtBid(20_000_000, "2026-10-13T01:33:03Z").includes("gamle"), "nye bud uten merknad");
+  });
+
+  await test("spillere aktive siste 24 timer (B-408)", () => {
+    assert(parseActivePlayers(13) === 13, "tall");
+    assert(parseActivePlayers("7") === 7, "tekst");
+    assert(parseActivePlayers(null) === null && parseActivePlayers(-1) === null, "ugyldig");
+    assert(activePlayersText(1) === "1 spiller aktiv siste 24 timer", activePlayersText(1));
+    assert(activePlayersText(13) === "13 spillere aktive siste 24 timer", activePlayersText(13));
   });
 
   setSaveListener(null);

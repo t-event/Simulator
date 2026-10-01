@@ -15,6 +15,12 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 408,
+    date: "2026-10-01",
+    title: "Hvor mange som spiller",
+    items: ["Startskjermen viser hvor mange spillere som har vært aktive de siste 24 timene."],
+  },
+  {
     b: 407,
     date: "2026-10-01",
     title: "Ryddigere Salg og Konsern",

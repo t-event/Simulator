@@ -7497,3 +7497,21 @@ Testet: typesjekk, lint, `npm test`, build; Playwright på de 7 størrelsene: in
 tekst; «Innstillinger» viser pausen når bryteren slås av.
 Konto (B-149): ikke aktuelt.
 Endringslogg: ja.
+
+## B-408 Antall spillere aktive siste 24 timer på startskjermen (2026-10-01)
+Status: gjennomført.
+Bakgrunn: eieren: «På startskjermen bør det stå antall spillere aktive siste 24 timer.»
+Gjort:
+- **Serveren teller** (`players_active_24h()`, 102): spill lagret på nett siste 24 timer, uten flaggede og sperrede
+  kontoer. Gjester teller med – de spiller også. Siden bare enheten som spilles på, laster opp (B-143), betyr en lagring
+  at noen faktisk har spilt; å bare åpne appen teller ikke. Bare et tall, ingen navn. 13 da den ble laget.
+- **Startskjermen** viser «13 spillere aktive siste 24 timer» (entall: «1 spiller aktiv …») under knappene, med et ikon.
+  Tallet hentes når skjermen vises og hvert femte minutt mens den står. Linja har fast plass mens tallet hentes og hvis
+  det feiler, så kortet ikke hopper; ved feil eller 0 står den tom. Uten tjenesten (bygget uten nøkler) vises den ikke.
+- `players_active_24h` kan kalles uten innlogging (som topplista og sesongstatusen) og er lagt i `guest_gate`.
+  Sikkerhetsrådet «anon kan kjøre security definer» gjelder den med vilje.
+Konto (B-149): nei – å se et tall er bare lesing (som å se topplista). Lagt i KONTO.md.
+Testet: nettest (tallet, ugyldige svar, entall/flertall); som `anon` i databasen (13); Playwright på 320, 390 og
+1 366 px med og uten lagret spill og med feil fra tjenesten: riktig tekst, ingen horisontal scrolling, knappene står
+stille.
+Endringslogg: ja.

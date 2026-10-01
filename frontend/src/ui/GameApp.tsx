@@ -53,6 +53,7 @@ import { useOpenTender } from "./openTender";
 import { applyCompanyIncome, applyDividendNews, applyTakeoverNews, applyTenderResults, worldNews } from "../net/world";
 import { applyKonsern, konsernDiffers } from "../net/konsern";
 import { VIEWS, viewUnlocked, type View } from "./views";
+import { ActivePlayers } from "./ActivePlayers";
 import { Icon, type IconName } from "./icons";
 import { isVerketTab } from "./verketTabs";
 import type { OnTab } from "./tabMemory";
@@ -130,6 +131,7 @@ function Intro({ api }: { api: GameApi }) {
             </div>
           </div>
         )}
+        <ActivePlayers />
         <SeasonTeaser />
         <IntroAccount api={api} />
         <details className="g-details g-intro-more">

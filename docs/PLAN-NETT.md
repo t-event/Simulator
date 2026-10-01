@@ -294,7 +294,8 @@ Alt før konsernet er som i dag. Ingenting koster penger for å gå fortere.
   og sesongen på Konsernverdi med listen «Produksjon» og nye uker (092–093), og ukens kontrollrom (094). Så
   serverautoritet trinn 1 med typevakt, unike felles funksjoner og skyggelogg (095), tidslinjetallene til kWh/t og
   leveringspresisjon (096), ukens kontrollrom ved ukeslutt (097), typevakten og energivakten rettet (098), fagpoeng mens du
-  var borte (100) og verdensjobbene én spiller om gangen med overvåking (`world_health()`, 101). Utkastet 099 (utbyttet
+  var borte (100), verdensjobbene én spiller om gangen med overvåking (`world_health()`, 101) og antall spillere aktive
+  siste 24 timer på startskjermen (102). Utkastet 099 (utbyttet
   for ferdige verk) ligger i `utkast/` til det er prøvekjørt 2.10. Hver fil forklarer seg selv øverst.
 - Hva som krever konto, nå og i fase 4 og 5: `docs/KONTO.md` (B-149).
 - Flere enheter samtidig: bare enheten som spilles på, lagrer; den andre settes på pause med «Spill her» (B-143).

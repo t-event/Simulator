@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 331 – 2026-10-01: Antall spillere aktive siste 24 timer på startskjermen (B-408)
+
+**Brukeren ba om:** at startskjermen viser antall spillere aktive siste 24 timer.
+
+**Gjort:** `players_active_24h()` (102, kjørt i databasen): lagringer siste 24 timer uten flaggede/sperrede, gjester med;
+kan kalles uten konto, lagt i `guest_gate`. `fetchActivePlayers`/`activePlayersText` i `net/leaderboard.ts`, linja
+`ActivePlayers` under knappene på startskjermen (fast plass, oppdateres hvert 5. min). KONTO.md, STATUS, PLAN-NETT, B-408.
+
+**Testet:** nettest, typesjekk, lint, `npm test`, build; som `anon` i databasen (13); Playwright på 320/390/1 366 px.
+
+**Gjenstår:** morgenkjøringen 2.10.
+
 ## Økt 330 – 2026-10-01: Designgjennomgangen, del 4: mindre tekst på Salg og Konsern (B-407)
 
 **Gjort:** Salg → Forespørsler: ta imot, kvaliteter og rekkefølge bak én rad «Innstillinger» med oppsummering
