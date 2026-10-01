@@ -21,7 +21,9 @@ tsc, lint, `npm test` (nye tester for fagpoeng borte og ukeresultatet), `balance
 opphold flagget). `balance.ts --daglig 15` gir Støperi på dag 19 (mål 20–50, AVVIK) – det samme på main før endringen, så
 det kommer ikke av fagpoengene; diagnosekjøringen er ikke med i CI.
 
-**Gjenstår:** 2.10: rapporten, så utbytterettingen og dry-run for etterbetaling til eieren.
+**Gjenstår:** 2.10: rapporten, så utbytterettingen og dry-run for etterbetaling til eieren. Eieren bekreftet 1.10: dry-run
+med spiller, dato, allerede utbetalt, korrigert beløp og differanse, også det migrasjonen selv utløser automatisk;
+rapportens opprinnelige grunnlag bevares, og korrigeringen dokumenteres separat (planlagt sjekk 2.10 kl. 07:45 UTC).
 
 ## Økt 321 – 2026-10-01: Typevakten og energivakten rettet (B-398)
 
@@ -32,8 +34,8 @@ selskap er ferdig.
 **Gjort:** 098 (i bruk): typevakten sjekker heltall og grenser for `stage`, `serverEdit`, `konsern.nextId` og `minute`,
 og at `history` og `konsern.plants` er lister. Alle steder serveren gjør om felt fra lagringen til heltall, er gått
 gjennom. Energivakten har bare en øvre grense som tåler forskyvningen; `timeline_energy` vurderer kWh/t over minst
-5 000 t. Utbytteutkastet er flyttet til 099. Funnene fra forrige gjennomgang ble rettet i PR #336 (B-397) – den forrige
-gjennomgangen så på PR #335.
+5 000 t. Utbytteutkastet er flyttet til 099. PR #336 (B-397) rettet 11 av de 13 funnene fra forrige gjennomgang;
+utbyttefunnene 3 og 4 venter på kjøringen etter 2.10-rapporten. (Merknaden om at PR-en ikke rettet funnene, gjaldt PR #335.)
 
 **Testet:** i transaksjoner som ble rullet tilbake: 24 av 24 lagringer godtas, og alle sju farlige tilfeller avvises;
 energivakten godtar 782 t uten ny strøm og nuller 99 mill. kWh på 1 000 t. Etter at 098 var i bruk: lagringer og tidslinja
