@@ -72,7 +72,7 @@ const NAV_ICON: Record<View, IconName> = {
 const ControlRoom = lazy(() => import("./control/ControlRoom").then((m) => ({ default: m.ControlRoom })));
 
 const SPEED_OPTIONS = [
-  { speed: 0, label: "❚❚", title: "Pause" },
+  { speed: 0, label: "Pause", title: "Pause" },
   { speed: 1, label: "1×", title: "Normal fart: ett døgn på to minutter" },
   { speed: 3, label: "3×", title: "Rask" },
   { speed: 10, label: "10×", title: "Veldig rask" },
@@ -317,7 +317,13 @@ function DecisionCard({
         <p>{d.text}</p>
         <div className="g-decision-options">
           {d.options.map((o, i) => (
-            <button key={o.label} className={i === 0 ? "g-primary" : ""} disabled={!ready} onClick={() => onChoose(i)}>
+            // Primærknapp bare på tips med ett svar; et valg har ofte ikke ett riktig svar (B-406)
+            <button
+              key={o.label}
+              className={tip && i === 0 ? "g-primary" : ""}
+              disabled={!ready}
+              onClick={() => onChoose(i)}
+            >
               <strong>{o.label}</strong>
               {o.hint && <span>{o.hint}</span>}
             </button>
@@ -519,7 +525,7 @@ function TopBar({
                     : api.setSpeed(o.speed)
                 }
               >
-                {o.label}
+                {o.speed === 0 ? <Icon name="pause" className="g-speed-pause" /> : o.label}
                 {locked && <Icon name="lock" className="g-speed-lock" />}
               </button>
             );

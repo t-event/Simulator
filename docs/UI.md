@@ -232,6 +232,8 @@ Prinsipp: **samme data og handlinger, forskjellig mengde synlig samtidig.** Grad
 | Toppliste / Hall of Fame | Ark | Egen side/ark med aktiv konkurranse og Hall of Fame; ikke låst til seksmåneders sesonger | Delvis |
 
 ### 6.1 Oversikt og anlegg – «hva er viktigst nå?»
+**Bygget (B-406):** rådsraden har tone fra `Hint.tone`: rød (`critical`) ved konkursfare, oransje (`heat`) når noe står
+eller går tapt, ellers info. Det alvorligste står først. Ikon + ord bærer meningen; høyden er fast (B-238).
 Øverst alltid én linje med det viktigste akkurat nå (flaskehals, kritisk hendelse eller neste store steg), deretter
 detaljer. På PC er det kontrollrommet: stort bilde + det som krever handling.
 

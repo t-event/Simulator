@@ -60,7 +60,10 @@ function missingScrap(g: GameState, stats: PlantStats): string | null {
   return short.length ? short.map((id) => SCRAP_TYPES[id].name.toLowerCase()).join(" og ") : null;
 }
 
-/** Rådene etter det første: to synlige, resten bak «Flere råd» så det ikke blir en tekstvegg (B-195) */
+/** Rådsraden i statusfarge (B-406): oransje når noe står eller går tapt, rød ved konkursfare; ikon + ord bærer meningen */
+const CTA_ICON = { info: "info", heat: "warning", critical: "error" } as const;
+const ctaClass = (h: Hint) => (h.tone ? `g-cta is-${h.tone}` : "g-cta");
+
 /**
  * Rådene under anleggsbildet (B-195, B-238): én rad med fast høyde, som alltid står der – også når det ikke er noe
  * råd. Før kom og gikk rådene med hver endring i verket, og alt under hoppet opp og ned. Teksten kortes til to linjer;
@@ -84,14 +87,14 @@ function HintSlot({ tips, run }: { tips: Hint[]; run: (t: Hint) => void }) {
             {text("Ingen råd akkurat nå. Verket går av seg selv.")}
           </div>
         ) : first.view || first.anchor ? (
-          <button className="g-cta" onClick={() => run(first)}>
-            <Icon name="info" />
+          <button className={ctaClass(first)} onClick={() => run(first)}>
+            <Icon name={CTA_ICON[first.tone ?? "info"]} />
             {text(first.text)}
             <Icon name="chevron-right" className="g-cta-go" />
           </button>
         ) : (
-          <div className="g-cta">
-            <Icon name="info" />
+          <div className={ctaClass(first)}>
+            <Icon name={CTA_ICON[first.tone ?? "info"]} />
             {text(first.text)}
           </div>
         )}

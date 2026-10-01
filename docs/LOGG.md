@@ -5,6 +5,17 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 329 – 2026-10-01: Designgjennomgangen, del 2 og 3: rådsraden i statusfarge (B-406)
+
+**Gjort:** `Hint.tone` (`critical`/`heat`) i `ui/hints.ts`, de alvorligste rådene først; rådsraden på Verket i
+statusfarge med varsel-/feilikon; pause-ikon i fartsvelgeren; hendelseskortene uten fast primærvalg (bare tips);
+topplistetall i visningsskriften; dempet verdi på forespørsler verket ikke rekker. Det meste av typografi-delen var alt
+gjort; konsernkassa blir i toppfeltet (B-340).
+
+**Testet:** `npm test` (ny test av rekkefølgen), typesjekk, lint, build; Playwright på 320/390/1 366 px.
+
+**Gjenstår:** del 4 (mindre tekst: Salg-innstillinger, Konsern-kortet); morgenkjøringen 2.10.
+
 ## Økt 328 – 2026-10-01: Designgjennomgangen, del 1: nytt verdenskart (B-405)
 
 **Brukeren ba om:** (sendte en designgjennomgang med kartprototype, mockups og kode i fire PR-er.)
