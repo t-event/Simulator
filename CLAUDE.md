@@ -473,6 +473,11 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   konsernforskning leses bare gjennom `world_shared`/`world_research` (unike, kjente id-er, forutsetninger) – aldri med
   `count(*)` rett på lista. `world_input_log` er skygge (hevdet / mulig / brukt) og skal ikke håndheves uten eierens
   beslutning; `world_claims` har grunnlaget fra 30.9. Fagpoeng og andre tall fra lagringen er ikke bevis for noe.
+- **Typevakten** (B-398, 098): felt fra lagringen som serveren gjør om til int/smallint (`stage`, `serverEdit`,
+  `konsern.nextId`, `minute`) og felt som leses som lister (`history`, `konsern.plants`), må sjekkes i
+  `state_type_problems`. Ny `(state ->> 'x')::int` i en serverfunksjon = ny sjekk der.
+- **`drop` via connectoren** (B-398): `execute_sql` med `drop function` venter på bekreftelse og tidsavbrytes. Unngå
+  `drop` i tester; lag heller en ny funksjon enn å endre returtypen.
 - **Tidslinjetall** (B-396, 096): `kwh_total`, `deliveries`, `missed`, `cancelled`, `complaints` er tellere i alt; serveren
   regner forholdet (`timeline_metrics`). `snapshot_metrics_guard` nuller urimelige tall og avviser aldri. I en
   BEFORE-trigger på `snapshots` er den genererte `season_key` tom – bruk `coalesce(new.season_id, 0)`.
