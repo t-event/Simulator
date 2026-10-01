@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 325 – 2026-10-01: Slagghåndteringen og V0/K-1 i skygge etter morgenkjøringen 2.10 (B-402)
+
+**Brukeren ba om:** vente med slagghåndteringen til nattkontrollen er grønn og rapportgrunnlaget er bevart (anbudet trekker
+bud fra konsernkassene med én gang); starte V0 og K-1 i skygge etter morgenkjøringen 2.10 med de avtalte satsene, uten
+noen virkning på penger, utbetalinger, konsernverdi eller konkurranser, isolert fra de ordinære jobbene; skyggerapport mot
+ingen programmer og 1/3/8 %, etablering for seg og datamengden.
+
+**Gjort:** B-402, FORSLAG oppdatert, instruksen for kjøringen 2.10 kl. 07:45 UTC utvidet med slagghåndteringen (når
+kontrollen er grønn og grunnlaget bevart) og starten på V0/K-1 i skygge. Ingenting slått på eller bygget ennå.
+Rettet: skraplageret har to registrerte utbetalinger (ikke tre dager, som jeg skrev i svaret).
+
+**Gjenstår:** morgenkjøringen 2.10; deretter V0/K-1 i skygge og skyggerapporten til eieren.
+
+---
+
 ## Økt 324 – 2026-10-01: Verdensjobbene én spiller om gangen, overvåking, og midnattstestene (B-401)
 
 **Brukeren ba om:** punkt 1 og 2 sammen, med testene i punkt 5: hver spiller behandles atomisk (feil rulles tilbake for

@@ -30,7 +30,9 @@ til «Avgjort» nederst).
 - **K-1 med modell B (B-389, `K1-PROGRAMMER.md`):** besvart (B-390): V0 ja (eget lag, nøytralt i forventning, skygge
   først), satsinger 1/3/8 %, trekk fra hver utbetaling. Bygges etter rapporten 2.10 i skygge og bak avslått bryter. Neste
   spørsmål til eieren: skyggedataene (fordelingen av hendelser, utslag med dagens plassering, hypotetiske programresultater)
-  – før V0 og K-1 får virkning. Avgjort: grunnlaget (datterverksutbyttet, B-392), Konsernverdi står, satsene 0,5/1,5/4 %
+  – før V0 og K-1 får virkning. **Start (B-402):** etter morgenkjøringen 2.10 og med rapportgrunnlaget bevart; skyggen
+  isoleres fra de ordinære jobbene, og rapporten sammenligner med ingen programmer og 1/3/8 %, med etablering for seg og
+  datamengden. Avgjort: grunnlaget (datterverksutbyttet, B-392), Konsernverdi står, satsene 0,5/1,5/4 %
   med 80 % vern (B-393). Skyggerapporten sammenligner med 1/3/8 % og viser etableringen for seg.
 
 - **Slå på gjestekontoer (B-212):** eieren må slå på «Allow anonymous sign-ins» under Authentication → Sign In /
@@ -49,8 +51,9 @@ til «Avgjort» nederst).
   sesong 2 er klar. Før `start_season` kjøres for sesong 3, legg inn ny
   pynt i `COSMETICS` med `season: 3` – både i butikken og på stigen (trinn 10–50). Ellers har sesong 3 ingen egen pynt.
 
-- **Slå på slagghåndteringen (B-253):** skraplageret fikk sin første eier 29.9. 01:33 UTC og betalte første gang for 29.9
-  (13,8 mill., rett etter midnatt norsk tid, B-369). Når det har betalt ut i noen dager uten feil: `update public.companies set active = true where type = 'slagg'; select public.world_tick();`
+- **Slå på slagghåndteringen (B-253, B-402):** eieren 1.10: først når nattkontrollen 2.10 er grønn og rapportgrunnlaget
+  er bevart (anbudet trekker bud fra konsernkassene med én gang). Skraplageret fikk sin første eier 29.9. 01:33 UTC og har to
+  registrerte utbetalinger (1.10). Da: `update public.companies set active = true where type = 'slagg'; select public.world_tick();`
   Sjekk så kortet under Konsern → Industrien.
 - **Slå på mekanisk verksted (B-256):** etter slagghåndteringen, og tidligst en uke etter at appen med vedlikeholdstallet er
   ute (så anslaget bygger på ekte tall): `update public.companies set active = true where type = 'verksted'; select
