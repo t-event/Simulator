@@ -96,10 +96,13 @@ function Intro({ api }: { api: GameApi }) {
         <TitleArt />
         <h1>Stålverket</h1>
         <p className="g-intro-lead">Fra garasje til storverk.</p>
-        <p className="g-intro-short">
-          Smelt skrap, lever stål til kundene og bygg ut – fra en kald garasje til et storverk. Underveis lærer du
-          hvordan et stålverk virker.
-        </p>
+        {/* Den som har et spill, vet hva det går ut på – da står «Fortsett» alene øverst (B-411) */}
+        {!hasSave && (
+          <p className="g-intro-short">
+            Smelt skrap, lever stål til kundene og bygg ut – fra en kald garasje til et storverk. Underveis lærer du
+            hvordan et stålverk virker.
+          </p>
+        )}
         {saved && (
           <p className="g-intro-save">
             Ditt spill: <strong>{STAGES[saved.stage]?.name ?? "Garasje"}</strong> · dag {day(saved)} ·{" "}
@@ -350,7 +353,6 @@ function DecisionCard({
 
 function Celebration({ g, onClose }: { g: GameState; onClose: () => void }) {
   const stage = STAGES[g.celebrate ?? g.stage];
-  const newResearch = researchOptions(g).filter((r) => r.stage === stage.id);
   const newGear = upgradeOptions(g).filter((o) => o.stage === stage.id && o.kind !== "stage");
   return (
     <div className="g-modal" role="dialog" aria-modal="true" aria-labelledby="celebrate-title">
@@ -360,16 +362,12 @@ function Celebration({ g, onClose }: { g: GameState; onClose: () => void }) {
         </div>
         <h2 id="celebrate-title">Flyttedag: {stage.name}!</h2>
         <p>{stage.description}</p>
-        <ul>
-          <li>Plass til {stage.staffCap} ansatte</li>
-          <li>Faste kostnader: {fmtKr(stage.fixedPerDay)} per døgn</li>
-          <li>
-            {Math.round(stage.yardT)} t skraplager og {Math.round(stage.storeT)} t ferdigvarelager
-          </li>
-          {newGear.length > 0 && <li>Nytt utstyr: {newGear.map((o) => o.name).join(", ")}</li>}
-          {newResearch.length > 0 && <li>Ny forskning: {newResearch.map((r) => r.name).join(", ")}</li>}
-          {stage.id === 2 && <li>Du er nå daglig leder – sørg for folk på alle plassene.</li>}
-        </ul>
+        {/* Én setning med det viktigste – tallene står på Verket (B-411) */}
+        <p className="g-celebrate-line">
+          {stage.id === 2 ? "Du er nå daglig leder – sørg for folk på alle plassene. " : ""}
+          Plass til {stage.staffCap} ansatte
+          {newGear.length > 0 ? " – og nytt utstyr å kjøpe under Anlegg" : ""}.
+        </p>
         <button className="g-primary" onClick={onClose}>
           Sett i gang
         </button>

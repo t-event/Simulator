@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 411,
+    date: "2026-10-02",
+    title: "Kortere flyttedag og roligere skiftrapport",
+    items: [
+      "Flyttedagen sier det viktigste i én setning – tallene finner du på Verket.",
+      "Startskjermen viser spillet ditt og Fortsett øverst når du har et spill.",
+      "Hendelser i Skiftrapporten står som dempede linjer, så meldingene fra andre spillere synes bedre.",
+    ],
+  },
+  {
     b: 410,
     date: "2026-10-02",
     title: "Konsern: plass og region",

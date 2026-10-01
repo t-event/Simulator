@@ -133,6 +133,8 @@
   --sp-6: 24px;
   --sp-7: 32px;
   --sp-8: 48px;
+  /* Bredden på alle ark fra høyre på PC (fagboka, hjelp, skiftrapporten …), B-411 */
+  --sheet-w: 520px;
   --r-sm: 4px;
   --r-md: 8px;
   --r-lg: 12px;
