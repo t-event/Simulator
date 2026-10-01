@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 410,
+    date: "2026-10-02",
+    title: "Konsern: plass og region",
+    items: [
+      "Konsernverdien viser plassen din på topplista.",
+      "Under Dine verk står regionen ved trinnet.",
+      "«Slik fungerer konsernet» er flyttet til Fagboka.",
+    ],
+  },
+  {
     b: 408,
     date: "2026-10-01",
     title: "Hvor mange som spiller",

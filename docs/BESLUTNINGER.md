@@ -7556,3 +7556,13 @@ Gjort:
 Konto (B-149): uendret (V0/K-1 og verksjefene krever konto når de bygges; rekonstruksjonen ikke).
 Endringslogg: nei – ingenting spillerne merker.
 
+## B-410 Polering 1: Konsern – region i Dine verk, plass på topplista, «Slik fungerer konsernet» i Fagboka (2026-10-02)
+Status: gjennomført.
+Bakgrunn: eieren ba om resten av poleringen fra designgjennomgangen (FORSLAG.md) i små PR-er, uavhengig av world-systemene og uten å røre rapportgrunnlaget 2.10.
+Gjort:
+- **Dine verk (mobil):** raden viser «Trinn 3 av 3 · Nordkysten» – regionen står ved trinnet, så raden sier hvor verket står uten å åpnes. Forklaringen av prikkene er kortet til én setning, siden trinnet står som tekst (B-394).
+- **Plass på topplista** ved konsernverdien: «Konsernverdi · nr. 4 på topplista», fra `my_rank('konsern')` (bare lesing), hentet når siden vises og husket i fem minutter (`ui/konsernRank.ts`). Uten konto vises den ikke.
+- **«Slik fungerer konsernet»** står ikke lenger som åtte punkter på Konsern → Oversikt, men som eget kapittel i Fagboka (`konsernregler`, tema «Konsernet og verden»), åpnet med én lenke. Tallene står der man kjøper; kapitlet forklarer reglene med vanlige ord.
+Testet: `npm test`, typesjekk, lint, build; Playwright på 320, 390, 412, 820 og 1 366 px med falsk topplisteplass: ingen horisontal scrolling, etiketten og radene avkortes ikke, lenken åpner kapitlet.
+Konto (B-149): plassen krever konto (topplista); resten ikke.
+Endringslogg: ja.

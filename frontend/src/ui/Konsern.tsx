@@ -6,12 +6,8 @@ import { WORLD_KONSERN } from "../game/konsernWorld";
 import {
   daysToAfford,
   dividends,
-  KONSERN_ECONOMY,
   DIRECTOR_AGREEMENT_SHARE,
-  BUILD_HOURS,
   flagshipBonus,
-  FLAGSHIP_MAX,
-  MODERNIZE_HOURS,
   projectLabel,
   projectProgress,
   realNow,
@@ -51,13 +47,10 @@ import {
   sisterProfit,
   sisterSalePrice,
   sisterValue,
-  upgradeCost,
-  VALUE_DAYS,
   type KonsernOption,
   type SharedId,
 } from "../game/konsern";
 import { computePlantStats, day } from "../game/plant";
-import { RESEARCH } from "../game/research";
 import { defaultRegion, isRegion, REGIONS, regionName } from "../game/regions";
 import type { GameState, RegionId, SisterPlant, SisterType } from "../game/types";
 import type { GameApi } from "../game/useGame";
@@ -66,6 +59,7 @@ import { Bar, Card, SubTabs } from "./common";
 import { Button, Callout, Metric, type Delta } from "./ds";
 import { useLastWorld, type OpenTender } from "./openTender";
 import { EARNS_FROM, konsernValueOf } from "../net/world";
+import { useKonsernRank } from "./konsernRank";
 import { IndustryPanel } from "./Companies";
 import { WorldMapPanel } from "./WorldMap";
 import { NeedsAccount } from "./Account";
@@ -600,6 +594,8 @@ function PlantRow({
           <strong>{p.name}</strong>
           <span className="g-plant-row-meta g-small-text">
             <PlantTier g={g} p={p} max={max} />
+            {/* Regionen ved trinnet (B-410), så raden sier hvor verket står uten å åpnes */}
+            {p.region && <span className="g-plant-row-region"> · {regionName(p.region)}</span>}
           </span>
         </span>
         <span className="g-plant-row-side">
@@ -818,12 +814,15 @@ export function KonsernPage({
   openTab,
   onTab,
   tender,
+  openBook,
 }: {
   g: GameState;
   act: Act;
   openTab?: string;
   onTab?: OnTab;
   tender: OpenTender | null;
+  /** Åpner Fagboka på et kapittel (B-410) */
+  openBook?: (chapter?: string) => void;
 }) {
   const [tab, setTab] = useState<KonsernTabId>(
     KONSERN_TAB_IDS.includes(openTab as KonsernTabId) ? (openTab as KonsernTabId) : "oversikt",
@@ -866,7 +865,7 @@ export function KonsernPage({
           )}
         </div>
       )}
-      {tab === "oversikt" && <KonsernOverview g={g} act={act} onBuy={() => setTab("utvid")} />}
+      {tab === "oversikt" && <KonsernOverview g={g} act={act} onBuy={() => setTab("utvid")} openBook={openBook} />}
       {tab === "utvid" && <KonsernBuy g={g} act={act} onShowPlants={() => setTab("oversikt")} />}
       {tab === "kart" && <WorldMapPanel g={g} onBuild={() => setTab("utvid")} />}
       {tab === "industri" && <IndustryPanel g={g} act={act} />}
@@ -919,7 +918,17 @@ function inflowDelta(perDay: number): Delta {
     : { text: "Ingenting inn ennå", dir: "flat" };
 }
 
-function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () => void }) {
+function KonsernOverview({
+  g,
+  act,
+  onBuy,
+  openBook,
+}: {
+  g: GameState;
+  act: Act;
+  onBuy: () => void;
+  openBook?: (chapter?: string) => void;
+}) {
   const k = g.konsern;
   const today = day(g);
   // Driftsresultatet i verkene og utbyttet til konsernkassa per ekte dag (B-181, B-304)
@@ -932,13 +941,10 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
   const dividend = shown.reduce((a, b) => a + b, 0);
   const equity = konsernEquity(g);
   const world = useLastWorld();
+  const rank = useKonsernRank(!!world);
   const options = konsernOptions(g);
   const advice = konsernAdvice(g);
   const next = KONSERN_MILESTONES[k.milestones];
-  const konsernResearch = {
-    total: RESEARCH.filter((r) => r.konsern).length,
-    done: RESEARCH.filter((r) => r.konsern && g.researched.includes(r.id)).length,
-  };
   return (
     <>
       {/* UI-3d (B-206): hovedkontoret. PC: nøkkeltallene og neste steg side om side, verkene som tabell over hele
@@ -951,7 +957,7 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
             {world ? (
               /* Under tallet: det som kommer inn i konsernkassa per ekte dag, så tallet vokser med det (B-404) */
               <Metric
-                label="Konsernverdi"
+                label={rank ? `Konsernverdi · nr. ${rank} på topplista` : "Konsernverdi"}
                 title="Samme tall som på topplista: konsernkassa pluss 60 dagers utbytte og bidrag, minus lån"
                 value={fmtKr(Math.floor(konsernValueOf(world, g.loan)))}
                 delta={inflowDelta(world.dividend.perDay + world.contribution.perDay)}
@@ -1042,53 +1048,12 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
             </p>
           )}
           <MoneyGuideLink g={g} />
-          <details className="g-details">
-            <summary>Slik fungerer konsernet</summary>
-            <ol className="g-konsern-steps">
-              <li>
-                <strong>Kjøp et stålverk</strong> ({fmtKr(SISTER_TYPES.stalverk.price)}) fra{" "}
-                <strong>konsernkassa</strong> – pengene fra hovedverkets bidrag og utbyttet, ikke kassa hjemme. Det har
-                egne folk og tjener ca. {fmtKr(SISTER_TYPES.stalverk.profitPerDay)} per døgn av seg selv.
-              </li>
-              <li>
-                <strong>Bygg det ut til storverk</strong> ({fmtKr(upgradeCost(g))}). Da tjener det fire ganger så mye.
-              </li>
-              <li>
-                <strong>Felles innkjøp og salg</strong> gjør alle verkene bedre, også hjemmeverket.{" "}
-                <strong>Modernisering</strong> gir {Math.round(MODERNIZE_GAIN * 100)} % mer per trinn.
-              </li>
-              <li>
-                <strong>Utbytte:</strong> hvert verk beholder {Math.round(KONSERN_ECONOMY.keepShare * 100)} % til
-                vedlikehold og reserve. Resten betales som utbytte{" "}
-                <strong>én gang per ekte dag rett til konsernkassa</strong> (Industrien), ikke til kassa hjemme – og
-                spillfarten betyr ingenting. Jo flere verk, jo mindre gir hvert nytt verk: flere verk gir fortsatt mer,
-                men ikke dobbelt så mye.
-              </li>
-              <li>
-                <strong>Bygging tar tid – ekte tid,</strong> uansett spillfart: et stålverk {BUILD_HOURS.stalverk}{" "}
-                timer, et storverk {BUILD_HOURS.storverk}, et stålkompleks {BUILD_HOURS.kompleks}, og hvert trinn
-                modernisering {MODERNIZE_HOURS}. Verket går som før mens det moderniseres. Inntil{" "}
-                {WORLD_KONSERN.queueMax} prosjekter i køen; ett bygges om gangen.
-              </li>
-              <li>
-                <strong>Hjemmeverket er flaggskipet:</strong> godt omdømme og stål som holder kvaliteten gir inntil +
-                {Math.round(FLAGSHIP_MAX * 100)} % utbytte fra alle datterverkene.
-              </li>
-              <li>
-                <strong>Titlene kommer av verkene:</strong> Stålmagnat med 3 storverk på trinn 3, Stålfyrste med 6 på
-                trinn 4 og så videre. Hver tittel åpner mer: høyere trinn, stålkomplekser og flere plasser.
-              </li>
-              <li>
-                <strong>Du taper ikke på å kjøpe:</strong> et verk er verdt ca. {VALUE_DAYS} døgns overskudd og teller
-                med i verdien i spillet. Å bare spare er den tregeste veien.
-              </li>
-            </ol>
-            <p className="g-muted g-small-text">
-              Konsernverdi (topplista) = konsernkassa pluss 60 dagers utbytte og bidrag, minus lån. Verdi i spillet =
-              kassa minus lån, pluss det verkene er verdt. Under Forskning finnes egne prosjekter for konsernet (
-              {konsernResearch.done} av {konsernResearch.total} forsket fram).
-            </p>
-          </details>
+          {/* Reglene står i Fagboka (B-410): ett trykk dit i stedet for åtte punkter her */}
+          {openBook && (
+            <button className="g-link g-konsern-howto" onClick={() => openBook("konsernregler")}>
+              <Icon name="book" /> Slik fungerer konsernet
+            </button>
+          )}
         </Card>
       </div>
       <NextStep g={g} act={act} />
@@ -1098,8 +1063,7 @@ function KonsernOverview({ g, act, onBuy }: { g: GameState; act: Act; onBuy: () 
           <Card title={`Dine verk (${k.plants.length} av ${maxSisters(g)} datterverk)`}>
             <div className="g-plant-cards">
               <p className="g-muted g-small-text g-plant-rows-hint">
-                Prikkene viser trinnet: grønn er modernisert, ring bygges nå. Tallet til høyre er utbyttet til
-                konsernkassa per ekte dag. Trykk på et verk for å modernisere eller selge.
+                Tallet til høyre er utbyttet per ekte dag. Trykk på et verk for å modernisere eller selge.
               </p>
               {k.plants.length >= maxSisters(g) - 1 && (
                 <p className="g-muted g-small-text g-plant-rows-hint">{moreSlotsText(g)}</p>
