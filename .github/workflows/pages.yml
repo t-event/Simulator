@@ -35,21 +35,10 @@ jobs:
         working-directory: frontend
         run: npx tsx src/sim/validate.ts
 
-      - name: Tester av spillmotoren
+      # Hele testpakken (B-397): motoren, nettlaget, skraplageret, endringsloggen og emoji – det samme som lokalt
+      - name: Tester (npm test)
         working-directory: frontend
-        run: npx tsx src/game/tests.ts
-
-      - name: Tester av nettlaget
-        working-directory: frontend
-        run: npx tsx src/net/tests.ts
-
-      - name: Endringsloggen dekker nyeste beslutning
-        working-directory: frontend
-        run: node scripts/sjekk-endringslogg.mjs
-
-      - name: Ingen emoji i appen (ikoner fra designsystemet)
-        working-directory: frontend
-        run: node scripts/sjekk-emoji.mjs
+        run: npm test
 
       - name: Balansetest av spillet
         working-directory: frontend

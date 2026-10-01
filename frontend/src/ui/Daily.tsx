@@ -16,6 +16,7 @@ import {
   streakReward,
   type Reward,
 } from "../game/daily";
+import { nextWorldMidnight, realNow, worldDay } from "../game/clock";
 import type { DailyMission, GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { claimAway, claimDailyMissions, claimDailyReward, fetchDailyStatus, setDailyStatus } from "../net/daily";
@@ -85,20 +86,33 @@ export function DailySync({ api, blocked }: { api: GameApi; blocked: boolean }) 
       if (checking) return;
       checking = true;
       try {
-        const [s, seconds] = await Promise.all([fetchDailyStatus(), claimAway()]);
-        if (s) setDailyStatus(s);
+        // Hver for seg (B-397): feiler statusen, men tida borte er hentet (serveren har registrert den), skal pengene
+        // likevel inn i spillet – ellers var de tapt
+        const [st, away] = await Promise.allSettled([fetchDailyStatus(), claimAway()]);
+        if (st.status === "fulfilled" && st.value) setDailyStatus(st.value);
+        const seconds = away.status === "fulfilled" ? away.value : 0;
         // Tida borte er hentet på serveren nå, så den legges inn i spillet selv om komponenten er byttet ut
         if (seconds > 0 && apiRef.current.game) {
           const reward = apiRef.current.act((g) => applyAwayReward(g, seconds, fmtKr));
           if (reward.cash > 0) showAway?.({ seconds, reward });
         }
-      } catch {
-        // Uten nett: prøv igjen neste gang appen vises
       } finally {
         checking = false;
       }
     };
     void check();
+    // Ved midnatt (norsk tid) kommer nye oppdrag, også når spilleren spiller uten pause (B-397)
+    let midnight: ReturnType<typeof setTimeout>;
+    const atMidnight = () => {
+      midnight = setTimeout(
+        () => {
+          void check();
+          atMidnight();
+        },
+        Math.max(1000, nextWorldMidnight(realNow()) - realNow() + 5000),
+      );
+    };
+    atMidnight();
     const onVisibility = () => {
       if (document.visibilityState === "hidden") hiddenAt = Date.now();
       else if (hiddenAt && Date.now() - hiddenAt >= AWAY_CHECK_MS) void check();
@@ -106,6 +120,7 @@ export function DailySync({ api, blocked }: { api: GameApi; blocked: boolean }) 
     document.addEventListener("visibilitychange", onVisibility);
     return () => {
       document.removeEventListener("visibilitychange", onVisibility);
+      clearTimeout(midnight);
     };
   }, [session, reconciled, hasGame]);
 
@@ -257,6 +272,13 @@ export function DailyCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
   const claim = async () => {
     setBusy(true);
     try {
+      // Har dagen skiftet siden oppdragene ble hentet, gjelder bonusen på serveren den nye dagen: hent dagens oppdrag
+      // i stedet for å bruke opp morgendagens bonus på gårsdagens oppdrag (B-397)
+      if (worldDay(realNow()) !== status.today) {
+        const fresh = await fetchDailyStatus().catch(() => null);
+        if (fresh) setDailyStatus(fresh);
+        return;
+      }
       const r = await claimDailyMissions();
       if (!r.already) act((gg) => void applyMissionBonus(gg, fmtKr));
       else act((gg) => void (gg.daily.claimed = true));

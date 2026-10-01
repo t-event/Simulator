@@ -714,11 +714,13 @@ export function takeScrap(
     const empty = recipeIds.filter((id) => g.scrap[id].t - amounts[id] <= 1e-9);
     const maxP = Math.max(0, ...empty.map((id) => SCRAP_TYPES[id].p));
     const maxTramp = Math.max(0, ...empty.map((id) => SCRAP_TYPES[id].tramp));
+    // Lagerets faktiske analyse avgjør, ikke standardanalysen: returskrap fra sekunda kan være skitnere enn vanlig
+    // retur og ødelegge kvaliteten (B-397)
     const subs = SCRAP_IDS.filter(
       (id) =>
         !recipeIds.includes(id) &&
-        SCRAP_TYPES[id].p <= maxP &&
-        SCRAP_TYPES[id].tramp <= maxTramp &&
+        g.scrap[id].p <= maxP &&
+        g.scrap[id].tramp <= maxTramp &&
         g.scrap[id].t > 1e-9 &&
         !g.scrap[id].radioactive,
     );
@@ -1555,6 +1557,8 @@ function lotsTonnage(g: GameState): number {
 
 function updateRolling(g: GameState, stats: PlantStats, dt: number): void {
   if (!rollingActive(g) || !isOpen(g, stats.hours) || stats.shifts === 0) return;
+  // Stengt etter en dødsulykke: valseverket står også (B-397)
+  if (g.minute < (g.closedUntilMin ?? 0)) return;
   let capacity = rollingTph(g) * (dt / 60);
   // Valseverket valser emnene armeringsordrene venter på, i køens rekkefølge, og ellers bare emner ingen ordre
   // trenger (B-228). Emneordrene beholder sine emner, og armeringsordrene får riktig kvalitet (B-223 gjorde halve

@@ -10,6 +10,7 @@ import {
   consumeAuthHash,
   getSession,
   getToken,
+  isTransient,
   KEEPALIVE_MAX,
   NetError,
   loggedOutByServer,
@@ -24,6 +25,7 @@ import {
   signOut,
   signUp,
   translateError,
+  rest,
   verifyCode,
 } from "./supabase";
 import {
@@ -795,6 +797,54 @@ const main = async () => {
     f.onRefresh = null;
   });
 
+  await test("Sent svar på fornyelsen (B-397): logget ut eller byttet konto underveis – den gamle kontoen kommer ikke tilbake", async () => {
+    const f = fresh();
+    const soon = (refresh: string, id = "u-a@test") => ({
+      access_token: "gammel",
+      refresh_token: refresh,
+      expires_at: Date.now() / 1000 + 10,
+      user: { id, email: "" },
+    });
+    // Logger ut mens svaret er underveis
+    setSession(soon("r1"));
+    f.onRefresh = () => setSession(null);
+    assert((await getToken()) === null && getSession() === null, `kontoen kom tilbake: ${getSession()?.user.id}`);
+    // Bytter til konto B mens svaret for A er underveis
+    const b = { ...soon("rb", "u-b@test"), expires_at: Date.now() / 1000 + 3600, access_token: "b-nokkel" };
+    setSession(soon("r1"));
+    f.onRefresh = () => setSession(b);
+    await getToken();
+    assert(getSession()?.user.id === "u-b@test" && getSession()?.refresh_token === "rb", "konto A tok over igjen");
+    f.onRefresh = null;
+    setSession(null);
+  });
+
+  await test("Fornyelsen feiler midlertidig (B-397): kallet går ikke uten innlogging og prøves igjen", async () => {
+    const f = fresh();
+    setSession({
+      access_token: "gammel",
+      refresh_token: "r1",
+      expires_at: Date.now() / 1000 + 10,
+      user: { id: "u-a@test", email: "" },
+    });
+    // Nettet faller ut akkurat når økta skal fornyes (selve kallet etterpå ville gått)
+    f.onRefresh = () => {
+      throw new TypeError("Failed to fetch");
+    };
+    const before = f.calls.length;
+    let err: unknown = null;
+    try {
+      await rest("saves?select=state");
+    } catch (e) {
+      err = e;
+    }
+    f.onRefresh = null;
+    assert(isTransient(err), `feilen skal gå over av seg selv: ${String(err)}`);
+    assert(!f.calls.slice(before).some((c) => c.includes("/rest/v1/saves")), "kallet gikk uten innlogging");
+    assert(getSession() !== null, "økta ble kastet");
+    setSession(null);
+  });
+
   await test("«Husk meg»: e-posten huskes, og uten avhuking lever økta bare til appen lukkes (B-146)", async () => {
     const f = fresh();
     f.users.set("a@test", { id: "u-a@test", password: "hemmelig", confirmed: true });
@@ -1361,6 +1411,48 @@ const main = async () => {
     const off = await startControlAttempt();
     assert(!off.ok && off.reason === "nett", "startet uten nett");
     f.offline = false;
+  });
+
+  await test("Ukeresultat som venter (B-397): sperrer ikke en annen konto, ryddes etter fristen, og leveres uten lagring i nettleseren", async () => {
+    const f = fresh();
+    await login(f);
+    f.controlWeek = true;
+    const r = await startControlAttempt();
+    assert(r.ok, "start");
+    if (!r.ok) return;
+    // Et resultat fra en annen konto på samme enhet gjelder ikke denne kontoen
+    f.offline = true;
+    await submitControlAttempt({
+      user: "u-annen",
+      id: 999,
+      points: 1,
+      stars: 1,
+      log: null,
+      deadline: r.attempt.deadline,
+    });
+    assert(pendingControl("u-a@test") === null && pendingControl("u-annen")?.id === 999, "sperret en annen konto");
+    // Fristen er ute: ryddes bort, uansett konto
+    assert(
+      pendingControl("u-annen", Date.parse(r.attempt.deadline) + 120_000) === null,
+      "ble ikke ryddet etter fristen",
+    );
+    assert(pendingControl() === null, "ligger fortsatt der");
+    // Lagringen i nettleseren virker ikke: resultatet leveres likevel fra minnet
+    const ls = globalThis.localStorage as unknown as { setItem: (k: string, v: string) => void };
+    const realSet = ls.setItem;
+    ls.setItem = () => {
+      throw new Error("QuotaExceededError");
+    };
+    const p = { user: "u-a@test", id: r.attempt.id, points: 2500, stars: 3, log: null, deadline: r.attempt.deadline };
+    const o1 = await submitControlAttempt(p);
+    assert(
+      o1.kind === "venter" && pendingControl("u-a@test")?.id === r.attempt.id,
+      `ved nettfeil ${JSON.stringify(o1)}`,
+    );
+    f.offline = false;
+    const o2 = await flushPendingControl();
+    ls.setItem = realSet;
+    assert(o2.kind === "levert" && o2.points === 2500, `levert fra minnet ${JSON.stringify(o2)}`);
   });
 
   await test("Ingenting lastes opp før spillet er avklart mot kontoen, heller ikke mens man velger (B-138)", async () => {

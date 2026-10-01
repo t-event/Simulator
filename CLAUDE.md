@@ -295,7 +295,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `node_modules/`-regel – ikke fjern den.
 - Tall som sammenlignes med et krav (omdømme, penger, fagpoeng) skal vises rundet **ned**
   (`fmtRep`, `Math.floor`), ellers ser et krav oppfylt ut når det ikke er det.
-- CI (`pages.yml`) kjører bare ved push til `main`, ikke på PR-er. Kjør sjekkene lokalt før PR.
+- CI: `pages.yml` (publiseringen) kjører ved push til `main`; `sjekker.yml` kjører de samme sjekkene på hver PR mot
+  `main` (B-397). Kjør sjekkene lokalt før PR likevel.
 - Testspilleren har en **nybegynner** (B-062) som følger rådene i spillet. Ny mekanikk som krever at spilleren
   gjør noe, må også gis et råd i spillet (hint, advarsel, «Neste store steg») – og nybegynneren må følge det,
   ellers feiler CI.
@@ -463,6 +464,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   eget verk) og lagrer `konsern_value`/`rank_by`; `season_history` gir dem. Topplista i appen har gruppene «Industriverden»
   og «Eget verk» (`BOARDS[].group`); nye lister fra spillet på mobilen hører til Eget verk. `week_kind` har ikke `vekst`
   fra uka 5.10.2026 – endres ukene, må ukene før gi samme type som før (resultatene regnes av samme funksjon).
+- **Økta og fornyelsen** (B-397): et svar på fornyelsen brukes bare hvis samme økt fortsatt er innlogget, og `rest()`
+  sender aldri et kall uten innlogging når spilleren var innlogget (feilen er da `isTransient`). Ikke gjør det om.
+- **Ukeresultat som venter** (B-397): `pendingControl(user)` gjelder bare den kontoen; resultatet ligger også i minnet.
+  Den automatiske oppdateringen venter mens `.control-room` er åpent eller et ukeresultat venter.
 - **Serverautoritet** (B-395, 095): `saves_type_guard` avviser lagringer med feil type i feltene serveren leser for alle
   (`state_type_problems`) – et nytt felt som leses av serverfunksjoner for alle spillere, må inn der. Felles funksjoner og
   konsernforskning leses bare gjennom `world_shared`/`world_research` (unike, kjente id-er, forutsetninger) – aldri med

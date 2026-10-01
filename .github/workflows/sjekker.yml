@@ -1,0 +1,53 @@
+name: Sjekker på pull request
+
+# De samme sjekkene som før publiseringen, men før merge (B-397). Bygget her bruker ikke nøklene i GitHub Secrets.
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sjekker-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sjekker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Installer avhengigheter
+        working-directory: frontend
+        run: npm ci
+
+      - name: Typesjekk
+        working-directory: frontend
+        run: npx tsc -b
+
+      - name: Lint
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Tester (npm test)
+        working-directory: frontend
+        run: npm test
+
+      - name: Verifiser prosessmodellen
+        working-directory: frontend
+        run: npx tsx src/sim/validate.ts
+
+      - name: Balansetest av spillet
+        working-directory: frontend
+        run: npx tsx src/game/balance.ts
+
+      - name: Bygg
+        working-directory: frontend
+        run: npm run build

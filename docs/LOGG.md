@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 320 – 2026-10-01: Feilrettinger etter kodegjennomgangen (B-397)
+
+**Brukeren ba om:** se på 13 funn og fire forslag fra en kodegjennomgang av main (e38241e), og svare en spiller som lurer
+på fagpoeng mens man er borte.
+
+**Gjort:** alle 13 funnene ble sjekket og stemte. Rettet 1, 2 og 5–13 i appen og 8 på serveren (097, i bruk). CI kjører
+hele `npm test`, og `sjekker.yml` kjører sjekkene på pull requests. Funn 3 og 4 (utbyttet) står som utkast
+(`supabase/utkast/098_utbytte_ferdige_verk.sql`) og venter på eieren på grunn av 2.10-rapporten.
+
+**Testet:** tsc, lint, `npm test` (seks nye tester: sent svar på fornyelsen, midlertidig feil i fornyelsen, ukeresultat
+for en annen konto / etter fristen / uten lagring i nettleseren, skrapklasseren med faktisk analyse, verdenshendelse som
+er over, dødsulykke stenger valseverket), `balance.ts`. 097 prøvd som spiller i en transaksjon som ble rullet tilbake:
+forrige ukes forsøk avvises med `uke_slutt`, denne ukas godtas. Utkastet 098 prøvd på samme måte: 0 ferdige prosjekter
+igjen uten registrering etter målingen, og målingene steg for de berørte.
+
+**Gjenstår:** eieren: når 098 skal kjøres, og om det skal etterbetales (dry-run først). Beskyttelse av main i GitHub.
+Svar om fagpoeng mens man er borte (FORSLAG).
+
 ## Økt 319 – 2026-10-01: Serverautoritet trinn 1 og tidslinjetall (B-395, B-396)
 
 **Brukeren ba om:** stram inn serverens tillit til mobilen trinnvis (valider og logg, steng det umulige, ikke straff

@@ -597,6 +597,8 @@ export interface GameState {
   pendingManual: ManualRequest | null;
   /** Beste poengsum i kontrollrommet (B-175) */
   controlBest?: number;
+  /** Hele verket er stengt til dette spillminuttet (dødsulykke, B-265/B-397); mangler = åpent */
+  closedUntilMin?: number;
   /** Spillminutter som er spolt fram om natta (6×), så juksesperren kan regne ut hvor lang tid dagene minst tar (B-176) */
   boostMin?: number;
   /**
