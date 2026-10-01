@@ -4,7 +4,6 @@
  */
 import { SheetHead } from "./ds";
 import { lazy, Suspense, useEffect, useState, useSyncExternalStore } from "react";
-import { awardPoints, log } from "../game/engine";
 import { GRADES } from "../game/data";
 import type { GameApi } from "../game/useGame";
 import { getSession, onSessionChange } from "../net/supabase";
@@ -20,7 +19,6 @@ import {
   type ControlAttempt,
   type SubmitOutcome,
   chestFp,
-  claimWeekChest,
   fetchWeeklyBoard,
   fetchWeeklyStatus,
   onWeeklyChange,
@@ -34,7 +32,6 @@ import {
 import { Place } from "./Place";
 import { Card } from "./common";
 import { fmtNum } from "./format";
-import { buzz } from "./haptics";
 import { Portal } from "./Portal";
 import { Icon } from "./icons";
 import { trainingSeed, weeklyGrade, weeklyRequest } from "./control/weekly";
@@ -64,7 +61,6 @@ export function WeeklyCard({ act }: { act: GameApi["act"] }) {
   const reconciled = useReconciled();
   const status = useWeekly();
   const [board, setBoard] = useState(false);
-  const [busy, setBusy] = useState(false);
   const user = session?.user.id ?? null;
 
   // Status ved innlogging og hvert femte minutt; plassen endrer seg når spillet lagres på nett
@@ -82,21 +78,6 @@ export function WeeklyCard({ act }: { act: GameApi["act"] }) {
   const kind = WEEK_KINDS[status.kind];
   const left = weekDaysLeft(status);
   const m = status.medals;
-  const open = async () => {
-    setBusy(true);
-    try {
-      const fp = await claimWeekChest();
-      if (fp > 0)
-        act((gg) => {
-          awardPoints(gg, fp);
-          log(gg, `Ukekista er åpnet: +${fp} fagpoeng.`, "good");
-        });
-      buzz(40);
-      setWeeklyStatus({ ...status, chest: null });
-    } finally {
-      setBusy(false);
-    }
-  };
   return (
     <Card
       title="Ukens utfordring"
@@ -113,11 +94,8 @@ export function WeeklyCard({ act }: { act: GameApi["act"] }) {
             {status.chest.count > 1
               ? `${status.chest.count} kister venter`
               : `Du ble nr. ${status.chest.best} på ukelista forrige uke`}{" "}
-            – {status.chest.fp} fagpoeng.
+            – {status.chest.fp} fagpoeng. Åpnes med «Hent alt» øverst på Mål.
           </span>
-          <button className="g-primary" disabled={busy} onClick={() => void open()}>
-            Åpne kista
-          </button>
         </div>
       )}
       <p>

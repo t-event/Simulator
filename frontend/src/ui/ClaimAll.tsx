@@ -1,0 +1,62 @@
+/**
+ * «Hent alt» øverst på Mål (B-415): én knapp for dagens bonus, ukekista og trinn på sesongstigen, når noe av det kan
+ * hentes. Står ikke der når ingenting venter (gradvis synlighet). Krever konto, som det den henter.
+ */
+import { useEffect, useState, useSyncExternalStore } from "react";
+import type { GameState } from "../game/types";
+import type { GameApi } from "../game/useGame";
+import { fetchSeasonTrack, onSeasonTrackChange, seasonTrack, setSeasonTrack } from "../net/seasonTrack";
+import { getSession, onSessionChange } from "../net/supabase";
+import { isReconciled, onCloudStatus } from "../net/sync";
+import { fetchWeeklyStatus, onWeeklyChange, setWeeklyStatus, weeklyStatus } from "../net/weekly";
+import { claimAll, claimables } from "./claims";
+import { Button } from "./ds";
+import { buzz } from "./haptics";
+import { Icon } from "./icons";
+import { useDailyStatus } from "./useDaily";
+
+export function ClaimAllBar({ g, act }: { g: GameState; act: GameApi["act"] }) {
+  const session = useSyncExternalStore(onSessionChange, getSession, getSession);
+  const reconciled = useSyncExternalStore(onCloudStatus, isReconciled, isReconciled);
+  const daily = useDailyStatus();
+  const weekly = useSyncExternalStore(onWeeklyChange, weeklyStatus, weeklyStatus);
+  const track = useSyncExternalStore(onSeasonTrackChange, seasonTrack, seasonTrack);
+  const [busy, setBusy] = useState(false);
+  const user = session?.user.id ?? null;
+
+  // Ukekista og stigen vises på fanen «Uka»; her hentes statusen én gang hvis den ikke er hentet fra før
+  useEffect(() => {
+    if (!user || !reconciled) return;
+    if (!weeklyStatus()) void fetchWeeklyStatus().then(setWeeklyStatus, () => {});
+    if (!seasonTrack()) void fetchSeasonTrack().then(setSeasonTrack, () => {});
+  }, [user, reconciled]);
+
+  if (!session) return null;
+  const items = claimables(g, daily, weekly, track);
+  if (!items.length) return null;
+  const run = async () => {
+    setBusy(true);
+    try {
+      await claimAll(act, items);
+      buzz(40);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="g-claim-all" role="status">
+      <Icon name="gift" />
+      <div className="g-claim-all-text">
+        <strong>Klar til å hente</strong>
+        <ul className="g-small-text">
+          {items.map((x) => (
+            <li key={x.id}>{x.label}</li>
+          ))}
+        </ul>
+      </div>
+      <Button variant="primary" disabled={busy} onClick={() => void run()}>
+        {items.length > 1 ? "Hent alt" : "Hent"}
+      </Button>
+    </div>
+  );
+}

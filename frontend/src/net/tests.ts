@@ -39,6 +39,8 @@ import {
   setNickname,
 } from "./leaderboard";
 import { claimAway, fetchDailyStatus } from "./daily";
+import { claimables } from "../ui/claims";
+import { tierFp } from "./seasonTrack";
 import {
   abandonControlAttempt,
   chestFp,
@@ -2206,6 +2208,36 @@ const main = async () => {
     assert(parseActivePlayers(null) === null && parseActivePlayers(-1) === null, "ugyldig");
     assert(activePlayersText(1) === "1 spiller aktiv siste 24 timer", activePlayersText(1));
     assert(activePlayersText(13) === "13 spillere aktive siste 24 timer", activePlayersText(13));
+  });
+
+  await test("Hent alt på Mål: det som venter, i rekkefølge (B-415)", () => {
+    const g = newGame(1);
+    const daily = { today: "2026-10-02", claimed: true, streak: 3, next: 3, missionsClaimed: false };
+    g.daily = { ...g.daily, date: "2026-10-02", claimed: false, missions: [{ id: "kontrakter", base: 0, target: 0 }] };
+    const weekly = { chest: { fp: 300, count: 1, best: 2 } } as unknown as Parameters<typeof claimables>[2];
+    const track = {
+      seasonId: 2,
+      points: 65,
+      perTier: 20,
+      maxTier: 50,
+      tier: 3,
+      claimed: [1],
+      playedToday: true,
+      rewardToday: true,
+      missionsToday: false,
+    };
+    const all = claimables(g, daily, weekly, track);
+    assert(all.map((x) => x.id).join(",") === "bonus,kiste,stige", all.map((x) => x.id).join(","));
+    assert(
+      all[2].label.startsWith("2 trinn") && all[2].label.includes(`${tierFp(2) + tierFp(3)} fagpoeng`),
+      all[2].label,
+    );
+    // Hentet bonus, ingen kiste, alle trinn hentet: ingenting
+    g.daily.claimed = true;
+    assert(claimables(g, daily, null, { ...track, claimed: [1, 2, 3] }).length === 0, "ingenting å hente");
+    // Gårsdagens oppdrag gir ingen bonus i dag
+    g.daily = { ...g.daily, claimed: false, date: "2026-10-01" };
+    assert(!claimables(g, daily, null, null).some((x) => x.id === "bonus"), "ikke gårsdagens bonus");
   });
 
   setSaveListener(null);

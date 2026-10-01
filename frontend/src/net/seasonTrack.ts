@@ -59,3 +59,23 @@ export function tierFp(tier: number): number {
 
 /** Trinn med pynt som bare finnes på stigen */
 export const TRACK_COSMETIC_TIERS = [10, 20, 30, 40, 50];
+
+// Siste status fra serveren (B-415), så kortet og «Hent alt» på Mål viser det samme
+let track: SeasonTrack | null = null;
+const listeners = new Set<() => void>();
+export function seasonTrack(): SeasonTrack | null {
+  return track;
+}
+export function setSeasonTrack(t: SeasonTrack | null): void {
+  track = t;
+  for (const fn of listeners) fn();
+}
+export function onSeasonTrackChange(fn: () => void): () => void {
+  listeners.add(fn);
+  return () => void listeners.delete(fn);
+}
+
+/** Trinn som er nådd, men ikke hentet */
+export function unclaimedTiers(t: SeasonTrack): number[] {
+  return Array.from({ length: t.tier }, (_, i) => i + 1).filter((n) => !t.claimed.includes(n));
+}

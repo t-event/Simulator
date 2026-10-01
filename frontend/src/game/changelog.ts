@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 415,
+    date: "2026-10-02",
+    title: "Hent alt på Mål",
+    items: [
+      "Det du kan hente – dagens bonus, ukekista og trinn på sesongstigen – står øverst på Mål med én knapp: «Hent alt».",
+    ],
+  },
+  {
     b: 414,
     date: "2026-10-02",
     title: "Enklere Folk og Marked",

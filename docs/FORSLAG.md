@@ -73,11 +73,10 @@ til «Avgjort» nederst).
 
 ## Forslag – spillet
 
-- **Resten av designgjennomgangen 1.10 (B-405–B-407, polering B-410–B-414):** bygget: trinn og region i «Dine verk», plass
-  på topplista ved konsernverdien, «Slik fungerer konsernet» i Fagboka, startskjermen, flyttedagen, Skiftrapporten, én
-  arkbredde, Økonomi (tre største poster), kontrollrommets resultat, «Nytt for deg» i Fagboka, Forskning i grupper,
-  Folk (filter og «Mer»), Marked (renhet og planleggerfane). Igjen: Mål (én «Hent»-knapp).
-  Ikke tatt: konsernkassa ut av toppfeltet på mobil (B-340), store bokstaver på alle underoverskrifter.
+- **Designgjennomgangen 1.10 – ferdig (B-405–B-415):** alt fra poleringslista er bygget. Ikke tatt: konsernkassa ut
+  av toppfeltet på mobil (B-340), store bokstaver på alle underoverskrifter. Står åpne (ikke i lista eieren ga): samme
+  fanenavn «Strøm» også i garasjen, topplista med faner og chips i stedet for en nedtrekksliste, og instruksjonen i
+  kontrollrommet som én linje rett over hold-inne-knappen.
 
 - **Stabilisering (B-380, spørsmål til eieren):** se `docs/STABILISERING.md` – kassetaket, legacy-gulvet, sesonglistene og
   innskuddet (fire spørsmål nederst). Verksjefene venter til dette er avklart.

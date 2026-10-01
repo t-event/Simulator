@@ -7611,3 +7611,16 @@ Gjort:
 Testet: typesjekk, lint, `npm test`, build; Playwright på 320, 390 og 1 366 px: søkere med ni roller (filter, én rolle, forklaring), ansatte med «Mer» åpnet, Marked med renhet og planleggerfanen; ingen avkorting, ingen horisontal scrolling.
 Konto (B-149): ingen endring.
 Endringslogg: ja.
+
+## B-415 Polering 6: «Hent alt» øverst på Mål (2026-10-02)
+Status: gjennomført.
+Bakgrunn: siste punkt i poleringen fra designgjennomgangen 1.10: Mål hadde tre «Hent»-knapper på to faner (dagens bonus på «I dag», ukekista og sesongtrinnene på «Uka»). Ingen endring i belønningene eller på serveren.
+Gjort:
+- **«Klar til å hente»** står øverst på Mål, uansett fane, når noe kan hentes: én linje per ting (dagens bonus med beløp, ukekista med fagpoeng, trinn på sesongstigen med fagpoeng) og én knapp, «Hent alt» (eller «Hent» når det er én ting). Står ikke der når ingenting venter, under veiledningen eller uten konto.
+- **Rekkefølgen:** dagens bonus først (den gir poeng på stigen), så ukekista, så stigen med fersk status fra serveren – et nytt trinn fra bonusen blir med. Hver henting er trygg å gjenta (serveren gir den én gang), og én feil stopper ikke resten.
+- **Kortene** sier fortsatt hva som venter, men viser til knappen øverst i stedet for å ha egne knapper. Dagens belønning (dag 1–7) hentes som før i vinduet som kommer av seg selv.
+- **Koden:** hentingen er flyttet fra kortene til `ui/claims.ts` (`claimables`, `claimAll` og én funksjon per henting); sesongstigens status ligger i et felles lager i `net/seasonTrack.ts`, som ukens og dagens status. Linja er `ui/ClaimAll.tsx`.
+- **Test** i `net/tests.ts`: det som venter, kommer i riktig rekkefølge med riktige fagpoeng; ingenting når alt er hentet; ingen bonus for gårsdagens oppdrag.
+Testet: typesjekk, lint, `npm test`, build; Playwright med falsk tjeneste på 320, 390 og 1 366 px: linja viser tre ting, «Hent alt» kaller hver henting én gang (bonus, kiste, stige), spillet får 354 fagpoeng og bonusen, og linja forsvinner etterpå; knappen 44 px, ingen avkorting eller horisontal scrolling.
+Konto (B-149): krever konto som det den henter; uten konto står de i det samlede kontokortet som før.
+Endringslogg: ja.
