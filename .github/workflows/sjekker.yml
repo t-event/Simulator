@@ -48,6 +48,11 @@ jobs:
         working-directory: frontend
         run: npx tsx src/game/balance.ts
 
+      # Med daglige belønninger, mot sin egen referanse (B-400), så endringer i belønningene blir synlige
+      - name: Balansetest med daglige belønninger
+        working-directory: frontend
+        run: npx tsx src/game/balance.ts --daglig 15
+
       - name: Bygg
         working-directory: frontend
         run: npm run build

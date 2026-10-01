@@ -88,7 +88,8 @@ export function applyStreakReward(g: GameState, streak: number, fmtKr: (v: numbe
 
 /**
  * Hva tida borte gir: døgns drift per time, høyst AWAY_MAX_HOURS timer. Under AWAY_MIN_MINUTES gir ingenting.
- * Fagpoengene kommer fra serveren (`fp`, B-399); appen legger inn det serveren sier, høyst AWAY_FP_MAX.
+ * Fagpoengene kommer fra serveren (`fp`, B-399), som regner dem og gir dem én gang – det er det som begrenser dem.
+ * Taket her er bare et vern mot et feil svar (B-400).
  */
 export function awayReward(g: GameState, seconds: number, fp = 0): Reward {
   if (seconds < AWAY_MIN_MINUTES * 60) return { cash: 0, fp: 0 };
