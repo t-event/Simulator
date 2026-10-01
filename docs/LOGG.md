@@ -5,6 +5,16 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 334 – 2026-10-02: Polering 2: startskjerm, flyttedag, Skiftrapporten, arkbredde (B-411)
+
+**Brukeren ba om:** resten av UI-poleringen i små PR-er (fortsettelse av økt 333).
+
+**Gjort:** introavsnittet skjult for dem som har et spill; flyttedagen med én setning i stedet for lista; dempede hendelseslinjer i Skiftrapporten; `--sheet-w` for arkene på PC. #351 (B-410) merget først.
+
+**Testet:** typesjekk, lint, `npm test`, build; Playwright på 320, 390 og 1 366 px (og arkbredden på 1 920).
+
+**Gjenstår:** Folk, Forskning, «Nytt for deg», Mål, Marked, Økonomi, kontrollrommets resultatskjerm; morgenkjøringen 2.10.
+
 ## Økt 333 – 2026-10-02: Polering 1: Konsern (B-410)
 
 **Brukeren ba om:** resten av UI-poleringen i små PR-er, uten å røre rapportgrunnlaget 2.10 (og V0/K-1, verksjefer og rekonstruksjon, som alt var gjort i #350 – merget for å frigjøre grenen; utkastet er ikke installert).

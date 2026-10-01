@@ -1935,6 +1935,11 @@ button {
   text-align: left;
 }
 
+/* Flyttedagen: én setning, tallene står på Verket (B-411) */
+.g-celebrate-line {
+  color: var(--text);
+}
+
 .g-celebrate-burst {
   color: var(--heat);
   animation: g-burst 0.6s ease-out;
@@ -4246,7 +4251,7 @@ button {
     --sheet-pad: var(--sp-5);
     height: 100%;
     max-height: none;
-    max-width: 520px;
+    max-width: var(--sheet-w);
     border-radius: 0;
     border-width: 0 0 0 1px;
     padding: var(--sheet-pad) var(--sheet-pad) calc(var(--sp-6) + env(safe-area-inset-bottom));
@@ -7469,12 +7474,13 @@ button.g-prod-row:hover {
   margin: 2px 0 0;
 }
 
-/* Hendelser fra spillet (B-339): midt i lista, som en linje i skiftrapporten */
+/* Hendelser fra spillet (B-339): midt i lista, som en dempet linje uten boks – spillernes meldinger står fram (B-411) */
 .g-chat-msg.is-event {
   align-self: center;
   max-width: 100%;
-  background: var(--info-bg);
-  border: 1px solid var(--info-border);
+  padding: 0 var(--sp-3);
+  background: none;
+  color: var(--text-dim);
   font-size: var(--fs-meta);
   text-align: center;
 }
@@ -7484,7 +7490,7 @@ button.g-prod-row:hover {
 }
 
 .g-chat-msg.is-event .ds-icon {
-  color: var(--info);
+  color: var(--text-dim);
   vertical-align: -3px;
 }
 

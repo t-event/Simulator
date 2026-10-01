@@ -7566,3 +7566,15 @@ Gjort:
 Testet: `npm test`, typesjekk, lint, build; Playwright på 320, 390, 412, 820 og 1 366 px med falsk topplisteplass: ingen horisontal scrolling, etiketten og radene avkortes ikke, lenken åpner kapitlet.
 Konto (B-149): plassen krever konto (topplista); resten ikke.
 Endringslogg: ja.
+
+## B-411 Polering 2: startskjermen, flyttedagen, Skiftrapporten og arkbredden (2026-10-02)
+Status: gjennomført.
+Bakgrunn: neste del av poleringen fra designgjennomgangen 1.10 (FORSLAG.md), i en liten PR uten noe som rører world-systemene eller rapportgrunnlaget 2.10.
+Gjort:
+- **Startskjermen:** den som har et lagret spill, ser ikke lenger introavsnittet («Smelt skrap …») – «Ditt spill», Fortsett (eneste primærknapp) og Nytt spill står øverst. Nye spillere ser avsnittet som før.
+- **Flyttedagen** er kortet til navnet på nivået, beskrivelsen, én setning («Plass til N ansatte – og nytt utstyr å kjøpe under Anlegg»; på støperiet også «Du er nå daglig leder …») og «Sett i gang». Lista med kostnader, lager, utstyr og forskning er borte – tallene står på Verket. Knappen er nå innenfor skjermen på 320 × 568 (før under kanten).
+- **Skiftrapporten:** hendelser fra spillet er dempede linjer uten boks (grå tekst og ikon), så spillernes meldinger står fram.
+- **Ark på PC:** alle ark fra høyre var alt 520 px brede; bredden er nå et token (`--sheet-w` i `tokens.css`), så den holdes felles.
+Testet: typesjekk, lint, `npm test`, build; Playwright på 320 × 568, 390 × 844 og 1 366 × 768 (startskjermen med og uten lagret spill, flyttedagen, Skiftrapporten med falsk tjeneste), og arkbredden på 1 366 og 1 920 px: ingen horisontal scrolling, knappen synlig.
+Konto (B-149): ingen endring (Skiftrapporten krever konto som før).
+Endringslogg: ja.
