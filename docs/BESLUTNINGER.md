@@ -7578,3 +7578,13 @@ Gjort:
 Testet: typesjekk, lint, `npm test`, build; Playwright på 320 × 568, 390 × 844 og 1 366 × 768 (startskjermen med og uten lagret spill, flyttedagen, Skiftrapporten med falsk tjeneste), og arkbredden på 1 366 og 1 920 px: ingen horisontal scrolling, knappen synlig.
 Konto (B-149): ingen endring (Skiftrapporten krever konto som før).
 Endringslogg: ja.
+
+## B-412 Polering 3: Økonomi med de tre største postene, kontrollrommets resultat på designsystemet (2026-10-02)
+Status: gjennomført.
+Bakgrunn: neste del av poleringen fra designgjennomgangen 1.10 (FORSLAG.md). Ingen endring i økonomien eller på serveren.
+Gjort:
+- **Verket → Økonomi:** «Inntekter i går» og «Kostnader i går» viser de tre største postene med tydeligere stolper (de er nesten hele summen); resten ligger bak «Alle poster (N til, sum)». Er det bare én post til, står den fremme – et trykk for én rad er unødvendig.
+- **Kontrollrommets resultat** (vanlig og ukens): poengene er et nøkkeltall (`Metric`) med endringen mot rekorden under, «Ny rekord» er en grønn status, knappene er designsystemets (`Button`: «Ta neste charge også» primær, «Tilbake til verket», lenken til topplista), og «Hvorfor?» er samme utvidbare rad som ellers i appen. Selve ovnen og rundene beholder sitt utseende. Ubrukte stiler (`cg-total`, `cg-record`, `cg-link`, `cg-board-link`) er fjernet.
+Testet: typesjekk, lint, `npm test`, build; Playwright på 320, 390 og 1 366 px: Økonomi med ekte storverksspill (tre poster + «Alle poster», ingen avkorting, ingen horisontal scrolling), og kontrollrommet spilt gjennom fire runder til resultatet (knappene 44 px, ingen avkorting).
+Konto (B-149): ingen endring.
+Endringslogg: ja.

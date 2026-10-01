@@ -5,6 +5,16 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 335 – 2026-10-02: Polering 3: Økonomi og kontrollrommets resultat (B-412)
+
+**Brukeren ba om:** resten av UI-poleringen i små PR-er (fortsettelse).
+
+**Gjort:** `Breakdown` viser de tre største postene og resten bak «Alle poster»; resultatet i kontrollrommet på `Metric`, status og `Button`. #352 (B-411) merget, publiseringen av #351 grønn.
+
+**Testet:** typesjekk, lint, `npm test`, build; Playwright på 320, 390 og 1 366 px (kontrollrommet spilt gjennom).
+
+**Gjenstår:** Folk, Forskning, «Nytt for deg», Mål, Marked; morgenkjøringen 2.10.
+
 ## Økt 334 – 2026-10-02: Polering 2: startskjerm, flyttedag, Skiftrapporten, arkbredde (B-411)
 
 **Brukeren ba om:** resten av UI-poleringen i små PR-er (fortsettelse av økt 333).

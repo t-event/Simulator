@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 412,
+    date: "2026-10-02",
+    title: "Ryddigere økonomi og resultat i kontrollrommet",
+    items: [
+      "Økonomi viser de tre største inntektene og kostnadene med stolper – resten finner du under «Alle poster».",
+      "Resultatet i kontrollrommet ser ut som resten av spillet: poengene store, endringen mot rekorden under og tydelige knapper.",
+    ],
+  },
+  {
     b: 411,
     date: "2026-10-02",
     title: "Kortere flyttedag og roligere skiftrapport",

@@ -89,28 +89,41 @@ export function ResultChart({ days }: { days: DayFinance[] }) {
   );
 }
 
-/** Poster sortert etter størrelse, med en stolpe som viser andelen av den største */
+const BREAKDOWN_TOP = 3;
+
+/** Poster sortert etter størrelse, med en stolpe som viser andelen av den største. De tre største står fremme – de er
+ *  nesten hele summen – og resten bak «Alle poster» (B-412) */
 export function Breakdown({ title, rows }: { title: string; rows: { label: string; value: number }[] }) {
   const list = rows.filter((r) => r.value > 0).sort((a, b) => b.value - a.value);
   if (!list.length) return null;
   const top = list[0].value;
   const total = list.reduce((a, r) => a + r.value, 0);
+  const item = (r: { label: string; value: number }) => (
+    <li key={r.label}>
+      <span className="g-breakdown-label">{r.label}</span>
+      <span className="g-breakdown-value">{fmtKr(r.value)}</span>
+      <span className="g-breakdown-bar" aria-hidden="true">
+        <span style={{ width: `${Math.max(2, (r.value / top) * 100)}%` }} />
+      </span>
+    </li>
+  );
+  // Én post til får stå fremme; en «Alle poster» med én rad er bare et ekstra trykk
+  const shown = list.length > BREAKDOWN_TOP + 1 ? BREAKDOWN_TOP : list.length;
+  const rest = list.slice(shown);
   return (
     <div className="g-breakdown">
       <h3 className="g-subhead">
         {title} <span className="g-muted">{fmtKr(total)}</span>
       </h3>
-      <ul>
-        {list.map((r) => (
-          <li key={r.label}>
-            <span className="g-breakdown-label">{r.label}</span>
-            <span className="g-breakdown-value">{fmtKr(r.value)}</span>
-            <span className="g-breakdown-bar" aria-hidden="true">
-              <span style={{ width: `${Math.max(2, (r.value / top) * 100)}%` }} />
-            </span>
-          </li>
-        ))}
-      </ul>
+      <ul>{list.slice(0, shown).map(item)}</ul>
+      {rest.length > 0 && (
+        <details className="g-details g-breakdown-more">
+          <summary>
+            Alle poster ({rest.length} til, {fmtKr(rest.reduce((a, r) => a + r.value, 0))})
+          </summary>
+          <ul>{rest.map(item)}</ul>
+        </details>
+      )}
     </div>
   );
 }

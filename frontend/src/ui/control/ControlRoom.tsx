@@ -9,6 +9,8 @@ import { GRADES } from "../../game/data";
 import type { ManualRequest } from "../../game/types";
 import { fmtNum } from "../format";
 import { buzz } from "../haptics";
+import { Button, Metric } from "../ds";
+import { changeDelta } from "../delta";
 import { Icon, type IconName } from "../icons";
 import {
   BUCKET_WARN_S,
@@ -673,22 +675,22 @@ function Result({
 }) {
   const record = score.points > best;
   const fp = 1 + score.rating + (score.rating >= 5 ? 15 : score.rating >= 4 ? 8 : 0);
+  // Samme byggeklosser som Verket (B-412): poengene som nøkkeltall, rekorden som endring og status
   return (
     <div className="cg-result">
       <div className="cg-rating">
         <Stars n={score.rating} of={5} />
         <h2>{score.headline}</h2>
-        <p className="cg-total">
-          {fmtNum(score.points)} poeng
-          {record ? (
-            <span className="cg-record">
-              {" "}
-              <Icon name="trophy" /> Ny rekord!
-            </span>
-          ) : (
-            <span className="cg-muted"> · rekord {fmtNum(best)}</span>
-          )}
-        </p>
+        <Metric
+          label="Poeng"
+          value={fmtNum(score.points)}
+          delta={best > 0 ? changeDelta(score.points, best, fmtNum, { than: "rekorden" }) : null}
+        />
+        {record && (
+          <span className="ds-status is-ok">
+            <Icon name="trophy" /> Ny rekord
+          </span>
+        )}
         <p className="cg-muted">
           +{fp} fagpoeng
           {score.rating >= 4 && ` · kundene betaler ${score.rating >= 5 ? 6 : 3} % ekstra for stålet`}
@@ -703,31 +705,29 @@ function Result({
             </div>
             <p>{x.text}</p>
             {x.stars < 3 && (
-              <details className="cg-lesson">
+              <details className="g-details cg-lesson">
                 <summary>Hvorfor?</summary>
                 <p>{x.lesson}</p>
-                <button className="cg-link" onClick={() => onDone(score.result, x.chapter)}>
+                <Button variant="link" icon="book" onClick={() => onDone(score.result, x.chapter)}>
                   Les mer i fagboka
-                </button>
+                </Button>
               </details>
             )}
           </li>
         ))}
       </ul>
       <div className="cg-result-actions">
-        <button className="cg-main is-ready" onClick={() => onDone(score.result, undefined, true)}>
+        <Button variant="primary" onClick={() => onDone(score.result, undefined, true)}>
           Ta neste charge også
-        </button>
-        <button className="cg-main is-quiet" onClick={() => onDone(score.result)}>
-          Tilbake til verket
-        </button>
+        </Button>
+        <Button onClick={() => onDone(score.result)}>Tilbake til verket</Button>
+        {/* Topplista for kontrollrommet (B-295): hvor står rekorden din mot de andre? */}
+        {onBoard && (
+          <Button variant="link" icon="trophy" onClick={() => onBoard(score.result)}>
+            Se topplista for kontrollrommet
+          </Button>
+        )}
       </div>
-      {/* Topplista for kontrollrommet (B-295): hvor står rekorden din mot de andre? */}
-      {onBoard && (
-        <button className="cg-link cg-board-link" onClick={() => onBoard(score.result)}>
-          <Icon name="trophy" /> Se topplista for kontrollrommet
-        </button>
-      )}
     </div>
   );
 }
@@ -739,7 +739,7 @@ function WeeklyResult({ score, weekly }: { score: Score; weekly: WeeklyMode }) {
       <div className="cg-rating">
         <Stars n={score.rating} of={5} />
         <h2>{score.headline}</h2>
-        <p className="cg-total">{fmtNum(score.points)} poeng</p>
+        <Metric label="Poeng" value={fmtNum(score.points)} />
         <p className="cg-muted" aria-live="polite">
           {weekly.counted ? (weekly.status ?? "Leverer …") : "Trening – teller ikke på ukelista."}
         </p>
@@ -757,13 +757,13 @@ function WeeklyResult({ score, weekly }: { score: Score; weekly: WeeklyMode }) {
       </ul>
       <div className="cg-result-actions">
         {weekly.onAgain && (
-          <button className="cg-main is-ready" onClick={weekly.onAgain}>
+          <Button variant="primary" onClick={weekly.onAgain}>
             Øv igjen
-          </button>
+          </Button>
         )}
-        <button className={`cg-main ${weekly.onAgain ? "is-quiet" : "is-ready"}`} onClick={() => weekly.onClose(false)}>
+        <Button variant={weekly.onAgain ? "secondary" : "primary"} onClick={() => weekly.onClose(false)}>
           Lukk
-        </button>
+        </Button>
       </div>
     </div>
   );
