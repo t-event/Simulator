@@ -7304,3 +7304,44 @@ Beslutning:
   belønningen. Taket i appen er ikke en juksesperre – en endret app kan omgå det (fagpoeng påvirker bare eget verk).
 Endringslogg: nei – spillerne merker ingenting.
 Konto (B-149): nei.
+
+## B-401 Verdensjobbene: én spiller om gangen, ingen dobbel betaling, og overvåking per jobb og spiller (2026-10-01)
+Status: gjennomført (migrasjon 101, lagt inn 1.10 ca. 13:25 UTC).
+Bakgrunn: eieren ba om punkt 1 og 2 fra stabiliseringslista sammen, med testene i punkt 5. Målingene, utbyttet, bidraget
+og selskapsinntekten gikk i én løkke per jobb (målingene i én setning for alle). En uventet feil hos én spiller stoppet
+jobben for alle, og `world_tick` rullet alt tilbake – også jobbene som hadde gått bra. Overvåkingen viste bare at
+pg_cron hadde startet `world_tick`, ikke om noe ble betalt.
+Beslutning:
+- Hver spiller (hvert selskap for selskapsinntekten) behandles i en egen deltransaksjon (`begin … exception`). Feiler
+  noe, rulles bare den spillerens behandling tilbake, feilen logges (`world_job_units`, `world_job_errors`), og resten
+  fortsetter. Spilleren prøves igjen i neste kjøring (hvert 5. minutt), fra første dag som ikke er betalt.
+- Ingen dobbel betaling ved nye forsøk: hver betaling skrives med `on conflict do nothing`, og kassa, kasseposten og
+  fondet krediteres bare når raden faktisk ble satt inn – i samme deltransaksjon som raden.
+- Hver jobb i `world_tick` kjøres for seg; én jobb som feiler, stopper ikke de andre.
+- Overvåking: `world_health()` gir per jobb siste start, siste fullførte og siste feilfrie kjøring, antall behandlet og
+  feilet, og status («ok», «feil hos enkelte», «feil i jobben», «står» når siste fullførte er over 20 min gammel – 35 for
+  målingene). `world_health_players()` gir per spiller siste måling, betalt til og med (utbytte og bidrag), siste
+  vellykkede behandling per jobb og feil som står, med status «ok», «feil», «mangler måling» eller «ikke betalt for i går»
+  (fra 00:30 norsk tid). Begge er bare for eieren (tatt fra anon og authenticated).
+- Reglene for beløpene er uendret. Oppryddingen (feilloggen 30 dager, målingene 20) står i én setning i `world_prune`.
+Prøvekjøring 1.10 (rullet tilbake): med en midlertidig `world_today` = i morgen betalte gammel og ny versjon 1.10 fra
+samme utgangspunkt. Én spiller fikk bevisst feil (i aktivitetsfaktoren og utbyttet per dag). Resultat: 0 avvik for de
+feilfrie i utbytte (13), bidrag (15), selskapsinntekt (1), kasseposter og målinger; spilleren med feil ble ikke målt eller
+betalt og fikk status «feil [utbytte, bidrag, malinger]»; jobbene viste «feil hos enkelte (13/1)». Da feilen var borte,
+betalte et nytt forsøk spilleren samme beløp som den gamle versjonen, med to kasseposter – fortsatt to etter enda en
+kjøring. En egen prøve viste at statusen går tilbake til «ok» ved neste vellykkede måling (16/0). Første ekte kjøring
+med pg_cron etter migrasjonen: alle jobber «ok».
+Testene i punkt 5: midnatt norsk tid i appen (`worldDay`, `nextWorldMidnight`) mot fasit fra `world_day()` i SQL, også
+når sommertiden slutter 25.10.2026 (døgn på 25 t) og begynner 28.3.2027 (23 t), og et helt år uten hoppede eller doble
+dager (`game/tests.ts`, uavhengig av maskinens tidssone). «Prosjekt ferdig mens appen er lukket» er prøvd mot utkastet
+099 tilpasset 101: tre ekte bestillinger med passert ferdigtid ble gjort ferdige ved målingen, og målingen brukte det nye
+utbyttet; ingen nye kasseposter. Testen gjentas i prøvekjøringen 2.10 før 099 legges inn.
+Utkastet 099 er tilpasset: oppgjøret (`konsern_settle`) gjøres per spiller inne i spillerens deltransaksjon i
+`sample_contributions`, ikke for alle verk i hver spillers måling. Historisk etterbetaling følger fortsatt den separate
+godkjenningsplanen (B-399).
+Merk: Supabase-connectoren holder igjen (tidsavbrudd etter 60 s, ingenting sendt til databasen) en DO-blokk eller en
+funksjon med flere setninger der én er `delete`. Prøvekjøringer unngår derfor `delete`.
+Ikke endret: datakvalitetsoversikten for tidslinjetallene tas når flere dager er samlet; variant B av ukens kontrollrom
+venter til stabiliseringen er ferdig; vern mot lekkede passord står fravalgt (krever Supabase Pro, B-363).
+Endringslogg: nei – spillerne merker ingenting.
+Konto (B-149): nei (serverjobber og overvåking for eieren).

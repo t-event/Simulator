@@ -2,6 +2,7 @@
  * Små, raske tester av spillmotoren (B-097). Kjøres med `npx tsx src/game/tests.ts` og i CI.
  * Hver test bygger sin egen tilstand, så de ikke er avhengige av lagrede filer.
  */
+import { nextWorldMidnight, worldDay } from "./clock";
 import {
   buildNeighbor,
   buyMastery,
@@ -4138,6 +4139,52 @@ test("Dødsulykke (B-397): hele verket stenges, også valseverket", () => {
   for (let i = 0; i < 4; i++) g.workers.push(makeCandidate(g, "ovn"));
   fatalAccident(g, "test");
   assert((g.closedUntilMin ?? 0) >= g.minute + FATAL_DOWN_DAYS * 1440, "verket er ikke stengt");
+});
+
+test("Den ekte dagen (B-401): midnatt norsk tid som world_day() på serveren, også når sommertiden slutter og begynner", () => {
+  // Fasit fra SQL 1.10.2026: world_day(t) og (world_day(t) + 1) at time zone 'Europe/Oslo'
+  const fasit: [string, string, string][] = [
+    ["2026-10-01T21:59:59Z", "2026-10-01", "2026-10-01T22:00:00Z"],
+    ["2026-10-01T22:00:00Z", "2026-10-02", "2026-10-02T22:00:00Z"],
+    // Natta til 25.10.2026: klokka stilles tilbake, døgnet har 25 timer
+    ["2026-10-24T21:59:59Z", "2026-10-24", "2026-10-24T22:00:00Z"],
+    ["2026-10-24T22:00:00Z", "2026-10-25", "2026-10-25T23:00:00Z"],
+    ["2026-10-25T00:59:59Z", "2026-10-25", "2026-10-25T23:00:00Z"],
+    ["2026-10-25T01:00:00Z", "2026-10-25", "2026-10-25T23:00:00Z"],
+    ["2026-10-25T22:59:59Z", "2026-10-25", "2026-10-25T23:00:00Z"],
+    ["2026-10-25T23:00:00Z", "2026-10-26", "2026-10-26T23:00:00Z"],
+    // Natta til 28.3.2027: klokka stilles fram, døgnet har 23 timer
+    ["2027-03-27T22:59:59Z", "2027-03-27", "2027-03-27T23:00:00Z"],
+    ["2027-03-27T23:00:00Z", "2027-03-28", "2027-03-28T22:00:00Z"],
+    ["2027-03-28T21:59:59Z", "2027-03-28", "2027-03-28T22:00:00Z"],
+    ["2027-03-28T22:00:00Z", "2027-03-29", "2027-03-29T22:00:00Z"],
+  ];
+  for (const [t, day, next] of fasit) {
+    const at = Date.parse(t);
+    assert(worldDay(at) === day, `worldDay(${t}) = ${worldDay(at)}, ventet ${day}`);
+    assert(
+      nextWorldMidnight(at) === Date.parse(next),
+      `nextWorldMidnight(${t}) = ${new Date(nextWorldMidnight(at)).toISOString()}`,
+    );
+  }
+  // Et helt år fra midnatt til midnatt: ingen dag hoppes over eller kommer to ganger, og døgnene er 23, 24 eller 25 timer
+  let at = Date.parse("2026-09-30T22:00:00Z");
+  const seen = new Set<string>();
+  const hours = new Map<number, number>();
+  for (let i = 0; i < 366; i++) {
+    const day = worldDay(at);
+    assert(!seen.has(day), `${day} kom to ganger`);
+    seen.add(day);
+    const next = nextWorldMidnight(at);
+    assert(worldDay(next) !== day && worldDay(next - 1) === day, `midnatt etter ${day} er feil`);
+    const h = (next - at) / 3_600_000;
+    hours.set(h, (hours.get(h) ?? 0) + 1);
+    at = next;
+  }
+  assert(
+    hours.get(23) === 1 && hours.get(25) === 1 && hours.get(24) === 364,
+    `døgnlengder ${JSON.stringify([...hours])}`,
+  );
 });
 
 if (failed) {

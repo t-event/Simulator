@@ -1,6 +1,6 @@
 # STATUS – slik virker Stålverket nå
 
-**Fasit for hvordan spillet virker i dag** (sist oppdatert 30.9.2026, B-387). Hvorfor ting er som de er, står i
+**Fasit for hvordan spillet virker i dag** (sist oppdatert 1.10.2026, B-401). Hvorfor ting er som de er, står i
 `BESLUTNINGER.md`; hva som ble gjort når, står i `LOGG.md`. Endrer du en regel, oppdater denne fila i samme økt. Står
 noe annet i et eldre analyse- eller forslagsdokument, gjelder denne fila.
 
@@ -50,6 +50,10 @@ regnes av serveren i ekte tid.
   utbyttepolitikken (resten til forsvarsfondet, B-334) og aktivitetskravet (B-327). Fullt konsern ≈ 35–38 mill./dag.
 - **Selskapsinntekt** for den som eier et strategisk selskap (skraplageret er det eneste aktive).
 - Dagen skifter ved midnatt norsk tid (`world_today`).
+- **Verdensjobbene** (B-401): hver spiller (hvert selskap) behandles for seg i målingene, utbyttet, bidraget og
+  selskapsinntekten. En feil rulles tilbake bare for den spilleren, logges, og prøves igjen neste kjøring (hvert 5. min);
+  en betaling krediteres bare når raden ble satt inn, så nye forsøk betaler aldri dobbelt. Status: `world_health()` (per
+  jobb) og `world_health_players()` (per spiller: siste måling, betalt til og med, siste vellykkede behandling, feil).
 
 **Ut:** nye verk og modernisering, anbud på selskaper, investering i Kontroll, oppkjøpsbud og motbud.
 
@@ -158,6 +162,7 @@ regnes av serveren i ekte tid.
 |---|---|---|
 | Kjøp, kø, stige, opptjent nivå | `game/konsernWorld.ts`, `game/konsern.ts` | `konsern_order`, `konsern_settle` (091) |
 | Utbytte | `game/dividend.ts` | `dividend_from_state` (051), `pay_dividends` |
+| Verdensjobbene og overvåkingen | – | `world_tick`, `world_health()`, `world_health_players()` (101) |
 | Bidrag | – (bare serveren) | `pay_contributions` (061, 077) |
 | Kontroll og oppkjøp | `game/control.ts` | `company_control`, `takeover_*` (067, 068, 087) |
 | Innskudd | `net/treasury.ts` | `treasury_limit`, `deposit_to_treasury` (090) |

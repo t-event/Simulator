@@ -16,10 +16,12 @@ declare
   d text := pg_get_functiondef('public.sample_contributions()'::regprocedure);
   o text := d;
 begin
-  d := replace(d, $a$  insert into public.contribution_samples as c (user_id, day, n, sum_full, sum_t, sum_margin, sum_div, n_div, last_at)$a$,
-                  $a$  -- Ferdige byggeprosjekter gjøres ferdige før målingen, også for den som er borte (B-397). Sjekker uten lås først
-  perform public.konsern_settle(k.user_id, now()) from public.konsern k;
-  insert into public.contribution_samples as c (user_id, day, n, sum_full, sum_t, sum_margin, sum_div, n_div, last_at)$a$);
+  -- Etter 101 (B-401) står målingen i løkka per spiller: oppgjøret gjøres for denne spilleren, i spillerens egen
+  -- deltransaksjon, så en feil hos én spiller ikke stopper målingene for de andre
+  d := replace(d, $a$      insert into public.contribution_samples as c (user_id, day, n, sum_full, sum_t, sum_margin, sum_div, n_div, last_at)$a$,
+                  $a$      -- Ferdige byggeprosjekter gjøres ferdige før målingen, også for den som er borte (B-397). Sjekker uten lås først
+      perform public.konsern_settle(k.user_id, now()) from public.konsern k where k.user_id = u.user_id;
+      insert into public.contribution_samples as c (user_id, day, n, sum_full, sum_t, sum_margin, sum_div, n_div, last_at)$a$);
   if d = o then
     raise exception 'sample_contributions: fant ikke teksten som skulle byttes';
   end if;

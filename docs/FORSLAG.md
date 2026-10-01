@@ -6,12 +6,15 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
-- **Ukens kontrollrom** er bygget (B-387, variant A). Venter: variant B (avspilling på serveren). Tidslinja samler nå
+- **Ukens kontrollrom** er bygget (B-387, variant A). Venter: variant B (avspilling på serveren) – eieren 1.10: venter til
+  stabiliseringen er ferdig (B-401). Tidslinja samler nå
   tallene til stål per kWh og leveringspresisjon (B-396, fra 1.10). Om noen uker: eieren avgjør minstetonn, minste antall
   leveranser, små verk og forbedring mot absolutt tall – da kan rotasjonen bli større og «Mer stål enn før» tas bort.
 - **Utbyttet for ferdige verk (B-397, B-399):** besvart – kjøres rett etter 2.10-rapporten; etterbetaling med dry-run per
   spiller og dato (allerede utbetalt, korrigert, differanse, usikkerhet), medregnet det migrasjonen selv utløser, og
   eierens godkjenning. Rapportens grunnlag bevares; korrigeringen dokumenteres separat. Planlagt sjekk 2.10 kl. 07:45 UTC.
+- **Datakvalitetsoversikt for tidslinjetallene (B-396, B-401):** eieren 1.10: tas når flere dager er samlet – andel
+  gyldige målinger (`metric_note`), kWh/t over perioder med nok tonn (`timeline_energy`) og leveringspresisjon per spiller.
 - **Beskytt main (B-397):** slå på «Require status checks» for `sjekker` under Settings → Branches i GitHub.
 - **Anbefalinger fra kodegjennomgangen (B-398), til beslutningene etter 2.10:** behold marginhopp som varsling til de
   falske positive er kartlagt (C og D viser hvorfor); prøv et prisbasert margintak i skygge først; sett krav til de nye
@@ -103,7 +106,8 @@ til «Avgjort» nederst).
   kostet 20 mill. i dagens penger. Appen viser gamle bud med dagens verdi.
 
 - **Vern mot lekkede passord (B-363):** finnes bare på Supabase Pro. Eieren 29.9: «Vi dropper det». Rådet
-  `auth_leaked_password_protection` i `get_advisors` står derfor, og er kjent.
+  `auth_leaked_password_protection` i `get_advisors` står derfor, og er kjent. Bekreftet igjen 1.10 (B-401): beslutningen
+  står.
 
 - **Fast regel om spilltid og ekte tid (B-323):** eieren sa ja 29.9; står i CLAUDE.md og RETNING.md.
 

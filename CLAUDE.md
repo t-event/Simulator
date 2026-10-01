@@ -518,6 +518,14 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `SEQUENCE_SOON_MIN` og køen har plass. Endres regelen, mål produksjon og ventetid på et fullt storverk med flere frø.
 - **Skrapvarsel** (B-219): varsler i grensesnittet bruker `scrapAlert` (neste charge står fast), ikke `scrapShort` (en
   type i resepten er under én charge – ovnen fyller da opp med annet). Ellers varsles det om returskrap som ikke kan kjøpes.
+- **Verdensjobbene** (B-401, 101): målingene, utbyttet, bidraget og selskapsinntekten behandler én spiller (ett selskap)
+  per deltransaksjon (`begin … exception` rundt hver), logger feil med `world_job_unit_error` og teller med
+  `world_job_start`/`world_job_finish`. Nye jobber i `world_tick` følger samme mønster, og en betaling krediterer kassa
+  bare når raden ble satt inn (`on conflict do nothing` + `if found`). Sjekk `select * from world_health()` og
+  `world_health_players()` når en økt rører verdensjobbene eller pengene på serveren.
+- **Supabase-connectoren og `delete`** (B-401): `execute_sql` holder igjen (tidsavbrudd etter 60 s, ingenting når
+  databasen) en DO-blokk eller funksjon med flere setninger der én er `delete`. Én setning går. Prøvekjøringer unngår
+  `delete` (bruk f.eks. en midlertidig `world_today` = i morgen); opprydding i funksjoner står i én setning.
 - **Flere selskaper** (B-253, B-256): tonn, gebyr og anslag regnes per type (`company_counted_t`, `company_fee`,
   `company_estimate` i 042/043). Verkstedet teller kroner vedlikehold (`snapshots.maint_kr` → `production_days.gained_maint`),
   ikke tonn, og `company_fee` er da en andel. Et selskap med `companies.active = false` får ikke anbud, inntekt eller plass i `world_status`. Varsler om avgjorte
