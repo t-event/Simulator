@@ -1,7 +1,7 @@
 -- UTKAST – IKKE KJØRT. Venter på eierens svar (B-397): skal den kjøres før eller etter 2.10-rapporten?
--- Blir den kjørt, flyttes fila til supabase/098_utbytte_ferdige_verk.sql.
+-- Blir den kjørt, flyttes fila til supabase/099_utbytte_ferdige_verk.sql.
 --
--- 098 Utbyttet for ferdige verk og for det siste verket som selges (B-397, funn 3 og 4 i kodegjennomgangen 1.10):
+-- 099 Utbyttet for ferdige verk og for det siste verket som selges (B-397, funn 3 og 4 i kodegjennomgangen 1.10):
 -- 1. Målingene hvert kvarter (`sample_contributions`) gjør ferdige byggeprosjekter ferdige først (`konsern_settle`).
 --    Før ble de gjort ferdige bare når spilleren lagret, og i `pay_dividends` ved midnatt: en spiller som var borte,
 --    fikk verket målt som under bygging (0 i utbytte) resten av dagen etter at det var ferdig. 1.10 gjaldt det 3 spillere.

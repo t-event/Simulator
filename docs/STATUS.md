@@ -86,6 +86,7 @@ regnes av serveren i ekte tid.
 - **Tidslinjetall til nye ukekonkurranser** (B-396, ikke slått på): tidslinja samler tellere i alt – strøm (`kwh_total`),
   leveranser (alltid i tide), misligholdt, avbrutt og reklamasjoner. Serveren regner kWh/t og leveringspresisjon selv
   (`timeline_metrics`); vakten nuller urimelige tall (`metric_note`) uten å avvise raden eller flagge spilleren.
+  kWh/t vurderes over minst 5 000 t (`timeline_energy`), fordi strøm bokføres ved chargestart og tonn ved støping (B-398).
 
 ## 7. Konto og gjester
 

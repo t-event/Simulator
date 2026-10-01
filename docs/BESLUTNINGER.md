@@ -7241,8 +7241,28 @@ Beslutning:
   sjekker før merge) må eieren slå på i GitHub (Settings → Branches).
 - **Venter på eieren (funn 3, 4):** utbyttet. Ferdige datterverk ble målt som under bygging resten av dagen for den som
   var borte (3 spillere 1.10), og den som solgte sitt siste verk før midnatt, fikk ikke utbyttet for dagen. Rettingen står
-  i `supabase/utkast/098_utbytte_ferdige_verk.sql` og er prøvd i en transaksjon som ble rullet tilbake. Den øker
+  i `supabase/utkast/099_utbytte_ferdige_verk.sql` og er prøvd i en transaksjon som ble rullet tilbake. Den øker
   utbetalingene litt for de berørte, og eieren ville ikke endre økonomien før 2.10-rapporten (B-395 punkt F) – så den
   kjøres når eieren sier fra. Etterbetaling for dagene før krever dry-run og eierens godkjenning.
 Endringslogg: ja
 Konto (B-149): nei – feilrettinger.
+
+## B-398 Typevakten og energivakten rettet (2026-10-01)
+Status: gjennomført (098).
+Bakgrunn: en ny kodegjennomgang fant to feil i kontrollene fra B-395/B-396.
+Beslutning:
+- **Typevakten** avviser nå også det som kunne stoppe verdensjobbene for alle: `history: null` og `konsern.plants: null`
+  (leses som lister), og tall som ikke er heltall eller er for store der serveren gjør dem om til heltall: `stage`
+  (0–100; int og smallint på topplista), `serverEdit`, `konsern.nextId` og `minute` (høyst 2 147 483 647). Alle feltene
+  der serveren gjør en verdi fra lagringen om til int, smallint eller boolean, er gått gjennom. Ingen av dagens 24
+  lagringer har noe av dette.
+- **Energivakten** hadde en nedre grense for kWh per tonn i hvert intervall. Strøm bokføres når chargen starter og tonn
+  når de støpes, så et intervall kan ha mange tonn og ingen ny strøm (eller omvendt). Vakten har nå bare en øvre grense
+  som tåler forskyvningen (1,5 mill. kWh + 3 000 per tonn). Forholdet vurderes over en periode med minst 5 000 t i
+  `timeline_energy` (`gyldig`: 120–3 000 kWh/t). `timeline_metrics` står uendret. Ingen målinger var forkastet (26 av 26
+  var godtatt).
+- Til beslutningene etter 2.10 (gjennomgangens anbefaling, i FORSLAG.md): marginhopp forblir varsling til de falske
+  positive er kartlagt; prisbasert margintak prøves i skygge først; krav til konkurransene settes ut fra gyldig
+  datadekning, tonn og antall avsluttede kontrakter.
+Endringslogg: nei – spillerne merker ingenting.
+Konto (B-149): nei.

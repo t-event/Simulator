@@ -5,6 +5,29 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 321 – 2026-10-01: Typevakten og energivakten rettet (B-398)
+
+**Brukeren ba om:** rette to nye feil i kontrollene (typevakten slapp gjennom `history: null` og nivå som 4,5 eller
+2 147 483 648; energivakten forkastet gyldige målinger når støpekøen tømmes), og svare på når vernet til en spillers
+selskap er ferdig.
+
+**Gjort:** 098 (i bruk): typevakten sjekker heltall og grenser for `stage`, `serverEdit`, `konsern.nextId` og `minute`,
+og at `history` og `konsern.plants` er lister. Alle steder serveren gjør om felt fra lagringen til heltall, er gått
+gjennom. Energivakten har bare en øvre grense som tåler forskyvningen; `timeline_energy` vurderer kWh/t over minst
+5 000 t. Utbytteutkastet er flyttet til 099. Funnene fra forrige gjennomgang ble rettet i PR #336 (B-397) – den forrige
+gjennomgangen så på PR #335.
+
+**Testet:** i transaksjoner som ble rullet tilbake: 24 av 24 lagringer godtas, og alle sju farlige tilfeller avvises;
+energivakten godtar 782 t uten ny strøm og nuller 99 mill. kWh på 1 000 t. Etter at 098 var i bruk: lagringer og tidslinja
+kommer inn, og `timeline_energy` gir 275 kWh/t for en stor spiller siste døgn.
+Merk: `execute_sql` med `drop function` venter på bekreftelse og ble tidsavbrutt to ganger (ingenting ble endret) – unngå
+`drop` i tester; derfor fikk vurderingen en egen funksjon i stedet for ny returtype.
+
+**Svar:** vernet på skraplageret til spilleren (kjøpt 29.9 kl. 03:33) slutter 2.10 kl. 03:33 norsk tid; konsesjonen
+varer til 13.10 kl. 03:33.
+
+**Gjenstår:** 099 (utbyttet) venter på eieren, som før.
+
 ## Økt 320 – 2026-10-01: Feilrettinger etter kodegjennomgangen (B-397)
 
 **Brukeren ba om:** se på 13 funn og fire forslag fra en kodegjennomgang av main (e38241e), og svare en spiller som lurer
@@ -12,15 +35,15 @@ på fagpoeng mens man er borte.
 
 **Gjort:** alle 13 funnene ble sjekket og stemte. Rettet 1, 2 og 5–13 i appen og 8 på serveren (097, i bruk). CI kjører
 hele `npm test`, og `sjekker.yml` kjører sjekkene på pull requests. Funn 3 og 4 (utbyttet) står som utkast
-(`supabase/utkast/098_utbytte_ferdige_verk.sql`) og venter på eieren på grunn av 2.10-rapporten.
+(`supabase/utkast/099_utbytte_ferdige_verk.sql`) og venter på eieren på grunn av 2.10-rapporten.
 
 **Testet:** tsc, lint, `npm test` (seks nye tester: sent svar på fornyelsen, midlertidig feil i fornyelsen, ukeresultat
 for en annen konto / etter fristen / uten lagring i nettleseren, skrapklasseren med faktisk analyse, verdenshendelse som
 er over, dødsulykke stenger valseverket), `balance.ts`. 097 prøvd som spiller i en transaksjon som ble rullet tilbake:
-forrige ukes forsøk avvises med `uke_slutt`, denne ukas godtas. Utkastet 098 prøvd på samme måte: 0 ferdige prosjekter
+forrige ukes forsøk avvises med `uke_slutt`, denne ukas godtas. Utkastet 099 prøvd på samme måte: 0 ferdige prosjekter
 igjen uten registrering etter målingen, og målingene steg for de berørte.
 
-**Gjenstår:** eieren: når 098 skal kjøres, og om det skal etterbetales (dry-run først). Beskyttelse av main i GitHub.
+**Gjenstår:** eieren: når 099 skal kjøres, og om det skal etterbetales (dry-run først). Beskyttelse av main i GitHub.
 Svar om fagpoeng mens man er borte (FORSLAG).
 
 ## Økt 319 – 2026-10-01: Serverautoritet trinn 1 og tidslinjetall (B-395, B-396)

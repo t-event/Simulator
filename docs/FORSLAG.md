@@ -9,11 +9,15 @@ til «Avgjort» nederst).
 - **Ukens kontrollrom** er bygget (B-387, variant A). Venter: variant B (avspilling på serveren). Tidslinja samler nå
   tallene til stål per kWh og leveringspresisjon (B-396, fra 1.10). Om noen uker: eieren avgjør minstetonn, minste antall
   leveranser, små verk og forbedring mot absolutt tall – da kan rotasjonen bli større og «Mer stål enn før» tas bort.
-- **Utbyttet for ferdige verk (B-397, funn 3 og 4):** rettingen er klar (`supabase/utkast/098_utbytte_ferdige_verk.sql`,
+- **Utbyttet for ferdige verk (B-397, funn 3 og 4):** rettingen er klar (`supabase/utkast/099_utbytte_ferdige_verk.sql`,
   prøvd). Skal den kjøres nå eller etter 2.10-rapporten? Skal de berørte etterbetales for dagene før (dry-run først)?
 - **Beskytt main (B-397):** slå på «Require status checks» for `sjekker` under Settings → Branches i GitHub.
 - **Fagpoeng mens man er borte (spillerspørsmål 1.10):** forslag: en liten andel (f.eks. 5 %) av vanlig fagpoengtakt i
   «Mens du var borte», regnet av serveren som pengene der (høyst åtte timer, krever konto). Venter på eieren.
+- **Anbefalinger fra kodegjennomgangen (B-398), til beslutningene etter 2.10:** behold marginhopp som varsling til de
+  falske positive er kartlagt (C og D viser hvorfor); prøv et prisbasert margintak i skygge først; sett krav til de nye
+  konkurransene ut fra gyldig datadekning, produsert mengde og antall avsluttede kontrakter (kWh/t over minst 5 000 t,
+  `timeline_energy`).
 - **Serverautoritet etter 2.10 (B-395):** skyggeloggen `world_input_log` vises eieren etter rapporten. Spørsmål: hvilke
   flagg skal håndheves, og hvilken mellomløsning for marginen (serverberegnet maksimum per tonn fra prisene, romslig grense
   for hvor fort marginen kan stige fra serverens egne målinger, kryssjekk av inntekt per tonn)? Bidragsformelen er urørt.
