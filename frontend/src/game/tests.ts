@@ -4218,6 +4218,12 @@ test("Rådsraden: det alvorligste først, med tone (B-406)", () => {
   assert(tips.length <= 3, "høyst tre råd");
 });
 
+test("V0-skyggen: høykonjunkturen er samme tall i simulatoren og i serverutkastet (B-409)", () => {
+  // world_event_boom_size i supabase/utkast/103_v0_k1_skygge.sql ga 0,30402 med standardtallene (testet i en
+  // transaksjon som ble rullet tilbake). Endres formelen eller tallene, må begge endres.
+  assert(Math.abs(k1BoomSize(K1) - 0.30402) < 0.0001, `høykonjunktur ${k1BoomSize(K1)}`);
+});
+
 if (failed) {
   console.log(`\n${failed} test(er) feilet`);
   process.exitCode = 1;
