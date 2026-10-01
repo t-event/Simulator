@@ -5,6 +5,16 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 336 – 2026-10-02: Polering 4: Fagboka og Forskning (B-413)
+
+**Brukeren ba om:** resten av UI-poleringen i små PR-er (fortsettelse).
+
+**Gjort:** «Nytt for deg» øverst i Fagboka og antall lest per tema; forskningsprosjektene gruppert etter hva de gir (`researchGroup`). #353 (B-412) merget, publiseringen av #352 grønn.
+
+**Testet:** typesjekk, lint, `npm test` (ny test for gruppene), build; Playwright på 320, 390 og 1 366 px.
+
+**Gjenstår:** Folk, Mål, Marked; morgenkjøringen 2.10.
+
 ## Økt 335 – 2026-10-02: Polering 3: Økonomi og kontrollrommets resultat (B-412)
 
 **Brukeren ba om:** resten av UI-poleringen i små PR-er (fortsettelse).

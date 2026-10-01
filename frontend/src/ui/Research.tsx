@@ -1,8 +1,9 @@
+import { Fragment, type ReactNode } from "react";
 import { buyFpDeal, buyMastery, doResearch, fpDeal } from "../game/actions";
 import { MASTERY, MASTERY_IDS, masteryCost, masteryEffect, masteryLevel, masteryOpen } from "../game/mastery";
 import { STAGES, stageRef } from "../game/data";
 import { knowledgeCard } from "../game/knowledge";
-import { researchOptions } from "../game/research";
+import { RESEARCH_GROUPS, researchGroup, researchOptions, type ResearchOption } from "../game/research";
 import type { GameState, MasteryId } from "../game/types";
 import { masteryGainPerDay } from "../game/masteryValue";
 import type { GameApi } from "../game/useGame";
@@ -119,6 +120,32 @@ function Mastery({ g, act }: { g: GameState; act: GameApi["act"] }) {
   );
 }
 
+/**
+ * Prosjektene sortert etter hva de gir (B-413), med en liten overskrift for hver gruppe når lista er lang nok til at
+ * det hjelper. Ellers ser 15–20 kort på støperiet helt like ut.
+ */
+function byGroup<T extends ResearchOption>(list: T[]): T[] {
+  const order = (r: T) => RESEARCH_GROUPS.findIndex((x) => x.id === researchGroup(r));
+  return [...list].sort((a, b) => order(a) - order(b));
+}
+
+function grouped<T extends ResearchOption>(list: T[], render: (r: T) => ReactNode, asItem = false): ReactNode {
+  const sorted = byGroup(list);
+  if (list.length <= 3 || new Set(sorted.map((r) => researchGroup(r))).size < 2) return sorted.map(render);
+  return sorted.map((r, i) => {
+    const group = researchGroup(r);
+    const title = RESEARCH_GROUPS.find((x) => x.id === group)!.title;
+    const first = i === 0 || researchGroup(sorted[i - 1]) !== group;
+    return (
+      <Fragment key={r.id}>
+        {first &&
+          (asItem ? <li className="g-research-group">{title}</li> : <h4 className="g-research-group">{title}</h4>)}
+        {render(r)}
+      </Fragment>
+    );
+  });
+}
+
 /** Forskning: fagpoeng brukes på å låse opp utstyr og forbedringer. */
 export function Research({
   g,
@@ -176,43 +203,47 @@ export function Research({
           {ready.length > 0 && (
             <>
               <h3 className="g-subhead">Klar til å forske ({ready.length})</h3>
-              <div className="g-upgrades">{ready.map(card)}</div>
+              <div className="g-upgrades">{grouped(ready, card)}</div>
             </>
           )}
           {later.length > 0 && (
             <>
               <h3 className="g-subhead">Trenger mer fagpoeng eller lesing ({later.length})</h3>
               <ul className="g-research-later">
-                {later.map((r, i) => (
-                  <li key={r.id}>
-                    <div className="g-contract-head">
-                      <strong>{r.name}</strong>
-                      <span className="g-fp-cost">{r.cost} fagpoeng</span>
-                    </div>
-                    <span className="g-muted g-small-text">{r.effect}</span>
-                    {/* Hvor nær du er (B-205): fagpoeng du har mot prisen */}
-                    <Bar
-                      value={Math.min(1, g.researchPoints / r.cost)}
-                      tone="accent"
-                      label={`Fagpoeng mot ${r.name}`}
-                    />
-                    {r.reads && !g.readChapters.includes(r.reads) ? (
-                      // Mange prosjekter kan vente på samme kapittel (konsernet: ni). Knappen står bare på det første,
-                      // så lista ikke blir ni like knapper (B-288)
-                      later.findIndex((x) => x.reads === r.reads) === i ? (
-                        <button className="g-small" onClick={() => openBook(r.reads)}>
-                          <Icon name="book" /> Les «{knowledgeCard(r.reads)?.title ?? "kapitlet"}» først
-                        </button>
+                {grouped(
+                  later,
+                  (r) => (
+                    <li key={r.id}>
+                      <div className="g-contract-head">
+                        <strong>{r.name}</strong>
+                        <span className="g-fp-cost">{r.cost} fagpoeng</span>
+                      </div>
+                      <span className="g-muted g-small-text">{r.effect}</span>
+                      {/* Hvor nær du er (B-205): fagpoeng du har mot prisen */}
+                      <Bar
+                        value={Math.min(1, g.researchPoints / r.cost)}
+                        tone="accent"
+                        label={`Fagpoeng mot ${r.name}`}
+                      />
+                      {r.reads && !g.readChapters.includes(r.reads) ? (
+                        // Mange prosjekter kan vente på samme kapittel (konsernet: ni). Knappen står bare på det første,
+                        // så lista ikke blir ni like knapper (B-288)
+                        byGroup(later).find((x) => x.reads === r.reads) === r ? (
+                          <button className="g-small" onClick={() => openBook(r.reads)}>
+                            <Icon name="book" /> Les «{knowledgeCard(r.reads)?.title ?? "kapitlet"}» først
+                          </button>
+                        ) : (
+                          <span className="g-muted g-small-text">
+                            Krever også «{knowledgeCard(r.reads)?.title ?? "kapitlet"}»
+                          </span>
+                        )
                       ) : (
-                        <span className="g-muted g-small-text">
-                          Krever også «{knowledgeCard(r.reads)?.title ?? "kapitlet"}»
-                        </span>
-                      )
-                    ) : (
-                      r.reason && <span className="g-muted g-small-text">{r.reason}</span>
-                    )}
-                  </li>
-                ))}
+                        r.reason && <span className="g-muted g-small-text">{r.reason}</span>
+                      )}
+                    </li>
+                  ),
+                  true,
+                )}
               </ul>
             </>
           )}

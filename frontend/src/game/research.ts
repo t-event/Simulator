@@ -562,6 +562,45 @@ export function researchForSpeed(speed: number): Research | undefined {
   return RESEARCH.find((r) => r.speed === speed);
 }
 
+/** Hva forskningen gir, så lista kan grupperes (B-413). Rekkefølgen her er rekkefølgen på Forskning */
+export type ResearchGroup = "auto" | "utstyr" | "drift" | "skrap" | "salg" | "konsern";
+
+export const RESEARCH_GROUPS: { id: ResearchGroup; title: string }[] = [
+  { id: "auto", title: "Fart og automatikk" },
+  { id: "utstyr", title: "Nytt utstyr" },
+  { id: "drift", title: "Drift og kvalitet" },
+  { id: "skrap", title: "Skrap og strøm" },
+  { id: "salg", title: "Salg og priser" },
+  { id: "konsern", title: "Konsernet" },
+];
+
+/** Prosjekter som ikke kan leses ut av feltene (fart, skrap, utstyr, konsern) */
+export const RESEARCH_GROUP_OF: Record<string, ResearchGroup> = {
+  salgsrutiner: "auto",
+  ordreplan: "auto",
+  innkjop: "auto",
+  bemanning: "auto",
+  vedlikeholdsplan: "auto",
+  energistyring: "skrap",
+  skumslagg: "skrap",
+  elektrodestyring: "skrap",
+  skraplogistikk: "skrap",
+  kundepleie: "salg",
+  eksport: "salg",
+  produktutvikling: "salg",
+  gronnstal: "salg",
+};
+
+export function researchGroup(r: Research): ResearchGroup {
+  if (r.konsern) return "konsern";
+  const fixed = RESEARCH_GROUP_OF[r.id];
+  if (fixed) return fixed;
+  if (r.speed) return "auto";
+  if (r.scrap) return "skrap";
+  if (r.unlocks) return "utstyr";
+  return "drift";
+}
+
 export function hasResearch(g: GameState, id: string): boolean {
   return g.researched.includes(id);
 }

@@ -134,7 +134,7 @@ frontend/src/
   game/        Spillmotoren – ren TypeScript uten React
     types.ts     Spilltilstand (JSON)       data.ts      Tabeller: skrap, utstyr, kunder …
     plant.ts     Utledede tall (kapasitet, skift)   engine.ts   Tid, produksjon, marked, hendelser
-    actions.ts   Spillerhandlinger          research.ts  Forskning, fagpoeng, låste skraptyper og fart
+    actions.ts   Spillerhandlinger          research.ts  Forskning, fagpoeng, låste skraptyper, fart og gruppene (B-413)
     recipe.ts    Reseptsjekk og forslag til billigste resept
     quiz.ts      Quiz per kapittel         missions.ts  Oppdrag fra fagboka
     challenges.ts Utfordringer på storverket, serier i trinn (B-232)   inbox.ts   Varsellista (hva som er viktig og nytt)

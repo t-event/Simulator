@@ -73,11 +73,11 @@ til «Avgjort» nederst).
 
 ## Forslag – spillet
 
-- **Resten av designgjennomgangen 1.10 (B-405–B-407, polering B-410–B-412):** bygget: trinn og region i «Dine verk», plass
+- **Resten av designgjennomgangen 1.10 (B-405–B-407, polering B-410–B-413):** bygget: trinn og region i «Dine verk», plass
   på topplista ved konsernverdien, «Slik fungerer konsernet» i Fagboka, startskjermen, flyttedagen, Skiftrapporten, én
-  arkbredde, Økonomi (tre største poster), kontrollrommets resultat. Igjen: Folk (filter-chips på søkere, én «Mer»-knapp
-  per ansatt), Forskning (gruppert etter hva det gir), Fagboka («Nytt for deg» øverst), Mål (én «Hent»-knapp), Marked
-  (renhet som stolpe på mobil, egen fane for planleggeren).
+  arkbredde, Økonomi (tre største poster), kontrollrommets resultat, «Nytt for deg» i Fagboka, Forskning i grupper.
+  Igjen: Folk (filter-chips på søkere, én «Mer»-knapp per ansatt), Mål (én «Hent»-knapp), Marked (renhet som stolpe på
+  mobil, egen fane for planleggeren).
   Ikke tatt: konsernkassa ut av toppfeltet på mobil (B-340), store bokstaver på alle underoverskrifter.
 
 - **Stabilisering (B-380, spørsmål til eieren):** se `docs/STABILISERING.md` – kassetaket, legacy-gulvet, sesonglistene og

@@ -7588,3 +7588,14 @@ Gjort:
 Testet: typesjekk, lint, `npm test`, build; Playwright på 320, 390 og 1 366 px: Økonomi med ekte storverksspill (tre poster + «Alle poster», ingen avkorting, ingen horisontal scrolling), og kontrollrommet spilt gjennom fire runder til resultatet (knappene 44 px, ingen avkorting).
 Konto (B-149): ingen endring.
 Endringslogg: ja.
+
+## B-413 Polering 4: «Nytt for deg» i Fagboka, Forskning gruppert etter hva den gir (2026-10-02)
+Status: gjennomført.
+Bakgrunn: neste del av poleringen fra designgjennomgangen 1.10 (FORSLAG.md). Ingen endring i økonomien eller på serveren.
+Gjort:
+- **Fagboka:** uleste kapitler står øverst under «Nytt for deg»; temaene under viser bare det man har lest, med «· 3 av 5 lest» ved overskriften. «Neste»-knappen vises når det ikke er noe nytt å lese (da peker den på en quiz). Et nytt kapittel forsvant før i en lang liste på støperiet.
+- **Forskning:** prosjektene har en gruppe etter hva de gir – Fart og automatikk, Nytt utstyr, Drift og kvalitet, Skrap og strøm, Salg og priser, Konsernet (`researchGroup`, `RESEARCH_GROUPS` og `RESEARCH_GROUP_OF` i `game/research.ts`; gruppen leses av feltene fart, skrap, utstyr og konsern, resten står i lista). «Klar til å forske» og «Trenger mer fagpoeng» sorteres etter gruppe, med en liten overskrift per gruppe når lista har mer enn tre prosjekter i minst to grupper. Stolpen mot fagpoengene fantes fra før (B-205).
+- **Test:** alle prosjekter havner i en gruppe som vises, og de faste gruppene peker på prosjekter som finnes.
+Testet: typesjekk, lint, `npm test`, build; Playwright på 320, 390 og 1 366 px: Fagboka med uleste kapitler og med alt lest, Forskning på stålverket med tre grupper; ingen avkorting, ingen horisontal scrolling.
+Konto (B-149): ingen endring.
+Endringslogg: ja.

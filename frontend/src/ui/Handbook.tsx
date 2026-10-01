@@ -315,6 +315,44 @@ function Contents({ g, onOpen }: { g: GameState; onOpen: (id: string) => void })
   const missions = all.filter((x) => x.mission);
   const locked = KNOWLEDGE.length - g.knowledge.length;
   const next = nextStep(g);
+  const fresh = cards.filter((c) => !g.readChapters.includes(c.id));
+  const row = (c: KnowledgeCard) => {
+    const s = chapterSteps(g, c.id);
+    const complete = s.done === s.total;
+    return (
+      <li key={c.id}>
+        <button className={`g-book-row${complete ? " is-complete" : ""}`} onClick={() => onOpen(c.id)}>
+          <span className="g-book-icon" aria-hidden="true">
+            <Icon name={c.icon} />
+          </span>
+          <span className="g-book-row-text">
+            <strong>{c.title}</strong>
+            <span className="g-muted g-small-text">
+              {!s.read
+                ? `${fmtRead(readSeconds(c))} å lese`
+                : s.hasQuiz && !s.quiz
+                  ? `Quiz klar · +${quizReward(g)} fagpoeng`
+                  : s.mission && !s.missionDone
+                    ? "Oppdrag i gang"
+                    : "Ferdig"}
+            </span>
+          </span>
+          {/* Linja under tittelen sier hva som gjenstår; til høyre bare «Ny», stegene eller en hake (B-241) */}
+          {!s.read ? (
+            <span className="g-badge g-badge-new">Ny</span>
+          ) : complete ? (
+            <span className="g-book-row-done" aria-label="Ferdig">
+              <Icon name="check" />
+            </span>
+          ) : (
+            <span className="g-book-row-steps">
+              {s.done} av {s.total}
+            </span>
+          )}
+        </button>
+      </li>
+    );
+  };
 
   return (
     <>
@@ -339,7 +377,14 @@ function Contents({ g, onOpen }: { g: GameState; onOpen: (id: string) => void })
         <Bar value={total ? done / total : 0} tone="ok" label="Fagboka" />
       </div>
 
-      {next ? (
+      {/* Det nye øverst (B-413): uleste kapitler under «Nytt for deg», så temaene med det man har lest. Uten dem
+          forsvant et nytt kapittel i en lang liste på støperiet */}
+      {fresh.length > 0 ? (
+        <section className="g-book-part g-book-fresh">
+          <h3>Nytt for deg</h3>
+          <ul>{fresh.map(row)}</ul>
+        </section>
+      ) : next ? (
         <button className="g-book-next-step" onClick={() => onOpen(next.id)}>
           <span className="g-book-icon" aria-hidden="true">
             <Icon name={knowledgeCard(next.id)!.icon} />
@@ -359,49 +404,17 @@ function Contents({ g, onOpen }: { g: GameState; onOpen: (id: string) => void })
 
       {KNOWLEDGE_PARTS.map((part) => {
         const inPart = cards.filter((c) => c.part === part.id);
-        if (!inPart.length) return null;
+        const shown = inPart.filter((c) => g.readChapters.includes(c.id));
+        if (!shown.length) return null;
         return (
           <section key={part.id} className="g-book-part">
-            <h3>{part.title}</h3>
-            <ul>
-              {inPart.map((c) => {
-                const s = chapterSteps(g, c.id);
-                const complete = s.done === s.total;
-                return (
-                  <li key={c.id}>
-                    <button className={`g-book-row${complete ? " is-complete" : ""}`} onClick={() => onOpen(c.id)}>
-                      <span className="g-book-icon" aria-hidden="true">
-                        <Icon name={c.icon} />
-                      </span>
-                      <span className="g-book-row-text">
-                        <strong>{c.title}</strong>
-                        <span className="g-muted g-small-text">
-                          {!s.read
-                            ? `${fmtRead(readSeconds(c))} å lese`
-                            : s.hasQuiz && !s.quiz
-                              ? `Quiz klar · +${quizReward(g)} fagpoeng`
-                              : s.mission && !s.missionDone
-                                ? "Oppdrag i gang"
-                                : "Ferdig"}
-                        </span>
-                      </span>
-                      {/* Linja under tittelen sier hva som gjenstår; til høyre bare «Ny», stegene eller en hake (B-241) */}
-                      {!s.read ? (
-                        <span className="g-badge g-badge-new">Ny</span>
-                      ) : complete ? (
-                        <span className="g-book-row-done" aria-label="Ferdig">
-                          <Icon name="check" />
-                        </span>
-                      ) : (
-                        <span className="g-book-row-steps">
-                          {s.done} av {s.total}
-                        </span>
-                      )}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+            <h3>
+              {part.title}{" "}
+              <span className="g-book-part-count">
+                · {shown.length} av {inPart.length} lest
+              </span>
+            </h3>
+            <ul>{shown.map(row)}</ul>
           </section>
         );
       })}
