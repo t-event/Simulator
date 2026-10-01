@@ -167,3 +167,22 @@ export function splitHonor(honor: string | null): { honor: string | null; honorI
   const icon = honor.startsWith("\u{1F3C6}") ? "trophy" : honor.startsWith("\u{1F396}") ? "medal" : null;
   return { honor: honor.replace(/^[\p{Extended_Pictographic}\u{FE0F}\s]+/u, ""), honorIcon: icon };
 }
+
+/** Svaret fra `players_active_24h()`: et heltall, ellers ingenting (B-408) */
+export function parseActivePlayers(v: unknown): number | null {
+  const n = typeof v === "number" ? v : typeof v === "string" ? Number(v) : NaN;
+  return Number.isFinite(n) && n >= 0 ? Math.floor(n) : null;
+}
+
+/** «13 spillere aktive siste 24 timer» (B-408) */
+export function activePlayersText(n: number): string {
+  return n === 1 ? "1 spiller aktiv siste 24 timer" : `${n.toLocaleString("nb-NO")} spillere aktive siste 24 timer`;
+}
+
+/**
+ * Antall spillere aktive siste 24 timer (B-408, 102): spill lagret på nett i døgnet som har gått, uten flaggede og
+ * sperrede kontoer. Bare et tall, så det kan leses uten konto – vises på startskjermen.
+ */
+export async function fetchActivePlayers(): Promise<number | null> {
+  return parseActivePlayers(await rpc<unknown>("players_active_24h", {}));
+}

@@ -36,6 +36,7 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Spille kampanjen, fagbok, quiz, forskning, kontrollrom, konsern | Nei | Regel 1 | – |
 | Felles hendelser (skrapmangel, strømkrise …) | Nei | Gjelder alle spill, også uten konto; hentes uten innlogging | B-129 |
 | Se topplista | Nei | Motiverer, bare lesing | B-127 |
+| Antall spillere aktive siste 24 timer (startskjermen) | Nei | Bare et tall, bare lesing | B-408 |
 | Automatisk oppdatering av appen | Nei | Gjelder alle | B-148 |
 | Lagring på nett, flere enheter | Ja | Regel 2 | B-125, B-140 |
 | Stå på topplista, kallenavn | Ja | Regel 3 | B-127 |

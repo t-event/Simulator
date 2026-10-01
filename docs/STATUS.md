@@ -98,6 +98,8 @@ regnes av serveren i ekte tid.
   åtte timer (80); serveren regner tida og fagpoengene (`claim_away_v2`, B-399). Lagring på nett, lister, konsern, selskaper og chat krever konto.
 - Gjester er anonyme kontoer (B-212) som slippes til det som står i `guest_gate`; de får ingen penger eller plass mellom
   spillere, og slettes etter 60 dager uten lagring (B-377).
+- Startskjermen viser antall spillere aktive siste 24 timer (spill lagret på nett i døgnet, uten flaggede og sperrede;
+  gjester teller med), fra `players_active_24h()` – kan leses uten konto (B-408).
 
 ## 8. Verdensøkonomien – hva simulatoren viser nå (B-385)
 
