@@ -5,6 +5,16 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 333 – 2026-10-02: Polering 1: Konsern (B-410)
+
+**Brukeren ba om:** resten av UI-poleringen i små PR-er, uten å røre rapportgrunnlaget 2.10 (og V0/K-1, verksjefer og rekonstruksjon, som alt var gjort i #350 – merget for å frigjøre grenen; utkastet er ikke installert).
+
+**Gjort:** region i radene under Dine verk, plass på topplista ved konsernverdien (`ui/konsernRank.ts`), «Slik fungerer konsernet» som kapittel i Fagboka (`konsernregler`) med lenke fra Konsern.
+
+**Testet:** `npm test`, typesjekk, lint, build; Playwright på fem bredder.
+
+**Gjenstår:** resten av poleringen; morgenkjøringen 2.10.
+
 ## Økt 332 – 2026-10-01: Klargjøring før 2.10: V0/K-1 i skygge (utkast), verksjef V1, rekonstruksjon (B-409)
 
 **Brukeren ba om:** gjøre V0/K-1 teknisk klart i kveld uten produksjonseffekt (migrasjon, trekning, skyggelogg,

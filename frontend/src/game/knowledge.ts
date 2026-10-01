@@ -440,6 +440,30 @@ export const KNOWLEDGE: KnowledgeCard[] = [
       },
     ],
   },
+  // Reglene for konsernet i spillet, flyttet hit fra «Slik fungerer konsernet» på Konsern-siden (B-410). Åpnes derfra;
+  // tallene står der du kjøper
+  {
+    id: "konsernregler",
+    title: "Slik fungerer konsernet",
+    icon: "konsern",
+    part: "verden",
+    short:
+      "Verkene kjøpes for konsernkassa, bygges i ekte tid og gir utbytte hver ekte dag. Flaggskipet og titlene gir mer.",
+    pages: [
+      {
+        head: "Slik bygger du konsernet",
+        text: "Du kjøper verk for konsernkassa – pengene fra hovedverkets bidrag og utbyttet – ikke for kassa hjemme. Start med et stålverk, bygg det ut til storverk, og senere til stålkompleks. Felles innkjøp og salg gjør alle verkene bedre, også hjemmeverket, og hvert trinn modernisering gir verket mer.",
+      },
+      {
+        head: "Ekte tid",
+        text: "Bygging og modernisering tar ekte timer, uansett hvor fort du spiller. Ett prosjekt bygges om gangen, og du kan ha noen i kø. Verket går som før mens det moderniseres. Utbyttet betales én gang per ekte dag.",
+      },
+      {
+        head: "Flaggskipet og titlene",
+        text: "Hjemmeverket er flaggskipet: godt omdømme og stål som holder kvaliteten gir mer utbytte fra alle datterverkene. Titlene – Stålmagnat, Stålfyrste og videre – kommer av verkene du har bygget, og hver tittel åpner mer: høyere trinn, stålkomplekser og flere plasser. Under Forskning finnes egne prosjekter for konsernet.",
+      },
+    ],
+  },
 ];
 
 /** Sesonger og felles hendelser (B-129); låses opp når spillet kobles til en sesong */

@@ -1197,6 +1197,7 @@ export function GameApp() {
               openTab={subTab.tab}
               onTab={onTab.konsern}
               tender={tender}
+              openBook={openBook}
             />
           )}
           {shown === "mal" && (
