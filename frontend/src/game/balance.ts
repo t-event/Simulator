@@ -1279,12 +1279,25 @@ const seeds = process.argv.includes("--seed")
 const DAYS = 240;
 const NOVICE_DAYS = 260;
 const NOVICE_MAX_DAY = 240;
-const targets = [
+const STANDARD_TARGETS = [
   { stage: 1, min: 7, max: 20 },
   { stage: 2, min: 20, max: 50 },
   { stage: 3, min: 55, max: 120 },
   { stage: 4, min: 120, max: 220 },
 ];
+/**
+ * Referansen når spilleren henter belønningene (`--daglig`, B-400): belønningene skal gi litt raskere progresjon, så
+ * nedre grense er noen dager lavere enn i standardkjøringen. Målt 1.10 med `--daglig 15`: medianene 7 / 19 / 55–60 /
+ * 135–144. Standardmålene over gjelder fortsatt for vanlig kjøring – avviket her begrunner ingen balanseendring.
+ */
+const REWARD_TARGETS = [
+  { stage: 1, min: 6, max: 20 },
+  { stage: 2, min: 15, max: 50 },
+  { stage: 3, min: 48, max: 120 },
+  { stage: 4, min: 110, max: 220 },
+];
+const targets = dailyEvery > 0 ? REWARD_TARGETS : STANDARD_TARGETS;
+if (dailyEvery > 0) console.log(`Belønningsscenario: henter alt hver ${dailyEvery}. spilldøgn (egen referanse, B-400)`);
 
 let failed = false;
 const results: RunSummary[] = [];

@@ -1,7 +1,8 @@
 -- 100 Fagpoeng mens du var borte (B-399). Serveren regner dem ut, som tida borte: 10 fagpoeng per time borte (ca. 5 %
 -- av vanlig takt – testspilleren tjener 5–8 fagpoeng per spilldøgn, og en time på 1× er 30 spilldøgn), høyst åtte
--- timer (80 fagpoeng), ingenting under 30 minutter. Appen legger inn det serveren svarer, og kan ikke skru det opp:
--- tida borte og fagpoengene telles bare én gang (samme rad i `daily` som pengene).
+-- timer (80 fagpoeng), ingenting under 30 minutter. Det som begrenser belønningen, er at serveren regner den og at tida
+-- borte bare hentes én gang (samme rad i `daily` som pengene). Appen legger inn det serveren svarer; taket i appen er
+-- bare et vern mot et feil svar, ikke en juksesperre (B-400).
 -- `claim_away()` står som før for eldre apper (de får pengene, ikke fagpoengene).
 
 alter table public.daily add column if not exists away_fp_total integer not null default 0;

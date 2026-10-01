@@ -114,7 +114,7 @@ npx tsx src/game/balance.ts --nybegynner --verbose --seed 2  # kjør som nybegyn
 npx tsx src/game/balance.ts --seed 2 --repdrop             # alt som tok omdømmet ned, time for time
 npx tsx src/game/balance.ts --vekst                        # største vekst per døgn og per nivå – grunnlaget for juksesperren
 npx tsx src/game/balance.ts --opphold                      # juksesperren med lange opphold (spill uten innlogging)
-npx tsx src/game/balance.ts --daglig 15                    # som over/vanlig kjøring, men henter daglige belønninger (B-149)
+npx tsx src/game/balance.ts --daglig 15                    # henter daglige belønninger (B-149), egen referanse (B-400, også i CI)
 npx tsx src/game/balance.ts --storovn 330                  # samme konsernspill med ulike ovner: tonn og overskudd (B-154)
 npx tsx src/game/balance.ts --storovn 330 --storovn-dump f.json   # … og lagre utgangspunktet; --storovn-base f.json bruker det igjen (B-305)
 npx tsx src/game/balance.ts --vurdering                    # kundevurderingene 1–10 per nivå, flink og nybegynner (B-161)
@@ -322,8 +322,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   server i Playwright må svare på `rpc/save_game` og gi `rev` og `device` på `saves?select=…`. To nettlesere
   simuleres med to `browser.newContext()` mot samme falske tilstand. «Appen vises igjen» utløses med
   `document.dispatchEvent(new Event("visibilitychange"))`, «legges bort» med `pagehide`.
-- Fagpoeng borte (B-399): `AWAY_FP_PER_HOUR`/`AWAY_FP_MAX` i `game/daily.ts` speiler `claim_away_v2` (100). Appen legger inn
-  det serveren svarer; endres tallene, endres begge.
+- Fagpoeng borte (B-399): `AWAY_FP_PER_HOUR`/`AWAY_FP_MAX` i `game/daily.ts` speiler `claim_away_v2` (100); endres tallene,
+  endres begge. Det som begrenser belønningen, er serverens beregning og engangshentingen – taket i appen er ingen
+  juksesperre (B-400).
 - Belønninger i «døgns drift» (B-149) må stemme mellom `game/daily.ts` og `supabase/013_daglig.sql` (`streak_days`,
   bonus i `claim_daily_missions`/`claim_away`), ellers kan juksesperren flagge den som henter dem. Endres
   belønningene: kjør `balance.ts --daglig 15` og `--opphold --daglig 15`.

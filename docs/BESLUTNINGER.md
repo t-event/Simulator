@@ -7277,8 +7277,9 @@ Beslutning:
   var borte» ved siden av pengene. Grunnlag: testspilleren tjener 5–8 fagpoeng per spilldøgn på alle nivåer
   (`balance.ts --fagpoeng`), og en time på 1× er 30 spilldøgn, altså ca. 200 i timen; 5 % = 10. 80 fagpoeng er under
   én forskning (median 120) og under en halvtime vanlig spilling. Serveren regner dem (`claim_away_v2`, 100) med samme tid
-  borte som pengene, så en endret app kan ikke skru opp tallet; appen tar høyst `AWAY_FP_MAX`. `claim_away()` står for
-  eldre apper. Fagpoeng gir bare framgang i eget verk (B-323).
+  borte som pengene og gir dem bare én gang – det er det som begrenser belønningen. Taket i appen (`AWAY_FP_MAX`) er bare
+  et vern mot et feil svar og kan omgås av en endret app (presisert i B-400). `claim_away()` står for eldre apper.
+  Fagpoeng gir bare framgang i eget verk (B-323).
 - **Utbytterettingen** (B-397, funn 3 og 4) kjøres rett etter 2.10-rapporten, og tidspunktet dokumenteres. Utkastet
   retter bare framover (fra 2.10); målinger som alt er tatt, og eldre dager for den som solgte sitt siste verk, rettes av
   en egen etterbetaling: dry-run per spiller og dato (betalt, riktig beløp, differanse, usikkerhet) og eierens
@@ -7287,3 +7288,19 @@ Beslutning:
   resultat fra en annen konto skygge for et nytt som ikke ble lagret.
 Endringslogg: ja
 Konto (B-149): ja – «Mens du var borte» krever konto (regel 4), som før.
+
+## B-400 Egen referanse for belønningsscenarioet i balansen, og den kjøres i CI (2026-10-01)
+Status: gjennomført.
+Bakgrunn: `balance.ts --daglig 15` (spilleren henter daglig belønning, oppdragsbonus og åtte timer borte hver 15.
+spilldøgn) når Støperi på dag 19, mot standardmålet 20–50 – også før B-399. Eieren: dag 19 er greit når spilleren henter
+belønningene; belønningene skal gi litt raskere progresjon, og avviket begrunner ingen balanseendring.
+Beslutning:
+- Standardmålene står (Verksted 7–20, Støperi 20–50, Stålverk 55–120, Storverk 120–220).
+- Belønningsscenarioet har sin egen referanse (`REWARD_TARGETS` i `balance.ts`): Verksted 6–20, Støperi 15–50, Stålverk
+  48–120, Storverk 110–220. Målt 1.10: medianene 7 / 19 / 55–60 / 135–144.
+- CI kjører `balance.ts --daglig 15` mot denne referansen, både på pull requests (`sjekker.yml`) og før publiseringen
+  (`pages.yml`), så senere endringer i belønningene blir synlige.
+- Presisering til B-399: det er serverens beregning og at fagpoengene for tida borte bare hentes én gang, som begrenser
+  belønningen. Taket i appen er ikke en juksesperre – en endret app kan omgå det (fagpoeng påvirker bare eget verk).
+Endringslogg: nei – spillerne merker ingenting.
+Konto (B-149): nei.

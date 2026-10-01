@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 323 – 2026-10-01: Egen referanse for belønningsscenarioet, i CI; presisering om fagpoeng (B-400)
+
+**Brukeren ba om:** beholde 20–50 som mål i standardkjøringen, gi belønningsscenarioet en egen referanse og kjøre det i
+CI; og presisere at det er serverens beregning og engangshentingen – ikke taket i appen – som begrenser fagpoengene.
+
+**Gjort:** `REWARD_TARGETS` i `balance.ts` (brukes med `--daglig`), nytt steg «Balansetest med daglige belønninger» i
+`sjekker.yml` og `pages.yml`. Teksten i B-399, 100, `daily.ts` og CLAUDE.md presisert.
+
+**Testet:** `balance.ts --daglig 15` mot den nye referansen, tsc, prettier, `npm test`.
+
+**Gjenstår:** 2.10: rapporten, så utbytterettingen og dry-run for etterbetaling.
+
 ## Økt 322 – 2026-10-01: Fagpoeng borte, utbytterettingen planlagt, restfeil i kontrollrommet (B-399)
 
 **Brukeren ba om:** fagpoeng mens man er borte (ca. 5 % av vanlig takt, høyst åtte timer, regnet av serveren); kjøre
