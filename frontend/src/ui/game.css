@@ -4828,6 +4828,28 @@ button {
   background: var(--accent);
 }
 
+/* De tre største postene står fremme med tydeligere stolper; resten bak «Alle poster» (B-412) */
+.g-breakdown > ul .g-breakdown-bar {
+  height: 6px;
+  border-radius: 3px;
+}
+
+.g-breakdown > ul .g-breakdown-value {
+  font-size: var(--fs-body);
+}
+
+.g-breakdown-more {
+  margin-top: var(--sp-3);
+}
+
+.g-breakdown-more > summary {
+  font-size: var(--fs-meta);
+}
+
+.g-breakdown-more > ul {
+  margin-top: var(--sp-3);
+}
+
 @media (min-width: 600px) {
   .g-breakdowns {
     grid-template-columns: 1fr 1fr;

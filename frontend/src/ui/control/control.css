@@ -561,15 +561,6 @@
   margin: 4px 0 0;
 }
 
-.cg-total {
-  font-size: var(--fs-page);
-  font-weight: 700;
-}
-
-.cg-record {
-  color: var(--warning);
-}
-
 .cg-result {
   display: flex;
   flex-direction: column;
@@ -605,37 +596,9 @@
 }
 
 .cg-lesson {
-  margin-top: 4px;
+  margin: 0 0 calc(-1 * var(--sp-2));
   font-size: var(--fs-body);
   color: var(--text-dim);
-}
-
-.cg-lesson summary {
-  cursor: pointer;
-  color: var(--accent);
-  min-height: 32px;
-  display: flex;
-  align-items: center;
-}
-
-.cg-link {
-  background: none;
-  border: 0;
-  color: var(--text-dim);
-  text-decoration: underline;
-  font-size: var(--fs-body);
-  min-height: 40px;
-}
-
-/* Lenken til topplista under resultatet (B-295) */
-.cg-board-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-2);
-  width: 100%;
-  min-height: 44px;
-  margin-top: var(--sp-2);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -663,10 +626,6 @@
 
 .cg-hint .ds-icon,
 .cg-hold .ds-icon,
-.cg-record .ds-icon {
-  margin-right: 6px;
-}
-
 .cg-main .ds-icon {
   margin-left: 4px;
 }
@@ -700,7 +659,24 @@
 .cg-result-actions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--sp-3);
+}
+
+/* Resultatet på designsystemet (B-412): nøkkeltallet, rekorden som status og knappene som på Verket */
+.cg-rating .ds-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: var(--sp-3);
+}
+
+.cg-rating .ds-status {
+  margin-top: var(--sp-3);
+}
+
+.cg-result-actions > .ds-button {
+  width: 100%;
+  min-height: var(--touch);
 }
 
 /* Høye mobiler: ovnen får mer av plassen over knappen */
@@ -787,8 +763,7 @@
 .cg-head h1,
 .cg-card h2,
 .cg-rating h2,
-.cg-points,
-.cg-total {
+.cg-points {
   font-family: var(--font-display);
   font-weight: 600;
   letter-spacing: 0.01em;
