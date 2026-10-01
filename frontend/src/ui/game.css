@@ -5575,6 +5575,15 @@ button {
   color: var(--text-2);
 }
 
+/* Antall lest per tema og «Nytt for deg» øverst (B-413) */
+.g-book-part-count {
+  font-weight: 400;
+}
+
+.g-book-fresh h3 {
+  color: var(--accent);
+}
+
 .g-book-part ul {
   list-style: none;
   margin: 0;
@@ -7877,4 +7886,14 @@ button.g-prod-row:hover {
   width: 16px;
   height: 16px;
   color: var(--ok);
+}
+
+/* Forskningen gruppert etter hva den gir (B-413): en liten overskrift over hver gruppe */
+.g-research-group {
+  grid-column: 1 / -1;
+  margin: var(--sp-3) 0 0;
+  font-size: var(--fs-meta);
+  font-weight: 600;
+  color: var(--text-2);
+  list-style: none;
 }

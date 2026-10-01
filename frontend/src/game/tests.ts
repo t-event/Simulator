@@ -212,7 +212,7 @@ import {
   productCapT,
   supportAdvice,
 } from "./plant";
-import { RESEARCH, researchOptions } from "./research";
+import { RESEARCH, RESEARCH_GROUP_OF, RESEARCH_GROUPS, researchGroup, researchOptions } from "./research";
 import { K1, k1BaseCheck, k1BoomSize, k1CostCheck } from "./programSim";
 import { migrate, parseSave } from "./save";
 import { ageOf, PENSION, pensionDay, pensionMorning, pensionSoon, retireAgeOf } from "./pension";
@@ -4222,6 +4222,20 @@ test("V0-skyggen: høykonjunkturen er samme tall i simulatoren og i serverutkast
   // world_event_boom_size i supabase/utkast/103_v0_k1_skygge.sql ga 0,30402 med standardtallene (testet i en
   // transaksjon som ble rullet tilbake). Endres formelen eller tallene, må begge endres.
   assert(Math.abs(k1BoomSize(K1) - 0.30402) < 0.0001, `høykonjunktur ${k1BoomSize(K1)}`);
+});
+
+test("Forskningen grupperes etter hva den gir (B-413)", () => {
+  // De faste gruppene peker på prosjekter som finnes, og alle prosjekter havner i en gruppe som vises
+  for (const id of Object.keys(RESEARCH_GROUP_OF))
+    assert(
+      RESEARCH.some((r) => r.id === id),
+      `ukjent prosjekt: ${id}`,
+    );
+  const shown = new Set(RESEARCH_GROUPS.map((x) => x.id));
+  for (const r of RESEARCH) assert(shown.has(researchGroup(r)), `uten gruppe: ${r.id}`);
+  assert(researchGroup(RESEARCH.find((r) => r.id === "stodig")!) === "auto", "10× er fart");
+  assert(researchGroup(RESEARCH.find((r) => r.id === "lysbue")!) === "utstyr", "lysbueovnen er utstyr");
+  assert(researchGroup(RESEARCH.find((r) => r.id === "konsernenergi")!) === "konsern", "konsernet for seg");
 });
 
 if (failed) {
