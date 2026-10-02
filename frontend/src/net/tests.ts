@@ -2475,6 +2475,32 @@ const main = async () => {
     assert(contributionAt(20_000_000, 0) === 0, "ingen aktivitet");
   });
 
+  await test("Konsernbanken (B-437): lånet fra serveren legges inn og trekkes fra konsernverdien", () => {
+    const g = newGame(437);
+    g.stage = 4;
+    g.konsern.unlocked = true;
+    const w = parseKonsern({
+      plants: [],
+      orders: [],
+      balance: 0,
+      bank: { enabled: true, loan: 3_792_940, limit: 185_367_229, rate: 0.01, share: 0.5 },
+    })!;
+    assert(w.bank?.loan === 3_792_940 && w.bank.limit === 185_367_229 && w.bank.enabled, JSON.stringify(w.bank));
+    assert(konsernDiffers(g, w, 0), "så ikke lånet");
+    applyKonsern(g, w, 0);
+    assert(g.konsern.bank?.loan === 3_792_940, "lagt inn");
+    assert(!konsernDiffers(g, w, 0), "forskjell etter at alt er lagt inn");
+    assert(parseKonsern({ plants: [] })!.bank === undefined, "eldre server uten bank");
+    // Konsernverdien: lånet i banken trekkes fra som lånet hjemme (121)
+    const status = {
+      treasury: { balance: 10e6 },
+      dividend: { fullPerDay: 1e6 },
+      contribution: { perDay: 0, activity: 1 },
+      konsern: w,
+    } as unknown as Parameters<typeof konsernValueOf>[0];
+    assert(konsernValueOf(status, 0) === 10e6 + 60e6 - 3_792_940, `konsernverdi ${konsernValueOf(status, 0)}`);
+  });
+
   await test("Profilen tåler svaret fra serveren og viser aldri ukjente felt (B-419)", () => {
     assert(parseProfile(null) === null, "ingen profil");
     assert(parseProfile({ nick: "" }) === null, "uten navn");

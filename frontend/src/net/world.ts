@@ -440,13 +440,19 @@ export function contributionAt(perDayFull: number, activity: number): number {
 
 /**
  * Konsernverdien slik topplista regner den (B-320, speiler `konsern_value` i 104): konsernkassa + 60 × (utbytte +
- * bidrag) − lån. Bidraget regnes med aktiviteten i siste betalte bidrag (B-417) – før sto en spiller som ikke hadde
+ * bidrag) − lån hjemme − lån i konsernbanken. Bidraget regnes med aktiviteten i siste betalte bidrag (B-417) – før sto en spiller som ikke hadde
  * spilt på dager, med fullt bidrag. Serveren tar også med dagens produksjon så langt; den har ikke appen.
  */
 export function konsernValueOf(w: WorldStatus, loan: number): number {
   // Hele utbyttet, uansett utbyttepolitikk (B-334): det som holdes igjen, er fortsatt konsernets
   const contribution = contributionAt(w.contribution.perDay, w.contribution.activity ?? 1);
-  return w.treasury.balance + 60 * (w.dividend.fullPerDay + contribution) - Math.max(0, loan);
+  // Lånet i konsernbanken trekkes også fra (B-437, 121)
+  return (
+    w.treasury.balance +
+    60 * (w.dividend.fullPerDay + contribution) -
+    Math.max(0, loan) -
+    Math.max(0, w.konsern?.bank?.loan ?? 0)
+  );
 }
 
 /**

@@ -63,6 +63,12 @@ regnes av serveren i ekte tid.
 
 **Ut:** nye verk og modernisering, anbud på selskaper, investering i Kontroll, oppkjøpsbud og motbud.
 
+**Konsernbanken** (B-437, 120/121): lån bare til bestillinger i konsernet (nye verk, utbygging, modernisering, bytte til
+kompleks) – aldri anbud, oppkjøpsbud, motbud eller Kontroll. Rammen er 10 dagers inntekt (snittet av utbyttet og
+bidraget de siste 7 ekte dagene). Lånet tas i bestillingen (`konsern_order_loan`): kassa betaler det den har, banken
+resten. Rente 1 % per ekte dag; hver natt går halvparten av utbyttet og bidraget til nedbetaling (`bank_service` i
+`world_tick`). Salg og avbestilling betaler lånet først. Lånet trekkes fra konsernverdien. Tallene i `config.world.bank`.
+
 **Innskudd fra kassa hjemme er stengt «fail-closed»** (B-382): grensen er 0 med mindre `config.world` har
 `treasury_deposit_enabled = true` og et positivt `treasury_base_per_day`. Ingen av delene er satt.
 

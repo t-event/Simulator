@@ -316,6 +316,19 @@ export interface SisterProject {
  * Et prosjekt i konsernkøen på serveren (B-326): betalt fra konsernkassa når det ble bestilt, bygges i rekkefølge.
  * Kopi av det serveren sier (`konsern_status`); appen viser den og starter prosjektene i takt med serveren.
  */
+/** Konsernbanken (B-437, `bank_status` i 120): lån til verk og modernisering, regnet på serveren */
+export interface KonsernBank {
+  enabled: boolean;
+  /** Det som er lånt nå, med påløpt rente */
+  loan: number;
+  /** Rammen: 10 dagers inntekt (utbytte og bidrag) */
+  limit: number;
+  /** Rente per ekte dag (0,01 = 1 %) */
+  rate: number;
+  /** Andelen av utbyttet og bidraget som betaler ned lånet hver dag */
+  share: number;
+}
+
 export interface KonsernOrder {
   id: number;
   kind: SisterProject["kind"];
@@ -708,6 +721,8 @@ export interface GameState {
      * fondet. Mangler uten konto og i eldre lagringer
      */
     policy?: { kind: PolicyId; changedAt: number | null; fund: number };
+    /** Konsernbanken (B-437), fra serveren: lånet, rammen og vilkårene. Mangler uten konto og i eldre lagringer */
+    bank?: KonsernBank;
   };
   /** Mesterskap (B-150): nivå per prosjekt */
   mastery: Partial<Record<MasteryId, number>>;

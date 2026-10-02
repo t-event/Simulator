@@ -14,7 +14,7 @@
  * Ingen import av motoren, så fila kan brukes av tester og av testspilleren uten sirkler.
  */
 import { defaultRegion, isRegion } from "./regions";
-import type { KonsernOrder, PolicyId, RegionId, SisterPlant, SisterProject, SisterType } from "./types";
+import type { KonsernBank, KonsernOrder, PolicyId, RegionId, SisterPlant, SisterProject, SisterType } from "./types";
 
 export const WORLD_KONSERN = {
   price: { stalverk: 5_000_000, storverk: 20_000_000, kompleks: 60_000_000 } as Record<SisterType, number>,
@@ -151,6 +151,8 @@ export interface KonsernWorld {
   balance: number;
   /** Utbyttepolitikken og forsvarsfondet (B-334), når serveren sender dem */
   policy?: { kind: PolicyId; changedAt: number | null; fund: number };
+  /** Konsernbanken (B-437), når serveren sender den */
+  bank?: KonsernBank;
 }
 
 export type OrderRequest =
@@ -167,6 +169,7 @@ export type OrderRefusal =
   | "verk"
   | "trinn"
   | "kasse"
+  | "laan"
   | "type"
   | "sperret"
   | "konsern"
@@ -184,6 +187,7 @@ export const ORDER_REFUSAL_TEXT: Record<OrderRefusal, string> = {
   verk: "Verket kan ikke endres nå – et prosjekt pågår eller står i køen.",
   trinn: "Verket er modernisert så langt det går nå.",
   kasse: "Det er ikke nok i konsernkassa.",
+  laan: "Lånet ville gått over rammen i konsernbanken (10 dagers inntekt).",
   type: "Ukjent kjøp.",
   sperret: "Kontoen er sperret mens topplista sjekker den.",
   konsern: "Konsernet er ikke åpnet ennå.",
@@ -192,6 +196,36 @@ export const ORDER_REFUSAL_TEXT: Record<OrderRefusal, string> = {
   uke: "Utbyttepolitikken kan endres én gang per uke.",
   nett: "Fikk ikke kontakt med serveren. Prøv igjen om litt.",
 };
+
+/** Hvor mye mer som kan lånes i konsernbanken (B-437): rammen minus det som er lånt */
+export function bankRoom(bank: KonsernBank | undefined | null): number {
+  return bank?.enabled ? Math.max(0, bank.limit - bank.loan) : 0;
+}
+
+/**
+ * Hvor mye et kjøp må låne (B-437, som `konsern_order` via `konsern_order_loan`): det kassa mangler, når det er innenfor
+ * rammen. 0 når kassa holder eller lånet ikke rekker.
+ */
+export function loanFor(balance: number, cost: number, bank: KonsernBank | undefined | null, sale = 0): number {
+  const need = cost - Math.max(0, balance) - sale;
+  return need > 0 && need <= bankRoom(bank) ? need : 0;
+}
+
+/**
+ * Én dag i konsernbanken (B-437, som `bank_service` i 120): renten for dagene siden sist legges til, og `share` av
+ * utbyttet og bidraget som har kommet inn, betaler ned – men aldri mer enn lånet eller det som står i kassa.
+ */
+export function bankDay(
+  loan: number,
+  days: number,
+  income: number,
+  balance: number,
+  bank: Pick<KonsernBank, "rate" | "share">,
+): { interest: number; repay: number; loan: number } {
+  const interest = Math.round(loan * bank.rate * days);
+  const repay = Math.max(0, Math.min(loan + interest, Math.round(bank.share * income), Math.max(0, balance)));
+  return { interest, repay, loan: loan + interest - repay };
+}
 
 /** Hvorfor et verk ikke kan flyttes (B-333) */
 export const MOVE_REFUSAL = ORDER_REFUSAL_TEXT.flyttet;

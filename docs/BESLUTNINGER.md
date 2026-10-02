@@ -8080,3 +8080,29 @@ Testet: motortest (trivsel opp og ned, fagboka låses opp, ingen nevner kvoter),
 Endringslogg: ja.
 Konto (B-149): krever ikke konto (eget verk, spilltid).
 
+## B-437 Konsernbanken: lån til verk og modernisering (2026-10-02)
+Status: gjennomført.
+Bakgrunn: eieren ønsket «egen bank for konsernkassa så man kan ta lån der også», og valgte «Verk og modernisering».
+Beslutning:
+- Lånet kan **bare** brukes på bestillinger i konsernet (nye verk, utbygging, modernisering, bytte til kompleks) – aldri
+  på anbud, oppkjøpsbud, motbud eller investering i Kontroll. Makt mot andre skal tjenes (B-323).
+- Lånet tas i bestillingen (`konsern_order_loan`): kassa betaler det den har, banken det som mangler. Pengene står aldri
+  fritt i kassa.
+- **Rammen** er 10 dagers inntekt: snittet av utbyttet og bidraget i kassaboka de siste 7 ekte dagene × 10. Uten
+  inntekt er rammen 0.
+- **Rente** 1 % per ekte dag, lagt til lånet. Hver natt (`bank_service` i `world_tick`, etter utbyttet og bidraget) går
+  50 % av utbyttet og bidraget som har kommet inn siden sist, til nedbetaling – aldri mer enn lånet eller kassa.
+- Selges et verk eller avbestilles noe mens lånet står, går pengene først til lånet (ellers kunne lån bli til fri kasse).
+- Lånet trekkes fra konsernverdien på topplista (121, `konsernValueOf`), som lånet hjemme.
+- Låsene: rådgivende lås per spiller, `konsern`, så `treasury` (B-433). `konsern_cancel` låser nå konsernet før kassa.
+- Ny posteringstype `lån` i kassaboka; opptak, rente og nedbetaling står også i `konsern_loan_log` (ingen tilgang for
+  spillerne). Tallene i `config.world.bank` (`enabled`, `limit_days`, `rate_per_day`, `repay_share`, `window_days`).
+- Appen: knappen «Lån X og bygg ut» står under kjøpskort kassa ikke rekker til (Utvid og «Neste steg»), ikke i tabellen
+  over verkene. Lånet vises i statusen på Utvid først når det finnes (gradvis synlighet).
+Testet: prøvekjøring som en ekte spiller i en transaksjon som ble rullet tilbake (ramme 185 mill., lån 3,79 mill.,
+avbestilling betalte lånet, rente og nedbetaling ga riktig kasse), `get_advisors`, motortest (`loanFor`, `bankDay` med
+tallene fra prøven), nettest (lånet legges inn og trekkes fra konsernverdien), Chromium på 390 og 320 px, `npm test`,
+typesjekk, lint, build.
+Endringslogg: ja.
+Konto (B-149): krever konto (konsernkassa, serveren, ekte tid – regel 3).
+

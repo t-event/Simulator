@@ -282,6 +282,9 @@ import {
   slotsAt,
   upgradeCostWorld,
   type KonsernWorld,
+  bankDay,
+  bankRoom,
+  loanFor,
 } from "./konsernWorld";
 import { masteryGainPerDay } from "./masteryValue";
 import {
@@ -4502,6 +4505,24 @@ test("Arbeidsmiljøkortene (B-436): riktig håndtering gir bedre trivsel, å se 
     assert(g.workers.length >= workers - 1, `${id}: flere enn én sluttet`);
   }
   assert(QUIZ.arbeidsmiljo?.length === 2, "quizen til arbeidsmiljø mangler");
+});
+
+test("Konsernbanken (B-437): lånet er det kassa mangler, innenfor rammen, og én dag gir som serveren", () => {
+  const bank = { enabled: true, loan: 0, limit: 185_367_229, rate: 0.01, share: 0.5 };
+  // Som prøven mot serveren 2.10: modernisering til 4,5 mill. med 707 060 i kassa
+  assert(loanFor(707_060, 4_500_000, bank) === 3_792_940, `lån ${loanFor(707_060, 4_500_000, bank)}`);
+  assert(loanFor(5_000_000, 4_500_000, bank) === 0, "kassa holder: ingen lån");
+  assert(loanFor(0, 200_000_000, bank) === 0, "over rammen: ingen lån");
+  assert(loanFor(0, 4_500_000, { ...bank, enabled: false }) === 0, "banken av");
+  assert(loanFor(0, 4_500_000, { ...bank, loan: 183_000_000 }) === 0, "rammen nesten brukt opp");
+  assert(bankRoom({ ...bank, loan: 200e6 }) === 0, "aldri negativ ramme");
+  // Én dag (som bank_service): rente 1 % og nedbetaling av halve inntekten, men aldri mer enn lånet eller kassa
+  const d = bankDay(3_792_940, 1, 60_000_000, 50_707_060, bank);
+  assert(d.interest === 37_929 && d.repay === 3_830_869 && d.loan === 0, JSON.stringify(d));
+  const e = bankDay(100_000_000, 1, 20_000_000, 5_000_000, bank);
+  assert(e.interest === 1_000_000 && e.repay === 5_000_000 && e.loan === 96_000_000, JSON.stringify(e));
+  const f = bankDay(100_000_000, 2, 0, 50_000_000, bank);
+  assert(f.interest === 2_000_000 && f.repay === 0 && f.loan === 102_000_000, JSON.stringify(f));
 });
 
 test("Quizen (B-428): svaralternativene står i blandet rekkefølge, men alltid den samme for et spørsmål", () => {

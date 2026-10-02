@@ -509,6 +509,11 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `drop` i tester; lag heller en ny funksjon enn å endre returtypen. Det samme gjelder `drop trigger` i `apply_migration`
   (B-430): bruk `create or replace trigger`. En migrasjon med en slettesetning i teksten holdes også igjen (B-434); endre
   da den levende funksjonen med `replace()` i en DO-blokk, som 114/115/119.
+- **Konsernbanken** (B-437, 120/121): lån tas bare i `konsern_order` når kallet kom via `konsern_order_loan` (som setter
+  `stalverk.bank` for transaksjonen) – aldri en egen «ta opp lån»-funksjon, så lånte penger aldri står fritt i kassa.
+  Nye måter å få penger ut av et verk eller en bestilling på (salg, refusjon) betaler lånet først (`bank_repay_from`).
+  Rammen leser kassaboka (`utbytte`/`bidrag`); nye inntektsposter som skal telle, må inn i `bank_limit`. Regelen er
+  speilet i `loanFor`/`bankDay` (`game/konsernWorld.ts`) – endres den, endres begge. Lånet trekkes fra `konsern_value`.
 - **Låserekkefølgen i konsernkassa** (B-433): `konsern_order` låser `konsern` før `treasury`. Nye serverfunksjoner som
   låser begge for samme spiller, gjør det i samme rekkefølge (oppkjøpsraden først hvis den er med), ellers kan to
   samtidige handlinger låse hverandre. `company_invest`/`takeover_defend` gjør det motsatt (kjent, ikke endret).

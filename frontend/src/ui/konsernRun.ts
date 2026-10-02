@@ -3,6 +3,7 @@
  * kassa i spillet. Etter svaret legges serverens konsern inn i spillet, og verdensstatusen hentes på nytt.
  */
 import type { KonsernOption } from "../game/konsern";
+import { fmtKr } from "./format";
 import { ORDER_REFUSAL_TEXT } from "../game/konsernWorld";
 import type { GameApi } from "../game/useGame";
 import { regionName } from "../game/regions";
@@ -52,12 +53,18 @@ export function getBuildRegion(): RegionId | null {
 }
 
 /** Kjør et kjøp fra Konsern: bestilling på serveren eller kjøp fra kassa i spillet */
-export async function runOption(act: Act, o: KonsernOption): Promise<boolean> {
+export async function runOption(act: Act, o: KonsernOption, loan = 0): Promise<boolean> {
   if (o.run) return act((gg) => o.run!(gg)).ok;
   if (!o.request) return false;
   const req = o.request.kind === "bygg" && buildRegion ? { ...o.request, region: buildRegion } : o.request;
   const uid = userId();
-  return done(act, uid, await orderKonsern(req), `${o.title}: bestilt.`);
+  // Med lån (B-437): serveren låner det kassa mangler, innenfor rammen
+  return done(
+    act,
+    uid,
+    await orderKonsern(req, loan > 0),
+    loan > 0 ? `${o.title}: bestilt. ${fmtKr(loan)} er lånt i konsernbanken.` : `${o.title}: bestilt.`,
+  );
 }
 
 /** Flytt et verk til en annen region, én gang (B-333) */

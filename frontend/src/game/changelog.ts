@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 437,
+    date: "2026-10-02",
+    title: "Konsernbanken",
+    items: [
+      "Mangler konsernkassa litt til et nytt verk eller en modernisering, kan du låne resten i konsernbanken – opptil 10 dagers inntekt.",
+      "Renten er 1 % per dag, og halvparten av utbyttet og bidraget betaler ned lånet hver natt.",
+      "Lånet kan bare brukes på verkene, ikke på anbud eller oppkjøpsbud. Det trekkes fra konsernverdien på topplista.",
+    ],
+  },
+  {
     b: 436,
     date: "2026-10-02",
     title: "Arbeidsmiljøet",
