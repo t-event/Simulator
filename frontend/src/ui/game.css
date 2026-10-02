@@ -1444,6 +1444,23 @@ button {
   color: var(--warning);
 }
 
+/* Konsernbanken (B-437): lån-knappen under et kjøp kassa ikke rekker til */
+.g-konsern-loan {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  flex-basis: 100%;
+}
+
+.g-konsern-loan button {
+  min-height: 44px;
+  align-self: flex-start;
+}
+
+.g-konsern-loan p {
+  margin: 0;
+}
+
 .g-konsern-steps {
   margin: 6px 0 8px;
   padding-left: 20px;

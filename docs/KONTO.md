@@ -164,3 +164,4 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Lærlinger utenfor drifta, alder og pensjon for ansatte | Nei | Regel 1: ditt eget spill | B-357 |
 | Konsernbidraget som snitt over den ekte dagen | Ja (som bidraget) | Regel 3: serveren, ekte tid | B-361 |
 | Arbeidsmiljøkort og kapitlet «Arbeidsmiljø og varsling» | Nei | Regel 1: ditt eget spill | B-436 |
+| Konsernbanken: lån til verk og modernisering | Ja (som konsernkassa) | Regel 3: serveren, ekte tid | B-437 |

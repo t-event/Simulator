@@ -2,7 +2,7 @@ import { hasPaidOut, paidOutTotal } from "../game/reserve";
 import { Fragment, useState } from "react";
 import { useReportTab, type OnTab } from "./tabMemory";
 import { WIN_CASH } from "../game/data";
-import { plannedPlants, WORLD_KONSERN } from "../game/konsernWorld";
+import { loanFor, plannedPlants, WORLD_KONSERN } from "../game/konsernWorld";
 import {
   daysToAfford,
   dividends,
@@ -123,14 +123,55 @@ function whyNot(g: GameState, o: KonsernOption): string | null {
     : `Konsernkassa mangler ${missing}${days ? ` – ca. ${days} ekte ${days === 1 ? "dag" : "dager"}` : ""}.`;
 }
 
+/**
+ * Hvor mye et kjøp av verk kan låne i konsernbanken (B-437): det konsernkassa mangler, når det er innenfor rammen.
+ * Bare for bestillinger (verk, utbygging, modernisering, bytte) – aldri for de felles funksjonene eller anbud.
+ */
+function optionLoan(g: GameState, o: KonsernOption): number {
+  if (o.blocked || o.pay !== "konsernkasse" || !o.request) return 0;
+  return loanFor(moneyFor(g, o), o.price, g.konsern.bank);
+}
+
+/**
+ * Lån-knappen under et kjøp kassa ikke rekker til (B-437): sier hva som lånes, renten og hvordan det betales ned. Bare
+ * på kjøpskortene (Utvid og «Neste steg»), ikke i tabellen over verkene, så den ikke står mange steder samtidig
+ */
+function LoanButton({
+  g,
+  o,
+  loan,
+  busy,
+  onRun,
+}: {
+  g: GameState;
+  o: KonsernOption;
+  loan: number;
+  busy: boolean;
+  onRun: () => void;
+}) {
+  const bank = g.konsern.bank;
+  if (loan <= 0 || !bank) return null;
+  return (
+    <div className="g-konsern-loan">
+      <button disabled={busy} onClick={onRun}>
+        Lån {fmtKr(loan)} og {optionVerb(o).toLowerCase()}
+      </button>
+      <p className="g-muted g-small-text">
+        Rente {Math.round(bank.rate * 1000) / 10} % per dag. {Math.round(bank.share * 100)} % av utbyttet og bidraget
+        betaler ned lånet hver natt.
+      </p>
+    </div>
+  );
+}
+
 /** Knappen som kjøper: venter på serveren for verkene, så den ikke trykkes to ganger */
 function useRunner(act: Act) {
   const [busy, setBusy] = useState(false);
-  const run = (o: KonsernOption) => {
+  const run = (o: KonsernOption, loan = 0) => {
     if (busy) return;
     setBusy(true);
     buzz(20);
-    void runOption(act, o).finally(() => setBusy(false));
+    void runOption(act, o, loan).finally(() => setBusy(false));
   };
   return { busy, run };
 }
@@ -198,6 +239,7 @@ function OptionCard({
   label?: string;
 }) {
   const reason = whyNot(g, o);
+  const loan = optionLoan(g, o);
   const rating = payRating(o.payback);
   const { busy, run } = useRunner(act);
   const perDay = o.pay === "kasse" ? "per døgn" : "per dag";
@@ -237,6 +279,7 @@ function OptionCard({
         {o.pay === "kasse" ? " fra kassa hjemme" : ""}
       </button>
       {reason && <p className="g-konsern-why g-small-text">{reason}</p>}
+      <LoanButton g={g} o={o} loan={loan} busy={busy} onRun={() => run(o, loan)} />
     </div>
   );
 }
@@ -1174,6 +1217,7 @@ function KonsernBuy({ g, act, onShowPlants }: { g: GameState; act: Act; onShowPl
   const types = (Object.keys(SISTER_TYPES) as SisterType[]).filter((t) => t !== "kompleks" || kompleksOpen(g));
   const shared = sharedIds.filter((id) => !owned.includes(id));
   const treasury = g.konsern.treasury;
+  const bank = g.konsern.bank;
   const orders = g.konsern.orders ?? [];
   const pending = orders.filter((o) => o.status === "kø" || o.status === "i gang").length;
   // Verkene slik de blir når køen er ferdig (B-428), som serveren teller plassene: før ble bygg som er i gang
@@ -1204,11 +1248,24 @@ function KonsernBuy({ g, act, onShowPlants }: { g: GameState; act: Act; onShowPl
                 {pending} av {WORLD_KONSERN.queueMax}
               </dd>
             </div>
+            {/* Lånet vises først når det finnes (B-437); lån-knappen står ved kjøpene kassa ikke rekker til */}
+            {bank && bank.loan > 0 && (
+              <div>
+                <dt>Lån</dt>
+                <dd>{fmtKr(Math.ceil(bank.loan))}</dd>
+              </div>
+            )}
           </dl>
           <p className="g-muted g-small-text">
             Alt betales fra konsernkassa med én gang og bygges i ekte tid, ett prosjekt om gangen. Verkene tjener mens
             de moderniseres.
           </p>
+          {bank && bank.loan > 0 && (
+            <p className="g-muted g-small-text">
+              Lånet betales ned med {Math.round(bank.share * 100)} % av utbyttet og bidraget hver natt. Renten er{" "}
+              {Math.round(bank.rate * 1000) / 10} % per dag. Selger du et verk, går pengene først til lånet.
+            </p>
+          )}
           {queueFull && (
             <Callout tone="heat">Byggekøen er full. Du kan bestille igjen når det neste prosjektet er ferdig.</Callout>
           )}

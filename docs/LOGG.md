@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 358 – 2026-10-02: Konsernbanken (B-437)
+
+**Brukeren ba om:** egen bank for konsernkassa, så man kan ta lån der også. Eieren valgte «Verk og modernisering».
+
+**Gjort:** 120 (lån i bestillingen via `konsern_order_loan`, ramme 10 dagers inntekt, rente 1 % per dag, nedbetaling
+av halve utbyttet og bidraget hver natt i `bank_service`, salg og avbestilling betaler lånet først, ny posteringstype
+`lån`, `konsern_loan_log`) og 121 (lånet trekkes fra konsernverdien). Appen: `bank` fra `konsern_status`, knappen «Lån
+X og …» på kjøpskortene, lånet i statusen på Utvid, `loanFor`/`bankDay` speiler serveren. #374 (B-436) merget og
+publisert.
+
+**Testet:** prøvekjøring som spiller i en transaksjon som ble rullet tilbake, `get_advisors`, motortest, nettest,
+Chromium 390/320 px, `npm test`, typesjekk, lint, build.
+
+**Gjenstår:** eierens beslutning om etterbetalingen; følg med på `world_health` (jobben `bank`) de første nettene.
+
 ## Økt 357 – 2026-10-02: Arbeidsmiljøkort (B-436)
 
 **Brukeren ba om:** et innspill fra en spiller om kvotering og rasisme under Folk. Eieren valgte arbeidsmiljøkort

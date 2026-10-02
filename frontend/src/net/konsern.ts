@@ -6,7 +6,7 @@
 import { applyWorld, finishKonsernProjects } from "../game/konsern";
 import type { KonsernWorld, OrderRefusal, OrderRequest } from "../game/konsernWorld";
 import { isRegion } from "../game/regions";
-import type { GameState, KonsernOrder, PolicyId, RegionId, SisterPlant, SisterType } from "../game/types";
+import type { GameState, KonsernBank, KonsernOrder, PolicyId, RegionId, SisterPlant, SisterType } from "../game/types";
 import { rpc } from "./supabase";
 
 type Row = Record<string, unknown>;
@@ -48,6 +48,17 @@ function parseOrder(o: Row): KonsernOrder {
   };
 }
 
+/** Konsernbanken fra `bank_status` (B-437) */
+function parseBank(b: Row): KonsernBank {
+  return {
+    enabled: b.enabled === true,
+    loan: num(b.loan),
+    limit: num(b.limit),
+    rate: b.rate === undefined ? 0.01 : num(b.rate),
+    share: b.share === undefined ? 0.5 : num(b.share),
+  };
+}
+
 /** Konsernet fra `konsern_status` */
 export function parseKonsern(r: Row | null | undefined): KonsernWorld | null {
   if (!r) return null;
@@ -59,6 +70,7 @@ export function parseKonsern(r: Row | null | undefined): KonsernWorld | null {
     floor: num(r.floor),
     earned: num(r.earned),
     balance: num(r.balance),
+    ...(r.bank && typeof r.bank === "object" ? { bank: parseBank(r.bank as Row) } : {}),
     ...(typeof r.policy === "string"
       ? {
           policy: {
@@ -95,7 +107,8 @@ export function konsernDiffers(g: GameState, w: KonsernWorld, perDay: number): b
     (w.earned ?? 0) > (k.earned ?? 0) ||
     k.treasury?.balance !== w.balance ||
     k.treasury?.perDay !== perDay ||
-    (!!w.policy && JSON.stringify(k.policy ?? null) !== JSON.stringify(w.policy))
+    (!!w.policy && JSON.stringify(k.policy ?? null) !== JSON.stringify(w.policy)) ||
+    (!!w.bank && JSON.stringify(k.bank ?? null) !== JSON.stringify(w.bank))
   );
 }
 
@@ -107,6 +120,7 @@ export function applyKonsern(g: GameState, w: KonsernWorld, perDay: number): voi
   finishKonsernProjects(g);
   g.konsern.treasury = { balance: w.balance, perDay };
   if (w.policy) g.konsern.policy = { ...w.policy };
+  if (w.bank) g.konsern.bank = { ...w.bank };
   applyWorld(g, w);
 }
 
@@ -123,9 +137,12 @@ async function call(fn: string, args: Record<string, unknown>): Promise<KonsernR
   return { ok: true, konsern: parseKonsern(r.konsern as Row) };
 }
 
-/** Bestill et prosjekt: betales med én gang fra konsernkassa og legges sist i køen */
-export function orderKonsern(req: OrderRequest): Promise<KonsernResult> {
-  return call("konsern_order", {
+/**
+ * Bestill et prosjekt: betales med én gang fra konsernkassa og legges sist i køen. Med `loan` lånes det kassa mangler i
+ * konsernbanken (B-437, `konsern_order_loan`), innenfor rammen
+ */
+export function orderKonsern(req: OrderRequest, loan = false): Promise<KonsernResult> {
+  return call(loan ? "konsern_order_loan" : "konsern_order", {
     p_kind: req.kind,
     p_plant: req.kind === "bygg" ? null : req.plant,
     p_type: req.kind === "bygg" ? req.type : null,
