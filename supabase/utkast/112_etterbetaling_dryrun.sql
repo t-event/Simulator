@@ -1,57 +1,104 @@
--- B-423: dry-run av etterbetalingen for utbyttet 30.9 og 1.10 (bare lesing – betaler ingenting).
--- Kjørt 2.10.2026 ca. 12:05 UTC. Resultatet står i docs/RAPPORT-2026-10-02.md, avsnitt 7, med bokstaver i stedet for navn.
--- Type a: verk som ble ferdige (bygg, modernisering, utbygging) før midnatt, men ble målt som før prosjektet til spilleren
---   lagret (eller til midnatt). Andelen f = tiden fra ferdig til første lagring, av døgnet. Forskjellen i utbytte for
---   verket ganges med f og legges på snittet; politikk og aktivitet som i pay_dividends.
--- Type b: dager med utbyttemålinger, men uten betaling (den som solgte sitt siste verk). Ingen rader 29.9–1.10.
--- Usikkerhet: dagens lagrede spill brukes for gamle dager (omdømme, kvalitet, forskning, politikk kan ha endret seg).
+-- B-423/B-425: dry-run av etterbetalingen for utbyttet 30.9 og 1.10 – bare lesing, betaler ingenting. Kjøres i én
+-- transaksjon som rulles tilbake (temp-tabellene forsvinner):  begin; <denne fila>; rollback;
+-- Utgave 2 (2.10.2026, B-425), etter kodegjennomgangen. Utgave 1 angret hver ordre på dagens verk, så en bygging
+-- fulgt av en utbygging ga grunnlaget for et storverk (fire ganger for mye), og en modernisering fulgt av en utbygging
+-- kunne gi null. Resultatet står i docs/RAPPORT-2026-10-02.md, avsnitt 7, med bokstaver i stedet for navn.
+--
+-- Slik regnes det:
+-- 1. Forskjellen per ordre: alle ferdige ordre for spilleren angres i rekkefølge fra den nyeste (også ordre etter 2.10),
+--    så hver ordre angres på verket slik det var rett etter at den ble ferdig. delta = dividend_from_state(etter) -
+--    dividend_from_state(før). Ordre på et verk som ikke finnes lenger, får ok = false og regnes ikke.
+-- 2. Andelen av døgnet ordren ble målt som før: fra ready_at til det første tegnet på at verket ble gjort ferdig –
+--    første tidslinjerad etter ready_at, en ny ordre eller en postering spilleren selv utløste (prosjekt, investering,
+--    anbud, refusjon) – og høyst til midnatt. Verket kan ha blitt gjort ferdig tidligere (world_status gjør det uten at
+--    appen laster opp), og serveren lagrer ikke de enkelte målingene, så andelen er en øvre grense for tidsvinduet.
+-- 3. Grunnlaget er snittet av målingene den dagen (sum_div / n_div) – det samme som ble betalt (paid_check = 0).
+--    Differansen = (dividend_to_treasury(grunnlag + Σ andel × delta) - dividend_to_treasury(grunnlag)) × aktiviteten.
+--
+-- Usikkerhet (summen er et anslag, ikke en fasit – den kan bli både for høy og for lav):
+-- * Tidsvinduet er en øvre grense (punkt 2).
+-- * delta regnes av dagens lagrede spill: forskning, mesterskap, felles funksjoner, flaggskipet, lasttaket og
+--   politikken kan ha vært annerledes 30.9/1.10 og trekker begge veier.
+-- * Målingene er ikke jevnt fordelt over døgnet (hvert 15. til 20. minutt, og flere bestillinger samme dag), så
+--   andel av døgnet er ikke nøyaktig andel av målingene.
+-- At grunnlaget gjenskaper betalingen, viser bare at utgangspunktet er riktig – ikke at korrigeringen er det.
 -- Ingen betaling uten eierens godkjenning. En betaling skrives som egen migrasjon med on conflict-vern og logg.
-with o as (
-  select o.id, o.user_id, o.kind, o.plant_id, o.ready_at, public.world_day(o.ready_at) d,
-         ((public.world_day(o.ready_at) + 1)::timestamp at time zone 'Europe/Oslo') day_end,
-         (select min(sn.at) from snapshots sn where sn.user_id = o.user_id and sn.at > o.ready_at) first_save
-  from konsern_orders o
-  where o.ready_at < timestamptz '2026-10-02 00:00+02' and o.status = 'ferdig' and o.kind in ('bygg','modernisering','utbygging')
+
+create temp table t_delta (user_id uuid, order_id bigint, kind text, plant_id int, ready_at timestamptz, delta numeric,
+  ok boolean) on commit drop;
+
+do $$
+declare
+  u record;
+  rec record;
+  st jsonb;
+  before jsonb;
+begin
+  for u in
+    select distinct ko.user_id from public.konsern_orders ko
+    where ko.status = 'ferdig' and ko.kind in ('bygg', 'modernisering', 'utbygging')
+      and ko.ready_at < timestamptz '2026-10-02 00:00+02'
+  loop
+    select jsonb_set(s.state, '{konsern,plants}', k.plants) into st
+    from public.saves s join public.konsern k on k.user_id = s.user_id where s.user_id = u.user_id;
+    for rec in
+      select * from public.konsern_orders o2
+      where o2.user_id = u.user_id and o2.status = 'ferdig' and o2.kind in ('bygg', 'modernisering', 'utbygging')
+      order by o2.ready_at desc, o2.id desc
+    loop
+      if not exists (select 1 from jsonb_array_elements(st -> 'konsern' -> 'plants') p
+                     where (p ->> 'id')::int = rec.plant_id) then
+        insert into t_delta values (u.user_id, rec.id, rec.kind, rec.plant_id, rec.ready_at, null, false);
+        continue;
+      end if;
+      before := jsonb_set(st, '{konsern,plants}', (
+        select jsonb_agg(case when (p ->> 'id')::int = rec.plant_id then
+                 case rec.kind
+                   when 'bygg' then p || '{"project": {"kind": "bygg"}}'::jsonb
+                   when 'modernisering' then p || jsonb_build_object('level', greatest(0, coalesce((p ->> 'level')::int, 0) - 1))
+                   else p || jsonb_build_object('type', case p ->> 'type' when 'kompleks' then 'storverk' else 'stalverk' end)
+                 end else p end order by i)
+        from jsonb_array_elements(st -> 'konsern' -> 'plants') with ordinality t(p, i)));
+      insert into t_delta values (u.user_id, rec.id, rec.kind, rec.plant_id, rec.ready_at,
+        public.dividend_from_state(st) - public.dividend_from_state(before), true);
+      st := before;
+    end loop;
+  end loop;
+end $$;
+
+create temp table t_res on commit drop as
+with w as (
+  select d.*, public.world_day(d.ready_at) dag,
+    ((public.world_day(d.ready_at) + 1)::timestamp at time zone 'Europe/Oslo') day_end,
+    (select min(sn.at) from public.snapshots sn where sn.user_id = d.user_id and sn.at > d.ready_at) snap,
+    least(
+      (select min(o2.created_at) from public.konsern_orders o2 where o2.user_id = d.user_id and o2.created_at > d.ready_at),
+      (select min(l.at) from public.treasury_ledger l where l.user_id = d.user_id and l.at > d.ready_at
+         and l.kind in ('prosjekt', 'investering', 'anbud', 'refusjon'))) action_at
+  from t_delta d where d.ready_at < timestamptz '2026-10-02 00:00+02'
 ),
-w as (
-  select o.*, least(coalesce(o.first_save, o.day_end), o.day_end) settle_at,
-         greatest(0, least(1, extract(epoch from (least(coalesce(o.first_save, o.day_end), o.day_end) - o.ready_at)) / 86400.0)) f,
-         s.state
-  from o join saves s on s.user_id = o.user_id
-),
-delta as (
+f as (
   select w.*,
-    public.dividend_from_state(w.state) - public.dividend_from_state(
-      jsonb_set(w.state, '{konsern,plants}', coalesce((
-        select jsonb_agg(case when (p->>'id')::int = w.plant_id then
-                 case w.kind
-                   when 'bygg' then p || jsonb_build_object('project', jsonb_build_object('kind','bygg'))
-                   when 'modernisering' then p || jsonb_build_object('level', greatest(0, coalesce((p->>'level')::int,0) - 1))
-                   when 'utbygging' then p || jsonb_build_object('type', case p->>'type' when 'kompleks' then 'storverk' else 'stalverk' end)
-                 end
-               else p end order by i)
-        from jsonb_array_elements(w.state->'konsern'->'plants') with ordinality t(p,i)), '[]'::jsonb))) dplant,
-    exists (select 1 from jsonb_array_elements(w.state->'konsern'->'plants') p where (p->>'id')::int = w.plant_id) plant_exists
+    greatest(0, least(1, extract(epoch from (least(w.day_end, coalesce(w.snap, w.day_end), coalesce(w.action_at, w.day_end))
+                                             - w.ready_at)) / 86400.0)) fr
   from w
 ),
 per_day as (
-  select user_id, d, count(*) n_orders, sum(f * dplant) add_base, max(f) max_f, bool_and(plant_exists) all_exist
-  from delta where f > 0 group by user_id, d
-),
-a as (
-  select pd.user_id, pd.d, 'a' typ, pd.n_orders, pd.max_f, pd.all_exist,
-         coalesce(dv.amount, 0) paid,
-         round(public.dividend_to_treasury(public.dividend_avg(pd.user_id, pd.d) + pd.add_base, public.policy_keep(pd.user_id)) * public.activity_factor(pd.user_id, pd.d)) korrigert
-  from per_day pd left join dividends dv on dv.user_id = pd.user_id and dv.day = pd.d
-),
-b as (
-  select c.user_id, c.day d, 'b' typ, 0 n_orders, null::numeric max_f, true all_exist, 0 paid,
-         round(public.dividend_to_treasury(c.sum_div / c.n_div, public.policy_keep(c.user_id)) * public.activity_factor(c.user_id, c.day)) korrigert
-  from contribution_samples c
-  where c.day between date '2026-09-29' and date '2026-10-01' and c.sum_div > 0 and c.n_div > 0
-    and not exists (select 1 from dividends dd where dd.user_id = c.user_id and dd.day = c.day)
+  select user_id, dag, count(*) n_orders, sum(fr * delta) add_base, bool_and(ok) all_ok, max(fr) max_fr,
+    bool_or(action_at is not null and action_at < coalesce(snap, day_end)) earlier_action
+  from f group by user_id, dag
 )
-select x.typ, dense_rank() over (order by x.user_id) spiller, x.d, x.n_orders, round(x.max_f, 2) maks_andel, x.all_exist verk_finnes,
-       round(x.paid) betalt, x.korrigert, round(x.korrigert - x.paid) differanse
-from (select * from a union all select * from b) x
-order by spiller, d, typ;
+select pd.*, dv.amount paid,
+  (select c.sum_div / c.n_div from public.contribution_samples c where c.user_id = pd.user_id and c.day = pd.dag and c.n_div > 0) base,
+  public.policy_keep(pd.user_id) keep, public.activity_factor(pd.user_id, pd.dag) act
+from per_day pd left join public.dividends dv on dv.user_id = pd.user_id and dv.day = pd.dag;
+
+-- nr = plassen etter konsernkassa da grunnlaget ble tatt (1 = A, 2 = B …), som i rapporten
+select r.nr, t.dag, t.n_orders, round(t.max_fr, 2) maks_andel, t.all_ok verk_finnes, t.earlier_action,
+  round(t.paid) betalt,
+  round((public.dividend_to_treasury(t.base + coalesce(t.add_base, 0), t.keep) - public.dividend_to_treasury(t.base, t.keep))
+        * t.act) differanse,
+  round(t.paid - public.dividend_to_treasury(t.base, t.keep) * t.act) paid_check
+from t_res t
+left join (select user_id, row_number() over (order by balance desc) nr from public.basis_20261002_treasury) r using (user_id)
+order by r.nr, t.dag;

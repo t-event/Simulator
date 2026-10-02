@@ -5,7 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
-## Økt 347 – 2026-10-02: V0 og K-1 i skygge (B-424)
+## Økt 348 – 2026-10-02: Kodegjennomgangen – utbyttegulv, V0-jobben og etterbetalingen på nytt (B-425)
+
+**Brukeren ba om:** gikk gjennom koden fram til #364 og fant 20 funn og flere småfeil; først 111 og 112, så én PR for 114,
+ny 112 og rettet rapport, og deretter gruppevise PR-er (lagring og kontobytte, så kontrollrom og spillmotor). Helsesjekken
+skal følge V0-jobbens intervall, 113 skal stå urørt, og «skygge» er ikke ubrukt.
+
+**Gjort:** funn 1 og 2 bekreftet. 114 (gulv 2.10 i `pay_dividends`, jobbnavnet `skygge_v0`) og 114_b (`world_health` med
+egne regler for `skygge_v0` og `skygge`) prøvekjørt og lagt inn. 112 skrevet om (ordrene angres i rekkefølge, tidsvinduet
+fra flere kilder); anslaget er 2 549 257 kr til elleve spillere, ikke betalt. Rapporten avsnitt 7, FORSLAG, STATUS,
+K1-PROGRAMMER og CLAUDE.md oppdatert. Nytt funn underveis: «skygge» var alt i bruk av revisjonen (095).
+
+**Testet:** prøvekjøringer rullet tilbake (kassene og utbytteradene uendret, `world_health` alle «ok»); 112 kjørt slik den
+står i fila (paid_check 0 for alle rader); `npm test`.
+
+**Gjenstår:** eierens gjennomgang av 112 og beslutning om beløpet; funn 3–20 og småfunnene i egne PR-er. En sletting av
+raden «skygge» som connectoren holdt igjen, skal ikke bekreftes.
+
+ – 2026-10-02: V0 og K-1 i skygge (B-424)
 
 **Brukeren ba om (kjøringen kl. 07:45, punkt 6):** bygg V0/K-1 i skygge når punkt 1–4 er ferdige og grunnlaget bevart;
 prøvekjør først og vis at betalingene og konsernverdien er uendret.

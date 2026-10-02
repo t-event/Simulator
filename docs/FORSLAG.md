@@ -51,8 +51,10 @@ til «Avgjort» nederst).
   sesong 2 er klar. Før `start_season` kjøres for sesong 3, legg inn ny
   pynt i `COSMETICS` med `season: 3` – både i butikken og på stigen (trinn 10–50). Ellers har sesong 3 ingen egen pynt.
 
-- **Etterbetaling av utbyttet 30.9 og 1.10 (B-423):** 1 875 716 kr til ni spillere for verk som ble ferdige mens de var
-  borte – tabellen i `docs/RAPPORT-2026-10-02.md`, avsnitt 7. Ikke betalt; venter på eierens ja eller nei.
+- **Etterbetaling av utbyttet 30.9 og 1.10 (B-423, regnet på nytt i B-425):** anslaget er 2 549 257 kr til elleve
+  spillere for verk som ble ferdige mens de var borte (utgave 1, 1 875 716 kr, var feil). Tabellen og usikkerheten står i
+  `docs/RAPPORT-2026-10-02.md`, avsnitt 7. Ikke betalt: beregningen gjennomgås først, så avgjør eieren beløpet i en egen
+  beslutning.
 
 - **Slå på slagghåndteringen (B-253, B-402):** Vilkårene er oppfylt 2.10 (grønt, grunnlaget bevart), men kjøringen kl. 07:00
   sa «ikke slå på» – eieren spørres (B-423). eieren 1.10: først når nattkontrollen 2.10 er grønn og rapportgrunnlaget
