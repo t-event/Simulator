@@ -72,7 +72,9 @@ regnes av serveren i ekte tid.
 ## 6. Konkurranse og lister
 
 - **Sesongen avgjøres på Konsernverdi** (B-384): `close_season` rangerer på `konsern_value` (konsernkassa + 60 dagers
-  utbytte og bidrag − lån, i ekte tid); de uten konsern kommer etter, på verdien i eget verk. Verdien i eget verk fryses
+  utbytte og bidrag − lån, i ekte tid); de uten konsern kommer etter, på verdien i eget verk. Bidraget i verdien regnes
+  med aktiviteten i siste betalte bidrag, eller dagens produksjon hvis den er høyere (B-417, 104) – en som ikke spiller,
+  står med det hen faktisk får betalt (gulvet 0,3), ikke med fullt bidrag. Verdien i eget verk fryses
   også (Hall of Fame). Sesonger startes og avsluttes bare manuelt.
 - **Topplista** har to grupper: «Industriverden · sesong» (Konsernverdi) og «Eget verk» (Verdi, Mest penger på bok,
   Produksjon, Raskest til storverk, Raskest til 10 mrd., Kontrollrom, Privat formue – fryst). Eget verk er ære, ikke makt.
