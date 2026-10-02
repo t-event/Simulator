@@ -190,8 +190,11 @@ export function defenseNeeded(
   const t = TAKEOVER;
   const v = Math.max(1, value);
   if (takeoverDefense(control, defense, fund, v) > attack) return 0;
-  const total = v * ((attack - control) / t.defenseW) ** 2 * 1.01;
-  if (total > t.cap * v) return null;
+  // Taket sjekkes mot det som akkurat holder, ikke mot tallet med slingring (B-427): nær taket sa rådet før «går ikke»
+  // om et motbud som vinner på serveren. Slingringen kuttes ved taket – alt under taket gir likevel et sterkere forsvar
+  const exact = v * ((attack - control) / t.defenseW) ** 2;
+  if (exact >= t.cap * v) return null;
+  const total = Math.min(exact * 1.01, t.cap * v);
   const f = Math.min(Math.max(0, fund), t.fundCap * v);
   return Math.max(0, Math.ceil(total - defense - f));
 }

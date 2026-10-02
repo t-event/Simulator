@@ -1742,6 +1742,11 @@ export function lotReservations(g: GameState): Map<number, number> {
   return planLots(g).reserved;
 }
 
+/** Hvor mange tonn av hver aktive kontrakt lageret dekker (kvalitet og køens rekkefølge, som leveransene, B-427) */
+export function contractCoverage(g: GameState): Map<number, number> {
+  return planLots(g).covered;
+}
+
 /** Aktive kontrakter i ordrekøens rekkefølge. */
 export function orderQueue(g: GameState): Contract[] {
   return g.contracts.filter((c) => c.status === "aktiv").sort((a, b) => a.priority - b.priority);

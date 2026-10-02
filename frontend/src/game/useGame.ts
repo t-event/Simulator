@@ -231,16 +231,17 @@ export function useGame(): GameApi {
         // Om natta, når verket står og ingenting skjer, går tida fortere (B-033)
         const boost = idleOutsideHours(g) ? IDLE_NIGHT_SPEED : 1;
         const gameMin = elapsed * g.speed * boost * GAME_MIN_PER_REAL_S;
-        advance(g, gameMin);
-        if (boost > 1) g.boostMin = (g.boostMin ?? 0) + gameMin;
         // Svarfristen på forespørsler og rammeavtaler går i vanlig tempo (1×) selv om du spoler, så du rekker å
-        // svare på 3× og 10× (B-071)
+        // svare på 3× og 10× (B-071). Fristen flyttes før tida går (B-427): før ble den flyttet etterpå, og et tilbud
+        // som skulle hatt svartid igjen, var da alt slettet som utløpt
         const factor = g.speed * boost;
         if (factor > 1) {
           const extra = gameMin * (1 - 1 / factor);
           for (const c of g.contracts) if (c.status === "tilbud") c.offerExpiresMin += extra;
           for (const a of g.agreements) if (a.status === "tilbud") a.offerExpiresMin += extra;
         }
+        advance(g, gameMin);
+        if (boost > 1) g.boostMin = (g.boostMin ?? 0) + gameMin;
         advanceTutorial(g);
         advanceRecipeGuide(g);
         flushLog();

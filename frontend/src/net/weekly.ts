@@ -3,6 +3,7 @@
  * tidslinja. Topp 3 får medalje og ukekiste med fagpoeng når uka er over (B-155). Krever konto for å være med;
  * lista kan leses uten.
  */
+import { realNow } from "../game/clock";
 import { rpc, userId } from "./supabase";
 
 export type WeekKind = "vekst" | "tonn" | "dager" | "kontroll";
@@ -216,7 +217,10 @@ export function forgetPendingMemory(): void {
   memPending = undefined;
 }
 
-/** Fristen for å levere er ute (med et minutts slingring for klokka) */
+/**
+ * Fristen for å levere er ute (med et minutts slingring). Fristen er serverens, så «nå» er serverens klokke (`realNow`,
+ * B-427) – en telefon med klokka stilt fram slettet før et gyldig resultat før det ble levert.
+ */
 function expired(p: PendingControl, now: number): boolean {
   return Date.parse(p.deadline) + 60_000 < now;
 }
@@ -225,7 +229,7 @@ function expired(p: PendingControl, now: number): boolean {
  * Resultatet som venter på å bli levert, for denne kontoen (`user`). Et resultat fra en annen konto på samme enhet
  * sperrer ingenting, og et resultat der fristen er ute, ryddes bort (B-397).
  */
-export function pendingControl(user?: string | null, now = Date.now()): PendingControl | null {
+export function pendingControl(user?: string | null, now = realNow()): PendingControl | null {
   const p = readPending();
   if (!p) return null;
   if (expired(p, now)) {
@@ -267,7 +271,22 @@ export async function submitControlAttempt(p: PendingControl): Promise<SubmitOut
 }
 
 /** Prøver å levere et resultat som venter. «venter» betyr at det skal prøves igjen senere. */
-export async function flushPendingControl(now = Date.now()): Promise<SubmitOutcome> {
+/** Leveringen som er på vei, per forsøk: kortet og synken i bakgrunnen kan prøve samtidig (B-427) */
+let flushing: { id: number; promise: Promise<SubmitOutcome> } | null = null;
+
+export async function flushPendingControl(now = realNow()): Promise<SubmitOutcome> {
+  const current = readPending();
+  if (current && flushing?.id === current.id) return flushing.promise;
+  const promise = flushOnce(now);
+  if (current) flushing = { id: current.id, promise };
+  try {
+    return await promise;
+  } finally {
+    if (flushing?.promise === promise) flushing = null;
+  }
+}
+
+async function flushOnce(now: number): Promise<SubmitOutcome> {
   const raw = readPending();
   if (raw && expired(raw, now)) {
     setPending(null);
@@ -282,11 +301,16 @@ export async function flushPendingControl(now = Date.now()): Promise<SubmitOutco
       p_stars: Math.round(p.stars),
       p_log: p.log ?? null,
     });
+    // Bare dette forsøket ryddes bort (B-427): to leveringer av samme resultat kan være på vei samtidig, og et nytt
+    // resultat kan ha kommet til mens svaret var underveis – det skal ikke slettes av et sent svar på det gamle
+    const clear = () => {
+      if (readPending()?.id === p.id) setPending(null);
+    };
     if (r?.ok) {
-      setPending(null);
+      clear();
       return { kind: "levert", points: Number(r.points), best: Number(r.best), left: Number(r.left) };
     }
-    setPending(null);
+    clear();
     return { kind: "avvist", reason: (typeof r?.reason === "string" ? r.reason : "ugyldig") as SubmitRefusal };
   } catch {
     // Nettfeil eller tjenesten er nede: resultatet blir liggende og prøves igjen
@@ -329,7 +353,7 @@ export async function claimWeekChest(): Promise<number> {
 }
 
 /** Dager igjen av uka, rundet opp */
-export function weekDaysLeft(s: WeeklyStatus, now = Date.now()): number {
+export function weekDaysLeft(s: WeeklyStatus, now = realNow()): number {
   return Math.max(0, Math.ceil((new Date(s.endsAt).getTime() - now) / 86_400_000));
 }
 

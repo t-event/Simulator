@@ -1573,6 +1573,35 @@ const main = async () => {
     assert(o.kind === "levert" && o.points === 1800, `Bs resultat ble ikke levert ${JSON.stringify(o)}`);
   });
 
+  await test("Ukeresultat (B-427): to leveringer samtidig blir én, og et nytt resultat slettes ikke av et sent svar", async () => {
+    const f = fresh();
+    await login(f);
+    f.controlWeek = true;
+    const r = await startControlAttempt();
+    assert(r.ok, "start");
+    if (!r.ok) return;
+    f.offline = true;
+    const p = { user: "u-a@test", id: r.attempt.id, points: 1500, stars: 2, log: null, deadline: r.attempt.deadline };
+    await submitControlAttempt(p);
+    f.offline = false;
+    const submits = () => f.calls.filter((c) => c.includes("weekly_control_submit")).length;
+    const before = submits();
+    const [a, b] = await Promise.all([flushPendingControl(), flushPendingControl()]);
+    assert(submits() === before + 1, `leveringer ${submits() - before}`);
+    assert(a.kind === "levert" && b.kind === "levert", "begge fikk svaret");
+    // Et nytt resultat som venter, ryddes ikke bort når et svar på et annet forsøk kommer
+    const r2 = await startControlAttempt();
+    if (!r2.ok) return;
+    f.offline = true;
+    await submitControlAttempt({ ...p, id: r2.attempt.id, deadline: r2.attempt.deadline });
+    f.offline = false;
+    const late = flushPendingControl();
+    store.set("stalverk-ukekontroll-v1", JSON.stringify({ ...p, id: 4242, deadline: r2.attempt.deadline }));
+    forgetPendingMemory();
+    await late;
+    assert(pendingControl("u-a@test")?.id === 4242, "det nye resultatet ble slettet av svaret på det gamle");
+  });
+
   await test("Ingenting lastes opp før spillet er avklart mot kontoen, heller ikke mens man velger (B-138)", async () => {
     const f = fresh();
     await login(f);

@@ -2,6 +2,7 @@
  * Ukens utfordring (B-152): kortet på Verket med ukas oppgave, plassen din i ligaen, medaljene og ukekista, og lista
  * for uka. Krever konto for å være med (docs/KONTO.md); lista kan leses uten.
  */
+import { lockLayout } from "./layoutLock";
 import { SheetHead } from "./ds";
 import { lazy, Suspense, useEffect, useState, useSyncExternalStore } from "react";
 import { GRADES } from "../game/data";
@@ -256,6 +257,10 @@ function WeeklyControlPanel({ act, user }: { act: GameApi["act"]; user: string }
   const [pending, setPendingState] = useState(() => pendingControl(user));
 
   const refresh = () => void fetchWeeklyStatus().then(setWeeklyStatus, () => {});
+
+  // Et tellende forsøk eies av dette panelet: skallet låses så panelet ikke monteres på nytt når skjermen snus (B-427)
+  const countedOpen = !!play?.counted;
+  useEffect(() => (countedOpen ? lockLayout() : undefined), [countedOpen]);
 
   // Et resultat som ikke ble levert (nettfeil), sendes når kortet vises og deretter hvert 20. sekund
   useEffect(() => {

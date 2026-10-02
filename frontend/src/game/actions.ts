@@ -22,6 +22,7 @@ import {
   addCost,
   adjustMorale,
   bookTemps,
+  contractCoverage,
   fmtKr,
   fmtT,
   log,
@@ -206,15 +207,17 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
     // Mangler forskningen, er det den som står i veien – advarslene om byttet kommer når den er gjort (B-144)
     if (!owned && c.product !== currentCasting.product && !reason) {
       const old = PRODUCTS[currentCasting.product].name.toLowerCase();
-      const remaining = g.contracts
-        .filter((x) => x.status === "aktiv" && x.product === currentCasting.product)
-        .reduce((a, x) => a + x.tonnes - x.delivered, 0);
       const inStock = g.lots
         .filter((l) => l.product === currentCasting.product && !l.second)
         .reduce((a, l) => a + l.t, 0);
       // Etter byttet kan det gamle produktet ikke lages. Kontrakter som ikke kan leveres fra lageret, ville gått
-      // over fristen og tatt med seg omdømmet, så de må leveres først (B-062)
-      const stuck = remaining - inStock;
+      // over fristen og tatt med seg omdømmet, så de må leveres først (B-062). Lageret teller bare med partier som
+      // holder kvaliteten kontrakten krever, fordelt i køens rekkefølge som leveransene (B-427) – fem tonn av en
+      // enklere kvalitet dekker ikke en kontrakt på en bedre
+      const coverage = contractCoverage(g);
+      const stuck = g.contracts
+        .filter((x) => x.status === "aktiv" && x.product === currentCasting.product)
+        .reduce((a, x) => a + Math.max(0, x.tonnes - x.delivered - (coverage.get(x.id) ?? 0)), 0);
       if (!reason && stuck > 0.05) reason = `Lever først kontraktene på ${old} (${fmtT(stuck)} igjen)`;
       schedulable = !!reason;
       // Rammeavtaler på det gamle produktet avsluttes uten straff ved byttet (endStaleAgreements, B-040)
