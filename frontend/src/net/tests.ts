@@ -41,7 +41,7 @@ import {
   setNickname,
 } from "./leaderboard";
 import { claimAway, fetchDailyStatus } from "./daily";
-import { applyWaitingRewards, claimables, grantAway } from "../ui/claims";
+import { applyWaitingRewards, claimables, grantAway, grantStreak } from "../ui/claims";
 import { tierFp } from "./seasonTrack";
 import {
   abandonControlAttempt,
@@ -67,6 +67,7 @@ import {
   markReconciled,
   needsRelink,
   onLocalSave,
+  OtherAccountError,
   pullIfNewer,
   resetCloud,
   SaveConflictError,
@@ -1381,6 +1382,78 @@ const main = async () => {
     assert(g.researchPoints === fp + 5, `fagpoeng ${g.researchPoints - fp}`);
     applyWaitingRewards(act);
     assert(g.researchPoints === fp + 5, "belønningen ble gitt to ganger");
+  });
+
+  await test("Kontobytte mens A laster opp (B-429): A sitt spill lastes aldri opp med B sin innlogging", async () => {
+    const f = fresh();
+    await login(f, "b@test");
+    const sessionB = getSession();
+    await login(f);
+    const g = newGame(16);
+    await linkOnLogin(g);
+    assert(g.owner === "u-a@test", "spillet er ikke A sitt");
+    // B logges inn i en annen fane mens A sin opplasting er på vei, og opplastingen feiler
+    f.onSaveGame = () => {
+      setSession(sessionB);
+      throw new Error("nettet forsvant");
+    };
+    g.minute += 60;
+    onLocalSave(g, true);
+    await flush();
+    f.onSaveGame = null;
+    // Neste forsøk med B sin innlogging: ingenting lastes opp
+    await flush();
+    g.minute += 60;
+    onLocalSave(g, true);
+    await flush(false, true);
+    assert(!f.saves.has("u-b@test"), "A sitt spill ble lagret på B sin konto");
+    assert(g.owner === "u-a@test", `eieren ble skrevet om til ${g.owner}`);
+    // Og direkte: et spill som tilhører en annen konto, lastes aldri opp
+    let err: unknown = null;
+    await uploadSave(g).catch((e: unknown) => (err = e));
+    assert(err instanceof OtherAccountError, `feil ${String(err)}`);
+    assert(!f.saves.has("u-b@test"), "uploadSave lagret A sitt spill på B sin konto");
+  });
+
+  await test("Vindusbytte mens en lagring er på vei (B-429): det nyeste lastes opp etterpå, også uten keepalive", async () => {
+    const f = fresh();
+    await login(f);
+    const g = newGame(17);
+    await linkOnLogin(g);
+    const saves = () => f.calls.filter((c) => c.startsWith("POST /rest/v1/rpc/save_game")).length;
+    const before = saves();
+    let blur: Promise<void> | null = null;
+    f.onSaveGame = () => {
+      if (blur) return;
+      g.minute += 120;
+      blur = leaving(g, false);
+    };
+    g.minute += 60;
+    onLocalSave(g, true);
+    await flush();
+    await blur;
+    f.onSaveGame = null;
+    assert(saves() === before + 2, `lagringer ${saves() - before}`);
+    assert(f.saves.get("u-a@test")?.minute === Math.floor(g.minute), "det nyeste ble ikke lastet opp");
+  });
+
+  await test("Daglig belønning etter kontobytte (B-429): går ikke til feil konto, men venter på riktig", async () => {
+    const f = fresh();
+    await login(f);
+    const g = newGame(18);
+    await linkOnLogin(g);
+    const act = <T>(fn: (gg: GameState) => T): T => fn(g);
+    const uid = getSession()!.user.id;
+    g.owner = "u-annen";
+    const fp = g.researchPoints;
+    assert(grantStreak(act, uid, 7) === null, "dagens belønning ble lagt inn i feil spill");
+    assert(g.researchPoints === fp, "feil spill fikk fagpoeng");
+    g.owner = uid;
+    applyWaitingRewards(act);
+    assert(g.researchPoints > fp, "belønningen kom ikke fram hos riktig konto");
+    const after = g.researchPoints;
+    applyWaitingRewards(act);
+    assert(g.researchPoints === after, "belønningen ble gitt to ganger");
   });
 
   await test("Kallenavn: for kort, tatt, og så OK; topplista viser meg", async () => {

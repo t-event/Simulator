@@ -3,7 +3,7 @@
  * selskaper, sesonger og rekorder, og «sist aktiv» i grove trinn. Bare det serveren alt viser andre steder; aldri
  * konsernkassa eller kassa i eget verk. Krever konto (uten konto: NeedsAccount i arket, ikke skjult).
  */
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ACHIEVEMENT_BY_ID, hasAchievement, visibleAchievements } from "../game/achievements";
 import { COSMETIC_BY_ID } from "../game/cosmetics";
 import { SISTER_TYPES } from "../game/konsern";
@@ -320,8 +320,13 @@ function ProfileEditor({ g, onDone }: { g: GameState; onDone: (saved: boolean) =
   const [error, setError] = useState<string | null>(null);
   const form = loaded && loaded.uid === uid ? loaded.form : null;
   const setForm = (f: ProfileSettings) => setLoaded({ uid, form: f });
+  // Hver henting av skjemaet får et nytt nummer (B-429): et svar på en eldre lagring (f.eks. etter A → B → A) skal ikke
+  // lukke et nyere skjema med endringer som ikke er lagret
+  const epoch = useRef(0);
 
   useEffect(() => {
+    const gen = epoch;
+    gen.current++;
     let alive = true;
     fetchProfileSettings().then(
       (s) => alive && setLoaded({ uid, form: s ?? { bio: "", emblem: null, showcase: [], dmOpen: true } }),
@@ -329,6 +334,7 @@ function ProfileEditor({ g, onDone }: { g: GameState; onDone: (saved: boolean) =
     );
     return () => {
       alive = false;
+      gen.current++;
     };
   }, [uid]);
 
@@ -342,13 +348,14 @@ function ProfileEditor({ g, onDone }: { g: GameState; onDone: (saved: boolean) =
   };
   const save = async () => {
     if (getSession()?.user.id !== loaded?.uid) return;
+    const mine = epoch.current;
     setBusy(true);
     setError(null);
     try {
       await saveProfileSettings(form);
-      onDone(true);
+      if (epoch.current === mine) onDone(true);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Fikk ikke lagret profilen.");
+      if (epoch.current === mine) setError(e instanceof Error ? e.message : "Fikk ikke lagret profilen.");
     } finally {
       setBusy(false);
     }

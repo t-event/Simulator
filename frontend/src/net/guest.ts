@@ -126,8 +126,8 @@ async function ensureGuest(): Promise<boolean> {
     return true;
   } catch (e) {
     // Anonyme kontoer er slått av (eller for mange forsøk): prøv igjen om et døgn. En feil hos tjenesten (5xx) er
-    // ikke et nei – da prøves det igjen ved neste lagring (B-428)
-    if (e instanceof NetError && !e.offline && e.status >= 400 && e.status < 500) markOff();
+    // ikke et nei – da prøves det igjen ved neste lagring (B-428). Det er heller ikke et tidsavbrudd (408, B-429)
+    if (e instanceof NetError && !e.offline && e.status >= 400 && e.status < 500 && e.status !== 408) markOff();
     return false;
   }
 }

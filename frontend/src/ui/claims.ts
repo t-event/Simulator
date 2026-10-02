@@ -4,7 +4,14 @@
  * bare rekkefølgen og det som legges inn i spillet etterpå.
  */
 import { grantCosmetic, trackCosmetic } from "../game/cosmetics";
-import { applyAwayReward, applyMissionBonus, missionBonus, missionBonusReady, type Reward } from "../game/daily";
+import {
+  applyAwayReward,
+  applyMissionBonus,
+  applyStreakReward,
+  missionBonus,
+  missionBonusReady,
+  type Reward,
+} from "../game/daily";
 import { realNow, worldDay } from "../game/clock";
 import { awardPoints, log } from "../game/engine";
 import type { GameState } from "../game/types";
@@ -29,6 +36,7 @@ import { fmtKr } from "./format";
  */
 type Deferred =
   | { uid: string; kind: "away"; seconds: number; fp: number }
+  | { uid: string; kind: "streak"; streak: number }
   | { uid: string; kind: "bonus"; day: string }
   | { uid: string; kind: "kiste"; fp: number }
   | { uid: string; kind: "stige"; fp: number; tiers: number[]; seasonId: number | null };
@@ -70,6 +78,7 @@ function grant(act: GameApi["act"], d: Deferred): boolean {
 
 function applyDeferred(gg: GameState, d: Deferred): void {
   if (d.kind === "away") applyAwayReward(gg, d.seconds, d.fp, fmtKr);
+  else if (d.kind === "streak") applyStreakReward(gg, d.streak, fmtKr);
   else if (d.kind === "bonus") {
     // En annen dag i spillet nå: bonusen gis, men dagens oppdrag merkes ikke som hentet
     if (gg.daily.date === d.day && !gg.daily.claimed) applyMissionBonus(gg, fmtKr);
@@ -118,6 +127,18 @@ export function grantAway(act: GameApi["act"], uid: string, seconds: number, fp:
     return true;
   });
   if (!done) writeDeferred([...readDeferred(), { uid, kind: "away", seconds, fp }]);
+  return reward;
+}
+
+/** Den daglige belønningen (dag `streak` i uka) er hentet for kontoen `uid` (B-429): som `grantAway` */
+export function grantStreak(act: GameApi["act"], uid: string, streak: number): Reward | null {
+  let reward: Reward | null = null;
+  const done = act((gg) => {
+    if (!isMine(gg, uid)) return false;
+    reward = applyStreakReward(gg, streak, fmtKr);
+    return true;
+  });
+  if (!done) writeDeferred([...readDeferred(), { uid, kind: "streak", streak }]);
   return reward;
 }
 

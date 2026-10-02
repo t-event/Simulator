@@ -67,8 +67,10 @@ regnes av serveren i ekte tid.
 - Anbud (48 t skjult) og pilotkonsesjon 14 dager; `world_tick` avgjør «lat» (pg_cron hvert 5. min).
 - Kontroll regnes av `company_control` (aktivitet, investering, region, eiertid); vises som kroner (B-370).
 - Oppkjøpsbud og motbud er på (fra 29.9.2026). Budet teller inntil 10 × verdien (verdi = 10 dagers inntekt), forsvaret
-  høyst 3 ×; eieren kan alltid miste selskapet. Eieren får `takeover_payout` (B-375). Anbud fra før 29.9 regnes i dagens
-  penger (B-374).
+  høyst 3 ×; eieren kan alltid miste selskapet. Står angrep og forsvar likt, beholder eieren selskapet (`att > def`).
+  Eieren får `takeover_payout` (B-375). Anbud fra før 29.9 regnes i dagens penger (B-374).
+- Slettes en konto mens et oppkjøpsbud er åpent, gjøres budet opp først (B-430, 116): angriperen får hele budet tilbake,
+  eieren får motbudet tilbake (kassa og fondet).
 - Slagghåndteringen og andre selskaper er ikke aktive.
 
 ## 6. Konkurranse og lister
