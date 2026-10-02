@@ -165,3 +165,4 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Konsernbidraget som snitt over den ekte dagen | Ja (som bidraget) | Regel 3: serveren, ekte tid | B-361 |
 | Arbeidsmiljøkort og kapitlet «Arbeidsmiljø og varsling» | Nei | Regel 1: ditt eget spill | B-436 |
 | Konsernbanken: lån til verk og modernisering | Ja (som konsernkassa) | Regel 3: serveren, ekte tid | B-437 |
+| Svar på rapporter: admin spør, spilleren svarer, varsel begge veier | Ja (ikke gjester) | Regel 3: mellom spillere | B-438 |

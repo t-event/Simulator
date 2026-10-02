@@ -29,6 +29,7 @@ import {
 import { openProfile } from "./profileStore";
 import { AdminSheet } from "./Admin";
 import { fetchIsAdmin } from "../net/admin";
+import { onMessagesChange, reportUnread } from "./messagesStore";
 import { fetchProfile, nicknameAvailable, nicknameProblem, setNickname as saveNickname } from "../net/leaderboard";
 import { ACCOUNT_FEATURES, type AccountFeature } from "../net/features";
 import { Card } from "./common";
@@ -492,6 +493,8 @@ export function AccountCard({
   const [newNick, setNewNick] = useState("");
   // Adminpanelet (B-421): knappen vises bare når serveren sier at kontoen er admin
   const [admin, setAdmin] = useState(false);
+  // Nye rapporter og svar som venter (B-438), samme tall som prikken ved Skiftrapporten
+  const adminNew = useSyncExternalStore(onMessagesChange, () => reportUnread().admin);
   const [adminOpen, setAdminOpen] = useState(false);
   // Per konto (B-426): byttes kontoen (f.eks. innlogging i en annen fane), lukkes panelet og svaret spørres om på nytt
   const uid = session?.user.id ?? null;
@@ -745,7 +748,7 @@ export function AccountCard({
         )}
         {admin && (
           <button type="button" onClick={() => setAdminOpen(true)}>
-            Adminpanel
+            Adminpanel{adminNew > 0 ? ` (${adminNew} nye)` : ""}
           </button>
         )}
         {adminOpen && <AdminSheet onClose={() => setAdminOpen(false)} />}

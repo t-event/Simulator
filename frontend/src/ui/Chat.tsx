@@ -28,7 +28,8 @@ import { fetchDmUnread, reportMessage } from "../net/messages";
 import { SubTabs } from "./common";
 import { Callout, SheetHead } from "./ds";
 import { DirectMessages } from "./Messages";
-import { dmUnread, onMessagesChange, setDmUnread, takeMessagesRequest } from "./messagesStore";
+import { messagesBadge, onMessagesChange, setDmUnread, setReportUnread, takeMessagesRequest } from "./messagesStore";
+import { fetchReportUnread } from "../net/reports";
 import { PlayerName } from "./Profile";
 import { Icon } from "./icons";
 
@@ -75,6 +76,8 @@ function checkLatest(): void {
     .catch(() => {});
   // Uleste privatmeldinger (B-421) gir samme prikk
   void fetchDmUnread().then(setDmUnread, () => {});
+  // Svar på rapporter (B-438): fra admin til spilleren, og nye rapporter og svar til eieren
+  void fetchReportUnread().then(setReportUnread, () => {});
 }
 
 function subscribeLatest(listener: () => void): () => void {
@@ -123,7 +126,7 @@ export function ChatButton({
 }) {
   const session = useSession();
   useSyncExternalStore(subscribeLatest, () => latestVer);
-  const unread = useSyncExternalStore(onMessagesChange, dmUnread, dmUnread);
+  const unread = useSyncExternalStore(onMessagesChange, messagesBadge, messagesBadge);
   // Ny innlogging: se etter meldinger med én gang
   useEffect(() => {
     if (session) checkLatest();
@@ -162,7 +165,7 @@ export function ChatSheet({ onClose, onOpenSettings }: { onClose: () => void; on
   const [dmStart, setDmStart] = useState<{ nick: string | null } | null>(first);
   const [dmKey, setDmKey] = useState(0);
   const [reported, setReported] = useState<Set<number>>(() => new Set());
-  const unread = useSyncExternalStore(onMessagesChange, dmUnread, dmUnread);
+  const unread = useSyncExternalStore(onMessagesChange, messagesBadge, messagesBadge);
   useEffect(
     () =>
       onMessagesChange(() => {

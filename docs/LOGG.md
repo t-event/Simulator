@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 359 – 2026-10-02: Svar på rapporter (B-438)
+
+**Brukeren ba om:** å kunne svare på en rapport i adminpanelet før et valg tas, varsel når noen rapporterer, og varsel til
+spilleren når eieren svarer.
+
+**Gjort:** 122 (`report_messages` og funksjonene for å skrive, svare, lese og telle), samtale og svarfelt per rapport i
+adminpanelet («Svar …»/«Spør …»), «Fra admin» øverst i Meldinger med svarfelt, varsel på prikken ved Skiftrapporten for
+begge, «N nye ting i adminpanelet» og «Adminpanel (N nye)». #375 (B-437) merget og publisert.
+
+**Testet:** forløpet som eier og spiller i en transaksjon som ble rullet tilbake, `get_advisors`, nettest, Chromium
+320/390/1366 px mot en falsk server, `npm test`, typesjekk, lint, build.
+
+**Gjenstår:** eierens beslutning om etterbetalingen; ryddingen av meldinger (utkast 108, før 1.11) bør også rydde
+`report_messages` for rapporter som er behandlet og eldre enn 30 dager.
+
 ## Økt 358 – 2026-10-02: Konsernbanken (B-437)
 
 **Brukeren ba om:** egen bank for konsernkassa, så man kan ta lån der også. Eieren valgte «Verk og modernisering».
