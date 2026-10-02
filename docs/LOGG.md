@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 361 – 2026-10-03: Oppkjøp – retning og simulator (B-440)
+
+**Brukeren ba om:** enig i at dagens regler gjør forsvar for billig, men ville ikke ha hele forslaget; ønsket en
+enklere modell (vinneren betaler, sammenlignbare vilkår ved tap, samme styrke for samme beløp, pause) prøvd i
+simulering før satsene bestemmes. Pågående bud skal avgjøres etter dagens regler.
+
+**Gjort:** `game/takeoverSim.ts` (dagens regler mot kandidatene, 12 scenarier, eierverdi 0/7/14 dager, plage og pause).
+B-440 med resultatene og forslag til satser. Ingen regel er endret.
+
+**Testet:** simulatoren kjørt; typesjekk, lint.
+
+**Gjenstår:** eierens valg av satser; deretter server (`resolve_takeovers`, `takeover_attack_of`/`takeover_defense_of`,
+pause), speilet i `game/control.ts`, tekstene på Industrien og testene.
+
 ## Økt 360 – 2026-10-03: Én samtale om gangen i adminpanelet (B-439)
 
 **Brukeren ba om:** svar på om spillerne ser begge svarene i rapporten (de gjør ikke det), og at panelet ikke blander dem.
