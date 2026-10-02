@@ -125,8 +125,9 @@ async function ensureGuest(): Promise<boolean> {
     store({ session, rev: 0 });
     return true;
   } catch (e) {
-    // Anonyme kontoer er slått av (eller for mange forsøk): prøv igjen om et døgn
-    if (e instanceof NetError && !e.offline) markOff();
+    // Anonyme kontoer er slått av (eller for mange forsøk): prøv igjen om et døgn. En feil hos tjenesten (5xx) er
+    // ikke et nei – da prøves det igjen ved neste lagring (B-428)
+    if (e instanceof NetError && !e.offline && e.status >= 400 && e.status < 500) markOff();
     return false;
   }
 }

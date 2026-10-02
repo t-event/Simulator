@@ -5,7 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
-## Økt 350 – 2026-10-02: Kodegjennomgangen – kontrollrom og spillmotor (B-427)
+## Økt 351 – 2026-10-02: Kodegjennomgangen – resten (B-428)
+
+**Brukeren ba om:** siste gruppe etter kontrollrom og spillmotor: funn 17–20 og småfunnene.
+
+**Gjort:** 115 (tilbakespolingen tar med tidslinjetallene fra 096, lenkefilteret med riktig ordgrense, lås i `dm_send`,
+uleste uten blokkerte) prøvekjørt og lagt inn; service workeren lagrer JS/CSS ved installasjonen og lar ikke feilsider
+erstatte kopien; gjester pauses ikke av 5xx; «Hent alt», quizblandingen, plasstellingen i konsernet, chat-lest,
+eksporten (versjon 2 publisert), programSim, worldSim og validate rettet. Rådgiverens vinduer ikke rettet – fant ikke
+feilen. #367 (B-427) merget.
+
+**Testet:** prøvekjøring av 115, quiztest, `npm test`, typesjekk, lint, validate, worldSim.
+
+**Gjenstår:** et konkret eksempel på rådgiverens vinduer; eierens beslutning om etterbetalingen (B-425).
+
+ – 2026-10-02: Kodegjennomgangen – kontrollrom og spillmotor (B-427)
 
 **Brukeren ba om:** neste gruppe etter lagring og kontobytte: kontrollrom og spillmotor (funn 9–16).
 

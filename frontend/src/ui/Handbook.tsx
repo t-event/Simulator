@@ -15,14 +15,9 @@ import { Bar } from "./common";
 import { fmtKr, fmtNum } from "./format";
 import { buzz } from "./haptics";
 import { Icon } from "./icons";
+import { answerOrder } from "./quizOrder";
 
 type Act = GameApi["act"];
-
-/** Fast, men blandet rekkefølge på svaralternativene, så riktig svar ikke alltid står på samme plass */
-function order(q: string, n: number): number[] {
-  const hash = (text: string) => [...text].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
-  return Array.from({ length: n }, (_, j) => j).sort((a, b) => hash(q + a) - hash(q + b));
-}
 
 function fmtRead(s: number): string {
   return s < 60 ? `${s} sek` : `${Math.round(s / 60)} min`;
@@ -118,7 +113,7 @@ function Quiz({ g, chapter, act, onDone }: { g: GameState; chapter: string; act:
       </div>
       <h3>{q.q}</h3>
       <div className="g-book-options">
-        {order(q.q, q.options.length).map((j) => {
+        {answerOrder(q.q, q.options.length).map((j) => {
           const mark = !answered ? "" : j === q.correct ? " is-right" : j === picked ? " is-wrong" : " is-dim";
           return (
             <button

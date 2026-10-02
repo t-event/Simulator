@@ -7879,3 +7879,31 @@ typesjekk, lint, build og `balance.ts`.
 Endringslogg: ja.
 Konto (B-149): uendret.
 
+## B-428 Etter kodegjennomgangen 2.10: resten av funnene (2026-10-02)
+Status: gjennomført, med ett unntak (rådgiverens vinduer, se under).
+Bakgrunn: siste gruppe etter B-425–B-427: funn 17–20 og småfunnene.
+Gjort:
+- **Tilbakespolingen (funn 17, 115):** `snapshots_rewound` har fått feltene fra 096 (kwh_total, deliveries, missed,
+  cancelled, complaints, metric_note), og `check_snapshot` tar dem med når tallene flyttes til side og legges tilbake.
+- **Offlinekopien (funn 18):** service workeren lagrer siden og JS/CSS fra `assets/` ved installasjonen (lest fra
+  siden), og et feilsvar (f.eks. 503) erstatter aldri den lagrede siden. `VERSION` er `stalverket-v2`. Filer som lastes
+  senere (kontrollrommet), lagres som før første gang de hentes.
+- **Gjester (funn 19):** bare et nei fra tjenesten (4xx) gir et døgns pause; en feil hos tjenesten (5xx) prøves igjen ved
+  neste lagring.
+- **Meldingsgrensene (funn 20, 115):** `dm_send` tar en lås per avsender før grensene sjekkes.
+- **Lenkefilteret (115):** `\b` er et tilbaketegn i PostgreSQL, ikke en ordgrense; nå `\y` i `chat_send`, `dm_send` og
+  `profile_update`. Domener uten http/www («eksempel.no») slapp gjennom før – vist med samme uttrykk før og etter.
+- **Uleste (115):** `dm_overview` teller ikke meldinger fra blokkerte eller eldre enn 30 dager.
+- **Småfunn:** «Hent alt» henter status hver gang Mål åpnes og når appen vises igjen; quizen blander svaralternativene
+  (ny hash, `ui/quizOrder.ts`, test); plassene i konsernet telles som serveren (`plannedPlants`); den felles chatten
+  merkes lest bare når den vises; eksporten melder feil ved sletting (edge-funksjonen `eksport` versjon 2, prøvd: svarer
+  «skipped» for en dag som alt er eksportert); `programSim --skann` regner av utbyttet som overskriften sier;
+  verdenssimulatoren byr bare med penger i kassa; `sim/validate.ts` gir exit 1 når en forventning ikke holder.
+- **Ikke rettet – rådgiverens vinduer (`decisions.ts`):** begge tellingene bruker samme vindu (10 døgn) på samme dag
+  (`repLog.day` og `closedDay`), og jeg fant ikke tilfellet der tallene blir for lave. Venter på et konkret eksempel fra
+  gjennomgangen før noe endres.
+Testet: prøvekjøring av 115 (rullet tilbake: filteret fanger «eksempel.no», lås og uleste på plass, seks steder i
+`check_snapshot`), `get_advisors` uten nye råd, quiztest, `npm test`, typesjekk, lint, `sim/validate.ts`, worldSim 90 dager.
+Endringslogg: ja.
+Konto (B-149): uendret.
+

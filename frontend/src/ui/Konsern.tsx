@@ -2,7 +2,7 @@ import { hasPaidOut, paidOutTotal } from "../game/reserve";
 import { Fragment, useState } from "react";
 import { useReportTab, type OnTab } from "./tabMemory";
 import { WIN_CASH } from "../game/data";
-import { WORLD_KONSERN } from "../game/konsernWorld";
+import { plannedPlants, WORLD_KONSERN } from "../game/konsernWorld";
 import {
   daysToAfford,
   dividends,
@@ -1179,7 +1179,9 @@ function KonsernBuy({ g, act, onShowPlants }: { g: GameState; act: Act; onShowPl
   const treasury = g.konsern.treasury;
   const orders = g.konsern.orders ?? [];
   const pending = orders.filter((o) => o.status === "kø" || o.status === "i gang").length;
-  const planned = g.konsern.plants.length + orders.filter((o) => o.kind === "bygg").length;
+  // Verkene slik de blir når køen er ferdig (B-428), som serveren teller plassene: før ble bygg som er i gang
+  // (allerede i lista) og ferdige bestillinger telt en gang til, og konsernet kunne se fullt ut
+  const planned = plannedPlants({ plants: g.konsern.plants, orders }).length;
   const slots = maxSisters(g);
   const queueFull = pending >= WORLD_KONSERN.queueMax;
   const plantsFull = planned >= slots;

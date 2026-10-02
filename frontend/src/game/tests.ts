@@ -319,6 +319,7 @@ import { contractCoverage, freeStockT, sellAllFree } from "./engine";
 import { leaderBonus, leaderBonusDue } from "./actions";
 import { autoPlay, ChargeGame, INPUT_LOG_MAX, seededRandom } from "../ui/control/chargeGame";
 import { hints } from "../ui/hints";
+import { answerOrder } from "../ui/quizOrder";
 import { hasMoulds, MOULD, mouldCost, mouldHour, mouldRisk, mouldWear, replaceMoulds, wearMoulds } from "./mould";
 import { applyCashCap, CASH_RESERVE, hasPaidOut, paidOutDayLog, paidOutTotal } from "./reserve";
 import { trainingSeed, weeklyGrade, weeklyRequest } from "../ui/control/weekly";
@@ -4389,6 +4390,18 @@ test("Motbud nær taket (B-427): rådet sier ikke «går ikke» om et forsvar so
   assert(need !== null && takeoverDefense(control, need, 0, V) > attack, `forsvar ${need}`);
   const over = control + TAKEOVER.defenseW * Math.sqrt(TAKEOVER.cap * 1.0001);
   assert(defenseNeeded(over, control, 0, 0, V) === null, "over taket");
+});
+
+test("Quizen (B-428): svaralternativene står i blandet rekkefølge, men alltid den samme for et spørsmål", () => {
+  const qs = Object.values(QUIZ).flat();
+  let moved = 0;
+  for (const q of qs) {
+    const o = answerOrder(q.q, q.options.length);
+    assert([...o].sort().join() === q.options.map((_, j) => j).join(), `alle alternativene med: ${q.q}`);
+    assert(o.join() === answerOrder(q.q, q.options.length).join(), "samme rekkefølge hver gang");
+    if (o.some((j, k) => j !== k)) moved++;
+  }
+  assert(moved > qs.length / 2, `bare ${moved} av ${qs.length} spørsmål er blandet`);
 });
 
 if (failed) {
