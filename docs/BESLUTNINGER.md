@@ -7830,3 +7830,27 @@ Ikke gjort: ingen betaling; ingen sletting av raden «skygge». Resten av funnen
 Endringslogg: nei – spillerne merker ingenting.
 Konto (B-149): ikke aktuelt (serverside).
 
+## B-426 Etter kodegjennomgangen 2.10: lagring, tidsgrense og kontobytte (2026-10-02)
+Status: gjennomført (funn 3–8 i gjennomgangen).
+Bakgrunn: eieren ba om gruppevise PR-er etter B-425, lagring og kontobytte først.
+Gjort:
+- **Lagringen (funn 3):** en opplasting merker bare det den faktisk sendte som lagret – spillminuttet og handlingene da
+  den startet (`synced(minute, serial)` i `net/sync.ts`). Før ble spillet slik det var da svaret kom, merket som lagret,
+  så framgang fra mens svaret var på vei kunne bli stående og senere erstattes av en eldre kopi fra en annen enhet. Legges
+  appen bort mens en lagring er på vei (`flush(keepalive)`), lastes det nyeste opp med én gang etterpå.
+- **Tidsgrensen (funn 4):** `call` i `net/supabase.ts` leser også svarinnholdet innenfor tidsgrensen på 30 s. Før stoppet
+  timeren når svarhodene kom, og et innhold som hang, kunne holde hele lagringskøen fast.
+- **Belønninger (funn 5):** tida borte, dagens bonus, ukekista og sesongstigen legges bare inn i spillet til kontoen som
+  hentet dem. Byttes kontoen mens svaret er på vei, tas belønningen vare på (`stalverk-ventende-belonninger-v1`) og legges
+  inn når den kontoens spill er i gang igjen (`applyWaitingRewards`, fra «Velkommen tilbake»-sjekken).
+- **Konsernet (funn 6):** svar på kjøp, avbestilling, salg og flytting legges bare inn når samme konto fortsatt er
+  innlogget og spillet er dens. Serveren skriver uansett konsernet inn i kontoens spill ved neste lagring.
+- **Adminpanelet (funn 7):** knappen og panelet nullstilles når kontoen byttes (per bruker-id, ikke per økt), og
+  panelet viser ingenting av det som er hentet når en annen konto er innlogget.
+- **Min profil (funn 8):** skjemaet hører til kontoen det ble hentet for; byttes kontoen, hentes det på nytt og kan ikke
+  lagres med den nye innloggingen.
+Testet: fire nye nettester (svarinnhold som henger, lagring underveis, appen legges bort under en lagring, belønning etter
+kontobytte), `npm test`, typesjekk, lint, build.
+Endringslogg: ja.
+Konto (B-149): uendret.
+

@@ -328,6 +328,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - Lagring på nett skjer ca. 2 s etter en handling, men aldri oftere enn hvert 15. s (`SOON_MIN_GAP_MS`), hvert 60. sekund ellers (B-353), og ved
   `blur`/`pagehide`. Appen sjekker hvert 20. sekund om en annen enhet har lagret (B-141). I Playwright: vent minst
   3 s etter en handling før du ser etter opplastingen.
+- **Opplasting og kontobytte** (B-426): en opplasting merker bare det den sendte som lagret (`synced(minute, serial)`),
+  aldri spillet slik det er når svaret kommer. Svar som legger noe inn i spillet (belønninger, konsernet, profil, admin),
+  sjekker at samme konto fortsatt er innlogget og at spillet er dens (`grant`/`isMine` i `ui/claims.ts`); belønninger
+  som kom etter et kontobytte, venter i `stalverk-ventende-belonninger-v1`. Nye hentinger følger samme mønster.
 - Bare enheten som spilles på, laster opp (B-143): `onLocalSave` laster ikke opp når spillminuttet er det samme som
   sist og ingen handling er gjort. Tester som kaller `onLocalSave` må derfor endre `g.minute` (eller bruke `soon`).
 - Lagring på nett går gjennom `save_game()` med versjonsnummer (B-140), ikke rett i tabellen `saves`. En falsk

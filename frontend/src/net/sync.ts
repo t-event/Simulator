@@ -64,9 +64,20 @@ let soonTimer: ReturnType<typeof setTimeout> | null = null;
  */
 let syncedMinute = -1;
 let actionPending = false;
-function synced(g: GameState): void {
-  syncedMinute = Math.floor(g.minute);
-  actionPending = false;
+/** Hver handling som skal med i neste opplasting, får et nummer, så en opplasting bare merker det den faktisk sendte */
+let actionSerial = 0;
+/**
+ * Merker det som ble sendt som lagret (B-426): spillminuttet og handlingene slik de var da opplastingen startet. Spillet
+ * går videre mens svaret er på vei, og ble tilstanden etterpå merket som lagret, kunne nyere framgang bli stående uten å
+ * lastes opp – og senere erstattes av en eldre kopi fra en annen enhet.
+ */
+function synced(minute: number, serial: number): void {
+  syncedMinute = minute;
+  if (serial === actionSerial) actionPending = false;
+}
+/** Et spill som hentes fra nett, er lagret slik det er */
+function syncedTo(g: GameState): void {
+  synced(Math.floor(g.minute), actionSerial);
 }
 function pageVisible(): boolean {
   return typeof document === "undefined" || document.visibilityState !== "hidden";
@@ -237,6 +248,10 @@ export async function uploadSave(g: GameState, keepalive = false, chosen = false
   if (!chosen && g.owner === id && staleCopy(g)) throw new SaveConflictError();
   g.owner = id;
   const day = dayOf(g);
+  // Det som sendes nå (B-426): spillet går videre mens svaret er på vei
+  const sentMinute = Math.floor(g.minute);
+  const sentSerial = actionSerial;
+  const sentRef = { gameId: g.gameId, season: g.season, minute: g.minute };
   // Sesongen leses før første await, så lagringen og tidslinja får samme verdi
   const season = g.season;
   // Tallene til tidslinja leses samtidig med dagen (B-162). Spillet går videre mens lagringen venter på svar, og
@@ -280,8 +295,8 @@ export async function uploadSave(g: GameState, keepalive = false, chosen = false
   });
   if (rev === null || rev === undefined) throw new SaveConflictError();
   setKnownRev(id, Number(rev));
-  synced(g);
-  knowCloud(g);
+  synced(sentMinute, sentSerial);
+  knowCloud(sentRef);
   if (day !== lastSnapshotDay) {
     await rest("snapshots", {
       method: "POST",
@@ -308,7 +323,10 @@ export function onLocalSave(g: GameState, soon = false): void {
   if (!reconciled) return;
   // Et spill som tilhører en annen konto, skal ikke overskrive kontoens spill (B-125)
   if (g.owner && g.owner !== userId()) return;
-  if (soon) actionPending = true;
+  if (soon) {
+    actionPending = true;
+    actionSerial++;
+  }
   // Står enheten bare åpen – på pause, eller i bakgrunnen mens tida går – lastes ingenting opp (B-143)
   if (!actionPending && !(Math.floor(g.minute) !== syncedMinute && pageVisible())) return;
   dirty = g;
@@ -344,6 +362,7 @@ export async function claim(g: GameState): Promise<boolean> {
   if (!cloudConfigured() || !getSession() || !reconciled) return true;
   if (inFlight) await inFlight;
   actionPending = true;
+  actionSerial++;
   dirty = g;
   await flush();
   return status.kind !== "conflict";
@@ -351,8 +370,13 @@ export async function claim(g: GameState): Promise<boolean> {
 
 /** Laster opp det som venter. Med `keepalive` når appen legges bort (fetch fullfører i bakgrunnen). */
 export async function flush(keepalive = false): Promise<void> {
-  // Er en lagring på vei, venter vi på den (det som er nytt, tas neste gang)
-  if (inFlight) return inFlight;
+  // Er en lagring på vei, venter vi på den. Det som er nytt, tas neste gang – men når appen legges bort (`keepalive`),
+  // finnes ingen neste gang: da lastes det nyeste opp med én gang etterpå (B-426)
+  if (inFlight) {
+    if (!keepalive) return inFlight;
+    await inFlight;
+    if (inFlight) return inFlight;
+  }
   if (!dirty || !getSession()) return;
   const g = dirty;
   dirty = null;
@@ -465,7 +489,7 @@ async function link(local: GameState | null): Promise<LinkDecision> {
   }
   if (!mine) {
     setKnownRev(id, row.rev);
-    synced(cloud);
+    syncedTo(cloud);
     setStatus({ kind: "saved", at: clock() });
     markReconciled();
     return { kind: "cloud", cloud };
@@ -473,7 +497,7 @@ async function link(local: GameState | null): Promise<LinkDecision> {
   // Serveren har endret spillet på nett (B-211, f.eks. økonomireformen): det lokale spillet er eldre og kan ikke velges
   if ((cloud.serverEdit ?? 0) > (mine.serverEdit ?? 0)) {
     setKnownRev(id, row.rev);
-    synced(cloud);
+    syncedTo(cloud);
     setStatus({ kind: "saved", at: clock() });
     markReconciled();
     return { kind: "cloud", cloud };
@@ -486,7 +510,7 @@ async function link(local: GameState | null): Promise<LinkDecision> {
     // En gammel kopi av det samme spillet (B-259): spillet på nett gjelder, selv om ingen andre har lagret siden
     if (cloudNewer || staleCopy(mine, cloud)) {
       setKnownRev(id, row.rev);
-      synced(cloud);
+      syncedTo(cloud);
       setStatus({ kind: "saved", at: clock() });
       markReconciled();
       return { kind: "cloud", cloud };
@@ -535,7 +559,7 @@ export async function pullIfNewer(): Promise<GameState | null> {
   const full = await fetchCloudRow();
   if (!full) return null;
   setKnownRev(id, full.rev);
-  synced(full.game);
+  syncedTo(full.game);
   knowCloud(full.game);
   dirty = null;
   lastSavedAt = clock();

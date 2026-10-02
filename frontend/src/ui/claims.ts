@@ -4,7 +4,7 @@
  * bare rekkefølgen og det som legges inn i spillet etterpå.
  */
 import { grantCosmetic, trackCosmetic } from "../game/cosmetics";
-import { applyMissionBonus, missionBonus, missionBonusReady } from "../game/daily";
+import { applyAwayReward, applyMissionBonus, missionBonus, missionBonusReady, type Reward } from "../game/daily";
 import { realNow, worldDay } from "../game/clock";
 import { awardPoints, log } from "../game/engine";
 import type { GameState } from "../game/types";
@@ -18,8 +18,108 @@ import {
   unclaimedTiers,
   type SeasonTrack,
 } from "../net/seasonTrack";
+import { userId } from "../net/supabase";
 import { claimWeekChest, setWeeklyStatus, weeklyStatus, type WeeklyStatus } from "../net/weekly";
 import { fmtKr } from "./format";
+
+/**
+ * Svar på en henting gjelder kontoen som ba om den (B-426). Byttes kontoen mens svaret er på vei, legges belønningen
+ * ikke inn i det nye spillet, men tas vare på (localStorage) til den første kontoens spill er i gang igjen – serveren
+ * har alt gitt den, og den kan ikke hentes på nytt.
+ */
+type Deferred =
+  | { uid: string; kind: "away"; seconds: number; fp: number }
+  | { uid: string; kind: "bonus"; day: string }
+  | { uid: string; kind: "kiste"; fp: number }
+  | { uid: string; kind: "stige"; fp: number; tiers: number[]; seasonId: number | null };
+
+const DEFERRED_KEY = "stalverk-ventende-belonninger-v1";
+
+function readDeferred(): Deferred[] {
+  try {
+    const v: unknown = JSON.parse(localStorage.getItem(DEFERRED_KEY) ?? "[]");
+    return Array.isArray(v) ? (v as Deferred[]) : [];
+  } catch {
+    return [];
+  }
+}
+function writeDeferred(list: Deferred[]): void {
+  try {
+    if (list.length) localStorage.setItem(DEFERRED_KEY, JSON.stringify(list.slice(-20)));
+    else localStorage.removeItem(DEFERRED_KEY);
+  } catch {
+    // Privat modus: belønningen er tapt for denne kontoen, men havner aldri hos en annen
+  }
+}
+
+/** Er spillet som er i gang nå, spillet til kontoen `uid`? */
+function isMine(g: GameState, uid: string | null): boolean {
+  return !!uid && userId() === uid && (!g.owner || g.owner === uid);
+}
+
+/** Legger inn belønningen i spillet hvis det fortsatt er kontoens, ellers tas den vare på. Gir true når den ble lagt inn */
+function grant(act: GameApi["act"], d: Deferred): boolean {
+  const done = act((gg) => {
+    if (!isMine(gg, d.uid)) return false;
+    applyDeferred(gg, d);
+    return true;
+  });
+  if (!done) writeDeferred([...readDeferred(), d]);
+  return done;
+}
+
+function applyDeferred(gg: GameState, d: Deferred): void {
+  if (d.kind === "away") applyAwayReward(gg, d.seconds, d.fp, fmtKr);
+  else if (d.kind === "bonus") {
+    // En annen dag i spillet nå: bonusen gis, men dagens oppdrag merkes ikke som hentet
+    if (gg.daily.date === d.day && !gg.daily.claimed) applyMissionBonus(gg, fmtKr);
+    else {
+      const r = missionBonus(gg);
+      gg.cash += r.cash;
+      awardPoints(gg, r.fp);
+      log(gg, `Dagens bonus fra ${d.day}: ${fmtKr(r.cash)} og ${r.fp} fagpoeng.`, "good");
+    }
+  } else if (d.kind === "kiste") {
+    awardPoints(gg, d.fp);
+    log(gg, `Ukekista er åpnet: +${d.fp} fagpoeng.`, "good");
+  } else {
+    awardPoints(gg, d.fp);
+    const got = d.tiers.map((t) => trackCosmetic(t, d.seasonId)).filter((c) => c !== null);
+    for (const c of got) grantCosmetic(gg, c.id);
+    log(
+      gg,
+      `Sesongstigen: ${d.tiers.length === 1 ? `trinn ${d.tiers[0]}` : `${d.tiers.length} trinn`} – +${d.fp} fagpoeng${got.length ? ` og ${got.map((c) => c.name).join(", ")}` : ""}.`,
+      "good",
+    );
+  }
+}
+
+/** Belønninger som ble hentet for denne kontoen mens et annet spill var i gang, legges inn nå */
+export function applyWaitingRewards(act: GameApi["act"]): void {
+  const uid = userId();
+  if (!uid) return;
+  const all = readDeferred();
+  const mine = all.filter((d) => d.uid === uid);
+  if (!mine.length) return;
+  const left = all.filter((d) => d.uid !== uid);
+  writeDeferred(left);
+  for (const d of mine) grant(act, d);
+}
+
+/**
+ * Tida borte (B-149) er hentet på serveren for kontoen `uid`: legg den inn i spillet hvis det fortsatt er kontoens.
+ * Gir belønningen som ble lagt inn, eller null når den ble tatt vare på til senere.
+ */
+export function grantAway(act: GameApi["act"], uid: string, seconds: number, fp: number): Reward | null {
+  let reward: Reward | null = null;
+  const done = act((gg) => {
+    if (!isMine(gg, uid)) return false;
+    reward = applyAwayReward(gg, seconds, fp, fmtKr);
+    return true;
+  });
+  if (!done) writeDeferred([...readDeferred(), { uid, kind: "away", seconds, fp }]);
+  return reward;
+}
 
 export type ClaimId = "bonus" | "kiste" | "stige";
 
@@ -67,39 +167,32 @@ export async function claimMissionBonus(act: GameApi["act"]): Promise<void> {
     if (fresh) setDailyStatus(fresh);
     return;
   }
+  const uid = userId();
   const r = await claimDailyMissions();
-  if (!r.already) act((gg) => void applyMissionBonus(gg, fmtKr));
-  else act((gg) => void (gg.daily.claimed = true));
-  setDailyStatus({ ...status, missionsClaimed: true });
+  if (!uid) return;
+  if (!r.already) grant(act, { uid, kind: "bonus", day: status.today });
+  else act((gg) => void (isMine(gg, uid) && (gg.daily.claimed = true)));
+  if (userId() === uid) setDailyStatus({ ...status, missionsClaimed: true });
 }
 
 /** Ukekista (flyttet fra WeeklyCard) */
 export async function openWeekChest(act: GameApi["act"]): Promise<void> {
+  const uid = userId();
   const fp = await claimWeekChest();
-  if (fp > 0)
-    act((gg) => {
-      awardPoints(gg, fp);
-      log(gg, `Ukekista er åpnet: +${fp} fagpoeng.`, "good");
-    });
+  if (!uid) return;
+  if (fp > 0) grant(act, { uid, kind: "kiste", fp });
   const now = weeklyStatus();
-  if (now) setWeeklyStatus({ ...now, chest: null });
+  if (now && userId() === uid) setWeeklyStatus({ ...now, chest: null });
 }
 
 /** Alle trinn som er nådd på sesongstigen (flyttet fra SeasonTrackCard), med pynten som hører til sesongen */
 export async function claimTrackTiers(act: GameApi["act"], seasonId: number | null): Promise<void> {
+  const uid = userId();
   const r = await claimSeasonTiers();
-  if (r.fp > 0 || r.tiers.length)
-    act((gg) => {
-      awardPoints(gg, r.fp);
-      const got = r.tiers.map((t) => trackCosmetic(t, seasonId)).filter((c) => c !== null);
-      for (const c of got) grantCosmetic(gg, c.id);
-      log(
-        gg,
-        `Sesongstigen: ${r.tiers.length === 1 ? `trinn ${r.tiers[0]}` : `${r.tiers.length} trinn`} – +${r.fp} fagpoeng${got.length ? ` og ${got.map((c) => c.name).join(", ")}` : ""}.`,
-        "good",
-      );
-    });
-  setSeasonTrack(await fetchSeasonTrack().catch(() => null));
+  if (!uid) return;
+  if (r.fp > 0 || r.tiers.length) grant(act, { uid, kind: "stige", fp: r.fp, tiers: r.tiers, seasonId });
+  const track = await fetchSeasonTrack().catch(() => null);
+  if (userId() === uid) setSeasonTrack(track);
 }
 
 /**

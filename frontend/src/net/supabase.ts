@@ -276,7 +276,15 @@ async function call(url: string, init: RequestInit): Promise<Response> {
     const res = await Promise.race([fetchImpl(url, { ...init, signal: abort.signal }), timeout]);
     // Serverens klokke styrer byggetida i konsernet (B-314)
     syncServerClock(res.headers?.get?.("date"));
-    return res;
+    // Svarinnholdet leses også innenfor tidsgrensen (B-426): før stoppet timeren når svarhodene kom, og et innhold som
+    // hang, holdt hele lagringskøen fast
+    if (typeof res.arrayBuffer !== "function") return res;
+    const body = await Promise.race([res.arrayBuffer(), timeout]);
+    return new Response(body.byteLength ? body : null, {
+      status: res.status,
+      statusText: res.statusText,
+      headers: res.headers,
+    });
   } catch (e) {
     if (e instanceof NetError) throw e;
     throw new NetError("Ingen kontakt med nettet.", 0, true);

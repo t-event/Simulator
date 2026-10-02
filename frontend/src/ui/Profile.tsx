@@ -313,20 +313,24 @@ function countText(ps: ProfilePlant[]): string {
  * (`profile_update`) og sier nei til lenker og for lang tekst.
  */
 function ProfileEditor({ g, onDone }: { g: GameState; onDone: (saved: boolean) => void }) {
-  const [form, setForm] = useState<ProfileSettings | null>(null);
+  // Skjemaet hører til kontoen det ble hentet for (B-426): byttes kontoen, vises det ikke og kan ikke lagres
+  const uid = useSyncExternalStore(onSessionChange, () => getSession()?.user.id ?? null);
+  const [loaded, setLoaded] = useState<{ uid: string | null; form: ProfileSettings } | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const form = loaded && loaded.uid === uid ? loaded.form : null;
+  const setForm = (f: ProfileSettings) => setLoaded({ uid, form: f });
 
   useEffect(() => {
     let alive = true;
     fetchProfileSettings().then(
-      (s) => alive && setForm(s ?? { bio: "", emblem: null, showcase: [], dmOpen: true }),
+      (s) => alive && setLoaded({ uid, form: s ?? { bio: "", emblem: null, showcase: [], dmOpen: true } }),
       () => alive && setError("Får ikke hentet profilen nå. Prøv igjen om litt."),
     );
     return () => {
       alive = false;
     };
-  }, []);
+  }, [uid]);
 
   if (!form) return error ? <Callout tone="critical">{error}</Callout> : <p className="g-muted">Henter profilen …</p>;
   const cosmetics = g.cosmetics.owned.map((id) => COSMETIC_BY_ID[id]).filter((c) => !!c);
@@ -337,6 +341,7 @@ function ProfileEditor({ g, onDone }: { g: GameState; onDone: (saved: boolean) =
     setForm({ ...form, showcase: on ? form.showcase.filter((x) => x !== id) : [...form.showcase, id] });
   };
   const save = async () => {
+    if (getSession()?.user.id !== loaded?.uid) return;
     setBusy(true);
     setError(null);
     try {

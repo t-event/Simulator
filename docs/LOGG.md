@@ -5,7 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
-## Økt 348 – 2026-10-02: Kodegjennomgangen – utbyttegulv, V0-jobben og etterbetalingen på nytt (B-425)
+## Økt 349 – 2026-10-02: Kodegjennomgangen – lagring, tidsgrense og kontobytte (B-426)
+
+**Brukeren ba om:** gruppevise PR-er etter B-425; lagring og kontobytte først (funn 3–8).
+
+**Gjort:** opplastingen merker bare det den sendte som lagret, og det nyeste lastes opp når appen legges bort under en
+lagring; tidsgrensen gjelder også svarinnholdet; belønninger, konsernsvar, adminpanelet og Min profil følger kontoen som
+spurte (belønninger som kom etter et kontobytte, tas vare på til kontoens spill er i gang). #365 (B-425) merget.
+
+**Testet:** fire nye nettester, `npm test`, typesjekk, lint, build, prettier.
+
+**Gjenstår:** kontrollrom og spillmotor (funn 9–16), så resten (17–20 og småfunnene).
+
+ – 2026-10-02: Kodegjennomgangen – utbyttegulv, V0-jobben og etterbetalingen på nytt (B-425)
 
 **Brukeren ba om:** gikk gjennom koden fram til #364 og fant 20 funn og flere småfeil; først 111 og 112, så én PR for 114,
 ny 112 og rettet rapport, og deretter gruppevise PR-er (lagring og kontobytte, så kontrollrom og spillmotor). Helsesjekken

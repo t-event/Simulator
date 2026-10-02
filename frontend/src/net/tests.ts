@@ -41,7 +41,7 @@ import {
   setNickname,
 } from "./leaderboard";
 import { claimAway, fetchDailyStatus } from "./daily";
-import { claimables } from "../ui/claims";
+import { applyWaitingRewards, claimables, grantAway } from "../ui/claims";
 import { tierFp } from "./seasonTrack";
 import {
   abandonControlAttempt,
@@ -1301,6 +1301,86 @@ const main = async () => {
     } finally {
       setRequestTimeout(30_000);
     }
+  });
+
+  await test("Svarinnhold som henger (B-426): tidsgrensen gjelder også innholdet, ikke bare svarhodene", async () => {
+    fresh();
+    setFetch(async () => new Response(new ReadableStream({ start() {} }), { status: 200 }));
+    setRequestTimeout(50);
+    try {
+      let err: unknown = null;
+      await rest("saves?select=rev").catch((e: unknown) => (err = e));
+      assert(err instanceof NetError && err.offline, `feil ${String(err)}`);
+    } finally {
+      setRequestTimeout(30_000);
+    }
+  });
+
+  await test("Lagring underveis (B-426): det som spilles mens svaret er på vei, regnes ikke som lagret", async () => {
+    const f = fresh();
+    await login(f);
+    const g = newGame(13);
+    await linkOnLogin(g);
+    const saves = () => f.calls.filter((c) => c.startsWith("POST /rest/v1/rpc/save_game")).length;
+    const before = saves();
+    let once = true;
+    f.onSaveGame = () => {
+      if (once) g.minute += 60;
+      once = false;
+    };
+    g.minute += 60;
+    onLocalSave(g, true);
+    await flush();
+    f.onSaveGame = null;
+    assert(saves() === before + 1, "første lagring");
+    // Appen legges bort: minuttene som gikk mens svaret var på vei, skal lastes opp
+    await leaving(g, false);
+    assert(saves() === before + 2, "det nyeste ble ikke lastet opp");
+    assert(f.saves.get("u-a@test")?.minute === Math.floor(g.minute), "spillet på nett er ikke det nyeste");
+  });
+
+  await test("Appen legges bort mens en lagring er på vei (B-426): det nyeste lastes opp etterpå", async () => {
+    const f = fresh();
+    await login(f);
+    const g = newGame(14);
+    await linkOnLogin(g);
+    const saves = () => f.calls.filter((c) => c.startsWith("POST /rest/v1/rpc/save_game")).length;
+    const before = saves();
+    let gone: Promise<void> | null = null;
+    f.onSaveGame = () => {
+      if (gone) return;
+      // Spilleren gjør noe og legger appen bort før svaret på første lagring er kommet
+      g.minute += 120;
+      gone = leaving(g);
+    };
+    g.minute += 60;
+    onLocalSave(g, true);
+    await flush();
+    await gone;
+    f.onSaveGame = null;
+    assert(saves() === before + 2, `lagringer ${saves() - before}`);
+    assert(f.saves.get("u-a@test")?.minute === Math.floor(g.minute), "det nyeste ble ikke lastet opp");
+  });
+
+  await test("Belønning etter kontobytte (B-426): havner ikke i en annen kontos spill, og kommer fram senere", async () => {
+    const f = fresh();
+    await login(f);
+    const g = newGame(15);
+    await linkOnLogin(g);
+    const act = <T>(fn: (gg: GameState) => T): T => fn(g);
+    const uid = getSession()!.user.id;
+    // Spillet som er i gang, tilhører en annen konto (byttet mens svaret var på vei)
+    g.owner = "u-annen";
+    const cash = g.cash;
+    const fp = g.researchPoints;
+    assert(grantAway(act, uid, 3600, 5) === null, "belønningen ble lagt inn i feil spill");
+    assert(g.cash === cash && g.researchPoints === fp, "feil spill fikk belønningen");
+    // Kontoens eget spill er i gang igjen
+    g.owner = uid;
+    applyWaitingRewards(act);
+    assert(g.researchPoints === fp + 5, `fagpoeng ${g.researchPoints - fp}`);
+    applyWaitingRewards(act);
+    assert(g.researchPoints === fp + 5, "belønningen ble gitt to ganger");
   });
 
   await test("Kallenavn: for kort, tatt, og så OK; topplista viser meg", async () => {

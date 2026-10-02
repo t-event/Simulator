@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 426,
+    date: "2026-10-02",
+    title: "Tryggere lagring på nett",
+    items: [
+      "Legger du bort appen mens den lagrer, kommer det siste du gjorde likevel med til nett.",
+      "En lagring som henger på dårlig nett, gir opp etter 30 sekunder og prøves igjen, i stedet for å stoppe lagringen.",
+      "Bytter du konto mens noe hentes, havner ikke belønninger eller kjøp i feil spill.",
+    ],
+  },
+  {
     b: 423,
     date: "2026-10-02",
     title: "Utbytte fra ferdige verk med én gang",
