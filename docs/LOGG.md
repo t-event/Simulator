@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 354 – 2026-10-02: «1» på Konsern, men ingenting å kjøpe (B-432)
+
+**Brukeren ba om:** forklaring på merket på Konsern – og sa så at det ikke var noe å ha råd til.
+
+**Gjort:** regnet ut tallet med eierens konsern fra serveren: «1» er moderniseringen av storverket (4,5 mill. av 12 mill.
+i konsernkassa). Den sto ikke under Utvid, for lista viste bare de tre som betaler seg raskest, og de var dyrere.
+`konsernGrowOptions` viser nå det du har råd til først. Ingen åpne anbud eller oppkjøpsbud.
+
+**Testet:** motortest med eierens konsern (feiler på den gamle rekkefølgen), `npm test`, typesjekk, lint, build.
+
+**Gjenstår:** eierens beslutning om etterbetalingen.
+
 ## Økt 353 – 2026-10-02: Etterkontrollen – grunnlaget for etterbetalingen frosset (B-431)
 
 **Brukeren ba om:** rette 112 (utbygging nullstiller nivået; refusjoner er ikke aktivitet), og fryse

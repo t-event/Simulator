@@ -32,8 +32,8 @@ import {
   orderLabel,
   titleOf,
   konsernAdvice,
+  konsernGrowOptions,
   konsernReady,
-  worthwhileOptions,
   konsernEquity,
   valueCreated,
   konsernOptions,
@@ -1164,16 +1164,13 @@ function MovePlant({ g, act, p }: { g: GameState; act: Act; p: SisterPlant }) {
 
 function KonsernBuy({ g, act, onShowPlants }: { g: GameState; act: Act; onShowPlants: () => void }) {
   const options = konsernOptions(g);
-  const advice = konsernAdvice(g);
   const byKey = (key: string) => options.find((o) => o.key === key);
   const sharedIds = Object.keys(KONSERN_SHARED) as SharedId[];
   const owned = sharedIds.filter((id) => !byKey(`felles-${id}`));
   const hasStalverk = g.konsern.plants.some((p) => p.type === "stalverk");
-  // Utbygging av verkene du har: de tre som betaler seg raskest (alle står under Oversikt → Dine verk)
-  const grow = worthwhileOptions(options)
-    .filter((o) => /^(mod|bygg|bytt)-/.test(o.key) && !o.blocked && o.key !== advice?.key)
-    .sort((x, y) => x.payback - y.payback)
-    .slice(0, 3);
+  // Utbygging av verkene du har: det du har råd til først, så det som betaler seg raskest (B-432; alle står under
+  // Oversikt → Dine verk)
+  const grow = konsernGrowOptions(g, options);
   const types = (Object.keys(SISTER_TYPES) as SisterType[]).filter((t) => t !== "kompleks" || kompleksOpen(g));
   const shared = sharedIds.filter((id) => !owned.includes(id));
   const treasury = g.konsern.treasury;
@@ -1252,7 +1249,7 @@ function KonsernBuy({ g, act, onShowPlants }: { g: GameState; act: Act; onShowPl
             <>
               <h3 className="g-subhead">Gjør verkene dine bedre</h3>
               <p className="g-muted g-small-text">
-                Hvert trinn modernisering gir verket 25 % mer overskudd. Her er de som betaler seg raskest.
+                Hvert trinn modernisering gir verket 25 % mer overskudd. Det du har råd til nå, står først.
               </p>
               <div className="g-buy-opts">
                 {grow.map((o) => (
