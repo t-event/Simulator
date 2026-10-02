@@ -5,6 +5,16 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 339 – 2026-10-02: «Datterverkene i går: 0 kr» (B-416)
+
+**Brukeren spurte:** hvorfor datterverkene ga 0 i går.
+
+**Svar og gjort:** ingen feil i utbyttet – det betales i ekte tid til konsernkassa (sjekket i `dividends`: betalt alle tre siste dager). Ruta på Økonomi leste det gamle døgnregnskapet; den viser nå utbyttet per ekte dag.
+
+**Testet:** typesjekk, lint, `npm test`, build; Playwright på tre bredder.
+
+**Gjenstår:** morgenkjøringen 2.10.
+
 ## Økt 338 – 2026-10-02: Polering 6: «Hent alt» på Mål (B-415)
 
 **Brukeren ba om:** resten av UI-poleringen i små PR-er (siste punkt).

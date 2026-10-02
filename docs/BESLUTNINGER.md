@@ -7624,3 +7624,11 @@ Gjort:
 Testet: typesjekk, lint, `npm test`, build; Playwright med falsk tjeneste på 320, 390 og 1 366 px: linja viser tre ting, «Hent alt» kaller hver henting én gang (bonus, kiste, stige), spillet får 354 fagpoeng og bonusen, og linja forsvinner etterpå; knappen 44 px, ingen avkorting eller horisontal scrolling.
 Konto (B-149): krever konto som det den henter; uten konto står de i det samlede kontokortet som før.
 Endringslogg: ja.
+
+## B-416 Økonomi: «Utbytte per ekte dag» i stedet for «Datterverkene i går» (2026-10-02)
+Status: gjennomført.
+Bakgrunn: eieren spurte hvorfor «Datterverkene i går» viste 0 kr. Ruta leste spillets eget døgnregnskap, men datterverkene betaler ikke i spilltid lenger: utbyttet regnes av serveren én gang per ekte dag og går rett til konsernkassa (B-304). Sjekket på serveren (bare lesing): utbyttet er betalt 29.9., 30.9. og 1.10. til 15 spillere (216,8 mill. kr for 1.10), og `world_health()` er ok.
+Gjort: ruta på Verket → Økonomi heter nå «Utbytte per ekte dag» og viser samme tall som Konsern-siden (`dividends` i `game/konsern.ts`). Den vises bare når konsernet har datterverk.
+Testet: typesjekk, lint, `npm test`, build; Playwright på 320, 390 og 1 366 px med et spill med datterverk (34,33 mill. kr, ingen avkorting).
+Konto (B-149): ingen endring.
+Endringslogg: ja.
