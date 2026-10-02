@@ -48,6 +48,8 @@ regnes av serveren i ekte tid.
 - **Bidrag** fra hovedverket hver ekte dag (`pay_contributions`, snitt av kvartersmålinger, B-318/B-361).
 - **Utbytte** fra datterverkene hver ekte dag (`pay_dividends`, `dividend_from_state`, snitt, B-304/B-362), etter
   utbyttepolitikken (resten til forsvarsfondet, B-334) og aktivitetskravet (B-327). Fullt konsern ≈ 35–38 mill./dag.
+  Ferdige byggeprosjekter gjøres ferdige ved hver måling, også for den som er borte, og den som har solgt sitt siste
+  verk, får utbyttet for målingene som er tatt (111, B-423).
 - **Selskapsinntekt** for den som eier et strategisk selskap (skraplageret er det eneste aktive).
 - Dagen skifter ved midnatt norsk tid (`world_today`).
 - **Verdensjobbene** (B-401): hver spiller (hvert selskap) behandles for seg i målingene, utbyttet, bidraget og

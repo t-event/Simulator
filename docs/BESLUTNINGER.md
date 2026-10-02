@@ -7757,3 +7757,30 @@ profil. Appen oppdaterer seg selv (B-148), så det gjelder bare noen minutter et
 Konto (B-149): uendret – krever konto.
 Testet: `npm test`, typesjekk, lint, build; serverfunksjonene lagt inn med samme kropp som før, bare bryteren snudd.
 Endringslogg: ja.
+
+## B-423 Rapporten 2.10, grunnlaget bevart og utbyttet for ferdige verk rettet framover (2026-10-02)
+Status: gjennomført; etterbetalingen venter på eierens godkjenning; slagghåndteringen venter på eierens svar.
+Bakgrunn: eierens to faste kjøringer 2.10 (kl. 07:00: sjekk skraplagerets utbetalinger 29.9–1.10 og rapporter
+pengestrømmene; kl. 07:45: nattkontroll, bevar grunnlaget, prøv 099 og legg den inn bare hvis den ikke etterbetaler noe
+automatisk, dry-run av etterbetalingen, vent på godkjenning).
+Gjort:
+- **Grunnlaget bevart** (110, lagt inn kl. ca. 12:00 UTC): urørte kopier `basis_20261002_*` av målingene, utbyttet,
+  bidraget og selskapsinntekten til og med 1.10, kassaboka før 2.10, kassene og byggeordrene. RLS på, tatt fra `anon` og
+  `authenticated`. Rapporten regnes fra kopiene.
+- **Rapporten** (`docs/RAPPORT-2026-10-02.md`): skraplageret betalte 42,3 mill. for tre dager og stemmer på krona mot
+  kassaboka; kassene stemmer mot kassaboka (576 470 149 kr); ingen jobbfeil. Spillerne står som bokstaver.
+- **Funn:** et verk som ble ferdig mens spilleren var borte, ble målt som under bygging til spilleren lagret eller til
+  midnatt; den som solgte sitt siste verk, ville mistet utbyttet for den delen av dagen.
+- **Rettet framover** (111, før utkast 099, lagt inn kl. ca. 12:03 UTC): målingene hvert kvarter gjør ferdige prosjekter
+  ferdige først (`konsern_settle` per spiller, i spillerens egen deltransaksjon), og `pay_dividends` tar med spillere
+  uten verk som har målinger med utbytte som ikke er betalt (fra 2.10). Prøvekjøringen (rullet tilbake) viste null
+  automatisk etterbetaling for dager før 2.10, uendrede betalinger og konsernverdi utover verkene som ble ferdige.
+- **Etterbetaling 30.9 og 1.10:** dry-run i `supabase/utkast/112_etterbetaling_dryrun.sql`, tabellen i rapporten
+  (avsnitt 7): 1 875 716 kr til ni spillere, ingen får mindre. **Ikke betalt** – venter på eierens godkjenning.
+- **Observasjon, ikke rettet:** produksjonstall som kommer inn etter midnatt, er ikke med i skraplagerets betaling for
+  dagen (ca. 3,0 mill. for lite til eieren over tre dager). Slik er regelen (B-188); en endring er eierens beslutning.
+- **Slagghåndteringen ikke slått på:** vilkårene i B-402 er oppfylt, men kjøringen kl. 07:00 og B-380 sier «ikke slå på».
+  Anbefalingen (slå på, eventuelt etter helga når kassene er større) står i rapporten; eieren avgjør.
+Endringslogg: ja – et verk som blir ferdig, gir utbytte fra da, også når spilleren er borte.
+Konto (B-149): ikke aktuelt (serverside).
+
