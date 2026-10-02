@@ -176,6 +176,7 @@ import {
   konsernNetFor,
   konsernValue,
   worthwhileOptions,
+  konsernGrowOptions,
   konsernReady,
   valueCreated,
   dividendInput,
@@ -3739,6 +3740,32 @@ test("Konsern-merket (B-342): modernisering av et stålverk som kan bygges ut, t
     `merket: ${ready}`,
   );
   assert(!konsernAdvice(g)?.key.startsWith("mod-"), "rådet foreslår ikke moderniseringen");
+});
+
+test("Konsern-merket (B-432): kjøpet merket teller, står under Utvid selv om dyrere kjøp betaler seg raskere", () => {
+  // Som et fullt konsern 2.10: ti komplekser på trinn 6, ett nytt kompleks, ett storverk og to stålverk på trinn 0
+  const g = newGame(432);
+  g.stage = 4;
+  g.konsern.unlocked = true;
+  g.researched.push("oppkjop", "standardverk", "storkonsern");
+  g.konsern.earned = 7;
+  g.konsern.legends = 7;
+  g.konsern.treasury = { balance: 12_000_000, perDay: 58_000_000 };
+  const plant = (id: number, type: SisterType, level: number) =>
+    ({ id, name: `V${id}`, type, level, boughtDay: 1, downUntilDay: 0, region: "nord" }) as const;
+  g.konsern.plants = [
+    ...Array.from({ length: 10 }, (_, i) => plant(i + 1, "kompleks", 6)),
+    plant(26, "storverk", 0),
+    plant(27, "stalverk", 0),
+    plant(28, "stalverk", 0),
+    plant(31, "kompleks", 0),
+  ];
+  const all = konsernOptions(g);
+  const affordable = worthwhileOptions(all).filter((o) => !o.blocked && o.price <= 12_000_000);
+  assert(konsernReady(g) === affordable.length && affordable.length > 0, `merket ${konsernReady(g)}`);
+  const shown = [konsernAdvice(g)?.key, ...konsernGrowOptions(g).map((o) => o.key)];
+  for (const o of affordable)
+    assert(o.key.startsWith("felles-") || shown.includes(o.key), `${o.key} teller på merket, men vises ikke`);
 });
 
 test("Skiftlederen leier ikke vikarer når hele verket står (B-346), men timen før ovnene starter", () => {

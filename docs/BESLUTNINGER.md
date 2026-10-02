@@ -7980,3 +7980,19 @@ utbygging) ble lagt inn i grunnlagstabellene i en transaksjon som ble rullet til
 87 500 og 350 000 kr, nøyaktig `dividend_from_state` for verket før og etter hvert steg.
 Endringslogg: nei.
 Konto (B-149): uendret.
+
+## B-432 Konsern-merket: kjøpet som telles, står under Utvid (2026-10-02)
+Status: gjennomført.
+Bakgrunn: eieren hadde «1» på Konsern, men fant ingenting å kjøpe. Tallet (`konsernReady`) teller kjøp som ikke er
+sperret og som pengene rekker til. I eierens konsern (fullt, 12 mill. i konsernkassa) var det moderniseringen av
+storverket til 4,5 mill. Under Utvid viste «Gjør verkene dine bedre» bare de tre som betaler seg raskest, og der sto tre
+dyrere kjøp (bytte til kompleks og utbygging, 12,75–48 mill.) som betalte seg litt raskere. «Neste steg» var
+moderniseringen av det nye komplekset til 13,5 mill. Det ene kjøpet eieren hadde råd til, sto bare under Oversikt →
+Dine verk.
+Beslutning: lista under Utvid (`konsernGrowOptions` i `game/konsern.ts`) viser det du har råd til først, deretter det
+som betaler seg raskest, fortsatt høyst tre. Alt tallet på Konsern teller, står dermed enten i «Neste steg», i lista
+eller blant de felles funksjonene. Tallet regnes som før.
+Testet: motortest med eierens konsern (feiler med den gamle rekkefølgen: «mod-26 teller på merket, men vises ikke»),
+`npm test`, typesjekk, lint, build.
+Endringslogg: ja.
+Konto (B-149): uendret.

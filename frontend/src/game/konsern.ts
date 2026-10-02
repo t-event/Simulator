@@ -693,6 +693,20 @@ export function worthwhileOptions(options: KonsernOption[]): KonsernOption[] {
 }
 
 /**
+ * Utbyggingen av verkene du har, under Konsern → Utvid (B-432): de tre som betaler seg raskest – men først det du har
+ * råd til nå. Tallet på Konsern i menyen (`konsernReady`) teller kjøp du har råd til, og før kunne det ene kjøpet du
+ * hadde råd til, mangle i lista når tre dyrere betalte seg litt raskere: «1» på Konsern, men ingenting å kjøpe.
+ */
+export function konsernGrowOptions(g: GameState, options = konsernOptions(g)): KonsernOption[] {
+  const advice = konsernAdvice(g);
+  const affordable = (o: KonsernOption) => moneyFor(g, o) >= o.price;
+  return worthwhileOptions(options)
+    .filter((o) => /^(mod|bygg|bytt)-/.test(o.key) && !o.blocked && o.key !== advice?.key)
+    .sort((x, y) => Number(affordable(y)) - Number(affordable(x)) || x.payback - y.payback)
+    .slice(0, 3);
+}
+
+/**
  * «Neste steg» på Konsern-fanen (B-119): kjøpet som har betalt seg raskest regnet fra i dag – tida det tar å spare
  * opp, pluss tida kjøpet bruker på å betale seg. Da foreslås ikke noe som ligger et halvt år fram i tid.
  */
