@@ -176,6 +176,7 @@ frontend/src/
     seasonTrack.ts Sesongstigen: poeng, trinn og henting (B-173)
     treasury.ts  Konsernkassa på serveren: status (overføringen er slått av, B-319)
     chat.ts      Skiftrapporten: felles chat – sende, hente, slette, sist lest (B-338; SQL i 070)
+    profile.ts   Profilen til en spiller fra `player_profile` (B-419; SQL i 105)
     konsern.ts   Konsernet på serveren: kjøp, avbestilling, salg og flytting, og svaret lagt inn i spillet (B-326, B-333)
     worldMap.ts  Verdenskartet: alle spilleres verk per region og selskapene (`world_map`, B-333)
     world.ts     Strategiske selskaper: status, anbud og bud (B-189)
@@ -216,6 +217,7 @@ frontend/src/
     fonts/       Visningsskriften for overskrifter og store tall (Barlow Semi Condensed 600, OFL)
     WorldMap.tsx Konsern → Kart: verdenskartet med regionene, andres verk og selskapene (B-333)
     Chat.tsx     Skiftrapporten: knappen ved varsellinja (under 380 px i tallraden) og arket (B-338)
+    Profile.tsx  Profilarket og `PlayerName` (brukernavn som åpner profilen); hvilken som er åpen: profileStore.ts (B-419)
     Companies.tsx Konsern → Industrien: ett kort per selskap (skraplageret nå) og konsernkassa (B-189, B-227)
     control/     Kontrollrommet: spillet i fire runder (chargeGame.ts: logikk, frø og inndatalogg, testspiller; ControlRoom.tsx,
                  B-175); weekly.ts: ukens charge og treningsfrø (B-387)
@@ -231,6 +233,7 @@ docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretn
                OKONOMI.md (økonomianalysen og reform 2, B-301), KONSERNBIDRAG.md (hovedverkets bidrag i ekte tid, B-313),
                OKONOMI-KONTROLL.md (kontrollen av modellen med tall og svakheter, B-324),
                KONSERN-FORSLAG.md (nivåer, priser fra konsernkassa og aktivitetskrav, bygget B-325–B-328, og simuleringen B-329),
+               PROFIL-FORSLAG.md (profiler, Min profil, privatmeldinger og adminpanelet, B-419),
                KONTROLL-FORSLAG.md (verdenskart, utbyttepolitikk, Kontroll, overtakelser og pengene hjemme, B-331, godkjent B-332),
                VERKSJEF-FORSLAG.md (verksjefer, besvart; V1 ferdig spesifisert i avsnitt 10, bygges etter V0/K-1, B-409),
                REKONSTRUKSJON-FORSLAG.md (rekonstruksjon etter konkurs, modellene A–E – venter på eierens valg, B-409),
@@ -580,6 +583,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   varsellinja og (under 380 px) i tallraden – begge er `ChatButton`, så en endring gjelder begge. Hendelser fra spillet
   (B-339, 071) skrives av triggerne `chat_on_tender`/`chat_on_takeover`/`chat_on_konsern` med `chat_event` (kind
   `hendelse`, uten avsender). Ny hendelse: ny trigger eller et kall til `chat_event`, aldri beløp som er hemmelige.
+- **Profiler** (B-419, 105): et brukernavn som vises for andre, skrives med `<PlayerName nick=… />` (`ui/Profile.tsx`), så
+  det åpner profilen. `player_profile` viser bare det serveren alt viser andre steder – aldri konsernkassa, kassa, fondet,
+  e-post eller klokkeslett. Nye felt i profilen vurderes mot det (og mot KONTO.md). Flaggede og sperrede har ingen profil.
 - **Eksporten** (B-345, 073): hver natt legger edge-funksjonen `eksport` (`supabase/functions/eksport`) alle tabellene i
   `public` (unntatt `save_backups`) i Storage-mappa `eksport` som `stalverk-ÅÅÅÅ-MM-DD.json.gz`, 14 dager. Kjør for hånd med
   `select net.http_post(url := (select decrypted_secret from vault.decrypted_secrets where name = 'eksport_url'), body := '{}')`

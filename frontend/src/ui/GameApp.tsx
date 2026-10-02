@@ -34,6 +34,7 @@ import { PendingControlSync } from "./Weekly";
 import { GoalsPage, GoalsSheet } from "./Goals";
 import { LeaderboardSheet } from "./Leaderboard";
 import { ChatButton, ChatSheet } from "./Chat";
+import { ProfileHost } from "./Profile";
 import { useDailyStatus } from "./useDaily";
 import { missionBonusReady } from "../game/daily";
 import { useSeasonStatus } from "./useSeason";
@@ -1255,6 +1256,8 @@ export function GameApp() {
           }}
         />
       )}
+      {/* Profilen til en spiller (B-419): åpnes ved å trykke på et brukernavn, over arket navnet stod i */}
+      <ProfileHost onOpenSettings={() => setSettingsOpen(true)} />
       {settingsOpen && (
         <SettingsSheet
           g={g}

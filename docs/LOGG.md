@@ -5,6 +5,26 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 342 – 2026-10-02: Profiler, fase 1 (B-419)
+
+**Brukeren ba om:** profiler for alle, et sted å endre sin egen, trykk på brukere i topplista og på konsernsidene, og
+privatmeldinger. Svarte på forslaget: synlighet og aktivitet etter anbefalingen, privatmeldinger etter anbefalingen med
+fri tekst, og et adminpanel bare eieren ser for å lese rapporterte meldinger.
+
+**Gjort:** planen med svarene i `docs/PROFIL-FORSLAG.md` (fase 1–3 og adminpanelet). Fase 1: `player_profile` (105, lagt
+inn i databasen) og profilarket i appen, åpnet fra brukernavnene i topplista, ukelista, chatten, kartet og Industrien.
+Konsernkassa vises aldri; «sist aktiv» i grove trinn. Profiler krever konto (KONTO.md, `ACCOUNT_FEATURES`).
+
+**Testet:** `npm test` (ny test av svaret), typesjekk, lint, build. Serverfunksjonen som innlogget spiller (rullet
+tilbake) for de fem øverste på Konsernverdi og et ukjent navn; `get_advisors` (ingen nye funn utover det kjente mønsteret
+for innloggede). Playwright med falsk server på alle 7 størrelsene: fra chatten og topplista, arket øverst, Esc lukker bare
+profilen, ingenting avkortet, ingen horisontal scrolling, navnene ca. 40–44 px å trykke på.
+
+**Gjenstår:** fase 2 (Min profil: kort tekst, profilmerke, tre prestasjoner, meldinger av/på) og fase 3 (privatmeldinger
+og adminpanelet). 2.10-planen kl. 07:45 UTC (nattsjekk, 099-prøvekjøring, etterbetaling som dry-run).
+
+---
+
 ## Økt 341 – 2026-10-02: «Leveransene kommer for sent» med salgsdirektør (B-418)
 
 **Brukeren spurte:** hvorfor mange med salgsdirektør får rådgiverkortet om sene leveranser – forklaring eller feil?

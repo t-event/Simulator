@@ -48,6 +48,11 @@ const COMPANY_NAME: Record<CompanyType, string> = {
   verksted: "Mekanisk verksted",
 };
 
+/** Navnet på selskapstypen, brukt når serveren ikke sender et navn */
+export function companyName(type: CompanyType): string {
+  return COMPANY_NAME[type];
+}
+
 /** Typen fra serveren; ukjente typer vises som skraplageret (eldste regel) */
 export function companyType(v: unknown): CompanyType {
   return v === "slagg" || v === "verksted" ? v : "skraplager";

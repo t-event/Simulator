@@ -2,6 +2,7 @@
  * Tester av nettlaget (B-125) uten nett: `fetch` byttes ut med en falsk tjeneste i minnet.
  * Kjøres med `npx tsx src/net/tests.ts` og i `npm test`.
  */
+import { parseProfile, seenText, sinceText } from "./profile";
 import type { GameState } from "../game/types";
 import { addCost, newGame } from "../game/engine";
 import { setCloudConfig } from "./config";
@@ -2247,6 +2248,41 @@ const main = async () => {
     assert(contributionAt(13_660_700, 1) === 13_660_700, "full aktivitet under taket: uendret");
     assert(Math.abs(contributionAt(37_542_729, 1) - 37_542_729) < 1, "full aktivitet over taket: uendret");
     assert(contributionAt(20_000_000, 0) === 0, "ingen aktivitet");
+  });
+
+  await test("Profilen tåler svaret fra serveren og viser aldri ukjente felt (B-419)", () => {
+    assert(parseProfile(null) === null, "ingen profil");
+    assert(parseProfile({ nick: "" }) === null, "uten navn");
+    const p = parseProfile({
+      nick: "Anna",
+      me: false,
+      since: "2026-09-26",
+      seen: "uke",
+      stage: 4,
+      title: "Stållegende",
+      league: "gull",
+      badges: ["reform", "ukjent"],
+      konsern: {
+        rank: 5,
+        value: "2473859678",
+        earned: 1,
+        treasury: 123,
+        plants: [{ name: "Øyverket", type: "kompleks", region: "vest", level: 5, building: false }, { type: "x" }],
+      },
+      companies: [{ name: null, type: "slagg", region: "oy" }],
+      seasons: [{ name: "Sesong 1", plass: 3 }, { name: "Uten plass" }],
+      records: { storverkDay: 848, ferdigDay: null, control: "1200" },
+    });
+    assert(!!p && p.nick === "Anna" && p.seen === "uke", "grunnfelt");
+    assert(p!.badges.length === 1 && p!.badges[0] === "reform", "ukjente merker vises ikke");
+    assert(p!.konsern?.value === 2_473_859_678 && p!.konsern.rank === 5, "konsernverdi som tall");
+    assert(!("treasury" in p!.konsern!), "konsernkassa er ikke med");
+    assert(p!.konsern!.plants[1].type === "stalverk" && p!.konsern!.plants[1].region === null, "ukjent verk");
+    assert(p!.companies[0].name === "Slagghåndteringen", "selskapets navn fra typen");
+    assert(p!.seasons.length === 1, "sesong uten plass tas bort");
+    assert(p!.records.control === 1200 && p!.records.ferdigDay === null, "rekorder");
+    assert(seenText("igar") === "i går" && seenText(null) === null, "sist aktiv");
+    assert(sinceText("2026-09-26") === "sep. 2026" && sinceText(null) === null, "med siden");
   });
 
   setSaveListener(null);

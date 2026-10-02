@@ -8001,3 +8001,144 @@ button.g-prod-row:hover {
   color: var(--ok);
   vertical-align: -3px;
 }
+
+/* Profiler (B-419): brukernavn som kan trykkes på, og profilarket */
+/* Inline: den loddrette polstringen gjør trykkflaten ca. 44 px høy uten å flytte linjen */
+.g-player {
+  display: inline;
+  min-height: 0;
+  padding: 10px 0;
+  margin: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+  text-decoration: underline dotted;
+  text-decoration-color: var(--text-dim);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.g-player:hover,
+.g-player:focus-visible {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+}
+
+.g-board-name .g-player.g-board-nick {
+  display: inline-block;
+  margin: -10px 0;
+  white-space: nowrap;
+}
+
+.g-modal-card.g-profile {
+  max-width: 480px;
+}
+
+.g-profile-title {
+  margin: 0 0 var(--sp-2);
+}
+
+.g-modal-card .g-profile-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px var(--sp-3);
+  margin: 0 0 var(--sp-3);
+  font-size: var(--fs-meta);
+}
+
+.g-profile-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 var(--sp-3);
+  padding: 0;
+  list-style: none;
+}
+
+.g-modal-card .g-profile-chips li {
+  font-size: var(--fs-meta);
+}
+
+.g-profile-chips .ds-icon {
+  width: 14px;
+  height: 14px;
+  vertical-align: -2px;
+}
+
+.g-profile-section {
+  border-top: 1px solid var(--line);
+  padding-top: var(--sp-3);
+  margin-top: var(--sp-3);
+}
+
+.g-profile-section h3 {
+  margin: 0 0 var(--sp-2);
+  font-size: var(--fs-body);
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.g-profile-stat {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-2);
+}
+
+.g-profile-stat > span:last-child {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.g-profile-stat strong {
+  font-size: var(--fs-title);
+  overflow-wrap: anywhere;
+}
+
+.g-profile-rank {
+  flex-shrink: 0;
+  min-width: 44px;
+  font-weight: 600;
+}
+
+.g-profile-rank .g-place .ds-icon {
+  width: 28px;
+  height: 28px;
+}
+
+.g-profile-regions,
+.g-profile-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.g-profile-regions li {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.g-profile-regions li:last-child {
+  border-bottom: 0;
+}
+
+.g-modal-card .g-profile-regions li,
+.g-modal-card .g-profile-list li {
+  font-size: var(--fs-body);
+}
+
+.g-profile-list li {
+  padding: 3px 0;
+}
+
+.g-profile-list .ds-icon {
+  width: 16px;
+  height: 16px;
+  vertical-align: -3px;
+}

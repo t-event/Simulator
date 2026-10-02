@@ -25,6 +25,7 @@ import type { GameState } from "../game/types";
 import { realNow } from "../game/clock";
 import { NeedsAccount } from "./Account";
 import { Callout, SheetHead } from "./ds";
+import { PlayerName } from "./Profile";
 import { Icon } from "./icons";
 
 /** Hvor ofte et åpent ark henter nye meldinger, og hvor ofte knappen ser etter nye (B-348: var 60 s) */
@@ -271,7 +272,7 @@ export function ChatSheet({ onClose, onOpenSettings }: { onClose: () => void; on
                 ) : (
                   <li key={m.id} className={`g-chat-msg${m.mine ? " is-mine" : ""}`}>
                     <div className="g-chat-meta">
-                      <strong>{m.mine ? "Deg" : m.nick}</strong>
+                      <strong>{m.mine ? "Deg" : <PlayerName nick={m.nick} />}</strong>
                       <span className="g-muted">{when(m.at)}</span>
                       {m.mine && (
                         <button className="g-link g-chat-del" onClick={() => void remove(m.id)}>
