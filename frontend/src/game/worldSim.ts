@@ -174,6 +174,7 @@ export function simulate(p: SimProfile, days: number, checkpoints: number[]): Si
   let fullDay: number | null = null;
   let spent = 0;
   let companyToday = 0;
+  let ownsCompany = false;
   for (let h = 0; h < days * 24; h++) {
     const now = h * HOUR;
     const year = years[Math.min(1, Math.floor(h / (365 * 24)))];
@@ -203,14 +204,18 @@ export function simulate(p: SimProfile, days: number, checkpoints: number[]): Si
       const dividend = dividendPerDay(input(p, w.plants));
       companyToday = 0;
       if (p.company) {
-        // Eier selskapet i perioder på 14 dager; betaler budet når en periode starter
+        // Eier selskapet i perioder på 14 dager; betaler budet når en periode starter – bare med penger i kassa (B-428),
+        // som på serveren. Før kunne profilen by med tom kasse og stå i minus
         const period = 14 / p.company.share;
-        const inPeriod = (day - 1) % period < 14;
-        if (inPeriod) companyToday = p.company.perDay;
         if ((day - 1) % period === 0) {
-          w.balance -= p.company.bid;
-          year.bids += p.company.bid;
+          ownsCompany = w.balance >= p.company.bid;
+          if (ownsCompany) {
+            w.balance -= p.company.bid;
+            year.bids += p.company.bid;
+          }
         }
+        const inPeriod = (day - 1) % period < 14;
+        if (inPeriod && ownsCompany) companyToday = p.company.perDay;
       }
       w.balance += p.contribution + dividend + companyToday;
       year.income += p.contribution + dividend + companyToday;

@@ -24,11 +24,20 @@ export function ClaimAllBar({ g, act }: { g: GameState; act: GameApi["act"] }) {
   const [busy, setBusy] = useState(false);
   const user = session?.user.id ?? null;
 
-  // Ukekista og stigen vises på fanen «Uka»; her hentes statusen én gang hvis den ikke er hentet fra før
+  // Ukekista og stigen vises på fanen «Uka». Statusen hentes på nytt hver gang Mål åpnes og når appen vises igjen
+  // (B-428): før ble den bare hentet hvis den manglet, så en ny kiste eller et nytt trinn var skjult til «Uka» ble åpnet
   useEffect(() => {
     if (!user || !reconciled) return;
-    if (!weeklyStatus()) void fetchWeeklyStatus().then(setWeeklyStatus, () => {});
-    if (!seasonTrack()) void fetchSeasonTrack().then(setSeasonTrack, () => {});
+    const refresh = () => {
+      void fetchWeeklyStatus().then(setWeeklyStatus, () => {});
+      void fetchSeasonTrack().then(setSeasonTrack, () => {});
+    };
+    refresh();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
   }, [user, reconciled]);
 
   if (!session) return null;

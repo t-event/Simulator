@@ -5,15 +5,28 @@
  * kopi som reserve. Filer med hash i navnet (assets/) endres aldri og tas fra
  * lageret først. Øk VERSION for å rydde bort gamle lagre.
  */
-const VERSION = "stalverket-v1";
+const VERSION = "stalverket-v2";
+
+/**
+ * Lagrer siden og filene den laster (JS og CSS i assets/), så spillet kan åpnes uten nett fra første gang (B-428).
+ * Før ble bare siden lagret ved installasjonen, og filene først når de ble hentet – var de ikke i nettleserens vanlige
+ * lager, startet ikke spillet uten nett.
+ */
+async function precache() {
+  const cache = await caches.open(VERSION);
+  await cache.addAll(["manifest.webmanifest", "icon.svg", "icon-192.png"]);
+  const page = await fetch("./", { cache: "no-store" });
+  if (!page.ok) return;
+  const html = await page.clone().text();
+  await cache.put("./", page);
+  // Stiene i siden er absolutte (/Simulator/assets/…): de løses mot adressen til service workeren
+  const found = [...html.matchAll(/(?:src|href)="([^"]*assets\/[^"]+)"/g)];
+  const assets = [...new Set(found.map((m) => new URL(m[1], self.location.href).href))];
+  await cache.addAll(assets);
+}
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches
-      .open(VERSION)
-      .then((cache) => cache.addAll(["./", "manifest.webmanifest", "icon.svg", "icon-192.png"]))
-      .then(() => self.skipWaiting()),
-  );
+  event.waitUntil(precache().then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (event) => {
@@ -35,6 +48,8 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
+          // Bare et svar som virker, erstatter kopien (B-428): før kunne en feilside (f.eks. 503) bli den lagrede siden
+          if (!response.ok) return caches.match("./").then((cached) => cached || response);
           const copy = response.clone();
           caches.open(VERSION).then((cache) => cache.put("./", copy));
           return response;

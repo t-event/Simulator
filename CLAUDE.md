@@ -604,6 +604,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   e-post eller klokkeslett. Nye felt i profilen vurderes mot det (og mot KONTO.md). Flaggede og sperrede har ingen profil.
   Spillerne har ingen update-regel på `profiles`: tekst, merke og prestasjoner endres bare via `profile_update` (106), som
   sjekker lengde, lenker, sperre, tempo og at merket og prestasjonene finnes i det lagrede spillet.
+- **Lenkefilteret i SQL** (B-428): ordgrense i PostgreSQL-regex er `\y` (`\m`/`\M`), aldri `\b` (det er et tilbaketegn).
+  Filteret står i `chat_send`, `dm_send` og `profile_update` – endres det, endres alle tre.
 - **Privatmeldinger og adminpanelet** (B-421, 107; på for alle med `profiles.dm_off`, B-422 – `dm_open` er ikke i bruk): tabellene har RLS uten regler og ingen tilgang for spillerne – alt går
   gjennom funksjonene. En ny funksjon som viser meldinger, filtrerer `hidden`, blokkering (`dm_blocked`) og 30 dager. Nye
   adminfunksjoner sjekker `is_admin()` først og logger i `admin_log`; eieren står i `admins` (lagt inn for hånd, aldri i

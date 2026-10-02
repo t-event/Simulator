@@ -15,6 +15,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 428,
+    date: "2026-10-02",
+    title: "Flere små rettinger",
+    items: [
+      "Spillet kan åpnes uten nett allerede etter første besøk.",
+      "Svaralternativene i fagbokas quiz står ikke lenger i samme rekkefølge hver gang.",
+      "«Hent alt» på Mål viser nye kister og trinn uten at du må åpne «Uka» først.",
+      "Konsernet viser ikke lenger at plassene er fulle når de ikke er det.",
+      "Prikken for nye meldinger i Skiftrapporten blir ikke borte før du har sett dem.",
+    ],
+  },
+  {
     b: 427,
     date: "2026-10-02",
     title: "Rettinger i kontrollrommet og verket",

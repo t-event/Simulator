@@ -101,14 +101,40 @@ function runCharge(options: { deslagFirst: boolean; scrapP?: number; seed?: numb
 
 const fmt = (n: number, d = 1) => n.toFixed(d);
 
+/**
+ * Forventningene (B-428): før skrev skriptet bare «AVVIK» og ga likevel exit 0, så CI kunne godta en prosessmodell som
+ * ga ugyldige resultater. Nå samles forventningene og gir exit 1 når én ikke holder. «Varme først» skal gi avvik –
+ * det er poenget i fagboka – så det sjekkes at fosforet blir høyere, ikke at tappingen er OK.
+ */
+declare const process: { exitCode?: number };
+const failures: string[] = [];
+function expect(ok: boolean, what: string): void {
+  if (!ok) failures.push(what);
+}
+
 console.log("=== Normal charge, riktig prosedyre (slagg av før oppvarming) ===");
 const normal = runCharge({ deslagFirst: true });
 console.log(`  Innsmelting ferdig:  ${fmt(normal.meltDoneS / 60, 0)} min, bad ${fmt(normal.tempAfterMelt, 0)} °C`);
 console.log(`  Tapp-til-tapp:       ${fmt(normal.totalS / 60, 0)} min`);
 console.log(`  Energi:              ${normal.kwhPerTonne} kWh/t   (forvarming sparer ca. 10 % mot korgkjøring)`);
-console.log(`  Slagg:               FeO ${fmt(normal.feo)} %, B2 ${fmt(normal.b2, 2)}   (vanlig for basisk skumslagg: FeO 25-30 %, B2 1,6-2,0)`);
-console.log(`  Fosfor:              ${fmt(normal.pAfterMelt, 4)} etter innsmelting -> ${fmt(normal.tap!.phosphorus_pct, 4)} tappet`);
+console.log(
+  `  Slagg:               FeO ${fmt(normal.feo)} %, B2 ${fmt(normal.b2, 2)}   (vanlig for basisk skumslagg: FeO 25-30 %, B2 1,6-2,0)`,
+);
+console.log(
+  `  Fosfor:              ${fmt(normal.pAfterMelt, 4)} etter innsmelting -> ${fmt(normal.tap!.phosphorus_pct, 4)} tappet`,
+);
 console.log(`  Tapperesultat:       ${normal.tap!.ok ? "OK" : "AVVIK: " + normal.tap!.deviations.join("; ")}`);
+expect(normal.tap!.ok, "normal charge: tappingen er ikke OK");
+expect(normal.feo >= 20 && normal.feo <= 35, `normal charge: FeO ${fmt(normal.feo)} % utenfor 20–35`);
+expect(normal.b2 >= 1.4 && normal.b2 <= 2.2, `normal charge: B2 ${fmt(normal.b2, 2)} utenfor 1,4–2,2`);
+expect(
+  normal.kwhPerTonne >= 300 && normal.kwhPerTonne <= 480,
+  `normal charge: ${normal.kwhPerTonne} kWh/t utenfor 300–480`,
+);
+expect(
+  normal.totalS >= 40 * 60 && normal.totalS <= 80 * 60,
+  `normal charge: tapp-til-tapp ${fmt(normal.totalS / 60, 0)} min utenfor 40–80`,
+);
 
 console.log("\n=== Fosfor: prosedyrens betydning ===");
 for (const [label, opts] of [
@@ -118,6 +144,11 @@ for (const [label, opts] of [
   ["Høyfosfor, varme først", { deslagFirst: false, scrapP: 0.085 }],
 ] as const) {
   const r = runCharge(opts);
+  if (opts.deslagFirst) expect(r.tap!.ok, `${label}: tappingen er ikke OK`);
+  else {
+    const first = runCharge({ ...opts, deslagFirst: true });
+    expect(r.pAfterHeating > first.pAfterHeating, `${label}: fosforet ble ikke høyere enn med avslagging først`);
+  }
   console.log(
     `  ${label.padEnd(30)} P ${fmt(r.pAfterMelt, 4)} -> etter oppvarming ${fmt(r.pAfterHeating, 4)} -> tappet ${fmt(r.tap!.phosphorus_pct, 4)}  ${r.tap!.ok ? "OK" : "AVVIK"}`,
   );
@@ -147,7 +178,10 @@ console.log("\n=== Overoppheting: ildfast ===");
     }
   }
   console.log(`  Bad stabiliserte på ${fmt(sim.state.bathTempC, 0)} °C`);
-  console.log(`  Advarsel etter ${warn !== null ? fmt(warn / 60, 0) : "-"} min, gjennombrenning etter ${fail !== null ? fmt(fail / 60, 0) : "-"} min`);
+  console.log(
+    `  Advarsel etter ${warn !== null ? fmt(warn / 60, 0) : "-"} min, gjennombrenning etter ${fail !== null ? fmt(fail / 60, 0) : "-"} min`,
+  );
+  expect(warn !== null && fail !== null && warn < fail, "overoppheting: ingen advarsel før gjennombrenningen");
 }
 
 console.log("\n=== Ildfastforbruk ved normal drift ===");
@@ -170,5 +204,13 @@ console.log("\n=== Ildfastforbruk ved normal drift ===");
     t += 1;
   }
   const wear = r.state.refractoryWear;
-  console.log(`  ${fmt(wear * 100, 2)} % per charge  =>  ca. ${Math.round(1 / Math.max(wear, 1e-9))} charger per potte`);
+  console.log(
+    `  ${fmt(wear * 100, 2)} % per charge  =>  ca. ${Math.round(1 / Math.max(wear, 1e-9))} charger per potte`,
+  );
+  expect(wear >= 0.004 && wear <= 0.03, `ildfast: ${fmt(wear * 100, 2)} % per charge utenfor 0,4–3 %`);
 }
+
+if (failures.length) {
+  console.log(`\nAVVIK FRA FORVENTNINGENE:\n  ${failures.join("\n  ")}`);
+  process.exitCode = 1;
+} else console.log("\nAlle forventninger OK");

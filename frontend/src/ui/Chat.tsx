@@ -222,9 +222,12 @@ export function ChatSheet({ onClose, onOpenSettings }: { onClose: () => void; on
   useEffect(() => {
     const el = listRef.current;
     if (el && stick.current) el.scrollTop = el.scrollHeight;
-    if (messages.length) markChatSeen(messages[messages.length - 1].id);
     saveChatCache(messages);
   }, [messages]);
+  // Lest bare når den felles chatten faktisk vises (B-428): i fanen «Meldinger» er den ikke sett
+  useEffect(() => {
+    if (tab === "chat" && messages.length) markChatSeen(messages[messages.length - 1].id);
+  }, [messages, tab]);
 
   const close = () => {
     window.dispatchEvent(new Event("skiftrapport-sett"));

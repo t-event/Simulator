@@ -1029,7 +1029,8 @@ function main(): void {
       [0.07, 0.16, 0.32],
     ] as [number, number, number][]) {
       for (const pl of ps) {
-        const r = simulateB(pl, { ...MODEL_B, budget }, { days: 730, reserve: 2e9 });
+        // Andel av utbyttet, som overskriften sier (B-428) – før regnet den av hele inntekten (MODEL_B), som er --skann-inntekt
+        const r = simulateB(pl, { ...MODEL_B, budget, base: "utbytte" }, { days: 730, reserve: 2e9 });
         console.log(
           `${budget.map((b) => `${Math.round(b * 100)} %`).join("/")} ${pl.name.padEnd(8)} andel ${Math.round(r.share * 100)} % · kasse 365/730 ${mrd(r.cash[365])}/${mrd(r.cash[730])} mrd. · maksbud mulig ${r.bids.can}/${r.bids.of} · endringer ${changes(r.timeline)}`,
         );

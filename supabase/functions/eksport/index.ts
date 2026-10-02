@@ -38,8 +38,16 @@ Deno.serve(async () => {
   const old = (files ?? [])
     .map((f) => f.name)
     .filter((n) => /^stalverk-\d{4}-\d{2}-\d{2}\.json\.gz$/.test(n) && n.slice(9, 19) < cutoff);
-  if (old.length) await db.storage.from(BUCKET).remove(old);
+  // Feil ved sletting meldes (B-428): før svarte funksjonen «removed» selv om de gamle filene ble liggende
+  const { error: rmError } = old.length ? await db.storage.from(BUCKET).remove(old) : { error: null };
 
   const tables = Object.keys((data as { tabeller?: Record<string, unknown> })?.tabeller ?? {}).length;
-  return json({ ok: true, file: name, kb: Math.round(gz.byteLength / 1024), tables, removed: old.length });
+  return json({
+    ok: true,
+    file: name,
+    kb: Math.round(gz.byteLength / 1024),
+    tables,
+    removed: rmError ? 0 : old.length,
+    ...(rmError ? { removeError: rmError.message, notRemoved: old } : {}),
+  });
 });
