@@ -7954,3 +7954,29 @@ tatt fra `anon` og `authenticated`, og `get_advisors` har ingen nye råd. 116 br
 `drop trigger` ble holdt igjen av connectoren).
 Endringslogg: ja (sammen med B-429).
 Konto (B-149): uendret.
+
+## B-431 Grunnlaget for etterbetalingen frosset, og 112 utgave 3 (2026-10-02)
+Status: gjennomført (117 lagt inn). Etterbetalingen venter fortsatt på eierens beslutning om beløpet.
+Bakgrunn: funn 3 i etterkontrollen. (a) En utbygging nullstiller nivået (`konsern_after`), men 112 satte bare typen
+tilbake når den ble angret, så modernisering → utbygging kunne gi feil grunnlag (eierens testtilfelle: 315 000 kr mot
+riktige 341 250 kr). Eieren fant ingen slik rekkefølge i spillerdataene. (b) Refusjoner ble regnet som tegn på at
+spilleren var i spillet, men serveren lager dem selv (tapte anbud, prisfall). (c) Eierens råd: frys beregningsgrunnlaget
+før beslutningen. 112 leste levende tabeller, så summen endret seg med noen kroner fra kjøring til kjøring.
+Beslutning:
+- **117:** alt 112 trenger, er kopiert i én transaksjon 2.10 kl. 19.12 til `basis_112_*` (spillerne med ferdige
+  konsernordre før 2.10: 11 spillere, 58 ordre, lagret spill med serverens verk, tidslinja, kassaboka, målingene,
+  utbyttet, politikken og aktiviteten, og `config.world`). RLS uten regler, tatt fra `anon` og `authenticated`.
+  Tabellene endres aldri.
+- **112 utgave 3** leser bare `basis_112_*` og de rene funksjonene, og stopper hvis `config.world.dividend` er endret
+  siden grunnlaget ble tatt. Å angre en utbygging gir verket nivået det hadde før (moderniseringene siden forrige bygging
+  eller utbygging); et eldre verk uten bygging på serveren merkes `nivaa_usikkert`. Refusjoner teller ikke lenger som
+  aktivitet.
+Resultat: **2 549 252 kr** til de samme 11 spillerne (utgave 2: 2 549 257). Forskjellen er K +11, N −6, O −10. Den
+kommer av at forskjellen per ordre nå regnes av det frosne spillet, ikke av det levende (omdømmet og kvaliteten siste
+uke endrer flaggskipet litt). Ingen rad har usikkert nivå, ingen rad hadde en tidligere handling enn tidslinja, og
+`paid_check` er 0 for alle. Summen er fortsatt et anslag (RAPPORT-2026-10-02.md, avsnitt 7).
+Testet: 112 utgave 3 kjørt i en transaksjon som ble rullet tilbake. Et konstruert tilfelle (bygging → modernisering →
+utbygging) ble lagt inn i grunnlagstabellene i en transaksjon som ble rullet tilbake: de tre forskjellene er 962 500,
+87 500 og 350 000 kr, nøyaktig `dividend_from_state` for verket før og etter hvert steg.
+Endringslogg: nei.
+Konto (B-149): uendret.
