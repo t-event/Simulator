@@ -503,6 +503,38 @@ export function specialistCost(g: GameState): number {
   return 15_000 * (1 + g.stage) ** 2;
 }
 
+/**
+ * Sene leveranser med salgsdirektør (B-418): direktøren signerer bare det verket rakk med produksjonen den siste uka,
+ * så når kontrakter likevel blir sene, har produksjonen nesten alltid falt etter at de ble signert. Spillerne fikk før
+ * beskjeden «verket har tatt på seg mer enn det rekker» og trodde det var en feil. Her står hva som skjedde, med tall.
+ */
+export function directorLateText(g: GameState): string {
+  const today = day(g);
+  const missed = g.contracts.filter(
+    (c) => c.status === "misligholdt" && (c.closedDay ?? -1) > today - ADVISOR_WINDOW_DAYS,
+  );
+  const byDir = missed.filter((c) => c.byDirector && !c.agreementId).length;
+  const weeks = missed.filter((c) => c.agreementId).length;
+  const shortT = missed.reduce((a, c) => a + Math.max(0, c.tonnes - c.delivered), 0);
+  const who = [
+    byDir > 0 ? `${byDir} ${byDir === 1 ? "kontrakt" : "kontrakter"} salgsdirektøren signerte` : "",
+    weeks > 0 ? `${weeks} ${weeks === 1 ? "ukeleveranse" : "ukeleveranser"} i rammeavtalene` : "",
+  ].filter(Boolean);
+  // Produksjonen før de sene kontraktene ble signert mot de siste døgnene
+  const signed = Math.min(...missed.map((c) => c.acceptedDay ?? today));
+  const before = g.history.filter((h) => h.day < signed && h.day >= signed - 7 && h.producedT > 0);
+  const after = g.history.filter((h) => h.day >= today - 3 && h.day < today);
+  const avg = (xs: { producedT: number }[]) => xs.reduce((a, h) => a + h.producedT, 0) / Math.max(1, xs.length);
+  const drop = before.length && after.length && avg(after) < avg(before) * 0.9;
+  return [
+    `${who.length ? `Det gjelder ${who.join(" og ")}` : "Flere kontrakter har gått over fristen"}, og det manglet ${fmtT(shortT)} til sammen.`,
+    " Salgsdirektøren signerer bare det verket rakk med produksjonen den siste uka – så når noe likevel blir sent, har produksjonen falt etterpå",
+    drop ? ` (fra ca. ${fmtT(avg(before))} til ${fmtT(avg(after))} per døgn).` : ".",
+    " Vanlige grunner er en ovn eller støpemaskin som sto, mange syke eller på ferie, eller skrap som ikke kom fram.",
+    " Direktøren tar færre ordrer av seg selv når produksjonen faller. Vil du ha mer luft, kan du slå av at han tar rammeavtaler (Folk → Ansatte).",
+  ].join("");
+}
+
 /** Tre omdømmetap av samme grunn på ti døgn gir besøk av rådgiveren. */
 export function maybeAdvisor(g: GameState): void {
   const today = day(g);
@@ -519,9 +551,12 @@ export function maybeAdvisor(g: GameState): void {
     g.pendingDecision = {
       id: "radgiver",
       title: a.title,
-      text: noHire
-        ? "Flere kontrakter har gått over fristen. Planleggerne dine setter allerede kortest frist øverst, så verket har tatt på seg mer enn det rekker. Si nei til forespørsler du ikke rekker – og har du salgsdirektør, kan du slå av at den tar rammeavtaler (under Folk → Ansatte)."
-        : a.text,
+      text:
+        cause === "sen" && g.konsern?.director?.active
+          ? directorLateText(g)
+          : noHire
+            ? "Flere kontrakter har gått over fristen. Planleggerne dine setter allerede kortest frist øverst, så verket har tatt på seg mer enn det rekker. Si nei til forespørsler du ikke rekker."
+            : a.text,
       options: noHire
         ? [book, { label: "Jeg ordner det selv" }]
         : [

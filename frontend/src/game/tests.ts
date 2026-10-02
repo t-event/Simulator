@@ -218,7 +218,14 @@ import { migrate, parseSave } from "./save";
 import { ageOf, PENSION, pensionDay, pensionMorning, pensionSoon, retireAgeOf } from "./pension";
 import { dutyWorkers, presentWorkers as presentNow, wildcardUse as wildUse } from "./plant";
 import { afterEmpireLoad, DIVIDEND, dividendParts, dividendPerDay, dividendToTreasury } from "./dividend";
-import { ANY_CARD_REAL_MS, makeDecision, maybeCreateDecision, resolveDecision, SAME_CARD_REAL_MS } from "./decisions";
+import {
+  ANY_CARD_REAL_MS,
+  directorLateText,
+  makeDecision,
+  maybeCreateDecision,
+  resolveDecision,
+  SAME_CARD_REAL_MS,
+} from "./decisions";
 import { landmarkContract, landmarkHour } from "./landmarks";
 import {
   addCost,
@@ -4236,6 +4243,88 @@ test("Forskningen grupperes etter hva den gir (B-413)", () => {
   assert(researchGroup(RESEARCH.find((r) => r.id === "stodig")!) === "auto", "10× er fart");
   assert(researchGroup(RESEARCH.find((r) => r.id === "lysbue")!) === "utstyr", "lysbueovnen er utstyr");
   assert(researchGroup(RESEARCH.find((r) => r.id === "konsernenergi")!) === "konsern", "konsernet for seg");
+});
+
+test("Sene leveranser med salgsdirektør: rådgiveren forklarer med tall (B-418)", () => {
+  const g = newGame(1);
+  g.stage = 4;
+  g.cash = 1_000_000_000;
+  g.konsern.unlocked = true;
+  assert(hireDirector(g).ok, "direktøren ble ikke ansatt");
+  const today = day(g);
+  // Et verk som laget 30 000 t i døgnet før kontraktene ble tatt, og 18 000 t de siste døgnene
+  g.history = [];
+  for (let d = today - 12; d < today; d++)
+    g.history.push({ ...structuredClone(g.today), day: d, producedT: d < today - 3 ? 30_000 : 18_000 });
+  const base = {
+    product: "emne",
+    grade: "standard",
+    pricePerT: 1,
+    offerExpiresMin: 0,
+    repGain: 0,
+    repLoss: 1,
+    penaltyPerT: 0,
+    priority: 0,
+  } as const;
+  g.contracts = [
+    {
+      ...base,
+      id: 1,
+      customer: "A",
+      tonnes: 5000,
+      delivered: 4600,
+      deadlineDay: today - 1,
+      status: "misligholdt",
+      closedDay: today,
+      acceptedDay: today - 5,
+      byDirector: true,
+    },
+    {
+      ...base,
+      id: 2,
+      customer: "B",
+      tonnes: 3000,
+      delivered: 2800,
+      deadlineDay: today - 1,
+      status: "misligholdt",
+      closedDay: today,
+      acceptedDay: today - 4,
+      byDirector: true,
+    },
+    {
+      ...base,
+      id: 3,
+      customer: "C",
+      tonnes: 9000,
+      delivered: 8700,
+      deadlineDay: today - 1,
+      status: "misligholdt",
+      closedDay: today,
+      acceptedDay: today - 6,
+      agreementId: 7,
+    },
+  ];
+  const text = directorLateText(g);
+  assert(text.includes("2 kontrakter salgsdirektøren signerte") && text.includes("1 ukeleveranse"), text);
+  assert(/\b900\st\b/.test(text), `manglet til sammen: ${text}`);
+  assert(/30\s000\st/.test(text) && /18\s000\st/.test(text), `fallet i produksjonen: ${text}`);
+  assert(text.includes("sammen. Salgsdirektøren"), `mellomrom mellom setningene: ${text}`);
+  // Kontrakter direktøren signerer, merkes; dine egne ikke
+  const offer = {
+    ...base,
+    id: 9,
+    customer: "D",
+    tonnes: 100,
+    delivered: 0,
+    deadlineDay: today + 9,
+    status: "tilbud",
+    closedDay: null,
+  } as const;
+  g.contracts.push({ ...offer }, { ...offer, id: 10 });
+  acceptContract(g, 9, "Salgsdirektøren");
+  acceptContract(g, 10);
+  assert(g.contracts.find((c) => c.id === 9)?.byDirector === true, "direktørens kontrakt merket");
+  assert(!g.contracts.find((c) => c.id === 10)?.byDirector, "egen kontrakt ikke merket");
 });
 
 if (failed) {
