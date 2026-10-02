@@ -5,6 +5,16 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 340 – 2026-10-02: Konsernverdien for spillere som ikke spiller (B-417)
+
+**Brukeren spurte:** om spiller C på 2. plass på Konsernverdi stemte eller skyldtes at hen ikke hadde logget inn; fiks om feil, uten å ødelegge testen senere i dag.
+
+**Funnet:** lista regnet bidraget med full aktivitet for alle; C har ikke produsert siden 28.9. og blir betalt med gulvet 0,3. **Gjort:** 104 (`konsern_value` med aktiviteten fra siste betaling eller dagens produksjon) og samme regel i appen. #356 (B-415, B-416) merget først.
+
+**Testet:** prøvekjøring i transaksjon, `get_advisors`, `npm test` (ny test), typesjekk, lint, build.
+
+**Gjenstår:** morgenkjøringen 2.10 (uendret – rapportgrunnlaget er ikke rørt).
+
 ## Økt 339 – 2026-10-02: «Datterverkene i går: 0 kr» (B-416)
 
 **Brukeren spurte:** hvorfor datterverkene ga 0 i går.

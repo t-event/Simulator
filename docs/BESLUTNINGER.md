@@ -7632,3 +7632,15 @@ Gjort: ruta på Verket → Økonomi heter nå «Utbytte per ekte dag» og viser 
 Testet: typesjekk, lint, `npm test`, build; Playwright på 320, 390 og 1 366 px med et spill med datterverk (34,33 mill. kr, ingen avkorting).
 Konto (B-149): ingen endring.
 Endringslogg: ja.
+
+## B-417 Konsernverdien regner bidraget med aktiviteten betalingen bruker (2026-10-02)
+Status: gjennomført (104, lagt inn ca. 00:15 UTC 2.10).
+Bakgrunn: eieren spurte om spiller C på 2.–3. plass på Konsernverdi stemte, eller om det var fordi hen ikke hadde logget inn på lenge. Funnet (bare lesing): C lagret sist 29.9. og har ikke produsert siden 28.9. Betalingen (`pay_contributions`) brukte derfor gulvet, aktivitet 0,3 (14,1 mill. per dag), men `konsern_value` regnet bidraget med aktivitet 1 for alle (37,5 mill. per dag etter taket) × 60 dager – om lag 1,4 mrd. for mye. Det traff alle som ikke spilte for fullt.
+Gjort:
+- `konsern_value` (104): bidraget regnes med aktiviteten i siste betalte bidrag (`contributions.activity`), eller dagens produksjon så langt hvis den er høyere (en som kommer tilbake, stiger samme dag). Uten noe betalt bidrag: 1, som før. Utbyttet, kassa og lånet er uendret.
+- Appen (`konsernValueOf` i `net/world.ts`) gjør det samme med `world_status.contribution.activity` og `contributionAt`, som speiler taket i `contribution_amount` (30 mill., potens 0,5). Appen har ikke dagens produksjon, så den kan ligge litt under lista den dagen en spiller kommer tilbake.
+- Virkning (prøvd i en transaksjon som ble rullet tilbake, så lagt inn): C fra plass 3 til 9 (3,20 → 1,80 mrd.); to delvis aktive spillere litt ned (−0,1 mrd.); alle som produserer for fullt, uendret.
+- Rører ikke 2.10-rapporten eller kjøringen 07:45: `konsern_value` er bare visning og sesongslutt – ingen penger flyttes, ingenting lagres, utbytte, bidrag og målinger er uendret. Utkastet 103 (V0/K-1) bruker `konsern_value` bare i skyggerapporten og beholder nummeret.
+Testet: prøvekjøring i transaksjon (før/etter for topp 15), `get_advisors` (uendret), `npm test` med ny test av `contributionAt` mot serverens tall (14 094 565 ved aktivitet 0,3), typesjekk, lint, build.
+Konto (B-149): uendret (Konsernverdi krever konto som før).
+Endringslogg: ja.

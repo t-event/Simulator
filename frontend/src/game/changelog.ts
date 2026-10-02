@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 417,
+    date: "2026-10-02",
+    title: "Riktigere Konsernverdi",
+    items: [
+      "Konsernverdien på topplista regner bidraget fra hovedverket med det du faktisk produserer – en som ikke spiller, står ikke lenger med fullt bidrag.",
+    ],
+  },
+  {
     b: 416,
     date: "2026-10-02",
     title: "Riktig utbytte på Økonomi",

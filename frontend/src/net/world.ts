@@ -419,13 +419,29 @@ export async function fetchWorldStatus(): Promise<WorldStatus> {
   };
 }
 
+/** Taket på bidraget (config.world.contribution, speiler `contribution_amount`): over 30 mill. per dag vokser det med potensen 0,5 */
+export const CONTRIBUTION_LOAD = { from: 30_000_000, power: 0.5 };
+
 /**
- * Konsernverdien slik topplista regner den (B-320, speiler `konsern_value` i 063): konsernkassa + 60 × (utbytte +
- * bidrag for en full dag) − lån. Tallene kommer fra serveren; lånet er det i spillet (det samme som lagres).
+ * Bidraget per dag ved en annen aktivitet enn full (B-417): regner tilbake fra bidraget for en full dag (etter taket) og
+ * legger taket på igjen – som `contribution_amount(full_day, aktivitet)` på serveren.
+ */
+export function contributionAt(perDayFull: number, activity: number): number {
+  const { from, power } = CONTRIBUTION_LOAD;
+  const full = perDayFull > from ? from * (perDayFull / from) ** (1 / power) : perDayFull;
+  const x = Math.max(0, full * activity);
+  return x > from ? from * (x / from) ** power : x;
+}
+
+/**
+ * Konsernverdien slik topplista regner den (B-320, speiler `konsern_value` i 104): konsernkassa + 60 × (utbytte +
+ * bidrag) − lån. Bidraget regnes med aktiviteten i siste betalte bidrag (B-417) – før sto en spiller som ikke hadde
+ * spilt på dager, med fullt bidrag. Serveren tar også med dagens produksjon så langt; den har ikke appen.
  */
 export function konsernValueOf(w: WorldStatus, loan: number): number {
   // Hele utbyttet, uansett utbyttepolitikk (B-334): det som holdes igjen, er fortsatt konsernets
-  return w.treasury.balance + 60 * (w.dividend.fullPerDay + w.contribution.perDay) - Math.max(0, loan);
+  const contribution = contributionAt(w.contribution.perDay, w.contribution.activity ?? 1);
+  return w.treasury.balance + 60 * (w.dividend.fullPerDay + contribution) - Math.max(0, loan);
 }
 
 /**

@@ -93,6 +93,7 @@ import {
 import {
   applyTakeoverNews,
   bidInNewMoney,
+  contributionAt,
   fmtBid,
   parseControl,
   parseTakeover,
@@ -2238,6 +2239,14 @@ const main = async () => {
     // Gårsdagens oppdrag gir ingen bonus i dag
     g.daily = { ...g.daily, claimed: false, date: "2026-10-01" };
     assert(!claimables(g, daily, null, null).some((x) => x.id === "bonus"), "ikke gårsdagens bonus");
+  });
+
+  await test("Konsernverdien regner bidraget med siste aktivitet (B-417)", () => {
+    // Tallene fra serveren 2.10: bidrag for full dag 37 542 729 (46 981 882 før taket), betalt med aktivitet 0,3
+    assert(Math.abs(contributionAt(37_542_729, 0.3) - 14_094_565) < 2, `${contributionAt(37_542_729, 0.3)}`);
+    assert(contributionAt(13_660_700, 1) === 13_660_700, "full aktivitet under taket: uendret");
+    assert(Math.abs(contributionAt(37_542_729, 1) - 37_542_729) < 1, "full aktivitet over taket: uendret");
+    assert(contributionAt(20_000_000, 0) === 0, "ingen aktivitet");
   });
 
   setSaveListener(null);
