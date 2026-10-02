@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 346 – 2026-10-02: Rapporten 2.10 og utbytterettingen (B-423)
+
+**Brukeren ba om (faste kjøringer kl. 07:00 og 07:45):** sjekk skraplagerets utbetalinger 29.9–1.10, rapporter
+pengestrømmene per ekte dag og per spiller, nattkontroll, bevar grunnlaget, prøv utkast 099 og legg den inn bare uten
+automatisk etterbetaling, dry-run av etterbetalingen, anbefal om slagghåndteringen (ikke slå på), deretter V0/K-1 i skygge.
+
+**Gjort:** grunnlaget kopiert urørt (110). Rapporten i `docs/RAPPORT-2026-10-02.md` (bokstaver, ikke navn): skraplageret
+stemmer på krona, kassene stemmer mot kassaboka, ingen jobbfeil. 099 prøvd (null etterbetaling, betalinger uendret) og
+lagt inn som 111. Dry-run av etterbetalingen: 1,88 mill. til ni spillere, ikke betalt. Slagghåndteringen ikke slått på
+(instruksene sier ulike ting – eieren spørres).
+
+**Testet:** prøvekjøring av 111 i en transaksjon som ble rullet tilbake; `world_health()` etter innleggingen; `npm test`.
+
+**Gjenstår:** eierens svar på etterbetalingen og slagghåndteringen; V0/K-1 i skygge (utkast 103, prøvekjøring først);
+`utkast/108` (ryddingen av meldinger) når eieren kan bekrefte, før 1.11.
+
+---
+
 ## Økt 345 – 2026-10-02: Meldinger på for alle (B-422)
 
 **Brukeren ba om:** «Meldinger skal være på for alle. De må skru av om de ikke vil ha.»

@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 423,
+    date: "2026-10-02",
+    title: "Utbytte fra ferdige verk med én gang",
+    items: [
+      "Et datterverk som blir ferdig, gir utbytte fra samme kvarter – også når du ikke er i spillet. Før kom det først med når du åpnet spillet igjen.",
+    ],
+  },
+  {
     b: 422,
     date: "2026-10-02",
     title: "Meldinger er på for alle",

@@ -51,7 +51,11 @@ til «Avgjort» nederst).
   sesong 2 er klar. Før `start_season` kjøres for sesong 3, legg inn ny
   pynt i `COSMETICS` med `season: 3` – både i butikken og på stigen (trinn 10–50). Ellers har sesong 3 ingen egen pynt.
 
-- **Slå på slagghåndteringen (B-253, B-402):** eieren 1.10: først når nattkontrollen 2.10 er grønn og rapportgrunnlaget
+- **Etterbetaling av utbyttet 30.9 og 1.10 (B-423):** 1 875 716 kr til ni spillere for verk som ble ferdige mens de var
+  borte – tabellen i `docs/RAPPORT-2026-10-02.md`, avsnitt 7. Ikke betalt; venter på eierens ja eller nei.
+
+- **Slå på slagghåndteringen (B-253, B-402):** Vilkårene er oppfylt 2.10 (grønt, grunnlaget bevart), men kjøringen kl. 07:00
+  sa «ikke slå på» – eieren spørres (B-423). eieren 1.10: først når nattkontrollen 2.10 er grønn og rapportgrunnlaget
   er bevart (anbudet trekker bud fra konsernkassene med én gang). Skraplageret fikk sin første eier 29.9. 01:33 UTC og har to
   registrerte utbetalinger (1.10). Da: `update public.companies set active = true where type = 'slagg'; select public.world_tick();`
   Sjekk så kortet under Konsern → Industrien.

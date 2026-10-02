@@ -1,5 +1,5 @@
--- UTKAST – IKKE KJØRT. Eieren (1.10, B-399): kjøres rett etter 2.10-rapporten, og tidspunktet dokumenteres.
--- Blir den kjørt, flyttes fila til supabase/ med neste ledige nummer.
+-- LAGT INN 2.10.2026 kl. ca. 12:03 UTC (B-423), etter 2.10-rapporten og en prøvekjøring som viste null automatisk
+-- etterbetaling for dager før 2.10. Var utkast 099.
 -- Retter bare målinger og utbetalinger framover. Målingene som alt er tatt (verk målt som under bygging), og dager før
 -- rettingen for den som solgte sitt siste verk, rettes av en egen etterbetaling – dry-run per spiller og dato først
 -- (betalt, riktig beløp, differanse, usikkerhet), og bare med eierens godkjenning.
