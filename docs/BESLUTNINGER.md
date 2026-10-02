@@ -7644,3 +7644,16 @@ Gjort:
 Testet: prøvekjøring i transaksjon (før/etter for topp 15), `get_advisors` (uendret), `npm test` med ny test av `contributionAt` mot serverens tall (14 094 565 ved aktivitet 0,3), typesjekk, lint, build.
 Konto (B-149): uendret (Konsernverdi krever konto som før).
 Endringslogg: ja.
+
+## B-418 Rådgiveren forklarer sene leveranser når salgsdirektøren signerer (2026-10-02)
+Status: gjennomført.
+Bakgrunn: eieren meldte at mange spillere med salgsdirektør får kortet «Rådgiveren: leveransene kommer for sent» og lurer på om det er en feil. Undersøkt: kortet kommer ved tre omdømmetap for sene leveranser på ti døgn. Direktøren signerer bare det verket rakk med produksjonen den siste uka (snittet med salgsteam, ellers det dårligste døgnet) og vil ha 25–30 % av tida til fristen til overs. En kopi av et storverk med direktør kjørt 60 døgn fram: to sene kontrakter, begge signert av direktøren og bare så vidt for sene (966 av 15 000 t og 135 av 2 000 t), rett etter syke, ferie og et strenggjennombrudd. Blant de aktive spillerne med direktør hadde de fleste 0–1 sene de siste ti døgnene. Det er altså ikke en feil i direktøren: kontraktene blir sene når produksjonen faller etter at han har signert. Men kortet sa «verket har tatt på seg mer enn det rekker», som om spilleren hadde gjort noe galt.
+Gjort:
+- Kontrakter direktøren signerer, merkes (`byDirector`, valgfritt felt – ingen migrering).
+- Med aktiv direktør sier kortet nå hva som skjedde, med tall (`directorLateText` i `decisions.ts`): hvor mange av de sene som var direktørens kontrakter og ukeleveranser i rammeavtalene, hvor mye som manglet til sammen, at produksjonen falt etter signeringen (fra ca. X til Y t per døgn, når fallet er over 10 %), vanlige grunner (ovn eller støpemaskin som sto, syke og ferie, skrap som ikke kom fram), at direktøren tar færre ordrer av seg selv, og at man kan slå av rammeavtalene under Folk → Ansatte.
+- Loggen sier ved hver frist som går ut om det var en ukeleveranse i rammeavtalen eller en kontrakt direktøren signerte.
+- Uten direktør: samme kort som før (setningen om direktøren er tatt ut av teksten for planleggere).
+Ikke endret: direktørens regler (B-172, B-240, B-312), straffene og når kortet kommer.
+Testet: ny test i `npm test` (teksten med tall og merket på direktørens kontrakter), typesjekk, lint, build, `balance.ts`.
+Konto (B-149): ingen endring.
+Endringslogg: ja.

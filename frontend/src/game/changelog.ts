@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 418,
+    date: "2026-10-02",
+    title: "Bedre forklaring på sene leveranser",
+    items: [
+      "Har du salgsdirektør og leveranser blir sene, forklarer rådgiveren hva som skjedde: hvor mye som manglet, og at produksjonen falt etter at kontraktene ble signert.",
+      "Loggen sier om en kontrakt som gikk over fristen, var signert av salgsdirektøren eller var en ukeleveranse i en rammeavtale.",
+    ],
+  },
+  {
     b: 417,
     date: "2026-10-02",
     title: "Riktigere Konsernverdi",

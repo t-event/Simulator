@@ -2747,6 +2747,7 @@ export function acceptContract(g: GameState, id: number, by = "Du"): PurchaseRes
   if (!c || c.status !== "tilbud") return { ok: false, message: "Tilbudet finnes ikke lenger." };
   c.status = "aktiv";
   c.acceptedDay = day(g);
+  if (by === "Salgsdirektøren") c.byDirector = true;
   // Spilleren svarer på forespørsler igjen: rådet om forespørsler som gikk ut, forsvinner (B-292)
   g.missedOffers = [];
   const others = g.contracts.filter((x) => x.status === "aktiv" && x.id !== c.id).map((x) => x.priority);
@@ -3487,7 +3488,7 @@ function onDay(g: GameState, stats: PlantStats): void {
       g.totals.contractsMissed = (g.totals.contractsMissed ?? 0) + 1;
       log(
         g,
-        `Fristen til ${c.customer} gikk ut med ${fmtT(remaining)} ulevert. Bot ${fmtKr(penalty)}, omdømme −${c.repLoss.toFixed(1).replace(".", ",")}.`,
+        `Fristen til ${c.customer} gikk ut med ${fmtT(remaining)} ulevert. Bot ${fmtKr(penalty)}, omdømme −${c.repLoss.toFixed(1).replace(".", ",")}.${c.agreementId ? " Det var en ukeleveranse i rammeavtalen." : c.byDirector ? " Salgsdirektøren hadde signert den." : ""}`,
         "bad",
       );
       unlock(g, "omdomme");

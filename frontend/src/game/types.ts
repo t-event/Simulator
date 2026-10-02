@@ -139,6 +139,8 @@ export interface Contract {
   closedDay: number | null;
   /** Dagen kontrakten ble signert (B-161); mangler i eldre lagringer */
   acceptedDay?: number;
+  /** Signert av salgsdirektøren (B-418), så rådgiveren kan forklare sene leveranser; mangler i eldre lagringer */
+  byDirector?: boolean;
   /** Minste margin til kravene i partiene som er levert, 0–1 (B-161) */
   qMargin?: number;
   /** Kundens vurdering 1–10 når kontrakten er levert (B-161) */

@@ -5,6 +5,16 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 341 – 2026-10-02: «Leveransene kommer for sent» med salgsdirektør (B-418)
+
+**Brukeren spurte:** hvorfor mange med salgsdirektør får rådgiverkortet om sene leveranser – forklaring eller feil?
+
+**Funnet:** ingen feil i direktøren. Han signerer etter forrige ukes produksjon med 25–30 % margin; kontraktene blir sene når produksjonen faller etterpå (simulering av et ekte storverk: 2 sene på 60 døgn, begge så vidt). Kortet ga feil forklaring. **Gjort:** direktørens kontrakter merkes, og kortet forklarer med tall hva som skjedde; loggen sier hvem som signerte. #357 (B-417) merget først.
+
+**Testet:** ny test, typesjekk, lint, build, balance.
+
+**Gjenstår:** morgenkjøringen 2.10.
+
 ## Økt 340 – 2026-10-02: Konsernverdien for spillere som ikke spiller (B-417)
 
 **Brukeren spurte:** om spiller C på 2. plass på Konsernverdi stemte eller skyldtes at hen ikke hadde logget inn; fiks om feil, uten å ødelegge testen senere i dag.
