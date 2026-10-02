@@ -200,6 +200,7 @@ frontend/src/
     Account.tsx  Konto: logg inn, opprett, glemt passord, velg spill ved konflikt (på startskjermen og i ⚙️)
     Leaderboard.tsx Topplista (arket bak pokalen, B-214)   Place.tsx  Plassering med medaljeikon (B-237)   Season.tsx  Sesongspørsmål, hendelser på Marked, sesonglinje (uten nedtelling, B-220)
     Daily.tsx    Velkommen tilbake, daglig belønning og kortet «Dagens oppdrag» på Mål
+    ClaimAll.tsx «Hent alt» øverst på Mål; hentingen (bonus, ukekiste, sesongtrinn) står i claims.ts (B-415)
     Achievements.tsx Prestasjonskortet på Mål og arket «Pynt verket» (🎨 på anleggsbildet)
     Weekly.tsx   Kortet «Ukens utfordring» på Mål og ukelista   Portal.tsx  Ark fra Verket legges i <body>
     SeasonTrack.tsx Kortet «Sesongstigen» på Mål (B-173)   Landmarks.tsx  Kortet «Landemerker» på Mål → I dag (B-218)

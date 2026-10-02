@@ -22,6 +22,7 @@ import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { AchievementsCard, PyntModal } from "./Achievements";
 import { Bar, Card, SubTabs } from "./common";
+import { ClaimAllBar } from "./ClaimAll";
 import { DailyCard } from "./Daily";
 import { SheetHead } from "./ds";
 import { LandmarksCard } from "./Landmarks";
@@ -168,6 +169,8 @@ export function GoalsPage({ g, stats, api, onOpenSettings, onSales, openTab, onT
     <div className={`g-grid g-goals is-${shown}`}>
       {pynt && <PyntModal g={g} stats={stats} act={act} onClose={() => setPynt(false)} />}
       <div className="g-col-wide">
+        {/* Det som kan hentes, står øverst uansett fane (B-415) */}
+        {!coaching && <ClaimAllBar g={g} act={act} />}
         <SubTabs tabs={tabs} value={shown} onChange={setTab} label="Mål" />
         {coaching && shown !== "prestasjoner" && (
           <p className="g-muted">Dagens oppdrag og belønningene kommer når den veiledede starten er ferdig.</p>
@@ -175,7 +178,7 @@ export function GoalsPage({ g, stats, api, onOpenSettings, onSales, openTab, onT
         {shown === "idag" && !coaching && (
           <>
             <MissingOutCard g={g} onLogin={onOpenSettings} />
-            <DailyCard g={g} act={act} />
+            <DailyCard g={g} />
             {/* Landemerket er også noe som kommer hver dag (B-218) */}
             <LandmarksCard g={g} onSales={onSales} />
           </>
@@ -183,7 +186,7 @@ export function GoalsPage({ g, stats, api, onOpenSettings, onSales, openTab, onT
         {shown === "uke" && !coaching && (
           <>
             <WeeklyCard act={act} />
-            <SeasonTrackCard act={act} />
+            <SeasonTrackCard />
             <MissingOutCard g={g} onLogin={onOpenSettings} />
           </>
         )}

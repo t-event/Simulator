@@ -5253,6 +5253,7 @@ button {
 }
 
 .g-goals > .g-col-wide > .g-card,
+.g-goals > .g-col-wide > .g-claim-all,
 .g-goals > .g-col-wide > .g-subtabs {
   width: 100%;
   max-width: 960px;
@@ -7951,4 +7952,52 @@ button.g-prod-row:hover {
   font-weight: 600;
   color: var(--text-2);
   list-style: none;
+}
+
+/* «Hent alt» øverst på Mål (B-415): det som kan hentes, i én rad med én knapp */
+.g-claim-all {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-4);
+  padding: var(--sp-4);
+  border: 1px solid var(--ok);
+  border-radius: var(--r-lg);
+  background: var(--ok-bg);
+}
+
+.g-claim-all > .ds-icon {
+  flex: none;
+  color: var(--ok);
+}
+
+.g-claim-all-text {
+  display: flex;
+  flex: 1 1 200px;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+
+.g-claim-all-text ul {
+  margin: 0;
+  padding-left: 1.1em;
+}
+
+.g-claim-all > .ds-button {
+  flex: none;
+  min-height: var(--touch);
+}
+
+/* Smal mobil: knappen under lista, i hele bredden */
+@media (max-width: 479px) {
+  .g-claim-all > .ds-button {
+    flex: 1 1 100%;
+  }
+}
+
+.g-claim-ready .ds-icon {
+  color: var(--ok);
+  vertical-align: -3px;
 }

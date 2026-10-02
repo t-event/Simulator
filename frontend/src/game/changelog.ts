@@ -15,6 +15,22 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 416,
+    date: "2026-10-02",
+    title: "Riktig utbytte på Økonomi",
+    items: [
+      "Økonomi viser utbyttet datterverkene gir konsernkassa per ekte dag, i stedet for en rute som alltid sto på 0 kr.",
+    ],
+  },
+  {
+    b: 415,
+    date: "2026-10-02",
+    title: "Hent alt på Mål",
+    items: [
+      "Det du kan hente – dagens bonus, ukekista og trinn på sesongstigen – står øverst på Mål med én knapp: «Hent alt».",
+    ],
+  },
+  {
     b: 414,
     date: "2026-10-02",
     title: "Enklere Folk og Marked",

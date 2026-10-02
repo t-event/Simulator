@@ -5,6 +5,26 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 339 – 2026-10-02: «Datterverkene i går: 0 kr» (B-416)
+
+**Brukeren spurte:** hvorfor datterverkene ga 0 i går.
+
+**Svar og gjort:** ingen feil i utbyttet – det betales i ekte tid til konsernkassa (sjekket i `dividends`: betalt alle tre siste dager). Ruta på Økonomi leste det gamle døgnregnskapet; den viser nå utbyttet per ekte dag.
+
+**Testet:** typesjekk, lint, `npm test`, build; Playwright på tre bredder.
+
+**Gjenstår:** morgenkjøringen 2.10.
+
+## Økt 338 – 2026-10-02: Polering 6: «Hent alt» på Mål (B-415)
+
+**Brukeren ba om:** resten av UI-poleringen i små PR-er (siste punkt).
+
+**Gjort:** «Klar til å hente» med «Hent alt» øverst på Mål; hentingen samlet i `ui/claims.ts`, sesongstigens status i felles lager. #355 (B-414) merget, publiseringen av #354 grønn. Hele poleringslista fra designgjennomgangen er nå bygget (B-405–B-415).
+
+**Testet:** typesjekk, lint, `npm test` (ny nettest), build; Playwright med falsk tjeneste på 320, 390 og 1 366 px.
+
+**Gjenstår:** morgenkjøringen 2.10 (rapporten, 099, backpay-tabellen, ev. slagghåndtering, V0/K-1 i skygge).
+
 ## Økt 337 – 2026-10-02: Polering 5: Folk og Marked (B-414)
 
 **Brukeren ba om:** resten av UI-poleringen i små PR-er (fortsettelse).

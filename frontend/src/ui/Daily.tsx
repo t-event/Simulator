@@ -5,7 +5,6 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   applyAwayReward,
-  applyMissionBonus,
   applyStreakReward,
   missionBonus,
   missionBonusReady,
@@ -16,10 +15,10 @@ import {
   streakReward,
   type Reward,
 } from "../game/daily";
-import { nextWorldMidnight, realNow, worldDay } from "../game/clock";
+import { nextWorldMidnight, realNow } from "../game/clock";
 import type { DailyMission, GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
-import { claimAway, claimDailyMissions, claimDailyReward, fetchDailyStatus, setDailyStatus } from "../net/daily";
+import { claimAway, claimDailyReward, fetchDailyStatus, setDailyStatus } from "../net/daily";
 import { getSession, onSessionChange } from "../net/supabase";
 import { isReconciled, onCloudStatus } from "../net/sync";
 import { Bar, Card } from "./common";
@@ -260,34 +259,14 @@ function progressText(g: GameState, m: DailyMission): string {
 }
 
 /** Dagens oppdrag og hvor langt du er i uka, på Verket → Oversikt. Bare med konto. */
-export function DailyCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
+export function DailyCard({ g }: { g: GameState }) {
   const session = useSession();
   const status = useDailyStatus();
-  const [busy, setBusy] = useState(false);
   // Uten konto står Dagens oppdrag i det samlede kontokortet (AccountFeaturesCard, B-191)
   if (!session) return null;
   if (!status || g.daily.date !== status.today) return null;
   const ready = missionBonusReady(g);
   const bonus = missionBonus(g);
-  const claim = async () => {
-    setBusy(true);
-    try {
-      // Har dagen skiftet siden oppdragene ble hentet, gjelder bonusen på serveren den nye dagen: hent dagens oppdrag
-      // i stedet for å bruke opp morgendagens bonus på gårsdagens oppdrag (B-397)
-      if (worldDay(realNow()) !== status.today) {
-        const fresh = await fetchDailyStatus().catch(() => null);
-        if (fresh) setDailyStatus(fresh);
-        return;
-      }
-      const r = await claimDailyMissions();
-      if (!r.already) act((gg) => void applyMissionBonus(gg, fmtKr));
-      else act((gg) => void (gg.daily.claimed = true));
-      buzz(30);
-      setDailyStatus({ ...status, missionsClaimed: true });
-    } finally {
-      setBusy(false);
-    }
-  };
   const streakLine = status.claimed
     ? status.streak === 7
       ? "Uka er full – i morgen begynner en ny uke."
@@ -319,9 +298,10 @@ export function DailyCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
       {g.daily.claimed ? (
         <p className="g-muted g-small-text">Bonusen for i dag er hentet. Nye oppdrag i morgen.</p>
       ) : ready ? (
-        <button className="g-primary" disabled={busy} onClick={() => void claim()}>
-          Hent bonus: {rewardText(bonus)}
-        </button>
+        // Hentes med «Hent alt» øverst på Mål (B-415)
+        <p className="g-small-text g-claim-ready">
+          <Icon name="gift" /> Bonusen er klar: {rewardText(bonus)}. Hent den øverst på Mål.
+        </p>
       ) : (
         <p className="g-muted g-small-text">
           Gjør alle tre for en bonus: {rewardText(bonus)} ({driftText(1)} og fagpoeng).

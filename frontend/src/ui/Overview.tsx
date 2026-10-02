@@ -1,3 +1,4 @@
+import { dividends } from "../game/konsern";
 import { useEffect, useState, type ReactNode } from "react";
 import { requestManual, requestReline, setFurnaceGrade, setTargetGrade, upgradeOptions } from "../game/actions";
 import { Maintenance } from "./Maintenance";
@@ -593,10 +594,12 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
                       value={fmtKr(plantResult(y))}
                       tone={plantResult(y) >= 0 ? "ok" : avgPlantResult(g) >= 0 ? "warning" : "critical"}
                     />
-                    {g.konsern.unlocked && (
+                    {/* Datterverkene betaler ikke i spilltid lenger, men utbytte hver ekte dag til konsernkassa (B-304). Før
+                        sto det «Datterverkene i går: 0 kr» her, som så ut som en feil (B-416) */}
+                    {g.konsern.unlocked && g.konsern.plants.length > 0 && (
                       <Stat
-                        label="Datterverkene i går"
-                        value={fmtKr((y.income.konsern ?? 0) - (y.costs.konsern ?? 0))}
+                        label="Utbytte per ekte dag"
+                        value={fmtKr(dividends(g, g.konsern.plants).reduce((a, b) => a + b, 0))}
                       />
                     )}
                     {(y.costs.investering ?? 0) > 0 && (
