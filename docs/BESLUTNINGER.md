@@ -7854,3 +7854,28 @@ kontobytte), `npm test`, typesjekk, lint, build.
 Endringslogg: ja.
 Konto (B-149): uendret.
 
+## B-427 Etter kodegjennomgangen 2.10: kontrollrom og spillmotor (2026-10-02)
+Status: gjennomført (funn 9–16 i gjennomgangen).
+Bakgrunn: eierens rekkefølge etter B-426: kontrollrom og spillmotor.
+Gjort:
+- **Ukens kontrollrom (funn 9 og 10):** et svar rydder bare bort det forsøket det gjelder, så et sent svar ikke sletter et
+  nytt resultat som venter; to leveringer av samme resultat samtidig (kortet og synken i bakgrunnen) blir én. Fristen
+  sjekkes mot serverens klokke (`realNow`), ikke telefonens – en klokke stilt en time fram slettet et gyldig resultat.
+- **Rotasjon (funn 11):** skallet (mobil/PC) låses mens et tellende forsøk er åpent (`ui/layoutLock.ts`). Før ble panelet
+  som eier forsøket, montert på nytt når bredden krysset 900 px: framdriften forsvant, forsøket kunne telle null, og
+  spillet sto på pause. Skallet byttes når forsøket lukkes.
+- **Produksjonsbytte (funn 12):** sperren teller bare lager som holder kvaliteten kontrakten krever, fordelt i køens
+  rekkefølge som leveransene (`contractCoverage`). Fem tonn av en enklere kvalitet åpnet før byttet for en kontrakt på en
+  bedre, som så ikke kunne leveres.
+- **Svarfristen på 10× (funn 13):** fristen på forespørsler og avtaler flyttes før tida går, ikke etterpå. Før kunne et
+  tilbud som skulle hatt svartid igjen, bli slettet som utløpt.
+- **Sommerstansen (funn 14 og 15):** foringen regnes per ovn (én induksjonsovn og én lysbueovn kostet 630 000 kr for mye),
+  og reservepotta per ovn. Et verk som får ferie midt i den, får valget ført på i år, og vikarlønnen gjelder bare året
+  valget er for (før ble valget ført på neste år: vikarlønn uten vikarer, og neste års valg ble hoppet over).
+- **Oppkjøpsrådet (funn 16):** `defenseNeeded` sjekker taket mot beløpet som akkurat holder, ikke beløpet med slingring,
+  og kutter slingringen ved taket. Nær taket sa rådet før «går ikke» om et motbud som vinner på serveren.
+Testet: tre nye motortester (kvalitet i lageret, sommervalget, motbud nær taket) og én nettest (ukeresultat), `npm test`,
+typesjekk, lint, build og `balance.ts`.
+Endringslogg: ja.
+Konto (B-149): uendret.
+

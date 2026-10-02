@@ -1,4 +1,5 @@
 import { realNow } from "../game/clock";
+import { layoutLocked, onLayoutLock } from "./layoutLock";
 import { RecipeGuideCoach } from "./RecipeGuide";
 import { isWinter } from "../game/calendar";
 import { lazy, Suspense, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
@@ -666,9 +667,16 @@ function useIsPc(): boolean {
   useEffect(() => {
     const mq = window.matchMedia?.(query);
     if (!mq) return;
-    const on = () => setPc(mq.matches);
+    // Står skallet låst (et tellende forsøk i kontrollrommet, B-427), byttes det først når låsen slippes
+    const on = () => {
+      if (!layoutLocked()) setPc(mq.matches);
+    };
     mq.addEventListener("change", on);
-    return () => mq.removeEventListener("change", on);
+    const off = onLayoutLock(on);
+    return () => {
+      mq.removeEventListener("change", on);
+      off();
+    };
   }, []);
   return pc;
 }

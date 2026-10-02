@@ -5,7 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
-## Økt 349 – 2026-10-02: Kodegjennomgangen – lagring, tidsgrense og kontobytte (B-426)
+## Økt 350 – 2026-10-02: Kodegjennomgangen – kontrollrom og spillmotor (B-427)
+
+**Brukeren ba om:** neste gruppe etter lagring og kontobytte: kontrollrom og spillmotor (funn 9–16).
+
+**Gjort:** ukeresultatet ryddes bare for sitt eget forsøk, leveringer samtidig blir én, fristen følger serverens klokke;
+skallet låses under et tellende forsøk; produksjonsbyttet teller bare lager med riktig kvalitet; svarfristen på 10× flyttes
+før tida går; sommerstansen regner foring per ovn og fører valget på riktig år; oppkjøpsrådet sjekker taket riktig.
+#366 (B-426) merget.
+
+**Testet:** tre motortester og én nettest, `npm test`, typesjekk, lint, build, `balance.ts`.
+
+**Gjenstår:** resten av funnene (17–20 og småfunnene).
+
+ – 2026-10-02: Kodegjennomgangen – lagring, tidsgrense og kontobytte (B-426)
 
 **Brukeren ba om:** gruppevise PR-er etter B-425; lagring og kontobytte først (funn 3–8).
 

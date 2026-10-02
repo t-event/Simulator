@@ -15,6 +15,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 427,
+    date: "2026-10-02",
+    title: "Rettinger i kontrollrommet og verket",
+    items: [
+      "Ukens kontrollrom: et resultat blir ikke lenger borte om telefonens klokke går feil, og et forsøk tåler at du snur nettbrettet.",
+      "Bytte av produksjon sperres til lageret har riktig kvalitet for kontraktene du har, ikke bare nok tonn.",
+      "Forespørsler på 3× og 10× forsvinner ikke lenger før svarfristen er ute.",
+      "Sommerstansen koster foring for hver ovn slik den er, ikke som om alle var den største.",
+      "Rådet om motbud sier ikke lenger «går ikke» om et motbud som faktisk holder.",
+    ],
+  },
+  {
     b: 426,
     date: "2026-10-02",
     title: "Tryggere lagring på nett",

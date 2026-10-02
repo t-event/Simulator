@@ -40,6 +40,7 @@ import {
   protectedUntil,
   takeoverAttack,
   takeoverDefense,
+  TAKEOVER,
 } from "./control";
 import {
   ACHIEVEMENT_BY_ID,
@@ -303,6 +304,7 @@ import {
   isChristmas,
   SUMMER,
   chooseSummer,
+  summerStart,
   summerStopDaysLeft,
   yearOf,
   YEAR_DAYS,
@@ -313,7 +315,7 @@ import { activeWar, WAR, warDay, warFactor } from "./war";
 import { acceptAgreement, buyScrap, roundDay } from "./engine";
 import { fixedPowerOffer, spotPowerPrice } from "./plant";
 import { explosionChance, FATAL_DOWN_DAYS, fatalAccident, WINTER_EXPLOSION } from "./accidents";
-import { freeStockT, sellAllFree } from "./engine";
+import { contractCoverage, freeStockT, sellAllFree } from "./engine";
 import { leaderBonus, leaderBonusDue } from "./actions";
 import { autoPlay, ChargeGame, INPUT_LOG_MAX, seededRandom } from "../ui/control/chargeGame";
 import { hints } from "../ui/hints";
@@ -4325,6 +4327,68 @@ test("Sene leveranser med salgsdirektør: rådgiveren forklarer med tall (B-418)
   acceptContract(g, 10);
   assert(g.contracts.find((c) => c.id === 9)?.byDirector === true, "direktørens kontrakt merket");
   assert(!g.contracts.find((c) => c.id === 10)?.byDirector, "egen kontrakt ikke merket");
+});
+
+test("Produksjonsbytte (B-427): lageret dekker bare kontrakter det holder kvaliteten for", () => {
+  const g = newGame(426);
+  g.minute = 50 * MIN_PER_DAY;
+  const loose = { c: 0.3, p: 0.045, tramp: 0.2 }; // holder Enkel, ikke Standard (P over 0,04)
+  g.lots = [
+    {
+      id: 1,
+      product: "emne",
+      t: 5,
+      analysis: loose,
+      known: loose,
+      measured: { c: true, p: true, tramp: true },
+      second: false,
+      madeDay: day(g),
+    },
+  ];
+  const c = {
+    id: 77,
+    customer: "Kunde",
+    product: "emne" as const,
+    grade: "standard" as const,
+    tonnes: 5,
+    delivered: 0,
+    pricePerT: 1,
+    deadlineDay: day(g) + 5,
+    offerExpiresMin: 0,
+    repGain: 0,
+    repLoss: 0,
+    penaltyPerT: 0,
+    status: "aktiv" as const,
+    closedDay: null,
+    acceptedDay: day(g),
+    priority: 2,
+  };
+  g.contracts = [c];
+  assert((contractCoverage(g).get(77) ?? 0) < 1e-6, "et parti som ikke holder kvaliteten, dekket kontrakten");
+  g.contracts = [{ ...c, grade: "enkel" }];
+  assert(Math.abs((contractCoverage(g).get(77) ?? 0) - 5) < 1e-6, "et parti som holder kvaliteten, dekket ikke");
+});
+
+test("Sommervalget (B-427): verket som får ferie midt i den, får valget ført på i år", () => {
+  const g = newGame(427);
+  const d = summerStart(200) + 5;
+  g.minute = (d - 1) * MIN_PER_DAY + 60;
+  chooseSummer(g, "vikarer");
+  assert(g.summer?.year === yearOf(d), `året ${g.summer?.year} mot ${yearOf(d)}`);
+  const after = summerStart(200) + 40;
+  g.minute = (after - 1) * MIN_PER_DAY + 60;
+  chooseSummer(g, "stans");
+  assert(g.summer?.year === yearOf(after + 360), "etter ferien gjelder valget neste år");
+});
+
+test("Motbud nær taket (B-427): rådet sier ikke «går ikke» om et forsvar som holder", () => {
+  const V = 1e8;
+  const control = 54;
+  const attack = control + TAKEOVER.defenseW * Math.sqrt(TAKEOVER.cap * 0.995);
+  const need = defenseNeeded(attack, control, 0, 0, V);
+  assert(need !== null && takeoverDefense(control, need, 0, V) > attack, `forsvar ${need}`);
+  const over = control + TAKEOVER.defenseW * Math.sqrt(TAKEOVER.cap * 1.0001);
+  assert(defenseNeeded(over, control, 0, 0, V) === null, "over taket");
 });
 
 if (failed) {

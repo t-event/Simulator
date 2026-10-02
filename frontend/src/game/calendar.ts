@@ -125,7 +125,9 @@ export function dateText(d: number): string {
 /** Valget på kortet (eller av seg selv når kortet ikke ble besvart): gjelder fellesferien i år */
 export function chooseSummer(g: GameState, choice: "stans" | "vikarer"): void {
   const today = day(g);
-  const start = today <= summerStart(today) ? summerStart(today) : summerStart(today + YEAR_DAYS);
+  // Ferien i år så lenge den ikke er over – også når verket først får ferie midt i den (B-427). Før ble valget da
+  // ført på neste år: vikarlønn uten vikarer resten av ferien, og neste års valg ble hoppet over
+  const start = today < summerStart(today) + SUMMER.days ? summerStart(today) : summerStart(today + YEAR_DAYS);
   g.summer = { year: yearOf(start), choice };
   const end = start + SUMMER.days - 1;
   log(
@@ -175,13 +177,13 @@ function summerDay(g: GameState, stats: PlantStats): void {
   if (!chosen) chooseSummer(g, "vikarer");
   if (today === start && g.summer?.choice === "stans") {
     const until = (start + SUMMER.days - 1) * MIN_PER_DAY;
-    for (const f of g.furnaces) {
+    for (const [i, f] of g.furnaces.entries()) {
       f.downUntilMin = Math.max(f.downUntilMin, until);
       f.downReason = "Planlagt stans: sommerstans";
       f.wear = 0;
       f.heatsOnLining = 0;
       f.lastRelineDay = today;
-      if (stats.furnace.arc) f.spareProgress = 1;
+      if ((stats.units[i]?.furnace ?? stats.furnace).arc) f.spareProgress = 1;
     }
     // Kundene vet om fellesferien: fristene som ikke er gått ut, flyttes tre uker – også for forespørsler som venter på
     // svar (B-321), ellers kunne de tas i stansen med en frist verket ikke rakk
@@ -191,7 +193,8 @@ function summerDay(g: GameState, stats: PlantStats): void {
         c.deadlineDay += SUMMER.days;
         if (c.status === "aktiv") moved++;
       }
-    const cost = stats.furnace.relineCost * g.furnaces.length;
+    // Foringen etter hver ovn (B-427): før ble alle ovnene regnet som den største
+    const cost = g.furnaces.reduce((a, _f, i) => a + (stats.units[i]?.furnace ?? stats.furnace).relineCost, 0);
     addCost(g, "vedlikehold", cost);
     adjustMorale(g, SUMMER.stansMorale);
     log(
@@ -200,7 +203,7 @@ function summerDay(g: GameState, stats: PlantStats): void {
       "event",
     );
   }
-  if (g.summer?.choice === "vikarer") {
+  if (g.summer?.choice === "vikarer" && g.summer.year === yearOf(today)) {
     addCost(g, "lonn", stats.salaryPerDay * SUMMER.tempExtra);
     if (today === start)
       log(
