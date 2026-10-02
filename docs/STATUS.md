@@ -1,6 +1,6 @@
 # STATUS – slik virker Stålverket nå
 
-**Fasit for hvordan spillet virker i dag** (sist oppdatert 1.10.2026, B-401). Hvorfor ting er som de er, står i
+**Fasit for hvordan spillet virker i dag** (sist oppdatert 3.10.2026, B-441). Hvorfor ting er som de er, står i
 `BESLUTNINGER.md`; hva som ble gjort når, står i `LOGG.md`. Endrer du en regel, oppdater denne fila i samme økt. Står
 noe annet i et eldre analyse- eller forslagsdokument, gjelder denne fila.
 
@@ -76,13 +76,20 @@ resten. Rente 1 % per ekte dag; hver natt går halvparten av utbyttet og bidrage
 
 - Anbud (48 t skjult) og pilotkonsesjon 14 dager; `world_tick` avgjør «lat» (pg_cron hvert 5. min).
 - Kontroll regnes av `company_control` (aktivitet, investering, region, eiertid); vises som kroner (B-370).
-- Oppkjøpsbud og motbud er på (fra 29.9.2026). Budet teller inntil 10 × verdien (verdi = 10 dagers inntekt), forsvaret
-  høyst 3 ×; eieren kan alltid miste selskapet. Står angrep og forsvar likt, beholder eieren selskapet (`att > def`).
-  Eieren får `takeover_payout` (B-375). Anbud fra før 29.9 regnes i dagens penger (B-374).
+- Oppkjøpsbud og motbud er på (fra 29.9.2026). Budet teller 60 × √(bud / V) × (0,5 + 0,5 × aktivitet) + region, inntil
+  10 × verdien (verdi = 10 dagers inntekt, også minstebudet); eieren kan alltid miste selskapet. Står bud og motbud likt,
+  beholder eieren selskapet (`att > def`). Eieren får `takeover_payout` ved salg (B-375). Anbud fra før 29.9 regnes i
+  dagens penger (B-374).
+- **Regelsett 2** (B-441, 123; alle bud fra 3.10.2026, `takeovers.rules` = 2): motbudet teller som budet (60 × √(beløp /
+  V), inntil 5 × V) pluss Kontroll / 5 (høyst 20). Fondet teller bare når det legges inn som motbud. Vinneren betaler:
+  eierens motbud som holder, er brukt opp; taperen får 75 % tilbake (kjøperen når budet ikke holder, eieren når selskapet
+  blir kjøpt). 14 dagers pause etter et avverget forsøk. Regelsett 1 (bud fra før 3.10): forsvar = Kontroll + 40 × √((motbud
+  + fond, fondet høyst V) / V), høyst 3 × V; kjøperen får 90 % tilbake, eieren 95 % av motbudet uansett.
 - Slettes en konto mens et oppkjøpsbud er åpent, gjøres budet opp først (B-430, 116; i `delete_my_account` før
   slettingen, B-434, 119): angriperen får hele budet tilbake, eieren får motbudet tilbake (kassa og fondet).
 - Selskapskortet viser verdien (10 dagers inntekt) og, ved oppkjøp, «Lønner det seg?»: inntekten i dagene kjøperen eier
-  selskapet (til perioden går ut, minst 14 dager) mot budet, og 90 % tilbake hvis budet ikke holder (B-435).
+  selskapet (til perioden går ut, minst 14 dager) mot budet, og hva som kommer tilbake hvis budet ikke holder (75 %,
+  regelsett 1: 90 %; B-435, B-441).
 - Slagghåndteringen og andre selskaper er ikke aktive.
 
 ## 6. Konkurranse og lister
@@ -201,7 +208,7 @@ resten. Rente 1 % per ekte dag; hver natt går halvparten av utbyttet og bidrage
 | Utbytte | `game/dividend.ts` | `dividend_from_state` (051), `pay_dividends` |
 | Verdensjobbene og overvåkingen | – | `world_tick`, `world_health()`, `world_health_players()` (101) |
 | Bidrag | – (bare serveren) | `pay_contributions` (061, 077) |
-| Kontroll og oppkjøp | `game/control.ts` | `company_control`, `takeover_*` (067, 068, 087) |
+| Kontroll og oppkjøp | `game/control.ts` (`TAKEOVER`, `TAKEOVER_V2`) | `company_control`, `takeover_*` (067, 068, 087, 123) |
 | Innskudd | `net/treasury.ts` | `treasury_limit`, `deposit_to_treasury` (090) |
 | Lister og sesong | `net/leaderboard.ts`, `net/season.ts` | `leaderboard`, `close_season`, `season_history` (092, 093) |
 | Uker og ukens kontrollrom | `net/weekly.ts`, `ui/Weekly.tsx`, `ui/control/weekly.ts` | `week_kind`, `weekly_scores`, `weekly_control_*` (094) |

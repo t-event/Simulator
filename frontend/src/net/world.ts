@@ -11,7 +11,7 @@ import type { KonsernWorld } from "../game/konsernWorld";
 import { parseKonsern } from "./konsern";
 import { isRegion } from "../game/regions";
 import type { RegionId } from "../game/types";
-import type { Buyout } from "../game/control";
+import { bidBack, type Buyout, type TakeoverRules } from "../game/control";
 
 export interface Tender {
   id: number;
@@ -102,6 +102,8 @@ export interface Takeover {
   closesAt: string;
   attack: number;
   defenseScore: number;
+  /** Regelsettet budet avgjøres etter (B-441): 1 for bud fra før 3.10.2026, 2 for nye */
+  rules: TakeoverRules;
 }
 
 export interface TakeoverWindow {
@@ -113,6 +115,8 @@ export interface TakeoverWindow {
   from: string | null;
   defenseNow: number;
   attackMin: number;
+  /** Regelsettet et nytt bud avgjøres etter (B-441) */
+  rules: TakeoverRules;
 }
 
 export interface TakeoverLast {
@@ -126,6 +130,7 @@ export interface TakeoverLast {
   mineOwner: boolean;
   /** Hva eieren fikk i konsernkassa da selskapet ble kjøpt (B-375) – bare for eieren */
   ownerPaid: number | null;
+  rules: TakeoverRules;
 }
 
 export interface CompanyControl {
@@ -251,6 +256,8 @@ export function parseTakeover(r: Row | null | undefined): Takeover | null {
     closesAt: String(r.closes_at),
     attack: num(r.attack),
     defenseScore: num(r.defense_score),
+    // Uten feltet er svaret fra før B-441, og da gjaldt regelsett 1
+    rules: r.rules === 2 ? 2 : 1,
   };
 }
 
@@ -264,6 +271,7 @@ export function parseWindow(r: Row | null | undefined): TakeoverWindow | null {
     from: str(r.from),
     defenseNow: num(r.defense_now),
     attackMin: num(r.attack_min),
+    rules: r.rules === 1 ? 1 : 2,
   };
 }
 
@@ -279,6 +287,7 @@ export function parseTakeoverLast(r: Row | null | undefined): TakeoverLast | nul
     mineAttack: r.mine_attack === true,
     mineOwner: r.mine_owner === true,
     ownerPaid: numOrNull(r.owner_paid),
+    rules: r.rules === 2 ? 2 : 1,
   };
 }
 
@@ -320,7 +329,7 @@ export function applyTakeoverNews(g: GameState, companies: Pick<Company, "name" 
         g,
         r.status === "overtatt"
           ? `Du kjøpte ${name}! Du eier det i 14 dager fra nå, og de første 3 dagene kan ingen by på det.`
-          : `Oppkjøpsbudet ditt på ${name} holdt ikke – eieren sto sterkest. ${fmtKr(Math.round(r.bid * 0.9))} er tilbake i konsernkassa.`,
+          : `Oppkjøpsbudet ditt på ${name} holdt ikke – eieren sto sterkest. ${fmtKr(Math.round(r.bid * bidBack(r.rules)))} er tilbake i konsernkassa.`,
         r.status === "overtatt" ? "good" : "event",
       );
     else

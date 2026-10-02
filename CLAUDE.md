@@ -123,7 +123,7 @@ npx tsx src/game/balance.ts --forste 700                   # kurven for første 
 npx tsx src/game/balance.ts --vinter                       # uhell, kort og kostnader om vinteren mot sommeren, per nivå (B-277, ca. 11 min)
 npx tsx src/game/balance.ts --sommerstans                  # testspilleren velger sommerstans i fellesferien (B-298)
 npx tsx src/game/programSim.ts                             # konsernprogrammene: A mot B (B-388); --k1, --k1-skann, --k1-drift, --k1-kost, --k1-verdi(-skann), --k1-etablering: K-1 med hendelser i regionene (B-389–B-393)
-npx tsx src/game/takeoverSim.ts                            # oppkjøp: når lønner det seg å kjøpe, forsvare eller gi seg – dagens regler mot kandidatene (B-440; --kort)
+npx tsx src/game/takeoverSim.ts                            # oppkjøp: når lønner det seg å kjøpe, forsvare eller gi seg – regelsett 1, kandidatene og regelsett 2 (B-440, B-441; --kort)
 npx tsx src/game/worldSim.ts                               # verdenssimulatoren: konsernkassa for liten/middels/stor/legacy etter 30–730 ekte dager, dager etter fullt konsern, maks bud, andel brukt (B-380, B-385; --dager 180 for kortere)
 npm run build
 ```
@@ -450,12 +450,15 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   Eieren ser Kontrollen som kroner (B-370): `bidToTake`, `controlAfterInvest` og `defenseNeeded` i `control.ts` speiler
   formlene – endres vektene i `company_control` eller overtakelsene, endres de også.
 - **Overtakelser** (B-335, 068; spillerne ser «oppkjøpsbud» og «motbud», B-371 – aldri «angrep»/«forsvar» i tekst): `takeovers`, avgjort «lat» av `resolve_takeovers` i `world_tick`. Formlene står i
-  `takeover_attack_of`/`takeover_defense_of` og speiles i `game/control.ts` (faste tall i testen). Eieren skal alltid
-  kunne miste selskapet (B-337): budet teller inntil 10 × V, forsvaret høyst 3 × V – endres vektene eller Kontrollens
+  `takeover_attack_of`/`takeover_defense_of` (regelsett 1) og `takeover_defense_of2` (regelsett 2, B-441) og speiles i
+  `game/control.ts` (`TAKEOVER`/`TAKEOVER_V2`, faste tall i testen). Hver rad har `takeovers.rules`: et bud avgjøres alltid
+  etter regelsettet det ble lagt inn under – nye regler får et nytt nummer, aldri en endring av de gamle. Tilbakebetalingen
+  står i `takeover_refund` (`bidBack`/`defenseBack`). Eieren skal alltid
+  kunne miste selskapet (B-337): budet teller inntil 10 × V, motbudet høyst 5 × V + 20 i Kontroll – endres vektene eller Kontrollens
   maks, må det sterkeste forsvaret fortsatt kunne slås (testen «alltid mulig»). Ingen fordel i fornyelsesanbudet. Bryteren
   `config.world.takeover.enabled` – på fra 29.9.2026 (B-339). Test med bryteren på i en DO-blokk som rulles tilbake (flytt
-  `company_owners.from_at` bakover for vernet, `closes_at` bakover for utfallet). Kjøperen får 14 dager fra kjøpet og 3 dagers vern; ingen
-  pause etter «avverget» (`cooldown_days` = 0, B-373). Eieren får `takeover_payout` (dagene som er igjen + 85 % av det
+  `company_owners.from_at` bakover for vernet, `closes_at` bakover for utfallet). Kjøperen får 14 dager fra kjøpet og 3 dagers vern; 14 dagers
+  pause etter «avverget» (`cooldown_days` = 14, B-441; var 0 fra B-373). Eieren får `takeover_payout` (dagene som er igjen + 85 % av det
   hen investerte i perioden, høyst 85 % av budet, B-375) – speilet i `buyoutPay`; investeringer føres per eierperiode i
   `company_owners`. Verdien (minstebudet) er 10 dagers inntekt. Anbud fra før økonomien ble delt på 10 (B-311) regnes i
   dagens penger (`bid_in_new_money`, 086; `bidInNewMoney`/`fmtBid` i `net/world.ts`, B-374). Til når ingen kan by, regnes av `company_protected_until`. Et nytt selskapsbytte må ende eierens

@@ -39,9 +39,12 @@ import {
   policyOf,
   policySplit,
   protectedUntil,
+  bidBack,
   TAKEOVER,
   TAKEOVER_REASON,
+  TAKEOVER_V2,
   takeoverPayoff,
+  type TakeoverRules,
 } from "../game/control";
 import { regionName } from "../game/regions";
 import type { PolicyId } from "../game/types";
@@ -566,7 +569,7 @@ function ControlSection({
       ? Date.parse(ctl.protectedUntil)
       : null
     : protectedUntil(ctl.since, realNow());
-  const take = bidToTake(ctl.score, fund, ctl.value);
+  const take = bidToTake(ctl.score, fund, ctl.value, 2);
   const endsAt = c.concessionUntil ? Date.parse(c.concessionUntil) : null;
   return (
     <section className="g-control">
@@ -638,7 +641,7 @@ function ControlSection({
         </ul>
         <p className="g-muted g-small-text">
           Beredskapsfondet gir lite Kontroll før det er stort i forhold til selskapet ({fmtKr(ctl.value)}), men får du
-          et oppkjøpsbud, teller det med i motbudet ditt av seg selv.
+          et oppkjøpsbud, kan du bruke det til motbud.
         </p>
       </details>
       {takeoversOn && (
@@ -650,17 +653,22 @@ function ControlSection({
               {TAKEOVER.defenseHours} timer på deg.
             </li>
             <li>
-              Du kan legge inn et motbud med penger fra konsernkassa eller beredskapsfondet. Du får 95 % tilbake
-              etterpå, uansett utfall.
+              Du kan legge inn et motbud med penger fra konsernkassa eller beredskapsfondet. Samme beløp teller like mye
+              som i oppkjøpsbudet, og Kontrollen din gir et lite forsprang.
             </li>
             <li>
-              Oppkjøpsbudet måles mot Kontrollen din pluss motbudet. Er oppkjøpsbudet sterkest, kjøper den andre
-              selskapet, og du får betalt for dagene du mister og 85 % av det du har investert (aldri mer enn 85 % av
-              budet). Ellers beholder du det.
+              Den som står sterkest når tida er ute, vinner og betaler: holder motbudet, beholder du selskapet, og
+              motbudet er brukt opp. Er oppkjøpsbudet sterkest, kjøper den andre selskapet, du får betalt for dagene du
+              mister og 85 % av det du har investert (aldri mer enn 85 % av budet), og 75 % av motbudet tilbake.
+            </li>
+            <li>
+              Holder ikke oppkjøpsbudet, får den som bød 75 % tilbake, og ingen kan by på selskapet de neste{" "}
+              {TAKEOVER_V2.pauseDays} dagene.
             </li>
           </ol>
           <p className="g-muted g-small-text">
-            Når konsesjonen går ut, kommer et nytt anbud, og da stiller alle likt – også du.
+            Et motbud lønner seg bare når det koster mindre enn det du taper på å miste selskapet. Når konsesjonen går
+            ut, kommer et nytt anbud, og da stiller alle likt – også du.
           </p>
         </details>
       )}
@@ -676,7 +684,7 @@ function InvestPreview({ c, fund, amount }: { c: Company; fund: number; amount: 
   return (
     <p className="g-small-text g-invest-preview">
       Med {fmtKr(amount)} til: Kontroll <strong>{after}</strong> ({controlWord(after).word.toLowerCase()}), og et bud må
-      være ca. <strong>{fmtKr(bidToTake(after, fund, ctl.value))}</strong> for å ta selskapet.
+      være ca. <strong>{fmtKr(bidToTake(after, fund, ctl.value, 2))}</strong> for å ta selskapet.
     </p>
   );
 }
@@ -708,7 +716,7 @@ function PolicySection({
       <p className="g-small-text">
         Beredskapsfondet nå: <strong>{fmtKr(p.fund)}</strong>.{" "}
         {ownsCompany
-          ? "Får et selskap et oppkjøpsbud, teller fondet med i motbudet ditt av seg selv."
+          ? "Får et selskap et oppkjøpsbud, kan du bruke fondet til motbud."
           : "Du eier ikke noe selskap nå, så «Ta ut» gir mest."}
       </p>
       <div className="g-policy-opts" role="radiogroup" aria-label="Utbyttepolitikk">
@@ -749,7 +757,17 @@ function companyValue(c: Company): number {
 }
 
 /** Lønner budet seg (B-435): hva kjøperen tjener i dagene hen eier selskapet, mot budet, og hva som kommer tilbake */
-function PayoffNote({ c, bid, decidedAt }: { c: Company; bid: number; decidedAt: number }) {
+function PayoffNote({
+  c,
+  bid,
+  decidedAt,
+  rules,
+}: {
+  c: Company;
+  bid: number;
+  decidedAt: number;
+  rules: TakeoverRules;
+}) {
   if (bid <= 0 || c.estimatePerDay <= 0) return null;
   const p = takeoverPayoff({
     bid,
@@ -757,6 +775,7 @@ function PayoffNote({ c, bid, decidedAt }: { c: Company; bid: number; decidedAt:
     decidedAt,
     concessionUntil: c.concessionUntil ? Date.parse(c.concessionUntil) : null,
     renewalOpen: !!c.tender || !!c.nextOwner,
+    rules,
   });
   const days = Math.round(p.days);
   return (
@@ -843,8 +862,10 @@ function TakeoverSection({
                 </label>
               )}
               <p className="g-muted g-small-text">
-                Pengene du legger inn, gjør motbudet sterkere{t.defense ? ` (${fmtKr(t.defense)} nå)` : ""}. Du får 95 %
-                tilbake når oppkjøpet er avgjort. Beredskapsfondet teller med av seg selv.
+                Pengene du legger inn, gjør motbudet sterkere{t.defense ? ` (${fmtKr(t.defense)} nå)` : ""}.{" "}
+                {t.rules === 1
+                  ? "Du får 95 % tilbake når oppkjøpet er avgjort. Beredskapsfondet teller med av seg selv."
+                  : "Holder motbudet, er pengene brukt opp. Blir selskapet kjøpt likevel, får du 75 % tilbake. Fondet teller bare når du legger det inn her."}
               </p>
             </>
           )}
@@ -860,9 +881,14 @@ function TakeoverSection({
               )}
               <p className="g-muted g-small-text">
                 Skriv hele det nye budet. Står budet sterkest til slutt, får eieren betalt for dagene hen mister, og
-                resten av budet er brukt. Ellers får du 90 % tilbake.
+                resten av budet er brukt. Ellers får du {Math.round(bidBack(t.rules) * 100)} % tilbake.
               </p>
-              <PayoffNote c={c} bid={Math.max(t.bid, millions(amount))} decidedAt={Date.parse(t.closesAt)} />
+              <PayoffNote
+                c={c}
+                bid={Math.max(t.bid, millions(amount))}
+                decidedAt={Date.parse(t.closesAt)}
+                rules={t.rules}
+              />
             </>
           )}
         </div>
@@ -875,7 +901,8 @@ function TakeoverSection({
               Et oppkjøpsbud må være minst verdien (10 dagers inntekt), {fmtKr(w.minBid)}, og betales fra konsernkassa
               med én gang. Alle ser budet, og eieren har {TAKEOVER.defenseHours} timer på seg til å legge inn et motbud.
               Med minstebudet: {lead(w.attackMin, w.defenseNow)} før eieren gjør noe. Større bud, at du spiller hver uke
-              og egne verk i regionen gjør budet sterkere – med stort nok bud kan alle selskaper kjøpes.
+              og egne verk i regionen gjør budet sterkere – med stort nok bud kan alle selskaper kjøpes. Eieren kan
+              svare med et motbud; samme beløp teller like mye for begge, men motbudet er brukt opp hvis det holder.
             </p>
             {amountRow(
               "Legg inn oppkjøpsbud",
@@ -887,12 +914,15 @@ function TakeoverSection({
             )}
             <p className="g-muted g-small-text">
               Står budet sterkest, eier du selskapet i 14 dager fra kjøpet. Eieren får betalt for dagene hen mister og
-              det hen har investert; resten av budet går ut av spillet. Ellers får du 90 % tilbake.
+              det hen har investert; resten av budet går ut av spillet. Ellers får du{" "}
+              {Math.round(bidBack(w.rules) * 100)} % tilbake, og ingen kan by på selskapet de neste{" "}
+              {TAKEOVER_V2.pauseDays} dagene.
             </p>
             <PayoffNote
               c={c}
               bid={millions(amount) || w.minBid}
               decidedAt={realNow() + TAKEOVER.defenseHours * 3_600_000}
+              rules={w.rules}
             />
           </details>
         ) : (
@@ -915,7 +945,7 @@ function DefenseVerdict({ c, fund }: { c: Company; fund: number }) {
   const t = c.takeover!;
   const ctl = c.control;
   if (!ctl) return null;
-  const need = defenseNeeded(t.attack, ctl.score, t.defense ?? 0, fund, ctl.value);
+  const need = defenseNeeded(t.attack, ctl.score, t.defense ?? 0, fund, ctl.value, t.rules);
   if (need === 0)
     return (
       <p className="g-small-text g-defense-verdict is-ok">
@@ -927,7 +957,16 @@ function DefenseVerdict({ c, fund }: { c: Company; fund: number }) {
       <Icon name="warning" /> Slik det står nå, mister du selskapet.{" "}
       {need === null
         ? "Budet er så stort at et motbud ikke kan stå imot. Du får betalt for dagene du mister og det du har investert."
-        : `Legg inn et motbud på ca. ${fmtKr(need)}${t.defense ? " til" : ""} for å beholde det – du får 95 % tilbake etterpå.`}
+        : t.rules === 1
+          ? `Legg inn et motbud på ca. ${fmtKr(need)}${t.defense ? " til" : ""} for å beholde det – du får 95 % tilbake etterpå.`
+          : `Et motbud på ca. ${fmtKr(need)}${t.defense ? " til" : ""} holder det – men da er pengene brukt opp.`}
+      {need !== null && t.rules === 2 && ctl.buyout && (
+        <>
+          {" "}
+          Blir selskapet kjøpt, får du ca. {fmtKr(buyoutPay(t.bid, ctl.buyout).kasse)} for dagene du mister og det du
+          har investert.
+        </>
+      )}
     </p>
   );
 }

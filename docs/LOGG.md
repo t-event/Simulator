@@ -5,6 +5,26 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 362 – 2026-10-03: Oppkjøp regelsett 2 (B-441)
+
+**Brukeren ba om:** å bygge de nye oppkjøpsreglene med satsene hen valgte: Kontroll høyst 20 poeng, tapsgebyr 25 % (til
+ingen), pause 14 dager. Bud som alt er lagt inn, skal avgjøres etter reglene de ble lagt inn under.
+
+**Gjort:** migrasjon 123 (`takeovers.rules`, 1 for alle rader som fantes, 2 for nye; `takeover_defense_of2`,
+`takeover_refund`, `resolve_takeovers` med to regelsett, `takeover_window` med regelsett 2 og når pausen slutter,
+`world_status` patchet med `rules`; `cooldown_days` 14). Appen: `TAKEOVER_V2`, `bidBack`/`defenseBack` og regelsettet i
+`takeoverDefense`/`bidToTake`/`defenseNeeded`/`takeoverPayoff` (`game/control.ts`); `rules` i svarene (`net/world.ts`) og i
+beskjeden når et bud er avgjort; tekstene på Industrien, utbyttepolitikken og «Slik henger pengene sammen».
+Simulatoren har regelsett 2 med budtak 10 × V (samme utfall som 5 × V, og B-337 holder).
+
+**Testet:** migrasjonen i en transaksjon som ble rullet tilbake før den ble lagt inn: budet som pågår, regnes som før
+(samme forsvar); samme bud etter regelsett 2 gir eieren 75 % av motbudet ved salg; et motbud som holder, er brukt opp og
+kjøperen får 75 %; vinduet viser pausen. Etterpå: budet som pågår, har `rules` 1 og samme forsvar, `world_status` som
+spiller gir `rules`. `get_advisors` uten nye funn. `npm test` (ny test for regelsett 2), typesjekk, lint, simulatoren.
+
+**Gjenstår:** følg med på det første budet etter regelsett 2. Eierens valg om etterbetalingen, ryddingen av meldinger
+(108, før 1.11) og slagghåndteringen står fortsatt.
+
 ## Økt 361 – 2026-10-03: Oppkjøp – retning og simulator (B-440)
 
 **Brukeren ba om:** enig i at dagens regler gjør forsvar for billig, men ville ikke ha hele forslaget; ønsket en
