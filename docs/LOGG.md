@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 344 – 2026-10-02: Profiler, fase 3 – privatmeldinger og adminpanelet (B-421)
+
+**Gjort:** privatmeldinger etter eierens svar (av som standard, bare kontoer som har spilt litt, grenser på serveren,
+blokkering, rapportering) og adminpanelet bare eieren ser. Server 107 lagt inn; eieren lagt inn i `admins` for hånd.
+Fanen «Meldinger» i Skiftrapporten, «Send melding» på profilen, bryteren i Min profil, «Rapporter» også i chatten.
+#360 (fase 2) merget og publisert.
+
+**Funnet:** `dm_send` hadde en variabel med samme navn som en kolonne – rettet før appen kom ut. Supabase-connectoren
+holder igjen SQL med `delete` (og `update` på ekte rader) til eieren bekrefter, så ryddingen hver natt
+(`supabase/utkast/108`) er ikke lagt inn ennå.
+
+**Testet:** `npm test`, typesjekk, lint, build; SQL med to ekte kontoer (rullet tilbake, sjekket at ingenting ble
+liggende); Playwright 320/390/1 366 px med falsk server.
+
+**Gjenstår:** legg inn `utkast/108_meldinger_rydding.sql` når eieren kan bekrefte (før 1.11). 2.10-planen kl. 07:45 UTC.
+
+---
+
 ## Økt 343 – 2026-10-02: Profiler, fase 2 – Min profil (B-420)
 
 **Gjort:** kort tekst, profilmerke og tre utvalgte prestasjoner. Serveren (106, lagt inn) har nye felt i `profiles` og

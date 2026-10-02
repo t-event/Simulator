@@ -35,6 +35,7 @@ import { GoalsPage, GoalsSheet } from "./Goals";
 import { LeaderboardSheet } from "./Leaderboard";
 import { ChatButton, ChatSheet } from "./Chat";
 import { ProfileHost } from "./Profile";
+import { messagesRequestVer, onMessagesChange } from "./messagesStore";
 import { useDailyStatus } from "./useDaily";
 import { missionBonusReady } from "../game/daily";
 import { useSeasonStatus } from "./useSeason";
@@ -844,6 +845,11 @@ export function GameApp() {
   // Topplista er et eget ark bak pokalen igjen (B-214); Mål er en egen side
   const [boardOpen, setBoardOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  // «Send melding» på en profil (B-421) åpner Skiftrapporten på fanen Meldinger
+  const messagesVer = useSyncExternalStore(onMessagesChange, messagesRequestVer, messagesRequestVer);
+  useEffect(() => {
+    if (messagesVer > 0) setChatOpen(true);
+  }, [messagesVer]);
   // Lista topplista åpner på: kontrollrommet når den åpnes fra resultatet der (B-295)
   const [boardKind, setBoardKind] = useState<BoardKind>("konsern");
   const [bookChapter, setBookChapter] = useState<string | null>(null);

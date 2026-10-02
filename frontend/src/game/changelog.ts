@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 421,
+    date: "2026-10-02",
+    title: "Privatmeldinger",
+    items: [
+      "Send meldinger til andre spillere: trykk på et brukernavn og «Send melding». Samtalene står under «Meldinger» i Skiftrapporten.",
+      "Meldinger er av til du slår dem på i Min profil, og begge må ha dem på. Du kan blokkere spillere og rapportere meldinger.",
+      "Meldinger kan rapporteres også i Skiftrapporten.",
+    ],
+  },
+  {
     b: 420,
     date: "2026-10-02",
     title: "Min profil",

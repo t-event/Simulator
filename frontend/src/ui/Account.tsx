@@ -27,6 +27,8 @@ import {
   verifyCode,
 } from "../net/supabase";
 import { openProfile } from "./profileStore";
+import { AdminSheet } from "./Admin";
+import { fetchIsAdmin } from "../net/admin";
 import { fetchProfile, nicknameAvailable, nicknameProblem, setNickname as saveNickname } from "../net/leaderboard";
 import { ACCOUNT_FEATURES, type AccountFeature } from "../net/features";
 import { Card } from "./common";
@@ -488,6 +490,20 @@ export function AccountCard({
   const [flagged, setFlagged] = useState(false);
   // Brukernavnet som velges når kontoen opprettes (B-214)
   const [newNick, setNewNick] = useState("");
+  // Adminpanelet (B-421): knappen vises bare når serveren sier at kontoen er admin
+  const [admin, setAdmin] = useState(false);
+  const [adminOpen, setAdminOpen] = useState(false);
+  useEffect(() => {
+    if (!session) return setAdmin(false);
+    let alive = true;
+    fetchIsAdmin().then(
+      (a) => alive && setAdmin(a),
+      () => {},
+    );
+    return () => {
+      alive = false;
+    };
+  }, [session]);
 
   useEffect(() => {
     if (!session) {
@@ -723,6 +739,12 @@ export function AccountCard({
             Min profil
           </button>
         )}
+        {admin && (
+          <button type="button" onClick={() => setAdminOpen(true)}>
+            Adminpanel
+          </button>
+        )}
+        {adminOpen && <AdminSheet onClose={() => setAdminOpen(false)} />}
         {flagged && (
           <p className="g-account-error">
             Kontoen er holdt utenfor topplista fordi spillet vokste raskere enn det som er mulig. Ta kontakt hvis du

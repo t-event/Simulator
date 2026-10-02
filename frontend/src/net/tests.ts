@@ -2,6 +2,7 @@
  * Tester av nettlaget (B-125) uten nett: `fetch` byttes ut med en falsk tjeneste i minnet.
  * Kjøres med `npx tsx src/net/tests.ts` og i `npm test`.
  */
+import { DM_REFUSAL_TEXT, parseOverview, parseThread, type DmRefusal } from "./messages";
 import { parseProfile, seenText, sinceText } from "./profile";
 import type { GameState } from "../game/types";
 import { addCost, newGame } from "../game/engine";
@@ -2294,6 +2295,28 @@ const main = async () => {
     assert(q!.bio === "Smelter skrap" && q!.emblem === "nordlys" && q!.dm, "tekst, merke, meldinger");
     assert(q!.showcase.join() === "a,b,c", "høyst tre prestasjoner, bare tekst");
     assert(p!.bio === null && p!.showcase.length === 0 && !p!.dm, "uten Min profil");
+  });
+
+  await test("Privatmeldinger: svarene fra serveren tåles, og avvisningene har norsk tekst (B-421)", () => {
+    const o = parseOverview({
+      eligible: true,
+      open: false,
+      blocked: ["Bo", 3],
+      threads: [
+        { nick: "Anna", last: "Hei", at: "2026-10-02T02:00:00Z", mine: false, unread: "2" },
+        { last: "uten navn" },
+      ],
+    });
+    assert(o.eligible && !o.open && o.blocked.join() === "Bo", "status og blokkerte");
+    assert(o.threads.length === 1 && o.threads[0].unread === 2 && o.threads[0].at > 0, "samtaler");
+    assert(parseOverview(null).threads.length === 0 && !parseOverview(null).eligible, "tomt svar");
+    const t = parseThread({
+      nick: "Anna",
+      canSend: true,
+      messages: [{ id: 1, body: "Hei", mine: true, at: 0 }, { id: "x" }],
+    });
+    assert(t.canSend && !t.blocked && t.messages.length === 1 && t.messages[0].mine, "samtalen");
+    for (const k of Object.keys(DM_REFUSAL_TEXT)) assert(DM_REFUSAL_TEXT[k as DmRefusal].length > 5, `tekst for ${k}`);
   });
 
   setSaveListener(null);

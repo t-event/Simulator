@@ -7703,3 +7703,40 @@ spiller i en transaksjon som ble rullet tilbake (lenke og for lang tekst avvist,
 bort, tempo); Playwright med falsk server på 320, 390 og 1 366 px: fra «Min profil», lenke avvist med norsk tekst, lagret
 og vist, ingenting avkortet, ingen horisontal scrolling.
 Endringslogg: ja.
+
+## B-421 Profiler, fase 3: privatmeldinger og adminpanelet (2026-10-02)
+Status: gjennomført, med ett unntak: ryddingen hver natt er skrevet, men ikke lagt inn (se under).
+Bakgrunn: eierens svar 2.10 (B-419): privatmeldinger etter anbefalingen med fri tekst, og et adminpanel bare eieren ser,
+der eieren leser rapporterte meldinger.
+Gjort:
+- Server (107, lagt inn): tabellene `dm_messages`, `dm_threads`, `dm_blocks` (blokkering slås av og på), `reports`
+  (kopi av meldingen), `admins` og `admin_log` – RLS på, ingen tilgang for `anon`/`authenticated`; alt går gjennom
+  funksjoner. `dm_send`: begge må ha meldinger på, avsender og mottaker må ha spilt litt (`dm_eligible`: brukernavn, ikke
+  gjest, ikke sperret/flagget, storverk eller minst 3 ekte aktive dager), høyst 500 tegn, ingen lenker, ikke oftere enn
+  hvert 3. s og høyst 20 på 10 min, høyst 5 nye samtaler per ekte dag. Den som er blokkert eller skriver til en med
+  meldinger av, får samme svar («tar ikke imot meldinger»). `dm_overview`, `dm_thread` (merker som lest), `dm_unread`,
+  `dm_block` og `message_report` (privatmelding til meg eller melding i Skiftrapporten som ikke er min). Ingen funksjon
+  viser meldinger eldre enn 30 dager.
+- Adminpanelet: `is_admin`, `admin_reports`, `admin_act` (skjul meldingen, avvis, sperr kontoen – sperring skjuler også
+  meldingen) og `admin_unban`. Hver funksjon sjekker `admins` mot `auth.uid()` først; hver handling logges i `admin_log`.
+  Eieren er lagt inn i `admins` for hånd (ikke i repoet).
+- Appen: fanen «Meldinger» i Skiftrapporten (samtaler, uleste, samtalen med blokkering og «Rapporter»), «Send melding» på
+  profilen til en som tar imot meldinger, bryteren «Ta imot privatmeldinger» i Min profil, «Rapporter» på andres
+  meldinger i Skiftrapporten, prikk på chatknappen ved uleste meldinger, og «Adminpanel» under kontoen – bare når
+  serveren sier at kontoen er admin.
+- **Ikke lagt inn:** `dm_cleanup` med pg_cron «meldinger-rydding» (`supabase/utkast/108_meldinger_rydding.sql`).
+  Supabase-connectoren holder igjen funksjoner som sletter til eieren bekrefter, og eieren var ikke til stede. Ingen
+  melding er eldre enn 30 dager før 1.11.2026, og ingen funksjon viser eldre meldinger, så det haster ikke – men den skal
+  inn før det.
+- En feil funnet i testen og rettet før appen ble tatt i bruk: variabelen for meldingsteksten i `dm_send` het det samme
+  som en kolonne (`b`), så sendingen feilet.
+Konto (B-149): krever konto – regel 3 (andre spillere). Gjester får ikke sende, lese eller rapportere (står ikke i
+`guest_gate`). Står i KONTO.md og `ACCOUNT_FEATURES` (`profiler` dekker profilene; meldinger vises bare med konto).
+Ikke endret: økonomien, verdensjobbene, topplistene og rapportgrunnlaget.
+Testet: `npm test` (svarene fra serveren og tekstene), typesjekk, lint, build. SQL med to ekte kontoer i en transaksjon
+som ble rullet tilbake (ingenting ble liggende igjen, sjekket etterpå): meldinger av → avvist, lenke og for lang tekst
+avvist, sendt, tempo, til seg selv avvist, oversikt og ulest hos mottakeren, lest etter `dm_thread`, rapport (samme
+rapport to ganger gir én), blokkering → «stengt», admin ser rapporten og skjuler meldingen, ikke-admin er ikke admin.
+Playwright med falsk server på 320, 390 og 1 366 px: prikk, «Send melding» fra profilen, lenke avvist, sendt, rapportert,
+blokkert, tilbake til lista, adminpanelet med handlingen – ingenting avkortet, ingen horisontal scrolling.
+Endringslogg: ja.
