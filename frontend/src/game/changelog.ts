@@ -15,6 +15,12 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 439,
+    date: "2026-10-03",
+    title: "Ryddigere svar på rapporter",
+    items: ["Samtalene om en rapport holdes helt adskilt: hver spiller ser bare sin egen samtale med admin."],
+  },
+  {
     b: 438,
     date: "2026-10-02",
     title: "Svar på rapporter",

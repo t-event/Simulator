@@ -5,6 +5,17 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 360 – 2026-10-03: Én samtale om gangen i adminpanelet (B-439)
+
+**Brukeren ba om:** svar på om spillerne ser begge svarene i rapporten (de gjør ikke det), og at panelet ikke blander dem.
+
+**Gjort:** fanene velger samtalen som vises; antall meldinger i fanen; tekst om hvem som ser samtalen. #376 merget og
+publisert.
+
+**Testet:** Chromium 390 px mot en falsk server, typesjekk, lint, `npm test`.
+
+**Gjenstår:** eierens svar på ny regel for oppkjøpsbud («vinneren betaler, og pengene går inn i selskapet»), etterbetalingen.
+
 ## Økt 359 – 2026-10-02: Svar på rapporter (B-438)
 
 **Brukeren ba om:** å kunne svare på en rapport i adminpanelet før et valg tas, varsel når noen rapporterer, og varsel til

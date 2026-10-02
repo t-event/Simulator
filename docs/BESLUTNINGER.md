@@ -8129,3 +8129,15 @@ px mot en falsk server, `npm test`, typesjekk, lint, build.
 Endringslogg: ja.
 Konto (B-149): krever konto (mellom spillere, regel 3); ikke gjester.
 
+## B-439 Adminpanelet viser én samtale om gangen (2026-10-03)
+Status: gjennomført.
+Bakgrunn: eieren så begge samtalene om en rapport (med den som rapporterte og den som skrev) i samme liste og lurte på
+om spillerne ser hverandres svar. Det gjør de ikke – `my_report_threads` gir hver spiller bare sin egen samtale – men
+panelet blandet dem.
+Beslutning: fanene «Svar …» og «Spør …» står øverst i samtalen og viser bare samtalen med den personen, med antall
+meldinger i fanen. Under står «Bare X ser denne samtalen» (for den som skrev meldingen: «… og aldri hvem som
+rapporterte»). Ingen endring på serveren.
+Testet: Chromium 390 px mot en falsk server (to samtaler, riktig fane viser riktig samtale), typesjekk, lint, `npm test`.
+Endringslogg: ja.
+Konto (B-149): uendret (adminpanelet).
+
