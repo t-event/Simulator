@@ -2,6 +2,7 @@
 --
 --   begin;
 --   <innholdet i supabase/113_v0_k1_skygge.sql>
+--   <innholdet i supabase/114_utbytte_gulv_skygge_v0.sql>   (jobbnavnet skygge_v0 og world_health, B-425)
 --   <innholdet i denne fila>
 --   select name, ok, detail from t_res order by n;
 --   rollback;
@@ -122,9 +123,9 @@ begin
       and n = (select count(*) from public.dividends dv where dv.day >= today - 3 and dv.day < today
                  and not public.user_is_guest(dv.user_id)) + (case when d < today - 3 then 1 else 0 end),
     n || ' / ' || n2);
-  insert into t_res (name, ok, detail) values ('skyggejobb: world_health «skygge» uten feil',
-    exists (select 1 from public.world_jobs where job = 'skygge' and failed_units = 0 and last_ok_at is not null),
-    coalesce((select failed_units::text from public.world_jobs where job = 'skygge'), 'mangler'));
+  insert into t_res (name, ok, detail) values ('skyggejobb: world_health «skygge_v0» uten feil',
+    exists (select 1 from public.world_jobs where job = 'skygge_v0' and failed_units = 0 and last_ok_at is not null),
+    coalesce((select failed_units::text from public.world_jobs where job = 'skygge_v0'), 'mangler'));
 
   select sum(amount) into after_div from public.dividends;
   select sum(balance) into after_tre from public.treasury;

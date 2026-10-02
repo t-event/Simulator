@@ -531,14 +531,16 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `SEQUENCE_SOON_MIN` og køen har plass. Endres regelen, mål produksjon og ventetid på et fullt storverk med flere frø.
 - **Skrapvarsel** (B-219): varsler i grensesnittet bruker `scrapAlert` (neste charge står fast), ikke `scrapShort` (en
   type i resepten er under én charge – ovnen fyller da opp med annet). Ellers varsles det om returskrap som ikke kan kjøpes.
-- **V0/K-1 i skygge** (B-424, 113): `world_shadow_tick` (cron `verden-skygge`, minutt 17) trekker hendelser og logger
+- **V0/K-1 i skygge** (B-424, 113; jobbnavnet `skygge_v0` fra 114, B-425 – «skygge» er revisjonen av verdiene fra mobilen,
+  som bare melder feil): `world_shadow_tick` (cron `verden-skygge`, minutt 17) trekker hendelser og logger
   `program_shadow_day` av utbyttet og bidraget som alt er betalt – den flytter aldri penger og kalles aldri fra
   `world_tick`. Bryterne `config.world.programs.enabled`/`events_enabled` står av til eieren bestemmer (etter
   skyggerapporten, `program_shadow_report()`). Skriv aldri de trukne datoene i noe som committes. Stopp skyggen med
   `select cron.unschedule('verden-skygge');`.
 - **Verdensjobbene** (B-401, 101): målingene, utbyttet, bidraget og selskapsinntekten behandler én spiller (ett selskap)
   per deltransaksjon (`begin … exception` rundt hver), logger feil med `world_job_unit_error` og teller med
-  `world_job_start`/`world_job_finish`. Nye jobber i `world_tick` følger samme mønster, og en betaling krediterer kassa
+  `world_job_start`/`world_job_finish`. En jobb som går sjeldnere enn hvert 20. minutt, eller bare melder feil, må ha
+  sin egen regel i `world_health` (114_b), ellers står den som «står». Nye jobber i `world_tick` følger samme mønster, og en betaling krediterer kassa
   bare når raden ble satt inn (`on conflict do nothing` + `if found`). Sjekk `select * from world_health()` og
   `world_health_players()` når en økt rører verdensjobbene eller pengene på serveren.
 - **Databasen mot repoet** (B-403): sjekk drift med sjekksum per funksjonskropp –

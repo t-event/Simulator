@@ -7807,3 +7807,26 @@ Gjort:
 Endringslogg: nei – spillerne merker ingenting.
 Konto (B-149): ikke aktuelt ennå (serverside, i skygge). Når K-1 slås på: krever konto (K1-PROGRAMMER.md avsnitt 9).
 
+## B-425 Etter kodegjennomgangen 2.10: gulvet for utbyttet, egen jobb for V0 og etterbetalingen regnet på nytt (2026-10-02)
+Status: gjennomført. Etterbetalingen venter på gjennomgang og en egen beslutning om beløpet. Erstatter tallene for
+etterbetalingen i B-423 (1 875 716 kr til ni spillere).
+Bakgrunn: eierens kodegjennomgang 2.10 (fram til #364) fant blant annet at 111 ikke sikret at eldre dager bare betales
+med eierens godkjenning, og at dry-run 112 kunne regne feil beløp. Eieren bekreftet i databasen at gulvet og jobbnavnet
+var på plass, og ba om at helsesjekken følger V0-jobbens intervall, at migrasjonshistorikken bevares (endringene i 114,
+113 urørt), at «skygge» ikke behandles som ubrukt, og at den nye summen omtales som et anslag.
+Gjort:
+- **114:** `pay_dividends` begynner aldri på en dag før 2.10 (løkka kunne begynne på en eldre ubetalt dag for den som
+  ble tatt med etter 111). Ingen spiller hadde slike dager. V0-skyggen har egen jobb `skygge_v0`; «skygge» er
+  revisjonen av verdiene fra mobilen (095) og skal ikke slettes. Prøvekjørt først: kassene og utbytteradene uendret.
+- **114_b:** `world_health` følger jobbens intervall: `skygge_v0` står først etter 75 minutter (går hver time),
+  `skygge` melder bare feil og vises som «feil i jobben» når siste feil kom innen en måling, ellers «ok».
+- **112 utgave 2:** ordrene angres i rekkefølge fra den nyeste, så hver forskjell regnes på verket slik det var da;
+  tidsvinduet går til første tegn på at verket ble regnet som ferdig (tidslinja, en ny ordre eller en postering
+  spilleren selv utløste). Anslaget: 2 549 257 kr til elleve spillere (tabellen i RAPPORT-2026-10-02.md, avsnitt 7).
+  Tidsvinduet er en øvre grense, men dagens lagrede spill og målingsvektingen trekker begge veier – summen er et anslag.
+- Testfila for skyggen kjøres nå med 113 og 114 og sjekker `skygge_v0`.
+Ikke gjort: ingen betaling; ingen sletting av raden «skygge». Resten av funnene i gjennomgangen tas i egne PR-er
+(lagring og kontobytte først, så kontrollrom og spillmotor).
+Endringslogg: nei – spillerne merker ingenting.
+Konto (B-149): ikke aktuelt (serverside).
+

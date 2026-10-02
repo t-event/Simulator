@@ -3,7 +3,7 @@
 **Lagt inn 2.10.2026 (B-424):** V0-skyggen og K-1-tabellene står i `supabase/113_v0_k1_skygge.sql` (før utkast 103,
 klargjort 1.10, B-409), med tester i `supabase/utkast/113_v0_k1_skygge_test.sql`. Prøvekjørt først i en transaksjon som
 ble rullet tilbake: ingen penger flyttet, konsernverdien uendret for alle. Skyggejobben `verden-skygge` går én gang
-i timen (minutt 17) og logger fra 2.10. Bryterne `enabled` og `events_enabled` står av; ingenting vises.
+i timen (minutt 17), logger fra 2.10 og står som `skygge_v0` i `world_health()` (114, B-425). Bryterne `enabled` og `events_enabled` står av; ingenting vises.
 Rapporten: `select public.program_shadow_report();` (gir kallenavn – skriv bokstaver i det som committes).
 
 **Status:** godkjent av eieren 30.9.2026 (B-390) med presiseringene under. Ingenting er bygget, ingen tall i verden er

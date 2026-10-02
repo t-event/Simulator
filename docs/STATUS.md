@@ -49,7 +49,7 @@ regnes av serveren i ekte tid.
 - **Utbytte** fra datterverkene hver ekte dag (`pay_dividends`, `dividend_from_state`, snitt, B-304/B-362), etter
   utbyttepolitikken (resten til forsvarsfondet, B-334) og aktivitetskravet (B-327). Fullt konsern ≈ 35–38 mill./dag.
   Ferdige byggeprosjekter gjøres ferdige ved hver måling, også for den som er borte, og den som har solgt sitt siste
-  verk, får utbyttet for målingene som er tatt (111, B-423).
+  verk, får utbyttet for målingene som er tatt (111, B-423). Dager før 2.10 betales aldri automatisk (114, B-425).
 - **Selskapsinntekt** for den som eier et strategisk selskap (skraplageret er det eneste aktive).
 - Dagen skifter ved midnatt norsk tid (`world_today`).
 - **Verdensjobbene** (B-401): hver spiller (hvert selskap) behandles for seg i målingene, utbyttet, bidraget og
@@ -169,7 +169,7 @@ regnes av serveren i ekte tid.
   `K1-PROGRAMMER.md` (B-389): serveren har i dag ingen hendelser i konsernverdenen, så K-1 trenger et lite, nøytralt
   hendelseslag (V0) for at Teknologi, Robusthet og Driftsytelse skal ha ekte effekt. Eieren godkjente V0, satsingene
   1/3/8 % og trekk fra hver utbetaling (B-390). V0 i skygge og K-1-tabellene er lagt inn 2.10 (113, B-424): hendelsene
-  trekkes og logges hver time uten virkning og uten visning, K-1-bryteren står av; skyggedataene går til eieren før noe
+  trekkes og logges hver time uten virkning og uten visning (jobben `skygge_v0` i `world_health`, B-425), K-1-bryteren står av; skyggedataene går til eieren før noe
   slås på. Ingenting er slått på. Programmene prises av normalt
   datterverksutbytte, ikke bidraget (B-392); Konsernverdi endres ikke. Satsene er foreløpig 0,5/1,5/4 % med 80 % vern på
   Høy (B-393); skyggen regner også 1/3/8 % og etableringen for seg.
