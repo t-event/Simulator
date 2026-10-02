@@ -4479,6 +4479,31 @@ test("Lønner oppkjøpet seg (B-435): inntekten i dagene kjøperen eier selskape
   assert(r.days === 30 && r.net > 0, `30 dager: ${r.days}, ${r.net}`);
 });
 
+test("Arbeidsmiljøkortene (B-436): riktig håndtering gir bedre trivsel, å se bort gir dårligere, fagboka låses opp", () => {
+  for (const id of ["trakassering", "rasisme", "utenfor"]) {
+    const g = newGame(436);
+    g.stage = 0;
+    for (let i = 0; i < 6; i++) g.workers.push({ ...makeCandidate(g, "ovn"), hiredDay: 1 });
+    assert(makeDecision(g, id) === null, `${id} i garasjen`);
+    g.stage = 2;
+    const card = makeDecision(g, id)!;
+    assert(!!card && card.options.length >= 2, `kortet ${id} mangler`);
+    assert(!/kvot/i.test(card.text + card.options.map((o) => o.label).join()), `${id} nevner kvoter`);
+    g.morale = 60;
+    g.pendingDecision = { ...card, resumeSpeed: 1 };
+    resolveDecision(g, 0);
+    assert(g.morale === 66, `${id}: riktig håndtering ga trivsel ${g.morale}`);
+    assert(g.knowledge.includes("arbeidsmiljo"), `${id}: fagboka ble ikke låst opp`);
+    const workers = g.workers.length;
+    g.morale = 60;
+    g.pendingDecision = { ...card, resumeSpeed: 1 };
+    resolveDecision(g, card.options.length - 1);
+    assert(g.morale === 50, `${id}: å se bort ga trivsel ${g.morale}`);
+    assert(g.workers.length >= workers - 1, `${id}: flere enn én sluttet`);
+  }
+  assert(QUIZ.arbeidsmiljo?.length === 2, "quizen til arbeidsmiljø mangler");
+});
+
 test("Quizen (B-428): svaralternativene står i blandet rekkefølge, men alltid den samme for et spørsmål", () => {
   const qs = Object.values(QUIZ).flat();
   let moved = 0;

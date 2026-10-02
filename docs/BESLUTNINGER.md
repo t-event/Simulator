@@ -8062,3 +8062,21 @@ Beslutning:
 Testet: motortest med eierens tall, `npm test`, typesjekk, lint, build.
 Endringslogg: ja.
 Konto (B-149): uendret (selskapene krever konto som før).
+
+## B-436 Arbeidsmiljø: valgkort om trakassering, rasisme og utenforskap (2026-10-02)
+Status: gjennomført.
+Bakgrunn: en spiller foreslo noe om «kvotering» og rasisme under Folk. Eieren valgte arbeidsmiljøkort framfor kvoter.
+Beslutning:
+- Tre nye hendelseskort fra nivå 1 med minst fire ansatte: **trakassering** (en kollega kommenterer kropp og utseende),
+  **rasisme** («spøker» i pauserommet) og **utenfor** (en ansatt holdes utenfor på skiftet).
+- Første valg er riktig håndtering (ta det på alvor, si tydelig fra, følge opp): trivsel +6. Å se bort: trivsel −10, og
+  den det gjelder slutter med 50 % sjanse. Trakasseringskortet har også «ordne det seg imellom»: −4 og 25 %.
+- Det første kortet låser opp fagbokkapitlet **«Arbeidsmiljø og varsling»** (del «Folk og kunder») med to quizspørsmål:
+  forbud mot trakassering og diskriminering, like muligheter (ingen kvote for vanlige ansatte), varsling og rutinen med
+  fem ansatte eller flere, og hvordan man følger opp. Gradvis synlighet (B-180): kapitlet vises først når det trengs.
+- Ingen kvoter i spillet, og ingen nye tall eller valutaer – bare trivsel, som før.
+- Testspilleren velger riktig håndtering (som en fornuftig leder).
+Testet: motortest (trivsel opp og ned, fagboka låses opp, ingen nevner kvoter), `balance.ts`, `npm test`, typesjekk, lint.
+Endringslogg: ja.
+Konto (B-149): krever ikke konto (eget verk, spilltid).
+
