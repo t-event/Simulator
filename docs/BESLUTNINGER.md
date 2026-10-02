@@ -8141,3 +8141,37 @@ Testet: Chromium 390 px mot en falsk server (to samtaler, riktig fane viser rikt
 Endringslogg: ja.
 Konto (B-149): uendret (adminpanelet).
 
+## B-440 Oppkjøp: retningen for nye regler, og simulatoren (2026-10-03)
+Status: retning godkjent av eieren; satsene venter på eierens valg. Ingenting er endret i spillet ennå.
+Bakgrunn: et oppkjøpsbud på skraplageret ble en budkrig. Med dagens regler koster eierens motbud bare 5 % (95 % tilbake
+uansett utfall), mens kjøperen betaler hele budet hvis hen vinner og bare eier selskapet i ca. 14 dager. Et vinnende bud
+måtte være rundt 900 mill., mot ca. 268 mill. i inntekt på 14 dager. Eieren avviste forslaget om at hele motbudet skal
+bli Kontroll og at tapsgebyret skal gå til motparten (det styrker eieren foran neste forsøk og gir eieren penger til
+neste forsvar).
+Beslutning (retning):
+1. Vinneren betaler sitt bud. Eierens vinnende motbud brukes opp – ingen automatisk investering eller ekstra Kontroll.
+2. Begge får sammenlignbare vilkår ved tap. Et tapsgebyr går ikke til motparten.
+3. Budberegningen justeres samtidig: samme beløp gir sammenlignbar styrke for begge. Eieren kan ha en begrenset fordel
+   fra Kontroll; fond som brukes i et motbud, koster som penger.
+4. Pause mellom oppkjøpsforsøk på samme selskap.
+5. Satsene velges etter simulering. Pågående bud avgjøres etter reglene de ble lagt inn under.
+Simulatoren: `npx tsx src/game/takeoverSim.ts` (`--kort` for sammendraget). Eieren svarer sist og velger det billigste
+motbudet som holder hvis det koster mindre enn det hen taper; kjøperen velger budet som gir mest eller gir seg. Eieren
+får som i dag betalt for dagene hen mister, så det eieren taper ved et salg, er en «eierverdi» (0, 7 eller 14 dagers
+inntekt). Resultater 3.10 (selskapet tjener 19,1 mill. per dag, verdi 191 mill., 12 scenarier per regel):
+- **Nå:** eier som vil beholde (eierverdi 7–14 dager): 0 av 12 oppkjøp lønner seg. Eieren vinner alltid fordi motbudet
+  er nesten gratis.
+- **Ny regel (Kontroll ≤ 20 poeng, samme vekt 60 og tak 5 × V for begge, tapsgebyr 10–25 %, pause 7–14 dager):**
+  eierverdi 0–7 dager: oppkjøp lønner seg i 12 av 12, pris 191–244 mill. Eierverdi 14 dager: 0 av 12 – eieren som vil
+  beholde selskapet, gjør det, men må betale for det. Det er et reelt valg for begge.
+- Kontroll ≤ 30: eieren beholder litt oftere (9 av 12 oppkjøp ved eierverdi 7). Kontroll ≤ 10: nesten ingen fordel.
+- **Plage:** med «vinneren betaler» koster det en aktiv eier (Kontroll 62) ca. 133 mill. å avvise et minstebud, mens
+  kjøperen bare taper gebyret (19 mill. med 10 %, 48 mill. med 25 %). Pausen begrenser det: 14 dager gir høyst ca. 1,8
+  forsøk per 30 dager (7 dager: 3). Eieren kan alltid velge å selge og få betalt for dagene, så plagen er et valg, men
+  gebyret bør ikke være for lavt.
+- Minstebud 1,5 × V stopper alle oppkjøp (dyrere enn 14 dagers inntekt) – minstebudet bør bli 1 × V.
+Foreslåtte satser (til eierens valg): Kontroll gir høyst 20 poeng, vekt 60 og tak 5 × V for begge, tapsgebyr 25 % for
+begge (til ingen), pause 14 dager etter et avgjort forsøk, minstebud 1 × V, betalingen til eieren ved salg som i dag.
+Endringslogg: nei.
+Konto (B-149): uendret.
+
