@@ -231,8 +231,8 @@ frontend/public/  PWA: manifest, ikoner (icon.svg er kilden; PNG-ene lages fra d
 supabase/      SQL-migrasjonene, nummerert. Kjøres i prosjektet med Supabase-connectoren (apply_migration) og
                legges her samtidig, så repoet speiler databasen. Sjekk get_advisors (security) etter hver DDL-endring.
 supabase/functions/ Edge-funksjoner (eksport, B-345)
-supabase/utkast/ Spørringer som bare leser (f.eks. dry-run av økonomireformen) og utkast som ikke er kjørt (099, 103 V0/K-1 i
-               skygge med testfil) – ikke migrasjoner. Et utkast testes med `begin; <utkast>; <test>; select … ; rollback;`
+supabase/utkast/ Spørringer som bare leser (f.eks. dry-run av økonomireformen) og utkast som ikke er kjørt (108 ryddingen av
+               meldinger, 112 dry-run av etterbetalingen; testfila til 113) – ikke migrasjoner. Et utkast testes med `begin; <utkast>; <test>; select … ; rollback;`
 docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretningen for sluttspillet, B-180), UI.md,
                OKONOMI.md (økonomianalysen og reform 2, B-301), KONSERNBIDRAG.md (hovedverkets bidrag i ekte tid, B-313),
                OKONOMI-KONTROLL.md (kontrollen av modellen med tall og svakheter, B-324),
@@ -531,6 +531,11 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `SEQUENCE_SOON_MIN` og køen har plass. Endres regelen, mål produksjon og ventetid på et fullt storverk med flere frø.
 - **Skrapvarsel** (B-219): varsler i grensesnittet bruker `scrapAlert` (neste charge står fast), ikke `scrapShort` (en
   type i resepten er under én charge – ovnen fyller da opp med annet). Ellers varsles det om returskrap som ikke kan kjøpes.
+- **V0/K-1 i skygge** (B-424, 113): `world_shadow_tick` (cron `verden-skygge`, minutt 17) trekker hendelser og logger
+  `program_shadow_day` av utbyttet og bidraget som alt er betalt – den flytter aldri penger og kalles aldri fra
+  `world_tick`. Bryterne `config.world.programs.enabled`/`events_enabled` står av til eieren bestemmer (etter
+  skyggerapporten, `program_shadow_report()`). Skriv aldri de trukne datoene i noe som committes. Stopp skyggen med
+  `select cron.unschedule('verden-skygge');`.
 - **Verdensjobbene** (B-401, 101): målingene, utbyttet, bidraget og selskapsinntekten behandler én spiller (ett selskap)
   per deltransaksjon (`begin … exception` rundt hver), logger feil med `world_job_unit_error` og teller med
   `world_job_start`/`world_job_finish`. Nye jobber i `world_tick` følger samme mønster, og en betaling krediterer kassa

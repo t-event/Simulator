@@ -5,7 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
-## Økt 346 – 2026-10-02: Rapporten 2.10 og utbytterettingen (B-423)
+## Økt 347 – 2026-10-02: V0 og K-1 i skygge (B-424)
+
+**Brukeren ba om (kjøringen kl. 07:45, punkt 6):** bygg V0/K-1 i skygge når punkt 1–4 er ferdige og grunnlaget bevart;
+prøvekjør først og vis at betalingene og konsernverdien er uendret.
+
+**Gjort:** utkast 103 prøvekjørt med testene (rullet tilbake, alt OK, ingen penger flyttet, konsernverdien lik for alle).
+Lagt inn som 113, rådene sjekket (to hjelpefunksjoner fikk fast `search_path`), skyggejobben `verden-skygge` startet og
+kjørt én gang for hånd: én hendelse per region trukket, jobben «ok». Docs: K1-PROGRAMMER, STATUS, CLAUDE.md.
+
+**Testet:** prøvekjøringen, rapporten etter innleggingen (rullet tilbake), `world_health()`, `get_advisors`.
+
+**Gjenstår:** skyggerapporten til eieren etter noen uker; svar på etterbetalingen og slagghåndteringen (B-423).
+
+ – 2026-10-02: Rapporten 2.10 og utbytterettingen (B-423)
 
 **Brukeren ba om (faste kjøringer kl. 07:00 og 07:45):** sjekk skraplagerets utbetalinger 29.9–1.10, rapporter
 pengestrømmene per ekte dag og per spiller, nattkontroll, bevar grunnlaget, prøv utkast 099 og legg den inn bare uten

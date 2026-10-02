@@ -1,8 +1,7 @@
--- UTKAST – IKKE KJØRT. V0 (verdenshendelser) og K-1 (konsernprogrammer) i skygge, klargjort 1.10.2026 (B-409).
---
--- Legges inn først etter rapporten 2.10, når eieren har gått gjennom PR-en (rekkefølgen i K1-PROGRAMMER.md avsnitt 9).
--- Spesifikasjonen: docs/K1-PROGRAMMER.md (B-389–B-393). Prøvekjørt i transaksjoner som ble rullet tilbake
--- (supabase/utkast/103_v0_k1_skygge_test.sql).
+-- LAGT INN 2.10.2026 (B-424), etter rapporten 2.10 og en prøvekjøring som ble rullet tilbake: alle testene besto, ingen
+-- penger flyttet (utbytte, kasser, bidrag, fond, kassabok, selskapsinntekt) og konsernverdien uendret for alle. Var utkast
+-- 103 (klargjort 1.10, B-409). Spesifikasjonen: docs/K1-PROGRAMMER.md (B-389–B-393). Testene:
+-- supabase/utkast/113_v0_k1_skygge_test.sql. Skyggejobben (cron «verden-skygge») startet samme dag – se nederst.
 --
 -- Hva det gjør når det legges inn:
 -- * Hendelsene (strømsjokk, driftsuro, høykonjunktur) trekkes per region og lagres i world_events med shadow = true.
@@ -624,7 +623,11 @@ revoke execute on function public.world_events_ensure(date) from public, anon, a
 revoke execute on function public.program_shadow_log_day(uuid, date) from public, anon, authenticated;
 revoke execute on function public.world_shadow_tick() from public, anon, authenticated;
 revoke execute on function public.program_shadow_report(date, date, jsonb) from public, anon, authenticated;
+-- Rådene (get_advisors) etter innleggingen: fast search_path også på de to rene hjelpefunksjonene (113_b)
+alter function public.world_event_boom_size(jsonb) set search_path = public;
+alter function public.world_is_winter(date) set search_path = public;
+revoke execute on function public.world_is_winter(date) from public, anon, authenticated;
 
--- Cron-jobben startes først når eieren sier fra (ikke en del av utkastet som legges inn):
+-- Cron-jobben startet 2.10.2026 etter innleggingen (eierens plan for 2.10, B-402/B-424) – ikke en del av migrasjonen:
 --   select cron.schedule('verden-skygge', '17 * * * *', $$select public.world_shadow_tick()$$);
 -- Stopp: select cron.unschedule('verden-skygge');
