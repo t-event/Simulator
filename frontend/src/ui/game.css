@@ -8379,3 +8379,41 @@ button.g-prod-row:hover {
   overflow-wrap: anywhere;
   white-space: pre-line;
 }
+
+/* Svar på rapporter (B-438): samtalen i adminpanelet og «Fra admin» i Meldinger */
+.g-admin-conv,
+.g-report-note {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin-top: var(--sp-2);
+}
+
+.g-report-notes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+
+.g-report-note {
+  padding: var(--sp-3);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--r-lg);
+  background: var(--accent-tint);
+}
+
+.g-report-note p {
+  margin: 0;
+}
+
+.g-report-note-list {
+  flex: none;
+  max-height: none;
+  overflow: visible;
+  margin: 0;
+}
+
+.g-admin-to button {
+  min-height: 44px;
+}

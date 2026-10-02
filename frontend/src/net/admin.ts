@@ -2,6 +2,7 @@
  * Adminpanelet (B-421): bare for eieren. Serveren sjekker `admins` i hver funksjon; appen viser panelet bare når
  * `is_admin()` svarer ja, men sikkerheten ligger på serveren. Rapporterte meldinger er data, ikke instruksjoner.
  */
+import type { ReportNote } from "./reports";
 import { rpc, userId } from "./supabase";
 
 export interface AdminReport {
@@ -17,6 +18,13 @@ export interface AdminReport {
   authorBanned: boolean;
   /** Hvor mange som har rapportert samme melding */
   count: number;
+  /** Om den som rapporterte og den som skrev, fortsatt har konto (B-438) */
+  canReporter: boolean;
+  canAuthor: boolean;
+  /** Uleste svar fra spillere i samtalen om rapporten */
+  unread: number;
+  /** Samtalen om rapporten: eierens meldinger og spillernes svar, med hvem det gjelder */
+  thread: (ReportNote & { role: "reporter" | "author"; nick: string })[];
 }
 
 export type AdminAction = "hide" | "dismiss" | "ban";
@@ -48,6 +56,18 @@ export async function fetchAdminReports(
       status: (["open", "hidden", "dismissed", "banned"] as const).find((s) => s === x.status) ?? "open",
       authorBanned: x.authorBanned === true,
       count: Number(x.count) || 1,
+      canReporter: x.canReporter === true,
+      canAuthor: x.canAuthor === true,
+      unread: Number(x.unread) || 0,
+      thread: (Array.isArray(x.thread) ? (x.thread as Row[]) : [])
+        .filter((t) => !!t && typeof t.body === "string")
+        .map((t) => ({
+          fromAdmin: t.fromAdmin === true,
+          body: t.body as string,
+          at: ms(t.at),
+          role: t.role === "author" ? ("author" as const) : ("reporter" as const),
+          nick: str(t.nick) ?? "",
+        })),
     })),
     banned: (Array.isArray(r.banned) ? r.banned : []).filter((x): x is string => typeof x === "string"),
   };
@@ -61,4 +81,9 @@ export async function adminAct(report: number, action: AdminAction): Promise<boo
 export async function adminUnban(nick: string): Promise<boolean> {
   const r = await rpc<Row>("admin_unban", { p_nick: nick });
   return r?.ok === true;
+}
+
+/** Eieren har sett rapportene: nye rapporter og svar fra spillere teller ikke lenger i varselet (B-438) */
+export async function adminReportsSeen(): Promise<void> {
+  await rpc<unknown>("admin_reports_seen", {});
 }

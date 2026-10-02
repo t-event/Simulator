@@ -21,6 +21,7 @@ import { Icon } from "./icons";
 import { setDmUnread } from "./messagesStore";
 import { openProfile } from "./profileStore";
 import { PlayerName } from "./Profile";
+import { ReportNotes } from "./ReportNotes";
 
 const POLL_MS = 5_000;
 
@@ -65,6 +66,7 @@ export function DirectMessages({ startWith }: { startWith: string | null }) {
     return <p className="g-muted g-small-text">{failed ? "Får ikke hentet meldingene nå." : "Henter …"}</p>;
   return (
     <div className="g-dm">
+      <ReportNotes />
       <DmStatus o={overview} />
       {overview.threads.length === 0 ? (
         <p className="g-muted g-small-text">

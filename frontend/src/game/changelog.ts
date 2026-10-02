@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 438,
+    date: "2026-10-02",
+    title: "Svar på rapporter",
+    items: [
+      "Har du rapportert en melding, kan admin nå spørre deg om mer. Du får varsel ved Skiftrapporten og svarer under Meldinger.",
+    ],
+  },
+  {
     b: 437,
     date: "2026-10-02",
     title: "Konsernbanken",

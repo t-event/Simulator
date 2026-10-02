@@ -8106,3 +8106,26 @@ typesjekk, lint, build.
 Endringslogg: ja.
 Konto (B-149): krever konto (konsernkassa, serveren, ekte tid – regel 3).
 
+## B-438 Svar på rapporter, med varsel begge veier (2026-10-02)
+Status: gjennomført.
+Bakgrunn: eieren (adminpanelet): «Her må jeg kunne svare på rapporten slik at jeg kan finne ut av problemet før et valg
+tas. Man bør også få varsel på om noen har sendt rapport til meg. Og de bør få varsel om jeg svarer.»
+Beslutning:
+- I adminpanelet har hver rapport en samtale. Eieren skriver til den som rapporterte («Svar …») eller den som skrev
+  meldingen («Spør …») før hen avviser, skjuler eller sperrer. Samtalen står under rapporten med alle svarene.
+- Spilleren ser eierens meldinger som «Fra admin» øverst i fanen Meldinger i Skiftrapporten, med meldingen det gjelder,
+  og kan svare der. Bare når eieren har skrevet til spilleren i den rapporten – ingen kan starte en samtale med eieren.
+  Høyst 500 tegn, ingen lenker (samme filter som privatmeldinger), hvert 3. sekund og høyst 20 svar per ekte dag.
+  Spilleren ser aldri hvem som rapporterte.
+- Varsel: prikken ved Skiftrapporten og tallet på Meldinger teller også uleste svar fra admin (spilleren) og nye
+  rapporter og svar fra spillere (eieren). Eieren ser i tillegg «N nye ting i adminpanelet» i Meldinger med en knapp dit,
+  og «Adminpanel (N nye)» under kontoen. Åpnes panelet, er alt sett (`admin_reports_seen`).
+- Server (122): `report_messages`, `admin_report_send` (logget i `admin_log`), `report_reply`, `my_report_threads`,
+  `report_seen`, `report_unread`, `admin_reports_seen`; `admin_reports` gir samtalen og uleste svar. Alt tatt fra
+  anon og public; gjester slipper ikke gjennom `guest_gate`.
+Testet: hele forløpet som eier og spiller i en transaksjon som ble rullet tilbake (varsel 1 → svar → varsel til eier →
+lest = 0; lenke avvist; den som ikke er spurt, kan ikke skrive), `get_advisors`, nettest, Chromium på 320, 390 og 1366
+px mot en falsk server, `npm test`, typesjekk, lint, build.
+Endringslogg: ja.
+Konto (B-149): krever konto (mellom spillere, regel 3); ikke gjester.
+

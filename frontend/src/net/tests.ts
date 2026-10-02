@@ -83,6 +83,7 @@ import { DEPOSIT_REFUSAL_TEXT, depositToTreasury, fetchTreasury } from "./treasu
 import { resetServerClock, serverClockOffset, syncServerClock } from "./clock";
 import { realNow } from "../game/clock";
 import { applyKonsern, konsernDiffers, parseKonsern } from "./konsern";
+import { parseReportThreads, parseReportUnread, REPORT_REFUSAL_TEXT } from "./reports";
 import { parseWorldMap } from "./worldMap";
 import {
   CHAT_REFUSAL_TEXT,
@@ -2473,6 +2474,35 @@ const main = async () => {
     assert(contributionAt(13_660_700, 1) === 13_660_700, "full aktivitet under taket: uendret");
     assert(Math.abs(contributionAt(37_542_729, 1) - 37_542_729) < 1, "full aktivitet over taket: uendret");
     assert(contributionAt(20_000_000, 0) === 0, "ingen aktivitet");
+  });
+
+  await test("Svar på rapporter (B-438): samtalene og varselet tåles fra serveren", () => {
+    const threads = parseReportThreads([
+      {
+        reportId: 3,
+        role: "reporter",
+        body: "Juks på kontrollrom!!",
+        kind: "dm",
+        unread: 1,
+        messages: [
+          { fromAdmin: true, body: "Kan du fortelle mer?", at: "2026-10-02T22:05:10Z" },
+          { fromAdmin: false, body: 42 },
+        ],
+      },
+      { reportId: "x" },
+      { reportId: 4, role: "rar", kind: "chat", messages: null },
+    ]);
+    assert(threads.length === 2, `to samtaler: ${threads.length}`);
+    assert(threads[0].messages.length === 1 && threads[0].messages[0].fromAdmin, "meldingen uten tekst er borte");
+    assert(threads[0].messages[0].at === Date.parse("2026-10-02T22:05:10Z"), "tidspunktet");
+    assert(
+      threads[1].role === "reporter" && threads[1].kind === "chat" && threads[1].messages.length === 0,
+      "ukjent rolle",
+    );
+    const u = parseReportUnread({ mine: "2", admin: -1 });
+    assert(u.mine === 2 && u.admin === 0, JSON.stringify(u));
+    assert(parseReportUnread(null).mine === 0, "tomt svar");
+    assert(REPORT_REFUSAL_TEXT.stengt.includes("admin"), "teksten når spilleren ikke er spurt");
   });
 
   await test("Konsernbanken (B-437): lånet fra serveren legges inn og trekkes fra konsernverdien", () => {

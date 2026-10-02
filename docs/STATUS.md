@@ -114,7 +114,11 @@ resten. Rente 1 % per ekte dag; hver natt går halvparten av utbyttet og bidrage
   10 min, høyst 5 nye samtaler per ekte dag. Blokkering (den blokkerte får «tar ikke imot meldinger»), rapportering (også
   i Skiftrapporten; rapporten er en kopi). Meldinger eldre enn 30 dager vises ikke; ryddingen hver natt venter på eierens
   bekreftelse (`supabase/utkast/108`). **Adminpanelet** (bare `admins`): rapportene, skjul, avvis, sperr og opphev sperre,
-  logget i `admin_log`.
+  logget i `admin_log`. **Svar på rapporter** (B-438, 122): eieren kan skrive til den som rapporterte eller den som skrev
+  meldingen før et valg tas; spilleren ser det som «Fra admin» øverst i Meldinger og kan svare der (bare når eieren har
+  skrevet, ≤ 500 tegn, ingen lenker, hvert 3. s / 20 per dag). Varsel begge veier på prikken ved Skiftrapporten
+  (`report_unread`): spilleren for svar fra admin, eieren for nye rapporter og svar fra spillere (også i knappen
+  «Adminpanel (N nye)»). Spilleren ser aldri hvem som rapporterte.
 - Juksesperren (`check_snapshot`) sjekker vekst, tonn, fart og første opplasting.
 - **Tidslinjetall til nye ukekonkurranser** (B-396, ikke slått på): tidslinja samler tellere i alt – strøm (`kwh_total`),
   leveranser (alltid i tide), misligholdt, avbrutt og reklamasjoner. Serveren regner kWh/t og leveringspresisjon selv

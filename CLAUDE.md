@@ -178,6 +178,7 @@ frontend/src/
     chat.ts      Skiftrapporten: felles chat – sende, hente, slette, sist lest (B-338; SQL i 070)
     profile.ts   Profilen til en spiller fra `player_profile` (B-419; SQL i 105), Min profil (`profile_update`, 106)
     messages.ts  Privatmeldinger: oversikt, samtale, sende, blokkere, rapportere (B-421; SQL i 107)
+    reports.ts   Svar på rapporter: samtalen med admin, svaret og varselet (B-438; SQL i 122)
     admin.ts     Adminpanelet: rapportene og handlingene – serveren sjekker `admins` (B-421)
     konsern.ts   Konsernet på serveren: kjøp, avbestilling, salg og flytting, og svaret lagt inn i spillet (B-326, B-333)
     worldMap.ts  Verdenskartet: alle spilleres verk per region og selskapene (`world_map`, B-333)
@@ -221,6 +222,7 @@ frontend/src/
     Chat.tsx     Skiftrapporten: knappen ved varsellinja (under 380 px i tallraden) og arket (B-338)
     Profile.tsx  Profilarket og `PlayerName` (brukernavn som åpner profilen); hvilken som er åpen: profileStore.ts (B-419)
     Messages.tsx Fanen «Meldinger» i Skiftrapporten; «Send melding» går via messagesStore.ts (B-421)
+    ReportNotes.tsx «Fra admin» øverst i Meldinger, og lenken til adminpanelet for eieren (B-438)
     Admin.tsx    Adminpanelet under kontoen, bare når `is_admin()` svarer ja (B-421)
     Companies.tsx Konsern → Industrien: ett kort per selskap (skraplageret nå) og konsernkassa (B-189, B-227)
     control/     Kontrollrommet: spillet i fire runder (chargeGame.ts: logikk, frø og inndatalogg, testspiller; ControlRoom.tsx,
@@ -629,7 +631,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   adminfunksjoner sjekker `is_admin()` først og logger i `admin_log`; eieren står i `admins` (lagt inn for hånd, aldri i
   repoet). Ryddingen hver natt (`supabase/utkast/108`) er ikke lagt inn: connectoren holder igjen SQL med `delete` til
   eieren bekrefter – legg den inn når eieren er til stede, før 1.11.2026. Unngå `update` på ekte rader i prøvekjøringer
-  (holdes også igjen); kall funksjonene som spilleren i stedet.
+  (holdes også igjen); kall funksjonene som spilleren i stedet. Svar på rapporter (B-438, 122): `report_messages`, én
+  samtale per rapport og spiller; spilleren kan bare svare der eieren har skrevet (`report_reply`). Varselet
+  (`report_unread`) hentes sammen med `dm_unread` i `checkLatest` (`ui/Chat.tsx`) og ligger i `messagesStore`
+  (`messagesBadge`); nye varsler på Skiftrapport-prikken legges inn der.
 - **Eksporten** (B-345, 073): hver natt legger edge-funksjonen `eksport` (`supabase/functions/eksport`) alle tabellene i
   `public` (unntatt `save_backups`) i Storage-mappa `eksport` som `stalverk-ÅÅÅÅ-MM-DD.json.gz`, 14 dager. Kjør for hånd med
   `select net.http_post(url := (select decrypted_secret from vault.decrypted_secrets where name = 'eksport_url'), body := '{}')`
