@@ -52,6 +52,16 @@ let reconciled = false;
 let relinkNeeded = false;
 const listeners = new Set<() => void>();
 let dirty: GameState | null = null;
+/**
+ * Kontoen som var innlogget da `dirty` ble lagt i køen (B-429). Byttes kontoen (f.eks. i en annen fane) mens en
+ * opplasting er på vei, skal det gamle spillet aldri lastes opp med den nye innloggingen – før B-429 kunne neste forsøk
+ * skrive kontoens navn på A sitt spill og lagre det over B sitt.
+ */
+let dirtyUser: string | null = null;
+function queue(g: GameState): void {
+  dirty = g;
+  dirtyUser = userId();
+}
 let lastUpload = 0;
 let lastSavedAt: number | null = null;
 let lastSnapshotDay = -1;
@@ -173,6 +183,14 @@ export class SaveConflictError extends Error {
   }
 }
 
+/** Spillet tilhører en annen konto enn den som er innlogget (B-429): lastes aldri opp, og prøves ikke igjen */
+export class OtherAccountError extends Error {
+  constructor() {
+    super("Spillet tilhører en annen konto.");
+    this.name = "OtherAccountError";
+  }
+}
+
 export function setClock(fn: () => number): void {
   clock = fn;
 }
@@ -246,6 +264,8 @@ export async function uploadSave(g: GameState, keepalive = false, chosen = false
   // En gammel kopi av spillet på nett lastes ikke opp (B-259) – bare når spilleren har valgt den (`chosen`). Appen
   // henter da spillet fra nett (`pullIfNewer` ser at lagringen ble avvist)
   if (!chosen && g.owner === id && staleCopy(g)) throw new SaveConflictError();
+  // Et spill som tilhører en annen konto, lastes aldri opp med denne innloggingen (B-429)
+  if (g.owner && g.owner !== id) throw new OtherAccountError();
   g.owner = id;
   const day = dayOf(g);
   // Det som sendes nå (B-426): spillet går videre mens svaret er på vei
@@ -329,7 +349,7 @@ export function onLocalSave(g: GameState, soon = false): void {
   }
   // Står enheten bare åpen – på pause, eller i bakgrunnen mens tida går – lastes ingenting opp (B-143)
   if (!actionPending && !(Math.floor(g.minute) !== syncedMinute && pageVisible())) return;
-  dirty = g;
+  queue(g);
   if (soon) {
     soonTimer ??= setTimeout(
       () => {
@@ -345,13 +365,15 @@ export function onLocalSave(g: GameState, soon = false): void {
 
 /**
  * Spilleren forlater enheten (appen legges bort, eller et annet vindu tas i bruk): last opp det som er spilt her,
- * også om siden alt er skjult, så den andre enheten får det (B-143).
+ * også om siden alt er skjult, så den andre enheten får det (B-143). Er en opplasting på vei, lastes det nyeste opp
+ * rett etter den – også når et annet vindu bare tas i bruk (B-429: før ventet det til neste gang, mens skyen viste
+ * «lagret»).
  */
 export function leaving(g: GameState, keepalive = true): Promise<void> {
   if (cloudConfigured() && !getSession()) return onGuestSave(g, true);
   if (cloudConfigured() && getSession() && reconciled && !(g.owner && g.owner !== userId()) && changedSinceSync(g))
-    dirty = g;
-  return flush(keepalive);
+    queue(g);
+  return flush(keepalive, true);
 }
 
 /**
@@ -363,21 +385,31 @@ export async function claim(g: GameState): Promise<boolean> {
   if (inFlight) await inFlight;
   actionPending = true;
   actionSerial++;
-  dirty = g;
+  queue(g);
   await flush();
   return status.kind !== "conflict";
 }
 
-/** Laster opp det som venter. Med `keepalive` når appen legges bort (fetch fullfører i bakgrunnen). */
-export async function flush(keepalive = false): Promise<void> {
-  // Er en lagring på vei, venter vi på den. Det som er nytt, tas neste gang – men når appen legges bort (`keepalive`),
-  // finnes ingen neste gang: da lastes det nyeste opp med én gang etterpå (B-426)
+/**
+ * Laster opp det som venter. Med `keepalive` når appen legges bort (fetch fullfører i bakgrunnen). `now`: spilleren
+ * forlater enheten, så det nyeste lastes opp etter en opplasting som er på vei.
+ */
+export async function flush(keepalive = false, now = keepalive): Promise<void> {
+  // Er en lagring på vei, venter vi på den. Det som er nytt, tas neste gang – men når spilleren forlater enheten,
+  // finnes ingen neste gang: da lastes det nyeste opp med én gang etterpå (B-426, B-429)
   if (inFlight) {
-    if (!keepalive) return inFlight;
+    if (!now) return inFlight;
     await inFlight;
     if (inFlight) return inFlight;
   }
-  if (!dirty || !getSession()) return;
+  if (!dirty || !getSession() || !reconciled) return;
+  const user = userId();
+  // Lagt i køen av en annen konto (B-429): forkastes
+  if (!user || dirtyUser !== user || (dirty.owner && dirty.owner !== user)) {
+    dirty = null;
+    dirtyUser = null;
+    return;
+  }
   const g = dirty;
   dirty = null;
   lastUpload = clock();
@@ -393,8 +425,9 @@ export async function flush(keepalive = false): Promise<void> {
         setStatus({ kind: "conflict" });
         return;
       }
-      // Prøver igjen ved neste lagring
-      dirty = dirty ?? g;
+      if (e instanceof OtherAccountError) return;
+      // Prøver igjen ved neste lagring – bare med samme konto (B-429)
+      if (!dirty && userId() === user) queue(g);
       if (e instanceof NetError && e.offline) setStatus({ kind: "offline", at: lastSavedAt });
       else setStatus({ kind: "error", message: e instanceof Error ? e.message : String(e), at: lastSavedAt });
     } finally {
@@ -414,6 +447,7 @@ export function resetCloud(): void {
   syncedMinute = -1;
   actionPending = false;
   dirty = null;
+  dirtyUser = null;
   lastUpload = 0;
   lastSavedAt = null;
   lastSnapshotDay = -1;
@@ -423,8 +457,18 @@ export function resetCloud(): void {
 
 // Logges spilleren ut av seg selv (økta avvist, eller utlogget i en annen fane), slås lagringen på nett av, så
 // skyen ikke står igjen i toppfeltet (B-145)
+let sessionUser = userId();
 onSessionChange(() => {
   if (!getSession() && status.kind !== "off") resetCloud();
+  // En annen konto er logget inn (B-429): det som lå i køen for den forrige, lastes aldri opp
+  const now = userId();
+  if (now !== sessionUser) {
+    sessionUser = now;
+    dirty = null;
+    dirtyUser = null;
+    if (soonTimer) clearTimeout(soonTimer);
+    soonTimer = null;
+  }
 });
 
 /** Hva som skal skje med spillet når man logger inn (B-125) */
@@ -543,6 +587,8 @@ export async function pullIfNewer(): Promise<GameState | null> {
   const id = userId();
   if (!id || !reconciled || knownRev === null) return null;
   const rows = await rest<{ rev: number; device: string | null }[]>("saves?select=rev,device");
+  // Kontoen er byttet mens svaret var på vei (B-429): svaret gjelder ikke spillet her
+  if (userId() !== id) return null;
   const row = rows[0];
   // Samme versjon, men lagringen ble avvist: serveren har endret spillet (B-211), så det fra nett gjelder
   const refused = !!row && Number(row.rev) === knownRev && status.kind === "conflict";
@@ -557,7 +603,7 @@ export async function pullIfNewer(): Promise<GameState | null> {
     return null;
   }
   const full = await fetchCloudRow();
-  if (!full) return null;
+  if (!full || userId() !== id) return null;
   setKnownRev(id, full.rev);
   syncedTo(full.game);
   knowCloud(full.game);

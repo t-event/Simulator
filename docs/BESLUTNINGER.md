@@ -7880,7 +7880,7 @@ Endringslogg: ja.
 Konto (B-149): uendret.
 
 ## B-428 Etter kodegjennomgangen 2.10: resten av funnene (2026-10-02)
-Status: gjennomført, med ett unntak (rådgiverens vinduer, se under).
+Status: gjennomført, med ett unntak (rådgiverens vinduer, se under – rettet i B-429).
 Bakgrunn: siste gruppe etter B-425–B-427: funn 17–20 og småfunnene.
 Gjort:
 - **Tilbakespolingen (funn 17, 115):** `snapshots_rewound` har fått feltene fra 096 (kwh_total, deliveries, missed,
@@ -7907,3 +7907,50 @@ Testet: prøvekjøring av 115 (rullet tilbake: filteret fanger «eksempel.no», 
 Endringslogg: ja.
 Konto (B-149): uendret.
 
+
+## B-429 Etterkontrollen 2.10: kontosynkronisering, kontrollrommet, offlinekopien og rådgiveren (2026-10-02)
+Status: gjennomført.
+Bakgrunn: eieren etterkontrollerte `main` ved 1f83d648 og fant åtte gjenstående feil, et konkret eksempel på
+rådgiverens vinduer (B-428) og tre småfunn. Eierens råd: kontosynkroniseringen og refusjonsfeilen (B-430) først.
+Gjort:
+- **A sitt spill over B sin lagring (funn 1, kritisk):** køen husker kontoen spillet ble lagt i køen for (`dirtyUser`).
+  `flush` laster ikke opp før spillet er avklart mot kontoen, og forkaster det som ble lagt i køen av en annen konto. En
+  feilet opplasting legges bare tilbake i køen hvis samme konto fortsatt er innlogget, og køen tømmes når en annen konto
+  logges inn. `uploadSave` skriver aldri kontoens navn på et spill som tilhører en annen konto (`OtherAccountError`), og
+  `pullIfNewer` forkaster svar som kom etter et kontobytte. Nettesten gjenskaper feilen på den gamle koden.
+- **«Hent dag» (funn 4):** den daglige belønningen går gjennom `grantStreak` – samme kontovakt og venteliste som tida
+  borte (B-426).
+- **Dagens status etter kontobytte (funn 5):** kommer en kontroll for en annen konto mens den forrige pågår, kjøres den
+  rett etterpå i stedet for å hoppes over.
+- **Rotasjon mens forsøket starter (funn 6):** skallet låses når forsøket bestilles, ikke først når svaret kommer. Låsen
+  slippes når kontrollrommet har tatt sin egen, eller når bestillingen feiler. Et svar som kommer etter at panelet er
+  borte, setter ikke spillet på pause.
+- **Vindusbytte (funn 7):** `leaving` laster opp det nyeste rett etter en opplasting som er på vei, også uten keepalive
+  (`flush(keepalive, now)`).
+- **Offlinekopien (funn 8):** installasjonen av service workeren feiler hvis siden ikke kan hentes (f.eks. 503), så den
+  gamle service workeren og kopien blir stående.
+- **Rådgiveren (eksempelet fra eieren):** sene kontrakter fjernes nå etter `ADVISOR_WINDOW_DAYS` (10 døgn), ikke etter fem,
+  så teksten teller alle sene kontrakter rådgiveren reagerte på. Andre avsluttede kontrakter står fem døgn som før.
+- **Småfunn:** 408 (tidsavbrudd) pauser ikke gjestekontoen; et gammelt svar på Min profil lukker ikke et nyere skjema
+  (A → B → A); motbudsrådet godtar likt på taket, som serveren (`att > def`).
+Testet: tre nettester (kontobytte under opplasting – feiler på den gamle koden, vindusbytte, daglig belønning), to
+motortester (rådgiveren med kontrakter avsluttet for 9, 6 og 0 døgn siden; motbud på taket), `npm test`, typesjekk, lint,
+build, `balance.ts`.
+Endringslogg: ja.
+Konto (B-149): uendret.
+
+## B-430 Oppkjøpsbud gjøres opp før en konto slettes (2026-10-02)
+Status: gjennomført (116 lagt inn).
+Bakgrunn: funn 2 i etterkontrollen. Budet og motbudet trekkes fra konsernkassa med én gang (068), og radene i
+`takeovers` slettes med kontoen (`on delete cascade`). Slettet angriperen eller eieren kontoen mens budet var åpent,
+fant `resolve_takeovers` aldri raden, og motparten fikk ikke pengene tilbake.
+Beslutning: en `before delete`-trigger på `profiles` kaller `takeovers_settle_for_user`, som gjør opp de åpne budene som
+`avbrutt`: angriperen får hele budet tilbake, eieren får motbudet tilbake dit det kom fra (kassa og fondet), med
+posteringer i kassaboka. Den som sletter kontoen, får ingenting. Ingen åpne bud fantes da 116 ble lagt inn (0 rader i
+`takeovers`), så ingen ekte data ble endret.
+Testet: prøvekjøring med to ekte kontoer og konstruerte bud (rullet tilbake): angriperen sletter → eieren +200 i kassa og
++100 i fondet; eieren sletter → angriperen +1000; andre kjøring gjør ingenting. Triggeren er på plass, funksjonene er
+tatt fra `anon` og `authenticated`, og `get_advisors` har ingen nye råd. 116 bruker `create or replace trigger` (en
+`drop trigger` ble holdt igjen av connectoren).
+Endringslogg: ja (sammen med B-429).
+Konto (B-149): uendret.

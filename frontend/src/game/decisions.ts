@@ -495,7 +495,8 @@ const ADVICE: Record<RepCause, { chapter: string; title: string; text: string; s
   },
 };
 
-const ADVISOR_WINDOW_DAYS = 10;
+/** Rådgiveren ser så mange døgn tilbake. Sene kontrakter står like lenge i lista (B-429, `onDay` i engine.ts) */
+export const ADVISOR_WINDOW_DAYS = 10;
 const ADVISOR_COOLDOWN_DAYS = 20;
 export const SPECIALIST_DAYS = 10;
 

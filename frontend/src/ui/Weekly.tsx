@@ -4,7 +4,7 @@
  */
 import { lockLayout } from "./layoutLock";
 import { SheetHead } from "./ds";
-import { lazy, Suspense, useEffect, useState, useSyncExternalStore } from "react";
+import { lazy, Suspense, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { GRADES } from "../game/data";
 import type { GameApi } from "../game/useGame";
 import { getSession, onSessionChange } from "../net/supabase";
@@ -258,9 +258,27 @@ function WeeklyControlPanel({ act, user }: { act: GameApi["act"]; user: string }
 
   const refresh = () => void fetchWeeklyStatus().then(setWeeklyStatus, () => {});
 
-  // Et tellende forsøk eies av dette panelet: skallet låses så panelet ikke monteres på nytt når skjermen snus (B-427)
+  // Et tellende forsøk eies av dette panelet: skallet låses så panelet ikke monteres på nytt når skjermen snus (B-427).
+  // Låsen tas alt når forsøket bestilles (B-429): serveren bruker forsøket før svaret kommer, og ble skjermen snudd mens
+  // svaret var på vei, forsvant panelet – forsøket var brukt, og det sene svaret satte spillet på pause uten kontrollrom
   const countedOpen = !!play?.counted;
-  useEffect(() => (countedOpen ? lockLayout() : undefined), [countedOpen]);
+  const startLock = useRef<(() => void) | null>(null);
+  const mounted = useRef(true);
+  useEffect(() => {
+    if (!countedOpen) return;
+    const release = lockLayout();
+    startLock.current?.();
+    startLock.current = null;
+    return release;
+  }, [countedOpen]);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      startLock.current?.();
+      startLock.current = null;
+    };
+  }, []);
 
   // Et resultat som ikke ble levert (nettfeil), sendes når kortet vises og deretter hvert 20. sekund
   useEffect(() => {
@@ -294,8 +312,13 @@ function WeeklyControlPanel({ act, user }: { act: GameApi["act"]; user: string }
     setConfirm(false);
     setBusy(true);
     setMessage(null);
+    startLock.current?.();
+    startLock.current = lockLayout();
+    let started = false;
     try {
       const r = await startControlAttempt();
+      // Panelet er borte (f.eks. ny konto): forsøket står åpent på kortet og kan spilles eller gis opp der
+      if (!mounted.current) return;
       if (!r.ok) {
         setMessage(CONTROL_REFUSAL_TEXT[r.reason]);
         refresh();
@@ -304,8 +327,14 @@ function WeeklyControlPanel({ act, user }: { act: GameApi["act"]; user: string }
       pause();
       setSubmitText(null);
       setPlay({ counted: true, attempt: r.attempt, key: nextKey(), scored: false });
+      // Låsen slippes når kontrollrommet har tatt sin egen (over)
+      started = true;
     } finally {
       setBusy(false);
+      if (!started) {
+        startLock.current?.();
+        startLock.current = null;
+      }
     }
   };
   const giveUp = async (id: number) => {

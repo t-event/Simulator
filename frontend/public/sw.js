@@ -16,7 +16,9 @@ async function precache() {
   const cache = await caches.open(VERSION);
   await cache.addAll(["manifest.webmanifest", "icon.svg", "icon-192.png"]);
   const page = await fetch("./", { cache: "no-store" });
-  if (!page.ok) return;
+  // Uten siden (f.eks. 503 under en publisering) skal installasjonen feile (B-429): ellers ble den nye service workeren
+  // aktiv, slettet den gamle kopien og sto uten noe å starte spillet med uten nett. Den gamle gjelder til neste forsøk
+  if (!page.ok) throw new Error(`Fikk ikke hentet siden (${page.status})`);
   const html = await page.clone().text();
   await cache.put("./", page);
   // Stiene i siden er absolutte (/Simulator/assets/…): de løses mot adressen til service workeren

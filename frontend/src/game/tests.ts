@@ -4392,6 +4392,48 @@ test("Motbud nær taket (B-427): rådet sier ikke «går ikke» om et forsvar so
   assert(defenseNeeded(over, control, 0, 0, V) === null, "over taket");
 });
 
+test("Motbud på taket (B-429): likt holder, så rådet sier ikke «går ikke» når serveren lar eieren beholde selskapet", () => {
+  const V = 1e8;
+  const control = 54;
+  // Angrepet står akkurat likt med det sterkeste forsvaret: serveren gir selskapet til angriperen bare ved att > def
+  const attack = takeoverDefense(control, TAKEOVER.cap * V, 0, V);
+  const need = defenseNeeded(attack, control, 0, 0, V);
+  assert(need !== null && takeoverDefense(control, need, 0, V) >= attack, `forsvar ${need}`);
+  assert(defenseNeeded(attack, control, TAKEOVER.cap * V, 0, V) === 0, "forsvar som står likt, holder alt");
+});
+
+test("Rådgiveren og sene kontrakter (B-429): alle sene kontrakter de siste ti døgnene er med i teksten", () => {
+  const g = newGame(429);
+  g.minute = 99 * MIN_PER_DAY + 23 * 60;
+  const next = day(g) + 1;
+  const late = (id: number, closed: number) =>
+    ({
+      id,
+      customer: `K${id}`,
+      product: "emne",
+      grade: "standard",
+      tonnes: 10_000,
+      delivered: 0,
+      pricePerT: 1,
+      deadlineDay: closed - 1,
+      offerExpiresMin: 0,
+      repGain: 0,
+      repLoss: 0,
+      penaltyPerT: 0,
+      status: "misligholdt",
+      closedDay: closed,
+      acceptedDay: closed - 10,
+      priority: 0,
+      byDirector: true,
+    }) as const;
+  g.contracts = [late(1, next - 9), late(2, next - 6), late(3, next)];
+  advance(g, 2 * 60);
+  assert(day(g) === next, `dagen ${day(g)}`);
+  assert(g.contracts.filter((c) => c.status === "misligholdt").length === 3, "sene kontrakter ble fjernet for tidlig");
+  const text = directorLateText(g);
+  assert(text.includes("3 kontrakter") && /30\s000\st/.test(text), text);
+});
+
 test("Quizen (B-428): svaralternativene står i blandet rekkefølge, men alltid den samme for et spørsmål", () => {
   const qs = Object.values(QUIZ).flat();
   let moved = 0;

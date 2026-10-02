@@ -15,6 +15,20 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 430,
+    date: "2026-10-02",
+    title: "Tryggere lagring ved bytte av konto",
+    items: [
+      "Bytter du konto mens spillet lagres, kan spillet ikke lenger havne på feil konto.",
+      "Daglig belønning og dagens oppdrag kommer fram også når du bytter konto mens appen henter dem.",
+      "Går du til et annet vindu mens spillet lagres, blir det nyeste lagret rett etterpå.",
+      "Ukens kontrollrom: forsøket tåler at du snur skjermen mens det startes.",
+      "Spillet kan fortsatt åpnes uten nett selv om en oppdatering feiler halvveis.",
+      "Rådgiveren teller alle sene kontrakter de siste ti døgnene, ikke bare de siste fem.",
+      "Slettes en konto midt i et oppkjøp, får den andre parten pengene sine tilbake.",
+    ],
+  },
+  {
     b: 428,
     date: "2026-10-02",
     title: "Flere små rettinger",

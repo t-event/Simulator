@@ -178,7 +178,8 @@ export function bidToTake(control: number, fund: number, value: number): number 
 
 /**
  * Hvor mye mer forsvar (kroner) eieren må sette inn for å stå imot et angrep som står nå (B-370): 0 hvis forsvaret alt
- * holder, null hvis det ikke går (angrepet er sterkere enn det største forsvaret). Litt over, så likt ikke er nok.
+ * holder, null hvis det ikke går (angrepet er sterkere enn det største forsvaret). Litt over der det går – men likt
+ * holder: serveren lar eieren beholde selskapet når angrep og forsvar står likt (`att > def` i `resolve_takeovers`, B-429).
  */
 export function defenseNeeded(
   attack: number,
@@ -189,11 +190,11 @@ export function defenseNeeded(
 ): number | null {
   const t = TAKEOVER;
   const v = Math.max(1, value);
-  if (takeoverDefense(control, defense, fund, v) > attack) return 0;
+  if (takeoverDefense(control, defense, fund, v) >= attack) return 0;
   // Taket sjekkes mot det som akkurat holder, ikke mot tallet med slingring (B-427): nær taket sa rådet før «går ikke»
   // om et motbud som vinner på serveren. Slingringen kuttes ved taket – alt under taket gir likevel et sterkere forsvar
   const exact = v * ((attack - control) / t.defenseW) ** 2;
-  if (exact >= t.cap * v) return null;
+  if (exact > t.cap * v) return null;
   const total = Math.min(exact * 1.01, t.cap * v);
   const f = Math.min(Math.max(0, fund), t.fundCap * v);
   return Math.max(0, Math.ceil(total - defense - f));

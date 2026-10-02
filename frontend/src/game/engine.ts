@@ -34,7 +34,7 @@ import { checkMissions } from "./missions";
 import { checkChallenges } from "./challenges";
 import { directorDailyT, finishKonsernProjects, konsernDay, valueCreated } from "./konsern";
 import { worldFactor } from "./world";
-import { maybeAdvisor, maybeCreateDecision } from "./decisions";
+import { ADVISOR_WINDOW_DAYS, maybeAdvisor, maybeCreateDecision } from "./decisions";
 import { maybeTip, setCreditHint } from "./tips";
 import { envDay, envHour, envStartBlocked, newEnv, updateEmissions } from "./environment";
 import { mouldHour, mouldRisk, wearMoulds } from "./mould";
@@ -3501,9 +3501,12 @@ function onDay(g: GameState, stats: PlantStats): void {
     }
   }
   updateAgreements(g, stats);
-  // Tilbud som gikk ut fjernes; avsluttede kontrakter vises i fem dager
+  // Tilbud som gikk ut fjernes; avsluttede kontrakter vises i fem dager. Sene kontrakter står like lenge som rådgiveren
+  // ser tilbake (B-429): før var de borte etter fem døgn, og rådgiveren regnet bare med den siste av tre sene
   g.contracts = g.contracts.filter((c) =>
-    c.status === "aktiv" ? true : c.status === "tilbud" ? true : (c.closedDay ?? 0) >= today - 5,
+    c.status === "aktiv" || c.status === "tilbud"
+      ? true
+      : (c.closedDay ?? 0) >= today - (c.status === "misligholdt" ? ADVISOR_WINDOW_DAYS : 5),
   );
 
   // Folk blir flinkere av å jobbe

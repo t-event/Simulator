@@ -4,7 +4,6 @@
  */
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
-  applyStreakReward,
   missionBonus,
   missionBonusReady,
   missionDone,
@@ -19,7 +18,7 @@ import type { DailyMission, GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { claimAway, claimDailyReward, fetchDailyStatus, setDailyStatus } from "../net/daily";
 import { getSession, onSessionChange, userId } from "../net/supabase";
-import { applyWaitingRewards, grantAway } from "./claims";
+import { applyWaitingRewards, grantAway, grantStreak } from "./claims";
 import { isReconciled, onCloudStatus } from "../net/sync";
 import { Bar, Card } from "./common";
 import { driftText, fmtKr, fmtNum, fmtT } from "./format";
@@ -39,6 +38,10 @@ const AWAY_CHECK_MS = 10 * 60_000;
 
 /** Én henting om gangen: serveren gir tida borte bare én gang, så svaret må ikke kastes (f.eks. ved ny render) */
 let checking = false;
+/** Kontoen kontrollen som pågår, gjelder (B-429) */
+let checkingUid: string | null = null;
+/** En kontroll for en annen konto som kom mens en pågikk: kjøres når den er ferdig (B-429) */
+let checkAgain: (() => Promise<void>) | null = null;
 /** Viser tida borte i vinduet som vises nå (settes av DailySync når den er montert) */
 let showAway: ((a: { seconds: number; reward: Reward }) => void) | null = null;
 
@@ -81,9 +84,15 @@ export function DailySync({ api, blocked }: { api: GameApi; blocked: boolean }) 
       return;
     }
     let hiddenAt = 0;
-    const check = async () => {
-      if (checking) return;
+    const check = async (): Promise<void> => {
+      if (checking) {
+        // Kontoen er byttet mens kontrollen for den forrige pågår (B-429): den nye får sin egen etterpå. Før ble den
+        // hoppet over, og dagens status og belønningen kom først ved neste kontroll
+        if (userId() !== checkingUid) checkAgain = check;
+        return;
+      }
       checking = true;
+      checkingUid = userId();
       try {
         // Hver for seg (B-397): feiler statusen, men tida borte er hentet (serveren har registrert den), skal pengene
         // likevel inn i spillet – ellers var de tapt
@@ -101,6 +110,10 @@ export function DailySync({ api, blocked }: { api: GameApi; blocked: boolean }) 
         if (apiRef.current.game) applyWaitingRewards(apiRef.current.act);
       } finally {
         checking = false;
+        checkingUid = null;
+        const next = checkAgain;
+        checkAgain = null;
+        if (next) void next();
       }
     };
     void check();
@@ -124,6 +137,7 @@ export function DailySync({ api, blocked }: { api: GameApi; blocked: boolean }) 
     return () => {
       document.removeEventListener("visibilitychange", onVisibility);
       clearTimeout(midnight);
+      if (checkAgain === check) checkAgain = null;
     };
   }, [session, reconciled, hasGame]);
 
@@ -143,11 +157,15 @@ export function DailySync({ api, blocked }: { api: GameApi; blocked: boolean }) 
   const claim = async () => {
     setBusy(true);
     try {
+      // Kontoen svaret gjelder (B-429): byttes kontoen mens svaret er på vei, havner belønningen ikke i det nye spillet
+      const uid = userId();
       const r = await claimDailyReward();
-      const reward: Reward = r.already ? { cash: 0, fp: 0 } : api.act((gg) => applyStreakReward(gg, r.streak, fmtKr));
+      const given = r.already || !uid ? null : grantStreak(apiRef.current.act, uid, r.streak);
+      if (userId() !== uid) return;
       buzz(30);
-      setClaimed({ streak: r.streak, reward });
+      setClaimed({ streak: r.streak, reward: given ?? { cash: 0, fp: 0 } });
       const s = await fetchDailyStatus().catch(() => null);
+      if (userId() !== uid) return;
       setDailyStatus(s ?? (status ? { ...status, claimed: true, streak: r.streak } : null));
     } catch {
       setClaimed(null);

@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 352 – 2026-10-02: Etterkontrollen – kontosynkronisering og refusjonen (B-429, B-430)
+
+**Brukeren ba om:** rette det etterkontrollen ved 1f83d648 fant: kontosynkroniseringen og refusjonsfeilen først, så
+resten; rådgivereksempelet med kontrakter fra dag 91, 94 og 100.
+
+**Gjort:** lagringskøen husker kontoen og laster aldri opp et annet kontos spill (`dirtyUser`, `OtherAccountError`);
+«Hent dag» med kontovakt (`grantStreak`); dagskontrollen for ny konto kjøres etter den som pågår; skallet låses når et
+tellende forsøk bestilles; vindusbytte laster opp det nyeste etter en lagring som er på vei; service workeren feiler
+installasjonen uten siden; sene kontrakter står ti døgn (rådgiveren); 408 pauser ikke gjesten; Min profil etter
+A → B → A; motbud likt på taket. 116 (oppgjør av åpne oppkjøpsbud før en konto slettes) prøvekjørt og lagt inn. Fem
+øktoverskrifter i denne fila (346–350) hadde mistet «## Økt N» og er satt tilbake.
+
+**Testet:** tre nettester og to motortester (kontobytte-testen feiler på den gamle koden), prøvekjøring av 116,
+`get_advisors`, `npm test`, typesjekk, lint, build, `balance.ts`.
+
+**Gjenstår:** 112 med frosset grunnlag (B-431, egen PR); eierens beslutning om etterbetalingen.
+
 ## Økt 351 – 2026-10-02: Kodegjennomgangen – resten (B-428)
 
 **Brukeren ba om:** siste gruppe etter kontrollrom og spillmotor: funn 17–20 og småfunnene.
@@ -19,7 +36,7 @@ feilen. #367 (B-427) merget.
 
 **Gjenstår:** et konkret eksempel på rådgiverens vinduer; eierens beslutning om etterbetalingen (B-425).
 
- – 2026-10-02: Kodegjennomgangen – kontrollrom og spillmotor (B-427)
+## Økt 350 – 2026-10-02: Kodegjennomgangen – kontrollrom og spillmotor (B-427)
 
 **Brukeren ba om:** neste gruppe etter lagring og kontobytte: kontrollrom og spillmotor (funn 9–16).
 
@@ -32,7 +49,7 @@ før tida går; sommerstansen regner foring per ovn og fører valget på riktig 
 
 **Gjenstår:** resten av funnene (17–20 og småfunnene).
 
- – 2026-10-02: Kodegjennomgangen – lagring, tidsgrense og kontobytte (B-426)
+## Økt 349 – 2026-10-02: Kodegjennomgangen – lagring, tidsgrense og kontobytte (B-426)
 
 **Brukeren ba om:** gruppevise PR-er etter B-425; lagring og kontobytte først (funn 3–8).
 
@@ -44,7 +61,7 @@ spurte (belønninger som kom etter et kontobytte, tas vare på til kontoens spil
 
 **Gjenstår:** kontrollrom og spillmotor (funn 9–16), så resten (17–20 og småfunnene).
 
- – 2026-10-02: Kodegjennomgangen – utbyttegulv, V0-jobben og etterbetalingen på nytt (B-425)
+## Økt 348 – 2026-10-02: Kodegjennomgangen – utbyttegulv, V0-jobben og etterbetalingen på nytt (B-425)
 
 **Brukeren ba om:** gikk gjennom koden fram til #364 og fant 20 funn og flere småfeil; først 111 og 112, så én PR for 114,
 ny 112 og rettet rapport, og deretter gruppevise PR-er (lagring og kontobytte, så kontrollrom og spillmotor). Helsesjekken
@@ -61,7 +78,7 @@ står i fila (paid_check 0 for alle rader); `npm test`.
 **Gjenstår:** eierens gjennomgang av 112 og beslutning om beløpet; funn 3–20 og småfunnene i egne PR-er. En sletting av
 raden «skygge» som connectoren holdt igjen, skal ikke bekreftes.
 
- – 2026-10-02: V0 og K-1 i skygge (B-424)
+## Økt 347 – 2026-10-02: V0 og K-1 i skygge (B-424)
 
 **Brukeren ba om (kjøringen kl. 07:45, punkt 6):** bygg V0/K-1 i skygge når punkt 1–4 er ferdige og grunnlaget bevart;
 prøvekjør først og vis at betalingene og konsernverdien er uendret.
@@ -74,7 +91,7 @@ kjørt én gang for hånd: én hendelse per region trukket, jobben «ok». Docs:
 
 **Gjenstår:** skyggerapporten til eieren etter noen uker; svar på etterbetalingen og slagghåndteringen (B-423).
 
- – 2026-10-02: Rapporten 2.10 og utbytterettingen (B-423)
+## Økt 346 – 2026-10-02: Rapporten 2.10 og utbytterettingen (B-423)
 
 **Brukeren ba om (faste kjøringer kl. 07:00 og 07:45):** sjekk skraplagerets utbetalinger 29.9–1.10, rapporter
 pengestrømmene per ekte dag og per spiller, nattkontroll, bevar grunnlaget, prøv utkast 099 og legg den inn bare uten
