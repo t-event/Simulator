@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 353 – 2026-10-02: Etterkontrollen – grunnlaget for etterbetalingen frosset (B-431)
+
+**Brukeren ba om:** rette 112 (utbygging nullstiller nivået; refusjoner er ikke aktivitet), og fryse
+beregningsgrunnlaget før beslutningen om etterbetalingen.
+
+**Gjort:** 117 kopierte alt 112 trenger, til `basis_112_*` (2.10 kl. 19.12). 112 utgave 3 leser bare dem, angrer
+utbygging med riktig nivå og stopper hvis utbytteregelen i `config` er endret. Ny sum: 2 549 252 kr (−5 kr; det frosne
+spillet i stedet for det levende). Rapporten er oppdatert. #369 (B-429, B-430) merget.
+
+**Testet:** 112 i en transaksjon som ble rullet tilbake, og et konstruert tilfelle (bygging → modernisering →
+utbygging) med riktige forskjeller.
+
+**Gjenstår:** eierens beslutning om etterbetalingen (hele anslaget, lavere sum eller ingenting).
+
 ## Økt 352 – 2026-10-02: Etterkontrollen – kontosynkronisering og refusjonen (B-429, B-430)
 
 **Brukeren ba om:** rette det etterkontrollen ved 1f83d648 fant: kontosynkroniseringen og refusjonsfeilen først, så

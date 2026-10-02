@@ -232,7 +232,8 @@ supabase/      SQL-migrasjonene, nummerert. Kjøres i prosjektet med Supabase-co
                legges her samtidig, så repoet speiler databasen. Sjekk get_advisors (security) etter hver DDL-endring.
 supabase/functions/ Edge-funksjoner (eksport, B-345)
 supabase/utkast/ Spørringer som bare leser (f.eks. dry-run av økonomireformen) og utkast som ikke er kjørt (108 ryddingen av
-               meldinger, 112 dry-run av etterbetalingen; testfila til 113) – ikke migrasjoner. Et utkast testes med `begin; <utkast>; <test>; select … ; rollback;`
+               meldinger, 112 dry-run av etterbetalingen – leser bare det frosne grunnlaget `basis_112_*` fra 117, B-431;
+               testfila til 113) – ikke migrasjoner. Et utkast testes med `begin; <utkast>; <test>; select … ; rollback;`
 docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretningen for sluttspillet, B-180), UI.md,
                OKONOMI.md (økonomianalysen og reform 2, B-301), KONSERNBIDRAG.md (hovedverkets bidrag i ekte tid, B-313),
                OKONOMI-KONTROLL.md (kontrollen av modellen med tall og svakheter, B-324),
