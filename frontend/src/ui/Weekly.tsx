@@ -194,7 +194,8 @@ let playKey = 0;
 const nextKey = () => ++playKey;
 function pauseGame(act: GameApi["act"]): void {
   act((gg) => {
-    speedBefore = gg.speed;
+    // Står spillet alt på pause for kontrollrommet, beholdes farten som ble husket (B-433)
+    if (speedBefore === null) speedBefore = gg.speed;
     gg.speed = 0;
   });
 }
@@ -304,6 +305,7 @@ function WeeklyControlPanel({ act, user }: { act: GameApi["act"]; user: string }
   const pause = () => pauseGame(act);
   const resume = () => resumeGame(act);
   const startTraining = () => {
+    if (busy) return;
     pause();
     setSubmitText(null);
     setPlay({ counted: false, seed: trainingSeed(), key: nextKey() });
@@ -410,7 +412,9 @@ function WeeklyControlPanel({ act, user }: { act: GameApi["act"]; user: string }
         </p>
       )}
       <div className="g-row g-week-control-actions">
-        <button onClick={startTraining}>
+        {/* Ikke trening mens et tellende forsøk bestilles (B-433): begge pauser spillet, og farten treningen husket, ble
+            overskrevet med 0, så spillet sto på pause etterpå */}
+        <button disabled={busy} onClick={startTraining}>
           <Icon name="gamepad-2" /> Øv på ukens kvalitet
         </button>
         <button

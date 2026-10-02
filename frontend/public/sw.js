@@ -9,22 +9,28 @@ const VERSION = "stalverket-v2";
 
 /**
  * Lagrer siden og filene den laster (JS og CSS i assets/), så spillet kan åpnes uten nett fra første gang (B-428).
- * Før ble bare siden lagret ved installasjonen, og filene først når de ble hentet – var de ikke i nettleserens vanlige
- * lager, startet ikke spillet uten nett.
+ * Alt hentes først, og lageret skrives først når alt er hentet (B-433): før ble den nye siden lagret over den gamle før
+ * JS/CSS var hentet, og svarte én fil 503, sto lageret med en side som trengte en fil som manglet. Feiler noe,
+ * feiler installasjonen, og den gamle service workeren og kopien gjelder til neste forsøk (B-429).
  */
+async function fetchOk(url) {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) throw new Error(`Fikk ikke hentet ${url} (${res.status})`);
+  return res;
+}
+
 async function precache() {
-  const cache = await caches.open(VERSION);
-  await cache.addAll(["manifest.webmanifest", "icon.svg", "icon-192.png"]);
-  const page = await fetch("./", { cache: "no-store" });
-  // Uten siden (f.eks. 503 under en publisering) skal installasjonen feile (B-429): ellers ble den nye service workeren
-  // aktiv, slettet den gamle kopien og sto uten noe å starte spillet med uten nett. Den gamle gjelder til neste forsøk
-  if (!page.ok) throw new Error(`Fikk ikke hentet siden (${page.status})`);
+  const page = await fetchOk("./");
   const html = await page.clone().text();
-  await cache.put("./", page);
   // Stiene i siden er absolutte (/Simulator/assets/…): de løses mot adressen til service workeren
   const found = [...html.matchAll(/(?:src|href)="([^"]*assets\/[^"]+)"/g)];
   const assets = [...new Set(found.map((m) => new URL(m[1], self.location.href).href))];
-  await cache.addAll(assets);
+  const files = ["manifest.webmanifest", "icon.svg", "icon-192.png", ...assets];
+  const fetched = await Promise.all(files.map((f) => fetchOk(f)));
+  const cache = await caches.open(VERSION);
+  await Promise.all(fetched.map((res, i) => cache.put(files[i], res)));
+  // Siden sist, når filene den trenger, ligger i lageret
+  await cache.put("./", page);
 }
 
 self.addEventListener("install", (event) => {

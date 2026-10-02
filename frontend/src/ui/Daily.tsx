@@ -38,9 +38,7 @@ const AWAY_CHECK_MS = 10 * 60_000;
 
 /** Én henting om gangen: serveren gir tida borte bare én gang, så svaret må ikke kastes (f.eks. ved ny render) */
 let checking = false;
-/** Kontoen kontrollen som pågår, gjelder (B-429) */
-let checkingUid: string | null = null;
-/** En kontroll for en annen konto som kom mens en pågikk: kjøres når den er ferdig (B-429) */
+/** En kontroll som ble bedt om mens en annen pågikk: kjøres når den er ferdig (B-429, B-433) */
 let checkAgain: (() => Promise<void>) | null = null;
 /** Viser tida borte i vinduet som vises nå (settes av DailySync når den er montert) */
 let showAway: ((a: { seconds: number; reward: Reward }) => void) | null = null;
@@ -86,13 +84,12 @@ export function DailySync({ api, blocked }: { api: GameApi; blocked: boolean }) 
     let hiddenAt = 0;
     const check = async (): Promise<void> => {
       if (checking) {
-        // Kontoen er byttet mens kontrollen for den forrige pågår (B-429): den nye får sin egen etterpå. Før ble den
-        // hoppet over, og dagens status og belønningen kom først ved neste kontroll
-        if (userId() !== checkingUid) checkAgain = check;
+        // En kontroll pågår: denne kjøres rett etterpå i stedet for å hoppes over. Før ble den borte – ved kontobytte
+        // (B-429), og ved midnatt når kontrollen som pågikk, ble startet før midnatt og ga gårsdagens status (B-433)
+        checkAgain = check;
         return;
       }
       checking = true;
-      checkingUid = userId();
       try {
         // Hver for seg (B-397): feiler statusen, men tida borte er hentet (serveren har registrert den), skal pengene
         // likevel inn i spillet – ellers var de tapt
@@ -110,7 +107,6 @@ export function DailySync({ api, blocked }: { api: GameApi; blocked: boolean }) 
         if (apiRef.current.game) applyWaitingRewards(apiRef.current.act);
       } finally {
         checking = false;
-        checkingUid = null;
         const next = checkAgain;
         checkAgain = null;
         if (next) void next();

@@ -5,7 +5,8 @@
 -- kunne gi null. Resultatet står i docs/RAPPORT-2026-10-02.md, avsnitt 7, med bokstaver i stedet for navn.
 -- Utgave 3 (2.10.2026, B-431), etter etterkontrollen:
 -- * Leser bare det frosne grunnlaget (`basis_112_*`, migrasjon 117), så summen ikke endrer seg når spillerne spiller
---   videre. Stopper hvis `config.world.dividend` er endret siden grunnlaget ble tatt (funksjonene leser den).
+--   videre. Stopper hvis `config.world.dividend` er endret siden grunnlaget ble tatt (funksjonene leser den), eller hvis
+--   en av funksjonene er endret (kontrollsummene i `basis_112_functions`, migrasjon 118, B-433).
 -- * En utbygging nullstiller nivået (`konsern_after`). Å angre den gir nå verket nivået det hadde før: modernisering-
 --   ene på verket etter forrige bygging eller utbygging. Før ble bare typen satt tilbake, så modernisering → utbygging
 --   ga feil grunnlag (et testtilfelle ga 315 000 kr mot riktige 341 250 kr). Et eldre verk uten bygging på serveren
@@ -49,6 +50,11 @@ begin
   if (select config_world -> 'dividend' from public.basis_112_meta)
      is distinct from (select value -> 'dividend' from public.config where id = 'world') then
     raise exception 'config.world.dividend er endret siden grunnlaget ble tatt (basis_112_meta): 112 må regnes på nytt';
+  end if;
+  -- Funksjonene 112 regner med, slik de var da grunnlaget ble tatt (118, B-433)
+  if exists (select 1 from public.basis_112_functions f
+             where f.checksum is distinct from (select md5(pg_get_functiondef(f.signature::regprocedure)))) then
+    raise exception 'en av funksjonene 112 bruker, er endret siden grunnlaget ble tatt (basis_112_functions)';
   end if;
   for u in select user_id from public.basis_112_users loop
     select b.state into st from public.basis_112_state b where b.user_id = u.user_id;
