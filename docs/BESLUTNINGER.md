@@ -7996,3 +7996,32 @@ Testet: motortest med eierens konsern (feiler med den gamle rekkefølgen: «mod-
 `npm test`, typesjekk, lint, build.
 Endringslogg: ja.
 Konto (B-149): uendret.
+
+## B-433 Etterkontrollen av #369/#370: fem restfunn (2026-10-02)
+Status: gjennomført (118 lagt inn).
+Bakgrunn: eieren etterkontrollerte #369 og #370 og bekreftet at de tidligere feilforløpene er rettet. Eieren regnet
+også 112 på nytt med bare SELECT og fikk 2 549 252 kr. Fem restfunn gjensto.
+Gjort:
+- **Sent A-svar etter kontobytte (P2):** et vellykket svar på A sin lagring flyttet versjonen B bygde på, så B sin neste
+  lagring ble avvist, og hentingen kunne bytte ut B sin framgang med en eldre kopi. Nå sjekker `uploadSave` kontoen også
+  når svaret kommer: er den byttet, huskes versjonen bare for A til neste innlogging (`rememberRev`), og verken versjonen,
+  «lagret» eller «lagret fra en annen enhet» endres for B. `link` gjør det samme etter hentingen. Nettesten feiler uten
+  rettingen («1 -> 2»).
+- **Offlinekopien (P2):** installasjonen henter siden og alle filene den trenger først, og skriver til lageret først når
+  alt er hentet. Siden skrives sist. Før ble ny side lagret over den gamle før JS/CSS var hentet.
+- **Dagskontrollen ved midnatt (P2):** en kontroll som kommer mens en annen pågår, kjøres alltid rett etterpå – også for
+  samme konto. Før gikk midnattskontrollen tapt når en kontroll startet før midnatt fortsatt pågikk.
+- **Låserekkefølgen i refusjonen (P2, 118):** `takeovers_settle_for_user` tar alle låsene først: oppkjøpsradene,
+  konsernet, så kassa – samme rekkefølge som `konsern_order` (konsernet før kassa) og `takeover_defend` (oppkjøpsraden
+  først). 116 står som den ble lagt inn. Kjent fra før og ikke endret her: `company_invest` og `takeover_defend` låser
+  kassa før konsernet, motsatt av `konsern_order`. Det kan bare gi en vranglås når samme spiller gjør to ting samtidig
+  fra to enheter, og da avbrytes den ene handlingen og rulles tilbake.
+- **Trening mens et tellende forsøk bestilles (P3):** treningsknappen er sperret mens forsøket bestilles, og pausen
+  husker farten fra første pause, så en ny pause ikke overskriver den med 0.
+- **112 (eierens forslag):** `basis_112_functions` (118) har definisjonen og kontrollsummen til funksjonene 112 bruker
+  (`dividend_from_state`, `dividend_to_treasury`, `world_day`, `world_shared`, `world_research`). 112 stopper hvis en av
+  dem er endret. Ingen er endret siden grunnlaget ble tatt (0 av 5).
+Testet: nettest for det sene svaret, prøvekjøring av 118 (rullet tilbake, samme utfall som 116), sjekken av
+kontrollsummene, `get_advisors`, `npm test`, typesjekk, lint, build.
+Endringslogg: ja.
+Konto (B-149): uendret.

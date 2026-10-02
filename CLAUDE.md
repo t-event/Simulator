@@ -334,7 +334,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   sjekker at samme konto fortsatt er innlogget og at spillet er dens (`grant`/`isMine` i `ui/claims.ts`); belønninger
   som kom etter et kontobytte, venter i `stalverk-ventende-belonninger-v1`. Nye hentinger følger samme mønster.
   Køen husker kontoen (`dirtyUser`, B-429): et spill lagt i køen av én konto lastes aldri opp med en annen innlogging, og
-  `uploadSave` skriver aldri om eieren av et spill som tilhører en annen konto (`OtherAccountError`).
+  `uploadSave` skriver aldri om eieren av et spill som tilhører en annen konto (`OtherAccountError`). Kommer svaret etter
+  et kontobytte, endres verken versjonen (`knownRev`) eller statusen for den nye kontoen (B-433, `rememberRev`).
 - Bare enheten som spilles på, laster opp (B-143): `onLocalSave` laster ikke opp når spillminuttet er det samme som
   sist og ingen handling er gjort. Tester som kaller `onLocalSave` må derfor endre `g.minute` (eller bruke `soon`).
 - Lagring på nett går gjennom `save_game()` med versjonsnummer (B-140), ikke rett i tabellen `saves`. En falsk
@@ -503,6 +504,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **`drop` via connectoren** (B-398): `execute_sql` med `drop function` venter på bekreftelse og tidsavbrytes. Unngå
   `drop` i tester; lag heller en ny funksjon enn å endre returtypen. Det samme gjelder `drop trigger` i `apply_migration`
   (B-430): bruk `create or replace trigger`.
+- **Låserekkefølgen i konsernkassa** (B-433): `konsern_order` låser `konsern` før `treasury`. Nye serverfunksjoner som
+  låser begge for samme spiller, gjør det i samme rekkefølge (oppkjøpsraden først hvis den er med), ellers kan to
+  samtidige handlinger låse hverandre. `company_invest`/`takeover_defend` gjør det motsatt (kjent, ikke endret).
 - **Tidslinjetall** (B-396, 096): `kwh_total`, `deliveries`, `missed`, `cancelled`, `complaints` er tellere i alt; serveren
   regner forholdet (`timeline_metrics`). `snapshot_metrics_guard` nuller urimelige tall og avviser aldri. I en
   BEFORE-trigger på `snapshots` er den genererte `season_key` tom – bruk `coalesce(new.season_id, 0)`.

@@ -154,6 +154,10 @@ function storedRev(user: string): number | null {
 }
 function setKnownRev(user: string, rev: number): void {
   knownRev = rev;
+  rememberRev(user, rev);
+}
+/** Husker versjonen for kontoen til neste innlogging, uten å røre versjonen spillet her bygger på (B-433) */
+function rememberRev(user: string, rev: number): void {
   try {
     localStorage.setItem(REV_KEY, JSON.stringify({ user, rev }));
   } catch {
@@ -313,6 +317,13 @@ export async function uploadSave(g: GameState, keepalive = false, chosen = false
     },
     keepalive,
   });
+  // Kontoen er byttet mens svaret var på vei (B-433): svaret gjelder den forrige kontoen. Det skal ikke flytte
+  // versjonen den nye kontoen bygger på – da ble neste lagring for den nye kontoen avvist, og hentingen kunne bytte ut
+  // framgangen med en eldre kopi – og et nei skal ikke gi «lagret fra en annen enhet» for den nye kontoen
+  if (userId() !== id) {
+    if (rev !== null && rev !== undefined) rememberRev(id, Number(rev));
+    throw new OtherAccountError();
+  }
   if (rev === null || rev === undefined) throw new SaveConflictError();
   setKnownRev(id, Number(rev));
   synced(sentMinute, sentSerial);
@@ -512,6 +523,8 @@ async function link(local: GameState | null): Promise<LinkDecision> {
   // Spilte man som gjest, tar kontoen over gjesten først (B-212)
   await adoptGuest();
   const row = await fetchCloudRow();
+  // En annen konto ble logget inn mens svaret var på vei (B-433): den kobles av sin egen innlogging
+  if (userId() !== id) return { kind: "none" };
   const stored = storedRev(id);
   const cloud = row?.game ?? null;
   knownRev = row ? row.rev : 0;

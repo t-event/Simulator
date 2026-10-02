@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 355 – 2026-10-02: Etterkontrollen av #369/#370 – fem restfunn (B-433)
+
+**Brukeren ba om:** rette de fem restfunnene etter etterkontrollen (sent A-svar, offlinekopien, midnatt, låserekkefølgen
+i refusjonen, trening under bestilling), og helst kontrollsummer for funksjonene 112 bruker.
+
+**Gjort:** kontovakt også når lagringssvaret kommer (versjonen huskes bare for kontoen svaret gjelder); service workeren
+henter alt før den skriver; dagskontrollen køer alltid en ny kontroll; 118 (låsene i refusjonen i samme rekkefølge som
+verkskjøpet, og `basis_112_functions` med kontrollsummer som 112 sjekker); treningsknappen sperret under bestilling og
+pausen beholder farten. #371 (B-432) merget og publisert.
+
+**Testet:** nettest (feiler uten rettingen), prøvekjøring av 118, kontrollsummene (0 av 5 endret), `get_advisors`,
+`npm test`, typesjekk, lint, build.
+
+**Gjenstår:** eierens beslutning om etterbetalingen; låserekkefølgen i `company_invest`/`takeover_defend` (kassa før
+konsernet) er kjent og ikke endret.
+
 ## Økt 354 – 2026-10-02: «1» på Konsern, men ingenting å kjøpe (B-432)
 
 **Brukeren ba om:** forklaring på merket på Konsern – og sa så at det ikke var noe å ha råd til.

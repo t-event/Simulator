@@ -59,6 +59,7 @@ import {
 import { fetchActiveEvents, fetchSeasonHistory, fetchSeasonStatus, markResultSeen, resultSeen } from "./season";
 import {
   cloudStatus,
+  currentRev,
   flush,
   isReconciled,
   keepLocal,
@@ -1413,6 +1414,25 @@ const main = async () => {
     await uploadSave(g).catch((e: unknown) => (err = e));
     assert(err instanceof OtherAccountError, `feil ${String(err)}`);
     assert(!f.saves.has("u-b@test"), "uploadSave lagret A sitt spill på B sin konto");
+  });
+
+  await test("Sent svar på A sin lagring etter kontobytte (B-433): flytter ikke versjonen B bygger på", async () => {
+    const f = fresh();
+    await login(f, "b@test");
+    const sessionB = getSession();
+    await login(f);
+    const g = newGame(19);
+    await linkOnLogin(g);
+    const before = currentRev();
+    // B logges inn mens A sin lagring er på vei; A sitt svar kommer etterpå og lykkes på serveren
+    f.onSaveGame = () => setSession(sessionB);
+    g.minute += 60;
+    onLocalSave(g, true);
+    await flush();
+    f.onSaveGame = null;
+    assert(f.saves.get("u-a@test")!.rev > (before ?? 0), "A sin lagring ble ikke lagret for A");
+    assert(currentRev() === before, `versjonen ble flyttet av A sitt svar: ${before} -> ${currentRev()}`);
+    assert(cloudStatus().kind !== "conflict" && cloudStatus().kind !== "saved", `status ${cloudStatus().kind}`);
   });
 
   await test("Vindusbytte mens en lagring er på vei (B-429): det nyeste lastes opp etterpå, også uten keepalive", async () => {
