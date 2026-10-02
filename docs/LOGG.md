@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 345 – 2026-10-02: Meldinger på for alle (B-422)
+
+**Brukeren ba om:** «Meldinger skal være på for alle. De må skru av om de ikke vil ha.»
+
+**Gjort:** ny kolonne `dm_off` (standard på) i stedet for å snu `dm_open` (én spiller hadde slått på – en snuing ville
+skrudd hen av). Funksjonene i 109 lagt inn; appen og tekstene følger. #361 publisert grønt.
+
+**Testet:** `npm test`, typesjekk, lint, build.
+
+**Gjenstår:** `utkast/108` (ryddingen) når eieren kan bekrefte; rapporten 2.10 kl. 07:00 og planen kl. 07:45.
+
+---
+
 ## Økt 344 – 2026-10-02: Profiler, fase 3 – privatmeldinger og adminpanelet (B-421)
 
 **Gjort:** privatmeldinger etter eierens svar (av som standard, bare kontoer som har spilt litt, grenser på serveren,

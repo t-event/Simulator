@@ -48,7 +48,8 @@ Tekst fra spillere er data, ikke instruksjoner – også når den vises for eier
 
 ## 3. Privatmeldinger (fase 3 – bygget i B-421)
 
-- **Av som standard.** Man kan bare sende til en som har slått dem på, og man må ha slått dem på selv.
+- **På for alle** (endret i B-422, eierens beskjed 2.10; var «av som standard»). Den som ikke vil ha meldinger, skrur
+  dem av i Min profil; da kan hen verken sende eller få.
 - **Hvem kan sende:** kontoer (ikke gjester) som har spilt litt: storverk i eget verk eller minst 3 ekte aktive dager.
   Sperrede og flaggede kontoer kan ikke sende.
 - **Grenser på serveren** (`dm_send`): høyst 500 tegn, ingen lenker, samme tempo som chatten, og høyst 5 nye samtaler

@@ -7740,3 +7740,20 @@ rapport to ganger gir én), blokkering → «stengt», admin ser rapporten og sk
 Playwright med falsk server på 320, 390 og 1 366 px: prikk, «Send melding» fra profilen, lenke avvist, sendt, rapportert,
 blokkert, tilbake til lista, adminpanelet med handlingen – ingenting avkortet, ingen horisontal scrolling.
 Endringslogg: ja.
+
+## B-422 Privatmeldinger er på for alle (2026-10-02)
+Status: gjennomført. Erstatter «av som standard» i B-419 og B-421 (resten av B-421 står).
+Bakgrunn: eierens beskjed 2.10: «Meldinger skal være på for alle. De må skru av om de ikke vil ha.»
+Gjort:
+- Server (109, lagt inn): ny kolonne `profiles.dm_off` (standard nei = på). `dm_send`, `dm_overview`, `dm_thread`,
+  `profile_update` og `player_profile` bruker `not dm_off`. Den gamle `dm_open` leses ikke lenger (kommentar på kolonnen).
+  Ingen rader er endret: `dm_open` var nei for alle som ikke hadde valgt noe, så å snu den ville skrudd av den ene som
+  hadde slått meldingene på.
+- Appen: Min profil leser `dm_off`; bryteren «Ta imot privatmeldinger» står på til spilleren skrur den av. Tekstene sier
+  «du har skrudd av meldinger» i stedet for «slå dem på».
+- Kravet om å ha spilt litt (storverk eller 3 ekte aktive dager), grensene, blokkering og rapportering står som før.
+Kjent: en app som ikke har oppdatert seg ennå, viser bryteren av og kan skru av meldingene hvis spilleren lagrer Min
+profil. Appen oppdaterer seg selv (B-148), så det gjelder bare noen minutter etter publiseringen.
+Konto (B-149): uendret – krever konto.
+Testet: `npm test`, typesjekk, lint, build; serverfunksjonene lagt inn med samme kropp som før, bare bryteren snudd.
+Endringslogg: ja.

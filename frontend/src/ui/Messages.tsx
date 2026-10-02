@@ -1,6 +1,6 @@
 /**
  * Privatmeldinger (B-421): fanen «Meldinger» i Skiftrapporten. Lista over samtaler, og samtalen med én spiller med
- * blokkering og rapportering. Av som standard – spilleren slår dem på i Min profil. Alle grenser sjekkes på serveren.
+ * blokkering og rapportering. På for alle (B-422) – kan skrus av i Min profil. Alle grenser sjekkes på serveren.
  */
 import { useEffect, useRef, useState } from "react";
 import { realNow } from "../game/clock";
@@ -130,7 +130,7 @@ function DmStatus({ o }: { o: DmOverview }) {
   if (o.open) return null;
   return (
     <Callout tone="info">
-      Meldinger er av. Slå dem på i Min profil, så kan du sende og få meldinger.{" "}
+      Du har skrudd av meldinger. Skru dem på i Min profil, så kan du sende og få meldinger.{" "}
       <button
         className="g-link"
         onClick={() => void fetchProfile().then((p) => p?.nickname && openProfile(p.nickname, true))}
@@ -248,8 +248,8 @@ function Conversation({ nick, onBack }: { nick: string; onBack: () => void }) {
             "Du har blokkert spilleren. Opphev blokkeringen for å skrive."
           ) : (
             <>
-              Du kan ikke skrive til spilleren nå: meldinger må være på hos begge, og åpnes når du har storverk eller
-              har spilt tre dager.{" "}
+              Du kan ikke skrive til spilleren nå: en av dere har skrudd av meldinger, eller meldinger er ikke åpnet
+              ennå (storverk eller tre dager spilt).{" "}
               <button
                 className="g-link"
                 onClick={() => void fetchProfile().then((p) => p?.nickname && openProfile(p.nickname, true))}

@@ -15,6 +15,12 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 422,
+    date: "2026-10-02",
+    title: "Meldinger er på for alle",
+    items: ["Privatmeldinger er nå på for alle. Vil du ikke ha meldinger, skrur du dem av i Min profil."],
+  },
+  {
     b: 421,
     date: "2026-10-02",
     title: "Privatmeldinger",

@@ -151,11 +151,11 @@ export const BIO_MAX = 120;
 export async function fetchProfileSettings(): Promise<ProfileSettings | null> {
   if (!userId()) return null;
   const rows = await rest<
-    { bio: string | null; emblem: string | null; showcase: string[] | null; dm_open: boolean | null }[]
-  >("profiles?select=bio,emblem,showcase,dm_open");
+    { bio: string | null; emblem: string | null; showcase: string[] | null; dm_off: boolean | null }[]
+  >("profiles?select=bio,emblem,showcase,dm_off");
   const r = rows[0];
   if (!r) return null;
-  return { bio: r.bio ?? "", emblem: r.emblem ?? null, showcase: r.showcase ?? [], dmOpen: r.dm_open === true };
+  return { bio: r.bio ?? "", emblem: r.emblem ?? null, showcase: r.showcase ?? [], dmOpen: r.dm_off !== true };
 }
 
 /** Hvorfor serveren sa nei, med vanlige ord */
@@ -178,5 +178,5 @@ export async function saveProfileSettings(s: ProfileSettings): Promise<ProfileSe
     dm_open?: boolean;
   }>("profile_update", { p_bio: s.bio, p_emblem: s.emblem, p_showcase: s.showcase, p_dm_open: s.dmOpen });
   if (!r.ok) throw new Error(PROFILE_REFUSAL_TEXT[r.reason ?? ""] ?? "Fikk ikke lagret profilen.");
-  return { bio: r.bio ?? "", emblem: r.emblem ?? null, showcase: r.showcase ?? [], dmOpen: r.dm_open === true };
+  return { bio: r.bio ?? "", emblem: r.emblem ?? null, showcase: r.showcase ?? [], dmOpen: r.dm_open !== false };
 }
