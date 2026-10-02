@@ -1,7 +1,7 @@
--- Tester for utkastet 103 (V0/K-1 i skygge, B-409). Kjøres ALLTID i én transaksjon som rulles tilbake:
+-- Tester for 113 (V0/K-1 i skygge, B-409, lagt inn B-424). Kjøres ALLTID i én transaksjon som rulles tilbake:
 --
 --   begin;
---   <innholdet i 103_v0_k1_skygge.sql>
+--   <innholdet i supabase/113_v0_k1_skygge.sql>
 --   <innholdet i denne fila>
 --   select name, ok, detail from t_res order by n;
 --   rollback;

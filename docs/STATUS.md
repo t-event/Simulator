@@ -168,8 +168,9 @@ regnes av serveren i ekte tid.
 - Programmodell for konsernprogrammene: eieren valgte B (aktivt budsjett, B-388/B-389). Spesifikasjonen står i
   `K1-PROGRAMMER.md` (B-389): serveren har i dag ingen hendelser i konsernverdenen, så K-1 trenger et lite, nøytralt
   hendelseslag (V0) for at Teknologi, Robusthet og Driftsytelse skal ha ekte effekt. Eieren godkjente V0, satsingene
-  1/3/8 % og trekk fra hver utbetaling (B-390). Bygges etter rapporten 2.10: V0 i skygge (logges, ingen virkning) og K-1
-  bak avslått bryter; skyggedataene går til eieren før noe slås på. Ingenting er slått på. Programmene prises av normalt
+  1/3/8 % og trekk fra hver utbetaling (B-390). V0 i skygge og K-1-tabellene er lagt inn 2.10 (113, B-424): hendelsene
+  trekkes og logges hver time uten virkning og uten visning, K-1-bryteren står av; skyggedataene går til eieren før noe
+  slås på. Ingenting er slått på. Programmene prises av normalt
   datterverksutbytte, ikke bidraget (B-392); Konsernverdi endres ikke. Satsene er foreløpig 0,5/1,5/4 % med 80 % vern på
   Høy (B-393); skyggen regner også 1/3/8 % og etableringen for seg.
 

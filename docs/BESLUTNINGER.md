@@ -7784,3 +7784,26 @@ Gjort:
 Endringslogg: ja – et verk som blir ferdig, gir utbytte fra da, også når spilleren er borte.
 Konto (B-149): ikke aktuelt (serverside).
 
+## B-424 V0 og K-1 i skygge lagt inn (2026-10-02)
+Status: gjennomført. Bryterne står av; aktivering er eierens beslutning etter skyggerapporten (B-402).
+Bakgrunn: eierens plan for 2.10 (B-402 og kjøringen kl. 07:45): når nattkontrollen er grønn, grunnlaget bevart og
+rapporten levert, bygges V0 og K-1 i skygge med satsene 0,5/1,5/4 % og 80 % vern på Høy. Punktene var oppfylt (B-423).
+Gjort:
+- **Prøvekjøring først** (rullet tilbake): utkast 103 med testene – brytere av, høykonjunkturen lik simulatoren
+  (0,3040), regionandelene som `dividend_from_state`, trekningen (seks regioner, ikke to ganger, alltid varslet to dager
+  før), skyggeloggen (brutto = kasse + fond, tapet riktig), skyggejobben idempotent uten feil, «skygge av» trekker ikke.
+  Utbytte, kasser, bidrag, fond, kassabok og selskapsinntekt var uendret, og konsernverdien var lik for alle 15.
+- **Lagt inn** som `supabase/113_v0_k1_skygge.sql` (før utkast 103): tabellene, funksjonene og
+  `config.world.programs` (`enabled` og `events_enabled` = false, `events_shadow` = true, `shadow_from` = 2.10). Etterpå
+  testet rapporten (kostnad = sats × utbytte for begge satssettene, nye satser i ettertid) og rådene; to rene
+  hjelpefunksjoner fikk fast `search_path` (113_b).
+- **Skyggejobben** `verden-skygge` (pg_cron, minutt 17 hver time) startet. Egen funksjon, egen jobb i `world_jobs`
+  («skygge»), én spiller per deltransaksjon; den kalles aldri fra `world_tick` og flytter ingen penger. Første kjøring
+  trakk én hendelse per region (alle tidligst om to uker) og sto «ok».
+- **Datamengde:** ca. 15 dagrader per ekte dag (ca. 1 kB per rad); hendelsene er noen få per region og måned.
+- **Skyggerapporten** (`program_shadow_report()`) sammenligner ingen programmer med 0,5/1,5/4 % og 1/3/8 %, viser
+  etableringen for seg og datamengden. Den legges fram for eieren etter noen uker med data; ingenting slås på før det.
+- De trukne datoene står bare i databasen, aldri i repoet (ingen skal kunne se hendelsene på forhånd).
+Endringslogg: nei – spillerne merker ingenting.
+Konto (B-149): ikke aktuelt ennå (serverside, i skygge). Når K-1 slås på: krever konto (K1-PROGRAMMER.md avsnitt 9).
+
