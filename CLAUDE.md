@@ -300,6 +300,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   prøves igjen etter en driftsstans, bruker `isTransient`, ikke bare `offline`.
 - **Tekstfelt på iPhone** (B-347): Safari zoomer inn på felt med skrift under 16 px og zoomer ikke ut igjen. Regelen
   nederst i `game.css` gir alle felt man skriver i minst 16 px på berøringsskjerm – ikke overstyr den med mindre skrift.
+- **Service workeren** (B-433, B-434): en ny side lagres bare når filene den trenger, ligger i lageret (`storePage` – ved
+  installasjonen og ved navigasjon). Prøv i Chromium mot `vite preview` med `PW_EXPERIMENTAL_SERVICE_WORKER_NETWORK_EVENTS=1`
+  (ellers ser ikke `context.route` service workerens kall); siden ligger på `/` i forhåndsvisningen.
 - Skjermbilder med `fullPage: true` viser faste menyer midt på siden; det er
   bare et artefakt av skjermbildet.
 - Prosessmodellen er kalibrert med steg på maks 1 s – del opp større steg.
@@ -335,7 +338,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   som kom etter et kontobytte, venter i `stalverk-ventende-belonninger-v1`. Nye hentinger følger samme mønster.
   Køen husker kontoen (`dirtyUser`, B-429): et spill lagt i køen av én konto lastes aldri opp med en annen innlogging, og
   `uploadSave` skriver aldri om eieren av et spill som tilhører en annen konto (`OtherAccountError`). Kommer svaret etter
-  et kontobytte, endres verken versjonen (`knownRev`) eller statusen for den nye kontoen (B-433, `rememberRev`).
+  et kontobytte, endres verken versjonen (`knownRev`) eller statusen for den nye kontoen (B-433, `rememberRev`). Alt i
+  lagringsforløpet sjekker generasjonen av koblingen (`syncGen`, B-434), ikke bare kontoen: A → B → A er en ny kobling.
 - Bare enheten som spilles på, laster opp (B-143): `onLocalSave` laster ikke opp når spillminuttet er det samme som
   sist og ingen handling er gjort. Tester som kaller `onLocalSave` må derfor endre `g.minute` (eller bruke `soon`).
 - Lagring på nett går gjennom `save_game()` med versjonsnummer (B-140), ikke rett i tabellen `saves`. En falsk
@@ -503,7 +507,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `state_type_problems`. Ny `(state ->> 'x')::int` i en serverfunksjon = ny sjekk der.
 - **`drop` via connectoren** (B-398): `execute_sql` med `drop function` venter på bekreftelse og tidsavbrytes. Unngå
   `drop` i tester; lag heller en ny funksjon enn å endre returtypen. Det samme gjelder `drop trigger` i `apply_migration`
-  (B-430): bruk `create or replace trigger`.
+  (B-430): bruk `create or replace trigger`. En migrasjon med en slettesetning i teksten holdes også igjen (B-434); endre
+  da den levende funksjonen med `replace()` i en DO-blokk, som 114/115/119.
 - **Låserekkefølgen i konsernkassa** (B-433): `konsern_order` låser `konsern` før `treasury`. Nye serverfunksjoner som
   låser begge for samme spiller, gjør det i samme rekkefølge (oppkjøpsraden først hvis den er med), ellers kan to
   samtidige handlinger låse hverandre. `company_invest`/`takeover_defend` gjør det motsatt (kjent, ikke endret).

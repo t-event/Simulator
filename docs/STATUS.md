@@ -69,8 +69,10 @@ regnes av serveren i ekte tid.
 - Oppkjøpsbud og motbud er på (fra 29.9.2026). Budet teller inntil 10 × verdien (verdi = 10 dagers inntekt), forsvaret
   høyst 3 ×; eieren kan alltid miste selskapet. Står angrep og forsvar likt, beholder eieren selskapet (`att > def`).
   Eieren får `takeover_payout` (B-375). Anbud fra før 29.9 regnes i dagens penger (B-374).
-- Slettes en konto mens et oppkjøpsbud er åpent, gjøres budet opp først (B-430, 116): angriperen får hele budet tilbake,
-  eieren får motbudet tilbake (kassa og fondet).
+- Slettes en konto mens et oppkjøpsbud er åpent, gjøres budet opp først (B-430, 116; i `delete_my_account` før
+  slettingen, B-434, 119): angriperen får hele budet tilbake, eieren får motbudet tilbake (kassa og fondet).
+- Selskapskortet viser verdien (10 dagers inntekt) og, ved oppkjøp, «Lønner det seg?»: inntekten i dagene kjøperen eier
+  selskapet (til perioden går ut, minst 14 dager) mot budet, og 90 % tilbake hvis budet ikke holder (B-435).
 - Slagghåndteringen og andre selskaper er ikke aktive.
 
 ## 6. Konkurranse og lister

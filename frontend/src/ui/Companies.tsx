@@ -41,6 +41,7 @@ import {
   protectedUntil,
   TAKEOVER,
   TAKEOVER_REASON,
+  takeoverPayoff,
 } from "../game/control";
 import { regionName } from "../game/regions";
 import type { PolicyId } from "../game/types";
@@ -256,6 +257,16 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
               <small> /døgn</small>
             </dd>
           </div>
+          {/* Verdien (B-435): det et oppkjøpsbud minst må være – før sto bare inntekten per døgn */}
+          {c.owner && companyValue(c) > 0 && (
+            <div>
+              <dt>Verdi</dt>
+              <dd>
+                {fmtKr(companyValue(c))}
+                <small> 10 dagers inntekt</small>
+              </dd>
+            </div>
+          )}
           {c.mine && (
             <div>
               <dt>Du har fått</dt>
@@ -732,6 +743,33 @@ function PolicySection({
 }
 
 /** Overtakelser (B-335): forsøk som pågår, forsvaret for eieren, bud for de andre og forrige utfall */
+/** Selskapets verdi (10 dagers inntekt): minstebudet ved oppkjøp (B-335) */
+function companyValue(c: Company): number {
+  return c.control?.value ?? c.takeoverWindow?.value ?? 0;
+}
+
+/** Lønner budet seg (B-435): hva kjøperen tjener i dagene hen eier selskapet, mot budet, og hva som kommer tilbake */
+function PayoffNote({ c, bid, decidedAt }: { c: Company; bid: number; decidedAt: number }) {
+  if (bid <= 0 || c.estimatePerDay <= 0) return null;
+  const p = takeoverPayoff({
+    bid,
+    perDay: c.estimatePerDay,
+    decidedAt,
+    concessionUntil: c.concessionUntil ? Date.parse(c.concessionUntil) : null,
+    renewalOpen: !!c.tender || !!c.nextOwner,
+  });
+  const days = Math.round(p.days);
+  return (
+    <p className={`g-small-text g-payoff ${p.net >= 0 ? "is-ok" : "is-bad"}`}>
+      <strong>Lønner det seg?</strong> Med {fmtKr(bid)}: står budet sterkest, eier du selskapet i ca. {days}{" "}
+      {days === 1 ? "dag" : "dager"} og tjener ca. {fmtKr(p.income)} ({fmtKr(c.estimatePerDay)} per dag) –{" "}
+      {p.net >= 0 ? `${fmtKr(p.net)} mer enn budet.` : `${fmtKr(-p.net)} mindre enn budet.`}
+      {p.net < 0 && " Vil du tjene på det, må du også vinne anbudet om neste periode."} Holder ikke budet, får du{" "}
+      {fmtKr(p.back)} tilbake.
+    </p>
+  );
+}
+
 function TakeoverSection({
   c,
   busy,
@@ -824,6 +862,7 @@ function TakeoverSection({
                 Skriv hele det nye budet. Står budet sterkest til slutt, får eieren betalt for dagene hen mister, og
                 resten av budet er brukt. Ellers får du 90 % tilbake.
               </p>
+              <PayoffNote c={c} bid={Math.max(t.bid, millions(amount))} decidedAt={Date.parse(t.closesAt)} />
             </>
           )}
         </div>
@@ -850,6 +889,11 @@ function TakeoverSection({
               Står budet sterkest, eier du selskapet i 14 dager fra kjøpet. Eieren får betalt for dagene hen mister og
               det hen har investert; resten av budet går ut av spillet. Ellers får du 90 % tilbake.
             </p>
+            <PayoffNote
+              c={c}
+              bid={millions(amount) || w.minBid}
+              decidedAt={realNow() + TAKEOVER.defenseHours * 3_600_000}
+            />
           </details>
         ) : (
           w.reason &&

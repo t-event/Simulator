@@ -8025,3 +8025,40 @@ Testet: nettest for det sene svaret, prøvekjøring av 118 (rullet tilbake, samm
 kontrollsummene, `get_advisors`, `npm test`, typesjekk, lint, build.
 Endringslogg: ja.
 Konto (B-149): uendret.
+
+## B-434 Etterkontrollen av #372: fire resttilfeller (2026-10-02)
+Status: gjennomført (119 lagt inn).
+Bakgrunn: eieren etterkontrollerte #372 ved d9dfe866. De fem scenarioene var rettet, men fire avgrensede tilfeller
+gjensto. 112-vernet var bekreftet (0 av 5 funksjoner endret).
+Gjort:
+- **A → B → A (P2):** lagringen har en generasjon for koblingen mot kontoen (`syncGen`). Den øker ved hver kobling,
+  utlogging og hvert kontobytte. Svar fra en eldre generasjon brukes aldri – heller ikke når kontoen er den samme igjen.
+  Det gjelder `uploadSave`, `flush` (legger ikke noe tilbake i køen), `link` og `pullIfNewer`. Nettest.
+- **Tidslinjeraden (P2):** `lastSnapshotDay` settes bare hvis generasjonen er den samme etter lagringen av raden, og
+  nullstilles når en annen konto logges inn.
+- **Vanlig sidelasting (P2):** service workeren lagrer en ny side ved navigasjon bare når filene den trenger, ligger i
+  lageret (`storePage`, samme som installasjonen). Prøvd i Chromium: en ny side som pekte på en JS-fil som svarte 503,
+  ble ikke lagret, og spillet startet uten nett med den gamle.
+- **Kontosletting mot oppkjøpsoppgjør (P2, 119):** `delete_my_account` gjør opp budene (`takeovers_settle_for_user`) før
+  brukeren slettes, så oppkjøpsradene låses før profilen. Triggeren fra 116 står for andre måter en profil slettes på.
+  Lagt inn med replace() på den levende funksjonen; connectoren holdt igjen en migrasjon med slettesetningen i teksten.
+Testet: nettest for A → B → A, Chromium-prøve av service workeren (`vite preview`), definisjonen av `delete_my_account`
+etterpå, `npm test`, typesjekk, lint, build.
+Endringslogg: ja (sammen med B-435).
+Konto (B-149): uendret.
+
+## B-435 Selskapets verdi og «Lønner det seg?» ved oppkjøp (2026-10-02)
+Status: gjennomført.
+Bakgrunn: eieren la inn et oppkjøpsbud på 350 mill. og visste ikke om det var verdt det; kortet viste bare inntekten
+per døgn (ca. 18 mill.).
+Beslutning:
+- Selskapskortet viser **verdien** (10 dagers inntekt, det et oppkjøpsbud minst må være) når selskapet har en eier.
+- Ved et oppkjøpsbud – både før du byr og mens budet ditt står – står **«Lønner det seg?»**: står budet sterkest, eier du
+  selskapet til perioden går ut, men minst 14 dager fra kjøpet (bare til perioden går ut hvis anbudet om neste periode
+  alt er åpent, som `resolve_takeovers`). Inntekten i de dagene mot budet, og hva du får tilbake hvis budet ikke holder
+  (90 %). Regnet av `takeoverPayoff` i `game/control.ts` med det selskapet tjener nå, så det er et anslag.
+- Eierens bud: 350 mill. på et selskap som tjener ca. 18,6 mill. per dag gir ca. 260 mill. på 14 dager – ca. 90 mill.
+  mindre enn budet, med mindre anbudet om neste periode også vinnes. Holder ikke budet, kommer 315 mill. tilbake.
+Testet: motortest med eierens tall, `npm test`, typesjekk, lint, build.
+Endringslogg: ja.
+Konto (B-149): uendret (selskapene krever konto som før).

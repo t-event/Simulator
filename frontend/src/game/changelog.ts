@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 435,
+    date: "2026-10-02",
+    title: "Lønner oppkjøpet seg?",
+    items: [
+      "Selskapene viser hva de er verdt (10 dagers inntekt), ikke bare hva de tjener per døgn.",
+      "Ved et oppkjøpsbud ser du hva du tjener i dagene du eier selskapet, mot budet – og hva du får tilbake hvis budet ikke holder.",
+      "Bytter du konto og tilbake mens spillet lagres, går ingen framgang tapt.",
+      "Spillet kan åpnes uten nett også når en oppdatering bare kom halvveis mens du lastet siden.",
+    ],
+  },
+  {
     b: 433,
     date: "2026-10-02",
     title: "Flere rettinger i lagringen",

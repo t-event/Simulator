@@ -1435,6 +1435,28 @@ const main = async () => {
     assert(cloudStatus().kind !== "conflict" && cloudStatus().kind !== "saved", `status ${cloudStatus().kind}`);
   });
 
+  await test("A → B → A mens A sin lagring er på vei (B-434): det gamle svaret brukes ikke", async () => {
+    const f = fresh();
+    await login(f, "b@test");
+    const sessionB = getSession();
+    await login(f);
+    const sessionA = getSession();
+    const g = newGame(20);
+    await linkOnLogin(g);
+    const before = currentRev();
+    // Kontoen byttes til B og tilbake til A mens svaret er på vei: samme konto, men en ny kobling
+    f.onSaveGame = () => {
+      setSession(sessionB);
+      setSession(sessionA);
+    };
+    g.minute += 60;
+    onLocalSave(g, true);
+    await flush();
+    f.onSaveGame = null;
+    assert(currentRev() === before, `det gamle svaret flyttet versjonen: ${before} -> ${currentRev()}`);
+    assert(cloudStatus().kind !== "conflict" && cloudStatus().kind !== "saved", `status ${cloudStatus().kind}`);
+  });
+
   await test("Vindusbytte mens en lagring er på vei (B-429): det nyeste lastes opp etterpå, også uten keepalive", async () => {
     const f = fresh();
     await login(f);

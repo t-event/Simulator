@@ -143,6 +143,8 @@ export const TAKEOVER = {
   defenseHours: 72,
   /** Ny eier er vernet de første dagene (`protect_days`) */
   protectDays: 3,
+  /** Kjøperen eier selskapet minst så mange dager fra kjøpet (`config.world.concession_days`, `resolve_takeovers`) */
+  ownDays: 14,
 };
 
 /** Angrepet: 60 × √(bud / V) × (0,5 + 0,5 × aktivitet) + 2,5 per egne verk i regionen (høyst 10); budet høyst 10 × V */
@@ -222,6 +224,34 @@ export function buyoutPay(bid: number, b: Buyout): { kasse: number; fond: number
   );
   const fond = Math.max(0, Math.min(cap - kasse, t.investBack * Math.max(0, b.investedFond)));
   return { kasse: Math.round(kasse), fond: Math.round(fond) };
+}
+
+/**
+ * Lønner budet seg (B-435)? Står budet sterkest når det avgjøres, eier kjøperen selskapet til konsesjonen går ut, men
+ * minst `ownDays` dager fra kjøpet – bare til konsesjonen går ut hvis anbudet om neste periode alt er åpent (som
+ * `resolve_takeovers`). Inntekten regnes med det selskapet tjener nå, så den er et anslag. Holder ikke budet, får
+ * kjøperen 90 % tilbake.
+ */
+export function takeoverPayoff(p: {
+  bid: number;
+  perDay: number;
+  /** Når budet avgjøres (ms) */
+  decidedAt: number;
+  /** Når eierens periode går ut (ms), eller null */
+  concessionUntil: number | null;
+  /** Anbudet om neste periode er åpent */
+  renewalOpen: boolean;
+}): { days: number; income: number; net: number; back: number } {
+  const day = 86_400_000;
+  const left = p.concessionUntil === null ? 0 : Math.max(0, (p.concessionUntil - p.decidedAt) / day);
+  const days = p.renewalOpen ? left : Math.max(left, TAKEOVER.ownDays);
+  const income = Math.max(0, p.perDay) * days;
+  return {
+    days,
+    income: Math.round(income),
+    net: Math.round(income - Math.max(0, p.bid)),
+    back: Math.round(Math.max(0, p.bid) * TAKEOVER.failRefund),
+  };
 }
 
 /** Det mest eieren kan få i kassa ved et oppkjøp nå, uansett bud (dagene som er igjen og investeringene) */
