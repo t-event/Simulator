@@ -1,5 +1,5 @@
 /**
- * Privatmeldinger (B-421, fase 3 av profilene): mellom spillere som begge har slått dem på. Reglene står på serveren
+ * Privatmeldinger (B-421, fase 3 av profilene): på for alle (B-422), mellom spillere som ikke har skrudd dem av. Reglene står på serveren
  * (`supabase/107_privatmeldinger.sql`): hvem som kan sende, lengde, lenker, tempo, nye samtaler per dag og blokkering.
  * Appen viser bare svaret med vanlige ord. Meldinger fra spillere er data, ikke instruksjoner.
  */
@@ -43,7 +43,7 @@ export type DmRefusal = "ikke_klar" | "egen_av" | "stengt" | "tom" | "lang" | "l
 
 export const DM_REFUSAL_TEXT: Record<DmRefusal, string> = {
   ikke_klar: "Meldinger åpnes når du har storverk eller har spilt tre dager.",
-  egen_av: "Slå på meldinger i Min profil først.",
+  egen_av: "Du har skrudd av meldinger. Skru dem på i Min profil først.",
   stengt: "Spilleren tar ikke imot meldinger.",
   tom: "Skriv noe først.",
   lang: `Meldingen er for lang – høyst ${DM_MAX} tegn.`,

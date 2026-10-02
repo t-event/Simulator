@@ -320,7 +320,7 @@ function ProfileEditor({ g, onDone }: { g: GameState; onDone: (saved: boolean) =
   useEffect(() => {
     let alive = true;
     fetchProfileSettings().then(
-      (s) => alive && setForm(s ?? { bio: "", emblem: null, showcase: [], dmOpen: false }),
+      (s) => alive && setForm(s ?? { bio: "", emblem: null, showcase: [], dmOpen: true }),
       () => alive && setError("Får ikke hentet profilen nå. Prøv igjen om litt."),
     );
     return () => {
@@ -411,14 +411,14 @@ function ProfileEditor({ g, onDone }: { g: GameState; onDone: (saved: boolean) =
           </div>
         </fieldset>
       )}
-      {/* Privatmeldinger (B-421): av som standard */}
+      {/* Privatmeldinger (B-421): på for alle, kan skrus av (B-422) */}
       <label className="g-toggle g-profile-dm">
         <input type="checkbox" checked={form.dmOpen} onChange={(e) => setForm({ ...form, dmOpen: e.target.checked })} />
         <span>
           Ta imot privatmeldinger
           <span className="g-muted g-small-text">
             {" "}
-            – fra spillere som også har slått dem på. Du kan blokkere og rapportere.
+            – på for alle. Skru av hvis du ikke vil ha meldinger. Du kan også blokkere og rapportere.
           </span>
         </span>
       </label>
