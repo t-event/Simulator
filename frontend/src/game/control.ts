@@ -122,7 +122,8 @@ export function controlAfterInvest(
 /**
  * Overtakelser (B-335, `068_overtakelser.sql`): bare strategiske selskaper, bud minst verdien, 72 timer forsvar, uten
  * tilfeldighet. Formlene speiler `takeover_attack_of` og `takeover_defense_of`. Budet teller inntil 10 × verdien, forsvaret
- * høyst 3 × verdien (B-337, `069`): eieren kan alltid miste selskapet til en aktiv angriper med stort nok bud.
+ * høyst 3 × verdien (B-337, `069`): eieren kan alltid miste selskapet til en aktiv angriper med stort nok bud. Tallene
+ * for forsvaret og tilbakebetalingen her er regelsett 1; regelsett 2 (B-441) står i `TAKEOVER_V2`.
  */
 export const TAKEOVER = {
   attackW: 60,
@@ -158,10 +159,47 @@ export function takeoverAttack(bid: number, value: number, activity: number, reg
   );
 }
 
-/** Forsvaret: Kontroll + 40 × √((forsvar + fond, fondet høyst V) / V); alt høyst 3 × V */
-export function takeoverDefense(control: number, defense: number, fund: number, value: number): number {
-  const t = TAKEOVER;
+/**
+ * Regelsettet et oppkjøpsbud avgjøres etter (B-441, `takeovers.rules`): 1 = slik det var til 3.10.2026 (bud som var lagt
+ * inn da, avgjøres slik), 2 = alle nye bud.
+ */
+export type TakeoverRules = 1 | 2;
+
+/**
+ * Regelsett 2 (B-441, `123_oppkjop_v2.sql`): vinneren betaler, den som taper, får 75 % tilbake, motbudet teller som budet
+ * (inntil 5 × V), Kontrollen gir høyst 20 poeng, fondet teller bare når det brukes, og 14 dagers pause etter et forsøk
+ * som ikke lyktes. Budet teller fortsatt inntil 10 × V, så eieren kan alltid miste selskapet (B-337).
+ */
+export const TAKEOVER_V2 = {
+  defenseW: 60,
+  /** Motbudet teller høyst 5 × verdien */
+  cap: 5,
+  /** Kontroll 100 gir så mange poeng */
+  controlMax: 20,
+  /** Den som taper, mister så mye av pengene sine (går til ingen) */
+  loseFee: 0.25,
+  /** Dager uten nye bud etter et forsøk som ikke lyktes (`cooldown_days`) */
+  pauseDays: 14,
+};
+
+/**
+ * Forsvaret. Regelsett 1: Kontroll + 40 × √((motbud + fond, fondet høyst V) / V), høyst 3 × V. Regelsett 2: Kontroll / 5
+ * + 60 × √(motbud / V), høyst 5 × V – fondet teller bare når det er lagt inn som motbud (da er det med i `defense`).
+ */
+export function takeoverDefense(
+  control: number,
+  defense: number,
+  fund: number,
+  value: number,
+  rules: TakeoverRules,
+): number {
   const v = Math.max(1, value);
+  if (rules === 2) {
+    const t = TAKEOVER_V2;
+    const ctl = (Math.min(100, Math.max(0, control)) / 100) * t.controlMax;
+    return ctl + t.defenseW * Math.sqrt(Math.min(t.cap * v, Math.max(0, defense)) / v);
+  }
+  const t = TAKEOVER;
   return (
     control + t.defenseW * Math.sqrt(Math.min(t.cap * v, defense + Math.min(Math.max(0, fund), t.fundCap * v)) / v)
   );
@@ -171,9 +209,9 @@ export function takeoverDefense(control: number, defense: number, fund: number, 
  * Hvor stort bud en aktiv spiller uten egne verk i regionen trenger for å ta selskapet hvis eieren ikke setter inn noe
  * forsvar (B-370). Minst verdien (minstebudet), høyst 10 × verdien. Et tall eieren forstår bedre enn poengene.
  */
-export function bidToTake(control: number, fund: number, value: number): number {
+export function bidToTake(control: number, fund: number, value: number, rules: TakeoverRules): number {
   const v = Math.max(1, value);
-  const d = takeoverDefense(control, 0, fund, v);
+  const d = takeoverDefense(control, 0, fund, v, rules);
   const need = v * (d / TAKEOVER.attackW) ** 2;
   return Math.max(v, Math.min(need, TAKEOVER.attackCap * v));
 }
@@ -189,17 +227,34 @@ export function defenseNeeded(
   defense: number,
   fund: number,
   value: number,
+  rules: TakeoverRules,
 ): number | null {
-  const t = TAKEOVER;
   const v = Math.max(1, value);
-  if (takeoverDefense(control, defense, fund, v) >= attack) return 0;
+  if (takeoverDefense(control, defense, fund, v, rules) >= attack) return 0;
+  const w = rules === 2 ? TAKEOVER_V2.defenseW : TAKEOVER.defenseW;
+  const cap = rules === 2 ? TAKEOVER_V2.cap : TAKEOVER.cap;
+  const ctl = rules === 2 ? (Math.min(100, Math.max(0, control)) / 100) * TAKEOVER_V2.controlMax : control;
   // Taket sjekkes mot det som akkurat holder, ikke mot tallet med slingring (B-427): nær taket sa rådet før «går ikke»
   // om et motbud som vinner på serveren. Slingringen kuttes ved taket – alt under taket gir likevel et sterkere forsvar
-  const exact = v * ((attack - control) / t.defenseW) ** 2;
-  if (exact > t.cap * v) return null;
-  const total = Math.min(exact * 1.01, t.cap * v);
-  const f = Math.min(Math.max(0, fund), t.fundCap * v);
+  const exact = v * ((attack - ctl) / w) ** 2;
+  if (exact > cap * v) return null;
+  const total = Math.min(exact * 1.01, cap * v);
+  const f = rules === 2 ? 0 : Math.min(Math.max(0, fund), TAKEOVER.fundCap * v);
   return Math.max(0, Math.ceil(total - defense - f));
+}
+
+/** Andelen kjøperen får tilbake når budet ikke holder (regelsett 1: 90 %, 2: 75 %) */
+export function bidBack(rules: TakeoverRules): number {
+  return rules === 2 ? 1 - TAKEOVER_V2.loseFee : TAKEOVER.failRefund;
+}
+
+/**
+ * Andelen av motbudet eieren får tilbake (`takeover_refund`): regelsett 1 95 % uansett; regelsett 2 ingenting når
+ * motbudet holder (det er brukt opp) og 75 % når selskapet blir kjøpt likevel
+ */
+export function defenseBack(rules: TakeoverRules, sold: boolean): number {
+  if (rules === 1) return TAKEOVER.defenseRefund;
+  return sold ? 1 - TAKEOVER_V2.loseFee : 0;
 }
 
 /** Det serveren sier om eierens periode (B-375, `company_control` → `buyout`) */
@@ -230,7 +285,7 @@ export function buyoutPay(bid: number, b: Buyout): { kasse: number; fond: number
  * Lønner budet seg (B-435)? Står budet sterkest når det avgjøres, eier kjøperen selskapet til konsesjonen går ut, men
  * minst `ownDays` dager fra kjøpet – bare til konsesjonen går ut hvis anbudet om neste periode alt er åpent (som
  * `resolve_takeovers`). Inntekten regnes med det selskapet tjener nå, så den er et anslag. Holder ikke budet, får
- * kjøperen 90 % tilbake.
+ * kjøperen 90 % (regelsett 1) eller 75 % (regelsett 2) tilbake.
  */
 export function takeoverPayoff(p: {
   bid: number;
@@ -241,6 +296,7 @@ export function takeoverPayoff(p: {
   concessionUntil: number | null;
   /** Anbudet om neste periode er åpent */
   renewalOpen: boolean;
+  rules: TakeoverRules;
 }): { days: number; income: number; net: number; back: number } {
   const day = 86_400_000;
   const left = p.concessionUntil === null ? 0 : Math.max(0, (p.concessionUntil - p.decidedAt) / day);
@@ -250,7 +306,7 @@ export function takeoverPayoff(p: {
     days,
     income: Math.round(income),
     net: Math.round(income - Math.max(0, p.bid)),
-    back: Math.round(Math.max(0, p.bid) * TAKEOVER.failRefund),
+    back: Math.round(Math.max(0, p.bid) * bidBack(p.rules)),
   };
 }
 
@@ -274,7 +330,7 @@ export const TAKEOVER_REASON: Record<string, string> = {
   ett: "Du har allerede et oppkjøpsbud på gang – ett om gangen.",
   vern: "Ny eier er vernet de 3 første dagene.",
   sent: "Konsesjonen går snart ut – vent på det nye anbudet.",
-  pause: "Det var et oppkjøpsforsøk på selskapet nylig – 14 dagers pause.",
+  pause: "Et oppkjøpsbud på selskapet holdt ikke nylig – 14 dagers pause før neste.",
   belop: "Budet må være minst verdien av selskapet.",
   kasse: "Det er ikke nok i konsernkassa.",
   eier: "Det går ikke med dette selskapet.",

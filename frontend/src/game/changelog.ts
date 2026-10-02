@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 441,
+    date: "2026-10-03",
+    title: "Nye regler for oppkjøp",
+    items: [
+      "Den som vinner et oppkjøp, betaler: holder eierens motbud, er det brukt opp. Den som taper, får 75 % tilbake.",
+      "Samme beløp teller like mye i oppkjøpsbudet og motbudet. Kontrollen gir eieren bare et lite forsprang, og beredskapsfondet teller bare når det legges inn som motbud.",
+      "Holder ikke et oppkjøpsbud, kan ingen by på selskapet de neste 14 dagene.",
+      "Bud som alt var lagt inn, avgjøres etter de gamle reglene.",
+    ],
+  },
+  {
     b: 439,
     date: "2026-10-03",
     title: "Ryddigere svar på rapporter",

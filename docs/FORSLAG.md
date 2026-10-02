@@ -6,10 +6,6 @@ til «Avgjort» nederst).
 
 ## Spørsmål til brukeren
 
-- **Nye regler for oppkjøp** (B-440): retningen er godkjent (vinneren betaler, samme vilkår ved tap, samme styrke for
-  samme beløp, pause). Venter på satsene: forslaget er Kontroll ≤ 20 poeng, vekt 60 og tak 5 × V for begge, tapsgebyr
-  25 % (til ingen), pause 14 dager, minstebud 1 × V. Se `npx tsx src/game/takeoverSim.ts`.
-
 - **Ukens kontrollrom** er bygget (B-387, variant A). Venter: variant B (avspilling på serveren) – eieren 1.10: venter til
   stabiliseringen er ferdig (B-401). Tidslinja samler nå
   tallene til stål per kWh og leveringspresisjon (B-396, fra 1.10). Om noen uker: eieren avgjør minstetonn, minste antall

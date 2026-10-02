@@ -35,6 +35,9 @@ import {
   controlWord,
   defenseNeeded,
   takeoverPayoff,
+  TAKEOVER_V2,
+  bidBack,
+  defenseBack,
   investPart,
   policyLockedUntil,
   policySplit,
@@ -3595,15 +3598,15 @@ test("Overtakelser (B-335): angrep og forsvar som på serveren, med tak", () => 
   const near = (a: number, b: number) => Math.abs(a - b) < 0.1;
   // Tallene fra SQL-testen: bud 600 mill., full aktivitet, 2 verk i regionen mot Kontroll 54 og 450 mill. i forsvar
   assert(near(takeoverAttack(600e6, V, 1, 2), 75.35), `angrep ${takeoverAttack(600e6, V, 1, 2)}`);
-  assert(near(takeoverDefense(54, 450e6, 0, V), 94.62), `forsvar ${takeoverDefense(54, 450e6, 0, V)}`);
+  assert(near(takeoverDefense(54, 450e6, 0, V, 1), 94.62), `forsvar ${takeoverDefense(54, 450e6, 0, V, 1)}`);
   assert(near(takeoverAttack(V, V, 1, 2), 65), "minstebudet");
   // Taket: budet teller høyst 10 × V (B-337), forsvaret høyst 3 × V, regionen høyst 10, fondet høyst V
   assert(near(takeoverAttack(100 * V, V, 1, 0), 60 * Math.sqrt(10)), "tak på budet");
-  assert(near(takeoverDefense(100, 100 * V, 100 * V, V), 100 + 40 * Math.sqrt(3)), "tak på forsvaret");
+  assert(near(takeoverDefense(100, 100 * V, 100 * V, V, 1), 100 + 40 * Math.sqrt(3)), "tak på forsvaret");
   // B-337: eieren kan alltid miste selskapet – en aktiv angriper med 10 × V slår det sterkeste forsvaret (SQL: 189,74 mot 169,28)
-  assert(takeoverAttack(10 * V, V, 1, 0) > takeoverDefense(100, 100 * V, 100 * V, V), "alltid mulig");
+  assert(takeoverAttack(10 * V, V, 1, 0) > takeoverDefense(100, 100 * V, 100 * V, V, 1), "alltid mulig");
   assert(near(takeoverAttack(V, V, 1, 20) - takeoverAttack(V, V, 1, 0), 10), "tak på regionen");
-  assert(near(takeoverDefense(50, 0, 10 * V, V), 90), "tak på fondet");
+  assert(near(takeoverDefense(50, 0, 10 * V, V, 1), 90), "tak på fondet");
   // En passiv angriper har halv styrke
   assert(near(takeoverAttack(V, V, 0, 0), 30), "passiv angriper");
 });
@@ -3613,11 +3616,11 @@ test("Kontrollen med vanlige ord (B-370): hva som skal til for å ta selskapet, 
   const V = 471_485_385;
   assert(Math.abs(investPart(34.74e6, V) - 1.78) < 0.01, `investering ${investPart(34.74e6, V)}`);
   // Kontroll 54 og nesten ikke fond: minstebudet (verdien) er nok for en aktiv spiller
-  assert(bidToTake(54, 3.8e6, V) === V, `bud ${bidToTake(54, 3.8e6, V)}`);
+  assert(bidToTake(54, 3.8e6, V, 1) === V, `bud ${bidToTake(54, 3.8e6, V, 1)}`);
   // Kontroll 80 uten fond: (80 / 60)² × V
-  assert(Math.abs(bidToTake(80, 0, V) - V * (80 / 60) ** 2) < 1, "bud ved 80");
+  assert(Math.abs(bidToTake(80, 0, V, 1) - V * (80 / 60) ** 2) < 1, "bud ved 80");
   // Taket: høyst 10 × V
-  assert(bidToTake(100, 100 * V, V) <= 10 * V, "tak");
+  assert(bidToTake(100, 100 * V, V, 1) <= 10 * V, "tak");
   const ctl = { score: 54, parts: { investering: 1.8 }, invested: 34.74e6, value: V };
   assert(controlAfterInvest(ctl, 0) === 54, "uten investering");
   const after = controlAfterInvest(ctl, 300e6);
@@ -3630,10 +3633,10 @@ test("Kontrollen med vanlige ord (B-370): hva som skal til for å ta selskapet, 
   const parts = { eier: 30, aktivitet: 20, investering: 1.8, region: 2.5, eiertid: 0, fond: 0 };
   assert(!controlSteps(parts, "balansert").some((p) => p.key === "fond"), "fondet vokser alt");
   // Forsvaret: holder det alt, trengs 0; ellers et beløp som snur det; for sterkt angrep gir null
-  assert(defenseNeeded(50, 54, 0, 0, V) === 0, "holder");
-  const need = defenseNeeded(70, 54, 0, 0, V)!;
-  assert(need > 0 && takeoverDefense(54, need, 0, V) > 70, `forsvar ${need}`);
-  assert(defenseNeeded(189, 54, 0, 0, V) === null, "for sterkt");
+  assert(defenseNeeded(50, 54, 0, 0, V, 1) === 0, "holder");
+  const need = defenseNeeded(70, 54, 0, 0, V, 1)!;
+  assert(need > 0 && takeoverDefense(54, need, 0, V, 1) > 70, `forsvar ${need}`);
+  assert(defenseNeeded(189, 54, 0, 0, V, 1) === null, "for sterkt");
   // Vernet: tre dager etter at eieren tok over
   const since = "2026-09-29T01:33:03Z";
   const t0 = Date.parse(since);
@@ -4417,20 +4420,20 @@ test("Motbud nær taket (B-427): rådet sier ikke «går ikke» om et forsvar so
   const V = 1e8;
   const control = 54;
   const attack = control + TAKEOVER.defenseW * Math.sqrt(TAKEOVER.cap * 0.995);
-  const need = defenseNeeded(attack, control, 0, 0, V);
-  assert(need !== null && takeoverDefense(control, need, 0, V) > attack, `forsvar ${need}`);
+  const need = defenseNeeded(attack, control, 0, 0, V, 1);
+  assert(need !== null && takeoverDefense(control, need, 0, V, 1) > attack, `forsvar ${need}`);
   const over = control + TAKEOVER.defenseW * Math.sqrt(TAKEOVER.cap * 1.0001);
-  assert(defenseNeeded(over, control, 0, 0, V) === null, "over taket");
+  assert(defenseNeeded(over, control, 0, 0, V, 1) === null, "over taket");
 });
 
 test("Motbud på taket (B-429): likt holder, så rådet sier ikke «går ikke» når serveren lar eieren beholde selskapet", () => {
   const V = 1e8;
   const control = 54;
   // Angrepet står akkurat likt med det sterkeste forsvaret: serveren gir selskapet til angriperen bare ved att > def
-  const attack = takeoverDefense(control, TAKEOVER.cap * V, 0, V);
-  const need = defenseNeeded(attack, control, 0, 0, V);
-  assert(need !== null && takeoverDefense(control, need, 0, V) >= attack, `forsvar ${need}`);
-  assert(defenseNeeded(attack, control, TAKEOVER.cap * V, 0, V) === 0, "forsvar som står likt, holder alt");
+  const attack = takeoverDefense(control, TAKEOVER.cap * V, 0, V, 1);
+  const need = defenseNeeded(attack, control, 0, 0, V, 1);
+  assert(need !== null && takeoverDefense(control, need, 0, V, 1) >= attack, `forsvar ${need}`);
+  assert(defenseNeeded(attack, control, TAKEOVER.cap * V, 0, V, 1) === 0, "forsvar som står likt, holder alt");
 });
 
 test("Rådgiveren og sene kontrakter (B-429): alle sene kontrakter de siste ti døgnene er med i teksten", () => {
@@ -4468,7 +4471,13 @@ test("Rådgiveren og sene kontrakter (B-429): alle sene kontrakter de siste ti d
 test("Lønner oppkjøpet seg (B-435): inntekten i dagene kjøperen eier selskapet, mot budet", () => {
   // Som eierens bud 2.10: 350 mill. på et selskap som tjener ca. 18,6 mill. per dag, perioden går ut om ca. 7 dager
   const decidedAt = Date.parse("2026-10-05T20:21:00Z");
-  const base = { bid: 350e6, perDay: 18.59e6, decidedAt, concessionUntil: Date.parse("2026-10-13T01:33:00Z") };
+  const base = {
+    bid: 350e6,
+    perDay: 18.59e6,
+    decidedAt,
+    concessionUntil: Date.parse("2026-10-13T01:33:00Z"),
+    rules: 1 as const,
+  };
   const p = takeoverPayoff({ ...base, renewalOpen: false });
   assert(p.days === 14, `minst 14 dager fra kjøpet: ${p.days}`);
   assert(Math.abs(p.income - 14 * 18.59e6) < 1, `inntekten ${p.income}`);
@@ -4480,6 +4489,32 @@ test("Lønner oppkjøpet seg (B-435): inntekten i dagene kjøperen eier selskape
   // En lang periode igjen: alle dagene teller
   const r = takeoverPayoff({ ...base, concessionUntil: decidedAt + 30 * 86_400_000, renewalOpen: false });
   assert(r.days === 30 && r.net > 0, `30 dager: ${r.days}, ${r.net}`);
+  // Regelsett 2 (B-441): 75 % tilbake
+  assert(takeoverPayoff({ ...base, renewalOpen: false, rules: 2 }).back === 262.5e6, "75 % tilbake");
+});
+
+test("Oppkjøp regelsett 2 (B-441): samme styrke for samme beløp, Kontroll høyst 20, fondet teller bare når det brukes", () => {
+  // Kontroll 57 gir 11,4 uten motbud (som `defense_now` i `takeover_window`)
+  const V = 191_341_777;
+  const near = (a: number, b: number) => Math.abs(a - b) < 0.05;
+  assert(near(takeoverDefense(57, 0, 0, V, 2), 11.4), `uten motbud ${takeoverDefense(57, 0, 0, V, 2)}`);
+  // Fondet teller ikke av seg selv
+  assert(takeoverDefense(57, 0, 50 * V, V, 2) === takeoverDefense(57, 0, 0, V, 2), "fondet av seg selv");
+  // Samme beløp gir samme styrke som et bud fra en aktiv kjøper uten verk i regionen, pluss Kontrollen (høyst 20)
+  assert(near(takeoverDefense(0, 2 * V, 0, V, 2), takeoverAttack(2 * V, V, 1, 0)), "samme styrke");
+  assert(near(takeoverDefense(100, 0, 0, V, 2), TAKEOVER_V2.controlMax), "Kontroll 100 = 20");
+  // Taket på motbudet er 5 × V, og B-337 holder: en aktiv kjøper med 10 × V slår det sterkeste motbudet
+  assert(near(takeoverDefense(100, 100 * V, 0, V, 2), 20 + 60 * Math.sqrt(5)), "tak på motbudet");
+  assert(takeoverAttack(10 * V, V, 1, 0) > takeoverDefense(100, 100 * V, 100 * V, V, 2), "alltid mulig");
+  // Motbudet som trengs, holder og regnes uten fondet
+  const need = defenseNeeded(90, 57, 0, 50 * V, V, 2)!;
+  assert(need > 0 && takeoverDefense(57, need, 0, V, 2) > 90, `motbud ${need}`);
+  assert(defenseNeeded(190, 57, 0, 0, V, 2) === null, "for sterkt");
+  // Uten motbud trenger en aktiv kjøper bare minstebudet
+  assert(bidToTake(57, 50 * V, V, 2) === V, "minstebudet holder");
+  // Tilbake: den som taper, får 75 %; vinneren betaler
+  assert(bidBack(2) === 0.75 && bidBack(1) === 0.9, "kjøperen tilbake");
+  assert(defenseBack(2, false) === 0 && defenseBack(2, true) === 0.75 && defenseBack(1, false) === 0.95, "eieren");
 });
 
 test("Arbeidsmiljøkortene (B-436): riktig håndtering gir bedre trivsel, å se bort gir dårligere, fagboka låses opp", () => {

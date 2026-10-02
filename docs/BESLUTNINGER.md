@@ -8142,7 +8142,7 @@ Endringslogg: ja.
 Konto (B-149): uendret (adminpanelet).
 
 ## B-440 Oppkjøp: retningen for nye regler, og simulatoren (2026-10-03)
-Status: retning godkjent av eieren; satsene venter på eierens valg. Ingenting er endret i spillet ennå.
+Status: retning godkjent av eieren; satsene valgt og bygget i B-441.
 Bakgrunn: et oppkjøpsbud på skraplageret ble en budkrig. Med dagens regler koster eierens motbud bare 5 % (95 % tilbake
 uansett utfall), mens kjøperen betaler hele budet hvis hen vinner og bare eier selskapet i ca. 14 dager. Et vinnende bud
 måtte være rundt 900 mill., mot ca. 268 mill. i inntekt på 14 dager. Eieren avviste forslaget om at hele motbudet skal
@@ -8175,3 +8175,26 @@ begge (til ingen), pause 14 dager etter et avgjort forsøk, minstebud 1 × V, be
 Endringslogg: nei.
 Konto (B-149): uendret.
 
+## B-441 Oppkjøp regelsett 2: vinneren betaler, 25 % tapsgebyr, Kontroll høyst 20, 14 dagers pause (2026-10-03)
+Status: gjelder. Erstatter tilbakebetalingen (90 %/95 %), forsvarsformelen og fondet som teller av seg selv fra B-335,
+B-337 og B-375 for nye bud; budets formel, taket på 10 × V, minstebudet og betalingen til eieren (B-375) gjelder fortsatt.
+Bakgrunn: retningen i B-440. Eieren valgte satsene etter simuleringen: «Høyst 20 poeng», «25 %», «14 dager».
+Beslutning:
+- **Vinneren betaler.** Kjøperen som vinner, betaler hele budet (eieren får `takeover_payout` som før, resten går ut av
+  spillet). Eieren som holder, har brukt opp motbudet – ingen investering eller Kontroll av det.
+- **Taperen får 75 % tilbake**, begge veier: kjøperen når budet ikke holder, eieren (motbudet, også fra fondet) når
+  selskapet blir kjøpt likevel. Tapsgebyret på 25 % går til ingen (`takeover_refund`).
+- **Samme beløp, samme styrke:** motbudet teller 60 × √(beløp / V) som budet, inntil 5 × V (`takeover_defense_of2`).
+  Kontrollen gir høyst 20 poeng (Kontroll 100 = 20). Beredskapsfondet teller bare når eieren legger det inn som motbud.
+- **Pause 14 dager** etter et avverget forsøk (`cooldown_days` = 14, også for selskaper med eldre forsøk).
+- **Pågående bud** avgjøres etter reglene de ble lagt inn under: `takeovers.rules` = 1 for alle rader som fantes da 123
+  ble lagt inn (også budet som avgjøres 5.10), 2 for nye. Appen viser tekst og tall etter regelsettet på hvert bud.
+- B-337 holder: det sterkeste motbudet (20 + 60 × √5 ≈ 154) kan slås av en aktiv kjøper (60 × √10 ≈ 190).
+Simulatoren (`takeoverSim.ts`, regelsett 2 med budtak 10 × V): eierverdi 0–7 dager – oppkjøp lønner seg i 12 av 12
+(191–207 mill. i snitt); eierverdi 14 dager – eieren beholder, men betaler for det. Plage: ca. 1,8 forsøk per 30 dager, og
+kjøperen taper 48 mill. per forsøk med minstebudet.
+Testet før den ble lagt inn (transaksjon rullet tilbake): budet som pågår, regnes som før; samme bud etter regelsett 2 gir
+eieren 75 % av motbudet tilbake ved salg; et motbud som holder, er brukt opp, og kjøperen får 75 %; vinduet viser pausen.
+Valgt bort: større minstebud (1,5 × V stopper alle oppkjøp), tak 3 × V på budet (endrer ingenting i simuleringen, men
+svekker B-337), Kontroll ≤ 30 (eieren beholder for ofte).
+Konto (B-149): uendret – oppkjøp krever konto som før.

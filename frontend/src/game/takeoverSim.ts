@@ -1,6 +1,6 @@
 /**
- * Oppkjøpssimulatoren (B-440): når lønner det seg å kjøpe, forsvare eller gi seg – med reglene som gjelder nå og med
- * kandidatene til en ny regel. Endrer ingen regler; den måler dem, så satsene kan velges før noe bygges.
+ * Oppkjøpssimulatoren (B-440): når lønner det seg å kjøpe, forsvare eller gi seg – med regelsett 1, kandidatene og
+ * regelsett 2 som ble valgt (B-441, `TAKEOVER_V2`). Endrer ingen regler; den måler dem.
  *
  * Modellen (forenklet, uten tilfeldighet):
  * - Selskapet tjener `I` per ekte dag; verdien er V = 10 × I (minstebudet), som på serveren.
@@ -18,7 +18,7 @@
  *   npx tsx src/game/takeoverSim.ts            # alle regelsettene, scenariene og sammendraget
  *   npx tsx src/game/takeoverSim.ts --kort     # bare sammendraget
  */
-import { TAKEOVER } from "./control";
+import { TAKEOVER, TAKEOVER_V2 } from "./control";
 
 declare const process: { argv: string[] };
 
@@ -47,7 +47,7 @@ interface Rules {
 }
 
 const NOW: Rules = {
-  name: "Nå",
+  name: "Regelsett 1 (før B-441)",
   attackW: TAKEOVER.attackW,
   attackCap: TAKEOVER.attackCap,
   defenseW: TAKEOVER.defenseW,
@@ -62,11 +62,12 @@ const NOW: Rules = {
 };
 
 /** Den enklere modellen: vinneren betaler, samme vilkår ved tap, samme styrke for samme beløp, begrenset Kontroll */
-function proposal(controlMax: number, fee: number, cap = 5, pauseDays = 7, minBid = 1): Rules {
+function proposal(controlMax: number, fee: number, cap = 5, pauseDays = 7, minBid = 1, attackCap = cap): Rules {
+  const caps = attackCap === cap ? `tak ${cap}V` : `tak ${attackCap}V/${cap}V`;
   return {
-    name: `Ny: Kontroll ≤ ${controlMax}, tap ${Math.round(fee * 100)} %, tak ${cap}V, pause ${pauseDays} d, min ${minBid}V`,
+    name: `Ny: Kontroll ≤ ${controlMax}, tap ${Math.round(fee * 100)} %, ${caps}, pause ${pauseDays} d, min ${minBid}V`,
     attackW: 60,
-    attackCap: cap,
+    attackCap,
     defenseW: 60,
     defenseCap: cap,
     controlMax,
@@ -88,6 +89,18 @@ const RULES: Rules[] = [
   proposal(20, 0.1, 3),
   proposal(20, 0.25),
   proposal(20, 0.25, 5, 14),
+  // Valgt (B-441): budet teller fortsatt inntil 10 × V, motbudet inntil 5 × V – eieren kan alltid miste selskapet (B-337)
+  {
+    ...proposal(
+      TAKEOVER_V2.controlMax,
+      TAKEOVER_V2.loseFee,
+      TAKEOVER_V2.cap,
+      TAKEOVER_V2.pauseDays,
+      1,
+      TAKEOVER.attackCap,
+    ),
+    name: "Regelsett 2 (B-441, gjelder nå)",
+  },
   proposal(20, 0.25, 5, 14, 1.5),
   proposal(40, 0.25, 5, 14, 1.5),
 ];
