@@ -8233,3 +8233,118 @@ button.g-prod-row:hover {
   height: 14px;
   vertical-align: -2px;
 }
+
+/* Privatmeldinger (B-421): samtalene i fanen «Meldinger» i Skiftrapporten */
+.g-flip {
+  transform: scaleX(-1);
+}
+
+.g-dm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-height: 0;
+  flex: 1;
+}
+
+.g-dm-threads {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.g-dm-thread {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  min-height: 56px;
+  padding: var(--sp-2) 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.g-dm-thread-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.g-dm-thread-top {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-2);
+}
+
+.g-dm-thread-last {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--text-dim);
+}
+
+.g-dm-thread.is-unread .g-dm-thread-last {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.g-dm-conv-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.g-dm-conv-head strong {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.g-dm-block {
+  min-height: 44px;
+  font-size: var(--fs-meta);
+}
+
+.g-profile-dm {
+  align-items: flex-start;
+  gap: var(--sp-2);
+  min-height: 44px;
+}
+
+/* Adminpanelet (B-421) */
+.g-admin-reports {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.g-admin-report {
+  border-top: 1px solid var(--line);
+  padding: var(--sp-3) 0;
+}
+
+.g-admin-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px var(--sp-2);
+}
+
+.g-modal-card .g-admin-body {
+  margin: var(--sp-2) 0;
+  padding: var(--sp-2) var(--sp-3);
+  border-left: 3px solid var(--line);
+  font-size: var(--fs-body);
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}

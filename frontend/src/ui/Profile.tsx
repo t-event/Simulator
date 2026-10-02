@@ -28,6 +28,7 @@ import { fmtKr, fmtNum } from "./format";
 import { Icon } from "./icons";
 import { Place } from "./Place";
 import { Portal } from "./Portal";
+import { openMessages } from "./messagesStore";
 import { closeProfile, onProfileChange, openProfile, openProfileNick, profileStartsInEdit } from "./profileStore";
 
 /** Et brukernavn som åpner profilen. `label` når teksten skal være noe annet enn navnet («Du», «Deg») */
@@ -136,6 +137,20 @@ function ProfileSheet({
           ) : (
             <>
               <ProfileBody p={profile} />
+              {!profile.me && profile.dm && (
+                <div className="g-profile-actions">
+                  <Button
+                    variant="primary"
+                    icon="message"
+                    onClick={() => {
+                      closeProfile();
+                      openMessages(profile.nick);
+                    }}
+                  >
+                    Send melding
+                  </Button>
+                </div>
+              )}
               {profile.me && (
                 <div className="g-profile-actions">
                   <Button icon="paint-roller" onClick={() => setEditing(true)}>
@@ -396,6 +411,17 @@ function ProfileEditor({ g, onDone }: { g: GameState; onDone: (saved: boolean) =
           </div>
         </fieldset>
       )}
+      {/* Privatmeldinger (B-421): av som standard */}
+      <label className="g-toggle g-profile-dm">
+        <input type="checkbox" checked={form.dmOpen} onChange={(e) => setForm({ ...form, dmOpen: e.target.checked })} />
+        <span>
+          Ta imot privatmeldinger
+          <span className="g-muted g-small-text">
+            {" "}
+            – fra spillere som også har slått dem på. Du kan blokkere og rapportere.
+          </span>
+        </span>
+      </label>
       {error && <Callout tone="critical">{error}</Callout>}
       <div className="g-profile-actions">
         <Button type="button" onClick={() => onDone(false)} disabled={busy}>

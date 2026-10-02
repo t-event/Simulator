@@ -176,7 +176,9 @@ frontend/src/
     seasonTrack.ts Sesongstigen: poeng, trinn og henting (B-173)
     treasury.ts  Konsernkassa på serveren: status (overføringen er slått av, B-319)
     chat.ts      Skiftrapporten: felles chat – sende, hente, slette, sist lest (B-338; SQL i 070)
-    profile.ts   Profilen til en spiller fra `player_profile` (B-419; SQL i 105)
+    profile.ts   Profilen til en spiller fra `player_profile` (B-419; SQL i 105), Min profil (`profile_update`, 106)
+    messages.ts  Privatmeldinger: oversikt, samtale, sende, blokkere, rapportere (B-421; SQL i 107)
+    admin.ts     Adminpanelet: rapportene og handlingene – serveren sjekker `admins` (B-421)
     konsern.ts   Konsernet på serveren: kjøp, avbestilling, salg og flytting, og svaret lagt inn i spillet (B-326, B-333)
     worldMap.ts  Verdenskartet: alle spilleres verk per region og selskapene (`world_map`, B-333)
     world.ts     Strategiske selskaper: status, anbud og bud (B-189)
@@ -218,6 +220,8 @@ frontend/src/
     WorldMap.tsx Konsern → Kart: verdenskartet med regionene, andres verk og selskapene (B-333)
     Chat.tsx     Skiftrapporten: knappen ved varsellinja (under 380 px i tallraden) og arket (B-338)
     Profile.tsx  Profilarket og `PlayerName` (brukernavn som åpner profilen); hvilken som er åpen: profileStore.ts (B-419)
+    Messages.tsx Fanen «Meldinger» i Skiftrapporten; «Send melding» går via messagesStore.ts (B-421)
+    Admin.tsx    Adminpanelet under kontoen, bare når `is_admin()` svarer ja (B-421)
     Companies.tsx Konsern → Industrien: ett kort per selskap (skraplageret nå) og konsernkassa (B-189, B-227)
     control/     Kontrollrommet: spillet i fire runder (chargeGame.ts: logikk, frø og inndatalogg, testspiller; ControlRoom.tsx,
                  B-175); weekly.ts: ukens charge og treningsfrø (B-387)
@@ -588,6 +592,12 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   e-post eller klokkeslett. Nye felt i profilen vurderes mot det (og mot KONTO.md). Flaggede og sperrede har ingen profil.
   Spillerne har ingen update-regel på `profiles`: tekst, merke og prestasjoner endres bare via `profile_update` (106), som
   sjekker lengde, lenker, sperre, tempo og at merket og prestasjonene finnes i det lagrede spillet.
+- **Privatmeldinger og adminpanelet** (B-421, 107): tabellene har RLS uten regler og ingen tilgang for spillerne – alt går
+  gjennom funksjonene. En ny funksjon som viser meldinger, filtrerer `hidden`, blokkering (`dm_blocked`) og 30 dager. Nye
+  adminfunksjoner sjekker `is_admin()` først og logger i `admin_log`; eieren står i `admins` (lagt inn for hånd, aldri i
+  repoet). Ryddingen hver natt (`supabase/utkast/108`) er ikke lagt inn: connectoren holder igjen SQL med `delete` til
+  eieren bekrefter – legg den inn når eieren er til stede, før 1.11.2026. Unngå `update` på ekte rader i prøvekjøringer
+  (holdes også igjen); kall funksjonene som spilleren i stedet.
 - **Eksporten** (B-345, 073): hver natt legger edge-funksjonen `eksport` (`supabase/functions/eksport`) alle tabellene i
   `public` (unntatt `save_backups`) i Storage-mappa `eksport` som `stalverk-ÅÅÅÅ-MM-DD.json.gz`, 14 dager. Kjør for hånd med
   `select net.http_post(url := (select decrypted_secret from vault.decrypted_secrets where name = 'eksport_url'), body := '{}')`

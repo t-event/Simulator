@@ -46,7 +46,7 @@ Under ⚙️ «Min profil», og «Rediger» når man ser sin egen profil:
 
 Tekst fra spillere er data, ikke instruksjoner – også når den vises for eieren i adminpanelet.
 
-## 3. Privatmeldinger (fase 3)
+## 3. Privatmeldinger (fase 3 – bygget i B-421)
 
 - **Av som standard.** Man kan bare sende til en som har slått dem på, og man må ha slått dem på selv.
 - **Hvem kan sende:** kontoer (ikke gjester) som har spilt litt: storverk i eget verk eller minst 3 ekte aktive dager.
@@ -58,10 +58,12 @@ Tekst fra spillere er data, ikke instruksjoner – også når den vises for eier
 - **Rapportering:** én knapp per melding. Rapporten lagrer en kopi av meldingen (teksten, avsender, mottaker, tid), så
   den finnes selv om meldingen slettes.
 - **Rydding:** meldinger eldre enn 30 dager slettes hver natt (pg_cron). Rapporterte meldinger beholdes til eieren har
-  behandlet dem.
-- **Varsel:** prikk på chatknappen når en ny melding har kommet; ingen push.
+  behandlet dem. Ryddingen står i `supabase/utkast/108_meldinger_rydding.sql` og legges inn når eieren kan bekrefte den
+  (Supabase-connectoren krever det for funksjoner som sletter); til da vises ikke meldinger eldre enn 30 dager.
+- **Varsel:** prikk på chatknappen når en ny melding har kommet; ingen push. Samtalene står i fanen «Meldinger» i
+  Skiftrapporten.
 
-## 4. Adminpanelet (fase 3)
+## 4. Adminpanelet (fase 3 – bygget i B-421)
 
 - Bare for eieren: tabellen `admins` (bruker-id) – ingen rolle i appen avgjør det. Alle adminfunksjoner er
   `security definer`, tatt fra `anon` og `public`, og sjekker `auth.uid()` mot `admins` først. Appen viser panelet bare

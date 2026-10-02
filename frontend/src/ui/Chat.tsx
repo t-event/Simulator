@@ -24,7 +24,11 @@ import { getSession, onSessionChange } from "../net/supabase";
 import type { GameState } from "../game/types";
 import { realNow } from "../game/clock";
 import { NeedsAccount } from "./Account";
+import { fetchDmUnread, reportMessage } from "../net/messages";
+import { SubTabs } from "./common";
 import { Callout, SheetHead } from "./ds";
+import { DirectMessages } from "./Messages";
+import { dmUnread, onMessagesChange, setDmUnread, takeMessagesRequest } from "./messagesStore";
 import { PlayerName } from "./Profile";
 import { Icon } from "./icons";
 
@@ -69,6 +73,8 @@ function checkLatest(): void {
       notifyLatest();
     })
     .catch(() => {});
+  // Uleste privatmeldinger (B-421) gir samme prikk
+  void fetchDmUnread().then(setDmUnread, () => {});
 }
 
 function subscribeLatest(listener: () => void): () => void {
@@ -117,11 +123,12 @@ export function ChatButton({
 }) {
   const session = useSession();
   useSyncExternalStore(subscribeLatest, () => latestVer);
+  const unread = useSyncExternalStore(onMessagesChange, dmUnread, dmUnread);
   // Ny innlogging: se etter meldinger med én gang
   useEffect(() => {
     if (session) checkLatest();
   }, [session]);
-  const fresh = !!session && latestId > chatSeen();
+  const fresh = !!session && (latestId > chatSeen() || unread > 0);
   if (g.tutorial !== null || (!session && g.stage < 1)) return null;
   return (
     <button
@@ -149,6 +156,25 @@ export function ChatSheet({ onClose, onOpenSettings }: { onClose: () => void; on
   const listRef = useRef<HTMLOListElement>(null);
   const lastId = useRef(0);
   const stick = useRef(true);
+  // Fanen «Meldinger» (B-421): åpnes også fra «Send melding» på en profil
+  const [first] = useState(takeMessagesRequest);
+  const [tab, setTab] = useState<"chat" | "dm">(first ? "dm" : "chat");
+  const [dmStart, setDmStart] = useState<{ nick: string | null } | null>(first);
+  const [dmKey, setDmKey] = useState(0);
+  const [reported, setReported] = useState<Set<number>>(() => new Set());
+  const unread = useSyncExternalStore(onMessagesChange, dmUnread, dmUnread);
+  useEffect(
+    () =>
+      onMessagesChange(() => {
+        const r = takeMessagesRequest();
+        if (r) {
+          setTab("dm");
+          setDmStart(r);
+          setDmKey((k) => k + 1);
+        }
+      }),
+    [],
+  );
 
   // Brukernavnet: uten det kan man lese, men ikke skrive
   useEffect(() => {
@@ -244,6 +270,26 @@ export function ChatSheet({ onClose, onOpenSettings }: { onClose: () => void; on
           </>
         ) : (
           <>
+            <SubTabs
+              label="Skiftrapporten eller meldinger"
+              value={tab}
+              onChange={(t) => {
+                setTab(t);
+                if (t === "dm") {
+                  setDmStart(null);
+                  setDmKey((k) => k + 1);
+                }
+              }}
+              tabs={[
+                { id: "chat", label: "Alle" },
+                { id: "dm", label: "Meldinger", count: unread },
+              ]}
+            />
+          </>
+        )}
+        {session && tab === "dm" && <DirectMessages key={dmKey} startWith={dmStart?.nick ?? null} />}
+        {session && tab === "chat" && (
+          <>
             <p className="g-muted g-small-text g-chat-intro">
               Felles for alle spillerne. Vær grei – meldingene står i 30 dager.
             </p>
@@ -279,6 +325,23 @@ export function ChatSheet({ onClose, onOpenSettings }: { onClose: () => void; on
                           Slett
                         </button>
                       )}
+                      {/* Rapporter (B-421): eieren ser en kopi i adminpanelet */}
+                      {!m.mine &&
+                        (reported.has(m.id) ? (
+                          <span className="g-muted g-chat-del">Rapportert</span>
+                        ) : (
+                          <button
+                            className="g-link g-chat-del"
+                            onClick={() =>
+                              void reportMessage("chat", m.id).then(
+                                (ok) => ok && setReported((x) => new Set(x).add(m.id)),
+                                () => {},
+                              )
+                            }
+                          >
+                            Rapporter
+                          </button>
+                        ))}
                     </div>
                     <p>{m.body}</p>
                   </li>
