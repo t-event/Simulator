@@ -286,6 +286,10 @@ function botHour(g: GameState): void {
       rensehavari: 0,
       // Dødsulykke (B-265): bare ett valg
       dodsulykke: 0,
+      // Arbeidsmiljøet (B-436): en fornuftig leder tar det på alvor
+      trakassering: 0,
+      rasisme: 0,
+      utenfor: 0,
       // Fellesferien (B-298): sommervikarer, så verket går videre
       fellesferie: process.argv.includes("--sommerstans") ? 0 : 1,
     };

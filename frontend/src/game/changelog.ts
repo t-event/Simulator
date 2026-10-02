@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 436,
+    date: "2026-10-02",
+    title: "Arbeidsmiljøet",
+    items: [
+      "Nye valg om arbeidsmiljøet: trakassering, rasistiske «spøker» og en ansatt som holdes utenfor. Tar du det på alvor, trives folk bedre. Ser du bort, kan noen slutte.",
+      "Nytt kapittel i fagboka: «Arbeidsmiljø og varsling» – hvordan man sier fra og følger opp.",
+    ],
+  },
+  {
     b: 435,
     date: "2026-10-02",
     title: "Lønner oppkjøpet seg?",

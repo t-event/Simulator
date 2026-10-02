@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 357 – 2026-10-02: Arbeidsmiljøkort (B-436)
+
+**Brukeren ba om:** et innspill fra en spiller om kvotering og rasisme under Folk. Eieren valgte arbeidsmiljøkort
+(trakassering, rasisme, en som holdes utenfor) med fagboktekst om likestilling og varsling – ingen kvoter. Også: egen
+bank for konsernkassa (lån til verk og modernisering) – egen økt.
+
+**Gjort:** tre valgkort i `decisions.ts` (`workplaceCard`), kapitlet «Arbeidsmiljø og varsling» i fagboka med quiz,
+testspilleren tar det på alvor. #373 (B-434/B-435) merget og publisert.
+
+**Testet:** motortest, `balance.ts`, `npm test`, typesjekk, lint.
+
+**Gjenstår:** konsernbanken (B-437); eierens beslutning om etterbetalingen.
+
 ## Økt 356 – 2026-10-02: Fire resttilfeller og «Lønner oppkjøpet seg?» (B-434, B-435)
 
 **Brukeren ba om:** rette de fire resttilfellene etter etterkontrollen av #372, og vise selskapets verdi – eieren byr 350

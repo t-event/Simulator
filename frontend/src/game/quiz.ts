@@ -123,6 +123,20 @@ export const QUIZ: Record<string, QuizQuestion[]> = {
       why: "Folk får lønn uansett. Et ekstra skift lønner seg bare hvis du får solgt det dere lager.",
     },
   ],
+  arbeidsmiljo: [
+    {
+      q: "En ansatt sier fra om trakassering. Hva gjør du?",
+      options: ["Ber dem ordne det seg imellom", "Lytter, undersøker og følger opp", "Venter og ser om det går over"],
+      correct: 1,
+      why: "Den som sier fra, skal tas på alvor. Lederen har plikt til å stoppe trakassering.",
+    },
+    {
+      q: "Hva krever loven når noen skal ansettes?",
+      options: ["En fast kvote av hvert kjønn", "At alle får de samme mulighetene", "Ingenting"],
+      correct: 1,
+      why: "Det er ingen kvote for vanlige ansatte, men ingen skal velges bort på grunn av kjønn, opprinnelse eller lignende.",
+    },
+  ],
   ildfast: [
     {
       q: "Hva er billigst?",
