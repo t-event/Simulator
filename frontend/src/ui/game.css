@@ -7444,6 +7444,20 @@ button.g-prod-row:hover {
   font-weight: 600;
 }
 
+/* Lønner budet seg (B-435): inntekten i dagene du eier selskapet mot budet */
+.g-payoff {
+  margin: var(--sp-2) 0;
+  padding: var(--sp-2);
+  border-left: 3px solid var(--heat-border);
+  background: var(--heat-bg);
+  border-radius: var(--r-sm);
+}
+
+.g-payoff.is-ok {
+  border-left-color: var(--ok-border);
+  background: var(--ok-bg);
+}
+
 .g-invest {
   margin: var(--sp-2) 0;
 }

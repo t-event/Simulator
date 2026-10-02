@@ -34,6 +34,7 @@ import {
   controlSteps,
   controlWord,
   defenseNeeded,
+  takeoverPayoff,
   investPart,
   policyLockedUntil,
   policySplit,
@@ -4459,6 +4460,23 @@ test("Rådgiveren og sene kontrakter (B-429): alle sene kontrakter de siste ti d
   assert(g.contracts.filter((c) => c.status === "misligholdt").length === 3, "sene kontrakter ble fjernet for tidlig");
   const text = directorLateText(g);
   assert(text.includes("3 kontrakter") && /30\s000\st/.test(text), text);
+});
+
+test("Lønner oppkjøpet seg (B-435): inntekten i dagene kjøperen eier selskapet, mot budet", () => {
+  // Som eierens bud 2.10: 350 mill. på et selskap som tjener ca. 18,6 mill. per dag, perioden går ut om ca. 7 dager
+  const decidedAt = Date.parse("2026-10-05T20:21:00Z");
+  const base = { bid: 350e6, perDay: 18.59e6, decidedAt, concessionUntil: Date.parse("2026-10-13T01:33:00Z") };
+  const p = takeoverPayoff({ ...base, renewalOpen: false });
+  assert(p.days === 14, `minst 14 dager fra kjøpet: ${p.days}`);
+  assert(Math.abs(p.income - 14 * 18.59e6) < 1, `inntekten ${p.income}`);
+  assert(p.net < 0 && Math.round(p.net / 1e6) === -90, `mot budet ${p.net}`);
+  assert(p.back === 315e6, `tilbake hvis budet ikke holder: ${p.back}`);
+  // Er anbudet om neste periode alt åpent, eier kjøperen det bare til perioden går ut
+  const q = takeoverPayoff({ ...base, renewalOpen: true });
+  assert(q.days > 7 && q.days < 7.3, `bare til perioden går ut: ${q.days}`);
+  // En lang periode igjen: alle dagene teller
+  const r = takeoverPayoff({ ...base, concessionUntil: decidedAt + 30 * 86_400_000, renewalOpen: false });
+  assert(r.days === 30 && r.net > 0, `30 dager: ${r.days}, ${r.net}`);
 });
 
 test("Quizen (B-428): svaralternativene står i blandet rekkefølge, men alltid den samme for et spørsmål", () => {

@@ -19,18 +19,28 @@ async function fetchOk(url) {
   return res;
 }
 
-async function precache() {
-  const page = await fetchOk("./");
+/**
+ * Lagrer en side som den nye kopien, men først når filene den trenger (JS og CSS i assets/, og `extra`) ligger i
+ * lageret. Det som alt ligger der, hentes ikke på nytt (filene har hash i navnet og endres aldri). Feiler én fil,
+ * står den gamle kopien urørt (B-433, B-434).
+ */
+async function storePage(page, extra = []) {
   const html = await page.clone().text();
   // Stiene i siden er absolutte (/Simulator/assets/…): de løses mot adressen til service workeren
   const found = [...html.matchAll(/(?:src|href)="([^"]*assets\/[^"]+)"/g)];
   const assets = [...new Set(found.map((m) => new URL(m[1], self.location.href).href))];
-  const files = ["manifest.webmanifest", "icon.svg", "icon-192.png", ...assets];
-  const fetched = await Promise.all(files.map((f) => fetchOk(f)));
   const cache = await caches.open(VERSION);
+  const missing = [];
+  for (const f of assets) if (!(await cache.match(f))) missing.push(f);
+  const files = [...extra, ...missing];
+  const fetched = await Promise.all(files.map((f) => fetchOk(f)));
   await Promise.all(fetched.map((res, i) => cache.put(files[i], res)));
   // Siden sist, når filene den trenger, ligger i lageret
   await cache.put("./", page);
+}
+
+async function precache() {
+  await storePage(await fetchOk("./"), ["manifest.webmanifest", "icon.svg", "icon-192.png"]);
 }
 
 self.addEventListener("install", (event) => {
@@ -56,10 +66,11 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Bare et svar som virker, erstatter kopien (B-428): før kunne en feilside (f.eks. 503) bli den lagrede siden
+          // Bare et svar som virker, erstatter kopien (B-428): før kunne en feilside (f.eks. 503) bli den lagrede siden.
+          // Og bare når filene siden trenger, er lagret (B-434): før ble ny side lagret med én gang, og svarte en ny
+          // JS-fil 503, startet ikke spillet uten nett
           if (!response.ok) return caches.match("./").then((cached) => cached || response);
-          const copy = response.clone();
-          caches.open(VERSION).then((cache) => cache.put("./", copy));
+          event.waitUntil(storePage(response.clone()).catch(() => {}));
           return response;
         })
         .catch(() => caches.match("./")),

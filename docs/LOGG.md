@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 356 – 2026-10-02: Fire resttilfeller og «Lønner oppkjøpet seg?» (B-434, B-435)
+
+**Brukeren ba om:** rette de fire resttilfellene etter etterkontrollen av #372, og vise selskapets verdi – eieren byr 350
+mill. og vet ikke om det er verdt det, når kortet bare viser ca. 18 mill. per døgn.
+
+**Gjort:** generasjon for koblingen mot kontoen (`syncGen`) i hele lagringsforløpet; tidslinjeraden følger generasjonen;
+service workeren lagrer ny side ved navigasjon først når filene ligger i lageret; 119 (`delete_my_account` gjør opp
+budene før slettingen). Selskapskortet viser verdien, og oppkjøpet viser «Lønner det seg?» (`takeoverPayoff`). Eierens
+bud: ca. 260 mill. på 14 dager mot 350 mill. (−90 mill.), 315 mill. tilbake hvis budet ikke holder.
+
+**Testet:** nettest (A → B → A), motortest (eierens tall), Chromium-prøve av service workeren, `npm test`, typesjekk,
+lint, build.
+
+**Gjenstår:** eierens beslutning om etterbetalingen.
+
 ## Økt 355 – 2026-10-02: Etterkontrollen av #369/#370 – fem restfunn (B-433)
 
 **Brukeren ba om:** rette de fem restfunnene etter etterkontrollen (sent A-svar, offlinekopien, midnatt, låserekkefølgen

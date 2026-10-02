@@ -65,6 +65,12 @@ function queue(g: GameState): void {
 let lastUpload = 0;
 let lastSavedAt: number | null = null;
 let lastSnapshotDay = -1;
+/**
+ * Generasjonen av koblingen mot kontoen (B-434): øker ved hver kobling, utlogging og bytte av konto. Et svar fra en
+ * eldre generasjon brukes aldri – heller ikke når kontoen er den samme igjen (A → B → A): da var A koblet til en nyere
+ * lagring på nett mens det gamle svaret var på vei, og svaret kunne flytte versjonen bakover.
+ */
+let syncGen = 0;
 let inFlight: Promise<void> | null = null;
 let soonTimer: ReturnType<typeof setTimeout> | null = null;
 /**
@@ -272,6 +278,7 @@ export async function uploadSave(g: GameState, keepalive = false, chosen = false
   if (g.owner && g.owner !== id) throw new OtherAccountError();
   g.owner = id;
   const day = dayOf(g);
+  const gen = syncGen;
   // Det som sendes nå (B-426): spillet går videre mens svaret er på vei
   const sentMinute = Math.floor(g.minute);
   const sentSerial = actionSerial;
@@ -320,8 +327,9 @@ export async function uploadSave(g: GameState, keepalive = false, chosen = false
   // Kontoen er byttet mens svaret var på vei (B-433): svaret gjelder den forrige kontoen. Det skal ikke flytte
   // versjonen den nye kontoen bygger på – da ble neste lagring for den nye kontoen avvist, og hentingen kunne bytte ut
   // framgangen med en eldre kopi – og et nei skal ikke gi «lagret fra en annen enhet» for den nye kontoen
-  if (userId() !== id) {
-    if (rev !== null && rev !== undefined) rememberRev(id, Number(rev));
+  // En ny kobling i mellomtiden (B-434), også for samme konto: svaret gjelder en eldre kobling og brukes ikke
+  if (userId() !== id || syncGen !== gen) {
+    if (userId() !== id && rev !== null && rev !== undefined) rememberRev(id, Number(rev));
     throw new OtherAccountError();
   }
   if (rev === null || rev === undefined) throw new SaveConflictError();
@@ -335,7 +343,8 @@ export async function uploadSave(g: GameState, keepalive = false, chosen = false
       body: snapshot,
       keepalive,
     });
-    lastSnapshotDay = day;
+    // Kontoen kan ha byttet mens tidslinjeraden ble lagret (B-434): da gjelder dagen ikke den nye kontoen
+    if (syncGen === gen) lastSnapshotDay = day;
   }
 }
 
@@ -422,6 +431,7 @@ export async function flush(keepalive = false, now = keepalive): Promise<void> {
     return;
   }
   const g = dirty;
+  const gen = syncGen;
   dirty = null;
   lastUpload = clock();
   setStatus({ kind: "saving" });
@@ -438,7 +448,7 @@ export async function flush(keepalive = false, now = keepalive): Promise<void> {
       }
       if (e instanceof OtherAccountError) return;
       // Prøver igjen ved neste lagring – bare med samme konto (B-429)
-      if (!dirty && userId() === user) queue(g);
+      if (!dirty && userId() === user && syncGen === gen) queue(g);
       if (e instanceof NetError && e.offline) setStatus({ kind: "offline", at: lastSavedAt });
       else setStatus({ kind: "error", message: e instanceof Error ? e.message : String(e), at: lastSavedAt });
     } finally {
@@ -450,6 +460,7 @@ export async function flush(keepalive = false, now = keepalive): Promise<void> {
 
 /** Nullstiller etter utlogging */
 export function resetCloud(): void {
+  syncGen++;
   if (soonTimer) clearTimeout(soonTimer);
   soonTimer = null;
   reconciled = false;
@@ -475,8 +486,11 @@ onSessionChange(() => {
   const now = userId();
   if (now !== sessionUser) {
     sessionUser = now;
+    syncGen++;
     dirty = null;
     dirtyUser = null;
+    // Tidslinjeraden for dagen er den forrige kontoens (B-434)
+    lastSnapshotDay = -1;
     if (soonTimer) clearTimeout(soonTimer);
     soonTimer = null;
   }
@@ -517,14 +531,15 @@ export async function linkOnLogin(local: GameState | null): Promise<LinkDecision
 
 async function link(local: GameState | null): Promise<LinkDecision> {
   const id = userId();
+  const gen = ++syncGen;
   reconciled = false;
   knownRev = null;
   if (!id) return { kind: "none" };
   // Spilte man som gjest, tar kontoen over gjesten først (B-212)
   await adoptGuest();
   const row = await fetchCloudRow();
-  // En annen konto ble logget inn mens svaret var på vei (B-433): den kobles av sin egen innlogging
-  if (userId() !== id) return { kind: "none" };
+  // En annen konto (B-433) eller en ny kobling (B-434) mens svaret var på vei: den nye koblingen gjelder
+  if (userId() !== id || syncGen !== gen) return { kind: "none" };
   const stored = storedRev(id);
   const cloud = row?.game ?? null;
   knownRev = row ? row.rev : 0;
@@ -598,10 +613,11 @@ export async function keepLocal(local: GameState): Promise<void> {
  */
 export async function pullIfNewer(): Promise<GameState | null> {
   const id = userId();
+  const gen = syncGen;
   if (!id || !reconciled || knownRev === null) return null;
   const rows = await rest<{ rev: number; device: string | null }[]>("saves?select=rev,device");
-  // Kontoen er byttet mens svaret var på vei (B-429): svaret gjelder ikke spillet her
-  if (userId() !== id) return null;
+  // Kontoen er byttet (B-429) eller koblet på nytt (B-434) mens svaret var på vei: svaret gjelder ikke spillet her
+  if (userId() !== id || syncGen !== gen) return null;
   const row = rows[0];
   // Samme versjon, men lagringen ble avvist: serveren har endret spillet (B-211), så det fra nett gjelder
   const refused = !!row && Number(row.rev) === knownRev && status.kind === "conflict";
@@ -616,7 +632,7 @@ export async function pullIfNewer(): Promise<GameState | null> {
     return null;
   }
   const full = await fetchCloudRow();
-  if (!full || userId() !== id) return null;
+  if (!full || userId() !== id || syncGen !== gen) return null;
   setKnownRev(id, full.rev);
   syncedTo(full.game);
   knowCloud(full.game);
