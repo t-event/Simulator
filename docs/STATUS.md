@@ -118,7 +118,8 @@ resten. Rente 1 % per ekte dag; hver natt går halvparten av utbyttet og bidrage
   meldingen før et valg tas; spilleren ser det som «Fra admin» øverst i Meldinger og kan svare der (bare når eieren har
   skrevet, ≤ 500 tegn, ingen lenker, hvert 3. s / 20 per dag). Varsel begge veier på prikken ved Skiftrapporten
   (`report_unread`): spilleren for svar fra admin, eieren for nye rapporter og svar fra spillere (også i knappen
-  «Adminpanel (N nye)»). Spilleren ser aldri hvem som rapporterte.
+  «Adminpanel (N nye)»). Spilleren ser aldri hvem som rapporterte, og bare sin egen samtale; panelet viser én samtale
+  om gangen (B-439).
 - Juksesperren (`check_snapshot`) sjekker vekst, tonn, fart og første opplasting.
 - **Tidslinjetall til nye ukekonkurranser** (B-396, ikke slått på): tidslinja samler tellere i alt – strøm (`kwh_total`),
   leveranser (alltid i tide), misligholdt, avbrutt og reklamasjoner. Serveren regner kWh/t og leveringspresisjon selv

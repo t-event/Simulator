@@ -202,23 +202,14 @@ function ReportConversation({ r, onSent }: { r: AdminReport; onSent: () => void 
     onSent();
   };
 
+  // Én samtale per spiller (B-439): fanen velger hvem du skriver til, og bare den samtalen vises – spillerne ser aldri
+  // hverandres meldinger, så panelet skal ikke blande dem heller
+  const shown = r.thread.filter((m) => m.role === to);
+  const count = (role: "reporter" | "author") => r.thread.filter((m) => m.role === role).length;
   return (
     <div className="g-admin-conv">
-      {r.thread.length > 0 && (
-        <ol className="g-chat-list g-report-note-list">
-          {r.thread.map((m, i) => (
-            <li key={i} className={`g-chat-msg${m.fromAdmin ? " is-mine" : ""}`}>
-              <div className="g-chat-meta">
-                <strong>{m.fromAdmin ? `Du til ${m.nick || name(m.role)}` : m.nick || name(m.role)}</strong>
-                <span className="g-muted">{when(m.at)}</span>
-              </div>
-              <p>{m.body}</p>
-            </li>
-          ))}
-        </ol>
-      )}
       {r.canReporter && r.canAuthor && (
-        <div className="g-subtabs g-admin-to" role="tablist" aria-label="Skriv til">
+        <div className="g-subtabs g-admin-to" role="tablist" aria-label="Samtale med">
           {(["reporter", "author"] as const).map((role) => (
             <button
               key={role}
@@ -228,10 +219,27 @@ function ReportConversation({ r, onSent }: { r: AdminReport; onSent: () => void 
               onClick={() => setTo(role)}
             >
               {role === "reporter" ? `Svar ${name(role)}` : `Spør ${name(role)}`}
+              {count(role) > 0 ? ` (${count(role)})` : ""}
             </button>
           ))}
         </div>
       )}
+      {shown.length > 0 && (
+        <ol className="g-chat-list g-report-note-list">
+          {shown.map((m, i) => (
+            <li key={i} className={`g-chat-msg${m.fromAdmin ? " is-mine" : ""}`}>
+              <div className="g-chat-meta">
+                <strong>{m.fromAdmin ? "Du" : m.nick || name(m.role)}</strong>
+                <span className="g-muted">{when(m.at)}</span>
+              </div>
+              <p>{m.body}</p>
+            </li>
+          ))}
+        </ol>
+      )}
+      <p className="g-muted g-small-text">
+        Bare {name(to)} ser denne samtalen{to === "author" ? ", og aldri hvem som rapporterte" : ""}.
+      </p>
       <form
         className="g-chat-form"
         onSubmit={(e) => {
