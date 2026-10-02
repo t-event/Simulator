@@ -33,7 +33,7 @@ Spillere som er flagget eller sperret, har ingen profil (som på topplista). Ing
 Industrien (eier og hvem som har bydd). Alle åpner samme ark (`ProfileHost` i GameApp, `ui/profileStore.ts`), oppå
 arket navnet stod i. Uten konto viser arket «Profiler krever konto» med knapp til innloggingen.
 
-## 2. Min profil (fase 2)
+## 2. Min profil (fase 2 – bygget i B-420)
 
 Under ⚙️ «Min profil», og «Rediger» når man ser sin egen profil:
 

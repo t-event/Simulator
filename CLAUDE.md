@@ -586,6 +586,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Profiler** (B-419, 105): et brukernavn som vises for andre, skrives med `<PlayerName nick=… />` (`ui/Profile.tsx`), så
   det åpner profilen. `player_profile` viser bare det serveren alt viser andre steder – aldri konsernkassa, kassa, fondet,
   e-post eller klokkeslett. Nye felt i profilen vurderes mot det (og mot KONTO.md). Flaggede og sperrede har ingen profil.
+  Spillerne har ingen update-regel på `profiles`: tekst, merke og prestasjoner endres bare via `profile_update` (106), som
+  sjekker lengde, lenker, sperre, tempo og at merket og prestasjonene finnes i det lagrede spillet.
 - **Eksporten** (B-345, 073): hver natt legger edge-funksjonen `eksport` (`supabase/functions/eksport`) alle tabellene i
   `public` (unntatt `save_backups`) i Storage-mappa `eksport` som `stalverk-ÅÅÅÅ-MM-DD.json.gz`, 14 dager. Kjør for hånd med
   `select net.http_post(url := (select decrypted_secret from vault.decrypted_secrets where name = 'eksport_url'), body := '{}')`

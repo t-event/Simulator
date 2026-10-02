@@ -26,6 +26,7 @@ import {
   updatePassword,
   verifyCode,
 } from "../net/supabase";
+import { openProfile } from "./profileStore";
 import { fetchProfile, nicknameAvailable, nicknameProblem, setNickname as saveNickname } from "../net/leaderboard";
 import { ACCOUNT_FEATURES, type AccountFeature } from "../net/features";
 import { Card } from "./common";
@@ -716,6 +717,12 @@ export function AccountCard({
             {nickname ? "Endre brukernavn" : "Bli med på topplista"}
           </button>
         </form>
+        {/* Min profil (B-420): teksten, merket og prestasjonene andre ser når de trykker på brukernavnet */}
+        {nickname && (
+          <button type="button" onClick={() => openProfile(nickname, true)}>
+            Min profil
+          </button>
+        )}
         {flagged && (
           <p className="g-account-error">
             Kontoen er holdt utenfor topplista fordi spillet vokste raskere enn det som er mulig. Ta kontakt hvis du

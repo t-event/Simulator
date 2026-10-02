@@ -2283,6 +2283,17 @@ const main = async () => {
     assert(p!.records.control === 1200 && p!.records.ferdigDay === null, "rekorder");
     assert(seenText("igar") === "i går" && seenText(null) === null, "sist aktiv");
     assert(sinceText("2026-09-26") === "sep. 2026" && sinceText(null) === null, "med siden");
+    // Min profil (B-420): tekst, merke og høyst tre prestasjoner
+    const q = parseProfile({
+      nick: "Bo",
+      bio: "Smelter skrap",
+      emblem: "nordlys",
+      showcase: ["a", 2, "b", "c", "d"],
+      dm: true,
+    });
+    assert(q!.bio === "Smelter skrap" && q!.emblem === "nordlys" && q!.dm, "tekst, merke, meldinger");
+    assert(q!.showcase.join() === "a,b,c", "høyst tre prestasjoner, bare tekst");
+    assert(p!.bio === null && p!.showcase.length === 0 && !p!.dm, "uten Min profil");
   });
 
   setSaveListener(null);

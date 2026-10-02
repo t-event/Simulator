@@ -8043,7 +8043,7 @@ button.g-prod-row:hover {
 .g-modal-card .g-profile-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px var(--sp-3);
+  gap: 2px 4px;
   margin: 0 0 var(--sp-3);
   font-size: var(--fs-meta);
 }
@@ -8141,4 +8141,95 @@ button.g-prod-row:hover {
   width: 16px;
   height: 16px;
   vertical-align: -3px;
+}
+
+/* Min profil (B-420): teksten og merket øverst, redigeringen i samme ark */
+.g-profile-about {
+  margin: 0 0 var(--sp-3);
+}
+
+.g-profile-about .g-profile-emblem {
+  display: inline-block;
+  margin-bottom: var(--sp-2);
+}
+
+.g-profile-emblem .ds-icon {
+  width: 14px;
+  height: 14px;
+  vertical-align: -2px;
+}
+
+.g-modal-card .g-profile-bio {
+  margin: 0;
+  padding: var(--sp-2) var(--sp-3);
+  border-left: 3px solid var(--line);
+  font-size: var(--fs-body);
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.g-profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+  margin-top: var(--sp-4);
+}
+
+.g-profile-actions .ds-button {
+  min-height: 44px;
+}
+
+.g-profile-edit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.g-profile-edit .g-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.g-profile-edit textarea,
+.g-profile-edit select {
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+.g-profile-edit textarea {
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  resize: vertical;
+}
+
+.g-profile-pick {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.g-profile-pick legend {
+  padding: 0;
+}
+
+/* Mange prestasjoner: lista ruller for seg selv, så Lagre ikke havner langt nede */
+.g-profile-pick .g-chip-row {
+  max-height: 220px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2px;
+}
+
+.g-profile-pick .ds-icon {
+  width: 14px;
+  height: 14px;
+  vertical-align: -2px;
 }

@@ -91,7 +91,9 @@ regnes av serveren i ekte tid.
 - **Profiler** (B-419, 105): trykk på et brukernavn (topplista, ukelista, chatten, kartet, Industrien) for profilen fra
   `player_profile`: tittel, merker, sesongplasseringer, sist aktiv i grove trinn, plass og verdi på «Konsernverdi» med verkene
   per region, selskaper og rekorder. Aldri konsernkassa, kassa eller fondet; flaggede og sperrede har ingen profil. Krever
-  konto. Min profil (fase 2) og privatmeldinger med adminpanel (fase 3) er besluttet, ikke bygget (`PROFIL-FORSLAG.md`).
+  konto. **Min profil** (B-420, 106): kort tekst (≤ 120 tegn, ingen lenker), profilmerke (egen pynt) og tre egne
+  prestasjoner, endret bare via `profile_update`. Privatmeldinger med adminpanel (fase 3) er besluttet, ikke bygget
+  (`PROFIL-FORSLAG.md`).
 - Juksesperren (`check_snapshot`) sjekker vekst, tonn, fart og første opplasting.
 - **Tidslinjetall til nye ukekonkurranser** (B-396, ikke slått på): tidslinja samler tellere i alt – strøm (`kwh_total`),
   leveranser (alltid i tide), misligholdt, avbrutt og reklamasjoner. Serveren regner kWh/t og leveringspresisjon selv
