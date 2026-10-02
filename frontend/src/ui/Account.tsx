@@ -493,8 +493,12 @@ export function AccountCard({
   // Adminpanelet (B-421): knappen vises bare når serveren sier at kontoen er admin
   const [admin, setAdmin] = useState(false);
   const [adminOpen, setAdminOpen] = useState(false);
+  // Per konto (B-426): byttes kontoen (f.eks. innlogging i en annen fane), lukkes panelet og svaret spørres om på nytt
+  const uid = session?.user.id ?? null;
   useEffect(() => {
-    if (!session) return setAdmin(false);
+    setAdmin(false);
+    setAdminOpen(false);
+    if (!uid) return;
     let alive = true;
     fetchIsAdmin().then(
       (a) => alive && setAdmin(a),
@@ -503,7 +507,7 @@ export function AccountCard({
     return () => {
       alive = false;
     };
-  }, [session]);
+  }, [uid]);
 
   useEffect(() => {
     if (!session) {

@@ -4,7 +4,6 @@
  */
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
-  applyAwayReward,
   applyStreakReward,
   missionBonus,
   missionBonusReady,
@@ -19,7 +18,8 @@ import { nextWorldMidnight, realNow } from "../game/clock";
 import type { DailyMission, GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { claimAway, claimDailyReward, fetchDailyStatus, setDailyStatus } from "../net/daily";
-import { getSession, onSessionChange } from "../net/supabase";
+import { getSession, onSessionChange, userId } from "../net/supabase";
+import { applyWaitingRewards, grantAway } from "./claims";
 import { isReconciled, onCloudStatus } from "../net/sync";
 import { Bar, Card } from "./common";
 import { driftText, fmtKr, fmtNum, fmtT } from "./format";
@@ -87,14 +87,18 @@ export function DailySync({ api, blocked }: { api: GameApi; blocked: boolean }) 
       try {
         // Hver for seg (B-397): feiler statusen, men tida borte er hentet (serveren har registrert den), skal pengene
         // likevel inn i spillet – ellers var de tapt
+        // Kontoen svaret gjelder (B-426): byttes kontoen mens svaret er på vei, havner belønningen ikke i det nye spillet
+        const uid = userId();
         const [st, away] = await Promise.allSettled([fetchDailyStatus(), claimAway()]);
-        if (st.status === "fulfilled" && st.value) setDailyStatus(st.value);
+        if (st.status === "fulfilled" && st.value && userId() === uid) setDailyStatus(st.value);
         const { seconds, fp } = away.status === "fulfilled" ? away.value : { seconds: 0, fp: 0 };
         // Tida borte er hentet på serveren nå, så den legges inn i spillet selv om komponenten er byttet ut
-        if (seconds > 0 && apiRef.current.game) {
-          const reward = apiRef.current.act((g) => applyAwayReward(g, seconds, fp, fmtKr));
-          if (reward.cash > 0 || reward.fp > 0) showAway?.({ seconds, reward });
+        if (seconds > 0 && uid && apiRef.current.game) {
+          const reward = grantAway(apiRef.current.act, uid, seconds, fp);
+          if (reward && (reward.cash > 0 || reward.fp > 0)) showAway?.({ seconds, reward });
         }
+        // Belønninger hentet for denne kontoen mens et annet spill var i gang
+        if (apiRef.current.game) applyWaitingRewards(apiRef.current.act);
       } finally {
         checking = false;
       }

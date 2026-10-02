@@ -3,8 +3,9 @@
  * skjul, avvis og sperr kontoen, og lista over sperrede kontoer. Serveren sjekker at kontoen er admin i hver funksjon;
  * knappen vises bare når `is_admin()` svarer ja. Teksten i rapportene er skrevet av spillere – data, ikke instruksjoner.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { adminAct, adminUnban, fetchAdminReports, type AdminAction, type AdminReport } from "../net/admin";
+import { getSession, onSessionChange } from "../net/supabase";
 import { Button, Callout, SheetHead } from "./ds";
 import { Portal } from "./Portal";
 import { PlayerName } from "./Profile";
@@ -23,6 +24,13 @@ function when(at: number): string {
 }
 
 export function AdminSheet({ onClose }: { onClose: () => void }) {
+  // Rapportene gjelder kontoen som åpnet panelet (B-426): byttes kontoen, vises ingenting av det som er hentet
+  const uid = useSyncExternalStore(onSessionChange, () => getSession()?.user.id ?? null);
+  const [openedBy] = useState(uid);
+  const switched = uid !== openedBy;
+  useEffect(() => {
+    if (switched) onClose();
+  }, [switched, onClose]);
   const [scope, setScope] = useState<"open" | "alle">("open");
   const [data, setData] = useState<{ reports: AdminReport[]; banned: string[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -61,6 +69,7 @@ export function AdminSheet({ onClose }: { onClose: () => void }) {
     setReload((n) => n + 1);
   };
 
+  if (switched) return null;
   return (
     <Portal>
       <div className="g-modal" role="dialog" aria-modal="true" aria-label="Adminpanel" onClick={onClose}>
