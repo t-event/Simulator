@@ -30,6 +30,7 @@ import {
   type WeeklyRow,
 } from "../net/weekly";
 import { Place } from "./Place";
+import { PlayerName } from "./Profile";
 import { Card } from "./common";
 import { fmtNum } from "./format";
 import { Portal } from "./Portal";
@@ -160,7 +161,7 @@ function WeeklyBoard({ kind, onClose }: { kind: WeekKind; onClose: () => void })
                   </span>
                   <span className="g-board-name">
                     <span className="g-board-line">
-                      <span className="g-board-nick">{r.nickname}</span>
+                      <PlayerName nick={r.nickname} className="g-board-nick" />
                     </span>
                     {r.gold > 0 && (
                       <span className="g-board-honor">

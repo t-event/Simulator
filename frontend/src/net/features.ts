@@ -41,6 +41,10 @@ export const ACCOUNT_FEATURES = {
     name: "Skiftrapporten",
     why: "Chatten er felles for alle spillerne, og de andre ser brukernavnet ditt ved meldingene.",
   },
+  profiler: {
+    name: "Profiler",
+    why: "Profilene viser det serveren vet om spillerne – konsernet, selskapene og sesongene – og bare for kontoer.",
+  },
   konsernkasse: {
     name: "Konsernkassa",
     why: "Kassa ligger på serveren og går i virkelig tid, så overføringene og det du kjøper i verden avgjøres der.",

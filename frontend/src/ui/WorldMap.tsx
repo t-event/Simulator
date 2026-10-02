@@ -14,6 +14,7 @@ import { AccountFeaturesCard } from "./Account";
 import { Card } from "./common";
 import { Icon } from "./icons";
 import { setBuildRegion } from "./konsernRun";
+import { PlayerName } from "./Profile";
 
 /** Formen på hver region (viewBox 400 × 300): kystlinje, navnets plass (lx, ly) og ankeret for merkene (mx, my) */
 const SHAPES: Record<RegionId, { d: string; lx: number; ly: number; mx: number; my: number }> = {
@@ -198,7 +199,15 @@ function RegionDetail({ g, r, onBuildHere }: { g: GameState; r: MapRegion; onBui
               <span className="g-map-row-main">
                 <strong>{c.name}</strong>
                 <span className="g-muted g-small-text">
-                  {c.mine ? "Ditt selskap" : c.owner ? `Eies av ${c.owner}` : "Ingen eier ennå – anbud åpent"}
+                  {c.mine ? (
+                    "Ditt selskap"
+                  ) : c.owner ? (
+                    <>
+                      Eies av <PlayerName nick={c.owner} />
+                    </>
+                  ) : (
+                    "Ingen eier ennå – anbud åpent"
+                  )}
                 </span>
               </span>
             </div>
@@ -215,7 +224,7 @@ function RegionDetail({ g, r, onBuildHere }: { g: GameState; r: MapRegion; onBui
               <span className="g-map-avatar ds-display">{p.nick[0]}</span>
               <span className="g-map-row-main">
                 <span className="g-map-row-name">
-                  <strong>{p.mine ? `${p.nick} (deg)` : p.nick}</strong>
+                  <strong>{p.mine ? `${p.nick} (deg)` : <PlayerName nick={p.nick} />}</strong>
                   {p.title && <span className="g-muted g-small-text">{p.title}</span>}
                 </span>
                 <span className="g-muted g-small-text">{countText(p)}</span>

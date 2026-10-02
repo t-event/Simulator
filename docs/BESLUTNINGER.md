@@ -7657,3 +7657,28 @@ Ikke endret: direktørens regler (B-172, B-240, B-312), straffene og når kortet
 Testet: ny test i `npm test` (teksten med tall og merket på direktørens kontrakter), typesjekk, lint, build, `balance.ts`.
 Konto (B-149): ingen endring.
 Endringslogg: ja.
+
+## B-419 Profiler: profilarket og klikkbare brukernavn (fase 1) (2026-10-02)
+Status: gjennomført (fase 1). Fase 2 (Min profil) og fase 3 (privatmeldinger og adminpanel) er besluttet og står i
+`docs/PROFIL-FORSLAG.md`.
+Bakgrunn: eieren ville ha profiler for alle, et sted å endre sin egen, trykk på brukere i topplista og på konsernsidene,
+og privatmeldinger. Svarene på forslaget: synlighet og aktivitet etter anbefalingen (konsernverdi og verk per region,
+aldri konsernkassa; «sist aktiv» i grove trinn), privatmeldinger etter anbefalingen med fri tekst (av som standard,
+blokkering, rapportering, grenser på serveren, bare kontoer som har spilt litt, rydding etter 30 dager), og et adminpanel
+bare eieren ser, der eieren leser rapporterte meldinger.
+Gjort:
+- Serverfunksjonen `player_profile(navn)` (105): brukernavn, tittel, nivå, merker, sesongplasseringer, «sist aktiv»
+  (i dag / i går / denne uka / denne måneden / over en måned, etter ekte dager i norsk tid), måneden kontoen fikk navn,
+  plass og verdi på lista «Konsernverdi» (samme regel som topplista) med verkene per region, selskapene spilleren eier og
+  rekordene (storverk, 10 mrd., kontrollrommet). Aldri konsernkassa, kassa eller fondet. Flaggede og sperrede har ingen
+  profil. Krever innlogging, tatt fra `anon` og `public`; gjester slipper ikke gjennom `guest_gate`.
+- Appen: profilarket (`ui/Profile.tsx`) åpnes ved å trykke på et brukernavn i topplista, ukelista, Skiftrapporten,
+  verdenskartet og Industrien (eier og hvem som har bydd). Arket legges oppå arket navnet stod i, og Esc lukker bare
+  profilen. Navnene har stiplet understrek og en trykkflate på ca. 44 px.
+- Profiler står i `ACCOUNT_FEATURES` og KONTO.md; uten konto viser arket «Profiler krever konto».
+Konto (B-149): krever konto – regel 3 (viser andre spillere).
+Ikke endret: økonomien, verdensjobbene, topplistene og rapportgrunnlaget.
+Testet: `npm test` (ny test av svaret fra serveren), typesjekk, lint, build; serverfunksjonen som innlogget spiller
+(rullet tilbake), med ukjent navn (null); Playwright på 320, 390 og 1 366 px med falsk server: fra chatten og topplista,
+arket øverst, ingenting avkortet, ingen horisontal scrolling.
+Endringslogg: ja.

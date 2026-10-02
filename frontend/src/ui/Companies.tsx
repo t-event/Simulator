@@ -53,6 +53,7 @@ import { MoneyGuideLink } from "./MoneyGuide";
 import { Icon } from "./icons";
 import { fmtKr, fmtT } from "./format";
 import { buzz } from "./haptics";
+import { PlayerName } from "./Profile";
 
 function useSession() {
   return useSyncExternalStore(onSessionChange, getSession, getSession);
@@ -244,7 +245,7 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
           <div>
             <dt>Eier</dt>
             <dd>
-              {c.mine ? "Du" : (c.owner ?? "Ingen")}
+              {c.mine ? "Du" : c.owner ? <PlayerName nick={c.owner} /> : "Ingen"}
               {c.owner && <small> til {until}</small>}
             </dd>
           </div>
@@ -359,7 +360,7 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
                 <ul>
                   {t.bidders.map((n) => (
                     <li key={n} className="g-chip">
-                      {n}
+                      <PlayerName nick={n} />
                     </li>
                   ))}
                 </ul>

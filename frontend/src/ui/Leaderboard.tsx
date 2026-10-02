@@ -4,6 +4,7 @@
  */
 import { useEffect, useState } from "react";
 import { Place } from "./Place";
+import { PlayerName } from "./Profile";
 import { cloudConfigured } from "../net/config";
 import {
   BADGE_NAMES,
@@ -320,7 +321,7 @@ function Leaderboard({
               </span>
               <span className="g-board-name">
                 <span className="g-board-line">
-                  <span className="g-board-nick">{r.nickname}</span>
+                  <PlayerName nick={r.nickname} className="g-board-nick" />
                   <em className="g-league">{levelLabel(r)}</em>
                 </span>
                 {/* Hvilken dag spilleren er på i sitt eget verk (B-378) – bare opplysning, teller ikke */}

@@ -88,6 +88,10 @@ regnes av serveren i ekte tid.
   fri, med egne frø, og teller ikke. De siste 15 minuttene av uka kan ingen starte et tellende forsøk, og
   ingenting leveres etter at uka er over (B-397). Verifiseringen er som for kontrollromsrekorden: rimelige tall, ikke avspilling
   (variant B – avspilling på serveren – venter).
+- **Profiler** (B-419, 105): trykk på et brukernavn (topplista, ukelista, chatten, kartet, Industrien) for profilen fra
+  `player_profile`: tittel, merker, sesongplasseringer, sist aktiv i grove trinn, plass og verdi på «Konsernverdi» med verkene
+  per region, selskaper og rekorder. Aldri konsernkassa, kassa eller fondet; flaggede og sperrede har ingen profil. Krever
+  konto. Min profil (fase 2) og privatmeldinger med adminpanel (fase 3) er besluttet, ikke bygget (`PROFIL-FORSLAG.md`).
 - Juksesperren (`check_snapshot`) sjekker vekst, tonn, fart og første opplasting.
 - **Tidslinjetall til nye ukekonkurranser** (B-396, ikke slått på): tidslinja samler tellere i alt – strøm (`kwh_total`),
   leveranser (alltid i tide), misligholdt, avbrutt og reklamasjoner. Serveren regner kWh/t og leveringspresisjon selv

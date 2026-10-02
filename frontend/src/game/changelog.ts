@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 419,
+    date: "2026-10-02",
+    title: "Profiler",
+    items: [
+      "Trykk på et brukernavn i topplista, ukelista, Skiftrapporten, på kartet eller i Industrien for å se profilen: tittel, merker, sesonger, konsernverdi og verk per region, selskaper og rekorder.",
+      "Profilen viser når spilleren sist var aktiv (i dag, i går, denne uka …). Konsernkassa og kassa vises aldri.",
+    ],
+  },
+  {
     b: 418,
     date: "2026-10-02",
     title: "Bedre forklaring på sene leveranser",
