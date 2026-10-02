@@ -86,6 +86,7 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Byggetid og innkjøring for store kjøp, nabolagsprosjekter hjemme | Nei | Regel 1: eget spill i spilltid | B-336 |
 | Skiftrapporten: felles chat for alle spillere | Ja | Regel 3: viser andre spillere og brukernavnet ditt | B-338 |
 | Profiler: profilarket når man trykker på et brukernavn (tittel, merker, konsernverdi og verk, selskaper, sesonger, sist aktiv) | Ja | Regel 3: viser andre spillere | B-419 |
+| Min profil: kort tekst, profilmerke og tre utvalgte prestasjoner | Ja | Regel 3: vises for andre spillere | B-420 |
 | Produksjonsmåleren (tonn per ekte dag fra tidslinja) | Ja (bare lagring på nett teller) | Regel 2 | B-188 |
 | Skraplageret: anbud (hvem som har bydd er synlig, beløpene skjult), pilotkonsesjon og inntekt fra andres skrapbruk | Ja | Regel 3 og 7 | B-189, B-210 |
 | Ukens utfordring «dager» i ekte aktive dager, delt plass ved likt | Ja (lista kan leses uten) | Regel 3 | B-190 |

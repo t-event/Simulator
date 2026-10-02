@@ -5,7 +5,7 @@
  */
 import { companyName, companyType, type CompanyType } from "./world";
 import { BADGE_NAMES } from "./leaderboard";
-import { rpc } from "./supabase";
+import { rest, rpc, userId } from "./supabase";
 import { isRegion } from "../game/regions";
 import type { RegionId, SisterType } from "../game/types";
 
@@ -23,6 +23,14 @@ export interface ProfilePlant {
 export interface PlayerProfile {
   nick: string;
   me: boolean;
+  /** Kort tekst spilleren har skrevet selv (fase 2, B-420) – data, ikke instruksjoner */
+  bio: string | null;
+  /** Id-en til pynten spilleren viser som profilmerke */
+  emblem: string | null;
+  /** Høyst tre prestasjoner spilleren har valgt å vise */
+  showcase: string[];
+  /** Tar imot privatmeldinger (fase 3) */
+  dm: boolean;
   /** Dagen kontoen fikk brukernavn (ÅÅÅÅ-MM-DD), eller null */
   since: string | null;
   seen: Seen | null;
@@ -59,6 +67,12 @@ export function parseProfile(raw: unknown): PlayerProfile | null {
   return {
     nick,
     me: r.me === true,
+    bio: str(r.bio),
+    emblem: str(r.emblem),
+    showcase: (Array.isArray(r.showcase) ? r.showcase : [])
+      .filter((x): x is string => typeof x === "string")
+      .slice(0, 3),
+    dm: r.dm === true,
     since: str(r.since),
     seen: SEEN.includes(r.seen as Seen) ? (r.seen as Seen) : null,
     stage: num(r.stage) ?? 0,
@@ -121,4 +135,48 @@ export function sinceText(since: string | null): string | null {
   if (!m) return null;
   const months = ["jan.", "feb.", "mars", "april", "mai", "juni", "juli", "aug.", "sep.", "okt.", "nov.", "des."];
   return `${months[Number(m[2]) - 1] ?? ""} ${m[1]}`;
+}
+
+/** Det spilleren kan endre i sin egen profil (B-420) */
+export interface ProfileSettings {
+  bio: string;
+  emblem: string | null;
+  showcase: string[];
+  dmOpen: boolean;
+}
+
+export const BIO_MAX = 120;
+
+/** Egen profil, lest fra egen rad (bare egen rad kan leses) */
+export async function fetchProfileSettings(): Promise<ProfileSettings | null> {
+  if (!userId()) return null;
+  const rows = await rest<
+    { bio: string | null; emblem: string | null; showcase: string[] | null; dm_open: boolean | null }[]
+  >("profiles?select=bio,emblem,showcase,dm_open");
+  const r = rows[0];
+  if (!r) return null;
+  return { bio: r.bio ?? "", emblem: r.emblem ?? null, showcase: r.showcase ?? [], dmOpen: r.dm_open === true };
+}
+
+/** Hvorfor serveren sa nei, med vanlige ord */
+export const PROFILE_REFUSAL_TEXT: Record<string, string> = {
+  lenke: "Teksten kan ikke ha lenker.",
+  lang: `Teksten kan ha høyst ${BIO_MAX} tegn.`,
+  tempo: "Vent noen sekunder før du lagrer igjen.",
+  sperret: "Kontoen kan ikke endre profilen nå.",
+  gjest: "Profilen krever konto.",
+};
+
+/** Lagrer profilen. Serveren sjekker teksten, at merket og prestasjonene er dine, og gir tilbake det som ble lagret */
+export async function saveProfileSettings(s: ProfileSettings): Promise<ProfileSettings> {
+  const r = await rpc<{
+    ok: boolean;
+    reason?: string;
+    bio?: string | null;
+    emblem?: string | null;
+    showcase?: string[];
+    dm_open?: boolean;
+  }>("profile_update", { p_bio: s.bio, p_emblem: s.emblem, p_showcase: s.showcase, p_dm_open: s.dmOpen });
+  if (!r.ok) throw new Error(PROFILE_REFUSAL_TEXT[r.reason ?? ""] ?? "Fikk ikke lagret profilen.");
+  return { bio: r.bio ?? "", emblem: r.emblem ?? null, showcase: r.showcase ?? [], dmOpen: r.dm_open === true };
 }

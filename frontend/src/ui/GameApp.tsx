@@ -1257,7 +1257,7 @@ export function GameApp() {
         />
       )}
       {/* Profilen til en spiller (B-419): åpnes ved å trykke på et brukernavn, over arket navnet stod i */}
-      <ProfileHost onOpenSettings={() => setSettingsOpen(true)} />
+      <ProfileHost g={g} onOpenSettings={() => setSettingsOpen(true)} />
       {settingsOpen && (
         <SettingsSheet
           g={g}

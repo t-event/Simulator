@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 420,
+    date: "2026-10-02",
+    title: "Min profil",
+    items: [
+      "Skriv en kort tekst om deg selv, velg et profilmerke blant pynten din og vis fram tre prestasjoner. Åpne din egen profil og trykk «Rediger profilen», eller «Min profil» under kontoen i innstillingene.",
+    ],
+  },
+  {
     b: 419,
     date: "2026-10-02",
     title: "Profiler",

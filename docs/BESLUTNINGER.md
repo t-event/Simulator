@@ -7682,3 +7682,24 @@ Testet: `npm test` (ny test av svaret fra serveren), typesjekk, lint, build; ser
 (rullet tilbake), med ukjent navn (null); Playwright på 320, 390 og 1 366 px med falsk server: fra chatten og topplista,
 arket øverst, ingenting avkortet, ingen horisontal scrolling.
 Endringslogg: ja.
+
+## B-420 Profiler, fase 2: Min profil (2026-10-02)
+Status: gjennomført. Fase 2 i `docs/PROFIL-FORSLAG.md` (besluttet i B-419).
+Gjort:
+- Nye felt i `profiles` (106): `bio` (kort tekst), `emblem` (profilmerke), `showcase` (høyst tre prestasjoner),
+  `dm_open` (privatmeldinger, av som standard – brukes i fase 3) og `profile_at` (tempo).
+- `profile_update` (106) er den eneste måten å endre dem på (spillerne har ingen update-regel på `profiles`): høyst 120
+  tegn, ingen lenker (samme mønster som chatten), sperrede og flaggede kan ikke endre, gjester får nei, høyst én lagring
+  per 5 s. Merket må være pynt spilleren eier i det lagrede spillet, og prestasjonene må være tjent der – ellers tas de
+  bort. `player_profile` gir teksten, merket, prestasjonene og om spilleren tar imot meldinger.
+- Appen: «Rediger profilen» på egen profil og «Min profil» under kontoen i innstillingene. Teksten med teller,
+  profilmerket som valg blant egen pynt, prestasjonene som valgknapper (høyst tre, lista ruller for seg selv). Profilen
+  viser merket og teksten øverst og «Utvalgte prestasjoner». Bryteren for privatmeldinger vises først når meldingene
+  finnes (gradvis synlighet).
+Konto (B-149): krever konto – regel 3 (vises for andre spillere). Står i KONTO.md.
+Ikke endret: økonomien, verdensjobbene, topplistene og rapportgrunnlaget.
+Testet: `npm test` (felt i svaret, høyst tre prestasjoner), typesjekk, lint, build; `profile_update` som innlogget
+spiller i en transaksjon som ble rullet tilbake (lenke og for lang tekst avvist, mellomrom ryddet, ukjent prestasjon tatt
+bort, tempo); Playwright med falsk server på 320, 390 og 1 366 px: fra «Min profil», lenke avvist med norsk tekst, lagret
+og vist, ingenting avkortet, ingen horisontal scrolling.
+Endringslogg: ja.

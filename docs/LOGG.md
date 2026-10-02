@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 343 – 2026-10-02: Profiler, fase 2 – Min profil (B-420)
+
+**Gjort:** kort tekst, profilmerke og tre utvalgte prestasjoner. Serveren (106, lagt inn) har nye felt i `profiles` og
+`profile_update` med samme tekstregler som chatten; merket og prestasjonene sjekkes mot det lagrede spillet.
+«Rediger profilen» på egen profil og «Min profil» under kontoen. #359 (fase 1) er merget og publisert.
+
+**Testet:** `npm test`, typesjekk, lint, build; `profile_update` som innlogget spiller (rullet tilbake): lenke, lengde,
+tempo, ukjent prestasjon; Playwright 320/390/1 366 px med falsk server.
+
+**Gjenstår:** fase 3 (privatmeldinger og adminpanelet). 2.10-planen kl. 07:45 UTC.
+
+---
+
 ## Økt 342 – 2026-10-02: Profiler, fase 1 (B-419)
 
 **Brukeren ba om:** profiler for alle, et sted å endre sin egen, trykk på brukere i topplista og på konsernsidene, og

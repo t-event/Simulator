@@ -3,10 +3,13 @@
  * ukelista); alle åpner samme ark, som står i GameApp (`ProfileHost`).
  */
 let open: string | null = null;
+let edit = false;
 const listeners = new Set<() => void>();
 
-export function openProfile(nick: string): void {
+/** `startEdit`: åpne rett i redigeringen (fra «Min profil» under innstillinger) */
+export function openProfile(nick: string, startEdit = false): void {
   open = nick;
+  edit = startEdit;
   for (const l of listeners) l();
 }
 
@@ -17,6 +20,11 @@ export function closeProfile(): void {
 
 export function openProfileNick(): string | null {
   return open;
+}
+
+/** Skal arket starte i redigeringen? Leses én gang når arket åpnes */
+export function profileStartsInEdit(): boolean {
+  return edit;
 }
 
 export function onProfileChange(l: () => void): () => void {

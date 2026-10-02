@@ -4,19 +4,31 @@
  * konsernkassa eller kassa i eget verk. Krever konto (uten konto: NeedsAccount i arket, ikke skjult).
  */
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { ACHIEVEMENT_BY_ID, hasAchievement, visibleAchievements } from "../game/achievements";
+import { COSMETIC_BY_ID } from "../game/cosmetics";
 import { SISTER_TYPES } from "../game/konsern";
 import { REGIONS } from "../game/regions";
-import type { SisterType } from "../game/types";
+import type { GameState, SisterType } from "../game/types";
 import { BADGE_NAMES, levelLabel } from "../net/leaderboard";
-import { fetchPlayerProfile, seenText, sinceText, type PlayerProfile, type ProfilePlant } from "../net/profile";
+import {
+  BIO_MAX,
+  fetchPlayerProfile,
+  fetchProfileSettings,
+  saveProfileSettings,
+  seenText,
+  sinceText,
+  type PlayerProfile,
+  type ProfilePlant,
+  type ProfileSettings,
+} from "../net/profile";
 import { getSession, onSessionChange } from "../net/supabase";
 import { NeedsAccount } from "./Account";
-import { Callout, SheetHead } from "./ds";
+import { Button, Callout, SheetHead } from "./ds";
 import { fmtKr, fmtNum } from "./format";
 import { Icon } from "./icons";
 import { Place } from "./Place";
 import { Portal } from "./Portal";
-import { closeProfile, onProfileChange, openProfile, openProfileNick } from "./profileStore";
+import { closeProfile, onProfileChange, openProfile, openProfileNick, profileStartsInEdit } from "./profileStore";
 
 /** Et brukernavn som åpner profilen. `label` når teksten skal være noe annet enn navnet («Du», «Deg») */
 export function PlayerName({ nick, label, className }: { nick: string; label?: string; className?: string }) {
@@ -36,12 +48,13 @@ export function PlayerName({ nick, label, className }: { nick: string; label?: s
 }
 
 /** Arket, montert én gang i GameApp */
-export function ProfileHost({ onOpenSettings }: { onOpenSettings: () => void }) {
+export function ProfileHost({ g, onOpenSettings }: { g: GameState; onOpenSettings: () => void }) {
   const nick = useSyncExternalStore(onProfileChange, openProfileNick, openProfileNick);
   if (!nick) return null;
   return (
     <ProfileSheet
       key={nick}
+      g={g}
       nick={nick}
       onClose={closeProfile}
       onOpenSettings={() => {
@@ -53,10 +66,12 @@ export function ProfileHost({ onOpenSettings }: { onOpenSettings: () => void }) 
 }
 
 function ProfileSheet({
+  g,
   nick,
   onClose,
   onOpenSettings,
 }: {
+  g: GameState;
   nick: string;
   onClose: () => void;
   onOpenSettings: () => void;
@@ -64,6 +79,8 @@ function ProfileSheet({
   const session = useSyncExternalStore(onSessionChange, getSession, getSession);
   const [profile, setProfile] = useState<PlayerProfile | null | undefined>(undefined);
   const [failed, setFailed] = useState(false);
+  const [editing, setEditing] = useState(profileStartsInEdit);
+  const [reload, setReload] = useState(0);
 
   useEffect(() => {
     if (!session) return;
@@ -75,7 +92,7 @@ function ProfileSheet({
     return () => {
       alive = false;
     };
-  }, [nick, session]);
+  }, [nick, session, reload]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -108,8 +125,25 @@ function ProfileSheet({
             <p className="g-muted">Henter profilen …</p>
           ) : profile === null ? (
             <p className="g-muted">Fant ingen profil for {nick}.</p>
+          ) : editing && profile.me ? (
+            <ProfileEditor
+              g={g}
+              onDone={(saved) => {
+                setEditing(false);
+                if (saved) setReload((n) => n + 1);
+              }}
+            />
           ) : (
-            <ProfileBody p={profile} />
+            <>
+              <ProfileBody p={profile} />
+              {profile.me && (
+                <div className="g-profile-actions">
+                  <Button icon="paint-roller" onClick={() => setEditing(true)}>
+                    Rediger profilen
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -122,8 +156,20 @@ function ProfileBody({ p }: { p: PlayerProfile }) {
   const since = sinceText(p.since);
   const { storverkDay, ferdigDay, control } = p.records;
   const hasRecords = storverkDay !== null || ferdigDay !== null || (control ?? 0) > 0;
+  const emblem = p.emblem ? COSMETIC_BY_ID[p.emblem] : undefined;
+  const shown = p.showcase.map((id) => ACHIEVEMENT_BY_ID[id]).filter((a) => !!a);
   return (
     <>
+      {(p.bio || emblem) && (
+        <div className="g-profile-about">
+          {emblem && (
+            <span className="g-chip g-profile-emblem">
+              <Icon name={emblem.icon} /> {emblem.name}
+            </span>
+          )}
+          {p.bio && <p className="g-profile-bio">{p.bio}</p>}
+        </div>
+      )}
       {(seen || since) && (
         <p className="g-small-text g-muted g-profile-meta">
           {seen && <span>Sist aktiv {seen}</span>}
@@ -147,6 +193,20 @@ function ProfileBody({ p }: { p: PlayerProfile }) {
             </li>
           ))}
         </ul>
+      )}
+
+      {shown.length > 0 && (
+        <section className="g-profile-section">
+          <h3>Utvalgte prestasjoner</h3>
+          <ul className="g-profile-list">
+            {shown.map((a) => (
+              <li key={a.id}>
+                <Icon name={a.icon} /> <strong>{a.name}</strong>{" "}
+                <span className="g-muted g-small-text">{a.description}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       {p.konsern && (
@@ -231,4 +291,120 @@ function countText(ps: ProfilePlant[]): string {
     })
     .filter(Boolean)
     .join(", ");
+}
+
+/**
+ * Min profil (B-420): kort tekst, profilmerke (pynt du eier) og tre prestasjoner du har. Serveren sjekker alt på nytt
+ * (`profile_update`) og sier nei til lenker og for lang tekst.
+ */
+function ProfileEditor({ g, onDone }: { g: GameState; onDone: (saved: boolean) => void }) {
+  const [form, setForm] = useState<ProfileSettings | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    fetchProfileSettings().then(
+      (s) => alive && setForm(s ?? { bio: "", emblem: null, showcase: [], dmOpen: false }),
+      () => alive && setError("Får ikke hentet profilen nå. Prøv igjen om litt."),
+    );
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  if (!form) return error ? <Callout tone="critical">{error}</Callout> : <p className="g-muted">Henter profilen …</p>;
+  const cosmetics = g.cosmetics.owned.map((id) => COSMETIC_BY_ID[id]).filter((c) => !!c);
+  const achievements = visibleAchievements(g).filter((a) => hasAchievement(g, a.id));
+  const toggle = (id: string) => {
+    const on = form.showcase.includes(id);
+    if (!on && form.showcase.length >= 3) return;
+    setForm({ ...form, showcase: on ? form.showcase.filter((x) => x !== id) : [...form.showcase, id] });
+  };
+  const save = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      await saveProfileSettings(form);
+      onDone(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Fikk ikke lagret profilen.");
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <form
+      className="g-profile-edit"
+      onSubmit={(e) => {
+        e.preventDefault();
+        void save();
+      }}
+    >
+      <label className="g-field">
+        <span>
+          Om deg{" "}
+          <span className="g-muted g-small-text">
+            ({form.bio.length}/{BIO_MAX}, ingen lenker)
+          </span>
+        </span>
+        <textarea
+          rows={3}
+          maxLength={BIO_MAX}
+          value={form.bio}
+          placeholder="F.eks. hva verket ditt er kjent for"
+          onChange={(e) => {
+            setError(null);
+            setForm({ ...form, bio: e.target.value });
+          }}
+        />
+      </label>
+      {cosmetics.length > 0 && (
+        <label className="g-field">
+          Profilmerke
+          <select value={form.emblem ?? ""} onChange={(e) => setForm({ ...form, emblem: e.target.value || null })}>
+            <option value="">Ingen</option>
+            {cosmetics.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+      {achievements.length > 0 && (
+        <fieldset className="g-profile-pick">
+          <legend>
+            Vis tre prestasjoner <span className="g-muted g-small-text">({form.showcase.length}/3)</span>
+          </legend>
+          <div className="g-chip-row">
+            {achievements.map((a) => {
+              const on = form.showcase.includes(a.id);
+              return (
+                <button
+                  key={a.id}
+                  type="button"
+                  className={`g-chip-btn${on ? " is-on" : ""}`}
+                  aria-pressed={on}
+                  disabled={!on && form.showcase.length >= 3}
+                  onClick={() => toggle(a.id)}
+                >
+                  <Icon name={a.icon} /> {a.name}
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
+      )}
+      {error && <Callout tone="critical">{error}</Callout>}
+      <div className="g-profile-actions">
+        <Button type="button" onClick={() => onDone(false)} disabled={busy}>
+          Avbryt
+        </Button>
+        <Button variant="primary" type="submit" disabled={busy}>
+          {busy ? "Lagrer …" : "Lagre"}
+        </Button>
+      </div>
+    </form>
+  );
 }
