@@ -1,6 +1,6 @@
 # STATUS – slik virker Stålverket nå
 
-**Fasit for hvordan spillet virker i dag** (sist oppdatert 3.10.2026, B-442). Hvorfor ting er som de er, står i
+**Fasit for hvordan spillet virker i dag** (sist oppdatert 3.10.2026, B-443). Hvorfor ting er som de er, står i
 `BESLUTNINGER.md`; hva som ble gjort når, står i `LOGG.md`. Endrer du en regel, oppdater denne fila i samme økt. Står
 noe annet i et eldre analyse- eller forslagsdokument, gjelder denne fila.
 
@@ -66,8 +66,9 @@ regnes av serveren i ekte tid.
 **Konsernbanken** (B-437, 120/121): lån bare til bestillinger i konsernet (nye verk, utbygging, modernisering, bytte til
 kompleks) – aldri anbud, oppkjøpsbud, motbud eller Kontroll. Rammen er 10 dagers inntekt (snittet av utbyttet og
 bidraget de siste 7 ekte dagene). Lånet tas i bestillingen (`konsern_order_loan`): kassa betaler det den har, banken
-resten. Rente 1 % per ekte dag; hver natt går halvparten av utbyttet og bidraget til nedbetaling (`bank_service` i
-`world_tick`). Salg og avbestilling betaler lånet først. Lånet trekkes fra konsernverdien. Tallene i `config.world.bank`.
+resten. Rente 1 % per ekte dag, regnet for hele dager før lånet endres (`bank_accrue`, B-443); hver natt går halvparten av
+utbyttet og bidraget siden forrige nedbetaling (`repay_at`) til lånet (`bank_service` i `world_tick`). Salg, avbestilling
+og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. Tallene i `config.world.bank`.
 
 **Innskudd fra kassa hjemme er stengt «fail-closed»** (B-382): grensen er 0 med mindre `config.world` har
 `treasury_deposit_enabled = true` og et positivt `treasury_base_per_day`. Ingen av delene er satt.
@@ -85,7 +86,10 @@ resten. Rente 1 % per ekte dag; hver natt går halvparten av utbyttet og bidrage
   eierens motbud som holder, er brukt opp; taperen får 75 % tilbake (kjøperen når budet ikke holder, eieren når selskapet
   blir kjøpt). 14 dagers pause etter et avverget forsøk. Mens et bud står åpent, kan andre by minst 5 % (minst 1 mill.)
   over; den overbudte får hele budet tilbake, og et bud de siste 12 timene flytter fristen til 12 timer etter budet
-  (B-442, 124, `takeover_bids`). Appen ber om bekreftelse før bud og motbud. Regelsett 1 (bud fra før 3.10): forsvar = Kontroll + 40 × √((motbud
+  (B-442, 124, `takeover_bids`). Et overbud må også gi et sterkere bud med budgiverens egen aktivitet og verk i regionen
+  (`takeover_outbid_min`), en egen økning må være minst 5 %, og fristen går aldri mer enn 24 timer forbi den opprinnelige
+  (B-443, 125). Appen ber om bekreftelse før bud og motbud og sender budet den viste (`takeover_bid` med `p_seen_bid`/
+  `p_seen_mine`, «endret» hvis det er endret). «Lønner det seg?» bruker kjøperens eget anslag (`company_estimate_for`). Regelsett 1 (bud fra før 3.10): forsvar = Kontroll + 40 × √((motbud
   + fond, fondet høyst V) / V), høyst 3 × V; kjøperen får 90 % tilbake, eieren 95 % av motbudet uansett.
 - Slettes en konto mens et oppkjøpsbud er åpent, gjøres budet opp først (B-430, 116; i `delete_my_account` før
   slettingen, B-434, 119): angriperen får hele budet tilbake, eieren får motbudet tilbake (kassa og fondet).
@@ -210,7 +214,7 @@ resten. Rente 1 % per ekte dag; hver natt går halvparten av utbyttet og bidrage
 | Utbytte | `game/dividend.ts` | `dividend_from_state` (051), `pay_dividends` |
 | Verdensjobbene og overvåkingen | – | `world_tick`, `world_health()`, `world_health_players()` (101) |
 | Bidrag | – (bare serveren) | `pay_contributions` (061, 077) |
-| Kontroll og oppkjøp | `game/control.ts` (`TAKEOVER`, `TAKEOVER_V2`, `minOutbid`) | `company_control`, `takeover_*` (067, 068, 087, 123, 124) |
+| Kontroll og oppkjøp | `game/control.ts` (`TAKEOVER`, `TAKEOVER_V2`, `minOutbid`) | `company_control`, `takeover_*` (067, 068, 087, 123, 124, 125) |
 | Innskudd | `net/treasury.ts` | `treasury_limit`, `deposit_to_treasury` (090) |
 | Lister og sesong | `net/leaderboard.ts`, `net/season.ts` | `leaderboard`, `close_season`, `season_history` (092, 093) |
 | Uker og ukens kontrollrom | `net/weekly.ts`, `ui/Weekly.tsx`, `ui/control/weekly.ts` | `week_kind`, `weekly_scores`, `weekly_control_*` (094) |

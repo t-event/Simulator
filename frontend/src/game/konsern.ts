@@ -564,6 +564,8 @@ export interface KonsernOption {
    * felles funksjonene (kjøpes med `run`)
    */
   pay: "konsernkasse" | "kasse";
+  /** Salget av det gamle verket i et bytte til kompleks (allerede trukket fra `price`, B-443: betaler lånet først) */
+  sale?: number;
   request?: OrderRequest;
   run?: (g: GameState) => { ok: boolean; message: string };
 }
@@ -607,6 +609,7 @@ export function konsernOptions(g: GameState): KonsernOption[] {
       key,
       title,
       price: "refusal" in q ? fallback.price : q.cost - q.sale,
+      sale: "refusal" in q ? undefined : q.sale,
       gain: netGain(g, base, next),
       blocked,
       hours: "refusal" in q ? fallback.hours : q.hours,

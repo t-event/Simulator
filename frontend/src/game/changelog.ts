@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 443,
+    date: "2026-10-03",
+    title: "Rettinger i oppkjøp og lån",
+    items: [
+      "Et overbud må gi et sterkere bud enn det som står – appen viser hvor mye som trengs. En økning av eget bud må være minst 5 %, og fristen kan flyttes høyst 24 timer.",
+      "Har budet endret seg mens du bekreftet, sendes det ikke. Bekreftelsen viser også om pengene tas fra kassa eller fondet.",
+      "«Lønner det seg?» regnes med det selskapet vil tjene med din produksjon.",
+      "Bytter du et verk mot et kompleks mens du har lån, går salget først til lånet. Renten regnes riktig når lånet endres.",
+    ],
+  },
+  {
     b: 442,
     date: "2026-10-03",
     title: "By over i samme runde",

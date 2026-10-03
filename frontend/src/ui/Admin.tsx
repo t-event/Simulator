@@ -180,19 +180,44 @@ export function AdminSheet({ onClose }: { onClose: () => void }) {
  * Spilleren får varsel ved Skiftrapporten og kan svare der. Svarene står her.
  */
 function ReportConversation({ r, onSent }: { r: AdminReport; onSent: () => void }) {
-  const [to, setTo] = useState<"reporter" | "author">(r.canReporter ? "reporter" : "author");
+  // Én samtale per spiller (B-439, B-443): hver som har rapportert samme melding, har sin egen fane (med sin rapport),
+  // og den som skrev meldingen har én. Samtalene blandes aldri – spillerne ser bare sin egen
+  const reporters = r.reporters.filter((z) => z.can);
+  const tabs: { key: string; label: string; to: "reporter" | "author"; report: number; name: string }[] = [
+    ...reporters.map((z) => ({
+      key: `r${z.report}`,
+      label: `Svar ${z.nick || "spilleren"}`,
+      to: "reporter" as const,
+      report: z.report,
+      name: z.nick || "spilleren",
+    })),
+    ...(r.canAuthor
+      ? [
+          {
+            key: "author",
+            label: `Spør ${r.author ?? "spilleren"}`,
+            to: "author" as const,
+            report: r.id,
+            name: r.author ?? "spilleren",
+          },
+        ]
+      : []),
+  ];
+  const [key, setKey] = useState(tabs[0]?.key ?? "");
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  if (!r.canReporter && !r.canAuthor) return null;
-  const name = (role: "reporter" | "author") => (role === "reporter" ? r.reporter : r.author) ?? "spilleren";
+  const tab = tabs.find((t) => t.key === key) ?? tabs[0];
+  if (!tab) return null;
+  const inTab = (t: (typeof tabs)[number]) =>
+    r.thread.filter((m) => (t.to === "author" ? m.role === "author" : m.role === "reporter" && m.report === t.report));
 
   const send = async () => {
     const body = text.trim();
     if (!body || busy) return;
     setBusy(true);
     setError(null);
-    const res = await adminReportSend(r.id, to, body);
+    const res = await adminReportSend(tab.report, tab.to, body);
     setBusy(false);
     if (!res.ok) {
       setError(REPORT_REFUSAL_TEXT[res.reason]);
@@ -202,24 +227,21 @@ function ReportConversation({ r, onSent }: { r: AdminReport; onSent: () => void 
     onSent();
   };
 
-  // Én samtale per spiller (B-439): fanen velger hvem du skriver til, og bare den samtalen vises – spillerne ser aldri
-  // hverandres meldinger, så panelet skal ikke blande dem heller
-  const shown = r.thread.filter((m) => m.role === to);
-  const count = (role: "reporter" | "author") => r.thread.filter((m) => m.role === role).length;
+  const shown = inTab(tab);
   return (
     <div className="g-admin-conv">
-      {r.canReporter && r.canAuthor && (
+      {tabs.length > 1 && (
         <div className="g-subtabs g-admin-to" role="tablist" aria-label="Samtale med">
-          {(["reporter", "author"] as const).map((role) => (
+          {tabs.map((t) => (
             <button
-              key={role}
+              key={t.key}
               role="tab"
-              aria-selected={to === role}
-              className={to === role ? "is-active" : ""}
-              onClick={() => setTo(role)}
+              aria-selected={tab.key === t.key}
+              className={tab.key === t.key ? "is-active" : ""}
+              onClick={() => setKey(t.key)}
             >
-              {role === "reporter" ? `Svar ${name(role)}` : `Spør ${name(role)}`}
-              {count(role) > 0 ? ` (${count(role)})` : ""}
+              {t.label}
+              {inTab(t).length > 0 ? ` (${inTab(t).length})` : ""}
             </button>
           ))}
         </div>
@@ -229,7 +251,7 @@ function ReportConversation({ r, onSent }: { r: AdminReport; onSent: () => void 
           {shown.map((m, i) => (
             <li key={i} className={`g-chat-msg${m.fromAdmin ? " is-mine" : ""}`}>
               <div className="g-chat-meta">
-                <strong>{m.fromAdmin ? "Du" : m.nick || name(m.role)}</strong>
+                <strong>{m.fromAdmin ? "Du" : m.nick || tab.name}</strong>
                 <span className="g-muted">{when(m.at)}</span>
               </div>
               <p>{m.body}</p>
@@ -238,7 +260,7 @@ function ReportConversation({ r, onSent }: { r: AdminReport; onSent: () => void 
         </ol>
       )}
       <p className="g-muted g-small-text">
-        Bare {name(to)} ser denne samtalen{to === "author" ? ", og aldri hvem som rapporterte" : ""}.
+        Bare {tab.name} ser denne samtalen{tab.to === "author" ? ", og aldri hvem som rapporterte" : ""}.
       </p>
       <form
         className="g-chat-form"
@@ -251,8 +273,8 @@ function ReportConversation({ r, onSent }: { r: AdminReport; onSent: () => void 
           type="text"
           value={text}
           maxLength={REPORT_REPLY_MAX}
-          placeholder={`Skriv til ${name(to)} …`}
-          aria-label={`Skriv til ${name(to)}`}
+          placeholder={`Skriv til ${tab.name} …`}
+          aria-label={`Skriv til ${tab.name}`}
           enterKeyHint="send"
           onChange={(e) => {
             setText(e.target.value);

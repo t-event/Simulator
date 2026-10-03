@@ -129,7 +129,9 @@ function whyNot(g: GameState, o: KonsernOption): string | null {
  */
 function optionLoan(g: GameState, o: KonsernOption): number {
   if (o.blocked || o.pay !== "konsernkasse" || !o.request) return 0;
-  return loanFor(moneyFor(g, o), o.price, g.konsern.bank);
+  // Prisen er etter salget i et bytte; loanFor trenger hele kostnaden og salget hver for seg (B-443)
+  const sale = o.sale ?? 0;
+  return loanFor(moneyFor(g, o), o.price + sale, g.konsern.bank, sale);
 }
 
 /**

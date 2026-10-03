@@ -5,6 +5,27 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 364 – 2026-10-03: Rettinger etter kontrollen av PR #373–#380 (B-443)
+
+**Brukeren ba om:** (kontrollrapport) åtte feil, to beregningssvakheter og én regelsvakhet i lånet, oppkjøpene,
+bekreftelsen, kontobytte og adminpanelet.
+
+**Gjort:** server 125 (`bank_accrue`, `repay_at`, bytte betaler lånet, `takeover_outbid_min`, økning minst 5 %, tak på
+fristen, `takeover_bid` med det appen viste, kassaboka ved avbrutt oppkjøp, `company_estimate_for`, adminpanelet med alle
+rapportører). Appen: bekreftelsen bygger på konto, bud og kilde; budet sendes med det som ble vist; samtalene fra admin
+følger kontoen; én fane per rapportør i adminpanelet; kjøperens eget anslag; `loanFor` med salget; simulatoren med
+anbudsgulv. Nye fallgruver i CLAUDE.md om koblingen (`alter table` og `update` uten `where` holdes igjen).
+
+**Testet:** alt på serveren i transaksjoner som ble rullet tilbake før det ble lagt inn (se B-443), og etterpå: budet som
+pågår, har regelsett 1 og samme bud og frist; verdensjobbene står «ok»; `get_advisors` uten nye funn. Chromium 320/390/
+1366 px mot en falsk server: bekreftelsen forsvinner når kilden byttes, budet sendes med `p_seen_bid`/`p_seen_mine`,
+adminpanelet har en fane per rapportør og svarer til riktig rapport. `npm test` (nye tester for `loanFor`), typesjekk,
+lint, bygg, `balance.ts`. Kontobytte midt i en samtale er ikke prøvd i nettleser (logikken: nøkkel per konto og sjekk av
+kontoen før svaret brukes).
+
+**Gjenstår:** eierens vurdering av anbudsgulvet i verdien (over ca. 14 dagers inntekt lønner ingen oppkjøp seg) og av
+regelen om at overbud må være sterkere. Etterbetalingen, ryddingen av meldinger (108) og slagghåndteringen som før.
+
 ## Økt 363 – 2026-10-03: Overbud i samme runde (B-442)
 
 **Brukeren ba om:** spurte om 14 dagers pause gir mening når et bud fra en som ikke kan reglene stenger ute dem som har
