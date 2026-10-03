@@ -8064,7 +8064,7 @@ Endringslogg: ja.
 Konto (B-149): uendret (selskapene krever konto som før).
 
 ## B-436 Arbeidsmiljø: valgkort om trakassering, rasisme og utenforskap (2026-10-02)
-Status: gjennomført.
+Status: erstattet av B-444 (kortene og kapitlet er tatt ut).
 Bakgrunn: en spiller foreslo noe om «kvotering» og rasisme under Folk. Eieren valgte arbeidsmiljøkort framfor kvoter.
 Beslutning:
 - Tre nye hendelseskort fra nivå 1 med minst fire ansatte: **trakassering** (en kollega kommenterer kropp og utseende),
@@ -8254,4 +8254,15 @@ inntekten siden forrige nedbetaling; for lavt overbud avvises med riktig minsteb
 én krone gir «okning»; fristen stopper 24 timer over; avbrutt oppkjøp skriver linjen i kassaboka; adminpanelet og
 anslaget har de nye feltene. Budet som pågår (regelsett 1), er urørt.
 Endringslogg: ja.
+Konto (B-149): uendret.
+
+## B-444 Arbeidsmiljøkortene tas ut (2026-10-03)
+Status: gjelder. Erstatter B-436.
+Bakgrunn: eierens beskjed 3.10.2026: «Jeg vil ikke ha popups om arbeidsmiljø og varsling da det er et sårt tema.»
+Beslutning: hendelseskortene om trakassering, rasistiske «spøker» og en ansatt som holdes utenfor er fjernet, sammen med
+fagbokkapitlet «Arbeidsmiljø og varsling» og quizen (de ble bare låst opp av kortene). Et kort som står åpent i et lagret
+spill, tas bort ved lasting (`migrate`), og farten blir som etter et vanlig kort; kapitlet tas ut av fagboka. Oppføringen
+om B-436 i «Hva er nytt» er også tatt ut, og fjerningen får ingen egen oppføring, så temaet ikke dukker opp i en popup.
+Nye hendelseskort om forhold mellom ansatte (trakassering, diskriminering, varsling) lages ikke uten at eieren ber om det.
+Endringslogg: nei
 Konto (B-149): uendret.

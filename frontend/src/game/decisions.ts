@@ -400,56 +400,6 @@ const MORE_MAKERS: Record<string, Maker> = {
       data: { cost },
     };
   },
-  // Arbeidsmiljøet (B-436): riktig håndtering gir bedre trivsel, å se bort gjør det verre. Ingen kvoter
-  trakassering: (g) => {
-    if (g.stage < 1 || g.workers.length < 4) return null;
-    return {
-      id: "trakassering",
-      title: "Si fra om trakassering",
-      text: "En operatør forteller at en kollega gang på gang kommer med kommentarer om kropp og utseende, også etter å ha fått beskjed om å slutte. Det er ubehagelig å gå på jobb.",
-      options: [
-        {
-          label: "Ta det på alvor: snakk med begge og følg opp",
-          hint: "Varslingsrutinen: lytt, undersøk, gi en klar beskjed og sjekk at det har stoppet.",
-        },
-        { label: "Be dem ordne det seg imellom", hint: "Den som sa fra, står alene igjen." },
-        { label: "Se bort fra det", hint: "Folk merker hva lederen lar passere." },
-      ],
-      data: { victim: pick(g, g.workers).id },
-    };
-  },
-  rasisme: (g) => {
-    if (g.stage < 1 || g.workers.length < 4) return null;
-    return {
-      id: "rasisme",
-      title: "«Det var bare en spøk»",
-      text: "En ny kollega får høre rasistiske «spøker» i pauserommet. Flere har hørt det, men ingen har sagt noe.",
-      options: [
-        {
-          label: "Si tydelig fra at det ikke godtas, og følg opp",
-          hint: "Alle skal kunne gå trygt på jobb, uansett hvor de kommer fra.",
-        },
-        { label: "La det passere – det var bare spøk", hint: "Den nye kan begynne å se seg om etter en annen jobb." },
-      ],
-      data: { victim: pick(g, g.workers).id },
-    };
-  },
-  utenfor: (g) => {
-    if (g.stage < 1 || g.workers.length < 4) return null;
-    return {
-      id: "utenfor",
-      title: "Holdt utenfor",
-      text: "En ansatt blir holdt utenfor på skiftet: ikke med i pausene, får ikke beskjed om endringer og blir satt på de tyngste jobbene alene.",
-      options: [
-        {
-          label: "Snakk med skiftet og fordel jobbene rettferdig",
-          hint: "Et godt lag tar vare på alle, og feil blir færre når alle får beskjed.",
-        },
-        { label: "Det får de ordne selv", hint: "Den som holdes utenfor, kan slutte." },
-      ],
-      data: { victim: pick(g, g.workers).id },
-    };
-  },
 };
 
 /** Lager kortet med denne id-en nå, eller null hvis det ikke passer (brukes av testene) */
@@ -959,11 +909,6 @@ export function resolveDecision(g: GameState, option: number): void {
         "good",
       );
       return;
-    case "trakassering":
-    case "rasisme":
-    case "utenfor":
-      workplaceCard(g, d.id, option, n("victim"));
-      return;
     case "tilsyn":
       if (yes) {
         addCost(g, "annet", n("cost"));
@@ -977,40 +922,4 @@ export function resolveDecision(g: GameState, option: number): void {
       }
       return;
   }
-}
-
-/**
- * Arbeidsmiljøkortene (B-436). Første valg er riktig håndtering: trivselen går opp. Å se bort senker trivselen, og den
- * det gjelder kan slutte. «Ordne det seg imellom» ligger midt imellom.
- */
-function workplaceCard(g: GameState, id: string, option: number, victimId: number): void {
-  const last = id === "trakassering" ? 2 : 1;
-  // Fagboka forklarer reglene etter det første kortet (gradvis synlighet, B-180)
-  unlock(g, "arbeidsmiljo");
-  if (option === 0) {
-    adjustMorale(g, 6);
-    const done: Record<string, string> = {
-      trakassering:
-        "Du snakket med begge. Kollegaen fikk en klar beskjed, og du følger opp om noen uker. Folk vet at det nytter å si fra (trivsel +6).",
-      rasisme: "Du sa tydelig fra at rasisme ikke godtas her, og fulgte opp med dem det gjaldt. Trivsel +6.",
-      utenfor: "Skiftet fikk en prat, og jobbene fordeles nå på alle. Trivsel +6.",
-    };
-    log(g, done[id], "good");
-    return;
-  }
-  const worse = option === last;
-  adjustMorale(g, worse ? -10 : -4);
-  const victim = g.workers.find((w) => w.id === victimId);
-  if (victim && chance(g, worse ? 0.5 : 0.25)) {
-    g.workers = g.workers.filter((w) => w !== victim);
-    log(g, `Det ble ikke tatt på alvor. ${quitText([victim])} Trivsel ${worse ? "−10" : "−4"}.`, "bad");
-    return;
-  }
-  log(
-    g,
-    worse
-      ? "Ingen gjorde noe, og det har folk merket seg. Trivsel −10."
-      : "Det ble ikke ordnet opp, og den som sa fra, føler seg alene. Trivsel −4.",
-    "bad",
-  );
 }

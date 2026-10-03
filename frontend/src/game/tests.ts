@@ -4525,29 +4525,25 @@ test("Overbud (B-442): minst 5 % og minst 1 mill. over budet som står, som `tak
   assert(minOutbid(10e6) === 11e6, "minst 1 mill.");
 });
 
-test("Arbeidsmiljøkortene (B-436): riktig håndtering gir bedre trivsel, å se bort gir dårligere, fagboka låses opp", () => {
-  for (const id of ["trakassering", "rasisme", "utenfor"]) {
-    const g = newGame(436);
-    g.stage = 0;
-    for (let i = 0; i < 6; i++) g.workers.push({ ...makeCandidate(g, "ovn"), hiredDay: 1 });
-    assert(makeDecision(g, id) === null, `${id} i garasjen`);
-    g.stage = 2;
-    const card = makeDecision(g, id)!;
-    assert(!!card && card.options.length >= 2, `kortet ${id} mangler`);
-    assert(!/kvot/i.test(card.text + card.options.map((o) => o.label).join()), `${id} nevner kvoter`);
-    g.morale = 60;
-    g.pendingDecision = { ...card, resumeSpeed: 1 };
-    resolveDecision(g, 0);
-    assert(g.morale === 66, `${id}: riktig håndtering ga trivsel ${g.morale}`);
-    assert(g.knowledge.includes("arbeidsmiljo"), `${id}: fagboka ble ikke låst opp`);
-    const workers = g.workers.length;
-    g.morale = 60;
-    g.pendingDecision = { ...card, resumeSpeed: 1 };
-    resolveDecision(g, card.options.length - 1);
-    assert(g.morale === 50, `${id}: å se bort ga trivsel ${g.morale}`);
-    assert(g.workers.length >= workers - 1, `${id}: flere enn én sluttet`);
-  }
-  assert(QUIZ.arbeidsmiljo?.length === 2, "quizen til arbeidsmiljø mangler");
+test("Arbeidsmiljøkortene er fjernet (B-444): kortene kommer ikke, og et åpent kort ryddes bort", () => {
+  const g = newGame(444);
+  g.stage = 2;
+  for (let i = 0; i < 6; i++) g.workers.push({ ...makeCandidate(g, "ovn"), hiredDay: 1 });
+  for (const id of ["trakassering", "rasisme", "utenfor"])
+    assert(makeDecision(g, id) === null, `${id} finnes fortsatt`);
+  assert(!KNOWLEDGE.some((k) => k.id === "arbeidsmiljo"), "kapitlet finnes fortsatt");
+  // Et lagret spill med kortet åpent og kapitlet låst opp
+  const saved = JSON.parse(JSON.stringify(g));
+  saved.pendingDecision = { id: "rasisme", title: "", text: "", options: [], data: {}, resumeSpeed: 10 };
+  saved.speed = 0;
+  saved.knowledge = [...saved.knowledge, "arbeidsmiljo"];
+  saved.readChapters = [...saved.readChapters, "arbeidsmiljo"];
+  const m = migrate(saved);
+  assert(m.pendingDecision === null && m.speed > 0, `åpent kort: ${JSON.stringify(m.pendingDecision)} fart ${m.speed}`);
+  assert(
+    !m.knowledge.includes("arbeidsmiljo") && !m.readChapters.includes("arbeidsmiljo"),
+    "kapitlet ble ikke tatt ut",
+  );
 });
 
 test("Konsernbanken (B-437): lånet er det kassa mangler, innenfor rammen, og én dag gir som serveren", () => {

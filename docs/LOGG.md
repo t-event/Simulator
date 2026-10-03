@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 365 – 2026-10-03: Arbeidsmiljøkortene tas ut (B-444)
+
+**Brukeren ba om:** ingen popups om arbeidsmiljø og varsling – det er et sårt tema.
+
+**Gjort:** de tre kortene (trakassering, rasisme, holdt utenfor), fagbokkapitlet og quizen er fjernet. `migrate` tar bort
+et kort som står åpent og kapitlet fra lagrede spill. B-436-oppføringen i endringsloggen er tatt ut, og fjerningen har
+ingen egen oppføring (`Endringslogg: nei`).
+
+**Testet:** ny test (kortene kommer ikke, et åpent kort og kapitlet ryddes bort ved lasting), `npm test`, typesjekk, lint,
+bygg, `balance.ts`.
+
+**Gjenstår:** ingenting nytt.
+
 ## Økt 364 – 2026-10-03: Rettinger etter kontrollen av PR #373–#380 (B-443)
 
 **Brukeren ba om:** (kontrollrapport) åtte feil, to beregningssvakheter og én regelsvakhet i lånet, oppkjøpene,

@@ -1,6 +1,6 @@
 # STATUS – slik virker Stålverket nå
 
-**Fasit for hvordan spillet virker i dag** (sist oppdatert 3.10.2026, B-443). Hvorfor ting er som de er, står i
+**Fasit for hvordan spillet virker i dag** (sist oppdatert 3.10.2026, B-444). Hvorfor ting er som de er, står i
 `BESLUTNINGER.md`; hva som ble gjort når, står i `LOGG.md`. Endrer du en regel, oppdater denne fila i samme økt. Står
 noe annet i et eldre analyse- eller forslagsdokument, gjelder denne fila.
 
@@ -20,10 +20,8 @@ regnes av serveren i ekte tid.
 
 - Fra garasje til storverk (nivå 0–4) med forskning, folk, strøm, resepter, kontrakter, vinter, fellesferie, utslipp,
   kokiller, byggetid for store kjøp (fra 50 mill.) og nabolagsprosjekter. Balansen sjekkes av `balance.ts` (CI).
-- **Arbeidsmiljø** (B-436): tre valgkort (trakassering, rasistiske «spøker», en som holdes utenfor) fra nivå 1 med minst
-  fire ansatte. Riktig håndtering (si fra, følge opp) gir trivsel +6; å se bort gir −10, og den det gjelder slutter med
-  50 % sjanse («ordne det seg imellom»: −4 og 25 %). Det første kortet låser opp fagbokkapitlet «Arbeidsmiljø og
-  varsling». Ingen kvoter.
+- Ingen hendelseskort om forhold mellom ansatte (trakassering, diskriminering, varsling) – tatt ut etter eierens ønske
+  (B-444).
 - **Kassa har ikke tak** (B-381). Den kan vokse fritt – den gir ingen makt i verden.
 - **Privat formue** (`g.paidOut` + gamle `lockedReserve`) er fryst historikk fra da kassa hadde tak (B-303–B-381). Den
   vokser ikke, kan ikke brukes, men teller i `valueCreated` (sluttmålet 10 mrd., stormodellene ved 25 mrd., prestasjoner).

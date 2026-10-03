@@ -339,5 +339,16 @@ export function migrate(g: GameState): GameState {
       m.base += paidOutTotal(g);
       m.v = 2;
     }
+  // Arbeidsmiljøkortene og kapitlet deres er fjernet (B-444, eierens ønske): et kort som står åpent, tas bort, og farten
+  // blir som etter et vanlig kort. Kapitlet tas ut av fagboka
+  const REMOVED_CARDS = ["trakassering", "rasisme", "utenfor"];
+  const open = g.pendingDecision;
+  if (open && REMOVED_CARDS.includes(open.id)) {
+    g.pendingDecision = null;
+    const keep = g.settings?.keepSpeed && open.resumeSpeed > 1;
+    g.speed = open.resumeSpeed > 0 ? (keep ? open.resumeSpeed : 1) : 0;
+  }
+  g.knowledge = g.knowledge.filter((k) => k !== "arbeidsmiljo");
+  g.readChapters = g.readChapters.filter((k) => k !== "arbeidsmiljo");
   return g;
 }

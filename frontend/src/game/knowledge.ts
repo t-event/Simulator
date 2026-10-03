@@ -184,32 +184,6 @@ export const KNOWLEDGE: KnowledgeCard[] = [
     ],
   },
   {
-    // Arbeidsmiljø, likestilling og varsling (B-436): låses opp av det første arbeidsmiljøkortet
-    id: "arbeidsmiljo",
-    title: "Arbeidsmiljø og varsling",
-    icon: "people",
-    part: "drift",
-    short: "Alle skal kunne gå trygt på jobb. Trakassering og rasisme stoppes, og den som sier fra, skal tas på alvor.",
-    pages: [
-      {
-        head: "Trygt for alle",
-        text: "Ingen skal trakasseres, holdes utenfor eller behandles dårligere på grunn av kjønn, hudfarge, opprinnelse, religion, funksjonsevne eller legning. Det er forbudt, og lederen har plikt til å forebygge det og stoppe det.",
-      },
-      {
-        head: "Like muligheter",
-        text: "Et stålverk har ingen kvote for hvor mange av hvert kjønn det må ha. Det loven krever, er at alle får de samme mulighetene når noen ansettes, får lønn eller blir forfremmet.",
-      },
-      {
-        head: "Å si fra – varsling",
-        text: "Å varsle betyr å si fra om noe som er galt på jobben, som trakassering eller farlige forhold. Den som varsler, skal ikke straffes for det. Med fem ansatte eller flere skal verket ha en skriftlig rutine for hvordan man sier fra, og hvem som følger opp.",
-      },
-      {
-        head: "Slik følger du opp",
-        text: "Lytt, undersøk saken, snakk med dem det gjelder, gi en klar beskjed og sjekk etterpå at det har stoppet. Et godt arbeidsmiljø gir folk som trives, blir og gjør færre feil.",
-      },
-    ],
-  },
-  {
     id: "ildfast",
     title: "Ildfast foring",
     icon: "brick-wall",
