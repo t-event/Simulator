@@ -8266,3 +8266,19 @@ om B-436 i «Hva er nytt» er også tatt ut, og fjerningen får ingen egen oppf�
 Nye hendelseskort om forhold mellom ansatte (trakassering, diskriminering, varsling) lages ikke uten at eieren ber om det.
 Endringslogg: nei
 Konto (B-149): uendret.
+
+## B-445 Eierens svar 3.10: slagghåndteringen på, overbud må være sterkere, etterbetalingen gjennomgått (2026-10-03)
+Status: gjelder.
+Bakgrunn: eieren svarte «Kjør på med alt du anbefaler» på lista over det som ventet på svar.
+Beslutning:
+- **Slagghåndteringen er slått på** (126): vilkårene i B-402 var oppfylt og verdensjobbene «ok». Første anbud åpnet
+  3.10 kl. 10:38 norsk tid og stenger 5.10 kl. 10:38 (48 timer, skjult, minstebud 0,1 mill.).
+- **Overbud må gi et sterkere bud** (B-443, punkt 4) står som eierens regel.
+- **Etterbetalingen** (B-423/B-425/B-431) er regnet på nytt på det frosne grunnlaget: samme svar, 2 549 252 kr til
+  elleve spillere, 15 rader; det som ble betalt, stemmer på krona for alle (paid_check 0). **Ikke betalt:** forberedelsen
+  av utbetalingen ble stoppet av sikkerhetssperren i arbeidsmiljøet (flytting av ekte penger). Utbetalingen krever eierens
+  uttrykkelige ja til beløpet og at eieren gir tillatelse til handlingen.
+- **Ryddingen av meldinger** (108) tar nå også samtalene om rapporter som er avgjort (eldre enn 30 dager). Ikke lagt inn:
+  koblingen holdt den igjen til eieren bekrefter. Må på plass før 1.11.2026.
+- Anbudsgulvet i verdien (B-443, funnet i simuleringen) er ikke endret; det rammer ikke skraplageret nå.
+Konto (B-149): uendret.

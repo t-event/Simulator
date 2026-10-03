@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 445,
+    date: "2026-10-03",
+    title: "Slagghåndteringen er åpnet",
+    items: [
+      "Slagghåndteringen kan nå vinnes i anbud under Konsern → Industrien. Det første anbudet står åpent i 48 timer, og ingen ser beløpene før det stenger.",
+    ],
+  },
+  {
     b: 443,
     date: "2026-10-03",
     title: "Rettinger i oppkjøp og lån",
