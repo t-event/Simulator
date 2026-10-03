@@ -301,6 +301,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Koblingen mot kontoen** (B-356): uten den (`reconciled`) laster appen verken opp eller henter. Feiler den fordi
   tjenesten er nede (`isTransient`), prøver `CloudFollow` igjen hvert 20. sekund (`needsRelink`). Nye kall som skal
   prøves igjen etter en driftsstans, bruker `isTransient`, ikke bare `offline`.
+- **Beløpsfelt** (B-447): felt for beløp er tekstfelt med `inputMode="decimal"` (`MillInput` i `ui/Companies.tsx`), aldri
+  `type="number"` – tastaturet på iPhone gir komma, og tallfeltet leser ikke «0,1». Eksempler i feltet rundes aldri til 0.
 - **Tekstfelt på iPhone** (B-347): Safari zoomer inn på felt med skrift under 16 px og zoomer ikke ut igjen. Regelen
   nederst i `game.css` gir alle felt man skriver i minst 16 px på berøringsskjerm – ikke overstyr den med mindre skrift.
 - **Service workeren** (B-433, B-434): en ny side lagres bare når filene den trenger, ligger i lageret (`storePage` – ved

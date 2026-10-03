@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 447,
+    date: "2026-10-03",
+    title: "Bud under 1 million",
+    items: [
+      "Beløpene under Konsern → Industrien skrives i millioner, og nå går det an å skrive desimaler med komma: 0,1 er 100 000 kr. Under anbudet står det hva budet blir i kroner.",
+    ],
+  },
+  {
     b: 446,
     date: "2026-10-03",
     title: "Etterbetalt utbytte",

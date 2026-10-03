@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 368 – 2026-10-03: Bud på 100 000 kr i anbudet (B-447)
+
+**Brukeren ba om:** (skjermbilde) det gikk ikke å by f.eks. 100 000 kr på slagghåndteringen.
+
+**Gjort:** feltene i millioner på Industrien er tekstfelt med desimaltastatur som godtar komma (iPhone ga «0,1», som
+tallfeltet ikke leste); eksempelet viser «0,1» i stedet for «0»; under anbudsfeltet står budet i kroner eller hva som er
+galt, og knappen er bare aktiv når budet kan sendes.
+
+**Testet:** Chromium 320/390/1366 px mot en falsk server: «0,1» gir «Du byr 100 000 kr» og sender 100 000 kr;
+«100000» gir «Høyeste bud er 324 mill. kr – skriv høyst 324»; «1» gir «Du kan by opptil …» med kassa 266 964 kr; ingen
+sidelengs scrolling. `npm test`, typesjekk, lint, bygg.
+
+**Gjenstår:** som i økt 367.
+
 ## Økt 367 – 2026-10-03: Etterbetalingen utført (B-446)
 
 **Brukeren ba om:** «Jeg godkjenner at du gjør det» – utbetal etterbetalingen på 2 549 252 kr eieren sa ja til.
