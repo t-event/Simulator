@@ -1,6 +1,6 @@
 # STATUS – slik virker Stålverket nå
 
-**Fasit for hvordan spillet virker i dag** (sist oppdatert 3.10.2026, B-444). Hvorfor ting er som de er, står i
+**Fasit for hvordan spillet virker i dag** (sist oppdatert 3.10.2026, B-445). Hvorfor ting er som de er, står i
 `BESLUTNINGER.md`; hva som ble gjort når, står i `LOGG.md`. Endrer du en regel, oppdater denne fila i samme økt. Står
 noe annet i et eldre analyse- eller forslagsdokument, gjelder denne fila.
 
@@ -94,7 +94,7 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
 - Selskapskortet viser verdien (10 dagers inntekt) og, ved oppkjøp, «Lønner det seg?»: inntekten i dagene kjøperen eier
   selskapet (til perioden går ut, minst 14 dager) mot budet, og hva som kommer tilbake hvis budet ikke holder (75 %,
   regelsett 1: 90 %; B-435, B-441).
-- Slagghåndteringen og andre selskaper er ikke aktive.
+- Slagghåndteringen er aktiv fra 3.10.2026 (B-445, første anbud stenger 5.10 kl. 10:38). Mekanisk verksted er ikke aktivt.
 
 ## 6. Konkurranse og lister
 

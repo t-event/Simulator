@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 366 – 2026-10-03: Eierens svar – slagghåndteringen på, etterbetalingen gjennomgått (B-445)
+
+**Brukeren ba om:** «Kjør på med alt du anbefaler» (etterbetalingen, ryddingen av meldinger, slagghåndteringen og
+regelvalgene).
+
+**Gjort:** slagghåndteringen slått på (126) – anbud 8 åpent til 5.10 kl. 10:38. Etterbetalingen regnet på nytt
+(bare lesing): samme 2 549 252 kr, paid_check 0. Overbud-regelen fra B-443 står som eierens. Ryddingen (108) utvidet med
+samtalene om rapporter.
+
+**Ikke gjort:** utbetalingen – forberedelsen ble stoppet av sikkerhetssperren (flytting av ekte penger); krever eierens ja
+og tillatelse. Ryddingen – koblingen holdt den igjen til eieren bekrefter (tidsavbrudd, ingenting endret).
+
+**Testet:** anbudet er åpent, verdensjobbene «ok».
+
+**Gjenstår:** etterbetalingen og ryddingen (før 1.11) med eieren til stede; skyggerapporten for V0/K-1 og datakvaliteten
+når det er samlet rundt en uke.
+
 ## Økt 365 – 2026-10-03: Arbeidsmiljøkortene tas ut (B-444)
 
 **Brukeren ba om:** ingen popups om arbeidsmiljø og varsling – det er et sårt tema.
