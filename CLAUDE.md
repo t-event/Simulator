@@ -605,7 +605,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   I tester som skal avgjøre noe: `update world_tick_state set last_at = 'epoch'` først. Test livsløpet med midlertidige
   testkontoer i en DO-blokk som ender med `raise exception`; sett `closes_at` bakover for å avgjøre et anbud.
 - **Sesongpynt** (B-287): pynt med `season: N` kan bare skaffes i sesong N. Når en ny sesong startes (`start_season`), må
-  pynten for den legges inn i `COSMETICS` (butikk og stigetrinn 10–50) – ellers har sesongen ingen egen pynt.
+  pynten for den legges inn i `COSMETICS` (butikk og stigetrinn 1 og 10–50, B-452) – ellers har sesongen ingen egen pynt.
+  Poengkurven på stigen står i `season_tier_of`/`season_tier_points` (129) og speiles i `tierOf`/`tierPoints`
+  (`net/seasonTrack.ts`) – endres den, endres begge.
 - **Knappene ved varsellinja åpner ark** (B-286): hjelp, Mål og topplista. På mobil åpner `go("mal")` arket; på PC er Mål en side.
 - **Kontrollromsrekorden på topplista** (B-295) tas fra `state.controlBest` av triggeren `note_control` på `saves` inn i
   `records.best_control` – bare for kontoer som alt har en rekordrad, og bare opptil 5 000 poeng. Endres poengene i

@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 374 – 2026-10-03: Det gratis sesongpasset (B-452)
+
+**Brukeren ba om:** (etter spørsmålet om «battle pass») det gratis sesongpasset som neste oppgave: 50 trinn, trinn 1 ved
+6 poeng, trinn 2 ved 12, så 20 per trinn; liten pynt på trinn 1; dagens oppdrag og neste premie sammen på Mål og
+framgangen i velkomstvinduet; opptjent beholdes, og pynten for trinn 1 også til dem som alt har hentet det.
+
+**Gjort:** migrasjon 129 (`season_tier_of`, `season_tier_points`, `season_track`, `claim_season_tiers`). Appen: `tierOf`/
+`tierPoints`, Sesongskilt (sesong 1 og 2) med tegning foran verket, `SeasonNextLine` på Dagens oppdrag og i
+velkomstvinduet, stigen hentes på nytt når belønningen er hentet, pynt for hentede trinn legges inn uten fagpoeng.
+
+**Testet:** se B-452 (SQL i en transaksjon som ble rullet tilbake, `npm test`, typesjekk, lint, bygg, Chromium 320/390/1366).
+
+**Gjenstår:** ryddingen av meldinger (108) før 1.11; kontrollene 5.10; skyggerapporten rundt 9.10; verv en venn og
+delingsknapp venter på eierens valg.
+
 ## Økt 373 – 2026-10-03: Begrenset minstebud ved oppkjøp (B-451)
 
 **Brukeren ba om:** F som forsiktig første endring; testen skal vise minstebud mellom 10 og 12 dagers inntekt, uendret

@@ -107,6 +107,11 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
   også (Hall of Fame). Sesonger startes og avsluttes bare manuelt.
 - **Topplista** har to grupper: «Industriverden · sesong» (Konsernverdi) og «Eget verk» (Verdi, Mest penger på bok,
   Produksjon, Raskest til storverk, Raskest til 10 mrd., Kontrollrom, Privat formue – fryst). Eget verk er ære, ikke makt.
+- **Sesongstigen** (gratis sesongpass, B-173, B-452, 129): poeng for hver dag med spill (1), dagens belønning (2), dagens
+  oppdrag (3) og topp 3 på ukelista (12/9/7), regnet på serveren i ekte tid. 50 trinn: trinn 1 ved 6 poeng, trinn 2 ved 12,
+  så 20 poeng per trinn (972 for trinn 50; `season_tier_of`, speilet i `tierOf`/`tierPoints`). Hvert trinn gir 20 + 2 ×
+  trinn fagpoeng én gang; trinn 1, 10, 20, 30, 40 og 50 gir sesongpynt. Pynt for trinn som alt er hentet, legges inn uten
+  nye fagpoeng. Neste premie står på Dagens oppdrag og i velkomstvinduet; premiene hentes med «Hent alt» på Mål.
 - **Ukens utfordring** roterer fra uka 5.10.2026: «Flest aktive dager» (ekte dager) → «Mer stål enn før» → «Ukens
   kontrollrom» (første gang uka 19.10). «Størst vekst i konsernverdi» er tatt bort. «Mer stål enn før» er midlertidig
   (kan påvirkes med en svak uke først) og byttes når stål per kWh og leveringspresisjon finnes i tidslinja.

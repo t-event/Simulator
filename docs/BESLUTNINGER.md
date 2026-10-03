@@ -8426,3 +8426,31 @@ Etterpå: begge selskaper har minstebud = 10 dagers inntekt, verdensjobbene «ok
 tallene.
 Endringslogg: ja.
 Konto (B-149): uendret.
+
+## B-452 Det gratis sesongpasset: raskere start på sesongstigen (2026-10-03)
+Status: gjelder. Bygger på B-173 og B-287.
+Bakgrunn: en spiller ønsket et «battle pass» med gratis og betalt spor. Sesongstigen er allerede et gratis spor, men etter
+åtte dager hadde 11 spillere nådd trinn 1, sju hentet premien og ingen nådd trinn 2 – starten og synligheten var svake.
+Eieren 3.10: det gratis sesongpasset er neste produktoppgave; betalingssporet venter (kosmetikk gir synlig belønning uten
+å øke pengestrømmen).
+Beslutning:
+- **50 trinn som før.** Trinn 1 krever 6 poeng i alt, trinn 2 krever 12, deretter 20 poeng per trinn – 972 poeng for
+  trinn 50 (før 1 000). Første premie kommer etter én full aktivitetsdag (spilt 1 + belønning 2 + oppdrag 3) eller to
+  dager med spill og daglig belønning. Serveren: `season_tier_of`/`season_tier_points`, `season_track` (også `tier_at`
+  og `next_at`) og `claim_season_tiers` (migrasjon 129). Appen speiler kurven (`tierOf`/`tierPoints`).
+- **Liten pynt på trinn 1:** Sesongskilt (sesong 1) og et eget for sesong 2; de større sesongpremiene på 10, 20, 30, 40 og
+  50 står. Skiltet står foran verket.
+- **Synlig framgang:** neste premie (eller at et trinn venter) står på Dagens oppdrag på Mål og i velkomstvinduet.
+  Premiene hentes med «Hent alt» som før.
+- **Opptjent beholdes:** poeng og hentede trinn står. Den som alt har hentet trinn 1, får Sesongskiltet uten nye
+  fagpoeng (appen legger inn pynten for hentede trinn som mangler). Med den nye kurven når mange trinn 2 straks og kan
+  hente det (24 fagpoeng); et trinn som alt er hentet, gir aldri fagpoeng igjen.
+- **Betalt spor:** ikke nå (svaret til eieren 3.10: bare pynt hvis det kommer, betaling og regler krever mye, og
+  spillerbasen er liten).
+Testet før det ble lagt inn (transaksjon som ble rullet tilbake): kurven gir 0→0, 5→0, 6→1, 11→1, 12→2, 31→2, 32→3,
+971→49, 972→50; en spiller med 31 poeng som hadde hentet trinn 1, fikk trinn 2 (24 fagpoeng), og et nytt forsøk ga
+ingenting. Appen: ny test i `npm test` (kurven begge veier for alle 50 trinn, pynt som mangler); Chromium 320/390/1366 px
+mot en falsk server: «Sesongstigen: 3 poeng til trinn 2 – 24 fagpoeng» på Dagens oppdrag, Sesongskiltet lagt inn og
+synlig i anleggsbildet, ingen sidelengs scrolling.
+Endringslogg: ja.
+Konto (B-149): uendret – sesongstigen krever konto som før.

@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 452,
+    date: "2026-10-03",
+    title: "Sesongstigen går raskere i starten",
+    items: [
+      "Første trinn på sesongstigen kommer etter én dag med alt (spill, daglig belønning og oppdrag) eller to dager med spill og belønning. Trinn 2 kommer ved 12 poeng, deretter 20 poeng per trinn.",
+      "Trinn 1 gir nå også pynt: et sesongskilt foran verket. Har du alt hentet trinn 1, får du skiltet uten å gjøre noe.",
+      "Hvor mange poeng som er igjen til neste premie, står på Dagens oppdrag og i velkomstvinduet.",
+    ],
+  },
+  {
     b: 451,
     date: "2026-10-03",
     title: "Lavere minstebud ved oppkjøp",

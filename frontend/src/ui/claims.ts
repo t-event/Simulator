@@ -3,7 +3,7 @@
  * «Hent»-knapp på to ulike faner; nå står én «Hent alt» øverst på Mål. Hentingen gjøres av serveren som før – her er
  * bare rekkefølgen og det som legges inn i spillet etterpå.
  */
-import { grantCosmetic, trackCosmetic } from "../game/cosmetics";
+import { COSMETIC_BY_ID, grantCosmetic, trackCosmetic } from "../game/cosmetics";
 import {
   applyAwayReward,
   applyMissionBonus,
@@ -101,6 +101,31 @@ function applyDeferred(gg: GameState, d: Deferred): void {
       "good",
     );
   }
+}
+
+/** Pynten for trinn som alt er hentet, men som spillet mangler (B-452: pynten på trinn 1 kom etter at trinnet ble hentet) */
+export function missingTrackCosmetics(g: GameState, track: SeasonTrack): string[] {
+  return track.claimed
+    .map((t) => trackCosmetic(t, track.seasonId))
+    .filter((c) => c !== null && !g.cosmetics.owned.includes(c.id))
+    .map((c) => c!.id);
+}
+
+/**
+ * Legger inn pynten for trinn som er hentet, uten nye fagpoeng (B-452). Bare i spillet til kontoen statusen gjelder
+ * (B-426). Gir pynten som ble lagt inn.
+ */
+export function grantMissingTrackCosmetics(act: GameApi["act"], track: SeasonTrack): string[] {
+  return act((gg) => {
+    if (!isMine(gg, track.uid)) return [];
+    const ids = missingTrackCosmetics(gg, track);
+    for (const id of ids) grantCosmetic(gg, id);
+    if (ids.length) {
+      const names = ids.map((id) => COSMETIC_BY_ID[id]?.name ?? id).join(", ");
+      log(gg, `Sesongstigen: ${names} for trinn du alt har hentet, er lagt til verket.`, "good");
+    }
+    return ids;
+  });
 }
 
 /** Belønninger som ble hentet for denne kontoen mens et annet spill var i gang, legges inn nå */

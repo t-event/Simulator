@@ -1158,6 +1158,9 @@ test("Sesongstigen og nye titler (B-173): pynt på trinn 10–50, titler etter S
     trackCosmetic(10, 1)?.id === "sesongflagg" && trackCosmetic(50, 1)?.id === "pokal" && !trackCosmetic(11, 1),
     "pynt på feil trinn",
   );
+  // Trinn 1 gir også pynt (B-452), egen for hver sesong
+  assert(trackCosmetic(1, 1)?.id === "sesongskilt" && trackCosmetic(1, 2)?.id === "sesongskilt2", "pynt på trinn 1");
+  assert(!trackCosmetic(2, 1) && cosmeticBlocked(g, "sesongskilt") === "season", "trinn 1-pynten kunne kjøpes");
   assert(cosmeticBlocked(g, "pokal") === "season", "stigepynt kunne kjøpes");
   grantCosmetic(g, "pokal");
   assert(g.cosmetics.owned.includes("pokal") && g.cosmetics.on.includes("pokal"), "pynten ble ikke gitt");

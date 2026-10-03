@@ -337,6 +337,17 @@ function Gear({ x }: { x: number }) {
 }
 
 /** Sesongpokalen foran verket (sesongstigen, B-173) */
+/** Sesongskiltet (trinn 1 på sesongstigen, B-452): en stolpe med et lite skilt */
+function SeasonSign({ x, color }: { x: number; color: string }) {
+  return (
+    <g transform={`translate(${x} 178)`}>
+      <rect x={-0.8} y={-14} width={1.6} height={14} fill="#8a939d" />
+      <rect x={-7} y={-20} width={14} height={8} rx={1.2} fill={color} stroke="#e8edf2" strokeWidth={0.8} />
+      <path d="M -3 -16 h 6" stroke="#e8edf2" strokeWidth={1.2} />
+    </g>
+  );
+}
+
 function Trophy({ x }: { x: number }) {
   return (
     <g transform={`translate(${x} 178)`}>
@@ -1111,6 +1122,8 @@ export function PlantScene({ g, stats, onStation }: Props) {
       )}
       {cosmeticOn(g, "stjerne") && <Star x={roof.apex[0]} y={Math.max(14, roof.apex[1] - 38)} />}
       {cosmeticOn(g, "pokal") && <Trophy x={stage === 0 ? 180 : 355} />}
+      {cosmeticOn(g, "sesongskilt") && <SeasonSign x={stage === 0 ? 96 : 296} color="#2b7fc0" />}
+      {cosmeticOn(g, "sesongskilt2") && <SeasonSign x={stage === 0 ? 106 : 306} color="#c0392b" />}
       {cosmeticOn(g, "statue") && <Statue x={stage === 0 ? 150 : 385} />}
       {cosmeticOn(g, "banner1") && <Banner x={bannerAt[0]} y={bannerAt[1]} season={1} />}
       {cosmeticOn(g, "banner2") && <Banner x={bannerAt[0]} y={bannerAt[1]} season={2} />}

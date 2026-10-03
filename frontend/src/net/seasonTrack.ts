@@ -1,11 +1,14 @@
 /**
  * Sesongstigen (B-173, supabase/024_sesongstigen.sql): poeng for hver dag med spill, dagens belønning, dagens oppdrag
- * og plassering på ukelista – alt regnet ut på serveren, så det følger virkelig tid og ikke kan jukses. 20 poeng per
- * trinn, 50 trinn. Hvert trinn gir fagpoeng; trinn 10, 20, 30, 40 og 50 gir pynt som bare finnes her.
+ * og plassering på ukelista – alt regnet ut på serveren, så det følger virkelig tid og ikke kan jukses. 50 trinn: trinn 1
+ * ved 6 poeng, trinn 2 ved 12, deretter 20 poeng per trinn (B-452, `season_tier_of`). Hvert trinn gir fagpoeng; trinn 1,
+ * 10, 20, 30, 40 og 50 gir pynt som bare finnes her.
  */
 import { rpc, userId } from "./supabase";
 
 export interface SeasonTrack {
+  /** Kontoen statusen gjelder (B-452): pynt legges bare inn i spillet til samme konto */
+  uid: string | null;
   seasonId: number | null;
   points: number;
   perTier: number;
@@ -30,10 +33,12 @@ interface TrackRow {
 }
 
 export async function fetchSeasonTrack(): Promise<SeasonTrack | null> {
-  if (!userId()) return null;
+  const uid = userId();
+  if (!uid) return null;
   const r = await rpc<TrackRow>("season_track", {});
   if (!r || r.season_id === null) return null;
   return {
+    uid,
     seasonId: r.season_id,
     points: Number(r.points) || 0,
     perTier: Number(r.per_tier) || 20,
@@ -57,8 +62,22 @@ export function tierFp(tier: number): number {
   return 20 + 2 * tier;
 }
 
-/** Trinn med pynt som bare finnes på stigen */
-export const TRACK_COSMETIC_TIERS = [10, 20, 30, 40, 50];
+/** Trinn med pynt som bare finnes på stigen (trinn 1 fra B-452) */
+export const TRACK_COSMETIC_TIERS = [1, 10, 20, 30, 40, 50];
+
+/** Poengene som trengs for et trinn (B-452, speiler `season_tier_points`): 6, 12, så 20 per trinn – 972 for trinn 50 */
+export function tierPoints(tier: number): number {
+  if (tier <= 0) return 0;
+  if (tier === 1) return 6;
+  return 12 + 20 * (tier - 2);
+}
+
+/** Trinnet for et antall poeng (B-452, speiler `season_tier_of`) */
+export function tierOf(points: number, maxTier = 50): number {
+  if (points < 6) return 0;
+  if (points < 12) return 1;
+  return Math.min(maxTier, 2 + Math.floor((points - 12) / 20));
+}
 
 // Siste status fra serveren (B-415), så kortet og «Hent alt» på Mål viser det samme
 let track: SeasonTrack | null = null;
