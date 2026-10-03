@@ -8396,3 +8396,33 @@ som før. Bud som alt er lagt inn, avgjøres etter reglene de ble lagt inn under
 `takeover_outbid_min` påvirkes.
 Endringslogg: nei
 Konto (B-149): uendret.
+
+## B-451 Begrenset minstebud ved oppkjøp (alternativ F) (2026-10-03)
+Status: gjelder. Bygger på B-449/B-450.
+Bakgrunn: eieren 3.10: «Jeg anbefaler F som en forsiktig første endring.» Testen skal bekrefte at nye oppkjøpsforsøk får
+minstebud mellom 10 og 12 dagers inntekt, at selskapsverdien, Kontroll og budstyrken er uendret, og at pågående bud og
+overbud følger dagens regler. «Lønner det seg?» skal fortsatt bruke kjøperens eget anslag.
+Beslutning («begrenset minstebud, øvrige regler beholdes»):
+- Minstebudet for et nytt oppkjøpsforsøk er det høyeste av 10 dagers inntekt og siste anbudspris, men aldri over 12 dagers
+  inntekt (`takeover_min_bid`, `config.world.takeover.min_bid_cap_days` = 12, migrasjon 128). Uten inntektsanslag er det
+  verdien, som før. `takeover_window` gir det nye minstebudet og styrken ved det (`attack_min`); `takeover_bid` leser
+  minstebudet derfra for nye bud.
+- Uendret: selskapsverdien (`company_value`) som skala for budstyrke, motbud, Kontroll og inntektsøkning; økninger og
+  overbud (`takeover_min_raise`, `takeover_outbid_min`); bud som alt er lagt inn, avgjøres etter regelsettet de ble lagt
+  inn under (`takeovers.rules`).
+- Appen: `takeoverMinBid` i `control.ts` speiler regelen (regnet av verdien og inntekten); selskapskortet viser
+  «Minstebud ved oppkjøp» (før «Verdi … 10 dagers inntekt»), eierens «bud for å ta selskapet» (`bidToTake`) starter på
+  minstebudet, og tekstene om oppkjøp sier hva minstebudet er. «Lønner det seg?» bruker fortsatt kjøperens eget anslag.
+Begrensning (B-450): et svært dyrt gammelt anbud gir fortsatt eieren et forsprang, fordi budstyrken regnes mot verdien.
+Presisering: høyeste bud i et anbud er omtrent 14 dagers anslått inntekt når det åpner – avrundet til hele millioner og
+med et gulv på 10 × minste bud (`open_tender`). Ved svært lav inntekt kan forholdet mellom anbudspris og inntekt derfor bli
+høyt også uten at inntekten faller etterpå.
+Testet før det ble lagt inn (transaksjon som ble rullet tilbake): skraplageret og slagghåndteringen har samme verdi,
+Kontroll (poeng og deler) og samme tall i vinduet (verdi, motbud uten penger, åpent/grunn); minstebudet er uendret når
+ingen gamle anbud er høye (10 dagers inntekt). Med et kunstig gammelt anbud på 5/11/12/20/50/300 dagers inntekt ble
+minstebudet 10/11/12/12/12/12 dager og verdien 10/11/12/20/50/300 dager; styrken ved minstebudet 60/60/60/46,5/29,4/12,0.
+Det pågående budet (regelsett 1) hadde samme budstyrke, motbud, minste økning, overbudskrav og vindu for andre.
+Etterpå: begge selskaper har minstebud = 10 dagers inntekt, verdensjobbene «ok». `npm test` har testen B-451 med de samme
+tallene.
+Endringslogg: ja.
+Konto (B-149): uendret.

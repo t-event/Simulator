@@ -76,7 +76,9 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
 - Anbud (48 t skjult) og pilotkonsesjon 14 dager; `world_tick` avgjør «lat» (pg_cron hvert 5. min).
 - Kontroll regnes av `company_control` (aktivitet, investering, region, eiertid); vises som kroner (B-370).
 - Oppkjøpsbud og motbud er på (fra 29.9.2026). Budet teller 60 × √(bud / V) × (0,5 + 0,5 × aktivitet) + region, inntil
-  10 × verdien (verdi = 10 dagers inntekt, også minstebudet); eieren kan alltid miste selskapet. Står bud og motbud likt,
+  10 × verdien (verdi V = det høyeste av 10 dagers inntekt og siste anbudspris); eieren kan alltid miste selskapet.
+  Minstebudet for et nytt forsøk er V, men aldri over 12 dagers inntekt (B-451, 128, `takeover_min_bid`); V er fortsatt
+  skalaen for budstyrke, motbud, Kontroll og inntektsøkning. Står bud og motbud likt,
   beholder eieren selskapet (`att > def`). Eieren får `takeover_payout` ved salg (B-375). Anbud fra før 29.9 regnes i
   dagens penger (B-374).
 - **Regelsett 2** (B-441, 123; alle bud fra 3.10.2026, `takeovers.rules` = 2): motbudet teller som budet (60 × √(beløp /
@@ -91,7 +93,7 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
   + fond, fondet høyst V) / V), høyst 3 × V; kjøperen får 90 % tilbake, eieren 95 % av motbudet uansett.
 - Slettes en konto mens et oppkjøpsbud er åpent, gjøres budet opp først (B-430, 116; i `delete_my_account` før
   slettingen, B-434, 119): angriperen får hele budet tilbake, eieren får motbudet tilbake (kassa og fondet).
-- Selskapskortet viser verdien (10 dagers inntekt) og, ved oppkjøp, «Lønner det seg?»: inntekten i dagene kjøperen eier
+- Selskapskortet viser minstebudet ved oppkjøp (B-451) og, ved oppkjøp, «Lønner det seg?»: inntekten i dagene kjøperen eier
   selskapet (til perioden går ut, minst 14 dager) mot budet, og hva som kommer tilbake hvis budet ikke holder (75 %,
   regelsett 1: 90 %; B-435, B-441).
 - Slagghåndteringen er aktiv fra 3.10.2026 (B-445, første anbud stenger 5.10 kl. 10:38). Mekanisk verksted er ikke aktivt.

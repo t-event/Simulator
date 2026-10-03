@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 373 – 2026-10-03: Begrenset minstebud ved oppkjøp (B-451)
+
+**Brukeren ba om:** F som forsiktig første endring; testen skal vise minstebud mellom 10 og 12 dagers inntekt, uendret
+verdi, Kontroll og budstyrke, og at pågående bud og overbud følger dagens regler. Presisering om anbudstaket.
+
+**Gjort:** migrasjon 128 (`takeover_min_bid`, `takeover_window`, `min_bid_cap_days` = 12). Appen: `takeoverMinBid`,
+`bidToTake` fra minstebudet, «Minstebud ved oppkjøp» på selskapskortet, tekstene om oppkjøp. Nummer 128 er brukt her –
+ryddingen av meldinger (utkast 108) får neste ledige nummer når den legges inn.
+
+**Testet:** hele migrasjonen i en transaksjon som ble rullet tilbake (tallene i B-451), og etterpå: minstebud = 10 dagers
+inntekt for begge selskaper, verdensjobbene «ok». Ny test i `npm test`; typesjekk, lint, bygg. Chromium 320/390/1366 px
+mot en falsk server: «Minstebud» viser 12 dagers inntekt når verdien er høyere, ingen sidelengs scrolling.
+
+**Gjenstår:** ryddingen av meldinger (108) før 1.11; kontrollene 5.10; skyggerapporten rundt 9.10; verv en venn og
+delingsknapp venter på eierens valg.
+
 ## Økt 372 – 2026-10-03: Oppkjøpssimulatoren rettet, store anbud prøvd (B-450)
 
 **Brukeren ba om:** rett simulatoren (Kontrollen virker automatisk på serveren) og prøv større forhold mellom gammel

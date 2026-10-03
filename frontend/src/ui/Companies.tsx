@@ -28,6 +28,7 @@ import {
 } from "../net/world";
 import {
   bidToTake,
+  takeoverMinBid,
   buyoutPay,
   CONTROL_PARTS,
   controlAfterInvest,
@@ -316,13 +317,13 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
               <small> /døgn</small>
             </dd>
           </div>
-          {/* Verdien (B-435): det et oppkjøpsbud minst må være – før sto bare inntekten per døgn */}
-          {c.owner && companyValue(c) > 0 && (
+          {/* Det et oppkjøpsbud minst må være (B-435, begrenset i B-451) – før sto bare inntekten per døgn */}
+          {c.owner && minBidOf(c) > 0 && (
             <div>
-              <dt>Verdi</dt>
+              <dt>Minstebud</dt>
               <dd>
-                {fmtKr(companyValue(c))}
-                <small> 10 dagers inntekt</small>
+                {fmtKr(minBidOf(c))}
+                <small> ved oppkjøp</small>
               </dd>
             </div>
           )}
@@ -614,7 +615,7 @@ function ControlSection({
       ? Date.parse(ctl.protectedUntil)
       : null
     : protectedUntil(ctl.since, realNow());
-  const take = bidToTake(ctl.score, fund, ctl.value, 2);
+  const take = bidToTake(ctl.score, fund, ctl.value, 2, minBidOf(c));
   const endsAt = c.concessionUntil ? Date.parse(c.concessionUntil) : null;
   return (
     <section className="g-control">
@@ -694,8 +695,8 @@ function ControlSection({
           <summary>Hvis noen vil kjøpe selskapet</summary>
           <ol className="g-small-text g-control-how">
             <li>
-              En annen spiller legger inn et oppkjøpsbud på minst verdien av selskapet. Du får beskjed, og har{" "}
-              {TAKEOVER.defenseHours} timer på deg.
+              En annen spiller legger inn et oppkjøpsbud på minst minstebudet ({fmtKr(minBidOf(c))}). Du får beskjed, og
+              har {TAKEOVER.defenseHours} timer på deg.
             </li>
             <li>
               Du kan legge inn et motbud med penger fra konsernkassa eller beredskapsfondet. Samme beløp teller like mye
@@ -729,7 +730,7 @@ function InvestPreview({ c, fund, amount }: { c: Company; fund: number; amount: 
   return (
     <p className="g-small-text g-invest-preview">
       Med {fmtKr(amount)} til: Kontroll <strong>{after}</strong> ({controlWord(after).word.toLowerCase()}), og et bud må
-      være ca. <strong>{fmtKr(bidToTake(after, fund, ctl.value, 2))}</strong> for å ta selskapet.
+      være ca. <strong>{fmtKr(bidToTake(after, fund, ctl.value, 2, minBidOf(c)))}</strong> for å ta selskapet.
     </p>
   );
 }
@@ -796,9 +797,16 @@ function PolicySection({
 }
 
 /** Overtakelser (B-335): forsøk som pågår, forsvaret for eieren, bud for de andre og forrige utfall */
-/** Selskapets verdi (10 dagers inntekt): minstebudet ved oppkjøp (B-335) */
+/** Selskapets verdi: det høyeste av 10 dagers inntekt og siste anbudspris – skalaen for budstyrke og Kontroll (B-335) */
 function companyValue(c: Company): number {
   return c.control?.value ?? c.takeoverWindow?.value ?? 0;
+}
+
+/** Minstebudet ved oppkjøp (B-451): fra serveren for andre, regnet av verdien og inntekten for eieren */
+function minBidOf(c: Company): number {
+  if (c.takeoverWindow) return c.takeoverWindow.minBid;
+  const value = companyValue(c);
+  return value > 0 ? takeoverMinBid(value, c.control?.buyout?.perDay ?? c.estimatePerDay) : 0;
 }
 
 /** Lønner budet seg (B-435): hva kjøperen tjener i dagene hen eier selskapet, mot budet, og hva som kommer tilbake */
@@ -1028,12 +1036,13 @@ function TakeoverSection({
           <details className="g-details">
             <summary>Kjøp selskapet</summary>
             <p className="g-small-text">
-              Et oppkjøpsbud må være minst verdien (10 dagers inntekt), {fmtKr(w.minBid)}, og betales fra konsernkassa
-              med én gang. Alle ser budet, og eieren har {TAKEOVER.defenseHours} timer på seg til å legge inn et motbud.
-              Med minstebudet: {lead(w.attackMin, w.defenseNow)} før eieren gjør noe. Større bud, at du spiller hver uke
-              og egne verk i regionen gjør budet sterkere – med stort nok bud kan alle selskaper kjøpes. Eieren kan
-              svare med et motbud; samme beløp teller like mye for begge, men motbudet er brukt opp hvis det holder.
-              Andre spillere kan by over deg i samme runde – da får du hele budet tilbake.
+              Et oppkjøpsbud må være minst {fmtKr(w.minBid)} – 10 dagers inntekt, eller siste anbudspris opptil 12
+              dagers inntekt – og betales fra konsernkassa med én gang. Alle ser budet, og eieren har{" "}
+              {TAKEOVER.defenseHours} timer på seg til å legge inn et motbud. Med minstebudet:{" "}
+              {lead(w.attackMin, w.defenseNow)} før eieren gjør noe. Større bud, at du spiller hver uke og egne verk i
+              regionen gjør budet sterkere – med stort nok bud kan alle selskaper kjøpes. Eieren kan svare med et
+              motbud; samme beløp teller like mye for begge, men motbudet er brukt opp hvis det holder. Andre spillere
+              kan by over deg i samme runde – da får du hele budet tilbake.
             </p>
             {amountRow("Legg inn oppkjøpsbud", () => askBid(millions(amount), millions(amount)), w.minBid)}
             {confirmBox}
