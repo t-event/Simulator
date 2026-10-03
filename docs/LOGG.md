@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 371 – 2026-10-03: Anbudsgulvet analysert (B-449)
+
+**Brukeren ba om:** sammenlign tak på 14 og 12 dagers inntekt og bare 10 dager i simulatoren, med kjøperens eget
+inntektsanslag, og husk at verdien også styrer Kontroll og budstyrke. Verkskontoen på utviklingslista. Kontrollene 5.10.
+
+**Gjort:** `takeoverSim.ts --gulv` med seks alternativer (A–F), kjøperanslag 0,8/1,0/1,2 og anbud 250/300/400 mill.,
+og tabellen over det verdien ellers styrer. Kartlagt hvor `company_value` brukes på serveren. Anbefaling F i B-449.
+Verkskontoen og anbudsgulvet står i FORSLAG. Påminnelser i økta 5.10 kl. 10:45 og 22:30 norsk tid.
+
+**Testet:** simulatoren kjører; typesjekk, lint, `npm test`.
+
+**Gjenstår:** eierens valg i B-449; ryddingen av meldinger (108) før 1.11; kontrollene 5.10; skyggerapporten rundt 9.10.
+
 ## Økt 370 – 2026-10-03: Ryddingen av meldinger godkjent, holdt igjen av koblingen
 
 **Brukeren ba om:** «Jeg godkjenner det du anbefaler» (ryddingen av meldinger, 108).
