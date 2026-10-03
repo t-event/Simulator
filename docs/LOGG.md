@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 369 – 2026-10-03: Selskapene synes på kartet (B-448)
+
+**Brukeren ba om:** (skjermbilde) selskapene vises ikke på kartet.
+
+**Gjort:** serveren sendte selskapene, men kartet viste bare de ti første merkene per region og la selskapene sist.
+Selskapene står nå først (`Markers` i `ui/WorldMap.tsx`).
+
+**Testet:** Chromium 320/390/1366 px mot en falsk server med åtte spillere i hver region: to selskapsmerker med «Alle»
+og «Selskaper», ingen med «Dine»; ingen sidelengs scrolling. `npm test`, typesjekk, lint, bygg.
+
+**Gjenstår:** som i økt 367.
+
 ## Økt 368 – 2026-10-03: Bud på 100 000 kr i anbudet (B-447)
 
 **Brukeren ba om:** (skjermbilde) det gikk ikke å by f.eks. 100 000 kr på slagghåndteringen.

@@ -1,7 +1,7 @@
 /**
  * Verdenskartet (B-333, ny tegning B-405): «anleggsbildet» for konsernet. En oppdiktet verden med seks regioner rundt
  * et hav, med alle spilleres datterverk og de strategiske selskapene: kystlinjer, sjøkartrutenett, skipsleder,
- * regionnavn med undertekst, tetthet som fyllfarge, merker i fast rutenett (dine først, «bygges» stiplet), filter
+ * regionnavn med undertekst, tetthet som fyllfarge, merker i fast rutenett (selskapene, så dine, «bygges» stiplet), filter
  * Alle/Dine/Selskaper, og et sidepanel med tre tall og «Bygg neste verk i …» som setter regionen under Utvid.
  * Kartet viser andre spillere, så det krever konto (KONTO.md).
  */
@@ -97,10 +97,14 @@ function useSession() {
   return useSyncExternalStore(onSessionChange, getSession, getSession);
 }
 
-/** Merkene i en region i et fast rutenett (5 per rad, to rader): dine først, så andres, så selskapene, så «+N» */
+/**
+ * Merkene i en region i et fast rutenett (5 per rad, to rader): selskapene først, så dine, så andres, så «+N».
+ * Selskapene står først så de alltid synes – sist ble de skjøvet inn i «+N» i regioner med mange verk (B-448)
+ */
 function Markers({ r, filter }: { r: MapRegion; filter: Filter }) {
   const s = SHAPES[r.id];
   const items: { kind: SisterType | "selskap"; mine: boolean; building: boolean }[] = [];
+  if (filter !== "dine") for (const c of r.companies) items.push({ kind: "selskap", mine: c.mine, building: false });
   const sorted = [...r.players].sort((a, b) => Number(b.mine) - Number(a.mine));
   if (filter !== "selskap")
     for (const p of sorted) {
@@ -112,7 +116,6 @@ function Markers({ r, filter }: { r: MapRegion; filter: Filter }) {
       for (let i = 0; i < Math.min(p.building, own.length); i++) own[own.length - 1 - i].building = true;
       items.push(...own);
     }
-  if (filter !== "dine") for (const c of r.companies) items.push({ kind: "selskap", mine: c.mine, building: false });
   const shown = items.slice(0, 10);
   const rest = items.length - shown.length;
   const pitch = 10;
