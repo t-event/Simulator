@@ -19,7 +19,10 @@ og tillatelse. Ryddingen – koblingen holdt den igjen til eieren bekrefter (tid
 
 **Testet:** anbudet er åpent, verdensjobbene «ok».
 
-**Gjenstår:** etterbetalingen og ryddingen (før 1.11) med eieren til stede; skyggerapporten for V0/K-1 og datakvaliteten
+**Etterpå:** eieren sa «Ja» til etterbetalingen på 2 549 252 kr. Forberedelsen ble stoppet av sikkerhetssperren igjen;
+ingenting er betalt.
+
+**Gjenstår:** etterbetalingen (godkjent beløp, venter på tillatelse) og ryddingen (før 1.11) med eieren til stede; skyggerapporten for V0/K-1 og datakvaliteten
 når det er samlet rundt en uke.
 
 ## Økt 365 – 2026-10-03: Arbeidsmiljøkortene tas ut (B-444)
