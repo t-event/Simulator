@@ -7525,6 +7525,24 @@ button.g-prod-row:hover {
   min-height: 44px;
 }
 
+/* Bekreft bud og motbud (B-442) */
+.g-confirm {
+  margin: var(--sp-2) 0;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+}
+
+.g-confirm-actions {
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.g-confirm-actions .ds-button {
+  min-height: 44px;
+}
+
 /* Byggeprosjekter og nabolaget (B-336) */
 .g-build-now,
 .g-build-next {

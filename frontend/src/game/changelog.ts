@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 442,
+    date: "2026-10-03",
+    title: "By over i samme runde",
+    items: [
+      "Står det et oppkjøpsbud på et selskap, kan du by over det (minst 5 % mer). Den som blir overbudt, får hele budet tilbake.",
+      "Kommer et bud de siste 12 timene, flyttes fristen så eieren rekker å svare.",
+      "Før et oppkjøpsbud eller motbud sendes, ser du hva det koster og hva du får tilbake.",
+    ],
+  },
+  {
     b: 441,
     date: "2026-10-03",
     title: "Nye regler for oppkjøp",

@@ -1,6 +1,6 @@
 # STATUS – slik virker Stålverket nå
 
-**Fasit for hvordan spillet virker i dag** (sist oppdatert 3.10.2026, B-441). Hvorfor ting er som de er, står i
+**Fasit for hvordan spillet virker i dag** (sist oppdatert 3.10.2026, B-442). Hvorfor ting er som de er, står i
 `BESLUTNINGER.md`; hva som ble gjort når, står i `LOGG.md`. Endrer du en regel, oppdater denne fila i samme økt. Står
 noe annet i et eldre analyse- eller forslagsdokument, gjelder denne fila.
 
@@ -83,7 +83,9 @@ resten. Rente 1 % per ekte dag; hver natt går halvparten av utbyttet og bidrage
 - **Regelsett 2** (B-441, 123; alle bud fra 3.10.2026, `takeovers.rules` = 2): motbudet teller som budet (60 × √(beløp /
   V), inntil 5 × V) pluss Kontroll / 5 (høyst 20). Fondet teller bare når det legges inn som motbud. Vinneren betaler:
   eierens motbud som holder, er brukt opp; taperen får 75 % tilbake (kjøperen når budet ikke holder, eieren når selskapet
-  blir kjøpt). 14 dagers pause etter et avverget forsøk. Regelsett 1 (bud fra før 3.10): forsvar = Kontroll + 40 × √((motbud
+  blir kjøpt). 14 dagers pause etter et avverget forsøk. Mens et bud står åpent, kan andre by minst 5 % (minst 1 mill.)
+  over; den overbudte får hele budet tilbake, og et bud de siste 12 timene flytter fristen til 12 timer etter budet
+  (B-442, 124, `takeover_bids`). Appen ber om bekreftelse før bud og motbud. Regelsett 1 (bud fra før 3.10): forsvar = Kontroll + 40 × √((motbud
   + fond, fondet høyst V) / V), høyst 3 × V; kjøperen får 90 % tilbake, eieren 95 % av motbudet uansett.
 - Slettes en konto mens et oppkjøpsbud er åpent, gjøres budet opp først (B-430, 116; i `delete_my_account` før
   slettingen, B-434, 119): angriperen får hele budet tilbake, eieren får motbudet tilbake (kassa og fondet).
@@ -208,7 +210,7 @@ resten. Rente 1 % per ekte dag; hver natt går halvparten av utbyttet og bidrage
 | Utbytte | `game/dividend.ts` | `dividend_from_state` (051), `pay_dividends` |
 | Verdensjobbene og overvåkingen | – | `world_tick`, `world_health()`, `world_health_players()` (101) |
 | Bidrag | – (bare serveren) | `pay_contributions` (061, 077) |
-| Kontroll og oppkjøp | `game/control.ts` (`TAKEOVER`, `TAKEOVER_V2`) | `company_control`, `takeover_*` (067, 068, 087, 123) |
+| Kontroll og oppkjøp | `game/control.ts` (`TAKEOVER`, `TAKEOVER_V2`, `minOutbid`) | `company_control`, `takeover_*` (067, 068, 087, 123, 124) |
 | Innskudd | `net/treasury.ts` | `treasury_limit`, `deposit_to_treasury` (090) |
 | Lister og sesong | `net/leaderboard.ts`, `net/season.ts` | `leaderboard`, `close_season`, `season_history` (092, 093) |
 | Uker og ukens kontrollrom | `net/weekly.ts`, `ui/Weekly.tsx`, `ui/control/weekly.ts` | `week_kind`, `weekly_scores`, `weekly_control_*` (094) |

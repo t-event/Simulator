@@ -116,8 +116,9 @@ export function MoneyGuide({ g, onClose }: { g: GameState; onClose: () => void }
                   mye i budet og motbudet, og Kontrollen gir eieren et lite forsprang. Den som vinner, betaler: holder
                   motbudet, er det brukt opp. Den som taper, får 75 % tilbake. Blir selskapet kjøpt, får du også
                   inntekten for dagene du mister og 85 % av det du har investert (aldri mer enn 85 % av budet), og
-                  kjøperen eier selskapet i 14 dager (vernet de første 3). Holder ikke budet, kan ingen by på selskapet
-                  de neste 14 dagene. Under Konsern → Industrien står det hvor stort bud som trengs for å kjøpe ditt.
+                  kjøperen eier selskapet i 14 dager (vernet de første 3). Mens et bud står, kan andre by over; den som
+                  blir overbudt, får alt tilbake. Holder ikke budet, kan ingen by på selskapet de neste 14 dagene. Under
+                  Konsern → Industrien står det hvor stort bud som trengs for å kjøpe ditt.
                 </p>
               </Question>
               <Question q="Hvorfor tar det lengre tid å bygge og modernisere enn før?">

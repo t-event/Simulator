@@ -40,6 +40,7 @@ import {
   policySplit,
   protectedUntil,
   bidBack,
+  defenseBack,
   TAKEOVER,
   TAKEOVER_REASON,
   TAKEOVER_V2,
@@ -47,6 +48,7 @@ import {
   type TakeoverRules,
 } from "../game/control";
 import { regionName } from "../game/regions";
+import { Button } from "./ds";
 import type { PolicyId } from "../game/types";
 import { ORDER_REFUSAL_TEXT } from "../game/konsernWorld";
 import { applyKonsern, setPolicy } from "../net/konsern";
@@ -203,6 +205,10 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
       const r = await bidTakeover(c.id, amount);
       if (!r.ok) return TAKEOVER_REASON[r.reason] ?? TAKEOVER_REASON.nett;
       tenderChanged();
+      const t = c.takeover;
+      if (t && !t.mineAttack)
+        return `Du har bydd over ${t.attacker} med ${fmtKr(amount)}. Budet ditt gjelder nå, og ${t.attacker} får pengene sine tilbake.`;
+      if (t) return `Budet er økt til ${fmtKr(amount)}.`;
       return `Budet på ${fmtKr(amount)} er lagt inn. Alle kan se det, og eieren har ${TAKEOVER.defenseHours} timer på seg.`;
     });
 
@@ -212,7 +218,9 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
       const r = await defendTakeover(c.takeover.id, amount, from);
       if (!r.ok) return TAKEOVER_REASON[r.reason] ?? TAKEOVER_REASON.nett;
       tenderChanged();
-      return `Motbudet ditt er økt med ${fmtKr(amount)}. Du får 95 % tilbake når oppkjøpet er avgjort.`;
+      return c.takeover.rules === 1
+        ? `Motbudet ditt er økt med ${fmtKr(amount)}. Du får 95 % tilbake når oppkjøpet er avgjort.`
+        : `Motbudet ditt er økt med ${fmtKr(amount)}. Holder det, er pengene brukt opp; blir selskapet kjøpt, får du 75 % tilbake.`;
     });
 
   const note = (at: string) =>
@@ -789,6 +797,11 @@ function PayoffNote({
   );
 }
 
+/** Et bud eller motbud som venter på bekreftelse (B-442): hva det koster, og hva som kommer tilbake */
+type PendingBid =
+  | { kind: "bud"; amount: number; add: number }
+  | { kind: "motbud"; amount: number; from: "kasse" | "fond" };
+
 function TakeoverSection({
   c,
   busy,
@@ -806,11 +819,15 @@ function TakeoverSection({
 }) {
   const [amount, setAmount] = useState("");
   const [from, setFrom] = useState<"kasse" | "fond">("kasse");
+  const [pending, setPending] = useState<PendingBid | null>(null);
   const t = c.takeover;
   const w = c.takeoverWindow;
   const last = c.takeoverLast;
+  const rules: TakeoverRules = t?.rules ?? w?.rules ?? 2;
   // Hvem som står sterkest, uten poeng (B-371)
   const lead = (a: number, d: number) => (a > d ? "oppkjøpsbudet står sterkest" : "eieren står sterkest");
+  // Et bud er hele budet; `add` er det som trekkes fra kassa nå (ved økning bare forskjellen)
+  const askBid = (total: number, add: number) => total > 0 && setPending({ kind: "bud", amount: total, add });
   const amountRow = (label: string, onGo: () => void, placeholder: number) => (
     <div className="g-row g-amount-row">
       <label className="g-amount">
@@ -820,7 +837,10 @@ function TakeoverSection({
           min={1}
           placeholder={String(Math.ceil(placeholder / 1e6))}
           value={amount}
-          onChange={(e) => setAmount(e.target.value)}
+          onChange={(e) => {
+            setAmount(e.target.value);
+            setPending(null);
+          }}
           aria-label="Beløp i millioner kroner"
         />
         <span>mill. kr</span>
@@ -828,6 +848,44 @@ function TakeoverSection({
       <button className="g-primary" disabled={busy || millions(amount) <= 0} onClick={onGo}>
         {label}
       </button>
+    </div>
+  );
+  const confirmBox = pending && (
+    <div className="g-confirm" role="alertdialog" aria-label="Bekreft">
+      <p className="g-small-text">
+        {pending.kind === "bud" ? (
+          <>
+            Du byr <strong>{fmtKr(pending.amount)}</strong>
+            {pending.add < pending.amount ? ` (${fmtKr(pending.add)} mer fra konsernkassa)` : " fra konsernkassa"}. Står
+            budet sterkest når tida er ute, kjøper du selskapet for det. Holder det ikke, får du{" "}
+            {fmtKr(pending.amount * bidBack(rules))} tilbake og mister{" "}
+            <strong>{fmtKr(pending.amount * (1 - bidBack(rules)))}</strong>.
+            {rules === 2 && " Byr noen over deg, får du hele budet tilbake."}
+          </>
+        ) : rules === 1 ? (
+          <>Du legger {fmtKr(pending.amount)} inn i motbudet. Du får 95 % tilbake når oppkjøpet er avgjort.</>
+        ) : (
+          <>
+            Du legger <strong>{fmtKr(pending.amount)}</strong> inn i motbudet. Holder det, er pengene brukt opp. Blir
+            selskapet kjøpt likevel, får du {fmtKr(pending.amount * defenseBack(2, true))} tilbake.
+          </>
+        )}
+      </p>
+      <div className="g-row g-confirm-actions">
+        <Button
+          variant="primary"
+          disabled={busy}
+          onClick={() => {
+            if (pending.kind === "bud") onBid(pending.amount);
+            else onDefend(pending.amount, pending.from);
+            setPending(null);
+            setAmount("");
+          }}
+        >
+          {pending.kind === "bud" ? "Bekreft bud" : "Bekreft motbud"}
+        </Button>
+        <Button onClick={() => setPending(null)}>Avbryt</Button>
+      </div>
     </div>
   );
   return (
@@ -841,15 +899,17 @@ function TakeoverSection({
             på {fmtKr(t.bid)}. Avgjøres {timeLeft(t.closesAt)} fra nå.
             {c.mine ? "" : ` Slik det står nå: ${lead(t.attack, t.defenseScore)}.`}
           </p>
+          {t.outbidMe && (
+            <p className="g-small-text">
+              <Icon name="info" /> Budet ditt ble overbudt, og pengene er tilbake i konsernkassa. Du kan by igjen.
+            </p>
+          )}
           {c.mine && <DefenseVerdict c={c} fund={fund} />}
           {c.mine && (
             <>
               {amountRow(
                 "Legg inn motbud",
-                () => {
-                  onDefend(millions(amount), from);
-                  setAmount("");
-                },
+                () => setPending({ kind: "motbud", amount: millions(amount), from }),
                 c.control?.value ?? 1e8,
               )}
               {fund > 0 && (
@@ -861,6 +921,7 @@ function TakeoverSection({
                   </select>
                 </label>
               )}
+              {confirmBox}
               <p className="g-muted g-small-text">
                 Pengene du legger inn, gjør motbudet sterkere{t.defense ? ` (${fmtKr(t.defense)} nå)` : ""}.{" "}
                 {t.rules === 1
@@ -871,14 +932,8 @@ function TakeoverSection({
           )}
           {t.mineAttack && (
             <>
-              {amountRow(
-                "Øk budet",
-                () => {
-                  onBid(millions(amount));
-                  setAmount("");
-                },
-                t.bid * 1.2,
-              )}
+              {amountRow("Øk budet", () => askBid(millions(amount), millions(amount) - t.bid), t.bid * 1.2)}
+              {confirmBox}
               <p className="g-muted g-small-text">
                 Skriv hele det nye budet. Står budet sterkest til slutt, får eieren betalt for dagene hen mister, og
                 resten av budet er brukt. Ellers får du {Math.round(bidBack(t.rules) * 100)} % tilbake.
@@ -890,6 +945,32 @@ function TakeoverSection({
                 rules={t.rules}
               />
             </>
+          )}
+          {!c.mine && !t.mineAttack && t.compete?.open && (
+            <details className="g-details">
+              <summary>By over</summary>
+              <p className="g-small-text">
+                Du kan by over {t.attacker}: minst {fmtKr(t.compete.minBid)}. Da tar budet ditt over runden, og{" "}
+                {t.attacker} får pengene sine tilbake. Det sterkeste budet når tida er ute, måles mot eierens motbud.
+              </p>
+              {amountRow("By over", () => askBid(millions(amount), millions(amount)), t.compete.minBid)}
+              {confirmBox}
+              <PayoffNote
+                c={c}
+                bid={millions(amount) || t.compete.minBid}
+                decidedAt={Math.max(Date.parse(t.closesAt), realNow() + TAKEOVER_V2.extendHours * 3_600_000)}
+                rules={t.rules}
+              />
+            </details>
+          )}
+          {!c.mine && !t.mineAttack && t.compete && !t.compete.open && t.compete.reason && (
+            <p className="g-muted g-small-text">{TAKEOVER_REASON[t.compete.reason] ?? ""}</p>
+          )}
+          {t.rules === 2 && (
+            <p className="g-muted g-small-text">
+              Kommer et nytt bud de siste {TAKEOVER_V2.extendHours} timene, flyttes fristen til{" "}
+              {TAKEOVER_V2.extendHours} timer etter budet, så eieren rekker å svare.
+            </p>
           )}
         </div>
       ) : (
@@ -903,15 +984,10 @@ function TakeoverSection({
               Med minstebudet: {lead(w.attackMin, w.defenseNow)} før eieren gjør noe. Større bud, at du spiller hver uke
               og egne verk i regionen gjør budet sterkere – med stort nok bud kan alle selskaper kjøpes. Eieren kan
               svare med et motbud; samme beløp teller like mye for begge, men motbudet er brukt opp hvis det holder.
+              Andre spillere kan by over deg i samme runde – da får du hele budet tilbake.
             </p>
-            {amountRow(
-              "Legg inn oppkjøpsbud",
-              () => {
-                onBid(millions(amount));
-                setAmount("");
-              },
-              w.minBid,
-            )}
+            {amountRow("Legg inn oppkjøpsbud", () => askBid(millions(amount), millions(amount)), w.minBid)}
+            {confirmBox}
             <p className="g-muted g-small-text">
               Står budet sterkest, eier du selskapet i 14 dager fra kjøpet. Eieren får betalt for dagene hen mister og
               det hen har investert; resten av budet går ut av spillet. Ellers får du{" "}
@@ -927,7 +1003,12 @@ function TakeoverSection({
           </details>
         ) : (
           w.reason &&
-          w.reason !== "pagar" && <p className="g-muted g-small-text">Oppkjøp: {TAKEOVER_REASON[w.reason] ?? ""}</p>
+          w.reason !== "pagar" && (
+            <p className="g-muted g-small-text">
+              Oppkjøp: {TAKEOVER_REASON[w.reason] ?? ""}
+              {w.reason === "pause" && w.from ? ` Nye bud fra ${fmtWhen(w.from)}.` : ""}
+            </p>
+          )
         ))
       )}
       {last && (

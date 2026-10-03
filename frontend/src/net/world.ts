@@ -104,6 +104,10 @@ export interface Takeover {
   defenseScore: number;
   /** Regelsettet budet avgjøres etter (B-441): 1 for bud fra før 3.10.2026, 2 for nye */
   rules: TakeoverRules;
+  /** Om spilleren kan by over i runden (B-442); null for eieren, den som byr og regelsett 1 */
+  compete: { open: boolean; reason: string | null; minBid: number } | null;
+  /** Spilleren hadde et bud i runden og ble overbudt (pengene er tilbake) */
+  outbidMe: boolean;
 }
 
 export interface TakeoverWindow {
@@ -258,7 +262,14 @@ export function parseTakeover(r: Row | null | undefined): Takeover | null {
     defenseScore: num(r.defense_score),
     // Uten feltet er svaret fra før B-441, og da gjaldt regelsett 1
     rules: r.rules === 2 ? 2 : 1,
+    compete: parseCompete(r.compete as Row | null),
+    outbidMe: r.outbid_me === true,
   };
+}
+
+function parseCompete(r: Row | null | undefined): Takeover["compete"] {
+  if (!r || typeof r !== "object") return null;
+  return { open: r.open === true, reason: str(r.reason), minBid: num(r.min_bid) };
 }
 
 export function parseWindow(r: Row | null | undefined): TakeoverWindow | null {

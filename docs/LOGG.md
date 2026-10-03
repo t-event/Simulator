@@ -5,6 +5,25 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 363 – 2026-10-03: Overbud i samme runde (B-442)
+
+**Brukeren ba om:** spurte om 14 dagers pause gir mening når et bud fra en som ikke kan reglene stenger ute dem som har
+spart. Valgte min anbefaling: flere kan by i samme runde, fristen forlenges ved sene bud, pausen kommer etter runden, og
+bekreftelse før bud.
+
+**Gjort:** migrasjon 124 (`takeover_bids`, `takeover_min_raise`, `takeover_compete`, `takeover_bid` med overbud og
+forlenget frist, hendelse i Skiftrapporten, `world_status` med `compete`/`outbid_me`). Appen: `minOutbid` og tallene i
+`TAKEOVER_V2`, «By over» og «Budet ditt ble overbudt» på Industrien, bekreftelse før bud og motbud, beskjedene etter
+motbud følger regelsettet (sa 95 % også i regelsett 2), pausen viser når nye bud kan legges inn, «Slik henger pengene
+sammen».
+
+**Testet:** migrasjonen i en transaksjon som ble rullet tilbake (se B-442), deretter lagt inn; `get_advisors` uten nye
+funn utover den nye tabellen uten regler (som de andre). Chromium 320/390/1366 px mot en falsk server: overbud med
+bekreftelse sender riktig kall, motbud viser bekreftelse, ingen horisontal scrolling. `npm test` (ny test), typesjekk,
+lint, bygg.
+
+**Gjenstår:** som før – etterbetalingen, ryddingen av meldinger (108) og slagghåndteringen venter på eieren.
+
 ## Økt 362 – 2026-10-03: Oppkjøp regelsett 2 (B-441)
 
 **Brukeren ba om:** å bygge de nye oppkjøpsreglene med satsene hen valgte: Kontroll høyst 20 poeng, tapsgebyr 25 % (til
