@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 451,
+    date: "2026-10-03",
+    title: "Lavere minstebud ved oppkjøp",
+    items: [
+      "Et oppkjøpsbud må aldri være over 12 dagers inntekt, selv om selskapet ble vunnet dyrt i anbud. Selskapskortet viser minstebudet.",
+      "Budstyrken, Kontrollen og bud som alt er lagt inn, er som før.",
+    ],
+  },
+  {
     b: 448,
     date: "2026-10-03",
     title: "Selskapene på kartet",

@@ -185,7 +185,23 @@ export const TAKEOVER_V2 = {
   raiseMin: 1_000_000,
   /** Kommer et bud de siste 12 timene, flyttes fristen til 12 timer etter budet (B-442, `extend_hours`) */
   extendHours: 12,
+  /** Verdien er så mange dagers inntekt (`config.world.control.value_days`) */
+  valueDays: 10,
+  /** Minstebudet er aldri over så mange dagers inntekt (B-451, `min_bid_cap_days`) */
+  minBidCapDays: 12,
 };
+
+/**
+ * Minstebudet for et nytt oppkjøpsforsøk (B-451, speiler `takeover_min_bid`): det høyeste av 10 dagers inntekt og siste
+ * anbudspris, men aldri over 12 dagers inntekt. Verdien (`company_value`) er det høyeste av 10 dagers inntekt og siste
+ * anbudspris, så minstebudet kan regnes av verdien og inntekten alene. Uten inntektsanslag er det verdien, som før.
+ * Verdien er fortsatt skalaen for budstyrke, motbud og Kontroll – bare minstebudet er begrenset.
+ */
+export function takeoverMinBid(value: number, perDay: number): number {
+  const t = TAKEOVER_V2;
+  if (perDay <= 0) return value;
+  return Math.max(t.valueDays * perDay, Math.min(value, t.minBidCapDays * perDay));
+}
 
 /** Minste overbud på et bud som står (B-442, speiler `takeover_min_raise`) */
 export function minOutbid(bid: number): number {
@@ -218,13 +234,20 @@ export function takeoverDefense(
 
 /**
  * Hvor stort bud en aktiv spiller uten egne verk i regionen trenger for å ta selskapet hvis eieren ikke setter inn noe
- * forsvar (B-370). Minst verdien (minstebudet), høyst 10 × verdien. Et tall eieren forstår bedre enn poengene.
+ * forsvar (B-370). Minst minstebudet (verdien, eller lavere med B-451), høyst 10 × verdien. Et tall eieren forstår bedre
+ * enn poengene.
  */
-export function bidToTake(control: number, fund: number, value: number, rules: TakeoverRules): number {
+export function bidToTake(
+  control: number,
+  fund: number,
+  value: number,
+  rules: TakeoverRules,
+  minBid: number = value,
+): number {
   const v = Math.max(1, value);
   const d = takeoverDefense(control, 0, fund, v, rules);
   const need = v * (d / TAKEOVER.attackW) ** 2;
-  return Math.max(v, Math.min(need, TAKEOVER.attackCap * v));
+  return Math.max(minBid, Math.min(need, TAKEOVER.attackCap * v));
 }
 
 /**
@@ -342,7 +365,7 @@ export const TAKEOVER_REASON: Record<string, string> = {
   vern: "Ny eier er vernet de 3 første dagene.",
   sent: "Konsesjonen går snart ut – vent på det nye anbudet.",
   pause: "Et oppkjøpsbud på selskapet holdt ikke nylig – 14 dagers pause før neste.",
-  belop: "Budet må være minst verdien av selskapet.",
+  belop: "Budet er lavere enn minstebudet.",
   overbud: "Overbudet er for lite: det må være minst 5 % over budet som står, og gi et sterkere bud.",
   okning: "En økning må være minst 5 % over budet ditt.",
   svak: "Du kan ikke by over: selv det største budet ville vært svakere enn det som står (spill hver uke for et sterkere bud).",

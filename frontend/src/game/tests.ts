@@ -39,6 +39,7 @@ import {
   bidBack,
   defenseBack,
   minOutbid,
+  takeoverMinBid,
   investPart,
   policyLockedUntil,
   policySplit,
@@ -4516,6 +4517,22 @@ test("Oppkjøp regelsett 2 (B-441): samme styrke for samme beløp, Kontroll høy
   // Tilbake: den som taper, får 75 %; vinneren betaler
   assert(bidBack(2) === 0.75 && bidBack(1) === 0.9, "kjøperen tilbake");
   assert(defenseBack(2, false) === 0 && defenseBack(2, true) === 0.75 && defenseBack(1, false) === 0.95, "eieren");
+});
+
+test("Begrenset minstebud (B-451): mellom 10 og 12 dagers inntekt, verdien og budstyrken uendret, som `takeover_min_bid`", () => {
+  const e = 20e6;
+  // SQL-testen 3.10 (rullet tilbake): anbud på 5, 11, 12, 20, 50 og 300 dagers inntekt ga minstebud på 10, 11, 12, 12, 12, 12
+  const days = [5, 11, 12, 20, 50, 300].map((t) => takeoverMinBid(Math.max(10 * e, t * e), e) / e);
+  assert(JSON.stringify(days) === JSON.stringify([10, 11, 12, 12, 12, 12]), `${days}`);
+  // Uten inntektsanslag: verdien, som før
+  assert(takeoverMinBid(5e8, 0) === 5e8, "uten anslag");
+  // Verdien er fortsatt skalaen: styrken ved minstebudet faller når et gammelt anbud er høyt (SQL: 46,5 / 29,4 / 12,0)
+  const atk = [20, 50, 300].map((t) => Math.round(takeoverAttack(12 * e, t * e, 1, 0) * 10) / 10);
+  assert(JSON.stringify(atk) === JSON.stringify([46.5, 29.4, 12]), `${atk}`);
+  // Budet eieren må tåle uten motbud starter på minstebudet, ikke på verdien
+  const v = 50 * e;
+  assert(bidToTake(0, 0, v, 2, takeoverMinBid(v, e)) === 12 * e, "fra minstebudet");
+  assert(bidToTake(57, 0, 10 * e, 2) === bidToTake(57, 0, 10 * e, 2, takeoverMinBid(10 * e, e)), "uendret uten anbud");
 });
 
 test("Overbud (B-442): minst 5 % og minst 1 mill. over budet som står, som `takeover_min_raise`", () => {
