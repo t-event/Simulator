@@ -8282,3 +8282,26 @@ Beslutning:
   koblingen holdt den igjen til eieren bekrefter. Må på plass før 1.11.2026.
 - Anbudsgulvet i verdien (B-443, funnet i simuleringen) er ikke endret; det rammer ikke skraplageret nå.
 Konto (B-149): uendret.
+
+## B-446 Etterbetalingen av utbyttet 30.9 og 1.10 er utført (2026-10-03)
+Status: gjelder.
+Bakgrunn: eieren sa «Ja» til etterbetalingen på 2 549 252 kr (B-445) og «Jeg godkjenner at du gjør det» 3.10.2026.
+Beslutning: utbetalt 3.10 kl. 10:59 norsk tid med migrasjon 127 (`supabase/127_etterbetaling.sql`):
+- Beløpene regnes av nøyaktig samme beregning som dry-run-en (utkast 112, utgave 3) på det frosne grunnlaget
+  `basis_112_*`; migrasjonen stopper uten å betale noe hvis summen ikke er den eieren godkjente, eller hvis grunnlaget,
+  utbyttereglene eller funksjonene har endret seg.
+- 2 549 252 kr til elleve spillere, 15 rader (30.9: 8 rader, 1 208 685 kr; 1.10: 7 rader, 1 340 567 kr). Per spiller som
+  i RAPPORT-2026-10-02.md, avsnitt 7: H 547 865, F 419 425, O 404 469, J 353 349, G 301 497, K 266 964, C 121 172,
+  E 57 559, D 40 981, M 25 529, N 10 442. Ingen er trukket.
+- Pengene gikk rett inn i konsernkassa. Kassaboka har én linje per spiller og dag med `kind = 'justering'` og ref
+  «etterbetaling utbytte <dag>» – kassaboka har ingen egen type for etterbetaling, og `justering` teller ikke i rammen i
+  konsernbanken (`bank_limit` leser bare `utbytte`/`bidrag`), så etterbetalingen gir ikke større lån.
+- `dividend_backpay` (én rad per spiller og dag, primærnøkkel) er vernet mot dobbel betaling; tabellen har RLS uten
+  regler og ingen tilgang for spillerne.
+Testet før det ble lagt inn: hele migrasjonen i en transaksjon som ble rullet tilbake – kassene økte med 2 549 252 kr,
+15 rader og 15 linjer i kassaboka for elleve spillere, og et nytt forsøk i samme transaksjon ga 0 nye rader. Etterpå:
+15 rader og 2 549 252 kr i både `dividend_backpay` og kassaboka, verdensjobbene «ok», `get_advisors` bare med det vanlige
+INFO-funnet (RLS uten regler).
+Grunnlaget `basis_112_*` står til det ikke trengs lenger (ingen sletting uten eierens beslutning).
+Endringslogg: ja.
+Konto (B-149): uendret (konsernkassa krever konto).

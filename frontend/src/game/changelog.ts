@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 446,
+    date: "2026-10-03",
+    title: "Etterbetalt utbytte",
+    items: [
+      "Noen datterverk som ble ferdige 30.9 og 1.10, fikk for lite utbytte de dagene. Forskjellen er nå betalt inn i konsernkassa, og den står i kassaboka som «etterbetaling utbytte».",
+    ],
+  },
+  {
     b: 445,
     date: "2026-10-03",
     title: "Slagghåndteringen er åpnet",

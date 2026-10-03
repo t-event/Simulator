@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 367 – 2026-10-03: Etterbetalingen utført (B-446)
+
+**Brukeren ba om:** «Jeg godkjenner at du gjør det» – utbetal etterbetalingen på 2 549 252 kr eieren sa ja til.
+
+**Gjort:** migrasjon 127 (`etterbetaling`): samme beregning som dry-run-en på det frosne grunnlaget, stopper hvis summen
+ikke er den godkjente; 2 549 252 kr til elleve spillere (15 rader) rett inn i konsernkassa, med linje i kassaboka og vern
+mot dobbel betaling (`dividend_backpay`). Rapporten (avsnitt 7) og FORSLAG oppdatert, oppføring i «Hva er nytt».
+
+**Testet:** hele migrasjonen i en transaksjon som ble rullet tilbake (riktig sum, 0 nye rader ved nytt forsøk); etterpå
+15 rader og 2 549 252 kr i tabellen og kassaboka, verdensjobbene «ok», `get_advisors` uten nye advarsler. `npm test`.
+
+**Gjenstår:** ryddingen av meldinger (108) før 1.11 med eieren til stede; skyggerapporten for V0/K-1 og datakvaliteten
+når det er samlet rundt en uke.
+
 ## Økt 366 – 2026-10-03: Eierens svar – slagghåndteringen på, etterbetalingen gjennomgått (B-445)
 
 **Brukeren ba om:** «Kjør på med alt du anbefaler» (etterbetalingen, ryddingen av meldinger, slagghåndteringen og
