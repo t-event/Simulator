@@ -9,7 +9,7 @@ import { fetchSeasonTrack, onSeasonTrackChange, seasonTrack, setSeasonTrack } fr
 import { getSession, onSessionChange } from "../net/supabase";
 import { isReconciled, onCloudStatus } from "../net/sync";
 import { fetchWeeklyStatus, onWeeklyChange, setWeeklyStatus, weeklyStatus } from "../net/weekly";
-import { claimAll, claimables } from "./claims";
+import { claimAll, claimables, grantMissingTrackCosmetics, missingTrackCosmetics } from "./claims";
 import { Button } from "./ds";
 import { buzz } from "./haptics";
 import { Icon } from "./icons";
@@ -39,6 +39,12 @@ export function ClaimAllBar({ g, act }: { g: GameState; act: GameApi["act"] }) {
     document.addEventListener("visibilitychange", onVisible);
     return () => document.removeEventListener("visibilitychange", onVisible);
   }, [user, reconciled]);
+
+  // Pynt for trinn som alt er hentet, men som spillet mangler (B-452), legges inn uten nye fagpoeng
+  const missing = track ? missingTrackCosmetics(g, track).join(",") : "";
+  useEffect(() => {
+    if (track && missing) grantMissingTrackCosmetics(act, track);
+  }, [act, track, missing]);
 
   if (!session) return null;
   const items = claimables(g, daily, weekly, track);

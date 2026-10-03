@@ -41,8 +41,8 @@ import {
   setNickname,
 } from "./leaderboard";
 import { claimAway, fetchDailyStatus } from "./daily";
-import { applyWaitingRewards, claimables, grantAway, grantStreak } from "../ui/claims";
-import { tierFp } from "./seasonTrack";
+import { applyWaitingRewards, claimables, grantAway, grantStreak, missingTrackCosmetics } from "../ui/claims";
+import { tierFp, tierOf, tierPoints } from "./seasonTrack";
 import {
   abandonControlAttempt,
   chestFp,
@@ -2438,12 +2438,30 @@ const main = async () => {
     assert(activePlayersText(13) === "13 spillere aktive siste 24 timer", activePlayersText(13));
   });
 
+  await test("Sesongpasset (B-452): trinn 1 ved 6 poeng, trinn 2 ved 12, så 20 per trinn, som `season_tier_of`", () => {
+    // SQL-testen 3.10: 0→0, 5→0, 6→1, 11→1, 12→2, 31→2, 32→3, 971→49, 972→50, 5000→50
+    const pts = [0, 5, 6, 11, 12, 31, 32, 971, 972, 5000];
+    const tiers = pts.map((p) => tierOf(p));
+    assert(JSON.stringify(tiers) === JSON.stringify([0, 0, 1, 1, 2, 2, 3, 49, 50, 50]), `${tiers}`);
+    assert(tierPoints(1) === 6 && tierPoints(2) === 12 && tierPoints(3) === 32 && tierPoints(50) === 972, "terskler");
+    for (let t = 1; t <= 50; t++)
+      assert(tierOf(tierPoints(t)) === t && tierOf(tierPoints(t) - 1) === t - 1, `trinn ${t}`);
+    // Pynten for trinn 1 mangler hos den som alt har hentet trinn 1: legges inn uten nye fagpoeng
+    const g = newGame(2);
+    const track = { uid: "u-a", seasonId: 1, points: 21, perTier: 20, maxTier: 50, tier: 2, claimed: [1] };
+    const t = { ...track, playedToday: false, rewardToday: false, missionsToday: false };
+    assert(missingTrackCosmetics(g, t).join(",") === "sesongskilt", missingTrackCosmetics(g, t).join(","));
+    g.cosmetics.owned.push("sesongskilt");
+    assert(missingTrackCosmetics(g, t).length === 0, "har den alt");
+  });
+
   await test("Hent alt på Mål: det som venter, i rekkefølge (B-415)", () => {
     const g = newGame(1);
     const daily = { today: "2026-10-02", claimed: true, streak: 3, next: 3, missionsClaimed: false };
     g.daily = { ...g.daily, date: "2026-10-02", claimed: false, missions: [{ id: "kontrakter", base: 0, target: 0 }] };
     const weekly = { chest: { fp: 300, count: 1, best: 2 } } as unknown as Parameters<typeof claimables>[2];
     const track = {
+      uid: "u-a",
       seasonId: 2,
       points: 65,
       perTier: 20,

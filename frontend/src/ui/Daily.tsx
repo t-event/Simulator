@@ -17,6 +17,8 @@ import { nextWorldMidnight, realNow } from "../game/clock";
 import type { DailyMission, GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { claimAway, claimDailyReward, fetchDailyStatus, setDailyStatus } from "../net/daily";
+import { fetchSeasonTrack, onSeasonTrackChange, seasonTrack, setSeasonTrack } from "../net/seasonTrack";
+import { SeasonNextLine } from "./SeasonTrack";
 import { getSession, onSessionChange, userId } from "../net/supabase";
 import { applyWaitingRewards, grantAway, grantStreak } from "./claims";
 import { isReconciled, onCloudStatus } from "../net/sync";
@@ -31,6 +33,20 @@ function useSession() {
 }
 function useReconciled() {
   return useSyncExternalStore(onCloudStatus, isReconciled, isReconciled);
+}
+function useTrack() {
+  return useSyncExternalStore(onSeasonTrackChange, seasonTrack, seasonTrack);
+}
+
+/** Sesongstigen på nytt for kontoen `uid` (B-452) – poengene endrer seg når belønninger hentes */
+function refreshTrack(uid: string | null): void {
+  if (!uid) return;
+  void fetchSeasonTrack().then(
+    (t) => {
+      if (userId() === uid) setSeasonTrack(t);
+    },
+    () => {},
+  );
 }
 
 /** Et opphold teller først etter så lang tid med appen i bakgrunnen (samme som på serveren) */
@@ -61,6 +77,7 @@ export function DailySync({ api, blocked }: { api: GameApi; blocked: boolean }) 
   const session = useSession();
   const reconciled = useReconciled();
   const status = useDailyStatus();
+  const track = useTrack();
   const [away, setAway] = useState<{ seconds: number; reward: Reward } | null>(null);
   const [claimed, setClaimed] = useState<{ streak: number; reward: Reward } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -97,6 +114,7 @@ export function DailySync({ api, blocked }: { api: GameApi; blocked: boolean }) 
         const uid = userId();
         const [st, away] = await Promise.allSettled([fetchDailyStatus(), claimAway()]);
         if (st.status === "fulfilled" && st.value && userId() === uid) setDailyStatus(st.value);
+        refreshTrack(uid);
         const { seconds, fp } = away.status === "fulfilled" ? away.value : { seconds: 0, fp: 0 };
         // Tida borte er hentet på serveren nå, så den legges inn i spillet selv om komponenten er byttet ut
         if (seconds > 0 && uid && apiRef.current.game) {
@@ -163,6 +181,7 @@ export function DailySync({ api, blocked }: { api: GameApi; blocked: boolean }) 
       const s = await fetchDailyStatus().catch(() => null);
       if (userId() !== uid) return;
       setDailyStatus(s ?? (status ? { ...status, claimed: true, streak: r.streak } : null));
+      refreshTrack(uid);
     } catch {
       setClaimed(null);
     } finally {
@@ -227,6 +246,7 @@ export function DailySync({ api, blocked }: { api: GameApi; blocked: boolean }) 
             )}
           </>
         )}
+        <SeasonNextLine track={track} />
         <div className="g-row">
           {rewardOpen && !claimed ? (
             <button className="g-primary" disabled={busy} onClick={() => void claim()}>
@@ -280,6 +300,7 @@ function progressText(g: GameState, m: DailyMission): string {
 export function DailyCard({ g }: { g: GameState }) {
   const session = useSession();
   const status = useDailyStatus();
+  const track = useTrack();
   // Uten konto står Dagens oppdrag i det samlede kontokortet (AccountFeaturesCard, B-191)
   if (!session) return null;
   if (!status || g.daily.date !== status.today) return null;
@@ -326,6 +347,7 @@ export function DailyCard({ g }: { g: GameState }) {
         </p>
       )}
       <p className="g-muted g-small-text">{streakLine}</p>
+      <SeasonNextLine track={track} />
     </Card>
   );
 }

@@ -126,7 +126,16 @@ export const COSMETICS: Cosmetic[] = [
     group: "banner",
     season: 1,
   },
-  // Sesongstigen i sesong 1 (B-173, B-287): bare som belønning, aldri til salgs
+  // Sesongstigen i sesong 1 (B-173, B-287): bare som belønning, aldri til salgs. Trinn 1 fra B-452
+  {
+    id: "sesongskilt",
+    icon: "award",
+    name: "Sesongskilt",
+    description: "Et lite skilt foran verket – du tok det første trinnet på sesongstigen i sesong 1.",
+    fp: 0,
+    seasonTier: 1,
+    season: 1,
+  },
   {
     id: "sesongflagg",
     icon: "flag-triangle-right",
@@ -198,6 +207,15 @@ export const COSMETICS: Cosmetic[] = [
     description: "Et rødt banner på hallveggen – du var med i sesong 2.",
     fp: 200,
     group: "banner",
+    season: 2,
+  },
+  {
+    id: "sesongskilt2",
+    icon: "award",
+    name: "Sesongskilt (sesong 2)",
+    description: "Et lite rødt skilt foran verket – det første trinnet på sesongstigen i sesong 2.",
+    fp: 0,
+    seasonTier: 1,
     season: 2,
   },
   {

@@ -10,8 +10,10 @@ import {
   seasonTrack,
   setSeasonTrack,
   tierFp,
+  tierPoints,
   TRACK_COSMETIC_TIERS,
   unclaimedTiers,
+  type SeasonTrack,
 } from "../net/seasonTrack";
 import { getSession, onSessionChange } from "../net/supabase";
 import { isReconciled, onCloudStatus } from "../net/sync";
@@ -50,7 +52,9 @@ export function SeasonTrackCard() {
   const gift = (t: number) => trackCosmetic(t, track.seasonId);
   const gifts = unclaimed.map(gift).filter((c) => c !== null);
   const top = track.tier >= track.maxTier;
-  const inTier = track.points - track.tier * track.perTier;
+  // Trinn 1 ved 6 poeng, trinn 2 ved 12, så 20 per trinn (B-452)
+  const inTier = track.points - tierPoints(track.tier);
+  const need = tierPoints(track.tier + 1) - tierPoints(track.tier);
   const nextGift = TRACK_COSMETIC_TIERS.find((t) => t > track.tier);
   const nextCosmetic = nextGift ? gift(nextGift) : null;
 
@@ -72,7 +76,7 @@ export function SeasonTrackCard() {
       {/* Hva stigen er, i én linje (B-290): en spiller lurte på det. Mer står i fagboka */}
       <p className="g-muted g-small-text">
         Du klatrer ved å spille litt hver dag: poeng for å spille, hente dagens belønning og ta dagens oppdrag. Hvert
-        trinn gir fagpoeng, og hvert tiende gir pynt som bare finnes denne sesongen.
+        trinn gir fagpoeng, og trinn 1 og hvert tiende gir pynt som bare finnes denne sesongen.
       </p>
       {unclaimed.length > 0 && (
         <div className="g-note g-week-chest">
@@ -90,9 +94,9 @@ export function SeasonTrackCard() {
         <p>Du er på toppen av stigen denne sesongen.</p>
       ) : (
         <>
-          <Bar value={inTier / track.perTier} tone="ok" label={`Trinn ${track.tier + 1}`} />
+          <Bar value={inTier / need} tone="ok" label={`Trinn ${track.tier + 1}`} />
           <p className="g-small-text">
-            {inTier} av {track.perTier} poeng til trinn {track.tier + 1} ({track.points} poeng denne sesongen).
+            {inTier} av {need} poeng til trinn {track.tier + 1} ({track.points} poeng denne sesongen).
           </p>
         </>
       )}
@@ -106,5 +110,32 @@ export function SeasonTrackCard() {
         </p>
       )}
     </Card>
+  );
+}
+
+/**
+ * Sesongstigen i én linje (B-452): premie som venter, eller hvor mange poeng som er igjen til neste trinn og hva det gir.
+ * Står på Dagens oppdrag og i velkomstvinduet, så framgangen synes der spilleren alt er.
+ */
+export function SeasonNextLine({ track }: { track: SeasonTrack | null }) {
+  if (!track) return null;
+  const waiting = unclaimedTiers(track);
+  if (waiting.length)
+    return (
+      <p className="g-small-text g-claim-ready">
+        <Icon name="star" /> Sesongstigen:{" "}
+        {waiting.length === 1 ? `trinn ${waiting[0]} er nådd` : `${waiting.length} trinn er nådd`} – hent premien øverst
+        på Mål.
+      </p>
+    );
+  if (track.tier >= track.maxTier) return null;
+  const next = track.tier + 1;
+  const left = Math.max(0, tierPoints(next) - track.points);
+  const gift = trackCosmetic(next, track.seasonId);
+  return (
+    <p className="g-small-text g-muted">
+      <Icon name="star" /> Sesongstigen: {left} poeng til trinn {next} – {tierFp(next)} fagpoeng
+      {gift ? ` og ${gift.name}` : ""}.
+    </p>
   );
 }
