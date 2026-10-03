@@ -5,6 +5,17 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 370 – 2026-10-03: Ryddingen av meldinger godkjent, holdt igjen av koblingen
+
+**Brukeren ba om:** «Jeg godkjenner det du anbefaler» (ryddingen av meldinger, 108).
+
+**Gjort:** sjekket at tabellene og kolonnene stemmer og at ingen meldinger er eldre enn 30 dager (eldste 2.10). Prøvde å
+legge inn 108 med `apply_migration`: koblingen holdt den igjen (tidsavbrudd etter 60 s), ingenting ble endret –
+`dm_cleanup` og jobben `meldinger-rydding` finnes ikke. Sikkerhetssperren i koblingen er ikke forsøkt omgått.
+
+**Gjenstår:** eieren kjører `supabase/utkast/108_meldinger_rydding.sql` i SQL-editoren i dashbordet (eller bekrefter i
+koblingen) før 1.11.2026; deretter flyttes fila til `supabase/128_meldinger_rydding.sql`.
+
 ## Økt 369 – 2026-10-03: Selskapene synes på kartet (B-448)
 
 **Brukeren ba om:** (skjermbilde) selskapene vises ikke på kartet.
