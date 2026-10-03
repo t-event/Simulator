@@ -78,6 +78,8 @@ export interface Company {
   incomeYesterday: number | null;
   incomeMine: number;
   estimatePerDay: number;
+  /** Anslaget med spillerens egen produksjon (B-443) – inntekten avhenger av eieren. null for eieren selv */
+  estimateMine: number | null;
   tender: Tender | null;
   lastResult: TenderResult | null;
   /** Regionen på verdenskartet (B-333) */
@@ -315,8 +317,21 @@ async function takeoverCall(fn: string, args: Record<string, unknown>): Promise<
 }
 
 /** Legg inn eller øk et bud på et selskap (B-335): betales fra konsernkassa med én gang */
-export function bidTakeover(company: number, amount: number): Promise<TakeoverResult> {
-  return takeoverCall("takeover_bid", { p_company: company, p_amount: Math.round(amount) });
+/**
+ * Legg inn, øk eller by over (B-335, B-442). `seen` er budet appen viste (B-443): har det endret seg på serveren siden,
+ * avvises budet med «endret» i stedet for å bli noe annet enn spilleren bekreftet.
+ */
+export function bidTakeover(
+  company: number,
+  amount: number,
+  seen: { bid: number; mine: boolean },
+): Promise<TakeoverResult> {
+  return takeoverCall("takeover_bid", {
+    p_company: company,
+    p_amount: Math.round(amount),
+    p_seen_bid: Math.round(seen.bid),
+    p_seen_mine: seen.mine,
+  });
 }
 
 /** Forsvar selskapet ditt med kapital fra kassa eller fondet (B-335) */
@@ -410,6 +425,7 @@ export async function fetchWorldStatus(): Promise<WorldStatus> {
       incomeYesterday: numOrNull(c.income_yesterday),
       incomeMine: num(c.income_mine),
       estimatePerDay: num(c.estimate_per_day),
+      estimateMine: numOrNull(c.estimate_mine),
       tender: parseTender(c.tender as Row | null),
       lastResult: parseResult(c.last_result as Row | null),
       region: isRegion(c.region) ? c.region : null,

@@ -120,6 +120,13 @@ interface Scenario {
   ownerExtraDays: number;
   /** Kjøperens egne verk i regionen */
   regionPlants: number;
+  /** Siste anbudspris (dagens penger): verdien er det høyeste av 10 dagers inntekt og den (`company_value`, B-443) */
+  tenderFloor?: number;
+}
+
+/** Selskapets verdi og minstebudet, som `company_value`: 10 dagers inntekt, men aldri under siste anbudspris */
+function valueOf(s: Scenario): number {
+  return Math.max(10 * s.perDay, s.tenderFloor ?? 0);
 }
 
 const I = 19_100_000; // skraplageret 3.10.2026: verdien ca. 191 mill. = 10 dager
@@ -166,7 +173,7 @@ interface Outcome {
 }
 
 function simulate(r: Rules, s: Scenario): Outcome {
-  const v = 10 * s.perDay;
+  const v = valueOf(s);
   const winDays = Math.max(s.daysLeft, TAKEOVER.ownDays);
   const gain = s.perDay * winDays;
   // Kjøperen prøver alle bud fra minstebudet til taket, og eieren svarer på hvert
@@ -200,7 +207,7 @@ function simulate(r: Rules, s: Scenario): Outcome {
 
 const mill = (x: number) => `${Math.round(x / 1e6)}`;
 
-function scenarios(extraDays: number): Scenario[] {
+function scenarios(extraDays: number, tenderFloor = 0): Scenario[] {
   const out: Scenario[] = [];
   for (const control of [20, 45, 62, 80])
     for (const daysLeft of [3, 7, 12])
@@ -212,6 +219,7 @@ function scenarios(extraDays: number): Scenario[] {
         fund: 15_000_000,
         ownerExtraDays: extraDays,
         regionPlants: 1,
+        tenderFloor,
       });
   return out;
 }
@@ -244,6 +252,19 @@ for (const r of RULES) {
     console.log("");
   }
 }
+// Anbudsgulvet (B-443): vant noen siste anbud dyrt, er verdien – og minstebudet – siste anbudspris
+const FLOORS = [250_000_000, 350_000_000];
+const chosen = RULES.find((r) => r.name.startsWith("Regelsett 2"))!;
+for (const floor of FLOORS)
+  for (const extra of [0, 7, 14]) {
+    const rows = scenarios(extra, floor).map((s) => simulate(chosen, s));
+    const buys = rows.filter((o) => o.bid !== null);
+    const avg = buys.reduce((a, o) => a + (o.bid ?? 0), 0) / Math.max(1, buys.length);
+    summary.push(
+      `| ${chosen.name}, anbudsgulv ${mill(floor)} | ${extra} | ${buys.length} av ${rows.length} | ${buys.length ? mill(avg) : "–"} | | |`,
+    );
+  }
+
 console.log("## Sammendrag");
 console.log(
   "| Regel | Eierverdi (dager) | Oppkjøp som lønner seg | Snittpris | Plage: eierens kostnad / kjøperens tap (Kontroll 62) | Forsøk per 30 dager |",

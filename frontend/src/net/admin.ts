@@ -23,8 +23,10 @@ export interface AdminReport {
   canAuthor: boolean;
   /** Uleste svar fra spillere i samtalen om rapporten */
   unread: number;
-  /** Samtalen om rapporten: eierens meldinger og spillernes svar, med hvem det gjelder */
-  thread: (ReportNote & { role: "reporter" | "author"; nick: string })[];
+  /** Samtalen om rapporten: eierens meldinger og spillernes svar, med hvem det gjelder og rapporten de hører til */
+  thread: (ReportNote & { role: "reporter" | "author"; nick: string; report: number })[];
+  /** Alle som har rapportert samme melding (B-443), med rapporten hver samtale hører til */
+  reporters: { report: number; nick: string; can: boolean }[];
 }
 
 export type AdminAction = "hide" | "dismiss" | "ban";
@@ -67,7 +69,16 @@ export async function fetchAdminReports(
           at: ms(t.at),
           role: t.role === "author" ? ("author" as const) : ("reporter" as const),
           nick: str(t.nick) ?? "",
+          report: Number(t.report) || Number(x.id),
         })),
+      // Eldre svar uten lista: bare den som rapporterte sist
+      reporters: Array.isArray(x.reporters)
+        ? (x.reporters as Row[]).map((z) => ({
+            report: Number(z.report),
+            nick: str(z.nick) ?? "",
+            can: z.can === true,
+          }))
+        : [{ report: Number(x.id), nick: str(x.reporter) ?? "", can: x.canReporter === true }],
     })),
     banned: (Array.isArray(r.banned) ? r.banned : []).filter((x): x is string => typeof x === "string"),
   };

@@ -8221,3 +8221,37 @@ Testet (transaksjon rullet tilbake): regelsett 1 avviser overbud; for lavt overb
 overbud flytter runden, gir den forrige hele budet tilbake, forlenger fristen til 12 timer og skriver i Skiftrapporten; en
 økning med lang frist igjen lar fristen stå.
 Konto (B-149): uendret – oppkjøp krever konto.
+
+## B-443 Rettinger etter kontrollen av PR #373–#380 (2026-10-03)
+Status: gjelder. Utfyller B-437 (konsernbanken), B-438/B-439 (rapportsvar) og B-441/B-442 (oppkjøp).
+Bakgrunn: en kontroll av main 77aa9cd fant feil rundt lånet, budbekreftelsen og kontobytte, og én regelsvakhet.
+Beslutning (rettet, server 125 + app):
+1. **Bytte til kompleks** betaler lånet med salget først, som salg og avbestilling. Mangler kassa da penger, lånes det
+   innenfor rammen (som kjøpet ellers). Speilet i `loanFor` (salget som eget argument).
+2. **Renten** regnes for hele ekte dager før lånet endres (`bank_accrue`, også før nedbetaling og nye lån). Et nytt lån
+   får ny rentedato; nedbetalingen av inntekten har sin egen dato (`konsern.repay_at`).
+3. **Egne økninger** i et oppkjøp (regelsett 2) må være minst 5 %, og fristen kan aldri gå mer enn 24 timer forbi den
+   opprinnelige (`extend_max_hours`).
+4. **Et overbud må også gi et sterkere bud** (`takeover_outbid_min`): regnet med budgiverens egen aktivitet og egne verk i
+   regionen. Ellers kunne et høyere beløp fra en svakere budgiver svekke runden – også med vilje, for å hjelpe eieren.
+   Den som ikke kan bli sterkere innenfor taket, får «svak». (Regelvalg tatt her fordi det tetter et misbruk; kan endres
+   av eieren.)
+5. **Budet sendes med det appen viste** (`takeover_bid` med budet og om det var ditt): har noe endret seg, avvises det
+   med «endret». Bekreftelsen i appen forsvinner når konto, bud eller betalingskilde endres, og viser kilden.
+6. **Kontobytte:** samtalene fra admin hentes og vises bare for kontoen som er innlogget (svar som kommer etter et bytte,
+   kastes); svar sendes bare fra kontoen samtalen tilhører.
+7. **Adminpanelet** har én fane per spiller som har rapportert samme melding, og svaret går til den rapporten.
+8. **Kassaboka:** eierens motbud fra kassa ved avbrutt oppkjøp får sin linje.
+9. **«Lønner det seg?»** regnes med kjøperens eget anslag (`company_estimate_for`), fordi inntekten avhenger av eierens
+   produksjon.
+10. **Simulatoren** regner verdien som `company_value`: det høyeste av 10 dagers inntekt og siste anbudspris.
+Funn i simuleringen (ikke endret, til eierens vurdering): er siste anbudspris høyere enn ca. 14 dagers inntekt, lønner ingen
+oppkjøp seg – minstebudet blir dyrere enn det kjøperen kan tjene (anbudsgulv 350 mill.: 0 av 12; 250 mill.: 12 av 12 når
+eierverdien er under 14 dager).
+Testet før det ble lagt inn (transaksjoner som ble rullet tilbake): rente for to dager før nedbetaling; bytte med lån 100
+mill. betalte 12 mill. ned med salget og trakk hele kostnaden fra kassa; nattjobben regner renten først og halvparten av
+inntekten siden forrige nedbetaling; for lavt overbud avvises med riktig minstebud; endret bud gir «endret»; en økning på
+én krone gir «okning»; fristen stopper 24 timer over; avbrutt oppkjøp skriver linjen i kassaboka; adminpanelet og
+anslaget har de nye feltene. Budet som pågår (regelsett 1), er urørt.
+Endringslogg: ja.
+Konto (B-149): uendret.

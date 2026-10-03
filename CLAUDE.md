@@ -455,7 +455,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   etter regelsettet det ble lagt inn under – nye regler får et nytt nummer, aldri en endring av de gamle. Tilbakebetalingen
   står i `takeover_refund` (`bidBack`/`defenseBack`). Overbud (B-442, 124): `takeover_bid` bytter `attacker_id` på raden
   og betaler den forrige tilbake – alt som leser «hvem som byr», må lese raden på nytt, aldri huske den fra budet ble lagt
-  inn; alle bud står i `takeover_bids`. Minste overbud: `takeover_min_raise` (`minOutbid`). Eieren skal alltid
+  inn; alle bud står i `takeover_bids`. Minste overbud: `takeover_min_raise` (`minOutbid`) og at budet blir sterkere
+  (`takeover_outbid_min`, B-443). Appen sender budet den viste (4-argumentsversjonen av `takeover_bid`); 2-arguments-
+  versjonen er den som gjør jobben – endres den, må overlasten fortsatt kalle den. Eieren skal alltid
   kunne miste selskapet (B-337): budet teller inntil 10 × V, motbudet høyst 5 × V + 20 i Kontroll – endres vektene eller Kontrollens
   maks, må det sterkeste forsvaret fortsatt kunne slås (testen «alltid mulig»). Ingen fordel i fornyelsesanbudet. Bryteren
   `config.world.takeover.enabled` – på fra 29.9.2026 (B-339). Test med bryteren på i en DO-blokk som rulles tilbake (flytt
@@ -519,7 +521,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   da den levende funksjonen med `replace()` i en DO-blokk, som 114/115/119.
 - **Konsernbanken** (B-437, 120/121): lån tas bare i `konsern_order` når kallet kom via `konsern_order_loan` (som setter
   `stalverk.bank` for transaksjonen) – aldri en egen «ta opp lån»-funksjon, så lånte penger aldri står fritt i kassa.
-  Nye måter å få penger ut av et verk eller en bestilling på (salg, refusjon) betaler lånet først (`bank_repay_from`).
+  Nye måter å få penger ut av et verk eller en bestilling på (salg, refusjon, bytte) betaler lånet først (`bank_repay_from`).
+  Alt som endrer lånet, regner renten først (`bank_accrue`, B-443); `loan_at` er rentedatoen, `repay_at` datoen for
+  nedbetalingen av inntekten – ikke bland dem.
   Rammen leser kassaboka (`utbytte`/`bidrag`); nye inntektsposter som skal telle, må inn i `bank_limit`. Regelen er
   speilet i `loanFor`/`bankDay` (`game/konsernWorld.ts`) – endres den, endres begge. Lånet trekkes fra `konsern_value`.
 - **Låserekkefølgen i konsernkassa** (B-433): `konsern_order` låser `konsern` før `treasury`. Nye serverfunksjoner som
@@ -584,7 +588,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   lokale mellomrom (hvor lenge appen var skjult, hvor gammel en liste i minnet er).
 - **Supabase-connectoren og `delete`** (B-401): `execute_sql` holder igjen (tidsavbrudd etter 60 s, ingenting når
   databasen) en DO-blokk eller funksjon med flere setninger der én er `delete`. Én setning går. Prøvekjøringer unngår
-  `delete` (bruk f.eks. en midlertidig `world_today` = i morgen); opprydding i funksjoner står i én setning.
+  `delete` (bruk f.eks. en midlertidig `world_today` = i morgen); opprydding i funksjoner står i én setning. Det samme
+  gjelder (B-443) `alter table` på en tabell med data i `execute_sql` (legg kolonnen inn med `apply_migration` først) og en
+  `update … set` uten `where` – også inne i en tekststreng, som en replace()-bit som slutter før `where`. La bitene ta med
+  hele setningen.
 - **Flere selskaper** (B-253, B-256): tonn, gebyr og anslag regnes per type (`company_counted_t`, `company_fee`,
   `company_estimate` i 042/043). Verkstedet teller kroner vedlikehold (`snapshots.maint_kr` → `production_days.gained_maint`),
   ikke tonn, og `company_fee` er da en andel. Et selskap med `companies.active = false` får ikke anbud, inntekt eller plass i `world_status`. Varsler om avgjorte

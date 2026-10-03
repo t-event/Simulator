@@ -207,8 +207,12 @@ export function bankRoom(bank: KonsernBank | undefined | null): number {
  * rammen. 0 når kassa holder eller lånet ikke rekker.
  */
 export function loanFor(balance: number, cost: number, bank: KonsernBank | undefined | null, sale = 0): number {
-  const need = cost - Math.max(0, balance) - sale;
-  return need > 0 && need <= bankRoom(bank) ? need : 0;
+  // Salget i et bytte betaler lånet først (B-443, som `konsern_order`): det som går til lånet, mangler i kjøpet, men
+  // gir like mye mer plass i rammen
+  const repay = Math.min(Math.max(0, bank?.loan ?? 0), Math.max(0, sale));
+  const need = cost - Math.max(0, balance) - sale + repay;
+  const room = bank?.enabled ? Math.max(0, bank.limit - (bank.loan - repay)) : 0;
+  return need > 0 && need <= room ? need : 0;
 }
 
 /**

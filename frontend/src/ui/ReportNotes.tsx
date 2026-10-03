@@ -16,6 +16,7 @@ import { AdminSheet } from "./Admin";
 import { Button, Callout } from "./ds";
 import { Icon } from "./icons";
 import { onMessagesChange, reportUnread, setReportUnread } from "./messagesStore";
+import { onSessionChange, userId } from "../net/supabase";
 
 function when(at: number): string {
   return at
@@ -24,6 +25,13 @@ function when(at: number): string {
 }
 
 export function ReportNotes() {
+  const uid = useSyncExternalStore(onSessionChange, userId, userId);
+  // Samtalene tilhører kontoen som var innlogget da de ble hentet (B-443): byttes kontoen, monteres alt på nytt, så
+  // ingenting fra forrige konto blir stående
+  return <ReportNotesFor key={uid ?? "ingen"} uid={uid} />;
+}
+
+function ReportNotesFor({ uid }: { uid: string | null }) {
   const counts = useSyncExternalStore(onMessagesChange, reportUnread, reportUnread);
   const [threads, setThreads] = useState<ReportThread[] | null>(null);
   const [adminOpen, setAdminOpen] = useState(false);
@@ -31,9 +39,11 @@ export function ReportNotes() {
 
   useEffect(() => {
     let alive = true;
+    if (!uid) return;
     fetchMyReportThreads().then(
       (t) => {
-        if (!alive) return;
+        // Et svar som kommer etter et kontobytte, hører til forrige konto
+        if (!alive || userId() !== uid) return;
         setThreads(t);
         // Det som vises, er lest
         const unread = t.filter((x) => x.unread > 0);
@@ -48,7 +58,7 @@ export function ReportNotes() {
     return () => {
       alive = false;
     };
-  }, [reload, counts.mine]);
+  }, [uid, reload, counts.mine]);
 
   return (
     <>
@@ -65,7 +75,7 @@ export function ReportNotes() {
       {threads && threads.length > 0 && (
         <section className="g-report-notes" aria-label="Fra admin">
           {threads.map((t) => (
-            <ReportNoteThread key={t.reportId} t={t} onSent={() => setReload((n) => n + 1)} />
+            <ReportNoteThread key={t.reportId} t={t} uid={uid} onSent={() => setReload((n) => n + 1)} />
           ))}
         </section>
       )}
@@ -73,14 +83,15 @@ export function ReportNotes() {
   );
 }
 
-function ReportNoteThread({ t, onSent }: { t: ReportThread; onSent: () => void }) {
+function ReportNoteThread({ t, uid, onSent }: { t: ReportThread; uid: string | null; onSent: () => void }) {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const send = async () => {
     const body = text.trim();
-    if (!body || busy) return;
+    // Svaret sendes bare fra kontoen samtalen tilhører
+    if (!body || busy || userId() !== uid) return;
     setBusy(true);
     setError(null);
     const r = await replyToReport(t.reportId, body);

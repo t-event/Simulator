@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
-import { getSession, onSessionChange } from "../net/supabase";
+import { getSession, onSessionChange, userId } from "../net/supabase";
 import { isReconciled, onCloudStatus } from "../net/sync";
 import { applyTreasuryDeposit, DEPOSIT_REFUSAL_TEXT, depositToTreasury } from "../net/treasury";
 import { tenderChanged } from "./openTender";
@@ -202,7 +202,7 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
 
   const doTakeoverBid = (c: Company, amount: number) =>
     run(`selskap-${c.id}`, async () => {
-      const r = await bidTakeover(c.id, amount);
+      const r = await bidTakeover(c.id, amount, { bid: c.takeover?.bid ?? 0, mine: c.takeover?.mineAttack ?? false });
       if (!r.ok) return TAKEOVER_REASON[r.reason] ?? TAKEOVER_REASON.nett;
       tenderChanged();
       const t = c.takeover;
@@ -776,10 +776,12 @@ function PayoffNote({
   decidedAt: number;
   rules: TakeoverRules;
 }) {
-  if (bid <= 0 || c.estimatePerDay <= 0) return null;
+  // Inntekten avhenger av eierens produksjon (B-443): kjøperen regnes med sin egen
+  const perDay = c.estimateMine ?? c.estimatePerDay;
+  if (bid <= 0 || perDay <= 0) return null;
   const p = takeoverPayoff({
     bid,
-    perDay: c.estimatePerDay,
+    perDay,
     decidedAt,
     concessionUntil: c.concessionUntil ? Date.parse(c.concessionUntil) : null,
     renewalOpen: !!c.tender || !!c.nextOwner,
@@ -789,7 +791,8 @@ function PayoffNote({
   return (
     <p className={`g-small-text g-payoff ${p.net >= 0 ? "is-ok" : "is-bad"}`}>
       <strong>Lønner det seg?</strong> Med {fmtKr(bid)}: står budet sterkest, eier du selskapet i ca. {days}{" "}
-      {days === 1 ? "dag" : "dager"} og tjener ca. {fmtKr(p.income)} ({fmtKr(c.estimatePerDay)} per dag) –{" "}
+      {days === 1 ? "dag" : "dager"} og tjener ca. {fmtKr(p.income)} ({fmtKr(perDay)} per dag
+      {c.estimateMine !== null ? " med din produksjon" : ""}) –{" "}
       {p.net >= 0 ? `${fmtKr(p.net)} mer enn budet.` : `${fmtKr(-p.net)} mindre enn budet.`}
       {p.net < 0 && " Vil du tjene på det, må du også vinne anbudet om neste periode."} Holder ikke budet, får du{" "}
       {fmtKr(p.back)} tilbake.
@@ -797,10 +800,14 @@ function PayoffNote({
   );
 }
 
-/** Et bud eller motbud som venter på bekreftelse (B-442): hva det koster, og hva som kommer tilbake */
-type PendingBid =
+/**
+ * Et bud eller motbud som venter på bekreftelse (B-442): hva det koster, og hva som kommer tilbake. `snap` er det
+ * bekreftelsen bygger på (konto, budet som står, betalingskilden, B-443) – endres noe av det, forsvinner bekreftelsen
+ */
+type PendingBid = { snap: string } & (
   | { kind: "bud"; amount: number; add: number }
-  | { kind: "motbud"; amount: number; from: "kasse" | "fond" };
+  | { kind: "motbud"; amount: number; from: "kasse" | "fond" }
+);
 
 function TakeoverSection({
   c,
@@ -823,11 +830,15 @@ function TakeoverSection({
   const t = c.takeover;
   const w = c.takeoverWindow;
   const last = c.takeoverLast;
+  const uid = useSyncExternalStore(onSessionChange, userId, userId);
+  const snap = `${uid}|${t?.id ?? 0}|${t?.bid ?? 0}|${t?.mineAttack ? 1 : 0}|${from}`;
+  // En bekreftelse som bygger på noe som har endret seg, vises ikke (og kan derfor ikke sendes)
+  const live = pending && pending.snap === snap ? pending : null;
   const rules: TakeoverRules = t?.rules ?? w?.rules ?? 2;
   // Hvem som står sterkest, uten poeng (B-371)
   const lead = (a: number, d: number) => (a > d ? "oppkjøpsbudet står sterkest" : "eieren står sterkest");
   // Et bud er hele budet; `add` er det som trekkes fra kassa nå (ved økning bare forskjellen)
-  const askBid = (total: number, add: number) => total > 0 && setPending({ kind: "bud", amount: total, add });
+  const askBid = (total: number, add: number) => total > 0 && setPending({ snap, kind: "bud", amount: total, add });
   const amountRow = (label: string, onGo: () => void, placeholder: number) => (
     <div className="g-row g-amount-row">
       <label className="g-amount">
@@ -850,24 +861,28 @@ function TakeoverSection({
       </button>
     </div>
   );
-  const confirmBox = pending && (
+  const confirmBox = live && (
     <div className="g-confirm" role="alertdialog" aria-label="Bekreft">
       <p className="g-small-text">
-        {pending.kind === "bud" ? (
+        {live.kind === "bud" ? (
           <>
-            Du byr <strong>{fmtKr(pending.amount)}</strong>
-            {pending.add < pending.amount ? ` (${fmtKr(pending.add)} mer fra konsernkassa)` : " fra konsernkassa"}. Står
-            budet sterkest når tida er ute, kjøper du selskapet for det. Holder det ikke, får du{" "}
-            {fmtKr(pending.amount * bidBack(rules))} tilbake og mister{" "}
-            <strong>{fmtKr(pending.amount * (1 - bidBack(rules)))}</strong>.
+            Du byr <strong>{fmtKr(live.amount)}</strong>
+            {live.add < live.amount ? ` (${fmtKr(live.add)} mer fra konsernkassa)` : " fra konsernkassa"}. Står budet
+            sterkest når tida er ute, kjøper du selskapet for det. Holder det ikke, får du{" "}
+            {fmtKr(live.amount * bidBack(rules))} tilbake og mister{" "}
+            <strong>{fmtKr(live.amount * (1 - bidBack(rules)))}</strong>.
             {rules === 2 && " Byr noen over deg, får du hele budet tilbake."}
           </>
         ) : rules === 1 ? (
-          <>Du legger {fmtKr(pending.amount)} inn i motbudet. Du får 95 % tilbake når oppkjøpet er avgjort.</>
+          <>
+            Du legger {fmtKr(live.amount)} fra {live.from === "fond" ? "beredskapsfondet" : "konsernkassa"} inn i
+            motbudet. Du får 95 % tilbake når oppkjøpet er avgjort.
+          </>
         ) : (
           <>
-            Du legger <strong>{fmtKr(pending.amount)}</strong> inn i motbudet. Holder det, er pengene brukt opp. Blir
-            selskapet kjøpt likevel, får du {fmtKr(pending.amount * defenseBack(2, true))} tilbake.
+            Du legger <strong>{fmtKr(live.amount)}</strong> fra{" "}
+            {live.from === "fond" ? "beredskapsfondet" : "konsernkassa"} inn i motbudet. Holder det, er pengene brukt
+            opp. Blir selskapet kjøpt likevel, får du {fmtKr(live.amount * defenseBack(2, true))} tilbake.
           </>
         )}
       </p>
@@ -876,13 +891,15 @@ function TakeoverSection({
           variant="primary"
           disabled={busy}
           onClick={() => {
-            if (pending.kind === "bud") onBid(pending.amount);
-            else onDefend(pending.amount, pending.from);
+            // Konto, bud og kilde er de samme som da bekreftelsen ble vist (`live`), ellers står den ikke her
+            if (userId() !== uid) return;
+            if (live.kind === "bud") onBid(live.amount);
+            else onDefend(live.amount, live.from);
             setPending(null);
             setAmount("");
           }}
         >
-          {pending.kind === "bud" ? "Bekreft bud" : "Bekreft motbud"}
+          {live.kind === "bud" ? "Bekreft bud" : "Bekreft motbud"}
         </Button>
         <Button onClick={() => setPending(null)}>Avbryt</Button>
       </div>
@@ -909,7 +926,7 @@ function TakeoverSection({
             <>
               {amountRow(
                 "Legg inn motbud",
-                () => setPending({ kind: "motbud", amount: millions(amount), from }),
+                () => setPending({ snap, kind: "motbud", amount: millions(amount), from }),
                 c.control?.value ?? 1e8,
               )}
               {fund > 0 && (
@@ -950,8 +967,9 @@ function TakeoverSection({
             <details className="g-details">
               <summary>By over</summary>
               <p className="g-small-text">
-                Du kan by over {t.attacker}: minst {fmtKr(t.compete.minBid)}. Da tar budet ditt over runden, og{" "}
-                {t.attacker} får pengene sine tilbake. Det sterkeste budet når tida er ute, måles mot eierens motbud.
+                Du kan by over {t.attacker}: minst {fmtKr(t.compete.minBid)}. Overbudet må også gi et sterkere bud enn
+                det som står – hvor sterkt det blir, avhenger av hvor aktiv du er og verkene dine i regionen. Da tar
+                budet ditt over runden, og {t.attacker} får pengene sine tilbake.
               </p>
               {amountRow("By over", () => askBid(millions(amount), millions(amount)), t.compete.minBid)}
               {confirmBox}

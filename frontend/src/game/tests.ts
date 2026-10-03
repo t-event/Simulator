@@ -4558,6 +4558,13 @@ test("Konsernbanken (B-437): lånet er det kassa mangler, innenfor rammen, og é
   assert(loanFor(0, 200_000_000, bank) === 0, "over rammen: ingen lån");
   assert(loanFor(0, 4_500_000, { ...bank, enabled: false }) === 0, "banken av");
   assert(loanFor(0, 4_500_000, { ...bank, loan: 183_000_000 }) === 0, "rammen nesten brukt opp");
+  // Bytte til kompleks (B-443): salget betaler lånet først, så kjøpet låner det tilbake innenfor rammen
+  const withLoan = { ...bank, loan: 100_000_000, limit: 185_000_000 };
+  assert(loanFor(500_000_000, 51_000_000, withLoan, 12_000_000) === 0, "kassa holder også etter nedbetalingen");
+  assert(
+    loanFor(30_000_000, 51_000_000, withLoan, 12_000_000) === 21_000_000,
+    `bytte ${loanFor(30_000_000, 51_000_000, withLoan, 12_000_000)}`,
+  );
   assert(bankRoom({ ...bank, loan: 200e6 }) === 0, "aldri negativ ramme");
   // Én dag (som bank_service): rente 1 % og nedbetaling av halve inntekten, men aldri mer enn lånet eller kassa
   const d = bankDay(3_792_940, 1, 60_000_000, 50_707_060, bank);
