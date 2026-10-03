@@ -52,7 +52,9 @@ til «Avgjort» nederst).
   pynt i `COSMETICS` med `season: 3` – både i butikken og på stigen (trinn 10–50). Ellers har sesong 3 ingen egen pynt.
 
 - **Etterbetaling av utbyttet 30.9 og 1.10 (B-423, regnet på nytt i B-425, gjennomgått på nytt 3.10, B-445):** 2 549 252 kr
-  til elleve spillere – venter på eierens ja til beløpet og tillatelse til utbetalingen. Anslaget var 2 549 257 kr til elleve
+  til elleve spillere – **eieren sa ja til beløpet 3.10.2026.** Utbetalingen er ikke gjort: sikkerhetssperren i
+  arbeidsmiljøet stopper at Claude flytter ekte penger. Venter på at eieren gir tillatelse (regel i innstillingene) eller
+  velger en annen måte. Anslaget var 2 549 257 kr til elleve
   spillere for verk som ble ferdige mens de var borte (utgave 1, 1 875 716 kr, var feil). Tabellen og usikkerheten står i
   `docs/RAPPORT-2026-10-02.md`, avsnitt 7. Ikke betalt: beregningen gjennomgås først, så avgjør eieren beløpet i en egen
   beslutning.
