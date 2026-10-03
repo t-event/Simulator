@@ -38,6 +38,7 @@ import {
   TAKEOVER_V2,
   bidBack,
   defenseBack,
+  minOutbid,
   investPart,
   policyLockedUntil,
   policySplit,
@@ -4515,6 +4516,13 @@ test("Oppkjøp regelsett 2 (B-441): samme styrke for samme beløp, Kontroll høy
   // Tilbake: den som taper, får 75 %; vinneren betaler
   assert(bidBack(2) === 0.75 && bidBack(1) === 0.9, "kjøperen tilbake");
   assert(defenseBack(2, false) === 0 && defenseBack(2, true) === 0.75 && defenseBack(1, false) === 0.95, "eieren");
+});
+
+test("Overbud (B-442): minst 5 % og minst 1 mill. over budet som står, som `takeover_min_raise`", () => {
+  // SQL-testen 3.10: 400 mill. gir 420 mill., 430 mill. gir 451,5 mill.
+  assert(minOutbid(400e6) === 420e6, `${minOutbid(400e6)}`);
+  assert(minOutbid(430e6) === 451.5e6, `${minOutbid(430e6)}`);
+  assert(minOutbid(10e6) === 11e6, "minst 1 mill.");
 });
 
 test("Arbeidsmiljøkortene (B-436): riktig håndtering gir bedre trivsel, å se bort gir dårligere, fagboka låses opp", () => {

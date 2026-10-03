@@ -180,7 +180,18 @@ export const TAKEOVER_V2 = {
   loseFee: 0.25,
   /** Dager uten nye bud etter et forsøk som ikke lyktes (`cooldown_days`) */
   pauseDays: 14,
+  /** Et overbud fra en annen spiller må være minst 5 % og minst 1 mill. over budet som står (B-442, `takeover_min_raise`) */
+  raiseStep: 0.05,
+  raiseMin: 1_000_000,
+  /** Kommer et bud de siste 12 timene, flyttes fristen til 12 timer etter budet (B-442, `extend_hours`) */
+  extendHours: 12,
 };
+
+/** Minste overbud på et bud som står (B-442, speiler `takeover_min_raise`) */
+export function minOutbid(bid: number): number {
+  const t = TAKEOVER_V2;
+  return Math.round(bid + Math.max(t.raiseMin, Math.ceil(bid * t.raiseStep)));
+}
 
 /**
  * Forsvaret. Regelsett 1: Kontroll + 40 × √((motbud + fond, fondet høyst V) / V), høyst 3 × V. Regelsett 2: Kontroll / 5
@@ -332,6 +343,7 @@ export const TAKEOVER_REASON: Record<string, string> = {
   sent: "Konsesjonen går snart ut – vent på det nye anbudet.",
   pause: "Et oppkjøpsbud på selskapet holdt ikke nylig – 14 dagers pause før neste.",
   belop: "Budet må være minst verdien av selskapet.",
+  overbud: "Et overbud må være minst 5 % over budet som står.",
   kasse: "Det er ikke nok i konsernkassa.",
   eier: "Det går ikke med dette selskapet.",
   av: "Oppkjøp er ikke slått på ennå.",

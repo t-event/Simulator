@@ -8198,3 +8198,26 @@ eieren 75 % av motbudet tilbake ved salg; et motbud som holder, er brukt opp, og
 Valgt bort: større minstebud (1,5 × V stopper alle oppkjøp), tak 3 × V på budet (endrer ingenting i simuleringen, men
 svekker B-337), Kontroll ≤ 30 (eieren beholder for ofte).
 Konto (B-149): uendret – oppkjøp krever konto som før.
+
+## B-442 Oppkjøp: flere kan by i samme runde, fristen forlenges ved sene bud, bekreftelse før bud (2026-10-03)
+Status: gjelder. Utfyller B-441 (pausen står).
+Bakgrunn: eieren spurte om 14 dagers pause gir mening når et bud fra en som «bare trykker rundt» stenger ute dem som har
+spart til et oppkjøp – først i 72 timer (ingen andre kunne by mens et bud sto åpent), så i 14 dager.
+Beslutning (eierens svar: «Gå for din anbefaling»):
+- **Overbud:** mens et oppkjøpsbud etter regelsett 2 står åpent, kan en annen spiller by minst 5 % (og minst 1 mill.) over
+  (`takeover_min_raise`). Budet tar over runden; den som ble overbudt, får hele budet tilbake (hen tapte ikke mot eieren).
+  Eierens motbud står. Samme sperrer som et nytt bud: ikke eieren, ikke sperret, ett åpent bud om gangen. Hendelsen står
+  i Skiftrapporten.
+- **Fristen:** et bud (nytt, økt eller overbud) de siste 12 timene flytter fristen til 12 timer etter budet, så eieren
+  rekker å svare.
+- **Pausen på 14 dager** kommer først etter en runde der alle kunne by – den verner fortsatt eieren mot å måtte brenne
+  motbud igjen og igjen.
+- **Bekreftelse:** appen viser hva et bud eller motbud koster og hva som kommer tilbake, før det sendes.
+- Bud fra før B-441 (regelsett 1) avgjøres som de ble lagt inn: ingen overbud, ingen forlenget frist.
+- `takeover_bids` lagrer alle bud i runden (visningen «du ble overbudt», ettersyn).
+Valgt bort: pause bare for den som bød (flere kan bytte på å presse samme eier), pause etter hva eieren brukte (vanskelig å
+forstå), bare kortere pause (løser ikke problemet).
+Testet (transaksjon rullet tilbake): regelsett 1 avviser overbud; for lavt overbud avvises med riktig minstebud; et
+overbud flytter runden, gir den forrige hele budet tilbake, forlenger fristen til 12 timer og skriver i Skiftrapporten; en
+økning med lang frist igjen lar fristen stå.
+Konto (B-149): uendret – oppkjøp krever konto.

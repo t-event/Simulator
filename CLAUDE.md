@@ -453,7 +453,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `takeover_attack_of`/`takeover_defense_of` (regelsett 1) og `takeover_defense_of2` (regelsett 2, B-441) og speiles i
   `game/control.ts` (`TAKEOVER`/`TAKEOVER_V2`, faste tall i testen). Hver rad har `takeovers.rules`: et bud avgjøres alltid
   etter regelsettet det ble lagt inn under – nye regler får et nytt nummer, aldri en endring av de gamle. Tilbakebetalingen
-  står i `takeover_refund` (`bidBack`/`defenseBack`). Eieren skal alltid
+  står i `takeover_refund` (`bidBack`/`defenseBack`). Overbud (B-442, 124): `takeover_bid` bytter `attacker_id` på raden
+  og betaler den forrige tilbake – alt som leser «hvem som byr», må lese raden på nytt, aldri huske den fra budet ble lagt
+  inn; alle bud står i `takeover_bids`. Minste overbud: `takeover_min_raise` (`minOutbid`). Eieren skal alltid
   kunne miste selskapet (B-337): budet teller inntil 10 × V, motbudet høyst 5 × V + 20 i Kontroll – endres vektene eller Kontrollens
   maks, må det sterkeste forsvaret fortsatt kunne slås (testen «alltid mulig»). Ingen fordel i fornyelsesanbudet. Bryteren
   `config.world.takeover.enabled` – på fra 29.9.2026 (B-339). Test med bryteren på i en DO-blokk som rulles tilbake (flytt
