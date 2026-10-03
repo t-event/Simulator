@@ -78,10 +78,46 @@ function fmtWhen(iso: string): string {
   });
 }
 
-/** Beløp i millioner fra et felt, til kroner */
+/** Beløp i millioner fra et felt, til kroner. Godtar komma og punktum og mellomrom («0,1», «1 000») */
 function millions(v: string): number {
-  const n = Number(v.replace(",", "."));
+  const n = Number(v.replace(/\s/g, "").replace(",", "."));
   return Number.isFinite(n) && n > 0 ? Math.round(n * 1_000_000) : 0;
+}
+
+/** Kroner som millioner til et felt eller et eksempel («0,1», «324») – aldri rundet til 0 */
+function millText(kr: number): string {
+  return (kr / 1e6).toLocaleString("nb-NO", { maximumFractionDigits: 2, useGrouping: false });
+}
+
+/**
+ * Felt for et beløp i millioner. Vanlig tekstfelt med desimaltastatur: på iPhone gir tastaturet komma, og et tallfelt
+ * (`type="number"`) leser ikke «0,1» – da kunne ingen by under 1 mill.
+ */
+function MillInput({
+  value,
+  onChange,
+  placeholder,
+  label,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: number;
+  label: string;
+}) {
+  return (
+    <label className="g-amount">
+      <input
+        type="text"
+        inputMode="decimal"
+        autoComplete="off"
+        placeholder={millText(placeholder)}
+        value={value}
+        onChange={(e) => onChange(e.target.value.replace(/[^\d\s,.]/g, ""))}
+        aria-label={label}
+      />
+      <span>mill. kr</span>
+    </label>
+  );
 }
 
 /** Hva selskapet tjener på, per type. Nye typer får sin linje her når serveren slår dem på */
@@ -245,6 +281,18 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
         : { tone: "neutral", text: c.owner ? "Eid av en annen" : "Ingen eier" };
     // Et bud kan ikke være større enn det som står i konsernkassa (pluss budet du alt har lagt inn)
     const canBid = t ? Math.min(t.maxBid, tr.balance + (t.myBid ?? 0)) : 0;
+    // Budet i kroner og hva som er galt med det, før det sendes (feltet er i millioner: 0,1 = 100 000 kr)
+    const bidKr = millions(bid);
+    const bidProblem =
+      !t || bidKr <= 0
+        ? null
+        : bidKr < t.minBid
+          ? `Minste bud er ${fmtKr(t.minBid)} – skriv ${millText(t.minBid)}.`
+          : bidKr > t.maxBid
+            ? `Høyeste bud er ${fmtKr(t.maxBid)} – skriv høyst ${millText(t.maxBid)}.`
+            : bidKr > canBid
+              ? `Du kan by opptil ${fmtKr(canBid)}.`
+              : null;
     return (
       <Card
         key={c.id}
@@ -319,18 +367,12 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
         {c.mine && c.control && (
           <div className="g-invest">
             <div className="g-row g-amount-row">
-              <label className="g-amount">
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  min={1}
-                  placeholder="100"
-                  value={invest[c.id] ?? ""}
-                  onChange={(e) => setInvest((b) => ({ ...b, [c.id]: e.target.value }))}
-                  aria-label="Investering i millioner kroner"
-                />
-                <span>mill. kr</span>
-              </label>
+              <MillInput
+                value={invest[c.id] ?? ""}
+                onChange={(v) => setInvest((b) => ({ ...b, [c.id]: v }))}
+                placeholder={100e6}
+                label="Investering i millioner kroner"
+              />
               <button
                 className="g-primary"
                 disabled={busy || millions(invest[c.id] ?? "") <= 0}
@@ -389,27 +431,28 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
               </div>
             )}
             <div className="g-row g-amount-row">
-              <label className="g-amount">
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  min={t.minBid / 1e6}
-                  max={canBid / 1e6}
-                  placeholder={t.myBid ? String(Math.round(t.myBid / 1e6)) : String(Math.round(t.minBid / 1e6))}
-                  value={bid}
-                  onChange={(e) => setBids((b) => ({ ...b, [c.id]: e.target.value }))}
-                  aria-label="Bud i millioner kroner"
-                />
-                <span>mill. kr</span>
-              </label>
+              <MillInput
+                value={bid}
+                onChange={(v) => setBids((b) => ({ ...b, [c.id]: v }))}
+                placeholder={t.myBid || t.minBid}
+                label="Bud i millioner kroner"
+              />
               <button
                 className="g-primary"
-                disabled={busy || millions(bid) <= 0}
-                onClick={() => void doBid(c, millions(bid))}
+                disabled={busy || bidKr <= 0 || bidProblem !== null}
+                onClick={() => void doBid(c, bidKr)}
               >
                 {t.myBid ? "Endre bud" : "Legg inn bud"}
               </button>
             </div>
+            <p
+              className={bidProblem ? "g-small-text g-bid-preview is-bad" : "g-small-text g-bid-preview"}
+              role="status"
+            >
+              {bidKr <= 0
+                ? `Skriv beløpet i millioner: ${millText(t.minBid)} = ${fmtKr(t.minBid)}.`
+                : (bidProblem ?? `Du byr ${fmtKr(bidKr)}.`)}
+            </p>
             <p className="g-muted g-small-text">
               Fra {fmtKr(t.minBid)} til {fmtKr(t.maxBid)}. Budet betales fra konsernkassa ({fmtKr(tr.balance)} nå
               {t.myBid ? ", pluss budet ditt" : ""}), så du kan by opptil {fmtKr(canBid)}.
@@ -505,18 +548,12 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
                 lik for alle){tr.freedAt && tr.left < tr.limit ? `. Mer blir ledig ${fmtWhen(tr.freedAt)}` : ""}.
               </p>
               <div className="g-row g-amount-row">
-                <label className="g-amount">
-                  <input
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    placeholder={String(Math.floor(maxDeposit / 1e6))}
-                    value={deposit}
-                    onChange={(e) => setDeposit(e.target.value)}
-                    aria-label="Beløp i millioner kroner"
-                  />
-                  <span>mill. kr</span>
-                </label>
+                <MillInput
+                  value={deposit}
+                  onChange={setDeposit}
+                  placeholder={Math.floor(maxDeposit / 1e6) * 1e6}
+                  label="Beløp i millioner kroner"
+                />
                 <button
                   className="g-primary"
                   disabled={busy || tr.left <= 0 || millions(deposit) <= 0}
@@ -841,21 +878,15 @@ function TakeoverSection({
   const askBid = (total: number, add: number) => total > 0 && setPending({ snap, kind: "bud", amount: total, add });
   const amountRow = (label: string, onGo: () => void, placeholder: number) => (
     <div className="g-row g-amount-row">
-      <label className="g-amount">
-        <input
-          type="number"
-          inputMode="decimal"
-          min={1}
-          placeholder={String(Math.ceil(placeholder / 1e6))}
-          value={amount}
-          onChange={(e) => {
-            setAmount(e.target.value);
-            setPending(null);
-          }}
-          aria-label="Beløp i millioner kroner"
-        />
-        <span>mill. kr</span>
-      </label>
+      <MillInput
+        value={amount}
+        onChange={(v) => {
+          setAmount(v);
+          setPending(null);
+        }}
+        placeholder={Math.ceil(placeholder / 1e6) * 1e6}
+        label="Beløp i millioner kroner"
+      />
       <button className="g-primary" disabled={busy || millions(amount) <= 0} onClick={onGo}>
         {label}
       </button>

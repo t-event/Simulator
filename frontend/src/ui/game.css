@@ -3998,6 +3998,17 @@ button {
   min-height: 44px;
 }
 
+/* Hva budet blir i kroner, eller hva som er galt med det, mens man skriver */
+.g-bid-preview {
+  margin: 2px 0 6px;
+  color: var(--text);
+}
+
+.g-bid-preview.is-bad {
+  color: var(--heat-fg);
+  font-weight: 600;
+}
+
 /* Designsystemet (B-191): overskrifter og store nøkkeltall får visningsskriften med tabulære tall. Den er smalere enn
    brødteksten, så den står ett trinn større. */
 .g-card h2,

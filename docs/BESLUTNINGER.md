@@ -8305,3 +8305,19 @@ INFO-funnet (RLS uten regler).
 Grunnlaget `basis_112_*` står til det ikke trengs lenger (ingen sletting uten eierens beslutning).
 Endringslogg: ja.
 Konto (B-149): uendret (konsernkassa krever konto).
+
+## B-447 Beløpsfeltene i konsernet godtar komma og bud under 1 mill. (2026-10-03)
+Status: gjelder.
+Bakgrunn: eieren (skjermbilde fra iPhone 3.10): «Det er ikke mulig å betale for eks 100 tusen» i anbudet på
+slagghåndteringen (minstebud 100 000 kr). Feltet er i millioner, eksempelet viste «0» (0,1 rundet ned), og tallfeltet
+(`type="number"`) leser ikke «0,1» med komma fra tastaturet på iPhone – knappen ble aldri aktiv. Skrev man 100000,
+ble det 100 000 mill. kr og avvist som «utenfor».
+Beslutning:
+- Alle beløpsfelt på Industrien (anbud, oppkjøp og motbud, investering, flytting) er vanlige tekstfelt med
+  desimaltastatur (`MillInput` i `ui/Companies.tsx`). De godtar komma, punktum og mellomrom; eksempelet viser
+  desimaler («0,1»), aldri 0.
+- Under anbudsfeltet står hele tiden hva budet blir i kroner («Du byr 100 000 kr»), eller hva som er galt (under
+  minstebudet, over høyeste bud, mer enn kassa) med hva man skal skrive. Knappen er bare aktiv når budet kan sendes.
+- Feltet er fortsatt i millioner; serveren er uendret.
+Endringslogg: ja.
+Konto (B-149): uendret.
