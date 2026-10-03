@@ -615,6 +615,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Salgsdirektøren regner med det verket faktisk lager** (`directorDailyT`, siste uke), ikke kapasiteten. Står ovner
   (én ovn om gangen, støping, folk), sier han nei til det Salg viser grønt – loggen forklarer det (B-312). Ikke løsne
   regelen: den holder omdømmet på 96–100 hos alle med direktør.
+- **Hendelseskort om forhold mellom ansatte** (B-444): trakassering, diskriminering og varsling er et sårt tema for eieren –
+  ingen slike kort, kapitler eller popups uten at eieren ber om det.
 - **Skjulte prestasjoner** (B-296): `hidden` på en serie gjør at den bare vises og telles for dem som har den. Bruk
   `visibleAchievements`/`visibleFamilies` i grensesnittet, ikke `ACHIEVEMENTS` direkte.
 - **Tilbakespoling** (B-261): et lavere dagtall flytter tidslinja etter dagen til `snapshots_rewound`; den legges tilbake
