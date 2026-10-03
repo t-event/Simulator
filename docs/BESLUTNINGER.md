@@ -8321,3 +8321,13 @@ Beslutning:
 - Feltet er fortsatt i millioner; serveren er uendret.
 Endringslogg: ja.
 Konto (B-149): uendret.
+
+## B-448 Selskapene står først på verdenskartet (2026-10-03)
+Status: gjelder.
+Bakgrunn: eieren (skjermbilde 3.10): «Selskapene vises ikke på kartet». Kartet viser høyst ti merker per region, og
+selskapene ble lagt til etter alle verkene. Med 14–27 verk i hver region havnet Skraplageret og Slagghåndteringen i «+N».
+Serveren (`world_map`) sendte dem riktig.
+Beslutning: selskapene tegnes først i rutenettet (deretter dine verk, så andres), så de alltid synes uansett hvor mange
+verk regionen har. Filtrene er som før.
+Endringslogg: ja.
+Konto (B-149): uendret.
