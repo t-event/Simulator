@@ -8333,7 +8333,7 @@ Endringslogg: ja.
 Konto (B-149): uendret.
 
 ## B-449 Anbudsgulvet i selskapsverdien – analyse, venter på eierens valg (2026-10-03)
-Status: analyse; ingen regel er endret.
+Status: analyse; ingen regel er endret. Tallene for store forhold og beskrivelsen av F er rettet i B-450.
 Bakgrunn: eieren 3.10: anbudsgulvet bør være neste analyseoppgave, men et tak på 14 dagers inntekt løser bare deler av
 problemet (20 mill./dag, 14 dagers eierskap: 400 mill. gir −120, tak 14 d gir 0, tak 12 d gir +40, 10 d gir +80).
 Sammenlign i simulatoren med kjøperens eget anslag, og husk at verdien også styrer Kontroll og budstyrke. At eieren alltid
@@ -8361,5 +8361,38 @@ skalaen (V) står som i dag. Da lønner oppkjøp seg bare for en kjøper som tje
 og et dyrt anbud gir ikke lenger vern for hele perioden. Om gamle anbudspriser også skal dempe Kontroll og
 inntektsøkning, tas for seg senere med ekte data. Bygging (når eieren har valgt): `takeover_window`/`takeover_bid` (nytt
 `takeover_min_bid`), speilet i `control.ts`, simulatoren og testen «alltid mulig»; ingen lagret verdi endres.
+Endringslogg: nei
+Konto (B-149): uendret.
+
+## B-450 Oppkjøpssimulatoren rettet: Kontrollen holder av seg selv; store anbud mot inntekt prøvd (2026-10-03)
+Status: analyse; ingen regel er endret. Retter tallene og beskrivelsen i B-449.
+Bakgrunn: eieren 3.10 fant to ting: (1) F beholder verdien som skala for budstyrken, så et dyrt gammelt anbud kan
+fortsatt beskytte eieren – med 20 mill./dag, anbud 6 mrd., Kontroll 80 og ett verk i regionen er minstebudet 240 mill.,
+men kjøperen må by over 303,75 mill. bare for å slå Kontrollen, mens hen kan tjene 280 mill. (2) Simulatoren lot
+kjøperen vinne når Kontrollen alene holdt, hvis eierens tap ved salg var null eller mindre – på serveren virker Kontrollen
+automatisk (`resolve_takeovers`: budet vinner bare når det er sterkere enn motbudet med Kontrollen).
+Rettet: `takeoverSim.ts` regner et bud som tapt når Kontrollen alene holder (motbud 0), i både hovedsimuleringen og
+`--gulv`. Det endrer én linje i sammendraget for regelsett 1 (eierverdi 0: 8 av 12 oppkjøp lønner seg, ikke 10; Kontroll
+62–80 med 3–7 dager igjen). Regelsett 2 og tabellen med anbud 250/300/400 mill. i B-449 er uendret.
+Nytt i `--gulv`: anbud på 12,5–300 dagers inntekt (20 mill./dag, kjøperen tjener like mye som eieren):
+| Anbud (dager) | A: i dag | C: høyst 12 dager | F: minstebud høyst 12 dager | F: bud for å slå Kontroll 80 alene |
+|---:|---|---|---|---:|
+| 12,5 | 24 av 36 | 24 av 36 | 24 av 36 | 240 |
+| 15–20 | 0 av 36 | 24 av 36 | 24 av 36 | 240 |
+| 30 | 0 | 24 | 21 | 240 |
+| 50 | 0 | 24 | 18 | 240 |
+| 100 | 0 | 24 | 15 | 240 |
+| 300 | 0 | 24 | 11 (Kontrollen alene holder i 9) | 304 (over 280) |
+Funn: F fjerner ikke all beskyttelse fra et gammelt anbud. Fordi budstyrken fortsatt regnes mot det gamle anbudet, gir
+et svært dyrt anbud eieren et forsprang som vokser med forholdet. C fjerner det, men endrer da også Kontroll,
+inntektsøkning og hvor mye bud og motbud kan telle. I praksis er forholdet lite: høyeste bud i et anbud er 14 dagers
+anslått inntekt når anbudet åpner (`open_tender`), så forholdet blir bare stort hvis inntekten faller etterpå (eller for
+anbud fra før B-311, som regnes om med `bid_in_new_money`). Halveres inntekten, er forholdet ca. 28 – F gir da omtrent
+21 av 36 mot 24 for C.
+Presis beskrivelse av F: «begrenset minstebud, øvrige regler beholdes» – minstebudet er det høyeste av 10 dagers inntekt og
+siste anbudspris, men aldri over 12 dagers inntekt; verdien som skala for budstyrke, motbud, Kontroll og inntektsøkning er
+som før. Bud som alt er lagt inn, avgjøres etter reglene de ble lagt inn under: F endrer bare minstebudet for nye bud
+(`takeover_window`, sjekken i `takeover_bid`), ikke verdien, så verken pågående bud, overbud (`takeover_min_raise`) eller
+`takeover_outbid_min` påvirkes.
 Endringslogg: nei
 Konto (B-149): uendret.
