@@ -8331,3 +8331,35 @@ Beslutning: selskapene tegnes først i rutenettet (deretter dine verk, så andre
 verk regionen har. Filtrene er som før.
 Endringslogg: ja.
 Konto (B-149): uendret.
+
+## B-449 Anbudsgulvet i selskapsverdien – analyse, venter på eierens valg (2026-10-03)
+Status: analyse; ingen regel er endret.
+Bakgrunn: eieren 3.10: anbudsgulvet bør være neste analyseoppgave, men et tak på 14 dagers inntekt løser bare deler av
+problemet (20 mill./dag, 14 dagers eierskap: 400 mill. gir −120, tak 14 d gir 0, tak 12 d gir +40, 10 d gir +80).
+Sammenlign i simulatoren med kjøperens eget anslag, og husk at verdien også styrer Kontroll og budstyrke. At eieren alltid
+*kan* kjøpes ut, betyr ikke at kjøpet alltid skal lønne seg; et gammelt anbud bør likevel vurderes kritisk som varig gulv.
+Hva verdien V (`company_value` = det høyeste av 10 dagers inntekt og siste anbudspris) styrer på serveren:
+minstebudet (`takeover_window`, `takeover_bid`), styrken på bud og motbud (√(beløp / V), tak 10 V og 5 V –
+`takeover_attack`, `takeover_defense`, `takeover_outbid_min`), Kontroll fra investering og fond (`company_control`) og
+inntektsøkningen fra investeringer (`pay_company_income`). Gulvet varer hele konsesjonsperioden, også etter et oppkjøp,
+til neste anbud er avgjort – en dyr anbudsvinner kjøper i praksis vern mot oppkjøp for hele perioden.
+Simuleringen (`npx tsx src/game/takeoverSim.ts --gulv`, regelsett 2, eieren 20 mill./dag, kjøperen 0,8/1,0/1,2 × det,
+anbud 250/300/400 mill., 36 situasjoner per kjøperanslag med eierens beste motbud):
+| Alternativ | Minstebud ved anbud 400 | Lønner seg (0,8 / 1,0 / 1,2) ved anbud 400 | Endrer Kontroll og budstyrke |
+|---|---:|---|---|
+| A: i dag | 400 | 0 / 0 / 0 | – |
+| B: anbudet teller høyst 14 dager | 280 | 0 / 0 / 27 | ja |
+| C: høyst 12 dager | 240 | 0 / 24 / 27 | ja |
+| D: bare 10 dager | 200 | 19 / 24 / 30 | ja |
+| E: minstebud 10 dager, skala som i dag | 200 | 17 / 24 / 27 | nei |
+| F: minstebud høyst 12 dager, skala som i dag | 240 | 0 / 24 / 27 | nei |
+Funn: problemet sitter i minstebudet, ikke i skalaen – E og F gir nesten samme utfall som D og C uten å endre Kontroll,
+inntektsøkning eller hvor mye bud og motbud kan telle. B løser lite: en like god kjøper går akkurat i null. D og E gjør
+oppkjøp lønnsomt også for en kjøper som tjener 20 % mindre enn eieren.
+Anbefaling: F – minstebudet er det høyeste av 10 dagers inntekt og siste anbudspris, men aldri over 12 dagers inntekt;
+skalaen (V) står som i dag. Da lønner oppkjøp seg bare for en kjøper som tjener omtrent like mye som eieren eller mer,
+og et dyrt anbud gir ikke lenger vern for hele perioden. Om gamle anbudspriser også skal dempe Kontroll og
+inntektsøkning, tas for seg senere med ekte data. Bygging (når eieren har valgt): `takeover_window`/`takeover_bid` (nytt
+`takeover_min_bid`), speilet i `control.ts`, simulatoren og testen «alltid mulig»; ingen lagret verdi endres.
+Endringslogg: nei
+Konto (B-149): uendret.

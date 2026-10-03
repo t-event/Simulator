@@ -17,10 +17,11 @@
  *
  *   npx tsx src/game/takeoverSim.ts            # alle regelsettene, scenariene og sammendraget
  *   npx tsx src/game/takeoverSim.ts --kort     # bare sammendraget
+ *   npx tsx src/game/takeoverSim.ts --gulv     # anbudsgulvet: fem måter å regne verdien på (B-449)
  */
 import { TAKEOVER, TAKEOVER_V2 } from "./control";
 
-declare const process: { argv: string[] };
+declare const process: { argv: string[]; exit(code?: number): never };
 
 interface Rules {
   name: string;
@@ -222,6 +223,139 @@ function scenarios(extraDays: number, tenderFloor = 0): Scenario[] {
         tenderFloor,
       });
   return out;
+}
+
+/**
+ * Anbudsgulvet (B-449): verdien V er det høyeste av 10 dagers inntekt og siste anbudspris (`company_value`). V er både
+ * minstebudet og skalaen for budstyrke, motbud, Kontroll (investering og fond) og inntektsøkningen fra investeringer.
+ * Alternativene endrer enten hele V eller bare minstebudet (E). Kjøperen regner med sitt eget anslag (`company_estimate_for`),
+ * som kan være lavere eller høyere enn eierens.
+ */
+interface FloorAlt {
+  name: string;
+  /** Skalaen (budstyrke, motbud, Kontroll, inntektsøkning) */
+  scale: (i: number, t: number) => number;
+  /** Minstebudet */
+  minBid: (i: number, t: number) => number;
+}
+const capped = (days: number) => (i: number, t: number) => Math.max(10 * i, Math.min(t, days * i));
+const today = (i: number, t: number) => Math.max(10 * i, t);
+const tenDays = (i: number) => 10 * i;
+const FLOOR_ALTS: FloorAlt[] = [
+  { name: "A: i dag – det høyeste av 10 dager og anbudet", scale: today, minBid: today },
+  { name: "B: anbudet teller høyst 14 dagers inntekt", scale: capped(14), minBid: capped(14) },
+  { name: "C: anbudet teller høyst 12 dagers inntekt", scale: capped(12), minBid: capped(12) },
+  { name: "D: bare 10 dagers inntekt", scale: tenDays, minBid: tenDays },
+  { name: "E: minstebud 10 dager, skala som i dag", scale: today, minBid: tenDays },
+  { name: "F: minstebud høyst 12 dager, skala som i dag", scale: today, minBid: capped(12) },
+];
+
+/** Kjøperens beste bud med alternativet, eller null: samme spill som `simulate`, men med kjøperens egen inntekt */
+function floorSimulate(r: Rules, s: Scenario, alt: FloorAlt, buyerPerDay: number, t: number): Outcome {
+  const v = alt.scale(s.perDay, t);
+  const min = alt.minBid(s.perDay, t);
+  const winDays = Math.max(s.daysLeft, TAKEOVER.ownDays);
+  const gain = buyerPerDay * winDays;
+  let best: Outcome = {
+    bid: null,
+    buyer: 0,
+    owner: 0,
+    ownerHolds: true,
+    breakEven: gain,
+    harassOwner: null,
+    harassBuyer: 0,
+  };
+  for (let bid = min; bid <= r.attackCap * v; bid += 0.01 * v) {
+    const att = attack(r, bid, v, s.regionPlants);
+    const hold = moneyToHold(r, s, att, v);
+    const lossIfBought = s.perDay * (s.daysLeft + s.ownerExtraDays) + TAKEOVER.investBack * s.invested - payout(bid, s);
+    const holdCost = hold === null ? Infinity : hold * r.ownerHoldCost;
+    const holds = hold !== null && holdCost < lossIfBought;
+    const buyer = holds ? -r.attackerLoseFee * bid : gain - bid;
+    const owner = holds ? -holdCost : -lossIfBought;
+    if (buyer > best.buyer) best = { ...best, bid, buyer, owner, ownerHolds: holds };
+  }
+  return best;
+}
+
+function floorReport(): void {
+  const r = RULES.find((x) => x.name.startsWith("Regelsett 2"))!;
+  const perDay = 20_000_000;
+  const tenders = [250_000_000, 300_000_000, 400_000_000];
+  const buyerFactors = [0.8, 1, 1.2];
+  console.log(
+    `Anbudsgulvet (B-449), regelsett 2. Eierens inntekt ${mill(perDay)} mill. per dag, kjøperen eier i 14 dager.`,
+  );
+  console.log("Tall i mill. kr. Kjøperens anslag 0,8 / 1,0 / 1,2 × eierens.\n");
+
+  console.log("### Uten motbud: kjøperens overskudd ved minstebudet (14 dager × kjøperens inntekt − minstebud)");
+  console.log("| Alternativ | Anbud | Minstebud | Kjøper 0,8 | Kjøper 1,0 | Kjøper 1,2 |");
+  console.log("|---|---:|---:|---:|---:|---:|");
+  for (const alt of FLOOR_ALTS)
+    for (const t of tenders) {
+      const min = alt.minBid(perDay, t);
+      const cells = buyerFactors.map((f) => mill(14 * f * perDay - min));
+      console.log(`| ${alt.name} | ${mill(t)} | ${mill(min)} | ${cells.join(" | ")} |`);
+    }
+
+  console.log(
+    "\n### Med eierens motbud: oppkjøp som lønner seg (av 36 per kjøperanslag) og snittoverskudd for kjøperen",
+  );
+  console.log(
+    "| Alternativ | Anbud | Lønner seg 0,8 | 1,0 | 1,2 | Snittoverskudd (når det lønner seg) | Eierens snitt når kjøpt |",
+  );
+  console.log("|---|---:|---:|---:|---:|---:|---:|");
+  for (const alt of FLOOR_ALTS)
+    for (const t of tenders) {
+      const counts: string[] = [];
+      let sumBuyer = 0;
+      let nBuys = 0;
+      let sumOwner = 0;
+      let nSold = 0;
+      for (const f of buyerFactors) {
+        let n = 0;
+        let total = 0;
+        for (const extra of [0, 7, 14])
+          for (const s0 of scenarios(extra)) {
+            const s = { ...s0, perDay };
+            total++;
+            const o = floorSimulate(r, s, alt, f * perDay, t);
+            if (o.bid === null) continue;
+            n++;
+            sumBuyer += o.buyer;
+            nBuys++;
+            if (!o.ownerHolds) {
+              sumOwner += o.owner;
+              nSold++;
+            }
+          }
+        counts.push(`${n} av ${total}`);
+      }
+      console.log(
+        `| ${alt.name} | ${mill(t)} | ${counts.join(" | ")} | ${nBuys ? mill(sumBuyer / nBuys) : "–"} | ${nSold ? mill(sumOwner / nSold) : "–"} |`,
+      );
+    }
+
+  // Det V også styrer: Kontroll fra investering og fond, inntektsøkningen, og hvor mye motbudet og budet kan telle
+  console.log("\n### Det andre verdien styrer (anbud 400 mill., investert 50 mill., fond 15 mill.)");
+  console.log(
+    "| Alternativ | Skala V | Kontroll fra investering (av 25) | Kontroll fra fondet (av 10) | Inntektsøkning | Motbud teller til | Bud teller til |",
+  );
+  console.log("|---|---:|---:|---:|---:|---:|---:|");
+  for (const alt of FLOOR_ALTS) {
+    const v = alt.scale(perDay, 400_000_000);
+    const inv = 25 * (1 - Math.exp(-50_000_000 / v));
+    const fund = 10 * (1 - Math.exp(-15_000_000 / (2 * v)));
+    const boost = 25 * (1 - Math.exp(-50_000_000 / v));
+    console.log(
+      `| ${alt.name} | ${mill(v)} | ${inv.toFixed(1)} | ${fund.toFixed(1)} | +${boost.toFixed(1)} % | ${mill(r.defenseCap * v)} | ${mill(r.attackCap * v)} |`,
+    );
+  }
+}
+
+if (process.argv.includes("--gulv")) {
+  floorReport();
+  process.exit(0);
 }
 
 const short = process.argv.includes("--kort");

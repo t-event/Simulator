@@ -15,6 +15,11 @@ til «Avgjort» nederst).
   eierens godkjenning. Rapportens grunnlag bevares; korrigeringen dokumenteres separat. Planlagt sjekk 2.10 kl. 07:45 UTC.
 - **Datakvalitetsoversikt for tidslinjetallene (B-396, B-401):** eieren 1.10: tas når flere dager er samlet – andel
   gyldige målinger (`metric_note`), kWh/t over perioder med nok tonn (`timeline_energy`) og leveringspresisjon per spiller.
+- **Anbudsgulvet i oppkjøpene (B-449):** analysen er ferdig – anbefalt F: minstebudet høyst 12 dagers inntekt, skalaen
+  for Kontroll og budstyrke som i dag. Venter på eierens valg (A–F i B-449) før noe bygges.
+- **Verkskontoen – mer å bruke penger på hjemme (eieren 3.10):** nabolagsprosjektene koster til sammen 28 mrd., og store
+  hjemmeverk har ofte ingen av dem. Etter dem trengs flere valg for store hjemmeverk, mens kassa fortsatt kan vokse fritt
+  (B-381). Lokal kasse skal ikke gi makt mellom spillere (B-190, B-323). Forslag lages i en egen analyse.
 - **Beskytt main (B-397):** slå på «Require status checks» for `sjekker` under Settings → Branches i GitHub.
 - **Anbefalinger fra kodegjennomgangen (B-398), til beslutningene etter 2.10:** behold marginhopp som varsling til de
   falske positive er kartlagt (C og D viser hvorfor); prøv et prisbasert margintak i skygge først; sett krav til de nye
