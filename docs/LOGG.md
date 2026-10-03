@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 372 – 2026-10-03: Oppkjøpssimulatoren rettet, store anbud prøvd (B-450)
+
+**Brukeren ba om:** rett simulatoren (Kontrollen virker automatisk på serveren) og prøv større forhold mellom gammel
+anbudspris og dagens inntekt før F tas i bruk; F beskrives som «begrenset minstebud, øvrige regler beholdes».
+
+**Gjort:** `takeoverSim.ts` regner et bud som tapt når Kontrollen alene holder. Ny tabell i `--gulv` for anbud på
+12,5–300 dagers inntekt. B-450 med tallene; B-449 merket. Eierens eksempel stemmer: 304 mill. for å slå Kontroll 80 alene
+ved anbud 6 mrd.
+
+**Testet:** simulatoren før og etter (bare én linje for regelsett 1 endret seg); typesjekk, lint, `npm test`.
+
+**Gjenstår:** eierens klarsignal for F; ryddingen av meldinger (108) før 1.11; kontrollene 5.10; skyggerapporten.
+
 ## Økt 371 – 2026-10-03: Anbudsgulvet analysert (B-449)
 
 **Brukeren ba om:** sammenlign tak på 14 og 12 dagers inntekt og bare 10 dager i simulatoren, med kjøperens eget

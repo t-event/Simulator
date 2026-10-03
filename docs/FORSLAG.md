@@ -15,8 +15,9 @@ til «Avgjort» nederst).
   eierens godkjenning. Rapportens grunnlag bevares; korrigeringen dokumenteres separat. Planlagt sjekk 2.10 kl. 07:45 UTC.
 - **Datakvalitetsoversikt for tidslinjetallene (B-396, B-401):** eieren 1.10: tas når flere dager er samlet – andel
   gyldige målinger (`metric_note`), kWh/t over perioder med nok tonn (`timeline_energy`) og leveringspresisjon per spiller.
-- **Anbudsgulvet i oppkjøpene (B-449):** analysen er ferdig – anbefalt F: minstebudet høyst 12 dagers inntekt, skalaen
-  for Kontroll og budstyrke som i dag. Venter på eierens valg (A–F i B-449) før noe bygges.
+- **Anbudsgulvet i oppkjøpene (B-449, B-450):** eieren heller mot F – «begrenset minstebud, øvrige regler beholdes».
+  Simulatoren er rettet (Kontrollen holder av seg selv) og prøvd med anbud opptil 300 dagers inntekt: F gir en begrenset
+  forbedring, et svært dyrt anbud beskytter fortsatt litt. Venter på eierens klarsignal før F bygges.
 - **Verkskontoen – mer å bruke penger på hjemme (eieren 3.10):** nabolagsprosjektene koster til sammen 28 mrd., og store
   hjemmeverk har ofte ingen av dem. Etter dem trengs flere valg for store hjemmeverk, mens kassa fortsatt kan vokse fritt
   (B-381). Lokal kasse skal ikke gi makt mellom spillere (B-190, B-323). Forslag lages i en egen analyse.

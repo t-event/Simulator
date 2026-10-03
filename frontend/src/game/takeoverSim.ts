@@ -193,7 +193,8 @@ function simulate(r: Rules, s: Scenario): Outcome {
     const hold = moneyToHold(r, s, att, v);
     const lossIfBought = s.perDay * (s.daysLeft + s.ownerExtraDays) + TAKEOVER.investBack * s.invested - payout(bid, s);
     const holdCost = hold === null ? Infinity : hold * r.ownerHoldCost;
-    const holds = hold !== null && holdCost < lossIfBought;
+    // Holder Kontrollen alene (motbud 0), taper budet uansett – serveren regner Kontrollen automatisk (B-449)
+    const holds = hold === 0 || (hold !== null && holdCost < lossIfBought);
     const buyer = holds ? -r.attackerLoseFee * bid : gain - bid;
     const owner = holds ? -holdCost : -lossIfBought;
     if (buyer > best.buyer) best = { ...best, bid, buyer, owner, ownerHolds: holds };
@@ -270,7 +271,8 @@ function floorSimulate(r: Rules, s: Scenario, alt: FloorAlt, buyerPerDay: number
     const hold = moneyToHold(r, s, att, v);
     const lossIfBought = s.perDay * (s.daysLeft + s.ownerExtraDays) + TAKEOVER.investBack * s.invested - payout(bid, s);
     const holdCost = hold === null ? Infinity : hold * r.ownerHoldCost;
-    const holds = hold !== null && holdCost < lossIfBought;
+    // Holder Kontrollen alene (motbud 0), taper budet uansett – serveren regner Kontrollen automatisk (B-449)
+    const holds = hold === 0 || (hold !== null && holdCost < lossIfBought);
     const buyer = holds ? -r.attackerLoseFee * bid : gain - bid;
     const owner = holds ? -holdCost : -lossIfBought;
     if (buyer > best.buyer) best = { ...best, bid, buyer, owner, ownerHolds: holds };
@@ -333,6 +335,40 @@ function floorReport(): void {
       }
       console.log(
         `| ${alt.name} | ${mill(t)} | ${counts.join(" | ")} | ${nBuys ? mill(sumBuyer / nBuys) : "–"} | ${nSold ? mill(sumOwner / nSold) : "–"} |`,
+      );
+    }
+
+  // Store forhold mellom gammel anbudspris og dagens inntekt (B-449): med skalaen som i dag (F) kan Kontrollen alene
+  // fortsatt holde mot alt kjøperen tjener på. «Bud for å slå Kontrollen» er det minste budet som slår eierens Kontroll
+  // uten motbud (Kontroll 80, ett verk i regionen) – over 14 dagers inntekt (280 mill.) lønner det seg ikke.
+  const ratios = [12.5, 15, 20, 30, 50, 100, 300];
+  console.log(
+    "\n### Store forhold: gammel anbudspris i dager av dagens inntekt (20 mill./dag, kjøperen 1,0 × eierens)",
+  );
+  console.log(
+    "| Alternativ | Anbud (dager) | Anbud | Minstebud | Bud for å slå Kontroll 80 alene | Lønner seg (av 36) | Kontroll alene holder mot minstebudet (av 36) |",
+  );
+  console.log("|---|---:|---:|---:|---:|---:|---:|");
+  for (const alt of FLOOR_ALTS.filter((a) => /^(A|C|F)/.test(a.name)))
+    for (const ratio of ratios) {
+      const t = ratio * perDay;
+      const v = alt.scale(perDay, t);
+      const min = alt.minBid(perDay, t);
+      const region = Math.min(TAKEOVER.regionMax, TAKEOVER.regionPer * 1);
+      const ctl80 = (80 / 100) * r.controlMax;
+      const beat = ctl80 <= region ? min : Math.max(min, v * ((ctl80 - region) / r.attackW) ** 2);
+      let n = 0;
+      let auto = 0;
+      let total = 0;
+      for (const extra of [0, 7, 14])
+        for (const s0 of scenarios(extra)) {
+          const s = { ...s0, perDay };
+          total++;
+          if (floorSimulate(r, s, alt, perDay, t).bid !== null) n++;
+          if (defense(r, s, 0, v) >= attack(r, min, v, s.regionPlants)) auto++;
+        }
+      console.log(
+        `| ${alt.name} | ${ratio} | ${mill(t)} | ${mill(min)} | ${beat > 14 * perDay ? `${mill(beat)} (over 280)` : mill(beat)} | ${n} av ${total} | ${auto} av ${total} |`,
       );
     }
 
