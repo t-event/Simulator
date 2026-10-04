@@ -8479,3 +8479,15 @@ Testet: ny test i `npm test` (varsel ved åpning og 12 timer før, én gang hver
 trykk går til Industrien, «Lønner det seg?» med 30 mill. kr, knappen i varsellista, ingen sidelengs scrolling.
 Endringslogg: ja.
 
+## B-454 Verkskontoen: analyse og forslag (2026-10-04)
+Status: forslag – venter på eieren. Bygger på B-331 (spor B), B-336 og B-381.
+Bakgrunn: eieren 3.10 ville ha flere valg for store hjemmeverk når nabolaget (28 mrd.) er kjøpt eller ikke brukt.
+Funn (21 storverk, 4.10): kassa median 9,5 mrd., nabolaget i snitt 2,4 av 6 bygg, 7 har ingen – fire av dem med
+9,5–45 mrd. i kassa. Kortet står nederst på Verket → Anlegg uten råd eller «!», så det største problemet er synlighet.
+Ramme: marginen hjemme teller i bidraget til konsernkassa (B-318), så nye kjøp hjemme skal være synlige, prestisje eller
+trygghet, aldri kostnadskutt eller mer salg.
+Forslag (docs/VERKSKONTO-FORSLAG.md): V1 råd og «!» om nabolaget (nå), V2 nabolaget i tre trinn uten ny effekt, V3 verkets
+stiftelse med titler og pynt i stigende trinn, V4 slitasje og fornyelse (senere). Ikke anbefalt: kostnadskutt for kroner,
+kroner til fagpoeng, overføring til konsernkassa.
+Endringslogg: nei.
+

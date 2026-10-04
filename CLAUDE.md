@@ -242,6 +242,7 @@ docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretn
                OKONOMI-KONTROLL.md (kontrollen av modellen med tall og svakheter, B-324),
                KONSERN-FORSLAG.md (nivåer, priser fra konsernkassa og aktivitetskrav, bygget B-325–B-328, og simuleringen B-329),
                PROFIL-FORSLAG.md (profiler, Min profil, privatmeldinger og adminpanelet, B-419),
+               VERKSKONTO-FORSLAG.md (mer å bruke penger på hjemme, V1–V4, venter på eieren, B-454),
                KONTROLL-FORSLAG.md (verdenskart, utbyttepolitikk, Kontroll, overtakelser og pengene hjemme, B-331, godkjent B-332),
                VERKSJEF-FORSLAG.md (verksjefer, besvart; V1 ferdig spesifisert i avsnitt 10, bygges etter V0/K-1, B-409),
                REKONSTRUKSJON-FORSLAG.md (rekonstruksjon etter konkurs, modellene A–E – venter på eierens valg, B-409),
