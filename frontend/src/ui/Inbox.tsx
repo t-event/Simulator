@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { SheetHead } from "./ds";
 import { importantLog } from "../game/inbox";
-import type { GameState } from "../game/types";
+import type { GameState, LogLink } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { fmtClock } from "./format";
 
@@ -18,7 +18,21 @@ const FILTERS: { id: Filter; label: string }[] = [
   { id: "good", label: "Gode nyheter" },
 ];
 
-export function InboxSheet({ g, act, onClose }: { g: GameState; act: GameApi["act"]; onClose: () => void }) {
+/** Teksten på knappen for et varsel med lenke (B-453) */
+const LINK_LABEL: Record<LogLink, string> = { industri: "Gå til selskapet" };
+
+export function InboxSheet({
+  g,
+  act,
+  onClose,
+  onLink,
+}: {
+  g: GameState;
+  act: GameApi["act"];
+  onClose: () => void;
+  /** Et varsel med lenke fører rett dit (B-453) */
+  onLink: (to: LogLink) => void;
+}) {
   const [filter, setFilter] = useState<Filter>("alle");
   // Det som var nytt da lista ble åpnet, merkes, og alt regnes som sett
   const [seenBefore] = useState(() => g.inboxSeenId ?? 0);
@@ -58,6 +72,11 @@ export function InboxSheet({ g, act, onClose }: { g: GameState; act: GameApi["ac
                   {e.id > seenBefore && <span className="g-badge g-badge-new">Ny</span>}
                 </span>
                 {e.text}
+                {e.link && (
+                  <button className="g-link g-log-go" onClick={() => onLink(e.link!)}>
+                    {LINK_LABEL[e.link]}
+                  </button>
+                )}
               </li>
             ))}
           </ul>

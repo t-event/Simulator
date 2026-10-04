@@ -1111,6 +1111,14 @@ button {
   padding-left: 8px;
 }
 
+/* Knappen under et varsel med lenke (B-453) */
+.g-log .g-log-go {
+  display: block;
+  min-height: 44px;
+  padding: 0;
+  text-align: left;
+}
+
 .g-log .log-good {
   border-color: var(--ok);
 }
@@ -3068,6 +3076,15 @@ button {
 }
 
 .g-notice-msg.is-idle {
+  color: var(--text-dim);
+}
+
+/* Varselet fører et sted (B-453): pila sier at et trykk går rett til selskapet */
+.g-notice-go {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  margin-left: auto;
   color: var(--text-dim);
 }
 
@@ -7470,6 +7487,20 @@ button.g-prod-row:hover {
 .g-defense-verdict {
   margin: var(--sp-2) 0;
   font-weight: 600;
+}
+
+/* Budet kommer tilbake (B-453): rett under budfeltet */
+.g-tender-refund {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-1);
+  margin: var(--sp-1) 0;
+}
+
+.g-tender-refund .ds-icon {
+  flex: none;
+  color: var(--ok);
+  margin-top: 2px;
 }
 
 /* Lønner budet seg (B-435): inntekten i dagene du eier selskapet mot budet */

@@ -31,6 +31,9 @@ export interface Toast {
   kind: LogEntry["kind"];
   /** Fra loggen (står i varsellista bak bjella), eller svar på noe spilleren trykket på */
   fromLog: boolean;
+  /** Hvor et trykk på varselet fører (B-453), og linja i loggen det kom fra */
+  link?: LogEntry["link"];
+  logId?: number;
 }
 
 export interface GameApi {
@@ -100,10 +103,16 @@ export function useGame(): GameApi {
   }, [pump]);
 
   const pushToast = useCallback(
-    (text: string, kind: Toast["kind"], fromLog = true) => {
+    (text: string, kind: Toast["kind"], fromLog = true, from?: Pick<LogEntry, "id" | "link">) => {
       // Det nyeste vises med en gang (B-171): før sto nye varsler i kø bak de gamle, og det siste som skjedde
       // kom for sent. Det som skyves bort, står i varsellista bak bjella.
-      const t: Toast = { id: toastId.current++, text, kind, fromLog };
+      const t: Toast = {
+        id: toastId.current++,
+        text,
+        kind,
+        fromLog,
+        ...(from?.link ? { link: from.link, logId: from.id } : {}),
+      };
       // Svar på noe spilleren trykket på, skal ikke skyves bort av et varsel fra loggen
       const keep = visible.current.filter((x) => !x.fromLog && fromLog);
       queue.current = keep.length ? [t] : [];
@@ -165,7 +174,7 @@ export function useGame(): GameApi {
     for (const entry of g.log) {
       if (entry.id <= lastLogId.current) continue;
       // Spilleren velger under tannhjulet hva som skal dukke opp på skjermen; alt står uansett i varsellista (B-089, B-115)
-      if (showToast(g, entry)) pushToast(entry.text, entry.kind);
+      if (showToast(g, entry)) pushToast(entry.text, entry.kind, true, entry);
     }
     if (g.log.length) lastLogId.current = g.log[g.log.length - 1].id;
   }, [pushToast]);

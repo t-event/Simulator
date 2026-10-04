@@ -111,7 +111,10 @@ import {
   applyDividendNews,
   konsernValueOf,
   applyTenderResult,
+  applyTenderNotices,
   applyTenderResults,
+  tenderNoticeDue,
+  type Company,
   BID_REFUSAL_TEXT,
   companyType,
   EARNS_FROM,
@@ -2168,6 +2171,49 @@ const main = async () => {
     assert(g.tenderSeen === 12, `sist sett ${g.tenderSeen}`);
     assert(/slagghåndteringen/.test(g.log.at(-1)!.text), "feil selskap i varselet");
     assert(applyTenderResults(g, companies, now) === 0, "samme varsler to ganger");
+  });
+
+  await test("Varsel om åpent anbud (B-453): når det åpner og 12 timer før, én gang hver, med lenke", async () => {
+    const g = newGame(453);
+    const now = Date.parse("2026-10-04T10:00:00Z");
+    const tender = {
+      id: 31,
+      opensAt: "2026-10-03T08:38:00Z",
+      closesAt: "2026-10-05T08:38:00Z",
+      minBid: 1e6,
+      maxBid: 1e9,
+      myBid: null,
+      bidders: ["Grane"],
+    };
+    const slagg = { type: "slagg" as const, name: "Slagghåndteringen", tender };
+    assert(worldNews(g, [{ ...slagg } as unknown as Company], now), "worldNews ser ikke anbudet");
+    assert(applyTenderNotices(g, [slagg], now) === 1, "ga ikke varsel om åpent anbud");
+    const e = g.log.at(-1)!;
+    assert(e.kind === "event" && e.link === "industri", `art og lenke: ${e.kind} ${e.link}`);
+    assert(/^Anbud åpent: Slagghåndteringen/.test(e.text) && /hele budet tilbake/.test(e.text), e.text);
+    assert(applyTenderNotices(g, [slagg], now + 3_600_000) === 0, "samme varsel to ganger");
+    assert(!worldNews(g, [{ ...slagg } as unknown as Company], now + 3_600_000), "worldNews etter varselet");
+    // 12 timer igjen: ett varsel til
+    const late = Date.parse(tender.closesAt) - 11 * 3_600_000;
+    assert(tenderNoticeDue(g, tender, late) === 2, "12 timer igjen er ikke på tur");
+    assert(
+      applyTenderNotices(g, [slagg], late) === 1 &&
+        /^Mindre enn 12 timer igjen av anbudet på slagghåndteringen/.test(g.log.at(-1)!.text),
+      g.log.at(-1)!.text,
+    );
+    assert(applyTenderNotices(g, [slagg], late + 60_000) === 0, "12 timer-varselet to ganger");
+    // Har bydd: ingen varsel. Åpnet sent: bare det andre varselet
+    const h = newGame(4531);
+    assert(applyTenderNotices(h, [{ ...slagg, tender: { ...tender, myBid: 5e6 } }], now) === 0, "varsel etter bud");
+    assert(applyTenderNotices(h, [slagg], late) === 1 && applyTenderNotices(h, [slagg], late) === 0, "sent åpnet");
+    assert(/^Mindre enn 12 timer igjen/.test(h.log.at(-1)!.text), "første varsel kom sent");
+    // Stengt anbud gir ingen varsel og glemmes
+    assert(applyTenderNotices(h, [slagg], Date.parse(tender.closesAt) + 1000) === 0, "varsel om stengt anbud");
+    assert(Object.keys(h.tenderNotice).length === 0, "stengt anbud ble ikke glemt");
+    // Gamle lagringer får et tomt minne
+    const old = JSON.parse(JSON.stringify(g));
+    delete old.tenderNotice;
+    assert(JSON.stringify(migrate(old).tenderNotice) === "{}", "migrate");
   });
 
   await test("Mekanisk verksted (B-256): typen tolkes, og spillet sender vedlikeholdet til tidslinja", async () => {

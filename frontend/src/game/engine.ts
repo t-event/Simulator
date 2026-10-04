@@ -119,6 +119,7 @@ import type {
   GradeId,
   IncomeCategory,
   LiquidBatch,
+  LogLink,
   Lot,
   ManualRequest,
   ProductId,
@@ -321,6 +322,7 @@ export function newGame(seed = Date.now()): GameState {
     season: null,
     seasonPromptSeen: null,
     tenderSeen: 0,
+    tenderNotice: {},
     takeoverSeen: "",
     bigBuild: null,
     neighborhood: { built: [], building: null },
@@ -378,8 +380,13 @@ export function newGame(seed = Date.now()): GameState {
 // ------------------------------------------------------------------ //
 // Hjelpere
 // ------------------------------------------------------------------ //
-export function log(g: GameState, text: string, kind: "info" | "good" | "bad" | "event" = "info"): void {
-  g.log.push({ id: g.nextLogId++, min: g.minute, text, kind });
+export function log(
+  g: GameState,
+  text: string,
+  kind: "info" | "good" | "bad" | "event" = "info",
+  link?: LogLink,
+): void {
+  g.log.push({ id: g.nextLogId++, min: g.minute, text, kind, ...(link ? { link } : {}) });
   if (g.log.length > LOG_MAX) g.log.splice(0, g.log.length - LOG_MAX);
 }
 

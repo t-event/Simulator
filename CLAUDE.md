@@ -609,6 +609,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   Poengkurven på stigen står i `season_tier_of`/`season_tier_points` (129) og speiles i `tierOf`/`tierPoints`
   (`net/seasonTrack.ts`) – endres den, endres begge.
 - **Knappene ved varsellinja åpner ark** (B-286): hjelp, Mål og topplista. På mobil åpner `go("mal")` arket; på PC er Mål en side.
+- **Varsler med lenke** (B-453): `log(g, tekst, art, link)` – en linje med `link` fører dit ved trykk i varsellinja (pil) og
+  i varsellista («Gå til selskapet»). Nye mål legges i `LogLink` (`types.ts`), `openLink` (`GameApp`) og `LINK_LABEL` (`Inbox.tsx`).
 - **Kontrollromsrekorden på topplista** (B-295) tas fra `state.controlBest` av triggeren `note_control` på `saves` inn i
   `records.best_control` – bare for kontoer som alt har en rekordrad, og bare opptil 5 000 poeng. Endres poengene i
   kontrollrommet mye, må grensen følge med.

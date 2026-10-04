@@ -290,6 +290,8 @@ export function migrate(g: GameState): GameState {
   for (const c of g.contracts ?? []) if (HAS_EMOJI.test(c.customer)) c.customer = c.customer.replace(EMOJI, "").trim();
   // Varsel om anbudsresultatet (B-237)
   if (loose.tenderSeen === undefined) loose.tenderSeen = 0;
+  // Varsel om åpne anbud (B-453)
+  if (loose.tenderNotice === undefined) loose.tenderNotice = {};
   if (loose.takeoverSeen === undefined) loose.takeoverSeen = "";
   if (loose.bigBuild === undefined) loose.bigBuild = null;
   if (!loose.neighborhood) loose.neighborhood = { built: [], building: null };

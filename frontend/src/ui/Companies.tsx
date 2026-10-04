@@ -22,6 +22,7 @@ import {
   bidTakeover,
   defendTakeover,
   placeBid,
+  TENDER_DAYS,
   timeLeft,
   type Company,
   type WorldStatus,
@@ -454,6 +455,11 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
                 ? `Skriv beløpet i millioner: ${millText(t.minBid)} = ${fmtKr(t.minBid)}.`
                 : (bidProblem ?? `Du byr ${fmtKr(bidKr)}.`)}
             </p>
+            {/* Synlig ved feltet (B-453): mange trodde budet var tapt hvis de ikke vant */}
+            <p className="g-small-text g-tender-refund">
+              <Icon name="check" /> Taper du, får du hele budet tilbake når anbudet stenger.
+            </p>
+            <TenderPayoff c={c} bid={bidKr > 0 && !bidProblem ? bidKr : (t.myBid ?? 0)} />
             <p className="g-muted g-small-text">
               Fra {fmtKr(t.minBid)} til {fmtKr(t.maxBid)}. Budet betales fra konsernkassa ({fmtKr(tr.balance)} nå
               {t.myBid ? ", pluss budet ditt" : ""}), så du kan by opptil {fmtKr(canBid)}.
@@ -467,8 +473,8 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
               <summary>Slik virker anbudet</summary>
               <p className="g-small-text">
                 Alle ser hvem som har bydd, men ingen ser beløpene før anbudet stenger ({fmtWhen(t.closesAt)}). Høyeste
-                bud vinner og driver lageret i 14 dager. Likt bud avgjøres ved trekning. De som ikke vinner, får budet
-                tilbake i konsernkassa. Alle stiller likt, også den som eier selskapet nå.
+                bud vinner og driver selskapet i {TENDER_DAYS} dager. Likt bud avgjøres ved trekning. De som ikke
+                vinner, får budet tilbake i konsernkassa. Alle stiller likt, også den som eier selskapet nå.
               </p>
             </details>
           </section>
@@ -841,6 +847,33 @@ function PayoffNote({
       {p.net >= 0 ? `${fmtKr(p.net)} mer enn budet.` : `${fmtKr(-p.net)} mindre enn budet.`}
       {p.net < 0 && " Vil du tjene på det, må du også vinne anbudet om neste periode."} Holder ikke budet, får du{" "}
       {fmtKr(p.back)} tilbake.
+    </p>
+  );
+}
+
+/**
+ * Lønner anbudet seg (B-453): hva selskapet tjener i konsesjonen med kjøperens egen produksjon, mot budet. Uten bud:
+ * hva det tjener, så spilleren ser hvor mye det er verdt å by
+ */
+function TenderPayoff({ c, bid }: { c: Company; bid: number }) {
+  // Inntekten avhenger av eierens produksjon (B-443): kjøperen regnes med sin egen
+  const perDay = c.estimateMine ?? c.estimatePerDay;
+  if (perDay <= 0) return null;
+  const income = perDay * TENDER_DAYS;
+  const own = c.estimateMine !== null ? " med din produksjon" : "";
+  if (bid <= 0)
+    return (
+      <p className="g-small-text g-payoff">
+        <strong>Lønner det seg?</strong> Vinner du, tjener selskapet ca. {fmtKr(perDay)} per dag{own} – ca.{" "}
+        {fmtKr(income)} på {TENDER_DAYS} dager (anslag). Byr du mindre enn det, tjener du på å vinne.
+      </p>
+    );
+  const net = income - bid;
+  return (
+    <p className={`g-small-text g-payoff ${net >= 0 ? "is-ok" : "is-bad"}`}>
+      <strong>Lønner det seg?</strong> Vinner du med {fmtKr(bid)}, tjener du ca. {fmtKr(income)} på {TENDER_DAYS} dager
+      ({fmtKr(perDay)} per dag{own}, anslag) –{" "}
+      {net >= 0 ? `${fmtKr(net)} mer enn budet.` : `${fmtKr(-net)} mindre enn budet.`}
     </p>
   );
 }

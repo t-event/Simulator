@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 375 – 2026-10-04: Anbudet synligere (B-453)
+
+**Brukeren ba om:** «Fiks det» – etter analysen av hvorfor så få bød på slagghåndteringen: budet tilbake synlig ved
+feltet, «Lønner det seg?» for anbud og varsel når et anbud åpner og når 12 timer er igjen, med vei rett til selskapet.
+
+**Gjort:** `applyTenderNotices`/`tenderNoticeDue` (`net/world.ts`) og `g.tenderNotice`; logglinjer kan ha `link`, og
+varsellinja og varsellista fører til Konsern → Industrien. På selskapskortet: linja om at budet kommer tilbake og
+`TenderPayoff`. «Slik virker anbudet» sier «driver selskapet» (ikke «lageret») for alle selskapene.
+
+**Testet:** se B-453 (`npm test`, typesjekk, lint, bygg, Chromium 320/390/1366).
+
+**Gjenstår:** resultatet av slagganbudet 5.10 (påminnelse); ryddingen av meldinger (108) før 1.11; oppkjøpet 5.10;
+skyggerapporten rundt 9.10; verv en venn og delingsknapp venter på eierens valg.
+
 ## Økt 374 – 2026-10-03: Det gratis sesongpasset (B-452)
 
 **Brukeren ba om:** (etter spørsmålet om «battle pass») det gratis sesongpasset som neste oppgave: 50 trinn, trinn 1 ved
