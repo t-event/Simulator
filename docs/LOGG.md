@@ -5,6 +5,17 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 376 – 2026-10-05: Verkskontoen – analyse (B-454)
+
+**Brukeren ba om:** «fortsett» – neste punkt som ikke venter på eieren: analysen av mer å bruke penger på hjemme.
+
+**Gjort:** sjekket at B-453 er ute (16 spill med den nye appen, 10 har fått varselet, 3 bud på slagghåndteringen).
+Ekte tall for 21 storverk (kassa, vekst, nabolaget) og `docs/VERKSKONTO-FORSLAG.md` med V1–V4 og spørsmål til eieren.
+Ingen kode endret.
+
+**Gjenstår:** eierens svar på V1–V4; resultatet av slagganbudet og oppkjøpet 5.10 (påminnelser); ryddingen av meldinger
+(108) før 1.11; skyggerapporten rundt 9.10; verv en venn og delingsknapp venter på eierens valg.
+
 ## Økt 375 – 2026-10-04: Anbudet synligere (B-453)
 
 **Brukeren ba om:** «Fiks det» – etter analysen av hvorfor så få bød på slagghåndteringen: budet tilbake synlig ved
