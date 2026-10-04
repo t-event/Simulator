@@ -8454,3 +8454,28 @@ mot en falsk server: «Sesongstigen: 3 poeng til trinn 2 – 24 fagpoeng» på D
 synlig i anleggsbildet, ingen sidelengs scrolling.
 Endringslogg: ja.
 Konto (B-149): uendret – sesongstigen krever konto som før.
+
+## B-453 Anbudet synligere: varsel, budet tilbake og «Lønner det seg?» (2026-10-04)
+Status: gjelder. Bygger på B-189, B-226, B-253 og B-443.
+Bakgrunn: det første anbudet på slagghåndteringen (stenger 5.10) hadde to bud etter et døgn, selv om 20 kunne by og 16
+hadde over 100 000 kr i konsernkassa. Beskjeden om åpent anbud sto bare som «!» på Konsern og på Industrien; at den som
+taper får budet tilbake, sto skjult under «Slik virker anbudet», og ingenting sa hva selskapet kunne tjene. Eieren 4.10:
+«Fiks det».
+Beslutning:
+- **Varsel i varsellinja:** når et anbud åpner, og når 12 timer er igjen, til den som ikke har bydd – hvert varsel én gang
+  per anbud (`g.tenderNotice`, glemmes når anbudet stenger). Den som åpner appen sent, får bare det andre. Varselet sier
+  hva eieren tjener på, når anbudet stenger, og at den som taper, får hele budet tilbake (`applyTenderNotices`,
+  `tenderNoticeDue` i `net/world.ts`).
+- **Varsler kan føre et sted:** logglinjer har `link` (nå bare «industri»). Et trykk på et slikt varsel i varsellinja går
+  rett til Konsern → Industrien (pil til høyre i linja), og i varsellista står knappen «Gå til selskapet». Et varsel som
+  er fulgt, er lest.
+- **Ved budfeltet:** «Taper du, får du hele budet tilbake når anbudet stenger.» står synlig under feltet.
+- **«Lønner det seg?» for anbud:** 14 dager × kjøperens eget anslag (`estimateMine`, ellers `estimatePerDay`) mot budet som
+  er skrevet (eller budet som står). Uten bud: hva selskapet tjener per dag og på 14 dager. Det er et anslag; reglene for
+  anbudet er uendret.
+Krever konto: anbudet gjorde det allerede (B-189); varselet kommer bare med konto og åpnet konsern, som «!» på Konsern.
+Testet: ny test i `npm test` (varsel ved åpning og 12 timer før, én gang hver, ingen etter bud, bare det andre når appen
+åpnes sent, stengt anbud glemmes, `migrate`); Chromium 320/390/1366 px mot en falsk server: varselet i varsellinja med pil,
+trykk går til Industrien, «Lønner det seg?» med 30 mill. kr, knappen i varsellista, ingen sidelengs scrolling.
+Endringslogg: ja.
+

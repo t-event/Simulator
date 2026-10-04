@@ -74,6 +74,9 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
 ## 5. Selskaper, Kontroll og oppkjøp
 
 - Anbud (48 t skjult) og pilotkonsesjon 14 dager; `world_tick` avgjør «lat» (pg_cron hvert 5. min).
+- Varsel om åpent anbud (B-453): i varsellinja når det åpner og når 12 timer er igjen, til den som ikke har bydd, med
+  lenke til Konsern → Industrien. Ved budfeltet: budet kommer tilbake til den som taper, og «Lønner det seg?» (14 dager ×
+  kjøperens eget anslag mot budet).
 - Kontroll regnes av `company_control` (aktivitet, investering, region, eiertid); vises som kroner (B-370).
 - Oppkjøpsbud og motbud er på (fra 29.9.2026). Budet teller 60 × √(bud / V) × (0,5 + 0,5 × aktivitet) + region, inntil
   10 × verdien (verdi V = det høyeste av 10 dagers inntekt og siste anbudspris); eieren kan alltid miste selskapet.

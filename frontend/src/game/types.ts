@@ -231,7 +231,12 @@ export interface LogEntry {
   min: number;
   text: string;
   kind: "info" | "good" | "bad" | "event";
+  /** Hvor varselet fører når spilleren trykker på det (B-453); uten: varsellista */
+  link?: LogLink;
 }
+
+/** Steder et varsel kan føre til (B-453): «industri» = Konsern → Industrien, der anbudene står */
+export type LogLink = "industri";
 
 export type CostCategory =
   | "skrap"
@@ -668,6 +673,8 @@ export interface GameState {
   seasonPromptSeen: number | null;
   /** Det siste anbudsresultatet spilleren har fått varsel om (B-237), 0 hvis ingen */
   tenderSeen: number;
+  /** Varsel om åpne anbud (B-453): per anbud (id) 1 = sagt fra at det åpnet, 2 = sagt fra at 12 timer er igjen */
+  tenderNotice: Record<string, number>;
   /**
    * Et stort kjøp som bygges i spilltid (B-336): hva det er, og når det er ferdig (spillminutt). Null uten bygg.
    * Bare ett om gangen

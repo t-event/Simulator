@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 453,
+    date: "2026-10-04",
+    title: "Lettere å se anbudene",
+    items: [
+      "Når et anbud på et selskap åpner, og når det er 12 timer igjen, kommer et varsel. Trykk på det, så kommer du rett til selskapet.",
+      "Ved budfeltet står det nå at du får hele budet tilbake hvis du ikke vinner.",
+      "«Lønner det seg?» viser hva selskapet tjener på 14 dager med din produksjon, mot budet du skriver.",
+    ],
+  },
+  {
     b: 452,
     date: "2026-10-03",
     title: "Sesongstigen går raskere i starten",

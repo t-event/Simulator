@@ -581,6 +581,70 @@ export function applyTenderResult(g: GameState, company: string, r: TenderResult
   return true;
 }
 
+/** Hvor mange timer før anbudet stenger spilleren får det andre varselet (B-453) */
+export const TENDER_LATE_H = 12;
+
+/** Dagene vinneren av et anbud driver selskapet (konsesjonen) */
+export const TENDER_DAYS = 14;
+
+/** «søn. 5. okt., 10:38» – når anbudet stenger, i spillerens egen tid */
+function closesText(iso: string): string {
+  return new Date(iso).toLocaleString("nb-NO", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+/**
+ * Hvilket varsel om et åpent anbud som skal gis nå (B-453): 1 = det har åpnet, 2 = 12 timer igjen, 0 = ingen. Bare til
+ * den som ikke har bydd, og hvert varsel bare én gang (`tenderNotice`). Åpner spilleren appen sent, kommer bare det andre.
+ */
+export function tenderNoticeDue(g: GameState, t: Tender, now = realNow()): 0 | 1 | 2 {
+  const left = Date.parse(t.closesAt) - now;
+  if (t.myBid !== null || left <= 0 || Date.parse(t.opensAt) > now) return 0;
+  const want = left <= TENDER_LATE_H * 3_600_000 ? 2 : 1;
+  return (g.tenderNotice?.[String(t.id)] ?? 0) >= want ? 0 : want;
+}
+
+/**
+ * Varsel i varsellinja om åpne anbud (B-453): når anbudet åpner og når 12 timer er igjen, med lenke til selskapet
+ * (Konsern → Industrien) og at den som taper, får hele budet tilbake. Anbud som er stengt, glemmes, så minnet ikke
+ * vokser. Gir hvor mange varsler som ble gitt.
+ */
+export function applyTenderNotices(
+  g: GameState,
+  companies: Pick<Company, "type" | "name" | "tender">[],
+  now = realNow(),
+): number {
+  g.tenderNotice ??= {};
+  const open = new Set<string>();
+  let n = 0;
+  for (const c of companies) {
+    const t = c.tender;
+    if (!t || Date.parse(t.closesAt) <= now) continue;
+    const key = String(t.id);
+    open.add(key);
+    const due = tenderNoticeDue(g, t, now);
+    if (!due) continue;
+    g.tenderNotice[key] = due;
+    const back = "Taper du, får du hele budet tilbake.";
+    log(
+      g,
+      due === 1
+        ? `Anbud åpent: ${c.name} – eieren tjener på ${EARNS_FROM[c.type]} i ${TENDER_DAYS} dager. Byd innen ${closesText(t.closesAt)}. ${back}`
+        : `Mindre enn ${TENDER_LATE_H} timer igjen av anbudet på ${c.name.toLowerCase()} (stenger ${closesText(t.closesAt)}). ${back}`,
+      "event",
+      "industri",
+    );
+    n++;
+  }
+  for (const k of Object.keys(g.tenderNotice)) if (!open.has(k)) delete g.tenderNotice[k];
+  return n;
+}
+
 /** Neste midnatt norsk tid – da betaler serveren inntekten for dagen som gikk (B-258, B-369) */
 export function nextPayout(now = realNow()): number {
   return nextWorldMidnight(now);
@@ -622,13 +686,14 @@ export function applyCompanyIncome(
   return n;
 }
 
-/** Er det noe nytt å si fra om (anbud, inntekt eller utbytte)? Så appen bare endrer spillet når det trengs */
+/** Er det noe nytt å si fra om (anbud som åpner eller er avgjort, inntekt eller utbytte)? Så appen bare endrer spillet når det trengs */
 export function worldNews(g: GameState, companies: Company[], now = realNow(), dividendYesterday = 0): boolean {
   const day = yesterdayWorld(now);
   if (dividendYesterday > 0 && g.dividendSeen !== day) return true;
   return companies.some(
     (c) =>
       (c.lastResult?.id ?? 0) > (g.tenderSeen ?? 0) ||
+      (!!c.tender && tenderNoticeDue(g, c.tender, now) > 0) ||
       (c.mine && (c.incomeYesterday ?? 0) > 0 && g.companyIncomeSeen?.[String(c.id)] !== day) ||
       // Et avgjort forsøk på å overta der spilleren var med (B-335)
       (!!c.takeoverLast &&

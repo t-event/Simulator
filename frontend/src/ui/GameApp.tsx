@@ -18,7 +18,7 @@ import { maxSpeed, researchForSpeed, researchOptions } from "../game/research";
 import { masteryReady, requestManual, upgradeOptions } from "../game/actions";
 import { buzz } from "./haptics";
 import { nextTutorialStep, skipTutorial, TUTORIAL } from "../game/tutorial";
-import type { GameState, LogEntry } from "../game/types";
+import type { GameState, LogEntry, LogLink } from "../game/types";
 import { fmtClock, fmtKr, fmtKrCompact, fmtNum, fmtRep, fmtT } from "./format";
 import { Handbook } from "./Handbook";
 import { HelpSheet } from "./HelpNow";
@@ -53,7 +53,14 @@ import { importantLog, markAllSeen, unseenCount } from "../game/inbox";
 import { Sales } from "./Sales";
 import { KonsernPage } from "./Konsern";
 import { useOpenTender } from "./openTender";
-import { applyCompanyIncome, applyDividendNews, applyTakeoverNews, applyTenderResults, worldNews } from "../net/world";
+import {
+  applyCompanyIncome,
+  applyDividendNews,
+  applyTakeoverNews,
+  applyTenderNotices,
+  applyTenderResults,
+  worldNews,
+} from "../net/world";
 import { applyKonsern, konsernDiffers } from "../net/konsern";
 import { VIEWS, viewUnlocked, type View } from "./views";
 import { ActivePlayers } from "./ActivePlayers";
@@ -459,12 +466,15 @@ function TopBar({
   onHelp,
   onChat,
   onKonsern,
+  onLink,
   notice,
 }: {
   g: GameState;
   api: GameApi;
   /** Konsernkassa i toppfeltet åpner Konsern → Industrien, der den brukes (B-340) */
   onKonsern: () => void;
+  /** Et varsel med lenke (B-453) */
+  onLink: (to: LogLink) => void;
   /** «Hva gjør jeg nå?» i varsellinja på PC (B-283) */
   onHelp: () => void;
   /** Skiftrapporten (B-338) */
@@ -595,7 +605,17 @@ function TopBar({
           <Icon name="circle-help" />
         </button>
       </div>
-      {notice && <NoticeRow g={g} api={api} onInbox={onInbox} onBoard={onBoard} onHelp={onHelp} onChat={onChat} />}
+      {notice && (
+        <NoticeRow
+          g={g}
+          api={api}
+          onInbox={onInbox}
+          onLink={onLink}
+          onBoard={onBoard}
+          onHelp={onHelp}
+          onChat={onChat}
+        />
+      )}
     </header>
   );
 }
@@ -605,6 +625,7 @@ function NoticeRow({
   g,
   api,
   onInbox,
+  onLink,
   onBoard,
   onHelp,
   onGoals,
@@ -614,6 +635,8 @@ function NoticeRow({
   g: GameState;
   api: GameApi;
   onInbox: () => void;
+  /** Et varsel med lenke fører rett dit (B-453): anbudet åpner Konsern → Industrien */
+  onLink: (to: LogLink) => void;
   onBoard: () => void;
   /** «Hva gjør jeg nå?» (B-283) */
   onHelp: () => void;
@@ -625,7 +648,7 @@ function NoticeRow({
 }) {
   return (
     <div className={`g-notice-row ${className}`.trim()}>
-      <NoticeLine api={api} unseen={unseenCount(g)} latest={latestUnseen(g)} onOpen={onInbox} />
+      <NoticeLine api={api} unseen={unseenCount(g)} latest={latestUnseen(g)} onOpen={onInbox} onLink={onLink} />
       <button
         className="g-book g-board-btn g-help-btn"
         onClick={onHelp}
@@ -749,13 +772,17 @@ function NoticeLine({
   unseen,
   latest,
   onOpen,
+  onLink,
 }: {
   api: GameApi;
   unseen: number;
   latest?: LogEntry;
   onOpen: () => void;
+  onLink: (to: LogLink) => void;
 }) {
   const t = api.toasts[0];
+  // Varselet om et åpent anbud fører rett til selskapet (B-453); det står fortsatt i varsellista
+  const link = t ? (t.fromLog ? t.link : undefined) : unseen > 0 ? latest?.link : undefined;
   // Når varselet har gått ut av linja, står det nyeste usette varselet der fortsatt (B-202). Tallet står på bjella
   const kind = t?.kind ?? (unseen > 0 ? latest?.kind : undefined);
   const text = t ? t.text : unseen > 0 ? (latest?.text ?? "Nye varsler – trykk for å se") : "Ingen nye varsler";
@@ -767,8 +794,18 @@ function NoticeLine({
     >
       <button
         className="g-notice-text"
-        onClick={() => (t && !t.fromLog ? api.dismissToast(t.id) : onOpen())}
-        aria-label={`Varsler${unseen ? ` (${unseen} nye)` : ""}: ${text}`}
+        onClick={() => {
+          if (t && !t.fromLog) return api.dismissToast(t.id);
+          if (!link) return onOpen();
+          // Varselet er lest når spilleren har fulgt det; ellers fører neste trykk dit igjen i stedet for til lista
+          const seen = t ? t.logId : latest?.id;
+          if (t) api.dismissToast(t.id);
+          if (seen) api.act((gg) => void (gg.inboxSeenId = Math.max(gg.inboxSeenId ?? 0, seen)));
+          onLink(link);
+        }}
+        aria-label={
+          link ? `${text} Trykk for å gå til selskapet.` : `Varsler${unseen ? ` (${unseen} nye)` : ""}: ${text}`
+        }
       >
         <span className="g-notice-bell" aria-hidden="true">
           <Icon name="bell" />
@@ -783,6 +820,7 @@ function NoticeLine({
           )}
           {text}
         </span>
+        {link && <Icon name="chevron-right" className="g-notice-go" />}
       </button>
       {/* Krysset fjerner alle varsler og tallet på bjella (B-171). Lista bak bjella har dem fortsatt */}
       {(t || unseen > 0) && (
@@ -950,6 +988,7 @@ export function GameApp() {
     if (g && worldNews(g, w.companies, realNow(), yesterday + contribution))
       act((gg) => {
         applyTenderResults(gg, w.companies);
+        applyTenderNotices(gg, w.companies);
         applyTakeoverNews(gg, w.companies);
         applyCompanyIncome(gg, w.companies);
         applyDividendNews(gg, yesterday, realNow(), contribution);
@@ -1038,6 +1077,11 @@ export function GameApp() {
     api.clearToasts();
     setInboxOpen(true);
   };
+  /** Et varsel med lenke (B-453): anbudet står under Konsern → Industrien */
+  const openLink = (to: LogLink) => {
+    setInboxOpen(false);
+    if (to === "industri") go("konsern", "industri");
+  };
   /** Åpner fagboka på et kapittel (eller det første uleste) og merker det som lest */
   const openBook = (chapter?: string) => {
     const start = chapter ?? g.knowledge.find((k) => !g.readChapters.includes(k)) ?? null;
@@ -1077,6 +1121,7 @@ export function GameApp() {
             onBook={() => openBook()}
             onResearch={() => go("forskning")}
             onKonsern={() => go("konsern", "industri")}
+            onLink={openLink}
             onHelp={() => setHelpOpen(true)}
             onChat={() => setChatOpen(true)}
             onSettings={() => setSettingsOpen(true)}
@@ -1156,6 +1201,7 @@ export function GameApp() {
               g={g}
               api={api}
               onInbox={openInbox}
+              onLink={openLink}
               onBoard={() => setBoardOpen(true)}
               onHelp={() => setHelpOpen(true)}
               onGoals={() => go("mal")}
@@ -1232,7 +1278,7 @@ export function GameApp() {
       {!modalOpen && <RecipeGuideCoach g={g} act={act} go={go} />}
 
       {bookOpen && <Handbook g={g} act={act} initial={bookChapter} onClose={() => setBookOpen(false)} />}
-      {inboxOpen && <InboxSheet g={g} act={act} onClose={() => setInboxOpen(false)} />}
+      {inboxOpen && <InboxSheet g={g} act={act} onClose={() => setInboxOpen(false)} onLink={openLink} />}
       {helpOpen && <HelpSheet g={g} stats={stats} go={go} onClose={() => setHelpOpen(false)} />}
       {goalsOpen && !isPc && (
         <GoalsSheet
