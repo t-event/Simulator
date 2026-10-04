@@ -6,6 +6,8 @@ import { CREDIT_HELP, creditLimit, currentOrder, recipeEstimate, scrapStopHelp }
 import { summerStart, summerStop, yearOf } from "../game/calendar";
 import { hasMoulds, MOULD, mouldCost, mouldWear } from "../game/mould";
 import { pensionSoon } from "../game/pension";
+import { neighborHintDue } from "../game/building";
+import { hasUpkeep, renewCost, repairerRenews, UPKEEP, upkeepWear } from "../game/upkeep";
 import {
   bonusGap,
   day,
@@ -41,7 +43,7 @@ import {
  * Rådene på Verket (B-064): det viktigste spilleren bør gjøre nå, med fanen rådet peker til. Brukes også til «!» på
  * Marked og Folk i menyen (B-202), så menyen og rådene alltid sier det samme.
  */
-export type Anchor = "vedlikehold" | "mal" | "rensing";
+export type Anchor = "vedlikehold" | "mal" | "rensing" | "bygg";
 
 export interface Hint {
   text: string;
@@ -195,6 +197,13 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
       text: `Kokillene i strengstøpingen er ${Math.floor(mouldWear(g) * 100)} % slitt, og strengen bryter lettere gjennom. Trykk her og så «Bytt kokiller» (${fmtKr(mouldCost(g))}).`,
       anchor: "vedlikehold",
     });
+  // Slitasjen på storverket (B-455): reparatøren fornyer selv hvis han bytter foringen; ellers må spilleren
+  if (hasUpkeep(g) && upkeepWear(g) >= UPKEEP.warnAt && !repairerRenews(g))
+    out.push({
+      text: `Storverket er ${Math.floor(upkeepWear(g) * 100)} % slitt, og ovnene havarerer oftere. Trykk her og så «Forny anlegget» (${fmtKr(renewCost(g))}).`,
+      anchor: "vedlikehold",
+      ...(upkeepWear(g) >= 1 ? { tone: "heat" as const } : {}),
+    });
   // Havari (B-281): reparasjonen skjer av seg selv, men spillerne trodde de måtte trykke på noe
   const broken = g.furnaces.findIndex((f) => g.minute < f.downUntilMin && /^Havari/.test(f.downReason ?? ""));
   if (broken >= 0) {
@@ -335,6 +344,13 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
   }
   if (g.stage >= 1 && stats.staffCount === 0)
     out.push({ text: "Nå har du plass til ansatte. Med flere folk kan verket gå flere skift.", view: "folk" });
+  // Nabolaget (B-455): store verk hadde milliarder i kassa uten å vite at byggene fantes – til kortet er sett én gang
+  const nb = neighborHintDue(g);
+  if (nb)
+    out.push({
+      text: `Kassa holder til ${nb.project.name.toLowerCase()} (${fmtKr(nb.price)}) – store bygg i byen gir en liten fordel for alltid og står i bildet av verket. Trykk her.`,
+      anchor: "bygg",
+    });
   // Det alvorligste først (B-406); ellers samme rekkefølge som over
   const rank = (h: Hint) => (h.tone === "critical" ? 0 : h.tone === "heat" ? 1 : 2);
   return out

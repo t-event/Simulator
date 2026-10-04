@@ -8480,7 +8480,7 @@ trykk går til Industrien, «Lønner det seg?» med 30 mill. kr, knappen i varse
 Endringslogg: ja.
 
 ## B-454 Verkskontoen: analyse og forslag (2026-10-04)
-Status: forslag – venter på eieren. Bygger på B-331 (spor B), B-336 og B-381.
+Status: bygget i B-455 (eieren: «bygg alt»). Bygger på B-331 (spor B), B-336 og B-381.
 Bakgrunn: eieren 3.10 ville ha flere valg for store hjemmeverk når nabolaget (28 mrd.) er kjøpt eller ikke brukt.
 Funn (21 storverk, 4.10): kassa median 9,5 mrd., nabolaget i snitt 2,4 av 6 bygg, 7 har ingen – fire av dem med
 9,5–45 mrd. i kassa. Kortet står nederst på Verket → Anlegg uten råd eller «!», så det største problemet er synlighet.
@@ -8490,4 +8490,33 @@ Forslag (docs/VERKSKONTO-FORSLAG.md): V1 råd og «!» om nabolaget (nå), V2 na
 stiftelse med titler og pynt i stigende trinn, V4 slitasje og fornyelse (senere). Ikke anbefalt: kostnadskutt for kroner,
 kroner til fagpoeng, overføring til konsernkassa.
 Endringslogg: nei.
+
+## B-455 Verkskontoen bygget: råd om nabolaget, tre trinn, stiftelsen og slitasje (2026-10-05)
+Status: gjelder. Bygger på B-454 (forslaget), B-336 og B-381.
+Bakgrunn: eieren 5.10: «bygg alt» om V1–V4 i docs/VERKSKONTO-FORSLAG.md. De åpne spørsmålene ble besvart med
+anbefalingene: 3 × og 9 × uten ny effekt, stiftelsen bare i eget spill, slitasjen i en lett versjon.
+Beslutning:
+- **V1 – råd og «!»:** når kassa holder til det neste nabolagsbygget, ingenting bygges og kortet «Byggeprosjekter» ikke er
+  sett (`g.buildSeen`), kommer et råd på Verket (trykk går til kortet på Anlegg) og «!» på Verket i menyen. Når kortet er
+  sett, kommer det ikke igjen.
+- **V2 – nabolaget i tre trinn:** når alle seks byggene står, kan hvert utvides til trinn 2 (3 × prisen) og trinn 3 (9 ×),
+  i rekkefølge, ett om gangen, 2 døgn ekstra byggetid per trinn. Ingen ny fordel – byggene blir større (og lysere på trinn
+  3) i bildet. I alt 28 + 84 + 252 = 364 mrd. (`g.neighborhood.levels`).
+- **V3 – verkets stiftelse:** når hele nabolaget står: gaver til byen i trinn (1, 2, 5, 10, 20, 50, 100, 200, 500,
+  1 000 mrd., deretter dobling), hvert med en tittel («Velgjører» … «Byens grunnstein»), prestasjoner og pynt på åsen (park,
+  fontene, statue, gullstatue). Bare i eget spill – ikke på profilen (`g.foundation`).
+- **V4 – slitasje og fornyelse (lett):** bare storverket. Slites 1/180 per spilldøgn (ikke i sommerstansen), høyst 150 %.
+  Over 50 % havarerer ovnene oftere (1 + 2 × (slitasje − 0,5)). Råd og beskjed ved 60 %; reparatøren fornyer selv ved 70 %
+  (samme bryter som foringen) når kassa har dobbelt beløpet. Fornyelsen koster 20 % av utstyrets pris × slitasjen
+  (`game/upkeep.ts`, `g.upkeep`). Testspilleren (flink og nybegynner) fornyer ved rådet.
+- **Alt føres som `investering`**, som `contribution_margin_raw` ikke teller: ingen av kjøpene øker eller senker bidraget
+  til konsernkassa, og lokal kasse gir fortsatt ingen makt i verden (B-190, B-323). Posten heter nå «Kjøp av utstyr, bygg
+  og gaver».
+- Nye prestasjoner i gruppen «Byen»: Nabolaget (1, 6, 12, 18 trinn) og Verkets stiftelse (1, 3, 5, 8, 10 gaver).
+Krever konto: nei (regel 1, eget spill i spilltid).
+Testet: nye tester i `npm test` (råd og «sett», trinn og priser, ingen ny fordel, investering, stiftelsens priser og
+titler; slitasje over 180 døgn, risiko, fornyelsens pris, gammel lagring); `balance.ts` og `--daglig 15` (exit 0),
+`--storovn 330`; Chromium 320/390/1366 px: «!» på Verket forsvinner når kortet er sett, kortet med trinn og stiftelsen,
+raden «Anlegget» under Vedlikehold, rådet om slitasje, byggene og stiftelsen i anleggsbildet, ingen sidelengs scrolling.
+Endringslogg: ja.
 

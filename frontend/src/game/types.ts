@@ -683,7 +683,18 @@ export interface GameState {
   /** Døgnet en ny støpemaskin ble ferdig, så den kjøres inn (B-336) */
   castingRampFromDay?: number;
   /** Nabolagsprosjektene (B-336): det som er bygget, og det som bygges nå */
-  neighborhood: { built: NeighborId[]; building: { id: NeighborId; readyMin: number } | null };
+  neighborhood: {
+    built: NeighborId[];
+    building: { id: NeighborId; readyMin: number; level?: number } | null;
+    /** Trinnet til utvidede bygg (B-455): 2 eller 3; mangler = trinn 1 */
+    levels?: Partial<Record<NeighborId, number>>;
+  };
+  /** Spilleren har sett kortet «Byggeprosjekter» (B-455): rådet og «!» om nabolaget kommer ikke igjen */
+  buildSeen?: boolean;
+  /** Verkets stiftelse (B-455): trinnet og alt som er gitt til byen */
+  foundation?: { tier: number; given: number };
+  /** Slitasjen på storverket (B-455): 0 = nytt, 1 = utslitt (høyst 1,5); mangler = nytt */
+  upkeep?: { wear: number };
   /** Siste avgjorte overtakelse spilleren har fått beskjed om (B-335), tidspunktet fra serveren; tom før første */
   takeoverSeen: string;
   /** Per selskap (id): den siste UTC-dagen eieren har fått beskjed om inntekten for (B-258) */

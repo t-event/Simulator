@@ -6,6 +6,9 @@
  *   støpemaskinen inn: 70 % fart første døgnet, full fart etter 5 døgn.
  * - Nabolagsprosjekter: store, synlige bygg i byen rundt storverket, for penger hjemme. Hvert gir en liten, varig fordel,
  *   tar noen døgn å bygge og står i anleggsbildet. Ett om gangen, i rekkefølge.
+ * - Verkskontoen (B-455): når alle seks står, kan de utvides to ganger (trinn 2 = 3 × prisen, trinn 3 = 9 ×) uten ny
+ *   effekt – bare større bygg i bildet – og verkets stiftelse gir penger til byen i trinn med stigende pris (titler og pynt).
+ *   Alt føres som investering, som marginen i bidraget ikke teller (B-318), så penger hjemme gir aldri mer i verden.
  * Alt gjelder bare eget spill (spilltid, B-323) og krever ikke konto.
  */
 import type { GameState, NeighborId } from "./types";
@@ -82,6 +85,93 @@ export function nextNeighbor(g: GameState): NeighborProject | null {
   return NEIGHBOR_PROJECTS.find((p) => !hasNeighbor(g, p.id)) ?? null;
 }
 
+/** Trinnene i nabolaget (B-455): 1 = bygget, 2 og 3 = utvidet. Prisen ganges med dette, og hvert trinn tar 2 døgn mer */
+export const NEIGHBOR_LEVELS = { max: 3, priceFactor: [1, 3, 9], extraDays: 2 };
+
+/** Trinnet et bygg står på: 0 = ikke bygget, 1–3 */
+export function neighborLevel(g: GameState, id: NeighborId): number {
+  if (!hasNeighbor(g, id)) return 0;
+  return Math.max(1, Math.min(NEIGHBOR_LEVELS.max, g.neighborhood?.levels?.[id] ?? 1));
+}
+
+/** Summen av trinnene (0–18): prestasjonene og bildet */
+export function neighborSteps(g: GameState): number {
+  return NEIGHBOR_PROJECTS.reduce((a, p) => a + neighborLevel(g, p.id), 0);
+}
+
+export interface NeighborStep {
+  project: NeighborProject;
+  /** Trinnet som bygges: 1 = nytt bygg, 2–3 = utvidelse */
+  level: number;
+  price: number;
+  days: number;
+}
+
+/** Prisen og byggetiden for et bygg på et trinn */
+export function neighborStep(project: NeighborProject, level: number): NeighborStep {
+  return {
+    project,
+    level,
+    price: project.price * NEIGHBOR_LEVELS.priceFactor[level - 1],
+    days: project.days + NEIGHBOR_LEVELS.extraDays * (level - 1),
+  };
+}
+
+/**
+ * Det neste som kan bygges i nabolaget: først de seks byggene i rekkefølge, så alle til trinn 2, så alle til trinn 3
+ * (gradvis synlighet: utvidelsene vises først når hele nabolaget står). Null når alt er på trinn 3.
+ */
+export function nextNeighborStep(g: GameState): NeighborStep | null {
+  for (let level = 1; level <= NEIGHBOR_LEVELS.max; level++) {
+    const p = NEIGHBOR_PROJECTS.find((x) => neighborLevel(g, x.id) < level);
+    if (p) return neighborStep(p, level);
+  }
+  return null;
+}
+
+/** Alle seks byggene står (utvidelsene og stiftelsen kommer da fram) */
+export function neighborhoodDone(g: GameState): boolean {
+  return NEIGHBOR_PROJECTS.every((p) => hasNeighbor(g, p.id));
+}
+
+/**
+ * Verkets stiftelse (B-455): penger til byen i trinn med stigende pris. Hvert trinn gir en tittel, en prestasjon og pynt i
+ * bildet – ingen effekt på drift, margin eller andre spillere. Etter tabellen dobles prisen for hvert trinn.
+ */
+export const FOUNDATION = {
+  prices: [1e9, 2e9, 5e9, 1e10, 2e10, 5e10, 1e11, 2e11, 5e11, 1e12],
+  titles: [
+    "Velgjører",
+    "Byens venn",
+    "Mesen",
+    "Stor mesen",
+    "Æresborger",
+    "Landets mesen",
+    "Filantrop",
+    "Stor filantrop",
+    "Legendarisk giver",
+    "Byens grunnstein",
+  ],
+};
+
+/** Trinnet i stiftelsen (0 = ingen gave ennå) */
+export function foundationTier(g: GameState): number {
+  return g.foundation?.tier ?? 0;
+}
+
+/** Prisen på trinn nr. `tier` (fra 1) */
+export function foundationPrice(tier: number): number {
+  const p = FOUNDATION.prices;
+  return tier <= p.length ? p[tier - 1] : p[p.length - 1] * 2 ** (tier - p.length);
+}
+
+/** Tittelen på et trinn (fra 1); etter tabellen telles «Byens grunnstein» opp */
+export function foundationTitle(tier: number): string {
+  const t = FOUNDATION.titles;
+  if (tier <= 0) return "";
+  return tier <= t.length ? t[tier - 1] : `${t[t.length - 1]} ${tier - t.length + 1}`;
+}
+
 /** Omdømmet synker ikke under dette (konserthuset) */
 export function reputationFloor(g: GameState): number {
   return hasNeighbor(g, "konserthus") ? 70 : 0;
@@ -95,6 +185,17 @@ export function showBuildCard(g: GameState): boolean {
     !!g.bigBuild ||
     !!g.neighborhood?.building ||
     (g.neighborhood?.built.length ?? 0) > 0 ||
+    foundationTier(g) > 0 ||
     (!!next && g.cash >= next.price * 0.5)
   );
+}
+
+/**
+ * Rådet om nabolaget (B-455, V1): kassa holder til det neste bygget, ingenting bygges, og spilleren har ikke sett kortet
+ * «Byggeprosjekter» ennå. Gir også «!» på Verket. Mange store verk hadde milliarder i kassa uten å vite at byggene fantes.
+ */
+export function neighborHintDue(g: GameState): NeighborStep | null {
+  if (g.stage < 4 || g.buildSeen || g.neighborhood?.building) return null;
+  const step = nextNeighborStep(g);
+  return step && g.cash >= step.price ? step : null;
 }

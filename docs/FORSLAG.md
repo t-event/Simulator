@@ -19,9 +19,8 @@ til «Avgjort» nederst).
   Om gamle anbud også skal dempe budstyrke og Kontroll (begrensningen i B-450), tas senere med ekte data.
 - **Verkskontoen – mer å bruke penger på hjemme (eieren 3.10):** nabolagsprosjektene koster til sammen 28 mrd., og store
   hjemmeverk har ofte ingen av dem. Etter dem trengs flere valg for store hjemmeverk, mens kassa fortsatt kan vokse fritt
-  (B-381). Lokal kasse skal ikke gi makt mellom spillere (B-190, B-323). Analysen er skrevet (B-454,
-  `docs/VERKSKONTO-FORSLAG.md`): V1 råd om nabolaget nå, V2 nabolaget i tre trinn, V3 verkets stiftelse, V4 slitasje –
-  venter på eierens svar på fire spørsmål.
+  (B-381). Lokal kasse skal ikke gi makt mellom spillere (B-190, B-323). Bygget i B-455 (V1–V4, eieren: «bygg alt»).
+  Mulig senere: vise stiftelsens tittel på profilen (krever at serveren leser trinnet, vurderes mot B-419).
 - **Beskytt main (B-397):** slå på «Require status checks» for `sjekker` under Settings → Branches i GitHub.
 - **Anbefalinger fra kodegjennomgangen (B-398), til beslutningene etter 2.10:** behold marginhopp som varsling til de
   falske positive er kartlagt (C og D viser hvorfor); prøv et prisbasert margintak i skygge først; sett krav til de nye

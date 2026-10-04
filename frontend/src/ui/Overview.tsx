@@ -399,7 +399,7 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
       setSheet("ovn");
       return;
     }
-    setTab(id === "vedlikehold" ? "anlegg" : "oversikt");
+    setTab(id === "vedlikehold" || id === "bygg" ? "anlegg" : "oversikt");
     setScrollTo((prev) => ({ id, n: (prev?.n ?? 0) + 1 }));
   };
   const openMaintenance = () => openAnchor("vedlikehold");
@@ -528,7 +528,7 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
           </div>
           {/* Byggetid og nabolaget (B-336) */}
           {showBuildCard(g) && (
-            <div className="g-col">
+            <div className="g-col" id="bygg">
               <BuildCard g={g} act={act} />
             </div>
           )}

@@ -84,6 +84,7 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Kontroll over selskaper og investeringer (fordelen i fornyelsesanbudet er tatt bort, B-337) | Ja | Regel 3 og 7 | B-334, B-370 |
 | Oppkjøp av strategiske selskaper (oppkjøpsbud, motbud, utfall; på fra 29.9.2026) og betaling til eieren for dagene hen mister | Ja | Regel 3 og 7 | B-335, B-339, B-371–B-375 |
 | Byggetid og innkjøring for store kjøp, nabolagsprosjekter hjemme | Nei | Regel 1: eget spill i spilltid | B-336 |
+| Verkskontoen: nabolaget i tre trinn, verkets stiftelse, slitasje og fornyelse | Nei | Regel 1: eget spill i spilltid | B-455 |
 | Skiftrapporten: felles chat for alle spillere | Ja | Regel 3: viser andre spillere og brukernavnet ditt | B-338 |
 | Profiler: profilarket når man trykker på et brukernavn (tittel, merker, konsernverdi og verk, selskaper, sesonger, sist aktiv) | Ja | Regel 3: viser andre spillere | B-419 |
 | Min profil: kort tekst, profilmerke og tre utvalgte prestasjoner | Ja | Regel 3: vises for andre spillere | B-420 |

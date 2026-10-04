@@ -699,45 +699,99 @@ function LadleAnnex({ x, glow }: { x: number; glow: boolean }) {
 }
 
 /** Nabolaget (B-336): små bygg på åsene rundt storverket, ett for hvert prosjekt som er bygget */
-function Neighborhood({ built, lit }: { built: readonly string[]; lit: boolean }) {
+function Neighborhood({
+  built,
+  levels,
+  lit,
+}: {
+  built: readonly string[];
+  /** Trinnet til utvidede bygg (B-455): større bygg i bildet */
+  levels: Partial<Record<string, number>>;
+  lit: boolean;
+}) {
   const on = (id: string) => built.includes(id);
-  const fill = "#3a4b5e";
+  const lvl = (id: string) => (on(id) ? Math.max(1, levels[id] ?? 1) : 0);
+  // Utvidet bygg (B-455): større rundt foten, og lysere på trinn 3
+  const grow = (id: string, cx: number, cy: number) => {
+    const k = [1, 1, 1.15, 1.3][lvl(id)];
+    return k === 1 ? undefined : `translate(${cx} ${cy}) scale(${k}) translate(${-cx} ${-cy})`;
+  };
+  const fillOf = (id: string) => (lvl(id) >= 3 ? "#4d6178" : "#3a4b5e");
   const win = lit ? "#f3d27a" : "#566779";
   return (
     <g aria-hidden="true">
-      {on("bro") && <path d="M6 141 Q 38 122 70 141 M6 141 L70 141" fill="none" stroke="#8a97a6" strokeWidth={1.4} />}
-      {on("konserthus") && (
+      {on("bro") && (
         <g>
+          <path d="M6 141 Q 38 122 70 141 M6 141 L70 141" fill="none" stroke="#8a97a6" strokeWidth={1.4} />
+          {/* Utvidet bro: tårn på trinn 2, lys langs brua på trinn 3 */}
+          {lvl("bro") >= 2 && (
+            <g fill="#8a97a6">
+              <rect x={21} y={124} width={1.6} height={17} />
+              <rect x={53} y={124} width={1.6} height={17} />
+            </g>
+          )}
+          {lvl("bro") >= 3 && [14, 26, 38, 50, 62].map((x) => <circle key={x} cx={x} cy={139.5} r={0.8} fill={win} />)}
+        </g>
+      )}
+      {on("konserthus") && (
+        <g transform={grow("konserthus", 35, 136)}>
           <path d="M24 134 Q 34 120 46 134 Z" fill="#b9c4cf" />
-          <rect x={24} y={133} width={22} height={3} fill={fill} />
+          <rect x={24} y={133} width={22} height={3} fill={fillOf("konserthus")} />
         </g>
       )}
       {on("sykehus") && (
-        <g>
-          <rect x={70} y={120} width={14} height={14} fill={fill} />
+        <g transform={grow("sykehus", 77, 134)}>
+          <rect x={70} y={120} width={14} height={14} fill={fillOf("sykehus")} />
           <rect x={75.5} y={122} width={3} height={8} fill="#c9463d" />
           <rect x={73} y={124.5} width={8} height={3} fill="#c9463d" />
         </g>
       )}
       {on("idrettshall") && (
-        <g>
-          <path d="M404 138 Q 415 128 426 138 Z" fill={fill} />
+        <g transform={grow("idrettshall", 415, 138)}>
+          <path d="M404 138 Q 415 128 426 138 Z" fill={fillOf("idrettshall")} />
           <rect x={408} y={134} width={3} height={2} fill={win} />
           <rect x={419} y={134} width={3} height={2} fill={win} />
         </g>
       )}
       {on("kulturhus") && (
-        <g>
-          <path d="M432 138 L432 128 L448 124 L448 138 Z" fill={fill} />
+        <g transform={grow("kulturhus", 440, 138)}>
+          <path d="M432 138 L432 128 L448 124 L448 138 Z" fill={fillOf("kulturhus")} />
           <rect x={436} y={131} width={8} height={2} fill={win} />
         </g>
       )}
       {on("skole") && (
-        <g>
-          <rect x={454} y={129} width={18} height={9} fill={fill} />
-          <rect x={461} y={123} width={4} height={6} fill={fill} />
+        <g transform={grow("skole", 463, 138)}>
+          <rect x={454} y={129} width={18} height={9} fill={fillOf("skole")} />
+          <rect x={461} y={123} width={4} height={6} fill={fillOf("skole")} />
           <rect x={457} y={132} width={3} height={2} fill={win} />
           <rect x={466} y={132} width={3} height={2} fill={win} />
+        </g>
+      )}
+    </g>
+  );
+}
+
+/** Verkets stiftelse (B-455): park (trinn 1), fontene (3), statue (5) og gullstatue (8) på åsen */
+function Foundation({ tier, x, y }: { tier: number; x: number; y: number }) {
+  return (
+    <g aria-hidden="true" transform={`translate(${x} ${y})`}>
+      {[-6, 0, 6].map((dx) => (
+        <g key={dx}>
+          <rect x={dx - 0.4} y={-3} width={0.8} height={3} fill="#5a4632" />
+          <circle cx={dx} cy={-4.5} r={2.4} fill="#3f7a4a" />
+        </g>
+      ))}
+      {tier >= 3 && (
+        <g>
+          <ellipse cx={-12} cy={-0.6} rx={3.4} ry={1.1} fill="#8fb8d8" />
+          <path d="M-12 -1 v -3" stroke="#cfe6f5" strokeWidth={0.7} />
+        </g>
+      )}
+      {tier >= 5 && (
+        <g fill={tier >= 8 ? "#e0b030" : "#9aa5b1"}>
+          <rect x={10} y={-2} width={4} height={2} />
+          <rect x={11.2} y={-6} width={1.6} height={4} />
+          <circle cx={12} cy={-7} r={1} />
         </g>
       )}
     </g>
@@ -891,7 +945,10 @@ export function PlantScene({ g, stats, onStation }: Props) {
       )}
 
       {/* Nabolaget på åsene (B-336) */}
-      {stage >= 4 && g.neighborhood?.built.length > 0 && <Neighborhood built={g.neighborhood.built} lit={night} />}
+      {stage >= 4 && g.neighborhood?.built.length > 0 && (
+        <Neighborhood built={g.neighborhood.built} levels={g.neighborhood.levels ?? {}} lit={night} />
+      )}
+      {stage >= 4 && (g.foundation?.tier ?? 0) > 0 && <Foundation tier={g.foundation!.tier} x={384} y={141} />}
 
       {/* Større transformator (B-330): kraftledning fra masta på åsen inn til smeltehallen */}
       {stage >= 3 && has(g, "trafo") && <PowerLine x={stage >= 4 ? 382 : 462} y={96} toX={250} toY={top + 16} />}

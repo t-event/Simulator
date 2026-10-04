@@ -147,7 +147,8 @@ frontend/src/
     konsern.ts   Datterverk, byggeprosjekter i ekte tid og flaggskipet (B-209); vises av ui/Konsern.tsx
     konsernWorld.ts Konsernet på serveren speilet: priser, køen, nivåstigen, settleWorld (B-325, B-326; SQL i 064)
     regions.ts   Verdenskartets seks regioner og standardregionen for nye verk (B-333; SQL i 066)
-    building.ts  Byggetid og innkjøring for store kjøp, og nabolaget på storverket (B-336); kortet i ui/Neighborhood.tsx
+    building.ts  Byggetid og innkjøring for store kjøp, nabolaget i tre trinn og verkets stiftelse (B-336, B-455);
+                 kortet i ui/Neighborhood.tsx   upkeep.ts  Slitasje og fornyelse av storverket (B-455), raden i ui/Maintenance.tsx
     control.ts   Utbyttepolitikken, forsvarsfondet og Kontroll: tall og ord appen viser (B-334; SQL i 067)
     world.ts     Felles hendelser i motoren og sesongfordel (B-129)
     environment.ts Utslipp, renseanlegg i trinn, havari og bøter (B-263); panelet står i ui/Upgrades.tsx (CleanerPanel)
@@ -242,7 +243,7 @@ docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretn
                OKONOMI-KONTROLL.md (kontrollen av modellen med tall og svakheter, B-324),
                KONSERN-FORSLAG.md (nivåer, priser fra konsernkassa og aktivitetskrav, bygget B-325–B-328, og simuleringen B-329),
                PROFIL-FORSLAG.md (profiler, Min profil, privatmeldinger og adminpanelet, B-419),
-               VERKSKONTO-FORSLAG.md (mer å bruke penger på hjemme, V1–V4, venter på eieren, B-454),
+               VERKSKONTO-FORSLAG.md (mer å bruke penger på hjemme, V1–V4, bygget B-455),
                KONTROLL-FORSLAG.md (verdenskart, utbyttepolitikk, Kontroll, overtakelser og pengene hjemme, B-331, godkjent B-332),
                VERKSJEF-FORSLAG.md (verksjefer, besvart; V1 ferdig spesifisert i avsnitt 10, bygges etter V0/K-1, B-409),
                REKONSTRUKSJON-FORSLAG.md (rekonstruksjon etter konkurs, modellene A–E – venter på eierens valg, B-409),
@@ -612,6 +613,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Knappene ved varsellinja åpner ark** (B-286): hjelp, Mål og topplista. På mobil åpner `go("mal")` arket; på PC er Mål en side.
 - **Varsler med lenke** (B-453): `log(g, tekst, art, link)` – en linje med `link` fører dit ved trykk i varsellinja (pil) og
   i varsellista («Gå til selskapet»). Nye mål legges i `LogLink` (`types.ts`), `openLink` (`GameApp`) og `LINK_LABEL` (`Inbox.tsx`).
+- **Kjøp hjemme og bidraget** (B-455): nabolaget, stiftelsen og fornyelsen føres som `investering`, som
+  `contribution_margin_raw` ikke teller. Nye pengesluk hjemme skal ikke gjøre verket billigere å drive eller selge mer (da
+  øker marginen og bidraget i ekte tid) – før dem som `investering` eller i en post serveren ikke leser. Slitasjen
+  (`upkeepRisk`) ganges inn i havaririsikoen i `heatEvents`; reparatøren fornyer i `upkeepHour`.
 - **Kontrollromsrekorden på topplista** (B-295) tas fra `state.controlBest` av triggeren `note_control` på `saves` inn i
   `records.best_control` – bare for kontoer som alt har en rekordrad, og bare opptil 5 000 poeng. Endres poengene i
   kontrollrommet mye, må grensen følge med.

@@ -12,7 +12,7 @@ export const COST_NAMES: Record<CostCategory, string> = {
   renter: "Renter",
   bot: "Bøter",
   konsern: "Konsernkostnader",
-  investering: "Kjøp av utstyr og verk",
+  investering: "Kjøp av utstyr, bygg og gaver",
   annet: "Annet",
 };
 

@@ -1,7 +1,8 @@
 # Forslag: verkskontoen – mer å bruke penger på hjemme (B-454)
 
 Eieren 3.10: nabolagsprosjektene koster 28 mrd. til sammen, og store hjemmeverk har ofte ingen av dem. Det trengs flere
-valg for store hjemmeverk, mens kassa fortsatt kan vokse fritt (B-381). Dette er analysen; ingenting er bygget.
+valg for store hjemmeverk, mens kassa fortsatt kan vokse fritt (B-381). **Bygget i B-455** (eieren 5.10: «bygg alt»), med
+anbefalingene som svar: 3 × og 9 × uten ny effekt, stiftelsen bare i eget spill, slitasjen i en lett versjon.
 
 ## 1. Ekte tall (4.10.2026, 21 storverk som har lagret de siste 14 dagene)
 

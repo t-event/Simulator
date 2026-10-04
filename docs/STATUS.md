@@ -20,6 +20,13 @@ regnes av serveren i ekte tid.
 
 - Fra garasje til storverk (nivå 0–4) med forskning, folk, strøm, resepter, kontrakter, vinter, fellesferie, utslipp,
   kokiller, byggetid for store kjøp (fra 50 mill.) og nabolagsprosjekter. Balansen sjekkes av `balance.ts` (CI).
+- **Verkskontoen på storverket** (B-455): råd og «!» på Verket når kassa holder til et nabolagsbygg og kortet
+  «Byggeprosjekter» ikke er sett (`neighborHintDue`). Når alle seks byggene står, kan de utvides til trinn 2 (3 × prisen)
+  og 3 (9 ×) uten ny fordel, og **verkets stiftelse** gir penger til byen i trinn (1, 2, 5, 10 … mrd., så dobling) for
+  titler, prestasjoner og pynt. **Slitasje:** storverket slites over 180 spilldøgn (ikke i sommerstansen); over 50 %
+  havarerer ovnene oftere (helt slitt: 2 ×). Fornyelsen koster 20 % av utstyrets pris × slitasjen; reparatøren fornyer
+  selv ved 70 % med «Reparatøren bytter foringen» på. Alt dette føres som `investering`, som marginen i bidraget ikke
+  teller.
 - Ingen hendelseskort om forhold mellom ansatte (trakassering, diskriminering, varsling) – tatt ut etter eierens ønske
   (B-444).
 - **Kassa har ikke tak** (B-381). Den kan vokse fritt – den gir ingen makt i verden.
