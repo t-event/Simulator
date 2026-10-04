@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 377 – 2026-10-05: Verkskontoen bygget (B-455)
+
+**Brukeren ba om:** «bygg alt» – V1–V4 fra verkskonto-forslaget.
+
+**Gjort:** `game/building.ts` (trinn, `nextNeighborStep`, stiftelsen, `neighborHintDue`), `game/upkeep.ts` (slitasje og
+fornyelse), handlingene `buildNeighbor` (også utvidelser), `donateFoundation`, `renewPlant`; råd på Verket, «!» på Verket,
+kortet «Byggeprosjekter» med trinn og stiftelsen, raden «Anlegget» under Vedlikehold, byggene større per trinn og
+stiftelsen i anleggsbildet, prestasjonsgruppen «Byen», testspilleren fornyer.
+
+**Testet:** se B-455.
+
+**Gjenstår:** resultatet av slagganbudet og oppkjøpet 5.10 (påminnelser); ryddingen av meldinger (108) før 1.11;
+skyggerapporten rundt 9.10; verv en venn og delingsknapp venter på eierens valg.
+
 ## Økt 376 – 2026-10-05: Verkskontoen – analyse (B-454)
 
 **Brukeren ba om:** «fortsett» – neste punkt som ikke venter på eieren: analysen av mer å bruke penger på hjemme.

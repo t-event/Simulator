@@ -19,6 +19,7 @@ import { masteryReady, requestManual, upgradeOptions } from "../game/actions";
 import { buzz } from "./haptics";
 import { nextTutorialStep, skipTutorial, TUTORIAL } from "../game/tutorial";
 import type { GameState, LogEntry, LogLink } from "../game/types";
+import { neighborHintDue } from "../game/building";
 import { fmtClock, fmtKr, fmtKrCompact, fmtNum, fmtRep, fmtT } from "./format";
 import { Handbook } from "./Handbook";
 import { HelpSheet } from "./HelpNow";
@@ -1146,16 +1147,24 @@ export function GameApp() {
               const director = !!g.konsern?.director?.active;
               // Marked og Folk: «!» når et råd på Verket peker dit – samme regler som rådene (B-202)
               // Konsern: «!» når et anbud er åpent og du ikke har bydd (B-226, B-253)
+              // Verket: «!» når kassa holder til et nabolagsbygg spilleren ikke vet om (B-455), til kortet er sett
+              const nb = v.id === "verket" ? neighborHintDue(g) : null;
               const alertHint =
                 v.id === "marked" || v.id === "folk"
                   ? navAlerts.get(v.id)
-                  : v.id === "konsern" && tender
+                  : nb
                     ? {
-                        text: `Anbud på ${tender.name.toLowerCase()} er åpent`,
-                        view: "konsern" as View,
-                        sub: "industri",
+                        text: `Kassa holder til ${nb.project.name.toLowerCase()}`,
+                        view: "verket" as View,
+                        sub: "anlegg",
                       }
-                    : undefined;
+                    : v.id === "konsern" && tender
+                      ? {
+                          text: `Anbud på ${tender.name.toLowerCase()} er åpent`,
+                          view: "konsern" as View,
+                          sub: "industri",
+                        }
+                      : undefined;
               const badge =
                 v.id === "salg"
                   ? g.contracts.filter((c) => c.status === "tilbud" && (!director || c.landmark)).length

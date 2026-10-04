@@ -56,7 +56,18 @@ import {
   wildcardUse,
 } from "./plant";
 import { newGradesAt, startRecipeGuide } from "./recipeGuide";
-import { BIG_BUILD, bigBuildDaysLeft, buildDays, isBigPurchase, NEIGHBOR_PROJECTS, nextNeighbor } from "./building";
+import {
+  BIG_BUILD,
+  bigBuildDaysLeft,
+  buildDays,
+  foundationPrice,
+  foundationTier,
+  foundationTitle,
+  isBigPurchase,
+  NEIGHBOR_PROJECTS,
+  neighborhoodDone,
+  nextNeighborStep,
+} from "./building";
 import { LADDER } from "./konsernWorld";
 import { landmarkHour } from "./landmarks";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
@@ -1124,22 +1135,46 @@ setScheduledSwitch(hourlyActions);
 export function buildNeighbor(g: GameState): PurchaseResult {
   if (g.stage < 4) return fail("Nabolagsprosjektene kommer på storverket.");
   if (g.neighborhood.building) return fail("Et prosjekt bygges allerede.");
-  const p = nextNeighbor(g);
-  if (!p) return fail("Alt er bygget.");
-  if (g.cash < p.price) return fail("For lite penger.");
-  addCost(g, "investering", p.price);
-  g.neighborhood.building = { id: p.id, readyMin: g.minute + p.days * MIN_PER_DAY };
-  log(g, `Byggingen av ${p.name.toLowerCase()} har startet – ferdig om ${p.days} døgn.`, "info");
-  return { ok: true, message: `${p.name} er bestilt – ferdig om ${p.days} døgn.` };
+  // Først de seks byggene, så utvidelsene til trinn 2 og 3 (B-455)
+  const step = nextNeighborStep(g);
+  if (!step) return fail("Alt er bygget.");
+  const { project: p, level, price, days } = step;
+  if (g.cash < price) return fail("For lite penger.");
+  addCost(g, "investering", price);
+  g.neighborhood.building = { id: p.id, readyMin: g.minute + days * MIN_PER_DAY, ...(level > 1 ? { level } : {}) };
+  const what =
+    level > 1 ? `Utvidelsen av ${p.name.toLowerCase()} (trinn ${level})` : `Byggingen av ${p.name.toLowerCase()}`;
+  log(g, `${what} har startet – ferdig om ${days} døgn.`, "info");
+  return {
+    ok: true,
+    message: `${level > 1 ? `${p.name} utvides` : `${p.name} er bestilt`} – ferdig om ${days} døgn.`,
+  };
 }
 
-/** Et nabolagsprosjekt som er ferdig bygget */
+/** Et nabolagsprosjekt som er ferdig bygget (eller utvidet, B-455) */
 export function finishNeighbor(g: GameState): boolean {
   const b = g.neighborhood?.building;
   if (!b || g.minute < b.readyMin) return false;
   g.neighborhood.building = null;
-  if (!g.neighborhood.built.includes(b.id)) g.neighborhood.built.push(b.id);
   const p = NEIGHBOR_PROJECTS.find((x) => x.id === b.id);
+  if ((b.level ?? 1) > 1) {
+    g.neighborhood.levels = { ...g.neighborhood.levels, [b.id]: b.level };
+    if (p) log(g, `${p.name} er utvidet til trinn ${b.level}! Byen er stolt av verket.`, "good");
+    return true;
+  }
+  if (!g.neighborhood.built.includes(b.id)) g.neighborhood.built.push(b.id);
   if (p) log(g, `${p.name} er ferdig! ${p.gives}`, "good");
   return true;
+}
+
+/** Verkets stiftelse (B-455): gir neste trinn til byen. Bare pynt og en tittel – ingen effekt på drift eller andre */
+export function donateFoundation(g: GameState): PurchaseResult {
+  if (g.stage < 4 || !neighborhoodDone(g)) return fail("Stiftelsen kommer når hele nabolaget er bygget.");
+  const tier = foundationTier(g) + 1;
+  const price = foundationPrice(tier);
+  if (g.cash < price) return fail("For lite penger.");
+  addCost(g, "investering", price);
+  g.foundation = { tier, given: (g.foundation?.given ?? 0) + price };
+  log(g, `Verkets stiftelse har gitt ${fmtKr(price)} til byen. Du er nå «${foundationTitle(tier)}».`, "good");
+  return { ok: true, message: `${fmtKr(price)} er gitt til byen. Ny tittel: «${foundationTitle(tier)}».` };
 }

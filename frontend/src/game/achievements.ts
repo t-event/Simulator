@@ -10,6 +10,7 @@ import { konsernEquity, valueCreated } from "./konsern";
 import { MASTERY_IDS, masteryLevel, masteryOpen } from "./mastery";
 import { QUIZ } from "./quiz";
 import { LANDMARKS } from "./landmarks";
+import { foundationTier, neighborSteps } from "./building";
 import type { GameState } from "./types";
 import type { IconName } from "../ui/icons";
 
@@ -41,7 +42,15 @@ export interface AchievementFamily {
   hidden?: boolean;
 }
 
-export type AchievementGroup = "Produksjon" | "Kunder" | "Kunnskap" | "Kontrollrom" | "Folk" | "Konsern" | "Æresmerker";
+export type AchievementGroup =
+  | "Produksjon"
+  | "Kunder"
+  | "Kunnskap"
+  | "Kontrollrom"
+  | "Folk"
+  | "Byen"
+  | "Konsern"
+  | "Æresmerker";
 
 export const ACHIEVEMENT_GROUPS: AchievementGroup[] = [
   "Produksjon",
@@ -49,6 +58,7 @@ export const ACHIEVEMENT_GROUPS: AchievementGroup[] = [
   "Kontrollrom",
   "Kunnskap",
   "Folk",
+  "Byen",
   "Konsern",
   "Æresmerker",
 ];
@@ -222,6 +232,20 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
     ["dag1000", 1000, "Tusen døgn", "Hold verket i gang i 1 000 døgn.", 40],
     ["dag2000", 2000, "Institusjon", "Hold verket i gang i 2 000 døgn.", 80],
     ["dag3650", 3650, "Ti år", "Hold verket i gang i 3 650 døgn.", 150],
+  ]),
+  // Byen (B-455): nabolaget i tre trinn og verkets stiftelse – for penger hjemme, bare eget spill
+  family("nabolag", "building-2", "Nabolaget", "Byen", neighborSteps, [
+    ["nabolag1", 1, "Byggherre", "Bygg det første bygget i byen rundt verket.", 10],
+    ["nabolag6", 6, "Hele nabolaget", "Bygg alle seks byggene i byen.", 30],
+    ["nabolag12", 12, "Byen vokser", "Utvid alle byggene til trinn 2.", 60],
+    ["nabolag18", 18, "Storbyen", "Utvid alle byggene til trinn 3.", 120],
+  ]),
+  family("stiftelse", "gift", "Verkets stiftelse", "Byen", foundationTier, [
+    ["stiftelse1", 1, "Velgjører", "Gi den første gaven fra verkets stiftelse.", 10],
+    ["stiftelse3", 3, "Mesen", "Gi tre gaver til byen.", 25],
+    ["stiftelse5", 5, "Æresborger", "Gi fem gaver til byen.", 50],
+    ["stiftelse8", 8, "Stor filantrop", "Gi åtte gaver til byen.", 80],
+    ["stiftelse10", 10, "Byens grunnstein", "Gi ti gaver til byen.", 120],
   ]),
   // Konsern. Merkene følger titlene (B-238); id-ene er beholdt, så verdi500 gis nå ved 200 mrd.
   family("verdi", "money", "Konsernverdi", "Konsern", (g) => konsernEquity(g), [

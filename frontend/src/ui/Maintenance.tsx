@@ -23,6 +23,16 @@ import {
   type PlantStats,
 } from "../game/plant";
 import { auto, hasResearch } from "../game/research";
+import {
+  hasUpkeep,
+  renewCost,
+  renewPlant,
+  repairerRenews,
+  UPKEEP,
+  upkeepDaysLeft,
+  upkeepRisk,
+  upkeepWear,
+} from "../game/upkeep";
 import { AutoToggle } from "./AutoToggle";
 import type { GameState } from "../game/types";
 import type { GameApi } from "../game/useGame";
@@ -130,6 +140,7 @@ export function Maintenance({
           );
         })}
         {hasMoulds(g) && <MouldRow g={g} act={act} />}
+        {hasUpkeep(g) && <UpkeepRow g={g} act={act} />}
       </ul>
 
       {g.stage >= 1 && (hasRepairer || canPlan) && (
@@ -198,6 +209,13 @@ export function Maintenance({
             timer.
           </p>
         )}
+        {hasUpkeep(g) && (
+          <p className="g-muted">
+            Storverket slites over ca. {UPKEEP.lifeDays} døgn. Over {fmtPct(UPKEEP.riskFrom)} slitasje havarerer ovnene
+            oftere. Fornyelsen koster en femdel av det utstyret kostet, ganget med hvor slitt det er, og regnes som en
+            investering. Reparatøren fornyer selv når han bytter foringen.
+          </p>
+        )}
         {g.stage >= 1 && !hasRepairer && (
           <p className="g-muted">Med en reparatør kan foringen byttes automatisk når den er slitt.</p>
         )}
@@ -230,6 +248,33 @@ function MouldRow({ g, act }: { g: GameState; act: GameApi["act"] }) {
           onClick={() => act((gg) => replaceMoulds(gg, computePlantStats(gg)))}
         >
           {wear < 0.05 ? "Nye kokiller" : `Bytt kokiller (${fmtKr(mouldCost(g))})`}
+        </button>
+      </div>
+    </li>
+  );
+}
+
+/** Slitasjen på storverket (B-455): én rad under kokillene */
+function UpkeepRow({ g, act }: { g: GameState; act: GameApi["act"] }) {
+  const wear = upkeepWear(g);
+  const tone = wear >= UPKEEP.warnAt ? "critical" : wear > UPKEEP.riskFrom ? "warning" : "ok";
+  const cost = renewCost(g);
+  return (
+    <li className="g-maint">
+      <div className="g-maint-head">
+        <strong>Anlegget</strong>
+        <span className={`g-maint-wear is-${tone}`}>{fmtPct(Math.min(1, wear))} slitt</span>
+      </div>
+      <Bar value={Math.min(1, wear)} tone={tone} label="Slitasje på storverket" />
+      <div className="g-maint-foot">
+        <span className="g-muted g-small-text">
+          {wear > UPKEEP.riskFrom
+            ? `${fmtNum(upkeepRisk(g), 1)} ganger så mange havarier`
+            : `Ca. ${fmtNum(upkeepDaysLeft(g), 0)} døgn til det er helt slitt`}
+          {repairerRenews(g) ? " – reparatøren fornyer" : ""}
+        </span>
+        <button className="g-small" disabled={wear < 0.05 || g.cash < cost} onClick={() => act((gg) => renewPlant(gg))}>
+          {wear < 0.05 ? "Som nytt" : `Forny anlegget (${fmtKr(cost)})`}
         </button>
       </div>
     </li>

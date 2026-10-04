@@ -38,6 +38,7 @@ import { ADVISOR_WINDOW_DAYS, maybeAdvisor, maybeCreateDecision } from "./decisi
 import { maybeTip, setCreditHint } from "./tips";
 import { envDay, envHour, envStartBlocked, newEnv, updateEmissions } from "./environment";
 import { mouldHour, mouldRisk, wearMoulds } from "./mould";
+import { upkeepDay, upkeepHour, upkeepRisk } from "./upkeep";
 import {
   calendarDay,
   inSummerBreak,
@@ -951,8 +952,8 @@ function startHeat(g: GameState, index: number, plant: PlantStats): boolean {
 function heatEvents(g: GameState, index: number, plant: PlantStats): number {
   const stats = unitView(plant, index);
   const f = g.furnaces[index];
-  // Om vinteren skjer havarier oftere (B-265)
-  const m = stats.maintFactor * riskFactor(g);
+  // Om vinteren skjer havarier oftere (B-265), og på et slitt storverk (B-455)
+  const m = stats.maintFactor * riskFactor(g) * upkeepRisk(g);
   const furnace = stats.furnace;
   let extra = 0;
   // Eksplosjon: vann eller is i skrapet blir til damp i det flytende stålet (B-265)
@@ -3219,6 +3220,8 @@ function onHour(g: GameState, stats: PlantStats): void {
   envHour(g, stats);
   // Reparatøren bytter slitte kokiller (B-351)
   mouldHour(g, stats);
+  // … og fornyer et slitt storverk (B-455)
+  upkeepHour(g);
   // Frost om vinteren (B-265)
   winterHour(g, stats);
   // Kapitlene forskningen krever, kommer i fagboka når forskningen blir synlig (B-025)
@@ -3383,6 +3386,8 @@ function walk(g: GameState, value: number, mean: number, pull: number, sd: numbe
 function onDay(g: GameState, stats: PlantStats): void {
   // Like partier på lageret slås sammen (B-353)
   compactLots(g);
+  // Storverket slites (B-455)
+  upkeepDay(g);
   const today = day(g);
   // Effekttariff for døgnet som er slutt: betales for den høyeste effekten verket trakk
   if (g.today.peakMW) addCost(g, "nett", g.today.peakMW * PEAK_RATE_PER_MW);

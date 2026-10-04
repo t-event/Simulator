@@ -11,6 +11,7 @@ import {
   doResearch,
   finishBigBuild,
   finishNeighbor,
+  donateFoundation,
   giveBonus,
   hireForWildcards,
   LEADER_COURSE_DAYS,
@@ -146,7 +147,22 @@ import {
   takeScrap,
   adjustReputation,
 } from "./engine";
-import { buildDays, hasNeighbor, isBigPurchase, nextNeighbor, rampFactor } from "./building";
+import {
+  buildDays,
+  foundationPrice,
+  foundationTier,
+  foundationTitle,
+  hasNeighbor,
+  isBigPurchase,
+  neighborHintDue,
+  neighborhoodDone,
+  neighborLevel,
+  neighborSteps,
+  nextNeighbor,
+  nextNeighborStep,
+  rampFactor,
+} from "./building";
+import { equipmentValue, renewCost, renewPlant, upkeepDay, upkeepRisk, upkeepWear } from "./upkeep";
 import {
   checkKonsernMilestones,
   kompleksOpen,
@@ -3709,6 +3725,81 @@ test("Nabolaget (B-336): bygges ett om gangen, i rekkefølge, og gir sine fordel
   g.reputation = 50;
   adjustReputation(g, -10);
   assert(g.reputation === 40, "under gulvet fra før");
+});
+
+test("Verkskontoen (B-455): nabolaget i tre trinn, stiftelsen og rådet", () => {
+  const g = newGame(455);
+  g.stage = 4;
+  g.cash = 30e9;
+  // Rådet: kassa holder til idrettshallen, kortet er ikke sett
+  assert(neighborHintDue(g)?.project.id === "idrettshall", "rådet om nabolaget");
+  g.buildSeen = true;
+  assert(neighborHintDue(g) === null, "rådet etter at kortet er sett");
+  g.buildSeen = false;
+  g.cash = 0.5e9;
+  assert(neighborHintDue(g) === null, "rådet uten penger");
+  const build = () => {
+    g.cash = 500e9;
+    const r = buildNeighbor(g);
+    assert(r.ok, r.message);
+    g.minute = g.neighborhood.building!.readyMin;
+    finishNeighbor(g);
+  };
+  assert(!donateFoundation(g).ok, "stiftelsen før nabolaget");
+  for (let i = 0; i < 6; i++) build();
+  assert(neighborhoodDone(g) && neighborSteps(g) === 6, "alle seks");
+  // Utvidelsene: trinn 2 koster 3 × og tar 2 døgn mer, uten ny fordel
+  const step = nextNeighborStep(g)!;
+  assert(step.level === 2 && step.project.id === "idrettshall" && step.price === 3e9 && step.days === 5, "trinn 2");
+  const morale = moraleNormal(g);
+  g.cash = 500e9;
+  const inv = g.today.costs.investering ?? 0;
+  buildNeighbor(g);
+  assert((g.today.costs.investering ?? 0) - inv === 3e9, "utvidelsen er en investering");
+  assert(!g.today.costs.vedlikehold || g.today.costs.vedlikehold === 0, "ikke vedlikehold");
+  g.minute = g.neighborhood.building!.readyMin;
+  assert(finishNeighbor(g) && neighborLevel(g, "idrettshall") === 2 && moraleNormal(g) === morale, "ingen ny fordel");
+  for (let i = 0; i < 11; i++) build();
+  assert(neighborSteps(g) === 18 && nextNeighborStep(g) === null, "alt på trinn 3");
+  assert(nextNeighbor(g) === null, "nextNeighbor som før");
+  // Stiftelsen: stigende pris, titler, investering
+  g.cash = 2.5e9;
+  assert(donateFoundation(g).ok && foundationTier(g) === 1 && g.cash === 1.5e9, "første gave");
+  assert(!donateFoundation(g).ok, "for lite til neste (2 mrd.)");
+  assert(foundationTitle(1) === "Velgjører" && foundationTitle(11) === "Byens grunnstein 2", foundationTitle(11));
+  assert(foundationPrice(10) === 1e12 && foundationPrice(11) === 2e12, "prisen dobles etter tabellen");
+  assert(g.foundation?.given === 1e9, "gitt i alt");
+});
+
+test("Slitasjen på storverket (B-455): slites over 180 døgn, flere havarier, fornyelsen er en investering", () => {
+  const g = newGame(4551);
+  assert(upkeepWear(g) === 0 && upkeepRisk(g) === 1, "før storverket");
+  upkeepDay(g);
+  assert(g.upkeep === undefined, "slites ikke før storverket");
+  g.stage = 4;
+  g.minute = 30 * 1440; // ikke i fellesferien
+  for (let i = 0; i < 90; i++) upkeepDay(g);
+  assert(Math.abs(upkeepWear(g) - 0.5) < 1e-9 && upkeepRisk(g) === 1, `halvveis: ${upkeepWear(g)}`);
+  for (let i = 0; i < 90; i++) upkeepDay(g);
+  assert(Math.abs(upkeepRisk(g) - 2) < 1e-9, `helt slitt: ${upkeepRisk(g)}`);
+  assert(
+    g.log.some((l) => /Forny anlegget/.test(l.text)),
+    "beskjed når det er slitt",
+  );
+  // Et storverk med en stor ovn: fornyelsen koster en femdel av utstyret
+  g.furnaces[0].type = FURNACES.filter((f) => f.stage === 4).at(-1)!.id;
+  const cost = renewCost(g);
+  assert(cost > 0 && Math.abs(cost - equipmentValue(g) * 0.2) < 1, `prisen ${cost}`);
+  g.cash = 0;
+  assert(!renewPlant(g).ok, "uten penger");
+  g.cash = cost + 1;
+  const inv = g.today.costs.investering ?? 0;
+  assert(renewPlant(g).ok && upkeepWear(g) === 0, "fornyet");
+  assert((g.today.costs.investering ?? 0) - inv === cost, "fornyelsen er en investering");
+  // Gamle lagringer: uten feltet er anlegget nytt
+  const old = JSON.parse(JSON.stringify(g));
+  delete old.upkeep;
+  assert(upkeepWear(migrate(old)) === 0, "gammel lagring");
 });
 
 test("Kassetaket (B-341): det som er betalt ut til eierne, teller mot sluttmålet og stormodellene", () => {

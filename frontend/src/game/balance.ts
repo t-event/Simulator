@@ -7,6 +7,7 @@
  * progresjonen havner innenfor målene, og feiler ellers (brukes i CI).
  */
 import { MOULD, mouldWear, replaceMoulds } from "./mould";
+import { renewPlant, UPKEEP, upkeepWear } from "./upkeep";
 import {
   bonusCost,
   buyFpDeal,
@@ -376,6 +377,8 @@ function botHour(g: GameState): void {
   });
   // Kokillene (B-351): nybegynneren følger rådet (85 %), den flinke ved 90 %
   if (mouldWear(g) >= (novice ? MOULD.warnAt : 0.9) && g.minute >= g.castDownUntilMin) replaceMoulds(g, stats);
+  // Slitasjen på storverket (B-455): begge følger rådet og fornyer når det kommer
+  if (upkeepWear(g) >= UPKEEP.warnAt) renewPlant(g);
 
   // Kontrakter: ta de som kan lages og rekkes
   const active = g.contracts.filter((c) => c.status === "aktiv");

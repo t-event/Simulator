@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 455,
+    date: "2026-10-05",
+    title: "Mer å bygge for storverket",
+    items: [
+      "Holder kassa til et nytt bygg i byen, får du et råd og et utropstegn på Verket. Byggene står under Verket → Anlegg.",
+      "Når alle seks byggene i byen står, kan de utvides to ganger. De blir større i bildet av verket.",
+      "Verkets stiftelse: gi penger til byen og få nye titler, prestasjoner og en park med fontene og statue.",
+      "Storverket slites over tid, og et slitt anlegg havarerer oftere. Forny det under Anlegg → Vedlikehold – eller la reparatøren gjøre det.",
+    ],
+  },
+  {
     b: 453,
     date: "2026-10-04",
     title: "Lettere å se anbudene",
