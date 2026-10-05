@@ -49,6 +49,10 @@ export const ACCOUNT_FEATURES = {
     name: "Verv en venn",
     why: "Serveren kobler vennen til lenken din og sjekker at vennen spiller selv før belønningen kommer.",
   },
+  venneliste: {
+    name: "Vennelista",
+    why: "Lista ligger på kontoen og viser andre spillere – bare det profilen deres viser alle.",
+  },
   konsernkasse: {
     name: "Konsernkassa",
     why: "Kassa ligger på serveren og går i virkelig tid, så overføringene og det du kjøper i verden avgjøres der.",

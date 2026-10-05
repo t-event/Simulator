@@ -26,6 +26,7 @@ import { realNow } from "../game/clock";
 import { NeedsAccount } from "./Account";
 import { fetchDmUnread, reportMessage } from "../net/messages";
 import { SubTabs } from "./common";
+import { FriendsPanel } from "./Friends";
 import { Callout, SheetHead } from "./ds";
 import { DirectMessages } from "./Messages";
 import { messagesBadge, onMessagesChange, setDmUnread, setReportUnread, takeMessagesRequest } from "./messagesStore";
@@ -161,7 +162,7 @@ export function ChatSheet({ onClose, onOpenSettings }: { onClose: () => void; on
   const stick = useRef(true);
   // Fanen «Meldinger» (B-421): åpnes også fra «Send melding» på en profil
   const [first] = useState(takeMessagesRequest);
-  const [tab, setTab] = useState<"chat" | "dm">(first ? "dm" : "chat");
+  const [tab, setTab] = useState<"chat" | "dm" | "venner">(first ? "dm" : "chat");
   const [dmStart, setDmStart] = useState<{ nick: string | null } | null>(first);
   const [dmKey, setDmKey] = useState(0);
   const [reported, setReported] = useState<Set<number>>(() => new Set());
@@ -277,7 +278,7 @@ export function ChatSheet({ onClose, onOpenSettings }: { onClose: () => void; on
         ) : (
           <>
             <SubTabs
-              label="Skiftrapporten eller meldinger"
+              label="Skiftrapporten, meldinger eller venner"
               value={tab}
               onChange={(t) => {
                 setTab(t);
@@ -289,11 +290,13 @@ export function ChatSheet({ onClose, onOpenSettings }: { onClose: () => void; on
               tabs={[
                 { id: "chat", label: "Alle" },
                 { id: "dm", label: "Meldinger", count: unread },
+                { id: "venner", label: "Venner" },
               ]}
             />
           </>
         )}
         {session && tab === "dm" && <DirectMessages key={dmKey} startWith={dmStart?.nick ?? null} />}
+        {session && tab === "venner" && <FriendsPanel />}
         {session && tab === "chat" && (
           <>
             <p className="g-muted g-small-text g-chat-intro">

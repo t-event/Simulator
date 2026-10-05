@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 383 – 2026-10-05: Vennelista (B-462)
+
+**Brukeren ba om:** «Fortsett» – siste punkt i anbefalingen (vennelista); alt annet i FORSLAG.md venter på eieren.
+
+**Gjort:** migrasjon 132 (`follows`, `follow_add`/`follow_remove`/`follow_list`), `net/friends.ts`, `ui/Friends.tsx`
+(fanen «Venner» i Skiftrapporten og knappen på profilarket), ikonene `user-plus`/`user-check`, `ACCOUNT_FEATURES.venneliste`.
+
+**Testet:** migrasjonen i en rullet transaksjon, rådgiveren, nettest, typesjekk, lint, `npm test`, bygg, Playwright
+320/390/1366 (fant og rettet sidelengs rulling med lange navn på 320 px).
+
+**Gjenstår:** eventuelt gjensidige venner og varsler senere; påminnelse 12.10 om spillerne på verkstedet (B-461).
+
 ## Økt 382 – 2026-10-05: Nye spillere som står fast (B-461)
 
 **Brukeren ba om:** «fortsett» – tiltakene fra analysen av spillere som står fast på verkstedet.
