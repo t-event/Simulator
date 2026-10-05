@@ -228,6 +228,7 @@ frontend/src/
     Messages.tsx Fanen «Meldinger» i Skiftrapporten; «Send melding» går via messagesStore.ts (B-421)
     ReportNotes.tsx «Fra admin» øverst i Meldinger, og lenken til adminpanelet for eieren (B-438)
     share.ts     Del verket: delingsmeny med tekst og lenke, ellers kopiert lenke (B-458, uten bilde B-460)
+    NicknameGate.tsx «Velg brukernavn»: påkrevd for alle kontoer, kan ikke lukkes (B-463); nickname.ts: navnet fra skjemaet
     Friends.tsx  Vennelista: fanen «Venner» i Skiftrapporten og knappen på profilarket (B-462)
     Referral.tsx Kortet «Verv en venn» på Mål → Uka og koblingen etter innlogging (`ReferralSync`, B-459)
     Admin.tsx    Adminpanelet under kontoen, bare når `is_admin()` svarer ja (B-421)
@@ -629,6 +630,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   lånerammen. Kravene (`referral_qualifies`) leser tidslinja (ekte dager, nivå), aldri tall fra lagringen. Startpakken til
   vennen legges inn med `grantReferralStart` (`ui/claims.ts`) bare når serveren svarer `ok`. Tallene i
   `config.world.referral`; startpakken i `REFERRAL_START` (`net/referral.ts`).
+- **Brukernavn er påkrevd** (B-463): `NicknameGate` setter navnet fra skjemaet (`pendingNick` i `ui/nickname.ts`) og
+  viser ellers arket som ikke kan lukkes. Kontokortet setter ikke lenger navnet selv – det lytter på `NICKNAME_EVENT`.
 - **Vennelista** (B-462, 132): `follows` med `active` – å ta noen av lista er en `update`, aldri `delete` (connectoren
   holder igjen migrasjoner med sletting). `follow_list` viser bare det `player_profile` alt viser andre; nye felt vurderes
   mot det. Enveis med vilje: ingen forespørsler eller varsler til den som følges.

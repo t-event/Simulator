@@ -35,6 +35,7 @@ import { ACCOUNT_FEATURES, type AccountFeature } from "../net/features";
 import { Card } from "./common";
 import { Icon } from "./icons";
 import { Button } from "./ds";
+import { NICKNAME_EVENT, setPendingNick } from "./nickname";
 import {
   cloudStatus,
   fetchFeatures,
@@ -201,24 +202,6 @@ export function AccountFeaturesCard({
       )}
     </Card>
   );
-}
-
-/** Brukernavnet fra skjemaet til kontoen er bekreftet (B-214). Ligger i localStorage, så det tåler at appen lukkes */
-const PENDING_NICK_KEY = "stalverk-nytt-brukernavn-v1";
-function pendingNick(): string | null {
-  try {
-    return localStorage.getItem(PENDING_NICK_KEY);
-  } catch {
-    return null;
-  }
-}
-function setPendingNick(n: string | null): void {
-  try {
-    if (n) localStorage.setItem(PENDING_NICK_KEY, n);
-    else localStorage.removeItem(PENDING_NICK_KEY);
-  } catch {
-    // Privat modus: brukernavnet velges etterpå
-  }
 }
 
 function useSession() {
@@ -522,23 +505,7 @@ export function AccountCard({
       .then(async (p) => {
         if (!alive) return;
         setFlagged(!!p?.flagged_at || !!p?.banned);
-        // Ny konto (B-214): brukernavnet fra skjemaet settes med én gang, så spilleren er med på topplista
-        const pending = pendingNick();
-        if (p && !p.nickname && pending) {
-          setPendingNick(null);
-          try {
-            const n = await saveNickname(pending);
-            if (!alive) return;
-            setNickname(n);
-            setNickDraft(n);
-            setInfo(`Du er med på topplista som «${n}».`);
-            return;
-          } catch {
-            if (!alive) return;
-            setError(`Brukernavnet «${pending}» ble tatt i mellomtiden. Velg et annet under.`);
-            setNickDraft(pending);
-          }
-        }
+        // Brukernavnet fra skjemaet (B-214) settes av arket «Velg brukernavn» (B-463), som også spør når det mangler
         setNickname(p?.nickname ?? null);
         if (p?.nickname) setNickDraft(p.nickname);
       })
@@ -547,6 +514,19 @@ export function AccountCard({
       alive = false;
     };
   }, [session]);
+
+  // Brukernavnet satt i arket «Velg brukernavn» (B-463)
+  useEffect(() => {
+    const onNick = (e: Event) => {
+      const n = (e as CustomEvent<string>).detail;
+      if (typeof n !== "string") return;
+      setNickname(n);
+      setNickDraft(n);
+      setInfo(`Du er med på topplista som «${n}».`);
+    };
+    window.addEventListener(NICKNAME_EVENT, onNick);
+    return () => window.removeEventListener(NICKNAME_EVENT, onNick);
+  }, []);
 
   useEffect(() => {
     void fetchFeatures().then((f) => {

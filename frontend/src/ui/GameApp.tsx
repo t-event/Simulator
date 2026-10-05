@@ -33,6 +33,7 @@ import { SeasonPrompt, SeasonResultNotice, SeasonSync, SeasonTeaser } from "./Se
 import { DailySync } from "./Daily";
 import { BadgeSync } from "./BadgeSync";
 import { ReferralSync } from "./Referral";
+import { NicknameGate } from "./NicknameGate";
 import { PendingControlSync } from "./Weekly";
 import { GoalsPage, GoalsSheet } from "./Goals";
 import { LeaderboardSheet } from "./Leaderboard";
@@ -1392,6 +1393,7 @@ export function GameApp() {
       <SeasonSync api={api} />
       <BadgeSync api={api} />
       <ReferralSync api={api} />
+      <NicknameGate />
       <PendingControlSync />
       <AutoUpdate api={api} />
       <CloudFollow api={api} onOpenSettings={() => setSettingsOpen(true)} />

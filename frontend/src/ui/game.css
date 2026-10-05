@@ -3596,6 +3596,22 @@ button {
   pointer-events: none;
 }
 
+/* Velg brukernavn (B-463): kan ikke lukkes, bare logges ut fra */
+.g-nick-gate .g-modal-card {
+  max-width: 420px;
+}
+.g-nick-gate .g-nick {
+  display: grid;
+  gap: var(--sp-2);
+}
+.g-nick-gate .ds-button,
+.g-nick-gate-out {
+  min-height: var(--touch);
+}
+.g-nick-gate-out {
+  margin-top: var(--sp-3);
+}
+
 /* Vennelista (B-462) */
 .g-friends {
   display: grid;

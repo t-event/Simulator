@@ -8641,3 +8641,19 @@ profilknappen, ingen sidelengs rulling).
 Krever konto: ja (regel 3: viser andre spillere og lagres på serveren).
 Endringslogg: ja.
 
+## B-463 Brukernavn er påkrevd for alle kontoer (2026-10-05)
+Status: gjelder. Skjerper B-214 (brukernavnet velges når kontoen lages).
+Bakgrunn: eieren 5.10: «Man må ha brukernavn, om man har laget seg konto.» Navnet velges i skjemaet og settes etter
+bekreftelsen på e-post, men en konto kunne bli stående uten navn hvis navnet ble tatt mens spilleren ventet på e-posten,
+eller hvis det ikke ble husket (privat modus). Ingen kontoer manglet navn 5.10 (32 med navn, 4 gjester).
+Beslutning:
+- **Arket «Velg brukernavn»** (`ui/NicknameGate.tsx`) legger seg over spillet når en innlogget konto mangler brukernavn.
+  Det kan ikke lukkes – bare «Logg ut i stedet». Samme regler som før: 3–20 tegn, ledig uten forskjell på store og små
+  bokstaver, og serveren sjekker igjen (`set_nickname`, unik indeks).
+- Navnet fra skjemaet prøves først i det stille; arket vises bare når det ikke gikk, med forklaring og navnet fylt ut.
+- Kontokortet viser navnet med én gang (`NICKNAME_EVENT`); hjelperne for navnet fra skjemaet står i `ui/nickname.ts`.
+- Gjester har ingen konto i appens forstand og får ikke arket.
+Testet: Playwright 320/390/1366 (uten navn, navnet tatt i mellomtiden, navnet ledig), typesjekk, lint, `npm test`, bygg.
+Krever konto: ja (gjelder bare kontoer).
+Endringslogg: ja.
+
