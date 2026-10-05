@@ -8718,3 +8718,13 @@ Testet: Playwright (iPhone 13) med telefonens svar «ja», «nei» og «lov alt 
 spørsmål, alle temaene ved ja, ingenting ved nei, svaret husket; typesjekk, lint, `npm test`, bygg.
 Krever konto: ja (som B-465).
 Endringslogg: ja.
+
+## B-468 Navnet på verket i byggevarselet (2026-10-05)
+Status: gjelder. Retter B-465.
+Bakgrunn: eieren 5.10: «Fiks». Varselet om et ferdig byggeprosjekt sa «Verket er modernisert» uten navn: ved
+modernisering og utbygging står navnet ikke i bestillingen (`konsern_orders.name` er tom).
+Beslutning: `push_scan` (migrasjon 136) henter navnet fra verket i konsernet (`konsern.plants`, samme id som `plant_id`)
+når bestillingen ikke har det. Varselet sier nå for eksempel «Elveverket er modernisert».
+Testet: oppslaget mot de siste bestillingene (alle fikk navn), jobben `push-varsler` går som før.
+Krever konto: ja (som B-465).
+Endringslogg: ja.
