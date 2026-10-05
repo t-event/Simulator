@@ -41,6 +41,7 @@ import { ChatButton, ChatSheet } from "./Chat";
 import { ProfileHost } from "./Profile";
 import { messagesRequestVer, onMessagesChange, openMessages } from "./messagesStore";
 import { usePushLinks } from "./pushLinks";
+import { PushAuto } from "./PushAuto";
 import type { PushLink } from "../net/push";
 import { useDailyStatus } from "./useDaily";
 import { missionBonusReady } from "../game/daily";
@@ -1405,6 +1406,7 @@ export function GameApp() {
       <BadgeSync api={api} />
       <ReferralSync api={api} />
       <NicknameGate />
+      <PushAuto />
       <PendingControlSync />
       <AutoUpdate api={api} />
       <CloudFollow api={api} onOpenSettings={() => setSettingsOpen(true)} />

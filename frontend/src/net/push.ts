@@ -94,12 +94,14 @@ export const PUSH_REFUSAL_TEXT: Record<PushRefusal, string> = {
 
 /** Slår på varsler (spør om lov første gang) eller lagrer nye temaer */
 export async function enablePush(kinds: PushKind[]): Promise<{ ok: true } | { ok: false; reason: PushRefusal }> {
-  const reg = await registration();
-  if (!reg || pushSupport() !== "ja") return { ok: false, reason: "støttes ikke" };
+  if (pushSupport() !== "ja") return { ok: false, reason: "støttes ikke" };
+  // Spør om lov før noe annet venter: iPhone viser spørsmålet bare rett etter et trykk (B-467)
   if (Notification.permission !== "granted") {
     const p = await Notification.requestPermission();
     if (p !== "granted") return { ok: false, reason: "nektet" };
   }
+  const reg = await registration();
+  if (!reg) return { ok: false, reason: "støttes ikke" };
   let sub = await reg.pushManager.getSubscription();
   if (!sub) {
     const key = await rpc<string | null>("push_public_key", {});
@@ -129,8 +131,39 @@ export const PUSH_TEST_TEXT: Record<"ok" | "av" | "nylig", string> = {
   nylig: "Du sendte et prøvevarsel nettopp. Vent noen minutter før du prøver igjen.",
 };
 
+/**
+ * Varsler på for alle (B-467, eieren 5.10): første gang en innlogget spiller trykker i spillet på en enhet som kan få
+ * varsler, spør telefonen om lov. Svaret huskes per konto og enhet – også «nei» og «slått av under Innstillinger» –
+ * så det spørres bare én gang.
+ */
+const AUTO_KEY = "stalverk-varsel-auto-v1";
+
+function autoSeen(): Record<string, true> {
+  try {
+    const v = JSON.parse(localStorage.getItem(AUTO_KEY) ?? "{}") as unknown;
+    return v && typeof v === "object" ? (v as Record<string, true>) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function markPushAutoDone(uid: string): void {
+  try {
+    localStorage.setItem(AUTO_KEY, JSON.stringify({ ...autoSeen(), [uid]: true }));
+  } catch {
+    // Privat modus: da spørres det kanskje igjen neste gang, og det er greit
+  }
+}
+
+/** Skal spillet slå på varsler for denne kontoen på denne enheten? */
+export function pushAutoWanted(uid: string): boolean {
+  return pushSupport() === "ja" && pushPermission() !== "denied" && !autoSeen()[uid];
+}
+
 /** Slår av varsler for denne enheten (på serveren og i nettleseren) */
 export async function disablePush(): Promise<void> {
+  const uid = userId();
+  if (uid) markPushAutoDone(uid);
   const sub = await currentSubscription();
   if (!sub) return;
   await rpc("push_unsubscribe", { p_endpoint: sub.endpoint });
