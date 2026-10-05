@@ -11,6 +11,8 @@ import {
   pushPermission,
   pushState,
   pushSupport,
+  PUSH_TEST_TEXT,
+  sendTestPush,
   type PushKind,
 } from "../net/push";
 import { getSession, onSessionChange, userId } from "../net/supabase";
@@ -25,6 +27,7 @@ export function PushSettings() {
   const [state, setState] = useState<{ uid: string; active: boolean; kinds: PushKind[] } | null>(null);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
+  const [sent, setSent] = useState<string | null>(null);
 
   useEffect(() => {
     if (!uid || support !== "ja") return;
@@ -52,9 +55,27 @@ export function PushSettings() {
   const cur = state && state.uid === uid ? state : null;
   const blocked = pushPermission() === "denied";
 
+  // Prøvevarselet (B-466): ser spilleren det på telefonen, virker alt
+  const test = async () => {
+    setBusy(true);
+    setNote(null);
+    setSent(null);
+    try {
+      const r = await sendTestPush();
+      if (userId() !== uid) return;
+      if (r.ok) setSent(PUSH_TEST_TEXT.ok);
+      else setNote(PUSH_TEST_TEXT[r.reason]);
+    } catch {
+      setNote("Får ikke kontakt med serveren. Prøv igjen.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const save = async (active: boolean, kinds: PushKind[]) => {
     setBusy(true);
     setNote(null);
+    setSent(null);
     try {
       if (!active) {
         await disablePush();
@@ -105,6 +126,12 @@ export function PushSettings() {
             </span>
           </label>
         ))}
+      {cur?.active && (
+        <Button icon="bell" disabled={busy} onClick={() => void test()}>
+          Send et prøvevarsel
+        </Button>
+      )}
+      {sent && <p className="g-small-text g-push-sent">{sent}</p>}
       {note && <p className="g-small-text g-push-error">{note}</p>}
     </div>
   );

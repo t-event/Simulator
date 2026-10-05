@@ -116,6 +116,19 @@ export async function enablePush(kinds: PushKind[]): Promise<{ ok: true } | { ok
   return { ok: false, reason: r?.reason === "gjest" ? "gjest" : "ugyldig" };
 }
 
+/** Prøvevarsel (B-466): serveren sender «Varslene virker» til enhetene som står på, høyst ett per 10 minutter */
+export type PushTestResult = { ok: true; devices: number } | { ok: false; reason: "av" | "nylig" };
+
+export async function sendTestPush(): Promise<PushTestResult> {
+  return rpc<PushTestResult>("push_test", {});
+}
+
+export const PUSH_TEST_TEXT: Record<"ok" | "av" | "nylig", string> = {
+  ok: "Prøvevarselet er sendt. Det kommer innen et minutt – legg gjerne spillet bort så lenge.",
+  av: "Slå på varsel på mobilen først.",
+  nylig: "Du sendte et prøvevarsel nettopp. Vent noen minutter før du prøver igjen.",
+};
+
 /** Slår av varsler for denne enheten (på serveren og i nettleseren) */
 export async function disablePush(): Promise<void> {
   const sub = await currentSubscription();

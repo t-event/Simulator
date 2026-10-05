@@ -8634,3 +8634,11 @@ button.g-prod-row:hover {
 .g-push-prompt .ds-button {
   min-height: var(--touch);
 }
+.g-push .ds-button {
+  min-height: var(--touch);
+  margin-top: var(--sp-2);
+}
+.g-push-sent {
+  color: var(--ok-fg);
+  margin: var(--sp-2) 0 0;
+}

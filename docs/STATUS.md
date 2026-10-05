@@ -178,6 +178,7 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
   privatmeldinger), per enhet. Serveren legger varsler i `push_outbox` (triggere, og `push_scan` hvert minutt for ferdige
   byggeprosjekter og 6 timer igjen av et oppkjøpsbud); edge-funksjonen `push` sender dem. Ingen hemmelige beløp, ingen
   meldingstekst, ikke eldre enn 6 timer. iPhone/iPad: bare fra hjemskjermen. Utlogging slår av varslene på enheten.
+  «Send et prøvevarsel» (B-466, `push_test`) sender «Varslene virker» til enhetene som står på, høyst ett per 10 minutter.
 - Gjester er anonyme kontoer (B-212) som slippes til det som står i `guest_gate`; de får ingen penger eller plass mellom
   spillere, og slettes etter 60 dager uten lagring (B-377).
 - Startskjermen viser antall spillere aktive siste 24 timer (spill lagret på nett i døgnet, uten flaggede og sperrede;
