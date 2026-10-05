@@ -27,6 +27,10 @@ regnes av serveren i ekte tid.
   havarerer ovnene oftere (helt slitt: 2 ×). Fornyelsen koster 20 % av utstyrets pris × slitasjen; reparatøren fornyer
   selv ved 70 % med «Reparatøren bytter foringen» på. Alt dette føres som `investering`, som marginen i bidraget ikke
   teller.
+- **Kontrakter på Salg** (B-461): vurderingen regner med det verket lager (snittet av de siste døgnene med produksjon),
+  men null når hele verket står til spilleren gjør noe (ingen penger til omforing, ingen folk). «Signer likevel…» spør
+  med boten. Råd på Verket når verket står og når kontrakter i køen ikke rekker fristen; avbryting foreslås bare når
+  den er billigere enn boten ved fristen (bot av ulevert ved fristen mot 60 % av det som gjenstår).
 - Ingen hendelseskort om forhold mellom ansatte (trakassering, diskriminering, varsling) – tatt ut etter eierens ønske
   (B-444).
 - **Kassa har ikke tak** (B-381). Den kan vokse fritt – den gir ingen makt i verden.

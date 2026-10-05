@@ -2,7 +2,15 @@ import { BONUS_COOLDOWN_DAYS, fpDeal, keyUpgrade, upgradeOptions } from "../game
 import { auto, missingResearchFor, researchOptions } from "../game/research";
 import { scrapResearchFor, scrapResearchHint } from "../game/recipe";
 import { BANKRUPTCY_DAYS, GRADES, ROLES } from "../game/data";
-import { CREDIT_HELP, creditLimit, currentOrder, recipeEstimate, scrapStopHelp } from "../game/engine";
+import {
+  CREDIT_HELP,
+  creditLimit,
+  currentOrder,
+  lateCosts,
+  plantStopped,
+  recipeEstimate,
+  scrapStopHelp,
+} from "../game/engine";
 import { summerStart, summerStop, yearOf } from "../game/calendar";
 import { hasMoulds, MOULD, mouldCost, mouldWear } from "../game/mould";
 import { pensionSoon } from "../game/pension";
@@ -84,6 +92,33 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
         view: "marked",
         sub: "skrap",
       });
+  }
+  // Verket står uten penger til omforing (B-461): før sto det bare som ventegrunn på ovnen, og nye kontrakter ble signert
+  const stopped = plantStopped(g);
+  if (stopped && g.cash >= -creditLimit(g, stats) && g.furnaces.some((f) => f.waitReason?.includes("mangler penger")))
+    out.push({
+      tone: "critical",
+      text: `Verket står: ${stopped}. Selg skrap du ikke trenger under Marked, eller ta opp lån under Verket → Økonomi – og ikke signer nye kontrakter før ovnen går igjen.`,
+      view: "marked",
+      sub: "skrap",
+    });
+  // Kontrakter i køen som ikke rekker fristen (B-461): nye spillere tok på seg mer enn verkstedet rakk, og bøtene tok
+  // kassa. Salgsdirektøren holder køen selv (B-312)
+  const late = g.konsern?.director?.active ? [] : lateCosts(g, stats);
+  if (late.length) {
+    const cheaper = late
+      .filter((l) => l.cancelBot < l.lateBot)
+      .sort((a, b) => b.lateBot - b.cancelBot - (a.lateBot - a.cancelBot))[0];
+    out.push({
+      tone: "heat",
+      text: `${late.length === 1 ? "1 kontrakt" : `${late.length} kontrakter`} i ordrekøen rekker ikke fristen med det verket lager nå. Ikke signer flere før køen tar seg inn.${
+        cheaper
+          ? ` Kontrakten med ${cheaper.contract.customer} rekker langt fra: å avbryte den nå koster ${fmtKr(cheaper.cancelBot)}, boten ved fristen blir ca. ${fmtKr(cheaper.lateBot)}.`
+          : " Boten regnes bare av det som ikke er levert ved fristen, så la dem gå."
+      }`,
+      view: "salg",
+      sub: "ko",
+    });
   }
   const active = g.contracts.filter((c) => c.status === "aktiv");
   const offers = g.contracts.filter((c) => c.status === "tilbud");

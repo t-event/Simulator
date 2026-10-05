@@ -636,6 +636,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Reformmerkene** (B-312): `badges_of` gir `reform` bare for rader i `economy_reform_log` som ikke er reform 2
   (`model not like 'reform 2%'`); nye reformer som skriver dit, må ha sin egen regel, ellers får alle «Reformveteran».
   Serveren er fasit: `applyServerBadges` tar bort merker (og prestasjonen) serveren ikke gir lenger.
+- **Verket står** (B-461): `plantStopped` (alle ovner venter på penger til omforing eller mangler folk) gir null
+  produksjon i `assessOffer` og `lateContracts` – ikke i `realisticDailyT`, som også gir størrelsen på nye forespørsler.
+  Nye grunner til at en ovn står til spilleren gjør noe, legges i `STOP_REASONS`. Råd om å avbryte sene kontrakter
+  bruker `lateCosts` (boten ved fristen mot 60 % av det som gjenstår), aldri «avbryt alltid».
 - **Salgsdirektøren regner med det verket faktisk lager** (`directorDailyT`, siste uke), ikke kapasiteten. Står ovner
   (én ovn om gangen, støping, folk), sier han nei til det Salg viser grønt – loggen forklarer det (B-312). Ikke løsne
   regelen: den holder omdømmet på 96–100 hos alle med direktør.

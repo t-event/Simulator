@@ -1918,11 +1918,30 @@ export function agreementLoadUntil(g: GameState, untilDay: number, product?: Pro
   return t;
 }
 
+/** Grunnene til at en ovn står til spilleren gjør noe (B-461): uten penger til omforing eller uten folk */
+const STOP_REASONS: Record<string, string> = {
+  "Foringen skal byttes – mangler penger til omforing": "foringen må byttes, men kassa har ikke råd til omforingen",
+  "Mangler folk": "det er ingen på jobb",
+};
+
+/**
+ * Står hele verket til spilleren gjør noe (B-461)? Da lager det ingenting, og forespørslene og ordrekøen skal ikke
+ * regne med produksjonen fra før. Gir grunnen med vanlige ord, eller null. Før sa Salg «Rekker det» mens ovnen sto
+ * uten penger til omforing, og nye kontrakter ble signert rett før konkurs.
+ */
+export function plantStopped(g: GameState): string | null {
+  if (!g.furnaces.length || g.furnaces.some((f) => f.heat)) return null;
+  const reasons = g.furnaces.map((f) => (f.waitReason ? STOP_REASONS[f.waitReason] : undefined));
+  return reasons.every((r) => r) ? reasons[0]! : null;
+}
+
 /**
  * Kontraktene i ordrekøen som ikke rekker fristen, hvis verket mister «lostT» tonn produksjon nå
  * (f.eks. ved utkobling fra nettselskapet, B-104). Anslaget bruker samme døgnproduksjon som forespørslene.
  */
 export function lateContracts(g: GameState, stats: PlantStats, lostT = 0): Contract[] {
+  // Står verket (B-461), rekker ingenting med frist før spilleren har ordnet det
+  if (plantStopped(g)) return orderQueue(g).filter((c) => !c.landmark);
   const perDay = realisticDailyT(g, stats);
   if (perDay <= 0) return orderQueue(g);
   let cum = lostT;
@@ -1933,6 +1952,39 @@ export function lateContracts(g: GameState, stats: PlantStats, lostT = 0): Contr
     if (doneDay > c.deadlineDay && !c.landmark) late.push(c);
   }
   return late;
+}
+
+export interface LateCost {
+  contract: Contract;
+  /** Tonn som trolig ikke er levert når fristen går ut */
+  shortT: number;
+  /** Boten for det (bot regnes av det som ikke er levert ved fristen) */
+  lateBot: number;
+  /** Boten for å avbryte nå (B-057) */
+  cancelBot: number;
+}
+
+/**
+ * Hva de sene kontraktene i køen trolig koster (B-461): boten ved fristen mot boten for å avbryte nå. Avbryting koster
+ * 60 % av det som gjenstår; boten ved fristen gjelder bare det som ikke er levert da – så avbryting lønner seg bare når
+ * kontrakten rekker langt fra. Står verket, regnes alt som gjenstår som ulevert.
+ */
+export function lateCosts(g: GameState, stats: PlantStats): LateCost[] {
+  const stopped = !!plantStopped(g);
+  const perDay = stopped ? 0 : realisticDailyT(g, stats);
+  const today = day(g);
+  let cum = 0;
+  const out: LateCost[] = [];
+  for (const c of orderQueue(g)) {
+    const left = c.tonnes - c.delivered;
+    cum += left;
+    if (c.landmark) continue;
+    const canMake = perDay * Math.max(0, c.deadlineDay - today + 1);
+    const shortT = Math.min(left, Math.max(0, cum - canMake));
+    if (shortT > 1e-6)
+      out.push({ contract: c, shortT, lateBot: shortT * c.penaltyPerT, cancelBot: cancelPenalty(c).bot });
+  }
+  return out;
 }
 
 /** Tonn som gjenstår i ordrekøen (bare én vare hvis «product» er gitt) */
@@ -2153,7 +2205,8 @@ export function assessOffer(g: GameState, stats: PlantStats, c: Contract, commit
     !missingResearch &&
     g.workers.some((w) => w.role === "klasser") &&
     !!suggestRecipe(g, c.grade, stats, "sikker");
-  const perDay = stats.dailyProductT > 0 ? realisticDailyT(g, stats) : 0;
+  // Står verket til spilleren gjør noe (B-461), lager det ingenting – uansett hva det laget før
+  const perDay = stats.dailyProductT > 0 && !plantStopped(g) ? realisticDailyT(g, stats) : 0;
   const needDays =
     perDay > 0
       ? Math.max(

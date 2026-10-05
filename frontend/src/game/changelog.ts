@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 461,
+    date: "2026-10-05",
+    title: "Hjelp når køen blir for lang",
+    items: [
+      "Salg ser nå når verket står (for eksempel uten penger til ny foring) og sier ifra i stedet for å vise «Rekker det».",
+      "«Signer likevel» spør først og viser hva en for sen kontrakt kan koste i bot og omdømme.",
+      "Nytt råd på Verket når kontrakter i køen ikke rekker fristen – og når det er billigere å avbryte en enn å vente på boten.",
+    ],
+  },
+  {
     b: 460,
     date: "2026-10-05",
     title: "Enklere deling",
