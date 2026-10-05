@@ -5,6 +5,16 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 378 – 2026-10-05: Datakvaliteten i tidslinjetallene (B-456)
+
+**Brukeren ba om:** «fortsett» – neste punkt som ikke venter på eieren: datakvalitetsoversikten (B-396, B-401).
+
+**Gjort:** spørringer som bare leser (`timeline_metrics`, `timeline_energy` per spiller og per døgn, `metric_note`) og
+`docs/DATAKVALITET.md` med dekning, kWh/t, presisjon og anbefalinger til eierens fire valg. Ingen kode endret.
+
+**Gjenstår:** eierens valg for konkurransene (B-456); resultatet av slagganbudet og oppkjøpet 5.10 (påminnelser);
+ryddingen av meldinger (108) før 1.11; skyggerapporten rundt 9.10; verv en venn og delingsknapp venter på eierens valg.
+
 ## Økt 377 – 2026-10-05: Verkskontoen bygget (B-455)
 
 **Brukeren ba om:** «bygg alt» – V1–V4 fra verkskonto-forslaget.

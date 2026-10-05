@@ -13,8 +13,9 @@ til «Avgjort» nederst).
 - **Utbyttet for ferdige verk (B-397, B-399):** besvart – kjøres rett etter 2.10-rapporten; etterbetaling med dry-run per
   spiller og dato (allerede utbetalt, korrigert, differanse, usikkerhet), medregnet det migrasjonen selv utløser, og
   eierens godkjenning. Rapportens grunnlag bevares; korrigeringen dokumenteres separat. Planlagt sjekk 2.10 kl. 07:45 UTC.
-- **Datakvalitetsoversikt for tidslinjetallene (B-396, B-401):** eieren 1.10: tas når flere dager er samlet – andel
-  gyldige målinger (`metric_note`), kWh/t over perioder med nok tonn (`timeline_energy`) og leveringspresisjon per spiller.
+- **Datakvalitetsoversikt for tidslinjetallene (B-396, B-401):** første oversikt 5.10 (B-456, `docs/DATAKVALITET.md`).
+  Spørsmål til eieren: minstetonn 5 000 t, små verk utenfor strøm per tonn, absolutt kWh/t blant storverk per uke (ikke
+  forbedring), minst 50 leveranser per uke for presisjon – ja? Ny oversikt om et par uker.
 - ~~Anbudsgulvet i oppkjøpene~~ **Bygget 3.10 (B-451):** F – minstebudet høyst 12 dagers inntekt, øvrige regler beholdes.
   Om gamle anbud også skal dempe budstyrke og Kontroll (begrensningen i B-450), tas senere med ekte data.
 - **Verkskontoen – mer å bruke penger på hjemme (eieren 3.10):** nabolagsprosjektene koster til sammen 28 mrd., og store
