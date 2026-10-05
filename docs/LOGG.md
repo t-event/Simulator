@@ -5,7 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
-## Økt 386 – 2026-10-05: Prøvevarsel (B-466)
+## Økt 387 – 2026-10-05: Varselet virker, ryddingen klar til eieren
+
+**Brukeren ba om:** «Fortsett» (med skjermbilde: prøvevarselet kom fram på iPhonen).
+
+**Gjort:** `supabase/utkast/108_meldinger_rydding.sql` rydder nå også varselboksen (sendte varsler etter 14 dager,
+avslåtte enheter etter 60 dager) og kan kjøres to ganger uten feil. Kolonnene og statusverdiene er sjekket mot databasen.
+Connectoren holder fortsatt igjen SQL med `delete`, så eieren kjører fila i SQL-editoren.
+
+**Testet:** kolonnene og `reports.status` mot databasen (bare lesing).
+
+**Gjenstår:** eieren kjører 108 (sjekk etterpå at jobben `meldinger-rydding` finnes i `cron.job`); B-464 i kveld.
+
+: Prøvevarsel (B-466)
 
 **Brukeren ba om:** «Fortsett».
 
