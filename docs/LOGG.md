@@ -5,7 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
-## Økt 388 – 2026-10-05: Varsler på for alle (B-467)
+## Økt 389 – 2026-10-05: Klar for oppkjøp 12, og navnet i byggevarselet (B-468)
+
+**Brukeren ba om:** «Alt klart for oppkjøp om 1 time?» og «Fiks» (navnet på verket i varselet).
+
+**Gjort:** sjekket oppkjøp 12 (stenger 22:21, avgjøres av neste kjøring), verdensjobbene (alle ok, én oppstartsfeil
+16:25 i Supabase), varslene (8 enheter, 8 av 8 levert). Migrasjon 136: `push_scan` henter navnet fra `konsern.plants`.
+
+**Testet:** oppslaget mot de siste bestillingene; `push-varsler` går som før; `npm test`.
+
+**Gjenstår:** B-464 kl. 22:35; eieren kjører 108.
+
+: Varsler på for alle (B-467)
 
 **Brukeren ba om:** «Skru på varsler for alle. Godtar ikke de varslinger er det ok. Da kan de gjøre det i innstillinger senere.»
 

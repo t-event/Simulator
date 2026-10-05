@@ -15,6 +15,12 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 468,
+    date: "2026-10-05",
+    title: "Navnet på verket i varselet",
+    items: ["Varselet om et ferdig byggeprosjekt sier nå hvilket verk det gjelder, ikke bare «Verket er modernisert»."],
+  },
+  {
     b: 467,
     date: "2026-10-05",
     title: "Varsler på som standard",
