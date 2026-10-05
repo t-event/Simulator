@@ -360,7 +360,20 @@ export async function signIn(email: string, password: string): Promise<Session> 
   return s;
 }
 
+// Det som må gjøres mens økta fortsatt gjelder (varsler på denne enheten slås av, B-465). Høyst 3 s, så utloggingen
+// aldri henger på nettet
+const beforeSignOut: (() => Promise<void>)[] = [];
+export function onBeforeSignOut(fn: () => Promise<void>): void {
+  beforeSignOut.push(fn);
+}
+
 export async function signOut(): Promise<void> {
+  if (getSession() && beforeSignOut.length) {
+    await Promise.race([
+      Promise.all(beforeSignOut.map((fn) => fn().catch(() => undefined))),
+      new Promise((r) => setTimeout(r, 3000)),
+    ]);
+  }
   const s = getSession();
   forgetSignedIn();
   setSession(null);

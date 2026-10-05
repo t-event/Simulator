@@ -5,6 +5,25 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 385 – 2026-10-05: Varsel på mobilen (B-465)
+
+**Brukeren ba om:** «Gå for dine anbefalinger og fortsett» – etter lista over det som venter på eieren.
+
+**Gjort:**
+- Gikk gjennom lista: designpunktene i FORSLAG var alt bygget (strykes i kveld sammen med B-464); stabiliseringen er
+  avgjort (B-381–B-385, FORSLAG rettet); skyggerapporten for V0/K-1 har bare tre dager og ingen treff – påminnelse 2.11;
+  mekanisk verksted slås på tidligst 12.10 (påminnelse med sjekker); rekonstruksjon venter (ingen konkurs på storverket,
+  én på verkstedet); alle 32 kontoer har brukernavn.
+- B-465: migrasjon 134 (abonnement, utboks, triggere på oppkjøp/anbud/privatmeldinger, `push_scan` for byggeprosjekter
+  og frister, jobben `push-varsler`), edge-funksjonen `push` (Web Push med WebCrypto, nøkkelen laget i Vault), appen
+  (`net/push.ts`, `ui/Push.tsx`, `ui/pushLinks.ts`, service workeren, utlogging slår av varslene).
+
+**Testet:** krypteringen mot et uavhengig bibliotek; migrasjonen med to ekte kontoer i en rullet transaksjon; edge-
+funksjonen ute (401 uten nøkkel); nettest; typesjekk, lint, `npm test`, bygg; Playwright 320/390/1366.
+
+**Gjenstår:** eieren prøver et ekte varsel på telefonen (iPhone: fra hjemskjermen); rydding av gamle rader i utboksen
+sammen med 108; B-464 i kveld; verkstedet 12.10; skyggerapporten 2.11.
+
 ## Økt 384 – 2026-10-05: Slagganbudet, inntektsanslaget og påkrevd brukernavn (B-463)
 
 **Brukeren ba om:** kontroll av slagganbudet; «Ta din anbefaling og fortsett» (inntektsanslaget); spurte hva som skjer

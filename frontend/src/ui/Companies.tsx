@@ -62,6 +62,7 @@ import { Icon } from "./icons";
 import { fmtKr, fmtT } from "./format";
 import { buzz } from "./haptics";
 import { PlayerName } from "./Profile";
+import { PushPrompt } from "./Push";
 
 function useSession() {
   return useSyncExternalStore(onSessionChange, getSession, getSession);
@@ -355,6 +356,10 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
 
         {c.control && (
           <ControlSection c={c} fund={fund} policy={g.konsern.policy?.kind ?? "ut"} takeoversOn={world.takeoversOn} />
+        )}
+        {/* Varsel på mobilen (B-465): eieren bør få vite det når noen byr, også når spillet ikke er åpent */}
+        {c.mine && world.takeoversOn && (
+          <PushPrompt text="Få varsel på mobilen når noen byr på selskapet, så du rekker å legge inn motbud." />
         )}
         {world.takeoversOn && (
           <TakeoverSection

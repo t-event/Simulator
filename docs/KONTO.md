@@ -88,6 +88,7 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Del verket (delingsknapp og forhåndsvisning av lenken) | Nei | Regel 1 | B-458 |
 | Verv en venn: kode, startpakke til vennen, 10 mill. i konsernkassa når vennen er i gang | Ja | Regel 2 og 7: serveren og konsernkassa | B-459 |
 | Vennelista: følge andre spillere (enveis), nivå og sist aktiv | Ja | Regel 3: viser andre spillere | B-462 |
+| Varsel på mobilen: oppkjøp, anbud, byggeprosjekter og privatmeldinger | Ja | Regel 3: lagres på serveren og gjelder hendelser mellom spillere | B-465 |
 | Skiftrapporten: felles chat for alle spillere | Ja | Regel 3: viser andre spillere og brukernavnet ditt | B-338 |
 | Profiler: profilarket når man trykker på et brukernavn (tittel, merker, konsernverdi og verk, selskaper, sesonger, sist aktiv) | Ja | Regel 3: viser andre spillere | B-419 |
 | Min profil: kort tekst, profilmerke og tre utvalgte prestasjoner | Ja | Regel 3: vises for andre spillere | B-420 |
@@ -101,7 +102,6 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | «Det går du glipp av» på Mål (plassen man ville hatt, belønningene) | Nei | Regel 6: vis hva kontoen gir | B-212 |
 | Ventetid i konsernet (fase 4) | Nei (serverklokke med konto) | Regel 5 | PLAN-NETT |
 | Anbud og skrapauksjoner (fase 5) | Ja | Regel 3 og 7 | PLAN-NETT |
-| Varsel på mobilen (senere) | Ja | Varselet knyttes til kontoen | – |
 | Toppliste for kontrollrommet (venter) | Ja | Regel 3 | B-143 |
 | Ukens utfordring, medaljer og ukekiste | Ja (lista kan leses uten) | Regel 3 og 7 | B-152 |
 | Ukens kontrollrom: tre tellende forsøk (trening på ukens kvalitet uten konto går ikke – kortet vises bare med konto) | Ja | Regel 3 og 7 | B-387 |

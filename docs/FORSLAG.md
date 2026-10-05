@@ -93,8 +93,8 @@ til «Avgjort» nederst).
   fanenavn «Strøm» også i garasjen, topplista med faner og chips i stedet for en nedtrekksliste, og instruksjonen i
   kontrollrommet som én linje rett over hold-inne-knappen.
 
-- **Stabilisering (B-380, spørsmål til eieren):** se `docs/STABILISERING.md` – kassetaket, legacy-gulvet, sesonglistene og
-  innskuddet (fire spørsmål nederst). Verksjefene venter til dette er avklart.
+- ~~Stabilisering (B-380)~~ **Avgjort (B-381–B-385):** kassetaket fjernet, tittel skilt fra opptjent nivå, sesonglistene og
+  innskuddet stengt. Verksjefene venter nå bare på V0/K-1 (B-409).
 
 - **Verksjefer for datterverkene (B-379, besvart, B-409):** `docs/VERKSJEF-FORSLAG.md` – svarene i avsnitt 9 og V1 ferdig
   spesifisert i avsnitt 10. Bygges etter V0/K-1 (2.10 → skygge → data → eventuelt live → V1).
@@ -116,8 +116,8 @@ til «Avgjort» nederst).
 - ~~Sjekk av første opplasting~~ **Bygget (B-257).** spill som kobles til en konto sent (f.eks. dag 610), sjekkes ikke av juksesperren
   før koblingen. En fornuftssjekk mot det testspilleren klarer på samme døgn (økt 108). «Koblet til på dag N» står nå
   på topplista (B-170).
-- **Varsel på mobilen** når et anbud er avgjort, et verk er ferdig bygget (fase 4–5) eller dagens belønning er klar.
-  Krever konto. Brukeren: «Ingen varsel på mobilen enda» (B-149).
+- ~~Varsel på mobilen~~ **Bygget 5.10 (B-465):** oppkjøp, anbud, byggeprosjekter og privatmeldinger, valgt per enhet.
+  Dagens belønning varsles ikke (mas). Eieren bør prøve et ekte varsel på telefonen (fra hjemskjermen på iPhone).
 
 ## Avgjort
 

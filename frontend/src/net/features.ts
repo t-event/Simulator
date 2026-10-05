@@ -53,6 +53,10 @@ export const ACCOUNT_FEATURES = {
     name: "Vennelista",
     why: "Lista ligger på kontoen og viser andre spillere – bare det profilen deres viser alle.",
   },
+  varsler: {
+    name: "Varsel på mobilen",
+    why: "Varslene sendes fra serveren når noe skjer mellom spillerne – et bud på selskapet ditt, et anbud, en melding.",
+  },
   konsernkasse: {
     name: "Konsernkassa",
     why: "Kassa ligger på serveren og går i virkelig tid, så overføringene og det du kjøper i verden avgjøres der.",

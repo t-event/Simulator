@@ -3,6 +3,7 @@
  * Kjøres med `npx tsx src/net/tests.ts` og i `npm test`.
  */
 import { DM_REFUSAL_TEXT, parseOverview, parseThread, type DmRefusal } from "./messages";
+import { parsePushLink, PUSH_KINDS } from "./push";
 import { parseProfile, seenText, sinceText } from "./profile";
 import {
   addFriend,
@@ -2789,6 +2790,17 @@ const main = async () => {
     await reloadFriends();
     assert(friendsList()?.length === 1 && !isFriend("Anna"), "tatt av");
     assert(parseFriends(null).length === 0 && parseFriends([{ nick: "" }, { x: 1 }]).length === 0, "rare svar");
+  });
+
+  await test("Varsel på mobilen: lenkene og temaene (B-465)", () => {
+    assert(parsePushLink("industri")?.to === "industri" && parsePushLink("konsern")?.to === "konsern", "faste lenker");
+    const m = parsePushLink("meldinger:Anna");
+    assert(m?.to === "meldinger" && m.nick === "Anna", `melding med navn: ${JSON.stringify(m)}`);
+    const n = parsePushLink("meldinger");
+    assert(n?.to === "meldinger" && n.nick === null, "melding uten navn");
+    assert(parsePushLink("noe-annet") === null && parsePushLink(null) === null, "ukjente lenker gir ingenting");
+    // Samme temaer som push_kinds() i 134
+    assert(PUSH_KINDS.map((k) => k.id).join(",") === "oppkjop,anbud,konsern,melding", "temaene");
   });
 
   setSaveListener(null);

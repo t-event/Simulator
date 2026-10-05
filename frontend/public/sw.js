@@ -92,3 +92,43 @@ self.addEventListener("fetch", (event) => {
     ),
   );
 });
+
+/*
+ * Varsel på mobilen (B-465): serveren sender et kryptert varsel (tittel, tekst, lenke). Trykk på det åpner spillet –
+ * er det alt åpent, får det beskjed om hvor det skal gå (`stalverk-varsel`), ellers åpnes det med `?varsel=<lenke>`.
+ */
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { body: event.data ? event.data.text() : "" };
+  }
+  const title = data.title || "Stålverket";
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: data.body || "",
+      icon: "icon-192.png",
+      badge: "icon-192.png",
+      tag: data.tag || undefined,
+      data: { link: data.link || null },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const link = (event.notification.data && event.notification.data.link) || null;
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+      const open = list.find((c) => new URL(c.url).pathname.startsWith(new URL(self.registration.scope).pathname));
+      if (open) {
+        if (link) open.postMessage({ type: "stalverk-varsel", link });
+        return open.focus();
+      }
+      const url = new URL(self.registration.scope);
+      if (link) url.searchParams.set("varsel", link);
+      return self.clients.openWindow(url.href);
+    }),
+  );
+});

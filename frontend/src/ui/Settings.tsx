@@ -17,6 +17,7 @@ import { InstallTip } from "./InstallTip";
 import { Card } from "./common";
 import { LOG_TOPICS } from "../game/inbox";
 import { fmtKr, fmtPct } from "./format";
+import { PushSettings } from "./Push";
 
 /** Banken: lån og kassekreditt. Står under Verket → Økonomi, der pengene er (B-072). */
 export function BankCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
@@ -239,6 +240,7 @@ export function SettingsSheet({
         </SetGroup>
         <SetGroup icon="bell" title="Varsler">
           <ToastSettings g={g} act={act} />
+          <PushSettings />
         </SetGroup>
         <SetGroup icon="info" title="Om spillet">
           <button className="g-set-link" onClick={() => setNews(true)}>
