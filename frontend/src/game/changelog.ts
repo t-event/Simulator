@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 463,
+    date: "2026-10-05",
+    title: "Alle kontoer har brukernavn",
+    items: [
+      "Mangler kontoen din brukernavn (for eksempel fordi navnet ble tatt mens du ventet på e-posten), ber spillet deg velge et før du spiller videre.",
+    ],
+  },
+  {
     b: 462,
     date: "2026-10-05",
     title: "Vennelista",

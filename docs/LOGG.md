@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 384 – 2026-10-05: Slagganbudet, inntektsanslaget og påkrevd brukernavn (B-463)
+
+**Brukeren ba om:** kontroll av slagganbudet; «Ta din anbefaling og fortsett» (inntektsanslaget); spurte hva som skjer
+med et brukernavn som finnes, og sa «Man må ha brukernavn, om man har laget seg konto».
+
+**Gjort:**
+- Anbud 8 avgjort 10:38, vinner 75 mill., eierskap og helse i orden. Funnet: inntektsanslaget er en øvre grense, ca. 1,9 ×
+  det som betales. Migrasjonen for et realistisk anslag og minstebud i anbud er prøvd (dry-run) og ligger som
+  `supabase/utkast/133_realistisk_anslag.sql` (B-464) til oppkjøp 12 er avgjort i kveld.
+- B-463: arket «Velg brukernavn» (`ui/NicknameGate.tsx`), hjelperne i `ui/nickname.ts`, kontokortet lytter på navnet.
+
+**Testet:** dry-run av 133 i rullet transaksjon; Playwright 320/390/1366 av arket; typesjekk, lint, `npm test`, bygg.
+
+**Gjenstår:** legge inn 133 etter oppkjøp 12 (påminnelse 22:35) med beslutningen B-464.
+
 ## Økt 383 – 2026-10-05: Vennelista (B-462)
 
 **Brukeren ba om:** «Fortsett» – siste punkt i anbefalingen (vennelista); alt annet i FORSLAG.md venter på eieren.
