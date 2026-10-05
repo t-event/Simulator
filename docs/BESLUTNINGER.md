@@ -8553,3 +8553,43 @@ før 12.10 som før, så strom/kontroll/presisjon/dager; rådgiveren uten nye fu
 Krever konto: ja, som ukens utfordring ellers (B-152).
 Endringslogg: ja.
 
+## B-458 Del verket: delingsknapp og forhåndsvisning av lenken (2026-10-05)
+Status: gjelder.
+Bakgrunn: eieren 5.10: «kjør på med dine anbefalinger» – anbefaling 2 (dele før verving): spillet hadde ingen enkel måte å
+vise fram verket på, og en delt lenke ga ingen forhåndsvisning.
+Beslutning:
+- **Delingsknapp** på anleggsbildet (Verket → Oversikt, ved pynteknappen): telefonens delingsmeny med bilde av verket (SVG
+  tegnet til PNG, 1 200 px), én setning («Verket mitt lager X tonn stål i døgnet …») og lenken. Kan nettleseren ikke
+  dele, kopieres teksten og lenken (`ui/share.ts`). Med konto har lenken vervekoden (B-459).
+- **Forhåndsvisning:** Open Graph- og Twitter-tagger i `index.html` med eget bilde `public/og.png` (1 200 × 630, laget fra
+  app-ikonet og tittelen med Chromium).
+Testet: Playwright 320/390/1366 (knappen overlapper ikke pynteknappen, ingen horisontal scrolling), delingen i Chromium
+(kopiering), typesjekk, lint, `npm test`, bygg.
+Krever konto: nei (regel 1). Vervekoden i lenken krever konto (B-459).
+Endringslogg: ja (sammen med B-459).
+
+## B-459 Verv en venn (2026-10-05)
+Status: gjelder.
+Bakgrunn: eieren 5.10: «kjør på med dine anbefalinger» – anbefaling 1 med tak og krav, så vervingen ikke kan brukes til å
+lage penger med egne kontoer.
+Beslutning:
+- **Kode og lenke** (migrasjon 131): hver konto (ikke gjest) får en kode på seks tegn (`referral_my_code`). Lenken er
+  `…/Simulator/?verv=KODE`; appen husker koden i 14 dager (`stalverk-verv-v1`) og tar den bort fra adresselinja.
+- **Kobling:** når vennen er innlogget og spillet avklart, kaller appen `referral_register`. Serveren sier nei til gjester,
+  ukjent kode, egen kode, konto som alt er vervet, konto eldre enn 14 dager og den som har vervet 5.
+- **Vennen** får en startpakke i eget spill: 50 000 kr og 25 fagpoeng (spilltid, B-323), lagt inn som andre belønninger
+  (`grant`, B-426) – bare når serveren svarer `ok`, som skjer én gang per konto.
+- **Den som vervet** får 10 mill. i konsernkassa når vennen er ekte: egen konto, ikke sperret eller flagget, minst 3 ulike
+  ekte dager med lagring og nådd nivå 3 (støperiet, `stage` 2) i tidslinja. Regnes «lat» når kortet hentes
+  (`referral_settle`), én gang per venn (`rewarded_at` settes før betalingen). Føres i kassaboka som `justering` med ref
+  `verving:<venn>` – ikke `utbytte`/`bidrag`, så den øker ikke lånerammen. Høyst 5 venner = 50 mill., mindre enn to
+  dagers utbytte for et fullt konsern.
+- **Kortet «Verv en venn»** på Mål → Uka (fra verkstedet): forklaring, «Del lenken», koden og vennene med dager og nivå.
+  Uten konto: en linje i «Det går du glipp av», og den som kom via en lenke, ser startpakken der.
+- **Prestasjonen «Verving»** (1, 3, 5 venner) er skjult til man har den, fordi den krever konto.
+- Tallene i `config.world.referral` (`reward`, `cap`, `min_days`, `min_stage`, `max_age_days`).
+Testet: migrasjonen i en transaksjon som ble rullet tilbake (kode, egen kode avvist, venn koblet én gang, ingen betaling
+før kravene, 10 mill. og én rad i kassaboka etter), rådgiveren uten nye funn, nettest med falsk server, Playwright.
+Krever konto: ja (regel 2 og 7: konsernkassa og serveren avgjør).
+Endringslogg: ja.
+

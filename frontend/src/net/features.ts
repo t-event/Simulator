@@ -45,6 +45,10 @@ export const ACCOUNT_FEATURES = {
     name: "Profiler",
     why: "Profilene viser det serveren vet om spillerne – konsernet, selskapene og sesongene – og bare for kontoer.",
   },
+  verving: {
+    name: "Verv en venn",
+    why: "Serveren kobler vennen til lenken din og sjekker at vennen spiller selv før belønningen kommer.",
+  },
   konsernkasse: {
     name: "Konsernkassa",
     why: "Kassa ligger på serveren og går i virkelig tid, så overføringene og det du kjøper i verden avgjøres der.",

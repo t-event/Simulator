@@ -35,6 +35,8 @@ import { VERKET_TABS, type VerketTab } from "./verketTabs";
 import type { View } from "./views";
 import { MoneyGuideLink } from "./MoneyGuide";
 import { Icon } from "./icons";
+import { shareGame, shareText, shareUrl } from "./share";
+import { referralCode } from "../net/referral";
 import { hasPaidOut, paidOutTotal } from "../game/reserve";
 import { Callout, Metric, StatusLine, type Status } from "./ds";
 import { changeDelta } from "./delta";
@@ -442,6 +444,7 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
           <button className="g-scene-pynt" onClick={() => setPynt(true)} aria-label="Pynt verket">
             <Icon name="palette" />
           </button>
+          <ShareButton g={g} stats={stats} />
           <div className="g-scene-caption">
             <strong>{stats.stage.name}</strong>
             <span>
@@ -840,5 +843,32 @@ function ProductionNow({
         )}
       </details>
     </Card>
+  );
+}
+
+/** Del verket (B-458): telefonens delingsmeny med bildet av verket og ett tall, ellers kopieres lenken */
+function ShareButton({ g, stats }: { g: GameState; stats: PlantStats }) {
+  const [note, setNote] = useState<string | null>(null);
+  useEffect(() => {
+    if (!note) return;
+    const t = setTimeout(() => setNote(null), 3500);
+    return () => clearTimeout(t);
+  }, [note]);
+  const share = async () => {
+    const svg = document.querySelector<SVGSVGElement>(".g-scene-wrap .plant-scene");
+    const r = await shareGame(shareText(g, stats), shareUrl(referralCode()), svg);
+    setNote(r === "kopiert" ? "Lenken er kopiert" : r === "feil" ? "Fikk ikke delt – prøv igjen" : null);
+  };
+  return (
+    <>
+      <button className="g-scene-share" onClick={() => void share()} aria-label="Del verket">
+        <Icon name="share-2" />
+      </button>
+      {note && (
+        <span className="g-scene-share-note" role="status">
+          {note}
+        </span>
+      )}
+    </>
   );
 }

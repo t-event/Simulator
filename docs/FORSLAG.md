@@ -22,6 +22,14 @@ til «Avgjort» nederst).
   hjemmeverk har ofte ingen av dem. Etter dem trengs flere valg for store hjemmeverk, mens kassa fortsatt kan vokse fritt
   (B-381). Lokal kasse skal ikke gi makt mellom spillere (B-190, B-323). Bygget i B-455 (V1–V4, eieren: «bygg alt»).
   Mulig senere: vise stiftelsens tittel på profilen (krever at serveren leser trinnet, vurderes mot B-419).
+- **Nye spillere som står fast (analyse 5.10, B-459-økta):** ingen kontoer står på støperiet eller stålverket – alle er på
+  verkstedet eller lavere (12) eller på storverket (21). Halvparten på verkstedet har negativ kasse. Driften går i pluss
+  hver dag (20–35 000 kr inn, 8–30 000 ut); det som tar kassa, er **bøter for fristene som går ut** – én spiller har 35
+  kontrakter og 23 misligholdte, andre har 3–5 bøter på 3 000–60 000 kr, og omdømmet faller til 0. Spillerne tar flere
+  kontrakter enn verkstedet rekker. Forslag til eieren: (a) høyst så mange aktive kontrakter som verket rekker på
+  verkstedet (sperre i Salg med forklaring), (b) tydeligere advarsel før signering når køen ikke rekker fristen, og
+  (c) et råd «Du har tatt på deg mer enn verket rekker» med «avbryt den minst lønnsomme». Anbefalt: (b) + (c) først,
+  (a) hvis det ikke hjelper.
 - **Beskytt main (B-397):** slå på «Require status checks» for `sjekker` under Settings → Branches i GitHub.
 - **Anbefalinger fra kodegjennomgangen (B-398), til beslutningene etter 2.10:** behold marginhopp som varsling til de
   falske positive er kartlagt (C og D viser hvorfor); prøv et prisbasert margintak i skygge først; sett krav til de nye
