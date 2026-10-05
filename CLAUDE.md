@@ -247,7 +247,7 @@ docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretn
                KONTROLL-FORSLAG.md (verdenskart, utbyttepolitikk, Kontroll, overtakelser og pengene hjemme, B-331, godkjent B-332),
                VERKSJEF-FORSLAG.md (verksjefer, besvart; V1 ferdig spesifisert i avsnitt 10, bygges etter V0/K-1, B-409),
                REKONSTRUKSJON-FORSLAG.md (rekonstruksjon etter konkurs, modellene A–E – venter på eierens valg, B-409),
-               STATUS.md (fasit for hvordan spillet virker nå, B-385),
+               STATUS.md (fasit for hvordan spillet virker nå, B-385), DATAKVALITET.md (tidslinjetallene, B-456),
                RAPPORT-2026-10-02.md (pengestrømmene 29.9–1.10, utbytterettingen og etterbetalingen, B-423; utført B-446),
                UKENS-KONTROLLROM.md (variant A bygget, B-387), KONSERNKAPITAL-FORSLAG.md (forslag med eierens svar, B-386/B-387),
                K1-PROGRAMMER.md (konsernprogrammene og verdenshendelsene V0, godkjent B-390 – bygges i skygge etter 2.10),

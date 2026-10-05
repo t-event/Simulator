@@ -8520,3 +8520,14 @@ titler; slitasje over 180 døgn, risiko, fornyelsens pris, gammel lagring); `bal
 raden «Anlegget» under Vedlikehold, rådet om slitasje, byggene og stiftelsen i anleggsbildet, ingen sidelengs scrolling.
 Endringslogg: ja.
 
+## B-456 Datakvaliteten i tidslinjetallene: første oversikt (2026-10-05)
+Status: rapport – anbefalingene venter på eieren. Bygger på B-396, B-398 og B-401.
+Bakgrunn: eieren 1.10: oversikten tas når flere dager er samlet. Grunnlag 1.10–4.10 (`docs/DATAKVALITET.md`).
+Funn: 88 % av radene har de nye tellerne (100 % siste døgn); vakten har bare merket to nye spill og ikke nullet noe.
+Storverk: 260–326 kWh/t (alle 16 gyldige), 3,7 % variasjon fra dag til dag for samme spiller, presisjon stort sett
+97–99 %. Små verk: ca. 1 000 kWh/t og for lite stål til å bli gyldige.
+Anbefaling (ikke bygget): minstetonn 5 000 t; små verk utenfor strøm per tonn; absolutt kWh/t blant storverk per uke, ikke
+forbedring (variasjonen er like stor som en ukes forbedring); minst 50 leveranser per uke for presisjon; «Mer stål enn før»
+tas ut når en konkurranse er valgt. Ny oversikt om et par uker.
+Endringslogg: nei.
+
