@@ -5,7 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
-## Økt 389 – 2026-10-05: Klar for oppkjøp 12, og navnet i byggevarselet (B-468)
+## Økt 390 – 2026-10-05: Varsel om motbud (B-469)
+
+**Brukeren ba om:** «Jeg som prøver å ta over en bedrift får ikke varsel på mobilen om eier byr over meg igjen.»
+
+**Gjort:** migrasjon 137: `push_on_takeover` reagerer også på `defense` (motbud → kjøperen, uten beløp, høyst ett per
+10 minutter) og `bid` fra samme kjøper (høyere bud → eieren).
+
+**Testet:** rullet transaksjon med alle tre tilfellene; `npm test`.
+
+**Gjenstår:** publiseringen av B-468/B-469 sto i kø hos GitHub (Actions); B-464 kl. 22:35.
+
+: Klar for oppkjøp 12, og navnet i byggevarselet (B-468)
 
 **Brukeren ba om:** «Alt klart for oppkjøp om 1 time?» og «Fiks» (navnet på verket i varselet).
 

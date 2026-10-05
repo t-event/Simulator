@@ -8728,3 +8728,17 @@ når bestillingen ikke har det. Varselet sier nå for eksempel «Elveverket er m
 Testet: oppslaget mot de siste bestillingene (alle fikk navn), jobben `push-varsler` går som før.
 Krever konto: ja (som B-465).
 Endringslogg: ja.
+
+## B-469 Varsel om motbud og høyere bud (2026-10-05)
+Status: gjelder. Utvider B-465.
+Bakgrunn: eieren 5.10: «Jeg som prøver å ta over en bedrift får ikke varsel på mobilen om eier byr over meg igjen.»
+Triggeren i 134 reagerte bare på status og ny kjøper – motbud (`takeovers.defense`) og at samme kjøper hever budet
+(`takeovers.bid`), ga ingen varsel.
+Beslutning (migrasjon 137, `push_on_takeover`):
+- **Motbud:** kjøperen får «Eieren la inn motbud på …» med fristen, uten beløpet – motbudet er ikke offentlig (bare
+  oppkjøpsbudet er det, B-339). Høyst ett slikt varsel per 10 minutter per oppkjøp.
+- **Høyere bud fra samme kjøper:** eieren får «Høyere oppkjøpsbud på …» med det nye budet og fristen.
+Testet: i en rullet transaksjon (motbud → varsel til kjøperen, høyere bud → varsel til eieren, nytt motbud innen 10
+minutter → ingen nytt varsel).
+Krever konto: ja (som B-465).
+Endringslogg: ja.

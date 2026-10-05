@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 469,
+    date: "2026-10-05",
+    title: "Varsel om motbud",
+    items: [
+      "Byr du på et selskap, får du varsel når eieren legger inn motbud. Eier du selskapet, får du varsel når kjøperen hever budet.",
+    ],
+  },
+  {
     b: 468,
     date: "2026-10-05",
     title: "Navnet på verket i varselet",
