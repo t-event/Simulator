@@ -22,6 +22,7 @@ import {
   type ProfileSettings,
 } from "../net/profile";
 import { getSession, onSessionChange } from "../net/supabase";
+import { FollowButton } from "./Friends";
 import { NeedsAccount } from "./Account";
 import { Button, Callout, SheetHead } from "./ds";
 import { fmtKr, fmtNum } from "./format";
@@ -137,18 +138,22 @@ function ProfileSheet({
           ) : (
             <>
               <ProfileBody p={profile} />
-              {!profile.me && profile.dm && (
+              {!profile.me && (
                 <div className="g-profile-actions">
-                  <Button
-                    variant="primary"
-                    icon="message"
-                    onClick={() => {
-                      closeProfile();
-                      openMessages(profile.nick);
-                    }}
-                  >
-                    Send melding
-                  </Button>
+                  {profile.dm && (
+                    <Button
+                      variant="primary"
+                      icon="message"
+                      onClick={() => {
+                        closeProfile();
+                        openMessages(profile.nick);
+                      }}
+                    >
+                      Send melding
+                    </Button>
+                  )}
+                  {/* Vennelista (B-462): enveis, den andre får ingen beskjed */}
+                  <FollowButton nick={profile.nick} />
                 </div>
               )}
               {profile.me && (

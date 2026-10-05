@@ -3596,6 +3596,40 @@ button {
   pointer-events: none;
 }
 
+/* Vennelista (B-462) */
+.g-friends {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-2);
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.g-friends-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-1);
+}
+.g-friends-list li {
+  min-height: var(--touch);
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+}
+.g-friends-who {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.g-friends-who > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Verv en venn (B-459) */
 .g-referral-share {
   display: flex;

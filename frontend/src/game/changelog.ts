@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 462,
+    date: "2026-10-05",
+    title: "Vennelista",
+    items: [
+      "Ny fane «Venner» i Skiftrapporten: legg til spillere du kjenner og se nivået deres og når de sist spilte.",
+      "På profilen til en spiller: «Legg til i vennelista». Den andre får ingen beskjed.",
+    ],
+  },
+  {
     b: 461,
     date: "2026-10-05",
     title: "Hjelp når køen blir for lang",

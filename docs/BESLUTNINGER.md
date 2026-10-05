@@ -8624,3 +8624,20 @@ Testet: ny test i `npm test` (Salg sier nei når ovnen står, «la den gå» mot
 Krever konto: nei (regel 1).
 Endringslogg: ja.
 
+## B-462 Vennelista (2026-10-05)
+Status: gjelder. Siste punkt i anbefalingen om flere spillere (B-458, B-459); eieren: «fortsett».
+Beslutning:
+- **Enveis, som å følge** (migrasjon 132): spilleren legger til andre med brukernavnet (fanen «Venner» i
+  Skiftrapporten) eller med «Legg til i vennelista» på profilarket. Den andre får ingen beskjed – det finnes ingen
+  forespørsler å godkjenne, og dermed ingen å spamme med.
+- **Bare det profilene alt viser andre** (`follow_list`): nivå/tittel og sist aktiv i grove trinn (B-419). Aldri kasse,
+  konsernkassa eller klokkeslett. Sperrede og flaggede vises ikke. Trykk på navnet åpner profilen.
+- Høyst 100 på lista. «Ta av vennelista» setter `active = false` (ingen sletting, så migrasjonen ikke holdes igjen,
+  B-434); å legge til igjen slår den på.
+- Ikke bygget: gjensidige venner, varsler når en venn går forbi deg, og vervede venner rett på lista – kan komme senere.
+Testet: migrasjonen i en transaksjon som ble rullet tilbake (legg til, egen konto, ukjent navn, ta av, legg til igjen),
+rådgiveren (bare kjente typer), nettest med falsk server, Playwright 320/390/1366 (fanen, legg til, feilmelding,
+profilknappen, ingen sidelengs rulling).
+Krever konto: ja (regel 3: viser andre spillere og lagres på serveren).
+Endringslogg: ja.
+

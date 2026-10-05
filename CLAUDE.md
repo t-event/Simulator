@@ -181,6 +181,7 @@ frontend/src/
     profile.ts   Profilen til en spiller fra `player_profile` (B-419; SQL i 105), Min profil (`profile_update`, 106)
     messages.ts  Privatmeldinger: oversikt, samtale, sende, blokkere, rapportere (B-421; SQL i 107)
     reports.ts   Svar på rapporter: samtalen med admin, svaret og varselet (B-438; SQL i 122)
+    friends.ts   Vennelista: følg/ta av og lista i minnet for kontoen (B-462; SQL i 132)
     referral.ts  Verv en venn: koden fra lenken (`?verv=`), kobling, status og koden til delingen (B-459; SQL i 131)
     admin.ts     Adminpanelet: rapportene og handlingene – serveren sjekker `admins` (B-421)
     konsern.ts   Konsernet på serveren: kjøp, avbestilling, salg og flytting, og svaret lagt inn i spillet (B-326, B-333)
@@ -227,6 +228,7 @@ frontend/src/
     Messages.tsx Fanen «Meldinger» i Skiftrapporten; «Send melding» går via messagesStore.ts (B-421)
     ReportNotes.tsx «Fra admin» øverst i Meldinger, og lenken til adminpanelet for eieren (B-438)
     share.ts     Del verket: delingsmeny med tekst og lenke, ellers kopiert lenke (B-458, uten bilde B-460)
+    Friends.tsx  Vennelista: fanen «Venner» i Skiftrapporten og knappen på profilarket (B-462)
     Referral.tsx Kortet «Verv en venn» på Mål → Uka og koblingen etter innlogging (`ReferralSync`, B-459)
     Admin.tsx    Adminpanelet under kontoen, bare når `is_admin()` svarer ja (B-421)
     Companies.tsx Konsern → Industrien: ett kort per selskap (skraplageret nå) og konsernkassa (B-189, B-227)
@@ -627,6 +629,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   lånerammen. Kravene (`referral_qualifies`) leser tidslinja (ekte dager, nivå), aldri tall fra lagringen. Startpakken til
   vennen legges inn med `grantReferralStart` (`ui/claims.ts`) bare når serveren svarer `ok`. Tallene i
   `config.world.referral`; startpakken i `REFERRAL_START` (`net/referral.ts`).
+- **Vennelista** (B-462, 132): `follows` med `active` – å ta noen av lista er en `update`, aldri `delete` (connectoren
+  holder igjen migrasjoner med sletting). `follow_list` viser bare det `player_profile` alt viser andre; nye felt vurderes
+  mot det. Enveis med vilje: ingen forespørsler eller varsler til den som følges.
 - **Kontrollromsrekorden på topplista** (B-295) tas fra `state.controlBest` av triggeren `note_control` på `saves` inn i
   `records.best_control` – bare for kontoer som alt har en rekordrad, og bare opptil 5 000 poeng. Endres poengene i
   kontrollrommet mye, må grensen følge med.

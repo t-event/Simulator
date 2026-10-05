@@ -170,6 +170,8 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
 - **Verv en venn** (B-459): kode per konto, lenken `?verv=KODE` huskes i 14 dager. Vennen (ny konto, ikke gjest, yngre
   enn 14 dager) får 50 000 kr og 25 fagpoeng i eget spill; den som vervet får belønningen i konsernkassa (avsnitt 4).
   Delingsknappen på anleggsbildet (B-458) sender tekst og lenke, uten bilde (B-460), og tar med koden.
+- **Vennelista** (B-462): enveis «følg» med brukernavnet (fanen Venner i Skiftrapporten, knapp på profilen), høyst 100.
+  Viser bare nivå/tittel og sist aktiv i grove trinn; den andre får ingen beskjed.
 - Gjester er anonyme kontoer (B-212) som slippes til det som står i `guest_gate`; de får ingen penger eller plass mellom
   spillere, og slettes etter 60 dager uten lagring (B-377).
 - Startskjermen viser antall spillere aktive siste 24 timer (spill lagret på nett i døgnet, uten flaggede og sperrede;

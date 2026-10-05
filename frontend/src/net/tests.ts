@@ -5,6 +5,15 @@
 import { DM_REFUSAL_TEXT, parseOverview, parseThread, type DmRefusal } from "./messages";
 import { parseProfile, seenText, sinceText } from "./profile";
 import {
+  addFriend,
+  FRIEND_REFUSAL_TEXT,
+  friendsList,
+  isFriend,
+  parseFriends,
+  reloadFriends,
+  removeFriend,
+} from "./friends";
+import {
   captureReferral,
   clearReferral,
   fetchReferral,
@@ -220,6 +229,8 @@ interface Fake {
   /** Ukens type fra den falske serveren, når den ikke er kontrollromsuke (B-457) */
   weekKind: string;
   control: { id: number; attempt: number; seed: number; points: number | null; abandoned: boolean }[];
+  /** Vennelista (B-462): brukernavnene på lista */
+  follows: string[];
 }
 function makeFake(): Fake {
   const f: Fake = {
@@ -238,6 +249,7 @@ function makeFake(): Fake {
     treasury: new Map(),
     bids: new Map(),
     guests: new Set(),
+    follows: [],
     guestsOff: false,
     chat: [],
     controlWeek: false,
@@ -660,6 +672,29 @@ function makeFake(): Fake {
     }
     if (path.startsWith("/rest/v1/rpc/weekly_board"))
       return json(200, [{ plass: 1, nickname: "Tuster", value: "5000", is_me: false, gold: 3 }]);
+    if (path.startsWith("/rest/v1/rpc/follow_add")) {
+      const n = String(body.p_nick ?? "");
+      if (n.toLowerCase() === "meg") return json(200, { ok: false, reason: "egen" });
+      if (!["Anna", "Bo"].some((x) => x.toLowerCase() === n.toLowerCase()))
+        return json(200, { ok: false, reason: "ukjent" });
+      const name = n.toLowerCase() === "anna" ? "Anna" : "Bo";
+      if (!f.follows.includes(name)) f.follows.push(name);
+      return json(200, { ok: true });
+    }
+    if (path.startsWith("/rest/v1/rpc/follow_remove")) {
+      f.follows = f.follows.filter((x) => x.toLowerCase() !== String(body.p_nick ?? "").toLowerCase());
+      return json(200, { ok: true });
+    }
+    if (path.startsWith("/rest/v1/rpc/follow_list"))
+      return json(
+        200,
+        f.follows.map((n) => ({
+          nick: n,
+          stage: "4",
+          title: n === "Anna" ? "Stålbaron" : null,
+          seen: n === "Anna" ? "idag" : "rart",
+        })),
+      );
     if (path.startsWith("/rest/v1/rpc/referral_register"))
       return json(200, body.p_code === "AB12CD" ? { ok: true } : { ok: false, reason: "ukjent" });
     if (path.startsWith("/rest/v1/rpc/referral_my_code"))
@@ -2731,6 +2766,29 @@ const main = async () => {
     setReferral(s);
     assert(referralCode() === "AB12CD", "koden til delingsknappen");
     setReferral(null);
+  });
+
+  await test("Vennelista (B-462): legg til med brukernavn, nei med grunn, ta av, og lista i minnet gjelder kontoen", async () => {
+    const f = fresh();
+    await login(f);
+    assert((await addFriend(" anna ")).ok, "legg til");
+    const egen = await addFriend("meg");
+    assert(!egen.ok && egen.reason === "egen" && FRIEND_REFUSAL_TEXT.egen.length > 3, "egen konto");
+    const ukjent = await addFriend("Ingen");
+    assert(!ukjent.ok && ukjent.reason === "ukjent", "ukjent navn");
+    await addFriend("Bo");
+    await reloadFriends();
+    const list = friendsList() ?? [];
+    assert(
+      list?.length === 2 && list[0].nick === "Anna" && list[0].title === "Stålbaron" && list[0].seen === "idag",
+      "lista",
+    );
+    assert(list[1].stage === 4 && list[1].seen === null, `ukjent «sist aktiv» blir null: ${JSON.stringify(list[1])}`);
+    assert(isFriend("ANNA") && !isFriend("Cecilie"), "isFriend");
+    await removeFriend("Anna");
+    await reloadFriends();
+    assert(friendsList()?.length === 1 && !isFriend("Anna"), "tatt av");
+    assert(parseFriends(null).length === 0 && parseFriends([{ nick: "" }, { x: 1 }]).length === 0, "rare svar");
   });
 
   setSaveListener(null);
