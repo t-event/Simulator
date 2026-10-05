@@ -5,6 +5,16 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 381 – 2026-10-05: Delingen uten bilde (B-460)
+
+**Brukeren ba om:** «dropp bilde som sendes med teksten når man deler».
+
+**Gjort:** `shareGame` sender bare tekst og lenke; `sceneImage` er fjernet. Forhåndsvisningen av lenken står.
+
+**Testet:** typesjekk, lint, `npm test`, bygg, Playwright (lenken kopieres med koden).
+
+**Gjenstår:** tiltakene mot at nye spillere står fast på verkstedet (pågår).
+
 ## Økt 380 – 2026-10-05: Del verket og verv en venn (B-458, B-459)
 
 **Brukeren ba om:** «kjør på med dine anbefalinger og fortsett» – meldingsryddingen, beskytte main, så delingsknapp,

@@ -15,6 +15,12 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 460,
+    date: "2026-10-05",
+    title: "Enklere deling",
+    items: ["Delingsknappen sender nå bare teksten og lenken, uten bilde."],
+  },
+  {
     b: 459,
     date: "2026-10-05",
     title: "Del verket og verv en venn",

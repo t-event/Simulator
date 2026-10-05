@@ -855,8 +855,7 @@ function ShareButton({ g, stats }: { g: GameState; stats: PlantStats }) {
     return () => clearTimeout(t);
   }, [note]);
   const share = async () => {
-    const svg = document.querySelector<SVGSVGElement>(".g-scene-wrap .plant-scene");
-    const r = await shareGame(shareText(g, stats), shareUrl(referralCode()), svg);
+    const r = await shareGame(shareText(g, stats), shareUrl(referralCode()));
     setNote(r === "kopiert" ? "Lenken er kopiert" : r === "feil" ? "Fikk ikke delt – prøv igjen" : null);
   };
   return (
