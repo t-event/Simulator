@@ -122,9 +122,12 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
   så 20 poeng per trinn (972 for trinn 50; `season_tier_of`, speilet i `tierOf`/`tierPoints`). Hvert trinn gir 20 + 2 ×
   trinn fagpoeng én gang; trinn 1, 10, 20, 30, 40 og 50 gir sesongpynt. Pynt for trinn som alt er hentet, legges inn uten
   nye fagpoeng. Neste premie står på Dagens oppdrag og i velkomstvinduet; premiene hentes med «Hent alt» på Mål.
-- **Ukens utfordring** roterer fra uka 5.10.2026: «Flest aktive dager» (ekte dager) → «Mer stål enn før» → «Ukens
-  kontrollrom» (første gang uka 19.10). «Størst vekst i konsernverdi» er tatt bort. «Mer stål enn før» er midlertidig
-  (kan påvirkes med en svak uke først) og byttes når stål per kWh og leveringspresisjon finnes i tidslinja.
+- **Ukens utfordring** (B-457, 130): uka 5.10 er «Flest aktive dager»; fra uka 12.10 roterer det **«Mest stål per kWh»
+  → «Ukens kontrollrom» (første gang 19.10) → «Leveranser i tide» → «Flest aktive dager»**. Stål per kWh er kg per kWh
+  i uka (1 000 × tonn / kWh) fra tidslinja, med minst 5 000 t og et rimelig forhold (`timeline_energy`) – små verk er
+  ikke med. Leveranser i tide er levert / (levert + misligholdt + avbrutt) i uka med minst 50 leveranser
+  (`timeline_metrics`). Begge regnes av serveren i ekte uker. «Mer stål enn før» og «Størst vekst i konsernverdi» er
+  tatt ut (står for gamle resultater).
 - **Ukens kontrollrom** (B-387, 094): tre tellende forsøk per uke med tre frø fra serveren (A, B, C) – de samme for alle,
   i samme rekkefølge – og ukens kvalitet. Et forsøk er brukt når det startes; det kan leveres med samme id til fristen
   (15 min), også etter en nettfeil (appen lagrer resultatet og prøver igjen). Serveren sjekker tid (20 s–15 min), poeng

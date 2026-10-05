@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 379 – 2026-10-05: Nye ukekonkurranser (B-457)
+
+**Brukeren ba om:** «kjør dine anbefalinger og fortsett» – anbefalingene fra datakvalitetsoversikten (B-456).
+
+**Gjort:** migrasjon 130 (`week_kind` med ny rotasjon fra 12.10, `weekly_scores` med «strom» og «presisjon»), appen med
+de nye typene (titler, forklaringer, tall, hva som skal til). Docs: STATUS, UKENS-KONTROLLROM, FORSLAG, DATAKVALITET.
+
+**Testet:** se B-457.
+
+**Gjenstår:** første uke med stål per kWh starter 12.10 – se lista etter et par dager; ny datakvalitetsoversikt om et par
+uker; resultatet av slagganbudet og oppkjøpet 5.10 (påminnelser); ryddingen av meldinger (108) før 1.11.
+
 ## Økt 378 – 2026-10-05: Datakvaliteten i tidslinjetallene (B-456)
 
 **Brukeren ba om:** «fortsett» – neste punkt som ikke venter på eieren: datakvalitetsoversikten (B-396, B-401).

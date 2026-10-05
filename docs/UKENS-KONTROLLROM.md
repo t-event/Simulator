@@ -5,7 +5,7 @@
   Ingen kan øve på de tellende frøene; trening bruker egne, tilfeldige frø på ukens kvalitet.
 - Et startet forsøk kan leveres med samme id til fristen, også etter en nettfeil (resultatet lagres i appen og sendes på
   nytt; innleveringen er idempotent).
-- Rotasjon dager → stål → kontrollrom fra uka 5.10.2026 (første kontrollromsuke 19.10). «Mer stål enn før» er midlertidig.
+- Rotasjon fra uka 12.10.2026 (B-457): stål per kWh → kontrollrom (første gang 19.10) → leveranser i tide → aktive dager.
 - Variant B (avspilling på serveren) venter.
 
 Det som står under, er forslaget slik det ble lagt fram.
@@ -88,10 +88,12 @@ Eieren vil at ukene roterer, så ikke samme type spiller alltid har fordel:
 | Uke | Konkurranse | Hvem har fordel |
 |---|---|---|
 | 1 | Flest aktive dager | Den som spiller jevnt (ekte dager) |
-| 2 | Mer stål enn før | Den som forbedrer verket sitt (prosent, små og store likt) |
+| 2 | ~~Mer stål enn før~~ | Tatt ut fra uka 12.10 (B-457) |
 | 3 | Ukens kontrollrom | Den beste operatøren |
-| senere | Mest stål per kWh | Den som driver effektivt – trenger kWh per tonn i tidslinja |
-| senere | Leveringspresisjon | Den som planlegger – trenger leverte og sene kontrakter i tidslinja |
+| fra 12.10 | Mest stål per kWh | Den som driver effektivt (storverk, minst 5 000 t i uka, B-457) |
+| fra 26.10 | Leveranser i tide | Den som planlegger (minst 50 leveranser i uka, B-457) |
+
+Rotasjonen fra uka 12.10: stål per kWh → kontrollrom → leveranser i tide → aktive dager.
 
 ## 5. Spørsmål til eieren
 

@@ -508,7 +508,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Sesongen og listene** (B-384, 092/093): `close_season` rangerer på `konsern_value` (de uten konsern etter, på verdien i
   eget verk) og lagrer `konsern_value`/`rank_by`; `season_history` gir dem. Topplista i appen har gruppene «Industriverden»
   og «Eget verk» (`BOARDS[].group`); nye lister fra spillet på mobilen hører til Eget verk. `week_kind` har ikke `vekst`
-  fra uka 5.10.2026 – endres ukene, må ukene før gi samme type som før (resultatene regnes av samme funksjon).
+  fra uka 5.10.2026, og fra 12.10 roterer `strom` → `kontroll` → `presisjon` → `dager` (B-457, 130) – endres ukene, må
+  ukene før gi samme type som før (resultatene regnes av samme funksjon). `weekly_scores` rangerer høyest først: et tall
+  der lavt er best (kWh/t), snus (kg per kWh).
 - **Økta og fornyelsen** (B-397): et svar på fornyelsen brukes bare hvis samme økt fortsatt er innlogget, og `rest()`
   sender aldri et kall uten innlogging når spilleren var innlogget (feilen er da `isTransient`). Ikke gjør det om.
 - **Ukeresultat som venter** (B-397): `pendingControl(user)` gjelder bare den kontoen; resultatet ligger også i minnet.

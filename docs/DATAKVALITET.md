@@ -53,4 +53,5 @@ ingen tall ennå.
 4. **Minste antall leveranser:** 50 per uke for presisjon (alle storverk har langt mer; små verk kommer ikke med).
 5. **«Mer stål enn før»:** kan tas ut når en av konkurransene over er valgt (B-387).
 
-Ingen av anbefalingene er bygget. Ny oversikt bør tas etter et par uker til, før konkurransene settes på.
+Anbefalingene 1–5 er bygget i B-457 (eieren 5.10: «kjør dine anbefalinger»): «Mest stål per kWh» fra uka 12.10 og
+«Leveranser i tide» fra uka 26.10. Ny oversikt om et par uker for å se om grensene holder.

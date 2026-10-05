@@ -8,14 +8,14 @@ til «Avgjort» nederst).
 
 - **Ukens kontrollrom** er bygget (B-387, variant A). Venter: variant B (avspilling på serveren) – eieren 1.10: venter til
   stabiliseringen er ferdig (B-401). Tidslinja samler nå
-  tallene til stål per kWh og leveringspresisjon (B-396, fra 1.10). Om noen uker: eieren avgjør minstetonn, minste antall
-  leveranser, små verk og forbedring mot absolutt tall – da kan rotasjonen bli større og «Mer stål enn før» tas bort.
+  tallene til stål per kWh og leveringspresisjon (B-396, fra 1.10). Grensene er satt (B-457): 5 000 t, 50 leveranser,
+  små verk utenfor, absolutt tall – og «Mer stål enn før» er tatt bort.
 - **Utbyttet for ferdige verk (B-397, B-399):** besvart – kjøres rett etter 2.10-rapporten; etterbetaling med dry-run per
   spiller og dato (allerede utbetalt, korrigert, differanse, usikkerhet), medregnet det migrasjonen selv utløser, og
   eierens godkjenning. Rapportens grunnlag bevares; korrigeringen dokumenteres separat. Planlagt sjekk 2.10 kl. 07:45 UTC.
 - **Datakvalitetsoversikt for tidslinjetallene (B-396, B-401):** første oversikt 5.10 (B-456, `docs/DATAKVALITET.md`).
-  Spørsmål til eieren: minstetonn 5 000 t, små verk utenfor strøm per tonn, absolutt kWh/t blant storverk per uke (ikke
-  forbedring), minst 50 leveranser per uke for presisjon – ja? Ny oversikt om et par uker.
+  Anbefalingene er bygget (B-457, eieren: «kjør dine anbefalinger»): «Mest stål per kWh» fra uka 12.10 og «Leveranser i
+  tide» fra 26.10. Ny oversikt om et par uker – se om grensene (5 000 t, 50 leveranser) holder.
 - ~~Anbudsgulvet i oppkjøpene~~ **Bygget 3.10 (B-451):** F – minstebudet høyst 12 dagers inntekt, øvrige regler beholdes.
   Om gamle anbud også skal dempe budstyrke og Kontroll (begrensningen i B-450), tas senere med ekte data.
 - **Verkskontoen – mer å bruke penger på hjemme (eieren 3.10):** nabolagsprosjektene koster til sammen 28 mrd., og store

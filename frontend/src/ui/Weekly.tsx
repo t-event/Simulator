@@ -55,6 +55,8 @@ function fmtValue(kind: WeekKind, v: number): string {
   if (kind === "vekst") return `+${fmtNum(v, 1)} %`;
   if (kind === "tonn") return `${fmtNum(v, 0)} %`;
   if (kind === "kontroll") return `${fmtNum(v, 0)} poeng`;
+  if (kind === "strom") return `${fmtNum(v, 2)} kg stål per kWh`;
+  if (kind === "presisjon") return `${fmtNum(v, 1)} % i tide`;
   return `${fmtNum(v, 0)} ${v === 1 ? "dag" : "dager"}`;
 }
 
@@ -110,7 +112,11 @@ export function WeeklyCard({ act }: { act: GameApi["act"] }) {
             ? "Du er ikke på lista ennå – den fylles når spillet lagres på nett."
             : status.kind === "kontroll"
               ? "Du er ikke på lista ennå – kjør et tellende forsøk."
-              : "Du er ikke på lista denne uka: spillet må ha vært lagret på nett minst to dager før uka startet."}{" "}
+              : status.kind === "strom"
+                ? "Du er ikke på lista ennå – verket må lage minst 5 000 tonn denne uka."
+                : status.kind === "presisjon"
+                  ? "Du er ikke på lista ennå – du trenger minst 50 leveranser denne uka."
+                  : "Du er ikke på lista denne uka: spillet må ha vært lagret på nett minst to dager før uka startet."}{" "}
         <span className="g-muted">
           {left <= 1 ? "Siste dag!" : `${left} dager igjen.`} Topp 3 får medalje og ukekiste ({chestFp(3)}–{chestFp(1)}{" "}
           fagpoeng).
@@ -179,7 +185,9 @@ function WeeklyBoard({ kind, onClose }: { kind: WeekKind; onClose: () => void })
             Uka går fra mandag til mandag. Alle er på samme liste
             {kind === "kontroll"
               ? " og kjører de samme chargene."
-              : ", og stålet måles i prosent, så et lite verk kan slå et stort."}{" "}
+              : kind === "tonn" || kind === "vekst"
+                ? ", og stålet måles i prosent, så et lite verk kan slå et stort."
+                : "."}{" "}
             Når uka er over, får topp 3 medalje og en ukekiste med fagpoeng. {WEEK_KINDS[kind].how}
           </p>
         </div>
