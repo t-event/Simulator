@@ -3,6 +3,10 @@ import { createRoot } from "react-dom/client";
 import "./ui/tokens.css";
 import "./index.css";
 import { GameApp } from "./ui/GameApp";
+import { captureReferral } from "./net/referral";
+
+// En vervelenke (?verv=KODE, B-459) huskes før spillet starter, og tas bort fra adresselinja
+captureReferral();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

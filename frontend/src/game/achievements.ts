@@ -233,6 +233,15 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
     ["dag2000", 2000, "Institusjon", "Hold verket i gang i 2 000 døgn.", 80],
     ["dag3650", 3650, "Ti år", "Hold verket i gang i 3 650 døgn.", 150],
   ]),
+  // Verv en venn (B-459): krever konto, så den vises bare for dem som har vervet noen (som æresmerkene)
+  {
+    ...family("verving", "user", "Verving", "Folk", counter("vervet"), [
+      ["verving1", 1, "Ambassadør", "En venn du vervet, kom godt i gang.", 25],
+      ["verving3", 3, "Rekrutterer", "Tre venner du vervet, kom godt i gang.", 50],
+      ["verving5", 5, "Stålverkets stemme", "Fem venner du vervet, kom godt i gang.", 100],
+    ]),
+    hidden: true,
+  },
   // Byen (B-455): nabolaget i tre trinn og verkets stiftelse – for penger hjemme, bare eget spill
   family("nabolag", "building-2", "Nabolaget", "Byen", neighborSteps, [
     ["nabolag1", 1, "Byggherre", "Bygg det første bygget i byen rundt verket.", 10],

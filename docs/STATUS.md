@@ -59,6 +59,8 @@ regnes av serveren i ekte tid.
   utbyttepolitikken (resten til forsvarsfondet, B-334) og aktivitetskravet (B-327). Fullt konsern ≈ 35–38 mill./dag.
   Ferdige byggeprosjekter gjøres ferdige ved hver måling, også for den som er borte, og den som har solgt sitt siste
   verk, får utbyttet for målingene som er tatt (111, B-423). Dager før 2.10 betales aldri automatisk (114, B-425).
+- **Verving** (B-459): 10 mill. per venn som har spilt minst 3 ekte dager og nådd støperiet, høyst 5 venner. Regnes når
+  kortet hentes (`referral_settle`), føres som `justering` og øker ikke lånerammen.
 - **Selskapsinntekt** for den som eier et strategisk selskap (skraplageret er det eneste aktive).
 - Dagen skifter ved midnatt norsk tid (`world_today`).
 - **Verdensjobbene** (B-401): hver spiller (hvert selskap) behandles for seg i målingene, utbyttet, bidraget og
@@ -161,6 +163,9 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
 
 - Selve spillet krever aldri konto (B-149, `KONTO.md`). «Mens du var borte» (konto) gir penger og 10 fagpoeng per time borte, høyst
   åtte timer (80); serveren regner tida og fagpoengene (`claim_away_v2`, B-399). Lagring på nett, lister, konsern, selskaper og chat krever konto.
+- **Verv en venn** (B-459): kode per konto, lenken `?verv=KODE` huskes i 14 dager. Vennen (ny konto, ikke gjest, yngre
+  enn 14 dager) får 50 000 kr og 25 fagpoeng i eget spill; den som vervet får belønningen i konsernkassa (avsnitt 4).
+  Delingsknappen på anleggsbildet (B-458) tar med koden.
 - Gjester er anonyme kontoer (B-212) som slippes til det som står i `guest_gate`; de får ingen penger eller plass mellom
   spillere, og slettes etter 60 dager uten lagring (B-377).
 - Startskjermen viser antall spillere aktive siste 24 timer (spill lagret på nett i døgnet, uten flaggede og sperrede;

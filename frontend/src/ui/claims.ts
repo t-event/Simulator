@@ -25,6 +25,7 @@ import {
   unclaimedTiers,
   type SeasonTrack,
 } from "../net/seasonTrack";
+import { REFERRAL_START } from "../net/referral";
 import { userId } from "../net/supabase";
 import { claimWeekChest, setWeeklyStatus, weeklyStatus, type WeeklyStatus } from "../net/weekly";
 import { fmtKr } from "./format";
@@ -39,7 +40,9 @@ type Deferred =
   | { uid: string; kind: "streak"; streak: number }
   | { uid: string; kind: "bonus"; day: string }
   | { uid: string; kind: "kiste"; fp: number }
-  | { uid: string; kind: "stige"; fp: number; tiers: number[]; seasonId: number | null };
+  | { uid: string; kind: "stige"; fp: number; tiers: number[]; seasonId: number | null }
+  | { uid: string; kind: "verv" }
+  | { uid: string; kind: "vervet"; total: number; paid: number; reward: number };
 
 const DEFERRED_KEY = "stalverk-ventende-belonninger-v1";
 
@@ -88,6 +91,23 @@ function applyDeferred(gg: GameState, d: Deferred): void {
       awardPoints(gg, r.fp);
       log(gg, `Dagens bonus fra ${d.day}: ${fmtKr(r.cash)} og ${r.fp} fagpoeng.`, "good");
     }
+  } else if (d.kind === "verv") {
+    gg.cash += REFERRAL_START.cash;
+    awardPoints(gg, REFERRAL_START.fp);
+    log(
+      gg,
+      `Startpakken fra vennen som vervet deg: ${fmtKr(REFERRAL_START.cash)} og ${REFERRAL_START.fp} fagpoeng.`,
+      "good",
+    );
+  } else if (d.kind === "vervet") {
+    // Telleren gir prestasjonen «Verving» (B-459); den går aldri ned
+    gg.counters.vervet = Math.max(gg.counters.vervet ?? 0, d.total);
+    if (d.paid > 0)
+      log(
+        gg,
+        `${d.paid === 1 ? "En venn du vervet, har" : `${d.paid} venner du vervet, har`} kommet godt i gang: ${fmtKr(d.paid * d.reward)} i konsernkassa.`,
+        "good",
+      );
   } else if (d.kind === "kiste") {
     awardPoints(gg, d.fp);
     log(gg, `Ukekista er åpnet: +${d.fp} fagpoeng.`, "good");
@@ -165,6 +185,24 @@ export function grantStreak(act: GameApi["act"], uid: string, streak: number): R
   });
   if (!done) writeDeferred([...readDeferred(), { uid, kind: "streak", streak }]);
   return reward;
+}
+
+/** Vennen er koblet til vervekoden på serveren (B-459): startpakken i spillet til kontoen `uid` */
+export function grantReferralStart(act: GameApi["act"], uid: string): void {
+  grant(act, { uid, kind: "verv" });
+}
+
+/** Vennene som har gitt belønning (B-459): telleren til prestasjonen, og varsel om dem serveren betalte nå */
+export function grantReferralRewards(
+  act: GameApi["act"],
+  uid: string,
+  total: number,
+  paid: number,
+  reward: number,
+): void {
+  const done = act((gg) => isMine(gg, uid) && (gg.counters.vervet ?? 0) >= total && paid === 0);
+  if (done) return;
+  grant(act, { uid, kind: "vervet", total, paid, reward });
 }
 
 export type ClaimId = "bonus" | "kiste" | "stige";

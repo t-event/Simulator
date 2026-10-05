@@ -3563,6 +3563,81 @@ button {
   border-radius: var(--r-md);
 }
 
+/* Del verket (B-458): ved siden av pynteknappen, og en kort beskjed over dem når lenken er kopiert */
+.g-scene-share {
+  position: absolute;
+  right: 56px;
+  bottom: 8px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  font-size: var(--fs-section);
+  background: var(--scrim-soft);
+  border-radius: var(--r-md);
+}
+.g-scene-share .ds-icon {
+  width: 20px;
+  height: 20px;
+}
+.g-scene-share-note {
+  position: absolute;
+  right: 8px;
+  bottom: 56px;
+  max-width: calc(100% - 16px);
+  padding: var(--sp-1) var(--sp-2);
+  font-size: var(--fs-caption);
+  color: var(--text);
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+/* Verv en venn (B-459) */
+.g-referral-share {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2) var(--sp-3);
+}
+.g-referral-share .ds-button {
+  min-height: var(--touch);
+}
+.g-referral-note {
+  min-height: 1.4em;
+  margin: var(--sp-1) 0 0;
+  font-size: var(--fs-caption);
+  color: var(--text-2);
+}
+.g-referral-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-1);
+}
+.g-referral-list li {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+.g-referral-list li > .g-muted {
+  flex: none;
+  white-space: nowrap;
+}
+.g-referral-nick {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Utfordringer (B-232): serier i trinn – ikon, tittel med trinnprikker, fremdrift, belønning */
 .g-challenges {
   list-style: none;

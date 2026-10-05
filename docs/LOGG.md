@@ -5,6 +5,29 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 380 – 2026-10-05: Del verket og verv en venn (B-458, B-459)
+
+**Brukeren ba om:** «kjør på med dine anbefalinger og fortsett» – meldingsryddingen, beskytte main, så delingsknapp,
+verv en venn og en titt på spillere som står fast.
+
+**Gjort:**
+- Meldingsryddingen (108) ble prøvd lagt inn som migrasjon igjen, men connectoren holder igjen SQL med `delete` (tidsavbrudd,
+  tredje gang). Ikke lagt inn – eieren må kjøre `supabase/utkast/108_meldinger_rydding.sql` i SQL-editoren før 1.11.
+- Beskytte main: `gh api` får 403 – eieren må slå på «Require status checks» (`sjekker`) under Settings → Branches.
+- B-458: delingsknapp på anleggsbildet (`ui/share.ts`, ikonet `share-2`), Open Graph-tagger og `public/og.png`.
+- B-459: migrasjon 131 (koder, vervinger, kravene, belønningen i konsernkassa), `net/referral.ts`, `ui/Referral.tsx`
+  (kort og kobling), startpakken og belønningsvarselet i `ui/claims.ts`, prestasjonen «Verving» (skjult), linjer i «Det
+  går du glipp av», `ACCOUNT_FEATURES.verving`.
+- Analyse av nye spillere (bare lesing): de stopper på verkstedet fordi de tar flere kontrakter enn de rekker, og bøtene
+  gir negativ kasse. Forslag til eieren står i FORSLAG.md.
+
+**Testet:** 131 i en transaksjon som ble rullet tilbake (kode, «egen», venn ok, «brukt», ingen betaling før kravene, 10
+mill. og én rad i kassaboka etter), rådgiveren (bare kjente typer), nettest med falsk server, typesjekk, lint, `npm test`,
+bygg, Playwright 320/390/1366.
+
+**Gjenstår:** eieren kjører 108 og slår på statussjekken; eieren velger tiltak for verkstedet (FORSLAG.md); venneliste
+senere.
+
 ## Økt 379 – 2026-10-05: Nye ukekonkurranser (B-457)
 
 **Brukeren ba om:** «kjør dine anbefalinger og fortsett» – anbefalingene fra datakvalitetsoversikten (B-456).

@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 459,
+    date: "2026-10-05",
+    title: "Del verket og verv en venn",
+    items: [
+      "Ny knapp på bildet av verket: del et bilde av verket ditt med venner, rett fra telefonens delingsmeny.",
+      "Verv en venn (under Mål → Uka, krever konto): del lenken din. Når en venn har spilt tre dager og flyttet til støperiet, får du 10 millioner i konsernkassa – inntil fem venner.",
+      "Vennen får en startpakke med 50 000 kr og 25 fagpoeng når kontoen er laget.",
+    ],
+  },
+  {
     b: 457,
     date: "2026-10-05",
     title: "Nye ukekonkurranser",

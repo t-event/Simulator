@@ -4,6 +4,15 @@
  */
 import { DM_REFUSAL_TEXT, parseOverview, parseThread, type DmRefusal } from "./messages";
 import { parseProfile, seenText, sinceText } from "./profile";
+import {
+  captureReferral,
+  clearReferral,
+  fetchReferral,
+  pendingReferral,
+  referralCode,
+  registerReferral,
+  setReferral,
+} from "./referral";
 import type { GameState } from "../game/types";
 import { addCost, newGame } from "../game/engine";
 import { setCloudConfig } from "./config";
@@ -651,6 +660,21 @@ function makeFake(): Fake {
     }
     if (path.startsWith("/rest/v1/rpc/weekly_board"))
       return json(200, [{ plass: 1, nickname: "Tuster", value: "5000", is_me: false, gold: 3 }]);
+    if (path.startsWith("/rest/v1/rpc/referral_register"))
+      return json(200, body.p_code === "AB12CD" ? { ok: true } : { ok: false, reason: "ukjent" });
+    if (path.startsWith("/rest/v1/rpc/referral_my_code"))
+      return json(200, {
+        code: "AB12CD",
+        cap: 5,
+        reward: "10000000",
+        min_days: 3,
+        min_stage: 2,
+        paid_now: 1,
+        friends: [
+          { nick: "Bo", days: "2", stage: 1, rewarded: false },
+          { nick: null, days: 4, stage: 3, rewarded: true },
+        ],
+      });
     if (path.startsWith("/rest/v1/config")) return json(200, [{ value: { cloud: true } }]);
     return json(404, { message: "ukjent" });
   });
@@ -2673,6 +2697,40 @@ const main = async () => {
     });
     assert(t.canSend && !t.blocked && t.messages.length === 1 && t.messages[0].mine, "samtalen");
     for (const k of Object.keys(DM_REFUSAL_TEXT)) assert(DM_REFUSAL_TEXT[k as DmRefusal].length > 5, `tekst for ${k}`);
+  });
+
+  await test("Verv en venn (B-459): lenken huskes og fjernes fra adressen, og svarene fra serveren tolkes", async () => {
+    const f = fresh();
+    const g = globalThis as { location?: unknown; history?: unknown };
+    const saved = { location: g.location, history: g.history };
+    let replaced = "";
+    g.location = { href: "https://x.test/Simulator/?verv=ab12cd&s=1#topp" };
+    g.history = { state: null, replaceState: (_s: unknown, _t: string, u: string) => (replaced = u) };
+    captureReferral();
+    assert(pendingReferral() === "AB12CD", "koden huskes med store bokstaver");
+    assert(replaced === "/Simulator/?s=1#topp", `adressen uten koden: ${replaced}`);
+    // En kode med rare tegn huskes ikke, men tas likevel bort fra adressen
+    clearReferral();
+    g.location = { href: "https://x.test/Simulator/?verv=<script>" };
+    captureReferral();
+    assert(pendingReferral() === null && replaced === "/Simulator/", "ugyldig kode");
+    // En gammel kode glemmes (serveren godtar bare kontoer yngre enn 14 dager)
+    store.set("stalverk-verv-v1", JSON.stringify({ code: "AB12CD", at: Date.now() - 15 * 24 * 3600_000 }));
+    assert(pendingReferral() === null && !store.has("stalverk-verv-v1"), "gammel kode");
+    g.location = saved.location;
+    g.history = saved.history;
+
+    await login(f);
+    assert((await registerReferral("AB12CD")).ok, "riktig kode");
+    const no = await registerReferral("FEIL00");
+    assert(!no.ok && no.reason === "ukjent", "ukjent kode");
+    const s = await fetchReferral();
+    assert(s?.code === "AB12CD" && s.reward === 10_000_000 && s.paidNow === 1, `status ${JSON.stringify(s)}`);
+    if (!s) return;
+    assert(s.friends.length === 2 && s.friends[0].days === 2 && s.friends[1].nick === null, "vennene");
+    setReferral(s);
+    assert(referralCode() === "AB12CD", "koden til delingsknappen");
+    setReferral(null);
   });
 
   setSaveListener(null);

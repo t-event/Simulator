@@ -30,6 +30,7 @@ import { fmtKr, fmtNum } from "./format";
 import { Icon } from "./icons";
 import { MissingOutCard } from "./MissingOut";
 import { SeasonTrackCard } from "./SeasonTrack";
+import { ReferralCard } from "./Referral";
 import { WeeklyCard } from "./Weekly";
 import { useReportTab, type OnTab } from "./tabMemory";
 
@@ -187,6 +188,7 @@ export function GoalsPage({ g, stats, api, onOpenSettings, onSales, openTab, onT
           <>
             <WeeklyCard act={act} />
             <SeasonTrackCard />
+            <ReferralCard g={g} act={act} />
             <MissingOutCard g={g} onLogin={onOpenSettings} />
           </>
         )}

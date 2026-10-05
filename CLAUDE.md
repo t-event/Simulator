@@ -181,6 +181,7 @@ frontend/src/
     profile.ts   Profilen til en spiller fra `player_profile` (B-419; SQL i 105), Min profil (`profile_update`, 106)
     messages.ts  Privatmeldinger: oversikt, samtale, sende, blokkere, rapportere (B-421; SQL i 107)
     reports.ts   Svar på rapporter: samtalen med admin, svaret og varselet (B-438; SQL i 122)
+    referral.ts  Verv en venn: koden fra lenken (`?verv=`), kobling, status og koden til delingen (B-459; SQL i 131)
     admin.ts     Adminpanelet: rapportene og handlingene – serveren sjekker `admins` (B-421)
     konsern.ts   Konsernet på serveren: kjøp, avbestilling, salg og flytting, og svaret lagt inn i spillet (B-326, B-333)
     worldMap.ts  Verdenskartet: alle spilleres verk per region og selskapene (`world_map`, B-333)
@@ -225,6 +226,8 @@ frontend/src/
     Profile.tsx  Profilarket og `PlayerName` (brukernavn som åpner profilen); hvilken som er åpen: profileStore.ts (B-419)
     Messages.tsx Fanen «Meldinger» i Skiftrapporten; «Send melding» går via messagesStore.ts (B-421)
     ReportNotes.tsx «Fra admin» øverst i Meldinger, og lenken til adminpanelet for eieren (B-438)
+    share.ts     Del verket: delingsmeny med bilde, ellers kopiert lenke (B-458)
+    Referral.tsx Kortet «Verv en venn» på Mål → Uka og koblingen etter innlogging (`ReferralSync`, B-459)
     Admin.tsx    Adminpanelet under kontoen, bare når `is_admin()` svarer ja (B-421)
     Companies.tsx Konsern → Industrien: ett kort per selskap (skraplageret nå) og konsernkassa (B-189, B-227)
     control/     Kontrollrommet: spillet i fire runder (chargeGame.ts: logikk, frø og inndatalogg, testspiller; ControlRoom.tsx,
@@ -619,6 +622,11 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `contribution_margin_raw` ikke teller. Nye pengesluk hjemme skal ikke gjøre verket billigere å drive eller selge mer (da
   øker marginen og bidraget i ekte tid) – før dem som `investering` eller i en post serveren ikke leser. Slitasjen
   (`upkeepRisk`) ganges inn i havaririsikoen i `heatEvents`; reparatøren fornyer i `upkeepHour`.
+- **Verv en venn** (B-459, 131): belønningen til den som vervet regnes bare på serveren (`referral_settle`, kalt fra
+  `referral_my_code`) og føres som `justering` med ref `verving:<venn>` – aldri `utbytte`/`bidrag`, ellers øker den
+  lånerammen. Kravene (`referral_qualifies`) leser tidslinja (ekte dager, nivå), aldri tall fra lagringen. Startpakken til
+  vennen legges inn med `grantReferralStart` (`ui/claims.ts`) bare når serveren svarer `ok`. Tallene i
+  `config.world.referral`; startpakken i `REFERRAL_START` (`net/referral.ts`).
 - **Kontrollromsrekorden på topplista** (B-295) tas fra `state.controlBest` av triggeren `note_control` på `saves` inn i
   `records.best_control` – bare for kontoer som alt har en rekordrad, og bare opptil 5 000 poeng. Endres poengene i
   kontrollrommet mye, må grensen følge med.

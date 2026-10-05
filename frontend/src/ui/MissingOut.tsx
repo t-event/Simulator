@@ -9,6 +9,7 @@ import { konsernEquity } from "../game/konsern";
 import type { GameState } from "../game/types";
 import { isGuest } from "../net/guest";
 import { fetchLeaderboard } from "../net/leaderboard";
+import { pendingReferral, REFERRAL_START } from "../net/referral";
 import { getSession, onSessionChange } from "../net/supabase";
 import { Card } from "./common";
 import { Button } from "./ds";
@@ -49,6 +50,12 @@ export function MissingOutCard({ g, onLogin }: { g: GameState; onLogin: () => vo
   if (session || g.tutorial !== null) return null;
   const guest = isGuest();
   const items: [string, string][] = [];
+  // Kom spilleren via en vervelenke, er startpakken det første kontoen gir (B-459)
+  if (pendingReferral())
+    items.push([
+      "Startpakke fra vennen din",
+      `${fmtKr(REFERRAL_START.cash)} og ${REFERRAL_START.fp} fagpoeng når du lager konto.`,
+    ]);
   if (place)
     items.push([
       "Topplista",
@@ -63,6 +70,8 @@ export function MissingOutCard({ g, onLogin }: { g: GameState; onLogin: () => vo
       "Ukens utfordring og sesongstigen",
       "Medaljer og ukekiste, og en stige du klatrer ved å spille litt hver dag – med fagpoeng og pynt som bare finnes denne sesongen.",
     ]);
+  if (g.stage >= 1)
+    items.push(["Verv en venn", "Del lenken din – når en venn kommer godt i gang, får konsernkassa di 10 millioner."]);
   if (g.konsern?.unlocked)
     items.push(["Skraplageret og konsernkassa", "By på skraplageret og tjen på de andre spillernes skrapkjøp."]);
   items.push([
