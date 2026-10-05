@@ -9,6 +9,7 @@ import {
   furnaceOrder,
   declineContract,
   lateContracts,
+  plantStopped,
   lotReservations,
   orderQueue,
   assessOffer,
@@ -118,7 +119,9 @@ function offerChecks(g: GameState, stats: PlantStats, c: Contract, committed: nu
               : narrow
                 ? `Knapt: blir ferdig ca. dag ${doneDay}, fristen er dag ${c.deadlineDay}. En stans eller fravær kan gjøre den for sen.`
                 : `Blir ferdig ca. dag ${doneDay} med ordrekøen du har (frist dag ${c.deadlineDay})`
-        : "Verket står – ingen produksjon nå",
+        : plantStopped(g)
+          ? `Verket står: ${plantStopped(g)}. Det lager ingenting før det er ordnet.`
+          : "Verket står – ingen produksjon nå",
     });
   }
   const tone: Tone = checks.some((ch) => ch.tone === "bad")
@@ -157,6 +160,8 @@ function answerText(hours: number) {
 /** Det viktigste med en forespørsel først (B-241): hvem, hvor mye og om verket rekker det – så tallene og kravene */
 function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; committed: number }) {
   const { checks, days, tone } = offerChecks(g, stats, c, committed);
+  // «Signer likevel» spør først (B-461): nye spillere signerte mange kontrakter verket ikke rakk, og bøtene tok kassa
+  const [confirmSign, setConfirmSign] = useState(false);
   const hours = answerHours(g, c);
   // Grunnen står rett under dommen: det som er galt eller usikkert, ellers når den blir ferdig
   const reason = tone === "ok" ? checks[checks.length - 1] : (checks.find((ch) => ch.tone === tone) ?? checks[0]);
@@ -218,13 +223,34 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
             : `Omdømme +${fmtNum(c.repGain, 1)} ved levering, −${fmtNum(c.repLoss, 1)} og bot ${fmtKr(c.penaltyPerT)}/tonn hvis for sent.`}
         </p>
       </details>
+      {confirmSign && tone === "bad" && (
+        <div className="g-note g-warn g-offer-confirm" role="alert">
+          {c.landmark
+            ? "Verket kan ikke lage dette nå. Signere likevel?"
+            : `Blir den for sen, koster den opptil ${fmtKr(c.penaltyPerT * c.tonnes)} i bot og ${fmtNum(c.repLoss, 1)} i omdømme. Signere likevel?`}
+          <div className="g-row">
+            <button
+              className="g-danger g-small"
+              onClick={() => {
+                act((gg) => acceptContract(gg, c.id));
+                setConfirmSign(false);
+              }}
+            >
+              Ja, signer
+            </button>
+            <button className="g-small" onClick={() => setConfirmSign(false)}>
+              Nei
+            </button>
+          </div>
+        </div>
+      )}
       {/* Rekker verket det ikke, er avslag det foreslåtte valget (B-241) */}
       <div className="g-row g-offer-actions">
         <button
           className={tone === "bad" ? undefined : "g-primary"}
-          onClick={() => act((gg) => acceptContract(gg, c.id))}
+          onClick={() => (tone === "bad" ? setConfirmSign(true) : act((gg) => acceptContract(gg, c.id)))}
         >
-          {tone === "bad" ? "Signer likevel" : "Signer"}
+          {tone === "bad" ? "Signer likevel…" : "Signer"}
         </button>
         <button
           className={tone === "bad" ? "g-primary" : undefined}
@@ -274,7 +300,7 @@ function OfferMasterDetail({ g, stats, act, offers, committed }: Props & { offer
           );
         })}
       </ul>
-      <OfferCard g={g} stats={stats} act={act} c={selected} committed={committed} />
+      <OfferCard key={selected.id} g={g} stats={stats} act={act} c={selected} committed={committed} />
     </div>
   );
 }

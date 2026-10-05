@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 382 – 2026-10-05: Nye spillere som står fast (B-461)
+
+**Brukeren ba om:** «fortsett» – tiltakene fra analysen av spillere som står fast på verkstedet.
+
+**Gjort:** gikk gjennom de ekte lagringene (bare lesing): spillerne signerer kontrakter verket ikke rekker, og én sto i
+fem døgn uten penger til omforing mens Salg sa «Rekker det». `plantStopped` og `lateCosts` i `engine.ts`; Salg sier
+fra når verket står, «Signer likevel…» spør med boten, og to nye råd på Verket (verket står / sene kontrakter med
+avbryt bare når det er billigere).
+
+**Testet:** ny test i `npm test`, typesjekk, lint, bygg, balansen, Playwright 320/390/1366.
+
+**Gjenstår:** ny oversikt over spillerne på verkstedet om en uke (ca. 12.10); sperre for antall kontrakter bare hvis
+det trengs.
+
 ## Økt 381 – 2026-10-05: Delingen uten bilde (B-460)
 
 **Brukeren ba om:** «dropp bilde som sendes med teksten når man deler».

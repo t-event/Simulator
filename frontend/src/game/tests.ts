@@ -79,6 +79,8 @@ import { ADDONS, CASTINGS, FURNACES, STAGES, WIN_CASH } from "./data";
 import {
   advance,
   assessOffer,
+  lateCosts,
+  plantStopped,
   queueFit,
   queueMinutes,
   nextAgreementWeek,
@@ -4692,6 +4694,71 @@ test("Quizen (B-428): svaralternativene står i blandet rekkefølge, men alltid 
     if (o.some((j, k) => j !== k)) moved++;
   }
   assert(moved > qs.length / 2, `bare ${moved} av ${qs.length} spørsmål er blandet`);
+});
+
+test("Verket står uten penger til omforing (B-461): Salg sier at det ikke rekker, og sene kontrakter får riktig råd", () => {
+  const g = newGame(461);
+  g.pendingDecision = null;
+  g.agreements = [];
+  const stats = computePlantStats(g);
+  g.history = [0, 1, 2].map((d) => ({ ...structuredClone(g.today), day: d, producedT: 2 }));
+  const base = { delivered: 0, pricePerT: 1, offerExpiresMin: 0, repGain: 0, repLoss: 0, penaltyPerT: 1000 };
+  const more = { status: "aktiv" as const, closedDay: null, acceptedDay: day(g), product: "emne" as const };
+  const offer = {
+    ...base,
+    ...more,
+    id: 9,
+    customer: "Ny",
+    grade: "enkel" as const,
+    tonnes: 1,
+    deadlineDay: day(g) + 10,
+    priority: 9,
+    status: "tilbud" as const,
+  };
+  g.contracts = [];
+  // Ovnen går: en liten kontrakt med god tid rekker
+  assert(plantStopped(g) === null && !assessOffer(g, stats, offer).tight, "en liten kontrakt rakk ikke");
+  // Ovnen står og venter på penger til omforing: ingenting rekker, uansett hva verket laget før
+  for (const f of g.furnaces) {
+    f.heat = null;
+    f.waitReason = "Foringen skal byttes – mangler penger til omforing";
+  }
+  assert(plantStopped(g)?.includes("omforing") === true, `grunn: ${plantStopped(g)}`);
+  const stoppedCheck = assessOffer(g, stats, offer);
+  assert(stoppedCheck.tight && !Number.isFinite(stoppedCheck.needDays), "Salg sa at det rakk mens ovnen sto");
+  for (const f of g.furnaces) f.waitReason = null;
+  // To sene kontrakter: den ene mangler bare litt (la den gå), den andre rekker langt fra (billigere å avbryte)
+  const perDay = realisticDailyT(g, stats);
+  g.contracts = [
+    {
+      ...base,
+      ...more,
+      id: 1,
+      customer: "Nesten",
+      grade: "enkel",
+      tonnes: perDay * 3.2,
+      deadlineDay: day(g) + 2,
+      priority: 1,
+    },
+    {
+      ...base,
+      ...more,
+      id: 2,
+      customer: "Langt fra",
+      grade: "enkel",
+      tonnes: perDay * 10,
+      deadlineDay: day(g) + 2,
+      priority: 2,
+    },
+  ];
+  const costs = lateCosts(g, stats);
+  const near = costs.find((l) => l.contract.customer === "Nesten");
+  const far = costs.find((l) => l.contract.customer === "Langt fra");
+  assert(!!near && near.lateBot < near.cancelBot, `«Nesten» burde ikke avbrytes: ${JSON.stringify(near)}`);
+  assert(
+    !!far && far.cancelBot < far.lateBot && Math.abs(far.shortT - perDay * 10) < 1e-6,
+    `«Langt fra»: ${JSON.stringify(far)}`,
+  );
 });
 
 if (failed) {

@@ -8602,3 +8602,25 @@ Testet: typesjekk, lint, `npm test`, bygg, Playwright (kopieringen virker som f�
 Krever konto: nei.
 Endringslogg: ja.
 
+## B-461 Nye spillere som står fast på verkstedet: Salg ser at verket står, bekreftelse og råd om sene kontrakter (2026-10-05)
+Status: gjelder. Bygger på analysen i økt 380 (FORSLAG.md) og eierens «fortsett».
+Bakgrunn: ingen kontoer står på støperiet eller stålverket; halvparten på verkstedet har negativ kasse. Driften går i
+pluss, men bøter for frister som går ut tar kassa. To mønstre i de ekte lagringene: (1) én spiller signerte ca. 60 t på
+få døgn med 2,4 t i døgnet – «Rekker det ikke» signert likevel; (2) én sto i fem døgn fordi foringen skulle byttes uten
+penger til omforing, og Salg sa likevel «Rekker det», fordi anslaget falt tilbake på kapasiteten når de siste døgnene
+hadde null produksjon. Spilleren signerte nye kontrakter rett før konkurs.
+Beslutning:
+- **Verket står** (`plantStopped` i `engine.ts`): når alle ovnene venter på penger til omforing eller mangler folk, regner
+  vurderingen på Salg (`assessOffer`) og ordrekøen (`lateContracts`) med null produksjon, og Salg sier hvorfor.
+  `realisticDailyT` er uendret (den brukes også til størrelsen på nye forespørsler).
+- **«Signer likevel…» spør først:** en forespørsel verket ikke rekker, må bekreftes med hva den kan koste (opptil hele
+  boten og omdømmet).
+- **Råd på Verket:** «Verket står: foringen må byttes …» (kritisk, til Marked → Skrap) og «N kontrakter i ordrekøen
+  rekker ikke fristen» (til Salg → Ordrekø). Rådet foreslår å avbryte bare når det er billigere: boten ved fristen
+  regnes av det som ikke er levert da, avbryting koster 60 % av det som gjenstår (`lateCosts`). Ikke for spillere med
+  salgsdirektør (han holder køen selv, B-312).
+- En sperre for antall kontrakter på verkstedet (forslag a) er ikke bygget; ny oversikt om en uke viser om dette holder.
+Testet: ny test i `npm test` (Salg sier nei når ovnen står, «la den gå» mot «avbryt»), balansen, Playwright 320/390/1366.
+Krever konto: nei (regel 1).
+Endringslogg: ja.
+

@@ -22,7 +22,7 @@ til «Avgjort» nederst).
   hjemmeverk har ofte ingen av dem. Etter dem trengs flere valg for store hjemmeverk, mens kassa fortsatt kan vokse fritt
   (B-381). Lokal kasse skal ikke gi makt mellom spillere (B-190, B-323). Bygget i B-455 (V1–V4, eieren: «bygg alt»).
   Mulig senere: vise stiftelsens tittel på profilen (krever at serveren leser trinnet, vurderes mot B-419).
-- **Nye spillere som står fast (analyse 5.10, B-459-økta):** ingen kontoer står på støperiet eller stålverket – alle er på
+- **Nye spillere som står fast (analyse 5.10, B-459-økta) – (b) og (c) bygget i B-461, ny oversikt ca. 12.10:** ingen kontoer står på støperiet eller stålverket – alle er på
   verkstedet eller lavere (12) eller på storverket (21). Halvparten på verkstedet har negativ kasse. Driften går i pluss
   hver dag (20–35 000 kr inn, 8–30 000 ut); det som tar kassa, er **bøter for fristene som går ut** – én spiller har 35
   kontrakter og 23 misligholdte, andre har 3–5 bøter på 3 000–60 000 kr, og omdømmet faller til 0. Spillerne tar flere
