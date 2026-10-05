@@ -640,7 +640,7 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   (`net/push.ts`) sammen; ny lenke: `parsePushLink` og `pushNav` i `GameApp`. Nøklene står bare i Vault (`push_vapid_*`,
   `push_kick_key`, `push_url`) – lag dem aldri på nytt (da slutter alle abonnementer å virke). Edge-funksjonen deployes med
   `verify_jwt = false` og sjekker vekkenøkkelen selv. Stopp varslene med `select cron.unschedule('push-varsler');`.
-  Utboksen ryddes ikke ennå (få rader); legg ryddingen inn sammen med 108 når eieren er til stede.
+  Utboksen ryddes av `dm_cleanup` i `supabase/utkast/108` (sendte etter 14 dager, avslåtte enheter etter 60) når den er kjørt.
 - **Vennelista** (B-462, 132): `follows` med `active` – å ta noen av lista er en `update`, aldri `delete` (connectoren
   holder igjen migrasjoner med sletting). `follow_list` viser bare det `player_profile` alt viser andre; nye felt vurderes
   mot det. Enveis med vilje: ingen forespørsler eller varsler til den som følges.
