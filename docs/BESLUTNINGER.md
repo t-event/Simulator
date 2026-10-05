@@ -8554,7 +8554,7 @@ Krever konto: ja, som ukens utfordring ellers (B-152).
 Endringslogg: ja.
 
 ## B-458 Del verket: delingsknapp og forhåndsvisning av lenken (2026-10-05)
-Status: gjelder.
+Status: gjelder, bortsett fra bildet i delingen (erstattet av B-460).
 Bakgrunn: eieren 5.10: «kjør på med dine anbefalinger» – anbefaling 2 (dele før verving): spillet hadde ingen enkel måte å
 vise fram verket på, og en delt lenke ga ingen forhåndsvisning.
 Beslutning:
@@ -8591,5 +8591,14 @@ Beslutning:
 Testet: migrasjonen i en transaksjon som ble rullet tilbake (kode, egen kode avvist, venn koblet én gang, ingen betaling
 før kravene, 10 mill. og én rad i kassaboka etter), rådgiveren uten nye funn, nettest med falsk server, Playwright.
 Krever konto: ja (regel 2 og 7: konsernkassa og serveren avgjør).
+Endringslogg: ja.
+
+## B-460 Delingen uten bilde (2026-10-05)
+Status: gjelder. Erstatter bildet av verket i delingen fra B-458.
+Bakgrunn: eieren 5.10: «dropp bilde som sendes med teksten når man deler».
+Beslutning: delingsknappen sender bare teksten og lenken (`shareGame` i `ui/share.ts`); bildet av anleggsbildet
+(`sceneImage`) er tatt bort. Forhåndsvisningen av lenken (Open Graph, `og.png`) står som før.
+Testet: typesjekk, lint, `npm test`, bygg, Playwright (kopieringen virker som før).
+Krever konto: nei.
 Endringslogg: ja.
 

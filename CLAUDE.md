@@ -226,7 +226,7 @@ frontend/src/
     Profile.tsx  Profilarket og `PlayerName` (brukernavn som åpner profilen); hvilken som er åpen: profileStore.ts (B-419)
     Messages.tsx Fanen «Meldinger» i Skiftrapporten; «Send melding» går via messagesStore.ts (B-421)
     ReportNotes.tsx «Fra admin» øverst i Meldinger, og lenken til adminpanelet for eieren (B-438)
-    share.ts     Del verket: delingsmeny med bilde, ellers kopiert lenke (B-458)
+    share.ts     Del verket: delingsmeny med tekst og lenke, ellers kopiert lenke (B-458, uten bilde B-460)
     Referral.tsx Kortet «Verv en venn» på Mål → Uka og koblingen etter innlogging (`ReferralSync`, B-459)
     Admin.tsx    Adminpanelet under kontoen, bare når `is_admin()` svarer ja (B-421)
     Companies.tsx Konsern → Industrien: ett kort per selskap (skraplageret nå) og konsernkassa (B-189, B-227)
