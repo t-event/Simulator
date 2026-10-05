@@ -8657,3 +8657,33 @@ Testet: Playwright 320/390/1366 (uten navn, navnet tatt i mellomtiden, navnet le
 Krever konto: ja (gjelder bare kontoer).
 Endringslogg: ja.
 
+
+## B-465 Varsel på mobilen (2026-10-05)
+Status: gjelder. Første del av forslaget «Varsel på mobilen» (FORSLAG.md, B-149: «Ingen varsel på mobilen enda»).
+Bakgrunn: eieren 5.10: «Gå for dine anbefalinger og fortsett.» Det som skjer mellom spillerne går i ekte tid, men
+spilleren fikk bare vite om det ved å åpne appen. Et oppkjøpsbud på selskapet ditt har en frist; uten varsel rakk man
+ikke alltid å legge inn motbud.
+Beslutning:
+- **Web Push uten bibliotek** (migrasjon 134, edge-funksjonen `push`): `push_subscriptions` (én rad per enhet, med
+  temaene spilleren valgte) og `push_outbox`. Triggerne legger varsler i utboksen bare når mottakeren har et aktivt
+  abonnement på temaet; jobben `push-varsler` (hvert minutt) ser etter ferdige byggeprosjekter og oppkjøpsfrister og
+  vekker edge-funksjonen, som sender kryptert (aes128gcm, VAPID med WebCrypto) og slår av enheter som er borte (404/410).
+- **Temaene:** oppkjøp (bud på selskapet ditt, overbud, 6 timer igjen, utfallet), anbud (åpner, hvem som vant – til dem
+  som bød), byggeprosjekter i konsernet som er ferdige, og privatmeldinger (høyst ett varsel per avsender per 10 minutter,
+  aldri fra blokkerte, uten teksten). Daglig belønning varsles ikke – det blir mas.
+- **Ingen hemmelige beløp:** anbudsbud nevnes ikke for andre; oppkjøpsbudet er offentlig fra før (B-339). Varsler eldre
+  enn 6 timer sendes ikke.
+- **Nøklene:** VAPID-nøkkelen lages av edge-funksjonen første gang og står bare i Vault (`push_vapid_private`,
+  `push_vapid_public`); appen henter den offentlige med `push_public_key()`. Edge-funksjonen svarer bare på kall med
+  vekkenøkkelen fra Vault (`push_kick_key`), adressen står i Vault (`push_url`). Ingenting av dette står i repoet.
+- **I appen:** bryteren «Varsel på mobilen» med temaene under Innstillinger → Varsler (`ui/Push.tsx`, `net/push.ts`), og
+  en oppfordring på selskapet du eier når oppkjøp er på (gradvis synlighet: der det betyr mest). Trykk på et varsel
+  åpner riktig sted (Industrien, Konsern eller samtalen i Meldinger, `ui/pushLinks.ts`). Utlogging slår av varslene på
+  enheten (`onBeforeSignOut`). På iPhone og iPad virker det bare når spillet ligger på hjemskjermen; kortet sier det.
+Testet: krypteringen og signaturen mot et uavhengig bibliotek (dekryptert likt, gyldig ES256); migrasjonen med to ekte
+kontoer i en rullet transaksjon (abonnement, ukjent tema avvist, to meldinger gir ett varsel, bud, overbud, frist,
+utfall, henting og tilbakemelding); edge-funksjonen ute (nøkkelen laget, 401 uten vekkenøkkel); nettest; Playwright
+320/390/1366 (bryter, temaer, oppfordring, trykk på varsel mens appen er åpen og når den åpnes fra varselet). Ekte
+varsel på telefonen må eieren prøve selv.
+Krever konto: ja (regel 3: lagres på serveren og gjelder hendelser mellom spillere).
+Endringslogg: ja.

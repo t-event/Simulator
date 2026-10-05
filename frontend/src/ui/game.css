@@ -8602,3 +8602,35 @@ button.g-prod-row:hover {
 .g-admin-to button {
   min-height: 44px;
 }
+
+/* Varsel på mobilen (B-465): bryteren under Varsler og oppfordringen på selskapet du eier */
+.g-push {
+  margin-top: var(--sp-3);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--line);
+}
+.g-push-kind {
+  margin-left: var(--sp-4);
+}
+.g-push-note {
+  margin-top: var(--sp-3);
+}
+.g-push-error {
+  color: var(--critical-fg);
+  margin: var(--sp-2) 0 0;
+}
+.g-push-prompt {
+  display: grid;
+  gap: var(--sp-2);
+  justify-items: start;
+  margin: var(--sp-3) 0;
+  padding: var(--sp-3);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+}
+.g-push-prompt p {
+  margin: 0;
+}
+.g-push-prompt .ds-button {
+  min-height: var(--touch);
+}

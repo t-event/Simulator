@@ -39,7 +39,9 @@ import { GoalsPage, GoalsSheet } from "./Goals";
 import { LeaderboardSheet } from "./Leaderboard";
 import { ChatButton, ChatSheet } from "./Chat";
 import { ProfileHost } from "./Profile";
-import { messagesRequestVer, onMessagesChange } from "./messagesStore";
+import { messagesRequestVer, onMessagesChange, openMessages } from "./messagesStore";
+import { usePushLinks } from "./pushLinks";
+import type { PushLink } from "../net/push";
 import { useDailyStatus } from "./useDaily";
 import { missionBonusReady } from "../game/daily";
 import { useSeasonStatus } from "./useSeason";
@@ -1042,6 +1044,10 @@ export function GameApp() {
     };
   }, [coachStep, coachView, pageNow, hasGame]);
 
+  // Trykk på et varsel på mobilen (B-465) åpner riktig sted; navigasjonen settes når spillet er lastet (pushNav under)
+  const pushNav = useRef<((link: PushLink) => void) | null>(null);
+  usePushLinks((link) => pushNav.current?.(link), hasGame);
+
   if (!g)
     return (
       <>
@@ -1084,6 +1090,11 @@ export function GameApp() {
   const openLink = (to: LogLink) => {
     setInboxOpen(false);
     if (to === "industri") go("konsern", "industri");
+  };
+  pushNav.current = (link) => {
+    if (link.to === "industri") openLink("industri");
+    else if (link.to === "konsern") go("konsern");
+    else openMessages(link.nick);
   };
   /** Åpner fagboka på et kapittel (eller det første uleste) og merker det som lest */
   const openBook = (chapter?: string) => {

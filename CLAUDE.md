@@ -182,6 +182,7 @@ frontend/src/
     messages.ts  Privatmeldinger: oversikt, samtale, sende, blokkere, rapportere (B-421; SQL i 107)
     reports.ts   Svar på rapporter: samtalen med admin, svaret og varselet (B-438; SQL i 122)
     friends.ts   Vennelista: følg/ta av og lista i minnet for kontoen (B-462; SQL i 132)
+    push.ts      Varsel på mobilen: abonnement per enhet, temaene, lenkene i varslene (B-465; SQL i 134, edge-funksjonen push)
     referral.ts  Verv en venn: koden fra lenken (`?verv=`), kobling, status og koden til delingen (B-459; SQL i 131)
     admin.ts     Adminpanelet: rapportene og handlingene – serveren sjekker `admins` (B-421)
     konsern.ts   Konsernet på serveren: kjøp, avbestilling, salg og flytting, og svaret lagt inn i spillet (B-326, B-333)
@@ -230,6 +231,7 @@ frontend/src/
     share.ts     Del verket: delingsmeny med tekst og lenke, ellers kopiert lenke (B-458, uten bilde B-460)
     NicknameGate.tsx «Velg brukernavn»: påkrevd for alle kontoer, kan ikke lukkes (B-463); nickname.ts: navnet fra skjemaet
     Friends.tsx  Vennelista: fanen «Venner» i Skiftrapporten og knappen på profilarket (B-462)
+    Push.tsx     Varsel på mobilen: bryteren under Varsler og oppfordringen på selskapet du eier; pushLinks.ts: trykk på varselet (B-465)
     Referral.tsx Kortet «Verv en venn» på Mål → Uka og koblingen etter innlogging (`ReferralSync`, B-459)
     Admin.tsx    Adminpanelet under kontoen, bare når `is_admin()` svarer ja (B-421)
     Companies.tsx Konsern → Industrien: ett kort per selskap (skraplageret nå) og konsernkassa (B-189, B-227)
@@ -240,7 +242,7 @@ frontend/scripts/ sjekk-endringslogg.mjs: endringsloggen dekker nyeste beslutnin
 frontend/public/  PWA: manifest, ikoner (icon.svg er kilden; PNG-ene lages fra den med Chromium, B-249), service worker
 supabase/      SQL-migrasjonene, nummerert. Kjøres i prosjektet med Supabase-connectoren (apply_migration) og
                legges her samtidig, så repoet speiler databasen. Sjekk get_advisors (security) etter hver DDL-endring.
-supabase/functions/ Edge-funksjoner (eksport, B-345)
+supabase/functions/ Edge-funksjoner (eksport, B-345; push, B-465)
 supabase/utkast/ Spørringer som bare leser (f.eks. dry-run av økonomireformen) og utkast som ikke er kjørt (108 ryddingen av
                meldinger, 112 dry-run av etterbetalingen – leser bare det frosne grunnlaget `basis_112_*` fra 117, B-431;
                testfila til 113) – ikke migrasjoner. Et utkast testes med `begin; <utkast>; <test>; select … ; rollback;`
@@ -632,6 +634,13 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `config.world.referral`; startpakken i `REFERRAL_START` (`net/referral.ts`).
 - **Brukernavn er påkrevd** (B-463): `NicknameGate` setter navnet fra skjemaet (`pendingNick` i `ui/nickname.ts`) og
   viser ellers arket som ikke kan lukkes. Kontokortet setter ikke lenger navnet selv – det lytter på `NICKNAME_EVENT`.
+- **Varsel på mobilen** (B-465, 134): nye hendelser mellom spillere varsles med `push_enqueue(bruker, tema, ref, tittel,
+  tekst, lenke)` fra en trigger eller `push_scan` – `ref` er unik (samme hendelse én gang), og raden lages bare når
+  mottakeren har en enhet med temaet. Aldri hemmelige beløp eller meldingstekst. Nytt tema: `push_kinds()` og `PUSH_KINDS`
+  (`net/push.ts`) sammen; ny lenke: `parsePushLink` og `pushNav` i `GameApp`. Nøklene står bare i Vault (`push_vapid_*`,
+  `push_kick_key`, `push_url`) – lag dem aldri på nytt (da slutter alle abonnementer å virke). Edge-funksjonen deployes med
+  `verify_jwt = false` og sjekker vekkenøkkelen selv. Stopp varslene med `select cron.unschedule('push-varsler');`.
+  Utboksen ryddes ikke ennå (få rader); legg ryddingen inn sammen med 108 når eieren er til stede.
 - **Vennelista** (B-462, 132): `follows` med `active` – å ta noen av lista er en `update`, aldri `delete` (connectoren
   holder igjen migrasjoner med sletting). `follow_list` viser bare det `player_profile` alt viser andre; nye felt vurderes
   mot det. Enveis med vilje: ingen forespørsler eller varsler til den som følges.

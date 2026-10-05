@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 465,
+    date: "2026-10-05",
+    title: "Varsel på mobilen",
+    items: [
+      "Slå på «Varsel på mobilen» under Innstillinger → Varsler, så får du beskjed når noen byr på selskapet ditt, når du er overbydd, når et anbud åpner eller avgjøres, når et verk i konsernet er ferdig bygget, og når noen skriver til deg.",
+      "Du velger selv hvilke temaer du vil ha. Trykk på varselet, så åpnes spillet på riktig sted.",
+      "På iPhone og iPad må spillet ligge på hjemskjermen for at varslene skal virke.",
+    ],
+  },
+  {
     b: 463,
     date: "2026-10-05",
     title: "Alle kontoer har brukernavn",
