@@ -46,6 +46,7 @@ import { tierFp, tierOf, tierPoints } from "./seasonTrack";
 import {
   abandonControlAttempt,
   chestFp,
+  WEEK_KINDS,
   claimWeekChest,
   fetchWeeklyBoard,
   fetchWeeklyStatus,
@@ -207,6 +208,8 @@ interface Fake {
   chat: { id: number; user: string | null; body: string; at: number; hidden: boolean }[];
   /** Ukens kontrollrom (B-387): om uka er en kontrollromsuke, og forsøkene */
   controlWeek: boolean;
+  /** Ukens type fra den falske serveren, når den ikke er kontrollromsuke (B-457) */
+  weekKind: string;
   control: { id: number; attempt: number; seed: number; points: number | null; abandoned: boolean }[];
 }
 function makeFake(): Fake {
@@ -229,6 +232,7 @@ function makeFake(): Fake {
     guestsOff: false,
     chat: [],
     controlWeek: false,
+    weekKind: "tonn",
     control: [],
   };
   const json = (status: number, body: unknown) =>
@@ -621,7 +625,7 @@ function makeFake(): Fake {
       return json(200, {
         week_start: "2026-09-21",
         ends_at: "2026-09-27T22:00:00+00:00",
-        kind: f.controlWeek ? "kontroll" : "tonn",
+        kind: f.controlWeek ? "kontroll" : f.weekKind,
         control: f.controlWeek
           ? {
               grade: "premium",
@@ -1569,6 +1573,14 @@ const main = async () => {
     assert((await claimWeekChest()) === 75 && (await claimWeekChest()) === 0, "kista ga fagpoeng to ganger");
     // Bare topp 3 får kiste (B-155)
     assert(chestFp(1) === 100 && chestFp(3) === 50 && chestFp(4) === 0, "kiste utenfor topp 3");
+    // De nye ukene (B-457) tolkes, og en ukjent type blir den eldste
+    for (const k of ["strom", "presisjon"] as const) {
+      f.weekKind = k;
+      assert((await fetchWeeklyStatus())?.kind === k, `ukens type ${k}`);
+      assert(WEEK_KINDS[k].title.length > 0, `tittel for ${k}`);
+    }
+    f.weekKind = "noe nytt";
+    assert((await fetchWeeklyStatus())?.kind === "vekst", "ukjent type");
   });
 
   await test("Ukens kontrollrom (B-387): tre forsøk, levering som tåler nettfeil, og samme svar ved ny innlevering", async () => {

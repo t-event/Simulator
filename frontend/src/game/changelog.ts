@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 457,
+    date: "2026-10-05",
+    title: "Nye ukekonkurranser",
+    items: [
+      "Fra uka som starter 12. oktober: «Mest stål per kWh» – hvem lager mest stål for strømmen. Du er med når verket lager minst 5 000 tonn i uka.",
+      "Fra 26. oktober: «Leveranser i tide» – hvem leverer flest kontrakter i tide. Du er med med minst 50 leveranser i uka.",
+      "«Mer stål enn før» er tatt ut. Ukens kontrollrom kommer som før uka 19. oktober.",
+    ],
+  },
+  {
     b: 455,
     date: "2026-10-05",
     title: "Mer å bygge for storverket",

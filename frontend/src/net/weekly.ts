@@ -6,7 +6,7 @@
 import { realNow } from "../game/clock";
 import { rpc, userId } from "./supabase";
 
-export type WeekKind = "vekst" | "tonn" | "dager" | "kontroll";
+export type WeekKind = "vekst" | "tonn" | "dager" | "kontroll" | "strom" | "presisjon";
 export type League = "bronse" | "solv" | "gull";
 
 // Én liste for alle, målt i prosent, så små og store verk kan konkurrere (B-172)
@@ -16,6 +16,7 @@ export const WEEK_KINDS: Record<WeekKind, { title: string; how: string }> = {
     title: "Størst vekst i konsernverdi",
     how: "Få konsernverdien til å vokse mest mulig i prosent denne uka (regnet fra minst 50 mill.). Du er med når spillet har vært lagret på nett minst to dager før uka.",
   },
+  // Tatt ut av rotasjonen fra uka 12.10.2026 (B-457): kunne påvirkes med en svak uke først. Står for resultatene fra før
   tonn: {
     title: "Mer stål enn før",
     how: "Lag mer stål per spilldøgn enn du gjorde uka før – tallet er farten denne uka i prosent av farten da. Du er med når spillet har vært lagret på nett minst to dager før uka.",
@@ -24,6 +25,15 @@ export const WEEK_KINDS: Record<WeekKind, { title: string; how: string }> = {
   kontroll: {
     title: "Ukens kontrollrom",
     how: "Tre tellende charger i kontrollrommet – de samme for alle, i samme rekkefølge. Den beste teller. Et forsøk er brukt når du starter det. Du kan øve så mye du vil på ukens kvalitet uten at det teller.",
+  },
+  // Fra uka 12.10.2026 (B-457): regnet av serveren fra tidslinja i ekte uker, så farten i spillet hjelper ikke
+  strom: {
+    title: "Mest stål per kWh",
+    how: "Lag mest mulig stål for hver kWh strøm denne uka. Du er med når verket lager minst 5 000 tonn i uka – små verk med induksjonsovn er ikke med, de bruker mye mer strøm per tonn.",
+  },
+  presisjon: {
+    title: "Leveranser i tide",
+    how: "Lever flest mulig kontrakter i tide denne uka: levert i prosent av levert, for sent og avbrutt. Du er med når du har minst 50 leveranser i uka. Likt tall gir delt plass.",
   },
   // Ekte dager, ikke spilldøgn (B-190): farten i spillet skal ikke avgjøre en konkurranse mellom spillere
   dager: {
@@ -85,7 +95,7 @@ interface StatusRow {
 }
 
 function asKind(k: string): WeekKind {
-  return k === "tonn" || k === "dager" || k === "kontroll" ? k : "vekst";
+  return k === "tonn" || k === "dager" || k === "kontroll" || k === "strom" || k === "presisjon" ? k : "vekst";
 }
 function asLeague(l: string): League {
   return l === "solv" || l === "gull" ? l : "bronse";

@@ -8521,7 +8521,7 @@ raden «Anlegget» under Vedlikehold, rådet om slitasje, byggene og stiftelsen 
 Endringslogg: ja.
 
 ## B-456 Datakvaliteten i tidslinjetallene: første oversikt (2026-10-05)
-Status: rapport – anbefalingene venter på eieren. Bygger på B-396, B-398 og B-401.
+Status: rapport – anbefalingene er bygget i B-457. Bygger på B-396, B-398 og B-401.
 Bakgrunn: eieren 1.10: oversikten tas når flere dager er samlet. Grunnlag 1.10–4.10 (`docs/DATAKVALITET.md`).
 Funn: 88 % av radene har de nye tellerne (100 % siste døgn); vakten har bare merket to nye spill og ikke nullet noe.
 Storverk: 260–326 kWh/t (alle 16 gyldige), 3,7 % variasjon fra dag til dag for samme spiller, presisjon stort sett
@@ -8530,4 +8530,26 @@ Anbefaling (ikke bygget): minstetonn 5 000 t; små verk utenfor strøm per tonn;
 forbedring (variasjonen er like stor som en ukes forbedring); minst 50 leveranser per uke for presisjon; «Mer stål enn før»
 tas ut når en konkurranse er valgt. Ny oversikt om et par uker.
 Endringslogg: nei.
+
+## B-457 Ukens utfordring: «Mest stål per kWh» og «Leveranser i tide» (2026-10-05)
+Status: gjelder. Erstatter «Mer stål enn før» i rotasjonen (B-235, B-387). Bygger på B-396, B-398 og B-456.
+Bakgrunn: eieren 5.10: «kjør dine anbefalinger» om B-456.
+Beslutning:
+- **Rotasjon** (`week_kind`, migrasjon 130): uka 5.10 er «Flest aktive dager» som før; fra uka 12.10 går det i fire:
+  stål per kWh (12.10) → kontrollrom (19.10, som før) → leveranser i tide (26.10) → aktive dager (2.11). Ukene før 12.10
+  gir samme type som før, så gamle resultater regnes likt. «Mer stål enn før» er tatt ut.
+- **Mest stål per kWh** (`strom`): kg stål per kWh i uka, 1 000 × tonn / kWh fra tidslinja (`timeline_energy`) – ikke det
+  avrundede kWh/t, som ga likt tall for tre spillere i prøven. Minst 5 000 t og 120–3 000 kWh/t. Små verk kommer ikke med.
+  Absolutt tall, ikke forbedring.
+- **Leveranser i tide** (`presisjon`): levert / (levert + misligholdt + avbrutt) i uka, i prosent med én desimal, minst 50
+  leveranser (`timeline_metrics`). Likt tall gir delt plass.
+- Begge regnes av serveren i ekte uker (mandag–mandag, norsk tid) fra tellerne i tidslinja; farten i spillet gir ikke
+  bedre forhold. Medaljer, ukekiste og sesongpoeng som før.
+- Appen: nye typer i `WEEK_KINDS` med forklaring, tall («3,79 kg stål per kWh», «99,4 % i tide») og hva som skal til for å
+  komme på lista.
+Testet: migrasjonen i en transaksjon som ble rullet tilbake, mot uka 28.9–4.10: 16 storverk med stål per kWh (3,07–3,85),
+15 med leveranser i tide (90,7–100 %), «dager» uendret (29 spillere). Etterpå: rotasjonen gir vekst/tonn/dager for ukene
+før 12.10 som før, så strom/kontroll/presisjon/dager; rådgiveren uten nye funn. Appen: ny test i `npm test`.
+Krever konto: ja, som ukens utfordring ellers (B-152).
+Endringslogg: ja.
 
