@@ -8687,3 +8687,17 @@ utfall, henting og tilbakemelding); edge-funksjonen ute (nøkkelen laget, 401 ut
 varsel på telefonen må eieren prøve selv.
 Krever konto: ja (regel 3: lagres på serveren og gjelder hendelser mellom spillere).
 Endringslogg: ja.
+
+## B-466 Prøvevarsel (2026-10-05)
+Status: gjelder. Bygger på B-465.
+Bakgrunn: eieren 5.10: «Fortsett». Etter B-465 sto én enhet på (en iPhone), men ingen hadde fått et varsel: det kommer
+først når noen byr eller skriver. Uten en måte å prøve på vet verken eieren eller spillerne om varslene kommer fram.
+Beslutning:
+- **«Send et prøvevarsel»** under bryteren (`push_test`, migrasjon 135): serveren legger «Varslene virker» i utboksen til
+  alle enhetene til kontoen som står på, uansett tema, og jobben sender det innen et minutt. Høyst ett per 10 minutter
+  per konto (unik `ref`). `push_claim` tar med alle aktive enheter for temaet `test`.
+- Appen sier «sendt – kommer innen et minutt», eller hvorfor ikke (varsler av, eller nettopp sendt).
+Testet: i en rullet transaksjon (ett per 10 minutter, går til alle enhetene som står på), typesjekk, lint, `npm test`,
+bygg, Playwright 320/390/1366.
+Krever konto: ja (som B-465).
+Endringslogg: ja.

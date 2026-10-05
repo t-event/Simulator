@@ -5,7 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
-## Økt 385 – 2026-10-05: Varsel på mobilen (B-465)
+## Økt 386 – 2026-10-05: Prøvevarsel (B-466)
+
+**Brukeren ba om:** «Fortsett».
+
+**Gjort:** én iPhone hadde slått på varsler, men ingen varsler var sendt (de kommer først ved et bud eller en melding).
+Knappen «Send et prøvevarsel» (`push_test`, migrasjon 135) lar spilleren prøve med én gang; høyst ett per 10 minutter.
+
+**Testet:** rullet transaksjon, typesjekk, lint, `npm test`, bygg, Playwright 320/390/1366.
+
+**Gjenstår:** eieren trykker «Send et prøvevarsel» på iPhonen og ser om det kommer; se da i `push_outbox` (sent/feil).
+
+: Varsel på mobilen (B-465)
 
 **Brukeren ba om:** «Gå for dine anbefalinger og fortsett» – etter lista over det som venter på eieren.
 

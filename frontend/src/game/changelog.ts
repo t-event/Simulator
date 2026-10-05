@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 466,
+    date: "2026-10-05",
+    title: "Prøv varslene",
+    items: [
+      "Ny knapp «Send et prøvevarsel» under Innstillinger → Varsler: da ser du med én gang om varslene kommer fram på telefonen.",
+    ],
+  },
+  {
     b: 465,
     date: "2026-10-05",
     title: "Varsel på mobilen",
