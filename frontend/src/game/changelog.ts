@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 467,
+    date: "2026-10-05",
+    title: "Varsler på som standard",
+    items: [
+      "Når du er logget inn, spør telefonen én gang om spillet kan sende varsler. Sier du ja, får du beskjed når noen byr på selskapet ditt, når et anbud åpner eller avgjøres, når et verk er ferdig bygget og når noen skriver til deg.",
+      "Vil du ikke ha dem, sier du nei – eller slår dem av under Innstillinger → Varsler. Da spør spillet ikke igjen.",
+    ],
+  },
+  {
     b: 466,
     date: "2026-10-05",
     title: "Prøv varslene",

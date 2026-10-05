@@ -5,7 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
-## Økt 387 – 2026-10-05: Varselet virker, ryddingen klar til eieren
+## Økt 388 – 2026-10-05: Varsler på for alle (B-467)
+
+**Brukeren ba om:** «Skru på varsler for alle. Godtar ikke de varslinger er det ok. Da kan de gjøre det i innstillinger senere.»
+
+**Gjort:** `ui/PushAuto.tsx`: første trykk i spillet etter innlogging slår på varsler med alle temaene (telefonen spør
+om lov; iPhone spør bare etter et trykk), én gang per konto og enhet. Har enheten alt gitt lov, skjer det uten spørsmål.
+«Nei» og «slått av under Innstillinger» huskes. `enablePush` spør om lov før alt annet.
+
+**Testet:** Playwright (iPhone 13) med «ja», «nei» og «lov alt gitt»; typesjekk, lint, `npm test`, bygg.
+
+**Gjenstår:** se om andelen med varsler øker (`push_subscriptions` der `active`); eieren kjører 108.
+
+: Varselet virker, ryddingen klar til eieren
 
 **Brukeren ba om:** «Fortsett» (med skjermbilde: prøvevarselet kom fram på iPhonen).
 

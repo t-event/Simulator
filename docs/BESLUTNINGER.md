@@ -8701,3 +8701,20 @@ Testet: i en rullet transaksjon (ett per 10 minutter, går til alle enhetene som
 bygg, Playwright 320/390/1366.
 Krever konto: ja (som B-465).
 Endringslogg: ja.
+
+## B-467 Varsler på for alle (2026-10-05)
+Status: gjelder. Endrer B-465 (der slo spilleren varsler på selv).
+Bakgrunn: eieren 5.10, etter at prøvevarselet kom fram: «Skru på varsler for alle. Godtar ikke de varslinger er det ok.
+Da kan de gjøre det i innstillinger senere.»
+Beslutning:
+- **Første trykk i spillet** etter innlogging, på en enhet som kan få varsler, slår på varsler med alle fire temaene
+  (`ui/PushAuto.tsx`). Telefonen spør selv om lov – det kan ingen nettside hoppe over, og iPhone spør bare rett etter et
+  trykk. Derfor skjer det ved et trykk og ikke når siden lastes.
+- **Én gang per konto og enhet** (`stalverk-varsel-auto-v1`): svaret huskes, også «nei». Den som slår av under
+  Innstillinger, spørres aldri igjen. Har enheten alt gitt lov, slås varslene på uten spørsmål.
+- Spørsmålet om lov kommer nå før alt annet i `enablePush`, så iPhone ikke mister trykket mens appen venter på nettet.
+- Uendret: iPhone/iPad bare fra hjemskjermen, gjester får ingenting, og alt kan slås av under Innstillinger → Varsler.
+Testet: Playwright (iPhone 13) med telefonens svar «ja», «nei» og «lov alt gitt»: ingen spørsmål før trykket, bare ett
+spørsmål, alle temaene ved ja, ingenting ved nei, svaret husket; typesjekk, lint, `npm test`, bygg.
+Krever konto: ja (som B-465).
+Endringslogg: ja.

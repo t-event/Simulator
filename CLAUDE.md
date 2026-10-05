@@ -232,6 +232,7 @@ frontend/src/
     NicknameGate.tsx «Velg brukernavn»: påkrevd for alle kontoer, kan ikke lukkes (B-463); nickname.ts: navnet fra skjemaet
     Friends.tsx  Vennelista: fanen «Venner» i Skiftrapporten og knappen på profilarket (B-462)
     Push.tsx     Varsel på mobilen: bryteren under Varsler og oppfordringen på selskapet du eier; pushLinks.ts: trykk på varselet (B-465)
+    PushAuto.tsx Varsler på for alle: første trykk etter innlogging lar telefonen spørre, én gang per konto og enhet (B-467)
     Referral.tsx Kortet «Verv en venn» på Mål → Uka og koblingen etter innlogging (`ReferralSync`, B-459)
     Admin.tsx    Adminpanelet under kontoen, bare når `is_admin()` svarer ja (B-421)
     Companies.tsx Konsern → Industrien: ett kort per selskap (skraplageret nå) og konsernkassa (B-189, B-227)
@@ -640,6 +641,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   (`net/push.ts`) sammen; ny lenke: `parsePushLink` og `pushNav` i `GameApp`. Nøklene står bare i Vault (`push_vapid_*`,
   `push_kick_key`, `push_url`) – lag dem aldri på nytt (da slutter alle abonnementer å virke). Edge-funksjonen deployes med
   `verify_jwt = false` og sjekker vekkenøkkelen selv. Stopp varslene med `select cron.unschedule('push-varsler');`.
+  Varsler er på som standard (B-467): `PushAuto` spør ved første trykk – aldri ved lasting (iPhone krever trykk), og
+  `requestPermission` skal stå først i `enablePush`. Svaret huskes i `stalverk-varsel-auto-v1`; `disablePush` merker det.
   Utboksen ryddes av `dm_cleanup` i `supabase/utkast/108` (sendte etter 14 dager, avslåtte enheter etter 60) når den er kjørt.
 - **Vennelista** (B-462, 132): `follows` med `active` – å ta noen av lista er en `update`, aldri `delete` (connectoren
   holder igjen migrasjoner med sletting). `follow_list` viser bare det `player_profile` alt viser andre; nye felt vurderes
