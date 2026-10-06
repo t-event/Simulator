@@ -647,6 +647,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Vennelista** (B-462, 132): `follows` med `active` – å ta noen av lista er en `update`, aldri `delete` (connectoren
   holder igjen migrasjoner med sletting). `follow_list` viser bare det `player_profile` alt viser andre; nye felt vurderes
   mot det. Enveis med vilje: ingen forespørsler eller varsler til den som følges.
+- **Inntektsanslaget** (B-464, 133): `company_estimate`/`company_estimate_for` leser `company_estimate_parts` (snittet
+  av det som telles per spiller siste 7 dager, regnet én gang per dag av `company_estimate_refresh`, cron
+  `selskapsanslag`) – aldri taket per spiller (`company_estimate_cap`, bare når det mangler tall). Anslaget styrer V,
+  anbudsgrensene og minstebudet ved oppkjøp; endres det, endres maktforholdet mellom spillere – aldri mens et oppkjøp er åpent.
 - **Kontrollromsrekorden på topplista** (B-295) tas fra `state.controlBest` av triggeren `note_control` på `saves` inn i
   `records.best_control` – bare for kontoer som alt har en rekordrad, og bare opptil 5 000 poeng. Endres poengene i
   kontrollrommet mye, må grensen følge med.

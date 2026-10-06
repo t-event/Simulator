@@ -8658,6 +8658,30 @@ Krever konto: ja (gjelder bare kontoer).
 Endringslogg: ja.
 
 
+## B-464 Realistisk inntektsanslag for selskapene og minstebud i anbudene (2026-10-05)
+Status: gjelder (lagt inn 6.10, etter at oppkjøp 12 var avgjort). Bygger på B-449–B-451.
+Bakgrunn: kontrollen av slagganbudet 5.10: vinneren betalte 75 mill., 2,7 dagers anslått inntekt. Eieren: «Ta din
+anbefaling og fortsett». Funnet: `company_estimate` regnet som om alle aktive spillere når taket for det som telles hver
+ekte dag, mens betalingen teller det de faktisk lager. Skraplageret ble anslått til 25,6 mill. per dag og betalte
+10,6–16,7 mill. Anslaget styrer høyeste anbud (14 dager), selskapsverdien V (10 dager) – og dermed minstebudet ved
+oppkjøp, budstyrken og Kontrollen – og «Lønner det seg?».
+Beslutning (migrasjon 133):
+- **Anslaget er det betalingen ville gitt:** snittet over de siste 7 ekte dagene av det som telles per spiller
+  (`company_counted_t` fra `production_days`), minus eieren (kjøperens eget anslag: minus kjøperen), ganget med gebyret.
+  Tallene per spiller regnes én gang per ekte dag (`company_estimate_refresh`, pg_cron `selskapsanslag`, i
+  `company_estimate_parts`). Med færre enn 3 dager med tall brukes det gamle (`company_estimate_cap`).
+- **Minstebud i anbudene:** 5 dagers anslått inntekt (`config.world.tender_floor_days`), rundet ned til hele millioner,
+  aldri under `bid_min` og aldri over halvparten av høyeste bud. Høyeste bud er fortsatt 14 dager.
+- Regelen for V, minstebudet ved oppkjøp (B-451) og Kontrollen er uendret – de får bare et riktig anslag.
+- Lagt inn etter at oppkjøp 12 var avgjort, så budet ble avgjort med verdien det ble lagt inn med.
+Dry-run (transaksjon som ble rullet tilbake, 5.10): skraplageret 25,6 → 14,6 mill./dag (betalt snitt 7 dager: 13,6),
+slagghåndteringen 27,9 → 16,0; V og minstebud ved oppkjøp 256 → 146 og 279 → 160 mill.; neste anbud: høyeste 205/224,
+minstebud 73/79 mill. Ingen investeringer, så Kontrollen endres ikke nå.
+Lagt inn 6.10: skraplageret 14,95 mill./dag (før 25,9), slagghåndteringen 16,3 (før 28,3); V og minstebud ved oppkjøp
+149,5 og 163 mill. Verkstedet er ikke aktivt og har ennå det gamle anslaget; det regnes første halvtime etter at det slås på.
+Krever konto: ja, som selskapene ellers (B-189).
+Endringslogg: ja.
+
 ## B-465 Varsel på mobilen (2026-10-05)
 Status: gjelder. Første del av forslaget «Varsel på mobilen» (FORSLAG.md, B-149: «Ingen varsel på mobilen enda»).
 Bakgrunn: eieren 5.10: «Gå for dine anbefalinger og fortsett.» Det som skjer mellom spillerne går i ekte tid, men

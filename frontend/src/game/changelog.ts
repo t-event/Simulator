@@ -56,6 +56,16 @@ export const CHANGELOG: ChangelogEntry[] = [
     ],
   },
   {
+    b: 464,
+    date: "2026-10-06",
+    title: "Riktigere tall for selskapene",
+    items: [
+      "«Tjener nå» for selskapene i Industrien viser nå det selskapet faktisk tjener, ikke det det kunne tjent om alle spilte fullt hver dag.",
+      "Minstebudet ved oppkjøp og høyeste bud i anbudene følger de riktigere tallene.",
+      "Anbudene har nå et minstebud på omtrent fem dagers inntekt.",
+    ],
+  },
+  {
     b: 463,
     date: "2026-10-05",
     title: "Alle kontoer har brukernavn",

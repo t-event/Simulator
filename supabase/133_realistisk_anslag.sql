@@ -1,4 +1,3 @@
--- UTKAST (ikke lagt inn ennå): legges inn 5.10 etter at oppkjøp 12 er avgjort, og flyttes da til supabase/.
 -- B-464: realistisk inntektsanslag for selskapene og minstebud i anbudene (eieren 5.10: «Ta din anbefaling og fortsett»).
 --
 -- Funnet 5.10: `company_estimate` regnet som om alle aktive spillere når taket for det som telles hver ekte dag
@@ -14,7 +13,7 @@
 --   brukes det gamle anslaget (`company_estimate_cap`).
 -- * Minstebud i anbudene: 5 dagers anslått inntekt (`config.world.tender_floor_days`), rundet ned til hele millioner,
 --   aldri under `bid_min` og aldri over halvparten av høyeste bud. Høyeste bud er 14 dagers inntekt som før.
--- * Lagt inn etter at oppkjøp 12 var avgjort (5.10 kl. 22:21), så et bud som var lagt inn, ble avgjort med verdien det
+-- * Lagt inn 6.10, etter at oppkjøp 12 var avgjort (5.10 kl. 22:21), så et bud som var lagt inn, ble avgjort med verdien det
 --   ble lagt inn med.
 
 create table if not exists public.company_estimate_parts (

@@ -86,6 +86,9 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
 
 ## 5. Selskaper, Kontroll og oppkjøp
 
+- **Inntektsanslaget** (B-464): det betalingen ville gitt – snittet av de siste 7 ekte dagene av det som telles per
+  spiller, minus eieren (kjøperens anslag: minus kjøperen), regnet én gang per dag (`company_estimate_refresh`). Brukes til
+  V (10 dager), høyeste anbud (14 dager), minstebudet i anbud (5 dager) og «Tjener nå».
 - Anbud (48 t skjult) og pilotkonsesjon 14 dager; `world_tick` avgjør «lat» (pg_cron hvert 5. min).
 - Varsel om åpent anbud (B-453): i varsellinja når det åpner og når 12 timer er igjen, til den som ikke har bydd, med
   lenke til Konsern → Industrien. Ved budfeltet: budet kommer tilbake til den som taper, og «Lønner det seg?» (14 dager ×

@@ -89,9 +89,9 @@ til «Avgjort» nederst).
 ## Forslag – spillet
 
 - **Designgjennomgangen 1.10 – ferdig (B-405–B-415):** alt fra poleringslista er bygget. Ikke tatt: konsernkassa ut
-  av toppfeltet på mobil (B-340), store bokstaver på alle underoverskrifter. Står åpne (ikke i lista eieren ga): samme
-  fanenavn «Strøm» også i garasjen, topplista med faner og chips i stedet for en nedtrekksliste, og instruksjonen i
-  kontrollrommet som én linje rett over hold-inne-knappen.
+  av toppfeltet på mobil (B-340), store bokstaver på alle underoverskrifter. ~~Står åpne: samme fanenavn «Strøm» også i
+  garasjen, topplista med faner og chips, instruksjonen i kontrollrommet rett over hold-inne-knappen~~ – sjekket 6.10:
+  alle tre er alt slik.
 
 - ~~Stabilisering (B-380)~~ **Avgjort (B-381–B-385):** kassetaket fjernet, tittel skilt fra opptjent nivå, sesonglistene og
   innskuddet stengt. Verksjefene venter nå bare på V0/K-1 (B-409).
