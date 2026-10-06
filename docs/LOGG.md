@@ -5,6 +5,28 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 391 – 2026-10-06: Oppkjøp 12 avgjort, realistisk inntektsanslag lagt inn (B-464)
+
+**Brukeren ba om:** påminnelsene etter oppkjøp 12: sjekk utfallet (bare lese), og legg så inn B-464.
+
+**Gjort:**
+- Oppkjøp 12 (regelsett 1) avgjort 5.10 kl. 22:21: avverget, eieren beholder selskapet. Kjøperen fikk 90 % av budet
+  tilbake, eieren 95 % av motbudet (kassa og fondet hver for seg). Varslene om frist, motbud og utfall kom fram (fire av
+  fire), verdensjobbene står ok, ingen åpne oppkjøp eller anbud.
+- Migrasjon 133 flyttet fra `supabase/utkast/` og lagt inn: anslaget er snittet av det som telles per spiller siste 7 ekte
+  dager, regnet av `company_estimate_refresh` (cron `selskapsanslag`, :07 og :37); minstebud i anbud 5 dager.
+- B-464 i BESLUTNINGER (før B-465), STATUS §5, CLAUDE.md, endringsloggen. FORSLAG: de tre åpne punktene fra
+  designgjennomgangen 1.10 er alt slik (Strøm-fanen, topplista med faner, instruksjonen over knappen) – strøket.
+- LOGG: overskriftene på økt 385–389 manglet «Økt N – dato» – rettet.
+
+**Testet:** anslaget etter innleggingen mot dry-run (skraplageret 14,95 mill./dag mot 14,6, slagg 16,3 mot 16,0; V og
+minstebud ved oppkjøp 149,5 og 163 mill.), `world_health` (alt ok), sikkerhetsrådene (bare de vanlige INFO for tabeller
+uten regler), `npm test`.
+
+**Gjenstår:** følge med på neste anbud (minstebudet) og at anslaget holder seg nær det som betales. Verkstedet (inaktivt)
+får anslaget regnet første halvtime etter at det slås på 12.10 – til da brukes det gamle taket. Eieren kjører 108 (cron
+`meldinger-rydding` finnes ikke ennå).
+
 ## Økt 390 – 2026-10-05: Varsel om motbud (B-469)
 
 **Brukeren ba om:** «Jeg som prøver å ta over en bedrift får ikke varsel på mobilen om eier byr over meg igjen.»
@@ -16,7 +38,7 @@ ble testet, og hva som gjenstår.
 
 **Gjenstår:** publiseringen av B-468/B-469 sto i kø hos GitHub (Actions); B-464 kl. 22:35.
 
-: Klar for oppkjøp 12, og navnet i byggevarselet (B-468)
+## Økt 389 – 2026-10-05: Klar for oppkjøp 12, og navnet i byggevarselet (B-468)
 
 **Brukeren ba om:** «Alt klart for oppkjøp om 1 time?» og «Fiks» (navnet på verket i varselet).
 
@@ -27,7 +49,7 @@ ble testet, og hva som gjenstår.
 
 **Gjenstår:** B-464 kl. 22:35; eieren kjører 108.
 
-: Varsler på for alle (B-467)
+## Økt 388 – 2026-10-05: Varsler på for alle (B-467)
 
 **Brukeren ba om:** «Skru på varsler for alle. Godtar ikke de varslinger er det ok. Da kan de gjøre det i innstillinger senere.»
 
@@ -39,7 +61,7 @@ om lov; iPhone spør bare etter et trykk), én gang per konto og enhet. Har enhe
 
 **Gjenstår:** se om andelen med varsler øker (`push_subscriptions` der `active`); eieren kjører 108.
 
-: Varselet virker, ryddingen klar til eieren
+## Økt 387 – 2026-10-05: Varselet virker, ryddingen klar til eieren
 
 **Brukeren ba om:** «Fortsett» (med skjermbilde: prøvevarselet kom fram på iPhonen).
 
@@ -51,7 +73,7 @@ Connectoren holder fortsatt igjen SQL med `delete`, så eieren kjører fila i SQ
 
 **Gjenstår:** eieren kjører 108 (sjekk etterpå at jobben `meldinger-rydding` finnes i `cron.job`); B-464 i kveld.
 
-: Prøvevarsel (B-466)
+## Økt 386 – 2026-10-05: Prøvevarsel (B-466)
 
 **Brukeren ba om:** «Fortsett».
 
@@ -62,7 +84,7 @@ Knappen «Send et prøvevarsel» (`push_test`, migrasjon 135) lar spilleren prø
 
 **Gjenstår:** eieren trykker «Send et prøvevarsel» på iPhonen og ser om det kommer; se da i `push_outbox` (sent/feil).
 
-: Varsel på mobilen (B-465)
+## Økt 385 – 2026-10-05: Varsel på mobilen (B-465)
 
 **Brukeren ba om:** «Gå for dine anbefalinger og fortsett» – etter lista over det som venter på eieren.
 
