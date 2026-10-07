@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 393 – 2026-10-07: Kjøp av stålkompleks teller i dagens oppdrag (B-470)
+
+**Brukeren ba om:** «Jeg kjøpte nettopp et nytt stålkompleks, men det teltes ikke i dagens utfordring om å kjøpe eller
+modernisere et datterverk.»
+
+**Gjort:** oppdraget «datter» målte verkene, som først kommer når byggingen starter – og et bytte til kompleks tar bort
+verket det erstatter. Nå teller det kjøpene (`totals.konsernBuys`, `noteKonsernBuy` i `konsern.ts`, kalt fra
+`ui/konsernRun.ts` og `localOrder`/`localCancel`). Dagens oppdrag fra før rettingen får kjøpet i køen godskrevet.
+
+**Testet:** typesjekk, `npm test` (ny test), `balance.ts` (exit 0), `balance.ts --daglig 15` (exit 0), lint, bygg.
+
+**Gjenstår:** eieren åpner spillet etter oppdateringen – oppdraget skal da stå som gjort.
+
 ## Økt 392 – 2026-10-07: Oppfølging av anslaget og nye spillere
 
 **Brukeren ba om:** «Fortsett».

@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 470,
+    date: "2026-10-07",
+    title: "Kjøp i konsernet teller i dagens oppdrag",
+    items: [
+      "Oppdraget «Kjøp eller moderniser et datterverk» teller kjøpet med én gang – også et stålkompleks som står i køen, og et bytte fra et mindre verk til kompleks.",
+      "Kjøpte du noe i dag før oppdateringen, er det godskrevet.",
+    ],
+  },
+  {
     b: 469,
     date: "2026-10-05",
     title: "Varsel om motbud",

@@ -8766,3 +8766,22 @@ Testet: i en rullet transaksjon (motbud → varsel til kjøperen, høyere bud �
 minutter → ingen nytt varsel).
 Krever konto: ja (som B-465).
 Endringslogg: ja.
+
+## B-470 Dagens oppdrag «Kjøp eller moderniser et datterverk» teller kjøpet (2026-10-07)
+Status: gjelder. Retter B-153.
+Bakgrunn: eieren 7.10: «Jeg kjøpte nettopp et nytt stålkompleks, men det teltes ikke i dagens utfordring om å kjøpe eller
+modernisere et datterverk.» Oppdraget målte verkene (1 per verk + trinnet), og et kjøp i konsernet blir først et verk når
+byggingen starter (kø i ekte tid, B-326). Et bytte til kompleks tar i tillegg bort verket det erstatter, så summen ble den
+samme eller lavere.
+Beslutning:
+- **Oppdraget teller kjøpene:** `g.totals.konsernBuys` øker ved hver bestilling som serveren godtar (nytt verk, bytte
+  til kompleks, modernisering, oppgradering) og går ned ved en avbestilling (`noteKonsernBuy`), så kjøp og avbestilling
+  ikke gir oppdraget. Salg og flytting teller ikke.
+- **Oppdrag startet før rettingen** (`v` under 3) får startverdien satt på nytt i `migrate()`: står noe i køen, er det
+  godskrevet (det kjøpet som ikke ble telt), ellers står oppdraget på 0.
+- Belønningen sjekkes ikke av serveren (`claim_daily_missions` gir bonusen én gang per dag), så ingenting på serveren er
+  endret.
+Testet: `npm test` (ny test: bytte til kompleks teller, avbestilling trekker fra, gammelt oppdrag med og uten noe i
+køen), `balance.ts` og `balance.ts --daglig 15`.
+Krever konto: ja, som kjøp i konsernet ellers (B-326).
+Endringslogg: ja.

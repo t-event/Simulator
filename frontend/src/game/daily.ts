@@ -155,8 +155,9 @@ const TEMPLATES: Record<MissionId, MissionTemplate> = {
     target: (g) => roundNice(3 * dayOfDrift(g)),
   },
   datter: {
-    // Et nytt datterverk eller et trinn modernisering teller
-    value: (g) => (g.konsern?.plants ?? []).reduce((a, p) => a + 1 + p.level, 0),
+    // Hvert kjøp teller med én gang (B-470): nytt verk, kompleks, modernisering. Verkene selv kom først når byggingen
+    // startet, og et bytte til kompleks tok bort verket det erstattet
+    value: (g) => g.totals.konsernBuys ?? 0,
     // Verkene kjøpes fra konsernkassa (B-326): bare med konto, og bare når noe kan bestilles
     eligible: (g) => !!g.konsern?.unlocked && konsernOptions(g).some((o) => o.pay === "konsernkasse" && !o.blocked),
     target: () => 1,
@@ -226,7 +227,7 @@ export function startMissionDay(g: GameState, date: string, claimed: boolean): v
       id,
       base: TEMPLATES[id].value(g),
       target: TEMPLATES[id].target(g),
-      v: 2,
+      v: 3,
     })),
   };
 }
