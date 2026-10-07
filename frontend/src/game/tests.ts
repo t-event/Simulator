@@ -296,6 +296,7 @@ import {
   ladderLevel,
   modMaxAt,
   placeOrder,
+  konsernAssets,
   sellPlant,
   settleWorld,
   worldLevel,
@@ -3418,6 +3419,28 @@ test("Sommerstans (B-321): salgsdirektøren står, ventende forespørsler får n
   assert(acceptAgreement(g, 321).ok, "kunne ikke signere");
   assert(a.weeksSent === 0 && a.nextDay === 97 + SUMMER.days, `første uke kom i ferien (nextDay ${a.nextDay})`);
   assert(!g.contracts.some((c) => c.agreementId === 321), "ukeleveranse i køen midt i ferien");
+});
+
+test("Konsernverdien (B-475): en bestilling flytter penger fra kassa til eiendelene, og verket teller når det er ferdig", () => {
+  const H = 3_600_000;
+  const t0 = 1_000_000_000_000;
+  const w: KonsernWorld = { plants: [], orders: [], nextId: 3, level: 2, floor: 0, balance: 100_000_000 };
+  w.plants.push({ id: 1, type: "kompleks", name: "A", level: 2, boughtDay: 0, downUntilDay: 0 });
+  w.plants.push({ id: 2, type: "stalverk", name: "B", level: 0, boughtDay: 0, downUntilDay: 0 });
+  // Kompleks på trinn 2: 60 mill. × 1,6 × 0,6; stålverket 5 mill. × 0,6
+  assert(konsernAssets(w) === 57_600_000 + 3_000_000, `eiendeler ${konsernAssets(w)}`);
+  const before = w.balance + konsernAssets(w);
+  const m = placeOrder(w, { kind: "modernisering", plant: 1 }, ["standardverk"], t0);
+  assert(
+    m.ok && w.balance + konsernAssets(w) === before,
+    `etter bestillingen ${w.balance + konsernAssets(w)} mot ${before}`,
+  );
+  // Et nytt verk teller med prisen mens det bygges, ikke med salgssummen i tillegg
+  const b = placeOrder(w, { kind: "bygg", type: "stalverk" }, [], t0);
+  assert(b.ok && w.balance + konsernAssets(w) === before, "nytt verk telt to ganger");
+  // Ferdig: komplekset på trinn 3 (60 × 1,9 × 0,6) og det nye stålverket med salgssummen
+  settleWorld(w, t0 + 20 * H);
+  assert(!w.orders.length && konsernAssets(w) === 68_400_000 + 3_000_000 + 3_000_000, `ferdig ${konsernAssets(w)}`);
 });
 
 test("Konsernet i ekte tid (B-326): priser, køen i rekkefølge, rabatt, bytte og salg som på serveren", () => {

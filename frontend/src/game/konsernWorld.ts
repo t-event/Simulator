@@ -137,6 +137,16 @@ export function salePrice(p: Pick<SisterPlant, "type" | "level">): number {
   return Math.round(WORLD_KONSERN.price[p.type] * (1 + WORLD_KONSERN.modShare * p.level) * WORLD_KONSERN.sellShare);
 }
 
+/**
+ * Verkene og prosjektene som eiendeler i konsernverdien (B-475, speiler `konsern_assets` i 142): hvert verk med
+ * salgssummen – ikke et verk som fortsatt bygges – og hver betalt bestilling som ikke er ferdig, med prisen. Da faller
+ * ikke konsernverdien når man bestiller, og prosjektet teller som verket når det er ferdig.
+ */
+export function konsernAssets(w: Pick<KonsernWorld, "plants" | "orders">): number {
+  const plants = w.plants.filter((p) => p.project?.kind !== "bygg").reduce((sum, p) => sum + salePrice(p), 0);
+  return plants + w.orders.reduce((sum, o) => sum + (o.cost > 0 ? o.cost : 0), 0);
+}
+
 /** Konsernet slik serveren holder det */
 export interface KonsernWorld {
   plants: SisterPlant[];

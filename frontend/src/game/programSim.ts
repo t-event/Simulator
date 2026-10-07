@@ -834,7 +834,7 @@ function k1CostReport(m: K1Model, ps: Player[], seeds: number[]): void {
 
 /**
  * Konsernverdi med og uten program (B-391): samme konsern, samme hendelser. Konsernverdien er kassa + 60 × (normalt
- * utbytte + bidrag) − lån (`konsern_value`); hendelsene er ikke med i det normale utbyttet, så bare kassa skiller.
+ * utbytte + bidrag) + verkene − lån (`konsern_value`, B-475); hendelsene er ikke med i det normale utbyttet, så bare kassa skiller.
  */
 function k1ValueReport(
   m: K1Model,

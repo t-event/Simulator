@@ -130,9 +130,9 @@ export function MoneyGuide({ g, onClose }: { g: GameState; onClose: () => void }
               </Question>
               <Question q="Hva teller på topplista?">
                 <p>
-                  <strong>Konsernverdi:</strong> konsernkassa pluss 60 dagers utbytte og bidrag, minus lån – regnet av
-                  serveren i ekte tid. <strong>Verdi i spillet:</strong> kassa hjemme minus lån, pluss det verkene er
-                  verdt. <strong>Privat formue</strong> har sin egen liste.
+                  <strong>Konsernverdi:</strong> konsernkassa pluss 60 dagers utbytte og bidrag og det verkene kan
+                  selges for, minus lån – regnet av serveren i ekte tid. <strong>Verdi i spillet:</strong> kassa hjemme
+                  minus lån, pluss det verkene er verdt. <strong>Privat formue</strong> har sin egen liste.
                 </p>
               </Question>
             </>

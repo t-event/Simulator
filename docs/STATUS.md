@@ -121,7 +121,7 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
 ## 6. Konkurranse og lister
 
 - **Sesongen avgjøres på Konsernverdi** (B-384): `close_season` rangerer på `konsern_value` (konsernkassa + 60 dagers
-  utbytte og bidrag − lån, i ekte tid); de uten konsern kommer etter, på verdien i eget verk. Bidraget i verdien regnes
+  utbytte og bidrag + verkene med salgssummen og betalte prosjekter med prisen (`konsern_assets`, B-475) − lån, i ekte tid); de uten konsern kommer etter, på verdien i eget verk. Bidraget i verdien regnes
   med aktiviteten i siste betalte bidrag, eller dagens produksjon hvis den er høyere (B-417, 104) – en som ikke spiller,
   står med det hen faktisk får betalt (gulvet 0,3), ikke med fullt bidrag. Verdien i eget verk fryses
   også (Hall of Fame). Sesonger startes og avsluttes bare manuelt.
