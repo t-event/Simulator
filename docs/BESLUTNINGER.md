@@ -8853,3 +8853,13 @@ transaksjoner som ble rullet tilbake (2 og 4 minutter, `fails` urørt ved 503 og
 legges tilbake eller merkes «for gammelt»; samme kode igjen `ok` første døgn og «brukt» etter to).
 Krever konto: uendret.
 Endringslogg: ja.
+
+## B-474 Databasen mot repoet 7.10: ingen avvik, og skriptet for kontrollen i repoet (2026-10-07)
+Brukeren: «Fortsett». Kontrollen fra B-403 er gjort på nytt etter migrasjonene 099–141. 27 funksjoner har en annen kropp i
+databasen enn i siste `create function` i repoet; alle 27 er endret senere med replace() på den levende kroppen (081 i en
+løkke, og navngitt i 084/087/090/091/095/097/111/114/115/118/119/120/121/123/124/125). Ingen funksjon finnes bare i
+databasen eller bare i repoet, og ingen levende funksjon har UTC-dato (081) eller det gamle lenkefilteret med `\b` (115)
+igjen. Spørringen lages nå av `supabase/utkast/funksjonsdrift.py` (bare lesing), så kontrollen kan gjentas.
+Verdensjobbene (`world_health`) står «ok», ingen cron-jobb har feilet og ingen varsler har feilet siste døgn.
+Krever konto: ikke relevant.
+Endringslogg: nei.

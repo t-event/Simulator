@@ -599,7 +599,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   pronamespace = 'public'::regnamespace` mot samme sjekksum av kroppen i siste `create [or replace] function` i
   `supabase/`. Avvik som er i orden: 081 patcher alle funksjoner med UTC-dato i en løkke, og 082/084/087/090/091/095/097
   patcher navngitte funksjoner med `replace` – den levende kroppen er da den patchede. Noen funksjoner er laget med
-  `create function` etter `drop` (039, 073, 092), ikke `create or replace`. Sjekket 1.10: ingen avvik.
+  `create function` etter `drop` (039, 073, 092), ikke `create or replace`. Sjekket 1.10 og 7.10: ingen avvik.
+  Spørringen lages av `python3 supabase/utkast/funksjonsdrift.py` (B-474); patchene etter 1.10: 111/114/115/118/119/120/121/123/124/125.
 - **Serverens klokke også i grensesnittet** (B-403): beskjeder og sjekker som gjelder ekte tid (utbytte for i går, om et
   anbud er åpent, tidsstempler fra serveren) bruker `realNow()`, ikke `Date.now()`. `Date.now()` er greit bare for
   lokale mellomrom (hvor lenge appen var skjult, hvor gammel en liste i minnet er).
