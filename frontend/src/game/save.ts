@@ -152,6 +152,7 @@ export function migrate(g: GameState): GameState {
   if (g.totals.kwh === undefined) g.totals.kwh = 0;
   if (g.totals.contractsMissed === undefined) g.totals.contractsMissed = 0;
   if (g.totals.contractsCancelled === undefined) g.totals.contractsCancelled = 0;
+  if (g.totals.konsernBuys === undefined) g.totals.konsernBuys = 0;
   if (g.konsern === undefined)
     g.konsern = {
       unlocked: false,
@@ -336,11 +337,19 @@ export function migrate(g: GameState): GameState {
   checkAchievements(g);
   // Dagens oppdrag «verdi» (B-352) måler nå verdien med utbetalt til eierne. Et oppdrag startet før det får utbetalingen
   // lagt til startverdien, ellers ble det gjort av seg selv
-  for (const m of g.daily?.missions ?? [])
-    if (m.id === "verdi" && m.v !== 2) {
+  for (const m of g.daily?.missions ?? []) {
+    if (m.id === "verdi" && (m.v ?? 0) < 2) {
       m.base += paidOutTotal(g);
       m.v = 2;
     }
+    // «datter» teller nå kjøpene (B-470). Et oppdrag startet før det får et kjøp som står i køen, godskrevet – det var
+    // det som ikke ble telt
+    if (m.id === "datter" && (m.v ?? 0) < 3) {
+      const queued = (g.konsern?.orders ?? []).length > 0 ? 1 : 0;
+      m.base = (g.totals.konsernBuys ?? 0) - queued;
+      m.v = 3;
+    }
+  }
   // Arbeidsmiljøkortene og kapitlet deres er fjernet (B-444, eierens ønske): et kort som står åpent, tas bort, og farten
   // blir som etter et vanlig kort. Kapitlet tas ut av fagboka
   const REMOVED_CARDS = ["trakassering", "rasisme", "utenfor"];

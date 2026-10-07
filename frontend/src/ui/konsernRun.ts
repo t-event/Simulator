@@ -2,7 +2,7 @@
  * Kjøp, avbestilling og salg i konsernet (B-326): verkene går via serveren (konsernkassa), de felles funksjonene via
  * kassa i spillet. Etter svaret legges serverens konsern inn i spillet, og verdensstatusen hentes på nytt.
  */
-import type { KonsernOption } from "../game/konsern";
+import { noteKonsernBuy, type KonsernOption } from "../game/konsern";
 import { fmtKr } from "./format";
 import { ORDER_REFUSAL_TEXT } from "../game/konsernWorld";
 import type { GameApi } from "../game/useGame";
@@ -25,7 +25,7 @@ type Act = GameApi["act"];
  * Svaret fra serveren gjelder kontoen som sendte kjøpet (B-426). Byttes kontoen mens svaret er på vei, legges det ikke
  * inn i det nye spillet – serveren skriver konsernet inn i den første kontoens spill ved neste lagring (save_game).
  */
-function done(act: Act, uid: string | null, r: KonsernResult, okText: string): boolean {
+function done(act: Act, uid: string | null, r: KonsernResult, okText: string, buys = 0): boolean {
   if (!uid || userId() !== uid) return false;
   if (!r.ok) {
     act(() => ({ ok: false, message: ORDER_REFUSAL_TEXT[r.reason] ?? ORDER_REFUSAL_TEXT.nett }));
@@ -35,6 +35,8 @@ function done(act: Act, uid: string | null, r: KonsernResult, okText: string): b
   const applied = act((gg) => {
     if (gg.owner && gg.owner !== uid) return false;
     if (w) applyKonsern(gg, w, gg.konsern.treasury?.perDay ?? 0);
+    // Dagens oppdrag «datter» teller kjøpet med én gang (B-470)
+    if (buys) noteKonsernBuy(gg, buys);
     return { ok: true, message: okText };
   });
   if (!applied) return false;
@@ -64,6 +66,7 @@ export async function runOption(act: Act, o: KonsernOption, loan = 0): Promise<b
     uid,
     await orderKonsern(req, loan > 0),
     loan > 0 ? `${o.title}: bestilt. ${fmtKr(loan)} er lånt i konsernbanken.` : `${o.title}: bestilt.`,
+    1,
   );
 }
 
@@ -75,7 +78,7 @@ export async function movePlantUi(act: Act, id: number, name: string, region: Re
 
 export async function cancelOrderUi(act: Act, id: number): Promise<boolean> {
   const uid = userId();
-  return done(act, uid, await cancelKonsern(id), "Avbestilt – pengene er tilbake i konsernkassa.");
+  return done(act, uid, await cancelKonsern(id), "Avbestilt – pengene er tilbake i konsernkassa.", -1);
 }
 
 export async function sellPlantUi(act: Act, id: number, name: string): Promise<boolean> {

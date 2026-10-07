@@ -767,6 +767,11 @@ export function sisterSalePrice(_g: GameState, p: SisterPlant): number {
  * Konsernet uten server (B-326): testene og testspilleren bestiller, avbestiller og selger mot den samme regelen som
  * serveren, med konsernkassa i `g.konsern.treasury`. Appen med konto går via `net/konsern.ts`.
  */
+/** Et kjøp i konsernet er gjort (B-470) – eller avbestilt (`-1`). Til dagens oppdrag «datter» */
+export function noteKonsernBuy(g: GameState, n = 1): void {
+  g.totals.konsernBuys = Math.max(0, (g.totals.konsernBuys ?? 0) + n);
+}
+
 export function localOrder(g: GameState, req: OrderRequest): { ok: boolean; message: string } {
   if (!g.konsern.unlocked) return { ok: false, message: ORDER_REFUSAL_TEXT.konsern };
   if (!g.konsern.treasury) return { ok: false, message: "Datterverk kjøpes fra konsernkassa – det krever en konto." };
@@ -774,6 +779,7 @@ export function localOrder(g: GameState, req: OrderRequest): { ok: boolean; mess
   const r = placeOrder(w, req, g.researched, realNow(), day(g));
   if (!r.ok) return { ok: false, message: ORDER_REFUSAL_TEXT[r.reason] };
   applyWorld(g, w);
+  noteKonsernBuy(g);
   return { ok: true, message: `Bestilt: ${orderLabel(g, r.order)}.` };
 }
 
@@ -782,6 +788,7 @@ export function localCancel(g: GameState, id: number): { ok: boolean; message: s
   const r = cancelOrder(w, id, realNow());
   if (!r.ok) return { ok: false, message: ORDER_REFUSAL_TEXT.startet };
   applyWorld(g, w);
+  noteKonsernBuy(g, -1);
   return { ok: true, message: `Avbestilt. ${fmtKr(r.refund)} er tilbake i konsernkassa.` };
 }
 

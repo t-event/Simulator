@@ -126,6 +126,8 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
   også (Hall of Fame). Sesonger startes og avsluttes bare manuelt.
 - **Topplista** har to grupper: «Industriverden · sesong» (Konsernverdi) og «Eget verk» (Verdi, Mest penger på bok,
   Produksjon, Raskest til storverk, Raskest til 10 mrd., Kontrollrom, Privat formue – fryst). Eget verk er ære, ikke makt.
+- **Dagens oppdrag «Kjøp eller moderniser et datterverk»** teller kjøpene i konsernet (`totals.konsernBuys`, B-470):
+  et kjøp teller når serveren har godtatt det, ikke når verket er bygget; en avbestilling trekker fra.
 - **Sesongstigen** (gratis sesongpass, B-173, B-452, 129): poeng for hver dag med spill (1), dagens belønning (2), dagens
   oppdrag (3) og topp 3 på ukelista (12/9/7), regnet på serveren i ekte tid. 50 trinn: trinn 1 ved 6 poeng, trinn 2 ved 12,
   så 20 poeng per trinn (972 for trinn 50; `season_tier_of`, speilet i `tierOf`/`tierPoints`). Hvert trinn gir 20 + 2 ×

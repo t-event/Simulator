@@ -3988,6 +3988,46 @@ test("Dagens oppdrag «verdi» (B-352): utbetalt til eierne teller, så det kan 
   );
 });
 
+test("Dagens oppdrag «datter» (B-470): et kjøp teller med én gang, også et bytte til kompleks", () => {
+  const g = newGame(470);
+  g.stage = 4;
+  g.konsern.unlocked = true;
+  g.won = true;
+  g.konsern.legends = 2;
+  g.konsern.earned = 2;
+  fund(g);
+  assert(buySister(g, "stalverk").ok, "første verk");
+  finishProjects(g);
+  g.daily = { date: "2026-10-06", claimed: false, missions: [] };
+  startMissionDay(g, "2026-10-07", false);
+  g.daily.missions = [{ id: "datter", base: g.totals.konsernBuys ?? 0, target: 1, v: 3 }];
+  const m = g.daily.missions[0];
+  // Bytte til kompleks: verket forsvinner og komplekset står i køen – før talte det ingenting
+  const small = g.konsern.plants[0];
+  assert(localOrder(g, { kind: "bytt", plant: small.id }).ok, "byttet feilet");
+  assert(missionDone(g, m), `bytte til kompleks talte ikke (${missionProgress(g, m)})`);
+  // En avbestilling trekker fra igjen, så kjøp og avbestilling ikke gir flere oppdrag
+  const order = g.konsern.orders.at(-1)!;
+  const before = g.totals.konsernBuys ?? 0;
+  assert(buySister(g, "stalverk").ok, "kjøp i køen");
+  const queued = g.konsern.orders.at(-1)!;
+  assert(queued.startsAt > realNow() && g.totals.konsernBuys === before + 1, "kjøpet i køen talte ikke");
+  assert(localCancel(g, queued.id).ok && g.totals.konsernBuys === before, "avbestillingen trakk ikke fra");
+  // Et oppdrag startet før endringen får kjøpet som står i køen, godskrevet
+  const old = newGame(471);
+  old.konsern.unlocked = true;
+  old.konsern.orders = [{ ...order, status: "kø" }];
+  old.daily = { date: "2026-10-07", claimed: false, missions: [{ id: "datter", base: 3, target: 1, v: 2 }] };
+  delete (old.totals as { konsernBuys?: number }).konsernBuys;
+  migrate(old);
+  assert(missionDone(old, old.daily.missions[0]), "gammelt oppdrag fikk ikke kjøpet i køen");
+  // Uten noe i køen: ingenting gratis
+  const none = newGame(472);
+  none.daily = { date: "2026-10-07", claimed: false, missions: [{ id: "datter", base: 3, target: 1, v: 2 }] };
+  migrate(none);
+  assert(missionProgress(none, none.daily.missions[0]) === 0, "gammelt oppdrag gjort uten kjøp");
+});
+
 test("Like partier på lageret slås sammen (B-353): færre partier, samme tonn og samme kvaliteter", () => {
   const g = newGame(353);
   g.minute = 400 * MIN_PER_DAY;

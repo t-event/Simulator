@@ -610,6 +610,11 @@ export interface GameState {
     contractsMissed: number;
     /** Kontrakter spilleren avbrøt (B-396) */
     contractsCancelled: number;
+    /**
+     * Kjøp i konsernet i alt (B-470): nye verk, bytte til kompleks, modernisering og oppgradering – til dagens oppdrag
+     * «datter». En avbestilling trekker fra. Mangler i eldre lagringer
+     */
+    konsernBuys?: number;
   };
   negativeDays: number;
   gameOver: boolean;
@@ -849,7 +854,10 @@ export interface DailyMission {
   /** Tallet ved dagens start */
   base: number;
   target: number;
-  /** 2: «verdi» måler verdien med utbetalt til eierne (B-352). Mangler i oppdrag startet før det */
+  /**
+   * 2: «verdi» måler verdien med utbetalt til eierne (B-352). 3: «datter» teller kjøpene (B-470). Mangler i oppdrag
+   * startet før B-352
+   */
   v?: number;
 }
 export interface DailyState {
