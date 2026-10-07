@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 401 – 2026-10-07: Selskapene i konsernverdien (B-476)
+
+**Brukeren ba om:** om en spiller får konsernverdi av selskapene han eier.
+
+**Gjort:** nei før – bare via kassa. Eieren valgte «dagene som er igjen»: migrasjon 143 (`konsern_companies_value` i
+`konsern_value`), `companiesValue` i appen, tekstene.
+
+**Testet:** dry-run av topplista (+264,8 mill. for den ene eieren, samme plass), verdien etter migrasjonen, `npm test`
+(ny test), typesjekk, lint, bygg.
+
+**Gjenstår:** 12.10 og 2.11 som før.
+
 ## Økt 400 – 2026-10-07: Konsernverdien faller ikke når man moderniserer (B-475)
 
 **Brukeren ba om:** «Om man oppgraderer konsernet sitt så går konsernverdien ned.»

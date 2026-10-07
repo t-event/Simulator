@@ -134,6 +134,7 @@ import {
   applyCompanyIncome,
   applyDividendNews,
   konsernValueOf,
+  companiesValue,
   applyTenderResult,
   applyTenderNotices,
   applyTenderResults,
@@ -2777,6 +2778,16 @@ const main = async () => {
       konsernValueOf(withPlants, 0) === 10e6 + 60e6 - 3_792_940 + 20e6 * 1.3 * 0.6 + 5e6,
       `konsernverdi med verk ${konsernValueOf(withPlants, 0)}`,
     );
+    // Selskapene: anslaget × dagene som er igjen av konsesjonen, høyst 60 (B-476, speiler konsern_companies_value i 143)
+    const now = Date.parse("2026-10-07T12:00:00Z");
+    const day = 86_400_000;
+    const companies = [
+      { mine: true, concessionUntil: new Date(now + 5.5 * day).toISOString(), estimatePerDay: 10e6 },
+      { mine: true, concessionUntil: new Date(now + 90 * day).toISOString(), estimatePerDay: 1e6 },
+      { mine: true, concessionUntil: new Date(now - day).toISOString(), estimatePerDay: 1e6 },
+      { mine: false, concessionUntil: new Date(now + 5 * day).toISOString(), estimatePerDay: 50e6 },
+    ];
+    assert(companiesValue(companies, now) === 55e6 + 60e6, `selskapene ${companiesValue(companies, now)}`);
   });
 
   await test("Profilen tåler svaret fra serveren og viser aldri ukjente felt (B-419)", () => {

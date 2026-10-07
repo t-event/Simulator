@@ -8881,3 +8881,15 @@ Virkning på topplista (dry-run 7.10): verkene utgjør 1–30 % av verdien; plas
 Sesongrangeringen (`close_season`) og skyggerapporten (`program_shadow_report`) bruker samme funksjon og følger med.
 Krever konto: uendret (Konsernverdi krever konto som før).
 Endringslogg: ja.
+
+## B-476 Selskapene man eier, teller i konsernverdien (2026-10-07)
+Eieren: «Får [en spiller] noen konsernverdi av bedriftene han eier?» Nei: selskapene talte bare gjennom det de alt hadde
+betalt inn i konsernkassa, mens utbyttet og bidraget telte 60 dager fremover. For eieren av to selskaper var
+selskapsinntekten (ca. 35 mill. per dag) større enn både utbyttet og bidraget, og anbudet trakk verdien rett ned.
+Eierens valg (av tre): **dagene som er igjen.** `konsern_companies_value` (migrasjon 143): hvert aktivt selskap spilleren
+eier, med inntektsanslaget per dag (`company_estimate`, det `world_status` viser) ganger dagene som er igjen av
+konsesjonen, høyst 60 – samme tanke som utbetalingen ved oppkjøp. Tallet synker mot slutten av konsesjonen og kommer
+tilbake når den fornyes i anbudet. Speilet i `companiesValue` (`net/world.ts`).
+Virkning 7.10: bare én spiller eier selskaper; +264,8 mill., plassen på topplista uendret (5).
+Krever konto: uendret.
+Endringslogg: ja.

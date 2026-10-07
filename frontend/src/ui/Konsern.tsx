@@ -1003,7 +1003,7 @@ function KonsernOverview({
               /* Under tallet: det som kommer inn i konsernkassa per ekte dag, så tallet vokser med det (B-404) */
               <Metric
                 label={rank ? `Konsernverdi · nr. ${rank} på topplista` : "Konsernverdi"}
-                title="Samme tall som på topplista: konsernkassa pluss 60 dagers utbytte og bidrag og det verkene kan selges for, minus lån. Et prosjekt som er betalt, teller med prisen til det er ferdig"
+                title="Samme tall som på topplista: konsernkassa pluss 60 dagers utbytte og bidrag og det verkene kan selges for og selskapene gir ut konsesjonen, minus lån. Et prosjekt som er betalt, teller med prisen til det er ferdig"
                 value={fmtKr(Math.floor(konsernValueOf(world, g.loan)))}
                 delta={inflowDelta(world.dividend.perDay + world.contribution.perDay)}
               />
