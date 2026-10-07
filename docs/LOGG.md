@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 398 – 2026-10-07: Egen gjennomgang av B-472 (B-473)
+
+**Brukeren ba om:** «Fortsett».
+
+**Gjort:** gjennomgang av PR #415 fant ti svakheter. Migrasjon 141 (varselkøen med rydding hvert minutt og økende ventetid,
+midlertidige feil teller ikke mot enheten; verving: samme kode igjen bare første døgn, `used`; ukemetrikken uten
+`pre_reform`). Appen: utlogging med fornyet nøkkel, `tokenFor` skiller nettfeil fra kontobytte, navnekravet beholder
+navnet ved nettfeil, kontokortets beskjed, «datter» med høyeste nye id, varsellista og «Ny».
+
+**Testet:** typesjekk, lint, `npm test`, bygg; varselkøen og vervingen i rullede transaksjoner.
+
+**Gjenstår:** følge med på `push_outbox` (`retry_at`, `attempts`) de neste dagene; 12.10 (strømuka, verkstedet, nye
+spillere), 2.11 (skyggerapporten).
+
 ## Økt 397 – 2026-10-07: Regelen for main gjelder også eieren
 
 **Brukeren ba om:** «Fikset» – krysset av for «Do not allow bypassing the above settings» på regelen for `main`.

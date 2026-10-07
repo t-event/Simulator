@@ -209,6 +209,8 @@ interface Fake {
   >;
   nicknames: Map<string, string>;
   calls: string[];
+  /** Nøkkelen (Authorization) per kall, samme rekkefølge som `calls` (B-473) */
+  auths: string[];
   /** keepalive per kall, samme rekkefølge som `calls` */
   keepalive: boolean[];
   offline: boolean;
@@ -245,6 +247,7 @@ function makeFake(): Fake {
     snapshots: new Map(),
     nicknames: new Map(),
     calls: [],
+    auths: [],
     keepalive: [],
     offline: false,
     down: false,
@@ -276,6 +279,7 @@ function makeFake(): Fake {
     const url = String(input);
     const path = url.replace(/^https?:\/\/[^/]+/, "");
     f.calls.push(`${init?.method ?? "GET"} ${path}`);
+    f.auths.push(String((init?.headers as Record<string, string>)?.Authorization ?? ""));
     f.keepalive.push(!!init?.keepalive);
     if (f.offline) throw new TypeError("Failed to fetch");
     if (f.down && path.startsWith("/rest/"))
@@ -706,6 +710,7 @@ function makeFake(): Fake {
       return json(200, {
         code: "AB12CD",
         cap: 5,
+        used: "3",
         reward: "10000000",
         min_days: 3,
         min_stage: 2,
@@ -869,6 +874,39 @@ const main = async () => {
       f.calls.some((c) => c.includes("/auth/v1/logout")),
       "den gamle økta ble ikke logget ut hos tjenesten",
     );
+    setSession(null);
+  });
+
+  await test("Fornyet nøkkel ved utlogging, og fornyelse uten nett er ikke kontobytte (B-473)", async () => {
+    const f = fresh();
+    const sess = (access: string, refresh = "r-x") => ({
+      access_token: access,
+      refresh_token: refresh,
+      expires_at: Date.now() / 1000 + 3600,
+      user: { id: "u-a@test", email: "" },
+    });
+    // Nøkkelen fornyes mens varslene slås av: utloggingen hos tjenesten bruker den nye
+    setSession(sess("gammel-nokkel"));
+    let once = true;
+    onBeforeSignOut(async () => {
+      if (!once) return;
+      once = false;
+      setSession(sess("ny-nokkel"));
+    });
+    await signOut();
+    const i = f.calls.findIndex((c) => c.includes("/auth/v1/logout"));
+    assert(i >= 0 && f.auths[i] === "Bearer ny-nokkel", `utloggingen brukte ${f.auths[i]}`);
+    // Samme konto, men fornyelsen feiler uten nett: en midlertidig feil, ikke «kontoen ble byttet»
+    f.offline = true;
+    setSession({ ...sess("gammel", "r1"), expires_at: Date.now() / 1000 + 10 });
+    let err: unknown = null;
+    try {
+      await rpcFor("u-a@test", "set_nickname", { name: "Navn" });
+    } catch (e) {
+      err = e;
+    }
+    assert(!(err instanceof AccountChangedError) && isTransient(err), `feilen var ${String(err)}`);
+    f.offline = false;
     setSession(null);
   });
 
@@ -2802,6 +2840,8 @@ const main = async () => {
     assert(s?.code === "AB12CD" && s.reward === 10_000_000 && s.paidNow === 1, `status ${JSON.stringify(s)}`);
     if (!s) return;
     assert(s.friends.length === 2 && s.friends[0].days === 2 && s.friends[1].nick === null, "vennene");
+    // Plassene kommer fra serveren, også for belønnede venner som er slettet (B-473)
+    assert(s.used === 3, `brukte plasser ${s.used}`);
     setReferral(s);
     assert(referralCode() === "AB12CD", "koden til delingsknappen");
     setReferral(null);

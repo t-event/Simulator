@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { SheetHead } from "./ds";
-import { importantLog } from "../game/inbox";
+import { importantLog, markAllSeen } from "../game/inbox";
 import type { GameState, LogLink } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { fmtClock } from "./format";
@@ -35,13 +35,11 @@ export function InboxSheet({
 }) {
   const [filter, setFilter] = useState<Filter>("alle");
   // Det som var nytt da lista ble åpnet, merkes, og alt regnes som sett
-  const [seenBefore] = useState(() => g.inboxSeenId ?? 0);
+  // (de som alt var fulgt fra varsellinja, er ikke nye – B-473)
+  const [seenBefore] = useState(() => ({ id: g.inboxSeenId ?? 0, read: new Set(g.inboxRead ?? []) }));
+  const isNew = (id: number) => id > seenBefore.id && !seenBefore.read.has(id);
   useEffect(() => {
-    act((gg) => {
-      const last = gg.log[gg.log.length - 1];
-      if (last) gg.inboxSeenId = last.id;
-      gg.inboxRead = [];
-    });
+    act((gg) => markAllSeen(gg));
   }, [act]);
   const entries = importantLog(g)
     .filter((e) => filter === "alle" || e.kind === filter)
@@ -67,10 +65,10 @@ export function InboxSheet({
         {entries.length ? (
           <ul className="g-log">
             {entries.map((e) => (
-              <li key={e.id} className={`log-${e.kind}${e.id > seenBefore ? " is-new" : ""}`}>
+              <li key={e.id} className={`log-${e.kind}${isNew(e.id) ? " is-new" : ""}`}>
                 <span className="g-log-time">
                   Dag {Math.floor(e.min / 1440) + 1} {fmtClock(e.min)}
-                  {e.id > seenBefore && <span className="g-badge g-badge-new">Ny</span>}
+                  {isNew(e.id) && <span className="g-badge g-badge-new">Ny</span>}
                 </span>
                 {e.text}
                 {e.link && (

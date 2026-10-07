@@ -108,7 +108,7 @@ export function ReferralCard({ g, act }: { g: GameState; act: GameApi["act"] }) 
   // Uten konto står vervingen i «Det går du glipp av» (B-212)
   if (!session || !status?.code) return null;
   const done = status.friends.filter((f) => f.rewarded).length;
-  const full = status.friends.length >= status.cap;
+  const full = status.used >= status.cap;
   const share = async () => {
     const r = await shareGame(
       "Bli med i Stålverket – bygg et stålverk fra garasjen. Med lenken min får du en startpakke.",
@@ -141,7 +141,7 @@ export function ReferralCard({ g, act }: { g: GameState; act: GameApi["act"] }) 
       {status.friends.length > 0 && (
         <>
           <p className="g-muted">
-            {status.friends.length} av {status.cap} vervet, {done} har gitt belønning.
+            {status.used} av {status.cap} plasser brukt, {done} har gitt belønning.
           </p>
           <ul className="g-referral-list">
             {status.friends.map((f, i) => (

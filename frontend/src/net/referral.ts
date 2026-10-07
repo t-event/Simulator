@@ -69,6 +69,8 @@ export interface ReferralStatus {
   uid: string;
   code: string | null;
   cap: number;
+  /** Plassene som er brukt – også av belønnede venner som har slettet kontoen (B-473) */
+  used: number;
   reward: number;
   minDays: number;
   minStage: number;
@@ -80,6 +82,7 @@ export interface ReferralStatus {
 interface StatusRow {
   code: string | null;
   cap?: number | string;
+  used?: number | string;
   reward?: number | string;
   min_days?: number | string;
   min_stage?: number | string;
@@ -96,6 +99,8 @@ export async function fetchReferral(): Promise<ReferralStatus | null> {
     uid,
     code: r.code ?? null,
     cap: Number(r.cap) || 5,
+    // Eldre server uten `used`: vennene i lista
+    used: r.used == null ? (r.friends ?? []).length : Number(r.used) || 0,
     reward: Number(r.reward) || 0,
     minDays: Number(r.min_days) || 3,
     minStage: Number(r.min_stage) || 2,

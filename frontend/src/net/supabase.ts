@@ -382,14 +382,17 @@ export async function signOut(): Promise<void> {
     setSession(null);
     return;
   }
-  if (getSession()?.user.id === s.user.id) {
+  // Nøkkelen kan ha blitt fornyet mens varslene ble slått av; da gjelder den nye (B-473)
+  const now = getSession();
+  const token = now?.user.id === s.user.id ? now.access_token : s.access_token;
+  if (now?.user.id === s.user.id) {
     forgetSignedIn();
     setSession(null);
   }
   try {
     // Bare denne enheten (scope=local). Standarden er å logge ut alle enheter, så spillet på mobilen ble logget ut
     // når man logget ut i en annen nettleser (B-145)
-    await fetchImpl(`${cloud.url}/auth/v1/logout?scope=local`, { method: "POST", headers: headers(s.access_token) });
+    await fetchImpl(`${cloud.url}/auth/v1/logout?scope=local`, { method: "POST", headers: headers(token) });
   } catch {
     // Økta er borte lokalt uansett
   }
@@ -608,7 +611,9 @@ export class AccountChangedError extends NetError {
 /** Nøkkelen til kontoen `uid`, eller feil hvis en annen konto er logget inn når den er klar (B-472) */
 export async function tokenFor(uid: string): Promise<string> {
   const token = await getToken();
-  if (!token || userId() !== uid) throw new AccountChangedError();
+  if (userId() !== uid) throw new AccountChangedError();
+  // Samme konto, men fornyelsen feilet (uten nett, tjenesten nede): prøves igjen senere, kontoen er ikke byttet (B-473)
+  if (!token) throw new NetError("Fikk ikke fornyet innloggingen. Prøver igjen snart.", 0, true);
   return token;
 }
 

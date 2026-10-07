@@ -702,10 +702,11 @@ export function AccountCard({
               if (!uid) return;
               const n = await saveNickname(uid, nickDraft);
               if (userId() !== uid) return;
+              // Hendelsen først: lytteren over setter sin egen beskjed, og denne skal stå (B-473)
+              announceNickname(uid, n);
               setNickname(n);
               setNickDraft(n);
               setInfo(`Brukernavnet «${n}» er lagret. Du er med på topplista.`);
-              announceNickname(uid, n);
             });
           }}
         >

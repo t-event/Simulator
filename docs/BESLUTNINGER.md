@@ -8830,3 +8830,26 @@ lenken), verving og varselkøen i transaksjoner som ble rullet tilbake, ukemetri
 med 27 leveranser fra første økt), `balance.ts` og `--daglig 15` (exit 0), Playwright av byggekortet på iPhone-størrelse.
 Krever konto: uendret (verving, varsler, venner og brukernavn krever konto som før).
 Endringslogg: ja.
+
+## B-473 Egen gjennomgang av B-472: ti svakheter rettet (2026-10-07)
+Brukeren: «Fortsett». En gjennomgang av mine egne rettelser i B-472 (PR #415) fant ti svakheter; alle er rettet.
+- **Varselkøen (migrasjon 141):** ryddingen står i `push_housekeeping` og kjøres av `push_kick` hvert minutt, ikke bare når
+  noe annet venter – før ble et varsel som var hentet men aldri meldt tilbake, liggende. Et slikt varsel legges tilbake bare
+  hvis det er under 6 timer gammelt og har færre enn 5 forsøk; ellers merkes det. Nye forsøk venter lenger og lenger
+  (`retry_at` = nå + 2^forsøk minutter: 2, 4, 8, 16), og midlertidige feil (ingen svar, 408, 429, 5xx) teller ikke mot
+  enheten (`fails`) – før kunne et kort avbrudd hos tjenesten for mobilvarsler slå av enheter.
+- **Verving (141):** samme kode igjen gir `ok` bare det første døgnet etter koblingen, så venner fra før B-472 ikke kan hente
+  startpakken på nytt i et nytt spill. `referral_my_code` gir `used` (plassene serveren teller, også belønnede venner som er
+  slettet), og kortet «Verv en venn» bruker det for «fullt» og «x av 5».
+- **Ukemetrikken (141):** utgangspunktet før perioden er aldri en rad merket `pre_reform` (fast regel, B-190).
+- **Kontoen i appen:** utloggingen hos tjenesten bruker den fornyede nøkkelen når samme konto fortsatt er innlogget.
+  `tokenFor` gir en midlertidig feil (ikke «kontoen ble byttet») når fornyelsen feiler for samme konto, og «Velg brukernavn»
+  beholder navnet fra skjemaet ved nettfeil i stedet for å si at det er tatt. Beskjeden «Brukernavnet er lagret» på
+  kontokortet blir ikke lenger overskrevet av sin egen hendelse.
+- **Spillet:** dagens oppdrag «datter» husker den nyeste av de nye bestillingene (høyeste id) etter et kjøp. Varsellista
+  bruker `markAllSeen`, og «Ny» vises ikke på varsler som alt er fulgt fra varsellinja.
+Testet: `npm test` (nye tester: nøkkelen ved utlogging, fornyelse uten nett, `used`), varselkøen og vervingen i
+transaksjoner som ble rullet tilbake (2 og 4 minutter, `fails` urørt ved 503 og +1 ved 403, femte forsøk merkes, strandede
+legges tilbake eller merkes «for gammelt»; samme kode igjen `ok` første døgn og «brukt» etter to).
+Krever konto: uendret.
+Endringslogg: ja.
