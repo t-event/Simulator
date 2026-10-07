@@ -47,6 +47,10 @@ import {
   signUp,
   translateError,
   rest,
+  AccountChangedError,
+  onBeforeSignOut,
+  rpcFor,
+  userId,
   verifyCode,
 } from "./supabase";
 import {
@@ -834,6 +838,40 @@ const main = async () => {
     assert((await getToken()) === null && getSession() !== null, "økta skulle beholdes uten nett");
   });
 
+  await test("Kontobytte underveis: navnet og utloggingen gjelder kontoen de startet for (B-472)", async () => {
+    const f = fresh();
+    const sess = (id: string) => ({
+      access_token: `t-${id}`,
+      refresh_token: `r-${id}`,
+      expires_at: Date.now() / 1000 + 3600,
+      user: { id, email: "" },
+    });
+    setSession(sess("u-a@test"));
+    // Et kall for kontoen B går ikke ut når A er logget inn (brukernavnet ble skrevet på feil konto)
+    const before = f.calls.length;
+    let threw = false;
+    try {
+      await rpcFor("u-b@test", "set_nickname", { name: "Feil" });
+    } catch (e) {
+      threw = e instanceof AccountChangedError;
+    }
+    assert(threw && f.calls.length === before, "kallet gikk ut med en annen konto");
+    // Kontoen byttes mens utloggingen venter på varslene: den nye kontoen skal ikke logges ut
+    let switchOnce = true;
+    onBeforeSignOut(async () => {
+      if (!switchOnce) return;
+      switchOnce = false;
+      setSession(sess("u-b@test"));
+    });
+    await signOut();
+    assert(getSession()?.user.id === "u-b@test", "den nye kontoen ble logget ut");
+    assert(
+      f.calls.some((c) => c.includes("/auth/v1/logout")),
+      "den gamle økta ble ikke logget ut hos tjenesten",
+    );
+    setSession(null);
+  });
+
   await test("Utlogging gjelder bare denne enheten, og avvist økt gir beskjed (B-145)", async () => {
     const f = fresh();
     const soon = (refresh: string, access = "gammel") => ({
@@ -1572,18 +1610,18 @@ const main = async () => {
     f.nicknames.set("u-annen", "Smelteren");
     let msg = "";
     try {
-      await setNickname("ab");
+      await setNickname(userId()!, "ab");
     } catch (e) {
       msg = (e as Error).message;
     }
     assert(msg.includes("3–20"), `for kort: «${msg}»`);
     try {
-      await setNickname("smelteren");
+      await setNickname(userId()!, "smelteren");
     } catch (e) {
       msg = (e as Error).message;
     }
     assert(msg.includes("tatt"), `tatt: «${msg}»`);
-    assert((await setNickname("  Stålkongen ")) === "Stålkongen", "kallenavnet ble ikke trimmet og lagret");
+    assert((await setNickname(userId()!, "  Stålkongen ")) === "Stålkongen", "kallenavnet ble ikke trimmet og lagret");
     assert((await fetchProfile())?.nickname === "Stålkongen", "profilen har ikke kallenavnet");
     const g = newGame(11);
     g.cash = 500_000;

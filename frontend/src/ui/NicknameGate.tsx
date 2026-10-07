@@ -8,7 +8,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { fetchProfile, nicknameAvailable, nicknameProblem, setNickname } from "../net/leaderboard";
 import { getSession, onSessionChange, signOut, userId } from "../net/supabase";
 import { flush, resetCloud } from "../net/sync";
-import { NICKNAME_EVENT, pendingNick, setPendingNick } from "./nickname";
+import { announceNickname, NICKNAME_EVENT, nicknameFrom, pendingNick, setPendingNick } from "./nickname";
 import { Button } from "./ds";
 import { Icon } from "./icons";
 import { Portal } from "./Portal";
@@ -34,12 +34,12 @@ export function NicknameGate() {
       const pending = pendingNick();
       if (pending) {
         try {
-          const n = await setNickname(pending);
+          const n = await setNickname(uid, pending);
           setPendingNick(null);
-          window.dispatchEvent(new CustomEvent(NICKNAME_EVENT, { detail: n }));
+          announceNickname(uid, n);
           return;
         } catch {
-          if (!alive) return;
+          if (!alive || userId() !== uid) return;
           setPendingNick(null);
           setDraft(pending);
           setError(`«${pending}» ble tatt av en annen i mellomtiden. Velg et annet.`);
@@ -52,9 +52,9 @@ export function NicknameGate() {
     };
   }, [uid]);
 
-  // Navnet kan også settes fra kontokortet
+  // Navnet kan også settes fra kontokortet – bare et navn for kontoen som mangler det, lukker arket (B-472)
   useEffect(() => {
-    const done = () => setMissingFor(null);
+    const done = (e: Event) => setMissingFor((m) => (nicknameFrom(e, m) ? null : m));
     window.addEventListener(NICKNAME_EVENT, done);
     return () => window.removeEventListener(NICKNAME_EVENT, done);
   }, []);
@@ -72,10 +72,12 @@ export function NicknameGate() {
     setError(null);
     try {
       if (!(await nicknameAvailable(name))) throw new Error("Brukernavnet er tatt. Velg et annet.");
-      const n = await setNickname(name);
+      // Kontoen kan være byttet mens sjekken gikk: navnet sendes bare for kontoen arket gjaldt (B-472)
+      if (!uid || userId() !== uid) return;
+      const n = await setNickname(uid, name);
       if (userId() !== uid) return;
       setMissingFor(null);
-      window.dispatchEvent(new CustomEvent(NICKNAME_EVENT, { detail: n }));
+      announceNickname(uid, n);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {

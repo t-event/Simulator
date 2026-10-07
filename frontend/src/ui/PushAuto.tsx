@@ -21,8 +21,14 @@ export function PushAuto() {
       const onTap = () => {
         stop();
         if (userId() !== uid) return;
-        markPushAutoDone(uid);
-        void enablePush(all).catch(() => undefined);
+        // Ferdig når telefonen har svart (ja eller nei). Feiler nettet, prøves det igjen neste gang spillet åpnes – da
+        // uten å spørre, siden lov alt er gitt (B-472)
+        void enablePush(all).then(
+          (r) => {
+            if (r.ok || r.reason === "nektet" || r.reason === "støttes ikke") markPushAutoDone(uid);
+          },
+          () => undefined,
+        );
       };
       document.addEventListener("click", onTap, { capture: true });
       stop = () => document.removeEventListener("click", onTap, { capture: true });

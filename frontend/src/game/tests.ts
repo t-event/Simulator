@@ -99,7 +99,7 @@ import {
   compactLots,
   ordersToMake,
 } from "./engine";
-import { logTopic, showToast, unseenCount } from "./inbox";
+import { logTopic, markAllSeen, markRead, showToast, unseenCount } from "./inbox";
 import { KNOWLEDGE, KNOWLEDGE_PARTS, readSeconds } from "./knowledge";
 import {
   applyMissionBonus,
@@ -724,6 +724,12 @@ test("Bjella teller problemer og hendelser, ikke gode nyheter", () => {
   log(g, "Noe galt", "bad");
   log(g, "Noe skjedde", "event");
   assert(unseenCount(g) === 2, `telte ${unseenCount(g)}`);
+  // Et nyere varsel fulgt fra varsellinja er lest – det eldre problemet står fortsatt som nytt (B-472)
+  const newest = g.log[g.log.length - 1];
+  markRead(g, newest.id);
+  assert(unseenCount(g) === 1, `etter lenken: ${unseenCount(g)}`);
+  markAllSeen(g);
+  assert(unseenCount(g) === 0 && (g.inboxRead ?? []).length === 0, "krysset nullstilte ikke");
 });
 
 test("Anbefalte støtteroller: to skrapklassere og avløsere også med fem skiftlag", () => {
@@ -3790,8 +3796,19 @@ test("Slitasjen på storverket (B-455): slites over 180 døgn, flere havarier, f
   );
   // Et storverk med en stor ovn: fornyelsen koster en femdel av utstyret
   g.furnaces[0].type = FURNACES.filter((f) => f.stage === 4).at(-1)!.id;
+  const cost0 = renewCost(g);
+  assert(cost0 > 0 && Math.abs(cost0 - equipmentValue(g) * 0.2) < 1, `prisen ${cost0}`);
+  // Støpemaskinen og utstyret på hver ovn teller med (B-472): de står ikke i `owned`
+  const v0 = equipmentValue(g);
+  const unitAddon = ADDONS.find((a) => a.perFurnace)!;
+  g.furnaces[0].addons = [...(g.furnaces[0].addons ?? []), unitAddon.id];
+  assert(equipmentValue(g) - v0 === unitAddon.price, "utstyret på ovnen telte ikke");
+  const caster = CASTINGS.at(-1)!;
+  const v1 = equipmentValue(g);
+  const prevCaster = CASTINGS.find((c) => c.id === g.castingType) ?? CASTINGS[0];
+  g.castingType = caster.id;
+  assert(equipmentValue(g) - v1 === caster.price - prevCaster.price, "støpemaskinen telte ikke");
   const cost = renewCost(g);
-  assert(cost > 0 && Math.abs(cost - equipmentValue(g) * 0.2) < 1, `prisen ${cost}`);
   g.cash = 0;
   assert(!renewPlant(g).ok, "uten penger");
   g.cash = cost + 1;
@@ -4013,6 +4030,12 @@ test("Dagens oppdrag «datter» (B-470): et kjøp teller med én gang, også et 
   const queued = g.konsern.orders.at(-1)!;
   assert(queued.startsAt > realNow() && g.totals.konsernBuys === before + 1, "kjøpet i køen talte ikke");
   assert(localCancel(g, queued.id).ok && g.totals.konsernBuys === before, "avbestillingen trakk ikke fra");
+  // En bestilling fra i går som avbestilles i dag, trekker ikke fra dagens kjøp (B-472)
+  assert(buySister(g, "stalverk").ok, "kjøp i går");
+  const yesterday = g.konsern.orders.at(-1)!;
+  startMissionDay(g, "2026-10-08", false);
+  const today = g.totals.konsernBuys ?? 0;
+  assert(localCancel(g, yesterday.id).ok && g.totals.konsernBuys === today, "avbestilling fra i går trakk fra");
   // Et oppdrag startet før endringen får kjøpet som står i køen, godskrevet
   const old = newGame(471);
   old.konsern.unlocked = true;

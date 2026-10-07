@@ -40,6 +40,7 @@ export function InboxSheet({
     act((gg) => {
       const last = gg.log[gg.log.length - 1];
       if (last) gg.inboxSeenId = last.id;
+      gg.inboxRead = [];
     });
   }, [act]);
   const entries = importantLog(g)

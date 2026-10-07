@@ -650,6 +650,11 @@ export interface GameState {
   fpDealDay: number;
   /** Siste logglinje spilleren har sett i varsellista (B-089) */
   inboxSeenId: number;
+  /**
+   * Varsler nyere enn `inboxSeenId` som er lest ett og ett – fulgt fra varsellinja (B-472). Ellers merket et nytt
+   * anbudsvarsel også eldre, uleste varsler som lest. Mangler i eldre lagringer
+   */
+  inboxRead?: number[];
   /** Runde: 1 for nye spill. 2+ finnes bare i eldre lagringer fra nytt spill+ (B-090), som er fjernet (B-141). */
   round: number;
   /** Spilleren har sett seiersskjermen og valgt å spille videre */
@@ -864,4 +869,6 @@ export interface DailyState {
   date: string | null;
   missions: DailyMission[];
   claimed: boolean;
+  /** Bestillingene i konsernet som er talt i dagens oppdrag «datter» (B-472); mangler før første kjøp */
+  buyIds?: number[];
 }

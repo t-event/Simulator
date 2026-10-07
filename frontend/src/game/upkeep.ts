@@ -7,7 +7,7 @@
 import { addCost, fmtKr, log, type PurchaseResult } from "./engine";
 import { ADDONS, CASTINGS, FURNACES } from "./data";
 import { summerStop } from "./calendar";
-import { presentWorkers, unitType } from "./plant";
+import { castingType, presentWorkers, unitType } from "./plant";
 import { auto } from "./research";
 import type { GameState } from "./types";
 
@@ -40,13 +40,22 @@ export function upkeepRisk(g: GameState): number {
   return 1 + UPKEEP.riskSlope * Math.max(0, upkeepWear(g) - UPKEEP.riskFrom);
 }
 
-/** Hva utstyret på verket kostet: ovnene, støpingen og alt tilleggsutstyr som er kjøpt */
+/**
+ * Hva utstyret på verket kostet: ovnene med utstyret på hver ovn, støpemaskinen og alt tilleggsutstyr som er kjøpt.
+ * Støpemaskinen (`castingType`) og utstyret per ovn (`furnaces[i].addons`) står ikke i `owned` – de manglet før, så
+ * fornyelsen ble for billig (B-472)
+ */
 export function equipmentValue(g: GameState): number {
   const owned = new Set(g.owned);
   const items = [...CASTINGS, ...ADDONS].filter((x) => owned.has(x.id));
   const furnaces = g.furnaces.reduce((a, _, i) => a + unitType(g, i).price, 0);
+  const unitAddons = g.furnaces.reduce(
+    (a, f) => a + (f.addons ?? []).reduce((b, id) => b + (ADDONS.find((x) => x.id === id)?.price ?? 0), 0),
+    0,
+  );
+  const casting = owned.has(castingType(g).id) ? 0 : castingType(g).price;
   const extra = FURNACES.filter((f) => owned.has(f.id) && !g.furnaces.some((_, i) => unitType(g, i).id === f.id));
-  return furnaces + [...items, ...extra].reduce((a, x) => a + x.price, 0);
+  return furnaces + unitAddons + casting + [...items, ...extra].reduce((a, x) => a + x.price, 0);
 }
 
 /** Hva en fornyelse koster nå (mer jo mer slitt) */

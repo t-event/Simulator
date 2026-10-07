@@ -21,5 +21,20 @@ export function setPendingNick(n: string | null): void {
   }
 }
 
-/** Gis når brukernavnet er satt (detail: navnet), så kontokortet og arket viser det med én gang */
+/**
+ * Gis når brukernavnet er satt (detail: kontoen og navnet), så kontokortet og arket viser det med én gang. Gjelder bare
+ * kontoen i `uid` (B-472): et sent svar for en annen konto skal ikke lukke arket eller vise navnet
+ */
 export const NICKNAME_EVENT = "stalverk-brukernavn";
+export interface NicknameSet {
+  uid: string;
+  nick: string;
+}
+export function announceNickname(uid: string, nick: string): void {
+  window.dispatchEvent(new CustomEvent<NicknameSet>(NICKNAME_EVENT, { detail: { uid, nick } }));
+}
+/** Navnet fra hendelsen, bare når den gjelder kontoen `uid` */
+export function nicknameFrom(e: Event, uid: string | null): string | null {
+  const d = (e as CustomEvent<NicknameSet>).detail;
+  return d && typeof d.nick === "string" && !!uid && d.uid === uid ? d.nick : null;
+}

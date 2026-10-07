@@ -24,6 +24,7 @@ import {
   signUp,
   isTransient,
   updatePassword,
+  userId,
   verifyCode,
 } from "../net/supabase";
 import { openProfile } from "./profileStore";
@@ -35,7 +36,7 @@ import { ACCOUNT_FEATURES, type AccountFeature } from "../net/features";
 import { Card } from "./common";
 import { Icon } from "./icons";
 import { Button } from "./ds";
-import { NICKNAME_EVENT, setPendingNick } from "./nickname";
+import { announceNickname, NICKNAME_EVENT, nicknameFrom, setPendingNick } from "./nickname";
 import {
   cloudStatus,
   fetchFeatures,
@@ -518,8 +519,9 @@ export function AccountCard({
   // Brukernavnet satt i arket «Velg brukernavn» (B-463)
   useEffect(() => {
     const onNick = (e: Event) => {
-      const n = (e as CustomEvent<string>).detail;
-      if (typeof n !== "string") return;
+      // Bare et navn for kontoen som er innlogget nå (B-472)
+      const n = nicknameFrom(e, userId());
+      if (n === null) return;
       setNickname(n);
       setNickDraft(n);
       setInfo(`Du er med på topplista som «${n}».`);
@@ -697,10 +699,13 @@ export function AccountCard({
           onSubmit={(e) => {
             e.preventDefault();
             void run(async () => {
-              const n = await saveNickname(nickDraft);
+              if (!uid) return;
+              const n = await saveNickname(uid, nickDraft);
+              if (userId() !== uid) return;
               setNickname(n);
               setNickDraft(n);
               setInfo(`Brukernavnet «${n}» er lagret. Du er med på topplista.`);
+              announceNickname(uid, n);
             });
           }}
         >

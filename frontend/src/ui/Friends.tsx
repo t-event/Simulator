@@ -13,28 +13,44 @@ import {
   removeFriend,
 } from "../net/friends";
 import { levelLabel } from "../net/leaderboard";
+import { getSession, onSessionChange } from "../net/supabase";
 import { seenText } from "../net/profile";
 import { Button } from "./ds";
 import { Icon } from "./icons";
 import { PlayerName } from "./Profile";
 
+// Lista gjelder én konto: et kontobytte endrer også hva som vises
+function onListChange(fn: () => void): () => void {
+  const a = onFriendsChange(fn);
+  const b = onSessionChange(fn);
+  return () => {
+    a();
+    b();
+  };
+}
 function useFriends() {
-  return useSyncExternalStore(onFriendsChange, friendsList, friendsList);
+  return useSyncExternalStore(onListChange, friendsList, friendsList);
+}
+function sessionUid(): string | null {
+  return getSession()?.user.id ?? null;
 }
 
 export function FriendsPanel() {
   const list = useFriends();
+  // Lista hentes på nytt for hver konto (B-472): etter et kontobytte sto den og lastet
+  const uid = useSyncExternalStore(onSessionChange, sessionUid, sessionUid);
   const [failed, setFailed] = useState(false);
   const [nick, setNick] = useState("");
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!uid) return;
     void reloadFriends().then(
       () => setFailed(false),
       () => setFailed(true),
     );
-  }, []);
+  }, [uid]);
 
   const add = async () => {
     const name = nick.trim();

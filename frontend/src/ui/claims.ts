@@ -92,6 +92,10 @@ function applyDeferred(gg: GameState, d: Deferred): void {
       log(gg, `Dagens bonus fra ${d.day}: ${fmtKr(r.cash)} og ${r.fp} fagpoeng.`, "good");
     }
   } else if (d.kind === "verv") {
+    // Høyst én gang per spill (B-472): serveren svarer `ok` igjen når vennen kobler seg på nytt med samme kode, så en
+    // startpakke som gikk tapt på nettet, kommer fram
+    if (gg.counters.vervStart) return;
+    gg.counters.vervStart = 1;
     gg.cash += REFERRAL_START.cash;
     awardPoints(gg, REFERRAL_START.fp);
     log(

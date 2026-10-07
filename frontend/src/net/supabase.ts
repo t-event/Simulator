@@ -368,16 +368,24 @@ export function onBeforeSignOut(fn: () => Promise<void>): void {
 }
 
 export async function signOut(): Promise<void> {
-  if (getSession() && beforeSignOut.length) {
+  // Økta som skal logges ut, er den som gjaldt da utloggingen startet (B-472): byttes kontoen mens varslene slås av,
+  // skal ikke den nye kontoen logges ut
+  const s = getSession();
+  if (s && beforeSignOut.length) {
     await Promise.race([
       Promise.all(beforeSignOut.map((fn) => fn().catch(() => undefined))),
       new Promise((r) => setTimeout(r, 3000)),
     ]);
   }
-  const s = getSession();
-  forgetSignedIn();
-  setSession(null);
-  if (!s) return;
+  if (!s) {
+    forgetSignedIn();
+    setSession(null);
+    return;
+  }
+  if (getSession()?.user.id === s.user.id) {
+    forgetSignedIn();
+    setSession(null);
+  }
   try {
     // Bare denne enheten (scope=local). Standarden er å logge ut alle enheter, så spillet på mobilen ble logget ut
     // når man logget ut i en annen nettleser (B-145)
@@ -588,4 +596,26 @@ export async function restAs<T>(token: string | null, path: string, init: RestIn
 
 export async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   return rest<T>(`rpc/${fn}`, { method: "POST", body: args });
+}
+
+/** Feilen når kontoen ble byttet før et kall som gjelder én bestemt konto, ble sendt */
+export class AccountChangedError extends NetError {
+  constructor() {
+    super("Kontoen ble byttet.", 0);
+  }
+}
+
+/** Nøkkelen til kontoen `uid`, eller feil hvis en annen konto er logget inn når den er klar (B-472) */
+export async function tokenFor(uid: string): Promise<string> {
+  const token = await getToken();
+  if (!token || userId() !== uid) throw new AccountChangedError();
+  return token;
+}
+
+/**
+ * Som `rpc`, men bare for kontoen `uid` (B-472): byttes kontoen før kallet sendes, sendes det ikke. Ellers kunne et kall
+ * som ventet på nøkkelen, gå ut med den nye kontoens nøkkel (brukernavnet ble skrevet på feil konto).
+ */
+export async function rpcFor<T>(uid: string, fn: string, args: Record<string, unknown>): Promise<T> {
+  return restAs<T>(await tokenFor(uid), `rpc/${fn}`, { method: "POST", body: args });
 }

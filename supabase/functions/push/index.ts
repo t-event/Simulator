@@ -66,13 +66,18 @@ Deno.serve(async (req) => {
       items.map(async (it) => {
         const payload = { title: it.title, body: it.body, link: it.link, tag: it.ref.split(":").slice(0, 2).join(":") };
         let ok = 0;
+        // Bare midlertidige feil (ingen svar, 408, 429, 5xx): varselet legges tilbake i køen (B-472)
+        let onlyTransient = it.subs.length > 0;
         let lastError: string | undefined;
         for (const sub of it.subs) {
           try {
             const r = await sendPush(sub, payload, vapid!, { urgency: it.kind === "oppkjop" ? "high" : "normal" });
             results.push({ endpoint: sub.endpoint, status: r.status, gone: r.gone });
             if (r.status >= 200 && r.status < 300) ok++;
-            else lastError = `${r.status} ${r.text ?? ""}`.trim();
+            else {
+              lastError = `${r.status} ${r.text ?? ""}`.trim();
+              if (!(r.status === 408 || r.status === 429 || r.status >= 500)) onlyTransient = false;
+            }
           } catch (e) {
             lastError = e instanceof Error ? e.message : String(e);
             results.push({ endpoint: sub.endpoint, status: 0 });
@@ -80,7 +85,12 @@ Deno.serve(async (req) => {
         }
         sent += ok;
         if (ok === 0) failed++;
-        results.push({ id: it.id, status: ok > 0 ? 201 : 0, error: ok > 0 ? null : (lastError ?? "ingen enheter") });
+        results.push({
+          id: it.id,
+          status: ok > 0 ? 201 : 0,
+          error: ok > 0 ? null : (lastError ?? "ingen enheter"),
+          retry: ok === 0 && onlyTransient,
+        });
         // Én rad per varsel som teller sendte enheter
         for (let i = 1; i < ok; i++) results.push({ id: it.id, status: 201 });
       }),

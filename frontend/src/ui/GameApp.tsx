@@ -55,7 +55,7 @@ import { newVersionAvailable, shouldReloadFor, UPDATE_CHECK_MS } from "../net/up
 import { pendingControl } from "../net/weekly";
 import { loadGame, saveGame, setSaveListener } from "../game/save";
 import { InboxSheet } from "./Inbox";
-import { importantLog, markAllSeen, unseenCount } from "../game/inbox";
+import { importantLog, isUnseen, markAllSeen, markRead, unseenCount } from "../game/inbox";
 import { Sales } from "./Sales";
 import { KonsernPage } from "./Konsern";
 import { useOpenTender } from "./openTender";
@@ -768,7 +768,7 @@ function latestUnseen(g: GameState): LogEntry | undefined {
   for (let i = list.length - 1; i >= 0; i--) {
     const e = list[i];
     if (e.id <= seen) break;
-    if (e.kind !== "good") return e;
+    if (e.kind !== "good" && isUnseen(g, e)) return e;
   }
   return undefined;
 }
@@ -806,7 +806,8 @@ function NoticeLine({
           // Varselet er lest når spilleren har fulgt det; ellers fører neste trykk dit igjen i stedet for til lista
           const seen = t ? t.logId : latest?.id;
           if (t) api.dismissToast(t.id);
-          if (seen) api.act((gg) => void (gg.inboxSeenId = Math.max(gg.inboxSeenId ?? 0, seen)));
+          // Bare dette varselet er lest – eldre, uleste varsler står der fortsatt (B-472)
+          if (seen) api.act((gg) => markRead(gg, seen));
           onLink(link);
         }}
         aria-label={

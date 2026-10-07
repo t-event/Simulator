@@ -2,7 +2,7 @@
  * Topplista og kallenavnet (B-127). Serveren regner listene ut fra tidslinja (`snapshots`); appen sender aldri
  * inn poeng selv.
  */
-import { rest, rpc, userId } from "./supabase";
+import { rest, rpc, rpcFor, userId } from "./supabase";
 
 export type BoardKind =
   | "verdi"
@@ -153,9 +153,12 @@ export async function nicknameAvailable(name: string): Promise<boolean> {
   return rpc<boolean>("nickname_available", { name: name.trim() });
 }
 
-/** Setter kallenavnet. Serveren sjekker lengde, tegn og at det er ledig; feil kommer som norsk melding. */
-export async function setNickname(name: string): Promise<string> {
-  return rpc<string>("set_nickname", { name });
+/**
+ * Setter kallenavnet for kontoen `uid` – sendes ikke hvis en annen konto er logget inn da (B-472). Serveren sjekker
+ * lengde, tegn og at det er ledig; feil kommer som norsk melding.
+ */
+export async function setNickname(uid: string, name: string): Promise<string> {
+  return rpcFor<string>(uid, "set_nickname", { name });
 }
 
 /**
