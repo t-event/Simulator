@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 402 – 2026-10-07: Databasen ble «unhealthy» (B-477)
+
+**Brukeren ba om:** «Databasen ble unhealthy».
+
+**Gjort:** loggene viste tidsavbrudd 17:44–17:48 UTC (world_status, save_game, leaderboard, my_rank). Topplista for
+konsernverdi regnet alle spillernes verdi ved hvert kall (ca. 0,8 s), og 26–33 kall i minuttet etter endringsloggen om
+ny rekkefølge brukte opp maskinen. Migrasjon 144: `konsern_value_cache` fylt hvert minutt av cron `konsernverdi`, og
+topplista leser derfra.
+
+**Testet:** målt før/etter (800 ms → 13 ms), samme verdier for alle 21, cron-jobben har kjørt, prosjektet friskt.
+
+**Gjenstår:** se at jobben går og at det ikke kommer nye tidsavbrudd; 12.10 og 2.11 som før.
+
 ## Økt 401 – 2026-10-07: Selskapene i konsernverdien (B-476)
 
 **Brukeren ba om:** om en spiller får konsernverdi av selskapene han eier.

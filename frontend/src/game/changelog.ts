@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 477,
+    date: "2026-10-07",
+    title: "Raskere toppliste",
+    items: [
+      "Topplista «Konsernverdi» regnes nå én gang i minuttet. Den lastet tregt og kunne gjøre resten av spillet tregt når mange så på den samtidig.",
+    ],
+  },
+  {
     b: 476,
     date: "2026-10-07",
     title: "Selskapene teller i konsernverdien",

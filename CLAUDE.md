@@ -427,7 +427,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   den vises – kassa i spillet er ikke med; bidraget der har aktiviteten fra siste betaling (104, B-417, speilet i
   `konsernValueOf`/`contributionAt` i `net/world.ts`) – aldri aktivitet 1 for alle. Verkene teller med salgssummen og betalte
   prosjekter med prisen (`konsern_assets`, 142, speilet i `konsernAssets`, B-475) – et verk som bygges, bare med prisen; selskapene med anslaget × dagene igjen av konsesjonen, høyst 60
-  (`konsern_companies_value`, 143, speilet i `companiesValue`, B-476); den gamle «verdi» (snapshots.equity) står for ligaer og titler.
+  (`konsern_companies_value`, 143, speilet i `companiesValue`, B-476). Lista leser `konsern_value_cache`, som jobben
+  `konsernverdi` fyller hvert minutt (144, B-477) – aldri `konsern_value` for alle spillere i et kall fra appen (det leser
+  hele lagringen per spiller; 30 kall i minuttet gjorde databasen «unhealthy» 7.10). `my_rank` henter hele lista; den gamle «verdi» (snapshots.equity) står for ligaer og titler.
 - **Salg av datterverk** (B-307): `sisterSalePrice` (60 % av byggekostnaden), aldri `sisterValue` (60 døgns overskudd med
   bonuser) – verdien er større enn prisen, så salg til verdi ga uendelig penger. Nye måter å kvitte seg med et verk på,
   bruker salgssummen.
