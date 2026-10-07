@@ -5,6 +5,17 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 394 – 2026-10-07: Sårbarhet i en byggepakke rettet
+
+**Brukeren ba om:** «Gjør det» – `npm audit fix` for varselet fra GitHub (Dependabot, høy alvorlighet).
+
+**Gjort:** `source-map-js` 1.2.1 → 1.2.2 i `package-lock.json` (GHSA-68fv-2mgg-jv7q, bare brukt når spillet bygges). Ingen
+andre pakker endret; `npm audit` viser 0 sårbarheter.
+
+**Testet:** typesjekk, lint, `npm test`, bygg.
+
+**Gjenstår:** ingenting.
+
 ## Økt 393 – 2026-10-07: Kjøp av stålkompleks teller i dagens oppdrag (B-470)
 
 **Brukeren ba om:** «Jeg kjøpte nettopp et nytt stålkompleks, men det teltes ikke i dagens utfordring om å kjøpe eller
