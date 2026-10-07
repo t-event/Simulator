@@ -8893,3 +8893,18 @@ tilbake når den fornyes i anbudet. Speilet i `companiesValue` (`net/world.ts`).
 Virkning 7.10: bare én spiller eier selskaper; +264,8 mill., plassen på topplista uendret (5).
 Krever konto: uendret.
 Endringslogg: ja.
+
+## B-477 Topplista «Konsernverdi» leser et lager som regnes hvert minutt (2026-10-07)
+Eieren: «Databasen ble unhealthy.» 17:44–17:48 UTC fikk world_status, save_game, leaderboard og my_rank tidsavbrudd.
+Årsak: `leaderboard('konsern')` – og `my_rank`, som henter hele lista for å finne én plass – regnet `konsern_value` for
+hver spiller ved hvert kall. Det leser hele det lagrede spillet flere ganger per spiller (ca. 0,8 s per kall). Etter
+endringsloggen om at rekkefølgen kunne ha endret seg (B-475), åpnet mange topplista, som henter på nytt hvert 15.–30.
+sekund: 26–33 slike kall i minuttet brukte opp maskinen. B-475/B-476 gjorde hvert kall litt tyngre, men det var
+mengden kall som veltet den.
+Rettet (migrasjon 144): tabellen `konsern_value_cache` (RLS uten tilgang for spillerne) fylles av `konsern_value_refresh`
+hvert minutt (cron `konsernverdi`, ca. 0,2 s), og topplista leser derfra (patchet med replace() som 114/115/120).
+Målt etter: leaderboard via my_rank 13 ms (før ca. 800 ms), samme verdi for alle 21 på lista. Verdien på lista kan være
+opptil et minutt gammel; Konsern-siden regner sin egen. `close_season` regner fortsatt `konsern_value` direkte.
+Stopp jobben med `select cron.unschedule('konsernverdi');` (da står lista stille).
+Krever konto: uendret.
+Endringslogg: ja.
