@@ -8939,3 +8939,22 @@ Resten av gjennomgangen stemte mellom appen og serveren:
 Testet i DO-blokker som ble rullet tilbake: 21 spillere med status «ok», og med én spiller som feilet: 20 regnet, den ene
 sto igjen med samme verdi, status «feil hos enkelte».
 Endringslogg: nei
+
+## B-480 «Nye bud fra …» viser når selskapet faktisk kan bys på (2026-10-07)
+Før den første fornyelsen av en konsesjon (skraplageret 11.–13.10) prøvekjørte jeg hele fornyelsen i en DO-blokk som
+ble rullet tilbake. Den virket:
+- Anbudet åpnes 48 timer før konsesjonen går ut.
+- Eieren får ingen fordel (`renewal_max` = 0).
+- Vinneren får en ny rad i `company_owners` fra konsesjonsslutt og 14 dager fram.
+- Taperne får budet tilbake.
+Prøven viste likevel én feil. `takeover_window` ga datoen for det første hinderet den fant, vernet (3 dager for en ny
+eier) eller pausen (14 dager etter et avverget bud). Budet avvises derimot til begge er over (`company_protected_until`).
+Skraplageret hadde et avverget bud 5.10, så etter en fornyelse 13.10 ville appen sagt «Nye bud fra 16.10», mens budene
+ble avvist til 19.10. I dag sto det «pause, nye bud fra 19.10», en dato etter at konsesjonen går ut.
+Nå er datoen `company_protected_until` for både vern og pause (migrasjon 146). Varer hindrene til budene uansett stenger
+før konsesjonen går ut (`last_days`), er grunnen `sent` («vent på det nye anbudet»). Appen er uendret; den viste alt
+serverens dato og grunn.
+Ikke endret: pausen etter et avverget bud følger selskapet, ikke eieren, så en ny eier etter fornyelsen arver den. Det
+er i tråd med at pausen skal skjerme selskapet mot nye bud rett etter hverandre (B-441).
+Testet i DO-blokker som ble rullet tilbake, med både fornyelse til en annen eier og til samme eier. Etter migrasjonen
+viser skraplageret `sent` og slagghåndteringen `vern` til 8.10.

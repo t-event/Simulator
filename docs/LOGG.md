@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 405 – 2026-10-07: Første fornyelse prøvekjørt, riktig dato for neste bud (B-480)
+
+**Brukeren ba om:** «fortsett».
+
+**Gjort:** sjekket driften. Topplista og konsernverdien regnet direkte er like for alle 21 spillerne, alle verdensjobbene
+står «ok», og de 37 varslene siste døgn ble levert på første forsøk. Prøvekjørte den første fornyelsen av en konsesjon
+(skraplageret, anbudet åpner 11.10 kl. 01:33 UTC): den virker. Feilen prøven fant: «Nye bud fra …» viste bare det første
+av vern og pause. Migrasjon 146 bruker `company_protected_until` og grunnen `sent` når hindrene varer ut konsesjonen.
+
+**Testet:** DO-blokker som ble rullet tilbake (fornyelse til ny og samme eier, vern og pause som overlapper), og
+`takeover_window` for begge selskapene etter migrasjonen. `npm test`.
+
+**Gjenstår:** følge med på fornyelsen av skraplageret 11.–13.10; 12.10 (strømuka, verkstedet, nye spillere), 2.11
+(skyggerapporten).
+
+---
+
 ## Økt 404 – 2026-10-07: Gjennomgang av B-475–B-478 (B-479)
 
 **Brukeren ba om:** «fortsett» – gjennomgangen av dagens endringer.
