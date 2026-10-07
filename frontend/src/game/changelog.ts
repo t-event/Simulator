@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 480,
+    date: "2026-10-07",
+    title: "Riktig dato for neste oppkjøpsbud",
+    items: [
+      "Når et selskap er vernet eller har pause etter et bud som ikke holdt, viser «Nye bud fra …» nå dagen da begge er over. Før kunne den vise en tidligere dag, og budet ble avvist.",
+      "Går konsesjonen ut før noen kan by, står det at du må vente på det nye anbudet, i stedet for en dato.",
+    ],
+  },
+  {
     b: 478,
     date: "2026-10-07",
     title: "Oppkjøp forklart bedre",

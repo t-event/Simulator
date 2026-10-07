@@ -101,7 +101,8 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
   skalaen for budstyrke, motbud, Kontroll og inntektsøkning. Står bud og motbud likt,
   beholder eieren selskapet (`att > def`). Eieren får `takeover_payout` ved salg (B-375), regnet med dagene som er
   igjen når budet avgjøres – appen viser anslaget ved fristen (`buyoutAt`, B-478). Nye bud kan legges inn til 5 dager før
-  perioden går ut (`last_days`); kjøperen ser datoen, og datoen når vernet for en ny eier slutter (B-478). Anbud fra før 29.9 regnes i
+  perioden går ut (`last_days`); kjøperen ser datoen, og når neste bud kan legges inn: dagen både vernet og pausen er over
+  (`company_protected_until`), eller «vent på det nye anbudet» hvis de varer til budene stenger (B-478, B-480). Anbud fra før 29.9 regnes i
   dagens penger (B-374).
 - **Regelsett 2** (B-441, 123; alle bud fra 3.10.2026, `takeovers.rules` = 2): motbudet teller som budet (60 × √(beløp /
   V), inntil 5 × V) pluss Kontroll / 5 (høyst 20). Fondet teller bare når det legges inn som motbud. Vinneren betaler:
