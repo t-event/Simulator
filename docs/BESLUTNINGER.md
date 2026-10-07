@@ -8924,3 +8924,18 @@ Ingen endring på serveren eller i reglene. Testet: `npm test` (ny test med tall
 Industrien på 320, 390 og 1366 px med falsk server (riktige tekster, ingen horisontal scrolling).
 Krever konto: uendret.
 Endringslogg: ja.
+
+## B-479 Jobben `konsernverdi` regner én spiller om gangen og melder fra i `world_health` (2026-10-07)
+Gjennomgangen av dagens endringer (B-475–B-478, eieren: «fortsett») fant én svakhet: jobben som fyller topplista
+«Konsernverdi» (144, B-477) regnet alle spillerne i én setning. Feilet `konsern_value` for én spiller, ble hele kjøringen
+rullet tilbake. Lista sto da stille for alle, og ingenting sa fra, fordi jobben ikke var med i `world_health`.
+Nå følger den mønsteret fra B-401 (migrasjon 145). Hver spiller regnes i sin egen deltransaksjon, og feil logges med
+`world_job_unit_error`. Kjøringen telles med `world_job_start`/`world_job_finish`, så jobben står som «står» etter
+20 minutter uten kjøring. En spiller som feiler, beholder forrige verdi på lista i stedet for å forsvinne.
+Resten av gjennomgangen stemte mellom appen og serveren:
+- `konsern_status` gir bare bestillinger i kø eller i gang, som `konsern_assets`.
+- `estimate_per_day` er `company_estimate`, og inaktive selskaper er ikke med.
+- `lastBidAt` er grensen `last_days` i `takeover_window`/`company_protected_until`.
+Testet i DO-blokker som ble rullet tilbake: 21 spillere med status «ok», og med én spiller som feilet: 20 regnet, den ene
+sto igjen med samme verdi, status «feil hos enkelte».
+Endringslogg: nei
