@@ -644,6 +644,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   (`net/push.ts`) sammen; ny lenke: `parsePushLink` og `pushNav` i `GameApp`. Nøklene står bare i Vault (`push_vapid_*`,
   `push_kick_key`, `push_url`) – lag dem aldri på nytt (da slutter alle abonnementer å virke). Edge-funksjonen deployes med
   `verify_jwt = false` og sjekker vekkenøkkelen selv. Stopp varslene med `select cron.unschedule('push-varsler');`.
+  Køen ryddes av `push_housekeeping` (fra `push_kick` hvert minutt); nye forsøk venter på `retry_at` (B-473), og bare varige
+  feil teller i `push_subscriptions.fails` – en ny måte å hente fra køen på, må respektere `retry_at`.
   Varsler er på som standard (B-467): `PushAuto` spør ved første trykk – aldri ved lasting (iPhone krever trykk), og
   `requestPermission` skal stå først i `enablePush`. Svaret huskes i `stalverk-varsel-auto-v1`; `disablePush` merker det.
   Utboksen ryddes av `dm_cleanup` (`supabase/108`, cron `meldinger-rydding`): sendte etter 14 dager, avslåtte enheter etter 60.

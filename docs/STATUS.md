@@ -176,9 +176,10 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
 - Selve spillet krever aldri konto (B-149, `KONTO.md`). «Mens du var borte» (konto) gir penger og 10 fagpoeng per time borte, høyst
   åtte timer (80); serveren regner tida og fagpoengene (`claim_away_v2`, B-399). Lagring på nett, lister, konsern, selskaper og chat krever konto.
 - **Verv en venn** (B-459): kode per konto, lenken `?verv=KODE` huskes i 14 dager. Vennen (ny konto, ikke gjest, yngre
-  enn 14 dager) får 50 000 kr og 25 fagpoeng i eget spill (høyst én gang per spill; samme kode igjen gir den på nytt
-  hvis svaret gikk tapt, B-472); den som vervet får belønningen i konsernkassa (avsnitt 4). Taket på 5 venner teller
+  enn 14 dager) får 50 000 kr og 25 fagpoeng i eget spill (høyst én gang per spill; samme kode igjen det første døgnet
+  gir den på nytt hvis svaret gikk tapt, B-472/B-473); den som vervet får belønningen i konsernkassa (avsnitt 4). Taket på 5 venner teller
   også belønnede venner som har slettet kontoen, og vervinger til samme kode går én om gangen (B-472).
+  Kortet viser plassene serveren teller (`used`, B-473).
   Delingsknappen på anleggsbildet (B-458) sender tekst og lenke, uten bilde (B-460), og tar med koden.
 - **Brukernavn er påkrevd** (B-463): en innlogget konto uten brukernavn får arket «Velg brukernavn», som ikke kan lukkes
   (bare logges ut fra). Navnet fra skjemaet settes i det stille når det er ledig.
@@ -189,7 +190,7 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
   privatmeldinger), per enhet. Serveren legger varsler i `push_outbox` (triggere, og `push_scan` hvert minutt for ferdige
   byggeprosjekter og 6 timer igjen av et oppkjøpsbud); edge-funksjonen `push` sender dem. Ingen hemmelige beløp, ingen
   meldingstekst, ikke eldre enn 6 timer. Kom et varsel ikke fram på grunn av en midlertidig feil, prøves det igjen
-  (høyst 5 ganger, B-472). iPhone/iPad: bare fra hjemskjermen. Utlogging slår av varslene på enheten.
+  etter 2, 4, 8 og 16 minutter (høyst 5 forsøk, B-472/B-473); midlertidige feil slår aldri av en enhet. iPhone/iPad: bare fra hjemskjermen. Utlogging slår av varslene på enheten.
   Oppkjøp varsler også motbud (til kjøperen, uten beløp) og høyere bud fra samme kjøper (til eieren), B-469.
   «Send et prøvevarsel» (B-466, `push_test`) sender «Varslene virker» til enhetene som står på, høyst ett per 10 minutter.
 - Gjester er anonyme kontoer (B-212) som slippes til det som står i `guest_gate`; de får ingen penger eller plass mellom

@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 473,
+    date: "2026-10-07",
+    title: "Flere små rettelser",
+    items: [
+      "Varsler på mobilen som ikke kom fram, prøves igjen med litt lengre pause hver gang. Et kort brudd hos telefonen slår ikke lenger av varslene.",
+      "Brukernavnet fra skjemaet blir ikke kalt «tatt» når det bare var nettet som sviktet.",
+      "«Verv en venn» viser de samme plassene som serveren teller.",
+      "Varsellista merker ikke varsler du alt har åpnet, som nye.",
+    ],
+  },
+  {
     b: 472,
     date: "2026-10-07",
     title: "Mange små rettelser",

@@ -40,7 +40,11 @@ function done(act: Act, uid: string | null, r: KonsernResult, okText: string, co
     const before = new Set(gg.konsern.orders.map((o) => o.id));
     if (w) applyKonsern(gg, w, gg.konsern.treasury?.perDay ?? 0);
     // Dagens oppdrag «datter» teller kjøpet med én gang (B-470); bestillingen huskes for dagen (B-472)
-    if (count && "buy" in count) noteKonsernBuy(gg, gg.konsern.orders.find((o) => !before.has(o.id))?.id ?? null);
+    if (count && "buy" in count) {
+      // Den nyeste av de nye: kom en bestilling fra en annen enhet med i samme svar, er det ikke den (B-473)
+      const fresh = gg.konsern.orders.filter((o) => !before.has(o.id)).map((o) => o.id);
+      noteKonsernBuy(gg, fresh.length ? Math.max(...fresh) : null);
+    }
     if (count && "cancel" in count) noteKonsernCancel(gg, count.cancel);
     return { ok: true, message: okText };
   });

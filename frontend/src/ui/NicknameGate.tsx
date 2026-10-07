@@ -6,7 +6,7 @@
  */
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { fetchProfile, nicknameAvailable, nicknameProblem, setNickname } from "../net/leaderboard";
-import { getSession, onSessionChange, signOut, userId } from "../net/supabase";
+import { AccountChangedError, getSession, isTransient, onSessionChange, signOut, userId } from "../net/supabase";
 import { flush, resetCloud } from "../net/sync";
 import { announceNickname, NICKNAME_EVENT, nicknameFrom, pendingNick, setPendingNick } from "./nickname";
 import { Button } from "./ds";
@@ -38,11 +38,16 @@ export function NicknameGate() {
           setPendingNick(null);
           announceNickname(uid, n);
           return;
-        } catch {
-          if (!alive || userId() !== uid) return;
-          setPendingNick(null);
+        } catch (e) {
+          if (!alive || userId() !== uid || e instanceof AccountChangedError) return;
           setDraft(pending);
-          setError(`«${pending}» ble tatt av en annen i mellomtiden. Velg et annet.`);
+          if (isTransient(e)) {
+            // Nettet eller tjenesten svikter: navnet er ikke tatt, så det beholdes og kan sendes igjen (B-473)
+            setError("Fikk ikke lagret brukernavnet akkurat nå. Trykk Lagre for å prøve igjen.");
+          } else {
+            setPendingNick(null);
+            setError(`«${pending}» ble tatt av en annen i mellomtiden. Velg et annet.`);
+          }
         }
       }
       if (alive && userId() === uid) setMissingFor(uid);
@@ -76,6 +81,7 @@ export function NicknameGate() {
       if (!uid || userId() !== uid) return;
       const n = await setNickname(uid, name);
       if (userId() !== uid) return;
+      setPendingNick(null);
       setMissingFor(null);
       announceNickname(uid, n);
     } catch (e) {
