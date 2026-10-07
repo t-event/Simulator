@@ -899,6 +899,14 @@ export function KonsernPage({
                 Legg inn motbud
               </button>
             </Callout>
+          ) : tender.mine ? (
+            <Callout tone="heat">
+              <strong>Perioden din på {tender.name.toLowerCase()} går ut</strong> – anbudet stenger{" "}
+              {fmtWhen(tender.closesAt)}. Vil du beholde selskapet, må du by som alle andre.{" "}
+              <button className="g-link" onClick={() => setTab("industri")}>
+                Legg inn bud
+              </button>
+            </Callout>
           ) : (
             <Callout tone="heat">
               <strong>Anbud på {tender.name.toLowerCase()} er åpent</strong> til {fmtWhen(tender.closesAt)}. Eieren

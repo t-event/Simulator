@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 481,
+    date: "2026-10-07",
+    title: "Beskjed når perioden på selskapet ditt går ut",
+    items: [
+      "Eier du et selskap og perioden går ut, får du nå en egen beskjed i appen og på mobilen: vil du beholde selskapet, må du by i anbudet som alle andre.",
+    ],
+  },
+  {
     b: 480,
     date: "2026-10-07",
     title: "Riktig dato for neste oppkjøpsbud",

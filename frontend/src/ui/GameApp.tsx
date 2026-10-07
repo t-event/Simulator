@@ -1175,7 +1175,9 @@ export function GameApp() {
                       }
                     : v.id === "konsern" && tender
                       ? {
-                          text: `Anbud på ${tender.name.toLowerCase()} er åpent`,
+                          text: tender.mine
+                            ? `By for å beholde ${tender.name.toLowerCase()}`
+                            : `Anbud på ${tender.name.toLowerCase()} er åpent`,
                           view: "konsern" as View,
                           sub: "industri",
                         }

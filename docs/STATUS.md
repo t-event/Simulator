@@ -94,6 +94,8 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
 - Varsel om åpent anbud (B-453): i varsellinja når det åpner og når 12 timer er igjen, til den som ikke har bydd, med
   lenke til Konsern → Industrien. Ved budfeltet: budet kommer tilbake til den som taper, og «Lønner det seg?» (14 dager ×
   kjøperens eget anslag mot budet).
+- Fornyelsen: anbudet åpner 48 timer før konsesjonen går ut, og eieren stiller likt med alle. Eieren får egen beskjed
+  (kortet, Konsern → Oversikt, varsellinja og varselet på mobilen) om at selskapet går tapt uten bud (B-481).
 - Kontroll regnes av `company_control` (aktivitet, investering, region, eiertid); vises som kroner (B-370).
 - Oppkjøpsbud og motbud er på (fra 29.9.2026). Budet teller 60 × √(bud / V) × (0,5 + 0,5 × aktivitet) + region, inntil
   10 × verdien (verdi V = det høyeste av 10 dagers inntekt og siste anbudspris); eieren kan alltid miste selskapet.
