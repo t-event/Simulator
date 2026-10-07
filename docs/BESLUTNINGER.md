@@ -8799,3 +8799,32 @@ Beslutning:
   varselryddingen, og verken `anon` eller `authenticated` kan kalle den. Ingenting var gammelt nok til å slettes 7.10.
 Krever konto: nei (drift).
 Endringslogg: nei.
+
+## B-472 Gjennomgangen 7.10: 17 feil i kontobytte, verving, varsler, ukemetrikk og spillet rettet (2026-10-07)
+Status: gjelder. Retter B-459, B-462–B-470 og B-396/B-457.
+Bakgrunn: eieren gjennomgikk de 22 PR-ene til og med #414 og fant 17 feil (bekreftet med kode og gjenspilling), med
+prioritet kontofeilene og vervingen først og ukemetrikken før strømuka 12.10. Hver feil er sjekket i koden før rettingen.
+Beslutning:
+- **Kontobytte (1–4, 14, 15):** kall som gjelder én konto, sendes med den kontoens nøkkel (`rpcFor`/`tokenFor` i
+  `net/supabase.ts`) og går ikke ut hvis en annen konto er logget inn – brukernavnet (`setNickname(uid, …)`) og påslaget
+  av varsler. Hendelsen «brukernavnet er satt» har kontoen med (`announceNickname`/`nicknameFrom`), så et sent svar ikke
+  lukker en annen kontos navnekrav. Utloggingen logger ut økta den startet med, ikke en ny konto. Et påslag av varsler som
+  var underveis da varslene ble slått av (utlogging), slår seg av igjen med samme konto. Varsler-på-for-alle merker seg
+  ferdig først når telefonen har svart. Vennelista hentes på nytt ved kontobytte.
+- **Verving (5–7, migrasjon 138):** taket teller også belønnede venner som har slettet kontoen (`referral_used`), vervinger
+  og utbetalinger for samme spiller går én om gangen (lås på `referral_codes`), og utbetalingen stopper på taket. Samme kode
+  igjen gir `ok` (startpakken kom ikke fram); appen gir startpakken høyst én gang per spill (`counters.vervStart`).
+- **Varsler på serveren (8, 9, migrasjon 140 og edge-funksjonen):** et varsel som ikke kom fram til noen enhet på grunn av
+  midlertidige feil (ingen svar, 408, 429, 5xx), legges tilbake i køen, høyst 5 forsøk (`attempts`); et varsel som ble
+  hentet men aldri meldt tilbake, prøves igjen etter 10 minutter. Byggevarselet tar med prosjekter som alt er `ferdig`.
+- **Ukemetrikken (10, migrasjon 139):** `timeline_metrics` regner fra siste lagring før perioden, så første økt i uka er med
+  i «Mest stål per kWh» og «Leveranser i tide» (første gang 12.10 og 26.10).
+- **Spillet (11–13, 16, 17):** fornyelsen av storverket regner med støpemaskinen og utstyret på hver ovn; en avbestilling
+  trekker bare fra et kjøp som er talt i dag (`daily.buyIds`); en varsellenke som kommer mens startskjermen står, huskes til
+  spillet åpnes; nabolagstipset regnes som sett først når byggekortet er på skjermen; å følge en lenke i varsellinja merker
+  bare det varselet som lest (`inboxRead`), ikke eldre, uleste varsler.
+Testet: `npm test` (nye tester: kontobytte under navn og utlogging, fornyelsesprisen, avbestilling fra i går, bjella etter
+lenken), verving og varselkøen i transaksjoner som ble rullet tilbake, ukemetrikken mot denne ukas tall (én spiller fikk
+med 27 leveranser fra første økt), `balance.ts` og `--daglig 15` (exit 0), Playwright av byggekortet på iPhone-størrelse.
+Krever konto: uendret (verving, varsler, venner og brukernavn krever konto som før).
+Endringslogg: ja.

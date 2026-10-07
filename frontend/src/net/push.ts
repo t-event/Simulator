@@ -5,7 +5,7 @@
  * iPhone og iPad: varsler virker bare når spillet er lagt på hjemskjermen (iOS 16.4 og nyere). I Safari ellers finnes
  * ikke `PushManager`, og kortet forklarer hva som skal til.
  */
-import { onBeforeSignOut, rpc, userId } from "./supabase";
+import { onBeforeSignOut, restAs, rpc, tokenFor, userId } from "./supabase";
 
 export type PushKind = "oppkjop" | "anbud" | "konsern" | "melding";
 
@@ -81,7 +81,7 @@ function isKind(k: string): k is PushKind {
   return PUSH_KINDS.some((p) => p.id === k);
 }
 
-export type PushRefusal = "støttes ikke" | "nektet" | "ingen nøkkel" | "gjest" | "ugyldig";
+export type PushRefusal = "støttes ikke" | "nektet" | "ingen nøkkel" | "gjest" | "ugyldig" | "avbrutt";
 
 export const PUSH_REFUSAL_TEXT: Record<PushRefusal, string> = {
   "støttes ikke": "Denne nettleseren kan ikke vise varsler.",
@@ -90,16 +90,26 @@ export const PUSH_REFUSAL_TEXT: Record<PushRefusal, string> = {
   "ingen nøkkel": "Varslene er ikke klare på serveren ennå. Prøv igjen om litt.",
   gjest: "Varsler krever konto.",
   ugyldig: "Telefonen ga et abonnement serveren ikke kunne bruke. Prøv igjen.",
+  avbrutt: "Varslene ble slått av igjen før de var slått på.",
 };
+
+/**
+ * Telles opp hver gang varslene slås av for enheten (av spilleren eller ved utlogging). Et påslag som var underveis da,
+ * angrer seg selv når svaret kommer (B-472) – ellers kunne enheten fortsette å få den forrige kontoens varsler
+ */
+let offGen = 0;
 
 /** Slår på varsler (spør om lov første gang) eller lagrer nye temaer */
 export async function enablePush(kinds: PushKind[]): Promise<{ ok: true } | { ok: false; reason: PushRefusal }> {
   if (pushSupport() !== "ja") return { ok: false, reason: "støttes ikke" };
+  const gen = offGen;
+  const uid = userId();
   // Spør om lov før noe annet venter: iPhone viser spørsmålet bare rett etter et trykk (B-467)
   if (Notification.permission !== "granted") {
     const p = await Notification.requestPermission();
     if (p !== "granted") return { ok: false, reason: "nektet" };
   }
+  if (!uid) return { ok: false, reason: "gjest" };
   const reg = await registration();
   if (!reg) return { ok: false, reason: "støttes ikke" };
   let sub = await reg.pushManager.getSubscription();
@@ -108,12 +118,24 @@ export async function enablePush(kinds: PushKind[]): Promise<{ ok: true } | { ok
     if (!key) return { ok: false, reason: "ingen nøkkel" };
     sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(key) });
   }
-  const r = await rpc<{ ok: boolean; reason?: string }>("push_subscribe", {
-    p_endpoint: sub.endpoint,
-    p_p256dh: b64(sub.getKey("p256dh")),
-    p_auth: b64(sub.getKey("auth")),
-    p_kinds: kinds,
+  // Nøkkelen til kontoen som slo på: påslaget sendes aldri med en annen konto (B-472)
+  const token = await tokenFor(uid);
+  const r = await restAs<{ ok: boolean; reason?: string }>(token, "rpc/push_subscribe", {
+    method: "POST",
+    body: {
+      p_endpoint: sub.endpoint,
+      p_p256dh: b64(sub.getKey("p256dh")),
+      p_auth: b64(sub.getKey("auth")),
+      p_kinds: kinds,
+    },
   });
+  if (r?.ok && (offGen !== gen || userId() !== uid)) {
+    // Slått av eller logget ut mens påslaget var underveis: slå av igjen med samme konto
+    await restAs(token, "rpc/push_unsubscribe", { method: "POST", body: { p_endpoint: sub.endpoint } }).catch(
+      () => undefined,
+    );
+    return { ok: false, reason: "avbrutt" };
+  }
   if (r?.ok) return { ok: true };
   return { ok: false, reason: r?.reason === "gjest" ? "gjest" : "ugyldig" };
 }
@@ -162,6 +184,7 @@ export function pushAutoWanted(uid: string): boolean {
 
 /** Slår av varsler for denne enheten (på serveren og i nettleseren) */
 export async function disablePush(): Promise<void> {
+  offGen++;
   const uid = userId();
   if (uid) markPushAutoDone(uid);
   const sub = await currentSubscription();
@@ -173,6 +196,7 @@ export async function disablePush(): Promise<void> {
 // Logger spilleren ut, skal ikke enheten få varsler for kontoen lenger (en delt telefon). Nettleserens abonnement står,
 // så neste konto kan slå på varsler uten å spørre om lov igjen.
 onBeforeSignOut(async () => {
+  offGen++;
   if (!userId()) return;
   const sub = await currentSubscription().catch(() => null);
   if (sub) await rpc("push_unsubscribe", { p_endpoint: sub.endpoint }).catch(() => undefined);

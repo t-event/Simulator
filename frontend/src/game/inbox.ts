@@ -81,8 +81,21 @@ export function importantLog(g: GameState): LogEntry[] {
 export function markAllSeen(g: GameState): void {
   const last = g.log[g.log.length - 1];
   if (last) g.inboxSeenId = last.id;
+  g.inboxRead = [];
+}
+
+/** Ett varsel er lest (fulgt fra varsellinja, B-472) – de eldre som ikke er lest, står fortsatt som nye */
+export function markRead(g: GameState, id: number): void {
+  const seen = g.inboxSeenId ?? 0;
+  if (id <= seen) return;
+  g.inboxRead = [...(g.inboxRead ?? []).filter((x) => x > seen && x !== id), id].slice(-50);
+}
+
+/** Er varselet nytt for spilleren (ikke sett i lista og ikke fulgt fra varsellinja)? */
+export function isUnseen(g: GameState, e: LogEntry): boolean {
+  return e.id > (g.inboxSeenId ?? 0) && !(g.inboxRead ?? []).includes(e.id);
 }
 
 export function unseenCount(g: GameState): number {
-  return importantLog(g).filter((e) => e.kind !== "good" && e.id > (g.inboxSeenId ?? 0)).length;
+  return importantLog(g).filter((e) => e.kind !== "good" && isUnseen(g, e)).length;
 }

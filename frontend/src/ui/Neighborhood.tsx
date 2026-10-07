@@ -3,7 +3,7 @@
  * store, synlige bygg i byen for pengene hjemme. Vises når det betyr noe: et bygg pågår, noe er bygget, eller kassa
  * nærmer seg prisen på det neste (gradvis synlighet).
  */
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import {
   bigBuildDaysLeft,
   foundationPrice,
@@ -36,13 +36,28 @@ export function BuildCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
   const done = neighborhoodDone(g);
   const tier = foundationTier(g);
   const gift = foundationPrice(tier + 1);
-  // Kortet er sett (B-455): rådet og «!» om nabolaget kommer ikke igjen
+  // Kortet er sett (B-455): rådet og «!» om nabolaget kommer ikke igjen. Først når kortet faktisk er på skjermen
+  // (B-472) – på mobil ligger det lenger ned, og rådet forsvant da bare siden ble åpnet
   const seen = !!g.buildSeen;
+  const marker = useRef<HTMLSpanElement>(null);
   useEffect(() => {
-    if (!seen) act((gg) => void (gg.buildSeen = true));
+    if (seen) return;
+    const el = marker.current;
+    if (!el || typeof IntersectionObserver === "undefined") {
+      act((gg) => void (gg.buildSeen = true));
+      return;
+    }
+    const io = new IntersectionObserver((entries) => {
+      if (!entries.some((e) => e.isIntersecting)) return;
+      io.disconnect();
+      act((gg) => void (gg.buildSeen = true));
+    });
+    io.observe(el);
+    return () => io.disconnect();
   }, [seen, act]);
   return (
     <Card title="Byggeprosjekter" className="g-build-card">
+      <span ref={marker} className="g-build-seen" aria-hidden="true" />
       {b && (
         <div className="g-build-now">
           <p className="g-small-text">

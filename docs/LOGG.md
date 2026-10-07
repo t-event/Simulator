@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 396 – 2026-10-07: 17 feil fra gjennomgangen rettet (B-472)
+
+**Brukeren ba om:** gjennomgangen av de 22 PR-ene til #414 med 17 funn, kontofeilene og vervingen først og ukemetrikken
+før 12.10.
+
+**Gjort:** alle 17 sjekket i koden og rettet (se B-472). Migrasjoner 138 (verving), 139 (ukemetrikk), 140 (varselkøen) lagt
+inn; edge-funksjonen `push` publisert på nytt (versjon 2). Appen: `rpcFor`/`tokenFor`, utlogging bundet til økta,
+varsler, brukernavn, venner, verv, fornyelse, datteroppdraget, push-lenken, byggekortet og varsellinja.
+
+**Testet:** typesjekk, lint, `npm test` (nye tester), bygg, `balance.ts` og `--daglig 15` (exit 0), verving og varselkøen i
+rullede transaksjoner, ukemetrikken mot ekte tall, Playwright av byggekortet (390 px).
+
+**Gjenstår:** følge med på at varslene går som før etter edge-funksjonen (push_outbox, `attempts`), og første strømuke
+12.10 med den nye metrikken. Mekanisk verksted og nye spillere 12.10.
+
 ## Økt 395 – 2026-10-07: Statussjekk på main og ryddingen av meldinger (B-471)
 
 **Brukeren ba om:** «Gå gjennom dette med meg» (ryddefila og statussjekken), så «Da er alt gjort, fortsett».

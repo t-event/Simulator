@@ -24,7 +24,8 @@ regnes av serveren i ekte tid.
   «Byggeprosjekter» ikke er sett (`neighborHintDue`). Når alle seks byggene står, kan de utvides til trinn 2 (3 × prisen)
   og 3 (9 ×) uten ny fordel, og **verkets stiftelse** gir penger til byen i trinn (1, 2, 5, 10 … mrd., så dobling) for
   titler, prestasjoner og pynt. **Slitasje:** storverket slites over 180 spilldøgn (ikke i sommerstansen); over 50 %
-  havarerer ovnene oftere (helt slitt: 2 ×). Fornyelsen koster 20 % av utstyrets pris × slitasjen; reparatøren fornyer
+  havarerer ovnene oftere (helt slitt: 2 ×). Fornyelsen koster 20 % av utstyrets pris × slitasjen (ovnene med utstyret
+  på hver ovn, støpemaskinen og tilleggsutstyret, B-472); reparatøren fornyer
   selv ved 70 % med «Reparatøren bytter foringen» på. Alt dette føres som `investering`, som marginen i bidraget ikke
   teller.
 - **Kontrakter på Salg** (B-461): vurderingen regner med det verket lager (snittet av de siste døgnene med produksjon),
@@ -127,7 +128,8 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
 - **Topplista** har to grupper: «Industriverden · sesong» (Konsernverdi) og «Eget verk» (Verdi, Mest penger på bok,
   Produksjon, Raskest til storverk, Raskest til 10 mrd., Kontrollrom, Privat formue – fryst). Eget verk er ære, ikke makt.
 - **Dagens oppdrag «Kjøp eller moderniser et datterverk»** teller kjøpene i konsernet (`totals.konsernBuys`, B-470):
-  et kjøp teller når serveren har godtatt det, ikke når verket er bygget; en avbestilling trekker fra.
+  et kjøp teller når serveren har godtatt det, ikke når verket er bygget; en avbestilling trekker fra bare et kjøp som er
+  talt samme dag (B-472).
 - **Sesongstigen** (gratis sesongpass, B-173, B-452, 129): poeng for hver dag med spill (1), dagens belønning (2), dagens
   oppdrag (3) og topp 3 på ukelista (12/9/7), regnet på serveren i ekte tid. 50 trinn: trinn 1 ved 6 poeng, trinn 2 ved 12,
   så 20 poeng per trinn (972 for trinn 50; `season_tier_of`, speilet i `tierOf`/`tierPoints`). Hvert trinn gir 20 + 2 ×
@@ -137,7 +139,8 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
   → «Ukens kontrollrom» (første gang 19.10) → «Leveranser i tide» → «Flest aktive dager»**. Stål per kWh er kg per kWh
   i uka (1 000 × tonn / kWh) fra tidslinja, med minst 5 000 t og et rimelig forhold (`timeline_energy`) – små verk er
   ikke med. Leveranser i tide er levert / (levert + misligholdt + avbrutt) i uka med minst 50 leveranser
-  (`timeline_metrics`). Begge regnes av serveren i ekte uker. «Mer stål enn før» og «Størst vekst i konsernverdi» er
+  (`timeline_metrics`). Begge regnes av serveren i ekte uker, fra siste lagring før uka (B-472), så første økt i uka
+  er med. «Mer stål enn før» og «Størst vekst i konsernverdi» er
   tatt ut (står for gamle resultater).
 - **Ukens kontrollrom** (B-387, 094): tre tellende forsøk per uke med tre frø fra serveren (A, B, C) – de samme for alle,
   i samme rekkefølge – og ukens kvalitet. Et forsøk er brukt når det startes; det kan leveres med samme id til fristen
@@ -173,7 +176,9 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
 - Selve spillet krever aldri konto (B-149, `KONTO.md`). «Mens du var borte» (konto) gir penger og 10 fagpoeng per time borte, høyst
   åtte timer (80); serveren regner tida og fagpoengene (`claim_away_v2`, B-399). Lagring på nett, lister, konsern, selskaper og chat krever konto.
 - **Verv en venn** (B-459): kode per konto, lenken `?verv=KODE` huskes i 14 dager. Vennen (ny konto, ikke gjest, yngre
-  enn 14 dager) får 50 000 kr og 25 fagpoeng i eget spill; den som vervet får belønningen i konsernkassa (avsnitt 4).
+  enn 14 dager) får 50 000 kr og 25 fagpoeng i eget spill (høyst én gang per spill; samme kode igjen gir den på nytt
+  hvis svaret gikk tapt, B-472); den som vervet får belønningen i konsernkassa (avsnitt 4). Taket på 5 venner teller
+  også belønnede venner som har slettet kontoen, og vervinger til samme kode går én om gangen (B-472).
   Delingsknappen på anleggsbildet (B-458) sender tekst og lenke, uten bilde (B-460), og tar med koden.
 - **Brukernavn er påkrevd** (B-463): en innlogget konto uten brukernavn får arket «Velg brukernavn», som ikke kan lukkes
   (bare logges ut fra). Navnet fra skjemaet settes i det stille når det er ledig.
@@ -183,7 +188,8 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
   gang per konto og enhet; «nei» og «slått av» huskes): bryter med fire temaer under Innstillinger → Varsler (oppkjøp, anbud, byggeprosjekter,
   privatmeldinger), per enhet. Serveren legger varsler i `push_outbox` (triggere, og `push_scan` hvert minutt for ferdige
   byggeprosjekter og 6 timer igjen av et oppkjøpsbud); edge-funksjonen `push` sender dem. Ingen hemmelige beløp, ingen
-  meldingstekst, ikke eldre enn 6 timer. iPhone/iPad: bare fra hjemskjermen. Utlogging slår av varslene på enheten.
+  meldingstekst, ikke eldre enn 6 timer. Kom et varsel ikke fram på grunn av en midlertidig feil, prøves det igjen
+  (høyst 5 ganger, B-472). iPhone/iPad: bare fra hjemskjermen. Utlogging slår av varslene på enheten.
   Oppkjøp varsler også motbud (til kjøperen, uten beløp) og høyere bud fra samme kjøper (til eieren), B-469.
   «Send et prøvevarsel» (B-466, `push_test`) sender «Varslene virker» til enhetene som står på, høyst ett per 10 minutter.
 - Gjester er anonyme kontoer (B-212) som slippes til det som står i `guest_gate`; de får ingen penger eller plass mellom

@@ -15,6 +15,19 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 472,
+    date: "2026-10-07",
+    title: "Mange små rettelser",
+    items: [
+      "Bytter du konto mens spillet jobber, havner ikke brukernavnet, utloggingen eller varslene på feil konto lenger.",
+      "Varsler på mobilen som ikke kom fram på grunn av nettet, prøves igjen. Ferdige byggeprosjekter varsles også når prosjektet ble ferdig mens du spilte.",
+      "Startpakken fra en venn som vervet deg, kommer fram selv om nettet falt ut. Taket på antall vervede venner holder.",
+      "Ukens «Mest stål per kWh» og «Leveranser i tide» teller med første økt i uka.",
+      "Fornyelsen av storverket koster nå riktig, med støpemaskinen og utstyret på ovnene.",
+      "En avbestilling fra i går trekker ikke fra dagens oppdrag. Et trykk på et varsel i varsellinja merker bare det varselet som lest.",
+    ],
+  },
+  {
     b: 470,
     date: "2026-10-07",
     title: "Kjøp i konsernet teller i dagens oppdrag",

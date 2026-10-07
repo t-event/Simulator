@@ -2,7 +2,7 @@
  * Kjøp, avbestilling og salg i konsernet (B-326): verkene går via serveren (konsernkassa), de felles funksjonene via
  * kassa i spillet. Etter svaret legges serverens konsern inn i spillet, og verdensstatusen hentes på nytt.
  */
-import { noteKonsernBuy, type KonsernOption } from "../game/konsern";
+import { noteKonsernBuy, noteKonsernCancel, type KonsernOption } from "../game/konsern";
 import { fmtKr } from "./format";
 import { ORDER_REFUSAL_TEXT } from "../game/konsernWorld";
 import type { GameApi } from "../game/useGame";
@@ -25,7 +25,10 @@ type Act = GameApi["act"];
  * Svaret fra serveren gjelder kontoen som sendte kjøpet (B-426). Byttes kontoen mens svaret er på vei, legges det ikke
  * inn i det nye spillet – serveren skriver konsernet inn i den første kontoens spill ved neste lagring (save_game).
  */
-function done(act: Act, uid: string | null, r: KonsernResult, okText: string, buys = 0): boolean {
+/** Hva svaret skal telle i dagens oppdrag «datter» (B-470, B-472): et kjøp, eller avbestillingen av en bestilling */
+type Count = { buy: true } | { cancel: number } | null;
+
+function done(act: Act, uid: string | null, r: KonsernResult, okText: string, count: Count = null): boolean {
   if (!uid || userId() !== uid) return false;
   if (!r.ok) {
     act(() => ({ ok: false, message: ORDER_REFUSAL_TEXT[r.reason] ?? ORDER_REFUSAL_TEXT.nett }));
@@ -34,9 +37,11 @@ function done(act: Act, uid: string | null, r: KonsernResult, okText: string, bu
   const w = r.konsern;
   const applied = act((gg) => {
     if (gg.owner && gg.owner !== uid) return false;
+    const before = new Set(gg.konsern.orders.map((o) => o.id));
     if (w) applyKonsern(gg, w, gg.konsern.treasury?.perDay ?? 0);
-    // Dagens oppdrag «datter» teller kjøpet med én gang (B-470)
-    if (buys) noteKonsernBuy(gg, buys);
+    // Dagens oppdrag «datter» teller kjøpet med én gang (B-470); bestillingen huskes for dagen (B-472)
+    if (count && "buy" in count) noteKonsernBuy(gg, gg.konsern.orders.find((o) => !before.has(o.id))?.id ?? null);
+    if (count && "cancel" in count) noteKonsernCancel(gg, count.cancel);
     return { ok: true, message: okText };
   });
   if (!applied) return false;
@@ -66,7 +71,7 @@ export async function runOption(act: Act, o: KonsernOption, loan = 0): Promise<b
     uid,
     await orderKonsern(req, loan > 0),
     loan > 0 ? `${o.title}: bestilt. ${fmtKr(loan)} er lånt i konsernbanken.` : `${o.title}: bestilt.`,
-    1,
+    { buy: true },
   );
 }
 
@@ -78,7 +83,9 @@ export async function movePlantUi(act: Act, id: number, name: string, region: Re
 
 export async function cancelOrderUi(act: Act, id: number): Promise<boolean> {
   const uid = userId();
-  return done(act, uid, await cancelKonsern(id), "Avbestilt – pengene er tilbake i konsernkassa.", -1);
+  return done(act, uid, await cancelKonsern(id), "Avbestilt – pengene er tilbake i konsernkassa.", {
+    cancel: id,
+  });
 }
 
 export async function sellPlantUi(act: Act, id: number, name: string): Promise<boolean> {

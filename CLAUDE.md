@@ -547,7 +547,7 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   låser begge for samme spiller, gjør det i samme rekkefølge (oppkjøpsraden først hvis den er med), ellers kan to
   samtidige handlinger låse hverandre. `company_invest`/`takeover_defend` gjør det motsatt (kjent, ikke endret).
 - **Tidslinjetall** (B-396, 096): `kwh_total`, `deliveries`, `missed`, `cancelled`, `complaints` er tellere i alt; serveren
-  regner forholdet (`timeline_metrics`). `snapshot_metrics_guard` nuller urimelige tall og avviser aldri. I en
+  regner forholdet (`timeline_metrics`, fra siste lagring før perioden – B-472, 139). `snapshot_metrics_guard` nuller urimelige tall og avviser aldri. I en
   BEFORE-trigger på `snapshots` er den genererte `season_key` tom – bruk `coalesce(new.season_id, 0)`.
 - **Utslipp** (B-263): røyken regnes i hvert tidssteg (`updateEmissions`) mot renseanlegget; boten kommer i `onDay`.
   Nye, større ovner må ha et renseanlegg som holder (`CLEANERS` i `environment.ts`), ellers får testspilleren bot.
@@ -633,6 +633,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   lånerammen. Kravene (`referral_qualifies`) leser tidslinja (ekte dager, nivå), aldri tall fra lagringen. Startpakken til
   vennen legges inn med `grantReferralStart` (`ui/claims.ts`) bare når serveren svarer `ok`. Tallene i
   `config.world.referral`; startpakken i `REFERRAL_START` (`net/referral.ts`).
+- **Kall for én bestemt konto** (B-472): bruk `rpcFor(uid, …)`/`tokenFor(uid)` (`net/supabase.ts`) når kallet bare gjelder
+  kontoen som startet handlingen (brukernavn, varsler) – `rpc` tar nøkkelen til den som er innlogget når kallet sendes.
+  Hendelser som gjelder én konto, har kontoen med (`announceNickname`). `signOut` logger ut økta den startet med.
 - **Brukernavn er påkrevd** (B-463): `NicknameGate` setter navnet fra skjemaet (`pendingNick` i `ui/nickname.ts`) og
   viser ellers arket som ikke kan lukkes. Kontokortet setter ikke lenger navnet selv – det lytter på `NICKNAME_EVENT`.
 - **Varsel på mobilen** (B-465, 134): nye hendelser mellom spillere varsles med `push_enqueue(bruker, tema, ref, tittel,
