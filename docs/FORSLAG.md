@@ -30,7 +30,6 @@ til «Avgjort» nederst).
   verkstedet (sperre i Salg med forklaring), (b) tydeligere advarsel før signering når køen ikke rekker fristen, og
   (c) et råd «Du har tatt på deg mer enn verket rekker» med «avbryt den minst lønnsomme». Anbefalt: (b) + (c) først,
   (a) hvis det ikke hjelper.
-- **Beskytt main (B-397):** slå på «Require status checks» for `sjekker` under Settings → Branches i GitHub.
 - **Anbefalinger fra kodegjennomgangen (B-398), til beslutningene etter 2.10:** behold marginhopp som varsling til de
   falske positive er kartlagt (C og D viser hvorfor); prøv et prisbasert margintak i skygge først; sett krav til de nye
   konkurransene ut fra gyldig datadekning, produsert mengde og antall avsluttede kontrakter (kWh/t over minst 5 000 t,
@@ -110,6 +109,8 @@ til «Avgjort» nederst).
 
 ## Avgjort
 
+- **Beskytt main (B-397, B-471):** eieren slo på «Require status checks» (`sjekker`) og PR før merge 7.10.
+- **Ryddingen av meldinger (B-421, B-471):** kjørt av eieren i SQL-editoren 7.10; cron `meldinger-rydding` hver natt.
 - **Gjestekontoer (B-212):** slått på av eieren 29.9. **Sjekket 7.10: virker** – 4 gjester laget siste uke, alle har
   lagret. Supabase anbefaler CAPTCHA mot misbruk; grensen er 30 nye gjester i timen per IP.
 - **Forlatte gjester (B-377):** eieren sa ja 30.9. Gjester som ikke har lagret på 60 dager, slettes hver natt av

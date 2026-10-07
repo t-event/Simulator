@@ -89,7 +89,8 @@ GitHub Pages: https://t-event.github.io/Simulator/
   så endringer dit går via PR. Aldri force-push til `main`.
 - **PR og merge (brukerens stående beskjed):** Når en endring er ferdig og alle sjekker er grønne
   lokalt, oppretter Claude selv PR til `main` og merger den, uten å spørre – også UI-faser (B-204: skjermbildene
-  sendes, men det ventes ikke på svar). Deretter sjekkes at
+  sendes, men det ventes ikke på svar). `main` krever at sjekken `sjekker` er grønn på PR-en før merge (B-471): vent på
+  den (eller slå på auto-merge), og rett den hvis den er rød. Deretter sjekkes at
   publiseringen i Actions («Publiser til GitHub Pages») går grønt. Er den rød, rettes feilen
   med én gang (se B-017).
 
@@ -244,8 +245,7 @@ frontend/public/  PWA: manifest, ikoner (icon.svg er kilden; PNG-ene lages fra d
 supabase/      SQL-migrasjonene, nummerert. Kjøres i prosjektet med Supabase-connectoren (apply_migration) og
                legges her samtidig, så repoet speiler databasen. Sjekk get_advisors (security) etter hver DDL-endring.
 supabase/functions/ Edge-funksjoner (eksport, B-345; push, B-465)
-supabase/utkast/ Spørringer som bare leser (f.eks. dry-run av økonomireformen) og utkast som ikke er kjørt (108 ryddingen av
-               meldinger, 112 dry-run av etterbetalingen – leser bare det frosne grunnlaget `basis_112_*` fra 117, B-431;
+supabase/utkast/ Spørringer som bare leser (f.eks. dry-run av økonomireformen) og utkast som ikke er kjørt (112 dry-run av etterbetalingen – leser bare det frosne grunnlaget `basis_112_*` fra 117, B-431;
                testfila til 113) – ikke migrasjoner. Et utkast testes med `begin; <utkast>; <test>; select … ; rollback;`
 docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretningen for sluttspillet, B-180), UI.md,
                OKONOMI.md (økonomianalysen og reform 2, B-301), KONSERNBIDRAG.md (hovedverkets bidrag i ekte tid, B-313),
@@ -643,7 +643,7 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `verify_jwt = false` og sjekker vekkenøkkelen selv. Stopp varslene med `select cron.unschedule('push-varsler');`.
   Varsler er på som standard (B-467): `PushAuto` spør ved første trykk – aldri ved lasting (iPhone krever trykk), og
   `requestPermission` skal stå først i `enablePush`. Svaret huskes i `stalverk-varsel-auto-v1`; `disablePush` merker det.
-  Utboksen ryddes av `dm_cleanup` i `supabase/utkast/108` (sendte etter 14 dager, avslåtte enheter etter 60) når den er kjørt.
+  Utboksen ryddes av `dm_cleanup` (`supabase/108`, cron `meldinger-rydding`): sendte etter 14 dager, avslåtte enheter etter 60.
 - **Vennelista** (B-462, 132): `follows` med `active` – å ta noen av lista er en `update`, aldri `delete` (connectoren
   holder igjen migrasjoner med sletting). `follow_list` viser bare det `player_profile` alt viser andre; nye felt vurderes
   mot det. Enveis med vilje: ingen forespørsler eller varsler til den som følges.
@@ -696,8 +696,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Privatmeldinger og adminpanelet** (B-421, 107; på for alle med `profiles.dm_off`, B-422 – `dm_open` er ikke i bruk): tabellene har RLS uten regler og ingen tilgang for spillerne – alt går
   gjennom funksjonene. En ny funksjon som viser meldinger, filtrerer `hidden`, blokkering (`dm_blocked`) og 30 dager. Nye
   adminfunksjoner sjekker `is_admin()` først og logger i `admin_log`; eieren står i `admins` (lagt inn for hånd, aldri i
-  repoet). Ryddingen hver natt (`supabase/utkast/108`) er ikke lagt inn: connectoren holder igjen SQL med `delete` til
-  eieren bekrefter – legg den inn når eieren er til stede, før 1.11.2026. Unngå `update` på ekte rader i prøvekjøringer
+  repoet). Ryddingen hver natt (`dm_cleanup`, `supabase/108`, cron `meldinger-rydding`) ble
+  kjørt av eieren i SQL-editoren 7.10 (B-471): connectoren holder igjen SQL med `delete` – endres den, gjør eieren det samme. Unngå `update` på ekte rader i prøvekjøringer
   (holdes også igjen); kall funksjonene som spilleren i stedet. Svar på rapporter (B-438, 122): `report_messages`, én
   samtale per rapport og spiller; spilleren kan bare svare der eieren har skrevet (`report_reply`). Varselet
   (`report_unread`) hentes sammen med `dm_unread` i `checkLatest` (`ui/Chat.tsx`) og ligger i `messagesStore`

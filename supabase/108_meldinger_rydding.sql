@@ -1,11 +1,8 @@
--- B-421/B-445: rydding av privatmeldinger og samtaler om rapporter hver natt (eldre enn 30 dager). IKKE KJØRT ennå:
--- Supabase-connectoren holder igjen migrasjoner som sletter, til eieren bekrefter (prøvd to ganger 3.10.2026, også etter
--- eierens godkjenning – tidsavbrudd). Kjøres
--- med apply_migration når eieren kan bekrefte, eller av eieren i SQL-editoren i dashbordet – før 1.11.2026 (første
--- melding blir 30 dager da). Rapportene (public.reports) har sin egen kopi av meldingen og ryddes ikke; samtalene om en
--- rapport som fortsatt er åpen, står til rapporten er avgjort. Fra 5.10 rydder den også varselboksen (B-465): sendte
--- varsler etter 14 dager og avslåtte enheter etter 60 dager. Slik kjøres den: Supabase-dashbordet → SQL Editor → lim
--- inn hele fila → Run. Kjøres den to ganger, er det ufarlig (funksjonen erstattes, jobben legges inn på nytt).
+-- B-421/B-445: rydding av privatmeldinger og samtaler om rapporter hver natt (eldre enn 30 dager). Kjørt av eieren i
+-- SQL-editoren 7.10.2026 (B-471) – Supabase-connectoren holder igjen migrasjoner som sletter. pg_cron `meldinger-rydding`
+-- kl. 03:53 UTC. Rapportene (public.reports) har sin egen kopi av meldingen og ryddes ikke; samtalene om en rapport som
+-- fortsatt er åpen, står til rapporten er avgjort. Rydder også varselboksen (B-465): sendte varsler etter 14 dager og
+-- avslåtte enheter etter 60 dager. Kjøres den to ganger, er det ufarlig (funksjonen erstattes, jobben legges inn på nytt).
 
 create or replace function public.dm_cleanup()
 returns void

@@ -154,8 +154,8 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
 - **Privatmeldinger** (B-421, 107; B-422, 109): på for alle – kan skrus av i Min profil (`profiles.dm_off`), og begge må ha spilt litt (storverk
   eller 3 ekte aktive dager; ikke gjester, sperrede eller flaggede). Høyst 500 tegn, ingen lenker, hvert 3. s / 20 på
   10 min, høyst 5 nye samtaler per ekte dag. Blokkering (den blokkerte får «tar ikke imot meldinger»), rapportering (også
-  i Skiftrapporten; rapporten er en kopi). Meldinger eldre enn 30 dager vises ikke; ryddingen hver natt venter på eierens
-  bekreftelse (`supabase/utkast/108`). **Adminpanelet** (bare `admins`): rapportene, skjul, avvis, sperr og opphev sperre,
+  i Skiftrapporten; rapporten er en kopi). Meldinger eldre enn 30 dager vises ikke; de slettes hver natt (`dm_cleanup`,
+  cron `meldinger-rydding` kl. 03:53 UTC, fra 7.10, B-471). **Adminpanelet** (bare `admins`): rapportene, skjul, avvis, sperr og opphev sperre,
   logget i `admin_log`. **Svar på rapporter** (B-438, 122): eieren kan skrive til den som rapporterte eller den som skrev
   meldingen før et valg tas; spilleren ser det som «Fra admin» øverst i Meldinger og kan svare der (bare når eieren har
   skrevet, ≤ 500 tegn, ingen lenker, hvert 3. s / 20 per dag). Varsel begge veier på prikken ved Skiftrapporten

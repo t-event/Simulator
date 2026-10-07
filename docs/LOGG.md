@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 395 – 2026-10-07: Statussjekk på main og ryddingen av meldinger (B-471)
+
+**Brukeren ba om:** «Gå gjennom dette med meg» (ryddefila og statussjekken), så «Da er alt gjort, fortsett».
+
+**Gjort:** sjekket før kjøringen at alle kolonnene fila bruker finnes, og at ingenting var gammelt nok til å slettes. Eieren
+kjørte 108 i SQL-editoren og slo på beskyttelsen av `main` (PR + `sjekker`, ingen godkjenning) og auto-merge. Etterpå:
+`meldinger-rydding` aktiv 03:53 UTC, funksjonen med varselryddingen, ikke tilgjengelig for spillerne. 108 flyttet ut av
+`utkast/`; CLAUDE.md (PR-regelen venter på sjekken), STATUS, FORSLAG.
+
+**Testet:** spørringene over; denne PR-en er den første som går gjennom den nye sjekken.
+
+**Gjenstår:** 12.10 (verkstedet, nye spillere), 14.10 (første strømuke), 2.11 (skyggerapporten).
+
 ## Økt 394 – 2026-10-07: Sårbarhet i en byggepakke rettet
 
 **Brukeren ba om:** «Gjør det» – `npm audit fix` for varselet fra GitHub (Dependabot, høy alvorlighet).
