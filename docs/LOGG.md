@@ -5,6 +5,16 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 397 – 2026-10-07: Regelen for main gjelder også eieren
+
+**Brukeren ba om:** «Fikset» – krysset av for «Do not allow bypassing the above settings» på regelen for `main`.
+
+**Gjort:** prøvd med denne PR-en: merge før `sjekker` var ferdig, så etter. B-471 og FORSLAG oppdatert.
+
+**Testet:** se PR-en (avvist merge før sjekken, merge etter).
+
+**Gjenstår:** 12.10 (strømuka, verkstedet, nye spillere), 2.11 (skyggerapporten).
+
 ## Økt 396 – 2026-10-07: 17 feil fra gjennomgangen rettet (B-472)
 
 **Brukeren ba om:** gjennomgangen av de 22 PR-ene til #414 med 17 funn, kontofeilene og vervingen først og ukemetrikken

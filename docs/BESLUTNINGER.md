@@ -8793,6 +8793,8 @@ igjen SQL med sletting. Eieren gikk gjennom stegene 7.10 og gjorde begge.
 Beslutning:
 - **`main` krever PR og at `sjekker` er grønn** (klassisk regel, uten krav om godkjenning eller oppdatert gren). Claude venter
   på sjekken før merge (eller slår på auto-merge); en rød sjekk rettes, aldri omgås.
+  Tillegg 7.10 kveld: eieren krysset av for «Do not allow bypassing the above settings» etter at PR #414 ble merget før
+  sjekken var ferdig – regelen gjelder nå også eieren, og GitHub avviser en merge før `sjekker` er grønn.
 - **Ryddingen hver natt er i gang** (`dm_cleanup`, cron `meldinger-rydding` 03:53 UTC): privatmeldinger og avgjorte
   rapportsamtaler etter 30 dager, tomme samtaler, sendte varsler etter 14 dager, avslåtte enheter etter 60. Fila er flyttet
   fra `supabase/utkast/` til `supabase/108_meldinger_rydding.sql`. Sjekket etterpå: jobben er aktiv, funksjonen har
