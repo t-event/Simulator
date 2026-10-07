@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 406 – 2026-10-07: Fornyelsen forklart for eieren (B-481)
+
+**Brukeren ba om:** «fortsett».
+
+**Gjort:** før den første fornyelsen (skraplageret, anbudet åpner 11.10) fikk eieren ingen egen beskjed om at selskapet
+går tapt uten bud. Nå sier selskapskortet, Konsern → Oversikt, varsellinja og varselet på mobilen (147) det rett ut.
+
+**Testet:** DO-blokk med fornyelsen (eierens og de andres varsel), Playwright på 320/390/1366 px, `npm test`, `tsc -b`,
+lint, build.
+
+**Gjenstår:** fornyelsen 11.–13.10 (sjekk satt til 13.10 kl. 02:00 UTC); 12.10 (strømuka, verkstedet, nye spillere),
+2.11 (skyggerapporten).
+
+---
+
 ## Økt 405 – 2026-10-07: Første fornyelse prøvekjørt, riktig dato for neste bud (B-480)
 
 **Brukeren ba om:** «fortsett».

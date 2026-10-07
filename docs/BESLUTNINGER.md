@@ -8958,3 +8958,18 @@ Ikke endret: pausen etter et avverget bud følger selskapet, ikke eieren, så en
 er i tråd med at pausen skal skjerme selskapet mot nye bud rett etter hverandre (B-441).
 Testet i DO-blokker som ble rullet tilbake, med både fornyelse til en annen eier og til samme eier. Etter migrasjonen
 viser skraplageret `sent` og slagghåndteringen `vern` til 8.10.
+
+## B-481 Fornyelsen: eieren får vite at hen må by for å beholde selskapet (2026-10-07)
+Den første fornyelsen av en konsesjon kommer 11.–13.10 (skraplageret). Eieren har ingen fordel i fornyelsesanbudet
+(`renewal_max` = 0) og mister selskapet uten bud. Likevel sto det «Du eier det» på kortet, og eieren fikk samme varsel som
+alle andre («Anbudet på skraplageret er åpent»). Det var lett å tro at selskapet ble fornyet av seg selv.
+Nå sier appen og varselet det rett ut:
+- **Selskapskortet:** så lenge eieren ikke har bydd, står det «Perioden din går ut … Vil du beholde selskapet, må du
+  by» øverst i anbudet.
+- **Konsern → Oversikt og varsellinja:** «Perioden din på skraplageret går ut» og «By for å beholde skraplageret» i
+  stedet for «Anbud på … er åpent». Fornyelsen av eget selskap går foran andre anbud (`OpenTender.mine`).
+- **Varsel på mobilen (migrasjon 147, `push_on_tender`):** eieren får «Perioden din på … går ut – by for å beholde
+  selskapet». Varselet har samme ref som før, så det blir ett varsel, ikke to.
+Reglene er uendret. Ingen konto-endring: anbudene krever konto som før (KONTO.md).
+Testet: DO-blokk som ble rullet tilbake (fornyelsen åpnet, eieren fikk den nye teksten og de ni andre den vanlige), og
+Playwright med falsk server på 320, 390 og 1366 px (riktige tekster, ingen horisontal scrolling). `npm test`.

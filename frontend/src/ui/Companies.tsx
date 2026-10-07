@@ -52,7 +52,7 @@ import {
   type TakeoverRules,
 } from "../game/control";
 import { regionName } from "../game/regions";
-import { Button } from "./ds";
+import { Button, Callout } from "./ds";
 import type { PolicyId } from "../game/types";
 import { ORDER_REFUSAL_TEXT } from "../game/konsernWorld";
 import { applyKonsern, setPolicy } from "../net/konsern";
@@ -415,6 +415,13 @@ export function IndustryPanel({ g, act }: { g: GameState; act: GameApi["act"] })
                 <Icon name="clock" /> stenger om {timeLeft(t.closesAt)}
               </span>
             </header>
+            {/* Fornyelsen (B-481): eieren har ingen fordel og mister selskapet uten bud */}
+            {c.mine && !t.myBid && (
+              <Callout tone="heat">
+                Perioden din går ut {until}. Vil du beholde selskapet, må du by – du stiller likt med alle andre, og
+                høyeste bud vinner.
+              </Callout>
+            )}
             <p className="g-tender-mine">
               {t.myBid ? (
                 <>

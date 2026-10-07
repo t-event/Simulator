@@ -10,6 +10,8 @@ export type OpenTender = {
   type: Company["type"];
   /** Noen prøver å overta et selskap du eier (B-335): angriperens kallenavn. Går foran anbudene */
   attacker?: string;
+  /** Fornyelsen av et selskap du eier (B-481): du må by for å beholde det */
+  mine?: boolean;
 };
 
 // Selskapskortene sier fra når et bud er lagt inn eller trukket, så merket i menyen følger med med én gang
@@ -58,7 +60,8 @@ export function useOpenTender(
           // Det som stenger først, av anbudene spilleren ikke har bydd på
           const c = w.companies
             .filter((x) => x.tender && x.tender.myBid === null && Date.parse(x.tender.closesAt) > realNow())
-            .sort((a, b) => Date.parse(a.tender!.closesAt) - Date.parse(b.tender!.closesAt))[0];
+            // Fornyelsen av et selskap du eier, går foran de andre anbudene (B-481)
+            .sort((a, b) => +b.mine - +a.mine || Date.parse(a.tender!.closesAt) - Date.parse(b.tender!.closesAt))[0];
           // Et forsøk på å overta et selskap du eier, går foran (B-335)
           const hit = w.companies.find((x) => x.mine && x.takeover && !x.takeover.mineAttack);
           if (!alive) return;
@@ -68,7 +71,7 @@ export function useOpenTender(
             hit?.takeover
               ? { closesAt: hit.takeover.closesAt, name: hit.name, type: hit.type, attacker: hit.takeover.attacker }
               : c?.tender
-                ? { closesAt: c.tender.closesAt, name: c.name, type: c.type }
+                ? { closesAt: c.tender.closesAt, name: c.name, type: c.type, mine: c.mine }
                 : null,
           );
           resultRef.current?.(w);
