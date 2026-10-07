@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 392 – 2026-10-07: Oppfølging av anslaget og nye spillere
+
+**Brukeren ba om:** «Fortsett».
+
+**Gjort (bare lest, ingenting endret i databasen):**
+- Inntektsanslaget (B-464) etter første døgn: regnet på nytt 7.10, skraplageret 14,7 mill./dag mot 14,6 i snitt betalt de
+  siste 7 dagene; slagghåndteringen 16,0 mot 18,5 og 17,8 (bare to dager med betaling). Verdensjobbene ok, ingen åpne
+  oppkjøp eller anbud, 10 enheter med varsler.
+- Gjestekontoene virker: 4 gjester siste uke, alle har lagret. FORSLAG: punktet flyttet til «Avgjort».
+- Nye kontoer siste uke: 13 (pluss 4 gjester). Samme mønster som 5.10 hos dem som står fast på verkstedet (mange
+  kontrakter, lavt omdømme, negativ kasse), men ingen ny spiller har begynt etter at B-461 kom ut 5.10 – for tidlig å si om
+  rådene hjelper. Oversikten 12.10 står.
+
+**Testet:** bare spørringer.
+
+**Gjenstår:** oversikten over nye spillere 12.10; mekanisk verksted 12.10; eieren kjører 108 og slår på statussjekken.
+
 ## Økt 391 – 2026-10-06: Oppkjøp 12 avgjort, realistisk inntektsanslag lagt inn (B-464)
 
 **Brukeren ba om:** påminnelsene etter oppkjøp 12: sjekk utfallet (bare lese), og legg så inn B-464.
