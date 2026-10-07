@@ -109,7 +109,8 @@ til «Avgjort» nederst).
 
 ## Avgjort
 
-- **Beskytt main (B-397, B-471):** eieren slo på «Require status checks» (`sjekker`) og PR før merge 7.10.
+- **Beskytt main (B-397, B-471):** eieren slo på «Require status checks» (`sjekker`) og PR før merge 7.10, og samme kveld
+  «Do not allow bypassing the above settings» – regelen gjelder også eieren (og dermed Claude).
 - **Ryddingen av meldinger (B-421, B-471):** kjørt av eieren i SQL-editoren 7.10; cron `meldinger-rydding` hver natt.
 - **Gjestekontoer (B-212):** slått på av eieren 29.9. **Sjekket 7.10: virker** – 4 gjester laget siste uke, alle har
   lagret. Supabase anbefaler CAPTCHA mot misbruk; grensen er 30 nye gjester i timen per IP.
