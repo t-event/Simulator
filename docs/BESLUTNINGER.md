@@ -8785,3 +8785,17 @@ Testet: `npm test` (ny test: bytte til kompleks teller, avbestilling trekker fra
 køen), `balance.ts` og `balance.ts --daglig 15`.
 Krever konto: ja, som kjøp i konsernet ellers (B-326).
 Endringslogg: ja.
+
+## B-471 Statussjekk på main og ryddingen av meldinger lagt inn (2026-10-07)
+Status: gjelder. Fullfører B-397 og B-421/B-445.
+Bakgrunn: begge krevde eieren – GitHub-integrasjonen kan ikke endre beskyttelsen av grener, og Supabase-connectoren holder
+igjen SQL med sletting. Eieren gikk gjennom stegene 7.10 og gjorde begge.
+Beslutning:
+- **`main` krever PR og at `sjekker` er grønn** (klassisk regel, uten krav om godkjenning eller oppdatert gren). Claude venter
+  på sjekken før merge (eller slår på auto-merge); en rød sjekk rettes, aldri omgås.
+- **Ryddingen hver natt er i gang** (`dm_cleanup`, cron `meldinger-rydding` 03:53 UTC): privatmeldinger og avgjorte
+  rapportsamtaler etter 30 dager, tomme samtaler, sendte varsler etter 14 dager, avslåtte enheter etter 60. Fila er flyttet
+  fra `supabase/utkast/` til `supabase/108_meldinger_rydding.sql`. Sjekket etterpå: jobben er aktiv, funksjonen har
+  varselryddingen, og verken `anon` eller `authenticated` kan kalle den. Ingenting var gammelt nok til å slettes 7.10.
+Krever konto: nei (drift).
+Endringslogg: nei.
