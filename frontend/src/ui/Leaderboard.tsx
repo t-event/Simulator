@@ -262,7 +262,7 @@ function Leaderboard({
       ))}
       <p className="g-muted g-small-text g-board-scope-note">
         {kind === "konsern"
-          ? "Sesongens hovedkonkurranse: konsernkassa pluss 60 dagers utbytte og bidrag og det verkene kan selges for, minus lån – regnet av serveren i ekte tid, uansett spillfart. Sesongen avgjøres etter denne lista."
+          ? "Sesongens hovedkonkurranse: konsernkassa pluss 60 dagers utbytte og bidrag og det verkene kan selges for og selskapene gir ut konsesjonen, minus lån – regnet av serveren i ekte tid, uansett spillfart. Sesongen avgjøres etter denne lista."
           : kind === "utbetalt"
             ? "Fryst historikk: det som ble flyttet til eierens private formue mens kassa hadde et tak. Taket er fjernet, så tallene vokser ikke lenger."
             : kind === "kontroll"

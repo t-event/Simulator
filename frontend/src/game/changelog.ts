@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 476,
+    date: "2026-10-07",
+    title: "Selskapene teller i konsernverdien",
+    items: [
+      "Eier du et selskap, teller det nå i konsernverdien: inntekten per dag ganger dagene som er igjen av konsesjonen (høyst 60).",
+      "Fornyer du konsesjonen i anbudet, kommer verdien tilbake.",
+    ],
+  },
+  {
     b: 475,
     date: "2026-10-07",
     title: "Konsernverdien teller verkene",

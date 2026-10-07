@@ -475,8 +475,27 @@ export function contributionAt(perDayFull: number, activity: number): number {
 }
 
 /**
- * Konsernverdien slik topplista regner den (B-320, speiler `konsern_value` i 142): konsernkassa + 60 × (utbytte +
- * bidrag) + verkene og prosjektene som er betalt (B-475) − lån hjemme − lån i konsernbanken. Bidraget regnes med aktiviteten i siste betalte bidrag (B-417) – før sto en spiller som ikke hadde
+ * Selskapene spilleren eier, i konsernverdien (B-476, speiler `konsern_companies_value` i 143): inntektsanslaget per dag
+ * ganger dagene som er igjen av konsesjonen, høyst 60.
+ */
+export function companiesValue(
+  companies: Pick<Company, "mine" | "concessionUntil" | "estimatePerDay">[],
+  now = realNow(),
+): number {
+  let sum = 0;
+  for (const c of companies) {
+    if (!c.mine || !c.concessionUntil) continue;
+    const until = Date.parse(c.concessionUntil);
+    if (!Number.isFinite(until)) continue;
+    const days = Math.min(60, Math.max(0, (until - now) / 86_400_000));
+    sum += Math.max(0, c.estimatePerDay) * days;
+  }
+  return sum;
+}
+
+/**
+ * Konsernverdien slik topplista regner den (B-320, speiler `konsern_value` i 143): konsernkassa + 60 × (utbytte +
+ * bidrag) + verkene og prosjektene som er betalt (B-475) + selskapene (B-476) − lån hjemme − lån i konsernbanken. Bidraget regnes med aktiviteten i siste betalte bidrag (B-417) – før sto en spiller som ikke hadde
  * spilt på dager, med fullt bidrag. Serveren tar også med dagens produksjon så langt; den har ikke appen.
  */
 export function konsernValueOf(w: WorldStatus, loan: number): number {
@@ -486,7 +505,8 @@ export function konsernValueOf(w: WorldStatus, loan: number): number {
   return (
     w.treasury.balance +
     60 * (w.dividend.fullPerDay + contribution) +
-    (w.konsern ? konsernAssets(w.konsern) : 0) -
+    (w.konsern ? konsernAssets(w.konsern) : 0) +
+    companiesValue(w.companies ?? []) -
     Math.max(0, loan) -
     Math.max(0, w.konsern?.bank?.loan ?? 0)
   );
