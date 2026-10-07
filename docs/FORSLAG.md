@@ -50,16 +50,6 @@ til «Avgjort» nederst).
   datamengden. Avgjort: grunnlaget (datterverksutbyttet, B-392), Konsernverdi står, satsene 0,5/1,5/4 %
   med 80 % vern (B-393). Skyggerapporten sammenligner med 1/3/8 % og viser etableringen for seg.
 
-- **Slå på gjestekontoer (B-212):** eieren må slå på «Allow anonymous sign-ins» under Authentication → Sign In /
-  Providers i dashbordet (connectoren kan ikke). **29.9: eieren slår det på** – sjekk etterpå at det kommer gjester
-  (`select count(*) from auth.users where is_anonymous`). Til det er gjort, prøver appen én gang i døgnet og gjør ellers ingenting.
-  **29.9 ca. 23:07: slått på av eieren.** **Sjekket 30.9 kl. 12 (norsk tid): 0 gjester, 0 lagringer fra gjester, ingen
-  403 fra `guest_gate`.** Det eneste forsøket på å lage en gjest i døgnet før kom 29.9 kl. 18:40 – før påslåingen – og fikk
-  422 (slått av). Den enheten prøver igjen etter et døgn (`OFF_KEY`, ca. 18:40 30.9); ingen andre spillere uten konto har
-  nådd spilldøgn 2 siden. Innstillingen kan ikke leses herfra: sjekk igjen etter 30.9 kl. 19, eller åpne spillet i et
-  privat vindu, spill til døgn 2 og se etter en rad i `auth.users` med `is_anonymous`.
-  Supabase anbefaler også CAPTCHA mot misbruk; grensen er 30 nye gjester i timen per IP.
-
 ## Venter
 
 - **Pynt for sesong 3 (B-287, B-291) – må gjøres før sesong 3 startes (eieren 1.10: venter til da):** pynten for
@@ -80,7 +70,6 @@ til «Avgjort» nederst).
 - ~~Veksten på toppen (B-238)~~ **Avgjort (reform 2, B-302):** taket for kassa (B-303), utbytte i ekte tid til
   konsernkassa (B-304) og realistiske kostnader på toppen (B-305) er bygget. Gebyret på skraplageret (500 kr/t) settes
   etter anbudet.
-
 
 - ~~Toppliste for kontrollrommet~~ **Bygget (B-295).**
 - **Glemt passord** er ikke testet med ekte e-post ennå (brukeren, 2026-09-26). Ekte innlogging virker. Test det
@@ -121,6 +110,8 @@ til «Avgjort» nederst).
 
 ## Avgjort
 
+- **Gjestekontoer (B-212):** slått på av eieren 29.9. **Sjekket 7.10: virker** – 4 gjester laget siste uke, alle har
+  lagret. Supabase anbefaler CAPTCHA mot misbruk; grensen er 30 nye gjester i timen per IP.
 - **Forlatte gjester (B-377):** eieren sa ja 30.9. Gjester som ikke har lagret på 60 dager, slettes hver natt av
   `cleanup_guests()` (pg_cron `gjester-rydding`).
 
