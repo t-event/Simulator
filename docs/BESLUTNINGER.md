@@ -8863,3 +8863,21 @@ igjen. Spørringen lages nå av `supabase/utkast/funksjonsdrift.py` (bare lesing
 Verdensjobbene (`world_health`) står «ok», ingen cron-jobb har feilet og ingen varsler har feilet siste døgn.
 Krever konto: ikke relevant.
 Endringslogg: nei.
+
+## B-475 Konsernverdien teller verkene som eiendeler (2026-10-07)
+Eieren: «Om man oppgraderer konsernet sitt så går konsernverdien ned. Man tar penger fra konsernkassa for å oppgradere og
+da går verdien ned.» Konsernverdien (B-320) var konsernkassa + 60 dagers utbytte og bidrag − lån. To grunner til fallet:
+1. Prisen ble trukket fra kassa med én gang, mens utbyttet først økte når prosjektet var ferdig (9–13 timer med kø).
+2. For de største konsernene (26–32 mill. per dag) ga 60 dagers ekstra utbytte etter imperiebelastningen mindre enn
+   prisen for 4–7 av valgene (opptil 4,8 mill. lavere verdi også etter at prosjektet var ferdig).
+Eierens valg (av tre): **verkene teller som eiendeler.** `konsern_value` får `konsern_assets` (migrasjon 142): hvert verk
+med salgssummen (som `konsern_sell`: 60 % av byggeprisen med trinnene) – ikke et verk som fortsatt bygges – og hver betalt
+bestilling som ikke er ferdig (`kø`, `i gang`) med prisen. Speilet i `konsernAssets` (`game/konsernWorld.ts`) og
+`konsernValueOf` (`net/world.ts`). Prøvd som spiller i en rullet transaksjon: kassa −13,5 mill., konsernverdien uendret
+ved bestillingen og +6,2 mill. når moderniseringen var ferdig. Med en rabattert modernisering blir verdien
+−0,045 × pris + 60 × mer utbytte etter prosjektet – positiv for alle valgene spillerne har i dag; uten rabatten
+(standardverk) kan den bli svakt negativ for de største.
+Virkning på topplista (dry-run 7.10): verkene utgjør 1–30 % av verdien; plassene 1–4 bytter rekkefølge og nr. 9 blir nr. 7.
+Sesongrangeringen (`close_season`) og skyggerapporten (`program_shadow_report`) bruker samme funksjon og følger med.
+Krever konto: uendret (Konsernverdi krever konto som før).
+Endringslogg: ja.

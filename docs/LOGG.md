@@ -5,6 +5,19 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 400 – 2026-10-07: Konsernverdien faller ikke når man moderniserer (B-475)
+
+**Brukeren ba om:** «Om man oppgraderer konsernet sitt så går konsernverdien ned.»
+
+**Gjort:** årsaken funnet (prisen trekkes straks, utbyttet øker først når prosjektet er ferdig; for de største konsernene
+ga 60 dagers ekstra utbytte mindre enn prisen). Eieren valgte at verkene teller som eiendeler: migrasjon 142
+(`konsern_assets` i `konsern_value`), `konsernAssets` i appen, tekstene om konsernverdien.
+
+**Testet:** som spiller i rullet transaksjon (verdien uendret ved bestilling, +6,2 mill. ferdig), dry-run av topplista,
+`npm test` (nye tester i motoren og nettlaget), typesjekk, lint, bygg.
+
+**Gjenstår:** se at topplista og Konsern-siden viser samme tall etter publiseringen; 12.10 og 2.11 som før.
+
 ## Økt 399 – 2026-10-07: Databasen mot repoet (B-474)
 
 **Brukeren ba om:** «Fortsett».

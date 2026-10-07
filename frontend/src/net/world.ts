@@ -7,7 +7,7 @@ import type { GameState } from "../game/types";
 import { rpc } from "./supabase";
 import { nextWorldMidnight, realNow, worldDay } from "../game/clock";
 import type { TreasuryStatus } from "./treasury";
-import type { KonsernWorld } from "../game/konsernWorld";
+import { konsernAssets, type KonsernWorld } from "../game/konsernWorld";
 import { parseKonsern } from "./konsern";
 import { isRegion } from "../game/regions";
 import type { RegionId } from "../game/types";
@@ -475,8 +475,8 @@ export function contributionAt(perDayFull: number, activity: number): number {
 }
 
 /**
- * Konsernverdien slik topplista regner den (B-320, speiler `konsern_value` i 104): konsernkassa + 60 × (utbytte +
- * bidrag) − lån hjemme − lån i konsernbanken. Bidraget regnes med aktiviteten i siste betalte bidrag (B-417) – før sto en spiller som ikke hadde
+ * Konsernverdien slik topplista regner den (B-320, speiler `konsern_value` i 142): konsernkassa + 60 × (utbytte +
+ * bidrag) + verkene og prosjektene som er betalt (B-475) − lån hjemme − lån i konsernbanken. Bidraget regnes med aktiviteten i siste betalte bidrag (B-417) – før sto en spiller som ikke hadde
  * spilt på dager, med fullt bidrag. Serveren tar også med dagens produksjon så langt; den har ikke appen.
  */
 export function konsernValueOf(w: WorldStatus, loan: number): number {
@@ -485,7 +485,8 @@ export function konsernValueOf(w: WorldStatus, loan: number): number {
   // Lånet i konsernbanken trekkes også fra (B-437, 121)
   return (
     w.treasury.balance +
-    60 * (w.dividend.fullPerDay + contribution) -
+    60 * (w.dividend.fullPerDay + contribution) +
+    (w.konsern ? konsernAssets(w.konsern) : 0) -
     Math.max(0, loan) -
     Math.max(0, w.konsern?.bank?.loan ?? 0)
   );

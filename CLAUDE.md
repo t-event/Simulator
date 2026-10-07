@@ -425,7 +425,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   kostnadsposter i døgnregnskapet må vurderes i `contribution_margin` (drift eller ikke). Tallene i
   `config.world.contribution`. Lista «Konsernverdi» (`leaderboard('konsern')`, 063, B-320) regnes av `konsern_value` når
   den vises – kassa i spillet er ikke med; bidraget der har aktiviteten fra siste betaling (104, B-417, speilet i
-  `konsernValueOf`/`contributionAt` i `net/world.ts`) – aldri aktivitet 1 for alle; den gamle «verdi» (snapshots.equity) står for ligaer og titler.
+  `konsernValueOf`/`contributionAt` i `net/world.ts`) – aldri aktivitet 1 for alle. Verkene teller med salgssummen og betalte
+  prosjekter med prisen (`konsern_assets`, 142, speilet i `konsernAssets`, B-475) – et verk som bygges, bare med prisen; den gamle «verdi» (snapshots.equity) står for ligaer og titler.
 - **Salg av datterverk** (B-307): `sisterSalePrice` (60 % av byggekostnaden), aldri `sisterValue` (60 døgns overskudd med
   bonuser) – verdien er større enn prisen, så salg til verdi ga uendelig penger. Nye måter å kvitte seg med et verk på,
   bruker salgssummen.

@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 475,
+    date: "2026-10-07",
+    title: "Konsernverdien teller verkene",
+    items: [
+      "Konsernverdien tar nå med det verkene i konsernet kan selges for. Et prosjekt du har betalt, teller med prisen til det er ferdig.",
+      "Moderniserer eller bygger du, går ikke konsernverdien ned lenger – pengene flytter fra kassa til verket.",
+      "Rekkefølgen på topplista «Konsernverdi» kan ha endret seg, fordi alle verk nå teller med.",
+    ],
+  },
+  {
     b: 473,
     date: "2026-10-07",
     title: "Flere små rettelser",

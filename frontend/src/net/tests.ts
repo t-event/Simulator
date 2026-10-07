@@ -2741,6 +2741,42 @@ const main = async () => {
       konsern: w,
     } as unknown as Parameters<typeof konsernValueOf>[0];
     assert(konsernValueOf(status, 0) === 10e6 + 60e6 - 3_792_940, `konsernverdi ${konsernValueOf(status, 0)}`);
+    // Verkene teller med salgssummen og betalte prosjekter med prisen (B-475, speiler konsern_assets i 142)
+    const withPlants = {
+      ...status,
+      konsern: {
+        ...w,
+        plants: [
+          { id: 1, type: "storverk", name: "A", level: 1, boughtDay: 0, downUntilDay: 0 },
+          {
+            id: 2,
+            type: "stalverk",
+            name: "B",
+            level: 0,
+            boughtDay: 0,
+            downUntilDay: 0,
+            project: { kind: "bygg", startedAt: 0, readyAt: 1 },
+          },
+        ],
+        orders: [
+          {
+            id: 9,
+            kind: "bygg",
+            plantId: 2,
+            type: "stalverk",
+            name: "B",
+            cost: 5e6,
+            startsAt: 0,
+            readyAt: 1,
+            status: "i gang",
+          },
+        ],
+      },
+    } as unknown as Parameters<typeof konsernValueOf>[0];
+    assert(
+      konsernValueOf(withPlants, 0) === 10e6 + 60e6 - 3_792_940 + 20e6 * 1.3 * 0.6 + 5e6,
+      `konsernverdi med verk ${konsernValueOf(withPlants, 0)}`,
+    );
   });
 
   await test("Profilen tåler svaret fra serveren og viser aldri ukjente felt (B-419)", () => {

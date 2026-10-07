@@ -27,7 +27,8 @@ export const BOARDS: {
   unit: "kr" | "rep" | "dager" | "poeng" | "t";
   group: BoardGroup;
 }[] = [
-  // Konsernverdien regnet av serveren (B-320): konsernkassa + 60 dagers utbytte og bidrag − lån, i ekte tid.
+  // Konsernverdien regnet av serveren (B-320): konsernkassa + 60 dagers utbytte og bidrag + verkene (B-475) − lån,
+  // i ekte tid.
   // Sesongens hovedkonkurranse (B-384): sesongen avsluttes etter denne (close_season)
   { id: "konsern", label: "Konsernverdi", unit: "kr", group: "verden" },
   // Eget verk (B-384): kasse − lån + verkenes verdi i spillet, med ligaer og titler (B-320)
