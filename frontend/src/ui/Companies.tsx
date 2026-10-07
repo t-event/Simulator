@@ -30,7 +30,9 @@ import {
 import {
   bidToTake,
   takeoverMinBid,
+  buyoutAt,
   buyoutPay,
+  lastBidAt,
   CONTROL_PARTS,
   controlAfterInvest,
   controlSteps,
@@ -666,8 +668,14 @@ function ControlSection({
       )}
       {takeoversOn && !c.takeover && ctl.buyout && !(vern && endsAt && vern >= endsAt) && (
         <p className="g-muted g-small-text g-buyout">
-          Blir selskapet kjøpt med det budet, får du ca. {fmtKr(buyoutPay(take, ctl.buyout).kasse)} i konsernkassa:
-          inntekten for dagene som er igjen og 85 % av det du har investert (aldri mer enn 85 % av budet).
+          Blir selskapet kjøpt med det budet, får du ca.{" "}
+          {fmtKr(
+            buyoutPay(take, buyoutAt(ctl.buyout, (vern ?? realNow()) + TAKEOVER.defenseHours * 3_600_000, realNow()))
+              .kasse,
+          )}{" "}
+          i konsernkassa: inntekten for dagene som er igjen når budet avgjøres ({TAKEOVER.defenseHours} timer etter at
+          det er lagt inn), og 85 % av det du har investert – aldri mer enn 85 % av budet. Beløpet blir mindre for hver
+          dag som går.
         </p>
       )}
       {steps.length > 0 && (
@@ -1073,6 +1081,12 @@ function TakeoverSection({
         (w.open ? (
           <details className="g-details">
             <summary>Kjøp selskapet</summary>
+            {lastBidAt(c.concessionUntil) !== null && (
+              <p className="g-small-text">
+                Bud kan legges inn til {fmtWhen(new Date(lastBidAt(c.concessionUntil)!).toISOString())} –{" "}
+                {TAKEOVER.lastDays} dager før perioden til eieren går ut. Etter det kommer et nytt anbud.
+              </p>
+            )}
             <p className="g-small-text">
               Et oppkjøpsbud må være minst {fmtKr(w.minBid)} – 10 dagers inntekt, eller siste anbudspris opptil 12
               dagers inntekt – og betales fra konsernkassa med én gang. Alle ser budet, og eieren har{" "}
@@ -1102,7 +1116,7 @@ function TakeoverSection({
           w.reason !== "pagar" && (
             <p className="g-muted g-small-text">
               Oppkjøp: {TAKEOVER_REASON[w.reason] ?? ""}
-              {w.reason === "pause" && w.from ? ` Nye bud fra ${fmtWhen(w.from)}.` : ""}
+              {(w.reason === "pause" || w.reason === "vern") && w.from ? ` Nye bud fra ${fmtWhen(w.from)}.` : ""}
             </p>
           )
         ))
@@ -1140,8 +1154,9 @@ function DefenseVerdict({ c, fund }: { c: Company; fund: number }) {
       {need !== null && t.rules === 2 && ctl.buyout && (
         <>
           {" "}
-          Blir selskapet kjøpt, får du ca. {fmtKr(buyoutPay(t.bid, ctl.buyout).kasse)} for dagene du mister og det du
-          har investert.
+          Blir selskapet kjøpt, får du ca.{" "}
+          {fmtKr(buyoutPay(t.bid, buyoutAt(ctl.buyout, Date.parse(t.closesAt), realNow())).kasse)} for dagene du mister
+          og det du har investert.
         </>
       )}
     </p>

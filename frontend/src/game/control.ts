@@ -144,6 +144,8 @@ export const TAKEOVER = {
   defenseHours: 72,
   /** Ny eier er vernet de første dagene (`protect_days`) */
   protectDays: 3,
+  /** Ingen nye bud de siste dagene av konsesjonen (`last_days`, `takeover_window` → «sent») */
+  lastDays: 5,
   /** Kjøperen eier selskapet minst så mange dager fra kjøpet (`config.world.concession_days`, `resolve_takeovers`) */
   ownDays: 14,
 };
@@ -342,6 +344,22 @@ export function takeoverPayoff(p: {
     net: Math.round(income - Math.max(0, p.bid)),
     back: Math.round(Math.max(0, p.bid) * bidBack(p.rules)),
   };
+}
+
+/**
+ * Eierens periode slik den står når budet avgjøres (B-478): serveren betaler for dagene som er igjen *da*
+ * (`resolve_takeovers`), ikke da budet ble lagt inn – så anslaget regnes ved fristen.
+ */
+export function buyoutAt(b: Buyout, decidedAt: number, now: number): Buyout {
+  const gone = Math.max(0, decidedAt - now) / 86_400_000;
+  return { ...b, daysLeft: Math.max(0, b.daysLeft - gone) };
+}
+
+/** Siste øyeblikk et nytt oppkjøpsbud kan legges inn (ms): `lastDays` før konsesjonen går ut (B-478), eller null */
+export function lastBidAt(concessionUntil: string | null | undefined): number | null {
+  if (!concessionUntil) return null;
+  const until = Date.parse(concessionUntil);
+  return Number.isFinite(until) ? until - TAKEOVER.lastDays * 86_400_000 : null;
 }
 
 /** Det mest eieren kan få i kassa ved et oppkjøp nå, uansett bud (dagene som er igjen og investeringene) */

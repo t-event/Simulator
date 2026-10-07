@@ -5,6 +5,17 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 403 – 2026-10-07: Oppkjøp bedre forklart (B-478)
+
+**Brukeren ba om:** hva en eier får ved et oppkjøp, om det burde vært bedre forklart, og så «gå for din anbefaling».
+
+**Gjort:** eierens anslag regnes ved fristen for budet (`buyoutAt`), kjøperen ser siste dag for bud (`lastBidAt`) og datoen
+når vernet slutter. Bare appen; serveren og reglene er som før.
+
+**Testet:** typesjekk, lint, `npm test` (ny test), bygg, Playwright av Industrien på 320/390/1366 px.
+
+**Gjenstår:** 12.10 og 2.11 som før.
+
 ## Økt 402 – 2026-10-07: Databasen ble «unhealthy» (B-477)
 
 **Brukeren ba om:** «Databasen ble unhealthy».

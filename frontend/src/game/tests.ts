@@ -29,7 +29,9 @@ import { MASTERY, MASTERY_IDS, masteryCost, masteryEffect, masteryOpen } from ".
 import {
   bidToTake,
   buyoutMax,
+  buyoutAt,
   buyoutPay,
+  lastBidAt,
   controlAdvice,
   controlAfterInvest,
   controlSteps,
@@ -4232,6 +4234,23 @@ test("Oppkjøp: eieren får dagene hen mister og det hen investerte, høyst 85 %
   assert(buyoutMax(b) === 167_000_000, "mest mulig");
   // Et svært høyt bud gir ikke mer: penger kan ikke flyttes mellom spillere med oppkjøp
   assert(buyoutPay(10e9, b).kasse === buyoutPay(1e9, b).kasse, "budet over erstatningen forsvinner");
+});
+
+test("Oppkjøp: eierens anslag regnes ved fristen, og siste dag for bud er 5 dager før perioden går ut (B-478)", () => {
+  const day = 86_400_000;
+  const now = Date.parse("2026-10-07T18:00:00Z");
+  const b = { perDay: 14_700_000, daysLeft: 5.3, investedKasse: 34_740_000, investedFond: 0 };
+  // Avgjøres 72 timer etter budet: 2,3 dager igjen da, ikke 5,3
+  const at = buyoutAt(b, now + 72 * 3_600_000, now);
+  assert(Math.abs(at.daysLeft - 2.3) < 1e-9 && at.perDay === b.perDay, `dager ${at.daysLeft}`);
+  assert(
+    buyoutPay(147_000_000, at).kasse === Math.round(2.3 * 14_700_000 + 0.85 * 34_740_000),
+    `ved fristen ${buyoutPay(147_000_000, at).kasse}`,
+  );
+  // Aldri under null dager, og en frist som alt er passert, trekker ikke fra noe
+  assert(buyoutAt(b, now + 10 * day, now).daysLeft === 0 && buyoutAt(b, now - day, now).daysLeft === 5.3, "grensene");
+  assert(lastBidAt("2026-10-13T01:33:00Z") === Date.parse("2026-10-08T01:33:00Z"), "siste dag for bud");
+  assert(lastBidAt(null) === null && lastBidAt("tull") === null, "uten periode");
 });
 
 test("K-1: programkostnaden regnes av normalinntekten før hendelsen og trekkes for seg (B-391)", () => {
