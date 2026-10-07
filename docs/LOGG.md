@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 404 – 2026-10-07: Gjennomgang av B-475–B-478 (B-479)
+
+**Brukeren ba om:** «fortsett» – gjennomgangen av dagens endringer.
+
+**Gjort:** gikk gjennom konsernverdien (verkene, bestillingene og selskapene), lageret til topplista og oppkjøpsfristene
+mot serveren. Alt stemte, bortsett fra at jobben `konsernverdi` regnet alle i én setning (én feil stoppet lista for alle,
+uten varsel). Migrasjon 145: én spiller per deltransaksjon, feil i `world_job_units`, jobben med i `world_health`.
+
+**Testet:** DO-blokker som ble rullet tilbake (vanlig kjøring og én spiller som feiler), `world_health()` etter at
+migrasjonen ble lagt inn.
+
+**Gjenstår:** 12.10 (første strømuke, mekanisk verksted, gjennomgang av nye spillere), 2.11 (skyggerapporten for V0/K-1).
+
+---
+
 ## Økt 403 – 2026-10-07: Oppkjøp bedre forklart (B-478)
 
 **Brukeren ba om:** hva en eier får ved et oppkjøp, om det burde vært bedre forklart, og så «gå for din anbefaling».
