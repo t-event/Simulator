@@ -5,6 +5,18 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 399 – 2026-10-07: Databasen mot repoet (B-474)
+
+**Brukeren ba om:** «Fortsett».
+
+**Gjort:** helsesjekk (verdensjobbene, cron, varslene siste døgn: alt i orden) og kontrollen av funksjonene i databasen mot
+repoet (B-403) etter migrasjon 099–141. 27 avvik, alle forklart av replace()-patcher i repoet; ingen manglende
+funksjoner. Skriptet `supabase/utkast/funksjonsdrift.py` lager spørringen.
+
+**Testet:** skriptet gir de samme sjekksummene som spørringen som ble kjørt.
+
+**Gjenstår:** 12.10 (strømuka, verkstedet, nye spillere), 2.11 (skyggerapporten).
+
 ## Økt 398 – 2026-10-07: Egen gjennomgang av B-472 (B-473)
 
 **Brukeren ba om:** «Fortsett».
