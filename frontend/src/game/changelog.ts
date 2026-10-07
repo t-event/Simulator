@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 478,
+    date: "2026-10-07",
+    title: "Oppkjøp forklart bedre",
+    items: [
+      "Eier du et selskap, viser appen nå hva du får hvis det blir kjøpt, regnet når budet avgjøres – ikke i dag. Beløpet var for høyt før.",
+      "Vil du kjøpe et selskap, ser du til hvilken dag det går an å by, og når en ny eier ikke lenger er vernet.",
+    ],
+  },
+  {
     b: 477,
     date: "2026-10-07",
     title: "Raskere toppliste",

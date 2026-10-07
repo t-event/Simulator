@@ -8908,3 +8908,19 @@ opptil et minutt gammel; Konsern-siden regner sin egen. `close_season` regner fo
 Stopp jobben med `select cron.unschedule('konsernverdi');` (da står lista stille).
 Krever konto: uendret.
 Endringslogg: ja.
+
+## B-478 Oppkjøp bedre forklart: eierens anslag ved fristen, siste dag for bud og datoen for vernet (2026-10-07)
+Eieren spurte hva en eier får ved et oppkjøp, og om det burde vært bedre forklart. Tre ting, eieren: «gå for din anbefaling»:
+1. **Eierens anslag var for høyt.** Appen regnet utbetalingen med dagene som er igjen nå, mens serveren betaler for dagene
+   som er igjen når budet avgjøres (`resolve_takeovers`, minst 72 timer senere). Med 5,3 dager igjen viste appen ca. 107
+   mill. i stedet for ca. 63 mill. Nå regnes anslaget ved fristen (`buyoutAt` i `game/control.ts`): for et nytt bud
+   72 timer fra nå (eller fra vernet slutter), for et bud som står, ved `closesAt`. Teksten sier at beløpet synker for
+   hver dag.
+2. **Kjøperen fikk ikke vite når det stenger.** Nye bud kan ikke legges inn de siste 5 dagene av konsesjonen (`last_days`),
+   og appen sa det bare når det alt var stengt. Nå står «Bud kan legges inn til …» (`lastBidAt`) i «Kjøp selskapet».
+3. **Vernet viste ikke dato for kjøperen.** Serveren sender `from` også for vernet; appen viser nå «Nye bud fra …» der
+   som for pausen.
+Ingen endring på serveren eller i reglene. Testet: `npm test` (ny test med tallene fra Skraplageret), Playwright av
+Industrien på 320, 390 og 1366 px med falsk server (riktige tekster, ingen horisontal scrolling).
+Krever konto: uendret.
+Endringslogg: ja.
