@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 482,
+    date: "2026-10-09",
+    title: "Hjelp til nye verk",
+    items: [
+      "I garasjen og på verkstedet kan du ikke lenger signere en kontrakt verket ikke rekker før fristen. Sene kontrakter koster bot og omdømme, og det var den vanligste grunnen til at nye verk gikk tom for penger.",
+      "Står ovnen fordi kassa ikke har råd til ny foring, kan du trykke «Lån og bytt» rett ved ovnen. Banken låner det som mangler, og foringen byttes med én gang.",
+    ],
+  },
+  {
     b: 481,
     date: "2026-10-07",
     title: "Beskjed når perioden på selskapet ditt går ut",

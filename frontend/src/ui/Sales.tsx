@@ -19,6 +19,7 @@ import {
   recipeEstimate,
   sellLot,
   sellAllFree,
+  signBlocked,
   freeStockT,
   spotPrice,
 } from "../game/engine";
@@ -160,6 +161,8 @@ function answerText(hours: number) {
 /** Det viktigste med en forespørsel først (B-241): hvem, hvor mye og om verket rekker det – så tallene og kravene */
 function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; committed: number }) {
   const { checks, days, tone } = offerChecks(g, stats, c, committed);
+  // Garasjen og verkstedet signerer ikke det de ikke rekker (B-482): bare «Avslå»
+  const blocked = signBlocked(g, c, stats);
   // «Signer likevel» spør først (B-461): nye spillere signerte mange kontrakter verket ikke rakk, og bøtene tok kassa
   const [confirmSign, setConfirmSign] = useState(false);
   const hours = answerHours(g, c);
@@ -223,7 +226,12 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
             : `Omdømme +${fmtNum(c.repGain, 1)} ved levering, −${fmtNum(c.repLoss, 1)} og bot ${fmtKr(c.penaltyPerT)}/tonn hvis for sent.`}
         </p>
       </details>
-      {confirmSign && tone === "bad" && (
+      {blocked && (
+        <p className="g-note g-warn g-offer-blocked" role="status">
+          <Icon name="warning" /> {blocked}
+        </p>
+      )}
+      {!blocked && confirmSign && tone === "bad" && (
         <div className="g-note g-warn g-offer-confirm" role="alert">
           {c.landmark
             ? "Verket kan ikke lage dette nå. Signere likevel?"
@@ -246,14 +254,16 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
       )}
       {/* Rekker verket det ikke, er avslag det foreslåtte valget (B-241) */}
       <div className="g-row g-offer-actions">
+        {!blocked && (
+          <button
+            className={tone === "bad" ? undefined : "g-primary"}
+            onClick={() => (tone === "bad" ? setConfirmSign(true) : act((gg) => acceptContract(gg, c.id)))}
+          >
+            {tone === "bad" ? "Signer likevel…" : "Signer"}
+          </button>
+        )}
         <button
-          className={tone === "bad" ? undefined : "g-primary"}
-          onClick={() => (tone === "bad" ? setConfirmSign(true) : act((gg) => acceptContract(gg, c.id)))}
-        >
-          {tone === "bad" ? "Signer likevel…" : "Signer"}
-        </button>
-        <button
-          className={tone === "bad" ? "g-primary" : undefined}
+          className={tone === "bad" || blocked ? "g-primary" : undefined}
           onClick={() => act((gg) => declineContract(gg, c.id))}
         >
           Avslå

@@ -98,7 +98,7 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
   if (stopped && g.cash >= -creditLimit(g, stats) && g.furnaces.some((f) => f.waitReason?.includes("mangler penger")))
     out.push({
       tone: "critical",
-      text: `Verket står: ${stopped}. Selg skrap du ikke trenger under Marked, eller ta opp lån under Verket → Økonomi – og ikke signer nye kontrakter før ovnen går igjen.`,
+      text: `Verket står: ${stopped}. Trykk «Lån og bytt» ved ovnen på Verket, eller selg skrap du ikke trenger under Marked – og ikke signer nye kontrakter før ovnen går igjen.`,
       view: "marked",
       sub: "skrap",
     });

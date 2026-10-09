@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 407 – 2026-10-09: Nybegynnerpakken (B-482)
+
+**Brukeren ba om:** «Lag en skikkelig liste for idag. Bygg en stor oppdatering og push.»
+
+**Lista:** (1) sperre i Salg på garasjen og verkstedet, (2) «Lån og bytt foringen», (3) nybegynnertallene som fast
+spørring, (4) påminnelse 12.10 om mekanisk verksted, (5) tester, balanse, Playwright, docs, PR.
+
+**Gjort:** gikk gjennom de 10 spillerne på nivå 0–1 (hva tok kassa: for mange kontrakter og bøter, og en ovn som sto uten
+penger til foringen). Alle fem punktene er gjort. Påminnelsen fyrer 12.10 kl. 07:00 UTC.
+
+**Testet:** `npm test`, `tsc -b`, lint, build, `balance.ts` (exit 0), Playwright på 320/390/1366 px.
+
+**Gjenstår:** fornyelsen av skraplageret 11.–13.10 (sjekk 13.10 kl. 02:00 UTC), 12.10 (verkstedet, nybegynnertallene,
+første strømuke), 2.11 (skyggerapporten). Venter på eieren: rekonstruksjon etter konkurs (A–E).
+
+---
+
 ## Økt 406 – 2026-10-07: Fornyelsen forklart for eieren (B-481)
 
 **Brukeren ba om:** «fortsett».

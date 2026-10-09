@@ -8973,3 +8973,28 @@ Nå sier appen og varselet det rett ut:
 Reglene er uendret. Ingen konto-endring: anbudene krever konto som før (KONTO.md).
 Testet: DO-blokk som ble rullet tilbake (fornyelsen åpnet, eieren fikk den nye teksten og de ni andre den vanlige), og
 Playwright med falsk server på 320, 390 og 1366 px (riktige tekster, ingen horisontal scrolling). `npm test`.
+
+## B-482 Nybegynnerpakken: sperre i Salg på de første nivåene og «Lån og bytt foringen» (2026-10-09)
+Eieren 9.10: «Lag en skikkelig liste for idag. Bygg en stor oppdatering og push.» Grunnlaget er nybegynnertallene for
+siste 7 dager: 14 nye kontoer, 10 i garasjen eller på verkstedet, 4 av dem med kassa i minus og én konkurs. Advarselen og
+spørsmålet før signering (B-461) var ikke nok. Én spiller i garasjen hadde 10 aktive kontrakter, og ble ferdig ca. 1 t i
+døgnet mot 33 t med frister om 2–12 døgn. Spilleren som gikk konkurs hadde 23 misligholdte kontrakter og 183 000 kr i bot
+på ett døgn. En tredje sto i flere døgn med «mangler penger til omforing», uten produksjon og med lønn som gikk.
+1. **Sperre i Salg (forslag a fra 5.10):** på nivå 0–1 (`SIGN_BLOCK_STAGE_MAX`) kan en kontrakt som ikke rekker fristen
+   («Rekker det ikke», `assessOffer(...).tight`), ikke signeres. Kortet viser bare «Avslå» og grunnen med vanlige ord.
+   Sjekken står også i `acceptContract`, så ingen vei rundt den i appen. Unntak: hendelseskortene (spilleren har sagt
+   ja i kortet, `force`) og salgsdirektøren. Fra støperiet er det som før (advarsel og spørsmål).
+   Testspilleren håndterer at signeringen kan avvises.
+2. **«Lån og bytt foringen»:** står en ovn fordi kassa ikke har råd til ny foring, viser varselet på Verket og raden i
+   vedlikeholdet «Lån X kr og bytt». Den låner det som mangler under kredittgrensen (rundet opp til hele tusen) og bytter
+   med én gang (`relineLoanNeed`/`relineOnLoan`). Låner banken ikke nok, står det hva som hjelper. Ovnens ventegrunn
+   byttes med én gang til stansen (før sto «mangler penger» til neste time). Rådene peker på knappen.
+3. **Nybegynnertallene som fast spørring:** `supabase/utkast/nybegynnere.sql` (leser bare, spillerne som kort hash).
+4. Påminnelse 12.10: mekanisk verksted (B-256) og ny oversikt over nybegynnerne.
+Konto: ingen endring – alt er i eget spill (KONTO.md). Ikke tatt: rekonstruksjon etter konkurs (venter på eierens valg,
+B-409) og pynt for sesong 3 (eieren: venter til sesongen startes).
+Testet:
+- `npm test`, med en ny test for sperren, unntakene og lånet.
+- `balance.ts`: alle nivådager innenfor målene, nybegynneren på storverket median dag 183, 0 konkurs.
+- Playwright på 320, 390 og 1366 px: garasjen viser bare «Avslå» med grunnen, og «Lån 8 000 kr og bytt» byttet
+  foringen. Ingen horisontal scrolling.

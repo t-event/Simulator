@@ -29,7 +29,7 @@ function furnaceHelp(g: GameState, text: string): string | null {
     return "Fellesferie: alle har ferie, og ovnene får vedlikehold. Starter igjen av seg selv etter tre uker.";
   if (/^Planlagt stans/.test(text)) return "Vedlikehold som er satt i gang. Blir ferdig av seg selv.";
   if (/mangler penger til omforing/.test(text))
-    return "Foringen må byttes, men kassa er tom. Selg stål under Salg, eller ta opp lån under Verket → Økonomi.";
+    return "Foringen må byttes, men kassa er tom. Trykk «Lån og bytt» ved ovnen på Verket, eller selg stål under Salg.";
   if (/Mangler skrap|Tomt for skrap/.test(text)) return scrapStopHelp(g);
   if (/Mangler folk/.test(text)) return "Det er ikke nok folk på skiftet. Ansett under Folk → Ansett.";
   if (/Utenfor arbeidstid/.test(text))

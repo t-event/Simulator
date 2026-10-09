@@ -32,6 +32,12 @@ regnes av serveren i ekte tid.
   men null når hele verket står til spilleren gjør noe (ingen penger til omforing, ingen folk). «Signer likevel…» spør
   med boten. Råd på Verket når verket står og når kontrakter i køen ikke rekker fristen; avbryting foreslås bare når
   den er billigere enn boten ved fristen (bot av ulevert ved fristen mot 60 % av det som gjenstår).
+- **Sperren i garasjen og på verkstedet** (B-482): på nivå 0–1 kan en kontrakt som ikke rekker fristen («Rekker det ikke»),
+  ikke signeres – bare avslås (`signBlocked`, også i `acceptContract`). Fra støperiet er det advarsel og spørsmål som før.
+  Hendelseskortene og salgsdirektøren sperres ikke.
+- **«Lån og bytt foringen»** (B-482): står en ovn fordi kassa (med kreditten) ikke har råd til ny foring, låner knappen ved
+  ovnen det som mangler (rundet opp til hele tusen) og bytter med én gang (`relineOnLoan`). Låner banken ikke nok, står
+  det hva som hjelper i stedet.
 - Ingen hendelseskort om forhold mellom ansatte (trakassering, diskriminering, varsling) – tatt ut etter eierens ønske
   (B-444).
 - **Kassa har ikke tak** (B-381). Den kan vokse fritt – den gir ingen makt i verden.

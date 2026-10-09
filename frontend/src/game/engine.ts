@@ -1128,6 +1128,8 @@ export function startReline(
     f.spareProgress = 0;
     f.downUntilMin = g.minute + swap * 60;
     f.downReason = "Planlagt stans: bytter potte";
+    // Ventegrunnen («mangler penger til omforing») byttes med én gang (B-482), ikke først neste time
+    f.waitReason = f.downReason;
     countEvent(g, "omforinger");
     log(
       g,
@@ -1143,6 +1145,8 @@ export function startReline(
   f.lastRelineDay = day(g);
   f.downUntilMin = g.minute + hours * 60;
   f.downReason = "Planlagt stans: ny foring";
+  // Ventegrunnen («mangler penger til omforing») byttes med én gang (B-482), ikke først neste time
+  f.waitReason = f.downReason;
   countEvent(g, "omforinger");
   const inPlace = stats.furnace.arc ? " Reservepotta var ikke klar, så foringen mures om inne i ovnen." : "";
   log(
@@ -2808,9 +2812,33 @@ export function declineAgreement(g: GameState, id: number): void {
   g.agreements = g.agreements.filter((a) => !(a.id === id && a.status === "tilbud"));
 }
 
-export function acceptContract(g: GameState, id: number, by = "Du"): PurchaseResult {
+/**
+ * Sperren på de første nivåene (B-482): i garasjen og på verkstedet kan en kontrakt som ikke rekker fristen, ikke
+ * signeres. Advarselen og spørsmålet (B-461) var ikke nok – nye spillere signerte likevel ti kontrakter garasjen ikke
+ * rakk, og bøtene tok kassa og omdømmet. Gir grunnen, eller null når den kan signeres.
+ */
+export const SIGN_BLOCK_STAGE_MAX = 1;
+export function signBlocked(g: GameState, c: Contract, stats = computePlantStats(g)): string | null {
+  if (g.stage > SIGN_BLOCK_STAGE_MAX || c.landmark || c.status !== "tilbud") return null;
+  if (!assessOffer(g, stats, c).tight) return null;
+  const place = STAGE_DEFINITE_NAME[g.stage] ?? "verket";
+  return plantStopped(g)
+    ? `Verket står (${plantStopped(g)}), så det rekker ikke fristen. Få ovnen i gang først.`
+    : `${place[0].toUpperCase()}${place.slice(1)} rekker ikke denne før fristen med ordrekøen du har. Lever det du har først – en kontrakt som blir for sen, koster bot og omdømme.`;
+}
+const STAGE_DEFINITE_NAME = ["garasjen", "verkstedet"];
+
+export function acceptContract(
+  g: GameState,
+  id: number,
+  by = "Du",
+  /** Hendelseskortene (hasteordre o.l.): spilleren har alt sagt ja i kortet */
+  force = false,
+): PurchaseResult {
   const c = g.contracts.find((x) => x.id === id);
   if (!c || c.status !== "tilbud") return { ok: false, message: "Tilbudet finnes ikke lenger." };
+  const blocked = force || by === "Salgsdirektøren" ? null : signBlocked(g, c);
+  if (blocked) return { ok: false, message: blocked };
   c.status = "aktiv";
   c.acceptedDay = day(g);
   if (by === "Salgsdirektøren") c.byDirector = true;
