@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { requestReline } from "../game/actions";
+import { relineLoanNeed, relineOnLoan, requestReline, waitsForMoney } from "../game/actions";
 import { PLAN_SAFETY_WEAR } from "../game/engine";
 import { computePlantStats, unitType } from "../game/plant";
 import {
@@ -120,21 +120,25 @@ export function Maintenance({
                     ? f.downReason
                     : [`${day(g) - f.lastRelineDay} døgn siden omforing`, pot].filter(Boolean).join(" · ")}
                 </span>
-                <button
-                  className={`g-small${f.relineRequested ? " g-primary is-on" : ""}`}
-                  disabled={down || (f.wear < 0.1 && !f.relineRequested)}
-                  onClick={() => act((gg) => requestReline(gg, i))}
-                >
-                  {f.relineRequested
-                    ? "Byttes etter chargen ✓"
-                    : f.wear < 0.1
-                      ? "Ny foring"
-                      : busy
-                        ? "Bytt etter chargen"
-                        : u.arc && f.spareProgress >= 1
-                          ? `Bytt potte (${swapHours} t)`
-                          : `Bytt (${fmtKr(u.relineCost)})`}
-                </button>
+                {waitsForMoney(f) ? (
+                  <RelineMoneyAction g={g} i={i} act={act} />
+                ) : (
+                  <button
+                    className={`g-small${f.relineRequested ? " g-primary is-on" : ""}`}
+                    disabled={down || (f.wear < 0.1 && !f.relineRequested)}
+                    onClick={() => act((gg) => requestReline(gg, i))}
+                  >
+                    {f.relineRequested
+                      ? "Byttes etter chargen ✓"
+                      : f.wear < 0.1
+                        ? "Ny foring"
+                        : busy
+                          ? "Bytt etter chargen"
+                          : u.arc && f.spareProgress >= 1
+                            ? `Bytt potte (${swapHours} t)`
+                            : `Bytt (${fmtKr(u.relineCost)})`}
+                  </button>
+                )}
               </div>
             </li>
           );
@@ -225,6 +229,18 @@ export function Maintenance({
 }
 
 /** Kokillene i strengstøpingen (B-351): én rad under ovnene */
+/** «Lån og bytt foringen» (B-482): det som mangler lånes og foringen byttes med ett trykk – ellers hva som hjelper */
+export function RelineMoneyAction({ g, i, act }: { g: GameState; i: number; act: GameApi["act"] }) {
+  const need = relineLoanNeed(g, i);
+  if (need === null)
+    return <span className="g-small-text g-muted">Banken låner ikke nok. Selg skrap eller stål du ikke trenger.</span>;
+  return (
+    <button className="g-small g-primary" onClick={() => act((gg) => relineOnLoan(gg, i))}>
+      {need > 0 ? `Lån ${fmtKr(need)} og bytt` : "Bytt foringen"}
+    </button>
+  );
+}
+
 function MouldRow({ g, act }: { g: GameState; act: GameApi["act"] }) {
   const wear = mouldWear(g);
   const tone = wear >= MOULD.warnAt ? "critical" : wear > MOULD.riskFrom ? "warning" : "ok";

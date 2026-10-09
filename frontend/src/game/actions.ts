@@ -30,6 +30,7 @@ import {
   orderQueue,
   startReline,
   maxLoan,
+  creditLimit,
   newFurnaceUnit,
   oftenSick,
   setScheduledSwitch,
@@ -42,6 +43,7 @@ import {
 import {
   bonusGap,
   castingType,
+  computePlantStats,
   day,
   daysUntilAllBack,
   staffing,
@@ -53,6 +55,7 @@ import {
   POWER_BINDING_DAYS,
   unitHas,
   unitType,
+  unitView,
   wildcardUse,
 } from "./plant";
 import { newGradesAt, startRecipeGuide } from "./recipeGuide";
@@ -834,6 +837,35 @@ export function requestReline(g: GameState, index: number): PurchaseResult {
     ok: true,
     message: f.relineRequested ? "Foringen byttes når chargen er ferdig." : "Omforingen er avbestilt.",
   };
+}
+
+/**
+ * Hva som må lånes for å bytte foringen på en ovn som står uten penger (B-482): 0 = kassa (med kreditten) holder,
+ * null = banken låner ikke ut nok. Omforingen kan tas på kassekreditten, så bare det som mangler under grensen lånes.
+ */
+export function relineLoanNeed(g: GameState, index: number, stats = computePlantStats(g)): number | null {
+  if (!g.furnaces[index]) return null;
+  const cost = unitView(stats, index).furnace.relineCost;
+  const short = cost - (g.cash + creditLimit(g, stats));
+  if (short <= 0) return 0;
+  const need = Math.ceil(short / 1000) * 1000;
+  return maxLoan(g) - g.loan >= need ? need : null;
+}
+
+/** Ovnen står fordi kassa ikke har råd til ny foring (B-482) */
+export function waitsForMoney(f: GameState["furnaces"][number]): boolean {
+  return !!f.waitReason?.includes("mangler penger til omforing");
+}
+
+/** «Lån og bytt foringen» (B-482): låner det som mangler og bytter foringen med én gang */
+export function relineOnLoan(g: GameState, index: number): PurchaseResult {
+  const need = relineLoanNeed(g, index);
+  if (need === null) return fail("Banken låner ikke ut nok til ny foring.");
+  if (need > 0) {
+    const r = borrow(g, need);
+    if (!r.ok) return r;
+  }
+  return requestReline(g, index);
 }
 
 /** Flytter en aktiv kontrakt opp (−1) eller ned (+1) i ordrekøen. */

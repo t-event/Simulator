@@ -1,7 +1,14 @@
 import { dividends } from "../game/konsern";
 import { useEffect, useState, type ReactNode } from "react";
-import { requestManual, requestReline, setFurnaceGrade, setTargetGrade, upgradeOptions } from "../game/actions";
-import { Maintenance } from "./Maintenance";
+import {
+  requestManual,
+  requestReline,
+  setFurnaceGrade,
+  setTargetGrade,
+  upgradeOptions,
+  waitsForMoney,
+} from "../game/actions";
+import { Maintenance, RelineMoneyAction } from "./Maintenance";
 import { ProductionCard } from "./ProductionCard";
 import { BuildCard } from "./Neighborhood";
 import { showBuildCard } from "../game/building";
@@ -217,7 +224,10 @@ function CompactChain({
 }) {
   const castHead = g.castQueue[0];
   const missing = missingScrap(g, stats);
-  const worn = g.furnaces.map((f, i) => ({ f, i })).filter((x) => x.f.wear >= 0.6 && !x.f.relineRequested);
+  // Også en ovn som står uten penger til foringen, selv om den er bestilt (B-482)
+  const worn = g.furnaces
+    .map((f, i) => ({ f, i }))
+    .filter((x) => waitsForMoney(x.f) || (x.f.wear >= 0.6 && !x.f.relineRequested));
   // Tall på knappen: utstyr der du kan kjøpe og har råd til. Et trykk åpner da utstyret direkte (B-065)
   const ready = (s: Station) => stationReady(g, s);
   // Ovn og støping åpner alltid utstyret når det finnes noe der, også når du ikke har råd (B-112)
@@ -274,11 +284,17 @@ function CompactChain({
       {worn.map(({ f, i }) => (
         <div key={i} className="g-note g-warn g-mini-alert">
           <button className="g-link" onClick={onMaintenance}>
-            Foringen{g.furnaces.length > 1 ? ` i ovn ${i + 1}` : ""} er {fmtPct(f.wear)} slitt. Se vedlikehold →
+            {waitsForMoney(f)
+              ? `${g.furnaces.length > 1 ? `Ovn ${i + 1}` : "Ovnen"} står: kassa har ikke råd til ny foring. Se vedlikehold →`
+              : `Foringen${g.furnaces.length > 1 ? ` i ovn ${i + 1}` : ""} er ${fmtPct(f.wear)} slitt. Se vedlikehold →`}
           </button>
-          <button className="g-small" onClick={() => act((gg) => requestReline(gg, i))}>
-            Bytt foring
-          </button>
+          {waitsForMoney(f) ? (
+            <RelineMoneyAction g={g} i={i} act={act} />
+          ) : (
+            <button className="g-small" onClick={() => act((gg) => requestReline(gg, i))}>
+              Bytt foring
+            </button>
+          )}
         </div>
       ))}
       <button className="g-link" onClick={onOpen}>

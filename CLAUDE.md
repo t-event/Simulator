@@ -674,6 +674,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   produksjon i `assessOffer` og `lateContracts` – ikke i `realisticDailyT`, som også gir størrelsen på nye forespørsler.
   Nye grunner til at en ovn står til spilleren gjør noe, legges i `STOP_REASONS`. Råd om å avbryte sene kontrakter
   bruker `lateCosts` (boten ved fristen mot 60 % av det som gjenstår), aldri «avbryt alltid».
+- **Sperren i Salg** (B-482): på nivå 0–1 avviser `acceptContract` en kontrakt som ikke rekker fristen (`signBlocked`).
+  Kontrakter spilleren alt har sagt ja til andre steder (hendelseskortene), signeres med `force`; salgsdirektøren sperres
+  ikke. Kode som signerer på vegne av spilleren, må se på `ok` (testspilleren gjør det).
 - **Salgsdirektøren regner med det verket faktisk lager** (`directorDailyT`, siste uke), ikke kapasiteten. Står ovner
   (én ovn om gangen, støping, folk), sier han nei til det Salg viser grønt – loggen forklarer det (B-312). Ikke løsne
   regelen: den holder omdømmet på 96–100 hos alle med direktør.

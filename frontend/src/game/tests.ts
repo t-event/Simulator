@@ -137,6 +137,7 @@ import {
 } from "./plant";
 import {
   acceptContract,
+  signBlocked,
   cancelContract,
   orderQueue,
   autoBuy,
@@ -347,7 +348,7 @@ import { acceptAgreement, buyScrap, roundDay } from "./engine";
 import { fixedPowerOffer, spotPowerPrice } from "./plant";
 import { explosionChance, FATAL_DOWN_DAYS, fatalAccident, WINTER_EXPLOSION } from "./accidents";
 import { contractCoverage, freeStockT, sellAllFree } from "./engine";
-import { leaderBonus, leaderBonusDue } from "./actions";
+import { leaderBonus, leaderBonusDue, relineLoanNeed, relineOnLoan } from "./actions";
 import { autoPlay, ChargeGame, INPUT_LOG_MAX, seededRandom } from "../ui/control/chargeGame";
 import { hints } from "../ui/hints";
 import { answerOrder } from "../ui/quizOrder";
@@ -4864,6 +4865,75 @@ test("Verket står uten penger til omforing (B-461): Salg sier at det ikke rekke
     !!far && far.cancelBot < far.lateBot && Math.abs(far.shortT - perDay * 10) < 1e-6,
     `«Langt fra»: ${JSON.stringify(far)}`,
   );
+});
+
+test("Garasjen og verkstedet signerer ikke det de ikke rekker (B-482), og «Lån og bytt foringen»", () => {
+  const g = newGame(482);
+  g.pendingDecision = null;
+  g.agreements = [];
+  g.history = [0, 1, 2].map((d) => ({ ...structuredClone(g.today), day: d, producedT: 1 }));
+  const stats = computePlantStats(g);
+  const perDay = realisticDailyT(g, stats);
+  const offer = (id: number, tonnes: number, deadlineDay: number) => ({
+    id,
+    customer: `Kunde ${id}`,
+    product: "stopegods" as const,
+    grade: "enkel" as const,
+    tonnes,
+    delivered: 0,
+    pricePerT: 10_000,
+    deadlineDay,
+    offerExpiresMin: g.minute + 600,
+    repGain: 1,
+    repLoss: 3,
+    penaltyPerT: 5000,
+    status: "tilbud" as const,
+    closedDay: null,
+    priority: 0,
+  });
+  g.contracts = [offer(1, perDay * 0.5, day(g) + 6), offer(2, perDay * 20, day(g) + 3)];
+  assert(g.stage === 0, `nytt spill på nivå ${g.stage}`);
+  // En liten kontrakt med god tid kan signeres
+  assert(signBlocked(g, g.contracts[0], stats) === null, "en liten kontrakt ble sperret");
+  assert(acceptContract(g, 1).ok, "fikk ikke signere en kontrakt som rekker");
+  // En som ikke rekker fristen, kan ikke signeres i garasjen
+  const why = signBlocked(g, g.contracts[1], stats);
+  assert(why?.startsWith("Garasjen rekker ikke") === true, `grunn: ${why}`);
+  const r = acceptContract(g, 2);
+  assert(!r.ok && g.contracts[1].status === "tilbud", "kontrakten ble signert likevel");
+  // Hendelseskortene (spilleren har sagt ja i kortet) og salgsdirektøren sperres ikke
+  assert(acceptContract(g, 2, "Du", true).ok, "hendelseskortet ble sperret");
+  // Fra støperiet er det bare en advarsel, som før
+  const h = newGame(4821);
+  h.pendingDecision = null;
+  h.stage = 2;
+  h.contracts = [offer(3, 999, day(h) + 1)];
+  assert(signBlocked(h, h.contracts[0]) === null, "støperiet ble sperret");
+
+  // Lån og bytt foringen: kassa holder ikke (heller ikke på kreditten), banken låner det som mangler
+  const v = newGame(4822);
+  v.pendingDecision = null;
+  v.stage = 1;
+  v.reputation = 50;
+  const vs = computePlantStats(v);
+  const cost = vs.furnace.relineCost;
+  const f = v.furnaces[0];
+  f.heat = null;
+  f.holding = null;
+  f.wear = 0.9;
+  f.waitReason = "Foringen skal byttes – mangler penger til omforing";
+  v.cash = -creditLimit(v, vs) + cost - 2500;
+  v.loan = 0;
+  const need = relineLoanNeed(v, 0, vs);
+  assert(need === 3000, `lånebehov ${need}`);
+  const res = relineOnLoan(v, 0);
+  assert(res.ok && v.loan === 3000 && f.wear === 0, `lån og bytt: ${res.message}, lån ${v.loan}, slitasje ${f.wear}`);
+  // Er lånet fullt, sier den det i stedet
+  f.wear = 0.9;
+  f.downUntilMin = 0;
+  v.cash = -creditLimit(v, vs) - 1_000_000;
+  assert(relineLoanNeed(v, 0, vs) === null, "banken lånte mer enn den kan");
+  assert(!relineOnLoan(v, 0).ok, "byttet uten penger");
 });
 
 if (failed) {

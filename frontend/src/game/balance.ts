@@ -408,7 +408,7 @@ function botHour(g: GameState): void {
       const need = committed + agreementLoadUntil(g, offer.deadlineDay) + offer.tonnes;
       if (need / realisticDailyT(g, stats) > (offer.deadlineDay - today + 1) * CONTRACT_MARGIN) continue;
     } else if (committed + offer.tonnes > capacity * days * 0.7) continue;
-    acceptContract(g, offer.id);
+    if (!acceptContract(g, offer.id).ok) continue;
     committed += offer.tonnes;
     activeGrades.add(offer.grade);
   }

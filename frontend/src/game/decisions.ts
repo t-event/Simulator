@@ -630,7 +630,7 @@ export function resolveDecision(g: GameState, option: number): void {
         priority: 0,
       };
       g.contracts.push(c);
-      acceptContract(g, c.id);
+      acceptContract(g, c.id, "Du", true);
       return;
     }
     case "lonnskrav":
@@ -837,7 +837,7 @@ export function resolveDecision(g: GameState, option: number): void {
         priority: 0,
       };
       g.contracts.push(c);
-      acceptContract(g, c.id);
+      acceptContract(g, c.id, "Du", true);
       return;
     }
     case "kundebesok":
