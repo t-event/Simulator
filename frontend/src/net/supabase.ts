@@ -5,7 +5,7 @@
  * `fetch` kan byttes ut i tester (setFetch), så ingenting her trenger nett for å testes.
  */
 import { cloud } from "./config";
-import { syncServerClock } from "./clock";
+import { serverClockOffset, syncServerClock } from "./clock";
 
 export interface Session {
   access_token: string;
@@ -199,6 +199,8 @@ export class NetError extends Error {
   status: number;
   /** true når det er nettet som mangler, ikke tjenesten som sa nei */
   offline: boolean;
+  /** Tjenesten sa at tilgangsnøkkelen er utløpt (B-483): fornyes og prøves igjen */
+  jwtExpired = false;
   constructor(message: string, status: number, offline = false) {
     super(message);
     this.status = status;
@@ -207,11 +209,22 @@ export class NetError extends Error {
 }
 
 /**
+ * Nå i serverens tid, i sekunder (B-483). Utløpet på innloggingen er serverens tid, men maskinens klokke kan gå feil –
+ * en Mac 12 timer bak (AM/PM) trodde nøkkelen var gyldig i 12 timer til, og alle kall ble avvist med «JWT expired».
+ * Forskyvningen leses fra Date-headeren i hvert svar (B-314).
+ */
+function serverNowS(): number {
+  return (Date.now() + serverClockOffset()) / 1000;
+}
+
+/**
  * Feil som går over av seg selv (B-356): uten nett, tidsgrensen, eller tjenesten nede eller overbelastet (503/504 da
  * databasen var strupet). Det som feiler slik, prøves igjen; andre feil (avvist, ikke logget inn) gjør ikke det.
  */
 export function isTransient(e: unknown): boolean {
-  return e instanceof NetError && (e.offline || e.status === 408 || e.status === 429 || e.status >= 500);
+  return (
+    e instanceof NetError && (e.offline || e.jwtExpired || e.status === 408 || e.status === 429 || e.status >= 500)
+  );
 }
 
 /** Oversetter feilmeldingene fra tjenesten til noe spilleren forstår */
@@ -250,6 +263,11 @@ async function readError(res: Response): Promise<NetError> {
     raw = String(body.msg ?? body.error_description ?? body.message ?? body.error ?? body.code ?? "");
   } catch {
     raw = "";
+  }
+  if (res.status === 401 && raw.toLowerCase().includes("jwt expired")) {
+    const e = new NetError("Innloggingen måtte fornyes. Prøver igjen.", 401);
+    e.jwtExpired = true;
+    return e;
   }
   return new NetError(translateError(res.status, raw), res.status);
 }
@@ -308,7 +326,7 @@ function toSession(body: Record<string, unknown>): Session {
   return {
     access_token: String(body.access_token),
     refresh_token: String(body.refresh_token),
-    expires_at: Number(body.expires_at ?? Math.floor(Date.now() / 1000) + expiresIn),
+    expires_at: Number(body.expires_at ?? Math.floor(serverNowS()) + expiresIn),
     user: { id: user.id, email: user.email ?? "" },
   };
 }
@@ -477,11 +495,16 @@ export async function getToken(): Promise<string | null> {
   if (!s) return null;
   // Har en annen fane fornyet økta, brukes den. En brukt refresh token avvises av tjenesten (B-145)
   const stored = storedSession();
-  if (stored && stored.user.id === s.user.id && stored.expires_at > s.expires_at) {
+  if (
+    stored &&
+    stored.user.id === s.user.id &&
+    stored.expires_at > s.expires_at &&
+    stored.access_token !== s.access_token
+  ) {
     session = s = stored;
     notify();
   }
-  if (s.expires_at - Date.now() / 1000 > REFRESH_MARGIN_S) return s.access_token;
+  if (s.expires_at - serverNowS() > REFRESH_MARGIN_S) return s.access_token;
   if (!refreshing || refreshingFor !== s.refresh_token) {
     const started = s;
     // Er spilleren logget ut eller har byttet konto mens svaret var underveis, gjelder svaret ikke lenger (B-397):
@@ -555,7 +578,7 @@ export function consumeAuthHash(hash = typeof location !== "undefined" ? locatio
   setSession({
     access_token: access,
     refresh_token: refresh,
-    expires_at: Number(p.get("expires_at") ?? Math.floor(Date.now() / 1000) + expiresIn),
+    expires_at: Number(p.get("expires_at") ?? Math.floor(serverNowS()) + expiresIn),
     user: { id, email },
   });
   if (typeof history !== "undefined") history.replaceState(null, "", location.pathname + location.search);
@@ -578,7 +601,27 @@ export async function rest<T>(path: string, init: RestInit = {}): Promise<T> {
   // Fikk vi ikke fornyet økta (nettet, tjenesten nede, eller kontoen ble byttet underveis), skal kallet heller ikke gå
   // uten innlogging: det ville blitt avvist og sett ut som en varig feil. Dette går over og prøves igjen (B-397)
   if (hadSession && !token) throw new NetError("Fikk ikke fornyet innloggingen. Prøver igjen snart.", 0, true);
-  return restAs<T>(token, path, init);
+  try {
+    return await restAs<T>(token, path, init);
+  } catch (e) {
+    // Utløpt nøkkel (B-483): forny og prøv én gang til – men bare for samme innlogging (B-397)
+    if (!(e instanceof NetError && e.jwtExpired && token)) throw e;
+    const next = await renewExpired(token);
+    if (!next) throw e;
+    return restAs<T>(next, path, init);
+  }
+}
+
+/**
+ * Tjenesten sa at nøkkelen `token` er utløpt (B-483): merk den som utløpt og forny. Gir den nye nøkkelen, eller null
+ * når innloggingen er byttet eller ikke kunne fornyes (da gjelder den opprinnelige feilen).
+ */
+async function renewExpired(token: string): Promise<string | null> {
+  const s = getSession();
+  if (!s || s.access_token !== token) return null;
+  session = { ...s, expires_at: 0 };
+  const next = await getToken();
+  return next && next !== token ? next : null;
 }
 
 /** Som `rest`, men med en bestemt nøkkel – gjestekontoen bruker sin egen (B-212) */
@@ -622,5 +665,14 @@ export async function tokenFor(uid: string): Promise<string> {
  * som ventet på nøkkelen, gå ut med den nye kontoens nøkkel (brukernavnet ble skrevet på feil konto).
  */
 export async function rpcFor<T>(uid: string, fn: string, args: Record<string, unknown>): Promise<T> {
-  return restAs<T>(await tokenFor(uid), `rpc/${fn}`, { method: "POST", body: args });
+  const token = await tokenFor(uid);
+  try {
+    return await restAs<T>(token, `rpc/${fn}`, { method: "POST", body: args });
+  } catch (e) {
+    // Utløpt nøkkel (B-483): forny og prøv én gang til, fortsatt bare for kontoen `uid`
+    if (!(e instanceof NetError && e.jwtExpired)) throw e;
+    const next = await renewExpired(token);
+    if (!next || userId() !== uid) throw e;
+    return restAs<T>(next, `rpc/${fn}`, { method: "POST", body: args });
+  }
 }

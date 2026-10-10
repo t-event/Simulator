@@ -8998,3 +8998,22 @@ Testet:
 - `balance.ts`: alle nivådager innenfor målene, nybegynneren på storverket median dag 183, 0 konkurs.
 - Playwright på 320, 390 og 1366 px: garasjen viser bare «Avslå» med grunnen, og «Lån 8 000 kr og bytt» byttet
   foringen. Ingen horisontal scrolling.
+
+## B-483 Innloggingen fornyes etter serverens klokke, og «JWT expired» fornyes og prøves igjen (2026-10-10)
+En spiller sendte eieren skjermbilder av «JWT expired» på topplista. Klokka på maskinen (en Mac) gikk 12 timer bak:
+«3:55 am» mens klokka var 15:55. Appen sammenlignet utløpet på innloggingen med maskinens klokke. Den trodde derfor at
+nøkkelen var gyldig i 12 timer til, og fornyet den ikke, mens serveren avviste alle kall. Serverloggen viste ca. 200
+avviste kall (401) i timen fra samme klient fra kl. 09 UTC 10.10, blant dem `save_game`. Spillet ble altså ikke lagret
+på nett.
+Rettet i nettlaget (`net/supabase.ts`):
+1. **Utløpet regnes i serverens tid:** `getToken` bruker maskinens klokke pluss forskyvningen fra Date-headeren i hvert
+   svar (`serverClockOffset`, B-314), og det samme gjør gjestekontoen (`net/guest.ts`). Når appen kjenner serverens
+   klokke, fornyes nøkkelen i tide uansett hva maskinklokka viser.
+2. **«JWT expired» fornyes og prøves igjen:** svarer tjenesten 401 «JWT expired», merkes nøkkelen som utløpt, økta
+   fornyes, og kallet prøves én gang til (`rest`, `rpcFor`). Bare for samme innlogging (B-397, B-472). Feilen er
+   `isTransient`, så lagringen prøver igjen. Den vises som «Innloggingen måtte fornyes. Prøver igjen.», aldri som
+   «JWT expired».
+3. En økt fra en annen fane tas bare over når den har en annen nøkkel (ellers ble en utløpt nøkkel tatt tilbake).
+Det andre skjermbildet («Kan ikke koble til – Siden kunne ikke lastes inn») er ikke en tekst fra spillet.
+Konto: ingen endring. Testet: ny nettlagstest der serveren er 12 timer foran maskinen. Det utløpte kallet fornyes og
+lykkes, neste nøkkel fornyes før kallet uten avvisning, og `rpcFor` fornyer også. `npm test`, `tsc -b`, lint og build.

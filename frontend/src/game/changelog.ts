@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 483,
+    date: "2026-10-10",
+    title: "Innloggingen fornyes selv om klokka går feil",
+    items: [
+      "Gikk klokka på maskinen feil, kunne innloggingen gå ut uten at spillet merket det, og da ble spillet ikke lagret på nett. Nå fornyes innloggingen etter serverens klokke, og et kall som blir avvist, prøves igjen med en gang.",
+    ],
+  },
+  {
     b: 482,
     date: "2026-10-09",
     title: "Hjelp til nye verk",

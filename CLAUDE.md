@@ -404,6 +404,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `save_game` er `security definer`; en serverfunksjon som kaller noe som er tatt fra `authenticated`, må være det,
   ellers stopper lagringen for alle (skjedde i ti minutter med B-314). Test nye serverfunksjoner som spilleren:
   `set_config('request.jwt.claims', …)` + `set_config('role','authenticated', true)` i en DO-blokk som rulles tilbake.
+- **Utløpet på innloggingen** (B-483): `getToken` (og gjesten) sammenligner `expires_at` med serverens tid
+  (`Date.now() + serverClockOffset()`), aldri bare maskinens klokke – en Mac 12 timer bak fikk «JWT expired» på alt, og
+  spillet ble ikke lagret. Et 401 «JWT expired» fornyes og prøves én gang i `rest`/`rpcFor` (`jwtExpired`, `isTransient`).
 - **Ingen emoji** (B-237): bruk ikoner fra `ui/icons.tsx`. `npm test` og CI stopper emoji i `src`, `public` og `index.html`
   (`scripts/sjekk-emoji.mjs`). Tekst fra serveren med tegn (plasseringen på topplista) gjøres om til ikon i appen.
 - **Ikoner i spillmotoren** (B-235): utfordringer og prestasjoner har `icon: IconName` (type-import fra `ui/icons.tsx`), og

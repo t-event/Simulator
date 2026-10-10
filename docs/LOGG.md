@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 408 – 2026-10-10: «JWT expired» hos en spiller med feil klokke (B-483)
+
+**Brukeren ba om:** en spiller sendte skjermbilder («JWT expired» på topplista, «Kan ikke koble til»).
+
+**Gjort:** Mac-klokka til spilleren gikk 12 timer bak. Appen fornyet derfor ikke innloggingen, og serveren avviste alle
+kall, også `save_game` (ca. 200 i timen siden kl. 09 UTC, se edge-loggen). Nå regnes utløpet i serverens tid, og et
+avvist «JWT expired»-kall fornyes og prøves én gang til.
+
+**Testet:** ny nettlagstest med serveren 12 timer foran, `npm test`, `tsc -b`, lint, build.
+
+**Gjenstår:** se i edge-loggen at 401-ene stopper når spilleren har fått den nye versjonen. Spilleren bør også sette
+klokka på automatisk. Ellers som økt 407.
+
+---
+
 ## Økt 407 – 2026-10-09: Nybegynnerpakken (B-482)
 
 **Brukeren ba om:** «Lag en skikkelig liste for idag. Bygg en stor oppdatering og push.»
