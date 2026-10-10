@@ -49,6 +49,7 @@ import {
   rest,
   AccountChangedError,
   onBeforeSignOut,
+  rpc,
   rpcFor,
   userId,
   verifyCode,
@@ -217,6 +218,10 @@ interface Fake {
   offline: boolean;
   /** Tjenesten svarer 503 på alt under /rest/ (databasen strupet, B-356) */
   down: boolean;
+  /** Tilgangsnøkler tjenesten sier er utløpt (B-483) */
+  expired: Set<string>;
+  /** Serverens klokke i ms, sendt som Date-header; null = ingen header */
+  serverTime: number | null;
   /** Kalles når appen fornyer økta – en annen fane kan fornye samtidig */
   onRefresh: (() => void) | null;
   /** Kalles mens save_game behandles, som om spillet går videre mens klienten venter på svar (B-162) */
@@ -252,6 +257,8 @@ function makeFake(): Fake {
     keepalive: [],
     offline: false,
     down: false,
+    expired: new Set(),
+    serverTime: null,
     onRefresh: null,
     onSaveGame: null,
     hangSave: false,
@@ -266,7 +273,13 @@ function makeFake(): Fake {
     control: [],
   };
   const json = (status: number, body: unknown) =>
-    new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+    new Response(JSON.stringify(body), {
+      status,
+      headers: {
+        "content-type": "application/json",
+        ...(f.serverTime !== null ? { date: new Date(f.serverTime).toUTCString() } : {}),
+      },
+    });
   const token = (id: string) => {
     const payload = btoa(JSON.stringify({ sub: id, email: `${id}@test` }));
     return `h.${payload}.s`;
@@ -341,6 +354,8 @@ function makeFake(): Fake {
         n.length >= 3 && n.length <= 20 && ![...f.nicknames.values()].some((x) => x.toLowerCase() === n),
       );
     }
+    const auth = String((init?.headers as Record<string, string>)?.Authorization ?? "");
+    if (f.expired.has(auth.replace(/^Bearer /, ""))) return json(401, { code: "PGRST301", message: "JWT expired" });
     const id = who(init);
     if (!id) return json(401, { message: "JWT" });
     // Som guest_gate i 035: en gjest får bare lagre spillet og overlevere seg selv
@@ -908,6 +923,45 @@ const main = async () => {
     }
     assert(!(err instanceof AccountChangedError) && isTransient(err), `feilen var ${String(err)}`);
     f.offline = false;
+    setSession(null);
+  });
+
+  await test("Maskinklokka 12 timer bak (B-483): utløpt nøkkel fornyes og kallet prøves igjen, og fornyes i tide etterpå", async () => {
+    const f = fresh();
+    resetServerClock();
+    // Serveren er 12 timer foran maskinen: nøkkelen ser gyldig ut lokalt, men er utløpt hos tjenesten
+    f.serverTime = Date.now() + 12 * 3600_000;
+    const old = `h.${btoa(JSON.stringify({ sub: "u-a@test", gammel: 1 }))}.s`;
+    f.expired.add(old);
+    setSession({
+      access_token: old,
+      refresh_token: "r1",
+      expires_at: Date.now() / 1000 + 3600,
+      user: { id: "u-a@test", email: "" },
+    });
+    const n = await rpc<number>("chat_latest", {});
+    assert(typeof n === "number", `kallet feilet: ${String(n)}`);
+    const refreshed = f.calls.filter((c) => c.includes("grant_type=refresh_token")).length;
+    assert(refreshed === 1 && getSession()?.access_token !== old, `fornyelser: ${refreshed}`);
+    const rejected = f.calls.length;
+    // Med serverens klokke kjent fornyes en nøkkel som nesten er ute, før kallet – uten et avvist kall først
+    // (den falske tjenesten gir alltid samme nye nøkkel, så den gamle får sitt eget navn)
+    const old2 = `h.${btoa(JSON.stringify({ sub: "u-a@test", gammel: 2 }))}.s`;
+    f.expired.add(old2);
+    setSession({ ...getSession()!, access_token: old2, refresh_token: "r1", expires_at: f.serverTime / 1000 + 30 });
+    await rpc<number>("chat_latest", {});
+    const after = f.calls.slice(rejected);
+    assert(
+      after[0]?.includes("grant_type=refresh_token") && after.length === 2,
+      `kallene etterpå: ${JSON.stringify(after)}`,
+    );
+    // rpcFor fornyer også, og bare for samme konto
+    setSession({ ...getSession()!, access_token: old, refresh_token: "r1", expires_at: f.serverTime / 1000 + 3600 });
+    const m = await rpcFor<number>("u-a@test", "chat_latest", {});
+    assert(typeof m === "number", "rpcFor feilet");
+    f.serverTime = null;
+    f.expired.clear();
+    resetServerClock();
     setSession(null);
   });
 

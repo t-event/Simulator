@@ -11,6 +11,7 @@
  */
 import type { GameState } from "../game/types";
 import { APP_VERSION, cloudConfigured } from "./config";
+import { serverClockOffset } from "./clock";
 import {
   getSession,
   isTransient,
@@ -41,7 +42,8 @@ let mem: GuestState | null = null;
 let loaded = false;
 let lastUpload = 0;
 let inFlight: Promise<void> | null = null;
-let clock: () => number = () => Date.now();
+// Serverens tid (B-483): utløpet på gjestens nøkkel er serverens tid, og maskinens klokke kan gå feil
+let clock: () => number = () => Date.now() + serverClockOffset();
 
 export function setGuestClock(fn: () => number): void {
   clock = fn;
