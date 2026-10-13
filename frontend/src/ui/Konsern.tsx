@@ -62,6 +62,9 @@ import { EARNS_FROM, konsernValueOf } from "../net/world";
 import { useKonsernRank } from "./konsernRank";
 import { IndustryPanel } from "./Companies";
 import { RegionsCard, WorldMapPanel } from "./WorldMap";
+import { ManagersCard } from "./Managers";
+import { useManagers } from "./useManagers";
+import { openCall, type ManagerStatus } from "../net/managers";
 import { NeedsAccount } from "./Account";
 import { cancelOrderUi, getBuildRegion, movePlantUi, runOption, sellPlantUi, setBuildRegion } from "./konsernRun";
 import { fmtKr, fmtT } from "./format";
@@ -874,8 +877,10 @@ export function KonsernPage({
   );
   useReportTab(tab, onTab);
   const canBuy = konsernReady(g);
+  // Verksjefene (B-488): hentes når Konsern er åpent, så prisen på moderniseringen følger mandatet
+  const managers = useManagers(g);
   const tabs: { id: KonsernTabId; label: string; count?: number; badge?: string; alert?: boolean }[] = [
-    { id: "oversikt", label: "Oversikt" },
+    { id: "oversikt", label: "Oversikt", badge: openCall(managers) ? "Samtale" : undefined },
     { id: "utvid", label: "Utvid", count: canBuy },
     // Verdenskartet (B-333): alle konsernene i en oppdiktet verden
     { id: "kart", label: "Kart" },
@@ -925,6 +930,7 @@ export function KonsernPage({
           onBuy={() => setTab("utvid")}
           onMap={() => setTab("kart")}
           openBook={openBook}
+          managers={managers}
         />
       )}
       {tab === "utvid" && <KonsernBuy g={g} act={act} onShowPlants={() => setTab("oversikt")} />}
@@ -985,10 +991,13 @@ function KonsernOverview({
   onBuy,
   onMap,
   openBook,
+  managers,
 }: {
   g: GameState;
   act: Act;
   onBuy: () => void;
+  /** Verksjefene fra serveren (B-488) */
+  managers: ManagerStatus | null;
   /** Åpner Kart-fanen (regionmester, B-487) */
   onMap: () => void;
   openBook?: (chapter?: string) => void;
@@ -1121,6 +1130,8 @@ function KonsernOverview({
         </Card>
       </div>
       <NextStep g={g} act={act} />
+      {/* Verksjefene og samtalene (B-488) */}
+      <ManagersCard g={g} act={act} status={managers} />
       {/* Regionmester (B-487): hvor du har tittelen, og hvor du er nærmest */}
       <RegionsCard g={g} onOpenMap={onMap} />
       <KonsernQueue g={g} act={act} />

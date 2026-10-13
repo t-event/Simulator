@@ -1,7 +1,8 @@
 # Forslag: verksjefer for datterverkene (RETNING fase 5, B-379)
 
-**Status:** eierens spørsmål er besvart (avsnitt 0 og 9, B-379, presisert 1.10 i B-409). V1 er spesifisert ferdig i
-avsnitt 10, men **bygges ikke ennå**. Rekkefølgen står: 2.10 → V0 i skygge og K-1 → data → eventuelt live → verksjef V1.
+**Status:** **V1 og V2 er bygget 13.10.2026 (B-488)** etter eierens beslutning («Bygg nå»), før skyggerapporten for
+V0/K-1. Dermed er rekkefølgen i B-409 erstattet. Avvikene fra avsnitt 10 står i B-488: Stabilitet er 0,98 + 0,01 × Folk,
+beløpene føres som `justering` etter utbyttet (ikke inne i `pay_dividends`), og samtalene (V2) er med. V3 venter.
 
 ## 0. Eierens svar 30.9.2026 (bygges ikke før stabiliseringen er ferdig, B-380)
 

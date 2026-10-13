@@ -9104,3 +9104,65 @@ Verksjefene (fase 5) er det store svaret, men eieren har bestemt at de bygges et
    - «Regionmester»: blir stående når den er tatt.
 Konto: ja (regel 3 – mellom spillere, regnet av serveren, KONTO.md).
 Jobben slås på når appen er publisert, så spillerne kan se tittelen i appen når varselet kommer.
+
+## B-488 Verksjefer for datterverkene: mandat og «Verksjefen ringer», med virkning i ekte tid (2026-10-13)
+Eieren: «Vi må bygge mer idag, folk har fortsatt ikke noe å gjøre i spillet lengere. Lag en plan og utfør», og valgte
+«Bygg nå» for verksjefene (verksjef, mandat og samtaler, med ekte virkning på utbyttet). **Erstatter rekkefølgen i B-409**
+(verksjefene skulle vente til skyggerapporten for V0/K-1 2.11). Spesifikasjonen i VERKSJEF-FORSLAG.md avsnitt 10 følges,
+med avvikene under. V2 (samtalene) er tatt med nå. V3 (lojalitet, oppsigelse fra verksjefen) er ikke bygget.
+1. **Server (152):**
+   - Tabellene `plant_managers`, `manager_candidates`, `manager_days`, `manager_calls`, `manager_effects` og
+     `manager_state`. Alle har RLS uten regler og brukes bare gjennom funksjonene.
+   - Tre kandidater per konsern per ekte dag (`manager_draw_candidates`). Drift, Økonomi og Folk er 1–5, summen 6–10, aldri
+     5 på to, og trekket er Forsiktig, Ærgjerrig, Sparsom eller Lojal.
+   - Handlingene: `manager_status`, `manager_hire`, `manager_set_mandate` (høyst én gang i uka), `manager_dismiss`
+     (sluttpakke 5 dagers lønn, 3 dagers karantene for verket) og `manager_answer`. De sjekker `auth.uid()`, gjester,
+     sperrede og bryteren (`manager_guard`), og er tatt fra `anon`.
+   - **Oppgjøret** (`managers_settle`, jobben `verksjefer`, cron hvert 10. min, én spiller per deltransaksjon og med i
+     `world_health`):
+     - For hver ekte dag utbyttet er betalt (fra `config.world.managers.from`), får hvert verk med verksjef andelen sin
+       (`manager_plant_shares`, samme regel som regionandelene) × det fulle utbyttet × (mandatfaktor − 1 − lønn).
+     - I tillegg kommer faktorene fra samtalene som gjelder den dagen.
+     - Beløpet føres i konsernkassa som `justering` med ref `verksjef:<dag>`. Kassaboka tillater ingen ny art, og
+       `justering` teller ikke i lånerammen.
+     - Et trekk tar aldri mer enn det som står i kassa (`manager_cash`).
+     - Verksjefen teller fra dagen etter ansettelsen, så ingen kan ansette etter å ha sett dagens utbytte.
+     - Uten verksjef skjer ingenting: utbyttet er nøyaktig som før. `pay_dividends` er ikke endret.
+   - **Moderniseringen:** `konsern_order` ganger prisen og tiden med `manager_mod_factor`. Lønnsomhet gir ×1,2 og ×1,25.
+     Vekst gir 1 − (0,10 + 0,03 × Drift) på prisen og 1 − (0,10 + 0,04 × Drift) på tiden.
+   - **«Verksjefen ringer»:**
+     - Konsern med minst én verksjef får ca. hver 55.–84. time en sak fra ett av åtte kort, og den første kommer etter
+       halve tiden. Høyst én er åpen, og samme kort kommer ikke igjen på samme verk på 30 dager.
+     - Fristen er 48 timer, og det kommer et varsel på mobilen (tema `konsern`, lenke `konsern`).
+     - Svarer ikke eieren, velger verksjefen etter trekket og sier fra.
+     - Engangsbeløp regnes i dager av verkets utbytte nå. Tidsbegrensede faktorer lagres i `manager_effects`.
+     - Med Stabilitet kommer det dårlige utfallet halvparten så ofte.
+   - Konsernverdien og Kontrollen er uendret, som for programmene (B-392).
+   - Prøvekjørt som spiller i DO-blokker som ble rullet tilbake: ansettelse og sperrer, oppgjøret med riktig beløp
+     (andel × utbytte × netto per verk), som bare føres én gang ved to kjøringer. Samtalen kom med varsel. Både svaret og
+     valget ved fristen virket, og likeså sluttpakken og karantenen. Moderniseringen kostet 1 125 000 → 978 750 og tok
+     4 t → 3,44 t (Vekst, Drift 1).
+2. **App:**
+   - Kortet «Verksjefene» på Konsern → Oversikt viser den åpne samtalen med begge svarene i kroner for verket og fristen,
+     hver verk med verksjef eller «Ansett», det verksjefene ga sist og de siste sakene.
+   - Arket med dagens kandidater viser stjerner, trekk, lønn og netto per dag etter mandatet. Det viser også hva mandatet
+     gjør med moderniseringen i kroner per trinn.
+   - Verksjefarket har mandatet (låst i en uke) og avslutt med sluttpakken.
+   - Fanen Oversikt får merket «Samtale» når en sak venter.
+   - Prisen og tiden på moderniseringen i appen følger mandatet (`setManagerModFactors`, speilet i `orderQuote` og
+     `modernizeCost`).
+   - Reglene er speilet i `game/managers.ts`, med faste tall i testen mot SQL-en.
+   - Kortet vises bare når bryteren er på og spilleren har et ferdig verk (B-180).
+3. **Simuleringen** (`npx tsx src/game/managerSim.ts`, mot akseptkriteriene i 10.6):
+   - Netto med tilfeldig kandidat: Lønnsomhet −1,7 %, Vekst −9,7 % og Stabilitet −3,9 % (kriterium 1). Beste av 3 på
+     Lønnsomhet gir +0,6 %, og beste av 15 gir +2,7 % (kriterium 2).
+   - Fullt konsern med 30 mill. per dag: 0,2–0,8 mill. per dag med Lønnsomhet (kriterium 4).
+   - Vekst sparer 1,8–3,4 mill. per kompleks-trinn og lønner seg når verket moderniseres oftere enn ca. hver 12. dag.
+   - Samtalene gir −0,1 % av utbyttet selv med beste svar. De er valg, ikke en pengekilde.
+   - **Avvik 1, Stabilitet:** 0,98 + 0,01 × Folk i stedet for 0,96 + 0,01 × Folk. V0 er ikke live, så uten endringen
+     hadde Stabilitet bare hatt ulempen (10.7). Den er fortsatt alltid litt i minus, og fordelen er samtalene.
+   - **Avvik 2, fisking:** sluttpakke og karantene er tjent inn etter ca. 15 dager med en bedre kandidat. Det er ikke
+     «mer enn det gir», men gevinsten har et tak (+4 %), og det er bare tre kandidater per dag. Holdes øye med.
+   - Testspilleren (`balance.ts --konsern`) har ikke fått en strategi med verksjefer ennå.
+4. **Bryteren** `config.world.managers.enabled` slås på når appen er publisert.
+Konto: ja (regel 3 – penger i ekte tid mellom spillerne, regnet av serveren, KONTO.md). I `ACCOUNT_FEATURES` som `verksjefer`.

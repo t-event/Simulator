@@ -8710,3 +8710,115 @@ button.g-prod-row:hover {
   white-space: normal;
   word-break: break-all;
 }
+
+/* Verksjefene (B-488): kortet på Konsern → Oversikt, samtalen og arkene */
+.g-konsern-managers .ds-button,
+.g-manager-cand .ds-button,
+.g-manager-option .ds-button,
+.g-manager-sheet .ds-button {
+  min-height: 44px;
+}
+.g-manager-plants,
+.g-manager-list,
+.g-manager-history {
+  list-style: none;
+  margin: var(--sp-3) 0 0;
+  padding: 0;
+}
+.g-manager-plant {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-3) 0;
+  border-top: 1px solid var(--line);
+}
+.g-manager-plant-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.g-manager-plant .ds-button {
+  flex: none;
+}
+.g-manager-history li {
+  color: var(--text-2);
+  padding: 2px 0;
+  overflow-wrap: anywhere;
+}
+.g-manager-options {
+  display: grid;
+  gap: var(--sp-3);
+  margin: var(--sp-3) 0;
+}
+.g-manager-option {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.g-manager-option .ds-button {
+  align-self: flex-start;
+}
+.g-manager-mandates {
+  display: grid;
+  gap: var(--sp-3);
+  margin: var(--sp-3) 0;
+}
+.g-manager-mandate {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  min-height: 44px;
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+.g-manager-mandate.is-on {
+  border-color: var(--accent-border);
+  background: var(--accent-tint-strong);
+}
+.g-manager-mandate:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.g-manager-cand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: var(--sp-4) 0;
+  border-top: 1px solid var(--line);
+}
+.g-manager-cand p {
+  margin: 0;
+}
+.g-manager-cand .ds-button {
+  align-self: flex-start;
+}
+.g-manager-cand-head {
+  display: flex;
+  flex-direction: column;
+}
+.g-manager-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-4);
+}
+.g-manager-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+@media (min-width: 900px) {
+  .g-manager-mandates {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .g-manager-options {
+    grid-template-columns: 1fr 1fr;
+  }
+}

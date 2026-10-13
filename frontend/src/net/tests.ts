@@ -110,6 +110,7 @@ import { realNow } from "../game/clock";
 import { applyKonsern, konsernDiffers, parseKonsern } from "./konsern";
 import { parseReportThreads, parseReportUnread, REPORT_REFUSAL_TEXT } from "./reports";
 import { parseWorldMap } from "./worldMap";
+import { openCall, parseManagerStatus } from "./managers";
 import { regionPoints, regionStrength } from "../game/regions";
 import {
   CHAT_REFUSAL_TEXT,
@@ -2569,6 +2570,56 @@ const main = async () => {
       parseWorldMap(null).every((r) => r.players.length === 0),
       "tomt svar",
     );
+  });
+
+  await test("Verksjefene (B-488): svaret fra manager_status tolkes, og ukjente kort og trekk slippes ikke inn", () => {
+    const s = parseManagerStatus({
+      enabled: true,
+      perDay: "3893683.47",
+      plants: [{ plant: 1, share: 0.885057, daily: 3446132 }],
+      candidates: [{ slot: 2, name: "Kari Berg", drift: 9, okonomi: 0, folk: 3, trait: "lur" }],
+      managers: [
+        {
+          plant: 1,
+          name: "Per Lie",
+          drift: 3,
+          okonomi: 4,
+          folk: 2,
+          trait: "lojal",
+          mandate: "vekst",
+          salary: 0.0525,
+          mandateFrom: "2026-10-20T10:00:00+00:00",
+        },
+      ],
+      calls: [
+        { id: 5, plant: 1, card: "foring", deadline: "2026-10-15T10:00:00+00:00", resolvedAt: null },
+        { id: 4, plant: 1, card: "finnes-ikke" },
+        {
+          id: 3,
+          plant: 1,
+          card: "lonn",
+          choice: 1,
+          chosenBy: "verksjef",
+          outcome: "uhell",
+          cash: -5,
+          resolvedAt: "2026-10-12T10:00:00Z",
+        },
+      ],
+      quarantine: null,
+    });
+    assert(s.enabled && Math.round(s.perDay) === 3893683, "status");
+    const c = s.candidates[0];
+    assert(
+      c.drift === 5 && c.okonomi === 1 && c.trait === "forsiktig",
+      "stjernene holdes i 1–5 og ukjent trekk blir forsiktig",
+    );
+    assert(
+      s.managers[0].mandate === "vekst" && s.managers[0].mandateFrom === Date.parse("2026-10-20T10:00:00Z"),
+      "mandat",
+    );
+    assert(s.calls.length === 2 && s.quarantine.length === 0, "ukjent kort er borte");
+    assert(openCall(s)?.id === 5 && s.calls[1].chosenBy === "verksjef" && s.calls[1].outcome === "uhell", "samtalene");
+    assert(!parseManagerStatus(null).enabled && openCall(null) === null, "tomt svar");
   });
 
   await test("Utbyttepolitikken og Kontroll (B-334): politikk og fond fra serveren, Kontrollen tolkes", () => {

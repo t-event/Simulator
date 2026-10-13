@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 488,
+    date: "2026-10-13",
+    title: "Verksjefer på datterverkene",
+    items: [
+      "Hvert datterverk kan nå få en verksjef. Velg blant dagens tre kandidater under Konsern → Oversikt – de er flinke i Drift, Økonomi og Folk, men ingen er flinke i alt.",
+      "Gi verksjefen et mandat: Lønnsomhet (mer utbytte, men dyrere modernisering), Vekst (billigere og raskere modernisering, men mindre utbytte) eller Stabilitet (færre ting som går galt). Verksjefen koster 3–6 % av verkets utbytte i lønn.",
+      "Et par ganger i uka ringer en verksjef og ber deg bestemme noe – en hastejobb, et lønnskrav, strømavtalen. Du får varsel på mobilen og 48 timer på deg. Svarer du ikke, bestemmer verksjefen selv.",
+      "Det verksjefene gir eller koster, kommer i konsernkassa hver dag etter utbyttet. Uten verksjef er alt som før.",
+    ],
+  },
+  {
     b: 487,
     date: "2026-10-13",
     title: "Kamp om regionene og et nytt selskap",
