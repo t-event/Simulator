@@ -209,7 +209,7 @@ function ProfileBody({ p }: { p: PlayerProfile }) {
           ))}
           {p.badges.map((b) => (
             <li key={b} className="g-chip">
-              <Icon name="scroll-text" /> {BADGE_NAMES[b]}
+              <Icon name={b === "regionmester" ? "crown" : "scroll-text"} /> {BADGE_NAMES[b]}
             </li>
           ))}
         </ul>

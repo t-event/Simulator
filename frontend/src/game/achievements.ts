@@ -291,9 +291,38 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
     (g) => Math.max(0, ...(g.konsern?.plants.map((p) => p.level) ?? [0])),
     [
       ["modern3", 3, "Moderne verk", "Moderniser et datterverk til trinn 3.", 15],
-      ["modern5", 5, "Toppmoderne", "Moderniser et datterverk helt, til trinn 5.", 40],
+      ["modern5", 5, "Toppmoderne", "Moderniser et datterverk til trinn 5.", 40],
+      // Trinn 6 åpnes på konsernnivå 7 (modMaxAt, B-325); B-487
+      ["modern6", 6, "Fremtidens verk", "Moderniser et datterverk til trinn 6.", 60],
     ],
   ),
+  // B-487: mål for dem som har kommet langt i konsernet – ferdig moderniserte verk og regionene på kartet
+  family(
+    "topptrinn",
+    "badge-check",
+    "Fullt modernisert",
+    "Konsern",
+    (g) => g.konsern?.plants.filter((p) => p.level >= 6).length ?? 0,
+    [
+      ["topptrinn3", 3, "Tre på toppen", "Ha tre datterverk på trinn 6.", 40],
+      ["topptrinn8", 8, "Åtte på toppen", "Ha åtte datterverk på trinn 6.", 80],
+      ["topptrinn14", 14, "Alt på toppen", "Ha fjorten datterverk på trinn 6.", 150],
+    ],
+  ),
+  family(
+    "regioner",
+    "flag",
+    "Regionene",
+    "Konsern",
+    (g) => new Set(g.konsern?.plants.map((p) => p.region).filter(Boolean)).size,
+    [
+      ["regioner3", 3, "Tre regioner", "Ha datterverk i tre regioner på verdenskartet.", 15],
+      ["regioner6", 6, "Over hele kartet", "Ha datterverk i alle seks regionene.", 40],
+    ],
+  ),
+  family("regionmester", "crown", "Regionmester", "Konsern", (g) => +!!g.serverBadges?.includes("regionmester"), [
+    ["regionmester", 1, "Regionmester", "Ha de sterkeste verkene i en region på verdenskartet.", 50],
+  ]),
   // Æresmerker (B-296): gis av serveren, vises bare for dem som har dem
   {
     ...family("reform", "scroll-text", "Reformveteran", "Æresmerker", (g) => +!!g.serverBadges?.includes("reform"), [

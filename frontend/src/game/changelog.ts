@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 487,
+    date: "2026-10-13",
+    title: "Kamp om regionene og et nytt selskap",
+    items: [
+      "Hver region på verdenskartet har nå en regionmester: konsernet med sterkest verk der. Bygg, moderniser eller flytt verk for å ta tittelen – og pass på, andre kan ta den fra deg. Du får beskjed når det skjer.",
+      "Kortet «Regionene» på Konsern → Oversikt viser hvor du er regionmester, og hvor lite som skal til i regionen der du er nærmest.",
+      "Regionmesteren får et eget merke på topplista, og det er kommet nye mål for konsernet: verk på trinn 6, verk i alle regionene og regionmester.",
+      "Mekanisk verksted har åpnet. Eieren tjener på vedlikeholdet de andre spillerne gjør. Det er det minste selskapet og det billigste å by på – første anbud stenger 15. oktober.",
+    ],
+  },
+  {
     b: 483,
     date: "2026-10-10",
     title: "Innloggingen fornyes selv om klokka går feil",

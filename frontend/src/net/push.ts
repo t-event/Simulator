@@ -203,11 +203,16 @@ onBeforeSignOut(async () => {
 });
 
 /** Lenken i et varsel: hvor appen skal gå når det trykkes på det (sw.js sender den hit) */
-export type PushLink = { to: "industri" } | { to: "konsern" } | { to: "meldinger"; nick: string | null };
+export type PushLink =
+  | { to: "industri" }
+  | { to: "konsern" }
+  /** Verdenskartet: regionmester (B-487) */
+  | { to: "kart" }
+  | { to: "meldinger"; nick: string | null };
 
 export function parsePushLink(link: string | null | undefined): PushLink | null {
   if (!link) return null;
-  if (link === "industri" || link === "konsern") return { to: link };
+  if (link === "industri" || link === "konsern" || link === "kart") return { to: link };
   if (link === "meldinger" || link.startsWith("meldinger:")) {
     const nick = link.slice("meldinger:".length);
     return { to: "meldinger", nick: nick || null };

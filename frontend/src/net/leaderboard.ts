@@ -72,7 +72,12 @@ export interface BoardRow {
 }
 
 /** Navnet på æresmerkene på topplista (samme navn som prestasjonen, B-296) */
-export const BADGE_NAMES: Record<string, string> = { reform: "Reformveteran", reform2: "Reformveteran II" };
+export const BADGE_NAMES: Record<string, string> = {
+  reform: "Reformveteran",
+  reform2: "Reformveteran II",
+  // Så lenge konsernet er regionmester i minst én region (B-487)
+  regionmester: "Regionmester",
+};
 
 const STAGE_NAMES = ["Garasje", "Verksted", "Støperi", "Stålverk", "Storverk"];
 

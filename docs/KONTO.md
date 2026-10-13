@@ -171,3 +171,4 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Konsernbanken: lån til verk og modernisering | Ja (som konsernkassa) | Regel 3: serveren, ekte tid | B-437 |
 | Svar på rapporter: admin spør, spilleren svarer, varsel begge veier | Ja (ikke gjester) | Regel 3: mellom spillere | B-438 |
 | Driftsstatus i adminpanelet: verdensjobbene og eksporten | Bare eieren (`admins`) | Ikke en spillfunksjon | B-485 |
+| Regionmester på verdenskartet: styrke, tittel, merke og varsel | Ja | Regel 3: mellom spillere, serveren | B-487 |

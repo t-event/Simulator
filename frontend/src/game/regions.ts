@@ -42,3 +42,22 @@ export function defaultRegion(plants: readonly SisterPlant[], orders: readonly K
   for (const id of REGION_IDS) if (count(id) < count(best)) best = id;
   return best;
 }
+
+/**
+ * Regionmester (B-487): styrken et ferdig verk gir i regionen sin – 12 for et stålkompleks, 4 for et storverk og 1 for
+ * et stålverk, ganget med 1 + 0,25 × trinnet. Serveren ganger summen med aktiviteten (`region_points` og
+ * `region_strengths` i supabase/151_regionmester.sql); endres regelen, endres begge.
+ */
+export const REGION_POINTS: Record<SisterPlant["type"], number> = { kompleks: 12, storverk: 4, stalverk: 1 };
+export const REGION_LEVEL_GAIN = 0.25;
+
+export function regionPoints(type: SisterPlant["type"], level: number): number {
+  return (REGION_POINTS[type] ?? 1) * (1 + REGION_LEVEL_GAIN * Math.max(0, level));
+}
+
+/** Styrken av dine ferdige verk i en region, før aktiviteten (verk som bygges, teller ikke ennå) */
+export function regionStrength(plants: readonly SisterPlant[], region: RegionId): number {
+  return plants
+    .filter((p) => p.region === region && p.project?.kind !== "bygg")
+    .reduce((a, p) => a + regionPoints(p.type, p.level), 0);
+}

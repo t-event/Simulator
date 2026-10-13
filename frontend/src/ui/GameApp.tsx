@@ -1096,6 +1096,7 @@ export function GameApp() {
   pushNav.current = (link) => {
     if (link.to === "industri") openLink("industri");
     else if (link.to === "konsern") go("konsern");
+    else if (link.to === "kart") go("konsern", "kart");
     else openMessages(link.nick);
   };
   /** Åpner fagboka på et kapittel (eller det første uleste) og merker det som lest */

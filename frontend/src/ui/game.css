@@ -8671,3 +8671,42 @@ button.g-prod-row:hover {
 .g-admin-drift > .ds-button {
   min-height: 44px;
 }
+
+/* Regionmester (B-487): mesteren under regionnavnet på kartet, boksen i regionen og kortet på Konsern → Oversikt */
+.g-map-sub.is-master {
+  fill: var(--heat);
+}
+.g-map-sub.is-master.is-mine {
+  fill: var(--accent);
+}
+.g-map-master-box {
+  margin: var(--sp-2) 0 var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+}
+.g-map-master-box.is-mine {
+  border-color: var(--accent-border);
+  background: var(--accent-tint);
+}
+.g-map-master-box p {
+  margin: 4px 0;
+}
+.g-map-master-line {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  overflow-wrap: anywhere;
+}
+.g-map-master-line > svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--heat);
+}
+.g-konsern-regions .ds-button {
+  min-height: 44px;
+}
+.g-map-master-line .g-player {
+  white-space: normal;
+  word-break: break-all;
+}
