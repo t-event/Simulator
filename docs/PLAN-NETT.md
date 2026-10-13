@@ -200,6 +200,11 @@ Spilleren ser: fanen «Anbud» under Salg og «Auksjon» under Marked, fra nivå
 - Hver natt (02:17 UTC) legger `eksport` (edge-funksjon, kalt av pg_cron) alle tabellene i `public` unntatt
   `save_backups` i den private mappa `eksport` i Storage som `stalverk-ÅÅÅÅ-MM-DD.json.gz`, 14 dager bakover.
   Innloggingsdata er ikke med. Lastes ned fra dashbordet (Storage → eksport). Gjenoppretting: se CLAUDE.md.
+- Hentes tabell for tabell, store tabeller i deler (B-484, 148): `backup_export_tables()` gir lista og antall deler (én
+  per påbegynte MB), `backup_export_table(tabell, del, deler)` radene i én del (hashen av første kolonne i
+  primærnøkkelen). Ett kall med alt (`backup_export()`) nådde tidsgrensen på 8 s og feilet 7 av 13 netter. pg_cron prøver
+  hver time fra 02:17 til 06:17 UTC; edge-funksjonen hopper over når dagens fil finnes. Jobben `eksport` i
+  `world_health()` og fanen «Drift» i adminpanelet (B-485) viser om det gikk.
 
 ### Senere (ikke bestemt)
 

@@ -8648,3 +8648,26 @@ button.g-prod-row:hover {
   color: var(--ok-fg);
   margin: var(--sp-2) 0 0;
 }
+
+/* Driftsstatus i adminpanelet (B-485) */
+.g-admin-jobs {
+  margin: 0 0 var(--sp-3);
+  padding: 0;
+  list-style: none;
+}
+.g-admin-jobs li {
+  border-top: 1px solid var(--line);
+  padding: var(--sp-2) 0;
+}
+.g-admin-jobs p {
+  margin: 2px 0 0;
+}
+.g-admin-job {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+}
+.g-admin-drift > .ds-button {
+  min-height: 44px;
+}
