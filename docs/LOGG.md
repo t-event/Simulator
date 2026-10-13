@@ -5,6 +5,32 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 409 – 2026-10-13: Eksporten tabell for tabell og driftsstatus i adminpanelet (B-484, B-485)
+
+**Brukeren ba om:** «På tide med ny oppdatering. Lag deg en plan på hva som skal bygges idag. Lag alt ferdig og push».
+
+**Gjennomgang først:** edge-loggen siste døgn hadde bare én reell feil: `rpc/backup_export` svarte 500 kl. 02:17 UTC
+(tidsgrensen på 8 s). Eksporten hadde feilet 7 av 13 netter. Ellers var det rent: `world_health` OK, alle aktive spillere
+på nyeste versjon (bygget 10.10), 401-ene etter B-483 er borte, alle varsler på mobilen siste uke levert (høyst 6 per
+spiller per dag), databasen er 48 MB, og ingen nye spillere på garasjen eller verkstedet siden 10.10 (for lite data til
+å si noe om sperren fra B-482). Rådene i `get_advisors` er de kjente.
+
+**Gjort:**
+- B-484: eksporten hentes tabell for tabell, med store tabeller i deler (148, edge-funksjonen `eksport` v3). Den prøves
+  igjen hver time til 06:17 UTC og melder seg som jobben `eksport` i `world_health`. Dagens fil er laget for hånd
+  (88 tabeller, 6 s, 3 353 kB).
+- B-485: fanen «Drift» i adminpanelet, med `admin_health()` (149).
+
+**Testet:** delene gir nøyaktig radene i tabellen (alle 88), tregeste del 0,4 s. Eksporten er kjørt for hånd via
+`net.http_post`. `admin_health` er prøvd som eier og som spiller (rulles tilbake). Playwright på 320, 390 og 1366 px.
+`npm test`, `tsc -b`, lint og build.
+
+**Gjenstår:** se i `world_health` 14.10 at nattens eksport gikk av seg selv. Ellers som før: mekanisk verksted (venter på
+eierens svar om `workshop_share`), rekonstruksjon (A–E), pynt for sesong 3, ny nybegynneroversikt når det er nye spillere,
+og V0/K-1-skyggerapporten 2.11.
+
+---
+
 ## Økt 408 – 2026-10-10: «JWT expired» hos en spiller med feil klokke (B-483)
 
 **Brukeren ba om:** en spiller sendte skjermbilder («JWT expired» på topplista, «Kan ikke koble til»).

@@ -9017,3 +9017,39 @@ Rettet i nettlaget (`net/supabase.ts`):
 Det andre skjermbildet («Kan ikke koble til – Siden kunne ikke lastes inn») er ikke en tekst fra spillet.
 Konto: ingen endring. Testet: ny nettlagstest der serveren er 12 timer foran maskinen. Det utløpte kallet fornyes og
 lykkes, neste nøkkel fornyes før kallet uten avvisning, og `rpcFor` fornyer også. `npm test`, `tsc -b`, lint og build.
+
+## B-484 Den nattlige eksporten hentes tabell for tabell (2026-10-13)
+Eksporten (B-345) feilet 7 av de 13 nettene fra 1.10 til 13.10. Det fantes ingen fil for 1.10, 7.–10.10, 12.10 og 13.10.
+Edge-loggen viste 500 fra `rpc/backup_export`, og databaseloggen «canceling statement due to statement timeout».
+`backup_export()` samlet alle 88 tabellene til én JSON på 24 MB i ett kall. Det tok 7,3 s, rett under tidsgrensen på 8 s
+i PostgREST, og gikk over de fleste nettene.
+1. **Tabell for tabell (148):** `backup_export_tables()` gir tabellene og hvor mange deler hver hentes i (én per
+   påbegynte MB på disk, bare tabeller med primærnøkkel). `backup_export_table(tabell, del, deler)` gir radene i én del.
+   En del er radene der hashen av første kolonne i primærnøkkelen gir delnummeret, så en rad aldri bytter del. Ingen rad
+   kommer med to ganger, og ingen faller ut fordi andre rader legges til mellom kallene. I dag: tidslinja i 10 deler,
+   lagringene i 3, reformloggen i 2. Det tregeste kallet tar 0,4 s. Edge-funksjonen `eksport` setter delene sammen til
+   samme filformat som før (`laget`, `versjon`, `tabeller`), så gjenopprettingen er uendret. Bare `service_role` kan kalle
+   funksjonene.
+2. **Prøves igjen:** pg_cron kaller funksjonen hver time fra 02:17 til 06:17 UTC (`17 2-6 * * *`). Når dagens fil finnes,
+   hoppes kallet over.
+3. **Melder seg i `world_health`:** edge-funksjonen fører jobben `eksport` (start, ferdig med antall tabeller, feil med
+   teksten). Den «står» etter 29 timer uten en ferdig eksport.
+Prøvekjørt for hånd 13.10: 88 tabeller på 6 s, 3 353 kB, alle radene med nøyaktig én gang (talt per tabell mot
+`count(*)`). `backup_export()` står igjen for bruk i SQL-editoren, men brukes ikke av eksporten.
+Konto: ingen endring (bare serveren).
+Endringslogg: nei – spillerne merker ingenting.
+
+## B-485 Driftsstatus i adminpanelet (2026-10-13)
+At eksporten feilet i nesten to uker uten at noen så det (B-484), viste at eieren mangler oversikt over jobbene på
+serveren. Den fikk eieren bare ved å be Claude kjøre `world_health()`.
+1. **Server (149):** `admin_health()` gir verdensjobbene fra `world_health()` (status, sist ferdig, sist uten feil, antall
+   spillere eller selskaper med feil, siste feiltekst) og den siste filen fra eksporten. Den sjekker `is_admin()` først,
+   som de andre adminfunksjonene. Den leser bare og logges derfor ikke i `admin_log` (som `admin_reports`).
+2. **App:** adminpanelet har fanen «Drift» ved siden av rapportene. Øverst står «Alle jobbene på serveren går som de
+   skal» eller hvilke jobber som trenger tilsyn. Så kommer siste sikkerhetskopi og én rad per jobb med navn på vanlige ord,
+   OK / Feil hos N / Står / Feil og når den sist ble ferdig (etter serverens klokke, B-403). Feilteksten vises bare når
+   noe er galt. Knappen «Oppdater» henter på nytt.
+Konto: bare eieren (KONTO.md). Testet som spiller i en DO-blokk som ruller tilbake: eieren får 13 jobber og eksporten,
+og en vanlig konto får «ikke tilgang». Playwright på 320, 390 og 1366 px, både alt i orden og med feil. Ingen horisontal
+scrolling, ingenting avkortet, og knappen er 44 px høy.
+Endringslogg: nei – bare eieren ser fanen.

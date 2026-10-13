@@ -235,7 +235,7 @@ frontend/src/
     Push.tsx     Varsel på mobilen: bryteren under Varsler og oppfordringen på selskapet du eier; pushLinks.ts: trykk på varselet (B-465)
     PushAuto.tsx Varsler på for alle: første trykk etter innlogging lar telefonen spørre, én gang per konto og enhet (B-467)
     Referral.tsx Kortet «Verv en venn» på Mål → Uka og koblingen etter innlogging (`ReferralSync`, B-459)
-    Admin.tsx    Adminpanelet under kontoen, bare når `is_admin()` svarer ja (B-421)
+    Admin.tsx    Adminpanelet under kontoen, bare når `is_admin()` svarer ja (B-421); fanen Drift (B-485)
     Companies.tsx Konsern → Industrien: ett kort per selskap (skraplageret nå) og konsernkassa (B-189, B-227)
     control/     Kontrollrommet: spillet i fire runder (chargeGame.ts: logikk, frø og inndatalogg, testspiller; ControlRoom.tsx,
                  B-175); weekly.ts: ukens charge og treningsfrø (B-387)
@@ -723,7 +723,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `select net.http_post(url := (select decrypted_secret from vault.decrypted_secrets where name = 'eksport_url'), body := '{}')`
   og se svaret i `net._http_response`. Gjenopprett én tabell (aldri over ekte data uten dry-run og eierens godkjenning):
   `select * from json_populate_recordset(null::public.<tabell>, '<fil>'::json -> 'tabeller' -> '<tabell>')`.
-  `backup_export()` må holde seg under tidsgrensen på 8 s (bygg tekst med `json_agg`, ikke jsonb bit for bit).
+  Eksporten henter tabell for tabell og store tabeller i deler (`backup_export_tables`/`backup_export_table`, 148, B-484) –
+  hvert kall må holde seg under tidsgrensen på 8 s; `backup_export()` (alt i ett kall) nådde den og brukes ikke lenger.
+  pg_cron prøver hver time til 06:17 UTC, og jobben `eksport` står i `world_health` og i adminpanelet → Drift (B-485).
 - **Gjester** (B-212) er anonyme kontoer, men appen ser dem som «uten konto» (`getSession()` er null; gjestens økt ligger i
   `net/guest.ts`). Serveren slipper gjester bare til det som står i `guest_gate` (035). Skal gjester få noe nytt, må det
   legges i lista der – ellers får de 403. Serverfunksjoner og triggere som gir penger, inntekt eller plass mellom

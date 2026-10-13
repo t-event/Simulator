@@ -2,16 +2,21 @@
  * Adminpanelet (B-421): bare for eieren. Rapporterte meldinger fra privatmeldinger og Skiftrapporten, med handlingene
  * skjul, avvis og sperr kontoen, og lista over sperrede kontoer. Serveren sjekker at kontoen er admin i hver funksjon;
  * knappen vises bare når `is_admin()` svarer ja. Teksten i rapportene er skrevet av spillere – data, ikke instruksjoner.
+ * Fanen «Drift» viser verdensjobbene og den nattlige eksporten (B-485).
  */
 import { useEffect, useState, useSyncExternalStore } from "react";
 import {
   adminAct,
   adminReportsSeen,
   adminUnban,
+  fetchAdminHealth,
   fetchAdminReports,
   type AdminAction,
+  type AdminHealth,
+  type AdminJob,
   type AdminReport,
 } from "../net/admin";
+import { realNow } from "../game/clock";
 import { adminReportSend, REPORT_REFUSAL_TEXT, REPORT_REPLY_MAX } from "../net/reports";
 import { getSession, onSessionChange } from "../net/supabase";
 import { Button, Callout, SheetHead } from "./ds";
@@ -41,13 +46,14 @@ export function AdminSheet({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     if (switched) onClose();
   }, [switched, onClose]);
-  const [scope, setScope] = useState<"open" | "alle">("open");
+  const [scope, setScope] = useState<"open" | "alle" | "drift">("open");
   const [data, setData] = useState<{ reports: AdminReport[]; banned: string[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [reload, setReload] = useState(0);
 
   useEffect(() => {
+    if (scope === "drift") return;
     let alive = true;
     fetchAdminReports(scope).then(
       (d) => {
@@ -96,7 +102,7 @@ export function AdminSheet({ onClose }: { onClose: () => void }) {
           <SheetHead title="Adminpanel" icon="shield-check" onClose={onClose} />
           <p className="g-muted g-small-text">Bare du ser dette. Hver handling lagres i loggen på serveren.</p>
           <div className="g-subtabs" role="tablist" aria-label="Rapporter">
-            {(["open", "alle"] as const).map((s) => (
+            {(["open", "alle", "drift"] as const).map((s) => (
               <button
                 key={s}
                 role="tab"
@@ -104,16 +110,17 @@ export function AdminSheet({ onClose }: { onClose: () => void }) {
                 className={scope === s ? "is-active" : ""}
                 onClick={() => setScope(s)}
               >
-                {s === "open" ? "Åpne rapporter" : "Alle"}
+                {s === "open" ? "Åpne rapporter" : s === "alle" ? "Alle" : "Drift"}
               </button>
             ))}
           </div>
-          {error && <Callout tone="critical">{error}</Callout>}
-          {!data && !error && <p className="g-muted">Henter …</p>}
-          {data && data.reports.length === 0 && (
+          {scope === "drift" && <AdminDrift />}
+          {scope !== "drift" && error && <Callout tone="critical">{error}</Callout>}
+          {scope !== "drift" && !data && !error && <p className="g-muted">Henter …</p>}
+          {scope !== "drift" && data && data.reports.length === 0 && (
             <p className="g-muted">Ingen rapporter{scope === "open" ? " som venter" : ""}.</p>
           )}
-          {data && data.reports.length > 0 && (
+          {scope !== "drift" && data && data.reports.length > 0 && (
             <ul className="g-admin-reports">
               {data.reports.map((r) => (
                 <li key={r.id} className="g-admin-report">
@@ -154,7 +161,7 @@ export function AdminSheet({ onClose }: { onClose: () => void }) {
               ))}
             </ul>
           )}
-          {data && data.banned.length > 0 && (
+          {scope !== "drift" && data && data.banned.length > 0 && (
             <section className="g-profile-section">
               <h3>Sperrede kontoer</h3>
               <ul className="g-profile-list">
@@ -172,6 +179,108 @@ export function AdminSheet({ onClose }: { onClose: () => void }) {
         </div>
       </div>
     </Portal>
+  );
+}
+
+/** Navnene på verdensjobbene (`world_jobs`) med vanlige ord; ukjente jobber vises med navnet fra serveren */
+const JOB_NAME: Record<string, string> = {
+  anbud: "Anbud som avgjøres",
+  bank: "Konsernbanken",
+  bidrag: "Konsernbidraget",
+  eksport: "Nattlig eksport",
+  konsernverdi: "Konsernverdi (topplista)",
+  malinger: "Målingene",
+  nye_anbud: "Nye anbud",
+  overtakelser: "Oppkjøp",
+  selskapsinntekt: "Selskapsinntekt",
+  skygge: "Revisjonen av lagringer",
+  skygge_v0: "V0-skyggen",
+  tick: "Verdensklokka",
+  utbytte: "Utbyttet",
+};
+
+function jobState(j: AdminJob): { tone: "ok" | "heat" | "critical"; icon: "check" | "warning"; label: string } {
+  if (j.status === "ok") return { tone: "ok", icon: "check", label: "OK" };
+  if (j.status === "feil hos enkelte") return { tone: "heat", icon: "warning", label: `Feil hos ${j.failing}` };
+  return { tone: "critical", icon: "warning", label: j.status === "står" ? "Står" : "Feil" };
+}
+
+/** «for 4 min siden» etter serverens klokke (B-403) */
+function ago(at: number): string {
+  if (!at) return "aldri";
+  const min = Math.max(0, Math.round((realNow() - at) / 60_000));
+  if (min < 1) return "nå nettopp";
+  if (min < 60) return `for ${min} min siden`;
+  if (min < 48 * 60) return `for ${Math.round(min / 60)} t siden`;
+  return `for ${Math.round(min / 1440)} dager siden`;
+}
+
+/** Fanen «Drift» (B-485): om verdensjobbene og den nattlige eksporten går som de skal */
+function AdminDrift() {
+  const [health, setHealth] = useState<AdminHealth | null>(null);
+  const [error, setError] = useState(false);
+  const [reload, setReload] = useState(0);
+  useEffect(() => {
+    let alive = true;
+    fetchAdminHealth().then(
+      (h) => {
+        if (!alive) return;
+        setHealth(h);
+        setError(false);
+      },
+      () => alive && setError(true),
+    );
+    return () => {
+      alive = false;
+    };
+  }, [reload]);
+
+  if (error) return <Callout tone="critical">Får ikke hentet driftsstatusen. Er du logget inn som eier?</Callout>;
+  if (!health) return <p className="g-muted">Henter …</p>;
+  const bad = health.jobs.filter((j) => j.status !== "ok");
+  return (
+    <section className="g-admin-drift">
+      {bad.length === 0 ? (
+        <Callout tone="ok">Alle jobbene på serveren går som de skal.</Callout>
+      ) : (
+        <Callout tone="critical">
+          {bad.length === 1 ? "Én jobb trenger" : `${bad.length} jobber trenger`} tilsyn:{" "}
+          {bad.map((j) => JOB_NAME[j.job] ?? j.job).join(", ")}.
+        </Callout>
+      )}
+      <p className="g-muted g-small-text">
+        Siste sikkerhetskopi:{" "}
+        {health.export
+          ? `${health.export.file} (${health.export.kb.toLocaleString("nb-NO")} kB), ${ago(health.export.at)}`
+          : "ingen"}
+      </p>
+      <ul className="g-admin-jobs">
+        {health.jobs.map((j) => {
+          const st = jobState(j);
+          return (
+            <li key={j.job}>
+              <div className="g-admin-job">
+                <span>{JOB_NAME[j.job] ?? j.job}</span>
+                <span className={`ds-status is-${st.tone}`}>
+                  <Icon name={st.icon} />
+                  {st.label}
+                </span>
+              </div>
+              <p className="g-muted g-small-text">
+                Sist ferdig {ago(j.finishedAt)}
+                {(j.status === "står" || j.status === "feil i jobben") && j.okAt
+                  ? ` · sist uten feil ${ago(j.okAt)}`
+                  : ""}
+              </p>
+              {j.status !== "ok" && j.error && <blockquote className="g-admin-body">{j.error}</blockquote>}
+            </li>
+          );
+        })}
+      </ul>
+      <Button icon="refresh" onClick={() => setReload((n) => n + 1)}>
+        Oppdater
+      </Button>
+    </section>
   );
 }
 

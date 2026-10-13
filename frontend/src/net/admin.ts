@@ -98,3 +98,41 @@ export async function adminUnban(nick: string): Promise<boolean> {
 export async function adminReportsSeen(): Promise<void> {
   await rpc<unknown>("admin_reports_seen", {});
 }
+
+/** En verdensjobb slik `world_health()` ser den (B-485): status er «ok», «står», «feil i jobben» eller «feil hos enkelte» */
+export interface AdminJob {
+  job: string;
+  status: string;
+  finishedAt: number;
+  okAt: number;
+  /** Spillere eller selskaper der jobben har feilet siste gang */
+  failing: number;
+  errorAt: number;
+  error: string | null;
+}
+
+export interface AdminHealth {
+  at: number;
+  jobs: AdminJob[];
+  /** Siste fil fra den nattlige eksporten (B-345, B-484) */
+  export: { file: string; at: number; kb: number } | null;
+}
+
+/** Driftsstatus i adminpanelet (B-485): verdensjobbene og den nattlige eksporten. Serveren sjekker `admins`. */
+export async function fetchAdminHealth(): Promise<AdminHealth> {
+  const r = ((await rpc<unknown>("admin_health", {})) ?? {}) as Row;
+  const e = r.export && typeof r.export === "object" ? (r.export as Row) : null;
+  return {
+    at: ms(r.at),
+    jobs: (Array.isArray(r.jobs) ? (r.jobs as Row[]) : []).map((j) => ({
+      job: str(j.job) ?? "",
+      status: str(j.status) ?? "",
+      finishedAt: ms(j.finishedAt),
+      okAt: ms(j.okAt),
+      failing: Number(j.failing) || 0,
+      errorAt: ms(j.errorAt),
+      error: str(j.error),
+    })),
+    export: e && typeof e.file === "string" ? { file: e.file, at: ms(e.at), kb: Number(e.kb) || 0 } : null,
+  };
+}
