@@ -13,6 +13,7 @@
  *   spilleren hadde ved byttet (gulvet).
  * Ingen import av motoren, så fila kan brukes av tester og av testspilleren uten sirkler.
  */
+import { managerModFactor } from "./managers";
 import { defaultRegion, isRegion } from "./regions";
 import type { KonsernBank, KonsernOrder, PolicyId, RegionId, SisterPlant, SisterProject, SisterType } from "./types";
 
@@ -306,7 +307,9 @@ export function orderQuote(
   if (!p) return { refusal: "verk" };
   if (req.kind === "modernisering") {
     if (p.level >= modMaxAt(lvl)) return { refusal: "trinn" };
-    return { cost: modCost(p.type, researched), hours: WORLD_KONSERN.modHours, sale: 0 };
+    // Verksjefens mandat gjør moderniseringen billigere og raskere (Vekst) eller dyrere og tregere (Lønnsomhet, B-488)
+    const f = managerModFactor(p.id);
+    return { cost: Math.round(modCost(p.type, researched) * f.cost), hours: WORLD_KONSERN.modHours * f.time, sale: 0 };
   }
   if (p.type !== "stalverk") return { refusal: "verk" };
   return { cost: upgradeCostWorld(researched), hours: WORLD_KONSERN.upgradeHours, sale: 0 };

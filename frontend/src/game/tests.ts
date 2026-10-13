@@ -356,6 +356,19 @@ import { hasMoulds, MOULD, mouldCost, mouldHour, mouldRisk, mouldWear, replaceMo
 import { applyCashCap, CASH_RESERVE, hasPaidOut, paidOutDayLog, paidOutTotal } from "./reserve";
 import { trainingSeed, weeklyGrade, weeklyRequest } from "../ui/control/weekly";
 import { changeDelta } from "../ui/delta";
+import {
+  CALL_CARD_BY_ID,
+  legalStats,
+  managerModFactor,
+  mandateFactor,
+  modFactors,
+  salaryShare,
+  setManagerModFactors,
+  traitChoice,
+} from "./managers";
+import { modCost as worldModCost } from "./konsernWorld";
+import { modernizeCost as konsernModernizeCost } from "./konsern";
+import type { SisterPlant as ManagerTestPlant } from "./types";
 
 declare const process: { exitCode?: number };
 
@@ -4934,6 +4947,37 @@ test("Garasjen og verkstedet signerer ikke det de ikke rekker (B-482), og «Lån
   v.cash = -creditLimit(v, vs) - 1_000_000;
   assert(relineLoanNeed(v, 0, vs) === null, "banken lånte mer enn den kan");
   assert(!relineOnLoan(v, 0).ok, "byttet uten penger");
+});
+
+test("Verksjefer (B-488): lønn, mandat og modernisering som i SQL-en, og uten verksjef er alt som før", () => {
+  // Faste tall fra manager_salary/manager_factor/manager_mod_factor i supabase/152_verksjefer.sql
+  assert(salaryShare({ drift: 1, okonomi: 2, folk: 3 }) === 0.03, "lønn sum 6");
+  assert(salaryShare({ drift: 3, okonomi: 3, folk: 3 }) === 0.0525, "lønn sum 9");
+  assert(salaryShare({ drift: 5, okonomi: 4, folk: 1 }) === 0.06, "lønn sum 10");
+  const s3 = { drift: 3, okonomi: 3, folk: 3 };
+  assert(Math.abs(mandateFactor("lonnsomhet", s3) - 1.04) < 1e-9, "lønnsomhet");
+  assert(mandateFactor("vekst", s3) === 0.95, "vekst");
+  assert(Math.abs(mandateFactor("stabilitet", s3) - 1.01) < 1e-9, "stabilitet");
+  assert(legalStats().length === 80, `kandidater ${legalStats().length}`);
+  const v1 = modFactors("vekst", { drift: 1, okonomi: 1, folk: 4 });
+  assert(Math.abs(v1.cost - 0.87) < 1e-9 && Math.abs(v1.time - 0.86) < 1e-9, "vekst drift 1");
+  const l = modFactors("lonnsomhet", s3);
+  assert(l.cost === 1.2 && l.time === 1.25, "lønnsomhet moderniserer dyrere");
+  // Verksjefen tar det trygge, dristige, billige – eller det som passer mandatet (manager_trait_choice)
+  const haste = CALL_CARD_BY_ID.hastejobb;
+  assert(traitChoice(haste, "lojal", "lonnsomhet") === 0 && traitChoice(haste, "forsiktig", "vekst") === 1, "trekk");
+  // Uten verksjef: ingen endring i prisen på moderniseringen
+  const g = newGame(488);
+  const p: ManagerTestPlant = { id: 7, type: "storverk", name: "Testverket", level: 1, boughtDay: 0, downUntilDay: 0 };
+  const base = konsernModernizeCost(p, g);
+  assert(managerModFactor(7).cost === 1 && base === worldModCost("storverk", []), "uten verksjef");
+  // Med Vekst og Drift 1 (som prøven mot konsern_order: 1 125 000 → 978 750, 4 t → 3,44 t)
+  setManagerModFactors([{ plant: 7, mandate: "vekst", stats: { drift: 1, okonomi: 1, folk: 4 } }]);
+  assert(konsernModernizeCost(p, g) === Math.round(base * 0.87), `med verksjef ${konsernModernizeCost(p, g)}`);
+  assert(Math.round(1_125_000 * managerModFactor(7).cost) === 978_750, "samme tall som serveren");
+  assert(managerModFactor(8).cost === 1, "bare verket med verksjef");
+  setManagerModFactors([]);
+  assert(konsernModernizeCost(p, g) === base, "tilbake uten verksjef");
 });
 
 if (failed) {

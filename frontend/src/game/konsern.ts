@@ -3,6 +3,7 @@
  * som svinger med markedet og av og til stopper opp. Sluttmålet er 10 mrd. i konsernverdi: egenkapital pluss
  * verdien av datterverkene.
  */
+import { managerModFactor } from "./managers";
 import {
   acceptAgreement,
   acceptContract,
@@ -508,7 +509,8 @@ export function valueCreated(g: GameState): number {
 
 /** Et trinn modernisering fra konsernkassa: 30 % av prisen, −25 % med «Standardverk» (B-120, B-326) */
 export function modernizeCost(p: SisterPlant, g?: GameState): number {
-  return modCost(p.type, g?.researched ?? []);
+  // Med verksjef etter mandatet (B-488), som `konsern_order`
+  return Math.round(modCost(p.type, g?.researched ?? []) * managerModFactor(p.id).cost);
 }
 
 /** Å bygge ut et stålverk til storverk koster forskjellen i pris; moderniseringen starter på nytt (B-119, B-326) */
@@ -672,7 +674,7 @@ export function konsernOptions(g: GameState): KonsernOption[] {
         `Moderniser ${p.name}`,
         { kind: "modernisering", plant: p.id },
         base.map((x) => (x === p ? plantOf(p.type, p.level + 1, x.id) : x)),
-        { price: modernizeCost(p, g), hours: MODERNIZE_HOURS },
+        { price: modernizeCost(p, g), hours: MODERNIZE_HOURS * managerModFactor(p.id).time },
       );
   }
   return out;

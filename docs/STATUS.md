@@ -66,6 +66,21 @@ regnes av serveren i ekte tid.
   (`activity_factor`); verk som bygges, teller ikke. Tittelen byttes bare når en annen er strengt sterkere. Jobben
   `regionmester` (cron hvert 10. min) bytter, skriver i Skiftrapporten og varsler (tema `konsern`, lenke `kart`).
   Merket «Regionmester» på topplista så lenge man har minst én region. Ingen penger. Speilet i `regionPoints`.
+- **Verksjefer** (B-488, 152):
+  - Hvert ferdige datterverk kan få en verksjef fra dagens tre kandidater. Drift, Økonomi og Folk er 1–5 med summen
+    6–10, og verksjefen har ett trekk.
+  - Mandatet:
+    - Lønnsomhet gir × (0,92 + 0,04 × snittet av Drift og Økonomi), og moderniseringen koster 20 % mer og tar 25 % lenger.
+    - Vekst gir × 0,95, og moderniseringen koster (10 + 3 × Drift) % mindre og tar (10 + 4 × Drift) % kortere.
+    - Stabilitet gir × (0,98 + 0,01 × Folk), og det dårlige utfallet i samtalene kommer halvparten så ofte.
+  - Lønnen er 3–6 % av verkets utbytte. Mandatet kan byttes én gang i uka. Avslutt koster 5 dagers lønn, og verket må
+    vente 3 dager på en ny.
+  - **Oppgjøret** (jobben `verksjefer`, hvert 10. min): etter hvert betalt utbytte får konsernkassa per verk andelen ×
+    det fulle utbyttet × (faktor − 1 − lønn), pluss samtalenes faktorer, som `justering` (`verksjef:<dag>`). Det teller
+    ikke i lånerammen og ikke i konsernverdien. Uten verksjef er alt som før.
+  - **«Verksjefen ringer»:** ca. 2–3 saker i uka, 48 timers frist og varsel på mobilen. Uten svar velger verksjefen
+    etter trekket.
+  - Bryteren er `config.world.managers.enabled`. Reglene er speilet i `game/managers.ts`.
 
 ## 4. Konsernkassa: inn og ut
 
@@ -265,7 +280,7 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
 - `UKENS-KONTROLLROM.md` – variant A er bygget (B-387); variant B (avspilling på serveren) venter.
 - `KONSERNKAPITAL-FORSLAG.md` – hva konsernkassa brukes til etter fullt konsern (B-386). Eierens premiss: penger skal
   gi valg, ikke forsvinne. Ingen økonomiske justeringer før eieren har svart.
-- `VERKSJEF-FORSLAG.md` – verksjefer (B-379), del av kapitalforslaget.
+- `VERKSJEF-FORSLAG.md` – V1 og V2 er bygget (B-488); V3 (lojalitet, oppsigelse fra verksjefen) venter.
 - Programmodell for konsernprogrammene: eieren valgte B (aktivt budsjett, B-388/B-389). Spesifikasjonen står i
   `K1-PROGRAMMER.md` (B-389): serveren har i dag ingen hendelser i konsernverdenen, så K-1 trenger et lite, nøytralt
   hendelseslag (V0) for at Teknologi, Robusthet og Driftsytelse skal ha ekte effekt. Eieren godkjente V0, satsingene

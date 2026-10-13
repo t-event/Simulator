@@ -5,6 +5,46 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 411 – 2026-10-13: Verksjefer for datterverkene, med samtalene (B-488)
+
+**Brukeren ba om:** «Vi må bygge mer idag, folk har fortsatt ikke noe å gjøre i spillet lengere. Lag en plan og utfør».
+Valgte så «Bygg nå» for verksjefene, med ekte virkning på utbyttet. Det erstatter rekkefølgen i B-409.
+
+**Gjort:**
+- Server (152):
+  - kandidater, ansettelse, mandat, avslutning med sluttpakke og karantene
+  - daglig oppgjør etter utbyttet som `justering` i konsernkassa, jobben `verksjefer`
+  - «Verksjefen ringer» med åtte kort, 48 timers frist, varsel på mobilen og valg etter trekket
+  - moderniseringen i `konsern_order` etter mandatet
+  - bryteren `config.world.managers.enabled`
+- Regler og speil i `game/managers.ts`, simulering i `managerSim.ts` (tallene i B-488).
+- App:
+  - kortet «Verksjefene» på Konsern → Oversikt med samtalen
+  - arket med kandidater og arket for verksjefen
+  - merket «Samtale» på Oversikt
+  - prisen og tiden på moderniseringen følger mandatet
+- Docs: B-488, STATUS, KONTO, CLAUDE.md, FORSLAG, VERKSJEF-FORSLAG og endringsloggen.
+- Rettelse til økt 410: jobben `regionmester` ble slått på av migrasjon 151 (cron-delen) og gikk alt 13.10 (seks bytter,
+  hendelser og varsler kom). Punktet «slå på jobben» under «Gjenstår» der er gjort.
+
+**Testet:**
+- SQL som spiller i DO-blokker som ble rullet tilbake: ansettelse og sperrer, og oppgjøret (riktig beløp, bare én gang).
+  Også samtalen med varsel, svar og valget ved fristen, sluttpakken og karantenen, og modernisering via `konsern_order`
+  (978 750 kr og 3,44 t med Vekst og Drift 1).
+- `get_advisors` (security): bare de forventede meldingene (funksjoner for `authenticated`, RLS uten regler).
+- Tester: formlene mot SQL-tallene, «uten verksjef er alt som før» og tolkningen av `manager_status`.
+- Playwright på 320, 390 og 1366 px: kortet, samtalen, ansettelse, svar og verksjefarket. Ingen horisontal scrolling,
+  ingen avkortede knapper, og alle knapper minst 44 px.
+- `npm test`, `tsc -b`, lint, build og `balance.ts`.
+
+**Gjenstår:**
+- Slå på bryteren etter publiseringen og følge de første ansettelsene, oppgjøret neste natt og samtalene.
+- Strategi med verksjefer i testspilleren (`balance.ts --konsern`). V3 (lojalitet).
+- Følge med på fisking (B-488).
+- Verkstedanbudet stenger 15.10. Eksporten sjekkes 14.10, og skyggerapporten kommer 2.11.
+
+---
+
 ## Økt 410 – 2026-10-13: Mekanisk verksted åpnet, regionmester og nye konsernmål (B-486, B-487)
 
 **Brukeren ba om:** «Åpne mekanisk verksted. Velg modell for meg. Sesong 3 pynt kan vi gjøre når vi er i sesong 2. Finn

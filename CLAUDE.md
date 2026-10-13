@@ -125,6 +125,7 @@ npx tsx src/game/balance.ts --vinter                       # uhell, kort og kost
 npx tsx src/game/balance.ts --sommerstans                  # testspilleren velger sommerstans i fellesferien (B-298)
 npx tsx src/game/programSim.ts                             # konsernprogrammene: A mot B (B-388); --k1, --k1-skann, --k1-drift, --k1-kost, --k1-verdi(-skann), --k1-etablering: K-1 med hendelser i regionene (B-389–B-393)
 npx tsx src/game/takeoverSim.ts                            # oppkjøp: når lønner det seg å kjøpe, forsvare eller gi seg – regelsett 1, kandidatene og regelsett 2 (B-440, B-441; --kort); --gulv: anbudsgulvet A–F (B-449)
+npx tsx src/game/managerSim.ts                             # verksjefene mot akseptkriteriene: netto per mandat, fisking, samtalene (B-488)
 npx tsx src/game/worldSim.ts                               # verdenssimulatoren: konsernkassa for liten/middels/stor/legacy etter 30–730 ekte dager, dager etter fullt konsern, maks bud, andel brukt (B-380, B-385; --dager 180 for kortere)
 npm run build
 ```
@@ -147,6 +148,7 @@ frontend/src/
     recipeGuide.ts Reseptguide for nye kvaliteter (vises av ui/RecipeGuide.tsx)
     konsern.ts   Datterverk, byggeprosjekter i ekte tid og flaggskipet (B-209); vises av ui/Konsern.tsx
     konsernWorld.ts Konsernet på serveren speilet: priser, køen, nivåstigen, settleWorld (B-325, B-326; SQL i 064)
+    managers.ts  Verksjefene: mandat, lønn, kandidater og kortene i «Verksjefen ringer» (B-488; SQL i 152), managerSim.ts
     regions.ts   Verdenskartets seks regioner og standardregionen for nye verk (B-333; SQL i 066); styrken til regionmester (B-487)
     building.ts  Byggetid og innkjøring for store kjøp, nabolaget i tre trinn og verkets stiftelse (B-336, B-455);
                  kortet i ui/Neighborhood.tsx   upkeep.ts  Slitasje og fornyelse av storverket (B-455), raden i ui/Maintenance.tsx
@@ -187,6 +189,7 @@ frontend/src/
     referral.ts  Verv en venn: koden fra lenken (`?verv=`), kobling, status og koden til delingen (B-459; SQL i 131)
     admin.ts     Adminpanelet: rapportene og handlingene – serveren sjekker `admins` (B-421)
     konsern.ts   Konsernet på serveren: kjøp, avbestilling, salg og flytting, og svaret lagt inn i spillet (B-326, B-333)
+    managers.ts  Verksjefene på serveren: status, ansett, mandat, avslutt, svar, og statusen i minnet (B-488)
     worldMap.ts  Verdenskartet: alle spilleres verk per region og selskapene (`world_map`, B-333)
     world.ts     Strategiske selskaper: status, anbud og bud (B-189)
     scrapIncome.ts Skraplagerets inntekt i ekte tid – speiler SQL-en i 029 (B-188); scrapTests.ts viser at fart ikke hjelper
@@ -224,6 +227,7 @@ frontend/src/
     icons.tsx    Ikoner fra Lucide, kopiert inn (lisens i icons-LICENSE.txt)   ds.tsx  StatusBadge, Callout, Button, Metric
     delta.ts     Endringen under nøkkeltallene (`changeDelta`, tegnes av `DeltaLine`/`Metric`, B-404)
     fonts/       Visningsskriften for overskrifter og store tall (Barlow Semi Condensed 600, OFL)
+    Managers.tsx Kortet «Verksjefene» på Konsern → Oversikt med samtalen og arkene; useManagers.ts henter (B-488)
     WorldMap.tsx Konsern → Kart: verdenskartet med regionene, andres verk og selskapene (B-333)
     Chat.tsx     Skiftrapporten: knappen ved varsellinja (under 380 px i tallraden) og arket (B-338)
     Profile.tsx  Profilarket og `PlayerName` (brukernavn som åpner profilen); hvilken som er åpen: profileStore.ts (B-419)
@@ -466,6 +470,14 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   faste tall i nettesten) – endres den, endres begge. Jobben `regionmester` (cron hvert 10. min) er den eneste som bytter
   mester og skriver hendelser/varsler; bytte bare når en annen er strengt sterkere. Tittelen gir ingen penger eller Kontroll
   – vil man gi den virkning, er det en ny beslutning. Stopp med `select cron.unschedule('regionmester');`.
+- **Verksjefer** (B-488, 152): `managers_settle` (jobben `verksjefer`, cron hvert 10. min) gjør opp hver betalt utbyttedag
+  én gang (`manager_days`), etter `pay_dividends`, som ikke er endret. Pengene føres som `justering` (`verksjef:<dag>`,
+  `sluttpakke:<id>`, `samtale:<id>`) via `manager_cash`, aldri som `utbytte`, så de ikke øker lånerammen. Kortene står i
+  `config.world.managers.cards` og i `CALL_CARDS` (`game/managers.ts`), og formlene i `manager_salary`/`manager_factor`/
+  `manager_mod_factor` og `salaryShare`/`mandateFactor`/`modFactors`, med faste tall i testen – endres én, endres begge.
+  `konsern_order` er patchet med `manager_mod_factor` etter linja med `mod_h`. Endres den funksjonen, må patchen være med.
+  Prisen i appen følger med `setManagerModFactors` (fra `net/managers.ts`). Bryteren er `config.world.managers.enabled`.
+  Stopp jobben med `select cron.unschedule('verksjefer');`.
 - **Utbyttepolitikk og Kontroll** (B-334, 067): `pay_dividends` betaler `dividend_to_treasury(fullt, policy_keep)` til
   kassa og resten til `konsern.fund`; `dividendToTreasury` i `dividend.ts` speiler den (faste tall i testen).
   `world_status.dividend.per_day` er etter politikken, `full_per_day` før – konsernverdien bruker det fulle. Kontrollen
