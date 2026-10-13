@@ -329,7 +329,7 @@ function Leaderboard({
                 {/* Æresmerker fra serveren (B-299), f.eks. for dem som var med da økonomireformen kom */}
                 {r.badges.map((b) => (
                   <span key={b} className="g-board-honor">
-                    <Icon name="scroll-text" /> {BADGE_NAMES[b]}
+                    <Icon name={b === "regionmester" ? "crown" : "scroll-text"} /> {BADGE_NAMES[b]}
                   </span>
                 ))}
                 {/* Beste plassering i en sesong som er over (B-143) */}

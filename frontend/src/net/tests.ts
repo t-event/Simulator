@@ -110,6 +110,7 @@ import { realNow } from "../game/clock";
 import { applyKonsern, konsernDiffers, parseKonsern } from "./konsern";
 import { parseReportThreads, parseReportUnread, REPORT_REFUSAL_TEXT } from "./reports";
 import { parseWorldMap } from "./worldMap";
+import { regionPoints, regionStrength } from "../game/regions";
 import {
   CHAT_REFUSAL_TEXT,
   chatSeen,
@@ -2980,6 +2981,57 @@ const main = async () => {
     assert(parsePushLink("noe-annet") === null && parsePushLink(null) === null, "ukjente lenker gir ingenting");
     // Samme temaer som push_kinds() i 134
     assert(PUSH_KINDS.map((k) => k.id).join(",") === "oppkjop,anbud,konsern,melding", "temaene");
+  });
+
+  await test("Regionmester: kartet med mester og styrke, lenken og poengene (B-487)", () => {
+    assert(parsePushLink("kart")?.to === "kart", "lenken til kartet");
+    const m = parseWorldMap({
+      regions: [
+        {
+          id: "nord",
+          master: { nick: "Anna", strength: 177, since: "2026-10-13T10:00:00Z", mine: false },
+          players: [
+            { nick: "Deg", mine: true, kompleks: 2, storverk: 0, stalverk: 0, building: 0, strength: 54.04 },
+            { nick: "Anna", mine: false, kompleks: 5, storverk: 1, stalverk: 0, building: 0, strength: "177" },
+          ],
+          companies: [],
+        },
+        { id: "jern", master: null, players: [], companies: [] },
+      ],
+    });
+    const nord = m.find((r) => r.id === "nord")!;
+    assert(nord.master?.nick === "Anna" && nord.master.strength === 177 && nord.master.since > 0, "mesteren");
+    assert(nord.players[0].strength === 54 && nord.players[1].strength === 177, "styrken per konsern");
+    assert(
+      m.find((r) => r.id === "jern")!.master === null && m.find((r) => r.id === "ost")!.master === null,
+      "uten mester",
+    );
+    // Samme tall som region_points() i 151: kompleks 12, storverk 4, stålverk 1, +25 % per trinn
+    assert(
+      regionPoints("kompleks", 6) === 30 && regionPoints("storverk", 2) === 6 && regionPoints("stalverk", 0) === 1,
+      "poengene per verk",
+    );
+    assert(
+      regionStrength(
+        [
+          { id: 1, type: "kompleks", name: "A", level: 4, boughtDay: 0, downUntilDay: 0, region: "nord" },
+          { id: 2, type: "storverk", name: "B", level: 0, boughtDay: 0, downUntilDay: 0, region: "nord" },
+          {
+            id: 3,
+            type: "kompleks",
+            name: "C",
+            level: 0,
+            boughtDay: 0,
+            downUntilDay: 0,
+            region: "nord",
+            project: { kind: "bygg", startedAt: 0, readyAt: 1 },
+          },
+          { id: 4, type: "kompleks", name: "D", level: 0, boughtDay: 0, downUntilDay: 0, region: "jern" },
+        ],
+        "nord",
+      ) === 28,
+      "styrken i en region: bare ferdige verk der",
+    );
   });
 
   setSaveListener(null);

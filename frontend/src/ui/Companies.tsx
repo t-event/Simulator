@@ -1,6 +1,6 @@
 /**
  * Industrien rundt verket (B-189, B-227): de strategiske selskapene og konsernkassa under Konsern → Industrien.
- * Skraplageret er det første selskapet; slagghåndtering og mekanisk verksted er bygget, men slått av (B-253, B-256).
+ * Skraplageret var det første selskapet; slagghåndteringen (B-253, B-445) og mekanisk verksted (B-256, B-486) er åpnet.
  * Eieren ser Kontrollen og kan investere; utbyttepolitikken og forsvarsfondet står ved konsernkassa (B-334). Hvert selskap serveren sender, får sitt eget kort, og konsernkassa – kapitalen
  * til alle selskapene – har sitt eget. Vises først når konsernet er åpnet (gradvis synlighet), krever konto. Alt avgjøres
  * på serveren i ekte tid; kortene viser bare det serveren sier.
@@ -129,12 +129,12 @@ function MillInput({
 const COMPANY_INTRO: Record<Company["type"], string> = {
   skraplager:
     "Eieren tjener på skrapet de andre spillerne kjøper – høyst én vanlig dags bruk per spiller per dag, så farten i spillet betyr ikke noe.",
-  // B-253: bygget, men slått av på serveren til skraplageret har vist at kjeden virker
+  // B-253, åpnet 3.10 (B-445)
   slagg:
     "Eieren tjener på slaggen de andre spillerne lager – omtrent 0,12 tonn slagg per tonn stål, høyst én vanlig dags produksjon per spiller per dag, så farten i spillet betyr ikke noe.",
-  // B-256: bygget, men slått av som slagghåndteringen
+  // B-256, åpnet 13.10 med andelen 0,2 (B-486)
   verksted:
-    "Eieren får halvparten av det de andre spillerne bruker på vedlikehold og reparasjoner – regnet per tonn stål de lager, høyst én vanlig dag per spiller per dag, så farten i spillet betyr ikke noe.",
+    "Eieren får en femdel av det de andre spillerne bruker på vedlikehold og reparasjoner – regnet per tonn stål de lager, høyst én vanlig dag per spiller per dag, så farten i spillet betyr ikke noe. Det minste selskapet, og det billigste å by på.",
 };
 
 const INDUSTRY_INTRO =

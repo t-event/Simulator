@@ -147,7 +147,7 @@ frontend/src/
     recipeGuide.ts Reseptguide for nye kvaliteter (vises av ui/RecipeGuide.tsx)
     konsern.ts   Datterverk, byggeprosjekter i ekte tid og flaggskipet (B-209); vises av ui/Konsern.tsx
     konsernWorld.ts Konsernet på serveren speilet: priser, køen, nivåstigen, settleWorld (B-325, B-326; SQL i 064)
-    regions.ts   Verdenskartets seks regioner og standardregionen for nye verk (B-333; SQL i 066)
+    regions.ts   Verdenskartets seks regioner og standardregionen for nye verk (B-333; SQL i 066); styrken til regionmester (B-487)
     building.ts  Byggetid og innkjøring for store kjøp, nabolaget i tre trinn og verkets stiftelse (B-336, B-455);
                  kortet i ui/Neighborhood.tsx   upkeep.ts  Slitasje og fornyelse av storverket (B-455), raden i ui/Maintenance.tsx
     control.ts   Utbyttepolitikken, forsvarsfondet og Kontroll: tall og ord appen viser (B-334; SQL i 067)
@@ -462,6 +462,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Regionene** (B-333): verkene har `region` (og `moved` etter én flytt), bestillinger av nye verk har `region`.
   Regionlista står i `konsern_regions()` og `game/regions.ts` – endres den, endres begge (og kartformene i
   `ui/WorldMap.tsx`). `konsern_order` har fått `p_region`; endres signaturen igjen, `drop function` den gamle først.
+- **Regionmester** (B-487, 151): styrken per verk står i `region_points` og speiles i `regionPoints` (`game/regions.ts`,
+  faste tall i nettesten) – endres den, endres begge. Jobben `regionmester` (cron hvert 10. min) er den eneste som bytter
+  mester og skriver hendelser/varsler; bytte bare når en annen er strengt sterkere. Tittelen gir ingen penger eller Kontroll
+  – vil man gi den virkning, er det en ny beslutning. Stopp med `select cron.unschedule('regionmester');`.
 - **Utbyttepolitikk og Kontroll** (B-334, 067): `pay_dividends` betaler `dividend_to_treasury(fullt, policy_keep)` til
   kassa og resten til `konsern.fund`; `dividendToTreasury` i `dividend.ts` speiler den (faste tall i testen).
   `world_status.dividend.per_day` er etter politikken, `full_per_day` før – konsernverdien bruker det fulle. Kontrollen

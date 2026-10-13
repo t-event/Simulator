@@ -61,6 +61,11 @@ regnes av serveren i ekte tid.
   - Ingenting tas bort: verk, trinn og betalte bestillinger over det opptjente står. Bytte til kompleks sperres ikke av
     plassene, bare av nivå 2.
 - Regioner (seks), flytt én gang per verk, verdenskart (B-333).
+- **Regionmester** (B-487, 151): i hver region er konsernet med sterkest ferdige verk regionmester. Styrken er per verk
+  12 (kompleks), 4 (storverk) eller 1 (stålverk) × (1 + 0,25 × trinnet), og summen ganges med aktiviteten
+  (`activity_factor`); verk som bygges, teller ikke. Tittelen byttes bare når en annen er strengt sterkere. Jobben
+  `regionmester` (cron hvert 10. min) bytter, skriver i Skiftrapporten og varsler (tema `konsern`, lenke `kart`).
+  Merket «Regionmester» på topplista så lenge man har minst én region. Ingen penger. Speilet i `regionPoints`.
 
 ## 4. Konsernkassa: inn og ut
 
@@ -102,6 +107,8 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
   kjøperens eget anslag mot budet).
 - Fornyelsen: anbudet åpner 48 timer før konsesjonen går ut, og eieren stiller likt med alle. Eieren får egen beskjed
   (kortet, Konsern → Oversikt, varsellinja og varselet på mobilen) om at selskapet går tapt uten bud (B-481).
+- Tre selskaper: skraplageret, slagghåndteringen (fra 3.10, B-445) og mekanisk verksted (fra 13.10, B-486). Verkstedets
+  eier får 0,2 av vedlikeholdet som teller hos de andre (`workshop_share`), ca. 7 mill. kr per dag – det minste selskapet.
 - Kontroll regnes av `company_control` (aktivitet, investering, region, eiertid); vises som kroner (B-370).
 - Oppkjøpsbud og motbud er på (fra 29.9.2026). Budet teller 60 × √(bud / V) × (0,5 + 0,5 × aktivitet) + region, inntil
   10 × verdien (verdi V = det høyeste av 10 dagers inntekt og siste anbudspris); eieren kan alltid miste selskapet.

@@ -5,6 +5,36 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 410 – 2026-10-13: Mekanisk verksted åpnet, regionmester og nye konsernmål (B-486, B-487)
+
+**Brukeren ba om:** «Åpne mekanisk verksted. Velg modell for meg. Sesong 3 pynt kan vi gjøre når vi er i sesong 2. Finn
+mer du kan jobbe med og bygge. Vi trenger mer å gjøre i spillet. De fleste har kommet så langt at man bare driver å
+moderniserer verkene sine og ingenting mer. Lag en stor oppdatering og push».
+
+**Gjort:**
+- B-486: verkstedet åpnet med andelen 0,2. Anslaget er 6,8 mill. per dag, mot ca. 20 for de andre (0,5 hadde gjort det
+  til det største). Første anbud åpnet 10:39 UTC og stenger 15.10.
+- B-487: regionmester på verdenskartet. Server (151): styrke per konsern og region, jobben `regionmester`, hendelser,
+  varsler, merke og `world_map` med mester og styrke. App: kartet, regionen, kortet «Regionene» på Konsern → Oversikt,
+  merket med krone, varsellenken `kart` og en side i Fagboka. Nye konsernmål: trinn 6, fullt modernisert, regionene og
+  regionmester.
+- Verksjefene er ikke bygget (venter på 2.11, B-409). Vi er i sesong 1, så pynten for sesong 3 venter.
+
+**Testet:**
+- Verkstedet prøvekjørt i en DO-blokk (rullet tilbake) før det ble slått på.
+- Regionmester prøvekjørt med ekte tall (rullet tilbake): seks bytter, fem ulike mestere, 6 hendelser og 5 varsler; andre
+  kjøring endret ingenting.
+- Nettester for kartet, poengene og lenken. Playwright på 320, 390 og 1366 px: kortet, kartet og regionene, uten
+  horisontal scrolling. Langt brukernavn brytes.
+- `npm test`, `tsc -b`, lint, build og `balance.ts`.
+
+**Gjenstår:**
+- Slå på jobben `regionmester` (cron) etter publiseringen, og se at hendelsene og varslene kom.
+- Følge verkstedanbudet til 15.10.
+- Sjekke eksporten 14.10, og skyggerapporten 2.11 (så verksjefene).
+
+---
+
 ## Økt 409 – 2026-10-13: Eksporten tabell for tabell og driftsstatus i adminpanelet (B-484, B-485)
 
 **Brukeren ba om:** «På tide med ny oppdatering. Lag deg en plan på hva som skal bygges idag. Lag alt ferdig og push».

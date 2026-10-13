@@ -61,7 +61,7 @@ import { useLastWorld, type OpenTender } from "./openTender";
 import { EARNS_FROM, konsernValueOf } from "../net/world";
 import { useKonsernRank } from "./konsernRank";
 import { IndustryPanel } from "./Companies";
-import { WorldMapPanel } from "./WorldMap";
+import { RegionsCard, WorldMapPanel } from "./WorldMap";
 import { NeedsAccount } from "./Account";
 import { cancelOrderUi, getBuildRegion, movePlantUi, runOption, sellPlantUi, setBuildRegion } from "./konsernRun";
 import { fmtKr, fmtT } from "./format";
@@ -918,7 +918,15 @@ export function KonsernPage({
           )}
         </div>
       )}
-      {tab === "oversikt" && <KonsernOverview g={g} act={act} onBuy={() => setTab("utvid")} openBook={openBook} />}
+      {tab === "oversikt" && (
+        <KonsernOverview
+          g={g}
+          act={act}
+          onBuy={() => setTab("utvid")}
+          onMap={() => setTab("kart")}
+          openBook={openBook}
+        />
+      )}
       {tab === "utvid" && <KonsernBuy g={g} act={act} onShowPlants={() => setTab("oversikt")} />}
       {tab === "kart" && <WorldMapPanel g={g} onBuild={() => setTab("utvid")} />}
       {tab === "industri" && <IndustryPanel g={g} act={act} />}
@@ -975,11 +983,14 @@ function KonsernOverview({
   g,
   act,
   onBuy,
+  onMap,
   openBook,
 }: {
   g: GameState;
   act: Act;
   onBuy: () => void;
+  /** Åpner Kart-fanen (regionmester, B-487) */
+  onMap: () => void;
   openBook?: (chapter?: string) => void;
 }) {
   const k = g.konsern;
@@ -1110,6 +1121,8 @@ function KonsernOverview({
         </Card>
       </div>
       <NextStep g={g} act={act} />
+      {/* Regionmester (B-487): hvor du har tittelen, og hvor du er nærmest */}
+      <RegionsCard g={g} onOpenMap={onMap} />
       <KonsernQueue g={g} act={act} />
       {k.plants.length > 0 && (
         <div className="g-col-wide g-konsern-plants">

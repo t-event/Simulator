@@ -3,15 +3,24 @@
  * et hav, med alle spilleres datterverk og de strategiske selskapene: kystlinjer, sjøkartrutenett, skipsleder,
  * regionnavn med undertekst, tetthet som fyllfarge, merker i fast rutenett (selskapene, så dine, «bygges» stiplet), filter
  * Alle/Dine/Selskaper, og et sidepanel med tre tall og «Bygg neste verk i …» som setter regionen under Utvid.
- * Kartet viser andre spillere, så det krever konto (KONTO.md).
+ * Kartet viser andre spillere, så det krever konto (KONTO.md). Hver region har en regionmester (B-487): konsernet med
+ * sterkest verk der. Mesteren står på kartet og i regionen, og `RegionsCard` viser stillingen på Konsern → Oversikt.
  */
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
-import { REGIONS, regionName } from "../game/regions";
+import { REGION_POINTS, REGIONS, regionName } from "../game/regions";
 import type { GameState, RegionId, SisterType } from "../game/types";
 import { getSession, onSessionChange } from "../net/supabase";
-import { fetchWorldMap, type MapPlayer, type MapRegion } from "../net/worldMap";
+import {
+  fetchWorldMap,
+  fmtStrength,
+  strengthGap,
+  type MapMaster,
+  type MapPlayer,
+  type MapRegion,
+} from "../net/worldMap";
 import { AccountFeaturesCard } from "./Account";
 import { Card } from "./common";
+import { Button } from "./ds";
 import { Icon } from "./icons";
 import { setBuildRegion } from "./konsernRun";
 import { PlayerName } from "./Profile";
@@ -78,7 +87,55 @@ function countText(p: MapPlayer): string {
   const parts = (["kompleks", "storverk", "stalverk"] as SisterType[])
     .filter((t) => p[t] > 0)
     .map((t) => `${p[t]} ${TYPE_WORD[t][p[t] === 1 ? 0 : 1]}`);
-  return parts.join(", ") + (p.building > 0 ? ` · ${p.building} bygges` : "");
+  return (
+    parts.join(", ") +
+    (p.building > 0 ? ` · ${p.building} bygges` : "") +
+    (p.strength > 0 ? ` · styrke ${fmtStrength(p.strength)}` : "")
+  );
+}
+
+/** Kort navn på kartet, så teksten holder seg inne i regionen */
+function shortNick(nick: string): string {
+  return nick.length > 10 ? `${nick.slice(0, 9)}…` : nick;
+}
+
+/** Regionmesteren og stillingen din i regionen (B-487) */
+function RegionMaster({ r }: { r: MapRegion }) {
+  const m: MapMaster | null = r.master;
+  const mine = r.players.find((p) => p.mine)?.strength ?? 0;
+  const gap = strengthGap(r);
+  const since = m?.since ? new Date(m.since).toLocaleDateString("nb-NO", { day: "numeric", month: "short" }) : null;
+  return (
+    <div className={`g-map-master-box${m?.mine ? " is-mine" : ""}`}>
+      <p className="g-map-master-line">
+        <Icon name="crown" />
+        {!m ? (
+          <span>Ingen regionmester ennå. Det første konsernet med ferdige verk her tar tittelen.</span>
+        ) : m.mine ? (
+          <span>
+            <strong>Du er regionmester her</strong> – styrke {fmtStrength(m.strength)}
+            {since ? ` (siden ${since})` : ""}
+          </span>
+        ) : (
+          <span>
+            Regionmester: <PlayerName nick={m.nick} /> – styrke {fmtStrength(m.strength)}
+            {since ? ` (siden ${since})` : ""}
+          </span>
+        )}
+      </p>
+      {m && !m.mine && (
+        <p className="g-small-text">
+          {mine > 0 ? `Du har styrke ${fmtStrength(mine)}. ` : "Du har ingen ferdige verk her. "}
+          Du trenger {fmtStrength(gap ?? 0)} til for å ta tittelen.
+        </p>
+      )}
+      <p className="g-muted g-small-text">
+        Styrke: et stålkompleks gir {REGION_POINTS.kompleks}, et storverk {REGION_POINTS.storverk} og et stålverk{" "}
+        {REGION_POINTS.stalverk}, og hvert moderniseringstrinn 25 % mer. Et verk kan flyttes én gang, gratis. Konsern
+        som ikke har vært aktive på en uke, teller mindre.
+      </p>
+    </div>
+  );
 }
 
 /** Kubene i lista: ett per verk, største først; de som bygges (alt talt med i typen), stiplet til slutt */
@@ -164,7 +221,9 @@ function RegionDetail({ g, r, onBuildHere }: { g: GameState; r: MapRegion; onBui
   const region = REGIONS.find((x) => x.id === r.id)!;
   const mine = r.players.filter((p) => p.mine).reduce((a, p) => a + plantsOf(p), 0);
   const plants = r.players.reduce((a, p) => a + plantsOf(p), 0);
-  const players = [...r.players].sort((a, b) => Number(b.mine) - Number(a.mine) || plantsOf(b) - plantsOf(a));
+  const players = [...r.players].sort(
+    (a, b) => Number(b.mine) - Number(a.mine) || b.strength - a.strength || plantsOf(b) - plantsOf(a),
+  );
   return (
     <section className="g-map-detail">
       <header className="g-map-detail-head">
@@ -177,6 +236,7 @@ function RegionDetail({ g, r, onBuildHere }: { g: GameState; r: MapRegion; onBui
           {mine ? `${mine} ${mine === 1 ? "ditt verk" : "dine verk"}` : "Ingen verk her"}
         </span>
       </header>
+      <RegionMaster r={r} />
       <dl className="g-map-stats">
         <div>
           <dt>Verk</dt>
@@ -383,8 +443,19 @@ export function WorldMapPanel({ g, onBuild }: { g: GameState; onBuild?: () => vo
                     <text className="g-map-label ds-display" x={s.lx} y={s.ly}>
                       {r.name.toUpperCase()}
                     </text>
-                    <text className="g-map-sub" x={s.lx} y={s.ly + 10}>
-                      {!data ? "…" : plants === 0 ? "ubebygd" : `${plants} verk · ${data.players.length} konsern`}
+                    {/* Regionmesteren (B-487) står under navnet; uten mester antallet verk og konsern */}
+                    <text
+                      className={`g-map-sub${data?.master ? " is-master" : ""}${data?.master?.mine ? " is-mine" : ""}`}
+                      x={s.lx}
+                      y={s.ly + 10}
+                    >
+                      {!data
+                        ? "…"
+                        : data.master
+                          ? `Mester: ${data.master.mine ? "deg" : shortNick(data.master.nick)}`
+                          : plants === 0
+                            ? "ubebygd"
+                            : `${plants} verk · ${data.players.length} konsern`}
                     </text>
                     {data && <Markers r={data} filter={filter} />}
                   </g>
@@ -434,7 +505,11 @@ export function WorldMapPanel({ g, onBuild }: { g: GameState; onBuild?: () => vo
                   >
                     <span>{r.name}</span>
                     <span className="g-muted">
-                      {!data ? "…" : n === 0 ? "Ingen verk" : `${n} verk${mine ? ` · ${mine} dine` : ""}`}
+                      {!data
+                        ? "…"
+                        : n === 0
+                          ? "Ingen verk"
+                          : `${data.master?.mine ? "Mester · " : ""}${n} verk${mine ? ` · ${mine} dine` : ""}`}
                     </span>
                   </button>
                 );
@@ -449,6 +524,69 @@ export function WorldMapPanel({ g, onBuild }: { g: GameState; onBuild?: () => vo
             )}
           </div>
         </div>
+      </Card>
+    </div>
+  );
+}
+
+/**
+ * Regionene på Konsern → Oversikt (B-487): hvor du er regionmester, og regionen der du er nærmest tittelen. Henter
+ * kartet selv (samme kall som Kart-fanen) og vises bare med konto og ferdige verk.
+ */
+export function RegionsCard({ g, onOpenMap }: { g: GameState; onOpenMap: () => void }) {
+  const session = useSession();
+  const user = session?.user.id ?? null;
+  const [map, setMap] = useState<MapRegion[] | null>(null);
+  const hasPlants = g.konsern.plants.some((p) => p.project?.kind !== "bygg");
+  useEffect(() => {
+    if (!user || !hasPlants) return;
+    let alive = true;
+    const load = () =>
+      fetchWorldMap().then(
+        (m) => alive && setMap(m),
+        () => {},
+      );
+    void load();
+    const t = setInterval(() => void load(), 120_000);
+    return () => {
+      alive = false;
+      clearInterval(t);
+    };
+  }, [user, hasPlants]);
+  if (!user || !hasPlants || !map) return null;
+  const held = map.filter((r) => r.master?.mine);
+  const closest = map
+    .map((r) => ({ r, gap: strengthGap(r) }))
+    .filter((x): x is { r: MapRegion; gap: number } => x.gap != null && x.r.players.some((p) => p.mine))
+    .sort((a, b) => a.gap - b.gap)[0];
+  const free = map.find((r) => !r.master);
+  return (
+    <div className="g-col g-konsern-regions-col">
+      <Card title="Regionene" className="g-konsern-regions">
+        {held.length > 0 ? (
+          <p className="g-map-master-line">
+            <Icon name="crown" />
+            <span>
+              <strong>Du er regionmester i {held.map((r) => regionName(r.id)).join(", ")}.</strong> Andre kan ta
+              tittelen ved å bygge, modernisere eller flytte verk dit.
+            </span>
+          </p>
+        ) : (
+          <p className="g-small-text">
+            Hver region har en regionmester: konsernet med sterkest verk der. Du er ikke regionmester ennå.
+          </p>
+        )}
+        {closest && (
+          <p className="g-small-text">
+            Nærmest: <strong>{regionName(closest.r.id)}</strong> – du trenger {fmtStrength(closest.gap)} mer styrke enn
+            du har for å slå {closest.r.master!.nick}. Et nytt stålkompleks gir {REGION_POINTS.kompleks}, en
+            modernisering av et kompleks 3.
+          </p>
+        )}
+        {free && <p className="g-small-text">{regionName(free.id)} har ingen regionmester – første til mølla.</p>}
+        <Button icon="flag" onClick={onOpenMap}>
+          Se kartet
+        </Button>
       </Card>
     </div>
   );

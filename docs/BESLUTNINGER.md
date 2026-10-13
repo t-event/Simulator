@@ -9053,3 +9053,54 @@ Konto: bare eieren (KONTO.md). Testet som spiller i en DO-blokk som ruller tilba
 og en vanlig konto får «ikke tilgang». Playwright på 320, 390 og 1366 px, både alt i orden og med feil. Ingen horisontal
 scrolling, ingenting avkortet, og knappen er 44 px høy.
 Endringslogg: nei – bare eieren ser fanen.
+
+## B-486 Mekanisk verksted åpnes, med andelen 0,2 (2026-10-13)
+Eieren: «Åpne mekanisk verksted. Velg modell for meg.» Verkstedet (B-256) var bygget, men slått av. Eieren skulle velge
+andelen av vedlikeholdet som går til eieren (`workshop_share`, 0,5 fra B-256).
+- **Hvorfor ikke 0,5:** da B-311 delte økonomien på ti, ble kronene for vedlikehold i spillet ikke delt, så 0,5 ga ca.
+  17–25 mill. kr per dag. Det er mer enn skraplageret og slagghåndteringen (ca. 20 mill.). B-256 mente at verkstedet
+  skulle være det minste selskapet og det billigste å by på.
+- **Valgt: 0,2.** Anslaget ble 6,8 mill. kr per dag (prøvekjørt i en DO-blokk som ble rullet tilbake), omtrent en tredel
+  av de andre. Første anbud: minstebud 34 mill., høyeste 95 mill. Det er et selskap mellomstore konsern kan by på, og
+  vedlikeholdstallene svinger mer (havarier) enn tonnene, så en lavere innsats demper svingningene. Med 0,1 (ca. 3,4 mill.)
+  hadde selskapet knapt vært verdt et bud. Med 0,5 hadde det vært det største.
+- **Gjort (150):** `workshop_share` = 0,2, selskapet `active`, anslaget regnet på nytt. Verdensjobben åpnet anbudet
+  13.10 kl. 10:39 UTC (stenger 15.10 kl. 10:39), og Skiftrapporten fikk hendelsen. Teksten på kortet under Industrien
+  sier «en femdel» og at det er det minste selskapet.
+Konto: som de andre selskapene (KONTO.md).
+
+## B-487 Kamp om regionene: regionmester på verdenskartet, og nye konsernmål (2026-10-13)
+Eieren: «Finn mer du kan jobbe med og bygge. Vi trenger mer å gjøre i spillet. De fleste har kommet så langt at man bare
+driver å moderniserer verkene sine og ingenting mer. Lag en stor oppdatering og push.»
+Tallene 13.10: tre konsern har 12–14 verk og tittel nr. 7, de fleste andre 5–10 verk. Alle har køen full av
+moderniseringer, og det er det eneste valget som er igjen i konsernet. Regionene (B-333) hadde nesten ingen virkning.
+Verksjefene (fase 5) er det store svaret, men eieren har bestemt at de bygges etter skyggerapporten for V0/K-1 2.11
+(B-409). Derfor ble det noe som ikke rører pengene.
+1. **Regionmester (server, 151):** i hver av de seks regionene er konsernet med sterkest ferdige verk regionmester.
+   Styrken per verk er 12 (stålkompleks), 4 (storverk) eller 1 (stålverk) × (1 + 0,25 × trinnet), samme forhold som
+   grunnutbyttet og trinnøkningen, og summen ganges med aktiviteten (`activity_factor`), så et forlatt konsern mister
+   regionene sine. Verk som bygges, teller ikke. Tittelen byttes bare når en annen er strengt sterkere (likt: den som har
+   den, beholder den). Flaggede, sperrede og gjester er ikke med.
+   - Tabellene `region_masters` og `region_master_log` (RLS uten regler, bare gjennom funksjonene).
+   - `region_strengths()` og `region_masters_refresh()`, jobben `regionmester` (cron hvert 10. min, i `world_health`, én
+     region per deltransaksjon).
+   - Ved bytte: hendelse i Skiftrapporten («X er ny regionmester i …»), varsel på mobilen til den nye og den som mistet
+     tittelen (tema `konsern`, lenke `kart`).
+   - `badges_of` gir merket `regionmester` så lenge man har minst én region.
+   - `world_map` har mesteren per region og styrken per konsern.
+   - Ingen penger og ingen Kontroll: tittelen gir ære (B-180, B-323). Prøvekjørt med ekte tall i en DO-blokk som ble rullet
+     tilbake: fem ulike konsern blir mester i de seks regionene, en mellomstor spiller tar én region ved å samle verkene
+     der, og flere regioner står jevnt (én 54–54). Andre kjøring endrer ingenting.
+2. **App:**
+   - Kartet viser «Mester: …» under regionnavnet, og regionknappene viser «Mester» der du har tittelen.
+   - Regionen viser mesteren, styrken din og hvor mye du mangler, og hvordan styrken regnes. Konsernene står etter styrke.
+   - Kortet «Regionene» på Konsern → Oversikt: hvor du er mester, regionen der du er nærmest, ledige regioner, «Se kartet».
+   - Merket på topplista og profilen (krone), varsellenken `kart` til Konsern → Kart, og en side i Fagboka
+     («Slik fungerer konsernet»). `regionPoints`/`regionStrength` speiler SQL-en (faste tall i nettesten).
+3. **Nye konsernmål (prestasjoner, fagpoeng):**
+   - «Fremtidens verk» (trinn 6).
+   - «Fullt modernisert»: 3, 8 og 14 verk på trinn 6.
+   - «Regionene»: verk i 3 og 6 regioner.
+   - «Regionmester»: blir stående når den er tatt.
+Konto: ja (regel 3 – mellom spillere, regnet av serveren, KONTO.md).
+Jobben slås på når appen er publisert, så spillerne kan se tittelen i appen når varselet kommer.

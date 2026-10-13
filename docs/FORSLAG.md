@@ -51,7 +51,7 @@ til «Avgjort» nederst).
 
 ## Venter
 
-- **Pynt for sesong 3 (B-287, B-291) – må gjøres før sesong 3 startes (eieren 1.10: venter til da):** pynten for
+- **Pynt for sesong 3 (B-287, B-291) – må gjøres før sesong 3 startes (eieren 13.10: tas mens sesong 2 pågår):** pynten for
   sesong 2 er klar. Før `start_season` kjøres for sesong 3, legg inn ny
   pynt i `COSMETICS` med `season: 3` – både i butikken og på stigen (trinn 10–50). Ellers har sesong 3 ingen egen pynt.
 
@@ -59,9 +59,8 @@ til «Avgjort» nederst).
   eierens godkjenning (migrasjon 127). Tabellen står i `docs/RAPPORT-2026-10-02.md`, avsnitt 7.
 
 - ~~Slå på slagghåndteringen~~ **Gjort 3.10 (B-445):** første anbud stenger 5.10 kl. 10:38.
-- **Slå på mekanisk verksted (B-256):** etter slagghåndteringen, og tidligst en uke etter at appen med vedlikeholdstallet er
-  ute (så anslaget bygger på ekte tall): `update public.companies set active = true where type = 'verksted'; select
-  public.world_tick();`
+- ~~Slå på mekanisk verksted (B-256)~~ **Gjort 13.10 (B-486):** andelen 0,2 (Claude valgte etter eierens «velg modell
+  for meg»), første anbud stenger 15.10.
 
 - **Logg inn med Google og Apple** (eieren: «senere», B-212). Krever oppsett i dashbordet og hos Google/Apple.
 
@@ -75,6 +74,11 @@ til «Avgjort» nederst).
   neste gang: «Glemt passord?» på kontokortet → koden i e-posten → nytt passord. Husk grensen på ca. 2 e-poster i timen.
 
 ## Forslag – spillet
+
+- **Mer å gjøre i sluttspillet (eieren 13.10, B-487):** regionmester og nye konsernmål er bygget. Verksjefene
+  (`VERKSJEF-FORSLAG.md`) er det store neste steget og venter på skyggerapporten 2.11 (B-409). Mulig senere: en ukeliste
+  «Mest modernisert» (krever ny ukestype, B-457), regionmester i Hall of Fame ved sesongslutt, og flere selskaper når
+  det er flere aktive konserneiere (ca. 1 per 4, B-387).
 
 - **Designgjennomgangen 1.10 – ferdig (B-405–B-415):** alt fra poleringslista er bygget. Ikke tatt: konsernkassa ut
   av toppfeltet på mobil (B-340), store bokstaver på alle underoverskrifter. ~~Står åpne: samme fanenavn «Strøm» også i

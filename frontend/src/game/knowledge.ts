@@ -462,6 +462,11 @@ export const KNOWLEDGE: KnowledgeCard[] = [
         head: "Flaggskipet og titlene",
         text: "Hjemmeverket er flaggskipet: godt omdømme og stål som holder kvaliteten gir mer utbytte fra alle datterverkene. Titlene – Stålmagnat, Stålfyrste og videre – kommer av verkene du har bygget, og hver tittel åpner mer: høyere trinn, stålkomplekser og flere plasser. Under Forskning finnes egne prosjekter for konsernet.",
       },
+      {
+        // B-487
+        head: "Regionene og regionmesteren",
+        text: "Hvert verk står i en av de seks regionene på verdenskartet. Konsernet med sterkest verk i en region er regionmester der. Et stålkompleks teller 12, et storverk 4 og et stålverk 1, og hvert trinn modernisering 25 % mer. Verk som bygges, teller ikke ennå, og konsern som ikke har vært aktive på en uke, teller mindre. Tittelen byttes når et annet konsern blir sterkere – så du kan bygge, modernisere eller flytte et verk (én gang, gratis) for å ta den. Den gir ære, ikke penger.",
+      },
     ],
   },
 ];
