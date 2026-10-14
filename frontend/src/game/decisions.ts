@@ -10,6 +10,7 @@ import { ROLES, SCRAP_TYPES, STAGES } from "./data";
 import {
   acceptContract,
   addCost,
+  assessOffer,
   addIncome,
   addScrapParti,
   adjustMorale,
@@ -22,12 +23,22 @@ import {
   lateContracts,
   log,
   makeCandidate,
+  plantStopped,
   quitText,
+  realisticDailyT,
   scrapPrice,
   unlock,
   workerLabel,
 } from "./engine";
-import { computePlantStats, day, isAbsent, marketSaturation, productPrice, satisfiedGrades } from "./plant";
+import {
+  computePlantStats,
+  day,
+  isAbsent,
+  marketSaturation,
+  productCapT,
+  productPrice,
+  satisfiedGrades,
+} from "./plant";
 import { chance, pick, rand, uniform } from "./random";
 import { bornAt, PENSION } from "./pension";
 import { knowledgeCard } from "./knowledge";
@@ -353,16 +364,17 @@ const MORE_MAKERS: Record<string, Maker> = {
     };
   },
   utlandsordre: (g) => {
-    const stats = computePlantStats(g);
-    if (g.stage < 3 || stats.dailyProductT <= 0) return null;
-    const product = stats.mainProduct;
-    const t = Math.max(1, Math.round(stats.dailyProductT * uniform(g, 2.5, 4)));
-    const pricePerT = Math.round(productPrice(g, product, "standard") * marketSaturation(stats.dailyProductT) * 1.15);
+    const offer = exportOrder(g);
+    if (!offer) return null;
+    const { t, pricePerT, product, doneDay } = offer;
     return {
       id: "utlandsordre",
       title: "Stor ordre fra utlandet",
-      text: `En kunde i utlandet vil ha ${fmtT(t)} i standardkvalitet innen ti døgn, og betaler 15 % over vanlig pris. En så stor ordre tar mye av kapasiteten.`,
-      options: [{ label: "Ta ordren", hint: "God pris, men sjekk at ordrekøen tåler det." }, { label: "Avslå" }],
+      text: `En kunde i utlandet vil ha ${fmtT(t)} ${product === "armering" ? "armering" : "emner"} i standardkvalitet innen ti døgn, og betaler 15 % over vanlig pris. Med det som alt står i ordrekøen, er den ferdig rundt dag ${doneDay} (fristen er dag ${day(g) + 10}).`,
+      options: [
+        { label: "Ta ordren", hint: "God pris, og verket rekker den med køen slik den er nå." },
+        { label: "Avslå" },
+      ],
       data: { t, pricePerT, product },
     };
   },
@@ -435,6 +447,48 @@ export const SAME_CARD_REAL_MS = 20 * 60_000;
  * kunne komme omtrent hvert minutt (oftere om vinteren). På 1× er to spilldøgn fire minutter, så der endrer det ingenting.
  */
 export const ANY_CARD_REAL_MS = 3 * 60_000;
+
+/**
+ * Ordren fra utlandet (B-491): størrelsen regnes av det verket rekker av varen – armering er begrenset av valseverket
+ * (B-217), ikke av hele døgnproduksjonen – og den må få plass i ordrekøen innen fristen (`assessOffer`). Før ble den
+ * 2,5–4 døgns produksjon av alt verket lager, så et storverk med lite valseverk fikk 111 000 t armering på ti døgn, som
+ * aldri kunne rekkes og presset ut kontraktene og rammeavtalene i køen. Gir null når det ikke er plass.
+ */
+export function exportOrder(
+  g: GameState,
+): { t: number; pricePerT: number; product: Contract["product"]; doneDay: number } | null {
+  const stats = computePlantStats(g);
+  if (g.stage < 3 || stats.dailyProductT <= 0 || plantStopped(g)) return null;
+  const product = stats.mainProduct;
+  const perDay = Math.min(productCapT(stats, product), realisticDailyT(g, stats));
+  if (perDay <= 0) return null;
+  const pricePerT = Math.round(productPrice(g, product, "standard") * marketSaturation(stats.dailyProductT) * 1.15);
+  const probe = (t: number): Contract => ({
+    id: -1,
+    customer: "Kunde i utlandet",
+    product,
+    grade: "standard",
+    tonnes: t,
+    delivered: 0,
+    pricePerT,
+    deadlineDay: day(g) + 10,
+    offerExpiresMin: g.minute,
+    repGain: 2,
+    repLoss: 3,
+    penaltyPerT: Math.round(pricePerT * 0.3),
+    status: "tilbud",
+    closedDay: null,
+    priority: 0,
+  });
+  // Ønsket: 2,5–4 døgn av det verket rekker av varen. Får den ikke plass, krymper den til den gjør det (ned til ett døgn)
+  let t = Math.max(1, Math.round(perDay * uniform(g, 2.5, 4)));
+  while (t >= perDay) {
+    const check = assessOffer(g, stats, probe(t));
+    if (!check.tight && !check.narrow) return { t, pricePerT, product, doneDay: check.doneDay };
+    t = Math.round(t * 0.8);
+  }
+  return null;
+}
 
 /** Kalles én gang per døgn. Lager av og til et nytt kort og pauser spillet. */
 export function maybeCreateDecision(g: GameState): void {
@@ -527,10 +581,25 @@ export function directorLateText(g: GameState): string {
   const after = g.history.filter((h) => h.day >= today - 3 && h.day < today);
   const avg = (xs: { producedT: number }[]) => xs.reduce((a, h) => a + h.producedT, 0) / Math.max(1, xs.length);
   const drop = before.length && after.length && avg(after) < avg(before) * 0.9;
+  // Store ordrer spilleren selv sa ja til i samme periode (B-491, f.eks. ordren fra utlandet) tar plass i køen og på
+  // valseverket – da var det ikke bare produksjonen som falt
+  const ownBig = g.contracts.filter(
+    (c) =>
+      !c.byDirector &&
+      !c.agreementId &&
+      !c.landmark &&
+      (c.acceptedDay ?? -1) > today - ADVISOR_WINDOW_DAYS &&
+      c.status !== "tilbud" &&
+      c.tonnes >= Math.max(1, avg(after.length ? after : before)),
+  );
+  const ownT = ownBig.reduce((a, c) => a + c.tonnes, 0);
   return [
     `${who.length ? `Det gjelder ${who.join(" og ")}` : "Flere kontrakter har gått over fristen"}, og det manglet ${fmtT(shortT)} til sammen.`,
     " Salgsdirektøren signerer bare det verket rakk med produksjonen den siste uka – så når noe likevel blir sent, har produksjonen falt etterpå",
     drop ? ` (fra ca. ${fmtT(avg(before))} til ${fmtT(avg(after))} per døgn).` : ".",
+    ownBig.length
+      ? ` Du sa også selv ja til ${ownBig.length === 1 ? "en stor ordre" : `${ownBig.length} store ordrer`} på ${fmtT(ownT)} i samme periode. Den bruker av den samme kapasiteten.`
+      : "",
     " Vanlige grunner er en ovn eller støpemaskin som sto, mange syke eller på ferie, eller skrap som ikke kom fram.",
     " Direktøren tar færre ordrer av seg selv når produksjonen faller. Vil du ha mer luft, kan du slå av at han tar rammeavtaler (Folk → Ansatte).",
   ].join("");

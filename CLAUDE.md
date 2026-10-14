@@ -598,7 +598,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   Nye salgsbonuser må legges inn i summen i `computePlantStats` (ikke utenfor taket), og ny inntekt på toppen skal
   måles med `balance.ts --storovn 330` – alt før storverket skal stå urørt.
 - **Døgnproduksjon og valseverket** (B-217): `stats.dailyProductT` er alt verket lager (emner og armering). Armering er
-  begrenset av valseverket (`stats.rolledDailyT`); bruk `productCapT(stats, vare)` når noe gjelder én vare.
+  begrenset av valseverket (`stats.rolledDailyT`); bruk `productCapT(stats, vare)` når noe gjelder én vare. Det gjelder også
+  hendelseskort som lager kontrakter (ordren fra utlandet, `exportOrder`, B-491): sjekk dem med `assessOffer` før kortet vises.
 - **Lagerplanen** (B-228): `planLots` i `engine.ts` fordeler partiene på kontraktene i køens rekkefølge (også emner som
   skal valses til armering). Leveranser, valseverket og `ordersToMake` bygger på den – ikke lag egne reservasjoner.
   Test endringer i produksjonen på et ekte, stort spill med flere frø (sene kontrakter og levert tonn), ikke bare balance.

@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 414 – 2026-10-14: Ordren fra utlandet (B-491)
+
+**Brukeren ba om:** sjekke hvorfor rådgiveren sa at leveransene kom for sent (skjermbilde fra dag 5729), og rette det
+hvis det ikke var brukerens feil.
+
+**Funnet:** én ovn sto i døgn 5724–5726, og det var tilfeldig. Hovedfeilen var hendelseskortet «Stor ordre fra
+utlandet»: det ga 111 373 t armering på ti døgn, regnet av hele døgnproduksjonen og ikke av valseverket, og uten å se på
+køen. Resultatet ble en halv leveranse, null i en avtaleuke og 165 mill. i bot.
+
+**Gjort:** `exportOrder` regner av valseverket og det verket lager, og kortet kommer bare når ordren får plass før
+fristen. Rådgiveren nevner egne store ordrer. Docs og endringsloggen er oppdatert.
+
+**Testet:** ny test i `game/tests.ts`, `npm test`, `tsc -b`, lint, build og `balance.ts`.
+
+**Gjenstår:** ingenting.
+
+---
+
 ## Økt 413 – 2026-10-14: Varsel om venner (B-490)
 
 **Brukeren ba om:** «Hva skal man med vennelista om den ikke brukes til noe». Valgte «Varsel om venner».
