@@ -80,6 +80,11 @@ regnes av serveren i ekte tid.
     ikke i lånerammen og ikke i konsernverdien. Uten verksjef er alt som før.
   - **«Verksjefen ringer»:** ca. 2–3 saker i uka, 48 timers frist og varsel på mobilen. Uten svar velger verksjefen
     etter trekket.
+  - **Trivsel** (B-489): 0–100, starter på 60, vises med ord. Per betalt dag endres den med passformen mellom mandat og
+    egenskaper minus 3. Følges rådet i en sak, gir det +3, svar mot rådet −4, og nytt mandat −8 (lojale tar minusene
+    halvt). Under 20 kommer «Tilbud fra en konkurrent»: lønnstillegg (+1 prosentpoeng, høyst 8 %) eller la verksjefen
+    gå (uten sluttpakke og karantene).
+  - 14 vanlige saker. En sak som venter, gir «!» på Konsern og en linje i varsellinja.
   - Bryteren er `config.world.managers.enabled`. Reglene er speilet i `game/managers.ts`.
 
 ## 4. Konsernkassa: inn og ut
@@ -280,7 +285,7 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
 - `UKENS-KONTROLLROM.md` – variant A er bygget (B-387); variant B (avspilling på serveren) venter.
 - `KONSERNKAPITAL-FORSLAG.md` – hva konsernkassa brukes til etter fullt konsern (B-386). Eierens premiss: penger skal
   gi valg, ikke forsvinne. Ingen økonomiske justeringer før eieren har svart.
-- `VERKSJEF-FORSLAG.md` – V1 og V2 er bygget (B-488); V3 (lojalitet, oppsigelse fra verksjefen) venter.
+- `VERKSJEF-FORSLAG.md` – V1–V3 er bygget (B-488, B-489).
 - Programmodell for konsernprogrammene: eieren valgte B (aktivt budsjett, B-388/B-389). Spesifikasjonen står i
   `K1-PROGRAMMER.md` (B-389): serveren har i dag ingen hendelser i konsernverdenen, så K-1 trenger et lite, nøytralt
   hendelseslag (V0) for at Teknologi, Robusthet og Driftsytelse skal ha ekte effekt. Eieren godkjente V0, satsingene

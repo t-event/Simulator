@@ -2,7 +2,8 @@
 
 **Status:** **V1 og V2 er bygget 13.10.2026 (B-488)** etter eierens beslutning («Bygg nå»), før skyggerapporten for
 V0/K-1. Dermed er rekkefølgen i B-409 erstattet. Avvikene fra avsnitt 10 står i B-488: Stabilitet er 0,98 + 0,01 × Folk,
-beløpene føres som `justering` etter utbyttet (ikke inne i `pay_dividends`), og samtalene (V2) er med. V3 venter.
+beløpene føres som `justering` etter utbyttet (ikke inne i `pay_dividends`), og samtalene (V2) er med. **V3 (trivsel og
+«Tilbud fra en konkurrent») er bygget 14.10 (B-489)**: «varsel dagen før» er erstattet av en sak med 48 timers frist.
 
 ## 0. Eierens svar 30.9.2026 (bygges ikke før stabiliseringen er ferdig, B-380)
 

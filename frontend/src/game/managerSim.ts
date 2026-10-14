@@ -5,7 +5,9 @@
  */
 import {
   CALL_CARDS,
+  bestMandate,
   legalStats,
+  loyaltyDaily,
   MANAGERS,
   MANDATES,
   MANDATE_NAME,
@@ -84,7 +86,8 @@ console.log(
 console.log(
   "\nSamtalene: forventet verdi i dager av verkets utbytte (uten mandat / med Stabilitet), og hva trekkene velger:",
 );
-for (const c of CALL_CARDS) {
+const POOL = CALL_CARDS.filter((c) => !c.special);
+for (const c of POOL) {
   const [a, b] = c.options;
   const choices = TRAITS.map((t) => `${t[0]}:${traitChoice(c, t, "lonnsomhet") ? "B" : "A"}`).join(" ");
   console.log(
@@ -93,9 +96,34 @@ for (const c of CALL_CARDS) {
 }
 const perWeek = 2.5;
 const avgBest = mean(() => {
-  const c = CALL_CARDS[Math.floor(rnd() * CALL_CARDS.length)];
+  const c = POOL[Math.floor(rnd() * POOL.length)];
   return Math.max(optionValue(c.options[0]), optionValue(c.options[1]));
 });
 console.log(
   `   Svarer du alltid best: ${avgBest.toFixed(2)} dager per samtale, ${perWeek} samtaler i uka ≈ ${pct((avgBest * perWeek) / 7 / 14)} av konsernets utbytte`,
+);
+
+console.log("\nTrivsel (B-489): endring per betalt dag med mandatet som passer best og med det dårligste:");
+const fits = MANDATES.map((m) =>
+  mean(() => {
+    const st = draw();
+    return loyaltyDaily(m, st, "forsiktig");
+  }),
+);
+console.log(
+  `   Snitt per mandat for tilfeldige kandidater: ${MANDATES.map((m, i) => `${MANDATE_NAME[m]} ${fits[i].toFixed(2)}`).join(", ")}`,
+);
+const bestFit = mean(() => {
+  const st = draw();
+  return loyaltyDaily(bestMandate(st), st, "forsiktig");
+});
+console.log(
+  `   Med mandatet som passer best: ${bestFit.toFixed(2)} per dag – det gir en verksjef som trives, uten tilbud fra konkurrenter`,
+);
+const worst = mean(() => {
+  const st = draw();
+  return Math.min(...MANDATES.map((m) => loyaltyDaily(m, st, "forsiktig")));
+});
+console.log(
+  `   Med det dårligste mandatet: ${worst.toFixed(2)} per dag – fra 60 til under 20 på ca. ${Math.ceil(40 / Math.max(-worst, 1e-6))} dager`,
 );

@@ -5,6 +5,37 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 412 – 2026-10-14: Verksjefenes trivsel, nye saker og varsel i varsellinja (B-489)
+
+**Brukeren ba om:** «Fortsett».
+
+**Gjort:**
+- Morgensjekker:
+  - Eksporten 14.10 gikk av seg selv (96 deler, fila finnes).
+  - Verksjefene: 4 konsern med 13 verksjefer. Første oppgjør 13.10 ga 0 kr, som riktig er: de teller fra dagen etter
+    ansettelsen. Ingen samtaler ennå.
+  - Uka «stål per kWh»: 13 spillere med 3,50–3,82 kg/kWh.
+  - Påminnelsene for de tre sjekkene ble tatt bort.
+- B-489:
+  - Trivsel (V3) på serveren (153a) og i appen.
+  - «Tilbud fra en konkurrent» og seks nye kort.
+  - Rådet vises i samtalen, og kandidatene viser hvilket mandat de passer best til.
+  - Statusen hentes i hele appen, med «!» på Konsern og en linje i varsellinja.
+
+**Testet:**
+- SQL som spiller i DO-blokker som ble rullet tilbake (tallene står i B-489).
+- Faste tall mot SQL i testene.
+- Playwright på 320, 390 og 1366 px med en verksjef som vil slutte og med en vanlig sak: varsellinja, kortet, svaret,
+  arkene. Ingen horisontal scrolling, alle knapper minst 44 px.
+- `npm test`, `tsc -b`, lint, build og `balance.ts`.
+
+**Gjenstår:**
+- Legge inn kortene og tallene i config (siste del av 153) når appen er publisert.
+- Strategi med verksjefer i testspilleren.
+- Følge med på fisking og tilbudene.
+
+---
+
 ## Økt 411 – 2026-10-13: Verksjefer for datterverkene, med samtalene (B-488)
 
 **Brukeren ba om:** «Vi må bygge mer idag, folk har fortsatt ikke noe å gjøre i spillet lengere. Lag en plan og utfør».

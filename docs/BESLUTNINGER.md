@@ -9166,3 +9166,41 @@ med avvikene under. V2 (samtalene) er tatt med nå. V3 (lojalitet, oppsigelse fr
    - Testspilleren (`balance.ts --konsern`) har ikke fått en strategi med verksjefer ennå.
 4. **Bryteren** `config.world.managers.enabled` slås på når appen er publisert.
 Konto: ja (regel 3 – penger i ekte tid mellom spillerne, regnet av serveren, KONTO.md). I `ACCOUNT_FEATURES` som `verksjefer`.
+
+## B-489 Verksjefenes trivsel (V3), seks nye saker og varsel i varsellinja (2026-10-14)
+Eieren: «Fortsett» (etter B-488, med «Vi må bygge mer idag» som oppgave). V3 i VERKSJEF-FORSLAG.md (avsnitt 6 og 8) var
+neste del i rekkefølgen eieren godkjente 30.9.
+1. **Trivsel 0–100** (`plant_managers.loyalty`, 153), starter på 60. Vises bare med ord: «trives godt», «trives»,
+   «misfornøyd», «vil slutte». Spilleren skal ikke passe på et tall (B-180).
+   - Per betalt utbyttedag (i oppgjøret, én gang per dag): passformen mellom mandatet og egenskapene minus 3. Passformen
+     er snittet av Drift og Økonomi for Lønnsomhet, Drift for Vekst og Folk for Stabilitet, rundet som `floor(x + 0,5)`
+     (= `Math.round`). Det gir −2 for 1 stjerne, 0 for 3 og +2 for 5.
+   - Svarer eieren selv: +3 når svaret er verksjefens råd (det verksjefen selv ville valgt etter trekket), −4 ellers.
+     Svarer eieren ikke, endres ingenting.
+   - Bytte av mandat: −8. Lojale verksjefer tar minusene halvt så tungt.
+2. **«Tilbud fra en konkurrent»:** under 20 kommer denne saken med én gang (ikke i den vanlige trekningen):
+   - Lønnstillegg: +1 prosentpoeng, høyst 8 %, og trivselen blir 55.
+   - La verksjefen gå: verksjefen slutter, uten sluttpakke og uten karantene.
+   - Svarer ikke eieren, velger verksjefen etter trekket (lojale blir, sparsomme og ærgjerrige går).
+   - Spesifikasjonen sa «varsel dagen før». Det er erstattet av denne saken med 48 timers frist, så eieren alltid kan
+     svare.
+3. **Seks nye kort:** vedlikehold, elektroder, kurs, støv, eksport og rabatt, som gir 14 vanlige. Flere av dem er
+   skadebegrensning, så snittet med beste svar er nå −0,3 % av konsernets utbytte (var −0,1 %). Samtalene er valg, ikke en
+   pengekilde.
+4. **App:**
+   - Samtalen viser «Verksjefen anbefaler dette» på rådet, og at det å følge det gjør verksjefen fornøyd.
+   - Arket med kandidatene viser «Passer best til …». Verksjefarket viser trivselen og hva som påvirker den.
+   - Statusen hentes i hele appen (hvert 5. minutt mens appen vises, og når Konsern åpnes), ikke bare på Konsern. En
+     sak som venter, gir «!» på Konsern og én linje i varsellinja med lenken «Svar verksjefen» (`LogLink` `konsern`).
+   - Speilet i `game/managers.ts` (`LOYALTY`, `loyaltyDaily`/`loyaltyAnswer`/`loyaltySwitch`), med faste tall i testen
+     mot `manager_fit`/`manager_loyalty_delta`.
+5. **Rekkefølgen ved publisering:** funksjonene og kolonnen ble lagt inn først (153a). Kortene og tallene i config
+   (153, siste del) legges inn etter at appen er publisert, for eldre apper viser ikke kort de ikke kjenner. Saken om
+   tilbud kommer bare når kortet finnes i config.
+Prøvekjørt som spiller i DO-blokker som ble rullet tilbake:
+- trivsel per dag (64 etter to dager med passform 4,5)
+- mandatbytte (lojal 64 → 60)
+- svar mot rådet (60 → 56)
+- tilbudet med varsel, lønnstillegg (lønn 0,07, trivsel 55) og «la gå» (sluttet, ingen karantene, ny ansatt samme dag)
+
+Konto: som B-488.

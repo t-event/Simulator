@@ -6,8 +6,11 @@
 import { useState } from "react";
 import { realNow } from "../game/clock";
 import {
+  bestMandate,
   CALL_CARD_BY_ID,
   effectDays,
+  LOYALTY,
+  loyaltyWord,
   MANAGERS,
   MANDATE_ABOUT,
   MANDATE_NAME,
@@ -15,6 +18,7 @@ import {
   modFactors,
   netShare,
   salaryShare,
+  traitChoice,
   TRAIT_ABOUT,
   TRAIT_NAME,
   type CallOption,
@@ -95,6 +99,8 @@ function report(act: Act, r: ManagerResult, okText: string): boolean {
 
 /** Hva et valg i en samtale betyr i kroner for verket */
 function optionKr(o: CallOption, daily: number, mandate: Mandate | null): string {
+  if (o.special === "raise") return `${signed(-LOYALTY.raise * daily)} per dag i lønn`;
+  if (o.special === "leave") return "Ingen kostnad";
   const parts: string[] = [];
   const sure = o.sure ?? {};
   if (sure.cash) parts.push(`${signed(sure.cash * daily)} nå`);
@@ -128,14 +134,21 @@ function CallBox({
     const r = await answerCall(call.id, choice);
     setBusy(false);
     const o = card.options[choice];
+    const who = call.manager ?? "Verksjefen";
     report(
       act,
       r,
-      r.ok && r.outcome === "uhell"
-        ? `${card.title}: det gikk dårlig denne gangen.`
-        : `${card.title}: «${o.label}». Verksjefen setter det i gang.`,
+      r.ok && r.special === "raise"
+        ? `${who} blir, med lønnstillegg.`
+        : r.ok && r.special === "leave"
+          ? `${who} har sluttet. Du kan ansette en ny med én gang.`
+          : r.ok && r.outcome === "uhell"
+            ? `${card.title}: det gikk dårlig denne gangen.`
+            : `${card.title}: «${o.label}». Verksjefen setter det i gang.`,
     );
   };
+  // Verksjefens råd er det verksjefen selv ville valgt (B-489): følger du det, trives verksjefen bedre
+  const advice = m && !card.special ? traitChoice(card, m.trait, m.mandate) : null;
   return (
     <Callout tone="heat">
       <strong>
@@ -148,7 +161,10 @@ function CallBox({
             <Button variant="secondary" disabled={busy} onClick={() => void answer(i as 0 | 1)}>
               {o.label}
             </Button>
-            <span className="g-small-text">{o.about}</span>
+            <span className="g-small-text">
+              {advice === i && <strong>Verksjefen anbefaler dette. </strong>}
+              {o.about}
+            </span>
             <span className="g-muted g-small-text">{optionKr(o, daily, m?.mandate ?? null)}</span>
           </div>
         ))}
@@ -156,6 +172,7 @@ function CallBox({
       <div className="g-muted g-small-text">
         Svar innen {fmtHours(call.deadline - realNow())}. Ellers bestemmer verksjefen selv
         {m ? ` – ${m.name.split(" ")[0]} ${TRAIT_ABOUT[m.trait]}` : ""}.
+        {advice != null && " Følger du rådet, trives verksjefen bedre."}
       </div>
     </Callout>
   );
@@ -173,6 +190,7 @@ function CallHistory({ status, plantName }: { status: ManagerStatus; plantName: 
         return (
           <li key={c.id}>
             {plantName(c.plant)}: {card?.title ?? "Sak"} – «{o?.label ?? "?"}»
+            {c.manager && card?.special ? ` (${c.manager})` : ""}
             {c.chosenBy === "verksjef" ? " (verksjefen valgte)" : ""}
             {c.outcome === "uhell" ? ", gikk dårlig" : ""}
             {c.cash ? ` (${signed(c.cash)})` : ""}
@@ -249,7 +267,8 @@ function HireSheet({
                   </div>
                   <StatsLine s={c} />
                   <p className="g-small-text">
-                    Lønn {pct(salaryShare(c))} av utbyttet ({fmtKr(Math.round(salaryShare(c) * daily))} per dag). Med{" "}
+                    Passer best til <strong>{MANDATE_NAME[bestMandate(c)].toLowerCase()}</strong>. Lønn{" "}
+                    {pct(salaryShare(c))} av utbyttet ({fmtKr(Math.round(salaryShare(c) * daily))} per dag). Med{" "}
                     {MANDATE_NAME[mandate].toLowerCase()}: <strong>{signed(net)} per dag</strong> etter lønnen
                     {modText(mandate, c, modBase)}.
                   </p>
@@ -262,7 +281,8 @@ function HireSheet({
           </ul>
           <p className="g-muted g-small-text">
             Drift og Økonomi gir mer med Lønnsomhet, Drift gjør moderniseringen billigere med Vekst, og Folk hjelper med
-            Stabilitet. Ingen er flinke i alt. Verksjefen begynner å telle fra i morgen.
+            Stabilitet. Ingen er flinke i alt. Verksjefen trives best med et mandat som passer det hen er flink til, og
+            begynner å telle fra i morgen.
           </p>
         </div>
       </div>
@@ -310,6 +330,11 @@ function ManagerSheet({
             Verksjef på <strong>{name}</strong>. {TRAIT_NAME[m.trait]}: {TRAIT_ABOUT[m.trait]}.
           </p>
           <StatsLine s={m} />
+          <p className="g-small-text">
+            <strong>Verksjefen {loyaltyWord(m.loyalty)}.</strong> Hen trives når mandatet passer det hen er flink til
+            (best: {MANDATE_NAME[bestMandate(m)].toLowerCase()}), og når du følger rådene i samtalene. Et nytt mandat
+            eller svar mot rådet gjør hen mindre fornøyd, og en misfornøyd verksjef kan få tilbud fra en konkurrent.
+          </p>
           <p className="g-small-text">
             Lønn {pct(m.salary)} av verkets utbytte. Med {MANDATE_NAME[m.mandate].toLowerCase()} gir verksjefen{" "}
             <strong>{signed(netShare(m.mandate, m) * daily)} per dag</strong> etter lønnen
@@ -400,7 +425,7 @@ export function ManagersCard({ g, act, status }: { g: GameState; act: Act; statu
                   <strong>{plantName(p.plant)}</strong>
                   <span className="g-muted g-small-text">
                     {m
-                      ? `${m.name} · ${MANDATE_NAME[m.mandate]}`
+                      ? `${m.name} · ${MANDATE_NAME[m.mandate]} · ${loyaltyWord(m.loyalty)}`
                       : q
                         ? `Ny verksjef om ${fmtHours(q.until - realNow())}`
                         : "Ingen verksjef"}
