@@ -356,6 +356,7 @@ import { hasMoulds, MOULD, mouldCost, mouldHour, mouldRisk, mouldWear, replaceMo
 import { applyCashCap, CASH_RESERVE, hasPaidOut, paidOutDayLog, paidOutTotal } from "./reserve";
 import { trainingSeed, weeklyGrade, weeklyRequest } from "../ui/control/weekly";
 import { changeDelta } from "../ui/delta";
+import { exportOrder } from "./decisions";
 import {
   bestMandate as mgrBestMandate,
   CALL_CARDS as CALL_CARDS_ALL,
@@ -5015,6 +5016,49 @@ test("Verksjefenes trivsel (B-489): samme tall som SQL-en, og «Tilbud fra en ko
     "trekk på tilbudet",
   );
   assert(CALL_CARDS_ALL.filter((c) => !c.special).length === 14, "fjorten vanlige kort");
+});
+
+test("Ordren fra utlandet (B-491): størrelsen følger valseverket og køen, og kortet kommer ikke når det ikke er plass", () => {
+  const g = newGame(491);
+  g.stage = 4;
+  g.owned.push("valseverk", "ovn2", "ovn3", "streng2", "streng3");
+  g.furnaceCount = 3;
+  g.furnaceType = "likestrom420";
+  g.castingType = "streng8";
+  g.settings.rolling = true;
+  g.workers = [];
+  for (const [role, n] of Object.entries(crewPerShift(g)) as [RoleId, number][])
+    for (let i = 0; i < n * 5; i++) g.workers.push(makeCandidate(g, role));
+  g.agreements = [];
+  g.contracts = [];
+  const stats = computePlantStats(g);
+  for (let d = 0; d < 7; d++) g.history.push({ ...structuredClone(g.today), day: d, producedT: stats.dailyProductT });
+  const offer = exportOrder(g);
+  assert(offer, "ingen ordre på et tomt verk");
+  const cap = Math.min(productCapT(stats, offer!.product), realisticDailyT(g, stats));
+  assert(offer!.t <= cap * 4 + 1, `for stor ordre: ${offer!.t} t mot ${Math.round(cap)} t per døgn`);
+  if (offer!.product === "armering")
+    assert(offer!.t < stats.dailyProductT * 2.5, "ordren ble regnet av hele døgnproduksjonen, ikke valseverket");
+  assert(offer!.doneDay <= day(g) + 10, `ferdig dag ${offer!.doneDay}, fristen er dag ${day(g) + 10}`);
+  // Full kø med samme vare til fristen: ingen ordre
+  g.contracts.push({
+    id: 900,
+    customer: "Test",
+    product: offer!.product,
+    grade: "standard",
+    tonnes: Math.round(cap * 11),
+    delivered: 0,
+    pricePerT: 1,
+    deadlineDay: day(g) + 11,
+    offerExpiresMin: g.minute,
+    repGain: 0,
+    repLoss: 0,
+    penaltyPerT: 0,
+    status: "aktiv",
+    closedDay: null,
+    priority: 1,
+  });
+  assert(exportOrder(g) === null, "ordren kom selv om køen var full");
 });
 
 if (failed) {

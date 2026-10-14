@@ -9231,3 +9231,28 @@ Prøvekjørt i en DO-blokk som ble rullet tilbake, med to ekte kontoer (A følge
 - Selskapene ga to varsler: ny eier og anbud som starter senere. Samme eier igjen ga ingen.
 
 Konto: ja (regel 3 – mellom spillere, regnet av serveren, KONTO.md).
+
+## B-491 Ordren fra utlandet følger valseverket og køen (2026-10-14)
+Eieren sendte et skjermbilde av «Rådgiveren: leveransene kommer for sent» (dag 5729) og ba om å sjekke hvorfor, og rette
+det hvis det ikke var noe eieren hadde gjort feil. Undersøkt i eierens lagring på serveren (bare lest):
+- Dag 5724–5726 falt produksjonen til omtrent halvparten (38–42 charger mot ca. 80). Samme dag kom vedlikehold for 27
+  mill. En ovn sto, altså en tilfeldig hendelse. Det var det rådgiveren beskrev.
+- **Feilen:** dag 5724 sa eieren ja til hendelseskortet «Stor ordre fra utlandet»: 111 373 t armering på ti døgn.
+  - Kortet regnet mengden som 2,5–4 døgn av hele døgnproduksjonen (ca. 30 000 t emner). Armering er begrenset av
+    valseverket (B-217), og det rakk ca. 5 800 t i døgnet, så ordren kunne aldri rekkes.
+  - Kortet sjekket heller ikke køen, og ordren tok valseverket fra rammeavtalen med armering.
+  - Resultatet: ordren ble levert halvveis (58 189 t), uka i avtalen fikk 0 t, og døgn 5735 kom 165 mill. i bot.
+  - Kortet sa bare «sjekk at ordrekøen tåler det», uten tall. Det var ikke eierens feil.
+**Endret:**
+1. `exportOrder` (decisions.ts) regner størrelsen av det verket rekker av varen: `productCapT` (valseverket for armering)
+   og det verket faktisk lager (`realisticDailyT`). Ordren må få plass i køen innen fristen (`assessOffer`, ikke trang).
+   Får den ikke plass, krymper den, ned til ett døgns mengde. Ellers kommer ikke kortet. Kortet sier når ordren er ferdig
+   med køen slik den er.
+2. Rådgiveren med salgsdirektør (`directorLateText`) nevner store ordrer spilleren selv har sagt ja til i samme periode,
+   så forklaringen ikke bare peker på produksjonen.
+Testet:
+- Test i `game/tests.ts`: et storverk med valseverk på 2 600 t per døgn og 7 900 t døgnproduksjon. Ordren er nå ca.
+  9 000 t (før: 19 700–31 600 t), ferdig før fristen, og kommer ikke når køen er full.
+- `balance.ts`.
+
+Konto: nei (spillet hjemme).

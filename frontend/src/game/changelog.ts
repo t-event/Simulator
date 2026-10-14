@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 491,
+    date: "2026-10-14",
+    title: "Ordren fra utlandet er ikke lenger umulig",
+    items: [
+      "«Stor ordre fra utlandet» kunne be om mer armering enn valseverket rekker på ti døgn, og presset ut andre leveranser. Nå er ordren så stor som verket faktisk rekker, og kortet kommer bare når den får plass i ordrekøen.",
+      "Kortet sier når ordren blir ferdig, og rådgiveren nevner store ordrer du selv har sagt ja til når leveransene kommer for sent.",
+    ],
+  },
+  {
     b: 490,
     date: "2026-10-14",
     title: "Varsel om vennene dine",
