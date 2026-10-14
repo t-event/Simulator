@@ -9256,3 +9256,31 @@ Testet:
 - `balance.ts`.
 
 Konto: nei (spillet hjemme).
+
+## B-492 Bøtene etter den umulige ordren fra utlandet er betalt tilbake (2026-10-14)
+Eieren: «Fiks den umulige utlandsordren». Koden ble rettet i B-491. Det som sto igjen, var bøtene i eierens eget spill.
+Dry-run først (bare lesing, så en DO-blokk som ble rullet tilbake): kasse 3 059,45 mill. → 3 224,53 mill., omdømme 93,5 →
+98,5, serverEdit 1 → 2. Kjørt som `supabase/155_utlandsordre_tilbakebetalt.sql` med eierens godkjenning (beskjeden over).
+- Tilbake: 92,27 mill. (ordren) + 72,81 mill. (ukeleveransen ordren tok valseverket fra) = 165,08 mill. kr, og de 5
+  omdømmepoengene bøtene tok (høyst 100).
+- En linje i loggen sier hva som er betalt tilbake. `serverEdit` + 1 og `device = 'server'` (B-211), så appen henter
+  spillet og eldre kopier avvises. Sikkerhetskopi i `save_backups` (`utlandsordre-tilbakebetalt`).
+- Tidslinja og døgnregnskapet er ikke endret (bota er historikk). Pengene står i kassa hjemme, så de gir ingen makt i
+  ekte tid (B-323).
+- Spillet finnes på loggen og i `admins`; ingen navn i repoet.
+Andre spillere: ingen andre lagringer har den samme ordren i loggen nå (sjekkes ikke bakover – loggen holder 150
+linjer). Får noen den samme feilen, gjøres det samme etter dry-run og eierens godkjenning.
+
+Konto: nei (retting av ett lagret spill). Endringslogg: nei
+
+## B-493 «Venner» på topplista og ukelista (2026-10-14)
+Eieren valgte forslaget «Venner på topplista og ukelista» (anbefalt etter B-490). Når vennelista har noen, står valget
+**Alle / Venner** over topplista (alle listene, sesong og Hall of Fame) og ukelista. «Venner» viser bare dem du følger og
+deg selv, med plassen på hele lista.
+- Ingen endring på serveren: appen henter hele lista (`leaderboard`/`weekly_board` med `lim` 100 000, som `my_rank`
+  alt gjør) og filtrerer på vennelista i minnet (`friendRows`, `ui/friendScope.ts`). Vennelista hentes én gang hvis den
+  ikke er i minnet (`useFriendList`).
+- Gradvis synlighet (B-180): uten venner vises ikke valget. Valget huskes ikke – lista åpner alltid på «Alle».
+- Lista viser bare det den alt viser alle; ingen nye opplysninger om noen.
+
+Konto: ja (vennelista krever konto, regel 2 – KONTO.md).

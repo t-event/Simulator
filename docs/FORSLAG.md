@@ -51,9 +51,9 @@ til «Avgjort» nederst).
 
 ## Venter
 
-- **Pynt for sesong 3 (B-287, B-291) – må gjøres før sesong 3 startes (eieren 13.10: tas mens sesong 2 pågår):** pynten for
-  sesong 2 er klar. Før `start_season` kjøres for sesong 3, legg inn ny
-  pynt i `COSMETICS` med `season: 3` – både i butikken og på stigen (trinn 10–50). Ellers har sesong 3 ingen egen pynt.
+- **Sesongpynten (B-287, B-291):** sesong 1 pågår (startet 25.9.2026, uten sluttdato). Pynten for sesong 2 er alt klar i
+  `COSMETICS` (`season: 2`), så ingenting må gjøres før sesong 2 startes. Pynten for sesong 3 lages mens sesong 2 pågår
+  (rettet 14.10: eieren påpekte at vi er i sesong 1, ikke 2).
 
 - ~~Etterbetaling av utbyttet 30.9 og 1.10~~ **Utført 3.10 (B-446):** 2 549 252 kr til elleve spillere, 15 rader, med
   eierens godkjenning (migrasjon 127). Tabellen står i `docs/RAPPORT-2026-10-02.md`, avsnitt 7.

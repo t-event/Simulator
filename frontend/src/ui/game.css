@@ -3357,10 +3357,22 @@ button {
   gap: var(--sp-2);
 }
 
-.g-board-scope button .ds-icon {
+.g-board-scope button .ds-icon,
+.g-board-friends button .ds-icon {
   width: 1em;
   height: 1em;
   vertical-align: -0.12em;
+}
+
+/* Alle / Venner over topplista og ukelista (B-493) */
+.g-subtabs.g-board-friends {
+  margin-top: var(--sp-2);
+}
+
+.g-subtabs.g-board-friends button {
+  flex-direction: row;
+  gap: var(--sp-2);
+  font-size: var(--fs-meta);
 }
 
 .g-board-scope-note {

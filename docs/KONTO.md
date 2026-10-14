@@ -89,6 +89,7 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Verv en venn: kode, startpakke til vennen, 10 mill. i konsernkassa når vennen er i gang | Ja | Regel 2 og 7: serveren og konsernkassa | B-459 |
 | Vennelista: følge andre spillere (enveis), nivå og sist aktiv | Ja | Regel 3: viser andre spillere | B-462 |
 | Varsel om venner: forbi deg, regionmester, selskap | Ja | Regel 3: mellom spillere, serveren | B-490 |
+| Venner på topplista og ukelista (filteret Alle / Venner) | Ja | Regel 3: viser andre spillere | B-493 |
 | Varsel på mobilen: oppkjøp, anbud, byggeprosjekter og privatmeldinger | Ja | Regel 3: lagres på serveren og gjelder hendelser mellom spillere | B-465 |
 | Skiftrapporten: felles chat for alle spillere | Ja | Regel 3: viser andre spillere og brukernavnet ditt | B-338 |
 | Profiler: profilarket når man trykker på et brukernavn (tittel, merker, konsernverdi og verk, selskaper, sesonger, sist aktiv) | Ja | Regel 3: viser andre spillere | B-419 |

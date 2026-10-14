@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 493,
+    date: "2026-10-14",
+    title: "Vennene dine på topplista",
+    items: [
+      "Følger du noen, kan du velge «Venner» over topplista og ukelista. Da ser du bare dem du følger og deg selv – med plassen på hele lista.",
+    ],
+  },
+  {
     b: 491,
     date: "2026-10-14",
     title: "Ordren fra utlandet er ikke lenger umulig",

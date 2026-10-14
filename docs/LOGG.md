@@ -5,6 +5,22 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 415 – 2026-10-14: Bøtene tilbake og venner på listene (B-492, B-493)
+
+**Brukeren ba om:** «Velg modell for meg» (rekonstruksjon), «Bygg det du anbefaler» (venner på listene og verksjefer i
+testspilleren), rettet at vi er i sesong 1, ikke 2, og «Fiks den umulige utlandsordren».
+
+**Gjort i denne PR-en:**
+- B-492: 165,08 mill. kr og 5 omdømmepoeng tilbake i eierens spill (155, dry-run først).
+- B-493: valget Alle / Venner på topplista og ukelista.
+- FORSLAG: sesongpynten rettet – sesong 1 pågår, pynten for sesong 2 er klar. Ingenting å gjøre før sesong 2 startes.
+
+**Testet:** nettest for `friendRows`, `npm test`, `tsc -b`, lint, build, Playwright på 320/390/1366 px.
+
+**Gjenstår:** verksjefer i testspilleren og rekonstruksjonen (egne PR-er i samme økt).
+
+---
+
 ## Økt 414 – 2026-10-14: Ordren fra utlandet (B-491)
 
 **Brukeren ba om:** sjekke hvorfor rådgiveren sa at leveransene kom for sent (skjermbilde fra dag 5729), og rette det

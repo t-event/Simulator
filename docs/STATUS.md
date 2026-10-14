@@ -227,6 +227,8 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
   **Varsel om venner** (B-490, 154; tema `venner`): den som følger, får beskjed når en venn går forbi på konsernlista
   (jobben `venner` hvert 10. minutt, høyst én gang per venn og dag), blir regionmester eller tar et selskap. Den som
   følges, får fortsatt ingen beskjed.
+  **Venner på listene** (B-493): når vennelista har noen, står «Alle / Venner» over topplista og ukelista. «Venner» viser
+  vennene og deg med plassen på hele lista (appen henter hele lista og filtrerer; ingen endring på serveren).
 - **Varsel på mobilen** (B-465, på som standard fra B-467: første trykk i spillet etter innlogging lar telefonen spørre om lov, én
   gang per konto og enhet; «nei» og «slått av» huskes): bryter med fire temaer under Innstillinger → Varsler (oppkjøp, anbud, byggeprosjekter,
   privatmeldinger), per enhet. Serveren legger varsler i `push_outbox` (triggere, og `push_scan` hvert minutt for ferdige
