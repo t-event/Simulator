@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 490,
+    date: "2026-10-14",
+    title: "Varsel om vennene dine",
+    items: [
+      "Vennelista gjør nå noe: har du varsler på, får du beskjed når noen på lista går forbi deg på konsernlista, blir regionmester eller tar et selskap.",
+      "Varslene kan slås av under Varsler (temaet «Venner»). De du følger, får fortsatt ingen beskjed.",
+    ],
+  },
+  {
     b: 489,
     date: "2026-10-14",
     title: "Verksjefer som trives – eller ikke",

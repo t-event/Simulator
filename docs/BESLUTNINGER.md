@@ -9204,3 +9204,30 @@ Prøvekjørt som spiller i DO-blokker som ble rullet tilbake:
 - tilbudet med varsel, lønnstillegg (lønn 0,07, trivsel 55) og «la gå» (sluttet, ingen karantene, ny ansatt samme dag)
 
 Konto: som B-488.
+
+## B-490 Varsel om venner (2026-10-14)
+Eieren: «Hva skal man med vennelista om den ikke brukes til noe». Vennelista (B-462) var en huskeliste: navn, tittel, sist
+aktiv og lenke til profil og meldinger, uten noe annet i spillet som brukte den. Eieren valgte «Varsel om venner» blant
+fire forslag (de andre: venner på topplista, venner på kartet, fjerne lista). Det bygger det B-462 lot stå («varsler
+når en venn går forbi deg»).
+1. **Nytt varseltema `venner`** (154, `push_kinds()` og `PUSH_KINDS`). Det er på som standard (B-467): enheter som alt har
+   varsler på, får temaet lagt til etter publiseringen. Det kan slås av under Varsler.
+2. **Tre varsler til den som følger:**
+   - **«X gikk forbi deg»** på konsernlista (`konsern_value_cache`, samme tall som topplista):
+     - Jobben `venner` (hvert 10. minutt, i `world_health`) husker per par hvem som lå foran (`friend_rank_state`).
+     - Det varsles bare når vennen går fra bak til foran, høyst én gang per venn og dag.
+     - Første gang paret sees, gir aldri varsel.
+     - Varselet viser plassene og fører til Konsern.
+   - **«X er regionmester»** (trigger på `region_master_log`), med lenke til kartet.
+   - **«X eier nå …» / «X vant anbudet på …»** (trigger på `company_owners`), med lenke til Industrien. Det varsles ikke
+     når samme eier fortsetter etter et nytt anbud.
+3. **Bare det som alt er offentlig** (topplista, kartet, Skiftrapporten): ingen beløp. Flaggede og sperrede varsles det
+   ikke om (`friend_followers`). Den som følges, får fortsatt ingen beskjed (enveis, B-462).
+4. **Appen:** temaet «Venner» under Varsler, og én linje i Venner-fanen som forteller hva lista gir.
+Prøvekjørt i en DO-blokk som ble rullet tilbake, med to ekte kontoer (A følger B), en testenhet for A og falske rader:
+- Første kjøring ga bare tilstanden.
+- «Gikk forbi» ga ett varsel med plassene, og andre kjøring ingen.
+- Regionmesteren ga ett varsel.
+- Selskapene ga to varsler: ny eier og anbud som starter senere. Samme eier igjen ga ingen.
+
+Konto: ja (regel 3 – mellom spillere, regnet av serveren, KONTO.md).

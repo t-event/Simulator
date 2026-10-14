@@ -3033,7 +3033,7 @@ const main = async () => {
     assert(n?.to === "meldinger" && n.nick === null, "melding uten navn");
     assert(parsePushLink("noe-annet") === null && parsePushLink(null) === null, "ukjente lenker gir ingenting");
     // Samme temaer som push_kinds() i 134
-    assert(PUSH_KINDS.map((k) => k.id).join(",") === "oppkjop,anbud,konsern,melding", "temaene");
+    assert(PUSH_KINDS.map((k) => k.id).join(",") === "oppkjop,anbud,konsern,melding,venner", "temaene");
   });
 
   await test("Regionmester: kartet med mester og styrke, lenken og poengene (B-487)", () => {

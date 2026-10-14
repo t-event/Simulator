@@ -224,6 +224,9 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
   (bare logges ut fra). Navnet fra skjemaet settes i det stille når det er ledig.
 - **Vennelista** (B-462): enveis «følg» med brukernavnet (fanen Venner i Skiftrapporten, knapp på profilen), høyst 100.
   Viser bare nivå/tittel og sist aktiv i grove trinn; den andre får ingen beskjed.
+  **Varsel om venner** (B-490, 154; tema `venner`): den som følger, får beskjed når en venn går forbi på konsernlista
+  (jobben `venner` hvert 10. minutt, høyst én gang per venn og dag), blir regionmester eller tar et selskap. Den som
+  følges, får fortsatt ingen beskjed.
 - **Varsel på mobilen** (B-465, på som standard fra B-467: første trykk i spillet etter innlogging lar telefonen spørre om lov, én
   gang per konto og enhet; «nei» og «slått av» huskes): bryter med fire temaer under Innstillinger → Varsler (oppkjøp, anbud, byggeprosjekter,
   privatmeldinger), per enhet. Serveren legger varsler i `push_outbox` (triggere, og `push_scan` hvert minutt for ferdige
