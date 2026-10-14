@@ -7,13 +7,18 @@
  */
 import { onBeforeSignOut, restAs, rpc, tokenFor, userId } from "./supabase";
 
-export type PushKind = "oppkjop" | "anbud" | "konsern" | "melding";
+export type PushKind = "oppkjop" | "anbud" | "konsern" | "melding" | "venner";
 
 export const PUSH_KINDS: { id: PushKind; label: string; hint: string }[] = [
   { id: "oppkjop", label: "Oppkjøp", hint: "Noen byr på selskapet ditt, du er overbydd, fristen nærmer seg, utfallet" },
   { id: "anbud", label: "Anbud", hint: "Et anbud åpner, og hvem som vant" },
   { id: "konsern", label: "Byggeprosjekter", hint: "Et verk i konsernet er ferdig bygget eller modernisert" },
   { id: "melding", label: "Privatmeldinger", hint: "Noen har skrevet til deg (teksten vises ikke på låseskjermen)" },
+  {
+    id: "venner",
+    label: "Venner",
+    hint: "Noen på vennelista går forbi deg på konsernlista, blir regionmester eller tar et selskap",
+  },
 ];
 
 export type PushSupport = "ja" | "hjemskjerm" | "nei";

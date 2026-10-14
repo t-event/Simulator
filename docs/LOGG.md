@@ -5,6 +5,26 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 413 – 2026-10-14: Varsel om venner (B-490)
+
+**Brukeren ba om:** «Hva skal man med vennelista om den ikke brukes til noe». Valgte «Varsel om venner».
+
+**Gjort:**
+- Server (154): tema `venner`, jobben `venner` («gikk forbi deg»), triggere for regionmester og selskap.
+- App: temaet under Varsler og en linje i Venner-fanen.
+- Docs: B-490, STATUS, KONTO, CLAUDE.md og endringsloggen.
+
+**Testet:**
+- DO-blokk med to ekte kontoer som ble rullet tilbake (tallene står i B-490).
+- Nettesten for temaene.
+- Playwright av Venner-fanen på 320, 390 og 1366 px.
+- `npm test`, `tsc -b`, lint og build.
+
+**Gjenstår:**
+- Etter publiseringen: legg til `venner` på enhetene som har varsler på, og slå på jobben `venner` (siste del av 154).
+
+---
+
 ## Økt 412 – 2026-10-14: Verksjefenes trivsel, nye saker og varsel i varsellinja (B-489)
 
 **Brukeren ba om:** «Fortsett».

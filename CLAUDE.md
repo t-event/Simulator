@@ -680,7 +680,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   Utboksen ryddes av `dm_cleanup` (`supabase/108`, cron `meldinger-rydding`): sendte etter 14 dager, avslåtte enheter etter 60.
 - **Vennelista** (B-462, 132): `follows` med `active` – å ta noen av lista er en `update`, aldri `delete` (connectoren
   holder igjen migrasjoner med sletting). `follow_list` viser bare det `player_profile` alt viser andre; nye felt vurderes
-  mot det. Enveis med vilje: ingen forespørsler eller varsler til den som følges.
+  mot det. Enveis med vilje: ingen forespørsler eller varsler til den som følges. Varsel om venner (B-490, 154) går til den
+  som følger: `friends_push_scan` (jobben `venner`, «forbi deg» med tilstanden i `friend_rank_state`, første møte gir aldri
+  varsel) og triggerne på `region_master_log` og `company_owners`. Nye vennevarsler bruker `friend_followers(bruker)`, så
+  flaggede og sperrede ikke varsles om, og bare det som alt er offentlig.
 - **Inntektsanslaget** (B-464, 133): `company_estimate`/`company_estimate_for` leser `company_estimate_parts` (snittet
   av det som telles per spiller siste 7 dager, regnet én gang per dag av `company_estimate_refresh`, cron
   `selskapsanslag`) – aldri taket per spiller (`company_estimate_cap`, bare når det mangler tall). Anslaget styrer V,

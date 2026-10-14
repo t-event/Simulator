@@ -72,7 +72,9 @@ export function FriendsPanel() {
   return (
     <div className="g-friends">
       <p className="g-muted g-small-text g-chat-intro">
-        Følg med på spillere du kjenner. De får ingen beskjed, og du ser bare det profilen deres viser alle.
+        Følg med på spillere du kjenner. De får ingen beskjed, og du ser bare det profilen deres viser alle. Har du
+        varsler på, får du beskjed når noen på lista går forbi deg på konsernlista, blir regionmester eller tar et
+        selskap.
       </p>
       <form
         className="g-chat-form"
