@@ -1,7 +1,8 @@
 # Forslag: rekonstruksjon etter konkurs (B-409)
 
-**Status:** designforslag til eieren 1.10.2026. Ingen modell er valgt og ingenting er bygget. Eieren velger; så blir
-valget en beslutning, og simuleringen i avsnitt 6 kjøres før noe bygges.
+**Status:** bygget som **modell B** (B-495, 14.10.2026). Eieren ba Claude velge modell («Velg modell for meg»). Tallene,
+simuleringen og avvikene fra forslaget står i B-495 og i `game/reconstruction.ts`. Modell E (konsernet redder
+hovedverket) er ikke tatt med: den flytter penger fra ekte tid inn i spilltid, mot retningen (B-319, B-382).
 
 ## 1. Slik er det i dag
 

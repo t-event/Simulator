@@ -5,6 +5,7 @@
  * Produksjonen følger stålet gjennom kjeden skraplager → ovn → øse →
  * støping → (valseverk) → lager → kunde, og hver del kan bli flaskehals.
  */
+import { reconDay } from "./reconstruction";
 import { hasNeighbor, reputationFloor } from "./building";
 import {
   BANKRUPTCY_DAYS,
@@ -3486,6 +3487,8 @@ function onDay(g: GameState, stats: PlantStats): void {
   if (g.history.length > HISTORY_MAX) g.history.splice(0, g.history.length - HISTORY_MAX);
   g.today = newDay(today, g.cash);
   paidOutDayLog(g);
+  // Rekonstruksjonsgjelden (B-495): 10 % av gårsdagens salg
+  reconDay(g);
 
   updatePowerDeal(g, today);
   if (g.gridCut && g.minute >= g.gridCut.untilMin) g.gridCut = null;

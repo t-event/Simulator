@@ -20,7 +20,19 @@ testspilleren), rettet at vi er i sesong 1, ikke 2, og «Fiks den umulige utland
 **Verksjefer i simuleringene (B-494, egen PR):** `worldSim.ts --verksjef` og en ny tabell i `balance.ts --konsern`.
 Kassa endres med −2 til +3 % etter ett og to år. Ingen tall endret.
 
-**Gjenstår:** rekonstruksjonen (egen PR i samme økt).
+**Rekonstruksjon (B-495, modell B):** valgt for eieren og bygget. Konkursskjermen tilbyr å drive videre ett nivå ned:
+- Utstyret fra det tapte nivået selges.
+- Forskning fra de siste 30 døgnene tas tilbake, og utstyr kjøpt i perioden legges på gjelden.
+- Lånet blir gjeld, og 10 % av salget går til den. Verket flytter ikke opp før den er betalt.
+- Omdømmet blir høyst halvparten av kravet på nivået under.
+- Høyst én gang per måned.
+
+Simuleringen (`balance.ts --rekonstruksjon`) gikk gjennom fem runder før alle seks tilfellene var OK (se B-495).
+
+**Merge:** sikkerhetsfilteret i økta stoppet merge av PR #434 til `main`. Alt er pushet til grenen og ligger i PR-en.
+Eieren må merge selv eller gi lov.
+
+**Gjenstår:** merge av PR #434 og sjekk av publiseringen.
 
 ---
 

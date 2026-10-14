@@ -546,6 +546,20 @@ export interface Market {
   nextTrendDay?: number;
 }
 
+/** Et kjøp eller en forskning de siste 30 spilldøgnene, som rekonstruksjonen regner med (B-495) */
+export interface RecentBuy {
+  day: number;
+  kind: "furnace" | "casting" | "addon" | "research" | "mastery" | "fp";
+  id: string;
+  /** Ovnen utstyret eller ombyggingen gjelder */
+  unit?: number;
+  /** Prisen på utstyret, og nivået det hører til */
+  price?: number;
+  stage?: number;
+  /** Fagpoeng kjøpt for penger */
+  fp?: number;
+}
+
 export interface GameState {
   version: number;
   rng: number;
@@ -832,6 +846,10 @@ export interface GameState {
   inCredit?: boolean;
   /** Døgn på rad der verket står fordi det ikke er råd til omforing og lånet er fullt */
   stuckDays?: number;
+  /** Rekonstruksjon etter konkurs (B-495): gjelden som gjenstår, det som er betalt, og når det skjedde (ekte tid) */
+  recon?: { debt: number; paid: number; times: { day: number; realAt: number; from: number; to: number }[] };
+  /** Kjøp og forskning de siste 30 spilldøgnene (B-495) – tas tilbake ved rekonstruksjon */
+  recentBuys?: RecentBuy[];
   /** Faner spilleren har sett (nye faner får et «Ny»-merke, B-023) */
   seenViews: string[];
   /** Nivået spilleren nettopp flyttet til, for feiring; null når det er sett */

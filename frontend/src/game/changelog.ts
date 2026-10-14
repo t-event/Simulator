@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 495,
+    date: "2026-10-14",
+    title: "Konkurs er ikke lenger slutten",
+    items: [
+      "Går verket konkurs fra støperiet og opp, kan banken rekonstruere det: du driver videre på nivået under i stedet for å starte i garasjen.",
+      "Det koster: utstyret fra det høyeste nivået selges, forskning fra de siste 30 døgnene tas tilbake, omdømmet faller kraftig, og lånet blir gjeld som betales med 10 % av salget. Du flytter ikke opp igjen før gjelden er betalt (den kan også betales ned i banken).",
+      "Forskning fra før, de flinkeste folka, prestasjonene og konsernet beholdes. Banken gjør det høyst én gang i måneden.",
+    ],
+  },
+  {
     b: 493,
     date: "2026-10-14",
     title: "Vennene dine på topplista",

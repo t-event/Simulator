@@ -90,9 +90,9 @@ til «Avgjort» nederst).
 
 - ~~Verksjefer for datterverkene (B-379, B-409)~~ **Bygget (B-488, B-489):** V1–V3 etter eierens «Bygg nå». Følg med på
   fisking (sluttpakken er tjent inn etter ca. 15 dager) og hvor ofte «Tilbud fra en konkurrent» kommer.
-- **Rekonstruksjon etter konkurs (B-409, spørsmål til eieren):** `docs/REKONSTRUKSJON-FORSLAG.md` – fem modeller (A–E)
-  sammenlignet, sperrene mot misbruk og hva eieren velger (avsnitt 7). Ingen modell valgt, ikke bygget.
-
+- ~~Rekonstruksjon etter konkurs (B-409)~~ **Bygget som modell B (B-495):** eieren ba Claude velge. Ett nivå ned,
+  forskning fra de siste 30 døgnene tilbake, halve lånet og minuset pluss startkassa og nylige kjøp som gjeld (10 % av salget),
+  høyst én gang per 30 ekte dager. Modell E er ikke tatt med.
 - ~~Trender i markedet~~ **Bygget (B-255).** («etterspørselen etter armering øker») som styrer hvilke kontrakter som dukker opp (se
   `DESIGN.md`).
 

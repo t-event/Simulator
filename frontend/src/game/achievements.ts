@@ -349,6 +349,18 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
     ),
     hidden: true,
   },
+  // Rekonstruksjon (B-495): bare for dem som har gått konkurs og bygget seg opp igjen til nivået de falt fra
+  {
+    ...family(
+      "rekonstruert",
+      "refresh",
+      "Rekonstruert",
+      "Folk",
+      (g) => +(g.recon?.times ?? []).some((t) => g.stage >= t.from),
+      [["rekonstruert", 1, "Tilbake fra konkurs", "Bygg verket opp igjen til nivået du gikk konkurs på.", 25]],
+    ),
+    hidden: true,
+  },
 ];
 
 // Merker som ble gitt med andre regler før B-232 beholdes, men nye gis etter tabellen over

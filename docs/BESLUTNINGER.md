@@ -9311,3 +9311,61 @@ Konklusjon: verksjefene er et valg med små tall, slik B-488 ville. Ingen tall e
 
 Konto: nei (simulering).
 Endringslogg: nei
+
+## B-495 Rekonstruksjon etter konkurs: modell B (2026-10-14)
+Eieren: «Velg modell for meg» (REKONSTRUKSJON-FORSLAG.md, B-409). Claude valgte **modell B – ett nivå ned**:
+- Den oppfyller premiss 3: en storverkspiller sendes ikke tilbake til garasjen. Den er enkel å forklare: «banken selger
+  det største».
+- C (samme nivå) ga for lite å tape på storverket. D (gradert) er mer å forstå og balansere. A er slik det var.
+- E (konsernet redder hovedverket) er ikke tatt med: penger fra ekte tid inn i spilltid går mot retningen (B-319, B-382).
+
+**Slik virker det** (`game/reconstruction.ts`, valget på konkursskjermen):
+- Fra støperiet og opp kan banken rekonstruere i stedet for nytt spill. Fra verkstedet er garasjen det eneste under, så
+  der er det nytt spill som før.
+- Nivået går ett ned:
+  - Utstyret fra det tapte nivået selges.
+  - Ovner og støping derfra blir den billigste typen på nivået under.
+  - Lager, ordrer og avtaler er borte, og nabolaget, stiftelsen og slitasjen følger storverkets tomt.
+  - Folk over taket slutter. Hver rolle beholder sin andel, og de flinkeste blir.
+- Siste 30 spilldøgn:
+  - Forskning og mesterskap tas tilbake, og fagpoeng kjøpt for penger trekkes fra.
+  - Utstyr kjøpt i perioden som beholdes, legges på gjelden med prisen. Å ta det bort ga i simuleringen et verk med
+    formlinje, liten ovn og 24 ansatte på lønn, som gikk konkurs igjen.
+- Gjeld: lånet slettes. Gjelden blir summen av
+  - halvparten av lånet og minuset,
+  - startkassa (sju døgns lønn, faste kostnader og skrap for verket slik det blir, lånt av banken),
+  - utstyret over.
+  10 % av salget går til gjelden hvert døgn (posten «renter», som bidraget ikke teller). Den kan også betales ned i
+  banken.
+- **Verket kan ikke flytte opp før gjelden er betalt.**
+- Omdømmet halveres og blir høyst halvparten av det nivået under krever (fra storverket: høyst 20).
+- Høyst én gang per 30 ekte dager (`realNow()`), og ikke før gjelden fra forrige gang er betalt. Ellers er det nytt spill.
+- Konsernet, konsernkassa, topplistene og prestasjonene er urørt. Nytt skjult merke: «Tilbake fra konkurs», når verket er
+  tilbake på nivået det falt fra.
+- Telleren for hvor ofte står i det lagrede spillet (`g.recon`), ikke i en egen tabell på serveren. Rekonstruksjonen
+  gir ingenting i ekte tid. Den som endrer lagringen sin, kan uansett gi seg selv penger.
+
+**Simulering** (`balance.ts --rekonstruksjon`): testspilleren går konkurs ti døgn etter at den har nådd stålverket eller
+storverket (frø 1–3), med og uten «lån maks» først. Utvikling underveis:
+1. Startkassa var 30 % av prisen på nivået: 2 av 6 gikk konkurs igjen (tomt skraplager, ingen penger).
+2. Startkassa ble sju døgns drift.
+3. Tilbakeføring av utstyr ga en ny felle, så utstyret ble lagt på gjelden i stedet.
+4. Andelen av salget (10–25 %) og hele gjelden (100 %) endret ingenting. Flaskehalsen var omdømmet.
+5. Derfor: høyst halvparten av kravet på nivået under, og ingen flytting før gjelden er betalt.
+
+Resultat, døgn tilbake mot døgn fra nivået under første gang (uten / med lån maks):
+
+| Nivå | Frø 1 | Frø 2 | Frø 3 |
+|---|---|---|---|
+| Stålverk | 54 / 54 mot 35 | 63 / 78 mot 43 | 62 / 62 mot 38 |
+| Storverk | 131 / 177 mot 67 | 207 / 102 mot 94 | 83 / 107 mot 91 |
+
+Ingen kom tilbake raskere enn 80 % av tiden første gang, og ingen gikk konkurs igjen (kriteriene i avsnitt 6).
+
+Testet:
+- Ny test i `game/tests.ts`: nivået, ovnene, støpingen, utstyret, gjelden, omdømmet, folk, tilbakeføringen, månedsgrensen,
+  gjelden fra salget, og at verkstedet ikke rekonstrueres.
+- Playwright av konkursskjermen på 320, 390 og 1366 px.
+- `balance.ts`.
+
+Konto: nei (regel 1 – hovedverket, spilltid).

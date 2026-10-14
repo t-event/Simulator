@@ -95,6 +95,7 @@ import {
   fmtKr,
   log,
   makeCandidate,
+  newFurnaceUnit,
   newGame,
   oftenSick,
   creditLimit,
@@ -342,6 +343,7 @@ import {
   YEAR_DAYS,
 } from "./calendar";
 import { MIN_PER_DAY } from "./data";
+import { noteBuy, reconDay, reconOption, reconstruct, startCash } from "./reconstruction";
 import { fmtDuration } from "../ui/format";
 import { activeWar, WAR, warDay, warFactor } from "./war";
 import { acceptAgreement, buyScrap, roundDay } from "./engine";
@@ -5059,6 +5061,75 @@ test("Ordren fra utlandet (B-491): størrelsen følger valseverket og køen, og 
     priority: 1,
   });
   assert(exportOrder(g) === null, "ordren kom selv om køen var full");
+});
+
+test("Rekonstruksjon (B-495): ett nivå ned, siste 30 døgn tilbake, gjeld i stedet for lån, og høyst én gang i måneden", () => {
+  const g = newGame(495);
+  g.minute = 100 * MIN_PER_DAY;
+  g.stage = 4;
+  g.owned = ["lager", "skraptak", "ferdiglager1", "ferdiglager2", "ferdiglager3", "ovn2", "ovn3"];
+  g.furnaces = [newFurnaceUnit(), newFurnaceUnit(), newFurnaceUnit()];
+  g.furnaces[0].type = "lysbue150";
+  g.furnaces[1].type = "lysbue30";
+  g.furnaces[2].type = "likestrom420";
+  g.furnaceCount = 3;
+  g.castingType = "streng8";
+  g.researched.push("opplaering");
+  g.researchPoints = 100;
+  g.reputation = 80;
+  g.loan = 18_000_000;
+  g.cash = -4_000_000;
+  for (let i = 0; i < 100; i++) g.workers.push(makeCandidate(g, "ovn"));
+  g.contracts = [];
+  // Kjøpt de siste 30 døgnene: tas tilbake. Kjøpt før det: står (hvis nivået under har det)
+  g.recentBuys = [{ day: 50, kind: "addon", id: "lager" }];
+  noteBuy(g, { kind: "addon", id: "skraptak", price: 300_000, stage: 2 });
+  noteBuy(g, { kind: "addon", id: "ferdiglager3", price: 30_000_000, stage: 4 });
+  noteBuy(g, { kind: "research", id: "opplaering" });
+  noteBuy(g, { kind: "fp", id: "samarbeid", fp: 40 });
+  assert(g.recentBuys!.length === 4, "kjøp eldre enn 30 døgn ryddes bort");
+  g.gameOver = true;
+  const now = 1_000 * 86_400_000;
+  const opt = reconOption(g, now);
+  assert(
+    opt.ok && opt.to === 3 && opt.cash > 0 && opt.owed === 300_000 && opt.debt === 11_000_000 + opt.cash + 300_000,
+    `valget: halve lånet og minuset, startkassa og utstyr kjøpt nylig som beholdes: ${JSON.stringify(opt)}`,
+  );
+  assert(reconstruct(g, now), "rekonstruksjonen ble ikke gjort");
+  assert(g.stage === 3 && !g.gameOver && g.speed === 0, "nivå 3, spillet går videre");
+  assert(g.furnaces.length === 2, `ovn 3 (storverket) er solgt: ${g.furnaces.length} ovner`);
+  assert(
+    g.furnaces[0].type === "lysbue30" && g.furnaces[1].type === "lysbue30",
+    `ovnene fra storverket blir grunnversjonen: ${g.furnaces.map((f) => f.type)}`,
+  );
+  assert(g.castingType === "streng1", `støpingen: ${g.castingType}`);
+  assert(!g.owned.includes("ferdiglager3") && !g.owned.includes("ovn3"), "utstyret fra storverket er solgt");
+  assert(g.owned.includes("lager") && g.owned.includes("ferdiglager2"), "utstyr fra før og fra nivået under står");
+  assert(g.owned.includes("skraptak"), "utstyr fra nivået under kjøpt nylig beholdes (prisen ligger i gjelden)");
+  assert(!g.researched.includes("opplaering") && g.researchPoints === 60, "forskning og kjøpte fagpoeng tilbake");
+  assert(
+    g.loan === 0 && opt.ok && g.cash === opt.cash && g.cash === startCash(g) && g.recon?.debt === opt.debt,
+    "lånet blir gjeld, og startkassa er lånt",
+  );
+  assert(g.reputation === 20 && g.workers.length <= 70, "omdømme: høyst halvparten av kravet på nivået under (40)");
+  // Ny konkurs: ikke før gjelden er betalt, og høyst én gang i måneden
+  g.gameOver = true;
+  assert(!reconOption(g, now).ok, "gjelden er ikke betalt");
+  g.recon!.debt = 0;
+  assert(!reconOption(g, now + 10 * 86_400_000).ok, "bare ti dager siden");
+  assert(reconOption(g, now + 31 * 86_400_000).ok, "etter en måned går det igjen");
+  g.gameOver = false;
+  // Gjelden betales med 10 % av salget hvert døgn
+  g.recon!.debt = 1_000_000;
+  g.history.push({ ...structuredClone(g.today), income: { kontrakt: 3_000_000, spot: 1_000_000 } });
+  const cash = g.cash;
+  reconDay(g);
+  assert(g.recon!.debt === 600_000 && g.cash === cash - 400_000, `betalt: ${g.recon!.debt}, ${cash - g.cash}`);
+  // Fra verkstedet: bare nytt spill
+  const v = newGame(1);
+  v.stage = 1;
+  v.gameOver = true;
+  assert(!reconOption(v).ok && !reconstruct(v), "verkstedet rekonstrueres ikke");
 });
 
 if (failed) {

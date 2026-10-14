@@ -8834,3 +8834,22 @@ button.g-prod-row:hover {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* Rekonstruksjon på konkursskjermen (B-495) */
+.g-recon {
+  margin: var(--sp-3) 0;
+  padding: var(--sp-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+}
+.g-recon ul {
+  margin: var(--sp-2) 0;
+  padding-left: 18px;
+}
+.g-recon li + li {
+  margin-top: var(--sp-1);
+}
+.g-end-actions button {
+  min-height: var(--touch);
+}

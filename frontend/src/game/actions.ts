@@ -1,6 +1,7 @@
 /**
  * Det spilleren kan gjøre: bygge ut, kjøpe utstyr, ansette, låne og styre produksjonen.
  */
+import { noteBuy } from "./reconstruction";
 import { MASTERY, MASTERY_IDS, masteryCost, masteryEffect, masteryLevel, masteryOpen } from "./mastery";
 import { checkKonsernMilestones, checkKonsernUnlock, directorHour, valueCreated } from "./konsern";
 import { checkAchievements } from "./achievements";
@@ -160,7 +161,9 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
   const next = STAGES[g.stage + 1];
   if (next) {
     let reason: string | null = null;
-    if (g.reputation < next.reputation) reason = `Krever omdømme ${next.reputation}`;
+    // Etter en rekonstruksjon (B-495): banken vil ha gjelden betalt før verket flytter opp igjen
+    if ((g.recon?.debt ?? 0) > 0) reason = `Betal gjelden etter konkursen først (${fmtKr(g.recon!.debt)} igjen)`;
+    else if (g.reputation < next.reputation) reason = `Krever omdømme ${next.reputation}`;
     else if (g.cash < next.price) reason = "For lite penger";
     out.push({
       id: `stage${next.id}`,
@@ -394,6 +397,15 @@ export function buyUpgrade(g: GameState, id: string): PurchaseResult {
   if (option.locked) return fail(`Krever at du har flyttet til ${stageRef(option.stage, g.stage)}.`);
   if (!option.available) return fail(option.reason ?? "Kan ikke kjøpes nå.");
   addCost(g, "investering", option.price);
+  // Rekonstruksjonen (B-495) legger det som er kjøpt de siste 30 døgnene og beholdes, på gjelden
+  if (option.kind !== "stage")
+    noteBuy(g, {
+      kind: option.kind,
+      id: option.unit !== undefined ? option.baseId : id,
+      unit: option.unit,
+      price: option.price,
+      stage: option.stage,
+    });
   // Store kjøp bygges i spilltid, ett om gangen (B-336)
   if (isBigPurchase(option) && option.kind !== "stage") {
     const days = buildDays(option.price);
@@ -540,6 +552,7 @@ export function doResearch(g: GameState, id: string): PurchaseResult {
   if (!option.available) return fail(option.reason ?? "Kan ikke forskes på nå.");
   g.researchPoints -= option.cost;
   g.researched.push(id);
+  noteBuy(g, { kind: "research", id });
   if (option.knowledge) unlock(g, option.knowledge);
   log(g, `Forskning ferdig: ${option.name}. ${option.effect}.`, "good");
   return { ok: true, message: `${option.name} er forsket fram.` };
@@ -553,6 +566,7 @@ export function buyMastery(g: GameState, id: MasteryId): PurchaseResult {
   if (g.researchPoints < cost) return fail(`Mangler ${Math.ceil(cost - g.researchPoints)} fagpoeng.`);
   g.researchPoints -= cost;
   g.mastery[id] = level + 1;
+  noteBuy(g, { kind: "mastery", id });
   const pct = (masteryEffect(id, level + 1) * 100).toFixed(1).replace(".", ",");
   log(g, `Mesterskap: ${MASTERY[id].name} nivå ${level + 1} – nå ${pct} % ${MASTERY[id].effect}.`, "good");
   return { ok: true, message: `${MASTERY[id].name} nivå ${level + 1}.` };
@@ -659,6 +673,7 @@ export function buyFpDeal(g: GameState): PurchaseResult {
   addCost(g, "annet", deal.price);
   g.researchPoints += deal.fp;
   g.fpDealDay = day(g);
+  noteBuy(g, { kind: "fp", id: "samarbeid", fp: deal.fp });
   log(g, `Forskningssamarbeidet ga ${deal.fp} fagpoeng (${fmtKr(deal.price)}).`, "good");
   return { ok: true, message: `+${deal.fp} fagpoeng.` };
 }
@@ -912,6 +927,18 @@ export function repay(g: GameState, amount: number): PurchaseResult {
   g.cash -= a;
   log(g, `Du betalte ned ${fmtKr(a)} på lånet.`, "info");
   return { ok: true, message: `Betalte ned ${fmtKr(a)}.` };
+}
+
+/** Betaler ned gjelden etter en rekonstruksjon fra kassa (B-495) */
+export function repayRecon(g: GameState, amount: number): PurchaseResult {
+  const r = g.recon;
+  const a = Math.min(amount, r?.debt ?? 0, Math.max(0, g.cash));
+  if (!r || a <= 0) return fail("Det er ingen gjeld å betale, eller kassa er tom.");
+  addCost(g, "renter", a);
+  r.debt -= a;
+  r.paid += a;
+  if (r.debt <= 0) log(g, `Gjelden etter konkursen er betalt: ${fmtKr(r.paid)} i alt. Banken er fornøyd.`, "good");
+  return { ok: true, message: `Betalt ${fmtKr(a)} av gjelden.` };
 }
 
 // ------------------------------------------------------------------ //
