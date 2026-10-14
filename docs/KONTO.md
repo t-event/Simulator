@@ -172,4 +172,4 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Svar på rapporter: admin spør, spilleren svarer, varsel begge veier | Ja (ikke gjester) | Regel 3: mellom spillere | B-438 |
 | Driftsstatus i adminpanelet: verdensjobbene og eksporten | Bare eieren (`admins`) | Ikke en spillfunksjon | B-485 |
 | Regionmester på verdenskartet: styrke, tittel, merke og varsel | Ja | Regel 3: mellom spillere, serveren | B-487 |
-| Verksjefer for datterverkene: mandat, oppgjør i konsernkassa og samtalene | Ja | Regel 3: penger i ekte tid, serveren | B-488 |
+| Verksjefer for datterverkene: mandat, oppgjør i konsernkassa, samtalene og trivselen | Ja | Regel 3: penger i ekte tid, serveren | B-488, B-489 |

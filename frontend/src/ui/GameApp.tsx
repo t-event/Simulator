@@ -10,7 +10,7 @@ import { ChangelogSheet } from "./Changelog";
 import { STAGES, WIN_CASH } from "../game/data";
 import { konsernReady, LEGENDS, WIN_TITLE } from "../game/konsern";
 import { InstallTip } from "./InstallTip";
-import { completeManual, unlock } from "../game/engine";
+import { completeManual, log, unlock } from "../game/engine";
 import { computePlantStats, day, energyPrice, idleOutsideHours, staffing } from "../game/plant";
 import { useGame, type GameApi } from "../game/useGame";
 import { resolveDecision } from "../game/decisions";
@@ -59,6 +59,9 @@ import { importantLog, isUnseen, markAllSeen, markRead, unseenCount } from "../g
 import { Sales } from "./Sales";
 import { KonsernPage } from "./Konsern";
 import { useOpenTender } from "./openTender";
+import { useManagers } from "./useManagers";
+import { managerCallText } from "./managerText";
+import { openCall } from "../net/managers";
 import {
   applyCompanyIncome,
   applyDividendNews,
@@ -1050,6 +1053,20 @@ export function GameApp() {
   const pushNav = useRef<((link: PushLink) => void) | null>(null);
   usePushLinks((link) => pushNav.current?.(link), hasGame);
 
+  // Verksjefene (B-488, B-489): hentes i hele appen, så en samtale som venter, gir «!» på Konsern og én linje i
+  // varsellinja med lenke dit – også for den som ikke har åpnet Konsern
+  const managers = useManagers(g, view === "konsern");
+  const call = openCall(managers);
+  const callText = call ? managerCallText(g, call) : null;
+  useEffect(() => {
+    const uid = userId();
+    if (!callText || !uid) return;
+    act((gg) => {
+      if ((gg.owner && gg.owner !== uid) || gg.log.some((e) => e.text === callText)) return false;
+      log(gg, callText, "event", "konsern");
+    });
+  }, [callText, act]);
+
   if (!g)
     return (
       <>
@@ -1092,6 +1109,7 @@ export function GameApp() {
   const openLink = (to: LogLink) => {
     setInboxOpen(false);
     if (to === "industri") go("konsern", "industri");
+    else if (to === "konsern") go("konsern", "oversikt");
   };
   pushNav.current = (link) => {
     if (link.to === "industri") openLink("industri");
@@ -1174,15 +1192,21 @@ export function GameApp() {
                         view: "verket" as View,
                         sub: "anlegg",
                       }
-                    : v.id === "konsern" && tender
+                    : v.id === "konsern" && call
                       ? {
-                          text: tender.mine
-                            ? `By for å beholde ${tender.name.toLowerCase()}`
-                            : `Anbud på ${tender.name.toLowerCase()} er åpent`,
+                          text: callText ?? "En verksjef venter på svar",
                           view: "konsern" as View,
-                          sub: "industri",
+                          sub: "oversikt",
                         }
-                      : undefined;
+                      : v.id === "konsern" && tender
+                        ? {
+                            text: tender.mine
+                              ? `By for å beholde ${tender.name.toLowerCase()}`
+                              : `Anbud på ${tender.name.toLowerCase()} er åpent`,
+                            view: "konsern" as View,
+                            sub: "industri",
+                          }
+                        : undefined;
               const badge =
                 v.id === "salg"
                   ? g.contracts.filter((c) => c.status === "tilbud" && (!director || c.landmark)).length
@@ -1284,6 +1308,7 @@ export function GameApp() {
               onTab={onTab.konsern}
               tender={tender}
               openBook={openBook}
+              managers={managers}
             />
           )}
           {shown === "mal" && (

@@ -236,7 +236,7 @@ export interface LogEntry {
 }
 
 /** Steder et varsel kan føre til (B-453): «industri» = Konsern → Industrien, der anbudene står */
-export type LogLink = "industri";
+export type LogLink = "industri" | "konsern";
 
 export type CostCategory =
   | "skrap"

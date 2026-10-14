@@ -15,6 +15,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 489,
+    date: "2026-10-14",
+    title: "Verksjefer som trives – eller ikke",
+    items: [
+      "Verksjefene trives når mandatet passer det de er flinke til, og når du følger rådene deres. Bytter du mandat ofte eller går mot rådene, blir de misfornøyde.",
+      "En misfornøyd verksjef kan få tilbud fra en konkurrent. Da velger du: gi lønnstillegg, eller la verksjefen gå.",
+      "Når en verksjef ringer, står det hvilket svar verksjefen anbefaler. Kandidatene viser hvilket mandat de passer best til.",
+      "Seks nye saker: vedlikehold, elektroder, sikkerhetskurs, støv, eksportordre og storkunden som vil ha rabatt.",
+      "Venter en verksjef på svar, får Konsern et merke og varsellinja en linje du kan trykke på.",
+    ],
+  },
+  {
     b: 488,
     date: "2026-10-13",
     title: "Verksjefer på datterverkene",

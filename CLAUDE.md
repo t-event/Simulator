@@ -227,7 +227,8 @@ frontend/src/
     icons.tsx    Ikoner fra Lucide, kopiert inn (lisens i icons-LICENSE.txt)   ds.tsx  StatusBadge, Callout, Button, Metric
     delta.ts     Endringen under nøkkeltallene (`changeDelta`, tegnes av `DeltaLine`/`Metric`, B-404)
     fonts/       Visningsskriften for overskrifter og store tall (Barlow Semi Condensed 600, OFL)
-    Managers.tsx Kortet «Verksjefene» på Konsern → Oversikt med samtalen og arkene; useManagers.ts henter (B-488)
+    Managers.tsx Kortet «Verksjefene» på Konsern → Oversikt med samtalen og arkene; useManagers.ts henter i hele appen,
+                 managerText.ts gir linja i varsellinja (B-488, B-489)
     WorldMap.tsx Konsern → Kart: verdenskartet med regionene, andres verk og selskapene (B-333)
     Chat.tsx     Skiftrapporten: knappen ved varsellinja (under 380 px i tallraden) og arket (B-338)
     Profile.tsx  Profilarket og `PlayerName` (brukernavn som åpner profilen); hvilken som er åpen: profileStore.ts (B-419)
@@ -477,7 +478,11 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `manager_mod_factor` og `salaryShare`/`mandateFactor`/`modFactors`, med faste tall i testen – endres én, endres begge.
   `konsern_order` er patchet med `manager_mod_factor` etter linja med `mod_h`. Endres den funksjonen, må patchen være med.
   Prisen i appen følger med `setManagerModFactors` (fra `net/managers.ts`). Bryteren er `config.world.managers.enabled`.
-  Stopp jobben med `select cron.unschedule('verksjefer');`.
+  Stopp jobben med `select cron.unschedule('verksjefer');`. Trivselen (B-489, 153): `manager_fit`/`manager_loyalty_delta`
+  og `loyaltyDaily` rundes med `floor(x + 0,5)` (= `Math.round`), aldri `round()` i SQL (det runder −0,5 til −1). Nye kort:
+  legg dem i `CALL_CARDS` og publiser appen før `config.world.managers.cards` får dem – eldre apper skjuler ukjente kort.
+  Kort med `special` trekkes ikke tilfeldig. Statusen hentes i hele appen hvert 5. minutt (`useManagers` i `GameApp`) – den
+  leser spillerens lagring på serveren, så ikke gjør det oftere.
 - **Utbyttepolitikk og Kontroll** (B-334, 067): `pay_dividends` betaler `dividend_to_treasury(fullt, policy_keep)` til
   kassa og resten til `konsern.fund`; `dividendToTreasury` i `dividend.ts` speiler den (faste tall i testen).
   `world_status.dividend.per_day` er etter politikken, `full_per_day` før – konsernverdien bruker det fulle. Kontrollen

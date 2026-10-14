@@ -25,6 +25,8 @@ export interface PlantManager extends ManagerStats {
   trait: Trait;
   mandate: Mandate;
   salary: number;
+  /** Trivselen 0–100 (B-489); under 20 kommer «Tilbud fra en konkurrent» */
+  loyalty: number;
   /** Når mandatet kan byttes igjen (ms) */
   mandateFrom: number;
 }
@@ -86,6 +88,7 @@ export function parseManagerStatus(r: Row | null | undefined): ManagerStatus {
       trait: trait(m.trait),
       mandate: mandate(m.mandate),
       salary: num(m.salary),
+      loyalty: m.loyalty == null ? 60 : Math.max(0, Math.min(100, int(m.loyalty))),
       mandateFrom: time(m.mandateFrom),
       ...stats(m),
     })),
@@ -151,7 +154,15 @@ export const MANAGER_REFUSAL_TEXT: Record<ManagerRefusal, string> = {
 };
 
 export type ManagerResult =
-  | { ok: true; cost?: number; outcome?: "sikker" | "uhell"; cash?: number; days?: number; factor?: number }
+  | {
+      ok: true;
+      cost?: number;
+      outcome?: "sikker" | "uhell";
+      cash?: number;
+      days?: number;
+      factor?: number;
+      special?: "raise" | "leave";
+    }
   | { ok: false; reason: ManagerRefusal; cost?: number };
 
 function result(r: Row | null | undefined): ManagerResult {
@@ -163,6 +174,7 @@ function result(r: Row | null | undefined): ManagerResult {
       cash: num(r.cash),
       days: int(r.days),
       factor: num(r.factor) || 1,
+      special: r.special === "raise" || r.special === "leave" ? r.special : undefined,
     };
   const reason =
     typeof r?.reason === "string" && r.reason in MANAGER_REFUSAL_TEXT ? (r.reason as ManagerRefusal) : "nett";

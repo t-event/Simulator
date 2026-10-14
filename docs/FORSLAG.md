@@ -76,7 +76,7 @@ til «Avgjort» nederst).
 ## Forslag – spillet
 
 - **Mer å gjøre i sluttspillet (eieren 13.10, B-487):** regionmester og nye konsernmål er bygget, og verksjefene
-  med samtalene er bygget (B-488). Mulig senere: V3 for verksjefene (lojalitet, oppsigelse fra verksjefen), en ukeliste
+  med samtalene og trivselen er bygget (B-488, B-489). Mulig senere: verksjefer i testspilleren, en ukeliste
   «Mest modernisert» (krever ny ukestype, B-457), regionmester i Hall of Fame ved sesongslutt, og flere selskaper når
   det er flere aktive konserneiere (ca. 1 per 4, B-387).
 
@@ -88,8 +88,8 @@ til «Avgjort» nederst).
 - ~~Stabilisering (B-380)~~ **Avgjort (B-381–B-385):** kassetaket fjernet, tittel skilt fra opptjent nivå, sesonglistene og
   innskuddet stengt. Verksjefene venter nå bare på V0/K-1 (B-409).
 
-- ~~Verksjefer for datterverkene (B-379, B-409)~~ **Bygget (B-488):** V1 og V2 etter eierens «Bygg nå». V3 (lojalitet,
-  oppsigelse fra verksjefen) venter. Følg med på fisking (sluttpakken er tjent inn etter ca. 15 dager).
+- ~~Verksjefer for datterverkene (B-379, B-409)~~ **Bygget (B-488, B-489):** V1–V3 etter eierens «Bygg nå». Følg med på
+  fisking (sluttpakken er tjent inn etter ca. 15 dager) og hvor ofte «Tilbud fra en konkurrent» kommer.
 - **Rekonstruksjon etter konkurs (B-409, spørsmål til eieren):** `docs/REKONSTRUKSJON-FORSLAG.md` – fem modeller (A–E)
   sammenlignet, sperrene mot misbruk og hva eieren velger (avsnitt 7). Ingen modell valgt, ikke bygget.
 

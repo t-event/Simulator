@@ -129,6 +129,8 @@ export interface CallOption {
   sure?: CallEffect;
   /** Med sjansen `chance` skjer `effect` i stedet for `sure` – alltid det dårlige utfallet; Stabilitet halverer sjansen */
   risk?: { chance: number; effect: CallEffect };
+  /** Bare i «Tilbud fra en konkurrent» (V3): lønnstillegg eller at verksjefen slutter */
+  special?: "raise" | "leave";
 }
 
 export interface CallCard {
@@ -136,6 +138,8 @@ export interface CallCard {
   title: string;
   text: string;
   options: [CallOption, CallOption];
+  /** Kommer ikke i den vanlige trekningen, bare når verksjefen trives dårlig (V3) */
+  special?: boolean;
 }
 
 /** Samme kort og tall som `config.world.managers.cards` på serveren */
@@ -305,6 +309,154 @@ export const CALL_CARDS: CallCard[] = [
       },
     ],
   },
+  {
+    id: "vedlikehold",
+    title: "Kranene trenger vedlikehold",
+    text: "Traverskranene bør gås over. Vi kan stoppe litt nå, eller vente og håpe de holder.",
+    options: [
+      {
+        label: "Stopp nå",
+        about: "To dager med 30 % mindre drift mens kranene gås over.",
+        tags: ["trygg"],
+        mandate: "stabilitet",
+        sure: { days: 2, factor: 0.7 },
+      },
+      {
+        label: "Vent",
+        about: "Ingen stans nå, men 30 % sjanse for fire dager med halv drift.",
+        tags: ["dristig", "billig"],
+        mandate: "lonnsomhet",
+        risk: { chance: 0.3, effect: { days: 4, factor: 0.5 } },
+      },
+    ],
+  },
+  {
+    id: "elektroder",
+    title: "Billigere elektroder",
+    text: "En ny leverandør tilbyr billigere elektroder, men de er ikke prøvd i ovnene våre.",
+    options: [
+      {
+        label: "Prøv dem",
+        about: "4 % mer i ti dager, men 25 % sjanse for at de knekker og gir tre dårlige dager.",
+        tags: ["dristig", "billig"],
+        mandate: "lonnsomhet",
+        sure: { days: 10, factor: 1.04 },
+        risk: { chance: 0.25, effect: { days: 3, factor: 0.6 } },
+      },
+      {
+        label: "Bli med de gamle",
+        about: "Vi vet hva vi har.",
+        tags: ["trygg"],
+        mandate: "stabilitet",
+      },
+    ],
+  },
+  {
+    id: "kurs",
+    title: "Sikkerhetskurs",
+    text: "Verneombudet vil sende alle på sikkerhetskurs. Det koster litt, men gir færre stopp.",
+    options: [
+      {
+        label: "Send alle på kurs",
+        about: "Koster under en halv dags utbytte, gir 2 % mer i 14 dager.",
+        tags: ["trygg"],
+        mandate: "stabilitet",
+        sure: { cash: -0.4, days: 14, factor: 1.02 },
+      },
+      {
+        label: "Ikke nå",
+        about: "Ingen kostnad, men 15 % sjanse for et uhell og to dager med halv drift.",
+        tags: ["dristig", "billig"],
+        mandate: "lonnsomhet",
+        risk: { chance: 0.15, effect: { days: 2, factor: 0.5 } },
+      },
+    ],
+  },
+  {
+    id: "stov",
+    title: "Naboene klager på støv",
+    text: "Naboene klager på støv fra skraplageret. Vi kan sette opp en støvduk nå, eller vente.",
+    options: [
+      {
+        label: "Sett opp støvduk",
+        about: "Koster under én dags utbytte.",
+        tags: ["trygg"],
+        mandate: "stabilitet",
+        sure: { cash: -0.8 },
+      },
+      {
+        label: "Vent",
+        about: "Ingen kostnad nå, men 35 % sjanse for en bot på to dagers utbytte.",
+        tags: ["dristig", "billig"],
+        mandate: "lonnsomhet",
+        risk: { chance: 0.35, effect: { cash: -2 } },
+      },
+    ],
+  },
+  {
+    id: "eksport",
+    title: "Eksportordre",
+    text: "En kunde i utlandet vil ha en stor ordre levert raskt. Frakten er dyr hvis noe går galt.",
+    options: [
+      {
+        label: "Ta ordren",
+        about: "10 % mer i sju dager, men 35 % sjanse for at frakten slår feil: 5 % mindre i sju dager.",
+        tags: ["dristig"],
+        mandate: "vekst",
+        sure: { days: 7, factor: 1.1 },
+        risk: { chance: 0.35, effect: { days: 7, factor: 0.95 } },
+      },
+      {
+        label: "Bli hjemme",
+        about: "Vi leverer til de vanlige kundene.",
+        tags: ["trygg", "billig"],
+        mandate: "stabilitet",
+      },
+    ],
+  },
+  {
+    id: "rabatt",
+    title: "Storkunden vil ha rabatt",
+    text: "Den største kunden vil ha 3 % rabatt de neste to ukene. Sier vi nei, kan de gå til en annen.",
+    options: [
+      {
+        label: "Gi rabatt",
+        about: "3 % mindre i 14 dager, men kunden blir.",
+        tags: ["trygg"],
+        mandate: "stabilitet",
+        sure: { days: 14, factor: 0.97 },
+      },
+      {
+        label: "Si nei",
+        about: "Ingen rabatt, men 40 % sjanse for at kunden går: 8 % mindre i ti dager.",
+        tags: ["dristig", "billig"],
+        mandate: "lonnsomhet",
+        risk: { chance: 0.4, effect: { days: 10, factor: 0.92 } },
+      },
+    ],
+  },
+  {
+    id: "tilbud",
+    title: "Tilbud fra en konkurrent",
+    text: "Jeg har fått et tilbud fra en konkurrent. Jeg trives ikke så godt her lenger.",
+    special: true,
+    options: [
+      {
+        label: "Gi lønnstillegg",
+        about: "Lønnen går opp 1 prosentpoeng, og verksjefen blir.",
+        tags: ["trygg"],
+        mandate: "stabilitet",
+        special: "raise",
+      },
+      {
+        label: "La verksjefen gå",
+        about: "Verksjefen slutter i dag. Ingen sluttpakke, og du kan ansette en ny med én gang.",
+        tags: ["dristig", "billig"],
+        mandate: "lonnsomhet",
+        special: "leave",
+      },
+    ],
+  },
 ];
 
 export const CALL_CARD_BY_ID: Record<string, CallCard> = Object.fromEntries(CALL_CARDS.map((c) => [c.id, c]));
@@ -327,6 +479,7 @@ export function optionValue(o: CallOption, mandate: Mandate | null = null): numb
 export function traitChoice(card: CallCard, trait: Trait, mandate: Mandate): 0 | 1 {
   const pick = (tag: "trygg" | "dristig" | "billig"): 0 | 1 =>
     card.options[1].tags.includes(tag) && !card.options[0].tags.includes(tag) ? 1 : 0;
+  if (card.special && trait === "lojal") return 0;
   if (trait === "forsiktig") return pick("trygg");
   if (trait === "aergjerrig") return pick("dristig");
   if (trait === "sparsom") return pick("billig");
@@ -350,4 +503,57 @@ export function setManagerModFactors(list: { plant: number; mandate: Mandate; st
 
 export function managerModFactor(plant: number): { cost: number; time: number } {
   return modByPlant.get(plant) ?? { cost: 1, time: 1 };
+}
+
+// ---------- Trivsel (V3, B-489) ----------
+
+/** Trivselen 0–100 (lojaliteten i VERKSJEF-FORSLAG.md avsnitt 6) – samme tall som `config.world.managers.loyalty` */
+export const LOYALTY = {
+  start: 60,
+  quitBelow: 20,
+  followAdvice: 3,
+  rejectAdvice: -4,
+  mandateSwitch: -8,
+  raise: 0.01,
+  raiseCap: 0.08,
+  afterRaise: 55,
+};
+
+/** Hvor godt mandatet passer verksjefen: Lønnsomhet = snittet av Drift og Økonomi, Vekst = Drift, Stabilitet = Folk */
+export function mandateFit(m: Mandate, s: ManagerStats): number {
+  if (m === "lonnsomhet") return (s.drift + s.okonomi) / 2;
+  if (m === "vekst") return s.drift;
+  return s.folk;
+}
+
+/** Mandatet som passer verksjefen best (likt: Lønnsomhet før Vekst før Stabilitet) */
+export function bestMandate(s: ManagerStats): Mandate {
+  return MANDATES.reduce((a, b) => (mandateFit(b, s) > mandateFit(a, s) ? b : a));
+}
+
+/** Lojale verksjefer tar dårlige dager halvt så tungt (avrundet mot null, som `trunc` i SQL) */
+function lojalAdjust(delta: number, trait: Trait): number {
+  return trait === "lojal" && delta < 0 ? Math.trunc(delta / 2) : delta;
+}
+
+/** Endringen i trivsel per betalt utbyttedag: passformen minus 3, rundet (1 stjerne = −2, 3 = 0, 5 = +2) */
+export function loyaltyDaily(m: Mandate, s: ManagerStats, trait: Trait): number {
+  return lojalAdjust(Math.round(mandateFit(m, s) - 3), trait);
+}
+
+/** Endringen når eieren svarer selv: fulgte rådet (verksjefens eget valg) eller gikk mot det */
+export function loyaltyAnswer(followed: boolean, trait: Trait): number {
+  return lojalAdjust(followed ? LOYALTY.followAdvice : LOYALTY.rejectAdvice, trait);
+}
+
+export function loyaltySwitch(trait: Trait): number {
+  return lojalAdjust(LOYALTY.mandateSwitch, trait);
+}
+
+/** Trivselen med vanlige ord (ingen tall å administrere, B-180) */
+export function loyaltyWord(l: number): string {
+  if (l >= 75) return "trives godt";
+  if (l >= 45) return "trives";
+  if (l >= LOYALTY.quitBelow + 5) return "misfornøyd";
+  return "vil slutte";
 }

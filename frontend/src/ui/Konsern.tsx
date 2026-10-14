@@ -63,7 +63,6 @@ import { useKonsernRank } from "./konsernRank";
 import { IndustryPanel } from "./Companies";
 import { RegionsCard, WorldMapPanel } from "./WorldMap";
 import { ManagersCard } from "./Managers";
-import { useManagers } from "./useManagers";
 import { openCall, type ManagerStatus } from "../net/managers";
 import { NeedsAccount } from "./Account";
 import { cancelOrderUi, getBuildRegion, movePlantUi, runOption, sellPlantUi, setBuildRegion } from "./konsernRun";
@@ -863,12 +862,15 @@ export function KonsernPage({
   onTab,
   tender,
   openBook,
+  managers,
 }: {
   g: GameState;
   act: Act;
   openTab?: string;
   onTab?: OnTab;
   tender: OpenTender | null;
+  /** Verksjefene fra serveren (B-488), hentet i hele appen (B-489) */
+  managers: ManagerStatus | null;
   /** Åpner Fagboka på et kapittel (B-410) */
   openBook?: (chapter?: string) => void;
 }) {
@@ -877,8 +879,6 @@ export function KonsernPage({
   );
   useReportTab(tab, onTab);
   const canBuy = konsernReady(g);
-  // Verksjefene (B-488): hentes når Konsern er åpent, så prisen på moderniseringen følger mandatet
-  const managers = useManagers(g);
   const tabs: { id: KonsernTabId; label: string; count?: number; badge?: string; alert?: boolean }[] = [
     { id: "oversikt", label: "Oversikt", badge: openCall(managers) ? "Samtale" : undefined },
     { id: "utvid", label: "Utvid", count: canBuy },

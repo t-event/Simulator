@@ -2588,6 +2588,7 @@ const main = async () => {
           trait: "lojal",
           mandate: "vekst",
           salary: 0.0525,
+          loyalty: 140,
           mandateFrom: "2026-10-20T10:00:00+00:00",
         },
       ],
@@ -2618,6 +2619,7 @@ const main = async () => {
       "mandat",
     );
     assert(s.calls.length === 2 && s.quarantine.length === 0, "ukjent kort er borte");
+    assert(s.managers[0].loyalty === 100, "trivselen holdes i 0–100 (B-489)");
     assert(openCall(s)?.id === 5 && s.calls[1].chosenBy === "verksjef" && s.calls[1].outcome === "uhell", "samtalene");
     assert(!parseManagerStatus(null).enabled && openCall(null) === null, "tomt svar");
   });

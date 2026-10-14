@@ -357,6 +357,13 @@ import { applyCashCap, CASH_RESERVE, hasPaidOut, paidOutDayLog, paidOutTotal } f
 import { trainingSeed, weeklyGrade, weeklyRequest } from "../ui/control/weekly";
 import { changeDelta } from "../ui/delta";
 import {
+  bestMandate as mgrBestMandate,
+  CALL_CARDS as CALL_CARDS_ALL,
+  loyaltyAnswer as mgrLoyaltyAnswer,
+  loyaltyDaily as mgrLoyaltyDaily,
+  loyaltySwitch as mgrLoyaltySwitch,
+  loyaltyWord as mgrLoyaltyWord,
+  mandateFit as mgrMandateFit,
   CALL_CARD_BY_ID,
   legalStats,
   managerModFactor,
@@ -4978,6 +4985,36 @@ test("Verksjefer (B-488): lønn, mandat og modernisering som i SQL-en, og uten v
   assert(managerModFactor(8).cost === 1, "bare verket med verksjef");
   setManagerModFactors([]);
   assert(konsernModernizeCost(p, g) === base, "tilbake uten verksjef");
+});
+
+test("Verksjefenes trivsel (B-489): samme tall som SQL-en, og «Tilbud fra en konkurrent» trekkes aldri tilfeldig", () => {
+  // manager_fit/manager_loyalty_delta i supabase/153: floor(passform − 3 + 0,5), lojale tar minusene halvt (mot null)
+  const s1 = { drift: 4, okonomi: 5, folk: 1 };
+  assert(mgrMandateFit("lonnsomhet", s1) === 4.5 && mgrMandateFit("stabilitet", s1) === 1, "passform");
+  assert(mgrLoyaltyDaily("lonnsomhet", s1, "lojal") === 2, "4,5 gir +2 (som floor(1,5 + 0,5))");
+  assert(
+    mgrLoyaltyDaily("stabilitet", s1, "forsiktig") === -2 && mgrLoyaltyDaily("stabilitet", s1, "lojal") === -1,
+    "1 stjerne",
+  );
+  assert(mgrLoyaltyDaily("lonnsomhet", { drift: 2, okonomi: 3, folk: 3 }, "forsiktig") === 0, "2,5 gir 0 (floor(0))");
+  assert(mgrLoyaltySwitch("lojal") === -4 && mgrLoyaltySwitch("sparsom") === -8, "mandatbytte (prøven: lojal 64 → 60)");
+  assert(
+    mgrLoyaltyAnswer(true, "forsiktig") === 3 && mgrLoyaltyAnswer(false, "forsiktig") === -4,
+    "rådet (prøven: 60 → 56)",
+  );
+  assert(mgrBestMandate({ drift: 1, okonomi: 5, folk: 3 }) === "lonnsomhet", "best: lønnsomhet ved likt");
+  assert(mgrBestMandate({ drift: 5, okonomi: 1, folk: 2 }) === "vekst", "best: vekst");
+  assert(mgrLoyaltyWord(80) === "trives godt" && mgrLoyaltyWord(19) === "vil slutte", "ord");
+  const offer = CALL_CARD_BY_ID.tilbud;
+  assert(
+    offer?.special === true && offer.options[0].special === "raise" && offer.options[1].special === "leave",
+    "tilbudet",
+  );
+  assert(
+    traitChoice(offer, "lojal", "lonnsomhet") === 0 && traitChoice(offer, "sparsom", "vekst") === 1,
+    "trekk på tilbudet",
+  );
+  assert(CALL_CARDS_ALL.filter((c) => !c.special).length === 14, "fjorten vanlige kort");
 });
 
 if (failed) {
