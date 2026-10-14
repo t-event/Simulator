@@ -17,7 +17,10 @@ testspilleren), rettet at vi er i sesong 1, ikke 2, og «Fiks den umulige utland
 
 **Testet:** nettest for `friendRows`, `npm test`, `tsc -b`, lint, build, Playwright på 320/390/1366 px.
 
-**Gjenstår:** verksjefer i testspilleren og rekonstruksjonen (egne PR-er i samme økt).
+**Verksjefer i simuleringene (B-494, egen PR):** `worldSim.ts --verksjef` og en ny tabell i `balance.ts --konsern`.
+Kassa endres med −2 til +3 % etter ett og to år. Ingen tall endret.
+
+**Gjenstår:** rekonstruksjonen (egen PR i samme økt).
 
 ---
 

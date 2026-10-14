@@ -126,7 +126,7 @@ npx tsx src/game/balance.ts --sommerstans                  # testspilleren velge
 npx tsx src/game/programSim.ts                             # konsernprogrammene: A mot B (B-388); --k1, --k1-skann, --k1-drift, --k1-kost, --k1-verdi(-skann), --k1-etablering: K-1 med hendelser i regionene (B-389–B-393)
 npx tsx src/game/takeoverSim.ts                            # oppkjøp: når lønner det seg å kjøpe, forsvare eller gi seg – regelsett 1, kandidatene og regelsett 2 (B-440, B-441; --kort); --gulv: anbudsgulvet A–F (B-449)
 npx tsx src/game/managerSim.ts                             # verksjefene mot akseptkriteriene: netto per mandat, fisking, samtalene (B-488)
-npx tsx src/game/worldSim.ts                               # verdenssimulatoren: konsernkassa for liten/middels/stor/legacy etter 30–730 ekte dager, dager etter fullt konsern, maks bud, andel brukt (B-380, B-385; --dager 180 for kortere)
+npx tsx src/game/worldSim.ts                               # verdenssimulatoren: konsernkassa for liten/middels/stor/legacy etter 30–730 ekte dager, dager etter fullt konsern, maks bud, andel brukt (B-380, B-385; --dager 180 for kortere; --verksjef: uten / Lønnsomhet / Vekst, B-494)
 npm run build
 ```
 

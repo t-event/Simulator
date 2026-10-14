@@ -61,6 +61,7 @@ import {
   setRealClock,
 } from "./konsern";
 import { answerQuiz, QUIZ, quizAvailable } from "./quiz";
+import { legalStats, MANDATE_NAME, modFactors, netShare, type ManagerStats } from "./managers";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
 import { ADDONS, CASTINGS, FURNACES, SCRAP_IDS, STAGES } from "./data";
 import {
@@ -1037,6 +1038,33 @@ if (process.argv.includes("--konsern")) {
         `${String(n).padStart(4)}  ${mill(drift).padStart(16)}  ${mill(net).padStart(13)}  ${mill(gain).padStart(30)}   ${gain > 0 ? `${Math.round(price / gain)} dager` : "aldri"}`,
       );
     }
+  }
+  // B-494: det samme med en verksjef på hvert verk – snittet over alle lovlige kandidater og den beste, per mandat
+  const stats = legalStats();
+  const avg = (f: (s: ManagerStats) => number) => stats.reduce((a, s) => a + f(s), 0) / stats.length;
+  const pct = (v: number) =>
+    `${v >= 0 ? "+" : "−"}${Math.abs(v * 100)
+      .toFixed(1)
+      .replace(".", ",")} %`;
+  console.log("\nVerksjef på hvert verk (B-494) – endring i utbyttet etter lønn, og moderniseringen:");
+  console.log(
+    "mandat         snitt kandidat   beste kandidat   andel som gir pluss   modernisering (snitt): pris / tid",
+  );
+  for (const m of ["lonnsomhet", "vekst", "stabilitet"] as const) {
+    const plus = stats.filter((s) => netShare(m, s) > 0).length / stats.length;
+    const best = Math.max(...stats.map((s) => netShare(m, s)));
+    const mod = { cost: avg((s) => modFactors(m, s).cost), time: avg((s) => modFactors(m, s).time) };
+    console.log(
+      `${MANDATE_NAME[m].padEnd(12)} ${pct(avg((s) => netShare(m, s))).padStart(16)} ${pct(best).padStart(16)} ${`${Math.round(plus * 100)} %`.padStart(21)}   ${pct(mod.cost - 1)} / ${pct(mod.time - 1)}`,
+    );
+  }
+  {
+    const g = make(14, "kompleks", 5, true);
+    const net = konsernNetFor(g, g.konsern.plants);
+    const best = Math.max(...stats.map((s) => netShare("lonnsomhet", s)));
+    console.log(
+      `Fullt konsern (14 komplekser, trinn 5): ${mill(net)} per dag uten verksjefer, ${mill(net * (1 + best))} med 14 av de beste (Lønnsomhet) – taket på tallene i B-488 er +${(best * 100).toFixed(1).replace(".", ",")} %.`,
+    );
   }
   console.log(
     `\nPlass til ${maxSisters(make(0, "kompleks", 0))} datterverk. Neste kjøp tilbys av konsernOptions (${konsernOptions(make(3, "kompleks", 5)).length} valg). Utbyttet betales av serveren én gang per ekte dag (B-304); spillfarten betyr ingenting.`,

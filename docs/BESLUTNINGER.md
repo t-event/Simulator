@@ -9271,7 +9271,8 @@ Dry-run først (bare lesing, så en DO-blokk som ble rullet tilbake): kasse 3 05
 Andre spillere: ingen andre lagringer har den samme ordren i loggen nå (sjekkes ikke bakover – loggen holder 150
 linjer). Får noen den samme feilen, gjøres det samme etter dry-run og eierens godkjenning.
 
-Konto: nei (retting av ett lagret spill). Endringslogg: nei
+Konto: nei (retting av ett lagret spill).
+Endringslogg: nei
 
 ## B-493 «Venner» på topplista og ukelista (2026-10-14)
 Eieren valgte forslaget «Venner på topplista og ukelista» (anbefalt etter B-490). Når vennelista har noen, står valget
@@ -9284,3 +9285,29 @@ deg selv, med plassen på hele lista.
 - Lista viser bare det den alt viser alle; ingen nye opplysninger om noen.
 
 Konto: ja (vennelista krever konto, regel 2 – KONTO.md).
+
+## B-494 Verksjefene i simuleringene (2026-10-14)
+Eieren: «Bygg det du anbefaler» – verksjefer i testspilleren, som en sikkerhetssjekk av balansen etter B-488/B-489.
+Testspilleren i `balance.ts` rekker ikke konsernet (0 datterverk etter 360 spilldøgn), så sjekken står der konsernet
+regnes i ekte dager:
+- `worldSim.ts --verksjef`: de seks spillertypene uten verksjef, med «Lønnsomhet» og med «Vekst». Hvert ferdige verk får
+  den beste av tre faste kandidater. Lønnsomhet ansettes bare når den gir pluss. Vekst brukes til verket har høyeste
+  trinn, så det beste mandatet. Utbyttet ganges per verk, og moderniseringen følger mandatet (`setManagerModFactors` →
+  `orderQuote`, som serveren). Samtalene er ikke med (de står i `managerSim.ts`).
+- `balance.ts --konsern`: ny tabell med endringen i utbyttet etter lønn per mandat (snitt over alle lovlige kandidater
+  og den beste), andelen kandidater som gir pluss, og moderniseringen. Ingen endring i testspilleren selv.
+**Resultat (dag 365 / 730):**
+- Kassa endres med −2 til +3 %. Lønnsomhet gir litt mindre for nye spillere fordi moderniseringen koster 20 % mer, og
+  Vekst gir litt mer.
+- Utbyttet per dag endres med høyst 1 mill. (34–39 mill.).
+- «Ferdig utbygd» kommer 2–4 dager før med Vekst og 2–4 dager etter med Lønnsomhet.
+- Med Vekst når middels spiller og legacy med komplekser på trinn 0 ett nivå høyere i stigen (8 og 9). Moderniseringen
+  blir 18 % billigere og betaler seg da innen 180 dager. Uten verksjef kan samme nivå kjøpes, bare med lengre
+  tilbakebetaling, så det er ingen ny vei forbi stigen.
+- Lønnsomhet: snitt −1,7 %, beste +4,0 %, og 31 % av kandidatene gir pluss. Vekst og Stabilitet gir alltid minus i
+  utbyttet (Vekst gir det tilbake i moderniseringen, Stabilitet i samtalene).
+- Fullt konsern (14 komplekser på trinn 5): 33,7 mill. per dag, 35,1 mill. med 14 av de beste.
+Konklusjon: verksjefene er et valg med små tall, slik B-488 ville. Ingen tall endres.
+
+Konto: nei (simulering).
+Endringslogg: nei
