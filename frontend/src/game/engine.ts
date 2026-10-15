@@ -106,6 +106,7 @@ import {
   unitType,
   unitHas,
   unitView,
+  fixedJobCount,
 } from "./plant";
 import { chance, noise, pick, rand, randInt, uniform } from "./random";
 import { bornAt, pensionMorning, PENSION } from "./pension";
@@ -3262,9 +3263,13 @@ export function workerLabel(w: Worker): string {
   return `${w.name} (${ROLES[w.role].name.toLowerCase()})`;
 }
 
-/** Hvem som sluttet, med stilling, og hva spilleren bør gjøre (B-066) */
-export function quitText(ws: Worker[]): string {
-  return `${ws.map(workerLabel).join(", ")} har sagt opp. Ansett ${ws.length === 1 ? "en ny" : "nye"} under Folk → Ansett.`;
+/**
+ * Hvem som sluttet, med stilling, og hva spilleren bør gjøre (B-066). Med `g` (etter at de har sluttet): står avløsere
+ * nå fast på plassene, kan de få fast jobb der (B-499)
+ */
+export function quitText(ws: Worker[], g?: GameState): string {
+  const fix = g && fixedJobCount(g) > 0 ? ", eller gi en avløser fast jobb på plassen (Folk → Skift)" : "";
+  return `${ws.map(workerLabel).join(", ")} har sagt opp. Ansett ${ws.length === 1 ? "en ny" : "nye"} under Folk → Ansett${fix}.`;
 }
 
 /** Trivselen driver mot det normale, nattarbeid tærer, og misfornøyde folk slutter (B-026) */
@@ -3279,7 +3284,7 @@ function updateMorale(g: GameState, stats: PlantStats): void {
     const quitters = g.workers.filter(() => chance(g, ((35 - g.morale) / 35) * 0.04));
     if (quitters.length) {
       g.workers = g.workers.filter((w) => !quitters.includes(w));
-      log(g, `${quitText(quitters)} Trivselen er lav – gi bonus, send folk på kurs eller unngå nattskift.`, "bad");
+      log(g, `${quitText(quitters, g)} Trivselen er lav – gi bonus, send folk på kurs eller unngå nattskift.`, "bad");
     }
   }
 }

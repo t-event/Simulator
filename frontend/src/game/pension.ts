@@ -6,7 +6,7 @@
 import { YEAR_DAYS } from "./calendar";
 import { ROLES } from "./data";
 import { adjustMorale, countEvent, log } from "./engine";
-import { day } from "./plant";
+import { day, fixedJobFor } from "./plant";
 import { uniform } from "./random";
 import type { GameState, Worker } from "./types";
 
@@ -83,7 +83,7 @@ export function pensionMorning(g: GameState): void {
       countEvent(g, "pensjon");
       log(
         g,
-        `${w.name} (${role}) går av med pensjon, ${ageOf(w, today)} år gammel${years >= 1 ? `, etter ${years} år på verket` : ""}. Takk for innsatsen!`,
+        `${w.name} (${role}) går av med pensjon, ${ageOf(w, today)} år gammel${years >= 1 ? `, etter ${years} år på verket` : ""}. Takk for innsatsen!${fixedJobFor(g, w.role) ? ` En avløser fyller plassen nå – gi en av dem fast jobb som ${role} under Folk → Skift.` : ""}`,
         "info",
       );
     } else if (today >= at - PENSION.noticeDays && !w.pensionNotice) {

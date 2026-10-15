@@ -8,6 +8,7 @@ import { checkAchievements } from "./achievements";
 import {
   ADDONS,
   CASTINGS,
+  CREW_ROLES,
   FURNACES,
   GRADES,
   MIN_PER_DAY,
@@ -28,6 +29,7 @@ import {
   fmtT,
   log,
   newCandidates,
+  normalSalary,
   orderQueue,
   startReline,
   maxLoan,
@@ -45,6 +47,7 @@ import {
   bonusGap,
   castingType,
   computePlantStats,
+  crewList,
   day,
   daysUntilAllBack,
   staffing,
@@ -58,6 +61,7 @@ import {
   unitType,
   unitView,
   wildcardUse,
+  fixedJobCandidates,
 } from "./plant";
 import { newGradesAt, startRecipeGuide } from "./recipeGuide";
 import {
@@ -749,6 +753,45 @@ export function hireForWildcards(g: GameState): PurchaseResult {
         : "Ingen søkere med de rollene akkurat nå. Nye kommer hver morgen.",
     );
   return { ok: true, message: `Ansatte ${hired} ${hired === 1 ? "person" : "personer"} – avløserne er ledige igjen.` };
+}
+
+/**
+ * Gir avløsere fast jobb på plassene de står fast på (B-499): avløseren blir f.eks. støper eller ovnsoperatør, får
+ * lønna til rollen og beholder ferdigheten. Skiftene er like fulle etterpå, men avløserne som er igjen, blir ledige
+ * til fravær – som når man ansetter til plassene (B-170), uten å ansette noen. Uten `workerId` gis alle plassene til
+ * de flinkeste avløserne; med `role` bare plassene i den rollen.
+ */
+export function giveFixedJob(g: GameState, workerId?: number, role?: RoleId): PurchaseResult {
+  const moved: Partial<Record<RoleId, number>> = {};
+  const names: string[] = [];
+  for (let guard = 0; guard < 2000; guard++) {
+    const use = wildcardUse(g);
+    if (use.tied <= 0) break;
+    const r = role ?? CREW_ROLES.find((x) => (use.byRole[x] ?? 0) > 0);
+    if (!r || !(use.byRole[r] ?? 0)) break;
+    const pool = fixedJobCandidates(g);
+    const w = workerId === undefined ? pool[0] : pool.find((x) => x.id === workerId);
+    if (!w) break;
+    w.role = r;
+    w.salary = Math.max(w.salary, normalSalary(g, r, w.skill));
+    moved[r] = (moved[r] ?? 0) + 1;
+    names.push(w.name);
+    if (workerId !== undefined) break;
+  }
+  const n = names.length;
+  if (n === 0) {
+    if (workerId !== undefined && !fixedJobCandidates(g).some((w) => w.id === workerId))
+      return fail("Bare avløsere med fagbrev kan få fast jobb.");
+    return fail("Avløserne står ikke fast på noen plass nå – ingen plass å gi dem.");
+  }
+  const what = crewList(moved);
+  if (n === 1) {
+    const r = Object.keys(moved)[0] as RoleId;
+    log(g, `${names[0]} har fått fast jobb som ${ROLES[r].name.toLowerCase()}.`, "good");
+    return { ok: true, message: `${names[0]} er nå ${ROLES[r].name.toLowerCase()}.` };
+  }
+  log(g, `${n} avløsere har fått fast jobb: ${what}.`, "good");
+  return { ok: true, message: `${n} avløsere har fått fast jobb: ${what}.` };
 }
 
 export function fire(g: GameState, workerId: number): PurchaseResult {

@@ -40,6 +40,9 @@ regnes av serveren i ekte tid.
   det hva som hjelper i stedet.
 - Ingen hendelseskort om forhold mellom ansatte (trakassering, diskriminering, varsling) – tatt ut etter eierens ønske
   (B-444).
+- **Fast jobb til avløsere** (B-499): står avløsere fast på plasser uten egne folk (folk har sluttet eller gått av med
+  pensjon), kan de få fast jobb der (Folk → Skift, eller «Mer» per avløser). De beholder ferdigheten, får lønna til
+  rollen, og resten av avløserne blir ledige til fravær. Skiftene er like fulle. Ikke lærlinger.
 - **Råd om gjelden etter konkursen** (B-498): når kassa har mer enn en ukes lønn og skrap til overs, sier et råd på
   Verket hvor mye som kan betales i banken (Verket → Økonomi).
 - **Konkurs og rekonstruksjon** (B-495): konkurs etter 7 døgn under kredittgrensen eller 3 døgn uten råd til foring.

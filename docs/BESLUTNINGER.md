@@ -9405,3 +9405,27 @@ salget, men spilleren kan også betale fra kassa i banken.
 - Testspilleren betaler alt ned selv (B-495), så nybegynneren trenger ikke rådet i CI.
 
 Konto: nei (regel 1 – hovedverket).
+
+## B-499 Fast jobb til avløsere (2026-10-15)
+Brukeren ba om: «Du sku ha gjort sånn at di 1000 avløseran man har at man kan send dem tel den faste stillinga tel den
+plassn vi treng dem som at dem får fast jobb dær. Og da blir til en støper, kranfører, ovnsopratør osv. Da det e folk
+som slutt å sånnt, går av me pensjon osv».
+
+Når folk slutter eller går av med pensjon, fyller avløserne plassene (B-164), men står da fast der og er ikke ledige til
+fravær. Før var eneste råd å ansette nye til plassene (B-170). Nå kan avløserne selv få jobben:
+- `giveFixedJob(g, workerId?, role?)` (`actions.ts`): en avløser som står fast på en plass i en skiftrolle
+  (ovnsoperatør, støper, kranfører, lab, valseverk), blir den rollen. Den beholder ferdigheten og får lønna til rollen (`normalSalary`, aldri lavere
+  enn før). Uten `workerId` fylles alle plassene med de flinkeste avløserne, i rollerekkefølgen.
+- Bare plasser avløserne står fast på (`wildcardUse(g).byRole`), så skiftene er like fulle etterpå, og resten av
+  avløserne blir ledige til fravær. Lærlinger og folk på lederutvikling får ikke fast jobb (`fixedJobCandidates` i
+  `plant.ts`).
+- Folk → Skift: knappen «Gi avløserne fast jobb (N)» i kortet «Anbefalt i tillegg til skiftene» ved siden av «Ansett til
+  plassene», og under bemanningstabellen når verket ikke har tre fulle skift. Under Folk → Ansatte → «Mer» har hver
+  avløser «Fast jobb som …» for plassene som trengs.
+- Beskjeden når noen sier opp (`quitText` med spillet) eller går av med pensjon, sier at en avløser kan få jobben når en
+  avløser nå står fast på plassen.
+- Ingen kostnad, ingen ny valuta.
+- Testspilleren bruker det ikke; nybegynneren trenger det ikke (det er et valg, ikke noe som stopper verket).
+
+Konto: nei (regel 1 – hovedverket).
+

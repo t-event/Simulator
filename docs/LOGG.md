@@ -5,6 +5,26 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 417 – 2026-10-15: Fast jobb til avløsere (B-499)
+
+**Brukeren ba om:** at avløserne kan sendes til den faste stillingen der det trengs folk og bli støper, ovnsoperatør
+osv. – når folk slutter eller går av med pensjon.
+
+**Gjort:**
+- `giveFixedJob` i `actions.ts`, `fixedJobCandidates`/`fixedJobCount`/`fixedJobFor` i `plant.ts`.
+- Knapp «Gi avløserne fast jobb (N)» på Folk → Skift (anbefalingskortet, og under bemanningstabellen under tre skift).
+- «Fast jobb som …» under «Mer» for hver avløser på Folk → Ansatte.
+- Beskjedene om oppsigelse og pensjon nevner muligheten når en avløser står fast på plassen.
+
+**Testet:**
+- Ny test (én avløser, alle, lærling, ingen plass, skiftene like, beskjeden).
+- `npm test`, `tsc -b`, lint, build og `balance.ts`.
+- Playwright på 320, 390 og 1366 px.
+
+**Gjenstår:** merge av PR #434 (eieren) og sjekk av publiseringen.
+
+---
+
 ## Økt 416 – 2026-10-15: Venner på kartet, verksjef-prestasjoner og råd om gjelden (B-496–B-498)
 
 **Brukeren ba om:** «Ny dag, nye muligheter. Lag en plan for hva du skal bygge idag. Utfør og push».

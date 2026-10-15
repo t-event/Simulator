@@ -2930,10 +2930,14 @@ button {
   height: 22px;
 }
 
-/* «Ansett til plassene» avløserne står på (B-170) */
+/* «Ansett til plassene» avløserne står på (B-170) og «Gi avløserne fast jobb» (B-499) */
 .g-support-action {
   margin-top: 4px;
   justify-self: start;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3);
 }
 
 .g-support-action button {

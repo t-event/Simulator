@@ -11,6 +11,7 @@ import {
   courseCost,
   fire,
   giveBonus,
+  giveFixedJob,
   hire,
   hireForMissing,
   LEADER_COURSE_DAYS,
@@ -35,6 +36,8 @@ import {
   crewCoverage,
   crewList,
   fireImpact,
+  fixedJobCandidates,
+  fixedJobCount,
   wildcardUse,
   unitType,
   day,
@@ -137,6 +140,11 @@ function roleEffect(g: GameState, stats: PlantStats, role: RoleId): string | nul
   }
 }
 
+/** «a, b og c» */
+function joinNames(parts: string[]): string {
+  return parts.length < 2 ? parts.join("") : `${parts.slice(0, -1).join(", ")} og ${parts[parts.length - 1]}`;
+}
+
 /** Hvorfor den ansatte er borte, med vanlige ord */
 function absenceName(w: Worker): string {
   return w.absentReason === "syk" ? "Syk" : w.absentReason === "lederkurs" ? "Lederutvikling" : "Ferie";
@@ -152,6 +160,7 @@ function SupportCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
     0,
   );
   const room = STAGES[g.stage].staffCap - g.workers.length;
+  const fixed = fixedJobCount(g);
   if (!advice.length) return null;
   const short = advice.filter((a) => a.have < a.want);
   return (
@@ -189,16 +198,22 @@ function SupportCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
             )}
             {a.role === "allround" && wild.tied > 0 && (
               <span className="g-support-action">
+                {/* Avløserne kan selv ta plassene de står på (B-499): ingen ansettelse, ingen søker trengs */}
+                {fixed > 0 && (
+                  <button onClick={() => act((gg) => giveFixedJob(gg))}>Gi avløserne fast jobb ({fixed})</button>
+                )}
                 {fits > 0 && room > 0 ? (
                   <button onClick={() => act((gg) => hireForWildcards(gg))}>
                     Ansett til plassene ({Math.min(wild.tied, fits, room)})
                   </button>
                 ) : (
-                  <span className="g-muted">
-                    {room <= 0
-                      ? "Det er ikke plass til flere ansatte."
-                      : "Ingen søkere med de rollene i dag. Nye kommer hver morgen."}
-                  </span>
+                  fixed === 0 && (
+                    <span className="g-muted">
+                      {room <= 0
+                        ? "Det er ikke plass til flere ansatte."
+                        : "Ingen søkere med de rollene i dag. Nye kommer hver morgen."}
+                    </span>
+                  )
                 )}
               </span>
             )}
@@ -509,8 +524,20 @@ function Absence({ g, stats, act }: Props) {
 type PeopleTab = "skift" | "ansett" | "ansatte" | "fravaer";
 
 /** Bemanningstabellen: hvem som står hvor på skiftene, med avløsere og vikarer */
-function CrewTable({ g, stats, shifts }: { g: GameState; stats: PlantStats; shifts: number }) {
+function CrewTable({
+  g,
+  stats,
+  shifts,
+  act,
+}: {
+  g: GameState;
+  stats: PlantStats;
+  shifts: number;
+  act: GameApi["act"];
+}) {
   const coverage = crewCoverage(g, stats.crew, shifts);
+  const fixed = fixedJobCount(g);
+  const fixedRoles = (Object.keys(wildcardUse(g).byRole) as RoleId[]).map((r) => ROLES[r].plural.toLowerCase());
   const count = (r: RoleId) => g.workers.filter((w) => w.role === r).length;
   const label = (r: RoleId, n: number) => `${n} ${(n === 1 ? ROLES[r].name : ROLES[r].plural).toLowerCase()}`;
   const inTable = new Set(coverage.rows.map((row) => row.role));
@@ -581,6 +608,15 @@ function CrewTable({ g, stats, shifts }: { g: GameState; stats: PlantStats; shif
         {others.length > 0 && ` Andre jobber (ikke på skift): ${others.join(", ")}.`}
         {idle.length > 0 && ` Trengs ikke nå, men tar plass blant de ansatte: ${idle.join(", ")}.`}
       </p>
+      {/* Avløsere som står fast på en plass, kan få fast jobb der (B-499) */}
+      {fixed > 0 && staffing(g, true).shifts < 3 && (
+        <p className="g-support-action">
+          <button onClick={() => act((gg) => giveFixedJob(gg))}>Gi avløserne fast jobb ({fixed})</button>
+          <span className="g-muted">
+            Avløserne som står fast, blir {joinNames(fixedRoles)} med lønna til rollen. Resten blir ledige til fravær.
+          </span>
+        </p>
+      )}
     </>
   );
 }
@@ -628,6 +664,10 @@ export function People({ g, stats, act, openTab, onTab }: Props & { openTab?: st
   const shown: PeopleTab = cap === 0 && !g.workers.length ? "skift" : tab;
 
   const crewTable = stats.crew && Object.keys(stats.crew).length > 0;
+  // Plassene avløserne står fast på, og avløserne som kan få fast jobb der (B-499)
+  const tiedNow = wildcardUse(g);
+  const tiedRoles = tiedNow.tied > 0 ? (Object.keys(tiedNow.byRole) as RoleId[]) : [];
+  const fixable = new Set(tiedRoles.length ? fixedJobCandidates(g).map((w) => w.id) : []);
   return (
     <div className={`g-grid g-folk is-${shown}`}>
       <div className="g-col-wide">
@@ -766,7 +806,7 @@ export function People({ g, stats, act, openTab, onTab }: Props & { openTab?: st
                 {crewTable && (
                   <details className="g-details g-mobile-only">
                     <summary>Se hvem som står hvor</summary>
-                    <CrewTable g={g} stats={stats} shifts={planShifts} />
+                    <CrewTable g={g} stats={stats} shifts={planShifts} act={act} />
                   </details>
                 )}
               </Card>
@@ -776,7 +816,7 @@ export function People({ g, stats, act, openTab, onTab }: Props & { openTab?: st
             {crewTable && (
               <div className="g-folk-side g-pc-only">
                 <Card title="Bemanning">
-                  <CrewTable g={g} stats={stats} shifts={planShifts} />
+                  <CrewTable g={g} stats={stats} shifts={planShifts} act={act} />
                 </Card>
               </div>
             )}
@@ -959,6 +999,21 @@ export function People({ g, stats, act, openTab, onTab }: Props & { openTab?: st
                                 </button>
                               ) : (
                                 <span className="g-row g-worker-actions">
+                                  {/* En avløser som står fast på en plass, kan få fast jobb der (B-499) */}
+                                  {w.role === "allround" &&
+                                    fixable.has(w.id) &&
+                                    tiedRoles.map((r) => (
+                                      <button
+                                        key={r}
+                                        className="g-small"
+                                        onClick={() => {
+                                          act((gg) => giveFixedJob(gg, w.id, r));
+                                          setMenuFor(null);
+                                        }}
+                                      >
+                                        Fast jobb som {ROLES[r].name.toLowerCase()}
+                                      </button>
+                                    ))}
                                   {/* En flink operatør kan bli skiftleder (B-210) */}
                                   {!leaderCourseBlock(g, w) && (
                                     <button

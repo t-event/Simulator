@@ -14,6 +14,7 @@ import {
   donateFoundation,
   giveBonus,
   hireForWildcards,
+  giveFixedJob,
   LEADER_COURSE_DAYS,
   leaderCourseBlock,
   leaderCourseCost,
@@ -264,6 +265,7 @@ import {
   avgRating,
   EXAM_RETRY_DAYS,
   normalSalary,
+  quitText,
   rateDelivery,
   recipeEstimate,
   ratingFactor,
@@ -5162,6 +5164,54 @@ test("Rekonstruksjon (B-495): ett nivå ned, siste 30 døgn tilbake, gjeld i ste
   v.stage = 1;
   v.gameOver = true;
   assert(!reconOption(v).ok && !reconstruct(v), "verkstedet rekonstrueres ikke");
+});
+
+test("Fast jobb til avløsere (B-499): avløserne tar plassene de står fast på, blir ledige, og skiftene er like", () => {
+  const g = newGame(76);
+  g.stage = 3;
+  g.castingType = "streng1";
+  g.workers = [];
+  const crew = crewPerShift(g);
+  // Fullt for tre skift, bortsett fra to støpere og én ovnsoperatør; fire avløsere
+  const short: Partial<Record<RoleId, number>> = { stoper: 2, ovn: 1 };
+  for (const [role, n] of Object.entries(crew) as [RoleId, number][])
+    for (let i = 0; i < n * 3 - (short[role] ?? 0); i++) g.workers.push(makeCandidate(g, role));
+  for (let i = 0; i < 4; i++) g.workers.push(makeCandidate(g, "allround"));
+  const avl = g.workers.filter((w) => w.role === "allround");
+  avl[0].skill = 1.2;
+  avl[1].skill = 4.5;
+  avl[2].skill = 3.1;
+  avl[3].skill = 2.2;
+  avl[3].apprenticeUntil = 999; // lærlinger får ikke fast jobb
+  const crews = staffing(g, true).crews;
+  assert(wildcardUse(g).tied === 3, `fast: ${JSON.stringify(wildcardUse(g))}`);
+  // Én bestemt avløser til en bestemt plass, med lønna til rollen
+  const one = avl[0];
+  const r1 = giveFixedJob(g, one.id, "ovn");
+  assert(r1.ok && one.role === "ovn", `én: ${r1.message}`);
+  assert(one.salary === normalSalary(g, "ovn", one.skill), `lønn ${one.salary}`);
+  assert(wildcardUse(g).tied === 2 && wildcardUse(g).byRole.ovn === undefined, "ovnsplassen er ikke fylt fast");
+  // Ingen plass i rollen lenger
+  assert(!giveFixedJob(g, avl[2].id, "ovn").ok, "fikk fast jobb der det ikke trengs");
+  // Lærlingen kan ikke
+  assert(!giveFixedJob(g, avl[3].id, "stoper").ok, "lærling fikk fast jobb");
+  // Resten: de flinkeste først, og skiftene er like etterpå
+  const r = giveFixedJob(g);
+  const after = wildcardUse(g);
+  assert(r.ok && after.tied === 0 && after.total === 0, `etter: ${JSON.stringify(after)} ${r.message}`);
+  assert(avl[1].role === "stoper" && avl[2].role === "stoper" && avl[3].role === "allround", "feil avløsere");
+  assert(staffing(g, true).crews === crews, "skiftene endret seg");
+  assert(!giveFixedJob(g).ok, "ga fast jobb uten at noen står fast");
+  assert(
+    g.log.some((l) => l.text.includes("har fått fast jobb")),
+    "ingenting i loggen",
+  );
+  // Når noen slutter og en avløser fyller plassen, sier beskjeden at avløseren kan få jobben
+  const quitter = g.workers.find((w) => w.role === "stoper" && w.id !== avl[1].id)!;
+  g.workers = g.workers.filter((w) => w !== quitter);
+  g.workers.push(makeCandidate(g, "allround"));
+  assert(quitText([quitter], g).includes("fast jobb"), quitText([quitter], g));
+  assert(!quitText([quitter]).includes("fast jobb"), "uten spillet: som før");
 });
 
 if (failed) {

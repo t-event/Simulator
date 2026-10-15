@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 499,
+    date: "2026-10-15",
+    title: "Avløserne kan få fast jobb",
+    items: [
+      "Når folk slutter eller går av med pensjon, fyller avløserne plassene. Nå kan du gi dem fast jobb der: avløseren blir støper, ovnsoperatør eller det som trengs, med lønna til rollen.",
+      "Knappen «Gi avløserne fast jobb» står på Folk → Skift, og under «Mer» på hver avløser. Resten av avløserne blir ledige til fravær.",
+    ],
+  },
+  {
     b: 498,
     date: "2026-10-15",
     title: "Vennene på kartet og nye merker for verksjefene",
