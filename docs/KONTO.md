@@ -90,6 +90,8 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Vennelista: følge andre spillere (enveis), nivå og sist aktiv | Ja | Regel 3: viser andre spillere | B-462 |
 | Varsel om venner: forbi deg, regionmester, selskap | Ja | Regel 3: mellom spillere, serveren | B-490 |
 | Venner på topplista og ukelista (filteret Alle / Venner) | Ja | Regel 3: viser andre spillere | B-493 |
+| Venner på verdenskartet | Ja | Regel 3: viser andre spillere | B-496 |
+| Prestasjoner for verksjefene (skjulte serier) | Ja | Regel 2: verksjefene er på serveren | B-497 |
 | Varsel på mobilen: oppkjøp, anbud, byggeprosjekter og privatmeldinger | Ja | Regel 3: lagres på serveren og gjelder hendelser mellom spillere | B-465 |
 | Skiftrapporten: felles chat for alle spillere | Ja | Regel 3: viser andre spillere og brukernavnet ditt | B-338 |
 | Profiler: profilarket når man trykker på et brukernavn (tittel, merker, konsernverdi og verk, selskaper, sesonger, sist aktiv) | Ja | Regel 3: viser andre spillere | B-419 |

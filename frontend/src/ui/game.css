@@ -8853,3 +8853,24 @@ button.g-prod-row:hover {
 .g-end-actions button {
   min-height: var(--touch);
 }
+
+/* Venner på verdenskartet (B-496): grønt, mellom dine (blå) og andres (grå) */
+.g-map-plant.is-friend {
+  fill: var(--ok);
+}
+.g-map-plant.is-building.is-friend {
+  fill: transparent;
+  stroke: var(--ok);
+}
+.g-map-key.is-friend,
+.g-map-filter.is-venner i {
+  background: var(--ok);
+}
+.g-map-row.is-friend {
+  border-color: var(--ok-border);
+  background: var(--ok-tint);
+}
+.g-map-friend {
+  color: var(--ok-fg);
+  font-weight: 600;
+}

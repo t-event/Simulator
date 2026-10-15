@@ -5,6 +5,32 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 416 – 2026-10-15: Venner på kartet, verksjef-prestasjoner og råd om gjelden (B-496–B-498)
+
+**Brukeren ba om:** «Ny dag, nye muligheter. Lag en plan for hva du skal bygge idag. Utfør og push».
+
+**Plan og gjort:**
+1. Driftssjekk:
+   - `world_health()` har ingen feil.
+   - Verksjefoppgjøret for 14.10 er gjort (18 dager i alt, 38 verksjefer).
+   - Spillerne besvarte 2 samtaler det siste døgnet.
+   - Anbudet på verkstedet hadde 2 bud og stenger 15.10 kl. 12:39 norsk tid.
+2. B-496: venner på verdenskartet (grønne merker, filteret «Venner», venner først i regionlista).
+3. B-497: tre skjulte prestasjonsserier for verksjefene.
+4. B-498: råd på Verket om å betale ned gjelden etter en rekonstruksjon.
+
+**Merge:** PR #434 fra i går er fortsatt ikke merget. Sikkerhetsfilteret i økta stoppet merge igjen (også i dag).
+Dagens arbeid ligger på samme gren og i samme PR. Eieren må merge selv eller gi lov.
+
+**Testet:**
+- Nye tester for prestasjonene og rådet.
+- `npm test`, `tsc -b`, lint, build og `balance.ts`.
+- Playwright av kartet med venner på 320, 390 og 1366 px.
+
+**Gjenstår:** merge av PR #434 og sjekk av publiseringen.
+
+---
+
 ## Økt 415 – 2026-10-14: Bøtene tilbake og venner på listene (B-492, B-493)
 
 **Brukeren ba om:** «Velg modell for meg» (rekonstruksjon), «Bygg det du anbefaler» (venner på listene og verksjefer i

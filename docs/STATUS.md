@@ -40,6 +40,8 @@ regnes av serveren i ekte tid.
   det hva som hjelper i stedet.
 - Ingen hendelseskort om forhold mellom ansatte (trakassering, diskriminering, varsling) – tatt ut etter eierens ønske
   (B-444).
+- **Råd om gjelden etter konkursen** (B-498): når kassa har mer enn en ukes lønn og skrap til overs, sier et råd på
+  Verket hvor mye som kan betales i banken (Verket → Økonomi).
 - **Konkurs og rekonstruksjon** (B-495): konkurs etter 7 døgn under kredittgrensen eller 3 døgn uten råd til foring.
   Fra støperiet og opp kan banken **rekonstruere** i stedet for nytt spill: ett nivå ned (utstyret fra det tapte nivået
   selges, ovner og støping derfra blir grunnversjonen for nivået under), forskning og mesterskap fra de siste 30
@@ -240,6 +242,8 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
   følges, får fortsatt ingen beskjed.
   **Venner på listene** (B-493): når vennelista har noen, står «Alle / Venner» over topplista og ukelista. «Venner» viser
   vennene og deg med plassen på hele lista (appen henter hele lista og filtrerer; ingen endring på serveren).
+  **Venner på kartet** (B-496): vennenes verk er grønne på Konsern → Kart, står først etter deg i regionlista, og
+  filteret «Venner» viser bare dine og deres verk.
 - **Varsel på mobilen** (B-465, på som standard fra B-467: første trykk i spillet etter innlogging lar telefonen spørre om lov, én
   gang per konto og enhet; «nei» og «slått av» huskes): bryter med fire temaer under Innstillinger → Varsler (oppkjøp, anbud, byggeprosjekter,
   privatmeldinger), per enhet. Serveren legger varsler i `push_outbox` (triggere, og `push_scan` hvert minutt for ferdige

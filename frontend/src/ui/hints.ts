@@ -1,7 +1,7 @@
 import { BONUS_COOLDOWN_DAYS, fpDeal, keyUpgrade, upgradeOptions } from "../game/actions";
 import { auto, missingResearchFor, researchOptions } from "../game/research";
 import { scrapResearchFor, scrapResearchHint } from "../game/recipe";
-import { BANKRUPTCY_DAYS, GRADES, ROLES } from "../game/data";
+import { BANKRUPTCY_DAYS, GRADES, ROLES, STAGES } from "../game/data";
 import {
   CREDIT_HELP,
   creditLimit,
@@ -101,6 +101,16 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
       text: `Verket står: ${stopped}. Trykk «Lån og bytt» ved ovnen på Verket, eller selg skrap du ikke trenger under Marked – og ikke signer nye kontrakter før ovnen går igjen.`,
       view: "marked",
       sub: "skrap",
+    });
+  // Gjelden etter en rekonstruksjon (B-498): verket flytter ikke opp før den er betalt. Rådet kommer når kassa har
+  // mer enn en ukes lønn og skrap å betale med, så det ikke frister til å tømme kassa
+  const debt = g.recon?.debt ?? 0;
+  const spare = g.cash - 7 * (stats.salaryPerDay + stats.dailyProductT * 3000);
+  if (debt > 0 && spare > 0 && g.stage < STAGES.length - 1)
+    out.push({
+      text: `Gjelden etter konkursen er ${fmtKr(debt)}. Du kan ikke flytte opp før den er betalt. Kassa har ${fmtKr(Math.min(spare, debt))} du kan betale med i banken under Verket → Økonomi.`,
+      view: "verket",
+      sub: "okonomi",
     });
   // Kontrakter i køen som ikke rekker fristen (B-461): nye spillere tok på seg mer enn verkstedet rakk, og bøtene tok
   // kassa. Salgsdirektøren holder køen selv (B-312)

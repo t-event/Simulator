@@ -9369,3 +9369,39 @@ Testet:
 - `balance.ts`.
 
 Konto: nei (regel 1 – hovedverket, spilltid).
+
+## B-496 Venner på verdenskartet (2026-10-15)
+Dagens plan (eierens «Lag en plan for hva du skal bygge idag. Utfør og push»). Dette var det siste ikke-valgte
+forslaget for vennelista (B-490).
+- Verkene til dem du følger, er grønne på Konsern → Kart (dine er blå, andres grå).
+- I lista for en region står vennene rett etter deg, med merket «Venn».
+- Filteret «Venner» viser bare dine verk og vennenes.
+- Gradvis synlighet (B-180): filteret og tegnforklaringen «Venners verk» vises bare når vennelista har noen.
+- Ingen endring på serveren: kartet viser det det alt viser alle, og vennelista hentes som før (`useFriendList`).
+
+Konto: ja (regel 3 – vennelista og kartet krever konto, KONTO.md).
+
+## B-497 Prestasjoner for verksjefene (2026-10-15)
+Tre nye serier under Konsern:
+- «Verksjefer» (1 og 5 ansatt).
+- «Verksjefen ringer» (10 og 50 samtaler besvart).
+- «God sjef» (en verksjef som trives godt, trivsel 75 eller mer).
+
+Slik telles det:
+- Tellerne står i spillet (`verksjef_ansatt`, `samtale_besvart`, `verksjef_trives`) og øker bare når serveren svarer ja.
+- Verksjefer som alt er ansatt, og trivselen telles fra statusen serveren sender, når kortet Verksjefene vises.
+- Seriene er skjulte (B-296), som vervingen: de krever konto og datterverk og vises bare for dem som har tatt en.
+- Prestasjonene gir fagpoeng som de andre, og ingenting i ekte tid (B-323).
+
+Konto: ja (regel 2 – verksjefene er på serveren).
+
+## B-498 Råd om gjelden etter en rekonstruksjon (2026-10-15)
+Etter B-495 kan verket ikke flytte opp før gjelden etter konkursen er betalt. Gjelden går ned av seg selv med 10 % av
+salget, men spilleren kan også betale fra kassa i banken.
+- Nytt råd på Verket: «Gjelden etter konkursen er … Du kan ikke flytte opp før den er betalt. Kassa har … du kan betale
+  med i banken.» Det fører til Verket → Økonomi.
+- Rådet kommer bare når kassa har mer enn en ukes lønn og skrap til overs, så det ikke frister til å tømme kassa.
+- Det kommer ikke på storverket, der det ikke er noe å flytte opp til.
+- Testspilleren betaler alt ned selv (B-495), så nybegynneren trenger ikke rådet i CI.
+
+Konto: nei (regel 1 – hovedverket).

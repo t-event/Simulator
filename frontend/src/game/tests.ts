@@ -5063,6 +5063,38 @@ test("Ordren fra utlandet (B-491): størrelsen følger valseverket og køen, og 
   assert(exportOrder(g) === null, "ordren kom selv om køen var full");
 });
 
+test("Råd om gjelden etter konkursen (B-498): når kassa kan betale, ikke når den trengs til drift", () => {
+  const g = newGame(498);
+  g.stage = 3;
+  g.recon = { debt: 5_000_000, paid: 0, times: [] };
+  g.cash = 0;
+  const tip = () => hints(g, computePlantStats(g)).find((h) => h.text.startsWith("Gjelden etter konkursen"));
+  assert(!tip(), "ikke med tom kasse");
+  g.cash = 50_000_000;
+  const t = tip();
+  assert(!!t && t.view === "verket" && t.sub === "okonomi", `rådet: ${JSON.stringify(t)}`);
+  g.recon.debt = 0;
+  assert(!tip(), "ikke når gjelden er betalt");
+});
+
+test("Prestasjoner for verksjefene (B-497): skjult til første verksjef, så tellerne", () => {
+  const g = newGame(497);
+  assert(!visibleFamilies(g).some((f) => f.id === "verksjef" || f.id === "godsjef"), "skjult uten verksjef");
+  g.counters.verksjef_ansatt = 1;
+  g.counters.samtale_besvart = 10;
+  g.counters.verksjef_trives = 1;
+  checkAchievements(g);
+  assert(
+    hasAchievement(g, "verksjef1") && hasAchievement(g, "samtaler10") && hasAchievement(g, "godsjef"),
+    "første verksjef, ti samtaler og en som trives",
+  );
+  assert(!hasAchievement(g, "verksjef5") && !hasAchievement(g, "samtaler50"), "ikke de neste trinnene ennå");
+  assert(
+    visibleFamilies(g).some((f) => f.id === "verksjef"),
+    "synlig når den er tatt",
+  );
+});
+
 test("Rekonstruksjon (B-495): ett nivå ned, siste 30 døgn tilbake, gjeld i stedet for lån, og høyst én gang i måneden", () => {
   const g = newGame(495);
   g.minute = 100 * MIN_PER_DAY;

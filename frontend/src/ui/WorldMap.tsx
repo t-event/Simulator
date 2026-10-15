@@ -24,6 +24,7 @@ import { Button } from "./ds";
 import { Icon } from "./icons";
 import { setBuildRegion } from "./konsernRun";
 import { PlayerName } from "./Profile";
+import { useFriendList } from "./friendScope";
 
 /** Formen på hver region (viewBox 400 × 300): kystlinje, navnets plass (lx, ly) og ankeret for merkene (mx, my) */
 const SHAPES: Record<RegionId, { d: string; lx: number; ly: number; mx: number; my: number }> = {
@@ -77,7 +78,7 @@ const TYPE_WORD: Record<SisterType, [string, string]> = {
   kompleks: ["kompleks", "komplekser"],
 };
 
-type Filter = "alle" | "dine" | "selskap";
+type Filter = "alle" | "dine" | "venner" | "selskap";
 
 function plantsOf(p: MapPlayer): number {
   return p.stalverk + p.storverk + p.kompleks;
@@ -158,18 +159,24 @@ function useSession() {
  * Merkene i en region i et fast rutenett (5 per rad, to rader): selskapene først, så dine, så andres, så «+N».
  * Selskapene står først så de alltid synes – sist ble de skjøvet inn i «+N» i regioner med mange verk (B-448)
  */
-function Markers({ r, filter }: { r: MapRegion; filter: Filter }) {
+function Markers({ r, filter, friends }: { r: MapRegion; filter: Filter; friends: Set<string> }) {
   const s = SHAPES[r.id];
-  const items: { kind: SisterType | "selskap"; mine: boolean; building: boolean }[] = [];
-  if (filter !== "dine") for (const c of r.companies) items.push({ kind: "selskap", mine: c.mine, building: false });
-  const sorted = [...r.players].sort((a, b) => Number(b.mine) - Number(a.mine));
+  const items: { kind: SisterType | "selskap"; mine: boolean; friend: boolean; building: boolean }[] = [];
+  if (filter !== "dine" && filter !== "venner")
+    for (const c of r.companies) items.push({ kind: "selskap", mine: c.mine, friend: false, building: false });
+  // Dine først, så vennene (B-496), så andre
+  const isFriend = (p: MapPlayer) => !p.mine && friends.has(p.nick.toLowerCase());
+  const sorted = [...r.players].sort(
+    (a, b) => Number(b.mine) - Number(a.mine) || Number(isFriend(b)) - Number(isFriend(a)),
+  );
   if (filter !== "selskap")
     for (const p of sorted) {
       if (filter === "dine" && !p.mine) continue;
+      if (filter === "venner" && !p.mine && !isFriend(p)) continue;
       // Verk som bygges, er alt talt med i typen sin (world_map): de siste merkene til spilleren blir stiplet
       const own: typeof items = [];
       for (const t of ["kompleks", "storverk", "stalverk"] as SisterType[])
-        for (let i = 0; i < p[t]; i++) own.push({ kind: t, mine: p.mine, building: false });
+        for (let i = 0; i < p[t]; i++) own.push({ kind: t, mine: p.mine, friend: isFriend(p), building: false });
       for (let i = 0; i < Math.min(p.building, own.length); i++) own[own.length - 1 - i].building = true;
       items.push(...own);
     }
@@ -199,7 +206,7 @@ function Markers({ r, filter }: { r: MapRegion; filter: Filter }) {
         return (
           <rect
             key={i}
-            className={`g-map-plant${it.mine ? " is-mine" : ""}${it.building ? " is-building" : ""}`}
+            className={`g-map-plant${it.mine ? " is-mine" : it.friend ? " is-friend" : ""}${it.building ? " is-building" : ""}`}
             x={x}
             y={y}
             width={size}
@@ -217,12 +224,27 @@ function Markers({ r, filter }: { r: MapRegion; filter: Filter }) {
   );
 }
 
-function RegionDetail({ g, r, onBuildHere }: { g: GameState; r: MapRegion; onBuildHere: () => void }) {
+function RegionDetail({
+  g,
+  r,
+  friends,
+  onBuildHere,
+}: {
+  g: GameState;
+  r: MapRegion;
+  friends: Set<string>;
+  onBuildHere: () => void;
+}) {
+  const isFriend = (p: MapPlayer) => !p.mine && friends.has(p.nick.toLowerCase());
   const region = REGIONS.find((x) => x.id === r.id)!;
   const mine = r.players.filter((p) => p.mine).reduce((a, p) => a + plantsOf(p), 0);
   const plants = r.players.reduce((a, p) => a + plantsOf(p), 0);
   const players = [...r.players].sort(
-    (a, b) => Number(b.mine) - Number(a.mine) || b.strength - a.strength || plantsOf(b) - plantsOf(a),
+    (a, b) =>
+      Number(b.mine) - Number(a.mine) ||
+      Number(isFriend(b)) - Number(isFriend(a)) ||
+      b.strength - a.strength ||
+      plantsOf(b) - plantsOf(a),
   );
   return (
     <section className="g-map-detail">
@@ -283,11 +305,12 @@ function RegionDetail({ g, r, onBuildHere }: { g: GameState; r: MapRegion; onBui
           <p className="g-map-empty">Ingen verk her ennå.</p>
         ) : (
           players.map((p) => (
-            <div key={p.nick} className={`g-map-row${p.mine ? " is-mine" : ""}`}>
+            <div key={p.nick} className={`g-map-row${p.mine ? " is-mine" : isFriend(p) ? " is-friend" : ""}`}>
               <span className="g-map-avatar ds-display">{p.nick[0]}</span>
               <span className="g-map-row-main">
                 <span className="g-map-row-name">
                   <strong>{p.mine ? `${p.nick} (deg)` : <PlayerName nick={p.nick} />}</strong>
+                  {isFriend(p) && <span className="g-map-friend g-small-text">Venn</span>}
                   {p.title && <span className="g-muted g-small-text">{p.title}</span>}
                 </span>
                 <span className="g-muted g-small-text">{countText(p)}</span>
@@ -326,6 +349,11 @@ export function WorldMapPanel({ g, onBuild }: { g: GameState; onBuild?: () => vo
   const [failed, setFailed] = useState(false);
   const [sel, setSel] = useState<RegionId | null>(null);
   const [filter, setFilter] = useState<Filter>("alle");
+  // Vennene (B-496): egen farge på kartet, først i lista og eget filter – bare når vennelista har noen
+  const friends = useFriendList();
+  const friendSet = new Set((friends ?? []).map((f) => f.nick.toLowerCase()));
+  const hasFriends = friendSet.size > 0;
+  const shownFilter: Filter = filter === "venner" && !hasFriends ? "alle" : filter;
 
   const load = useCallback(
     () =>
@@ -371,13 +399,14 @@ export function WorldMapPanel({ g, onBuild }: { g: GameState; onBuild?: () => vo
               [
                 ["alle", "Alle"],
                 ["dine", "Dine"],
+                ...(hasFriends ? [["venner", "Venner"]] : []),
                 ["selskap", "Selskaper"],
               ] as [Filter, string][]
             ).map(([id, label]) => (
               <button
                 key={id}
-                className={`g-map-filter is-${id}${filter === id ? " is-on" : ""}`}
-                aria-pressed={filter === id}
+                className={`g-map-filter is-${id}${shownFilter === id ? " is-on" : ""}`}
+                aria-pressed={shownFilter === id}
                 onClick={() => setFilter(id)}
               >
                 <i aria-hidden="true" />
@@ -457,7 +486,7 @@ export function WorldMapPanel({ g, onBuild }: { g: GameState; onBuild?: () => vo
                             ? "ubebygd"
                             : `${plants} verk · ${data.players.length} konsern`}
                     </text>
-                    {data && <Markers r={data} filter={filter} />}
+                    {data && <Markers r={data} filter={shownFilter} friends={friendSet} />}
                   </g>
                 );
               })}
@@ -478,6 +507,11 @@ export function WorldMapPanel({ g, onBuild }: { g: GameState; onBuild?: () => vo
               <span>
                 <i className="g-map-key is-mine" /> Dine verk
               </span>
+              {hasFriends && (
+                <span>
+                  <i className="g-map-key is-friend" /> Venners verk
+                </span>
+              )}
               <span>
                 <i className="g-map-key is-other" /> Andres verk
               </span>
@@ -516,7 +550,7 @@ export function WorldMapPanel({ g, onBuild }: { g: GameState; onBuild?: () => vo
               })}
             </div>
             {current ? (
-              <RegionDetail g={g} r={current} onBuildHere={buildHere} />
+              <RegionDetail g={g} r={current} friends={friendSet} onBuildHere={buildHere} />
             ) : (
               <p className="g-muted g-small-text">
                 {failed ? "Fikk ikke hentet kartet. Prøver igjen snart." : "Henter kartet …"}

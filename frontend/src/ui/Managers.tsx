@@ -3,7 +3,7 @@
  * ringer»). Serveren avgjør alt (supabase/152_verksjefer.sql); kortet viser bare det serveren svarer. Vises når bryteren
  * er på og spilleren har et ferdig verk – før det finnes det ikke (B-180).
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { realNow } from "../game/clock";
 import {
   bestMandate,
@@ -92,8 +92,12 @@ function modText(m: Mandate, s: ManagerStats, modBase: number): string {
 }
 
 /** Skriver svaret fra serveren som en beskjed i spillet */
-function report(act: Act, r: ManagerResult, okText: string): boolean {
-  act(() => (r.ok ? { ok: true, message: okText } : { ok: false, message: MANAGER_REFUSAL_TEXT[r.reason] }));
+function report(act: Act, r: ManagerResult, okText: string, count?: string): boolean {
+  act((g) => {
+    // Tellerne til prestasjonene (B-497): bare det serveren sa ja til
+    if (r.ok && count) g.counters[count] = (g.counters[count] ?? 0) + 1;
+    return r.ok ? { ok: true, message: okText } : { ok: false, message: MANAGER_REFUSAL_TEXT[r.reason] };
+  });
   return r.ok;
 }
 
@@ -145,6 +149,7 @@ function CallBox({
           : r.ok && r.outcome === "uhell"
             ? `${card.title}: det gikk dårlig denne gangen.`
             : `${card.title}: «${o.label}». Verksjefen setter det i gang.`,
+      "samtale_besvart",
     );
   };
   // Verksjefens råd er det verksjefen selv ville valgt (B-489): følger du det, trives verksjefen bedre
@@ -225,7 +230,10 @@ function HireSheet({
     setBusy(true);
     const r = await hireManager(plant, c.slot, mandate);
     setBusy(false);
-    if (report(act, r, `${c.name} er ny verksjef på ${name} (${MANDATE_NAME[mandate].toLowerCase()}).`)) onClose();
+    if (
+      report(act, r, `${c.name} er ny verksjef på ${name} (${MANDATE_NAME[mandate].toLowerCase()}).`, "verksjef_ansatt")
+    )
+      onClose();
   };
   return (
     <Portal>
@@ -388,6 +396,18 @@ function ManagerSheet({
 /** Kortet på Konsern → Oversikt */
 export function ManagersCard({ g, act, status }: { g: GameState; act: Act; status: ManagerStatus | null }) {
   const [sheet, setSheet] = useState<{ kind: "hire" | "manager"; plant: number } | null>(null);
+  // Prestasjonene (B-497): verksjefer ansatt før tellerne kom, og en som trives godt, telles fra statusen fra serveren
+  const hired = status?.enabled ? status.managers.length : 0;
+  const happy = status?.enabled ? status.managers.some((m) => m.loyalty >= 75) : false;
+  useEffect(() => {
+    const behind = hired > (g.counters.verksjef_ansatt ?? 0);
+    const newHappy = happy && !g.counters.verksjef_trives;
+    if (!behind && !newHappy) return;
+    act((gg) => {
+      if (behind) gg.counters.verksjef_ansatt = Math.max(gg.counters.verksjef_ansatt ?? 0, hired);
+      if (newHappy) gg.counters.verksjef_trives = 1;
+    });
+  }, [hired, happy, g.counters.verksjef_ansatt, g.counters.verksjef_trives, act]);
   if (!status?.enabled) return null;
   const modBase = (id: number) => {
     const p = g.konsern.plants.find((x) => x.id === id);

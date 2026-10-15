@@ -349,6 +349,27 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
     ),
     hidden: true,
   },
+  // Verksjefene (B-497): krever konto og datterverk, så de vises bare for dem som har tatt en (som vervingen)
+  {
+    ...family("verksjef", "user-check", "Verksjefer", "Konsern", counter("verksjef_ansatt"), [
+      ["verksjef1", 1, "Første verksjef", "Ansett en verksjef på et datterverk.", 10],
+      ["verksjef5", 5, "Ledergruppen", "Ansett fem verksjefer.", 30],
+    ]),
+    hidden: true,
+  },
+  {
+    ...family("samtaler", "message", "Verksjefen ringer", "Konsern", counter("samtale_besvart"), [
+      ["samtaler10", 10, "Sjefen svarer", "Svar på ti samtaler fra verksjefene.", 20],
+      ["samtaler50", 50, "Alltid på tråden", "Svar på femti samtaler fra verksjefene.", 50],
+    ]),
+    hidden: true,
+  },
+  {
+    ...family("godsjef", "people", "God sjef", "Konsern", counter("verksjef_trives"), [
+      ["godsjef", 1, "God sjef", "Ha en verksjef som trives godt.", 20],
+    ]),
+    hidden: true,
+  },
   // Rekonstruksjon (B-495): bare for dem som har gått konkurs og bygget seg opp igjen til nivået de falt fra
   {
     ...family(
