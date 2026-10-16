@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 501,
+    date: "2026-10-16",
+    title: "Skiftlederen ordner faste jobber",
+    items: [
+      "Har du skiftleder, kan du slå på at skiftlederen gir avløserne fast jobb av seg selv når noen slutter eller går av med pensjon (Folk → Skift).",
+      "Beskjeden om at noen har sagt opp eller går av med pensjon, har nå en knapp som tar deg rett til skiftene eller søkerne.",
+    ],
+  },
+  {
     b: 499,
     date: "2026-10-15",
     title: "Avløserne kan få fast jobb",

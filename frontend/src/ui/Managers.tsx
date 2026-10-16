@@ -46,6 +46,8 @@ import { Button, Callout, SheetHead } from "./ds";
 import { fmtKr } from "./format";
 import { Icon } from "./icons";
 import { Portal } from "./Portal";
+import { isMine } from "./claims";
+import { userId } from "../net/supabase";
 
 type Act = GameApi["act"];
 
@@ -92,10 +94,10 @@ function modText(m: Mandate, s: ManagerStats, modBase: number): string {
 }
 
 /** Skriver svaret fra serveren som en beskjed i spillet */
-function report(act: Act, r: ManagerResult, okText: string, count?: string): boolean {
+function report(act: Act, r: ManagerResult, okText: string, count?: { key: string; uid: string | null }): boolean {
   act((g) => {
-    // Tellerne til prestasjonene (B-497): bare det serveren sa ja til
-    if (r.ok && count) g.counters[count] = (g.counters[count] ?? 0) + 1;
+    // Tellerne til prestasjonene (B-497): bare det serveren sa ja til, og bare i spillet til kontoen som spurte (B-426)
+    if (r.ok && count && isMine(g, count.uid)) g.counters[count.key] = (g.counters[count.key] ?? 0) + 1;
     return r.ok ? { ok: true, message: okText } : { ok: false, message: MANAGER_REFUSAL_TEXT[r.reason] };
   });
   return r.ok;
@@ -135,6 +137,7 @@ function CallBox({
   if (!card) return null;
   const answer = async (choice: 0 | 1) => {
     setBusy(true);
+    const uid = userId();
     const r = await answerCall(call.id, choice);
     setBusy(false);
     const o = card.options[choice];
@@ -149,7 +152,7 @@ function CallBox({
           : r.ok && r.outcome === "uhell"
             ? `${card.title}: det gikk dårlig denne gangen.`
             : `${card.title}: «${o.label}». Verksjefen setter det i gang.`,
-      "samtale_besvart",
+      { key: "samtale_besvart", uid },
     );
   };
   // Verksjefens råd er det verksjefen selv ville valgt (B-489): følger du det, trives verksjefen bedre
@@ -228,10 +231,14 @@ function HireSheet({
   const [busy, setBusy] = useState(false);
   const hire = async (c: ManagerCandidate) => {
     setBusy(true);
+    const uid = userId();
     const r = await hireManager(plant, c.slot, mandate);
     setBusy(false);
     if (
-      report(act, r, `${c.name} er ny verksjef på ${name} (${MANDATE_NAME[mandate].toLowerCase()}).`, "verksjef_ansatt")
+      report(act, r, `${c.name} er ny verksjef på ${name} (${MANDATE_NAME[mandate].toLowerCase()}).`, {
+        key: "verksjef_ansatt",
+        uid,
+      })
     )
       onClose();
   };
@@ -404,6 +411,8 @@ export function ManagersCard({ g, act, status }: { g: GameState; act: Act; statu
     const newHappy = happy && !g.counters.verksjef_trives;
     if (!behind && !newHappy) return;
     act((gg) => {
+      // Statusen gjelder kontoen som er innlogget nå – bare inn i dens spill (B-426)
+      if (!isMine(gg, userId())) return;
       if (behind) gg.counters.verksjef_ansatt = Math.max(gg.counters.verksjef_ansatt ?? 0, hired);
       if (newHappy) gg.counters.verksjef_trives = 1;
     });

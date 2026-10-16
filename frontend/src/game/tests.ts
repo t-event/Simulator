@@ -15,6 +15,7 @@ import {
   giveBonus,
   hireForWildcards,
   giveFixedJob,
+  leaderFixedJobs,
   LEADER_COURSE_DAYS,
   leaderCourseBlock,
   leaderCourseCost,
@@ -265,6 +266,7 @@ import {
   avgRating,
   EXAM_RETRY_DAYS,
   normalSalary,
+  quitLink,
   quitText,
   rateDelivery,
   recipeEstimate,
@@ -5212,6 +5214,43 @@ test("Fast jobb til avløsere (B-499): avløserne tar plassene de står fast på
   g.workers.push(makeCandidate(g, "allround"));
   assert(quitText([quitter], g).includes("fast jobb"), quitText([quitter], g));
   assert(!quitText([quitter]).includes("fast jobb"), "uten spillet: som før");
+});
+
+test("Skiftlederen gir avløsere fast jobb (B-500) og beskjedene fører til Folk (B-501)", () => {
+  const g = newGame(77);
+  g.stage = 3;
+  g.castingType = "streng1";
+  g.workers = [];
+  const crew = crewPerShift(g);
+  for (const [role, n] of Object.entries(crew) as [RoleId, number][])
+    for (let i = 0; i < n * 3 - (role === "stoper" ? 1 : 0); i++) g.workers.push(makeCandidate(g, role));
+  for (let i = 0; i < 2; i++) g.workers.push(makeCandidate(g, "allround"));
+  // Uten skiftleder eller uten valget skjer ingenting
+  g.settings.leaderFixedJobs = true;
+  leaderFixedJobs(g);
+  assert(wildcardUse(g).tied === 1, "fast jobb uten skiftleder");
+  assert(quitLink(g) === "folk", `lenke ${quitLink(g)}`);
+  const leader = makeCandidate(g, "skiftleder");
+  g.workers.push(leader);
+  g.settings.leaderFixedJobs = false;
+  leaderFixedJobs(g);
+  assert(wildcardUse(g).tied === 1, "fast jobb uten valget");
+  // Med begge: avløseren får plassen, og loggen sier hvem som gjorde det
+  g.settings.leaderFixedJobs = true;
+  leaderFixedJobs(g);
+  assert(
+    wildcardUse(g).tied === 0 && g.workers.filter((w) => w.role === "stoper").length === crew.stoper! * 3,
+    "plassen",
+  );
+  assert(
+    g.log.some((l) => l.text.startsWith("Skiftlederen ga")),
+    "loggen",
+  );
+  // Ingen avløser å gi plassen: beskjeden fører til søkerne
+  assert(quitLink(g) === "ansett", `lenke etter ${quitLink(g)}`);
+  // I garasjen er det ingen ansatte, og ingen lenke
+  const garage = newGame(1);
+  assert(quitLink(garage) === undefined, "lenke i garasjen");
 });
 
 if (failed) {

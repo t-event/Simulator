@@ -56,6 +56,7 @@ import { newVersionAvailable, shouldReloadFor, UPDATE_CHECK_MS } from "../net/up
 import { pendingControl } from "../net/weekly";
 import { loadGame, saveGame, setSaveListener } from "../game/save";
 import { InboxSheet } from "./Inbox";
+import { LINK_LABEL } from "./logLinks";
 import { importantLog, isUnseen, markAllSeen, markRead, unseenCount } from "../game/inbox";
 import { Sales } from "./Sales";
 import { KonsernPage } from "./Konsern";
@@ -847,9 +848,7 @@ function NoticeLine({
           if (seen) api.act((gg) => markRead(gg, seen));
           onLink(link);
         }}
-        aria-label={
-          link ? `${text} Trykk for å gå til selskapet.` : `Varsler${unseen ? ` (${unseen} nye)` : ""}: ${text}`
-        }
+        aria-label={link ? `${text} ${LINK_LABEL[link]}.` : `Varsler${unseen ? ` (${unseen} nye)` : ""}: ${text}`}
       >
         <span className="g-notice-bell" aria-hidden="true">
           <Icon name="bell" />
@@ -1144,6 +1143,8 @@ export function GameApp() {
     setInboxOpen(false);
     if (to === "industri") go("konsern", "industri");
     else if (to === "konsern") go("konsern", "oversikt");
+    else if (to === "folk") go("folk", "skift");
+    else if (to === "ansett") go("folk", "ansett");
   };
   pushNav.current = (link) => {
     if (link.to === "industri") openLink("industri");

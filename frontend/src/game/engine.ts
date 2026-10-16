@@ -3268,8 +3268,20 @@ export function workerLabel(w: Worker): string {
  * nå fast på plassene, kan de få fast jobb der (B-499)
  */
 export function quitText(ws: Worker[], g?: GameState): string {
-  const fix = g && fixedJobCount(g) > 0 ? ", eller gi en avløser fast jobb på plassen (Folk → Skift)" : "";
+  const fix =
+    g && fixedJobCount(g) > 0 && !leaderGivesJobs(g) ? ", eller gi en avløser fast jobb på plassen (Folk → Skift)" : "";
   return `${ws.map(workerLabel).join(", ")} har sagt opp. Ansett ${ws.length === 1 ? "en ny" : "nye"} under Folk → Ansett${fix}.`;
+}
+
+/** Skiftlederen gir selv avløsere fast jobb (B-500), så beskjedene trenger ikke be spilleren om det */
+export function leaderGivesJobs(g: GameState): boolean {
+  return !!g.settings.leaderFixedJobs && shiftLeaderAtWork(g);
+}
+
+/** Hvor beskjeden om en oppsigelse fører (B-501): til skiftene når en avløser kan ta plassen, ellers til søkerne */
+export function quitLink(g: GameState): LogLink | undefined {
+  if (STAGES[g.stage].staffCap === 0) return undefined;
+  return fixedJobCount(g) > 0 ? "folk" : "ansett";
 }
 
 /** Trivselen driver mot det normale, nattarbeid tærer, og misfornøyde folk slutter (B-026) */
@@ -3284,7 +3296,12 @@ function updateMorale(g: GameState, stats: PlantStats): void {
     const quitters = g.workers.filter(() => chance(g, ((35 - g.morale) / 35) * 0.04));
     if (quitters.length) {
       g.workers = g.workers.filter((w) => !quitters.includes(w));
-      log(g, `${quitText(quitters, g)} Trivselen er lav – gi bonus, send folk på kurs eller unngå nattskift.`, "bad");
+      log(
+        g,
+        `${quitText(quitters, g)} Trivselen er lav – gi bonus, send folk på kurs eller unngå nattskift.`,
+        "bad",
+        quitLink(g),
+      );
     }
   }
 }

@@ -134,6 +134,7 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Verksjefer, mandat og «Verksjefen ringer» i datterverkene | Nei | Regel 1: ditt eget spill | planlagt, B-180 |
 | Rekonstruksjon ved konkurs (ett nivå ned, gjeld) | Nei | Regel 1: hovedverket, spilltid | B-495 |
 | Fast jobb til avløsere på plassene de står fast på | Nei | Regel 1: hovedverket | B-499 |
+| Skiftlederen gir avløsere fast jobb, lenker til Folk i beskjedene | Nei | Regel 1: hovedverket | B-500, B-501 |
 | Myk grense for kassa og bunden konsernreserve (midlertidig) | Nei | Regel 1: eget spill | B-193 |
 | Æraer og Hall of Fame | Ja | Regel 3 | Grunnleggeræraen og navnet «Hall of Fame»: B-182. Neste æra: ikke bestemt |
 | Pause på Salg (innstilling) | Nei | Regel 1: ditt eget spill | B-222 |

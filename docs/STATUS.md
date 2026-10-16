@@ -43,6 +43,8 @@ regnes av serveren i ekte tid.
 - **Fast jobb til avløsere** (B-499): står avløsere fast på plasser uten egne folk (folk har sluttet eller gått av med
   pensjon), kan de få fast jobb der (Folk → Skift, eller «Mer» per avløser). De beholder ferdigheten, får lønna til
   rollen, og resten av avløserne blir ledige til fravær. Skiftene er like fulle. Ikke lærlinger.
+  Med en skiftleder kan det skje av seg selv (valget i Folk → Skift, B-500). Beskjedene om oppsigelse og pensjon har
+  lenke til Folk → Skift eller Folk → Ansett (B-501).
 - **Råd om gjelden etter konkursen** (B-498): når kassa har mer enn en ukes lønn og skrap til overs, sier et råd på
   Verket hvor mye som kan betales i banken (Verket → Økonomi).
 - **Konkurs og rekonstruksjon** (B-495): konkurs etter 7 døgn under kredittgrensen eller 3 døgn uten råd til foring.

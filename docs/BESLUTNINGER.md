@@ -9429,3 +9429,38 @@ fravær. Før var eneste råd å ansette nye til plassene (B-170). Nå kan avlø
 
 Konto: nei (regel 1 – hovedverket).
 
+## B-500 Skiftlederen gir avløsere fast jobb (2026-10-16)
+Oppfølging av B-499: med mange avløsere er det tungvint å trykke hver gang noen slutter eller går av med pensjon.
+- Nytt valg i kortet «Anbefalt i tillegg til skiftene» (Folk → Skift): «Skiftlederen gir avløsere fast jobb når noen
+  slutter eller går av» (`settings.leaderFixedJobs`, mangler = av). Vises når verket har både skiftleder og avløsere –
+  samme mønster som skiftlederens vikarer (B-211) og bonus (B-271).
+- Hver time (`hourlyActions` → `leaderFixedJobs`): er valget på og en skiftleder på jobb, får avløserne som står fast på
+  plasser uten egne folk, fast jobb der (`giveFixedJob` med `byLeader`, loggen sier «Skiftlederen ga …»).
+- Beskjedene om oppsigelse og pensjon ber da ikke spilleren gi avløseren jobben (`leaderGivesJobs`).
+- Feltet er valgfritt i lagringen, så `migrate()` trenger ingen standardverdi.
+
+Konto: nei (regel 1 – hovedverket).
+
+## B-501 Beskjedene om folk som slutter, fører til Folk (2026-10-16)
+- Ny `LogLink`: «folk» (Folk → Skift, «Gå til skiftene») og «ansett» (Folk → Ansett, «Gå til søkerne»), i `openLink`
+  (`GameApp`) og `LINK_LABEL` (`Inbox.tsx`), som lenkene fra B-453.
+- Oppsigelse (lav trivsel og lønnskravet): til skiftene når en avløser kan ta plassen, ellers til søkerne (`quitLink`).
+- Pensjon: beskjeden en måned før fører til søkerne; beskjeden på dagen fører til skiftene når en avløser fyller plassen.
+- `LINK_LABEL` står nå i `ui/logLinks.ts` (brukes av varsellista og varsellinja). Skjermleserteksten på varsellinja
+  sa «Trykk for å gå til selskapet» for alle lenker; nå sier den teksten til lenken.
+
+Konto: nei (regel 1).
+
+## B-502 Kodegjennomgang av B-495–B-499 (2026-10-16)
+Gjennomgang av rekonstruksjonen, verksjef-prestasjonene, vennefilteret, rådet om gjelden og fast jobb til avløsere.
+- Rettet: tellerne til verksjef-prestasjonene (B-497) ble skrevet inn i spillet etter svaret fra serveren uten å sjekke
+  kontoen. Nå bare når samme konto er innlogget og spillet er dens (`isMine` fra `ui/claims.ts`, nå eksportert), både
+  for ansettelse, samtaler og synkroniseringen fra statusen (B-426).
+- Rettet: emoji-sjekken (`scripts/sjekk-emoji.mjs`, B-237) feilet med Node som har Unicode 16, der ★ (U+2605) og
+  ☰ (U+2630) regnes som piktogrammer. De er teksttegn, ikke emoji, og fjernes før sjekken. Ekte emoji stoppes som før.
+- Sjekket uten funn: rekkefølgen for gjeldsbetalingen (`reconDay` etter `history.push`), at folk beholdes per rolle,
+  at `reconOption` regner på en kopi, at vennelista holdes per konto, og at fast jobb ikke gis til lærlinger.
+
+Endringslogg: nei
+Konto: nei.
+

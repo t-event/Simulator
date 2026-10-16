@@ -236,7 +236,8 @@ export interface LogEntry {
 }
 
 /** Steder et varsel kan føre til (B-453): «industri» = Konsern → Industrien, der anbudene står */
-export type LogLink = "industri" | "konsern";
+/** Hvor et varsel fører (B-453); «folk» = Folk → Skift, «ansett» = Folk → Ansett (B-501) */
+export type LogLink = "industri" | "konsern" | "folk" | "ansett";
 
 export type CostCategory =
   | "skrap"
@@ -434,6 +435,8 @@ export interface Settings {
   leaderTemps?: boolean;
   /** Skiftlederen gir alle bonus når det er lenge siden eller trivselen er lav (B-271). Mangler = av */
   leaderBonus?: boolean;
+  /** Skiftlederen gir avløsere fast jobb på plassene de står fast på (B-500). Mangler = av */
+  leaderFixedJobs?: boolean;
   /** Klokketimen skiftene starter (6, 14 eller 22) */
   shiftStart: number;
   /** Start ikke ny charge når strømprisen er over dette (kr/kWh). null = ingen grense */

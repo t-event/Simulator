@@ -5,7 +5,7 @@
  */
 import { YEAR_DAYS } from "./calendar";
 import { ROLES } from "./data";
-import { adjustMorale, countEvent, log } from "./engine";
+import { adjustMorale, countEvent, leaderGivesJobs, log } from "./engine";
 import { day, fixedJobFor } from "./plant";
 import { uniform } from "./random";
 import type { GameState, Worker } from "./types";
@@ -83,8 +83,9 @@ export function pensionMorning(g: GameState): void {
       countEvent(g, "pensjon");
       log(
         g,
-        `${w.name} (${role}) går av med pensjon, ${ageOf(w, today)} år gammel${years >= 1 ? `, etter ${years} år på verket` : ""}. Takk for innsatsen!${fixedJobFor(g, w.role) ? ` En avløser fyller plassen nå – gi en av dem fast jobb som ${role} under Folk → Skift.` : ""}`,
+        `${w.name} (${role}) går av med pensjon, ${ageOf(w, today)} år gammel${years >= 1 ? `, etter ${years} år på verket` : ""}. Takk for innsatsen!${fixedJobFor(g, w.role) && !leaderGivesJobs(g) ? ` En avløser fyller plassen nå – gi en av dem fast jobb som ${role} under Folk → Skift.` : ""}`,
         "info",
+        fixedJobFor(g, w.role) ? "folk" : undefined,
       );
     } else if (today >= at - PENSION.noticeDays && !w.pensionNotice) {
       w.pensionNotice = true;
@@ -92,6 +93,7 @@ export function pensionMorning(g: GameState): void {
         g,
         `${w.name} (${role}) går av med pensjon om ${at - today} døgn. Ansett en ny ${role} i tide, så skiftene går som før.`,
         "event",
+        "ansett",
       );
     }
   }

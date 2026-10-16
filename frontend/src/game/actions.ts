@@ -42,6 +42,7 @@ import {
   unlock,
   WARNING_DAYS,
   type PurchaseResult,
+  leaderGivesJobs,
 } from "./engine";
 import {
   bonusGap,
@@ -62,6 +63,7 @@ import {
   unitView,
   wildcardUse,
   fixedJobCandidates,
+  fixedJobCount,
 } from "./plant";
 import { newGradesAt, startRecipeGuide } from "./recipeGuide";
 import {
@@ -761,7 +763,7 @@ export function hireForWildcards(g: GameState): PurchaseResult {
  * til fravær – som når man ansetter til plassene (B-170), uten å ansette noen. Uten `workerId` gis alle plassene til
  * de flinkeste avløserne; med `role` bare plassene i den rollen.
  */
-export function giveFixedJob(g: GameState, workerId?: number, role?: RoleId): PurchaseResult {
+export function giveFixedJob(g: GameState, workerId?: number, role?: RoleId, byLeader = false): PurchaseResult {
   const moved: Partial<Record<RoleId, number>> = {};
   const names: string[] = [];
   for (let guard = 0; guard < 2000; guard++) {
@@ -787,10 +789,19 @@ export function giveFixedJob(g: GameState, workerId?: number, role?: RoleId): Pu
   const what = crewList(moved);
   if (n === 1) {
     const r = Object.keys(moved)[0] as RoleId;
-    log(g, `${names[0]} har fått fast jobb som ${ROLES[r].name.toLowerCase()}.`, "good");
+    const as = ROLES[r].name.toLowerCase();
+    log(
+      g,
+      byLeader ? `Skiftlederen ga ${names[0]} fast jobb som ${as}.` : `${names[0]} har fått fast jobb som ${as}.`,
+      "good",
+    );
     return { ok: true, message: `${names[0]} er nå ${ROLES[r].name.toLowerCase()}.` };
   }
-  log(g, `${n} avløsere har fått fast jobb: ${what}.`, "good");
+  log(
+    g,
+    byLeader ? `Skiftlederen ga ${n} avløsere fast jobb: ${what}.` : `${n} avløsere har fått fast jobb: ${what}.`,
+    "good",
+  );
   return { ok: true, message: `${n} avløsere har fått fast jobb: ${what}.` };
 }
 
@@ -1081,6 +1092,15 @@ export function leaderBonus(g: GameState): void {
 }
 
 /**
+ * Skiftlederen gir avløsere fast jobb (B-500): når spilleren har slått det på og en skiftleder er på jobb, får avløserne
+ * som står fast på plasser uten egne folk (fordi noen har sluttet eller gått av med pensjon), fast jobb der.
+ */
+export function leaderFixedJobs(g: GameState): void {
+  if (!leaderGivesJobs(g) || fixedJobCount(g) <= 0) return;
+  giveFixedJob(g, undefined, undefined, true);
+}
+
+/**
  * Advarsel om fravær (B-101): mulig når en ansatt har vært syk tre ganger eller mer på 60 døgn. Virker på dem som
  * misbruker egenmelding. Var den ansatte faktisk syk, går trivselen ned.
  */
@@ -1217,6 +1237,8 @@ function hourlyActions(g: GameState): void {
   finishNeighbor(g);
   // Skiftlederen gir bonus når det trengs (B-271)
   leaderBonus(g);
+  // … og fast jobb til avløsere som står fast på en plass (B-500)
+  leaderFixedJobs(g);
   landmarkHour(g);
   directorHour(g);
   checkKonsernMilestones(g);

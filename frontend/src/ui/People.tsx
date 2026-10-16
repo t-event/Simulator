@@ -221,6 +221,22 @@ function SupportCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
         ))}
       </ul>
       {short.length > 0 && <p className="g-muted">Ansett under «Ansett». Søkerne har rollen sin oppgitt.</p>}
+      {/* Skiftlederen gir avløsere fast jobb (B-500): valget vises når du har både skiftleder og avløsere */}
+      {wild.total > 0 && g.workers.some((w) => w.role === "skiftleder") && (
+        <label className="g-toggle">
+          <input
+            type="checkbox"
+            checked={!!g.settings.leaderFixedJobs}
+            onChange={(e) => act((gg) => void (gg.settings.leaderFixedJobs = e.target.checked))}
+          />
+          <span>
+            Skiftlederen gir avløsere fast jobb når noen slutter eller går av
+            <span className="g-toggle-hint g-muted">
+              Avløseren som står på plassen, blir støper, ovnsoperatør eller det som trengs, med lønna til rollen.
+            </span>
+          </span>
+        </label>
+      )}
     </Card>
   );
 }

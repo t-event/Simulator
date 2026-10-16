@@ -655,7 +655,7 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   (`net/seasonTrack.ts`) – endres den, endres begge.
 - **Knappene ved varsellinja åpner ark** (B-286): hjelp, Mål og topplista. På mobil åpner `go("mal")` arket; på PC er Mål en side.
 - **Varsler med lenke** (B-453): `log(g, tekst, art, link)` – en linje med `link` fører dit ved trykk i varsellinja (pil) og
-  i varsellista («Gå til selskapet»). Nye mål legges i `LogLink` (`types.ts`), `openLink` (`GameApp`) og `LINK_LABEL` (`Inbox.tsx`).
+  i varsellista («Gå til selskapet»). Nye mål legges i `LogLink` (`types.ts`), `openLink` (`GameApp`) og `LINK_LABEL` (`ui/logLinks.ts`, B-501).
 - **Kjøp hjemme og bidraget** (B-455): nabolaget, stiftelsen og fornyelsen føres som `investering`, som
   `contribution_margin_raw` ikke teller. Nye pengesluk hjemme skal ikke gjøre verket billigere å drive eller selge mer (da
   øker marginen og bidraget i ekte tid) – før dem som `investering` eller i en post serveren ikke leser. Slitasjen

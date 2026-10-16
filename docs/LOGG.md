@@ -5,6 +5,30 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 418 – 2026-10-16: Skiftlederen gir fast jobb, lenker i beskjedene og kodegjennomgang (B-500–B-502)
+
+**Brukeren ba om:** «Ny dag. Lag en plan for hva som skal bygges idag. Bygg og push».
+
+**Driftssjekk:** Supabase-connectoren svarte «You do not have permission to perform this action» på alt (også
+`select now()`), så `world_health()` ble ikke sjekket, og planen ble bare endringer i appen. Eieren bør se på
+connectoren/tilgangen.
+
+**Plan og gjort:**
+1. B-500: valget «Skiftlederen gir avløsere fast jobb når noen slutter eller går av» (Folk → Skift).
+2. B-501: beskjedene om oppsigelse og pensjon fører til Folk → Skift eller Folk → Ansett.
+3. B-502: gjennomgang av B-495–B-499; rettet kontosjekken i tellerne til verksjef-prestasjonene.
+
+**Merge:** PR #434 er fortsatt åpen (mergeable, CI grønn). Dagens arbeid ligger på samme gren og PR.
+
+**Testet:**
+- Ny test for skiftlederen og lenkene.
+- `npm test`, `tsc -b`, lint, build og `balance.ts`.
+- Playwright på 320, 390 og 1366 px.
+
+**Gjenstår:** merge av PR #434 (eieren), driftssjekk når connectoren virker igjen.
+
+---
+
 ## Økt 417 – 2026-10-15: Fast jobb til avløsere (B-499)
 
 **Brukeren ba om:** at avløserne kan sendes til den faste stillingen der det trengs folk og bli støper, ovnsoperatør

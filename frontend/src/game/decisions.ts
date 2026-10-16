@@ -24,6 +24,7 @@ import {
   log,
   makeCandidate,
   plantStopped,
+  quitLink,
   quitText,
   realisticDailyT,
   scrapPrice,
@@ -717,7 +718,7 @@ export function resolveDecision(g: GameState, option: number): void {
         const quitter = pick(g, g.workers);
         g.workers = g.workers.filter((w) => w !== quitter);
         adjustMorale(g, -5);
-        log(g, `Mottilbudet ble for lavt. Dere møttes på 3 %, men ${quitText([quitter], g)}`, "bad");
+        log(g, `Mottilbudet ble for lavt. Dere møttes på 3 %, men ${quitText([quitter], g)}`, "bad", quitLink(g));
       } else {
         adjustMorale(g, -15);
         const quitters = g.workers.filter(() => chance(g, 0.12)).slice(0, 3);
@@ -728,6 +729,7 @@ export function resolveDecision(g: GameState, option: number): void {
             ? `Lønnskravet ble avslått. ${quitText(quitters, g)}`
             : "Lønnskravet ble avslått. Stemningen er dårlig, men alle blir.",
           quitters.length ? "bad" : "info",
+          quitters.length ? quitLink(g) : undefined,
         );
       }
       return;
