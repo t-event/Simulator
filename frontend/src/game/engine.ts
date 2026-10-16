@@ -5,6 +5,7 @@
  * Produksjonen følger stålet gjennom kjeden skraplager → ovn → øse →
  * støping → (valseverk) → lager → kunde, og hver del kan bli flaskehals.
  */
+import { reconDay } from "./reconstruction";
 import { hasNeighbor, reputationFloor } from "./building";
 import {
   BANKRUPTCY_DAYS,
@@ -105,6 +106,7 @@ import {
   unitType,
   unitHas,
   unitView,
+  fixedJobCount,
 } from "./plant";
 import { chance, noise, pick, rand, randInt, uniform } from "./random";
 import { bornAt, pensionMorning, PENSION } from "./pension";
@@ -3261,9 +3263,25 @@ export function workerLabel(w: Worker): string {
   return `${w.name} (${ROLES[w.role].name.toLowerCase()})`;
 }
 
-/** Hvem som sluttet, med stilling, og hva spilleren bør gjøre (B-066) */
-export function quitText(ws: Worker[]): string {
-  return `${ws.map(workerLabel).join(", ")} har sagt opp. Ansett ${ws.length === 1 ? "en ny" : "nye"} under Folk → Ansett.`;
+/**
+ * Hvem som sluttet, med stilling, og hva spilleren bør gjøre (B-066). Med `g` (etter at de har sluttet): står avløsere
+ * nå fast på plassene, kan de få fast jobb der (B-499)
+ */
+export function quitText(ws: Worker[], g?: GameState): string {
+  const fix =
+    g && fixedJobCount(g) > 0 && !leaderGivesJobs(g) ? ", eller gi en avløser fast jobb på plassen (Folk → Skift)" : "";
+  return `${ws.map(workerLabel).join(", ")} har sagt opp. Ansett ${ws.length === 1 ? "en ny" : "nye"} under Folk → Ansett${fix}.`;
+}
+
+/** Skiftlederen gir selv avløsere fast jobb (B-500), så beskjedene trenger ikke be spilleren om det */
+export function leaderGivesJobs(g: GameState): boolean {
+  return !!g.settings.leaderFixedJobs && shiftLeaderAtWork(g);
+}
+
+/** Hvor beskjeden om en oppsigelse fører (B-501): til skiftene når en avløser kan ta plassen, ellers til søkerne */
+export function quitLink(g: GameState): LogLink | undefined {
+  if (STAGES[g.stage].staffCap === 0) return undefined;
+  return fixedJobCount(g) > 0 ? "folk" : "ansett";
 }
 
 /** Trivselen driver mot det normale, nattarbeid tærer, og misfornøyde folk slutter (B-026) */
@@ -3278,7 +3296,12 @@ function updateMorale(g: GameState, stats: PlantStats): void {
     const quitters = g.workers.filter(() => chance(g, ((35 - g.morale) / 35) * 0.04));
     if (quitters.length) {
       g.workers = g.workers.filter((w) => !quitters.includes(w));
-      log(g, `${quitText(quitters)} Trivselen er lav – gi bonus, send folk på kurs eller unngå nattskift.`, "bad");
+      log(
+        g,
+        `${quitText(quitters, g)} Trivselen er lav – gi bonus, send folk på kurs eller unngå nattskift.`,
+        "bad",
+        quitLink(g),
+      );
     }
   }
 }
@@ -3486,6 +3509,8 @@ function onDay(g: GameState, stats: PlantStats): void {
   if (g.history.length > HISTORY_MAX) g.history.splice(0, g.history.length - HISTORY_MAX);
   g.today = newDay(today, g.cash);
   paidOutDayLog(g);
+  // Rekonstruksjonsgjelden (B-495): 10 % av gårsdagens salg
+  reconDay(g);
 
   updatePowerDeal(g, today);
   if (g.gridCut && g.minute >= g.gridCut.untilMin) g.gridCut = null;

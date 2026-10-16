@@ -274,7 +274,7 @@ export interface Stage {
 }
 
 /** Nivåene i bestemt form, til tekst som «når du har flyttet til støperiet» */
-const STAGE_DEFINITE = ["garasjen", "verkstedet", "støperiet", "stålverket", "storverket"];
+export const STAGE_DEFINITE = ["garasjen", "verkstedet", "støperiet", "stålverket", "storverket"];
 
 /**
  * Et nivå forklart for en ny spiller: «støperiet (nivå 3 av 5)», eller «verkstedet (neste nivå)» når det er

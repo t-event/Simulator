@@ -40,6 +40,24 @@ regnes av serveren i ekte tid.
   det hva som hjelper i stedet.
 - Ingen hendelseskort om forhold mellom ansatte (trakassering, diskriminering, varsling) – tatt ut etter eierens ønske
   (B-444).
+- **Fast jobb til avløsere** (B-499): står avløsere fast på plasser uten egne folk (folk har sluttet eller gått av med
+  pensjon), kan de få fast jobb der (Folk → Skift, eller «Mer» per avløser). De beholder ferdigheten, får lønna til
+  rollen, og resten av avløserne blir ledige til fravær. Skiftene er like fulle. Ikke lærlinger.
+  Med en skiftleder kan det skje av seg selv (valget i Folk → Skift, B-500). Beskjedene om oppsigelse og pensjon har
+  lenke til Folk → Skift eller Folk → Ansett (B-501).
+- **Råd om gjelden etter konkursen** (B-498): når kassa har mer enn en ukes lønn og skrap til overs, sier et råd på
+  Verket hvor mye som kan betales i banken (Verket → Økonomi).
+- **Konkurs og rekonstruksjon** (B-495): konkurs etter 7 døgn under kredittgrensen eller 3 døgn uten råd til foring.
+  Fra støperiet og opp kan banken **rekonstruere** i stedet for nytt spill: ett nivå ned (utstyret fra det tapte nivået
+  selges, ovner og støping derfra blir grunnversjonen for nivået under), forskning og mesterskap fra de siste 30
+  spilldøgnene og fagpoeng kjøpt for penger i perioden tas tilbake, lager og ordrer er borte, folk over taket slutter
+  (hver rolle beholder sin andel, de flinkeste blir), omdømmet halveres og blir høyst halvparten av det nivået under
+  krever. Lånet slettes; gjelden blir halvparten av lånet
+  og minuset, pluss startkassa (sju døgns lønn, faste kostnader og skrap) og prisen på utstyr fra de siste 30 døgnene som
+  beholdes, og 10 % av salget går til den hvert døgn (posten «renter», som bidraget ikke teller); den kan også betales ned
+  i banken. Verket kan ikke flytte opp igjen før gjelden er betalt. Høyst
+  én gang per 30 ekte dager (serverens klokke) og ikke før gjelden er betalt. Konsernet, topplistene og prestasjonene
+  er urørt. Regnes lokalt (`game/reconstruction.ts`); kontoen trengs ikke.
 - **Kassa har ikke tak** (B-381). Den kan vokse fritt – den gir ingen makt i verden.
 - **Privat formue** (`g.paidOut` + gamle `lockedReserve`) er fryst historikk fra da kassa hadde tak (B-303–B-381). Den
   vokser ikke, kan ikke brukes, men teller i `valueCreated` (sluttmålet 10 mrd., stormodellene ved 25 mrd., prestasjoner).
@@ -227,6 +245,10 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
   **Varsel om venner** (B-490, 154; tema `venner`): den som følger, får beskjed når en venn går forbi på konsernlista
   (jobben `venner` hvert 10. minutt, høyst én gang per venn og dag), blir regionmester eller tar et selskap. Den som
   følges, får fortsatt ingen beskjed.
+  **Venner på listene** (B-493): når vennelista har noen, står «Alle / Venner» over topplista og ukelista. «Venner» viser
+  vennene og deg med plassen på hele lista (appen henter hele lista og filtrerer; ingen endring på serveren).
+  **Venner på kartet** (B-496): vennenes verk er grønne på Konsern → Kart, står først etter deg i regionlista, og
+  filteret «Venner» viser bare dine og deres verk.
 - **Varsel på mobilen** (B-465, på som standard fra B-467: første trykk i spillet etter innlogging lar telefonen spørre om lov, én
   gang per konto og enhet; «nei» og «slått av» huskes): bryter med fire temaer under Innstillinger → Varsler (oppkjøp, anbud, byggeprosjekter,
   privatmeldinger), per enhet. Serveren legger varsler i `push_outbox` (triggere, og `push_scan` hvert minutt for ferdige
@@ -289,6 +311,7 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
 - `KONSERNKAPITAL-FORSLAG.md` – hva konsernkassa brukes til etter fullt konsern (B-386). Eierens premiss: penger skal
   gi valg, ikke forsvinne. Ingen økonomiske justeringer før eieren har svart.
 - `VERKSJEF-FORSLAG.md` – V1–V3 er bygget (B-488, B-489).
+- `REKONSTRUKSJON-FORSLAG.md` – modell B er bygget (B-495).
 - Programmodell for konsernprogrammene: eieren valgte B (aktivt budsjett, B-388/B-389). Spesifikasjonen står i
   `K1-PROGRAMMER.md` (B-389): serveren har i dag ingen hendelser i konsernverdenen, så K-1 trenger et lite, nøytralt
   hendelseslag (V0) for at Teknologi, Robusthet og Driftsytelse skal ha ekte effekt. Eieren godkjente V0, satsingene

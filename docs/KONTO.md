@@ -89,6 +89,9 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Verv en venn: kode, startpakke til vennen, 10 mill. i konsernkassa når vennen er i gang | Ja | Regel 2 og 7: serveren og konsernkassa | B-459 |
 | Vennelista: følge andre spillere (enveis), nivå og sist aktiv | Ja | Regel 3: viser andre spillere | B-462 |
 | Varsel om venner: forbi deg, regionmester, selskap | Ja | Regel 3: mellom spillere, serveren | B-490 |
+| Venner på topplista og ukelista (filteret Alle / Venner) | Ja | Regel 3: viser andre spillere | B-493 |
+| Venner på verdenskartet | Ja | Regel 3: viser andre spillere | B-496 |
+| Prestasjoner for verksjefene (skjulte serier) | Ja | Regel 2: verksjefene er på serveren | B-497 |
 | Varsel på mobilen: oppkjøp, anbud, byggeprosjekter og privatmeldinger | Ja | Regel 3: lagres på serveren og gjelder hendelser mellom spillere | B-465 |
 | Skiftrapporten: felles chat for alle spillere | Ja | Regel 3: viser andre spillere og brukernavnet ditt | B-338 |
 | Profiler: profilarket når man trykker på et brukernavn (tittel, merker, konsernverdi og verk, selskaper, sesonger, sist aktiv) | Ja | Regel 3: viser andre spillere | B-419 |
@@ -129,7 +132,9 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Kontroll og overtakelser | Ja | Regel 3 og 7 | planlagt, B-180 |
 | Industrimakt på profilen og topplista | Ja | Regel 3 | planlagt, B-180 |
 | Verksjefer, mandat og «Verksjefen ringer» i datterverkene | Nei | Regel 1: ditt eget spill | planlagt, B-180 |
-| Rekonstruksjon ved konkurs | Nei | Regel 1 | planlagt, B-180 |
+| Rekonstruksjon ved konkurs (ett nivå ned, gjeld) | Nei | Regel 1: hovedverket, spilltid | B-495 |
+| Fast jobb til avløsere på plassene de står fast på | Nei | Regel 1: hovedverket | B-499 |
+| Skiftlederen gir avløsere fast jobb, lenker til Folk i beskjedene | Nei | Regel 1: hovedverket | B-500, B-501 |
 | Myk grense for kassa og bunden konsernreserve (midlertidig) | Nei | Regel 1: eget spill | B-193 |
 | Æraer og Hall of Fame | Ja | Regel 3 | Grunnleggeræraen og navnet «Hall of Fame»: B-182. Neste æra: ikke bestemt |
 | Pause på Salg (innstilling) | Nei | Regel 1: ditt eget spill | B-222 |

@@ -4,6 +4,7 @@ import { importantLog, markAllSeen } from "../game/inbox";
 import type { GameState, LogLink } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { fmtClock } from "./format";
+import { LINK_LABEL } from "./logLinks";
 
 /**
  * Varsellista (B-089): de siste viktige hendelsene samlet på ett sted, så ingenting går tapt
@@ -19,7 +20,6 @@ const FILTERS: { id: Filter; label: string }[] = [
 ];
 
 /** Teksten på knappen for et varsel med lenke (B-453) */
-const LINK_LABEL: Record<LogLink, string> = { industri: "Gå til selskapet", konsern: "Svar verksjefen" };
 
 export function InboxSheet({
   g,

@@ -111,6 +111,7 @@ import { applyKonsern, konsernDiffers, parseKonsern } from "./konsern";
 import { parseReportThreads, parseReportUnread, REPORT_REFUSAL_TEXT } from "./reports";
 import { parseWorldMap } from "./worldMap";
 import { openCall, parseManagerStatus } from "./managers";
+import { friendRows } from "../ui/friendScope";
 import { regionPoints, regionStrength } from "../game/regions";
 import {
   CHAT_REFUSAL_TEXT,
@@ -3023,6 +3024,32 @@ const main = async () => {
     await reloadFriends();
     assert(friendsList()?.length === 1 && !isFriend("Anna"), "tatt av");
     assert(parseFriends(null).length === 0 && parseFriends([{ nick: "" }, { x: 1 }]).length === 0, "rare svar");
+  });
+
+  await test("Venner på topplista og ukelista: bare vennene og deg, med plassen på hele lista (B-493)", () => {
+    const rows = [
+      { plass: 1, nick: "Anna", me: false },
+      { plass: 2, nick: "Bo", me: false },
+      { plass: 7, nick: "Deg", me: true },
+      { plass: 40, nick: "cara", me: false },
+    ];
+    const friends = parseFriends([{ nick: "Cara" }, { nick: "Anna" }, { nick: "Ukjent" }]);
+    const out = friendRows(
+      rows,
+      friends,
+      (r) => r.nick,
+      (r) => r.me,
+    );
+    assert(out.map((r) => `${r.plass}:${r.nick}`).join(",") === "1:Anna,7:Deg,40:cara", JSON.stringify(out));
+    assert(
+      friendRows(
+        rows,
+        [],
+        (r) => r.nick,
+        (r) => r.me,
+      ).length === 1,
+      "uten venner: bare deg",
+    );
   });
 
   await test("Varsel på mobilen: lenkene og temaene (B-465)", () => {

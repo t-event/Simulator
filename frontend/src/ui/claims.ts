@@ -64,7 +64,7 @@ function writeDeferred(list: Deferred[]): void {
 }
 
 /** Er spillet som er i gang nå, spillet til kontoen `uid`? */
-function isMine(g: GameState, uid: string | null): boolean {
+export function isMine(g: GameState, uid: string | null): boolean {
   return !!uid && userId() === uid && (!g.owner || g.owner === uid);
 }
 

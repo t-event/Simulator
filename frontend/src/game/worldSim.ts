@@ -11,6 +11,7 @@
  *
  *   npx tsx src/game/worldSim.ts              # alle spillertypene, 30/60/90/180/365/730 dager (B-385)
  *   npx tsx src/game/worldSim.ts --dager 180  # kortere
+ *   npx tsx src/game/worldSim.ts --verksjef   # også med verksjefer: uten / Lønnsomhet / Vekst (B-494)
  *
  * I tillegg (B-385): dagen konsernet er ferdig utbygd (ingenting mer betaler seg), hvor mange dager etter det kassa når
  * 1/5/10/25 mrd., hvor mange maksimale oppkjøpsbud (10 × verdien av skraplageret) kassa har råd til, og hvor stor del
@@ -33,6 +34,7 @@ import {
   type OrderRequest,
 } from "./konsernWorld";
 import type { SisterPlant, SisterType } from "./types";
+import { bestMandate, legalStats, netShare, setManagerModFactors, type Mandate, type ManagerStats } from "./managers";
 
 declare const process: { argv: string[] };
 
@@ -117,6 +119,51 @@ function after(plants: SisterPlant[], req: OrderRequest, nextId: number): Sister
   );
 }
 
+/**
+ * Verksjefer i simuleringen (B-494): hvert ferdige verk får den beste av tre kandidater (fast trukket per verk, som
+ * dagens kandidater på serveren). «lonnsomhet»: mandatet som gir mest utbytte, og bare hvis det gir pluss. «vekst»: Vekst
+ * til verket har nådd høyeste trinn nå, så det beste mandatet. Gir utbyttet med lønnen trukket fra og setter
+ * moderniseringen som serveren (setManagerModFactors, brukt av orderQuote). Samtalene er ikke med (managerSim.ts).
+ */
+export type ManagerPlan = "lonnsomhet" | "vekst";
+const LEGAL = legalStats();
+function candidates(plant: number): ManagerStats[] {
+  return [0, 1, 2].map((k) => LEGAL[(plant * 37 + k * 53) % LEGAL.length]);
+}
+function managersFor(w: KonsernWorld, plan: ManagerPlan | null): Map<number, number> {
+  const factors = new Map<number, number>();
+  if (!plan) {
+    setManagerModFactors([]);
+    return factors;
+  }
+  const hired: { plant: number; mandate: Mandate; stats: ManagerStats }[] = [];
+  const top = modMaxAt(Math.max(w.level, w.floor, ladderLevel(w.plants)));
+  for (const p of w.plants) {
+    if (p.project?.kind === "bygg") continue;
+    const growing = plan === "vekst" && p.level < top;
+    const pick = candidates(p.id)
+      .map((s) => ({ s, m: growing ? ("vekst" as Mandate) : bestMandate(s) }))
+      .map((x) =>
+        netShare(x.m, x.s) >= netShare("lonnsomhet", x.s) || growing ? x : { s: x.s, m: "lonnsomhet" as Mandate },
+      )
+      .sort((a, b) => netShare(b.m, b.s) - netShare(a.m, a.s))[0];
+    if (!growing && netShare(pick.m, pick.s) <= 0) continue;
+    hired.push({ plant: p.id, mandate: pick.m, stats: pick.s });
+    factors.set(p.id, 1 + netShare(pick.m, pick.s));
+  }
+  setManagerModFactors(hired);
+  return factors;
+}
+/** Utbyttet med verksjefene: hvert verks andel av utbyttet ganges med faktoren til verksjefen der */
+function dividendWith(p: SimProfile, plants: SisterPlant[], factors: Map<number, number>): number {
+  const total = dividendPerDay(input(p, plants));
+  if (!factors.size) return total;
+  const parts = plants.map((x) => ({ id: x.id, v: dividendPerDay(input(p, [x])) }));
+  const sum = parts.reduce((a, x) => a + x.v, 0);
+  if (sum <= 0) return total;
+  return total * parts.reduce((a, x) => a + (x.v / sum) * (factors.get(x.id) ?? 1), 0);
+}
+
 /** Det som betaler seg raskest nå, eller null */
 function bestOrder(w: KonsernWorld, p: SimProfile): OrderRequest | null {
   const base = plannedPlants(w);
@@ -157,7 +204,12 @@ function describe(plants: SisterPlant[]): string {
   return `${n("stalverk")} stål / ${n("storverk")} stor / ${n("kompleks")} kompl., snitt trinn ${avg.toFixed(1)}`;
 }
 
-export function simulate(p: SimProfile, days: number, checkpoints: number[]): SimResult {
+export function simulate(
+  p: SimProfile,
+  days: number,
+  checkpoints: number[],
+  plan: ManagerPlan | null = null,
+): SimResult {
   const w: KonsernWorld = {
     plants: p.plants.map((x) => ({ ...x })),
     orders: [],
@@ -179,6 +231,7 @@ export function simulate(p: SimProfile, days: number, checkpoints: number[]): Si
     const now = h * HOUR;
     const year = years[Math.min(1, Math.floor(h / (365 * 24)))];
     settleWorld(w, now);
+    const factors = managersFor(w, plan);
     const earned = ladderLevel(w.plants);
     for (let i = 0; i < earned; i++) if (levelDays[i] === null) levelDays[i] = Math.ceil(now / DAY);
     // Fyll køen
@@ -201,7 +254,7 @@ export function simulate(p: SimProfile, days: number, checkpoints: number[]): Si
     // Ved midnatt: bidrag, utbytte og selskapsinntekt for dagen som gikk
     if ((h + 1) % 24 === 0) {
       const day = (h + 1) / 24;
-      const dividend = dividendPerDay(input(p, w.plants));
+      const dividend = dividendWith(p, w.plants, factors);
       companyToday = 0;
       if (p.company) {
         // Eier selskapet i perioder på 14 dager; betaler budet når en periode starter – bare med penger i kassa (B-428),
@@ -237,6 +290,7 @@ export function simulate(p: SimProfile, days: number, checkpoints: number[]): Si
         });
     }
   }
+  setManagerModFactors([]);
   return { rows, levelDays, fullDay, cashDays, years };
 }
 
@@ -352,6 +406,24 @@ function main(): void {
         `År ${n + 1}: inntekt ${mrd(y.income)} mrd. · brukt ${mrd(used)} mrd. (${Math.round((100 * used) / y.income)} %; verk ${mrd(y.spent)}, selskapsbud ${mrd(y.bids)}) · ligger i kassa ${Math.round((100 * (y.income - used)) / y.income)} %`,
       );
     });
+    console.log("");
+  }
+  if (args.includes("--verksjef")) {
+    // B-494: samme spillere med verksjefer – skal gi noen prosent, ikke et nytt nivå eller en ny vei forbi stigen
+    console.log("Verksjefer (B-494): kasse og utbytte per dag ved dag 365 / 730, opptjent nivå, ferdig utbygd");
+    for (const p of profiles()) {
+      const line = (plan: ManagerPlan | null) => {
+        const r = simulate(p, days, checkpoints, plan);
+        const at = (d: number) => r.rows.find((row) => row.day === d);
+        const cell = (d: number) => {
+          const row = at(d);
+          return row ? `${mrd(row.balance)} mrd. / ${mill(row.dividend)} mill. / nivå ${row.earned}` : "–";
+        };
+        return `  ${(plan ?? "uten").padEnd(11)} ${cell(365).padEnd(34)} ${cell(730).padEnd(34)} ferdig ${r.fullDay ?? "–"}`;
+      };
+      console.log(`== ${p.name}`);
+      for (const plan of [null, "lonnsomhet", "vekst"] as const) console.log(line(plan));
+    }
     console.log("");
   }
   // Forskjellen mellom små, middels og store (B-385)

@@ -10,6 +10,8 @@ import { MOULD, mouldWear, replaceMoulds } from "./mould";
 import { renewPlant, UPKEEP, upkeepWear } from "./upkeep";
 import {
   bonusCost,
+  borrow,
+  repayRecon,
   buyFpDeal,
   buyUpgrade,
   courseCost,
@@ -61,6 +63,9 @@ import {
   setRealClock,
 } from "./konsern";
 import { answerQuiz, QUIZ, quizAvailable } from "./quiz";
+import { RECON, reconstruct } from "./reconstruction";
+import { creditLimit, maxLoan } from "./engine";
+import { legalStats, MANDATE_NAME, modFactors, netShare, type ManagerStats } from "./managers";
 import { hasResearch, missingResearchFor, RESEARCH, researchOptions, scrapUnlocked } from "./research";
 import { ADDONS, CASTINGS, FURNACES, SCRAP_IDS, STAGES } from "./data";
 import {
@@ -499,6 +504,8 @@ function botHour(g: GameState): void {
 
   // Utbygging: nytt nivå først, så det som gir mest på nåværende nivå
   const reserve = Math.max(5_000, stats.salaryPerDay * 5 + stats.dailyProductT * 6000);
+  // Gjelden etter en rekonstruksjon (B-495) først: verket kan ikke flytte opp før den er betalt
+  if ((g.recon?.debt ?? 0) > 0 && g.cash > reserve) repayRecon(g, g.cash - reserve);
   const perStage: string[][] = [
     [],
     ["induksjon1", "formlinje", "lager", "xrf", "portal", "salgskontor"],
@@ -992,6 +999,85 @@ if (process.argv.includes("--storovn")) {
   }
   process.exit?.(0);
 }
+if (process.argv.includes("--rekonstruksjon")) {
+  // B-495 (REKONSTRUKSJON-FORSLAG.md, avsnitt 6): testspilleren går konkurs rett etter at den har nådd et nivå, og
+  // rekonstrueres ett nivå ned. Hvor lang tid tar det å komme tilbake, mot tiden det tok fra nivået under første gang?
+  // Begge spiller ti døgn på nivået før konkursen; «lån maks» låner alt banken gir først og bruker det – kjøpene tas
+  // tilbake og lånet blir gjeld, så det skal ikke hjelpe.
+  // Prøv andre tall: --rekgjeld 1 (andel av lån og minus som blir gjeld), --rekandel 0.25 (andel av salget)
+  if (process.argv.includes("--rekgjeld"))
+    RECON.debtShare = Number(process.argv[process.argv.indexOf("--rekgjeld") + 1]);
+  if (process.argv.includes("--rekandel"))
+    RECON.revenueShare = Number(process.argv[process.argv.indexOf("--rekandel") + 1]);
+  console.log(`Gjeld ${RECON.debtShare * 100} % av lån og minus, ${RECON.revenueShare * 100} % av salget til gjelden`);
+  // Antall døgn til nivået, «konkurs» hvis verket går konkurs igjen, eller null hvis det ikke rekkes innen grensen
+  const until = (g: GameState, stage: number, limit: number): number | "konkurs" | null => {
+    const start = day(g);
+    while (g.stage < stage && day(g) - start <= limit) {
+      botHour(g);
+      const logBefore = g.log.at(-1)?.id ?? 0;
+      advance(g, 60);
+      hourHook?.(g, logBefore);
+      if (g.gameOver) return "konkurs";
+    }
+    return g.stage >= stage ? day(g) - start : null;
+  };
+  const show = (v: number | "konkurs" | null) => (v === null ? "ikke ennå" : v === "konkurs" ? "konkurs" : `${v} døgn`);
+  console.log("frø  nivå        første gang (fra nivået under)  tilbake etter rekonstruksjon  lån maks først");
+  let bad = 0;
+  const only = process.argv.includes("--rekdag") ? Number(process.argv[process.argv.indexOf("--rekdag") + 1]) : 0;
+  for (const target of only ? [only] : [3, 4]) {
+    for (const seed of only ? [Number(process.argv[process.argv.indexOf("--rekdag") + 2])] : [1, 2, 3]) {
+      const results: (number | "konkurs" | null)[] = [];
+      let climb: number | null = null;
+      for (const greedy of [false, true]) {
+        const g = newGame(seed);
+        if (typeof until(g, target - 1, 400) !== "number") break;
+        const c = until(g, target, 400);
+        if (typeof c !== "number") break;
+        climb = c;
+        // Ti døgn på nivået før konkursen; «lån maks» låner alt banken gir først og bruker det
+        if (greedy) borrow(g, maxLoan(g));
+        for (let h = 0; h < 240 && !g.gameOver; h++) {
+          botHour(g);
+          advance(g, 60);
+        }
+        g.gameOver = true;
+        g.cash = Math.min(g.cash, -creditLimit(g));
+        if (!reconstruct(g)) throw new Error("rekonstruksjonen ble ikke gjort");
+        const limit = 3 * climb + 120;
+        if (process.argv.includes("--rekdag"))
+          hourHook = (gg, logBefore) => {
+            for (const e of gg.log)
+              if (e.id > logBefore && e.kind === "bad") console.log(`   dag ${day(gg)}: ${e.text.slice(0, 140)}`);
+          };
+        const back = until(g, target, limit);
+        hourHook = null;
+        if (back === null && process.argv.includes("--verbose"))
+          console.log(
+            `   frø ${seed}${greedy ? " (lån maks)" : ""}: etter ${limit} døgn nivå ${g.stage}, kasse ${fmtKr(g.cash)}, gjeld ${fmtKr(g.recon?.debt ?? 0)}, omdømme ${Math.round(g.reputation)}`,
+          );
+        results.push(back);
+      }
+      const [back, greedyBack] = results;
+      // Raskere enn 80 % av tiden fra nivået under er et avvik. Lenger tid (også «ikke ennå») er i orden, men en ny
+      // konkurs med testspilleren betyr at rekonstruksjonen gir et verk som ikke kan drives
+      const fast = (v: number | "konkurs" | null | undefined) =>
+        typeof v === "number" && climb !== null && v < 0.8 * climb;
+      const ok = climb !== null && !fast(back) && !fast(greedyBack) && back !== "konkurs" && greedyBack !== "konkurs";
+      if (!ok) bad++;
+      console.log(
+        `${String(seed).padStart(3)}  ${STAGES[target].name.padEnd(11)} ${(climb === null ? "-" : `${climb} døgn`).padStart(30)}  ${show(back ?? null).padStart(28)}  ${show(greedyBack ?? null).padStart(14)}  ${ok ? "OK" : "AVVIK"}`,
+      );
+    }
+  }
+  console.log(
+    bad
+      ? `${bad} AVVIK: tilbake raskere enn 80 % av tiden fra nivået under, eller konkurs igjen`
+      : "OK: ingen kom tilbake raskere enn 80 % av tiden det tok fra nivået under, og ingen gikk konkurs igjen",
+  );
+  process.exit?.(bad ? 1 : 0);
+}
 if (process.argv.includes("--konsern")) {
   // B-304: utbyttet til konsernkassa per ekte dag med 1–14 datterverk, og hva neste verk gir. Som hos spillerne som har
   // kommet lengst: felles innkjøp og salg, konsernforskningen og mesterskapet «Konsernledelse» på nivå 15.
@@ -1037,6 +1123,33 @@ if (process.argv.includes("--konsern")) {
         `${String(n).padStart(4)}  ${mill(drift).padStart(16)}  ${mill(net).padStart(13)}  ${mill(gain).padStart(30)}   ${gain > 0 ? `${Math.round(price / gain)} dager` : "aldri"}`,
       );
     }
+  }
+  // B-494: det samme med en verksjef på hvert verk – snittet over alle lovlige kandidater og den beste, per mandat
+  const stats = legalStats();
+  const avg = (f: (s: ManagerStats) => number) => stats.reduce((a, s) => a + f(s), 0) / stats.length;
+  const pct = (v: number) =>
+    `${v >= 0 ? "+" : "−"}${Math.abs(v * 100)
+      .toFixed(1)
+      .replace(".", ",")} %`;
+  console.log("\nVerksjef på hvert verk (B-494) – endring i utbyttet etter lønn, og moderniseringen:");
+  console.log(
+    "mandat         snitt kandidat   beste kandidat   andel som gir pluss   modernisering (snitt): pris / tid",
+  );
+  for (const m of ["lonnsomhet", "vekst", "stabilitet"] as const) {
+    const plus = stats.filter((s) => netShare(m, s) > 0).length / stats.length;
+    const best = Math.max(...stats.map((s) => netShare(m, s)));
+    const mod = { cost: avg((s) => modFactors(m, s).cost), time: avg((s) => modFactors(m, s).time) };
+    console.log(
+      `${MANDATE_NAME[m].padEnd(12)} ${pct(avg((s) => netShare(m, s))).padStart(16)} ${pct(best).padStart(16)} ${`${Math.round(plus * 100)} %`.padStart(21)}   ${pct(mod.cost - 1)} / ${pct(mod.time - 1)}`,
+    );
+  }
+  {
+    const g = make(14, "kompleks", 5, true);
+    const net = konsernNetFor(g, g.konsern.plants);
+    const best = Math.max(...stats.map((s) => netShare("lonnsomhet", s)));
+    console.log(
+      `Fullt konsern (14 komplekser, trinn 5): ${mill(net)} per dag uten verksjefer, ${mill(net * (1 + best))} med 14 av de beste (Lønnsomhet) – taket på tallene i B-488 er +${(best * 100).toFixed(1).replace(".", ",")} %.`,
+    );
   }
   console.log(
     `\nPlass til ${maxSisters(make(0, "kompleks", 0))} datterverk. Neste kjøp tilbys av konsernOptions (${konsernOptions(make(3, "kompleks", 5)).length} valg). Utbyttet betales av serveren én gang per ekte dag (B-304); spillfarten betyr ingenting.`,

@@ -9256,3 +9256,211 @@ Testet:
 - `balance.ts`.
 
 Konto: nei (spillet hjemme).
+
+## B-492 Bøtene etter den umulige ordren fra utlandet er betalt tilbake (2026-10-14)
+Eieren: «Fiks den umulige utlandsordren». Koden ble rettet i B-491. Det som sto igjen, var bøtene i eierens eget spill.
+Dry-run først (bare lesing, så en DO-blokk som ble rullet tilbake): kasse 3 059,45 mill. → 3 224,53 mill., omdømme 93,5 →
+98,5, serverEdit 1 → 2. Kjørt som `supabase/155_utlandsordre_tilbakebetalt.sql` med eierens godkjenning (beskjeden over).
+- Tilbake: 92,27 mill. (ordren) + 72,81 mill. (ukeleveransen ordren tok valseverket fra) = 165,08 mill. kr, og de 5
+  omdømmepoengene bøtene tok (høyst 100).
+- En linje i loggen sier hva som er betalt tilbake. `serverEdit` + 1 og `device = 'server'` (B-211), så appen henter
+  spillet og eldre kopier avvises. Sikkerhetskopi i `save_backups` (`utlandsordre-tilbakebetalt`).
+- Tidslinja og døgnregnskapet er ikke endret (bota er historikk). Pengene står i kassa hjemme, så de gir ingen makt i
+  ekte tid (B-323).
+- Spillet finnes på loggen og i `admins`; ingen navn i repoet.
+Andre spillere: ingen andre lagringer har den samme ordren i loggen nå (sjekkes ikke bakover – loggen holder 150
+linjer). Får noen den samme feilen, gjøres det samme etter dry-run og eierens godkjenning.
+
+Konto: nei (retting av ett lagret spill).
+Endringslogg: nei
+
+## B-493 «Venner» på topplista og ukelista (2026-10-14)
+Eieren valgte forslaget «Venner på topplista og ukelista» (anbefalt etter B-490). Når vennelista har noen, står valget
+**Alle / Venner** over topplista (alle listene, sesong og Hall of Fame) og ukelista. «Venner» viser bare dem du følger og
+deg selv, med plassen på hele lista.
+- Ingen endring på serveren: appen henter hele lista (`leaderboard`/`weekly_board` med `lim` 100 000, som `my_rank`
+  alt gjør) og filtrerer på vennelista i minnet (`friendRows`, `ui/friendScope.ts`). Vennelista hentes én gang hvis den
+  ikke er i minnet (`useFriendList`).
+- Gradvis synlighet (B-180): uten venner vises ikke valget. Valget huskes ikke – lista åpner alltid på «Alle».
+- Lista viser bare det den alt viser alle; ingen nye opplysninger om noen.
+
+Konto: ja (vennelista krever konto, regel 2 – KONTO.md).
+
+## B-494 Verksjefene i simuleringene (2026-10-14)
+Eieren: «Bygg det du anbefaler» – verksjefer i testspilleren, som en sikkerhetssjekk av balansen etter B-488/B-489.
+Testspilleren i `balance.ts` rekker ikke konsernet (0 datterverk etter 360 spilldøgn), så sjekken står der konsernet
+regnes i ekte dager:
+- `worldSim.ts --verksjef`: de seks spillertypene uten verksjef, med «Lønnsomhet» og med «Vekst». Hvert ferdige verk får
+  den beste av tre faste kandidater. Lønnsomhet ansettes bare når den gir pluss. Vekst brukes til verket har høyeste
+  trinn, så det beste mandatet. Utbyttet ganges per verk, og moderniseringen følger mandatet (`setManagerModFactors` →
+  `orderQuote`, som serveren). Samtalene er ikke med (de står i `managerSim.ts`).
+- `balance.ts --konsern`: ny tabell med endringen i utbyttet etter lønn per mandat (snitt over alle lovlige kandidater
+  og den beste), andelen kandidater som gir pluss, og moderniseringen. Ingen endring i testspilleren selv.
+**Resultat (dag 365 / 730):**
+- Kassa endres med −2 til +3 %. Lønnsomhet gir litt mindre for nye spillere fordi moderniseringen koster 20 % mer, og
+  Vekst gir litt mer.
+- Utbyttet per dag endres med høyst 1 mill. (34–39 mill.).
+- «Ferdig utbygd» kommer 2–4 dager før med Vekst og 2–4 dager etter med Lønnsomhet.
+- Med Vekst når middels spiller og legacy med komplekser på trinn 0 ett nivå høyere i stigen (8 og 9). Moderniseringen
+  blir 18 % billigere og betaler seg da innen 180 dager. Uten verksjef kan samme nivå kjøpes, bare med lengre
+  tilbakebetaling, så det er ingen ny vei forbi stigen.
+- Lønnsomhet: snitt −1,7 %, beste +4,0 %, og 31 % av kandidatene gir pluss. Vekst og Stabilitet gir alltid minus i
+  utbyttet (Vekst gir det tilbake i moderniseringen, Stabilitet i samtalene).
+- Fullt konsern (14 komplekser på trinn 5): 33,7 mill. per dag, 35,1 mill. med 14 av de beste.
+Konklusjon: verksjefene er et valg med små tall, slik B-488 ville. Ingen tall endres.
+
+Konto: nei (simulering).
+Endringslogg: nei
+
+## B-495 Rekonstruksjon etter konkurs: modell B (2026-10-14)
+Eieren: «Velg modell for meg» (REKONSTRUKSJON-FORSLAG.md, B-409). Claude valgte **modell B – ett nivå ned**:
+- Den oppfyller premiss 3: en storverkspiller sendes ikke tilbake til garasjen. Den er enkel å forklare: «banken selger
+  det største».
+- C (samme nivå) ga for lite å tape på storverket. D (gradert) er mer å forstå og balansere. A er slik det var.
+- E (konsernet redder hovedverket) er ikke tatt med: penger fra ekte tid inn i spilltid går mot retningen (B-319, B-382).
+
+**Slik virker det** (`game/reconstruction.ts`, valget på konkursskjermen):
+- Fra støperiet og opp kan banken rekonstruere i stedet for nytt spill. Fra verkstedet er garasjen det eneste under, så
+  der er det nytt spill som før.
+- Nivået går ett ned:
+  - Utstyret fra det tapte nivået selges.
+  - Ovner og støping derfra blir den billigste typen på nivået under.
+  - Lager, ordrer og avtaler er borte, og nabolaget, stiftelsen og slitasjen følger storverkets tomt.
+  - Folk over taket slutter. Hver rolle beholder sin andel, og de flinkeste blir.
+- Siste 30 spilldøgn:
+  - Forskning og mesterskap tas tilbake, og fagpoeng kjøpt for penger trekkes fra.
+  - Utstyr kjøpt i perioden som beholdes, legges på gjelden med prisen. Å ta det bort ga i simuleringen et verk med
+    formlinje, liten ovn og 24 ansatte på lønn, som gikk konkurs igjen.
+- Gjeld: lånet slettes. Gjelden blir summen av
+  - halvparten av lånet og minuset,
+  - startkassa (sju døgns lønn, faste kostnader og skrap for verket slik det blir, lånt av banken),
+  - utstyret over.
+  10 % av salget går til gjelden hvert døgn (posten «renter», som bidraget ikke teller). Den kan også betales ned i
+  banken.
+- **Verket kan ikke flytte opp før gjelden er betalt.**
+- Omdømmet halveres og blir høyst halvparten av det nivået under krever (fra storverket: høyst 20).
+- Høyst én gang per 30 ekte dager (`realNow()`), og ikke før gjelden fra forrige gang er betalt. Ellers er det nytt spill.
+- Konsernet, konsernkassa, topplistene og prestasjonene er urørt. Nytt skjult merke: «Tilbake fra konkurs», når verket er
+  tilbake på nivået det falt fra.
+- Telleren for hvor ofte står i det lagrede spillet (`g.recon`), ikke i en egen tabell på serveren. Rekonstruksjonen
+  gir ingenting i ekte tid. Den som endrer lagringen sin, kan uansett gi seg selv penger.
+
+**Simulering** (`balance.ts --rekonstruksjon`): testspilleren går konkurs ti døgn etter at den har nådd stålverket eller
+storverket (frø 1–3), med og uten «lån maks» først. Utvikling underveis:
+1. Startkassa var 30 % av prisen på nivået: 2 av 6 gikk konkurs igjen (tomt skraplager, ingen penger).
+2. Startkassa ble sju døgns drift.
+3. Tilbakeføring av utstyr ga en ny felle, så utstyret ble lagt på gjelden i stedet.
+4. Andelen av salget (10–25 %) og hele gjelden (100 %) endret ingenting. Flaskehalsen var omdømmet.
+5. Derfor: høyst halvparten av kravet på nivået under, og ingen flytting før gjelden er betalt.
+
+Resultat, døgn tilbake mot døgn fra nivået under første gang (uten / med lån maks):
+
+| Nivå | Frø 1 | Frø 2 | Frø 3 |
+|---|---|---|---|
+| Stålverk | 54 / 54 mot 35 | 63 / 78 mot 43 | 62 / 62 mot 38 |
+| Storverk | 131 / 177 mot 67 | 207 / 102 mot 94 | 83 / 107 mot 91 |
+
+Ingen kom tilbake raskere enn 80 % av tiden første gang, og ingen gikk konkurs igjen (kriteriene i avsnitt 6).
+
+Testet:
+- Ny test i `game/tests.ts`: nivået, ovnene, støpingen, utstyret, gjelden, omdømmet, folk, tilbakeføringen, månedsgrensen,
+  gjelden fra salget, og at verkstedet ikke rekonstrueres.
+- Playwright av konkursskjermen på 320, 390 og 1366 px.
+- `balance.ts`.
+
+Konto: nei (regel 1 – hovedverket, spilltid).
+
+## B-496 Venner på verdenskartet (2026-10-15)
+Dagens plan (eierens «Lag en plan for hva du skal bygge idag. Utfør og push»). Dette var det siste ikke-valgte
+forslaget for vennelista (B-490).
+- Verkene til dem du følger, er grønne på Konsern → Kart (dine er blå, andres grå).
+- I lista for en region står vennene rett etter deg, med merket «Venn».
+- Filteret «Venner» viser bare dine verk og vennenes.
+- Gradvis synlighet (B-180): filteret og tegnforklaringen «Venners verk» vises bare når vennelista har noen.
+- Ingen endring på serveren: kartet viser det det alt viser alle, og vennelista hentes som før (`useFriendList`).
+
+Konto: ja (regel 3 – vennelista og kartet krever konto, KONTO.md).
+
+## B-497 Prestasjoner for verksjefene (2026-10-15)
+Tre nye serier under Konsern:
+- «Verksjefer» (1 og 5 ansatt).
+- «Verksjefen ringer» (10 og 50 samtaler besvart).
+- «God sjef» (en verksjef som trives godt, trivsel 75 eller mer).
+
+Slik telles det:
+- Tellerne står i spillet (`verksjef_ansatt`, `samtale_besvart`, `verksjef_trives`) og øker bare når serveren svarer ja.
+- Verksjefer som alt er ansatt, og trivselen telles fra statusen serveren sender, når kortet Verksjefene vises.
+- Seriene er skjulte (B-296), som vervingen: de krever konto og datterverk og vises bare for dem som har tatt en.
+- Prestasjonene gir fagpoeng som de andre, og ingenting i ekte tid (B-323).
+
+Konto: ja (regel 2 – verksjefene er på serveren).
+
+## B-498 Råd om gjelden etter en rekonstruksjon (2026-10-15)
+Etter B-495 kan verket ikke flytte opp før gjelden etter konkursen er betalt. Gjelden går ned av seg selv med 10 % av
+salget, men spilleren kan også betale fra kassa i banken.
+- Nytt råd på Verket: «Gjelden etter konkursen er … Du kan ikke flytte opp før den er betalt. Kassa har … du kan betale
+  med i banken.» Det fører til Verket → Økonomi.
+- Rådet kommer bare når kassa har mer enn en ukes lønn og skrap til overs, så det ikke frister til å tømme kassa.
+- Det kommer ikke på storverket, der det ikke er noe å flytte opp til.
+- Testspilleren betaler alt ned selv (B-495), så nybegynneren trenger ikke rådet i CI.
+
+Konto: nei (regel 1 – hovedverket).
+
+## B-499 Fast jobb til avløsere (2026-10-15)
+Brukeren ba om: «Du sku ha gjort sånn at di 1000 avløseran man har at man kan send dem tel den faste stillinga tel den
+plassn vi treng dem som at dem får fast jobb dær. Og da blir til en støper, kranfører, ovnsopratør osv. Da det e folk
+som slutt å sånnt, går av me pensjon osv».
+
+Når folk slutter eller går av med pensjon, fyller avløserne plassene (B-164), men står da fast der og er ikke ledige til
+fravær. Før var eneste råd å ansette nye til plassene (B-170). Nå kan avløserne selv få jobben:
+- `giveFixedJob(g, workerId?, role?)` (`actions.ts`): en avløser som står fast på en plass i en skiftrolle
+  (ovnsoperatør, støper, kranfører, lab, valseverk), blir den rollen. Den beholder ferdigheten og får lønna til rollen (`normalSalary`, aldri lavere
+  enn før). Uten `workerId` fylles alle plassene med de flinkeste avløserne, i rollerekkefølgen.
+- Bare plasser avløserne står fast på (`wildcardUse(g).byRole`), så skiftene er like fulle etterpå, og resten av
+  avløserne blir ledige til fravær. Lærlinger og folk på lederutvikling får ikke fast jobb (`fixedJobCandidates` i
+  `plant.ts`).
+- Folk → Skift: knappen «Gi avløserne fast jobb (N)» i kortet «Anbefalt i tillegg til skiftene» ved siden av «Ansett til
+  plassene», og under bemanningstabellen når verket ikke har tre fulle skift. Under Folk → Ansatte → «Mer» har hver
+  avløser «Fast jobb som …» for plassene som trengs.
+- Beskjeden når noen sier opp (`quitText` med spillet) eller går av med pensjon, sier at en avløser kan få jobben når en
+  avløser nå står fast på plassen.
+- Ingen kostnad, ingen ny valuta.
+- Testspilleren bruker det ikke; nybegynneren trenger det ikke (det er et valg, ikke noe som stopper verket).
+
+Konto: nei (regel 1 – hovedverket).
+
+## B-500 Skiftlederen gir avløsere fast jobb (2026-10-16)
+Oppfølging av B-499: med mange avløsere er det tungvint å trykke hver gang noen slutter eller går av med pensjon.
+- Nytt valg i kortet «Anbefalt i tillegg til skiftene» (Folk → Skift): «Skiftlederen gir avløsere fast jobb når noen
+  slutter eller går av» (`settings.leaderFixedJobs`, mangler = av). Vises når verket har både skiftleder og avløsere –
+  samme mønster som skiftlederens vikarer (B-211) og bonus (B-271).
+- Hver time (`hourlyActions` → `leaderFixedJobs`): er valget på og en skiftleder på jobb, får avløserne som står fast på
+  plasser uten egne folk, fast jobb der (`giveFixedJob` med `byLeader`, loggen sier «Skiftlederen ga …»).
+- Beskjedene om oppsigelse og pensjon ber da ikke spilleren gi avløseren jobben (`leaderGivesJobs`).
+- Feltet er valgfritt i lagringen, så `migrate()` trenger ingen standardverdi.
+
+Konto: nei (regel 1 – hovedverket).
+
+## B-501 Beskjedene om folk som slutter, fører til Folk (2026-10-16)
+- Ny `LogLink`: «folk» (Folk → Skift, «Gå til skiftene») og «ansett» (Folk → Ansett, «Gå til søkerne»), i `openLink`
+  (`GameApp`) og `LINK_LABEL` (`Inbox.tsx`), som lenkene fra B-453.
+- Oppsigelse (lav trivsel og lønnskravet): til skiftene når en avløser kan ta plassen, ellers til søkerne (`quitLink`).
+- Pensjon: beskjeden en måned før fører til søkerne; beskjeden på dagen fører til skiftene når en avløser fyller plassen.
+- `LINK_LABEL` står nå i `ui/logLinks.ts` (brukes av varsellista og varsellinja). Skjermleserteksten på varsellinja
+  sa «Trykk for å gå til selskapet» for alle lenker; nå sier den teksten til lenken.
+
+Konto: nei (regel 1).
+
+## B-502 Kodegjennomgang av B-495–B-499 (2026-10-16)
+Gjennomgang av rekonstruksjonen, verksjef-prestasjonene, vennefilteret, rådet om gjelden og fast jobb til avløsere.
+- Rettet: tellerne til verksjef-prestasjonene (B-497) ble skrevet inn i spillet etter svaret fra serveren uten å sjekke
+  kontoen. Nå bare når samme konto er innlogget og spillet er dens (`isMine` fra `ui/claims.ts`, nå eksportert), både
+  for ansettelse, samtaler og synkroniseringen fra statusen (B-426).
+- Rettet: emoji-sjekken (`scripts/sjekk-emoji.mjs`, B-237) feilet med Node som har Unicode 16, der ★ (U+2605) og
+  ☰ (U+2630) regnes som piktogrammer. De er teksttegn, ikke emoji, og fjernes før sjekken. Ekte emoji stoppes som før.
+- Sjekket uten funn: rekkefølgen for gjeldsbetalingen (`reconDay` etter `history.push`), at folk beholdes per rolle,
+  at `reconOption` regner på en kopi, at vennelista holdes per konto, og at fast jobb ikke gis til lærlinger.
+
+Endringslogg: nei
+Konto: nei.
+

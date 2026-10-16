@@ -236,7 +236,8 @@ export interface LogEntry {
 }
 
 /** Steder et varsel kan føre til (B-453): «industri» = Konsern → Industrien, der anbudene står */
-export type LogLink = "industri" | "konsern";
+/** Hvor et varsel fører (B-453); «folk» = Folk → Skift, «ansett» = Folk → Ansett (B-501) */
+export type LogLink = "industri" | "konsern" | "folk" | "ansett";
 
 export type CostCategory =
   | "skrap"
@@ -434,6 +435,8 @@ export interface Settings {
   leaderTemps?: boolean;
   /** Skiftlederen gir alle bonus når det er lenge siden eller trivselen er lav (B-271). Mangler = av */
   leaderBonus?: boolean;
+  /** Skiftlederen gir avløsere fast jobb på plassene de står fast på (B-500). Mangler = av */
+  leaderFixedJobs?: boolean;
   /** Klokketimen skiftene starter (6, 14 eller 22) */
   shiftStart: number;
   /** Start ikke ny charge når strømprisen er over dette (kr/kWh). null = ingen grense */
@@ -544,6 +547,20 @@ export interface Market {
   trend?: MarketTrend | null;
   /** Første døgn en ny trend kan starte */
   nextTrendDay?: number;
+}
+
+/** Et kjøp eller en forskning de siste 30 spilldøgnene, som rekonstruksjonen regner med (B-495) */
+export interface RecentBuy {
+  day: number;
+  kind: "furnace" | "casting" | "addon" | "research" | "mastery" | "fp";
+  id: string;
+  /** Ovnen utstyret eller ombyggingen gjelder */
+  unit?: number;
+  /** Prisen på utstyret, og nivået det hører til */
+  price?: number;
+  stage?: number;
+  /** Fagpoeng kjøpt for penger */
+  fp?: number;
 }
 
 export interface GameState {
@@ -832,6 +849,10 @@ export interface GameState {
   inCredit?: boolean;
   /** Døgn på rad der verket står fordi det ikke er råd til omforing og lånet er fullt */
   stuckDays?: number;
+  /** Rekonstruksjon etter konkurs (B-495): gjelden som gjenstår, det som er betalt, og når det skjedde (ekte tid) */
+  recon?: { debt: number; paid: number; times: { day: number; realAt: number; from: number; to: number }[] };
+  /** Kjøp og forskning de siste 30 spilldøgnene (B-495) – tas tilbake ved rekonstruksjon */
+  recentBuys?: RecentBuy[];
   /** Faner spilleren har sett (nye faner får et «Ny»-merke, B-023) */
   seenViews: string[];
   /** Nivået spilleren nettopp flyttet til, for feiring; null når det er sett */

@@ -122,11 +122,12 @@ npx tsx src/game/balance.ts --vurdering                    # kundevurderingene 1
 npx tsx src/game/balance.ts --konsern                      # utbyttet per ekte dag med 1–14 verk (B-304)
 npx tsx src/game/balance.ts --forste 700                   # kurven for første opplasting i juksesperren (B-257, ca. 40 min)
 npx tsx src/game/balance.ts --vinter                       # uhell, kort og kostnader om vinteren mot sommeren, per nivå (B-277, ca. 11 min)
+npx tsx src/game/balance.ts --rekonstruksjon               # konkurs rett etter nivå 3/4, rekonstruert: døgn tilbake mot første gang (B-495, ca. 10 min)
 npx tsx src/game/balance.ts --sommerstans                  # testspilleren velger sommerstans i fellesferien (B-298)
 npx tsx src/game/programSim.ts                             # konsernprogrammene: A mot B (B-388); --k1, --k1-skann, --k1-drift, --k1-kost, --k1-verdi(-skann), --k1-etablering: K-1 med hendelser i regionene (B-389–B-393)
 npx tsx src/game/takeoverSim.ts                            # oppkjøp: når lønner det seg å kjøpe, forsvare eller gi seg – regelsett 1, kandidatene og regelsett 2 (B-440, B-441; --kort); --gulv: anbudsgulvet A–F (B-449)
 npx tsx src/game/managerSim.ts                             # verksjefene mot akseptkriteriene: netto per mandat, fisking, samtalene (B-488)
-npx tsx src/game/worldSim.ts                               # verdenssimulatoren: konsernkassa for liten/middels/stor/legacy etter 30–730 ekte dager, dager etter fullt konsern, maks bud, andel brukt (B-380, B-385; --dager 180 for kortere)
+npx tsx src/game/worldSim.ts                               # verdenssimulatoren: konsernkassa for liten/middels/stor/legacy etter 30–730 ekte dager, dager etter fullt konsern, maks bud, andel brukt (B-380, B-385; --dager 180 for kortere; --verksjef: uten / Lønnsomhet / Vekst, B-494)
 npm run build
 ```
 
@@ -156,6 +157,7 @@ frontend/src/
     world.ts     Felles hendelser i motoren og sesongfordel (B-129)
     environment.ts Utslipp, renseanlegg i trinn, havari og bøter (B-263); panelet står i ui/Upgrades.tsx (CleanerPanel)
     mould.ts     Kokillene i strengstøpingen: slitasje per tonn, risiko for gjennombrudd, bytte (B-351); raden i ui/Maintenance.tsx
+    reconstruction.ts Rekonstruksjon etter konkurs: ett nivå ned, gjeld, siste 30 døgn tilbake (B-495); valget på konkursskjermen
     pension.ts   Alder og pensjon for de ansatte (B-357): `born`, pensjonsalder 62–67, beskjed en måned før
     calendar.ts  Året i spillet (360 døgn, dag 1 = 1. april), vinter 15.11.–14.3. og frost (B-265, B-272), fellesferie (B-298);
                  `calendarAhead` til kalenderkortet på Oversikt (ui/CalendarCard.tsx, B-321)
@@ -260,7 +262,7 @@ docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretn
                VERKSKONTO-FORSLAG.md (mer å bruke penger på hjemme, V1–V4, bygget B-455),
                KONTROLL-FORSLAG.md (verdenskart, utbyttepolitikk, Kontroll, overtakelser og pengene hjemme, B-331, godkjent B-332),
                VERKSJEF-FORSLAG.md (verksjefer, besvart; V1 ferdig spesifisert i avsnitt 10, bygges etter V0/K-1, B-409),
-               REKONSTRUKSJON-FORSLAG.md (rekonstruksjon etter konkurs, modellene A–E – venter på eierens valg, B-409),
+               REKONSTRUKSJON-FORSLAG.md (rekonstruksjon etter konkurs, modellene A–E – modell B bygget, B-495),
                STATUS.md (fasit for hvordan spillet virker nå, B-385), DATAKVALITET.md (tidslinjetallene, B-456),
                RAPPORT-2026-10-02.md (pengestrømmene 29.9–1.10, utbytterettingen og etterbetalingen, B-423; utført B-446),
                UKENS-KONTROLLROM.md (variant A bygget, B-387), KONSERNKAPITAL-FORSLAG.md (forslag med eierens svar, B-386/B-387),
@@ -653,7 +655,7 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   (`net/seasonTrack.ts`) – endres den, endres begge.
 - **Knappene ved varsellinja åpner ark** (B-286): hjelp, Mål og topplista. På mobil åpner `go("mal")` arket; på PC er Mål en side.
 - **Varsler med lenke** (B-453): `log(g, tekst, art, link)` – en linje med `link` fører dit ved trykk i varsellinja (pil) og
-  i varsellista («Gå til selskapet»). Nye mål legges i `LogLink` (`types.ts`), `openLink` (`GameApp`) og `LINK_LABEL` (`Inbox.tsx`).
+  i varsellista («Gå til selskapet»). Nye mål legges i `LogLink` (`types.ts`), `openLink` (`GameApp`) og `LINK_LABEL` (`ui/logLinks.ts`, B-501).
 - **Kjøp hjemme og bidraget** (B-455): nabolaget, stiftelsen og fornyelsen føres som `investering`, som
   `contribution_margin_raw` ikke teller. Nye pengesluk hjemme skal ikke gjøre verket billigere å drive eller selge mer (da
   øker marginen og bidraget i ekte tid) – før dem som `investering` eller i en post serveren ikke leser. Slitasjen
@@ -708,6 +710,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Salgsdirektøren regner med det verket faktisk lager** (`directorDailyT`, siste uke), ikke kapasiteten. Står ovner
   (én ovn om gangen, støping, folk), sier han nei til det Salg viser grønt – loggen forklarer det (B-312). Ikke løsne
   regelen: den holder omdømmet på 96–100 hos alle med direktør.
+- **Rekonstruksjon** (B-495): kjøp og forskning registreres med `noteBuy` (`game/reconstruction.ts`) i
+  `buyUpgrade` (med pris og nivå), `doResearch`, `buyMastery` og `buyFpDeal`. Rekonstruksjonen tar tilbake forskning,
+  mesterskap og kjøpte fagpoeng fra de siste 30 døgnene og legger utstyr som beholdes, på gjelden. Nye ting som kjøpes for
+  penger hjemme og overlever en rekonstruksjon, må også registreres der, ellers kan «lån maks, kjøp, gå konkurs» lønne seg. Nytt utstyr på et nivå selges av `rebuild` hvis nivået er tapt.
 - **Hendelseskort om forhold mellom ansatte** (B-444): trakassering, diskriminering og varsling er et sårt tema for eieren –
   ingen slike kort, kapitler eller popups uten at eieren ber om det.
 - **Skjulte prestasjoner** (B-296): `hidden` på en serie gjør at den bare vises og telles for dem som har den. Bruk

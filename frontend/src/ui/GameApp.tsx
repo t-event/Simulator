@@ -7,7 +7,8 @@ import "./game.css";
 import { isElsewhere, onTabChange, playHere } from "../game/tabLock";
 import { markChangelogSeen, unseenChangelog } from "../game/changelog";
 import { ChangelogSheet } from "./Changelog";
-import { STAGES, WIN_CASH } from "../game/data";
+import { STAGE_DEFINITE, STAGES, WIN_CASH } from "../game/data";
+import { reconOption, reconstruct } from "../game/reconstruction";
 import { konsernReady, LEGENDS, WIN_TITLE } from "../game/konsern";
 import { InstallTip } from "./InstallTip";
 import { completeManual, log, unlock } from "../game/engine";
@@ -55,6 +56,7 @@ import { newVersionAvailable, shouldReloadFor, UPDATE_CHECK_MS } from "../net/up
 import { pendingControl } from "../net/weekly";
 import { loadGame, saveGame, setSaveListener } from "../game/save";
 import { InboxSheet } from "./Inbox";
+import { LINK_LABEL } from "./logLinks";
 import { importantLog, isUnseen, markAllSeen, markRead, unseenCount } from "../game/inbox";
 import { Sales } from "./Sales";
 import { KonsernPage } from "./Konsern";
@@ -254,15 +256,19 @@ function EndScreen({
   g,
   onRestart,
   onContinue,
+  onReconstruct,
   inSeason,
 }: {
   g: GameState;
   onRestart: () => void;
   onContinue?: () => void;
+  /** Rekonstruksjon etter konkurs (B-495): driv videre på nivået under */
+  onReconstruct?: () => void;
   /** Spillet er med i sesongen som pågår */
   inSeason?: boolean;
 }) {
   const won = g.won && !g.gameOver;
+  const recon = !won ? reconOption(g) : null;
   return (
     <div className="g-modal" role="dialog" aria-modal="true">
       <div className="g-modal-card">
@@ -281,6 +287,30 @@ function EndScreen({
           <li>Kontrakter levert: {g.totals.contractsDone}</li>
           <li>Reklamasjoner: {g.totals.complaints}</li>
         </ul>
+        {recon?.ok && (
+          <div className="g-recon">
+            <p>
+              <strong>Banken kan rekonstruere verket.</strong> Du driver videre i {STAGE_DEFINITE[recon.to]} i stedet
+              for å starte i garasjen:
+            </p>
+            <ul>
+              <li>
+                Utstyret fra {STAGE_DEFINITE[g.stage]}, lageret og ordrene er borte. Forskning fra de siste 30 døgnene
+                tas tilbake.
+              </li>
+              <li>
+                Du starter med {fmtKr(recon.cash)}. Lånet, startkassa og utstyr du kjøpte nylig blir {fmtKr(recon.debt)}{" "}
+                i gjeld, som betales med 10 % av salget.
+              </li>
+              <li>
+                Omdømmet faller kraftig, og du kan ikke flytte opp igjen før gjelden er betalt. Forskning fra før, de
+                flinkeste folka, prestasjonene og konsernet beholdes.
+              </li>
+            </ul>
+            <p className="g-muted g-small-text">Banken gjør det høyst én gang i måneden.</p>
+          </div>
+        )}
+        {recon && !recon.ok && g.stage > 0 && <p className="g-muted">{recon.reason}</p>}
         {won && (
           <p className="g-muted">
             {inSeason
@@ -296,16 +326,21 @@ function EndScreen({
             åpner <strong>mesterskapet</strong> under Forskning, så fagpoengene alltid har noe å gå til.
           </p>
         )}
-        <div className="g-row">
+        <div className="g-row g-end-actions">
           {won && onContinue && (
             <button className="g-primary" onClick={onContinue}>
               Spill videre
             </button>
           )}
           {/* Etter en seier ligger «Nytt spill» under tannhjulet med bekreftelse, så ingen sletter spillet ved et uhell */}
+          {recon?.ok && onReconstruct && (
+            <button className="g-primary" onClick={onReconstruct}>
+              Rekonstruer verket
+            </button>
+          )}
           {!won && (
-            <button className="g-primary" onClick={onRestart}>
-              Nytt spill
+            <button className={recon?.ok && onReconstruct ? "" : "g-primary"} onClick={onRestart}>
+              {recon?.ok ? "Start i garasjen" : "Nytt spill"}
             </button>
           )}
         </div>
@@ -813,9 +848,7 @@ function NoticeLine({
           if (seen) api.act((gg) => markRead(gg, seen));
           onLink(link);
         }}
-        aria-label={
-          link ? `${text} Trykk for å gå til selskapet.` : `Varsler${unseen ? ` (${unseen} nye)` : ""}: ${text}`
-        }
+        aria-label={link ? `${text} ${LINK_LABEL[link]}.` : `Varsler${unseen ? ` (${unseen} nye)` : ""}: ${text}`}
       >
         <span className="g-notice-bell" aria-hidden="true">
           <Icon name="bell" />
@@ -1110,6 +1143,8 @@ export function GameApp() {
     setInboxOpen(false);
     if (to === "industri") go("konsern", "industri");
     else if (to === "konsern") go("konsern", "oversikt");
+    else if (to === "folk") go("folk", "skift");
+    else if (to === "ansett") go("folk", "ansett");
   };
   pushNav.current = (link) => {
     if (link.to === "industri") openLink("industri");
@@ -1454,7 +1489,7 @@ export function GameApp() {
       {!modalOpen && <LoggedOutNotice onLogin={() => setSettingsOpen(true)} />}
       {!modalOpen && <SeasonResultNotice onOpen={setResultOpen} />}
       {!modalOpen && !resultOpen && <SeasonPrompt api={api} g={g} onOpenSettings={() => setSettingsOpen(true)} />}
-      {g.gameOver && <EndScreen g={g} onRestart={api.quit} />}
+      {g.gameOver && <EndScreen g={g} onRestart={api.quit} onReconstruct={() => api.act((gg) => reconstruct(gg))} />}
       {g.won && !winSeen && !g.gameOver && !g.pendingManual && (
         <EndScreen
           g={g}

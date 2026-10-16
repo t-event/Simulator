@@ -412,6 +412,23 @@ export function wildcardUse(g: GameState): { total: number; tied: number; spare:
   return { total, tied: Math.min(total, tiedWorkers), spare: Math.max(0, total - tiedWorkers), byRole };
 }
 
+/** Avløsere som kan få fast jobb (B-499): ikke lærlinger eller folk på lederutvikling, de flinkeste først */
+export function fixedJobCandidates(g: GameState): Worker[] {
+  return g.workers
+    .filter((w) => w.role === "allround" && w.apprenticeUntil === undefined && w.absentReason !== "lederkurs")
+    .sort((a, b) => b.skill - a.skill);
+}
+
+/** Står en avløser fast på en plass i rollen, og finnes det en avløser som kan få den fast (B-499)? */
+export function fixedJobFor(g: GameState, role: RoleId): boolean {
+  return (wildcardUse(g).byRole[role] ?? 0) > 0 && fixedJobCount(g) > 0;
+}
+
+/** Hvor mange avløsere som kan få fast jobb på plassene de står fast på nå (B-499) */
+export function fixedJobCount(g: GameState): number {
+  return Math.min(wildcardUse(g).tied, fixedJobCandidates(g).length);
+}
+
 /**
  * Hva skjer med skiftene hvis en ansatt slutter (B-164)? Skiftlag før og etter, og hva som mangler for lagene man
  * hadde. Brukes når spilleren skal si opp noen.
@@ -1003,7 +1020,7 @@ export function supportAdvice(g: GameState): SupportAdvice[] {
           ? "Ledige avløsere tar plassen til dem som er syke eller har ferie. De ekstra skiftlagene dekker mye, men er flere borte i samme rolle, fyller avløseren hullet."
           : "Ledige avløsere tar plassen til dem som er syke eller har ferie.",
       note: wild.tied
-        ? `${wild.tied} av ${wild.total} avløsere står fast som ${crewList(wild.byRole)}, fordi det mangler egne folk der. Ansetter du dem, blir avløserne ledige.`
+        ? `${wild.tied} av ${wild.total} avløsere står fast som ${crewList(wild.byRole)}, fordi det mangler egne folk der. Gi dem fast jobb der, eller ansett folk til plassene, så blir resten av avløserne ledige.`
         : undefined,
     });
   return out;

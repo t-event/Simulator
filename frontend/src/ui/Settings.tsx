@@ -3,9 +3,10 @@ import { SheetHead } from "./ds";
 import { Icon, type IconName } from "./icons";
 import { CHANGELOG } from "../game/changelog";
 import { ChangelogSheet } from "./Changelog";
-import { borrow, repay } from "../game/actions";
+import { borrow, repay, repayRecon } from "../game/actions";
 import { LOAN_INTEREST_PER_DAY } from "../game/data";
 import { creditLimit, maxLoan } from "../game/engine";
+import { RECON } from "../game/reconstruction";
 import { maxSpeed } from "../game/research";
 import type { PlantStats } from "../game/plant";
 import type { GameState } from "../game/types";
@@ -28,6 +29,16 @@ export function BankCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
       <p>
         Lån: <strong>{fmtKr(g.loan)}</strong> av maks {fmtKr(maxLoan(g))}
       </p>
+      {/* Gjelden etter en rekonstruksjon (B-495): betales av seg selv med en andel av salget */}
+      {(g.recon?.debt ?? 0) > 0 && (
+        <p>
+          Gjeld etter konkursen: <strong>{fmtKr(g.recon!.debt)}</strong>{" "}
+          <span className="g-muted">
+            – {Math.round(RECON.revenueShare * 100)} % av salget går til den hvert døgn ({fmtKr(g.recon!.paid)} betalt).
+            Du kan ikke flytte opp igjen før den er betalt.
+          </span>
+        </p>
+      )}
       <p className="g-muted">
         Rente {fmtPct(LOAN_INTEREST_PER_DAY * 365, 0)} per år, trukket daglig. Banken låner mer til større verk med godt
         omdømme. Kassekreditt: {fmtKr(creditLimit(g))} – blir du stående under den i en uke, er det konkurs.
@@ -39,6 +50,11 @@ export function BankCard({ g, act }: { g: GameState; act: GameApi["act"] }) {
         <button disabled={g.loan <= 0 || g.cash <= 0} onClick={() => act((gg) => repay(gg, loanStep))}>
           Betal ned {fmtKr(Math.min(loanStep, g.loan, Math.max(0, g.cash)))}
         </button>
+        {(g.recon?.debt ?? 0) > 0 && (
+          <button disabled={g.cash <= 0} onClick={() => act((gg) => repayRecon(gg, loanStep))}>
+            Betal {fmtKr(Math.min(loanStep, g.recon!.debt, Math.max(0, g.cash)))} på gjelden
+          </button>
+        )}
       </div>
     </Card>
   );

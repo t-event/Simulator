@@ -15,6 +15,52 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 501,
+    date: "2026-10-16",
+    title: "Skiftlederen ordner faste jobber",
+    items: [
+      "Har du skiftleder, kan du slå på at skiftlederen gir avløserne fast jobb av seg selv når noen slutter eller går av med pensjon (Folk → Skift).",
+      "Beskjeden om at noen har sagt opp eller går av med pensjon, har nå en knapp som tar deg rett til skiftene eller søkerne.",
+    ],
+  },
+  {
+    b: 499,
+    date: "2026-10-15",
+    title: "Avløserne kan få fast jobb",
+    items: [
+      "Når folk slutter eller går av med pensjon, fyller avløserne plassene. Nå kan du gi dem fast jobb der: avløseren blir støper, ovnsoperatør eller det som trengs, med lønna til rollen.",
+      "Knappen «Gi avløserne fast jobb» står på Folk → Skift, og under «Mer» på hver avløser. Resten av avløserne blir ledige til fravær.",
+    ],
+  },
+  {
+    b: 498,
+    date: "2026-10-15",
+    title: "Vennene på kartet og nye merker for verksjefene",
+    items: [
+      "Følger du noen, er verkene deres grønne på verdenskartet, og filteret «Venner» viser bare dine og deres verk.",
+      "Nye prestasjoner for verksjefene: den første du ansetter, samtalene du svarer på, og en verksjef som trives godt.",
+      "Etter en rekonstruksjon sier et råd på Verket hvor mye av gjelden kassa kan betale, så du kommer deg opp igjen.",
+    ],
+  },
+  {
+    b: 495,
+    date: "2026-10-14",
+    title: "Konkurs er ikke lenger slutten",
+    items: [
+      "Går verket konkurs fra støperiet og opp, kan banken rekonstruere det: du driver videre på nivået under i stedet for å starte i garasjen.",
+      "Det koster: utstyret fra det høyeste nivået selges, forskning fra de siste 30 døgnene tas tilbake, omdømmet faller kraftig, og lånet blir gjeld som betales med 10 % av salget. Du flytter ikke opp igjen før gjelden er betalt (den kan også betales ned i banken).",
+      "Forskning fra før, de flinkeste folka, prestasjonene og konsernet beholdes. Banken gjør det høyst én gang i måneden.",
+    ],
+  },
+  {
+    b: 493,
+    date: "2026-10-14",
+    title: "Vennene dine på topplista",
+    items: [
+      "Følger du noen, kan du velge «Venner» over topplista og ukelista. Da ser du bare dem du følger og deg selv – med plassen på hele lista.",
+    ],
+  },
+  {
     b: 491,
     date: "2026-10-14",
     title: "Ordren fra utlandet er ikke lenger umulig",

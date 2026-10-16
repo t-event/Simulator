@@ -3,7 +3,7 @@
  * ringer»). Serveren avgjør alt (supabase/152_verksjefer.sql); kortet viser bare det serveren svarer. Vises når bryteren
  * er på og spilleren har et ferdig verk – før det finnes det ikke (B-180).
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { realNow } from "../game/clock";
 import {
   bestMandate,
@@ -46,6 +46,8 @@ import { Button, Callout, SheetHead } from "./ds";
 import { fmtKr } from "./format";
 import { Icon } from "./icons";
 import { Portal } from "./Portal";
+import { isMine } from "./claims";
+import { userId } from "../net/supabase";
 
 type Act = GameApi["act"];
 
@@ -92,8 +94,12 @@ function modText(m: Mandate, s: ManagerStats, modBase: number): string {
 }
 
 /** Skriver svaret fra serveren som en beskjed i spillet */
-function report(act: Act, r: ManagerResult, okText: string): boolean {
-  act(() => (r.ok ? { ok: true, message: okText } : { ok: false, message: MANAGER_REFUSAL_TEXT[r.reason] }));
+function report(act: Act, r: ManagerResult, okText: string, count?: { key: string; uid: string | null }): boolean {
+  act((g) => {
+    // Tellerne til prestasjonene (B-497): bare det serveren sa ja til, og bare i spillet til kontoen som spurte (B-426)
+    if (r.ok && count && isMine(g, count.uid)) g.counters[count.key] = (g.counters[count.key] ?? 0) + 1;
+    return r.ok ? { ok: true, message: okText } : { ok: false, message: MANAGER_REFUSAL_TEXT[r.reason] };
+  });
   return r.ok;
 }
 
@@ -131,6 +137,7 @@ function CallBox({
   if (!card) return null;
   const answer = async (choice: 0 | 1) => {
     setBusy(true);
+    const uid = userId();
     const r = await answerCall(call.id, choice);
     setBusy(false);
     const o = card.options[choice];
@@ -145,6 +152,7 @@ function CallBox({
           : r.ok && r.outcome === "uhell"
             ? `${card.title}: det gikk dårlig denne gangen.`
             : `${card.title}: «${o.label}». Verksjefen setter det i gang.`,
+      { key: "samtale_besvart", uid },
     );
   };
   // Verksjefens råd er det verksjefen selv ville valgt (B-489): følger du det, trives verksjefen bedre
@@ -223,9 +231,16 @@ function HireSheet({
   const [busy, setBusy] = useState(false);
   const hire = async (c: ManagerCandidate) => {
     setBusy(true);
+    const uid = userId();
     const r = await hireManager(plant, c.slot, mandate);
     setBusy(false);
-    if (report(act, r, `${c.name} er ny verksjef på ${name} (${MANDATE_NAME[mandate].toLowerCase()}).`)) onClose();
+    if (
+      report(act, r, `${c.name} er ny verksjef på ${name} (${MANDATE_NAME[mandate].toLowerCase()}).`, {
+        key: "verksjef_ansatt",
+        uid,
+      })
+    )
+      onClose();
   };
   return (
     <Portal>
@@ -388,6 +403,20 @@ function ManagerSheet({
 /** Kortet på Konsern → Oversikt */
 export function ManagersCard({ g, act, status }: { g: GameState; act: Act; status: ManagerStatus | null }) {
   const [sheet, setSheet] = useState<{ kind: "hire" | "manager"; plant: number } | null>(null);
+  // Prestasjonene (B-497): verksjefer ansatt før tellerne kom, og en som trives godt, telles fra statusen fra serveren
+  const hired = status?.enabled ? status.managers.length : 0;
+  const happy = status?.enabled ? status.managers.some((m) => m.loyalty >= 75) : false;
+  useEffect(() => {
+    const behind = hired > (g.counters.verksjef_ansatt ?? 0);
+    const newHappy = happy && !g.counters.verksjef_trives;
+    if (!behind && !newHappy) return;
+    act((gg) => {
+      // Statusen gjelder kontoen som er innlogget nå – bare inn i dens spill (B-426)
+      if (!isMine(gg, userId())) return;
+      if (behind) gg.counters.verksjef_ansatt = Math.max(gg.counters.verksjef_ansatt ?? 0, hired);
+      if (newHappy) gg.counters.verksjef_trives = 1;
+    });
+  }, [hired, happy, g.counters.verksjef_ansatt, g.counters.verksjef_trives, act]);
   if (!status?.enabled) return null;
   const modBase = (id: number) => {
     const p = g.konsern.plants.find((x) => x.id === id);

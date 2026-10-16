@@ -14,6 +14,8 @@ import {
   donateFoundation,
   giveBonus,
   hireForWildcards,
+  giveFixedJob,
+  leaderFixedJobs,
   LEADER_COURSE_DAYS,
   leaderCourseBlock,
   leaderCourseCost,
@@ -95,6 +97,7 @@ import {
   fmtKr,
   log,
   makeCandidate,
+  newFurnaceUnit,
   newGame,
   oftenSick,
   creditLimit,
@@ -263,6 +266,8 @@ import {
   avgRating,
   EXAM_RETRY_DAYS,
   normalSalary,
+  quitLink,
+  quitText,
   rateDelivery,
   recipeEstimate,
   ratingFactor,
@@ -342,6 +347,7 @@ import {
   YEAR_DAYS,
 } from "./calendar";
 import { MIN_PER_DAY } from "./data";
+import { noteBuy, reconDay, reconOption, reconstruct, startCash } from "./reconstruction";
 import { fmtDuration } from "../ui/format";
 import { activeWar, WAR, warDay, warFactor } from "./war";
 import { acceptAgreement, buyScrap, roundDay } from "./engine";
@@ -5059,6 +5065,192 @@ test("Ordren fra utlandet (B-491): størrelsen følger valseverket og køen, og 
     priority: 1,
   });
   assert(exportOrder(g) === null, "ordren kom selv om køen var full");
+});
+
+test("Råd om gjelden etter konkursen (B-498): når kassa kan betale, ikke når den trengs til drift", () => {
+  const g = newGame(498);
+  g.stage = 3;
+  g.recon = { debt: 5_000_000, paid: 0, times: [] };
+  g.cash = 0;
+  const tip = () => hints(g, computePlantStats(g)).find((h) => h.text.startsWith("Gjelden etter konkursen"));
+  assert(!tip(), "ikke med tom kasse");
+  g.cash = 50_000_000;
+  const t = tip();
+  assert(!!t && t.view === "verket" && t.sub === "okonomi", `rådet: ${JSON.stringify(t)}`);
+  g.recon.debt = 0;
+  assert(!tip(), "ikke når gjelden er betalt");
+});
+
+test("Prestasjoner for verksjefene (B-497): skjult til første verksjef, så tellerne", () => {
+  const g = newGame(497);
+  assert(!visibleFamilies(g).some((f) => f.id === "verksjef" || f.id === "godsjef"), "skjult uten verksjef");
+  g.counters.verksjef_ansatt = 1;
+  g.counters.samtale_besvart = 10;
+  g.counters.verksjef_trives = 1;
+  checkAchievements(g);
+  assert(
+    hasAchievement(g, "verksjef1") && hasAchievement(g, "samtaler10") && hasAchievement(g, "godsjef"),
+    "første verksjef, ti samtaler og en som trives",
+  );
+  assert(!hasAchievement(g, "verksjef5") && !hasAchievement(g, "samtaler50"), "ikke de neste trinnene ennå");
+  assert(
+    visibleFamilies(g).some((f) => f.id === "verksjef"),
+    "synlig når den er tatt",
+  );
+});
+
+test("Rekonstruksjon (B-495): ett nivå ned, siste 30 døgn tilbake, gjeld i stedet for lån, og høyst én gang i måneden", () => {
+  const g = newGame(495);
+  g.minute = 100 * MIN_PER_DAY;
+  g.stage = 4;
+  g.owned = ["lager", "skraptak", "ferdiglager1", "ferdiglager2", "ferdiglager3", "ovn2", "ovn3"];
+  g.furnaces = [newFurnaceUnit(), newFurnaceUnit(), newFurnaceUnit()];
+  g.furnaces[0].type = "lysbue150";
+  g.furnaces[1].type = "lysbue30";
+  g.furnaces[2].type = "likestrom420";
+  g.furnaceCount = 3;
+  g.castingType = "streng8";
+  g.researched.push("opplaering");
+  g.researchPoints = 100;
+  g.reputation = 80;
+  g.loan = 18_000_000;
+  g.cash = -4_000_000;
+  for (let i = 0; i < 100; i++) g.workers.push(makeCandidate(g, "ovn"));
+  g.contracts = [];
+  // Kjøpt de siste 30 døgnene: tas tilbake. Kjøpt før det: står (hvis nivået under har det)
+  g.recentBuys = [{ day: 50, kind: "addon", id: "lager" }];
+  noteBuy(g, { kind: "addon", id: "skraptak", price: 300_000, stage: 2 });
+  noteBuy(g, { kind: "addon", id: "ferdiglager3", price: 30_000_000, stage: 4 });
+  noteBuy(g, { kind: "research", id: "opplaering" });
+  noteBuy(g, { kind: "fp", id: "samarbeid", fp: 40 });
+  assert(g.recentBuys!.length === 4, "kjøp eldre enn 30 døgn ryddes bort");
+  g.gameOver = true;
+  const now = 1_000 * 86_400_000;
+  const opt = reconOption(g, now);
+  assert(
+    opt.ok && opt.to === 3 && opt.cash > 0 && opt.owed === 300_000 && opt.debt === 11_000_000 + opt.cash + 300_000,
+    `valget: halve lånet og minuset, startkassa og utstyr kjøpt nylig som beholdes: ${JSON.stringify(opt)}`,
+  );
+  assert(reconstruct(g, now), "rekonstruksjonen ble ikke gjort");
+  assert(g.stage === 3 && !g.gameOver && g.speed === 0, "nivå 3, spillet går videre");
+  assert(g.furnaces.length === 2, `ovn 3 (storverket) er solgt: ${g.furnaces.length} ovner`);
+  assert(
+    g.furnaces[0].type === "lysbue30" && g.furnaces[1].type === "lysbue30",
+    `ovnene fra storverket blir grunnversjonen: ${g.furnaces.map((f) => f.type)}`,
+  );
+  assert(g.castingType === "streng1", `støpingen: ${g.castingType}`);
+  assert(!g.owned.includes("ferdiglager3") && !g.owned.includes("ovn3"), "utstyret fra storverket er solgt");
+  assert(g.owned.includes("lager") && g.owned.includes("ferdiglager2"), "utstyr fra før og fra nivået under står");
+  assert(g.owned.includes("skraptak"), "utstyr fra nivået under kjøpt nylig beholdes (prisen ligger i gjelden)");
+  assert(!g.researched.includes("opplaering") && g.researchPoints === 60, "forskning og kjøpte fagpoeng tilbake");
+  assert(
+    g.loan === 0 && opt.ok && g.cash === opt.cash && g.cash === startCash(g) && g.recon?.debt === opt.debt,
+    "lånet blir gjeld, og startkassa er lånt",
+  );
+  assert(g.reputation === 20 && g.workers.length <= 70, "omdømme: høyst halvparten av kravet på nivået under (40)");
+  // Ny konkurs: ikke før gjelden er betalt, og høyst én gang i måneden
+  g.gameOver = true;
+  assert(!reconOption(g, now).ok, "gjelden er ikke betalt");
+  g.recon!.debt = 0;
+  assert(!reconOption(g, now + 10 * 86_400_000).ok, "bare ti dager siden");
+  assert(reconOption(g, now + 31 * 86_400_000).ok, "etter en måned går det igjen");
+  g.gameOver = false;
+  // Gjelden betales med 10 % av salget hvert døgn
+  g.recon!.debt = 1_000_000;
+  g.history.push({ ...structuredClone(g.today), income: { kontrakt: 3_000_000, spot: 1_000_000 } });
+  const cash = g.cash;
+  reconDay(g);
+  assert(g.recon!.debt === 600_000 && g.cash === cash - 400_000, `betalt: ${g.recon!.debt}, ${cash - g.cash}`);
+  // Fra verkstedet: bare nytt spill
+  const v = newGame(1);
+  v.stage = 1;
+  v.gameOver = true;
+  assert(!reconOption(v).ok && !reconstruct(v), "verkstedet rekonstrueres ikke");
+});
+
+test("Fast jobb til avløsere (B-499): avløserne tar plassene de står fast på, blir ledige, og skiftene er like", () => {
+  const g = newGame(76);
+  g.stage = 3;
+  g.castingType = "streng1";
+  g.workers = [];
+  const crew = crewPerShift(g);
+  // Fullt for tre skift, bortsett fra to støpere og én ovnsoperatør; fire avløsere
+  const short: Partial<Record<RoleId, number>> = { stoper: 2, ovn: 1 };
+  for (const [role, n] of Object.entries(crew) as [RoleId, number][])
+    for (let i = 0; i < n * 3 - (short[role] ?? 0); i++) g.workers.push(makeCandidate(g, role));
+  for (let i = 0; i < 4; i++) g.workers.push(makeCandidate(g, "allround"));
+  const avl = g.workers.filter((w) => w.role === "allround");
+  avl[0].skill = 1.2;
+  avl[1].skill = 4.5;
+  avl[2].skill = 3.1;
+  avl[3].skill = 2.2;
+  avl[3].apprenticeUntil = 999; // lærlinger får ikke fast jobb
+  const crews = staffing(g, true).crews;
+  assert(wildcardUse(g).tied === 3, `fast: ${JSON.stringify(wildcardUse(g))}`);
+  // Én bestemt avløser til en bestemt plass, med lønna til rollen
+  const one = avl[0];
+  const r1 = giveFixedJob(g, one.id, "ovn");
+  assert(r1.ok && one.role === "ovn", `én: ${r1.message}`);
+  assert(one.salary === normalSalary(g, "ovn", one.skill), `lønn ${one.salary}`);
+  assert(wildcardUse(g).tied === 2 && wildcardUse(g).byRole.ovn === undefined, "ovnsplassen er ikke fylt fast");
+  // Ingen plass i rollen lenger
+  assert(!giveFixedJob(g, avl[2].id, "ovn").ok, "fikk fast jobb der det ikke trengs");
+  // Lærlingen kan ikke
+  assert(!giveFixedJob(g, avl[3].id, "stoper").ok, "lærling fikk fast jobb");
+  // Resten: de flinkeste først, og skiftene er like etterpå
+  const r = giveFixedJob(g);
+  const after = wildcardUse(g);
+  assert(r.ok && after.tied === 0 && after.total === 0, `etter: ${JSON.stringify(after)} ${r.message}`);
+  assert(avl[1].role === "stoper" && avl[2].role === "stoper" && avl[3].role === "allround", "feil avløsere");
+  assert(staffing(g, true).crews === crews, "skiftene endret seg");
+  assert(!giveFixedJob(g).ok, "ga fast jobb uten at noen står fast");
+  assert(
+    g.log.some((l) => l.text.includes("har fått fast jobb")),
+    "ingenting i loggen",
+  );
+  // Når noen slutter og en avløser fyller plassen, sier beskjeden at avløseren kan få jobben
+  const quitter = g.workers.find((w) => w.role === "stoper" && w.id !== avl[1].id)!;
+  g.workers = g.workers.filter((w) => w !== quitter);
+  g.workers.push(makeCandidate(g, "allround"));
+  assert(quitText([quitter], g).includes("fast jobb"), quitText([quitter], g));
+  assert(!quitText([quitter]).includes("fast jobb"), "uten spillet: som før");
+});
+
+test("Skiftlederen gir avløsere fast jobb (B-500) og beskjedene fører til Folk (B-501)", () => {
+  const g = newGame(77);
+  g.stage = 3;
+  g.castingType = "streng1";
+  g.workers = [];
+  const crew = crewPerShift(g);
+  for (const [role, n] of Object.entries(crew) as [RoleId, number][])
+    for (let i = 0; i < n * 3 - (role === "stoper" ? 1 : 0); i++) g.workers.push(makeCandidate(g, role));
+  for (let i = 0; i < 2; i++) g.workers.push(makeCandidate(g, "allround"));
+  // Uten skiftleder eller uten valget skjer ingenting
+  g.settings.leaderFixedJobs = true;
+  leaderFixedJobs(g);
+  assert(wildcardUse(g).tied === 1, "fast jobb uten skiftleder");
+  assert(quitLink(g) === "folk", `lenke ${quitLink(g)}`);
+  const leader = makeCandidate(g, "skiftleder");
+  g.workers.push(leader);
+  g.settings.leaderFixedJobs = false;
+  leaderFixedJobs(g);
+  assert(wildcardUse(g).tied === 1, "fast jobb uten valget");
+  // Med begge: avløseren får plassen, og loggen sier hvem som gjorde det
+  g.settings.leaderFixedJobs = true;
+  leaderFixedJobs(g);
+  assert(
+    wildcardUse(g).tied === 0 && g.workers.filter((w) => w.role === "stoper").length === crew.stoper! * 3,
+    "plassen",
+  );
+  assert(
+    g.log.some((l) => l.text.startsWith("Skiftlederen ga")),
+    "loggen",
+  );
+  // Ingen avløser å gi plassen: beskjeden fører til søkerne
+  assert(quitLink(g) === "ansett", `lenke etter ${quitLink(g)}`);
+  // I garasjen er det ingen ansatte, og ingen lenke
+  const garage = newGame(1);
+  assert(quitLink(garage) === undefined, "lenke i garasjen");
 });
 
 if (failed) {
