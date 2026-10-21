@@ -40,6 +40,10 @@ regnes av serveren i ekte tid.
   det hva som hjelper i stedet.
 - Ingen hendelseskort om forhold mellom ansatte (trakassering, diskriminering, varsling) – tatt ut etter eierens ønske
   (B-444).
+- **Grønt stål** (B-506): med forskningen «Grønt stål» vises CO₂ per tonn på Resept. Innsatsen teller: råjern 1,9,
+  jernsvamp 0,15, skrap ca. 0,03; i tillegg kommer strøm og 0,08 fast. Hver femte forespørsel vil ha høyst 0,30 til samme
+  pris. Holder snittet kravet, gir det 50 % ekstra omdømme og teller mot prestasjonen «Grønt stål»; ellers ingen bot.
+  «Hydrogenbasert jernsvamp» (350 fagpoeng) åpner jernsvamp (6 200 kr/t, nesten uten sporelementer).
 - **Støpemaskinen og valseverket i kontrollrommet** (B-505): «Ta styringen selv» i utstyrsarket for Støping (med
   strengstøping / valseverk). Tre runder hver. Fagpoeng én gang per spilldøgn per spill. 4–5 stjerner gir i 24/48 timer
   halvparten så mange strenggjennombrudd, eller 1/2 prosentpoeng mer utbytte i valseverket.

@@ -160,6 +160,7 @@ frontend/src/
     reconstruction.ts Rekonstruksjon etter konkurs: ett nivå ned, gjeld, siste 30 døgn tilbake (B-495); valget på konkursskjermen
     pension.ts   Alder og pensjon for de ansatte (B-357): `born`, pensjonsalder 62–67, beskjed en måned før
     minis.ts     Støpemaskinen og valseverket i kontrollrommet: fagpoeng per døgn, rekord og fordelen i drifta (B-505)
+    green.ts     Grønt stål: CO₂ per tonn (innsats, strøm, fast), grønne forespørsler og omdømmet (B-506)
     calendar.ts  Året i spillet (360 døgn, dag 1 = 1. april), vinter 15.11.–14.3. og frost (B-265, B-272), fellesferie (B-298);
                  `calendarAhead` til kalenderkortet på Oversikt (ui/CalendarCard.tsx, B-321)
     war.ts       Krig i verden, bare i konsernet: dyrere strøm, flere forespørsler, høyst én per år (B-297)
@@ -719,6 +720,9 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `buyUpgrade` (med pris og nivå), `doResearch`, `buyMastery` og `buyFpDeal`. Rekonstruksjonen tar tilbake forskning,
   mesterskap og kjøpte fagpoeng fra de siste 30 døgnene og legger utstyr som beholdes, på gjelden. Nye ting som kjøpes for
   penger hjemme og overlever en rekonstruksjon, må også registreres der, ellers kan «lån maks, kjøp, gå konkurs» lønne seg. Nytt utstyr på et nivå selges av `rebuild` hvis nivået er tapt.
+- **Nye skraptyper** (B-506): markedet trekker tilfeldige tall per skraptype hvert døgn. En ny type må holdes utenfor
+  `marketIds` (`engine.ts`) til den er forsket fram, ellers flyttes alle tilfeldige tall i spillet og `balance.ts` gir
+  helt andre nivådager. `migrate()` fyller nye typer inn i lageret, alle resepter og `scrapFactor`.
 - **Hendelseskort om forhold mellom ansatte** (B-444): trakassering, diskriminering og varsling er et sårt tema for eieren –
   ingen slike kort, kapitler eller popups uten at eieren ber om det.
 - **Skjulte prestasjoner** (B-296): `hidden` på en serie gjør at den bare vises og telles for dem som har den. Bruk

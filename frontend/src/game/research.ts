@@ -398,7 +398,19 @@ export const RESEARCH: Research[] = [
     cost: 600,
     requires: ["produktutvikling", "skumslagg"],
     description: "Dokumentert lavt klimaavtrykk: skrap i stedet for malm, ren strøm og gjenvunnet varme.",
-    effect: "5 % bedre priser og flere forespørsler",
+    effect: "5 % bedre priser og flere forespørsler. Viser CO₂ per tonn, og noen kunder vil ha grønt stål",
+    knowledge: "gront",
+  },
+  {
+    id: "jernsvamp",
+    name: "Hydrogenbasert jernsvamp",
+    stage: 4,
+    cost: 350,
+    requires: ["gronnstal"],
+    scrap: ["jernsvamp"],
+    description:
+      "Jernmalm redusert med hydrogen i stedet for koks. Tynner ut sporelementene som råjern, men med en brøkdel av klimaavtrykket.",
+    effect: "Du kan kjøpe jernsvamp",
   },
   // Konsernet (B-120): åpnes når konsernet er åpnet
   {
@@ -528,6 +540,7 @@ const READS: Record<string, string> = {
   ledelse: "folk",
   produktutvikling: "omdomme",
   gronnstal: "fosfor",
+  jernsvamp: "gront",
   konsernstyring: "konsern",
   fellesvedlikehold: "konsern",
   kunnskapsdeling: "konsern",

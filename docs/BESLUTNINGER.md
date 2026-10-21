@@ -9538,3 +9538,31 @@ Fase 1.3 i forslaget: to nye spill i samme stil som chargen (B-175).
 
 Konto: nei (regel 1 – hovedverket, spilltid).
 
+## B-506 Grønt stål: CO₂ per tonn, jernsvamp og kunder som vil ha grønt stål (2026-10-21)
+Fase 3.1 i SLUTTSPILL-FORSLAG.md, etter eierens «kjør på med resten av dine anbefalinger». Valget i forslaget (spørsmål 4)
+er tatt som anbefalt: grønt stål gir omdømme og en prestasjon, ikke mer penger (B-305, B-455).
+- **Klimaavtrykk** (`game/green.ts`), en avledet verdi (B-180), regnet for hver charge i `startHeat`:
+  - Innsatsen (`SCRAP_CO2`): skrap 0,02–0,04, råjern 1,9, jernsvamp 0,15 og retur 0 t CO₂ per tonn.
+  - Strømmen: 30 g per kWh.
+  - Det faste: 0,08 t for elektroder, kalk og gass.
+  - `g.co2Now` er et glidende snitt av chargene. Tallene er generiske og avrundede, til læring.
+- **«Grønt stål»** (forskningen fra før, nivå 4) viser nå også avtrykket på Resept (per skraptype og for resepten) og
+  åpner kapitlet «Grønt stål og CO₂» i fagboka, med quiz.
+- **Ny forskning «Hydrogenbasert jernsvamp»** (nivå 4, 350 fagpoeng, krever Grønt stål) åpner jernsvamp: 6 200 kr/t,
+  nesten ingen sporelementer og 1,1 i energibehov. Den tynner ut kobber og tinn som råjern, men med en brøkdel av
+  avtrykket.
+- **Grønne forespørsler:** med Grønt stål har hver femte forespørsel et krav på høyst 0,30 t CO₂ per tonn.
+  - Hvilke det blir, avgjøres av nummeret, ikke av en tilfeldig trekning, så resten av spillet trekker de samme tallene.
+  - Prisen er den samme. Avtrykket følger leveransene (`co2Sum`).
+  - Holder snittet kravet, gir det 50 % ekstra omdømme og teller tonnene mot prestasjonen «Grønt stål» (1 000 / 10 000 /
+    100 000 t, skjult til første levering).
+  - Holder det ikke, betaler kunden som vanlig – ingen bot. Salg viser hva resepten gir mot kravet.
+- **Markedet** trekker ikke tall for jernsvamp før den er forsket fram. Ellers ville en ny skraptype flyttet alle
+  tilfeldige tall i spillet: nivådagene i `balance.ts` ble først helt annerledes, og nå er de like som før.
+- Testspilleren forsker jernsvamp i konsernfasen (alt som er igjen). Kassa på slutten varierer derfor mer enn før,
+  mens omdømmet blir høyere. Alle mål er OK.
+- **Lagringen:** `migrate()` legger jernsvamp inn med tomt lager, 0 i alle resepter og vanlig pris. Serveren leser ikke
+  skraptypene.
+
+Konto: nei (regel 1 – hovedverket, spilltid).
+

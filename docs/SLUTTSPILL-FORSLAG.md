@@ -105,7 +105,7 @@ det som må lages.
 
 ## 3. Fase 3 – nytt innhold (større)
 
-### 3.1 Grønt stål hjemme
+### 3.1 Grønt stål hjemme – bygget (B-506)
 
 - **Hva:** en ny gren etter storverket – ikke et nytt nivå:
   - Forskning på hydrogenbasert jernsvamp (DRI), som erstatter noe av skrapet, og CO₂-regnskap per tonn.

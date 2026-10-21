@@ -306,6 +306,36 @@ export const KNOWLEDGE: KnowledgeCard[] = [
     ],
   },
   {
+    id: "gront",
+    title: "Grønt stål og CO₂",
+    icon: "trees",
+    part: "ovn",
+    short:
+      "Stål av skrap har et lite klimaavtrykk. Råjern fra masovn har et stort. Jernsvamp laget med hydrogen kan tynne ut skrapet nesten uten CO₂.",
+    pages: [
+      {
+        head: "Hvor kommer CO₂-en fra?",
+        text: "Avtrykket per tonn stål regnes fra alt som går inn: innsatsen i ovnen, strømmen til lysbuen og det som brukes underveis – elektroder, kalk og gass i brennerne. Verket viser det i tonn CO₂ per tonn stål under Resept.",
+      },
+      {
+        head: "Skrap mot malm",
+        text: "Skrap er stål som alt er laget, så det har nesten ikke noe avtrykk. Råjern lages av malm i en masovn med koks, og det gir rundt to tonn CO₂ per tonn. Råjern tynner ut kobber og tinn, men gjør stålet mye mindre grønt.",
+      },
+      {
+        head: "Hydrogen og jernsvamp",
+        text: "Jernmalm kan reduseres med hydrogen i stedet for koks. Da blir det vann i stedet for CO₂, og resultatet er jernsvamp: nesten rent jern som tynner ut sporelementene like godt som råjern. Det er dyrere, og det krever litt mer strøm å smelte.",
+      },
+      {
+        head: "Strømmen teller",
+        text: "En lysbueovn bruker mye strøm. Med ren strøm, som vann- og vindkraft, blir avtrykket fra strømmen lite. Hver kWh du sparer, gjør likevel stålet litt grønnere.",
+      },
+      {
+        head: "Kunder som vil ha grønt stål",
+        text: "Noen kunder vil ha stål under et krav til CO₂ per tonn. Holder stålet kravet, snakker de varmt om verket. Holder det ikke, betaler de som vanlig – men du går glipp av omdømmet.",
+      },
+    ],
+  },
+  {
     id: "fosfor",
     title: "Fosfor og avslagging",
     icon: "research",

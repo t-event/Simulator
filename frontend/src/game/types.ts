@@ -5,7 +5,7 @@
  * lastes inn igjen uten omforming. Motoren endrer tilstanden på stedet.
  */
 
-export type ScrapId = "blandet" | "tungt" | "shredder" | "spon" | "rent" | "rajern" | "retur";
+export type ScrapId = "blandet" | "tungt" | "shredder" | "spon" | "rent" | "rajern" | "jernsvamp" | "retur";
 export type ProductId = "stopegods" | "blokk" | "emne" | "armering";
 export type GradeId = "enkel" | "standard" | "armering" | "lavkarbon" | "hoykarbon" | "premium";
 export type RoleId =
@@ -151,6 +151,10 @@ export interface Contract {
   landmark?: string;
   /** Forespørselen kom mens etterspørselen etter kvaliteten eller varen var høy (B-255) */
   trend?: boolean;
+  /** Grønt stål (B-506): kunden vil ha høyst så mange tonn CO₂ per tonn stål */
+  co2Max?: number;
+  /** Tonn CO₂ for det som er levert så langt (tonn levert × klimaavtrykket da) */
+  co2Sum?: number;
 }
 
 /**
@@ -652,6 +656,8 @@ export interface GameState {
   pendingManual: ManualRequest | null;
   /** Beste poengsum i kontrollrommet (B-175) */
   controlBest?: number;
+  /** Klimaavtrykket til stålet verket lager nå, tonn CO₂ per tonn (B-506): snittet av de siste chargene */
+  co2Now?: number;
   /** Støpemaskinen og valseverket i kontrollrommet (B-505): rekord, fagpoeng i dag og fordelen. Mangler = ikke spilt */
   minis?: Partial<Record<MiniKind, MiniRecord>>;
   /** Hele verket er stengt til dette spillminuttet (dødsulykke, B-265/B-397); mangler = åpent */

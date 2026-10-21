@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 506,
+    date: "2026-10-21",
+    title: "Grønt stål",
+    items: [
+      "Med «Grønt stål» forsket fram ser du klimaavtrykket på Resept: hvor mye CO₂ hvert tonn stål gir, og hvor mye hver skraptype bidrar. Råjern fra masovn gir mest.",
+      "Ny forskning: hydrogenbasert jernsvamp – rent jern som tynner ut kobber og tinn med lite CO₂, men er dyrt.",
+      "Noen kunder vil ha grønt stål. Leverer du under kravet, får du ekstra omdømme og en ny prestasjon. Prisen er den samme.",
+      "Nytt kapittel i fagboka: «Grønt stål og CO₂», med quiz.",
+    ],
+  },
+  {
     b: 505,
     date: "2026-10-21",
     title: "Ta styringen ved støpemaskinen og i valseverket",

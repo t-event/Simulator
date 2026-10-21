@@ -370,6 +370,15 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
     ]),
     hidden: true,
   },
+  // Grønt stål (B-506): tonn levert under CO₂-kravet – vises når den første grønne kontrakten er levert
+  {
+    ...family("gront", "trees", "Grønt stål", "Kunder", counter("gront_t"), [
+      ["gront1k", 1000, "Grønn leverandør", "Lever 1 000 t grønt stål under CO₂-kravet.", 20],
+      ["gront10k", 10000, "Grønn industri", "Lever 10 000 t grønt stål under CO₂-kravet.", 40],
+      ["gront100k", 100000, "Grønt stålverk", "Lever 100 000 t grønt stål under CO₂-kravet.", 80],
+    ]),
+    hidden: true,
+  },
   // Rekonstruksjon (B-495): bare for dem som har gått konkurs og bygget seg opp igjen til nivået de falt fra
   {
     ...family(

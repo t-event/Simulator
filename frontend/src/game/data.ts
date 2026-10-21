@@ -131,6 +131,21 @@ export const SCRAP_TYPES: Record<ScrapId, ScrapType> = {
     buyable: true,
     description: "Nesten fritt for sporelementer, men med rundt 4 % karbon. Karbonet må brennes bort med oksygen.",
   },
+  jernsvamp: {
+    id: "jernsvamp",
+    name: "Jernsvamp",
+    short: "Jernsvamp",
+    price: 6200,
+    energy: 1.1,
+    tramp: 0.005,
+    p: 0.008,
+    c: 0.03,
+    dirt: 0.03,
+    radioPerT: 0,
+    buyable: true,
+    description:
+      "Jernmalm redusert med hydrogen i stedet for koks. Nesten rent jern med lavt klimaavtrykk, men dyrt og litt tyngre å smelte.",
+  },
   retur: {
     id: "retur",
     name: "Returskrap",

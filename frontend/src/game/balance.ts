@@ -109,6 +109,7 @@ function expectedFor(g: GameState, recipe: Recipe, grade: GradeId) {
     spon: { c: 0.3, p: 0.035, tramp: 0.35, price: 1700 },
     rent: { c: 0.08, p: 0.012, tramp: 0.05, price: 4200 },
     rajern: { c: 4, p: 0.05, tramp: 0.01, price: 5000 },
+    jernsvamp: { c: 0.03, p: 0.008, tramp: 0.005, price: 6200 },
     retur: { c: 0.2, p: 0.02, tramp: 0.15, price: 0 },
   };
   let c = 0;

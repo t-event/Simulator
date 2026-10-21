@@ -7,6 +7,7 @@
  */
 import { reconDay } from "./reconstruction";
 import { castCalmFactor, rollYieldBonus } from "./minis";
+import { GREEN, greenOn, heatCo2, noteHeatCo2, SCRAP_CO2, contractCo2, fmtCo2 } from "./green";
 import { hasNeighbor, reputationFloor } from "./building";
 import {
   BANKRUPTCY_DAYS,
@@ -165,7 +166,7 @@ export const TARGET_C: Record<GradeId, number> = {
 // ------------------------------------------------------------------ //
 // Oppstart
 // ------------------------------------------------------------------ //
-function emptyStock(): ScrapStock {
+export function emptyStock(): ScrapStock {
   return { t: 0, p: 0, tramp: 0, c: 0, dirt: 0, radioactive: false };
 }
 
@@ -221,7 +222,7 @@ export function newGame(seed = Date.now()): GameState {
     castWait: null,
     rollProgressT: 0,
     scrap,
-    recipe: { blandet: 30, tungt: 60, shredder: 0, spon: 0, rent: 0, rajern: 0, retur: 10 },
+    recipe: { blandet: 30, tungt: 60, shredder: 0, spon: 0, rent: 0, rajern: 0, jernsvamp: 0, retur: 10 },
     gradeRecipes: {},
     targetGrade: "standard",
     lots: [],
@@ -605,6 +606,8 @@ interface Mix {
   dirt: number;
   energy: number;
   radioactive: boolean;
+  /** Klimaavtrykket fra innsatsen, tonn CO₂ per tonn (B-506) */
+  co2: number;
 }
 
 /** Hva spilleren kan gjøre når ovnen står uten skrap: hvorfor planleggeren ikke har kjøpt, eller at noen må kjøpe (B-048) */
@@ -762,6 +765,7 @@ export function takeScrap(
     dirt: 0,
     energy: 0,
     radioactive: false,
+    co2: 0,
   };
   for (const id of SCRAP_IDS) {
     const t = amounts[id];
@@ -782,6 +786,7 @@ export function takeScrap(
     mix.expected.tramp += w * known.tramp * trampF;
     mix.dirt += w * stock.dirt * dirtF;
     mix.energy += w * type.energy;
+    mix.co2 += w * SCRAP_CO2[id];
     if (stock.radioactive) mix.radioactive = true;
   }
   mix.energy *= 1 + mix.dirt;
@@ -888,6 +893,8 @@ function startHeat(g: GameState, index: number, plant: PlantStats): boolean {
   const grade = furnaceGrade(g, index);
   const mix = takeScrap(g, size, false, gradeRecipe(g, grade));
   if (!mix) return false;
+  // Klimaavtrykket til chargen (B-506): innsatsen, strømmen og det faste
+  noteHeatCo2(g, heatCo2(mix.co2, stats.kwhPerT * mix.energy));
   const furnace = stats.furnace;
   const metallicYield = Math.max(0.6, 1 - mix.dirt - furnace.oxidationLoss);
 
@@ -2330,6 +2337,8 @@ function deliverContracts(g: GameState): void {
       lot.t -= take;
       c.delivered += take;
       addIncome(g, "kontrakt", take * c.pricePerT);
+      // Grønt stål (B-506): avtrykket til det verket lager nå, følger med leveransen
+      if (c.co2Max !== undefined) c.co2Sum = (c.co2Sum ?? 0) + take * (g.co2Now ?? c.co2Max);
       // Kunden merker seg hvor godt stålet holdt kravene (B-161)
       c.qMargin = Math.min(c.qMargin ?? 1, specMargin(lot.analysis, c.grade));
       if (complains(g, lot.analysis, c.grade)) {
@@ -2378,6 +2387,25 @@ function deliverContracts(g: GameState): void {
         `Kontrakten med ${c.customer} er levert. Kunden gir ${r.score}/10: «${r.quote}» Omdømme +${gain.toFixed(1).replace(".", ",")}.`,
         r.score >= 5 ? "good" : "bad",
       );
+      // Grønt stål (B-506): holdt stålet kravet, får verket ekstra omdømme – ellers bare som en vanlig kontrakt
+      const co2 = contractCo2(c);
+      if (co2 !== null && c.co2Max !== undefined) {
+        if (co2 <= c.co2Max + 1e-9) {
+          const extra = Math.round(gain * GREEN.repShare * 10) / 10;
+          adjustReputation(g, extra);
+          countEvent(g, "gront_t", c.tonnes);
+          log(
+            g,
+            `${c.customer} fikk grønt stål: ${fmtCo2(co2)} (krav ${fmtCo2(c.co2Max)}). Omdømme +${extra.toFixed(1).replace(".", ",")} ekstra.`,
+            "good",
+          );
+        } else
+          log(
+            g,
+            `Stålet til ${c.customer} holdt ikke CO₂-kravet: ${fmtCo2(co2)} mot ${fmtCo2(c.co2Max)}. Kunden betaler som vanlig, men det ble ikke noe ekstra omdømme. Mindre råjern i resepten hjelper (se fagboka).`,
+            "info",
+          );
+      }
       if (g.totals.contractsDone === 1) unlock(g, "omdomme");
       if (c.agreementId) agreementWeekClosed(g, c, true);
     }
@@ -2558,8 +2586,12 @@ function makeOffer(g: GameState, stats: PlantStats): Contract | null {
   // Små verk får mer omdømme per kontrakt, så starten ikke står og stamper på omdømmet (B-034)
   const early = g.stage === 0 ? 1.5 : 1;
   const repGain = Math.round((0.4 + 0.5 * size) * (GRADES[grade].premium > 1.1 ? 1.3 : 1) * early * 10) / 10;
+  const id = g.nextContractId++;
+  // Grønt stål (B-506): hver femte forespørsel har et krav til klimaavtrykket når «Grønt stål» er forsket fram. Valgt
+  // etter nummeret, ikke tilfeldig, så resten av spillet trekker de samme tallene som før
+  const green = greenOn(g) && !firstOrders && id % Math.round(1 / GREEN.share) === 0;
   return {
-    id: g.nextContractId++,
+    id,
     customer: customer.name,
     product,
     grade,
@@ -2567,6 +2599,7 @@ function makeOffer(g: GameState, stats: PlantStats): Contract | null {
     delivered: 0,
     pricePerT,
     deadlineDay: today + days,
+    ...(green ? { co2Max: GREEN.limit, co2Sum: 0 } : {}),
     // Tilbudet står åpent 8–20 timer før kunden går videre
     offerExpiresMin: g.minute + uniform(g, 8, 20) * 60,
     repGain,
@@ -3606,7 +3639,10 @@ function onDay(g: GameState, stats: PlantStats): void {
   );
   const trendMsg = updateTrend(g, today, stats.products, trendGrades);
   if (trendMsg) log(g, trendMsg, "event");
-  for (const id of SCRAP_IDS) {
+  // Jernsvampen (B-506) er med i markedet først når den er forsket fram: ellers ville en ekstra type flyttet alle
+  // tilfeldige tall i spillet for alle andre
+  const marketIds = SCRAP_IDS.filter((id) => id !== "jernsvamp" || scrapUnlocked(g, id));
+  for (const id of marketIds) {
     // Skrapprisen følger stålprisen, med egen støy per type
     const mean = 0.4 + 0.6 * m.steelFactor;
     m.scrapFactor[id] = walk(g, m.scrapFactor[id], mean, 0.15, 0.03, 0.6, 1.8);
@@ -3614,7 +3650,7 @@ function onDay(g: GameState, stats: PlantStats): void {
   if (chance(g, 0.03)) {
     const id = pick(
       g,
-      SCRAP_IDS.filter((x) => SCRAP_TYPES[x].buyable),
+      marketIds.filter((x) => SCRAP_TYPES[x].buyable),
     );
     m.scrapFactor[id] = Math.min(1.8, m.scrapFactor[id] * 1.4);
     log(g, `Mangel på ${SCRAP_TYPES[id].name.toLowerCase()}: prisen har steget kraftig.`, "event");

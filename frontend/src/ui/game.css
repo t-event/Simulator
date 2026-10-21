@@ -8892,3 +8892,12 @@ button.g-prod-row:hover {
   align-items: flex-start;
   gap: 2px;
 }
+
+/* Klimaavtrykket under resepten (B-506) */
+.g-co2 .ds-icon {
+  vertical-align: -2px;
+}
+
+.g-co2.is-ok strong {
+  color: var(--ok);
+}

@@ -359,6 +359,7 @@ import { leaderBonus, leaderBonusDue, relineLoanNeed, relineOnLoan } from "./act
 import { autoPlay, ChargeGame, INPUT_LOG_MAX, seededRandom } from "../ui/control/chargeGame";
 import { autoPlayMini, newMiniGame } from "../ui/control/miniGame";
 import { castCalmFactor, finishMini, miniAvailable, miniFpToday, rollYieldBonus } from "./minis";
+import { GREEN, heatCo2, recipeInputCo2 } from "./green";
 import { hints } from "../ui/hints";
 import { answerOrder } from "../ui/quizOrder";
 import { hasMoulds, MOULD, mouldCost, mouldHour, mouldRisk, mouldWear, replaceMoulds, wearMoulds } from "./mould";
@@ -1140,7 +1141,7 @@ test("Skrapinnkjøperen selger skrap ingen resept trenger når lageret er fullt 
   // Lageret fullt av tungt skrap; resepten vil bare ha blandet skrap
   for (const id of Object.keys(g.scrap) as (keyof typeof g.scrap)[]) g.scrap[id].t = 0;
   g.scrap.tungt = { ...g.scrap.tungt, t: stats.yardT, p: 0.02, tramp: 0.16, c: 0.2, dirt: 0.03, radioactive: false };
-  g.recipe = { rent: 0, spon: 0, retur: 0, tungt: 0, rajern: 0, blandet: 100, shredder: 0 };
+  g.recipe = { rent: 0, spon: 0, retur: 0, tungt: 0, rajern: 0, jernsvamp: 0, blandet: 100, shredder: 0 };
   g.gradeRecipes[g.targetGrade] = { ...g.recipe };
   for (const f of g.furnaces) f.grade = null;
   g.cash = 1e9;
@@ -1175,7 +1176,7 @@ test("Skrapklasseren bruker renere skrap når returskrapet er tomt (B-171)", () 
   for (const id of Object.keys(g.scrap) as (keyof typeof g.scrap)[]) g.scrap[id].t = 0;
   g.scrap.tungt.t = 8;
   g.scrap.rent = { ...g.scrap.rent, t: 50, p: 0.012, tramp: 0.05, c: 0.06, dirt: 0.01, radioactive: false };
-  const recipe = { rent: 0, spon: 0, retur: 20, tungt: 80, rajern: 0, blandet: 0, shredder: 0 };
+  const recipe = { rent: 0, spon: 0, retur: 20, tungt: 80, rajern: 0, jernsvamp: 0, blandet: 0, shredder: 0 };
   // Tungt skrap til 80 %, men returskrapet mangler: rent skrap (renere) fyller inn
   const mix = takeScrap(g, 10, false, recipe);
   assert(mix !== null, "ovnen ble stående og vente på returskrap");
@@ -1923,7 +1924,7 @@ test("Skrapklasseren smelter om eget returskrap, og planleggeren holder av plass
       f.grade = null;
       f.type = "lysbue30";
     }
-    g.recipe = { rent: 90, spon: 0, retur: 0, tungt: 0, rajern: 10, blandet: 0, shredder: 0 };
+    g.recipe = { rent: 90, spon: 0, retur: 0, tungt: 0, rajern: 10, jernsvamp: 0, blandet: 0, shredder: 0 };
     g.gradeRecipes[g.targetGrade] = { ...g.recipe };
     return g;
   };
@@ -1951,7 +1952,16 @@ test("Skrapklasseren smelter om eget returskrap, og planleggeren holder av plass
   r.scrap.retur = { t: 30, ...clean };
   r.furnaces.push(structuredClone(r.furnaces[0]));
   r.furnaces[1].grade = "premium";
-  r.gradeRecipes.premium = { rent: 60, spon: 0, retur: 10, tungt: 0, rajern: 30, blandet: 0, shredder: 0 };
+  r.gradeRecipes.premium = {
+    rent: 60,
+    spon: 0,
+    retur: 10,
+    tungt: 0,
+    rajern: 30,
+    jernsvamp: 0,
+    blandet: 0,
+    shredder: 0,
+  };
   takeScrap(r, 100, false, r.recipe);
   // Premium trenger 10 % av 100 t til to charger = 20 t; bare det som er over, kan brukes
   assert(Math.abs(r.scrap.retur.t - 20) < 0.01, `tok returen premium-resepten trenger (${r.scrap.retur.t} t igjen)`);
@@ -2228,7 +2238,7 @@ test("Skrapvarselet (B-219): ikke når ovnen fyller opp med annet skrap, men nå
   const g = newGame(219);
   g.stage = 1;
   const stats = computePlantStats(g);
-  g.recipe = { rent: 0, spon: 0, retur: 50, tungt: 50, rajern: 0, blandet: 0, shredder: 0 };
+  g.recipe = { rent: 0, spon: 0, retur: 50, tungt: 50, rajern: 0, jernsvamp: 0, blandet: 0, shredder: 0 };
   for (const id of Object.keys(g.scrap) as (keyof typeof g.scrap)[]) g.scrap[id].t = 0;
   g.scrap.tungt.t = 1000;
   // Returskrapet er tomt og kan ikke kjøpes, men ovnen fyller opp med tungt skrap: ingen varsel
@@ -4394,7 +4404,7 @@ test("Skrapklasseren (B-397): lagerets faktiske analyse avgjør om returskrap ka
     g.scrap.retur = { ...g.scrap.retur, t: 50, p: 0.01, tramp, c: 0.06, dirt: 0.01, radioactive: false };
     return g;
   };
-  const recipe = { rent: 100, spon: 0, retur: 0, tungt: 0, rajern: 0, blandet: 0, shredder: 0 };
+  const recipe = { rent: 100, spon: 0, retur: 0, tungt: 0, rajern: 0, jernsvamp: 0, blandet: 0, shredder: 0 };
   // Skitten retur (sporelementer over det rene skrapet): ovnen venter heller enn å ødelegge kvaliteten
   const dirty = setup(0.125);
   assert(takeScrap(dirty, 10, false, recipe) === null, "brukte returskrap som var skitnere enn det rene skrapet");
@@ -5320,6 +5330,80 @@ test("Støpemaskinen og valseverket i kontrollrommet (B-505): spillbare, fagpoen
   // Valseverket: ingen fordel uten valseverk, ellers 1–2 prosentpoeng
   const noRoll = finishMini(g, "valsing", 5, 900);
   assert(noRoll.boostHours === 0 && rollYieldBonus(g) === 0, "fordel uten valseverk");
+});
+
+test("Grønt stål (B-506): CO₂ per tonn, forespørsler med krav og ekstra omdømme når stålet holder", () => {
+  const zero = { blandet: 0, tungt: 0, shredder: 0, spon: 0, rent: 0, rajern: 0, jernsvamp: 0, retur: 0 };
+  // Skrap har nesten ikke noe avtrykk, råjern mye, jernsvamp lite
+  const scrap = heatCo2(recipeInputCo2({ ...zero, tungt: 100 }), 420);
+  const pig = heatCo2(recipeInputCo2({ ...zero, tungt: 60, rajern: 40 }), 420);
+  const sponge = heatCo2(recipeInputCo2({ ...zero, tungt: 60, jernsvamp: 40 }), 420);
+  assert(scrap < GREEN.limit && sponge < GREEN.limit && pig > GREEN.limit, `${scrap} ${sponge} ${pig}`);
+  // Forespørsler: hver femte er grønn når «Grønt stål» er forsket fram, ellers ingen
+  const g = newGame(506);
+  g.totals.contractsDone = 5;
+  const stats = computePlantStats(g);
+  const offers = (gg: GameState) => {
+    gg.contracts = [];
+    for (let i = 0; i < 25; i++) {
+      extraOffer(gg, stats);
+      gg.contracts = gg.contracts.map((c) => ({ ...c, status: "misligholdt" as const }));
+    }
+    return gg.contracts.filter((c) => c.co2Max !== undefined).length;
+  };
+  assert(offers(g) === 0, "grønne forespørsler uten forskningen");
+  g.researched.push("gronnstal");
+  const greenOffers = offers(g);
+  assert(greenOffers >= 3 && greenOffers <= 7, `grønne: ${greenOffers} av 25`);
+  // Leveransen: under kravet gir ekstra omdømme og teller tonnene; over kravet bare som vanlig
+  const deliver = (co2Now: number) => {
+    const d = newGame(507);
+    d.stage = 3;
+    d.researched.push("gronnstal");
+    d.pendingDecision = null;
+    d.reputation = 50;
+    const product = d.contracts[0].product;
+    const a = { c: 0.1, p: 0.01, tramp: 0.1 };
+    d.lots = [
+      {
+        id: 1,
+        product,
+        t: 20,
+        analysis: a,
+        known: a,
+        measured: { c: true, p: true, tramp: true },
+        second: false,
+        madeDay: day(d),
+      },
+    ];
+    d.contracts = [
+      {
+        ...structuredClone(d.contracts[0]),
+        id: 99,
+        grade: "enkel",
+        tonnes: 10,
+        delivered: 0,
+        status: "aktiv",
+        priority: 1,
+        repGain: 1,
+        co2Max: GREEN.limit,
+        co2Sum: 0,
+        deadlineDay: day(d) + 5,
+      },
+    ];
+    d.co2Now = co2Now;
+    advance(d, 60);
+    const c = d.contracts.find((x) => x.id === 99);
+    return {
+      done: c?.status === "fullfort",
+      counted: d.counters.gront_t ?? 0,
+      log: d.log.map((l) => l.text).join(" | "),
+    };
+  };
+  const good = deliver(0.12);
+  assert(good.done && good.counted === 10 && good.log.includes("fikk grønt stål"), `grønt: ${JSON.stringify(good)}`);
+  const bad = deliver(0.9);
+  assert(bad.done && bad.counted === 0 && bad.log.includes("holdt ikke CO₂-kravet"), `ikke grønt: ${bad.log}`);
 });
 
 if (failed) {
