@@ -9566,3 +9566,25 @@ er tatt som anbefalt: grønt stål gir omdømme og en prestasjon, ikke mer penge
 
 Konto: nei (regel 1 – hovedverket, spilltid).
 
+## B-507 Regionale fellesprosjekter: simulert, anbefalt modell C, venter på eieren (2026-10-21)
+Fase 2.3 i SLUTTSPILL-FORSLAG.md. Prosjektene flytter penger mellom spillere i ekte tid, og Supabase-connectoren svarte
+ikke. Derfor er de simulert og spesifisert, ikke bygget. Detaljene står i `docs/FELLESPROSJEKT-FORSLAG.md`, og
+simulatoren er `frontend/src/game/projectSim.ts`.
+
+Funnene:
+- Penger tilbake lønner seg nesten aldri for den som betaler, og gratispassasjerene vinner. Modell B ga −2,3 dagers
+  inntekt for dem som bidro og +1,2 for dem som ikke gjorde det.
+- En varig pengefordel blir en ny inntektsmotor (mot B-311/B-393).
+- Kassene på 11–22 mrd. er så store at prosjektene må måles mot kassa, ikke mot dagens inntekt.
+
+Anbefalt er modell C: ingen penger tilbake, titler og +25 %/+10 % regionmester-styrke i 30 dager til de to største
+bidragsyterne. Målet er 2 % av kassene i regionen. Ved bom kommer halvparten tilbake.
+
+De andre serverstegene i planen venter også:
+- K-1 venter på skyggerapporten (2.11) og eierens valg av satser.
+- Flere selskaper venter på eierens valg av type (SLUTTSPILL-FORSLAG spørsmål 3).
+- «Mest modernisert» og regionmester i Hall of Fame krever serveren. Hall of Fame betyr ingenting før sesong 1 slutter.
+
+Endringslogg: nei
+Konto: ja når det bygges (regel 2).
+

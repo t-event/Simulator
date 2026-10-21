@@ -5,6 +5,35 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 421 – 2026-10-21: Kontrollrommet, grønt stål og fellesprosjektene (B-505–B-507)
+
+**Brukeren:** «Vi skal fortsette med sesong 1. Kjør på med resten av dine anbefalinger» (SLUTTSPILL-FORSLAG.md).
+
+**Gjort:**
+- B-505: støpemaskinen og valseverket som spill i kontrollrommet (tre runder hver), med fagpoeng per døgn, rekord og en
+  kort fordel i drifta. Knappene står i arket for Støping.
+- B-506: grønt stål – CO₂ per tonn på Resept, jernsvamp (ny forskning og skraptype), grønne forespørsler med ekstra
+  omdømme og prestasjonen «Grønt stål», og kapitlet med quiz.
+- B-507: fellesprosjektene er simulert (`projectSim.ts`) og spesifisert (`FELLESPROSJEKT-FORSLAG.md`), med anbefalt
+  modell C. De er ikke bygget: connectoren svarte «ingen tilgang», og de flytter penger mellom spillere.
+- Sesong 2 er tatt ut av planen (sesong 1 fortsetter).
+
+**Testet:**
+- Nye tester for B-505 og B-506.
+- `npm test`, `tsc -b`, lint, build og `balance.ts`. Nivådagene er like som før. Kassa på slutten varierer mer, fordi
+  testspilleren forsker jernsvamp i konsernfasen.
+- Playwright:
+  - Støpemaskinen på 320, 390 og 1366 px: hold-runden, tidsrunden og resultatet. To feil ble rettet: fargen på det grønne,
+    og rekorden og fagpoengene på resultatet.
+  - Resept med klimaavtrykket på 320 og 1366 px.
+
+**Gjenstår:**
+- Eierens svar (fellesprosjektene, selskapstype, K-1 etter 2.11).
+- Connectoren.
+- Merge av PR #434.
+
+---
+
 ## Økt 420 – 2026-10-21: Plan for sluttspillet (B-504)
 
 **Brukeren:** spilleren som har kommet lengst, har ikke mer å gjøre – lag en plan for videre utvikling.

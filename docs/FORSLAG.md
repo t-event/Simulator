@@ -75,6 +75,8 @@ til «Avgjort» nederst).
 
 ## Forslag – spillet
 
+- **Regionale fellesprosjekter (B-507):** simulert og spesifisert i `FELLESPROSJEKT-FORSLAG.md`. Anbefalt modell C (titler
+  og regionmester-styrke, ingen penger tilbake). Tre spørsmål til eieren i avsnitt 5.
 - **Sluttspillet videre (eieren 21.10, B-504):** plan i `SLUTTSPILL-FORSLAG.md` – sesong 2, nye kontrollromsspill,
   K-1 på etter 2.11, flere selskaper, regionale fellesprosjekter, grønt stål og industriklynger. Fem spørsmål til eieren i
   avsnitt 4 (dato og vri for sesong 2, fellesprosjektene, selskapstypene, grønt stål og penger, connectoren).

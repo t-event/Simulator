@@ -126,6 +126,7 @@ npx tsx src/game/balance.ts --rekonstruksjon               # konkurs rett etter 
 npx tsx src/game/balance.ts --sommerstans                  # testspilleren velger sommerstans i fellesferien (B-298)
 npx tsx src/game/programSim.ts                             # konsernprogrammene: A mot B (B-388); --k1, --k1-skann, --k1-drift, --k1-kost, --k1-verdi(-skann), --k1-etablering: K-1 med hendelser i regionene (B-389–B-393)
 npx tsx src/game/takeoverSim.ts                            # oppkjøp: når lønner det seg å kjøpe, forsvare eller gi seg – regelsett 1, kandidatene og regelsett 2 (B-440, B-441; --kort); --gulv: anbudsgulvet A–F (B-449)
+npx tsx src/game/projectSim.ts                             # regionale fellesprosjekter: modellene A–C, bidragsytere mot gratispassasjerer (B-507)
 npx tsx src/game/managerSim.ts                             # verksjefene mot akseptkriteriene: netto per mandat, fisking, samtalene (B-488)
 npx tsx src/game/worldSim.ts                               # verdenssimulatoren: konsernkassa for liten/middels/stor/legacy etter 30–730 ekte dager, dager etter fullt konsern, maks bud, andel brukt (B-380, B-385; --dager 180 for kortere; --verksjef: uten / Lønnsomhet / Vekst, B-494)
 npm run build
@@ -267,6 +268,7 @@ docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretn
                VERKSJEF-FORSLAG.md (verksjefer, besvart; V1 ferdig spesifisert i avsnitt 10, bygges etter V0/K-1, B-409),
                REKONSTRUKSJON-FORSLAG.md (rekonstruksjon etter konkurs, modellene A–E – modell B bygget, B-495),
                SLUTTSPILL-FORSLAG.md (plan for spillere som er ferdige: sesong 2, K-1, selskaper, fellesprosjekter, B-504),
+               FELLESPROSJEKT-FORSLAG.md (regionale fellesprosjekter, simulert i game/projectSim.ts, anbefalt modell C, B-507),
                STATUS.md (fasit for hvordan spillet virker nå, B-385), DATAKVALITET.md (tidslinjetallene, B-456),
                RAPPORT-2026-10-02.md (pengestrømmene 29.9–1.10, utbytterettingen og etterbetalingen, B-423; utført B-446),
                UKENS-KONTROLLROM.md (variant A bygget, B-387), KONSERNKAPITAL-FORSLAG.md (forslag med eierens svar, B-386/B-387),
