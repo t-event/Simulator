@@ -5,6 +5,26 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 420 – 2026-10-21: Plan for sluttspillet (B-504)
+
+**Brukeren:** spilleren som har kommet lengst, har ikke mer å gjøre – lag en plan for videre utvikling.
+
+**Gjort:**
+- `docs/SLUTTSPILL-FORSLAG.md` med tre faser:
+  1. Nye mål: sesong 2, Hall of Fame, ukeliste og kontrollrom.
+  2. Valg for pengene: K-1, flere selskaper og regionale fellesprosjekter.
+  3. Grønt stål og industriklynger.
+- Fem spørsmål til eieren. B-504, FORSLAG.md, STATUS (avsnitt 10) og CLAUDE.md er oppdatert.
+
+**Ikke gjort:** lagringen til spilleren er ikke sett på, fordi Supabase-connectoren svarer «You do not have permission».
+
+**Gjenstår:**
+- Eierens svar på spørsmålene.
+- Merge av PR #434.
+- Connectoren.
+
+---
+
 ## Økt 419 – 2026-10-21: Planleggeren og landemerkene (B-503)
 
 **Brukeren:** planleggeren prioriterer ordren uten frist (landemerket) foran alle andre, så kontrakter spilleren hadde

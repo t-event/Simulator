@@ -315,6 +315,7 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
   gi valg, ikke forsvinne. Ingen økonomiske justeringer før eieren har svart.
 - `VERKSJEF-FORSLAG.md` – V1–V3 er bygget (B-488, B-489).
 - `REKONSTRUKSJON-FORSLAG.md` – modell B er bygget (B-495).
+- `SLUTTSPILL-FORSLAG.md` – plan for spillere som er ferdige (B-504): sesong 2, kontrollrom, K-1, selskaper, fellesprosjekter.
 - Programmodell for konsernprogrammene: eieren valgte B (aktivt budsjett, B-388/B-389). Spesifikasjonen står i
   `K1-PROGRAMMER.md` (B-389): serveren har i dag ingen hendelser i konsernverdenen, så K-1 trenger et lite, nøytralt
   hendelseslag (V0) for at Teknologi, Robusthet og Driftsytelse skal ha ekte effekt. Eieren godkjente V0, satsingene

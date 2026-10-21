@@ -9487,3 +9487,21 @@ Målt på et lagret stålverk med en full kø og et landemerke på fem døgns pr
 
 Konto: nei (regel 1 – hovedverket).
 
+## B-504 Plan for sluttspillet videre (2026-10-21)
+Eieren: spilleren som har kommet lengst, har ikke mer å gjøre i spillet – lag en plan for videre utvikling.
+
+Planen står i `docs/SLUTTSPILL-FORSLAG.md`. Kort fortalt:
+- **Fase 1, nye mål:** sesongslutt og sesong 2 (pynten er klar), regionmester i Hall of Fame, ukelista «Mest
+  modernisert», og nye spill i kontrollrommet (støping og valsing).
+- **Fase 2, valg for pengene:** K-1 slås på etter skyggerapporten 2.11, flere selskaper med ulik nytte (1 per 4 aktive
+  konserneiere) og regionale fellesprosjekter i ekte tid.
+- **Fase 3:** grønt stål hjemme (læring) og industriklynger (samarbeid).
+
+Ikke anbefalt nå: prestisjerestart (B-141), eierutbytte og høyere tak på konsernet.
+
+Ingenting er bygget eller endret. Fem spørsmål til eieren står i avsnitt 4. Supabase-connectoren svarte «ingen tilgang»,
+så lagringen til spilleren er ikke sett på – planen kalibreres når den virker igjen.
+
+Endringslogg: nei
+Konto: avgjøres per steg (se forslaget).
+

@@ -75,6 +75,10 @@ til «Avgjort» nederst).
 
 ## Forslag – spillet
 
+- **Sluttspillet videre (eieren 21.10, B-504):** plan i `SLUTTSPILL-FORSLAG.md` – sesong 2, nye kontrollromsspill,
+  K-1 på etter 2.11, flere selskaper, regionale fellesprosjekter, grønt stål og industriklynger. Fem spørsmål til eieren i
+  avsnitt 4 (dato og vri for sesong 2, fellesprosjektene, selskapstypene, grønt stål og penger, connectoren).
+
 - **Mer å gjøre i sluttspillet (eieren 13.10, B-487):** regionmester og nye konsernmål er bygget, og verksjefene
   med samtalene og trivselen er bygget (B-488, B-489), og verksjefene er med i simuleringene (B-494) og har egne prestasjoner (B-497). Mulig senere: en ukeliste
   «Mest modernisert» (krever ny ukestype, B-457), regionmester i Hall of Fame ved sesongslutt, og flere selskaper når
