@@ -1886,13 +1886,58 @@ function rollingFeed(g: GameState, orders: Contract[]): Contract | undefined {
 }
 
 /** Planleggeren sorterer køen etter frist. */
-function plannerSort(g: GameState): void {
+function plannerSort(g: GameState, stats: PlantStats): void {
   // Den innleide planleggeren fra rådgiveren sorterer uansett forskning (B-059)
   if (!plannerSortsQueue(g)) return;
-  // Landemerker først (B-211), så etter frist
-  orderQueue(g)
-    .sort((a, b) => (a.landmark ? 0 : 1) - (b.landmark ? 0 : 1) || a.deadlineDay - b.deadlineDay)
-    .forEach((c, i) => (c.priority = i + 1));
+  const perDay = plantStopped(g) ? 0 : realisticDailyT(g, stats);
+  plannerOrder(g, perDay).forEach((c, i) => (c.priority = i + 1));
+}
+
+/**
+ * Hvor full et landemerke kan gjøre køen foran en kontrakt med frist (B-503): andelen av tida til fristen som
+ * produksjonen før den får bruke. Litt under 1, fordi døgnproduksjonen er et anslag (havarier, fravær)
+ */
+export const LANDMARK_SLACK = 0.9;
+
+/**
+ * Rekkefølgen planleggeren setter køen i (B-503): etter frist, og hvert landemerke (ingen frist, B-218) så tidlig det går
+ * uten at en kontrakt eller en ukeleveranse i en rammeavtale blir for sen. Før gikk landemerker alltid først (B-211), og
+ * kontrakter spilleren hadde tid til, ble plutselig for sene. Går det ikke noe sted, står landemerket bakerst til det blir
+ * plass. Salgsdirektøren regner fortsatt med landemerkene først (`queueFit`), så han holder av plass til dem.
+ */
+export function plannerOrder(g: GameState, perDay: number): Contract[] {
+  const queue = orderQueue(g);
+  const marks = queue.filter((c) => c.landmark);
+  const list = queue.filter((c) => !c.landmark).sort((a, b) => a.deadlineDay - b.deadlineDay);
+  if (!marks.length) return list;
+  if (perDay <= 0) return [...list, ...marks];
+  const today = day(g);
+  const left = (c: Contract) => Math.max(0, c.tonnes - c.delivered);
+  // Jobbene med frist: kontraktene i køen og ukene i rammeavtalene som kommer, i fristrekkefølge
+  type Job = { t: number; deadline: number; contract?: Contract; landmark?: boolean };
+  let jobs: Job[] = list.map((c) => ({ t: left(c), deadline: c.deadlineDay, contract: c }));
+  for (const a of g.agreements)
+    if (a.status === "aktiv") for (const w of agreementWeeks(a)) jobs.push({ t: w.t, deadline: w.deadline });
+  jobs.sort((a, b) => a.deadline - b.deadline);
+  for (const m of marks) {
+    let at = jobs.length;
+    for (let k = 0; k <= jobs.length; k++) {
+      const trial = [...jobs.slice(0, k), { t: left(m), deadline: Infinity, landmark: true }, ...jobs.slice(k)];
+      let cum = 0;
+      let ok = true;
+      for (let j = 0; j < trial.length && ok; j++) {
+        cum += trial[j].t;
+        if (j > k && !trial[j].landmark && cum > LANDMARK_SLACK * perDay * Math.max(1, trial[j].deadline - today + 1))
+          ok = false;
+      }
+      if (ok) {
+        at = k;
+        break;
+      }
+    }
+    jobs = [...jobs.slice(0, at), { t: left(m), deadline: Infinity, contract: m, landmark: true }, ...jobs.slice(at)];
+  }
+  return jobs.flatMap((j) => (j.contract ? [j.contract] : []));
 }
 
 /**
@@ -3353,7 +3398,7 @@ function onHour(g: GameState, stats: PlantStats): void {
     }
     if (lotsTonnage(g) > stats.storeT * 0.85) sellExcess(g, stats, 0.6);
   }
-  plannerSort(g);
+  plannerSort(g, stats);
   followQueue(g, stats);
   // Automatisk innkjøp krever en planlegger (se B-021). Er planleggeren borte, går de faste bestillingene
   // videre (B-048)

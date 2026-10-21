@@ -40,6 +40,9 @@ regnes av serveren i ekte tid.
   det hva som hjelper i stedet.
 - Ingen hendelseskort om forhold mellom ansatte (trakassering, diskriminering, varsling) – tatt ut etter eierens ønske
   (B-444).
+- **Planleggeren og landemerker** (B-503): planleggeren sorterer ordrekøen etter frist og setter et landemerke (ingen
+  frist) så tidlig det går uten at en kontrakt eller ukeleveranse blir for sen (90 % av døgnproduksjonen). Ellers venter
+  det bakerst. Uten planlegger går landemerket først når det tas. Salgsdirektøren regner med landemerkene først.
 - **Fast jobb til avløsere** (B-499): står avløsere fast på plasser uten egne folk (folk har sluttet eller gått av med
   pensjon), kan de få fast jobb der (Folk → Skift, eller «Mer» per avløser). De beholder ferdigheten, får lønna til
   rollen, og resten av avløserne blir ledige til fravær. Skiftene er like fulle. Ikke lærlinger.

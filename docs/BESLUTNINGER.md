@@ -9464,3 +9464,26 @@ Gjennomgang av rekonstruksjonen, verksjef-prestasjonene, vennefilteret, rådet o
 Endringslogg: nei
 Konto: nei.
 
+## B-503 Planleggeren setter landemerker der de ikke gjør andre ordrer for sene (2026-10-21)
+Brukeren: «eg trur han dær planleggern har missførstått med tidsfokuse på ordren med ingen frist på. Før alle di andre
+som eg hadd tia tell får eg plutselig ikke tia tell å produser lengre».
+
+Årsak: planleggeren satte alltid landemerker (ingen frist, B-218) først i køen (B-211). Ble et landemerke tatt med
+en full kø, ble kontrakter som rakk fristen, plutselig for sene.
+
+Ny regel (`plannerOrder` i `engine.ts`, erstatter planleggerdelen av B-211):
+- Planleggeren sorterer kontraktene etter frist som før. Hvert landemerke legges inn så tidlig det går uten at noen
+  kontrakt i køen eller ukeleveranse i en rammeavtale blir for sen. Det regnes med 90 % av døgnproduksjonen
+  (`LANDMARK_SLACK`), fordi den er et anslag.
+- Går det ikke noe sted (eller verket står), venter landemerket bakerst til det blir plass.
+- Uten planlegger er det som før: landemerket går først når det tas (`acceptContract`), og spilleren styrer køen.
+- Salgsdirektøren og vurderingen på Salg (`queueFit`) regner fortsatt med landemerkene først. Da holder de av plass,
+  så landemerket ikke blir stående bakerst for alltid (problemet B-211 rettet).
+- Tekstene på Salg og i landemerkekortet sier hva planleggeren gjør.
+
+Målt på et lagret stålverk med en full kø og et landemerke på fem døgns produksjon, frø 0–2:
+- Før ble 2–3 flere kontrakter for sene enn uten landemerket.
+- Nå blir like mange for sene som uten landemerket, og landemerket blir levert etter 18–20 døgn.
+
+Konto: nei (regel 1 – hovedverket).
+

@@ -143,6 +143,7 @@ import {
   signBlocked,
   cancelContract,
   orderQueue,
+  plannerOrder,
   autoBuy,
   ensureCandidates,
   RETURN_MAX_SHARE,
@@ -5251,6 +5252,39 @@ test("Skiftlederen gir avløsere fast jobb (B-500) og beskjedene fører til Folk
   // I garasjen er det ingen ansatte, og ingen lenke
   const garage = newGame(1);
   assert(quitLink(garage) === undefined, "lenke i garasjen");
+});
+
+test("Planleggeren og landemerker (B-503): landemerket går foran bare når ingen kontrakt med frist blir for sen", () => {
+  const g = newGame(503);
+  g.stage = 3;
+  g.agreements = [];
+  const today = day(g);
+  const base = g.contracts[0];
+  const mk = (id: number, t: number, deadline: number, landmark?: string): Contract => ({
+    ...structuredClone(base),
+    id,
+    tonnes: t,
+    delivered: 0,
+    deadlineDay: deadline,
+    status: "aktiv",
+    priority: id,
+    landmark,
+  });
+  // Landemerket ble tatt sist, men står først i køen (slik `acceptContract` legger det)
+  g.contracts = [mk(1, 300, today + 4), mk(2, 400, today + 9), mk(3, 300, today + 30, "fyr")];
+  g.contracts[2].priority = 0;
+  const ids = (perDay: number) =>
+    plannerOrder(g, perDay)
+      .map((c) => c.id)
+      .join(",");
+  // 100 t per døgn: landemerket foran ville gjort begge kontraktene for sene – det venter
+  assert(ids(100) === "1,2,3", `100 t/døgn: ${ids(100)}`);
+  // 200 t per døgn: god tid, landemerket går først
+  assert(ids(200) === "3,1,2", `200 t/døgn: ${ids(200)}`);
+  // 120 t per døgn: plass etter den første kontrakten, men ikke foran den
+  assert(ids(120) === "1,3,2", `120 t/døgn: ${ids(120)}`);
+  // Verket står: landemerket bakerst
+  assert(ids(0) === "1,2,3", `står: ${ids(0)}`);
 });
 
 if (failed) {

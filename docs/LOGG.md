@@ -5,6 +5,26 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 419 – 2026-10-21: Planleggeren og landemerkene (B-503)
+
+**Brukeren:** planleggeren prioriterer ordren uten frist (landemerket) foran alle andre, så kontrakter spilleren hadde
+tid til, plutselig ikke rakk fristen.
+
+**Gjort:**
+- B-503: planleggeren sorterer etter frist og legger landemerket så tidlig det går uten at noe blir for sent
+  (`plannerOrder`, `LANDMARK_SLACK` = 0,9). Ellers venter det bakerst.
+- Teksten på Salg og i landemerkekortet er oppdatert.
+
+**Testet:**
+- Ny test (100/120/200 t per døgn og verket står).
+- `npm test`, `tsc -b`, lint, build og `balance.ts` (uendret).
+- Sammenligning før/etter på et lagret stålverk (frø 0–2, to laster). Med regelen blir ikke flere kontrakter for sene
+  enn uten landemerket, og landemerket leveres etter 18–20 døgn.
+
+**Gjenstår:** merge av PR #434 (eieren). Supabase-connectoren svarte ikke i forrige økt.
+
+---
+
 ## Økt 418 – 2026-10-16: Skiftlederen gir fast jobb, lenker i beskjedene og kodegjennomgang (B-500–B-502)
 
 **Brukeren ba om:** «Ny dag. Lag en plan for hva som skal bygges idag. Bygg og push».

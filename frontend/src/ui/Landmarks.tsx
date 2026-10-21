@@ -4,6 +4,7 @@
  */
 import { LANDMARKS, landmarkContract, nextLandmark, todayKey } from "../game/landmarks";
 import { Icon } from "./icons";
+import { plannerSortsQueue } from "../game/engine";
 import type { GameState } from "../game/types";
 import { Card } from "./common";
 import { fmtT } from "./format";
@@ -39,7 +40,11 @@ export function LandmarksCard({ g, onSales }: { g: GameState; onSales: () => voi
           <strong>{c.customer}</strong>:{" "}
           {c.status === "tilbud"
             ? "venter på svar. "
-            : `${fmtT(c.delivered)} av ${fmtT(c.tonnes)} levert – står først i ordrekøen, ingen frist. `}
+            : `${fmtT(c.delivered)} av ${fmtT(c.tonnes)} levert, ingen frist – ${
+                plannerSortsQueue(g)
+                  ? "planleggeren lager det når kontraktene med frist rekker det likevel"
+                  : "står først i ordrekøen"
+              }. `}
           {c.status === "tilbud" && (
             <button className="g-link" onClick={onSales}>
               Se forespørselen under Salg

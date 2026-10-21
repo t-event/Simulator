@@ -112,7 +112,9 @@ function offerChecks(g: GameState, stats: PlantStats, c: Contract, committed: nu
       tone: tight ? "bad" : narrow ? "warn" : "ok",
       text: Number.isFinite(needDays)
         ? c.landmark
-          ? `Ingen frist – landemerket står først i ordrekøen og blir ferdig ca. dag ${doneDay}`
+          ? plannerSortsQueue(g)
+            ? `Ingen frist – planleggeren lager det foran kontraktene med frist når de rekker det likevel, ellers etter dem. Ferdig senest ca. dag ${doneDay}`
+            : `Ingen frist – landemerket går først i ordrekøen og blir ferdig ca. dag ${doneDay}`
           : tight && pushesLate && needDays <= days
             ? `Rekker det neppe: den har kortere frist og går foran ${pushesLate} i ordrekøen, som da blir for sen`
             : tight

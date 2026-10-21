@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 503,
+    date: "2026-10-21",
+    title: "Planleggeren og landemerkene",
+    items: [
+      "Planleggeren setter ikke lenger landemerker foran alt annet. Et landemerke lages så tidlig det går uten at kontrakter med frist blir for sene – ellers venter det til det blir plass.",
+    ],
+  },
+  {
     b: 501,
     date: "2026-10-16",
     title: "Skiftlederen ordner faste jobber",
