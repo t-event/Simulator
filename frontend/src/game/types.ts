@@ -517,6 +517,19 @@ export interface WorldEvent {
 }
 
 /** Sesongens vri (B-152): gjelder hele sesongen, bare for spill som er med i den */
+/** Spillene ved støpemaskinen og valseverket (B-505) */
+export type MiniKind = "stoping" | "valsing";
+
+export interface MiniRecord {
+  /** Beste poengsum */
+  best: number;
+  /** Spilldøgnet fagpoengene sist ble gitt */
+  fpDay: number;
+  /** Fordelen varer til dette spillminuttet, med så mange stjerner (4 eller 5) */
+  boostUntilMin: number;
+  boostStars: number;
+}
+
 export interface SeasonTwist {
   id: string;
   title: string;
@@ -639,6 +652,8 @@ export interface GameState {
   pendingManual: ManualRequest | null;
   /** Beste poengsum i kontrollrommet (B-175) */
   controlBest?: number;
+  /** Støpemaskinen og valseverket i kontrollrommet (B-505): rekord, fagpoeng i dag og fordelen. Mangler = ikke spilt */
+  minis?: Partial<Record<MiniKind, MiniRecord>>;
   /** Hele verket er stengt til dette spillminuttet (dødsulykke, B-265/B-397); mangler = åpent */
   closedUntilMin?: number;
   /** Spillminutter som er spolt fram om natta (6×), så juksesperren kan regne ut hvor lang tid dagene minst tar (B-176) */

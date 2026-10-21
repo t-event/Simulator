@@ -159,6 +159,7 @@ frontend/src/
     mould.ts     Kokillene i strengstøpingen: slitasje per tonn, risiko for gjennombrudd, bytte (B-351); raden i ui/Maintenance.tsx
     reconstruction.ts Rekonstruksjon etter konkurs: ett nivå ned, gjeld, siste 30 døgn tilbake (B-495); valget på konkursskjermen
     pension.ts   Alder og pensjon for de ansatte (B-357): `born`, pensjonsalder 62–67, beskjed en måned før
+    minis.ts     Støpemaskinen og valseverket i kontrollrommet: fagpoeng per døgn, rekord og fordelen i drifta (B-505)
     calendar.ts  Året i spillet (360 døgn, dag 1 = 1. april), vinter 15.11.–14.3. og frost (B-265, B-272), fellesferie (B-298);
                  `calendarAhead` til kalenderkortet på Oversikt (ui/CalendarCard.tsx, B-321)
     war.ts       Krig i verden, bare i konsernet: dyrere strøm, flere forespørsler, høyst én per år (B-297)
@@ -245,7 +246,8 @@ frontend/src/
     Admin.tsx    Adminpanelet under kontoen, bare når `is_admin()` svarer ja (B-421); fanen Drift (B-485)
     Companies.tsx Konsern → Industrien: ett kort per selskap (skraplageret nå) og konsernkassa (B-189, B-227)
     control/     Kontrollrommet: spillet i fire runder (chargeGame.ts: logikk, frø og inndatalogg, testspiller; ControlRoom.tsx,
-                 B-175); weekly.ts: ukens charge og treningsfrø (B-387)
+                 B-175); weekly.ts: ukens charge og treningsfrø (B-387); miniGame.ts + MiniRoom.tsx: støpemaskinen og
+                 valseverket (runder «hold» og «tid», testspiller `autoPlayMini`, B-505)
   sim/         Prosessmodell for lysbueovnen (brukes ikke av spillet lenger, sjekkes av sim/validate.ts)
 frontend/scripts/ sjekk-endringslogg.mjs: endringsloggen dekker nyeste beslutning; sjekk-emoji.mjs: ingen emoji (B-237)
 frontend/public/  PWA: manifest, ikoner (icon.svg er kilden; PNG-ene lages fra den med Chromium, B-249), service worker

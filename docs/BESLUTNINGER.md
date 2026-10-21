@@ -9505,3 +9505,36 @@ så lagringen til spilleren er ikke sett på – planen kalibreres når den virk
 Endringslogg: nei
 Konto: avgjøres per steg (se forslaget).
 
+## B-505 Støpemaskinen og valseverket i kontrollrommet (2026-10-21)
+Eieren: «Vi skal fortsette med sesong 1. Kjør på med resten av dine anbefalinger» (SLUTTSPILL-FORSLAG.md, B-504). Sesong
+2 er tatt ut av planen; sesong 1 fortsetter uten sluttdato.
+
+Fase 1.3 i forslaget: to nye spill i samme stil som chargen (B-175).
+- **Støpemaskinen** har tre runder:
+  1. Hold mellomkaret fullt (hold inne for å åpne øsa, en ny øse midt i).
+  2. Støpefarten (det grønne flytter seg når stålet blir varmere og kaldere).
+  3. Kapp emnene (seks trykk i tide, fortere og smalere).
+- **Valseverket** har tre runder:
+  1. Varm emnene (kalde emner kommer inn).
+  2. Still valsene (fem trykk i tide).
+  3. Kjøl stangen (å holde inne kjøler, en tykk stang varmer).
+- **Logikken** står i `ui/control/miniGame.ts`: én motor for runder av typen «hold i det grønne» og «trykk i tide», med frø
+  og testspiller (`autoPlayMini`). Tegningen står i `MiniRoom.tsx`, som gjenbruker målerne og stjernene fra kontrollrommet.
+  - Farlige verdier teller først etter at verdien har vært i det grønne – starten er alltid utenfor.
+  - Den flinke testspilleren får 5 stjerner og den slurvete 1–2, på 30–35 s.
+- **I verket** (`game/minis.ts`, spilltid, B-323):
+  - Fagpoeng 1 + stjerner (+5 for 4, +10 for 5), én gang per spilldøgn per spill. Rekorden står i `g.minis`.
+  - 4 stjerner gir en fordel i 24 timer, 5 stjerner i 48 timer:
+    - Støpemaskinen: halvparten så mange strenggjennombrudd (`castCalmFactor` ganges inn i sjansen i `castBatch`).
+    - Valseverket: utbyttet 1 (2) prosentpoeng høyere (`rollYieldBonus` i `updateRolling`). Planen for emnene regner
+      fortsatt med 96 %, så det blir bare litt mer armering.
+  - Ingen salgsbonus (B-305) og ingenting mellom spillere.
+- **Hvor:** knappene står i utstyrsarket for Støping («Ta styringen selv») og vises bare med strengstøping eller et
+  valseverk som går (B-180). Spillet åpnes i fullskjerm. Rekorden og fagpoengene leses når spillet åpnes, så
+  resultatskjermen viser riktig etter at resultatet er lagt inn.
+- **Ikke med nå:** ukelister og frø fra serveren (Supabase-connectoren svarer ikke). Det kan kobles på som ukens
+  kontrollrom senere (B-387).
+- `g.minis` er valgfritt i lagringen (mangler = ikke spilt).
+
+Konto: nei (regel 1 – hovedverket, spilltid).
+

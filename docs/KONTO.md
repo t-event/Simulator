@@ -136,6 +136,7 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Fast jobb til avløsere på plassene de står fast på | Nei | Regel 1: hovedverket | B-499 |
 | Skiftlederen gir avløsere fast jobb, lenker til Folk i beskjedene | Nei | Regel 1: hovedverket | B-500, B-501 |
 | Planleggeren setter landemerker der de ikke gjør andre ordrer for sene | Nei | Regel 1: hovedverket | B-503 |
+| Støpemaskinen og valseverket i kontrollrommet (trening hjemme) | Nei | Regel 1: spilltid | B-505 |
 | Myk grense for kassa og bunden konsernreserve (midlertidig) | Nei | Regel 1: eget spill | B-193 |
 | Æraer og Hall of Fame | Ja | Regel 3 | Grunnleggeræraen og navnet «Hall of Fame»: B-182. Neste æra: ikke bestemt |
 | Pause på Salg (innstilling) | Nei | Regel 1: ditt eget spill | B-222 |

@@ -40,6 +40,9 @@ regnes av serveren i ekte tid.
   det hva som hjelper i stedet.
 - Ingen hendelseskort om forhold mellom ansatte (trakassering, diskriminering, varsling) – tatt ut etter eierens ønske
   (B-444).
+- **Støpemaskinen og valseverket i kontrollrommet** (B-505): «Ta styringen selv» i utstyrsarket for Støping (med
+  strengstøping / valseverk). Tre runder hver. Fagpoeng én gang per spilldøgn per spill. 4–5 stjerner gir i 24/48 timer
+  halvparten så mange strenggjennombrudd, eller 1/2 prosentpoeng mer utbytte i valseverket.
 - **Planleggeren og landemerker** (B-503): planleggeren sorterer ordrekøen etter frist og setter et landemerke (ingen
   frist) så tidlig det går uten at en kontrakt eller ukeleveranse blir for sen (90 % av døgnproduksjonen). Ellers venter
   det bakerst. Uten planlegger går landemerket først når det tas. Salgsdirektøren regner med landemerkene først.

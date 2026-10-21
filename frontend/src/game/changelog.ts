@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 505,
+    date: "2026-10-21",
+    title: "Ta styringen ved støpemaskinen og i valseverket",
+    items: [
+      "To nye spill i kontrollrommet: hold mellomkaret fullt, følg støpefarten og kapp emnene – eller varm, valse og kjøl armeringsstengene. Du finner dem i arket for Støping.",
+      "Fagpoeng én gang per døgn for hvert spill. Med 4–5 stjerner går drifta bedre en stund: færre strenggjennombrudd, eller mer armering av emnene.",
+    ],
+  },
+  {
     b: 503,
     date: "2026-10-21",
     title: "Planleggeren og landemerkene",

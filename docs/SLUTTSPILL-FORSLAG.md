@@ -32,7 +32,7 @@ det som må lages.
 
 ## 1. Fase 1 – nye mål nå (det meste er alt bygget)
 
-### 1.1 Avslutt sesong 1 og start sesong 2
+### 1.1 Avslutt sesong 1 og start sesong 2 – tatt ut (eieren 21.10: sesong 1 fortsetter, B-505)
 
 - **Hva:** `end_season()` → Hall of Fame (Konsernverdi, B-384) → `start_season('…', vri)`. Pynten for sesong 2 ligger klar i
   `COSMETICS` (B-287). Sesongstigen starter på nytt (50 trinn, ny pynt), og alle får en ny plass på «Industriverden · sesong».
@@ -54,7 +54,7 @@ det som må lages.
 - **Ukelista «Mest modernisert»:** antall trinn modernisert i konsernet i ekte uka, fra `konsern_orders` (serveren eier
   dem). Den må få en ny ukestype i rotasjonen (B-457), og ukene før skal gi samme type som før.
 
-### 1.3 Nye spill i kontrollrommet
+### 1.3 Nye spill i kontrollrommet – bygget som trening hjemme (B-505)
 
 - **Hva:** to nye runder i samme stil som kontrollrommet (B-175):
   - **Støpemaskinen:** hold farten mot temperaturen i øsa uten strenggjennombrudd. Det lærer det samme som kokillene

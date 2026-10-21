@@ -687,7 +687,7 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
           </div>
         </>
       )}
-      {sheet && <UpgradeSheet g={g} station={sheet} act={act} onClose={() => setSheet(null)} />}
+      {sheet && <UpgradeSheet g={g} station={sheet} act={act} onClose={() => setSheet(null)} openBook={openBook} />}
     </div>
   );
 }

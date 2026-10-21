@@ -61,7 +61,7 @@ const ROUND_ICON: Record<string, IconName> = { smelt: "flame", rens: "wind", sla
 
 const fmt = (v: number, d: number) => v.toFixed(d).replace(".", ",");
 
-function Stars({ n, of = 3 }: { n: number; of?: number }) {
+export function Stars({ n, of = 3 }: { n: number; of?: number }) {
   return (
     <span className="cg-stars" aria-label={`${n} av ${of} stjerner`}>
       {/* Stjerneikoner (B-237) */}
@@ -73,7 +73,7 @@ function Stars({ n, of = 3 }: { n: number; of?: number }) {
 }
 
 /** Måler med grønt felt. Symbolet i tillegg til fargen er for fargeblinde og sterkt sollys (B-087). */
-function Gauge(props: {
+export function Gauge(props: {
   label: string;
   value: number;
   min: number;

@@ -8878,3 +8878,17 @@ button.g-prod-row:hover {
   color: var(--ok-fg);
   font-weight: 600;
 }
+
+/* «Ta styringen» ved støpemaskinen og valseverket (B-505) */
+.g-mini-panel {
+  margin: var(--sp-3) 0;
+}
+
+.g-mini-panel .g-row > button {
+  flex: 1 1 140px;
+  min-height: var(--touch);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}

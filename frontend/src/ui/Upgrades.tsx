@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { SheetHead, StatusLine } from "./ds";
 import { furnaceState, statusOf } from "./plantStatus";
 import {
@@ -15,7 +15,9 @@ import { KONSERN_UNLOCK_EQUITY } from "../game/konsern";
 import { computePlantStats, unitType } from "../game/plant";
 import { cleaner, envActive, envDown, shortfall, stopsOnBreakdown } from "../game/environment";
 import { SellAllButton } from "./Sales";
-import type { GameState } from "../game/types";
+import type { GameState, MiniKind } from "../game/types";
+import { finishMini, miniAvailable, miniBoost, miniFp, miniFpToday, MINI_NAMES } from "../game/minis";
+import { Icon } from "./icons";
 import type { GameApi } from "../game/useGame";
 import { Bar, Card } from "./common";
 import { fmtKr, fmtNum, fmtPct, fmtRep, fmtT } from "./format";
@@ -178,17 +180,60 @@ function OptionList({ g, options, act }: { g: GameState; options: UpgradeOption[
   );
 }
 
+const MiniRoom = lazy(() => import("./control/MiniRoom").then((m) => ({ default: m.MiniRoom })));
+
+/**
+ * «Ta styringen» ved støpemaskinen og valseverket (B-505): vises bare når verket har strengstøping eller valseverk.
+ * Fagpoeng én gang per spilldøgn per spill, og med 4–5 stjerner en kort fordel i drifta (game/minis.ts).
+ */
+function MiniPanel({ g, onPlay }: { g: GameState; onPlay: (kind: MiniKind) => void }) {
+  const kinds = (["stoping", "valsing"] as const).filter((k) => miniAvailable(g, k));
+  if (!kinds.length) return null;
+  return (
+    <div className="g-mini-panel">
+      <p className="g-muted">
+        Ta styringen selv: et kort spill i kontrollrommet. Gir fagpoeng én gang per døgn, og med 4–5 stjerner går drifta
+        bedre en stund.
+      </p>
+      <div className="g-row">
+        {kinds.map((k) => {
+          const boost = miniBoost(g, k);
+          return (
+            <button key={k} onClick={() => onPlay(k)}>
+              <Icon name={k === "stoping" ? "gauge" : "sliders-horizontal"} /> {MINI_NAMES[k]}
+              <span className="g-muted g-sub">
+                {boost
+                  ? `Fordel nå (${boost} stjerner)`
+                  : miniFpToday(g, k)
+                    ? "Fagpoeng hentet i dag"
+                    : `Opptil ${miniFp(5)} fagpoeng`}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function UpgradeSheet({
   g,
   station,
   act,
   onClose,
+  openBook,
 }: {
   g: GameState;
   station: Station;
   act: GameApi["act"];
   onClose: () => void;
+  /** Åpner fagboka på et kapittel (fra resultatet i kontrollrommet, B-505) */
+  openBook?: (chapter?: string) => void;
 }) {
+  // Rekorden og fagpoengene leses når spillet åpnes: resultatet legges inn før resultatskjermen vises
+  const [mini, setMini] = useState<{ kind: MiniKind; n: number; best: number; fp: number } | null>(null);
+  const play = (kind: MiniKind) =>
+    setMini({ kind, n: Date.now(), best: g.minis?.[kind]?.best ?? 0, fp: miniFpToday(g, kind) ? 0 : 1 });
   const options = stationOptions(g, station);
   const units = station === "ovn" && g.furnaces.length > 1 ? [undefined, ...g.furnaces.map((_, i) => i)] : null;
   const unitList = (unit: number | undefined) => options.filter((o) => o.unit === unit);
@@ -206,6 +251,27 @@ export function UpgradeSheet({
   const sellAll = station === "lager" ? <SellAllButton g={g} act={act} /> : null;
   // Renseanlegget står sammen med utstyret for hele verket, der de større anleggene kjøpes (B-263)
   const cleaner = station === "ovn" && envActive(g) ? <CleanerPanel g={g} act={act} /> : null;
+  const miniPanel = station === "stoping" ? <MiniPanel g={g} onPlay={play} /> : null;
+  if (mini)
+    return (
+      <Portal>
+        <Suspense fallback={null}>
+          <MiniRoom
+            key={mini.n}
+            kind={mini.kind}
+            best={mini.best}
+            fpNow={mini.fp}
+            onScore={(score) => act((gg) => void finishMini(gg, mini.kind, score.rating, score.points))}
+            onClose={(again) => (again ? play(mini.kind) : setMini(null))}
+            onChapter={(chapter) => {
+              setMini(null);
+              onClose();
+              openBook?.(chapter);
+            }}
+          />
+        </Suspense>
+      </Portal>
+    );
   return (
     <Portal>
       <div className="g-modal" role="dialog" aria-modal="true" aria-label={STATION_NAMES[station]} onClick={onClose}>
@@ -248,6 +314,7 @@ export function UpgradeSheet({
             <>
               {sellAll}
               {cleaner}
+              {miniPanel}
               <OptionList g={g} options={options} act={act} />
             </>
           )}

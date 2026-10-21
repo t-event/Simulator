@@ -769,3 +769,65 @@
   letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;
 }
+
+/* Tidsrundene ved støpemaskinen og valseverket (B-505): strengen går forbi, trykk når merket er i det grønne */
+.cg-track {
+  position: relative;
+  width: 100%;
+  height: 24vh;
+  min-height: 130px;
+  max-height: 220px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 6px solid var(--art-ladle);
+  overflow: hidden;
+}
+
+.cg-track-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--ok);
+  opacity: 0.45;
+  border-left: 3px solid var(--ok);
+  border-right: 3px solid var(--ok);
+}
+
+.cg-track-bar {
+  position: absolute;
+  left: 0;
+  top: 42%;
+  height: 16%;
+  background: linear-gradient(90deg, var(--art-melt), var(--art-melt-hot));
+  border-radius: 0 6px 6px 0;
+}
+
+.cg-track-marker {
+  position: absolute;
+  top: 18%;
+  bottom: 18%;
+  width: 4px;
+  margin-left: -2px;
+  background: var(--on-strong);
+  box-shadow: 0 0 6px var(--on-strong);
+}
+
+.cg-track-hit {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--on-strong);
+}
+
+.cg-track-hit.is-good {
+  background: var(--ok);
+}
+
+.cg-track-hit.is-bad {
+  background: var(--critical);
+}

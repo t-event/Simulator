@@ -6,6 +6,7 @@
  * støping → (valseverk) → lager → kunde, og hver del kan bli flaskehals.
  */
 import { reconDay } from "./reconstruction";
+import { castCalmFactor, rollYieldBonus } from "./minis";
 import { hasNeighbor, reputationFloor } from "./building";
 import {
   BANKRUPTCY_DAYS,
@@ -1379,7 +1380,15 @@ function castBatch(g: GameState, batch: LiquidBatch, stats: PlantStats): void {
   wearMoulds(g, batch.t, stats);
   if (
     casting.continuous &&
-    chance(g, 0.01 * stats.maintFactor * (batch.tempOff ? 2.5 : 1) * (has(g, "bruddvarsling") ? 0.4 : 1) * mouldRisk(g))
+    chance(
+      g,
+      0.01 *
+        stats.maintFactor *
+        (batch.tempOff ? 2.5 : 1) *
+        (has(g, "bruddvarsling") ? 0.4 : 1) *
+        mouldRisk(g) *
+        castCalmFactor(g),
+    )
   ) {
     const hours = 4 * stats.repairFactor;
     g.castDownUntilMin = g.minute + hours * 60;
@@ -1589,7 +1598,8 @@ function updateRolling(g: GameState, stats: PlantStats, dt: number): void {
     if (take <= 1e-9) continue;
     lot.t -= take;
     capacity -= take;
-    const outT = take * ROLLING_YIELD;
+    // Godt kjørt i valseverket (B-505): litt mindre kapp og glødeskall en stund
+    const outT = take * (ROLLING_YIELD + rollYieldBonus(g));
     addReturnScrap(g, take - outT, lot.analysis, stats);
     g.rollProgressT += outT;
     addLot(g, {

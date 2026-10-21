@@ -357,6 +357,8 @@ import { explosionChance, FATAL_DOWN_DAYS, fatalAccident, WINTER_EXPLOSION } fro
 import { contractCoverage, freeStockT, sellAllFree } from "./engine";
 import { leaderBonus, leaderBonusDue, relineLoanNeed, relineOnLoan } from "./actions";
 import { autoPlay, ChargeGame, INPUT_LOG_MAX, seededRandom } from "../ui/control/chargeGame";
+import { autoPlayMini, newMiniGame } from "../ui/control/miniGame";
+import { castCalmFactor, finishMini, miniAvailable, miniFpToday, rollYieldBonus } from "./minis";
 import { hints } from "../ui/hints";
 import { answerOrder } from "../ui/quizOrder";
 import { hasMoulds, MOULD, mouldCost, mouldHour, mouldRisk, mouldWear, replaceMoulds, wearMoulds } from "./mould";
@@ -5285,6 +5287,39 @@ test("Planleggeren og landemerker (B-503): landemerket går foran bare når inge
   assert(ids(120) === "1,3,2", `120 t/døgn: ${ids(120)}`);
   // Verket står: landemerket bakerst
   assert(ids(0) === "1,2,3", `står: ${ids(0)}`);
+});
+
+test("Støpemaskinen og valseverket i kontrollrommet (B-505): spillbare, fagpoeng én gang per døgn og en kort fordel", () => {
+  // Spillene: den flinke får 4–5 stjerner, den slurvete 1–2, og samme frø gir samme spill
+  for (const kind of ["stoping", "valsing"] as const) {
+    for (const seed of [11, 22, 33]) {
+      const good = autoPlayMini(newMiniGame(kind, seed), "flink");
+      const bad = autoPlayMini(newMiniGame(kind, seed), "slurvete");
+      assert(good.score.rating >= 4, `${kind} ${seed}: flink fikk ${good.score.rating}`);
+      assert(bad.score.rating <= 2, `${kind} ${seed}: slurvete fikk ${bad.score.rating}`);
+      assert(good.seconds < 60, `${kind}: ${good.seconds} s`);
+      const again = autoPlayMini(newMiniGame(kind, seed), "flink");
+      assert(again.score.points === good.score.points, `${kind}: samme frø ga ulike poeng`);
+    }
+  }
+  // I verket: bare med strengstøping (støpemaskinen) og valseverk (valsingen)
+  const g = newGame(505);
+  g.stage = 3;
+  g.castingType = "streng1";
+  assert(miniAvailable(g, "stoping"), "støpemaskinen skulle vært med");
+  const fp = g.researchPoints;
+  const first = finishMini(g, "stoping", 5, 1800);
+  assert(first.fp === 16 && g.researchPoints === fp + 16 && first.record, `første: ${JSON.stringify(first)}`);
+  assert(first.boostHours === 48 && castCalmFactor(g) === 0.5, "fordelen ved støpemaskinen");
+  // Samme døgn: ingen nye fagpoeng, men rekorden og fordelen kan fortsatt bedres
+  const second = finishMini(g, "stoping", 3, 1200);
+  assert(second.fp === 0 && !second.record && miniFpToday(g, "stoping"), `andre: ${JSON.stringify(second)}`);
+  // Fordelen går ut
+  g.minute += 49 * 60;
+  assert(castCalmFactor(g) === 1, "fordelen varte for lenge");
+  // Valseverket: ingen fordel uten valseverk, ellers 1–2 prosentpoeng
+  const noRoll = finishMini(g, "valsing", 5, 900);
+  assert(noRoll.boostHours === 0 && rollYieldBonus(g) === 0, "fordel uten valseverk");
 });
 
 if (failed) {
