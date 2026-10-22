@@ -5,6 +5,37 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 422 – 2026-10-22: Fellesprosjektene bygget (B-508)
+
+**Brukeren:** «Fortsett. Har fikset supabase connectoren».
+
+**Gjort:**
+- Så på dataene først: alle verdensjobbene «ok», 15–20 aktive konsern per region, og de to som er ferdige, har 14
+  komplekser på trinn 6. Utbyttet fra verkene i en region er 60–100 mill. per dag.
+- B-508: fellesprosjektene (modell C) på serveren, `supabase/156_fellesprosjekter.sql`:
+  - Tabellene `region_projects` og `region_project_gifts`.
+  - `project_status`, `project_give` og jobben `fellesprosjekter`.
+  - Fordelen i `region_strengths`, merkene i `badges_of` og prosjektene i `world_map`.
+  - Posten `fellesprosjekt` i kassaboka. Bryteren står av.
+- Appen: kortet «Fellesprosjekter» på Konsern → Oversikt, merkene på topplista og profilen, prestasjonen
+  «Fellesprosjekt» og prosjektene på kartet. `MillInput` er flyttet til egen fil.
+
+**Testet:**
+- Livsløpet med ekte tall i en DO-blokk som ble rullet tilbake: åpne, for lite, gi, målet nådd (merker og styrke), bom
+  med halvparten tilbake, og `world_health`.
+- Regionmester-styrken er lik før og etter. Sikkerhetsrådene: bare de vanlige (tabeller uten regler, funksjoner for
+  innloggede).
+- Ny nettest. `npm test`, `tsc -b`, lint, build og `balance.ts`.
+- Playwright med falsk server på 320, 390 og 1366 px: kortet, bekreftelsen, gaven og kassa i spillet etterpå.
+
+**Gjenstår:**
+- Slå på bryteren når PR #434 er merget og publisert (SQL-en står i B-508).
+- K-1 etter skyggerapporten 2.11.
+- Selskapstype (kraftverk, ildfast eller havn).
+- Merge av PR #434.
+
+---
+
 ## Økt 421 – 2026-10-21: Kontrollrommet, grønt stål og fellesprosjektene (B-505–B-507)
 
 **Brukeren:** «Vi skal fortsette med sesong 1. Kjør på med resten av dine anbefalinger» (SLUTTSPILL-FORSLAG.md).

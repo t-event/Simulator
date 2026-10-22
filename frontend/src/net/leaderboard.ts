@@ -2,6 +2,7 @@
  * Topplista og kallenavnet (B-127). Serveren regner listene ut fra tidslinja (`snapshots`); appen sender aldri
  * inn poeng selv.
  */
+import type { IconName } from "../ui/icons";
 import { rest, rpc, rpcFor, userId } from "./supabase";
 
 export type BoardKind =
@@ -77,6 +78,16 @@ export const BADGE_NAMES: Record<string, string> = {
   reform2: "Reformveteran II",
   // Så lenge konsernet er regionmester i minst én region (B-487)
   regionmester: "Regionmester",
+  // Fellesprosjektene (B-508): varige, fra prosjekter som nådde målet
+  hovedbidragsyter: "Hovedbidragsyter",
+  fellesprosjekt: "Fellesprosjekt",
+};
+
+/** Ikonet ved merket (resten får rullen) */
+export const BADGE_ICONS: Record<string, IconName> = {
+  regionmester: "crown",
+  hovedbidragsyter: "landmark",
+  fellesprosjekt: "award",
 };
 
 const STAGE_NAMES = ["Garasje", "Verksted", "Støperi", "Stålverk", "Storverk"];

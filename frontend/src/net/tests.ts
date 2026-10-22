@@ -55,6 +55,7 @@ import {
   verifyCode,
 } from "./supabase";
 import {
+  BADGE_NAMES,
   fetchLeaderboard,
   fetchMyRank,
   fetchProfile,
@@ -112,7 +113,8 @@ import { parseReportThreads, parseReportUnread, REPORT_REFUSAL_TEXT } from "./re
 import { parseWorldMap } from "./worldMap";
 import { openCall, parseManagerStatus } from "./managers";
 import { friendRows } from "../ui/friendScope";
-import { regionPoints, regionStrength } from "../game/regions";
+import { boostedStrength, regionPoints, regionStrength } from "../game/regions";
+import { GIVE_REFUSAL_TEXT, parseProjectStatus } from "./projects";
 import {
   CHAT_REFUSAL_TEXT,
   chatSeen,
@@ -3112,6 +3114,64 @@ const main = async () => {
       ) === 28,
       "styrken i en region: bare ferdige verk der",
     );
+  });
+
+  await test("Fellesprosjekter: statusen, kartet, merkene og fordelen (B-508)", () => {
+    const s = parseProjectStatus({
+      enabled: true,
+      min_gift: 1000000,
+      balance: 5e8,
+      my_regions: ["jern", "noe"],
+      projects: [
+        {
+          id: 8,
+          region: "jern",
+          kind: "kai",
+          name: "Dypvannskai",
+          goal: 4e8,
+          total: 2.4e8,
+          deadline: "2026-11-12T03:18:38Z",
+          status: "apen",
+          mine: 2.4e8,
+          givers: 1,
+          top: [{ nick: "Deg", share: 0.6, mine: true }],
+          my_rank: 1,
+        },
+        { id: 9, region: "ukjent", goal: 1, status: "apen" },
+        { id: 10, region: "nord", goal: 3.6e8, total: 4e6, status: "bom", mine: 4e6, refunded: 2e6 },
+      ],
+    });
+    assert(s.enabled && s.myRegions.join() === "jern", "regionene der du kan gi");
+    assert(s.projects.length === 2, "ukjente regioner hoppes over");
+    const p = s.projects[0];
+    assert(p.goal === 4e8 && p.total === 2.4e8 && p.myRank === 1 && p.deadline > 0 && p.top[0].mine, "prosjektet");
+    assert(s.projects[1].status === "bom" && s.projects[1].refunded === 2e6, "bom med halvparten tilbake");
+    assert(!parseProjectStatus(null).enabled && parseProjectStatus(null).refund === 0.5, "uten svar");
+    assert(GIVE_REFUSAL_TEXT.region.length > 0 && GIVE_REFUSAL_TEXT.kassa.length > 0, "tekstene");
+    const m = parseWorldMap({
+      regions: [
+        {
+          id: "jern",
+          players: [],
+          companies: [],
+          project: { id: 8, name: "Dypvannskai", goal: 4e8, total: 1e8 },
+          built: [{ name: "Ny kraftlinje", kind: "kraftlinje", nick: "Anna", mine: false }],
+        },
+      ],
+    });
+    const jern = m.find((r) => r.id === "jern")!;
+    assert(jern.project?.total === 1e8 && jern.built[0].nick === "Anna", "prosjektet og bygningen på kartet");
+    assert(
+      m.find((r) => r.id === "nord")!.project === null && m.find((r) => r.id === "nord")!.built.length === 0,
+      "tom",
+    );
+    assert(BADGE_NAMES.hovedbidragsyter === "Hovedbidragsyter" && !!BADGE_NAMES.fellesprosjekt, "merkene");
+    // Samme tall som region_project_boost() i 156: +25 % for nr. 1, +10 % for nr. 2, den høyeste gjelder
+    assert(
+      boostedStrength(42, [1]) === 52.5 && boostedStrength(42, [2]) === 46.2 && boostedStrength(42, [2, 1]) === 52.5,
+      "fordelen i styrken",
+    );
+    assert(boostedStrength(42, []) === 42 && boostedStrength(42, [3]) === 42, "ingen fordel for andre");
   });
 
   setSaveListener(null);

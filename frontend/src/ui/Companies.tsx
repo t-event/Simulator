@@ -62,6 +62,8 @@ import { Bar, Card } from "./common";
 import { MoneyGuideLink } from "./MoneyGuide";
 import { Icon } from "./icons";
 import { fmtKr, fmtT } from "./format";
+import { millions, millText } from "./amount";
+import { MillInput } from "./MillInput";
 import { buzz } from "./haptics";
 import { PlayerName } from "./Profile";
 import { PushPrompt } from "./Push";
@@ -81,48 +83,6 @@ function fmtWhen(iso: string): string {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
-
-/** Beløp i millioner fra et felt, til kroner. Godtar komma og punktum og mellomrom («0,1», «1 000») */
-function millions(v: string): number {
-  const n = Number(v.replace(/\s/g, "").replace(",", "."));
-  return Number.isFinite(n) && n > 0 ? Math.round(n * 1_000_000) : 0;
-}
-
-/** Kroner som millioner til et felt eller et eksempel («0,1», «324») – aldri rundet til 0 */
-function millText(kr: number): string {
-  return (kr / 1e6).toLocaleString("nb-NO", { maximumFractionDigits: 2, useGrouping: false });
-}
-
-/**
- * Felt for et beløp i millioner. Vanlig tekstfelt med desimaltastatur: på iPhone gir tastaturet komma, og et tallfelt
- * (`type="number"`) leser ikke «0,1» – da kunne ingen by under 1 mill.
- */
-function MillInput({
-  value,
-  onChange,
-  placeholder,
-  label,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  placeholder: number;
-  label: string;
-}) {
-  return (
-    <label className="g-amount">
-      <input
-        type="text"
-        inputMode="decimal"
-        autoComplete="off"
-        placeholder={millText(placeholder)}
-        value={value}
-        onChange={(e) => onChange(e.target.value.replace(/[^\d\s,.]/g, ""))}
-        aria-label={label}
-      />
-      <span>mill. kr</span>
-    </label>
-  );
 }
 
 /** Hva selskapet tjener på, per type. Nye typer får sin linje her når serveren slår dem på */

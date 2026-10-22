@@ -7,7 +7,7 @@
  * sterkest verk der. Mesteren står på kartet og i regionen, og `RegionsCard` viser stillingen på Konsern → Oversikt.
  */
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
-import { REGION_POINTS, REGIONS, regionName } from "../game/regions";
+import { PROJECT_BOOST, REGION_POINTS, REGIONS, regionName } from "../game/regions";
 import type { GameState, RegionId, SisterType } from "../game/types";
 import { getSession, onSessionChange } from "../net/supabase";
 import {
@@ -135,6 +135,20 @@ function RegionMaster({ r }: { r: MapRegion }) {
         {REGION_POINTS.stalverk}, og hvert moderniseringstrinn 25 % mer. Et verk kan flyttes én gang, gratis. Konsern
         som ikke har vært aktive på en uke, teller mindre.
       </p>
+      {/* Fellesprosjektene (B-508): det som er åpent, og bygningene med navnet til hovedbidragsyteren */}
+      {r.project && (
+        <p className="g-small-text">
+          <Icon name="landmark" /> Fellesprosjekt: <strong>{r.project.name}</strong> –{" "}
+          {Math.floor((100 * r.project.total) / r.project.goal)} % av målet. Den som gir mest, får{" "}
+          {Math.round(PROJECT_BOOST.top1 * 100)} % mer styrke her i {PROJECT_BOOST.days} dager.
+        </p>
+      )}
+      {r.built.map((b, i) => (
+        <p key={i} className="g-small-text g-muted">
+          <Icon name="landmark" /> {b.name} – bygget med {b.mine ? "deg" : <PlayerName nick={b.nick} />} som
+          hovedbidragsyter
+        </p>
+      ))}
     </div>
   );
 }

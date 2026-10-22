@@ -63,6 +63,7 @@ import { useKonsernRank } from "./konsernRank";
 import { IndustryPanel } from "./Companies";
 import { RegionsCard, WorldMapPanel } from "./WorldMap";
 import { ManagersCard } from "./Managers";
+import { ProjectsCard } from "./Projects";
 import { openCall, type ManagerStatus } from "../net/managers";
 import { NeedsAccount } from "./Account";
 import { cancelOrderUi, getBuildRegion, movePlantUi, runOption, sellPlantUi, setBuildRegion } from "./konsernRun";
@@ -1134,6 +1135,8 @@ function KonsernOverview({
       <ManagersCard g={g} act={act} status={managers} />
       {/* Regionmester (B-487): hvor du har tittelen, og hvor du er nærmest */}
       <RegionsCard g={g} onOpenMap={onMap} />
+      {/* Fellesprosjektene i regionene (B-508) */}
+      <ProjectsCard g={g} act={act} />
       <KonsernQueue g={g} act={act} />
       {k.plants.length > 0 && (
         <div className="g-col-wide g-konsern-plants">

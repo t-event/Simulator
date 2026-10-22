@@ -61,6 +61,10 @@ export const ACCOUNT_FEATURES = {
     name: "Verksjefer",
     why: "Verksjefene endrer utbyttet til konsernkassa i ekte tid, så serveren ansetter dem og gjør opp hver dag.",
   },
+  fellesprosjekter: {
+    name: "Fellesprosjekter",
+    why: "Konsernene i en region gir fra konsernkassa i ekte tid, og serveren avgjør målet, fristen og merkene.",
+  },
   konsernkasse: {
     name: "Konsernkassa",
     why: "Kassa ligger på serveren og går i virkelig tid, så overføringene og det du kjøper i verden avgjøres der.",

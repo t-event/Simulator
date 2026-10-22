@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 508,
+    date: "2026-10-22",
+    title: "Fellesprosjekter i regionene",
+    items: [
+      "Hver region får et stort fellesprosjekt, som en ny kraftlinje eller en dypvannskai. Alle med ferdige datterverk i regionen kan gi fra konsernkassa under Konsern → Oversikt.",
+      "Den som gir mest, blir hovedbidragsyter og får 25 % mer regionmester-styrke i regionen i 30 dager. Nummer to får 10 %. Alle som gir minst en tidel av målet, får et merke.",
+      "Prosjektet har 21 dager. Nås ikke målet, får alle halvparten tilbake.",
+      "Ferdige prosjekter står på verdenskartet med navnet til hovedbidragsyteren.",
+    ],
+  },
+  {
     b: 506,
     date: "2026-10-21",
     title: "Grønt stål",

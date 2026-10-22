@@ -8,6 +8,7 @@ import { PlayerName } from "./Profile";
 import { cloudConfigured } from "../net/config";
 import {
   BADGE_NAMES,
+  BADGE_ICONS,
   BOARDS,
   fetchLeaderboard,
   fetchMyRank,
@@ -354,7 +355,7 @@ function Leaderboard({
                 {/* Æresmerker fra serveren (B-299), f.eks. for dem som var med da økonomireformen kom */}
                 {r.badges.map((b) => (
                   <span key={b} className="g-board-honor">
-                    <Icon name={b === "regionmester" ? "crown" : "scroll-text"} /> {BADGE_NAMES[b]}
+                    <Icon name={BADGE_ICONS[b] ?? "scroll-text"} /> {BADGE_NAMES[b]}
                   </span>
                 ))}
                 {/* Beste plassering i en sesong som er over (B-143) */}

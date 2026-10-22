@@ -61,3 +61,16 @@ export function regionStrength(plants: readonly SisterPlant[], region: RegionId)
     .filter((p) => p.region === region && p.project?.kind !== "bygg")
     .reduce((a, p) => a + regionPoints(p.type, p.level), 0);
 }
+
+/**
+ * Fellesprosjektene (B-508): den som gir mest til et prosjekt som når målet, får 25 % mer styrke i regionen i 30 dager,
+ * nummer to 10 %. Serveren ganger det inn i `region_strengths` (`region_project_boost`, supabase/156_fellesprosjekter.sql);
+ * endres tallene i `config.world.projects`, endres de her. Bare den høyeste gjelder, de legges ikke sammen.
+ */
+export const PROJECT_BOOST = { top1: 0.25, top2: 0.1, days: 30 };
+
+/** Styrken i regionen med fordelen fra fellesprosjektene (plass 1 eller 2 i et prosjekt som er ferdig) */
+export function boostedStrength(strength: number, ranks: readonly number[]): number {
+  const boost = Math.max(0, ...ranks.map((r) => (r === 1 ? PROJECT_BOOST.top1 : r === 2 ? PROJECT_BOOST.top2 : 0)));
+  return Math.round(strength * (1 + boost) * 10) / 10;
+}

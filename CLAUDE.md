@@ -152,6 +152,7 @@ frontend/src/
     konsernWorld.ts Konsernet på serveren speilet: priser, køen, nivåstigen, settleWorld (B-325, B-326; SQL i 064)
     managers.ts  Verksjefene: mandat, lønn, kandidater og kortene i «Verksjefen ringer» (B-488; SQL i 152), managerSim.ts
     regions.ts   Verdenskartets seks regioner og standardregionen for nye verk (B-333; SQL i 066); styrken til regionmester (B-487)
+                 og fordelen fra fellesprosjektene (`boostedStrength`, B-508)
     building.ts  Byggetid og innkjøring for store kjøp, nabolaget i tre trinn og verkets stiftelse (B-336, B-455);
                  kortet i ui/Neighborhood.tsx   upkeep.ts  Slitasje og fornyelse av storverket (B-455), raden i ui/Maintenance.tsx
     control.ts   Utbyttepolitikken, forsvarsfondet og Kontroll: tall og ord appen viser (B-334; SQL i 067)
@@ -232,6 +233,8 @@ frontend/src/
     icons.tsx    Ikoner fra Lucide, kopiert inn (lisens i icons-LICENSE.txt)   ds.tsx  StatusBadge, Callout, Button, Metric
     delta.ts     Endringen under nøkkeltallene (`changeDelta`, tegnes av `DeltaLine`/`Metric`, B-404)
     fonts/       Visningsskriften for overskrifter og store tall (Barlow Semi Condensed 600, OFL)
+    Projects.tsx Kortet «Fellesprosjekter» på Konsern → Oversikt; net/projects.ts: status og gaven (B-508)
+    MillInput.tsx Beløpsfeltet i millioner, amount.ts: tekst til kroner (B-447)
     Managers.tsx Kortet «Verksjefene» på Konsern → Oversikt med samtalen og arkene; useManagers.ts henter i hele appen,
                  managerText.ts gir linja i varsellinja (B-488, B-489)
     WorldMap.tsx Konsern → Kart: verdenskartet med regionene, andres verk og selskapene (B-333)
@@ -268,7 +271,7 @@ docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretn
                VERKSJEF-FORSLAG.md (verksjefer, besvart; V1 ferdig spesifisert i avsnitt 10, bygges etter V0/K-1, B-409),
                REKONSTRUKSJON-FORSLAG.md (rekonstruksjon etter konkurs, modellene A–E – modell B bygget, B-495),
                SLUTTSPILL-FORSLAG.md (plan for spillere som er ferdige: sesong 2, K-1, selskaper, fellesprosjekter, B-504),
-               FELLESPROSJEKT-FORSLAG.md (regionale fellesprosjekter, simulert i game/projectSim.ts, anbefalt modell C, B-507),
+               FELLESPROSJEKT-FORSLAG.md (regionale fellesprosjekter, simulert i game/projectSim.ts, modell C bygget B-508),
                STATUS.md (fasit for hvordan spillet virker nå, B-385), DATAKVALITET.md (tidslinjetallene, B-456),
                RAPPORT-2026-10-02.md (pengestrømmene 29.9–1.10, utbytterettingen og etterbetalingen, B-423; utført B-446),
                UKENS-KONTROLLROM.md (variant A bygget, B-387), KONSERNKAPITAL-FORSLAG.md (forslag med eierens svar, B-386/B-387),
@@ -325,7 +328,7 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Koblingen mot kontoen** (B-356): uten den (`reconciled`) laster appen verken opp eller henter. Feiler den fordi
   tjenesten er nede (`isTransient`), prøver `CloudFollow` igjen hvert 20. sekund (`needsRelink`). Nye kall som skal
   prøves igjen etter en driftsstans, bruker `isTransient`, ikke bare `offline`.
-- **Beløpsfelt** (B-447): felt for beløp er tekstfelt med `inputMode="decimal"` (`MillInput` i `ui/Companies.tsx`), aldri
+- **Beløpsfelt** (B-447): felt for beløp er tekstfelt med `inputMode="decimal"` (`MillInput` i `ui/MillInput.tsx`), aldri
   `type="number"` – tastaturet på iPhone gir komma, og tallfeltet leser ikke «0,1». Eksempler i feltet rundes aldri til 0.
 - **Tekstfelt på iPhone** (B-347): Safari zoomer inn på felt med skrift under 16 px og zoomer ikke ut igjen. Regelen
   nederst i `game.css` gir alle felt man skriver i minst 16 px på berøringsskjerm – ikke overstyr den med mindre skrift.
@@ -479,6 +482,12 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   faste tall i nettesten) – endres den, endres begge. Jobben `regionmester` (cron hvert 10. min) er den eneste som bytter
   mester og skriver hendelser/varsler; bytte bare når en annen er strengt sterkere. Tittelen gir ingen penger eller Kontroll
   – vil man gi den virkning, er det en ny beslutning. Stopp med `select cron.unschedule('regionmester');`.
+- **Fellesprosjekter** (B-508, 156): gaven (`project_give`) låser prosjektraden, den rådgivende låsen per spiller,
+  `konsern` og så `treasury`, og fører posten `fellesprosjekt` – aldri `utbytte`/`bidrag` (lånerammen). Bom betales tilbake
+  av `projects_settle` (jobben `fellesprosjekter`, cron hvert 10. min) én spiller om gangen og merkes i
+  `region_project_gifts.refunded`. Fordelen i regionmester-styrken (`region_project_boost`) speiles i `boostedStrength` –
+  endres tallene i `config.world.projects`, endres `PROJECT_BOOST` også. Topplista viser andel av målet, aldri beløp andre
+  har gitt. Bryteren `config.world.projects.enabled`; stopp jobben med `select cron.unschedule('fellesprosjekter');`.
 - **Verksjefer** (B-488, 152): `managers_settle` (jobben `verksjefer`, cron hvert 10. min) gjør opp hver betalt utbyttedag
   én gang (`manager_days`), etter `pay_dividends`, som ikke er endret. Pengene føres som `justering` (`verksjef:<dag>`,
   `sluttpakke:<id>`, `samtale:<id>`) via `manager_cash`, aldri som `utbytte`, så de ikke øker lånerammen. Kortene står i

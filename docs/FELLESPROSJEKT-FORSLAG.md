@@ -1,8 +1,9 @@
 # Regionale fellesprosjekter – forslag med simulering (B-507)
 
-**Status:** forslag. Ingenting er bygget på serveren. Supabase-connectoren svarte «ingen tilgang» 21.10, og prosjektene
-flytter penger mellom spillere i ekte tid, så de skal simuleres og godkjennes av eieren først (B-180, B-190). Simulatoren
-er `npx tsx src/game/projectSim.ts` (fra `frontend/`).
+**Status:** modell C er bygget 22.10 (B-508, `supabase/156_fellesprosjekter.sql`, kortet i `ui/Projects.tsx`). Bryteren
+står av til appen er publisert. Avvik fra avsnitt 4: én rad per spiller og prosjekt i `region_project_gifts` (summen, ikke
+hver gave), og målet rundes opp til hele 10 mill. Med tallene 22.10 blir målet 4 dagers utbytte (250–400 mill.), ikke 2 %
+av kassene. Simulatoren er `npx tsx src/game/projectSim.ts` (fra `frontend/`).
 
 ## 1. Idéen (SLUTTSPILL-FORSLAG.md, 2.3)
 

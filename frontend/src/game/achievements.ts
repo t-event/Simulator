@@ -323,6 +323,18 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
   family("regionmester", "crown", "Regionmester", "Konsern", (g) => +!!g.serverBadges?.includes("regionmester"), [
     ["regionmester", 1, "Regionmester", "Ha de sterkeste verkene i en region på verdenskartet.", 50],
   ]),
+  // Fellesprosjektene (B-508): merkene fra serveren for prosjekter som nådde målet
+  family(
+    "fellesprosjekt",
+    "landmark",
+    "Fellesprosjekt",
+    "Konsern",
+    (g) => (g.serverBadges?.includes("hovedbidragsyter") ? 2 : g.serverBadges?.includes("fellesprosjekt") ? 1 : 0),
+    [
+      ["fellesprosjekt", 1, "Med på dugnaden", "Gi minst en tidel av målet til et fellesprosjekt som blir ferdig.", 30],
+      ["hovedbidragsyter", 2, "Hovedbidragsyter", "Gi mest til et fellesprosjekt som blir ferdig.", 60],
+    ],
+  ),
   // Æresmerker (B-296): gis av serveren, vises bare for dem som har dem
   {
     ...family("reform", "scroll-text", "Reformveteran", "Æresmerker", (g) => +!!g.serverBadges?.includes("reform"), [

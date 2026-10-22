@@ -89,7 +89,7 @@ det som må lages.
 - **Hvorfor:** i dag er det tre selskaper å kjempe om. Flere, og ulike, gjør at ulike spillere vil ha ulike ting
   (regionen, verkene, strategien) – ikke bare den med størst saldo.
 
-### 2.3 Regionale fellesprosjekter – simulert, anbefalt modell C (B-507, FELLESPROSJEKT-FORSLAG.md)
+### 2.3 Regionale fellesprosjekter – bygget som modell C (B-508, FELLESPROSJEKT-FORSLAG.md)
 
 - **Hva:** i hver region åpner det et stort prosjekt i ekte tid, f.eks. «Ny kraftlinje», «Dypvannskai» eller «Skrapterminal».
   Det har et mål (f.eks. 20 mrd. kr) og en frist (f.eks. 21 ekte dager). Alle med verk i regionen kan bidra fra

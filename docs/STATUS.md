@@ -94,6 +94,13 @@ regnes av serveren i ekte tid.
   (`activity_factor`); verk som bygges, teller ikke. Tittelen byttes bare når en annen er strengt sterkere. Jobben
   `regionmester` (cron hvert 10. min) bytter, skriver i Skiftrapporten og varsler (tema `konsern`, lenke `kart`).
   Merket «Regionmester» på topplista så lenge man har minst én region. Ingen penger. Speilet i `regionPoints`.
+- **Fellesprosjekter** (B-508, 156; bryteren `config.world.projects.enabled` står av til appen er publisert): ett prosjekt
+  per region om gangen, der minst to aktive konsern har ferdige verk. Målet er det største av 4 dagers utbytte fra verkene
+  i regionen og 2 % av kassene der, fristen 21 ekte dager, et nytt 7 dager etter at det forrige er avgjort. Man gir fra
+  konsernkassa (minst 1 mill., bare med ferdig verk i regionen; posten `fellesprosjekt`). Målet nådd: pengene er brukt,
+  nr. 1 får merket «Hovedbidragsyter» og +25 % regionmester-styrke i regionen i 30 dager, nr. 2 +10 % (høyeste gjelder,
+  `region_project_boost` i `region_strengths`, speilet i `boostedStrength`), og alle med minst 10 % av målet merket
+  «Fellesprosjekt». Bom: halvparten tilbake. Jobben `fellesprosjekter` (hvert 10. min). Kortet på Konsern → Oversikt.
 - **Verksjefer** (B-488, 152):
   - Hvert ferdige datterverk kan få en verksjef fra dagens tre kandidater. Drift, Økonomi og Folk er 1–5 med summen
     6–10, og verksjefen har ett trekk.
@@ -322,7 +329,9 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
   gi valg, ikke forsvinne. Ingen økonomiske justeringer før eieren har svart.
 - `VERKSJEF-FORSLAG.md` – V1–V3 er bygget (B-488, B-489).
 - `REKONSTRUKSJON-FORSLAG.md` – modell B er bygget (B-495).
-- `SLUTTSPILL-FORSLAG.md` – plan for spillere som er ferdige (B-504): sesong 2, kontrollrom, K-1, selskaper, fellesprosjekter.
+- `SLUTTSPILL-FORSLAG.md` – plan for spillere som er ferdige (B-504): kontrollrommet (B-505), grønt stål (B-506) og
+  fellesprosjektene (B-508) er bygget; K-1 og flere selskaper venter.
+- `FELLESPROSJEKT-FORSLAG.md` – modell C er bygget (B-508).
 - Programmodell for konsernprogrammene: eieren valgte B (aktivt budsjett, B-388/B-389). Spesifikasjonen står i
   `K1-PROGRAMMER.md` (B-389): serveren har i dag ingen hendelser i konsernverdenen, så K-1 trenger et lite, nøytralt
   hendelseslag (V0) for at Teknologi, Robusthet og Driftsytelse skal ha ekte effekt. Eieren godkjente V0, satsingene

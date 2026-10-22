@@ -9588,3 +9588,41 @@ De andre serverstegene i planen venter også:
 Endringslogg: nei
 Konto: ja når det bygges (regel 2).
 
+
+## B-508 Regionale fellesprosjekter bygget (modell C), står av til appen er publisert (2026-10-22)
+Erstatter «venter på eieren» i B-507. Eieren: «Fortsett. Har fikset supabase connectoren» etter «kjør på med resten av
+dine anbefalinger» – modell C er bygget som anbefalt i FELLESPROSJEKT-FORSLAG.md. Serveren er `supabase/156_fellesprosjekter.sql`.
+- **Ett prosjekt per region** om gangen, i fast rekkefølge: Ny kraftlinje, Dypvannskai, Felles skrapterminal,
+  Jernbanespor til verkene, Fagskole for industrien og Fjernvarme fra spillvarmen. Det åpner bare der minst to aktive
+  konsern har ferdige verk. Et nytt åpner 7 dager etter at det forrige er avgjort.
+- **Målet** er det største av 4 dagers utbytte fra verkene i regionen (hvert konsern med sin andel av styrken der,
+  `region_dividend`) og 2 % av konsernkassene til spillerne der. Det rundes opp til hele 10 mill. Med dagens tall blir
+  det 250–400 mill. per region. **Fristen** er 21 ekte dager.
+- **Å gi** (`project_give`): fra konsernkassa, minst 1 mill., aldri mer enn det som mangler. Bare med et ferdig verk i
+  regionen, og ikke for gjester, flaggede eller sperrede. Låsene: prosjektraden, den rådgivende låsen per spiller,
+  `konsern`, så `treasury` (B-433). Kassaboka får den nye posten `fellesprosjekt`, ikke `utbytte`/`bidrag`, så
+  lånerammen ikke endres.
+- **Målet nådd:**
+  - Pengene er brukt.
+  - Den som ga mest, er «Hovedbidragsyter» (varig merke) og får +25 % regionmester-styrke i regionen i 30 dager. Nummer to
+    får +10 %. Den høyeste fordelen gjelder; de legges ikke sammen. Fordelen ganges inn i `region_strengths`
+    (`region_project_boost`) og er speilet i `PROJECT_BOOST`/`boostedStrength` (`game/regions.ts`).
+  - Alle som ga minst 10 % av målet, får merket «Fellesprosjekt».
+  - Prosjektet står på verdenskartet med navnet til hovedbidragsyteren.
+  - Regionmester gir fortsatt ingen penger eller Kontroll (B-487).
+- **Fristen ute:** halvparten tilbake til alle som ga, én spiller per deltransaksjon (B-401), og ingen merker.
+- **Jobben `fellesprosjekter`** (cron hvert 10. min, `projects_settle`) avgjør, betaler tilbake, minner om fristen tre
+  dager før og åpner nye. Den står i `world_health` med standardregelen (20 min). Hendelsene går til Skiftrapporten
+  (`chat_event`) og som varsel (`push_enqueue`, tema `konsern`, lenke `konsern`).
+- **Appen:** kortet «Fellesprosjekter» på Konsern → Oversikt (`ui/Projects.tsx`, `net/projects.ts`), med målet,
+  fristen, de tre som har gitt mest (andel av målet, aldri beløp) og et beløpsfelt (`MillInput`, flyttet til egen fil)
+  med bekreftelse. Merkene står på topplista og profilen, og prestasjonen «Fellesprosjekt» har to trinn. Kartet viser
+  prosjektet som er åpent, og bygningene.
+- **Bryteren** `config.world.projects.enabled` står av. Den slås på når PR-en med appen er publisert, så Skiftrapporten
+  ikke melder om prosjekter appen ikke viser ennå: `update config set value = jsonb_set(value, '{projects,enabled}',
+  'true') where id = 'world';`. Tallene står i samme objekt.
+- **Prøvd** med ekte tall i en DO-blokk som ble rullet tilbake: seks prosjekter åpnet (250–400 mill.), gaver trakk
+  kassa og ble ført, målet nådd ga merker og +25/+10 % styrke, bom ga halvparten tilbake, og `world_health` sto «ok».
+  Regionmester-styrken var lik før og etter migrasjonen (101 rader, samme sum).
+
+Konto: ja (regel 3 – penger mellom spillere i ekte tid). Lagt i `ACCOUNT_FEATURES` og KONTO.md. Uten konto finnes ingen datterverk (`NeedsAccount` «Datterverk»), og kortet vises først når man har ferdige verk (B-180).
