@@ -122,11 +122,13 @@ npx tsx src/game/balance.ts --vurdering                    # kundevurderingene 1
 npx tsx src/game/balance.ts --konsern                      # utbyttet per ekte dag med 1–14 verk (B-304)
 npx tsx src/game/balance.ts --forste 700                   # kurven for første opplasting i juksesperren (B-257, ca. 40 min)
 npx tsx src/game/balance.ts --vinter                       # uhell, kort og kostnader om vinteren mot sommeren, per nivå (B-277, ca. 11 min)
+npx tsx src/game/balance.ts --rekonstruksjon               # konkurs rett etter nivå 3/4, rekonstruert: døgn tilbake mot første gang (B-495, ca. 10 min)
 npx tsx src/game/balance.ts --sommerstans                  # testspilleren velger sommerstans i fellesferien (B-298)
 npx tsx src/game/programSim.ts                             # konsernprogrammene: A mot B (B-388); --k1, --k1-skann, --k1-drift, --k1-kost, --k1-verdi(-skann), --k1-etablering: K-1 med hendelser i regionene (B-389–B-393)
 npx tsx src/game/takeoverSim.ts                            # oppkjøp: når lønner det seg å kjøpe, forsvare eller gi seg – regelsett 1, kandidatene og regelsett 2 (B-440, B-441; --kort); --gulv: anbudsgulvet A–F (B-449)
+npx tsx src/game/projectSim.ts                             # regionale fellesprosjekter: modellene A–C, bidragsytere mot gratispassasjerer (B-507)
 npx tsx src/game/managerSim.ts                             # verksjefene mot akseptkriteriene: netto per mandat, fisking, samtalene (B-488)
-npx tsx src/game/worldSim.ts                               # verdenssimulatoren: konsernkassa for liten/middels/stor/legacy etter 30–730 ekte dager, dager etter fullt konsern, maks bud, andel brukt (B-380, B-385; --dager 180 for kortere)
+npx tsx src/game/worldSim.ts                               # verdenssimulatoren: konsernkassa for liten/middels/stor/legacy etter 30–730 ekte dager, dager etter fullt konsern, maks bud, andel brukt (B-380, B-385; --dager 180 for kortere; --verksjef: uten / Lønnsomhet / Vekst, B-494)
 npm run build
 ```
 
@@ -150,13 +152,17 @@ frontend/src/
     konsernWorld.ts Konsernet på serveren speilet: priser, køen, nivåstigen, settleWorld (B-325, B-326; SQL i 064)
     managers.ts  Verksjefene: mandat, lønn, kandidater og kortene i «Verksjefen ringer» (B-488; SQL i 152), managerSim.ts
     regions.ts   Verdenskartets seks regioner og standardregionen for nye verk (B-333; SQL i 066); styrken til regionmester (B-487)
+                 og fordelen fra fellesprosjektene (`boostedStrength`, B-508)
     building.ts  Byggetid og innkjøring for store kjøp, nabolaget i tre trinn og verkets stiftelse (B-336, B-455);
                  kortet i ui/Neighborhood.tsx   upkeep.ts  Slitasje og fornyelse av storverket (B-455), raden i ui/Maintenance.tsx
     control.ts   Utbyttepolitikken, forsvarsfondet og Kontroll: tall og ord appen viser (B-334; SQL i 067)
     world.ts     Felles hendelser i motoren og sesongfordel (B-129)
     environment.ts Utslipp, renseanlegg i trinn, havari og bøter (B-263); panelet står i ui/Upgrades.tsx (CleanerPanel)
     mould.ts     Kokillene i strengstøpingen: slitasje per tonn, risiko for gjennombrudd, bytte (B-351); raden i ui/Maintenance.tsx
+    reconstruction.ts Rekonstruksjon etter konkurs: ett nivå ned, gjeld, siste 30 døgn tilbake (B-495); valget på konkursskjermen
     pension.ts   Alder og pensjon for de ansatte (B-357): `born`, pensjonsalder 62–67, beskjed en måned før
+    minis.ts     Støpemaskinen og valseverket i kontrollrommet: fagpoeng per døgn, rekord og fordelen i drifta (B-505)
+    green.ts     Grønt stål: CO₂ per tonn (innsats, strøm, fast), grønne forespørsler og omdømmet (B-506)
     calendar.ts  Året i spillet (360 døgn, dag 1 = 1. april), vinter 15.11.–14.3. og frost (B-265, B-272), fellesferie (B-298);
                  `calendarAhead` til kalenderkortet på Oversikt (ui/CalendarCard.tsx, B-321)
     war.ts       Krig i verden, bare i konsernet: dyrere strøm, flere forespørsler, høyst én per år (B-297)
@@ -227,6 +233,8 @@ frontend/src/
     icons.tsx    Ikoner fra Lucide, kopiert inn (lisens i icons-LICENSE.txt)   ds.tsx  StatusBadge, Callout, Button, Metric
     delta.ts     Endringen under nøkkeltallene (`changeDelta`, tegnes av `DeltaLine`/`Metric`, B-404)
     fonts/       Visningsskriften for overskrifter og store tall (Barlow Semi Condensed 600, OFL)
+    Projects.tsx Kortet «Fellesprosjekter» på Konsern → Oversikt; net/projects.ts: status og gaven (B-508)
+    MillInput.tsx Beløpsfeltet i millioner, amount.ts: tekst til kroner (B-447)
     Managers.tsx Kortet «Verksjefene» på Konsern → Oversikt med samtalen og arkene; useManagers.ts henter i hele appen,
                  managerText.ts gir linja i varsellinja (B-488, B-489)
     WorldMap.tsx Konsern → Kart: verdenskartet med regionene, andres verk og selskapene (B-333)
@@ -241,9 +249,10 @@ frontend/src/
     PushAuto.tsx Varsler på for alle: første trykk etter innlogging lar telefonen spørre, én gang per konto og enhet (B-467)
     Referral.tsx Kortet «Verv en venn» på Mål → Uka og koblingen etter innlogging (`ReferralSync`, B-459)
     Admin.tsx    Adminpanelet under kontoen, bare når `is_admin()` svarer ja (B-421); fanen Drift (B-485)
-    Companies.tsx Konsern → Industrien: ett kort per selskap (skraplageret nå) og konsernkassa (B-189, B-227)
+    Companies.tsx Konsern → Industrien: ett kort per selskap og konsernkassa (B-189, B-227); kraftverket (B-509)
     control/     Kontrollrommet: spillet i fire runder (chargeGame.ts: logikk, frø og inndatalogg, testspiller; ControlRoom.tsx,
-                 B-175); weekly.ts: ukens charge og treningsfrø (B-387)
+                 B-175); weekly.ts: ukens charge og treningsfrø (B-387); miniGame.ts + MiniRoom.tsx: støpemaskinen og
+                 valseverket (runder «hold» og «tid», testspiller `autoPlayMini`, B-505)
   sim/         Prosessmodell for lysbueovnen (brukes ikke av spillet lenger, sjekkes av sim/validate.ts)
 frontend/scripts/ sjekk-endringslogg.mjs: endringsloggen dekker nyeste beslutning; sjekk-emoji.mjs: ingen emoji (B-237)
 frontend/public/  PWA: manifest, ikoner (icon.svg er kilden; PNG-ene lages fra den med Chromium, B-249), service worker
@@ -260,7 +269,9 @@ docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretn
                VERKSKONTO-FORSLAG.md (mer å bruke penger på hjemme, V1–V4, bygget B-455),
                KONTROLL-FORSLAG.md (verdenskart, utbyttepolitikk, Kontroll, overtakelser og pengene hjemme, B-331, godkjent B-332),
                VERKSJEF-FORSLAG.md (verksjefer, besvart; V1 ferdig spesifisert i avsnitt 10, bygges etter V0/K-1, B-409),
-               REKONSTRUKSJON-FORSLAG.md (rekonstruksjon etter konkurs, modellene A–E – venter på eierens valg, B-409),
+               REKONSTRUKSJON-FORSLAG.md (rekonstruksjon etter konkurs, modellene A–E – modell B bygget, B-495),
+               SLUTTSPILL-FORSLAG.md (plan for spillere som er ferdige: sesong 2, K-1, selskaper, fellesprosjekter, B-504),
+               FELLESPROSJEKT-FORSLAG.md (regionale fellesprosjekter, simulert i game/projectSim.ts, modell C bygget B-508),
                STATUS.md (fasit for hvordan spillet virker nå, B-385), DATAKVALITET.md (tidslinjetallene, B-456),
                RAPPORT-2026-10-02.md (pengestrømmene 29.9–1.10, utbytterettingen og etterbetalingen, B-423; utført B-446),
                UKENS-KONTROLLROM.md (variant A bygget, B-387), KONSERNKAPITAL-FORSLAG.md (forslag med eierens svar, B-386/B-387),
@@ -317,7 +328,7 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Koblingen mot kontoen** (B-356): uten den (`reconciled`) laster appen verken opp eller henter. Feiler den fordi
   tjenesten er nede (`isTransient`), prøver `CloudFollow` igjen hvert 20. sekund (`needsRelink`). Nye kall som skal
   prøves igjen etter en driftsstans, bruker `isTransient`, ikke bare `offline`.
-- **Beløpsfelt** (B-447): felt for beløp er tekstfelt med `inputMode="decimal"` (`MillInput` i `ui/Companies.tsx`), aldri
+- **Beløpsfelt** (B-447): felt for beløp er tekstfelt med `inputMode="decimal"` (`MillInput` i `ui/MillInput.tsx`), aldri
   `type="number"` – tastaturet på iPhone gir komma, og tallfeltet leser ikke «0,1». Eksempler i feltet rundes aldri til 0.
 - **Tekstfelt på iPhone** (B-347): Safari zoomer inn på felt med skrift under 16 px og zoomer ikke ut igjen. Regelen
   nederst i `game.css` gir alle felt man skriver i minst 16 px på berøringsskjerm – ikke overstyr den med mindre skrift.
@@ -471,6 +482,12 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   faste tall i nettesten) – endres den, endres begge. Jobben `regionmester` (cron hvert 10. min) er den eneste som bytter
   mester og skriver hendelser/varsler; bytte bare når en annen er strengt sterkere. Tittelen gir ingen penger eller Kontroll
   – vil man gi den virkning, er det en ny beslutning. Stopp med `select cron.unschedule('regionmester');`.
+- **Fellesprosjekter** (B-508, 156): gaven (`project_give`) låser prosjektraden, den rådgivende låsen per spiller,
+  `konsern` og så `treasury`, og fører posten `fellesprosjekt` – aldri `utbytte`/`bidrag` (lånerammen). Bom betales tilbake
+  av `projects_settle` (jobben `fellesprosjekter`, cron hvert 10. min) én spiller om gangen og merkes i
+  `region_project_gifts.refunded`. Fordelen i regionmester-styrken (`region_project_boost`) speiles i `boostedStrength` –
+  endres tallene i `config.world.projects`, endres `PROJECT_BOOST` også. Topplista viser andel av målet, aldri beløp andre
+  har gitt. Bryteren `config.world.projects.enabled`; stopp jobben med `select cron.unschedule('fellesprosjekter');`.
 - **Verksjefer** (B-488, 152): `managers_settle` (jobben `verksjefer`, cron hvert 10. min) gjør opp hver betalt utbyttedag
   én gang (`manager_days`), etter `pay_dividends`, som ikke er endret. Pengene føres som `justering` (`verksjef:<dag>`,
   `sluttpakke:<id>`, `samtale:<id>`) via `manager_cash`, aldri som `utbytte`, så de ikke øker lånerammen. Kortene står i
@@ -607,6 +624,8 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   `queueFit` (ingen jobb i køen blir for sen når den nye går foran). `queueFit` alene slipper inn mer – ikke bruk den i
   stedet for den gamle. Valseverket får emner til `ROLLING_BUFFER_H` timer først (`planLots`), og ovnene fordeles etter
   hva som haster (`headFurnaces`). Mål endringer i produksjonen med flere frø på et fullt storverk, ikke én kjøring.
+  Landemerker (B-503): planleggeren setter dem med `plannerOrder` (så tidlig det går uten at noe med frist blir for sent),
+  mens `queueFit` fortsatt regner dem først – det er med vilje, så salgsdirektøren holder av plass. Ikke gjør dem like.
 - **Sekvenser i strengstøpingen** (B-046, B-273): `pickNextLadle` venter bare når samme kvalitet kommer innen
   `SEQUENCE_SOON_MIN` og køen har plass. Endres regelen, mål produksjon og ventetid på et fullt storverk med flere frø.
 - **Skrapvarsel** (B-219): varsler i grensesnittet bruker `scrapAlert` (neste charge står fast), ikke `scrapShort` (en
@@ -641,7 +660,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   hele setningen.
 - **Flere selskaper** (B-253, B-256): tonn, gebyr og anslag regnes per type (`company_counted_t`, `company_fee`,
   `company_estimate` i 042/043). Verkstedet teller kroner vedlikehold (`snapshots.maint_kr` → `production_days.gained_maint`),
-  ikke tonn, og `company_fee` er da en andel. Et selskap med `companies.active = false` får ikke anbud, inntekt eller plass i `world_status`. Varsler om avgjorte
+  ikke tonn, og `company_fee` er da en andel. Kraftverket (B-509, 157) teller kWh: stålet som teller × `power_kwh_per_t` (tidslinja
+  siste 7 ekte dager), og `company_fee` er kroner per kWh. En ny type: `companies_type_check`, `company_counted_t`,
+  `company_fee`, `company_estimate_cap` og `CompanyType`/`companyType`/`EARNS_FROM`/`COMPANY_INTRO` i appen – og appen
+  publiseres før selskapet slås på (eldre apper viser ukjente typer som skraplageret). Et selskap med `companies.active = false` får ikke anbud, inntekt eller plass i `world_status`. Varsler om avgjorte
   anbud gis med `applyTenderResults` (i rekkefølge etter anbudet), ikke ett og ett selskap.
 - **Anbud og inntekt** (B-189) avgjøres «lat» av `world_status()` → `world_tick()`. `world_tick` kjøres av pg_cron hvert 5. minutt (`verden-tick`, B-364) og ellers høyst én gang
   per 30 s og hopper over når en annen holder på (B-343, 072) – ikke gjør låsen ventende igjen, da står appene i kø.
@@ -653,7 +675,7 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   (`net/seasonTrack.ts`) – endres den, endres begge.
 - **Knappene ved varsellinja åpner ark** (B-286): hjelp, Mål og topplista. På mobil åpner `go("mal")` arket; på PC er Mål en side.
 - **Varsler med lenke** (B-453): `log(g, tekst, art, link)` – en linje med `link` fører dit ved trykk i varsellinja (pil) og
-  i varsellista («Gå til selskapet»). Nye mål legges i `LogLink` (`types.ts`), `openLink` (`GameApp`) og `LINK_LABEL` (`Inbox.tsx`).
+  i varsellista («Gå til selskapet»). Nye mål legges i `LogLink` (`types.ts`), `openLink` (`GameApp`) og `LINK_LABEL` (`ui/logLinks.ts`, B-501).
 - **Kjøp hjemme og bidraget** (B-455): nabolaget, stiftelsen og fornyelsen føres som `investering`, som
   `contribution_margin_raw` ikke teller. Nye pengesluk hjemme skal ikke gjøre verket billigere å drive eller selge mer (da
   øker marginen og bidraget i ekte tid) – før dem som `investering` eller i en post serveren ikke leser. Slitasjen
@@ -708,6 +730,13 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Salgsdirektøren regner med det verket faktisk lager** (`directorDailyT`, siste uke), ikke kapasiteten. Står ovner
   (én ovn om gangen, støping, folk), sier han nei til det Salg viser grønt – loggen forklarer det (B-312). Ikke løsne
   regelen: den holder omdømmet på 96–100 hos alle med direktør.
+- **Rekonstruksjon** (B-495): kjøp og forskning registreres med `noteBuy` (`game/reconstruction.ts`) i
+  `buyUpgrade` (med pris og nivå), `doResearch`, `buyMastery` og `buyFpDeal`. Rekonstruksjonen tar tilbake forskning,
+  mesterskap og kjøpte fagpoeng fra de siste 30 døgnene og legger utstyr som beholdes, på gjelden. Nye ting som kjøpes for
+  penger hjemme og overlever en rekonstruksjon, må også registreres der, ellers kan «lån maks, kjøp, gå konkurs» lønne seg. Nytt utstyr på et nivå selges av `rebuild` hvis nivået er tapt.
+- **Nye skraptyper** (B-506): markedet trekker tilfeldige tall per skraptype hvert døgn. En ny type må holdes utenfor
+  `marketIds` (`engine.ts`) til den er forsket fram, ellers flyttes alle tilfeldige tall i spillet og `balance.ts` gir
+  helt andre nivådager. `migrate()` fyller nye typer inn i lageret, alle resepter og `scrapFactor`.
 - **Hendelseskort om forhold mellom ansatte** (B-444): trakassering, diskriminering og varsling er et sårt tema for eieren –
   ingen slike kort, kapitler eller popups uten at eieren ber om det.
 - **Skjulte prestasjoner** (B-296): `hidden` på en serie gjør at den bare vises og telles for dem som har den. Bruk

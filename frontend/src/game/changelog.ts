@@ -15,6 +15,100 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 509,
+    date: "2026-10-22",
+    title: "Kraftverket",
+    items: [
+      "Et nytt selskap å by på: kraftverket i Østskogen. Eieren får 12 øre for hver kWh de andre verkene bruker.",
+      "Kraftverket følger de samme reglene som de andre selskapene: anbud, Kontroll og oppkjøp under Konsern → Industrien.",
+    ],
+  },
+  {
+    b: 508,
+    date: "2026-10-22",
+    title: "Fellesprosjekter i regionene",
+    items: [
+      "Hver region får et stort fellesprosjekt, som en ny kraftlinje eller en dypvannskai. Alle med ferdige datterverk i regionen kan gi fra konsernkassa under Konsern → Oversikt.",
+      "Den som gir mest, blir hovedbidragsyter og får 25 % mer regionmester-styrke i regionen i 30 dager. Nummer to får 10 %. Alle som gir minst en tidel av målet, får et merke.",
+      "Prosjektet har 21 dager. Nås ikke målet, får alle halvparten tilbake.",
+      "Ferdige prosjekter står på verdenskartet med navnet til hovedbidragsyteren.",
+    ],
+  },
+  {
+    b: 506,
+    date: "2026-10-21",
+    title: "Grønt stål",
+    items: [
+      "Med «Grønt stål» forsket fram ser du klimaavtrykket på Resept: hvor mye CO₂ hvert tonn stål gir, og hvor mye hver skraptype bidrar. Råjern fra masovn gir mest.",
+      "Ny forskning: hydrogenbasert jernsvamp – rent jern som tynner ut kobber og tinn med lite CO₂, men er dyrt.",
+      "Noen kunder vil ha grønt stål. Leverer du under kravet, får du ekstra omdømme og en ny prestasjon. Prisen er den samme.",
+      "Nytt kapittel i fagboka: «Grønt stål og CO₂», med quiz.",
+    ],
+  },
+  {
+    b: 505,
+    date: "2026-10-21",
+    title: "Ta styringen ved støpemaskinen og i valseverket",
+    items: [
+      "To nye spill i kontrollrommet: hold mellomkaret fullt, følg støpefarten og kapp emnene – eller varm, valse og kjøl armeringsstengene. Du finner dem i arket for Støping.",
+      "Fagpoeng én gang per døgn for hvert spill. Med 4–5 stjerner går drifta bedre en stund: færre strenggjennombrudd, eller mer armering av emnene.",
+    ],
+  },
+  {
+    b: 503,
+    date: "2026-10-21",
+    title: "Planleggeren og landemerkene",
+    items: [
+      "Planleggeren setter ikke lenger landemerker foran alt annet. Et landemerke lages så tidlig det går uten at kontrakter med frist blir for sene – ellers venter det til det blir plass.",
+    ],
+  },
+  {
+    b: 501,
+    date: "2026-10-16",
+    title: "Skiftlederen ordner faste jobber",
+    items: [
+      "Har du skiftleder, kan du slå på at skiftlederen gir avløserne fast jobb av seg selv når noen slutter eller går av med pensjon (Folk → Skift).",
+      "Beskjeden om at noen har sagt opp eller går av med pensjon, har nå en knapp som tar deg rett til skiftene eller søkerne.",
+    ],
+  },
+  {
+    b: 499,
+    date: "2026-10-15",
+    title: "Avløserne kan få fast jobb",
+    items: [
+      "Når folk slutter eller går av med pensjon, fyller avløserne plassene. Nå kan du gi dem fast jobb der: avløseren blir støper, ovnsoperatør eller det som trengs, med lønna til rollen.",
+      "Knappen «Gi avløserne fast jobb» står på Folk → Skift, og under «Mer» på hver avløser. Resten av avløserne blir ledige til fravær.",
+    ],
+  },
+  {
+    b: 498,
+    date: "2026-10-15",
+    title: "Vennene på kartet og nye merker for verksjefene",
+    items: [
+      "Følger du noen, er verkene deres grønne på verdenskartet, og filteret «Venner» viser bare dine og deres verk.",
+      "Nye prestasjoner for verksjefene: den første du ansetter, samtalene du svarer på, og en verksjef som trives godt.",
+      "Etter en rekonstruksjon sier et råd på Verket hvor mye av gjelden kassa kan betale, så du kommer deg opp igjen.",
+    ],
+  },
+  {
+    b: 495,
+    date: "2026-10-14",
+    title: "Konkurs er ikke lenger slutten",
+    items: [
+      "Går verket konkurs fra støperiet og opp, kan banken rekonstruere det: du driver videre på nivået under i stedet for å starte i garasjen.",
+      "Det koster: utstyret fra det høyeste nivået selges, forskning fra de siste 30 døgnene tas tilbake, omdømmet faller kraftig, og lånet blir gjeld som betales med 10 % av salget. Du flytter ikke opp igjen før gjelden er betalt (den kan også betales ned i banken).",
+      "Forskning fra før, de flinkeste folka, prestasjonene og konsernet beholdes. Banken gjør det høyst én gang i måneden.",
+    ],
+  },
+  {
+    b: 493,
+    date: "2026-10-14",
+    title: "Vennene dine på topplista",
+    items: [
+      "Følger du noen, kan du velge «Venner» over topplista og ukelista. Da ser du bare dem du følger og deg selv – med plassen på hele lista.",
+    ],
+  },
+  {
     b: 491,
     date: "2026-10-14",
     title: "Ordren fra utlandet er ikke lenger umulig",

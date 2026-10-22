@@ -10,6 +10,8 @@ import type { GameState, GradeId } from "../game/types";
 import type { GameApi } from "../game/useGame";
 import { AnalysisLegend, Card, GradeChips } from "./common";
 import { fmtKr, fmtNum, fmtPct } from "./format";
+import { fmtCo2, GREEN, greenOn, heatCo2, recipeInputCo2, SCRAP_CO2 } from "../game/green";
+import { Icon } from "./icons";
 
 /**
  * Resepten (B-035): hvor mye av hver skraptype som går i ovnen, med knapper for mer og mindre,
@@ -33,6 +35,8 @@ export function RecipeCard({ g, stats, act }: { g: GameState; stats: PlantStats;
   const worst = worstCase(g, grade, stats, recipe);
   const worstOk = satisfies(worst, grade);
   const spec = GRADES[grade];
+  const green = greenOn(g);
+  const co2 = heatCo2(recipeInputCo2(recipe), stats.kwhPerT * est.energyFactor);
 
   return (
     <Card title={`Resepten for ${spec.name.toLowerCase()}`}>
@@ -90,6 +94,7 @@ export function RecipeCard({ g, stats, act }: { g: GameState; stats: PlantStats;
                 <strong>{type.name}</strong>
                 <span className="g-muted">
                   P {fmtNum(type.p, 3)} · Spor {fmtNum(type.tramp, 2)}
+                  {green && ` · CO₂ ${fmtNum(SCRAP_CO2[id], 2)}`}
                 </span>
               </div>
               <div className="g-stepper">
@@ -128,6 +133,15 @@ export function RecipeCard({ g, stats, act }: { g: GameState; stats: PlantStats;
         <span>Holder kravet til:</span>
         <GradeChips grades={est.grades.filter((id) => GRADES[id].minStage <= g.stage)} highlight={grade} />
       </div>
+      {/* Grønt stål (B-506): klimaavtrykket med denne resepten, når «Grønt stål» er forsket fram */}
+      {green && (
+        <p className={`g-note g-co2${co2 <= GREEN.limit ? " is-ok" : ""}`}>
+          <Icon name="trees" /> Klimaavtrykk: <strong>{fmtCo2(co2)}</strong>
+          {co2 <= GREEN.limit
+            ? ` – grønt stål (krav ${fmtNum(GREEN.limit, 2)}).`
+            : ` – over kravet for grønt stål (${fmtNum(GREEN.limit, 2)}). Råjern gir mest CO₂${scrapUnlocked(g, "jernsvamp") ? "; jernsvamp tynner ut med lite CO₂" : ""}.`}
+        </p>
+      )}
 
       {grader ? (
         <>

@@ -9,7 +9,7 @@ import { COSMETIC_BY_ID } from "../game/cosmetics";
 import { SISTER_TYPES } from "../game/konsern";
 import { REGIONS } from "../game/regions";
 import type { GameState, SisterType } from "../game/types";
-import { BADGE_NAMES, levelLabel } from "../net/leaderboard";
+import { BADGE_ICONS, BADGE_NAMES, levelLabel } from "../net/leaderboard";
 import {
   BIO_MAX,
   fetchPlayerProfile,
@@ -209,7 +209,7 @@ function ProfileBody({ p }: { p: PlayerProfile }) {
           ))}
           {p.badges.map((b) => (
             <li key={b} className="g-chip">
-              <Icon name={b === "regionmester" ? "crown" : "scroll-text"} /> {BADGE_NAMES[b]}
+              <Icon name={BADGE_ICONS[b] ?? "scroll-text"} /> {BADGE_NAMES[b]}
             </li>
           ))}
         </ul>

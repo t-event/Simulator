@@ -31,6 +31,8 @@ import {
   type WeeklyRow,
 } from "../net/weekly";
 import { Place } from "./Place";
+import { FriendFilter } from "./FriendFilter";
+import { FRIENDS_LIMIT, friendRows, useFriendList, type FriendScope } from "./friendScope";
 import { PlayerName } from "./Profile";
 import { Card } from "./common";
 import { fmtNum } from "./format";
@@ -135,30 +137,47 @@ export function WeeklyCard({ act }: { act: GameApi["act"] }) {
 
 /** Ukelista: én liste for alle spillerne (B-172) */
 function WeeklyBoard({ kind, onClose }: { kind: WeekKind; onClose: () => void }) {
-  const [data, setData] = useState<{ rows: WeeklyRow[] | null } | null>(null);
-  const rows = data ? data.rows : null;
-  const error = !!data && data.rows === null;
+  // Alle eller bare vennene (B-493): hele lista hentes når filteret står på Venner
+  const friends = useFriendList();
+  const [who, setWho] = useState<FriendScope>("alle");
+  const onlyFriends = who === "venner" && !!friends && friends.length > 0;
+  const key = onlyFriends ? "venner" : "alle";
+  const [data, setData] = useState<{ key: string; rows: WeeklyRow[] | null } | null>(null);
+  const current = data && data.key === key ? data : null;
+  const rows =
+    current?.rows && onlyFriends && friends
+      ? friendRows(
+          current.rows,
+          friends,
+          (r) => r.nickname,
+          (r) => r.isMe,
+        )
+      : (current?.rows ?? null);
+  const error = !!current && current.rows === null;
   useEffect(() => {
     let alive = true;
-    fetchWeeklyBoard(null).then(
-      (r) => alive && setData({ rows: r }),
-      () => alive && setData({ rows: null }),
+    fetchWeeklyBoard(null, key === "venner" ? FRIENDS_LIMIT : undefined).then(
+      (r) => alive && setData({ key, rows: r }),
+      () => alive && setData({ key, rows: null }),
     );
     return () => {
       alive = false;
     };
-  }, []);
+  }, [key]);
   return (
     <Portal>
       <div className="g-modal" role="dialog" aria-modal="true" aria-label="Ukens utfordring" onClick={onClose}>
         <div className="g-modal-card" onClick={(e) => e.stopPropagation()}>
           <SheetHead title={WEEK_KINDS[kind].title} icon="medal" onClose={onClose} />
+          {friends && friends.length > 0 && <FriendFilter value={who} onChange={setWho} />}
           {error ? (
             <p className="g-muted">Fikk ikke hentet lista. Prøv igjen senere.</p>
           ) : !rows ? (
             <p className="g-muted">Henter …</p>
           ) : rows.length === 0 ? (
-            <p className="g-muted">Ingen på lista ennå denne uka.</p>
+            <p className="g-muted">
+              {onlyFriends ? "Ingen av vennene dine er på lista denne uka." : "Ingen på lista ennå denne uka."}
+            </p>
           ) : (
             <ol className="g-board">
               {rows.map((r) => (

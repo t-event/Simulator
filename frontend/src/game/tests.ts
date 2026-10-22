@@ -14,6 +14,8 @@ import {
   donateFoundation,
   giveBonus,
   hireForWildcards,
+  giveFixedJob,
+  leaderFixedJobs,
   LEADER_COURSE_DAYS,
   leaderCourseBlock,
   leaderCourseCost,
@@ -95,6 +97,7 @@ import {
   fmtKr,
   log,
   makeCandidate,
+  newFurnaceUnit,
   newGame,
   oftenSick,
   creditLimit,
@@ -140,6 +143,7 @@ import {
   signBlocked,
   cancelContract,
   orderQueue,
+  plannerOrder,
   autoBuy,
   ensureCandidates,
   RETURN_MAX_SHARE,
@@ -263,6 +267,8 @@ import {
   avgRating,
   EXAM_RETRY_DAYS,
   normalSalary,
+  quitLink,
+  quitText,
   rateDelivery,
   recipeEstimate,
   ratingFactor,
@@ -342,6 +348,7 @@ import {
   YEAR_DAYS,
 } from "./calendar";
 import { MIN_PER_DAY } from "./data";
+import { noteBuy, reconDay, reconOption, reconstruct, startCash } from "./reconstruction";
 import { fmtDuration } from "../ui/format";
 import { activeWar, WAR, warDay, warFactor } from "./war";
 import { acceptAgreement, buyScrap, roundDay } from "./engine";
@@ -350,6 +357,9 @@ import { explosionChance, FATAL_DOWN_DAYS, fatalAccident, WINTER_EXPLOSION } fro
 import { contractCoverage, freeStockT, sellAllFree } from "./engine";
 import { leaderBonus, leaderBonusDue, relineLoanNeed, relineOnLoan } from "./actions";
 import { autoPlay, ChargeGame, INPUT_LOG_MAX, seededRandom } from "../ui/control/chargeGame";
+import { autoPlayMini, newMiniGame } from "../ui/control/miniGame";
+import { castCalmFactor, finishMini, miniAvailable, miniFpToday, rollYieldBonus } from "./minis";
+import { GREEN, heatCo2, recipeInputCo2 } from "./green";
 import { hints } from "../ui/hints";
 import { answerOrder } from "../ui/quizOrder";
 import { hasMoulds, MOULD, mouldCost, mouldHour, mouldRisk, mouldWear, replaceMoulds, wearMoulds } from "./mould";
@@ -1131,7 +1141,7 @@ test("Skrapinnkjøperen selger skrap ingen resept trenger når lageret er fullt 
   // Lageret fullt av tungt skrap; resepten vil bare ha blandet skrap
   for (const id of Object.keys(g.scrap) as (keyof typeof g.scrap)[]) g.scrap[id].t = 0;
   g.scrap.tungt = { ...g.scrap.tungt, t: stats.yardT, p: 0.02, tramp: 0.16, c: 0.2, dirt: 0.03, radioactive: false };
-  g.recipe = { rent: 0, spon: 0, retur: 0, tungt: 0, rajern: 0, blandet: 100, shredder: 0 };
+  g.recipe = { rent: 0, spon: 0, retur: 0, tungt: 0, rajern: 0, jernsvamp: 0, blandet: 100, shredder: 0 };
   g.gradeRecipes[g.targetGrade] = { ...g.recipe };
   for (const f of g.furnaces) f.grade = null;
   g.cash = 1e9;
@@ -1166,7 +1176,7 @@ test("Skrapklasseren bruker renere skrap når returskrapet er tomt (B-171)", () 
   for (const id of Object.keys(g.scrap) as (keyof typeof g.scrap)[]) g.scrap[id].t = 0;
   g.scrap.tungt.t = 8;
   g.scrap.rent = { ...g.scrap.rent, t: 50, p: 0.012, tramp: 0.05, c: 0.06, dirt: 0.01, radioactive: false };
-  const recipe = { rent: 0, spon: 0, retur: 20, tungt: 80, rajern: 0, blandet: 0, shredder: 0 };
+  const recipe = { rent: 0, spon: 0, retur: 20, tungt: 80, rajern: 0, jernsvamp: 0, blandet: 0, shredder: 0 };
   // Tungt skrap til 80 %, men returskrapet mangler: rent skrap (renere) fyller inn
   const mix = takeScrap(g, 10, false, recipe);
   assert(mix !== null, "ovnen ble stående og vente på returskrap");
@@ -1914,7 +1924,7 @@ test("Skrapklasseren smelter om eget returskrap, og planleggeren holder av plass
       f.grade = null;
       f.type = "lysbue30";
     }
-    g.recipe = { rent: 90, spon: 0, retur: 0, tungt: 0, rajern: 10, blandet: 0, shredder: 0 };
+    g.recipe = { rent: 90, spon: 0, retur: 0, tungt: 0, rajern: 10, jernsvamp: 0, blandet: 0, shredder: 0 };
     g.gradeRecipes[g.targetGrade] = { ...g.recipe };
     return g;
   };
@@ -1942,7 +1952,16 @@ test("Skrapklasseren smelter om eget returskrap, og planleggeren holder av plass
   r.scrap.retur = { t: 30, ...clean };
   r.furnaces.push(structuredClone(r.furnaces[0]));
   r.furnaces[1].grade = "premium";
-  r.gradeRecipes.premium = { rent: 60, spon: 0, retur: 10, tungt: 0, rajern: 30, blandet: 0, shredder: 0 };
+  r.gradeRecipes.premium = {
+    rent: 60,
+    spon: 0,
+    retur: 10,
+    tungt: 0,
+    rajern: 30,
+    jernsvamp: 0,
+    blandet: 0,
+    shredder: 0,
+  };
   takeScrap(r, 100, false, r.recipe);
   // Premium trenger 10 % av 100 t til to charger = 20 t; bare det som er over, kan brukes
   assert(Math.abs(r.scrap.retur.t - 20) < 0.01, `tok returen premium-resepten trenger (${r.scrap.retur.t} t igjen)`);
@@ -2219,7 +2238,7 @@ test("Skrapvarselet (B-219): ikke når ovnen fyller opp med annet skrap, men nå
   const g = newGame(219);
   g.stage = 1;
   const stats = computePlantStats(g);
-  g.recipe = { rent: 0, spon: 0, retur: 50, tungt: 50, rajern: 0, blandet: 0, shredder: 0 };
+  g.recipe = { rent: 0, spon: 0, retur: 50, tungt: 50, rajern: 0, jernsvamp: 0, blandet: 0, shredder: 0 };
   for (const id of Object.keys(g.scrap) as (keyof typeof g.scrap)[]) g.scrap[id].t = 0;
   g.scrap.tungt.t = 1000;
   // Returskrapet er tomt og kan ikke kjøpes, men ovnen fyller opp med tungt skrap: ingen varsel
@@ -4385,7 +4404,7 @@ test("Skrapklasseren (B-397): lagerets faktiske analyse avgjør om returskrap ka
     g.scrap.retur = { ...g.scrap.retur, t: 50, p: 0.01, tramp, c: 0.06, dirt: 0.01, radioactive: false };
     return g;
   };
-  const recipe = { rent: 100, spon: 0, retur: 0, tungt: 0, rajern: 0, blandet: 0, shredder: 0 };
+  const recipe = { rent: 100, spon: 0, retur: 0, tungt: 0, rajern: 0, jernsvamp: 0, blandet: 0, shredder: 0 };
   // Skitten retur (sporelementer over det rene skrapet): ovnen venter heller enn å ødelegge kvaliteten
   const dirty = setup(0.125);
   assert(takeScrap(dirty, 10, false, recipe) === null, "brukte returskrap som var skitnere enn det rene skrapet");
@@ -5059,6 +5078,332 @@ test("Ordren fra utlandet (B-491): størrelsen følger valseverket og køen, og 
     priority: 1,
   });
   assert(exportOrder(g) === null, "ordren kom selv om køen var full");
+});
+
+test("Råd om gjelden etter konkursen (B-498): når kassa kan betale, ikke når den trengs til drift", () => {
+  const g = newGame(498);
+  g.stage = 3;
+  g.recon = { debt: 5_000_000, paid: 0, times: [] };
+  g.cash = 0;
+  const tip = () => hints(g, computePlantStats(g)).find((h) => h.text.startsWith("Gjelden etter konkursen"));
+  assert(!tip(), "ikke med tom kasse");
+  g.cash = 50_000_000;
+  const t = tip();
+  assert(!!t && t.view === "verket" && t.sub === "okonomi", `rådet: ${JSON.stringify(t)}`);
+  g.recon.debt = 0;
+  assert(!tip(), "ikke når gjelden er betalt");
+});
+
+test("Prestasjoner for verksjefene (B-497): skjult til første verksjef, så tellerne", () => {
+  const g = newGame(497);
+  assert(!visibleFamilies(g).some((f) => f.id === "verksjef" || f.id === "godsjef"), "skjult uten verksjef");
+  g.counters.verksjef_ansatt = 1;
+  g.counters.samtale_besvart = 10;
+  g.counters.verksjef_trives = 1;
+  checkAchievements(g);
+  assert(
+    hasAchievement(g, "verksjef1") && hasAchievement(g, "samtaler10") && hasAchievement(g, "godsjef"),
+    "første verksjef, ti samtaler og en som trives",
+  );
+  assert(!hasAchievement(g, "verksjef5") && !hasAchievement(g, "samtaler50"), "ikke de neste trinnene ennå");
+  assert(
+    visibleFamilies(g).some((f) => f.id === "verksjef"),
+    "synlig når den er tatt",
+  );
+});
+
+test("Rekonstruksjon (B-495): ett nivå ned, siste 30 døgn tilbake, gjeld i stedet for lån, og høyst én gang i måneden", () => {
+  const g = newGame(495);
+  g.minute = 100 * MIN_PER_DAY;
+  g.stage = 4;
+  g.owned = ["lager", "skraptak", "ferdiglager1", "ferdiglager2", "ferdiglager3", "ovn2", "ovn3"];
+  g.furnaces = [newFurnaceUnit(), newFurnaceUnit(), newFurnaceUnit()];
+  g.furnaces[0].type = "lysbue150";
+  g.furnaces[1].type = "lysbue30";
+  g.furnaces[2].type = "likestrom420";
+  g.furnaceCount = 3;
+  g.castingType = "streng8";
+  g.researched.push("opplaering");
+  g.researchPoints = 100;
+  g.reputation = 80;
+  g.loan = 18_000_000;
+  g.cash = -4_000_000;
+  for (let i = 0; i < 100; i++) g.workers.push(makeCandidate(g, "ovn"));
+  g.contracts = [];
+  // Kjøpt de siste 30 døgnene: tas tilbake. Kjøpt før det: står (hvis nivået under har det)
+  g.recentBuys = [{ day: 50, kind: "addon", id: "lager" }];
+  noteBuy(g, { kind: "addon", id: "skraptak", price: 300_000, stage: 2 });
+  noteBuy(g, { kind: "addon", id: "ferdiglager3", price: 30_000_000, stage: 4 });
+  noteBuy(g, { kind: "research", id: "opplaering" });
+  noteBuy(g, { kind: "fp", id: "samarbeid", fp: 40 });
+  assert(g.recentBuys!.length === 4, "kjøp eldre enn 30 døgn ryddes bort");
+  g.gameOver = true;
+  const now = 1_000 * 86_400_000;
+  const opt = reconOption(g, now);
+  assert(
+    opt.ok && opt.to === 3 && opt.cash > 0 && opt.owed === 300_000 && opt.debt === 11_000_000 + opt.cash + 300_000,
+    `valget: halve lånet og minuset, startkassa og utstyr kjøpt nylig som beholdes: ${JSON.stringify(opt)}`,
+  );
+  assert(reconstruct(g, now), "rekonstruksjonen ble ikke gjort");
+  assert(g.stage === 3 && !g.gameOver && g.speed === 0, "nivå 3, spillet går videre");
+  assert(g.furnaces.length === 2, `ovn 3 (storverket) er solgt: ${g.furnaces.length} ovner`);
+  assert(
+    g.furnaces[0].type === "lysbue30" && g.furnaces[1].type === "lysbue30",
+    `ovnene fra storverket blir grunnversjonen: ${g.furnaces.map((f) => f.type)}`,
+  );
+  assert(g.castingType === "streng1", `støpingen: ${g.castingType}`);
+  assert(!g.owned.includes("ferdiglager3") && !g.owned.includes("ovn3"), "utstyret fra storverket er solgt");
+  assert(g.owned.includes("lager") && g.owned.includes("ferdiglager2"), "utstyr fra før og fra nivået under står");
+  assert(g.owned.includes("skraptak"), "utstyr fra nivået under kjøpt nylig beholdes (prisen ligger i gjelden)");
+  assert(!g.researched.includes("opplaering") && g.researchPoints === 60, "forskning og kjøpte fagpoeng tilbake");
+  assert(
+    g.loan === 0 && opt.ok && g.cash === opt.cash && g.cash === startCash(g) && g.recon?.debt === opt.debt,
+    "lånet blir gjeld, og startkassa er lånt",
+  );
+  assert(g.reputation === 20 && g.workers.length <= 70, "omdømme: høyst halvparten av kravet på nivået under (40)");
+  // Ny konkurs: ikke før gjelden er betalt, og høyst én gang i måneden
+  g.gameOver = true;
+  assert(!reconOption(g, now).ok, "gjelden er ikke betalt");
+  g.recon!.debt = 0;
+  assert(!reconOption(g, now + 10 * 86_400_000).ok, "bare ti dager siden");
+  assert(reconOption(g, now + 31 * 86_400_000).ok, "etter en måned går det igjen");
+  g.gameOver = false;
+  // Gjelden betales med 10 % av salget hvert døgn
+  g.recon!.debt = 1_000_000;
+  g.history.push({ ...structuredClone(g.today), income: { kontrakt: 3_000_000, spot: 1_000_000 } });
+  const cash = g.cash;
+  reconDay(g);
+  assert(g.recon!.debt === 600_000 && g.cash === cash - 400_000, `betalt: ${g.recon!.debt}, ${cash - g.cash}`);
+  // Fra verkstedet: bare nytt spill
+  const v = newGame(1);
+  v.stage = 1;
+  v.gameOver = true;
+  assert(!reconOption(v).ok && !reconstruct(v), "verkstedet rekonstrueres ikke");
+});
+
+test("Fast jobb til avløsere (B-499): avløserne tar plassene de står fast på, blir ledige, og skiftene er like", () => {
+  const g = newGame(76);
+  g.stage = 3;
+  g.castingType = "streng1";
+  g.workers = [];
+  const crew = crewPerShift(g);
+  // Fullt for tre skift, bortsett fra to støpere og én ovnsoperatør; fire avløsere
+  const short: Partial<Record<RoleId, number>> = { stoper: 2, ovn: 1 };
+  for (const [role, n] of Object.entries(crew) as [RoleId, number][])
+    for (let i = 0; i < n * 3 - (short[role] ?? 0); i++) g.workers.push(makeCandidate(g, role));
+  for (let i = 0; i < 4; i++) g.workers.push(makeCandidate(g, "allround"));
+  const avl = g.workers.filter((w) => w.role === "allround");
+  avl[0].skill = 1.2;
+  avl[1].skill = 4.5;
+  avl[2].skill = 3.1;
+  avl[3].skill = 2.2;
+  avl[3].apprenticeUntil = 999; // lærlinger får ikke fast jobb
+  const crews = staffing(g, true).crews;
+  assert(wildcardUse(g).tied === 3, `fast: ${JSON.stringify(wildcardUse(g))}`);
+  // Én bestemt avløser til en bestemt plass, med lønna til rollen
+  const one = avl[0];
+  const r1 = giveFixedJob(g, one.id, "ovn");
+  assert(r1.ok && one.role === "ovn", `én: ${r1.message}`);
+  assert(one.salary === normalSalary(g, "ovn", one.skill), `lønn ${one.salary}`);
+  assert(wildcardUse(g).tied === 2 && wildcardUse(g).byRole.ovn === undefined, "ovnsplassen er ikke fylt fast");
+  // Ingen plass i rollen lenger
+  assert(!giveFixedJob(g, avl[2].id, "ovn").ok, "fikk fast jobb der det ikke trengs");
+  // Lærlingen kan ikke
+  assert(!giveFixedJob(g, avl[3].id, "stoper").ok, "lærling fikk fast jobb");
+  // Resten: de flinkeste først, og skiftene er like etterpå
+  const r = giveFixedJob(g);
+  const after = wildcardUse(g);
+  assert(r.ok && after.tied === 0 && after.total === 0, `etter: ${JSON.stringify(after)} ${r.message}`);
+  assert(avl[1].role === "stoper" && avl[2].role === "stoper" && avl[3].role === "allround", "feil avløsere");
+  assert(staffing(g, true).crews === crews, "skiftene endret seg");
+  assert(!giveFixedJob(g).ok, "ga fast jobb uten at noen står fast");
+  assert(
+    g.log.some((l) => l.text.includes("har fått fast jobb")),
+    "ingenting i loggen",
+  );
+  // Når noen slutter og en avløser fyller plassen, sier beskjeden at avløseren kan få jobben
+  const quitter = g.workers.find((w) => w.role === "stoper" && w.id !== avl[1].id)!;
+  g.workers = g.workers.filter((w) => w !== quitter);
+  g.workers.push(makeCandidate(g, "allround"));
+  assert(quitText([quitter], g).includes("fast jobb"), quitText([quitter], g));
+  assert(!quitText([quitter]).includes("fast jobb"), "uten spillet: som før");
+});
+
+test("Skiftlederen gir avløsere fast jobb (B-500) og beskjedene fører til Folk (B-501)", () => {
+  const g = newGame(77);
+  g.stage = 3;
+  g.castingType = "streng1";
+  g.workers = [];
+  const crew = crewPerShift(g);
+  for (const [role, n] of Object.entries(crew) as [RoleId, number][])
+    for (let i = 0; i < n * 3 - (role === "stoper" ? 1 : 0); i++) g.workers.push(makeCandidate(g, role));
+  for (let i = 0; i < 2; i++) g.workers.push(makeCandidate(g, "allround"));
+  // Uten skiftleder eller uten valget skjer ingenting
+  g.settings.leaderFixedJobs = true;
+  leaderFixedJobs(g);
+  assert(wildcardUse(g).tied === 1, "fast jobb uten skiftleder");
+  assert(quitLink(g) === "folk", `lenke ${quitLink(g)}`);
+  const leader = makeCandidate(g, "skiftleder");
+  g.workers.push(leader);
+  g.settings.leaderFixedJobs = false;
+  leaderFixedJobs(g);
+  assert(wildcardUse(g).tied === 1, "fast jobb uten valget");
+  // Med begge: avløseren får plassen, og loggen sier hvem som gjorde det
+  g.settings.leaderFixedJobs = true;
+  leaderFixedJobs(g);
+  assert(
+    wildcardUse(g).tied === 0 && g.workers.filter((w) => w.role === "stoper").length === crew.stoper! * 3,
+    "plassen",
+  );
+  assert(
+    g.log.some((l) => l.text.startsWith("Skiftlederen ga")),
+    "loggen",
+  );
+  // Ingen avløser å gi plassen: beskjeden fører til søkerne
+  assert(quitLink(g) === "ansett", `lenke etter ${quitLink(g)}`);
+  // I garasjen er det ingen ansatte, og ingen lenke
+  const garage = newGame(1);
+  assert(quitLink(garage) === undefined, "lenke i garasjen");
+});
+
+test("Planleggeren og landemerker (B-503): landemerket går foran bare når ingen kontrakt med frist blir for sen", () => {
+  const g = newGame(503);
+  g.stage = 3;
+  g.agreements = [];
+  const today = day(g);
+  const base = g.contracts[0];
+  const mk = (id: number, t: number, deadline: number, landmark?: string): Contract => ({
+    ...structuredClone(base),
+    id,
+    tonnes: t,
+    delivered: 0,
+    deadlineDay: deadline,
+    status: "aktiv",
+    priority: id,
+    landmark,
+  });
+  // Landemerket ble tatt sist, men står først i køen (slik `acceptContract` legger det)
+  g.contracts = [mk(1, 300, today + 4), mk(2, 400, today + 9), mk(3, 300, today + 30, "fyr")];
+  g.contracts[2].priority = 0;
+  const ids = (perDay: number) =>
+    plannerOrder(g, perDay)
+      .map((c) => c.id)
+      .join(",");
+  // 100 t per døgn: landemerket foran ville gjort begge kontraktene for sene – det venter
+  assert(ids(100) === "1,2,3", `100 t/døgn: ${ids(100)}`);
+  // 200 t per døgn: god tid, landemerket går først
+  assert(ids(200) === "3,1,2", `200 t/døgn: ${ids(200)}`);
+  // 120 t per døgn: plass etter den første kontrakten, men ikke foran den
+  assert(ids(120) === "1,3,2", `120 t/døgn: ${ids(120)}`);
+  // Verket står: landemerket bakerst
+  assert(ids(0) === "1,2,3", `står: ${ids(0)}`);
+});
+
+test("Støpemaskinen og valseverket i kontrollrommet (B-505): spillbare, fagpoeng én gang per døgn og en kort fordel", () => {
+  // Spillene: den flinke får 4–5 stjerner, den slurvete 1–2, og samme frø gir samme spill
+  for (const kind of ["stoping", "valsing"] as const) {
+    for (const seed of [11, 22, 33]) {
+      const good = autoPlayMini(newMiniGame(kind, seed), "flink");
+      const bad = autoPlayMini(newMiniGame(kind, seed), "slurvete");
+      assert(good.score.rating >= 4, `${kind} ${seed}: flink fikk ${good.score.rating}`);
+      assert(bad.score.rating <= 2, `${kind} ${seed}: slurvete fikk ${bad.score.rating}`);
+      assert(good.seconds < 60, `${kind}: ${good.seconds} s`);
+      const again = autoPlayMini(newMiniGame(kind, seed), "flink");
+      assert(again.score.points === good.score.points, `${kind}: samme frø ga ulike poeng`);
+    }
+  }
+  // I verket: bare med strengstøping (støpemaskinen) og valseverk (valsingen)
+  const g = newGame(505);
+  g.stage = 3;
+  g.castingType = "streng1";
+  assert(miniAvailable(g, "stoping"), "støpemaskinen skulle vært med");
+  const fp = g.researchPoints;
+  const first = finishMini(g, "stoping", 5, 1800);
+  assert(first.fp === 16 && g.researchPoints === fp + 16 && first.record, `første: ${JSON.stringify(first)}`);
+  assert(first.boostHours === 48 && castCalmFactor(g) === 0.5, "fordelen ved støpemaskinen");
+  // Samme døgn: ingen nye fagpoeng, men rekorden og fordelen kan fortsatt bedres
+  const second = finishMini(g, "stoping", 3, 1200);
+  assert(second.fp === 0 && !second.record && miniFpToday(g, "stoping"), `andre: ${JSON.stringify(second)}`);
+  // Fordelen går ut
+  g.minute += 49 * 60;
+  assert(castCalmFactor(g) === 1, "fordelen varte for lenge");
+  // Valseverket: ingen fordel uten valseverk, ellers 1–2 prosentpoeng
+  const noRoll = finishMini(g, "valsing", 5, 900);
+  assert(noRoll.boostHours === 0 && rollYieldBonus(g) === 0, "fordel uten valseverk");
+});
+
+test("Grønt stål (B-506): CO₂ per tonn, forespørsler med krav og ekstra omdømme når stålet holder", () => {
+  const zero = { blandet: 0, tungt: 0, shredder: 0, spon: 0, rent: 0, rajern: 0, jernsvamp: 0, retur: 0 };
+  // Skrap har nesten ikke noe avtrykk, råjern mye, jernsvamp lite
+  const scrap = heatCo2(recipeInputCo2({ ...zero, tungt: 100 }), 420);
+  const pig = heatCo2(recipeInputCo2({ ...zero, tungt: 60, rajern: 40 }), 420);
+  const sponge = heatCo2(recipeInputCo2({ ...zero, tungt: 60, jernsvamp: 40 }), 420);
+  assert(scrap < GREEN.limit && sponge < GREEN.limit && pig > GREEN.limit, `${scrap} ${sponge} ${pig}`);
+  // Forespørsler: hver femte er grønn når «Grønt stål» er forsket fram, ellers ingen
+  const g = newGame(506);
+  g.totals.contractsDone = 5;
+  const stats = computePlantStats(g);
+  const offers = (gg: GameState) => {
+    gg.contracts = [];
+    for (let i = 0; i < 25; i++) {
+      extraOffer(gg, stats);
+      gg.contracts = gg.contracts.map((c) => ({ ...c, status: "misligholdt" as const }));
+    }
+    return gg.contracts.filter((c) => c.co2Max !== undefined).length;
+  };
+  assert(offers(g) === 0, "grønne forespørsler uten forskningen");
+  g.researched.push("gronnstal");
+  const greenOffers = offers(g);
+  assert(greenOffers >= 3 && greenOffers <= 7, `grønne: ${greenOffers} av 25`);
+  // Leveransen: under kravet gir ekstra omdømme og teller tonnene; over kravet bare som vanlig
+  const deliver = (co2Now: number) => {
+    const d = newGame(507);
+    d.stage = 3;
+    d.researched.push("gronnstal");
+    d.pendingDecision = null;
+    d.reputation = 50;
+    const product = d.contracts[0].product;
+    const a = { c: 0.1, p: 0.01, tramp: 0.1 };
+    d.lots = [
+      {
+        id: 1,
+        product,
+        t: 20,
+        analysis: a,
+        known: a,
+        measured: { c: true, p: true, tramp: true },
+        second: false,
+        madeDay: day(d),
+      },
+    ];
+    d.contracts = [
+      {
+        ...structuredClone(d.contracts[0]),
+        id: 99,
+        grade: "enkel",
+        tonnes: 10,
+        delivered: 0,
+        status: "aktiv",
+        priority: 1,
+        repGain: 1,
+        co2Max: GREEN.limit,
+        co2Sum: 0,
+        deadlineDay: day(d) + 5,
+      },
+    ];
+    d.co2Now = co2Now;
+    advance(d, 60);
+    const c = d.contracts.find((x) => x.id === 99);
+    return {
+      done: c?.status === "fullfort",
+      counted: d.counters.gront_t ?? 0,
+      log: d.log.map((l) => l.text).join(" | "),
+    };
+  };
+  const good = deliver(0.12);
+  assert(good.done && good.counted === 10 && good.log.includes("fikk grønt stål"), `grønt: ${JSON.stringify(good)}`);
+  const bad = deliver(0.9);
+  assert(bad.done && bad.counted === 0 && bad.log.includes("holdt ikke CO₂-kravet"), `ikke grønt: ${bad.log}`);
 });
 
 if (failed) {

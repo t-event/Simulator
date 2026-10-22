@@ -6,14 +6,14 @@ import { isElsewhere } from "./tabLock";
 import { grantResearchForOwned } from "./actions";
 import { checkAchievements } from "./achievements";
 import { RESEARCH } from "./research";
-import { ADDONS } from "./data";
+import { ADDONS, SCRAP_IDS } from "./data";
 import { newEnv } from "./environment";
 import { paidOutTotal } from "./reserve";
 import { giveAge } from "./pension";
 
 /** Forskning som ble lagt til med B-054; de andre automatikk-forskningene fantes fra før */
 const NEW_AUTOMATION = ["salgsrutiner", "ordreplan", "innkjop", "bemanning"];
-import { compactLots, roundDay, SAVE_VERSION } from "./engine";
+import { compactLots, emptyStock, roundDay, SAVE_VERSION } from "./engine";
 import type { GameState } from "./types";
 
 const KEY = "stalverk-spill-v1";
@@ -361,5 +361,12 @@ export function migrate(g: GameState): GameState {
   }
   g.knowledge = g.knowledge.filter((k) => k !== "arbeidsmiljo");
   g.readChapters = g.readChapters.filter((k) => k !== "arbeidsmiljo");
+  // Nye skraptyper (jernsvamp, B-506): tomt lager, 0 i alle resepter og vanlig pris i markedet
+  for (const id of SCRAP_IDS) {
+    if (!g.scrap[id]) g.scrap[id] = emptyStock();
+    if (g.recipe[id] === undefined) g.recipe[id] = 0;
+    for (const r of Object.values(g.gradeRecipes)) if (r && r[id] === undefined) r[id] = 0;
+    if (g.market?.scrapFactor && g.market.scrapFactor[id] === undefined) g.market.scrapFactor[id] = 1;
+  }
   return g;
 }

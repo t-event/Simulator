@@ -40,6 +40,34 @@ regnes av serveren i ekte tid.
   det hva som hjelper i stedet.
 - Ingen hendelseskort om forhold mellom ansatte (trakassering, diskriminering, varsling) – tatt ut etter eierens ønske
   (B-444).
+- **Grønt stål** (B-506): med forskningen «Grønt stål» vises CO₂ per tonn på Resept. Innsatsen teller: råjern 1,9,
+  jernsvamp 0,15, skrap ca. 0,03; i tillegg kommer strøm og 0,08 fast. Hver femte forespørsel vil ha høyst 0,30 til samme
+  pris. Holder snittet kravet, gir det 50 % ekstra omdømme og teller mot prestasjonen «Grønt stål»; ellers ingen bot.
+  «Hydrogenbasert jernsvamp» (350 fagpoeng) åpner jernsvamp (6 200 kr/t, nesten uten sporelementer).
+- **Støpemaskinen og valseverket i kontrollrommet** (B-505): «Ta styringen selv» i utstyrsarket for Støping (med
+  strengstøping / valseverk). Tre runder hver. Fagpoeng én gang per spilldøgn per spill. 4–5 stjerner gir i 24/48 timer
+  halvparten så mange strenggjennombrudd, eller 1/2 prosentpoeng mer utbytte i valseverket.
+- **Planleggeren og landemerker** (B-503): planleggeren sorterer ordrekøen etter frist og setter et landemerke (ingen
+  frist) så tidlig det går uten at en kontrakt eller ukeleveranse blir for sen (90 % av døgnproduksjonen). Ellers venter
+  det bakerst. Uten planlegger går landemerket først når det tas. Salgsdirektøren regner med landemerkene først.
+- **Fast jobb til avløsere** (B-499): står avløsere fast på plasser uten egne folk (folk har sluttet eller gått av med
+  pensjon), kan de få fast jobb der (Folk → Skift, eller «Mer» per avløser). De beholder ferdigheten, får lønna til
+  rollen, og resten av avløserne blir ledige til fravær. Skiftene er like fulle. Ikke lærlinger.
+  Med en skiftleder kan det skje av seg selv (valget i Folk → Skift, B-500). Beskjedene om oppsigelse og pensjon har
+  lenke til Folk → Skift eller Folk → Ansett (B-501).
+- **Råd om gjelden etter konkursen** (B-498): når kassa har mer enn en ukes lønn og skrap til overs, sier et råd på
+  Verket hvor mye som kan betales i banken (Verket → Økonomi).
+- **Konkurs og rekonstruksjon** (B-495): konkurs etter 7 døgn under kredittgrensen eller 3 døgn uten råd til foring.
+  Fra støperiet og opp kan banken **rekonstruere** i stedet for nytt spill: ett nivå ned (utstyret fra det tapte nivået
+  selges, ovner og støping derfra blir grunnversjonen for nivået under), forskning og mesterskap fra de siste 30
+  spilldøgnene og fagpoeng kjøpt for penger i perioden tas tilbake, lager og ordrer er borte, folk over taket slutter
+  (hver rolle beholder sin andel, de flinkeste blir), omdømmet halveres og blir høyst halvparten av det nivået under
+  krever. Lånet slettes; gjelden blir halvparten av lånet
+  og minuset, pluss startkassa (sju døgns lønn, faste kostnader og skrap) og prisen på utstyr fra de siste 30 døgnene som
+  beholdes, og 10 % av salget går til den hvert døgn (posten «renter», som bidraget ikke teller); den kan også betales ned
+  i banken. Verket kan ikke flytte opp igjen før gjelden er betalt. Høyst
+  én gang per 30 ekte dager (serverens klokke) og ikke før gjelden er betalt. Konsernet, topplistene og prestasjonene
+  er urørt. Regnes lokalt (`game/reconstruction.ts`); kontoen trengs ikke.
 - **Kassa har ikke tak** (B-381). Den kan vokse fritt – den gir ingen makt i verden.
 - **Privat formue** (`g.paidOut` + gamle `lockedReserve`) er fryst historikk fra da kassa hadde tak (B-303–B-381). Den
   vokser ikke, kan ikke brukes, men teller i `valueCreated` (sluttmålet 10 mrd., stormodellene ved 25 mrd., prestasjoner).
@@ -66,6 +94,13 @@ regnes av serveren i ekte tid.
   (`activity_factor`); verk som bygges, teller ikke. Tittelen byttes bare når en annen er strengt sterkere. Jobben
   `regionmester` (cron hvert 10. min) bytter, skriver i Skiftrapporten og varsler (tema `konsern`, lenke `kart`).
   Merket «Regionmester» på topplista så lenge man har minst én region. Ingen penger. Speilet i `regionPoints`.
+- **Fellesprosjekter** (B-508, 156; bryteren `config.world.projects.enabled` på fra 22.10.2026): ett prosjekt
+  per region om gangen, der minst to aktive konsern har ferdige verk. Målet er det største av 4 dagers utbytte fra verkene
+  i regionen og 2 % av kassene der, fristen 21 ekte dager, et nytt 7 dager etter at det forrige er avgjort. Man gir fra
+  konsernkassa (minst 1 mill., bare med ferdig verk i regionen; posten `fellesprosjekt`). Målet nådd: pengene er brukt,
+  nr. 1 får merket «Hovedbidragsyter» og +25 % regionmester-styrke i regionen i 30 dager, nr. 2 +10 % (høyeste gjelder,
+  `region_project_boost` i `region_strengths`, speilet i `boostedStrength`), og alle med minst 10 % av målet merket
+  «Fellesprosjekt». Bom: halvparten tilbake. Jobben `fellesprosjekter` (hvert 10. min). Kortet på Konsern → Oversikt.
 - **Verksjefer** (B-488, 152):
   - Hvert ferdige datterverk kan få en verksjef fra dagens tre kandidater. Drift, Økonomi og Folk er 1–5 med summen
     6–10, og verksjefen har ett trekk.
@@ -129,6 +164,9 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
   (kortet, Konsern → Oversikt, varsellinja og varselet på mobilen) om at selskapet går tapt uten bud (B-481).
 - Tre selskaper: skraplageret, slagghåndteringen (fra 3.10, B-445) og mekanisk verksted (fra 13.10, B-486). Verkstedets
   eier får 0,2 av vedlikeholdet som teller hos de andre (`workshop_share`), ca. 7 mill. kr per dag – det minste selskapet.
+- Kraftverket (B-509, 157) i Østskogen: eieren får 12 øre per kWh de andre bruker (`power_fee_per_kwh`) – stålet som teller
+  × spillerens kWh per tonn siste 7 ekte dager fra tidslinja (`power_kwh_per_t`, 150–800, ellers 300). Anslaget 22.10:
+  ca. 11 mill. kr per dag. Aktivt fra 22.10.2026.
 - Kontroll regnes av `company_control` (aktivitet, investering, region, eiertid); vises som kroner (B-370).
 - Oppkjøpsbud og motbud er på (fra 29.9.2026). Budet teller 60 × √(bud / V) × (0,5 + 0,5 × aktivitet) + region, inntil
   10 × verdien (verdi V = det høyeste av 10 dagers inntekt og siste anbudspris); eieren kan alltid miste selskapet.
@@ -154,7 +192,8 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
 - Selskapskortet viser minstebudet ved oppkjøp (B-451) og, ved oppkjøp, «Lønner det seg?»: inntekten i dagene kjøperen eier
   selskapet (til perioden går ut, minst 14 dager) mot budet, og hva som kommer tilbake hvis budet ikke holder (75 %,
   regelsett 1: 90 %; B-435, B-441).
-- Slagghåndteringen er aktiv fra 3.10.2026 (B-445, første anbud stenger 5.10 kl. 10:38). Mekanisk verksted er ikke aktivt.
+- Slagghåndteringen er aktiv fra 3.10.2026 (B-445, første anbud stenger 5.10 kl. 10:38), mekanisk verksted fra 13.10 (B-486).
+  Kraftverket er aktivt fra 22.10.2026 (B-509).
 
 ## 6. Konkurranse og lister
 
@@ -227,6 +266,10 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
   **Varsel om venner** (B-490, 154; tema `venner`): den som følger, får beskjed når en venn går forbi på konsernlista
   (jobben `venner` hvert 10. minutt, høyst én gang per venn og dag), blir regionmester eller tar et selskap. Den som
   følges, får fortsatt ingen beskjed.
+  **Venner på listene** (B-493): når vennelista har noen, står «Alle / Venner» over topplista og ukelista. «Venner» viser
+  vennene og deg med plassen på hele lista (appen henter hele lista og filtrerer; ingen endring på serveren).
+  **Venner på kartet** (B-496): vennenes verk er grønne på Konsern → Kart, står først etter deg i regionlista, og
+  filteret «Venner» viser bare dine og deres verk.
 - **Varsel på mobilen** (B-465, på som standard fra B-467: første trykk i spillet etter innlogging lar telefonen spørre om lov, én
   gang per konto og enhet; «nei» og «slått av» huskes): bryter med fire temaer under Innstillinger → Varsler (oppkjøp, anbud, byggeprosjekter,
   privatmeldinger), per enhet. Serveren legger varsler i `push_outbox` (triggere, og `push_scan` hvert minutt for ferdige
@@ -289,6 +332,10 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
 - `KONSERNKAPITAL-FORSLAG.md` – hva konsernkassa brukes til etter fullt konsern (B-386). Eierens premiss: penger skal
   gi valg, ikke forsvinne. Ingen økonomiske justeringer før eieren har svart.
 - `VERKSJEF-FORSLAG.md` – V1–V3 er bygget (B-488, B-489).
+- `REKONSTRUKSJON-FORSLAG.md` – modell B er bygget (B-495).
+- `SLUTTSPILL-FORSLAG.md` – plan for spillere som er ferdige (B-504): kontrollrommet (B-505), grønt stål (B-506) og
+  fellesprosjektene (B-508) er bygget; K-1 og flere selskaper venter.
+- `FELLESPROSJEKT-FORSLAG.md` – modell C er bygget (B-508).
 - Programmodell for konsernprogrammene: eieren valgte B (aktivt budsjett, B-388/B-389). Spesifikasjonen står i
   `K1-PROGRAMMER.md` (B-389): serveren har i dag ingen hendelser i konsernverdenen, så K-1 trenger et lite, nøytralt
   hendelseslag (V0) for at Teknologi, Robusthet og Driftsytelse skal ha ekte effekt. Eieren godkjente V0, satsingene

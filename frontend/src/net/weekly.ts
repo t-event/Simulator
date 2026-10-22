@@ -343,10 +343,10 @@ export interface WeeklyRow {
   gold: number;
 }
 
-export async function fetchWeeklyBoard(league: League | null): Promise<WeeklyRow[]> {
+export async function fetchWeeklyBoard(league: League | null, lim = 20): Promise<WeeklyRow[]> {
   const rows = await rpc<{ plass: number; nickname: string; value: string | number; is_me: boolean; gold: number }[]>(
     "weekly_board",
-    { p_league: league, lim: 20 },
+    { p_league: league, lim },
   );
   return (rows ?? []).map((r) => ({
     plass: r.plass,

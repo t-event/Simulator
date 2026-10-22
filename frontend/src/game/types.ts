@@ -5,7 +5,7 @@
  * lastes inn igjen uten omforming. Motoren endrer tilstanden på stedet.
  */
 
-export type ScrapId = "blandet" | "tungt" | "shredder" | "spon" | "rent" | "rajern" | "retur";
+export type ScrapId = "blandet" | "tungt" | "shredder" | "spon" | "rent" | "rajern" | "jernsvamp" | "retur";
 export type ProductId = "stopegods" | "blokk" | "emne" | "armering";
 export type GradeId = "enkel" | "standard" | "armering" | "lavkarbon" | "hoykarbon" | "premium";
 export type RoleId =
@@ -151,6 +151,10 @@ export interface Contract {
   landmark?: string;
   /** Forespørselen kom mens etterspørselen etter kvaliteten eller varen var høy (B-255) */
   trend?: boolean;
+  /** Grønt stål (B-506): kunden vil ha høyst så mange tonn CO₂ per tonn stål */
+  co2Max?: number;
+  /** Tonn CO₂ for det som er levert så langt (tonn levert × klimaavtrykket da) */
+  co2Sum?: number;
 }
 
 /**
@@ -236,7 +240,8 @@ export interface LogEntry {
 }
 
 /** Steder et varsel kan føre til (B-453): «industri» = Konsern → Industrien, der anbudene står */
-export type LogLink = "industri" | "konsern";
+/** Hvor et varsel fører (B-453); «folk» = Folk → Skift, «ansett» = Folk → Ansett (B-501) */
+export type LogLink = "industri" | "konsern" | "folk" | "ansett";
 
 export type CostCategory =
   | "skrap"
@@ -434,6 +439,8 @@ export interface Settings {
   leaderTemps?: boolean;
   /** Skiftlederen gir alle bonus når det er lenge siden eller trivselen er lav (B-271). Mangler = av */
   leaderBonus?: boolean;
+  /** Skiftlederen gir avløsere fast jobb på plassene de står fast på (B-500). Mangler = av */
+  leaderFixedJobs?: boolean;
   /** Klokketimen skiftene starter (6, 14 eller 22) */
   shiftStart: number;
   /** Start ikke ny charge når strømprisen er over dette (kr/kWh). null = ingen grense */
@@ -514,6 +521,19 @@ export interface WorldEvent {
 }
 
 /** Sesongens vri (B-152): gjelder hele sesongen, bare for spill som er med i den */
+/** Spillene ved støpemaskinen og valseverket (B-505) */
+export type MiniKind = "stoping" | "valsing";
+
+export interface MiniRecord {
+  /** Beste poengsum */
+  best: number;
+  /** Spilldøgnet fagpoengene sist ble gitt */
+  fpDay: number;
+  /** Fordelen varer til dette spillminuttet, med så mange stjerner (4 eller 5) */
+  boostUntilMin: number;
+  boostStars: number;
+}
+
 export interface SeasonTwist {
   id: string;
   title: string;
@@ -544,6 +564,20 @@ export interface Market {
   trend?: MarketTrend | null;
   /** Første døgn en ny trend kan starte */
   nextTrendDay?: number;
+}
+
+/** Et kjøp eller en forskning de siste 30 spilldøgnene, som rekonstruksjonen regner med (B-495) */
+export interface RecentBuy {
+  day: number;
+  kind: "furnace" | "casting" | "addon" | "research" | "mastery" | "fp";
+  id: string;
+  /** Ovnen utstyret eller ombyggingen gjelder */
+  unit?: number;
+  /** Prisen på utstyret, og nivået det hører til */
+  price?: number;
+  stage?: number;
+  /** Fagpoeng kjøpt for penger */
+  fp?: number;
 }
 
 export interface GameState {
@@ -622,6 +656,10 @@ export interface GameState {
   pendingManual: ManualRequest | null;
   /** Beste poengsum i kontrollrommet (B-175) */
   controlBest?: number;
+  /** Klimaavtrykket til stålet verket lager nå, tonn CO₂ per tonn (B-506): snittet av de siste chargene */
+  co2Now?: number;
+  /** Støpemaskinen og valseverket i kontrollrommet (B-505): rekord, fagpoeng i dag og fordelen. Mangler = ikke spilt */
+  minis?: Partial<Record<MiniKind, MiniRecord>>;
   /** Hele verket er stengt til dette spillminuttet (dødsulykke, B-265/B-397); mangler = åpent */
   closedUntilMin?: number;
   /** Spillminutter som er spolt fram om natta (6×), så juksesperren kan regne ut hvor lang tid dagene minst tar (B-176) */
@@ -832,6 +870,10 @@ export interface GameState {
   inCredit?: boolean;
   /** Døgn på rad der verket står fordi det ikke er råd til omforing og lånet er fullt */
   stuckDays?: number;
+  /** Rekonstruksjon etter konkurs (B-495): gjelden som gjenstår, det som er betalt, og når det skjedde (ekte tid) */
+  recon?: { debt: number; paid: number; times: { day: number; realAt: number; from: number; to: number }[] };
+  /** Kjøp og forskning de siste 30 spilldøgnene (B-495) – tas tilbake ved rekonstruksjon */
+  recentBuys?: RecentBuy[];
   /** Faner spilleren har sett (nye faner får et «Ny»-merke, B-023) */
   seenViews: string[];
   /** Nivået spilleren nettopp flyttet til, for feiring; null når det er sett */

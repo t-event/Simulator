@@ -5,6 +5,9 @@
  * Produksjonen følger stålet gjennom kjeden skraplager → ovn → øse →
  * støping → (valseverk) → lager → kunde, og hver del kan bli flaskehals.
  */
+import { reconDay } from "./reconstruction";
+import { castCalmFactor, rollYieldBonus } from "./minis";
+import { GREEN, greenOn, heatCo2, noteHeatCo2, SCRAP_CO2, contractCo2, fmtCo2 } from "./green";
 import { hasNeighbor, reputationFloor } from "./building";
 import {
   BANKRUPTCY_DAYS,
@@ -105,6 +108,7 @@ import {
   unitType,
   unitHas,
   unitView,
+  fixedJobCount,
 } from "./plant";
 import { chance, noise, pick, rand, randInt, uniform } from "./random";
 import { bornAt, pensionMorning, PENSION } from "./pension";
@@ -162,7 +166,7 @@ export const TARGET_C: Record<GradeId, number> = {
 // ------------------------------------------------------------------ //
 // Oppstart
 // ------------------------------------------------------------------ //
-function emptyStock(): ScrapStock {
+export function emptyStock(): ScrapStock {
   return { t: 0, p: 0, tramp: 0, c: 0, dirt: 0, radioactive: false };
 }
 
@@ -218,7 +222,7 @@ export function newGame(seed = Date.now()): GameState {
     castWait: null,
     rollProgressT: 0,
     scrap,
-    recipe: { blandet: 30, tungt: 60, shredder: 0, spon: 0, rent: 0, rajern: 0, retur: 10 },
+    recipe: { blandet: 30, tungt: 60, shredder: 0, spon: 0, rent: 0, rajern: 0, jernsvamp: 0, retur: 10 },
     gradeRecipes: {},
     targetGrade: "standard",
     lots: [],
@@ -602,6 +606,8 @@ interface Mix {
   dirt: number;
   energy: number;
   radioactive: boolean;
+  /** Klimaavtrykket fra innsatsen, tonn CO₂ per tonn (B-506) */
+  co2: number;
 }
 
 /** Hva spilleren kan gjøre når ovnen står uten skrap: hvorfor planleggeren ikke har kjøpt, eller at noen må kjøpe (B-048) */
@@ -759,6 +765,7 @@ export function takeScrap(
     dirt: 0,
     energy: 0,
     radioactive: false,
+    co2: 0,
   };
   for (const id of SCRAP_IDS) {
     const t = amounts[id];
@@ -779,6 +786,7 @@ export function takeScrap(
     mix.expected.tramp += w * known.tramp * trampF;
     mix.dirt += w * stock.dirt * dirtF;
     mix.energy += w * type.energy;
+    mix.co2 += w * SCRAP_CO2[id];
     if (stock.radioactive) mix.radioactive = true;
   }
   mix.energy *= 1 + mix.dirt;
@@ -885,6 +893,8 @@ function startHeat(g: GameState, index: number, plant: PlantStats): boolean {
   const grade = furnaceGrade(g, index);
   const mix = takeScrap(g, size, false, gradeRecipe(g, grade));
   if (!mix) return false;
+  // Klimaavtrykket til chargen (B-506): innsatsen, strømmen og det faste
+  noteHeatCo2(g, heatCo2(mix.co2, stats.kwhPerT * mix.energy));
   const furnace = stats.furnace;
   const metallicYield = Math.max(0.6, 1 - mix.dirt - furnace.oxidationLoss);
 
@@ -1377,7 +1387,15 @@ function castBatch(g: GameState, batch: LiquidBatch, stats: PlantStats): void {
   wearMoulds(g, batch.t, stats);
   if (
     casting.continuous &&
-    chance(g, 0.01 * stats.maintFactor * (batch.tempOff ? 2.5 : 1) * (has(g, "bruddvarsling") ? 0.4 : 1) * mouldRisk(g))
+    chance(
+      g,
+      0.01 *
+        stats.maintFactor *
+        (batch.tempOff ? 2.5 : 1) *
+        (has(g, "bruddvarsling") ? 0.4 : 1) *
+        mouldRisk(g) *
+        castCalmFactor(g),
+    )
   ) {
     const hours = 4 * stats.repairFactor;
     g.castDownUntilMin = g.minute + hours * 60;
@@ -1587,7 +1605,8 @@ function updateRolling(g: GameState, stats: PlantStats, dt: number): void {
     if (take <= 1e-9) continue;
     lot.t -= take;
     capacity -= take;
-    const outT = take * ROLLING_YIELD;
+    // Godt kjørt i valseverket (B-505): litt mindre kapp og glødeskall en stund
+    const outT = take * (ROLLING_YIELD + rollYieldBonus(g));
     addReturnScrap(g, take - outT, lot.analysis, stats);
     g.rollProgressT += outT;
     addLot(g, {
@@ -1884,13 +1903,58 @@ function rollingFeed(g: GameState, orders: Contract[]): Contract | undefined {
 }
 
 /** Planleggeren sorterer køen etter frist. */
-function plannerSort(g: GameState): void {
+function plannerSort(g: GameState, stats: PlantStats): void {
   // Den innleide planleggeren fra rådgiveren sorterer uansett forskning (B-059)
   if (!plannerSortsQueue(g)) return;
-  // Landemerker først (B-211), så etter frist
-  orderQueue(g)
-    .sort((a, b) => (a.landmark ? 0 : 1) - (b.landmark ? 0 : 1) || a.deadlineDay - b.deadlineDay)
-    .forEach((c, i) => (c.priority = i + 1));
+  const perDay = plantStopped(g) ? 0 : realisticDailyT(g, stats);
+  plannerOrder(g, perDay).forEach((c, i) => (c.priority = i + 1));
+}
+
+/**
+ * Hvor full et landemerke kan gjøre køen foran en kontrakt med frist (B-503): andelen av tida til fristen som
+ * produksjonen før den får bruke. Litt under 1, fordi døgnproduksjonen er et anslag (havarier, fravær)
+ */
+export const LANDMARK_SLACK = 0.9;
+
+/**
+ * Rekkefølgen planleggeren setter køen i (B-503): etter frist, og hvert landemerke (ingen frist, B-218) så tidlig det går
+ * uten at en kontrakt eller en ukeleveranse i en rammeavtale blir for sen. Før gikk landemerker alltid først (B-211), og
+ * kontrakter spilleren hadde tid til, ble plutselig for sene. Går det ikke noe sted, står landemerket bakerst til det blir
+ * plass. Salgsdirektøren regner fortsatt med landemerkene først (`queueFit`), så han holder av plass til dem.
+ */
+export function plannerOrder(g: GameState, perDay: number): Contract[] {
+  const queue = orderQueue(g);
+  const marks = queue.filter((c) => c.landmark);
+  const list = queue.filter((c) => !c.landmark).sort((a, b) => a.deadlineDay - b.deadlineDay);
+  if (!marks.length) return list;
+  if (perDay <= 0) return [...list, ...marks];
+  const today = day(g);
+  const left = (c: Contract) => Math.max(0, c.tonnes - c.delivered);
+  // Jobbene med frist: kontraktene i køen og ukene i rammeavtalene som kommer, i fristrekkefølge
+  type Job = { t: number; deadline: number; contract?: Contract; landmark?: boolean };
+  let jobs: Job[] = list.map((c) => ({ t: left(c), deadline: c.deadlineDay, contract: c }));
+  for (const a of g.agreements)
+    if (a.status === "aktiv") for (const w of agreementWeeks(a)) jobs.push({ t: w.t, deadline: w.deadline });
+  jobs.sort((a, b) => a.deadline - b.deadline);
+  for (const m of marks) {
+    let at = jobs.length;
+    for (let k = 0; k <= jobs.length; k++) {
+      const trial = [...jobs.slice(0, k), { t: left(m), deadline: Infinity, landmark: true }, ...jobs.slice(k)];
+      let cum = 0;
+      let ok = true;
+      for (let j = 0; j < trial.length && ok; j++) {
+        cum += trial[j].t;
+        if (j > k && !trial[j].landmark && cum > LANDMARK_SLACK * perDay * Math.max(1, trial[j].deadline - today + 1))
+          ok = false;
+      }
+      if (ok) {
+        at = k;
+        break;
+      }
+    }
+    jobs = [...jobs.slice(0, at), { t: left(m), deadline: Infinity, contract: m, landmark: true }, ...jobs.slice(at)];
+  }
+  return jobs.flatMap((j) => (j.contract ? [j.contract] : []));
 }
 
 /**
@@ -2273,6 +2337,8 @@ function deliverContracts(g: GameState): void {
       lot.t -= take;
       c.delivered += take;
       addIncome(g, "kontrakt", take * c.pricePerT);
+      // Grønt stål (B-506): avtrykket til det verket lager nå, følger med leveransen
+      if (c.co2Max !== undefined) c.co2Sum = (c.co2Sum ?? 0) + take * (g.co2Now ?? c.co2Max);
       // Kunden merker seg hvor godt stålet holdt kravene (B-161)
       c.qMargin = Math.min(c.qMargin ?? 1, specMargin(lot.analysis, c.grade));
       if (complains(g, lot.analysis, c.grade)) {
@@ -2321,6 +2387,25 @@ function deliverContracts(g: GameState): void {
         `Kontrakten med ${c.customer} er levert. Kunden gir ${r.score}/10: «${r.quote}» Omdømme +${gain.toFixed(1).replace(".", ",")}.`,
         r.score >= 5 ? "good" : "bad",
       );
+      // Grønt stål (B-506): holdt stålet kravet, får verket ekstra omdømme – ellers bare som en vanlig kontrakt
+      const co2 = contractCo2(c);
+      if (co2 !== null && c.co2Max !== undefined) {
+        if (co2 <= c.co2Max + 1e-9) {
+          const extra = Math.round(gain * GREEN.repShare * 10) / 10;
+          adjustReputation(g, extra);
+          countEvent(g, "gront_t", c.tonnes);
+          log(
+            g,
+            `${c.customer} fikk grønt stål: ${fmtCo2(co2)} (krav ${fmtCo2(c.co2Max)}). Omdømme +${extra.toFixed(1).replace(".", ",")} ekstra.`,
+            "good",
+          );
+        } else
+          log(
+            g,
+            `Stålet til ${c.customer} holdt ikke CO₂-kravet: ${fmtCo2(co2)} mot ${fmtCo2(c.co2Max)}. Kunden betaler som vanlig, men det ble ikke noe ekstra omdømme. Mindre råjern i resepten hjelper (se fagboka).`,
+            "info",
+          );
+      }
       if (g.totals.contractsDone === 1) unlock(g, "omdomme");
       if (c.agreementId) agreementWeekClosed(g, c, true);
     }
@@ -2501,8 +2586,12 @@ function makeOffer(g: GameState, stats: PlantStats): Contract | null {
   // Små verk får mer omdømme per kontrakt, så starten ikke står og stamper på omdømmet (B-034)
   const early = g.stage === 0 ? 1.5 : 1;
   const repGain = Math.round((0.4 + 0.5 * size) * (GRADES[grade].premium > 1.1 ? 1.3 : 1) * early * 10) / 10;
+  const id = g.nextContractId++;
+  // Grønt stål (B-506): hver femte forespørsel har et krav til klimaavtrykket når «Grønt stål» er forsket fram. Valgt
+  // etter nummeret, ikke tilfeldig, så resten av spillet trekker de samme tallene som før
+  const green = greenOn(g) && !firstOrders && id % Math.round(1 / GREEN.share) === 0;
   return {
-    id: g.nextContractId++,
+    id,
     customer: customer.name,
     product,
     grade,
@@ -2510,6 +2599,7 @@ function makeOffer(g: GameState, stats: PlantStats): Contract | null {
     delivered: 0,
     pricePerT,
     deadlineDay: today + days,
+    ...(green ? { co2Max: GREEN.limit, co2Sum: 0 } : {}),
     // Tilbudet står åpent 8–20 timer før kunden går videre
     offerExpiresMin: g.minute + uniform(g, 8, 20) * 60,
     repGain,
@@ -3261,9 +3351,25 @@ export function workerLabel(w: Worker): string {
   return `${w.name} (${ROLES[w.role].name.toLowerCase()})`;
 }
 
-/** Hvem som sluttet, med stilling, og hva spilleren bør gjøre (B-066) */
-export function quitText(ws: Worker[]): string {
-  return `${ws.map(workerLabel).join(", ")} har sagt opp. Ansett ${ws.length === 1 ? "en ny" : "nye"} under Folk → Ansett.`;
+/**
+ * Hvem som sluttet, med stilling, og hva spilleren bør gjøre (B-066). Med `g` (etter at de har sluttet): står avløsere
+ * nå fast på plassene, kan de få fast jobb der (B-499)
+ */
+export function quitText(ws: Worker[], g?: GameState): string {
+  const fix =
+    g && fixedJobCount(g) > 0 && !leaderGivesJobs(g) ? ", eller gi en avløser fast jobb på plassen (Folk → Skift)" : "";
+  return `${ws.map(workerLabel).join(", ")} har sagt opp. Ansett ${ws.length === 1 ? "en ny" : "nye"} under Folk → Ansett${fix}.`;
+}
+
+/** Skiftlederen gir selv avløsere fast jobb (B-500), så beskjedene trenger ikke be spilleren om det */
+export function leaderGivesJobs(g: GameState): boolean {
+  return !!g.settings.leaderFixedJobs && shiftLeaderAtWork(g);
+}
+
+/** Hvor beskjeden om en oppsigelse fører (B-501): til skiftene når en avløser kan ta plassen, ellers til søkerne */
+export function quitLink(g: GameState): LogLink | undefined {
+  if (STAGES[g.stage].staffCap === 0) return undefined;
+  return fixedJobCount(g) > 0 ? "folk" : "ansett";
 }
 
 /** Trivselen driver mot det normale, nattarbeid tærer, og misfornøyde folk slutter (B-026) */
@@ -3278,7 +3384,12 @@ function updateMorale(g: GameState, stats: PlantStats): void {
     const quitters = g.workers.filter(() => chance(g, ((35 - g.morale) / 35) * 0.04));
     if (quitters.length) {
       g.workers = g.workers.filter((w) => !quitters.includes(w));
-      log(g, `${quitText(quitters)} Trivselen er lav – gi bonus, send folk på kurs eller unngå nattskift.`, "bad");
+      log(
+        g,
+        `${quitText(quitters, g)} Trivselen er lav – gi bonus, send folk på kurs eller unngå nattskift.`,
+        "bad",
+        quitLink(g),
+      );
     }
   }
 }
@@ -3330,7 +3441,7 @@ function onHour(g: GameState, stats: PlantStats): void {
     }
     if (lotsTonnage(g) > stats.storeT * 0.85) sellExcess(g, stats, 0.6);
   }
-  plannerSort(g);
+  plannerSort(g, stats);
   followQueue(g, stats);
   // Automatisk innkjøp krever en planlegger (se B-021). Er planleggeren borte, går de faste bestillingene
   // videre (B-048)
@@ -3486,6 +3597,8 @@ function onDay(g: GameState, stats: PlantStats): void {
   if (g.history.length > HISTORY_MAX) g.history.splice(0, g.history.length - HISTORY_MAX);
   g.today = newDay(today, g.cash);
   paidOutDayLog(g);
+  // Rekonstruksjonsgjelden (B-495): 10 % av gårsdagens salg
+  reconDay(g);
 
   updatePowerDeal(g, today);
   if (g.gridCut && g.minute >= g.gridCut.untilMin) g.gridCut = null;
@@ -3526,7 +3639,10 @@ function onDay(g: GameState, stats: PlantStats): void {
   );
   const trendMsg = updateTrend(g, today, stats.products, trendGrades);
   if (trendMsg) log(g, trendMsg, "event");
-  for (const id of SCRAP_IDS) {
+  // Jernsvampen (B-506) er med i markedet først når den er forsket fram: ellers ville en ekstra type flyttet alle
+  // tilfeldige tall i spillet for alle andre
+  const marketIds = SCRAP_IDS.filter((id) => id !== "jernsvamp" || scrapUnlocked(g, id));
+  for (const id of marketIds) {
     // Skrapprisen følger stålprisen, med egen støy per type
     const mean = 0.4 + 0.6 * m.steelFactor;
     m.scrapFactor[id] = walk(g, m.scrapFactor[id], mean, 0.15, 0.03, 0.6, 1.8);
@@ -3534,7 +3650,7 @@ function onDay(g: GameState, stats: PlantStats): void {
   if (chance(g, 0.03)) {
     const id = pick(
       g,
-      SCRAP_IDS.filter((x) => SCRAP_TYPES[x].buyable),
+      marketIds.filter((x) => SCRAP_TYPES[x].buyable),
     );
     m.scrapFactor[id] = Math.min(1.8, m.scrapFactor[id] * 1.4);
     log(g, `Mangel på ${SCRAP_TYPES[id].name.toLowerCase()}: prisen har steget kraftig.`, "event");

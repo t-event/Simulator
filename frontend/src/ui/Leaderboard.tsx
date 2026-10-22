@@ -8,6 +8,7 @@ import { PlayerName } from "./Profile";
 import { cloudConfigured } from "../net/config";
 import {
   BADGE_NAMES,
+  BADGE_ICONS,
   BOARDS,
   fetchLeaderboard,
   fetchMyRank,
@@ -27,6 +28,8 @@ import { useSyncExternalStore } from "react";
 import { Callout, SheetHead } from "./ds";
 import { fmtKr, fmtNum, fmtRep, fmtT } from "./format";
 import { Icon } from "./icons";
+import { FriendFilter } from "./FriendFilter";
+import { FRIENDS_LIMIT, friendRows, useFriendList, type FriendScope } from "./friendScope";
 
 /** Spillerens egne resultater fra sesonger som er over (B-143) */
 function SeasonHistory() {
@@ -135,6 +138,10 @@ function Leaderboard({
   const [kind, setKind] = useState<BoardKind>(initialKind);
   // Denne sesongen eller Hall of Fame (B-129, B-182)
   const [scope, setScope] = useState<"sesong" | "alle">("sesong");
+  // Alle eller bare vennene (B-493): bare når vennelista har noen
+  const friends = useFriendList();
+  const [who, setWho] = useState<FriendScope>("alle");
+  const onlyFriends = who === "venner" && !!session && !!friends && friends.length > 0;
   const status = useSeasonStatus();
   const current = status?.current ?? null;
   // Kontrollrommet har én liste for alle tider (B-295): rekorden følger kontoen, ikke sesongen
@@ -144,7 +151,7 @@ function Leaderboard({
       : null;
   const hallOfFame = seasonId === null;
   // Radene huskes sammen med lista de hører til (B-171): bytter man liste, vises ikke tallene fra den forrige
-  const key = `${kind}:${seasonId ?? "alle"}`;
+  const key = `${kind}:${seasonId ?? "alle"}:${onlyFriends ? "venner" : "alle"}`;
   const [loaded, setLoaded] = useState<{ key: string; rows: BoardRow[]; at: number } | null>(null);
   const rows = loaded && loaded.key === key ? loaded.rows : null;
   const [loading, setLoading] = useState(false);
@@ -162,12 +169,24 @@ function Leaderboard({
         setError(null);
         setLoading(true);
         const [list, rank, profile] = await Promise.all([
-          fetchLeaderboard(kind, seasonId),
+          fetchLeaderboard(kind, seasonId, onlyFriends ? FRIENDS_LIMIT : undefined),
           session ? fetchMyRank(kind, seasonId).catch(() => null) : Promise.resolve(null),
           session ? fetchProfile().catch(() => null) : Promise.resolve(null),
         ]);
         if (!alive) return;
-        setLoaded({ key: `${kind}:${seasonId ?? "alle"}`, rows: list, at: Date.now() });
+        setLoaded({
+          key: `${kind}:${seasonId ?? "alle"}:${onlyFriends ? "venner" : "alle"}`,
+          rows:
+            onlyFriends && friends
+              ? friendRows(
+                  list,
+                  friends,
+                  (r) => r.nickname,
+                  (r) => r.is_me,
+                )
+              : list,
+          at: Date.now(),
+        });
         setMyRank(rank);
         setNickname(profile ? profile.nickname : null);
       } catch (e) {
@@ -179,7 +198,7 @@ function Leaderboard({
     return () => {
       alive = false;
     };
-  }, [kind, session, tick, seasonId]);
+  }, [kind, session, tick, seasonId, onlyFriends, friends]);
 
   // Lista hentes på nytt mens den er åpen, så den følger med mens man spiller (B-144). Snapshots lastes opp med
   // lagringen på nett (ca. hvert 15. sekund), så oftere enn det gir ikke noe nytt.
@@ -260,6 +279,7 @@ function Leaderboard({
           </div>
         </div>
       ))}
+      {session && friends && friends.length > 0 && <FriendFilter value={who} onChange={setWho} />}
       <p className="g-muted g-small-text g-board-scope-note">
         {kind === "konsern"
           ? "Sesongens hovedkonkurranse: konsernkassa pluss 60 dagers utbytte og bidrag og det verkene kan selges for og selskapene gir ut konsesjonen, minus lån – regnet av serveren i ekte tid, uansett spillfart. Sesongen avgjøres etter denne lista."
@@ -311,7 +331,13 @@ function Leaderboard({
           ))}
         </ol>
       )}
-      {rows && rows.length === 0 && <p className="g-muted">Ingen på lista ennå. Du kan bli den første.</p>}
+      {rows && rows.length === 0 && (
+        <p className="g-muted">
+          {onlyFriends
+            ? "Ingen av vennene dine er på denne lista ennå."
+            : "Ingen på lista ennå. Du kan bli den første."}
+        </p>
+      )}
       {rows && rows.length > 0 && (
         <ol className="g-board">
           {rows.map((r) => (
@@ -329,7 +355,7 @@ function Leaderboard({
                 {/* Æresmerker fra serveren (B-299), f.eks. for dem som var med da økonomireformen kom */}
                 {r.badges.map((b) => (
                   <span key={b} className="g-board-honor">
-                    <Icon name={b === "regionmester" ? "crown" : "scroll-text"} /> {BADGE_NAMES[b]}
+                    <Icon name={BADGE_ICONS[b] ?? "scroll-text"} /> {BADGE_NAMES[b]}
                   </span>
                 ))}
                 {/* Beste plassering i en sesong som er over (B-143) */}

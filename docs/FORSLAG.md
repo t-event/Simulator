@@ -51,9 +51,9 @@ til «Avgjort» nederst).
 
 ## Venter
 
-- **Pynt for sesong 3 (B-287, B-291) – må gjøres før sesong 3 startes (eieren 13.10: tas mens sesong 2 pågår):** pynten for
-  sesong 2 er klar. Før `start_season` kjøres for sesong 3, legg inn ny
-  pynt i `COSMETICS` med `season: 3` – både i butikken og på stigen (trinn 10–50). Ellers har sesong 3 ingen egen pynt.
+- **Sesongpynten (B-287, B-291):** sesong 1 pågår (startet 25.9.2026, uten sluttdato). Pynten for sesong 2 er alt klar i
+  `COSMETICS` (`season: 2`), så ingenting må gjøres før sesong 2 startes. Pynten for sesong 3 lages mens sesong 2 pågår
+  (rettet 14.10: eieren påpekte at vi er i sesong 1, ikke 2).
 
 - ~~Etterbetaling av utbyttet 30.9 og 1.10~~ **Utført 3.10 (B-446):** 2 549 252 kr til elleve spillere, 15 rader, med
   eierens godkjenning (migrasjon 127). Tabellen står i `docs/RAPPORT-2026-10-02.md`, avsnitt 7.
@@ -75,8 +75,15 @@ til «Avgjort» nederst).
 
 ## Forslag – spillet
 
+- **Regionale fellesprosjekter (B-508):** bygget som modell C. Bryteren slås på når PR-en med appen er publisert
+  (SQL-en i B-508). Etter noen uker: se om målene er passe (hvor mange prosjekter blir ferdige, og hvor mange gir).
+- **Sluttspillet videre (eieren 21.10, B-504):** plan i `SLUTTSPILL-FORSLAG.md`. Sesong 1 fortsetter (B-505). Bygget:
+  kontrollromsspillene (B-505), grønt stål (B-506) og fellesprosjektene (B-508). Kraftverket er bygget (B-509) og slås på
+  sammen med fellesprosjektene. Venter: K-1 etter 2.11. Ildfastfabrikk og havn kan komme når det er flere aktive
+  konserneiere (omtrent ett selskap per fire).
+
 - **Mer å gjøre i sluttspillet (eieren 13.10, B-487):** regionmester og nye konsernmål er bygget, og verksjefene
-  med samtalene og trivselen er bygget (B-488, B-489). Mulig senere: verksjefer i testspilleren, en ukeliste
+  med samtalene og trivselen er bygget (B-488, B-489), og verksjefene er med i simuleringene (B-494) og har egne prestasjoner (B-497). Mulig senere: en ukeliste
   «Mest modernisert» (krever ny ukestype, B-457), regionmester i Hall of Fame ved sesongslutt, og flere selskaper når
   det er flere aktive konserneiere (ca. 1 per 4, B-387).
 
@@ -90,9 +97,9 @@ til «Avgjort» nederst).
 
 - ~~Verksjefer for datterverkene (B-379, B-409)~~ **Bygget (B-488, B-489):** V1–V3 etter eierens «Bygg nå». Følg med på
   fisking (sluttpakken er tjent inn etter ca. 15 dager) og hvor ofte «Tilbud fra en konkurrent» kommer.
-- **Rekonstruksjon etter konkurs (B-409, spørsmål til eieren):** `docs/REKONSTRUKSJON-FORSLAG.md` – fem modeller (A–E)
-  sammenlignet, sperrene mot misbruk og hva eieren velger (avsnitt 7). Ingen modell valgt, ikke bygget.
-
+- ~~Rekonstruksjon etter konkurs (B-409)~~ **Bygget som modell B (B-495):** eieren ba Claude velge. Ett nivå ned,
+  forskning fra de siste 30 døgnene tilbake, halve lånet og minuset pluss startkassa og nylige kjøp som gjeld (10 % av salget),
+  høyst én gang per 30 ekte dager. Modell E er ikke tatt med.
 - ~~Trender i markedet~~ **Bygget (B-255).** («etterspørselen etter armering øker») som styrer hvilke kontrakter som dukker opp (se
   `DESIGN.md`).
 

@@ -2930,10 +2930,14 @@ button {
   height: 22px;
 }
 
-/* «Ansett til plassene» avløserne står på (B-170) */
+/* «Ansett til plassene» avløserne står på (B-170) og «Gi avløserne fast jobb» (B-499) */
 .g-support-action {
   margin-top: 4px;
   justify-self: start;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3);
 }
 
 .g-support-action button {
@@ -3357,10 +3361,22 @@ button {
   gap: var(--sp-2);
 }
 
-.g-board-scope button .ds-icon {
+.g-board-scope button .ds-icon,
+.g-board-friends button .ds-icon {
   width: 1em;
   height: 1em;
   vertical-align: -0.12em;
+}
+
+/* Alle / Venner over topplista og ukelista (B-493) */
+.g-subtabs.g-board-friends {
+  margin-top: var(--sp-2);
+}
+
+.g-subtabs.g-board-friends button {
+  flex-direction: row;
+  gap: var(--sp-2);
+  font-size: var(--fs-meta);
 }
 
 .g-board-scope-note {
@@ -8711,6 +8727,41 @@ button.g-prod-row:hover {
   word-break: break-all;
 }
 
+/* Fellesprosjektene (B-508): ett avsnitt per prosjekt i kortet på Konsern → Oversikt */
+.g-project + .g-project {
+  margin-top: var(--sp-3);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--panel-border);
+}
+.g-project-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin: var(--sp-2) 0;
+  font-size: var(--fs-section);
+  overflow-wrap: anywhere;
+}
+.g-project-title > svg {
+  flex: none;
+  color: var(--accent);
+}
+.g-project.is-settled .g-project-title > svg {
+  color: var(--ok);
+}
+.g-project-top {
+  margin: var(--sp-1) 0;
+  padding-left: 1.4em;
+  font-size: var(--fs-meta);
+}
+.g-project-top li.is-mine {
+  font-weight: 600;
+}
+.g-project-top .g-player {
+  white-space: normal;
+  word-break: break-all;
+}
+
 /* Verksjefene (B-488): kortet på Konsern → Oversikt, samtalen og arkene */
 .g-konsern-managers .ds-button,
 .g-manager-cand .ds-button,
@@ -8821,4 +8872,67 @@ button.g-prod-row:hover {
   .g-manager-options {
     grid-template-columns: 1fr 1fr;
   }
+}
+
+/* Rekonstruksjon på konkursskjermen (B-495) */
+.g-recon {
+  margin: var(--sp-3) 0;
+  padding: var(--sp-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+}
+.g-recon ul {
+  margin: var(--sp-2) 0;
+  padding-left: 18px;
+}
+.g-recon li + li {
+  margin-top: var(--sp-1);
+}
+.g-end-actions button {
+  min-height: var(--touch);
+}
+
+/* Venner på verdenskartet (B-496): grønt, mellom dine (blå) og andres (grå) */
+.g-map-plant.is-friend {
+  fill: var(--ok);
+}
+.g-map-plant.is-building.is-friend {
+  fill: transparent;
+  stroke: var(--ok);
+}
+.g-map-key.is-friend,
+.g-map-filter.is-venner i {
+  background: var(--ok);
+}
+.g-map-row.is-friend {
+  border-color: var(--ok-border);
+  background: var(--ok-tint);
+}
+.g-map-friend {
+  color: var(--ok-fg);
+  font-weight: 600;
+}
+
+/* «Ta styringen» ved støpemaskinen og valseverket (B-505) */
+.g-mini-panel {
+  margin: var(--sp-3) 0;
+}
+
+.g-mini-panel .g-row > button {
+  flex: 1 1 140px;
+  min-height: var(--touch);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+/* Klimaavtrykket under resepten (B-506) */
+.g-co2 .ds-icon {
+  vertical-align: -2px;
+}
+
+.g-co2.is-ok strong {
+  color: var(--ok);
 }

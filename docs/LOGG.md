@@ -5,6 +5,232 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 423 – 2026-10-22: Kraftverket (B-509)
+
+**Brukeren:** «Velg din anbefaling og fortsett» (hvilken selskapstype som kommer først).
+
+**Gjort:**
+- B-509: kraftverket i Østskogen (`supabase/157_kraftverk.sql`, lagt inn og slått av). Eieren får 12 øre per kWh de andre
+  bruker, regnet av stålet som teller og kWh per tonn fra tidslinja (`power_kwh_per_t`).
+- Appen kjenner typen: navnet, «hva eieren tjener på» og teksten på kortet under Konsern → Industrien.
+
+**Testet:**
+- I en DO-blokk som ble rullet tilbake: anslaget er 10,7 mill. kr per dag (snittet 273 kWh per tonn, 16 spillere med
+  tall). Anbudet åpnet ved neste `world_tick` (minstebud 53 mill., høyeste 150 mill.), og Skiftrapporten fikk beskjed.
+- Sikkerhetsrådene er uendret. `npm test` (ny sjekk av typen), `tsc -b`, lint, build og `balance.ts`.
+
+**Slått på 22.10 (eieren: «Du skal bare skru på»):** fellesprosjektene og kraftverket, før PR #434 er merget. Seks
+prosjekter åpnet (250–400 mill., frist 12.11), og anbudet på kraftverket åpner ved neste `world_tick`. Til appen er
+publisert, ser spillerne prosjektene bare i Skiftrapporten og varslene, og eldre apper viser kraftverket med teksten til
+skraplageret.
+
+**Gjenstår:**
+- Merge PR #434.
+- K-1 etter skyggerapporten 2.11.
+
+---
+
+## Økt 422 – 2026-10-22: Fellesprosjektene bygget (B-508)
+
+**Brukeren:** «Fortsett. Har fikset supabase connectoren».
+
+**Gjort:**
+- Så på dataene først: alle verdensjobbene «ok», 15–20 aktive konsern per region, og de to som er ferdige, har 14
+  komplekser på trinn 6. Utbyttet fra verkene i en region er 60–100 mill. per dag.
+- B-508: fellesprosjektene (modell C) på serveren, `supabase/156_fellesprosjekter.sql`:
+  - Tabellene `region_projects` og `region_project_gifts`.
+  - `project_status`, `project_give` og jobben `fellesprosjekter`.
+  - Fordelen i `region_strengths`, merkene i `badges_of` og prosjektene i `world_map`.
+  - Posten `fellesprosjekt` i kassaboka. Bryteren står av.
+- Appen: kortet «Fellesprosjekter» på Konsern → Oversikt, merkene på topplista og profilen, prestasjonen
+  «Fellesprosjekt» og prosjektene på kartet. `MillInput` er flyttet til egen fil.
+
+**Testet:**
+- Livsløpet med ekte tall i en DO-blokk som ble rullet tilbake: åpne, for lite, gi, målet nådd (merker og styrke), bom
+  med halvparten tilbake, og `world_health`.
+- Regionmester-styrken er lik før og etter. Sikkerhetsrådene: bare de vanlige (tabeller uten regler, funksjoner for
+  innloggede).
+- Ny nettest. `npm test`, `tsc -b`, lint, build og `balance.ts`.
+- Playwright med falsk server på 320, 390 og 1366 px: kortet, bekreftelsen, gaven og kassa i spillet etterpå.
+
+**Gjenstår:**
+- Slå på bryteren når PR #434 er merget og publisert (SQL-en står i B-508).
+- K-1 etter skyggerapporten 2.11.
+- Selskapstype (kraftverk, ildfast eller havn).
+- Merge av PR #434.
+
+---
+
+## Økt 421 – 2026-10-21: Kontrollrommet, grønt stål og fellesprosjektene (B-505–B-507)
+
+**Brukeren:** «Vi skal fortsette med sesong 1. Kjør på med resten av dine anbefalinger» (SLUTTSPILL-FORSLAG.md).
+
+**Gjort:**
+- B-505: støpemaskinen og valseverket som spill i kontrollrommet (tre runder hver), med fagpoeng per døgn, rekord og en
+  kort fordel i drifta. Knappene står i arket for Støping.
+- B-506: grønt stål – CO₂ per tonn på Resept, jernsvamp (ny forskning og skraptype), grønne forespørsler med ekstra
+  omdømme og prestasjonen «Grønt stål», og kapitlet med quiz.
+- B-507: fellesprosjektene er simulert (`projectSim.ts`) og spesifisert (`FELLESPROSJEKT-FORSLAG.md`), med anbefalt
+  modell C. De er ikke bygget: connectoren svarte «ingen tilgang», og de flytter penger mellom spillere.
+- Sesong 2 er tatt ut av planen (sesong 1 fortsetter).
+
+**Testet:**
+- Nye tester for B-505 og B-506.
+- `npm test`, `tsc -b`, lint, build og `balance.ts`. Nivådagene er like som før. Kassa på slutten varierer mer, fordi
+  testspilleren forsker jernsvamp i konsernfasen.
+- Playwright:
+  - Støpemaskinen på 320, 390 og 1366 px: hold-runden, tidsrunden og resultatet. To feil ble rettet: fargen på det grønne,
+    og rekorden og fagpoengene på resultatet.
+  - Resept med klimaavtrykket på 320 og 1366 px.
+
+**Gjenstår:**
+- Eierens svar (fellesprosjektene, selskapstype, K-1 etter 2.11).
+- Connectoren.
+- Merge av PR #434.
+
+---
+
+## Økt 420 – 2026-10-21: Plan for sluttspillet (B-504)
+
+**Brukeren:** spilleren som har kommet lengst, har ikke mer å gjøre – lag en plan for videre utvikling.
+
+**Gjort:**
+- `docs/SLUTTSPILL-FORSLAG.md` med tre faser:
+  1. Nye mål: sesong 2, Hall of Fame, ukeliste og kontrollrom.
+  2. Valg for pengene: K-1, flere selskaper og regionale fellesprosjekter.
+  3. Grønt stål og industriklynger.
+- Fem spørsmål til eieren. B-504, FORSLAG.md, STATUS (avsnitt 10) og CLAUDE.md er oppdatert.
+
+**Ikke gjort:** lagringen til spilleren er ikke sett på, fordi Supabase-connectoren svarer «You do not have permission».
+
+**Gjenstår:**
+- Eierens svar på spørsmålene.
+- Merge av PR #434.
+- Connectoren.
+
+---
+
+## Økt 419 – 2026-10-21: Planleggeren og landemerkene (B-503)
+
+**Brukeren:** planleggeren prioriterer ordren uten frist (landemerket) foran alle andre, så kontrakter spilleren hadde
+tid til, plutselig ikke rakk fristen.
+
+**Gjort:**
+- B-503: planleggeren sorterer etter frist og legger landemerket så tidlig det går uten at noe blir for sent
+  (`plannerOrder`, `LANDMARK_SLACK` = 0,9). Ellers venter det bakerst.
+- Teksten på Salg og i landemerkekortet er oppdatert.
+
+**Testet:**
+- Ny test (100/120/200 t per døgn og verket står).
+- `npm test`, `tsc -b`, lint, build og `balance.ts` (uendret).
+- Sammenligning før/etter på et lagret stålverk (frø 0–2, to laster). Med regelen blir ikke flere kontrakter for sene
+  enn uten landemerket, og landemerket leveres etter 18–20 døgn.
+
+**Gjenstår:** merge av PR #434 (eieren). Supabase-connectoren svarte ikke i forrige økt.
+
+---
+
+## Økt 418 – 2026-10-16: Skiftlederen gir fast jobb, lenker i beskjedene og kodegjennomgang (B-500–B-502)
+
+**Brukeren ba om:** «Ny dag. Lag en plan for hva som skal bygges idag. Bygg og push».
+
+**Driftssjekk:** Supabase-connectoren svarte «You do not have permission to perform this action» på alt (også
+`select now()`), så `world_health()` ble ikke sjekket, og planen ble bare endringer i appen. Eieren bør se på
+connectoren/tilgangen.
+
+**Plan og gjort:**
+1. B-500: valget «Skiftlederen gir avløsere fast jobb når noen slutter eller går av» (Folk → Skift).
+2. B-501: beskjedene om oppsigelse og pensjon fører til Folk → Skift eller Folk → Ansett.
+3. B-502: gjennomgang av B-495–B-499; rettet kontosjekken i tellerne til verksjef-prestasjonene.
+
+**Merge:** PR #434 er fortsatt åpen (mergeable, CI grønn). Dagens arbeid ligger på samme gren og PR.
+
+**Testet:**
+- Ny test for skiftlederen og lenkene.
+- `npm test`, `tsc -b`, lint, build og `balance.ts`.
+- Playwright på 320, 390 og 1366 px.
+
+**Gjenstår:** merge av PR #434 (eieren), driftssjekk når connectoren virker igjen.
+
+---
+
+## Økt 417 – 2026-10-15: Fast jobb til avløsere (B-499)
+
+**Brukeren ba om:** at avløserne kan sendes til den faste stillingen der det trengs folk og bli støper, ovnsoperatør
+osv. – når folk slutter eller går av med pensjon.
+
+**Gjort:**
+- `giveFixedJob` i `actions.ts`, `fixedJobCandidates`/`fixedJobCount`/`fixedJobFor` i `plant.ts`.
+- Knapp «Gi avløserne fast jobb (N)» på Folk → Skift (anbefalingskortet, og under bemanningstabellen under tre skift).
+- «Fast jobb som …» under «Mer» for hver avløser på Folk → Ansatte.
+- Beskjedene om oppsigelse og pensjon nevner muligheten når en avløser står fast på plassen.
+
+**Testet:**
+- Ny test (én avløser, alle, lærling, ingen plass, skiftene like, beskjeden).
+- `npm test`, `tsc -b`, lint, build og `balance.ts`.
+- Playwright på 320, 390 og 1366 px.
+
+**Gjenstår:** merge av PR #434 (eieren) og sjekk av publiseringen.
+
+---
+
+## Økt 416 – 2026-10-15: Venner på kartet, verksjef-prestasjoner og råd om gjelden (B-496–B-498)
+
+**Brukeren ba om:** «Ny dag, nye muligheter. Lag en plan for hva du skal bygge idag. Utfør og push».
+
+**Plan og gjort:**
+1. Driftssjekk:
+   - `world_health()` har ingen feil.
+   - Verksjefoppgjøret for 14.10 er gjort (18 dager i alt, 38 verksjefer).
+   - Spillerne besvarte 2 samtaler det siste døgnet.
+   - Anbudet på verkstedet hadde 2 bud og stenger 15.10 kl. 12:39 norsk tid.
+2. B-496: venner på verdenskartet (grønne merker, filteret «Venner», venner først i regionlista).
+3. B-497: tre skjulte prestasjonsserier for verksjefene.
+4. B-498: råd på Verket om å betale ned gjelden etter en rekonstruksjon.
+
+**Merge:** PR #434 fra i går er fortsatt ikke merget. Sikkerhetsfilteret i økta stoppet merge igjen (også i dag).
+Dagens arbeid ligger på samme gren og i samme PR. Eieren må merge selv eller gi lov.
+
+**Testet:**
+- Nye tester for prestasjonene og rådet.
+- `npm test`, `tsc -b`, lint, build og `balance.ts`.
+- Playwright av kartet med venner på 320, 390 og 1366 px.
+
+**Gjenstår:** merge av PR #434 og sjekk av publiseringen.
+
+---
+
+## Økt 415 – 2026-10-14: Bøtene tilbake og venner på listene (B-492, B-493)
+
+**Brukeren ba om:** «Velg modell for meg» (rekonstruksjon), «Bygg det du anbefaler» (venner på listene og verksjefer i
+testspilleren), rettet at vi er i sesong 1, ikke 2, og «Fiks den umulige utlandsordren».
+
+**Gjort i denne PR-en:**
+- B-492: 165,08 mill. kr og 5 omdømmepoeng tilbake i eierens spill (155, dry-run først).
+- B-493: valget Alle / Venner på topplista og ukelista.
+- FORSLAG: sesongpynten rettet – sesong 1 pågår, pynten for sesong 2 er klar. Ingenting å gjøre før sesong 2 startes.
+
+**Testet:** nettest for `friendRows`, `npm test`, `tsc -b`, lint, build, Playwright på 320/390/1366 px.
+
+**Verksjefer i simuleringene (B-494, egen PR):** `worldSim.ts --verksjef` og en ny tabell i `balance.ts --konsern`.
+Kassa endres med −2 til +3 % etter ett og to år. Ingen tall endret.
+
+**Rekonstruksjon (B-495, modell B):** valgt for eieren og bygget. Konkursskjermen tilbyr å drive videre ett nivå ned:
+- Utstyret fra det tapte nivået selges.
+- Forskning fra de siste 30 døgnene tas tilbake, og utstyr kjøpt i perioden legges på gjelden.
+- Lånet blir gjeld, og 10 % av salget går til den. Verket flytter ikke opp før den er betalt.
+- Omdømmet blir høyst halvparten av kravet på nivået under.
+- Høyst én gang per måned.
+
+Simuleringen (`balance.ts --rekonstruksjon`) gikk gjennom fem runder før alle seks tilfellene var OK (se B-495).
+
+**Merge:** sikkerhetsfilteret i økta stoppet merge av PR #434 til `main`. Alt er pushet til grenen og ligger i PR-en.
+Eieren må merge selv eller gi lov.
+
+**Gjenstår:** merge av PR #434 og sjekk av publiseringen.
+
+---
+
 ## Økt 414 – 2026-10-14: Ordren fra utlandet (B-491)
 
 **Brukeren ba om:** sjekke hvorfor rådgiveren sa at leveransene kom for sent (skjermbilde fra dag 5729), og rette det

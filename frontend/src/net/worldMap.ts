@@ -1,7 +1,7 @@
 /**
  * Verdenskartet (B-333): alle spilleres datterverk per region og de strategiske selskapene, fra `world_map()` i
  * supabase/066_verdenskartet.sql. Bare det topplista alt viser: kallenavn, tittel og antall verk per type. Regionmesteren
- * og styrken per konsern kommer fra supabase/151_regionmester.sql (B-487).
+ * og styrken per konsern kommer fra supabase/151_regionmester.sql (B-487), fellesprosjektene fra 156 (B-508).
  */
 import { isRegion, REGION_IDS } from "../game/regions";
 import type { RegionId } from "../game/types";
@@ -38,11 +38,29 @@ export interface MapCompany {
   mine: boolean;
 }
 
+/** Fellesprosjektet som er åpent i regionen (B-508) */
+export interface MapProject {
+  id: number;
+  name: string;
+  goal: number;
+  total: number;
+}
+
+/** Et fellesprosjekt som nådde målet: bygningen på kartet, med navnet til hovedbidragsyteren */
+export interface MapBuilt {
+  name: string;
+  kind: string;
+  nick: string;
+  mine: boolean;
+}
+
 export interface MapRegion {
   id: RegionId;
   players: MapPlayer[];
   companies: MapCompany[];
   master: MapMaster | null;
+  project: MapProject | null;
+  built: MapBuilt[];
 }
 
 type Row = Record<string, unknown>;
@@ -58,6 +76,8 @@ export function parseWorldMap(r: Row | null | undefined): MapRegion[] {
     const players = Array.isArray(row?.players) ? (row.players as Row[]) : [];
     const companies = Array.isArray(row?.companies) ? (row.companies as Row[]) : [];
     const m = row?.master && typeof row.master === "object" ? (row.master as Row) : null;
+    const pr = row?.project && typeof row.project === "object" ? (row.project as Row) : null;
+    const built = Array.isArray(row?.built) ? (row.built as Row[]) : [];
     return {
       id,
       master: m
@@ -86,6 +106,21 @@ export function parseWorldMap(r: Row | null | undefined): MapRegion[] {
         name: str(c.name) ?? "Selskap",
         owner: str(c.owner),
         mine: c.mine === true,
+      })),
+      project:
+        pr && Number(pr.goal) > 0
+          ? {
+              id: num(pr.id),
+              name: str(pr.name) ?? "Fellesprosjekt",
+              goal: Number(pr.goal),
+              total: Number(pr.total) || 0,
+            }
+          : null,
+      built: built.map((b) => ({
+        name: str(b.name) ?? "Fellesprosjekt",
+        kind: str(b.kind) ?? "",
+        nick: str(b.nick) ?? "Ukjent",
+        mine: b.mine === true,
       })),
     };
   });

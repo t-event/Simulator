@@ -89,6 +89,9 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Verv en venn: kode, startpakke til vennen, 10 mill. i konsernkassa når vennen er i gang | Ja | Regel 2 og 7: serveren og konsernkassa | B-459 |
 | Vennelista: følge andre spillere (enveis), nivå og sist aktiv | Ja | Regel 3: viser andre spillere | B-462 |
 | Varsel om venner: forbi deg, regionmester, selskap | Ja | Regel 3: mellom spillere, serveren | B-490 |
+| Venner på topplista og ukelista (filteret Alle / Venner) | Ja | Regel 3: viser andre spillere | B-493 |
+| Venner på verdenskartet | Ja | Regel 3: viser andre spillere | B-496 |
+| Prestasjoner for verksjefene (skjulte serier) | Ja | Regel 2: verksjefene er på serveren | B-497 |
 | Varsel på mobilen: oppkjøp, anbud, byggeprosjekter og privatmeldinger | Ja | Regel 3: lagres på serveren og gjelder hendelser mellom spillere | B-465 |
 | Skiftrapporten: felles chat for alle spillere | Ja | Regel 3: viser andre spillere og brukernavnet ditt | B-338 |
 | Profiler: profilarket når man trykker på et brukernavn (tittel, merker, konsernverdi og verk, selskaper, sesonger, sist aktiv) | Ja | Regel 3: viser andre spillere | B-419 |
@@ -123,13 +126,18 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Funksjon | Krever konto | Hvorfor | Beslutning |
 | --- | --- | --- | --- |
 | Økonomireformen (engangs) | Gjelder spill på nett | Endrer lagringen på nett | gjennomført 2026-09-27, B-186 |
-| Strategiske bedrifter (eie, investere, inntekt fra andres aktivitet) | Ja | Regel 3 og 7: deles med andre, avgjøres på serveren | skraplageret bygget (B-189); slagghåndteringen og mekanisk verksted bygget, slått av (B-253, B-256) |
+| Strategiske bedrifter (eie, investere, inntekt fra andres aktivitet) | Ja | Regel 3 og 7: deles med andre, avgjøres på serveren | skraplageret bygget (B-189); slagghåndteringen og mekanisk verksted (B-253, B-256), kraftverket (B-509) |
 | Konsernkassen (penger flyttet inn i verdenen) | Ja | Regel 2 og 7 | bygget, B-183; vises på skraplagerkortet (B-189) |
 | Varsel om åpent anbud på skraplageret («!» på Konsern, merke på fanen Industrien, beskjed på Oversikt) | Ja | Regel 3 og 7: del av skraplageret | B-226, B-227 |
 | Kontroll og overtakelser | Ja | Regel 3 og 7 | planlagt, B-180 |
 | Industrimakt på profilen og topplista | Ja | Regel 3 | planlagt, B-180 |
 | Verksjefer, mandat og «Verksjefen ringer» i datterverkene | Nei | Regel 1: ditt eget spill | planlagt, B-180 |
-| Rekonstruksjon ved konkurs | Nei | Regel 1 | planlagt, B-180 |
+| Rekonstruksjon ved konkurs (ett nivå ned, gjeld) | Nei | Regel 1: hovedverket, spilltid | B-495 |
+| Fast jobb til avløsere på plassene de står fast på | Nei | Regel 1: hovedverket | B-499 |
+| Skiftlederen gir avløsere fast jobb, lenker til Folk i beskjedene | Nei | Regel 1: hovedverket | B-500, B-501 |
+| Planleggeren setter landemerker der de ikke gjør andre ordrer for sene | Nei | Regel 1: hovedverket | B-503 |
+| Støpemaskinen og valseverket i kontrollrommet (trening hjemme) | Nei | Regel 1: spilltid | B-505 |
+| Grønt stål: CO₂ per tonn, jernsvamp og grønne forespørsler | Nei | Regel 1: spilltid | B-506 |
 | Myk grense for kassa og bunden konsernreserve (midlertidig) | Nei | Regel 1: eget spill | B-193 |
 | Æraer og Hall of Fame | Ja | Regel 3 | Grunnleggeræraen og navnet «Hall of Fame»: B-182. Neste æra: ikke bestemt |
 | Pause på Salg (innstilling) | Nei | Regel 1: ditt eget spill | B-222 |
@@ -174,3 +182,4 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Driftsstatus i adminpanelet: verdensjobbene og eksporten | Bare eieren (`admins`) | Ikke en spillfunksjon | B-485 |
 | Regionmester på verdenskartet: styrke, tittel, merke og varsel | Ja | Regel 3: mellom spillere, serveren | B-487 |
 | Verksjefer for datterverkene: mandat, oppgjør i konsernkassa, samtalene og trivselen | Ja | Regel 3: penger i ekte tid, serveren | B-488, B-489 |
+| Regionale fellesprosjekter: gi fra konsernkassa, merkene og regionmester-styrken | Ja | Regel 3: penger mellom spillere i ekte tid, serveren | B-508 |

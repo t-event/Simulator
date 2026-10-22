@@ -1,12 +1,14 @@
 /**
  * Det spilleren kan gjøre: bygge ut, kjøpe utstyr, ansette, låne og styre produksjonen.
  */
+import { noteBuy } from "./reconstruction";
 import { MASTERY, MASTERY_IDS, masteryCost, masteryEffect, masteryLevel, masteryOpen } from "./mastery";
 import { checkKonsernMilestones, checkKonsernUnlock, directorHour, valueCreated } from "./konsern";
 import { checkAchievements } from "./achievements";
 import {
   ADDONS,
   CASTINGS,
+  CREW_ROLES,
   FURNACES,
   GRADES,
   MIN_PER_DAY,
@@ -27,6 +29,7 @@ import {
   fmtT,
   log,
   newCandidates,
+  normalSalary,
   orderQueue,
   startReline,
   maxLoan,
@@ -39,11 +42,13 @@ import {
   unlock,
   WARNING_DAYS,
   type PurchaseResult,
+  leaderGivesJobs,
 } from "./engine";
 import {
   bonusGap,
   castingType,
   computePlantStats,
+  crewList,
   day,
   daysUntilAllBack,
   staffing,
@@ -57,6 +62,8 @@ import {
   unitType,
   unitView,
   wildcardUse,
+  fixedJobCandidates,
+  fixedJobCount,
 } from "./plant";
 import { newGradesAt, startRecipeGuide } from "./recipeGuide";
 import {
@@ -160,7 +167,9 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
   const next = STAGES[g.stage + 1];
   if (next) {
     let reason: string | null = null;
-    if (g.reputation < next.reputation) reason = `Krever omdømme ${next.reputation}`;
+    // Etter en rekonstruksjon (B-495): banken vil ha gjelden betalt før verket flytter opp igjen
+    if ((g.recon?.debt ?? 0) > 0) reason = `Betal gjelden etter konkursen først (${fmtKr(g.recon!.debt)} igjen)`;
+    else if (g.reputation < next.reputation) reason = `Krever omdømme ${next.reputation}`;
     else if (g.cash < next.price) reason = "For lite penger";
     out.push({
       id: `stage${next.id}`,
@@ -394,6 +403,15 @@ export function buyUpgrade(g: GameState, id: string): PurchaseResult {
   if (option.locked) return fail(`Krever at du har flyttet til ${stageRef(option.stage, g.stage)}.`);
   if (!option.available) return fail(option.reason ?? "Kan ikke kjøpes nå.");
   addCost(g, "investering", option.price);
+  // Rekonstruksjonen (B-495) legger det som er kjøpt de siste 30 døgnene og beholdes, på gjelden
+  if (option.kind !== "stage")
+    noteBuy(g, {
+      kind: option.kind,
+      id: option.unit !== undefined ? option.baseId : id,
+      unit: option.unit,
+      price: option.price,
+      stage: option.stage,
+    });
   // Store kjøp bygges i spilltid, ett om gangen (B-336)
   if (isBigPurchase(option) && option.kind !== "stage") {
     const days = buildDays(option.price);
@@ -540,6 +558,7 @@ export function doResearch(g: GameState, id: string): PurchaseResult {
   if (!option.available) return fail(option.reason ?? "Kan ikke forskes på nå.");
   g.researchPoints -= option.cost;
   g.researched.push(id);
+  noteBuy(g, { kind: "research", id });
   if (option.knowledge) unlock(g, option.knowledge);
   log(g, `Forskning ferdig: ${option.name}. ${option.effect}.`, "good");
   return { ok: true, message: `${option.name} er forsket fram.` };
@@ -553,6 +572,7 @@ export function buyMastery(g: GameState, id: MasteryId): PurchaseResult {
   if (g.researchPoints < cost) return fail(`Mangler ${Math.ceil(cost - g.researchPoints)} fagpoeng.`);
   g.researchPoints -= cost;
   g.mastery[id] = level + 1;
+  noteBuy(g, { kind: "mastery", id });
   const pct = (masteryEffect(id, level + 1) * 100).toFixed(1).replace(".", ",");
   log(g, `Mesterskap: ${MASTERY[id].name} nivå ${level + 1} – nå ${pct} % ${MASTERY[id].effect}.`, "good");
   return { ok: true, message: `${MASTERY[id].name} nivå ${level + 1}.` };
@@ -659,6 +679,7 @@ export function buyFpDeal(g: GameState): PurchaseResult {
   addCost(g, "annet", deal.price);
   g.researchPoints += deal.fp;
   g.fpDealDay = day(g);
+  noteBuy(g, { kind: "fp", id: "samarbeid", fp: deal.fp });
   log(g, `Forskningssamarbeidet ga ${deal.fp} fagpoeng (${fmtKr(deal.price)}).`, "good");
   return { ok: true, message: `+${deal.fp} fagpoeng.` };
 }
@@ -734,6 +755,54 @@ export function hireForWildcards(g: GameState): PurchaseResult {
         : "Ingen søkere med de rollene akkurat nå. Nye kommer hver morgen.",
     );
   return { ok: true, message: `Ansatte ${hired} ${hired === 1 ? "person" : "personer"} – avløserne er ledige igjen.` };
+}
+
+/**
+ * Gir avløsere fast jobb på plassene de står fast på (B-499): avløseren blir f.eks. støper eller ovnsoperatør, får
+ * lønna til rollen og beholder ferdigheten. Skiftene er like fulle etterpå, men avløserne som er igjen, blir ledige
+ * til fravær – som når man ansetter til plassene (B-170), uten å ansette noen. Uten `workerId` gis alle plassene til
+ * de flinkeste avløserne; med `role` bare plassene i den rollen.
+ */
+export function giveFixedJob(g: GameState, workerId?: number, role?: RoleId, byLeader = false): PurchaseResult {
+  const moved: Partial<Record<RoleId, number>> = {};
+  const names: string[] = [];
+  for (let guard = 0; guard < 2000; guard++) {
+    const use = wildcardUse(g);
+    if (use.tied <= 0) break;
+    const r = role ?? CREW_ROLES.find((x) => (use.byRole[x] ?? 0) > 0);
+    if (!r || !(use.byRole[r] ?? 0)) break;
+    const pool = fixedJobCandidates(g);
+    const w = workerId === undefined ? pool[0] : pool.find((x) => x.id === workerId);
+    if (!w) break;
+    w.role = r;
+    w.salary = Math.max(w.salary, normalSalary(g, r, w.skill));
+    moved[r] = (moved[r] ?? 0) + 1;
+    names.push(w.name);
+    if (workerId !== undefined) break;
+  }
+  const n = names.length;
+  if (n === 0) {
+    if (workerId !== undefined && !fixedJobCandidates(g).some((w) => w.id === workerId))
+      return fail("Bare avløsere med fagbrev kan få fast jobb.");
+    return fail("Avløserne står ikke fast på noen plass nå – ingen plass å gi dem.");
+  }
+  const what = crewList(moved);
+  if (n === 1) {
+    const r = Object.keys(moved)[0] as RoleId;
+    const as = ROLES[r].name.toLowerCase();
+    log(
+      g,
+      byLeader ? `Skiftlederen ga ${names[0]} fast jobb som ${as}.` : `${names[0]} har fått fast jobb som ${as}.`,
+      "good",
+    );
+    return { ok: true, message: `${names[0]} er nå ${ROLES[r].name.toLowerCase()}.` };
+  }
+  log(
+    g,
+    byLeader ? `Skiftlederen ga ${n} avløsere fast jobb: ${what}.` : `${n} avløsere har fått fast jobb: ${what}.`,
+    "good",
+  );
+  return { ok: true, message: `${n} avløsere har fått fast jobb: ${what}.` };
 }
 
 export function fire(g: GameState, workerId: number): PurchaseResult {
@@ -914,6 +983,18 @@ export function repay(g: GameState, amount: number): PurchaseResult {
   return { ok: true, message: `Betalte ned ${fmtKr(a)}.` };
 }
 
+/** Betaler ned gjelden etter en rekonstruksjon fra kassa (B-495) */
+export function repayRecon(g: GameState, amount: number): PurchaseResult {
+  const r = g.recon;
+  const a = Math.min(amount, r?.debt ?? 0, Math.max(0, g.cash));
+  if (!r || a <= 0) return fail("Det er ingen gjeld å betale, eller kassa er tom.");
+  addCost(g, "renter", a);
+  r.debt -= a;
+  r.paid += a;
+  if (r.debt <= 0) log(g, `Gjelden etter konkursen er betalt: ${fmtKr(r.paid)} i alt. Banken er fornøyd.`, "good");
+  return { ok: true, message: `Betalt ${fmtKr(a)} av gjelden.` };
+}
+
 // ------------------------------------------------------------------ //
 // Strøm og skift (B-024)
 // ------------------------------------------------------------------ //
@@ -1008,6 +1089,15 @@ export function leaderBonus(g: GameState): void {
   g.lastBonusDay = day(g);
   adjustMorale(g, 15);
   log(g, `Skiftlederen ga alle ansatte bonus (${fmtKr(cost)}). Trivselen stiger.`, "good");
+}
+
+/**
+ * Skiftlederen gir avløsere fast jobb (B-500): når spilleren har slått det på og en skiftleder er på jobb, får avløserne
+ * som står fast på plasser uten egne folk (fordi noen har sluttet eller gått av med pensjon), fast jobb der.
+ */
+export function leaderFixedJobs(g: GameState): void {
+  if (!leaderGivesJobs(g) || fixedJobCount(g) <= 0) return;
+  giveFixedJob(g, undefined, undefined, true);
 }
 
 /**
@@ -1147,6 +1237,8 @@ function hourlyActions(g: GameState): void {
   finishNeighbor(g);
   // Skiftlederen gir bonus når det trengs (B-271)
   leaderBonus(g);
+  // … og fast jobb til avløsere som står fast på en plass (B-500)
+  leaderFixedJobs(g);
   landmarkHour(g);
   directorHour(g);
   checkKonsernMilestones(g);

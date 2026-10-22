@@ -23,6 +23,7 @@ import {
   freeStockT,
   spotPrice,
 } from "../game/engine";
+import { fmtCo2, heatCo2, recipeInputCo2 } from "../game/green";
 import { moveInQueue, toggleOfferGrade } from "../game/actions";
 import { scrapResearchHint } from "../game/recipe";
 import {
@@ -112,7 +113,9 @@ function offerChecks(g: GameState, stats: PlantStats, c: Contract, committed: nu
       tone: tight ? "bad" : narrow ? "warn" : "ok",
       text: Number.isFinite(needDays)
         ? c.landmark
-          ? `Ingen frist – landemerket står først i ordrekøen og blir ferdig ca. dag ${doneDay}`
+          ? plannerSortsQueue(g)
+            ? `Ingen frist – planleggeren lager det foran kontraktene med frist når de rekker det likevel, ellers etter dem. Ferdig senest ca. dag ${doneDay}`
+            : `Ingen frist – landemerket går først i ordrekøen og blir ferdig ca. dag ${doneDay}`
           : tight && pushesLate && needDays <= days
             ? `Rekker det neppe: den har kortere frist og går foran ${pushesLate} i ordrekøen, som da blir for sen`
             : tight
@@ -123,6 +126,17 @@ function offerChecks(g: GameState, stats: PlantStats, c: Contract, committed: nu
         : plantStopped(g)
           ? `Verket står: ${plantStopped(g)}. Det lager ingenting før det er ordnet.`
           : "Verket står – ingen produksjon nå",
+    });
+  }
+  // Grønt stål (B-506): holder resepten kravet til CO₂? Ingen bot hvis ikke – bare ikke det ekstra omdømmet
+  if (c.co2Max !== undefined && canMake) {
+    const co2 = heatCo2(recipeInputCo2(gradeRecipe(g, c.grade)), stats.kwhPerT * est.energyFactor);
+    checks.push({
+      tone: "ok",
+      text:
+        co2 <= c.co2Max
+          ? `Grønt stål: resepten gir ${fmtCo2(co2)} (krav ${fmtCo2(c.co2Max)}) – ekstra omdømme ved levering`
+          : `Grønt stål: resepten gir ${fmtCo2(co2)}, kravet er ${fmtCo2(c.co2Max)}. Med mindre råjern får du ekstra omdømme`,
     });
   }
   const tone: Tone = checks.some((ch) => ch.tone === "bad")

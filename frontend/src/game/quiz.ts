@@ -151,6 +151,26 @@ export const QUIZ: Record<string, QuizQuestion[]> = {
       why: "En strålingsportal koster lite sammenlignet med en opprydding.",
     },
   ],
+  gront: [
+    {
+      q: "Hvilken innsats gir mest CO₂ per tonn?",
+      options: ["Skrap", "Råjern fra masovn", "Returskrap fra eget verk"],
+      correct: 1,
+      why: "Råjern lages av malm med koks i en masovn. Skrap er stål som alt finnes.",
+    },
+    {
+      q: "Hva bruker man i stedet for koks for å lage jernsvamp med lite CO₂?",
+      options: ["Hydrogen", "Kull", "Naturgass"],
+      correct: 0,
+      why: "Hydrogen tar oksygenet fra malmen og blir til vann i stedet for CO₂.",
+    },
+    {
+      q: "Hvorfor tilsetter man råjern eller jernsvamp i skrapet?",
+      options: ["For å tynne ut kobber og tinn", "For å få mer slagg", "For å gjøre stålet billigere"],
+      correct: 0,
+      why: "Begge er nesten frie for sporelementer, så de tynner ut det skrapet har med seg.",
+    },
+  ],
   miljo: [
     {
       q: "Hva gjør renseanlegget?",

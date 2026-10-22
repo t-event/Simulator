@@ -323,6 +323,18 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
   family("regionmester", "crown", "Regionmester", "Konsern", (g) => +!!g.serverBadges?.includes("regionmester"), [
     ["regionmester", 1, "Regionmester", "Ha de sterkeste verkene i en region på verdenskartet.", 50],
   ]),
+  // Fellesprosjektene (B-508): merkene fra serveren for prosjekter som nådde målet
+  family(
+    "fellesprosjekt",
+    "landmark",
+    "Fellesprosjekt",
+    "Konsern",
+    (g) => (g.serverBadges?.includes("hovedbidragsyter") ? 2 : g.serverBadges?.includes("fellesprosjekt") ? 1 : 0),
+    [
+      ["fellesprosjekt", 1, "Med på dugnaden", "Gi minst en tidel av målet til et fellesprosjekt som blir ferdig.", 30],
+      ["hovedbidragsyter", 2, "Hovedbidragsyter", "Gi mest til et fellesprosjekt som blir ferdig.", 60],
+    ],
+  ),
   // Æresmerker (B-296): gis av serveren, vises bare for dem som har dem
   {
     ...family("reform", "scroll-text", "Reformveteran", "Æresmerker", (g) => +!!g.serverBadges?.includes("reform"), [
@@ -346,6 +358,48 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
           25,
         ],
       ],
+    ),
+    hidden: true,
+  },
+  // Verksjefene (B-497): krever konto og datterverk, så de vises bare for dem som har tatt en (som vervingen)
+  {
+    ...family("verksjef", "user-check", "Verksjefer", "Konsern", counter("verksjef_ansatt"), [
+      ["verksjef1", 1, "Første verksjef", "Ansett en verksjef på et datterverk.", 10],
+      ["verksjef5", 5, "Ledergruppen", "Ansett fem verksjefer.", 30],
+    ]),
+    hidden: true,
+  },
+  {
+    ...family("samtaler", "message", "Verksjefen ringer", "Konsern", counter("samtale_besvart"), [
+      ["samtaler10", 10, "Sjefen svarer", "Svar på ti samtaler fra verksjefene.", 20],
+      ["samtaler50", 50, "Alltid på tråden", "Svar på femti samtaler fra verksjefene.", 50],
+    ]),
+    hidden: true,
+  },
+  {
+    ...family("godsjef", "people", "God sjef", "Konsern", counter("verksjef_trives"), [
+      ["godsjef", 1, "God sjef", "Ha en verksjef som trives godt.", 20],
+    ]),
+    hidden: true,
+  },
+  // Grønt stål (B-506): tonn levert under CO₂-kravet – vises når den første grønne kontrakten er levert
+  {
+    ...family("gront", "trees", "Grønt stål", "Kunder", counter("gront_t"), [
+      ["gront1k", 1000, "Grønn leverandør", "Lever 1 000 t grønt stål under CO₂-kravet.", 20],
+      ["gront10k", 10000, "Grønn industri", "Lever 10 000 t grønt stål under CO₂-kravet.", 40],
+      ["gront100k", 100000, "Grønt stålverk", "Lever 100 000 t grønt stål under CO₂-kravet.", 80],
+    ]),
+    hidden: true,
+  },
+  // Rekonstruksjon (B-495): bare for dem som har gått konkurs og bygget seg opp igjen til nivået de falt fra
+  {
+    ...family(
+      "rekonstruert",
+      "refresh",
+      "Rekonstruert",
+      "Folk",
+      (g) => +(g.recon?.times ?? []).some((t) => g.stage >= t.from),
+      [["rekonstruert", 1, "Tilbake fra konkurs", "Bygg verket opp igjen til nivået du gikk konkurs på.", 25]],
     ),
     hidden: true,
   },
