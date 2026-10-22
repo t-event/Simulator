@@ -19,8 +19,13 @@ ble testet, og hva som gjenstår.
   tall). Anbudet åpnet ved neste `world_tick` (minstebud 53 mill., høyeste 150 mill.), og Skiftrapporten fikk beskjed.
 - Sikkerhetsrådene er uendret. `npm test` (ny sjekk av typen), `tsc -b`, lint, build og `balance.ts`.
 
+**Slått på 22.10 (eieren: «Du skal bare skru på»):** fellesprosjektene og kraftverket, før PR #434 er merget. Seks
+prosjekter åpnet (250–400 mill., frist 12.11), og anbudet på kraftverket åpner ved neste `world_tick`. Til appen er
+publisert, ser spillerne prosjektene bare i Skiftrapporten og varslene, og eldre apper viser kraftverket med teksten til
+skraplageret.
+
 **Gjenstår:**
-- Merge PR #434. Slå på fellesprosjektene (B-508) og kraftverket (B-509) når appen er publisert.
+- Merge PR #434.
 - K-1 etter skyggerapporten 2.11.
 
 ---

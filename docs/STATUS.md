@@ -94,7 +94,7 @@ regnes av serveren i ekte tid.
   (`activity_factor`); verk som bygges, teller ikke. Tittelen byttes bare når en annen er strengt sterkere. Jobben
   `regionmester` (cron hvert 10. min) bytter, skriver i Skiftrapporten og varsler (tema `konsern`, lenke `kart`).
   Merket «Regionmester» på topplista så lenge man har minst én region. Ingen penger. Speilet i `regionPoints`.
-- **Fellesprosjekter** (B-508, 156; bryteren `config.world.projects.enabled` står av til appen er publisert): ett prosjekt
+- **Fellesprosjekter** (B-508, 156; bryteren `config.world.projects.enabled` på fra 22.10.2026): ett prosjekt
   per region om gangen, der minst to aktive konsern har ferdige verk. Målet er det største av 4 dagers utbytte fra verkene
   i regionen og 2 % av kassene der, fristen 21 ekte dager, et nytt 7 dager etter at det forrige er avgjort. Man gir fra
   konsernkassa (minst 1 mill., bare med ferdig verk i regionen; posten `fellesprosjekt`). Målet nådd: pengene er brukt,
@@ -166,7 +166,7 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
   eier får 0,2 av vedlikeholdet som teller hos de andre (`workshop_share`), ca. 7 mill. kr per dag – det minste selskapet.
 - Kraftverket (B-509, 157) i Østskogen: eieren får 12 øre per kWh de andre bruker (`power_fee_per_kwh`) – stålet som teller
   × spillerens kWh per tonn siste 7 ekte dager fra tidslinja (`power_kwh_per_t`, 150–800, ellers 300). Anslaget 22.10:
-  ca. 11 mill. kr per dag. Bygget, men slått av (`active = false`) til appen som kjenner typen, er publisert.
+  ca. 11 mill. kr per dag. Aktivt fra 22.10.2026.
 - Kontroll regnes av `company_control` (aktivitet, investering, region, eiertid); vises som kroner (B-370).
 - Oppkjøpsbud og motbud er på (fra 29.9.2026). Budet teller 60 × √(bud / V) × (0,5 + 0,5 × aktivitet) + region, inntil
   10 × verdien (verdi V = det høyeste av 10 dagers inntekt og siste anbudspris); eieren kan alltid miste selskapet.
@@ -193,7 +193,7 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
   selskapet (til perioden går ut, minst 14 dager) mot budet, og hva som kommer tilbake hvis budet ikke holder (75 %,
   regelsett 1: 90 %; B-435, B-441).
 - Slagghåndteringen er aktiv fra 3.10.2026 (B-445, første anbud stenger 5.10 kl. 10:38), mekanisk verksted fra 13.10 (B-486).
-  Kraftverket er ikke aktivt ennå (B-509).
+  Kraftverket er aktivt fra 22.10.2026 (B-509).
 
 ## 6. Konkurranse og lister
 
