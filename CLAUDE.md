@@ -249,7 +249,7 @@ frontend/src/
     PushAuto.tsx Varsler på for alle: første trykk etter innlogging lar telefonen spørre, én gang per konto og enhet (B-467)
     Referral.tsx Kortet «Verv en venn» på Mål → Uka og koblingen etter innlogging (`ReferralSync`, B-459)
     Admin.tsx    Adminpanelet under kontoen, bare når `is_admin()` svarer ja (B-421); fanen Drift (B-485)
-    Companies.tsx Konsern → Industrien: ett kort per selskap (skraplageret nå) og konsernkassa (B-189, B-227)
+    Companies.tsx Konsern → Industrien: ett kort per selskap og konsernkassa (B-189, B-227); kraftverket (B-509)
     control/     Kontrollrommet: spillet i fire runder (chargeGame.ts: logikk, frø og inndatalogg, testspiller; ControlRoom.tsx,
                  B-175); weekly.ts: ukens charge og treningsfrø (B-387); miniGame.ts + MiniRoom.tsx: støpemaskinen og
                  valseverket (runder «hold» og «tid», testspiller `autoPlayMini`, B-505)
@@ -660,7 +660,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   hele setningen.
 - **Flere selskaper** (B-253, B-256): tonn, gebyr og anslag regnes per type (`company_counted_t`, `company_fee`,
   `company_estimate` i 042/043). Verkstedet teller kroner vedlikehold (`snapshots.maint_kr` → `production_days.gained_maint`),
-  ikke tonn, og `company_fee` er da en andel. Et selskap med `companies.active = false` får ikke anbud, inntekt eller plass i `world_status`. Varsler om avgjorte
+  ikke tonn, og `company_fee` er da en andel. Kraftverket (B-509, 157) teller kWh: stålet som teller × `power_kwh_per_t` (tidslinja
+  siste 7 ekte dager), og `company_fee` er kroner per kWh. En ny type: `companies_type_check`, `company_counted_t`,
+  `company_fee`, `company_estimate_cap` og `CompanyType`/`companyType`/`EARNS_FROM`/`COMPANY_INTRO` i appen – og appen
+  publiseres før selskapet slås på (eldre apper viser ukjente typer som skraplageret). Et selskap med `companies.active = false` får ikke anbud, inntekt eller plass i `world_status`. Varsler om avgjorte
   anbud gis med `applyTenderResults` (i rekkefølge etter anbudet), ikke ett og ett selskap.
 - **Anbud og inntekt** (B-189) avgjøres «lat» av `world_status()` → `world_tick()`. `world_tick` kjøres av pg_cron hvert 5. minutt (`verden-tick`, B-364) og ellers høyst én gang
   per 30 s og hopper over når en annen holder på (B-343, 072) – ikke gjør låsen ventende igjen, da står appene i kø.

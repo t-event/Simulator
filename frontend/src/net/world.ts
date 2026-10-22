@@ -38,14 +38,15 @@ export interface TenderResult {
   myBid: number | null;
 }
 
-/** Selskapstypene serveren kjenner (B-189, B-253, B-256). Et selskap som er slått av, sendes ikke. */
-export type CompanyType = "skraplager" | "slagg" | "verksted";
+/** Selskapstypene serveren kjenner (B-189, B-253, B-256, B-509). Et selskap som er slått av, sendes ikke. */
+export type CompanyType = "skraplager" | "slagg" | "verksted" | "kraftverk";
 
 /** Navnet serveren bruker når det mangler */
 const COMPANY_NAME: Record<CompanyType, string> = {
   skraplager: "Skraplageret",
   slagg: "Slagghåndteringen",
   verksted: "Mekanisk verksted",
+  kraftverk: "Kraftverket",
 };
 
 /** Navnet på selskapstypen, brukt når serveren ikke sender et navn */
@@ -55,7 +56,7 @@ export function companyName(type: CompanyType): string {
 
 /** Typen fra serveren; ukjente typer vises som skraplageret (eldste regel) */
 export function companyType(v: unknown): CompanyType {
-  return v === "slagg" || v === "verksted" ? v : "skraplager";
+  return v === "slagg" || v === "verksted" || v === "kraftverk" ? v : "skraplager";
 }
 
 /** Hva eieren tjener på, med vanlige ord – brukt i beskjeden om åpent anbud */
@@ -63,6 +64,7 @@ export const EARNS_FROM: Record<CompanyType, string> = {
   skraplager: "skrapet de andre spillerne bruker",
   slagg: "slaggen de andre spillerne lager",
   verksted: "vedlikeholdet og reparasjonene hos de andre spillerne",
+  kraftverk: "strømmen de andre verkene bruker",
 };
 
 export interface Company {

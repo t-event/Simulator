@@ -9626,3 +9626,29 @@ dine anbefalinger» – modell C er bygget som anbefalt i FELLESPROSJEKT-FORSLAG
   Regionmester-styrken var lik før og etter migrasjonen (101 rader, samme sum).
 
 Konto: ja (regel 3 – penger mellom spillere i ekte tid). Lagt i `ACCOUNT_FEATURES` og KONTO.md. Uten konto finnes ingen datterverk (`NeedsAccount` «Datterverk»), og kortet vises først når man har ferdige verk (B-180).
+
+## B-509 Kraftverket: det fjerde selskapet, eieren tjener på strømmen de andre bruker (2026-10-22)
+Eieren: «Velg din anbefaling og fortsett» – valget mellom kraftverk, ildfastfabrikk og havn (SLUTTSPILL-FORSLAG 2.2,
+spørsmål 3). Valgt: **kraftverket**. Strøm er den største kostnaden i en lysbueovn, så det lærer spillerne noe. Serveren har
+alt kWh per spiller i tidslinja (`snapshots.kwh_total`, B-396), så det trengs ingen ny måling i appen. Ildfast og havn
+venter til det er flere aktive konserneiere (omtrent ett selskap per fire).
+- **Inntekten** (`supabase/157_kraftverk.sql`): 12 øre per kWh de andre bruker (`config.world.power_fee_per_kwh`).
+  Det som teller per spiller og ekte dag, er stålet som teller (skraplagerets tonn / 1,1, høyst én vanlig spilldag),
+  ganget med spillerens kWh per tonn de siste 7 ekte dagene (`power_kwh_per_t`). kWh per tonn er økningen i telleren for
+  strøm delt på økningen i tonnene, innenfor 150–800, ellers 300, og uten tall merket `pre_reform` (B-190). Farten i
+  spillet gir derfor ikke mer.
+- **Anslaget** med tallene 22.10: ca. 10,7 mill. kr per dag (89 mill. kWh per dag, snittet 273 kWh per tonn). Det ligger
+  mellom verkstedet (5,3) og skraplageret og slagghåndteringen (ca. 18). Minstebudet i første anbud blir ca. 53 mill. og
+  høyeste bud 150 mill.
+- **Ingen rabatt på strømmen hjemme.** Forslaget nevnte lavere strømpris i regionen. Det ville latt et selskap i ekte tid
+  endre økonomien i eget verk, som går i spilltid (B-323), og det er ikke tatt med.
+- **Region:** Østskogen (elvene), der det ikke var noe selskap fra før.
+- **Appen** kjenner typen (`CompanyType`, `EARNS_FROM`, kortet på Konsern → Industrien). Alt annet – anbud, Kontroll,
+  oppkjøp, konsernverdi, kartet og Skiftrapporten – er felles for alle selskaper.
+- **Slått av** (`active = false`) til appen er publisert. Eldre apper viser ukjente typer som skraplageret. Slås på med
+  `update companies set active = true where type = 'kraftverk'; select company_estimate_refresh(true);`, og anbudet åpner
+  da av seg selv innen fem minutter.
+- **Prøvd** i en DO-blokk som ble rullet tilbake: anslaget over, anbudet åpnet med beskjed i Skiftrapporten, og
+  `world_status` viste selskapet med region og anbud. Sikkerhetsrådene er uendret.
+
+Konto: ja (regel 3 og 7, som de andre strategiske selskapene). KONTO.md er oppdatert.

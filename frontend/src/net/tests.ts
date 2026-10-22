@@ -147,6 +147,7 @@ import {
   tenderNoticeDue,
   type Company,
   BID_REFUSAL_TEXT,
+  companyName,
   companyType,
   EARNS_FROM,
   fetchWorldStatus,
@@ -2426,6 +2427,10 @@ const main = async () => {
 
   await test("Mekanisk verksted (B-256): typen tolkes, og spillet sender vedlikeholdet til tidslinja", async () => {
     assert(companyType("verksted") === "verksted" && companyType("slagg") === "slagg", "kjente typer");
+    assert(
+      companyType("kraftverk") === "kraftverk" && companyName("kraftverk") === "Kraftverket",
+      "kraftverket (B-509)",
+    );
     assert(companyType("noe nytt") === "skraplager", "ukjent type");
     assert(/vedlikeholdet/.test(EARNS_FROM.verksted), "hva verkstedet tjener på");
     const f = fresh();

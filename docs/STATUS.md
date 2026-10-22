@@ -164,6 +164,9 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
   (kortet, Konsern → Oversikt, varsellinja og varselet på mobilen) om at selskapet går tapt uten bud (B-481).
 - Tre selskaper: skraplageret, slagghåndteringen (fra 3.10, B-445) og mekanisk verksted (fra 13.10, B-486). Verkstedets
   eier får 0,2 av vedlikeholdet som teller hos de andre (`workshop_share`), ca. 7 mill. kr per dag – det minste selskapet.
+- Kraftverket (B-509, 157) i Østskogen: eieren får 12 øre per kWh de andre bruker (`power_fee_per_kwh`) – stålet som teller
+  × spillerens kWh per tonn siste 7 ekte dager fra tidslinja (`power_kwh_per_t`, 150–800, ellers 300). Anslaget 22.10:
+  ca. 11 mill. kr per dag. Bygget, men slått av (`active = false`) til appen som kjenner typen, er publisert.
 - Kontroll regnes av `company_control` (aktivitet, investering, region, eiertid); vises som kroner (B-370).
 - Oppkjøpsbud og motbud er på (fra 29.9.2026). Budet teller 60 × √(bud / V) × (0,5 + 0,5 × aktivitet) + region, inntil
   10 × verdien (verdi V = det høyeste av 10 dagers inntekt og siste anbudspris); eieren kan alltid miste selskapet.
@@ -189,7 +192,8 @@ og bytte til kompleks betaler lånet først. Lånet trekkes fra konsernverdien. 
 - Selskapskortet viser minstebudet ved oppkjøp (B-451) og, ved oppkjøp, «Lønner det seg?»: inntekten i dagene kjøperen eier
   selskapet (til perioden går ut, minst 14 dager) mot budet, og hva som kommer tilbake hvis budet ikke holder (75 %,
   regelsett 1: 90 %; B-435, B-441).
-- Slagghåndteringen er aktiv fra 3.10.2026 (B-445, første anbud stenger 5.10 kl. 10:38). Mekanisk verksted er ikke aktivt.
+- Slagghåndteringen er aktiv fra 3.10.2026 (B-445, første anbud stenger 5.10 kl. 10:38), mekanisk verksted fra 13.10 (B-486).
+  Kraftverket er ikke aktivt ennå (B-509).
 
 ## 6. Konkurranse og lister
 

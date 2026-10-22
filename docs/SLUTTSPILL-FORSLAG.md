@@ -77,7 +77,7 @@ det som må lages.
   valg av risikoprofil – ikke et sluk og ikke forventet meravkastning (B-393). Hendelser i regionene gjør at valget betyr
   noe fra uke til uke.
 
-### 2.2 Flere selskaper (S-1 i KONSERNKAPITAL-FORSLAG)
+### 2.2 Flere selskaper (S-1 i KONSERNKAPITAL-FORSLAG) – kraftverket bygget (B-509)
 
 - **Regel:** omtrent ett aktivt selskap per 4 aktive konserneiere (aktivitetskravet, B-327), i regionen der flest har verk
   uten et selskap. Serveren foreslår, eieren godkjenner.

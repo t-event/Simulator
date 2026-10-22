@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 509,
+    date: "2026-10-22",
+    title: "Kraftverket",
+    items: [
+      "Et nytt selskap å by på: kraftverket i Østskogen. Eieren får 12 øre for hver kWh de andre verkene bruker.",
+      "Kraftverket følger de samme reglene som de andre selskapene: anbud, Kontroll og oppkjøp under Konsern → Industrien.",
+    ],
+  },
+  {
     b: 508,
     date: "2026-10-22",
     title: "Fellesprosjekter i regionene",

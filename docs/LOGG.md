@@ -5,6 +5,26 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 423 – 2026-10-22: Kraftverket (B-509)
+
+**Brukeren:** «Velg din anbefaling og fortsett» (hvilken selskapstype som kommer først).
+
+**Gjort:**
+- B-509: kraftverket i Østskogen (`supabase/157_kraftverk.sql`, lagt inn og slått av). Eieren får 12 øre per kWh de andre
+  bruker, regnet av stålet som teller og kWh per tonn fra tidslinja (`power_kwh_per_t`).
+- Appen kjenner typen: navnet, «hva eieren tjener på» og teksten på kortet under Konsern → Industrien.
+
+**Testet:**
+- I en DO-blokk som ble rullet tilbake: anslaget er 10,7 mill. kr per dag (snittet 273 kWh per tonn, 16 spillere med
+  tall). Anbudet åpnet ved neste `world_tick` (minstebud 53 mill., høyeste 150 mill.), og Skiftrapporten fikk beskjed.
+- Sikkerhetsrådene er uendret. `npm test` (ny sjekk av typen), `tsc -b`, lint, build og `balance.ts`.
+
+**Gjenstår:**
+- Merge PR #434. Slå på fellesprosjektene (B-508) og kraftverket (B-509) når appen er publisert.
+- K-1 etter skyggerapporten 2.11.
+
+---
+
 ## Økt 422 – 2026-10-22: Fellesprosjektene bygget (B-508)
 
 **Brukeren:** «Fortsett. Har fikset supabase connectoren».

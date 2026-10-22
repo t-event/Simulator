@@ -1,6 +1,7 @@
 /**
  * Industrien rundt verket (B-189, B-227): de strategiske selskapene og konsernkassa under Konsern → Industrien.
- * Skraplageret var det første selskapet; slagghåndteringen (B-253, B-445) og mekanisk verksted (B-256, B-486) er åpnet.
+ * Skraplageret var det første selskapet; slagghåndteringen (B-253, B-445), mekanisk verksted (B-256, B-486) og
+ * kraftverket (B-509) har kommet til.
  * Eieren ser Kontrollen og kan investere; utbyttepolitikken og forsvarsfondet står ved konsernkassa (B-334). Hvert selskap serveren sender, får sitt eget kort, og konsernkassa – kapitalen
  * til alle selskapene – har sitt eget. Vises først når konsernet er åpnet (gradvis synlighet), krever konto. Alt avgjøres
  * på serveren i ekte tid; kortene viser bare det serveren sier.
@@ -95,6 +96,9 @@ const COMPANY_INTRO: Record<Company["type"], string> = {
   // B-256, åpnet 13.10 med andelen 0,2 (B-486)
   verksted:
     "Eieren får en femdel av det de andre spillerne bruker på vedlikehold og reparasjoner – regnet per tonn stål de lager, høyst én vanlig dag per spiller per dag, så farten i spillet betyr ikke noe. Det minste selskapet, og det billigste å by på.",
+  // B-509: strømmen er den største kostnaden i en lysbueovn
+  kraftverk:
+    "Eieren får 12 øre for hver kWh de andre verkene bruker – regnet av stålet de lager og hvor mye strøm de bruker per tonn, høyst én vanlig dag per spiller per dag, så farten i spillet betyr ikke noe. Verk som bruker lite strøm per tonn, gir eieren mindre.",
 };
 
 const INDUSTRY_INTRO =
