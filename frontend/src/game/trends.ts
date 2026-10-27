@@ -52,6 +52,9 @@ const GRADE_WORD: Record<GradeId, string> = {
   lavkarbon: "lavkarbonstål",
   hoykarbon: "høykarbonstål",
   premium: "premiumstål",
+  seigherdet: "seigherdingsstål",
+  verktoy: "verktøystål",
+  tannhjul: "tannhjulsstål",
 };
 
 /** Navnet på det trenden gjelder: «armeringskvalitet», «emner» */

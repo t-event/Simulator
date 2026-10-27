@@ -412,6 +412,18 @@ export const RESEARCH: Research[] = [
       "Jernmalm redusert med hydrogen i stedet for koks. Tynner ut sporelementene som råjern, men med en brøkdel av klimaavtrykket.",
     effect: "Du kan kjøpe jernsvamp",
   },
+  // Spesialstål (B-510): legeringsstål laget med øseovnen
+  {
+    id: "spesialstal",
+    name: "Spesialstål",
+    stage: 4,
+    cost: 400,
+    requires: ["osemetallurgi", "produktutvikling"],
+    knowledge: "spesialstal",
+    description:
+      "Legert stål med krom, nikkel, molybden og vanadium, tilsatt i øseovnen. Dyrt å lage, og kundene betaler for det.",
+    effect: "Forespørsler på seigherdings-, verktøy- og tannhjulsstål (krever øseovn, de to siste også vakuum)",
+  },
   // Konsernet (B-120): åpnes når konsernet er åpnet
   {
     id: "konsernstyring",
@@ -541,6 +553,7 @@ const READS: Record<string, string> = {
   produktutvikling: "omdomme",
   gronnstal: "fosfor",
   jernsvamp: "gront",
+  spesialstal: "oseovn",
   konsernstyring: "konsern",
   fellesvedlikehold: "konsern",
   kunnskapsdeling: "konsern",

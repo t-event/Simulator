@@ -51,6 +51,7 @@ import { hints, type Anchor, type Hint } from "./hints";
 import { furnaceState, statusOf } from "./plantStatus";
 import { Breakdown, ResultChart } from "./Finance";
 import { COST_NAMES, dayResult, INCOME_NAMES } from "./financeNames";
+import { specialOn } from "../game/special";
 
 interface Props {
   g: GameState;
@@ -725,7 +726,10 @@ function ProductionNow({
   const nextWeek = nextAgreementWeek(g);
   const queueMin = nextWeek ? queueMinutes(g, stats) : 0;
   const gradeOptions = (current: GradeId | null, skip?: GradeId) =>
-    GRADE_IDS.filter((id) => id !== skip && (GRADES[id].minStage <= g.stage || id === current)).map((id) => (
+    GRADE_IDS.filter(
+      (id) =>
+        id !== skip && ((GRADES[id].minStage <= g.stage && (!GRADES[id].alloy || specialOn(g))) || id === current),
+    ).map((id) => (
       <option key={id} value={id}>
         {GRADES[id].name}
       </option>

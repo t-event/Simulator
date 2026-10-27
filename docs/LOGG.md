@@ -5,6 +5,33 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 424 – 2026-10-27: Stor oppdatering «Spesialstål» (B-510)
+
+**Brukeren:** «Planlegg nå en ny stor update. Lag en plan og gjennomfør. Du har tilgang til supabase igjen».
+
+**Gjort:**
+- Så på dataene først: 15 aktive spillere siste uke, alle på storverket. Ingen nye på to uker. Alle som sluttet før
+  storverket, er borte. Fellesprosjektene er på 0–37 % etter fem dager, og alle verdensjobbene står som «ok».
+- Valgte spesialstål som stor oppdatering (begrunnelsen står i B-510):
+  - Tre legerte kvaliteter, som øseovnen legerer.
+  - Forskning og spesialstålforespørsler, valgt etter nummeret så tilfeldige tall ikke flyttes.
+  - Tekst på Salg og Resept, fagbokkapittel med quiz og en ny prestasjon.
+- Ny fil `game/special.ts`. `mixSatisfies` (`plant.ts`) sjekker resepten før legeringen.
+
+**Testet:**
+- Ny test i `game/tests.ts`. `npm test`, `tsc -b`, lint og build er grønne.
+- `balance.ts`: OK, nivådagene er uendret.
+- `--storovn 330`: fem forløp med og uten spesialstål fra samme utgangspunkt gir +1–1,5 mill. per døgn (7 %, mindre enn
+  støyen).
+- Et spill på storverket med en spesialstålkontrakt i tre døgn: legert, levert, og prestasjonen telte 1 375 t.
+- Playwright på 320, 390 og 1366 px: Salg og Resept med spesialstål, og ingen horisontal scrolling.
+
+**Gjenstår:**
+- K-1 etter skyggerapporten 2.11.
+- Se om spesialstålet blir brukt (forskningen i lagringene) om en uke.
+
+---
+
 ## Økt 423 – 2026-10-22: Kraftverket (B-509)
 
 **Brukeren:** «Velg din anbefaling og fortsett» (hvilken selskapstype som kommer først).

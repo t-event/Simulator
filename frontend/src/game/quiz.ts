@@ -171,6 +171,30 @@ export const QUIZ: Record<string, QuizQuestion[]> = {
       why: "Begge er nesten frie for sporelementer, så de tynner ut det skrapet har med seg.",
     },
   ],
+  spesialstal: [
+    {
+      q: "Hvor tilsetter man legeringene i et skrapbasert stålverk?",
+      options: ["I skrapkurven", "I øseovnen etter tapping", "I kokillen"],
+      correct: 1,
+      why: "Legeringene legges i øsa når slaggen er tatt av, så lite går tapt i slaggen.",
+    },
+    {
+      q: "Hvilket metall gjør stålet seigt, også i kulde?",
+      options: ["Nikkel", "Kobber", "Tinn"],
+      correct: 0,
+      why: "Nikkel gir seighet. Kobber og tinn er sporelementer som gjør stålet sprøtt.",
+    },
+    {
+      q: "Hvorfor må resepten fortsatt ha rent skrap når stålet skal legeres?",
+      options: [
+        "Fordi kobber og tinn ikke kan fjernes",
+        "Fordi legeringene ikke smelter i urent skrap",
+        "Fordi rent skrap er billigst",
+      ],
+      correct: 0,
+      why: "Øseovnen kan tilsette metaller, men ikke ta ut kobber og tinn. De må holdes lave fra starten.",
+    },
+  ],
   miljo: [
     {
       q: "Hva gjør renseanlegget?",

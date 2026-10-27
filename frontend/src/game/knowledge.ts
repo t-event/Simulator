@@ -336,6 +336,36 @@ export const KNOWLEDGE: KnowledgeCard[] = [
     ],
   },
   {
+    id: "spesialstal",
+    title: "Spesialstål og legeringer",
+    icon: "atom",
+    part: "ovn",
+    short:
+      "Legert stål får krom, nikkel, molybden eller vanadium i øseovnen. Det blir sterkere og hardere, men legeringene er dyre.",
+    pages: [
+      {
+        head: "Hva er et legert stål?",
+        text: "Vanlig stål er jern og litt karbon. Et legert stål har i tillegg noen tideler eller hele prosent av andre metaller. De gjør at stålet kan herdes dypere, tåler mer slitasje eller holder seg seigt i kulde. Aksler, verktøy og tannhjul er laget av slikt stål.",
+      },
+      {
+        head: "Legeringene og hva de gjør",
+        text: "Krom gjør stålet hardere og lettere å herde. Molybden gjør det seigt etter herding og sterkt ved høy temperatur. Nikkel gjør det seigt, også i kulde. Vanadium gir små, harde korn som gjør verktøy slitesterkt.",
+      },
+      {
+        head: "Tilsatt i øseovnen",
+        text: "Legeringene kommer som ferrolegeringer – for eksempel ferrokrom og ferromolybden – og som rent nikkel. De legges i øsa etter tapping, når slaggen er tatt av, så lite går tapt. Operatøren tar prøver og justerer til analysen treffer. Bommer den uten at noen merker det, må stålet sperres.",
+      },
+      {
+        head: "Rent skrap er fortsatt viktig",
+        text: "Kobber og tinn kan ikke fjernes fra stålet, og i spesialstål er kravet strengt. Resepten må derfor holde kobber og tinn lavt med rent skrap, råjern eller jernsvamp. Verktøystål og tannhjulsstål må også vakuumbehandles, så hydrogen og nitrogen ikke gjør dem sprø.",
+      },
+      {
+        head: "Dyrt å lage, godt betalt",
+        text: "Molybden og nikkel er dyre metaller, og legeringen koster fra noen hundre til nesten to tusen kroner per tonn stål. Kundene betaler mer for spesialstål, men de kjøper mindre partier – og de forventer at hvert parti holder.",
+      },
+    ],
+  },
+  {
     id: "fosfor",
     title: "Fosfor og avslagging",
     icon: "research",

@@ -163,6 +163,7 @@ frontend/src/
     pension.ts   Alder og pensjon for de ansatte (B-357): `born`, pensjonsalder 62–67, beskjed en måned før
     minis.ts     Støpemaskinen og valseverket i kontrollrommet: fagpoeng per døgn, rekord og fordelen i drifta (B-505)
     green.ts     Grønt stål: CO₂ per tonn (innsats, strøm, fast), grønne forespørsler og omdømmet (B-506)
+    special.ts   Spesialstål: legeringene, hva verket mangler, og hvilke forespørsler som blir spesialstål (B-510)
     calendar.ts  Året i spillet (360 døgn, dag 1 = 1. april), vinter 15.11.–14.3. og frost (B-265, B-272), fellesferie (B-298);
                  `calendarAhead` til kalenderkortet på Oversikt (ui/CalendarCard.tsx, B-321)
     war.ts       Krig i verden, bare i konsernet: dyrere strøm, flere forespørsler, høyst én per år (B-297)
@@ -737,6 +738,12 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
 - **Nye skraptyper** (B-506): markedet trekker tilfeldige tall per skraptype hvert døgn. En ny type må holdes utenfor
   `marketIds` (`engine.ts`) til den er forsket fram, ellers flyttes alle tilfeldige tall i spillet og `balance.ts` gir
   helt andre nivådager. `migrate()` fyller nye typer inn i lageret, alle resepter og `scrapFactor`.
+- **Spesialstål og nye kvaliteter** (B-510): legert stål har `Analysis.alloy` og holder bare sin egen kvalitet (`satisfies`).
+  Resepten og forslagene sjekker blandingen før legeringen med `mixSatisfies` – bruk den der analysen kommer fra skrapet,
+  `satisfies` der den kommer fra et parti. En ny kvalitet må holdes utenfor `CUSTOMERS`, trendene og annet som trekker
+  tilfeldig blant kvalitetene, ellers flyttes alle tilfeldige tall i spillet (som nye skraptyper, B-506). Spesialstål-
+  forespørslene velges etter nummeret i `specialGradeFor`. `--storovn` er ett forløp og svært ujevnt (±10 mill.): mål
+  endringer på toppen med flere forløp fra samme utgangspunkt (`--storovn-base`) og ulike tilfeldige tall.
 - **Hendelseskort om forhold mellom ansatte** (B-444): trakassering, diskriminering og varsling er et sårt tema for eieren –
   ingen slike kort, kapitler eller popups uten at eieren ber om det.
 - **Skjulte prestasjoner** (B-296): `hidden` på en serie gjør at den bare vises og telles for dem som har den. Bruk

@@ -104,6 +104,7 @@ import {
   satisfies,
   specMargin,
   satisfiedGrades,
+  mixSatisfies,
   type PlantStats,
   unitType,
   unitHas,
@@ -135,6 +136,15 @@ import type {
 } from "./types";
 import { applyCashCap, paidOutDayLog } from "./reserve";
 import { TREND, trendHits, trendPriceFactor, updateTrend } from "./trends";
+import {
+  alloyCostPerT,
+  alloyReady,
+  isSpecial,
+  SPECIAL,
+  SPECIAL_CUSTOMERS,
+  specialGradeFor,
+  specialOn,
+} from "./special";
 
 export const SAVE_VERSION = 1;
 const STEP_MIN = 10;
@@ -161,6 +171,9 @@ export const TARGET_C: Record<GradeId, number> = {
   lavkarbon: 0.05,
   hoykarbon: 0.7,
   premium: 0.25,
+  seigherdet: 0.4,
+  verktoy: 0.65,
+  tannhjul: 0.18,
 };
 
 // ------------------------------------------------------------------ //
@@ -863,7 +876,8 @@ export function recipeEstimate(
   };
   return {
     analysis,
-    grades: satisfiedGrades(analysis),
+    // Spesialstål (B-510) holder kravet når blandingen gjør det, siden øseovnen legerer – bare når det er forsket fram
+    grades: specialOn(g) ? GRADE_IDS.filter((id) => mixSatisfies(analysis, id)) : satisfiedGrades(analysis),
     scrapCostPerT: cost,
     metallicYield: Math.max(0.6, 1 - dirt - stats.furnace.oxidationLoss),
     energyFactor: energy * (1 + dirt),
@@ -1279,16 +1293,18 @@ function joinAnd(parts: string[]): string {
 // Støping og valsing
 // ------------------------------------------------------------------ //
 function knownAnalysis(batch: LiquidBatch, stats: PlantStats): Pick<Lot, "known" | "measured"> {
+  // Legeringen er kjent: øseovnen tilsatte den selv (B-510)
+  const alloy = batch.analysis.alloy ? { alloy: batch.analysis.alloy } : {};
   if (stats.lab === 2) {
     return { known: { ...batch.analysis }, measured: { c: true, p: true, tramp: true } };
   }
   if (stats.lab === 1) {
     return {
-      known: { c: batch.expected.c, p: batch.expected.p, tramp: batch.analysis.tramp },
+      known: { c: batch.expected.c, p: batch.expected.p, tramp: batch.analysis.tramp, ...alloy },
       measured: { c: false, p: false, tramp: true },
     };
   }
-  return { known: { ...batch.expected }, measured: { c: false, p: false, tramp: false } };
+  return { known: { ...batch.expected, ...alloy }, measured: { c: false, p: false, tramp: false } };
 }
 
 function lotKey(l: Pick<Lot, "product" | "second" | "analysis" | "known" | "measured">): string {
@@ -1411,13 +1427,41 @@ function castBatch(g: GameState, batch: LiquidBatch, stats: PlantStats): void {
     );
     unlock(g, "streng");
   }
+  // Spesialstål (B-510): øseovnen tilsetter legeringen. Av og til bommer den; oppdager operatøren det, rettes det
+  // med mer legering, ellers sperres stålet. Uten øseovn (og vakuum der det trengs) blir stålet ulegert
+  let blocked = false;
+  if (isSpecial(batch.grade) && alloyReady(g, batch.grade, stats)) {
+    const spec = GRADES[batch.grade];
+    let cost = alloyCostPerT(batch.grade);
+    if (chance(g, SPECIAL.missRisk * (1.6 - 0.15 * ladleSkill(g)))) {
+      if (chance(g, Math.min(0.95, 0.45 + 0.12 * ladleSkill(g)))) {
+        cost *= 1 + SPECIAL.fixExtra;
+        log(
+          g,
+          `Legeringen i en øse med ${spec.name.toLowerCase()} bommet, men prøven fant det og den ble rettet.`,
+          "info",
+        );
+      } else {
+        blocked = true;
+        log(
+          g,
+          `Legeringen i en øse med ${spec.name.toLowerCase()} bommet uten at det ble oppdaget før støping. Stålet er sperret.`,
+          "event",
+        );
+      }
+    }
+    addCost(g, "forbruk", cost * t);
+    batch.analysis = { ...batch.analysis, alloy: spec.alloy };
+  }
   // Øseovnen: operatøren tar prøver og legerer. Karbon kan rettes; fosfor og kobber kan ikke.
   // Oppdages avviket ikke, eller kan det ikke rettes, sperres stålet (B-037)
-  let blocked = false;
-  if (has(g, "oseovn") && stats.furnace.arc && !satisfies(batch.analysis, batch.grade)) {
+  if (!blocked && has(g, "oseovn") && stats.furnace.arc && !satisfies(batch.analysis, batch.grade)) {
     const caught = chance(g, Math.min(0.95, 0.45 + 0.12 * ladleSkill(g)));
     const spec = GRADES[batch.grade];
-    const carbonOnly = batch.analysis.p <= spec.pMax && batch.analysis.tramp <= spec.trampMax;
+    const carbonOnly =
+      batch.analysis.p <= spec.pMax &&
+      batch.analysis.tramp <= spec.trampMax &&
+      (batch.analysis.alloy ?? null) === (spec.alloy ?? null);
     if (caught && carbonOnly) {
       batch.analysis = { ...batch.analysis, c: TARGET_C[batch.grade] };
     } else {
@@ -1425,7 +1469,9 @@ function castBatch(g: GameState, batch: LiquidBatch, stats: PlantStats): void {
       log(
         g,
         caught
-          ? `Øseovnen fant at stålet ikke holder ${spec.name.toLowerCase()} (fosfor eller kobber), og det kan ikke legeres bort. Stålet er sperret.`
+          ? spec.alloy && batch.analysis.alloy !== spec.alloy
+            ? `${spec.name} trenger legering i øseovnen${spec.vacuum ? " og vakuumavgassing" : ""}, og verket har ikke det som trengs. Stålet er sperret.`
+            : `Øseovnen fant at stålet ikke holder ${spec.name.toLowerCase()} (fosfor eller kobber), og det kan ikke legeres bort. Stålet er sperret.`
           : "Stål som ikke holdt kravet, gikk til støping uten nok prøver. Det er oppdaget og sperret.",
         "event",
       );
@@ -2406,6 +2452,8 @@ function deliverContracts(g: GameState): void {
             "info",
           );
       }
+      // Spesialstål (B-510): tonnene teller mot prestasjonen
+      if (isSpecial(c.grade)) countEvent(g, "spesial_t", c.tonnes);
       if (g.totals.contractsDone === 1) unlock(g, "omdomme");
       if (c.agreementId) agreementWeekClosed(g, c, true);
     }
@@ -2560,14 +2608,19 @@ function pickCustomer(
 function makeOffer(g: GameState, stats: PlantStats): Contract | null {
   const picked = pickCustomer(g, stats);
   if (!picked) return null;
-  const { customer, product, grade } = picked;
+  const { customer, product } = picked;
   const capacity = Math.max(0.1, productCapT(stats, product));
   // En kontrakt skal være et lite prosjekt: 1,5–4 døgns produksjon, ikke noe som er ferdig på sekunder
   // De første kontraktene i garasjen er små, så starten går fort og man ser at det virker (B-033)
   const firstOrders =
     g.stage === 0 && g.totals.contractsDone + g.contracts.filter((c) => c.status === "aktiv").length < 2;
+  // Spesialstål (B-510): noen forespørsler gjelder legert stål, valgt etter nummeret (ingen ekstra trekning)
+  const special = specialGradeFor(g, stats, g.nextContractId, product, firstOrders);
+  const grade = special ?? picked.grade;
   const workDays = firstOrders ? uniform(g, 0.4, 0.8) : uniform(g, CONTRACT_DAYS[0], CONTRACT_DAYS[1]);
-  const tonnes = roundTonnes(Math.max(customer.minT, Math.min(customer.maxT, capacity * workDays)));
+  const tonnes = roundTonnes(
+    Math.max(customer.minT, Math.min(customer.maxT, capacity * workDays)) * (special ? SPECIAL.sizeFactor : 1),
+  );
   // Lager verket mer enn markedet tar unna, blir prisen lavere (B-252); trenden i markedet gir mer eller mindre (B-255)
   const pricePerT = Math.round(
     productPrice(g, product, grade) *
@@ -2585,14 +2638,17 @@ function makeOffer(g: GameState, stats: PlantStats): Contract | null {
   const size = Math.min(3, tonnes / capacity);
   // Små verk får mer omdømme per kontrakt, så starten ikke står og stamper på omdømmet (B-034)
   const early = g.stage === 0 ? 1.5 : 1;
-  const repGain = Math.round((0.4 + 0.5 * size) * (GRADES[grade].premium > 1.1 ? 1.3 : 1) * early * 10) / 10;
+  const repGain =
+    Math.round(
+      (0.4 + 0.5 * size) * (GRADES[grade].premium > 1.1 ? 1.3 : 1) * early * (special ? SPECIAL.repFactor : 1) * 10,
+    ) / 10;
   const id = g.nextContractId++;
   // Grønt stål (B-506): hver femte forespørsel har et krav til klimaavtrykket når «Grønt stål» er forsket fram. Valgt
   // etter nummeret, ikke tilfeldig, så resten av spillet trekker de samme tallene som før
   const green = greenOn(g) && !firstOrders && id % Math.round(1 / GREEN.share) === 0;
   return {
     id,
-    customer: customer.name,
+    customer: (special && SPECIAL_CUSTOMERS[special]) || customer.name,
     product,
     grade,
     tonnes,
@@ -3634,8 +3690,9 @@ function onDay(g: GameState, stats: PlantStats): void {
   }
   // Trender i markedet (B-255): bare kvaliteter og varer spilleren kan få forespørsler på
   const wantedGrades = g.settings.offerGrades ?? [];
+  // Spesialstål (B-510) er ikke med: det ville flyttet trekningen av trender for alle på storverket
   const trendGrades = GRADE_IDS.filter(
-    (id) => GRADES[id].minStage <= g.stage && (!wantedGrades.length || wantedGrades.includes(id)),
+    (id) => !isSpecial(id) && GRADES[id].minStage <= g.stage && (!wantedGrades.length || wantedGrades.includes(id)),
   );
   const trendMsg = updateTrend(g, today, stats.products, trendGrades);
   if (trendMsg) log(g, trendMsg, "event");

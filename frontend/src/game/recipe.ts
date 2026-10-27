@@ -4,7 +4,7 @@
  */
 import { GRADES, SCRAP_IDS, SCRAP_TYPES, stageRef } from "./data";
 import { recipeEstimate } from "./engine";
-import { energyPrice, has, satisfies, type PlantStats } from "./plant";
+import { energyPrice, has, mixSatisfies, type PlantStats } from "./plant";
 import { hasResearch, RESEARCH, researchForScrap, scrapUnlocked, type Research } from "./research";
 import type { Analysis, GameState, GradeId, ScrapId } from "./types";
 
@@ -124,7 +124,7 @@ export function suggestRecipe(
   const test = () => {
     const est = recipeEstimate(g, grade, stats, weights);
     const a = est.analysis;
-    if (!satisfies({ c: a.c, p: a.p / margin, tramp: a.tramp / margin }, grade)) return;
+    if (!mixSatisfies({ c: a.c, p: a.p / margin, tramp: a.tramp / margin }, grade)) return;
     const cost = est.scrapCostPerT / est.metallicYield + est.energyFactor * kwh;
     // Sikker: lavest nærhet til grensene; ved likt, billigst
     const score = mode === "billig" ? cost : closeness(a, grade) * 1e6 + cost;

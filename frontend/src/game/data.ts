@@ -6,7 +6,7 @@
  * utbytte, hvilke elementer som kan fjernes hvor), men de beskriver ikke noe
  * bestemt anlegg.
  */
-import type { Crew, GradeId, ProductId, RoleId, ScrapId } from "./types";
+import type { AlloyId, Crew, GradeId, ProductId, RoleId, ScrapId } from "./types";
 
 // ------------------------------------------------------------------ //
 // Tid
@@ -179,6 +179,9 @@ export interface GradeSpec {
   /** Laveste nivå kundene begynner å spørre etter denne kvaliteten */
   minStage: number;
   description: string;
+  /** Spesialstål (B-510): legeringen øseovnen må tilsette, og om stålet må vakuumbehandles */
+  alloy?: AlloyId;
+  vacuum?: boolean;
 }
 
 export const GRADES: Record<GradeId, GradeSpec> = {
@@ -248,6 +251,48 @@ export const GRADES: Record<GradeId, GradeSpec> = {
     premium: 1.28,
     minStage: 1,
     description: "Krevende kunder med strenge krav til fosfor og sporelementer.",
+  },
+  // Spesialstål (B-510): forespørslene kommer bare etter forskningen «Spesialstål», se game/special.ts
+  seigherdet: {
+    id: "seigherdet",
+    name: "Seigherdingsstål",
+    cMin: 0.3,
+    cMax: 0.45,
+    pMax: 0.025,
+    trampMax: 0.2,
+    premium: 1.45,
+    minStage: 4,
+    alloy: "crmo",
+    description:
+      "Krom-molybden-stål til aksler, bolter og veivaksler. Herdes og anløpes, så det blir både sterkt og seigt.",
+  },
+  verktoy: {
+    id: "verktoy",
+    name: "Verktøystål",
+    cMin: 0.55,
+    cMax: 0.75,
+    pMax: 0.02,
+    trampMax: 0.12,
+    premium: 1.7,
+    minStage: 4,
+    alloy: "crmov",
+    vacuum: true,
+    description:
+      "Hardt stål med krom, molybden og vanadium til verktøy og former. Må være svært rent, og vakuumbehandles.",
+  },
+  tannhjul: {
+    id: "tannhjul",
+    name: "Tannhjulsstål",
+    cMin: 0.12,
+    cMax: 0.25,
+    pMax: 0.02,
+    trampMax: 0.15,
+    premium: 1.85,
+    minStage: 4,
+    alloy: "crnimo",
+    vacuum: true,
+    description:
+      "Krom-nikkel-molybden-stål til tannhjul i girkasser. Overflaten settes inn med karbon og blir hard, kjernen holder seg seig.",
   },
 };
 

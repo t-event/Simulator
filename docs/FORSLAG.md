@@ -78,7 +78,7 @@ til «Avgjort» nederst).
 - **Regionale fellesprosjekter (B-508):** bygget som modell C. Bryteren slås på når PR-en med appen er publisert
   (SQL-en i B-508). Etter noen uker: se om målene er passe (hvor mange prosjekter blir ferdige, og hvor mange gir).
 - **Sluttspillet videre (eieren 21.10, B-504):** plan i `SLUTTSPILL-FORSLAG.md`. Sesong 1 fortsetter (B-505). Bygget:
-  kontrollromsspillene (B-505), grønt stål (B-506) og fellesprosjektene (B-508). Kraftverket er bygget (B-509) og slås på
+  kontrollromsspillene (B-505), grønt stål (B-506), fellesprosjektene (B-508) og spesialstål (B-510). Kraftverket er bygget (B-509) og slås på
   sammen med fellesprosjektene. Venter: K-1 etter 2.11. Ildfastfabrikk og havn kan komme når det er flere aktive
   konserneiere (omtrent ett selskap per fire).
 

@@ -3,7 +3,8 @@ import { applyRecipe, nudgeRecipe } from "../game/actions";
 import { startRecipeGuide } from "../game/recipeGuide";
 import { GRADES, SCRAP_IDS, SCRAP_TYPES } from "../game/data";
 import { recipeEstimate } from "../game/engine";
-import { furnaceGrade, gradeRecipe, gradesInUse, hasGrader, satisfies, type PlantStats } from "../game/plant";
+import { furnaceGrade, gradeRecipe, gradesInUse, hasGrader, mixSatisfies, type PlantStats } from "../game/plant";
+import { ALLOYS, alloyCostPerT, alloyMissing } from "../game/special";
 import { gradeChecks, scrapResearchFor, scrapResearchHint, suggestRecipe, worstCase } from "../game/recipe";
 import { scrapUnlocked } from "../game/research";
 import type { GameState, GradeId } from "../game/types";
@@ -33,7 +34,7 @@ export function RecipeCard({ g, stats, act }: { g: GameState; stats: PlantStats;
   const missingResearch = safe ? null : scrapResearchFor(g, grade, stats);
   const grader = hasGrader(g);
   const worst = worstCase(g, grade, stats, recipe);
-  const worstOk = satisfies(worst, grade);
+  const worstOk = mixSatisfies(worst, grade);
   const spec = GRADES[grade];
   const green = greenOn(g);
   const co2 = heatCo2(recipeInputCo2(recipe), stats.kwhPerT * est.energyFactor);
@@ -63,6 +64,14 @@ export function RecipeCard({ g, stats, act }: { g: GameState; stats: PlantStats;
         du under Oversikt («Produksjon nå»).
         {inUse.length > 1 && ` Denne resepten brukes i ovn ${ovens.map((i) => i + 1).join(" og ")}.`}
       </p>
+      {/* Spesialstål (B-510): resepten gir karbon, fosfor og kobber; legeringen kommer i øseovnen */}
+      {spec.alloy && (
+        <p className="g-small-text">
+          Spesialstål: ovnen lager stålet etter resepten, og øseovnen tilsetter {ALLOYS[spec.alloy].name} (
+          {ALLOYS[spec.alloy].additions}) etterpå – ca. {fmtKr(alloyCostPerT(grade))} per tonn.{" "}
+          {alloyMissing(g, grade, stats) ?? "Kobber og tinn må likevel holdes lavt, for de kan ikke fjernes."}
+        </p>
+      )}
 
       <div className="g-recipe-suggest">
         <button

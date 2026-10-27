@@ -84,7 +84,7 @@ import {
   TARGET_C,
 } from "./engine";
 import { autoPlay, ChargeGame, type Policy } from "../ui/control/chargeGame";
-import { computePlantStats, day, fixedPriceAdvice, hasPlanner, satisfies } from "./plant";
+import { computePlantStats, day, fixedPriceAdvice, hasPlanner, mixSatisfies } from "./plant";
 declare const process: { argv: string[]; exitCode?: number; exit?: (code: number) => void };
 
 import type { Crew, GameState, GradeId, ManualRequest, RoleId, ScrapId } from "./types";
@@ -127,7 +127,7 @@ function expectedFor(g: GameState, recipe: Recipe, grade: GradeId) {
   // Litt sikkerhetsmargin, slik en forsiktig spiller ville gjort uten full analyse
   const margin = stats.lab === 2 ? 1 : 0.85;
   const analysis = { c: finalC, p: (p * (1 - stats.dephos)) / margin, tramp: tramp / margin };
-  return { ok: satisfies(analysis, grade), price };
+  return { ok: mixSatisfies(analysis, grade), price };
 }
 
 function cheapestRecipe(g: GameState, grade: GradeId): Recipe | null {

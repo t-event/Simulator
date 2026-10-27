@@ -44,6 +44,13 @@ regnes av serveren i ekte tid.
   jernsvamp 0,15, skrap ca. 0,03; i tillegg kommer strøm og 0,08 fast. Hver femte forespørsel vil ha høyst 0,30 til samme
   pris. Holder snittet kravet, gir det 50 % ekstra omdømme og teller mot prestasjonen «Grønt stål»; ellers ingen bot.
   «Hydrogenbasert jernsvamp» (350 fagpoeng) åpner jernsvamp (6 200 kr/t, nesten uten sporelementer).
+- **Spesialstål** (B-510): forskningen «Spesialstål» (nivå 4, 400 fagpoeng, krever Øsemetallurgi og Produktutvikling,
+  les «Øseovnen» først) gir forespørsler på tre legerte kvaliteter: seigherdingsstål (krom og molybden, 600 kr/t i
+  legering), verktøystål (krom, molybden og vanadium, 900 kr/t, vakuum) og tannhjulsstål (krom, nikkel og molybden,
+  1 800 kr/t, vakuum). Hver fjerde forespørsel (nummer 2, 6, 10 …) blir spesialstål når verket har øseovn (og vakuum der
+  det trengs), med halve partiet og 20 % mer omdømme. Øseovnen tilsetter legeringen etter tapping (posten «forbruk»);
+  bom 5 % før operatørens dyktighet – oppdaget = 30 % mer legering, ellers sperret. Legert stål holder bare sin egen
+  kvalitet (`Analysis.alloy`). Prestasjonen «Spesialstål» (1 000 / 10 000 / 100 000 t, skjult til første levering).
 - **Støpemaskinen og valseverket i kontrollrommet** (B-505): «Ta styringen selv» i utstyrsarket for Støping (med
   strengstøping / valseverk). Tre runder hver. Fagpoeng én gang per spilldøgn per spill. 4–5 stjerner gir i 24/48 timer
   halvparten så mange strenggjennombrudd, eller 1/2 prosentpoeng mer utbytte i valseverket.

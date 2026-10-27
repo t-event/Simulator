@@ -9652,3 +9652,57 @@ venter til det er flere aktive konserneiere (omtrent ett selskap per fire).
   `world_status` viste selskapet med region og anbud. Sikkerhetsrådene er uendret.
 
 Konto: ja (regel 3 og 7, som de andre strategiske selskapene). KONTO.md er oppdatert.
+
+## B-510 Stor oppdatering «Spesialstål»: legeringsstål laget med øseovnen (2026-10-27)
+Eieren: «Planlegg nå en ny stor update. Lag en plan og gjennomfør.»
+
+**Hva dataene sa (27.10):**
+- 15 aktive spillere siste uke, alle på storverket. Ingen nye spillere de to siste ukene.
+- Alle 15 som sluttet før storverket, er borte.
+- Konsernene er på nivå 2–9. Bare to er ferdige.
+- Skiftrapporten har vært stille i en uke.
+- Det er altså storverkspillerne som spiller, og de trenger noe nytt å lære og velge i eget verk.
+
+**Valgt plan:** spesialstål, en ny gren hjemme for alle på storverket. Den følger hovedmålet for spillet (lære bort
+hvordan et stålverk virker), er spilltid (B-323) og flytter ingen penger mellom spillere. Det andre som var vurdert:
+- K-1 venter på skyggerapporten 2.11 og eierens satser.
+- Klynger trenger flere aktive spillere.
+- Sesong 2 er tatt ut (B-505).
+- Bedre start for nye spillere hjelper ikke før det kommer nye.
+
+**Bygget:**
+- **Tre legerte kvaliteter** (`GRADES`, `minStage` 4):
+  - Seigherdingsstål: krom og molybden, C 0,30–0,45, maks 0,20 kobber og tinn, pris × 1,45.
+  - Verktøystål: krom, molybden og vanadium, C 0,55–0,75, maks 0,12, × 1,70, krever vakuum.
+  - Tannhjulsstål: krom, nikkel og molybden, C 0,12–0,25, maks 0,15, × 1,85, krever vakuum.
+- **Legeringen i analysen** (`Analysis.alloy`): legert stål holder bare sin egen kvalitet, og ulegert stål holder ikke
+  spesialstål. Resepten og forslagene sjekker blandingen før legeringen (`mixSatisfies`), siden øseovnen legerer etterpå.
+- **Øseovnen legerer** (`castBatch`): 600, 900 eller 1 800 kr per tonn, ført som `forbruk` (som serveren trekker fra i
+  bidraget, B-455). Legeringen bommer i 5 % av øsene før operatørens dyktighet. Oppdages bommen, rettes den med 30 % mer
+  legering; ellers sperres stålet.
+- **Forespørslene** (`game/special.ts`): etter forskningen «Spesialstål» (400 fagpoeng, nivå 4) blir hver fjerde
+  forespørsel på emner, blokker eller støpegods spesialstål, når verket kan legere den.
+  - Valgt etter nummeret (2, 6, 10 …), ikke ved trekning, så resten av spillet trekker de samme tallene (som B-506).
+  - Kvalitetene er heller ikke med i trendene. Nivådagene i `balance.ts` er derfor uendret.
+  - Partiet er halvparten av det vanlige, og omdømmet 20 % høyere. Kundene heter Akselfabrikken, Verktøymakeren og
+    Girfabrikken.
+- **Grensesnittet:**
+  - Salg viser legeringen og kostnaden, eller hva verket mangler (øseovn eller vakuum).
+  - Resept forklarer at ovnen lager stålet og øseovnen legerer.
+  - Spesialstål står ikke blant kvalitetene man velger forespørsler etter, siden de kommer av seg selv.
+- **Fagboka** har kapitlet «Spesialstål og legeringer» med quiz, og det er en prestasjon «Spesialstål»
+  (1 000 / 10 000 / 100 000 t, skjult til første levering).
+
+**Balanse:** `balance.ts` er OK med uendrede nivådager. `--storovn 330` måler toppen med fem tilfeldige forløp med og uten
+spesialstål fra samme utgangspunkt:
+- 90 t: snitt 17,0 mot 15,4 mill. kr per døgn.
+- 250 t: 19,8 mot 18,7.
+- 420 t: 16,9 mot 15,7.
+Det er ca. 1–1,5 mill. mer per døgn (7 %), mindre enn støyen mellom forløp (±10 mill.). Ett enkelt forløp viste −15
+mill., men det var et uheldig forløp: tilfeldige tall flyttes når legeringen trekker sjansen for bom. Spesialstål går
+gjennom samme metning av markedet (B-252), og legeringen betales per tonn, så det blir ikke en ny inntektsmotor (B-305).
+
+**Kjent risiko:** en eldre app som åpner et spill med en spesialstålkontrakt, kjenner ikke kvaliteten. Appen oppdaterer
+seg selv (B-148), og forespørslene kommer først etter forskningen.
+
+Konto: nei (regel 1 – hovedverket, spilltid). KONTO.md er oppdatert.

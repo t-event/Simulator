@@ -7,7 +7,19 @@
 
 export type ScrapId = "blandet" | "tungt" | "shredder" | "spon" | "rent" | "rajern" | "jernsvamp" | "retur";
 export type ProductId = "stopegods" | "blokk" | "emne" | "armering";
-export type GradeId = "enkel" | "standard" | "armering" | "lavkarbon" | "hoykarbon" | "premium";
+export type GradeId =
+  | "enkel"
+  | "standard"
+  | "armering"
+  | "lavkarbon"
+  | "hoykarbon"
+  | "premium"
+  // Spesialstål (B-510): legeringsstål laget med øseovnen
+  | "seigherdet"
+  | "verktoy"
+  | "tannhjul";
+/** Legeringene øseovnen tilsetter i spesialstål (B-510) */
+export type AlloyId = "crmo" | "crmov" | "crnimo";
 export type RoleId =
   | "allround"
   | "ovn"
@@ -28,6 +40,8 @@ export interface Analysis {
   c: number;
   p: number;
   tramp: number;
+  /** Legeringen øseovnen tilsatte (spesialstål, B-510). Mangler = vanlig ulegert stål */
+  alloy?: AlloyId;
 }
 
 /** Skrap på lager av én type, med gjennomsnittlig innhold for det som ligger der. */
