@@ -97,7 +97,7 @@ export function startRecipeGuide(g: GameState, grade: GradeId): void {
 
 /** Kvalitetene som blir tilgjengelige når verket flytter til et nivå */
 export function newGradesAt(stage: number): GradeId[] {
-  return GRADE_IDS.filter((id) => GRADES[id].minStage === stage);
+  return GRADE_IDS.filter((id) => GRADES[id].minStage === stage && !GRADES[id].alloy);
 }
 
 /** Går videre når steget er gjort */

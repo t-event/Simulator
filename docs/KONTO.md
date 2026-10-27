@@ -138,6 +138,7 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Planleggeren setter landemerker der de ikke gjør andre ordrer for sene | Nei | Regel 1: hovedverket | B-503 |
 | Støpemaskinen og valseverket i kontrollrommet (trening hjemme) | Nei | Regel 1: spilltid | B-505 |
 | Grønt stål: CO₂ per tonn, jernsvamp og grønne forespørsler | Nei | Regel 1: spilltid | B-506 |
+| Spesialstål: legeringsstål laget med øseovnen | Nei | Regel 1: spilltid | B-510 |
 | Myk grense for kassa og bunden konsernreserve (midlertidig) | Nei | Regel 1: eget spill | B-193 |
 | Æraer og Hall of Fame | Ja | Regel 3 | Grunnleggeræraen og navnet «Hall of Fame»: B-182. Neste æra: ikke bestemt |
 | Pause på Salg (innstilling) | Nei | Regel 1: ditt eget spill | B-222 |

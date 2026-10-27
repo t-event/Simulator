@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 510,
+    date: "2026-10-27",
+    title: "Spesialstål",
+    items: [
+      "Ny forskning på storverket: «Spesialstål». Da kommer det forespørsler på seigherdingsstål, verktøystål og tannhjulsstål – legert stål som kundene betaler godt for.",
+      "Øseovnen tilsetter legeringen etter tapping: krom, nikkel, molybden eller vanadium. Legeringen koster per tonn, og verktøy- og tannhjulsstål må også vakuumbehandles.",
+      "Resepten må fortsatt holde kobber og tinn lavt. Salg og Resept viser hva legeringen koster, og hva verket mangler.",
+      "Nytt kapittel i fagboka: «Spesialstål og legeringer», med quiz – og en ny prestasjon.",
+    ],
+  },
+  {
     b: 509,
     date: "2026-10-22",
     title: "Kraftverket",

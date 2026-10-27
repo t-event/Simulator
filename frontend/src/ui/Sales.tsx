@@ -24,6 +24,7 @@ import {
   spotPrice,
 } from "../game/engine";
 import { fmtCo2, heatCo2, recipeInputCo2 } from "../game/green";
+import { ALLOYS, alloyCostPerT, alloyMissing } from "../game/special";
 import { moveInQueue, toggleOfferGrade } from "../game/actions";
 import { scrapResearchHint } from "../game/recipe";
 import {
@@ -127,6 +128,19 @@ function offerChecks(g: GameState, stats: PlantStats, c: Contract, committed: nu
           ? `Verket står: ${plantStopped(g)}. Det lager ingenting før det er ordnet.`
           : "Verket står – ingen produksjon nå",
     });
+  }
+  // Spesialstål (B-510): øseovnen legerer stålet – det koster per tonn, og krever øseovn (og vakuum for noen)
+  const alloy = GRADES[c.grade].alloy;
+  if (alloy && canMake) {
+    const missing = alloyMissing(g, c.grade, stats);
+    checks.push(
+      missing
+        ? { tone: "bad", text: missing }
+        : {
+            tone: "ok",
+            text: `Spesialstål: øseovnen tilsetter ${ALLOYS[alloy].name} – ca. ${fmtKr(alloyCostPerT(c.grade))} per tonn i legering`,
+          },
+    );
   }
   // Grønt stål (B-506): holder resepten kravet til CO₂? Ingen bot hvis ikke – bare ikke det ekstra omdømmet
   if (c.co2Max !== undefined && canMake) {
@@ -357,7 +371,8 @@ function OffersTab({ g, stats, act }: Props) {
             : a.offerExpiresMin - b.offerExpiresMin,
     );
   // Kvalitetene som finnes på dette nivået; bare disse kan velges (B-042)
-  const openGrades = GRADE_IDS.filter((id) => GRADES[id].minStage <= g.stage);
+  // Spesialstål (B-510) velges ikke her: de forespørslene kommer av seg selv etter forskningen
+  const openGrades = GRADE_IDS.filter((id) => GRADES[id].minStage <= g.stage && !GRADES[id].alloy);
   const wanted = g.settings.offerGrades;
   const committed = orderQueue(g).reduce((a, c) => a + c.tonnes - c.delivered, 0);
   const verdicts = offers.map((c) => offerChecks(g, stats, c, committed).tone);

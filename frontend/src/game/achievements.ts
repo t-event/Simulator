@@ -391,6 +391,15 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
     ]),
     hidden: true,
   },
+  // Spesialstål (B-510): tonn spesialstål levert – vises når den første spesialstålkontrakten er levert
+  {
+    ...family("spesial", "atom", "Spesialstål", "Kunder", counter("spesial_t"), [
+      ["spesial1k", 1000, "Legert", "Lever 1 000 t spesialstål.", 20],
+      ["spesial10k", 10000, "Spesialstålverk", "Lever 10 000 t spesialstål.", 40],
+      ["spesial100k", 100000, "Legeringsmester", "Lever 100 000 t spesialstål.", 80],
+    ]),
+    hidden: true,
+  },
   // Rekonstruksjon (B-495): bare for dem som har gått konkurs og bygget seg opp igjen til nivået de falt fra
   {
     ...family(

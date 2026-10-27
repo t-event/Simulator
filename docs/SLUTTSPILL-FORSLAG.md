@@ -116,6 +116,11 @@ det som må lages.
 - **Balanse:** ny inntekt på toppen skal måles med `balance.ts --storovn 330` og holdes under taket (B-305). Grønne
   kontrakter gir heller omdømme, merker og ukelister enn mer penger, ellers øker bidraget i ekte tid (B-455).
 
+### 3.1b Spesialstål – bygget (B-510)
+
+Legeringsstål laget med øseovnen: tre kvaliteter, forskning, forespørsler, fagbok og prestasjon. Spilltid, ingen penger
+mellom spillere.
+
 ### 3.2 Industriklynger (samarbeid)
 
 - **Hva:** 2–5 spillere med verk i samme region danner en klynge med navn og merke på kartet. De har felles mål (f.eks.

@@ -360,6 +360,8 @@ import { autoPlay, ChargeGame, INPUT_LOG_MAX, seededRandom } from "../ui/control
 import { autoPlayMini, newMiniGame } from "../ui/control/miniGame";
 import { castCalmFactor, finishMini, miniAvailable, miniFpToday, rollYieldBonus } from "./minis";
 import { GREEN, heatCo2, recipeInputCo2 } from "./green";
+import { mixSatisfies, satisfies as meets } from "./plant";
+import { ALLOYS, alloyCostPerT, alloyMissing, SPECIAL_GRADES } from "./special";
 import { hints } from "../ui/hints";
 import { answerOrder } from "../ui/quizOrder";
 import { hasMoulds, MOULD, mouldCost, mouldHour, mouldRisk, mouldWear, replaceMoulds, wearMoulds } from "./mould";
@@ -5404,6 +5406,88 @@ test("Grønt stål (B-506): CO₂ per tonn, forespørsler med krav og ekstra omd
   assert(good.done && good.counted === 10 && good.log.includes("fikk grønt stål"), `grønt: ${JSON.stringify(good)}`);
   const bad = deliver(0.9);
   assert(bad.done && bad.counted === 0 && bad.log.includes("holdt ikke CO₂-kravet"), `ikke grønt: ${bad.log}`);
+});
+
+test("Spesialstål (B-510): legeringen i analysen, forespørsler etter nummeret og prestasjonen", () => {
+  // Analysen: ulegert stål holder ikke seigherdingsstål (men blandingen gjør det), og legert stål er ikke vanlig stål
+  const plain = { c: 0.4, p: 0.01, tramp: 0.1 };
+  assert(!meets(plain, "seigherdet") && mixSatisfies(plain, "seigherdet"), "ulegert stål");
+  assert(meets({ ...plain, alloy: "crmo" }, "seigherdet"), "legert seigherdingsstål");
+  assert(!meets({ ...plain, alloy: "crmo" }, "standard") && meets(plain, "standard"), "legert stål er ikke standard");
+  assert(!meets({ ...plain, alloy: "crmov" }, "seigherdet"), "feil legering");
+  assert(SPECIAL_GRADES.join() === "seigherdet,verktoy,tannhjul", SPECIAL_GRADES.join());
+  assert(alloyCostPerT("seigherdet") === ALLOYS.crmo.costPerT && alloyCostPerT("standard") === 0, "legeringen koster");
+  // Forespørsler: bare etter forskningen, bare det verket kan legere, valgt etter nummeret
+  const g = newGame(510);
+  g.stage = 4;
+  g.totals.contractsDone = 5;
+  g.furnaceType = "lysbue30";
+  g.furnaces.forEach((f) => (f.type = "lysbue30"));
+  g.castingType = "streng1";
+  const offers = () => {
+    const stats = computePlantStats(g);
+    g.contracts = [];
+    const out: Contract[] = [];
+    for (let i = 0; i < 40; i++) {
+      extraOffer(g, stats);
+      out.push(...g.contracts.filter((c) => c.status === "tilbud"));
+      g.contracts = g.contracts.map((c) => ({ ...c, status: "misligholdt" as const }));
+    }
+    return out.filter((c) => SPECIAL_GRADES.includes(c.grade));
+  };
+  assert(offers().length === 0, "spesialstål uten forskningen");
+  g.researched.push("spesialstal");
+  assert(offers().length === 0, "spesialstål uten øseovn");
+  assert(/øseovn/.test(alloyMissing(g, "seigherdet", computePlantStats(g)) ?? ""), "mangler øseovn");
+  g.owned.push("oseovn");
+  const crmo = offers();
+  assert(crmo.length >= 6 && crmo.every((c) => c.grade === "seigherdet"), `uten vakuum: ${crmo.map((c) => c.grade)}`);
+  assert(
+    crmo.every((c) => c.customer === "Akselfabrikken"),
+    "kunden",
+  );
+  assert(/vakuum/.test(alloyMissing(g, "verktoy", computePlantStats(g)) ?? ""), "mangler vakuum");
+  g.owned.push("vakuum");
+  const all = new Set(offers().map((c) => c.grade));
+  assert(all.size === 3, `med vakuum: ${[...all]}`);
+  // Leveransen teller tonnene mot prestasjonen
+  const d = newGame(511);
+  d.stage = 4;
+  d.pendingDecision = null;
+  d.reputation = 50;
+  const product = d.contracts[0].product;
+  const a = { ...plain, alloy: "crmo" as const };
+  d.lots = [
+    {
+      id: 1,
+      product,
+      t: 20,
+      analysis: a,
+      known: a,
+      measured: { c: true, p: true, tramp: true },
+      second: false,
+      madeDay: day(d),
+    },
+  ];
+  d.contracts = [
+    {
+      ...structuredClone(d.contracts[0]),
+      id: 99,
+      grade: "seigherdet",
+      tonnes: 10,
+      delivered: 0,
+      status: "aktiv",
+      priority: 1,
+      repGain: 1,
+      deadlineDay: day(d) + 5,
+    },
+  ];
+  advance(d, 60);
+  const done = d.contracts.find((x) => x.id === 99);
+  assert(
+    done?.status === "fullfort" && (d.counters.spesial_t ?? 0) === 10,
+    `levert: ${done?.status} ${d.counters.spesial_t}`,
+  );
 });
 
 if (failed) {

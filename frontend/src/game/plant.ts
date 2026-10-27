@@ -749,7 +749,15 @@ export function computePlantStats(g: GameState): PlantStats {
 // ------------------------------------------------------------------ //
 export function satisfies(a: Analysis, grade: GradeId): boolean {
   const spec = GRADES[grade];
+  // Spesialstål (B-510) må ha legeringen sin; legert stål selges ikke som vanlig ulegert stål
+  if ((a.alloy ?? null) !== (spec.alloy ?? null)) return false;
   return a.c >= spec.cMin && a.c <= spec.cMax && a.p <= spec.pMax && a.tramp <= spec.trampMax;
+}
+
+/** Holder blandingen fra ovnen kvaliteten når øseovnen legerer som den skal? (Resepten, før legeringen, B-510) */
+export function mixSatisfies(a: Analysis, grade: GradeId): boolean {
+  const alloy = GRADES[grade].alloy;
+  return satisfies(alloy ? { ...a, alloy } : { c: a.c, p: a.p, tramp: a.tramp }, grade);
 }
 
 export function satisfiedGrades(a: Analysis): GradeId[] {
