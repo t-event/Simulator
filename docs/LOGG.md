@@ -5,6 +5,23 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 425 – 2026-11-02: Skyggerapporten for V0/K-1
+
+**Oppgaven:** den planlagte jobben «Skyggerapporten V0/K-1» – rapporten til eieren etter en måned i skygge.
+
+**Gjort:**
+- `docs/SKYGGE-RAPPORT-2026-11.md` er laget fra `program_shadow_report()`, med bokstaver i stedet for navn og uten
+  trukne datoer.
+- Funnet: 3 hendelser startet, alle høykonjunktur (forventet 3,4, men i tre typer). Vernet kunne derfor ikke måles.
+  V0 alene ville gitt +4,5 % utbytte, 0–10,4 % per spiller, etter hvor verkene står.
+- Anbefaling: la skyggen gå én måned til. Bryterne står av til eieren svarer.
+
+**Gjenstår:**
+- Eierens svar på de tre spørsmålene i rapporten.
+- Ny rapport i begynnelsen av desember.
+
+---
+
 ## Økt 424 – 2026-10-27: Stor oppdatering «Spesialstål» (B-510)
 
 **Brukeren:** «Planlegg nå en ny stor update. Lag en plan og gjennomfør. Du har tilgang til supabase igjen».

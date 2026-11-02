@@ -5,6 +5,8 @@ klargjort 1.10, B-409), med tester i `supabase/utkast/113_v0_k1_skygge_test.sql`
 ble rullet tilbake: ingen penger flyttet, konsernverdien uendret for alle. Skyggejobben `verden-skygge` går én gang
 i timen (minutt 17), logger fra 2.10 og står som `skygge_v0` i `world_health()` (114, B-425). Bryterne `enabled` og `events_enabled` står av; ingenting vises.
 Rapporten: `select public.program_shadow_report();` (gir kallenavn – skriv bokstaver i det som committes).
+**Første rapport 2.11.2026:** `docs/SKYGGE-RAPPORT-2026-11.md` – bare høykonjunktur i måneden, anbefalt å la skyggen gå én
+måned til.
 
 **Status:** godkjent av eieren 30.9.2026 (B-390) med presiseringene under. Ingenting er bygget, ingen tall i verden er
 endret. Rekkefølgen: rapporten etter 2.10 → V0 i skygge og K-1 bak avslått bryter → skyggedata tilbake til eieren →
