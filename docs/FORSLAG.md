@@ -75,6 +75,8 @@ til «Avgjort» nederst).
 
 ## Forslag – spillet
 
+- **V0/K-1 (skyggerapporten 2.11):** `docs/SKYGGE-RAPPORT-2026-11.md`. Bare høykonjunktur i første måned, så vernet kan
+  ikke måles. Anbefalt: la skyggen gå til begynnelsen av desember. Tre spørsmål til eieren i avsnitt 6.
 - **Regionale fellesprosjekter (B-508):** bygget som modell C. Bryteren slås på når PR-en med appen er publisert
   (SQL-en i B-508). Etter noen uker: se om målene er passe (hvor mange prosjekter blir ferdige, og hvor mange gir).
 - **Sluttspillet videre (eieren 21.10, B-504):** plan i `SLUTTSPILL-FORSLAG.md`. Sesong 1 fortsetter (B-505). Bygget:
