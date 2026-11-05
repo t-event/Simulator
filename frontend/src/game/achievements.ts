@@ -391,6 +391,15 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
     ]),
     hidden: true,
   },
+  // Valsetråd (B-511): tonn valsetråd levert – vises når den første trådkontrakten er levert
+  {
+    ...family("trad", "cable-car", "Valsetråd", "Kunder", counter("trad_t"), [
+      ["trad1k", 1000, "Første kveil", "Lever 1 000 t valsetråd.", 20],
+      ["trad10k", 10000, "Trådverk", "Lever 10 000 t valsetråd.", 40],
+      ["trad100k", 100000, "Tråd til hele landet", "Lever 100 000 t valsetråd.", 80],
+    ]),
+    hidden: true,
+  },
   // Spesialstål (B-510): tonn spesialstål levert – vises når den første spesialstålkontrakten er levert
   {
     ...family("spesial", "atom", "Spesialstål", "Kunder", counter("spesial_t"), [

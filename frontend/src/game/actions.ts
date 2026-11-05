@@ -335,6 +335,8 @@ export function upgradeOptions(g: GameState): UpgradeOption[] {
       o.reason = `Bygges – ferdig om ${bigBuildDaysLeft(g)} døgn`;
       continue;
     }
+    // Mangler forskningen, er det den som teller – byggetiden kommer når utstyret kan kjøpes (B-144)
+    if (o.reason?.startsWith("Forsk fram")) continue;
     const days = buildDays(o.price);
     const note = `Tar ${days} døgn å bygge${o.kind === "furnace" ? ", og ovnen står mens den bygges om" : ""}. Kjøres inn over ${BIG_BUILD.rampDays} døgn.`;
     o.warning = o.warning ? `${note} ${o.warning}` : note;

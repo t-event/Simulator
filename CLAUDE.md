@@ -164,6 +164,7 @@ frontend/src/
     minis.ts     Støpemaskinen og valseverket i kontrollrommet: fagpoeng per døgn, rekord og fordelen i drifta (B-505)
     green.ts     Grønt stål: CO₂ per tonn (innsats, strøm, fast), grønne forespørsler og omdømmet (B-506)
     special.ts   Spesialstål: legeringene, hva verket mangler, og hvilke forespørsler som blir spesialstål (B-510)
+                 Trådvalseverket (B-511) står i plant.ts (`wireActive`, `WIRE_YIELD`) og engine.ts (`updateWire`, `planLots`)
     calendar.ts  Året i spillet (360 døgn, dag 1 = 1. april), vinter 15.11.–14.3. og frost (B-265, B-272), fellesferie (B-298);
                  `calendarAhead` til kalenderkortet på Oversikt (ui/CalendarCard.tsx, B-321)
     war.ts       Krig i verden, bare i konsernet: dyrere strøm, flere forespørsler, høyst én per år (B-297)
@@ -745,6 +746,12 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   tilfeldig blant kvalitetene, ellers flyttes alle tilfeldige tall i spillet (som nye skraptyper, B-506). Spesialstål-
   forespørslene velges etter nummeret i `specialGradeFor`. `--storovn` er ett forløp og svært ujevnt (±10 mill.): mål
   endringer på toppen med flere forløp fra samme utgangspunkt (`--storovn-base`) og ulike tilfeldige tall.
+- **Trådvalseverket og nye varer** (B-511): valsetråd lages av en egen linje (`updateWire`, `stats.wireDailyT`) som bare
+  valser emner en ordre på valsetråd venter på (`toRollWire` i `planLots`) – ikke la den valse ledige emner. Nye varer som
+  krever en egen linje, regnes i `productCapT`, `rollingNeedDays` og `queueFit`-sjekken i `assessOffer`. Nye kunder står
+  sist i `CUSTOMERS` og trekkes bare når verket lager varen (`stats.products`), ellers flyttes alle tilfeldige tall.
+- **`advance` stopper ved kort** (B-511): et hendelseskort (`pendingDecision`) eller en manuell charge (`pendingManual`)
+  stopper tida. Tester som lar tida gå i mange timer, rydder dem i en løkke (`advance(g, 60)` per time).
 - **Hendelseskort om forhold mellom ansatte** (B-444): trakassering, diskriminering og varsling er et sårt tema for eieren –
   ingen slike kort, kapitler eller popups uten at eieren ber om det.
 - **Skjulte prestasjoner** (B-296): `hidden` på en serie gjør at den bare vises og telles for dem som har den. Bruk

@@ -6,7 +6,7 @@
  */
 
 export type ScrapId = "blandet" | "tungt" | "shredder" | "spon" | "rent" | "rajern" | "jernsvamp" | "retur";
-export type ProductId = "stopegods" | "blokk" | "emne" | "armering";
+export type ProductId = "stopegods" | "blokk" | "emne" | "armering" | "valsetrad";
 export type GradeId =
   | "enkel"
   | "standard"

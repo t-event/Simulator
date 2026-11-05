@@ -386,12 +386,15 @@ export function Market({ g, stats, act, openTab, onTab }: Props & { openTab?: st
             <TrendNote g={g} />
             <table className="g-table">
               <tbody>
-                {(["stopegods", "blokk", "emne", "armering"] as ProductId[]).map((p) => (
-                  <tr key={p} className={stats.products.includes(p) ? "" : "g-dim"}>
-                    <td>{PRODUCTS[p].name}</td>
-                    <td className="num">{fmtKr(productPrice(g, p, "standard"))}/tonn</td>
-                  </tr>
-                ))}
+                {(["stopegods", "blokk", "emne", "armering", "valsetrad"] as ProductId[])
+                  // Valsetråd (B-511) står bare for verk med trådvalseverk
+                  .filter((p) => p !== "valsetrad" || stats.products.includes(p))
+                  .map((p) => (
+                    <tr key={p} className={stats.products.includes(p) ? "" : "g-dim"}>
+                      <td>{PRODUCTS[p].name}</td>
+                      <td className="num">{fmtKr(productPrice(g, p, "standard"))}/tonn</td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
             <p className="g-muted">

@@ -311,6 +311,8 @@ export const PRODUCTS: Record<ProductId, Product> = {
   blokk: { id: "blokk", name: "Blokker", price: 7_400, spotPerDay: 60 },
   emne: { id: "emne", name: "Emner", price: 7_000, spotPerDay: 500 },
   armering: { id: "armering", name: "Armeringsstål", price: 8_300, spotPerDay: 600 },
+  // Trådvalseverket (B-511): kveiler av valsetråd til trådtrekkerier, spikerfabrikker og fjærfabrikker
+  valsetrad: { id: "valsetrad", name: "Valsetråd", price: 8_900, spotPerDay: 150 },
 };
 
 export const SPOT_DISCOUNT = 0.78;
@@ -1046,6 +1048,18 @@ export const ADDONS: Addon[] = [
     description:
       "Et tredje, raskere valseverk for stormodellene av ovner. Omtrent 60 % mer valsekapasitet enn to valseverk.",
   },
+  // Trådvalseverket (B-511): en egen linje som valser emner til valsetråd i kveiler
+  {
+    id: "tradverk",
+    name: "Trådvalseverk",
+    stage: 4,
+    price: 120_000_000,
+    requires: ["valseverk"],
+    crew: { valse: 2 },
+    needsContinuous: true,
+    description:
+      "En egen valselinje som valser emnene til tynn tråd i kveiler, med styrt kjøling. Valsetråd til trådtrekkerier, spikerfabrikker og fjærfabrikker.",
+  },
   {
     id: "valseverk",
     name: "Valseverk",
@@ -1308,6 +1322,34 @@ export const CUSTOMERS: CustomerType[] = [
     grades: ["lavkarbon", "premium"],
     minT: 800,
     maxT: 10000,
+  },
+  // Trådvalseverket (B-511): kundene finnes bare for verk som lager valsetråd, så de flytter ingen tilfeldige tall ellers
+  {
+    name: "Trådtrekkeriet",
+    minStage: 4,
+    maxStage: 4,
+    products: ["valsetrad"],
+    grades: ["lavkarbon", "standard"],
+    minT: 100,
+    maxT: 2500,
+  },
+  {
+    name: "Spikerfabrikken",
+    minStage: 4,
+    maxStage: 4,
+    products: ["valsetrad"],
+    grades: ["lavkarbon", "enkel"],
+    minT: 50,
+    maxT: 1500,
+  },
+  {
+    name: "Fjærfabrikken",
+    minStage: 4,
+    maxStage: 4,
+    products: ["valsetrad"],
+    grades: ["hoykarbon"],
+    minT: 50,
+    maxT: 1200,
   },
 ];
 
