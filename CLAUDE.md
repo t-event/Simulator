@@ -279,6 +279,7 @@ docs/          Minne: LOGG.md, BESLUTNINGER.md, DESIGN.md, RETNING.md (hovedretn
                UKENS-KONTROLLROM.md (variant A bygget, B-387), KONSERNKAPITAL-FORSLAG.md (forslag med eierens svar, B-386/B-387),
                K1-PROGRAMMER.md (konsernprogrammene og verdenshendelsene V0, godkjent B-390 – bygges i skygge etter 2.10),
                SKYGGE-RAPPORT-2026-11.md (første skyggerapport for V0/K-1, bokstaver i stedet for navn),
+               RETNINGSANALYSE-2026-11.md (hvorfor spillet står stille, og forslaget om sesong 2 med blanke ark, B-514),
                STABILISERING.md (cash-audit, legacy-gulvet og verdenssimuleringen, B-380; besluttet B-381–B-385, dry-run i avsnitt 9),
                (designsystem, mobil + PC, plan for redesignet, B-187),
                PLAN-NETT.md (det som er bygget på nett), FORSLAG.md, KONTO.md (hva som krever konto)

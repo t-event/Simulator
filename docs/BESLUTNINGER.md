@@ -9784,3 +9784,32 @@ Neste skyggerapport er planlagt 2.12 som en egen jobb. Den følger samme regler:
 trukne datoer i noe som committes.
 
 Endringslogg: nei (ingenting i spillet er endret).
+
+## B-514 Retningsanalyse: spillet står stille – forslag om sesong 2 med blanke ark (2026-11-05)
+Eieren: «Studer spillet og finn ut hva vi har gjort slik at spillet har gått i feil retning. Vi har 10 aktive spillere og
+får ikke flere. Spillerne har ikke mer å gjøre. Her må vi gjøre drastiske tiltak.»
+
+Analysen står i `docs/RETNINGSANALYSE-2026-11.md`. Kort:
+- **Tilførselen har stoppet:** 48 kontoer, 34 av dem de to første ukene. 2 nye på tre uker, og 9 av 10 som startet
+  etter 5.10, sluttet første dag.
+- **Nybegynnerne står fast:** 20 av 48 kom aldri forbi nivå 1 (omdømme 0–23, ofte minus på kassa).
+- **Veteranene er ferdige:** alle 12 aktive har all forskning, og 20 har nådd sluttmålet. Spilletida per spiller og døgn
+  er ca. en tidel av slutten av september.
+- **Det sosiale er tomt:** 0 meldinger i Skiftrapporten på 14 dager, og 5 oppkjøp totalt.
+- **Årsakene:**
+  - Sluttspillet ble bygget som et stort flerspillersystem for en verden med 10–15 spillere (fra B-180), og som venting
+    i ekte tid (B-311).
+  - Reform 2 tok framgang fra toppspillerne midt i toppen (B-302–B-311).
+  - 513 beslutninger på seks uker.
+  - Nybegynneren er målt med en testspiller, ikke med mennesker.
+  - Det har ikke vært noen plan for å skaffe spillere.
+
+**Anbefalt (venter på eieren):**
+1. Sesong 2 med blanke ark (snur B-505).
+2. Fiks den første timen før start.
+3. Stopp i nye sluttspillsystemer (K-1, verksjef V1, flere selskaper, klynger), og én oppdatering i uka.
+4. En lansering av sesong 2 for å hente nye spillere.
+
+Fire spørsmål til eieren står i avsnitt 4. Ingenting er bygget eller endret.
+
+Endringslogg: nei (ingenting i spillet er endret).
