@@ -80,6 +80,14 @@ regnes av serveren i ekte tid.
   - **Omdømmet** synker på alle nivåer aldri under kravet for nivået verket har nådd (5 / 18 / 40 / 65), når det først
     er der.
   - Tellerne `startskrap`, `skrap_tomt`, `utgatt` og `sen` i `state.counters` måler starten.
+- **Bygg på nytt** (B-517, `game/rebuild.ts`, kortet på Mål → I dag): frivillig nytt løp fra garasjen når verket er
+  på storverket og sluttmålet er nådd eller all forskning er gjort.
+  - Konsernet, merker, pynt, fagboka, rekorder og serverens tall (`serverEdit`, `treasuryOut`) står.
+  - Forskning, mesterskap, fagpoeng, folk og kasse starter på nytt.
+  - Startfordel: 3× fart, flere skrapleverandører og 20 fagpoeng per gang (høyst 100).
+  - Serveren betaler utbyttet og tillater konsernkjøp og anbud etter `konsern_stage` (det høyeste av nivået hjemme og
+    `records.best_stage` når `state.rebuilds` > 0, 159).
+  - Bidraget følger nivået hjemme.
 - **Konkurs og rekonstruksjon** (B-495): konkurs etter 7 døgn under kredittgrensen eller 3 døgn uten råd til foring
   (fra støperiet, B-516).
   Fra støperiet og opp kan banken **rekonstruere** i stedet for nytt spill: ett nivå ned (utstyret fra det tapte nivået

@@ -393,6 +393,14 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamily[] = [
   },
   // Valsetråd (B-511): tonn valsetråd levert – vises når den første trådkontrakten er levert
   {
+    ...family("bygg", "refresh", "Bygget på nytt", "Produksjon", counter("rebuilds"), [
+      ["bygg1", 1, "Bygget på nytt", "Selg storverket og bygg på nytt fra garasjen.", 20],
+      ["bygg3", 3, "Gründer", "Bygg på nytt tre ganger.", 40],
+      ["bygg5", 5, "Seriegründer", "Bygg på nytt fem ganger.", 80],
+    ]),
+    hidden: true,
+  },
+  {
     ...family("trad", "cable-car", "Valsetråd", "Kunder", counter("trad_t"), [
       ["trad1k", 1000, "Første kveil", "Lever 1 000 t valsetråd.", 20],
       ["trad10k", 10000, "Trådverk", "Lever 10 000 t valsetråd.", 40],

@@ -1356,6 +1356,7 @@ export function GameApp() {
               onSales={() => go("salg", "tilbud")}
               openTab={subTab.tab}
               onTab={onTab.mal}
+              onRebuilt={() => go("verket")}
             />
           )}
         </main>
@@ -1373,6 +1374,10 @@ export function GameApp() {
           stats={stats}
           api={api}
           onClose={() => setGoalsOpen(false)}
+          onRebuilt={() => {
+            setGoalsOpen(false);
+            go("verket");
+          }}
           onOpenSettings={() => {
             setGoalsOpen(false);
             setSettingsOpen(true);

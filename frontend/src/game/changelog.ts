@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 517,
+    date: "2026-11-05",
+    title: "Bygg på nytt",
+    items: [
+      "Har du bygget storverket? Under Mål kan du nå velge å bygge på nytt fra garasjen – helt frivillig.",
+      "Konsernet, konsernkassa og utbyttet står, og det gjør prestasjonene, pynten og fagboka også. Hjemmeverket, forskningen og fagpoengene starter på nytt.",
+      "Du starter med 3× fart, flere skrapleverandører og litt fagpoeng, og kan prøve å slå rekorden din på «Raskest til storverk».",
+    ],
+  },
+  {
     b: 516,
     date: "2026-11-05",
     title: "En roligere start",
