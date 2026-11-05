@@ -76,9 +76,11 @@ til «Avgjort» nederst).
 ## Forslag – spillet
 
 - **V0/K-1 (skyggerapporten 2.11):** `docs/SKYGGE-RAPPORT-2026-11.md`. Bare høykonjunktur i første måned, så vernet kan
-  ikke måles. Anbefalt: la skyggen gå til begynnelsen av desember. Tre spørsmål til eieren i avsnitt 6.
+  ikke måles. Besvart (B-513): skyggen går til begynnelsen av desember, satsene 0,5/1,5/4 % og etableringen 2 dager
+  beholdes til neste rapport (planlagt 2.12).
 - **Regionale fellesprosjekter (B-508):** bygget som modell C. Bryteren slås på når PR-en med appen er publisert
-  (SQL-en i B-508). Etter noen uker: se om målene er passe (hvor mange prosjekter blir ferdige, og hvor mange gir).
+  (SQL-en i B-508). Første runde var for høy (B-512: mål 4 → 2 dagers utbytte). Se etter 12.11 om neste runde får flere
+  givere; ellers vurder et varsel når et prosjekt åpner.
 - **Sluttspillet videre (eieren 21.10, B-504):** plan i `SLUTTSPILL-FORSLAG.md`. Sesong 1 fortsetter (B-505). Bygget:
   kontrollromsspillene (B-505), grønt stål (B-506), fellesprosjektene (B-508) og spesialstål (B-510). Kraftverket er bygget (B-509) og slås på
   sammen med fellesprosjektene. Venter: K-1 etter 2.11. Ildfastfabrikk og havn kan komme når det er flere aktive

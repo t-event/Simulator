@@ -100,4 +100,7 @@ Teknisk er alt klart. Det som mangler, er å se vernet virke på ekte tap:
    kostnaden.
 3. Etableringen: behold 2 dagers utbytte til neste rapport (anbefalt), eller sett ned til 1 dag allerede nå?
 
+**Svar (5.11, B-513):** eieren valgte anbefalingene – skyggen går én måned til, satsene og etableringen beholdes.
+Neste rapport er planlagt 2.12.
+
 Endringslogg: nei (ingenting i spillet er endret).

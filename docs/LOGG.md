@@ -5,6 +5,20 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 427 – 2026-11-05: Svarene på skyggerapporten
+
+**Oppgaven:** «Gjør det du anbefaler» – svaret på de tre spørsmålene i skyggerapporten for V0/K-1.
+
+**Gjort:** B-513: skyggen går én måned til, satsene 0,5/1,5/4 % og etableringen 2 dagers utbytte beholdes. Ingenting i
+databasen er endret; sjekket at bryterne står av og at `verden-skygge` går (rader til 4.11). Neste skyggerapport er lagt
+inn som en planlagt jobb 2.12, og en sjekk av første runde av fellesprosjektene 13.11. FORSLAG og rapporten er oppdatert.
+
+**Testet:** `npm test` (endringsloggen: B-513 har «Endringslogg: nei»).
+
+**Gjenstår:** skyggerapport nr. 2 (2.12); fellesprosjektene etter 12.11.
+
+---
+
 ## Økt 426 – 2026-11-05: Stor oppdatering «Trådvalseverket» og lavere mål for fellesprosjektene
 
 **Oppgaven:** «Nå er det lenge siden vi har gjort en stor oppdatering. Lag en plan og gjennomfør.»
