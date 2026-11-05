@@ -5,6 +5,25 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 428 – 2026-11-05: Retningsanalysen
+
+**Oppgaven:** «Studer spillet og finn ut hva vi har gjort slik at spillet har gått i feil retning … Her må vi gjøre
+drastiske tiltak.»
+
+**Gjort:** gikk gjennom kontoene, lagringene, tidslinja og konsernet i databasen, og alle beslutningene siden B-300.
+Analysen og fire tiltak står i `docs/RETNINGSANALYSE-2026-11.md` (B-514). FORSLAG har saken øverst.
+
+**Funn:**
+- 2 nye kontoer på tre uker, og 9 av 10 nye sluttet første dag.
+- 20 av 48 står fast på nivå 0–1.
+- Alle 12 aktive er ferdige med forskningen.
+- Spilletida per spiller er ca. en tidel av slutten av september.
+- Det sosiale er tomt.
+
+**Gjenstår:** eierens svar på de fire spørsmålene. Bygges ikke før svaret kommer.
+
+---
+
 ## Økt 427 – 2026-11-05: Svarene på skyggerapporten
 
 **Oppgaven:** «Gjør det du anbefaler» – svaret på de tre spørsmålene i skyggerapporten for V0/K-1.
