@@ -70,7 +70,18 @@ regnes av serveren i ekte tid.
   lenke til Folk → Skift eller Folk → Ansett (B-501).
 - **Råd om gjelden etter konkursen** (B-498): når kassa har mer enn en ukes lønn og skrap til overs, sier et råd på
   Verket hvor mye som kan betales i banken (Verket → Økonomi).
-- **Konkurs og rekonstruksjon** (B-495): konkurs etter 7 døgn under kredittgrensen eller 3 døgn uten råd til foring.
+- **Starthjelpen** (B-516, `game/starter.ts`), i garasjen og verkstedet (nivå 0–1):
+  - Skraphandleren kjøper skrap etter resepten når ovnen ellers ville stått (`starterScrap`, også på kreditt).
+  - Naboen bytter foringen ved 85 % slitasje.
+  - En for sen levering gir et råd, men ingen bot og ikke noe tap av omdømme.
+  - Banken slår ikke verket konkurs.
+  - Uten kontrakt i køen pauser spillet én gang per ny forespørsel (`starterWaitOffer`, i `useGame`).
+  - 10× («Stødig drift») kan forskes først i verkstedet.
+  - **Omdømmet** synker på alle nivåer aldri under kravet for nivået verket har nådd (5 / 18 / 40 / 65), når det først
+    er der.
+  - Tellerne `startskrap`, `skrap_tomt`, `utgatt` og `sen` i `state.counters` måler starten.
+- **Konkurs og rekonstruksjon** (B-495): konkurs etter 7 døgn under kredittgrensen eller 3 døgn uten råd til foring
+  (fra støperiet, B-516).
   Fra støperiet og opp kan banken **rekonstruere** i stedet for nytt spill: ett nivå ned (utstyret fra det tapte nivået
   selges, ovner og støping derfra blir grunnversjonen for nivået under), forskning og mesterskap fra de siste 30
   spilldøgnene og fagpoeng kjøpt for penger i perioden tas tilbake, lager og ordrer er borte, folk over taket slutter

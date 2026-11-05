@@ -15,6 +15,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 516,
+    date: "2026-11-05",
+    title: "En roligere start",
+    items: [
+      "I garasjen og verkstedet kjører skraphandleren på skrap når lageret er tomt, så ovnen ikke blir stående.",
+      "Naboen bytter foringen før den brenner gjennom, og en for sen levering koster ingenting før støperiet – du får et råd i stedet.",
+      "Banken slår ikke verkstedet konkurs, og spillet venter på deg når en forespørsel kommer og du ikke har noen kontrakt.",
+      "10× fart kommer i verkstedet, ikke i garasjen.",
+      "Omdømmet synker aldri under det nivået ditt krevde, så ett uhell sender deg ikke tilbake.",
+    ],
+  },
+  {
     b: 512,
     date: "2026-11-05",
     title: "Trådvalseverket",

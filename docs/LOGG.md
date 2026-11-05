@@ -5,6 +5,30 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 430 – 2026-11-05: Starthjelpen (tiltak A)
+
+**Oppgaven:** «Bygg» – anbefalingene i retningsanalysen del 2, i rekkefølge. Først A: den første timen.
+
+**Gjort (B-516):** `game/starter.ts`:
+- skrap fra skraphandleren når ovnen ellers ville stått,
+- naboen bytter foringen,
+- ingen bot, tap av omdømme eller konkurs i garasjen og verkstedet,
+- pause når en ny forespørsel kommer uten kontrakt i køen, og klokka går igjen etter signering,
+- 10× fra verkstedet,
+- omdømmegulv per nivå,
+- tellere til måling.
+
+Tekstene i Salg, rådene og tipset om kreditt følger med.
+
+**Testet:**
+- `npm test` med ny test, `tsc`, lint og build.
+- `balance.ts` EXIT 0 (storverket median dag 146, nybegynneren 176).
+- Playwright på 320, 390 og 1 366 px: start, Salg med teksten om starthjelpen, ingen horisontal scrolling.
+
+**Gjenstår:** B («Bygg på nytt»), C (ukens scenario), D (rydd). Måling av nye spillere om noen uker (tellerne).
+
+---
+
 ## Økt 429 – 2026-11-05: Retningsanalysen, del 2
 
 **Oppgaven:** «Vi kan også endre på alt vi har bygget. Studer dette mer og kom med anbefalinger. Vil helst ikke starte ny

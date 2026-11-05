@@ -88,7 +88,8 @@ export const RESEARCH: Research[] = [
   {
     id: "stodig",
     name: "Stødig drift",
-    stage: 0,
+    // Fra verkstedet (B-516): 10× de første minuttene lot klokka gå fra nybegynnerne
+    stage: 1,
     cost: 10,
     requires: ["rutiner"],
     description: "Verket går jevnt nok til at du kan spole fram til noe skjer.",

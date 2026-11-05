@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { GAME_MIN_PER_REAL_S } from "./data";
-import { advance, newGame, type PurchaseResult } from "./engine";
+import { advance, log, newGame, type PurchaseResult } from "./engine";
+import { starterWaitOffer } from "./starter";
 import { IDLE_NIGHT_SPEED, idleOutsideHours } from "./plant";
 import { maxSpeed } from "./research";
 import { advanceTutorial } from "./tutorial";
@@ -208,6 +209,8 @@ export function useGame(): GameApi {
       const g = gameRef.current;
       if (!g || g.gameOver || speed > maxSpeed(g)) return;
       g.speed = speed;
+      // Spilleren styrer klokka selv: starthjelpen starter den ikke igjen etterpå (B-516)
+      g.starterResume = undefined;
       bump();
     },
     [bump],
@@ -251,9 +254,28 @@ export function useGame(): GameApi {
         }
         advance(g, gameMin);
         if (boost > 1) g.boostMin = (g.boostMin ?? 0) + gameMin;
+        // Starthjelpen (B-516): uten kontrakt i køen venter spillet når en ny forespørsel kommer, så klokka ikke går
+        // fra nybegynneren mens ovnen ikke har noe å lage
+        const wait = starterWaitOffer(g);
+        if (wait) {
+          g.starterWaitedFor = Math.max(...g.contracts.filter((c) => c.status === "tilbud").map((c) => c.id));
+          g.starterResume = g.speed;
+          g.speed = 0;
+          log(
+            g,
+            `Spillet venter på deg: ${wait.customer} vil kjøpe stål, og du har ingen kontrakt i gang. Se på forespørselen under Salg – klokka går videre når du har signert.`,
+            "info",
+          );
+        }
         advanceTutorial(g);
         advanceRecipeGuide(g);
         flushLog();
+      }
+      // Starthjelpen (B-516): spillet sto og ventet på en kontrakt – nå er den signert, så klokka går igjen
+      if (g.speed === 0 && g.starterResume && !g.gameOver && g.contracts.some((c) => c.status === "aktiv")) {
+        g.speed = Math.min(g.starterResume, maxSpeed(g));
+        g.starterResume = undefined;
+        bump();
       }
       // Byggeprosjektene i konsernet går i ekte tid, også når spillet står på pause (B-209)
       if (!wasRunning && g.konsern?.plants.some((p) => p.project) && finishKonsernProjects(g)) {

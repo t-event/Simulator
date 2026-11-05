@@ -9,6 +9,7 @@ import { reconDay } from "./reconstruction";
 import { castCalmFactor, rollYieldBonus } from "./minis";
 import { GREEN, greenOn, heatCo2, noteHeatCo2, SCRAP_CO2, contractCo2, fmtCo2 } from "./green";
 import { hasNeighbor, reputationFloor } from "./building";
+import { stageReputationFloor, STARTER_RELINE_WEAR, starterHelp } from "./starter";
 import {
   BANKRUPTCY_DAYS,
   CUSTOMERS,
@@ -466,7 +467,11 @@ export function awardPoints(g: GameState, points: number): void {
 
 export function adjustReputation(g: GameState, delta: number): void {
   // Konserthuset (B-336): omdømmet synker ikke under 70 (når det først er der)
-  const floor = g.reputation >= reputationFloor(g) ? reputationFloor(g) : 0;
+  const neighbor = g.reputation >= reputationFloor(g) ? reputationFloor(g) : 0;
+  // … og aldri under kravet for nivået verket har nådd (B-516): ett uhell skal ikke sende spilleren tilbake. Er
+  // omdømmet alt lavere (eldre lagringer), gjelder gulvet først når det er nådd igjen, som konserthuset
+  const stageFloor = stageReputationFloor(g);
+  const floor = Math.max(neighbor, g.reputation >= stageFloor ? stageFloor : 0);
   g.reputation = Math.max(floor, Math.min(100, g.reputation + delta));
 }
 
@@ -1127,7 +1132,7 @@ export function startReline(
   g: GameState,
   index: number,
   plant = computePlantStats(g),
-  why: "manuell" | "plan" | "reparatør" | "spesialist" = "manuell",
+  why: "manuell" | "plan" | "reparatør" | "spesialist" | "nabo" = "manuell",
 ): PurchaseResult {
   // Foring, pris og tid etter akkurat denne ovnen (B-074)
   const stats = unitView(plant, index);
@@ -1145,6 +1150,7 @@ export function startReline(
     plan: " etter vedlikeholdsplanen",
     reparatør: " av reparatøren",
     spesialist: " av den innleide vedlikeholdsspesialisten",
+    nabo: " – naboen så at foringen var slitt (fra støperiet må du følge med selv: «Bytt foring» i utstyrsarket)",
   }[why];
   // Lysbueovn med ferdig reservepotte: bytt potte på noen timer, og la murerne mure opp den slitte (B-030)
   if (stats.furnace.arc && f.spareProgress >= 1) {
@@ -1227,8 +1233,18 @@ function updateFurnaces(g: GameState, stats: PlantStats): void {
       auto(g, "autoReline") && presentWorkers(g).some((w) => w.role === "vedlikehold") && f.wear >= g.settings.relineAt;
     // Vedlikeholdsspesialisten fra rådgiveren (ti døgn) bytter ved 80 % slitasje
     const specialistDue = (g.specialists.havari ?? 0) > g.minute && f.wear >= 0.8;
-    if (f.relineRequested || planDue || repairerDue || specialistDue) {
-      const why = f.relineRequested ? "manuell" : planDue ? "plan" : repairerDue ? "reparatør" : "spesialist";
+    // Starthjelpen (B-516): naboen bytter foringen før den kan brenne gjennom, til og med verkstedet
+    const starterDue = starterHelp(g) && f.wear >= STARTER_RELINE_WEAR;
+    if (f.relineRequested || planDue || repairerDue || specialistDue || starterDue) {
+      const why = f.relineRequested
+        ? "manuell"
+        : planDue
+          ? "plan"
+          : repairerDue
+            ? "reparatør"
+            : specialistDue
+              ? "spesialist"
+              : "nabo";
       if (startReline(g, i, stats, why).ok) {
         f.relineRequested = false;
         continue;
@@ -1270,7 +1286,8 @@ function updateFurnaces(g: GameState, stats: PlantStats): void {
       f.waitReason = "Venter mens du er i kontrollrommet";
       continue;
     }
-    if (!startHeat(g, i, stats)) {
+    // Starthjelpen (B-516): skraphandleren kjører på skrap før ovnen blir stående
+    if (!startHeat(g, i, stats) && !(starterScrap(g, stats) && startHeat(g, i, stats))) {
       const was = f.waitReason;
       f.waitReason =
         hasGrader(g) && stats.yardUsed >= unitView(stats, i).sizeT ? "Mangler skrap til resepten" : "Tomt for skrap";
@@ -1285,7 +1302,29 @@ function updateFurnaces(g: GameState, stats: PlantStats): void {
         : `${stopped.length === 1 ? "Ovn" : "Ovnene"} ${joinAnd(stopped.map((s) => String(s.i + 1)))} står`;
     const why = stopped.some((s) => s.why === "Tomt for skrap") ? "skraplageret er tomt" : "mangler skrap til resepten";
     log(g, `${who}: ${why}. ${scrapStopHelp(g)}`, "bad");
+    countEvent(g, "skrap_tomt");
   }
+}
+
+/**
+ * Starthjelpen (B-516): i garasjen og verkstedet kjøper skraphandleren inn skrap etter resepten når ovnen ellers ville
+ * stått – som planleggeren, men uten å ansette noen. Kassekreditten kan brukes; banken slår ikke verket konkurs i
+ * starthjelpen. Gir true når noe ble kjøpt.
+ */
+function starterScrap(g: GameState, stats: PlantStats): boolean {
+  if (!starterHelp(g) || (auto(g, "autoBuy") && plannerOrders(g)) || scrapBlocked(g)) return false;
+  const before = SCRAP_IDS.reduce((a, id) => a + g.scrap[id].t, 0);
+  const cash = g.cash;
+  autoBuy(g, stats, { credit: true, cap: null });
+  const bought = SCRAP_IDS.reduce((a, id) => a + g.scrap[id].t, 0) - before;
+  if (bought <= 1e-6) return false;
+  countEvent(g, "startskrap");
+  log(
+    g,
+    `Skraplageret var tomt, så skraphandleren kjørte på ${fmtT(bought)} skrap etter resepten (${fmtKr(cash - g.cash)}). Fra støperiet kjøper du selv under Marked, eller ansetter en planlegger.`,
+    "info",
+  );
+  return true;
 }
 
 function joinAnd(parts: string[]): string {
@@ -2762,6 +2801,7 @@ function expireOffers(g: GameState, stats: PlantStats): void {
       const director = g.konsern?.director?.active === true;
       if (fitted && !director)
         g.missedOffers = [...(g.missedOffers ?? []).filter((m) => m > g.minute - MIN_PER_DAY), g.minute];
+      countEvent(g, "utgatt");
       log(
         g,
         fitted && director
@@ -3798,12 +3838,22 @@ function onDay(g: GameState, stats: PlantStats): void {
     // Landemerker har ingen frist (B-218): de står i køen til de er levert
     if (c.status === "aktiv" && !c.landmark && c.deadlineDay < today) {
       const remaining = c.tonnes - c.delivered;
-      const penalty = remaining * c.penaltyPerT;
-      addCost(g, "bot", penalty);
-      repLoss(g, c.repLoss, "sen");
       c.status = "misligholdt";
       c.closedDay = today;
       g.totals.contractsMissed = (g.totals.contractsMissed ?? 0) + 1;
+      countEvent(g, "sen");
+      // Starthjelpen (B-516): i garasjen og verkstedet er en for sen levering en lekse, ikke en straff
+      if (starterHelp(g)) {
+        log(
+          g,
+          `Fristen til ${c.customer} gikk ut med ${fmtT(remaining)} ulevert. Kunden er skuffet, men i starten slipper du bot og tap av omdømme. Ta forespørsler du rekker: Salg viser grønt når verket rekker fristen. Fra støperiet koster det.`,
+          "bad",
+        );
+        continue;
+      }
+      const penalty = remaining * c.penaltyPerT;
+      addCost(g, "bot", penalty);
+      repLoss(g, c.repLoss, "sen");
       log(
         g,
         `Fristen til ${c.customer} gikk ut med ${fmtT(remaining)} ulevert. Bot ${fmtKr(penalty)}, omdømme −${c.repLoss.toFixed(1).replace(".", ",")}.${c.agreementId ? " Det var en ukeleveranse i rammeavtalen." : c.byDirector ? " Salgsdirektøren hadde signert den." : ""}`,
@@ -3845,7 +3895,7 @@ function onDay(g: GameState, stats: PlantStats): void {
 
   // Står verket fordi det ikke er råd til omforing, og lånet er fullt, er det slutt (B-033)
   const cantReline = g.furnaces.every((f) => (f.waitReason ?? "").includes("mangler penger til omforing"));
-  if (cantReline && g.loan >= maxLoan(g) - 1) {
+  if (cantReline && g.loan >= maxLoan(g) - 1 && !starterHelp(g)) {
     g.stuckDays = (g.stuckDays ?? 0) + 1;
     if (g.stuckDays === 1)
       log(
@@ -3865,7 +3915,16 @@ function onDay(g: GameState, stats: PlantStats): void {
   if (g.cash < -creditLimit(g)) {
     // Sommerstansen (B-349): verket kan ikke tjene penger i tre uker, så banken venter med å telle til ovnene går igjen.
     // Før ble spillere som hadde kjøpt skrap på kreditt rett før ferien, slått konkurs mens verket sto
-    if (summerStop(g)) {
+    // Starthjelpen (B-516): banken slår ikke et verksted konkurs, men sier ifra
+    if (starterHelp(g)) {
+      g.negativeDays = 0;
+      if (day(g) % 3 === 0)
+        log(
+          g,
+          `Kassa er under kredittgrensen. I starten venter banken, men du kan ikke kjøpe mer på kreditt. ${CREDIT_HELP}`,
+          "bad",
+        );
+    } else if (summerStop(g)) {
       if (summerStopDaysLeft(g) % 7 === 0)
         log(
           g,

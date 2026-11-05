@@ -874,6 +874,10 @@ export interface GameState {
   snowUntilMin?: number;
   /** Spillminuttene da en forespørsel som passet verket, gikk ut uten svar (B-292). Tømmes når du signerer en kontrakt */
   missedOffers?: number[];
+  /** Starthjelpen (B-516): den siste forespørselen spillet har ventet på (pauset for) */
+  starterWaitedFor?: number;
+  /** Farten spillet hadde før starthjelpen pauset; spillet går videre med den når en kontrakt er signert (B-516) */
+  starterResume?: number;
   /** Merker bare serveren vet om (B-296), f.eks. «reform» for dem som ble berørt av økonomireformen */
   serverBadges?: string[];
   /** Krig i verden (B-297): den siste krigen (også når den er over), så det blir høyst én per år. null = ingen ennå */

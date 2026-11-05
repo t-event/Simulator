@@ -9844,3 +9844,41 @@ Nye funn (del 2 i `docs/RETNINGSANALYSE-2026-11.md`):
 Ingenting er bygget eller endret.
 
 Endringslogg: nei (ingenting i spillet er endret).
+
+## B-516 Starthjelpen: garasjen og verkstedet går ikke fra nybegynneren (2026-11-05)
+Eieren: «Bygg» (tiltak A i B-515). Retningsanalysen viste at alle 20 som sto fast på nivå 0–1, hadde levert noe, men
+mistet kontrollen: forespørsler gikk ut (324), skrapet tok slutt (14 av 20), og bøter og havari tok omdømmet under kravet
+for neste nivå.
+
+**Bygget** (`game/starter.ts`). I garasjen og verkstedet (nivå 0–1, `starterHelp`):
+- **Skraphandleren** kjøper skrap etter resepten når ovnen ellers ville stått (`starterScrap` i ovnsløkka, med
+  planleggerens `autoBuy`, også på kreditt). Loggen sier hva det kostet, og at man kjøper selv fra støperiet.
+- **Naboen bytter foringen** ved 85 % slitasje, før faren for gjennombrenning (`STARTER_RELINE_WEAR`).
+- **For sen levering** gir et råd, men ingen bot og ikke noe tap av omdømme. Salg sier det, også i bekreftelsen.
+- **Ingen konkurs:** banken teller ikke døgn under kredittgrensen, men man kan ikke kjøpe mer på kreditt. Det samme
+  gjelder for verket som står uten råd til foring.
+- **Spillet venter:** uten kontrakt i køen pauser spillet én gang per ny forespørsel (`starterWaitOffer`, i `useGame`).
+  Når en kontrakt er signert, går klokka videre med farten den hadde (`starterResume`). Velger spilleren fart selv, gjør
+  starthjelpen det ikke.
+- **10× («Stødig drift»)** kan forskes først i verkstedet (nivå 1), ikke i garasjen.
+
+**Omdømmegulvet** gjelder alle nivåer: omdømmet synker aldri under kravet for nivået verket har nådd (5 / 18 / 40 / 65),
+når det først er der (`stageReputationFloor`). Ett uhell sender ikke spilleren tilbake. Dødsulykken (−25) stopper derfor
+på 40 på stålverket.
+
+**Måling:** tellerne `startskrap`, `skrap_tomt`, `utgatt` og `sen` i `state.counters`. Om noen uker kan vi sammenligne
+nye spillere med de 20 i B-515, rett fra lagringene.
+
+**Balanse:** `balance.ts` EXIT 0, litt raskere enn før:
+- Medianen er dag 7 / 24 / 62 / 146 (før 7 / 21 / 62 / 158).
+- Nybegynneren når storverket dag 176 (før 183), med 0 konkurser.
+- Målene er uendret.
+
+Testen «Starthjelpen (B-516)» dekker:
+- pausen,
+- sen levering uten straff,
+- gulvet,
+- ingen konkurs,
+- skrapet og foringen.
+
+Konto: nei (regel 1 – eget spill). KONTO.md er oppdatert.
