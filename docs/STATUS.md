@@ -51,6 +51,12 @@ regnes av serveren i ekte tid.
   det trengs), med halve partiet og 20 % mer omdømme. Øseovnen tilsetter legeringen etter tapping (posten «forbruk»);
   bom 5 % før operatørens dyktighet – oppdaget = 30 % mer legering, ellers sperret. Legert stål holder bare sin egen
   kvalitet (`Analysis.alloy`). Prestasjonen «Spesialstål» (1 000 / 10 000 / 100 000 t, skjult til første levering).
+- **Trådvalseverket** (B-511): forskningen «Trådvalsing» (nivå 4, 400 fagpoeng, krever Valsing og Produktutvikling)
+  åpner utstyret «Trådvalseverk» (120 mill., krever valseverket og strengstøping, 2 valsere). Det er en egen linje på
+  80 t/t med 97 % utbytte som valser **bare** emner en ordre på valsetråd venter på (`toRollWire` i `planLots`,
+  `updateWire`); ledige emner blir liggende, og armeringen er urørt. Valsetråd: 8 900 kr/t. Kundene Trådtrekkeriet,
+  Spikerfabrikken og Fjærfabrikken (nivå 4) trekkes bare når verket kan lage valsetråd. Prestasjonen «Valsetråd»
+  (1 000 / 10 000 / 100 000 t, skjult til første levering).
 - **Støpemaskinen og valseverket i kontrollrommet** (B-505): «Ta styringen selv» i utstyrsarket for Støping (med
   strengstøping / valseverk). Tre runder hver. Fagpoeng én gang per spilldøgn per spill. 4–5 stjerner gir i 24/48 timer
   halvparten så mange strenggjennombrudd, eller 1/2 prosentpoeng mer utbytte i valseverket.
@@ -102,7 +108,7 @@ regnes av serveren i ekte tid.
   `regionmester` (cron hvert 10. min) bytter, skriver i Skiftrapporten og varsler (tema `konsern`, lenke `kart`).
   Merket «Regionmester» på topplista så lenge man har minst én region. Ingen penger. Speilet i `regionPoints`.
 - **Fellesprosjekter** (B-508, 156; bryteren `config.world.projects.enabled` på fra 22.10.2026): ett prosjekt
-  per region om gangen, der minst to aktive konsern har ferdige verk. Målet er det største av 4 dagers utbytte fra verkene
+  per region om gangen, der minst to aktive konsern har ferdige verk. Målet er det største av 2 dagers utbytte (4 til runden med frist 12.11, B-512) fra verkene
   i regionen og 2 % av kassene der, fristen 21 ekte dager, et nytt 7 dager etter at det forrige er avgjort. Man gir fra
   konsernkassa (minst 1 mill., bare med ferdig verk i regionen; posten `fellesprosjekt`). Målet nådd: pengene er brukt,
   nr. 1 får merket «Hovedbidragsyter» og +25 % regionmester-styrke i regionen i 30 dager, nr. 2 +10 % (høyeste gjelder,

@@ -101,6 +101,9 @@ import {
   productCapT,
   rollingTph,
   ROLLING_YIELD,
+  wireActive,
+  wireTph,
+  WIRE_YIELD,
   satisfies,
   specMargin,
   satisfiedGrades,
@@ -1668,6 +1671,38 @@ function updateRolling(g: GameState, stats: PlantStats, dt: number): void {
   g.lots = g.lots.filter((l) => l.t > 1e-6);
 }
 
+/**
+ * Trådvalseverket (B-511): valser emnene planen har satt av til ordrene på valsetråd, så langt kapasiteten rekker.
+ * Det går med samme åpningstid og stans som valseverket, men valser aldri ledige emner på egen hånd.
+ */
+function updateWire(g: GameState, stats: PlantStats, dt: number): void {
+  if (!wireActive(g) || !isOpen(g, stats.hours) || stats.shifts === 0) return;
+  if (g.minute < (g.closedUntilMin ?? 0)) return;
+  const { toRollWire } = planLots(g);
+  if (!toRollWire.size) return;
+  let capacity = wireTph(g) * (dt / 60);
+  for (const lot of g.lots) {
+    if (capacity <= 1e-9) break;
+    const room = toRollWire.get(lot.id) ?? 0;
+    const take = Math.min(room, lot.t, capacity);
+    if (take <= 1e-9) continue;
+    lot.t -= take;
+    capacity -= take;
+    const outT = take * WIRE_YIELD;
+    addReturnScrap(g, take - outT, lot.analysis, stats);
+    addLot(g, {
+      product: "valsetrad",
+      t: outT,
+      analysis: { ...lot.analysis },
+      known: { ...lot.known },
+      measured: { ...lot.measured },
+      second: false,
+      madeDay: day(g),
+    });
+  }
+  g.lots = g.lots.filter((l) => l.t > 1e-6);
+}
+
 // ------------------------------------------------------------------ //
 // Salg
 // ------------------------------------------------------------------ //
@@ -1755,6 +1790,8 @@ interface LotPlan {
   reserved: Map<number, number>;
   /** Tonn emner i hvert parti som skal valses til armeringsordrene (B-228) */
   toRoll: Map<number, number>;
+  /** Tonn emner i hvert parti som skal valses til valsetråd i trådvalseverket (B-511) */
+  toRollWire: Map<number, number>;
   /** Tonn hver kontrakt har dekket på lager: ferdig vare, og for armering emner som venter på valsing */
   covered: Map<number, number>;
 }
@@ -1768,6 +1805,7 @@ interface LotPlan {
 function planLots(g: GameState): LotPlan {
   const reserved = new Map<number, number>();
   const toRoll = new Map<number, number>();
+  const toRollWire = new Map<number, number>();
   const covered = new Map<number, number>();
   const rolling = rollingActive(g);
   const take = (c: Contract, product: ProductId, need: number, onTake: (lot: Lot, t: number) => void): number => {
@@ -1786,6 +1824,10 @@ function planLots(g: GameState): LotPlan {
   const queue = orderQueue(g);
   const roll = (c: Contract, billets: number) =>
     take(c, "emne", billets, (lot, t) => toRoll.set(lot.id, (toRoll.get(lot.id) ?? 0) + t)) * ROLLING_YIELD;
+  // Trådvalseverket (B-511) får emner bare til ordrene på valsetråd, i køens rekkefølge
+  const wire = wireActive(g);
+  const rollWire = (c: Contract, billets: number) =>
+    take(c, "emne", billets, (lot, t) => toRollWire.set(lot.id, (toRollWire.get(lot.id) ?? 0) + t)) * WIRE_YIELD;
   // Valseverket får emner til de neste timene først (B-240). Før fikk armeringsordrene emner først når alle emneordrene
   // foran i køen var dekket – de tok også emnene som ble støpt til armeringen – så valseverket sto store deler av døgnet
   // og armeringen kom for sent, selv med ledig kapasitet. Resten av armeringen får emner i køens rekkefølge som før.
@@ -1809,9 +1851,10 @@ function planLots(g: GameState): LotPlan {
     let got = covered.get(c.id) ?? 0;
     got += take(c, c.product, left - got, () => {});
     if (c.product === "armering" && rolling && left - got > 1e-6) got += roll(c, (left - got) / ROLLING_YIELD);
+    if (c.product === "valsetrad" && wire && left - got > 1e-6) got += rollWire(c, (left - got) / WIRE_YIELD);
     covered.set(c.id, got);
   }
-  return { reserved, toRoll, covered };
+  return { reserved, toRoll, toRollWire, covered };
 }
 
 /** Hvor mye av hvert parti aktive kontrakter vil få, i samme rekkefølge som leveransene. */
@@ -2119,9 +2162,11 @@ export function rollingNeedDays(
   tonnes: number,
   until: number,
 ): number {
-  if (product !== "armering" || stats.rolledDailyT <= 0) return 0;
-  const perDay = Math.min(productCapT(stats, "armering"), realisticDailyT(g, stats));
-  return (committedT(g, "armering") + agreementLoadUntil(g, until, "armering") + tonnes) / perDay;
+  // Trådvalseverket (B-511) har sin egen kapasitet på samme måte
+  const rolled = product === "armering" ? stats.rolledDailyT : product === "valsetrad" ? stats.wireDailyT : 0;
+  if (rolled <= 0) return 0;
+  const perDay = Math.min(productCapT(stats, product), realisticDailyT(g, stats));
+  return (committedT(g, product) + agreementLoadUntil(g, until, product) + tonnes) / perDay;
 }
 
 /** En jobb i planen over køen (B-240): tonn som gjenstår, fristen og hvor den står i køen */
@@ -2339,8 +2384,8 @@ export function assessOffer(g: GameState, stats: PlantStats, c: Contract, commit
     const fit = queueFit(g, perDay, extra, { front: Math.max(0, committed - committedT(g)) });
     pushesLate = fit.pushesLate;
     pushesNarrow = fit.pushesNarrow;
-    if (c.product === "armering" && stats.rolledDailyT > 0) {
-      const roll = queueFit(g, Math.min(productCapT(stats, "armering"), perDay), extra, { product: "armering" });
+    if ((c.product === "armering" && stats.rolledDailyT > 0) || (c.product === "valsetrad" && stats.wireDailyT > 0)) {
+      const roll = queueFit(g, Math.min(productCapT(stats, c.product), perDay), extra, { product: c.product });
       pushesLate ??= roll.pushesLate;
       pushesNarrow ||= roll.pushesNarrow;
     }
@@ -2454,6 +2499,8 @@ function deliverContracts(g: GameState): void {
       }
       // Spesialstål (B-510): tonnene teller mot prestasjonen
       if (isSpecial(c.grade)) countEvent(g, "spesial_t", c.tonnes);
+      // Valsetråd (B-511): tonnene teller mot prestasjonen
+      if (c.product === "valsetrad") countEvent(g, "trad_t", c.tonnes);
       if (g.totals.contractsDone === 1) unlock(g, "omdomme");
       if (c.agreementId) agreementWeekClosed(g, c, true);
     }
@@ -3874,6 +3921,7 @@ function step(g: GameState, dt: number): void {
   if (mw > (g.today.peakMW ?? 0)) g.today.peakMW = mw;
   updateCasting(g, stats, dt);
   updateRolling(g, stats, dt);
+  updateWire(g, stats, dt);
   processComplaints(g);
   // Byggeprosjekter i konsernet blir ferdige i ekte tid (B-209)
   if (g.konsern?.plants.length) finishKonsernProjects(g);

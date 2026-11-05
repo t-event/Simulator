@@ -9706,3 +9706,64 @@ gjennom samme metning av markedet (B-252), og legeringen betales per tonn, så d
 seg selv (B-148), og forespørslene kommer først etter forskningen.
 
 Konto: nei (regel 1 – hovedverket, spilltid). KONTO.md er oppdatert.
+
+## B-511 Stor oppdatering «Trådvalseverket»: valsetråd til nye kunder (2026-11-05)
+Eieren: «Nå er det lenge siden vi har gjort en stor oppdatering. Lag en plan og gjennomfør.»
+
+**Hva dataene sa (5.11):**
+- 12 aktive spillere siste uke, 11 siste døgn, og én ny konto på 14 dager. Alle aktive er på storverket.
+- Spesialstål (B-510) er tatt godt imot: 12 har forsket det fram, og 11 har levert.
+- Fellesprosjektene (B-508) står langt fra målet: 0–54 % med en uke igjen, og 0–4 givere per region (se B-512).
+- Skiftrapporten har vært stille i 14 dager. Alle fire selskapene har eier.
+
+**Valgt plan:** mer av det som virket – en ny gren hjemme for storverket, i spilltid (B-323), som lærer bort en ny del av
+et stålverk – og lavere mål for fellesprosjektene (B-512). K-1 venter fortsatt på neste skyggerapport.
+
+**Bygget:**
+- **Ny vare: valsetråd** (`PRODUCTS.valsetrad`, 8 900 kr/t, 150 t spot per døgn): tynn tråd i kveiler.
+- **Nytt utstyr: Trådvalseverk** (`tradverk`, nivå 4, 120 mill., krever valseverket og strengstøping, 2 valsere). Det er
+  en egen linje på 80 t/t med 97 % utbytte (`WIRE_TPH`, `WIRE_YIELD` i `plant.ts`), ved siden av valseverket.
+  - Det valser **bare** emner som en ordre på valsetråd venter på (`toRollWire` i `planLots`, i køens rekkefølge, etter
+    ferdig valsetråd på lager). Ledige emner blir liggende. Armeringen og valseverket er urørt.
+  - `updateWire` (etter `updateRolling`) går i driftstiden, og tapet går tilbake som returskrap.
+  - `stats.wireDailyT` er det linja rekker i døgnet. `productCapT`, `rollingNeedDays` og `queueFit` i `assessOffer`
+    regner valsetråd mot den, som armering mot valseverket.
+- **Ny forskning: Trådvalsing** (nivå 4, 400 fagpoeng, krever Valsing og Produktutvikling) åpner utstyret.
+- **Tre nye kunder** (bare nivå 4, bare når verket kan lage valsetråd): Trådtrekkeriet (lavkarbon og standard),
+  Spikerfabrikken (lavkarbon og enkel) og Fjærfabrikken (høykarbon).
+  - De står sist i `CUSTOMERS` og er bare med i trekningen når `stats.products` har valsetråd. Andre spillere trekker
+    altså de samme tallene som før, og nivådagene i `balance.ts` er uendret.
+- **Grensesnittet:** Salg viser forespørslene som andre, Marked → Priser har valsetråd (bare når verket lager den), og
+  Anlegg har en rad «Trådvalseverk». Utstyret står under Støping. Store kjøp som mangler forskningen, får ikke lenger
+  merknaden om byggetid (den hørte til kjøp man kan gjøre).
+- **Fagboka** har kapitlet «Valsetråd» (fra emne til kveil, styrt kjøling, trekking hos kunden, kobber gjør at tråden
+  ryker) med tre quizspørsmål. Prestasjonen «Valsetråd» (1 000 / 10 000 / 100 000 t) er skjult til første levering.
+
+**Balanse:** `balance.ts` er OK med uendrede nivådager (median 7 / 21 / 62 / 158, nybegynneren 183). Valsetråd selges med
+samme metning av markedet som alt annet (B-252) og er bare litt dyrere enn armering, så det er et valg og noe å lære, ikke
+en ny inntektsmotor (B-305). Testen «Trådvalseverket (B-511)» viser at kundene bare kommer med trådvalseverk, at
+kapasiteten regnes, og at en ordre på 100 t valses og leveres.
+
+**Kjent risiko:** en eldre app som åpner et spill med valsetråd, kjenner ikke varen. Appen oppdaterer seg selv (B-148), og
+forespørslene kommer først etter forskningen og kjøpet.
+
+Konto: nei (regel 1 – hovedverket, spilltid). KONTO.md er oppdatert.
+
+## B-512 Lavere mål for fellesprosjektene fra neste runde (2026-11-05)
+Del av planen i B-511. Første runde av fellesprosjektene (B-508) åpnet 22.10 med frist 12.11. Status 5.11:
+- Jernåsen 54 %, Øyene 20 %, Vestbukta 17 %, Nordkysten 7 %, Østskogen og Sørsletta 0 %.
+- Bare 9 gaver i alt, og 0–4 givere per region (15–19 konsern har verk i hver region).
+
+Målet var det største av 4 dagers utbytte fra verkene i regionen og 2 % av konsernkassene til eierne (250–400 mill.).
+Ingen region er nær, og et mål som ser umulig ut, får folk til å la være å gi.
+
+**Endret:** `config.world.projects.goal_days` 4 → 2 (`supabase/158_fellesprosjekt_mal.sql`). Neste runde får mål på ca.
+160–270 mill. med tallene 5.11. 2 % av konsernkassene (ca. 120–150 mill.) er fortsatt gulvet. Med samme gaver som i første
+runde ville Jernåsen nådd ca. 80 %.
+
+Prosjektene som er åpne nå, beholder målet sitt, fordi spillerne har gitt mot det. Bommer de, betales halvparten tilbake
+som før. Ingen penger flyttes av denne endringen.
+
+Ser neste runde like stille ut, er det neste å vurdere et varsel når et prosjekt åpner (push), heller enda lavere mål.
+
+Konto: uendret (fellesprosjektene krever konto, B-508).

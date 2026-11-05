@@ -4,7 +4,7 @@
  * egen «Utstyr»-knapp, og foringen sto både her og i vedlikeholdskortet ved siden av.
  */
 import { PRODUCTS } from "../game/data";
-import { castingType, hasGrader, rollingActive, unitType, type PlantStats } from "../game/plant";
+import { castingType, hasGrader, rollingActive, unitType, wireActive, type PlantStats } from "../game/plant";
 import type { GameState } from "../game/types";
 import { Bar, Card } from "./common";
 import { Callout, StatusLine, type Status } from "./ds";
@@ -144,6 +144,19 @@ export function ProductionCard({
             icon: "refresh",
             name: "Valseverk",
             detail: "Valser emner til armeringsstål",
+            status: { status: "kjorer", label: "I drift" },
+          } satisfies Row,
+        ]
+      : []),
+    // Trådvalseverket (B-511) valser bare emner til ordrene på valsetråd
+    ...(wireActive(g)
+      ? [
+          {
+            key: "trad",
+            station: null,
+            icon: "cable-car",
+            name: "Trådvalseverk",
+            detail: "Valser emner til valsetråd når en ordre venter",
             status: { status: "kjorer", label: "I drift" },
           } satisfies Row,
         ]

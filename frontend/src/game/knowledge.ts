@@ -336,6 +336,32 @@ export const KNOWLEDGE: KnowledgeCard[] = [
     ],
   },
   {
+    id: "valsetrad",
+    title: "Valsetråd",
+    icon: "cable-car",
+    part: "stoping",
+    short:
+      "Et trådvalseverk valser emnene ned til tynn tråd i stor fart og legger den i kveiler. Tråden trekkes videre til spiker, fjærer og wire.",
+    pages: [
+      {
+        head: "Fra emne til kveil",
+        text: "Emnet varmes opp og går gjennom mange valsepar etter hverandre. Hvert par gjør tverrsnittet litt mindre, og tråden går fortere og fortere – til slutt over 300 km/t. Den legges i ringer på et transportbånd og blir til en kveil på et par tonn.",
+      },
+      {
+        head: "Styrt kjøling",
+        text: "Etter valsingen blåses ringene med luft i et bestemt tempo. Kjøles tråden for fort, blir den hard og sprø; kjøles den for sakte, blir kornene grove. Riktig kjøling gir en tråd som kan trekkes tynnere uten å ryke.",
+      },
+      {
+        head: "Trekking hos kunden",
+        text: "Trådtrekkeriet drar tråden gjennom stadig mindre hull, så den blir tynnere og sterkere. Spiker, gjerdetråd og sveisetråd lages av lavkarbonstål; fjærer og stålwire av høykarbonstål.",
+      },
+      {
+        head: "Kobber gjør at tråden ryker",
+        text: "Under trekkingen strekkes stålet kraftig. Kobber og tinn gir små sprekker som får tråden til å ryke i trekkeriet. Derfor vil trådkundene ha rent stål – og et verk som leverer tråd som ryker, mister kunden.",
+      },
+    ],
+  },
+  {
     id: "spesialstal",
     title: "Spesialstål og legeringer",
     icon: "atom",

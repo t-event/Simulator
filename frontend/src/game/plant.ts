@@ -38,6 +38,18 @@ export function rollingTph(g: GameState): number {
 }
 export const ROLLING_YIELD = 0.96;
 
+/** Trådvalseverket (B-511): en egen linje med egen fart; det valser bare emner til ordrer på valsetråd */
+const WIRE_TPH = 80;
+export const WIRE_YIELD = 0.97;
+
+export function wireActive(g: GameState): boolean {
+  return has(g, "tradverk");
+}
+
+export function wireTph(g: GameState): number {
+  return wireActive(g) ? WIRE_TPH : 0;
+}
+
 /** Tall for én ovn (B-074) */
 export interface UnitStats {
   furnace: FurnaceType;
@@ -108,6 +120,8 @@ export interface PlantStats {
   dailyProductT: number;
   /** Armering valseverket rekker per døgn (0 uten valsing). Resten av det som støpes, blir emner (B-217). */
   rolledDailyT: number;
+  /** Valsetråd trådvalseverket rekker per døgn (0 uten trådvalseverk, B-511) */
+  wireDailyT: number;
   offersPerDay: number;
   priceBonus: number;
 }
@@ -117,6 +131,7 @@ export interface PlantStats {
  * Emner som kontraktene venter på, valses ikke (updateRolling), så emnene kan ta hele støpingen.
  */
 export function productCapT(stats: PlantStats, product: ProductId): number {
+  if (product === "valsetrad") return Math.min(stats.dailyProductT, stats.wireDailyT);
   return product === "armering" && stats.rolledDailyT > 0
     ? Math.min(stats.dailyProductT, stats.rolledDailyT)
     : stats.dailyProductT;
@@ -672,6 +687,7 @@ export function computePlantStats(g: GameState): PlantStats {
 
   const products: ProductId[] = [casting.product];
   if (rollingActive(g)) products.push("armering");
+  if (wireActive(g) && casting.product === "emne") products.push("valsetrad");
   const mainProduct = rollingActive(g) ? "armering" : casting.product;
 
   // Anslått døgnproduksjon: smeltekapasitet i åpningstida, begrenset av støping og valsing
@@ -694,6 +710,9 @@ export function computePlantStats(g: GameState): PlantStats {
     productPerDay -= rolledT * (1 - ROLLING_YIELD);
     rolledDailyT = rolledT * ROLLING_YIELD;
   }
+  // Trådvalseverket (B-511) valser bare emner til ordrene på valsetråd, så døgnproduksjonen står som den er
+  const wireDailyT =
+    wireActive(g) && casting.product === "emne" ? wireTph(g) * Math.max(8, staff.hours) * WIRE_YIELD : 0;
 
   // Effekten den største ovnen trekker mens den smelter
   const furnaceMW = Math.max(...units.map((u) => u.furnaceMW));
@@ -739,6 +758,7 @@ export function computePlantStats(g: GameState): PlantStats {
     mainProduct,
     dailyProductT: productPerDay,
     rolledDailyT,
+    wireDailyT,
     offersPerDay,
     priceBonus,
   };

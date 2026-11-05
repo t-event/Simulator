@@ -47,6 +47,7 @@ const ADDON_STATION: Record<string, Station> = {
   streng2: "stoping",
   streng3: "stoping",
   valseverk: "stoping",
+  tradverk: "stoping",
 };
 
 function stationOf(o: UpgradeOption): Station | null {

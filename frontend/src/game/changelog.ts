@@ -15,6 +15,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 512,
+    date: "2026-11-05",
+    title: "Trådvalseverket",
+    items: [
+      "Ny forskning på storverket: «Trådvalsing». Den åpner trådvalseverket, en egen valselinje som valser emner til valsetråd i kveiler.",
+      "Tre nye kunder kjøper valsetråd: Trådtrekkeriet, Spikerfabrikken og Fjærfabrikken. Forespørslene kommer når verket har trådvalseverk.",
+      "Trådvalseverket valser bare emner til ordrene på valsetråd, så valseverket og armeringen går som før.",
+      "Nytt kapittel i fagboka: «Valsetråd», med quiz – og en ny prestasjon.",
+      "Fellesprosjektene: neste runde får omtrent halvparten så høyt mål som den første.",
+    ],
+  },
+  {
     b: 510,
     date: "2026-10-27",
     title: "Spesialstål",

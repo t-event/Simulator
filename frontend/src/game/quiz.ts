@@ -171,6 +171,26 @@ export const QUIZ: Record<string, QuizQuestion[]> = {
       why: "Begge er nesten frie for sporelementer, så de tynner ut det skrapet har med seg.",
     },
   ],
+  valsetrad: [
+    {
+      q: "Hva skjer med valsetråden rett etter valsingen?",
+      options: ["Den kjøles styrt med luft", "Den støpes på nytt", "Den legeres i øsa"],
+      correct: 0,
+      why: "Styrt kjøling gir riktig styrke og kornstørrelse, så tråden kan trekkes uten å ryke.",
+    },
+    {
+      q: "Hvorfor vil trådkundene ha stål med lite kobber?",
+      options: ["Kobber gjør at tråden ryker i trekkingen", "Kobber gjør tråden for tung", "Kobber gir feil farge"],
+      correct: 0,
+      why: "Kobber og tinn gir små sprekker når stålet strekkes kraftig i trekkeriet.",
+    },
+    {
+      q: "Hvilken kvalitet bruker fjærfabrikken?",
+      options: ["Høykarbon", "Lavkarbon", "Enkel"],
+      correct: 0,
+      why: "Fjærer og stålwire trenger det sterke høykarbonstålet. Spiker og gjerdetråd lages av lavkarbon.",
+    },
+  ],
   spesialstal: [
     {
       q: "Hvor tilsetter man legeringene i et skrapbasert stålverk?",

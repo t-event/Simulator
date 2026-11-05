@@ -412,6 +412,18 @@ export const RESEARCH: Research[] = [
       "Jernmalm redusert med hydrogen i stedet for koks. Tynner ut sporelementene som råjern, men med en brøkdel av klimaavtrykket.",
     effect: "Du kan kjøpe jernsvamp",
   },
+  // Trådvalseverket (B-511): valsetråd i kveiler
+  {
+    id: "tradvalsing",
+    name: "Trådvalsing",
+    stage: 4,
+    cost: 400,
+    requires: ["valsing", "produktutvikling"],
+    unlocks: ["tradverk"],
+    knowledge: "valsetrad",
+    description: "Valsing av emner til tynn tråd i høy fart, med styrt kjøling så tråden kan trekkes videre.",
+    effect: "Åpner for trådvalseverk og kunder som kjøper valsetråd",
+  },
   // Spesialstål (B-510): legeringsstål laget med øseovnen
   {
     id: "spesialstal",
@@ -554,6 +566,7 @@ const READS: Record<string, string> = {
   gronnstal: "fosfor",
   jernsvamp: "gront",
   spesialstal: "oseovn",
+  tradvalsing: "valsing",
   konsernstyring: "konsern",
   fellesvedlikehold: "konsern",
   kunnskapsdeling: "konsern",

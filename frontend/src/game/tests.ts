@@ -5490,6 +5490,75 @@ test("Spesialstål (B-510): legeringen i analysen, forespørsler etter nummeret 
   );
 });
 
+test("Trådvalseverket (B-511): kundene bare med trådvalseverk, emner valses til valsetråd og leveres", () => {
+  const g = newGame(512);
+  g.stage = 4;
+  g.totals.contractsDone = 5;
+  g.furnaceType = "lysbue30";
+  g.furnaces.forEach((f) => (f.type = "lysbue30"));
+  g.castingType = "streng1";
+  const wireOffers = () => {
+    const stats = computePlantStats(g);
+    g.contracts = [];
+    const out: Contract[] = [];
+    for (let i = 0; i < 60; i++) {
+      extraOffer(g, stats);
+      out.push(...g.contracts.filter((c) => c.status === "tilbud"));
+      g.contracts = g.contracts.map((c) => ({ ...c, status: "misligholdt" as const }));
+    }
+    return out.filter((c) => c.product === "valsetrad");
+  };
+  assert(wireOffers().length === 0 && computePlantStats(g).wireDailyT === 0, "valsetråd uten trådvalseverk");
+  g.owned.push("tradverk");
+  const stats = computePlantStats(g);
+  assert(stats.products.includes("valsetrad") && stats.wireDailyT > 0, `kapasiteten: ${stats.wireDailyT}`);
+  assert(productCapT(stats, "valsetrad") <= stats.dailyProductT, "kapasiteten er høyst døgnproduksjonen");
+  const wire = wireOffers();
+  assert(wire.length >= 3, `forespørsler på valsetråd: ${wire.length}`);
+  assert(
+    wire.every((c) => ["Trådtrekkeriet", "Spikerfabrikken", "Fjærfabrikken"].includes(c.customer)),
+    wire.map((c) => c.customer).join(),
+  );
+  // Emner på lager valses til valsetråd for ordren og leveres (med folk nok til ett skift)
+  for (const [role, n] of Object.entries(computePlantStats(g).missing))
+    for (let i = 0; i < (n ?? 0); i++) g.workers.push({ ...makeCandidate(g, role as RoleId), hiredDay: 1 });
+  g.pendingDecision = null;
+  g.reputation = 50;
+  const a = { c: 0.05, p: 0.01, tramp: 0.1 };
+  g.lots = [];
+  g.lots.push({
+    id: g.nextLotId++,
+    product: "emne",
+    t: 120,
+    analysis: a,
+    known: a,
+    measured: { c: true, p: true, tramp: true },
+    second: false,
+    madeDay: day(g),
+  });
+  g.contracts = [
+    {
+      ...structuredClone(wire[0]),
+      id: 99,
+      grade: "lavkarbon",
+      tonnes: 100,
+      delivered: 0,
+      status: "aktiv",
+      priority: 1,
+      deadlineDay: day(g) + 5,
+    },
+  ];
+  // Hendelseskort og manuelle charger stopper tida – testen svarer ikke på dem, bare rydder dem bort
+  for (let h = 0; h < 48; h++) {
+    g.pendingDecision = null;
+    g.pendingManual = null;
+    advance(g, 60);
+  }
+  const c = g.contracts.find((x) => x.id === 99);
+  assert(c?.status === "fullfort", `kontrakten: ${c?.status} ${Math.round(c?.delivered ?? 0)}`);
+  assert((g.counters.trad_t ?? 0) === 100, `prestasjonen: ${g.counters.trad_t}`);
+});
+
 if (failed) {
   console.log(`\n${failed} test(er) feilet`);
   process.exitCode = 1;

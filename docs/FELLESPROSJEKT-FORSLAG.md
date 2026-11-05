@@ -3,7 +3,8 @@
 **Status:** modell C er bygget 22.10 (B-508, `supabase/156_fellesprosjekter.sql`, kortet i `ui/Projects.tsx`). Bryteren
 står av til appen er publisert. Avvik fra avsnitt 4: én rad per spiller og prosjekt i `region_project_gifts` (summen, ikke
 hver gave), og målet rundes opp til hele 10 mill. Med tallene 22.10 blir målet 4 dagers utbytte (250–400 mill.), ikke 2 %
-av kassene. Simulatoren er `npx tsx src/game/projectSim.ts` (fra `frontend/`).
+av kassene. Fra runden etter 12.11 er målet 2 dagers utbytte (B-512): første runde fikk 0–54 % med 0–4 givere per
+region. Simulatoren er `npx tsx src/game/projectSim.ts` (fra `frontend/`).
 
 ## 1. Idéen (SLUTTSPILL-FORSLAG.md, 2.3)
 

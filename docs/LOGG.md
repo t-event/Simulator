@@ -5,6 +5,34 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 426 – 2026-11-05: Stor oppdatering «Trådvalseverket» og lavere mål for fellesprosjektene
+
+**Oppgaven:** «Nå er det lenge siden vi har gjort en stor oppdatering. Lag en plan og gjennomfør.»
+
+**Plan (fra dataene 5.11):** 12 aktive siste uke, alle på storverket; spesialstål ble godt tatt imot (12 forsket, 11
+levert); fellesprosjektene står på 0–54 % med 0–4 givere per region. Derfor: en ny gren hjemme (trådvalseverket, B-511) og
+lavere mål for neste runde av fellesprosjektene (B-512).
+
+**Gjort:**
+- B-511: varen valsetråd, utstyret Trådvalseverk (egen linje, 80 t/t, valser bare emner til ordrene på valsetråd),
+  forskningen Trådvalsing, tre nye kunder (bare med i trekningen når verket lager valsetråd), raden på Anlegg, prisen på
+  Marked, fagbokkapittel med quiz, skjult prestasjon. Store kjøp uten forskningen får ikke lenger merknaden om byggetid.
+- B-512: `config.world.projects.goal_days` 4 → 2 (`supabase/158_fellesprosjekt_mal.sql`, kjørt). Åpne prosjekter beholder
+  målet.
+- Docs: BESLUTNINGER, STATUS, KONTO, FELLESPROSJEKT-FORSLAG, CLAUDE.md, endringsloggen.
+
+**Testet:** `npm test` (ny test «Trådvalseverket (B-511)»), `tsc`, lint, build. `balance.ts` EXIT 0 med uendrede nivådager
+(7 / 21 / 62 / 158, nybegynneren 183). Playwright på 320, 390 og 1 366 px: forespørsel på valsetråd i Salg, valsetråd
+under Marked → Priser, raden «Trådvalseverk» på Anlegg, ingen horisontal scrolling.
+
+**Fallgruve funnet:** `advance` stopper ved et hendelseskort (`pendingDecision`) eller en manuell charge. Tester som skal
+la tida gå i mange timer, må rydde dem i en løkke.
+
+**Gjenstår:** første runde av fellesprosjektene avgjøres 12.11; se om neste runde får flere givere. Eierens tre spørsmål i
+skyggerapporten (V0/K-1) står fortsatt.
+
+---
+
 ## Økt 425 – 2026-11-02: Skyggerapporten for V0/K-1
 
 **Oppgaven:** den planlagte jobben «Skyggerapporten V0/K-1» – rapporten til eieren etter en måned i skygge.
