@@ -9919,3 +9919,28 @@ Testet:
 
 Konto: nei for selve valget (regel 1 – eget spill). At konsernet og utbyttet blir stående, gjelder bare dem med konto
 (som før). KONTO.md er oppdatert.
+
+## B-518 Rydd og senk tempoet (tiltak D), og ukens scenario venter en uke (2026-11-05)
+Eieren: «Bygg» (tiltak A–F i B-515). A (B-516) og B (B-517) er ute samme dag.
+
+**D – det som gjelder fra nå:**
+- **Ingen nye systemer mellom spillere** før vi ser at det er flere spillere. Det gjelder K-1 (står av, skyggen går til
+  rapporten 2.12, B-513), verksjef V1, flere selskaper og industriklynger.
+- **Én oppdatering i uka** med én nyhet som forklares godt, i stedet for flere publiseringer om dagen. Rettinger av feil
+  går ut med én gang som før.
+- **Fellesprosjektene og privatmeldingene** tas ikke bort ennå. Første runde av fellesprosjektene avgjøres 12.11, og
+  neste runde har lavere mål (B-512). Den planlagte sjekken 13.11 sier om noen gir. Gir fortsatt nesten ingen, foreslås
+  det å ta dem bort (eierens valg).
+- **For nye spillere** er det lite å skjule: på nivå 0 viser appen bare Verket, Marked og Salg, og Skiftrapporten og
+  konsernet kommer senere. Ingen endring nå.
+
+**C – ukens scenario venter:** et scenario krever et eget spill ved siden av det lagrede, og lagringen på nett laster i
+dag opp det spillet som er åpent (B-426–B-434). Det må bygges med egen lagring og testes grundig. Det er neste ukes
+nyhet hvis «Bygg på nytt» og starthjelpen ikke gir nok liv, etter målingen 19.11.
+
+**Måling 19.11** (planlagt jobb):
+- nye kontoer og hvor langt de kommer, med tellerne fra B-516,
+- hvor mange som har bygget på nytt (`state.rebuilds`),
+- aktive spillere og lagringer per spiller per døgn mot 5.11.
+
+Endringslogg: nei (ingenting i spillet er endret).
