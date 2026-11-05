@@ -83,6 +83,12 @@ til «Avgjort» nederst).
   - D: rydd og senk tempoet,
   - E: spør de 10,
   - F: hent nye spillere etter A.
+  Status 5.11:
+  - A er bygget (B-516) og B er bygget (B-517).
+  - D gjelder som arbeidsform (B-518).
+  - C venter til etter målingen 19.11.
+  - E: eieren sender meldingen til de aktive.
+  - F: når målingen viser at starten holder på nye spillere.
   Går foran alt annet i denne lista.
 - **V0/K-1 (skyggerapporten 2.11):** `docs/SKYGGE-RAPPORT-2026-11.md`. Bare høykonjunktur i første måned, så vernet kan
   ikke måles. Besvart (B-513): skyggen går til begynnelsen av desember, satsene 0,5/1,5/4 % og etableringen 2 dager

@@ -5,6 +5,21 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 432 – 2026-11-05: Rydd og senk tempoet (tiltak D)
+
+**Gjort (B-518):**
+- Ingen nye systemer mellom spillere, og én oppdatering i uka.
+- Fellesprosjektene og privatmeldingene vurderes etter 13.11.
+- Ukens scenario (C) venter: det trenger egen lagring ved siden av det lagrede spillet.
+- Planlagt måling 19.11.
+
+**Gjenstår:**
+- Meldingen til de aktive (E), som eieren sender.
+- Målingen 19.11.
+- C etter målingen.
+
+---
+
 ## Økt 431 – 2026-11-05: «Bygg på nytt» (tiltak B)
 
 **Gjort (B-517):**
