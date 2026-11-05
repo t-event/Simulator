@@ -248,6 +248,7 @@ import {
 import { RESEARCH, RESEARCH_GROUP_OF, RESEARCH_GROUPS, researchGroup, researchOptions } from "./research";
 import { K1, k1BaseCheck, k1BoomSize, k1CostCheck } from "./programSim";
 import { migrate, parseSave } from "./save";
+import { starterWaitOffer } from "./starter";
 import { ageOf, PENSION, pensionDay, pensionMorning, pensionSoon, retireAgeOf } from "./pension";
 import { dutyWorkers, presentWorkers as presentNow, wildcardUse as wildUse } from "./plant";
 import { afterEmpireLoad, DIVIDEND, dividendParts, dividendPerDay, dividendToTreasury } from "./dividend";
@@ -2902,7 +2903,8 @@ test("Dødsulykke (B-265): en ansatt omkommer, verket stenges i tre døgn, stor 
     "verket ble ikke stengt",
   );
   assert(g.castDownUntilMin >= g.minute + FATAL_DOWN_DAYS * 1440, "støpingen ble ikke stengt");
-  assert(g.cash <= cash - 20_000_000 && g.reputation === 35 && g.morale === 45, "følgene");
+  // Omdømmet faller 25, men aldri under kravet for nivået (stålverket: 40, B-516)
+  assert(g.cash <= cash - 20_000_000 && g.reputation === 40 && g.morale === 45, "følgene");
   assert(g.pendingDecision?.id === "dodsulykke", "kortet kom ikke");
   resolveDecision(g, 0);
   // Uten ansatte skjer ingenting (eieren alene i garasjen)
@@ -5557,6 +5559,83 @@ test("Trådvalseverket (B-511): kundene bare med trådvalseverk, emner valses ti
   const c = g.contracts.find((x) => x.id === 99);
   assert(c?.status === "fullfort", `kontrakten: ${c?.status} ${Math.round(c?.delivered ?? 0)}`);
   assert((g.counters.trad_t ?? 0) === 100, `prestasjonen: ${g.counters.trad_t}`);
+});
+
+test("Starthjelpen (B-516): skrap kjøpes, foringen byttes, ingen bot eller konkurs før støperiet, og spillet venter", () => {
+  const ready = (g: GameState) => {
+    g.pendingDecision = null;
+    g.pendingManual = null;
+    for (const [role, n] of Object.entries(computePlantStats(g).missing))
+      for (let i = 0; i < (n ?? 0); i++) g.workers.push({ ...makeCandidate(g, role as RoleId), hiredDay: 1 });
+  };
+  // Spillet venter på en forespørsel når køen er tom – én gang per forespørsel
+  const w = newGame(516);
+  w.contracts = [];
+  extraOffer(w, computePlantStats(w));
+  const offer = starterWaitOffer(w);
+  assert(!!offer, "venter ikke på forespørselen");
+  w.starterWaitedFor = offer!.id;
+  assert(!starterWaitOffer(w), "venter to ganger på samme forespørsel");
+  w.stage = 2;
+  w.starterWaitedFor = 0;
+  assert(!starterWaitOffer(w), "venter også på støperiet");
+
+  // For sen levering i garasjen: ingen bot og ikke noe tap av omdømme
+  const late = newGame(517);
+  late.contracts = [];
+  extraOffer(late, computePlantStats(late));
+  const base = late.contracts[0];
+  assert(!!base, "ingen forespørsel å bygge på");
+  late.reputation = 10;
+  late.contracts = [
+    { ...base, id: 90, tonnes: 5, delivered: 0, status: "aktiv", priority: 1, deadlineDay: day(late), repLoss: 4 },
+  ];
+  const cash = late.cash;
+  for (let h = 0; h < 30; h++) {
+    late.pendingDecision = null;
+    late.pendingManual = null;
+    advance(late, 60);
+  }
+  assert(!late.contracts.some((c) => c.id === 90 && c.status === "aktiv"), "kontrakten gikk ikke ut");
+  assert(
+    late.reputation >= 10 && (late.today.costs.bot ?? 0) === 0 && (late.counters.sen ?? 0) === 1,
+    `straff i garasjen: ${late.reputation} ${late.cash - cash}`,
+  );
+
+  // Omdømmet synker ikke under kravet for nivået
+  const floor = newGame(518);
+  floor.stage = 2;
+  floor.reputation = 20;
+  adjustReputation(floor, -10);
+  assert(floor.reputation === STAGES[2].reputation, `gulvet for støperiet: ${floor.reputation}`);
+
+  // Ingen konkurs i starthjelpen, selv langt under kredittgrensen
+  const broke = newGame(519);
+  ready(broke);
+  broke.cash = -10_000_000;
+  for (let h = 0; h < 24 * 10; h++) {
+    broke.pendingDecision = null;
+    broke.pendingManual = null;
+    advance(broke, 60);
+  }
+  assert(!broke.gameOver, "konkurs i garasjen");
+
+  // Skraphandleren kjører på skrap når ovnen ellers ville stått, og naboen bytter slitt foring
+  const sc = newGame(520);
+  ready(sc);
+  for (const stock of Object.values(sc.scrap)) stock.t = 0;
+  sc.cash = 200_000;
+  sc.furnaces[0].wear = 0.87;
+  for (let h = 0; h < 48; h++) {
+    sc.pendingDecision = null;
+    sc.pendingManual = null;
+    advance(sc, 60);
+  }
+  assert((sc.counters.startskrap ?? 0) >= 1, "skraphandleren kjøpte ikke skrap");
+  assert(
+    sc.furnaces[0].wear < 0.85 && (sc.counters.omforinger ?? 0) >= 1,
+    `foringen ble ikke byttet: ${sc.furnaces[0].wear}`,
+  );
 });
 
 if (failed) {

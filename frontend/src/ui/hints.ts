@@ -12,6 +12,7 @@ import {
   scrapStopHelp,
 } from "../game/engine";
 import { summerStart, summerStop, yearOf } from "../game/calendar";
+import { starterHelp } from "../game/starter";
 import { hasMoulds, MOULD, mouldCost, mouldWear } from "../game/mould";
 import { pensionSoon } from "../game/pension";
 import { neighborHintDue } from "../game/building";
@@ -76,7 +77,9 @@ export function hints(g: GameState, stats: PlantStats): Hint[] {
     const left = BANKRUPTCY_DAYS - g.negativeDays;
     out.push({
       tone: "critical",
-      text: `Kassa er under kredittgrensen. ${summerStop(g) ? `Banken venter til sommerstansen er over, men da er det konkurs om ${left} døgn` : `Blir den der, er det konkurs om ${left} døgn`}. ${CREDIT_HELP}`,
+      text: starterHelp(g)
+        ? `Kassa er under kredittgrensen, så du kan ikke kjøpe mer på kreditt. I starten venter banken. ${CREDIT_HELP}`
+        : `Kassa er under kredittgrensen. ${summerStop(g) ? `Banken venter til sommerstansen er over, men da er det konkurs om ${left} døgn` : `Blir den der, er det konkurs om ${left} døgn`}. ${CREDIT_HELP}`,
       view: "marked",
       sub: "skrap",
     });

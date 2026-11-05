@@ -164,6 +164,7 @@ frontend/src/
     minis.ts     Støpemaskinen og valseverket i kontrollrommet: fagpoeng per døgn, rekord og fordelen i drifta (B-505)
     green.ts     Grønt stål: CO₂ per tonn (innsats, strøm, fast), grønne forespørsler og omdømmet (B-506)
     special.ts   Spesialstål: legeringene, hva verket mangler, og hvilke forespørsler som blir spesialstål (B-510)
+    starter.ts   Starthjelpen i garasjen og verkstedet: skrap, foring, ingen straff, pause, omdømmegulv (B-516)
                  Trådvalseverket (B-511) står i plant.ts (`wireActive`, `WIRE_YIELD`) og engine.ts (`updateWire`, `planLots`)
     calendar.ts  Året i spillet (360 døgn, dag 1 = 1. april), vinter 15.11.–14.3. og frost (B-265, B-272), fellesferie (B-298);
                  `calendarAhead` til kalenderkortet på Oversikt (ui/CalendarCard.tsx, B-321)
@@ -751,6 +752,10 @@ nøkkelen `stalverk-spill-v1` i `localStorage`.
   valser emner en ordre på valsetråd venter på (`toRollWire` i `planLots`) – ikke la den valse ledige emner. Nye varer som
   krever en egen linje, regnes i `productCapT`, `rollingNeedDays` og `queueFit`-sjekken i `assessOffer`. Nye kunder står
   sist i `CUSTOMERS` og trekkes bare når verket lager varen (`stats.products`), ellers flyttes alle tilfeldige tall.
+- **Starthjelpen** (B-516): nivå 0–1 (`starterHelp`) har ingen bot for sen levering, ingen konkurs, automatisk skrap og
+  foring. Ny straff eller nye feilsituasjoner tidlig i spillet må sjekke `starterHelp` – retningsanalysen (B-515) viste
+  at nybegynnerne mistet kontrollen fordi klokka gikk, ikke fordi de ikke forsto. Omdømmegulvet per nivå
+  (`stageReputationFloor`) gjelder alle nivåer: tester som venter et stort fall i omdømmet, må regne med gulvet.
 - **`advance` stopper ved kort** (B-511): et hendelseskort (`pendingDecision`) eller en manuell charge (`pendingManual`)
   stopper tida. Tester som lar tida gå i mange timer, rydder dem i en løkke (`advance(g, 60)` per time).
 - **Hendelseskort om forhold mellom ansatte** (B-444): trakassering, diskriminering og varsling er et sårt tema for eieren –

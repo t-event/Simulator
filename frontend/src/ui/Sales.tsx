@@ -25,6 +25,7 @@ import {
 } from "../game/engine";
 import { fmtCo2, heatCo2, recipeInputCo2 } from "../game/green";
 import { ALLOYS, alloyCostPerT, alloyMissing } from "../game/special";
+import { starterHelp } from "../game/starter";
 import { moveInQueue, toggleOfferGrade } from "../game/actions";
 import { scrapResearchHint } from "../game/recipe";
 import {
@@ -251,7 +252,9 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
         <p className="g-muted">
           {c.landmark
             ? `Omdømme +${fmtNum(c.repGain, 1)} ved levering. Ingen frist og ingen bot.`
-            : `Omdømme +${fmtNum(c.repGain, 1)} ved levering, −${fmtNum(c.repLoss, 1)} og bot ${fmtKr(c.penaltyPerT)}/tonn hvis for sent.`}
+            : starterHelp(g)
+              ? `Omdømme +${fmtNum(c.repGain, 1)} ved levering. I garasjen og verkstedet gir en for sen levering ingen bot og ikke noe tap av omdømme; fra støperiet blir det −${fmtNum(c.repLoss, 1)} og ${fmtKr(c.penaltyPerT)}/tonn.`
+              : `Omdømme +${fmtNum(c.repGain, 1)} ved levering, −${fmtNum(c.repLoss, 1)} og bot ${fmtKr(c.penaltyPerT)}/tonn hvis for sent.`}
         </p>
       </details>
       {blocked && (
@@ -263,7 +266,9 @@ function OfferCard({ g, stats, c, act, committed }: Props & { c: Contract; commi
         <div className="g-note g-warn g-offer-confirm" role="alert">
           {c.landmark
             ? "Verket kan ikke lage dette nå. Signere likevel?"
-            : `Blir den for sen, koster den opptil ${fmtKr(c.penaltyPerT * c.tonnes)} i bot og ${fmtNum(c.repLoss, 1)} i omdømme. Signere likevel?`}
+            : starterHelp(g)
+              ? "Verket rekker sannsynligvis ikke fristen. Kunden blir skuffet, men i starten koster det ingenting. Signere likevel?"
+              : `Blir den for sen, koster den opptil ${fmtKr(c.penaltyPerT * c.tonnes)} i bot og ${fmtNum(c.repLoss, 1)} i omdømme. Signere likevel?`}
           <div className="g-row">
             <button
               className="g-danger g-small"
