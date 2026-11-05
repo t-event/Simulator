@@ -878,6 +878,8 @@ export interface GameState {
   starterWaitedFor?: number;
   /** Farten spillet hadde før starthjelpen pauset; spillet går videre med den når en kontrakt er signert (B-516) */
   starterResume?: number;
+  /** Hvor mange ganger spilleren har bygget på nytt fra garasjen (B-517); serveren teller da det høyeste nivået i konsernet */
+  rebuilds?: number;
   /** Merker bare serveren vet om (B-296), f.eks. «reform» for dem som ble berørt av økonomireformen */
   serverBadges?: string[];
   /** Krig i verden (B-297): den siste krigen (også når den er over), så det blir høyst én per år. null = ingen ennå */

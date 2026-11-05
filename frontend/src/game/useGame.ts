@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { GAME_MIN_PER_REAL_S } from "./data";
 import { advance, log, newGame, type PurchaseResult } from "./engine";
 import { starterWaitOffer } from "./starter";
+import { canRebuild, rebuildGame } from "./rebuild";
 import { IDLE_NIGHT_SPEED, idleOutsideHours } from "./plant";
 import { maxSpeed } from "./research";
 import { advanceTutorial } from "./tutorial";
@@ -47,6 +48,8 @@ export interface GameApi {
   clearToasts: () => void;
   /** Nytt spill, med eller uten veiledet start */
   startNew: (guided: boolean) => void;
+  /** «Bygg på nytt» (B-517): nytt hjemmeverk i garasjen, konsernet og merkene står */
+  rebuild: () => boolean;
   continueSaved: () => void;
   /** Kjører en handling på spillet og tegner på nytt. Resultatmeldinger vises som varsel. */
   act: <T>(fn: (g: GameState) => T) => T;
@@ -144,6 +147,12 @@ export function useGame(): GameApi {
     },
     [begin],
   );
+  const rebuild = useCallback(() => {
+    const g = gameRef.current;
+    if (!g || !canRebuild(g)) return false;
+    begin(rebuildGame(g));
+    return true;
+  }, [begin]);
   const continueSaved = useCallback(() => {
     const g = loadGame();
     begin(g ?? newGame());
@@ -314,6 +323,7 @@ export function useGame(): GameApi {
     toastsWaiting,
     clearToasts,
     startNew,
+    rebuild,
     continueSaved,
     act,
     setSpeed,

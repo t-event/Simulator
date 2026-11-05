@@ -5,6 +5,7 @@
  * «Hva gjør jeg nå?» og topplista ved siden av. Topplista er ikke her, men i arket bak pokalen (B-214).
  */
 import { useState } from "react";
+import { RebuildCard } from "./Rebuild";
 import {
   CHALLENGE_FAMILIES,
   CHALLENGE_STAGE,
@@ -135,6 +136,8 @@ interface GoalsProps {
   onSales: () => void;
   openTab?: string;
   onTab?: OnTab;
+  /** Etter «Bygg på nytt» (B-517): til verket i garasjen */
+  onRebuilt?: () => void;
 }
 
 /**
@@ -152,7 +155,7 @@ export function GoalsSheet({ onClose, ...props }: GoalsProps & { onClose: () => 
   );
 }
 
-export function GoalsPage({ g, stats, api, onOpenSettings, onSales, openTab, onTab }: GoalsProps) {
+export function GoalsPage({ g, stats, api, onOpenSettings, onSales, openTab, onTab, onRebuilt }: GoalsProps) {
   const act = api.act;
   const [tab, setTab] = useState<GoalsTab>(isGoalsTab(openTab) ? openTab : "idag");
   useReportTab(tab, onTab);
@@ -179,6 +182,15 @@ export function GoalsPage({ g, stats, api, onOpenSettings, onSales, openTab, onT
         {shown === "idag" && !coaching && (
           <>
             <MissingOutCard g={g} onLogin={onOpenSettings} />
+            {/* «Bygg på nytt» (B-517): bare for veteraner som er ferdige med storverket */}
+            <RebuildCard
+              g={g}
+              onRebuild={() => {
+                const ok = api.rebuild();
+                if (ok) onRebuilt?.();
+                return ok;
+              }}
+            />
             <DailyCard g={g} />
             {/* Landemerket er også noe som kommer hver dag (B-218) */}
             <LandmarksCard g={g} onSales={onSales} />

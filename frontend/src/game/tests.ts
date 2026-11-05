@@ -249,6 +249,7 @@ import { RESEARCH, RESEARCH_GROUP_OF, RESEARCH_GROUPS, researchGroup, researchOp
 import { K1, k1BaseCheck, k1BoomSize, k1CostCheck } from "./programSim";
 import { migrate, parseSave } from "./save";
 import { starterWaitOffer } from "./starter";
+import { canRebuild, rebuildFp, rebuildGame } from "./rebuild";
 import { ageOf, PENSION, pensionDay, pensionMorning, pensionSoon, retireAgeOf } from "./pension";
 import { dutyWorkers, presentWorkers as presentNow, wildcardUse as wildUse } from "./plant";
 import { afterEmpireLoad, DIVIDEND, dividendParts, dividendPerDay, dividendToTreasury } from "./dividend";
@@ -5636,6 +5637,42 @@ test("Starthjelpen (B-516): skrap kjøpes, foringen byttes, ingen bot eller konk
     sc.furnaces[0].wear < 0.85 && (sc.counters.omforinger ?? 0) >= 1,
     `foringen ble ikke byttet: ${sc.furnaces[0].wear}`,
   );
+});
+
+test("Bygg på nytt (B-517): nytt hjemmeverk i garasjen, konsernet, merkene og serverens tall står", () => {
+  const old = newGame(5170);
+  assert(!canRebuild(old), "kan bygge på nytt fra garasjen");
+  old.stage = STAGES.length - 1;
+  old.won = true;
+  old.serverEdit = 7;
+  old.treasuryOut = 123;
+  old.owner = "konto-1";
+  old.achievements = { verksted: 1, storverk: 1 };
+  old.cosmetics = { owned: ["flagg"], on: ["flagg"] };
+  old.readChapters = ["skrap"];
+  old.konsern.unlocked = true;
+  old.konsern.legends = 5;
+  old.konsern.director = { active: true } as unknown as GameState["konsern"]["director"];
+  old.researched.push("valsing", "stodig");
+  old.researchPoints = 5000;
+  old.cash = 9_000_000_000;
+  assert(canRebuild(old), "kan ikke bygge på nytt fra storverket");
+  const g = rebuildGame(old, 5171);
+  assert(g.stage === 0 && g.cash < 1_000_000 && g.gameId !== old.gameId, "ikke et nytt verk i garasjen");
+  assert(g.rebuilds === 1 && g.counters.rebuilds === 1, "telleren");
+  assert(g.serverEdit === 7 && g.treasuryOut === 123 && g.owner === "konto-1", "serverens tall fulgte ikke med");
+  assert(g.konsern.unlocked && g.konsern.legends === 5 && g.konsern.director === null, "konsernet");
+  assert(
+    g.achievements.storverk === 1 && g.cosmetics.on.includes("flagg") && g.readChapters.includes("skrap"),
+    "merkene",
+  );
+  assert(
+    g.researched.includes("rutiner") && g.researched.includes("skrapkjop") && !g.researched.includes("valsing"),
+    `forskningen: ${g.researched.join()}`,
+  );
+  assert(g.researchPoints >= rebuildFp(1) && g.researchPoints < 5000 && g.tutorial === null, "fagpoengene");
+  const again = rebuildGame({ ...g, stage: STAGES.length - 1 }, 5172);
+  assert(again.rebuilds === 2 && rebuildFp(9) === 100, "andre gang og taket");
 });
 
 if (failed) {

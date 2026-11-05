@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 431 – 2026-11-05: «Bygg på nytt» (tiltak B)
+
+**Gjort (B-517):**
+- `game/rebuild.ts` og kortet `ui/Rebuild.tsx` på Mål → I dag, med ark og avkrysning.
+- Prestasjonen «Bygget på nytt».
+- Serveren (159): `konsern_stage`, brukt i utbyttet, konsernkjøp, anbud og sesongen. Uten den ville en som bygger på nytt,
+  mistet utbyttet (`pay_dividends` krevde nivå 4 hjemme).
+
+**Testet:**
+- `npm test` med ny test, `tsc`, lint og build.
+- `konsern_stage` mot en ekte lagring, kun lesing.
+- `get_advisors`: ingen ny advarsel.
+- Playwright på 320, 390 og 1 366 px.
+
+**Gjenstår:** C (ukens scenario), D (rydd).
+
+---
+
 ## Økt 430 – 2026-11-05: Starthjelpen (tiltak A)
 
 **Oppgaven:** «Bygg» – anbefalingene i retningsanalysen del 2, i rekkefølge. Først A: den første timen.

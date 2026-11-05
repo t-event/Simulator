@@ -9882,3 +9882,40 @@ Testen «Starthjelpen (B-516)» dekker:
 - skrapet og foringen.
 
 Konto: nei (regel 1 – eget spill). KONTO.md er oppdatert.
+
+## B-517 «Bygg på nytt»: et frivillig nytt løp fra garasjen for veteraner (2026-11-05)
+Eieren: «Bygg» (tiltak B i B-515), i stedet for en ny sesong med blanke ark, som eieren ikke ville ha (frykt for å miste
+de 10 aktive).
+
+**Bygget:**
+- **Valget** (`game/rebuild.ts`, kortet `ui/Rebuild.tsx` på Mål → I dag): vises når verket er på storverket og enten
+  sluttmålet er nådd eller all forskning er gjort (`canRebuild`). Et ark forklarer hva som står og hva som starter på
+  nytt, og knappen er sperret til man har krysset av.
+- **Nytt løp** (`rebuildGame`): nytt `gameId` (B-259) og et hjemmeverk i garasjen.
+  - **Blir med:** konsernet (salgsdirektøren slutter, siden jobben hørte til hjemmeverket), `serverEdit`, `treasuryOut`,
+    Privat formue, konto og sesong. Også prestasjoner, pynt, merker, fagboka med quiz og oppdrag, rekorder, daglig
+    belønning, tips og tellere.
+  - **Starter på nytt:** forskning, mesterskap, fagpoeng, folk, kasse, lager og kontrakter.
+  - **Startfordel:** 3× fart og flere skrapleverandører, og 20 fagpoeng per gang (høyst 100).
+  - Starthjelpen (B-516) gjelder også her.
+- **Prestasjonen «Bygget på nytt»** (1 / 3 / 5 ganger, skjult til første gang). Topplista «Raskest til storverk» tar
+  det nye løpet når det når storverket, og rekorden for alle tider er den beste.
+- **Serveren** (`supabase/159_bygg_paa_nytt.sql`):
+  - `konsern_stage(bruker, state)` gir det høyeste av nivået hjemme og `records.best_stage` når `state.rebuilds` er et
+    positivt tall.
+  - Utbyttet (`pay_dividends`, `dividend_per_day`), kjøp i konsernet (`konsern_order`), anbud (`place_bid`) og sesongens
+    konsernverdi (`close_season`) bruker den nå. De ble rettet med `replace`, og migrasjonen stopper hvis teksten ikke
+    finnes.
+  - Uten `rebuilds` er alt som før (prøvd: nivå 4 → 4, nivå 0 uten → 0, nivå 0 med → 4, tull → 0).
+  - **Bidraget** følger fortsatt nivået hjemme: et lite verk gir lite. Arket sier det.
+  - `records.best_stage` kommer fra tidslinja som juksesperren sjekker, så et falskt `rebuilds` gir ingenting man ikke
+    alt har hatt.
+- Den gamle tidslinja flyttes til `snapshots_rewound` når det nye løpet laster opp dag 1 (B-261), som ved et nytt spill.
+
+Testet:
+- Testen «Bygg på nytt (B-517)».
+- Playwright på 320, 390 og 1 366 px: kortet, arket, sperret knapp og garasjen etterpå med konsernet og 20 fagpoeng.
+- `get_advisors`: ingen ny advarsel.
+
+Konto: nei for selve valget (regel 1 – eget spill). At konsernet og utbyttet blir stående, gjelder bare dem med konto
+(som før). KONTO.md er oppdatert.
