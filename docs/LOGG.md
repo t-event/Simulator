@@ -5,6 +5,26 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 429 – 2026-11-05: Retningsanalysen, del 2
+
+**Oppgaven:** «Vi kan også endre på alt vi har bygget. Studer dette mer og kom med anbefalinger. Vil helst ikke starte ny
+sesong.»
+
+**Gjort:**
+- Leste varsellistene til de 20 som står fast på nivå 0–1 og telte hva som skjedde.
+- Telte bruken av funksjonene (alle tabellene) og bestillingene i konsernet per uke.
+- Skrev del 2 i `RETNINGSANALYSE-2026-11.md` med anbefalingene A–F (B-515).
+
+**Funn:**
+- Nybegynnerne mister kontrollen fordi klokka går, skrapet tar slutt og straffen kommer tidlig, ikke fordi de ikke
+  forstår.
+- Veteranene bygger, men stigene er på toppen.
+- Systemene der spillerne skal møte hverandre, er nesten ubrukt.
+
+**Gjenstår:** eierens valg blant A–F. Ingenting er bygget.
+
+---
+
 ## Økt 428 – 2026-11-05: Retningsanalysen
 
 **Oppgaven:** «Studer spillet og finn ut hva vi har gjort slik at spillet har gått i feil retning … Her må vi gjøre
