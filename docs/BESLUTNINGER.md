@@ -9767,3 +9767,20 @@ som før. Ingen penger flyttes av denne endringen.
 Ser neste runde like stille ut, er det neste å vurdere et varsel når et prosjekt åpner (push), heller enda lavere mål.
 
 Konto: uendret (fellesprosjektene krever konto, B-508).
+
+## B-513 Svarene på skyggerapporten: skyggen går én måned til (2026-11-05)
+Eieren, etter B-511/B-512 og skyggerapporten (`docs/SKYGGE-RAPPORT-2026-11.md`): «Gjør det du anbefaler.» Det er de tre
+anbefalingene i avsnitt 6 i rapporten:
+1. **V0 og K-1 slås ikke på nå.** Skyggen (`world_shadow_tick`, cron `verden-skygge`) går videre til begynnelsen av
+   desember. Da tas en ny rapport med hendelsene som alt er trukket (tre av fire er dårlige), så vernet kan måles på ekte
+   tap. Bryterne `config.world.programs.enabled` og `events_enabled` står av.
+2. **Satsene** beholdes på 0,5 / 1,5 / 4 % (`programs.budget`) til neste rapport. Skyggen regner fortsatt begge
+   alternativene (`shadow_budgets`, også 1 / 3 / 8 %).
+3. **Etableringen** beholdes på 2 dagers utbytte (`establish_income_days`) til neste rapport. Er den fortsatt tung med
+   dårlige hendelser i grunnlaget, foreslås 1 dag.
+
+Ingenting i config eller databasen er endret: alt står som før, og sjekket 5.11 (skyggen har rader til og med 4.11).
+Neste skyggerapport er planlagt 2.12 som en egen jobb. Den følger samme regler: bokstaver i stedet for navn, og ingen
+trukne datoer i noe som committes.
+
+Endringslogg: nei (ingenting i spillet er endret).
