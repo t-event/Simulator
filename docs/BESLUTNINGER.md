@@ -9813,3 +9813,34 @@ Analysen står i `docs/RETNINGSANALYSE-2026-11.md`. Kort:
 Fire spørsmål til eieren står i avsnitt 4. Ingenting er bygget eller endret.
 
 Endringslogg: nei (ingenting i spillet er endret).
+
+## B-515 Retningsanalyse del 2: ingen ny sesong – nybegynnerne først, «Bygg på nytt» for veteraner (2026-11-05)
+Eieren: «Vi kan også endre på alt vi har bygget. Studer dette mer og kom med anbefalinger. Vil helst ikke starte ny
+sesong da jeg er redd for at de 10 spillerne slutter da.» Sesong 2 med blanke ark (tiltak 1 i B-514) er tatt ut.
+
+Nye funn (del 2 i `docs/RETNINGSANALYSE-2026-11.md`):
+- Alle 20 som står fast på nivå 0–1, leverte noe (19 av 20), men spillet gikk fra dem:
+  - forespørsler gikk ut hos alle 20 (324 i alt),
+  - tomt skraplager hos 14,
+  - pengeproblemer hos 13,
+  - bot for sen levering hos 11,
+  - havari hos 5.
+  Klokka går (3× og 10× tidlig), og ett tap av omdømme kan sende dem tilbake under kravet for nivået.
+- Veteranene bruker det som bygger: bestillinger i konsernet (1 254), banken og verksjefene. Bestillingene har falt fra
+  366 til 65 i uka. Det som er laget for å møte andre spillere, er nesten ubrukt:
+  - ukens kontrollrom 7 forsøk,
+  - privatmeldinger 3,
+  - oppkjøp 5,
+  - fellesprosjekter 9 gaver.
+
+**Anbefalt (venter på eieren):**
+- A: den første timen (skrap levert, spillet venter, ingen straff før støperiet, måling).
+- B: «Bygg på nytt» som et frivillig valg for veteraner. Konsernet blir stående.
+- C: ukens scenario for alle, i stedet for ukens kontrollrom.
+- D: rydd og senk tempoet.
+- E: spør de 10.
+- F: hent nye spillere når A er ute.
+
+Ingenting er bygget eller endret.
+
+Endringslogg: nei (ingenting i spillet er endret).

@@ -75,9 +75,15 @@ til «Avgjort» nederst).
 
 ## Forslag – spillet
 
-- **Retningsanalysen 5.11 (B-514, `RETNINGSANALYSE-2026-11.md`):** få nye spillere, nybegynnere som står fast, og
-  veteraner uten noe å gjøre. Anbefalt: sesong 2 med blanke ark, fiks av den første timen, stopp i nye
-  sluttspillsystemer og en lansering. Fire spørsmål til eieren i avsnitt 4. Går foran alt annet i denne lista.
+- **Retningsanalysen 5.11 (B-514, B-515, `RETNINGSANALYSE-2026-11.md`):** få nye spillere, nybegynnere som står fast,
+  og veteraner uten noe å gjøre. Ny sesong er tatt ut (eieren). Anbefalt i del 2, avsnitt 7:
+  - A: den første timen,
+  - B: «Bygg på nytt» frivillig for veteraner,
+  - C: ukens scenario,
+  - D: rydd og senk tempoet,
+  - E: spør de 10,
+  - F: hent nye spillere etter A.
+  Går foran alt annet i denne lista.
 - **V0/K-1 (skyggerapporten 2.11):** `docs/SKYGGE-RAPPORT-2026-11.md`. Bare høykonjunktur i første måned, så vernet kan
   ikke måles. Besvart (B-513): skyggen går til begynnelsen av desember, satsene 0,5/1,5/4 % og etableringen 2 dager
   beholdes til neste rapport (planlagt 2.12).

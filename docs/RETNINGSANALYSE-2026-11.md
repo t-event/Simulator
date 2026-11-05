@@ -147,3 +147,110 @@ nye spillere (de faller av i garasjen) eller veteranene (de er ferdige med den).
 2. Startdato (forslag 23.11) og lengde (forslag 6 uker)?
 3. Skal K-1, verksjef V1, flere selskaper og klynger legges på hylla (tiltak 3)?
 4. Kan du la 3–5 personer prøve starten mens du ser på, og har du kanaler for lanseringen (tiltak 4)?
+
+---
+
+# Del 2 – uten ny sesong (5.11, B-515)
+
+Eieren: «Vi kan også endre på alt vi har bygget. Studer dette mer og kom med anbefalinger. Vil helst ikke starte ny
+sesong da jeg er redd for at de 10 spillerne slutter da.» Tiltak 1 i del 1 (sesong 2 med blanke ark) er tatt ut.
+
+## 5. Mer om nybegynnerne: spillet går fra dem
+
+Jeg leste varsellista i alle 20 lagringene som står fast på nivå 0–1:
+
+| Hva skjedde | Spillere (av 20) | Ganger |
+|---|---|---|
+| Forespørsler gikk ut uten svar | 20 | 324 |
+| Ovnen sto fordi skraplageret var tomt | 14 | 78 |
+| Kassa tom eller banken bekymret | 13 | – |
+| Bot og tap av omdømme for sen levering | 11 | – |
+| Havari (gjennombrent foring, omdømme −5) | 5 | – |
+| Leverte minst én kontrakt | 19 | – |
+
+De forsto altså det grunnleggende: 19 av 20 leverte. Men spillet krever at man passer på hele tida.
+
+- **Klokka går mens nybegynneren ser bort,** og den går fort: 3× og 10× låses opp i løpet av de første minuttene.
+- **Når skrapet er tomt, står ovnen.** Forespørslene går ut, og kontraktene blir for sene.
+- **Det gir bot og tap av omdømme.** Kravet for å komme videre er omdømme 5 og 18, så én bot (−5,6) eller ett havari
+  (−5) kan sende spilleren tilbake til start.
+- **Kassa går i minus, og banken begynner å telle ned mot konkurs.**
+- **Hjelpen kommer for sent:** planleggeren som kjøper skrap selv, er noe man leier inn senere.
+
+Nybegynneren taper ikke fordi spillet er vanskelig å forstå, men fordi det straffer at man ikke passer på.
+
+## 6. Mer om veteranene: hva de faktisk gjør
+
+| Det som brukes | Tall | Det som nesten ikke brukes | Tall |
+|---|---|---|---|
+| Bestillinger i konsernet (mest modernisering) | 1 254 | Ukens kontrollrom, forsøk | 7 |
+| Lån i konsernbanken (logg) | 737 | Privatmeldinger | 3 |
+| Verksjefer ansatt | 159 | Oppkjøp | 5 |
+| Trinn hentet på sesongstigen | 100 | Gaver til fellesprosjekter | 9 |
+| | | Skiftrapporten siste 14 dager | 0 |
+
+Bestillingene i konsernet går ned uke for uke:
+
+| Uke (start) | 28.9 | 5.10 | 12.10 | 19.10 | 26.10 | 2.11 |
+|---|---|---|---|---|---|---|
+| Bestillinger | 130 | 366 | 284 | 250 | 159 | 65 |
+
+Det veteranene liker, er å **bygge og forbedre**: først hjemmeverket (der spilletida var størst), så moderniseringen av
+datterverkene. Begge stigene er nå på toppen for de fleste. Systemene der spillerne skal møte hverandre, er nesten
+ubrukt med 10 spillere.
+
+## 7. Anbefalingene, i rekkefølge
+
+### A. Den første timen (viktigst for å vokse – rører ikke veteranene)
+1. **Naboen leverer skrap.** Til og med verkstedet kjøper spillet inn skrap til resepten selv, gratis, med en kort
+   forklaring om at det blir ditt ansvar senere. Det er den vanligste grunnen til at ovnen står.
+2. **Spillet venter på deg.** I garasjen og verkstedet pauser klokka når en forespørsel venter og køen er tom, eller når
+   ovnen står og spilleren må gjøre noe. 10× låses opp i verkstedet, ikke de første minuttene.
+3. **Ingen straff før støperiet:**
+   - ingen bot og ikke noe tap av omdømme for sen levering, bare et råd om hva som gikk galt,
+   - foringen byttes automatisk,
+   - ingen konkurs.
+   Omdømmet kan ikke synke under kravet for nivået man er på.
+4. **Måling:** et lite tidslinjetall for de første øktene (nivå, leveranser, skrap tomt, utgåtte forespørsler), så vi ser
+   effekten.
+5. **Eieren ser 3–5 personer spille de første 15 minuttene.** Det finnes ingen bedre test.
+
+### B. «Bygg på nytt» for veteraner som vil (i stedet for sesong 2)
+- Et valg, aldri tvang. Spilleren kan selge storverket og starte i garasjen igjen.
+- Det som blir stående:
+  - konsernet, konsernkassa og selskapene (de ligger på serveren og er ikke en del av hjemmeverket),
+  - titler, merker, pynt og prestasjoner.
+- Gevinsten er synlig, men liten:
+  - en stjerne ved navnet,
+  - en startfordel neste gang (f.eks. en forskning gratis),
+  - en egen liste «Raskest til storverket» i spilldøgn.
+- Det gir veteranene reisen tilbake uten at noen mister noe de ikke vil miste. Hvis 3–4 av de 10 velger det, har de noe
+  å gjøre i uker.
+- Kostnad: bidraget til konsernkassa blir lavere til det nye verket er stort, og spilleren ser det før hen velger.
+
+### C. Ukens scenario (noe nytt hver uke, for alle)
+- Et kort, fast oppdrag med samme frø for alle, i en egen sandkasse som ikke rører verket. Det tar ca. 10–20 minutter.
+- Eksempler:
+  - «Snu et verk på konkursens rand på 30 døgn»,
+  - «Lever vinterordren med halvt mannskap»,
+  - «Lavest kWh per tonn på 10 døgn».
+- Topplista per uke, og en merkevare i sesongstigen.
+- Erstatter ukens kontrollrom (7 forsøk totalt), som få bruker.
+- For nybegynnere er scenariet også en rask smakebit på storverket.
+
+### D. Rydd og senk tempoet
+- **Stopp nye systemer mellom spillere:** K-1, verksjef V1, flere selskaper, klynger.
+- **Vurder å ta bort** fellesprosjektene og privatmeldingene. Ingen savner dem, og de gjør spillet tyngre.
+- **Skjul for nye spillere** alt de ikke trenger den første uka. I dag er det mange menyer, kort og tall tidlig.
+- **Én oppdatering i uka** med én nyhet som forklares godt.
+
+### E. Spør de 10
+Send en kort melding til de aktive (Skiftrapporten eller direkte): «Hva ville fått deg til å spille mer? Hva er
+kjedelig?» Ti svar fra ekte spillere er verdt mer enn alle simuleringene våre.
+
+### F. Hent nye spillere – når A er ferdig
+Det er ingen vits i å invitere folk til en start som mister 9 av 10. Når A er ute og målingene ser bedre ut, lager jeg en
+kort tekst og et delingsbilde til eierens kanaler (venner, kolleger, skoler med TIP-fag, bransje). Det kan også prøves
+å legge spillet i Google Play som app; det gjør spillet lettere å finne.
+
+**Rekkefølge:** A og E denne uka, så B og C, D underveis og F når tallene for den første timen er bedre.
