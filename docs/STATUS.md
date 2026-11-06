@@ -80,6 +80,9 @@ regnes av serveren i ekte tid.
   - **Omdømmet** synker på alle nivåer aldri under kravet for nivået verket har nådd (5 / 18 / 40 / 65), når det først
     er der.
   - Tellerne `startskrap`, `skrap_tomt`, `utgatt` og `sen` i `state.counters` måler starten.
+- **Invitasjonen til betaen** (B-519, `game/invite.ts`): et kort på Verket → Oversikt fra verkstedet og opp. Det
+  inviterer til eierens nye spill i beta og ber om tilbakemeldinger. Det lukkes for godt med «Prøv betaen» eller
+  «Nei takk» (`tipsSeen`) og forsvinner etter 31.1.2027.
 - **Bygg på nytt** (B-517, `game/rebuild.ts`, kortet på Mål → I dag): frivillig nytt løp fra garasjen når verket er
   på storverket og sluttmålet er nådd eller all forskning er gjort.
   - Konsernet, merker, pynt, fagboka, rekorder og serverens tall (`serverEdit`, `treasuryOut`) står.

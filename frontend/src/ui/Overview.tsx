@@ -13,6 +13,7 @@ import { ProductionCard } from "./ProductionCard";
 import { BuildCard } from "./Neighborhood";
 import { showBuildCard } from "../game/building";
 import { CalendarCard } from "./CalendarCard";
+import { BetaInviteCard } from "./BetaInvite";
 import { RecipeCard } from "./Recipe";
 import { auto, automationUnlocked } from "../game/research";
 import { GRADE_IDS, GRADES, SCRAP_TYPES, STAGES } from "../game/data";
@@ -501,6 +502,8 @@ export function Overview({ g, stats, act, go, openBook, tab: chosenTab, setTab }
                 <Icon name="chevron-right" />
               </button>
             )}
+            {/* Invitasjonen til det nye spillet i beta (B-519), til spilleren åpner eller lukker den */}
+            <BetaInviteCard g={g} act={act} />
             <ProductionNow g={g} stats={stats} act={act} onRecipe={() => setTab("resept")} />
           </div>
           <div className="g-col">

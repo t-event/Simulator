@@ -5,6 +5,24 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 433 – 2026-11-06: Invitasjon til betaen
+
+**Oppgaven:** «Lag en invitasjon i stålverksspillet til mitt nye spill som er i beta. Vil gjerne ha tilbakemeldinger.»
+
+**Gjort (B-519):**
+- Kortet «Invitasjon: prøv Dynamittdalen» på Verket → Oversikt, fra verkstedet og opp.
+- «Prøv betaen» åpner betaen i en ny fane.
+- Valget huskes, og kortet forsvinner etter 31.1.2027.
+- Endringsloggen nevner det.
+
+**Testet:**
+- `npm test` med ny test, `tsc`, lint og build.
+- Playwright på 320, 390 og 1 366 px, også at den nye fanen åpnes.
+
+**Gjenstår:** ingenting. Tilbakemeldingene kommer i Skiftrapporten.
+
+---
+
 ## Økt 432 – 2026-11-05: Rydd og senk tempoet (tiltak D)
 
 **Gjort (B-518):**

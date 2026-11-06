@@ -250,6 +250,7 @@ import { K1, k1BaseCheck, k1BoomSize, k1CostCheck } from "./programSim";
 import { migrate, parseSave } from "./save";
 import { starterWaitOffer } from "./starter";
 import { canRebuild, rebuildFp, rebuildGame } from "./rebuild";
+import { BETA_INVITE, dismissBetaInvite, showBetaInvite } from "./invite";
 import { ageOf, PENSION, pensionDay, pensionMorning, pensionSoon, retireAgeOf } from "./pension";
 import { dutyWorkers, presentWorkers as presentNow, wildcardUse as wildUse } from "./plant";
 import { afterEmpireLoad, DIVIDEND, dividendParts, dividendPerDay, dividendToTreasury } from "./dividend";
@@ -5673,6 +5674,22 @@ test("Bygg på nytt (B-517): nytt hjemmeverk i garasjen, konsernet, merkene og s
   assert(g.researchPoints >= rebuildFp(1) && g.researchPoints < 5000 && g.tutorial === null, "fagpoengene");
   const again = rebuildGame({ ...g, stage: STAGES.length - 1 }, 5172);
   assert(again.rebuilds === 2 && rebuildFp(9) === 100, "andre gang og taket");
+});
+
+test("Invitasjonen til betaen (B-519): ikke i garasjen eller veiledningen, borte når den er lukket eller utløpt", () => {
+  const g = newGame(5190);
+  const now = Date.parse("2026-11-10T12:00:00Z");
+  assert(!showBetaInvite(g, now), "vises i garasjen");
+  g.stage = 1;
+  g.tutorial = 2;
+  assert(!showBetaInvite(g, now), "vises i veiledningen");
+  g.tutorial = null;
+  assert(showBetaInvite(g, now), "vises ikke i verkstedet");
+  assert(!showBetaInvite(g, Date.parse("2027-02-02T12:00:00Z")), "vises etter at den er utløpt");
+  dismissBetaInvite(g);
+  dismissBetaInvite(g);
+  assert(!showBetaInvite(g, now) && g.tipsSeen.filter((t) => t === BETA_INVITE.id).length === 1, "lukket");
+  assert(BETA_INVITE.url.startsWith("https://"), "lenken skal være https");
 });
 
 if (failed) {
