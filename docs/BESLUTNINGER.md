@@ -9944,3 +9944,22 @@ nyhet hvis «Bygg på nytt» og starthjelpen ikke gir nok liv, etter målingen 1
 - aktive spillere og lagringer per spiller per døgn mot 5.11.
 
 Endringslogg: nei (ingenting i spillet er endret).
+
+## B-519 Invitasjon til eierens nye spill i beta (2026-11-06)
+Eieren: «Lag en invitasjon i stålverksspillet til mitt nye spill som er i beta. Vil gjerne ha tilbakemeldinger.»
+
+**Bygget** (`game/invite.ts`, `ui/BetaInvite.tsx`):
+- Et kort på Verket → Oversikt med invitasjonen og en bønn om tilbakemeldinger (i Skiftrapporten).
+- «Prøv betaen» åpner betaen i en ny fane (`window.open`, Stålverket blir stående). «Nei takk» lukker kortet.
+- Begge valgene huskes i `tipsSeen`, som også følger med ved «Bygg på nytt».
+- **Gradvis synlighet (B-180):** ikke i den veiledede starten og ikke i garasjen. Nye spillere skal lære dette spillet
+  først (starthjelpen, B-516). Kortet vises fra verkstedet.
+- **Lenken er https** (http svarer med 301 til https).
+- Kortet forsvinner av seg selv etter 31.1.2027 (`BETA_INVITE.until`, ekte dato).
+
+**Testet:**
+- Testen «Invitasjonen til betaen (B-519)».
+- Playwright på 320, 390 og 1 366 px: kortet vises, «Nei takk» tar det bort, ingen horisontal scrolling, og «Prøv
+  betaen» åpner betaen i en ny fane.
+
+Konto: nei (regel 1 – vises for alle, ingenting lagres på nett). KONTO.md er oppdatert.

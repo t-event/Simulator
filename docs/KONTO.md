@@ -142,6 +142,7 @@ Tvilstilfeller: spør brukeren. Er det ikke avklart, velg «krever konto» for a
 | Trådvalseverket: valsetråd til nye kunder | Nei | Regel 1: spilltid | B-511 |
 | Starthjelpen i garasjen og verkstedet | Nei | Regel 1: eget spill | B-516 |
 | «Bygg på nytt»: nytt løp fra garasjen, konsernet står | Nei | Regel 1: eget spill | B-517 |
+| Invitasjon til eierens nye spill i beta | Nei | Regel 1: ingenting på nett | B-519 |
 | Myk grense for kassa og bunden konsernreserve (midlertidig) | Nei | Regel 1: eget spill | B-193 |
 | Æraer og Hall of Fame | Ja | Regel 3 | Grunnleggeræraen og navnet «Hall of Fame»: B-182. Neste æra: ikke bestemt |
 | Pause på Salg (innstilling) | Nei | Regel 1: ditt eget spill | B-222 |

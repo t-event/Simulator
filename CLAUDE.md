@@ -166,6 +166,7 @@ frontend/src/
     special.ts   Spesialstål: legeringene, hva verket mangler, og hvilke forespørsler som blir spesialstål (B-510)
     starter.ts   Starthjelpen i garasjen og verkstedet: skrap, foring, ingen straff, pause, omdømmegulv (B-516)
     rebuild.ts   «Bygg på nytt»: nytt løp fra garasjen, det som følger med, startfordelen (B-517); kortet i ui/Rebuild.tsx
+    invite.ts    Invitasjonen til eierens nye spill i beta: når kortet vises, lenken og sluttdatoen (B-519); kortet i ui/BetaInvite.tsx
                  Trådvalseverket (B-511) står i plant.ts (`wireActive`, `WIRE_YIELD`) og engine.ts (`updateWire`, `planLots`)
     calendar.ts  Året i spillet (360 døgn, dag 1 = 1. april), vinter 15.11.–14.3. og frost (B-265, B-272), fellesferie (B-298);
                  `calendarAhead` til kalenderkortet på Oversikt (ui/CalendarCard.tsx, B-321)

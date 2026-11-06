@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    b: 519,
+    date: "2026-11-06",
+    title: "Invitasjon til et nytt spill",
+    items: [
+      "Den som lager Stålverket, har laget et nytt spill: Dynamittdalen. Det er i beta, og du er invitert – se kortet på Verket.",
+      "Vi vil gjerne høre hva du synes. Skriv det gjerne i Skiftrapporten.",
+    ],
+  },
+  {
     b: 517,
     date: "2026-11-05",
     title: "Bygg på nytt",
