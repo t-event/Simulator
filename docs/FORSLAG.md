@@ -93,9 +93,13 @@ til «Avgjort» nederst).
 - **V0/K-1 (skyggerapporten 2.11):** `docs/SKYGGE-RAPPORT-2026-11.md`. Bare høykonjunktur i første måned, så vernet kan
   ikke måles. Besvart (B-513): skyggen går til begynnelsen av desember, satsene 0,5/1,5/4 % og etableringen 2 dager
   beholdes til neste rapport (planlagt 2.12).
-- **Regionale fellesprosjekter (B-508):** bygget som modell C. Bryteren slås på når PR-en med appen er publisert
-  (SQL-en i B-508). Første runde var for høy (B-512: mål 4 → 2 dagers utbytte). Se etter 12.11 om neste runde får flere
-  givere; ellers vurder et varsel når et prosjekt åpner.
+- **Regionale fellesprosjekter (B-508):** første runde (sjekket 13.11):
+  - Jernåsen nådde målet. De fem andre bommet med 10–30 %, og halvparten er betalt tilbake.
+  - 7 spillere ga.
+  - Neste runde får lavere mål (B-512): Jernåsen åpner tidligst 16.11, de andre 19.11.
+  - Forslag til eieren: et varsel på mobilen til alle med verk i regionen når et prosjekt åpner, og «tre dager igjen»
+    også til dem som ikke har gitt. I dag går varslene bare til givere. Det er én liten endring på serveren (en ny
+    `push_enqueue` i `projects_settle`, temaet `konsern` finnes). Venter på eierens ja, jf. én nyhet i uka (B-518).
 - **Sluttspillet videre (eieren 21.10, B-504):** plan i `SLUTTSPILL-FORSLAG.md`. Sesong 1 fortsetter (B-505). Bygget:
   kontrollromsspillene (B-505), grønt stål (B-506), fellesprosjektene (B-508) og spesialstål (B-510). Kraftverket er bygget (B-509) og slås på
   sammen med fellesprosjektene. Venter: K-1 etter 2.11. Ildfastfabrikk og havn kan komme når det er flere aktive
