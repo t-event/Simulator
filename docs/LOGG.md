@@ -5,6 +5,28 @@ ble testet, og hva som gjenstår.
 
 ---
 
+## Økt 434 – 2026-11-13: Fellesprosjektene etter første runde (planlagt sjekk)
+
+**Oppgaven:** den planlagte jobben «Fellesprosjektene etter første runde» (B-508, B-512).
+
+**Funn (bare lesing):**
+- **Jernåsen nådde målet** (400 mill., 4 givere, ferdig 9.11). Fordelen i regionmester varer til 9.12.
+- **De fem andre bommet:** Øyene 30 %, Vestbukta 17 %, Nordkysten 17 %, Østskogen 10 % og Sørsletta 10 %.
+- 7 ulike spillere ga i alt 667 mill.
+- Halvparten tilbake ved bom er betalt: 9 rader og 133,5 mill. Det stemmer mot `region_project_gifts.refunded` og
+  kassaboka.
+- Jobben `fellesprosjekter` er ok, og ingen feil.
+- `goal_days` = 2.
+- **Neste runde:** Jernåsen åpner tidligst 16.11, de andre 19.11. Med tallene i dag blir målene ca. 160–270 mill.
+- **Varslene på mobilen** gikk bare til dem som alt hadde gitt («tre dager igjen», ferdig, bom). De som aldri ga, fikk
+  ingen beskjed om at prosjektet fantes.
+
+**Gjort:** ingenting rettet, ingenting var galt. FORSLAG oppdatert.
+
+**Gjenstår:** eierens valg om varsel når et prosjekt åpner (FORSLAG). Målingen 19.11.
+
+---
+
 ## Økt 433 – 2026-11-06: Invitasjon til betaen
 
 **Oppgaven:** «Lag en invitasjon i stålverksspillet til mitt nye spill som er i beta. Vil gjerne ha tilbakemeldinger.»
